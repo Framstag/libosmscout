@@ -25,9 +25,11 @@
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawNode.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class CoordDataGenerator : public ImportModule
+  class CoordDataGenerator CLASS_FINAL : public ImportModule
   {
   private:
     bool FindDuplicateCoordinates(const TypeConfig& typeConfig,

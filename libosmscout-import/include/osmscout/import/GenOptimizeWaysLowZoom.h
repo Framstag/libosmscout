@@ -35,9 +35,11 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class OptimizeWaysLowZoomGenerator : public ImportModule
+  class OptimizeWaysLowZoomGenerator CLASS_FINAL : public ImportModule
   {
   private:
     typedef std::unordered_map<FileOffset,FileOffset> FileOffsetFileOffsetMap;

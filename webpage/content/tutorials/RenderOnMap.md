@@ -35,7 +35,7 @@ the type as internal and add it to the `TypeConfig`, here is an slightly
 modified example from `TypeConfig.cpp` itself, registering a custom type used
 for rendering the current route:
 
-```C++
+```c++
 TypeInfoRef route=std::make_shared<TypeInfo>("_route");
 
 route->SetInternal().CanBeWay(true);
@@ -49,21 +49,20 @@ internally).
 
 Later on you can create (in this case) a way, assigning the route type to it:
 
-```C++
-    TypeConfigRef   typeConfig=database->GetTypeConfig();
+```c++
+TypeConfigRef typeConfig=database->GetTypeConfig();
+Way           way;
 
-    Way             way;
+if (!typeConfig) {
+  return false;
+}
 
-    if (!typeConfig) {
-      return false;
-    }
+TypeInfoRef routeType=typeConfig->GetTypeInfo("_route");
 
-    TypeInfoRef routeType=typeConfig->GetTypeInfo("_route");
+assert(routeType!=typeConfig->typeInfoIgnore);
 
-    assert(routeType!=typeConfig->typeInfoIgnore);
-
-    way.SetType(routeType);
-    way.SetLayerToMax();
+way.SetType(routeType);
+way.SetLayerToMax();
 ```
 
 Make sure that you fill way.nodes afterwards with valid data to build the actual
@@ -72,7 +71,7 @@ on top of all other ways.
 
 In the next step you can now inject this way into the `MapData`:
 
-```C++
+```c++
 data.poiWays.push_back(way);
 ```
 Finally make sure that you have some style definition attached:

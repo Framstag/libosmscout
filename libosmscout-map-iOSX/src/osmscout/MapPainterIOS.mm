@@ -237,6 +237,7 @@ namespace osmscout {
      */
     void MapPainterIOS::GetTextDimension(const Projection& projection,
                                          const MapParameter& parameter,
+                                         double objectWidth,
                                          double fontSize,
                                          const std::string& text,
                                          double& xOff,
@@ -262,7 +263,7 @@ namespace osmscout {
         double yOff;
         double width;
         double height;
-        GetTextDimension(projection,parameter,fontSize,text,xOff,yOff,width,height);
+        GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text,xOff,yOff,width,height);
         return width;
     }
     
@@ -271,7 +272,7 @@ namespace osmscout {
         double yOff;
         double width;
         double height;
-        GetTextDimension(projection, parameter,fontSize,text,xOff,yOff,width,height);
+        GetTextDimension(projection, parameter,/*objectWidth*/-1,fontSize,text,xOff,yOff,width,height);
         return height;
     }
     
@@ -556,7 +557,7 @@ namespace osmscout {
                 
                 NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
                 
-                GetTextDimension(projection, parameter,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
+                GetTextDimension(projection, parameter,/*objectWidth*/-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
                 x1 = charOrigin.GetX();
                 y1 = charOrigin.GetY();
                 if(!followPath(followPathHnd,nww, charOrigin)){

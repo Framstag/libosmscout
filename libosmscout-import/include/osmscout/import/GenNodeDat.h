@@ -22,9 +22,11 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class NodeDataGenerator : public ImportModule
+  class NodeDataGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* NODES_TMP;

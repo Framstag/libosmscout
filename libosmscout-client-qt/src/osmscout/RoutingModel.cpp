@@ -1,6 +1,6 @@
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
-  Copyright (C) 2010  Tim Teulings
+ OSMScout - a Qt backend for libosmscout and libosmscout-map
+ Copyright (C) 2010  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -8,7 +8,7 @@
   version 2.1 of the License, or (at your option) any later version.
 
   This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
 
@@ -17,13 +17,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/RoutingModel.h>
 
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 
 #include <osmscout/system/Math.h>
+#include <osmscout/RoutingModel.h>
 
 static QString DistanceToString(double distance)
 {
@@ -394,16 +394,33 @@ void RoutingListModel::DumpNameChangedDescription(const osmscout::RouteDescripti
   route.routeSteps.push_back(changed);
 }
 
-void RoutingListModel::setStartAndTarget(Location* start,
-                                         Location* target)
+void RoutingListModel::setStartAndTarget(LocationEntry* start,
+                                         LocationEntry* target)
 {
+  std::cout << "Routing from '" << start->getLabel().toLocal8Bit().data() << "' to '" << target->getLabel().toLocal8Bit().data() << "'" << std::endl;
+
+  // TODO:
+  //  - handle location entries with typeCoordinate that don't have database
+  //  - implement routing with multiple databases
+  //
+  // as first step, we can try to manipulate with locations from different 
+  // databases like with type coordinates...
+  if (start->getDatabase() != target->getDatabase()){
+    qWarning() << "Start and target are from different databases! It is not supported yet.";
+    qWarning() << "Start database:" << start->getDatabase();
+    qWarning() << "Target database:" << target->getDatabase();
+    return;
+  }
+  
   beginResetModel();
-
   route.routeSteps.clear();
-
-  std::cout << "Routing from '" << start->getName().toLocal8Bit().data() << "' to '" << target->getName().toLocal8Bit().data() << "'" << std::endl;
-
-  osmscout::TypeConfigRef             typeConfig=DBThread::GetInstance()->GetTypeConfig();
+  
+  QString                             databasePath=start->getDatabase();
+  osmscout::TypeConfigRef             typeConfig=DBThread::GetInstance()->GetTypeConfig(databasePath);
+  if (!typeConfig){
+    qWarning() << "Can't find database:" << databasePath;
+    return;    
+  }
   osmscout::FastestPathRoutingProfile routingProfile(typeConfig);
   osmscout::Way                       routeWay;
   osmscout::Vehicle                   vehicle=osmscout::vehicleCar;//settings->GetRoutingVehicle();
@@ -426,42 +443,31 @@ void RoutingListModel::setStartAndTarget(Location* start,
                                      160.0);
   }
 
-  osmscout::ObjectFileRef startObject;
-  size_t                  startNodeIndex;
+  osmscout::RoutePosition startPosition=DBThread::GetInstance()->GetClosestRoutableNode(databasePath,
+                                                                                        start->getReferences().front(),
+                                                                                        routingProfile,
+                                                                                        1000);
 
-  osmscout::ObjectFileRef targetObject;
-  size_t                  targetNodeIndex;
-
-  if (!DBThread::GetInstance()->GetClosestRoutableNode(start->getReferences().front(),
-                                                       vehicle,
-                                                       1000,
-                                                       startObject,
-                                                       startNodeIndex)) {
-    std::cerr << "There was an error while routing!" << std::endl;
-  }
-
-  if (!startObject.Valid()) {
+  if (!startPosition.IsValid()) {
     std::cerr << "Cannot find a routing node close to the start location" << std::endl;
+    return;
   }
 
-  if (!DBThread::GetInstance()->GetClosestRoutableNode(target->getReferences().front(),
-                                                       vehicle,
-                                                       1000,
-                                                       targetObject,
-                                                       targetNodeIndex)) {
-    std::cerr << "There was an error while routing!" << std::endl;
-  }
+  osmscout::RoutePosition targetPosition=DBThread::GetInstance()->GetClosestRoutableNode(databasePath,
+                                                                                         target->getReferences().front(),
+                                                                                         routingProfile,
+                                                                                         1000);
 
-  if (!targetObject.Valid()) {
+  if (!targetPosition.IsValid()) {
     std::cerr << "Cannot find a routing node close to the target location" << std::endl;
+
+    return;
   }
 
-  if (!DBThread::GetInstance()->CalculateRoute(vehicle,
+  if (!DBThread::GetInstance()->CalculateRoute(databasePath,
                                                routingProfile,
-                                               startObject,
-                                               startNodeIndex,
-                                               targetObject,
-                                               targetNodeIndex,
+                                               startPosition,
+                                               targetPosition,
                                                route.routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;
@@ -469,12 +475,12 @@ void RoutingListModel::setStartAndTarget(Location* start,
 
   std::cout << "Route calculated" << std::endl;
 
-  DBThread::GetInstance()->TransformRouteDataToRouteDescription(vehicle,
+  DBThread::GetInstance()->TransformRouteDataToRouteDescription(databasePath,
                                                                 routingProfile,
                                                                 route.routeData,
                                                                 route.routeDescription,
-                                                                start->getName().toUtf8().constData(),
-                                                                target->getName().toUtf8().constData());
+                                                                start->getLabel().toUtf8().constData(),
+                                                                target->getLabel().toUtf8().constData());
 
   std::cout << "Route transformed" << std::endl;
 
@@ -639,7 +645,8 @@ void RoutingListModel::setStartAndTarget(Location* start,
     prevNode=node;
   }
 
-  if (DBThread::GetInstance()->TransformRouteDataToWay(vehicle,
+  if (DBThread::GetInstance()->TransformRouteDataToWay(databasePath,
+                                                       vehicle,
                                                        route.routeData,
                                                        routeWay)) {
     DBThread::GetInstance()->ClearRoute();

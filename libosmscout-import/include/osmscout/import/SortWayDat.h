@@ -24,9 +24,11 @@
 
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class SortWayDataGenerator : public SortDataGenerator<Way>
+  class SortWayDataGenerator CLASS_FINAL : public SortDataGenerator<Way>
   {
   public:
     static const char* WAYADDRESS_DAT;

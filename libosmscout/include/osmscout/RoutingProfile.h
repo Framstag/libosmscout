@@ -47,6 +47,8 @@ namespace osmscout {
     virtual ~RoutingProfile();
 
     virtual Vehicle GetVehicle() const = 0;
+    virtual double GetCostLimitDistance() const = 0;
+    virtual double GetCostLimitFactor() const = 0;
 
     virtual bool CanUse(const RouteNode& currentNode,
                         const std::vector<ObjectVariantData>& objectVariantData,
@@ -86,6 +88,8 @@ namespace osmscout {
     MaxSpeedFeatureValueReader maxSpeedReader;
     Vehicle                    vehicle;
     uint8_t                    vehicleRouteNodeBit;
+    double                     costLimitDistance;
+    double                     costLimitFactor;
     std::vector<double>        speeds;
     double                     minSpeed;
     double                     maxSpeed;
@@ -108,6 +112,20 @@ namespace osmscout {
     inline Vehicle GetVehicle() const
     {
       return vehicle;
+    }
+
+    void SetCostLimitDistance(double costLimitDistance);
+
+    inline double GetCostLimitDistance() const
+    {
+      return costLimitDistance;
+    }
+
+    void SetCostLimitFactor(double costLimitFactor);
+
+    inline double GetCostLimitFactor() const
+    {
+      return costLimitFactor;
     }
 
     void AddType(const TypeInfoRef& type, double speed);

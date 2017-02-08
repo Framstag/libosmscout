@@ -28,6 +28,15 @@ Window {
         dialog.open()
     }
 
+    function openMapDownloadDialog() {
+        var component = Qt.createComponent("MapDownloadDialog.qml")
+        var dialog = component.createObject(mainWindow, {})
+
+        dialog.opened.connect(onDialogOpened)
+        dialog.closed.connect(onDialogClosed)
+        dialog.open()
+    }
+
     function showLocation(location) {
         map.showLocation(location)
     }
@@ -87,6 +96,11 @@ Window {
         }
     }
 
+    Settings {
+        id: settings
+        //mapDPI: 50
+    }
+
     GridLayout {
         id: content
         anchors.fill: parent
@@ -102,6 +116,39 @@ Window {
                                Theme.vertSpace+searchDialog.height+Theme.vertSpace,
                                map.width-2*Theme.horizSpace,
                                map.height-searchDialog.y-searchDialog.height-3*Theme.vertSpace)
+            }
+
+            function setupInitialPosition(){
+                if (map.databaseLoaded){
+                  if (map.isInDatabaseBoundingBox(settings.mapView.lat, settings.mapView.lon)){
+                    map.view = settings.mapView;
+                    console.log("restore last position: " + settings.mapView.lat + " " + settings.mapView.lon);
+                  }else{
+                    console.log("position " + settings.mapView.lat + " " + settings.mapView.lon + " is outside database, recenter");
+                    map.recenter();
+                  }
+                }else{
+                  map.view = settings.mapView;
+                }
+            }
+
+            onTap: {
+                console.log("tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
+                map.focus=true;
+            }
+            onLongTap: {
+                console.log("long tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon);
+                map.focus=true;
+            }
+            onViewChanged: {
+                //console.log("map center "+ map.view.lat + " " + map.view.lon + "");
+                settings.mapView = map.view;
+            }
+            Component.onCompleted: {
+                setupInitialPosition();
+            }
+            onDatabaseLoaded: {
+                setupInitialPosition();
             }
 
             Keys.onPressed: {
@@ -152,9 +199,29 @@ Window {
                          event.key === Qt.Key_R) {
                     map.reloadStyle();
                 }
-            }
+                else if (event.modifiers===(Qt.ControlModifier | Qt.ShiftModifier) &&
+                         event.key === Qt.Key_D) {
+                    var debugState = map.toggleDebug();
 
-            // Use PinchArea for multipoint zoom in/out?
+                    if (debugState) {
+                      console.log("DEBUG is ON");
+                    }
+                    else {
+                      console.log("DEBUG is OFF");
+                    }
+                }
+                else if (event.modifiers===(Qt.ControlModifier | Qt.ShiftModifier) &&
+                         event.key === Qt.Key_I) {
+                    var infoState = map.toggleInfo();
+
+                    if (infoState) {
+                      console.log("INFO is ON");
+                    }
+                    else {
+                      console.log("INFO is OFF");
+                    }
+                }
+            }
 
             SearchDialog {
                 id: searchDialog
@@ -166,6 +233,7 @@ Window {
                 desktop: map
 
                 onShowLocation: {
+                    console.log("location: "+location);
                     map.showLocation(location)
                 }
 
@@ -189,6 +257,28 @@ Window {
                 spacing: Theme.mapButtonSpace
 
                 MapButton {
+                    id: downloadBtn
+                    Image {
+                        id: downloadIcon
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width * 0.8
+                        height: parent.height * 0.8
+
+                        source: "qrc:///pics/Download.svg"
+                        fillMode: Image.PreserveAspectFit
+                        horizontalAlignment: Image.AlignHCenter
+                        verticalAlignment: Image.AlignVCenter
+                        sourceSize.width: width
+                        sourceSize.height: height
+                    }
+                    onClicked: {
+                        openMapDownloadDialog();
+                    }
+                }
+
+                MapButton {
                     id: about
                     label: "?"
 
@@ -206,6 +296,15 @@ Window {
                 y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
+
+                MapButton {
+                    id: recenter
+                    label: "*"
+
+                    onClicked: {
+                        map.recenter()
+                    }
+                }
 
                 MapButton {
                     id: zoomIn

@@ -105,6 +105,7 @@ namespace osmscout {
      sortObjects(true),
      sortBlockSize(40000000),
      sortTileMag(14),
+     processingQueueSize(std::max((unsigned int)1,std::thread::hardware_concurrency())),
      numericIndexPageSize(1024),
      rawCoordBlockSize(60000000),
      rawNodeDataMemoryMaped(false),
@@ -204,6 +205,11 @@ namespace osmscout {
   size_t ImportParameter::GetSortTileMag() const
   {
     return sortTileMag;
+  }
+
+  size_t ImportParameter::GetProcessingQueueSize() const
+  {
+    return processingQueueSize;
   }
 
   size_t ImportParameter::GetNumericIndexPageSize() const
@@ -438,6 +444,11 @@ namespace osmscout {
     this->sortTileMag=sortTileMag;
   }
 
+  void ImportParameter::SetProcessingQueueSize(size_t processingQueueSize)
+  {
+    this->processingQueueSize=processingQueueSize;
+  }
+
   void ImportParameter::SetNumericIndexPageSize(size_t numericIndexPageSize)
   {
     this->numericIndexPageSize=numericIndexPageSize;
@@ -594,7 +605,7 @@ namespace osmscout {
   {
     this->assumeLand=assumeLand;
   }
-    
+
   void ImportParameter::SetLangOrder(const std::vector<std::string>& langOrder)
   {
     this->langOrder = langOrder;
@@ -604,7 +615,7 @@ namespace osmscout {
   {
     this->altLangOrder = altLangOrder;
   }
-    
+
   void ImportModuleDescription::SetName(const std::string& name)
   {
     this->name=name;
@@ -974,7 +985,7 @@ namespace osmscout {
 
     DumpTypeConfigData(*typeConfig,
                        progress);
-      
+
     progress.Info("Parsed language(s) :");
     int langIndex = 0;
     for(const auto& lang : parameter.GetLangOrder()){
@@ -989,7 +1000,7 @@ namespace osmscout {
       }
       langIndex+=2;
     }
-      
+
     progress.Info("Parsed alt language(s) :");
     langIndex = 0;
     for(const auto& lang : parameter.GetAltLangOrder()){

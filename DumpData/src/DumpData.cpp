@@ -306,18 +306,26 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
   std::cout.setf(oldFlags,std::ios::floatfield);
   std::cout.precision(oldPrecision);
 
+  for (const auto& object : routeNode.objects) {
+    std::cout << std::endl;
+    std::cout << "  object {" << std::endl;
+    std::cout << "    object: " << object.object.GetName() << std::endl;
+    std::cout << "    variant: " << object.objectVariantIndex << std::endl;
+    std::cout << "  }" << std::endl;
+  }
+
   for (const auto& path : routeNode.paths) {
     std::cout << std::endl;
     std::cout << "  path {" << std::endl;
-    std::cout << "     object: " << routeNode.objects[path.objectIndex].object.GetName() << std::endl;
+    std::cout << "    object: " << routeNode.objects[path.objectIndex].object.GetName() << std::endl;
     std::cout << "  }" << std::endl;
   }
 
   for (const auto& exclude : routeNode.excludes) {
     std::cout << std::endl;
     std::cout << "  exclude {" << std::endl;
-    std::cout << "     from: " << exclude.source.GetName() << std::endl;
-    std::cout << "     to: " << routeNode.objects[exclude.targetIndex].object.GetName() << std::endl;
+    std::cout << "    from: " << exclude.source.GetName() << std::endl;
+    std::cout << "    to: " << routeNode.objects[exclude.targetIndex].object.GetName() << std::endl;
     std::cout << "  }" << std::endl;
   }
 
@@ -487,7 +495,19 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
           osmscout::AdminLevelFeatureValue *adminLevelValue=dynamic_cast<osmscout::AdminLevelFeatureValue*>(value);
 
           DumpIndent(indent);
-          std::cout << "AdminLevel: " << (unsigned int)adminLevelValue->GetAdminLevel() << std::endl;
+          std::cout << "AdminLevel: " << (unsigned int)adminLevelValue->GetAdminLevel();
+
+          if (!adminLevelValue->GetIsIn().empty()) {
+            std::cout << " is in " << adminLevelValue->GetIsIn();
+          }
+
+          std::cout << std::endl;
+        }
+        else if (dynamic_cast<osmscout::IsInFeatureValue*>(value)!=NULL) {
+          osmscout::IsInFeatureValue *isInValue=dynamic_cast<osmscout::IsInFeatureValue*>(value);
+
+          DumpIndent(indent);
+          std::cout << "IsIn: " << isInValue->GetIsIn() << std::endl;
         }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);
@@ -692,8 +712,8 @@ int main(int argc, char* argv[])
   }
   catch (std::runtime_error) {
     std::cerr << "ERROR: Cannot set locale" << std::endl;
-  }  
-  
+  }
+
   if (!ParseArguments(argc,
                       argv,
                       map,

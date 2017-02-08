@@ -83,7 +83,9 @@ namespace osmscout {
     bool HasPattern(const MapParameter& parameter,
                     const FillStyle& style);
 
-    void GetTextDimension(const MapParameter& parameter,
+    void GetTextDimension(const Projection& projection,
+                          const MapParameter& parameter,
+                          double objectWidth,
                           double fontSize,
                           const std::string& text,
                           double& xOff,

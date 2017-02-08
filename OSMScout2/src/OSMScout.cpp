@@ -21,14 +21,17 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickView>
+#include <QApplication>
 
 // Custom QML objects
-#include "osmscout/MapWidget.h"
-#include "osmscout/SearchLocationModel.h"
-#include "osmscout/RoutingModel.h"
+#include <osmscout/MapWidget.h>
+#include <osmscout/SearchLocationModel.h>
+#include <osmscout/RoutingModel.h>
+#include <osmscout/AvailableMapsModel.h>
+#include <osmscout/MapDownloadsModel.h>
 
 // Application settings
-#include "osmscout/Settings.h"
+#include <osmscout/Settings.h>
 
 // Application theming
 #include "Theme.h"
@@ -54,7 +57,6 @@ int main(int argc, char* argv[])
 #endif
 
   QGuiApplication app(argc,argv);
-  SettingsRef     settings;
   int             result;
 
   app.setOrganizationName("libosmscout");
@@ -66,20 +68,83 @@ int main(int argc, char* argv[])
   qRegisterMetaType<osmscout::TileRef>();
 
   qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
-  qmlRegisterType<Location>("net.sf.libosmscout.map", 1, 0, "Location");
+  qmlRegisterType<LocationEntry>("net.sf.libosmscout.map", 1, 0, "LocationEntry");
   qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
   qmlRegisterType<RouteStep>("net.sf.libosmscout.map", 1, 0, "RouteStep");
   qmlRegisterType<RoutingListModel>("net.sf.libosmscout.map", 1, 0, "RoutingListModel");
+  qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
+  qmlRegisterType<AvailableMapsModel>("net.sf.libosmscout.map", 1, 0, "AvailableMapsModel");
+  qmlRegisterType<MapDownloadsModel>("net.sf.libosmscout.map", 1, 0, "MapDownloadsModel");
 
   qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
 
-  osmscout::log.Debug(true);
+  osmscout::log.Debug(false);
+  osmscout::log.Info(false);
 
-  settings=std::make_shared<Settings>();
+  // load online tile providers
+  Settings::GetInstance()->loadOnlineTileProviders(
+    ":/resources/online-tile-providers.json");
+  Settings::GetInstance()->loadMapProviders(
+    ":/resources/map-providers.json");
 
   QThread thread;
 
-  if (!DBThread::InitializeInstance()) {
+  // setup paths
+  QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+  QStringList cmdLineArgs = QApplication::arguments();
+
+  QStringList mapLookupDirectories;
+  if (cmdLineArgs.size() > 1){
+    mapLookupDirectories << cmdLineArgs.at(1);
+  }
+  else{
+    mapLookupDirectories << QDir::currentPath();
+    mapLookupDirectories << QDir(documentsLocation).filePath("Maps");
+  }
+
+  QString stylesheetFilename;
+  if (cmdLineArgs.size() > 2){
+    stylesheetFilename = cmdLineArgs.at(2);
+  }
+  else{
+    if (cmdLineArgs.size() > 1){
+      stylesheetFilename = QDir(cmdLineArgs.at(1)).filePath("standard.oss");
+    }else{
+      stylesheetFilename = QDir("stylesheets") .filePath("standard.oss");
+    }
+  }
+
+  QString iconDirectory;
+  if (cmdLineArgs.size() > 3){
+    iconDirectory = cmdLineArgs.at(3);
+  }
+  else {
+    if (cmdLineArgs.size() > 1) {
+      iconDirectory = QDir(cmdLineArgs.at(1)).filePath("icons");
+    }
+    else {
+      iconDirectory = "icons";
+    }
+  }
+/*
+  if (!DBThread::InitializeTiledInstance(
+          mapLookupDirectories,
+          stylesheetFilename,
+          iconDirectory,
+          cacheLocation + QDir::separator() + "OSMScoutTileCache",
+          / onlineTileCacheSize  / 100,
+          / offlineTileCacheSize / 200
+      )) {
+    std::cerr << "Cannot initialize DBThread" << std::endl;
+    return 1;
+  }
+*/
+  if (!DBThread::InitializePlaneInstance(
+          mapLookupDirectories,
+          stylesheetFilename,
+          iconDirectory
+      )) {
     std::cerr << "Cannot initialize DBThread" << std::endl;
     return 1;
   }
@@ -101,6 +166,7 @@ int main(int argc, char* argv[])
   thread.wait();
 
   DBThread::FreeInstance();
+  Settings::FreeInstance();
 
   return result;
 }

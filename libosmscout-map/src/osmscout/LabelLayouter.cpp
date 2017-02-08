@@ -19,6 +19,8 @@
 
 #include <osmscout/LabelLayouter.h>
 
+//#define LABEL_LAYOUTER_DEBUG
+
 namespace osmscout {
 
   LabelData::LabelData()
@@ -48,9 +50,11 @@ namespace osmscout {
 
     searchEventTop.y=eventRef->label->by1;
     searchEventTop.x=eventRef->label->bx1;
+    searchEventTop.label=eventRef->label;
 
     searchEventBottom.y=eventRef->label->by2;
     searchEventBottom.x=eventRef->label->bx1;
+    searchEventBottom.label=eventRef->label;
 
     std::set<LabelEvent>::iterator event;
 
@@ -58,11 +62,12 @@ namespace osmscout {
 
     assert(event!=events.end());
 
-    /*
+#if defined(LABEL_LAYOUTER_DEBUG)
     std::cout << "Removing event: ";
     std::cout << event->label->text << " ";
     std::cout << event->x << "," << event->y << " | ";
-    std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;*/
+    std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;
+#endif
 
     events.erase(event);
 
@@ -70,17 +75,23 @@ namespace osmscout {
 
     assert(event!=events.end());
 
-    /*
+#if defined(LABEL_LAYOUTER_DEBUG)
     std::cout << "Removing event: ";
     std::cout << event->label->text << " ";
     std::cout << event->x << "," << event->y << " | ";
-    std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;*/
+    std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;
+#endif
 
     events.erase(event);
   }
 
   bool LabelLayouter::Intersects(const LabelData& first, const LabelData& second) const
   {
+    // Labels with the same id never intersect
+    if (first.id==second.id) {
+      return false;
+    }
+
     if (dynamic_cast<ShieldStyle*>(first.style.get())!=NULL &&
         dynamic_cast<ShieldStyle*>(second.style.get())!=NULL) {
       double horizLabelSpace=shieldLabelSpace;
@@ -167,19 +178,27 @@ namespace osmscout {
     maxSpace=std::max(maxSpace,labelSpace);
     maxSpace=std::max(maxSpace,shieldLabelSpace);
     maxSpace=std::max(maxSpace,sameLabelSpace);
+
+    dropNotVisiblePointLabels=parameter.GetDropNotVisiblePointLabels();
+
+    labelsAdded=0;
   }
 
   bool LabelLayouter::Placelabel(const LabelData& label,
                                  LabelDataRef& labelRef)
   {
+    labelsAdded++;
+
     LabelEvent searchEvent;
 
+    if (dropNotVisiblePointLabels) {
       if (label.bx2<0 || label.bx1>=width) {
-      return false;
-    }
+        return false;
+      }
 
-    if (label.by2<0 || label.by1>=height) {
-      return false;
+      if (label.by2<0 || label.by1>=height) {
+        return false;
+      }
     }
 
     searchEvent.y=label.by1-maxSpace;
@@ -187,57 +206,75 @@ namespace osmscout {
 
     std::set<LabelEvent>::iterator event=events.lower_bound(searchEvent);
 
-    /*
-    std::cout << "--- Placing: ";
-    std::cout << label.text << " ";
+#if defined(LABEL_LAYOUTER_DEBUG)
+    std::cout << "--- Placing: '";
+    std::cout << label.text << "' ";
     std::cout << label.bx1 << " - " << label.bx2 << ", "  << label.by1 << " - " << label.by2;
     std::cout << std::endl;
 
-    for (const auto& ev ent : events) {
-      std::cout << "Event: ";
-      std::cout << event.label->text << " ";
+    for (const auto& event : events) {
+      std::cout << "Event: '";
+      std::cout << event.label->text << "' ";
       std::cout << event.x << "," << event.y << " | ";
       std::cout << event.label->bx1 << " - " << event.label->bx2 << ", "  << event.label->by1 << " - " << event.label->by2 << std::endl;
-    }*/
+    }
+#endif
 
     while (event!=events.end() &&
            label.by2+maxSpace>=event->y) {
-      /*
-      std::cout << event->label->text << " ";
+#if defined(LABEL_LAYOUTER_DEBUG)
+      std::cout << "---->: '";
+      std::cout << event->label->text << "' ";
       std::cout << event->x << "," << event->y << " | ";
-      std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;*/
+      std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;
+#endif
+
       if (Intersects(*event->label,label)) {
         if (label.priority<event->label->priority) {
           LabelDataRef oldLabel=event->label;
 
-          //std::cout << "DROPPING lower prio " << event->label->text << " " << label.priority << " vs. " << event->label->priority << std::endl;
+#if defined(LABEL_LAYOUTER_DEBUG)
+          std::cout << "DROPPING lower prio '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
+#endif
+
+          // Remobving old label and restart inserting
           DeleteEventsForLabel(event);
           labels.erase(oldLabel);
 
           // Restart the search :-/
           event=events.lower_bound(searchEvent);
         }
-        else if (label.priority>event->label->priority) {
+        else if (label.priority==event->label->priority) {
           LabelDataRef oldLabel=event->label;
 
-          //std::cout << "DROPPING same prio and exit " << event->label->text << " " << label.priority << " vs. " << event->label->priority << std::endl;
+#if defined(LABEL_LAYOUTER_DEBUG)
+          std::cout << "DROPPING same prio and exit '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
+#endif
+          // Drop old and new label
           DeleteEventsForLabel(event);
           labels.erase(oldLabel);
 
           return false;
         }
         else {
-          //std::cout << "CANCEL since higher prio " << event->label->text << " " << label.priority << " vs. " << event->label->priority << std::endl;
+#if defined(LABEL_LAYOUTER_DEBUG)
+          std::cout << "CANCEL since higher prio '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
+#endif
+          // Do not insert new label
           return false;
         }
       }
       else {
-        //std::cout << "IGNORING " << event->label->text << std::endl;
+#if defined(LABEL_LAYOUTER_DEBUG)
+        std::cout << "IGNORING '" << event->label->text << "'" << std::endl;
+#endif
         event++;
       }
     }
 
-    //std::cout << "INSERT" << std::endl;
+#if defined(LABEL_LAYOUTER_DEBUG)
+    std::cout << "INSERT" << std::endl;
+#endif
 
     labels.push_front(label);
     labelRef=labels.begin();

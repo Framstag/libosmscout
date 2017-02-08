@@ -32,11 +32,13 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Progress.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
   /**
     Representation of an (complex/multipolygon) area
     */
-  class OSMSCOUT_API Area
+  class OSMSCOUT_API Area CLASS_FINAL
   {
   public:
     static const uint8_t masterRingId;
@@ -191,6 +193,11 @@ namespace osmscout {
       return fileOffset;
     }
 
+    inline ObjectFileRef GetObjectFileRef() const
+    {
+      return ObjectFileRef(fileOffset,refArea);
+    }
+
     inline TypeInfoRef GetType() const
     {
       return rings.front().GetType();
@@ -209,6 +216,24 @@ namespace osmscout {
     bool GetCenter(GeoCoord& center) const;
 
     void GetBoundingBox(GeoBox& boundingBox) const;
+
+    /**
+     * Returns true if the bounding box of the object intersects the given
+     * bounding box
+     *
+     * @param boundingBox
+     *    bounding box to test for intersection
+     * @return
+     *    true on intersection, else false
+     */
+    inline bool Intersects(const GeoBox& boundingBox) const
+    {
+      GeoBox objectBoundingBox;
+
+      GetBoundingBox(objectBoundingBox);
+
+      return objectBoundingBox.Intersects(boundingBox);
+    }
 
     /**
      * Read the area as written by Write().

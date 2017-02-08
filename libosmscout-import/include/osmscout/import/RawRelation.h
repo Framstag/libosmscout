@@ -29,9 +29,11 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawRelation
+  class RawRelation CLASS_FINAL
   {
   public:
     enum MemberType {

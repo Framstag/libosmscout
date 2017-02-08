@@ -22,9 +22,11 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class TypeDataGenerator : public ImportModule
+  class TypeDataGenerator CLASS_FINAL : public ImportModule
   {
   public:
 

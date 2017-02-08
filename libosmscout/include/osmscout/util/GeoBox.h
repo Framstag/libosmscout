@@ -24,6 +24,8 @@
 
 #include <osmscout/GeoCoord.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -34,13 +36,14 @@ namespace osmscout {
    * The bounding box is defined by two coordinates (type GeoCoord) that span a
    * (in coordinate space) rectangular area.
    */
-  struct OSMSCOUT_API GeoBox
+  class OSMSCOUT_API GeoBox CLASS_FINAL
   {
+  private:
     GeoCoord minCoord;
     GeoCoord maxCoord;
+    bool     valid;
 
-    bool valid;
-
+  public:
     /**
      * The default constructor creates an invalid instance.
      */
@@ -105,6 +108,13 @@ namespace osmscout {
                other.GetMaxLat()<minCoord.GetLat() ||
                other.GetMinLat()>=maxCoord.GetLat());
     }
+
+    /**
+     * Create new GeoBox from intersection of this with other
+     * If not Intersects, invalid GeoBox is returned
+     * @param other
+     */
+    GeoBox Intersection(const GeoBox& other) const;
 
     /**
      * Returns true, if the GeoBox instance is valid. This means there were

@@ -24,9 +24,11 @@
 
 #include <osmscout/Node.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class SortNodeDataGenerator : public SortDataGenerator<Node>
+  class SortNodeDataGenerator CLASS_FINAL : public SortDataGenerator<Node>
   {
   public:
     static const char* NODEADDRESS_DAT;

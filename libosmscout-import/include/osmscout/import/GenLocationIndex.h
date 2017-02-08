@@ -32,9 +32,11 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class LocationIndexGenerator : public ImportModule
+  class LocationIndexGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* const FILENAME_LOCATION_REGION_TXT;
@@ -95,60 +97,50 @@ namespace osmscout {
       An area has a name and also a number of locations, which are possibly
       within the area but area currently also represented by this area.
       */
-    struct Region
+    class Region
     {
-      FileOffset                           indexOffset; //!< Offset into the index file
-      FileOffset                           dataOffset;  //!< Offset into the index file
+    private:
+      std::vector<GeoBox>                  boundingBoxes; //!< bounding box of each area building the region
+      GeoBox                               boundingBox;   //!< Overall bounding box of all areas
+      std::vector<GeoCoord>                probePoints;   //!< Points within the region that can be used to check region containment
 
-      ObjectFileRef                        reference;   //!< Reference to the object this area is based on
-      std::string                          name;        //!< The name of this area
+    public:
+      FileOffset                           indexOffset;   //!< Offset into the index file
+      FileOffset                           dataOffset;    //!< Offset into the index file
 
-      std::list<RegionAlias>               aliases;     //!< Location that are represented by this region
-      std::vector<std::vector<GeoCoord> >  areas;       //!< the geometric area of this region
+      ObjectFileRef                        reference;     //!< Reference to the object this area is based on
+      std::string                          name;          //!< The name of this area
+      std::string                          isIn;          //!< Name of the parent region as stated in OSM (is_in tag)
+      std::list<RegionAlias>               aliases;       //!< Location that are represented by this region
+      int                                  level{-1};     //!< Admin level or -1 if not set
 
-      double                               minlon;
-      double                               minlat;
-      double                               maxlon;
-      double                               maxlat;
+      std::vector<std::vector<GeoCoord> >  areas;         //!< the geometric area of this region
+      std::list<RegionPOI>                 pois;          //!< A list of POIs in this region
+      std::map<std::string,RegionLocation> locations;     //!< list of indexed objects in this region
 
-      std::list<RegionPOI>                 pois;        //!< A list of POIs in this region
-      std::map<std::string,RegionLocation> locations;   //!< list of indexed objects in this region
+      std::list<RegionRef>                 regions;       //!< A list of sub regions
 
-      std::list<RegionRef>                 regions;     //!< A list of sub regions
+    public:
+      void CalculateMinMax();
+      bool CouldContain(const GeoBox& boundingBox) const;
+      bool CouldContain(const Region& region, bool strict) const;
 
-      void CalculateMinMax()
+      bool Contains(Region& child) const;                 //! Checks whether child is within this
+
+      inline GeoBox GetBoundingBox() const
       {
-        bool isStart=true;
-
-        for (size_t i=0; i<areas.size(); i++) {
-          for (size_t j=0; j<areas[i].size(); j++) {
-            if (isStart) {
-              minlon=areas[i][j].GetLon();
-              maxlon=areas[i][j].GetLon();
-
-              minlat=areas[i][j].GetLat();
-              maxlat=areas[i][j].GetLat();
-
-              isStart=false;
-            }
-            else {
-              minlon=std::min(minlon,areas[i][j].GetLon());
-              maxlon=std::max(maxlon,areas[i][j].GetLon());
-
-              minlat=std::min(minlat,areas[i][j].GetLat());
-              maxlat=std::max(maxlat,areas[i][j].GetLat());
-            }
-          }
-        }
+        return boundingBox;
       }
-    };
 
-    struct Boundary
-    {
-      ObjectFileRef                       reference;
-      std::string                         name;
-      size_t                              level;
-      std::vector<std::vector<GeoCoord> > areas;
+      inline const std::vector<GeoBox> GetAreaBoundingBoxes() const
+      {
+        return boundingBoxes;
+      }
+
+    protected:
+      void CalculateProbePoints();                           //! Finds probe points for this to be used for containment test
+      void CalculateProbePointsForArea(size_t areaIndex,     //! Finds probe points for an area
+                                       size_t refinement=0);
     };
 
     class RegionIndex
@@ -222,19 +214,19 @@ namespace osmscout {
                           const Region& rootRegion,
                           const std::string& filename);
 
-    void AddRegion(Region& parent,
-                   const RegionRef& region);
+    bool AddRegion(Region& parent,
+                   RegionRef& region,
+                   bool assume_contains=true);
 
     bool GetBoundaryAreas(const ImportParameter& parameter,
                           Progress& progress,
                           const TypeConfigRef& typeConfig,
                           const TypeInfoSet& boundaryTypes,
-                          std::list<Boundary>& boundaryAreas);
+                          std::vector<std::list<RegionRef>>& boundaryAreas);
 
     void SortInBoundaries(Progress& progress,
                           Region& rootRegion,
-                          const std::list<Boundary>& boundaryAreas,
-                          size_t level);
+                          std::list<RegionRef>& boundaryAreas);
 
     bool IndexRegionAreas(const TypeConfig& typeConfig,
                           const ImportParameter& parameter,
@@ -264,10 +256,7 @@ namespace osmscout {
                                  const Area& area,
                                  const std::vector<Point>& nodes,
                                  const std::string& name,
-                                 double minlon,
-                                 double minlat,
-                                 double maxlon,
-                                 double maxlat);
+                                 const GeoBox& boundingBox);
 
     void AddLocationAreaToRegion(RegionRef& rootRegion,
                                  const Area& area,
@@ -284,10 +273,7 @@ namespace osmscout {
     bool AddLocationWayToRegion(Region& region,
                                 const Way& way,
                                 const std::string& name,
-                                double minlon,
-                                double minlat,
-                                double maxlon,
-                                double maxlat);
+                                const GeoBox& boundingBox);
 
     bool IndexLocationWays(const TypeConfigRef& typeConfig,
                            const ImportParameter& parameter,
@@ -301,10 +287,7 @@ namespace osmscout {
                                 const std::string& location,
                                 const std::string& address,
                                 const std::vector<Point>& nodes,
-                                double minlon,
-                                double minlat,
-                                double maxlon,
-                                double maxlat,
+                                const GeoBox& boundingBox,
                                 bool& added);
 
     void AddPOIAreaToRegion(Progress& progress,
@@ -312,10 +295,7 @@ namespace osmscout {
                             const FileOffset& fileOffset,
                             const std::string& name,
                             const std::vector<Point>& nodes,
-                            double minlon,
-                            double minlat,
-                            double maxlon,
-                            double maxlat,
+                            const GeoBox& boundingBox,
                             bool& added);
 
     bool IndexAddressAreas(const TypeConfig& typeConfig,
@@ -330,10 +310,7 @@ namespace osmscout {
                                const std::string& location,
                                const std::string& address,
                                const std::vector<Point>& nodes,
-                               double minlon,
-                               double minlat,
-                               double maxlon,
-                               double maxlat,
+                               const GeoBox& boundingBox,
                                bool& added);
 
     bool AddPOIWayToRegion(Progress& progress,
@@ -341,10 +318,7 @@ namespace osmscout {
                            const FileOffset& fileOffset,
                            const std::string& name,
                            const std::vector<Point>& nodes,
-                           double minlon,
-                           double minlat,
-                           double maxlon,
-                           double maxlat,
+                           const GeoBox& boundingBox,
                            bool& added);
 
     bool IndexAddressWays(const TypeConfig& typeConfig,
@@ -368,7 +342,7 @@ namespace osmscout {
     std::map<std::string,RegionLocation>::iterator FindLocation(Progress& progress,
                                                                 Region& region,
                                                                 const std::string &locationName);
-    
+
     void AddAddressNodeToRegion(Progress& progress,
                                 Region& region,
                                 const FileOffset& fileOffset,

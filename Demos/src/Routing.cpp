@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -55,6 +56,43 @@
   Very short: "In den Hüchten" Dortmund => "Kaiserstrasse" Dortmund
      51.5717798 7.4587852  51.5143553 7.4932118
 */
+
+class ConsoleRoutingProgress : public osmscout::RoutingProgress
+{
+private:
+  std::chrono::system_clock::time_point lastDump;
+  double                                maxPercent;
+
+public:
+  ConsoleRoutingProgress()
+  : lastDump(std::chrono::system_clock::now()),
+    maxPercent(0.0)
+  {
+    // no code
+  }
+
+  void Reset()
+  {
+    lastDump=std::chrono::system_clock::now();
+    maxPercent=0.0;
+  }
+
+  void Progress(double currentMaxDistance,
+                double overallDistance)
+  {
+    double currentPercent=(currentMaxDistance*100.0)/overallDistance;
+
+    std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
+
+    maxPercent=std::max(maxPercent,currentPercent);
+
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(now-lastDump).count()>500) {
+      std::cout << (size_t)maxPercent << "%" << std::endl;
+
+      lastDump=now;
+    }
+  }
+};
 
 static std::string TimeToString(double time)
 {
@@ -207,6 +245,11 @@ static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node
   if (node.HasDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC)) {
     return true;
   }
+
+  /*
+  if (node.HasDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC)) {
+    return true;
+  }*/
 
   return false;
 #endif
@@ -550,9 +593,11 @@ int main(int argc, char* argv[])
   }
 
   osmscout::TypeConfigRef             typeConfig=database->GetTypeConfig();
-  osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
   std::map<std::string,double>        carSpeedTable;
+  osmscout::RoutingParameter          parameter;
+
+  parameter.SetProgress(std::make_shared<ConsoleRoutingProgress>());
 
   switch (vehicle) {
   case osmscout::vehicleFoot:
@@ -571,66 +616,50 @@ int main(int argc, char* argv[])
     break;
   }
 
-  osmscout::ObjectFileRef startObject;
-  size_t                  startNodeIndex;
+  osmscout::RoutePosition start=router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
+                                                               routingProfile,
+                                                               1000);
 
-  if (!router->GetClosestRoutableNode(startLat,
-                                      startLon,
-                                      vehicle,
-                                      1000,
-                                      startObject,
-                                      startNodeIndex)) {
+  if (!start.IsValid()) {
     std::cerr << "Error while searching for routing node near start location!" << std::endl;
     return 1;
   }
 
-  if (startObject.Invalid() || startObject.GetType()==osmscout::refNode) {
+  if (start.GetObjectFileRef().GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
-  osmscout::ObjectFileRef targetObject;
-  size_t                  targetNodeIndex;
+  osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
+                                                               routingProfile,
+                                                               1000);
 
-  if (!router->GetClosestRoutableNode(targetLat,
-                                      targetLon,
-                                      vehicle,
-                                      1000,
-                                      targetObject,
-                                      targetNodeIndex)) {
+  if (!target.IsValid()) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;
     return 1;
   }
 
-  if (targetObject.Invalid() || targetObject.GetType()==osmscout::refNode) {
+  if (target.GetObjectFileRef().GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
 
-  if (!router->CalculateRoute(routingProfile,
-                              startObject,
-                              startNodeIndex,
-                              targetObject,
-                              targetNodeIndex,
-                              data)) {
+  osmscout::RoutingResult result=router->CalculateRoute(routingProfile,
+                                                        start,
+                                                        target,
+                                                        parameter);
+
+  if (!result.Success()) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();
     return 1;
   }
 
-  if (data.IsEmpty()) {
-    std::cout << "No Route found!" << std::endl;
-
-    router->Close();
-
-    return 0;
-  }
-
 #ifdef DATA_DEBUG
-  for (const auto &entry : data.Entries()) {
+  for (const auto &entry : result.GetRoute().Entries()) {
     std::cout << entry.GetPathObject().GetName() << "[" << entry.GetCurrentNodeIndex() << "]" << " = " << entry.GetCurrentNodeId() << " => " << entry.GetTargetNodeIndex() << std::endl;
   }
 #endif
 
-  router->TransformRouteDataToRouteDescription(data,
+  router->TransformRouteDataToRouteDescription(result.GetRoute(),
                                                description);
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
@@ -642,6 +671,7 @@ int main(int argc, char* argv[])
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
 
   osmscout::RoutePostprocessor::InstructionPostprocessorRef instructionProcessor=std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>();
 
@@ -659,7 +689,7 @@ int main(int argc, char* argv[])
   std::list<osmscout::Point> points;
 
   if(outputGPX) {
-    if (!router->TransformRouteDataToPoints(data,
+    if (!router->TransformRouteDataToPoints(result.GetRoute(),
                                             points)) {
       std::cerr << "Error during route conversion" << std::endl;
     }
@@ -722,6 +752,7 @@ int main(int argc, char* argv[])
     osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
     osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
     osmscout::RouteDescription::MotorwayJunctionDescriptionRef motorwayJunctionDescription;
+    osmscout::RouteDescription::MaxSpeedDescriptionRef         maxSpeedDescription;
 
     desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
     if (desc) {
@@ -789,6 +820,11 @@ int main(int argc, char* argv[])
       motorwayJunctionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayJunctionDescription>(desc);
     }
 
+    desc=node->GetDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
+    if (desc) {
+      maxSpeedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MaxSpeedDescription>(desc);
+    }
+
     if (crossingWaysDescription &&
         roundaboutCrossingCounter>0 &&
         crossingWaysDescription->GetExitCount()>1) {
@@ -818,6 +854,15 @@ int main(int argc, char* argv[])
     else {
       std::cout << "       ";
     }
+
+    /*
+    if (maxSpeedDescription) {
+      std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
+      std::cout << (size_t)maxSpeedDescription->GetMaxSpeed() << " km/h ";
+    }
+    else {
+      std::cout << "           ";
+    }*/
 
     size_t lineCount=0;
 

@@ -52,10 +52,9 @@ namespace osmscout {
   private:
     mutable std::mutex mutex;
 
-    TypeInfoSet        prefillTypes;
-    std::vector<O>     prefillData;
-
     TypeInfoSet        types;
+
+    std::vector<O>     prefillData;
     std::vector<O>     data;
 
     bool               complete;
@@ -70,20 +69,79 @@ namespace osmscout {
       // no code
     }
 
+    bool IsEmpty() const
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      return types.Empty();
+    }
+
     /**
-     * Assign data to the tile that was derived from existing tiles
+     * Marks the tile as inpcomplete again, without actually clearing data and types.
      */
-    void SetPrefillData(const TypeInfoSet& types,
+    void Invalidate()
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      complete=false;
+    }
+
+    /**
+     * Assign data to the tile that was derived from existing tiles. Resets the list of loaded types
+     * to the list given.
+     */
+    void AddPrefillData(const TypeInfoSet& types,
                         const std::vector<O>& data)
     {
       std::lock_guard<std::mutex> guard(mutex);
 
-      this->prefillData=data;
-      this->prefillTypes=types;
+      if (this->types.Empty()) {
+        this->types=types;
+      }
+      else {
+        this->types.Add(types);
+      }
+
+      if (this->prefillData.empty()) {
+        this->prefillData=data;
+      }
+      else {
+        this->prefillData.reserve(this->prefillData.size()+data.size());
+        this->prefillData.insert(this->prefillData.end(),data.begin(),data.end());
+      }
+
+      complete=false;
     }
 
     /**
-     * Assign data to the tile that was loaded
+     * Assign data to the tile that was derived from existing tiles. Resets the list of loaded types
+     * to the list given. This version has move semantics for the data.
+     */
+    void AddPrefillData(const TypeInfoSet& types,
+                        std::vector<O>&& data)
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      if (this->types.Empty()) {
+        this->types=types;
+      }
+      else {
+        this->types.Add(types);
+      }
+
+      if (this->prefillData.empty()) {
+        this->prefillData=std::move(data);
+      }
+      else {
+        this->prefillData.reserve(this->prefillData.size()+data.size());
+        this->prefillData.insert(this->prefillData.end(),data.begin(),data.end());
+      }
+
+      complete=false;
+    }
+
+    /**
+     * Assign data to the tile and mark the tile as completed.
      */
     void SetData(const TypeInfoSet& types,
                  const std::vector<O>& data)
@@ -91,9 +149,29 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       this->data=data;
-      this->types=types;
+      this->types.Add(types);
+
+      complete=true;
     }
 
+    /**
+     * Assign data to the tile and mark the tile as completed.  This version has move semantics for the data.
+     */
+    void SetData(const TypeInfoSet& types,
+                 std::vector<O>&& data)
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      this->data=std::move(data);
+      this->types.Add(types);
+
+      complete=true;
+    }
+
+    /**
+     * Mark the tile as completed (useful if prefill data is already complete and
+     * no more actual data has to be loaded)
+     */
     void SetComplete()
     {
       std::lock_guard<std::mutex> guard(mutex);
@@ -109,33 +187,6 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       return complete;
-    }
-
-    /**
-     * Return the list of types of the prefill data stored in the tile.
-     *
-     * Note that it is stll possibly that there is no acutal data for this type in the
-     * TileData stored.
-     */
-    const TypeInfoSet GetPrefillTypes() const
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-
-      return types;
-    }
-
-    size_t GetPrefillDataSize() const
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-
-      return prefillData.size();
-    }
-
-    void CopyPrefillData(std::function<void(const O&)> function) const
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-
-      std::for_each(prefillData.begin(),prefillData.end(),function);
     }
 
     /**
@@ -155,13 +206,14 @@ namespace osmscout {
     {
       std::lock_guard<std::mutex> guard(mutex);
 
-      return prefillData.size();
+      return prefillData.size()+data.size();
     }
 
     void CopyData(std::function<void(const O&)> function) const
     {
       std::lock_guard<std::mutex> guard(mutex);
 
+      std::for_each(prefillData.begin(),prefillData.end(),function);
       std::for_each(data.begin(),data.end(),function);
     }
   };
@@ -324,15 +376,15 @@ namespace osmscout {
     }
 
     /**
-     * Return 'true' if no data at all has been assigned
+     * Return 'true' if no data for any type has been assigned
      */
     inline bool IsEmpty() const
     {
-      return !nodeData.IsComplete() &&
-             !wayData.IsComplete() &&
-             !areaData.IsComplete() &&
-             !optimizedWayData.IsComplete() &&
-             !optimizedAreaData.IsComplete();
+      return nodeData.IsEmpty() &&
+             wayData.IsEmpty() &&
+             areaData.IsEmpty() &&
+             optimizedWayData.IsEmpty() &&
+             optimizedAreaData.IsEmpty();
     }
   };
 
@@ -394,20 +446,10 @@ namespace osmscout {
                                 const Tile& parentTile,
                                 const GeoBox& boundingBox,
                                 const TypeInfoSet& nodeTypes);
-    void ResolveOptimizedWaysFromParent(Tile& tile,
-                                        const Tile& parentTile,
-                                        const GeoBox& boundingBox,
-                                        const TypeInfoSet& optimizedWayTypes,
-                                        const TypeInfoSet& wayTypes);
     void ResolveWaysFromParent(Tile& tile,
                                const Tile& parentTile,
                                const GeoBox& boundingBox,
                                const TypeInfoSet& wayTypes);
-    void ResolveOptimizedAreasFromParent(Tile& tile,
-                                         const Tile& parentTile,
-                                         const GeoBox& boundingBox,
-                                         const TypeInfoSet& optimizedAreaTypes,
-                                         const TypeInfoSet& areaTypes);
     void ResolveAreasFromParent(Tile& tile,
                                 const Tile& parentTile,
                                 const GeoBox& boundingBox,
@@ -418,7 +460,14 @@ namespace osmscout {
 
     void SetSize(size_t cacheSize);
 
+    inline size_t GetSize() const
+    {
+      return cacheSize;
+    }
+
     void CleanupCache();
+
+    void InvalidateCache();
 
     TileRef GetCachedTile(const TileId& id) const;
     TileRef GetTile(const TileId& id) const;

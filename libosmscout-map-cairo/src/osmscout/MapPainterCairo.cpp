@@ -632,6 +632,7 @@ namespace osmscout {
 
   void MapPainterCairo::GetTextDimension(const Projection& projection,
                                          const MapParameter& parameter,
+                                         double objectWidth,
                                          double fontSize,
                                          const std::string& text,
                                          double& xOff,
@@ -651,7 +652,13 @@ namespace osmscout {
     PangoFontMetrics *metrics=pango_context_get_metrics(context,
                                                         font,
                                                         pango_context_get_language(context));
-    size_t           proposedWidth=pango_font_metrics_get_approximate_char_width(metrics)*parameter.GetLabelLineCharCount();
+
+    double proposedWidth=proposedLabelWidth(parameter,
+                                            pango_font_metrics_get_approximate_char_width(metrics),
+                                            objectWidth,
+                                            text.length()
+                                            );
+
     PangoRectangle   extends;
 
     pango_layout_set_text(layout,text.c_str(),text.length());
@@ -803,7 +810,7 @@ namespace osmscout {
       PangoFontMetrics *metrics=pango_context_get_metrics(context,
                                                           font,
                                                           pango_context_get_language(context));
-      size_t           proposedWidth=pango_font_metrics_get_approximate_char_width(metrics)*parameter.GetLabelLineCharCount();
+      size_t           proposedWidth=std::floor(label.bx2-label.bx1)+1;
 
       pango_layout_set_text(layout,label.text.c_str(),label.text.length());
       pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);

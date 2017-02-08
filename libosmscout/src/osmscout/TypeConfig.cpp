@@ -165,7 +165,7 @@ namespace osmscout {
     if (type) {
       DeleteData();
     }
-    if (other.GetType()) {    
+    if (other.GetType()) {
       SetType(other.GetType());
 
       for (size_t idx=0; idx<other.GetFeatureCount(); idx++) {
@@ -1022,6 +1022,8 @@ namespace osmscout {
     RegisterFeature(std::make_shared<EleFeature>());
     RegisterFeature(std::make_shared<DestinationFeature>());
     RegisterFeature(std::make_shared<BuildingFeature>());
+
+    RegisterFeature(std::make_shared<IsInFeature>());
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore

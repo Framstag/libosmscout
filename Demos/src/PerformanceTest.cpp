@@ -77,7 +77,7 @@ struct LevelStats
   double drawMinTime;
   double drawMaxTime;
   double drawTotalTime;
-  
+
   double allocMax;
   double allocSum;
 
@@ -145,8 +145,8 @@ int main(int argc, char* argv[])
     std::cerr << "  <start zoom> <end zoom>" << std::endl;
     std::cerr << "  <tile width> <tile height>" << std::endl;
     std::cerr << "  <cairo|Qt|noop|none>" << std::endl;
-#if defined(HAVE_LIB_GPERFTOOLS)    
-    std::cerr << "  [heap profile prefix]" << std::endl;    
+#if defined(HAVE_LIB_GPERFTOOLS)
+    std::cerr << "  [heap profile prefix]" << std::endl;
 #endif
     return 1;
   }
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
       heapProfilePrefix = argv[12];
   }
 #endif
-  
+
   map=argv[1];
   style=argv[2];
 
@@ -287,8 +287,8 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
     return 1;
   }
-  
-#if defined(HAVE_LIB_GPERFTOOLS)  
+
+#if defined(HAVE_LIB_GPERFTOOLS)
   if (heapProfile){
     HeapProfilerStart(heapProfilePrefix.c_str());
   }
@@ -306,22 +306,17 @@ int main(int argc, char* argv[])
        level++) {
     LevelStats              stats(level);
     osmscout::Magnification magnification;
-    int                     xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
 
     magnification.SetLevel(level);
 
-    xTileStart=osmscout::LonToTileX(std::min(lonLeft,lonRight),
-                                    magnification);
-    xTileEnd=osmscout::LonToTileX(std::max(lonLeft,lonRight),
-                                  magnification);
-    xTileCount=xTileEnd-xTileStart+1;
-
-    yTileStart=osmscout::LatToTileY(std::max(latTop,latBottom),
-                                    magnification);
-    yTileEnd=osmscout::LatToTileY(std::min(latTop,latBottom),
-                                  magnification);
-
-    yTileCount=yTileEnd-yTileStart+1;
+    osmscout::OSMTileId     tileA(osmscout::GeoCoord(latBottom,lonLeft).GetOSMTile(magnification));
+    osmscout::OSMTileId     tileB(osmscout::GeoCoord(latTop,lonRight).GetOSMTile(magnification));
+    uint32_t                xTileStart=std::min(tileA.GetX(),tileB.GetX());
+    uint32_t                xTileEnd=std::max(tileA.GetX(),tileB.GetX());
+    uint32_t                xTileCount=xTileEnd-xTileStart+1;
+    uint32_t                yTileStart=std::min(tileA.GetY(),tileB.GetY());
+    uint32_t                yTileEnd=std::max(tileA.GetY(),tileB.GetY());
+    uint32_t                yTileCount=yTileEnd-yTileStart+1;
 
     std::cout << "----------" << std::endl;
     std::cout << "Drawing level " << level << ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
@@ -342,10 +337,13 @@ int main(int argc, char* argv[])
       delta=1;
     }
 
-    for (int y=yTileStart; y<=yTileEnd; y++) {
-      for (int x=xTileStart; x<=xTileEnd; x++) {
-        osmscout::MapData  data;
-        osmscout::GeoBox   boundingBox;
+    for (uint32_t y=yTileStart; y<=yTileEnd; y++) {
+      for (uint32_t x=xTileStart; x<=xTileEnd; x++) {
+        osmscout::MapData       data;
+        osmscout::OSMTileId     tile(x,y);
+        osmscout::OSMTileIdBox  tileBox(osmscout::OSMTileId(x-1,y-1),
+                                        osmscout::OSMTileId(x+1,y+1));
+        osmscout::GeoBox        boundingBox;
 
         if ((current % delta)==0) {
           std::cout << current*100/tileCount << "% " << current;
@@ -358,8 +356,7 @@ int main(int argc, char* argv[])
           std::cout << std::endl;
         }
 
-        projection.Set(x-1,y-1,
-                       x+1,y+1,
+        projection.Set(tile,
                        magnification,
                        DPI,
                        tileWidth,
@@ -370,18 +367,17 @@ int main(int argc, char* argv[])
 
         osmscout::StopClock dbTimer;
 
-        osmscout::GeoBox dataBoundingBox(osmscout::GeoCoord(osmscout::TileYToLat(y-1,magnification),osmscout::TileXToLon(x-1,magnification)),
-                                         osmscout::GeoCoord(osmscout::TileYToLat(y+1,magnification),osmscout::TileXToLon(x+1,magnification)));
+        osmscout::GeoBox dataBoundingBox(tileBox.GetBoundingBox(magnification));
 
         std::list<osmscout::TileRef> tiles;
 
-        // set cache size almost unlimited, 
+        // set cache size almost unlimited,
         // for better estimate of peak memory usage by tile loading
         mapService->SetCacheSize(10000000);
-        
+
         mapService->LookupTiles(magnification,dataBoundingBox,tiles);
         mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-        mapService->ConvertTilesToMapData(tiles,data);
+        mapService->AddTileDataToMapData(tiles,data);
 
         stats.nodeCount+=data.nodes.size();
         stats.wayCount+=data.ways.size();
@@ -461,12 +457,12 @@ int main(int argc, char* argv[])
 
     statistics.push_back(stats);
   }
-  
-#if defined(HAVE_LIB_GPERFTOOLS)  
+
+#if defined(HAVE_LIB_GPERFTOOLS)
   if (heapProfile){
     HeapProfilerStop();
   }
-#endif  
+#endif
 
   std::cout << "==========" << std::endl;
 
@@ -478,7 +474,7 @@ int main(int argc, char* argv[])
     std::cout << "max: " << formatAlloc(stats.allocMax) << " ";
     std::cout << "avg: " << formatAlloc(stats.allocSum / stats.tileCount) << std::endl;
 #endif
-    
+
     std::cout << " Tot. data  : ";
     std::cout << "nodes: " << stats.nodeCount << " ";
     std::cout << "way: " << stats.wayCount << " ";

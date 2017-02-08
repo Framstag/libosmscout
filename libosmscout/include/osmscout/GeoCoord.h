@@ -26,7 +26,10 @@
 
 #include <osmscout/Types.h>
 
+#include <osmscout/util/Magnification.h>
+
 #include <osmscout/system/Math.h>
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
   /**
@@ -53,16 +56,21 @@ namespace osmscout {
    */
   const size_t coordByteSize=7;
 
+  // forward declaration to avoid circular header includes
+  class OSMTileId;
+
   /**
    * \ingroup Geometry
    *
    * Anonymous geographic coordinate.
    */
-  struct OSMSCOUT_API GeoCoord
+  class OSMSCOUT_API GeoCoord CLASS_FINAL
   {
+  private:
     double lat;
     double lon;
 
+  public:
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
      */
@@ -189,42 +197,11 @@ namespace osmscout {
     }
 
     /**
-     * Return true if both coordinates are equals (using == operator)
+     * Return true if both coordinates are equal (using == operator)
      */
     inline bool IsEqual(const GeoCoord& other) const
     {
       return lat==other.lat && lon==other.lon;
-    }
-
-    /**
-     * Return true if both coordinates are equals (using == operator)
-     */
-    inline bool operator==(const GeoCoord& other) const
-    {
-      return lat==other.lat && lon==other.lon;
-    }
-
-    /**
-     * Return true if coordinates are not equal
-     */
-    inline bool operator!=(const GeoCoord& other) const
-    {
-      return lat!=other.lat || lon!=other.lon;
-    }
-
-    inline bool operator<(const GeoCoord& other) const
-    {
-      return lat<other.lat ||
-      (lat==other.lat && lon<other.lon);
-    }
-
-    /**
-     * Assign the value of other
-     */
-    inline void operator=(const GeoCoord& other)
-    {
-      this->lat=other.lat;
-      this->lon=other.lon;
     }
 
     /**
@@ -260,15 +237,11 @@ namespace osmscout {
      * @param target
      *    Target coordinate to measure distance
      * @return
-     *    Point to point distance to target coordinates in meters
+     *    Point to point distance to target coordinates in kilometers
      * @note
      *    The difference in height between the two points is neglected.
      */
-    double GetDistance(GeoCoord target);
-    inline double operator-(GeoCoord other)
-    {
-        return GetDistance(other);
-    }
+    double GetDistance(GeoCoord target) const;
 
     /**
     * Get coordinate of position + course and distance.
@@ -282,6 +255,44 @@ namespace osmscout {
     *    The difference in height between the two points is neglected.
     */
     GeoCoord Add(double bearing, double distance);
+
+    OSMTileId GetOSMTile(const Magnification& magnification) const;
+
+    /**
+     * Return true if both coordinates are equals (using == operator)
+     */
+    inline bool operator==(const GeoCoord& other) const
+    {
+      return lat==other.lat && lon==other.lon;
+    }
+
+    /**
+     * Return true if coordinates are not equal
+     */
+    inline bool operator!=(const GeoCoord& other) const
+    {
+      return lat!=other.lat || lon!=other.lon;
+    }
+
+    inline bool operator<(const GeoCoord& other) const
+    {
+      return lat<other.lat ||
+             (lat==other.lat && lon<other.lon);
+    }
+
+    /**
+     * Assign the value of other
+     */
+    inline void operator=(const GeoCoord& other)
+    {
+      this->lat=other.lat;
+      this->lon=other.lon;
+    }
+
+    inline double operator-(const GeoCoord& other)
+    {
+      return GetDistance(other);
+    }
   };
 }
 

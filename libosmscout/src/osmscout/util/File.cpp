@@ -46,7 +46,24 @@ namespace osmscout {
       throw IOException(filename,"Opening file");
     }
 
-#if defined(HAVE_FSEEKO)
+#if defined(__WIN32__) || defined(WIN32)
+	if (_fseeki64(file, 0L, SEEK_END) != 0) {
+		fclose(file);
+		throw IOException(filename, "Seeking end of file");
+	}
+
+	const __int64 size = _ftelli64(file);
+
+	if (size == -1) {
+		fclose(file);
+
+		throw IOException(filename, "Getting current file position");
+	}
+
+	fclose(file);
+
+	return (FileOffset)size;
+#elif defined(HAVE_FSEEKO)
     if (fseeko(file,0L,SEEK_END)!=0) {
       fclose(file);
 
@@ -135,14 +152,11 @@ namespace osmscout {
 
   bool ExistsInFilesystem(const std::string& filename)
   {
-#if defined(HAVE_SYS_STAT_H)
-    struct stat s;
-
-    return stat(filename.c_str(),&s)==0;
-#elif defined(__WIN32__) || defined(WIN32)
+#if defined(__WIN32__) || defined(WIN32)
     return GetFileAttributes(filename.c_str())!=INVALID_FILE_ATTRIBUTES;
-
-
+#elif defined(HAVE_SYS_STAT_H)
+    struct stat s;
+    return stat(filename.c_str(),&s)==0;
 #else
     throw IOException(filename,"Is file directory","Not implemented");
 #endif
@@ -150,7 +164,15 @@ namespace osmscout {
 
   bool IsDirectory(const std::string& filename)
   {
-#if defined(HAVE_SYS_STAT_H)
+#if defined(__WIN32__) || defined(WIN32)
+    DWORD attributes=GetFileAttributes(filename.c_str());
+
+    if (attributes==INVALID_FILE_ATTRIBUTES) {
+      throw IOException(filename,"Is file directory");
+    }
+
+    return (attributes & FILE_ATTRIBUTE_DIRECTORY)!=0;
+#elif defined(HAVE_SYS_STAT_H)
     struct stat s;
 
     if (stat(filename.c_str(),
@@ -159,14 +181,6 @@ namespace osmscout {
     }
 
     return s.st_mode & S_IFDIR;
-#elif defined(__WIN32__) || defined(WIN32)
-    DWORD attributes=GetFileAttributes(filename.c_str());
-
-    if (attributes==INVALID_FILE_ATTRIBUTES) {
-      throw IOException(filename,"Is file directory");
-    }
-
-    return (attributes & FILE_ATTRIBUTE_DIRECTORY)!=0;
 #else
     throw IOException(filename,"Is file directory","Not implemented");
 #endif

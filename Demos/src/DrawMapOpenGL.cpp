@@ -125,7 +125,7 @@ public:
 
     mapService->LookupTiles(projection,tiles);
     result=mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-    mapService->ConvertTilesToMapData(tiles,data);
+    mapService->AddTileDataToMapData(tiles,data);
 
     return result;
   }

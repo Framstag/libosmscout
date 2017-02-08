@@ -9,5 +9,7 @@
         <file>qml/custom/ScrollIndicator.qml</file>
         <file>qml/MapControl.qml</file>
         <file>qml/TextEditor.qml</file>
+        
+        <file>resources/online-tile-providers.json</file>
     </qresource>
 </RCC>

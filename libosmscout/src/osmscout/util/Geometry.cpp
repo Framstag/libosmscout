@@ -29,7 +29,7 @@
 #endif
 
 #include <osmscout/system/Assert.h>
-#include <iostream>
+
 namespace osmscout {
 
   size_t Pow(size_t a, size_t b)
@@ -67,60 +67,36 @@ namespace osmscout {
                                               const GeoCoord& b,
                                               GeoCoord& intersection)
   {
-    double xdelta=b.lon-a.lon;
-    double ydelta=b.lat-a.lat;
+    double xdelta=b.GetLon()-a.GetLon();
+    double ydelta=b.GetLat()-a.GetLat();
 
     if (xdelta==0 && ydelta==0) {
       return std::numeric_limits<double>::infinity();
     }
 
-    double u=((p.lon-a.lon)*xdelta+(p.lat-a.lat)*ydelta)/(xdelta*xdelta+ydelta*ydelta);
+    double u=((p.GetLon()-a.GetLon())*xdelta+(p.GetLat()-a.GetLat())*ydelta)/(xdelta*xdelta+ydelta*ydelta);
 
     double cx,cy;
 
     if (u<0) {
-      cx=a.lon;
-      cy=a.lat;
+      cx=a.GetLon();
+      cy=a.GetLat();
     }
     else if (u>1) {
-      cx=b.lon;
-      cy=b.lat;
+      cx=b.GetLon();
+      cy=b.GetLat();
     }
     else {
-      cx=a.lon+u*xdelta;
-      cy=a.lat+u*ydelta;
+      cx=a.GetLon()+u*xdelta;
+      cy=a.GetLat()+u*ydelta;
     }
 
-    double dx=cx-p.lon;
-    double dy=cy-p.lat;
+    double dx=cx-p.GetLon();
+    double dy=cy-p.GetLat();
 
     intersection.Set(cy,cx);
 
     return sqrt(dx*dx+dy*dy);
-  }
-
-  /**
-    Calculating basic cost for the A* algorithm based on the
-    spherical distance of two points on earth
-    */
-  double GetSphericalDistance(double aLon, double aLat,
-                              double bLon, double bLat)
-  {
-    double r=6371.01; // Average radius of earth
-    double aLatRad=DegToRad(aLat);
-    double bLatRad=DegToRad(bLat);
-    double dLat=DegToRad(bLat-aLat);
-    double dLon=DegToRad(bLon-aLon);
-
-    double sindLonDiv2=sin(dLon/2);
-
-    double a = sin(dLat/2)*sin(dLat/2)+
-        cos(aLatRad)*cos(bLatRad)*
-        sindLonDiv2*sindLonDiv2;
-
-    double c = 2*atan2(sqrt(a),sqrt(1-a));
-
-    return r*c;
   }
 
   /**
@@ -692,7 +668,7 @@ namespace osmscout {
         mapEntry=idEdgeMap.find(polygons.back().back().toIndex);
 
         if (mapEntry->second.empty()) {
-          std::cerr << "No matching node found" << std::endl;
+          //std::cerr << "No matching node found" << std::endl;
           return false;
         }
 

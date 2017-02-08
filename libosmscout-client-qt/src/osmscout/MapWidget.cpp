@@ -1,6 +1,7 @@
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  This source is part of the libosmscout-map library
   Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2016  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,9 +18,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/MapWidget.h>
-
+#include <cmath>
 #include <iostream>
+
+#include <osmscout/MapWidget.h>
+#include <osmscout/InputHandler.h>
 
 #define TMP_SUFFIX ".tmp"
 
@@ -28,44 +31,102 @@ static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
-      center(0.0,0.0),
-      angle(0.0),
-      magnification(64),
-      mouseDragging(false),
-      dbInitialized(false),
-      hasBeenPainted(false)
-
+      inputHandler(NULL), 
+      showCurrentPosition(false),
+      finished(false)
 {
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);
-
+    
     DBThread *dbThread=DBThread::GetInstance();
+    
+    mapDpi = Settings::GetInstance()->GetMapDPI();
+
+    connect(Settings::GetInstance(), SIGNAL(MapDPIChange(double)),
+            this, SLOT(onMapDPIChange(double)));
+  
+    tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
+
     //setFocusPolicy(Qt::StrongFocus);
 
-    connect(dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
-            this,SLOT(initialisationFinished(DatabaseLoadedResponse)));
-
-    connect(this,SIGNAL(TriggerMapRenderingSignal(RenderMapRequest)),
-            dbThread,SLOT(TriggerMapRendering(RenderMapRequest)));
-
-    connect(dbThread,SIGNAL(HandleMapRenderingResult()),
-            this,SLOT(redraw()));
-
     connect(dbThread,SIGNAL(Redraw()),
-            this,SLOT(redraw()));
-
+            this,SLOT(redraw()));    
     connect(dbThread,SIGNAL(stylesheetFilenameChanged()),
             this,SIGNAL(stylesheetFilenameChanged()));
+    connect(dbThread,SIGNAL(styleErrorsChanged()),
+            this,SIGNAL(styleErrorsChanged()));
+    connect(dbThread,SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
+            this,SIGNAL(databaseLoaded(osmscout::GeoBox)));
+        
+    connect(&tapRecognizer, SIGNAL(tap(const QPoint)),        this, SLOT(onTap(const QPoint)));
+    connect(&tapRecognizer, SIGNAL(doubleTap(const QPoint)),  this, SLOT(onDoubleTap(const QPoint)));
+    connect(&tapRecognizer, SIGNAL(longTap(const QPoint)),    this, SLOT(onLongTap(const QPoint)));
+    connect(&tapRecognizer, SIGNAL(tapLongTap(const QPoint)), this, SLOT(onTapLongTap(const QPoint)));
+    
+    // TODO, open last position, move to current position or get as constructor argument...
+    view = new MapView(this, osmscout::GeoCoord(0.0, 0.0), /*angle*/ 0, osmscout::Magnification::magContinent);
+    setupInputHandler(new InputHandler(*view));
+    setKeepTouchGrab(true);
+
+    setRenderTarget(RenderTarget::FramebufferObject);
+    setPerformanceHints(PerformanceHint::FastFBOResizing);
 }
 
 MapWidget::~MapWidget()
 {
-    // no code
+    delete inputHandler;
+    delete view;
 }
 
-QString MapWidget::stylesheetFilename() {
-    DBThread *dbThread=DBThread::GetInstance();
-    return dbThread->GetStylesheetFilename();
+void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states)
+{
+    QMouseEvent *mEvent = static_cast<QMouseEvent *>(event);
+
+    QTouchEvent::TouchPoint touchPoint;
+    touchPoint.setPressure(1);
+    touchPoint.setPos(mEvent->pos());
+    touchPoint.setState(states);
+    
+    QList<QTouchEvent::TouchPoint> points;
+    points << touchPoint;
+    QTouchEvent *touchEvnt = new QTouchEvent(QEvent::TouchBegin,0, Qt::NoModifier, 0, points);
+    //qDebug() << "translate mouse event to touch event: "<< touchEvnt;
+    touchEvent(touchEvnt);
+    delete touchEvnt;
+}
+void MapWidget::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button()==1) {
+        translateToTouch(event, Qt::TouchPointPressed);
+    }
+}
+void MapWidget::mouseMoveEvent(QMouseEvent* event)
+{
+    translateToTouch(event, Qt::TouchPointMoved);
+}
+void MapWidget::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (event->button()==1) {
+        translateToTouch(event, Qt::TouchPointReleased);
+    }
+}
+ 
+void MapWidget::setupInputHandler(InputHandler *newGesture)
+{
+    bool locked = false; 
+    if (inputHandler != NULL){
+        locked = inputHandler->isLockedToPosition();
+        delete inputHandler;
+    }
+    inputHandler = newGesture;
+    
+    connect(inputHandler, SIGNAL(viewChanged(const MapView&)), 
+            this, SLOT(changeView(const MapView&)));
+
+    if (locked != inputHandler->isLockedToPosition()){
+        emit lockToPossitionChanged();
+    }
+    //qDebug() << "Input handler changed (" << (newGesture->animationInProgress()? "animation": "stationary") << ")";
 }
 
 void MapWidget::redraw()
@@ -73,94 +134,57 @@ void MapWidget::redraw()
     update();
 }
 
-void MapWidget::initialisationFinished(const DatabaseLoadedResponse& response)
+void MapWidget::changeView(const MapView &updated)
 {
-    size_t zoom=1;
-    double dlat=360;
-    double dlon=180;
-
-    center=response.boundingBox.GetCenter();
-
-    while (dlat>response.boundingBox.GetHeight() &&
-           dlon>response.boundingBox.GetWidth()) {
-        zoom=zoom*2;
-        dlat=dlat/2;
-        dlon=dlon/2;
+    //qDebug() << "viewChanged: " << QString::fromStdString(updated.center.GetDisplayText()) << "   level: " << updated.magnification.GetLevel();
+    //qDebug() << "viewChanged (" << (inputHandler->animationInProgress()? "animation": "stationary") << ")";
+    bool changed = *view != updated;
+    view->operator =( updated );
+    // make sure that we render map with antialiasing. TODO: do it better
+    if (changed || (!inputHandler->animationInProgress())){
+        redraw();
     }
-
-    magnification=zoom;
-
-    dbInitialized=true;
-
-    if (hasBeenPainted) {
-        TriggerMapRendering();
+    if (changed){
+        emit viewChanged();
     }
 }
 
-void MapWidget::TriggerMapRendering()
+void MapWidget::touchEvent(QTouchEvent *event)
 {
-    DBThread         *dbThread=DBThread::GetInstance();
-    RenderMapRequest request;
-
-    request.coord=center;
-    request.angle=angle;
-    request.magnification=magnification;
-    request.width=width();
-    request.height=height();
-
-    dbThread->CancelCurrentDataLoading();
-
-    emit TriggerMapRenderingSignal(request);
-}
-
-
-void MapWidget::HandleMouseMove(QMouseEvent* event)
-{
-    osmscout::MercatorProjection projection=startProjection;
-
-    if (!projection.IsValid()) {
-        return;
+  
+    if (!inputHandler->touch(event)){
+        if (event->touchPoints().size() == 1){
+            QTouchEvent::TouchPoint tp = event->touchPoints()[0];
+            setupInputHandler(new DragHandler(*view, mapDpi));
+        }else{
+            setupInputHandler(new MultitouchHandler(*view, mapDpi));
+        }
+        inputHandler->touch(event);
     }
 
-    if (!projection.Move(startX-event->x(),
-                         event->y()-startY)) {
-        return;
+    tapRecognizer.touch(event);
+    
+    event->accept();
+  
+    /*
+    qDebug() << "touchEvent:";
+    QList<QTouchEvent::TouchPoint> relevantTouchPoints;
+    for (QTouchEvent::TouchPoint tp: event->touchPoints()){
+      Qt::TouchPointStates state(tp.state());
+      qDebug() << "  " << state <<" " << tp.id() << 
+              " pos " << tp.pos().x() << "x" << tp.pos().y() << 
+              " @ " << tp.pressure();    
     }
+    */
+ }
 
-    center=projection.GetCenter();
-}
-
-void MapWidget::mousePressEvent(QMouseEvent* event)
+void MapWidget::focusOutEvent(QFocusEvent *event)
 {
-    if (event->button()==1) {
-        DBThread *dbThread=DBThread::GetInstance();
-
-        dbThread->GetProjection(startProjection);
-
-        startX=event->x();
-        startY=event->y();
-
-        setFocus(true);
-        mouseDragging=true;
+    qDebug() << "focus-out event";
+    if (!inputHandler->focusOutEvent(event)){
+        setupInputHandler(new InputHandler(*view));
     }
-}
-
-void MapWidget::mouseMoveEvent(QMouseEvent* event)
-{
-    HandleMouseMove(event);
-    update();
-}
-
-void MapWidget::mouseReleaseEvent(QMouseEvent* event)
-{
-    if (event->button()==1 &&
-        (startX!=event->x() ||
-         startY!=event->y())) {
-        mouseDragging=false;
-        HandleMouseMove(event);
-        TriggerMapRendering();
-        update();
-    }
+    QQuickPaintedItem::focusOutEvent(event);
 }
 
 void MapWidget::wheelEvent(QWheelEvent* event)
@@ -168,11 +192,11 @@ void MapWidget::wheelEvent(QWheelEvent* event)
     int numDegrees=event->delta()/8;
     int numSteps=numDegrees/15;
 
-    if (numSteps>0) {
-        zoomIn(numSteps*1.35);
+    if (numSteps>=0) {
+        zoomIn(numSteps*1.35, event->pos());
     }
-    else if (numSteps<0) {
-        zoomOut(-numSteps*1.35);
+    else {
+        zoomOut(-numSteps*1.35, event->pos());
     }
 
     event->accept();
@@ -180,69 +204,382 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThread *dbThread = DBThread::GetInstance();
 
-    if (dbInitialized) {
-        RenderMapRequest request;
-        QRectF           boundingBox=contentsBoundingRect();
+    bool animationInProgress = inputHandler->animationInProgress();
+    
+    painter->setRenderHint(QPainter::Antialiasing, !animationInProgress);
+    painter->setRenderHint(QPainter::TextAntialiasing, !animationInProgress);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform, !animationInProgress);
+    painter->setRenderHint(QPainter::HighQualityAntialiasing, !animationInProgress);
+    
+    RenderMapRequest request;
+    QRectF           boundingBox = contentsBoundingRect();
 
-        request.coord=center;
-        request.angle=angle;
-        request.magnification=magnification;
-        request.width=boundingBox.width();
-        request.height=boundingBox.height();
+    request.coord = view->center;
+    request.angle = view->angle;
+    request.magnification = view->magnification;
+    request.width = boundingBox.width();
+    request.height = boundingBox.height();
 
-        if (!dbThread->RenderMap(*painter,request)) {
-            if (!mouseDragging) {
-                TriggerMapRendering();
+    bool oldFinished = finished;
+    finished = dbThread->RenderMap(*painter,request);
+    if (oldFinished != finished){
+        emit finishedChanged(finished);
+    }
+
+    // render current position spot
+    if (showCurrentPosition && locationValid){
+        osmscout::MercatorProjection projection = getProjection();
+        
+        double x;
+        double y;
+        projection.GeoToPixel(osmscout::GeoCoord(currentPosition.GetLat(), currentPosition.GetLon()), x, y);
+        if (boundingBox.contains(x, y)){
+            
+            if (horizontalAccuracyValid){
+                double diameter = horizontalAccuracy * projection.GetMeterInPixel();
+                if (diameter > 25.0 && diameter < std::max(request.width, request.height)){
+                    painter->setBrush(QBrush(QColor::fromRgbF(1.0, 1.0, 1.0, 0.4)));
+                    painter->setPen(QColor::fromRgbF(1.0, 1.0, 1.0, 0.7));
+                    painter->drawEllipse(x - (diameter /2.0), y - (diameter /2.0), diameter, diameter);
+                }
+            }
+            
+            // TODO: take DPI into account
+            painter->setBrush(QBrush(QColor::fromRgbF(0,1,0, .6)));
+            painter->setPen(QColor::fromRgbF(0.0, 0.5, 0.0, 0.9));
+            painter->drawEllipse(x - 10, y - 10, 20, 20);
+        }
+    }
+    
+    // render marks
+    if (!marks.isEmpty()){
+        osmscout::MercatorProjection projection = getProjection();
+        
+        double x;
+        double y;
+        painter->setBrush(QBrush());
+        QPen pen;
+        pen.setColor(QColor::fromRgbF(0.8, 0.0, 0.0, 0.9));
+        pen.setWidth(6);
+        painter->setPen(pen);
+        
+        for (auto &entry: marks){
+            projection.GeoToPixel(osmscout::GeoCoord(entry.GetLat(), entry.GetLon()), x, y);
+            if (boundingBox.contains(x, y)){
+                // TODO: take DPI into account
+                painter->drawEllipse(x - 20, y - 20, 40, 40);
             }
         }
     }
-    else {
-      dbThread->RenderMessage(*painter,width(),height(),"Database not initialized yet");
-    }
+}
 
-    hasBeenPainted=true;
+void MapWidget::recenter()
+{
+  DBThread *dbThread = DBThread::GetInstance();
+  DatabaseLoadedResponse resp = dbThread->loadedResponse();
+  if (!resp.boundingBox.IsValid()){
+    return;
+  }
+  double dimension = osmscout::GetEllipsoidalDistance(resp.boundingBox.GetMinCoord(),
+                                                      resp.boundingBox.GetMaxCoord());
+  
+  showCoordinates(resp.boundingBox.GetCenter(), magnificationByDimension(dimension));
+}
+
+bool MapWidget::isDatabaseLoaded()
+{
+  DBThread *dbThread = DBThread::GetInstance();
+  DatabaseLoadedResponse resp = dbThread->loadedResponse();
+  return resp.boundingBox.IsValid();
+}
+
+bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
+{
+  DBThread *dbThread = DBThread::GetInstance();
+  DatabaseLoadedResponse resp = dbThread->loadedResponse();
+  if (!resp.boundingBox.IsValid()){
+    return false;
+  }
+  osmscout::GeoCoord coord(lat, lon);
+  return resp.boundingBox.Includes(coord);
+}
+
+void MapWidget::zoom(double zoomFactor)
+{
+    zoom(zoomFactor, QPoint(width()/2, height()/2));
 }
 
 void MapWidget::zoomIn(double zoomFactor)
 {
-    osmscout::Magnification maxMag;
-
-    maxMag.SetLevel(20);
-
-    double mag=magnification.GetMagnification()*zoomFactor;
-
-    if (std::isnan(mag) || mag>maxMag.GetMagnification()) {
-        magnification.SetMagnification(maxMag.GetMagnification());
-    }
-    else {
-        magnification.SetMagnification(mag);
-    }
-
-    TriggerMapRendering();
-    emit zoomLevelChanged();
-    emit zoomLevelNameChanged();
+    zoomIn(zoomFactor, QPoint(width()/2, height()/2));
 }
 
 void MapWidget::zoomOut(double zoomFactor)
 {
-    double mag=magnification.GetMagnification()/zoomFactor;
-
-    if (std::isnan(mag) ||mag<1) {
-        magnification.SetMagnification(1);
-    }
-    else {
-        magnification.SetMagnification(mag);
-    }
-
-    TriggerMapRendering();
-    emit zoomLevelChanged();
-    emit zoomLevelNameChanged();
+    zoomOut(zoomFactor, QPoint(width()/2, height()/2));
 }
 
-QString MapWidget::zoomLevelName() {
-    double level = magnification.GetMagnification();
+void MapWidget::zoom(double zoomFactor, const QPoint widgetPosition)
+{
+  if (zoomFactor == 1)
+    return;
+  
+  if (!inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()))){
+    setupInputHandler(new MoveHandler(*view, mapDpi));
+    inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()));
+  }
+}
+
+void MapWidget::zoomIn(double zoomFactor, const QPoint widgetPosition)
+{
+    zoom(zoomFactor, widgetPosition);
+}
+
+void MapWidget::zoomOut(double zoomFactor, const QPoint widgetPosition)
+{
+    zoom( 1.0/zoomFactor, widgetPosition);
+}
+
+void MapWidget::move(QVector2D vector)
+{
+    if (!inputHandler->move(vector)){
+        setupInputHandler(new MoveHandler(*view, mapDpi));
+        inputHandler->move(vector);
+    }
+}
+
+void MapWidget::left()
+{
+    move(QVector2D( width()/-3, 0 ));
+}
+
+void MapWidget::right()
+{
+    move(QVector2D( width()/3, 0 ));
+}
+
+void MapWidget::up()
+{
+    move(QVector2D( 0, height()/-3 ));
+}
+
+void MapWidget::down()
+{
+    move(QVector2D( 0, height()/+3 ));
+}
+
+void MapWidget::rotateLeft()
+{
+    if (!inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE)){
+        setupInputHandler(new MoveHandler(*view, mapDpi));
+        inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE);
+    }
+}
+
+void MapWidget::rotateRight()
+{
+    if (!inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE)){
+        setupInputHandler(new MoveHandler(*view, mapDpi));
+        inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE);
+    }
+}
+
+void MapWidget::toggleDaylight()
+{
+    DBThread *dbThread=DBThread::GetInstance();
+
+    dbThread->ToggleDaylight();
+    redraw();
+}
+
+void MapWidget::reloadStyle()
+{
+    DBThread *dbThread=DBThread::GetInstance();
+
+    dbThread->ReloadStyle();
+    redraw();
+}
+
+void MapWidget::reloadTmpStyle() {
+    DBThread* dbThread=DBThread::GetInstance();
+    dbThread->ReloadStyle(TMP_SUFFIX);
+    redraw();    
+}
+
+void MapWidget::setLockToPosition(bool lock){
+    if (lock){
+        if (!inputHandler->currentPosition(locationValid, currentPosition)){
+            setupInputHandler(new LockHandler(*view, mapDpi, std::min(width(), height()) / 3));
+            inputHandler->currentPosition(locationValid, currentPosition);
+        }
+    }else{
+        setupInputHandler(new InputHandler(*view));
+    }
+}
+
+void MapWidget::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)
+{
+    if (!inputHandler->showCoordinates(coord, magnification)){
+        setupInputHandler(new JumpHandler(*view));
+        inputHandler->showCoordinates(coord, magnification);
+    }
+}
+
+void MapWidget::showCoordinates(double lat, double lon)
+{
+    showCoordinates(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);
+}
+
+void MapWidget::showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Magnification magnification)
+{
+    
+    MapView newView = *view;
+    newView.magnification = magnification;
+    newView.center = coord;
+    setupInputHandler(new InputHandler(newView));
+    changeView(newView);
+}
+
+void MapWidget::showCoordinatesInstantly(double lat, double lon)
+{
+    showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);    
+}
+
+osmscout::Magnification MapWidget::magnificationByDimension(double dimension)
+{
+  osmscout::Magnification::Mag mag = osmscout::Magnification::magBlock;
+  if (dimension > 0.1)
+    mag = osmscout::Magnification::magVeryClose;
+  if (dimension > 0.2)
+    mag = osmscout::Magnification::magCloser;
+  if (dimension > 0.5)
+    mag = osmscout::Magnification::magClose;
+  if (dimension > 1)
+    mag = osmscout::Magnification::magDetail;
+  if (dimension > 3)
+    mag = osmscout::Magnification::magSuburb;
+  if (dimension > 7)
+    mag = osmscout::Magnification::magCity;
+  if (dimension > 15)
+    mag = osmscout::Magnification::magCityOver;
+  if (dimension > 30)
+    mag = osmscout::Magnification::magProximity;
+  if (dimension > 60)
+    mag = osmscout::Magnification::magRegion;
+  if (dimension > 120)
+    mag = osmscout::Magnification::magCounty;
+  if (dimension > 240)
+    mag = osmscout::Magnification::magStateOver;
+  if (dimension > 500)
+    mag = osmscout::Magnification::magState;
+  return osmscout::Magnification(mag);
+}
+
+void MapWidget::showLocation(LocationEntry* location)
+{
+  if (!location){
+    qWarning() << "Invalid location" << location;
+    return;
+  }
+  qDebug() << "Show location: " << location;
+    
+  osmscout::GeoCoord center;
+  double dimension = 0.01; // km
+  if (location->getBBox().IsValid()){
+    center = location->getBBox().GetCenter();
+    dimension = osmscout::GetEllipsoidalDistance(location->getBBox().GetMinCoord(),
+                                                 location->getBBox().GetMaxCoord());
+  }else{
+    center = location->getCoord();
+  }
+  
+       
+  showCoordinates(center, magnificationByDimension(dimension));
+}
+
+void MapWidget::locationChanged(bool locationValid, double lat, double lon, bool horizontalAccuracyValid, double horizontalAccuracy)
+{
+    // location
+    lastUpdate.restart();
+    this->locationValid = locationValid;
+    this->currentPosition.Set(lat, lon);
+    this->horizontalAccuracyValid = horizontalAccuracyValid;
+    this->horizontalAccuracy = horizontalAccuracy;
+
+    inputHandler->currentPosition(locationValid, currentPosition);
+
+    redraw();
+}
+
+void MapWidget::addPositionMark(int id, double lat, double lon)
+{
+    marks.insert(id, osmscout::GeoCoord(lat, lon));
+    update();
+}
+
+void MapWidget::removePositionMark(int id)
+{
+    marks.remove(id);
+    update();
+}
+
+void MapWidget::onTap(const QPoint p)
+{
+    qDebug() << "tap " << p;
+    double lat;
+    double lon;
+    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
+    emit tap(p.x(), p.y(), lat, lon);
+}
+
+void MapWidget::onDoubleTap(const QPoint p)
+{
+    qDebug() << "double tap " << p;
+    zoomIn(2.0, p);
+    double lat;
+    double lon;
+    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
+    emit doubleTap(p.x(), p.y(), lat, lon);
+}
+
+void MapWidget::onLongTap(const QPoint p)
+{
+    qDebug() << "long tap " << p;
+    double lat;
+    double lon;
+    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
+    emit longTap(p.x(), p.y(), lat, lon);
+}
+
+void MapWidget::onTapLongTap(const QPoint p)
+{
+    qDebug() << "tap, long tap " << p;
+    zoomOut(2.0, p);
+    double lat;
+    double lon;
+    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
+    emit tapLongTap(p.x(), p.y(), lat, lon);
+}
+
+void MapWidget::onMapDPIChange(double dpi)
+{
+    mapDpi = dpi;
+    
+    // discard current input handler
+    setupInputHandler(new InputHandler(*view));
+}
+
+QString MapWidget::GetStylesheetFilename() const
+{
+    DBThread *dbThread=DBThread::GetInstance();
+    return dbThread->GetStylesheetFilename();
+}
+
+QString MapWidget::GetZoomLevelName() const
+{
+    double level = view->magnification.GetMagnification();
     if(level>=osmscout::Magnification::magWorld && level < osmscout::Magnification::magContinent){
         return "World";
     } else if(level>=osmscout::Magnification::magContinent && level < osmscout::Magnification::magState){
@@ -281,215 +618,46 @@ QString MapWidget::zoomLevelName() {
 
     return "";
 }
-
-void MapWidget::left()
-{
-    DBThread                     *dbThread=DBThread::GetInstance();
-    osmscout::MercatorProjection projection;
-
-    dbThread->GetProjection(projection);
-
-    if (!projection.IsValid()) {
-        TriggerMapRendering();
-        return;
-    }
-
-    projection.MoveLeft(width()/3);
-
-    center=projection.GetCenter();
-
-    TriggerMapRendering();
-}
-
-void MapWidget::right()
-{
-    DBThread                     *dbThread=DBThread::GetInstance();
-    osmscout::MercatorProjection projection;
-
-    dbThread->GetProjection(projection);
-
-    if (!projection.IsValid()) {
-        TriggerMapRendering();
-        return;
-    }
-
-    projection.MoveRight(width()/3);
-
-    center=projection.GetCenter();
-
-    TriggerMapRendering();
-}
-
-void MapWidget::up()
-{
-    DBThread                     *dbThread=DBThread::GetInstance();
-    osmscout::MercatorProjection projection;
-
-    dbThread->GetProjection(projection);
-
-    if (!projection.IsValid()) {
-        TriggerMapRendering();
-        return;
-    }
-
-    projection.MoveUp(height()/3);
-
-    center=projection.GetCenter();
-
-    TriggerMapRendering();
-}
-
-void MapWidget::down()
-{
-    DBThread                     *dbThread=DBThread::GetInstance();
-    osmscout::MercatorProjection projection;
-
-    dbThread->GetProjection(projection);
-
-    if (!projection.IsValid()) {
-        TriggerMapRendering();
-        return;
-    }
-
-    projection.MoveDown(height()/3);
-
-    center=projection.GetCenter();
-
-    TriggerMapRendering();
-}
-
-void MapWidget::rotateLeft()
-{
-    angle=round(angle/DELTA_ANGLE)*DELTA_ANGLE-DELTA_ANGLE;
-
-    if (angle<0) {
-        angle+=2*M_PI;
-    }
-
-    TriggerMapRendering();
-}
-
-void MapWidget::rotateRight()
-{
-    angle=round(angle/DELTA_ANGLE)*DELTA_ANGLE+DELTA_ANGLE;
-
-    if (angle>=2*M_PI) {
-        angle-=2*M_PI;
-    }
-
-    TriggerMapRendering();
-}
-
-void MapWidget::toggleDaylight()
+bool MapWidget::stylesheetHasErrors() const
 {
     DBThread *dbThread=DBThread::GetInstance();
-
-    dbThread->ToggleDaylight();
-    TriggerMapRendering();
+    return !dbThread->GetStyleErrors().isEmpty();
 }
-
-void MapWidget::showCoordinates(double lat, double lon)
+int MapWidget::firstStylesheetErrorLine() const
 {
-    center=osmscout::GeoCoord(lat,lon);
-    this->magnification=osmscout::Magnification::magVeryClose;
-
-    TriggerMapRendering();
+    DBThread *dbThread=DBThread::GetInstance();
+    QList<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.isEmpty())
+      return -1;
+    return errors.first().GetLine();
 }
-
-void MapWidget::showLocation(Location* location)
+int MapWidget::firstStylesheetErrorColumn() const
 {
-    if (location==NULL) {
-        qDebug() << "MapWidget::showLocation(): no location passed!";
-
-        return;
-    }
-
-    qDebug() << "MapWidget::showLocation(\"" << location->getName().toLocal8Bit().constData() << "\")";
-
-    if (location->getType()==Location::typeObject) {
-        osmscout::ObjectFileRef reference=location->getReferences().front();
-
-        DBThread* dbThread=DBThread::GetInstance();
-
-        if (reference.GetType()==osmscout::refNode) {
-            osmscout::NodeRef node;
-
-            if (dbThread->GetNodeByOffset(reference.GetFileOffset(),node)) {
-                center=node->GetCoords();
-                this->magnification=osmscout::Magnification::magVeryClose;
-
-                TriggerMapRendering();
-            }
-        }
-        else if (reference.GetType()==osmscout::refArea) {
-            osmscout::AreaRef area;
-
-            if (dbThread->GetAreaByOffset(reference.GetFileOffset(),area)) {
-                if (area->GetCenter(center)) {
-                    this->magnification=osmscout::Magnification::magVeryClose;
-
-                    TriggerMapRendering();
-                }
-            }
-        }
-        else if (reference.GetType()==osmscout::refWay) {
-            osmscout::WayRef way;
-
-            if (dbThread->GetWayByOffset(reference.GetFileOffset(),way)) {
-                if (way->GetCenter(center)) {
-                    this->magnification=osmscout::Magnification::magVeryClose;
-
-                    TriggerMapRendering();
-                }
-            }
-        }
-        else {
-            assert(false);
-        }
-    }
-    else if (location->getType()==Location::typeCoordinate) {
-        osmscout::GeoCoord coord=location->getCoord();
-
-        qDebug() << "MapWidget: " << coord.GetDisplayText().c_str();
-
-        center=coord;
-        this->magnification=osmscout::Magnification::magVeryClose;
-
-        TriggerMapRendering();
-    }
+    DBThread *dbThread=DBThread::GetInstance();
+    QList<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.isEmpty())
+      return -1;
+    return errors.first().GetColumn();  
+}
+QString MapWidget::firstStylesheetErrorDescription() const
+{
+    DBThread *dbThread=DBThread::GetInstance();
+    QList<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.isEmpty())
+      return "";
+    return errors.first().GetDescription();
 }
 
-void MapWidget::reloadStyle() {
-    DBThread* dbThread=DBThread::GetInstance();
-    if(dbThread->ReloadStyle()){
-        TriggerMapRendering();
-        hasErrors = false;
-    } else {
-        StyleError err = dbThread->GetStyleErrors().at(0);
-        errorLine = err.GetLine();
-        errorColumn = err.GetColumn();
-        errorDescription = err.GetTypeName()+": "+err.GetText();
-        hasErrors = true;
-    }
+bool MapWidget::toggleDebug()
+{
+    osmscout::log.Debug(!osmscout::log.IsDebug());
+
+    return osmscout::log.IsDebug();
 }
 
-void MapWidget::reloadTmpStyle() {
-    DBThread* dbThread=DBThread::GetInstance();
-    if(dbThread->ReloadStyle(TMP_SUFFIX)){
-        TriggerMapRendering();
-        hasErrors = false;
-    } else {
-        hasErrors = true;
-        QList<StyleError> errors = dbThread->GetStyleErrors();
-        if (!errors.isEmpty()){
-            StyleError err = errors.at(0);
-            errorLine = err.GetLine();
-            errorColumn = err.GetColumn();
-            errorDescription = err.GetTypeName()+": "+err.GetText();
-        }else{
-            errorLine = 0;
-            errorColumn = 0;
-            errorDescription = "unknown error";            
-        }
-    }
+bool MapWidget::toggleInfo()
+{
+    osmscout::log.Info(!osmscout::log.IsInfo());
+
+    return osmscout::log.IsInfo();
 }

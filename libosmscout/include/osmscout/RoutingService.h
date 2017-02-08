@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <atomic>
+#include <functional>
 #include <list>
 #include <memory>
 #include <set>
@@ -35,7 +37,9 @@
 #include <osmscout/RouteNode.h>
 
 // Datafiles
+#include <osmscout/DataFile.h>
 #include <osmscout/Database.h>
+#include <osmscout/ObjectVariantDataFile.h>
 
 // Routing
 #include <osmscout/Intersection.h>
@@ -43,21 +47,60 @@
 #include <osmscout/RouteData.h>
 #include <osmscout/RoutingProfile.h>
 
+#include <osmscout/util/Breaker.h>
 #include <osmscout/util/Cache.h>
+
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 
+  /**
+   * \ingroup Routing
+   */
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
   /**
    * \ingroup Routing
+   *
+   * Start or end position of a rout calculation
+   */
+  class OSMSCOUT_API RoutePosition CLASS_FINAL
+  {
+  private:
+    ObjectFileRef object;
+    size_t        nodeIndex;
+
+  public:
+    RoutePosition();
+    RoutePosition(const ObjectFileRef& object,
+                  size_t nodeIndex);
+
+    inline bool IsValid() const
+    {
+      return object.Valid();
+    }
+
+    inline ObjectFileRef GetObjectFileRef() const
+    {
+      return object;
+    }
+
+    inline size_t GetNodeIndex() const
+    {
+      return nodeIndex;
+    }
+  };
+
+  /**
+   * \ingroup Routing
+   *
    * Database instance initialization parameter to influence the behavior of the database
    * instance.
    *
    * The following groups attributes are currently available:
    * - Switch for showing debug information
    */
-  class OSMSCOUT_API RouterParameter
+  class OSMSCOUT_API RouterParameter CLASS_FINAL
   {
   private:
     bool          debugPerformance;
@@ -68,6 +111,117 @@ namespace osmscout {
     void SetDebugPerformance(bool debug);
 
     bool IsDebugPerformance() const;
+  };
+
+  /**
+   * \ingroup Routing
+   *
+   * Optional callback object for monitoring routing progress
+   */
+  class OSMSCOUT_API RoutingProgress
+  {
+  public:
+    virtual ~RoutingProgress();
+
+    /**
+     * Call, if you want to reset the progress
+     */
+    virtual void Reset() = 0;
+
+    /**
+     * Repeately called by the router while visiting routing nodes
+     * @param currentMaxDistance
+     *    current maximum distance from start
+     * @param overallDistance
+     *    distance between start and target
+     */
+    virtual void Progress(double currentMaxDistance,
+                          double overallDistance) = 0;
+  };
+
+  /**
+   * \ingroup Routing
+   */
+  typedef std::shared_ptr<RoutingProgress> RoutingProgressRef;
+
+  /**
+   * \ingroup Routing
+   *
+   * Parameter object for routing calculations. Holds all optional
+   * flags and callback objects that can be passed to the router
+   */
+  class OSMSCOUT_API RoutingParameter CLASS_FINAL
+  {
+  private:
+    BreakerRef         breaker;
+    RoutingProgressRef progress;
+
+  public:
+    void SetBreaker(const BreakerRef& breaker);
+    void SetProgress(const RoutingProgressRef& progress);
+
+    inline BreakerRef GetBreaker() const
+    {
+      return breaker;
+    }
+
+    inline RoutingProgressRef GetProgress() const
+    {
+      return progress;
+    }
+  };
+
+  /**
+   * Result of a routing calculation. This object is always returned.
+   * In case of an routing error it however may not contain a valid route
+   * (route is empty).
+   *
+   * @TODO: Make setter private and class friend to the RoutingService
+   */
+  class OSMSCOUT_API RoutingResult CLASS_FINAL
+  {
+  private:
+    RouteData route;
+    double    currentMaxDistance;
+    double    overallDistance;
+
+  public:
+    RoutingResult();
+
+    inline void SetOverallDistance(double overallDistance)
+    {
+      this->overallDistance=overallDistance;
+    }
+
+    inline void SetCurrentMaxDistance(double currentMaxDistance)
+    {
+      this->currentMaxDistance=currentMaxDistance;
+    }
+
+    inline double GetOverallDistance() const
+    {
+      return overallDistance;
+    }
+
+    inline double GetCurrentMaxDistance() const
+    {
+      return currentMaxDistance;
+    }
+
+    inline RouteData& GetRoute()
+    {
+      return route;
+    }
+
+    inline const RouteData& GetRoute() const
+    {
+      return route;
+    }
+
+    inline bool Success() const
+    {
+      return !route.IsEmpty();
+    }
   };
 
   /**
@@ -86,6 +240,8 @@ namespace osmscout {
   {
   private:
     /**
+     * \ingroup Routing
+     *
      * A path in the routing graph from one node to the next (expressed via the target object)
      * with additional information as required by the A* algorithm.
      */
@@ -166,11 +322,88 @@ namespace osmscout {
       }
     };
 
+    /**
+     * \ingroup Routing
+     *
+     * Minimum required data for a node in the ClosedSet.
+     *
+     * The ClosedSet is the set of routing nodes that have been
+     * already handled.
+     *
+     * From the VNode list from the last routing node back to the start
+     * the route is recalculated by following the previousNode chain.
+     */
+    struct VNode
+    {
+      FileOffset    currentNode;   //!< FileOffset of this route node
+      FileOffset    previousNode;  //!< FileOffset of the previous route node
+      ObjectFileRef object;        //!< The object (way/area) visited from the current route node
+
+      /**
+       * Equality operator
+       * @param other
+       *    Other object to compare against
+       * @return
+       *    True, if both objects are equal. Objects are currently equal
+       *    if they have the same route node file offset.
+       */
+      inline bool operator==(const VNode& other) const
+      {
+        return currentNode==other.currentNode;
+      }
+
+      /**
+       * Simple inline constructor for searching for VNodes in the
+       * ClosedSet.
+       *
+       * @param currentNode
+       *    Offset of the node to search for
+       */
+      inline VNode(FileOffset currentNode)
+        : currentNode(currentNode),
+          previousNode(0)
+      {
+        // no code
+      }
+
+      /**
+       * Full featured constructor
+       *
+       * @param currentNode
+       *    FileOffset of the current route node
+       * @param object
+       *    Type of object used to navigate to this route node
+       * @param previousNode
+       *    FileOffset of the previous route node visited
+       */
+      VNode(FileOffset currentNode,
+                 const ObjectFileRef& object,
+                 FileOffset previousNode)
+      : currentNode(currentNode),
+        previousNode(previousNode),
+        object(object)
+      {
+        // no code
+      }
+    };
+
+    /**
+     * Helper class for calculating hash codes for
+     * VNode instances to make it usable in std::unordered_set.
+     */
+    struct ClosedNodeHasher
+    {
+      inline size_t operator()(const VNode& node) const
+      {
+        return std::hash<FileOffset>()(node.currentNode);
+      }
+    };
+
     typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
     typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
     typedef std::unordered_map<FileOffset,OpenListRef>    OpenMap;
-    typedef std::unordered_map<FileOffset,RNodeRef>       CloseMap;
+    typedef std::unordered_set<VNode,ClosedNodeHasher>    ClosedSet;
 
   public:
     //! Relative filename of the intersection data file
@@ -192,8 +425,7 @@ namespace osmscout {
 
     IndexedDataFile<Id,RouteNode>        routeNodeDataFile;     //!< Cached access to the 'route.dat' file
     IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
-
-    std::vector<ObjectVariantData>       objectVariantData;     //!< Cached data regarding object variants
+    ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loadinfg object variant data
 
   private:
     std::string GetDataFilename(const std::string& filenamebase) const;
@@ -201,9 +433,6 @@ namespace osmscout {
     std::string GetIndexFilename(const std::string& filenamebase) const;
 
     bool HasNodeWithId(const std::vector<Point>& nodes) const;
-
-    bool LoadObjectVariantData(const std::string& filename,
-                               std::vector<ObjectVariantData>& objectVariantData) const;
 
     void GetStartForwardRouteNode(const RoutingProfile& profile,
                                   const WayRef& way,
@@ -224,33 +453,52 @@ namespace osmscout {
                                     size_t nodeIndex,
                                     RouteNodeRef& routeNode);
 
+    bool GetRNode(const RoutingProfile& profile,
+                  const RoutePosition& position,
+                  const WayRef& way,
+                  size_t routeNodeIndex,
+                  const RouteNodeRef& routeNode,
+                  const GeoCoord& startCoord,
+                  const GeoCoord& targetCoord,
+                  RNodeRef& node);
+
+    bool GetWayStartNodes(const RoutingProfile& profile,
+                          const RoutePosition& position,
+                          GeoCoord& startCoord,
+                          const GeoCoord& targetCoord,
+                          RouteNodeRef& forwardRouteNode,
+                          RouteNodeRef& backwardRouteNode,
+                          RNodeRef& forwardRNode,
+                          RNodeRef& backwardRNode);
+
     bool GetStartNodes(const RoutingProfile& profile,
-                       const ObjectFileRef& object,
-                       size_t nodeIndex,
-                       double& targetLon,
-                       double& targetLat,
+                       const RoutePosition& position,
+                       GeoCoord& startCoord,
+                       const GeoCoord& targetCoord,
                        RouteNodeRef& forwardRouteNode,
                        RouteNodeRef& backwardRouteNode,
                        RNodeRef& forwardRNode,
                        RNodeRef& backwardRNode);
 
+    bool GetWayTargetNodes(const RoutingProfile& profile,
+                           const RoutePosition& position,
+                           GeoCoord& targetCoord,
+                           RouteNodeRef& forwardNode,
+                           RouteNodeRef& backwardNode);
+
     bool GetTargetNodes(const RoutingProfile& profile,
-                        const ObjectFileRef& object,
-                        size_t nodeIndex,
-                        double& targetLon,
-                        double& targetLat,
+                        const RoutePosition& position,
+                        GeoCoord& targetCoord,
                         RouteNodeRef& forwardNode,
                         RouteNodeRef& backwardNode);
 
-    void ResolveRNodeChainToList(const RNodeRef& end,
-                                 const CloseMap& closeMap,
-                                 std::list<RNodeRef>& nodes);
+    void ResolveRNodeChainToList(FileOffset finalRouteNode,
+                                 const ClosedSet& closedSet,
+                                 std::list<VNode>& nodes);
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
-                                  const std::list<RNodeRef>& nodes,
-                                  const ObjectFileRef& startObject,
-                                  size_t startNodeIndex,
-                                  const ObjectFileRef& targetObject,
-                                  size_t targetNodeIndex,
+                                  const std::list<VNode>& nodes,
+                                  const RoutePosition& start,
+                                  const RoutePosition& target,
                                   RouteData& route);
 
     bool ResolveRouteDataJunctions(RouteData& route);
@@ -275,18 +523,15 @@ namespace osmscout {
 
     TypeConfigRef GetTypeConfig() const;
 
-    bool CalculateRoute(const RoutingProfile& profile,
-                        const ObjectFileRef& startObject,
-                        size_t startNodeIndex,
-                        const ObjectFileRef& targetObject,
-                        size_t targetNodeIndex,
-                        RouteData& route);
+    RoutingResult CalculateRoute(const RoutingProfile& profile,
+                                 const RoutePosition& start,
+                                 const RoutePosition& target,
+                                 const RoutingParameter& parameter);
 
-    bool CalculateRoute(const RoutingProfile& profile,
-                        Vehicle vehicle,
-                        double radius,
-                        std::vector<GeoCoord> via,
-                        RouteData& route);
+    RoutingResult CalculateRoute(const RoutingProfile& profile,
+                                 std::vector<GeoCoord> via,
+                                 double radius,
+                                 const RoutingParameter& parameter);
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);
@@ -297,16 +542,9 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
-#ifdef SWIG
-    %apply ObjectFileRef& OUTPUT {ObjectFileRef& object};
-    %apply long& OUTPUT {size_t& nodeIndex};
-#endif
-    bool GetClosestRoutableNode(double lat,
-                                double lon,
-                                const Vehicle& vehicle,
-                                double radius,
-                                ObjectFileRef& object,
-                                size_t& nodeIndex) const;
+    RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
+                                         const RoutingProfile& profile,
+                                         double radius) const;
 
     void DumpStatistics();
   };

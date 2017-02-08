@@ -29,7 +29,7 @@ namespace osmscout {
   TileId::TileId(const Magnification& magnification,
                  size_t x,
                  size_t y)
-  : magnification(magnification),
+  : level(magnification.GetLevel()),
     x(x),
     y(y),
     boundingBox(GeoCoord(y*cellDimension[magnification.GetLevel()].height-90.0,
@@ -45,7 +45,7 @@ namespace osmscout {
    */
   std::string TileId::DisplayText() const
   {
-    return NumberToString(magnification.GetLevel())+ "." + NumberToString(y) + "." + NumberToString(x);
+    return NumberToString(level)+ "." + NumberToString(y) + "." + NumberToString(x);
   }
 
   /**
@@ -59,9 +59,9 @@ namespace osmscout {
   {
     Magnification zoomedOutMagnification;
 
-    assert(magnification.GetLevel()>0);
+    assert(level>0);
 
-    zoomedOutMagnification.SetLevel(magnification.GetLevel()-1);
+    zoomedOutMagnification.SetLevel(level-1);
 
     return TileId(zoomedOutMagnification,x/2,y/2);
   }
@@ -71,7 +71,7 @@ namespace osmscout {
    */
   bool TileId::operator==(const TileId& other) const
   {
-    return magnification==other.magnification &&
+    return level==other.level &&
            y==other.y &&
            x==other.x;
   }
@@ -81,7 +81,7 @@ namespace osmscout {
    */
   bool TileId::operator!=(const TileId& other) const
   {
-    return magnification!=other.magnification ||
+    return level!=other.level ||
            y!=other.y ||
            x!=other.x;
   }
@@ -92,8 +92,8 @@ namespace osmscout {
    */
   bool TileId::operator<(const TileId& other) const
   {
-    if (magnification!=other.magnification) {
-      return magnification<other.magnification;
+    if (level!=other.level) {
+      return level<other.level;
     }
 
     if (y!=other.y) {

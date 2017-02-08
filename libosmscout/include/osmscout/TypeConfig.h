@@ -42,6 +42,8 @@
 
 #include <osmscout/system/Assert.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -177,7 +179,7 @@ namespace osmscout {
   /**
    * An instantiation of a feature for a certain type.
    */
-  class OSMSCOUT_API FeatureInstance
+  class OSMSCOUT_API FeatureInstance CLASS_FINAL
   {
   private:
     FeatureRef     feature;    //!< The feature we are an instance of
@@ -242,7 +244,7 @@ namespace osmscout {
    *
    *  \see TypeConfig
    */
-  class OSMSCOUT_API TypeInfo
+  class OSMSCOUT_API TypeInfo CLASS_FINAL
   {
   public:
     static const unsigned char typeNode     = 1 << 0; //!< Condition applies to nodes
@@ -793,7 +795,7 @@ namespace osmscout {
 
   typedef std::shared_ptr<TypeInfo> TypeInfoRef;
 
-  class OSMSCOUT_API TypeInfoSetConstIterator : public std::iterator<std::input_iterator_tag, const TypeInfoRef>
+  class OSMSCOUT_API TypeInfoSetConstIterator CLASS_FINAL : public std::iterator<std::input_iterator_tag, const TypeInfoRef>
   {
   private:
     std::vector<TypeInfoRef>::const_iterator iterCurrent;
@@ -829,14 +831,15 @@ namespace osmscout {
 
       return *this;
     }
+
     TypeInfoSetConstIterator operator++(int)
-     {
+    {
       TypeInfoSetConstIterator tmp(*this);
 
       operator++();
 
       return tmp;
-     }
+    }
 
     bool operator==(const TypeInfoSetConstIterator& other)
     {
@@ -862,7 +865,7 @@ namespace osmscout {
    * internal array was not preinitialized to it maximum size by passing a
    * TypeConfig or another TypeInfoSet in the constructor.
    */
-  class OSMSCOUT_API TypeInfoSet
+  class OSMSCOUT_API TypeInfoSet CLASS_FINAL
   {
   private:
     std::vector<TypeInfoRef> types;
@@ -947,7 +950,7 @@ namespace osmscout {
    * A FeatureValueBuffer is instantiated by an object and holds information
    * about the type of the object, the features and feature values available for the given object.
    */
-  class OSMSCOUT_API FeatureValueBuffer
+  class OSMSCOUT_API FeatureValueBuffer CLASS_FINAL
   {
   private:
     TypeInfoRef type;
@@ -1048,11 +1051,28 @@ namespace osmscout {
     FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
     bool operator==(const FeatureValueBuffer& other) const;
     bool operator!=(const FeatureValueBuffer& other) const;
+
+    template<class T> const T* findValue() const
+    {
+      for (auto &featureInstance :GetType()->GetFeatures()){
+          if (HasFeature(featureInstance.GetIndex())){
+            osmscout::FeatureRef feature=featureInstance.GetFeature();
+            if (feature->HasValue()){
+              osmscout::FeatureValue *value=GetValue(featureInstance.GetIndex());
+              const T *v = dynamic_cast<const T*>(value);
+              if (v!=NULL){
+                return v;
+              }
+            }
+          }
+      }
+      return NULL;
+    }
   };
 
   typedef std::shared_ptr<FeatureValueBuffer> FeatureValueBufferRef;
 
-  static const uint32_t FILE_FORMAT_VERSION=10;
+  static const uint32_t FILE_FORMAT_VERSION=11;
 
   /**
    * \ingroup type
@@ -1060,10 +1080,12 @@ namespace osmscout {
    * The TypeConfig class holds information about object types
    * defined by a database instance.
    */
-  class OSMSCOUT_API TypeConfig
+  class OSMSCOUT_API TypeConfig CLASS_FINAL
   {
   public:
     static const char* FILE_TYPES_DAT;
+    static const uint32_t MIN_FORMAT_VERSION = FILE_FORMAT_VERSION;
+    static const uint32_t MAX_FORMAT_VERSION = FILE_FORMAT_VERSION;
 
   private:
 

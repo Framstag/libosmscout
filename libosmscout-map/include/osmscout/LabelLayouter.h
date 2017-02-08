@@ -32,11 +32,12 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelData
   {
   public:
+    size_t                   id;       //!< Id of this label, multiple labels with the same id do not intersect with each other
+    size_t                   priority; //!< Priority of the entry
     double                   bx1;      //!< Dimensions of bounding box
     double                   by1;      //!< Dimensions of bounding box
     double                   bx2;      //!< Dimensions of bounding box
     double                   by2;      //!< Dimensions of bounding box
-    size_t                   priority; //!< Priority of the entry
 
     double                   x;        //!< Coordinate of the left, top edge of the text
     double                   y;        //!< Coordinate of the left, top edge of the text
@@ -64,7 +65,19 @@ namespace osmscout {
         return y<other.y;
       }
 
-      return x<other.x;
+      if (x!=other.x) {
+        return x<other.x;
+      }
+
+      if (label->id!=other.label->id){
+        return label->id<other.label->id;
+      }
+
+      if (label->y!=other.label->y){
+        return label->y<other.label->y;
+      }
+
+      return label->x<other.label->x;
     }
   };
 
@@ -82,6 +95,8 @@ namespace osmscout {
     double               shieldLabelSpace;
     double               sameLabelSpace;
     double               maxSpace;
+    bool                 dropNotVisiblePointLabels;
+    size_t               labelsAdded;
 
   private:
     void DeleteEventsForLabel(const std::set<LabelEvent>::iterator& eventRef);
@@ -110,6 +125,11 @@ namespace osmscout {
     inline size_t Size() const
     {
       return labels.size();
+    }
+
+    inline size_t GetLabelsAdded() const
+    {
+      return labelsAdded;
     }
   };
 }

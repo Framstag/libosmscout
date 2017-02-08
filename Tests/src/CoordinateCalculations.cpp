@@ -24,7 +24,7 @@
 
 #include <osmscout/GeoCoord.h>
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char** /*argv*/)
 {
 	// Distance:
 	//    43135.331925721744 m
@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
 	std::cout << "Distance between " << location1.GetDisplayText() << " and " << location2.GetDisplayText() << ": " << distance_km << " km" << std::endl;
 
 	// Target:
-	//    Latitude: 51°27'48" N (51.463397)
-	//    Longitude: 7°0'22" E (7.006078)
+	//    Latitude: 51Â°27'48" N (51.463397)
+	//    Longitude: 7Â°0'22" E (7.006078)
 	double distance = 14665.298166863819; // [m]
 	double angle = 76.010085273091411718093847668127; // [deg]
 	osmscout::GeoCoord target = location1.Add(angle, distance);

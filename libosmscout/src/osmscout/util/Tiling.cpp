@@ -19,37 +19,81 @@
 
 #include <osmscout/util/Tiling.h>
 
+#include <algorithm>
+
+#include <osmscout/GeoCoord.h>
+
+#include <osmscout/util/GeoBox.h>
+
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
 
-  // See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
-  // coordinate transformation
-
-  size_t LonToTileX(double lon,
-                     const Magnification& magnification)
+  OSMTileId::OSMTileId(uint32_t x,
+                       uint32_t y)
+    : x(x),
+      y(y)
   {
-    return (size_t)(floor((lon + 180.0) / 360.0 *magnification.GetMagnification()));
+    // no code
   }
 
-  size_t LatToTileY(double lat,
-                    const Magnification& magnification)
-  {
-    return (size_t)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * magnification.GetMagnification()));
-  }
-
-  double TileXToLon(int x,
-                    const Magnification& magnification)
-  {
-    return x / magnification.GetMagnification() * 360.0 - 180.0;
-  }
-
-  double TileYToLat(int y,
-                    const Magnification& magnification)
+  /**
+   * Return the top left coordinate of the tile
+   * @param magnification
+   *    Magnification to complete the definition of the tile id (these are relative
+   *    to a magnification)
+   *
+   * @return
+   *    The resuting coordinate
+   */
+  GeoCoord OSMTileId::GetTopLeftCoord(const Magnification& magnification) const
   {
     double n = M_PI - 2.0 * M_PI * y / magnification.GetMagnification();
 
-    return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
+    return GeoCoord(180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n))),
+                    x / magnification.GetMagnification() * 360.0 - 180.0);
+  }
+
+  /**
+   * Return the bounding box of the given tile
+   *
+   * @param magnification
+   *    Magnification to complete the definition of the tile id (these are relative
+   *    to a magnification)
+   *
+   * @return
+   *    The GeoBox defining the resulting area
+   */
+  GeoBox OSMTileId::GetBoundingBox(const Magnification& magnification) const
+  {
+    return GeoBox(GetTopLeftCoord(magnification),
+                  OSMTileId(x+1,y+1).GetTopLeftCoord(magnification));
+  }
+
+  OSMTileIdBox::OSMTileIdBox(const OSMTileId& a,
+                             const OSMTileId& b)
+  : minTile(std::min(a.GetX(),b.GetX()),
+            std::min(a.GetY(),b.GetY())),
+    maxTile(std::max(a.GetX(),b.GetX()),
+            std::max(a.GetY(),b.GetY()))
+  {
+    // no code
+  }
+
+  /**
+   * Return the bounding box of the region defined by the box
+   *
+   * @param magnification
+   *    Magnification to complete the definition of the tile ids (these are relative
+   *    to a magnification)
+   *
+   * @return
+   *    The GeoBox defining the resulting area
+   */
+  GeoBox OSMTileIdBox::GetBoundingBox(const Magnification& magnification) const
+  {
+    return GeoBox(minTile.GetTopLeftCoord(magnification),
+                  OSMTileId(maxTile.GetX()+1,maxTile.GetY()+1).GetTopLeftCoord(magnification));
   }
 }
 

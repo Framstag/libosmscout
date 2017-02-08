@@ -21,32 +21,7 @@
 
 namespace osmscout {
 
-  Breaker::Breaker()
-  {
-    // no code
-  }
-
   Breaker::~Breaker()
-  {
-    // no code
-  }
-
-  DummyBreaker::DummyBreaker()
-  {
-
-  }
-
-  bool DummyBreaker::Break()
-  {
-    return false;
-  }
-
-  bool DummyBreaker::IsAborted() const
-  {
-    return false;
-  }
-
-  void DummyBreaker::Reset()
   {
     // no code
   }
@@ -57,11 +32,9 @@ namespace osmscout {
 
   }
 
-  bool ThreadedBreaker::Break()
+  void ThreadedBreaker::Break()
   {
     aborted=true;
-
-    return true;
   }
 
   bool ThreadedBreaker::IsAborted() const

@@ -31,9 +31,11 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Progress.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class OSMSCOUT_API Node
+  class OSMSCOUT_API Node CLASS_FINAL
   {
   private:
     FeatureValueBuffer featureValueBuffer; //!< List of features
@@ -54,7 +56,11 @@ namespace osmscout {
       return fileOffset;
     }
 
-  public:
+    inline ObjectFileRef GetObjectFileRef() const
+    {
+      return ObjectFileRef(fileOffset,refNode);
+    }
+
     inline TypeInfoRef GetType() const
     {
       return featureValueBuffer.GetType();
@@ -63,6 +69,19 @@ namespace osmscout {
     inline const GeoCoord& GetCoords() const
     {
       return coords;
+    }
+
+    /**
+     * Returns true if the nodes is in the given bounding box
+     *
+     * @param boundingBox
+     *    bounding box to test for intersection
+     * @return
+     *    true on intersection, else false
+     */
+    inline bool Intersects(const GeoBox& boundingBox) const
+    {
+      return boundingBox.Includes(coords);
     }
 
     inline size_t GetFeatureCount() const

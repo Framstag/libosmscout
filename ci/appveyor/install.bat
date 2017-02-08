@@ -9,6 +9,7 @@ echo MSYS2 directory: %MSYS2_DIR%
 echo MSYS2 system: %MSYSTEM%
 echo Configuration: %CONFIGURATION%
 echo Bits: %BIT%
+echo Target: %TARGET%
 
 echo Start updating build dependencies...
 
@@ -20,7 +21,8 @@ IF %COMPILER%==msys2 (
   echo "Updating dependencies...
   bash -lc "pacman -S --needed --noconfirm pacman-mirrors"
   bash -lc "pacman -S --needed --noconfirm git"
-  
+  bash -lc "pacman -Syyu --noconfirm"
+
   IF %BUILDTOOL%==autoconf (
   echo Installing autoconf tools...
   bash -lc "pacman -S --needed --noconfirm git autoconf automake make"
@@ -28,16 +30,32 @@ IF %COMPILER%==msys2 (
   echo Installing cmake tools...
   bash -lc "pacman -S --needed --noconfirm git make mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules"
   )
-  
+
   echo Installing build and compile time dependencies...
-  bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-protobuf mingw-w64-x86_64-libxml2 mingw-w64-x86_64-cairo mingw-w64-x86_64-pango mingw-w64-x86_64-qt5"
+
+  IF %TARGET%==importer (
+    bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-libxml2 zip"
+
+    cinst wget -x86
+
+    wget https://github.com/rinigus/marisa-trie/archive/0.2.4.zip -O marisa.zip
+    7z x marisa.zip
+    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && cd marisa-trie-0.2.4 && ./configure --disable-shared && make -j2 && make install"
+
+    wget https://github.com/google/protobuf/releases/download/v3.1.0/protobuf-cpp-3.1.0.zip -O protobuf-cpp-3.1.0.zip
+    7z x protobuf-cpp-3.1.0.zip
+    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && cd protobuf-3.1.0 && ./configure --disable-shared && make -j2 && make install"
+
+  ) ELSE (
+    bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-protobuf mingw-w64-x86_64-libxml2 mingw-w64-x86_64-cairo mingw-w64-x86_64-pango mingw-w64-x86_64-qt5"
+  )
 )
 
 IF %COMPILER%==msvc2015 (
   @echo on
   echo MSVC2015 build...
   echo Installing wget...
-  
+
   cinst wget -x86
 
   IF %PLATFORM%==x64 (

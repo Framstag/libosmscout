@@ -20,16 +20,18 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <marisa.h>
+
 #include <osmscout/Types.h>
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/import/Import.h>
 
-#include <marisa.h>
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout
 {
-  class TextIndexGenerator : public ImportModule
+  class TextIndexGenerator CLASS_FINAL : public ImportModule
   {
   public:
     TextIndexGenerator();

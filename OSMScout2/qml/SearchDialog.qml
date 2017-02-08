@@ -13,7 +13,7 @@ FocusScope {
     property alias startLocation: searchEdit.location;
     property alias destinationLocation: destinationEdit.location;
 
-    signal showLocation(Location location)
+    signal showLocation(LocationEntry location)
 
     width: searchRectangle.width
     height: searchRectangle.height
@@ -101,6 +101,7 @@ FocusScope {
                 onShowLocation: {
                     if (searchDialog.state === "SEARCH") {
                         searchDialog.showLocation(startLocation)
+                        focus=false;
                     }
                     else if (searchDialog.state == "ROUTE") {
                         // TODO: Store as startLocation
@@ -156,6 +157,12 @@ FocusScope {
                 Layout.maximumWidth: Theme.averageCharWidth*60
 
                 desktop: searchDialog.desktop
+
+                onShowLocation: {
+                    console.log("Routing...")
+                    route()
+                    showRoutingResult()
+                }
             }
 
             DialogActionButton {

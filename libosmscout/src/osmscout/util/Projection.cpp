@@ -119,14 +119,14 @@ namespace osmscout {
     if (angle!=0.0) {
       angleSin=sin(angle);
       angleCos=cos(angle);
-      angleNegSin=sin(-angle);
-      angleNegCos=cos(-angle); // TODO: Optimize because of symetry
+      angleNegSin=-angleSin;
+      angleNegCos=angleCos;
     }
     else {
       angleSin=0;
       angleNegSin=0;
       angleCos=1;
-      angleNegCos=-1;
+      angleNegCos=1;
     }
 
     // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level
@@ -319,14 +319,14 @@ namespace osmscout {
     if (angle!=0.0) {
       angleSin=sin(angle);
       angleCos=cos(angle);
-      angleNegSin=sin(-angle);
-      angleNegCos=cos(-angle); // TODO: Optimize because of symetry
+      angleNegSin=-angleSin;
+      angleNegCos=angleCos;
     }
     else {
       angleSin=0;
       angleNegSin=0;
       angleCos=1;
-      angleNegCos=-1;
+      angleNegCos=1;
     }
 
     // Width in meter of a tile of the given magnification at the equator
@@ -393,11 +393,11 @@ namespace osmscout {
     scaledLatDeriv = latDeriv * gradtorad * scale;
 
     /*
-    std::cout << "Center: " << lat << "° lat " << lon << "° lon" << std::endl;
+    std::cout << "Center: " << GeoCoord(lat,lon).GetDisplayText() << std::endl;
     std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
     std::cout << "Screen dimension: " << width << "x" << height << " " << dpi << " DPI " << std::endl;
 
-    std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthVisibleMeter << " " << std::endl;
+    std::cout << "Box: " << GeoBox(GeoCoord(latMin,lonMin),GeoCoord(latMax,lonMax)).GetDisplayText() << ", " << groundWidthVisibleMeter << " " << std::endl;
 
     std::cout << "Scale: 1 : " << scale << std::endl;*/
 
@@ -565,41 +565,36 @@ namespace osmscout {
     return true;
 }
 
-  bool TileProjection::Set(size_t tileX, size_t tileY,
+  bool TileProjection::Set(const OSMTileId& tile,
                            const Magnification& magnification,
                            double dpi,
                            size_t width, size_t height)
   {
-    double latMin=TileYToLat(tileY+1,
-                      magnification);
-    double latMax=TileYToLat(tileY,
-                      magnification);
+    GeoBox boundingBox(tile.GetBoundingBox(magnification));
 
-    double lonMin=TileXToLon(tileX,
-                      magnification);
-    double lonMax=TileXToLon(tileX+1,
-                      magnification);
-
-    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
+    return SetInternal(boundingBox.GetMinLon(),
+                       boundingBox.GetMinLat(),
+                       boundingBox.GetMaxLon(),
+                       boundingBox.GetMaxLat(),
+                       magnification,
+                       dpi,
+                       width,height);
   }
 
-  bool TileProjection::Set(size_t tileAX, size_t tileAY,
-                           size_t tileBX, size_t tileBY,
+  bool TileProjection::Set(const OSMTileIdBox& tileBox,
                            const Magnification& magnification,
                            double dpi,
                            size_t width,size_t height)
   {
-    double latMin=TileYToLat(std::max(tileAY,tileBY)+1,
-                             magnification);
-    double latMax=TileYToLat(std::min(tileAY,tileBY),
-                             magnification);
+    GeoBox boundingBox(tileBox.GetBoundingBox(magnification));
 
-    double lonMin=TileXToLon(std::min(tileAX,tileBX),
-                             magnification);
-    double lonMax=TileXToLon(std::max(tileAX,tileBX)+1,
-                             magnification);
-
-    return SetInternal(lonMin,latMin,lonMax,latMax,magnification,dpi,width,height);
+    return SetInternal(boundingBox.GetMinLon(),
+                       boundingBox.GetMinLat(),
+                       boundingBox.GetMaxLon(),
+                       boundingBox.GetMaxLat(),
+                       magnification,
+                       dpi,
+                       width,height);
   }
 
   bool TileProjection::PixelToGeo(double x, double y,

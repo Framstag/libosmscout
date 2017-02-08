@@ -23,9 +23,11 @@
 #include <osmscout/import/GenNumericIndex.h>
 #include <osmscout/import/RawNode.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawNodeIndexGenerator : public NumericIndexGenerator<OSMId,RawNode>
+  class RawNodeIndexGenerator CLASS_FINAL : public NumericIndexGenerator<OSMId,RawNode>
   {
   public:
     static const char* RAWNODE_IDX;

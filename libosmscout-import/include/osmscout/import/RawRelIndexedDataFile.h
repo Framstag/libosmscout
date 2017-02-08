@@ -24,9 +24,11 @@
 
 #include <osmscout/import/RawRelation.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawRelationIndexedDataFile : public IndexedDataFile<OSMId,RawRelation>
+  class RawRelationIndexedDataFile CLASS_FINAL : public IndexedDataFile<OSMId,RawRelation>
   {
   public:
     RawRelationIndexedDataFile(unsigned long indexCacheSize);

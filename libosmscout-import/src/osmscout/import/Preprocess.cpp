@@ -23,6 +23,8 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/BoundingBoxDataFile.h>
+#include <osmscout/TypeDistributionDataFile.h>
 #include <osmscout/CoordDataFile.h>
 
 #include <osmscout/util/File.h>
@@ -45,8 +47,6 @@
 
 namespace osmscout {
 
-  const char* Preprocess::BOUNDING_DAT="bounding.dat";
-  const char* Preprocess::DISTRIBUTION_DAT="distribution.dat";
   const char* Preprocess::RAWCOORDS_DAT="rawcoords.dat";
   const char* Preprocess::RAWNODES_DAT="rawnodes.dat";
   const char* Preprocess::RAWWAYS_DAT="rawways.dat";
@@ -122,8 +122,8 @@ namespace osmscout {
   : typeConfig(typeConfig),
     parameter(parameter),
     progress(progress),
-    blockWorkerQueue(1000),
-    writeWorkerQueue(1000),
+    blockWorkerQueue(parameter.GetProcessingQueueSize()),
+    writeWorkerQueue(parameter.GetProcessingQueueSize()),
     writeWorkerThread(&Preprocess::Callback::WriteWorkerLoop,this),
     coordCount(0),
     nodeCount(0),
@@ -145,7 +145,7 @@ namespace osmscout {
 
     size_t blockWorkerCount=std::max((unsigned int)1,std::thread::hardware_concurrency());
 
-    progress.Info("Using "+NumberToString(blockWorkerCount)+" block worker threads");
+    progress.Info("Using "+NumberToString(blockWorkerCount)+" block worker threads"+" with queue size of "+NumberToString(parameter.GetProcessingQueueSize()));
 
     for (size_t t=1; t<=blockWorkerCount; t++) {
       blockWorkerThreads.push_back(std::thread(&Preprocess::Callback::BlockWorkerLoop,this));
@@ -163,6 +163,10 @@ namespace osmscout {
 
   bool Preprocess::Callback::Initialize()
   {
+    readNodes=false;
+    readWays=false;
+    readRelations=false;
+
     try {
       rawCoordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       RAWCOORDS_DAT));
@@ -487,12 +491,12 @@ namespace osmscout {
   {
     ProcessedDataRef processed(new ProcessedData());
 
-    processed->rawCoastlines.reserve(10000);
-    processed->rawCoords.reserve(10000);
-    processed->rawNodes.reserve(10000);
-    processed->rawWays.reserve(10000);
-    processed->rawRelations.reserve(10000);
-    processed->turnRestriction.reserve(10000);
+    processed->rawCoastlines.reserve(data->wayData.size());
+    processed->rawCoords.reserve(data->nodeData.size());
+    processed->rawNodes.reserve(data->nodeData.size());
+    processed->rawWays.reserve(data->wayData.size());
+    processed->rawRelations.reserve(data->relationData.size());
+    processed->turnRestriction.reserve(data->relationData.size());
 
     //std::cout << "Poping block " << data->nodeData.size() << " " << data->wayData.size() << " " << data->relationData.size() << std::endl;
 
@@ -604,6 +608,12 @@ namespace osmscout {
 
       maxCoord.Set(std::max(maxCoord.GetLat(),entry.coord.GetLat()),
                    std::max(maxCoord.GetLon(),entry.coord.GetLon()));
+
+      if (!readNodes) {
+        progress.Info("Start reading nodes");
+      }
+
+      readNodes=true;
     }
 
     for (const auto& entry : data->wayData) {
@@ -612,6 +622,12 @@ namespace osmscout {
       }
 
       lastWayId=entry.id;
+
+      if (!readWays) {
+        progress.Info("Start reading ways");
+      }
+
+      readWays=true;
     }
 
     for (const auto& entry : data->relationData) {
@@ -621,6 +637,12 @@ namespace osmscout {
 
       lastRelationId=entry.id;
       relationCount++;
+
+      if (!readRelations) {
+        progress.Info("Start reading relations");
+      }
+
+      readRelations=true;
     }
 
     //
@@ -657,7 +679,7 @@ namespace osmscout {
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                  DISTRIBUTION_DAT));
+                                  TypeDistributionDataFile::DISTRIBUTION_DAT));
 
       for (const auto &type : typeConfig->GetTypes()) {
         writer.Write(nodeStat[type->GetIndex()]);
@@ -680,13 +702,13 @@ namespace osmscout {
 
   bool Preprocess::Callback::DumpBoundingBox()
   {
-    progress.SetAction("Generating bounding.dat");
+    progress.SetAction("Generating '"+std::string(BoundingBoxDataFile::BOUNDINGBOX_DAT)+"'");
 
     FileWriter writer;
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                  BOUNDING_DAT));
+                                  BoundingBoxDataFile::BOUNDINGBOX_DAT));
 
       writer.WriteCoord(minCoord);
       writer.WriteCoord(maxCoord);
@@ -826,9 +848,9 @@ namespace osmscout {
     description.SetName("Preprocess");
     description.SetDescription("Initial parsing of import file(s)");
 
-    description.AddProvidedFile(BOUNDING_DAT);
+    description.AddProvidedFile(BoundingBoxDataFile::BOUNDINGBOX_DAT);
 
-    description.AddProvidedTemporaryFile(DISTRIBUTION_DAT);
+    description.AddProvidedTemporaryFile(TypeDistributionDataFile::DISTRIBUTION_DAT);
     description.AddProvidedTemporaryFile(RAWCOORDS_DAT);
     description.AddProvidedTemporaryFile(RAWNODES_DAT);
     description.AddProvidedTemporaryFile(RAWWAYS_DAT);

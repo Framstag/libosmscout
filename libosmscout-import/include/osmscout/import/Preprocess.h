@@ -37,13 +37,12 @@
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawRelation.h>
 
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
-  class Preprocess : public ImportModule
+  class Preprocess CLASS_FINAL : public ImportModule
   {
   public:
-    static const char* BOUNDING_DAT;
-    static const char* DISTRIBUTION_DAT;
     static const char* RAWCOORDS_DAT;
     static const char* RAWNODES_DAT;
     static const char* RAWWAYS_DAT;
@@ -77,12 +76,17 @@ namespace osmscout {
       std::vector<std::thread>                 blockWorkerThreads;
       WorkQueue<void>                          writeWorkerQueue;
       std::thread                              writeWorkerThread;
+
       FileWriter                               rawCoordWriter;
       FileWriter                               nodeWriter;
       FileWriter                               wayWriter;
       FileWriter                               coastlineWriter;
       FileWriter                               turnRestrictionWriter;
       FileWriter                               multipolygonWriter;
+
+      bool                                     readNodes;
+      bool                                     readWays;
+      bool                                     readRelations;
 
       uint32_t                                 coordCount;
       uint32_t                                 nodeCount;

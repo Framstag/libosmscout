@@ -30,13 +30,15 @@
 
 #include <osmscout/util/FileScanner.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
    * A Intersection is a node, where multiple routeable ways or areas
    * meet.
    */
-  class OSMSCOUT_API Intersection
+  class OSMSCOUT_API Intersection CLASS_FINAL
   {
   private:
     Id                         nodeId;  //!< The id/file offset of the node where the ways meet

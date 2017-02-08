@@ -10,6 +10,7 @@ echo MSYS2 system: %MSYSTEM%
 echo Configuration: %CONFIGURATION%
 echo Bits: %BIT%
 echo Buildtool: %BUILDTOOL%
+echo Target: %TARGET%
 
 IF %COMPILER%==msys2 (
   @echo on
@@ -21,7 +22,12 @@ IF %COMPILER%==msys2 (
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
   ) ELSE (
     echo "Using build tool 'cmake'..."
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && mkdir build && cd build && CXX=g++ CC=gcc cmake -G 'MSYS Makefiles' .. && cmake -LAH .. && make"
+    IF %TARGET%==importer (
+      bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && . packaging/import/windows/build_import.sh"
+      appveyor PushArtifact build\libosmscout-importer-Windows-x86_64.zip
+    ) ELSE (
+        bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && mkdir build && cd build && CXX=g++ CC=gcc cmake -G 'MSYS Makefiles' .. && cmake -LAH .. && make -j2"
+    )
   )  
 )
 

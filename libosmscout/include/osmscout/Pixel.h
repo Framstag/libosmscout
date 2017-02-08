@@ -26,6 +26,8 @@
 
 #include <osmscout/util/Number.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -34,7 +36,7 @@ namespace osmscout {
    * Representation of a pixel on a display or a plane.
    * Coordinates are non-negative, values are decimal.
    */
-  struct OSMSCOUT_API Pixel
+  struct OSMSCOUT_API Pixel CLASS_FINAL
   {
     uint32_t x;
     uint32_t y;
@@ -80,7 +82,7 @@ namespace osmscout {
    * Two dimensional coordinate (floating point values,
    * negative coordinates possible).
    */
-  class OSMSCOUT_API Vertex2D
+  class OSMSCOUT_API Vertex2D CLASS_FINAL
   {
   private:
     double coords[2];
@@ -152,7 +154,7 @@ namespace osmscout {
    * Three dimensional coordinate (floating point values,
    * negative coordinates possible).
    */
-  class OSMSCOUT_API Vertex3D
+  class OSMSCOUT_API Vertex3D CLASS_FINAL
   {
   private:
     double x;

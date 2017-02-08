@@ -29,8 +29,8 @@
 
 #include <iostream>
 
-SettingsDialog::SettingsDialog(const SettingsRef& settings)
- : settings(settings)/*,
+SettingsDialog::SettingsDialog()
+/* : settings(settings),
    dpi(new QSpinBox())*/
 {
   std::cout << "SettingsDialog::SettingsDialog()" << std::endl;

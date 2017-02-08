@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include <osmscout/DataFile.h>
+#include <osmscout/TypeDistributionDataFile.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -45,21 +46,13 @@ namespace osmscout {
     return a->GetNodeCount()>b->GetNodeCount();
   }
 
-  WayWayDataGenerator::Distribution::Distribution()
-  : nodeCount(0),
-    wayCount(0),
-    areaCount(0)
-  {
-    // no code
-  }
-
   void WayWayDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                            ImportModuleDescription& description) const
   {
     description.SetName("WayWayDataGenerator");
     description.SetDescription("Merge ways into bigger ways");
 
-    description.AddRequiredFile(Preprocess::DISTRIBUTION_DAT);
+    description.AddRequiredFile(TypeDistributionDataFile::DISTRIBUTION_DAT);
     description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
     description.AddRequiredFile(Preprocess::RAWTURNRESTR_DAT);
 
@@ -138,38 +131,6 @@ namespace osmscout {
     }
 
     progress.Info(std::string("Wrote back ")+NumberToString(restrictionsSet.size())+" restrictions");
-
-    return true;
-  }
-
-  bool WayWayDataGenerator::ReadTypeDistribution(const TypeConfigRef& typeConfig,
-                                                 const ImportParameter& parameter,
-                                                 Progress& progress,
-                                                 std::vector<Distribution>& typeDistribution) const
-  {
-    typeDistribution.clear();
-    typeDistribution.resize(typeConfig->GetTypeCount());
-
-    FileScanner scanner;
-
-    try {
-      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   Preprocess::DISTRIBUTION_DAT),
-                   FileScanner::Sequential,
-                   true);
-
-      for (const auto &type : typeConfig->GetTypes()) {
-        scanner.Read(typeDistribution[type->GetIndex()].nodeCount);
-        scanner.Read(typeDistribution[type->GetIndex()].wayCount);
-        scanner.Read(typeDistribution[type->GetIndex()].areaCount);
-      }
-
-      scanner.Close();
-    }
-    catch (IOException& e) {
-      progress.Error(e.GetDescription());
-      return false;
-    }
 
     return true;
   }
@@ -720,12 +681,12 @@ namespace osmscout {
   {
     progress.SetAction("Generate wayway.tmp");
 
-    std::vector<Distribution>               typeDistribution;
-
     TypeInfoSet                             wayTypes;
     TypeInfoSet                             slowFallbackTypes;
 
     RestrictionData                         restrictions;
+
+    TypeDistributionDataFile                typeDistributionDataFile;
 
     FileScanner                             scanner;
     FileWriter                              wayWriter;
@@ -736,16 +697,16 @@ namespace osmscout {
 
     progress.SetAction("Reading type distribution");
 
-    if (!ReadTypeDistribution(typeConfig,
-                              parameter,
-                              progress,
-                              typeDistribution)) {
+
+    if (!typeDistributionDataFile.Load(*typeConfig,
+                                       parameter.GetDestinationDirectory())) {
+      progress.Error("Cannot load data file '"+typeDistributionDataFile.GetFilename()+"'");
       return false;
     }
 
     for (const auto &type : typeConfig->GetTypes()) {
       if (!type->GetIgnore()) {
-        if (typeDistribution[type->GetIndex()].wayCount>=parameter.GetRawWayBlockSize()) {
+        if (typeDistributionDataFile.GetWayCount(*type)>=parameter.GetRawWayBlockSize()) {
           slowFallbackTypes.Set(type);
         }
         else {

@@ -30,9 +30,11 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class AreaWayIndexGenerator : public ImportModule
+  class AreaWayIndexGenerator CLASS_FINAL : public ImportModule
   {
   private:
     typedef std::map<Pixel,size_t>                 CoordCountMap;

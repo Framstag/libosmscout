@@ -436,12 +436,56 @@ namespace osmscout {
         ++contra;
       }
 
+      if (count>=100 && pro/20.0>contra) {
+        return true;
+      }
+    }
+
+    return pro/20.0>contra;
+  }
+
+  /**
+   * \ingroup Geometry
+   * Assumes that the given areas do not intersect.
+   *
+   * Returns true, of area a is within b or the same as b. This
+   * version uses some heuristic based on the assumption that areas
+   * are either in another area or not - but there may be some smaller
+   * errors due to areas slightly overlapping.
+   */
+  template<typename N,typename M>
+  inline bool IsAreaSubOfAreaOrSame(const std::vector<N>& a,
+                                    const std::vector<M>& b)
+  {
+    size_t pro=0;
+    size_t contra=0;
+    size_t count=0;
+
+    pro=0;
+    contra=0;
+    count=0;
+
+    for (const auto& node : a) {
+      int relPos=GetRelationOfPointToArea(node,b);
+
+      ++count;
+
+      if (relPos>0) {
+        ++pro;
+      }
+      else if (relPos<0) {
+        ++contra;
+      }
+
       if (count>=100 && pro/20>contra) {
         return true;
       }
     }
 
-    return pro/20>contra;
+    if (pro == 0 && contra == 0 && count > 0)
+      return true;
+
+    return pro/20.0>contra;
   }
 
   /**
@@ -801,14 +845,6 @@ namespace osmscout {
                                                                  const GeoCoord& a,
                                                                  const GeoCoord& b,
                                                                  GeoCoord& intersection);
-
-  /**
-   * \ingroup Geometry
-   * Calculates the spherical distance between the two given points
-   * on the sphere.
-   */
-  extern OSMSCOUT_API double GetSphericalDistance(double aLon, double aLat,
-                                                  double bLon, double bLat);
 
   /**
    * \ingroup Geometry

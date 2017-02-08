@@ -34,9 +34,11 @@
 #include <osmscout/import/pbf/fileformat.pb.h>
 #include <osmscout/import/pbf/osmformat.pb.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class PreprocessPBF : public Preprocessor
+  class PreprocessPBF CLASS_FINAL : public Preprocessor
   {
   private:
     char                             *buffer;

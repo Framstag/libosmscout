@@ -1,0 +1,51 @@
+[
+  {
+    "id": "mapnik",
+    "name": "OSM Mapnik",
+    "servers": [
+      "https://a.tile.openstreetmap.org/%1/%2/%3.png",
+      "https://b.tile.openstreetmap.org/%1/%2/%3.png",
+      "https://c.tile.openstreetmap.org/%1/%2/%3.png"
+    ],
+    "maximumZoomLevel": 19, 
+    "copyright": "© OpenStreetMap contributors"
+  }, 
+  {
+    "id": "hikebikemap",
+    "name": "Hike & Bike Map",
+    "servers": [
+      "http://a.tiles.wmflabs.org/hikebike/%1/%2/%3.png",
+      "http://b.tiles.wmflabs.org/hikebike/%1/%2/%3.png",
+      "http://c.tiles.wmflabs.org/hikebike/%1/%2/%3.png"
+    ],
+    "maximumZoomLevel": 19,
+    "copyright": "© Leaflet, OSM, NASA"
+  },
+  {
+    "id": "watercolor",
+    "name": "Watercolor",
+    "servers": [
+      "https://stamen-tiles.a.ssl.fastly.net/watercolor/%1/%2/%3.jpg"
+    ],
+    "maximumZoomLevel": 19,
+    "copyright": "© Stamen Design, OSM"
+  },
+  {
+    "id": "toner",
+    "name": "Toner",
+    "servers": [
+      "https://stamen-tiles.a.ssl.fastly.net/toner/%1/%2/%3.png"
+    ],
+    "maximumZoomLevel": 19,
+    "copyright": "© Stamen Design, OSM"
+  },
+  {
+    "id": "terrain",
+    "name": "Terrain",
+    "servers": [
+      "https://stamen-tiles.a.ssl.fastly.net/terrain/%1/%2/%3.png"
+    ],
+    "maximumZoomLevel": 19,
+    "copyright": "© Stamen Design, OSM"
+  }
+]

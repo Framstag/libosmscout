@@ -31,9 +31,11 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawNode
+  class RawNode CLASS_FINAL
   {
   private:
     OSMId              id;

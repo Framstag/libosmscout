@@ -29,6 +29,11 @@
 #include <osmscout/util/Tiling.h>
 
 //#define DEBUG_GROUNDTILES
+//#define DEBUG_NODE_DRAW
+
+#if defined(DEBUG_GROUNDTILES)
+#include <osmscout/Coord.h>
+#endif
 
 namespace osmscout {
 
@@ -44,22 +49,32 @@ namespace osmscout {
       return false;
     }
 
-    if (a.boundingBox.minCoord.GetLon()==b.boundingBox.minCoord.GetLon()) {
-      if (a.boundingBox.maxCoord.GetLon()==b.boundingBox.maxCoord.GetLon()) {
-        if (a.boundingBox.minCoord.GetLat()==b.boundingBox.minCoord.GetLat()) {
-          return a.boundingBox.maxCoord.GetLat()>b.boundingBox.maxCoord.GetLat();
+    if (a.boundingBox.GetMinCoord().GetLon()==b.boundingBox.GetMinCoord().GetLon()) {
+      if (a.boundingBox.GetMaxCoord().GetLon()==b.boundingBox.GetMaxCoord().GetLon()) {
+        if (a.boundingBox.GetMinCoord().GetLat()==b.boundingBox.GetMinCoord().GetLat()) {
+          return a.boundingBox.GetMaxCoord().GetLat()>b.boundingBox.GetMaxCoord().GetLat();
         }
         else {
-          return a.boundingBox.minCoord.GetLat()<b.boundingBox.minCoord.GetLat();
+          return a.boundingBox.GetMinCoord().GetLat()<b.boundingBox.GetMinCoord().GetLat();
         }
       }
       else {
-        return a.boundingBox.maxCoord.GetLon()>b.boundingBox.maxCoord.GetLon();
+        return a.boundingBox.GetMaxCoord().GetLon()>b.boundingBox.GetMaxCoord().GetLon();
       }
     }
     else {
-      return a.boundingBox.minCoord.GetLon()<b.boundingBox.minCoord.GetLon();
+      return a.boundingBox.GetMinCoord().GetLon()<b.boundingBox.GetMinCoord().GetLon();
     }
+  }
+
+  /**
+   * Deletes the content hold by this instance.
+   */
+  void MapData::ClearDBData()
+  {
+    nodes.clear();
+    areas.clear();
+    ways.clear();
   }
 
   /**
@@ -100,8 +115,8 @@ namespace osmscout {
 
     textStyle->SetStyle(TextStyle::normal);
     textStyle->SetPriority(0);
-    textStyle->SetTextColor(Color(0,0,0,0.5));
-    textStyle->SetSize(1.2);
+    textStyle->SetTextColor(Color(0,0,0,0.9));
+    textStyle->SetSize(0.7);
 
     debugLabel=textStyle;
   }
@@ -308,7 +323,7 @@ namespace osmscout {
 
     statisticList.sort([](const DataStatistic& a, const DataStatistic& b)->bool{return a.objectCount>b.objectCount;});
 
-    log.Info() << "Type|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
+    log.Info() << "Type|ObjectCount|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
     for (const auto& entry : statisticList) {
       log.Info() << entry.type->GetName() << " "
           << entry.objectCount << " "
@@ -320,56 +335,31 @@ namespace osmscout {
   }
 
   bool MapPainter::IsVisibleArea(const Projection& projection,
-                                 const std::vector<Point>& nodes,
+                                 const GeoBox& boundingBox,
                                  double pixelOffset) const
   {
-    if (nodes.empty()) {
-      return false;
-    }
-
-    // Bounding box
-    double lonMin=nodes[0].GetLon();
-    double lonMax=lonMin;
-    double latMin=nodes[0].GetLat();
-    double latMax=latMin;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      lonMin=std::min(lonMin,nodes[i].GetLon());
-      lonMax=std::max(lonMax,nodes[i].GetLon());
-      latMin=std::min(latMin,nodes[i].GetLat());
-      latMax=std::max(latMax,nodes[i].GetLat());
-    }
-
     double x1;
     double x2;
     double y1;
     double y2;
 
-    projection.GeoToPixel(GeoCoord(latMin,
-                                   lonMin),
+    projection.GeoToPixel(boundingBox.GetMinCoord(),
                           x1,
                           y1);
 
-    projection.GeoToPixel(GeoCoord(latMax,
-                                   lonMax),
+    projection.GeoToPixel(boundingBox.GetMaxCoord(),
                           x2,
                           y2);
 
-    double xMin=std::min(x1,x2);
-    double xMax=std::max(x1,x2);
-    double yMin=std::min(y1,y2);
-    double yMax=std::max(y1,y2);
+    double xMin=std::min(x1,x2)-pixelOffset;
+    double xMax=std::max(x1,x2)+pixelOffset;
+    double yMin=std::min(y1,y2)-pixelOffset;
+    double yMax=std::max(y1,y2)+pixelOffset;
 
-    if (x2-x1<=areaMinDimension &&
-        y2-y1<=areaMinDimension) {
+    if (xMax-xMin<=areaMinDimension &&
+        yMax-yMin<=areaMinDimension) {
       return false;
     }
-
-    xMin-=pixelOffset;
-    yMin-=pixelOffset;
-
-    xMax+=pixelOffset;
-    yMax+=pixelOffset;
 
     return !(xMin>=projection.GetWidth() ||
              yMin>=projection.GetHeight() ||
@@ -470,7 +460,7 @@ namespace osmscout {
     FillStyleRef      landFill;
 
 #if defined(DEBUG_GROUNDTILES)
-      std::set<Coord> drawnLabels;
+      std::set<GeoCoord> drawnLabels;
 #endif
 
     styleConfig.GetLandFillStyle(projection,
@@ -519,40 +509,61 @@ namespace osmscout {
       unknownFill=this->seaFill;
     }
 
-    for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
-        tile!=data.groundTiles.end();
-        ++tile) {
+    for (const auto& tile : data.groundTiles) {
       AreaData areaData;
 
-      switch (tile->type) {
+      if (tile.type==GroundTile::unknown &&
+          !parameter.GetRenderUnknowns()) {
+        continue;
+      }
+
+      switch (tile.type) {
       case GroundTile::land:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=landFill;
         break;
       case GroundTile::water:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=seaFill;
         break;
       case GroundTile::coast:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=coastFill;
         break;
       case GroundTile::unknown:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
         areaData.fillStyle=unknownFill;
         break;
       }
 
-      GeoCoord minCoord(tile->yAbs*tile->cellHeight-90.0,
-                        tile->xAbs*tile->cellWidth-180.0);
-      GeoCoord maxCoord(minCoord.GetLat()+tile->cellHeight,
-                        minCoord.GetLon()+tile->cellWidth);
+      GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
+                        tile.xAbs*tile.cellWidth-180.0);
+      GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
+                        minCoord.GetLon()+tile.cellWidth);
 
       areaData.boundingBox.Set(minCoord,maxCoord);
 
-      if (tile->coords.empty()) {
+      if (tile.coords.empty()) {
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= fill" << std::endl;
+#endif
+        // Fill the cell completely with the fill for the given cell type
         points.resize(5);
 
-        points[0].SetCoord(areaData.boundingBox.minCoord);
-        points[1].SetCoord(GeoCoord(areaData.boundingBox.minCoord.GetLat(),areaData.boundingBox.maxCoord.GetLon()));
-        points[2].SetCoord(areaData.boundingBox.maxCoord);
-        points[3].SetCoord(GeoCoord(areaData.boundingBox.maxCoord.GetLat(),areaData.boundingBox.minCoord.GetLon()));
+        points[0].SetCoord(areaData.boundingBox.GetMinCoord());
+        points[1].SetCoord(GeoCoord(areaData.boundingBox.GetMinCoord().GetLat(),
+                                    areaData.boundingBox.GetMaxCoord().GetLon()));
+        points[2].SetCoord(areaData.boundingBox.GetMaxCoord());
+        points[3].SetCoord(GeoCoord(areaData.boundingBox.GetMaxCoord().GetLat(),
+                                    areaData.boundingBox.GetMinCoord().GetLon()));
         points[4]=points[0];
 
         transBuffer.transPolygon.TransformArea(projection,
@@ -579,14 +590,17 @@ namespace osmscout {
                                           ceil(transBuffer.transPolygon.points[s+4].y));
       }
       else {
-        points.resize(tile->coords.size());
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= sub" << std::endl;
+#endif
+        points.resize(tile.coords.size());
 
-        for (size_t i=0; i<tile->coords.size(); i++) {
+        for (size_t i=0; i<tile.coords.size(); i++) {
           double lat;
           double lon;
 
-          lat=areaData.boundingBox.minCoord.GetLat()+tile->coords[i].y*tile->cellHeight/GroundTile::Coord::CELL_MAX;
-          lon=areaData.boundingBox.minCoord.GetLon()+tile->coords[i].x*tile->cellWidth/GroundTile::Coord::CELL_MAX;
+          lat=areaData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=areaData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
 
           points[i].SetCoord(GeoCoord(lat,lon));
         }
@@ -599,20 +613,20 @@ namespace osmscout {
         for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
           double x,y;
 
-          if (tile->coords[i].x==0) {
+          if (tile.coords[i].x==0) {
             x=floor(transBuffer.transPolygon.points[i].x);
           }
-          else if (tile->coords[i].x==GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[i].x==GroundTile::Coord::CELL_MAX) {
             x=ceil(transBuffer.transPolygon.points[i].x);
           }
           else {
             x=transBuffer.transPolygon.points[i].x;
           }
 
-          if (tile->coords[i].y==0) {
+          if (tile.coords[i].y==0) {
             y=ceil(transBuffer.transPolygon.points[i].y);
           }
-          else if (tile->coords[i].y==GroundTile::Coord::CELL_MAX) {
+          else if (tile.coords[i].y==GroundTile::Coord::CELL_MAX) {
             y=floor(transBuffer.transPolygon.points[i].y);
           }
           else {
@@ -633,20 +647,20 @@ namespace osmscout {
           size_t lineStart=0;
           size_t lineEnd;
 
-          while (lineStart<tile->coords.size()) {
-            while (lineStart<tile->coords.size() &&
-                   !tile->coords[lineStart].coast) {
+          while (lineStart<tile.coords.size()) {
+            while (lineStart<tile.coords.size() &&
+                   !tile.coords[lineStart].coast) {
               lineStart++;
             }
 
-            if (lineStart>=tile->coords.size()) {
+            if (lineStart>=tile.coords.size()) {
               continue;
             }
 
             lineEnd=lineStart;
 
-            while (lineEnd<tile->coords.size() &&
-                   tile->coords[lineEnd].coast) {
+            while (lineEnd<tile.coords.size() &&
+                   tile.coords[lineEnd].coast) {
               lineEnd++;
             }
 
@@ -679,45 +693,56 @@ namespace osmscout {
       DrawArea(projection,parameter,areaData);
 
 #if defined(DEBUG_GROUNDTILES)
-      double ccLon=areaData.minLon+(areaData.maxLon-areaData.minLon)/2;
-      double ccLat=areaData.minLat+(areaData.maxLat-areaData.minLat)/2;
+      size_t   labelId=nextLabelId++;
+      GeoCoord cc=areaData.boundingBox.GetCenter();
 
       std::string label;
 
-      size_t x=(ccLon+180)/tile->cellWidth;
-      size_t y=(ccLat+90)/tile->cellHeight;
+      size_t x=(cc.GetLon()+180)/tile.cellWidth;
+      size_t y=(cc.GetLat()+90)/tile.cellHeight;
 
-      label=NumberToString(tile->xRel);
-      label+=",";
-      label+=NumberToString(tile->yRel);
+      label=NumberToString(tile.xRel)+","+NumberToString(tile.yRel);
 
-      double lon=(x*tile->cellWidth+tile->cellWidth/2)-180.0;
-      double lat=(y*tile->cellHeight+tile->cellHeight/2)-90.0;
+      double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
+      double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
 
       double px;
       double py;
 
-      projection.GeoToPixel(lon,
-                            lat,
+      projection.GeoToPixel(GeoCoord(lat,lon),
                             px,py);
 
-
-      if (drawnLabels.find(Coord(x,y))!=drawnLabels.end()) {
+      if (drawnLabels.find(GeoCoord(x,y))!=drawnLabels.end()) {
         continue;
       }
 
-      LabelData labelData;
+      LabelLayoutData labelData;
 
-      labelData.x=px;
-      labelData.y=py;
-      labelData.alpha=0.5;
-      labelData.fontSize=1.2;
-      labelData.style=debugLabel;
-      labelData.text=label;
+      labelData.fontSize=debugLabel->GetSize();
 
-      labels.push_back(labelData);
+      GetTextDimension(projection,
+                       parameter,
+                       -1,
+                       labelData.fontSize,
+                       label,
+                       labelData.xOff,
+                       labelData.yOff,
+                       labelData.width,
+                       labelData.height);
 
-      drawnLabels.insert(Coord(x,y));
+      labelData.alpha=debugLabel->GetAlpha();
+      labelData.position=0;
+      labelData.label=label;
+      labelData.textStyle=debugLabel;
+      labelData.icon=false;
+
+      RegisterPointLabel(projection,
+                         parameter,
+                         labelData,
+                         px,py,
+                         labelId);
+
+      drawnLabels.insert(GeoCoord(x,y));
 #endif
     }
   }
@@ -744,18 +769,14 @@ namespace osmscout {
                                         transEnd,
                                         wayScanlines);
 
-    double frameHoriz;
-    double frameVert;
-
-    // Get the amount of delta to add to the frame, depending on the actual style
-    GetLabelFrame(*style,
-                  frameHoriz,
-                  frameVert);
+    double frameHoriz=5;
+    double frameVert=5;
 
     double xOff,yOff,width,height;
 
     GetTextDimension(projection,
                      parameter,
+                     /*objectWidth*/ -1,
                      style->GetSize(),
                      text,
                      xOff,yOff,width,height);
@@ -766,6 +787,7 @@ namespace osmscout {
       double    x=wayScanlines[i].x+0.5;
       double    y=wayScanlines[i].y+0.5;
 
+      labelBox.id=nextLabelId++;
       labelBox.bx1=x-width/2-frameHoriz;
       labelBox.bx2=x+width/2+frameHoriz;
       labelBox.by1=y-height/2-frameVert;
@@ -790,50 +812,32 @@ namespace osmscout {
   /**
    * Register a label with the given parameter.The given coordinates
    * define the center of the label. The resulting label will be
-   * vertically and horizontally alligned to the given coordinate.
+   * vertically and horizontally aligned to the given coordinate.
    */
-  bool MapPainter::RegisterPointLabel(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const LabelStyleRef& style,
-                                      const std::string& text,
-                                      double fontSize,
-                                      double height,
-                                      double alpha,
+  bool MapPainter::RegisterPointLabel(const Projection& /*projection*/,
+                                      const MapParameter& /*parameter*/,
+                                      const LabelLayoutData& data,
                                       double x,
-                                      double y)
+                                      double y,
+                                      size_t id)
   {
     // Something is an overlay, if its alpha is <0.8
-    bool overlay=alpha<0.8;
-
-    double frameHoriz;
-    double frameVert;
-
-    // Get the amount of delta to add to the frame, depending on the actual style
-    GetLabelFrame(*style,
-                  frameHoriz,
-                  frameVert);
-
-    double xOff,yOff,width;
-
-    GetTextDimension(projection,
-                     parameter,
-                     fontSize,
-                     text,
-                     xOff,yOff,width,height);
+    bool overlay=data.alpha<0.8;
 
     LabelData labelBox;
 
-    labelBox.bx1=x-width/2-frameHoriz;
-    labelBox.bx2=x+width/2+frameHoriz;
-    labelBox.by1=y-height/2-frameVert;
-    labelBox.by2=y+height/2+frameVert;
-    labelBox.priority=style->GetPriority();
-    labelBox.x=x-xOff-width/2;
-    labelBox.y=y-yOff-height/2;
-    labelBox.alpha=alpha;
-    labelBox.fontSize=fontSize;
-    labelBox.style=style;
-    labelBox.text=text;
+    labelBox.id=id;
+    labelBox.bx1=x-data.width/2;
+    labelBox.bx2=x+data.width/2;
+    labelBox.by1=y-data.height/2;
+    labelBox.by2=y+data.height/2;
+    labelBox.priority=data.textStyle->GetPriority();
+    labelBox.x=x-data.xOff-data.width/2;
+    labelBox.y=y-data.yOff-data.height/2;
+    labelBox.alpha=data.alpha;
+    labelBox.fontSize=data.fontSize;
+    labelBox.style=data.textStyle;
+    labelBox.text=data.label;
 
     LabelDataRef label;
 
@@ -860,6 +864,7 @@ namespace osmscout {
                                      const std::vector<TextStyleRef>& textStyles,
                                      double x,
                                      double y,
+                                     double objectWidth,
                                      double objectHeight)
   {
     labelLayoutData.clear();
@@ -874,6 +879,7 @@ namespace osmscout {
                  x,y);
     }*/
 
+    size_t labelId=nextLabelId++;
     double overallTextHeight=0;
     bool   hasSymbol=false;
 
@@ -885,6 +891,9 @@ namespace osmscout {
         LabelLayoutData data;
 
         data.position=iconStyle->GetPosition();
+        data.xOff=0;
+        data.yOff=0;
+        data.width=14;  // TODO
         data.height=14; // TODO
         data.icon=true;
         data.iconStyle=iconStyle;
@@ -897,6 +906,9 @@ namespace osmscout {
         LabelLayoutData data;
 
         data.position=iconStyle->GetPosition();
+        data.xOff=0;
+        data.yOff=0;
+        data.width=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth());
         data.height=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
         data.icon=false;
         data.iconStyle=iconStyle;
@@ -922,41 +934,62 @@ namespace osmscout {
         double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
         data.fontSize=textStyle->GetSize()*pow(1.5,factor);
 
-        GetFontHeight(projection,
-                      parameter,
-                      data.fontSize,
-                      data.height);
+        GetTextDimension(projection,
+                         parameter,
+                         objectWidth,
+                         data.fontSize,
+                         label,
+                         data.xOff,
+                         data.yOff,
+                         data.width,
+                         data.height);
 
-        double alpha=textStyle->GetAlpha()/factor;
-
-        if (alpha>1.0) {
-          alpha=1.0;
-        }
-
-        data.alpha=alpha;
+        data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
       else if (textStyle->GetAutoSize()) {
         double height=std::abs((objectHeight)*0.1);
 
-        if (height==0) {
+        if (height==0 || height<standardFontSize) {
           continue;
         }
 
-        if (height<standardFontSize) {
-          continue;
+        // Retricts the height of a label to maxHeight
+        double alpha=textStyle->GetAlpha();
+        double maxHeight=projection.GetHeight()/5;
+
+        if (height>maxHeight) {
+            // If the height exeeds maxHeight the alpha value will be decreased
+            double minAlpha=projection.GetHeight();
+            double normHeight=(height-maxHeight)/(minAlpha-maxHeight);
+            alpha*=std::min(std::max(1-normHeight,0.2),1.0);
+            height=maxHeight;
         }
 
         data.fontSize=height/standardFontSize;
-        data.height=height;
-        data.alpha=textStyle->GetAlpha();
+        data.alpha=alpha;
+
+        GetTextDimension(projection,
+                         parameter,
+                         objectWidth,
+                         data.fontSize,
+                         label,
+                         data.xOff,
+                         data.yOff,
+                         data.width,
+                         data.height);
       }
       else {
         data.fontSize=textStyle->GetSize();
 
-        GetFontHeight(projection,
-                      parameter,
-                      data.fontSize,
-                      data.height);
+        GetTextDimension(projection,
+                         parameter,
+                         objectWidth,
+                         data.fontSize,
+                         label,
+                         data.xOff,
+                         data.yOff,
+                         data.width,
+                         data.height);
 
         data.alpha=textStyle->GetAlpha();
       }
@@ -982,31 +1015,25 @@ namespace osmscout {
     // This is the top center position of the initial label element.
     // Note that RegisterPointLabel gets passed the center of the label,
     // thus we need to convert it...
-    double offset;
+    double offset = hasSymbol ? y : y-overallTextHeight/2;
 
-    if (hasSymbol) {
-     offset=y;
-    }
-    else {
-      offset=y-overallTextHeight/2;
-    }
-
+    //std::cout << ">>>" << std::endl;
     for (const auto& data : labelLayoutData) {
       if (data.textStyle) {
+        //std::cout << "# Text '" << data.label << "' " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
         RegisterPointLabel(projection,
                            parameter,
-                           data.textStyle,
-                           data.label,
-                           data.fontSize,
-                           data.height,
-                           data.alpha,
-                           x,offset+data.height/2);
+                           data,
+                           x,offset+data.height/2,
+                           labelId);
       }
       else if (data.icon) {
+        //std::cout << "# Icon " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
         DrawIcon(data.iconStyle.get(),
                  x,offset);
       }
       else {
+        //std::cout << "# Symbol " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
         DrawSymbol(projection,
                    parameter,
                    *data.iconStyle->GetSymbol(),
@@ -1015,6 +1042,26 @@ namespace osmscout {
 
       offset+=data.height;
     }
+    //std::cout << "<<<" << std::endl;
+  }
+
+  double MapPainter::proposedLabelWidth(const MapParameter& parameter,
+                                        double averageCharWidth,
+                                        double objectWidth,
+                                        size_t stringLength)
+  {
+    double proposedWidth;
+    // If there is just a few characters (less than LabelLineMinCharCount)
+    // we should not wrap the words at all.
+    if (stringLength>parameter.GetLabelLineMinCharCount()){
+      proposedWidth=objectWidth>0 && parameter.GetLabelLineFitToArea() ?
+        std::min(objectWidth,parameter.GetLabelLineFitToWidth()) : parameter.GetLabelLineFitToWidth();
+      proposedWidth=std::min(proposedWidth,(double)parameter.GetLabelLineMaxCharCount()*averageCharWidth);
+      proposedWidth=std::max(proposedWidth,(double)parameter.GetLabelLineMinCharCount()*averageCharWidth);
+    }else{
+      proposedWidth=parameter.GetLabelLineMaxCharCount()*averageCharWidth;
+    }
+    return proposedWidth;
   }
 
   void MapPainter::DrawNodes(const StyleConfig& styleConfig,
@@ -1022,12 +1069,39 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const MapData& data)
   {
+#if defined(DEBUG_NODE_DRAW)
+    std::vector<double> times;
+
+    times.resize(styleConfig.GetTypeConfig()->GetMaxTypeId()+1,0.0);
+#endif
+
     for (const auto& node : data.nodes) {
+#if defined(DEBUG_NODE_DRAW)
+      StopClockNano nodeTimer;
+#endif
+
       DrawNode(styleConfig,
                projection,
                parameter,
                node);
+
+#if defined(DEBUG_NODE_DRAW)
+      nodeTimer.Stop();
+
+      times[node->GetType()->GetNodeId()]+=nodeTimer.GetNanoseconds();
+#endif
     }
+
+#if defined(DEBUG_NODE_DRAW)
+    for (auto type : styleConfig.GetTypeConfig()->GetTypes())
+    {
+      double overallTime=times[type->GetNodeId()];
+
+      if (overallTime>0.0) {
+        std::cout << "Node type " << type->GetName() << " " << times[type->GetNodeId()] << " nsecs" << std::endl;
+      }
+    }
+#endif
   }
 
   void MapPainter::DrawAreas(const StyleConfig& /*styleConfig*/,
@@ -1049,7 +1123,7 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const AreaData& areaData)
   {
-    IconStyleRef     iconStyle;
+    IconStyleRef iconStyle;
 
     styleConfig.GetAreaTextStyles(areaData.type,
                                   *areaData.buffer,
@@ -1083,6 +1157,7 @@ namespace osmscout {
                       textStyles,
                       (minX+maxX)/2,
                       (minY+maxY)/2,
+                      maxX-minX,
                       maxY-minY);
   }
 
@@ -1233,7 +1308,7 @@ namespace osmscout {
                       node->GetFeatureValueBuffer(),
                       iconStyle,
                       textStyles,
-                      x,y,0);
+                      x,y);
 
     nodesDrawn++;
   }
@@ -1481,15 +1556,12 @@ namespace osmscout {
 
     projection.GetDimensions(boundingBox);
 
-    size_t startTileX=LonToTileX(boundingBox.GetMinLon(),
-                                 magnification);
-    size_t endTileX=LonToTileX(boundingBox.GetMaxLon(),
-                               magnification)+1;
-
-    size_t startTileY=LatToTileY(boundingBox.GetMaxLat(),
-                                 magnification);
-    size_t endTileY=LatToTileY(boundingBox.GetMinLat(),
-                               magnification)+1;
+    osmscout::OSMTileId     tileA(boundingBox.GetMinCoord().GetOSMTile(magnification));
+    osmscout::OSMTileId     tileB(boundingBox.GetMaxCoord().GetOSMTile(magnification));
+    uint32_t                startTileX=std::min(tileA.GetX(),tileB.GetX());
+    uint32_t                endTileX=std::max(tileA.GetX(),tileB.GetX());
+    uint32_t                startTileY=std::min(tileA.GetY(),tileB.GetY());
+    uint32_t                endTileY=std::max(tileA.GetY(),tileB.GetY());
 
     if (startTileX>0) {
       startTileX--;
@@ -1506,8 +1578,7 @@ namespace osmscout {
       points.resize(endTileX-startTileX+1);
 
       for (size_t x=startTileX; x<=endTileX; x++) {
-        points[x-startTileX].Set(0,GeoCoord(TileYToLat(y,magnification),
-                                            TileXToLon(x,magnification)));
+        points[x-startTileX].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
       }
 
       size_t transStart;
@@ -1542,8 +1613,7 @@ namespace osmscout {
       points.resize(endTileY-startTileY+1);
 
       for (size_t y=startTileY; y<=endTileY; y++) {
-        points[y-startTileY].Set(0,GeoCoord(TileYToLat(y,magnification),
-                                            TileXToLon(x,magnification)));
+        points[y-startTileY].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
       }
 
       size_t transStart;
@@ -1659,6 +1729,10 @@ namespace osmscout {
               continue;
             }
 
+            if (type->GetIgnore()) {
+              continue;
+            }
+
             styleConfig.GetAreaFillStyle(type,
                                          ring.GetFeatureValueBuffer(),
                                          projection,
@@ -1670,13 +1744,15 @@ namespace osmscout {
 
             foundRing=true;
 
+            AreaData a;
+
+            ring.GetBoundingBox(a.boundingBox);
+
             if (!IsVisibleArea(projection,
-                               ring.nodes,
+                               a.boundingBox,
                                fillStyle->GetBorderWidth()/2)) {
               continue;
             }
-
-            AreaData a;
 
             // Collect possible clippings. We only take into account inner rings of the next level
             // that do not have a type and thus act as a clipping region. If a inner ring has a type,
@@ -1693,14 +1769,12 @@ namespace osmscout {
               j++;
             }
 
-            a.ref=ObjectFileRef(area->GetFileOffset(),refArea);
+            a.ref=area->GetObjectFileRef();
             a.type=type;
             a.buffer=&ring.GetFeatureValueBuffer();
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;
-
-            ring.GetBoundingBox(a.boundingBox);
 
             areaData.push_back(a);
 
@@ -1858,19 +1932,6 @@ namespace osmscout {
     wayData.sort();
   }
 
-  void MapPainter::GetLabelFrame(const LabelStyle& style,
-                                 double& horizontal,
-                                 double& vertical)
-  {
-    horizontal=0;
-    vertical=0;
-
-    if (dynamic_cast<const ShieldStyle*>(&style)!=NULL) {
-      horizontal=5;
-      vertical=5;
-    }
-  }
-
   bool MapPainter::Draw(const Projection& projection,
                         const MapParameter& parameter,
                         const MapData& data)
@@ -1891,6 +1952,7 @@ namespace osmscout {
 
     labelsDrawn=0;
 
+    nextLabelId=0;
     labels.Initialize(projection,
                       parameter);
     overlayLabels.Initialize(projection,
@@ -2146,7 +2208,7 @@ namespace osmscout {
           << nodesTimer << "/" << poisTimer << " (sec)";
 
       log.Info()
-          << "Labels: " << labels.Size() << "/" << overlayLabels.Size() << "/" << labelsDrawn << " (pcs) "
+          << "Labels: " << labels.Size() << "/" << labels.GetLabelsAdded() << " " << overlayLabels.Size() << "/" << overlayLabels.GetLabelsAdded() << " " << labelsDrawn << " (pcs) "
           << labelsTimer << " (sec)";
     }
 

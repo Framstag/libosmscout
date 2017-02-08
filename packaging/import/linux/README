@@ -1,0 +1,23 @@
+This is a package that allows you to import OpenStreetMap maps
+distributed as PBF. To use,
+
+1. Unpack this archive
+
+2. In terminal, run import.sh included in this archive with for each
+PBF map that you would want to import (one map in a time). For
+example:
+
+  libosmscout-importer.Linux.x86_64/import.sh estonia-latest.osm.pbf
+
+After that, the directory with the corresponding name will be
+created. The script strips the following suffixes from the file name:
+
+-latest.osm.pbf
+.osm.pbf
+.pbf
+
+In the example case above, a directory estonia will be created and the
+map will be imported into that directory.
+
+3. Copy the imported folder to your device (internal disk or SD card)
+and point the program using libosmscout to that folder.

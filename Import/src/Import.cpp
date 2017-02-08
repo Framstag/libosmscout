@@ -100,6 +100,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
 
   std::cout << " --strictAreas true|false             assure that areas are simple (default: " << BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
 
+  std::cout << " --processingQueueSize <number>       size of of the processing worker queus (default: " << parameter.GetProcessingQueueSize() << ")" << std::endl;
+
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
 
   std::cout << " --rawCoordBlockSize <number>         number of raw coords resolved in block (default: " << parameter.GetRawCoordBlockSize() << ")" << std::endl;
@@ -293,14 +295,14 @@ std::vector<std::string> ParseLangOrderArgument(int argc,
     std::vector<std::string> langVec;
     int                      parameterIndex=currentIndex;
     int                      argumentIndex=currentIndex+1;
-    
+
     currentIndex+=2;
-    
+
     if (argumentIndex>=argc) {
         std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
         return langVec;
     }
-    
+
     std::string argument=argv[argumentIndex];
     langVec = split(argument, ',');
 
@@ -341,6 +343,9 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
 
   progress.Info(std::string("StrictAreas: ")+
                 (parameter.GetStrictAreas() ? "true" : "false"));
+
+  progress.Info(std::string("ProcessingQueueSize: ")+
+                osmscout::NumberToString(parameter.GetProcessingQueueSize()));
 
   progress.Info(std::string("NumericIndexPageSize: ")+
                 osmscout::NumberToString(parameter.GetNumericIndexPageSize()));
@@ -585,6 +590,19 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--processingQueueSize")==0) {
+      size_t processingQueueSize;
+
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             processingQueueSize)) {
+        parameter.SetProcessingQueueSize(processingQueueSize);
+      }
+      else {
+        parameterError=true;
+      }
+    }
     else if (strcmp(argv[i],"--numericIndexPageSize")==0) {
       size_t numericIndexPageSize;
 
@@ -800,7 +818,7 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(argv[i],"--langOrder")==0) {
         std::vector<std::string> langOrder;
-        
+
         langOrder = ParseLangOrderArgument(argc,
                                            argv,
                                            i);
@@ -813,7 +831,7 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(argv[i],"--altLangOrder")==0) {
         std::vector<std::string> langOrder;
-        
+
         langOrder = ParseLangOrderArgument(argc,
                                            argv,
                                            i);

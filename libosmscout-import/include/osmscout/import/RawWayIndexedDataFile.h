@@ -24,9 +24,11 @@
 
 #include <osmscout/import/RawWay.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
-  class RawWayIndexedDataFile : public IndexedDataFile<OSMId,RawWay>
+  class RawWayIndexedDataFile CLASS_FINAL : public IndexedDataFile<OSMId,RawWay>
   {
   public:
     RawWayIndexedDataFile(unsigned long indexCacheSize);

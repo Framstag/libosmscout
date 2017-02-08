@@ -59,6 +59,12 @@ namespace osmscout {
     valid=true;
   }
 
+  /**
+   * Changes the GeoBox to include the other bounding box, too (calculation of the common rectangular hull)
+   *
+   * @param other
+   *    Other geoBox to include, too
+   */
   void GeoBox::Include(const GeoBox& other)
   {
     assert(valid);
@@ -73,6 +79,20 @@ namespace osmscout {
                           other.GetMaxCoord().GetLat()),
                  std::max(maxCoord.GetLon(),
                           other.GetMaxCoord().GetLon()));
+  }
+
+  GeoBox GeoBox::Intersection(const GeoBox& other) const
+  {
+    if (!valid || !other.valid || !Intersects(other))
+      return GeoBox();
+
+    GeoCoord cornerMin( std::max( other.GetMinLat(), GetMinLat()),
+                        std::max( other.GetMinLon(), GetMinLon()));
+
+    GeoCoord cornerMax( std::min( other.GetMaxLat(), GetMaxLat()),
+                        std::min( other.GetMaxLon(), GetMaxLon()));
+
+    return GeoBox(cornerMin, cornerMax);
   }
 
   GeoCoord GeoBox::GetCenter() const

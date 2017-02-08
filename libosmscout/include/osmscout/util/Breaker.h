@@ -22,46 +22,57 @@
 
 #include <osmscout/CoreFeatures.h>
 
-
 #include <atomic>
 #include <memory>
-#include <thread>
 
 #include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 
+  /**
+   * \ingroup Util
+   *
+   * A breaker object instance allows to trigger cancelation of long running processes.
+   */
   class OSMSCOUT_API Breaker
   {
   public:
-    Breaker();
     virtual ~Breaker();
 
-    virtual bool Break() = 0;
+    /**
+     * Stop the processing. This is just a setting a flag that must actively get polled
+     * by the long running process. So while the process was signaled to stop, it can still
+     * continue for a while.
+     *
+     * @return
+     */
+    virtual void Break() = 0;
+
+    /**
+     * Return true, if the process was signaled to stop
+     *
+     * @return
+     *    True, if signaled, else false
+     */
     virtual bool IsAborted() const = 0;
+
+    /**
+     * Reset the state of the breaker.
+     */
     virtual void Reset() = 0;
   };
 
   typedef std::shared_ptr<Breaker> BreakerRef;
 
-  class OSMSCOUT_API DummyBreaker : public Breaker
-  {
-  public:
-    DummyBreaker();
-
-    virtual bool Break();
-    virtual bool IsAborted() const;
-    virtual void Reset();
-  };
-
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {
   private:
     std::atomic<bool> aborted;
+
   public:
     ThreadedBreaker();
 
-    virtual bool Break();
+    virtual void Break();
     virtual bool IsAborted() const;
     virtual void Reset();
   };

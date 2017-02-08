@@ -1,20 +1,25 @@
 TEMPLATE = app
 
+QT_CONFIG -= no-pkg-config
+
 CONFIG += qt warn_on debug link_pkgconfig thread c++11 silent
 
 QT += core gui widgets qml quick
 
-PKGCONFIG += libosmscout-map-qt libosmscout-client-qt
+!macx {
+  PKGCONFIG += libosmscout-map-qt libosmscout-client-qt
+  gcc:QMAKE_CXXFLAGS += -fopenmp
+} else {
+  INCLUDEPATH+=../../libosmscout/include
+  INCLUDEPATH+=../../libosmscout-client-qt/include
+  INCLUDEPATH+=../../libosmscout-map/include
+  INCLUDEPATH+=../../libosmscout-map-qt/include
 
-macx: {
-    PKGCONFIG -= libosmscout-map-qt
-    PKGCONFIG += libosmscout-map libosmscout
-    QT_CONFIG -= no-pkg-config
+  LIBS+=-L../../libosmscout-client-qt/build -losmscout-client-qt
+  LIBS+=-L../../libosmscout-map-qt/build -losmscout-map-qt
+  LIBS+=-L../../libosmscout-map/src/.libs -losmscoutmap
+  LIBS+=-L../../libosmscout/src/.libs -losmscout
 }
-
-gcc:QMAKE_CXXFLAGS += -fopenmp
-
-INCLUDEPATH = src
 
 release: DESTDIR = release
 debug:   DESTDIR = debug
@@ -53,9 +58,3 @@ OTHER_FILES += \
 
 RESOURCES += \
     res.qrc
-
-macx: {
-    LIBS += -L$$PWD/../libosmscout-map-qt/build -llibosmscout-map-qt
-    INCLUDEPATH += ../libosmscout/include ../libosmscout-map/include ../libosmscout-map-qt/include ../libosmscout-client-qt/include
-    PRE_TARGETDEPS += $$PWD/../libosmscout-map-qt/build/liblibosmscout-map-qt.a
-}

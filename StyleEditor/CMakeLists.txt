@@ -1,6 +1,9 @@
 if(NOT ${OSMSCOUT_BUILD_MAP_QT})
 	message(SEND_ERROR "The Qt map drawing backend is required for StyleEditor application")
 endif()
+if(NOT ${OSMSCOUT_BUILD_CLIENT_QT})
+	message(SEND_ERROR "The Qt client lib is required for StyleEditor application")
+endif()
 if(NOT Qt5Core_FOUND)
 	message(SEND_ERROR "Qt5Core is required for StyleEditor application")
 endif()
@@ -30,11 +33,26 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-	src/FileIO.cpp
-	src/Highlighter.cpp
-	src/MainWindow.cpp
-	src/SettingsDialog.cpp
-	src/StyleEditor.cpp
+  src/FileIO.cpp
+  src/Highlighter.cpp
+  src/MainWindow.cpp
+  src/SettingsDialog.cpp
+  src/StyleEditor.cpp
+
+  # qml files in CMake sources make it visible in QtCreator
+  qml/AboutDialog.qml
+  qml/main.qml
+  qml/settings.qml
+  qml/SearchGeocodeDialog.qml
+  qml/TextEditor.qml
+  qml/custom/LocationEdit.qml
+  qml/custom/MapDialog.qml
+  qml/custom/ScrollIndicator.qml
+  qml/custom/LineEdit.qml
+  qml/custom/DialogActionButton.qml
+  qml/custom/MapButton.qml
+  qml/SearchLocationDialog.qml
+  qml/MapControl.qml
 )
 
 set(RESOURCE_FILES
@@ -63,4 +81,6 @@ target_link_libraries(StyleEditor
         osmscout_client_qt
 )
 
+# enable QML debuger
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 set_property(TARGET StyleEditor PROPERTY CXX_STANDARD 11)
