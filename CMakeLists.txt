@@ -19,6 +19,12 @@ if(WIN32)
   set(CMAKE_SUPPRESS_REGENERATION true)
 endif()
 
+# provide more addressable memory on win 32bit builds
+# see https://msdn.microsoft.com/en-us/library/aa366778
+if (MINGW)
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--large-address-aware")
+endif()
+
 if(APPLE AND NOT ANDROID)
   set(CMAKE_SIZEOF_VOID_P 4)
   set(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "com.apple.compilers.llvm.clang.1_0")
