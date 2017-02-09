@@ -42,7 +42,7 @@ Q_DECLARE_METATYPE(ObjectKey)
 /**
  * \ingroup QtAPI
  */
-class LocationInfoModel : public QAbstractListModel
+class OSMSCOUT_CLIENT_QT_API LocationInfoModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(bool ready READ isReady NOTIFY readyChange)

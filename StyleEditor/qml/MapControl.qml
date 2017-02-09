@@ -29,13 +29,25 @@ Rectangle {
         mapView.reloadTmpStyle()
     }
 
+    MapObjectInfoModel{
+        id: mapObjectInfo
+    }
 
     Map {
         id: mapView
         anchors.fill: parent
 
         focus: true
-/*
+        property bool shift: false;
+
+        onMouseMove: {
+          if (modifiers & Qt.ControlModifier){
+            console.log("mouse move");
+            mapObjectInfo.setPosition(mapView.view, screenX, screenY);
+          }
+        }
+
+        /*
         Keys.onPressed: {
             if (event.key === Qt.Key_Plus) {
                 mapView.zoomIn(2.0)
@@ -56,7 +68,7 @@ Rectangle {
                 mapView.right()
             }
         }
-*/
+        */
         // Use PinchArea for multipoint zoom in/out?
     }
 

@@ -37,6 +37,7 @@ MapWidget::MapWidget(QQuickItem* parent)
 {
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);
+    setAcceptHoverEvents(true);
     
     DBThread *dbThread=DBThread::GetInstance();
     
@@ -103,6 +104,14 @@ void MapWidget::mousePressEvent(QMouseEvent* event)
 void MapWidget::mouseMoveEvent(QMouseEvent* event)
 {
     translateToTouch(event, Qt::TouchPointMoved);
+}
+void MapWidget::hoverMoveEvent(QHoverEvent* event) {
+    QQuickPaintedItem::hoverMoveEvent(event);
+
+    double lat;
+    double lon;
+    getProjection().PixelToGeo(event->pos().x(), event->pos().y(), lon, lat);
+    emit mouseMove(event->pos().x(), event->pos().y(), lat, lon, event->modifiers());
 }
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 {

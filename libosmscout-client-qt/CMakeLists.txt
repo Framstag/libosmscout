@@ -39,6 +39,7 @@ set(HEADER_FILES
     include/osmscout/PersistentCookieJar.h
     include/osmscout/MapManager.h
     include/osmscout/MapDownloadsModel.h
+    include/osmscout/MapObjectInfoModel.h
 )
 
 set(SOURCE_FILES
@@ -61,6 +62,7 @@ set(SOURCE_FILES
     src/osmscout/AvailableMapsModel.cpp
     src/osmscout/MapManager.cpp
     src/osmscout/MapDownloadsModel.cpp
+    src/osmscout/MapObjectInfoModel.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})
