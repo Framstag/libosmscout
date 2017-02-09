@@ -380,7 +380,7 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_GPERFTOOLS)
       if (heapProfile){
           std::ostringstream buff;
-          buff << "load-" << level << "-" << x << "-" << y;
+          buff << "load-" << level << "-" << tile.GetX() << "-" << tile.GetY();
           HeapProfilerDump(buff.str().c_str());
       }
       struct mallinfo alloc_info = tc_mallinfo();
