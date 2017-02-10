@@ -25,7 +25,7 @@ IF %COMPILER%==msys2 (
       bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && . packaging/import/windows/build_import.sh"
       appveyor PushArtifact build\libosmscout-importer-Windows-x86_64.zip
     ) ELSE (
-        bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && mkdir build && cd build && CXX=g++ CC=gcc cmake -G 'MSYS Makefiles' .. && cmake -LAH .. && make -j2"
+        bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && mkdir build && cd build && CXX=g++ CC=gcc cmake -G 'MSYS Makefiles' .. && cmake -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -LAH .. && make -j2"
     )
   )
 )
