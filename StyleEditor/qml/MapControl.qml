@@ -42,8 +42,10 @@ Rectangle {
 
         onMouseMove: {
           if (modifiers & Qt.ControlModifier){
-            console.log("mouse move");
-            mapObjectInfo.setPosition(mapView.view, screenX, screenY);
+            //console.log("mouse move");
+            mapObjectInfo.setPosition(mapView.view, 
+                                      mapView.width, mapView.height,
+                                      screenX, screenY);
           }
         }
 
