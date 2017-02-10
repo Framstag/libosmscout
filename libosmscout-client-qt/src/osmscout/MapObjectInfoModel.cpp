@@ -65,19 +65,23 @@ QHash<int, QByteArray> MapObjectInfoModel::roleNames() const
 
   roles[LabelRole]="label";
   roles[TypeRole] ="type";
+  roles[IdRole]   ="id";
+  roles[NameRole] ="name";
   
   return roles;
 }
 
 QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
 {
-  qDebug() << "Get data" << index.row() << " role: " << role << " (label: " << LabelRole<< ")";
+  //qDebug() << "Get data" << index.row() << " role: " << role;
 
   if(index.row() < 0 || index.row() >= model.size()) {
+    qDebug() << "Undefined row" << index.row();
     return QVariant();
   }
   QMap<int, QVariant> obj = model.at(index.row());
   if (!obj.contains(role)){
+    //qDebug() << "Undefined role" << role << "("<<LabelRole<<"..."<<NameRole<<")";
     return QVariant();
   }
   return obj[role];
@@ -132,8 +136,8 @@ void MapObjectInfoModel::update()
   projection.SetLinearInterpolationUsage(view.magnification.GetLevel() >= 10);
 
   beginResetModel();
-
-  std::cout << "object near " << this->screenX << " " << this->screenY << ":" << std::endl;
+  model.clear();
+  //std::cout << "object near " << this->screenX << " " << this->screenY << ":" << std::endl;
 
   double x;
   double y;
@@ -151,7 +155,7 @@ void MapObjectInfoModel::update()
       }
     }
 
-    std::cout << "ways:  " << d.ways.size() << std::endl;
+    //std::cout << "ways:  " << d.ways.size() << std::endl;
     for (auto const &w:d.ways){
       // TODO: better detection
       osmscout::GeoBox bbox;
@@ -163,7 +167,7 @@ void MapObjectInfoModel::update()
       }
     }
 
-    std::cout << "areas: " << d.areas.size() << std::endl;
+    //std::cout << "areas: " << d.areas.size() << std::endl;
     for (auto const &a:d.areas){
       // TODO: better detection
       osmscout::GeoBox bbox;
@@ -175,5 +179,6 @@ void MapObjectInfoModel::update()
       }
     }
   }
+  //std::cout << "count: "<< model.size() << std::endl;
   endResetModel();
 }

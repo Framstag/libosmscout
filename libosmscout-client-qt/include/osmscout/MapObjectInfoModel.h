@@ -65,19 +65,19 @@ private:
 
   template<class T> void fillObjectInfo(QString type, const T &o)
   {
-    std::cout << " - "<<type.toStdString()<<": " << o->GetType()->GetName() << " " << o->GetObjectFileRef().GetFileOffset();
+    //std::cout << " - "<<type.toStdString()<<": " << o->GetType()->GetName() << " " << o->GetObjectFileRef().GetFileOffset();
     QMap<int, QVariant> info;
     info[LabelRole]=QString::fromStdString(o->GetType()->GetName());
-    info[TypeRole]="node";
+    info[TypeRole]=type;
     info[IdRole]=QVariant::fromValue<uint64_t>(o->GetObjectFileRef().GetFileOffset());
 
     const osmscout::FeatureValueBuffer &features=o->GetFeatureValueBuffer();
     const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
     if (name!=NULL){
       info[NameRole]=QString::fromStdString(name->GetLabel());
-      std::cout << " \"" << name->GetLabel() << "\"";
+      //std::cout << " \"" << name->GetLabel() << "\"";
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
     model << info;
   }
 
