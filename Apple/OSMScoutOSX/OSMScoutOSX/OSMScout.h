@@ -25,9 +25,8 @@ namespace osmscout {
     class MyBreaker : public Breaker {
     public:
         MyBreaker() : osmscout::Breaker(), aborted(false){}
-        bool Break(){
+        void Break(){
             aborted = true;
-            return true;
         }
         bool IsAborted() const {
             return aborted;

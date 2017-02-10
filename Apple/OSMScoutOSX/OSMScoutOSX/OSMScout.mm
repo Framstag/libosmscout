@@ -67,14 +67,15 @@ namespace osmscout {
     void OSMScoutCpp::drawMap(CGContextRef paintCG, size_t x, size_t y, double zoom, size_t width, size_t height){
         assert(isMapPainterConfigured);
         Magnification mag(zoom);
-        projection.Set(x, y, mag, dpi, (width+1), (height+1));
+        projection.Set(OSMTileId((uint32_t)x,(uint32_t)y), mag, dpi, (width+1), (height+1));
         GeoBox boundingBox;
         projection.GetDimensions(boundingBox);
         
         std::list<osmscout::TileRef> tiles;
         mapService->LookupTiles(projection,tiles);
         mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-        mapService->ConvertTilesToMapData(tiles,data);
+        data.ClearDBData();
+        mapService->AddTileDataToMapData(tiles,data);
         if (drawParameter.GetRenderSeaLand()) {
             mapService->GetGroundTiles(boundingBox,
                                        mag,
