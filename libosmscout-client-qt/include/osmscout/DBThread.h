@@ -242,6 +242,8 @@ signals:
 
   void searchFinished(const QString searchPattern, bool error);
 
+  void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
+
 public slots:
   void ToggleDaylight();
   void ReloadStyle(const QString &suffix="");
@@ -284,7 +286,9 @@ public slots:
    * @param limit - suggested limit for count of retrieved entries from one database
    */
   void SearchForLocations(const QString searchPattern, int limit);
-  
+
+  void requestObjectsOnView(const RenderMapRequest&);
+
 protected:
   MapManagerRef                 mapManager;
 

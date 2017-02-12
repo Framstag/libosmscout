@@ -25,6 +25,7 @@
 // Custom QML objects
 #include "osmscout/MapWidget.h"
 #include "osmscout/SearchLocationModel.h"
+#include "osmscout/MapObjectInfoModel.h"
 #include "FileIO.h"
 
 // Application settings
@@ -57,6 +58,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
   qmlRegisterType<LocationEntry>("net.sf.libosmscout.map", 1, 0, "Location");
   qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
+  qmlRegisterType<MapObjectInfoModel>("net.sf.libosmscout.map", 1, 0, "MapObjectInfoModel");
   qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
   qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
 
