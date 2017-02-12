@@ -90,23 +90,59 @@ namespace osmscout {
     void Include(const GeoBox& other);
 
     /**
-     * Returns 'true' if coord is within the bounding box. The boundingBox interval is as an open interval
-     * at one end [..[.
+     *
+     * Returns 'true' if coordinate is within the bounding box.
+     *
+     * @param other
+     *    GeoCoord to check for inclusion
+     * @param openInterval
+     *    If true, an open interval for the GeoBox is assumed else a closed interval.
+     * @return
+     *    True, if there is intersection, else false.
      */
-    inline bool Includes(const GeoCoord& coord) const
+    inline bool Includes(const GeoCoord& coord,
+                         bool openInterval=true) const
     {
-      return minCoord.GetLat()<=coord.GetLat() &&
-             maxCoord.GetLat()>coord.GetLat() &&
-             minCoord.GetLon()<=coord.GetLon() &&
-             maxCoord.GetLon()>coord.GetLon();
+      if (openInterval) {
+        return minCoord.GetLat()<=coord.GetLat() &&
+               maxCoord.GetLat()>coord.GetLat() &&
+               minCoord.GetLon()<=coord.GetLon() &&
+               maxCoord.GetLon()>coord.GetLon();
+      }
+      else {
+        return minCoord.GetLat()<=coord.GetLat() &&
+               maxCoord.GetLat()>=coord.GetLat() &&
+               minCoord.GetLon()<=coord.GetLon() &&
+               maxCoord.GetLon()>=coord.GetLon();
+      }
     }
 
-    inline bool Intersects(const GeoBox& other) const
+    /**
+     * Returns true, if both GeoBox instances intersect with each other
+     *
+     * @param other
+     *    Other instance to compare against
+     * @param openInterval
+     *    If true, an open interval for this GeoBox is assumed else a closed interval.
+     * @return
+     *    True, if there is intersection, else false.
+     *
+     */
+    inline bool Intersects(const GeoBox& other,
+                           bool openInterval=true) const
     {
-      return !(other.GetMaxLon()<minCoord.GetLon() ||
-               other.GetMinLon()>=maxCoord.GetLon() ||
-               other.GetMaxLat()<minCoord.GetLat() ||
-               other.GetMinLat()>=maxCoord.GetLat());
+      if (openInterval) {
+        return !(other.GetMaxLon()<minCoord.GetLon() ||
+                 other.GetMinLon()>=maxCoord.GetLon() ||
+                 other.GetMaxLat()<minCoord.GetLat() ||
+                 other.GetMinLat()>=maxCoord.GetLat());
+      }
+      else {
+        return !(other.GetMaxLon()<=minCoord.GetLon() ||
+                 other.GetMinLon()>=maxCoord.GetLon() ||
+                 other.GetMaxLat()<=minCoord.GetLat() ||
+                 other.GetMinLat()>=maxCoord.GetLat());
+      }
     }
 
     /**
