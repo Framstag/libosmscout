@@ -66,6 +66,11 @@ namespace osmscout {
         return featureValueBuffer.GetType();
       }
 
+      inline void ClearFeatureValues()
+      {
+        featureValueBuffer.ClearFeatureValues();
+      }
+
       inline size_t GetFeatureCount() const
       {
         return featureValueBuffer.GetType()->GetFeatureCount();
@@ -150,6 +155,11 @@ namespace osmscout {
       inline void SetFeatures(const FeatureValueBuffer& buffer)
       {
         featureValueBuffer.Set(buffer);
+      }
+
+      inline void CopyMissingValues(const FeatureValueBuffer& buffer)
+      {
+        featureValueBuffer.CopyMissingValues(buffer);
       }
 
       inline void MarkAsMasterRing()
