@@ -74,6 +74,9 @@ if(MINGW)
   add_definitions(-D_WIN32_WINNT=0x0600)
   if(NOT OSMSCOUT_PLATFORM_X64)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=i686")
+    # provide more addressable memory on win 32bit builds
+    # see https://msdn.microsoft.com/en-us/library/aa366778
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--large-address-aware")
   endif ()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fno-tree-slp-vectorize -Wno-error=cast-qual -Wno-unused-local-typedefs")
 endif()

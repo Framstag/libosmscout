@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 
 import "custom"
 import net.sf.libosmscout.map 1.0
@@ -29,13 +29,77 @@ Rectangle {
         mapView.reloadTmpStyle()
     }
 
+    MapObjectInfoModel{
+        id: mapObjectInfo
+    }
+
+    Rectangle {
+        id: mapObjectInfoPopup
+        visible: false
+        z: 2
+        height: mapObjectInfoView.contentHeight
+        // contentWidth seems don't work...
+        width: Math.max(500, mapObjectInfoView.contentWidth)
+        color: "#ffffff"
+
+        border.width : 1
+        border.color : "#808080"
+
+        ListView {
+            id: mapObjectInfoView
+            model: mapObjectInfo
+            anchors.fill: parent
+            delegate: Row{
+                padding: 2
+                spacing: 5
+                Text {
+                    id: typeLabel
+                    text: (typeof type=="undefined")?"":type
+                }
+                Text {
+                    id: labelLabel
+                    text: (typeof label=="undefined")?"":label
+                }
+                Text {
+                    id: idLabel
+                    text: id+""
+                }
+                Text {
+                    id: nameLabel
+                    text: {
+                      if (typeof name=="undefined"){
+                        return "";
+                      }else{
+                        return "\""+name+"\"";
+                      }
+                    }
+                }
+            }
+        }
+    }
 
     Map {
         id: mapView
         anchors.fill: parent
 
         focus: true
-/*
+        property bool shift: false;
+
+        onMouseMove: {
+          if (modifiers & Qt.ControlModifier){
+            //console.log("popup "+mapObjectInfo.rowCount());
+            mapObjectInfo.setPosition(mapView.view, 
+                                      mapView.width, mapView.height,
+                                      screenX, screenY);
+            mapObjectInfoPopup.visible=true;
+            mapObjectInfoPopup.x=screenX;
+            mapObjectInfoPopup.y=screenY;
+          }else{
+            mapObjectInfoPopup.visible=false;
+          }
+        }
+
+        /*
         Keys.onPressed: {
             if (event.key === Qt.Key_Plus) {
                 mapView.zoomIn(2.0)
@@ -56,7 +120,7 @@ Rectangle {
                 mapView.right()
             }
         }
-*/
+        */
         // Use PinchArea for multipoint zoom in/out?
     }
 

@@ -977,7 +977,34 @@ namespace osmscout {
     FeatureValueBuffer(const FeatureValueBuffer& other);
     virtual ~FeatureValueBuffer();
 
+    /**
+     * Deletes the current feature values and assign the type and values
+     * of the passed featur evalue buffer.
+     *
+     * @param other
+     *    Other FeatureValueBuffer to make a copy of
+     */
     void Set(const FeatureValueBuffer& other);
+
+    /**
+     * Maintains the current values and types and copies over
+     * all not already set feature values of the passed instance to the current instance.
+     *
+     * Both FeatureValueBuffers do not have to have the same type. Copying is a based on
+     * best effort. The copy opperation is expensive.
+     *
+     * @param other
+     *    instance to copy missing values from.
+     *
+     * @note Untested!
+     *
+     */
+    void CopyMissingValues(const FeatureValueBuffer& other);
+
+    /**
+     * Clears all feature buffer values
+     */
+    void ClearFeatureValues();
 
     void SetType(const TypeInfoRef& type);
 

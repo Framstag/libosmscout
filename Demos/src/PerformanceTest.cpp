@@ -311,15 +311,10 @@ int main(int argc, char* argv[])
 
     osmscout::OSMTileId     tileA(osmscout::GeoCoord(latBottom,lonLeft).GetOSMTile(magnification));
     osmscout::OSMTileId     tileB(osmscout::GeoCoord(latTop,lonRight).GetOSMTile(magnification));
-    uint32_t                xTileStart=std::min(tileA.GetX(),tileB.GetX());
-    uint32_t                xTileEnd=std::max(tileA.GetX(),tileB.GetX());
-    uint32_t                xTileCount=xTileEnd-xTileStart+1;
-    uint32_t                yTileStart=std::min(tileA.GetY(),tileB.GetY());
-    uint32_t                yTileEnd=std::max(tileA.GetY(),tileB.GetY());
-    uint32_t                yTileCount=yTileEnd-yTileStart+1;
+    osmscout::OSMTileIdBox  tileArea(tileA,tileB);
 
     std::cout << "----------" << std::endl;
-    std::cout << "Drawing level " << level << ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
+    std::cout << "Drawing level " << level << ", " << tileArea.GetCount() << " tiles " << tileArea.GetDisplayText() << std::endl;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
     osmscout::MapPainterCairo cairoMapPainter(styleConfig);
@@ -330,129 +325,126 @@ int main(int argc, char* argv[])
     osmscout::MapPainterNoOp  noOpMapPainter(styleConfig);
 
     size_t current=1;
-    size_t tileCount=(yTileEnd-yTileStart+1)*(xTileEnd-xTileStart+1);
+    size_t tileCount=tileArea.GetCount();
     size_t delta=tileCount/20;
 
     if (delta==0) {
       delta=1;
     }
 
-    for (uint32_t y=yTileStart; y<=yTileEnd; y++) {
-      for (uint32_t x=xTileStart; x<=xTileEnd; x++) {
-        osmscout::MapData       data;
-        osmscout::OSMTileId     tile(x,y);
-        osmscout::OSMTileIdBox  tileBox(osmscout::OSMTileId(x-1,y-1),
-                                        osmscout::OSMTileId(x+1,y+1));
-        osmscout::GeoBox        boundingBox;
+    for (const auto& tile : tileArea) {
+      osmscout::MapData       data;
+      osmscout::OSMTileIdBox  tileBox(osmscout::OSMTileId(tile.GetX()-1,tile.GetY()-1),
+                                      osmscout::OSMTileId(tile.GetX()+1,tile.GetY()+1));
+      osmscout::GeoBox        boundingBox;
 
-        if ((current % delta)==0) {
-          std::cout << current*100/tileCount << "% " << current;
+      if ((current % delta)==0) {
+        std::cout << current*100/tileCount << "% " << current;
 
-          if (stats.tileCount>0) {
-            std::cout << " " << stats.dbTotalTime/stats.tileCount;
-            std::cout << " " << stats.drawTotalTime/stats.tileCount;
-          }
-
-          std::cout << std::endl;
+        if (stats.tileCount>0) {
+          std::cout << " " << stats.dbTotalTime/stats.tileCount;
+          std::cout << " " << stats.drawTotalTime/stats.tileCount;
         }
 
-        projection.Set(tile,
-                       magnification,
-                       DPI,
-                       tileWidth,
-                       tileHeight);
+        std::cout << std::endl;
+      }
 
-        projection.GetDimensions(boundingBox);
-        projection.SetLinearInterpolationUsage(level >= 10);
+      projection.Set(tile,
+                     magnification,
+                     DPI,
+                     tileWidth,
+                     tileHeight);
 
-        osmscout::StopClock dbTimer;
+      projection.GetDimensions(boundingBox);
+      projection.SetLinearInterpolationUsage(level >= 10);
 
-        osmscout::GeoBox dataBoundingBox(tileBox.GetBoundingBox(magnification));
+      osmscout::StopClock dbTimer;
 
-        std::list<osmscout::TileRef> tiles;
+      osmscout::GeoBox dataBoundingBox(tileBox.GetBoundingBox(magnification));
 
-        // set cache size almost unlimited,
-        // for better estimate of peak memory usage by tile loading
-        mapService->SetCacheSize(10000000);
+      std::list<osmscout::TileRef> tiles;
 
-        mapService->LookupTiles(magnification,dataBoundingBox,tiles);
-        mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-        mapService->AddTileDataToMapData(tiles,data);
+      // set cache size almost unlimited,
+      // for better estimate of peak memory usage by tile loading
+      mapService->SetCacheSize(10000000);
 
-        stats.nodeCount+=data.nodes.size();
-        stats.wayCount+=data.ways.size();
-        stats.areaCount+=data.areas.size();
+      mapService->LookupTiles(magnification,dataBoundingBox,tiles);
+      mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+      mapService->AddTileDataToMapData(tiles,data);
+
+      stats.nodeCount+=data.nodes.size();
+      stats.wayCount+=data.ways.size();
+      stats.areaCount+=data.areas.size();
 
 
 #if defined(HAVE_LIB_GPERFTOOLS)
-        if (heapProfile){
-            std::ostringstream buff;
-            buff << "load-" << level << "-" << x << "-" << y;
-            HeapProfilerDump(buff.str().c_str());
-        }
-        struct mallinfo alloc_info = tc_mallinfo();
+      if (heapProfile){
+          std::ostringstream buff;
+          buff << "load-" << level << "-" << tile.GetX() << "-" << tile.GetY();
+          HeapProfilerDump(buff.str().c_str());
+      }
+      struct mallinfo alloc_info = tc_mallinfo();
 #else
 #if defined(HAVE_MALLINFO)
-        struct mallinfo alloc_info = mallinfo();
+      struct mallinfo alloc_info = mallinfo();
 #endif
 #endif
 #if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
-        std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
-        stats.allocMax = std::max(stats.allocMax, (double)alloc_info.uordblks);
-        stats.allocSum = stats.allocSum + (double)alloc_info.uordblks;
+      std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
+      stats.allocMax = std::max(stats.allocMax, (double)alloc_info.uordblks);
+      stats.allocSum = stats.allocSum + (double)alloc_info.uordblks;
 #endif
 
-        // set cache size back to default
-        mapService->SetCacheSize(25);
-        dbTimer.Stop();
+      // set cache size back to default
+      mapService->SetCacheSize(25);
+      dbTimer.Stop();
 
-        double dbTime=dbTimer.GetMilliseconds();
+      double dbTime=dbTimer.GetMilliseconds();
 
-        stats.dbMinTime=std::min(stats.dbMinTime,dbTime);
-        stats.dbMaxTime=std::max(stats.dbMaxTime,dbTime);
-        stats.dbTotalTime+=dbTime;
+      stats.dbMinTime=std::min(stats.dbMinTime,dbTime);
+      stats.dbMaxTime=std::max(stats.dbMaxTime,dbTime);
+      stats.dbTotalTime+=dbTime;
 
-        osmscout::StopClock drawTimer;
+      osmscout::StopClock drawTimer;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-        if (driver=="cairo") {
-          //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-          cairoMapPainter.DrawMap(projection,
-                                  drawParameter,
-                                  data,
-                                  cairo);
-        }
+      if (driver=="cairo") {
+        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
+        cairoMapPainter.DrawMap(projection,
+                                drawParameter,
+                                data,
+                                cairo);
+      }
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
-        if (driver=="Qt") {
-          //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-          qtMapPainter.DrawMap(projection,
-                               drawParameter,
-                               data,
-                               qtPainter);
-        }
-#endif
-        if (driver=="noop") {
-          noOpMapPainter.DrawMap(projection,
-                                 drawParameter,
-                                 data);
-        }
-        if (driver=="none") {
-          // Do nothing
-        }
-
-        drawTimer.Stop();
-
-        stats.tileCount++;
-
-        double drawTime=drawTimer.GetMilliseconds();
-
-        stats.drawMinTime=std::min(stats.drawMinTime,drawTime);
-        stats.drawMaxTime=std::max(stats.drawMaxTime,drawTime);
-        stats.drawTotalTime+=drawTime;
-
-        current++;
+      if (driver=="Qt") {
+        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
+        qtMapPainter.DrawMap(projection,
+                             drawParameter,
+                             data,
+                             qtPainter);
       }
+#endif
+      if (driver=="noop") {
+        noOpMapPainter.DrawMap(projection,
+                               drawParameter,
+                               data);
+      }
+      if (driver=="none") {
+        // Do nothing
+      }
+
+      drawTimer.Stop();
+
+      stats.tileCount++;
+
+      double drawTime=drawTimer.GetMilliseconds();
+
+      stats.drawMinTime=std::min(stats.drawMinTime,drawTime);
+      stats.drawMaxTime=std::max(stats.drawMaxTime,drawTime);
+      stats.drawTotalTime+=drawTime;
+
+      current++;
     }
 
     statistics.push_back(stats);
@@ -468,6 +460,7 @@ int main(int argc, char* argv[])
 
   for (const auto& stats : statistics) {
     std::cout << "Level: " << stats.level << std::endl;
+    std::cout << "Tiles: " << stats.tileCount << std::endl;
 
 #if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
     std::cout << " Used memory: ";
@@ -480,21 +473,27 @@ int main(int argc, char* argv[])
     std::cout << "way: " << stats.wayCount << " ";
     std::cout << "areas: " << stats.areaCount << std::endl;
 
-    std::cout << " Avg. data  : ";
-    std::cout << "nodes: " << stats.nodeCount/stats.tileCount << " ";
-    std::cout << "way: " << stats.wayCount/stats.tileCount << " ";
-    std::cout << "areas: " << stats.areaCount/stats.tileCount << std::endl;
+    if (stats.tileCount>0) {
+      std::cout << " Avg. data  : ";
+      std::cout << "nodes: " << stats.nodeCount/stats.tileCount << " ";
+      std::cout << "way: " << stats.wayCount/stats.tileCount << " ";
+      std::cout << "areas: " << stats.areaCount/stats.tileCount << std::endl;
+    }
 
     std::cout << " DB         : ";
     std::cout << "total: " << stats.dbTotalTime << " ";
     std::cout << "min: " << stats.dbMinTime << " ";
-    std::cout << "avg: " << stats.dbTotalTime/stats.tileCount << " ";
+    if (stats.tileCount>0) {
+      std::cout << "avg: " << stats.dbTotalTime/stats.tileCount << " ";
+    }
     std::cout << "max: " << stats.dbMaxTime << " " << std::endl;
 
     std::cout << " Map        : ";
     std::cout << "total: " << stats.drawTotalTime << " ";
     std::cout << "min: " << stats.drawMinTime << " ";
-    std::cout << "avg: " << stats.drawTotalTime/stats.tileCount << " ";
+    if (stats.tileCount>0) {
+      std::cout << "avg: " << stats.drawTotalTime/stats.tileCount << " ";
+    }
     std::cout << "max: " << stats.drawMaxTime << std::endl;
   }
 
