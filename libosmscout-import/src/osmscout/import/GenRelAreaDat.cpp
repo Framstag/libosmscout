@@ -795,6 +795,61 @@ namespace osmscout {
     }
   }
 
+  TypeInfoRef RelAreaDataGenerator::AutodetectRelationType(const ImportParameter& parameter,
+                                                           const TypeConfig& typeConfig,
+                                                           const RawRelation& rawRelation,
+                                                           std::list<MultipolygonPart>& parts,
+                                                           std::list<MultipolygonPart>::iterator& copyPart) const
+  {
+    std::vector<size_t>                                typeCount(typeConfig.GetTypeCount(),0);
+    std::vector<std::list<MultipolygonPart>::iterator> partRef(typeConfig.GetTypeCount(),parts.end());
+
+    TypeInfoRef masterType=typeConfig.typeInfoIgnore;
+
+    for (std::list<MultipolygonPart>::iterator ring=parts.begin(); ring!=parts.end(); ring++) {
+      if (ring->role.IsOuterRing() &&
+          ring->IsArea() &&
+          ring->role.GetType()!=typeConfig.typeInfoIgnore) {
+        typeCount[ring->role.GetType()->GetIndex()]++;
+        partRef[ring->role.GetType()->GetIndex()]=ring;
+      }
+    }
+
+    size_t maxCount=0;
+    size_t maxCountType=0;
+    size_t countTypes=0;
+
+    for (size_t i=0; i<typeCount.size(); i++) {
+      if (typeCount[i]>maxCount) {
+        maxCount=typeCount[i];
+        maxCountType=i;
+        countTypes=1;
+      }
+      else if (typeCount[i]==maxCount) {
+        countTypes++;
+      }
+    }
+
+    masterType=typeConfig.GetTypes()[maxCountType];
+
+    if (countTypes>1 &&
+        masterType!=typeConfig.typeInfoIgnore) {
+      parameter.GetErrorReporter()->ReportRelation(rawRelation.GetId(),
+                                                   rawRelation.GetType(),
+                                                   "Conflicting types for outer ring (choosen type "+
+                                                   masterType->GetName()+")");
+    }
+
+    if (countTypes==1) {
+      copyPart=partRef[masterType->GetIndex()];
+    }
+    else {
+      copyPart=parts.end();
+    }
+
+    return masterType;
+  }
+
   bool RelAreaDataGenerator::HandleMultipolygonRelation(const ImportParameter& parameter,
                                                         Progress& progress,
                                                         const TypeConfig& typeConfig,
@@ -868,27 +923,26 @@ namespace osmscout {
     masterRing.MarkAsMasterRing();
 
     if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
-      for (auto& ring : parts) {
-        if (ring.role.IsOuterRing() &&
-            ring.IsArea() &&
-            ring.role.GetType()!=typeConfig.typeInfoIgnore) {
-          if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
-            if (progress.OutputDebug()) {
-              progress.Debug("Autodetecting type of multipolygon relation "+
-                             NumberToString(rawRelation.GetId())+" as "+
-                             ring.role.GetType()->GetName());
-            }
+      std::list<MultipolygonPart>::iterator copyPart=parts.end();
 
-            masterRing.SetFeatures(ring.role.GetFeatureValueBuffer());
-          }
-          else if (masterRing.GetType()!=ring.role.GetType()) {
-            parameter.GetErrorReporter()->ReportRelation(rawRelation.GetId(),
-                                                         rawRelation.GetType(),
-                                                         "Conflicting types for outer ring ("+
-                                                         masterRing.GetType()->GetName()+
-                                                         " vs. "+ring.ways.front()->GetType()->GetName()+")");
-          }
-        }
+      TypeInfoRef masterType=AutodetectRelationType(parameter,
+                                                    typeConfig,
+                                                    rawRelation,
+                                                    parts,
+                                                    copyPart);
+
+      if (progress.OutputDebug()) {
+        progress.Debug("Autodetecting type of multipolygon relation "+
+                       NumberToString(rawRelation.GetId())+" as "+
+                       masterType->GetName());
+      }
+
+      if (copyPart!=parts.end())  {
+        masterRing.SetFeatures(copyPart->role.GetFeatureValueBuffer());
+        //copyPart->role.SetType(typeConfig.typeInfoIgnore);
+      }
+      else {
+        masterRing.SetType(masterType);
       }
     }
 
@@ -921,14 +975,39 @@ namespace osmscout {
     bool optimizeAwayMaster=false;
 
     if (masterRing.HasAnyFeaturesSet()) {
-      bool outerRingsClean=true;
+      // Check: Master ring has values and there is one explicit outer ring
+      size_t outerRingCount=0;
 
       for (const auto& ring : parts) {
         if (ring.role.IsOuterRing()) {
-          if (ring.role.GetType()!=masterRing.GetType()) {
-            outerRingsClean=false;
+          outerRingCount++;
+
+          if (outerRingCount>1) {
             break;
           }
+        }
+      }
+
+      if (outerRingCount==1) {
+        optimizeAwayMaster=true;
+
+        for (auto& ring : parts) {
+          if (ring.role.IsOuterRing()) {
+            ring.role.SetFeatures(masterRing.GetFeatureValueBuffer());
+            break;
+          }
+        }
+      }
+    }
+    else {
+      // Check: The master ring does not have any values and has the same type as all outer rings
+      bool outerRingsClean=true;
+
+      for (const auto& ring : parts) {
+        if (ring.role.IsOuterRing() &&
+            ring.role.GetType()!=masterRing.GetType()) {
+          outerRingsClean=false;
+          break;
         }
       }
 
@@ -941,7 +1020,8 @@ namespace osmscout {
       relation.rings.push_back(masterRing);
     }
 
-    relation.rings.reserve(parts.size());
+    relation.rings.reserve(parts.size()+relation.rings.size());
+
     for (const auto& ring : parts) {
       assert(!ring.role.nodes.empty());
 
@@ -950,7 +1030,8 @@ namespace osmscout {
 
     if (!optimizeAwayMaster) {
       for (auto& ring : relation.rings) {
-        if (ring.IsOuterRing() && ring.GetType()==masterRing.GetType()) {
+        if (ring.IsOuterRing() &&
+            ring.GetType()==masterRing.GetType()) {
           ring.SetType(typeConfig.typeInfoIgnore);
         }
       }
