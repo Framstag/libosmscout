@@ -81,7 +81,7 @@ check_type_size(wchar_t SIZEOF_WCHAR_T)
 set(CMAKE_EXTRA_INCLUDE_FILES)
 
 # check functions exists
-check_function_exists(fseeko HAVE_FSEEKO)
+#check_function_exists(fseeko HAVE_FSEEKO)
 check_function_exists(mmap HAVE_MMAP)
 check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posix_madvise HAVE_POSIX_MADVISE)
