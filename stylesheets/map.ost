@@ -1861,6 +1861,11 @@ TYPES
     = NODE AREA ("place"=="continent")
       {Name, NameAlt, IsIn}
 
+  // Not part of the administrative boundary hierachy?
+  TYPE place_peninsula IGNORE
+    = NODE AREA ("place"=="peninsula")
+      {Name, NameAlt}
+      
   TYPE place_country
     = NODE ("place"=="country")
       {Name, NameAlt, IsIn}
