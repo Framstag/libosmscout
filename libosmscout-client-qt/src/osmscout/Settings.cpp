@@ -23,6 +23,7 @@
 #include <QDir>
 #include <QObject>
 #include <QDebug>
+#include <QFileInfo>
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -256,6 +257,61 @@ void Settings::SetGpsFormat(const QString formatId)
     settings.setValue("gpsFormat", formatId);
     emit GpsFormatChanged(formatId);
   }
+}
+
+const QString Settings::GetStyleSheetDirectory() const
+{
+  return settings.value("stylesheetDirectory", "stylesheets").toString();
+}
+void Settings::SetStyleSheetDirectory(const QString dir)
+{
+  if (GetStyleSheetDirectory() != dir){
+    settings.setValue("stylesheetDirectory", dir);
+    emit StyleSheetDirectoryChanged(dir);
+  }
+}
+
+const QString Settings::GetStyleSheetFile() const
+{
+  return settings.value("stylesheetFile", "standard.oss").toString();
+}
+const QString Settings::GetStyleSheetAbsoluteFile() const
+{
+  return QFileInfo(GetStyleSheetDirectory(), GetStyleSheetFile()).absoluteFilePath();
+}
+void Settings::SetStyleSheetFile(const QString file)
+{
+  if (GetStyleSheetFile() != file){
+    settings.setValue("stylesheetFile", file);
+    emit StyleSheetFileChanged(file);
+  }
+}
+
+const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags(const QString styleSheetFile)
+{
+  std::unordered_map<std::string,bool> stylesheetFlags; // TODO: read from config
+  settings.beginGroup("stylesheetFlags/"+styleSheetFile);
+  for (const QString key:settings.allKeys()){
+    stylesheetFlags[key.toStdString()]=settings.value(key, false).toBool();
+  }
+  settings.endGroup();
+  return stylesheetFlags;
+}
+const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags()
+{
+  return GetStyleSheetFlags(GetStyleSheetFile());
+}
+void Settings::SetStyleSheetFlags(const QString styleSheetFile, std::unordered_map<std::string,bool> flags)
+{
+  settings.beginGroup("stylesheetFlags/"+styleSheetFile);
+  for (const auto &entry:flags){
+    settings.setValue(QString::fromStdString(entry.first), entry.second);
+  }
+  settings.endGroup();
+}
+void Settings::SetStyleSheetFlags(std::unordered_map<std::string,bool> flags)
+{
+  SetStyleSheetFlags(GetStyleSheetFile(), flags);
 }
 
 const QString Settings::GetHttpCacheDir() const

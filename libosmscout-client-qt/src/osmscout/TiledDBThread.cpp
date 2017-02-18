@@ -39,12 +39,11 @@
 
 // TODO: watch system memory and evict caches when system is under pressure
 TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
-                             QString stylesheetFilename,
                              QString iconDirectory,
                              QString tileCacheDirectory,
                              size_t onlineTileCacheSize,
                              size_t offlineTileCacheSize)
- : DBThread(databaseLookupDirs, stylesheetFilename, iconDirectory),
+ : DBThread(databaseLookupDirs, iconDirectory),
    tileCacheDirectory(tileCacheDirectory),
    onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
    offlineTileCache(offlineTileCacheSize), // render offline tile is expensive

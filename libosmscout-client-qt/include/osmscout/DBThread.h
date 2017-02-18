@@ -315,7 +315,7 @@ protected:
 
 protected:
   
-  DBThread(QStringList databaseLookupDirectories, QString stylesheetFilename, QString iconDirectory);
+  DBThread(QStringList databaseLookupDirectories, QString iconDirectory);
 
   virtual ~DBThread();
 
@@ -417,14 +417,12 @@ public:
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
   
   static bool InitializeTiledInstance(QStringList databaseDirectory, 
-                                      QString stylesheetFilename, 
                                       QString iconDirectory,
                                       QString tileCacheDirectory,
                                       size_t onlineTileCacheSize = 20, 
                                       size_t offlineTileCacheSize = 50);
 
   static bool InitializePlaneInstance(QStringList databaseDirectory, 
-                                      QString stylesheetFilename, 
                                       QString iconDirectory);
   
   static DBThread* GetInstance();

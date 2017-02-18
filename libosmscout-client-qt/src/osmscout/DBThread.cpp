@@ -96,12 +96,10 @@ QString StyleError::GetTypeName() const
 
 
 DBThread::DBThread(QStringList databaseLookupDirs,
-                   QString stylesheetFilename,
                    QString iconDirectory)
   : mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
     mapDpi(-1),
     physicalDpi(-1),
-    stylesheetFilename(stylesheetFilename),
     iconDirectory(iconDirectory),
     daylight(true),
     renderSea(true)
@@ -119,11 +117,14 @@ DBThread::DBThread(QStringList databaseLookupDirs,
   QScreen *srn=QGuiApplication::screens().at(0);
 
   physicalDpi = (double)srn->physicalDotsPerInch();
-  qDebug() << "Reported screen DPI: " << physicalDpi;
+  osmscout::log.Debug() << "Reported screen DPI: " << physicalDpi;
   mapDpi = Settings::GetInstance()->GetMapDPI();
-  qDebug() << "Map DPI override: " << mapDpi;
+  osmscout::log.Debug() << "Map DPI override: " << mapDpi;
 
   renderSea = Settings::GetInstance()->GetRenderSea();
+  stylesheetFilename=Settings::GetInstance()->GetStyleSheetAbsoluteFile();
+  stylesheetFlags=Settings::GetInstance()->GetStyleSheetFlags();
+  osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
   connect(Settings::GetInstance(), SIGNAL(MapDPIChange(double)),
           this, SLOT(onMapDPIChange(double)),
@@ -298,6 +299,10 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
         if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
           qDebug() << "Cannot load style sheet!";
           styleConfig=NULL;
+        }else{
+          for (const auto& flag : stylesheetFlags) {
+            styleConfig->AddFlag(flag.first,flag.second);
+          }
         }
       }
       else {
@@ -1132,7 +1137,6 @@ osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) cons
 static DBThread* dbThreadInstance=NULL;
 
 bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
-                                       QString stylesheetFilename,
                                        QString iconDirectory,
                                        QString tileCacheDirectory,
                                        size_t onlineTileCacheSize,
@@ -1143,7 +1147,6 @@ bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
   }
 
   dbThreadInstance=new TiledDBThread(databaseLookupDirectory,
-                                     stylesheetFilename,
                                      iconDirectory,
                                      tileCacheDirectory,
                                      onlineTileCacheSize,
@@ -1153,7 +1156,6 @@ bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
 }
 
 bool DBThread::InitializePlaneInstance(QStringList databaseLookupDirectory,
-                                       QString stylesheetFilename,
                                        QString iconDirectory)
 {
   if (dbThreadInstance!=NULL) {
@@ -1161,7 +1163,6 @@ bool DBThread::InitializePlaneInstance(QStringList databaseLookupDirectory,
   }
 
   dbThreadInstance=new PlaneDBThread(databaseLookupDirectory,
-                                     stylesheetFilename,
                                      iconDirectory);
 
   return true;
