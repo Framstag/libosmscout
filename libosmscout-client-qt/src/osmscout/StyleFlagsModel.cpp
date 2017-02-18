@@ -17,10 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapFlagsModel.h>
+#include <osmscout/StyleFlagsModel.h>
 #include <osmscout/DBThread.h>
 
-MapFlagsModel::MapFlagsModel():
+StyleFlagsModel::StyleFlagsModel():
   QAbstractListModel()
 {
   DBThread* dbThread = DBThread::GetInstance();
@@ -30,11 +30,11 @@ MapFlagsModel::MapFlagsModel():
   onStyleChanged();
 }
 
-MapFlagsModel::~MapFlagsModel()
+StyleFlagsModel::~StyleFlagsModel()
 {
 }
 
-void MapFlagsModel::onStyleChanged()
+void StyleFlagsModel::onStyleChanged()
 {
   beginResetModel();
   DBThread* dbThread = DBThread::GetInstance();
@@ -42,7 +42,7 @@ void MapFlagsModel::onStyleChanged()
   endResetModel();
 }
 
-QVariant MapFlagsModel::data(const QModelIndex &index, int role) const
+QVariant StyleFlagsModel::data(const QModelIndex &index, int role) const
 {
   if(index.row() < 0 || index.row() >= mapFlags.size()) {
     qDebug() << "Undefined row" << index.row();
@@ -59,7 +59,7 @@ QVariant MapFlagsModel::data(const QModelIndex &index, int role) const
   return QVariant();
 }
 
-QHash<int, QByteArray> MapFlagsModel::roleNames() const
+QHash<int, QByteArray> StyleFlagsModel::roleNames() const
 {
   QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
 
@@ -69,7 +69,7 @@ QHash<int, QByteArray> MapFlagsModel::roleNames() const
   return roles;
 }
 
-Qt::ItemFlags MapFlagsModel::flags(const QModelIndex &index) const
+Qt::ItemFlags StyleFlagsModel::flags(const QModelIndex &index) const
 {
   if(!index.isValid()) {
       return Qt::ItemIsEnabled;
@@ -78,7 +78,7 @@ Qt::ItemFlags MapFlagsModel::flags(const QModelIndex &index) const
   return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-Q_INVOKABLE void MapFlagsModel::setFlag(const QString &key, bool value)
+Q_INVOKABLE void StyleFlagsModel::setFlag(const QString &key, bool value)
 {
   qDebug() << "Setup style flag" << key << "to" << value;
   DBThread* dbThread = DBThread::GetInstance();

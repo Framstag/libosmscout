@@ -49,8 +49,8 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/moc_MapObjectInfoModel.cpp \
                                  osmscout/MapStyleModel.cpp \
                                  osmscout/moc_MapStyleModel.cpp \
-                                 osmscout/MapFlagsModel.cpp \
-                                 osmscout/moc_MapFlagsModel.cpp
+                                 osmscout/StyleFlagsModel.cpp \
+                                 osmscout/moc_StyleFlagsModel.cpp
 
 osmscout/moc_%.cpp: $(top_srcdir)/include/osmscout/%.h
 	@MOC@ -o$@ $<
@@ -72,4 +72,4 @@ CLEANFILES = osmscout/moc_DBThread.cpp \
 	     osmscout/moc_MapDownloadsModel.cpp \
 	     osmscout/moc_MapObjectInfoModel.cpp \
 	     osmscout/moc_MapStyleModel.cpp \
-	     osmscout/moc_MapFlagsModel.cpp
+	     osmscout/moc_StyleFlagsModel.cpp

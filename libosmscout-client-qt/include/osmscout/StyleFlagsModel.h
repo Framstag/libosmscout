@@ -1,6 +1,6 @@
 
-#ifndef MAPFLAGSMODEL_H
-#define MAPFLAGSMODEL_H
+#ifndef STYLEFLAGSMODEL_H
+#define STYLEFLAGSMODEL_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -31,7 +31,7 @@
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API MapFlagsModel: public QAbstractListModel
+class OSMSCOUT_CLIENT_QT_API StyleFlagsModel: public QAbstractListModel
 {
   Q_OBJECT
 
@@ -44,8 +44,8 @@ public:
       ValueRole = Qt::UserRole+1,
   };
 
-  MapFlagsModel();
-  virtual ~MapFlagsModel();
+  StyleFlagsModel();
+  virtual ~StyleFlagsModel();
 
   Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
   {
@@ -61,5 +61,5 @@ private:
   QMap<QString,bool> mapFlags;
 };
 
-#endif /* MAPFLAGSMODEL_H */
+#endif /* STYLEFLAGSMODEL_H */
 
