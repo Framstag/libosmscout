@@ -246,6 +246,7 @@ signals:
 
 public slots:
   void ToggleDaylight();
+  void SetStyleFlag(const QString &key, bool value);
   void ReloadStyle(const QString &suffix="");
   void LoadStyle(QString stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
@@ -411,7 +412,9 @@ public:
   const QList<StyleError> &GetStyleErrors() const
   {
       return styleErrors;
-  }  
+  }
+
+  const QMap<QString,bool> GetStyleFlags() const;
 
   static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);

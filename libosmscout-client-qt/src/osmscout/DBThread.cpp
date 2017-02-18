@@ -283,10 +283,6 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
   databases.clear();
   osmscout::GeoBox boundingBox;
 
-  //stylesheetFilename = resourceDirectory + QDir::separator() + "map-styles" + QDir::separator() + "standard.oss";
-  // TODO: remove last separator, it should be added by renderer (MapPainter*.cpp)
-  //iconDirectory = resourceDirectory + QDir::separator() + "map-icons" + QDir::separator(); // TODO: load icon set for given stylesheet
-
   for (auto &databaseDirectory:databaseDirectories){
     osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
     osmscout::StyleConfigRef styleConfig;
@@ -296,13 +292,15 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       if (typeConfig) {
         styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
+        // setup flag overrides before load
+        for (const auto& flag : stylesheetFlags) {
+            qDebug() << "flag"<<QString::fromStdString(flag.first)<<":"<<flag.second;
+            styleConfig->AddFlag(flag.first,flag.second);
+        }
+
         if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
           qDebug() << "Cannot load style sheet!";
           styleConfig=NULL;
-        }else{
-          for (const auto& flag : stylesheetFlags) {
-            styleConfig->AddFlag(flag.first,flag.second);
-          }
         }
       }
       else {
@@ -372,6 +370,19 @@ void DBThread::ToggleDaylight()
   ReloadStyle();
 
   qDebug() << "Toggling daylight done.";
+}
+
+void DBThread::SetStyleFlag(const QString &key, bool value)
+{
+  {
+    QMutexLocker locker(&mutex);
+
+    if (!isInitializedInternal()) {
+        return;
+    }
+    stylesheetFlags[key.toStdString()] = value;
+  }
+  ReloadStyle();
 }
 
 void DBThread::ReloadStyle(const QString &suffix)
@@ -1126,12 +1137,33 @@ void DBThread::onRenderSeaChanged(bool b)
 
 osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) const
 {
+  QMutexLocker threadLocker(&mutex);
   for (auto &db:databases){
     if (db->path == databasePath){
       return db->database->GetTypeConfig();
     }
   }
   return osmscout::TypeConfigRef();
+}
+
+const QMap<QString,bool> DBThread::GetStyleFlags() const
+{
+  QMutexLocker threadLocker(&mutex);
+  QMap<QString,bool> flags;
+  // add flag overrides
+  for (const auto& flag : stylesheetFlags){
+    flags[QString::fromStdString(flag.first)]=flag.second;
+  }
+  // add flags defined by stylesheet
+  for (auto &db:databases){
+    for (const auto& flag : db->styleConfig->GetFlags()){
+      if (!flags.contains(QString::fromStdString(flag.first))){
+        flags[QString::fromStdString(flag.first)]=flag.second;
+      }
+    }
+  }
+  
+  return flags;
 }
 
 static DBThread* dbThreadInstance=NULL;
