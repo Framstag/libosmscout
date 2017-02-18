@@ -294,7 +294,6 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
         // setup flag overrides before load
         for (const auto& flag : stylesheetFlags) {
-            qDebug() << "flag"<<QString::fromStdString(flag.first)<<":"<<flag.second;
             styleConfig->AddFlag(flag.first,flag.second);
         }
 
