@@ -79,14 +79,27 @@ namespace osmscout {
     unsigned long areaAreaIndexCacheSize;
     unsigned long areaNodeIndexCacheSize;
 
+    unsigned long nodeDataCacheSize;
+    unsigned long wayDataCacheSize;
+    unsigned long areaDataCacheSize;
   public:
     DatabaseParameter();
 
     void SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize);
     void SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize);
+    void SetNodeDataCacheSize(unsigned long  size);
+    void SetWayDataCacheSize(unsigned long  size);
+    void SetAreaDataCacheSize(unsigned long  size);
+    void SetOptimisedWaysDataCacheSize(unsigned long  size);
+    void SetOptimisedAreasDataCacheSize(unsigned long  size);
 
     unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetAreaNodeIndexCacheSize() const;
+    unsigned long GetNodeDataCacheSize() const;
+    unsigned long GetWayDataCacheSize() const;
+    unsigned long GetAreaDataCacheSize() const;
+    unsigned long GetOptimisedWaysDataCacheSize() const;
+    unsigned long GetOptimisedAreasDataCacheSize() const;
   };
 
   /**

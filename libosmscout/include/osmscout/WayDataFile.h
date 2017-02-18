@@ -37,7 +37,7 @@ namespace osmscout {
     static const char* WAYS_IDMAP;
 
   public:
-    WayDataFile();
+    WayDataFile(size_t cacheSize);
   };
 
   typedef std::shared_ptr<WayDataFile> WayDataFileRef;

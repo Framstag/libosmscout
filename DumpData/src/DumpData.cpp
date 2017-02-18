@@ -730,7 +730,8 @@ int main(int argc, char* argv[])
 
   osmscout::IndexedDataFile<osmscout::Id,osmscout::RouteNode> routeNodeDataFile("router.dat",
                                                                                 "router.idx",
-                                                                                6000);
+                                                                                6000,
+                                                                                1000);
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;

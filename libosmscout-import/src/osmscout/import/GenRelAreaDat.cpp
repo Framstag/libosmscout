@@ -1097,9 +1097,9 @@ namespace osmscout {
 
     CoordDataFile              coordDataFile;
 
-    RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayIndexCacheSize());
+    RawWayIndexedDataFile      wayDataFile(parameter.GetRawWayIndexCacheSize(),/*dataCache*/0);
 
-    RawRelationIndexedDataFile relDataFile(parameter.GetRawWayIndexCacheSize());
+    RawRelationIndexedDataFile relDataFile(parameter.GetRawWayIndexCacheSize(),/*dataCache*/0);
     FeatureRef                 featureName(typeConfig->GetFeature(RefFeature::NAME));
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),

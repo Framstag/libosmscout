@@ -56,6 +56,7 @@ namespace osmscout {
     featureValueBuffer.Read(scanner);
 
     scanner.ReadCoord(coords);
+    nextFileOffset=scanner.GetPos();
   }
 
   /**

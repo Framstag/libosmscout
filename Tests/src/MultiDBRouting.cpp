@@ -252,7 +252,8 @@ int main(int argc, char* argv[])
 
   osmscout::IndexedDataFile<osmscout::Id,osmscout::RouteNode> routeNodeFile(std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".dat",
                                                                             std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".idx",
-                                                                            12000);
+                                                                            /*indexCacheSize*/12000,
+                                                                            /*dataCacheSize*/1000);
 
   std::cout << "Opening routing database 1..." << std::endl;
 
