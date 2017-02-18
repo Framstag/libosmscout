@@ -59,7 +59,7 @@ CLEANFILES = osmscout/moc_DBThread.cpp \
 	     osmscout/moc_MapWidget.cpp \
 	     osmscout/moc_RoutingModel.cpp \
 	     osmscout/moc_LocationEntry.cpp \
-	     osmscout/moc_SearchLocationModel.cpp
+	     osmscout/moc_SearchLocationModel.cpp \
 	     osmscout/moc_Settings.cpp \
 	     osmscout/moc_LocationInfoModel.cpp \
 	     osmscout/moc_TiledDBThread.cpp \
