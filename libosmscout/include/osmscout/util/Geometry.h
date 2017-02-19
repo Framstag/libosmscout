@@ -371,15 +371,37 @@ namespace osmscout {
    */
   template<typename N,typename M>
   inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
-                                        const std::vector<M>& b)
-  {
+                                        const std::vector<M>& b,
+                                        const GeoBox aBox,
+                                        const GeoBox bBox)
+   {
+    if (!aBox.Intersects(bBox)){
+      return false;
+    }
+
     for (const auto& node : a) {
-      if (GetRelationOfPointToArea(node,b)>=0) {
+      if (bBox.Includes(node, /*openInterval*/ false) && GetRelationOfPointToArea(node,b)>=0) {
         return true;
       }
     }
 
     return false;
+  }
+
+  /**
+   * \ingroup Geometry
+   * Return true, if at least one point of area a in within area b
+   */
+  template<typename N,typename M>
+  inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
+                                        const std::vector<M>& b)
+  {
+    GeoBox aBox;
+    GeoBox bBox;
+    GetBoundingBox(a, aBox);
+    GetBoundingBox(b, bBox);
+
+    return IsAreaAtLeastPartlyInArea(a,b,aBox,bBox);
   }
 
   /**

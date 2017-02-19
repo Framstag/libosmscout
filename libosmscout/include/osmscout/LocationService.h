@@ -514,7 +514,7 @@ namespace osmscout {
                        const double maxDistance=100);
 
     /**
-     * @see LoadNearNodes
+     * @see LoadNearAreas
      */
     bool LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
                        std::vector<LocationDescriptionCandicate> &candidates,
@@ -522,15 +522,18 @@ namespace osmscout {
 
     bool DescribeLocationByName(const GeoCoord& location,
                                 LocationDescription& description,
-                                const double lookupDistance=100);
+                                const double lookupDistance=100,
+                                const double sizeFilter=1.0);
 
     bool DescribeLocationByAddress(const GeoCoord& location,
                                    LocationDescription& description,
-                                   const double lookupDistance=100);
+                                   const double lookupDistance=100,
+                                   const double sizeFilter=1.0);
 
     bool DescribeLocationByPOI(const GeoCoord& location,
                                LocationDescription& description,
-                               const double lookupDistance=100);
+                               const double lookupDistance=100,
+                               const double sizeFilter=1.0);
   };
 
   //! \ingroup Service

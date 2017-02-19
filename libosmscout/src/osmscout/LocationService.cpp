@@ -1031,6 +1031,7 @@ namespace osmscout {
     {
       ObjectFileRef         object;
       std::vector<GeoCoord> coords;
+      GeoBox                bbox;
     };
 
   private:
@@ -1101,8 +1102,12 @@ namespace osmscout {
             }
           }
           else {
+            GeoBox ringBBox;
+            area->rings[r].GetBoundingBox(ringBBox);
             if (!IsAreaAtLeastPartlyInArea(entry.coords,
-                                           area->rings[r].nodes)) {
+                                           area->rings[r].nodes,
+                                           entry.bbox,
+                                           ringBBox)) {
               continue;
             }
           }
@@ -1309,6 +1314,7 @@ namespace osmscout {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
             searchEntry.object=object;
+            area->rings[r].GetBoundingBox(searchEntry.bbox);
 
             searchEntry.coords.resize(area->rings[r].nodes.size());
 
@@ -1331,6 +1337,7 @@ namespace osmscout {
         AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
         searchEntry.object=object;
+        way->GetBoundingBox(searchEntry.bbox);
 
         searchEntry.coords.resize(way->nodes.size());
 
@@ -1571,7 +1578,8 @@ namespace osmscout {
 
   bool LocationService::DescribeLocationByName(const GeoCoord& location,
                                                LocationDescription& description,
-                                               const double lookupDistance)
+                                               const double lookupDistance,
+                                               const double sizeFilter)
   {
     // search all addressable areas and nodes, sort it by distance, get first with name
     TypeConfigRef typeConfig=database->GetTypeConfig();
@@ -1629,7 +1637,7 @@ namespace osmscout {
     for (const auto &candidate : candidates) {
       std::list<ReverseLookupResult> result;
 
-      if (candidate.GetName().empty()) {
+      if (candidate.GetSize() > sizeFilter || candidate.GetName().empty()) {
         continue;
       }
 
@@ -1684,7 +1692,8 @@ namespace osmscout {
 
   bool LocationService::DescribeLocationByAddress(const GeoCoord& location,
                                                   LocationDescription& description,
-                                                  const double lookupDistance)
+                                                  const double lookupDistance,
+                                                  const double sizeFilter)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
     TypeConfigRef typeConfig=database->GetTypeConfig();
@@ -1740,8 +1749,11 @@ namespace osmscout {
     std::sort(candidates.begin(),candidates.end(),DistanceComparator);
 
     for (const auto &candidate : candidates) {
-      std::list<ReverseLookupResult> result;
+      if (candidate.GetSize() > sizeFilter){
+        continue;
+      }
 
+      std::list<ReverseLookupResult> result;
       if (!ReverseLookupObject(candidate.GetRef(), result)) {
         return false;
       }
@@ -1769,7 +1781,8 @@ namespace osmscout {
 
   bool LocationService::DescribeLocationByPOI(const GeoCoord& location,
                                               LocationDescription& description,
-                                              const double lookupDistance)
+                                              const double lookupDistance,
+                                              const double sizeFilter)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
     TypeConfigRef typeConfig=database->GetTypeConfig();
@@ -1824,8 +1837,11 @@ namespace osmscout {
     std::sort(candidates.begin(),candidates.end(),DistanceComparator);
 
     for (const auto &candidate : candidates) {
-      std::list<ReverseLookupResult> result;
+      if (candidate.GetSize() > sizeFilter){
+        continue;
+      }
 
+      std::list<ReverseLookupResult> result;
       if (!ReverseLookupObject(candidate.GetRef(), result)) {
         return false;
       }
