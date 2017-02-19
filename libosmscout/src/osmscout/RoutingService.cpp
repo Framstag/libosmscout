@@ -173,7 +173,7 @@ namespace osmscout {
     if (!routeNodeDataFile.Open(database->GetTypeConfig(),
                                 path,
                                 true,
-                                true)) {
+                                database->GetRouterDataMMap())) {
       log.Error() << "Cannot open '" <<  path << "'!";
       return false;
     }

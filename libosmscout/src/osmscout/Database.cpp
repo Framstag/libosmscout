@@ -39,7 +39,11 @@ namespace osmscout {
     areaNodeIndexCacheSize(1000),
     nodeDataCacheSize(5000),
     wayDataCacheSize(10000),
-    areaDataCacheSize(5000)
+    areaDataCacheSize(5000),
+    routerDataMMap(true),
+    nodesDataMMap(true),
+    areasDataMMap(true),
+    waysDataMMap(true)
   {
     // no code
   }
@@ -69,6 +73,26 @@ namespace osmscout {
     this->areaDataCacheSize=size;
   }
 
+  void DatabaseParameter::SetRouterDataMMap(bool mmap)
+  {
+    routerDataMMap=mmap;
+  }
+
+  void DatabaseParameter::SetNodesDataMMap(bool mmap)
+  {
+    nodesDataMMap=mmap;
+  }
+
+  void DatabaseParameter::SetAreasDataMMap(bool mmap)
+  {
+    areasDataMMap=mmap;
+  }
+
+  void DatabaseParameter::SetWaysDataMMap(bool mmap)
+  {
+    waysDataMMap=mmap;
+  }
+
   unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
     return areaAreaIndexCacheSize;
@@ -92,6 +116,26 @@ namespace osmscout {
   unsigned long DatabaseParameter::GetAreaDataCacheSize() const
   {
     return areaDataCacheSize;
+  }
+
+  bool DatabaseParameter::GetRouterDataMMap() const
+  {
+    return routerDataMMap;
+  }
+
+  bool DatabaseParameter::GetNodesDataMMap() const
+  {
+    return nodesDataMMap;
+  }
+
+  bool DatabaseParameter::GetAreasDataMMap() const
+  {
+    return areasDataMMap;
+  }
+
+  bool DatabaseParameter::GetWaysDataMMap() const
+  {
+    return waysDataMMap;
   }
 
   Database::Database(const DatabaseParameter& parameter)
@@ -247,7 +291,7 @@ namespace osmscout {
 
       if (!nodeDataFile->Open(typeConfig,
                               path,
-                              true)) {
+                              parameter.GetNodesDataMMap())) {
         log.Error() << "Cannot open 'nodes.dat'!";
         return NULL;
       }
@@ -277,7 +321,7 @@ namespace osmscout {
 
       if (!areaDataFile->Open(typeConfig,
                               path,
-                              true)) {
+                              parameter.GetAreasDataMMap())) {
         log.Error() << "Cannot open 'areas.dat'!";
         return NULL;
       }
@@ -307,7 +351,7 @@ namespace osmscout {
 
       if (!wayDataFile->Open(typeConfig,
                              path,
-                             true)) {
+                             parameter.GetWaysDataMMap())) {
         log.Error() << "Cannot open 'ways.dat'!";
         return NULL;
       }
