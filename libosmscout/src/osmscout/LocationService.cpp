@@ -1031,6 +1031,7 @@ namespace osmscout {
     {
       ObjectFileRef         object;
       std::vector<GeoCoord> coords;
+      GeoBox                bbox;
     };
 
   private:
@@ -1101,8 +1102,12 @@ namespace osmscout {
             }
           }
           else {
+            GeoBox ringBBox;
+            area->rings[r].GetBoundingBox(ringBBox);
             if (!IsAreaAtLeastPartlyInArea(entry.coords,
-                                           area->rings[r].nodes)) {
+                                           area->rings[r].nodes,
+                                           entry.bbox,
+                                           ringBBox)) {
               continue;
             }
           }
@@ -1309,6 +1314,7 @@ namespace osmscout {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
             searchEntry.object=object;
+            area->rings[r].GetBoundingBox(searchEntry.bbox);
 
             searchEntry.coords.resize(area->rings[r].nodes.size());
 
@@ -1331,6 +1337,7 @@ namespace osmscout {
         AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
         searchEntry.object=object;
+        way->GetBoundingBox(searchEntry.bbox);
 
         searchEntry.coords.resize(way->nodes.size());
 
