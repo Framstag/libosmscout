@@ -100,8 +100,8 @@ namespace osmscout {
      * @return
      *    True, if there is intersection, else false.
      */
-    inline bool Includes(const GeoCoord& coord,
-                         bool openInterval=true) const
+    template<typename P> inline bool Includes(const P& coord,
+                                              bool openInterval=true) const
     {
       if (openInterval) {
         return minCoord.GetLat()<=coord.GetLat() &&
