@@ -283,6 +283,69 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
   databases.clear();
   osmscout::GeoBox boundingBox;
 
+#if defined(HAVE_MMAP)
+  if (sizeof(void*)<=4){
+    // we are on 32 bit system probably, we have to be careful with mmap
+    qint64 mmapQuota=1.5 * (1<<30); // 1.5 GiB
+    QStringList mmapFiles;
+    mmapFiles << "bounding.dat" << "router2.dat" << "types.dat" << "textregion.dat" << "textpoi.dat"
+              << "textother.dat" << "areasopt.dat" << "areanode.idx" << "textloc.dat" << "water.idx"
+              << "areaway.idx" << "waysopt.dat" << "intersections.idx" << "router.idx" << "areaarea.idx"
+              << "location.idx" << "intersections.dat";
+
+    for (auto &databaseDirectory:databaseDirectories){
+      for (auto &file:mmapFiles){
+        mmapQuota-=QFileInfo(databaseDirectory, file).size();
+      }
+    }
+    if (mmapQuota<0){
+      qWarning() << "Database is too huge to be mapped";
+    }
+
+    qint64 nodesSize=0;
+    for (auto &databaseDirectory:databaseDirectories){
+      nodesSize+=QFileInfo(databaseDirectory, "nodes.dat").size();
+    }
+    if (mmapQuota-nodesSize<0){
+      qWarning() << "Nodes data files can't be mmapped";
+      databaseParameter.SetNodesDataMMap(false);
+    }else{
+      mmapQuota-=nodesSize;
+    }
+
+    qint64 areasSize=0;
+    for (auto &databaseDirectory:databaseDirectories){
+      areasSize+=QFileInfo(databaseDirectory, "areas.dat").size();
+    }
+    if (mmapQuota-areasSize<0){
+      qWarning() << "Areas data files can't be mmapped";
+      databaseParameter.SetAreasDataMMap(false);
+    }else{
+      mmapQuota-=areasSize;
+    }
+
+    qint64 waysSize=0;
+    for (auto &databaseDirectory:databaseDirectories){
+      waysSize+=QFileInfo(databaseDirectory, "ways.dat").size();
+    }
+    if (mmapQuota-waysSize<0){
+      qWarning() << "Ways data files can't be mmapped";
+      databaseParameter.SetWaysDataMMap(false);
+    }else{
+      mmapQuota-=waysSize;
+    }
+
+    qint64 routerSize=0;
+    for (auto &databaseDirectory:databaseDirectories){
+      routerSize+=QFileInfo(databaseDirectory, "router.dat").size();
+    }
+    if (mmapQuota-routerSize<0){
+      qWarning() << "Router data files can't be mmapped";
+      databaseParameter.SetRouterDataMMap(false);
+    }
+  }
+#endif
+
   for (auto &databaseDirectory:databaseDirectories){
     osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
     osmscout::StyleConfigRef styleConfig;
