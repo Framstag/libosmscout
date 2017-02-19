@@ -39,9 +39,8 @@ static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
 static int UPDATED_DATA_RENDERING_TIMEOUT = 200;
 
 PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
-                             QString stylesheetFilename,
                              QString iconDirectory)
- : DBThread(databaseLookupDirs, stylesheetFilename, iconDirectory),
+ : DBThread(databaseLookupDirs, iconDirectory),
    canvasOverrun(1.5),
    pendingRenderingTimer(this),
    currentImage(NULL),

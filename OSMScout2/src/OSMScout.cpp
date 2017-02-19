@@ -22,6 +22,7 @@
 #include <QQmlApplicationEngine>
 #include <QQuickView>
 #include <QApplication>
+#include <QFileInfo>
 
 // Custom QML objects
 #include <osmscout/MapWidget.h>
@@ -103,16 +104,10 @@ int main(int argc, char* argv[])
     mapLookupDirectories << QDir(documentsLocation).filePath("Maps");
   }
 
-  QString stylesheetFilename;
   if (cmdLineArgs.size() > 2){
-    stylesheetFilename = cmdLineArgs.at(2);
-  }
-  else{
-    if (cmdLineArgs.size() > 1){
-      stylesheetFilename = QDir(cmdLineArgs.at(1)).filePath("standard.oss");
-    }else{
-      stylesheetFilename = QDir("stylesheets") .filePath("standard.oss");
-    }
+    QFileInfo stylesheetFile(cmdLineArgs.at(2));
+    Settings::GetInstance()->SetStyleSheetDirectory(stylesheetFile.dir().path());
+    Settings::GetInstance()->SetStyleSheetFile(stylesheetFile.fileName());
   }
 
   QString iconDirectory;
@@ -130,7 +125,6 @@ int main(int argc, char* argv[])
 /*
   if (!DBThread::InitializeTiledInstance(
           mapLookupDirectories,
-          stylesheetFilename,
           iconDirectory,
           cacheLocation + QDir::separator() + "OSMScoutTileCache",
           / onlineTileCacheSize  / 100,
@@ -142,7 +136,6 @@ int main(int argc, char* argv[])
 */
   if (!DBThread::InitializePlaneInstance(
           mapLookupDirectories,
-          stylesheetFilename,
           iconDirectory
       )) {
     std::cerr << "Cannot initialize DBThread" << std::endl;

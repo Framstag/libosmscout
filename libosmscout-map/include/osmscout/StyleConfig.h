@@ -1554,6 +1554,11 @@ namespace osmscout {
     void AddFlag(const std::string& name,
                  bool value);
 
+    inline const std::unordered_map<std::string,bool> GetFlags() const
+    {
+      return flags;
+    }
+
     StyleConstantRef GetConstantByName(const std::string& name) const;
     void AddConstant(const std::string& name,
                      const StyleConstantRef& variable);

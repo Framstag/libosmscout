@@ -91,7 +91,6 @@ protected:
 
 public:
   PlaneDBThread(QStringList databaseLookupDirs, 
-                QString stylesheetFilename, 
                 QString iconDirectory);
     
   virtual ~PlaneDBThread();
