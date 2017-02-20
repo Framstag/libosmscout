@@ -49,7 +49,8 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
    currentMagnification(0),
    finishedImage(NULL),
    finishedCoord(0.0,0.0),
-   finishedMagnification(0)
+   finishedMagnification(0),
+   font(QFont("sans-serif", 2.0))
 {
   pendingRenderingTimer.setSingleShot(true);
 
@@ -349,6 +350,14 @@ void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
   emit TileStatusChanged(changedTile);
 }
 
+void PlaneDBThread::SetFont(QFont font) {
+  this->font=font;
+}
+
+const QFont& PlaneDBThread::GetFont() const {
+  return this->font;
+}
+  
 /**
  * Actual map drawing into the back buffer
  */
@@ -406,6 +415,9 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple databases
     drawParameter.SetRenderSeaLand(renderSea);
 
+	drawParameter.SetFontName(font.toString().toStdString());
+	drawParameter.SetFontSize(font.pointSizeF());
+	
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);

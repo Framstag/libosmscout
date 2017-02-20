@@ -84,6 +84,8 @@ private:
   osmscout::Magnification       finishedMagnification;
   osmscout::FillStyleRef        finishedUnknownFillStyle;
 
+  QFont                         font;
+  
 protected:  
   virtual void TileStateCallback(const osmscout::TileRef& changedTile);
 
@@ -99,6 +101,9 @@ public:
                          const RenderMapRequest& request);
   
   virtual void InvalidateVisualCache();
+  
+  virtual void SetFont(QFont font);
+  virtual const QFont& GetFont() const;
 };
 
 #endif
