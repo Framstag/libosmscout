@@ -314,6 +314,30 @@ void Settings::SetStyleSheetFlags(std::unordered_map<std::string,bool> flags)
   SetStyleSheetFlags(GetStyleSheetFile(), flags);
 }
 
+QString Settings::GetFontName() const
+{
+  return settings.value("settings/map/fontName", "sans-serif").toString();
+}
+void Settings::SetFontName(const QString fontName)
+{
+  if (GetFontName()!=fontName){
+    settings.setValue("settings/map/fontName", fontName);
+    emit FontNameChanged(fontName);
+  }
+}
+
+double Settings::GetFontSize() const
+{
+  return settings.value("settings/map/fontSize", 2.0).toDouble();
+}
+void Settings::SetFontSize(double fontSize)
+{
+  if (GetFontSize()!=fontSize){
+    settings.setValue("settings/map/fontSize", fontSize);
+    emit FontSizeChanged(fontSize);
+  }
+}
+
 const QString Settings::GetHttpCacheDir() const
 {
   QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);  
@@ -354,6 +378,10 @@ QmlSettings::QmlSettings()
             this, SIGNAL(RenderSeaChanged(bool)));
     connect(Settings::GetInstance(), SIGNAL(GpsFormatChanged(const QString)),
             this, SIGNAL(GpsFormatChanged(const QString)));
+    connect(Settings::GetInstance(), SIGNAL(FontNameChanged(const QString)),
+            this, SIGNAL(FontNameChanged(const QString)));
+    connect(Settings::GetInstance(), SIGNAL(FontSizeChanged(double)),
+            this, SIGNAL(FontSizeChanged(double)));
 }
 
 double QmlSettings::GetPhysicalDPI() const
@@ -439,4 +467,20 @@ const QString QmlSettings::GetGpsFormat() const
 void QmlSettings::SetGpsFormat(const QString formatId)
 {
     Settings::GetInstance()->SetGpsFormat(formatId);  
+}
+QString QmlSettings::GetFontName() const
+{
+    return Settings::GetInstance()->GetFontName();
+}
+void QmlSettings::SetFontName(const QString fontName)
+{
+    Settings::GetInstance()->SetFontName(fontName);
+}
+double QmlSettings::GetFontSize() const
+{
+    return Settings::GetInstance()->GetFontSize();
+}
+void QmlSettings::SetFontSize(double fontSize)
+{
+    Settings::GetInstance()->SetFontSize(fontSize);
 }

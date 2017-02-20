@@ -102,7 +102,9 @@ DBThread::DBThread(QStringList databaseLookupDirs,
     physicalDpi(-1),
     iconDirectory(iconDirectory),
     daylight(true),
-    renderSea(true)
+    renderSea(true),
+    fontName("sans-serif"),
+    fontSize(2.0)
 {
   // fix Qt signals with uint32_t on x86_64:
   //
@@ -116,18 +118,27 @@ DBThread::DBThread(QStringList databaseLookupDirs,
 
   QScreen *srn=QGuiApplication::screens().at(0);
 
+  Settings *settings=Settings::GetInstance();
   physicalDpi = (double)srn->physicalDotsPerInch();
   osmscout::log.Debug() << "Reported screen DPI: " << physicalDpi;
-  mapDpi = Settings::GetInstance()->GetMapDPI();
+  mapDpi = settings->GetMapDPI();
   osmscout::log.Debug() << "Map DPI override: " << mapDpi;
 
-  renderSea = Settings::GetInstance()->GetRenderSea();
-  stylesheetFilename=Settings::GetInstance()->GetStyleSheetAbsoluteFile();
-  stylesheetFlags=Settings::GetInstance()->GetStyleSheetFlags();
+  renderSea=settings->GetRenderSea();
+  fontName=settings->GetFontName();
+  fontSize=settings->GetFontSize();
+  stylesheetFilename=settings->GetStyleSheetAbsoluteFile();
+  stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
-  connect(Settings::GetInstance(), SIGNAL(MapDPIChange(double)),
+  connect(settings, SIGNAL(MapDPIChange(double)),
           this, SLOT(onMapDPIChange(double)),
+          Qt::QueuedConnection);
+  connect(settings, SIGNAL(FontNameChanged(const QString)),
+          this, SLOT(onFontNameChanged(const QString)),
+          Qt::QueuedConnection);
+  connect(settings, SIGNAL(FontSizeChanged(double)),
+          this, SLOT(onFontSizeChanged(double)),
           Qt::QueuedConnection);
 
   connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
@@ -1192,6 +1203,26 @@ void DBThread::onRenderSeaChanged(bool b)
   {
     QMutexLocker threadLocker(&mutex);
     renderSea = b;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void DBThread::onFontNameChanged(const QString fontName)
+{
+  {
+    QMutexLocker threadLocker(&mutex);
+    this->fontName=fontName;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void DBThread::onFontSizeChanged(double fontSize)
+{
+  {
+    QMutexLocker threadLocker(&mutex);
+    this->fontSize=fontSize;
   }
   InvalidateVisualCache();
   emit Redraw();

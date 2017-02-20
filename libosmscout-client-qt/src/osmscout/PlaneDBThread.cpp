@@ -406,6 +406,9 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple databases
     drawParameter.SetRenderSeaLand(renderSea);
 
+    drawParameter.SetFontName(fontName.toStdString());
+    drawParameter.SetFontSize(fontSize);
+
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);

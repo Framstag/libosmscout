@@ -57,15 +57,17 @@
 class OSMSCOUT_CLIENT_QT_API Settings: public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(double   mapDPI     READ GetMapDPI     WRITE SetMapDPI     NOTIFY MapDPIChange)
-  Q_PROPERTY(MapView  *mapView   READ GetMapView    WRITE SetMapView    NOTIFY MapViewChanged)
+  Q_PROPERTY(double   mapDPI      READ GetMapDPI              WRITE SetMapDPI       NOTIFY MapDPIChange)
+  Q_PROPERTY(MapView  *mapView    READ GetMapView             WRITE SetMapView      NOTIFY MapViewChanged)
   Q_PROPERTY(bool     onlineTiles READ GetOnlineTilesEnabled WRITE SetOnlineTilesEnabled NOTIFY OnlineTilesEnabledChanged)
   Q_PROPERTY(QString  onlineTileProviderId READ GetOnlineTileProviderId WRITE SetOnlineTileProviderId NOTIFY OnlineTileProviderIdChanged)
-  Q_PROPERTY(bool     offlineMap READ GetOfflineMap WRITE SetOfflineMap NOTIFY OfflineMapChanged)
-  Q_PROPERTY(bool     renderSea  READ GetRenderSea  WRITE SetRenderSea  NOTIFY RenderSeaChanged)
-  Q_PROPERTY(QString  gpsFormat  READ GetGpsFormat  WRITE SetGpsFormat  NOTIFY GpsFormatChanged)
+  Q_PROPERTY(bool     offlineMap  READ GetOfflineMap          WRITE SetOfflineMap   NOTIFY OfflineMapChanged)
+  Q_PROPERTY(bool     renderSea   READ GetRenderSea           WRITE SetRenderSea    NOTIFY RenderSeaChanged)
+  Q_PROPERTY(QString  gpsFormat   READ GetGpsFormat           WRITE SetGpsFormat    NOTIFY GpsFormatChanged)
   Q_PROPERTY(QString  styleSheetDirectory READ GetStyleSheetDirectory WRITE SetStyleSheetDirectory NOTIFY StyleSheetDirectoryChanged)
   Q_PROPERTY(QString  styleSheetFile      READ GetStyleSheetFile      WRITE SetStyleSheetFile      NOTIFY StyleSheetFileChanged)
+  Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
+  Q_PROPERTY(double   fontSize    READ GetFontSize            WRITE SetFontSize     NOTIFY FontSizeChanged)
 
 signals:
   void MapDPIChange(double dpi);
@@ -77,6 +79,8 @@ signals:
   void GpsFormatChanged(const QString formatId);
   void StyleSheetDirectoryChanged(const QString dir);
   void StyleSheetFileChanged(const QString file);
+  void FontNameChanged(const QString fontName);
+  void FontSizeChanged(double fontSize);
 
 private:
   QSettings settings;
@@ -136,6 +140,12 @@ public:
   void SetStyleSheetFlags(const QString styleSheetFile, std::unordered_map<std::string,bool> flags);
   void SetStyleSheetFlags(std::unordered_map<std::string,bool> flags);
 
+  QString GetFontName() const;
+  void SetFontName(const QString fontName);
+
+  double GetFontSize() const;
+  void SetFontSize(double fontSize);
+
   const QString GetHttpCacheDir() const;
   
   static Settings* GetInstance();
@@ -171,6 +181,8 @@ class OSMSCOUT_CLIENT_QT_API QmlSettings: public QObject{
   Q_PROPERTY(bool     offlineMap READ GetOfflineMap WRITE SetOfflineMap NOTIFY OfflineMapChanged)
   Q_PROPERTY(bool     renderSea  READ GetRenderSea  WRITE SetRenderSea  NOTIFY RenderSeaChanged)
   Q_PROPERTY(QString  gpsFormat  READ GetGpsFormat  WRITE SetGpsFormat  NOTIFY GpsFormatChanged)
+  Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
+  Q_PROPERTY(double   fontSize    READ GetFontSize            WRITE SetFontSize     NOTIFY FontSizeChanged)
 
 signals:
   void MapDPIChange(double dpi);
@@ -180,6 +192,8 @@ signals:
   void OfflineMapChanged(bool);
   void RenderSeaChanged(bool);
   void GpsFormatChanged(const QString formatId);
+  void FontNameChanged(const QString fontName);
+  void FontSizeChanged(double fontSize);
 
 public:
   QmlSettings();
@@ -210,6 +224,12 @@ public:
   
   const QString GetGpsFormat() const;
   void SetGpsFormat(const QString formatId);
+
+  QString GetFontName() const;
+  void SetFontName(const QString fontName);
+
+  double GetFontSize() const;
+  void SetFontSize(double fontSize);
 };
 
 #endif

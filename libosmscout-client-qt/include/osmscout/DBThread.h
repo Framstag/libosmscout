@@ -269,7 +269,9 @@ public slots:
   void requestLocationDescription(const osmscout::GeoCoord location);
 
   virtual void onMapDPIChange(double dpi);
-  virtual void onRenderSeaChanged(bool);  
+  virtual void onRenderSeaChanged(bool);
+  virtual void onFontNameChanged(const QString);
+  virtual void onFontSizeChanged(double);
 
   /**
    * Start object search by some pattern. 
@@ -313,6 +315,9 @@ protected:
 
   bool                          renderError;
   QList<StyleError>             styleErrors;
+
+  QString                       fontName;
+  double                        fontSize;
 
 protected:
   

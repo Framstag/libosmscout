@@ -175,6 +175,9 @@ void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple sources
     drawParameter.SetRenderSeaLand(renderSea);
 
+    drawParameter.SetFontName(fontName.toStdString());
+    drawParameter.SetFontSize(fontSize);
+
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);
