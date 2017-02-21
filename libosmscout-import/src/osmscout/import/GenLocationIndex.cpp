@@ -1222,6 +1222,7 @@ namespace osmscout {
                                                       const FileOffset& fileOffset,
                                                       const std::string& location,
                                                       const std::string& address,
+                                                      const std::string &postalCode,
                                                       const std::vector<Point>& nodes,
                                                       const GeoBox& boundingBox,
                                                       bool& added)
@@ -1236,6 +1237,7 @@ namespace osmscout {
                                    fileOffset,
                                    location,
                                    address,
+                                   postalCode,
                                    nodes,
                                    boundingBox,
                                    added);
@@ -1262,6 +1264,7 @@ namespace osmscout {
     RegionAddress regionAddress;
 
     regionAddress.name=address;
+    regionAddress.postalCode=postalCode;
     regionAddress.object.Set(fileOffset,refArea);
 
     loc->second.addresses.push_back(regionAddress);
@@ -1315,6 +1318,7 @@ namespace osmscout {
     uint32_t    areaCount;
     size_t      addressFound=0;
     size_t      poiFound=0;
+    size_t      postalCodeFound=0;
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -1331,6 +1335,7 @@ namespace osmscout {
       std::string           name;
       std::string           location;
       std::string           address;
+      std::string           postalCode;
       std::vector<Point>    nodes;
 
       for (uint32_t a=1; a<=areaCount; a++) {
@@ -1340,6 +1345,7 @@ namespace osmscout {
         scanner.ReadNumber(tmpType);
 
         scanner.Read(name);
+        scanner.Read(postalCode);
         scanner.Read(location);
         scanner.Read(address);
         scanner.Read(nodes,false);
@@ -1351,7 +1357,11 @@ namespace osmscout {
                        !address.empty();
         bool isPOI=!name.empty() &&
                    type->GetIndexAsPOI();
-
+        bool hasPostalCode=!postalCode.empty();
+        
+        if (hasPostalCode)
+          postalCodeFound++;
+        
         if (!isAddress && !isPOI) {
           continue;
         }
@@ -1372,6 +1382,7 @@ namespace osmscout {
                                  fileOffset,
                                  location,
                                  address,
+                                 postalCode,
                                  nodes,
                                  boundingBox,
                                  added);
@@ -1398,7 +1409,10 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(areaCount)+" areas analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
+      progress.Info(NumberToString(areaCount)+" areas analyzed, "+
+                    NumberToString(addressFound)+" addresses found, "+
+                    NumberToString(poiFound)+" POIs found, "+
+                    NumberToString(postalCodeFound)+" postal codes found");
 
       scanner.Close();
     }
@@ -1538,6 +1552,7 @@ namespace osmscout {
     uint32_t    wayCount;
     //size_t      addressFound=0;
     size_t      poiFound=0;
+    size_t      postalCodeFound=0;
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -1551,7 +1566,8 @@ namespace osmscout {
       uint32_t              tmpType;
       TypeId                typeId;
       TypeInfoRef           type;
-      std::string           name;
+      std::string           name;      
+      std::string           postalCode;
       std::string           location;
       std::vector<Point>    nodes;
 
@@ -1561,12 +1577,18 @@ namespace osmscout {
         scanner.ReadFileOffset(fileOffset);
         scanner.ReadNumber(tmpType);
         scanner.Read(name);
+        scanner.Read(postalCode);
         scanner.Read(location);
         scanner.Read(nodes,false);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetWayTypeInfo(typeId);
 
+        bool hasPostalCode=!postalCode.empty();
+
+        if (hasPostalCode)
+          postalCodeFound++;
+        
         bool isPOI=!name.empty() &&
                    type->GetIndexAsPOI();
 
@@ -1620,7 +1642,8 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(wayCount)+" ways analyzed, "/*+NumberToString(addressFound)+" addresses founds, "*/+NumberToString(poiFound)+" POIs founds");
+      progress.Info(NumberToString(wayCount)+" ways analyzed, "/*+NumberToString(addressFound)+" addresses founds, "*/+NumberToString(poiFound)+" POIs found, "+
+                    NumberToString(postalCodeFound)+" postal codes found");
 
       scanner.Close();
     }

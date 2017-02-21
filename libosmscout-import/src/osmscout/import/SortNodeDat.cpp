@@ -30,11 +30,11 @@ namespace osmscout {
   class NodeLocationProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter
   {
   private:
-    FileWriter                 writer;
-    uint32_t                   overallDataCount;
-    NameFeatureValueReader     *nameReader;
-    LocationFeatureValueReader *locationReader;
-    AddressFeatureValueReader  *addressReader;
+    FileWriter                   writer;
+    uint32_t                     overallDataCount;
+    NameFeatureValueReader       *nameReader;
+    LocationFeatureValueReader   *locationReader;
+    AddressFeatureValueReader    *addressReader;
     PostalCodeFeatureValueReader *postalCodeReader;
 
   public:
@@ -164,6 +164,9 @@ namespace osmscout {
 
     delete addressReader;
     addressReader=NULL;
+    
+    delete postalCodeReader;
+    postalCodeReader=NULL;
 
     try {
       writer.SetPos(0);

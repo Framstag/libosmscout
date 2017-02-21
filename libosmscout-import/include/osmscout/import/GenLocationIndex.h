@@ -286,6 +286,7 @@ namespace osmscout {
                                 const FileOffset& fileOffset,
                                 const std::string& location,
                                 const std::string& address,
+                                const std::string& postalCode,
                                 const std::vector<Point>& nodes,
                                 const GeoBox& boundingBox,
                                 bool& added);

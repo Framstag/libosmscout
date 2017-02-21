@@ -35,10 +35,11 @@ namespace osmscout {
   class WayLocationProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter
   {
   private:
-    FileWriter                 writer;
-    uint32_t                   overallDataCount;
-    NameFeatureValueReader     *nameReader;
-    LocationFeatureValueReader *locationReader;
+    FileWriter                   writer;
+    uint32_t                     overallDataCount;
+    NameFeatureValueReader       *nameReader;
+    LocationFeatureValueReader   *locationReader;
+    PostalCodeFeatureValueReader *postalCodeReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -60,7 +61,8 @@ namespace osmscout {
     overallDataCount=0;
 
     nameReader=new NameFeatureValueReader(typeConfig);
-    locationReader=new LocationFeatureValueReader(typeConfig);
+    locationReader=new LocationFeatureValueReader(typeConfig);    
+    postalCodeReader=new PostalCodeFeatureValueReader(typeConfig);
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -94,9 +96,12 @@ namespace osmscout {
       }
 
       LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
+      PostalCodeFeatureValue *postalCodeValue=postalCodeReader->GetValue(way.GetFeatureValueBuffer());
+      
       std::string          name;
       std::string          location;
       std::string          address;
+      std::string          postalCode;
 
       name=nameValue->GetName();
 
@@ -104,9 +109,14 @@ namespace osmscout {
         location=locationValue->GetLocation();
       }
 
+      if (postalCodeValue!=NULL) {
+        postalCode=postalCodeValue->GetPostalCode();
+      }
+      
       writer.WriteFileOffset(offset);
       writer.WriteNumber(way.GetType()->GetWayId());
-      writer.Write(name);
+      writer.Write(name);      
+      writer.Write(postalCode);
       writer.Write(location);
       writer.Write(way.nodes,false);
 
@@ -130,6 +140,9 @@ namespace osmscout {
 
     delete locationReader;
     locationReader=NULL;
+    
+    delete postalCodeReader;
+    postalCodeReader=NULL;
 
     writer.SetPos(0);
     writer.Write(overallDataCount);

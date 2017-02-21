@@ -1447,9 +1447,6 @@ namespace osmscout {
                                 const TagMap& tags,
                                 FeatureValueBuffer& buffer) const
   {
-    // ignore ways for now
-    if (object.GetType() == OSMRefType::osmRefWay)
-      return;
 
     auto postalCode=tags.find(tagPostalCode);
     auto addrPostCode=tags.find(tagAddrPostCode);
