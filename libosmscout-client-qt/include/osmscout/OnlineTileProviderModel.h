@@ -23,8 +23,7 @@
 #include <QAbstractListModel>
 
 #include <osmscout/OnlineTileProvider.h>
-#include <osmscout/Settings.h>
-
+#include <osmscout/DBThread.h>
 
 /**
  * \ingroup QtAPI
@@ -82,7 +81,7 @@ class OSMSCOUT_CLIENT_QT_API OnlineTileProviderModel : public QAbstractListModel
 public:
   inline OnlineTileProviderModel()
   {
-      onlineProviders = Settings::GetInstance()->GetOnlineProviders();
+      onlineProviders = DBThread::GetInstance()->GetSettings()->GetOnlineProviders();
   };
   
   virtual inline ~OnlineTileProviderModel(){};

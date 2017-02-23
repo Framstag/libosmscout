@@ -40,10 +40,11 @@
 // TODO: watch system memory and evict caches when system is under pressure
 TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
                              QString iconDirectory,
+                             SettingsRef settings,
                              QString tileCacheDirectory,
                              size_t onlineTileCacheSize,
                              size_t offlineTileCacheSize)
- : DBThread(databaseLookupDirs, iconDirectory),
+ : DBThread(databaseLookupDirs, iconDirectory, settings),
    tileCacheDirectory(tileCacheDirectory),
    onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
    offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
@@ -56,16 +57,16 @@ TiledDBThread::TiledDBThread(QStringList databaseLookupDirs,
   screenHeight=srn->availableSize().height();
 
 
-  onlineTilesEnabled = Settings::GetInstance()->GetOnlineTilesEnabled();
-  offlineTilesEnabled = Settings::GetInstance()->GetOfflineMap();
+  onlineTilesEnabled = settings->GetOnlineTilesEnabled();
+  offlineTilesEnabled = settings->GetOfflineMap();
 
-  connect(Settings::GetInstance(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
+  connect(settings.get(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
           this, SLOT(onlineTileProviderChanged()));
-  connect(Settings::GetInstance(), SIGNAL(OnlineTilesEnabledChanged(bool)),
+  connect(settings.get(), SIGNAL(OnlineTilesEnabledChanged(bool)),
           this, SLOT(onlineTilesEnabledChanged(bool)));
-  connect(Settings::GetInstance(), SIGNAL(OfflineMapChanged(bool)),
+  connect(settings.get(), SIGNAL(OfflineMapChanged(bool)),
           this, SLOT(onOfflineMapChanged(bool)));
-  connect(Settings::GetInstance(), SIGNAL(RenderSeaChanged(bool)),
+  connect(settings.get(), SIGNAL(RenderSeaChanged(bool)),
           this, SLOT(onRenderSeaChanged(bool)));
 
   connect(this, SIGNAL(stylesheetFilenameChanged()),

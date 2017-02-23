@@ -65,7 +65,8 @@ int main(int argc, char* argv[])
   QThread thread;
   
   // load online tile providers
-  Settings::GetInstance()->loadOnlineTileProviders(
+  SettingsRef settings=std::make_shared<Settings>();
+  settings->loadOnlineTileProviders(
     ":/resources/online-tile-providers.json");
 
   // setup paths
@@ -83,8 +84,8 @@ int main(int argc, char* argv[])
   
   if (cmdLineArgs.size() > 2){
     QFileInfo stylesheetFile(cmdLineArgs.at(2));
-    Settings::GetInstance()->SetStyleSheetDirectory(stylesheetFile.dir().path());
-    Settings::GetInstance()->SetStyleSheetFile(stylesheetFile.fileName());
+    settings->SetStyleSheetDirectory(stylesheetFile.dir().path());
+    settings->SetStyleSheetFile(stylesheetFile.fileName());
   }
   
   QString iconDirectory;
@@ -101,6 +102,7 @@ int main(int argc, char* argv[])
   if (!DBThread::InitializeTiledInstance(
           mapLookupDirectories,
           iconDirectory,
+          settings,
           cacheLocation + QDir::separator() + "OSMScoutTileCache",
           /* onlineTileCacheSize  */ 100,
           /* offlineTileCacheSize */ 200
@@ -131,7 +133,6 @@ int main(int argc, char* argv[])
   thread.wait();
 
   DBThread::FreeInstance();
-  Settings::FreeInstance();
 
   return result;
 }

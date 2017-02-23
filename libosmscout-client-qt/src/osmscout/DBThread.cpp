@@ -96,8 +96,10 @@ QString StyleError::GetTypeName() const
 
 
 DBThread::DBThread(QStringList databaseLookupDirs,
-                   QString iconDirectory)
+                   QString iconDirectory,
+                   SettingsRef settings)
   : mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
+    settings(settings),
     mapDpi(-1),
     physicalDpi(-1),
     iconDirectory(iconDirectory),
@@ -118,7 +120,6 @@ DBThread::DBThread(QStringList databaseLookupDirs,
 
   QScreen *srn=QGuiApplication::screens().at(0);
 
-  Settings *settings=Settings::GetInstance();
   physicalDpi = (double)srn->physicalDotsPerInch();
   osmscout::log.Debug() << "Reported screen DPI: " << physicalDpi;
   mapDpi = settings->GetMapDPI();
@@ -131,13 +132,13 @@ DBThread::DBThread(QStringList databaseLookupDirs,
   stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
-  connect(settings, SIGNAL(MapDPIChange(double)),
+  connect(settings.get(), SIGNAL(MapDPIChange(double)),
           this, SLOT(onMapDPIChange(double)),
           Qt::QueuedConnection);
-  connect(settings, SIGNAL(FontNameChanged(const QString)),
+  connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
           this, SLOT(onFontNameChanged(const QString)),
           Qt::QueuedConnection);
-  connect(settings, SIGNAL(FontSizeChanged(double)),
+  connect(settings.get(), SIGNAL(FontSizeChanged(double)),
           this, SLOT(onFontSizeChanged(double)),
           Qt::QueuedConnection);
 
@@ -1263,6 +1264,7 @@ static DBThread* dbThreadInstance=NULL;
 
 bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
                                        QString iconDirectory,
+                                       SettingsRef settings,
                                        QString tileCacheDirectory,
                                        size_t onlineTileCacheSize,
                                        size_t offlineTileCacheSize)
@@ -1273,6 +1275,7 @@ bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
 
   dbThreadInstance=new TiledDBThread(databaseLookupDirectory,
                                      iconDirectory,
+                                     settings,
                                      tileCacheDirectory,
                                      onlineTileCacheSize,
                                      offlineTileCacheSize);
@@ -1281,14 +1284,16 @@ bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
 }
 
 bool DBThread::InitializePlaneInstance(QStringList databaseLookupDirectory,
-                                       QString iconDirectory)
+                                       QString iconDirectory,
+                                       SettingsRef settings)
 {
   if (dbThreadInstance!=NULL) {
     return false;
   }
 
   dbThreadInstance=new PlaneDBThread(databaseLookupDirectory,
-                                     iconDirectory);
+                                     iconDirectory,
+                                     settings);
 
   return true;
 }

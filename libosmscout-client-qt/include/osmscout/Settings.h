@@ -43,8 +43,8 @@
 /**
  * \ingroup QtAPI
  * 
- * Settings provide global instance (singleton) that extends Qt's QSettings
- * by properties with signals. It may be accessed via Settings::GetInstance method.
+ * Settings provides central point mutable configuration of OSMScout library.
+ * It uses Qt's QSettings for persistency. It may be accessed from DBThread instance.
  * 
  * List of online tile providers should be initialized at applicaiton start.
  * ```
@@ -58,12 +58,10 @@ class OSMSCOUT_CLIENT_QT_API Settings: public QObject
 {
   Q_OBJECT
   Q_PROPERTY(double   mapDPI      READ GetMapDPI              WRITE SetMapDPI       NOTIFY MapDPIChange)
-  Q_PROPERTY(MapView  *mapView    READ GetMapView             WRITE SetMapView      NOTIFY MapViewChanged)
   Q_PROPERTY(bool     onlineTiles READ GetOnlineTilesEnabled WRITE SetOnlineTilesEnabled NOTIFY OnlineTilesEnabledChanged)
   Q_PROPERTY(QString  onlineTileProviderId READ GetOnlineTileProviderId WRITE SetOnlineTileProviderId NOTIFY OnlineTileProviderIdChanged)
   Q_PROPERTY(bool     offlineMap  READ GetOfflineMap          WRITE SetOfflineMap   NOTIFY OfflineMapChanged)
   Q_PROPERTY(bool     renderSea   READ GetRenderSea           WRITE SetRenderSea    NOTIFY RenderSeaChanged)
-  Q_PROPERTY(QString  gpsFormat   READ GetGpsFormat           WRITE SetGpsFormat    NOTIFY GpsFormatChanged)
   Q_PROPERTY(QString  styleSheetDirectory READ GetStyleSheetDirectory WRITE SetStyleSheetDirectory NOTIFY StyleSheetDirectoryChanged)
   Q_PROPERTY(QString  styleSheetFile      READ GetStyleSheetFile      WRITE SetStyleSheetFile      NOTIFY StyleSheetFileChanged)
   Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
@@ -71,12 +69,10 @@ class OSMSCOUT_CLIENT_QT_API Settings: public QObject
 
 signals:
   void MapDPIChange(double dpi);
-  void MapViewChanged(MapView *view);
   void OnlineTilesEnabledChanged(bool);
   void OnlineTileProviderIdChanged(const QString id);
   void OfflineMapChanged(bool);
   void RenderSeaChanged(bool);
-  void GpsFormatChanged(const QString formatId);
   void StyleSheetDirectoryChanged(const QString dir);
   void StyleSheetFileChanged(const QString file);
   void FontNameChanged(const QString fontName);
@@ -85,7 +81,6 @@ signals:
 private:
   QSettings settings;
   double    physicalDpi;
-  MapView   *view;
   QMap<QString, OnlineTileProvider> onlineProviderMap;
   QList<OnlineTileProvider> onlineProviders;
   QList<MapProvider> mapProviders;
@@ -99,9 +94,6 @@ public:
   void SetMapDPI(double dpi);
   double GetMapDPI() const;
 
-  MapView *GetMapView();
-  void SetMapView(MapView *view);
-  
   osmscout::Vehicle GetRoutingVehicle() const;
   void SetRoutingVehicle(const osmscout::Vehicle& vehicle);
   
@@ -124,9 +116,6 @@ public:
   
   bool GetRenderSea() const;
   void SetRenderSea(bool);
-  
-  const QString GetGpsFormat() const;
-  void SetGpsFormat(const QString formatId);
 
   const QString GetStyleSheetDirectory() const;
   void SetStyleSheetDirectory(const QString dir);
@@ -146,11 +135,13 @@ public:
   double GetFontSize() const;
   void SetFontSize(double fontSize);
 
-  const QString GetHttpCacheDir() const;
-  
-  static Settings* GetInstance();
-  static void FreeInstance();
+  const QString GetHttpCacheDir() const;  
 };
+
+/**
+ * \ingroup QtAPI
+ */
+typedef std::shared_ptr<Settings> SettingsRef;
 
 /**
  * \ingroup QtAPI
@@ -175,23 +166,22 @@ class OSMSCOUT_CLIENT_QT_API QmlSettings: public QObject{
   Q_OBJECT
   Q_PROPERTY(double   physicalDPI READ GetPhysicalDPI CONSTANT)
   Q_PROPERTY(double   mapDPI    READ GetMapDPI  WRITE SetMapDPI   NOTIFY MapDPIChange)
-  Q_PROPERTY(QObject  *mapView  READ GetMapView WRITE SetMapView  NOTIFY MapViewChanged)
   Q_PROPERTY(bool     onlineTiles READ GetOnlineTilesEnabled WRITE SetOnlineTilesEnabled NOTIFY OnlineTilesEnabledChanged)
   Q_PROPERTY(QString  onlineTileProviderId READ GetOnlineTileProviderId WRITE SetOnlineTileProviderId NOTIFY OnlineTileProviderIdChanged)
   Q_PROPERTY(bool     offlineMap READ GetOfflineMap WRITE SetOfflineMap NOTIFY OfflineMapChanged)
   Q_PROPERTY(bool     renderSea  READ GetRenderSea  WRITE SetRenderSea  NOTIFY RenderSeaChanged)
-  Q_PROPERTY(QString  gpsFormat  READ GetGpsFormat  WRITE SetGpsFormat  NOTIFY GpsFormatChanged)
   Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
   Q_PROPERTY(double   fontSize    READ GetFontSize            WRITE SetFontSize     NOTIFY FontSizeChanged)
 
+private:
+  SettingsRef settings;
+
 signals:
   void MapDPIChange(double dpi);
-  void MapViewChanged(MapView *view);
   void OnlineTilesEnabledChanged(bool enabled);
   void OnlineTileProviderIdChanged(const QString id);
   void OfflineMapChanged(bool);
   void RenderSeaChanged(bool);
-  void GpsFormatChanged(const QString formatId);
   void FontNameChanged(const QString fontName);
   void FontSizeChanged(double fontSize);
 
@@ -205,9 +195,6 @@ public:
   void SetMapDPI(double dpi);
   double GetMapDPI() const;  
     
-  MapView *GetMapView() const;
-  void SetMapView(QObject *view);    
-
   bool GetOnlineTilesEnabled() const;
   void SetOnlineTilesEnabled(bool b);
   
@@ -220,10 +207,7 @@ public:
   void SetOfflineMap(bool);
   
   bool GetRenderSea() const;
-  void SetRenderSea(bool);  
-  
-  const QString GetGpsFormat() const;
-  void SetGpsFormat(const QString formatId);
+  void SetRenderSea(bool);
 
   QString GetFontName() const;
   void SetFontName(const QString fontName);

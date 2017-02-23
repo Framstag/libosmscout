@@ -33,10 +33,12 @@ set(OSMSCOUT_USER_AGENT "OSMScout demo app %1")
 
 set(HEADER_FILES
     src/Theme.h
+    src/AppSettings.h
 )
 
 set(SOURCE_FILES
     src/Theme.cpp
+    src/AppSettings.cpp
     src/OSMScout.cpp
 
     # qml files in CMake sources make it visible in QtCreator
