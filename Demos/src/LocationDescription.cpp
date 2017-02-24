@@ -116,10 +116,14 @@ void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
   std::cout << std::endl;
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regions;
   locationService->ResolveAdminRegionHierachie(adminRegion, regions);
-  osmscout::FileOffset parentOffset = adminRegion->regionOffset;
-  while (parentOffset != 0){
-    osmscout::AdminRegionRef region = regions[parentOffset];
-    std::cout << "  > parent region: " << region->name << std::endl;
+  osmscout::FileOffset offset = adminRegion->regionOffset;
+  while (offset != 0){
+    osmscout::AdminRegionRef region = regions[offset];
+    std::cout << "  > ";
+    if (offset!=adminRegion->regionOffset){
+      std::cout << "parent ";
+    }
+    std::cout << "region: " << region->name << std::endl;
 
     if(region->object.type==osmscout::RefType::refArea){
       osmscout::AreaRef area;
@@ -127,7 +131,7 @@ void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
       DumpFeatures(area->GetFeatureValueBuffer(), "    ");
     }
 
-    parentOffset = region->parentRegionOffset;
+    offset = region->parentRegionOffset;
   }
 }
 
