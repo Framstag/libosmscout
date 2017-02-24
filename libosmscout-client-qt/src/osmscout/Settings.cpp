@@ -32,8 +32,12 @@
 #include <osmscout/Settings.h>
 #include <osmscout/DBThread.h>
 
-Settings::Settings()
+Settings::Settings(QSettings *providedStorage):
+  storage(providedStorage)
 {
+    if (storage==NULL){
+      storage=new QSettings(this);
+    }
     /* Warning: Sailfish OS before version 2.0.1 reports incorrect DPI (100)
      *
      * Some DPI values:
@@ -49,8 +53,7 @@ Settings::Settings()
 
 Settings::~Settings()
 {
-    settings.sync();
-    // QObject will delete view (child)
+    // QObject will delete view and settings if this is owner
 }
 
 double Settings::GetPhysicalDPI() const
@@ -60,34 +63,34 @@ double Settings::GetPhysicalDPI() const
 
 void Settings::SetMapDPI(double dpi)
 {
-    settings.setValue("OSMScoutLib/Rendering/DPI", (unsigned int)dpi);
+    storage->setValue("OSMScoutLib/Rendering/DPI", (unsigned int)dpi);
     emit MapDPIChange(dpi);
 }
 
 double Settings::GetMapDPI() const
 {
-  return (size_t)settings.value("OSMScoutLib/Rendering/DPI",physicalDpi).toDouble();
+  return (size_t)storage->value("OSMScoutLib/Rendering/DPI",physicalDpi).toDouble();
 }
 
 osmscout::Vehicle Settings::GetRoutingVehicle() const
 {
-  return (osmscout::Vehicle)settings.value("OSMScoutLib/Routing/Vehicle",osmscout::vehicleCar).toUInt();
+  return (osmscout::Vehicle)storage->value("OSMScoutLib/Routing/Vehicle",osmscout::vehicleCar).toUInt();
 }
 
 void Settings::SetRoutingVehicle(const osmscout::Vehicle& vehicle)
 {
-  settings.setValue("OSMScoutLib/Routing/Vehicle", (unsigned int)vehicle);
+  storage->setValue("OSMScoutLib/Routing/Vehicle", (unsigned int)vehicle);
 }
 
 bool Settings::GetOnlineTilesEnabled() const
 {
-  return settings.value("OSMScoutLib/Rendering/OnlineTiles", true).toBool();
+  return storage->value("OSMScoutLib/Rendering/OnlineTiles", true).toBool();
 }
 
 void Settings::SetOnlineTilesEnabled(bool b)
 {
   if (GetOnlineTilesEnabled() != b){
-    settings.setValue("OSMScoutLib/Rendering/OnlineTiles", b);
+    storage->setValue("OSMScoutLib/Rendering/OnlineTiles", b);
     emit OnlineTilesEnabledChanged(b);
   }
 }
@@ -116,12 +119,12 @@ const QString Settings::GetOnlineTileProviderId() const
     if (!onlineProviders.isEmpty()){
         def = onlineProviders.begin()->getId();
     }
-    return settings.value("OSMScoutLib/Rendering/OnlineTileProvider", def).toString();
+    return storage->value("OSMScoutLib/Rendering/OnlineTileProvider", def).toString();
 }
 
 void Settings::SetOnlineTileProviderId(QString id){
     if (GetOnlineTileProviderId() != id){
-        settings.setValue("OSMScoutLib/Rendering/OnlineTileProvider", id);
+        storage->setValue("OSMScoutLib/Rendering/OnlineTileProvider", id);
         emit OnlineTileProviderIdChanged(id);
     }
 }
@@ -184,43 +187,43 @@ bool Settings::loadMapProviders(QString path)
 
 bool Settings::GetOfflineMap() const
 {
-    return settings.value("OSMScoutLib/Rendering/OfflineMap", true).toBool();
+    return storage->value("OSMScoutLib/Rendering/OfflineMap", true).toBool();
 }
 void Settings::SetOfflineMap(bool b)
 {
   if (GetOfflineMap() != b){
-    settings.setValue("OSMScoutLib/Rendering/OfflineMap", b);
+    storage->setValue("OSMScoutLib/Rendering/OfflineMap", b);
     emit OfflineMapChanged(b);
   }
 }
 
 bool Settings::GetRenderSea() const
 {
-  return settings.value("OSMScoutLib/Rendering/RenderSea", true).toBool();
+  return storage->value("OSMScoutLib/Rendering/RenderSea", true).toBool();
 }
 void Settings::SetRenderSea(bool b)
 {
   if (GetRenderSea() != b){
-    settings.setValue("OSMScoutLib/Rendering/RenderSea", b);
+    storage->setValue("OSMScoutLib/Rendering/RenderSea", b);
     emit RenderSeaChanged(b);
   }    
 }
 
 const QString Settings::GetStyleSheetDirectory() const
 {
-  return settings.value("OSMScoutLib/Rendering/StylesheetDirectory", "stylesheets").toString();
+  return storage->value("OSMScoutLib/Rendering/StylesheetDirectory", "stylesheets").toString();
 }
 void Settings::SetStyleSheetDirectory(const QString dir)
 {
   if (GetStyleSheetDirectory() != dir){
-    settings.setValue("OSMScoutLib/Rendering/StylesheetDirectory", dir);
+    storage->setValue("OSMScoutLib/Rendering/StylesheetDirectory", dir);
     emit StyleSheetDirectoryChanged(dir);
   }
 }
 
 const QString Settings::GetStyleSheetFile() const
 {
-  return settings.value("OSMScoutLib/Rendering/StylesheetFile", "standard.oss").toString();
+  return storage->value("OSMScoutLib/Rendering/StylesheetFile", "standard.oss").toString();
 }
 const QString Settings::GetStyleSheetAbsoluteFile() const
 {
@@ -229,7 +232,7 @@ const QString Settings::GetStyleSheetAbsoluteFile() const
 void Settings::SetStyleSheetFile(const QString file)
 {
   if (GetStyleSheetFile() != file){
-    settings.setValue("OSMScoutLib/Rendering/StylesheetFile", file);
+    storage->setValue("OSMScoutLib/Rendering/StylesheetFile", file);
     emit StyleSheetFileChanged(file);
   }
 }
@@ -237,11 +240,11 @@ void Settings::SetStyleSheetFile(const QString file)
 const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags(const QString styleSheetFile)
 {
   std::unordered_map<std::string,bool> stylesheetFlags; // TODO: read from config
-  settings.beginGroup("OSMScoutLib/Rendering/StylesheetFlags/"+styleSheetFile);
-  for (const QString key:settings.allKeys()){
-    stylesheetFlags[key.toStdString()]=settings.value(key, false).toBool();
+  storage->beginGroup("OSMScoutLib/Rendering/StylesheetFlags/"+styleSheetFile);
+  for (const QString key:storage->allKeys()){
+    stylesheetFlags[key.toStdString()]=storage->value(key, false).toBool();
   }
-  settings.endGroup();
+  storage->endGroup();
   return stylesheetFlags;
 }
 const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags()
@@ -250,11 +253,11 @@ const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags()
 }
 void Settings::SetStyleSheetFlags(const QString styleSheetFile, std::unordered_map<std::string,bool> flags)
 {
-  settings.beginGroup("OSMScoutLib/Rendering/StylesheetFlags/"+styleSheetFile);
+  storage->beginGroup("OSMScoutLib/Rendering/StylesheetFlags/"+styleSheetFile);
   for (const auto &entry:flags){
-    settings.setValue(QString::fromStdString(entry.first), entry.second);
+    storage->setValue(QString::fromStdString(entry.first), entry.second);
   }
-  settings.endGroup();
+  storage->endGroup();
 }
 void Settings::SetStyleSheetFlags(std::unordered_map<std::string,bool> flags)
 {
@@ -263,24 +266,24 @@ void Settings::SetStyleSheetFlags(std::unordered_map<std::string,bool> flags)
 
 QString Settings::GetFontName() const
 {
-  return settings.value("OSMScoutLib/Rendering/FontName", "sans-serif").toString();
+  return storage->value("OSMScoutLib/Rendering/FontName", "sans-serif").toString();
 }
 void Settings::SetFontName(const QString fontName)
 {
   if (GetFontName()!=fontName){
-    settings.setValue("OSMScoutLib/Rendering/FontName", fontName);
+    storage->setValue("OSMScoutLib/Rendering/FontName", fontName);
     emit FontNameChanged(fontName);
   }
 }
 
 double Settings::GetFontSize() const
 {
-  return settings.value("OSMScoutLib/Rendering/FontSize", 2.0).toDouble();
+  return storage->value("OSMScoutLib/Rendering/FontSize", 2.0).toDouble();
 }
 void Settings::SetFontSize(double fontSize)
 {
   if (GetFontSize()!=fontSize){
-    settings.setValue("OSMScoutLib/Rendering/FontSize", fontSize);
+    storage->setValue("OSMScoutLib/Rendering/FontSize", fontSize);
     emit FontSizeChanged(fontSize);
   }
 }

@@ -79,14 +79,14 @@ signals:
   void FontSizeChanged(double fontSize);
 
 private:
-  QSettings settings;
+  QSettings *storage;
   double    physicalDpi;
   QMap<QString, OnlineTileProvider> onlineProviderMap;
   QList<OnlineTileProvider> onlineProviders;
   QList<MapProvider> mapProviders;
 
 public:
-  Settings();
+  Settings(QSettings *providedStorage=NULL);
   virtual ~Settings();
 
   double GetPhysicalDPI() const;
