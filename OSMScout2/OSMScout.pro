@@ -29,9 +29,11 @@ RCC_DIR = $$DESTDIR/
 UI_DIR = $$DESTDIR/
 
 SOURCES = src/OSMScout.cpp \
-          src/Theme.cpp
+          src/Theme.cpp \
+          src/AppSettings.cpp
 
-HEADERS = src/Theme.h
+HEADERS = src/Theme.h \
+          src/AppSettings.h
 
 DISTFILES += \
     qml/custom/MapButton.qml \

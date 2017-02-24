@@ -41,9 +41,9 @@ MapWidget::MapWidget(QQuickItem* parent)
     
     DBThread *dbThread=DBThread::GetInstance();
     
-    mapDpi = Settings::GetInstance()->GetMapDPI();
+    mapDpi = dbThread->GetSettings()->GetMapDPI();
 
-    connect(Settings::GetInstance(), SIGNAL(MapDPIChange(double)),
+    connect(dbThread->GetSettings().get(), SIGNAL(MapDPIChange(double)),
             this, SLOT(onMapDPIChange(double)));
   
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());

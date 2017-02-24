@@ -96,13 +96,17 @@ QString StyleError::GetTypeName() const
 
 
 DBThread::DBThread(QStringList databaseLookupDirs,
-                   QString iconDirectory)
+                   QString iconDirectory,
+                   SettingsRef settings)
   : mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
+    settings(settings),
     mapDpi(-1),
     physicalDpi(-1),
     iconDirectory(iconDirectory),
     daylight(true),
-    renderSea(true)
+    renderSea(true),
+    fontName("sans-serif"),
+    fontSize(2.0)
 {
   // fix Qt signals with uint32_t on x86_64:
   //
@@ -118,16 +122,24 @@ DBThread::DBThread(QStringList databaseLookupDirs,
 
   physicalDpi = (double)srn->physicalDotsPerInch();
   osmscout::log.Debug() << "Reported screen DPI: " << physicalDpi;
-  mapDpi = Settings::GetInstance()->GetMapDPI();
+  mapDpi = settings->GetMapDPI();
   osmscout::log.Debug() << "Map DPI override: " << mapDpi;
 
-  renderSea = Settings::GetInstance()->GetRenderSea();
-  stylesheetFilename=Settings::GetInstance()->GetStyleSheetAbsoluteFile();
-  stylesheetFlags=Settings::GetInstance()->GetStyleSheetFlags();
+  renderSea=settings->GetRenderSea();
+  fontName=settings->GetFontName();
+  fontSize=settings->GetFontSize();
+  stylesheetFilename=settings->GetStyleSheetAbsoluteFile();
+  stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
-  connect(Settings::GetInstance(), SIGNAL(MapDPIChange(double)),
+  connect(settings.get(), SIGNAL(MapDPIChange(double)),
           this, SLOT(onMapDPIChange(double)),
+          Qt::QueuedConnection);
+  connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
+          this, SLOT(onFontNameChanged(const QString)),
+          Qt::QueuedConnection);
+  connect(settings.get(), SIGNAL(FontSizeChanged(double)),
+          this, SLOT(onFontSizeChanged(double)),
           Qt::QueuedConnection);
 
   connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
@@ -1197,6 +1209,26 @@ void DBThread::onRenderSeaChanged(bool b)
   emit Redraw();
 }
 
+void DBThread::onFontNameChanged(const QString fontName)
+{
+  {
+    QMutexLocker threadLocker(&mutex);
+    this->fontName=fontName;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void DBThread::onFontSizeChanged(double fontSize)
+{
+  {
+    QMutexLocker threadLocker(&mutex);
+    this->fontSize=fontSize;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
 osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) const
 {
   QMutexLocker threadLocker(&mutex);
@@ -1232,6 +1264,7 @@ static DBThread* dbThreadInstance=NULL;
 
 bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
                                        QString iconDirectory,
+                                       SettingsRef settings,
                                        QString tileCacheDirectory,
                                        size_t onlineTileCacheSize,
                                        size_t offlineTileCacheSize)
@@ -1242,6 +1275,7 @@ bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
 
   dbThreadInstance=new TiledDBThread(databaseLookupDirectory,
                                      iconDirectory,
+                                     settings,
                                      tileCacheDirectory,
                                      onlineTileCacheSize,
                                      offlineTileCacheSize);
@@ -1250,14 +1284,16 @@ bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
 }
 
 bool DBThread::InitializePlaneInstance(QStringList databaseLookupDirectory,
-                                       QString iconDirectory)
+                                       QString iconDirectory,
+                                       SettingsRef settings)
 {
   if (dbThreadInstance!=NULL) {
     return false;
   }
 
   dbThreadInstance=new PlaneDBThread(databaseLookupDirectory,
-                                     iconDirectory);
+                                     iconDirectory,
+                                     settings);
 
   return true;
 }

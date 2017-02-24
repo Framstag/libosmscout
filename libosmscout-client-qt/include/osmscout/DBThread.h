@@ -269,7 +269,9 @@ public slots:
   void requestLocationDescription(const osmscout::GeoCoord location);
 
   virtual void onMapDPIChange(double dpi);
-  virtual void onRenderSeaChanged(bool);  
+  virtual void onRenderSeaChanged(bool);
+  virtual void onFontNameChanged(const QString);
+  virtual void onFontSizeChanged(double);
 
   /**
    * Start object search by some pattern. 
@@ -292,6 +294,7 @@ public slots:
 
 protected:
   MapManagerRef                 mapManager;
+  SettingsRef                   settings;
 
   double                        mapDpi;
   double                        physicalDpi;
@@ -314,9 +317,14 @@ protected:
   bool                          renderError;
   QList<StyleError>             styleErrors;
 
+  QString                       fontName;
+  double                        fontSize;
+
 protected:
   
-  DBThread(QStringList databaseLookupDirectories, QString iconDirectory);
+  DBThread(QStringList databaseLookupDirectories,
+           QString iconDirectory,
+           SettingsRef settings);
 
   virtual ~DBThread();
 
@@ -404,6 +412,11 @@ public:
     return mapManager;
   }
 
+  inline SettingsRef GetSettings() const
+  {
+    return settings;
+  }
+
   inline QString GetStylesheetFilename() const
   {
     return stylesheetFilename;
@@ -421,12 +434,14 @@ public:
   
   static bool InitializeTiledInstance(QStringList databaseDirectory, 
                                       QString iconDirectory,
+                                      SettingsRef settings,
                                       QString tileCacheDirectory,
                                       size_t onlineTileCacheSize = 20, 
                                       size_t offlineTileCacheSize = 50);
 
   static bool InitializePlaneInstance(QStringList databaseDirectory, 
-                                      QString iconDirectory);
+                                      QString iconDirectory,
+                                      SettingsRef settings);
   
   static DBThread* GetInstance();
   static void FreeInstance();

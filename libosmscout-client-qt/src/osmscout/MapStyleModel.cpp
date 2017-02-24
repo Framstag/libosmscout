@@ -28,7 +28,7 @@ MapStyleModel::MapStyleModel():
   connect(dbThread,SIGNAL(stylesheetFilenameChanged()),
           this,SIGNAL(styleChanged()));
 
-  Settings* settings = Settings::GetInstance();
+  SettingsRef settings=DBThread::GetInstance()->GetSettings();
 
   QDirIterator dirIt(settings->GetStyleSheetDirectory(), QDirIterator::FollowSymlinks);
   while (dirIt.hasNext()) {
@@ -53,7 +53,7 @@ QString MapStyleModel::getStyle() const
 void MapStyleModel::setStyle(const QString &styleFile) const
 {
   DBThread* dbThread = DBThread::GetInstance();
-  Settings* settings = Settings::GetInstance();
+  SettingsRef settings=dbThread->GetSettings();
 
   settings->SetStyleSheetFile(styleFile);
 

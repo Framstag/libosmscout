@@ -89,7 +89,8 @@ protected:
 
 public:
   PlaneDBThread(QStringList databaseLookupDirs, 
-                QString iconDirectory);
+                QString iconDirectory,
+                SettingsRef renderingSettings);
     
   virtual ~PlaneDBThread();
 

@@ -89,5 +89,6 @@ Q_INVOKABLE void StyleFlagsModel::setFlag(const QString &key, bool value)
   for (const auto &key:updated.keys()){
     flags[key.toStdString()]=updated[key];
   }
-  Settings::GetInstance()->SetStyleSheetFlags(flags);
+  SettingsRef settings=DBThread::GetInstance()->GetSettings();
+  settings->SetStyleSheetFlags(flags);
 }

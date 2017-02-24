@@ -39,8 +39,9 @@ static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
 static int UPDATED_DATA_RENDERING_TIMEOUT = 200;
 
 PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
-                             QString iconDirectory)
- : DBThread(databaseLookupDirs, iconDirectory),
+                             QString iconDirectory,
+                             SettingsRef renderingSettings)
+ : DBThread(databaseLookupDirs, iconDirectory, renderingSettings),
    canvasOverrun(1.5),
    pendingRenderingTimer(this),
    currentImage(NULL),
@@ -405,6 +406,9 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetRenderBackground(false); // we draw background before MapPainter
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple databases
     drawParameter.SetRenderSeaLand(renderSea);
+
+    drawParameter.SetFontName(fontName.toStdString());
+    drawParameter.SetFontSize(fontSize);
 
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);
