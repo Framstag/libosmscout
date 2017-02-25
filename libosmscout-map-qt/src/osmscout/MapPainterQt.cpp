@@ -59,23 +59,26 @@ namespace osmscout {
                               const MapParameter& parameter,
                               double fontSize)
   {
-    std::map<size_t,QFont>::const_iterator f;
+    FontDescriptor descriptor;
+    descriptor.fontName=QString::fromStdString(parameter.GetFontName());
+    descriptor.fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+    descriptor.weight=QFont::Normal;
+    descriptor.italic=false;
 
-    fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
-
-    f=fonts.find(fontSize);
-
-    if (f!=fonts.end()) {
-      return f->second;
+    if (fonts.contains(descriptor)) {
+      return fonts.value(descriptor);
     }
 
-    QFont font(parameter.GetFontName().c_str(),QFont::Normal,false);
+    QFont font(descriptor.fontName.toStdString().c_str(),
+               descriptor.weight,
+               descriptor.italic);
 
-    font.setPixelSize(fontSize);
+    font.setPixelSize(descriptor.fontSize);
     font.setStyleStrategy(QFont::PreferAntialias);
     font.setStyleStrategy(QFont::PreferMatch);
 
-    return fonts.insert(std::pair<size_t,QFont>(fontSize,font)).first->second;
+    fonts[descriptor]=font;
+    return font;
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& /*styleConfig*/,
