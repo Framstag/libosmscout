@@ -23,6 +23,7 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
+#include <osmscout/TypeFeatures.h>
 
 /**
  * Examples:
@@ -39,6 +40,31 @@
  * "is close/at named object"
  * src/LocationDescription ../maps/nordrhein-westfalen 51.49300 7.48255
  */
+
+void DumpFeatures(const osmscout::FeatureValueBuffer &features, std::string indent="  ")
+{
+    for (auto featureInstance :features.GetType()->GetFeatures()){
+      if (features.HasFeature(featureInstance.GetIndex())){
+        osmscout::FeatureRef feature=featureInstance.GetFeature();
+        std::cout << indent << "+ feature " << feature->GetName();
+        if (feature->HasValue()){
+          osmscout::FeatureValue *value=features.GetValue(featureInstance.GetIndex());
+          if (feature->HasLabel()){
+            if (!value->GetLabel().empty()){
+              std::cout << ": " << value->GetLabel();
+            }
+          }else{
+            // print other values without defined label
+            const auto *adminLevel=dynamic_cast<const osmscout::AdminLevelFeatureValue*>(value);
+            if (adminLevel!=NULL){
+              std::cout << ": " << (int)adminLevel->GetAdminLevel();
+            }
+          }
+        }
+        std::cout << std::endl;
+      }
+    }
+}
 
 void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& description)
 {
@@ -75,25 +101,12 @@ void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& descri
   // print all features of this place
   std::cout << std::endl;
   if (place.GetObjectFeatures()){
-    for (auto featureInstance :place.GetObjectFeatures()->GetType()->GetFeatures()){
-      if (place.GetObjectFeatures()->HasFeature(featureInstance.GetIndex())){
-        osmscout::FeatureRef feature=featureInstance.GetFeature();
-        if (feature->HasValue() && feature->HasLabel()){
-          osmscout::FeatureValue *value=place.GetObjectFeatures()->GetValue(featureInstance.GetIndex());
-          if (value->GetLabel().empty()){
-            std::cout << "  + feature " << feature->GetName() << std::endl;
-          }else{
-            std::cout << "  + feature " << feature->GetName() << ": " << value->GetLabel() << std::endl;
-          }
-        }else{
-          std::cout << "  + feature " << feature->GetName() << std::endl;
-        }
-      }
-    }
+    DumpFeatures(*place.GetObjectFeatures());
   }
 }
 
 void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
+                            const osmscout::DatabaseRef &database,
                             const osmscout::AdminRegionRef& adminRegion)
 {
   if (!adminRegion){
@@ -103,11 +116,22 @@ void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
   std::cout << std::endl;
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regions;
   locationService->ResolveAdminRegionHierachie(adminRegion, regions);
-  osmscout::FileOffset parentOffset = adminRegion->parentRegionOffset;
-  while (parentOffset != 0){
-    osmscout::AdminRegionRef region = regions[parentOffset];
-    std::cout << "  > parent region: " << region->name << std::endl;
-    parentOffset = region->parentRegionOffset;
+  osmscout::FileOffset offset = adminRegion->regionOffset;
+  while (offset != 0){
+    osmscout::AdminRegionRef region = regions[offset];
+    std::cout << "  > ";
+    if (offset!=adminRegion->regionOffset){
+      std::cout << "parent ";
+    }
+    std::cout << "region: " << region->name << std::endl;
+
+    if(region->object.type==osmscout::RefType::refArea){
+      osmscout::AreaRef area;
+      database->GetAreaByOffset(region->object.offset, area);
+      DumpFeatures(area->GetFeatureValueBuffer(), "    ");
+    }
+
+    offset = region->parentRegionOffset;
   }
 }
 
@@ -168,17 +192,17 @@ int main(int argc, char* argv[])
 
   if (atNameDescription) {
     DumpLocationAtPlaceDescription(*atNameDescription);
-    DumpParentAdminRegions(locationService, atNameDescription->GetPlace().GetAdminRegion());
+    DumpParentAdminRegions(locationService, database, atNameDescription->GetPlace().GetAdminRegion());
   }
 
   if (atAddressDescription) {
     DumpLocationAtPlaceDescription(*atAddressDescription);
-    DumpParentAdminRegions(locationService, atAddressDescription->GetPlace().GetAdminRegion());
+    DumpParentAdminRegions(locationService, database, atAddressDescription->GetPlace().GetAdminRegion());
   }
 
   if (atPOIDescription) {
     DumpLocationAtPlaceDescription(*atPOIDescription);
-    DumpParentAdminRegions(locationService, atPOIDescription->GetPlace().GetAdminRegion());
+    DumpParentAdminRegions(locationService, database, atPOIDescription->GetPlace().GetAdminRegion());
   }
 
   database->Close();
