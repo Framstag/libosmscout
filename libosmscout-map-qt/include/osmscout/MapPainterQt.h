@@ -23,6 +23,7 @@
 #include <mutex>
 
 #include <QPainter>
+#include <QMap>
 
 #include <osmscout/private/MapQtImportExport.h>
 
