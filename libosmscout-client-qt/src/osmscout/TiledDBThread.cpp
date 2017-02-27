@@ -693,7 +693,7 @@ void TiledDBThread::onStylesheetFilenameChanged(){
 
 void TiledDBThread::InvalidateVisualCache()
 {
-  // invalidate tile cache and emit Redraw
+  // invalidate tile cache
   QMutexLocker locker(&tileCacheMutex);
   offlineTileCache.invalidate();
   offlineTileCache.clearPendingRequests();
