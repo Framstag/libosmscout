@@ -71,6 +71,10 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const FillStyle& fillStyle);
 
+    void SetBorder(const Projection& projection,
+                   const MapParameter& parameter,
+                   const BorderStyle& borderStyle);
+
     bool FollowPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
     void FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
                         bool isClosed, bool keepOrientation);

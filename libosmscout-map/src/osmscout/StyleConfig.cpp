@@ -717,6 +717,90 @@ namespace osmscout {
     return borderDash<other.borderDash;
   }
 
+  BorderStyle::BorderStyle()
+    : color(1.0,0.0,0.0,0.0),
+      width(0.0)
+  {
+    // no code
+  }
+
+  BorderStyle::BorderStyle(const BorderStyle& style)
+  {
+    this->color=style.color;
+    this->width=style.width;
+    this->dash=style.dash;
+  }
+
+  BorderStyle& BorderStyle::SetColor(const Color& color)
+  {
+    this->color=color;
+
+    return *this;
+  }
+
+  BorderStyle& BorderStyle::SetWidth(double value)
+  {
+    width=value;
+
+    return *this;
+  }
+
+  BorderStyle& BorderStyle::SetDashes(const std::vector<double> dashes)
+  {
+    dash=dashes;
+
+    return *this;
+  }
+
+  void BorderStyle::CopyAttributes(const BorderStyle& other,
+                                 const std::set<Attribute>& attributes)
+  {
+    for (const auto& attribute : attributes) {
+      switch (attribute) {
+      case attrColor:
+        color=other.color;
+        break;
+      case attrWidth:
+        width=other.width;
+        break;
+      case attrDashes:
+        dash=other.dash;
+        break;
+      }
+    }
+  }
+
+  bool BorderStyle::operator==(const BorderStyle& other) const
+  {
+    if (color!=other.color) {
+      return false;
+    }
+
+    if (width!=other.width) {
+      return false;
+    }
+
+    return dash==other.dash;
+  }
+
+  bool BorderStyle::operator!=(const BorderStyle& other) const
+  {
+    return !operator==(other);
+  }
+
+  bool BorderStyle::operator<(const BorderStyle& other) const
+  {
+    if (color!=other.color) {
+      return color<other.color;
+    }
+
+    if (width!=other.width) {
+      return width<other.width;
+    }
+
+    return dash<other.dash;
+  }
+
   LabelStyle::LabelStyle()
    : priority(std::numeric_limits<size_t>::max()),
      size(1)
@@ -1212,14 +1296,18 @@ namespace osmscout {
     // no code
   }
 
-  DrawPrimitive::DrawPrimitive(const FillStyleRef& fillStyle)
-  : fillStyle(fillStyle)
+  DrawPrimitive::DrawPrimitive(const FillStyleRef& fillStyle,
+                               const BorderStyleRef& borderStyle)
+  : fillStyle(fillStyle),
+    borderStyle(borderStyle)
   {
     // no code
   }
 
-  PolygonPrimitive::PolygonPrimitive(const FillStyleRef& fillStyle)
-  : DrawPrimitive(fillStyle)
+  PolygonPrimitive::PolygonPrimitive(const FillStyleRef& fillStyle,
+                                     const BorderStyleRef& borderStyle)
+  : DrawPrimitive(fillStyle,
+                  borderStyle)
   {
     // no code
   }
@@ -1251,8 +1339,10 @@ namespace osmscout {
   RectanglePrimitive::RectanglePrimitive(const Vertex2D& topLeft,
                                          double width,
                                          double height,
-                                         const FillStyleRef& fillStyle)
-  : DrawPrimitive(fillStyle),
+                                         const FillStyleRef& fillStyle,
+                                         const BorderStyleRef& borderStyle)
+  : DrawPrimitive(fillStyle,
+                  borderStyle),
     topLeft(topLeft),
     width(width),
     height(height)
@@ -1274,8 +1364,10 @@ namespace osmscout {
 
   CirclePrimitive::CirclePrimitive(const Vertex2D& center,
                                    double radius,
-                                   const FillStyleRef& fillStyle)
-  : DrawPrimitive(fillStyle),
+                                   const FillStyleRef& fillStyle,
+                                   const BorderStyleRef& borderStyle)
+  : DrawPrimitive(fillStyle,
+                  borderStyle),
     center(center),
     radius(radius)
   {
@@ -1661,12 +1753,14 @@ namespace osmscout {
     wayTypeSets.clear();
 
     areaFillStyleConditionals.clear();
+    areaBorderStyleConditionals.clear();
     areaTextStyleConditionals.clear();
     areaIconStyleConditionals.clear();
     areaBorderTextStyleConditionals.clear();
     areaBorderSymbolStyleConditionals.clear();
 
     areaFillStyleSelectors.clear();
+    areaBorderStyleSelectors.clear();
     areaTextStyleSelectors.clear();
     areaIconStyleSelectors.clear();
     areaBorderTextStyleSelectors.clear();
@@ -2036,6 +2130,8 @@ namespace osmscout {
 
     GetMaxLevelInConditionals(areaFillStyleConditionals,
                               maxLevel);
+    GetMaxLevelInConditionals(areaBorderStyleConditionals,
+                              maxLevel);
     GetMaxLevelInConditionals(areaTextStyleConditionals,
                               maxLevel);
     GetMaxLevelInConditionals(areaIconStyleConditionals,
@@ -2049,6 +2145,11 @@ namespace osmscout {
                        areaFillStyleConditionals,
                        maxLevel,
                        areaFillStyleSelectors);
+
+    SortInConditionals(*typeConfig,
+                       areaBorderStyleConditionals,
+                       maxLevel,
+                       areaBorderStyleSelectors);
 
     std::unordered_map<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
 
@@ -2094,6 +2195,10 @@ namespace osmscout {
                        maxLevel,
                        areaTypeSets);
     CalculateUsedTypes(*typeConfig,
+                       areaBorderStyleConditionals,
+                       maxLevel,
+                       areaTypeSets);
+    CalculateUsedTypes(*typeConfig,
                        areaTextStyleConditionals,
                        maxLevel,
                        areaTypeSets);
@@ -2111,6 +2216,7 @@ namespace osmscout {
                        areaTypeSets);
 
     areaFillStyleConditionals.clear();
+    areaBorderStyleConditionals.clear();
     areaTextStyleConditionals.clear();
     areaIconStyleConditionals.clear();
     areaBorderTextStyleConditionals.clear();
@@ -2274,6 +2380,14 @@ namespace osmscout {
     FillConditionalStyle conditional(filter,style);
 
     areaFillStyleConditionals.push_back(conditional);
+  }
+
+  void StyleConfig::AddAreaBorderStyle(const StyleFilter& filter,
+                                       BorderPartialStyle& style)
+  {
+    BorderConditionalStyle conditional(filter,style);
+
+    areaBorderStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddAreaTextStyle(const StyleFilter& filter,
@@ -2506,6 +2620,18 @@ namespace osmscout {
                     buffer,
                     projection,
                     fillStyle);
+  }
+
+  void StyleConfig::GetAreaBorderStyle(const TypeInfoRef& type,
+                                       const FeatureValueBuffer& buffer,
+                                       const Projection& projection,
+                                       BorderStyleRef& borderStyle) const
+  {
+    GetFeatureStyle(styleResolveContext,
+                    areaBorderStyleSelectors[type->GetIndex()],
+                    buffer,
+                    projection,
+                    borderStyle);
   }
 
   bool StyleConfig::HasAreaTextStyles(const TypeInfoRef& type,

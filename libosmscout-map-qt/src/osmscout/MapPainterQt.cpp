@@ -741,11 +741,26 @@ namespace osmscout {
 
       if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=NULL) {
         const PolygonPrimitive *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
-        FillStyleRef           style=polygon->GetFillStyle();
+        FillStyleRef           fillStyle=polygon->GetFillStyle();
+        BorderStyleRef         borderStyle=polygon->GetBorderStyle();
 
-        SetFill(projection,
-                parameter,
-                *style);
+        if (fillStyle) {
+          SetFill(projection,
+                  parameter,
+                  *fillStyle);
+        }
+        else {
+          painter->setBrush(Qt::NoBrush);
+        }
+
+        if (borderStyle) {
+          SetBorder(projection,
+                    parameter,
+                    *borderStyle);
+        }
+        else {
+          painter->setPen(Qt::NoPen);
+        }
 
         QPainterPath path;
 
@@ -766,11 +781,26 @@ namespace osmscout {
       }
       else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=NULL) {
         const RectanglePrimitive *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
-        FillStyleRef             style=rectangle->GetFillStyle();
+        FillStyleRef             fillStyle=rectangle->GetFillStyle();
+        BorderStyleRef           borderStyle=rectangle->GetBorderStyle();
 
-        SetFill(projection,
-                parameter,
-                *style);
+        if (fillStyle) {
+          SetFill(projection,
+                  parameter,
+                  *fillStyle);
+        }
+        else {
+          painter->setBrush(Qt::NoBrush);
+        }
+
+        if (borderStyle) {
+          SetBorder(projection,
+                    parameter,
+                    *borderStyle);
+        }
+        else {
+          painter->setPen(Qt::NoPen);
+        }
 
         QPainterPath path;
 
@@ -783,7 +813,8 @@ namespace osmscout {
       }
       else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=NULL) {
         const CirclePrimitive *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
-        FillStyleRef          style=circle->GetFillStyle();
+        FillStyleRef          fillStyle=circle->GetFillStyle();
+        BorderStyleRef        borderStyle=circle->GetBorderStyle();
 
         QPointF center(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
                        y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY));
@@ -795,9 +826,23 @@ namespace osmscout {
 
         radius=circle->GetRadius()*projection.GetMeterInPixel();*/
 
-        SetFill(projection,
-                parameter,
-                *style);
+        if (fillStyle) {
+          SetFill(projection,
+                  parameter,
+                  *fillStyle);
+        }
+        else {
+          painter->setBrush(Qt::NoBrush);
+        }
+
+        if (borderStyle) {
+          SetBorder(projection,
+                    parameter,
+                    *borderStyle);
+        }
+        else {
+          painter->setPen(Qt::NoPen);
+        }
 
         /*
         QRadialGradient grad(center, radius);
@@ -956,9 +1001,23 @@ namespace osmscout {
       }
     }
 
-    SetFill(projection,
-            parameter,
-            *area.fillStyle);
+    if (area.fillStyle) {
+      SetFill(projection,
+              parameter,
+              *area.fillStyle);
+    }
+    else {
+      painter->setBrush(Qt::NoBrush);
+    }
+
+    if (area.borderStyle) {
+      SetBorder(projection,
+                parameter,
+                *area.borderStyle);
+    }
+    else {
+      painter->setPen(Qt::NoPen);
+    }
 
     bool restoreTransform = false;
     size_t idx = -1;
@@ -1025,8 +1084,6 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const FillStyle& fillStyle)
   {
-    double borderWidth=projection.ConvertWidthToPixel(fillStyle.GetBorderWidth());
-
     if (fillStyle.HasPattern() &&
         projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
         HasPattern(parameter,fillStyle)) {
@@ -1043,25 +1100,32 @@ namespace osmscout {
     else {
       painter->setBrush(Qt::NoBrush);
     }
+  }
+
+  void MapPainterQt::SetBorder(const Projection& projection,
+                               const MapParameter& parameter,
+                               const BorderStyle& borderStyle)
+  {
+    double borderWidth=projection.ConvertWidthToPixel(borderStyle.GetWidth());
 
     if (borderWidth>=parameter.GetLineMinWidthPixel()) {
       QPen pen;
 
-      pen.setColor(QColor::fromRgbF(fillStyle.GetBorderColor().GetR(),
-                                    fillStyle.GetBorderColor().GetG(),
-                                    fillStyle.GetBorderColor().GetB(),
-                                    fillStyle.GetBorderColor().GetA()));
+      pen.setColor(QColor::fromRgbF(borderStyle.GetColor().GetR(),
+                                    borderStyle.GetColor().GetG(),
+                                    borderStyle.GetColor().GetB(),
+                                    borderStyle.GetColor().GetA()));
       pen.setWidthF(borderWidth);
 
-      if (fillStyle.GetBorderDash().empty()) {
+      if (borderStyle.GetDash().empty()) {
         pen.setStyle(Qt::SolidLine);
         pen.setCapStyle(Qt::RoundCap);
       }
       else {
         QVector<qreal> dashes;
 
-        for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
-          dashes << fillStyle.GetBorderDash()[i];
+        for (size_t i=0; i<borderStyle.GetDash().size(); i++) {
+          dashes << borderStyle.GetDash()[i];
         }
 
         pen.setDashPattern(dashes);
@@ -1073,7 +1137,6 @@ namespace osmscout {
     else {
       painter->setPen(Qt::NoPen);
     }
-
   }
 
   bool MapPainterQt::DrawMap(const Projection& projection,

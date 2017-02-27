@@ -113,6 +113,7 @@ public:
   Errors  *errors;
 
 typedef std::list<FillStyleRef>       FillStyleList;
+typedef std::list<BorderStyleRef>     BorderStyleList;
 typedef std::list<IconStyleRef>       IconStyleList;
 typedef std::list<TextStyleRef>       TextStyleList;
 typedef std::list<LineStyleRef>       LineStyleList;
@@ -202,8 +203,12 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void POLYGON(Symbol& symbol);
 	void RECTANGLE(Symbol& symbol);
 	void CIRCLE(Symbol& symbol);
-	void COORD(Vertex2D& coord);
+	void AREAFILLSYMSTYLE(FillPartialStyle& fillStyle);
 	void FILLSTYLEATTR(FillPartialStyle& style);
+	void AREABORDERSYMSTYLE(BorderPartialStyle& borderStyle);
+	void BORDERSTYLEATTR(BorderPartialStyle& style);
+	void AREASYMBOLSTYLE(FillPartialStyle& fillStyle, BorderPartialStyle& borderStyle);
+	void COORD(Vertex2D& coord);
 	void UDOUBLE(double& value);
 	void DOUBLE(double& value);
 	void CONSTBLOCK(bool state);
@@ -248,6 +253,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void AREASTYLE(StyleFilter filter, bool state);
 	void AREATEXTSTYLE(StyleFilter filter, bool state);
 	void AREAICONSTYLE(StyleFilter filter, bool state);
+	void AREABORDERSTYLE(StyleFilter filter, bool state);
 	void AREABORDERTEXTSTYLE(StyleFilter filter, bool state);
 	void AREABORDERSYMBOLSTYLE(StyleFilter filter, bool state);
 	void UDISPLAYSIZE(double& value);

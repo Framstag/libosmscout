@@ -97,7 +97,8 @@ namespace osmscout {
 
     void DrawFill(const Projection& projection,
                   const MapParameter& parameter,
-                  const FillStyle& fillStyle,
+                  const FillStyleRef& fillStyle,
+                  const BorderStyleRef& borderStyle,
                   agg::path_storage& path);
 
   protected:

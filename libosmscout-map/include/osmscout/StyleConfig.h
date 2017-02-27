@@ -740,6 +740,73 @@ namespace osmscout {
   /**
    * \ingroup Stylesheet
    *
+   * Style options for borders around an area.
+   */
+  class OSMSCOUT_MAP_API BorderStyle
+  {
+  public:
+    enum Attribute {
+      attrColor,
+      attrWidth,
+      attrDashes
+    };
+
+  private:
+    Color               color;
+    double              width;
+    std::vector<double> dash;
+
+  public:
+    BorderStyle();
+    BorderStyle(const BorderStyle& style);
+
+    BorderStyle& SetColor(const Color& color);
+    BorderStyle& SetWidth(double value);
+    BorderStyle& SetDashes(const std::vector<double> dashes);
+
+    inline bool IsVisible() const
+    {
+      return width>0 && color.IsVisible();
+    }
+
+    inline const Color& GetColor() const
+    {
+      return color;
+    }
+
+    inline double GetWidth() const
+    {
+      return width;
+    }
+
+    inline bool HasDashes() const
+    {
+      return !dash.empty();
+    }
+
+    inline const std::vector<double>& GetDash() const
+    {
+      return dash;
+    }
+
+    void CopyAttributes(const BorderStyle& other,
+                        const std::set<Attribute>& attributes);
+
+    bool operator==(const BorderStyle& other) const;
+    bool operator!=(const BorderStyle& other) const;
+    bool operator<(const BorderStyle& other) const;
+  };
+
+  typedef std::shared_ptr<BorderStyle>                         BorderStyleRef;
+  typedef PartialStyle<BorderStyle,BorderStyle::Attribute>     BorderPartialStyle;
+  typedef ConditionalStyle<BorderStyle,BorderStyle::Attribute> BorderConditionalStyle;
+  typedef StyleSelector<BorderStyle,BorderStyle::Attribute>    BorderStyleSelector;
+  typedef std::list<BorderStyleSelector>                       BorderStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<BorderStyleSelectorList> >   BorderStyleLookupTable;  //!Index selectors by type and level
+
+  /**
+   * \ingroup Stylesheet
+   *
    * Abstract base class for all (point) labels. All point labels have priority
    * and a alpha value.
    */
@@ -1138,15 +1205,22 @@ namespace osmscout {
   class OSMSCOUT_MAP_API DrawPrimitive
   {
   private:
-    FillStyleRef fillStyle;
+    FillStyleRef   fillStyle;
+    BorderStyleRef borderStyle;
 
   public:
-    DrawPrimitive(const FillStyleRef& fillStyle);
+    DrawPrimitive(const FillStyleRef& fillStyle,
+                  const BorderStyleRef& borderStyle);
     virtual ~DrawPrimitive();
 
     inline const FillStyleRef& GetFillStyle() const
     {
       return fillStyle;
+    }
+
+    inline const BorderStyleRef& GetBorderStyle() const
+    {
+      return borderStyle;
     }
 
     virtual void GetBoundingBox(double& minX,
@@ -1167,7 +1241,8 @@ namespace osmscout {
     std::list<Vertex2D> coords;
 
   public:
-    PolygonPrimitive(const FillStyleRef& fillStyle);
+    PolygonPrimitive(const FillStyleRef& fillStyle,
+                     const BorderStyleRef& borderStyle);
 
     void AddCoord(const Vertex2D& coord);
 
@@ -1199,7 +1274,8 @@ namespace osmscout {
     RectanglePrimitive(const Vertex2D& topLeft,
                        double width,
                        double height,
-                       const FillStyleRef& fillStyle);
+                       const FillStyleRef& fillStyle,
+                       const BorderStyleRef& borderStyle);
 
     inline const Vertex2D& GetTopLeft() const
     {
@@ -1237,7 +1313,8 @@ namespace osmscout {
   public:
     CirclePrimitive(const Vertex2D& center,
                     double radius,
-                    const FillStyleRef& fillStyle);
+                    const FillStyleRef& fillStyle,
+                    const BorderStyleRef& borderStyle);
 
     inline const Vertex2D& GetCenter() const
     {
@@ -1505,12 +1582,14 @@ namespace osmscout {
     // Area
 
     std::list<FillConditionalStyle>            areaFillStyleConditionals;
+    std::list<BorderConditionalStyle>          areaBorderStyleConditionals;
     std::list<TextConditionalStyle>            areaTextStyleConditionals;
     std::list<IconConditionalStyle>            areaIconStyleConditionals;
     std::list<PathTextConditionalStyle>        areaBorderTextStyleConditionals;
     std::list<PathSymbolConditionalStyle>      areaBorderSymbolStyleConditionals;
 
     FillStyleLookupTable                       areaFillStyleSelectors;
+    BorderStyleLookupTable                     areaBorderStyleSelectors;
     std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
     IconStyleLookupTable                       areaIconStyleSelectors;
     PathTextStyleLookupTable                   areaBorderTextStyleSelectors;
@@ -1589,6 +1668,8 @@ namespace osmscout {
 
     void AddAreaFillStyle(const StyleFilter& filter,
                           FillPartialStyle& style);
+    void AddAreaBorderStyle(const StyleFilter& filter,
+                            BorderPartialStyle& style);
     void AddAreaTextStyle(const StyleFilter& filter,
                           TextPartialStyle& style);
     void AddAreaIconStyle(const StyleFilter& filter,
@@ -1648,6 +1729,10 @@ namespace osmscout {
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           FillStyleRef& fillStyle) const;
+    void GetAreaBorderStyle(const TypeInfoRef& type,
+                            const FeatureValueBuffer& buffer,
+                            const Projection& projection,
+                            BorderStyleRef& borderStyle) const;
     bool HasAreaTextStyles(const TypeInfoRef& type,
                            const Magnification& magnification) const;
     void GetAreaTextStyles(const TypeInfoRef& type,

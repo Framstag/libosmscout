@@ -1716,8 +1716,9 @@ namespace osmscout {
           const Area::Ring& ring=area->rings[i];
 
           if (ring.GetRing()==ringId) {
-            TypeInfoRef  type;
-            FillStyleRef fillStyle;
+            TypeInfoRef    type;
+            FillStyleRef   fillStyle;
+            BorderStyleRef borderStyle;
 
             if (ring.IsOuterRing()) {
               type=area->GetType();
@@ -1738,19 +1739,25 @@ namespace osmscout {
                                          projection,
                                          fillStyle);
 
-            if (!fillStyle) {
+            styleConfig.GetAreaBorderStyle(type,
+                                           ring.GetFeatureValueBuffer(),
+                                           projection,
+                                           borderStyle);
+
+            if (!(fillStyle || borderStyle)) {
               continue;
             }
 
             foundRing=true;
 
             AreaData a;
+            double   borderWidth=fillStyle ? fillStyle->GetBorderWidth() : borderStyle->GetWidth();
 
             ring.GetBoundingBox(a.boundingBox);
 
             if (!IsVisibleArea(projection,
                                a.boundingBox,
-                               fillStyle->GetBorderWidth()/2)) {
+                               borderWidth/2.0)) {
               continue;
             }
 
@@ -1773,8 +1780,22 @@ namespace osmscout {
             a.type=type;
             a.buffer=&ring.GetFeatureValueBuffer();
             a.fillStyle=fillStyle;
+            a.borderStyle=borderStyle;
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;
+
+            if (borderStyle) {
+              if (!a.fillStyle) {
+                a.fillStyle=std::make_shared<FillStyle>();
+              }
+
+              a.fillStyle->SetBorderColor(borderStyle->GetColor());
+              a.fillStyle->SetBorderWidth(borderStyle->GetWidth());
+
+              if (borderStyle->HasDashes()) {
+                a.fillStyle->SetBorderDashes(borderStyle->GetDash());
+              }
+            }
 
             areaData.push_back(a);
 

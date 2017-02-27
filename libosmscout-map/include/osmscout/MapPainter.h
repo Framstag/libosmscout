@@ -170,6 +170,7 @@ namespace osmscout {
       TypeInfoRef              type;
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       FillStyleRef             fillStyle;       //!< Fill style
+      BorderStyleRef           borderStyle;     //!< Border style
       GeoBox                   boundingBox;     //!< Bounding box of the area
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer

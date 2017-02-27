@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 94;
-	noSym = 94;
+	maxT = 93;
+	noSym = 93;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -164,12 +164,12 @@ void Scanner::Init() {
 	start.set(61, 21);
 	start.set(59, 22);
 	start.set(44, 23);
-	start.set(91, 24);
-	start.set(93, 25);
-	start.set(45, 26);
-	start.set(58, 27);
-	start.set(60, 28);
-	start.set(46, 29);
+	start.set(46, 24);
+	start.set(91, 25);
+	start.set(93, 26);
+	start.set(45, 27);
+	start.set(58, 28);
+	start.set(60, 29);
 	start.set(40, 30);
 	start.set(41, 31);
 	start.set(33, 32);
@@ -184,68 +184,67 @@ void Scanner::Init() {
 	keywords.set("WAYS", 18);
 	keywords.set("GROUP", 19);
 	keywords.set("SYMBOL", 21);
-	keywords.set("POLYGON", 22);
-	keywords.set("RECTANGLE", 23);
-	keywords.set("x", 24);
-	keywords.set("CIRCLE", 25);
-	keywords.set("CONST", 26);
-	keywords.set("COLOR", 27);
-	keywords.set("MAG", 28);
-	keywords.set("UINT", 29);
-	keywords.set("STYLE", 30);
-	keywords.set("FEATURE", 33);
-	keywords.set("PATH", 34);
-	keywords.set("TYPE", 35);
-	keywords.set("ONEWAY", 37);
-	keywords.set("BRIDGE", 38);
-	keywords.set("TUNNEL", 39);
-	keywords.set("SIZE", 40);
-	keywords.set("m", 41);
-	keywords.set("mm", 42);
-	keywords.set("px", 44);
-	keywords.set("NODE", 46);
-	keywords.set("TEXT", 48);
-	keywords.set("ICON", 50);
-	keywords.set("WAY", 51);
-	keywords.set("SHIELD", 52);
-	keywords.set("AREA", 53);
-	keywords.set("BORDERTEXT", 54);
-	keywords.set("BORDERSYMBOL", 55);
-	keywords.set("color", 56);
-	keywords.set("dash", 57);
-	keywords.set("gapColor", 58);
-	keywords.set("displayWidth", 59);
-	keywords.set("width", 60);
-	keywords.set("displayOffset", 61);
-	keywords.set("offset", 62);
-	keywords.set("cap", 63);
-	keywords.set("joinCap", 64);
-	keywords.set("endCap", 65);
-	keywords.set("priority", 66);
-	keywords.set("zIndex", 67);
-	keywords.set("pattern", 68);
-	keywords.set("patternMinMag", 69);
-	keywords.set("borderColor", 70);
-	keywords.set("borderWidth", 71);
-	keywords.set("borderDash", 72);
-	keywords.set("label", 73);
-	keywords.set("style", 74);
-	keywords.set("size", 75);
-	keywords.set("scaleMag", 76);
-	keywords.set("autoSize", 77);
-	keywords.set("position", 78);
-	keywords.set("backgroundColor", 79);
-	keywords.set("shieldSpace", 80);
-	keywords.set("symbol", 81);
-	keywords.set("symbolSpace", 82);
-	keywords.set("name", 83);
-	keywords.set("butt", 84);
-	keywords.set("round", 85);
-	keywords.set("square", 86);
-	keywords.set("normal", 87);
-	keywords.set("emphasize", 88);
-	keywords.set("lighten", 89);
-	keywords.set("darken", 92);
+	keywords.set("BORDER", 22);
+	keywords.set("AREA", 23);
+	keywords.set("POLYGON", 25);
+	keywords.set("RECTANGLE", 26);
+	keywords.set("x", 27);
+	keywords.set("CIRCLE", 28);
+	keywords.set("CONST", 29);
+	keywords.set("COLOR", 30);
+	keywords.set("MAG", 31);
+	keywords.set("UINT", 32);
+	keywords.set("STYLE", 33);
+	keywords.set("FEATURE", 36);
+	keywords.set("PATH", 37);
+	keywords.set("TYPE", 38);
+	keywords.set("ONEWAY", 40);
+	keywords.set("BRIDGE", 41);
+	keywords.set("TUNNEL", 42);
+	keywords.set("SIZE", 43);
+	keywords.set("m", 44);
+	keywords.set("mm", 45);
+	keywords.set("px", 47);
+	keywords.set("NODE", 49);
+	keywords.set("TEXT", 50);
+	keywords.set("ICON", 52);
+	keywords.set("WAY", 53);
+	keywords.set("SHIELD", 54);
+	keywords.set("BORDERTEXT", 55);
+	keywords.set("BORDERSYMBOL", 56);
+	keywords.set("color", 57);
+	keywords.set("dash", 58);
+	keywords.set("gapColor", 59);
+	keywords.set("displayWidth", 60);
+	keywords.set("width", 61);
+	keywords.set("displayOffset", 62);
+	keywords.set("offset", 63);
+	keywords.set("cap", 64);
+	keywords.set("joinCap", 65);
+	keywords.set("endCap", 66);
+	keywords.set("priority", 67);
+	keywords.set("zIndex", 68);
+	keywords.set("pattern", 69);
+	keywords.set("patternMinMag", 70);
+	keywords.set("label", 71);
+	keywords.set("style", 72);
+	keywords.set("size", 73);
+	keywords.set("scaleMag", 74);
+	keywords.set("autoSize", 75);
+	keywords.set("position", 76);
+	keywords.set("backgroundColor", 77);
+	keywords.set("borderColor", 78);
+	keywords.set("shieldSpace", 79);
+	keywords.set("symbol", 80);
+	keywords.set("symbolSpace", 81);
+	keywords.set("name", 82);
+	keywords.set("butt", 83);
+	keywords.set("round", 84);
+	keywords.set("square", 85);
+	keywords.set("normal", 86);
+	keywords.set("emphasize", 87);
+	keywords.set("lighten", 88);
+	keywords.set("darken", 91);
 
 
   tvalLength = 128;
@@ -481,27 +480,27 @@ TokenRef Scanner::NextToken() {
 		case 23:
 			{t->kind = 20; break;}
 		case 24:
-			{t->kind = 31; break;}
+			{t->kind = 24; break;}
 		case 25:
-			{t->kind = 32; break;}
+			{t->kind = 34; break;}
 		case 26:
-			{t->kind = 36; break;}
+			{t->kind = 35; break;}
 		case 27:
-			{t->kind = 43; break;}
+			{t->kind = 39; break;}
 		case 28:
-			{t->kind = 45; break;}
+			{t->kind = 46; break;}
 		case 29:
-			{t->kind = 47; break;}
+			{t->kind = 48; break;}
 		case 30:
-			{t->kind = 90; break;}
+			{t->kind = 89; break;}
 		case 31:
-			{t->kind = 91; break;}
+			{t->kind = 90; break;}
 		case 32:
-			{t->kind = 93; break;}
+			{t->kind = 92; break;}
 		case 33:
-			recEnd = pos; recKind = 49;
+			recEnd = pos; recKind = 51;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
-			else {t->kind = 49; break;}
+			else {t->kind = 51; break;}
 
   }
   AppendVal(t);
