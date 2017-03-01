@@ -141,6 +141,10 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const FillStyle& style);
         
+        void SetBorder(const Projection& projection,
+                       const MapParameter& parameter,
+                       const BorderStyle& borderStyle);
+        
         void SetFill(const Projection& projection,
                      const MapParameter& parameter,
                      const FillStyle& fillStyle,
