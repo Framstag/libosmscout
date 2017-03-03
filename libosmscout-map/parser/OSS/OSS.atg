@@ -1321,6 +1321,24 @@ PRODUCTIONS
                      style.style->SetDashes(dashes);
                      style.attributes.insert(BorderStyle::attrDashes);
                   .)
+                | (. double displayOffset; .)
+                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
+                  (.
+                     style.style->SetDisplayOffset(displayOffset);
+                     style.attributes.insert(BorderStyle::attrDisplayOffset);
+                  .)
+                | (. double offset; .)
+                  "offset" ":" MAPSIZE<offset>
+                  (.
+                     style.style->SetOffset(offset);
+                     style.attributes.insert(BorderStyle::attrOffset);
+                  .)
+                | (. int priority; .)
+                  "priority" ":" INT<priority>
+                  (.
+                     style.style->SetPriority(priority);
+                     style.attributes.insert(BorderStyle::attrPriority);
+                  .)
                 )
                 .
 

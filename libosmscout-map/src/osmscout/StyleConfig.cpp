@@ -719,7 +719,9 @@ namespace osmscout {
 
   BorderStyle::BorderStyle()
     : color(1.0,0.0,0.0,0.0),
-      width(0.0)
+      width(0.0),
+      displayOffset(0.0),
+      offset(0.0)
   {
     // no code
   }
@@ -752,8 +754,29 @@ namespace osmscout {
     return *this;
   }
 
+  BorderStyle& BorderStyle::SetDisplayOffset(double value)
+  {
+    displayOffset=value;
+
+    return *this;
+  }
+
+  BorderStyle& BorderStyle::SetOffset(double value)
+  {
+    offset=value;
+
+    return *this;
+  }
+
+  BorderStyle& BorderStyle::SetPriority(int priority)
+  {
+    this->priority=priority;
+
+    return *this;
+  }
+
   void BorderStyle::CopyAttributes(const BorderStyle& other,
-                                 const std::set<Attribute>& attributes)
+                                   const std::set<Attribute>& attributes)
   {
     for (const auto& attribute : attributes) {
       switch (attribute) {
@@ -765,6 +788,15 @@ namespace osmscout {
         break;
       case attrDashes:
         dash=other.dash;
+        break;
+      case attrDisplayOffset:
+        displayOffset=other.displayOffset;
+        break;
+      case attrOffset:
+        offset=other.offset;
+        break;
+      case attrPriority:
+        priority=other.priority;
         break;
       }
     }

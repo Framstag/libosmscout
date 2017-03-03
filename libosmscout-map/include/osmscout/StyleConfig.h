@@ -748,13 +748,19 @@ namespace osmscout {
     enum Attribute {
       attrColor,
       attrWidth,
-      attrDashes
+      attrDashes,
+      attrDisplayOffset,
+      attrOffset,
+      attrPriority
     };
 
   private:
     Color               color;
     double              width;
     std::vector<double> dash;
+    double              displayOffset;
+    double              offset;
+    int                 priority;
 
   public:
     BorderStyle();
@@ -763,6 +769,9 @@ namespace osmscout {
     BorderStyle& SetColor(const Color& color);
     BorderStyle& SetWidth(double value);
     BorderStyle& SetDashes(const std::vector<double> dashes);
+    BorderStyle& SetDisplayOffset(double value);
+    BorderStyle& SetOffset(double value);
+    BorderStyle& SetPriority(int priority);
 
     inline bool IsVisible() const
     {
@@ -787,6 +796,21 @@ namespace osmscout {
     inline const std::vector<double>& GetDash() const
     {
       return dash;
+    }
+
+    inline double GetDisplayOffset() const
+    {
+      return displayOffset;
+    }
+
+    inline double GetOffset() const
+    {
+      return offset;
+    }
+
+    inline int GetPriority() const
+    {
+      return priority;
     }
 
     void CopyAttributes(const BorderStyle& other,

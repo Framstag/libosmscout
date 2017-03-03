@@ -496,8 +496,11 @@ void Parser::AREABORDERSYMSTYLE(BorderPartialStyle& borderStyle) {
 }
 
 void Parser::BORDERSTYLEATTR(BorderPartialStyle& style) {
-		if (la->kind == 16 /* ";" */) {
-		} else if (la->kind == 57 /* "color" */) {
+		switch (la->kind) {
+		case 16 /* ";" */: {
+			break;
+		}
+		case 57 /* "color" */: {
 			Color color; 
 			Get();
 			Expect(46 /* ":" */);
@@ -505,7 +508,9 @@ void Parser::BORDERSTYLEATTR(BorderPartialStyle& style) {
 			style.style->SetColor(color);
 			style.attributes.insert(BorderStyle::attrColor);
 			
-		} else if (la->kind == 61 /* "width" */) {
+			break;
+		}
+		case 61 /* "width" */: {
 			double width; 
 			Get();
 			Expect(46 /* ":" */);
@@ -513,7 +518,9 @@ void Parser::BORDERSTYLEATTR(BorderPartialStyle& style) {
 			style.style->SetWidth(width);
 			style.attributes.insert(BorderStyle::attrWidth);
 			
-		} else if (la->kind == 58 /* "dash" */) {
+			break;
+		}
+		case 58 /* "dash" */: {
 			std::vector<double> dashes;
 			double              dash;
 			
@@ -529,7 +536,40 @@ void Parser::BORDERSTYLEATTR(BorderPartialStyle& style) {
 			style.style->SetDashes(dashes);
 			style.attributes.insert(BorderStyle::attrDashes);
 			
-		} else SynErr(106);
+			break;
+		}
+		case 62 /* "displayOffset" */: {
+			double displayOffset; 
+			Get();
+			Expect(46 /* ":" */);
+			DISPLAYSIZE(displayOffset);
+			style.style->SetDisplayOffset(displayOffset);
+			style.attributes.insert(BorderStyle::attrDisplayOffset);
+			
+			break;
+		}
+		case 63 /* "offset" */: {
+			double offset; 
+			Get();
+			Expect(46 /* ":" */);
+			MAPSIZE(offset);
+			style.style->SetOffset(offset);
+			style.attributes.insert(BorderStyle::attrOffset);
+			
+			break;
+		}
+		case 67 /* "priority" */: {
+			int priority; 
+			Get();
+			Expect(46 /* ":" */);
+			INT(priority);
+			style.style->SetPriority(priority);
+			style.attributes.insert(BorderStyle::attrPriority);
+			
+			break;
+		}
+		default: SynErr(106); break;
+		}
 }
 
 void Parser::AREASYMBOLSTYLE(FillPartialStyle& fillStyle, BorderPartialStyle& borderStyle) {
@@ -2168,8 +2208,8 @@ bool Parser::StartOf(int s)
 	static bool set[18][95] = {
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, T,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, T,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, T,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, T,T,T,T, T,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,T,T, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, T,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, T,T,T,T, T,T,T,x, x,T,T,T, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
