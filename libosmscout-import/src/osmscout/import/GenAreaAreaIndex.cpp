@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <osmscout/TypeFeatures.h>
-
+ 
 #include <osmscout/AreaAreaIndex.h>
 #include <osmscout/AreaDataFile.h>
 
@@ -44,11 +44,12 @@ namespace osmscout {
   class AreaLocationProcessorFilter : public SortDataGenerator<Area>::ProcessingFilter
   {
   private:
-    FileWriter                 writer;
-    uint32_t                   overallDataCount;
-    NameFeatureValueReader     *nameReader;
-    LocationFeatureValueReader *locationReader;
-    AddressFeatureValueReader  *addressReader;
+    FileWriter                   writer;
+    uint32_t                     overallDataCount;
+    NameFeatureValueReader       *nameReader;
+    LocationFeatureValueReader   *locationReader;
+    AddressFeatureValueReader    *addressReader;
+    PostalCodeFeatureValueReader *postalCodeReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -71,7 +72,8 @@ namespace osmscout {
 
     nameReader=new NameFeatureValueReader(typeConfig);
     locationReader=new LocationFeatureValueReader(typeConfig);
-    addressReader=new AddressFeatureValueReader(typeConfig);
+    addressReader=new AddressFeatureValueReader(typeConfig);    
+    postalCodeReader=new PostalCodeFeatureValueReader(typeConfig);
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -99,10 +101,12 @@ namespace osmscout {
         NameFeatureValue     *nameValue=nameReader->GetValue(ring->GetFeatureValueBuffer());
         LocationFeatureValue *locationValue=locationReader->GetValue(ring->GetFeatureValueBuffer());
         AddressFeatureValue  *addressValue=addressReader->GetValue(ring->GetFeatureValueBuffer());
+        PostalCodeFeatureValue *postalCodeValue=postalCodeReader->GetValue(ring->GetFeatureValueBuffer());
 
         std::string          name;
         std::string          location;
         std::string          address;
+        std::string          postalCode;
 
         if (nameValue!=NULL) {
           name=nameValue->GetName();
@@ -114,6 +118,10 @@ namespace osmscout {
 
         if (addressValue!=NULL) {
           address=addressValue->GetAddress();
+        }
+        
+        if (postalCodeValue!=NULL) {
+          postalCode=postalCodeValue->GetPostalCode();
         }
 
         bool isAddress=!ring->GetType()->GetIgnore() &&
@@ -143,6 +151,7 @@ namespace osmscout {
               writer.WriteFileOffset(offset);
               writer.WriteNumber(ring->GetType()->GetAreaId());
               writer.Write(name);
+              writer.Write(postalCode);
               writer.Write(location);
               writer.Write(address);
               writer.Write(r->nodes,false);
@@ -155,6 +164,7 @@ namespace osmscout {
           writer.WriteFileOffset(offset);
           writer.WriteNumber(ring->GetType()->GetAreaId());
           writer.Write(name);
+          writer.Write(postalCode);
           writer.Write(location);
           writer.Write(address);
           writer.Write(ring->nodes,false);
@@ -183,6 +193,9 @@ namespace osmscout {
 
     delete addressReader;
     addressReader=NULL;
+    
+    delete postalCodeReader;
+    postalCodeReader=NULL;
 
     try {
       writer.SetPos(0);
