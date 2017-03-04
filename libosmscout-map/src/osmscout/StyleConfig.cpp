@@ -726,6 +726,13 @@ namespace osmscout {
     // no code
   }
 
+  BorderStyle& BorderStyle::SetSlot(const std::string& slot)
+  {
+    this->slot=slot;
+
+    return *this;
+  }
+
   BorderStyle::BorderStyle(const BorderStyle& style)
   {
     this->color=style.color;
@@ -2178,10 +2185,23 @@ namespace osmscout {
                        maxLevel,
                        areaFillStyleSelectors);
 
-    SortInConditionals(*typeConfig,
-                       areaBorderStyleConditionals,
-                       maxLevel,
-                       areaBorderStyleSelectors);
+    std::unordered_map<std::string,std::list<BorderConditionalStyle> > borderStyleBySlot;
+
+    for (auto& conditional : areaBorderStyleConditionals) {
+      borderStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
+    }
+
+    areaBorderStyleSelectors.resize(borderStyleBySlot.size());
+
+    size_t idx=0;
+    for (const auto& entry : borderStyleBySlot) {
+      SortInConditionals(*typeConfig,
+                         entry.second,
+                         maxLevel,
+                         areaBorderStyleSelectors[idx]);
+
+      idx++;
+    }
 
     std::unordered_map<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
 
@@ -2191,7 +2211,7 @@ namespace osmscout {
 
     areaTextStyleSelectors.resize(textStyleBySlot.size());
 
-    size_t idx=0;
+    idx=0;
     for (const auto& entry : textStyleBySlot) {
       SortInConditionals(*typeConfig,
                          entry.second,
@@ -2654,16 +2674,29 @@ namespace osmscout {
                     fillStyle);
   }
 
-  void StyleConfig::GetAreaBorderStyle(const TypeInfoRef& type,
-                                       const FeatureValueBuffer& buffer,
-                                       const Projection& projection,
-                                       BorderStyleRef& borderStyle) const
+  void StyleConfig::GetAreaBorderStyles(const TypeInfoRef& type,
+                                        const FeatureValueBuffer& buffer,
+                                        const Projection& projection,
+                                        std::vector<BorderStyleRef>& borderStyles) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaBorderStyleSelectors[type->GetIndex()],
-                    buffer,
-                    projection,
-                    borderStyle);
+    BorderStyleRef style;
+
+    borderStyles.clear();
+    borderStyles.reserve(areaBorderStyleSelectors.size());
+
+    for (size_t slot=0; slot<areaBorderStyleSelectors.size(); slot++) {
+      style=NULL;
+
+      GetFeatureStyle(styleResolveContext,
+                      areaBorderStyleSelectors[slot][type->GetIndex()],
+                      buffer,
+                      projection,
+                      style);
+
+      if (style) {
+        borderStyles.push_back(style);
+      }
+    }
   }
 
   bool StyleConfig::HasAreaTextStyles(const TypeInfoRef& type,

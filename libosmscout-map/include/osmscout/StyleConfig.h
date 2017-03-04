@@ -755,6 +755,7 @@ namespace osmscout {
     };
 
   private:
+    std::string         slot;
     Color               color;
     double              width;
     std::vector<double> dash;
@@ -766,6 +767,8 @@ namespace osmscout {
     BorderStyle();
     BorderStyle(const BorderStyle& style);
 
+    BorderStyle& SetSlot(const std::string& slot);
+
     BorderStyle& SetColor(const Color& color);
     BorderStyle& SetWidth(double value);
     BorderStyle& SetDashes(const std::vector<double> dashes);
@@ -776,6 +779,11 @@ namespace osmscout {
     inline bool IsVisible() const
     {
       return width>0 && color.IsVisible();
+    }
+
+    inline const std::string& GetSlot() const
+    {
+      return slot;
     }
 
     inline const Color& GetColor() const
@@ -1613,7 +1621,7 @@ namespace osmscout {
     std::list<PathSymbolConditionalStyle>      areaBorderSymbolStyleConditionals;
 
     FillStyleLookupTable                       areaFillStyleSelectors;
-    BorderStyleLookupTable                     areaBorderStyleSelectors;
+    std::vector<BorderStyleLookupTable>        areaBorderStyleSelectors;
     std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
     IconStyleLookupTable                       areaIconStyleSelectors;
     PathTextStyleLookupTable                   areaBorderTextStyleSelectors;
@@ -1753,10 +1761,10 @@ namespace osmscout {
                           const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           FillStyleRef& fillStyle) const;
-    void GetAreaBorderStyle(const TypeInfoRef& type,
-                            const FeatureValueBuffer& buffer,
-                            const Projection& projection,
-                            BorderStyleRef& borderStyle) const;
+    void GetAreaBorderStyles(const TypeInfoRef& type,
+                             const FeatureValueBuffer& buffer,
+                             const Projection& projection,
+                             std::vector<BorderStyleRef>& borderStyles) const;
     bool HasAreaTextStyles(const TypeInfoRef& type,
                            const Magnification& magnification) const;
     void GetAreaTextStyles(const TypeInfoRef& type,

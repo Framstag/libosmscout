@@ -1716,9 +1716,10 @@ namespace osmscout {
           const Area::Ring& ring=area->rings[i];
 
           if (ring.GetRing()==ringId) {
-            TypeInfoRef    type;
-            FillStyleRef   fillStyle;
-            BorderStyleRef borderStyle;
+            TypeInfoRef                 type;
+            FillStyleRef                fillStyle;
+            std::vector<BorderStyleRef> borderStyles;
+            BorderStyleRef              borderStyle;
 
             if (ring.IsOuterRing()) {
               type=area->GetType();
@@ -1739,10 +1740,14 @@ namespace osmscout {
                                          projection,
                                          fillStyle);
 
-            styleConfig.GetAreaBorderStyle(type,
-                                           ring.GetFeatureValueBuffer(),
-                                           projection,
-                                           borderStyle);
+            styleConfig.GetAreaBorderStyles(type,
+                                            ring.GetFeatureValueBuffer(),
+                                            projection,
+                                            borderStyles);
+
+            if (borderStyles.size()>=1) {
+              borderStyle=borderStyles[0];
+            }
 
             if (!(fillStyle || borderStyle)) {
               continue;
