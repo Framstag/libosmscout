@@ -36,7 +36,8 @@ namespace osmscout {
   {
   }
 
-  bool PreprocessPoly::closePolygon(Context context,
+  bool PreprocessPoly::ClosePolygon(Progress& progress,
+                                    Context context,
                                     std::list<GeoCoord> &polygonNodes,
                                     OSMId &availableId,
                                     TagId polygonTagId)
@@ -46,8 +47,10 @@ namespace osmscout {
       polygonNodes.pop_back();
     }
     std::vector<GeoCoord> v1(polygonNodes.begin(), polygonNodes.end());
-    if (!AreaIsSimple(v1))
+    if (!AreaIsSimple(v1)){
+      progress.Warning("Datapolygon is not simple!");
       return false;
+    }
 
     std::vector<Node> nodes(polygonNodes.size());
     int i=0;
@@ -58,7 +61,8 @@ namespace osmscout {
     }
     // undefined area should be on the right side
     bool ccw=AreaIsCCW(nodes);
-    if ((context==IncludedPolygon && ccw) || (context==ExcludedPolygon && !ccw)){
+    if ((context==IncludedPolygon && !ccw) || (context==ExcludedPolygon && ccw)){
+      progress.Debug("Reverse datapolygon");
       polygonNodes.reverse();
     }
 
@@ -134,7 +138,7 @@ namespace osmscout {
           case IncludedPolygon:
           case ExcludedPolygon:
             if (line=="END"){
-              if (!closePolygon(context, polygonNodes, availableId, typeConfig->tagDataPolygon)){
+              if (!ClosePolygon(progress, context, polygonNodes, availableId, typeConfig->tagDataPolygon)){
                 throw IOException(filename, "Invalid section on line "+NumberToStringUnsigned(lineNum), "");
               }
               context=Section;

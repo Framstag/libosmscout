@@ -54,7 +54,8 @@ namespace osmscout {
       double y;
     };
 
-    bool closePolygon(Context context,
+    bool ClosePolygon(Progress& progress,
+                      Context context,
                       std::list<GeoCoord> &polygonNodes,
                       OSMId &availableId,
                       TagId polygonTagId);
