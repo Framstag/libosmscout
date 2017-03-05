@@ -135,6 +135,11 @@ namespace osmscout {
         a2.IsEqual(b2)) {
       return true;
     }
+    if (a1.IsEqual(a2) &&
+        b1.IsEqual(b2)){
+      // two different zero size vectors can't intersects
+      return false;
+    }
 
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
                 (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());

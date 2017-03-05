@@ -36,6 +36,8 @@ int main(int /*argc*/, char** /*argv*/)
   assert (!osmscout::GetLineIntersection(a,a,
                                          b,b,
                                          intersection));
+  assert (!osmscout::LinesIntersect(a,a,
+                                    b,b));
   std::cout << "OK" << std::endl;
 }
 
