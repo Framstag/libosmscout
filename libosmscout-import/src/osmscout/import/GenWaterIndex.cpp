@@ -322,6 +322,17 @@ namespace osmscout {
                     GeoCoord(maxLat,maxLon));
   }
 
+  void computeSegmentBoxes(const std::vector<Point>& path,
+                           std::vector<GeoBox> &segmentBoxes,
+                           size_t bound)
+  {
+    for (size_t i=0;i<bound;i+=1000){
+      GeoBox box;
+      GetSegmentBoundingBox(path,i,std::min(i+1000,bound), box);
+      segmentBoxes.push_back(box);
+    }
+  }
+
   bool WaterIndexGenerator::FirstPathIntersection(const std::vector<Point> &aPath,
                                                   const std::vector<Point> &bPath,
                                                   bool aClosed,
@@ -346,6 +357,10 @@ namespace osmscout {
     GetSegmentBoundingBox(bPath,bIndex,bBound,bBox);
     GeoBox aLineBox;
 
+    // compute b-boxes for B path, each 1000 point-long segment
+    std::vector<GeoBox> bSegmentBoxes;
+    computeSegmentBoxes(bPath,bSegmentBoxes,bBound);
+
     for (;aIndex<aBound;aIndex++){
       Point a1=aPath[aIndex%aPath.size()];
       Point a2=aPath[(aIndex+1)%aPath.size()];
@@ -356,6 +371,13 @@ namespace osmscout {
       for (bIndex=bStart;bIndex<bBound;bIndex++){
         Point b1=bPath[bIndex%bPath.size()];
         Point b2=bPath[(bIndex+1)%bPath.size()];
+        
+        if ((!bSegmentBoxes[bIndex/1000].Intersects(aLineBox)) &&
+             !aLineBox.Intersects(GeoBox(b1.GetCoord(),b2.GetCoord()),/*openInterval*/false)){
+          // round up
+          bIndex+=(1000-(bIndex%1000));
+          continue;
+        }
         if (!aLineBox.Intersects(GeoBox(b1.GetCoord(),b2.GetCoord()),/*openInterval*/false)){
           continue;
         }
@@ -367,8 +389,10 @@ namespace osmscout {
                       (b2.GetLat()-intersection.GetLat())-
                       (intersection.GetLat()-a1.GetLat())*
                       (b2.GetLon()-intersection.GetLon());
+#if defined(DEBUG_TILING)
           std::cout << "Found intersection " << intersection.GetLat() << " " << intersection.GetLon()
             << " direction " << orientation << std::endl;
+#endif
           return true;
         }
       }
@@ -576,15 +600,20 @@ namespace osmscout {
         wayCoastlines.push_back(coastline);
       }
     }
+
+    osmscout::StopClock clock;
     size_t areasBefore=areaCoastlines.size();
     SynthetizeCoastlinesAreas(progress,
                               dataPolygon,
                               wayCoastlines,
                               areaCoastlines);
 
+    clock.Stop();
     progress.Info(NumberToString(dataPolygon.size())+" data polygon(s), and "+
                   NumberToString(wayCoastlines.size())+" way coastline(s) synthetized into "+
-                  NumberToString(areaCoastlines.size()-areasBefore)+" new area coastlines(s)");
+                  NumberToString(areaCoastlines.size()-areasBefore)+" new area coastlines(s), tooks "+
+                  clock.ResultString() +" s"
+    );
 
     coastlines=areaCoastlines;
   }
