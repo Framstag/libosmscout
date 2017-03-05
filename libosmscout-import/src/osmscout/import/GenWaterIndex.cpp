@@ -37,6 +37,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
+#include <osmscout/util/Geometry.h>
 
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/RawCoastline.h>
@@ -297,6 +298,168 @@ namespace osmscout {
     return true;
   }
 
+  void GetSegmentBoundingBox(const std::vector<Point>& nodes,
+                             size_t from, size_t to,
+                             GeoBox& boundingBox)
+  {
+    if (nodes.empty() || from>=to){
+      boundingBox.Invalidate();
+    }
+
+    double minLon=nodes[from%nodes.size()].GetLon();
+    double maxLon=nodes[from%nodes.size()].GetLon();
+    double minLat=nodes[from%nodes.size()].GetLat();
+    double maxLat=nodes[from%nodes.size()].GetLat();
+
+    for (size_t i=from; i<to; i++) {
+      minLon=std::min(minLon,nodes[i%nodes.size()].GetLon());
+      maxLon=std::max(maxLon,nodes[i%nodes.size()].GetLon());
+      minLat=std::min(minLat,nodes[i%nodes.size()].GetLat());
+      maxLat=std::max(maxLat,nodes[i%nodes.size()].GetLat());
+    }
+
+    boundingBox.Set(GeoCoord(minLat,minLon),
+                    GeoCoord(maxLat,maxLon));
+  }
+
+  bool WaterIndexGenerator::FirstPathIntersection(const std::vector<Point> &aPath,
+                                                  const std::vector<Point> &bPath,
+                                                  bool aClosed,
+                                                  bool bClosed,
+                                                  size_t &aIndex,
+                                                  size_t &bIndex,
+                                                  GeoCoord &intersection,
+                                                  double &orientation
+                                                  )
+  {
+    size_t aBound=aClosed?aIndex+aPath.size():aPath.size()-1;
+    size_t bBound=bClosed?bIndex+bPath.size():bPath.size()-1;
+    size_t bStart=bIndex;
+
+    if (bStart>=bBound || aIndex>=aBound){
+      return false;
+    }
+
+    GeoBox aBox;
+    GeoBox bBox;
+    GetSegmentBoundingBox(aPath,aIndex,aBound,aBox);
+    GetSegmentBoundingBox(bPath,bIndex,bBound,bBox);
+    GeoBox aLineBox;
+
+    for (;aIndex<aBound;aIndex++){
+      Point a1=aPath[aIndex%aPath.size()];
+      Point a2=aPath[(aIndex+1)%aPath.size()];
+      aLineBox.Set(a1.GetCoord(),a2.GetCoord());
+      if (!bBox.Intersects(aLineBox,/*openInterval*/false)){
+        continue;
+      }
+      for (bIndex=bStart;bIndex<bBound;bIndex++){
+        Point b1=bPath[bIndex%bPath.size()];
+        Point b2=bPath[(bIndex+1)%bPath.size()];
+        if (!aLineBox.Intersects(GeoBox(b1.GetCoord(),b2.GetCoord()),/*openInterval*/false)){
+          continue;
+        }
+        if (GetLineIntersection(a1.GetCoord(),a2.GetCoord(),
+                                b1.GetCoord(),b2.GetCoord(),
+                                intersection)){
+
+          orientation=(intersection.GetLon()-a1.GetLon())*
+                      (b2.GetLat()-intersection.GetLat())-
+                      (intersection.GetLat()-a1.GetLat())*
+                      (b2.GetLon()-intersection.GetLon());
+          std::cout << "Found intersection " << intersection.GetLat() << " " << intersection.GetLon()
+            << " direction " << orientation << std::endl;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  void WaterIndexGenerator::SynthetizeCoastlinesAreas(Progress& progress,
+                                                      const std::list<CoastRef>& dataPolygons,
+                                                      const std::list<CoastRef>& coastlineWays,
+                                                      std::list<CoastRef> &coastlineAreas)
+  {
+    std::vector<CoastRef> candidates;
+
+    for (const auto &polygon:dataPolygons){
+      CoastRef candidate=std::make_shared<Coast>();
+      candidate->isArea=false;
+      candidate->coast=polygon->coast;
+      candidates.push_back(candidate);
+    }
+
+    for (const auto &c:candidates){
+
+      for (const auto &w:coastlineWays){
+
+        // try to find intersection between this candidate and way
+        size_t ci=0;
+        size_t wi=0;
+        double orientation;
+        GeoCoord intersection1;
+        while (FirstPathIntersection(c->coast,w->coast,
+                                     true,false,
+                                     ci,wi,
+                                     intersection1,
+                                     orientation)){
+          if (orientation>0.0){ // left agle: candidate -> intersection -> way
+            size_t wi2=wi+1;
+            size_t ci2=ci+1;
+            GeoCoord intersection2;
+            if (FirstPathIntersection(w->coast,c->coast,
+                                      false,true,
+                                      wi2,ci2,
+                                      intersection2,
+                                      orientation)){
+              if (orientation>0.0){ // left angle: way -> intersection -> candidate
+                std::vector<Point> cutted;
+                if (ci2>=c->coast.size()){
+                  cutted.insert(cutted.end(),
+                                c->coast.begin()+((ci2+1)%c->coast.size()),
+                                c->coast.begin()+ci);
+                  cutted.push_back(Point(0,intersection1));
+                  cutted.insert(cutted.end(),
+                                w->coast.begin()+wi+1,
+                                w->coast.begin()+wi2);
+                  cutted.push_back(Point(0,intersection2));
+                }else{
+                  cutted.insert(cutted.end(),
+                                c->coast.begin(),
+                                c->coast.begin()+ci);
+                  cutted.push_back(Point(0,intersection1));
+                  cutted.insert(cutted.end(),
+                                w->coast.begin()+wi+1,
+                                w->coast.begin()+wi2);
+                  cutted.push_back(Point(0,intersection2));
+                  cutted.insert(cutted.end(),
+                                c->coast.begin()+(ci2+1),
+                                c->coast.end());
+                }
+                c->coast=cutted;
+                c->isArea=true;
+              }
+            }else{
+              // right angle between coastline and data area should not happen now
+              progress.Warning("Right angle between coastline and data polygon "+intersection2.GetDisplayText());
+              break;
+            }
+            wi=wi2+1;
+            ci=0;
+          }else{
+            wi=0;
+          }
+          ci++;
+        }
+      }
+      if (c->isArea){
+        coastlineAreas.push_back(c);
+      }
+    }
+  }
+
+
   void WaterIndexGenerator::MergeCoastlines(Progress& progress,
                                             std::list<CoastRef>& coastlines)
   {
@@ -386,6 +549,45 @@ namespace osmscout {
     coastlines=mergedCoastlines;
   }
 
+  /**
+   * try to synthetize areas from all way coastlines
+   * that intersects with data polygon
+   *
+   * @param progress
+   * @param coastlines
+   * @param dataPolygon
+   */
+  void WaterIndexGenerator::SynthetizeCoastlines(Progress& progress,
+                                                 std::list<CoastRef>& coastlines,
+                                                 std::list<CoastRef>& dataPolygon)
+  {
+    if (dataPolygon.empty()){
+      return;
+    }
+
+    progress.SetAction("Synthetize coastlines");
+
+    std::list<CoastRef> areaCoastlines;
+    std::list<CoastRef> wayCoastlines;
+    for (const auto& coastline : coastlines) {
+      if (coastline->isArea){
+        areaCoastlines.push_back(coastline);
+      }else{
+        wayCoastlines.push_back(coastline);
+      }
+    }
+    size_t areasBefore=areaCoastlines.size();
+    SynthetizeCoastlinesAreas(progress,
+                              dataPolygon,
+                              wayCoastlines,
+                              areaCoastlines);
+
+    progress.Info(NumberToString(dataPolygon.size())+" data polygon(s), and "+
+                  NumberToString(wayCoastlines.size())+" way coastline(s) synthetized into "+
+                  NumberToString(areaCoastlines.size()-areasBefore)+" new area coastlines(s)");
+
+    coastlines=areaCoastlines;
+  }
 
   /**
    * Markes a cell as "coast", if one of the coastlines intersects with it.
@@ -1867,9 +2069,11 @@ namespace osmscout {
       return false;
     }
 
-    MergeCoastlines(progress,
-                    coastlines);
+    MergeCoastlines(progress,coastlines);
 
+    SynthetizeCoastlines(progress,
+                         coastlines,
+                         dataPolygon);
 
     progress.SetAction("Writing 'water.idx'");
 

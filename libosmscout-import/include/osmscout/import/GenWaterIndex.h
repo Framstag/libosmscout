@@ -205,8 +205,27 @@ namespace osmscout {
                          Progress& progress,
                          std::list<CoastRef>& coastlines);
 
+    bool FirstPathIntersection(const std::vector<Point> &aPath,
+                                                  const std::vector<Point> &bPath,
+                                                  bool aClosed,
+                                                  bool bClosed,
+                                                  size_t &aIndex,
+                                                  size_t &bIndex,
+                                                  GeoCoord &intersection,
+                                                  double &orientation
+                                                  );
+
+    void SynthetizeCoastlinesAreas(Progress& progress,
+                                   const std::list<CoastRef>& dataPolygons,
+                                   const std::list<CoastRef>& coastlineWays,
+                                   std::list<CoastRef> &coastlineAreas);
+
     void MergeCoastlines(Progress& progress,
                          std::list<CoastRef>& coastlines);
+
+    void SynthetizeCoastlines(Progress& progress,
+                              std::list<CoastRef>& coastlines,
+                              std::list<CoastRef>& dataPolygon);
 
     void MarkCoastlineCells(Progress& progress,
                             Level& level,
