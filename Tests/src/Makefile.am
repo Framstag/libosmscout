@@ -6,7 +6,8 @@ bin_PROGRAMS = CachePerformance \
                ThreadedDatabase \
                WorkQueue \
 	       MapRotate \
-               MultiDBRouting
+               MultiDBRouting \
+	       Geometry
 
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               -I$(top_srcdir)/include
@@ -46,6 +47,10 @@ MapRotate_LDADD = $(LIBOSMSCOUT_LIBS) $(LIBOSMSCOUTMAP_LIBS)
 MultiDBRouting_SOURCES = MultiDBRouting.cpp
 MultiDBRouting_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 MultiDBRouting_LDADD = $(LIBOSMSCOUT_LIBS)
+
+Geometry_SOURCES = Geometry.cpp
+Geometry_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+Geometry_LDADD = $(LIBOSMSCOUT_LIBS)
 
 if HAVE_LIB_OSMSCOUTMAPQT
 bin_PROGRAMS += DrawTextQt

@@ -135,6 +135,11 @@ namespace osmscout {
         a2.IsEqual(b2)) {
       return true;
     }
+    if (a1.IsEqual(a2) &&
+        b1.IsEqual(b2)){
+      // two different zero size vectors can't intersects
+      return false;
+    }
 
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
                 (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
@@ -177,10 +182,19 @@ namespace osmscout {
                            N& intersection)
   {
     if (a1.IsEqual(b1) ||
-        a1.IsEqual(b2) ||
-        a2.IsEqual(b1) ||
-        a2.IsEqual(b2)) {
+        a1.IsEqual(b2)){
+      intersection.Set(a1.GetLat(),a1.GetLon());
       return true;
+    }
+    if (a2.IsEqual(b1) ||
+        a2.IsEqual(b2)) {
+      intersection.Set(a2.GetLat(),a2.GetLon());
+      return true;
+    }
+    if (a1.IsEqual(a2) &&
+        b1.IsEqual(b2)){
+      // two different zero size vectors can't intersects
+      return false;
     }
 
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
@@ -195,6 +209,8 @@ namespace osmscout {
       if (ua_numr==0.0 && ub_numr==0.0) {
         // This gives currently false hits because of number resolution problems, if two lines are very
         // close together and for example are part of a very details node curve intersections are detected.
+
+        // FIXME: setup intersection
         return true;
       }
       else {

@@ -72,6 +72,13 @@ else()
 	message("Skip DrawTextQt test, libosmscout-map-qt is missing.")
 endif()
 
+#---- Geometry
+add_executable(Geometry src/Geometry.cpp)
+set_property(TARGET Geometry PROPERTY CXX_STANDARD 11)
+target_include_directories(Geometry PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(Geometry osmscout)
+install(TARGETS Geometry RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
 #---- WorkQueue
 add_executable(WorkQueue src/WorkQueue.cpp)
 set_property(TARGET WorkQueue PROPERTY CXX_STANDARD 11)
