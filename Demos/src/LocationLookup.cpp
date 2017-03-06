@@ -235,7 +235,6 @@ int main(int argc, char* argv[])
   osmscout::LocationSearch                                search;
   osmscout::LocationSearchResult                          searchResult;
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
-  std::string                                             path;
 
   search.limit=50;
 
