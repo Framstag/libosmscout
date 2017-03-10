@@ -905,6 +905,7 @@ void DBThread::requestObjectsOnView(const RenderMapRequest &view)
 
     emit viewObjectsLoaded(view, data);
   }
+  emit viewObjectsLoaded(view, osmscout::MapData());
 }
 
 bool DBThread::CalculateRoute(const QString databasePath,
