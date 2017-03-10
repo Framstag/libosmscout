@@ -270,6 +270,7 @@ public:
   
   bool isDatabaseLoaded();
   Q_INVOKABLE bool isInDatabaseBoundingBox(double lat, double lon);
+  Q_INVOKABLE QPointF screenPosition(double lat, double lon);
 };
 
 #endif
