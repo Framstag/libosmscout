@@ -156,7 +156,9 @@ namespace osmscout {
     return LoadRawBoundaries(parameter,
                              progress,
                              coastlines,
-                             Preprocess::RAWCOASTLINE_DAT);
+                             Preprocess::RAWCOASTLINE_DAT,
+                             State::land,
+                             State::water);
   }
 
   bool WaterIndexGenerator::LoadDataPolygon(const ImportParameter& parameter,
@@ -167,13 +169,17 @@ namespace osmscout {
     return LoadRawBoundaries(parameter,
                              progress,
                              coastlines,
-                             Preprocess::RAWDATAPOLYGON_DAT);
+                             Preprocess::RAWDATAPOLYGON_DAT,
+                             State::land,
+                             State::unknown);
   }
 
   bool WaterIndexGenerator::LoadRawBoundaries(const ImportParameter& parameter,
                                               Progress& progress,
                                               std::list<CoastRef>& coastlines,
-                                              const char* rawFile)
+                                              const char* rawFile,
+                                              State leftState,
+                                              State rightState)
   {
     // We must have coastline type defined
     FileScanner                scanner;
@@ -247,6 +253,8 @@ namespace osmscout {
         coast->isArea=coastline->IsArea();
 
         coast->coast.resize(coastline->GetNodeCount());
+        coast->left=leftState;
+        coast->right=rightState;
 
         for (size_t n=0; n<coastline->GetNodeCount(); n++) {
           CoordDataFile::ResultMap::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
@@ -1483,7 +1491,7 @@ namespace osmscout {
    */
   void WaterIndexGenerator::GetCoastlineData(const ImportParameter& parameter,
                                              Progress& progress,
-                                             Projection& projection,
+                                             const Projection& projection,
                                              const Level& level,
                                              const std::list<CoastRef>& coastlines,
                                              Data& data)
@@ -2003,6 +2011,206 @@ namespace osmscout {
     }
   }
 
+  void WaterIndexGenerator::buildTiles(const TypeConfigRef &typeConfig,
+                                       const ImportParameter &parameter,
+                                       Progress &progress,
+                                       const MercatorProjection &projection,
+                                       Level &levelStruct,
+                                       std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                                       const std::list<CoastRef> &coastlines,
+                                       Data &data)
+  {
+    if (!coastlines.empty()) {
+      // Collects, calculates and generates a number of data about a coastline
+      GetCoastlineData(parameter,
+                       progress,
+                       projection,
+                       levelStruct,
+                       coastlines,
+                       data);
+
+      // Mark cells that intersect a coastline as coast
+      MarkCoastlineCells(progress,
+                         levelStruct,
+                         data);
+
+      // Fills coords information for cells that completely contain a coastline
+      HandleAreaCoastlinesCompletelyInACell(progress,
+                                            levelStruct,
+                                            data,
+                                            cellGroundTileMap);
+
+      // Fills coords information for cells that intersect a coastline
+      HandleCoastlinesPartiallyInACell(progress,
+                                       coastlines,
+                                       levelStruct,
+                                       cellGroundTileMap,
+                                       data);
+    }
+
+    // Calculate the cell type for cells directly around coast cells
+    CalculateCoastEnvironment(progress,
+                              levelStruct,
+                              cellGroundTileMap);
+
+    if (parameter.GetAssumeLand()) {
+      // Assume cell type 'land' for cells that intersect with 'land' object types
+      AssumeLand(parameter,
+                 progress,
+                 *typeConfig,
+                 levelStruct);
+    }
+
+    if (!coastlines.empty()) {
+      // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
+      FillWater(progress,
+                levelStruct,20);
+    }
+
+    // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
+    FillLand(progress,
+             levelStruct);
+
+    levelStruct.hasCellData=false;
+    levelStruct.defaultCellData=unknown;
+
+    if (levelStruct.cellXCount>0 && levelStruct.cellYCount>0) {
+      levelStruct.defaultCellData=levelStruct.GetState(0,0);
+
+      if (cellGroundTileMap.size()>0) {
+        levelStruct.hasCellData=true;
+      }
+      else {
+        for (uint32_t y=0; y<levelStruct.cellYCount; y++) {
+          for (uint32_t x=0; x<levelStruct.cellXCount; x++) {
+            levelStruct.hasCellData=levelStruct.GetState(x,y)!=levelStruct.defaultCellData;
+
+            if (levelStruct.hasCellData) {
+              break;
+            }
+          }
+
+          if (levelStruct.hasCellData) {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  void WaterIndexGenerator::writeTiles(Progress &progress,
+                                       const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                                       const uint32_t level,
+                                       Level &levelStruct,
+                                       FileWriter &writer)
+  {
+    if (levelStruct.hasCellData) {
+
+      //
+      // Calculate size of data
+      //
+
+      size_t dataSize=4;
+      char   buffer[10];
+
+      for (const auto& coord : cellGroundTileMap) {
+        // Number of ground tiles
+        dataSize+=EncodeNumber(coord.second.size(),buffer);
+
+        for (const auto& tile : coord.second) {
+          // Type
+          dataSize++;
+
+          // Number of coordinates
+          dataSize+=EncodeNumber(tile.coords.size(),buffer);
+
+          // Data for coordinate pairs
+          dataSize+=tile.coords.size()*2*sizeof(uint16_t);
+        }
+      }
+
+      levelStruct.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
+
+      progress.Info("Writing index for level "+
+                    NumberToString(level)+", "+
+                    NumberToString(levelStruct.cellXCount*levelStruct.cellXCount)+" cells, "+
+                    NumberToString(cellGroundTileMap.size())+" entries, "+
+                    NumberToString(levelStruct.dataOffsetBytes)+" bytes/entry, "+
+                    ByteSizeToString(1.0*levelStruct.cellXCount*levelStruct.cellYCount*levelStruct.dataOffsetBytes+dataSize));
+
+      //
+      // Write bitmap
+      //
+
+      levelStruct.indexDataOffset=writer.GetPos();
+
+      for (uint32_t y=0; y<levelStruct.cellYCount; y++) {
+        for (uint32_t x=0; x<levelStruct.cellXCount; x++) {
+          State state=levelStruct.GetState(x,y);
+
+          writer.WriteFileOffset((FileOffset) state,
+                                 levelStruct.dataOffsetBytes);
+        }
+      }
+
+      //
+      // Write data
+      //
+
+      FileOffset dataOffset=writer.GetPos();
+
+      // TODO: when data format will be changing, consider usage ones (0xFF..FF) as empty placeholder
+      writer.WriteFileOffset((FileOffset)0,4);
+
+      for (const auto& coord : cellGroundTileMap) {
+        FileOffset startPos=writer.GetPos();
+
+        writer.WriteNumber((uint32_t) coord.second.size());
+
+        for (const auto& tile : coord.second) {
+          writer.Write((uint8_t) tile.type);
+
+          writer.WriteNumber((uint32_t) tile.coords.size());
+
+          for (size_t c=0; c<tile.coords.size(); c++) {
+            if (tile.coords[c].coast) {
+              uint16_t x=tile.coords[c].x | uint16_t(1 << 15);
+
+              writer.Write(x);
+            }
+            else {
+              writer.Write(tile.coords[c].x);
+            }
+            writer.Write(tile.coords[c].y);
+          }
+        }
+
+        FileOffset endPos;
+        uint32_t   cellId=coord.first.y*levelStruct.cellXCount+coord.first.x;
+        size_t     index =cellId*levelStruct.dataOffsetBytes;
+
+        endPos=writer.GetPos();
+
+        writer.SetPos(levelStruct.indexDataOffset+index);
+        writer.WriteFileOffset(startPos-dataOffset,
+                               levelStruct.dataOffsetBytes);
+        writer.SetPos(endPos);
+      }
+    }
+    else {
+      progress.Info("All cells have state '"+StateToString(levelStruct.defaultCellData)+"' and no coastlines, no cell index needed");
+    }
+
+    FileOffset currentPos=writer.GetPos();
+
+    writer.SetPos(levelStruct.indexEntryOffset);
+    writer.Write(levelStruct.hasCellData);
+    writer.Write(levelStruct.dataOffsetBytes);
+    writer.Write((uint8_t) levelStruct.defaultCellData);
+    writer.WriteFileOffset(levelStruct.indexDataOffset);
+    writer.SetPos(currentPos);
+  }
+
   void WaterIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                               ImportModuleDescription& description) const
   {
@@ -2116,200 +2324,35 @@ namespace osmscout {
                       writer,
                       levels);
 
-      for (size_t level=0; level<levels.size(); level++) {
+      for (size_t levelIndex=0; levelIndex<levels.size(); levelIndex++) {
         Magnification                          magnification;
         MercatorProjection                     projection;
         Data                                   data;
         std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
 
-        magnification.SetLevel((uint32_t) (level+parameter.GetWaterIndexMinMag()));
+        uint32_t level=levelIndex+parameter.GetWaterIndexMinMag();
+        Level &levelStruct=levels[levelIndex];
+
+        magnification.SetLevel(level);
 
         projection.Set(GeoCoord(0.0,0.0),magnification,72,640,480);
 
-        progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
+        progress.SetAction("Building tiles for level "+NumberToString(level));
 
-        if (!coastlines.empty()) {
-          // Collects, calculates and generates a number of data about a coastline
-          GetCoastlineData(parameter,
-                           progress,
-                           projection,
-                           levels[level],
-                           coastlines,
-                           data);
+        buildTiles(typeConfig,
+                   parameter,
+                   progress,
+                   projection,
+                   levelStruct,
+                   cellGroundTileMap,
+                   coastlines,
+                   data);
 
-          // Mark cells that intersect a coastline as coast
-          MarkCoastlineCells(progress,
-                             levels[level],
-                             data);
-
-          // Fills coords information for cells that completely contain a coastline
-          HandleAreaCoastlinesCompletelyInACell(progress,
-                                                levels[level],
-                                                data,
-                                                cellGroundTileMap);
-
-          // Fills coords information for cells that intersect a coastline
-          HandleCoastlinesPartiallyInACell(progress,
-                                           coastlines,
-                                           levels[level],
-                                           cellGroundTileMap,
-                                           data);
-        }
-
-        // Calculate the cell type for cells directly around coast cells
-        CalculateCoastEnvironment(progress,
-                                  levels[level],
-                                  cellGroundTileMap);
-
-        if (parameter.GetAssumeLand()) {
-          // Assume cell type 'land' for cells that intersect with 'land' object types
-          AssumeLand(parameter,
-                     progress,
-                     *typeConfig,
-                     levels[level]);
-        }
-
-        if (!coastlines.empty()) {
-          // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
-          FillWater(progress,
-                    levels[level],20);
-        }
-
-        // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
-        FillLand(progress,
-                 levels[level]);
-
-        levels[level].hasCellData=false;
-        levels[level].defaultCellData=unknown;
-
-        if (levels[level].cellXCount>0 && levels[level].cellYCount>0) {
-          levels[level].defaultCellData=levels[level].GetState(0,0);
-
-          if (cellGroundTileMap.size()>0) {
-            levels[level].hasCellData=true;
-          }
-          else {
-            for (uint32_t y=0; y<levels[level].cellYCount; y++) {
-              for (uint32_t x=0; x<levels[level].cellXCount; x++) {
-                levels[level].hasCellData=levels[level].GetState(x,y)!=levels[level].defaultCellData;
-
-                if (levels[level].hasCellData) {
-                  break;
-                }
-              }
-
-              if (levels[level].hasCellData) {
-                break;
-              }
-            }
-          }
-        }
-
-        if (levels[level].hasCellData) {
-
-          //
-          // Calculate size of data
-          //
-
-          size_t dataSize=4;
-          char   buffer[10];
-
-          for (const auto& coord : cellGroundTileMap) {
-            // Number of ground tiles
-            dataSize+=EncodeNumber(coord.second.size(),buffer);
-
-            for (const auto& tile : coord.second) {
-              // Type
-              dataSize++;
-
-              // Number of coordinates
-              dataSize+=EncodeNumber(tile.coords.size(),buffer);
-
-              // Data for coordinate pairs
-              dataSize+=tile.coords.size()*2*sizeof(uint16_t);
-            }
-          }
-
-          levels[level].dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
-
-          progress.Info("Writing index for level "+
-                        NumberToString(level+parameter.GetWaterIndexMinMag())+", "+
-                        NumberToString(levels[level].cellXCount*levels[level].cellXCount)+" cells, "+
-                        NumberToString(cellGroundTileMap.size())+" entries, "+
-                        NumberToString(levels[level].dataOffsetBytes)+" bytes/entry, "+
-                        ByteSizeToString(1.0*levels[level].cellXCount*levels[level].cellYCount*levels[level].dataOffsetBytes+dataSize));
-
-          //
-          // Write bitmap
-          //
-
-          levels[level].indexDataOffset=writer.GetPos();
-
-          for (uint32_t y=0; y<levels[level].cellYCount; y++) {
-            for (uint32_t x=0; x<levels[level].cellXCount; x++) {
-              State state=levels[level].GetState(x,y);
-
-              writer.WriteFileOffset((FileOffset) state,
-                                     levels[level].dataOffsetBytes);
-            }
-          }
-
-          //
-          // Write data
-          //
-
-          FileOffset dataOffset=writer.GetPos();
-
-          // TODO: when data format will be changing, consider usage ones (0xFF..FF) as empty placeholder
-          writer.WriteFileOffset((FileOffset)0,4);
-
-          for (const auto& coord : cellGroundTileMap) {
-            FileOffset startPos=writer.GetPos();
-
-            writer.WriteNumber((uint32_t) coord.second.size());
-
-            for (const auto& tile : coord.second) {
-              writer.Write((uint8_t) tile.type);
-
-              writer.WriteNumber((uint32_t) tile.coords.size());
-
-              for (size_t c=0; c<tile.coords.size(); c++) {
-                if (tile.coords[c].coast) {
-                  uint16_t x=tile.coords[c].x | uint16_t(1 << 15);
-
-                  writer.Write(x);
-                }
-                else {
-                  writer.Write(tile.coords[c].x);
-                }
-                writer.Write(tile.coords[c].y);
-              }
-            }
-
-            FileOffset endPos;
-            uint32_t   cellId=coord.first.y*levels[level].cellXCount+coord.first.x;
-            size_t     index =cellId*levels[level].dataOffsetBytes;
-
-            endPos=writer.GetPos();
-
-            writer.SetPos(levels[level].indexDataOffset+index);
-            writer.WriteFileOffset(startPos-dataOffset,
-                                   levels[level].dataOffsetBytes);
-            writer.SetPos(endPos);
-          }
-        }
-        else {
-          progress.Info("All cells have state '"+StateToString(levels[level].defaultCellData)+"' and no coastlines, no cell index needed");
-        }
-
-        FileOffset currentPos=writer.GetPos();
-
-        writer.SetPos(levels[level].indexEntryOffset);
-        writer.Write(levels[level].hasCellData);
-        writer.Write(levels[level].dataOffsetBytes);
-        writer.Write((uint8_t) levels[level].defaultCellData);
-        writer.WriteFileOffset(levels[level].indexDataOffset);
-        writer.SetPos(currentPos);
+        writeTiles(progress,
+                   cellGroundTileMap,
+                   level,
+                   levelStruct,
+                   writer);
       }
 
       coastlines.clear();

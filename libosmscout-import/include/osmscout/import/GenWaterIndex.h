@@ -159,6 +159,8 @@ namespace osmscout {
       Id                 frontNodeId;
       Id                 backNodeId;
       std::vector<Point> coast;
+      State              left;
+      State              right;
     };
 
     typedef std::shared_ptr<Coast> CoastRef;
@@ -195,7 +197,9 @@ namespace osmscout {
     bool LoadRawBoundaries(const ImportParameter& parameter,
                            Progress& progress,
                            std::list<CoastRef>& coastlines,
-                           const char* rawFile);
+                           const char* rawFile,
+                           State leftState,
+                           State rightState);
 
     bool LoadCoastlines(const ImportParameter& parameter,
                         Progress& progress,
@@ -255,7 +259,7 @@ namespace osmscout {
 
     void GetCoastlineData(const ImportParameter& parameter,
                           Progress& progress,
-                          Projection& projection,
+                          const Projection& projection,
                           const Level& level,
                           const std::list<CoastRef>& coastlines,
                           Data& data);
@@ -309,6 +313,21 @@ namespace osmscout {
                                           const Level& level,
                                           std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                           Data& data);
+
+    void buildTiles(const TypeConfigRef& typeConfig,
+                    const ImportParameter& parameter,
+                    Progress &progress,
+                    const MercatorProjection &projection,
+                    Level &levelStruct,
+                    std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                    const std::list<CoastRef> &coastlines,
+                    Data &data);
+
+    void writeTiles(Progress &progress,
+                    const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                    const uint32_t level,
+                    Level &levelStruct,
+                    FileWriter &writer);
 
   public:
     void GetDescription(const ImportParameter& parameter,
