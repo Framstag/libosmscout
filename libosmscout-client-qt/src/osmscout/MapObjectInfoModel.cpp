@@ -105,6 +105,8 @@ void MapObjectInfoModel::setPosition(QObject *o,
 
   this->screenX=screenX;
   this->screenY=screenY;
+  this->ready=false;
+  emit readyChange(ready);
 
   if (this->view!=r){
     this->view=r;
@@ -181,4 +183,7 @@ void MapObjectInfoModel::update()
   }
   //std::cout << "count: "<< model.size() << std::endl;
   endResetModel();
+
+  this->ready=true;
+  emit readyChange(ready);
 }
