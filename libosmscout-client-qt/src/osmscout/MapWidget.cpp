@@ -315,6 +315,14 @@ bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
   return resp.boundingBox.Includes(coord);
 }
 
+QPointF MapWidget::screenPosition(double lat, double lon)
+{
+    double x;
+    double y;
+    getProjection().GeoToPixel(osmscout::GeoCoord(lat, lon), x, y);
+    return QPointF(x, y);
+}
+
 void MapWidget::zoom(double zoomFactor)
 {
     zoom(zoomFactor, QPoint(width()/2, height()/2));
