@@ -795,6 +795,23 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Tries to detect the type of the relation based on the types of the outer rings. In cases where
+   * outer rings have different types. Takes the type with occurs most. In the case where there is only
+   * one outer ring, return it as copyPart to allow calling code to copy attributes from it.
+   *
+   * @param parameter
+   *    Parameter object
+   * @param typeConfig
+   *    Type configuration
+   * @param rawRelation
+   *    The raw relation to analyse (only passed for type and id)
+   * @param parts
+   *    The list of parts for the raw relation
+   * @param copyPart
+   *    Optional reference of the part tat defines the outer ring
+   * @return
+   */
   TypeInfoRef RelAreaDataGenerator::AutodetectRelationType(const ImportParameter& parameter,
                                                            const TypeConfig& typeConfig,
                                                            const RawRelation& rawRelation,
@@ -806,7 +823,8 @@ namespace osmscout {
 
     TypeInfoRef masterType=typeConfig.typeInfoIgnore;
 
-    for (std::list<MultipolygonPart>::iterator ring=parts.begin(); ring!=parts.end(); ring++) {
+    // Count the occurence of outer types and store the last outer ring found for each type
+    for (std::list<MultipolygonPart>::iterator ring=parts.begin(); ring!=parts.end(); ++ring) {
       if (ring->role.IsOuterRing() &&
           ring->IsArea() &&
           ring->role.GetType()!=typeConfig.typeInfoIgnore) {
@@ -1242,6 +1260,7 @@ namespace osmscout {
 
         writer.Write((uint8_t)osmRefRelation);
         writer.Write(rawRel.GetId());
+
         rel.WriteImport(*typeConfig,
                         writer);
 
