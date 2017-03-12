@@ -110,8 +110,7 @@ namespace osmscout {
     bool start=true;
 
     for (const auto& ring : rings) {
-      if ((ring.IsMasterRing() && !ring.nodes.empty()) ||
-          ring.IsOuterRing()) {
+      if (ring.IsOuterRing()) {
         for (size_t j=0; j<ring.nodes.size(); j++) {
           if (start) {
             minLat=ring.nodes[j].GetLat();
@@ -148,8 +147,7 @@ namespace osmscout {
     boundingBox.Invalidate();
 
     for (const auto& ring : rings) {
-      if ((ring.IsMasterRing() && !ring.nodes.empty()) ||
-          ring.IsOuterRing()) {
+      if (ring.IsOuterRing()) {
         if (!boundingBox.IsValid()) {
           ring.GetBoundingBox(boundingBox);
         }
@@ -432,9 +430,9 @@ namespace osmscout {
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
-    bool                              hasMaster=rings[0].IsMasterRing();
+    bool                              hasMaster=ring->IsMasterRing();
 
-    // Outer ring
+    // Master/Outer ring
 
     writer.WriteTypeId(ring->GetType()->GetAreaId(),
                        typeConfig.GetAreaTypeIdBytes());
