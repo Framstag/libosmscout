@@ -853,7 +853,7 @@ namespace osmscout {
 
       entry.type=area.GetType()->GetAreaId();
       entry.offset=offset;
-      
+
       levels[level][Pixel(x,y)].areas.push_back(entry);
     }
 
