@@ -110,7 +110,8 @@ namespace osmscout {
     bool start=true;
 
     for (const auto& ring : rings) {
-      if (ring.IsOuterRing()) {
+      if ((ring.IsMasterRing() && !ring.nodes.empty()) ||
+          ring.IsOuterRing()) {
         for (size_t j=0; j<ring.nodes.size(); j++) {
           if (start) {
             minLat=ring.nodes[j].GetLat();
@@ -146,15 +147,16 @@ namespace osmscout {
   {
     boundingBox.Invalidate();
 
-    for (const auto& role : rings) {
-      if (role.IsOuterRing()) {
+    for (const auto& ring : rings) {
+      if ((ring.IsMasterRing() && !ring.nodes.empty()) ||
+          ring.IsOuterRing()) {
         if (!boundingBox.IsValid()) {
-          role.GetBoundingBox(boundingBox);
+          ring.GetBoundingBox(boundingBox);
         }
         else {
           GeoBox ringBoundingBox;
 
-          role.GetBoundingBox(ringBoundingBox);
+          ring.GetBoundingBox(ringBoundingBox);
 
           boundingBox.Include(ringBoundingBox);
         }
