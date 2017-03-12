@@ -491,7 +491,8 @@ namespace osmscout {
       if (specialFlag1) {
         addByte|= 0x80;
       }
-      if (specialFlag1) {
+
+      if (specialFlag2) {
         addByte|= 0x40;
       }
 
