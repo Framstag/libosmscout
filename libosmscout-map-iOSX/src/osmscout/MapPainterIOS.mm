@@ -884,12 +884,10 @@ namespace osmscout {
                                    const FillStyle& style){
         CGContextSaveGState(cg);
         CGContextBeginPath(cg);
-        const Color &borderColor = style.GetBorderColor();
-        CGContextSetRGBStrokeColor(cg, borderColor.GetR(), borderColor.GetG(), borderColor.GetB(), borderColor.GetA());
         const Color &fillColor = style.GetFillColor();
         CGContextSetRGBFillColor(cg, fillColor.GetR(), fillColor.GetG(), fillColor.GetB(), fillColor.GetA());
         CGContextAddRect(cg, CGRectMake(0,0,projection.GetWidth(),projection.GetHeight()));
-        CGContextDrawPath(cg, kCGPathFillStroke);
+        CGContextDrawPath(cg, kCGPathFill);
         CGContextRestoreGState(cg);
     }
     
