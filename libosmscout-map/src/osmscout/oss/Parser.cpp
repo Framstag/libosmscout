@@ -587,12 +587,6 @@ void Parser::AREASYMBOLSTYLE(FillPartialStyle& fillStyle, BorderPartialStyle& bo
 		}
 		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(110); Get();}
 		Expect(12 /* "}" */);
-		fillStyle.style->SetBorderColor(borderStyle.style->GetColor());
-		fillStyle.style->SetBorderWidth(borderStyle.style->GetWidth());
-		if (borderStyle.style->HasDashes()) {
-		 fillStyle.style->SetBorderDashes(borderStyle.style->GetDash());
-		}
-		
 }
 
 void Parser::COORD(Vertex2D& coord) {

@@ -303,13 +303,6 @@ PRODUCTIONS
                   )  
                 }
                 SYNC "}"
-                (.
-                  fillStyle.style->SetBorderColor(borderStyle.style->GetColor());
-                  fillStyle.style->SetBorderWidth(borderStyle.style->GetWidth());
-                  if (borderStyle.style->HasDashes()) {
-                    fillStyle.style->SetBorderDashes(borderStyle.style->GetDash());
-                  }
-                .)
                 .
 
   POLYGON<Symbol& symbol>

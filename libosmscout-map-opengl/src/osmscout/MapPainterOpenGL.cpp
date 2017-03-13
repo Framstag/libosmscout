@@ -252,14 +252,15 @@ namespace osmscout {
       gluTessEndPolygon(tesselator);
     }
 
-    if (area.fillStyle->GetBorderWidth()>0 &&
-        area.fillStyle->GetBorderColor().IsVisible()) {
-      double borderWidth=projection.ConvertWidthToPixel(area.fillStyle->GetBorderWidth());
+    if (area.borderStyle &&
+        area.borderStyle->GetWidth()>0 &&
+        area.borderStyle->GetColor().IsVisible()) {
+      double borderWidth=projection.ConvertWidthToPixel(area.borderStyle->GetWidth());
 
-      glColor4d(area.fillStyle->GetBorderColor().GetR(),
-                area.fillStyle->GetBorderColor().GetG(),
-                area.fillStyle->GetBorderColor().GetB(),
-                area.fillStyle->GetBorderColor().GetA());
+      glColor4d(area.borderStyle->GetColor().GetR(),
+                area.borderStyle->GetColor().GetG(),
+                area.borderStyle->GetColor().GetB(),
+                area.borderStyle->GetColor().GetA());
 
       glLineWidth(borderWidth);
 

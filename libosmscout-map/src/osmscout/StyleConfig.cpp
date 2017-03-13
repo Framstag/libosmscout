@@ -569,9 +569,7 @@ namespace osmscout {
   FillStyle::FillStyle()
    : fillColor(1.0,0.0,0.0,0.0),
      patternId(0),
-     patternMinMag(Magnification::magWorld),
-     borderColor(1.0,0.0,0.0,0.0),
-     borderWidth(0.0)
+     patternMinMag(Magnification::magWorld)
   {
     // no code
   }
@@ -582,9 +580,6 @@ namespace osmscout {
     this->pattern=style.pattern;
     this->patternId=style.patternId;
     this->patternMinMag=style.patternMinMag;
-    this->borderColor=style.borderColor;
-    this->borderWidth=style.borderWidth;
-    this->borderDash=style.borderDash;
   }
 
   FillStyle& FillStyle::SetFillColor(const Color& color)
@@ -613,27 +608,6 @@ namespace osmscout {
     return *this;
   }
 
-  FillStyle& FillStyle::SetBorderColor(const Color& color)
-  {
-    borderColor=color;
-
-    return *this;
-  }
-
-  FillStyle& FillStyle::SetBorderWidth(double value)
-  {
-    borderWidth=value;
-
-    return *this;
-  }
-
-  FillStyle& FillStyle::SetBorderDashes(const std::vector<double> dashes)
-  {
-    borderDash=dashes;
-
-    return *this;
-  }
-
   void FillStyle::CopyAttributes(const FillStyle& other,
                                  const std::set<Attribute>& attributes)
   {
@@ -649,15 +623,6 @@ namespace osmscout {
       case attrPatternMinMag:
         patternMinMag=other.patternMinMag;
         break;
-      case attrBorderColor:
-        borderColor=other.borderColor;
-        break;
-      case attrBorderWidth:
-        borderWidth=other.borderWidth;
-        break;
-      case attrBorderDashes:
-        borderDash=other.borderDash;
-        break;
       }
     }
   }
@@ -672,19 +637,7 @@ namespace osmscout {
       return false;
     }
 
-    if (patternMinMag!=other.patternMinMag) {
-      return false;
-    }
-
-    if (borderColor!=other.borderColor) {
-      return false;
-    }
-
-    if (borderWidth!=other.borderWidth) {
-      return false;
-    }
-
-    return borderDash==other.borderDash;
+    return patternMinMag!=other.patternMinMag;
   }
 
   bool FillStyle::operator!=(const FillStyle& other) const
@@ -702,19 +655,7 @@ namespace osmscout {
       return pattern<other.pattern;
     }
 
-    if (patternMinMag!=other.patternMinMag) {
-      return patternMinMag<other.patternMinMag;
-    }
-
-    if (borderColor!=other.borderColor) {
-      return borderColor<other.borderColor;
-    }
-
-    if (borderWidth!=other.borderWidth) {
-      return borderWidth<other.borderWidth;
-    }
-
-    return borderDash<other.borderDash;
+    return patternMinMag<other.patternMinMag;
   }
 
   BorderStyle::BorderStyle()

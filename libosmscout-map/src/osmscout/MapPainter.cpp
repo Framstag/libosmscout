@@ -1756,7 +1756,7 @@ namespace osmscout {
             foundRing=true;
 
             AreaData a;
-            double   borderWidth=fillStyle ? fillStyle->GetBorderWidth() : borderStyle->GetWidth();
+            double   borderWidth=borderStyle? borderStyle->GetWidth() : 0.0;
 
             ring.GetBoundingBox(a.boundingBox);
 
@@ -1788,19 +1788,6 @@ namespace osmscout {
             a.borderStyle=borderStyle;
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;
-
-            if (borderStyle) {
-              if (!a.fillStyle) {
-                a.fillStyle=std::make_shared<FillStyle>();
-              }
-
-              a.fillStyle->SetBorderColor(borderStyle->GetColor());
-              a.fillStyle->SetBorderWidth(borderStyle->GetWidth());
-
-              if (borderStyle->HasDashes()) {
-                a.fillStyle->SetBorderDashes(borderStyle->GetDash());
-              }
-            }
 
             areaData.push_back(a);
 

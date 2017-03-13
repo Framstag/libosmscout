@@ -643,10 +643,7 @@ namespace osmscout {
     enum Attribute {
       attrFillColor,
       attrPattern,
-      attrPatternMinMag,
-      attrBorderColor,
-      attrBorderWidth,
-      attrBorderDashes
+      attrPatternMinMag
     };
 
   private:
@@ -654,9 +651,6 @@ namespace osmscout {
     std::string         pattern;
     mutable size_t      patternId;
     Magnification       patternMinMag;
-    Color               borderColor;
-    double              borderWidth;
-    std::vector<double> borderDash;
 
   public:
     FillStyle();
@@ -666,14 +660,10 @@ namespace osmscout {
     FillStyle& SetPattern(const std::string& pattern);
     void SetPatternId(size_t id) const;
     FillStyle& SetPatternMinMag(const Magnification& mag);
-    FillStyle& SetBorderColor(const Color& color);
-    FillStyle& SetBorderWidth(double value);
-    FillStyle& SetBorderDashes(const std::vector<double> dashes);
 
     inline bool IsVisible() const
     {
       return (fillColor.IsVisible() ||
-              (borderWidth>0 && borderColor.IsVisible()) ||
               !pattern.empty());
     }
 
@@ -700,26 +690,6 @@ namespace osmscout {
     inline const Magnification& GetPatternMinMag() const
     {
       return patternMinMag;
-    }
-
-    inline const Color& GetBorderColor() const
-    {
-      return borderColor;
-    }
-
-    inline double GetBorderWidth() const
-    {
-      return borderWidth;
-    }
-
-    inline bool HasBorderDashes() const
-    {
-      return !borderDash.empty();
-    }
-
-    inline const std::vector<double>& GetBorderDash() const
-    {
-      return borderDash;
     }
 
     void CopyAttributes(const FillStyle& other,

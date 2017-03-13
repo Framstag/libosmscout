@@ -159,26 +159,26 @@ namespace osmscout {
 
         stream << ";fillRule:nonzero";
 
-        double borderWidth=projection.ConvertWidthToPixel(area.fillStyle->GetBorderWidth());
+        double borderWidth=area.borderStyle ? projection.ConvertWidthToPixel(area.borderStyle->GetWidth()) : 0.0;
 
         if (borderWidth>0.0) {
-          stream << ";stroke:" << GetColorValue(area.fillStyle->GetBorderColor());
+          stream << ";stroke:" << GetColorValue(area.borderStyle->GetColor());
 
-          if (!area.fillStyle->GetBorderColor().IsSolid()) {
-            stream << ";stroke-opacity:" << area.fillStyle->GetBorderColor().GetA();
+          if (!area.borderStyle->GetColor().IsSolid()) {
+            stream << ";stroke-opacity:" << area.borderStyle->GetColor().GetA();
           }
 
           stream << ";stroke-width:" << borderWidth;
 
-          if (area.fillStyle->HasBorderDashes()) {
+          if (area.borderStyle->HasDashes()) {
             stream << ";stroke-dasharray:";
 
-            for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i++) {
+            for (size_t i=0; i<area.borderStyle->GetDash().size(); i++) {
               if (i>0) {
                 stream << ",";
               }
 
-              stream << area.fillStyle->GetBorderDash()[i]*borderWidth;
+              stream << area.borderStyle->GetDash()[i]*borderWidth;
             }
           }
         }
