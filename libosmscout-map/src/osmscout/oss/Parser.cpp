@@ -1989,13 +1989,13 @@ void Parser::AREABORDERSTYLE(StyleFilter filter, bool state) {
 		BorderPartialStyle style;
 		std::string        slot;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(159); Get();}
-		Expect(11 /* "{" */);
 		if (la->kind == 51 /* "#" */) {
 			Get();
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(159); Get();}
+		Expect(11 /* "{" */);
 		while (StartOf(2)) {
 			BORDERSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 3);

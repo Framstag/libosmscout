@@ -1130,11 +1130,11 @@ PRODUCTIONS
                   BorderPartialStyle style;
                   std::string        slot;
                 .)
-                SYNC "{"
                 [
                   "#"
                   IDENT<slot> (. style.style->SetSlot(slot); .)
                 ]
+                SYNC "{"
                 {
                   BORDERSTYLEATTR<style> WEAK ";"
                 }

@@ -1022,9 +1022,11 @@ namespace osmscout {
       painter->setPen(Qt::NoPen);
     }
 
-    bool restoreTransform = false;
-    size_t idx = -1;
-    if (area.fillStyle->HasPattern()) {
+    bool   restoreTransform=false;
+    size_t idx=-1;
+
+    if (area.fillStyle &&
+        area.fillStyle->HasPattern()) {
       idx=area.fillStyle->GetPatternId()-1;
 
       if (idx<patterns.size() && !patterns[idx].textureImage().isNull()) {
