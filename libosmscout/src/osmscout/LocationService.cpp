@@ -1006,7 +1006,8 @@ namespace osmscout {
         result.limitReached=true;
       }
 
-      adminRegionVisitor.results.sort([](const auto& a, const auto& b) {
+      adminRegionVisitor.results.sort([](const AdminRegionMatchVisitor::AdminRegionResult& a,
+                                         const AdminRegionMatchVisitor::AdminRegionResult& b) {
         return a.adminRegion->regionOffset<b.adminRegion->regionOffset;
       });
 
