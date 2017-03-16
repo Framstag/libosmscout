@@ -436,7 +436,7 @@ namespace osmscout {
   {
     assert(database);
   }
-  
+
   const FeatureValueBufferRef LocationService::GetObjectFeatureBuffer(const ObjectFileRef &object)
   {
     FeatureValueBufferRef objectFeatureBuff;
@@ -448,19 +448,19 @@ namespace osmscout {
         if (database->GetNodeByOffset(object.GetFileOffset(), node)) {
           objectFeatureBuff = std::make_shared<FeatureValueBuffer>();
           objectFeatureBuff->Set(node->GetFeatureValueBuffer());
-        }      
+        }
         break;
       case refWay:
         if (database->GetWayByOffset(object.GetFileOffset(), way)) {
           objectFeatureBuff = std::make_shared<FeatureValueBuffer>();
           objectFeatureBuff->Set(way->GetFeatureValueBuffer());
-        }      
+        }
         break;
       case refArea:
         if (database->GetAreaByOffset(object.GetFileOffset(), area)) {
           objectFeatureBuff = std::make_shared<FeatureValueBuffer>();
           objectFeatureBuff->Set(area->GetFeatureValueBuffer());
-        }      
+        }
         break;
       case refNone:
       default:
@@ -1006,8 +1006,36 @@ namespace osmscout {
         result.limitReached=true;
       }
 
+      adminRegionVisitor.results.sort([](const auto& a, const auto& b) {
+        return a.adminRegion->regionOffset<b.adminRegion->regionOffset;
+      });
+
+      std::set<FileOffset> visitedAdminHierachie;
+
       for (const auto& regionResult : adminRegionVisitor.results) {
         // std::cout << "- '" << regionResult.adminRegion->name << "', '" << regionResult.adminRegion->aliasName << "'..." << std::endl;
+
+        std::map<FileOffset,AdminRegionRef> adminHierachie;
+        bool                                visited=false;
+
+        if (!ResolveAdminRegionHierachie(regionResult.adminRegion,
+                                         adminHierachie)) {
+          log.Error() << "Error during resolving admin region hierachie";
+          return false;
+        }
+
+        for (const auto& hierachieEntry : adminHierachie) {
+          if (visitedAdminHierachie.find(hierachieEntry.first)!=visitedAdminHierachie.end()) {
+            visited=true;
+            break;
+          }
+        }
+
+        visitedAdminHierachie.insert(regionResult.adminRegion->regionOffset);
+
+        if (visited) {
+          continue;
+        }
 
         if (!HandleAdminRegion(search,
                                searchEntry,
@@ -1513,7 +1541,7 @@ namespace osmscout {
     return true;
   }
 
-  bool LocationService::LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types, 
+  bool LocationService::LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
                                       std::vector<LocationDescriptionCandicate> &candidates,
                                       const double maxDistance)
   {
@@ -1717,7 +1745,7 @@ namespace osmscout {
     if (!addressTypes.Empty()) {
       if (!LoadNearAreas(location,
                          addressTypes,
-                         candidates, 
+                         candidates,
                          lookupDistance)){
         return false;
       }
@@ -1854,7 +1882,7 @@ namespace osmscout {
         }
         else {
           description.SetAtPOIDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                       candidate.GetDistance()*1000, 
+                                                                                       candidate.GetDistance()*1000,
                                                                                        candidate.GetBearing()));
         }
         return true;
