@@ -5,10 +5,14 @@ OSS
     COLOR unknownColor               = @waterColor;
 
   SYMBOL place_city
-    CIRCLE 0,0 1.25 {color: #ff0000aa; }
+    CIRCLE 0,0 1.25 {
+      AREA {color: #ff0000aa; }
+    }
 
   SYMBOL place_town
-    CIRCLE 0,0 0.75 {color: #ff000055; }
+    CIRCLE 0,0 0.75 {
+      AREA {color: #ff000055; }
+    }
 
   STYLE
    [TYPE _tile_sea] AREA {color: @waterColor;}
@@ -17,8 +21,9 @@ OSS
    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
   [TYPE boundary_administrative] {
-    AREA {color: #dddddd; borderColor: #aaaaaa; borderWidth: 0.5mm;}
-    AREA.TEXT { label: Name.name; style: emphasize; size: 1.5; priority: 1; }
+    AREA {color: #dddddd; }
+    AREA.BORDER {color: #aaaaaa; width: 0.5mm;}
+    AREA.TEXT { label: Name.name; style: emphasize; size: 1.5; priority: 6; }
   }
 
   [TYPE place_millioncity MAG stateOver-] {
