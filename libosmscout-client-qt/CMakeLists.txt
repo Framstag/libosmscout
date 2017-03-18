@@ -18,6 +18,7 @@ set(HEADER_FILES
     #include/osmscout/private/Config.h
     #include/osmscout/ClientQtFeatures.h
     include/osmscout/DBThread.h
+    include/osmscout/FileDownloader.h
     include/osmscout/InputHandler.h
     include/osmscout/LocationEntry.h
     include/osmscout/LocationInfoModel.h
@@ -46,6 +47,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
+    src/osmscout/FileDownloader.cpp
     src/osmscout/InputHandler.cpp
     src/osmscout/LocationEntry.cpp
     src/osmscout/LocationInfoModel.cpp
