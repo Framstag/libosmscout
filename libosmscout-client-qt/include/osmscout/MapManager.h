@@ -30,6 +30,7 @@
 
 #include <osmscout/MapProvider.h>
 #include <osmscout/AvailableMapsModel.h>
+#include <osmscout/FileDownloader.h>
 
 #include <QtGlobal>
 #if QT_VERSION >= 0x050400
@@ -38,88 +39,31 @@
 #endif
 
 /**
- * Simple utility class for download single file over http.
- * It don't support downloading restart when connection 
- * is interrupted.
- * \ingroup QtAPI
- */
-class OSMSCOUT_CLIENT_QT_API FileDownloadJob: public QObject
-{
-  Q_OBJECT
-  
-private:
-  QUrl           url;
-  QFile          file;
-  bool           downloading;
-  bool           downloaded;
-  QNetworkReply  *reply;
-  qint64         bytesDownloaded;
-  QString        fileName;
-
-signals:
-  void finished();
-  void failed();
-  void downloadProgress();
-
-public slots:
-  void onFinished(QNetworkReply* reply);
-  void onReadyRead();
-  void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-
-public:
-  FileDownloadJob(QUrl url, QFileInfo file);
-  virtual inline ~FileDownloadJob(){};
-  
-  void start(QNetworkAccessManager *webCtrl);
-
-  inline bool isDownloading() const
-  {
-    return downloading;
-  }
-
-  inline bool isDownloaded() const
-  {
-    return downloaded;
-  };
-
-  inline qint64 getBytesDownloaded() const
-  {
-    return bytesDownloaded;
-  };
-
-  inline QString getFileName() const
-  {
-    return fileName;
-  };
-};
-
-/**
  * Utility class for downloading map database described by AvailableMapsModelMap
- * over http. When connection is interrupted, downloading will be retried
- * after some backoff period.
+ * over http. 
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
 {
   Q_OBJECT
   
-  QList<FileDownloadJob*> jobs;
+  QList<FileDownloader*>  jobs;
   QNetworkAccessManager   *webCtrl;
   
   AvailableMapsModelMap   map;
   QDir                    target;
   
-  QTimer                  backoffTimer;
-  int                     backoffInterval;
   bool                    done;
   bool                    started;
+
+  uint64_t                downloadedBytes;
 
 signals:
   void finished();
   void downloadProgress();
 
 public slots:
-  void onJobFailed();
+  void onJobFailed(QString error_text);
   void onJobFinished();
   void downloadNextFile();
 
