@@ -242,8 +242,11 @@ signals:
 
   void searchFinished(const QString searchPattern, bool error);
 
+  void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
+
 public slots:
   void ToggleDaylight();
+  void SetStyleFlag(const QString &key, bool value);
   void ReloadStyle(const QString &suffix="");
   void LoadStyle(QString stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
@@ -266,7 +269,9 @@ public slots:
   void requestLocationDescription(const osmscout::GeoCoord location);
 
   virtual void onMapDPIChange(double dpi);
-  virtual void onRenderSeaChanged(bool);  
+  virtual void onRenderSeaChanged(bool);
+  virtual void onFontNameChanged(const QString);
+  virtual void onFontSizeChanged(double);
 
   /**
    * Start object search by some pattern. 
@@ -284,9 +289,12 @@ public slots:
    * @param limit - suggested limit for count of retrieved entries from one database
    */
   void SearchForLocations(const QString searchPattern, int limit);
-  
+
+  void requestObjectsOnView(const RenderMapRequest&);
+
 protected:
   MapManagerRef                 mapManager;
+  SettingsRef                   settings;
 
   double                        mapDpi;
   double                        physicalDpi;
@@ -309,9 +317,14 @@ protected:
   bool                          renderError;
   QList<StyleError>             styleErrors;
 
+  QString                       fontName;
+  double                        fontSize;
+
 protected:
   
-  DBThread(QStringList databaseLookupDirectories, QString stylesheetFilename, QString iconDirectory);
+  DBThread(QStringList databaseLookupDirectories,
+           QString iconDirectory,
+           SettingsRef settings);
 
   virtual ~DBThread();
 
@@ -399,6 +412,11 @@ public:
     return mapManager;
   }
 
+  inline SettingsRef GetSettings() const
+  {
+    return settings;
+  }
+
   inline QString GetStylesheetFilename() const
   {
     return stylesheetFilename;
@@ -407,21 +425,23 @@ public:
   const QList<StyleError> &GetStyleErrors() const
   {
       return styleErrors;
-  }  
+  }
+
+  const QMap<QString,bool> GetStyleFlags() const;
 
   static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
   
   static bool InitializeTiledInstance(QStringList databaseDirectory, 
-                                      QString stylesheetFilename, 
                                       QString iconDirectory,
+                                      SettingsRef settings,
                                       QString tileCacheDirectory,
                                       size_t onlineTileCacheSize = 20, 
                                       size_t offlineTileCacheSize = 50);
 
   static bool InitializePlaneInstance(QStringList databaseDirectory, 
-                                      QString stylesheetFilename, 
-                                      QString iconDirectory);
+                                      QString iconDirectory,
+                                      SettingsRef settings);
   
   static DBThread* GetInstance();
   static void FreeInstance();

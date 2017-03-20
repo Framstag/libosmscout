@@ -878,13 +878,13 @@ namespace osmscout {
     if (writeIds) {
       uint8_t hasNodesFlags=hasNodes ? 0x04 : 0x00;
 
-      if (nodesSize<16) {
+      if (nodesSize<=0x0f) { // 2^4 (8 -3 flags -1 continuation bit)
         uint8_t nodeSize1=(nodesSize & 0x0f) << 3;
         uint8_t size=coordSizeFlags | hasNodesFlags | nodeSize1;
 
         Write(size);
       }
-      else if (nodesSize<2048) {
+      else if (nodesSize<=0x7ff) { // 2^(4+7)=2^11 (16-3-1-1)
         uint8_t size[2];
         uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
         uint8_t nodeSize2=nodesSize >> 4;                   // The final bits
@@ -894,7 +894,7 @@ namespace osmscout {
 
         Write((char*)size,2);
       }
-      else if(nodesSize<1048576){
+      else if (nodesSize<=0x3ffff) { // 2^(11+7)=2^18 (24-3-1-1-1)
         uint8_t size[3];
         uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
         uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80; // Further 7 bits + continuation bit
@@ -906,29 +906,29 @@ namespace osmscout {
 
         Write((char*)size,3);
       }
-      else {
+      else { // 2^(18+8)=2^26 (32-3-1-1-1)
           uint8_t size[4];
           uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80;  // The initial 4 bits + continuation bit
           uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80;  // Further 7 bits + continuation bit
           uint8_t nodeSize3=((nodesSize >> 11) & 0x7f) | 0x80; // further 7 bits + continuation bit
           uint8_t nodeSize4=nodesSize >> 18;                    // The final bits
-          
+
           size[0]=coordSizeFlags  | hasNodesFlags | nodeSize1;
           size[1]=nodeSize2;
           size[2]=nodeSize3;
           size[3]=nodeSize4;
-          
+
           Write((char*)size,4);
       }
     }
     else {
-      if (nodesSize<32) {
+      if (nodesSize<=0x1f) {    // 2^5 (8 bits - 2 flag bit -1 continuation bit)
         uint8_t nodeSize1=(nodesSize & 0x1f) << 2;
         uint8_t size=coordSizeFlags | nodeSize1;
 
         Write(size);
       }
-      else if (nodesSize<4096) {
+      else if (nodesSize<=0xfff) { // 2^(5+7)=2^12 (16-2-1-1)
         uint8_t size[2];
         uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
         uint8_t nodeSize2=nodesSize >> 5; // The final bits
@@ -938,7 +938,7 @@ namespace osmscout {
 
         Write((char*)size,2);
       }
-      else if (nodesSize<2097152){
+      else if (nodesSize<=0x7ffff) { // 2^(12+7)=2^19 (24-2-1-1-1)
         uint8_t size[3];
         uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
         uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
@@ -949,18 +949,18 @@ namespace osmscout {
         size[2]=nodeSize3;
 
         Write((char*)size,3);
-      } else {
+      } else { // 2^(19+8)2^27 (32-2-1-1-1)
           uint8_t size[4];
           uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
           uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
           uint8_t nodeSize3=((nodesSize >> 12) & 0x7f) | 0x80; // further 7 bits + continuation bit
           uint8_t nodeSize4=nodesSize >> 19; // The final bits
-          
+
           size[0]=coordSizeFlags | nodeSize1;
           size[1]=nodeSize2;
           size[2]=nodeSize3;
           size[3]=nodeSize4;
-          
+
           Write((char*)size,4);
       }
     }

@@ -30,6 +30,7 @@ bool Equals(const std::vector<osmscout::Point>& coordsA, const std::vector<osmsc
 
   for (size_t i=0; i<coordsA.size(); i++) {
     if (coordsA[i].GetCoord().GetDisplayText()!=coordsB[i].GetCoord().GetDisplayText()) {
+      std::cerr << "Difference at offset " << i << " " << coordsA[i].GetCoord().GetDisplayText() << " <=> " << coordsB[i].GetCoord().GetDisplayText() << std::endl;
       return false;
     }
   }
@@ -69,6 +70,10 @@ int main()
   std::vector<osmscout::Point> outCoords4;
   std::vector<osmscout::Point> outCoords5;
   std::vector<osmscout::Point> outCoords6;
+  std::vector<osmscout::Point> outCoords7;
+
+
+  osmscout::FileOffset  finalWriteFileOffset;
 
   bool                  inBool;
   uint16_t              in16u;
@@ -85,6 +90,9 @@ int main()
   std::vector<osmscout::Point> inCoords4;
   std::vector<osmscout::Point> inCoords5;
   std::vector<osmscout::Point> inCoords6;
+  std::vector<osmscout::Point> inCoords7;
+
+  osmscout::FileOffset  finalReadFileOffset;
 
   outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57231,7.46418)));
   outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57233,7.46430)));
@@ -127,6 +135,12 @@ int main()
   outCoords6=outCoords5;
   std::reverse(outCoords6.begin(),outCoords6.end());
 
+  uint64_t maxCoords=1000000;
+
+  for (uint64_t i=1; i<=maxCoords; i++) {
+    outCoords7.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55493)));
+  }
+
   try {
     writer.Open("test.dat");
     writer.Write(outBool1);
@@ -168,6 +182,9 @@ int main()
     writer.Write(outCoords4,false);
     writer.Write(outCoords5,false);
     writer.Write(outCoords6,false);
+    writer.Write(outCoords7,false);
+
+    finalWriteFileOffset=writer.GetPos();
 
     writer.Close();
 
@@ -403,6 +420,35 @@ int main()
       std::cout << ", got ";
 
       DumpGeoCoords(inCoords6);
+
+      std::cout << std::endl;
+      errors++;
+    }
+
+    scanner.Read(inCoords7,false);
+    if (!Equals(inCoords7,outCoords7)) {
+      std::cerr << "Read/Write(std::vector<GeoCoord>) 7: Expected ";
+
+      std::cout << outCoords7.size();
+
+      std::cout << ", got ";
+
+      std::cout << inCoords7.size();
+
+      std::cout << std::endl;
+      errors++;
+    }
+
+    finalReadFileOffset=scanner.GetPos();
+
+    if (finalWriteFileOffset!=finalReadFileOffset) {
+      std::cerr << "Final file offset check: Expected ";
+
+      std::cout << finalWriteFileOffset;
+
+      std::cout << ", got ";
+
+      std::cout << finalReadFileOffset;
 
       std::cout << std::endl;
       errors++;

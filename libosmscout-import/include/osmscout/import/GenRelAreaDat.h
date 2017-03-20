@@ -213,6 +213,12 @@ namespace osmscout {
     std::string ResolveRelationName(const FeatureRef& featureName,
                                     const RawRelation& rawRelation) const;
 
+    TypeInfoRef AutodetectRelationType(const ImportParameter& parameter,
+                                       const TypeConfig& typeConfig,
+                                       const RawRelation& rawRelation,
+                                       std::list<MultipolygonPart>& parts,
+                                       std::list<MultipolygonPart>::iterator& copyPart) const;
+
   public:
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const;

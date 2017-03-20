@@ -23,6 +23,7 @@
 #include <mutex>
 
 #include <QPainter>
+#include <QMap>
 
 #include <osmscout/private/MapQtImportExport.h>
 
@@ -45,19 +46,37 @@ namespace osmscout {
       size_t nVertex;
       size_t direction;
     };
+    struct FontDescriptor
+    {
+      QString       fontName;
+      size_t        fontSize;
+      QFont::Weight weight;
+      bool          italic;
+
+      bool operator<(const FontDescriptor& other) const
+      {
+        if (fontName!=other.fontName)
+         return fontName<other.fontName;
+        if (fontSize!=other.fontSize)
+         return fontSize<other.fontSize;
+        if (weight!=other.weight)
+         return weight<other.weight;
+        return italic<other.italic;
+      }
+    };
 
   private:
-    CoordBufferImpl<Vertex2D> *coordBuffer;
+    CoordBufferImpl<Vertex2D>  *coordBuffer;
 
-    QPainter                  *painter;
+    QPainter                   *painter;
 
-    std::vector<QImage>       images;        //! vector of QImage for icons
-    std::vector<QImage>       patternImages; //! vector of QImage for fill patterns
-    std::vector<QBrush>       patterns;      //! vector of QBrush for fill patterns
-    std::map<size_t,QFont>    fonts;         //! Cached fonts
-    std::vector<double>       sin;           //! Lookup table for sin calculation
+    std::vector<QImage>        images;        //! vector of QImage for icons
+    std::vector<QImage>        patternImages; //! vector of QImage for fill patterns
+    std::vector<QBrush>        patterns;      //! vector of QBrush for fill patterns
+    QMap<FontDescriptor,QFont> fonts;         //! Cached fonts
+    std::vector<double>        sin;           //! Lookup table for sin calculation
 
-    std::mutex                mutex;         //! Mutex for locking concurrent calls
+    std::mutex                 mutex;         //! Mutex for locking concurrent calls
 
   private:
     QFont GetFont(const Projection& projection,
@@ -70,6 +89,10 @@ namespace osmscout {
     void SetFill(const Projection& projection,
                  const MapParameter& parameter,
                  const FillStyle& fillStyle);
+
+    void SetBorder(const Projection& projection,
+                   const MapParameter& parameter,
+                   const BorderStyle& borderStyle);
 
     bool FollowPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
     void FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,

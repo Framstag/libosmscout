@@ -36,12 +36,13 @@
 #include <unistd.h>
 
 DrawWindow::DrawWindow(QString variant, int sinCount, QWidget *parent)
-   : QWidget(parent), variant(variant), sinCount(sinCount), cnt(0)
+   : QWidget(parent), variant(variant), sinCount(sinCount), cnt(0), startOffset(0), moveOffset(0)
 {
   create();
   setMinimumSize(QSize(300,100));
 
   timer.restart();
+  animTimer.restart();
 
   sin.resize(360*10);
 
@@ -163,6 +164,13 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::Si
         //QPointF point=p.pointAtPercent(p.percentAtLength(glyphOffset));
         QPointF point=p.PointAtLength(glyphOffset);
 
+        // check if current glyph can be visible
+        QRectF boundingRect=glypRun.rawFont().boundingRect(index);
+        qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
+        if (!painter->viewport().intersects(QRect(QPoint(point.x()-diagonal, point.y()-diagonal),
+                                                  QPoint(point.x()+diagonal, point.y()+diagonal)))){
+          continue;
+        }
         setupTransformation(painter, p, glyphOffset, fontHeight*-1);
 
         QGlyphRun orphanGlyph;
@@ -219,9 +227,9 @@ void DrawWindow::paintEvent(QPaintEvent */* event */)
   for (int k=0;k<sinCount;k++){
     osmscout::SimplifiedPath p;
     // fill path with sinus
-    for (int x=0;x<width();x++){
+    for (int x=startOffset;(x+startOffset)<width();x++){
       //int y=std::cos(((double)(x+sinStart)/(double)width()) *3*M_PI) * (height()/2-44) + height()/2;
-      int y=std::sin(((double)(x+sinStart)/(double)width()) *2*M_PI) * (height()/2-44) + height()/2;
+      int y=std::sin(((double)(x+sinStart+moveOffset)/(double)width()) *2*M_PI) * (height()/2-44) + height()/2;
       p.AddPoint(x,y);
     }
     sinStart+=30;
@@ -238,7 +246,12 @@ void DrawWindow::paintEvent(QPaintEvent */* event */)
   if (timer.elapsed()>2000){
     qDebug() << "" << ((double)cnt/(double)timer.elapsed())*1000 << " fps";
     cnt=0;
-    timer.restart();    
+    timer.restart();
+  }
+  if (animTimer.elapsed()>100){
+    startOffset=(startOffset-1)%width();
+    moveOffset=startOffset-0.2;
+    animTimer.restart();
   }
 
   painter.end();

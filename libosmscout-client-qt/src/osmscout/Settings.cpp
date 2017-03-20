@@ -23,16 +23,21 @@
 #include <QDir>
 #include <QObject>
 #include <QDebug>
+#include <QFileInfo>
 
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
 
 #include <osmscout/Settings.h>
+#include <osmscout/DBThread.h>
 
-Settings::Settings(): 
-    view(NULL)
+Settings::Settings(QSettings *providedStorage):
+  storage(providedStorage)
 {
+    if (storage==NULL){
+      storage=new QSettings(this);
+    }
     /* Warning: Sailfish OS before version 2.0.1 reports incorrect DPI (100)
      *
      * Some DPI values:
@@ -48,8 +53,7 @@ Settings::Settings():
 
 Settings::~Settings()
 {
-    settings.sync();
-    // QObject will delete view (child)
+    // QObject will delete view and settings if this is owner
 }
 
 double Settings::GetPhysicalDPI() const
@@ -59,75 +63,34 @@ double Settings::GetPhysicalDPI() const
 
 void Settings::SetMapDPI(double dpi)
 {
-    settings.setValue("settings/map/dpi", (unsigned int)dpi);
+    storage->setValue("OSMScoutLib/Rendering/DPI", (unsigned int)dpi);
     emit MapDPIChange(dpi);
 }
 
 double Settings::GetMapDPI() const
 {
-  return (size_t)settings.value("settings/map/dpi",physicalDpi).toDouble();
-}
-
-MapView *Settings::GetMapView()
-{
-  if (view == NULL){
-    double lat   = settings.value("settings/map/lat",   0).toDouble();
-    double lon   = settings.value("settings/map/lon",   0).toDouble();
-    double angle = settings.value("settings/map/angle", 0).toDouble();
-    double mag   = settings.value("settings/map/mag",   osmscout::Magnification::magContinent).toDouble();
-    view = new MapView(this, 
-              osmscout::GeoCoord(lat, lon),
-              angle,
-              osmscout::Magnification(mag)
-              );
-  }
-  return view;
-}
-
-void Settings::SetMapView(MapView *updated)
-{
-  bool changed = false;
-  if (view == NULL){
-    view = new MapView(this, 
-              osmscout::GeoCoord(updated->GetLat(), updated->GetLon()),
-              updated->GetAngle(),
-              osmscout::Magnification(updated->GetMag())
-              );
-    changed = true;
-  }else{
-    changed = *view != *updated;  
-    if (changed){
-        view->operator =( *updated );
-    }
-  }
-  if (changed){
-    settings.setValue("settings/map/lat", view->GetLat());
-    settings.setValue("settings/map/lon", view->GetLon());
-    settings.setValue("settings/map/angle", view->GetAngle());
-    settings.setValue("settings/map/mag", view->GetMag());
-    emit MapViewChanged(view);
-  }
+  return (size_t)storage->value("OSMScoutLib/Rendering/DPI",physicalDpi).toDouble();
 }
 
 osmscout::Vehicle Settings::GetRoutingVehicle() const
 {
-  return (osmscout::Vehicle)settings.value("routing/vehicle",osmscout::vehicleCar).toUInt();
+  return (osmscout::Vehicle)storage->value("OSMScoutLib/Routing/Vehicle",osmscout::vehicleCar).toUInt();
 }
 
 void Settings::SetRoutingVehicle(const osmscout::Vehicle& vehicle)
 {
-  settings.setValue("routing/vehicle", (unsigned int)vehicle);
+  storage->setValue("OSMScoutLib/Routing/Vehicle", (unsigned int)vehicle);
 }
 
 bool Settings::GetOnlineTilesEnabled() const
 {
-  return settings.value("onlineTiles", true).toBool();
+  return storage->value("OSMScoutLib/Rendering/OnlineTiles", true).toBool();
 }
 
 void Settings::SetOnlineTilesEnabled(bool b)
 {
   if (GetOnlineTilesEnabled() != b){
-    settings.setValue("onlineTiles", b);
+    storage->setValue("OSMScoutLib/Rendering/OnlineTiles", b);
     emit OnlineTilesEnabledChanged(b);
   }
 }
@@ -156,12 +119,12 @@ const QString Settings::GetOnlineTileProviderId() const
     if (!onlineProviders.isEmpty()){
         def = onlineProviders.begin()->getId();
     }
-    return settings.value("onlineTileProvider", def).toString();
+    return storage->value("OSMScoutLib/Rendering/OnlineTileProvider", def).toString();
 }
 
 void Settings::SetOnlineTileProviderId(QString id){
     if (GetOnlineTileProviderId() != id){
-        settings.setValue("onlineTileProvider", id);
+        storage->setValue("OSMScoutLib/Rendering/OnlineTileProvider", id);
         emit OnlineTileProviderIdChanged(id);
     }
 }
@@ -224,37 +187,104 @@ bool Settings::loadMapProviders(QString path)
 
 bool Settings::GetOfflineMap() const
 {
-    return settings.value("offlineMap", true).toBool();
+    return storage->value("OSMScoutLib/Rendering/OfflineMap", true).toBool();
 }
 void Settings::SetOfflineMap(bool b)
 {
   if (GetOfflineMap() != b){
-    settings.setValue("offlineMap", b);
+    storage->setValue("OSMScoutLib/Rendering/OfflineMap", b);
     emit OfflineMapChanged(b);
   }
 }
 
 bool Settings::GetRenderSea() const
 {
-  return settings.value("renderSea", true).toBool();
+  return storage->value("OSMScoutLib/Rendering/RenderSea", true).toBool();
 }
 void Settings::SetRenderSea(bool b)
 {
   if (GetRenderSea() != b){
-    settings.setValue("renderSea", b);
+    storage->setValue("OSMScoutLib/Rendering/RenderSea", b);
     emit RenderSeaChanged(b);
   }    
 }
 
-const QString Settings::GetGpsFormat() const
+const QString Settings::GetStyleSheetDirectory() const
 {
-  return settings.value("gpsFormat", "degrees").toString();
+  return storage->value("OSMScoutLib/Rendering/StylesheetDirectory", "stylesheets").toString();
 }
-void Settings::SetGpsFormat(const QString formatId)
+void Settings::SetStyleSheetDirectory(const QString dir)
 {
-  if (GetGpsFormat() != formatId){
-    settings.setValue("gpsFormat", formatId);
-    emit GpsFormatChanged(formatId);
+  if (GetStyleSheetDirectory() != dir){
+    storage->setValue("OSMScoutLib/Rendering/StylesheetDirectory", dir);
+    emit StyleSheetDirectoryChanged(dir);
+  }
+}
+
+const QString Settings::GetStyleSheetFile() const
+{
+  return storage->value("OSMScoutLib/Rendering/StylesheetFile", "standard.oss").toString();
+}
+const QString Settings::GetStyleSheetAbsoluteFile() const
+{
+  return QFileInfo(GetStyleSheetDirectory(), GetStyleSheetFile()).absoluteFilePath();
+}
+void Settings::SetStyleSheetFile(const QString file)
+{
+  if (GetStyleSheetFile() != file){
+    storage->setValue("OSMScoutLib/Rendering/StylesheetFile", file);
+    emit StyleSheetFileChanged(file);
+  }
+}
+
+const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags(const QString styleSheetFile)
+{
+  std::unordered_map<std::string,bool> stylesheetFlags; // TODO: read from config
+  storage->beginGroup("OSMScoutLib/Rendering/StylesheetFlags/"+styleSheetFile);
+  for (const QString key:storage->allKeys()){
+    stylesheetFlags[key.toStdString()]=storage->value(key, false).toBool();
+  }
+  storage->endGroup();
+  return stylesheetFlags;
+}
+const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags()
+{
+  return GetStyleSheetFlags(GetStyleSheetFile());
+}
+void Settings::SetStyleSheetFlags(const QString styleSheetFile, std::unordered_map<std::string,bool> flags)
+{
+  storage->beginGroup("OSMScoutLib/Rendering/StylesheetFlags/"+styleSheetFile);
+  for (const auto &entry:flags){
+    storage->setValue(QString::fromStdString(entry.first), entry.second);
+  }
+  storage->endGroup();
+}
+void Settings::SetStyleSheetFlags(std::unordered_map<std::string,bool> flags)
+{
+  SetStyleSheetFlags(GetStyleSheetFile(), flags);
+}
+
+QString Settings::GetFontName() const
+{
+  return storage->value("OSMScoutLib/Rendering/FontName", "sans-serif").toString();
+}
+void Settings::SetFontName(const QString fontName)
+{
+  if (GetFontName()!=fontName){
+    storage->setValue("OSMScoutLib/Rendering/FontName", fontName);
+    emit FontNameChanged(fontName);
+  }
+}
+
+double Settings::GetFontSize() const
+{
+  return storage->value("OSMScoutLib/Rendering/FontSize", 2.0).toDouble();
+}
+void Settings::SetFontSize(double fontSize)
+{
+  if (GetFontSize()!=fontSize){
+    storage->setValue("OSMScoutLib/Rendering/FontSize", fontSize);
+    emit FontSizeChanged(fontSize);
   }
 }
 
@@ -264,95 +294,64 @@ const QString Settings::GetHttpCacheDir() const
   return cacheLocation + QDir::separator() + "OSMScoutHttpCache";
 }
 
-static Settings* settingsInstance=NULL;
-
-Settings* Settings::GetInstance()
-{
-    if (settingsInstance == NULL){
-        settingsInstance = new Settings();
-    }
-    return settingsInstance;
-}
-
-void Settings::FreeInstance()
-{
-    if (settingsInstance != NULL){
-        delete settingsInstance;
-        settingsInstance = NULL;
-    }
-}
-
 QmlSettings::QmlSettings()
 {
-    connect(Settings::GetInstance(), SIGNAL(MapDPIChange(double)), 
+    settings=DBThread::GetInstance()->GetSettings();
+
+    connect(settings.get(), SIGNAL(MapDPIChange(double)),
             this, SIGNAL(MapDPIChange(double)));
-    connect(Settings::GetInstance(), SIGNAL(MapViewChanged(MapView *)),
-            this, SIGNAL(MapViewChanged(MapView *)));
-    connect(Settings::GetInstance(), SIGNAL(OnlineTilesEnabledChanged(bool)),
+    connect(settings.get(), SIGNAL(OnlineTilesEnabledChanged(bool)),
             this, SIGNAL(OnlineTilesEnabledChanged(bool)));
-    connect(Settings::GetInstance(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
+    connect(settings.get(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
             this, SIGNAL(OnlineTileProviderIdChanged(const QString)));
-    connect(Settings::GetInstance(), SIGNAL(OfflineMapChanged(bool)),
+    connect(settings.get(), SIGNAL(OfflineMapChanged(bool)),
             this, SIGNAL(OfflineMapChanged(bool)));
-    connect(Settings::GetInstance(), SIGNAL(RenderSeaChanged(bool)),
+    connect(settings.get(), SIGNAL(RenderSeaChanged(bool)),
             this, SIGNAL(RenderSeaChanged(bool)));
-    connect(Settings::GetInstance(), SIGNAL(GpsFormatChanged(const QString)),
-            this, SIGNAL(GpsFormatChanged(const QString)));
+    connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
+            this, SIGNAL(FontNameChanged(const QString)));
+    connect(settings.get(), SIGNAL(FontSizeChanged(double)),
+            this, SIGNAL(FontSizeChanged(double)));
 }
 
 double QmlSettings::GetPhysicalDPI() const
 {
-    return Settings::GetInstance()->GetPhysicalDPI();
+    return settings->GetPhysicalDPI();
 }
 
 void QmlSettings::SetMapDPI(double dpi)
 {
-    Settings::GetInstance()->SetMapDPI(dpi);
+    settings->SetMapDPI(dpi);
 }
 
 double QmlSettings::GetMapDPI() const
 {
-    return Settings::GetInstance()->GetMapDPI();
-}
-
-MapView *QmlSettings::GetMapView() const
-{
-    return Settings::GetInstance()->GetMapView();
-}
-
-void QmlSettings::SetMapView(QObject *o)
-{
-    MapView *view = dynamic_cast<MapView*>(o);
-    if (view == NULL){
-        qWarning() << "Failed to cast " << o << " to MapView*.";
-        return;
-    }
-    Settings::GetInstance()->SetMapView(view);
+    return settings->GetMapDPI();
 }
 
 bool QmlSettings::GetOnlineTilesEnabled() const
 {
-    return Settings::GetInstance()->GetOnlineTilesEnabled();
+    return settings->GetOnlineTilesEnabled();
 }
 
 void QmlSettings::SetOnlineTilesEnabled(bool b)
 {
-    Settings::GetInstance()->SetOnlineTilesEnabled(b);
+    settings->SetOnlineTilesEnabled(b);
 }
 
 const QString QmlSettings::GetOnlineTileProviderId() const
 {
-    return Settings::GetInstance()->GetOnlineTileProviderId();
+    return settings->GetOnlineTileProviderId();
 }
 
 void QmlSettings::SetOnlineTileProviderId(QString id)
 {
-    Settings::GetInstance()->SetOnlineTileProviderId(id);
+    settings->SetOnlineTileProviderId(id);
 }
 
 QString QmlSettings::onlineProviderCopyright()
 {
-    OnlineTileProvider provider = Settings::GetInstance()->GetOnlineTileProvider();
+    OnlineTileProvider provider = settings->GetOnlineTileProvider();
     if (provider.isValid()){
         return provider.getCopyright();
     }
@@ -361,26 +360,34 @@ QString QmlSettings::onlineProviderCopyright()
 
 bool QmlSettings::GetOfflineMap() const
 {
-    return Settings::GetInstance()->GetOfflineMap();
+    return settings->GetOfflineMap();
 }
 void QmlSettings::SetOfflineMap(bool b)
 {
-    Settings::GetInstance()->SetOfflineMap(b);
+    settings->SetOfflineMap(b);
 }
 
 bool QmlSettings::GetRenderSea() const
 {
-    return Settings::GetInstance()->GetRenderSea();
+    return settings->GetRenderSea();
 }
 void QmlSettings::SetRenderSea(bool b)
 {
-    Settings::GetInstance()->SetRenderSea(b);
+    settings->SetRenderSea(b);
 }
-const QString QmlSettings::GetGpsFormat() const
+QString QmlSettings::GetFontName() const
 {
-    return Settings::GetInstance()->GetGpsFormat();
+    return settings->GetFontName();
 }
-void QmlSettings::SetGpsFormat(const QString formatId)
+void QmlSettings::SetFontName(const QString fontName)
 {
-    Settings::GetInstance()->SetGpsFormat(formatId);  
+    settings->SetFontName(fontName);
+}
+double QmlSettings::GetFontSize() const
+{
+    return settings->GetFontSize();
+}
+void QmlSettings::SetFontSize(double fontSize)
+{
+    settings->SetFontSize(fontSize);
 }

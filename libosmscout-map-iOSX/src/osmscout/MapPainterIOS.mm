@@ -451,9 +451,7 @@ namespace osmscout {
                                           const MapParameter& parameter,
                                           const Symbol& symbol,
                                           double space,
-                                          /*bool isClosed,*/
                                           size_t transStart, size_t transEnd){
-        
         
         double minX,minY,maxX,maxY;
         symbol.GetBoundingBox(minX,minY,maxX,maxY);
@@ -470,7 +468,6 @@ namespace osmscout {
         if(!isClosed && !followPath(followPathHnd, space/2, origin)){
             return;
         }
-        CGContextSaveGState(cg);
         bool loop = true;
         while (loop){
             x1 = origin.GetX();
@@ -479,8 +476,8 @@ namespace osmscout {
             if(loop){
                 x2 = origin.GetX();
                 y2 = origin.GetY();
+                loop = followPath(followPathHnd, width/2, origin);
                 if(loop){
-                    loop = followPath(followPathHnd, width/2, origin);
                     x3 = origin.GetX();
                     y3 = origin.GetY();
                     slope = atan2(y3-y1,x3-x1);
@@ -488,13 +485,12 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, 0, height/2);
+                    DrawSymbol(projection, parameter, symbol, width, height/2);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, space, origin);
                 }
             }
         }
-        CGContextRestoreGState(cg);
     }
 
     static inline double distSq(const Vertex2D &v1, const Vertex2D &v2){
@@ -647,11 +643,6 @@ namespace osmscout {
         for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
              p!=symbol.GetPrimitives().end();
              ++p) {
-            FillStyleRef fillStyle=(*p)->GetFillStyle();
-            
-            SetFill(projection,
-                          parameter,
-                          *fillStyle);
   
             DrawPrimitive* primitive=p->get();
             double         centerX=maxX-minX;
@@ -659,7 +650,23 @@ namespace osmscout {
             
             if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
                 PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+                FillStyleRef fillStyle=polygon->GetFillStyle();
+                BorderStyleRef borderStyle=polygon->GetBorderStyle();
+
+                if (fillStyle) {
+                    SetFill(projection, parameter, *fillStyle);
+                } else {
+                    CGContextSetRGBFillColor(cg,0,0,0,0);
+                }
+                
+                if (borderStyle) {
+                    SetBorder(projection, parameter, *borderStyle);
+                } else {
+                    CGContextSetRGBStrokeColor(cg,0,0,0,0);
+                }
+                
                 CGContextBeginPath(cg);
+                
                 for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
                      pixel!=polygon->GetCoords().end();
                      ++pixel) {
@@ -762,8 +769,6 @@ namespace osmscout {
                                 const FillStyle& fillStyle,
                                 CGFloat xOffset, CGFloat yOffset) {
         
-        double borderWidth=projection.ConvertWidthToPixel(fillStyle.GetBorderWidth());
-
         if (fillStyle.HasPattern() &&
             projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
             HasPattern(parameter,fillStyle)) {
@@ -780,35 +785,11 @@ namespace osmscout {
             CGContextSetFillPattern(cg, pattern, &components);
             CGPatternRelease(pattern);
         } else if (fillStyle.GetFillColor().IsVisible()) {
-
+            
             CGContextSetRGBFillColor(cg, fillStyle.GetFillColor().GetR(), fillStyle.GetFillColor().GetG(),
                                      fillStyle.GetFillColor().GetB(), fillStyle.GetFillColor().GetA());
         } else {
             CGContextSetRGBFillColor(cg,0,0,0,0);
-        }
-        
-        if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-            CGContextSetRGBStrokeColor(cg,fillStyle.GetBorderColor().GetR(),
-                                          fillStyle.GetBorderColor().GetG(),
-                                          fillStyle.GetBorderColor().GetB(),
-                                          fillStyle.GetBorderColor().GetA());
-            CGContextSetLineWidth(cg, borderWidth);
-            
-            if (fillStyle.GetBorderDash().empty()) {
-                CGContextSetLineDash(cg, 0.0, NULL, 0);
-            }
-            else {
-                CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*fillStyle.GetBorderDash().size());
-                for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
-                    dashes[i] = fillStyle.GetBorderDash()[i]*borderWidth;
-                }
-                CGContextSetLineDash(cg, 0.0, dashes, fillStyle.GetBorderDash().size());
-                free(dashes); dashes = NULL;
-                CGContextSetLineCap(cg, kCGLineCapButt);
-            }
-        }
-        else {
-            CGContextSetRGBStrokeColor(cg,0,0,0,0);
         }
     }
     
@@ -827,8 +808,7 @@ namespace osmscout {
         if (style.GetDash().empty()) {
             CGContextSetLineDash(cg, 0.0, NULL, 0);
             CGContextSetLineCap(cg, kCGLineCapRound);
-        }
-        else {
+        } else {
             CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*style.GetDash().size());
             for (size_t i=0; i<style.GetDash().size(); i++) {
                 dashes[i] = style.GetDash()[i]*lineWidth;
@@ -848,8 +828,7 @@ namespace osmscout {
      */
     void MapPainterIOS::DrawArea(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapPainter::AreaData& area)
-    {
+                                const MapPainter::AreaData& area) {
         CGContextSaveGState(cg);
         CGContextBeginPath(cg);
         CGContextMoveToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),
@@ -878,9 +857,18 @@ namespace osmscout {
             }
         }
         
-        SetFill(projection, parameter, *area.fillStyle,
-                coordBuffer->buffer[area.transStart].GetX(), coordBuffer->buffer[area.transStart].GetY());
+        if (area.fillStyle) {
+            SetFill(projection, parameter, *area.fillStyle);
+        } else {
+            CGContextSetRGBFillColor(cg,0,0,0,0);
+        }
         
+        if (area.borderStyle) {
+            SetBorder(projection, parameter, *area.borderStyle);
+        } else {
+            CGContextSetRGBStrokeColor(cg,0,0,0,0);
+        }
+
         CGContextDrawPath(cg,  kCGPathEOFillStroke);
         CGContextRestoreGState(cg);
     }
@@ -896,13 +884,46 @@ namespace osmscout {
                                    const FillStyle& style){
         CGContextSaveGState(cg);
         CGContextBeginPath(cg);
-        const Color &borderColor = style.GetBorderColor();
-        CGContextSetRGBStrokeColor(cg, borderColor.GetR(), borderColor.GetG(), borderColor.GetB(), borderColor.GetA());
         const Color &fillColor = style.GetFillColor();
         CGContextSetRGBFillColor(cg, fillColor.GetR(), fillColor.GetG(), fillColor.GetB(), fillColor.GetA());
         CGContextAddRect(cg, CGRectMake(0,0,projection.GetWidth(),projection.GetHeight()));
-        CGContextDrawPath(cg, kCGPathFillStroke);
+        CGContextDrawPath(cg, kCGPathFill);
         CGContextRestoreGState(cg);
     }
+    
+    /*
+     * SetBorder(const Projection& projection,
+     *           const MapParameter& parameter,
+     *           const BorderStyle& borderStyle)
+     */
+    void MapPainterIOS::SetBorder(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const BorderStyle& borderStyle){
+        double borderWidth=projection.ConvertWidthToPixel(borderStyle.GetWidth());
+        
+        if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+            CGContextSetRGBStrokeColor(cg,borderStyle.GetColor().GetR(),
+                                       borderStyle.GetColor().GetG(),
+                                       borderStyle.GetColor().GetB(),
+                                       borderStyle.GetColor().GetA());
+            CGContextSetLineWidth(cg, borderWidth);
+            
+            if (borderStyle.GetDash().empty()) {
+                CGContextSetLineDash(cg, 0.0, NULL, 0);
+                CGContextSetLineCap(cg, kCGLineCapRound);
+            } else {
+                CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*borderStyle.GetDash().size());
+                for (size_t i=0; i<borderStyle.GetDash().size(); i++) {
+                    dashes[i] = borderStyle.GetDash()[i]*borderWidth;
+                }
+                CGContextSetLineDash(cg, 0.0, dashes, borderStyle.GetDash().size());
+                free(dashes); dashes = NULL;
+                CGContextSetLineCap(cg, kCGLineCapButt);
+            }
+        } else {
+            CGContextSetRGBStrokeColor(cg,0,0,0,0);
+        }
+    }
+
     
 }

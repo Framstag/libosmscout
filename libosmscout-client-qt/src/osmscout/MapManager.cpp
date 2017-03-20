@@ -27,67 +27,9 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/DBThread.h>
 
-FileDownloadJob::FileDownloadJob(QUrl url, QFileInfo fileInfo):
-  url(url), file(fileInfo.filePath()), downloading(false), downloaded(false), reply(NULL), bytesDownloaded(0)
-{
-  fileName=fileInfo.fileName();
-}
-
-void FileDownloadJob::start(QNetworkAccessManager *webCtrl)
-{
-  connect(webCtrl, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
-  qDebug() << "Downloading "<<url.toString()<<"to"<<file.fileName();
-
-  // open file
-  file.open(QIODevice::WriteOnly);
-  
-  // open connection
-  QNetworkRequest request(url);    
-  request.setHeader(QNetworkRequest::UserAgentHeader, QString(OSMSCOUT_USER_AGENT).arg(OSMSCOUT_VERSION_STRING));
-
-  downloading=true;
-  reply=webCtrl->get(request);
-  connect(reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-  connect(reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(onDownloadProgress(qint64, qint64)));
-}
-
-void FileDownloadJob::onDownloadProgress(qint64 bytesReceived, qint64 /*bytesTotal*/)
-{
-  bytesDownloaded=bytesReceived;
-  emit downloadProgress();
-}
-
-void FileDownloadJob::onReadyRead()
-{
-  file.write(reply->readAll());
-}
-
-void FileDownloadJob::onFinished(QNetworkReply* reply)
-{
-  if (reply!=this->reply)
-    return; // not for us
-  
-  // we are finished, we don't need to be connected anymore
-  disconnect(QObject::sender(), SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
-
-  downloading=false;
-  file.close();
-  if (reply->error() == QNetworkReply::NoError){
-    downloaded=true;
-    emit finished();
-  }else{
-    osmscout::log.Error() << "Downloading failed" << reply;
-    emit failed();
-  }  
-  reply->deleteLater();
-  this->reply=NULL;
-}
-
 MapDownloadJob::MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target):
-  webCtrl(webCtrl), map(map), target(target), backoffInterval(1000), done(false), started(false)
+  webCtrl(webCtrl), map(map), target(target), done(false), started(false), downloadedBytes(0)
 {
-  backoffTimer.setSingleShot(true);
-  connect(&backoffTimer, SIGNAL(timeout()), this, SLOT(downloadNextFile()));
 }
 
 MapDownloadJob::~MapDownloadJob()
@@ -112,8 +54,8 @@ void MapDownloadJob::start()
             << "waysopt.dat" 
             << "location.idx"
             << "water.idx"
-            << "intersections.dat"                                                                                                                                                                                                                                                                                         
-            << "intersections.idx"                                                                                                                                                                                                                                                                                         
+            << "intersections.dat" 
+            << "intersections.idx"
             << "router.dat"
             << "router2.dat"
             << "router.idx"
@@ -127,45 +69,48 @@ void MapDownloadJob::start()
   fileNames << "types.dat";
 
   for (auto fileName:fileNames){
-    auto job=new FileDownloadJob(map.getProvider().getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));
-    connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
-    connect(job, SIGNAL(failed()), this, SLOT(onJobFailed()));
-    connect(job, SIGNAL(downloadProgress()), this, SIGNAL(downloadProgress()));
+    auto job=new FileDownloader(webCtrl, map.getProvider().getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));
+    connect(job, SIGNAL(finished(QString)), this, SLOT(onJobFinished()));
+    connect(job, SIGNAL(error(QString)), this, SLOT(onJobFailed(QString)));
+    connect(job, SIGNAL(writtenBytes(uint64_t)), this, SIGNAL(downloadProgress()));
     jobs << job; 
   }
   started=true;
   downloadNextFile();
 }
 
-void MapDownloadJob::onJobFailed(){
-  osmscout::log.Debug() << "Continue downloading after"<<backoffInterval<<"ms";
-  backoffTimer.setInterval(backoffInterval); 
-  backoffInterval=std::min(backoffInterval * 2, 10*60*1000);
-  backoffTimer.start();
+void MapDownloadJob::onJobFailed(QString error_text){
+  osmscout::log.Debug() << "Download failed with the error: " << error_text.toStdString();
+
+#pragma message "Here should be some code that propagates error message to the user"
 }
+
 void MapDownloadJob::onJobFinished()
 {
-  backoffInterval=1000;
+  if (!jobs.isEmpty())
+    {
+      jobs[0]->deleteLater();
+      downloadedBytes += jobs[0]->getBytesDownloaded();
+      jobs.pop_front();      
+    }
+  
   downloadNextFile();
 }
 
 void MapDownloadJob::downloadNextFile()
 {
-  //qDebug() << "current thread:"<<QThread::currentThread();
-  for (auto job:jobs){
-    if (!job->isDownloaded()){
-      job->start(webCtrl);
-      return;
-    }
-  }
-  done=true;
+  if (!jobs.isEmpty())
+    jobs[0]->startDownload();
+  else
+    done=true;
+  
   emit finished();
 }
 
 double MapDownloadJob::getProgress()
 {
   double expected=expectedSize();
-  size_t downloaded=0;
+  uint64_t downloaded=downloadedBytes;
   for (auto job:jobs){
     downloaded+=job->getBytesDownloaded();
   }
@@ -176,11 +121,8 @@ double MapDownloadJob::getProgress()
 
 QString MapDownloadJob::getDownloadingFile()
 {
-  for (auto job:jobs){
-    if (job->isDownloading()){
-      return job->getFileName();
-    }
-  }
+  if (!jobs.isEmpty())
+    return jobs[0]->getFileName();
   return "";
 }
 

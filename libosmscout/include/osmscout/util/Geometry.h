@@ -135,6 +135,11 @@ namespace osmscout {
         a2.IsEqual(b2)) {
       return true;
     }
+    if (a1.IsEqual(a2) &&
+        b1.IsEqual(b2)){
+      // two different zero size vectors can't intersects
+      return false;
+    }
 
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
                 (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
@@ -177,10 +182,19 @@ namespace osmscout {
                            N& intersection)
   {
     if (a1.IsEqual(b1) ||
-        a1.IsEqual(b2) ||
-        a2.IsEqual(b1) ||
-        a2.IsEqual(b2)) {
+        a1.IsEqual(b2)){
+      intersection.Set(a1.GetLat(),a1.GetLon());
       return true;
+    }
+    if (a2.IsEqual(b1) ||
+        a2.IsEqual(b2)) {
+      intersection.Set(a2.GetLat(),a2.GetLon());
+      return true;
+    }
+    if (a1.IsEqual(a2) &&
+        b1.IsEqual(b2)){
+      // two different zero size vectors can't intersects
+      return false;
     }
 
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
@@ -195,6 +209,8 @@ namespace osmscout {
       if (ua_numr==0.0 && ub_numr==0.0) {
         // This gives currently false hits because of number resolution problems, if two lines are very
         // close together and for example are part of a very details node curve intersections are detected.
+
+        // FIXME: setup intersection
         return true;
       }
       else {
@@ -328,18 +344,17 @@ namespace osmscout {
   inline int GetRelationOfPointToArea(const N& point,
                                       const std::vector<M>& nodes)
   {
-    const double tol = 1e-6;
     size_t i,j;
     bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
-      if (fabs(point.GetLat()-nodes[i].GetLat())<tol &&
-          fabs(point.GetLon()-nodes[i].GetLon())<tol) {
+      if (point.GetLat()==nodes[i].GetLat() &&
+          point.GetLon()==nodes[i].GetLon()) {
         return 0;
       }
 
-      if ((((nodes[i].GetLat()<point.GetLat()+tol) && (point.GetLat()<nodes[j].GetLat())) ||
-           ((nodes[j].GetLat()<point.GetLat()+tol) && (point.GetLat()<nodes[i].GetLat()))) &&
+      if ((((nodes[i].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[j].GetLat())) ||
+           ((nodes[j].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[i].GetLat()))) &&
           (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat())/(nodes[j].GetLat()-nodes[i].GetLat())+
            nodes[i].GetLon())) {
         c=!c;
@@ -372,15 +387,37 @@ namespace osmscout {
    */
   template<typename N,typename M>
   inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
-                                        const std::vector<M>& b)
-  {
+                                        const std::vector<M>& b,
+                                        const GeoBox aBox,
+                                        const GeoBox bBox)
+   {
+    if (!aBox.Intersects(bBox)){
+      return false;
+    }
+
     for (const auto& node : a) {
-      if (GetRelationOfPointToArea(node,b)>=0) {
+      if (bBox.Includes(node, /*openInterval*/ false) && GetRelationOfPointToArea(node,b)>=0) {
         return true;
       }
     }
 
     return false;
+  }
+
+  /**
+   * \ingroup Geometry
+   * Return true, if at least one point of area a in within area b
+   */
+  template<typename N,typename M>
+  inline bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
+                                        const std::vector<M>& b)
+  {
+    GeoBox aBox;
+    GeoBox bBox;
+    GetBoundingBox(a, aBox);
+    GetBoundingBox(b, bBox);
+
+    return IsAreaAtLeastPartlyInArea(a,b,aBox,bBox);
   }
 
   /**

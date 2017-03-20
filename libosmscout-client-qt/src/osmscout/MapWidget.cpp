@@ -37,12 +37,13 @@ MapWidget::MapWidget(QQuickItem* parent)
 {
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);
+    setAcceptHoverEvents(true);
     
     DBThread *dbThread=DBThread::GetInstance();
     
-    mapDpi = Settings::GetInstance()->GetMapDPI();
+    mapDpi = dbThread->GetSettings()->GetMapDPI();
 
-    connect(Settings::GetInstance(), SIGNAL(MapDPIChange(double)),
+    connect(dbThread->GetSettings().get(), SIGNAL(MapDPIChange(double)),
             this, SLOT(onMapDPIChange(double)));
   
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
@@ -103,6 +104,14 @@ void MapWidget::mousePressEvent(QMouseEvent* event)
 void MapWidget::mouseMoveEvent(QMouseEvent* event)
 {
     translateToTouch(event, Qt::TouchPointMoved);
+}
+void MapWidget::hoverMoveEvent(QHoverEvent* event) {
+    QQuickPaintedItem::hoverMoveEvent(event);
+
+    double lat;
+    double lon;
+    getProjection().PixelToGeo(event->pos().x(), event->pos().y(), lon, lat);
+    emit mouseMove(event->pos().x(), event->pos().y(), lat, lon, event->modifiers());
 }
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 {
@@ -304,6 +313,14 @@ bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
   }
   osmscout::GeoCoord coord(lat, lon);
   return resp.boundingBox.Includes(coord);
+}
+
+QPointF MapWidget::screenPosition(double lat, double lon)
+{
+    double x;
+    double y;
+    getProjection().GeoToPixel(osmscout::GeoCoord(lat, lon), x, y);
+    return QPointF(x, y);
 }
 
 void MapWidget::zoom(double zoomFactor)

@@ -49,10 +49,8 @@ class OSMSCOUT_CLIENT_QT_API PlaneDBThread : public DBThread
   Q_OBJECT
   
 signals:
-  void TriggerDrawMap();
   void TileStatusChanged(const osmscout::TileRef& tile);
   void TriggerMapRenderingSignal(const RenderMapRequest& request);
-  void TriggerInitialRendering();
   
 public slots:
   void DrawMap();
@@ -91,8 +89,8 @@ protected:
 
 public:
   PlaneDBThread(QStringList databaseLookupDirs, 
-                QString stylesheetFilename, 
-                QString iconDirectory);
+                QString iconDirectory,
+                SettingsRef renderingSettings);
     
   virtual ~PlaneDBThread();
 

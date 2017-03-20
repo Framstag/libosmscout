@@ -66,6 +66,11 @@ namespace osmscout {
         return featureValueBuffer.GetType();
       }
 
+      inline void ClearFeatureValues()
+      {
+        featureValueBuffer.ClearFeatureValues();
+      }
+
       inline size_t GetFeatureCount() const
       {
         return featureValueBuffer.GetType()->GetFeatureCount();
@@ -152,6 +157,11 @@ namespace osmscout {
         featureValueBuffer.Set(buffer);
       }
 
+      inline void CopyMissingValues(const FeatureValueBuffer& buffer)
+      {
+        featureValueBuffer.CopyMissingValues(buffer);
+      }
+
       inline void MarkAsMasterRing()
       {
         ring=masterRingId;
@@ -177,13 +187,14 @@ namespace osmscout {
 
   private:
     FileOffset        fileOffset;
+    FileOffset        nextFileOffset;
 
   public:
     std::vector<Ring> rings;
 
   public:
     inline Area()
-    : fileOffset(0)
+    : fileOffset(0),nextFileOffset(0)
     {
       // no code
     }
@@ -191,6 +202,11 @@ namespace osmscout {
     inline FileOffset GetFileOffset() const
     {
       return fileOffset;
+    }
+
+    inline FileOffset GetNextFileOffset() const
+    {
+      return nextFileOffset;
     }
 
     inline ObjectFileRef GetObjectFileRef() const

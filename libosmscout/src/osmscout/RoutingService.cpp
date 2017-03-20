@@ -113,10 +113,12 @@ namespace osmscout {
      debugPerformance(parameter.IsDebugPerformance()),
      routeNodeDataFile(GetDataFilename(filenamebase),
                        GetIndexFilename(filenamebase),
-                       12000),
+                       /*indexCacheSize*/ 12000,
+                       /*dataCacheSize*/ 1000),
      junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
                       RoutingService::FILENAME_INTERSECTIONS_IDX,
-                      10000)
+                      /*indexCacheSize*/ 10000,
+                      /*dataCacheSize*/ 1000)
   {
     assert(database);
   }
@@ -171,7 +173,7 @@ namespace osmscout {
     if (!routeNodeDataFile.Open(database->GetTypeConfig(),
                                 path,
                                 true,
-                                true)) {
+                                database->GetRouterDataMMap())) {
       log.Error() << "Cannot open '" <<  path << "'!";
       return false;
     }

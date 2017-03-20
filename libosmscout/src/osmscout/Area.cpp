@@ -146,15 +146,15 @@ namespace osmscout {
   {
     boundingBox.Invalidate();
 
-    for (const auto& role : rings) {
-      if (role.IsOuterRing()) {
+    for (const auto& ring : rings) {
+      if (ring.IsOuterRing()) {
         if (!boundingBox.IsValid()) {
-          role.GetBoundingBox(boundingBox);
+          ring.GetBoundingBox(boundingBox);
         }
         else {
           GeoBox ringBoundingBox;
 
-          role.GetBoundingBox(ringBoundingBox);
+          ring.GetBoundingBox(ringBoundingBox);
 
           boundingBox.Include(ringBoundingBox);
         }
@@ -227,6 +227,7 @@ namespace osmscout {
                    rings[i].GetType()->GetAreaId()!=typeIgnore &&
                    rings[i].GetType()->CanRoute());
     }
+    nextFileOffset=scanner.GetPos();
   }
 
   /**
@@ -293,6 +294,7 @@ namespace osmscout {
                    rings[i].GetType()->GetAreaId()!=typeIgnore ||
                    rings[i].ring==outerRingId);
     }
+    nextFileOffset=scanner.GetPos();
   }
 
   /**
@@ -358,6 +360,7 @@ namespace osmscout {
       scanner.Read(rings[i].nodes,
                    false);
     }
+    nextFileOffset=scanner.GetPos();
   }
 
   /**
@@ -427,9 +430,9 @@ namespace osmscout {
   {
     std::vector<Ring>::const_iterator ring=rings.begin();
     bool                              multipleRings=rings.size()>1;
-    bool                              hasMaster=rings[0].IsMasterRing();
+    bool                              hasMaster=ring->IsMasterRing();
 
-    // Outer ring
+    // Master/Outer ring
 
     writer.WriteTypeId(ring->GetType()->GetAreaId(),
                        typeConfig.GetAreaTypeIdBytes());

@@ -69,6 +69,7 @@ OST
   to numeric values again.
 
   https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed
+  https://wiki.openstreetmap.org/wiki/Speed_limits
 */
 MAX SPEEDS
   SPEED "CZ:urban"         =  50 km/h
@@ -87,6 +88,11 @@ MAX SPEEDS
   SPEED "SK:urban"         =  50 km/h
   SPEED "SK:rural"         =  90 km/h
   SPEED "SK:motorway"      = 130 km/h
+
+  SPEED "IT:urban"         =  50 km/h
+  SPEED "IT:rural"         =  90 km/h
+  SPEED "IT:trunk"         = 110 km/h
+  SPEED "IT:motorway"      = 130 km/h
 
   SPEED "RU:living_street" =  20 km/h
   SPEED "RU:urban"         =  60 km/h
@@ -1861,6 +1867,11 @@ TYPES
     = NODE AREA ("place"=="continent")
       {Name, NameAlt, IsIn}
 
+  // Not part of the administrative boundary hierachy?
+  TYPE place_peninsula IGNORE
+    = NODE AREA ("place"=="peninsula")
+      {Name, NameAlt}
+      
   TYPE place_country
     = NODE ("place"=="country")
       {Name, NameAlt, IsIn}

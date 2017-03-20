@@ -52,6 +52,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GN
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OSMSCOUT_WARNING_FLAGS}")
 endif()
 
+# Enable Large file support
+include(TestLargeFiles)
+OPJ_TEST_LARGE_FILES(OPJ_HAVE_LARGEFILES)
+
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /wd4251")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Oi")
@@ -74,6 +78,9 @@ if(MINGW)
   add_definitions(-D_WIN32_WINNT=0x0600)
   if(NOT OSMSCOUT_PLATFORM_X64)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=i686")
+    # provide more addressable memory on win 32bit builds
+    # see https://msdn.microsoft.com/en-us/library/aa366778
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--large-address-aware")
   endif ()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fno-tree-slp-vectorize -Wno-error=cast-qual -Wno-unused-local-typedefs")
 endif()
@@ -122,9 +129,13 @@ if(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COM
 endif()
 
 # postfix for debug builds
-if(NOT APPLE)
-  set(CMAKE_DEBUG_POSTFIX "d")
-endif ()
+if(NOT CMAKE_DEBUG_POSTFIX)
+    if(APPLE)
+        set(CMAKE_DEBUG_POSTFIX _debug)
+    else()
+        set(CMAKE_DEBUG_POSTFIX d)
+    endif()
+endif()
 
 # global variables
 set(OSMSCOUT_BASE_DIR_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})

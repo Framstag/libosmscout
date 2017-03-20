@@ -23,6 +23,7 @@
 #include <osmscout/util/String.h>
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/PersistentCookieJar.h>
+#include <osmscout/DBThread.h>
 
 MapProvider AvailableMapsModelMap::getProvider() const
 {
@@ -56,10 +57,11 @@ int AvailableMapsModelMap::getVersion() const
 
 AvailableMapsModel::AvailableMapsModel()
 {
-  mapProviders = Settings::GetInstance()->GetMapProviders();
+  SettingsRef settings=DBThread::GetInstance()->GetSettings();
+  mapProviders = settings->GetMapProviders();
 
   connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT(listDownloaded(QNetworkReply*)));    
-  diskCache.setCacheDirectory(Settings::GetInstance()->GetHttpCacheDir());
+  diskCache.setCacheDirectory(settings->GetHttpCacheDir());
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar());
 

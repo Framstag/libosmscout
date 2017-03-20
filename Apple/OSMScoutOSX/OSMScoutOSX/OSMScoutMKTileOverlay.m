@@ -89,7 +89,8 @@
         CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);
         CGContextRelease(bitmapContext);
         NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
-        NSData *imgData = [bitmapRep representationUsingType:NSPNGFileType properties:nil];
+        NSDictionary *props = [NSDictionary dictionaryWithObjectsAndKeys:nil];
+        NSData *imgData = [bitmapRep representationUsingType:NSPNGFileType properties:props];
         _result(imgData,nil);
         CGImageRelease(cgImage);
 #endif

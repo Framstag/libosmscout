@@ -13,6 +13,7 @@
 COMPILER OSS
 
 typedef std::list<FillStyleRef>       FillStyleList;
+typedef std::list<BorderStyleRef>     BorderStyleList;
 typedef std::list<IconStyleRef>       IconStyleList;
 typedef std::list<TextStyleRef>       TextStyleList;
 typedef std::list<LineStyleRef>       LineStyleList;
@@ -143,7 +144,7 @@ PRODUCTIONS
                  .)
                  FLAGBLOCK<state && newState>
                  (.
-                   this->state=state; 
+                   this->state=state;
                    executed=newState;
                  .)
                  "}"
@@ -156,7 +157,7 @@ PRODUCTIONS
                    .)
                    FLAGBLOCK<!executed && state && newState>
                    (.
-                     this->state=state; 
+                     this->state=state;
                      executed=newState;
                    .)
                    "}"
@@ -169,7 +170,7 @@ PRODUCTIONS
                    .)
                    FLAGBLOCK<!executed && state>
                    (.
-                     this->state=state; 
+                     this->state=state;
                    .)
                    "}"
                  ]
@@ -273,12 +274,45 @@ PRODUCTIONS
                 .)
                 .
 
+  AREAFILLSYMSTYLE<FillPartialStyle& fillStyle>
+              = SYNC "{"
+                {
+                  FILLSTYLEATTR<fillStyle> WEAK ";"
+                }
+                "}"
+                .
+
+  AREABORDERSYMSTYLE<BorderPartialStyle& borderStyle>
+              = SYNC "BORDER" "{"
+                {
+                  BORDERSTYLEATTR<borderStyle> WEAK ";"
+                }
+                "}"
+                .
+
+  AREASYMBOLSTYLE<FillPartialStyle& fillStyle, BorderPartialStyle& borderStyle>
+              = SYNC "{"
+                {
+                  SYNC "AREA" 
+                  (  
+                    AREAFILLSYMSTYLE<fillStyle>
+                  | "."
+                    (
+                      AREABORDERSYMSTYLE<borderStyle>
+                    )  
+                  )  
+                }
+                SYNC "}"
+                .
+
   POLYGON<Symbol& symbol>
               = SYNC "POLYGON"
                 (.
                   StyleFilter         filter;
-                  FillPartialStyle    style;
-                  PolygonPrimitiveRef polygon=std::make_shared<PolygonPrimitive>(style.style);
+                  FillPartialStyle    fillStyle;
+                  BorderPartialStyle  borderStyle;
+                  PolygonPrimitiveRef polygon=std::make_shared<PolygonPrimitive>(fillStyle.style,
+                                                                                 borderStyle.style);
                   Vertex2D            coord;
                 .)
                 COORD<coord>   (. polygon->AddCoord(coord); .)
@@ -286,59 +320,51 @@ PRODUCTIONS
                 {
                   COORD<coord> (. polygon->AddCoord(coord); .)
                 }
-                SYNC "{"
-                {
-                  FILLSTYLEATTR<style> WEAK ";"
-                }
-                SYNC "}"
+                AREASYMBOLSTYLE<fillStyle,borderStyle>
                 (. symbol.AddPrimitive(polygon); .)
                 .
 
   RECTANGLE<Symbol& symbol>
               = SYNC "RECTANGLE"
                 (.
-                  StyleFilter       filter;
-                  FillPartialStyle  style;
-                  Vertex2D          topLeft;
-                  double            width;
-                  double            height;
+                  StyleFilter        filter;
+                  FillPartialStyle   fillStyle;
+                  BorderPartialStyle borderStyle;
+                  Vertex2D           topLeft;
+                  double             width;
+                  double             height;
                 .)
                 COORD<topLeft>
                 UDOUBLE<width>
                 "x"
                 UDOUBLE<height>
 
-                SYNC "{"
-                {
-                  FILLSTYLEATTR<style> WEAK ";"
-                }
-                SYNC "}"
+                AREASYMBOLSTYLE<fillStyle,borderStyle>
                 (.
                   symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(topLeft,
                                                                            width,height,
-                                                                           style.style));
+                                                                           fillStyle.style,
+                                                                           borderStyle.style));
                 .)
                 .
 
   CIRCLE<Symbol& symbol>
               = SYNC "CIRCLE"
                 (.
-                  Vertex2D          center;
-                  double            radius;
-                  StyleFilter       filter;
-                  FillPartialStyle  style;
+                  Vertex2D           center;
+                  double             radius;
+                  StyleFilter        filter;
+                  FillPartialStyle   fillStyle;
+                  BorderPartialStyle borderStyle;
                 .)
                 COORD<center>
                 UDOUBLE<radius>
-                SYNC "{"
-                {
-                  FILLSTYLEATTR<style> WEAK ";"
-                }
-                SYNC "}"
+                AREASYMBOLSTYLE<fillStyle,borderStyle>
                 (.
                   symbol.AddPrimitive(std::make_shared<CirclePrimitive>(center,
                                                                         radius,
-                                                                        style.style));
+                                                                        fillStyle.style,
+                                                                        borderStyle.style));
                 .)
                 .
 
@@ -378,7 +404,7 @@ PRODUCTIONS
                  .)
                  CONSTBLOCK<state && newState>
                  (.
-                   this->state=state; 
+                   this->state=state;
                    executed=newState;
                  .)
                  "}"
@@ -391,7 +417,7 @@ PRODUCTIONS
                    .)
                    CONSTBLOCK<!executed && state && newState>
                    (.
-                     this->state=state; 
+                     this->state=state;
                      executed=newState;
                    .)
                    "}"
@@ -404,7 +430,7 @@ PRODUCTIONS
                    .)
                    CONSTBLOCK<!executed && state>
                    (.
-                     this->state=state; 
+                     this->state=state;
                    .)
                    "}"
                  ]
@@ -605,7 +631,7 @@ PRODUCTIONS
                 .
 
   STYLEFILTER_GROUP<StyleFilter& filter>
-              = (. 
+              = (.
                    TypeInfoSet types;
                    std::string groupName;
                 .)
@@ -618,7 +644,7 @@ PRODUCTIONS
                           !filter.HasType(type)) {
                         continue;
                       }
-                      
+
                       types.Set(type);
                     }
                   }
@@ -636,12 +662,12 @@ PRODUCTIONS
                     }
                   .)
                 }
-                 
+
                 (. filter.SetTypes(types); .)
                 .
 
   STYLEFILTER_FEATURE<StyleFilter& filter>
-              = (. 
+              = (.
                   TypeInfoSet types;
                   std::string featureName;
                 .)
@@ -662,7 +688,7 @@ PRODUCTIONS
                              !filter.HasType(type)) {
                            continue;
                          }
-                          
+
                          types.Set(type);
                        }
                     }
@@ -690,12 +716,12 @@ PRODUCTIONS
                     }
                   .)
                 }
-                 
+
                 (. filter.SetTypes(types); .)
                 .
 
   STYLEFILTER_PATH<StyleFilter& filter>
-              = (. 
+              = (.
                   TypeInfoSet types;
                  .)
                 "PATH"
@@ -706,14 +732,14 @@ PRODUCTIONS
                           !filter.HasType(type)) {
                         continue;
                       }
-                       
+
                       types.Set(type);
                     }
                   }
-                   
+
                   filter.SetTypes(types);
                 .)
-                . 
+                .
 
   STYLEFILTER_TYPE<StyleFilter& filter>
               = (.
@@ -766,7 +792,7 @@ PRODUCTIONS
                 }
 
                 (. filter.SetTypes(types); .)
-                . 
+                .
 
   STYLEFILTER_MAG<StyleFilter& filter>
               = "MAG"
@@ -803,7 +829,7 @@ PRODUCTIONS
                      }
                   .)
                 ]
-                .     
+                .
 
   STYLEFILTER_ONEWAY<StyleFilter& filter>
               = "ONEWAY"
@@ -825,14 +851,14 @@ PRODUCTIONS
                   filter.SetTunnel(true);
                 .)
                 .
-               
+
   STYLEFILTER_SIZE<StyleFilter& filter>
               = (. SizeConditionRef sizeCondition; .)
                 "SIZE"
                 SIZECONDITION<sizeCondition>
                 (. filter.SetSizeCondition(sizeCondition); .)
                 .
-                
+
   SIZECONDITION<SizeConditionRef& condition>
               = (.
                   condition=std::make_shared<SizeCondition>();
@@ -1035,6 +1061,7 @@ PRODUCTIONS
                   (
                     AREATEXTSTYLE<filter,state>
                   | AREAICONSTYLE<filter,state>
+                  | AREABORDERSTYLE<filter,state>
                   | AREABORDERTEXTSTYLE<filter,state>
                   | AREABORDERSYMBOLSTYLE<filter,state>
                   )
@@ -1097,6 +1124,27 @@ PRODUCTIONS
                 .)
                 .
 
+  AREABORDERSTYLE<StyleFilter filter, bool state>
+              = SYNC "BORDER"
+                (.
+                  BorderPartialStyle style;
+                  std::string        slot;
+                .)
+                [
+                  "#"
+                  IDENT<slot> (. style.style->SetSlot(slot); .)
+                ]
+                SYNC "{"
+                {
+                  BORDERSTYLEATTR<style> WEAK ";"
+                }
+                SYNC "}"
+                (.
+                  if (state) {
+                    config.AddAreaBorderStyle(filter,style);
+                  }
+                .)
+                .
 
   AREABORDERTEXTSTYLE<StyleFilter filter, bool state>
               = SYNC "BORDERTEXT"
@@ -1240,31 +1288,54 @@ PRODUCTIONS
                      style.style->SetPatternMinMag(minMag);
                      style.attributes.insert(FillStyle::attrPatternMinMag);
                   .)
-                | (. Color borderColor; .)
-                  "borderColor" ":" COLOR<borderColor>
+                )
+                .
+
+  BORDERSTYLEATTR<BorderPartialStyle& style>
+              = (
+                | (. Color color; .)
+                  "color" ":" COLOR<color>
                   (.
-                     style.style->SetBorderColor(borderColor);
-                     style.attributes.insert(FillStyle::attrBorderColor);
+                     style.style->SetColor(color);
+                     style.attributes.insert(BorderStyle::attrColor);
                   .)
                 | (. double width; .)
-                  "borderWidth" ":" UDISPLAYSIZE<width>
+                  "width" ":" UDISPLAYSIZE<width>
                   (.
-                     style.style->SetBorderWidth(width);
-                     style.attributes.insert(FillStyle::attrBorderWidth);
+                     style.style->SetWidth(width);
+                     style.attributes.insert(BorderStyle::attrWidth);
                   .)
                 | (.
                     std::vector<double> dashes;
                     double              dash;
                    .)
-                  "borderDash" ":"
+                  "dash" ":"
                    UDOUBLE<dash>   (. dashes.push_back(dash); .)
                   {
                     ","
                     UDOUBLE<dash>  (. dashes.push_back(dash); .)
                   }
                   (.
-                     style.style->SetBorderDashes(dashes);
-                     style.attributes.insert(FillStyle::attrBorderDashes);
+                     style.style->SetDashes(dashes);
+                     style.attributes.insert(BorderStyle::attrDashes);
+                  .)
+                | (. double displayOffset; .)
+                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
+                  (.
+                     style.style->SetDisplayOffset(displayOffset);
+                     style.attributes.insert(BorderStyle::attrDisplayOffset);
+                  .)
+                | (. double offset; .)
+                  "offset" ":" MAPSIZE<offset>
+                  (.
+                     style.style->SetOffset(offset);
+                     style.attributes.insert(BorderStyle::attrOffset);
+                  .)
+                | (. int priority; .)
+                  "priority" ":" INT<priority>
+                  (.
+                     style.style->SetPriority(priority);
+                     style.attributes.insert(BorderStyle::attrPriority);
                   .)
                 )
                 .
@@ -1515,22 +1586,22 @@ PRODUCTIONS
                 IDENT<featureName>
                 [
                   "."
-                  // This is a hack, since "name" is a reserved token, we could not have a IDENT name... 
+                  // This is a hack, since "name" is a reserved token, we could not have a IDENT name...
                   ( IDENT<labelName> | "name" (. labelName="name"; .) )
                 ]
                 (.
                   if (!labelName.empty()) {
                     FeatureRef feature;
-                  
+
                     feature=config.GetTypeConfig()->GetFeature(featureName);
-                  
+
                     if (!feature) {
                       std::string e="'"+featureName+"' is not a registered feature";
 
                       SemErr(e.c_str());
                       return;
                     }
-                  
+
                     if (!feature->HasLabel()) {
                       std::string e="'"+featureName+"' does not support labels";
 
@@ -1539,7 +1610,7 @@ PRODUCTIONS
                     }
 
                     size_t labelIndex;
-                  
+
                     if (!feature->GetLabelIndex(labelName,
                                                 labelIndex)) {
                       std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
@@ -1547,14 +1618,14 @@ PRODUCTIONS
                       SemErr(e.c_str());
                       return;
                     }
-                  
+
                     label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
                                                                       featureName,
                                                                       labelName);
                   }
                   else {
                     label=config.GetLabelProvider(featureName);
-                    
+
                     if (!label) {
                       std::string e="There is no label provider with name '"+featureName+"' registered";
 
@@ -1612,14 +1683,14 @@ PRODUCTIONS
                       std::string e="Constant not defined";
 
                       SemErr(e.c_str());
-                      
+
                       color=Color::BLACK;
                     }
                     else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
                       std::string e="Constant is not of type 'COLOR'";
 
                       SemErr(e.c_str());
-                      
+
                       color=Color::BLACK;
                     }
                     else {

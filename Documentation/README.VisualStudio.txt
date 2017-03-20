@@ -1,25 +1,12 @@
-You need VisualStudio2015 or higher (C++11 support!).
+You need VisualStudio 2015 or 2017 (C++11 support!). Most of the code
+might also work using Visual Studio 2013, but you likely need to 
+make some changes to the code to get it really build.
 
-The build has been tested with VisualStudio 2015.
+The build has been tested with VisualStudio 2015. To generate
+VisualStudio project files you need to use cmake. Note that
+VisualStudio 2017 has direct support for cmake.
 
-Build Files for visual studio can be found in the windows directory.
-* The project files (*.vcxproj) belong in the corresponding
-  sub project folder
-* The solution file (*.sln) has to be placed into the top level
-  directory.
-* Not all sub projects are being build, currently only building
-  the base libraries is supported.
+For details regarding the cmake build see the central appveyor build
+and its configuration files in this repository (appveyor.yml and
+ci/appveyor/).
 
-The build files currently make the following assumptions:
-* zlib, libxml2 and iconv are compiled and placed within the libsosmcout
-  top-level directory (in parallel to the libosmscout, libosmscout-import,...
-  directories). You can find the binaries for exmaple here:
-  http://www.zlatkovic.com/libxml.en.html
-  You need to either download the 32 or 64 bit builds. I tested with the
-  64bit binaries.
-  Include and library search pathes in the projects are configured
-  relative to these directories.
-* protobuf is not yet configured and tested but should in priciple 
-  work similar. You should use protobuf since it offers an dramatic
-  performance boost.
-* libosmscout-map will follow.

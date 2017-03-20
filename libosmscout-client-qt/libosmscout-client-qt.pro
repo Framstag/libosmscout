@@ -8,6 +8,7 @@ INCLUDEPATH += include ../libosmscout-map/include ../libosmscout-map-qt/include 
 SOURCES += \
     src/osmscout/AvailableMapsModel.cpp \
     src/osmscout/DBThread.cpp \
+    src/osmscout/FileDownloader.cpp \
     src/osmscout/InputHandler.cpp \
     src/osmscout/LocationEntry.cpp \
     src/osmscout/LocationInfoModel.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     include/osmscout/AvailableMapsModel.h \
     include/osmscout/ClientQtFeatures.h \
     include/osmscout/DBThread.h \
+    include/osmscout/FileDownloader.h \
     include/osmscout/InputHandler.h \
     include/osmscout/LocationEntry.h \
     include/osmscout/LocationInfoModel.h \

@@ -59,23 +59,26 @@ namespace osmscout {
                               const MapParameter& parameter,
                               double fontSize)
   {
-    std::map<size_t,QFont>::const_iterator f;
+    FontDescriptor descriptor;
+    descriptor.fontName=QString::fromStdString(parameter.GetFontName());
+    descriptor.fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+    descriptor.weight=QFont::Normal;
+    descriptor.italic=false;
 
-    fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
-
-    f=fonts.find(fontSize);
-
-    if (f!=fonts.end()) {
-      return f->second;
+    if (fonts.contains(descriptor)) {
+      return fonts.value(descriptor);
     }
 
-    QFont font(parameter.GetFontName().c_str(),QFont::Normal,false);
+    QFont font(descriptor.fontName.toStdString().c_str(),
+               descriptor.weight,
+               descriptor.italic);
 
-    font.setPixelSize(fontSize);
+    font.setPixelSize(descriptor.fontSize);
     font.setStyleStrategy(QFont::PreferAntialias);
     font.setStyleStrategy(QFont::PreferMatch);
 
-    return fonts.insert(std::pair<size_t,QFont>(fontSize,font)).first->second;
+    fonts[descriptor]=font;
+    return font;
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& /*styleConfig*/,
@@ -540,8 +543,8 @@ namespace osmscout {
           QPointF point=p.PointAtLength(glyphOffset);
           // check if current glyph can be visible
           qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
-          if (!painter->viewport().intersects(QRect(point.x()-diagonal, point.y()-diagonal,
-                                                    point.x()+diagonal, point.y()+diagonal))){
+          if (!painter->viewport().intersects(QRect(QPoint(point.x()-diagonal, point.y()-diagonal),
+                                                    QPoint(point.x()+diagonal, point.y()+diagonal)))){
             continue;
           }
           qreal angle=p.AngleAtLengthDeg(glyphOffset);
@@ -741,11 +744,26 @@ namespace osmscout {
 
       if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=NULL) {
         const PolygonPrimitive *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
-        FillStyleRef           style=polygon->GetFillStyle();
+        FillStyleRef           fillStyle=polygon->GetFillStyle();
+        BorderStyleRef         borderStyle=polygon->GetBorderStyle();
 
-        SetFill(projection,
-                parameter,
-                *style);
+        if (fillStyle) {
+          SetFill(projection,
+                  parameter,
+                  *fillStyle);
+        }
+        else {
+          painter->setBrush(Qt::NoBrush);
+        }
+
+        if (borderStyle) {
+          SetBorder(projection,
+                    parameter,
+                    *borderStyle);
+        }
+        else {
+          painter->setPen(Qt::NoPen);
+        }
 
         QPainterPath path;
 
@@ -766,11 +784,26 @@ namespace osmscout {
       }
       else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=NULL) {
         const RectanglePrimitive *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
-        FillStyleRef             style=rectangle->GetFillStyle();
+        FillStyleRef             fillStyle=rectangle->GetFillStyle();
+        BorderStyleRef           borderStyle=rectangle->GetBorderStyle();
 
-        SetFill(projection,
-                parameter,
-                *style);
+        if (fillStyle) {
+          SetFill(projection,
+                  parameter,
+                  *fillStyle);
+        }
+        else {
+          painter->setBrush(Qt::NoBrush);
+        }
+
+        if (borderStyle) {
+          SetBorder(projection,
+                    parameter,
+                    *borderStyle);
+        }
+        else {
+          painter->setPen(Qt::NoPen);
+        }
 
         QPainterPath path;
 
@@ -783,7 +816,8 @@ namespace osmscout {
       }
       else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=NULL) {
         const CirclePrimitive *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
-        FillStyleRef          style=circle->GetFillStyle();
+        FillStyleRef          fillStyle=circle->GetFillStyle();
+        BorderStyleRef        borderStyle=circle->GetBorderStyle();
 
         QPointF center(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
                        y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY));
@@ -795,9 +829,23 @@ namespace osmscout {
 
         radius=circle->GetRadius()*projection.GetMeterInPixel();*/
 
-        SetFill(projection,
-                parameter,
-                *style);
+        if (fillStyle) {
+          SetFill(projection,
+                  parameter,
+                  *fillStyle);
+        }
+        else {
+          painter->setBrush(Qt::NoBrush);
+        }
+
+        if (borderStyle) {
+          SetBorder(projection,
+                    parameter,
+                    *borderStyle);
+        }
+        else {
+          painter->setPen(Qt::NoPen);
+        }
 
         /*
         QRadialGradient grad(center, radius);
@@ -956,13 +1004,29 @@ namespace osmscout {
       }
     }
 
-    SetFill(projection,
-            parameter,
-            *area.fillStyle);
+    if (area.fillStyle) {
+      SetFill(projection,
+              parameter,
+              *area.fillStyle);
+    }
+    else {
+      painter->setBrush(Qt::NoBrush);
+    }
 
-    bool restoreTransform = false;
-    size_t idx = -1;
-    if (area.fillStyle->HasPattern()) {
+    if (area.borderStyle) {
+      SetBorder(projection,
+                parameter,
+                *area.borderStyle);
+    }
+    else {
+      painter->setPen(Qt::NoPen);
+    }
+
+    bool   restoreTransform=false;
+    size_t idx=-1;
+
+    if (area.fillStyle &&
+        area.fillStyle->HasPattern()) {
       idx=area.fillStyle->GetPatternId()-1;
 
       if (idx<patterns.size() && !patterns[idx].textureImage().isNull()) {
@@ -1025,8 +1089,6 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const FillStyle& fillStyle)
   {
-    double borderWidth=projection.ConvertWidthToPixel(fillStyle.GetBorderWidth());
-
     if (fillStyle.HasPattern() &&
         projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
         HasPattern(parameter,fillStyle)) {
@@ -1043,25 +1105,32 @@ namespace osmscout {
     else {
       painter->setBrush(Qt::NoBrush);
     }
+  }
+
+  void MapPainterQt::SetBorder(const Projection& projection,
+                               const MapParameter& parameter,
+                               const BorderStyle& borderStyle)
+  {
+    double borderWidth=projection.ConvertWidthToPixel(borderStyle.GetWidth());
 
     if (borderWidth>=parameter.GetLineMinWidthPixel()) {
       QPen pen;
 
-      pen.setColor(QColor::fromRgbF(fillStyle.GetBorderColor().GetR(),
-                                    fillStyle.GetBorderColor().GetG(),
-                                    fillStyle.GetBorderColor().GetB(),
-                                    fillStyle.GetBorderColor().GetA()));
+      pen.setColor(QColor::fromRgbF(borderStyle.GetColor().GetR(),
+                                    borderStyle.GetColor().GetG(),
+                                    borderStyle.GetColor().GetB(),
+                                    borderStyle.GetColor().GetA()));
       pen.setWidthF(borderWidth);
 
-      if (fillStyle.GetBorderDash().empty()) {
+      if (borderStyle.GetDash().empty()) {
         pen.setStyle(Qt::SolidLine);
         pen.setCapStyle(Qt::RoundCap);
       }
       else {
         QVector<qreal> dashes;
 
-        for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
-          dashes << fillStyle.GetBorderDash()[i];
+        for (size_t i=0; i<borderStyle.GetDash().size(); i++) {
+          dashes << borderStyle.GetDash()[i];
         }
 
         pen.setDashPattern(dashes);
@@ -1073,7 +1142,6 @@ namespace osmscout {
     else {
       painter->setPen(Qt::NoPen);
     }
-
   }
 
   bool MapPainterQt::DrawMap(const Projection& projection,

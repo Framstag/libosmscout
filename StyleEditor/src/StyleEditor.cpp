@@ -25,6 +25,7 @@
 // Custom QML objects
 #include "osmscout/MapWidget.h"
 #include "osmscout/SearchLocationModel.h"
+#include "osmscout/MapObjectInfoModel.h"
 #include "FileIO.h"
 
 // Application settings
@@ -57,13 +58,15 @@ int main(int argc, char* argv[])
   qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
   qmlRegisterType<LocationEntry>("net.sf.libosmscout.map", 1, 0, "Location");
   qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
+  qmlRegisterType<MapObjectInfoModel>("net.sf.libosmscout.map", 1, 0, "MapObjectInfoModel");
   qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
   qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
 
   QThread thread;
   
   // load online tile providers
-  Settings::GetInstance()->loadOnlineTileProviders(
+  SettingsRef settings=std::make_shared<Settings>();
+  settings->loadOnlineTileProviders(
     ":/resources/online-tile-providers.json");
 
   // setup paths
@@ -79,15 +82,10 @@ int main(int argc, char* argv[])
     mapLookupDirectories << documentsLocation + QDir::separator() + "Maps";
   }
   
-  QString stylesheetFilename;
   if (cmdLineArgs.size() > 2){
-    stylesheetFilename = cmdLineArgs.at(2);
-  }else{
-    if (cmdLineArgs.size() > 1){
-      stylesheetFilename = cmdLineArgs.at(1) + QDir::separator() + "standard.oss";
-    }else{
-      stylesheetFilename = QString("stylesheets") + QDir::separator() + "standard.oss";
-    }
+    QFileInfo stylesheetFile(cmdLineArgs.at(2));
+    settings->SetStyleSheetDirectory(stylesheetFile.dir().path());
+    settings->SetStyleSheetFile(stylesheetFile.fileName());
   }
   
   QString iconDirectory;
@@ -103,8 +101,8 @@ int main(int argc, char* argv[])
 
   if (!DBThread::InitializeTiledInstance(
           mapLookupDirectories,
-          stylesheetFilename, 
           iconDirectory,
+          settings,
           cacheLocation + QDir::separator() + "OSMScoutTileCache",
           /* onlineTileCacheSize  */ 100,
           /* offlineTileCacheSize */ 200
@@ -135,7 +133,6 @@ int main(int argc, char* argv[])
   thread.wait();
 
   DBThread::FreeInstance();
-  Settings::FreeInstance();
 
   return result;
 }

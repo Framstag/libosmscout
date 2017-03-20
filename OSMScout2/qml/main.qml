@@ -100,6 +100,9 @@ Window {
         id: settings
         //mapDPI: 50
     }
+    AppSettings{
+        id: appSettings
+    }
 
     GridLayout {
         id: content
@@ -120,29 +123,29 @@ Window {
 
             function setupInitialPosition(){
                 if (map.databaseLoaded){
-                  if (map.isInDatabaseBoundingBox(settings.mapView.lat, settings.mapView.lon)){
-                    map.view = settings.mapView;
-                    console.log("restore last position: " + settings.mapView.lat + " " + settings.mapView.lon);
+                  if (map.isInDatabaseBoundingBox(appSettings.mapView.lat, appSettings.mapView.lon)){
+                    map.view = appSettings.mapView;
+                    console.log("restore last position: " + appSettings.mapView.lat + " " + appSettings.mapView.lon);
                   }else{
-                    console.log("position " + settings.mapView.lat + " " + settings.mapView.lon + " is outside database, recenter");
+                    console.log("position " + appSettings.mapView.lat + " " + appSettings.mapView.lon + " is outside database, recenter");
                     map.recenter();
                   }
                 }else{
-                  map.view = settings.mapView;
+                  map.view = appSettings.mapView;
                 }
             }
 
             onTap: {
-                console.log("tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
+                console.log("tap: " + screenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
                 map.focus=true;
             }
             onLongTap: {
-                console.log("long tap: " + sceenX + "x" + screenY + " @ " + lat + " " + lon);
+                console.log("long tap: " + screenX + "x" + screenY + " @ " + lat + " " + lon);
                 map.focus=true;
             }
             onViewChanged: {
                 //console.log("map center "+ map.view.lat + " " + map.view.lon + "");
-                settings.mapView = map.view;
+                appSettings.mapView = map.view;
             }
             Component.onCompleted: {
                 setupInitialPosition();

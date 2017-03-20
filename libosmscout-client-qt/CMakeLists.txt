@@ -18,6 +18,7 @@ set(HEADER_FILES
     #include/osmscout/private/Config.h
     #include/osmscout/ClientQtFeatures.h
     include/osmscout/DBThread.h
+    include/osmscout/FileDownloader.h
     include/osmscout/InputHandler.h
     include/osmscout/LocationEntry.h
     include/osmscout/LocationInfoModel.h
@@ -39,10 +40,14 @@ set(HEADER_FILES
     include/osmscout/PersistentCookieJar.h
     include/osmscout/MapManager.h
     include/osmscout/MapDownloadsModel.h
+    include/osmscout/MapObjectInfoModel.h
+    include/osmscout/MapStyleModel.h
+    include/osmscout/StyleFlagsModel.h
 )
 
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
+    src/osmscout/FileDownloader.cpp
     src/osmscout/InputHandler.cpp
     src/osmscout/LocationEntry.cpp
     src/osmscout/LocationInfoModel.cpp
@@ -61,6 +66,9 @@ set(SOURCE_FILES
     src/osmscout/AvailableMapsModel.cpp
     src/osmscout/MapManager.cpp
     src/osmscout/MapDownloadsModel.cpp
+    src/osmscout/MapObjectInfoModel.cpp
+    src/osmscout/MapStyleModel.cpp
+    src/osmscout/StyleFlagsModel.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})

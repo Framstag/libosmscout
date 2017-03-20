@@ -39,9 +39,9 @@ static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
 static int UPDATED_DATA_RENDERING_TIMEOUT = 200;
 
 PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
-                             QString stylesheetFilename,
-                             QString iconDirectory)
- : DBThread(databaseLookupDirs, stylesheetFilename, iconDirectory),
+                             QString iconDirectory,
+                             SettingsRef renderingSettings)
+ : DBThread(databaseLookupDirs, iconDirectory, renderingSettings),
    canvasOverrun(1.5),
    pendingRenderingTimer(this),
    currentImage(NULL),
@@ -396,11 +396,19 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugData(false);
     drawParameter.SetDebugPerformance(true);
-    drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
-    drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
+
+    // optimize process can reduce number of nodes before rendering
+    // it helps for slow renderer backend, but it cost some cpu
+    // it seems that it is ok to disable it for Qt
+    drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::none);
+    drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::none);
+
     drawParameter.SetRenderBackground(false); // we draw background before MapPainter
     drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple databases
     drawParameter.SetRenderSeaLand(renderSea);
+
+    drawParameter.SetFontName(fontName.toStdString());
+    drawParameter.SetFontSize(fontSize);
 
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);

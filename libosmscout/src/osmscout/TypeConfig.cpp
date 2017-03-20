@@ -259,7 +259,7 @@ namespace osmscout {
 
   void FeatureValueBuffer::FreeValue(size_t idx)
   {
-    if (HasFeature(idx)){
+    if (HasFeature(idx)) {
       if (type->GetFeature(idx).GetFeature()->HasValue()) {
           FeatureValue* value=GetValue(idx);
           value->~FeatureValue();
@@ -491,7 +491,8 @@ namespace osmscout {
       if (specialFlag1) {
         addByte|= 0x80;
       }
-      if (specialFlag1) {
+
+      if (specialFlag2) {
         addByte|= 0x40;
       }
 
@@ -548,6 +549,52 @@ namespace osmscout {
   {
     return !operator==(other);
   }
+
+  void FeatureValueBuffer::CopyMissingValues(const FeatureValueBuffer& other)
+  {
+    for (size_t i=0; i<other.GetFeatureCount(); i++) {
+      // Feature set?
+      if (!other.HasFeature(i)) {
+        continue;
+      }
+
+      std::string featureName=other.GetFeature(i).GetFeature()->GetName();
+      size_t      featureIndex;
+
+      // Does our type has this feature, too?
+      if (!GetType()->GetFeature(featureName,
+                                 featureIndex)) {
+        continue;
+      }
+
+      // We do not overwrite existing feature values
+      if (HasFeature(featureIndex)) {
+        continue;
+      }
+
+      // Copy feature with/without value
+      if (other.GetFeature(i).GetFeature()->HasValue()) {
+        FeatureValue* otherValue=other.GetValue(i);
+        FeatureValue* thisValue=AllocateValue(featureIndex);
+
+        *thisValue=*otherValue;
+      }
+      else {
+        size_t featureBit=GetFeature(featureIndex).GetFeatureBit();
+        size_t byteIdx=featureBit/8;
+
+        featureBits[byteIdx]=featureBits[byteIdx] | (1 << featureBit%8);
+      }
+    }
+  }
+
+  void FeatureValueBuffer::ClearFeatureValues()
+  {
+    for (size_t i=0; i<GetFeatureCount(); i++) {
+      FreeValue(i);
+    }
+  }
+
 
   const char* TypeConfig::FILE_TYPES_DAT="types.dat";
 

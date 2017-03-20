@@ -452,34 +452,39 @@ namespace osmscout {
 
   void MapPainterCairo::DrawFillStyle(const Projection& projection,
                                       const MapParameter& parameter,
-                                      const FillStyle& fill)
+                                      const FillStyleRef& fill,
+                                      const BorderStyleRef& border)
   {
-    bool hasFill;
-    bool hasBorder=fill.GetBorderWidth()>0 &&
-                   fill.GetBorderColor().IsVisible() &&
-                   fill.GetBorderWidth()>=minimumLineWidth;
+    bool hasFill=false;
+    bool hasBorder=false;
 
-    if (fill.HasPattern() &&
-        projection.GetMagnification()>=fill.GetPatternMinMag() &&
-        HasPattern(parameter,fill)) {
-      size_t idx=fill.GetPatternId()-1;
+    if (fill) {
+      if (fill->HasPattern() &&
+          projection.GetMagnification()>=fill->GetPatternMinMag() &&
+          HasPattern(parameter,*fill)) {
+        size_t idx=fill->GetPatternId()-1;
 
-      assert(idx<patterns.size());
-      assert(patterns[idx]!=NULL);
+        assert(idx<patterns.size());
+        assert(patterns[idx]!=NULL);
 
-      cairo_set_source(draw,patterns[idx]);
-      hasFill=true;
+        cairo_set_source(draw,patterns[idx]);
+        hasFill=true;
+      }
+      else if (fill->GetFillColor().IsVisible()) {
+        Color color=fill->GetFillColor();
+        cairo_set_source_rgba(draw,
+                              color.GetR(),
+                              color.GetG(),
+                              color.GetB(),
+                              color.GetA());
+        hasFill=true;
+      }
     }
-    else if (fill.GetFillColor().IsVisible()) {
-      cairo_set_source_rgba(draw,
-                            fill.GetFillColor().GetR(),
-                            fill.GetFillColor().GetG(),
-                            fill.GetFillColor().GetB(),
-                            fill.GetFillColor().GetA());
-      hasFill=true;
-    }
-    else {
-      hasFill=false;
+
+    if (border) {
+      hasBorder=border->GetWidth()>0 &&
+                border->GetColor().IsVisible() &&
+                border->GetWidth()>=minimumLineWidth;
     }
 
     if (hasFill && hasBorder) {
@@ -490,12 +495,12 @@ namespace osmscout {
     }
 
     if (hasBorder) {
-      double borderWidth=projection.ConvertWidthToPixel(fill.GetBorderWidth());
+      double borderWidth=projection.ConvertWidthToPixel(border->GetWidth());
 
       if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-        SetLineAttributes(fill.GetBorderColor(),
+        SetLineAttributes(border->GetColor(),
                           borderWidth,
-                          fill.GetBorderDash());
+                          border->GetDash());
 
         cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
 
@@ -656,8 +661,7 @@ namespace osmscout {
     double proposedWidth=proposedLabelWidth(parameter,
                                             pango_font_metrics_get_approximate_char_width(metrics),
                                             objectWidth,
-                                            text.length()
-                                            );
+                                            text.length());
 
     PangoRectangle   extends;
 
@@ -748,9 +752,10 @@ namespace osmscout {
     double height=projection.ConvertWidthToPixel(maxY-minY);
 
     for (const auto& primitive : symbol.GetPrimitives()) {
-      FillStyleRef fillStyle=primitive->GetFillStyle();
+      FillStyleRef   fillStyle=primitive->GetFillStyle();
+      BorderStyleRef borderStyle=primitive->GetBorderStyle();
 
-      size_t offset=space/2;
+      double offset=space/2.0;
 
       cairo_new_path(draw);
 
@@ -778,7 +783,8 @@ namespace osmscout {
 
       DrawFillStyle(projection,
                     parameter,
-                    *fillStyle);
+                    fillStyle,
+                    borderStyle);
 
       cairo_path_destroy(patternPath);
     }
@@ -916,7 +922,8 @@ namespace osmscout {
       PangoLayout *layout=pango_cairo_create_layout(draw);
 
       pango_layout_set_font_description(layout,font);
-      pango_layout_set_text(layout,label.text.c_str(),label.text.length());
+      pango_layout_set_text(layout,label.text.c_str(),
+                            label.text.length());
 
       cairo_move_to(draw,
                     label.x,
@@ -1180,14 +1187,13 @@ namespace osmscout {
 
     symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-         p!=symbol.GetPrimitives().end();
-         ++p) {
-      FillStyleRef fillStyle=(*p)->GetFillStyle();
+    for (const auto& primitive: symbol.GetPrimitives()) {
+      FillStyleRef   fillStyle=primitive->GetFillStyle();
+      BorderStyleRef borderStyle=primitive->GetBorderStyle();
 
       DrawPrimitivePath(projection,
                         parameter,
-                        *p,
+                        primitive,
                         x,y,
                         minX,
                         minY,
@@ -1196,7 +1202,8 @@ namespace osmscout {
 
       DrawFillStyle(projection,
                     parameter,
-                    *fillStyle);
+                    fillStyle,
+                    borderStyle);
     }
   }
 
@@ -1330,7 +1337,8 @@ namespace osmscout {
 
     DrawFillStyle(projection,
                   parameter,
-                  *area.fillStyle);
+                  area.fillStyle,
+                  area.borderStyle);
 
     cairo_restore(draw);
   }

@@ -81,6 +81,20 @@ namespace osmscout {
                           other.GetMaxCoord().GetLon()));
   }
 
+  GeoBox GeoBox::Intersection(const GeoBox& other) const
+  {
+    if (!valid || !other.valid || !Intersects(other))
+      return GeoBox();
+
+    GeoCoord cornerMin( std::max( other.GetMinLat(), GetMinLat()),
+                        std::max( other.GetMinLon(), GetMinLon()));
+
+    GeoCoord cornerMax( std::min( other.GetMaxLat(), GetMaxLat()),
+                        std::min( other.GetMaxLon(), GetMaxLon()));
+
+    return GeoBox(cornerMin, cornerMax);
+  }
+
   GeoCoord GeoBox::GetCenter() const
   {
     return GeoCoord((minCoord.GetLat()+maxCoord.GetLat())/2,

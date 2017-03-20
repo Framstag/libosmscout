@@ -73,7 +73,8 @@ namespace osmscout {
 
     void DrawFillStyle(const Projection& projection,
                        const MapParameter& parameter,
-                       const FillStyle& fill);
+                       const FillStyleRef& fill,
+                       const BorderStyleRef& border);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,

@@ -92,8 +92,8 @@ private:
 
 public:
   TiledDBThread(QStringList databaseLookupDirectories, 
-                QString stylesheetFilename, 
                 QString iconDirectory,
+                SettingsRef renderingSettings,
                 QString tileCacheDirectory,
                 size_t onlineTileCacheSize = 20, 
                 size_t offlineTileCacheSize = 50);

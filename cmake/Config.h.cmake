@@ -26,6 +26,10 @@
 #cmakedefine HAVE_FSEEKO 1
 #endif
 
+#cmakedefine _LARGEFILE_SOURCE
+#cmakedefine _LARGE_FILES
+#cmakedefine _FILE_OFFSET_BITS @_FILE_OFFSET_BITS@
+
 /* Define to 1 if the system has the type `int16_t'. */
 #ifndef HAVE_INT16_T
 #cmakedefine HAVE_INT16_T 1

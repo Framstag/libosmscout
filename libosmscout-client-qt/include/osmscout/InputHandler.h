@@ -30,6 +30,8 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
 
+#include <osmscout/private/ClientQtImportExport.h>
+
 /**
  * \ingroup QtAPI
  *
@@ -48,7 +50,7 @@
  * this tolerance. For double tap, when second tap is farther than this tolerance,
  * double-tap event is not emited.
  */
-class TapRecognizer : public QObject{
+class OSMSCOUT_CLIENT_QT_API TapRecognizer : public QObject{
   Q_OBJECT
 
 private:
@@ -152,7 +154,7 @@ public:
  *
  * Object thats carry information about view center, angle and magnification.
  */
-class MapView: public QObject
+class OSMSCOUT_CLIENT_QT_API MapView: public QObject
 {
   Q_OBJECT
 
@@ -227,7 +229,7 @@ inline bool operator!=(const MapView& a, const MapView& b)
  *
  * Handler also controls map animations.
  */
-class InputHandler : public QObject{
+class OSMSCOUT_CLIENT_QT_API InputHandler : public QObject{
     Q_OBJECT
 public:
     InputHandler(MapView view);
@@ -258,7 +260,7 @@ protected:
  * Handler with support of simple moves and zoom.
  * View changes are animated, so one action may emits many of viewChange signals.
  */
-class MoveHandler : public InputHandler {
+class OSMSCOUT_CLIENT_QT_API MoveHandler : public InputHandler {
     Q_OBJECT
 
 private:
@@ -304,7 +306,7 @@ private:
  *
  * Input handler that animates jumps to target map view.
  */
-class JumpHandler : public InputHandler {
+class OSMSCOUT_CLIENT_QT_API JumpHandler : public InputHandler {
     Q_OBJECT
 
 private:
@@ -332,7 +334,7 @@ public:
  *
  * InputHandler with support of dragg gesture.
  */
-class DragHandler : public MoveHandler {
+class OSMSCOUT_CLIENT_QT_API DragHandler : public MoveHandler {
     Q_OBJECT
 public:
     DragHandler(MapView view, double dpi);
@@ -362,7 +364,7 @@ private:
  * InputHandler with support of multitouch input. It use just first two
  * touch points from touch events.
  */
-class MultitouchHandler : public MoveHandler {
+class OSMSCOUT_CLIENT_QT_API MultitouchHandler : public MoveHandler {
     Q_OBJECT
 public:
     MultitouchHandler(MapView view, double dpi);
@@ -392,7 +394,7 @@ private:
  *
  * Input handler that locks map view to current position.
  */
-class LockHandler : public JumpHandler {
+class OSMSCOUT_CLIENT_QT_API LockHandler : public JumpHandler {
     Q_OBJECT
 protected:
     double dpi;

@@ -89,11 +89,12 @@ signals:
   void viewChanged();
   void lockToPossitionChanged();
   void finishedChanged(bool finished);
-  
-  void tap(const int sceenX, const int screenY, const double lat, const double lon);
-  void doubleTap(const int sceenX, const int screenY, const double lat, const double lon);
-  void longTap(const int sceenX, const int screenY, const double lat, const double lon);
-  void tapLongTap(const int sceenX, const int screenY, const double lat, const double lon);
+
+  void mouseMove(const int screenX, const int screenY, const double lat, const double lon, const Qt::KeyboardModifiers modifiers);
+  void tap(const int screenX, const int screenY, const double lat, const double lon);
+  void doubleTap(const int screenX, const int screenY, const double lat, const double lon);
+  void longTap(const int screenX, const int screenY, const double lat, const double lon);
+  void tapLongTap(const int screenX, const int screenY, const double lat, const double lon);
 
   void stylesheetFilenameChanged();
   void styleErrorsChanged();
@@ -258,6 +259,7 @@ public:
   void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
   void mouseReleaseEvent(QMouseEvent* event);
+  void hoverMoveEvent(QHoverEvent* event);
   
   void paint(QPainter *painter);
   
@@ -268,6 +270,7 @@ public:
   
   bool isDatabaseLoaded();
   Q_INVOKABLE bool isInDatabaseBoundingBox(double lat, double lon);
+  Q_INVOKABLE QPointF screenPosition(double lat, double lon);
 };
 
 #endif

@@ -253,52 +253,58 @@ namespace osmscout {
 
   void MapPainterAgg::DrawFill(const Projection& projection,
                                const MapParameter& parameter,
-                               const FillStyle& fillStyle,
+                               const FillStyleRef& fillStyle,
+                               const BorderStyleRef& borderStyle,
                                agg::path_storage& path)
   {
-    if (fillStyle.GetFillColor().IsVisible()) {
-      renderer_aa->color(agg::rgba(fillStyle.GetFillColor().GetR(),
-                                   fillStyle.GetFillColor().GetG(),
-                                   fillStyle.GetFillColor().GetB(),
-                                   fillStyle.GetFillColor().GetA()));
+    if (fillStyle &&
+      fillStyle->GetFillColor().IsVisible()) {
+      Color color=fillStyle->GetFillColor();
+      renderer_aa->color(agg::rgba(color.GetR(),
+                                   color.GetG(),
+                                   color.GetB(),
+                                   color.GetA()));
 
       agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
     }
 
-    double borderWidth=projection.ConvertWidthToPixel(fillStyle.GetBorderWidth());
+    if (borderStyle) {
+      double borderWidth=projection.ConvertWidthToPixel(borderStyle->GetWidth());
 
-    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-      renderer_aa->color(agg::rgba(fillStyle.GetBorderColor().GetR(),
-                                   fillStyle.GetBorderColor().GetG(),
-                                   fillStyle.GetBorderColor().GetB(),
-                                   fillStyle.GetBorderColor().GetA()));
+      if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+        Color color=borderStyle->GetColor();
+        renderer_aa->color(agg::rgba(color.GetR(),
+                                     color.GetG(),
+                                     color.GetB(),
+                                     color.GetA()));
 
-      if (fillStyle.GetBorderDash().empty()) {
-        agg::conv_stroke<agg::path_storage> stroke(path);
+        if (borderStyle->GetDash().empty()) {
+          agg::conv_stroke<agg::path_storage> stroke(path);
 
-        stroke.width(borderWidth);
-        stroke.line_cap(agg::round_cap);
+          stroke.width(borderWidth);
+          stroke.line_cap(agg::round_cap);
 
-        rasterizer->add_path(stroke);
+          rasterizer->add_path(stroke);
 
-        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
-      }
-      else {
-        agg::conv_dash<agg::path_storage>                    dasher(path);
-        agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dasher);
-
-        stroke.width(borderWidth);
-
-        stroke.line_cap(agg::butt_cap);
-
-        for (size_t i=0; i<fillStyle.GetBorderDash().size(); i+=2) {
-          dasher.add_dash(fillStyle.GetBorderDash()[i]*borderWidth,
-                          fillStyle.GetBorderDash()[i+1]*borderWidth);
+          agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
         }
+        else {
+          agg::conv_dash<agg::path_storage>                    dasher(path);
+          agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dasher);
 
-        rasterizer->add_path(stroke);
+          stroke.width(borderWidth);
 
-        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+          stroke.line_cap(agg::butt_cap);
+
+          for (size_t i=0; i<borderStyle->GetDash().size(); i+=2) {
+            dasher.add_dash(borderStyle->GetDash()[i]*borderWidth,
+                            borderStyle->GetDash()[i+1]*borderWidth);
+          }
+
+          rasterizer->add_path(stroke);
+
+          agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+        }
       }
     }
   }
@@ -529,7 +535,8 @@ namespace osmscout {
 
       if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
         PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-        FillStyleRef      style=polygon->GetFillStyle();
+        FillStyleRef      fillStyle=polygon->GetFillStyle();
+        BorderStyleRef    borderStyle=polygon->GetBorderStyle();
         agg::path_storage path;
 
         for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
@@ -551,12 +558,14 @@ namespace osmscout {
 
         DrawFill(projection,
                  parameter,
-                 *style,
+                 fillStyle,
+                 borderStyle,
                  path);
       }
       else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
         RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-        FillStyleRef        style=rectangle->GetFillStyle();
+        FillStyleRef        fillStyle=rectangle->GetFillStyle();
+        BorderStyleRef      borderStyle=rectangle->GetBorderStyle();
         agg::path_storage   path;
         double              xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX);
         double              yPos=y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY);
@@ -574,12 +583,14 @@ namespace osmscout {
 
         DrawFill(projection,
                  parameter,
-                 *style,
+                 fillStyle,
+                 borderStyle,
                  path);
       }
       else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
         CirclePrimitive*  circle=dynamic_cast<CirclePrimitive*>(primitive);
-        FillStyleRef      style=circle->GetFillStyle();
+        FillStyleRef      fillStyle=circle->GetFillStyle();
+        BorderStyleRef    borderStyle=circle->GetBorderStyle();
         agg::path_storage path;
         double            radius=projection.ConvertWidthToPixel(circle->GetRadius());
 
@@ -594,7 +605,8 @@ namespace osmscout {
 
         DrawFill(projection,
                  parameter,
-                 *style,
+                 fillStyle,
+                 borderStyle,
                  path);
       }
     }
@@ -722,7 +734,8 @@ namespace osmscout {
 
     DrawFill(projection,
              parameter,
-             *area.fillStyle,
+             area.fillStyle,
+             area.borderStyle,
              path);
   }
 
