@@ -2,6 +2,7 @@
 **/cmake_install.cmake
 **/CMakeFiles
 /build/
+build/
 
 # IDEs
 **/.cproject
