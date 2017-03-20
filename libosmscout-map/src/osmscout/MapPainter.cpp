@@ -509,14 +509,6 @@ namespace osmscout {
       seaFill=this->seaFill;
     }
 
-    if (!coastFill) {
-      coastFill=this->seaFill;
-    }
-
-    if (!unknownFill) {
-      unknownFill=this->seaFill;
-    }
-
     for (const auto& tile : data.groundTiles) {
       AreaData areaData;
 
@@ -550,6 +542,9 @@ namespace osmscout {
 #endif
         areaData.fillStyle=unknownFill;
         break;
+      }
+      if (!areaData.fillStyle){
+        continue;
       }
 
       GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
