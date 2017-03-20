@@ -43,6 +43,7 @@
 **/.autotools
 **/debug
 **/release
+build/
 
 # IDEs
 **/.cproject
