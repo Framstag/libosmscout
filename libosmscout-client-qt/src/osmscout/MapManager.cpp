@@ -81,8 +81,8 @@ void MapDownloadJob::start()
 
 void MapDownloadJob::onJobFailed(QString error_text){
   osmscout::log.Debug() << "Download failed with the error: " << error_text.toStdString();
-
-#pragma message "Here should be some code that propagates error message to the user"
+  // application should be connected to MapDownloadsModel::mapDownloadFails(QString) signal
+  // and propagate error message to user
 }
 
 void MapDownloadJob::onJobFinished()
