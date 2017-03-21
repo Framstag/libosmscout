@@ -29,6 +29,7 @@
 #include <QProcess>
 #include <QByteArray>
 #include <QTime>
+#include <QFileInfo>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -50,7 +51,8 @@ public:
   ~FileDownloader();
 
   operator bool() const { return m_isok; }
-  QString getFileName() const { return m_path; }
+  QString getFileName() const { return QFileInfo(m_path).fileName(); }
+  QString getFilePath() const { return m_path; }
   uint64_t getBytesDownloaded() const;
 
 signals:
