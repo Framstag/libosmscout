@@ -2210,7 +2210,7 @@ namespace osmscout {
     if (!coastlines.empty()) {
       // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
       FillWater(progress,
-                levelStruct,20);
+                levelStruct,60);
     }
 
     // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
