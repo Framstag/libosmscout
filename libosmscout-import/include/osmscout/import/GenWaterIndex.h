@@ -399,13 +399,11 @@ namespace osmscout {
 
       void HandleCoastlineCell(const Pixel &cell,
                                const std::list<size_t>& intersectCoastlines,
-                               const std::list<CoastRef>& coastlines,
                                const Level& level,
                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                Data& data);
 
       void HandleCoastlinesPartiallyInACell(Progress& progress,
-                                            const std::list<CoastRef>& coastlines,
                                             const Level& level,
                                             std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                             Data& data);
