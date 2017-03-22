@@ -171,12 +171,6 @@ namespace osmscout {
         lonMax=(level.cellXStart+cell.x+1)*level.cellWidth-180.0;
         latMin=(level.cellYStart+cell.y)*level.cellHeight-90.0;
         latMax=(level.cellYStart+cell.y+1)*level.cellHeight-90.0;
-        /*
-        borderPoints[0]=Coord(0,GeoCoord(latMax,lonMin)); // top left
-        borderPoints[1]=Coord(0,GeoCoord(latMax,lonMax)); // top right
-        borderPoints[2]=Coord(0,GeoCoord(latMin,lonMax)); // bottom right
-        borderPoints[3]=Coord(0,GeoCoord(latMin,lonMin)); // bottom left
-         */
 
         borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                           // top left
         borderCoords[1].Set(GroundTile::Coord::CELL_MAX,GroundTile::Coord::CELL_MAX,false); // top right
