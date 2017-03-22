@@ -43,7 +43,6 @@
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
 #include <osmscout/WayDataFile.h>
-#include <c++/5/bits/shared_ptr.h>
 
 #if !defined(DEBUG_COASTLINE)
 #define DEBUG_COASTLINE
