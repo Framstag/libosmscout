@@ -320,6 +320,13 @@ namespace osmscout {
                    Level& level,
                    size_t tileCount);
 
+    bool containsCoord(const std::list<GroundTile> &tiles,
+                       const GroundTile::Coord &coord);
+
+    void FillWaterAroundIsland(Progress& progress,
+                               Level& level,
+                               std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
+
     void FillLand(Progress& progress,
                   Level& level);
 

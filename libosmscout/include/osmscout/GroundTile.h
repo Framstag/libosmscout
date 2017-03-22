@@ -85,6 +85,11 @@ namespace osmscout {
         this->y=y;
         this->coast=coast;
       }
+
+      inline bool operator==(const Coord &coord) const
+      {
+        return x==coord.x && y==coord.y && coast==coord.coast;
+      }
     };
 
     Type               type;          //!< The type of the cell

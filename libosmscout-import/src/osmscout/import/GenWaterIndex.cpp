@@ -1022,6 +1022,68 @@ namespace osmscout {
     }
   }
 
+  bool WaterIndexGenerator::containsCoord(const std::list<GroundTile> &tiles,
+                                          const GroundTile::Coord &coord)
+  {
+    for (const auto &tile:tiles){
+      for (const auto &c:tile.coords){
+        if (c==coord){
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  void WaterIndexGenerator::FillWaterAroundIsland(Progress& progress,
+                                                  Level& level,
+                                                  std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap)
+  {
+    progress.Info("Filling water around islands");
+    
+    for (const auto &entry:cellGroundTileMap){
+      Pixel coord=entry.first;
+
+      CellBoundaries cellBoundaries(level,coord);
+      bool fillWater=false;
+
+      if (!fillWater && coord.y>0 && level.GetState(coord.x,coord.y-1)==water &&
+          (!containsCoord(entry.second, cellBoundaries.borderCoords[0]) ||
+           !containsCoord(entry.second, cellBoundaries.borderCoords[1]))){
+        fillWater=true;
+      }
+      if (!fillWater && coord.y<(level.cellYCount-1) && level.GetState(coord.x,coord.y+1)==water &&
+          (!containsCoord(entry.second, cellBoundaries.borderCoords[2]) ||
+           !containsCoord(entry.second, cellBoundaries.borderCoords[3]))){
+        fillWater=true;
+      }
+      if (!fillWater && coord.x>0 && level.GetState(coord.x-1,coord.y)==water &&
+          (!containsCoord(entry.second, cellBoundaries.borderCoords[0]) ||
+           !containsCoord(entry.second, cellBoundaries.borderCoords[2]))){
+        fillWater=true;
+      }
+      if (!fillWater && coord.x<(level.cellXCount-1) && level.GetState(coord.x+1,coord.y)==water &&
+          (!containsCoord(entry.second, cellBoundaries.borderCoords[1]) ||
+           !containsCoord(entry.second, cellBoundaries.borderCoords[3]))){
+        fillWater=true;
+      }
+
+      if (fillWater){
+        GroundTile groundTile(GroundTile::water);
+#if defined(DEBUG_TILING)
+        std::cout << "Add water base to tile with islands: " << coord.x << "," << coord.y << std::endl;
+#endif
+
+        groundTile.coords.push_back(cellBoundaries.borderCoords[0]);
+        groundTile.coords.push_back(cellBoundaries.borderCoords[1]);
+        groundTile.coords.push_back(cellBoundaries.borderCoords[2]);
+        groundTile.coords.push_back(cellBoundaries.borderCoords[3]);
+
+        cellGroundTileMap[coord].push_front(groundTile);
+      }
+    }
+  }
+
   /**
    * Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
    *
@@ -2211,6 +2273,8 @@ namespace osmscout {
       // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
       FillWater(progress,
                 levelStruct,60);
+
+      FillWaterAroundIsland(progress, levelStruct, cellGroundTileMap);
     }
 
     // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
