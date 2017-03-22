@@ -16,9 +16,9 @@ OSS
 
   STYLE
    [TYPE _tile_sea] AREA {color: @waterColor;}
-   [TYPE _tile_coast] AREA {color: @waterColor;}
+   //[TYPE _tile_coast] AREA {color: @waterColor;}
    [TYPE _tile_land] AREA {color: @landColor;}
-   [TYPE _tile_unknown] AREA {color: @unknownColor;}
+   //[TYPE _tile_unknown] AREA {color: @unknownColor;}
 
   [TYPE boundary_administrative] {
     AREA {color: #dddddd; }
