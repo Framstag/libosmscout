@@ -136,7 +136,7 @@ namespace osmscout {
      optimizationCellSizeMax(255),
      optimizationWayMethod(TransPolygon::quality),
      routeNodeBlockSize(500000),
-     assumeLand(true),
+     assumeLand(false),
      langOrder({"#"}),
      firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2))
   {
