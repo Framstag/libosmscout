@@ -374,42 +374,56 @@ namespace osmscout {
                                             const std::list<IntersectionRef> &intersectionsCW,
                                             bool isArea);
 
+    bool FindTripoint(const IntersectionRef pathStart,
+                      IntersectionRef &pathEnd,
+                      IntersectionRef &startNext,
+                      IntersectionRef &endNext,
+                      Data &data,
+                      const std::list<IntersectionRef> intersectionsCW
+                      );
+
+    void WalkPath(GroundTile &groundTile,
+                  const Level& level,
+                  const CellBoundaries &cellBoundaries,
+                  const IntersectionRef pathStart,
+                  const IntersectionRef pathEnd,
+                  CoastlineDataRef coastline);
+
     bool WalkBoundaryCW(GroundTile &groundTile,
-                        const Level &level,
-                        const IntersectionRef outIntersection,
-                        const std::list<IntersectionRef> &intersectionsCW,
-                        std::set<IntersectionRef> &visitedIntersections,
-                        CoastlineDataRef coastline,
-                        const CellBoundaries &cellBoundaries,
-                        Data& data);
+                          const Level &level,
+                          const IntersectionRef outIntersection,
+                          const std::list<IntersectionRef> &intersectionsCW,
+                          std::set<IntersectionRef> &visitedIntersections,
+                          const CellBoundaries &cellBoundaries,
+                          Data& data);
 
-    void HandleCoastlineCell(const Pixel &cell,
-                             const std::list<size_t>& intersectCoastlines,
-                             const std::list<CoastRef>& coastlines,
-                             const Level& level,
-                             std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
-                             Data& data);
+      void HandleCoastlineCell(const Pixel &cell,
+                               const std::list<size_t>& intersectCoastlines,
+                               const std::list<CoastRef>& coastlines,
+                               const Level& level,
+                               std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
+                               Data& data);
 
-    void HandleCoastlinesPartiallyInACell(Progress& progress,
-                                          const std::list<CoastRef>& coastlines,
-                                          const Level& level,
-                                          std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
-                                          Data& data);
+      void HandleCoastlinesPartiallyInACell(Progress& progress,
+                                            const std::list<CoastRef>& coastlines,
+                                            const Level& level,
+                                            std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
+                                            Data& data);
 
-    void buildTiles(const TypeConfigRef& typeConfig,
-                    const ImportParameter& parameter,
-                    Progress &progress,
-                    const MercatorProjection &projection,
-                    Level &levelStruct,
-                    std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
-                    const std::list<CoastRef> &coastlines,
-                    Data &data);
+      void buildTiles(const TypeConfigRef& typeConfig,
+                      const ImportParameter& parameter,
+                      Progress &progress,
+                      const MercatorProjection &projection,
+                      Level &levelStruct,
+                      std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                      const std::list<CoastRef> &coastlines,
+                      Data &data);
 
-    void writeTiles(Progress &progress,
-                    const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
-                    const uint32_t level,
-                    Level &levelStruct,
-                    FileWriter &writer);
+      void writeTiles(Progress &progress,
+                      const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                      const uint32_t level,
+                      Level &levelStruct,
+                      FileWriter &writer);
 
   public:
     void GetDescription(const ImportParameter& parameter,
