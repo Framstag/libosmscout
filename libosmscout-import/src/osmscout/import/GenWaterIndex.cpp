@@ -1195,7 +1195,13 @@ namespace osmscout {
       }
 
       Pixel      coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
-      GroundTile groundTile(GroundTile::land);
+
+      GroundTile type=GroundTile::land;
+      if (coastline->left==CoastState::unknown)
+        type=GroundTile::unknown;
+      if (coastline->left==CoastState::water)
+        type=GroundTile::water; // should not happen on the Earth
+      GroundTile groundTile(type);
 
       double cellMinLat=level.cellHeight*coastline->cell.y-90.0;
       double cellMinLon=level.cellWidth*coastline->cell.x-180.0;
