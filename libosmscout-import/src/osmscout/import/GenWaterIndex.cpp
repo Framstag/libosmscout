@@ -638,7 +638,7 @@ namespace osmscout {
   }
 
   /**
-   * try to synthetize areas from all way coastlines
+   * try to synthetize coastline segments from all way coastlines
    * that intersects with data polygon
    *
    * @param progress
@@ -655,31 +655,50 @@ namespace osmscout {
 
     progress.SetAction("Synthetize coastlines");
 
-    std::list<CoastRef> areaCoastlines;
+    std::list<CoastRef> clippedCoastlineSegments;
     std::list<CoastRef> wayCoastlines;
     for (const auto& coastline : coastlines) {
       if (coastline->isArea){
-        areaCoastlines.push_back(coastline);
+        clippedCoastlineSegments.push_back(coastline);
       }else{
         wayCoastlines.push_back(coastline);
       }
     }
 
     osmscout::StopClock clock;
-    size_t areasBefore=areaCoastlines.size();
+    size_t areasBefore=clippedCoastlineSegments.size();
     SynthetizeCoastlinesSegments(progress,
                                  dataPolygon,
                                  wayCoastlines,
-                                 areaCoastlines);
+                                 clippedCoastlineSegments);
+
+    // define coastline states if there are still some undefined
+    for (auto const &coastline:clippedCoastlineSegments){
+      if (coastline->right==CoastState::undefined){
+        coastline->right=CoastState::unknown;
+      }
+      if (coastline->left==CoastState::undefined && coastline->isArea){
+        for (auto const &testCoast:clippedCoastlineSegments){
+          if (testCoast->right==CoastState::water &&
+              IsAreaAtLeastPartlyInArea(testCoast->coast,coastline->coast)){
+            coastline->left=CoastState::water;
+          }
+        }
+      }
+      if (coastline->left==CoastState::undefined){
+        // still undefined, it is land probably
+        coastline->left=CoastState::land;
+      }
+    }
 
     clock.Stop();
     progress.Info(NumberToString(dataPolygon.size())+" data polygon(s), and "+
                   NumberToString(wayCoastlines.size())+" way coastline(s) synthetized into "+
-                  NumberToString(areaCoastlines.size()-areasBefore)+" new area coastlines(s), tooks "+
+                  NumberToString(clippedCoastlineSegments.size()-areasBefore)+" new area coastlines(s), tooks "+
                   clock.ResultString() +" s"
     );
 
-    coastlines=areaCoastlines;
+    coastlines=clippedCoastlineSegments;
   }
 
   /**
