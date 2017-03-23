@@ -968,7 +968,8 @@ namespace osmscout {
    */
   void WaterIndexGenerator::FillWater(Progress& progress,
                                       Level& level,
-                                      size_t tileCount)
+                                      size_t tileCount,
+                                      const std::list<CoastRef>& dataPolygon)
   {
     progress.Info("Filling water");
 
@@ -978,6 +979,24 @@ namespace osmscout {
       for (uint32_t y=0; y<level.cellYCount; y++) {
         for (uint32_t x=0; x<level.cellXCount; x++) {
           if (level.GetState(x,y)==water) {
+
+            // avoid filling of water outside data polygon
+            if (!dataPolygon.empty()){
+              CellBoundaries cellBoundary(level,Pixel(x,y));
+              std::vector<GeoCoord> cellCoords;
+              cellCoords.assign(cellBoundary.borderPoints, cellBoundary.borderPoints + 4);
+              bool included=false;
+              for (const auto &poly:dataPolygon){
+                if (IsAreaAtLeastPartlyInArea(cellCoords,poly->coast)){
+                  included=true;
+                  break;
+                }
+              }
+              if (!included){
+                continue;
+              }
+            }
+
             if (y>0) {
               if (level.GetState(x,y-1)==unknown) {
 #if defined(DEBUG_TILING)
@@ -2226,7 +2245,8 @@ namespace osmscout {
                                        Level &levelStruct,
                                        std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
                                        const std::list<CoastRef> &coastlines,
-                                       Data &data)
+                                       Data &data,
+                                       const std::list<CoastRef>& dataPolygon)
   {
     if (!coastlines.empty()) {
       // Collects, calculates and generates a number of data about a coastline
@@ -2271,7 +2291,9 @@ namespace osmscout {
     if (!coastlines.empty()) {
       // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
       FillWater(progress,
-                levelStruct,60);
+                levelStruct,
+                /*tileCount*/10,
+                dataPolygon);
 
       FillWaterAroundIsland(progress, levelStruct, cellGroundTileMap);
     }
@@ -2555,7 +2577,8 @@ namespace osmscout {
                    levelStruct,
                    cellGroundTileMap,
                    coastlines,
-                   data);
+                   data,
+                   dataPolygon);
 
         writeTiles(progress,
                    cellGroundTileMap,

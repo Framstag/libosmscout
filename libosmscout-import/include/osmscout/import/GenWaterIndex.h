@@ -24,6 +24,7 @@
 #include <vector>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/Coord.h>
 #include <osmscout/Pixel.h>
 
 #include <osmscout/GroundTile.h>
@@ -165,12 +166,18 @@ namespace osmscout {
       double latMax;
 
       GroundTile::Coord borderCoords[4];
+      GeoCoord borderPoints[4];
 
       inline CellBoundaries(const Level &level, const Pixel &cell){
         lonMin=(level.cellXStart+cell.x)*level.cellWidth-180.0;
         lonMax=(level.cellXStart+cell.x+1)*level.cellWidth-180.0;
         latMin=(level.cellYStart+cell.y)*level.cellHeight-90.0;
         latMax=(level.cellYStart+cell.y+1)*level.cellHeight-90.0;
+
+        borderPoints[0]=GeoCoord(latMax,lonMin); // top left
+        borderPoints[1]=GeoCoord(latMax,lonMax); // top right
+        borderPoints[2]=GeoCoord(latMin,lonMax); // bottom right
+        borderPoints[3]=GeoCoord(latMin,lonMin); // bottom left
 
         borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                           // top left
         borderCoords[1].Set(GroundTile::Coord::CELL_MAX,GroundTile::Coord::CELL_MAX,false); // top right
@@ -318,7 +325,8 @@ namespace osmscout {
 
     void FillWater(Progress& progress,
                    Level& level,
-                   size_t tileCount);
+                   size_t tileCount,
+                   const std::list<CoastRef>& dataPolygon);
 
     bool containsCoord(const std::list<GroundTile> &tiles,
                        const GroundTile::Coord &coord);
@@ -416,7 +424,8 @@ namespace osmscout {
                       Level &levelStruct,
                       std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
                       const std::list<CoastRef> &coastlines,
-                      Data &data);
+                      Data &data,
+                      const std::list<CoastRef>& dataPolygon);
 
       void writeTiles(Progress &progress,
                       const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
