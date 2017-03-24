@@ -110,8 +110,6 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
 
   m_download_last_read_time.start();
   m_download_throttle_time_start.start();
-
-  startTimer(1000); // used to check for timeouts and in throttling network speed
 }
 
 FileDownloader::~FileDownloader()
@@ -129,6 +127,7 @@ void FileDownloader::startDownload()
 
   if (m_downloaded > 0)
     {
+      // TODO: Range header don't have to be supported by server, we should handle such case
       QByteArray range_header = "bytes=" + QByteArray::number((qulonglong)m_downloaded) + "-";
       request.setRawHeader("Range",range_header);
     }
@@ -146,6 +145,8 @@ void FileDownloader::startDownload()
   m_download_last_read_time.restart();
   m_download_throttle_time_start.restart();
   m_download_throttle_bytes = 0;
+
+  m_timeout_timer_id=startTimer(1000); // used to check for timeouts and in throttling network speed
 }
 
 void FileDownloader::onFinished()
@@ -320,6 +321,7 @@ void FileDownloader::onDownloaded()
 
 bool FileDownloader::restartDownload(bool force)
 {
+  killTimer(m_timeout_timer_id);
 //  qDebug() << QTime::currentTime() << " / Restart called: "
 //           << m_url << " " << m_download_retries << " " << m_download_last_read_time.elapsed();
 
