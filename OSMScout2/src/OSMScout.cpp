@@ -53,6 +53,25 @@ static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
     return theme;
 }
 
+#define DEBUG   4
+#define INFO    3
+#define WARNING 2
+#define ERROR   1
+
+static int LogEnv(QString env)
+{
+  if (env.toUpper()=="DEBUG"){
+    return DEBUG;
+  }
+  if (env.toUpper()=="INFO"){
+    return INFO;
+  }
+  if (env.toUpper()=="ERROR"){
+    return ERROR;
+  }
+  return WARNING;
+}
+
 int main(int argc, char* argv[])
 {
 #ifdef Q_WS_X11
@@ -82,8 +101,12 @@ int main(int argc, char* argv[])
 
   qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
 
-  osmscout::log.Debug(false);
-  osmscout::log.Info(false);
+  // init logger by system system variable
+  int logEnv=LogEnv(QProcessEnvironment::systemEnvironment().value("OSMSCOUT_LOG", "WARNING"));
+  osmscout::log.Debug(logEnv>=DEBUG);
+  osmscout::log.Info(logEnv>=INFO);
+  osmscout::log.Warn(logEnv>=WARNING);
+  osmscout::log.Error(logEnv>=ERROR);
 
   SettingsRef settings=std::make_shared<Settings>();
   // load online tile providers
