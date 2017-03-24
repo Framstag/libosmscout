@@ -62,19 +62,21 @@ signals:
   void error(QString error_text);
 
 public slots:
+  void startDownload();
+
+protected slots:
   void onNetworkReadyRead();
   void onDownloaded();
   void onNetworkError(QNetworkReply::NetworkError code);
-  void startDownload(); ///< called internally, but has to be a slot
+
+  void onProcessStarted();
+  void onProcessRead();
+  void onProcessStopped(int exitCode); ///< Called on error while starting or when process has stopped
+  void onBytesWritten(qint64);
 
 protected:
-  void onProcessStarted();
-  void onProcessStopped(int exitCode, QProcess::ExitStatus exitStatus); ///< Called on error while starting or when process has stopped
   void onProcessStateChanged(QProcess::ProcessState newState); ///< Called when state of the process has changed
-  void onProcessRead();
   void onProcessReadError();
-
-  void onBytesWritten(qint64);
 
   void onFinished();
   void onError(const QString &err);
