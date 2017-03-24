@@ -89,8 +89,8 @@ void MapDownloadJob::onJobFinished()
 {
   if (!jobs.isEmpty())
     {
-      jobs[0]->deleteLater();
-      downloadedBytes += jobs[0]->getBytesDownloaded();
+      jobs.first()->deleteLater();
+      downloadedBytes += jobs.first()->getBytesDownloaded();
       jobs.pop_front();      
     }
   
@@ -100,7 +100,7 @@ void MapDownloadJob::onJobFinished()
 void MapDownloadJob::downloadNextFile()
 {
   if (!jobs.isEmpty())
-    jobs[0]->startDownload();
+    jobs.first()->startDownload();
   else
     done=true;
   
@@ -122,7 +122,7 @@ double MapDownloadJob::getProgress()
 QString MapDownloadJob::getDownloadingFile()
 {
   if (!jobs.isEmpty())
-    return jobs[0]->getFileName();
+    return jobs.first()->getFileName();
   return "";
 }
 
