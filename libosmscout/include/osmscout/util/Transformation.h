@@ -126,7 +126,6 @@ namespace osmscout {
 
     virtual void Reset() = 0;
     virtual size_t PushCoord(double x, double y) = 0;
-    virtual size_t GetLength() const = 0;
     virtual bool GenerateParallelWay(size_t orgStart,
                                      size_t orgEnd,
                                      double offset,
@@ -156,7 +155,6 @@ namespace osmscout {
 
     void Reset();
     size_t PushCoord(double x, double y);
-    size_t GetLength() const;
 
     bool GenerateParallelWay(size_t orgStart,
                              size_t orgEnd,
@@ -211,12 +209,6 @@ namespace osmscout {
     buffer[usedPoints].Set(x,y);
 
     return usedPoints++;
-  }
-
-  template<class P>
-  size_t CoordBufferImpl<P>::GetLength() const
-  {
-    return usedPoints;
   }
 
   template<class P>
