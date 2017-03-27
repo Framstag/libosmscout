@@ -61,10 +61,10 @@ namespace osmscout {
                 if(nextNode == route->Nodes().end()){
                     break;
                 }
-                double d = distanceToSegment(location.GetLon(), location.GetLat(),
-                                             node->GetLocation().GetLon(), node->GetLocation().GetLat(),
-                                             nextNode->GetLocation().GetLon(),nextNode->GetLocation().GetLat(),
-                                             abscissa, qx, qy);
+                double d =DistanceToSegment(location.GetLon(),location.GetLat(),
+                                            node->GetLocation().GetLon(),node->GetLocation().GetLat(),
+                                            nextNode->GetLocation().GetLon(),nextNode->GetLocation().GetLat(),
+                                            abscissa,qx,qy);
                 if(minDistance>=d){
                     minDistance = d;
                     if(d <= distanceInDegrees(snapDistanceInMeters, location.GetLat())){
