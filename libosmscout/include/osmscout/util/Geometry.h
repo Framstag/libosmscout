@@ -974,7 +974,11 @@ namespace osmscout {
    * r the abscissa on the line of (qx,qy) the orthogonal projected point from (px,py).
    * 0 <= r <= 1 if q is between p1 and p2.
    */
-  extern OSMSCOUT_API double distanceToSegment(double px, double py, double p1x, double p1y, double p2x, double p2y, double &r, double &qx, double &qy);
+  extern OSMSCOUT_API double DistanceToSegment(double px, double py,
+                                               double p1x, double p1y,
+                                               double p2x, double p2y,
+                                               double& r,
+                                               double& qx, double& qy);
 
   class OSMSCOUT_API PolygonMerger
   {
