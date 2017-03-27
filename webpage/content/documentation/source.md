@@ -89,6 +89,14 @@ In the top level directory type:
 This should recursivly analyse dependencies for all project sub directories and
 afterwards build them.
 
+Real life example for building using VisualStudio:
+```bash
+mkdir build
+cd build
+cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0 -DCMAKE_INSTALL_PREFIX=D:\Mine\OpenSource\osmlib
+cmake --build . --config Release --target install
+```
+
 ### Building of OSMScout2
 
 The OSMScout2 Qt5 based demo is build using qmake if autoconf is used. The
@@ -103,6 +111,7 @@ you must  make sure, that the libosmsocut libraries are found by the loader.
 For this `LD_LIBRARY_PATH` has to be extended. See the `setupAutoconf.sh`
 script in the top level directory for how to do it.
 
-### Windows
+#### Windows
 Libraries are searched via `PATH` or must be in the same directory as the
 executable that requires it.
+
