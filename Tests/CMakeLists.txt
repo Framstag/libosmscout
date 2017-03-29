@@ -152,3 +152,9 @@ target_include_directories(WStringStringConversion PRIVATE ${OSMSCOUT_BASE_DIR_S
 target_link_libraries(WStringStringConversion osmscout)
 add_test(NAME WStringStringConversion COMMAND WStringStringConversion)
 
+#---- TransPolygon
+add_executable(TransPolygon src/TransPolygon.cpp include/TestWay.h)
+set_property(TARGET TransPolygon PROPERTY CXX_STANDARD 11)
+target_include_directories(TransPolygon PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(TransPolygon osmscout)
+add_test(NAME TransPolygon COMMAND TransPolygon)

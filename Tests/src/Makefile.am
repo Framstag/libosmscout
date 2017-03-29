@@ -18,7 +18,8 @@ check_PROGRAMS = CalculateResolution \
                  FileScannerWriter \
                  GeoCoordParse \
                  NumberSet \
-                 ScanConversion
+                 ScanConversion \
+                 TransPolygon
 
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               -I$(top_srcdir)/include
@@ -113,6 +114,10 @@ DrawTextQt_CXXFLAGS = -fPIC \
 DrawTextQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
                    $(LIBOSMSCOUTMAP_LIBS) \
                    $(LIBOSMSCOUT_LIBS)
+
+TransPolygon_SOURCES = TransPolygon.cpp
+TransPolygon_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+TransPolygon_LDADD = $(LIBOSMSCOUT_LIBS)
 
 TESTS = $(check_PROGRAMS)
 
