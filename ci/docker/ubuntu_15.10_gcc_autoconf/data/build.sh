@@ -18,4 +18,4 @@ cd libosmscout
 . ./setupAutoconf.sh
 env
 make full
-
+cd Tests && make check

@@ -1,17 +1,85 @@
 #!/bin/bash
 cd `dirname $0`
-set -xe
+set -x
 
-./archlinux_clang_autoconf/run.sh   "$@"
+./archlinux_clang_autoconf/run.sh   "$@" 
+RESULT_archlinux_clang_autoconf=$?
+
 ./archlinux_gcc_autoconf/run.sh     "$@"
-./archlinux_gcc_cmake/run.sh        "$@"
-./debian_jessie_gcc_autoconf/run.sh "$@"
-./debian_jessie_gcc_cmake/run.sh    "$@"
-./ubuntu_14.04_gcc_autoconf/run.sh  "$@"
-./ubuntu_14.04_gcc_cmake/run.sh     "$@"
-./ubuntu_15.10_gcc_autoconf/run.sh  "$@"
-./ubuntu_15.10_gcc_cmake/run.sh     "$@"
-./ubuntu_16.04_gcc_autoconf/run.sh  "$@"
-./ubuntu_16.04_gcc_cmake/run.sh     "$@"
-./ubuntu_16.10_gcc_autoconf/run.sh  "$@"
-./ubuntu_16.10_gcc_cmake/run.sh     "$@"
+RESULT_archlinux_gcc_autoconf=$?
+ 
+./archlinux_gcc_cmake/run.sh        "$@" 
+RESULT_archlinux_gcc_cmake=$?
+
+./debian_jessie_gcc_autoconf/run.sh "$@" 
+RESULT_debian_jessie_gcc_autoconf=$?
+
+./debian_jessie_gcc_cmake/run.sh    "$@" 
+RESULT_debian_jessie_gcc_cmake=$?
+
+./ubuntu_14.04_gcc_autoconf/run.sh  "$@" 
+RESULT_ubuntu_14_04_gcc_autoconf=$?
+
+./ubuntu_14.04_gcc_cmake/run.sh     "$@" 
+RESULT_ubuntu_14_04_gcc_cmake=$?
+
+./ubuntu_15.10_gcc_autoconf/run.sh  "$@" 
+RESULT_ubuntu_15_10_gcc_autoconf=$?
+
+./ubuntu_15.10_gcc_cmake/run.sh     "$@" 
+RESULT_ubuntu_15_10_gcc_cmake=$?
+
+./ubuntu_16.04_gcc_autoconf/run.sh  "$@" 
+RESULT_ubuntu_16_04_gcc_autoconf=$?
+
+./ubuntu_16.04_gcc_cmake/run.sh     "$@" 
+RESULT_ubuntu_16_04_gcc_cmake=$?
+
+./ubuntu_16.10_gcc_autoconf/run.sh  "$@" 
+RESULT_ubuntu_16_10_gcc_autoconf=$?
+
+./ubuntu_16.10_gcc_cmake/run.sh     "$@" 
+RESULT_ubuntu_16_10_gcc_cmake=$?
+
+# print results
+set +x
+echo 
+
+echo -ne "archlinux_clang_autoconf     "
+if [ $RESULT_archlinux_clang_autoconf    -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "archlinux_gcc_autoconf       "
+if [ $RESULT_archlinux_gcc_autoconf      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "archlinux_gcc_cmake          "
+if [ $RESULT_archlinux_gcc_cmake         -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "debian_jessie_gcc_autoconf   "
+if [ $RESULT_debian_jessie_gcc_autoconf  -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "debian_jessie_gcc_cmake      "
+if [ $RESULT_debian_jessie_gcc_cmake     -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_14.04_gcc_autoconf    "
+if [ $RESULT_ubuntu_14_04_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_14.04_gcc_cmake       "
+if [ $RESULT_ubuntu_14_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_15.10_gcc_autoconf    "
+if [ $RESULT_ubuntu_15_10_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_15.10_gcc_cmake       "
+if [ $RESULT_ubuntu_15_10_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_16.04_gcc_autoconf    "
+if [ $RESULT_ubuntu_16_04_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_16.04_gcc_cmake       "
+if [ $RESULT_ubuntu_16_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_16.10_gcc_autoconf    "
+if [ $RESULT_ubuntu_16_10_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_16.10_gcc_cmake       "
+if [ $RESULT_ubuntu_16_10_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi

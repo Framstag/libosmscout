@@ -20,4 +20,5 @@ export CC=clang
 export CXX=clang++
 env
 make full
+cd Tests && make check
 
