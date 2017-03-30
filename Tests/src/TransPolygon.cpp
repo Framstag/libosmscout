@@ -63,7 +63,11 @@ bool WayIsSimple(const std::vector<osmscout::Point> points)
 int main(int /*argc*/, char** /*argv*/)
 {
   std::vector<osmscout::Point> testWay=GetTestWay();
-  assert(WayIsSimple(testWay));
+
+  if (!WayIsSimple(testWay)){
+    std::cout << "Test way is not simple" << std::endl;
+    return 1;
+  }
 
   osmscout::MercatorProjection projection;
   osmscout::Magnification mag;
@@ -87,7 +91,11 @@ int main(int /*argc*/, char** /*argv*/)
       optimised.push_back(osmscout::Point(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y)));
     }
   }
-  assert(WayIsSimple(optimised));
+
+  if (!WayIsSimple(optimised)){
+    std::cout << "Optimised way is not simple" << std::endl;
+    return 2;
+  }
 
   std::cout << "OK" << std::endl;
 
