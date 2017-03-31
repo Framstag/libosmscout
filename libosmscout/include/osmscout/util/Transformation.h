@@ -65,6 +65,26 @@ namespace osmscout {
       double y;
     };
 
+  private:
+    struct TransPointRef{
+      TransPoint *p;
+
+      inline double GetLat() const
+      {
+        return p->x;
+      }
+
+      inline double GetLon() const
+      {
+        return p->y;
+      }
+
+      inline bool IsEqual(const TransPointRef &other) const
+      {
+        return p==other.p;
+      }
+    };
+
   public:
     TransPoint* points;
 
@@ -74,6 +94,7 @@ namespace osmscout {
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
+    bool FindIntersection(std::vector<TransPointRef> optimised, size_t &i, size_t &j);
     void EnsureSimple(bool isArea);
 
   public:

@@ -349,7 +349,7 @@ namespace osmscout {
     }
   }
 
-  bool FindIntersection(std::vector<osmscout::Point> optimised, size_t &i, size_t &j){
+  bool TransPolygon::FindIntersection(std::vector<TransPointRef> optimised, size_t &i, size_t &j){
     size_t edgesIntersect=0;
     for (i=0; i<optimised.size()-1; i++) {
       edgesIntersect=0;
@@ -379,11 +379,12 @@ namespace osmscout {
 
   void TransPolygon::EnsureSimple(bool isArea)
   {
-    // copy points to vector of osmscout::Point for easy manipulation
-    std::vector<osmscout::Point> optimised;
+    // copy points to vector of TransPointRef for easy manipulation
+    std::vector<TransPointRef> optimised;
     for (size_t i=0;i<length;i++) {
       if (points[i].draw) {
-        optimised.push_back(osmscout::Point(0, osmscout::GeoCoord(points[i].x, points[i].y)));
+        TransPointRef ref{points+i};
+        optimised.push_back(ref);
       }
     }
 
@@ -414,17 +415,12 @@ namespace osmscout {
       }
     }
     if (modified){
-      // convert points back
-      if (isArea){
-        optimised.pop_back();
-      }
-      for (size_t i=0;i<optimised.size();i++){
-        points[i].x=optimised[i].GetLat();
-        points[i].y=optimised[i].GetLon();
-        points[i].draw=true;
-      }
-      for (size_t i=optimised.size();i<length;i++){
+      // setup draw property for points remaining in optimised vector
+      for (size_t i=0;i<length;i++){
         points[i].draw=false;
+      }
+      for (TransPointRef &ref:optimised){
+        ref.p->draw=true;
       }
     }
   }
