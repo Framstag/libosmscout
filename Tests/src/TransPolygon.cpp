@@ -28,7 +28,7 @@ using namespace std;
 bool WayIsSimple(const std::vector<osmscout::Point> points)
 {
   if (points.size()<3) {
-    return false;
+    return true;
   }
 
   size_t edgesIntersect=0;
@@ -71,11 +71,11 @@ int main(int /*argc*/, char** /*argv*/)
 
   osmscout::MercatorProjection projection;
   osmscout::Magnification mag;
-  mag.SetMagnification(osmscout::Magnification::magCounty);
+  mag.SetMagnification(osmscout::Magnification::magSuburb);
   projection.Set(osmscout::GeoCoord(43.914554, 8.0902544),
                  /*angle*/ 0,
                  mag,
-                 /*dpi*/ 200,
+                 /*dpi*/ 72,
                  /*width*/ 1000,
                  /*height*/ 1000);
 
@@ -83,7 +83,8 @@ int main(int /*argc*/, char** /*argv*/)
   polygon.TransformWay(projection,
                        osmscout::TransPolygon::OptimizeMethod::quality,
                        testWay,
-                       /*optimizeErrorTolerance*/1.0);
+                       /*optimizeErrorTolerance*/1.0,
+                       /*requireSimple*/true);
 
   std::vector<osmscout::Point> optimised;
   for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
@@ -95,6 +96,25 @@ int main(int /*argc*/, char** /*argv*/)
   if (!WayIsSimple(optimised)){
     std::cout << "Optimised way is not simple" << std::endl;
     return 2;
+  }
+
+  // try again as area
+  polygon.TransformArea(projection,
+                        osmscout::TransPolygon::OptimizeMethod::quality,
+                        testWay,
+                        /*optimizeErrorTolerance*/1.0,
+                        /*requireSimple*/true);
+
+  optimised.clear();
+  for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
+    if (polygon.points[p].draw) {
+      optimised.push_back(osmscout::Point(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y)));
+    }
+  }
+
+  if (!AreaIsSimple(optimised)){
+    std::cout << "Optimised area is not simple" << std::endl;
+    return 3;
   }
 
   std::cout << "OK" << std::endl;

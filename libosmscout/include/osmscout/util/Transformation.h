@@ -74,6 +74,7 @@ namespace osmscout {
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
+    void EnsureSimple(bool isArea);
 
   public:
     TransPolygon();
@@ -102,12 +103,14 @@ namespace osmscout {
     void TransformArea(const Projection& projection,
                        OptimizeMethod optimize,
                        const std::vector<Point>& nodes,
-                       double optimizeErrorTolerance);
+                       double optimizeErrorTolerance,
+                       bool requireSimple=false);
 
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
                       const std::vector<Point>& nodes,
-                      double optimizeErrorTolerance);
+                      double optimizeErrorTolerance,
+                      bool requireSimple=false);
 
     bool GetBoundingBox(double& xmin, double& ymin,
                         double& xmax, double& ymax) const;
