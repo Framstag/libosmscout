@@ -350,27 +350,22 @@ namespace osmscout {
   }
 
   bool TransPolygon::FindIntersection(std::vector<TransPointRef> optimised, size_t &i, size_t &j){
-    size_t edgesIntersect=0;
-    for (i=0; i<optimised.size()-1; i++) {
-      edgesIntersect=0;
+    for (; i<optimised.size()-1; i++) {
 
       for (j=i+1; j<optimised.size()-1; j++) {
         if (LinesIntersect(optimised[i],
                            optimised[i+1],
                            optimised[j],
                            optimised[j+1])) {
-          edgesIntersect++;
 
-          if (i==0) {
-            if (edgesIntersect>2) {
-              return true;
-            }
+          if (optimised[i].IsEqual(optimised[j]) ||
+              optimised[i].IsEqual(optimised[j+1]) ||
+              optimised[i+1].IsEqual(optimised[j]) ||
+              optimised[i+1].IsEqual(optimised[j+1])) {
+            continue; // ignore sibling edges
           }
-          else {
-            if (edgesIntersect>1) {
-              return true;
-            }
-          }
+
+          return true;
         }
       }
     }
@@ -401,16 +396,24 @@ namespace osmscout {
       isSimple=true;
 
       size_t i=0;
-      size_t j=0;
-      if (FindIntersection(optimised,i,j)){
-        isSimple=false;
-        modified=true;
-        if (isArea && j-i > i+(optimised.size()-j)){
-          optimised.erase(optimised.begin()+j+1, optimised.end());
-          optimised.erase(optimised.begin(), optimised.begin()+i);
-          optimised.push_back(optimised.front());
+      size_t j;
+      bool updated=true;
+      // following while is just performance optimisation,
+      // we don't start searching intersections from start again
+      while (updated){
+        if (FindIntersection(optimised,i,j)){
+          isSimple=false;
+          modified=true;
+          if (isArea && j-i > i+(optimised.size()-j)){
+            optimised.erase(optimised.begin()+j+1, optimised.end());
+            optimised.erase(optimised.begin(), optimised.begin()+i);
+            optimised.push_back(optimised.front());
+            i=0;
+          }else{
+            optimised.erase(optimised.begin()+i+1, optimised.begin()+j+1);
+          }
         }else{
-          optimised.erase(optimised.begin()+i+1, optimised.begin()+j+1);
+          updated=false;
         }
       }
     }
