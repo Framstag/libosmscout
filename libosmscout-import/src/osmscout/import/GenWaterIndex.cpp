@@ -1248,13 +1248,15 @@ namespace osmscout {
         polygon.TransformArea(projection,
                               parameter.GetOptimizationWayMethod(),
                               coast->coast,
-                              1.0);
+                              1.0,
+                              true);
       }
       else {
         polygon.TransformWay(projection,
                              parameter.GetOptimizationWayMethod(),
                              coast->coast,
-                             1.0);
+                             1.0,
+                             true);
       }
 
       if (coast->isArea) {
