@@ -1024,6 +1024,9 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 		if (la->kind == 42 /* "TUNNE" */) {
 			STYLEFILTER_TUNNEL(filter);
 		}
+		if (la->kind == 999 /* "EMBANKMENT" */) {
+			STYLEFILTER_EMBANKMENT(filter);
+		}
 		if (la->kind == 43 /* "SIZE" */) {
 			STYLEFILTER_SIZE(filter);
 		}
@@ -1239,6 +1242,12 @@ void Parser::STYLEFILTER_BRIDGE(StyleFilter& filter) {
 void Parser::STYLEFILTER_TUNNEL(StyleFilter& filter) {
 		Expect(42 /* "TUNNE" */);
 		filter.SetTunnel(true);
+		
+}
+
+void Parser::STYLEFILTER_EMBANKMENT(StyleFilter& filter) {
+		Expect(999 /* "EMBANKMENT" */);
+		filter.SetEmbankment(true);
 		
 }
 
@@ -2416,6 +2425,7 @@ void Errors::SynErr(int line, int col, int n)
 			case 167: s = coco_string_create("invalid CAPSTYLE"); break;
 			case 168: s = coco_string_create("invalid TEXTLABE"); break;
 			case 169: s = coco_string_create("invalid LABELSTYLE"); break;
+			case 999: s = coco_string_create("\"EMBANKMENT\" expected"); break;
 
     default:
     {

@@ -233,6 +233,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STYLEFILTER_ONEWAY(StyleFilter& filter);
 	void STYLEFILTER_BRIDGE(StyleFilter& filter);
 	void STYLEFILTER_TUNNEL(StyleFilter& filter);
+	void STYLEFILTER_EMBANKMENT(StyleFilter& filter);
 	void STYLEFILTER_SIZE(StyleFilter& filter);
 	void SIZECONDITION(SizeConditionRef& condition);
 	void NODESTYLEDEF(StyleFilter filter, bool state);

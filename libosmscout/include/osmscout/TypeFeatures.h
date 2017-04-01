@@ -1182,6 +1182,28 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const;
   };
 
+  class OSMSCOUT_API EmbankmentFeature : public Feature
+  {
+    private:
+      TagId tagEmbankment;
+
+    public:
+        /** Name of this feature */
+        static const char* const NAME;
+
+    public:
+        void Initialize(TypeConfig& typeConfig);
+
+        std::string GetName() const;
+
+        void Parse(Progress& progress,
+                   const TypeConfig& typeConfig,
+                   const FeatureInstance& feature,
+                   const ObjectOSMRef& object,
+                   const TagMap& tags,
+                   FeatureValueBuffer& buffer) const;
+  };
+
   class OSMSCOUT_API RoundaboutFeature : public Feature
   {
   private:
@@ -1644,6 +1666,7 @@ namespace osmscout {
   typedef FeatureReader<AccessRestrictedFeature> AccessRestrictedFeatureReader;
   typedef FeatureReader<BridgeFeature>           BridgeFeatureReader;
   typedef FeatureReader<TunnelFeature>           TunnelFeatureReader;
+  typedef FeatureReader<EmbankmentFeature>       EmbankmentFeatureReader;
   typedef FeatureReader<RoundaboutFeature>       RoundaboutFeatureReader;
 
   /**

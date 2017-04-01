@@ -169,6 +169,7 @@ namespace osmscout {
   private:
     BridgeFeatureReader      bridgeReader;
     TunnelFeatureReader      tunnelReader;
+    EmbankmentFeatureReader  embankmentReader;
     AccessFeatureValueReader accessReader;
 
   public:
@@ -182,6 +183,11 @@ namespace osmscout {
     inline bool IsTunnel(const FeatureValueBuffer& buffer) const
     {
       return tunnelReader.IsSet(buffer);
+    }
+
+    inline bool IsEmbankment(const FeatureValueBuffer& buffer) const
+    {
+      return embankmentReader.IsSet(buffer);
     }
 
     bool IsOneway(const FeatureValueBuffer& buffer) const;
@@ -303,6 +309,7 @@ namespace osmscout {
     size_t                maxLevel;
     bool                  bridge;
     bool                  tunnel;
+    bool                  embankment;
     bool                  oneway;
     SizeConditionRef      sizeCondition;
 
@@ -316,6 +323,7 @@ namespace osmscout {
     StyleFilter& SetMaxLevel(size_t level);
     StyleFilter& SetBridge(bool bridge);
     StyleFilter& SetTunnel(bool tunnel);
+    StyleFilter& SetEmbankment(bool embankment);
     StyleFilter& SetOneway(bool oneway);
 
     StyleFilter& SetSizeCondition(const SizeConditionRef& condition);
@@ -350,6 +358,11 @@ namespace osmscout {
       return tunnel;
     }
 
+    inline bool GetEmbankment() const
+    {
+      return embankment;
+    }
+
     inline bool GetOneway() const
     {
       return oneway;
@@ -380,6 +393,7 @@ namespace osmscout {
   private:
     bool             bridge;
     bool             tunnel;
+    bool             embankment;
     bool             oneway;
     SizeConditionRef sizeCondition;
 
@@ -393,9 +407,10 @@ namespace osmscout {
 
     inline bool HasCriteria() const
     {
-      return bridge ||
-             tunnel ||
-             oneway ||
+      return bridge     ||
+             tunnel     ||
+             embankment ||
+             oneway     ||
              sizeCondition;
     }
 
@@ -407,6 +422,11 @@ namespace osmscout {
     inline bool GetTunnel() const
     {
       return tunnel;
+    }
+
+    inline bool GetEmbankment() const
+    {
+      return embankment;
     }
 
     inline bool GetOneway() const
