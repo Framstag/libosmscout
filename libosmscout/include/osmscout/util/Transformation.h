@@ -58,6 +58,12 @@ namespace osmscout {
       quality = 2
     };
 
+    enum OutputConstraint
+    {
+      noConstraint = 0,
+      simple = 1
+    };
+
     struct OSMSCOUT_API TransPoint
     {
       bool   draw;
@@ -125,13 +131,13 @@ namespace osmscout {
                        OptimizeMethod optimize,
                        const std::vector<Point>& nodes,
                        double optimizeErrorTolerance,
-                       bool requireSimple=false);
+                       OutputConstraint constraint=noConstraint);
 
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
                       const std::vector<Point>& nodes,
                       double optimizeErrorTolerance,
-                      bool requireSimple=false);
+                      OutputConstraint constraint=noConstraint);
 
     bool GetBoundingBox(double& xmin, double& ymin,
                         double& xmax, double& ymax) const;

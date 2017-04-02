@@ -1249,14 +1249,14 @@ namespace osmscout {
                               parameter.GetOptimizationWayMethod(),
                               coast->coast,
                               1.0,
-                              true);
+                              TransPolygon::simple);
       }
       else {
         polygon.TransformWay(projection,
                              parameter.GetOptimizationWayMethod(),
                              coast->coast,
                              1.0,
-                             true);
+                             TransPolygon::simple);
       }
 
       if (coast->isArea) {

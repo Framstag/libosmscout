@@ -432,7 +432,7 @@ namespace osmscout {
                                    OptimizeMethod optimize,
                                    const std::vector<Point>& nodes,
                                    double optimizeErrorTolerance,
-                                   bool requireSimple)
+                                   OutputConstraint constraint)
   {
     if (nodes.size()<2) {
       length=0;
@@ -457,7 +457,7 @@ namespace osmscout {
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
       }
-      if (requireSimple){
+      if (constraint==simple){
         EnsureSimple(true);
       }
 
@@ -484,7 +484,7 @@ namespace osmscout {
                                   OptimizeMethod optimize,
                                   const std::vector<Point>& nodes,
                                   double optimizeErrorTolerance,
-                                  bool requireSimple)
+                                  OutputConstraint constraint)
   {
     if (nodes.empty()) {
       length=0;
@@ -511,7 +511,7 @@ namespace osmscout {
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
       }
-      if (requireSimple){
+      if (constraint==simple){
         EnsureSimple(false);
       }
 
