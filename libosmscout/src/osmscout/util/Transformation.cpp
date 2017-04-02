@@ -349,7 +349,7 @@ namespace osmscout {
     }
   }
 
-  bool TransPolygon::FindIntersection(std::vector<TransPointRef> optimised, size_t &i, size_t &j){
+  bool TransPolygon::FindIntersection(const std::vector<TransPointRef> &optimised, size_t &i, size_t &j){
     for (; i<optimised.size()-1; i++) {
 
       for (j=i+1; j<optimised.size()-1; j++) {

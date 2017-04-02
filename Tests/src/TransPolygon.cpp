@@ -25,7 +25,7 @@
 
 using namespace std;
 
-bool WayIsSimple(const std::vector<osmscout::Point> points)
+bool WayIsSimple(const std::vector<osmscout::Point> &points)
 {
   if (points.size()<3) {
     return true;

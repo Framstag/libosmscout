@@ -94,7 +94,7 @@ namespace osmscout {
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
-    bool FindIntersection(std::vector<TransPointRef> optimised, size_t &i, size_t &j);
+    bool FindIntersection(const std::vector<TransPointRef> &optimised, size_t &i, size_t &j);
     void EnsureSimple(bool isArea);
 
   public:
