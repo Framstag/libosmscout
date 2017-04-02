@@ -84,7 +84,7 @@ int main(int /*argc*/, char** /*argv*/)
                        osmscout::TransPolygon::OptimizeMethod::quality,
                        testWay,
                        /*optimizeErrorTolerance*/1.0,
-                       /*requireSimple*/true);
+                       osmscout::TransPolygon::simple);
 
   std::vector<osmscout::Point> optimised;
   for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
@@ -103,7 +103,7 @@ int main(int /*argc*/, char** /*argv*/)
                         osmscout::TransPolygon::OptimizeMethod::quality,
                         testWay,
                         /*optimizeErrorTolerance*/1.0,
-                        /*requireSimple*/true);
+                        osmscout::TransPolygon::simple);
 
   optimised.clear();
   for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
