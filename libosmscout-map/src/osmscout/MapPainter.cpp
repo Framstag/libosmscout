@@ -35,6 +35,8 @@
 #include <osmscout/Coord.h>
 #endif
 
+static size_t numberOfSegments = 0;
+
 namespace osmscout {
 
   /**
@@ -779,13 +781,32 @@ namespace osmscout {
                   style->GetSize(),
                   fontHeight);
 
+    size_t               stepSizeInPixel=(size_t)projection.ConvertWidthToPixel(2*fontHeight/*shieldStyle->GetShieldSpace()*/);
+
     wayScanlines.clear();
 
-    size_t               stepSizeInPixel=(size_t)projection.ConvertWidthToPixel(2*fontHeight/*shieldStyle->GetShieldSpace()*/);
+    transBuffer.buffer->GetGridPoints(transStart,
+                                      transEnd,
+                                      projection.ConvertWidthToPixel(2.0),
+                                      wayScanlines);
+
+    std::cout << "GRID: ";
+    for (size_t i=0; i<wayScanlines.size(); i++) {
+      std::cout << wayScanlines[i].x << "," << wayScanlines[i].y << " ";
+    }
+    std::cout << std::endl;
+
+    wayScanlines.clear();
 
     transBuffer.buffer->ScanConvertLine(transStart,
                                         transEnd,
                                         wayScanlines);
+
+    std::cout << "SCAN: ";
+    for (size_t i=0; i<wayScanlines.size(); i++) {
+      std::cout << wayScanlines[i].x << "," << wayScanlines[i].y << " ";
+    }
+    std::cout << std::endl;
 
     double frameHoriz=5;
     double frameVert=5;
@@ -1437,20 +1458,27 @@ namespace osmscout {
                                       projection,
                                       shieldStyle);
 
-    if (shieldStyle) {
-      std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
-                                                                *data.buffer);
-
-      if (!shieldLabel.empty()) {
-        RegisterPointWayLabel(projection,
-                              parameter,
-                              shieldStyle,
-                              shieldLabel,
-                              data.transStart,
-                              data.transEnd);
-        waysLabelDrawn++;
-      }
+    if (!shieldStyle) {
+      return;
     }
+
+    std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
+                                                              *data.buffer);
+
+    if (shieldLabel.empty()) {
+      return;
+    }
+
+
+    numberOfSegments+=data.transEnd-data.transStart+1;
+
+    RegisterPointWayLabel(projection,
+                          parameter,
+                          shieldStyle,
+                          shieldLabel,
+                          data.transStart,
+                          data.transEnd);
+    waysLabelDrawn++;
   }
 
   void MapPainter::DrawWayContourLabel(const StyleConfig& styleConfig,
@@ -1506,12 +1534,15 @@ namespace osmscout {
                                        const Projection& projection,
                                        const MapParameter& parameter)
   {
+    numberOfSegments = 0;
     for (const auto& way : wayPathData) {
       DrawWayShieldLabel(styleConfig,
                          projection,
                          parameter,
                          way);
     }
+
+    std::cout << "Number of way segments: " << numberOfSegments << std::endl;
   }
 
   void MapPainter::DrawWayContourLabels(const StyleConfig& styleConfig,
