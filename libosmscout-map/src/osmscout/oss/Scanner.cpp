@@ -245,6 +245,7 @@ void Scanner::Init() {
 	keywords.set("emphasize", 87);
 	keywords.set("lighten", 88);
 	keywords.set("darken", 91);
+	keywords.set("EMBANKMENT", 999);
 
 
   tvalLength = 128;

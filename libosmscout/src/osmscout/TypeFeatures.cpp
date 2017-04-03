@@ -1721,6 +1721,35 @@ namespace osmscout {
     }
   }
 
+  const char* const EmbankmentFeature::NAME = "Embankment";
+
+  void EmbankmentFeature::Initialize(TypeConfig& typeConfig)
+  {
+        tagEmbankment=typeConfig.RegisterTag("embankment");
+  }
+    
+  std::string EmbankmentFeature::GetName() const
+  {
+        return NAME;
+  }
+    
+  void EmbankmentFeature::Parse(Progress& /*progress*/,
+                            const TypeConfig& /*typeConfig*/,
+                            const FeatureInstance& feature,
+                            const ObjectOSMRef& /*object*/,
+                            const TagMap& tags,
+                            FeatureValueBuffer& buffer) const
+  {
+        auto embankment=tags.find(tagEmbankment);
+
+        if (embankment!=tags.end() &&
+            !(embankment->second=="no" ||
+              embankment->second=="false" ||
+              embankment->second=="0")) {
+                buffer.AllocateValue(feature.GetIndex());
+        }
+  }
+
   const char* const RoundaboutFeature::NAME = "Roundabout";
 
   void RoundaboutFeature::Initialize(TypeConfig& typeConfig)

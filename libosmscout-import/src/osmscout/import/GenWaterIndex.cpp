@@ -633,6 +633,7 @@ namespace osmscout {
 
     BridgeFeatureReader bridgeFeatureRader(typeConfig);
     TunnelFeatureReader tunnelFeatureRader(typeConfig);
+    EmbankmentFeatureReader embankmentFeatureRader(typeConfig);
     FileScanner         scanner;
     uint32_t            wayCount=0;
 
@@ -658,6 +659,7 @@ namespace osmscout {
             !way.GetType()->GetIgnoreSeaLand() &&
             !tunnelFeatureRader.IsSet(way.GetFeatureValueBuffer()) &&
             !bridgeFeatureRader.IsSet(way.GetFeatureValueBuffer()) &&
+            !embankmentFeatureRader.IsSet(way.GetFeatureValueBuffer()) &&
             way.nodes.size()>=2) {
           std::set<Pixel> coords;
 
