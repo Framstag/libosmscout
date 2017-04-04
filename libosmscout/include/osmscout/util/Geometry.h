@@ -1082,13 +1082,13 @@ namespace osmscout {
    * \ingroup Geometry
    */
   template<typename N>
-  void OSMSCOUT_API FindPathIntersections(const std::vector<N> &aPath,
-                                          const std::vector<N> &bPath,
-                                          bool aClosed,
-                                          bool bClosed,
-                                          std::vector<PathIntersection> &intersections,
-                                          size_t aStartIndex=0,
-                                          size_t bStartIndex=0)
+  void FindPathIntersections(const std::vector<N> &aPath,
+                             const std::vector<N> &bPath,
+                             bool aClosed,
+                             bool bClosed,
+                             std::vector<PathIntersection> &intersections,
+                             size_t aStartIndex=0,
+                             size_t bStartIndex=0)
   {
     size_t aIndex=aStartIndex;
     size_t bIndex=bStartIndex;
