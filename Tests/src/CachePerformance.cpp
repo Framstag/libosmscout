@@ -66,7 +66,7 @@ static const size_t cacheSize=2000000;
 
 typedef osmscout::Cache<osmscout::Id,Data>     DataCache;
 
-void TestData()
+bool TestData()
 {
   std::cout << "*** Caching of struct ***" << std::endl;
 
@@ -88,7 +88,9 @@ void TestData()
 
   insertTimer.Stop();
 
-  assert(cache.GetSize()==cacheSize);
+  if (cache.GetSize()!=cacheSize){
+    return false;
+  }
 
   std::cout << "Updating values  in cache..." << std::endl;
 
@@ -105,7 +107,9 @@ void TestData()
 
   updateTimer.Stop();
 
-  assert(cache.GetSize()==cacheSize);
+  if (cache.GetSize()!=cacheSize){
+    return false;
+  }
 
   std::cout << "Searching for entries not in cache..." << std::endl;
 
@@ -115,7 +119,7 @@ void TestData()
     DataCache::CacheRef entry;
 
     if (cache.GetEntry(i,entry)) {
-      assert(false);
+      return false;
     }
   }
 
@@ -123,7 +127,7 @@ void TestData()
     DataCache::CacheRef entry;
 
     if (cache.GetEntry(i,entry)) {
-      assert(false);
+      return false;
     }
   }
 
@@ -138,7 +142,7 @@ void TestData()
       DataCache::CacheRef entry;
 
       if (!cache.GetEntry(i,entry)) {
-        assert(false);
+        return false;
       }
     }
   }
@@ -154,7 +158,7 @@ void TestData()
       DataCache::CacheRef entry;
 
       if (!cache.GetEntry(i,entry)) {
-        assert(false);
+        return false;
       }
 
       Data data=entry->value;
@@ -168,11 +172,11 @@ void TestData()
   std::cout << "Miss time: "  << missTimer << std::endl;
   std::cout << "Hit time: "  << hitTimer << std::endl;
   std::cout << "Copy time: "  << copyTimer << std::endl;
+
+  return true;
 }
 
 int main(int /*argc*/, char* /*argv*/[])
 {
-  TestData();
-
-  return 0;
+  return TestData() ? 0:1;
 }
