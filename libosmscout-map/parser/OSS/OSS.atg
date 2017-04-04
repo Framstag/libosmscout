@@ -625,6 +625,9 @@ PRODUCTIONS
                      STYLEFILTER_TUNNEL<filter>
                    ]
                    [
+                     STYLEFILTER_EMBANKMENT<filter>
+                   ]
+                   [
                      STYLEFILTER_SIZE<filter>
                    ]
                 "]"
@@ -849,6 +852,13 @@ PRODUCTIONS
               = "TUNNEL"
                 (.
                   filter.SetTunnel(true);
+                .)
+                .
+
+  STYLEFILTER_EMBANKMENT<StyleFilter& filter>
+              = "EMBANKMENT"
+                (.
+                  filter.SetEmbankment(true);
                 .)
                 .
 
