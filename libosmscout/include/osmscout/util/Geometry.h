@@ -182,12 +182,12 @@ namespace osmscout {
    *
    * Returns true, if the lines defined by the given coordinates intersect. Returns the intersection.
    */
-  template<typename N>
+  template<typename N,typename I>
   bool GetLineIntersection(const N& a1,
                            const N& a2,
                            const N& b1,
                            const N& b2,
-                           N& intersection)
+                           I& intersection)
   {
     if (a1.IsEqual(b1) ||
         a1.IsEqual(b2)){
@@ -1013,6 +1013,147 @@ namespace osmscout {
                                                double p2x, double p2y,
                                                double& r,
                                                double& qx, double& qy);
+
+  /**
+   * \ingroup Geometry
+   * Information about intersection of two paths
+   */
+  struct OSMSCOUT_API PathIntersection
+  {
+    GeoCoord point;         // intersection point
+    size_t aIndex;          // "a path" point index before intersection
+    size_t bIndex;          // "b path" point index before intersection
+    double orientation;     // angle between a -> intersection -> b
+                            //   orientation > 0 = left angle
+    double aDistanceSquare; // distance^2 between "a path" point and intersection
+    double bDistanceSquare; // distance^2 between "b path" point and intersection
+  };
+
+  /**
+   * Helper for FindPathIntersections
+   *
+   * Compute bounding box of path segment from node index
+   * `from` (inclusive) to node index `to` (exclusive)
+   */
+  template<typename N>
+  void GetSegmentBoundingBox(const std::vector<N>& path,
+                             size_t from, size_t to,
+                             GeoBox& boundingBox)
+  {
+    if (path.empty() || from>=to){
+      boundingBox.Invalidate();
+    }
+
+    double minLon=path[from%path.size()].GetLon();
+    double maxLon=path[from%path.size()].GetLon();
+    double minLat=path[from%path.size()].GetLat();
+    double maxLat=path[from%path.size()].GetLat();
+
+    for (size_t i=from; i<to; i++) {
+      minLon=std::min(minLon,path[i%path.size()].GetLon());
+      maxLon=std::max(maxLon,path[i%path.size()].GetLon());
+      minLat=std::min(minLat,path[i%path.size()].GetLat());
+      maxLat=std::max(maxLat,path[i%path.size()].GetLat());
+    }
+
+    boundingBox.Set(GeoCoord(minLat,minLon),
+                    GeoCoord(maxLat,maxLon));
+  }
+
+  /**
+   * Helper for FindPathIntersections
+   *
+   * Compute bounding boxes for path segments with length 1000 nodes,
+   * up to node index bound (exclusive)
+   */
+  template<typename N>
+  void ComputeSegmentBoxes(const std::vector<N>& path,
+                           std::vector<GeoBox> &segmentBoxes,
+                           size_t bound)
+  {
+    for (size_t i=0;i<bound;i+=1000){
+      GeoBox box;
+      GetSegmentBoundingBox(path,i,std::min(i+1000,bound), box);
+      segmentBoxes.push_back(box);
+    }
+  }
+
+  /**
+   * \ingroup Geometry
+   */
+  template<typename N>
+  void OSMSCOUT_API FindPathIntersections(const std::vector<N> &aPath,
+                                          const std::vector<N> &bPath,
+                                          bool aClosed,
+                                          bool bClosed,
+                                          std::vector<PathIntersection> &intersections,
+                                          size_t aStartIndex=0,
+                                          size_t bStartIndex=0)
+  {
+    size_t aIndex=aStartIndex;
+    size_t bIndex=bStartIndex;
+    size_t aBound=aClosed?aIndex+aPath.size():aPath.size()-1;
+    size_t bBound=bClosed?bIndex+bPath.size():bPath.size()-1;
+    size_t bStart=bIndex;
+
+    if (bStart>=bBound || aIndex>=aBound){
+      return;
+    }
+
+    GeoBox aBox;
+    GeoBox bBox;
+    GetSegmentBoundingBox(aPath,aIndex,aBound,aBox);
+    GetSegmentBoundingBox(bPath,bIndex,bBound,bBox);
+    GeoBox aLineBox;
+    GeoBox bLineBox;
+
+    // compute b-boxes for B path, each 1000 point-long segment
+    std::vector<GeoBox> bSegmentBoxes;
+    ComputeSegmentBoxes(bPath,bSegmentBoxes,bBound);
+
+    for (;aIndex<aBound;aIndex++){
+      N a1=aPath[aIndex%aPath.size()];
+      N a2=aPath[(aIndex+1)%aPath.size()];
+      aLineBox.Set(GeoCoord(a1.GetLat(),a1.GetLon()),
+                   GeoCoord(a2.GetLat(),a2.GetLon()));
+      if (!bBox.Intersects(aLineBox,/*openInterval*/false)){
+        continue;
+      }
+      for (bIndex=bStart;bIndex<bBound;bIndex++){
+        N b1=bPath[bIndex%bPath.size()];
+        N b2=bPath[(bIndex+1)%bPath.size()];
+        bLineBox.Set(GeoCoord(b1.GetLat(),b1.GetLon()),
+                     GeoCoord(b2.GetLat(),b2.GetLon()));
+
+        if ((!bSegmentBoxes[bIndex/1000].Intersects(aLineBox)) &&
+             !aLineBox.Intersects(bLineBox,/*openInterval*/false)){
+          // round up
+          bIndex+=(1000-(bIndex%1000));
+          continue;
+        }
+        if (!aLineBox.Intersects(bLineBox,/*openInterval*/false)){
+          continue;
+        }
+        PathIntersection pi;
+        if (GetLineIntersection(a1,a2,
+                                b1,b2,
+                                pi.point)){
+
+          pi.orientation=(pi.point.GetLon()-a1.GetLon())*
+                         (b2.GetLat()-pi.point.GetLat())-
+                         (pi.point.GetLat()-a1.GetLat())*
+                         (b2.GetLon()-pi.point.GetLon());
+
+          pi.aIndex=aIndex;
+          pi.bIndex=bIndex;
+          pi.aDistanceSquare=DistanceSquare(GeoCoord(a1.GetLat(),a1.GetLon()),pi.point);
+          pi.bDistanceSquare=DistanceSquare(GeoCoord(b1.GetLat(),b1.GetLon()),pi.point);
+
+          intersections.push_back(pi);
+        }
+      }
+    }
+  }
 
   class OSMSCOUT_API PolygonMerger
   {

@@ -22,6 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 #include <osmscout/Way.h>
 
@@ -328,109 +329,14 @@ namespace osmscout {
     return true;
   }
 
-  void GetSegmentBoundingBox(const std::vector<Point>& nodes,
-                             size_t from, size_t to,
-                             GeoBox& boundingBox)
-  {
-    if (nodes.empty() || from>=to){
-      boundingBox.Invalidate();
-    }
-
-    double minLon=nodes[from%nodes.size()].GetLon();
-    double maxLon=nodes[from%nodes.size()].GetLon();
-    double minLat=nodes[from%nodes.size()].GetLat();
-    double maxLat=nodes[from%nodes.size()].GetLat();
-
-    for (size_t i=from; i<to; i++) {
-      minLon=std::min(minLon,nodes[i%nodes.size()].GetLon());
-      maxLon=std::max(maxLon,nodes[i%nodes.size()].GetLon());
-      minLat=std::min(minLat,nodes[i%nodes.size()].GetLat());
-      maxLat=std::max(maxLat,nodes[i%nodes.size()].GetLat());
-    }
-
-    boundingBox.Set(GeoCoord(minLat,minLon),
-                    GeoCoord(maxLat,maxLon));
-  }
-
-  void computeSegmentBoxes(const std::vector<Point>& path,
-                           std::vector<GeoBox> &segmentBoxes,
-                           size_t bound)
-  {
-    for (size_t i=0;i<bound;i+=1000){
-      GeoBox box;
-      GetSegmentBoundingBox(path,i,std::min(i+1000,bound), box);
-      segmentBoxes.push_back(box);
-    }
-  }
-
-  bool WaterIndexGenerator::FirstPathIntersection(const std::vector<Point> &aPath,
-                                                  const std::vector<Point> &bPath,
-                                                  bool aClosed,
-                                                  bool bClosed,
-                                                  size_t &aIndex,
-                                                  size_t &bIndex,
-                                                  GeoCoord &intersection,
-                                                  double &orientation
-                                                  )
-  {
-    size_t aBound=aClosed?aIndex+aPath.size():aPath.size()-1;
-    size_t bBound=bClosed?bIndex+bPath.size():bPath.size()-1;
-    size_t bStart=bIndex;
-
-    if (bStart>=bBound || aIndex>=aBound){
-      return false;
-    }
-
-    GeoBox aBox;
-    GeoBox bBox;
-    GetSegmentBoundingBox(aPath,aIndex,aBound,aBox);
-    GetSegmentBoundingBox(bPath,bIndex,bBound,bBox);
-    GeoBox aLineBox;
-
-    // compute b-boxes for B path, each 1000 point-long segment
-    std::vector<GeoBox> bSegmentBoxes;
-    computeSegmentBoxes(bPath,bSegmentBoxes,bBound);
-
-    for (;aIndex<aBound;aIndex++){
-      Point a1=aPath[aIndex%aPath.size()];
-      Point a2=aPath[(aIndex+1)%aPath.size()];
-      aLineBox.Set(a1.GetCoord(),a2.GetCoord());
-      if (!bBox.Intersects(aLineBox,/*openInterval*/false)){
-        continue;
-      }
-      for (bIndex=bStart;bIndex<bBound;bIndex++){
-        Point b1=bPath[bIndex%bPath.size()];
-        Point b2=bPath[(bIndex+1)%bPath.size()];
-        
-        if ((!bSegmentBoxes[bIndex/1000].Intersects(aLineBox)) &&
-             !aLineBox.Intersects(GeoBox(b1.GetCoord(),b2.GetCoord()),/*openInterval*/false)){
-          // round up
-          bIndex+=(1000-(bIndex%1000));
-          continue;
-        }
-        if (!aLineBox.Intersects(GeoBox(b1.GetCoord(),b2.GetCoord()),/*openInterval*/false)){
-          continue;
-        }
-        if (GetLineIntersection(a1.GetCoord(),a2.GetCoord(),
-                                b1.GetCoord(),b2.GetCoord(),
-                                intersection)){
-
-          orientation=(intersection.GetLon()-a1.GetLon())*
-                      (b2.GetLat()-intersection.GetLat())-
-                      (intersection.GetLat()-a1.GetLat())*
-                      (b2.GetLon()-intersection.GetLon());
-#if defined(DEBUG_TILING)
-          std::cout << "    Found intersection " << intersection.GetLat() << " " << intersection.GetLon()
-            << " direction " << orientation << std::endl;
-#endif
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  void cutPath(std::vector<Point> &dst, const std::vector<Point> &src, size_t start, size_t end)
+  /**
+   * Cut path `src` from point `start` (inclusive)
+   * to `end` (exclusive) and store result to `dst`
+   */
+  void cutPath(std::vector<Point> &dst,
+               const std::vector<Point> &src,
+               size_t start,
+               size_t end)
   {
     start=start%src.size();
     end=end%src.size();
@@ -448,12 +354,54 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Just for debug. It exports path to gpx file that may be
+   * open in external editor (josm for example). It is very userful
+   * to visual check that path is generated/cutted/walk (...) correctly.
+   *
+   * Just call this method from some place, add breakpoint after it
+   * and check the result...
+   */
+  void WriteGpx(const std::vector<Point> &path, const char* name)
+  {
+    std::ofstream gpxFile;
+    gpxFile.open(name);
+    gpxFile.imbue(std::locale("C"));
+
+    gpxFile << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    gpxFile << "<gpx creator=\"osmscout\" version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\"";
+    gpxFile << " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+    gpxFile << " xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n";
+
+    gpxFile << " <trk><trkseg>\n";
+    for (auto const &point: path){
+      gpxFile << "<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\"></trkpt>\n";
+    }
+    gpxFile << " </trkseg></trk>\n</gpx>";
+
+    gpxFile.close();
+  }
+
+  bool PathIntersectionSortA(const PathIntersection &i1, const PathIntersection &i2)
+  {
+    if (i1.aIndex==i2.aIndex)
+      return i1.aDistanceSquare < i2.aDistanceSquare;
+    return i1.aIndex < i2.aIndex;
+  }
+
+  bool PathIntersectionSortB(const PathIntersection &i1, const PathIntersection &i2)
+  {
+    if (i1.bIndex==i2.bIndex)
+      return i1.bDistanceSquare < i2.bDistanceSquare;
+    return i1.bIndex < i2.bIndex;
+  }
+
   void WaterIndexGenerator::SynthetizeCoastlinesSegments(Progress& progress,
                                                          const std::list<CoastRef>& dataPolygons,
                                                          const std::list<CoastRef>& coastlineWays,
                                                          std::list<CoastRef> &coastlines)
   {
-    std::list<CoastRef> candidates;
+    std::vector<CoastRef> candidates;
 
     for (const auto &polygon:dataPolygons){
       CoastRef candidate=std::make_shared<Coast>();
@@ -463,87 +411,118 @@ namespace osmscout {
       candidate->right=polygon->right;
       candidates.push_back(candidate);
     }
+    std::vector<std::vector<PathIntersection>> wayIntersections(coastlineWays.size());
 
-    while (!candidates.empty()){
-      CoastRef c = candidates.front();
-      candidates.pop_front();
+    /**
+     * create matrix of intersection candidates x ways
+     * split candidate and ways separately
+     */
+    for (size_t ci=0;ci<candidates.size();ci++){
+      CoastRef c=candidates[ci];
+      //WriteGpx(c->coast,"candidate.gpx");
+      std::vector<PathIntersection> candidateIntersections;
 
+      size_t wi=0;
       for (const auto &w:coastlineWays){
 
-        // try to find intersection between this candidate and way
-        size_t ci=0;
-        size_t wi=0;
-        double orientation;
-        GeoCoord intersection1;
-        while (FirstPathIntersection(c->coast,w->coast,
-                                     c->isArea,false,
-                                     ci,wi,
-                                     intersection1,
-                                     orientation)){
-          if (orientation>0.0){ // left agle: candidate -> intersection -> way
-            size_t wi2=wi+1;
-            size_t ci2=ci+1;
-            GeoCoord intersection2;
-            if (FirstPathIntersection(w->coast,c->coast,
-                                      false,c->isArea,
-                                      wi2,ci2,
-                                      intersection2,
-                                      orientation)){
-              if (orientation>0.0){ // left angle: way -> intersection -> candidate
+        //WriteGpx(w->coast,"way.gpx");
 
-                // cut candidate from intersection2 to intersection1,
-                // create left/right boundary of land/unknown
-                CoastRef landBoundary=std::make_shared<Coast>();
-                landBoundary->coast.push_back(Point(0,intersection2));
-                cutPath(landBoundary->coast, c->coast, 
-                        (ci2+1), ci);
-                landBoundary->coast.push_back(Point(0,intersection1));
-                landBoundary->left=w->left;
-                landBoundary->right=c->right;
-                assert(landBoundary->right==CoastState::unknown);
-                assert(landBoundary->left==CoastState::land);
-                landBoundary->isArea=false;
-                //coastlines.push_back(landBoundary);
-                candidates.push_back(landBoundary);
-                
-                // cut coastline way from intersection 1 to intersection2
-                CoastRef shortedWay=std::make_shared<Coast>();
-                shortedWay->id=w->id;
-                shortedWay->sortCriteria=w->sortCriteria;
-                shortedWay->left=w->left;
-                shortedWay->right=w->right;
-                shortedWay->isArea=false;
-                shortedWay->coast.push_back(Point(0,intersection1));
-                cutPath(shortedWay->coast, w->coast,
-                        wi+1, wi2);
-                shortedWay->coast.push_back(Point(0,intersection2));
-                coastlines.push_back(shortedWay);
+        // try to find intersections between this candidate and way
+        std::vector<PathIntersection> intersections;
+        FindPathIntersections(c->coast,w->coast,
+                              c->isArea,false,
+                              intersections);
 
-                // finally, cut candidate itself from intersecion1 to intersection2
-                std::vector<Point> cutted;
-                cutted.push_back(Point(0,intersection1));
-                cutPath(cutted, c->coast,
-                        ci+1, ci2);
-                cutted.push_back(Point(0,intersection2));
-                c->coast=cutted;
-                c->left=CoastState::water;
-                c->isArea=false;
-              }
-            }else{
-              // right angle between coastline and data area should not happen now
-              progress.Warning("Right angle between coastline and data polygon "+intersection2.GetDisplayText());
-              break;
-            }
-            wi=wi2+1;
-            ci=0;
-          }else{
-            wi=0;
-          }
-          ci++;
+        candidateIntersections.insert(candidateIntersections.end(),
+                                      intersections.begin(),
+                                      intersections.end());
+        wayIntersections[wi].insert(wayIntersections[wi].end(),
+                                    intersections.begin(),
+                                    intersections.end());
+        wi++;
+      }
+
+      // cut candidate
+      if (candidateIntersections.empty()){
+        coastlines.push_back(candidates[ci]);
+      }else{
+        if (candidateIntersections.size()%2!=0){
+          progress.Warning("Odd count of intersections: "+candidateIntersections.size());
+          continue;
+        }
+        std::sort(candidateIntersections.begin(),
+                  candidateIntersections.end(),
+                  PathIntersectionSortA);
+
+        for (size_t ii=0;ii<candidateIntersections.size();ii++){
+          PathIntersection int1=candidateIntersections[ii];
+          PathIntersection int2=candidateIntersections[(ii+1)%candidateIntersections.size()];
+
+          std::cout << "    Cut data polygon from " <<
+            int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
+            int2.point.GetLat() << " " << int2.point.GetLon() <<
+            std::endl;
+
+          CoastRef part=std::make_shared<Coast>();
+          part->coast.push_back(Point(0,int1.point));
+          cutPath(part->coast, c->coast,
+                  (int1.aIndex+1), int2.aIndex+1);
+          part->coast.push_back(Point(0,int2.point));
+          part->left=int1.orientation>0 ? CoastState::water : CoastState::land;
+          assert(int1.orientation>0 ? int2.orientation<0 : int2.orientation>0);
+          part->right=c->right;
+          part->id=c->id;
+          part->sortCriteria=c->sortCriteria;
+          part->isArea=false;
+          coastlines.push_back(part);
         }
       }
-      
-      coastlines.push_back(c);
+    }
+
+    // cut ways
+    size_t wi=0;
+    for (const auto &w:coastlineWays){
+      std::vector<PathIntersection> intersections=wayIntersections[wi];
+      if (intersections.empty()){
+        continue;
+      }
+      if (intersections.size()%2!=0){
+        progress.Warning("Odd count of intersections: "+intersections.size());
+        continue;
+      }
+
+      std::sort(intersections.begin(),
+                intersections.end(),
+                PathIntersectionSortB);
+
+      for (size_t ii=0;ii<intersections.size()-1;ii++){
+        PathIntersection int1=intersections[ii];
+        PathIntersection int2=intersections[ii+1];
+        assert(int1.orientation>0 ? int2.orientation<0 : int2.orientation>0);
+        if (int1.orientation<0){
+          continue;
+        }
+
+        std::cout << "    Cut coastline from " <<
+          int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
+          int2.point.GetLat() << " " << int2.point.GetLon() <<
+          std::endl;
+
+        CoastRef part=std::make_shared<Coast>();
+        part->coast.push_back(Point(0,int1.point));
+        cutPath(part->coast, w->coast,
+                (int1.bIndex+1), int2.bIndex+1);
+        part->coast.push_back(Point(0,int2.point));
+        part->left=w->left;
+        part->right=w->right;
+        part->id=w->id;
+        part->sortCriteria=w->sortCriteria;
+        part->isArea=false;
+        coastlines.push_back(part);
+      }
+
+
+      wi++;
     }
   }
 
@@ -694,7 +673,7 @@ namespace osmscout {
     clock.Stop();
     progress.Info(NumberToString(dataPolygon.size())+" data polygon(s), and "+
                   NumberToString(wayCoastlines.size())+" way coastline(s) synthetized into "+
-                  NumberToString(clippedCoastlineSegments.size()-areasBefore)+" new area coastlines(s), tooks "+
+                  NumberToString(clippedCoastlineSegments.size()-areasBefore)+" new coastlines(s) segments, tooks "+
                   clock.ResultString() +" s"
     );
 
@@ -1675,7 +1654,7 @@ namespace osmscout {
       for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
         if (polygon.points[p].draw) {
           coastline->points.push_back(GeoCoord(coast->coast[p].GetLat(),
-                                                              coast->coast[p].GetLon()));
+                                               coast->coast[p].GetLon()));
         }
       }
 
@@ -1703,12 +1682,15 @@ namespace osmscout {
         coastline->cell.x=cxMin;
         coastline->cell.y=cyMin;
         coastline->isCompletelyInCell=true;
+
+        if (level.IsInAbsolute(coastline->cell.x,coastline->cell.y)) {
+          Pixel coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
+          data.cellCoveredCoastlines[coord].push_back(curCoast);
+        }
       }
       else {
         coastline->isCompletelyInCell=false;
-      }
 
-      if (!coastline->isCompletelyInCell) {
         // Calculate all intersections for all path steps for all cells covered
         GetCellIntersections(level,
                              coastline->points,
@@ -1968,13 +1950,16 @@ namespace osmscout {
     return result;
   }
 
-  bool WaterIndexGenerator::FindTripoint(const IntersectionRef pathStart,
-                                         IntersectionRef &pathEnd,
-                                         IntersectionRef &startNext,
-                                         IntersectionRef &endNext,
-                                         Data &data,
-                                         const std::list<IntersectionRef> intersectionsCW
-                                         )
+  bool WaterIndexGenerator::WalkThroughTripoint(GroundTile &groundTile,
+                                                const Level& level,
+                                                const CellBoundaries &cellBoundaries,
+                                                const IntersectionRef pathStart,
+                                                IntersectionRef &pathEnd,
+                                                IntersectionRef &startNext,
+                                                IntersectionRef &endNext,
+                                                Data &data,
+                                                const std::list<IntersectionRef> &intersectionsCW,
+                                                const std::vector<CoastlineDataRef> &containingPaths)
   {
     CoastlineDataRef coastline=data.coastlines[pathStart->coastline];
     GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
@@ -2008,6 +1993,16 @@ namespace osmscout {
         endNext=intersection;
         nextIndex=i;
         nextDistance=distance;
+      }
+    }
+    
+    // cell may fully contain path that is part of this tripoint
+    for (const CoastlineDataRef &path:containingPaths){
+      if (path->points.size()<2){
+        continue;
+      }
+      if (tripoint.IsEqual(path->points.front()) || tripoint.IsEqual(path->points.back())){
+        std::cout << "TODO" << std::endl;
       }
     }
     if (nextIndex<0){
@@ -2047,6 +2042,7 @@ namespace osmscout {
     startNext->direction=(endNext->direction==Direction::in) ? Direction::out : Direction::in;
     startNext->borderIndex=0; // ?
 
+    //WalkPath(groundTile, level, cellBoundaries, pathStart, pathEnd, coastline);
     return true;
   }
 
@@ -2088,7 +2084,8 @@ namespace osmscout {
                                            const std::list<IntersectionRef> &intersectionsCW,
                                            std::set<IntersectionRef> &visitedIntersections,
                                            const CellBoundaries &cellBoundaries,
-                                           Data& data)
+                                           Data& data,
+                                           const std::vector<CoastlineDataRef> &containingPaths)
   {
 #if defined(DEBUG_COASTLINE)
       std::cout << "   walk around " << TypeToString(groundTile.type) <<
@@ -2116,13 +2113,17 @@ namespace osmscout {
         IntersectionRef startNext;
         IntersectionRef endNext;
         if (coastline->isArea ||
-            !FindTripoint(pathStart,
-                          pathEnd,
-                          startNext,
-                          endNext,
-                          data,
-                          intersectionsCW
-                          )){
+            !WalkThroughTripoint(groundTile,
+                                 level,
+                                 cellBoundaries,
+                                 pathStart,
+                                 pathEnd,
+                                 startNext,
+                                 endNext,
+                                 data,
+                                 intersectionsCW,
+                                 containingPaths
+                                 )){
           return false;
         }
 #if defined(DEBUG_COASTLINE)
@@ -2179,6 +2180,17 @@ namespace osmscout {
       }
       intersectionsCW.sort(IntersectionCWComparator());
 
+      // collect fully contained coastline paths (may be part of tripoints)
+      std::vector<CoastlineDataRef> containingPaths;
+      const auto &cellCoastlineEntry=data.cellCoveredCoastlines.find(cell);
+      if (cellCoastlineEntry!=data.cellCoveredCoastlines.end()){
+        for (size_t i:cellCoastlineEntry->second){
+          if (!data.coastlines[i]->isArea && data.coastlines[i]->isCompletelyInCell){
+            containingPaths.push_back(data.coastlines[i]);
+          }
+        }
+      }
+
 #if defined(DEBUG_COASTLINE)
       std::cout.precision(5);
       std::cout << "    cell boundaries" <<
@@ -2219,7 +2231,8 @@ namespace osmscout {
                             intersectionsCW,
                             visitedIntersections,
                             cellBoundaries,
-                            data)){
+                            data,
+                            containingPaths)){
             std::cout << "Can't walk around cell boundary!" << std::endl;
             continue;
         }

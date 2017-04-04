@@ -234,8 +234,9 @@ namespace osmscout {
 
     struct Data
     {
-      std::vector<CoastlineDataRef>      coastlines;         //! data for each coastline
-      std::map<Pixel,std::list<size_t> > cellCoastlines;     //! Contains for each cell the list of coastlines
+      std::vector<CoastlineDataRef>      coastlines;           //! data for each coastline
+      std::map<Pixel,std::list<size_t>> cellCoastlines;        //! Contains for each cell the list of *intersecting* coastlines
+      std::map<Pixel,std::list<size_t>> cellCoveredCoastlines; //! Contains for each cell the list of covered coastlines
     };
 
   private:
@@ -262,16 +263,6 @@ namespace osmscout {
     bool LoadDataPolygon(const ImportParameter& parameter,
                          Progress& progress,
                          std::list<CoastRef>& coastlines);
-
-    bool FirstPathIntersection(const std::vector<Point> &aPath,
-                                                  const std::vector<Point> &bPath,
-                                                  bool aClosed,
-                                                  bool bClosed,
-                                                  size_t &aIndex,
-                                                  size_t &bIndex,
-                                                  GeoCoord &intersection,
-                                                  double &orientation
-                                                  );
 
     void SynthetizeCoastlinesSegments(Progress& progress,
                                       const std::list<CoastRef>& dataPolygons,
@@ -383,13 +374,16 @@ namespace osmscout {
                                             const std::list<IntersectionRef> &intersectionsCW,
                                             bool isArea);
 
-    bool FindTripoint(const IntersectionRef pathStart,
-                      IntersectionRef &pathEnd,
-                      IntersectionRef &startNext,
-                      IntersectionRef &endNext,
-                      Data &data,
-                      const std::list<IntersectionRef> intersectionsCW
-                      );
+    bool WalkThroughTripoint(GroundTile &groundTile,
+                             const Level& level,
+                             const CellBoundaries &cellBoundaries,
+                             const IntersectionRef pathStart,
+                             IntersectionRef &pathEnd,
+                             IntersectionRef &startNext,
+                             IntersectionRef &endNext,
+                             Data &data,
+                             const std::list<IntersectionRef> &intersectionsCW,
+                             const std::vector<CoastlineDataRef> &containingPaths);
 
     void WalkPath(GroundTile &groundTile,
                   const Level& level,
@@ -404,7 +398,8 @@ namespace osmscout {
                           const std::list<IntersectionRef> &intersectionsCW,
                           std::set<IntersectionRef> &visitedIntersections,
                           const CellBoundaries &cellBoundaries,
-                          Data& data);
+                          Data& data,
+                          const std::vector<CoastlineDataRef> &containingPaths);
 
       void HandleCoastlineCell(const Pixel &cell,
                                const std::list<size_t>& intersectCoastlines,
