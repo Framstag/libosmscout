@@ -33,11 +33,19 @@ int main(int /*argc*/, char** /*argv*/)
   osmscout::GeoCoord b(52,15);
   osmscout::GeoCoord intersection;
   
-  assert (!osmscout::GetLineIntersection(a,a,
-                                         b,b,
-                                         intersection));
-  assert (!osmscout::LinesIntersect(a,a,
-                                    b,b));
+  if (osmscout::GetLineIntersection(a,a,
+                                    b,b,
+                                    intersection))
+  {
+    return 1;
+  }
+
+  if (osmscout::LinesIntersect(a,a,
+                               b,b)){
+    return 2;
+  }
+
   std::cout << "OK" << std::endl;
+  return 0;
 }
 

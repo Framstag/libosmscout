@@ -58,11 +58,37 @@ namespace osmscout {
       quality = 2
     };
 
+    enum OutputConstraint
+    {
+      noConstraint = 0,
+      simple = 1
+    };
+
     struct OSMSCOUT_API TransPoint
     {
       bool   draw;
       double x;
       double y;
+    };
+
+  private:
+    struct TransPointRef{
+      TransPoint *p;
+
+      inline double GetLat() const
+      {
+        return p->x;
+      }
+
+      inline double GetLon() const
+      {
+        return p->y;
+      }
+
+      inline bool IsEqual(const TransPointRef &other) const
+      {
+        return p==other.p;
+      }
     };
 
   public:
@@ -74,6 +100,8 @@ namespace osmscout {
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
+    bool FindIntersection(const std::vector<TransPointRef> &optimised, size_t &i, size_t &j);
+    void EnsureSimple(bool isArea);
 
   public:
     TransPolygon();
@@ -102,12 +130,14 @@ namespace osmscout {
     void TransformArea(const Projection& projection,
                        OptimizeMethod optimize,
                        const std::vector<Point>& nodes,
-                       double optimizeErrorTolerance);
+                       double optimizeErrorTolerance,
+                       OutputConstraint constraint=noConstraint);
 
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
                       const std::vector<Point>& nodes,
-                      double optimizeErrorTolerance);
+                      double optimizeErrorTolerance,
+                      OutputConstraint constraint=noConstraint);
 
     bool GetBoundingBox(double& xmin, double& ymin,
                         double& xmax, double& ymax) const;

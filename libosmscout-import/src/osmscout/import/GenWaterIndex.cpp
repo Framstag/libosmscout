@@ -1250,13 +1250,15 @@ namespace osmscout {
         polygon.TransformArea(projection,
                               parameter.GetOptimizationWayMethod(),
                               coast->coast,
-                              1.0);
+                              1.0,
+                              TransPolygon::simple);
       }
       else {
         polygon.TransformWay(projection,
                              parameter.GetOptimizationWayMethod(),
                              coast->coast,
-                             1.0);
+                             1.0,
+                             TransPolygon::simple);
       }
 
       if (coast->isArea) {
