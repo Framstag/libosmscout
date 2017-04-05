@@ -234,7 +234,7 @@ namespace osmscout {
 
     struct Data
     {
-      std::vector<CoastlineDataRef>      coastlines;           //! data for each coastline
+      std::vector<CoastlineDataRef>     coastlines;            //! data for each coastline
       std::map<Pixel,std::list<size_t>> cellCoastlines;        //! Contains for each cell the list of *intersecting* coastlines
       std::map<Pixel,std::list<size_t>> cellCoveredCoastlines; //! Contains for each cell the list of covered coastlines
     };
@@ -374,16 +374,14 @@ namespace osmscout {
                                             const std::list<IntersectionRef> &intersectionsCW,
                                             bool isArea);
 
-    bool WalkThroughTripoint(GroundTile &groundTile,
-                             const Level& level,
-                             const CellBoundaries &cellBoundaries,
-                             const IntersectionRef pathStart,
-                             IntersectionRef &pathEnd,
-                             IntersectionRef &startNext,
-                             IntersectionRef &endNext,
-                             Data &data,
-                             const std::list<IntersectionRef> &intersectionsCW,
-                             const std::vector<CoastlineDataRef> &containingPaths);
+    bool WalkFromTripoint(GroundTile &groundTile,
+                          const Level& level,
+                          const CellBoundaries &cellBoundaries,
+                          IntersectionRef &pathStart,
+                          IntersectionRef &pathEnd,
+                          Data &data,
+                          const std::list<IntersectionRef> &intersectionsCW,
+                          const std::vector<size_t> &containingPaths);
 
     void WalkPath(GroundTile &groundTile,
                   const Level& level,
@@ -399,7 +397,7 @@ namespace osmscout {
                           std::set<IntersectionRef> &visitedIntersections,
                           const CellBoundaries &cellBoundaries,
                           Data& data,
-                          const std::vector<CoastlineDataRef> &containingPaths);
+                          const std::vector<size_t> &containingPaths);
 
       void HandleCoastlineCell(const Pixel &cell,
                                const std::list<size_t>& intersectCoastlines,

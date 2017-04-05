@@ -1950,100 +1950,123 @@ namespace osmscout {
     return result;
   }
 
-  bool WaterIndexGenerator::WalkThroughTripoint(GroundTile &groundTile,
-                                                const Level& level,
-                                                const CellBoundaries &cellBoundaries,
-                                                const IntersectionRef pathStart,
-                                                IntersectionRef &pathEnd,
-                                                IntersectionRef &startNext,
-                                                IntersectionRef &endNext,
-                                                Data &data,
-                                                const std::list<IntersectionRef> &intersectionsCW,
-                                                const std::vector<CoastlineDataRef> &containingPaths)
+  bool WaterIndexGenerator::WalkFromTripoint(GroundTile &groundTile,
+                                             const Level& level,
+                                             const CellBoundaries &cellBoundaries,
+                                             IntersectionRef &pathStart, // incomming path
+                                             IntersectionRef &pathEnd,
+                                             Data &data,
+                                             const std::list<IntersectionRef> &intersectionsCW,
+                                             const std::vector<size_t> &containingPaths)
   {
     CoastlineDataRef coastline=data.coastlines[pathStart->coastline];
+    if (coastline->points.size()<2){
+      return false;
+    }
     GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
+    GeoCoord previousPoint=(pathStart->direction==Direction::in) ?
+      coastline->points[coastline->points.size()-2] :
+      coastline->points[1];
+    CoastState walkType=(pathStart->direction==Direction::in) ? coastline->right : coastline->left;
 
-    // get index of pathStart in intersectionsCW
-    int startIndex=-1;
+    // try to find right outgoing path from the tripoint
+    std::vector<size_t> candidates;
     for (const auto &intersection:intersectionsCW){
-      startIndex++;
-      if (intersection==pathStart){
-        break;
-      }
+      candidates.push_back(intersection->coastline);
     }
-
-    // try to find coastline starting/ending in tripoint...
-    int i=-1;
-    int nextIndex=-1;
-    int nextDistance=0;
-    for (const auto &intersection:intersectionsCW){
-      i++;
-      CoastlineDataRef c=data.coastlines[intersection->coastline];
-      if (intersection->coastline==pathStart->coastline || c->isArea){
-        continue;
-      }
-      GeoCoord coord=(intersection->direction==Direction::in) ? c->points.back() : c->points.front();
-      if (tripoint!=coord){
-        continue;
-      }
-      // ...that is nearest CCW to pathStart
-      int distance=(i>startIndex) ? intersectionsCW.size()-(i-startIndex) : (startIndex-i);
-      if (nextIndex==-1 || distance<nextDistance){
-        endNext=intersection;
-        nextIndex=i;
-        nextDistance=distance;
-      }
-    }
-    
     // cell may fully contain path that is part of this tripoint
-    for (const CoastlineDataRef &path:containingPaths){
+    for (const size_t path:containingPaths){
+      candidates.push_back(path);
+    }
+
+    IntersectionRef outgoing;
+    IntersectionRef outgoingEnd;
+    double outgoingAngle;
+    CoastlineDataRef outgoingCoastline;
+    bool intersectCell=false;
+
+    for (const size_t pathIndex:candidates){
+      if (pathStart->coastline==pathIndex){
+        continue;
+      }
+      CoastlineDataRef path=data.coastlines[pathIndex];
       if (path->points.size()<2){
         continue;
       }
-      if (tripoint.IsEqual(path->points.front()) || tripoint.IsEqual(path->points.back())){
-        std::cout << "TODO" << std::endl;
+      if (!tripoint.IsEqual(path->points.front()) && !tripoint.IsEqual(path->points.back())){
+        continue;
       }
-    }
-    if (nextIndex<0){
-      return false;
-    }
+      Direction direction=tripoint.IsEqual(path->points.front()) ? Direction::out : Direction::in;
+      if ((direction==Direction::out && walkType!=path->right) || 
+          (direction==Direction::in && walkType!=path->left)){
+        continue;
+      }
+      GeoCoord previousOutPoint= direction==Direction::out ? path->points[1] : path->points[path->points.size()-2];
 
-    // try to find nearest intersection on found coastline to tripoint
-    for (const auto &intersection:intersectionsCW){
-      if (intersection->coastline==endNext->coastline && intersection->direction==endNext->direction){
-        if (endNext->direction==Direction::in){
-          if (intersection->prevWayPointIndex > endNext->prevWayPointIndex){
-            endNext=intersection;
+      double angle=(tripoint.GetLon()-previousPoint.GetLon())*
+                   (previousOutPoint.GetLat()-tripoint.GetLat())-
+                   (tripoint.GetLat()-previousPoint.GetLat())*
+                   (previousOutPoint.GetLon()-tripoint.GetLon());
+
+      if ((!outgoing) || (outgoing && angle < outgoingAngle)){
+        outgoingAngle=angle;
+        outgoingCoastline=path;
+        
+        outgoing=std::make_shared<Intersection>();
+        outgoing->coastline=pathIndex;
+        outgoing->prevWayPointIndex=(direction==Direction::in) ? path->points.size()-1 : 0;
+        outgoing->point=tripoint;
+        outgoing->distanceSquare=0; // ?
+        outgoing->direction=(direction==Direction::in) ? Direction::out : Direction::in; // in direction to tripoint == "outgoing" from cell
+        outgoing->borderIndex=0; // ?
+
+        IntersectionRef pathCellIntersection;
+        for (const auto &cellIntersection:intersectionsCW){
+          if (cellIntersection->coastline==pathIndex){
+            if (!pathCellIntersection){
+              pathCellIntersection=cellIntersection;
+            }else{
+              if (direction==Direction::out &&
+                  (pathCellIntersection->prevWayPointIndex > cellIntersection->prevWayPointIndex ||
+                   (pathCellIntersection->prevWayPointIndex==cellIntersection->prevWayPointIndex &&
+                    pathCellIntersection->distanceSquare > cellIntersection->distanceSquare))){
+                pathCellIntersection=cellIntersection;
+              }
+              if (direction==Direction::in &&
+                  (pathCellIntersection->prevWayPointIndex < cellIntersection->prevWayPointIndex ||
+                   (pathCellIntersection->prevWayPointIndex==cellIntersection->prevWayPointIndex &&
+                    pathCellIntersection->distanceSquare < cellIntersection->distanceSquare))){
+                pathCellIntersection=cellIntersection;
+              }
+            }
           }
+        }
+        intersectCell=pathCellIntersection ? true : false;
+        if (pathCellIntersection){
+          outgoingEnd=pathCellIntersection;
         }else{
-          if (intersection->prevWayPointIndex < endNext->prevWayPointIndex){
-            endNext=intersection;
-          }
+          outgoingEnd=std::make_shared<Intersection>();
+          outgoingEnd->coastline=pathIndex;
+          outgoingEnd->prevWayPointIndex=(direction==Direction::in) ? 0 : path->points.size()-1;
+          outgoingEnd->point=(direction==Direction::in) ? path->points.front() : path->points.back();
+          outgoingEnd->distanceSquare=0; // ?
+          outgoingEnd->direction=direction;
+          outgoingEnd->borderIndex=0; // ?
         }
       }
     }
-
-    // create synthetic pathEnd, startNext
-    pathEnd=std::make_shared<Intersection>();
-    pathEnd->coastline=pathStart->coastline;
-    pathEnd->prevWayPointIndex=(pathStart->direction==Direction::in) ? coastline->points.size()-1 : 0;
-    pathEnd->point=tripoint;
-    pathEnd->distanceSquare=0; // ?
-    pathEnd->direction=(pathStart->direction==Direction::in) ? Direction::out : Direction::in;
-    pathEnd->borderIndex=0; // ?
-
-    coastline=data.coastlines[endNext->coastline];
-    startNext=std::make_shared<Intersection>();
-    startNext->coastline=endNext->coastline;
-    startNext->prevWayPointIndex=(endNext->direction==Direction::in) ? coastline->points.size()-1 : 0;
-    startNext->point=tripoint;
-    startNext->distanceSquare=0; // ?
-    startNext->direction=(endNext->direction==Direction::in) ? Direction::out : Direction::in;
-    startNext->borderIndex=0; // ?
-
-    //WalkPath(groundTile, level, cellBoundaries, pathStart, pathEnd, coastline);
-    return true;
+    if (!outgoing){
+      return false;
+    }
+    assert(outgoing->direction!=outgoingEnd->direction);
+    // we are left this cell
+    if (intersectCell){
+      pathEnd=outgoingEnd;
+    }
+    // finally, walk from the tripoint (outgoing) to (outgoingEnd)
+    WalkPath(groundTile, level, cellBoundaries, outgoing, outgoingEnd, outgoingCoastline);
+    pathStart=outgoing;
+    return true;   
   }
 
   void WaterIndexGenerator::WalkPath(GroundTile &groundTile,
@@ -2085,7 +2108,7 @@ namespace osmscout {
                                            std::set<IntersectionRef> &visitedIntersections,
                                            const CellBoundaries &cellBoundaries,
                                            Data& data,
-                                           const std::vector<CoastlineDataRef> &containingPaths)
+                                           const std::vector<size_t> &containingPaths)
   {
 #if defined(DEBUG_COASTLINE)
       std::cout << "   walk around " << TypeToString(groundTile.type) <<
@@ -2098,7 +2121,6 @@ namespace osmscout {
     bool error=false;
     size_t step=0;
     while ((step==0 || pathStart!=startIntersection) && !error){
-      step++;
       visitedIntersections.insert(pathStart);
       CoastlineDataRef coastline=data.coastlines[pathStart->coastline]; // TODO: check that we have correct type
       IntersectionRef pathEnd=FindSiblingIntersection(pathStart,
@@ -2108,41 +2130,57 @@ namespace osmscout {
 #if defined(DEBUG_COASTLINE)
         std::cout << "     can't found sibling intersection for " << pathStart->point.GetDisplayText() << std::endl;
 #endif
+        GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
 
-        // handle coastline Tripoint
-        IntersectionRef startNext;
-        IntersectionRef endNext;
-        if (coastline->isArea ||
-            !WalkThroughTripoint(groundTile,
-                                 level,
-                                 cellBoundaries,
-                                 pathStart,
-                                 pathEnd,
-                                 startNext,
-                                 endNext,
-                                 data,
-                                 intersectionsCW,
-                                 containingPaths
-                                 )){
-          return false;
+        // create synthetic end
+        IntersectionRef end=std::make_shared<Intersection>();
+        end->coastline=pathStart->coastline;
+        end->prevWayPointIndex=(pathStart->direction==Direction::in) ? coastline->points.size()-1 : 0;
+        end->point=tripoint;
+        end->distanceSquare=0; // ?
+        end->direction=(pathStart->direction==Direction::in) ? Direction::out : Direction::in;
+        end->borderIndex=0; // ?
+
+        WalkPath(groundTile, level, cellBoundaries, pathStart, end, coastline);
+
+        while (!pathEnd){
+          if (coastline->isArea){
+            return false; // area can't be part of tripoint, it should not happen
+          }
+          GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
+  #if defined(DEBUG_COASTLINE)
+          std::cout << "     found tripoint " << tripoint.GetDisplayText() << std::endl;
+  #endif
+
+          // handle coastline Tripoint
+          if (!WalkFromTripoint(groundTile,
+                                level,
+                                cellBoundaries,
+                                pathStart,
+                                pathEnd,
+                                data,
+                                intersectionsCW,
+                                containingPaths)){
+            return false;
+          }
+
+          step++;
+          if (step>1000){ // last fuse
+            // put breakpoint here if coputation stucks in this loop :-/
+            std::cout << "   too many steps, give up... " << step << std::endl;
+            return false;
+          }
         }
-#if defined(DEBUG_COASTLINE)
-        std::cout << "     found tripoint " << pathEnd->point.GetDisplayText() << std::endl;
-#endif
-
+      }else{
         WalkPath(groundTile, level, cellBoundaries, pathStart, pathEnd, coastline);
-        pathStart=startNext;
-        pathEnd=endNext;
-        coastline=data.coastlines[pathStart->coastline];
       }
 
-      if (step>1000){
+      step++;
+      if (step>1000){ // last fuse
         // put breakpoint here if coputation stucks in this loop :-/
         std::cout << "   too many steps, give up... " << step << std::endl;
         return false;
       }
-
-      WalkPath(groundTile, level, cellBoundaries, pathStart, pathEnd, coastline);
       
       pathStart=GetNextCW(intersectionsCW,
                           pathEnd);
@@ -2181,12 +2219,12 @@ namespace osmscout {
       intersectionsCW.sort(IntersectionCWComparator());
 
       // collect fully contained coastline paths (may be part of tripoints)
-      std::vector<CoastlineDataRef> containingPaths;
+      std::vector<size_t> containingPaths;
       const auto &cellCoastlineEntry=data.cellCoveredCoastlines.find(cell);
       if (cellCoastlineEntry!=data.cellCoveredCoastlines.end()){
         for (size_t i:cellCoastlineEntry->second){
           if (!data.coastlines[i]->isArea && data.coastlines[i]->isCompletelyInCell){
-            containingPaths.push_back(data.coastlines[i]);
+            containingPaths.push_back(i);
           }
         }
       }
