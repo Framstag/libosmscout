@@ -2350,7 +2350,8 @@ namespace osmscout {
                               levelStruct,
                               cellGroundTileMap);
 
-    if (parameter.GetAssumeLand()) {
+    if (parameter.GetAssumeLand()==ImportParameter::AssumeLandStrategy::enable ||
+        (parameter.GetAssumeLand()==ImportParameter::AssumeLandStrategy::automatic && dataPolygon.empty())) {
       // Assume cell type 'land' for cells that intersect with 'land' object types
       AssumeLand(parameter,
                  progress,

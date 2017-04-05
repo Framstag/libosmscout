@@ -136,7 +136,7 @@ namespace osmscout {
      optimizationCellSizeMax(255),
      optimizationWayMethod(TransPolygon::quality),
      routeNodeBlockSize(500000),
-     assumeLand(false),
+     assumeLand(AssumeLandStrategy::automatic),
      langOrder({"#"}),
      firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2))
   {
@@ -363,7 +363,7 @@ namespace osmscout {
     return routeNodeBlockSize;
   }
 
-  bool ImportParameter::GetAssumeLand() const
+  ImportParameter::AssumeLandStrategy ImportParameter::GetAssumeLand() const
   {
     return assumeLand;
   }
@@ -607,7 +607,7 @@ namespace osmscout {
     this->routeNodeBlockSize=blockSize;
   }
 
-  void ImportParameter::SetAssumeLand(bool assumeLand)
+  void ImportParameter::SetAssumeLand(AssumeLandStrategy assumeLand)
   {
     this->assumeLand=assumeLand;
   }
