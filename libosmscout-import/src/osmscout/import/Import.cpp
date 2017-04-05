@@ -138,7 +138,8 @@ namespace osmscout {
      routeNodeBlockSize(500000),
      assumeLand(AssumeLandStrategy::automatic),
      langOrder({"#"}),
-     firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2))
+     firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2)),
+     fillWaterArea(20)
   {
     // no code
   }
@@ -625,6 +626,16 @@ namespace osmscout {
   void ImportParameter::SetFirstFreeOSMId(OSMId id)
   {
     firstFreeOSMId=id;
+  }
+
+  void ImportParameter::SetFillWaterArea(size_t fillWaterArea)
+  {
+    this->fillWaterArea=fillWaterArea;
+  }
+
+  size_t ImportParameter::GetFillWaterArea() const
+  {
+    return fillWaterArea;
   }
 
   void ImportModuleDescription::SetName(const std::string& name)

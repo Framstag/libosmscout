@@ -2363,7 +2363,7 @@ namespace osmscout {
       // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
       FillWater(progress,
                 levelStruct,
-                /*tileCount*/10,
+                parameter.GetFillWaterArea(),
                 dataPolygon);
 
       FillWaterAroundIsland(progress, levelStruct, cellGroundTileMap);

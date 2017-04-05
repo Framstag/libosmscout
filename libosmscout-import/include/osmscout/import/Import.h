@@ -167,6 +167,7 @@ namespace osmscout {
     std::vector<std::string>     altLangOrder;             //<! the same as langOrder but for a alt (second) lang
 
     OSMId                        firstFreeOSMId;           //<! first id available for synthetic objects (parsed polygon files)
+    size_t                       fillWaterArea;            //<! count of tiles around coastlines flooded by water
 
   public:
     ImportParameter();
@@ -315,6 +316,9 @@ namespace osmscout {
     void SetAltLangOrder(const std::vector<std::string>& altLangOrder);
 
     void SetFirstFreeOSMId(OSMId id);
+
+    void SetFillWaterArea(size_t fillWaterArea);
+    size_t GetFillWaterArea() const;
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription CLASS_FINAL
