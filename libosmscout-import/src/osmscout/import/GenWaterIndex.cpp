@@ -458,10 +458,13 @@ namespace osmscout {
           PathIntersection int1=candidateIntersections[ii];
           PathIntersection int2=candidateIntersections[(ii+1)%candidateIntersections.size()];
 
+#if defined(DEBUG_COASTLINE)
+          std::cout.precision(5);
           std::cout << "    Cut data polygon from " <<
             int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
             int2.point.GetLat() << " " << int2.point.GetLon() <<
             std::endl;
+#endif
 
           CoastRef part=std::make_shared<Coast>();
           part->coast.push_back(Point(0,int1.point));
@@ -503,10 +506,13 @@ namespace osmscout {
           continue;
         }
 
+#if defined(DEBUG_COASTLINE)
+        std::cout.precision(5);
         std::cout << "    Cut coastline from " <<
           int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
           int2.point.GetLat() << " " << int2.point.GetLon() <<
           std::endl;
+#endif
 
         CoastRef part=std::make_shared<Coast>();
         part->coast.push_back(Point(0,int1.point));
@@ -2199,7 +2205,8 @@ namespace osmscout {
     return true;
   }
 
-  void WaterIndexGenerator::HandleCoastlineCell(const Pixel &cell,
+  void WaterIndexGenerator::HandleCoastlineCell(Progress& progress,
+                                                const Pixel &cell,
                                                 const std::list<size_t>& intersectCoastlines,
                                                 const Level& level,
                                                 std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
@@ -2271,7 +2278,7 @@ namespace osmscout {
                             cellBoundaries,
                             data,
                             containingPaths)){
-            std::cout << "Can't walk around cell boundary!" << std::endl;
+            progress.Warning("Can't walk around cell boundary!");
             continue;
         }
 
@@ -2300,7 +2307,8 @@ namespace osmscout {
         " (level offset " << level.indexEntryOffset << "): " << std::endl;
 #endif
 
-      HandleCoastlineCell(cellEntry.first,
+      HandleCoastlineCell(progress,
+                          cellEntry.first,
                           cellEntry.second,
                           level,
                           cellGroundTileMap,

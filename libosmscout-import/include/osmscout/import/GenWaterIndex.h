@@ -399,7 +399,8 @@ namespace osmscout {
                           Data& data,
                           const std::vector<size_t> &containingPaths);
 
-      void HandleCoastlineCell(const Pixel &cell,
+      void HandleCoastlineCell(Progress& progress,
+                               const Pixel &cell,
                                const std::list<size_t>& intersectCoastlines,
                                const Level& level,
                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
