@@ -486,6 +486,7 @@ namespace osmscout {
     size_t wi=0;
     for (const auto &w:coastlineWays){
       std::vector<PathIntersection> intersections=wayIntersections[wi];
+      wi++;
       if (intersections.empty()){
         continue;
       }
@@ -526,9 +527,6 @@ namespace osmscout {
         part->isArea=false;
         coastlines.push_back(part);
       }
-
-
-      wi++;
     }
   }
 
