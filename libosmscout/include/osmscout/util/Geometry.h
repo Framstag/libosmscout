@@ -1080,6 +1080,9 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
+   * Find all intersections between aPath and bPath from node index aStartIndex
+   * and bStartIndex.
+   * Intersections are added to intersections vector.
    */
   template<typename N>
   void FindPathIntersections(const std::vector<N> &aPath,
@@ -1100,9 +1103,7 @@ namespace osmscout {
       return;
     }
 
-    GeoBox aBox;
     GeoBox bBox;
-    GetSegmentBoundingBox(aPath,aIndex,aBound,aBox);
     GetSegmentBoundingBox(bPath,bIndex,bBound,bBox);
     GeoBox aLineBox;
     GeoBox bLineBox;
@@ -1125,10 +1126,10 @@ namespace osmscout {
         bLineBox.Set(GeoCoord(b1.GetLat(),b1.GetLon()),
                      GeoCoord(b2.GetLat(),b2.GetLon()));
 
-        if ((!bSegmentBoxes[bIndex/1000].Intersects(aLineBox)) &&
+        if ((!bSegmentBoxes[bIndex/1000].Intersects(aLineBox,/*openInterval*/false)) &&
              !aLineBox.Intersects(bLineBox,/*openInterval*/false)){
           // round up
-          bIndex+=(1000-(bIndex%1000));
+          bIndex+=std::max(0, 998-(int)(bIndex%1000));
           continue;
         }
         if (!aLineBox.Intersects(bLineBox,/*openInterval*/false)){
@@ -1153,6 +1154,55 @@ namespace osmscout {
         }
       }
     }
+  }
+
+  /**
+   * \ingroup Geometry
+   * Find next intersetion on way (with itself) from node index i.
+   * Return true if some intersection was found (way is not simple),
+   * i and j indexes are setup to start possition of intesections lines.
+   */
+  template<typename N>
+  bool FindIntersection(const std::vector<N> &way,
+                        size_t &i,
+                        size_t &j)
+  {
+    GeoBox lineBox;
+
+    // compute b-boxes for path, each 1000 point-long segment
+    std::vector<GeoBox> segmentBoxes;
+    ComputeSegmentBoxes(way,segmentBoxes,way.size());
+
+    for (; i<way.size()-1; i++) {
+      N i1=way[i];
+      N i2=way[i+1];
+      lineBox.Set(GeoCoord(i1.GetLat(),i1.GetLon()),
+                  GeoCoord(i2.GetLat(),i2.GetLon()));
+
+      for (j=i+1; j<way.size()-1; j++) {
+        if (!segmentBoxes[j/1000].Intersects(lineBox,/*openInterval*/false) &&
+            !segmentBoxes[(j+1)/1000].Intersects(lineBox,/*openInterval*/false)){
+          // round up
+          j+=std::max(0, 998-(int)(j%1000));
+          continue;
+        }
+        if (LinesIntersect(way[i],
+                           way[i+1],
+                           way[j],
+                           way[j+1])) {
+
+          if (way[i].IsEqual(way[j]) ||
+              way[i].IsEqual(way[j+1]) ||
+              way[i+1].IsEqual(way[j]) ||
+              way[i+1].IsEqual(way[j+1])) {
+            continue; // ignore sibling edges
+          }
+
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   class OSMSCOUT_API PolygonMerger
