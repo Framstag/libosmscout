@@ -962,6 +962,23 @@ namespace osmscout {
     return true;
   }
 
+  bool WaterIndexGenerator::IsCellInDataPolygon(const CellBoundaries &cellBoundary,
+                                                const std::list<CoastRef>& dataPolygon)
+  {
+    if (dataPolygon.empty()){
+      return true;
+    }
+
+    std::vector<GeoCoord> cellCoords;
+    cellCoords.assign(cellBoundary.borderPoints, cellBoundary.borderPoints + 4);
+    for (const auto &poly:dataPolygon){
+      if (IsAreaAtLeastPartlyInArea(cellCoords,poly->coast)){
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
    *
@@ -983,20 +1000,8 @@ namespace osmscout {
           if (level.GetState(x,y)==water) {
 
             // avoid filling of water outside data polygon
-            if (!dataPolygon.empty()){
-              CellBoundaries cellBoundary(level,Pixel(x,y));
-              std::vector<GeoCoord> cellCoords;
-              cellCoords.assign(cellBoundary.borderPoints, cellBoundary.borderPoints + 4);
-              bool included=false;
-              for (const auto &poly:dataPolygon){
-                if (IsAreaAtLeastPartlyInArea(cellCoords,poly->coast)){
-                  included=true;
-                  break;
-                }
-              }
-              if (!included){
-                continue;
-              }
+            if (!IsCellInDataPolygon(CellBoundaries(level,Pixel(x,y)),dataPolygon)){
+              continue;
             }
 
             if (y>0) {
@@ -1042,7 +1047,23 @@ namespace osmscout {
     }
   }
 
-  bool WaterIndexGenerator::containsCoord(const std::list<GroundTile> &tiles,
+  bool WaterIndexGenerator::ContainsCoord(const std::list<GroundTile> &tiles,
+                                          const GroundTile::Coord &coord,
+                                          GroundTile::Type type)
+  {
+    for (const auto &tile:tiles){
+      if (tile.type==type){
+        for (const auto &c:tile.coords){
+          if (c==coord){
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  bool WaterIndexGenerator::ContainsCoord(const std::list<GroundTile> &tiles,
                                           const GroundTile::Coord &coord)
   {
     for (const auto &tile:tiles){
@@ -1054,37 +1075,74 @@ namespace osmscout {
     }
     return false;
   }
-  
+
+  bool WaterIndexGenerator::ContainsWater(const Pixel &coord,
+                                          const Level &level,
+                                          const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
+                                          const GroundTile::Coord &testCoord1,
+                                          const GroundTile::Coord &testCoord2)
+  {
+    if (coord.x>=level.cellXCount || coord.y>=level.cellYCount){
+      return false;
+    }
+    if (level.GetState(coord.x,coord.y)==water){
+      return true;
+    }
+    const auto &tilesEntry=cellGroundTileMap.find(coord);
+    if (tilesEntry==cellGroundTileMap.end()){
+      return false;
+    }
+    return ContainsCoord(tilesEntry->second,testCoord1,GroundTile::water) ||
+           ContainsCoord(tilesEntry->second,testCoord2,GroundTile::water);
+  }
+
   void WaterIndexGenerator::FillWaterAroundIsland(Progress& progress,
                                                   Level& level,
-                                                  std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap)
+                                                  std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
+                                                  const std::list<CoastRef>& dataPolygon)
   {
     progress.Info("Filling water around islands");
     
     for (const auto &entry:cellGroundTileMap){
       Pixel coord=entry.first;
-
       CellBoundaries cellBoundaries(level,coord);
+
+      if (ContainsCoord(entry.second, cellBoundaries.borderCoords[0]) ||
+          ContainsCoord(entry.second, cellBoundaries.borderCoords[1]) ||
+          ContainsCoord(entry.second, cellBoundaries.borderCoords[2]) ||
+          ContainsCoord(entry.second, cellBoundaries.borderCoords[3])){
+        continue;
+      }
+      // cell with some GroundTile, but all borderCoors are missing
+      // => it contains island(s)
+
+      // avoid filling of water outside data polygon
+      if (!IsCellInDataPolygon(CellBoundaries(level,coord),dataPolygon)){
+        continue;
+      }
+
       bool fillWater=false;
 
-      if (!fillWater && coord.y>0 && level.GetState(coord.x,coord.y-1)==water &&
-          (!containsCoord(entry.second, cellBoundaries.borderCoords[0]) ||
-           !containsCoord(entry.second, cellBoundaries.borderCoords[1]))){
+      // test if some tiles around contains water
+
+      // top
+      if (!fillWater && coord.y>0 && ContainsWater(Pixel(coord.x, coord.y-1),level,cellGroundTileMap,
+                                                   cellBoundaries.borderCoords[0],cellBoundaries.borderCoords[1])){
         fillWater=true;
       }
-      if (!fillWater && coord.y<(level.cellYCount-1) && level.GetState(coord.x,coord.y+1)==water &&
-          (!containsCoord(entry.second, cellBoundaries.borderCoords[2]) ||
-           !containsCoord(entry.second, cellBoundaries.borderCoords[3]))){
+      // bottom
+      if (!fillWater && ContainsWater(Pixel(coord.x, coord.y+1),level,cellGroundTileMap,
+                                      cellBoundaries.borderCoords[2],cellBoundaries.borderCoords[3])){
         fillWater=true;
       }
-      if (!fillWater && coord.x>0 && level.GetState(coord.x-1,coord.y)==water &&
-          (!containsCoord(entry.second, cellBoundaries.borderCoords[0]) ||
-           !containsCoord(entry.second, cellBoundaries.borderCoords[2]))){
+      // left
+      if (!fillWater && coord.x>0 && ContainsWater(Pixel(coord.x-1, coord.y),level,cellGroundTileMap,
+                                                   cellBoundaries.borderCoords[0],cellBoundaries.borderCoords[3])){
         fillWater=true;
       }
-      if (!fillWater && coord.x<(level.cellXCount-1) && level.GetState(coord.x+1,coord.y)==water &&
-          (!containsCoord(entry.second, cellBoundaries.borderCoords[1]) ||
-           !containsCoord(entry.second, cellBoundaries.borderCoords[3]))){
+      // right
+      if (!fillWater && ContainsWater(Pixel(coord.x+1, coord.y),level,cellGroundTileMap,
+                                      cellBoundaries.borderCoords[1],cellBoundaries.borderCoords[2])){
         fillWater=true;
       }
 
@@ -1099,6 +1157,7 @@ namespace osmscout {
         groundTile.coords.push_back(cellBoundaries.borderCoords[2]);
         groundTile.coords.push_back(cellBoundaries.borderCoords[3]);
 
+        // water GroundTile as "top layer"
         cellGroundTileMap[coord].push_front(groundTile);
       }
     }
@@ -2372,7 +2431,10 @@ namespace osmscout {
                 parameter.GetFillWaterArea(),
                 dataPolygon);
 
-      FillWaterAroundIsland(progress, levelStruct, cellGroundTileMap);
+      FillWaterAroundIsland(progress,
+                            levelStruct,
+                            cellGroundTileMap,
+                            dataPolygon);
     }
 
     // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too

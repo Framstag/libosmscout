@@ -314,17 +314,31 @@ namespace osmscout {
                     const TypeConfig& typeConfig,
                     Level& level);
 
+    bool IsCellInDataPolygon(const CellBoundaries &cellBoundary,
+                             const std::list<CoastRef>& dataPolygon);
+
     void FillWater(Progress& progress,
                    Level& level,
                    size_t tileCount,
                    const std::list<CoastRef>& dataPolygon);
 
-    bool containsCoord(const std::list<GroundTile> &tiles,
+    bool ContainsCoord(const std::list<GroundTile> &tiles,
+                       const GroundTile::Coord &coord,
+                       GroundTile::Type type);
+
+    bool ContainsCoord(const std::list<GroundTile> &tiles,
                        const GroundTile::Coord &coord);
+
+    bool ContainsWater(const Pixel &coord,
+                       const Level &level,
+                       const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
+                       const GroundTile::Coord &testCoord1,
+                       const GroundTile::Coord &testCoord2);
 
     void FillWaterAroundIsland(Progress& progress,
                                Level& level,
-                               std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
+                               std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
+                               const std::list<CoastRef>& dataPolygon);
 
     void FillLand(Progress& progress,
                   Level& level);
