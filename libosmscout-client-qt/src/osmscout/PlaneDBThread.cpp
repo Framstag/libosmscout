@@ -441,6 +441,15 @@ void PlaneDBThread::DrawMap()
     for (auto &db:databases){
       std::list<osmscout::TileRef> tiles;
       osmscout::MapData            data; // TODO: make sence cache these data?
+      osmscout::GeoBox             dbBox;
+      osmscout::GeoBox             renderBox;
+
+      db->database->GetBoundingBox(dbBox);
+      renderProjection.GetDimensions(renderBox);
+      if (!dbBox.Intersects(renderBox)){
+        osmscout::log.Debug() << "Skip database " << db->path.toStdString();
+        continue;
+      }
 
       db->mapService->LookupTiles(renderProjection,tiles);
       db->mapService->AddTileDataToMapData(tiles,data);
