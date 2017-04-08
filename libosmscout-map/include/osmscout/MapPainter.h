@@ -209,7 +209,6 @@ namespace osmscout {
     LabelLayouter                labels;
     LabelLayouter                overlayLabels;
 
-    std::vector<ScanCell>        wayScanlines;
     std::vector<LabelLayoutData> labelLayoutData;
     //@}
 

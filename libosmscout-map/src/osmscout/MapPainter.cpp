@@ -773,8 +773,8 @@ namespace osmscout {
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
-    double               fontHeight;
-    const LabelStyleRef& style=shieldStyle->GetShieldStyle();
+    double                       fontHeight;
+    const LabelStyleRef&         style=shieldStyle->GetShieldStyle();
     std::unordered_set<ScanCell> gridPoints;
 
     GetFontHeight(projection,
@@ -797,19 +797,6 @@ namespace osmscout {
     }
     std::cout << std::endl;*/
 
-    /*
-    wayScanlines.clear();
-
-    transBuffer.buffer->ScanConvertLine(transStart,
-                                        transEnd,
-                                        wayScanlines);
-
-    std::cout << "SCAN: ";
-    for (size_t i=0; i<wayScanlines.size(); i++) {
-      std::cout << wayScanlines[i].x << "," << wayScanlines[i].y << " ";
-    }
-    std::cout << std::endl;*/
-
     double frameHoriz=5;
     double frameVert=5;
 
@@ -822,9 +809,6 @@ namespace osmscout {
                      text,
                      xOff,yOff,width,height);
 
-    /*
-    size_t i=0;
-    while (i<wayScanlines.size()) {*/
     if (text=="A 46") {
       std::cout << text << " " << gridSize << ":" << std::endl;
     }
@@ -838,17 +822,15 @@ namespace osmscout {
 
       if (text=="A 46") {
         std::cout << gridPoint.x << "," << gridPoint.y << " ";
-
-        DrawSymbol(projection,
-                  parameter,
-                  *symbol,
-                  gridPoint.x,gridPoint.y);
-        continue;
       }
 
+      DrawSymbol(projection,
+                 parameter,
+                 *symbol,
+                 gridPoint.x,gridPoint.y);
+      continue;
+
       LabelData labelBox;
-      //double    x=wayScanlines[i].x+0.5;
-      //double    y=wayScanlines[i].y+0.5;
       double    x=gridPoint.GetX();
       double    y=gridPoint.GetY();
 
@@ -869,8 +851,6 @@ namespace osmscout {
 
       labels.Placelabel(labelBox,
                         label);
-
-      //i+=stepSizeInPixel;
     }
     if (text=="A 46") {
       std::cout << std::endl;
