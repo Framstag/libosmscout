@@ -21,6 +21,7 @@
 */
 
 #include <algorithm>
+#include <functional>
 #include <list>
 #include <unordered_map>
 #include <utility>
@@ -1070,6 +1071,11 @@ namespace osmscout {
       this->y=y;
     }
 
+    inline bool operator==(const ScanCell& other) const
+    {
+      return x==other.x && y==other.y;
+    }
+
     inline bool IsEqual(const ScanCell& other) const
     {
       return x==other.x && y==other.y;
@@ -1345,6 +1351,17 @@ namespace osmscout {
   const size_t CELL_DIMENSION_COUNT = CELL_DIMENSION_MAX+1;
 
   extern OSMSCOUT_API CellDimension cellDimension[CELL_DIMENSION_COUNT];
+}
+
+namespace std {
+  template <>
+  struct hash<osmscout::ScanCell>
+  {
+    size_t operator()(const osmscout::ScanCell& cell) const
+    {
+      return hash<int>{}(cell.GetX()) ^ (hash<int>{}(cell.GetY()) << 1);
+    }
+  };
 }
 
 #endif

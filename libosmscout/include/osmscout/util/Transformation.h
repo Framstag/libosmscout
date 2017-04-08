@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include <iostream>
+#include <unordered_set>
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>
@@ -184,7 +185,7 @@ namespace osmscout {
     virtual void GetGridPoints(size_t start,
                                size_t end,
                                double gridSize,
-                               std::vector<ScanCell>& cells) = 0;
+                               std::unordered_set<ScanCell>& cells) = 0;
   };
 
   /**
@@ -220,7 +221,7 @@ namespace osmscout {
     void GetGridPoints(size_t start,
                        size_t end,
                        double gridSize,
-                       std::vector<ScanCell>& cells);
+                       std::unordered_set<ScanCell>& cells);
   };
 
   template<class P>
@@ -364,27 +365,25 @@ namespace osmscout {
   void CoordBufferImpl<P>::GetGridPoints(size_t start,
                                          size_t end,
                                          double gridSize,
-                                         std::vector<ScanCell>& cells)
+                                         std::unordered_set<ScanCell>& cells)
   {
     if (start==end) {
       return;
     }
 
-    std::cout << ">>>" << std::endl;
+    //std::cout << ">>>" << std::endl;
 
     double gridHalf=gridSize/2.0;
     size_t current=start;
     size_t next=current+1;
     double cGridX=floor((buffer[current].GetX())/gridSize);
     double cGridY=floor((buffer[current].GetY())/gridSize);
-    double nGridX;
-    double nGridY;
 
     while (next<=end) {
-      nGridX=floor((buffer[next].GetX())/gridSize);
-      nGridY=floor((buffer[next].GetY())/gridSize);
+      double nGridX=floor((buffer[next].GetX())/gridSize);
+      double nGridY=floor((buffer[next].GetY())/gridSize);
 
-      std::cout << cGridX << "," << cGridY << " " << nGridX << "," << nGridY << std::endl;
+      //std::cout << cGridX << "," << cGridY << " " << nGridX << "," << nGridY << std::endl;
 
       if (cGridX!=nGridX) {
         for (double g=cGridX+1; g<=nGridX; g++) {
@@ -399,12 +398,12 @@ namespace osmscout {
           ScanCell vLine2      =ScanCell((int)vLineX,(int)vLineY2);
           ScanCell intersection=ScanCell(0,0);
 
-          std::cout << "Intersect X: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
-          std::cout << " vs. " << vLine1.GetX() << "," <<  vLine1.GetY() << " - " << vLine2.GetX() << "," << vLine2.GetY() << std::endl;
+          //std::cout << "Intersect X: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
+          //std::cout << " vs. " << vLine1.GetX() << "," <<  vLine1.GetY() << " - " << vLine2.GetX() << "," << vLine2.GetY() << std::endl;
 
           if (GetLineIntersectionPixel(line1,line2,vLine1,vLine2,intersection)) {
-            std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
-            cells.push_back(intersection);
+            //std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
+            cells.insert(intersection);
           }
         }
       }
@@ -422,12 +421,12 @@ namespace osmscout {
           ScanCell hLine2      =ScanCell((int) hLineX2,(int) hLineY);
           ScanCell intersection=ScanCell(0,0);
 
-          std::cout << "Intersect Y: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
-          std::cout << " vs. " << hLine1.GetX() << "," <<  hLine1.GetY() << " - " << hLine2.GetX() << "," << hLine2.GetY() << std::endl;
+          //std::cout << "Intersect Y: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
+          //std::cout << " vs. " << hLine1.GetX() << "," <<  hLine1.GetY() << " - " << hLine2.GetX() << "," << hLine2.GetY() << std::endl;
 
           if (GetLineIntersectionPixel(line1,line2,hLine1,hLine2,intersection)) {
-            std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
-            cells.push_back(intersection);
+            //std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
+            cells.insert(intersection);
           }
         }
       }
@@ -438,7 +437,7 @@ namespace osmscout {
       next++;
     }
 
-    std::cout << "<<<" << std::endl;
+    //std::cout << "<<<" << std::endl;
   }
 
   /**
