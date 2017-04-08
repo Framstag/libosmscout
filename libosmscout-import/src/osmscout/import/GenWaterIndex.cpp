@@ -336,11 +336,13 @@ namespace osmscout {
   void cutPath(std::vector<Point> &dst,
                const std::vector<Point> &src,
                size_t start,
-               size_t end)
+               size_t end,
+               double startDistanceSquare,
+               double endDistanceSquare)
   {
     start=start%src.size();
     end=end%src.size();
-    if (start>end){
+    if (start>end || (start==end && startDistanceSquare>endDistanceSquare)){
       dst.insert(dst.end(),
                  src.begin()+start,
                  src.end());
@@ -469,7 +471,8 @@ namespace osmscout {
           CoastRef part=std::make_shared<Coast>();
           part->coast.push_back(Point(0,int1.point));
           cutPath(part->coast, c->coast,
-                  (int1.aIndex+1), int2.aIndex+1);
+                  int1.aIndex+1, int2.aIndex+1,
+                  int1.aDistanceSquare, int2.aDistanceSquare);
           part->coast.push_back(Point(0,int2.point));
           part->left=int1.orientation>0 ? CoastState::water : CoastState::land;
           assert(int1.orientation>0 ? int2.orientation<0 : int2.orientation>0);
@@ -478,6 +481,8 @@ namespace osmscout {
           part->sortCriteria=c->sortCriteria;
           part->isArea=false;
           coastlines.push_back(part);
+
+          //WriteGpx(part->coast,"data.gpx");
         }
       }
     }
@@ -518,7 +523,8 @@ namespace osmscout {
         CoastRef part=std::make_shared<Coast>();
         part->coast.push_back(Point(0,int1.point));
         cutPath(part->coast, w->coast,
-                (int1.bIndex+1), int2.bIndex+1);
+                int1.bIndex+1, int2.bIndex+1,
+                int1.bDistanceSquare, int2.bDistanceSquare);
         part->coast.push_back(Point(0,int2.point));
         part->left=w->left;
         part->right=w->right;
@@ -526,6 +532,8 @@ namespace osmscout {
         part->sortCriteria=w->sortCriteria;
         part->isArea=false;
         coastlines.push_back(part);
+
+        //WriteGpx(part->coast,"cut.gpx");
       }
     }
   }
