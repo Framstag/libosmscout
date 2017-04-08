@@ -79,11 +79,17 @@ CONST
   UINT labelPrioMillionCity         = 6;
   UINT labelPrioBigCity             = 7;
   UINT labelPrioCity                = 8;
-  UINT labelPrioTown                = 9;
-  UINT labelPrioVillage             = 10;
-  UINT labelPrioHamlet              = 11;
-  UINT labelPrioSuburb              = 12;
-  UINT labelPrioLocality            = 13;
+  
+  UINT labelShieldMotorway          = 9;
+  UINT labelShieldTrunk             = 11;
+  UINT labelShieldPrimary           = 11;
+  
+  
+  UINT labelPrioTown                = 12;
+  UINT labelPrioVillage             = 13;
+  UINT labelPrioHamlet              = 14;
+  UINT labelPrioSuburb              = 15;
+  UINT labelPrioLocality            = 16;
 
   UINT labelPrioNatural             = 20;
   UINT labelPrioLanduse             = 25;
@@ -1054,15 +1060,15 @@ STYLE
  // WAY.SHIELD
 
  [MAG state-] {
-   [TYPE highway_motorway] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @motorwayShieldColor; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_motorway] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @motorwayShieldColor; borderColor: #ffffff; priority: @labelShieldMotorway;}
  }
 
  [MAG proximity-] {
-   [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @trunkShieldColor; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @trunkShieldColor; borderColor: #ffffff; priority: @labelShieldTrunk;}
  }
 
  [MAG city-] {
-   [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @primaryShieldColor; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @primaryShieldColor; borderColor: #ffffff; priority: @labelShieldPrimary;}
  }
 
  // Labels
