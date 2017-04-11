@@ -141,6 +141,7 @@ namespace osmscout {
       return false;
     }
 
+    // denominator, see GetLineIntersection for more details
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
                 (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
 
@@ -149,11 +150,18 @@ namespace osmscout {
     double ub_numr=(a2.GetLon()-a1.GetLon())*(a1.GetLat()-b1.GetLat())-
                    (a2.GetLat()-a1.GetLat())*(a1.GetLon()-b1.GetLon());
 
-    if (denr==0.0) {
+    if (denr==0.0) { // parallels
       if (ua_numr==0.0 && ub_numr==0.0) {
-        // This gives currently false hits because of number resolution problems, if two lines are very
-        // close together and for example are part of a very details node curve intersections are detected.
-        return true;
+        // two lines are on one straight line, check the bounds
+        GeoBox aBox(GeoCoord(a1.GetLat(),a1.GetLon()),
+                    GeoCoord(a2.GetLat(),a2.GetLon()));
+        GeoBox bBox(GeoCoord(b1.GetLat(),b1.GetLon()),
+                    GeoCoord(b2.GetLat(),b2.GetLon()));
+
+        return bBox.Includes(a1,false) ||
+               bBox.Includes(a2,false) ||
+               aBox.Includes(b1,false) ||
+               aBox.Includes(b2,false);
       }
       else {
         return false;
@@ -197,6 +205,14 @@ namespace osmscout {
       return false;
     }
 
+    // for geographic, expect point.x=lon and point.y=lat
+
+    // see https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+    // and http://www.geeksforgeeks.org/orientation-3-ordered-points/
+
+    // denominator < 0  : left angle
+    // denominator == 0 : parallels
+    // denominator > 0  : right angle
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
                 (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
 
@@ -207,11 +223,29 @@ namespace osmscout {
 
     if (denr==0.0) {
       if (ua_numr==0.0 && ub_numr==0.0) {
-        // This gives currently false hits because of number resolution problems, if two lines are very
-        // close together and for example are part of a very details node curve intersections are detected.
+        // two lines are on one straight line, check the bounds
+        GeoBox aBox(GeoCoord(a1.GetLat(),a1.GetLon()),
+                    GeoCoord(a2.GetLat(),a2.GetLon()));
+        GeoBox bBox(GeoCoord(b1.GetLat(),b1.GetLon()),
+                    GeoCoord(b2.GetLat(),b2.GetLon()));
+        if (bBox.Includes(a1,false)){
+          intersection.Set(a1.GetLat(),a1.GetLon());
+          return true;
+        }
+        if (bBox.Includes(a2,false)){
+          intersection.Set(a2.GetLat(),a2.GetLon());
+          return true;
+        }
+        if (aBox.Includes(b1,false)){
+          intersection.Set(b1.GetLat(),b1.GetLon());
+          return true;
+        }
+        if (aBox.Includes(b2,false)){
+          intersection.Set(b2.GetLat(),b2.GetLon());
+          return true;
+        }
 
-        // FIXME: setup intersection
-        return true;
+        return false;
       }
       else {
         return false;
