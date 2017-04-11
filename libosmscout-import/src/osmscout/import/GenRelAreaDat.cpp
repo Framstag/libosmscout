@@ -146,6 +146,7 @@ namespace osmscout {
                                         Progress& progress,
                                         Id id,
                                         const std::string& name,
+                                        const TypeInfoRef& type,
                                         std::list<MultipolygonPart>& parts)
   {
     std::list<MultipolygonPart>                 rings;
@@ -184,6 +185,11 @@ namespace osmscout {
                        " of way "+NumberToString(entry.second.front()->ways.front()->GetId())+
                        " cannot be joined with any other way of the relation "+
                        NumberToString(id)+" "+name);
+
+        parameter.GetErrorReporter()->ReportRelation(id,
+                                                     type,
+                                                     "Incomplete or broken relation - cannot join path "+
+                                                     NumberToString(entry.second.front()->ways.front()->GetId()));
         return false;
       }
 
@@ -318,6 +324,7 @@ namespace osmscout {
                                                  Progress& progress,
                                                  Id id,
                                                  const std::string& name,
+                                                 const TypeInfoRef& type,
                                                  std::list<MultipolygonPart>& parts)
   {
     std::list<MultipolygonPart> groups;
@@ -331,6 +338,7 @@ namespace osmscout {
                     progress,
                     id,
                     name,
+                    type,
                     parts)) {
       return false;
     }
@@ -459,7 +467,7 @@ namespace osmscout {
 
           part.role.nodes[n].Set(coordEntry->second.GetSerial(),
                                  coordEntry->second.GetCoord());
-        }
+          }
 
         part.ways.push_back(way);
 
@@ -918,6 +926,7 @@ namespace osmscout {
                              progress,
                              rawRelation.GetId(),
                              name,
+                             rawRelation.GetType(),
                              parts)) {
       return false;
     }

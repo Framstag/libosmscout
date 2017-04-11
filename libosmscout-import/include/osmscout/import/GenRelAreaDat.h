@@ -160,6 +160,7 @@ namespace osmscout {
                     Progress& progress,
                     Id id,
                     const std::string& name,
+                    const TypeInfoRef& type,
                     std::list<MultipolygonPart>& parts);
 
     bool ResolveMultipolygon(const TypeConfig& typeConfig,
@@ -167,6 +168,7 @@ namespace osmscout {
                              Progress& progress,
                              Id id,
                              const std::string& name,
+                             const TypeInfoRef& type,
                              std::list<MultipolygonPart>& parts);
 
     bool ComposeAreaMembers(const TypeConfig& typeConfig,

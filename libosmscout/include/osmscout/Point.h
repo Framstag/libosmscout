@@ -87,7 +87,7 @@ namespace osmscout {
     /**
      * Returns a fast calculable unique id for the coordinate under consideration
      * that different OSM nodes with the same coordinate will have different ids if the
-     * identity of the node is important - else th serial id will 0.
+     * identity of the node is important - else the serial id will be 0.
      *
      * The id does not have any semantics regarding sorting. Coordinates with close ids
      * do not need to be close in location.
@@ -125,7 +125,7 @@ namespace osmscout {
 
     /**
      * Compare this and the other point for "sameness". Sameness is defined as having the
-     * same coordinate but not necessarily the same serial id. THis means, that both points
+     * same coordinate but not necessarily the same serial id. This means, that both points
      * have the same location but are not necessarily identical.
      *
      * @param other

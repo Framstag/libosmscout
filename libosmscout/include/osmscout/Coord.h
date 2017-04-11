@@ -45,7 +45,7 @@ namespace osmscout {
   struct OSMSCOUT_API Coord CLASS_FINAL
   {
   private:
-    uint8_t    serial;     //!< Serial id in relation to all coordinates witht he same coord value
+    uint8_t    serial;     //!< Serial id in relation to all coordinates with the same coord value
     GeoCoord   coord;      //!< The geographic coordinate
 
   public:
