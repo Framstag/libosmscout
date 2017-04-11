@@ -326,7 +326,7 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const PathShieldStyleRef& style,
                                const std::string& text,
-                               size_t transStart, size_t transEnd);
+                               const std::vector<Point>& nodes);
 
     bool RegisterPointLabel(const Projection& projection,
                             const MapParameter& parameter,
@@ -352,7 +352,7 @@ namespace osmscout {
     void DrawWayShieldLabel(const StyleConfig& styleConfig,
                             const Projection& projection,
                             const MapParameter& parameter,
-                            const WayPathData& data);
+                            const Way& data);
 
     void DrawWayContourLabel(const StyleConfig& styleConfig,
                              const Projection& projection,
@@ -361,7 +361,8 @@ namespace osmscout {
 
     void DrawWayShieldLabels(const StyleConfig& styleConfig,
                              const Projection& projection,
-                             const MapParameter& parameter);
+                             const MapParameter& parameter,
+                             const MapData& data);
 
     void DrawWayContourLabels(const StyleConfig& styleConfig,
                               const Projection& projection,

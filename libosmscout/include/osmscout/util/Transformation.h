@@ -182,10 +182,6 @@ namespace osmscout {
     virtual void ScanConvertLine(size_t start,
                                  size_t end,
                                  std::vector<ScanCell>& cells) = 0;
-    virtual void GetGridPoints(size_t start,
-                               size_t end,
-                               double gridSize,
-                               std::unordered_set<ScanCell>& cells) = 0;
   };
 
   /**
@@ -217,11 +213,6 @@ namespace osmscout {
     void ScanConvertLine(size_t start,
                          size_t end,
                          std::vector<ScanCell>& cells);
-
-    void GetGridPoints(size_t start,
-                       size_t end,
-                       double gridSize,
-                       std::unordered_set<ScanCell>& cells);
   };
 
   template<class P>
@@ -359,85 +350,6 @@ namespace osmscout {
                                 x2,y2,
                                 cells);
     }
-  }
-
-  template<class P>
-  void CoordBufferImpl<P>::GetGridPoints(size_t start,
-                                         size_t end,
-                                         double gridSize,
-                                         std::unordered_set<ScanCell>& cells)
-  {
-    if (start==end) {
-      return;
-    }
-
-    //std::cout << ">>>" << std::endl;
-
-    double gridHalf=gridSize/2.0;
-    size_t current=start;
-    size_t next=current+1;
-    double cGridX=floor((buffer[current].GetX())/gridSize);
-    double cGridY=floor((buffer[current].GetY())/gridSize);
-
-    while (next<=end) {
-      double nGridX=floor((buffer[next].GetX())/gridSize);
-      double nGridY=floor((buffer[next].GetY())/gridSize);
-
-      //std::cout << cGridX << "," << cGridY << " " << nGridX << "," << nGridY << std::endl;
-
-      if (cGridX!=nGridX) {
-        for (double g=cGridX+1; g<=nGridX; g++) {
-          double   vLineX      =g*gridSize;
-          double   vLineY1     =cGridY*gridSize;
-          double   vLineY2     =(cGridY+1)*gridSize;
-          ScanCell line1       =ScanCell(buffer[current].GetX(),
-                                         buffer[current].GetY());
-          ScanCell line2       =ScanCell(buffer[next].GetX(),
-                                         buffer[next].GetY());
-          ScanCell vLine1      =ScanCell((int)vLineX,(int)vLineY1);
-          ScanCell vLine2      =ScanCell((int)vLineX,(int)vLineY2);
-          ScanCell intersection=ScanCell(0,0);
-
-          //std::cout << "Intersect X: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
-          //std::cout << " vs. " << vLine1.GetX() << "," <<  vLine1.GetY() << " - " << vLine2.GetX() << "," << vLine2.GetY() << std::endl;
-
-          if (GetLineIntersectionPixel(line1,line2,vLine1,vLine2,intersection)) {
-            //std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
-            cells.insert(intersection);
-          }
-        }
-      }
-
-      if (cGridY!=nGridY) {
-        for (double g=cGridY+1; g<=nGridY; g++) {
-          double hLineX1       =cGridX*gridSize;
-          double hLineX2       =(cGridX+1)*gridSize;
-          double hLineY        =g*gridSize;
-          ScanCell line1       =ScanCell(buffer[current].GetX(),
-                                         buffer[current].GetY());
-          ScanCell line2       =ScanCell(buffer[next].GetX(),
-                                         buffer[next].GetY());
-          ScanCell hLine1      =ScanCell((int) hLineX1,(int) hLineY);
-          ScanCell hLine2      =ScanCell((int) hLineX2,(int) hLineY);
-          ScanCell intersection=ScanCell(0,0);
-
-          //std::cout << "Intersect Y: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
-          //std::cout << " vs. " << hLine1.GetX() << "," <<  hLine1.GetY() << " - " << hLine2.GetX() << "," << hLine2.GetY() << std::endl;
-
-          if (GetLineIntersectionPixel(line1,line2,hLine1,hLine2,intersection)) {
-            //std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
-            cells.insert(intersection);
-          }
-        }
-      }
-
-      cGridX=nGridX;
-      cGridY=nGridY;
-      current++;
-      next++;
-    }
-
-    //std::cout << "<<<" << std::endl;
   }
 
   /**
