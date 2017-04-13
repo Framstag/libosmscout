@@ -398,10 +398,10 @@ namespace osmscout {
     return i1.bIndex < i2.bIndex;
   }
 
-  void WaterIndexGenerator::SynthetizeCoastlinesSegments(Progress& progress,
-                                                         const std::list<CoastRef>& dataPolygons,
-                                                         const std::list<CoastRef>& coastlineWays,
-                                                         std::list<CoastRef> &coastlines)
+  void WaterIndexGenerator::SynthetizeCoastlines2(Progress& progress,
+                                                  const std::list<CoastRef>& dataPolygons,
+                                                  const std::list<CoastRef>& coastlines,
+                                                  std::list<CoastRef> &synthetized)
   {
     std::vector<CoastRef> candidates;
 
@@ -413,10 +413,10 @@ namespace osmscout {
       candidate->right=polygon->right;
       candidates.push_back(candidate);
     }
-    std::vector<std::vector<PathIntersection>> wayIntersections(coastlineWays.size());
+    std::vector<std::vector<PathIntersection>> wayIntersections(coastlines.size());
 
     /**
-     * create matrix of intersection candidates x ways
+     * create matrix of intersection candidates x coastlines
      * split candidate and ways separately
      */
     for (size_t ci=0;ci<candidates.size();ci++){
@@ -425,14 +425,14 @@ namespace osmscout {
       std::vector<PathIntersection> candidateIntersections;
 
       size_t wi=0;
-      for (const auto &w:coastlineWays){
+      for (const auto &coastline:coastlines){
 
         //WriteGpx(w->coast,"way.gpx");
 
         // try to find intersections between this candidate and way
         std::vector<PathIntersection> intersections;
-        FindPathIntersections(c->coast,w->coast,
-                              c->isArea,false,
+        FindPathIntersections(c->coast,coastline->coast,
+                              c->isArea,coastline->isArea,
                               intersections);
 
         candidateIntersections.insert(candidateIntersections.end(),
@@ -446,7 +446,7 @@ namespace osmscout {
 
       // cut candidate
       if (candidateIntersections.empty()){
-        coastlines.push_back(candidates[ci]);
+        synthetized.push_back(candidates[ci]);
       }else{
         if (candidateIntersections.size()%2!=0){
           progress.Warning("Odd count of intersections: "+candidateIntersections.size());
@@ -464,7 +464,8 @@ namespace osmscout {
           std::cout.precision(5);
           std::cout << "    Cut data polygon from " <<
             int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
-            int2.point.GetLat() << " " << int2.point.GetLon() <<
+            int2.point.GetLat() << " " << int2.point.GetLon() << " left state: " <<
+            (int1.orientation>0 ?"water":"land") <<
             std::endl;
 #endif
 
@@ -480,7 +481,7 @@ namespace osmscout {
           part->id=c->id;
           part->sortCriteria=c->sortCriteria;
           part->isArea=false;
-          coastlines.push_back(part);
+          synthetized.push_back(part);
 
           //WriteGpx(part->coast,"data.gpx");
         }
@@ -489,10 +490,19 @@ namespace osmscout {
 
     // cut ways
     size_t wi=0;
-    for (const auto &w:coastlineWays){
+    for (const auto &coastline:coastlines){
       std::vector<PathIntersection> intersections=wayIntersections[wi];
       wi++;
       if (intersections.empty()){
+        if (coastline->isArea){
+          // test island without intersections if it is inside data polygon...
+          for (const auto &poly:dataPolygons){
+            if (IsAreaAtLeastPartlyInArea(coastline->coast,poly->coast)){
+              synthetized.push_back(coastline);
+              break;
+            }
+          }
+        }
         continue;
       }
       if (intersections.size()%2!=0){
@@ -504,9 +514,10 @@ namespace osmscout {
                 intersections.end(),
                 PathIntersectionSortB);
 
-      for (size_t ii=0;ii<intersections.size()-1;ii++){
+      size_t limit=coastline->isArea?intersections.size():intersections.size()-1;
+      for (size_t ii=0;ii<limit;ii++){
         PathIntersection int1=intersections[ii];
-        PathIntersection int2=intersections[ii+1];
+        PathIntersection int2=intersections[(ii+1)%intersections.size()];
         assert(int1.orientation>0 ? int2.orientation<0 : int2.orientation>0);
         if (int1.orientation<0){
           continue;
@@ -522,16 +533,16 @@ namespace osmscout {
 
         CoastRef part=std::make_shared<Coast>();
         part->coast.push_back(Point(0,int1.point));
-        cutPath(part->coast, w->coast,
+        cutPath(part->coast, coastline->coast,
                 int1.bIndex+1, int2.bIndex+1,
                 int1.bDistanceSquare, int2.bDistanceSquare);
         part->coast.push_back(Point(0,int2.point));
-        part->left=w->left;
-        part->right=w->right;
-        part->id=w->id;
-        part->sortCriteria=w->sortCriteria;
+        part->left=coastline->left;
+        part->right=coastline->right;
+        part->id=coastline->id;
+        part->sortCriteria=coastline->sortCriteria;
         part->isArea=false;
-        coastlines.push_back(part);
+        synthetized.push_back(part);
 
         //WriteGpx(part->coast,"cut.gpx");
       }
@@ -646,30 +657,25 @@ namespace osmscout {
 
     progress.SetAction("Synthetize coastlines");
 
-    std::list<CoastRef> clippedCoastlineSegments;
-    std::list<CoastRef> wayCoastlines;
+    std::list<CoastRef> synthetized;
+    std::list<CoastRef> allCoastlines;
     for (const auto& coastline : coastlines) {
-      if (coastline->isArea){
-        clippedCoastlineSegments.push_back(coastline);
-      }else{
-        wayCoastlines.push_back(coastline);
-      }
+      allCoastlines.push_back(coastline);
     }
 
     osmscout::StopClock clock;
-    size_t areasBefore=clippedCoastlineSegments.size();
-    SynthetizeCoastlinesSegments(progress,
-                                 dataPolygon,
-                                 wayCoastlines,
-                                 clippedCoastlineSegments);
+    SynthetizeCoastlines2(progress,
+                          dataPolygon,
+                          allCoastlines,
+                          synthetized);
 
     // define coastline states if there are still some undefined
-    for (auto const &coastline:clippedCoastlineSegments){
+    for (auto const &coastline:synthetized){
       if (coastline->right==CoastState::undefined){
         coastline->right=CoastState::unknown;
       }
       if (coastline->left==CoastState::undefined && coastline->isArea){
-        for (auto const &testCoast:clippedCoastlineSegments){
+        for (auto const &testCoast:synthetized){
           if (testCoast->right==CoastState::water &&
               IsAreaAtLeastPartlyInArea(testCoast->coast,coastline->coast)){
             coastline->left=CoastState::water;
@@ -684,12 +690,12 @@ namespace osmscout {
 
     clock.Stop();
     progress.Info(NumberToString(dataPolygon.size())+" data polygon(s), and "+
-                  NumberToString(wayCoastlines.size())+" way coastline(s) synthetized into "+
-                  NumberToString(clippedCoastlineSegments.size()-areasBefore)+" new coastlines(s) segments, tooks "+
+                  NumberToString(allCoastlines.size())+" coastline(s) synthetized into "+
+                  NumberToString(synthetized.size())+" coastlines(s), tooks "+
                   clock.ResultString() +" s"
     );
 
-    coastlines=clippedCoastlineSegments;
+    coastlines=synthetized;
   }
 
   /**

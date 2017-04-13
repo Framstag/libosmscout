@@ -264,10 +264,10 @@ namespace osmscout {
                          Progress& progress,
                          std::list<CoastRef>& coastlines);
 
-    void SynthetizeCoastlinesSegments(Progress& progress,
-                                      const std::list<CoastRef>& dataPolygons,
-                                      const std::list<CoastRef>& coastlineWays,
-                                      std::list<CoastRef> &coastlines);
+    void SynthetizeCoastlines2(Progress& progress,
+                               const std::list<CoastRef>& dataPolygons,
+                               const std::list<CoastRef>& coastlines,
+                               std::list<CoastRef> &synthetized);
 
     void MergeCoastlines(Progress& progress,
                          std::list<CoastRef>& coastlines);
