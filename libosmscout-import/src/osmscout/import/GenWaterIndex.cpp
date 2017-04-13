@@ -1734,6 +1734,11 @@ namespace osmscout {
         if (coastline->points.front()!=coastline->points.back()) {
           coastline->points.push_back(coastline->points.front());
         }
+        if (coastline->points.size()<=3){
+          // ignore island reduced just to line
+          coastline->points.clear();
+          continue;
+        }
       }
 
       GeoBox  boundingBox;
