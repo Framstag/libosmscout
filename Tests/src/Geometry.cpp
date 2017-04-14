@@ -33,19 +33,47 @@ int main(int /*argc*/, char** /*argv*/)
   osmscout::GeoCoord b(52,15);
   osmscout::GeoCoord intersection;
   
-  if (osmscout::GetLineIntersection(a,a,
+  if (osmscout::LinesIntersect(a,a,
+                               b,b) ||
+      osmscout::GetLineIntersection(a,a,
                                     b,b,
                                     intersection))
   {
+    std::cout << "Failure" << std::endl;
     return 1;
   }
+  std::cout << "OK" << std::endl;
 
-  if (osmscout::LinesIntersect(a,a,
-                               b,b)){
+  std::cout << "Two horizontal vectors, one left the other, can't intersects... ";
+  osmscout::GeoCoord x1(1,0);
+  osmscout::GeoCoord x2(2,0);
+  osmscout::GeoCoord y1(3,0);
+  osmscout::GeoCoord y2(4,0);
+  if (osmscout::LinesIntersect(x1,x2,
+                               y1,y2) ||
+      osmscout::GetLineIntersection(x1,x2,
+                                    y1,y2,
+                                    intersection)){
+    std::cout << "Failure" << std::endl;
     return 2;
   }
-
   std::cout << "OK" << std::endl;
+
+  std::cout << "Two vertical vectors, one above the other, can't intersects... ";
+  x1.Set(0,1);
+  x2.Set(0,2);
+  y1.Set(0,3);
+  y2.Set(0,4);
+  if (osmscout::LinesIntersect(x1,x2,
+                               y1,y2) ||
+      osmscout::GetLineIntersection(x1,x2,
+                                    y1,y2,
+                                    intersection)){
+    std::cout << "Failure" << std::endl;
+    return 2;
+  }
+  std::cout << "OK" << std::endl;
+
   return 0;
 }
 
