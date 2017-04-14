@@ -364,10 +364,11 @@ namespace osmscout {
    * Just call this method from some place, add breakpoint after it
    * and check the result...
    */
-  void WriteGpx(const std::vector<Point> &path, const char* name)
+  template<typename InputIterator>
+  void WriteGpx(InputIterator begin, InputIterator end, const std::string name)
   {
     std::ofstream gpxFile;
-    gpxFile.open(name);
+    gpxFile.open(name.c_str());
     gpxFile.imbue(std::locale("C"));
 
     gpxFile << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -376,12 +377,17 @@ namespace osmscout {
     gpxFile << " xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\n";
 
     gpxFile << " <trk><trkseg>\n";
-    for (auto const &point: path){
-      gpxFile << "<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\"></trkpt>\n";
+    for (InputIterator it=begin; it!=end;it++){
+      gpxFile << "<trkpt lat=\"" << it->GetLat() << "\" lon=\"" << it->GetLon() << "\"></trkpt>\n";
     }
     gpxFile << " </trkseg></trk>\n</gpx>";
 
     gpxFile.close();
+  }
+
+  void WriteGpx(const std::vector<Point> &path, const std::string name)
+  {
+    WriteGpx(path.begin(), path.end(), name);
   }
 
   bool PathIntersectionSortA(const PathIntersection &i1, const PathIntersection &i2)
