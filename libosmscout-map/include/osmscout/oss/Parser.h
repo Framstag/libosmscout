@@ -124,7 +124,7 @@ StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
 
-inline std::string Destring(const char* str)
+std::string Destring(const char* str)
 {
   std::string result(str);
 
@@ -137,7 +137,7 @@ inline std::string Destring(const char* str)
   return result;
 }
 
-inline bool StringToDouble(const char* string, double& value)
+bool StringToDouble(const char* string, double& value)
 {
   std::istringstream buffer(string);
 
@@ -148,7 +148,7 @@ inline bool StringToDouble(const char* string, double& value)
   return !buffer.fail() && !buffer.bad() && buffer.eof();
 }
 
-inline size_t GetHexDigitValue(char c)
+size_t GetHexDigitValue(char c)
 {
   if (c>='0' && c<='9') {
     return c-'0';
@@ -161,7 +161,7 @@ inline size_t GetHexDigitValue(char c)
   return 0;
 }
 
-inline void ToRGBA(const std::string& str, Color& color)
+void ToRGBA(const std::string& str, Color& color)
 {
   double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
   double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
@@ -176,6 +176,37 @@ inline void ToRGBA(const std::string& str, Color& color)
   }
 
   color=Color(r,g,b,a);
+}
+
+void AddFeatureToFilter(StyleFilter& filter,
+                        const std::string& featureName,
+                        TypeInfoSet& resultTypes)
+{
+  FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
+
+  if (!feature) {
+    std::string e="Unknown feature '"+featureName+"'";
+
+    SemErr(e.c_str());
+    return;
+  }
+
+  for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+    if (type->HasFeature(featureName)) {
+      if (!filter.FiltersByType() ||
+          filter.HasType(type)) {
+        // Add type only if the filter either has no types or 
+        // if the the type is already filtered  
+        resultTypes.Set(type);
+      }
+    }
+  }
+
+  if (!resultTypes.Empty()) {
+    size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
+  
+    filter.AddFeature(featureFilterIndex);
+  }
 }
 
 
@@ -231,9 +262,6 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STYLEFILTER_TYPE(StyleFilter& filter);
 	void STYLEFILTER_MAG(StyleFilter& filter);
 	void STYLEFILTER_ONEWAY(StyleFilter& filter);
-	void STYLEFILTER_BRIDGE(StyleFilter& filter);
-	void STYLEFILTER_TUNNEL(StyleFilter& filter);
-	void STYLEFILTER_EMBANKMENT(StyleFilter& filter);
 	void STYLEFILTER_SIZE(StyleFilter& filter);
 	void SIZECONDITION(SizeConditionRef& condition);
 	void NODESTYLEDEF(StyleFilter filter, bool state);

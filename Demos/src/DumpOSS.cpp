@@ -90,12 +90,6 @@ void DumpType(const osmscout::TypeConfigRef& /*typeConfig*/,
     for (const auto& selector : areaFillStyleSelectors) {
       if (selector.criteria.HasCriteria()) {
         std::cout << "      [";
-        if (selector.criteria.GetBridge()) {
-          std::cout << " BRIDGE";
-        }
-        if (selector.criteria.GetTunnel()) {
-          std::cout << " TUNNEL";
-        }
         if (selector.criteria.GetOneway()) {
           std::cout << " ONEWAY";
         }
@@ -117,12 +111,6 @@ void DumpType(const osmscout::TypeConfigRef& /*typeConfig*/,
     for (const auto& selector : areaTextStyleSelectors) {
       if (selector.criteria.HasCriteria()) {
         std::cout << "      [";
-        if (selector.criteria.GetBridge()) {
-          std::cout << " BRIDGE";
-        }
-        if (selector.criteria.GetTunnel()) {
-          std::cout << " TUNNEL";
-        }
         if (selector.criteria.GetOneway()) {
           std::cout << " ONEWAY";
         }
@@ -150,12 +138,6 @@ void DumpType(const osmscout::TypeConfigRef& /*typeConfig*/,
     for (const auto& selector : nodeTextStyleSelectors) {
       if (selector.criteria.HasCriteria()) {
         std::cout << "      [";
-        if (selector.criteria.GetBridge()) {
-          std::cout << " BRIDGE";
-        }
-        if (selector.criteria.GetTunnel()) {
-          std::cout << " TUNNEL";
-        }
         if (selector.criteria.GetOneway()) {
           std::cout << " ONEWAY";
         }

@@ -1727,12 +1727,12 @@ namespace osmscout {
   {
         tagEmbankment=typeConfig.RegisterTag("embankment");
   }
-    
+
   std::string EmbankmentFeature::GetName() const
   {
         return NAME;
   }
-    
+
   void EmbankmentFeature::Parse(Progress& /*progress*/,
                             const TypeConfig& /*typeConfig*/,
                             const FeatureInstance& feature,
@@ -2066,6 +2066,35 @@ namespace osmscout {
     if (isIn!=tags.end() && !isIn->second.empty()) {
       IsInFeatureValue* value=static_cast<IsInFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
       value->SetIsIn(isIn->second);
+    }
+  }
+
+  DynamicFeatureReader::DynamicFeatureReader(const TypeConfig& typeConfig,
+                                             const Feature& feature)
+  : featureName(feature.GetName())
+  {
+    lookupTable.resize(typeConfig.GetTypeCount(),
+                       std::numeric_limits<size_t>::max());
+
+    for (const auto &type : typeConfig.GetTypes()) {
+      size_t index;
+
+      if (type->GetFeature(featureName,
+                           index)) {
+        lookupTable[type->GetIndex()]=index;
+      }
+    }
+  }
+
+  bool DynamicFeatureReader::IsSet(const FeatureValueBuffer& buffer) const
+  {
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
+
+    if (index!=std::numeric_limits<size_t>::max()) {
+      return buffer.HasFeature(index);
+    }
+    else {
+      return false;
     }
   }
 }
