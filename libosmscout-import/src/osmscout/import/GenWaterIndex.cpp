@@ -370,6 +370,7 @@ namespace osmscout {
     std::ofstream gpxFile;
     gpxFile.open(name.c_str());
     gpxFile.imbue(std::locale("C"));
+    gpxFile.precision(100);
 
     gpxFile << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     gpxFile << "<gpx creator=\"osmscout\" version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\"";
@@ -636,6 +637,10 @@ namespace osmscout {
         progress.Warning("Dropping to short coastline with id "+NumberToString(coastline->id));
         continue;
       }
+
+      //if (!coastline->isArea){
+      //  WriteGpx(coastline->coast, "coastway-"+NumberToString(coastline->id)+".gpx");
+      //}
 
       mergedCoastlines.push_back(coastline);
     }
