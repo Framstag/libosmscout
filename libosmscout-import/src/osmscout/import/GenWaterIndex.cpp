@@ -428,26 +428,33 @@ namespace osmscout {
      */
     for (size_t ci=0;ci<candidates.size();ci++){
       CoastRef c=candidates[ci];
-      //WriteGpx(c->coast,"candidate.gpx");
+      //WriteGpx(c->coast,"candidate"+NumberToString(ci)+".gpx");
       std::vector<PathIntersection> candidateIntersections;
 
       size_t wi=0;
       for (const auto &coastline:coastlines){
 
-        //WriteGpx(w->coast,"way.gpx");
-
+        //WriteGpx(coastline->coast,"coastline-"+NumberToString(coastline->id)+".gpx");
         // try to find intersections between this candidate and way
         std::vector<PathIntersection> intersections;
         FindPathIntersections(c->coast,coastline->coast,
                               c->isArea,coastline->isArea,
                               intersections);
 
-        candidateIntersections.insert(candidateIntersections.end(),
-                                      intersections.begin(),
-                                      intersections.end());
-        wayIntersections[wi].insert(wayIntersections[wi].end(),
-                                    intersections.begin(),
-                                    intersections.end());
+        // filter out intersections when part of coasline and data area is same
+        // intersection.orientation==0.0
+        size_t valid=0;
+        for (auto &intersection:intersections){
+          if (intersection.orientation!=0.0){
+            candidateIntersections.push_back(intersection);
+            wayIntersections[wi].push_back(intersection);
+            valid++;
+          }
+        }
+        if (valid%2!=0){
+          progress.Warning("Odd count ("+NumberToString(valid)+") of valid intersections. "+
+                           "Coastline "+NumberToString(coastline->id));
+        }
         wi++;
       }
 
@@ -2148,10 +2155,9 @@ namespace osmscout {
         }
       }
     }
-    if (!outgoing){
+    if (!outgoing || outgoing->direction==outgoingEnd->direction){
       return false;
     }
-    assert(outgoing->direction!=outgoingEnd->direction);
     // we are left this cell
     if (intersectCell){
       pathEnd=outgoingEnd;
