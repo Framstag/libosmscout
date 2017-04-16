@@ -633,7 +633,7 @@ namespace osmscout {
         wayCoastCount++;
       }
 
-      if (coastline->coast.size()<=2) {
+      if ((coastline->isArea && coastline->coast.size()<=2) || coastline->coast.size()<2) {
         progress.Warning("Dropping to short coastline with id "+NumberToString(coastline->id));
         continue;
       }
