@@ -19,7 +19,8 @@ check_PROGRAMS = CalculateResolution \
                  GeoCoordParse \
                  NumberSet \
                  ScanConversion \
-                 TransPolygon
+                 TransPolygon \
+		 GeoBox
 
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               -I$(top_srcdir)/include
@@ -118,6 +119,10 @@ DrawTextQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
 TransPolygon_SOURCES = TransPolygon.cpp
 TransPolygon_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 TransPolygon_LDADD = $(LIBOSMSCOUT_LIBS)
+
+GeoBox_SOURCES = GeoBox.cpp
+GeoBox_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+GeoBox_LDADD = $(LIBOSMSCOUT_LIBS)
 
 TESTS = $(check_PROGRAMS)
 
