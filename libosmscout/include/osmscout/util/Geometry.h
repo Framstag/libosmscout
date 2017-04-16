@@ -1095,6 +1095,7 @@ namespace osmscout {
   {
     size_t aIndex=aStartIndex;
     size_t bIndex=bStartIndex;
+    // bounds are inclusive
     size_t aBound=aClosed?aIndex+aPath.size():aPath.size()-1;
     size_t bBound=bClosed?bIndex+bPath.size():bPath.size()-1;
     size_t bStart=bIndex;
@@ -1104,13 +1105,13 @@ namespace osmscout {
     }
 
     GeoBox bBox;
-    GetSegmentBoundingBox(bPath,bIndex,bBound,bBox);
+    GetSegmentBoundingBox(bPath,bIndex,bBound+1,bBox);
     GeoBox aLineBox;
     GeoBox bLineBox;
 
     // compute b-boxes for B path, each 1000 point-long segment
     std::vector<GeoBox> bSegmentBoxes;
-    ComputeSegmentBoxes(bPath,bSegmentBoxes,bBound);
+    ComputeSegmentBoxes(bPath,bSegmentBoxes,bBound+1);
 
     for (;aIndex<aBound;aIndex++){
       N a1=aPath[aIndex%aPath.size()];
@@ -1126,8 +1127,8 @@ namespace osmscout {
         bLineBox.Set(GeoCoord(b1.GetLat(),b1.GetLon()),
                      GeoCoord(b2.GetLat(),b2.GetLon()));
 
-        if ((!bSegmentBoxes[bIndex/1000].Intersects(aLineBox,/*openInterval*/false)) &&
-             !aLineBox.Intersects(bLineBox,/*openInterval*/false)){
+        if (!bSegmentBoxes[bIndex/1000].Intersects(aLineBox,/*openInterval*/false) &&
+            !aLineBox.Intersects(bLineBox,/*openInterval*/false)){
           // round up
           bIndex+=std::max(0, 998-(int)(bIndex%1000));
           continue;
@@ -1140,10 +1141,17 @@ namespace osmscout {
                                 b1,b2,
                                 pi.point)){
 
-          pi.orientation=(pi.point.GetLon()-a1.GetLon())*
-                         (b2.GetLat()-pi.point.GetLat())-
-                         (pi.point.GetLat()-a1.GetLat())*
-                         (b2.GetLon()-pi.point.GetLon());
+          // if b2==pi or a1==pi, orientation is zero then
+          // for that reason, we prolong both lines for computation
+          // of intersection orientation
+          GeoCoord pointBefore(a1.GetLat()-(a2.GetLat()-a1.GetLat()),
+                               a1.GetLon()-(a2.GetLon()-a1.GetLon()));
+          GeoCoord pointAfter(b2.GetLat()+(b2.GetLat()-b1.GetLat()),
+                              b2.GetLon()+(b2.GetLon()-b1.GetLon()));
+          pi.orientation=(pi.point.GetLon()-pointBefore.GetLon())*
+                         (pointAfter.GetLat()-pi.point.GetLat())-
+                         (pi.point.GetLat()-pointBefore.GetLat())*
+                         (pointAfter.GetLon()-pi.point.GetLon());
 
           pi.aIndex=aIndex;
           pi.bIndex=bIndex;
