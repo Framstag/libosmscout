@@ -103,6 +103,9 @@ namespace osmscout {
     template<typename P> inline bool Includes(const P& coord,
                                               bool openInterval=true) const
     {
+      if (!valid){
+        return false;
+      }
       if (openInterval) {
         return minCoord.GetLat()<=coord.GetLat() &&
                maxCoord.GetLat()>coord.GetLat() &&
@@ -131,6 +134,9 @@ namespace osmscout {
     inline bool Intersects(const GeoBox& other,
                            bool openInterval=true) const
     {
+      if (!valid || !other.valid){
+        return false;
+      }
       if (openInterval) {
         return !(other.GetMaxLon()<minCoord.GetLon() ||
                  other.GetMinLon()>=maxCoord.GetLon() ||
@@ -138,10 +144,10 @@ namespace osmscout {
                  other.GetMinLat()>=maxCoord.GetLat());
       }
       else {
-        return !(other.GetMaxLon()<=minCoord.GetLon() ||
-                 other.GetMinLon()>=maxCoord.GetLon() ||
-                 other.GetMaxLat()<=minCoord.GetLat() ||
-                 other.GetMinLat()>=maxCoord.GetLat());
+        return !(other.GetMaxLon()<minCoord.GetLon() ||
+                 other.GetMinLon()>maxCoord.GetLon() ||
+                 other.GetMaxLat()<minCoord.GetLat() ||
+                 other.GetMinLat()>maxCoord.GetLat());
       }
     }
 
