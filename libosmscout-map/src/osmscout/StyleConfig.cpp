@@ -704,6 +704,13 @@ namespace osmscout {
     return *this;
   }
 
+  BorderStyle& BorderStyle::SetGapColor(const Color& gapColor)
+  {
+    this->gapColor=gapColor;
+
+    return *this;
+  }
+
   BorderStyle& BorderStyle::SetWidth(double value)
   {
     width=value;
@@ -747,6 +754,9 @@ namespace osmscout {
       case attrColor:
         color=other.color;
         break;
+      case attrGapColor:
+        gapColor=other.gapColor;
+        break;
       case attrWidth:
         width=other.width;
         break;
@@ -772,11 +782,27 @@ namespace osmscout {
       return false;
     }
 
-    if (width!=other.width) {
+    if (gapColor!=other.gapColor) {
       return false;
     }
 
-    return dash==other.dash;
+    if (width!=other.width) {
+      return width<other.width;
+    }
+
+    if (dash!=other.dash) {
+      return dash<other.dash;
+    }
+
+    if (displayOffset!=other.displayOffset) {
+      return displayOffset<other.displayOffset;
+    }
+
+    if (offset!=other.offset) {
+      return offset<other.offset;
+    }
+
+    return priority<other.priority;
   }
 
   bool BorderStyle::operator!=(const BorderStyle& other) const
@@ -790,11 +816,27 @@ namespace osmscout {
       return color<other.color;
     }
 
+    if (gapColor!=other.gapColor) {
+      return gapColor<other.gapColor;
+    }
+
     if (width!=other.width) {
       return width<other.width;
     }
 
-    return dash<other.dash;
+    if (displayOffset!=other.displayOffset) {
+      return displayOffset<other.displayOffset;
+    }
+
+    if (offset!=other.offset) {
+      return offset<other.offset;
+    }
+
+    if (dash!=other.dash) {
+      return dash<other.dash;
+    }
+
+    return priority<other.priority;
   }
 
   LabelStyle::LabelStyle()

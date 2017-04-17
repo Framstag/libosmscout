@@ -707,6 +707,7 @@ namespace osmscout {
   public:
     enum Attribute {
       attrColor,
+      attrGapColor,
       attrWidth,
       attrDashes,
       attrDisplayOffset,
@@ -717,6 +718,7 @@ namespace osmscout {
   private:
     std::string         slot;
     Color               color;
+    Color               gapColor;
     double              width;
     std::vector<double> dash;
     double              displayOffset;
@@ -730,6 +732,7 @@ namespace osmscout {
     BorderStyle& SetSlot(const std::string& slot);
 
     BorderStyle& SetColor(const Color& color);
+    BorderStyle& SetGapColor(const Color& color);
     BorderStyle& SetWidth(double value);
     BorderStyle& SetDashes(const std::vector<double> dashes);
     BorderStyle& SetDisplayOffset(double value);
@@ -749,6 +752,11 @@ namespace osmscout {
     inline const Color& GetColor() const
     {
       return color;
+    }
+
+    inline const Color& GetGapColor() const
+    {
+      return gapColor;
     }
 
     inline double GetWidth() const

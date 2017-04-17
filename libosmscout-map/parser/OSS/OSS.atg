@@ -1301,6 +1301,12 @@ PRODUCTIONS
                      style.style->SetDashes(dashes);
                      style.attributes.insert(BorderStyle::attrDashes);
                   .)
+                | (. Color gapColor; .)
+                  "gapColor" ":" COLOR<gapColor>
+                  (.
+                     style.style->SetGapColor(gapColor);
+                     style.attributes.insert(BorderStyle::attrGapColor);
+                  .)
                 | (. double displayOffset; .)
                   "displayOffset" ":"  DISPLAYSIZE<displayOffset>
                   (.
