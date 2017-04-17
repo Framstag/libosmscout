@@ -232,11 +232,28 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
     currentAngle=request.angle;
     currentMagnification=request.magnification;
 
+    projection.Set(currentCoord,
+                   currentAngle,
+                   currentMagnification,
+                   mapDpi,
+                   currentWidth,
+                   currentHeight);
+
+    osmscout::GeoBox requestBox;
+    projection.GetDimensions(requestBox);
+
     for (auto db:databases){
       if (db->database->IsOpen() &&
           db->styleConfig) {
-        osmscout::AreaSearchParameter searchParameter;
 
+        osmscout::GeoBox dbBox;
+        db->database->GetBoundingBox(dbBox);
+        if (!dbBox.Intersects(requestBox)){
+          osmscout::log.Debug() << "Skip loading from database " << db->path.toStdString();
+          continue;
+        }
+
+        osmscout::AreaSearchParameter searchParameter;
         db->dataLoadingBreaker->Reset();
         searchParameter.SetBreaker(db->dataLoadingBreaker);
 
@@ -249,13 +266,6 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
 
         searchParameter.SetUseMultithreading(true);
         searchParameter.SetUseLowZoomOptimization(true);
-
-        projection.Set(currentCoord,
-                       currentAngle,
-                       currentMagnification,
-                       mapDpi,
-                       currentWidth,
-                       currentHeight);
 
         std::list<osmscout::TileRef> tiles;
 
