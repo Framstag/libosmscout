@@ -1690,13 +1690,15 @@ namespace osmscout {
   {
     progress.Info("Calculate coastline data");
 
-    data.coastlines.resize(coastlines.size());
-
-    size_t curCoast=0;
+    int index=-1;
+    std::vector<CoastlineDataRef> transformedCoastlines;
+    std::vector<CoastRef> coasts;
+    transformedCoastlines.resize(coastlines.size());
+    coasts.resize(coastlines.size());
     for (const auto& coast : coastlines) {
       CoastlineDataRef coastline=std::make_shared<CoastlineData>();
-      data.coastlines[curCoast]=coastline;
-      progress.SetProgress(curCoast,coastlines.size());
+      index++;
+      progress.SetProgress(index,coastlines.size());
 
       TransPolygon polygon;
 
@@ -1760,10 +1762,58 @@ namespace osmscout {
         }
         if (coastline->points.size()<=3){
           // ignore island reduced just to line
-          coastline->points.clear();
           continue;
         }
       }
+      transformedCoastlines[index]=coastline;
+      coasts[index]=coast;
+    }
+
+    /* In some countries are islands too close to land or other isnlands
+     * that its coastlines intersects after polygon optimisation.
+     * It may cause problems in following computation, that strongly rely
+     * on the fact that coastlines don't intersect.
+     *
+     * For that reason, we will try to detect such intersections between land
+     * (line coastlines) and inslands (area coastlines) to remove the most visible
+     * errors. Detect intersections between all islands is too expensive.
+     */
+    progress.Info("Filter intersecting islands");
+    for (size_t i=0;i<transformedCoastlines.size();i++){
+      progress.SetProgress(i,transformedCoastlines.size());
+      for (size_t j=i+1;j<transformedCoastlines.size();j++){
+        CoastlineDataRef a=transformedCoastlines[i];
+        CoastlineDataRef b=transformedCoastlines[j];
+        if (!a || !b || (a->isArea == b->isArea)){
+          // ignore possible intersections between two coastline ways (it may be touching)
+          // or two coastline areas (it is not so problematic and its computaion is expensive)
+          continue;
+        }
+
+        std::vector<PathIntersection> intersections;
+        FindPathIntersections(a->points,b->points,a->isArea,b->isArea,intersections);
+        if (!intersections.empty()){
+          progress.Warning("Detected intersection "+NumberToString(coasts[i]->id)+" <> "+NumberToString(coasts[j]->id));
+          if (a->isArea && !b->isArea){
+            transformedCoastlines[i]=NULL;
+          } else if (b->isArea && !a->isArea){
+            transformedCoastlines[j]=NULL;
+          }
+        }
+      }
+    }
+
+    progress.Info("Calculate covered tiles");
+    size_t curCoast=0;
+    data.coastlines.resize(transformedCoastlines.size());
+    for (size_t index=0;index<transformedCoastlines.size();index++){
+      progress.SetProgress(index,transformedCoastlines.size());
+      CoastlineDataRef coastline=transformedCoastlines[index];
+      if (!coastline){
+        continue;
+      }
+      CoastRef coast=coasts[index];
+      data.coastlines[curCoast]=coastline;
 
       GeoBox  boundingBox;
 
