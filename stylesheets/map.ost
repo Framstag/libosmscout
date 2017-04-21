@@ -29,7 +29,7 @@ OST
     PIN_WAY:
       This is a way, even if the path is closed
     MULTIPOLYGON:
-      Tye should be handled as multipolygon even if type is not set to multipolygon.
+      Type should be handled as multipolygon even if type is not set to multipolygon.
     ADMIN_REGION:
       The given area or node describes an administrate region
       that should be part of the region tree for the city/street

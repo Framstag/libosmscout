@@ -48,6 +48,7 @@ namespace osmscout {
     static const char* RAWWAYS_DAT;
     static const char* RAWRELS_DAT;
     static const char* RAWCOASTLINE_DAT;
+    static const char* RAWDATAPOLYGON_DAT;
     static const char* RAWTURNRESTR_DAT;
 
   private:
@@ -60,6 +61,7 @@ namespace osmscout {
         std::vector<RawNode>         rawNodes;
         std::vector<RawWay>          rawWays;
         std::vector<RawCoastline>    rawCoastlines;
+        std::vector<RawCoastline>    rawDatapolygon;
         std::vector<RawRelation>     rawRelations;
         std::vector<TurnRestriction> turnRestriction;
       };
@@ -81,6 +83,7 @@ namespace osmscout {
       FileWriter                               nodeWriter;
       FileWriter                               wayWriter;
       FileWriter                               coastlineWriter;
+      FileWriter                               datapolygonWriter;
       FileWriter                               turnRestrictionWriter;
       FileWriter                               multipolygonWriter;
 
@@ -94,6 +97,7 @@ namespace osmscout {
       uint32_t                                 areaCount;
       uint32_t                                 relationCount;
       uint32_t                                 coastlineCount;
+      uint32_t                                 datapolygonCount;
       uint32_t                                 turnRestrictionCount;
       uint32_t                                 multipolygonCount;
 

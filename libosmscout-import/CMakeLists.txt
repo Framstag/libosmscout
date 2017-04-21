@@ -43,6 +43,7 @@ set(HEADER_FILES
     include/osmscout/import/Preprocessor.h
     include/osmscout/import/PreprocessOSM.h
     include/osmscout/import/PreprocessPBF.h
+    include/osmscout/import/PreprocessPoly.h
     include/osmscout/import/RawCoastline.h
     include/osmscout/import/RawCoord.h
     include/osmscout/import/RawNode.h
@@ -90,6 +91,7 @@ set(SOURCE_FILES
     src/osmscout/import/Preprocessor.cpp
     src/osmscout/import/PreprocessOSM.cpp
     src/osmscout/import/PreprocessPBF.cpp
+    src/osmscout/import/PreprocessPoly.cpp
     src/osmscout/import/RawCoastline.cpp
     src/osmscout/import/RawCoord.cpp
     src/osmscout/import/RawNode.cpp

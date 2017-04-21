@@ -487,10 +487,10 @@ STYLE
     [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
 
     [TYPE _tile_sea] AREA {color: @waterColor;}
-    [TYPE _tile_coast] AREA {color: @waterColor;}
+    //[TYPE _tile_coast] AREA {color: @waterColor;}
     //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
     [TYPE _tile_land] AREA {color: @landColor;}
-    [TYPE _tile_unknown] AREA {color: @unknownColor;}
+    //[TYPE _tile_unknown] AREA {color: @unknownColor;}
 
     //[TYPE _osm_tile_border] WAY {color: #222222; displayWidth: 0.2mm; }
     //[TYPE _osm_subtile_border] WAY {color: #444444; displayWidth: 0.1mm; }

@@ -74,6 +74,18 @@ int main(int /*argc*/, char** /*argv*/)
   }
   std::cout << "OK" << std::endl;
 
+  std::cout << "Two touching vectors should intersects... ";
+  x1.Set(65.03795,179.99898);
+  x2.Set(65.03846,180.0);
+  y1.Set(35.61404,180.0);
+  y2.Set(83.83133,180.0);
+  if (!osmscout::LinesIntersect(x1,x2,
+                                y1,y2)){
+    std::cout << "Failure" << std::endl;
+    return 2;
+  }
+  std::cout << "OK" << std::endl;
+
   return 0;
 }
 

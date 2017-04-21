@@ -349,29 +349,6 @@ namespace osmscout {
     }
   }
 
-  bool TransPolygon::FindIntersection(const std::vector<TransPointRef> &optimised, size_t &i, size_t &j){
-    for (; i<optimised.size()-1; i++) {
-
-      for (j=i+1; j<optimised.size()-1; j++) {
-        if (LinesIntersect(optimised[i],
-                           optimised[i+1],
-                           optimised[j],
-                           optimised[j+1])) {
-
-          if (optimised[i].IsEqual(optimised[j]) ||
-              optimised[i].IsEqual(optimised[j+1]) ||
-              optimised[i+1].IsEqual(optimised[j]) ||
-              optimised[i+1].IsEqual(optimised[j+1])) {
-            continue; // ignore sibling edges
-          }
-
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   void TransPolygon::EnsureSimple(bool isArea)
   {
     // copy points to vector of TransPointRef for easy manipulation
