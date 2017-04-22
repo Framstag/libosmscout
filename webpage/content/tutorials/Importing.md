@@ -80,9 +80,11 @@ You can use these polygon files directly as Import tool input beside standard da
 ```
 
 Italy without defined data polygon:
+
 <a class="screenshot" href="/images/ItalyWithoutDataPolygon.png"><img src="/images/ItalyWithoutDataPolygon.png" width="460" height="380" alt="Italy imported without data polygon"/></a>
 
 With data polygon:
+
 <a class="screenshot" href="/images/ItalyWithDataPolygon.png"   ><img src="/images/ItalyWithDataPolygon.png"    width="460" height="380" alt="Italy imported with data polygon"/></a>
 
 ## Adding contour lines
