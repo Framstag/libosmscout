@@ -60,15 +60,19 @@ static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
 
 static int LogEnv(QString env)
 {
-  if (env.toUpper()=="DEBUG"){
+  if (env.toUpper()=="DEBUG") {
     return DEBUG;
   }
-  if (env.toUpper()=="INFO"){
+  else if (env.toUpper()=="INFO") {
     return INFO;
   }
-  if (env.toUpper()=="ERROR"){
+  else if (env.toUpper()=="WARNING") {
+    return INFO;
+  }
+  else if (env.toUpper()=="ERROR") {
     return ERROR;
   }
+
   return WARNING;
 }
 
@@ -102,7 +106,12 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
 
   // init logger by system system variable
-  int logEnv=LogEnv(QProcessEnvironment::systemEnvironment().value("OSMSCOUT_LOG", "WARNING"));
+  QString logLevelName=QProcessEnvironment::systemEnvironment().value("OSMSCOUT_LOG", "WARNING");
+
+  std::cout << "Setting libosmscout logging to level: " << logLevelName.toStdString() << std::endl;
+
+  int logEnv=LogEnv(logLevelName);
+
   osmscout::log.Debug(logEnv>=DEBUG);
   osmscout::log.Info(logEnv>=INFO);
   osmscout::log.Warn(logEnv>=WARNING);
