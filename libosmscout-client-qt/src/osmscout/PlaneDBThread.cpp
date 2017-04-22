@@ -365,7 +365,7 @@ void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
  */
 void PlaneDBThread::DrawMap()
 {
-  osmscout::log.Debug() << "DrawMap()";  
+  osmscout::log.Debug() << "DrawMap()";
   {
     QMutexLocker locker(&mutex);
     if (databases.isEmpty()){
@@ -406,6 +406,10 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugData(false);
     drawParameter.SetDebugPerformance(true);
+    // We want to get notified, if we have more than 1000 objects from a certain type (=> move type rendering to a higher zoom level?)
+    drawParameter.SetWarningObjectCountLimit(1000);
+    // We want to get notified, if we have more than 20000 coords from a certain type (=> move type rendering to a higher zoom level?)
+    drawParameter.SetWarningCoordCountLimit(20000);
 
     // optimize process can reduce number of nodes before rendering
     // it helps for slow renderer backend, but it cost some cpu

@@ -46,6 +46,8 @@ namespace osmscout {
     renderUnknowns(false),
     debugData(false),
     debugPerformance(false),
+    warnObjectCountLimit(0),
+    warnCoordCountLimit(0),
     showAltLanguage(false)
   {
     // no code
@@ -184,6 +186,16 @@ namespace osmscout {
   void MapParameter::SetDebugPerformance(bool debug)
   {
     debugPerformance=debug;
+  }
+
+  void MapParameter::SetWarningObjectCountLimit(size_t limit)
+  {
+    warnObjectCountLimit=limit;
+  }
+
+  void MapParameter::SetWarningCoordCountLimit(size_t limit)
+  {
+    warnCoordCountLimit=limit;
   }
 
   void MapParameter::SetBreaker(const BreakerRef& breaker)

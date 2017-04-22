@@ -288,6 +288,7 @@ namespace osmscout {
      */
     //@{
     void DumpDataStatistics(const Projection& projection,
+                            const MapParameter& parameter,
                             const MapData& data);
     //@}
 

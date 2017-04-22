@@ -76,6 +76,9 @@ namespace osmscout {
     bool                         debugData;                 //!< Print out some performance relvant information about the data
     bool                         debugPerformance;          //!< Print out some performance information
 
+    size_t                       warnObjectCountLimit;      //!< Limit for objects/type. If limit is reached a warning is created
+    size_t                       warnCoordCountLimit;       //!< Limit for coords/type. If limit is reached a warning is created
+
     bool                         showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
 
     BreakerRef                   breaker;                   //!< Breaker to abort processing on external request
@@ -119,6 +122,9 @@ namespace osmscout {
 
     void SetDebugData(bool debug);
     void SetDebugPerformance(bool debug);
+
+    void SetWarningObjectCountLimit(size_t limit);
+    void SetWarningCoordCountLimit(size_t limit);
 
     void SetShowAltLanguage(bool showAltLanguage);
 
@@ -253,6 +259,16 @@ namespace osmscout {
     inline bool IsDebugData() const
     {
       return debugData;
+    }
+
+    inline size_t GetWarningObjectCountLimit() const
+    {
+      return warnObjectCountLimit;
+    }
+
+    inline size_t GetWarningCoordCountLimit() const
+    {
+      return warnCoordCountLimit;
     }
 
     inline bool GetShowAltLanguage() const
