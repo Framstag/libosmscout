@@ -485,7 +485,7 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, width, height/2);
+                    DrawSymbol(projection, parameter, symbol, 0, -height/2);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, space, origin);
                 }
@@ -645,8 +645,8 @@ namespace osmscout {
              ++p) {
   
             DrawPrimitive* primitive=p->get();
-            double         centerX=maxX-minX;
-            double         centerY=maxY-minY;
+            double         centerX=(maxX+minX)/2;
+            double         centerY=(maxY+minY)/2;
             
             if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
                 PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
@@ -679,25 +679,51 @@ namespace osmscout {
                     }
                 }
                 
-                CGContextDrawPath(cg, kCGPathFill);
+                CGContextDrawPath(cg, kCGPathFillStroke);
             }
             else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
                 RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+                FillStyleRef fillStyle=rectangle->GetFillStyle();
+                BorderStyleRef borderStyle=rectangle->GetBorderStyle();
+                if (fillStyle) {
+                    SetFill(projection, parameter, *fillStyle);
+                } else {
+                    CGContextSetRGBFillColor(cg,0,0,0,0);
+                }
+                
+                if (borderStyle) {
+                    SetBorder(projection, parameter, *borderStyle);
+                } else {
+                    CGContextSetRGBStrokeColor(cg,0,0,0,0);
+                }
                 CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
                                          y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY),
                                          projection.ConvertWidthToPixel(rectangle->GetWidth()),
                                          projection.ConvertWidthToPixel(rectangle->GetHeight()));
                 CGContextAddRect(cg,rect);
-                CGContextDrawPath(cg, kCGPathFill);
+                CGContextDrawPath(cg, kCGPathFillStroke);
             }
             else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
                 CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+                FillStyleRef fillStyle=circle->GetFillStyle();
+                BorderStyleRef borderStyle=circle->GetBorderStyle();
+                if (fillStyle) {
+                    SetFill(projection, parameter, *fillStyle);
+                } else {
+                    CGContextSetRGBFillColor(cg,0,0,0,0);
+                }
+                
+                if (borderStyle) {
+                    SetBorder(projection, parameter, *borderStyle);
+                } else {
+                    CGContextSetRGBStrokeColor(cg,0,0,0,0);
+                }
                 CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
                                          y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY),
                                          projection.ConvertWidthToPixel(circle->GetRadius()),
                                          projection.ConvertWidthToPixel(circle->GetRadius()));
                 CGContextAddEllipseInRect(cg, rect);
-                CGContextDrawPath(cg, kCGPathFill);
+                CGContextDrawPath(cg, kCGPathFillStroke);
             }
         }
         CGContextRestoreGState(cg);
