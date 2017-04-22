@@ -162,7 +162,7 @@ CONST
   COLOR commercialColor            = #efc8c8;
   COLOR constructionColor          = #9d9d6c;
 
-  COLOR farmColor                = #ead8bd;
+  COLOR farmlandColor              = #ead8bd;
   COLOR farmyardColor              = #dcbe92;
   COLOR fellColor                  = #f9f9f9;
 
@@ -1251,7 +1251,7 @@ STYLE
 
  IF daylight {
    [MAG region-] {
-     [TYPE landuse_farmland] AREA { color: @farmColor; }
+     [TYPE landuse_farmland] AREA { color: @farmlandColor; }
      [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
      [TYPE landuse_industrial] AREA { color: @industrialColor; }
      [TYPE landuse_landfill] AREA { color: @landFillColor; }
@@ -1262,7 +1262,6 @@ STYLE
    }
 
    [MAG proximity-] {
-     [TYPE landuse_farm] AREA { color: @farmColor; }
      // Semiransparent overlay
      [TYPE landuse_military] {
        AREA { color: @militaryColor;}
@@ -1310,8 +1309,7 @@ STYLE
    }
 
    [MAG close-] {
-     [TYPE landuse_farm,
-           landuse_farmland,
+     [TYPE landuse_farmland,
            landuse_farmyard,
            landuse_quarry,
            landuse_landfill,

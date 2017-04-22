@@ -629,12 +629,6 @@ TYPES
       {Name, NameAlt} MERGE_AREAS
       GROUP landuse
 
-  TYPE landuse_farm
-    = AREA ("landuse"=="farm")
-      {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM MERGE_AREAS
-      GROUP landuse
-
   TYPE landuse_farmland
     = AREA ("landuse"=="farmland")
       {Name, NameAlt}
