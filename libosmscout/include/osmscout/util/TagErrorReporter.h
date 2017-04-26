@@ -26,7 +26,7 @@ namespace osmscout {
   class OSMSCOUT_API TagErrorReporter
   {
   public:
-    virtual ~TagErrorReporter(){};
+    virtual inline ~TagErrorReporter(){};
 
     virtual void ReportTag(const ObjectOSMRef& object,
                            const TagMap& tags,
