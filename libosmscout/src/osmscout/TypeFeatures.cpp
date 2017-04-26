@@ -88,7 +88,7 @@ namespace osmscout {
     return new (buffer) NameFeatureValue();
   }
 
-  void NameFeature::Parse(Progress& /*progress*/,
+  void NameFeature::Parse(TagErrorReporter& /*errorReporter*/,
                           const TypeConfig& typeConfig,
                           const FeatureInstance& feature,
                           const ObjectOSMRef& /*object*/,
@@ -174,7 +174,7 @@ namespace osmscout {
     return new (buffer) NameAltFeatureValue();
   }
 
-  void NameAltFeature::Parse(Progress& /*progress*/,
+  void NameAltFeature::Parse(TagErrorReporter& /*errorReporter*/,
                              const TypeConfig& typeConfig,
                              const FeatureInstance& feature,
                              const ObjectOSMRef& /*object*/,
@@ -261,7 +261,7 @@ namespace osmscout {
     return new (buffer) RefFeatureValue();
   }
 
-  void RefFeature::Parse(Progress& /*progress*/,
+  void RefFeature::Parse(TagErrorReporter& /*errorReporter*/,
                          const TypeConfig& /*typeConfig*/,
                          const FeatureInstance& feature,
                          const ObjectOSMRef& /*object*/,
@@ -330,7 +330,7 @@ namespace osmscout {
     return new (buffer) LocationFeatureValue();
   }
 
-  void LocationFeature::Parse(Progress& /*progress*/,
+  void LocationFeature::Parse(TagErrorReporter& /*errorReporter*/,
                               const TypeConfig& /*typeConfig*/,
                               const FeatureInstance& feature,
                               const ObjectOSMRef& /*object*/,
@@ -426,7 +426,7 @@ namespace osmscout {
     return new (buffer) AddressFeatureValue();
   }
 
-  void AddressFeature::Parse(Progress& /*progress*/,
+  void AddressFeature::Parse(TagErrorReporter& /*errorReporter*/,
                              const TypeConfig& /*typeConfig*/,
                              const FeatureInstance& feature,
                              const ObjectOSMRef& /*object*/,
@@ -529,7 +529,7 @@ namespace osmscout {
     return new (buffer) AccessFeatureValue();
   }
 
-  void AccessFeature::Parse(Progress& /*progress*/,
+  void AccessFeature::Parse(TagErrorReporter& /*errorReporter*/,
                             const TypeConfig& /*typeConfig*/,
                             const FeatureInstance& feature,
                             const ObjectOSMRef& /*object*/,
@@ -791,7 +791,7 @@ namespace osmscout {
     return new (buffer) AccessRestrictedFeatureValue();
   }
 
-  void AccessRestrictedFeature::Parse(Progress& /*progress*/,
+  void AccessRestrictedFeature::Parse(TagErrorReporter& /*errorReporter*/,
                                       const TypeConfig& /*typeConfig*/,
                                       const FeatureInstance& feature,
                                       const ObjectOSMRef& /*object*/,
@@ -908,7 +908,7 @@ namespace osmscout {
     return new (buffer) LayerFeatureValue();
   }
 
-  void LayerFeature::Parse(Progress& progress,
+  void LayerFeature::Parse(TagErrorReporter& errorReporter,
                            const TypeConfig& /*typeConfig*/,
                            const FeatureInstance& feature,
                            const ObjectOSMRef& object,
@@ -928,7 +928,7 @@ namespace osmscout {
         }
       }
       else {
-        progress.Warning(std::string("Layer tag value '")+layer->second+"' for "+object.GetName()+" is not numeric!");
+        errorReporter.ReportTag(object,tags,std::string("Layer tag value '")+layer->second+"' is not numeric!");
       }
     }
   }
@@ -983,7 +983,7 @@ namespace osmscout {
     return new (buffer) WidthFeatureValue();
   }
 
-  void WidthFeature::Parse(Progress& progress,
+  void WidthFeature::Parse(TagErrorReporter& errorReporter,
                            const TypeConfig& /*typeConfig*/,
                            const FeatureInstance& feature,
                            const ObjectOSMRef& object,
@@ -1031,10 +1031,10 @@ namespace osmscout {
     }
 
     if (!StringToNumber(widthString,w)) {
-      progress.Warning(std::string("Width tag value '")+width->second+"' for "+object.GetName()+" is no double!");
+      errorReporter.ReportTag(object,tags,std::string("Width tag value '")+width->second+"' is no double!");
     }
     else if (w<0 && w>255.5) {
-      progress.Warning(std::string("Width tag value '")+width->second+"' for "+object.GetName()+" value is too small or too big!");
+      errorReporter.ReportTag(object,tags,std::string("Width tag value '")+width->second+"' value is too small or too big!");
     }
     else {
       WidthFeatureValue* value=static_cast<WidthFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
@@ -1093,7 +1093,7 @@ namespace osmscout {
     return new (buffer) MaxSpeedFeatureValue();
   }
 
-  void MaxSpeedFeature::Parse(Progress& progress,
+  void MaxSpeedFeature::Parse(TagErrorReporter& errorReporter,
                               const TypeConfig& typeConfig,
                               const FeatureInstance& feature,
                               const ObjectOSMRef& object,
@@ -1156,7 +1156,7 @@ namespace osmscout {
         valueNumeric=maxSpeedValue;
       }
       else {
-        progress.Warning(std::string("Max speed tag value '")+maxSpeed->second+"' for "+object.GetName()+" is not numeric!");
+        errorReporter.ReportTag(object,tags,std::string("Max speed tag value '")+maxSpeed->second+"' is not numeric!");
         return;
       }
     }
@@ -1233,7 +1233,7 @@ namespace osmscout {
     return new (buffer) GradeFeatureValue();
   }
 
-  void GradeFeature::Parse(Progress& progress,
+  void GradeFeature::Parse(TagErrorReporter& errorReporter,
                            const TypeConfig& typeConfig,
                            const FeatureInstance& feature,
                            const ObjectOSMRef& object,
@@ -1279,7 +1279,7 @@ namespace osmscout {
         return;
       }
       else {
-        progress.Warning(std::string("Unsupported tracktype value '")+tracktype->second+"' for "+object.GetName());
+        errorReporter.ReportTag(object,tags,std::string("Unsupported tracktype value '")+tracktype->second+"'");
       }
     }
 
@@ -1295,7 +1295,7 @@ namespace osmscout {
         value->SetGrade((uint8_t)grade);
       }
       else {
-        progress.Warning(std::string("Unknown surface type '")+surface->second+"' for "+object.GetName()+"!");
+        errorReporter.ReportTag(object,tags,std::string("Unknown surface type '")+surface->second+"' !");
       }
     }
   }
@@ -1354,7 +1354,7 @@ namespace osmscout {
     return new (buffer) AdminLevelFeatureValue();
   }
 
-  void AdminLevelFeature::Parse(Progress& progress,
+  void AdminLevelFeature::Parse(TagErrorReporter& errorReporter,
                                 const TypeConfig& /*typeConfig*/,
                                 const FeatureInstance& feature,
                                 const ObjectOSMRef& object,
@@ -1379,7 +1379,7 @@ namespace osmscout {
         }
       }
       else {
-        progress.Warning(std::string("Admin level is not numeric '")+adminLevel->second+"' for "+object.GetName()+"!");
+        errorReporter.ReportTag(object,tags,std::string("Admin level is not numeric '")+adminLevel->second+"'!");
       }
     }
   }
@@ -1440,7 +1440,7 @@ namespace osmscout {
     return new (buffer) PostalCodeFeatureValue();
   }
 
-  void PostalCodeFeature::Parse(Progress& progress,
+  void PostalCodeFeature::Parse(TagErrorReporter& errorReporter,
                                 const TypeConfig& /*typeConfig*/,
                                 const FeatureInstance& feature,
                                 const ObjectOSMRef& object,
@@ -1471,11 +1471,10 @@ namespace osmscout {
         PostalCodeFeatureValue* value=static_cast<PostalCodeFeatureValue*>(fv);
 
         value->SetPostalCode(postalCodeValue);
-        //progress.Info(std::string("Found postal code ")+postalCodeValue+" for "+object.GetName());
       }
     }
     catch (const std::exception &e) {
-      progress.Error(std::string("PostalCodeFeature::Parse Exception ")+e.what());
+      errorReporter.ReportTag(object,tags,std::string("Postal code parse exception: ")+e.what());
     }
   }
 
@@ -1534,12 +1533,12 @@ namespace osmscout {
     return new (buffer) WebsiteFeatureValue();
   }
 
-  void WebsiteFeature::Parse(Progress& progress,
-                                const TypeConfig& /*typeConfig*/,
-                                const FeatureInstance& feature,
-                                const ObjectOSMRef& object,
-                                const TagMap& tags,
-                                FeatureValueBuffer& buffer) const
+  void WebsiteFeature::Parse(TagErrorReporter& errorReporter,
+                             const TypeConfig& /*typeConfig*/,
+                             const FeatureInstance& feature,
+                             const ObjectOSMRef& object,
+                             const TagMap& tags,
+                             FeatureValueBuffer& buffer) const
   {
     // ignore ways for now
     if (object.GetType() == OSMRefType::osmRefWay)
@@ -1560,11 +1559,10 @@ namespace osmscout {
         WebsiteFeatureValue* value=static_cast<WebsiteFeatureValue*>(fv);
 
         value->SetWebsite(strValue);
-        //progress.Info(std::string("Found website ")+strValue+" for "+object.GetName());
       }
     }
     catch (const std::exception &e) {
-      progress.Error(std::string("WebsiteFeature::Parse Exception ")+e.what());
+      errorReporter.ReportTag(object,tags,std::string("Website parse exception: ")+e.what());
     }
   }
 
@@ -1623,12 +1621,12 @@ namespace osmscout {
     return new (buffer) PhoneFeatureValue();
   }
 
-  void PhoneFeature::Parse(Progress& progress,
-                                const TypeConfig& /*typeConfig*/,
-                                const FeatureInstance& feature,
-                                const ObjectOSMRef& object,
-                                const TagMap& tags,
-                                FeatureValueBuffer& buffer) const
+  void PhoneFeature::Parse(TagErrorReporter& errorReporter,
+                           const TypeConfig& /*typeConfig*/,
+                           const FeatureInstance& feature,
+                           const ObjectOSMRef& object,
+                           const TagMap& tags,
+                           FeatureValueBuffer& buffer) const
   {
     // ignore ways for now
     if (object.GetType() == OSMRefType::osmRefWay)
@@ -1655,11 +1653,10 @@ namespace osmscout {
         PhoneFeatureValue* value=static_cast<PhoneFeatureValue*>(fv);
 
         value->SetPhone(strValue);
-        //progress.Info(std::string("Found phone ")+strValue+" for "+object.GetName());
       }
     }
     catch (const std::exception &e) {
-      progress.Error(std::string("PhoneFeature::Parse Exception ")+e.what());
+      errorReporter.ReportTag(object,tags,std::string("Phone parse exception: ")+e.what());
     }
   }
 
@@ -1675,7 +1672,7 @@ namespace osmscout {
     return NAME;
   }
 
-  void BridgeFeature::Parse(Progress& /*progress*/,
+  void BridgeFeature::Parse(TagErrorReporter& /*errorReporter*/,
                             const TypeConfig& /*typeConfig*/,
                             const FeatureInstance& feature,
                             const ObjectOSMRef& /*object*/,
@@ -1704,7 +1701,7 @@ namespace osmscout {
     return NAME;
   }
 
-  void TunnelFeature::Parse(Progress& /*progress*/,
+  void TunnelFeature::Parse(TagErrorReporter& /*errorReporter*/,
                             const TypeConfig& /*typeConfig*/,
                             const FeatureInstance& feature,
                             const ObjectOSMRef& /*object*/,
@@ -1733,12 +1730,12 @@ namespace osmscout {
         return NAME;
   }
 
-  void EmbankmentFeature::Parse(Progress& /*progress*/,
-                            const TypeConfig& /*typeConfig*/,
-                            const FeatureInstance& feature,
-                            const ObjectOSMRef& /*object*/,
-                            const TagMap& tags,
-                            FeatureValueBuffer& buffer) const
+  void EmbankmentFeature::Parse(TagErrorReporter& /*errorReporter*/,
+                                const TypeConfig& /*typeConfig*/,
+                                const FeatureInstance& feature,
+                                const ObjectOSMRef& /*object*/,
+                                const TagMap& tags,
+                                FeatureValueBuffer& buffer) const
   {
         auto embankment=tags.find(tagEmbankment);
 
@@ -1762,7 +1759,7 @@ namespace osmscout {
     return NAME;
   }
 
-  void RoundaboutFeature::Parse(Progress& /*progress*/,
+  void RoundaboutFeature::Parse(TagErrorReporter& /*errorReporter*/,
                                 const TypeConfig& /*typeConfig*/,
                                 const FeatureInstance& feature,
                                 const ObjectOSMRef& /*object*/,
@@ -1836,7 +1833,7 @@ namespace osmscout {
     return new (buffer) EleFeatureValue();
   }
 
-  void EleFeature::Parse(Progress& progress,
+  void EleFeature::Parse(TagErrorReporter& errorReporter,
                          const TypeConfig& /*typeConfig*/,
                          const FeatureInstance& feature,
                          const ObjectOSMRef& object,
@@ -1884,10 +1881,10 @@ namespace osmscout {
     }
 
     if (!StringToNumber(eleString,e)) {
-      progress.Warning(std::string("Ele tag value '")+ele->second+"' for "+object.GetName()+" is no double!");
+      errorReporter.ReportTag(object,tags,std::string("Ele tag value '")+ele->second+"' is no double!");
     }
     else if (e<0 && e>std::numeric_limits<uint32_t>::max()) {
-      progress.Warning(std::string("Ele tag value '")+ele->second+"' for "+object.GetName()+" value is too small or too big!");
+      errorReporter.ReportTag(object,tags,std::string("Ele tag value '")+ele->second+"' value is too small or too big!");
     }
     else {
       EleFeatureValue* value=static_cast<EleFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
@@ -1955,7 +1952,7 @@ namespace osmscout {
     return new (buffer) DestinationFeatureValue();
   }
 
-  void DestinationFeature::Parse(Progress& /*progress*/,
+  void DestinationFeature::Parse(TagErrorReporter& /*errorReporter*/,
                                  const TypeConfig& /*typeConfig*/,
                                  const FeatureInstance& feature,
                                  const ObjectOSMRef& /*object*/,
@@ -1987,7 +1984,7 @@ namespace osmscout {
     return NAME;
   }
 
-  void BuildingFeature::Parse(Progress& /*progress*/,
+  void BuildingFeature::Parse(TagErrorReporter& /*errorReporter*/,
                             const TypeConfig& /*typeConfig*/,
                             const FeatureInstance& feature,
                             const ObjectOSMRef& /*object*/,
@@ -2054,7 +2051,7 @@ namespace osmscout {
     return new (buffer) IsInFeatureValue();
   }
 
-  void IsInFeature::Parse(Progress& /*progress*/,
+  void IsInFeature::Parse(TagErrorReporter& /*errorReporter*/,
                           const TypeConfig& /*typeConfig*/,
                           const FeatureInstance& feature,
                           const ObjectOSMRef& /*object*/,

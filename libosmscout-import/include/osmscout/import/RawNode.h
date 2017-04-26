@@ -118,7 +118,7 @@ namespace osmscout {
 
     void UnsetFeature(size_t idx);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& errorReporter,
                const TypeConfig& typeConfig,
                const TagMap& tags);
     void Read(const TypeConfig& typeConfig,

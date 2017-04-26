@@ -61,14 +61,14 @@ namespace osmscout {
     this->nodes=nodes;
   }
 
-  void RawWay::Parse(Progress& progress,
+  void RawWay::Parse(TagErrorReporter& errorReporter,
                      const TypeConfig& typeConfig,
                      const TagMap& tags)
   {
     ObjectOSMRef object(id,
                         osmRefWay);
 
-    featureValueBuffer.Parse(progress,
+    featureValueBuffer.Parse(errorReporter,
                              typeConfig,
                              object,
                              tags);

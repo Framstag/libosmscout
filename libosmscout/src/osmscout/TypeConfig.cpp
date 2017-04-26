@@ -272,13 +272,13 @@ namespace osmscout {
     }
   }
 
-  void FeatureValueBuffer::Parse(Progress& progress,
+  void FeatureValueBuffer::Parse(TagErrorReporter& errorReporter,
                                  const TypeConfig& typeConfig,
                                  const ObjectOSMRef& object,
                                  const TagMap& tags)
   {
     for (const auto &feature : type->GetFeatures()) {
-      feature.GetFeature()->Parse(progress,
+      feature.GetFeature()->Parse(errorReporter,
                                   typeConfig,
                                   feature,
                                   object,

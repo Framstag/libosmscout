@@ -51,14 +51,14 @@ namespace osmscout {
     featureValueBuffer.FreeValue(idx);
   }
 
-  void RawNode::Parse(Progress& progress,
+  void RawNode::Parse(TagErrorReporter& errorReporter,
                       const TypeConfig& typeConfig,
                       const TagMap& tags)
   {
     ObjectOSMRef object(id,
                         osmRefNode);
 
-    featureValueBuffer.Parse(progress,
+    featureValueBuffer.Parse(errorReporter,
                              typeConfig,
                              object,
                              tags);
