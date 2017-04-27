@@ -1,3 +1,6 @@
+#ifndef TAGERRORREPORTER_H
+#define TAGERRORREPORTER_H
+
 /*
   This source is part of the libosmscout library
   Copyright (C) 2017 Lukas Karas
@@ -17,9 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef TAGERRORREPORTER_H
-#define TAGERRORREPORTER_H
+#include <string>
 
+#include <osmscout/ObjectRef.h>
+#include <osmscout/Tag.h>
+
+#include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 
