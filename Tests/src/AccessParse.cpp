@@ -4,6 +4,7 @@
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/util/TagErrorReporter.h>
 
 std::string AccessToString(uint8_t access)
 {
