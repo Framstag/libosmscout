@@ -28,6 +28,7 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/TagErrorReporter.h>
 
 #include <osmscout/system/Compiler.h>
 
@@ -101,7 +102,7 @@ namespace osmscout {
     void SetId(OSMId id);
     void SetType(const TypeInfoRef& type);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& errorReporter,
                const TypeConfig& typeConfig,
                const TagMap& tags);
     void Read(const TypeConfig& typeConfig,
