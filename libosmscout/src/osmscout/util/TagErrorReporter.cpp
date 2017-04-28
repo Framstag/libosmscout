@@ -1,6 +1,3 @@
-#ifndef TAGERRORREPORTER_H
-#define TAGERRORREPORTER_H
-
 /*
   This source is part of the libosmscout library
   Copyright (C) 2017 Lukas Karas
@@ -20,40 +17,21 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <string>
-
-#include <osmscout/ObjectRef.h>
-#include <osmscout/Tag.h>
-
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/util/TagErrorReporter.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API TagErrorReporter
+  TagErrorReporter::TagErrorReporter()
   {
-  protected:
-    TagErrorReporter();
+  }
 
-  public:
-    virtual inline ~TagErrorReporter(){};
-
-    virtual void ReportTag(const ObjectOSMRef& object,
-                           const TagMap& tags,
-                           const std::string& error) = 0;
-  };
-
-  class OSMSCOUT_API SilentTagErrorReporter: public TagErrorReporter
+  SilentTagErrorReporter::SilentTagErrorReporter()
   {
-  public:
-    SilentTagErrorReporter();
+  }
 
-    virtual inline ~SilentTagErrorReporter(){};
-
-    virtual void ReportTag(const ObjectOSMRef& object,
-                           const TagMap& tags,
-                           const std::string& error);
-  };
+  void SilentTagErrorReporter::ReportTag(const ObjectOSMRef& /*object*/,
+                                         const TagMap& /*tags*/,
+                                         const std::string& /*error*/)
+  {
+  }
 }
-
-#endif /* TAGERRORREPORTER_H */
-
