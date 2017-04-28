@@ -35,6 +35,7 @@ set(HEADER_FILES
     include/osmscout/util/Tiling.h
     include/osmscout/util/Transformation.h
     include/osmscout/util/WorkQueue.h
+    include/osmscout/util/TagErrorReporter.h
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
@@ -112,6 +113,7 @@ set(SOURCE_FILES
     src/osmscout/util/Tiling.cpp
     src/osmscout/util/Transformation.cpp
     src/osmscout/util/WorkQueue.cpp
+    src/osmscout/util/TagErrorReporter.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp
