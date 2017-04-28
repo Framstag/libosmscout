@@ -31,6 +31,9 @@ namespace osmscout {
 
   class OSMSCOUT_API TagErrorReporter
   {
+  protected:
+    inline TagErrorReporter(){};
+
   public:
     virtual inline ~TagErrorReporter(){};
 
@@ -42,13 +45,13 @@ namespace osmscout {
   class OSMSCOUT_API SilentTagErrorReporter: public TagErrorReporter
   {
   public:
-    inline SilentTagErrorReporter(){}
+    inline SilentTagErrorReporter(){};
 
-    virtual inline ~SilentTagErrorReporter(){}
+    virtual inline ~SilentTagErrorReporter(){};
 
     virtual inline void ReportTag(const ObjectOSMRef& /*object*/,
                                   const TagMap& /*tags*/,
-                                  const std::string& /*error*/){}
+                                  const std::string& /*error*/){};
   };
 }
 
