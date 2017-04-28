@@ -32,6 +32,7 @@ set(HEADER_FILES
     include/osmscout/util/Projection.h
     include/osmscout/util/StopClock.h
     include/osmscout/util/String.h
+    include/osmscout/util/TagErrorReporter.h
     include/osmscout/util/Tiling.h
     include/osmscout/util/Transformation.h
     include/osmscout/util/WorkQueue.h
