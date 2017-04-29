@@ -40,6 +40,7 @@ namespace osmscout {
     : progress(progress),
       typeConfig(typeConfig),
       destinationDirectory(destinationDirectory),
+      tagErrorCount(0),
       wayErrorCount(0),
       relationErrorCount(0),
       locationErrorCount(0)
