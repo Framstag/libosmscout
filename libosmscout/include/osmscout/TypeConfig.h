@@ -39,6 +39,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Progress.h>
+#include <osmscout/util/TagErrorReporter.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -166,7 +167,7 @@ namespace osmscout {
 
     virtual FeatureValue* AllocateValue(void* buffer);
 
-    virtual void Parse(Progress& progress,
+    virtual void Parse(TagErrorReporter& reporter,
                        const TypeConfig& typeConfig,
                        const FeatureInstance& feature,
                        const ObjectOSMRef& object,
@@ -1057,7 +1058,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(size_t idx);
     void FreeValue(size_t idx);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& errorReporter,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TagMap& tags);

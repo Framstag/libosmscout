@@ -239,7 +239,7 @@ namespace osmscout {
       node.SetType(type);
       node.SetCoord(data.coord);
 
-      node.Parse(progress,
+      node.Parse(*parameter.GetErrorReporter(),
                  *typeConfig,
                  data.tags);
 
@@ -381,7 +381,7 @@ namespace osmscout {
       assert(false);
     }
 
-    way.Parse(progress,
+    way.Parse(*parameter.GetErrorReporter(),
               *typeConfig,
               data.tags);
 
@@ -470,7 +470,7 @@ namespace osmscout {
 
     relation.members=members;
 
-    relation.Parse(progress,
+    relation.Parse(*parameter.GetErrorReporter(),
                    *typeConfig,
                    tags);
 

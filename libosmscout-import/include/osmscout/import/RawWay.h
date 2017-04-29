@@ -134,7 +134,7 @@ namespace osmscout {
       nodes.assign(first,end);
     }
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& errorReporter,
                const TypeConfig& typeConfig,
                const TagMap& tags);
     void Read(const TypeConfig& typeConfig,
