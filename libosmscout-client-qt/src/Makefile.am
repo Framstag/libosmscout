@@ -52,7 +52,9 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/MapStyleModel.cpp \
                                  osmscout/moc_MapStyleModel.cpp \
                                  osmscout/StyleFlagsModel.cpp \
-                                 osmscout/moc_StyleFlagsModel.cpp
+                                 osmscout/moc_StyleFlagsModel.cpp \
+                                 osmscout/OSMScoutQt.cpp \
+                                 osmscout/moc_OSMScoutQt.cpp
 
 osmscout/moc_%.cpp: $(top_srcdir)/include/osmscout/%.h
 	@MOC@ -o$@ $<

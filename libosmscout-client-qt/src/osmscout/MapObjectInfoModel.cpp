@@ -21,24 +21,25 @@
 #include <QtCore/qabstractitemmodel.h>
 
 #include <osmscout/MapObjectInfoModel.h>
+#include <osmscout/OSMScoutQt.h>
 
 MapObjectInfoModel::MapObjectInfoModel():
 ready(false), setup(false), view()
 {
-  DBThread *dbThread = DBThread::GetInstance();
+  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
   this->mapDpi=dbThread->GetMapDpi();
 
   qRegisterMetaType<osmscout::MapData>("osmscout::MapData");
 
-  connect(dbThread, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
+  connect(dbThread.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
           this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
           Qt::QueuedConnection);
 
   connect(this, SIGNAL(objectsRequested(const RenderMapRequest &)),
-          dbThread, SLOT(requestObjectsOnView(const RenderMapRequest&)),
+          dbThread.get(), SLOT(requestObjectsOnView(const RenderMapRequest&)),
           Qt::QueuedConnection);
 
-  connect(dbThread, SIGNAL(viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
+  connect(dbThread.get(), SIGNAL(viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
           this, SLOT(onViewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
           Qt::QueuedConnection);
 }

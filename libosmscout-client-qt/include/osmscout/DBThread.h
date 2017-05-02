@@ -221,6 +221,8 @@ enum DatabaseCoverage{
  */
 class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 {
+  friend class OSMScoutQt; // accessing to protected constructor
+
   Q_OBJECT
   Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
   
@@ -321,13 +323,11 @@ protected:
   double                        fontSize;
 
 protected:
-  
+
   DBThread(QStringList databaseLookupDirectories,
            QString iconDirectory,
            SettingsRef settings);
-
-  virtual ~DBThread();
-
+  
   bool AssureRouter(osmscout::Vehicle vehicle);
 
   virtual void TileStateCallback(const osmscout::TileRef& changedTile);
@@ -360,6 +360,8 @@ protected:
   bool isInitializedInternal();
 
 public:
+  virtual ~DBThread();
+
   bool isInitialized(); 
   
   const DatabaseLoadedResponse loadedResponse() const;
@@ -431,20 +433,9 @@ public:
 
   static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
-  
-  static bool InitializeTiledInstance(QStringList databaseDirectory, 
-                                      QString iconDirectory,
-                                      SettingsRef settings,
-                                      QString tileCacheDirectory,
-                                      size_t onlineTileCacheSize = 20, 
-                                      size_t offlineTileCacheSize = 50);
 
-  static bool InitializePlaneInstance(QStringList databaseDirectory, 
-                                      QString iconDirectory,
-                                      SettingsRef settings);
-  
-  static DBThread* GetInstance();
-  static void FreeInstance();
 };
+
+typedef std::shared_ptr<DBThread> DBThreadRef;
 
 #endif

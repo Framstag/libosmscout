@@ -24,6 +24,7 @@
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/PersistentCookieJar.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/OSMScoutQt.h>
 
 MapProvider AvailableMapsModelMap::getProvider() const
 {
@@ -57,7 +58,7 @@ int AvailableMapsModelMap::getVersion() const
 
 AvailableMapsModel::AvailableMapsModel()
 {
-  SettingsRef settings=DBThread::GetInstance()->GetSettings();
+  SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
   mapProviders = settings->GetMapProviders();
 
   connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT(listDownloaded(QNetworkReply*)));    

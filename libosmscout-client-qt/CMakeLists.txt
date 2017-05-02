@@ -43,6 +43,7 @@ set(HEADER_FILES
     include/osmscout/MapObjectInfoModel.h
     include/osmscout/MapStyleModel.h
     include/osmscout/StyleFlagsModel.h
+    include/osmscout/OSMScoutQt.h
 )
 
 set(SOURCE_FILES
@@ -69,6 +70,7 @@ set(SOURCE_FILES
     src/osmscout/MapObjectInfoModel.cpp
     src/osmscout/MapStyleModel.cpp
     src/osmscout/StyleFlagsModel.cpp
+    src/osmscout/OSMScoutQt.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})
