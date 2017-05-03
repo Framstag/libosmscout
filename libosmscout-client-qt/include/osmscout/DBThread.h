@@ -27,6 +27,7 @@
 #include <QMutex>
 #include <QTime>
 #include <QTimer>
+#include <QReadWriteLock>
 
 #include <osmscout/LocationEntry.h>
 #include <osmscout/Database.h>
@@ -190,7 +191,7 @@ protected:
   double                        mapDpi;
   double                        physicalDpi;
 
-  mutable QMutex                mutex;
+  mutable QReadWriteLock        lock;
   
   osmscout::DatabaseParameter   databaseParameter;
   QList<DBInstanceRef>          databases;
@@ -255,6 +256,14 @@ public:
   
   const DatabaseLoadedResponse loadedResponse() const;
 
+  /**
+   * Test if some bounding box is covered by databases - fully, partially or not covered.
+   * Database bounding box combined with water-index is used.
+   *
+   * @param magnification
+   * @param bbox
+   * @return DatabaseCoverage enum: Outside, Covered, Intersects
+   */
   DatabaseCoverage databaseCoverage(const osmscout::Magnification &magnification,
                                     const osmscout::GeoBox &bbox);
 

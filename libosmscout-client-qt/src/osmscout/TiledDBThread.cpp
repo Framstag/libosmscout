@@ -101,18 +101,18 @@ TiledDBThread::~TiledDBThread()
 void TiledDBThread::Initialize()
 {
   {
-  QMutexLocker locker(&mutex);
-  qDebug() << "Initialize";
+    QWriteLocker locker(&lock);
+    qDebug() << "Initialize";
 
-  // create tile downloader in correct thread
-  tileDownloader = new OsmTileDownloader(tileCacheDirectory);
-  connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-          Qt::QueuedConnection);
+    // create tile downloader in correct thread
+    tileDownloader = new OsmTileDownloader(tileCacheDirectory);
+    connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+            this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+            Qt::QueuedConnection);
 
-  connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
-          this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
-          Qt::QueuedConnection);
+    connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
+            this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+            Qt::QueuedConnection);
   }
 
 
@@ -139,7 +139,7 @@ void TiledDBThread::onDatabaseLoaded(osmscout::GeoBox boundingBox)
 void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
         size_t width, size_t height, size_t lookupWidth, size_t lookupHeight)
 {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
 
     for (auto db:databases){
       if (!db->database->IsOpen() || (!db->styleConfig)) {
@@ -546,7 +546,7 @@ void TiledDBThread::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32
           databaseCoverageOfTile(zoomLevel, xtile, ytile) == DatabaseCoverage::Covered));
 
     if (requestedFromWeb){
-        QMutexLocker locker(&mutex);
+        QReadLocker locker(&lock);
         if (tileDownloader == NULL){
             qWarning() << "tile requested but donwloader is not initialized yet";
             emit tileDownloadFailed(zoomLevel, xtile, ytile, false);
@@ -704,7 +704,7 @@ void TiledDBThread::onlineTileProviderChanged()
 void TiledDBThread::onlineTilesEnabledChanged(bool b)
 {
     {
-        QMutexLocker threadLocker(&mutex);
+        QWriteLocker locker(&lock);
         onlineTilesEnabled = b;
 
         QMutexLocker cacheLocker(&tileCacheMutex);
@@ -717,7 +717,7 @@ void TiledDBThread::onlineTilesEnabledChanged(bool b)
 void TiledDBThread::onOfflineMapChanged(bool b)
 {
     {
-        QMutexLocker threadLocker(&mutex);
+        QWriteLocker locker(&lock);
         offlineTilesEnabled = b;
 
         QMutexLocker cacheLocker(&tileCacheMutex);
