@@ -15,9 +15,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-    #include/osmscout/private/Config.h
-    #include/osmscout/ClientQtFeatures.h
     include/osmscout/DBThread.h
+    include/osmscout/DBInstance.h
     include/osmscout/FileDownloader.h
     include/osmscout/InputHandler.h
     include/osmscout/LocationEntry.h
@@ -48,6 +47,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
+    src/osmscout/DBInstance.cpp
     src/osmscout/FileDownloader.cpp
     src/osmscout/InputHandler.cpp
     src/osmscout/LocationEntry.cpp

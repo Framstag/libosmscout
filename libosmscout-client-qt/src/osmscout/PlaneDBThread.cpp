@@ -469,10 +469,10 @@ void PlaneDBThread::DrawMap()
                                        data.groundTiles);
       }
 
-      success&=db->painter->DrawMap(renderProjection,
-                                    drawParameter,
-                                    data,
-                                    &p);
+      success&=db->GetPainter()->DrawMap(renderProjection,
+                                         drawParameter,
+                                         data,
+                                         &p);
 
     }
     p.end();

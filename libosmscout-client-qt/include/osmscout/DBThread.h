@@ -34,15 +34,13 @@
 #include <osmscout/MapService.h>
 #include <osmscout/RoutingService.h>
 #include <osmscout/RoutePostprocessor.h>
-
 #include <osmscout/MapPainterQt.h>
-
-#include <osmscout/util/Breaker.h>
 
 #include <osmscout/Settings.h>
 #include <osmscout/TileCache.h>
 #include <osmscout/OsmTileDownloader.h>
 #include <osmscout/MapManager.h>
+#include <osmscout/DBInstance.h>
 
 /**
  * \ingroup QtAPI
@@ -76,115 +74,6 @@ struct DatabaseLoadedResponse
 };
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)
-
-/**
- * \ingroup QtAPI
- */
-class OSMSCOUT_CLIENT_QT_API QBreaker : public osmscout::Breaker
-{
-private:
-  mutable QMutex mutex;
-  bool           aborted;
-
-public:
-  QBreaker();
-
-  void Break();
-  bool IsAborted() const;
-  void Reset();
-};
-
-/**
- * \ingroup QtAPI
- */
-class OSMSCOUT_CLIENT_QT_API StyleError
-{
-    enum StyleErrorType {
-        Symbol, Error, Warning, Exception
-    };
-
-public:
-    StyleError(StyleErrorType type, int line, int column, const QString &text) :
-        type(type), line(line), column(column), text(text){}
-    StyleError(QString msg);
-
-    StyleErrorType GetType(){ return type; }
-    QString GetTypeName() const;
-    int GetLine(){ return line; }
-    int GetColumn(){ return column; }
-    const QString &GetText(){ return text; }
-    QString GetDescription(){return GetTypeName()+": "+GetText();}
-
-private:
-    StyleErrorType  type;
-    int             line;
-    int             column;
-    QString         text;
-};
-
-/**
- * \ingroup QtAPI
- * 
- * Instance of one osmscout database and database specific objects.
- */
-class DBInstance : public QObject
-{
-  Q_OBJECT
-
-public:
-  QString                       path;
-  osmscout::DatabaseRef         database;
-  
-  osmscout::LocationServiceRef  locationService;
-  osmscout::MapServiceRef       mapService;
-  osmscout::MapService::CallbackId callbackId;
-  osmscout::BreakerRef          dataLoadingBreaker;  
-  
-  osmscout::RoutingServiceRef   router;
-
-  osmscout::StyleConfigRef      styleConfig;
-  osmscout::MapPainterQt        *painter;
-  
-  inline DBInstance(QString path,
-                    osmscout::DatabaseRef database,
-                    osmscout::LocationServiceRef locationService,
-                    osmscout::MapServiceRef mapService,
-                    osmscout::MapService::CallbackId callbackId,
-                    osmscout::BreakerRef dataLoadingBreaker,
-                    osmscout::StyleConfigRef styleConfig):
-    path(path),
-    database(database),
-    locationService(locationService),
-    mapService(mapService),
-    callbackId(callbackId),
-    dataLoadingBreaker(dataLoadingBreaker),
-    styleConfig(styleConfig),
-    painter(NULL)
-  {
-    if (styleConfig){
-      painter = new osmscout::MapPainterQt(styleConfig);
-    }   
-  };
-  
-  inline ~DBInstance()
-  {
-    close();
-    if (painter!=NULL) {
-      delete painter;
-    }
-  };
-
-  bool LoadStyle(QString stylesheetFilename,
-                 std::unordered_map<std::string,bool> stylesheetFlags, 
-                 QList<StyleError> &errors);
-  
-  bool AssureRouter(osmscout::Vehicle vehicle, 
-                    osmscout::RouterParameter routerParameter);  
-
-  void close();
-};
-
-typedef std::shared_ptr<DBInstance> DBInstanceRef;
 
 enum DatabaseCoverage{
   Outside = 0,

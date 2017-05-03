@@ -261,10 +261,10 @@ void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32
       p.setRenderHint(QPainter::TextAntialiasing);
       p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-      success|=db->painter->DrawMap(projection,
-                                    drawParameter,
-                                    data,
-                                    &p);
+      success|=db->GetPainter()->DrawMap(projection,
+                                         drawParameter,
+                                         data,
+                                         &p);
 
       osmscout::log.Debug() << "draw:      " << timer.elapsed();
       timer.restart();
