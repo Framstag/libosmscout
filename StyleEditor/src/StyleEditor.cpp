@@ -83,8 +83,10 @@ int main(int argc, char* argv[])
     }
   }
 
-  builder.WithIconDirectory(iconDirectory)
-    .WithMapLookupDirectories(mapLookupDirectories);
+  builder
+    .WithIconDirectory(iconDirectory)
+    .WithMapLookupDirectories(mapLookupDirectories)
+    .WithOnlineTileProviders(":/resources/online-tile-providers.json");
 
   if (!builder.Init()){
     std::cerr << "Cannot initialize OSMScout library" << std::endl;

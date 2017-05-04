@@ -128,8 +128,11 @@ int main(int argc, char* argv[])
       iconDirectory = "icons";
     }
   }
-  builder.WithIconDirectory(iconDirectory)
-    .WithMapLookupDirectories(mapLookupDirectories);
+  builder
+    .WithIconDirectory(iconDirectory)
+    .WithMapLookupDirectories(mapLookupDirectories)
+    .WithOnlineTileProviders(":/resources/online-tile-providers.json")
+    .WithMapProviders(":/resources/map-providers.json");
 
   if (!builder.Init()){
     std::cerr << "Cannot initialize OSMScout library" << std::endl;

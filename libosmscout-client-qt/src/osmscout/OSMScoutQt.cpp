@@ -31,13 +31,12 @@
 #include <osmscout/Settings.h>
 #include <osmscout/TiledDBThread.h>
 #include <osmscout/PlaneDBThread.h>
+#include <osmscout/MapObjectInfoModel.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
 OSMScoutQtBuilder::OSMScoutQtBuilder():
   settingsStorage(NULL),
-  onlineTileProviders(":/resources/online-tile-providers.json"),
-  mapProviders(":/resources/map-providers.json"),
   onlineTileCacheSize(100),
   offlineTileCacheSize(200),
   styleSheetDirectoryConfigured(false),
@@ -63,8 +62,12 @@ bool OSMScoutQtBuilder::Init(bool tiledInstance)
   SettingsRef settings=std::make_shared<Settings>(settingsStorage);
 
   // load online tile providers
-  settings->loadOnlineTileProviders(onlineTileProviders);
-  settings->loadMapProviders(mapProviders);
+  if (!onlineTileProviders.isEmpty()){
+    settings->loadOnlineTileProviders(onlineTileProviders);
+  }
+  if (!mapProviders.isEmpty()){
+    settings->loadMapProviders(mapProviders);
+  }
 
   // setup style sheet
   if (styleSheetFileConfigured){
@@ -119,6 +122,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<QmlSettings>(uri, versionMajor, versionMinor, "Settings");
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
   qmlRegisterType<MapDownloadsModel>(uri, versionMajor, versionMinor, "MapDownloadsModel");
+  qmlRegisterType<MapObjectInfoModel>(uri, versionMajor, versionMinor, "MapObjectInfoModel");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()

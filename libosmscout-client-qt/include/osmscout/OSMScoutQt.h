@@ -69,6 +69,12 @@ public:
     return *this;
   };
 
+  inline OSMScoutQtBuilder& WithMapProviders(QString mapProviders)
+  {
+    this->mapProviders=mapProviders;
+    return *this;
+  };
+
   inline OSMScoutQtBuilder& WithMapLookupDirectories(QStringList mapLookupDirectories)
   {
     this->mapLookupDirectories=mapLookupDirectories;
