@@ -104,8 +104,8 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
 
     QString path=db->path;
     osmscout::MapService::TileStateCallback callback=[this,path](const osmscout::TileRef& tile) {
-      // qt is not happy to emit signals from lamda...
-      tileStateChangedCallback(path,tile);
+      //std::cout << "callback called for job: " << this << std::endl;
+      emit tileStateChanged(path,tile);
     };
     
     osmscout::MapService::CallbackId callbackId=db->mapService->RegisterTileStateCallback(callback);
@@ -131,11 +131,6 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
     }
 
   }
-}
-void DBLoadJob::tileStateChangedCallback(QString dbPath,const osmscout::TileRef tile)
-{
-  //std::cout << "callback called for job: " << this << std::endl;
-  emit tileStateChanged(dbPath,tile);
 }
 
 void DBLoadJob::onTileStateChagned(QString dbPath,const osmscout::TileRef tile)
