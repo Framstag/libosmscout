@@ -50,6 +50,7 @@ void DBJob::Close()
     qWarning() << "Closing from non Job thread";
   }
   delete locker;
+  locker=NULL;
   databases.clear();
 }
 
@@ -72,6 +73,9 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
 
 DBLoadJob::~DBLoadJob()
 {
+  // we have to call Close from ~DBLoadJob
+  // it (DBLoadJob::Close) is unreachable when ~DBJob is called
+  Close();
 }
 
 void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
@@ -100,10 +104,12 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
 
     QString path=db->path;
     osmscout::MapService::TileStateCallback callback=[this,path](const osmscout::TileRef& tile) {
-      emit tileStateChanged(path,tile);
+      // qt is not happy to emit signals from lamda...
+      tileStateChangedCallback(path,tile);
     };
     
     osmscout::MapService::CallbackId callbackId=db->mapService->RegisterTileStateCallback(callback);
+    //std::cout << "callback registered for job: " << this << " " << db->path.toStdString() << ": " << callbackId  << std::endl ;
     callbacks[db->path]=callbackId;
     loadedTiles[db->path]=QMap<osmscout::TileId,osmscout::TileRef>();
     QMap<osmscout::TileId,osmscout::TileRef> tileMap;
@@ -126,6 +132,11 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
 
   }
 }
+void DBLoadJob::tileStateChangedCallback(QString dbPath,const osmscout::TileRef tile)
+{
+  //std::cout << "callback called for job: " << this << std::endl;
+  emit tileStateChanged(dbPath,tile);
+}
 
 void DBLoadJob::onTileStateChagned(QString dbPath,const osmscout::TileRef tile)
 {
@@ -138,6 +149,7 @@ void DBLoadJob::onTileStateChagned(QString dbPath,const osmscout::TileRef tile)
   if (!loadingTiles.contains(dbPath)){
     return; // loaded already
   }
+
   QMap<osmscout::TileId,osmscout::TileRef> &loadingTileMap=loadingTiles[dbPath];
   auto tileIt=loadingTileMap.find(tile->GetId());
   if (tileIt==loadingTileMap.end()){
@@ -149,10 +161,10 @@ void DBLoadJob::onTileStateChagned(QString dbPath,const osmscout::TileRef tile)
   loadedTileMap[tile->GetId()]=tileIt.value();
   loadingTileMap.remove(tile->GetId());
 
-  if (loadingTileMap.isEmpty()){
+  if (loadingTileMap.isEmpty()){ // this database is finished
     loadingTiles.remove(dbPath);
-    emit databaseLoaded(dbPath,loadingTileMap.values());
-    if (loadingTiles.isEmpty()){
+    emit databaseLoaded(dbPath,loadedTileMap.values());
+    if (loadingTiles.isEmpty()){ // all databases are finished
       emit finished(loadedTiles);
       qDebug() << "Loaded completely";
       Close();
@@ -168,7 +180,9 @@ void DBLoadJob::Close()
   // deregister callbacks
   for (auto &db:databases){
     if (callbacks.contains(db->path)){
+      //std::cout << "Remove callback for job: " << this << ": " << callbacks[db->path] << std::endl;
       db->mapService->DeregisterTileStateCallback(callbacks[db->path]);
+      callbacks.remove(db->path);
     }
   }
 
