@@ -56,7 +56,11 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/StyleFlagsModel.cpp \
                                  osmscout/moc_StyleFlagsModel.cpp \
                                  osmscout/OSMScoutQt.cpp \
-                                 osmscout/moc_OSMScoutQt.cpp
+                                 osmscout/moc_OSMScoutQt.cpp \
+                                 osmscout/DBJob.cpp \
+                                 osmscout/moc_DBJob.cpp \
+                                 osmscout/LookupModule.cpp \
+                                 osmscout/moc_LookupModule.cpp
 
 osmscout/moc_%.cpp: $(top_srcdir)/include/osmscout/%.h
 	@MOC@ -o$@ $<
@@ -84,4 +88,6 @@ MOSTLYCLEANFILES = osmscout/moc_DBThread.cpp \
                    osmscout/moc_OnlineTileProvider.cpp \
                    osmscout/moc_OnlineTileProviderModel.cpp \
                    osmscout/moc_PlaneDBThread.cpp \
-                   osmscout/moc_OSMScoutQt.cpp
+                   osmscout/moc_OSMScoutQt.cpp \
+                   osmscout/moc_DBJob.cpp \
+                   osmscout/moc_LookupModule.cpp
