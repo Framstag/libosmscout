@@ -696,54 +696,6 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
   emit searchFinished(searchPattern, /*error*/ false);
 }
 
-void DBThread::requestObjectsOnView(const RenderMapRequest &view)
-{
-  QReadLocker locker(&lock);
-  if (!isInitializedInternal()){
-      return; // ignore request if db is not initialized
-  }
-
-  // setup projection for data lookup
-  osmscout::MercatorProjection lookupProjection;
-  lookupProjection.Set(view.coord, /* angle */ 0, view.magnification, mapDpi, view.width*1.5, view.height*1.5);
-  lookupProjection.SetLinearInterpolationUsage(view.magnification.GetLevel() >= 10);
-
-  osmscout::AreaSearchParameter searchParameter;
-  // https://github.com/Framstag/libosmscout/blob/master/Documentation/RenderTuning.txt
-  if (view.magnification.GetLevel() >= 15) {
-    searchParameter.SetMaximumAreaLevel(6);
-  }
-  else {
-    searchParameter.SetMaximumAreaLevel(4);
-  }
-  searchParameter.SetUseMultithreading(true);
-  searchParameter.SetUseLowZoomOptimization(true);
-
-  for (auto &db:databases){
-    if (!db->database->IsOpen() || (!db->styleConfig)) {
-      continue;
-    }
-    std::list<osmscout::TileRef>  tiles;
-    osmscout::MapData             data;
-
-    osmscout::GeoBox dbBox;
-    db->database->GetBoundingBox(dbBox);
-    osmscout::GeoBox lookupBox;
-    lookupProjection.GetDimensions(lookupBox);
-    if (!dbBox.Intersects(lookupBox)){
-      std::cout << "Skip database" << db->path.toStdString() << std::endl;
-      continue;
-    }
-    db->mapService->LookupTiles(lookupProjection,tiles);
-    // load tiles synchronous
-    db->mapService->LoadMissingTileData(searchParameter,*db->styleConfig,tiles);
-    db->mapService->AddTileDataToMapData(tiles,data);
-
-    emit viewObjectsLoaded(view, data);
-  }
-  emit viewObjectsLoaded(view, osmscout::MapData());
-}
-
 bool DBThread::CalculateRoute(const QString databasePath,
                               const osmscout::RoutingProfile& routingProfile,
                               const osmscout::RoutePosition& start,
@@ -1095,4 +1047,10 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
   }
   
   return flags;
+}
+
+void DBThread::RunJob(DBJob *job)
+{
+  QReadLocker *locker=new QReadLocker(&lock);
+  job->Run(databases,locker);
 }

@@ -92,6 +92,7 @@ bool OSMScoutQtBuilder::Init(bool tiledInstance)
   }
 
   QThread *thread=new QThread();
+  thread->setObjectName("DBThread");
 
   dbThread->connect(thread, SIGNAL(started()), SLOT(Initialize()));
   dbThread->connect(thread, SIGNAL(finished()), SLOT(Finalize()));
@@ -165,4 +166,14 @@ DBThreadRef OSMScoutQt::GetDBThread()
 SettingsRef OSMScoutQt::GetSettings()
 {
   return settings;
+}
+
+LookupModuleRef OSMScoutQt::MakeLookupModule()
+{
+  QThread *thread=new QThread();
+  thread->setObjectName("LookupModule");
+  LookupModuleRef module=std::make_shared<LookupModule>(thread,dbThread);
+  module->moveToThread(thread);
+  thread->start();
+  return module;
 }

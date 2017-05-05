@@ -42,6 +42,7 @@
 #include <osmscout/OsmTileDownloader.h>
 #include <osmscout/MapManager.h>
 #include <osmscout/DBInstance.h>
+#include <osmscout/DBJob.h>
 
 /**
  * \ingroup QtAPI
@@ -134,8 +135,6 @@ signals:
 
   void searchFinished(const QString searchPattern, bool error);
 
-  void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
-
 public slots:
   void ToggleDaylight();
   void SetStyleFlag(const QString &key, bool value);
@@ -181,8 +180,6 @@ public slots:
    * @param limit - suggested limit for count of retrieved entries from one database
    */
   void SearchForLocations(const QString searchPattern, int limit);
-
-  void requestObjectsOnView(const RenderMapRequest&);
 
 protected:
   MapManagerRef                 mapManager;
@@ -328,6 +325,8 @@ public:
   }
 
   const QMap<QString,bool> GetStyleFlags() const;
+
+  void RunJob(DBJob *job);
 
   static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);

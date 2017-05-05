@@ -26,20 +26,21 @@
 MapObjectInfoModel::MapObjectInfoModel():
 ready(false), setup(false), view()
 {
-  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  this->mapDpi=dbThread->GetMapDpi();
+
+  lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
+  this->mapDpi=OSMScoutQt::GetInstance().GetSettings()->GetMapDPI();
 
   qRegisterMetaType<osmscout::MapData>("osmscout::MapData");
 
-  connect(dbThread.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
+  connect(lookupModule.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
           this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
           Qt::QueuedConnection);
 
   connect(this, SIGNAL(objectsRequested(const RenderMapRequest &)),
-          dbThread.get(), SLOT(requestObjectsOnView(const RenderMapRequest&)),
+          lookupModule.get(), SLOT(requestObjectsOnView(const RenderMapRequest&)),
           Qt::QueuedConnection);
 
-  connect(dbThread.get(), SIGNAL(viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
+  connect(lookupModule.get(), SIGNAL(viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
           this, SLOT(onViewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
           Qt::QueuedConnection);
 }

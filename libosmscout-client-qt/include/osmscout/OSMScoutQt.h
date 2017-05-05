@@ -24,6 +24,7 @@
 
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/LookupModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -141,6 +142,7 @@ public:
 
   DBThreadRef GetDBThread();
   SettingsRef GetSettings();
+  LookupModuleRef MakeLookupModule();
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,
