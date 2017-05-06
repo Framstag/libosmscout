@@ -46,9 +46,6 @@
 
 namespace osmscout {
 
-  class Symbol;
-  typedef std::shared_ptr<Symbol> SymbolRef;
-
   /**
    * \ingroup Stylesheet
    *
