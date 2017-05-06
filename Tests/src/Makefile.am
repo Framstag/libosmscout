@@ -8,6 +8,7 @@ bin_PROGRAMS = CachePerformance \
                WStringStringConversion
 
 check_PROGRAMS = CalculateResolution \
+		 ColorParse \
                  NumberSetPerformance \
                  WorkQueue \
                  MapRotate \
@@ -32,6 +33,10 @@ AccessParse_LDADD = $(LIBOSMSCOUT_LIBS)
 BitsAndBytesNeeded_SOURCES = BitsAndBytesNeeded.cpp
 BitsAndBytesNeeded_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 BitsAndBytesNeeded_LDADD = $(LIBOSMSCOUT_LIBS)
+
+ColorParse_SOURCES = ColorParse.cpp
+ColorParse_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+ColorParse_LDADD = $(LIBOSMSCOUT_LIBS)
 
 EncodeNumber_SOURCES = EncodeNumber.cpp
 EncodeNumber_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
