@@ -10,6 +10,7 @@ libosmscoutmap_la_SOURCES = osmscout/oss/Scanner.cpp \
                             osmscout/LabelLayouter.cpp \
                             osmscout/MapPainter.cpp \
                             osmscout/MapParameter.cpp \
+                            osmscout/LabelProvider.cpp \
                             osmscout/StyleConfig.cpp \
                             osmscout/TileId.cpp \
                             osmscout/DataTileCache.cpp \
