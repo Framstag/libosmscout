@@ -145,7 +145,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OSS() {
-		while (!(la->kind == _EOF || la->kind == 7 /* "OSS" */)) {SynErr(92); Get();}
+		while (!(la->kind == _EOF || la->kind == 7 /* "OSS" */)) {SynErr(62); Get();}
 		Expect(7 /* "OSS" */);
 		state=true; 
 		while (la->kind == 9 /* "FLAG" */) {
@@ -167,13 +167,13 @@ void Parser::OSS() {
 }
 
 void Parser::FLAGSECTION() {
-		while (!(la->kind == _EOF || la->kind == 9 /* "FLAG" */)) {SynErr(93); Get();}
+		while (!(la->kind == _EOF || la->kind == 9 /* "FLAG" */)) {SynErr(63); Get();}
 		Expect(9 /* "FLAG" */);
 		FLAGBLOCK(true);
 }
 
 void Parser::WAYORDER() {
-		while (!(la->kind == _EOF || la->kind == 17 /* "ORDER" */)) {SynErr(94); Get();}
+		while (!(la->kind == _EOF || la->kind == 17 /* "ORDER" */)) {SynErr(64); Get();}
 		Expect(17 /* "ORDER" */);
 		Expect(18 /* "WAYS" */);
 		size_t priority=1;
@@ -184,13 +184,13 @@ void Parser::WAYORDER() {
 }
 
 void Parser::CONSTSECTION() {
-		while (!(la->kind == _EOF || la->kind == 29 /* "CONST" */)) {SynErr(95); Get();}
+		while (!(la->kind == _EOF || la->kind == 29 /* "CONST" */)) {SynErr(65); Get();}
 		Expect(29 /* "CONST" */);
 		CONSTBLOCK(true);
 }
 
 void Parser::SYMBOLSECTION() {
-		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(96); Get();}
+		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(66); Get();}
 		Expect(21 /* "SYMBO" */);
 		std::string name;
 		
@@ -287,7 +287,7 @@ void Parser::IFCOND(bool& state) {
 		std::string flag;
 		bool        negate=false;
 		
-		if (la->kind == 90 /* "!" */) {
+		if (la->kind == 60 /* "!" */) {
 			Get();
 			negate=true; 
 		}
@@ -336,7 +336,7 @@ void Parser::BOOL(bool& value) {
 }
 
 void Parser::WAYGROUP(size_t priority) {
-		while (!(la->kind == _EOF || la->kind == 19 /* "GROUP" */)) {SynErr(97); Get();}
+		while (!(la->kind == _EOF || la->kind == 19 /* "GROUP" */)) {SynErr(67); Get();}
 		Expect(19 /* "GROUP" */);
 		if (la->kind == _ident) {
 			std::string wayTypeName;
@@ -384,7 +384,7 @@ void Parser::WAYGROUP(size_t priority) {
 }
 
 void Parser::POLYGON(Symbol& symbol) {
-		while (!(la->kind == _EOF || la->kind == 25 /* "POLYGON" */)) {SynErr(98); Get();}
+		while (!(la->kind == _EOF || la->kind == 25 /* "POLYGON" */)) {SynErr(68); Get();}
 		Expect(25 /* "POLYGON" */);
 		StyleFilter         filter;
 		FillPartialStyle    fillStyle;
@@ -406,7 +406,7 @@ void Parser::POLYGON(Symbol& symbol) {
 }
 
 void Parser::RECTANGLE(Symbol& symbol) {
-		while (!(la->kind == _EOF || la->kind == 26 /* "RECTANGLE" */)) {SynErr(99); Get();}
+		while (!(la->kind == _EOF || la->kind == 26 /* "RECTANGLE" */)) {SynErr(69); Get();}
 		Expect(26 /* "RECTANGLE" */);
 		StyleFilter        filter;
 		FillPartialStyle   fillStyle;
@@ -428,7 +428,7 @@ void Parser::RECTANGLE(Symbol& symbol) {
 }
 
 void Parser::CIRCLE(Symbol& symbol) {
-		while (!(la->kind == _EOF || la->kind == 28 /* "CIRCLE" */)) {SynErr(100); Get();}
+		while (!(la->kind == _EOF || la->kind == 28 /* "CIRCLE" */)) {SynErr(70); Get();}
 		Expect(28 /* "CIRCLE" */);
 		Vertex2D           center;
 		double             radius;
@@ -447,9 +447,9 @@ void Parser::CIRCLE(Symbol& symbol) {
 }
 
 void Parser::AREAFILLSYMSTYLE(FillPartialStyle& fillStyle) {
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(101); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(71); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 55 /* "color" */ || la->kind == 67 /* "pattern" */ || la->kind == 68 /* "patternMinMag" */) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			FILLSTYLEATTR(fillStyle);
 			ExpectWeak(16 /* ";" */, 1);
 		}
@@ -457,145 +457,38 @@ void Parser::AREAFILLSYMSTYLE(FillPartialStyle& fillStyle) {
 }
 
 void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
-		if (la->kind == 55 /* "color" */) {
-			Color fillColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(fillColor);
-			style.style->SetFillColor(fillColor);
-			style.attributes.insert(FillStyle::attrFillColor);
-			
-		} else if (la->kind == 67 /* "pattern" */) {
-			std::string patternName; 
-			Get();
-			Expect(44 /* ":" */);
-			STRING(patternName);
-			style.style->SetPattern(patternName);
-			style.attributes.insert(FillStyle::attrPattern);
-			
-		} else if (la->kind == 68 /* "patternMinMag" */) {
-			Magnification minMag; 
-			Get();
-			Expect(44 /* ":" */);
-			MAG(minMag);
-			style.style->SetPatternMinMag(minMag);
-			style.attributes.insert(FillStyle::attrPatternMinMag);
-			
-		} else SynErr(102);
+		ATTRIBUTE(style,*FillStyle::GetDescriptor());
 }
 
 void Parser::AREABORDERSYMSTYLE(BorderPartialStyle& borderStyle) {
-		while (!(la->kind == _EOF || la->kind == 22 /* "BORDER" */)) {SynErr(103); Get();}
+		while (!(la->kind == _EOF || la->kind == 22 /* "BORDER" */)) {SynErr(72); Get();}
 		Expect(22 /* "BORDER" */);
 		Expect(11 /* "{" */);
-		while (StartOf(2)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			BORDERSTYLEATTR(borderStyle);
-			ExpectWeak(16 /* ";" */, 3);
+			ExpectWeak(16 /* ";" */, 1);
 		}
 		Expect(12 /* "}" */);
 }
 
 void Parser::BORDERSTYLEATTR(BorderPartialStyle& style) {
-		switch (la->kind) {
-		case 16 /* ";" */: {
-			break;
-		}
-		case 55 /* "color" */: {
-			Color color; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(color);
-			style.style->SetColor(color);
-			style.attributes.insert(BorderStyle::attrColor);
-			
-			break;
-		}
-		case 59 /* "width" */: {
-			double width; 
-			Get();
-			Expect(44 /* ":" */);
-			UDISPLAYSIZE(width);
-			style.style->SetWidth(width);
-			style.attributes.insert(BorderStyle::attrWidth);
-			
-			break;
-		}
-		case 56 /* "dash" */: {
-			std::vector<double> dashes;
-			double              dash;
-			
-			Get();
-			Expect(44 /* ":" */);
-			UDOUBLE(dash);
-			dashes.push_back(dash); 
-			while (la->kind == 20 /* "," */) {
-				Get();
-				UDOUBLE(dash);
-				dashes.push_back(dash); 
-			}
-			style.style->SetDashes(dashes);
-			style.attributes.insert(BorderStyle::attrDashes);
-			
-			break;
-		}
-		case 57 /* "gapColor" */: {
-			Color gapColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(gapColor);
-			style.style->SetGapColor(gapColor);
-			style.attributes.insert(BorderStyle::attrGapColor);
-			
-			break;
-		}
-		case 60 /* "displayOffset" */: {
-			double displayOffset; 
-			Get();
-			Expect(44 /* ":" */);
-			DISPLAYSIZE(displayOffset);
-			style.style->SetDisplayOffset(displayOffset);
-			style.attributes.insert(BorderStyle::attrDisplayOffset);
-			
-			break;
-		}
-		case 61 /* "offset" */: {
-			double offset; 
-			Get();
-			Expect(44 /* ":" */);
-			MAPSIZE(offset);
-			style.style->SetOffset(offset);
-			style.attributes.insert(BorderStyle::attrOffset);
-			
-			break;
-		}
-		case 65 /* "priority" */: {
-			int priority; 
-			Get();
-			Expect(44 /* ":" */);
-			INT(priority);
-			style.style->SetPriority(priority);
-			style.attributes.insert(BorderStyle::attrPriority);
-			
-			break;
-		}
-		default: SynErr(104); break;
-		}
+		ATTRIBUTE(style,*BorderStyle::GetDescriptor());
 }
 
 void Parser::AREASYMBOLSTYLE(FillPartialStyle& fillStyle, BorderPartialStyle& borderStyle) {
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(105); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(73); Get();}
 		Expect(11 /* "{" */);
 		while (la->kind == 23 /* "AREA" */) {
-			while (!(la->kind == _EOF || la->kind == 23 /* "AREA" */)) {SynErr(106); Get();}
+			while (!(la->kind == _EOF || la->kind == 23 /* "AREA" */)) {SynErr(74); Get();}
 			Get();
 			if (la->kind == 11 /* "{" */) {
 				AREAFILLSYMSTYLE(fillStyle);
 			} else if (la->kind == 24 /* "." */) {
 				Get();
 				AREABORDERSYMSTYLE(borderStyle);
-			} else SynErr(107);
+			} else SynErr(75);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(108); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(76); Get();}
 		Expect(12 /* "}" */);
 }
 
@@ -626,7 +519,7 @@ void Parser::UDOUBLE(double& value) {
 			 SemErr(e.c_str());
 			}
 			
-		} else SynErr(109);
+		} else SynErr(77);
 }
 
 void Parser::DOUBLE(double& value) {
@@ -651,7 +544,7 @@ void Parser::DOUBLE(double& value) {
 			 SemErr(e.c_str());
 			}
 			
-		} else SynErr(110);
+		} else SynErr(78);
 		if (negate) {
 		 value=-value;
 		}
@@ -659,7 +552,7 @@ void Parser::DOUBLE(double& value) {
 }
 
 void Parser::CONSTBLOCK(bool state) {
-		while (StartOf(4)) {
+		while (StartOf(2)) {
 			if (la->kind == 10 /* "IF" */) {
 				CONSTCONDBLOCK(state);
 			} else {
@@ -714,7 +607,7 @@ void Parser::CONSTDEF() {
 			MAGCONSTDEF();
 		} else if (la->kind == 32 /* "UINT" */) {
 			UINTCONSTDEF();
-		} else SynErr(111);
+		} else SynErr(79);
 }
 
 void Parser::COLORCONSTDEF() {
@@ -793,14 +686,16 @@ void Parser::UINTCONSTDEF() {
 }
 
 void Parser::COLOR(Color& color) {
-		if (la->kind == 86 /* "lighten" */) {
-			double factor; 
+		StyleConstantRef constant;
+		double           factor;
+		
+		if (la->kind == 56 /* "lighten" */) {
 			Get();
-			Expect(87 /* "(" */);
+			Expect(58 /* "(" */);
 			COLOR(color);
 			Expect(20 /* "," */);
 			UDOUBLE(factor);
-			Expect(88 /* ")" */);
+			Expect(59 /* ")" */);
 			if (factor>=0.0 && factor<=1.0) {
 			 color=color.Lighten(factor);
 			}
@@ -810,14 +705,14 @@ void Parser::COLOR(Color& color) {
 			 SemErr(e.c_str());
 			}
 			
-		} else if (la->kind == 89 /* "darken" */) {
+		} else if (la->kind == 57 /* "darken" */) {
 			double factor; 
 			Get();
-			Expect(87 /* "(" */);
+			Expect(58 /* "(" */);
 			COLOR(color);
 			Expect(20 /* "," */);
 			UDOUBLE(factor);
-			Expect(88 /* ")" */);
+			Expect(59 /* ")" */);
 			if (factor>=0.0 && factor<=1.0) {
 			 color=color.Darken(factor);
 			}
@@ -828,28 +723,10 @@ void Parser::COLOR(Color& color) {
 			}
 			
 		} else if (la->kind == _color) {
-			Get();
-			std::string c(t->val);
-			
-			if (c.length()!=7 &&
-			   c.length()!=9) {
-			 std::string e="Illegal color value";
-			 SemErr(e.c_str());
-			}
-			
-			if (!errors->hasErrors) {
-			 ToRGBA(c,color);
-			}
-			
+			COLOR_VALUE(color);
 		} else if (la->kind == _variable) {
-			Get();
-			StyleConstantRef constant=config.GetConstantByName(t->val+1);
-			
+			CONSTANT(constant);
 			if (!constant) {
-			 std::string e="Constant not defined";
-			
-			 SemErr(e.c_str());
-			
 			 color=Color::BLACK;
 			}
 			else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
@@ -865,7 +742,7 @@ void Parser::COLOR(Color& color) {
 			 color=colorConstant->GetColor();
 			}
 			
-		} else SynErr(112);
+		} else SynErr(80);
 }
 
 void Parser::MAG(Magnification& magnification) {
@@ -891,27 +768,23 @@ void Parser::MAG(Magnification& magnification) {
 			}
 			
 		} else if (la->kind == _variable) {
-			Get();
-			StyleConstantRef constant=config.GetConstantByName(t->val+1);
-			
+			StyleConstantRef constant; 
+			CONSTANT(constant);
 			if (!constant) {
-			 std::string e="Constant not defined";
-			
-			 SemErr(e.c_str());
+			 magnification.SetLevel(0);
 			}
 			else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
 			 std::string e="Variable is not of type 'MAG'";
 			
 			 SemErr(e.c_str());
 			}
-			
-			if (!errors->hasErrors) {
+			else {
 			 StyleConstantMag* magConstant=dynamic_cast<StyleConstantMag*>(constant.get());
 			
 			 magnification=magConstant->GetMag();
 			}
 			
-		} else SynErr(113);
+		} else SynErr(81);
 }
 
 void Parser::UINT(size_t& value) {
@@ -944,12 +817,12 @@ void Parser::UINT(size_t& value) {
 			 value=uintConstant->GetUInt();
 			}
 			
-		} else SynErr(114);
+		} else SynErr(82);
 }
 
 void Parser::STYLEBLOCK(StyleFilter filter, bool state) {
-		while (StartOf(5)) {
-			if (StartOf(6)) {
+		while (StartOf(3)) {
+			if (StartOf(4)) {
 				STYLE(filter,state);
 			} else {
 				STYLECONDBLOCK(filter,state);
@@ -967,7 +840,7 @@ void Parser::STYLE(StyleFilter filter, bool state) {
 			Expect(12 /* "}" */);
 		} else if (la->kind == 23 /* "AREA" */ || la->kind == 47 /* "NODE" */ || la->kind == 51 /* "WAY" */) {
 			STYLEDEF(filter,state);
-		} else SynErr(115);
+		} else SynErr(83);
 }
 
 void Parser::STYLECONDBLOCK(StyleFilter filter, bool state) {
@@ -1041,7 +914,7 @@ void Parser::STYLEDEF(StyleFilter filter, bool state) {
 			WAYSTYLEDEF(filter,state);
 		} else if (la->kind == 23 /* "AREA" */) {
 			AREASTYLEDEF(filter,state);
-		} else SynErr(116);
+		} else SynErr(84);
 }
 
 void Parser::STYLEFILTER_GROUP(StyleFilter& filter) {
@@ -1270,18 +1143,18 @@ void Parser::SIZECONDITION(SizeConditionRef& condition) {
 }
 
 void Parser::NODESTYLEDEF(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 47 /* "NODE" */)) {SynErr(117); Get();}
+		while (!(la->kind == _EOF || la->kind == 47 /* "NODE" */)) {SynErr(85); Get();}
 		Expect(47 /* "NODE" */);
 		Expect(24 /* "." */);
 		if (la->kind == 48 /* "TEXT" */) {
 			NODETEXTSTYLE(filter,state);
 		} else if (la->kind == 50 /* "ICON" */) {
 			NODEICONSTYLE(filter,state);
-		} else SynErr(118);
+		} else SynErr(86);
 }
 
 void Parser::WAYSTYLEDEF(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 51 /* "WAY" */)) {SynErr(119); Get();}
+		while (!(la->kind == _EOF || la->kind == 51 /* "WAY" */)) {SynErr(87); Get();}
 		Expect(51 /* "WAY" */);
 		if (la->kind == 11 /* "{" */ || la->kind == 49 /* "#" */) {
 			WAYSTYLE(filter,state);
@@ -1293,12 +1166,12 @@ void Parser::WAYSTYLEDEF(StyleFilter filter, bool state) {
 				WAYPATHSYMBOLSTYLE(filter,state);
 			} else if (la->kind == 52 /* "SHIELD" */) {
 				WAYSHIELDSTYLE(filter,state);
-			} else SynErr(120);
-		} else SynErr(121);
+			} else SynErr(88);
+		} else SynErr(89);
 }
 
 void Parser::AREASTYLEDEF(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 23 /* "AREA" */)) {SynErr(122); Get();}
+		while (!(la->kind == _EOF || la->kind == 23 /* "AREA" */)) {SynErr(90); Get();}
 		Expect(23 /* "AREA" */);
 		if (la->kind == 11 /* "{" */) {
 			AREASTYLE(filter,state);
@@ -1314,12 +1187,12 @@ void Parser::AREASTYLEDEF(StyleFilter filter, bool state) {
 				AREABORDERTEXTSTYLE(filter,state);
 			} else if (la->kind == 54 /* "BORDERSYMBO" */) {
 				AREABORDERSYMBOLSTYLE(filter,state);
-			} else SynErr(123);
-		} else SynErr(124);
+			} else SynErr(91);
+		} else SynErr(92);
 }
 
 void Parser::NODETEXTSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(125); Get();}
+		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(93); Get();}
 		Expect(48 /* "TEXT" */);
 		TextPartialStyle style;
 		std::string      slot;
@@ -1329,13 +1202,13 @@ void Parser::NODETEXTSTYLE(StyleFilter filter, bool state) {
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(126); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(94); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(7)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			TEXTSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 8);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(127); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(95); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddNodeTextStyle(filter,style);
@@ -1344,17 +1217,17 @@ void Parser::NODETEXTSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::NODEICONSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(128); Get();}
+		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(96); Get();}
 		Expect(50 /* "ICON" */);
 		IconPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(129); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(97); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 74 /* "position" */ || la->kind == 78 /* "symbol" */ || la->kind == 80 /* "name" */) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			ICONSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 9);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(130); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(98); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddNodeIconStyle(filter,style);
@@ -1363,130 +1236,11 @@ void Parser::NODEICONSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
-		switch (la->kind) {
-		case 69 /* "label" */: {
-			LabelProviderRef label; 
-			Get();
-			Expect(44 /* ":" */);
-			TEXTLABEL(label);
-			if (label) {
-			 style.style->SetLabel(label);
-			 style.attributes.insert(TextStyle::attrLabel);
-			}
-			
-			break;
-		}
-		case 70 /* "style" */: {
-			TextStyle::Style labelStyle; 
-			Get();
-			Expect(44 /* ":" */);
-			LABELSTYLE(labelStyle);
-			style.style->SetStyle(labelStyle);
-			style.attributes.insert(TextStyle::attrStyle);
-			
-			break;
-		}
-		case 55 /* "color" */: {
-			Color textColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(textColor);
-			style.style->SetTextColor(textColor);
-			style.attributes.insert(TextStyle::attrTextColor);
-			
-			break;
-		}
-		case 71 /* "size" */: {
-			double size; 
-			Get();
-			Expect(44 /* ":" */);
-			UDOUBLE(size);
-			style.style->SetSize(size);
-			style.attributes.insert(TextStyle::attrSize);
-			
-			break;
-		}
-		case 72 /* "scaleMag" */: {
-			Magnification scaleMag; 
-			Get();
-			Expect(44 /* ":" */);
-			MAG(scaleMag);
-			style.style->SetScaleAndFadeMag(scaleMag);
-			style.attributes.insert(TextStyle::attrScaleAndFadeMag);
-			
-			break;
-		}
-		case 73 /* "autoSize" */: {
-			bool autoSize; 
-			Get();
-			Expect(44 /* ":" */);
-			BOOL(autoSize);
-			style.style->SetAutoSize(autoSize);
-			style.attributes.insert(TextStyle::attrAutoSize);
-			
-			break;
-		}
-		case 65 /* "priority" */: {
-			size_t priority; 
-			Get();
-			Expect(44 /* ":" */);
-			UINT(priority);
-			style.style->SetPriority((uint8_t)priority);
-			style.attributes.insert(TextStyle::attrPriority);
-			
-			break;
-		}
-		case 74 /* "position" */: {
-			size_t position; 
-			Get();
-			Expect(44 /* ":" */);
-			UINT(position);
-			style.style->SetPosition(position);
-			style.attributes.insert(TextStyle::attrPosition);
-			
-			break;
-		}
-		default: SynErr(131); break;
-		}
+		ATTRIBUTE(style,*TextStyle::GetDescriptor());
 }
 
 void Parser::ICONSTYLEATTR(IconPartialStyle& style) {
-		if (la->kind == 78 /* "symbol" */) {
-			std::string name;
-			SymbolRef   symbol;
-			
-			Get();
-			Expect(44 /* ":" */);
-			IDENT(name);
-			symbol=config.GetSymbol(name);
-			
-			if (!symbol) {
-			 std::string e="Map symbol '"+name+"' is not defined";
-			
-			 SemErr(e.c_str());
-			}
-			else {
-			 style.style->SetSymbol(symbol);
-			 style.attributes.insert(IconStyle::attrSymbol);
-			}
-			
-		} else if (la->kind == 80 /* "name" */) {
-			std::string name; 
-			Get();
-			Expect(44 /* ":" */);
-			IDENT(name);
-			style.style->SetIconName(name);
-			style.attributes.insert(IconStyle::attrIconName);
-			
-		} else if (la->kind == 74 /* "position" */) {
-			size_t position; 
-			Get();
-			Expect(44 /* ":" */);
-			UINT(position);
-			style.style->SetPosition(position);
-			style.attributes.insert(IconStyle::attrPosition);
-			
-		} else SynErr(132);
+		ATTRIBUTE(style,*IconStyle::GetDescriptor());
 }
 
 void Parser::WAYSTYLE(StyleFilter filter, bool state) {
@@ -1498,13 +1252,13 @@ void Parser::WAYSTYLE(StyleFilter filter, bool state) {
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(133); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(99); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(10)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			LINESTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 11);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(134); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(100); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayLineStyle(filter,style);
@@ -1513,17 +1267,17 @@ void Parser::WAYSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::WAYPATHTEXTSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(135); Get();}
+		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(101); Get();}
 		Expect(48 /* "TEXT" */);
 		PathTextPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(136); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(102); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(12)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			PATHTEXTSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 13);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(137); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(103); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayPathTextStyle(filter,style);
@@ -1532,17 +1286,17 @@ void Parser::WAYPATHTEXTSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(138); Get();}
+		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(104); Get();}
 		Expect(21 /* "SYMBO" */);
 		PathSymbolPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(139); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(105); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(14)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			PATHSYMBOLSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 15);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(140); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(106); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayPathSymbolStyle(filter,style);
@@ -1551,17 +1305,17 @@ void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::WAYSHIELDSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 52 /* "SHIELD" */)) {SynErr(141); Get();}
+		while (!(la->kind == _EOF || la->kind == 52 /* "SHIELD" */)) {SynErr(107); Get();}
 		Expect(52 /* "SHIELD" */);
 		PathShieldPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(142); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(108); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(16)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			PATHSHIELDSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 17);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(143); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(109); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddWayPathShieldStyle(filter,style);
@@ -1570,331 +1324,31 @@ void Parser::WAYSHIELDSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::LINESTYLEATTR(LinePartialStyle& style) {
-		switch (la->kind) {
-		case 55 /* "color" */: {
-			Color lineColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(lineColor);
-			style.style->SetLineColor(lineColor);
-			style.attributes.insert(LineStyle::attrLineColor);
-			
-			break;
-		}
-		case 56 /* "dash" */: {
-			std::vector<double> dashes;
-			double              dash;
-			
-			Get();
-			Expect(44 /* ":" */);
-			UDOUBLE(dash);
-			dashes.push_back(dash); 
-			while (la->kind == 20 /* "," */) {
-				Get();
-				UDOUBLE(dash);
-				dashes.push_back(dash); 
-			}
-			style.style->SetDashes(dashes);
-			style.attributes.insert(LineStyle::attrDashes);
-			
-			break;
-		}
-		case 57 /* "gapColor" */: {
-			Color gapColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(gapColor);
-			style.style->SetGapColor(gapColor);
-			style.attributes.insert(LineStyle::attrGapColor);
-			
-			break;
-		}
-		case 58 /* "displayWidth" */: {
-			double displayWidth; 
-			Get();
-			Expect(44 /* ":" */);
-			UDISPLAYSIZE(displayWidth);
-			style.style->SetDisplayWidth(displayWidth);
-			style.attributes.insert(LineStyle::attrDisplayWidth);
-			
-			break;
-		}
-		case 59 /* "width" */: {
-			double width; 
-			Get();
-			Expect(44 /* ":" */);
-			UMAPSIZE(width);
-			style.style->SetWidth(width);
-			style.attributes.insert(LineStyle::attrWidth);
-			
-			break;
-		}
-		case 60 /* "displayOffset" */: {
-			double displayOffset; 
-			Get();
-			Expect(44 /* ":" */);
-			DISPLAYSIZE(displayOffset);
-			style.style->SetDisplayOffset(displayOffset);
-			style.attributes.insert(LineStyle::attrDisplayOffset);
-			
-			break;
-		}
-		case 61 /* "offset" */: {
-			double offset; 
-			Get();
-			Expect(44 /* ":" */);
-			MAPSIZE(offset);
-			style.style->SetOffset(offset);
-			style.attributes.insert(LineStyle::attrOffset);
-			
-			break;
-		}
-		case 62 /* "cap" */: {
-			LineStyle::CapStyle capStyle; 
-			Get();
-			Expect(44 /* ":" */);
-			CAPSTYLE(capStyle);
-			style.style->SetJoinCap(capStyle);
-			style.attributes.insert(LineStyle::attrJoinCap);
-			
-			style.style->SetEndCap(capStyle);
-			style.attributes.insert(LineStyle::attrEndCap);
-			
-			break;
-		}
-		case 63 /* "joinCap" */: {
-			LineStyle::CapStyle capStyle; 
-			Get();
-			Expect(44 /* ":" */);
-			CAPSTYLE(capStyle);
-			style.style->SetJoinCap(capStyle);
-			style.attributes.insert(LineStyle::attrJoinCap);
-			
-			break;
-		}
-		case 64 /* "endCap" */: {
-			LineStyle::CapStyle capStyle; 
-			Get();
-			Expect(44 /* ":" */);
-			CAPSTYLE(capStyle);
-			style.style->SetEndCap(capStyle);
-			style.attributes.insert(LineStyle::attrEndCap);
-			
-			break;
-		}
-		case 65 /* "priority" */: {
-			int priority; 
-			Get();
-			Expect(44 /* ":" */);
-			INT(priority);
-			style.style->SetPriority(priority);
-			style.attributes.insert(LineStyle::attrPriority);
-			
-			break;
-		}
-		case 66 /* "zIndex" */: {
-			int zIndex; 
-			Get();
-			Expect(44 /* ":" */);
-			INT(zIndex);
-			style.style->SetZIndex(zIndex);
-			style.attributes.insert(LineStyle::attrZIndex);
-			
-			break;
-		}
-		default: SynErr(144); break;
-		}
+		ATTRIBUTE(style,*LineStyle::GetDescriptor());
 }
 
 void Parser::PATHTEXTSTYLEATTR(PathTextPartialStyle& style) {
-		if (la->kind == 69 /* "label" */) {
-			LabelProviderRef label; 
-			Get();
-			Expect(44 /* ":" */);
-			TEXTLABEL(label);
-			if (label) {
-			 style.style->SetLabel(label);
-			 style.attributes.insert(PathTextStyle::attrLabel);
-			}
-			
-		} else if (la->kind == 55 /* "color" */) {
-			Color textColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(textColor);
-			style.style->SetTextColor(textColor);
-			style.attributes.insert(PathTextStyle::attrTextColor);
-			
-		} else if (la->kind == 71 /* "size" */) {
-			double size; 
-			Get();
-			Expect(44 /* ":" */);
-			UDOUBLE(size);
-			style.style->SetSize(size);
-			style.attributes.insert(PathTextStyle::attrSize);
-			
-		} else if (la->kind == 60 /* "displayOffset" */) {
-			double displayOffset; 
-			Get();
-			Expect(44 /* ":" */);
-			DISPLAYSIZE(displayOffset);
-			style.style->SetDisplayOffset(displayOffset);
-			style.attributes.insert(PathTextStyle::attrDisplayOffset);
-			
-		} else if (la->kind == 61 /* "offset" */) {
-			double offset; 
-			Get();
-			Expect(44 /* ":" */);
-			MAPSIZE(offset);
-			style.style->SetOffset(offset);
-			style.attributes.insert(PathTextStyle::attrOffset);
-			
-		} else SynErr(145);
+		ATTRIBUTE(style,*PathTextStyle::GetDescriptor());
 }
 
 void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
-		if (la->kind == 78 /* "symbol" */) {
-			std::string name;
-			SymbolRef   symbol;
-			
-			Get();
-			Expect(44 /* ":" */);
-			IDENT(name);
-			symbol=config.GetSymbol(name);
-			
-			if (!symbol) {
-			 std::string e="Map symbol '"+name+"' is not defined";
-			
-			 SemErr(e.c_str());
-			}
-			else {
-			 style.style->SetSymbol(symbol);
-			 style.attributes.insert(PathSymbolStyle::attrSymbol);
-			}
-			
-		} else if (la->kind == 79 /* "symbolSpace" */) {
-			double symbolSpace; 
-			Get();
-			Expect(44 /* ":" */);
-			UDISPLAYSIZE(symbolSpace);
-			style.style->SetSymbolSpace(symbolSpace);
-			style.attributes.insert(PathSymbolStyle::attrSymbolSpace);
-			
-		} else if (la->kind == 60 /* "displayOffset" */) {
-			double displayOffset; 
-			Get();
-			Expect(44 /* ":" */);
-			DISPLAYSIZE(displayOffset);
-			style.style->SetDisplayOffset(displayOffset);
-			style.attributes.insert(PathSymbolStyle::attrDisplayOffset);
-			
-		} else if (la->kind == 61 /* "offset" */) {
-			double offset; 
-			Get();
-			Expect(44 /* ":" */);
-			MAPSIZE(offset);
-			style.style->SetOffset(offset);
-			style.attributes.insert(PathSymbolStyle::attrOffset);
-			
-		} else SynErr(146);
+		ATTRIBUTE(style,*PathSymbolStyle::GetDescriptor());
 }
 
 void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
-		switch (la->kind) {
-		case 69 /* "label" */: {
-			LabelProviderRef label; 
-			Get();
-			Expect(44 /* ":" */);
-			TEXTLABEL(label);
-			if (label) {
-			 style.style->SetLabel(label);
-			 style.attributes.insert(PathShieldStyle::attrLabel);
-			}
-			
-			break;
-		}
-		case 55 /* "color" */: {
-			Color textColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(textColor);
-			style.style->SetTextColor(textColor);
-			style.attributes.insert(PathShieldStyle::attrTextColor);
-			
-			break;
-		}
-		case 75 /* "backgroundColor" */: {
-			Color bgColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(bgColor);
-			style.style->SetBgColor(bgColor);
-			style.attributes.insert(PathShieldStyle::attrBgColor);
-			
-			break;
-		}
-		case 76 /* "borderColor" */: {
-			Color borderColor; 
-			Get();
-			Expect(44 /* ":" */);
-			COLOR(borderColor);
-			style.style->SetBorderColor(borderColor);
-			style.attributes.insert(PathShieldStyle::attrBorderColor);
-			
-			break;
-		}
-		case 71 /* "size" */: {
-			double size; 
-			Get();
-			Expect(44 /* ":" */);
-			UDOUBLE(size);
-			style.style->SetSize(size);
-			style.attributes.insert(PathShieldStyle::attrSize);
-			
-			break;
-		}
-		case 65 /* "priority" */: {
-			size_t priority; 
-			Get();
-			Expect(44 /* ":" */);
-			UINT(priority);
-			if (priority<std::numeric_limits<uint8_t>::max()) {
-			 style.style->SetPriority((uint8_t)priority);
-			 style.attributes.insert(PathShieldStyle::attrPriority);
-			}
-			else {
-			 std::string e="Priority must be in the interval [0,"+
-			               NumberToString(std::numeric_limits<uint8_t>::max())+"[";
-			
-			 SemErr(e.c_str());
-			}
-			
-			break;
-		}
-		case 77 /* "shieldSpace" */: {
-			double shieldSpace; 
-			Get();
-			Expect(44 /* ":" */);
-			UDISPLAYSIZE(shieldSpace);
-			style.style->SetShieldSpace(shieldSpace);
-			style.attributes.insert(PathShieldStyle::attrShieldSpace);
-			
-			break;
-		}
-		default: SynErr(147); break;
-		}
+		ATTRIBUTE(style,*PathShieldStyle::GetDescriptor());
 }
 
 void Parser::AREASTYLE(StyleFilter filter, bool state) {
 		FillPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(148); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(110); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 55 /* "color" */ || la->kind == 67 /* "pattern" */ || la->kind == 68 /* "patternMinMag" */) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			FILLSTYLEATTR(style);
 			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(149); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(111); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaFillStyle(filter,style);
@@ -1903,7 +1357,7 @@ void Parser::AREASTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREATEXTSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(150); Get();}
+		while (!(la->kind == _EOF || la->kind == 48 /* "TEXT" */)) {SynErr(112); Get();}
 		Expect(48 /* "TEXT" */);
 		TextPartialStyle style;
 		std::string      slot;
@@ -1913,13 +1367,13 @@ void Parser::AREATEXTSTYLE(StyleFilter filter, bool state) {
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(151); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(113); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(7)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			TEXTSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 8);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(152); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(114); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaTextStyle(filter,style);
@@ -1928,17 +1382,17 @@ void Parser::AREATEXTSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREAICONSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(153); Get();}
+		while (!(la->kind == _EOF || la->kind == 50 /* "ICON" */)) {SynErr(115); Get();}
 		Expect(50 /* "ICON" */);
 		IconPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(154); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(116); Get();}
 		Expect(11 /* "{" */);
-		while (la->kind == 74 /* "position" */ || la->kind == 78 /* "symbol" */ || la->kind == 80 /* "name" */) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			ICONSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 9);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(155); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(117); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaIconStyle(filter,style);
@@ -1947,7 +1401,7 @@ void Parser::AREAICONSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREABORDERSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 22 /* "BORDER" */)) {SynErr(156); Get();}
+		while (!(la->kind == _EOF || la->kind == 22 /* "BORDER" */)) {SynErr(118); Get();}
 		Expect(22 /* "BORDER" */);
 		BorderPartialStyle style;
 		std::string        slot;
@@ -1957,13 +1411,13 @@ void Parser::AREABORDERSTYLE(StyleFilter filter, bool state) {
 			IDENT(slot);
 			style.style->SetSlot(slot); 
 		}
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(157); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(119); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(2)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			BORDERSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 3);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(158); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(120); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaBorderStyle(filter,style);
@@ -1972,17 +1426,17 @@ void Parser::AREABORDERSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREABORDERTEXTSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 53 /* "BORDERTEXT" */)) {SynErr(159); Get();}
+		while (!(la->kind == _EOF || la->kind == 53 /* "BORDERTEXT" */)) {SynErr(121); Get();}
 		Expect(53 /* "BORDERTEXT" */);
 		PathTextPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(160); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(122); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(12)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			PATHTEXTSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 13);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(161); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(123); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaBorderTextStyle(filter,style);
@@ -1991,17 +1445,17 @@ void Parser::AREABORDERTEXTSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREABORDERSYMBOLSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 54 /* "BORDERSYMBO" */)) {SynErr(162); Get();}
+		while (!(la->kind == _EOF || la->kind == 54 /* "BORDERSYMBO" */)) {SynErr(124); Get();}
 		Expect(54 /* "BORDERSYMBO" */);
 		PathSymbolPartialStyle style;
 		
-		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(163); Get();}
+		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(125); Get();}
 		Expect(11 /* "{" */);
-		while (StartOf(14)) {
+		while (la->kind == _ident || la->kind == 55 /* "name" */) {
 			PATHSYMBOLSTYLEATTR(style);
-			ExpectWeak(16 /* ";" */, 15);
+			ExpectWeak(16 /* ";" */, 1);
 		}
-		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(164); Get();}
+		while (!(la->kind == _EOF || la->kind == 12 /* "}" */)) {SynErr(126); Get();}
 		Expect(12 /* "}" */);
 		if (state) {
 		 config.AddAreaBorderSymbolStyle(filter,style);
@@ -2009,54 +1463,705 @@ void Parser::AREABORDERSYMBOLSTYLE(StyleFilter filter, bool state) {
 		
 }
 
-void Parser::UDISPLAYSIZE(double& value) {
-		UDOUBLE(value);
-		Expect(43 /* "mm" */);
-}
-
-void Parser::UMAPSIZE(double& value) {
-		UDOUBLE(value);
-		Expect(42 /* "m" */);
-}
-
-void Parser::DISPLAYSIZE(double& value) {
-		DOUBLE(value);
-		Expect(43 /* "mm" */);
-}
-
-void Parser::MAPSIZE(double& value) {
-		DOUBLE(value);
-		Expect(42 /* "m" */);
-}
-
-void Parser::CAPSTYLE(LineStyle::CapStyle& style) {
-		if (la->kind == 81 /* "butt" */) {
-			Get();
-			style=LineStyle::capButt; 
-		} else if (la->kind == 82 /* "round" */) {
-			Get();
-			style=LineStyle::capRound; 
-		} else if (la->kind == 83 /* "square" */) {
-			Get();
-			style=LineStyle::capSquare; 
-		} else SynErr(165);
-}
-
-void Parser::INT(int& value) {
-		bool negate=false; 
-		if (la->kind == 39 /* "-" */) {
-			Get();
-			negate=true; 
-		}
-		Expect(_number);
-		if (!StringToNumber(t->val,value)) {
-		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
+void Parser::ATTRIBUTE(PartialStyleBase& style, const StyleDescriptor& descriptor) {
+		std::string                 attributeName;
+		StyleAttributeDescriptorRef attributeDescriptor;
 		
+		if (la->kind == _ident) {
+			IDENT(attributeName);
+		} else if (la->kind == 55 /* "name" */) {
+			Get();
+			attributeName="name"; 
+		} else SynErr(127);
+		attributeDescriptor=descriptor.GetAttribute(attributeName);
+		
+		if (!attributeDescriptor) {
+		 std::string e="'"+attributeName+"' is not a known attribute of the given style";
+		
+		 SemErr(e.c_str());
+		 
+		 attributeDescriptor=std::make_shared<StyleVoidAttributeDescriptor>();
+		}
+		
+		Expect(44 /* ":" */);
+		ATTRIBUTEVALUE(style,*attributeDescriptor);
+}
+
+void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescriptor& descriptor) {
+		ValueType              valueType=ValueType::VOID;
+		bool                   negate=false;
+		std::string            ident;
+		std::string            subIdent;
+		std::string            stringValue;
+		std::string            function;
+		double                 factor;
+		std::string            unit;
+		std::string            number;
+		std::list<std::string> numberList;
+		Color                  color;
+		StyleConstantRef       constant;
+		
+		if (la->kind == _ident || la->kind == 56 /* "lighten" */ || la->kind == 57 /* "darken" */) {
+			if (la->kind == _ident) {
+				IDENT(ident);
+				valueType=ValueType::IDENT; 
+			} else if (la->kind == 56 /* "lighten" */) {
+				Get();
+				ident="lighten"; valueType=ValueType::IDENT; 
+			} else {
+				Get();
+				ident="darken"; valueType=ValueType::IDENT; 
+			}
+			if (la->kind == 24 /* "." */ || la->kind == 58 /* "(" */) {
+				if (la->kind == 58 /* "(" */) {
+					Get();
+					valueType=ValueType::COLOR;
+					function=ident;
+					
+					if (la->kind == _color) {
+						COLOR_VALUE(color);
+					} else if (la->kind == _variable) {
+						CONSTANT(constant);
+					} else SynErr(128);
+					Expect(20 /* "," */);
+					UDOUBLE(factor);
+					Expect(59 /* ")" */);
+				} else {
+					Get();
+					if (la->kind == _ident) {
+						IDENT(subIdent);
+					} else if (la->kind == 55 /* "name" */) {
+						Get();
+						subIdent="name"; 
+					} else SynErr(129);
+				}
+			}
+		} else if (la->kind == _string) {
+			STRING(stringValue);
+			valueType=ValueType::STRING; 
+		} else if (la->kind == _number || la->kind == _double || la->kind == 39 /* "-" */) {
+			if (la->kind == 39 /* "-" */) {
+				Get();
+				negate=true; 
+			}
+			if (la->kind == _number) {
+				Get();
+				number=t->val;
+				valueType=ValueType::NUMBER;
+				
+				if (la->kind == _ident || la->kind == 42 /* "m" */ || la->kind == 43 /* "mm" */) {
+					if (la->kind == _ident) {
+						IDENT(unit);
+					} else if (la->kind == 43 /* "mm" */) {
+						Get();
+						unit="mm"; 
+					} else {
+						Get();
+						unit="m"; 
+					}
+				}
+				while (la->kind == 20 /* "," */) {
+					Get();
+					if (la->kind == _number) {
+						Get();
+						numberList.push_back(t->val); 
+					} else if (la->kind == _double) {
+						Get();
+						numberList.push_back(t->val); 
+					} else SynErr(130);
+				}
+			} else if (la->kind == _double) {
+				Get();
+				number=t->val;
+				valueType=ValueType::NUMBER;
+				
+				if (la->kind == _ident || la->kind == 42 /* "m" */ || la->kind == 43 /* "mm" */) {
+					if (la->kind == _ident) {
+						IDENT(unit);
+					} else if (la->kind == 43 /* "mm" */) {
+						Get();
+						unit="mm"; 
+					} else {
+						Get();
+						unit="m"; 
+					}
+				}
+				while (la->kind == 20 /* "," */) {
+					Get();
+					if (la->kind == _number) {
+						Get();
+						numberList.push_back(t->val); 
+					} else if (la->kind == _double) {
+						Get();
+						numberList.push_back(t->val); 
+					} else SynErr(131);
+				}
+			} else SynErr(132);
+		} else if (la->kind == _color) {
+			COLOR_VALUE(color);
+			valueType=ValueType::COLOR; 
+		} else if (la->kind == _variable) {
+			CONSTANT(constant);
+			valueType=ValueType::CONSTANT; 
+		} else SynErr(133);
+		if (descriptor.GetType()==StyleAttributeType::BOOL) {
+		 if (valueType==ValueType::IDENT) {
+		   if (ident=="true" && subIdent.empty()) {
+		     style.SetBoolValue(descriptor.GetAttribute(),true);
+		   }
+		   else if (ident=="false" && subIdent.empty()) {
+		     style.SetBoolValue(descriptor.GetAttribute(),false);
+		   }
+		   else {
+		     std::string e="Attribute '"+descriptor.GetName()+"' requires a boolean value ('true' or 'false')";
+		    
+		     SemErr(e.c_str());
+		   }
+		 }
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::STRING) {
+		 if (valueType==ValueType::IDENT) {
+		   if (subIdent.empty()) {
+		     style.SetStringValue(descriptor.GetAttribute(),ident);
+		   }
+		   else {
+		     std::string e="Attribute '"+descriptor.GetName()+"' requires a simple IDENT as value";
+		   
+		     SemErr(e.c_str());
+		   }
+		 }
+		 else if (valueType==ValueType::STRING) {
+		   style.SetStringValue(descriptor.GetAttribute(),stringValue);
+		 }
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::COLOR) {
+		 if (valueType==ValueType::COLOR) {
+		   if (constant) {
+		     if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
+		       std::string e="Constant is not of type 'COLOR'";
+		
+		       SemErr(e.c_str());
+		     }
+		     else {
+		       StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
+		
+		       color=colorConstant->GetColor();
+		     }
+		   }
+		 
+		   if (!function.empty()) {
+		     if (factor<0.0 && factor>1.0) {
+		      std::string e="Factor must be in the range [0..1]";
+		
+		       SemErr(e.c_str());
+		     }
+		   
+		     if (function=="lighten") {
+		       if (!errors->hasErrors) {
+		         style.SetColorValue(descriptor.GetAttribute(),color.Lighten(factor));
+		       }
+		     }
+		     else if (function=="darken") {
+		       if (!errors->hasErrors) {
+		         style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
+		       }
+		     }
+		     else {
+		       std::string e="Unknown color function '"+function+"'";
+		
+		       SemErr(e.c_str());
+		     }
+		   }
+		   else {                     
+		     style.SetColorValue(descriptor.GetAttribute(),color);
+		   }
+		 }
+		 else if (valueType==ValueType::CONSTANT) {
+		   if (!constant) {
+		     // no code
+		   }
+		   else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
+		     std::string e="Constant is not of type 'COLOR'";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (!errors->hasErrors) {
+		     StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
+		
+		     style.SetColorValue(descriptor.GetAttribute(),colorConstant->GetColor());
+		   }
+		 }
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::MAGNIFICATION) {
+		 if (valueType==ValueType::IDENT) {
+		   Magnification magnification;
+		   
+		   if (subIdent.empty() && magnificationConverter.Convert(ident,magnification)) {
+		     style.SetMagnificationValue(descriptor.GetAttribute(),magnification);
+		   }
+		   else {
+		     std::string e="'"+std::string(ident)+"' is not a valid magnification level";
+		
+		     SemErr(e.c_str());
+		   }
+		 }
+		 else if (valueType==ValueType::NUMBER) {
+		   Magnification magnification;
+		   size_t        level;
+		   
+		   if (StringToNumber(number,level)) {
+		     magnification.SetLevel((uint32_t)level);
+		   }
+		   else {
+		     std::string e="Cannot parse number '"+std::string(number)+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		 }
+		 else if (valueType==ValueType::CONSTANT) {
+		   if (!constant) {
+		     // no code
+		   }
+		   else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
+		     std::string e="Constant is not of type 'MAGNIFICATION'";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (!errors->hasErrors) {
+		     StyleConstantMag* uintConstant=dynamic_cast<StyleConstantMag*>(constant.get());
+		
+		     style.SetMagnificationValue(descriptor.GetAttribute(),uintConstant->GetMag());
+		   }
+		 }
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::ENUM) {
+		 const StyleEnumAttributeDescriptor& enumDescriptor=dynamic_cast<const StyleEnumAttributeDescriptor&>(descriptor);
+		 
+		 if (valueType==ValueType::IDENT) {
+		   int value=enumDescriptor.GetEnumValue(ident);
+		   
+		   if (value>=0) {
+		     style.SetIntValue(descriptor.GetAttribute(),value);
+		   }
+		   else {
+		     std::string e="'"+ident+"' is not a valid enumeration value for this attribute";
+		   
+		     SemErr(e.c_str());
+		   }
+		 }
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::DISPLAY_SIZE) {
+		 if (valueType==ValueType::NUMBER) {                     
+		   double value;
+		   
+		   if (unit!="mm") {
+		     std::string e="Value must have unit 'mm' and not '"+unit+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     if (negate) {
+		       value=-value;
+		     }
+		     style.SetDoubleValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::UDISPLAY_SIZE) {
+		 if (valueType==ValueType::NUMBER) {                     
+		   double value;
+		   
+		   if (negate) {
+		     std::string e="Negative numbers not allowed here";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (unit!="mm") {
+		     std::string e="Value must have unit 'mm' and not '"+unit+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     style.SetDoubleValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::MAP_SIZE) {
+		 if (valueType==ValueType::NUMBER) {                     
+		   double value;
+		   
+		   if (unit!="m") {
+		     std::string e="Value must have unit 'm' and not '"+unit+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     if (negate) {
+		       value=-value;
+		     }
+		     style.SetDoubleValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::UMAP_SIZE) {
+		 if (valueType==ValueType::NUMBER) {                     
+		   double value;
+		   
+		   if (negate) {
+		     std::string e="Negative numbers not allowed here";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (unit!="m") {
+		     std::string e="Value must have unit 'm' and not '"+unit+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     style.SetDoubleValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::DOUBLE) {
+		 if (valueType==ValueType::NUMBER) {                     
+		   double value;
+		   
+		   if (!unit.empty()) {
+		     std::string e="Value must not have a unit";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     if (negate) {
+		       value=-value;
+		     }
+		     style.SetDoubleValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::UDOUBLE) {
+		 if (valueType==ValueType::NUMBER) {                     
+		   double value;
+		   
+		   if (negate) {
+		     std::string e="Negative numbers not allowed here";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (!unit.empty()) {
+		     std::string e="Value must not have unit";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     style.SetDoubleValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::UDOUBLE_ARRAY) {
+		 if (valueType==ValueType::NUMBER) {
+		   double              value;
+		   std::vector<double> valueList(numberList.size()+1);
+		   
+		   if (negate) {
+		     std::string e="Negative numbers not allowed here";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (!unit.empty()) {
+		     std::string e="Value must not have unit";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   valueList.push_back(value);
+		   
+		   for (const auto number : numberList) {
+		     if (!StringToNumber(number,value)) {
+		       std::string e="Cannot parse number '"+number+"'";
+		
+		       SemErr(e.c_str());
+		     }
+		     
+		     valueList.push_back(value);
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     style.SetDoubleArrayValue(descriptor.GetAttribute(),valueList);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::LABEL) {
+		 if (!subIdent.empty()) {
+		   FeatureRef feature;
+		
+		   feature=config.GetTypeConfig()->GetFeature(ident);
+		
+		   if (!feature) {
+		     std::string e="'"+ident+"' is not a registered feature";
+		
+		     SemErr(e.c_str());
+		   }
+		   else if (!feature->HasLabel()) {
+		     std::string e="'"+ident+"' does not support labels";
+		
+		     SemErr(e.c_str());
+		   }
+		   else {
+		     size_t labelIndex;
+		
+		     if (!feature->GetLabelIndex(subIdent,
+		                                 labelIndex)) {
+		       std::string e="'"+ident+"' does not have a label named '"+subIdent+"'";
+		
+		       SemErr(e.c_str());
+		     }
+		     else {
+		       LabelProviderRef label;
+		       
+		       label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
+		                                                         ident,
+		                                                         subIdent);
+		       style.SetLabelValue(descriptor.GetAttribute(),label);
+		     }
+		   }
+		 }
+		 else {
+		   LabelProviderRef label;
+		   
+		   label=config.GetLabelProvider(ident);
+		
+		   if (!label) {
+		     std::string e="There is no label provider with name '"+ident+"' registered";
+		
+		     SemErr(e.c_str());
+		   }
+		   else {
+		     style.SetLabelValue(descriptor.GetAttribute(),label);
+		   }
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::SYMBOL) {
+		 if (valueType==ValueType::IDENT) {
+		   SymbolRef symbol=config.GetSymbol(ident);
+		
+		   if (symbol && subIdent.empty()) {
+		     style.SetSymbolValue(descriptor.GetAttribute(),symbol);
+		   }
+		   else {
+		     std::string e="Map symbol '"+ident+"' is not defined";
+		
+		     SemErr(e.c_str());
+		   }
+		 }
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::INT) {                   
+		 if (valueType==ValueType::NUMBER) {                     
+		   int value;
+		   
+		   if (!unit.empty()) {
+		     std::string e="Vaue must not have a unit";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     if (negate) {
+		       value=-value;
+		     }
+		     style.SetIntValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		 /*else if (valueType==ValueType::CONSTANT) {
+		   if (!constant) {
+		     // no code
+		   }
+		   else if (dynamic_cast<StyleConstantInt*>(constant.get())==NULL) {
+		     std::string e="Constant is not of type 'INT'";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (!errors->hasErrors) {
+		     StyleConstantInt* uintConstant=dynamic_cast<StyleConstantInt*>(constant.get());
+		
+		     style.SetIntValue(descriptor.GetAttribute(),intConstant->GetInt());
+		   }
+		 }*/
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		else if (descriptor.GetType()==StyleAttributeType::UINT) {                   
+		 if (valueType==ValueType::NUMBER) {                     
+		   size_t value;
+		   
+		   if (negate) {
+		     std::string e="Negative numbers not allowed here";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (!unit.empty()) {
+		     std::string e="Vaue must not have a unit";
+		
+		     SemErr(e.c_str());
+		   }
+		  
+		   if (!StringToNumber(number,value)) {
+		     std::string e="Cannot parse number '"+number+"'";
+		
+		     SemErr(e.c_str());
+		   }
+		   
+		   if (!errors->hasErrors) {
+		     style.SetUIntValue(descriptor.GetAttribute(),value);
+		   }
+		 }
+		 else if (valueType==ValueType::CONSTANT) {
+		   if (!constant) {
+		     // no code
+		   }
+		   else if (dynamic_cast<StyleConstantUInt*>(constant.get())==NULL) {
+		     std::string e="Constant is not of type 'UINT'";
+		
+		     SemErr(e.c_str());
+		   }
+		
+		   if (!errors->hasErrors) {
+		     StyleConstantUInt* uintConstant=dynamic_cast<StyleConstantUInt*>(constant.get());
+		
+		     style.SetUIntValue(descriptor.GetAttribute(),uintConstant->GetUInt());
+		   }
+		 }
+		 else {
+		   std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+		   
+		   SemErr(e.c_str());
+		 }
+		}
+		
+}
+
+void Parser::COLOR_VALUE(Color& color) {
+		Expect(_color);
+		std::string c(t->val);
+		
+		if (c.length()!=7 &&
+		   c.length()!=9) {
+		 std::string e="Illegal color value";
+		 
 		 SemErr(e.c_str());
 		}
 		
-		if (negate) {
-		 value=-value;
+		if (!errors->hasErrors) {
+		 color=osmscout::Color::FromHexString(c);
+		}
+		
+}
+
+void Parser::CONSTANT(StyleConstantRef& constant) {
+		constant=NULL;
+		
+		Expect(_variable);
+		constant=config.GetConstantByName(t->val+1);
+		
+		if (!constant) {
+		 std::string e=std::string("Constant \"") + t->val + "\" not defined";
+		
+		 SemErr(e.c_str());
 		}
 		
 }
@@ -2065,76 +2170,6 @@ void Parser::STRING(std::string& value) {
 		Expect(_string);
 		value=Destring(t->val);
 		
-}
-
-void Parser::TEXTLABEL(LabelProviderRef& label) {
-		std::string featureName;
-		std::string labelName;
-		
-		IDENT(featureName);
-		if (la->kind == 24 /* "." */) {
-			Get();
-			if (la->kind == _ident) {
-				IDENT(labelName);
-			} else if (la->kind == 80 /* "name" */) {
-				Get();
-				labelName="name"; 
-			} else SynErr(166);
-		}
-		if (!labelName.empty()) {
-		 FeatureRef feature;
-		
-		 feature=config.GetTypeConfig()->GetFeature(featureName);
-		
-		 if (!feature) {
-		   std::string e="'"+featureName+"' is not a registered feature";
-		
-		   SemErr(e.c_str());
-		   return;
-		 }
-		
-		 if (!feature->HasLabel()) {
-		   std::string e="'"+featureName+"' does not support labels";
-		
-		   SemErr(e.c_str());
-		   return;
-		 }
-		
-		 size_t labelIndex;
-		
-		 if (!feature->GetLabelIndex(labelName,
-		                             labelIndex)) {
-		   std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
-		
-		   SemErr(e.c_str());
-		   return;
-		 }
-		
-		 label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
-		                                                   featureName,
-		                                                   labelName);
-		}
-		else {
-		 label=config.GetLabelProvider(featureName);
-		
-		 if (!label) {
-		   std::string e="There is no label provider with name '"+featureName+"' registered";
-		
-		   SemErr(e.c_str());
-		   return;
-		 }
-		}
-		
-}
-
-void Parser::LABELSTYLE(TextStyle::Style& style) {
-		if (la->kind == 84 /* "normal" */) {
-			Get();
-			style=TextStyle::normal; 
-		} else if (la->kind == 85 /* "emphasize" */) {
-			Get();
-			style=TextStyle::emphasize; 
-		} else SynErr(167);
 }
 
 
@@ -2153,7 +2188,7 @@ Parser::Parser(Scanner *scanner,
                StyleConfig& config)
  : config(config)
 {
-	maxT = 91;
+	maxT = 61;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -2168,25 +2203,12 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[18][93] = {
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,x,T, T,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, T,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,T, T,T,x,T, T,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,T,x,x, x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,T, x,x,x,x, T,T,x,x, x,x,x,x, x,T,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,T, x,x,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,T,x,x, x,T,x,T, x,x,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
+	static bool set[5][63] = {
+		{T,x,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,x, x,x,x,x, x,x,x},
+		{T,T,x,x, x,x,x,T, x,T,x,T, T,x,x,x, x,T,x,T, x,T,T,T, x,T,T,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,x,T,T, T,T,T,T, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x}
 	};
 
 
@@ -2264,119 +2286,85 @@ void Errors::SynErr(int line, int col, int n)
 			case 52: s = coco_string_create("\"SHIELD\" expected"); break;
 			case 53: s = coco_string_create("\"BORDERTEXT\" expected"); break;
 			case 54: s = coco_string_create("\"BORDERSYMBOL\" expected"); break;
-			case 55: s = coco_string_create("\"color\" expected"); break;
-			case 56: s = coco_string_create("\"dash\" expected"); break;
-			case 57: s = coco_string_create("\"gapColor\" expected"); break;
-			case 58: s = coco_string_create("\"displayWidth\" expected"); break;
-			case 59: s = coco_string_create("\"width\" expected"); break;
-			case 60: s = coco_string_create("\"displayOffset\" expected"); break;
-			case 61: s = coco_string_create("\"offset\" expected"); break;
-			case 62: s = coco_string_create("\"cap\" expected"); break;
-			case 63: s = coco_string_create("\"joinCap\" expected"); break;
-			case 64: s = coco_string_create("\"endCap\" expected"); break;
-			case 65: s = coco_string_create("\"priority\" expected"); break;
-			case 66: s = coco_string_create("\"zIndex\" expected"); break;
-			case 67: s = coco_string_create("\"pattern\" expected"); break;
-			case 68: s = coco_string_create("\"patternMinMag\" expected"); break;
-			case 69: s = coco_string_create("\"label\" expected"); break;
-			case 70: s = coco_string_create("\"style\" expected"); break;
-			case 71: s = coco_string_create("\"size\" expected"); break;
-			case 72: s = coco_string_create("\"scaleMag\" expected"); break;
-			case 73: s = coco_string_create("\"autoSize\" expected"); break;
-			case 74: s = coco_string_create("\"position\" expected"); break;
-			case 75: s = coco_string_create("\"backgroundColor\" expected"); break;
-			case 76: s = coco_string_create("\"borderColor\" expected"); break;
-			case 77: s = coco_string_create("\"shieldSpace\" expected"); break;
-			case 78: s = coco_string_create("\"symbol\" expected"); break;
-			case 79: s = coco_string_create("\"symbolSpace\" expected"); break;
-			case 80: s = coco_string_create("\"name\" expected"); break;
-			case 81: s = coco_string_create("\"butt\" expected"); break;
-			case 82: s = coco_string_create("\"round\" expected"); break;
-			case 83: s = coco_string_create("\"square\" expected"); break;
-			case 84: s = coco_string_create("\"normal\" expected"); break;
-			case 85: s = coco_string_create("\"emphasize\" expected"); break;
-			case 86: s = coco_string_create("\"lighten\" expected"); break;
-			case 87: s = coco_string_create("\"(\" expected"); break;
-			case 88: s = coco_string_create("\")\" expected"); break;
-			case 89: s = coco_string_create("\"darken\" expected"); break;
-			case 90: s = coco_string_create("\"!\" expected"); break;
-			case 91: s = coco_string_create("??? expected"); break;
-			case 92: s = coco_string_create("this symbol not expected in OSS"); break;
-			case 93: s = coco_string_create("this symbol not expected in FLAGSECTION"); break;
-			case 94: s = coco_string_create("this symbol not expected in WAYORDER"); break;
-			case 95: s = coco_string_create("this symbol not expected in CONSTSECTION"); break;
-			case 96: s = coco_string_create("this symbol not expected in SYMBOLSECTION"); break;
-			case 97: s = coco_string_create("this symbol not expected in WAYGROUP"); break;
-			case 98: s = coco_string_create("this symbol not expected in POLYGON"); break;
-			case 99: s = coco_string_create("this symbol not expected in RECTANGLE"); break;
-			case 100: s = coco_string_create("this symbol not expected in CIRCLE"); break;
-			case 101: s = coco_string_create("this symbol not expected in AREAFILLSYMSTYLE"); break;
-			case 102: s = coco_string_create("invalid FILLSTYLEATTR"); break;
-			case 103: s = coco_string_create("this symbol not expected in AREABORDERSYMSTYLE"); break;
-			case 104: s = coco_string_create("invalid BORDERSTYLEATTR"); break;
-			case 105: s = coco_string_create("this symbol not expected in AREASYMBOLSTYLE"); break;
-			case 106: s = coco_string_create("this symbol not expected in AREASYMBOLSTYLE"); break;
-			case 107: s = coco_string_create("invalid AREASYMBOLSTYLE"); break;
-			case 108: s = coco_string_create("this symbol not expected in AREASYMBOLSTYLE"); break;
-			case 109: s = coco_string_create("invalid UDOUBLE"); break;
-			case 110: s = coco_string_create("invalid DOUBLE"); break;
-			case 111: s = coco_string_create("invalid CONSTDEF"); break;
-			case 112: s = coco_string_create("invalid COLOR"); break;
-			case 113: s = coco_string_create("invalid MAG"); break;
-			case 114: s = coco_string_create("invalid UINT"); break;
-			case 115: s = coco_string_create("invalid STYLE"); break;
-			case 116: s = coco_string_create("invalid STYLEDEF"); break;
-			case 117: s = coco_string_create("this symbol not expected in NODESTYLEDEF"); break;
-			case 118: s = coco_string_create("invalid NODESTYLEDEF"); break;
-			case 119: s = coco_string_create("this symbol not expected in WAYSTYLEDEF"); break;
-			case 120: s = coco_string_create("invalid WAYSTYLEDEF"); break;
-			case 121: s = coco_string_create("invalid WAYSTYLEDEF"); break;
-			case 122: s = coco_string_create("this symbol not expected in AREASTYLEDEF"); break;
-			case 123: s = coco_string_create("invalid AREASTYLEDEF"); break;
-			case 124: s = coco_string_create("invalid AREASTYLEDEF"); break;
-			case 125: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
-			case 126: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
-			case 127: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
-			case 128: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
-			case 129: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
-			case 130: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
-			case 131: s = coco_string_create("invalid TEXTSTYLEATTR"); break;
-			case 132: s = coco_string_create("invalid ICONSTYLEATTR"); break;
-			case 133: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
-			case 134: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
-			case 135: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
-			case 136: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
-			case 137: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
-			case 138: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
-			case 139: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
-			case 140: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
-			case 141: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
-			case 142: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
-			case 143: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
-			case 144: s = coco_string_create("invalid LINESTYLEATTR"); break;
-			case 145: s = coco_string_create("invalid PATHTEXTSTYLEATTR"); break;
-			case 146: s = coco_string_create("invalid PATHSYMBOLSTYLEATTR"); break;
-			case 147: s = coco_string_create("invalid PATHSHIELDSTYLEATTR"); break;
-			case 148: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
-			case 149: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
-			case 150: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
-			case 151: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
-			case 152: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
-			case 153: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
-			case 154: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
-			case 155: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
-			case 156: s = coco_string_create("this symbol not expected in AREABORDERSTYLE"); break;
-			case 157: s = coco_string_create("this symbol not expected in AREABORDERSTYLE"); break;
-			case 158: s = coco_string_create("this symbol not expected in AREABORDERSTYLE"); break;
-			case 159: s = coco_string_create("this symbol not expected in AREABORDERTEXTSTYLE"); break;
-			case 160: s = coco_string_create("this symbol not expected in AREABORDERTEXTSTYLE"); break;
-			case 161: s = coco_string_create("this symbol not expected in AREABORDERTEXTSTYLE"); break;
-			case 162: s = coco_string_create("this symbol not expected in AREABORDERSYMBOLSTYLE"); break;
-			case 163: s = coco_string_create("this symbol not expected in AREABORDERSYMBOLSTYLE"); break;
-			case 164: s = coco_string_create("this symbol not expected in AREABORDERSYMBOLSTYLE"); break;
-			case 165: s = coco_string_create("invalid CAPSTYLE"); break;
-			case 166: s = coco_string_create("invalid TEXTLABE"); break;
-			case 167: s = coco_string_create("invalid LABELSTYLE"); break;
+			case 55: s = coco_string_create("\"name\" expected"); break;
+			case 56: s = coco_string_create("\"lighten\" expected"); break;
+			case 57: s = coco_string_create("\"darken\" expected"); break;
+			case 58: s = coco_string_create("\"(\" expected"); break;
+			case 59: s = coco_string_create("\")\" expected"); break;
+			case 60: s = coco_string_create("\"!\" expected"); break;
+			case 61: s = coco_string_create("??? expected"); break;
+			case 62: s = coco_string_create("this symbol not expected in OSS"); break;
+			case 63: s = coco_string_create("this symbol not expected in FLAGSECTION"); break;
+			case 64: s = coco_string_create("this symbol not expected in WAYORDER"); break;
+			case 65: s = coco_string_create("this symbol not expected in CONSTSECTION"); break;
+			case 66: s = coco_string_create("this symbol not expected in SYMBOLSECTION"); break;
+			case 67: s = coco_string_create("this symbol not expected in WAYGROUP"); break;
+			case 68: s = coco_string_create("this symbol not expected in POLYGON"); break;
+			case 69: s = coco_string_create("this symbol not expected in RECTANGLE"); break;
+			case 70: s = coco_string_create("this symbol not expected in CIRCLE"); break;
+			case 71: s = coco_string_create("this symbol not expected in AREAFILLSYMSTYLE"); break;
+			case 72: s = coco_string_create("this symbol not expected in AREABORDERSYMSTYLE"); break;
+			case 73: s = coco_string_create("this symbol not expected in AREASYMBOLSTYLE"); break;
+			case 74: s = coco_string_create("this symbol not expected in AREASYMBOLSTYLE"); break;
+			case 75: s = coco_string_create("invalid AREASYMBOLSTYLE"); break;
+			case 76: s = coco_string_create("this symbol not expected in AREASYMBOLSTYLE"); break;
+			case 77: s = coco_string_create("invalid UDOUBLE"); break;
+			case 78: s = coco_string_create("invalid DOUBLE"); break;
+			case 79: s = coco_string_create("invalid CONSTDEF"); break;
+			case 80: s = coco_string_create("invalid COLOR"); break;
+			case 81: s = coco_string_create("invalid MAG"); break;
+			case 82: s = coco_string_create("invalid UINT"); break;
+			case 83: s = coco_string_create("invalid STYLE"); break;
+			case 84: s = coco_string_create("invalid STYLEDEF"); break;
+			case 85: s = coco_string_create("this symbol not expected in NODESTYLEDEF"); break;
+			case 86: s = coco_string_create("invalid NODESTYLEDEF"); break;
+			case 87: s = coco_string_create("this symbol not expected in WAYSTYLEDEF"); break;
+			case 88: s = coco_string_create("invalid WAYSTYLEDEF"); break;
+			case 89: s = coco_string_create("invalid WAYSTYLEDEF"); break;
+			case 90: s = coco_string_create("this symbol not expected in AREASTYLEDEF"); break;
+			case 91: s = coco_string_create("invalid AREASTYLEDEF"); break;
+			case 92: s = coco_string_create("invalid AREASTYLEDEF"); break;
+			case 93: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
+			case 94: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
+			case 95: s = coco_string_create("this symbol not expected in NODETEXTSTYLE"); break;
+			case 96: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
+			case 97: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
+			case 98: s = coco_string_create("this symbol not expected in NODEICONSTYLE"); break;
+			case 99: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
+			case 100: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
+			case 101: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
+			case 102: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
+			case 103: s = coco_string_create("this symbol not expected in WAYPATHTEXTSTYLE"); break;
+			case 104: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
+			case 105: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
+			case 106: s = coco_string_create("this symbol not expected in WAYPATHSYMBOLSTYLE"); break;
+			case 107: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
+			case 108: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
+			case 109: s = coco_string_create("this symbol not expected in WAYSHIELDSTYLE"); break;
+			case 110: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
+			case 111: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
+			case 112: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
+			case 113: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
+			case 114: s = coco_string_create("this symbol not expected in AREATEXTSTYLE"); break;
+			case 115: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
+			case 116: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
+			case 117: s = coco_string_create("this symbol not expected in AREAICONSTYLE"); break;
+			case 118: s = coco_string_create("this symbol not expected in AREABORDERSTYLE"); break;
+			case 119: s = coco_string_create("this symbol not expected in AREABORDERSTYLE"); break;
+			case 120: s = coco_string_create("this symbol not expected in AREABORDERSTYLE"); break;
+			case 121: s = coco_string_create("this symbol not expected in AREABORDERTEXTSTYLE"); break;
+			case 122: s = coco_string_create("this symbol not expected in AREABORDERTEXTSTYLE"); break;
+			case 123: s = coco_string_create("this symbol not expected in AREABORDERTEXTSTYLE"); break;
+			case 124: s = coco_string_create("this symbol not expected in AREABORDERSYMBOLSTYLE"); break;
+			case 125: s = coco_string_create("this symbol not expected in AREABORDERSYMBOLSTYLE"); break;
+			case 126: s = coco_string_create("this symbol not expected in AREABORDERSYMBOLSTYLE"); break;
+			case 127: s = coco_string_create("invalid ATTRIBUTE"); break;
+			case 128: s = coco_string_create("invalid ATTRIBUTEVALUE"); break;
+			case 129: s = coco_string_create("invalid ATTRIBUTEVALUE"); break;
+			case 130: s = coco_string_create("invalid ATTRIBUTEVALUE"); break;
+			case 131: s = coco_string_create("invalid ATTRIBUTEVALUE"); break;
+			case 132: s = coco_string_create("invalid ATTRIBUTEVALUE"); break;
+			case 133: s = coco_string_create("invalid ATTRIBUTEVALUE"); break;
 
     default:
     {

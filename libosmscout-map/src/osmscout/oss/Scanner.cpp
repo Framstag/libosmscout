@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 91;
-	noSym = 91;
+	maxT = 61;
+	noSym = 61;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -210,39 +210,9 @@ void Scanner::Init() {
 	keywords.set("SHIELD", 52);
 	keywords.set("BORDERTEXT", 53);
 	keywords.set("BORDERSYMBOL", 54);
-	keywords.set("color", 55);
-	keywords.set("dash", 56);
-	keywords.set("gapColor", 57);
-	keywords.set("displayWidth", 58);
-	keywords.set("width", 59);
-	keywords.set("displayOffset", 60);
-	keywords.set("offset", 61);
-	keywords.set("cap", 62);
-	keywords.set("joinCap", 63);
-	keywords.set("endCap", 64);
-	keywords.set("priority", 65);
-	keywords.set("zIndex", 66);
-	keywords.set("pattern", 67);
-	keywords.set("patternMinMag", 68);
-	keywords.set("label", 69);
-	keywords.set("style", 70);
-	keywords.set("size", 71);
-	keywords.set("scaleMag", 72);
-	keywords.set("autoSize", 73);
-	keywords.set("position", 74);
-	keywords.set("backgroundColor", 75);
-	keywords.set("borderColor", 76);
-	keywords.set("shieldSpace", 77);
-	keywords.set("symbol", 78);
-	keywords.set("symbolSpace", 79);
-	keywords.set("name", 80);
-	keywords.set("butt", 81);
-	keywords.set("round", 82);
-	keywords.set("square", 83);
-	keywords.set("normal", 84);
-	keywords.set("emphasize", 85);
-	keywords.set("lighten", 86);
-	keywords.set("darken", 89);
+	keywords.set("name", 55);
+	keywords.set("lighten", 56);
+	keywords.set("darken", 57);
 
 
   tvalLength = 128;
@@ -490,11 +460,11 @@ TokenRef Scanner::NextToken() {
 		case 29:
 			{t->kind = 46; break;}
 		case 30:
-			{t->kind = 87; break;}
+			{t->kind = 58; break;}
 		case 31:
-			{t->kind = 88; break;}
+			{t->kind = 59; break;}
 		case 32:
-			{t->kind = 90; break;}
+			{t->kind = 60; break;}
 		case 33:
 			recEnd = pos; recKind = 49;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}

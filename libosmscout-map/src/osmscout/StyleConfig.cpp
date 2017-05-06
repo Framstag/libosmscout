@@ -321,6 +321,27 @@ namespace osmscout {
     return matchesMaxMM || matchesMaxPx;
   }
 
+  class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    LineStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",LineStyle::attrLineColor));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("gapColor",LineStyle::attrGapColor));
+      AddAttribute(std::make_shared<StyleUDisplayAttributeDescriptor>("displayWidth",LineStyle::attrDisplayWidth));
+      AddAttribute(std::make_shared<StyleUMapAttributeDescriptor>("width",LineStyle::attrWidth));
+      AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",LineStyle::attrDisplayOffset));
+      AddAttribute(std::make_shared<StyleMapAttributeDescriptor>("offset",LineStyle::attrOffset));
+      AddAttribute(std::make_shared<CapStyleEnumAttributeDescriptor>("joinCap",LineStyle::attrJoinCap));
+      AddAttribute(std::make_shared<CapStyleEnumAttributeDescriptor>("endCap",LineStyle::attrEndCap));
+      AddAttribute(std::make_shared<StyleUDoubleArrayAttributeDescriptor>("dash",LineStyle::attrDashes));
+      AddAttribute(std::make_shared<StyleIntAttributeDescriptor>("priority",LineStyle::attrPriority));
+      AddAttribute(std::make_shared<StyleIntAttributeDescriptor>("zIndex",LineStyle::attrZIndex));
+    }
+  };
+
+  static StyleDescriptorRef lineStyleDescriptor=std::make_shared<LineStyleDescriptor>();
+
   LineStyle::LineStyle()
    : lineColor(1.0,0.0,0.0,0.0),
      gapColor(1,0.0,0.0,0.0),
@@ -351,6 +372,71 @@ namespace osmscout {
     zIndex(style.zIndex)
   {
     // no code
+  }
+
+  void LineStyle::SetColorValue(int attribute, const Color& value)
+  {
+    switch (attribute) {
+    case attrLineColor:
+      SetLineColor(value);
+      break;
+    case attrGapColor:
+      SetGapColor(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void LineStyle::SetDoubleValue(int attribute, double value)
+  {
+    switch (attribute) {
+    case attrDisplayWidth:
+      SetDisplayWidth(value);
+      break;
+    case attrWidth:
+      SetWidth(value);
+      break;
+    case attrDisplayOffset:
+      SetDisplayOffset(value);
+      break;
+    case attrOffset:
+      SetOffset(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void LineStyle::SetDoubleArrayValue(int attribute, const std::vector<double>& value)
+  {
+    switch (attribute) {
+    case attrDashes:
+      SetDashes(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void LineStyle::SetIntValue(int attribute, int value)
+  {
+    switch (attribute) {
+    case attrJoinCap:
+      SetJoinCap((CapStyle)value);
+      break;
+    case attrEndCap:
+      SetEndCap((CapStyle)value);
+      break;
+    case attrPriority:
+      SetPriority(value);
+      break;
+    case attrZIndex:
+      SetZIndex(value);
+      break;
+    default:
+      assert(false);
+    }
   }
 
   LineStyle& LineStyle::SetSlot(const std::string& slot)
@@ -435,6 +521,11 @@ namespace osmscout {
     this->zIndex=zIndex;
 
     return *this;
+  }
+
+  StyleDescriptorRef LineStyle::GetDescriptor()
+  {
+    return lineStyleDescriptor;
   }
 
   void LineStyle::CopyAttributes(const LineStyle& other,
@@ -582,6 +673,19 @@ namespace osmscout {
     return zIndex<other.zIndex;
   }
 
+  class FillStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    FillStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",FillStyle::attrFillColor));
+      AddAttribute(std::make_shared<StyleStringAttributeDescriptor>("pattern",FillStyle::attrPattern));
+      AddAttribute(std::make_shared<StyleMagnificationAttributeDescriptor>("patternMinMag",FillStyle::attrPatternMinMag));
+    }
+  };
+
+  static StyleDescriptorRef fillStyleDescriptor=std::make_shared<FillStyleDescriptor>();
+
   FillStyle::FillStyle()
    : fillColor(1.0,0.0,0.0,0.0),
      patternId(0),
@@ -622,6 +726,11 @@ namespace osmscout {
     patternMinMag=mag;
 
     return *this;
+  }
+
+  StyleDescriptorRef FillStyle::GetDescriptor()
+  {
+    return fillStyleDescriptor;
   }
 
   void FillStyle::CopyAttributes(const FillStyle& other,
@@ -674,6 +783,59 @@ namespace osmscout {
     return patternMinMag<other.patternMinMag;
   }
 
+  void FillStyle::SetStringValue(int attribute,
+                                 const std::string& value)
+  {
+    switch (attribute) {
+    case attrPattern:
+      SetPattern(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void FillStyle::SetColorValue(int attribute,
+                                const Color& value)
+  {
+    switch (attribute) {
+    case attrFillColor:
+      SetFillColor(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void FillStyle::SetMagnificationValue(int attribute,
+                                        Magnification value)
+  {
+    switch (attribute) {
+    case attrPatternMinMag:
+      SetPatternMinMag(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  class BorderStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    BorderStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",BorderStyle::attrColor));
+      AddAttribute(std::make_shared<StyleUDisplayAttributeDescriptor>("width",BorderStyle::attrWidth));
+      AddAttribute(std::make_shared<StyleUDoubleArrayAttributeDescriptor>("dash",BorderStyle::attrDashes));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("gapColor",BorderStyle::attrGapColor));
+      AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",BorderStyle::attrDisplayOffset));
+      AddAttribute(std::make_shared<StyleMapAttributeDescriptor>("offset",BorderStyle::attrOffset));
+      AddAttribute(std::make_shared<StyleIntAttributeDescriptor>("priority",BorderStyle::attrPriority));
+    }
+  };
+
+  static StyleDescriptorRef borderStyleDescriptor=std::make_shared<BorderStyleDescriptor>();
+
   BorderStyle::BorderStyle()
     : color(1.0,0.0,0.0,0.0),
       width(0.0),
@@ -695,6 +857,59 @@ namespace osmscout {
     this->color=style.color;
     this->width=style.width;
     this->dash=style.dash;
+  }
+
+  void BorderStyle::SetColorValue(int attribute, const Color& value)
+  {
+    switch (attribute) {
+    case attrColor:
+      SetColor(value);
+      break;
+    case attrGapColor:
+      SetColor(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void BorderStyle::SetDoubleValue(int attribute, double value)
+  {
+    switch (attribute) {
+    case attrWidth:
+      SetWidth(value);
+      break;
+    case attrDisplayOffset:
+      SetDisplayOffset(value);
+      break;
+    case attrOffset:
+      SetOffset(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void BorderStyle::SetDoubleArrayValue(int attribute, const std::vector<double>& value)
+  {
+    switch (attribute) {
+    case attrDashes:
+      SetDashes(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void BorderStyle::SetIntValue(int attribute, int value)
+  {
+    switch (attribute) {
+    case attrPriority:
+      SetPriority(value);
+      break;
+    default:
+      assert(false);
+    }
   }
 
   BorderStyle& BorderStyle::SetColor(const Color& color)
@@ -744,6 +959,11 @@ namespace osmscout {
     this->priority=priority;
 
     return *this;
+  }
+
+  StyleDescriptorRef BorderStyle::GetDescriptor()
+  {
+    return borderStyleDescriptor;
   }
 
   void BorderStyle::CopyAttributes(const BorderStyle& other,
@@ -871,6 +1091,24 @@ namespace osmscout {
     return *this;
   }
 
+  class TextStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    TextStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleLabelAttributeDescriptor>("label",TextStyle::attrLabel));
+      AddAttribute(std::make_shared<TextStyleEnumAttributeDescriptor>("style",TextStyle::attrStyle));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",TextStyle::attrTextColor));
+      AddAttribute(std::make_shared<StyleUDoubleAttributeDescriptor>("size",TextStyle::attrSize));
+      AddAttribute(std::make_shared<StyleMagnificationAttributeDescriptor>("scaleMag",TextStyle::attrScaleAndFadeMag));
+      AddAttribute(std::make_shared<StyleBoolAttributeDescriptor>("autoSize",TextStyle::attrAutoSize));
+      AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("priority",TextStyle::attrPriority));
+      AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("position",TextStyle::attrPosition));
+    }
+  };
+
+  static StyleDescriptorRef textStyleDescriptor=std::make_shared<TextStyleDescriptor>();
+
   TextStyle::TextStyle()
    : position(0),
      textColor(0,0,0),
@@ -892,6 +1130,87 @@ namespace osmscout {
     autoSize(style.autoSize)
   {
     // no code
+  }
+
+  void TextStyle::SetBoolValue(int attribute, bool value)
+  {
+    switch (attribute) {
+    case attrAutoSize:
+      SetAutoSize(value);
+      break;
+    default:
+      assert(false);
+    }
+
+  }
+
+  void TextStyle::SetColorValue(int attribute, const Color& value)
+  {
+    switch (attribute) {
+    case attrTextColor:
+      SetTextColor(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void TextStyle::SetMagnificationValue(int attribute, const Magnification& value)
+  {
+    switch (attribute) {
+    case attrScaleAndFadeMag:
+      SetScaleAndFadeMag(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void TextStyle::SetDoubleValue(int attribute, double value)
+  {
+    switch (attribute) {
+    case attrSize:
+      SetSize(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void TextStyle::SetIntValue(int attribute, int value)
+  {
+    switch (attribute) {
+    case attrStyle:
+      SetStyle((Style)value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void TextStyle::SetUIntValue(int attribute, size_t value)
+  {
+    switch (attribute) {
+    case attrPriority:
+      SetPriority(value);
+      break;
+    case attrPosition:
+      SetPosition(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void TextStyle::SetLabelValue(int attribute, const LabelProviderRef& value)
+  {
+    switch (attribute) {
+    case attrLabel:
+      SetLabel(value);
+      break;
+    default:
+      assert(false);
+    }
   }
 
   TextStyle& TextStyle::SetSlot(const std::string& slot)
@@ -955,6 +1274,11 @@ namespace osmscout {
     this->autoSize=autoSize;
 
     return *this;
+  }
+
+  StyleDescriptorRef TextStyle::GetDescriptor()
+  {
+    return textStyleDescriptor;
   }
 
   void TextStyle::CopyAttributes(const TextStyle& other,
@@ -1074,9 +1398,9 @@ namespace osmscout {
   }
 
   ShieldStyle::ShieldStyle()
-   : textColor(0,0,0),
-     bgColor(1,1,1),
-     borderColor(0,0,0)
+   : textColor(Color::WHITE),
+     bgColor(Color::BLACK),
+     borderColor(Color::WHITE)
   {
     // no code
   }
@@ -1159,6 +1483,23 @@ namespace osmscout {
     }
   }
 
+  class PathShieldStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    PathShieldStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleLabelAttributeDescriptor>("label",PathShieldStyle::attrLabel));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",PathShieldStyle::attrTextColor));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("backgroundColor",PathShieldStyle::attrBgColor));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("borderColor",PathShieldStyle::attrBorderColor));
+      AddAttribute(std::make_shared<StyleUDoubleAttributeDescriptor>("size",PathShieldStyle::attrSize));
+      AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("priority",PathShieldStyle::attrPriority));
+      AddAttribute(std::make_shared<StyleUDisplayAttributeDescriptor>("shieldSpace",PathShieldStyle::attrShieldSpace));
+    }
+  };
+
+  static StyleDescriptorRef pathShieldStyleDescriptor=std::make_shared<PathShieldStyleDescriptor>();
+
   PathShieldStyle::PathShieldStyle()
    : shieldStyle(std::make_shared<ShieldStyle>()),
      shieldSpace(3.0)
@@ -1171,6 +1512,61 @@ namespace osmscout {
      shieldSpace(style.shieldSpace)
   {
     // no code
+  }
+
+  void PathShieldStyle::SetLabelValue(int attribute,
+                                      const LabelProviderRef& value)
+  {
+    switch (attribute) {
+    case attrLabel:
+      SetLabel(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+
+  void PathShieldStyle::SetColorValue(int attribute, const Color& value)
+  {
+    switch (attribute) {
+    case attrTextColor:
+      SetTextColor(value);
+      break;
+    case attrBgColor:
+      SetBgColor(value);
+      break;
+    case attrBorderColor:
+      SetBorderColor(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void PathShieldStyle::SetDoubleValue(int attribute, const double value)
+  {
+    switch (attribute) {
+    case attrSize:
+      SetSize(value);
+      break;
+    case attrShieldSpace:
+      SetShieldSpace(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void PathShieldStyle::SetUIntValue(int attribute, size_t value)
+  {
+    switch (attribute) {
+    case attrPriority:
+      SetPriority(value);
+      break;
+    default:
+      assert(false);
+    }
   }
 
   PathShieldStyle& PathShieldStyle::SetLabel(const LabelProviderRef& label)
@@ -1222,8 +1618,13 @@ namespace osmscout {
     return *this;
   }
 
+  StyleDescriptorRef PathShieldStyle::GetDescriptor()
+  {
+    return pathShieldStyleDescriptor;
+  }
+
   void PathShieldStyle::CopyAttributes(const PathShieldStyle& other,
-                                   const std::set<Attribute>& attributes)
+                                       const std::set<Attribute>& attributes)
   {
     for (const auto& attribute : attributes) {
       switch (attribute) {
@@ -1252,6 +1653,21 @@ namespace osmscout {
     }
   }
 
+  class PathTextStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    PathTextStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleLabelAttributeDescriptor>("label",PathTextStyle::attrLabel));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",PathTextStyle::attrTextColor));
+      AddAttribute(std::make_shared<StyleUDoubleAttributeDescriptor>("size",PathTextStyle::attrSize));
+      AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",PathTextStyle::attrDisplayOffset));
+      AddAttribute(std::make_shared<StyleUMapAttributeDescriptor>("offset",PathTextStyle::attrOffset));
+    }
+  };
+
+  static StyleDescriptorRef pathTextStyleDescriptor=std::make_shared<PathTextStyleDescriptor>();
+
   PathTextStyle::PathTextStyle()
    : size(1),
      textColor(0,0,0),
@@ -1268,6 +1684,45 @@ namespace osmscout {
     this->textColor=style.textColor;
     this->displayOffset=style.displayOffset;
     this->offset=style.offset;
+  }
+
+  void PathTextStyle::SetColorValue(int attribute, const Color& value)
+  {
+    switch (attribute) {
+    case attrTextColor:
+      SetTextColor(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void PathTextStyle::SetDoubleValue(int attribute, double value)
+  {
+    switch (attribute) {
+    case attrSize:
+      SetSize(value);
+      break;
+    case attrDisplayOffset:
+      SetDisplayOffset(value);
+      break;
+    case attrOffset:
+      SetOffset(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void PathTextStyle::SetLabelValue(int attribute, const LabelProviderRef& value)
+  {
+    switch (attribute) {
+    case attrLabel:
+      SetLabel(value);
+      break;
+    default:
+      assert(false);
+    }
   }
 
   PathTextStyle& PathTextStyle::SetLabel(const LabelProviderRef& label)
@@ -1303,6 +1758,11 @@ namespace osmscout {
     this->offset=value;
 
     return *this;
+  }
+
+  StyleDescriptorRef PathTextStyle::GetDescriptor()
+  {
+    return pathTextStyleDescriptor;
   }
 
   void PathTextStyle::CopyAttributes(const PathTextStyle& other,
@@ -1452,6 +1912,19 @@ namespace osmscout {
     primitives.push_back(primitive);
   }
 
+  class IconStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    IconStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleSymbolAttributeDescriptor>("symbol",IconStyle::attrSymbol));
+      AddAttribute(std::make_shared<StyleStringAttributeDescriptor>("name",IconStyle::attrIconName));
+      AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("position",IconStyle::attrPosition));
+    }
+  };
+
+  static StyleDescriptorRef iconStyleDescriptor=std::make_shared<IconStyleDescriptor>();
+
   IconStyle::IconStyle()
    : iconId(0),
      position(0)
@@ -1465,6 +1938,42 @@ namespace osmscout {
     position(style.position)
   {
     // no code
+  }
+
+  void IconStyle::SetStringValue(int attribute,
+                                 const std::string& value)
+  {
+    switch (attribute) {
+    case attrIconName:
+      SetIconName(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void IconStyle::SetSymbolValue(int attribute,
+                                 const SymbolRef& value)
+  {
+    switch (attribute) {
+    case attrSymbol:
+      SetSymbol(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void IconStyle::SetUIntValue(int attribute,
+                               size_t value)
+  {
+    switch (attribute) {
+    case attrPosition:
+      SetPosition(value);
+      break;
+    default:
+      assert(false);
+    }
   }
 
   IconStyle& IconStyle::SetSymbol(const SymbolRef& symbol)
@@ -1495,6 +2004,11 @@ namespace osmscout {
     return *this;
   }
 
+  StyleDescriptorRef IconStyle::GetDescriptor()
+  {
+    return iconStyleDescriptor;
+  }
+
   void IconStyle::CopyAttributes(const IconStyle& other,
                                  const std::set<Attribute>& attributes)
   {
@@ -1513,6 +2027,20 @@ namespace osmscout {
       }
     }
   }
+
+  class PathSymbolStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  {
+  public:
+    PathSymbolStyleDescriptor()
+    {
+      AddAttribute(std::make_shared<StyleSymbolAttributeDescriptor>("symbol",PathSymbolStyle::attrSymbol));
+      AddAttribute(std::make_shared<StyleUDisplayAttributeDescriptor>("symbolSpace",PathSymbolStyle::attrSymbolSpace));
+      AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",PathSymbolStyle::attrDisplayOffset));
+      AddAttribute(std::make_shared<StyleUMapAttributeDescriptor>("offset",PathSymbolStyle::attrOffset));
+    }
+  };
+
+  static StyleDescriptorRef pathSymbolStyleDescriptor=std::make_shared<PathSymbolStyleDescriptor>();
 
   PathSymbolStyle::PathSymbolStyle()
   : symbolSpace(15),
@@ -1559,6 +2087,10 @@ namespace osmscout {
     return *this;
   }
 
+  StyleDescriptorRef PathSymbolStyle::GetDescriptor()
+  {
+    return pathSymbolStyleDescriptor;
+  }
 
   void PathSymbolStyle::CopyAttributes(const PathSymbolStyle& other,
                                        const std::set<Attribute>& attributes)
@@ -1578,6 +2110,36 @@ namespace osmscout {
         offset=other.offset;
         break;
       }
+    }
+  }
+
+  void PathSymbolStyle::SetDoubleValue(int attribute,
+                                       double value)
+  {
+    switch (attribute) {
+    case attrOffset:
+      SetOffset(value);
+      break;
+    case attrDisplayOffset:
+      SetDisplayOffset(value);
+      break;
+    case attrSymbolSpace:
+      SetSymbolSpace(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  void PathSymbolStyle::SetSymbolValue(int attribute,
+                                       const SymbolRef& value)
+  {
+    switch (attribute) {
+    case attrSymbol:
+      SetSymbol(value);
+      break;
+    default:
+      assert(false);
     }
   }
 
@@ -1704,6 +2266,91 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  Style::~Style()
+  {
+    // no code
+  }
+
+  void Style::SetBoolValue(int /*attribute*/,
+                           bool /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetStringValue(int /*attribute*/,
+                             const std::string& /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetColorValue(int /*attribute*/,
+                            const Color& /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetMagnificationValue(int /*attribute*/,
+                                    const Magnification& /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetDoubleValue(int /*attribute*/,
+                             double /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetDoubleArrayValue(int /*attribute*/,
+                                  const std::vector<double>& /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetSymbolValue(int /*attribute*/,
+                             const SymbolRef& /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetIntValue(int /*attribute*/,
+                          int /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetUIntValue(int /*attribute*/,
+                           size_t /*value*/)
+  {
+    assert(false);
+  }
+
+  void Style::SetLabelValue(int /*attribute*/,
+                            const LabelProviderRef& /*value*/)
+  {
+    assert(false);
+  }
+
+  StyleAttributeDescriptor::StyleAttributeDescriptor(StyleAttributeType type,
+                                                     const std::string& name,
+                                                     int attribute)
+  : type(type),
+    name(name),
+    attribute(attribute)
+  {
+    // no code
+  }
+
+  StyleAttributeDescriptor::~StyleAttributeDescriptor()
+  {
+    // no code
+  }
+
+  void StyleDescriptor::AddAttribute(const StyleAttributeDescriptorRef& attribute)
+  {
+    attributeMap[attribute->GetName()]=attribute;
   }
 
   StyleConfig::StyleConfig(const TypeConfigRef& typeConfig)
@@ -2967,6 +3614,5 @@ namespace osmscout {
   {
     return errors;
   }
-
 }
 
