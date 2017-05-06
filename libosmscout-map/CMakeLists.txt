@@ -11,6 +11,7 @@ set(HEADER_FILES
 	include/osmscout/MapParameter.h
 	include/osmscout/MapService.h
 	include/osmscout/LabelProvider.h
+	include/osmscout/StyleDescription.h
 	include/osmscout/StyleConfig.h
 	include/osmscout/TileId.h
 	include/osmscout/DataTileCache.h
@@ -26,6 +27,7 @@ set(SOURCE_FILES
 	src/osmscout/MapParameter.cpp
 	src/osmscout/MapService.cpp
 	src/osmscout/LabelProvider.cpp
+	src/osmscout/StyleDescription.cpp
 	src/osmscout/StyleConfig.cpp
 	src/osmscout/TileId.cpp
 	src/osmscout/DataTileCache.cpp
