@@ -99,7 +99,7 @@ void PlaneDBThread::Initialize()
 void PlaneDBThread::onStylesheetFilenameChanged()
 {
   {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
     QMutexLocker finishedLocker(&finishedMutex);
     for (auto db:databases){
       if (db->styleConfig){
@@ -223,7 +223,7 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
 
   osmscout::log.Debug() << "Start data loading...";
   {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
     // CancelCurrentDataLoading();
 
     currentWidth=request.width;
@@ -312,7 +312,7 @@ void PlaneDBThread::InvalidateVisualCache()
 
 void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
 
   bool relevant=false;
   for (auto &db: databases){
@@ -367,7 +367,7 @@ void PlaneDBThread::DrawMap()
 {
   osmscout::log.Debug() << "DrawMap()";  
   {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
     if (databases.isEmpty()){
       osmscout::log.Warn() << " No databases!";
       return;
@@ -469,10 +469,10 @@ void PlaneDBThread::DrawMap()
                                        data.groundTiles);
       }
 
-      success&=db->painter->DrawMap(renderProjection,
-                                    drawParameter,
-                                    data,
-                                    &p);
+      success&=db->GetPainter()->DrawMap(renderProjection,
+                                         drawParameter,
+                                         data,
+                                         &p);
 
     }
     p.end();

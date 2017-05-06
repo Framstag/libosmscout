@@ -21,28 +21,29 @@
 #include <QtCore/qabstractitemmodel.h>
 
 #include <osmscout/LocationInfoModel.h>
+#include <osmscout/OSMScoutQt.h>
 
 LocationInfoModel::LocationInfoModel(): 
 ready(false), setup(false)
 {
-    DBThread *dbThread = DBThread::GetInstance();
+    DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
     
     qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
     qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");
     
-    connect(dbThread, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)), 
+    connect(dbThread.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
             this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
             Qt::QueuedConnection);
     
     connect(this, SIGNAL(locationDescriptionRequested(const osmscout::GeoCoord)), 
-            dbThread, SLOT(requestLocationDescription(const osmscout::GeoCoord)),
+            dbThread.get(), SLOT(requestLocationDescription(const osmscout::GeoCoord)),
             Qt::QueuedConnection);
     
-    connect(dbThread, SIGNAL(locationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)), 
+    connect(dbThread.get(), SIGNAL(locationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)),
             this, SLOT(onLocationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)),
             Qt::QueuedConnection);
     
-    connect(dbThread, SIGNAL(locationDescriptionFinished(const osmscout::GeoCoord)), 
+    connect(dbThread.get(), SIGNAL(locationDescriptionFinished(const osmscout::GeoCoord)),
             this, SLOT(onLocationDescriptionFinished(const osmscout::GeoCoord)),
             Qt::QueuedConnection);    
     

@@ -27,6 +27,7 @@
 #include <QMutex>
 #include <QTime>
 #include <QTimer>
+#include <QReadWriteLock>
 
 #include <osmscout/LocationEntry.h>
 #include <osmscout/Database.h>
@@ -34,15 +35,14 @@
 #include <osmscout/MapService.h>
 #include <osmscout/RoutingService.h>
 #include <osmscout/RoutePostprocessor.h>
-
 #include <osmscout/MapPainterQt.h>
-
-#include <osmscout/util/Breaker.h>
 
 #include <osmscout/Settings.h>
 #include <osmscout/TileCache.h>
 #include <osmscout/OsmTileDownloader.h>
 #include <osmscout/MapManager.h>
+#include <osmscout/DBInstance.h>
+#include <osmscout/DBJob.h>
 
 /**
  * \ingroup QtAPI
@@ -76,115 +76,6 @@ struct DatabaseLoadedResponse
 };
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)
-
-/**
- * \ingroup QtAPI
- */
-class OSMSCOUT_CLIENT_QT_API QBreaker : public osmscout::Breaker
-{
-private:
-  mutable QMutex mutex;
-  bool           aborted;
-
-public:
-  QBreaker();
-
-  void Break();
-  bool IsAborted() const;
-  void Reset();
-};
-
-/**
- * \ingroup QtAPI
- */
-class OSMSCOUT_CLIENT_QT_API StyleError
-{
-    enum StyleErrorType {
-        Symbol, Error, Warning, Exception
-    };
-
-public:
-    StyleError(StyleErrorType type, int line, int column, const QString &text) :
-        type(type), line(line), column(column), text(text){}
-    StyleError(QString msg);
-
-    StyleErrorType GetType(){ return type; }
-    QString GetTypeName() const;
-    int GetLine(){ return line; }
-    int GetColumn(){ return column; }
-    const QString &GetText(){ return text; }
-    QString GetDescription(){return GetTypeName()+": "+GetText();}
-
-private:
-    StyleErrorType  type;
-    int             line;
-    int             column;
-    QString         text;
-};
-
-/**
- * \ingroup QtAPI
- * 
- * Instance of one osmscout database and database specific objects.
- */
-class DBInstance : public QObject
-{
-  Q_OBJECT
-
-public:
-  QString                       path;
-  osmscout::DatabaseRef         database;
-  
-  osmscout::LocationServiceRef  locationService;
-  osmscout::MapServiceRef       mapService;
-  osmscout::MapService::CallbackId callbackId;
-  osmscout::BreakerRef          dataLoadingBreaker;  
-  
-  osmscout::RoutingServiceRef   router;
-
-  osmscout::StyleConfigRef      styleConfig;
-  osmscout::MapPainterQt        *painter;
-  
-  inline DBInstance(QString path,
-                    osmscout::DatabaseRef database,
-                    osmscout::LocationServiceRef locationService,
-                    osmscout::MapServiceRef mapService,
-                    osmscout::MapService::CallbackId callbackId,
-                    osmscout::BreakerRef dataLoadingBreaker,
-                    osmscout::StyleConfigRef styleConfig):
-    path(path),
-    database(database),
-    locationService(locationService),
-    mapService(mapService),
-    callbackId(callbackId),
-    dataLoadingBreaker(dataLoadingBreaker),
-    styleConfig(styleConfig),
-    painter(NULL)
-  {
-    if (styleConfig){
-      painter = new osmscout::MapPainterQt(styleConfig);
-    }   
-  };
-  
-  inline ~DBInstance()
-  {
-    close();
-    if (painter!=NULL) {
-      delete painter;
-    }
-  };
-
-  bool LoadStyle(QString stylesheetFilename,
-                 std::unordered_map<std::string,bool> stylesheetFlags, 
-                 QList<StyleError> &errors);
-  
-  bool AssureRouter(osmscout::Vehicle vehicle, 
-                    osmscout::RouterParameter routerParameter);  
-
-  void close();
-};
-
-typedef std::shared_ptr<DBInstance> DBInstanceRef;
 
 enum DatabaseCoverage{
   Outside = 0,
@@ -221,6 +112,8 @@ enum DatabaseCoverage{
  */
 class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 {
+  friend class OSMScoutQt; // accessing to protected constructor
+
   Q_OBJECT
   Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
   
@@ -241,8 +134,6 @@ signals:
   void searchResult(const QString searchPattern, const QList<LocationEntry>);
 
   void searchFinished(const QString searchPattern, bool error);
-
-  void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
 
 public slots:
   void ToggleDaylight();
@@ -290,8 +181,6 @@ public slots:
    */
   void SearchForLocations(const QString searchPattern, int limit);
 
-  void requestObjectsOnView(const RenderMapRequest&);
-
 protected:
   MapManagerRef                 mapManager;
   SettingsRef                   settings;
@@ -299,7 +188,7 @@ protected:
   double                        mapDpi;
   double                        physicalDpi;
 
-  mutable QMutex                mutex;
+  mutable QReadWriteLock        lock;
   
   osmscout::DatabaseParameter   databaseParameter;
   QList<DBInstanceRef>          databases;
@@ -321,13 +210,11 @@ protected:
   double                        fontSize;
 
 protected:
-  
+
   DBThread(QStringList databaseLookupDirectories,
            QString iconDirectory,
            SettingsRef settings);
-
-  virtual ~DBThread();
-
+  
   bool AssureRouter(osmscout::Vehicle vehicle);
 
   virtual void TileStateCallback(const osmscout::TileRef& changedTile);
@@ -360,10 +247,20 @@ protected:
   bool isInitializedInternal();
 
 public:
+  virtual ~DBThread();
+
   bool isInitialized(); 
   
   const DatabaseLoadedResponse loadedResponse() const;
 
+  /**
+   * Test if some bounding box is covered by databases - fully, partially or not covered.
+   * Database bounding box combined with water-index is used.
+   *
+   * @param magnification
+   * @param bbox
+   * @return DatabaseCoverage enum: Outside, Covered, Intersects
+   */
   DatabaseCoverage databaseCoverage(const osmscout::Magnification &magnification,
                                     const osmscout::GeoBox &bbox);
 
@@ -429,22 +326,13 @@ public:
 
   const QMap<QString,bool> GetStyleFlags() const;
 
+  void RunJob(DBJob *job);
+
   static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
-  
-  static bool InitializeTiledInstance(QStringList databaseDirectory, 
-                                      QString iconDirectory,
-                                      SettingsRef settings,
-                                      QString tileCacheDirectory,
-                                      size_t onlineTileCacheSize = 20, 
-                                      size_t offlineTileCacheSize = 50);
 
-  static bool InitializePlaneInstance(QStringList databaseDirectory, 
-                                      QString iconDirectory,
-                                      SettingsRef settings);
-  
-  static DBThread* GetInstance();
-  static void FreeInstance();
 };
+
+typedef std::shared_ptr<DBThread> DBThreadRef;
 
 #endif

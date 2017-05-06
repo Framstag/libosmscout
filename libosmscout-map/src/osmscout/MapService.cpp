@@ -311,10 +311,12 @@ namespace osmscout {
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
 
     if (!optimizeAreasLowZoom) {
+      tile->GetOptimizedAreaData().SetComplete();
       return false;
     }
 
     if (!optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
+      tile->GetOptimizedAreaData().SetComplete();
       return true;
     }
 
@@ -461,10 +463,12 @@ namespace osmscout {
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
 
     if (!optimizeWaysLowZoom) {
+      tile->GetOptimizedWayData().SetComplete();
       return false;
     }
 
     if (!optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
+      tile->GetOptimizedWayData().SetComplete();
       return true;
     }
 

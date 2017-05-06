@@ -15,9 +15,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-    #include/osmscout/private/Config.h
-    #include/osmscout/ClientQtFeatures.h
     include/osmscout/DBThread.h
+    include/osmscout/DBInstance.h
     include/osmscout/FileDownloader.h
     include/osmscout/InputHandler.h
     include/osmscout/LocationEntry.h
@@ -43,10 +42,14 @@ set(HEADER_FILES
     include/osmscout/MapObjectInfoModel.h
     include/osmscout/MapStyleModel.h
     include/osmscout/StyleFlagsModel.h
+    include/osmscout/OSMScoutQt.h
+    include/osmscout/DBJob.h
+    include/osmscout/LookupModule.h
 )
 
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
+    src/osmscout/DBInstance.cpp
     src/osmscout/FileDownloader.cpp
     src/osmscout/InputHandler.cpp
     src/osmscout/LocationEntry.cpp
@@ -69,6 +72,9 @@ set(SOURCE_FILES
     src/osmscout/MapObjectInfoModel.cpp
     src/osmscout/MapStyleModel.cpp
     src/osmscout/StyleFlagsModel.cpp
+    src/osmscout/OSMScoutQt.cpp
+    src/osmscout/DBJob.cpp
+    src/osmscout/LookupModule.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})

@@ -19,11 +19,12 @@
 
 #include <osmscout/MapDownloadsModel.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/OSMScoutQt.h>
 
 MapDownloadsModel::MapDownloadsModel(QObject *parent):
   QAbstractListModel(parent){
 
-  mapManager=DBThread::GetInstance()->GetMapManager();
+  mapManager=OSMScoutQt::GetInstance().GetDBThread()->GetMapManager();
   connect(mapManager.get(), SIGNAL(downloadJobsChanged()), this, SLOT(onDownloadJobsChanged()));
   connect(mapManager.get(), SIGNAL(mapDownloadFails(QString)), this, SIGNAL(mapDownloadFails(QString)));
   onDownloadJobsChanged();
@@ -31,7 +32,7 @@ MapDownloadsModel::MapDownloadsModel(QObject *parent):
 
 QString MapDownloadsModel::suggestedDirectory(QVariant mapVar, QString rootDirectory)
 {
-  auto mapManager=DBThread::GetInstance()->GetMapManager();
+  auto mapManager=OSMScoutQt::GetInstance().GetDBThread()->GetMapManager();
   auto directories=mapManager->getLookupDirectories();
   auto it=directories.begin();
   QString path=rootDirectory;
