@@ -438,6 +438,15 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Interface class that offers a medium generic interface for styles classes. The
+   * interface defines methods for setting index attributes to a given value.
+   *
+   * Used by the style sheet parser. The parser uses the StyleDescriptor to get te attribute name,
+   * type and index. Attribute values are written back to the style instance using the index.
+   */
   class OSMSCOUT_MAP_API Style
   {
   public:
@@ -455,6 +464,11 @@ namespace osmscout {
     virtual void SetLabelValue(int attribute, const LabelProviderRef& value);
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Enumeration of different style sheet attribute value types
+   */
   enum class StyleAttributeType
   {
     VOID,
@@ -476,6 +490,11 @@ namespace osmscout {
     SYMBOL
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Base class for all attribute metadata
+   */
   class OSMSCOUT_MAP_API StyleAttributeDescriptor
   {
   private:
@@ -507,6 +526,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a 'VOID' attribute. This attribute type is only used internally.
+   */
   class OSMSCOUT_MAP_API StyleVoidAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -519,6 +543,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a bool attribute value
+   */
   class OSMSCOUT_MAP_API StyleBoolAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -532,6 +561,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a string attribute value
+   */
   class OSMSCOUT_MAP_API StyleStringAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -545,6 +579,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a color attribute value
+   */
   class OSMSCOUT_MAP_API StyleColorAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -558,6 +597,12 @@ namespace osmscout {
     }
   };
 
+
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a magnification attribute value
+   */
   class OSMSCOUT_MAP_API StyleMagnificationAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -571,6 +616,12 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a enumeration attribute value. The base class has to get derived for defining
+   * an actual enum type.
+   */
   class OSMSCOUT_MAP_API StyleEnumAttributeDescriptor : public StyleAttributeDescriptor
   {
   public:
@@ -590,7 +641,6 @@ namespace osmscout {
     }
 
   public:
-
     void AddEnumValue(const std::string& name,
                      int value)
     {
@@ -610,6 +660,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a display size (using 'mm' unit) attribute value
+   */
   class OSMSCOUT_MAP_API StyleDisplayAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -623,6 +678,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a unsigned display size (using 'mm' unit) attribute value
+   */
   class OSMSCOUT_MAP_API StyleUDisplayAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -636,6 +696,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a map size (using 'm' unit) attribute value
+   */
   class OSMSCOUT_MAP_API StyleMapAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -649,6 +714,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a unsigned map size (using 'm' unit) attribute value
+   */
   class OSMSCOUT_MAP_API StyleUMapAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -662,6 +732,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a unitless double attribute value
+   */
   class OSMSCOUT_MAP_API StyleDoubleAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -675,6 +750,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a unitless unsigned double attribute value
+   */
   class OSMSCOUT_MAP_API StyleUDoubleAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -688,6 +768,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a unitless array of unsigned double attribute value
+   */
   class OSMSCOUT_MAP_API StyleUDoubleArrayAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -701,6 +786,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a unitless int attribute value
+   */
   class OSMSCOUT_MAP_API StyleIntAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -714,6 +804,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a unitless unsigned int attribute value
+   */
   class OSMSCOUT_MAP_API StyleUIntAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -727,6 +822,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a label attribute value
+   */
   class OSMSCOUT_MAP_API StyleLabelAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -740,6 +840,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * \ingroup Stylesheet
+   *
+   * Describes a symbol attribute value
+   */
   class OSMSCOUT_MAP_API StyleSymbolAttributeDescriptor CLASS_FINAL : public StyleAttributeDescriptor
   {
   public:
@@ -757,6 +862,8 @@ namespace osmscout {
   typedef std::shared_ptr<StyleAttributeDescriptor> StyleAttributeDescriptorRef;
 
   /**
+   * \ingroup Stylesheet
+   *
    * Holds Meta information and technical description of a style. It currently holds
    * a list of parameters and their types. It also allows to assign type safe values
    * to a given style object.
