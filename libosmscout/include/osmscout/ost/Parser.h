@@ -22,6 +22,7 @@
 #define osmscout_ost_PARSER_H
 
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/util/String.h>
 
@@ -119,18 +120,22 @@ std::string Destring(const char* str)
 	void OST();
 	void MAXSPEEDS();
 	void GRADES();
+	void FEATURES();
 	void TYPES();
 	void MAXSPEED();
 	void STRING(std::string& value);
 	void UINT(size_t& value);
 	void GRADE();
-	void TYPE();
+	void FEATURE();
 	void IDENT(std::string& value);
+	void FEATUREDESCS(Feature& feature);
+	void TYPE();
 	void TYPEKINDS(unsigned char& types);
 	void TAGCONDITION(TagConditionRef& condition);
-	void FEATURE(TypeInfo& typeInfo);
+	void TYPEFEATURE(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
 	void GROUPS(TypeInfo& typeInfo);
+	void TYPEDESCS(TypeInfo& typeInfo);
 	void TAGANDCOND(TagConditionRef& condition);
 	void TAGBOOLCOND(TagConditionRef& condition);
 	void TAGBINCOND(TagConditionRef& condition);
