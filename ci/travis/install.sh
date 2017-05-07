@@ -59,7 +59,7 @@ elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
 
   wget https://github.com/spf13/hugo/releases/download/v0.20.7/hugo_0.20.7_Linux-64bit.deb
-  sudo dpkg -i hugo_0.20.7-Linux-64bit.deb
+  sudo dpkg -i hugo_0.20.7_Linux-64bit.deb
 
   sudo apt-get -qq update
   sudo apt-get install -y python3-pygments python-pygments doxygen lftp
