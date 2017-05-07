@@ -67,7 +67,7 @@ namespace osmscout {
    *
    * Allows to load data objects by offset using various standard library data structures.
    */
-  template <class N, class C>
+  template <class N>
   class DataFile
   {
   public:
@@ -110,16 +110,12 @@ namespace osmscout {
     virtual bool IsOpen() const;
     virtual bool Close();
 
-    bool GetByOffset(const C<FileOffset>& offsets,
-                     std::vector<ValueType>& data) const;
-
-    /*
     bool GetByOffset(const std::vector<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
     bool GetByOffset(const std::list<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
     bool GetByOffset(const std::set<FileOffset>& offsets,
-                     std::vector<ValueType>& data) const;*/
+                     std::vector<ValueType>& data) const;
 
     bool GetByOffset(const std::vector<FileOffset>& offsets,
                      const GeoBox& boundingBox,
@@ -267,8 +263,8 @@ namespace osmscout {
    *
    * Method is thread-safe.
    */
-  template <class N, class C1>
-  bool DataFile<N>::GetByOffset(const C1<FileOffset>& offsets,
+  template <class N>
+  bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
   {
     data.reserve(data.size()+offsets.size());
@@ -343,7 +339,6 @@ namespace osmscout {
    *
    * Method is thread-safe.
    */
-   /*
   template <class N>
   bool DataFile<N>::GetByOffset(const std::list<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
@@ -372,14 +367,13 @@ namespace osmscout {
     }
 
     return true;
-  }*/
+  }
 
   /**
    * Read data values from the given file offsets.
    *
    * Method is thread-safe.
    */
-/*
   template <class N>
   bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
@@ -408,7 +402,7 @@ namespace osmscout {
     }
 
     return true;
-  }*/
+  }
 
   /**
    * Read data values from the given file offsets.
