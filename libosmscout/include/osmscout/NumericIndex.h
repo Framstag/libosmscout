@@ -113,9 +113,12 @@ namespace osmscout {
     bool IsOpen() const;
 
     bool GetOffset(const N& id, FileOffset& offset) const;
-    bool GetOffsets(const std::vector<N>& ids, std::vector<FileOffset>& offsets) const;
-    bool GetOffsets(const std::list<N>& ids, std::vector<FileOffset>& offsets) const;
-    bool GetOffsets(const std::set<N>& ids, std::vector<FileOffset>& offsets) const;
+
+    template<typename IteratorIn>
+    bool GetOffsets(IteratorIn begin,
+                    IteratorIn end,
+                    size_t size,
+                    std::vector<FileOffset>& offsets) const;
 
     void DumpStatistics() const;
   };
@@ -437,64 +440,19 @@ namespace osmscout {
    * This method is thread-safe.
    */
   template <class N>
-  bool NumericIndex<N>::GetOffsets(const std::vector<N>& ids,
+  template<typename IteratorIn>
+  bool NumericIndex<N>::GetOffsets(IteratorIn begin,
+                                   IteratorIn end,
+                                   size_t size,
                                    std::vector<FileOffset>& offsets) const
   {
     offsets.clear();
-    offsets.reserve(ids.size());
+    offsets.reserve(size);
 
-    for (const auto& id : ids) {
+    for (IteratorIn idIter=begin; idIter!=end; ++idIter) {
       FileOffset offset;
 
-      if (GetOffset(id,
-                    offset)) {
-        offsets.push_back(offset);
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Return the file offsets in the data file for the given object ids.
-   *
-   * This method is thread-safe.
-   */
-  template <class N>
-  bool NumericIndex<N>::GetOffsets(const std::list<N>& ids,
-                                   std::vector<FileOffset>& offsets) const
-  {
-    offsets.clear();
-    offsets.reserve(ids.size());
-
-    for (const auto& id : ids) {
-      FileOffset offset;
-
-      if (GetOffset(id,
-                    offset)) {
-        offsets.push_back(offset);
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Return the file offsets in the data file for the given object ids.
-   *
-   * This method is thread-safe.
-   */
-  template <class N>
-  bool NumericIndex<N>::GetOffsets(const std::set<N>& ids,
-                                   std::vector<FileOffset>& offsets) const
-  {
-    offsets.clear();
-    offsets.reserve(ids.size());
-
-    for (const auto& id : ids) {
-      FileOffset offset;
-
-      if (GetOffset(id,
+      if (GetOffset(*idIter,
                     offset)) {
         offsets.push_back(offset);
       }

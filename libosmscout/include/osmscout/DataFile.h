@@ -644,14 +644,19 @@ namespace osmscout {
   bool IndexedDataFile<I,N>::GetOffsets(const std::set<I>& ids,
                                         std::vector<FileOffset>& offsets) const
   {
-    return index.GetOffsets(ids,offsets);
+    return index.GetOffsets(ids.begin(),
+                            ids.end(),
+                            ids.size(),
+                            offsets);
   }
 
   template <class I, class N>
   bool IndexedDataFile<I,N>::GetOffsets(const std::vector<I>& ids,
                                         std::vector<FileOffset>& offsets) const
   {
-    return index.GetOffsets(ids,offsets);
+    return index.GetOffsets(ids.begin(),
+                            ids.end(),
+                            ids.size(),offsets);
   }
 
   template <class I, class N>
@@ -667,7 +672,10 @@ namespace osmscout {
   {
     std::vector<FileOffset> offsets;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
@@ -683,7 +691,10 @@ namespace osmscout {
   {
     std::vector<FileOffset> offsets;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
@@ -699,7 +710,10 @@ namespace osmscout {
   {
     std::vector<FileOffset> offsets;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
@@ -716,7 +730,10 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
     std::vector<ValueType>  d;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
