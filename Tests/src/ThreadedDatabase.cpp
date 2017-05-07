@@ -248,12 +248,16 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
         result=false;
       }
 
-      if (!nodeDataFile->GetByOffset(nodeOffsets,
+      if (!nodeDataFile->GetByOffset(nodeOffsets.begin(),
+                                     nodeOffsets.end(),
+                                     nodeOffsets.size(),
                                      nodeData)) {
         result=false;
       }
 
-      if (!wayDataFile->GetByOffset(wayOffsets,
+      if (!wayDataFile->GetByOffset(wayOffsets.begin(),
+                                    wayOffsets.end(),
+                                    wayOffsets.size(),
                                     wayData)) {
         result=false;
       }

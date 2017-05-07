@@ -606,7 +606,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=nodeDataFile->GetByOffset(offsets,nodes);
+    bool result=nodeDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),nodes);
 
     time.Stop();
 
@@ -653,7 +653,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=nodeDataFile->GetByOffset(offsets,nodes);
+    bool result=nodeDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),nodes);
 
     time.Stop();
 
@@ -675,7 +675,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=nodeDataFile->GetByOffset(offsets,nodes);
+    bool result=nodeDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),nodes);
 
     time.Stop();
 
@@ -741,7 +741,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=areaDataFile->GetByOffset(offsets,areas);
+    bool result=areaDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),areas);
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
@@ -761,7 +761,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=areaDataFile->GetByOffset(offsets,areas);
+    bool result=areaDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),areas);
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
@@ -781,7 +781,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=areaDataFile->GetByOffset(offsets,areas);
+    bool result=areaDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),areas);
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
@@ -865,7 +865,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=wayDataFile->GetByOffset(offsets,ways);
+    bool result=wayDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),ways);
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
@@ -885,7 +885,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=wayDataFile->GetByOffset(offsets,ways);
+    bool result=wayDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),ways);
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
@@ -905,7 +905,7 @@ namespace osmscout {
 
     StopClock time;
 
-    bool result=wayDataFile->GetByOffset(offsets,ways);
+    bool result=wayDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),ways);
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();

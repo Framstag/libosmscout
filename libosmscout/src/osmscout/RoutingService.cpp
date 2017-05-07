@@ -1880,7 +1880,9 @@ namespace osmscout {
     std::sort(wayWayOffsets.begin(),
               wayWayOffsets.end());
 
-    if (!wayDataFile->GetByOffset(wayWayOffsets,
+    if (!wayDataFile->GetByOffset(wayWayOffsets.begin(),
+                                  wayWayOffsets.end(),
+                                  wayWayOffsets.size(),
                                   ways)) {
       log.Error() << "Error reading ways in area!";
       return position;
