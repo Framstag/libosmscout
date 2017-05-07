@@ -574,9 +574,8 @@ namespace osmscout {
     bool Get(const I& id,
              ValueType& entry) const;
 
-    bool GetOffsets(const std::set<I>& ids,
-                    std::vector<FileOffset>& offsets) const;
-    bool GetOffsets(const std::vector<I>& ids,
+    template<typename IteratorIn>
+    bool GetOffsets(IteratorIn begin, IteratorIn end, size_t size,
                     std::vector<FileOffset>& offsets) const;
 
     bool Get(const std::vector<I>& ids,
@@ -585,6 +584,7 @@ namespace osmscout {
              std::vector<ValueType>& data) const;
     bool Get(const std::set<I>& ids,
              std::vector<ValueType>& data) const;
+    
     bool Get(const std::set<I>& ids,
              std::unordered_map<I,ValueType>& data) const;
 
@@ -641,23 +641,15 @@ namespace osmscout {
   }
 
   template <class I, class N>
-  bool IndexedDataFile<I,N>::GetOffsets(const std::set<I>& ids,
+  template<typename IteratorIn>
+  bool IndexedDataFile<I,N>::GetOffsets(IteratorIn begin, IteratorIn end, size_t size,
                                         std::vector<FileOffset>& offsets) const
   {
-    return index.GetOffsets(ids.begin(),
-                            ids.end(),
-                            ids.size(),
-                            offsets);
-  }
-
-  template <class I, class N>
-  bool IndexedDataFile<I,N>::GetOffsets(const std::vector<I>& ids,
-                                        std::vector<FileOffset>& offsets) const
-  {
-    return index.GetOffsets(ids.begin(),
-                            ids.end(),
-                            ids.size(),offsets);
-  }
+    return index.GetOffsets(begin,
+                           end,
+                           size,
+                           offsets);
+  };
 
   template <class I, class N>
   bool IndexedDataFile<I,N>::GetOffset(const I& id,
