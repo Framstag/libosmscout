@@ -67,7 +67,7 @@ namespace osmscout {
    *
    * Allows to load data objects by offset using various standard library data structures.
    */
-  template <class N>
+  template <class N, class C>
   class DataFile
   {
   public:
@@ -110,14 +110,19 @@ namespace osmscout {
     virtual bool IsOpen() const;
     virtual bool Close();
 
-    bool GetByOffset(const std::vector<FileOffset>& offsets,
+    bool GetByOffset(const C<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
+
+    /*
     bool GetByOffset(const std::vector<FileOffset>& offsets,
-                     const GeoBox& boundingBox,
                      std::vector<ValueType>& data) const;
     bool GetByOffset(const std::list<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
     bool GetByOffset(const std::set<FileOffset>& offsets,
+                     std::vector<ValueType>& data) const;*/
+
+    bool GetByOffset(const std::vector<FileOffset>& offsets,
+                     const GeoBox& boundingBox,
                      std::vector<ValueType>& data) const;
 
     bool GetByOffset(const std::set<FileOffset>& offsets,
@@ -262,17 +267,19 @@ namespace osmscout {
    *
    * Method is thread-safe.
    */
-  template <class N>
-  bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
+  template <class N, class C1>
+  bool DataFile<N>::GetByOffset(const C1<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
   {
     data.reserve(data.size()+offsets.size());
 
     for (const auto& offset : offsets) {
       ValueCacheRef entryRef;
-      if (cache.GetEntry(offset,entryRef)){
+
+      if (cache.GetEntry(offset,entryRef)) {
         data.push_back(entryRef->value);
-      }else{
+      }
+      else {
         ValueType value=std::make_shared<N>();
 
         if (!ReadData(*typeConfig,
@@ -336,6 +343,7 @@ namespace osmscout {
    *
    * Method is thread-safe.
    */
+   /*
   template <class N>
   bool DataFile<N>::GetByOffset(const std::list<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
@@ -364,13 +372,14 @@ namespace osmscout {
     }
 
     return true;
-  }
+  }*/
 
   /**
    * Read data values from the given file offsets.
    *
    * Method is thread-safe.
    */
+/*
   template <class N>
   bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
                                 std::vector<ValueType>& data) const
@@ -399,7 +408,7 @@ namespace osmscout {
     }
 
     return true;
-  }
+  }*/
 
   /**
    * Read data values from the given file offsets.
