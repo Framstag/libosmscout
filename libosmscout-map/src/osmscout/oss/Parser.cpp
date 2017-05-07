@@ -1488,7 +1488,7 @@ void Parser::ATTRIBUTE(PartialStyleBase& style, const StyleDescriptor& descripto
 }
 
 void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescriptor& descriptor) {
-		ValueType              valueType=ValueType::VOID;
+		ValueType              valueType=ValueType::NO_VALUE;
 		bool                   negate=false;
 		std::string            ident;
 		std::string            subIdent;

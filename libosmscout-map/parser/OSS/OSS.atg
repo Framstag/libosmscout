@@ -25,7 +25,7 @@ bool                                  state;
 
 enum class ValueType
 {
-  VOID,
+  NO_VALUE,
   IDENT,
   STRING,
   COLOR,
@@ -1251,7 +1251,7 @@ PRODUCTIONS
   ATTRIBUTEVALUE<PartialStyleBase& style, const StyleAttributeDescriptor& descriptor>
               =
                  (.
-                   ValueType              valueType=ValueType::VOID;
+                   ValueType              valueType=ValueType::NO_VALUE;
                    bool                   negate=false;
                    std::string            ident;
                    std::string            subIdent;

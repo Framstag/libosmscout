@@ -125,7 +125,7 @@ bool                                  state;
 
 enum class ValueType
 {
-  VOID,
+  NO_VALUE,
   IDENT,
   STRING,
   COLOR,
