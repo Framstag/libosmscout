@@ -23,6 +23,7 @@
 #include <osmscout/OsmTileDownloader.h>
 #include <osmscout/OnlineTileProvider.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/OSMScoutQt.h>
 
 OsmTileDownloader::OsmTileDownloader(QString diskCacheDir):
   serverNumber(qrand())
@@ -42,7 +43,7 @@ OsmTileDownloader::OsmTileDownloader(QString diskCacheDir):
   diskCache.setCacheDirectory(diskCacheDir);
   webCtrl.setCache(&diskCache);
 
-  SettingsRef settings=DBThread::GetInstance()->GetSettings();
+  SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
   
   connect(settings.get(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
           this, SLOT(onlineTileProviderChanged()));
@@ -55,7 +56,7 @@ OsmTileDownloader::~OsmTileDownloader() {
 
 void OsmTileDownloader::onlineTileProviderChanged()
 {
-  tileProvider = DBThread::GetInstance()->GetSettings()->GetOnlineTileProvider();
+  tileProvider=OSMScoutQt::GetInstance().GetSettings()->GetOnlineTileProvider();
   requests.clear();
 }
 

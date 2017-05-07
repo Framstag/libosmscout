@@ -29,6 +29,7 @@
 #include <osmscout/util/GeoBox.h>
 
 #include <osmscout/DBThread.h>
+#include <osmscout/LookupModule.h>
 
 #include <osmscout/LocationInfoModel.h>
 #include <osmscout/private/ClientQtImportExport.h>
@@ -109,6 +110,7 @@ private:
   int screenY;
   QList<osmscout::MapData> mapData;
   double mapDpi;
+  LookupModuleRef lookupModule;
 };
 
 #endif /* MAPOBJECTINFOMODEL_H */

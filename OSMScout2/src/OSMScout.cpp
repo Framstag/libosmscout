@@ -24,6 +24,9 @@
 #include <QApplication>
 #include <QFileInfo>
 
+// OSM Scout library singleton
+#include <osmscout/OSMScoutQt.h>
+
 // Custom QML objects
 #include <osmscout/MapWidget.h>
 #include <osmscout/SearchLocationModel.h>
@@ -40,8 +43,6 @@
 #include "AppSettings.h"
 
 #include <osmscout/util/Logger.h>
-
-Q_DECLARE_METATYPE(osmscout::TileRef)
 
 static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
@@ -89,20 +90,11 @@ int main(int argc, char* argv[])
   app.setOrganizationDomain("libosmscout.sf.net");
   app.setApplicationName("OSMScout");
 
-  qRegisterMetaType<RenderMapRequest>();
-  qRegisterMetaType<DatabaseLoadedResponse>();
-  qRegisterMetaType<osmscout::TileRef>();
+  // register OSMScout library QML types
+  OSMScoutQt::RegisterQmlTypes();
 
-  qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
-  qmlRegisterType<LocationEntry>("net.sf.libosmscout.map", 1, 0, "LocationEntry");
-  qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
-  qmlRegisterType<RouteStep>("net.sf.libosmscout.map", 1, 0, "RouteStep");
-  qmlRegisterType<RoutingListModel>("net.sf.libosmscout.map", 1, 0, "RoutingListModel");
-  qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
+  // register application QML types
   qmlRegisterType<AppSettings>("net.sf.libosmscout.map", 1, 0, "AppSettings");
-  qmlRegisterType<AvailableMapsModel>("net.sf.libosmscout.map", 1, 0, "AvailableMapsModel");
-  qmlRegisterType<MapDownloadsModel>("net.sf.libosmscout.map", 1, 0, "MapDownloadsModel");
-
   qmlRegisterSingletonType<Theme>("net.sf.libosmscout.map", 1, 0, "Theme", ThemeProvider);
 
   // init logger by system system variable
@@ -117,33 +109,20 @@ int main(int argc, char* argv[])
   osmscout::log.Warn(logEnv>=WARNING);
   osmscout::log.Error(logEnv>=ERROR);
 
-  SettingsRef settings=std::make_shared<Settings>();
-  // load online tile providers
-  settings->loadOnlineTileProviders(
-    ":/resources/online-tile-providers.json");
-  settings->loadMapProviders(
-    ":/resources/map-providers.json");
-
-  QThread thread;
+  OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
 
   // setup paths
-  QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
   QStringList cmdLineArgs = QApplication::arguments();
 
   QStringList mapLookupDirectories;
   if (cmdLineArgs.size() > 1){
     mapLookupDirectories << cmdLineArgs.at(1);
   }
-  else{
-    mapLookupDirectories << QDir::currentPath();
-    mapLookupDirectories << QDir(documentsLocation).filePath("Maps");
-  }
 
   if (cmdLineArgs.size() > 2){
     QFileInfo stylesheetFile(cmdLineArgs.at(2));
-    settings->SetStyleSheetDirectory(stylesheetFile.dir().path());
-    settings->SetStyleSheetFile(stylesheetFile.fileName());
+    builder.WithStyleSheetDirectory(stylesheetFile.dir().path())
+     .WithStyleSheetFile(stylesheetFile.fileName());
   }
 
   QString iconDirectory;
@@ -158,45 +137,22 @@ int main(int argc, char* argv[])
       iconDirectory = "icons";
     }
   }
-/*
-  if (!DBThread::InitializeTiledInstance(
-          mapLookupDirectories,
-          iconDirectory,
-          renderingSettings,
-          cacheLocation + QDir::separator() + "OSMScoutTileCache",
-          / onlineTileCacheSize  / 100,
-          / offlineTileCacheSize / 200
-      )) {
-    std::cerr << "Cannot initialize DBThread" << std::endl;
+  builder
+    .WithIconDirectory(iconDirectory)
+    .WithMapLookupDirectories(mapLookupDirectories)
+    .WithOnlineTileProviders(":/resources/online-tile-providers.json")
+    .WithMapProviders(":/resources/map-providers.json");
+
+  if (!builder.Init()){
+    std::cerr << "Cannot initialize OSMScout library" << std::endl;
     return 1;
   }
-*/
-  if (!DBThread::InitializePlaneInstance(
-          mapLookupDirectories,
-          iconDirectory,
-          settings
-      )) {
-    std::cerr << "Cannot initialize DBThread" << std::endl;
-    return 1;
-  }
-
-  DBThread* dbThread=DBThread::GetInstance();
-
-  dbThread->connect(&thread, SIGNAL(started()), SLOT(Initialize()));
-  dbThread->connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
-
-  dbThread->moveToThread(&thread);
 
   QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
 
-  thread.start();
-
   result=app.exec();
 
-  thread.quit();
-  thread.wait();
-
-  DBThread::FreeInstance();
+  OSMScoutQt::FreeInstance();
 
   return result;
 }

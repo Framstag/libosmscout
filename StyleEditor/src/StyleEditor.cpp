@@ -22,19 +22,15 @@
 #include <QQuickView>
 #include <QApplication>
 
-// Custom QML objects
-#include "osmscout/MapWidget.h"
-#include "osmscout/SearchLocationModel.h"
-#include "osmscout/MapObjectInfoModel.h"
-#include "FileIO.h"
-
-// Application settings
-#include "osmscout/Settings.h"
+// OSMScout library
+#include <osmscout/Settings.h>
+#include <osmscout/OSMScoutQt.h>
 
 // Main Window
 #include "MainWindow.h"
 
-Q_DECLARE_METATYPE(osmscout::TileRef)
+// Custom QML objects
+#include "FileIO.h"
 
 int main(int argc, char* argv[])
 {
@@ -50,24 +46,12 @@ int main(int argc, char* argv[])
   app.setOrganizationDomain("libosmscout.sf.net");
   app.setApplicationName("StyleEditor");
 
+  // register OSMScout library QML types
+  OSMScoutQt::RegisterQmlTypes();
 
-  qRegisterMetaType<RenderMapRequest>();
-  qRegisterMetaType<DatabaseLoadedResponse>();
-  qRegisterMetaType<osmscout::TileRef>();
-
-  qmlRegisterType<MapWidget>("net.sf.libosmscout.map", 1, 0, "Map");
-  qmlRegisterType<LocationEntry>("net.sf.libosmscout.map", 1, 0, "Location");
-  qmlRegisterType<LocationListModel>("net.sf.libosmscout.map", 1, 0, "LocationListModel");
-  qmlRegisterType<MapObjectInfoModel>("net.sf.libosmscout.map", 1, 0, "MapObjectInfoModel");
   qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
-  qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
-
-  QThread thread;
-  
-  // load online tile providers
-  SettingsRef settings=std::make_shared<Settings>();
-  settings->loadOnlineTileProviders(
-    ":/resources/online-tile-providers.json");
+    
+  OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
 
   // setup paths
   QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);  
@@ -84,8 +68,8 @@ int main(int argc, char* argv[])
   
   if (cmdLineArgs.size() > 2){
     QFileInfo stylesheetFile(cmdLineArgs.at(2));
-    settings->SetStyleSheetDirectory(stylesheetFile.dir().path());
-    settings->SetStyleSheetFile(stylesheetFile.fileName());
+    builder.WithStyleSheetDirectory(stylesheetFile.dir().path())
+     .WithStyleSheetFile(stylesheetFile.fileName());
   }
   
   QString iconDirectory;
@@ -99,26 +83,18 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (!DBThread::InitializeTiledInstance(
-          mapLookupDirectories,
-          iconDirectory,
-          settings,
-          cacheLocation + QDir::separator() + "OSMScoutTileCache",
-          /* onlineTileCacheSize  */ 100,
-          /* offlineTileCacheSize */ 200
-      )) {
-    std::cerr << "Cannot initialize DBThread" << std::endl;
+  builder
+    .WithIconDirectory(iconDirectory)
+    .WithMapLookupDirectories(mapLookupDirectories)
+    .WithOnlineTileProviders(":/resources/online-tile-providers.json");
+
+  if (!builder.Init()){
+    std::cerr << "Cannot initialize OSMScout library" << std::endl;
+    return 1;
   }
 
-  DBThread* dbThread=DBThread::GetInstance();
-
+  DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
   window=new MainWindow(dbThread);
-
-  dbThread->connect(&thread, SIGNAL(started()), SLOT(Initialize()));
-  dbThread->connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
-
-  dbThread->moveToThread(&thread);
-  thread.start();
 
   result=app.exec();
 
@@ -129,10 +105,7 @@ int main(int argc, char* argv[])
       QFile::remove(tmpStylesheet);
   }
 
-  thread.quit();
-  thread.wait();
-
-  DBThread::FreeInstance();
+  OSMScoutQt::FreeInstance();
 
   return result;
 }

@@ -33,10 +33,10 @@ public slots:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
 
 private:
-  DBThread    *dbThread;
+  DBThreadRef dbThread;
 
 public:
-  MainWindow(DBThread *dbThread);
+  MainWindow(DBThreadRef dbThread);
   ~MainWindow();
 
 

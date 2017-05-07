@@ -22,11 +22,11 @@
 #include <QGuiApplication>
 #include "SettingsDialog.h"
 
-MainWindow::MainWindow(DBThread *dbThread)
+MainWindow::MainWindow(DBThreadRef dbThread)
  : QQmlApplicationEngine(QUrl("qrc:/qml/main.qml")),
    dbThread(dbThread)
 {  
-  connect(dbThread,
+  connect(dbThread.get(),
           SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
           this,
           SLOT(InitialisationFinished(DatabaseLoadedResponse)));

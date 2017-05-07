@@ -20,15 +20,16 @@
 
 #include <osmscout/MapStyleModel.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/OSMScoutQt.h>
 
 MapStyleModel::MapStyleModel():
   QAbstractListModel()
 { 
-  DBThread* dbThread = DBThread::GetInstance();
-  connect(dbThread,SIGNAL(stylesheetFilenameChanged()),
+  DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
+  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
           this,SIGNAL(styleChanged()));
 
-  SettingsRef settings=DBThread::GetInstance()->GetSettings();
+  SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
 
   QDirIterator dirIt(settings->GetStyleSheetDirectory(), QDirIterator::FollowSymlinks);
   while (dirIt.hasNext()) {
@@ -46,13 +47,13 @@ MapStyleModel::~MapStyleModel()
 
 QString MapStyleModel::getStyle() const
 {
-  QFileInfo fileInfo(DBThread::GetInstance()->GetStylesheetFilename());
+  QFileInfo fileInfo(OSMScoutQt::GetInstance().GetDBThread()->GetStylesheetFilename());
   return fileInfo.fileName();
 }
 
 void MapStyleModel::setStyle(const QString &styleFile) const
 {
-  DBThread* dbThread = DBThread::GetInstance();
+  DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
   SettingsRef settings=dbThread->GetSettings();
 
   settings->SetStyleSheetFile(styleFile);
