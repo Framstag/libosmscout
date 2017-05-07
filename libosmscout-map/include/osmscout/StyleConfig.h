@@ -631,7 +631,7 @@ namespace osmscout {
 
     void SetStringValue(int attribute, const std::string& value);
     void SetColorValue(int attribute, const Color& value);
-    void SetMagnificationValue(int attribute, Magnification value);
+    void SetMagnificationValue(int attribute, const Magnification& value);
 
     FillStyle& SetFillColor(const Color& color);
     FillStyle& SetPattern(const std::string& pattern);

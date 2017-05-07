@@ -675,7 +675,7 @@ namespace osmscout {
   }
 
   void FillStyle::SetMagnificationValue(int attribute,
-                                        Magnification value)
+                                        const Magnification& value)
   {
     switch (attribute) {
     case attrPatternMinMag:
