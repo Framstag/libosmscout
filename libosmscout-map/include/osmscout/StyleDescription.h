@@ -60,6 +60,9 @@ namespace osmscout {
     virtual void SetLabelValue(int attribute, const LabelProviderRef& value);
   };
 
+  // Probem under Mac OS X
+  #undef TYPE_BOOL
+
   /**
    * \ingroup Stylesheet
    *

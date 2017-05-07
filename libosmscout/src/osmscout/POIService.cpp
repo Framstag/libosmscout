@@ -135,7 +135,8 @@ namespace osmscout {
     if (!spans.empty()) {
       std::sort(spans.begin(),spans.end());
 
-      if (!areaDataFile->GetByBlockSpans(spans,
+      if (!areaDataFile->GetByBlockSpans(spans.begin(),
+                                         spans.end(),
                                          areas)) {
         log.Error() << "Error reading areas in area!";
 

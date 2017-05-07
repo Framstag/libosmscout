@@ -177,7 +177,7 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
       std::vector<osmscout::WayRef>        optimizedWayData;
       std::vector<osmscout::WayRef>        wayData;
 
-      std::vector<osmscout::DataBlockSpan> areaOffsets;
+      std::vector<osmscout::DataBlockSpan> areaSpans;
       osmscout::TypeInfoSet                loadedAreaTypes;
       osmscout::TypeInfoSet                loadedOptimizedAreaTypes;
       std::vector<osmscout::AreaRef>       optimizedAreaData;
@@ -219,7 +219,7 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
                                          testData.boundingBox,
                                          AREAINDEXACCESS_AREA_LEVEL+4,
                                          testData.areaTypes,
-                                         areaOffsets,
+                                         areaSpans,
                                          loadedAreaTypes)) {
         result=false;
       }
@@ -244,7 +244,7 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
         result=false;
       }
 
-      if (testData.areaOffsets!=areaOffsets) {
+      if (testData.areaOffsets!=areaSpans) {
         result=false;
       }
 
@@ -262,7 +262,8 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
         result=false;
       }
 
-      if (!areaDataFile->GetByBlockSpans(areaOffsets,
+      if (!areaDataFile->GetByBlockSpans(areaSpans.begin(),
+                                         areaSpans.end(),
                                          areaData)) {
         result=false;
       }
