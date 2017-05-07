@@ -34,9 +34,6 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API MapPainterNoOp : public MapPainter
   {
-  private:
-    CoordBufferImpl<Vertex2D>* coordBuffer;
-
   protected:
     bool HasIcon(const StyleConfig& styleConfig,const MapParameter& parameter,IconStyle& style);
 
