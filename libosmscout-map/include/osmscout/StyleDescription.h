@@ -67,23 +67,23 @@ namespace osmscout {
    */
   enum class StyleAttributeType
   {
-    VOID,
-    BOOL,
-    STRING,
-    COLOR,
-    MAGNIFICATION,
-    ENUM,
-    DISPLAY_SIZE,
-    UDISPLAY_SIZE,
-    MAP_SIZE,
-    UMAP_SIZE,
-    DOUBLE,
-    UDOUBLE,
-    UDOUBLE_ARRAY,
-    INT,
-    UINT,
-    LABEL,
-    SYMBOL
+    TYPE_VOID,
+    TYPE_BOOL,
+    TYPE_STRING,
+    TYPE_COLOR,
+    TYPE_MAGNIFICATION,
+    TYPE_ENUM,
+    TYPE_DISPLAY_SIZE,
+    TYPE_UDISPLAY_SIZE,
+    TYPE_MAP_SIZE,
+    TYPE_UMAP_SIZE,
+    TYPE_DOUBLE,
+    TYPE_UDOUBLE,
+    TYPE_UDOUBLE_ARRAY,
+    TYPE_INT,
+    TYPE_UINT,
+    TYPE_LABEL,
+    TYPE_SYMBOL
   };
 
   /**
@@ -131,7 +131,7 @@ namespace osmscout {
   {
   public:
     StyleVoidAttributeDescriptor()
-      : StyleAttributeDescriptor(StyleAttributeType::VOID,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_VOID,
                                  "",
                                  -1)
     {
@@ -149,7 +149,7 @@ namespace osmscout {
   public:
     StyleBoolAttributeDescriptor(const std::string& name,
                                  int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::BOOL,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_BOOL,
                                  name,
                                  attribute)
     {
@@ -167,7 +167,7 @@ namespace osmscout {
   public:
     StyleStringAttributeDescriptor(const std::string& name,
                                    int attribute)
-    : StyleAttributeDescriptor(StyleAttributeType::STRING,
+    : StyleAttributeDescriptor(StyleAttributeType::TYPE_STRING,
                                name,
                                attribute)
     {
@@ -185,7 +185,7 @@ namespace osmscout {
   public:
     StyleColorAttributeDescriptor(const std::string& name,
                                   int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::COLOR,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_COLOR,
                                  name,
                                  attribute)
     {
@@ -204,7 +204,7 @@ namespace osmscout {
   public:
     StyleMagnificationAttributeDescriptor(const std::string& name,
                                           int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::MAGNIFICATION,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_MAGNIFICATION,
                                  name,
                                  attribute)
     {
@@ -229,7 +229,7 @@ namespace osmscout {
   protected:
     StyleEnumAttributeDescriptor(const std::string& name,
                                  int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::ENUM,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_ENUM,
                                  name,
                                  attribute)
     {
@@ -266,7 +266,7 @@ namespace osmscout {
   public:
     StyleDisplayAttributeDescriptor(const std::string& name,
                                     int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::DISPLAY_SIZE,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_DISPLAY_SIZE,
                                  name,
                                  attribute)
     {
@@ -284,7 +284,7 @@ namespace osmscout {
   public:
     StyleUDisplayAttributeDescriptor(const std::string& name,
                                      int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::UDISPLAY_SIZE,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_UDISPLAY_SIZE,
                                  name,
                                  attribute)
     {
@@ -302,7 +302,7 @@ namespace osmscout {
   public:
     StyleMapAttributeDescriptor(const std::string& name,
                                 int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::MAP_SIZE,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_MAP_SIZE,
                                  name,
                                  attribute)
     {
@@ -320,7 +320,7 @@ namespace osmscout {
   public:
     StyleUMapAttributeDescriptor(const std::string& name,
                                  int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::UMAP_SIZE,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_UMAP_SIZE,
                                  name,
                                  attribute)
     {
@@ -338,7 +338,7 @@ namespace osmscout {
   public:
     StyleDoubleAttributeDescriptor(const std::string& name,
                                    int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::DOUBLE,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_DOUBLE,
                                  name,
                                  attribute)
     {
@@ -356,7 +356,7 @@ namespace osmscout {
   public:
     StyleUDoubleAttributeDescriptor(const std::string& name,
                                     int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::UDOUBLE,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_UDOUBLE,
                                  name,
                                  attribute)
     {
@@ -374,7 +374,7 @@ namespace osmscout {
   public:
     StyleUDoubleArrayAttributeDescriptor(const std::string& name,
                                          int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::UDOUBLE_ARRAY,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_UDOUBLE_ARRAY,
                                  name,
                                  attribute)
     {
@@ -392,7 +392,7 @@ namespace osmscout {
   public:
     StyleIntAttributeDescriptor(const std::string& name,
                                 int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::INT,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_INT,
                                  name,
                                  attribute)
     {
@@ -410,7 +410,7 @@ namespace osmscout {
   public:
     StyleUIntAttributeDescriptor(const std::string& name,
                                  int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::UINT,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_UINT,
                                  name,
                                  attribute)
     {
@@ -428,7 +428,7 @@ namespace osmscout {
   public:
     StyleLabelAttributeDescriptor(const std::string& name,
                                   int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::LABEL,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_LABEL,
                                  name,
                                  attribute)
     {
@@ -446,7 +446,7 @@ namespace osmscout {
   public:
     StyleSymbolAttributeDescriptor(const std::string& name,
                                    int attribute)
-      : StyleAttributeDescriptor(StyleAttributeType::SYMBOL,
+      : StyleAttributeDescriptor(StyleAttributeType::TYPE_SYMBOL,
                                  name,
                                  attribute)
     {

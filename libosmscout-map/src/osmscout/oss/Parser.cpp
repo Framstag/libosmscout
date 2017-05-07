@@ -1604,7 +1604,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 			CONSTANT(constant);
 			valueType=ValueType::CONSTANT; 
 		} else SynErr(133);
-		if (descriptor.GetType()==StyleAttributeType::BOOL) {
+		if (descriptor.GetType()==StyleAttributeType::TYPE_BOOL) {
 		 if (valueType==ValueType::IDENT) {
 		   if (ident=="true" && subIdent.empty()) {
 		     style.SetBoolValue(descriptor.GetAttribute(),true);
@@ -1624,7 +1624,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   SemErr(e.c_str());
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::STRING) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_STRING) {
 		 if (valueType==ValueType::IDENT) {
 		   if (subIdent.empty()) {
 		     style.SetStringValue(descriptor.GetAttribute(),ident);
@@ -1644,7 +1644,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   SemErr(e.c_str());
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::COLOR) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_COLOR) {
 		 if (valueType==ValueType::COLOR) {
 		   if (constant) {
 		     if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
@@ -1708,7 +1708,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   SemErr(e.c_str());
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::MAGNIFICATION) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_MAGNIFICATION) {
 		 if (valueType==ValueType::IDENT) {
 		   Magnification magnification;
 		   
@@ -1756,7 +1756,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   SemErr(e.c_str());
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::ENUM) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_ENUM) {
 		 const StyleEnumAttributeDescriptor& enumDescriptor=dynamic_cast<const StyleEnumAttributeDescriptor&>(descriptor);
 		 
 		 if (valueType==ValueType::IDENT) {
@@ -1777,7 +1777,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   SemErr(e.c_str());
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::DISPLAY_SIZE) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_DISPLAY_SIZE) {
 		 if (valueType==ValueType::NUMBER) {                     
 		   double value;
 		   
@@ -1801,7 +1801,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::UDISPLAY_SIZE) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_UDISPLAY_SIZE) {
 		 if (valueType==ValueType::NUMBER) {                     
 		   double value;
 		   
@@ -1828,7 +1828,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::MAP_SIZE) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_MAP_SIZE) {
 		 if (valueType==ValueType::NUMBER) {                     
 		   double value;
 		   
@@ -1852,7 +1852,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::UMAP_SIZE) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_UMAP_SIZE) {
 		 if (valueType==ValueType::NUMBER) {                     
 		   double value;
 		   
@@ -1879,7 +1879,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::DOUBLE) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_DOUBLE) {
 		 if (valueType==ValueType::NUMBER) {                     
 		   double value;
 		   
@@ -1903,7 +1903,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::UDOUBLE) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_UDOUBLE) {
 		 if (valueType==ValueType::NUMBER) {                     
 		   double value;
 		   
@@ -1930,7 +1930,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::UDOUBLE_ARRAY) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_UDOUBLE_ARRAY) {
 		 if (valueType==ValueType::NUMBER) {
 		   double              value;
 		   std::vector<double> valueList(numberList.size()+1);
@@ -1970,7 +1970,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::LABEL) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_LABEL) {
 		 if (!subIdent.empty()) {
 		   FeatureRef feature;
 		
@@ -2020,7 +2020,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::SYMBOL) {
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_SYMBOL) {
 		 if (valueType==ValueType::IDENT) {
 		   SymbolRef symbol=config.GetSymbol(ident);
 		
@@ -2039,7 +2039,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   SemErr(e.c_str());
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::INT) {                   
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_INT) {                   
 		 if (valueType==ValueType::NUMBER) {                     
 		   int value;
 		   
@@ -2084,7 +2084,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   SemErr(e.c_str());
 		 }
 		}
-		else if (descriptor.GetType()==StyleAttributeType::UINT) {                   
+		else if (descriptor.GetType()==StyleAttributeType::TYPE_UINT) {                   
 		 if (valueType==ValueType::NUMBER) {                     
 		   size_t value;
 		   
