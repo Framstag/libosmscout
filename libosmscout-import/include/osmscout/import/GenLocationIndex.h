@@ -90,7 +90,7 @@ namespace osmscout {
       std::string GetName() const;
     };
 
-    struct Region;
+    class Region;
 
     typedef std::shared_ptr<Region> RegionRef;
 
