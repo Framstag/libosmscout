@@ -214,7 +214,7 @@ void MapWidget::wheelEvent(QWheelEvent* event)
     else {
         zoomOut(-numSteps*1.35, event->pos());
     }
-    cumulNumDegrees = 0;
+    cumulNumDegrees %= 120;
 
     event->accept();
 }
