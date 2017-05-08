@@ -28,7 +28,7 @@
 
 #include <osmscout/private/ClientQtImportExport.h>
 
-class OSMSCOUT_CLIENT_QT_API MapRenderer{
+class OSMSCOUT_CLIENT_QT_API MapRenderer : QObject {
   Q_OBJECT
 
 signals:
