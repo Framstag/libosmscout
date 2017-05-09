@@ -199,8 +199,14 @@ void MapWidget::focusOutEvent(QFocusEvent *event)
 
 void MapWidget::wheelEvent(QWheelEvent* event)
 {
-    int numDegrees=event->delta()/8;
-    int numSteps=numDegrees/15;
+    static int cumulNumDegrees = 0;
+    cumulNumDegrees += event->angleDelta().y();
+    if(abs(cumulNumDegrees) < 120){
+        return;
+    }
+
+    int numDegrees =  cumulNumDegrees / 8;
+    int numSteps = numDegrees / 15;
 
     if (numSteps>=0) {
         zoomIn(numSteps*1.35, event->pos());
@@ -208,6 +214,7 @@ void MapWidget::wheelEvent(QWheelEvent* event)
     else {
         zoomOut(-numSteps*1.35, event->pos());
     }
+    cumulNumDegrees %= 120;
 
     event->accept();
 }
