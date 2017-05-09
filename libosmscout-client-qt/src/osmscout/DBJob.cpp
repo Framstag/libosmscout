@@ -67,7 +67,7 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
   searchParameter.SetBreaker(breaker);
   
   connect(this,SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
-          this,SLOT(onTileStateChagned(QString,const osmscout::TileRef)),
+          this,SLOT(onTileStateChanged(QString,const osmscout::TileRef)),
           Qt::QueuedConnection);
 }
 
@@ -133,7 +133,7 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
   }
 }
 
-void DBLoadJob::onTileStateChagned(QString dbPath,const osmscout::TileRef tile)
+void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
 {
   if (!tile->IsComplete()){
     return; // ignore incomplete
