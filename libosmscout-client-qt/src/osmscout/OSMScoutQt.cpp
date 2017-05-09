@@ -115,15 +115,19 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<DatabaseLoadedResponse>();
   qRegisterMetaType<osmscout::TileRef>();
 
-  qmlRegisterType<MapWidget>(uri, versionMajor, versionMinor, "Map");
-  qmlRegisterType<LocationEntry>(uri, versionMajor, versionMinor, "LocationEntry");
-  qmlRegisterType<LocationListModel>(uri, versionMajor, versionMinor, "LocationListModel");
-  qmlRegisterType<RouteStep>(uri, versionMajor, versionMinor, "RouteStep");
-  qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");
-  qmlRegisterType<QmlSettings>(uri, versionMajor, versionMinor, "Settings");
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
+  qmlRegisterType<LocationEntry>(uri, versionMajor, versionMinor, "LocationEntry");
+  qmlRegisterType<LocationInfoModel>(uri, versionMajor, versionMinor, "LocationInfoModel");
+  qmlRegisterType<LocationListModel>(uri, versionMajor, versionMinor, "LocationListModel");
   qmlRegisterType<MapDownloadsModel>(uri, versionMajor, versionMinor, "MapDownloadsModel");
   qmlRegisterType<MapObjectInfoModel>(uri, versionMajor, versionMinor, "MapObjectInfoModel");
+  qmlRegisterType<MapStyleModel>(uri, versionMajor, versionMinor, "MapStyleModel");
+  qmlRegisterType<MapWidget>(uri, versionMajor, versionMinor, "Map");
+  qmlRegisterType<OnlineTileProviderModel>(uri, versionMajor, versionMinor, "OnlineTileProviderModel");
+  qmlRegisterType<QmlSettings>(uri, versionMajor, versionMinor, "Settings");
+  qmlRegisterType<RouteStep>(uri, versionMajor, versionMinor, "RouteStep");
+  qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");
+  qmlRegisterType<StyleFlagsModel>(uri, versionMajor, versionMinor, "StyleFlagsModel");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
