@@ -21,17 +21,22 @@
 #include <QQmlEngine>
 
 #include <osmscout/OSMScoutQt.h>
+#include <osmscout/Settings.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/DataTileCache.h>
-#include <osmscout/MapWidget.h>
-#include <osmscout/SearchLocationModel.h>
-#include <osmscout/RoutingModel.h>
-#include <osmscout/AvailableMapsModel.h>
-#include <osmscout/MapDownloadsModel.h>
-#include <osmscout/Settings.h>
-#include <osmscout/TiledDBThread.h>
 #include <osmscout/PlaneDBThread.h>
+#include <osmscout/TiledDBThread.h>
+#include <osmscout/MapWidget.h>
+
+#include <osmscout/AvailableMapsModel.h>
+#include <osmscout/LocationInfoModel.h>
+#include <osmscout/MapDownloadsModel.h>
 #include <osmscout/MapObjectInfoModel.h>
+#include <osmscout/MapStyleModel.h>
+#include <osmscout/OnlineTileProviderModel.h>
+#include <osmscout/RoutingModel.h>
+#include <osmscout/SearchLocationModel.h>
+#include <osmscout/StyleFlagsModel.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
