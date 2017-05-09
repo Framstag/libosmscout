@@ -114,6 +114,13 @@ public:
     return *this;
   };
 
+  inline OSMScoutQtBuilder& WithTileCacheSizes(size_t onlineTileCacheSize,
+                                               size_t offlineTileCacheSize){
+    this->onlineTileCacheSize=onlineTileCacheSize;
+    this->offlineTileCacheSize=offlineTileCacheSize;
+    return *this;
+  }
+
   bool Init(bool tiledInstance=false);
 };
 
