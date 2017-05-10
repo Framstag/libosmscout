@@ -62,7 +62,7 @@ protected:
   QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> loadedTiles;
 
 protected slots:
-  void onTileStateChagned(QString dbPath,const osmscout::TileRef tile);
+  void onTileStateChanged(QString dbPath,const osmscout::TileRef tile);
 
 signals:
   /**
