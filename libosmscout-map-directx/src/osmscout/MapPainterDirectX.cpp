@@ -551,34 +551,26 @@ namespace osmscout
 
 	void MapPainterDirectX::DrawPath(const Projection& projection, const MapParameter& parameter, const Color& color, double width, const std::vector<double>& dash, LineStyle::CapStyle startCap, LineStyle::CapStyle endCap, size_t transStart, size_t transEnd)
 	{
-		uint64_t hash = (((uint32_t)transStart) << 32) | ((uint32_t)transEnd);
-		GeometryMap::const_iterator g = m_Geometries.find(hash);
-		if (g != m_Geometries.end()) {
-			m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(color), width, GetStrokeStyle(dash));
-		}
-		else
+		ID2D1PathGeometry* pPathGeometry;
+		HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
+		if (SUCCEEDED(hr))
 		{
-			ID2D1PathGeometry* pPathGeometry;
-			HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
+			ID2D1GeometrySink *pSink = NULL;
+			hr = pPathGeometry->Open(&pSink);
 			if (SUCCEEDED(hr))
 			{
-				ID2D1GeometrySink *pSink = NULL;
-				hr = pPathGeometry->Open(&pSink);
-				if (SUCCEEDED(hr))
-				{
-					pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[transStart].GetX(), coordBuffer->buffer[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
+				pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[transStart].GetX(), coordBuffer->buffer[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
 
-					for (size_t i = transStart + 1; i <= transEnd; i++) {
-						pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
-					}
-					pSink->EndFigure(D2D1_FIGURE_END_OPEN);
-					hr = pSink->Close();
-					pSink->Release();
-					pSink = NULL;
+				for (size_t i = transStart + 1; i <= transEnd; i++) {
+					pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
 				}
+				pSink->EndFigure(D2D1_FIGURE_END_OPEN);
+				hr = pSink->Close();
+				pSink->Release();
+				pSink = NULL;
 			}
-			m_pRenderTarget->DrawGeometry(m_Geometries.insert(std::make_pair(hash, pPathGeometry)).first->second, GetColorBrush(color), width, GetStrokeStyle(dash));
 		}
+		m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(color), width, GetStrokeStyle(dash));
 	}
 
 	void MapPainterDirectX::DrawContourLabel(const Projection& projection,
