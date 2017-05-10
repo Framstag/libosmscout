@@ -596,11 +596,11 @@ namespace osmscout
 
 	void MapPainterDirectX::DrawArea(const Projection& projection, const MapParameter& parameter, const MapPainter::AreaData& area)
 	{
-		FillStyle fillStyle = *area.fillStyle;
-		BorderStyle borderStyle = *area.borderStyle;
+		std::shared_ptr<FillStyle> fillStyle = area.fillStyle;
+		std::shared_ptr<BorderStyle> borderStyle = area.borderStyle;
 
-		bool hasBorder = borderStyle.GetWidth() > 0.0 && borderStyle.GetColor().IsVisible();
-		double borderWidth = hasBorder ? projection.ConvertWidthToPixel(borderStyle.GetWidth()) : 0.0;
+		bool hasBorder = borderStyle && borderStyle->GetWidth() > 0.0 && borderStyle->GetColor().IsVisible();
+		double borderWidth = hasBorder ? projection.ConvertWidthToPixel(borderStyle->GetWidth()) : 0.0;
 
 		uint64_t hash = (((uint32_t)area.transStart) << 32) | ((uint32_t)area.transEnd);
 		GeometryMap::const_iterator g = m_Geometries.find(hash);
@@ -625,8 +625,8 @@ namespace osmscout
 			}
 			g = m_Geometries.insert(std::make_pair(hash, pPathGeometry)).first;
 		}
-		m_pRenderTarget->FillGeometry(g->second, GetColorBrush(fillStyle.GetFillColor()));
-		if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(borderStyle.GetColor()), borderWidth, GetStrokeStyle(borderStyle.GetDash()));
+		m_pRenderTarget->FillGeometry(g->second, GetColorBrush(fillStyle->GetFillColor()));
+		if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
 		for (std::list<PolyData>::const_iterator c = area.clippings.begin();
 			c != area.clippings.end();
 			c++) {
@@ -655,8 +655,8 @@ namespace osmscout
 				}
 				g = m_Geometries.insert(std::make_pair(hash, pPathGeometry)).first;
 			}
-			m_pRenderTarget->FillGeometry(g->second, GetColorBrush(fillStyle.GetFillColor()));
-			if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(borderStyle.GetColor()), borderWidth, GetStrokeStyle(borderStyle.GetDash()));
+			m_pRenderTarget->FillGeometry(g->second, GetColorBrush(fillStyle->GetFillColor()));
+			if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
 		}
 	}
 
