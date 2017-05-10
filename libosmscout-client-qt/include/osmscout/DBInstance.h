@@ -23,7 +23,8 @@
 #include <QObject>
 #include <QMutex>
 #include <QDebug>
-#include <QThreadStorage>
+#include <QMap>
+#include <QThread>
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
@@ -94,7 +95,9 @@ class OSMSCOUT_CLIENT_QT_API DBInstance : public QObject
 
 private:
   QMutex                                  mutex;
-  QThreadStorage<osmscout::MapPainterQt*> *painterHolder;
+  QMap<QThread*,osmscout::MapPainterQt*>  painterHolder;
+public slots:
+  void onThreadFinished();
 
 public: // TODO: make it private, ensure thread safety
   QString                          path;
@@ -115,7 +118,6 @@ public: // TODO: make it private, ensure thread safety
                     osmscout::MapService::CallbackId callbackId,
                     osmscout::BreakerRef dataLoadingBreaker,
                     osmscout::StyleConfigRef styleConfig):
-    painterHolder(NULL),
     path(path),
     database(database),
     locationService(locationService),

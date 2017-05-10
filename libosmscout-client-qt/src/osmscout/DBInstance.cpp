@@ -112,13 +112,13 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
 
   if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
     // Tear down
-    if (painterHolder!=NULL){
-      delete painterHolder;
-      painterHolder=NULL;
-    }
+    qDeleteAll(painterHolder);
+    painterHolder.clear();
 
     // Recreate
     styleConfig=newStyleConfig;
+
+    std::cout << "Create new style with " << stylesheetFilename.toStdString() << std::endl;
   }
   else {
     std::list<std::string> errorsStrings=newStyleConfig->GetErrors();
@@ -170,13 +170,21 @@ bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
 osmscout::MapPainterQt* DBInstance::GetPainter()
 {
   QMutexLocker locker(&mutex);
-  if (painterHolder==NULL){
-    painterHolder=new QThreadStorage<osmscout::MapPainterQt*>();
+  if (!painterHolder.contains(QThread::currentThread()) && styleConfig){
+    painterHolder[QThread::currentThread()]=new osmscout::MapPainterQt(styleConfig);
+    connect(QThread::currentThread(),SIGNAL(finished()),
+            this,SLOT(onThreadFinished()));
   }
-  if (!painterHolder->hasLocalData() && styleConfig){
-    painterHolder->setLocalData(new osmscout::MapPainterQt(styleConfig));
+  return painterHolder[QThread::currentThread()];
+}
+
+void DBInstance::onThreadFinished()
+{
+  QMutexLocker locker(&mutex);
+  if (painterHolder.contains(QThread::currentThread())){
+    delete painterHolder[QThread::currentThread()];
+    painterHolder.remove(QThread::currentThread());
   }
-  return painterHolder->localData();
 }
 
 void DBInstance::close()
@@ -185,10 +193,9 @@ void DBInstance::close()
   if (router && router->IsOpen()) {
     router->Close();
   }
-  if (painterHolder!=NULL){
-    delete painterHolder;
-    painterHolder=NULL;
-  }
+
+  qDeleteAll(painterHolder);
+  painterHolder.clear();
 
   if (callbackId){
     mapService->DeregisterTileStateCallback(callbackId);
