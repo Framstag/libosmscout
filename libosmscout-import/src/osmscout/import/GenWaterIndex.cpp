@@ -2131,7 +2131,7 @@ namespace osmscout {
 
     IntersectionRef outgoing;
     IntersectionRef outgoingEnd;
-    double outgoingAngle;
+    double outgoingAngle=0;
     CoastlineDataRef outgoingCoastline;
     bool intersectCell=false;
 
