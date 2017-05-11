@@ -1369,7 +1369,7 @@ namespace osmscout {
 
       Pixel      coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
 
-      GroundTile type=GroundTile::land;
+      GroundTile::Type type=GroundTile::land;
       if (coastline->left==CoastState::unknown)
         type=GroundTile::unknown;
       if (coastline->left==CoastState::water)
