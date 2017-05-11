@@ -27,6 +27,8 @@
 #include <osmscout/PlaneDBThread.h>
 #include <osmscout/TiledDBThread.h>
 #include <osmscout/MapWidget.h>
+#include <osmscout/PlaneMapRenderer.h>
+#include <osmscout/TiledMapRenderer.h>
 
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/LocationInfoModel.h>
@@ -185,4 +187,13 @@ LookupModuleRef OSMScoutQt::MakeLookupModule()
   module->moveToThread(thread);
   thread->start();
   return module;
+}
+
+MapRendererRef OSMScoutQt::MakeMapRenderer(RenderingType type)
+{
+  if (type==RenderingType::TiledRendering){
+    return std::make_shared<TiledMapRenderer>(settings,dbThread);
+  }else{
+    return std::make_shared<PlaneMapRenderer>(settings,dbThread);
+  }
 }

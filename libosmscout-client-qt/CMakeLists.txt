@@ -45,6 +45,9 @@ set(HEADER_FILES
     include/osmscout/OSMScoutQt.h
     include/osmscout/DBJob.h
     include/osmscout/LookupModule.h
+    include/osmscout/MapRenderer.h
+    include/osmscout/PlaneMapRenderer.h
+    include/osmscout/TiledMapRenderer.h
 )
 
 set(SOURCE_FILES
@@ -75,6 +78,9 @@ set(SOURCE_FILES
     src/osmscout/OSMScoutQt.cpp
     src/osmscout/DBJob.cpp
     src/osmscout/LookupModule.cpp
+    src/osmscout/MapRenderer.cpp
+    src/osmscout/PlaneMapRenderer.cpp
+    src/osmscout/TiledMapRenderer.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})

@@ -18,36 +18,30 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef MAPRENDERER_H
-#define MAPRENDERER_H
+
+#ifndef PLANEMAPRENDERER_H
+#define PLANEMAPRENDERER_H
 
 #include <QObject>
 #include <QSettings>
 
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/MapRenderer.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
-class OSMSCOUT_CLIENT_QT_API MapRenderer : public QObject {
+class OSMSCOUT_CLIENT_QT_API PlaneMapRenderer : public MapRenderer {
   Q_OBJECT
 
-private:
-  SettingsRef settings;
-  DBThreadRef dbThread;
-
-signals:
-  void Redraw();
-
 public slots:
-  virtual void InvalidateVisualCache() = 0;
-
-protected:
-  MapRenderer(SettingsRef settings,
-              DBThreadRef dbThread);
+  virtual void InvalidateVisualCache();
 
 public:
-  virtual ~MapRenderer();
+  PlaneMapRenderer(SettingsRef settings,
+              DBThreadRef dbThread);
+
+  virtual ~PlaneMapRenderer();
 
   /**
    * Render map defined by request to painter
@@ -56,10 +50,7 @@ public:
    * @return true if rendered map is complete
    */
   virtual bool RenderMap(QPainter& painter,
-                         const RenderMapRequest& request) = 0;
+                         const RenderMapRequest& request);
 };
 
-typedef std::shared_ptr<MapRenderer> MapRendererRef;
-
-#endif /* MAPRENDERER_H */
-
+#endif /* PLANEMAPRENDERER_H */

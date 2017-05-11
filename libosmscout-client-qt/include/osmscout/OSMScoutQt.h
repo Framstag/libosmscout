@@ -25,6 +25,7 @@
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/LookupModule.h>
+#include <osmscout/MapRenderer.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -132,6 +133,14 @@ typedef std::shared_ptr<OSMScoutQtBuilder> OSMScoutQtBuilderRef;
 /**
  * \ingroup QtAPI
  */
+enum OSMSCOUT_CLIENT_QT_API RenderingType{
+  PlaneRendering = 0,
+  TiledRendering = 1
+};
+
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
   friend class OSMScoutQtBuilder;
 
@@ -150,6 +159,7 @@ public:
   DBThreadRef GetDBThread();
   SettingsRef GetSettings();
   LookupModuleRef MakeLookupModule();
+  MapRendererRef MakeMapRenderer(RenderingType type);
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,
