@@ -29,6 +29,15 @@
 
 namespace osmscout {
 
+/**
+ * Some temporary variables used in asserts may be unused
+ * on production build, when asserts are wiped out.
+ *
+ * Usage of this macro for such variables makes production
+ * build happy, and avoids unused-variable warning
+ */
+#define _unused(x) ((void)(x))
+
   class CoordDataGenerator CLASS_FINAL : public ImportModule
   {
   private:

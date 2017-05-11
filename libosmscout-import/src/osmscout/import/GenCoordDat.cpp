@@ -119,6 +119,7 @@ namespace osmscout {
             }
 
             assert(currentUpperLimit<oldUpperLimit);
+            _unused(oldUpperLimit);
           }
         }
 
@@ -294,6 +295,7 @@ namespace osmscout {
             }
 
             assert(currentUpperLimit<oldUpperLimit);
+            _unused(oldUpperLimit);
           }
         }
 

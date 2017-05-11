@@ -649,7 +649,7 @@ namespace osmscout {
                            end,
                            size,
                            offsets);
-  };
+  }
 
   template <class I, class N>
   bool IndexedDataFile<I,N>::GetOffset(const I& id,
