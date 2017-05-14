@@ -45,6 +45,7 @@
 #endif
 
 #include <osmscout/system/Assert.h>
+#include <osmscout/system/Compiler.h>
 
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/Logger.h>
@@ -220,6 +221,7 @@ namespace osmscout {
       }
     }
 #elif  defined(__WIN32__) || defined(WIN32)
+    unused(mode);
     if (useMmap && this->size>0) {
       FreeBuffer();
 

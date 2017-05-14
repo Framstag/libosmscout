@@ -144,6 +144,7 @@ namespace osmscout {
   {
     uint32_t    wayCount=0;
     size_t      collectedWaysCount=0;
+    size_t      collectedWayNodesCount=0;
     size_t      typesWithWays=0;
     TypeInfoSet currentTypes(types);
 
@@ -174,8 +175,10 @@ namespace osmscout {
       ways[way->GetType()->GetIndex()].push_back(way);
 
       collectedWaysCount++;
+      collectedWayNodesCount+=way->GetNodes().size();
 
-      while (collectedWaysCount>parameter.GetRawWayBlockSize() &&
+      while ((collectedWaysCount>parameter.GetRawWayBlockSize() ||
+              collectedWayNodesCount>parameter.GetRawCoordBlockSize()) &&
              typesWithWays>1) {
         TypeInfoRef victimType;
 
@@ -192,6 +195,9 @@ namespace osmscout {
         assert(victimType);
 
         collectedWaysCount-=ways[victimType->GetIndex()].size();
+        for (auto const &way:ways[victimType->GetIndex()]){
+          collectedWayNodesCount-=way->GetNodes().size();
+        }
         ways[victimType->GetIndex()].clear();
 
         typesWithWays--;
