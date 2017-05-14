@@ -145,14 +145,16 @@ class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
   friend class OSMScoutQtBuilder;
 
 private:
-  QThread *backgroundThread;
+  QThread     *backgroundThread;
   SettingsRef settings;
   DBThreadRef dbThread;
+  QString     iconDirectory;
 
 private:
   OSMScoutQt(QThread *backgroundThread,
              SettingsRef settings,
-             DBThreadRef dbThread);
+             DBThreadRef dbThread,
+             QString iconDirectory);
 public:
   virtual ~OSMScoutQt();
 

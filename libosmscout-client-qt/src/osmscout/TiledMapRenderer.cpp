@@ -21,9 +21,11 @@
 #include <osmscout/TiledMapRenderer.h>
 
 
-TiledMapRenderer::TiledMapRenderer(SettingsRef settings,
-            DBThreadRef dbThread):
-  MapRenderer(settings,dbThread)
+TiledMapRenderer::TiledMapRenderer(QThread *thread,
+                                   SettingsRef settings,
+                                   DBThreadRef dbThread,
+                                   QString iconDirectory):
+  MapRenderer(thread,settings,dbThread,iconDirectory)
 {
 }
 

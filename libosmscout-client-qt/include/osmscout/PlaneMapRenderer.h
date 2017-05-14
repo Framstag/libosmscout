@@ -34,12 +34,53 @@
 class OSMSCOUT_CLIENT_QT_API PlaneMapRenderer : public MapRenderer {
   Q_OBJECT
 
+private:
+  double                        canvasOverrun; // scale of rendered canvas, relative to screen dimensions
+  osmscout::MercatorProjection  projection;
+
+  mutable QMutex                lastRequestMutex;
+  RenderMapRequest              lastRequest;
+
+  DBLoadJob                     *loadJob;
+
+  QTime                         lastRendering;
+  QTimer                        pendingRenderingTimer;
+
+  QImage                        *currentImage;
+  size_t                        currentWidth;
+  size_t                        currentHeight;
+  osmscout::GeoCoord            currentCoord;
+  double                        currentAngle;
+  osmscout::Magnification       currentMagnification;
+
+  mutable QMutex                finishedMutex;  // mutex protecting access to finished* variables
+                                                // to avoid deadlock, we should not acquire global mutex when holding finishedMutex
+                                                // reverse order is possible
+  QImage                        *finishedImage;
+  osmscout::GeoCoord            finishedCoord;
+  double                        finishedAngle;
+  osmscout::Magnification       finishedMagnification;
+  osmscout::FillStyleRef        finishedUnknownFillStyle;
+
+signals:
+  //void TileStatusChanged(const osmscout::TileRef& tile);
+  void TriggerMapRenderingSignal(const RenderMapRequest& request);
+  void TriggerInitialRendering();
+
 public slots:
+  void DrawMap();
+  void HandleTileStatusChanged(QString dbPath,const osmscout::TileRef tile);
+  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
+  void TriggerMapRendering(const RenderMapRequest& request);
+  void HandleInitialRenderingRequest();
+  void onStylesheetFilenameChanged();
   virtual void InvalidateVisualCache();
 
 public:
-  PlaneMapRenderer(SettingsRef settings,
-              DBThreadRef dbThread);
+  PlaneMapRenderer(QThread *thread,
+                   SettingsRef settings,
+                   DBThreadRef dbThread,
+                   QString iconDirectory);
 
   virtual ~PlaneMapRenderer();
 

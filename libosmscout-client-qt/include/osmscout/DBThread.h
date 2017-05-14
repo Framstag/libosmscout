@@ -116,7 +116,10 @@ class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 
   Q_OBJECT
   Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
-  
+
+public:
+  typedef std::function<void(const QList<DBInstanceRef>&)> SynchronousDBJob;
+
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void TriggerInitialRendering();
@@ -327,6 +330,7 @@ public:
   const QMap<QString,bool> GetStyleFlags() const;
 
   void RunJob(DBJob *job);
+  void RunSynchronousJob(SynchronousDBJob job);
 
   static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);

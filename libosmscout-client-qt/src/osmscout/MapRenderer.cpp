@@ -20,12 +20,150 @@
 
 #include <osmscout/MapRenderer.h>
 
-MapRenderer::MapRenderer(SettingsRef settings,
-                         DBThreadRef dbThread):
-  settings(settings),dbThread(dbThread)
+MapRenderer::MapRenderer(QThread *thread,
+                         SettingsRef settings,
+                         DBThreadRef dbThread,
+                         QString iconDirectory):
+  thread(thread),
+  settings(settings),
+  dbThread(dbThread),
+  iconDirectory(iconDirectory)
 {
+  mapDpi = settings->GetMapDPI();
+  osmscout::log.Debug() << "Map DPI override: " << mapDpi;
+
+  renderSea=settings->GetRenderSea();
+  fontName=settings->GetFontName();
+  fontSize=settings->GetFontSize();
+
+  connect(settings.get(), SIGNAL(MapDPIChange(double)),
+          this, SLOT(onMapDPIChange(double)),
+          Qt::QueuedConnection);
+  connect(settings.get(), SIGNAL(RenderSeaChanged(bool)),
+          this, SLOT(onRenderSeaChanged(bool)),
+          Qt::QueuedConnection);
+  connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
+          this, SLOT(onFontNameChanged(const QString)),
+          Qt::QueuedConnection);
+  connect(settings.get(), SIGNAL(FontSizeChanged(double)),
+          this, SLOT(onFontSizeChanged(double)),
+          Qt::QueuedConnection);
 }
 
 MapRenderer::~MapRenderer()
 {
+  if (thread!=NULL){
+    thread->quit();
+    thread->deleteLater();
+  }
+}
+
+void MapRenderer::onMapDPIChange(double dpi)
+{
+  {
+    QMutexLocker locker(&lock);
+    mapDpi = dpi;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void MapRenderer::onRenderSeaChanged(bool b)
+{
+  {
+    QMutexLocker locker(&lock);
+    renderSea = b;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void MapRenderer::onFontNameChanged(const QString fontName)
+{
+  {
+    QMutexLocker locker(&lock);
+    this->fontName=fontName;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void MapRenderer::onFontSizeChanged(double fontSize)
+{
+  {
+    QMutexLocker locker(&lock);
+    this->fontSize=fontSize;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
+                         QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
+                         osmscout::MapParameter *drawParameter,
+                         QPainter *p):
+  renderProjection(renderProjection),
+  tiles(tiles),
+  drawParameter(drawParameter),
+  p(p),
+  success(false)
+{
+}
+
+DBRenderJob::~DBRenderJob()
+{
+}
+
+void DBRenderJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
+{
+  DBJob::Run(databases,locker);
+  bool backgroundRendered=false;
+  success=true;
+  
+  for (auto &db:databases){
+    if (!tiles.contains(db->path)){
+      osmscout::log.Debug() << "Skip database " << db->path.toStdString();
+      continue;
+    }
+    // fill background with "unknown" color
+    if (!backgroundRendered && db->styleConfig){
+        osmscout::FillStyleRef unknownFillStyle;
+        db->styleConfig->GetUnknownFillStyle(renderProjection, unknownFillStyle);
+        if (unknownFillStyle){
+          osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
+          p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
+                      QColor::fromRgbF(backgroundColor.GetR(),
+                                       backgroundColor.GetG(),
+                                       backgroundColor.GetB(),
+                                       1));
+          backgroundRendered=true;
+        }
+    }
+    if (!backgroundRendered){
+      // as backup, when "unknown" style is not defined, use black color
+      p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
+                  QBrush(QColor::fromRgbF(0,0,0,1)));
+      backgroundRendered=true;
+    }
+    std::list<osmscout::TileRef> tileList=tiles[db->path].values().toStdList();
+    osmscout::MapData            data;
+    
+    db->mapService->AddTileDataToMapData(tileList,data);
+
+    if (drawParameter->GetRenderSeaLand()) {
+      db->mapService->GetGroundTiles(renderProjection,
+                                     data.groundTiles);
+    }
+
+    success&=db->GetPainter()->DrawMap(renderProjection,
+                                       *drawParameter,
+                                       data,
+                                       p);
+
+  }
+  if (!backgroundRendered){
+    p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
+                QBrush(QColor::fromRgbF(0,0,0,1)));
+  }
+  Close();
 }

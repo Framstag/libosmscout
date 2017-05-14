@@ -1054,3 +1054,9 @@ void DBThread::RunJob(DBJob *job)
   QReadLocker *locker=new QReadLocker(&lock);
   job->Run(databases,locker);
 }
+
+void DBThread::RunSynchronousJob(SynchronousDBJob job)
+{
+  QReadLocker locker(&lock);
+  job(databases);
+}

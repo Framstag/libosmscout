@@ -39,7 +39,8 @@ MapWidget::MapWidget(QQuickItem* parent)
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);
     setAcceptHoverEvents(true);
-    
+
+    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(RenderingType::PlaneRendering);
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
     
     mapDpi = dbThread->GetSettings()->GetMapDPI();
@@ -52,7 +53,9 @@ MapWidget::MapWidget(QQuickItem* parent)
     //setFocusPolicy(Qt::StrongFocus);
 
     connect(dbThread.get(),SIGNAL(Redraw()),
-            this,SLOT(redraw()));    
+            this,SLOT(redraw()));
+    connect(renderer.get(),SIGNAL(Redraw()),
+            this,SLOT(redraw()));
     connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
             this,SIGNAL(stylesheetFilenameChanged()));
     connect(dbThread.get(),SIGNAL(styleErrorsChanged()),
@@ -221,7 +224,7 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
-    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
+    //DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
 
     bool animationInProgress = inputHandler->animationInProgress();
     
@@ -240,7 +243,8 @@ void MapWidget::paint(QPainter *painter)
     request.height = boundingBox.height();
 
     bool oldFinished = finished;
-    finished = dbThread->RenderMap(*painter,request);
+    //finished = dbThread->RenderMap(*painter,request);
+    finished = renderer->RenderMap(*painter,request);
     if (oldFinished != finished){
         emit finishedChanged(finished);
     }

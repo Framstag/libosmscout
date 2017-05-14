@@ -56,8 +56,10 @@ void DBJob::Close()
 
 DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
                      unsigned long maximumAreaLevel,
-                     bool lowZoomOptimization):
+                     bool lowZoomOptimization,
+                     bool closeOnFinish):
   DBJob(),
+  closeOnFinish(closeOnFinish),
   breaker(std::make_shared<QBreaker>()),
   lookupProjection(lookupProjection)
 {
@@ -116,6 +118,7 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
     for (auto &tile:tiles){
       tileMap[tile->GetId()]=tile;
     }
+    allTiles[db->path]=tileMap;
     loadingTiles[db->path]=tileMap;
 
     // load tiles asynchronous
@@ -162,7 +165,9 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
     if (loadingTiles.isEmpty()){ // all databases are finished
       emit finished(loadedTiles);
       qDebug() << "Loaded completely";
-      Close();
+      if (closeOnFinish){
+        Close();
+      }
     }
   }
 }
@@ -182,6 +187,16 @@ void DBLoadJob::Close()
   }
 
   DBJob::Close();
+}
+
+bool DBLoadJob::IsFinished() const
+{
+  return loadingTiles.isEmpty();
+}
+
+QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> DBLoadJob::GetAllTiles() const
+{
+  return allTiles;
 }
 
 bool DBLoadJob::AddTileDataToMapData(QString dbPath,

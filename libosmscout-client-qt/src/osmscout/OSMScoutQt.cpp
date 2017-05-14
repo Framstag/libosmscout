@@ -109,7 +109,8 @@ bool OSMScoutQtBuilder::Init(bool tiledInstance)
 
   osmScoutInstance=new OSMScoutQt(thread,
                                   settings,
-                                  std::shared_ptr<DBThread>(dbThread));
+                                  std::shared_ptr<DBThread>(dbThread),
+                                  iconDirectory);
 
   return true;
 }
@@ -155,10 +156,12 @@ void OSMScoutQt::FreeInstance()
 
 OSMScoutQt::OSMScoutQt(QThread *backgroundThread,
                        SettingsRef settings,
-                       DBThreadRef dbThread):
+                       DBThreadRef dbThread,
+                       QString iconDirectory):
         backgroundThread(backgroundThread),
         settings(settings),
-        dbThread(dbThread)
+        dbThread(dbThread),
+        iconDirectory(iconDirectory)
 {
 }
 
@@ -191,9 +194,15 @@ LookupModuleRef OSMScoutQt::MakeLookupModule()
 
 MapRendererRef OSMScoutQt::MakeMapRenderer(RenderingType type)
 {
+  QThread *thread=new QThread();
+  thread->setObjectName("MapRenderer");
+  MapRendererRef mapRenderer;
   if (type==RenderingType::TiledRendering){
-    return std::make_shared<TiledMapRenderer>(settings,dbThread);
+    mapRenderer=std::make_shared<TiledMapRenderer>(thread,settings,dbThread,iconDirectory);
   }else{
-    return std::make_shared<PlaneMapRenderer>(settings,dbThread);
+    mapRenderer=std::make_shared<PlaneMapRenderer>(thread,settings,dbThread,iconDirectory);
   }
+  mapRenderer->moveToThread(thread);
+  thread->start();
+  return mapRenderer;
 }

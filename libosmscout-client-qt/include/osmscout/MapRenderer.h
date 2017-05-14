@@ -29,22 +29,62 @@
 
 #include <osmscout/private/ClientQtImportExport.h>
 
+class OSMSCOUT_CLIENT_QT_API DBRenderJob : public DBJob{
+  Q_OBJECT
+private:
+  osmscout::MercatorProjection renderProjection;
+  QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles;
+  osmscout::MapParameter *drawParameter;
+  QPainter *p;
+  bool success;
+
+public:
+  DBRenderJob(osmscout::MercatorProjection renderProjection,
+              QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
+              osmscout::MapParameter *drawParameter,
+              QPainter *p);
+  virtual ~DBRenderJob();
+
+  virtual void Run(QList<DBInstanceRef> &databases, QReadLocker *locker);
+
+  inline bool IsSuccess(){
+    return success;
+  };
+};
+
 class OSMSCOUT_CLIENT_QT_API MapRenderer : public QObject {
   Q_OBJECT
 
-private:
+protected:
+  QThread     *thread;
   SettingsRef settings;
   DBThreadRef dbThread;
+  QMutex      lock;
+  
+  double      mapDpi;
+  bool        renderSea;
+
+  QString     fontName;
+  double      fontSize;
+  QString     iconDirectory;
 
 signals:
   void Redraw();
+  void TriggerDrawMap();
 
 public slots:
   virtual void InvalidateVisualCache() = 0;
 
+  virtual void onMapDPIChange(double dpi);
+  virtual void onRenderSeaChanged(bool);
+  virtual void onFontNameChanged(const QString);
+  virtual void onFontSizeChanged(double);
+
 protected:
-  MapRenderer(SettingsRef settings,
-              DBThreadRef dbThread);
+  MapRenderer(QThread *thread,
+              SettingsRef settings,
+              DBThreadRef dbThread,
+              QString iconDirectory);
 
 public:
   virtual ~MapRenderer();

@@ -38,8 +38,10 @@ public slots:
   virtual void InvalidateVisualCache();
 
 public:
-  TiledMapRenderer(SettingsRef settings,
-              DBThreadRef dbThread);
+  TiledMapRenderer(QThread *thread,
+                   SettingsRef settings,
+                   DBThreadRef dbThread,
+                   QString iconDirectory);
 
   virtual ~TiledMapRenderer();
 

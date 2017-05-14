@@ -53,11 +53,13 @@ public:
 class OSMSCOUT_CLIENT_QT_API DBLoadJob : public DBJob{
   Q_OBJECT
 protected:
+  bool                                            closeOnFinish;
   osmscout::BreakerRef                            breaker;
   osmscout::MercatorProjection                    lookupProjection;
   osmscout::AreaSearchParameter                   searchParameter;
   QMap<QString,osmscout::MapService::CallbackId>  callbacks;
 
+  QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> allTiles;
   QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> loadingTiles;
   QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> loadedTiles;
 
@@ -77,12 +79,25 @@ signals:
 public:
   DBLoadJob(osmscout::MercatorProjection lookupProjection,
             unsigned long maximumAreaLevel,
-            bool lowZoomOptimization);
+            bool lowZoomOptimization,
+            bool closeOnFinish=true);
   virtual ~DBLoadJob();
 
   virtual void Run(QList<DBInstanceRef> &databases, QReadLocker *locker);
   virtual void Close();
 
+  bool IsFinished() const;
+  QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> GetAllTiles() const;
+
+  /**
+   * Add tile data to map data.
+   *
+   * @param dbPath
+   * @param tiles
+   * @param data
+   * @return true on success
+   *         false when given database was not added to this job, or job was closed
+   */
   bool AddTileDataToMapData(QString dbPath,
                             const QList<osmscout::TileRef> &tiles,
                             osmscout::MapData &data);
