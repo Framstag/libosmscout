@@ -149,6 +149,24 @@ namespace osmscout {
     if (fseeko(file,0L,SEEK_SET)!=0) {
       throw IOException(filename,"Cannot seek to start of file");
     }
+#elif defined(HAVE__FSEEKI64) && defined(HAVE__FTELLI64)
+    __int64 size;
+
+    if (_fseeki64(file,0L,SEEK_END)!=0) {
+      throw IOException(filename,"Cannot seek to end of file");
+    }
+
+    size=_ftelli64(file);
+
+    if (size==-1) {
+      throw IOException(filename,"Cannot get size of file");
+    }
+
+    this->size=(FileOffset)size;
+
+    if (_fseeki64(file,0L,SEEK_SET)!=0) {
+      throw IOException(filename,"Cannot seek to start of file");
+    }
 #else
     long size;
 
@@ -359,8 +377,9 @@ namespace osmscout {
 
 #if defined(HAVE_FSEEKO)
     hasError=fseeko(file,(off_t)pos,SEEK_SET)!=0;
+#elif defined(HAVE__FSEEKi64)
 #else
-    hasError=fseek(file,pos,SEEK_SET)!=0;
+    hasError=_fseeki64(file,(__int64)pos,SEEK_SET)!=0;
 #endif
 
     if (hasError) {
@@ -387,6 +406,15 @@ namespace osmscout {
 
 #if defined(HAVE_FSEEKO)
     off_t filepos=ftello(file);
+
+    if (filepos==-1) {
+      hasError=true;
+      throw IOException(filename,"Cannot set position in file");
+    }
+
+    return (FileOffset)filepos;
+#elif defined(HAVE__FTELLI64)
+    __int64 filepos=_ftelli64(file);
 
     if (filepos==-1) {
       hasError=true;
@@ -449,7 +477,7 @@ namespace osmscout {
         throw IOException(filename,"Cannot read string","Cannot read beyond end of file");
       }
 
-      size_t start=offset;
+      FileOffset start=offset;
 
       while (offset<size &&
              buffer[offset]!='\0') {

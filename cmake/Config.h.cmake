@@ -26,6 +26,16 @@
 #cmakedefine HAVE_FSEEKO 1
 #endif
 
+/* Define to 1 if _fseeki64 exists and is declared. */
+#ifndef HAVE__FSEEKI64
+#cmakedefine HAVE__FSEEKI64 1
+#endif
+
+/* Define to 1 if _ftelli64 exists and is declared. */
+#ifndef HAVE__FTELLI64
+#cmakedefine HAVE__FTELLI64 1
+#endif
+
 #cmakedefine _LARGEFILE_SOURCE
 #cmakedefine _LARGE_FILES
 #cmakedefine _FILE_OFFSET_BITS @_FILE_OFFSET_BITS@

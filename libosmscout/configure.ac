@@ -55,7 +55,7 @@ AC_CHECK_TYPES([std::shared_mutex],[AC_DEFINE([OSMSCOUT_HAVE_SHARED_MUTEX],[1],[
 
 AC_CHECK_SIZEOF([wchar_t])
 
-AC_CHECK_FUNCS([mmap posix_fadvise posix_madvise])
+AC_CHECK_FUNCS([mmap posix_fadvise posix_madvise _fseeki64 _ftelli64])
 
 AC_SEARCH_LIBS([sqrt],[m],[])
 
