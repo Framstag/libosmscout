@@ -10,6 +10,40 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+bool button_down = false;
+
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+  if(button == GLFW_MOUSE_BUTTON_LEFT)
+  {
+	if(action == GLFW_PRESS)
+	{
+      button_down = true;
+	}
+    else if(action == GLFW_RELEASE)
+    {
+      button_down = false;
+    }
+  }
+
+  if(button_down){
+    std::cout << "click" << std::endl;
+  }
+
+}
+
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  std::cout << "scroll" << std::endl;
+}
+
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+  if(button_down){
+    std::cout << "drag" << std::endl;
+  }
+}
+
 int main(int argc, char* argv[])
 {
   std::string map;
@@ -49,6 +83,27 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
+  osmscout::GeoBox BoundingBox;
+  bool b = database.get()->GetBoundingBox(BoundingBox);
+  std::cout << " " << BoundingBox.GetCenter().GetLat() << " " << BoundingBox.GetCenter().GetLon() << std::endl;
+
+  osmscout::MercatorProjection  projection;
+  osmscout::MapParameter        drawParameter;
+  osmscout::AreaSearchParameter searchParameter;
+  osmscout::MapData             data;
+
+  projection.Set(BoundingBox.GetCenter(),
+                 osmscout::Magnification(1),
+                 100,
+                 width,
+                 height);
+
+  std::list<osmscout::TileRef> tiles;
+
+  mapService->LookupTiles(projection,tiles);
+  mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+  mapService->AddTileDataToMapData(tiles,data);
+
   GLFWwindow* window;
   if (!glfwInit())
     return -1;
@@ -61,6 +116,9 @@ int main(int argc, char* argv[])
     return -1;
   }
   glfwSetKeyCallback(window, key_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetScrollCallback(window, scroll_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
   while (!glfwWindowShouldClose(window))
