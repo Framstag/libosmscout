@@ -90,6 +90,13 @@ namespace osmscout {
 
     typedef std::shared_ptr<Router> RouterRef;
 
+    enum class OSMSCOUT_IMPORT_API AssumeLandStrategy
+    {
+      disable   = 0, // disable land detection by database objects
+      enable    = 1, // enable land detection
+      automatic = 2, // disable land detection when data polygon is known
+    };
+
   private:
     std::list<std::string>       mapfiles;                 //<! Name of the files containing map data (either *.osm or *.osm.pbf)
     std::string                  typefile;                 //<! Name and path ff type definition file (map.ost.xml)
@@ -153,11 +160,14 @@ namespace osmscout {
 
     size_t                       routeNodeBlockSize;       //<! Number of route nodes loaded during import until ways get resolved
 
-    bool                         assumeLand;               //<! During sea/land detection,we either trust coastlines only or make some
+    AssumeLandStrategy           assumeLand;               //<! During sea/land detection,we either trust coastlines only or make some
                                                            //<! assumptions which tiles are sea and which are land.
     std::vector<std::string>     langOrder;                //<! languages used when parsing name[:lang] and
                                                            //<! place_name[:lang] tags
     std::vector<std::string>     altLangOrder;             //<! the same as langOrder but for a alt (second) lang
+
+    OSMId                        firstFreeOSMId;           //<! first id available for synthetic objects (parsed polygon files)
+    size_t                       fillWaterArea;            //<! count of tiles around coastlines flooded by water
 
   public:
     ImportParameter();
@@ -227,7 +237,9 @@ namespace osmscout {
 
     size_t GetRouteNodeBlockSize() const;
 
-    bool GetAssumeLand() const;
+    AssumeLandStrategy GetAssumeLand() const;
+
+    OSMId GetFirstFreeOSMId() const;
 
     const std::vector<std::string>& GetLangOrder () const;
     const std::vector<std::string>& GetAltLangOrder () const;
@@ -298,10 +310,15 @@ namespace osmscout {
 
     void SetRouteNodeBlockSize(size_t blockSize);
 
-    void SetAssumeLand(bool assumeLand);
+    void SetAssumeLand(AssumeLandStrategy assumeLand);
 
     void SetLangOrder(const std::vector<std::string>& langOrder);
     void SetAltLangOrder(const std::vector<std::string>& altLangOrder);
+
+    void SetFirstFreeOSMId(OSMId id);
+
+    void SetFillWaterArea(size_t fillWaterArea);
+    size_t GetFillWaterArea() const;
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription CLASS_FINAL

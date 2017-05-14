@@ -99,6 +99,6 @@ AX_CREATE_PKGCONFIG_INFO([],
                          [$PTHREAD_CFLAGS $OPENMP_CXXFLAGS $SIMD_FLAGS $MARISA_CFLAGS],
                          [$OPENMP_CXXFLAGS])
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
 AC_OUTPUT
 

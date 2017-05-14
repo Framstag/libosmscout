@@ -39,6 +39,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Progress.h>
+#include <osmscout/util/TagErrorReporter.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -97,7 +98,8 @@ namespace osmscout {
   class OSMSCOUT_API Feature
   {
   private:
-    std::unordered_map<std::string,size_t> labels;
+    std::unordered_map<std::string,size_t>      labels;
+    std::unordered_map<std::string,std::string> descriptions; //!< Map of descriptions for given language codes
 
   protected:
     size_t RegisterLabel(const std::string& labelName,
@@ -112,6 +114,9 @@ namespace osmscout {
      * it registers Tags (and stores their TagId) for further processing.
      */
     virtual void Initialize(TypeConfig& typeConfig) = 0;
+
+    void AddDescription(const std::string& languageCode,
+                        const std::string& description);
 
     /**
      * Returns the name of the feature
@@ -164,9 +169,16 @@ namespace osmscout {
     bool GetLabelIndex(const std::string& labelName,
                        size_t& index) const;
 
+    std::string GetDescription(const std::string& languageCode) const;
+
+    inline const std::unordered_map<std::string,std::string>& GetDescriptions() const
+    {
+      return descriptions;
+    };
+
     virtual FeatureValue* AllocateValue(void* buffer);
 
-    virtual void Parse(Progress& progress,
+    virtual void Parse(TagErrorReporter& reporter,
                        const TypeConfig& typeConfig,
                        const FeatureInstance& feature,
                        const ObjectOSMRef& object,
@@ -267,41 +279,42 @@ namespace osmscout {
     };
 
   private:
-    TypeId                                 nodeId;                  //!< Type if in case the object is a node
-    TypeId                                 wayId;                   //!< Type if in case the object is a way
-    TypeId                                 areaId;                  //!< Type if in case the object is a area
-    std::string                            name;                    //!< Name of the type
-    size_t                                 index;                   //!< Internal unique index of the type
+    TypeId                                      nodeId;                  //!< Type if in case the object is a node
+    TypeId                                      wayId;                   //!< Type if in case the object is a way
+    TypeId                                      areaId;                  //!< Type if in case the object is a area
+    std::string                                 name;                    //!< Name of the type
+    size_t                                      index;                   //!< Internal unique index of the type
 
-    bool                                   internal;                //!< This typ eis only internally used, there is no OSM date for this type
+    bool                                        internal;                //!< This typ eis only internally used, there is no OSM date for this type
 
-    std::list<TypeCondition>               conditions;              //!< One of this conditions must be fulfilled for a object to match this type
-    std::unordered_map<std::string,size_t> nameToFeatureMap;
-    std::vector<FeatureInstance>           features;                //!< List of feature this type has
-    size_t                                 featureMaskBytes;        //!< Size of the feature bitmask in bytes
-    size_t                                 specialFeatureMaskBytes; //!< Size of the feature bitmask in bytes
-    size_t                                 valueBufferSize;         //!< Size of the value buffer holding values for all feature of the type
+    std::list<TypeCondition>                    conditions;              //!< One of this conditions must be fulfilled for a object to match this type
+    std::unordered_map<std::string,size_t>      nameToFeatureMap;
+    std::vector<FeatureInstance>                features;                //!< List of feature this type has
+    size_t                                      featureMaskBytes;        //!< Size of the feature bitmask in bytes
+    size_t                                      specialFeatureMaskBytes; //!< Size of the feature bitmask in bytes
+    size_t                                      valueBufferSize;         //!< Size of the value buffer holding values for all feature of the type
 
-    bool                                   canBeNode;               //!< Type can be a node
-    bool                                   canBeWay;                //!< Type can be a way
-    bool                                   canBeArea;               //!< Type can be a area
-    bool                                   canBeRelation;
-    bool                                   isPath;                  //!< Type has path characteristics (features like bridges, tunnels, names,...)
-    bool                                   canRouteFoot;            //!< Object of this type are by default routable for foot
-    bool                                   canRouteBicycle;         //!< Object of this type are by default routable for bicylce
-    bool                                   canRouteCar;             //!< Object of this type are by default routable for car
-    bool                                   indexAsAddress;          //!< Objects of this type are addressable
-    bool                                   indexAsLocation;         //!< Objects of this type are defining a location (e.g. street)
-    bool                                   indexAsRegion;           //!< Objects of this type are defining a administrative region (e.g. city, county,...)
-    bool                                   indexAsPOI;              //!< Objects of this type are defining a POI
-    bool                                   optimizeLowZoom;         //!< Optimize objects of this type for low zoom rendering
-    bool                                   multipolygon;
-    bool                                   pinWay;                  //!< If there is no way/area information treat this object as way even it the way is closed
-    bool                                   mergeAreas;              //!< Areas of this type are merged under certain conditions
-    bool                                   ignoreSeaLand;           //!< Ignore objects of this type for sea/land calculation
-    bool                                   ignore;                  //!< Ignore objects of this type
+    bool                                        canBeNode;               //!< Type can be a node
+    bool                                        canBeWay;                //!< Type can be a way
+    bool                                        canBeArea;               //!< Type can be a area
+    bool                                        canBeRelation;
+    bool                                        isPath;                  //!< Type has path characteristics (features like bridges, tunnels, names,...)
+    bool                                        canRouteFoot;            //!< Object of this type are by default routable for foot
+    bool                                        canRouteBicycle;         //!< Object of this type are by default routable for bicylce
+    bool                                        canRouteCar;             //!< Object of this type are by default routable for car
+    bool                                        indexAsAddress;          //!< Objects of this type are addressable
+    bool                                        indexAsLocation;         //!< Objects of this type are defining a location (e.g. street)
+    bool                                        indexAsRegion;           //!< Objects of this type are defining a administrative region (e.g. city, county,...)
+    bool                                        indexAsPOI;              //!< Objects of this type are defining a POI
+    bool                                        optimizeLowZoom;         //!< Optimize objects of this type for low zoom rendering
+    bool                                        multipolygon;
+    bool                                        pinWay;                  //!< If there is no way/area information treat this object as way even it the way is closed
+    bool                                        mergeAreas;              //!< Areas of this type are merged under certain conditions
+    bool                                        ignoreSeaLand;           //!< Ignore objects of this type for sea/land calculation
+    bool                                        ignore;                  //!< Ignore objects of this type
 
-    std::unordered_set<std::string>        groups;                  //!< Set of idents that server as categorizing groups
+    std::unordered_set<std::string>             groups;                  //!< Set of idents that server as categorizing groups
+    std::unordered_map<std::string,std::string> descriptions;            //!< Map of descriptions for given language codes
 
   private:
     TypeInfo(const TypeInfo& other);
@@ -352,6 +365,9 @@ namespace osmscout {
      * Add a categorizing group name to the type.
      */
     TypeInfo& AddGroup(const std::string& groupName);
+
+    TypeInfo& AddDescription(const std::string& languageCode,
+                             const std::string& description);
 
     inline bool HasFeatures()
     {
@@ -791,6 +807,13 @@ namespace osmscout {
     {
       return groups.find(groupName)!=groups.end();
     }
+
+    inline const std::unordered_map<std::string,std::string>& GetDescriptions() const
+    {
+      return descriptions;
+    };
+
+    std::string GetDescription(const std::string& languageCode) const;
   };
 
   typedef std::shared_ptr<TypeInfo> TypeInfoRef;
@@ -1057,7 +1080,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(size_t idx);
     void FreeValue(size_t idx);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& errorReporter,
                const TypeConfig& typeConfig,
                const ObjectOSMRef& object,
                const TagMap& tags);
@@ -1099,7 +1122,7 @@ namespace osmscout {
 
   typedef std::shared_ptr<FeatureValueBuffer> FeatureValueBufferRef;
 
-  static const uint32_t FILE_FORMAT_VERSION=11;
+  static const uint32_t FILE_FORMAT_VERSION=13;
 
   /**
    * \ingroup type
@@ -1164,12 +1187,14 @@ namespace osmscout {
     FeatureRef                                  featureGrade;
     FeatureRef                                  featureBridge;
     FeatureRef                                  featureTunnel;
+    FeatureRef                                  featureEmbankment;
     FeatureRef                                  featureRoundabout;
 
   public:
     // Internal use (only available during preprocessing)
     TagId                                       tagArea;
     TagId                                       tagNatural;
+    TagId                                       tagDataPolygon;
     TagId                                       tagType;
     TagId                                       tagRestriction;
     TagId                                       tagJunction;

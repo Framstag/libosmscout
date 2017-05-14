@@ -1,4 +1,5 @@
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeatures.h>
 
 #include <osmscout/util/String.h>
 
@@ -38,6 +39,7 @@ PRODUCTIONS
   OST         = SYNC "OST"
                 [MAXSPEEDS]
                 [GRADES]
+                [FEATURES]
                 [TYPES]
                 "END"
                 .
@@ -72,13 +74,16 @@ PRODUCTIONS
 
 
   GRADES      = SYNC "GRADES"
-                GRADE {GRADE}
+                GRADE
+                {
+                  GRADE
+                }
                 .
 
-  GRADE       = (.
+  GRADE       = SYNC "SURFACE" "GRADE"
+                (.
                   size_t grade;
                 .)
-                SYNC "SURFACE" "GRADE"
                 UINT<grade>
                 "{"
                  {
@@ -100,6 +105,50 @@ PRODUCTIONS
                    .)
                  }
                 "}"
+                .
+
+  FEATURES    = SYNC "FEATURES"
+                FEATURE
+                {
+                  FEATURE
+                }
+                .
+
+  FEATURE     = SYNC "FEATURE"
+                (.
+                  std::string          featureName;
+                  osmscout::FeatureRef feature;
+                .)
+                IDENT<featureName>
+                (.
+                  feature=config.GetFeature(featureName);
+                  
+                  if (!feature) {
+                    std::string e="Unknown feature '"+featureName+"'";
+
+                    SemErr(e.c_str());
+                    
+                    // Avoid NULL-pointer further on
+                    feature=std::make_shared<osmscout::NameFeature>();
+                  }
+                .)
+                [
+                  FEATUREDESCS<*feature>
+                ]
+                .
+
+  FEATUREDESCS<Feature& feature>
+              = "DESC"
+                (. 
+                  std::string languageCode;
+                  std::string description;
+                 .)
+                IDENT<languageCode> ":" STRING<description>
+                (. feature.AddDescription(languageCode,description); .)
+                {
+                  IDENT<languageCode> ":" STRING<description>
+                  (. feature.AddDescription(languageCode,description); .)
+                }
                 .
 
   TYPES       = SYNC "TYPES"
@@ -131,10 +180,10 @@ PRODUCTIONS
                 [
                   "{"
                   [
-                    FEATURE<*typeInfo>
+                    TYPEFEATURE<*typeInfo>
                     {
                       ","
-                      FEATURE<*typeInfo>
+                      TYPEFEATURE<*typeInfo>
                     }
                   ]  
                   "}"
@@ -146,6 +195,9 @@ PRODUCTIONS
 
                 [
                   GROUPS<*typeInfo>
+                ]
+                [
+                  TYPEDESCS<*typeInfo>
                 ]
                 (.
                   config.RegisterType(typeInfo);
@@ -423,7 +475,7 @@ PRODUCTIONS
                | "RELATION"  (. types|=TypeInfo::typeRelation; .)
                .
 
-  FEATURE <TypeInfo& typeInfo>
+  TYPEFEATURE <TypeInfo& typeInfo>
               = (. std::string name; .)
                 IDENT<name>
                 (.
@@ -508,6 +560,19 @@ PRODUCTIONS
                 }
                 .
 
+  TYPEDESCS<TypeInfo& typeInfo>
+              = "DESC"
+                (. 
+                  std::string languageCode;
+                  std::string description;
+                 .)
+                IDENT<languageCode> ":" STRING<description>
+                (. typeInfo.AddDescription(languageCode,description); .)
+                {
+                  IDENT<languageCode> ":" STRING<description>
+                  (. typeInfo.AddDescription(languageCode,description); .)
+                }
+                .
 
   IDENT<std::string& value>
               = ident

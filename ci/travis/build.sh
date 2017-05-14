@@ -7,12 +7,13 @@ echo "Build start time: `date`"
 if [ "$TARGET" = "build" ]; then
   if [ "$BUILDTOOL" = "autoconf" ]; then
     make full
-    (cd libosmscout/tests && make check)
+    (cd Tests && make check)
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
     cmake ..
     make
+    make test
   fi
 elif [ "$TARGET" = "importer" ]; then
     packaging/import/linux/build_import.sh

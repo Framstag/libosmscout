@@ -220,6 +220,47 @@ namespace osmscout {
     return true;
   }
 
+  RoutePostprocessor::WayTypePostprocessor::WayTypePostprocessor()
+  {
+    // no code
+  }
+
+  bool RoutePostprocessor::WayTypePostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                         const RoutingProfile& /*profile*/,
+                                                         RouteDescription& description,
+                                                         Database& /*database*/)
+  {
+    //
+    // Store the name of each way
+    //
+
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+         node!=description.Nodes().end();
+         ++node) {
+      // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
+      if (!node->HasPathObject()) {
+        break;
+      }
+
+      if (node->GetPathObject().GetType()==refArea) {
+        AreaRef                                  area=postprocessor.GetArea(node->GetPathObject().GetFileOffset());
+        RouteDescription::TypeNameDescriptionRef typeNameDesc=std::make_shared<RouteDescription::TypeNameDescription>(area->GetType()->GetName());
+
+        node->AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
+                             typeNameDesc);
+      }
+      else if (node->GetPathObject().GetType()==refWay) {
+        WayRef                                   way=postprocessor.GetWay(node->GetPathObject().GetFileOffset());
+        RouteDescription::TypeNameDescriptionRef typeNameDesc=std::make_shared<RouteDescription::TypeNameDescription>(way->GetType()->GetName());
+
+        node->AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
+                             typeNameDesc);
+      }
+    }
+
+    return true;
+  }
+
   RoutePostprocessor::CrossingWaysPostprocessor::CrossingWaysPostprocessor()
   {
     // no code

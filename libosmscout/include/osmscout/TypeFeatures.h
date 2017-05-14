@@ -88,7 +88,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -156,7 +156,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -225,7 +225,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -291,7 +291,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -364,7 +364,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -612,7 +612,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -747,7 +747,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -807,7 +807,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -867,7 +867,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -927,7 +927,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -988,7 +988,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1062,7 +1062,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1130,7 +1130,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1152,7 +1152,7 @@ namespace osmscout {
 
     std::string GetName() const;
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1174,12 +1174,34 @@ namespace osmscout {
 
     std::string GetName() const;
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
                FeatureValueBuffer& buffer) const;
+  };
+
+  class OSMSCOUT_API EmbankmentFeature : public Feature
+  {
+    private:
+      TagId tagEmbankment;
+
+    public:
+        /** Name of this feature */
+        static const char* const NAME;
+
+    public:
+        void Initialize(TypeConfig& typeConfig);
+
+        std::string GetName() const;
+
+        void Parse(TagErrorReporter& reporter,
+                   const TypeConfig& typeConfig,
+                   const FeatureInstance& feature,
+                   const ObjectOSMRef& object,
+                   const TagMap& tags,
+                   FeatureValueBuffer& buffer) const;
   };
 
   class OSMSCOUT_API RoundaboutFeature : public Feature
@@ -1196,7 +1218,7 @@ namespace osmscout {
 
     std::string GetName() const;
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1268,7 +1290,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1339,7 +1361,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1361,7 +1383,7 @@ namespace osmscout {
 
     std::string GetName() const;
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1429,7 +1451,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1495,7 +1517,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1554,7 +1576,7 @@ namespace osmscout {
     size_t GetValueSize() const;
     FeatureValue* AllocateValue(void* buffer);
 
-    void Parse(Progress& progress,
+    void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
@@ -1644,7 +1666,31 @@ namespace osmscout {
   typedef FeatureReader<AccessRestrictedFeature> AccessRestrictedFeatureReader;
   typedef FeatureReader<BridgeFeature>           BridgeFeatureReader;
   typedef FeatureReader<TunnelFeature>           TunnelFeatureReader;
+  typedef FeatureReader<EmbankmentFeature>       EmbankmentFeatureReader;
   typedef FeatureReader<RoundaboutFeature>       RoundaboutFeatureReader;
+
+  /**
+   * Variant of FeatureReader that is not type set and thus can easier get used
+   * in cases where runtime dynamics are required and features are referenced
+   * by name and not by type.
+   */
+  class OSMSCOUT_API DynamicFeatureReader CLASS_FINAL
+  {
+  private:
+    std::string         featureName;
+    std::vector<size_t> lookupTable;
+
+  public:
+    DynamicFeatureReader(const TypeConfig& typeConfig,
+                         const Feature& feature);
+
+    inline std::string GetFeatureName() const
+    {
+      return featureName;
+    }
+
+    bool IsSet(const FeatureValueBuffer& buffer) const;
+  };
 
   /**
    * Helper template class for easy access to the value of a certain feature for objects of any type.

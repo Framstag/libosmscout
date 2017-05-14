@@ -1,16 +1,66 @@
+# interactive tests, we exclude it from CI build, check target
+# WStringStringConversion works only with some locales, exclude it too
 bin_PROGRAMS = CachePerformance \
-               CalculateResolution \
                CoordinateEncoding \
-               NumberSetPerformance \
                ReaderScannerPerformance \
+               MultiDBRouting  \
                ThreadedDatabase \
-               WorkQueue \
-	       MapRotate \
-               MultiDBRouting \
-	       Geometry
+               WStringStringConversion
+
+check_PROGRAMS = CalculateResolution \
+		 ColorParse \
+                 NumberSetPerformance \
+                 WorkQueue \
+                 MapRotate \
+                 Geometry \
+                 AccessParse \
+                 BitsAndBytesNeeded \
+                 EncodeNumber \
+                 FileScannerWriter \
+                 GeoCoordParse \
+                 NumberSet \
+                 ScanConversion \
+                 TransPolygon \
+		 GeoBox
 
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               -I$(top_srcdir)/include
+
+AccessParse_SOURCES = AccessParse.cpp
+AccessParse_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+AccessParse_LDADD = $(LIBOSMSCOUT_LIBS)
+
+BitsAndBytesNeeded_SOURCES = BitsAndBytesNeeded.cpp
+BitsAndBytesNeeded_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+BitsAndBytesNeeded_LDADD = $(LIBOSMSCOUT_LIBS)
+
+ColorParse_SOURCES = ColorParse.cpp
+ColorParse_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+ColorParse_LDADD = $(LIBOSMSCOUT_LIBS)
+
+EncodeNumber_SOURCES = EncodeNumber.cpp
+EncodeNumber_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+EncodeNumber_LDADD = $(LIBOSMSCOUT_LIBS)
+
+FileScannerWriter_SOURCES = FileScannerWriter.cpp
+FileScannerWriter_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+FileScannerWriter_LDADD = $(LIBOSMSCOUT_LIBS)
+
+GeoCoordParse_SOURCES = GeoCoordParse.cpp
+GeoCoordParse_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+GeoCoordParse_LDADD = $(LIBOSMSCOUT_LIBS)
+
+NumberSet_SOURCES = NumberSet.cpp
+NumberSet_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+NumberSet_LDADD = $(LIBOSMSCOUT_LIBS)
+
+ScanConversion_SOURCES = ScanConversion.cpp
+ScanConversion_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+ScanConversion_LDADD = $(LIBOSMSCOUT_LIBS)
+
+WStringStringConversion_SOURCES = WStringStringConversion.cpp
+WStringStringConversion_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+WStringStringConversion_LDADD = $(LIBOSMSCOUT_LIBS)
 
 CachePerformance_SOURCES = CachePerformance.cpp
 CachePerformance_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
@@ -70,3 +120,14 @@ DrawTextQt_CXXFLAGS = -fPIC \
 DrawTextQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
                    $(LIBOSMSCOUTMAP_LIBS) \
                    $(LIBOSMSCOUT_LIBS)
+
+TransPolygon_SOURCES = TransPolygon.cpp
+TransPolygon_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+TransPolygon_LDADD = $(LIBOSMSCOUT_LIBS)
+
+GeoBox_SOURCES = GeoBox.cpp
+GeoBox_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+GeoBox_LDADD = $(LIBOSMSCOUT_LIBS)
+
+TESTS = $(check_PROGRAMS)
+

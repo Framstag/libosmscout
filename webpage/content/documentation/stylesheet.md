@@ -153,7 +153,10 @@ criteria exist:
 :  matches all types that are in all the given groups (AND semantic)
 
 `FEATURE <featurename> "," <featurename>...`
-:  matches all types that have ALL the given features (AND semantic).
+:  matches all types that have ALL the given features (AND semantic) and in
+turn all object that have the feature set during runtime (so objects which have
+a type that has this feature but the feature is not actually present for 
+agiven nstance of this type do not match).
 
 `PATH`
 : matches all types wihich are annotated as `PATH` in the OST file.
@@ -169,12 +172,6 @@ criteria exist:
   
 `ONEWAY`
 : this filter only matches for oneways.
-
-`BRIDGE`
-: this filter only matches for bridges
-
-`TUNNEL`
-: this filter only matches for tunnels
 
 `SIZE <widthInMeter>m <minWidthMM>mm:<minWidthPx>px "<" <maxWidthMM>mm:<maxWidthPx>px`
 : this filter restrict objects by dimension of things on map in releation
@@ -268,12 +265,35 @@ displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
 width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
 displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
 offset       |FroundSize   |Offset of the drawn line in relation to the actual path.
-cap          |Cap          |Cap to be used in all cases.
 joinCap      |Cap          |Cap in case where lines join.
 endCap       |Cap          |Cap in the case where the lines ends without joining another line.
 priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
 
 If `displayWidth` and `width` are both set, the resulting pixel values will be added.
+
+### BorderStyle - Border of areas
+
+### LineStyle - Drawing lines
+
+Currently allowed instances:
+
+* `AREA.BORDER#<slot>`
+
+The border style has the following attributes:
+
+Name         |Type         |Description
+-------------|-------------|-----------
+color        |Color        |Color of the line. if not set, color is transparent (a lines is not drawn)
+dash         |Dash         |Size of the dashes. If not set lines is solid
+gapColor     |Color        |Color drawn in the "gap", if not set gapColor is transparent
+displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
+width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
+displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
+offset       |FroundSize   |Offset of the drawn line in relation to the actual path.
+priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
+
+If `displayWidth` and `width` are both set, the resulting pixel values will be added.
+
 
 ### FillStyle - Filling areas
 
@@ -288,9 +308,6 @@ Name         |Type         |Description
 color        |Color        |The fill color. By default transparent so area will not be filled.
 pattern      |String       |(File)name of an image that is repeately drawn on top of the area. By default no pattern will be drawn.
 patternMinMag|Magnification|Minimum magnification for the pattern to be drawn (deprecated, should be better defined by a filter). By default this is magWorld, so the pattern will always be drawn
-borderColor  |Color        |Color of the border line. By default transparent so not border wil be drawn.
-borderWidth  |Screen size  |Width of the border. By default the border with is 0.
-borderDash   |Dash         |Dash widths of the border. By default the border is solid.
 
 ### TextStyle - Drawing labels for nodes or areas
 
@@ -403,8 +420,8 @@ Currently the following functions exist:
 
 Name           |Type         |Description
 ---------------|-------------|-----------
-lighten        |Color, Int   |Returns a lighter version of the given color
-darken         |Color, Int   |Returns a darker version of the given color
+lighten        |Color, Double|Returns a lighter version of the given color
+darken         |Color, Double|Returns a darker version of the given color
 
 ## Example
 

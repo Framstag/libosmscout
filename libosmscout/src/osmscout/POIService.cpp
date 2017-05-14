@@ -67,20 +67,22 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<FileOffset> nodeOffsets;
+    std::vector<FileOffset> offsets;
 
     if (!areaNodeIndex->GetOffsets(boundingBox,
                                    types,
-                                   nodeOffsets,
+                                   offsets,
                                    loadedTypes)) {
       log.Error() << "Error getting nodes from area node index!";
       return false;
     }
 
-    std::sort(nodeOffsets.begin(),
-              nodeOffsets.end());
+    std::sort(offsets.begin(),
+              offsets.end());
 
-    if (!nodeDataFile->GetByOffset(nodeOffsets,
+    if (!nodeDataFile->GetByOffset(offsets.begin(),
+                                   offsets.end(),
+                                   offsets.size(),
                                    nodes)) {
       log.Error() << "Error reading nodes in area!";
 
@@ -133,7 +135,8 @@ namespace osmscout {
     if (!spans.empty()) {
       std::sort(spans.begin(),spans.end());
 
-      if (!areaDataFile->GetByBlockSpans(spans,
+      if (!areaDataFile->GetByBlockSpans(spans.begin(),
+                                         spans.end(),
                                          areas)) {
         log.Error() << "Error reading areas in area!";
 
@@ -170,22 +173,24 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<FileOffset>  wayWayOffsets;
+    std::vector<FileOffset>  offsets;
     TypeInfoSet              loadedWayTypes;
 
 
     if (!areaWayIndex->GetOffsets(boundingBox,
                                   types,
-                                  wayWayOffsets,
+                                  offsets,
                                   loadedWayTypes)) {
       log.Error() << "Error getting ways and relations from area way index!";
 
       return false;
     }
 
-    std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
+    std::sort(offsets.begin(),offsets.end());
 
-    if (!wayDataFile->GetByOffset(wayWayOffsets,
+    if (!wayDataFile->GetByOffset(offsets.begin(),
+                                  offsets.end(),
+                                  offsets.size(),
                                   ways)) {
       log.Error() << "Error reading ways in area!";
 

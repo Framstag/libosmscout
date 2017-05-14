@@ -60,8 +60,8 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
       return;
     }
 
-  connect( &m_file, &QFile::bytesWritten,
-           this, &FileDownloader::onBytesWritten );
+  connect( &m_file, SIGNAL(bytesWritten(qint64)),
+           this, SLOT(onBytesWritten(qint64)) );
 
   // start data processor if requested
   QString command;
@@ -87,33 +87,29 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
       m_pipe_to_process = true;
       m_process = new QProcess(this);
 
-      connect( m_process, &QProcess::started,
-               this, &FileDownloader::onProcessStarted );
+      connect( m_process, SIGNAL(started()),
+               this, SLOT(onProcessStarted()) );
 
-      connect( m_process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-               this, &FileDownloader::onProcessStopped );
+      connect( m_process, SIGNAL(finished(int)),
+               this, SLOT(onProcessStopped(int)) );
 
-      connect( m_process, &QProcess::stateChanged,
-               this, &FileDownloader::onProcessStateChanged );
+      connect( m_process, SIGNAL(stateChanged(QProcess::ProcessState)),
+               this, SLOT(onProcessStateChanged(QProcess::ProcessState)) );
 
-      connect( m_process, &QProcess::readyReadStandardOutput,
-               this, &FileDownloader::onProcessRead );
+      connect( m_process, SIGNAL(readyReadStandardOutput()),
+               this, SLOT(onProcessRead()) );
 
-      connect( m_process, &QProcess::readyReadStandardError,
-               this, &FileDownloader::onProcessReadError );
+      connect( m_process, SIGNAL(readyReadStandardError()),
+               this, SLOT(onProcessReadError()) );
 
-      connect( m_process, &QProcess::bytesWritten,
-               this, &FileDownloader::onBytesWritten );
+      connect( m_process, SIGNAL(bytesWritten(qint64)),
+               this, SIGNAL(onBytesWritten(qint64)) );
 
       m_process->start(command, arguments);
     }
 
   m_download_last_read_time.start();
   m_download_throttle_time_start.start();
-
-  // start download
-  // startDownload();
-  startTimer(1000); // used to check for timeouts and in throttling network speed
 }
 
 FileDownloader::~FileDownloader()
@@ -124,8 +120,6 @@ FileDownloader::~FileDownloader()
 
 void FileDownloader::startDownload()
 {
-  // qDebug() << "Start or ReStart: " << m_url;
-
   // start download
   QNetworkRequest request(m_url);
   request.setHeader(QNetworkRequest::UserAgentHeader,
@@ -133,6 +127,7 @@ void FileDownloader::startDownload()
 
   if (m_downloaded > 0)
     {
+      // TODO: Range header don't have to be supported by server, we should handle such case
       QByteArray range_header = "bytes=" + QByteArray::number((qulonglong)m_downloaded) + "-";
       request.setRawHeader("Range",range_header);
     }
@@ -150,6 +145,8 @@ void FileDownloader::startDownload()
   m_download_last_read_time.restart();
   m_download_throttle_time_start.restart();
   m_download_throttle_bytes = 0;
+
+  m_timeout_timer_id=startTimer(1000); // used to check for timeouts and in throttling network speed
 }
 
 void FileDownloader::onFinished()
@@ -324,6 +321,7 @@ void FileDownloader::onDownloaded()
 
 bool FileDownloader::restartDownload(bool force)
 {
+  killTimer(m_timeout_timer_id);
 //  qDebug() << QTime::currentTime() << " / Restart called: "
 //           << m_url << " " << m_download_retries << " " << m_download_last_read_time.elapsed();
 
@@ -409,7 +407,7 @@ void FileDownloader::onProcessRead()
   emit writtenBytes(m_written);
 }
 
-void FileDownloader::onProcessStopped(int exitCode, QProcess::ExitStatus /*exitStatus*/)
+void FileDownloader::onProcessStopped(int exitCode)
 {
   if (exitCode != 0)
     {

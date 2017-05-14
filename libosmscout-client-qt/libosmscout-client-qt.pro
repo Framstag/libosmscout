@@ -25,7 +25,14 @@ SOURCES += \
     src/osmscout/SearchLocationModel.cpp \
     src/osmscout/Settings.cpp \
     src/osmscout/TileCache.cpp \
-    src/osmscout/TiledDBThread.cpp
+    src/osmscout/TiledDBThread.cpp \
+    src/osmscout/MapStyleModel.cpp \
+    src/osmscout/StyleFlagsModel.cpp \
+    src/osmscout/MapObjectInfoModel.cpp \
+    src/osmscout/DBInstance.cpp \
+    src/osmscout/DBJob.cpp \
+    src/osmscout/LookupModule.cpp \
+    src/osmscout/OSMScoutQt.cpp
 
 
 HEADERS += \
@@ -52,7 +59,15 @@ HEADERS += \
     include/osmscout/TileCache.h \
     include/osmscout/TiledDBThread.h \
     include/osmscout/private/ClientQtImportExport.h \
-    include/osmscout/private/Config.h
+    include/osmscout/private/Config.h \
+    include/osmscout/MapStyleModel.h \
+    include/osmscout/StyleFlagsModel.h \
+    include/osmscout/MapObjectInfoModel.h \
+    include/osmscout/DBInstance.h \
+    include/osmscout/DBJob.h \
+    include/osmscout/LookupModule.h \
+    include/osmscout/MapRenderer.h \
+    include/osmscout/OSMScoutQt.h
 
 macx {
     QMAKE_CXXFLAGS = -mmacosx-version-min=10.7 -std=gnu0x -stdlib=libc++

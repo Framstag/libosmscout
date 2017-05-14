@@ -58,11 +58,37 @@ namespace osmscout {
       quality = 2
     };
 
+    enum OutputConstraint
+    {
+      noConstraint = 0,
+      simple = 1
+    };
+
     struct OSMSCOUT_API TransPoint
     {
       bool   draw;
       double x;
       double y;
+    };
+
+  private:
+    struct TransPointRef{
+      TransPoint *p;
+
+      inline double GetLat() const
+      {
+        return p->x;
+      }
+
+      inline double GetLon() const
+      {
+        return p->y;
+      }
+
+      inline bool IsEqual(const TransPointRef &other) const
+      {
+        return p==other.p;
+      }
     };
 
   public:
@@ -74,6 +100,7 @@ namespace osmscout {
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
+    void EnsureSimple(bool isArea);
 
   public:
     TransPolygon();
@@ -102,12 +129,14 @@ namespace osmscout {
     void TransformArea(const Projection& projection,
                        OptimizeMethod optimize,
                        const std::vector<Point>& nodes,
-                       double optimizeErrorTolerance);
+                       double optimizeErrorTolerance,
+                       OutputConstraint constraint=noConstraint);
 
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
                       const std::vector<Point>& nodes,
-                      double optimizeErrorTolerance);
+                      double optimizeErrorTolerance,
+                      OutputConstraint constraint=noConstraint);
 
     bool GetBoundingBox(double& xmin, double& ymin,
                         double& xmax, double& ymax) const;
@@ -126,7 +155,6 @@ namespace osmscout {
 
     virtual void Reset() = 0;
     virtual size_t PushCoord(double x, double y) = 0;
-    virtual size_t GetLength() const = 0;
     virtual bool GenerateParallelWay(size_t orgStart,
                                      size_t orgEnd,
                                      double offset,
@@ -156,7 +184,6 @@ namespace osmscout {
 
     void Reset();
     size_t PushCoord(double x, double y);
-    size_t GetLength() const;
 
     bool GenerateParallelWay(size_t orgStart,
                              size_t orgEnd,
@@ -211,12 +238,6 @@ namespace osmscout {
     buffer[usedPoints].Set(x,y);
 
     return usedPoints++;
-  }
-
-  template<class P>
-  size_t CoordBufferImpl<P>::GetLength() const
-  {
-    return usedPoints;
   }
 
   template<class P>

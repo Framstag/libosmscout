@@ -79,11 +79,17 @@ CONST
   UINT labelPrioMillionCity         = 6;
   UINT labelPrioBigCity             = 7;
   UINT labelPrioCity                = 8;
-  UINT labelPrioTown                = 9;
-  UINT labelPrioVillage             = 10;
-  UINT labelPrioHamlet              = 11;
-  UINT labelPrioSuburb              = 12;
-  UINT labelPrioLocality            = 13;
+  
+  UINT labelShieldMotorway          = 9;
+  UINT labelShieldTrunk             = 11;
+  UINT labelShieldPrimary           = 11;
+  
+  
+  UINT labelPrioTown                = 12;
+  UINT labelPrioVillage             = 13;
+  UINT labelPrioHamlet              = 14;
+  UINT labelPrioSuburb              = 15;
+  UINT labelPrioLocality            = 16;
 
   UINT labelPrioNatural             = 20;
   UINT labelPrioLanduse             = 25;
@@ -156,7 +162,7 @@ CONST
   COLOR commercialColor            = #efc8c8;
   COLOR constructionColor          = #9d9d6c;
 
-  COLOR farmColor                = #ead8bd;
+  COLOR farmlandColor              = #ead8bd;
   COLOR farmyardColor              = #dcbe92;
   COLOR fellColor                  = #f9f9f9;
 
@@ -485,7 +491,7 @@ STYLE
     [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
 
     [TYPE _tile_sea] AREA {color: @waterColor;}
-    [TYPE _tile_coast] AREA {color: /*@coastColor;*/@waterColor;}
+    //[TYPE _tile_coast] AREA {color: /*@coastColor;*/@waterColor;}
     //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
     [TYPE _tile_land] AREA {color: @landColor;}
     [TYPE _tile_unknown] AREA {color: @unknownColor;}
@@ -593,7 +599,7 @@ STYLE
         [SIZE 15m 0.25mm:3px<] {
           WAY {color: @waterColor; width: 15m;}
 
-          [TUNNEL] {
+          [FEATURE Tunnel] {
             WAY#ldash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: -7.5m; priority: 1; }
             WAY#rdash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: 7.5m; priority: 1;}
 
@@ -604,7 +610,7 @@ STYLE
         [SIZE 15m <0.25mm:3px] {
           WAY {color: @waterColor; displayWidth: 0.25mm; }
 
-          [TUNNEL] {
+          [FEATURE Tunnel] {
             WAY {color: #ff000000;}
           }
         }
@@ -726,8 +732,8 @@ STYLE
     }
 
    [TYPE route_ferry] {
-     WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; cap: butt; }
-     WAY {color: #0000ff; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
+     WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; joinCap: butt; endCap: butt; }
+     WAY {color: #0000ff; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}
    }
  }
 
@@ -836,72 +842,72 @@ STYLE
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; }
 
    [TYPE highway_motorway, highway_motorway_link SIZE 20m 0.45mm:3px<] {
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@motorwayColor,0.3);}
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -10m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 10m; displayOffset: 0.25mm;}
      }
    }
 
    [TYPE highway_trunk, highway_trunk_link, highway_motorway_trunk SIZE 18m 0.4mm:3px<] {
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@trunkColor,0.3);}
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -9m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 9m; displayOffset: 0.25mm;}
      }
    }
 
    [TYPE highway_primary, highway_primary_link, highway_motorway_primary SIZE 14m 0.4mm:3px<] {
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@primaryColor,0.3);}
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -7m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 7m; displayOffset: 0.25mm;}
      }
    }
 
    [TYPE highway_secondary, highway_secondary_link SIZE 12m 0.25mm:3px<] {
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@secondaryColor,0.3);}
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -6m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 6m; displayOffset: 0.25mm;}
      }
    }
 
    [TYPE highway_tertiary SIZE 10m 0.25mm:3px<] {
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@tertiaryColor,0.3);}
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -5m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 5m; displayOffset: 0.25mm;}
      }
    }
 
    [TYPE highway_road SIZE 8m 0.1mm:3px<] {
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@roadColor,0.3);}
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -4m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 4m; displayOffset: 0.25mm;}
      }
@@ -909,11 +915,11 @@ STYLE
 
    [TYPE highway_unclassified, highway_residential SIZE 8m 0.1mm:3px<] {
      // Better rendering?
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
      }
@@ -921,23 +927,23 @@ STYLE
 
    [TYPE highway_service SIZE 8m 0.1mm:3px<] {
        // Better rendering?
-       [TUNNEL] {
+       [FEATURE Tunnel] {
          WAY#outline { dash: 0.5,0.5; }
        }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -4m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 4m; displayOffset: 0.25mm;}
      }
    }
 
    [TYPE highway_living_street SIZE 8m 0.1mm:3px<] {
-     [TUNNEL] {
+     [FEATURE Tunnel] {
        WAY#outline { dash: 0.5,0.5; }
        WAY { color: lighten(@livingStreetColor,0.3);}
      }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -4m; displayOffset: -0.25mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 4m; displayOffset: 0.25mm;}
      }
@@ -948,10 +954,10 @@ STYLE
    [TYPE highway_bus_stop] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
 
    [TYPE highway_track] {
-     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
-     WAY {color: #90570c; dash: 3,1; cap: butt; displayWidth: 0.4mm;}
+     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
+     WAY {color: #90570c; dash: 3,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
      }
@@ -964,17 +970,17 @@ STYLE
      [SIZE 8m 0.1mm:3px<] WAY {color: @pedestrianColor; width: 8m; }
      [SIZE 8m <0.1mm:3px] WAY {color: @pedestrianColor; displayWidth: 0.1mm; }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.3mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.3mm;}
      }
    }
 
    [TYPE highway_path] {
-     WAY#outline {color: #ffffff50; displayWidth: 0.8mm; cap: butt;}
-     WAY {color: #555555; dash: 8,2; cap: butt; displayWidth: 0.25mm;}
+     WAY#outline {color: #ffffff50; displayWidth: 0.8mm; joinCap: butt; endCap: butt;}
+     WAY {color: #555555; dash: 8,2; joinCap: butt; endCap: butt; displayWidth: 0.25mm;}
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.4mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.4mm;}
      }
@@ -984,29 +990,29 @@ STYLE
    }
 
    [TYPE highway_cycleway] {
-     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
-     WAY {color: #4645fa; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
+     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
+     WAY {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
      }
    }
 
    [TYPE highway_footway] {
-     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
-     WAY {color: #f64762; dash: 1,1; cap: butt; displayWidth: 0.4mm; }
+     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
+     WAY {color: #f64762; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
      }
    }
 
    [TYPE highway_bridleway] {
-     WAY {color: #90570c; displayWidth: 0.4mm; cap: butt; }
+     WAY {color: #90570c; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.2mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.2mm;}
      }
@@ -1017,7 +1023,7 @@ STYLE
    [TYPE leisure_track] {
      WAY {color: #bde3cb; displayWidth: 0.3mm; }
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.15mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.15mm;}
      }
@@ -1042,9 +1048,9 @@ STYLE
 
  [MAG @stepsMag-] {
    [TYPE highway_steps] {
-      WAY {color: #fe9897; dash: 0.25,0.25; cap: butt; displayWidth: 1.3mm;}
+      WAY {color: #fe9897; dash: 0.25,0.25; joinCap: butt; endCap: butt; displayWidth: 1.3mm;}
 
-     [BRIDGE] {
+     [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.65mm;}
        WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.65mm;}
      }
@@ -1054,15 +1060,15 @@ STYLE
  // WAY.SHIELD
 
  [MAG state-] {
-   [TYPE highway_motorway] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @motorwayShieldColor; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_motorway] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @motorwayShieldColor; borderColor: #ffffff; priority: @labelShieldMotorway;}
  }
 
  [MAG proximity-] {
-   [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @trunkShieldColor; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_trunk] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @trunkShieldColor; borderColor: #ffffff; priority: @labelShieldTrunk;}
  }
 
  [MAG city-] {
-   [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @primaryShieldColor; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_primary] WAY.SHIELD { label: Ref.name; color: #ffffff; backgroundColor: @primaryShieldColor; borderColor: #ffffff; priority: @labelShieldPrimary;}
  }
 
  // Labels
@@ -1157,15 +1163,15 @@ STYLE
    [MAG suburb-] {
      [TYPE railway_rail] {
        [SIZE 5m 0.25mm:3px<] {
-         WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
-         WAY {color: #939393; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m;}
+         WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
+         WAY {color: #939393; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 5m;}
        }
-       [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
+       [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
      }
    }
 
    [MAG close-] {
-     [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; cap: butt; displayWidth: 0.2mm; width: 4m;}
+     [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
 
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
      [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
@@ -1173,7 +1179,7 @@ STYLE
      [TYPE railway_funicular] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
 
      [TYPE railway_subway] {
-       WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; cap: butt; }
+       WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
      }
    }
 
@@ -1183,21 +1189,21 @@ STYLE
            railway_narrow_gauge,
            railway_funicular
          SIZE 5m 0.25mm:3px<] {
-       [TUNNEL] {
-         WAY {dash: 1,1; cap: butt;}
+       [FEATURE Tunnel] {
+         WAY {dash: 1,1; joinCap: butt; endCap: butt;}
        }
-       [BRIDGE] {
+       [FEATURE Bridge] {
          WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
          WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
        }
      }
      [TYPE railway_rail SIZE 5m 0.25mm:3px<] {
        // Better rendering?
-       [TUNNEL] {
+       [FEATURE Tunnel] {
          WAY#outline { dash: 0.5,0.5; }
        }
 
-       [BRIDGE] {
+       [FEATURE Bridge] {
          WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
          WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
        }
@@ -1245,7 +1251,7 @@ STYLE
 
  IF daylight {
    [MAG region-] {
-     [TYPE landuse_farmland] AREA { color: @farmColor; }
+     [TYPE landuse_farmland] AREA { color: @farmlandColor; }
      [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
      [TYPE landuse_industrial] AREA { color: @industrialColor; }
      [TYPE landuse_landfill] AREA { color: @landFillColor; }
@@ -1256,7 +1262,6 @@ STYLE
    }
 
    [MAG proximity-] {
-     [TYPE landuse_farm] AREA { color: @farmColor; }
      // Semiransparent overlay
      [TYPE landuse_military] {
        AREA { color: @militaryColor;}
@@ -1304,8 +1309,7 @@ STYLE
    }
 
    [MAG close-] {
-     [TYPE landuse_farm,
-           landuse_farmland,
+     [TYPE landuse_farmland,
            landuse_farmyard,
            landuse_quarry,
            landuse_landfill,
@@ -1511,7 +1515,7 @@ STYLE
 
    [TYPE barrier_city_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
    [TYPE barrier_city_wall] WAY#decor {color: @wallColor;
-             dash: 1,5; displayOffset: 0.09mm; offset: 0.5m; cap: butt;
+             dash: 1,5; displayOffset: 0.09mm; offset: 0.5m; joinCap: butt; endCap: butt;
              displayWidth: 0.1mm; width: 0.5m;
    }
    [TYPE barrier_wall]           {
@@ -1557,15 +1561,15 @@ STYLE
 [MAG close-] {
      [TYPE aerialway_gondola]{
         WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
-        WAY#gondola {color: #101010; dash: 1,15; cap: round; displayWidth: 0.1mm; width: 4m;}
+        WAY#gondola {color: #101010; dash: 1,15; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
      }
      [TYPE aerialway_chair_lift]{
         WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
-        WAY#chair {color: #101010; dash: 0.3,5; cap: square; displayWidth: 0.1mm; width: 4m;}
+        WAY#chair {color: #101010; dash: 0.3,5; joinCap: square; endCap: square; displayWidth: 0.1mm; width: 4m;}
      }
      [TYPE aerialway_drag_lift]{
         WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
-        WAY#drag {color: #101010; dash: 0.2,5; cap: round; displayWidth: 0.1mm; width: 4m;}
+        WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
      }
 }
 

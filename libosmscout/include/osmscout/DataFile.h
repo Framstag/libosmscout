@@ -110,25 +110,27 @@ namespace osmscout {
     virtual bool IsOpen() const;
     virtual bool Close();
 
-    bool GetByOffset(const std::vector<FileOffset>& offsets,
-                     std::vector<ValueType>& data) const;
-    bool GetByOffset(const std::vector<FileOffset>& offsets,
-                     const GeoBox& boundingBox,
-                     std::vector<ValueType>& data) const;
-    bool GetByOffset(const std::list<FileOffset>& offsets,
-                     std::vector<ValueType>& data) const;
-    bool GetByOffset(const std::set<FileOffset>& offsets,
-                     std::vector<ValueType>& data) const;
-
-    bool GetByOffset(const std::set<FileOffset>& offsets,
-                     std::unordered_map<FileOffset,ValueType>& dataMap) const;
-
     bool GetByOffset(const FileOffset& offset,
                      ValueType& entry) const;
 
     bool GetByBlockSpan(const DataBlockSpan& span,
                         std::vector<ValueType>& data) const;
-    bool GetByBlockSpans(const std::vector<DataBlockSpan>& spans,
+
+    template<typename IteratorIn>
+    bool GetByOffset(IteratorIn begin, IteratorIn end, size_t size,
+                     std::vector<ValueType>& data) const;
+
+    template<typename IteratorIn>
+    bool GetByOffset(IteratorIn begin, IteratorIn end, size_t size,
+                     const GeoBox& boundingBox,
+                     std::vector<ValueType>& data) const;
+
+    template<typename IteratorIn>
+    bool GetByOffset(IteratorIn begin, IteratorIn end, size_t size,
+                     std::unordered_map<FileOffset,ValueType>& dataMap) const;
+
+    template<typename IteratorIn>
+    bool GetByBlockSpans(IteratorIn begin, IteratorIn end,
                          std::vector<ValueType>& data) const;
   };
 
@@ -258,32 +260,51 @@ namespace osmscout {
   }
 
   /**
-   * Read data values from the given file offsets.
+   * Reads data for the given file offsets. File offsets are passed by iterator over
+   * some container. the size parameter hints as the number of entries returned by the iterators
+   * and is used to preallocate enough room in the result vector.
    *
-   * Method is thread-safe.
+   * @tparam N
+   *    Object type managed by the data file
+   * @tparam IteratorIn
+   *    Iterator over a colection
+   * @param begin
+   *    Start iterator for the file offset
+   * @param end
+   *    End iterator for the file offset
+   * @param size
+   *    Number of entries returnd by the begin, end itertaor pair. USed for preallocating enough space
+   *    in result vector.
+   * @param data
+   *    vector containing data. Data is appended.
+   * @return
+   *    false if there was an error, else true
    */
   template <class N>
-  bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
+  template <typename IteratorIn>
+  bool DataFile<N>::GetByOffset(IteratorIn begin, IteratorIn end, size_t size,
                                 std::vector<ValueType>& data) const
   {
-    data.reserve(data.size()+offsets.size());
+    data.reserve(data.size()+size);
 
-    for (const auto& offset : offsets) {
+    for (IteratorIn offsetIter=begin; offsetIter!=end; ++offsetIter) {
       ValueCacheRef entryRef;
-      if (cache.GetEntry(offset,entryRef)){
+
+      if (cache.GetEntry(*offsetIter,entryRef)) {
         data.push_back(entryRef->value);
-      }else{
+      }
+      else {
         ValueType value=std::make_shared<N>();
 
         if (!ReadData(*typeConfig,
                       scanner,
-                      offset,
+                      *offsetIter,
                       *value)) {
-          log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
+          log.Error() << "Error while reading data from offset " << *offsetIter << " of file " << datafilename << "!";
           return false;
         }
 
-        cache.SetEntry(ValueCacheEntry(offset,value));
+        cache.SetEntry(ValueCacheEntry(*offsetIter,value));
         data.push_back(value);
       }
     }
@@ -297,28 +318,29 @@ namespace osmscout {
    * Method is thread-safe.
    */
   template <class N>
-  bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
+  template<typename IteratorIn>
+  bool DataFile<N>::GetByOffset(IteratorIn begin, IteratorIn end, size_t size,
                                 const GeoBox& boundingBox,
                                 std::vector<ValueType>& data) const
   {
-    data.reserve(data.size()+offsets.size());
+    data.reserve(data.size()+size);
 
-    for (const auto& offset : offsets) {
+    for (IteratorIn offsetIter=begin; offsetIter!=end; ++offsetIter) {
       ValueType value=std::make_shared<N>();
 
       ValueCacheRef entryRef;
-      if (cache.GetEntry(offset,entryRef)){
+      if (cache.GetEntry(*offsetIter,entryRef)){
         value=entryRef->value;
       }else{
         if (!ReadData(*typeConfig,
                       scanner,
-                      offset,
+                      *offsetIter,
                       *value)) {
-          log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
+          log.Error() << "Error while reading data from offset " << *offsetIter << " of file " << datafilename << "!";
           return false;
         }
 
-        cache.SetEntry(ValueCacheEntry(offset,value));
+        cache.SetEntry(ValueCacheEntry(*offsetIter,value));
       }
 
       if (!value->Intersects(boundingBox)) {
@@ -337,82 +359,16 @@ namespace osmscout {
    * Method is thread-safe.
    */
   template <class N>
-  bool DataFile<N>::GetByOffset(const std::list<FileOffset>& offsets,
-                                std::vector<ValueType>& data) const
-  {
-    data.reserve(data.size()+offsets.size());
-
-    for (const auto& offset : offsets) {
-      ValueCacheRef entryRef;
-      if (cache.GetEntry(offset,entryRef)){
-        data.push_back(entryRef->value);
-      }else{
-        ValueType value=std::make_shared<N>();
-
-        if (!ReadData(*typeConfig,
-                      scanner,
-                      offset,
-                      *value)) {
-          log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
-          // TODO: Remove broken entry from cache
-          return false;
-        }
-
-        cache.SetEntry(ValueCacheEntry(offset,value));
-        data.push_back(value);
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Read data values from the given file offsets.
-   *
-   * Method is thread-safe.
-   */
-  template <class N>
-  bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
-                                std::vector<ValueType>& data) const
-  {
-    data.reserve(data.size()+offsets.size());
-
-    for (const auto& offset : offsets) {
-      ValueCacheRef entryRef;
-      if (cache.GetEntry(offset,entryRef)){
-        data.push_back(entryRef->value);
-      }else{
-        ValueType value=std::make_shared<N>();
-
-        if (!ReadData(*typeConfig,
-                      scanner,
-                      offset,
-                      *value)) {
-          log.Error() << "Error while reading data from offset " << offset << " of file " << datafilename << "!";
-          // TODO: Remove broken entry from cache
-          return false;
-        }
-
-        cache.SetEntry(ValueCacheEntry(offset,value));
-        data.push_back(value);
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Read data values from the given file offsets.
-   *
-   * Method is thread-safe.
-   */
-  template <class N>
-  bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
+  template<typename IteratorIn>
+  bool DataFile<N>::GetByOffset(IteratorIn begin, IteratorIn end, size_t size,
                                 std::unordered_map<FileOffset,ValueType>& dataMap) const
   {
     std::vector<ValueType> data;
 
-    if (!GetByOffset(offsets,data)) {
+    if (!GetByOffset(begin,
+                     end,
+                     size,
+                     data)) {
       return false;
     }
 
@@ -518,29 +474,30 @@ namespace osmscout {
    * Method is thread-safe.
    */
   template <class N>
-  bool DataFile<N>::GetByBlockSpans(const std::vector<DataBlockSpan>& spans,
+  template<typename IteratorIn>
+  bool DataFile<N>::GetByBlockSpans(IteratorIn begin, IteratorIn end,
                                     std::vector<ValueType>& data) const
   {
     uint32_t overallCount=0;
 
-    for (const auto& span : spans) {
-      overallCount+=span.count;
+    for (IteratorIn spanIter=begin; spanIter!=end; ++spanIter) {
+      overallCount+=spanIter->count;
     }
 
     data.reserve(data.size()+overallCount);
 
     try {
-      for (const auto& span : spans) {
-        if (span.count==0) {
+      for (IteratorIn spanIter=begin; spanIter!=end; ++spanIter) {
+        if (spanIter->count==0) {
           continue;
         }
 
         std::lock_guard<std::mutex> lock(accessMutex);
 
         bool offsetSetup=false;
-        FileOffset offset=span.startOffset;
+        FileOffset offset=spanIter->startOffset;
 
-        for (uint32_t i=1; i<=span.count; i++) {
+        for (uint32_t i=1; i<=spanIter->count; i++) {
           ValueCacheRef entryRef;
           if (cache.GetEntry(offset,entryRef)){
             data.push_back(entryRef->value);
@@ -556,7 +513,7 @@ namespace osmscout {
             if (!ReadData(*typeConfig,
                           scanner,
                           *value)) {
-              log.Error() << "Error while reading data #" << i << " starting from offset " << span.startOffset <<
+              log.Error() << "Error while reading data #" << i << " starting from offset " << spanIter->startOffset <<
               " of file " << datafilename << "!";
               return false;
             }
@@ -611,12 +568,15 @@ namespace osmscout {
 
     bool IsOpen() const;
 
-    bool GetOffsets(const std::set<I>& ids,
-                    std::vector<FileOffset>& offsets) const;
-    bool GetOffsets(const std::vector<I>& ids,
-                    std::vector<FileOffset>& offsets) const;
     bool GetOffset(const I& id,
                    FileOffset& offset) const;
+
+    bool Get(const I& id,
+             ValueType& entry) const;
+
+    template<typename IteratorIn>
+    bool GetOffsets(IteratorIn begin, IteratorIn end, size_t size,
+                    std::vector<FileOffset>& offsets) const;
 
     bool Get(const std::vector<I>& ids,
              std::vector<ValueType>& data) const;
@@ -624,11 +584,10 @@ namespace osmscout {
              std::vector<ValueType>& data) const;
     bool Get(const std::set<I>& ids,
              std::vector<ValueType>& data) const;
+    
     bool Get(const std::set<I>& ids,
              std::unordered_map<I,ValueType>& data) const;
 
-    bool Get(const I& id,
-             ValueType& entry) const;
   };
 
   template <class I, class N>
@@ -682,17 +641,14 @@ namespace osmscout {
   }
 
   template <class I, class N>
-  bool IndexedDataFile<I,N>::GetOffsets(const std::set<I>& ids,
+  template<typename IteratorIn>
+  bool IndexedDataFile<I,N>::GetOffsets(IteratorIn begin, IteratorIn end, size_t size,
                                         std::vector<FileOffset>& offsets) const
   {
-    return index.GetOffsets(ids,offsets);
-  }
-
-  template <class I, class N>
-  bool IndexedDataFile<I,N>::GetOffsets(const std::vector<I>& ids,
-                                        std::vector<FileOffset>& offsets) const
-  {
-    return index.GetOffsets(ids,offsets);
+    return index.GetOffsets(begin,
+                           end,
+                           size,
+                           offsets);
   }
 
   template <class I, class N>
@@ -708,11 +664,17 @@ namespace osmscout {
   {
     std::vector<FileOffset> offsets;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
-    return DataFile<N>::GetByOffset(offsets,data);
+    return DataFile<N>::GetByOffset(offsets.begin(),
+                                    offsets.end(),
+                                    offsets.size(),
+                                    data);
   }
 
   template <class I, class N>
@@ -721,11 +683,17 @@ namespace osmscout {
   {
     std::vector<FileOffset> offsets;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
-    return DataFile<N>::GetByOffset(offsets,data);
+    return DataFile<N>::GetByOffset(offsets.begin(),
+                                    offsets.end(),
+                                    offsets.size(),
+                                    data);
   }
 
   template <class I, class N>
@@ -734,11 +702,17 @@ namespace osmscout {
   {
     std::vector<FileOffset> offsets;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
-    return DataFile<N>::GetByOffset(offsets,data);
+    return DataFile<N>::GetByOffset(offsets.begin(),
+                                    offsets.end(),
+                                    offsets.size(),
+                                    data);
   }
 
   template <class I, class N>
@@ -748,11 +722,17 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
     std::vector<ValueType>  d;
 
-    if (!index.GetOffsets(ids,offsets)) {
+    if (!index.GetOffsets(ids.begin(),
+                          ids.end(),
+                          ids.size(),
+                          offsets)) {
       return false;
     }
 
-    if (!DataFile<N>::GetByOffset(offsets,d)) {
+    if (!DataFile<N>::GetByOffset(offsets.begin(),
+                                  offsets.end(),
+                                  offsets.size(),
+                                  d)) {
       return false;
     }
 

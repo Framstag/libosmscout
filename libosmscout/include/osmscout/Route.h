@@ -77,6 +77,8 @@ namespace osmscout {
     static const char* const MOTORWAY_JUNCTION_DESC;
     /** Constant for a description of the maximum speed for the given way */
     static const char* const WAY_MAXSPEED_DESC;
+    /** Constant for a description of type name of the way (TypeNameDescription) */
+    static const char* const WAY_TYPE_NAME_DESC;
 
   public:
     /**
@@ -468,6 +470,28 @@ namespace osmscout {
 
     typedef std::shared_ptr<MaxSpeedDescription> MaxSpeedDescriptionRef;
 
+    /**
+     * \ingroup Routing
+     * Something has a type name. This is the name of the type of the way used.
+     */
+    class OSMSCOUT_API TypeNameDescription : public Description
+    {
+    private:
+      std::string name;
+
+    public:
+      TypeNameDescription(const std::string& name);
+
+      std::string GetDebugString() const;
+
+      bool HasName() const;
+
+      std::string GetName() const;
+
+      std::string GetDescription() const;
+    };
+
+    typedef std::shared_ptr<TypeNameDescription> TypeNameDescriptionRef;
 
     /**
      * \ingroup Routing

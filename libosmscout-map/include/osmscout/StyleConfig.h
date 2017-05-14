@@ -41,124 +41,10 @@
 #include <osmscout/util/Transformation.h>
 
 #include <osmscout/MapParameter.h>
+#include <osmscout/LabelProvider.h>
+#include <osmscout/StyleDescription.h>
 
 namespace osmscout {
-
-  /**
-   * \ingroup Stylesheet
-   *
-   * Interface one must implement to provider a label for the map.
-   */
-  class OSMSCOUT_MAP_API LabelProvider
-  {
-  public:
-    virtual ~LabelProvider();
-
-    /**
-     * Returns the label based on the given feature value buffer
-     *
-     * @param buffer
-     *    The FeatureValueBuffer instance
-     * @return
-     *    The label, if the given feature has a value and a label or a empty string
-     */
-    virtual std::string GetLabel(const MapParameter& parameter,
-                                 const FeatureValueBuffer& buffer) const = 0;
-
-    /**
-     * Returns the name of the label provider as it must get stated in the style sheet
-     */
-    virtual std::string GetName() const = 0;
-  };
-
-  typedef std::shared_ptr<LabelProvider> LabelProviderRef;
-
-  /**
-   * \ingroup Stylesheet
-   *
-   */
-  class OSMSCOUT_MAP_API LabelProviderFactory
-  {
-  public:
-    virtual ~LabelProviderFactory();
-
-    virtual LabelProviderRef Create(const TypeConfig& typeConfig) const = 0;
-  };
-
-  typedef std::shared_ptr<LabelProviderFactory> LabelProviderFactoryRef;
-
-  /**
-   * \ingroup Stylesheet
-   *
-   */
-  class OSMSCOUT_MAP_API INameLabelProviderFactory : public LabelProviderFactory
-  {
-  private:
-    class INameLabelProvider : public LabelProvider
-    {
-    private:
-      std::vector<size_t> nameLookupTable;
-      std::vector<size_t> nameAltLookupTable;
-
-    public:
-      INameLabelProvider(const TypeConfig& typeConfig);
-
-      std::string GetLabel(const MapParameter& parameter,
-                           const FeatureValueBuffer& buffer) const;
-
-      inline std::string GetName() const
-      {
-        return "IName";
-      }
-    };
-
-    private:
-      mutable LabelProviderRef instance;
-
-    public:
-      LabelProviderRef Create(const TypeConfig& typeConfig) const;
-  };
-
-  /**
-   * \ingroup Stylesheet
-   *
-   * Generates a label based on a given feature name and label name.
-   *
-   * Example:
-   *   Give me the label "inMeter" of the Ele-Feature.
-   */
-  class OSMSCOUT_MAP_API DynamicFeatureLabelReader : public LabelProvider
-  {
-
-  private:
-    std::vector<size_t> lookupTable;
-    std::string         featureName;
-    std::string         labelName;
-    size_t              labelIndex;
-
-  public:
-    /**
-     * Assigns a label to the reader
-     *
-     * @param typeConfig
-     *   Reference to the current type configuration
-     * @param featureName
-     *   Name of the feature which must be valid and must support labels
-     * @param labelIndex
-     *   The index of the labels to use (a feature might support multiple labels)
-     */
-    DynamicFeatureLabelReader(const TypeConfig& typeConfig,
-                              const std::string& featureName,
-                              const std::string& labelName);
-
-    std::string GetLabel(const MapParameter& parameter,
-                         const FeatureValueBuffer& buffer) const;
-
-    inline std::string GetName() const
-    {
-      return featureName + "." + labelName;
-    }
-  };
 
   /**
    * \ingroup Stylesheet
@@ -167,21 +53,25 @@ namespace osmscout {
   class OSMSCOUT_MAP_API StyleResolveContext
   {
   private:
-    BridgeFeatureReader      bridgeReader;
-    TunnelFeatureReader      tunnelReader;
-    AccessFeatureValueReader accessReader;
+    TypeConfigRef                     typeConfig;
+    std::map<std::string,size_t>      featureReaderMap; //< Map that maps feature names to index in the feature reader vector
+    std::vector<DynamicFeatureReader> featureReaders;   //< List of feature readers
+    AccessFeatureValueReader          accessReader;
 
   public:
     StyleResolveContext(const TypeConfigRef& typeConfig);
 
-    inline bool IsBridge(const FeatureValueBuffer& buffer) const
+    size_t GetFeatureReaderIndex(const Feature& feature);
+
+    inline bool HasFeature(size_t featureIndex,
+                           const FeatureValueBuffer& buffer) const
     {
-      return bridgeReader.IsSet(buffer);
+      return featureReaders[featureIndex].IsSet(buffer);
     }
 
-    inline bool IsTunnel(const FeatureValueBuffer& buffer) const
+    inline std::string GetFeatureName(size_t featureIndex) const
     {
-      return tunnelReader.IsSet(buffer);
+      return featureReaders[featureIndex].GetFeatureName();
     }
 
     bool IsOneway(const FeatureValueBuffer& buffer) const;
@@ -298,31 +188,36 @@ namespace osmscout {
   public:
 
   private:
-    TypeInfoSet           types;
-    size_t                minLevel;
-    size_t                maxLevel;
-    bool                  bridge;
-    bool                  tunnel;
-    bool                  oneway;
-    SizeConditionRef      sizeCondition;
+    bool             filtersByType;
+    TypeInfoSet      types;
+    size_t           minLevel;
+    size_t           maxLevel;
+    std::set<size_t> features;
+    bool             oneway;
+    SizeConditionRef sizeCondition;
 
   public:
     StyleFilter();
     StyleFilter(const StyleFilter& other);
 
     StyleFilter& SetTypes(const TypeInfoSet& types);
-
     StyleFilter& SetMinLevel(size_t level);
     StyleFilter& SetMaxLevel(size_t level);
-    StyleFilter& SetBridge(bool bridge);
-    StyleFilter& SetTunnel(bool tunnel);
+
+    StyleFilter& AddFeature(const size_t featureFilterIndex);
+
     StyleFilter& SetOneway(bool oneway);
 
     StyleFilter& SetSizeCondition(const SizeConditionRef& condition);
 
-    inline bool HasTypes() const
+    inline bool FiltersByType() const
     {
-      return !types.Empty();
+      return filtersByType;
+    }
+
+    inline bool FiltersByFeature() const
+    {
+      return !features.empty();
     }
 
     inline bool HasType(const TypeInfoRef& type) const
@@ -340,14 +235,9 @@ namespace osmscout {
       return maxLevel;
     }
 
-    inline bool GetBridge() const
+    inline const std::set<size_t>& GetFeatures() const
     {
-      return bridge;
-    }
-
-    inline bool GetTunnel() const
-    {
-      return tunnel;
+      return features;
     }
 
     inline bool GetOneway() const
@@ -369,7 +259,7 @@ namespace osmscout {
   /**
    * \ingroup Stylesheet
    *
-   * Holds all filter criteria (minus type and zoomlevel criteria which are
+   * Holds all filter criteria (minus type and zoom level criteria which are
    * directly handled by the lookup table) for a concrete style which have to
    * evaluated during runtime.
    */
@@ -378,8 +268,7 @@ namespace osmscout {
   public:
 
   private:
-    bool             bridge;
-    bool             tunnel;
+    std::set<size_t> features;
     bool             oneway;
     SizeConditionRef sizeCondition;
 
@@ -393,20 +282,9 @@ namespace osmscout {
 
     inline bool HasCriteria() const
     {
-      return bridge ||
-             tunnel ||
-             oneway ||
+      return !features.empty() ||
+             oneway     ||
              sizeCondition;
-    }
-
-    inline bool GetBridge() const
-    {
-      return bridge;
-    }
-
-    inline bool GetTunnel() const
-    {
-      return tunnel;
     }
 
     inline bool GetOneway() const
@@ -414,21 +292,33 @@ namespace osmscout {
       return oneway;
     }
 
-    bool Matches(double meterInPixel,
-                 double meterInMM) const;
     bool Matches(const StyleResolveContext& context,
                  const FeatureValueBuffer& buffer,
                  double meterInPixel,
                  double meterInMM) const;
   };
 
+  struct PartialStyleBase
+  {
+    virtual void SetBoolValue(int attribute, bool value) = 0;
+    virtual void SetStringValue(int attribute, const std::string& value) = 0;
+    virtual void SetColorValue(int attribute, const Color& value) = 0;
+    virtual void SetMagnificationValue(int attribute, const Magnification& value) = 0;
+    virtual void SetDoubleValue(int attribute, const double value) = 0;
+    virtual void SetDoubleArrayValue(int attribute, const std::vector<double>& value) = 0;
+    virtual void SetSymbolValue(int attribute, const SymbolRef& value) = 0;
+    virtual void SetIntValue(int attribute, int value) = 0;
+    virtual void SetUIntValue(int attribute, size_t value) = 0;
+    virtual void SetLabelValue(int attribute, const LabelProviderRef& value) = 0;
+  };
+
   /**
    * \ingroup Stylesheet
    * A Style together with a set of the attributes that are explicitly
-   * set in the stye.
+   * set in the style.
    */
   template<class S, class A>
-  struct PartialStyle
+  struct PartialStyle : public PartialStyleBase
   {
     std::set<A>        attributes;
     std::shared_ptr<S> style;
@@ -438,6 +328,67 @@ namespace osmscout {
     {
       // no code
     }
+
+    inline void SetBoolValue(int attribute, bool value)
+    {
+      style->SetBoolValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetStringValue(int attribute, const std::string& value)
+    {
+      style->SetStringValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetColorValue(int attribute, const Color& value)
+    {
+      style->SetColorValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetMagnificationValue(int attribute, const Magnification& value)
+    {
+      style->SetMagnificationValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetDoubleValue(int attribute, double value)
+    {
+      style->SetDoubleValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetDoubleArrayValue(int attribute, const std::vector<double>& value)
+    {
+      style->SetDoubleArrayValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetSymbolValue(int attribute, const SymbolRef& value)
+    {
+      style->SetSymbolValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetIntValue(int attribute, int value)
+    {
+      style->SetIntValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetUIntValue(int attribute, size_t value)
+    {
+      style->SetUIntValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
+    inline void SetLabelValue(int attribute, const LabelProviderRef& value)
+    {
+      style->SetLabelValue(attribute,value);
+      attributes.insert((A)attribute);
+    }
+
   };
 
   /**
@@ -490,7 +441,7 @@ namespace osmscout {
    *
    * Style options for a line.
    */
-  class OSMSCOUT_MAP_API LineStyle
+  class OSMSCOUT_MAP_API LineStyle : public Style
   {
   public:
     enum CapStyle {
@@ -530,6 +481,11 @@ namespace osmscout {
   public:
     LineStyle();
     LineStyle(const LineStyle& style);
+
+    void SetColorValue(int attribute, const Color& value);
+    void SetDoubleValue(int attribute, double value);
+    void SetDoubleArrayValue(int attribute, const std::vector<double>& value);
+    void SetIntValue(int attribute, int value);
 
     LineStyle& SetSlot(const std::string& slot);
 
@@ -617,6 +573,8 @@ namespace osmscout {
       return zIndex;
     }
 
+    static StyleDescriptorRef GetDescriptor();
+
     void CopyAttributes(const LineStyle& other,
                         const std::set<Attribute>& attributes);
 
@@ -624,6 +582,21 @@ namespace osmscout {
     bool operator!=(const LineStyle& other) const;
     bool operator<(const LineStyle& other) const;
   };
+
+  class OSMSCOUT_MAP_API CapStyleEnumAttributeDescriptor CLASS_FINAL : public StyleEnumAttributeDescriptor
+  {
+  public:
+    CapStyleEnumAttributeDescriptor(const std::string& name,
+                                    int attribute)
+      : StyleEnumAttributeDescriptor(name,
+                                     attribute)
+    {
+      AddEnumValue("butt",LineStyle::capButt);
+      AddEnumValue("round",LineStyle::capRound);
+      AddEnumValue("square",LineStyle::capSquare);
+    }
+  };
+
 
   typedef std::shared_ptr<LineStyle>                       LineStyleRef;
   typedef PartialStyle<LineStyle,LineStyle::Attribute>     LinePartialStyle;
@@ -637,7 +610,7 @@ namespace osmscout {
    *
    * Style options for filling an area.
    */
-  class OSMSCOUT_MAP_API FillStyle
+  class OSMSCOUT_MAP_API FillStyle : public Style
   {
   public:
     enum Attribute {
@@ -655,6 +628,10 @@ namespace osmscout {
   public:
     FillStyle();
     FillStyle(const FillStyle& style);
+
+    void SetStringValue(int attribute, const std::string& value);
+    void SetColorValue(int attribute, const Color& value);
+    void SetMagnificationValue(int attribute, const Magnification& value);
 
     FillStyle& SetFillColor(const Color& color);
     FillStyle& SetPattern(const std::string& pattern);
@@ -692,6 +669,8 @@ namespace osmscout {
       return patternMinMag;
     }
 
+    static StyleDescriptorRef GetDescriptor();
+
     void CopyAttributes(const FillStyle& other,
                         const std::set<Attribute>& attributes);
 
@@ -712,11 +691,12 @@ namespace osmscout {
    *
    * Style options for borders around an area.
    */
-  class OSMSCOUT_MAP_API BorderStyle
+  class OSMSCOUT_MAP_API BorderStyle : public Style
   {
   public:
     enum Attribute {
       attrColor,
+      attrGapColor,
       attrWidth,
       attrDashes,
       attrDisplayOffset,
@@ -727,6 +707,7 @@ namespace osmscout {
   private:
     std::string         slot;
     Color               color;
+    Color               gapColor;
     double              width;
     std::vector<double> dash;
     double              displayOffset;
@@ -737,9 +718,15 @@ namespace osmscout {
     BorderStyle();
     BorderStyle(const BorderStyle& style);
 
+    void SetColorValue(int attribute, const Color& value);
+    void SetDoubleValue(int attribute, double value);
+    void SetDoubleArrayValue(int attribute, const std::vector<double>& value);
+    void SetIntValue(int attribute, int value);
+
     BorderStyle& SetSlot(const std::string& slot);
 
     BorderStyle& SetColor(const Color& color);
+    BorderStyle& SetGapColor(const Color& color);
     BorderStyle& SetWidth(double value);
     BorderStyle& SetDashes(const std::vector<double> dashes);
     BorderStyle& SetDisplayOffset(double value);
@@ -759,6 +746,11 @@ namespace osmscout {
     inline const Color& GetColor() const
     {
       return color;
+    }
+
+    inline const Color& GetGapColor() const
+    {
+      return gapColor;
     }
 
     inline double GetWidth() const
@@ -791,6 +783,8 @@ namespace osmscout {
       return priority;
     }
 
+    static StyleDescriptorRef GetDescriptor();
+
     void CopyAttributes(const BorderStyle& other,
                         const std::set<Attribute>& attributes);
 
@@ -812,7 +806,7 @@ namespace osmscout {
    * Abstract base class for all (point) labels. All point labels have priority
    * and a alpha value.
    */
-  class OSMSCOUT_MAP_API LabelStyle
+  class OSMSCOUT_MAP_API LabelStyle : public Style
   {
   private:
     size_t priority;
@@ -879,6 +873,14 @@ namespace osmscout {
     TextStyle();
     TextStyle(const TextStyle& style);
 
+    void SetBoolValue(int attribute, bool value);
+    void SetColorValue(int attribute, const Color& value);
+    void SetMagnificationValue(int attribute, const Magnification& value);
+    void SetDoubleValue(int attribute, double value);
+    void SetIntValue(int attribute, int value);
+    void SetUIntValue(int attribute, size_t value);
+    void SetLabelValue(int attribute, const LabelProviderRef& value);
+
     TextStyle& SetSlot(const std::string& slot);
 
     TextStyle& SetPriority(uint8_t priority);
@@ -936,12 +938,27 @@ namespace osmscout {
       return autoSize;
     }
 
+    static StyleDescriptorRef GetDescriptor();
+
     void CopyAttributes(const TextStyle& other,
                         const std::set<Attribute>& attributes);
 
     bool operator==(const TextStyle& other) const;
     bool operator!=(const TextStyle& other) const;
     bool operator<(const TextStyle& other) const;
+  };
+
+  class OSMSCOUT_MAP_API TextStyleEnumAttributeDescriptor CLASS_FINAL : public StyleEnumAttributeDescriptor
+  {
+  public:
+    TextStyleEnumAttributeDescriptor(const std::string& name,
+                                     int attribute)
+      : StyleEnumAttributeDescriptor(name,
+                                     attribute)
+    {
+      AddEnumValue("normal",TextStyle::normal);
+      AddEnumValue("emphasize",TextStyle::emphasize);
+    }
   };
 
   typedef std::shared_ptr<TextStyle>                       TextStyleRef;
@@ -1030,11 +1047,11 @@ namespace osmscout {
   /**
    * \ingroup Stylesheet
    *
-   * A style defining repretive drawing of a shield label along a path. It consists
+   * A style defining repetive drawing of a shield label along a path. It consists
    * mainly of the attributes of the shield itself (it internally holds a shield
    * label for this) and some more attributes defining the way of repetition.
    */
-  class OSMSCOUT_MAP_API PathShieldStyle
+  class OSMSCOUT_MAP_API PathShieldStyle : public Style
   {
   public:
     enum Attribute {
@@ -1054,6 +1071,11 @@ namespace osmscout {
   public:
     PathShieldStyle();
     PathShieldStyle(const PathShieldStyle& style);
+
+    void SetLabelValue(int attribute, const LabelProviderRef& value);
+    void SetColorValue(int attribute, const Color& value);
+    void SetDoubleValue(int attribute, const double value);
+    void SetUIntValue(int attribute, size_t value);
 
     PathShieldStyle& SetLabel(const LabelProviderRef& label);
     PathShieldStyle& SetPriority(uint8_t priority);
@@ -1113,6 +1135,8 @@ namespace osmscout {
       return shieldStyle;
     }
 
+    static StyleDescriptorRef GetDescriptor();
+
     void CopyAttributes(const PathShieldStyle& other,
                         const std::set<Attribute>& attributes);
   };
@@ -1130,7 +1154,7 @@ namespace osmscout {
    * A style for drawing text onto a path, the text following the
    * contour of the path.
    */
-  class OSMSCOUT_MAP_API PathTextStyle
+  class OSMSCOUT_MAP_API PathTextStyle : public Style
   {
   public:
     enum Attribute {
@@ -1151,6 +1175,10 @@ namespace osmscout {
   public:
     PathTextStyle();
     PathTextStyle(const PathTextStyle& style);
+
+    void SetColorValue(int attribute, const Color& value);
+    void SetDoubleValue(int attribute, double value);
+    void SetLabelValue(int attribute, const LabelProviderRef& value);
 
     PathTextStyle& SetLabel(const LabelProviderRef& label);
     PathTextStyle& SetSize(double size);
@@ -1189,6 +1217,8 @@ namespace osmscout {
       return offset;
     }
 
+    static StyleDescriptorRef GetDescriptor();
+
     void CopyAttributes(const PathTextStyle& other,
                         const std::set<Attribute>& attributes);
   };
@@ -1199,6 +1229,78 @@ namespace osmscout {
   typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute>    PathTextStyleSelector;
   typedef std::list<PathTextStyleSelector>                         PathTextStyleSelectorList; //! List of selectors
   typedef std::vector<std::vector<PathTextStyleSelectorList> >     PathTextStyleLookupTable;  //!Index selectors by type and level
+
+  /**
+   * \ingroup Stylesheet
+   *
+   * The icon style allow the rendering of external images or internal symbols.
+   */
+  class OSMSCOUT_MAP_API IconStyle : public Style
+  {
+  public:
+    enum Attribute {
+      attrSymbol,
+      attrIconName,
+      attrPosition
+    };
+
+  private:
+    SymbolRef   symbol;
+    std::string iconName; //!< name of the icon as given in style
+    size_t      iconId;   //!< Id for external resource binding
+    size_t      position; //!< Relative vertical position of the label
+
+  public:
+    IconStyle();
+    IconStyle(const IconStyle& style);
+
+    void SetStringValue(int attribute, const std::string& value);
+    void SetSymbolValue(int attribute, const SymbolRef& value);
+    void SetUIntValue(int attribute, size_t value);
+
+    IconStyle& SetSymbol(const SymbolRef& symbol);
+    IconStyle& SetIconName(const std::string& iconName);
+    IconStyle& SetIconId(size_t id);
+    IconStyle& SetPosition(size_t position);
+
+    inline bool IsVisible() const
+    {
+      return !iconName.empty() ||
+              symbol;
+    }
+
+    inline const SymbolRef& GetSymbol() const
+    {
+      return symbol;
+    }
+
+    inline std::string GetIconName() const
+    {
+      return iconName;
+    }
+
+    inline size_t GetIconId() const
+    {
+      return iconId;
+    }
+
+    inline size_t GetPosition() const
+    {
+      return position;
+    }
+
+    static StyleDescriptorRef GetDescriptor();
+
+    void CopyAttributes(const IconStyle& other,
+                        const std::set<Attribute>& attributes);
+  };
+
+  typedef std::shared_ptr<IconStyle>                       IconStyleRef;
+  typedef PartialStyle<IconStyle,IconStyle::Attribute>     IconPartialStyle;
+  typedef ConditionalStyle<IconStyle,IconStyle::Attribute> IconConditionalStyle;
+  typedef StyleSelector<IconStyle,IconStyle::Attribute>    IconStyleSelector;
+  typedef std::list<IconStyleSelector>                     IconStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * \ingroup Stylesheet
@@ -1340,7 +1442,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    * Definition of a symbol. A symbol consists of a list of DrawPrimitives
-   * with with assigned rendeirng styes.
+   * with with assigned rendering styes.
    */
   class OSMSCOUT_MAP_API Symbol
   {
@@ -1390,80 +1492,12 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<Symbol> SymbolRef;
-
-  /**
-   * \ingroup Stylesheet
-   *
-   * The icon style allow the rendering of external images or internal symbols.
-   */
-  class OSMSCOUT_MAP_API IconStyle
-  {
-  public:
-    enum Attribute {
-      attrSymbol,
-      attrIconName,
-      attrPosition
-    };
-
-  private:
-    SymbolRef   symbol;
-    std::string iconName; //!< name of the icon as given in style
-    size_t      iconId;   //!< Id for external resource binding
-    size_t      position; //!< Relative vertical position of the label
-
-  public:
-    IconStyle();
-    IconStyle(const IconStyle& style);
-
-    IconStyle& SetSymbol(const SymbolRef& symbol);
-    IconStyle& SetIconName(const std::string& iconName);
-    IconStyle& SetIconId(size_t id);
-    IconStyle& SetPosition(size_t position);
-
-    inline bool IsVisible() const
-    {
-      return !iconName.empty() ||
-              symbol;
-    }
-
-    inline const SymbolRef& GetSymbol() const
-    {
-      return symbol;
-    }
-
-    inline std::string GetIconName() const
-    {
-      return iconName;
-    }
-
-    inline size_t GetIconId() const
-    {
-      return iconId;
-    }
-
-    inline size_t GetPosition() const
-    {
-      return position;
-    }
-
-    void CopyAttributes(const IconStyle& other,
-                        const std::set<Attribute>& attributes);
-  };
-
-  typedef std::shared_ptr<IconStyle>                       IconStyleRef;
-  typedef PartialStyle<IconStyle,IconStyle::Attribute>     IconPartialStyle;
-  typedef ConditionalStyle<IconStyle,IconStyle::Attribute> IconConditionalStyle;
-  typedef StyleSelector<IconStyle,IconStyle::Attribute>    IconStyleSelector;
-  typedef std::list<IconStyleSelector>                     IconStyleSelectorList; //! List of selectors
-  typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;  //!Index selectors by type and level
-
   /**
    * \ingroup Stylesheet
    *
    * Style for repetive drawing of symbols on top of a path.
    */
-  class OSMSCOUT_MAP_API PathSymbolStyle
+  class OSMSCOUT_MAP_API PathSymbolStyle : public Style
   {
   public:
 
@@ -1483,6 +1517,9 @@ namespace osmscout {
   public:
     PathSymbolStyle();
     PathSymbolStyle(const PathSymbolStyle& style);
+
+    void SetDoubleValue(int attribute, double value);
+    void SetSymbolValue(int attribute, const SymbolRef& value);
 
     PathSymbolStyle& SetSymbol(const SymbolRef& symbol);
     PathSymbolStyle& SetSymbolSpace(double space);
@@ -1514,6 +1551,8 @@ namespace osmscout {
       return offset;
     }
 
+    static StyleDescriptorRef GetDescriptor();
+
     void CopyAttributes(const PathSymbolStyle& other,
                         const std::set<Attribute>& attributes);
   };
@@ -1539,7 +1578,7 @@ namespace osmscout {
   {
   private:
     TypeConfigRef                              typeConfig;             //!< Reference to the type configuration
-    StyleResolveContext                        styleResolveContext;    //!< Instance of helper class that can get passed around to templated helper methods
+    mutable StyleResolveContext                styleResolveContext;    //!< Instance of helper class that can get passed around to templated helper methods
 
     FeatureValueBuffer                         tileLandBuffer;         //!< Fake FeatureValueBuffer for land tiles
     FeatureValueBuffer                         tileSeaBuffer;          //!< Fake FeatureValueBuffer for sea tiles
@@ -1650,6 +1689,8 @@ namespace osmscout {
     void Postprocess();
 
     TypeConfigRef GetTypeConfig() const;
+
+    size_t GetFeatureFilterIndex(const Feature& feature) const;
 
     StyleConfig& SetWayPrio(const TypeInfoRef& type,
                             size_t prio);

@@ -64,6 +64,29 @@ You can also call the importer by hand. The minimum command line would be
     --destinationDirectory nordrhein-westfalen \
     nordrhein-westfalen.osm.pbf
 ```
+
+## Crop land and sea by data polygon
+
+When you plan to use multiple maps (databases) or combine map with other sources (render it on top of online map for example),
+it is usefull to crop land and sea by some polygon. In case of data substract from Geofabrik, there are such 
+polygons available in *.poly* format, for example [*nordrhein-westfalen.poly*](http://download.geofabrik.de/europe/germany/nordrhein-westfalen.poly).
+You can use these polygon files directly as Import tool input beside standard data file.
+
+```bash
+  $ .../Import/src/Import  \
+    --typefile ../stylesheets/map.ost \
+    --destinationDirectory nordrhein-westfalen \
+    nordrhein-westfalen.osm.pbf nordrhein-westfalen.poly
+```
+
+Italy without defined data polygon:
+
+<a class="screenshot" href="/images/ItalyWithoutDataPolygon.png"><img src="/images/ItalyWithoutDataPolygon.png" width="460" height="380" alt="Italy imported without data polygon"/></a>
+
+With data polygon:
+
+<a class="screenshot" href="/images/ItalyWithDataPolygon.png"   ><img src="/images/ItalyWithDataPolygon.png"    width="460" height="380" alt="Italy imported with data polygon"/></a>
+
 ## Adding contour lines
 
 Some years ago, Nasa released data from Shuttle Radar Topography Mission ([http://en.wikipedia.org/wiki/SRTM](SRTM)) for public use.
@@ -113,7 +136,7 @@ files into `srtm/SrtmCache` subdirectory (relative to directory where will be `S
 
 ## Resulting database
 
-The importer uses a number of import steps (currently ver 20) to generate a
+The importer uses a number of import steps (currently 24) to generate a
 custom database consisting of several data and index files.
 
 Each step print itself with a header showing its running number, its name,

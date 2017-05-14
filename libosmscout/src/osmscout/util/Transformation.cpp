@@ -349,10 +349,67 @@ namespace osmscout {
     }
   }
 
+  void TransPolygon::EnsureSimple(bool isArea)
+  {
+    // copy points to vector of TransPointRef for easy manipulation
+    std::vector<TransPointRef> optimised;
+    for (size_t i=0;i<length;i++) {
+      if (points[i].draw) {
+        TransPointRef ref{points+i};
+        optimised.push_back(ref);
+      }
+    }
+
+    if (optimised.size()<=3) {
+      return;
+    }
+    if (isArea){
+      optimised.push_back(optimised.front());
+    }
+
+    bool modified=false;
+    bool isSimple=false;
+    while (!isSimple){
+      isSimple=true;
+
+      size_t i=0;
+      size_t j;
+      bool updated=true;
+      // following while is just performance optimisation,
+      // we don't start searching intersections from start again
+      while (updated){
+        if (FindIntersection(optimised,i,j)){
+          isSimple=false;
+          modified=true;
+          if (isArea && j-i > i+(optimised.size()-j)){
+            optimised.erase(optimised.begin()+j+1, optimised.end());
+            optimised.erase(optimised.begin(), optimised.begin()+i);
+            optimised.push_back(optimised.front());
+            i=0;
+          }else{
+            optimised.erase(optimised.begin()+i+1, optimised.begin()+j+1);
+          }
+        }else{
+          updated=false;
+        }
+      }
+    }
+    if (modified){
+      // setup draw property for points remaining in optimised vector
+      for (size_t i=0;i<length;i++){
+        points[i].draw=false;
+      }
+      for (TransPointRef &ref:optimised){
+        ref.p->draw=true;
+      }
+    }
+  }
+
   void TransPolygon::TransformArea(const Projection& projection,
                                    OptimizeMethod optimize,
                                    const std::vector<Point>& nodes,
-                                   double optimizeErrorTolerance)
+                                   double optimizeErrorTolerance,
+                                   OutputConstraint constraint)
   {
     if (nodes.size()<2) {
       length=0;
@@ -367,17 +424,18 @@ namespace osmscout {
       pointsSize=nodes.size();
     }
 
+    TransformGeoToPixel(projection,
+                        nodes);
     if (optimize!=none) {
-      TransformGeoToPixel(projection,
-                          nodes);
-
-
       if (optimize==fast) {
         DropSimilarPoints(optimizeErrorTolerance);
         DropRedundantPointsFast(optimizeErrorTolerance);
       }
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
+      }
+      if (constraint==simple){
+        EnsureSimple(true);
       }
 
       length=0;
@@ -397,16 +455,13 @@ namespace osmscout {
         }
       }
     }
-    else {
-      TransformGeoToPixel(projection,
-                          nodes);
-    }
   }
 
   void TransPolygon::TransformWay(const Projection& projection,
                                   OptimizeMethod optimize,
                                   const std::vector<Point>& nodes,
-                                  double optimizeErrorTolerance)
+                                  double optimizeErrorTolerance,
+                                  OutputConstraint constraint)
   {
     if (nodes.empty()) {
       length=0;
@@ -421,9 +476,9 @@ namespace osmscout {
       pointsSize=nodes.size();
     }
 
+    TransformGeoToPixel(projection,
+                        nodes);
     if (optimize!=none) {
-      TransformGeoToPixel(projection,
-                          nodes);
 
       DropSimilarPoints(optimizeErrorTolerance);
 
@@ -432,6 +487,9 @@ namespace osmscout {
       }
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
+      }
+      if (constraint==simple){
+        EnsureSimple(false);
       }
 
       length=0;
@@ -449,10 +507,6 @@ namespace osmscout {
           end=i;
         }
       }
-    }
-    else {
-      TransformGeoToPixel(projection,
-                          nodes);
     }
   }
 

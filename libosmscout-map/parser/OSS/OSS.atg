@@ -1,4 +1,3 @@
-#include <iostream>
 #include <limits>
 #include <list>
 #include <sstream>
@@ -24,7 +23,17 @@ StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
 
-inline std::string Destring(const char* str)
+enum class ValueType
+{
+  NO_VALUE,
+  IDENT,
+  STRING,
+  COLOR,
+  NUMBER,
+  CONSTANT
+};
+
+std::string Destring(const char* str)
 {
   std::string result(str);
 
@@ -37,7 +46,7 @@ inline std::string Destring(const char* str)
   return result;
 }
 
-inline bool StringToDouble(const char* string, double& value)
+bool StringToDouble(const char* string, double& value)
 {
   std::istringstream buffer(string);
 
@@ -48,7 +57,7 @@ inline bool StringToDouble(const char* string, double& value)
   return !buffer.fail() && !buffer.bad() && buffer.eof();
 }
 
-inline size_t GetHexDigitValue(char c)
+size_t GetHexDigitValue(char c)
 {
   if (c>='0' && c<='9') {
     return c-'0';
@@ -61,21 +70,35 @@ inline size_t GetHexDigitValue(char c)
   return 0;
 }
 
-inline void ToRGBA(const std::string& str, Color& color)
+void AddFeatureToFilter(StyleFilter& filter,
+                        const std::string& featureName,
+                        TypeInfoSet& resultTypes)
 {
-  double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
-  double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
-  double b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
-  double a;
+  FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 
-  if (str.length()==9) {
-    a=(16*GetHexDigitValue(str[7])+GetHexDigitValue(str[8]))/255.0;
-  }
-  else {
-    a=1.0;
+  if (!feature) {
+    std::string e="Unknown feature '"+featureName+"'";
+
+    SemErr(e.c_str());
+    return;
   }
 
-  color=Color(r,g,b,a);
+  for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+    if (type->HasFeature(featureName)) {
+      if (!filter.FiltersByType() ||
+          filter.HasType(type)) {
+        // Add type only if the filter either has no types or 
+        // if the the type is already filtered  
+        resultTypes.Set(type);
+      }
+    }
+  }
+
+  if (!resultTypes.Empty()) {
+    size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
+  
+    filter.AddFeature(featureFilterIndex);
+  }
 }
 
 CHARACTERS
@@ -619,12 +642,6 @@ PRODUCTIONS
                      STYLEFILTER_ONEWAY<filter>
                    ]
                    [
-                     STYLEFILTER_BRIDGE<filter>
-                   ]
-                   [
-                     STYLEFILTER_TUNNEL<filter>
-                   ]
-                   [
                      STYLEFILTER_SIZE<filter>
                    ]
                 "]"
@@ -640,7 +657,7 @@ PRODUCTIONS
                 (.
                   for (const auto& type : config.GetTypeConfig()->GetTypes()) {
                     if (type->IsInGroup(groupName)) {
-                      if (filter.HasTypes() &&
+                      if (filter.FiltersByType() &&
                           !filter.HasType(type)) {
                         continue;
                       }
@@ -674,46 +691,17 @@ PRODUCTIONS
                 "FEATURE"
                 IDENT<featureName>
                 (.
-                  FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
-
-                  if (!feature) {
-                    std::string e="Unknown feature '"+featureName+"'";
-
-                    SemErr(e.c_str());
-                  }
-                  else {
-                    for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-                       if (type->HasFeature(featureName)) {
-                         if (filter.HasTypes() &&
-                             !filter.HasType(type)) {
-                           continue;
-                         }
-
-                         types.Set(type);
-                       }
-                    }
-                  }
+                  AddFeatureToFilter(filter,
+                                     featureName,
+                                     types);                  
                 .)
                 {
-                  (. std::string featureName; .)
                   ","
                   IDENT<featureName>
                   (.
-                    FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
-
-                    if (!feature) {
-                      std::string e="Unknown feature '"+featureName+"'";
-
-                      SemErr(e.c_str());
-                    }
-                    else {
-                      for (const auto& type : config.GetTypeConfig()->GetTypes()) {
-                         if (types.IsSet(type) &&
-                             !type->HasFeature(featureName)) {
-                           types.Remove(type);
-                         }
-                      }
-                    }
+                    AddFeatureToFilter(filter,
+                                       featureName,
+                                       types);                  
                   .)
                 }
 
@@ -728,7 +716,7 @@ PRODUCTIONS
                 (.
                   for (const auto& type : config.GetTypeConfig()->GetTypes()) {
                     if (type->IsPath()) {
-                      if (filter.HasTypes() &&
+                      if (filter.FiltersByType() &&
                           !filter.HasType(type)) {
                         continue;
                       }
@@ -757,7 +745,7 @@ PRODUCTIONS
 
                     SemWarning(e.c_str());
                   }
-                  else if (filter.HasTypes() &&
+                  else if (filter.FiltersByType() &&
                            !filter.HasType(type)) {
                     std::string e="Type '"+name+"' is not included by parent filter";
 
@@ -779,7 +767,7 @@ PRODUCTIONS
 
                       SemWarning(e.c_str());
                     }
-                    else if (filter.HasTypes() &&
+                    else if (filter.FiltersByType() &&
                              !filter.HasType(type)) {
                       std::string e="Type '"+name+"' is not included by parent filter";
 
@@ -835,20 +823,6 @@ PRODUCTIONS
               = "ONEWAY"
                 (.
                   filter.SetOneway(true);
-                .)
-                .
-
-  STYLEFILTER_BRIDGE<StyleFilter& filter>
-              = "BRIDGE"
-                (.
-                  filter.SetBridge(true);
-                .)
-                .
-
-  STYLEFILTER_TUNNEL<StyleFilter& filter>
-              = "TUNNEL"
-                (.
-                  filter.SetTunnel(true);
                 .)
                 .
 
@@ -1181,463 +1155,779 @@ PRODUCTIONS
                 .
 
   LINESTYLEATTR<LinePartialStyle& style>
-              = (
-                  (. Color lineColor; .)
-                  "color" ":" COLOR<lineColor>
-                  (.
-                     style.style->SetLineColor(lineColor);
-                     style.attributes.insert(LineStyle::attrLineColor);
-                  .)
-                | (.
-                    std::vector<double> dashes;
-                    double              dash;
-                   .)
-                  "dash" ":"
-                   UDOUBLE<dash>   (. dashes.push_back(dash); .)
-                  {
-                    ","
-                    UDOUBLE<dash>  (. dashes.push_back(dash); .)
-                  }
-                  (.
-                     style.style->SetDashes(dashes);
-                     style.attributes.insert(LineStyle::attrDashes);
-                  .)
-                | (. Color gapColor; .)
-                  "gapColor" ":" COLOR<gapColor>
-                  (.
-                     style.style->SetGapColor(gapColor);
-                     style.attributes.insert(LineStyle::attrGapColor);
-                  .)
-                | (. double displayWidth; .)
-                  "displayWidth" ":"  UDISPLAYSIZE<displayWidth>
-                  (.
-                     style.style->SetDisplayWidth(displayWidth);
-                     style.attributes.insert(LineStyle::attrDisplayWidth);
-                  .)
-                | (. double width; .)
-                  "width" ":" UMAPSIZE<width>
-                  (.
-                     style.style->SetWidth(width);
-                     style.attributes.insert(LineStyle::attrWidth);
-                  .)
-                | (. double displayOffset; .)
-                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
-                  (.
-                     style.style->SetDisplayOffset(displayOffset);
-                     style.attributes.insert(LineStyle::attrDisplayOffset);
-                  .)
-                | (. double offset; .)
-                  "offset" ":" MAPSIZE<offset>
-                  (.
-                     style.style->SetOffset(offset);
-                     style.attributes.insert(LineStyle::attrOffset);
-                  .)
-                | (. LineStyle::CapStyle capStyle; .)
-                  "cap" ":" CAPSTYLE<capStyle>
-                  (.
-                     style.style->SetJoinCap(capStyle);
-                     style.attributes.insert(LineStyle::attrJoinCap);
-
-                     style.style->SetEndCap(capStyle);
-                     style.attributes.insert(LineStyle::attrEndCap);
-                  .)
-                | (. LineStyle::CapStyle capStyle; .)
-                  "joinCap" ":" CAPSTYLE<capStyle>
-                  (.
-                     style.style->SetJoinCap(capStyle);
-                     style.attributes.insert(LineStyle::attrJoinCap);
-                  .)
-                | (. LineStyle::CapStyle capStyle; .)
-                  "endCap" ":" CAPSTYLE<capStyle>
-                  (.
-                     style.style->SetEndCap(capStyle);
-                     style.attributes.insert(LineStyle::attrEndCap);
-                  .)
-                | (. int priority; .)
-                  "priority" ":" INT<priority>
-                  (.
-                     style.style->SetPriority(priority);
-                     style.attributes.insert(LineStyle::attrPriority);
-                  .)
-                | (. int zIndex; .)
-                  "zIndex" ":" INT<zIndex>
-                  (.
-                     style.style->SetZIndex(zIndex);
-                     style.attributes.insert(LineStyle::attrZIndex);
-                  .)
-                )
+              = 
+                ATTRIBUTE<style,*LineStyle::GetDescriptor()>
                 .
 
   FILLSTYLEATTR<FillPartialStyle& style>
-              = (
-                  (. Color fillColor; .)
-                  "color" ":" COLOR<fillColor>
-                  (.
-                     style.style->SetFillColor(fillColor);
-                     style.attributes.insert(FillStyle::attrFillColor);
-                  .)
-                | (. std::string patternName; .)
-                  "pattern" ":" STRING<patternName>
-                  (.
-                     style.style->SetPattern(patternName);
-                     style.attributes.insert(FillStyle::attrPattern);
-                  .)
-                | (. Magnification minMag; .)
-                  "patternMinMag" ":" MAG<minMag>
-                  (.
-                     style.style->SetPatternMinMag(minMag);
-                     style.attributes.insert(FillStyle::attrPatternMinMag);
-                  .)
-                )
+              =   
+                ATTRIBUTE<style,*FillStyle::GetDescriptor()>
                 .
 
   BORDERSTYLEATTR<BorderPartialStyle& style>
-              = (
-                | (. Color color; .)
-                  "color" ":" COLOR<color>
-                  (.
-                     style.style->SetColor(color);
-                     style.attributes.insert(BorderStyle::attrColor);
-                  .)
-                | (. double width; .)
-                  "width" ":" UDISPLAYSIZE<width>
-                  (.
-                     style.style->SetWidth(width);
-                     style.attributes.insert(BorderStyle::attrWidth);
-                  .)
-                | (.
-                    std::vector<double> dashes;
-                    double              dash;
-                   .)
-                  "dash" ":"
-                   UDOUBLE<dash>   (. dashes.push_back(dash); .)
-                  {
-                    ","
-                    UDOUBLE<dash>  (. dashes.push_back(dash); .)
-                  }
-                  (.
-                     style.style->SetDashes(dashes);
-                     style.attributes.insert(BorderStyle::attrDashes);
-                  .)
-                | (. double displayOffset; .)
-                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
-                  (.
-                     style.style->SetDisplayOffset(displayOffset);
-                     style.attributes.insert(BorderStyle::attrDisplayOffset);
-                  .)
-                | (. double offset; .)
-                  "offset" ":" MAPSIZE<offset>
-                  (.
-                     style.style->SetOffset(offset);
-                     style.attributes.insert(BorderStyle::attrOffset);
-                  .)
-                | (. int priority; .)
-                  "priority" ":" INT<priority>
-                  (.
-                     style.style->SetPriority(priority);
-                     style.attributes.insert(BorderStyle::attrPriority);
-                  .)
-                )
+              = 
+                ATTRIBUTE<style,*BorderStyle::GetDescriptor()>
                 .
 
   TEXTSTYLEATTR<TextPartialStyle& style>
-              = (
-                  (. LabelProviderRef label; .)
-                  "label" ":" TEXTLABEL<label>
-                  (.
-                     if (label) {
-                       style.style->SetLabel(label);
-                       style.attributes.insert(TextStyle::attrLabel);
-                     }
-                  .)
-                | (. TextStyle::Style labelStyle; .)
-                  "style" ":" LABELSTYLE<labelStyle>
-                  (.
-                     style.style->SetStyle(labelStyle);
-                     style.attributes.insert(TextStyle::attrStyle);
-                  .)
-                | (. Color textColor; .)
-                  "color" ":" COLOR<textColor>
-                  (.
-                     style.style->SetTextColor(textColor);
-                     style.attributes.insert(TextStyle::attrTextColor);
-                  .)
-                | (. double size; .)
-                  "size" ":" UDOUBLE<size>
-                  (.
-                     style.style->SetSize(size);
-                     style.attributes.insert(TextStyle::attrSize);
-                  .)
-                | (. Magnification scaleMag; .)
-                  "scaleMag" ":" MAG<scaleMag>
-                  (.
-                     style.style->SetScaleAndFadeMag(scaleMag);
-                     style.attributes.insert(TextStyle::attrScaleAndFadeMag);
-                  .)
-                | (. bool autoSize; .)
-                  "autoSize" ":" BOOL<autoSize>
-                  (.
-                     style.style->SetAutoSize(autoSize);
-                     style.attributes.insert(TextStyle::attrAutoSize);
-                  .)
-                | (. size_t priority; .)
-                  "priority" ":" UINT<priority>
-                  (.
-                    style.style->SetPriority((uint8_t)priority);
-                    style.attributes.insert(TextStyle::attrPriority);
-                  .)
-                | (. size_t position; .)
-                  "position" ":" UINT<position>
-                  (.
-                    style.style->SetPosition(position);
-                    style.attributes.insert(TextStyle::attrPosition);
-                  .)
-                )
+              =
+                ATTRIBUTE<style,*TextStyle::GetDescriptor()>
                 .
 
   PATHSHIELDSTYLEATTR<PathShieldPartialStyle& style>
-              = (
-                  (. LabelProviderRef label; .)
-                  "label" ":" TEXTLABEL<label>
-                  (.
-                     if (label) {
-                       style.style->SetLabel(label);
-                       style.attributes.insert(PathShieldStyle::attrLabel);
-                     }
-                  .)
-                | (. Color textColor; .)
-                  "color" ":" COLOR<textColor>
-                  (.
-                     style.style->SetTextColor(textColor);
-                     style.attributes.insert(PathShieldStyle::attrTextColor);
-                  .)
-                | (. Color bgColor; .)
-                  "backgroundColor" ":" COLOR<bgColor>
-                  (.
-                     style.style->SetBgColor(bgColor);
-                     style.attributes.insert(PathShieldStyle::attrBgColor);
-                  .)
-                | (. Color borderColor; .)
-                  "borderColor" ":" COLOR<borderColor>
-                  (.
-                     style.style->SetBorderColor(borderColor);
-                     style.attributes.insert(PathShieldStyle::attrBorderColor);
-                  .)
-                | (. double size; .)
-                  "size" ":" UDOUBLE<size>
-                  (.
-                     style.style->SetSize(size);
-                     style.attributes.insert(PathShieldStyle::attrSize);
-                  .)
-                | (. size_t priority; .)
-                  "priority" ":" UINT<priority>
-                  (.
-                    if (priority<std::numeric_limits<uint8_t>::max()) {
-                      style.style->SetPriority((uint8_t)priority);
-                      style.attributes.insert(PathShieldStyle::attrPriority);
-                    }
-                    else {
-                      std::string e="Priority must be in the interval [0,"+
-                                    NumberToString(std::numeric_limits<uint8_t>::max())+"[";
-
-                      SemErr(e.c_str());
-                    }
-                  .)
-                | (. double shieldSpace; .)
-                  "shieldSpace" ":" UDISPLAYSIZE<shieldSpace>
-                  (.
-                     style.style->SetShieldSpace(shieldSpace);
-                     style.attributes.insert(PathShieldStyle::attrShieldSpace);
-                  .)
-                )
+              = 
+                ATTRIBUTE<style,*PathShieldStyle::GetDescriptor()>              
                 .
 
   PATHTEXTSTYLEATTR<PathTextPartialStyle& style>
-              = (
-                  (. LabelProviderRef label; .)
-                  "label" ":" TEXTLABEL<label>
-                  (.
-                     if (label) {
-                       style.style->SetLabel(label);
-                       style.attributes.insert(PathTextStyle::attrLabel);
-                     }
-                  .)
-                | (. Color textColor; .)
-                  "color" ":" COLOR<textColor>
-                  (.
-                     style.style->SetTextColor(textColor);
-                     style.attributes.insert(PathTextStyle::attrTextColor);
-                  .)
-                | (. double size; .)
-                  "size" ":" UDOUBLE<size>
-                  (.
-                     style.style->SetSize(size);
-                     style.attributes.insert(PathTextStyle::attrSize);
-                  .)
-                | (. double displayOffset; .)
-                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
-                  (.
-                     style.style->SetDisplayOffset(displayOffset);
-                     style.attributes.insert(PathTextStyle::attrDisplayOffset);
-                  .)
-                | (. double offset; .)
-                  "offset" ":" MAPSIZE<offset>
-                  (.
-                     style.style->SetOffset(offset);
-                     style.attributes.insert(PathTextStyle::attrOffset);
-                  .)
-                )
+              = 
+                ATTRIBUTE<style,*PathTextStyle::GetDescriptor()>
                 .
 
   PATHSYMBOLSTYLEATTR<PathSymbolPartialStyle& style>
-              = (
-                  (.
-                    std::string name;
-                    SymbolRef   symbol;
-                   .)
-                  "symbol" ":" IDENT<name>
-                  (.
-                     symbol=config.GetSymbol(name);
-
-                     if (!symbol) {
-                       std::string e="Map symbol '"+name+"' is not defined";
-
-                       SemErr(e.c_str());
-                     }
-                     else {
-                       style.style->SetSymbol(symbol);
-                       style.attributes.insert(PathSymbolStyle::attrSymbol);
-                     }
-                  .)
-                | (. double symbolSpace; .)
-                  "symbolSpace" ":" UDISPLAYSIZE<symbolSpace>
-                  (.
-                     style.style->SetSymbolSpace(symbolSpace);
-                     style.attributes.insert(PathSymbolStyle::attrSymbolSpace);
-                  .)
-                | (. double displayOffset; .)
-                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
-                  (.
-                     style.style->SetDisplayOffset(displayOffset);
-                     style.attributes.insert(PathSymbolStyle::attrDisplayOffset);
-                  .)
-                | (. double offset; .)
-                  "offset" ":" MAPSIZE<offset>
-                  (.
-                     style.style->SetOffset(offset);
-                     style.attributes.insert(PathSymbolStyle::attrOffset);
-                  .)
-                )
+              = 
+                ATTRIBUTE<style,*PathSymbolStyle::GetDescriptor()>
                 .
 
   ICONSTYLEATTR<IconPartialStyle& style>
-              = (
-                  (.
-                    std::string name;
-                    SymbolRef   symbol;
-                   .)
-                  "symbol" ":" IDENT<name>
-                  (.
-                     symbol=config.GetSymbol(name);
-
-                     if (!symbol) {
-                       std::string e="Map symbol '"+name+"' is not defined";
-
-                       SemErr(e.c_str());
-                     }
-                     else {
-                       style.style->SetSymbol(symbol);
-                       style.attributes.insert(IconStyle::attrSymbol);
-                     }
-                  .)
-                | (. std::string name; .)
-                  "name" ":" IDENT<name>
-                  (.
-                      style.style->SetIconName(name);
-                      style.attributes.insert(IconStyle::attrIconName);
-                  .)
-                | (. size_t position; .)
-                  "position" ":" UINT<position>
-                  (.
-                    style.style->SetPosition(position);
-                    style.attributes.insert(IconStyle::attrPosition);
-                  .)
-                )
+              = 
+                ATTRIBUTE<style,*IconStyle::GetDescriptor()>
                 .
 
-  CAPSTYLE<LineStyle::CapStyle& style>
-              = (
-                  "butt"    (. style=LineStyle::capButt; .)
-                | "round"   (. style=LineStyle::capRound; .)
-                | "square"  (. style=LineStyle::capSquare; .)
-                ).
-
-  LABELSTYLE<TextStyle::Style& style>
-              = (
-                  "normal"    (. style=TextStyle::normal; .)
-                | "emphasize" (. style=TextStyle::emphasize; .)
-                ).
-
-  TEXTLABEL<LabelProviderRef& label>
-              = (.
-                  std::string featureName;
-                  std::string labelName;
+  ATTRIBUTE<PartialStyleBase& style, const StyleDescriptor& descriptor>
+              =
+                 (.
+                   std::string                 attributeName;
+                   StyleAttributeDescriptorRef attributeDescriptor;
                  .)
-                IDENT<featureName>
-                [
-                  "."
-                  // This is a hack, since "name" is a reserved token, we could not have a IDENT name...
-                  ( IDENT<labelName> | "name" (. labelName="name"; .) )
-                ]
+                 (
+                   IDENT<attributeName>
+                 | "name" (. attributeName="name"; .)  
+                 )
+                 
+                 (.
+                   attributeDescriptor=descriptor.GetAttribute(attributeName);
+                   
+                   if (!attributeDescriptor) {
+                     std::string e="'"+attributeName+"' is not a known attribute of the given style";
+
+                     SemErr(e.c_str());
+                     
+                     attributeDescriptor=std::make_shared<StyleVoidAttributeDescriptor>();
+                   }
+                  .)
+                 ":"
+                 ATTRIBUTEVALUE<style,*attributeDescriptor>
+                 .
+
+  /*
+    We have the following source types (types we actualy parse)
+    IDENT,
+    STRING,
+    COLOR,
+    NUMBER,
+    CONSTANT
+    
+    and the following target types (types we should return):
+    BOOL,
+    STRING,
+    COLOR,
+    MAGNIFICATION,
+    ENUM,
+    DISPLAY_SIZE,
+    UDISPLAY_SIZE,
+    MAP_SIZE,
+    UMAP_SIZE,
+    DOUBLE,
+    UDOUBLE,
+    UDOUBLE_ARRAY,
+    INT,
+    UINT,
+    LABEL,
+    SYMBOL    
+
+   (in both cases besides "VOID")
+  */
+  ATTRIBUTEVALUE<PartialStyleBase& style, const StyleAttributeDescriptor& descriptor>
+              =
+                 (.
+                   ValueType              valueType=ValueType::NO_VALUE;
+                   bool                   negate=false;
+                   std::string            ident;
+                   std::string            subIdent;
+                   std::string            stringValue;
+                   std::string            function;
+                   double                 factor;
+                   std::string            unit;
+                   std::string            number;
+                   std::list<std::string> numberList;
+                   Color                  color;
+                   StyleConstantRef       constant;
+                  .)
+                  
+                 (
+                   (
+                     IDENT<ident> (. valueType=ValueType::IDENT; .)
+                   | "lighten"    (. ident="lighten"; valueType=ValueType::IDENT; .)  
+                   | "darken"     (. ident="darken"; valueType=ValueType::IDENT; .)  
+                   )
+                   [
+                     (
+                       "("
+                       (.
+                           valueType=ValueType::COLOR;
+                           function=ident;
+                        .)
+                       (
+                         COLOR_VALUE<color>
+                       | CONSTANT<constant>
+                       )
+                       ","
+                       UDOUBLE<factor>
+                       ")"
+                     )
+                     |
+                     (
+                       "."
+                       (
+                         IDENT<subIdent>
+                       | "name" (. subIdent="name"; .)  
+                       )
+                     )  
+                   ]
+                 | STRING<stringValue>
+                   (. valueType=ValueType::STRING; .)
+                 | [
+                    "-" (. negate=true; .)
+                   ]
+                   (
+                     number
+                     (.
+                       number=t->val;
+                       valueType=ValueType::NUMBER;
+                     .)
+                     [
+                       (
+                         IDENT<unit>
+                       | "mm" (. unit="mm"; .)
+                       | "m"  (. unit="m"; .)
+                       )  
+                     ]
+                     {
+                       ","
+                       (
+                         number (. numberList.push_back(t->val); .)
+                       | double (. numberList.push_back(t->val); .)
+                       )
+                     }  
+                   | double
+                     (.
+                       number=t->val;
+                       valueType=ValueType::NUMBER;
+                     .)  
+                     [
+                       (
+                         IDENT<unit>
+                       | "mm" (. unit="mm"; .)
+                       | "m"  (. unit="m"; .)
+                       )  
+                     ]
+                     {
+                       ","
+                       (
+                         number (. numberList.push_back(t->val); .)
+                       | double (. numberList.push_back(t->val); .)
+                       )
+                     }  
+                   )                   
+                 | COLOR_VALUE<color>
+                   (. valueType=ValueType::COLOR; .)
+                 | CONSTANT<constant>
+                   (. valueType=ValueType::CONSTANT; .)
+                 )
+                 
+                 (.
+                   if (descriptor.GetType()==StyleAttributeType::TYPE_BOOL) {
+                     if (valueType==ValueType::IDENT) {
+                       if (ident=="true" && subIdent.empty()) {
+                         style.SetBoolValue(descriptor.GetAttribute(),true);
+                       }
+                       else if (ident=="false" && subIdent.empty()) {
+                         style.SetBoolValue(descriptor.GetAttribute(),false);
+                       }
+                       else {
+                         std::string e="Attribute '"+descriptor.GetName()+"' requires a boolean value ('true' or 'false')";
+                        
+                         SemErr(e.c_str());
+                       }
+                     }
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_STRING) {
+                     if (valueType==ValueType::IDENT) {
+                       if (subIdent.empty()) {
+                         style.SetStringValue(descriptor.GetAttribute(),ident);
+                       }
+                       else {
+                         std::string e="Attribute '"+descriptor.GetName()+"' requires a simple IDENT as value";
+                       
+                         SemErr(e.c_str());
+                       }
+                     }
+                     else if (valueType==ValueType::STRING) {
+                       style.SetStringValue(descriptor.GetAttribute(),stringValue);
+                     }
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_COLOR) {
+                     if (valueType==ValueType::COLOR) {
+                       if (constant) {
+                         if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
+                           std::string e="Constant is not of type 'COLOR'";
+
+                           SemErr(e.c_str());
+                         }
+                         else {
+                           StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
+
+                           color=colorConstant->GetColor();
+                         }
+                       }
+                     
+                       if (!function.empty()) {
+                         if (factor<0.0 && factor>1.0) {
+                          std::string e="Factor must be in the range [0..1]";
+
+                           SemErr(e.c_str());
+                         }
+                       
+                         if (function=="lighten") {
+                           if (!errors->hasErrors) {
+                             style.SetColorValue(descriptor.GetAttribute(),color.Lighten(factor));
+                           }
+                         }
+                         else if (function=="darken") {
+                           if (!errors->hasErrors) {
+                             style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
+                           }
+                         }
+                         else {
+                           std::string e="Unknown color function '"+function+"'";
+
+                           SemErr(e.c_str());
+                         }
+                       }
+                       else {                     
+                         style.SetColorValue(descriptor.GetAttribute(),color);
+                       }
+                     }
+                     else if (valueType==ValueType::CONSTANT) {
+                       if (!constant) {
+                         // no code
+                       }
+                       else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
+                         std::string e="Constant is not of type 'COLOR'";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!errors->hasErrors) {
+                         StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
+
+                         style.SetColorValue(descriptor.GetAttribute(),colorConstant->GetColor());
+                       }
+                     }
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_MAGNIFICATION) {
+                     if (valueType==ValueType::IDENT) {
+                       Magnification magnification;
+                       
+                       if (subIdent.empty() && magnificationConverter.Convert(ident,magnification)) {
+                         style.SetMagnificationValue(descriptor.GetAttribute(),magnification);
+                       }
+                       else {
+                         std::string e="'"+std::string(ident)+"' is not a valid magnification level";
+
+                         SemErr(e.c_str());
+                       }
+                     }
+                     else if (valueType==ValueType::NUMBER) {
+                       Magnification magnification;
+                       size_t        level;
+                       
+                       if (StringToNumber(number,level)) {
+                         magnification.SetLevel((uint32_t)level);
+                       }
+                       else {
+                         std::string e="Cannot parse number '"+std::string(number)+"'";
+
+                         SemErr(e.c_str());
+                       }
+                     }
+                     else if (valueType==ValueType::CONSTANT) {
+                       if (!constant) {
+                         // no code
+                       }
+                       else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
+                         std::string e="Constant is not of type 'MAGNIFICATION'";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!errors->hasErrors) {
+                         StyleConstantMag* uintConstant=dynamic_cast<StyleConstantMag*>(constant.get());
+
+                         style.SetMagnificationValue(descriptor.GetAttribute(),uintConstant->GetMag());
+                       }
+                     }
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_ENUM) {
+                     const StyleEnumAttributeDescriptor& enumDescriptor=dynamic_cast<const StyleEnumAttributeDescriptor&>(descriptor);
+                     
+                     if (valueType==ValueType::IDENT) {
+                       int value=enumDescriptor.GetEnumValue(ident);
+                       
+                       if (value>=0) {
+                         style.SetIntValue(descriptor.GetAttribute(),value);
+                       }
+                       else {
+                         std::string e="'"+ident+"' is not a valid enumeration value for this attribute";
+                       
+                         SemErr(e.c_str());
+                       }
+                     }
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_DISPLAY_SIZE) {
+                     if (valueType==ValueType::NUMBER) {                     
+                       double value;
+                       
+                       if (unit!="mm") {
+                         std::string e="Value must have unit 'mm' and not '"+unit+"'";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         if (negate) {
+                           value=-value;
+                         }
+                         style.SetDoubleValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_UDISPLAY_SIZE) {
+                     if (valueType==ValueType::NUMBER) {                     
+                       double value;
+                       
+                       if (negate) {
+                         std::string e="Negative numbers not allowed here";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (unit!="mm") {
+                         std::string e="Value must have unit 'mm' and not '"+unit+"'";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         style.SetDoubleValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_MAP_SIZE) {
+                     if (valueType==ValueType::NUMBER) {                     
+                       double value;
+                       
+                       if (unit!="m") {
+                         std::string e="Value must have unit 'm' and not '"+unit+"'";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         if (negate) {
+                           value=-value;
+                         }
+                         style.SetDoubleValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_UMAP_SIZE) {
+                     if (valueType==ValueType::NUMBER) {                     
+                       double value;
+                       
+                       if (negate) {
+                         std::string e="Negative numbers not allowed here";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (unit!="m") {
+                         std::string e="Value must have unit 'm' and not '"+unit+"'";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         style.SetDoubleValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_DOUBLE) {
+                     if (valueType==ValueType::NUMBER) {                     
+                       double value;
+                       
+                       if (!unit.empty()) {
+                         std::string e="Value must not have a unit";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         if (negate) {
+                           value=-value;
+                         }
+                         style.SetDoubleValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_UDOUBLE) {
+                     if (valueType==ValueType::NUMBER) {                     
+                       double value;
+                       
+                       if (negate) {
+                         std::string e="Negative numbers not allowed here";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!unit.empty()) {
+                         std::string e="Value must not have unit";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         style.SetDoubleValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_UDOUBLE_ARRAY) {
+                     if (valueType==ValueType::NUMBER) {
+                       double              value;
+                       std::vector<double> valueList(numberList.size()+1);
+                       
+                       if (negate) {
+                         std::string e="Negative numbers not allowed here";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!unit.empty()) {
+                         std::string e="Value must not have unit";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       valueList.push_back(value);
+                       
+                       for (const auto number : numberList) {
+                         if (!StringToNumber(number,value)) {
+                           std::string e="Cannot parse number '"+number+"'";
+
+                           SemErr(e.c_str());
+                         }
+                         
+                         valueList.push_back(value);
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         style.SetDoubleArrayValue(descriptor.GetAttribute(),valueList);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_LABEL) {
+                     if (!subIdent.empty()) {
+                       FeatureRef feature;
+
+                       feature=config.GetTypeConfig()->GetFeature(ident);
+
+                       if (!feature) {
+                         std::string e="'"+ident+"' is not a registered feature";
+
+                         SemErr(e.c_str());
+                       }
+                       else if (!feature->HasLabel()) {
+                         std::string e="'"+ident+"' does not support labels";
+
+                         SemErr(e.c_str());
+                       }
+                       else {
+                         size_t labelIndex;
+
+                         if (!feature->GetLabelIndex(subIdent,
+                                                     labelIndex)) {
+                           std::string e="'"+ident+"' does not have a label named '"+subIdent+"'";
+
+                           SemErr(e.c_str());
+                         }
+                         else {
+                           LabelProviderRef label;
+                           
+                           label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
+                                                                             ident,
+                                                                             subIdent);
+                           style.SetLabelValue(descriptor.GetAttribute(),label);
+                         }
+                       }
+                     }
+                     else {
+                       LabelProviderRef label;
+                       
+                       label=config.GetLabelProvider(ident);
+
+                       if (!label) {
+                         std::string e="There is no label provider with name '"+ident+"' registered";
+
+                         SemErr(e.c_str());
+                       }
+                       else {
+                         style.SetLabelValue(descriptor.GetAttribute(),label);
+                       }
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_SYMBOL) {
+                     if (valueType==ValueType::IDENT) {
+                       SymbolRef symbol=config.GetSymbol(ident);
+
+                       if (symbol && subIdent.empty()) {
+                         style.SetSymbolValue(descriptor.GetAttribute(),symbol);
+                       }
+                       else {
+                         std::string e="Map symbol '"+ident+"' is not defined";
+
+                         SemErr(e.c_str());
+                       }
+                     }
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_INT) {                   
+                     if (valueType==ValueType::NUMBER) {                     
+                       int value;
+                       
+                       if (!unit.empty()) {
+                         std::string e="Vaue must not have a unit";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         if (negate) {
+                           value=-value;
+                         }
+                         style.SetIntValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                     /*else if (valueType==ValueType::CONSTANT) {
+                       if (!constant) {
+                         // no code
+                       }
+                       else if (dynamic_cast<StyleConstantInt*>(constant.get())==NULL) {
+                         std::string e="Constant is not of type 'INT'";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!errors->hasErrors) {
+                         StyleConstantInt* uintConstant=dynamic_cast<StyleConstantInt*>(constant.get());
+
+                         style.SetIntValue(descriptor.GetAttribute(),intConstant->GetInt());
+                       }
+                     }*/
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_UINT) {                   
+                     if (valueType==ValueType::NUMBER) {                     
+                       size_t value;
+                       
+                       if (negate) {
+                         std::string e="Negative numbers not allowed here";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!unit.empty()) {
+                         std::string e="Vaue must not have a unit";
+
+                         SemErr(e.c_str());
+                       }
+                      
+                       if (!StringToNumber(number,value)) {
+                         std::string e="Cannot parse number '"+number+"'";
+
+                         SemErr(e.c_str());
+                       }
+                       
+                       if (!errors->hasErrors) {
+                         style.SetUIntValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                     else if (valueType==ValueType::CONSTANT) {
+                       if (!constant) {
+                         // no code
+                       }
+                       else if (dynamic_cast<StyleConstantUInt*>(constant.get())==NULL) {
+                         std::string e="Constant is not of type 'UINT'";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!errors->hasErrors) {
+                         StyleConstantUInt* uintConstant=dynamic_cast<StyleConstantUInt*>(constant.get());
+
+                         style.SetUIntValue(descriptor.GetAttribute(),uintConstant->GetUInt());
+                       }
+                     }
+                     else {
+                       std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
+                       
+                       SemErr(e.c_str());
+                     }
+                   }
+                 .)
+                .
+
+  COLOR_VALUE<Color& color>
+               =
+                color 
                 (.
-                  if (!labelName.empty()) {
-                    FeatureRef feature;
+                  std::string c(t->val);
 
-                    feature=config.GetTypeConfig()->GetFeature(featureName);
-
-                    if (!feature) {
-                      std::string e="'"+featureName+"' is not a registered feature";
-
-                      SemErr(e.c_str());
-                      return;
-                    }
-
-                    if (!feature->HasLabel()) {
-                      std::string e="'"+featureName+"' does not support labels";
-
-                      SemErr(e.c_str());
-                      return;
-                    }
-
-                    size_t labelIndex;
-
-                    if (!feature->GetLabelIndex(labelName,
-                                                labelIndex)) {
-                      std::string e="'"+featureName+"' does not have a label named '"+labelName+"'";
-
-                      SemErr(e.c_str());
-                      return;
-                    }
-
-                    label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
-                                                                      featureName,
-                                                                      labelName);
+                  if (c.length()!=7 &&
+                      c.length()!=9) {
+                    std::string e="Illegal color value";
+                    
+                    SemErr(e.c_str());
                   }
-                  else {
-                    label=config.GetLabelProvider(featureName);
 
-                    if (!label) {
-                      std::string e="There is no label provider with name '"+featureName+"' registered";
-
-                      SemErr(e.c_str());
-                      return;
-                    }
+                  if (!errors->hasErrors) {
+                    color=osmscout::Color::FromHexString(c);
                   }
+                .) 
+               . 
+
+  CONSTANT<StyleConstantRef& constant>
+               = 
+                 (.
+                   constant=NULL;
+                 .)
+                 variable
+                 (.
+                   constant=config.GetConstantByName(t->val+1);
+
+                   if (!constant) {
+                     std::string e=std::string("Constant \"") + t->val + "\" not defined";
+
+                     SemErr(e.c_str());
+                   }
+                 .)
+               . 
+
+  STRING<std::string& value>
+              = string
+                (.
+                  value=Destring(t->val);
                 .)
                 .
 
   COLOR<Color& color>
-              =   (. double factor; .)
+              =  
+                (.
+                   StyleConstantRef constant;
+                   double           factor;
+                .)
+                ( 
                   "lighten" "(" COLOR<color> "," UDOUBLE<factor> ")"
                   (.
                     if (factor>=0.0 && factor<=1.0) {
@@ -1661,29 +1951,10 @@ PRODUCTIONS
                       SemErr(e.c_str());
                     }
                   .)
-                | color
+                | COLOR_VALUE<color>
+                | CONSTANT<constant>
                   (.
-                    std::string c(t->val);
-
-                    if (c.length()!=7 &&
-                        c.length()!=9) {
-                      std::string e="Illegal color value";
-                      SemErr(e.c_str());
-                    }
-
-                    if (!errors->hasErrors) {
-                      ToRGBA(c,color);
-                    }
-                  .)
-                | variable
-                  (.
-                    StyleConstantRef constant=config.GetConstantByName(t->val+1);
-
                     if (!constant) {
-                      std::string e="Constant not defined";
-
-                      SemErr(e.c_str());
-
                       color=Color::BLACK;
                     }
                     else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
@@ -1699,10 +1970,12 @@ PRODUCTIONS
                       color=colorConstant->GetColor();
                     }
                   .)
+                )  
                 .
 
   MAG<Magnification& magnification>
-              = (
+              = 
+                (
                   (. std::string name; .)
                   IDENT<name>
                   (.
@@ -1728,44 +2001,27 @@ PRODUCTIONS
                     }
                   .)
                 )
-                | variable
+                |
+                (
+                  (. StyleConstantRef constant; .)
+                  CONSTANT<constant>
                   (.
-                    StyleConstantRef constant=config.GetConstantByName(t->val+1);
-
                     if (!constant) {
-                      std::string e="Constant not defined";
-
-                      SemErr(e.c_str());
+                      magnification.SetLevel(0);
                     }
                     else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
                       std::string e="Variable is not of type 'MAG'";
 
                       SemErr(e.c_str());
                     }
-
-                    if (!errors->hasErrors) {
+                    else {
                       StyleConstantMag* magConstant=dynamic_cast<StyleConstantMag*>(constant.get());
 
                       magnification=magConstant->GetMag();
                     }
                   .)
-               .
-
-  /* Size in units of screen (currently millimeter) */
-  UDISPLAYSIZE <double& value>
-              = UDOUBLE<value> "mm".
-
-  /* Size in units of screen (currently millimeter) */
-  DISPLAYSIZE <double& value>
-              = DOUBLE<value> "mm".
-
-  /* Size in units of map (currently meter) */
-  UMAPSIZE <double& value>
-              = UDOUBLE<value> "m".
-
-  /* Size in units of map (currently meter) */
-  MAPSIZE <double& value>
-              = DOUBLE<value> "m".
+                )  
+              .
 
   IDENT<std::string& value>
               = ident
@@ -1793,13 +2049,6 @@ PRODUCTIONS
 
                     value=false;
                   }
-                .)
-                .
-
-  STRING<std::string& value>
-              = string
-                (.
-                  value=Destring(t->val);
                 .)
                 .
 
@@ -1846,26 +2095,6 @@ PRODUCTIONS
                     }
                   .)
                 )
-                (.
-                  if (negate) {
-                    value=-value;
-                  }
-                .)
-                .
-
-  INT<int& value>
-              = (. bool negate=false; .)
-                [
-                  "-" (. negate=true; .)
-                ]
-                number
-                (.
-                  if (!StringToNumber(t->val,value)) {
-                    std::string e="Cannot parse number '"+std::string(t->val)+"'";
-
-                    SemErr(e.c_str());
-                  }
-                .)
                 (.
                   if (negate) {
                     value=-value;

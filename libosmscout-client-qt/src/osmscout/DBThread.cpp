@@ -29,72 +29,6 @@
 #include <osmscout/TextSearchIndex.h>
 #endif
 
-QBreaker::QBreaker()
-  : osmscout::Breaker(),
-    aborted(false)
-{
-}
-
-void QBreaker::Break()
-{
-  QMutexLocker locker(&mutex);
-
-  aborted=true;
-}
-
-bool QBreaker::IsAborted() const
-{
-  QMutexLocker locker(&mutex);
-
-  return aborted;
-}
-
-void QBreaker::Reset()
-{
-  QMutexLocker locker(&mutex);
-
-  aborted=false;
-}
-
-StyleError::StyleError(QString msg){
-    QRegExp rx("(\\d+),(\\d+) (Symbol|Error|Warning|Exception):(.*)");
-    if(rx.exactMatch(msg)){
-        line = rx.cap(1).toInt();
-        column = rx.cap(2).toInt();
-        if(rx.cap(3) == "Symbol"){
-            type = Symbol;
-        } else if(rx.cap(3) == "Error"){
-            type = Error;
-        } else if(rx.cap(3) == "Warning"){
-            type = Warning;
-        } else {
-            type = Exception;
-        }
-        text = rx.cap(4);
-    }
-}
-
-QString StyleError::GetTypeName() const
-{
-    switch(type){
-    case Symbol:
-        return QString("symbol");
-        break;
-    case Error:
-        return QString("error");
-        break;
-    case Warning:
-        return QString("warning");
-        break;
-    case Exception:
-        return QString("exception");
-        break;
-    default:
-      return QString("???");
-    }
-}
-
-
 DBThread::DBThread(QStringList databaseLookupDirs,
                    QString iconDirectory,
                    SettingsRef settings)
@@ -102,6 +36,7 @@ DBThread::DBThread(QStringList databaseLookupDirs,
     settings(settings),
     mapDpi(-1),
     physicalDpi(-1),
+    lock(QReadWriteLock::Recursive),
     iconDirectory(iconDirectory),
     daylight(true),
     renderSea(true),
@@ -184,7 +119,7 @@ bool DBThread::isInitializedInternal()
 }
 
 bool DBThread::isInitialized(){
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
   return isInitializedInternal();
 }
 
@@ -199,7 +134,7 @@ double DBThread::GetPhysicalDpi() const
 }
 
 const DatabaseLoadedResponse DBThread::loadedResponse() const {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
   DatabaseLoadedResponse response;
   for (auto db:databases){
     if (response.boundingBox.IsValid()){
@@ -216,9 +151,8 @@ const DatabaseLoadedResponse DBThread::loadedResponse() const {
 DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magnification,
                                             const osmscout::GeoBox &bbox)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
 
-  // TODO: use database multi-polygon, not bounding box
   osmscout::GeoBox boundingBox;
   for (const auto &db:databases){
     if (boundingBox.IsValid()){
@@ -278,8 +212,8 @@ void DBThread::TileStateCallback(const osmscout::TileRef& /*changedTile*/)
 
 bool DBThread::InitializeDatabases()
 {
-  QMutexLocker locker(&mutex);
-  qDebug() << "Initialize";
+  QReadLocker locker(&lock);
+  qDebug() << "Initialize databases";
   mapManager->lookupDatabases();
 
   return true;
@@ -287,7 +221,7 @@ bool DBThread::InitializeDatabases()
 
 void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 {
-  QMutexLocker locker(&mutex);
+  QWriteLocker locker(&lock);
 
   for (auto db:databases){
     db->close();
@@ -412,7 +346,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
 void DBThread::Finalize()
 {
-  QMutexLocker locker(&mutex);
+  QWriteLocker locker(&lock);
   qDebug() << "Finalize";
 
   for (auto db:databases){
@@ -431,7 +365,7 @@ void DBThread::CancelCurrentDataLoading()
 void DBThread::ToggleDaylight()
 {
   {
-    QMutexLocker locker(&mutex);
+    QWriteLocker locker(&lock);
 
     if (!isInitializedInternal()) {
         return;
@@ -449,7 +383,7 @@ void DBThread::ToggleDaylight()
 void DBThread::SetStyleFlag(const QString &key, bool value)
 {
   {
-    QMutexLocker locker(&mutex);
+    QWriteLocker locker(&lock);
 
     if (!isInitializedInternal()) {
         return;
@@ -470,7 +404,7 @@ void DBThread::LoadStyle(QString stylesheetFilename,
                          std::unordered_map<std::string,bool> stylesheetFlags,
                          const QString &suffix)
 {
-  QMutexLocker locker(&mutex);
+  QWriteLocker locker(&lock);
 
   this->stylesheetFilename = stylesheetFilename;
   this->stylesheetFlags = stylesheetFlags;
@@ -487,104 +421,6 @@ void DBThread::LoadStyle(QString stylesheetFilename,
   InvalidateVisualCache();
   emit stylesheetFilenameChanged();
   emit Redraw();
-}
-
-bool DBInstance::LoadStyle(QString stylesheetFilename,
-                           std::unordered_map<std::string,bool> stylesheetFlags,
-                           QList<StyleError> &errors)
-{
-
-
-  if (!database->IsOpen()) {
-    return false;
-  }
-
-  osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
-
-  if (!typeConfig) {
-    return false;
-  }
-
-  // new map style may require more data types. when tile is marked as "completed"
-  // such data types are never loaded into these tiles
-  // so we mark them as "incomplete" to make sure that all types for new stylesheet are loaded
-  mapService->InvalidateTileCache();
-  osmscout::StyleConfigRef newStyleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-
-  for (const auto& flag : stylesheetFlags) {
-    newStyleConfig->AddFlag(flag.first,flag.second);
-  }
-
-  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
-    // Tear down
-    if (painter!=NULL){
-      delete painter;
-      painter=NULL;
-    }
-
-    // Recreate
-    styleConfig=newStyleConfig;
-    painter=new osmscout::MapPainterQt(styleConfig);
-  }
-  else {
-    std::list<std::string> errorsStrings=newStyleConfig->GetErrors();
-
-    for(const auto& errorString : errorsStrings) {
-      StyleError err(QString::fromStdString(errorString));
-      qWarning() << "Style error:" << err.GetDescription();
-      errors.append(err);
-    }
-
-    styleConfig=NULL;
-
-    return false;
-  }
-
-  return true;
-}
-
-
-bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
-                              osmscout::RouterParameter routerParameter)
-{
-  if (!database->IsOpen()) {
-    return false;
-  }
-
-  if (!router/* ||
-      (router && router->GetVehicle()!=vehicle)*/) {
-    if (router) {
-      if (router->IsOpen()) {
-        router->Close();
-      }
-      router=NULL;
-    }
-
-    router=std::make_shared<osmscout::RoutingService>(database,
-                                                      routerParameter,
-                                                      osmscout::RoutingService::DEFAULT_FILENAME_BASE);
-
-    if (!router->Open()) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-void DBInstance::close()
-{
-  if (router && router->IsOpen()) {
-    router->Close();
-  }
-
-  if (callbackId){
-    mapService->DeregisterTileStateCallback(callbackId);
-  }
-  callbackId = 0;
-  if (database->IsOpen()) {
-    database->Close();
-  }
 }
 
 bool DBThread::GetObjectDetails(DBInstanceRef db,
@@ -775,7 +611,7 @@ bool DBThread::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &e
 
 void DBThread::SearchForLocations(const QString searchPattern, int limit)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
 
   qDebug() << "Searching for" << searchPattern;
   QTime timer;
@@ -860,61 +696,13 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
   emit searchFinished(searchPattern, /*error*/ false);
 }
 
-void DBThread::requestObjectsOnView(const RenderMapRequest &view)
-{
-  QMutexLocker locker(&mutex);
-  if (!isInitializedInternal()){
-      return; // ignore request if db is not initialized
-  }
-
-  // setup projection for data lookup
-  osmscout::MercatorProjection lookupProjection;
-  lookupProjection.Set(view.coord, /* angle */ 0, view.magnification, mapDpi, view.width*1.5, view.height*1.5);
-  lookupProjection.SetLinearInterpolationUsage(view.magnification.GetLevel() >= 10);
-
-  osmscout::AreaSearchParameter searchParameter;
-  // https://github.com/Framstag/libosmscout/blob/master/Documentation/RenderTuning.txt
-  if (view.magnification.GetLevel() >= 15) {
-    searchParameter.SetMaximumAreaLevel(6);
-  }
-  else {
-    searchParameter.SetMaximumAreaLevel(4);
-  }
-  searchParameter.SetUseMultithreading(true);
-  searchParameter.SetUseLowZoomOptimization(true);
-
-  for (auto &db:databases){
-    if (!db->database->IsOpen() || (!db->styleConfig)) {
-      continue;
-    }
-    std::list<osmscout::TileRef>  tiles;
-    osmscout::MapData             data;
-
-    osmscout::GeoBox dbBox;
-    db->database->GetBoundingBox(dbBox);
-    osmscout::GeoBox lookupBox;
-    lookupProjection.GetDimensions(lookupBox);
-    if (!dbBox.Intersects(lookupBox)){
-      std::cout << "Skip database" << db->path.toStdString() << std::endl;
-      continue;
-    }
-    db->mapService->LookupTiles(lookupProjection,tiles);
-    // load tiles synchronous
-    db->mapService->LoadMissingTileData(searchParameter,*db->styleConfig,tiles);
-    db->mapService->AddTileDataToMapData(tiles,data);
-
-    emit viewObjectsLoaded(view, data);
-  }
-  emit viewObjectsLoaded(view, osmscout::MapData());
-}
-
 bool DBThread::CalculateRoute(const QString databasePath,
                               const osmscout::RoutingProfile& routingProfile,
                               const osmscout::RoutePosition& start,
                               const osmscout::RoutePosition target,
                               osmscout::RouteData& route)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
 
   DBInstanceRef database;
   for (auto &db:databases){
@@ -953,7 +741,7 @@ bool DBThread::TransformRouteDataToRouteDescription(const QString databasePath,
                                                     const std::string& start,
                                                     const std::string& target)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
 
   DBInstanceRef database;
   for (auto &db:databases){
@@ -1010,7 +798,7 @@ bool DBThread::TransformRouteDataToWay(const QString databasePath,
                                        const osmscout::RouteData& data,
                                        osmscout::Way& way)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
 
   DBInstanceRef database;
   for (auto &db:databases){
@@ -1046,7 +834,7 @@ osmscout::RoutePosition DBThread::GetClosestRoutableNode(const QString databaseP
                                                          const osmscout::RoutingProfile& routingProfile,
                                                          double radius)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
   osmscout::RoutePosition position;
 
   DBInstanceRef database;
@@ -1143,7 +931,7 @@ QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& l
 
 void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
   if (!isInitializedInternal()){
       return; // ignore request if db is not initialized
   }
@@ -1193,7 +981,7 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
 void DBThread::onMapDPIChange(double dpi)
 {
   {
-    QMutexLocker locker(&mutex);
+    QWriteLocker locker(&lock);
     mapDpi = dpi;
   }
   InvalidateVisualCache();
@@ -1203,7 +991,7 @@ void DBThread::onMapDPIChange(double dpi)
 void DBThread::onRenderSeaChanged(bool b)
 {
   {
-    QMutexLocker threadLocker(&mutex);
+    QWriteLocker locker(&lock);
     renderSea = b;
   }
   InvalidateVisualCache();
@@ -1213,7 +1001,7 @@ void DBThread::onRenderSeaChanged(bool b)
 void DBThread::onFontNameChanged(const QString fontName)
 {
   {
-    QMutexLocker threadLocker(&mutex);
+    QWriteLocker locker(&lock);
     this->fontName=fontName;
   }
   InvalidateVisualCache();
@@ -1223,7 +1011,7 @@ void DBThread::onFontNameChanged(const QString fontName)
 void DBThread::onFontSizeChanged(double fontSize)
 {
   {
-    QMutexLocker threadLocker(&mutex);
+    QWriteLocker locker(&lock);
     this->fontSize=fontSize;
   }
   InvalidateVisualCache();
@@ -1232,7 +1020,7 @@ void DBThread::onFontSizeChanged(double fontSize)
 
 osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) const
 {
-  QMutexLocker threadLocker(&mutex);
+  QReadLocker locker(&lock);
   for (auto &db:databases){
     if (db->path == databasePath){
       return db->database->GetTypeConfig();
@@ -1243,7 +1031,7 @@ osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) cons
 
 const QMap<QString,bool> DBThread::GetStyleFlags() const
 {
-  QMutexLocker threadLocker(&mutex);
+  QReadLocker locker(&lock);
   QMap<QString,bool> flags;
   // add flag overrides
   for (const auto& flag : stylesheetFlags){
@@ -1261,54 +1049,8 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
   return flags;
 }
 
-static DBThread* dbThreadInstance=NULL;
-
-bool DBThread::InitializeTiledInstance(QStringList databaseLookupDirectory,
-                                       QString iconDirectory,
-                                       SettingsRef settings,
-                                       QString tileCacheDirectory,
-                                       size_t onlineTileCacheSize,
-                                       size_t offlineTileCacheSize)
+void DBThread::RunJob(DBJob *job)
 {
-  if (dbThreadInstance!=NULL) {
-    return false;
-  }
-
-  dbThreadInstance=new TiledDBThread(databaseLookupDirectory,
-                                     iconDirectory,
-                                     settings,
-                                     tileCacheDirectory,
-                                     onlineTileCacheSize,
-                                     offlineTileCacheSize);
-
-  return true;
-}
-
-bool DBThread::InitializePlaneInstance(QStringList databaseLookupDirectory,
-                                       QString iconDirectory,
-                                       SettingsRef settings)
-{
-  if (dbThreadInstance!=NULL) {
-    return false;
-  }
-
-  dbThreadInstance=new PlaneDBThread(databaseLookupDirectory,
-                                     iconDirectory,
-                                     settings);
-
-  return true;
-}
-
-
-
-DBThread* DBThread::GetInstance()
-{
-  return dbThreadInstance;
-}
-
-void DBThread::FreeInstance()
-{
-  delete dbThreadInstance;
-
-  dbThreadInstance=NULL;
+  QReadLocker *locker=new QReadLocker(&lock);
+  job->Run(databases,locker);
 }

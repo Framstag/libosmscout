@@ -19,12 +19,13 @@
 
 #include <osmscout/StyleFlagsModel.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/OSMScoutQt.h>
 
 StyleFlagsModel::StyleFlagsModel():
   QAbstractListModel()
 {
-  DBThread* dbThread = DBThread::GetInstance();
-  connect(dbThread,SIGNAL(stylesheetFilenameChanged()),
+  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
+  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
           this,SLOT(onStyleChanged()),
           Qt::QueuedConnection);
   onStyleChanged();
@@ -37,7 +38,7 @@ StyleFlagsModel::~StyleFlagsModel()
 void StyleFlagsModel::onStyleChanged()
 {
   beginResetModel();
-  DBThread* dbThread = DBThread::GetInstance();
+  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
   mapFlags=dbThread->GetStyleFlags();
   endResetModel();
 }
@@ -81,7 +82,7 @@ Qt::ItemFlags StyleFlagsModel::flags(const QModelIndex &index) const
 Q_INVOKABLE void StyleFlagsModel::setFlag(const QString &key, bool value)
 {
   qDebug() << "Setup style flag" << key << "to" << value;
-  DBThread* dbThread = DBThread::GetInstance();
+  DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
   dbThread->SetStyleFlag(key, value);
   QMap<QString,bool> updated=dbThread->GetStyleFlags();
   
@@ -89,6 +90,6 @@ Q_INVOKABLE void StyleFlagsModel::setFlag(const QString &key, bool value)
   for (const auto &key:updated.keys()){
     flags[key.toStdString()]=updated[key];
   }
-  SettingsRef settings=DBThread::GetInstance()->GetSettings();
+  SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
   settings->SetStyleSheetFlags(flags);
 }

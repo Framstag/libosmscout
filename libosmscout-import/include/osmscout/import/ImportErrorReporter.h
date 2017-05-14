@@ -29,6 +29,7 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/HTMLWriter.h>
+#include <osmscout/util/TagErrorReporter.h>
 
 #include <osmscout/system/Compiler.h>
 
@@ -38,10 +39,11 @@ namespace osmscout {
    * Class to report OSM data problems during import against.
    * Based on the reported errors various HTML bases error reporting pages are generated.
    */
-  class OSMSCOUT_IMPORT_API ImportErrorReporter CLASS_FINAL
+  class OSMSCOUT_IMPORT_API ImportErrorReporter CLASS_FINAL: public TagErrorReporter
   {
   public:
     static const char* const FILENAME_INDEX_HTML;
+    static const char* const FILENAME_TAG_HTML;
     static const char* const FILENAME_WAY_HTML;
     static const char* const FILENAME_RELATION_HTML;
     static const char* const FILENAME_LOCATION_HTML;
@@ -80,6 +82,9 @@ namespace osmscout {
 
     std::list<ReportError> errors;
 
+    HTMLWriter             tagReport;
+    size_t                 tagErrorCount;
+
     HTMLWriter             wayReport;
     size_t                 wayErrorCount;
 
@@ -102,6 +107,10 @@ namespace osmscout {
                         const TypeConfigRef& typeConfig,
                         const std::string& destinationDirectory);
     virtual ~ImportErrorReporter();
+
+    virtual void ReportTag(const ObjectOSMRef &object,
+                           const TagMap& tags,
+                           const std::string& error);
 
     void ReportWay(OSMId id,
                    const TagMap& tags,

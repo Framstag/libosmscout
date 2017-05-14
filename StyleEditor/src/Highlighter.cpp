@@ -90,7 +90,7 @@ void Highlighter::updateRules()
 
     kwTUNNELBRIDGEFormat.setFontWeight(QFont::Bold);
     kwTUNNELBRIDGEFormat.setForeground(QColor("#25a13b"));
-    rule.pattern = QRegExp("TUNNEL|BRIDGE");
+    rule.pattern = QRegExp("FEATURE");
     rule.pattern.setMinimal(true);
     rule.format = kwTUNNELBRIDGEFormat;
     highlightingRules.append(rule);

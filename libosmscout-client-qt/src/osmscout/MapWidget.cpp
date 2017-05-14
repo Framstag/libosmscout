@@ -23,6 +23,7 @@
 
 #include <osmscout/MapWidget.h>
 #include <osmscout/InputHandler.h>
+#include <osmscout/OSMScoutQt.h>
 
 #define TMP_SUFFIX ".tmp"
 
@@ -39,7 +40,7 @@ MapWidget::MapWidget(QQuickItem* parent)
     setAcceptedMouseButtons(Qt::LeftButton);
     setAcceptHoverEvents(true);
     
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
     
     mapDpi = dbThread->GetSettings()->GetMapDPI();
 
@@ -50,13 +51,13 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     //setFocusPolicy(Qt::StrongFocus);
 
-    connect(dbThread,SIGNAL(Redraw()),
+    connect(dbThread.get(),SIGNAL(Redraw()),
             this,SLOT(redraw()));    
-    connect(dbThread,SIGNAL(stylesheetFilenameChanged()),
+    connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
             this,SIGNAL(stylesheetFilenameChanged()));
-    connect(dbThread,SIGNAL(styleErrorsChanged()),
+    connect(dbThread.get(),SIGNAL(styleErrorsChanged()),
             this,SIGNAL(styleErrorsChanged()));
-    connect(dbThread,SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
+    connect(dbThread.get(),SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
             this,SIGNAL(databaseLoaded(osmscout::GeoBox)));
         
     connect(&tapRecognizer, SIGNAL(tap(const QPoint)),        this, SLOT(onTap(const QPoint)));
@@ -198,8 +199,14 @@ void MapWidget::focusOutEvent(QFocusEvent *event)
 
 void MapWidget::wheelEvent(QWheelEvent* event)
 {
-    int numDegrees=event->delta()/8;
-    int numSteps=numDegrees/15;
+    static int cumulNumDegrees = 0;
+    cumulNumDegrees += event->angleDelta().y();
+    if(abs(cumulNumDegrees) < 120){
+        return;
+    }
+
+    int numDegrees =  cumulNumDegrees / 8;
+    int numSteps = numDegrees / 15;
 
     if (numSteps>=0) {
         zoomIn(numSteps*1.35, event->pos());
@@ -207,13 +214,14 @@ void MapWidget::wheelEvent(QWheelEvent* event)
     else {
         zoomOut(-numSteps*1.35, event->pos());
     }
+    cumulNumDegrees %= 120;
 
     event->accept();
 }
 
 void MapWidget::paint(QPainter *painter)
 {
-    DBThread *dbThread = DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
 
     bool animationInProgress = inputHandler->animationInProgress();
     
@@ -286,7 +294,7 @@ void MapWidget::paint(QPainter *painter)
 
 void MapWidget::recenter()
 {
-  DBThread *dbThread = DBThread::GetInstance();
+  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
   DatabaseLoadedResponse resp = dbThread->loadedResponse();
   if (!resp.boundingBox.IsValid()){
     return;
@@ -299,14 +307,14 @@ void MapWidget::recenter()
 
 bool MapWidget::isDatabaseLoaded()
 {
-  DBThread *dbThread = DBThread::GetInstance();
+  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
   DatabaseLoadedResponse resp = dbThread->loadedResponse();
   return resp.boundingBox.IsValid();
 }
 
 bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
 {
-  DBThread *dbThread = DBThread::GetInstance();
+  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
   DatabaseLoadedResponse resp = dbThread->loadedResponse();
   if (!resp.boundingBox.IsValid()){
     return false;
@@ -405,7 +413,7 @@ void MapWidget::rotateRight()
 
 void MapWidget::toggleDaylight()
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
 
     dbThread->ToggleDaylight();
     redraw();
@@ -413,14 +421,14 @@ void MapWidget::toggleDaylight()
 
 void MapWidget::reloadStyle()
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
 
     dbThread->ReloadStyle();
     redraw();
 }
 
 void MapWidget::reloadTmpStyle() {
-    DBThread* dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
     dbThread->ReloadStyle(TMP_SUFFIX);
     redraw();    
 }
@@ -590,7 +598,7 @@ void MapWidget::onMapDPIChange(double dpi)
 
 QString MapWidget::GetStylesheetFilename() const
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
     return dbThread->GetStylesheetFilename();
 }
 
@@ -637,12 +645,12 @@ QString MapWidget::GetZoomLevelName() const
 }
 bool MapWidget::stylesheetHasErrors() const
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
     return !dbThread->GetStyleErrors().isEmpty();
 }
 int MapWidget::firstStylesheetErrorLine() const
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
     QList<StyleError> errors=dbThread->GetStyleErrors();
     if (errors.isEmpty())
       return -1;
@@ -650,7 +658,7 @@ int MapWidget::firstStylesheetErrorLine() const
 }
 int MapWidget::firstStylesheetErrorColumn() const
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
     QList<StyleError> errors=dbThread->GetStyleErrors();
     if (errors.isEmpty())
       return -1;
@@ -658,7 +666,7 @@ int MapWidget::firstStylesheetErrorColumn() const
 }
 QString MapWidget::firstStylesheetErrorDescription() const
 {
-    DBThread *dbThread=DBThread::GetInstance();
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
     QList<StyleError> errors=dbThread->GetStyleErrors();
     if (errors.isEmpty())
       return "";

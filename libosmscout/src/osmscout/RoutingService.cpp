@@ -522,19 +522,25 @@ namespace osmscout {
     // Load data
     //
 
-    if (!routeNodeDataFile.GetByOffset(routeNodeOffsets,
+    if (!routeNodeDataFile.GetByOffset(routeNodeOffsets.begin(),
+                                       routeNodeOffsets.end(),
+                                       routeNodeOffsets.size(),
                                        routeNodeMap)) {
       log.Error() << "Cannot load route nodes";
       return false;
     }
 
-    if (!areaDataFile->GetByOffset(areaOffsets,
+    if (!areaDataFile->GetByOffset(areaOffsets.begin(),
+                                   areaOffsets.end(),
+                                   areaOffsets.size(),
                                    areaMap)) {
       log.Error() << "Cannot load areas";
       return false;
     }
 
-    if (!wayDataFile->GetByOffset(wayOffsets,
+    if (!wayDataFile->GetByOffset(wayOffsets.begin(),
+                                  wayOffsets.end(),
+                                  wayOffsets.size(),
                                   wayMap)) {
       log.Error() << "Cannot load ways";
       return false;
@@ -1880,13 +1886,16 @@ namespace osmscout {
     std::sort(wayWayOffsets.begin(),
               wayWayOffsets.end());
 
-    if (!wayDataFile->GetByOffset(wayWayOffsets,
+    if (!wayDataFile->GetByOffset(wayWayOffsets.begin(),
+                                  wayWayOffsets.end(),
+                                  wayWayOffsets.size(),
                                   ways)) {
       log.Error() << "Error reading ways in area!";
       return position;
     }
 
-    if (!areaDataFile->GetByBlockSpans(wayAreaSpans,
+    if (!areaDataFile->GetByBlockSpans(wayAreaSpans.begin(),
+                                       wayAreaSpans.end(),
                                        areas)) {
       log.Error() << "Error reading areas in area!";
       return position;

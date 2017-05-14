@@ -160,6 +160,8 @@ namespace osmscout {
     }
 
     bool operator<(const Color& other) const;
+
+    static Color FromHexString(const std::string& hexString);
   };
 }
 

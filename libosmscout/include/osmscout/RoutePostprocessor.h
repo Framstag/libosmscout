@@ -126,6 +126,21 @@ namespace osmscout {
 
     /**
      * \ingroup Routing
+     * Places a name description as way description
+     */
+    class OSMSCOUT_API WayTypePostprocessor : public Postprocessor
+    {
+    public:
+      WayTypePostprocessor();
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   const RoutingProfile& profile,
+                   RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
+     * \ingroup Routing
      * Places a crossing ways description as a description of the name of all ways crossing the given node
      */
     class OSMSCOUT_API CrossingWaysPostprocessor : public Postprocessor

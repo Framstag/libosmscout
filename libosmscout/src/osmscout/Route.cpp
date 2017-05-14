@@ -54,7 +54,9 @@ namespace osmscout {
   /** Constant for a description of motorway junction (MotorwayJunctionDescription) */
   const char* const RouteDescription::MOTORWAY_JUNCTION_DESC = "MotorwayJunction";
   /** Constant for a description of the maximum speed for the given way */
-  const char* const RouteDescription::WAY_MAXSPEED_DESC     = "MaxSpeed";
+  const char* const RouteDescription::WAY_MAXSPEED_DESC      = "MaxSpeed";
+  /** Constant for a description of type name of the way (TypeNameDescription) */
+  const char* const RouteDescription::WAY_TYPE_NAME_DESC     = "TypeName";
 
   RouteDescription::Description::~Description()
   {
@@ -411,6 +413,36 @@ namespace osmscout {
     location(GeoCoord(NAN, NAN))
   {
     // no code
+  }
+
+  RouteDescription::TypeNameDescription::TypeNameDescription(const std::string& name)
+    : name(name)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::TypeNameDescription::GetDebugString() const
+  {
+    return "Name: '"+GetDescription()+"'";
+  }
+
+  bool RouteDescription::TypeNameDescription::HasName() const
+  {
+    return !name.empty();
+  }
+
+  std::string RouteDescription::TypeNameDescription::GetName() const
+  {
+    return name;
+  }
+
+  std::string RouteDescription::TypeNameDescription::GetDescription() const
+  {
+    std::ostringstream stream;
+
+    stream << name;
+
+    return stream.str();
   }
 
   bool RouteDescription::Node::HasDescription(const char* name) const

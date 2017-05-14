@@ -135,33 +135,11 @@ namespace osmscout {
   }
 
   void MapPainter::DumpDataStatistics(const Projection& projection,
+                                      const MapParameter& parameter,
                                       const MapData& data)
   {
-    std::map<TypeInfoRef,DataStatistic> statistics;
-    TypeInfoSet                         types;
-
-    // Prefilling all possible types from style sheet
-
-    styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                        types);
-
-    for (const auto& type : types) {
-      /* ignore */ statistics[type];
-    }
-
-    styleConfig->GetWayTypesWithMaxMag(projection.GetMagnification(),
-                                       types);
-
-    for (const auto& type : types) {
-      /* ignore */ statistics[type];
-    }
-
-    styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                        types);
-
-    for (const auto& type : types) {
-      /* ignore */ statistics[type];
-    }
+    std::unordered_map<TypeInfoRef,DataStatistic> statistics;
+    TypeInfoSet                                   types;
 
     // Now analyse the actual data
 
@@ -171,19 +149,21 @@ namespace osmscout {
       entry.nodeCount++;
       entry.coordCount++;
 
-      IconStyleRef iconStyle;
+      if (parameter.IsDebugData()) {
+        IconStyleRef iconStyle;
 
-      styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
-                                     projection,
-                                     textStyles);
-      styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                    projection,
-                                    iconStyle);
+        styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
+                                       projection,
+                                       textStyles);
+        styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                      projection,
+                                      iconStyle);
 
-      entry.labelCount+=textStyles.size();
+        entry.labelCount+=textStyles.size();
 
-      if (iconStyle) {
-        entry.iconCount++;
+        if (iconStyle) {
+          entry.iconCount++;
+        }
       }
     }
 
@@ -193,19 +173,21 @@ namespace osmscout {
       entry.nodeCount++;
       entry.coordCount++;
 
-      IconStyleRef iconStyle;
+      if (parameter.IsDebugData()) {
+        IconStyleRef iconStyle;
 
-      styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
-                                     projection,
-                                     textStyles);
-      styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                    projection,
-                                    iconStyle);
+        styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
+                                       projection,
+                                       textStyles);
+        styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                      projection,
+                                      iconStyle);
 
-      entry.labelCount+=textStyles.size();
+        entry.labelCount+=textStyles.size();
 
-      if (iconStyle) {
-        entry.iconCount++;
+        if (iconStyle) {
+          entry.iconCount++;
+        }
       }
     }
 
@@ -215,22 +197,24 @@ namespace osmscout {
       entry.wayCount++;
       entry.coordCount+=way->nodes.size();
 
-      PathShieldStyleRef shieldStyle;
-      PathTextStyleRef   pathTextStyle;
+      if (parameter.IsDebugData()) {
+        PathShieldStyleRef shieldStyle;
+        PathTextStyleRef   pathTextStyle;
 
-      styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+        styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+                                           projection,
+                                           shieldStyle);
+        styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
                                          projection,
-                                         shieldStyle);
-      styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
-                                       projection,
-                                       pathTextStyle);
+                                         pathTextStyle);
 
-      if (shieldStyle) {
-        entry.labelCount++;
-      }
+        if (shieldStyle) {
+          entry.labelCount++;
+        }
 
-      if (pathTextStyle) {
-        entry.labelCount++;
+        if (pathTextStyle) {
+          entry.labelCount++;
+        }
       }
     }
 
@@ -240,22 +224,24 @@ namespace osmscout {
       entry.wayCount++;
       entry.coordCount+=way->nodes.size();
 
-      PathShieldStyleRef shieldStyle;
-      PathTextStyleRef   pathTextStyle;
+      if (parameter.IsDebugData()) {
+        PathShieldStyleRef shieldStyle;
+        PathTextStyleRef   pathTextStyle;
 
-      styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+        styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+                                           projection,
+                                           shieldStyle);
+        styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
                                          projection,
-                                         shieldStyle);
-      styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
-                                       projection,
-                                       pathTextStyle);
+                                         pathTextStyle);
 
-      if (shieldStyle) {
-        entry.labelCount++;
-      }
+        if (shieldStyle) {
+          entry.labelCount++;
+        }
 
-      if (pathTextStyle) {
-        entry.labelCount++;
+        if (pathTextStyle) {
+          entry.labelCount++;
+        }
       }
     }
 
@@ -267,23 +253,25 @@ namespace osmscout {
       for (const auto& ring : area->rings) {
         entry.coordCount+=ring.nodes.size();
 
-        if (ring.IsMasterRing()) {
-          IconStyleRef iconStyle;
+        if (parameter.IsDebugData()) {
+          if (ring.IsMasterRing()) {
+            IconStyleRef iconStyle;
 
-          styleConfig->GetAreaTextStyles(area->GetType(),
-                                         ring.GetFeatureValueBuffer(),
-                                         projection,
-                                         textStyles);
-          styleConfig->GetAreaIconStyle(area->GetType(),
-                                        ring.GetFeatureValueBuffer(),
-                                        projection,
-                                        iconStyle);
+            styleConfig->GetAreaTextStyles(area->GetType(),
+                                           ring.GetFeatureValueBuffer(),
+                                           projection,
+                                           textStyles);
+            styleConfig->GetAreaIconStyle(area->GetType(),
+                                          ring.GetFeatureValueBuffer(),
+                                          projection,
+                                          iconStyle);
 
-          if (iconStyle) {
-            entry.iconCount++;
+            if (iconStyle) {
+              entry.iconCount++;
+            }
+
+            entry.labelCount+=textStyles.size();
           }
-
-          entry.labelCount+=textStyles.size();
         }
       }
     }
@@ -296,49 +284,69 @@ namespace osmscout {
       for (const auto& ring : area->rings) {
         entry.coordCount+=ring.nodes.size();
 
-        if (ring.IsMasterRing()) {
-          IconStyleRef iconStyle;
+        if (parameter.IsDebugData()) {
+          if (ring.IsMasterRing()) {
+            IconStyleRef iconStyle;
 
-          styleConfig->GetAreaTextStyles(area->GetType(),
-                                         ring.GetFeatureValueBuffer(),
-                                         projection,
-                                         textStyles);
-          styleConfig->GetAreaIconStyle(area->GetType(),
-                                        ring.GetFeatureValueBuffer(),
-                                        projection,
-                                        iconStyle);
+            styleConfig->GetAreaTextStyles(area->GetType(),
+                                           ring.GetFeatureValueBuffer(),
+                                           projection,
+                                           textStyles);
+            styleConfig->GetAreaIconStyle(area->GetType(),
+                                          ring.GetFeatureValueBuffer(),
+                                          projection,
+                                          iconStyle);
 
-          if (iconStyle) {
-            entry.iconCount++;
+            if (iconStyle) {
+              entry.iconCount++;
+            }
+
+            entry.labelCount+=textStyles.size();
           }
-
-          entry.labelCount+=textStyles.size();
         }
       }
     }
 
-    std::list<DataStatistic> statisticList;
-
     for (auto& entry : statistics) {
-      entry.second.type=entry.first;
-
       entry.second.objectCount=entry.second.nodeCount+entry.second.wayCount+entry.second.areaCount;
 
-      statisticList.push_back(entry.second);
+      if (entry.first) {
+        if (parameter.GetWarningObjectCountLimit()>0 &&
+          entry.second.objectCount>parameter.GetWarningObjectCountLimit()) {
+          log.Warn() << "Type : " << entry.first->GetName() << " has " << entry.second.objectCount << " objects (performance limit: " << parameter.GetWarningObjectCountLimit() << ")";
+        }
+
+        if (parameter.GetWarningCoordCountLimit()>0 &&
+            entry.second.coordCount>parameter.GetWarningCoordCountLimit()) {
+          log.Warn() << "Type : " << entry.first->GetName() << " has " << entry.second.coordCount << " coords (performance limit: " << parameter.GetWarningCoordCountLimit() << ")";
+        }
+
+      }
     }
 
-    statistics.clear();
+    if (parameter.IsDebugData()) {
+      std::list<DataStatistic> statisticList;
 
-    statisticList.sort([](const DataStatistic& a, const DataStatistic& b)->bool{return a.objectCount>b.objectCount;});
+      for (auto& entry : statistics) {
+        entry.second.type=entry.first;
 
-    log.Info() << "Type|ObjectCount|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
-    for (const auto& entry : statisticList) {
-      log.Info() << entry.type->GetName() << " "
-          << entry.objectCount << " "
-          << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " "
-          << entry.coordCount << " "
-          << entry.labelCount << " "
-          << entry.iconCount;
+        statisticList.push_back(entry.second);
+      }
+
+      statistics.clear();
+
+      statisticList.sort([](const DataStatistic& a,
+                            const DataStatistic& b)->bool {return a.objectCount>b.objectCount;});
+
+      log.Info() << "Type|ObjectCount|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
+      for (const auto& entry : statisticList) {
+        log.Info() << entry.type->GetName() << " "
+                   << entry.objectCount << " "
+                   << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " "
+                   << entry.coordCount << " "
+                   << entry.labelCount << " "
+                   << entry.iconCount;
+      }
     }
   }
 
@@ -509,14 +517,6 @@ namespace osmscout {
       seaFill=this->seaFill;
     }
 
-    if (!coastFill) {
-      coastFill=this->seaFill;
-    }
-
-    if (!unknownFill) {
-      unknownFill=this->seaFill;
-    }
-
     for (const auto& tile : data.groundTiles) {
       AreaData areaData;
 
@@ -550,6 +550,9 @@ namespace osmscout {
 #endif
         areaData.fillStyle=unknownFill;
         break;
+      }
+      if (!areaData.fillStyle){
+        continue;
       }
 
       GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
@@ -2005,16 +2008,16 @@ namespace osmscout {
                         const MapData& data)
   {
     errorTolerancePixel=projection.ConvertWidthToPixel(parameter.GetOptimizeErrorToleranceMm());
-    areaMinDimension=projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
-    contourLabelOffset=projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
-    contourLabelSpace=projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
+    areaMinDimension   =projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
+    contourLabelOffset =projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
+    contourLabelSpace  =projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
 
-    waysSegments=0;
-    waysDrawn=0;
+    waysSegments  =0;
+    waysDrawn     =0;
     waysLabelDrawn=0;
 
     areasSegments=0;
-    areasDrawn=0;
+    areasDrawn   =0;
 
     nodesDrawn=0;
 
@@ -2043,13 +2046,17 @@ namespace osmscout {
       projection.GetDimensions(boundingBox);
 
       log.Info()
-          << "Draw: " << boundingBox.GetDisplayText() << " "
-          << (int)projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " "
-          << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI()<< " DPI";
+        << "Draw: " << boundingBox.GetDisplayText() << " "
+        << (int) projection.GetMagnification().GetMagnification() << "x" << "/"
+        << projection.GetMagnification().GetLevel() << " "
+        << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI() << " DPI";
     }
 
-    if (parameter.IsDebugData()) {
+    if (parameter.GetWarningCoordCountLimit()>0 ||
+        parameter.GetWarningObjectCountLimit()>0 ||
+        parameter.IsDebugData()) {
       DumpDataStatistics(projection,
+                         parameter,
                          data);
     }
 

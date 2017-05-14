@@ -243,6 +243,26 @@ namespace osmscout {
     return (in > quorum_isin);
   }
 
+  void LocationIndexGenerator::Region::AddLocationObject(const std::string& locationName,
+                                                         const ObjectFileRef& objectRef)
+  {
+    std::string locationNameLower=UTF8StringToLower(locationName);
+
+    RegionLocation& location=locations[locationNameLower];
+
+    std::unordered_map<std::string,size_t>::iterator nameEntry=location.names.find(locationName);
+
+    if (nameEntry!=location.names.end()) {
+      nameEntry->second++;
+    }
+    else {
+      location.names[locationName]=1;
+    }
+
+    location.objects.push_back(objectRef);
+  }
+
+
   LocationIndexGenerator::RegionRef LocationIndexGenerator::RegionIndex::GetRegionForNode(RegionRef& rootRegion,
                                                                                           const GeoCoord& coord) const
   {
@@ -262,6 +282,21 @@ namespace osmscout {
     }
 
     return rootRegion;
+  }
+
+  std::string LocationIndexGenerator::RegionLocation::GetName() const
+  {
+    std::string name;
+    size_t      maxCount=0;
+
+    for (const auto& nameEntry : names) {
+      if (nameEntry.second>maxCount) {
+        name=nameEntry.first;
+        maxCount=nameEntry.second;
+      }
+    }
+
+    return name;
   }
 
   void LocationIndexGenerator::Write(FileWriter& writer,
@@ -552,7 +587,7 @@ namespace osmscout {
         for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
-        out << " - " << nodeEntry.first << std::endl;
+        out << " - " << nodeEntry.second.GetName() << std::endl;
 
         for (const auto& object : nodeEntry.second.objects) {
           for (size_t i=0; i<indent+4; i++) {
@@ -994,7 +1029,7 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.locations[name].objects.push_back(ObjectFileRef(area.GetFileOffset(),refArea));
+    region.AddLocationObject(name,ObjectFileRef(area.GetFileOffset(),refArea));
 
     for (size_t i=0; i<region.areas.size(); i++) {
       if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
@@ -1142,7 +1177,7 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.locations[name].objects.push_back(ObjectFileRef(way.GetFileOffset(),refWay));
+    region.AddLocationObject(name,ObjectFileRef(way.GetFileOffset(),refWay));
 
     for (size_t i=0; i<region.areas.size(); i++) {
       if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
@@ -1249,7 +1284,7 @@ namespace osmscout {
 
     if (loc==region.locations.end()) {
       errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refArea),
-                                         std::string("Street of address '")+location +"' '"+address+"' cannot be resolved in region '"+region.name+"'");
+                                         std::string("Street '")+location +"' of address '"+address+"' cannot be resolved in region '"+region.name+"'");
       return;
     }
 
@@ -1449,7 +1484,7 @@ namespace osmscout {
 
     if (loc==region.locations.end()) {
       errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refWay),
-                                         std::string("Street of address '")+location +"' '"+address+"' cannot be resolved in region '"+region.name+"'");
+                                         std::string("Street '")+location +"' of address '"+address+"' cannot be resolved in region '"+region.name+"'");
     }
     else {
       for (const auto& regionAddress : loc->second.addresses) {
@@ -1632,55 +1667,50 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Return an iterator the the location with the given name. Besides looking for exact matches
+   * the methods also tries to find close matches with difference only in case. It will also
+   * fake location in cases where the name matches the region name or one of its aliases.
+   *
+   * @param progress
+   *    Progress
+   * @param region
+   *    Region to search in
+   * @param locationName
+   *    Name of the location to search for
+   * @return
+   *    Iterator to the location or region.locations.end()
+   */
   std::map<std::string,LocationIndexGenerator::RegionLocation>::iterator LocationIndexGenerator::FindLocation(Progress& progress,
                                                                                                               Region& region,
                                                                                                               const std::string &locationName)
   {
     std::map<std::string,RegionLocation>           &locations=region.locations;
-    std::map<std::string,RegionLocation>::iterator loc=locations.find(locationName);
+    std::string                                    locationNameSearch=UTF8StringToLower(locationName);
+    std::map<std::string,RegionLocation>::iterator loc=locations.find(locationNameSearch);
 
     if (loc!=locations.end()) {
-      // exact match
+      // case insensitive match
       return loc;
     }
 
-    // Fallback: look if any other location does match case insensitive
-
-    std::wstring wLocation(UTF8StringToWString(locationName));
-    std::transform(wLocation.begin(),wLocation.end(),wLocation.begin(),::tolower);
-
-    for (loc=locations.begin(); loc!=locations.end(); loc++) {
-      std::wstring wLocation2(UTF8StringToWString(loc->first));
-      std::transform(wLocation2.begin(),wLocation2.end(),wLocation2.begin(),::tolower);
-
-      if (wLocation==wLocation2) {
-        progress.Debug(std::string("Using address '") + loc->first + "' instead of '" + locationName + "'");
-
-        return loc;
-      }
-    }
-
-    // if locationName is same as region.name (or its name alias) add new location entry
+    // if locationName is same as region.name (or one of its name aliases) add new location entry
     // it is usual case for addresses without street and defined addr:place
-    std::wstring wRegionName(UTF8StringToWString(region.name));
-    std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);
+    std::string regionNameLower=UTF8StringToLower(region.name);
 
-    if (wRegionName==wLocation) {
-      RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
-      newLoc.objects.push_back(region.reference);
-      locations[region.name]=newLoc;
+    if (regionNameLower==locationNameSearch) {
+      region.AddLocationObject(region.name,region.reference);
+
       progress.Debug(std::string("Create virtual location for region '")+region.name+"'");
       return locations.find(region.name);
     }
 
     for (auto &alias: region.aliases) {
-      std::wstring wRegionName(UTF8StringToWString(alias.name));
-      std::transform(wRegionName.begin(),wRegionName.end(),wRegionName.begin(),::tolower);
+      std::string regionAliasNameLower=UTF8StringToLower(alias.name);
 
-      if (wRegionName==wLocation) {
-        RegionLocation newLoc = {0, std::list<ObjectFileRef>(), std::list<RegionAddress>()};
-        newLoc.objects.push_back(ObjectFileRef(alias.reference,refNode));
-        locations[alias.name]=newLoc;
+      if (regionAliasNameLower==locationNameSearch) {
+        region.AddLocationObject(alias.name,ObjectFileRef(alias.reference,refNode));
+
         progress.Debug(std::string("Create virtual location for '")+alias.name+"' (alias of region "+region.name+")");
         return locations.find(alias.name);
       }
@@ -1954,7 +1984,7 @@ namespace osmscout {
     for (auto& location : region.locations) {
       location.second.objects.sort(ObjectFileRefByFileOffsetComparator());
 
-      writer.Write(location.first);
+      writer.Write(location.second.GetName());
       writer.WriteNumber((uint32_t)location.second.objects.size()); // Number of objects
 
       if (!location.second.addresses.empty()) {

@@ -82,12 +82,15 @@ namespace osmscout {
 
     struct RegionLocation
     {
-      FileOffset               addressOffset; //!< Offset of place where the address list offset is stored
-      std::list<ObjectFileRef> objects;       //!< Objects that represent this location
-      std::list<RegionAddress> addresses;     //!< Addresses at this location
+      std::unordered_map<std::string,size_t> names;         //!< map of names in different case used for this location and their use count
+      FileOffset                   addressOffset; //!< Offset of place where the address list offset is stored
+      std::list<ObjectFileRef>     objects;       //!< Objects that represent this location
+      std::list<RegionAddress>     addresses;     //!< Addresses at this location
+
+      std::string GetName() const;
     };
 
-    struct Region;
+    class Region;
 
     typedef std::shared_ptr<Region> RegionRef;
 
@@ -136,6 +139,8 @@ namespace osmscout {
       {
         return boundingBoxes;
       }
+
+      void AddLocationObject(const std::string& locationName, const ObjectFileRef& objectRef);
 
     protected:
       void CalculateProbePoints();                           //! Finds probe points for this to be used for containment test

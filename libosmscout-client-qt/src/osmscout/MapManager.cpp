@@ -82,15 +82,17 @@ void MapDownloadJob::start()
 void MapDownloadJob::onJobFailed(QString error_text){
   osmscout::log.Debug() << "Download failed with the error: " << error_text.toStdString();
 
-#pragma message "Here should be some code that propagates error message to the user"
+  // TODO: add some flag if this failure is temprary and downloading will be
+  //       retried. If it is final, unrecoverable failure, emit mapDownloadFails
+  // TODO: Report file these failures to UI (via MapDownloadsModel?)
 }
 
 void MapDownloadJob::onJobFinished()
 {
   if (!jobs.isEmpty())
     {
-      jobs[0]->deleteLater();
-      downloadedBytes += jobs[0]->getBytesDownloaded();
+      jobs.first()->deleteLater();
+      downloadedBytes += jobs.first()->getBytesDownloaded();
       jobs.pop_front();      
     }
   
@@ -100,7 +102,7 @@ void MapDownloadJob::onJobFinished()
 void MapDownloadJob::downloadNextFile()
 {
   if (!jobs.isEmpty())
-    jobs[0]->startDownload();
+    jobs.first()->startDownload();
   else
     done=true;
   
@@ -122,7 +124,7 @@ double MapDownloadJob::getProgress()
 QString MapDownloadJob::getDownloadingFile()
 {
   if (!jobs.isEmpty())
-    return jobs[0]->getFileName();
+    return jobs.first()->getFileName();
   return "";
 }
 

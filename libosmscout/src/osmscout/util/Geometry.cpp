@@ -488,42 +488,45 @@ namespace osmscout {
    * on the line supporting the segment is outside [p1,p2]
    * r is the abscissa of q on the line, 0 <= r <= 1 if q is between p1 and p2.
    */
-  double distanceToSegment(double px, double py, double p1x, double p1y, double p2x, double p2y, double &r, double &qx, double &qy){
-
-    if(p1x == p2x && p1y == p2y){
+  double DistanceToSegment(double px, double py,
+                           double p1x, double p1y,
+                           double p2x, double p2y,
+                           double& r,
+                           double& qx, double& qy)
+  {
+    if (p1x==p2x && p1y==p2y) {
         return NAN;
     }
 
-    double rn = (px-p1x)*(p2x-p1x) + (py-p1y)*(p2y-p1y);
-    double rd = (p2x-p1x)*(p2x-p1x) + (p2y-p1y)*(p2y-p1y);
-    r = rn / rd;
-    double ppx = p1x + r*(p2x-p1x);
-    double ppy = p1y + r*(p2y-p1y);
-    double s =  ((p1y-py)*(p2x-p1x)-(p1x-px)*(p2y-p1y)) / rd;
+    double rn=(px-p1x)*(p2x-p1x) + (py-p1y)*(p2y-p1y);
+    double rd=(p2x-p1x)*(p2x-p1x) + (p2y-p1y)*(p2y-p1y);
+    r=rn / rd;
+    double ppx=p1x + r*(p2x-p1x);
+    double ppy=p1y + r*(p2y-p1y);
+    double s=((p1y-py)*(p2x-p1x)-(p1x-px)*(p2y-p1y)) / rd;
 
+    if ((r >= 0) && (r <= 1)) {
+      qx=ppx;
+      qy=ppy;
 
-    if ((r >= 0) && (r <= 1))
-    {
-        qx = ppx;
-        qy = ppy;
-        return fabs(s)*sqrt(rd);
+      return fabs(s)*sqrt(rd);
     }
-    else
-    {
-        double dist1 = (px-p1x)*(px-p1x) + (py-p1y)*(py-p1y);
-        double dist2 = (px-p2x)*(px-p2x) + (py-p2y)*(py-p2y);
-        if (dist1 < dist2)
-        {
-            qx = p1x;
-            qy = p1y;
-            return sqrt(dist1);
-        }
-        else
-        {
-            qx = p2x;
-            qy = p2y;
-            return sqrt(dist2);
-        }
+    else {
+      double dist1=(px-p1x)*(px-p1x) + (py-p1y)*(py-p1y);
+      double dist2=(px-p2x)*(px-p2x) + (py-p2y)*(py-p2y);
+
+      if (dist1<dist2) {
+        qx=p1x;
+        qy=p1y;
+
+        return sqrt(dist1);
+      }
+      else {
+        qx=p2x;
+        qy=p2y;
+
+        return sqrt(dist2);
+      }
     }
   }
 

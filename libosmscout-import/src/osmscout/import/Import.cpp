@@ -136,8 +136,10 @@ namespace osmscout {
      optimizationCellSizeMax(255),
      optimizationWayMethod(TransPolygon::quality),
      routeNodeBlockSize(500000),
-     assumeLand(true),
-     langOrder({"#"})
+     assumeLand(AssumeLandStrategy::automatic),
+     langOrder({"#"}),
+     firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2)),
+     fillWaterArea(20)
   {
     // no code
   }
@@ -362,9 +364,14 @@ namespace osmscout {
     return routeNodeBlockSize;
   }
 
-  bool ImportParameter::GetAssumeLand() const
+  ImportParameter::AssumeLandStrategy ImportParameter::GetAssumeLand() const
   {
     return assumeLand;
+  }
+
+  OSMId ImportParameter::GetFirstFreeOSMId() const
+  {
+    return firstFreeOSMId;
   }
 
   const std::vector<std::string>& ImportParameter::GetLangOrder() const
@@ -601,7 +608,7 @@ namespace osmscout {
     this->routeNodeBlockSize=blockSize;
   }
 
-  void ImportParameter::SetAssumeLand(bool assumeLand)
+  void ImportParameter::SetAssumeLand(AssumeLandStrategy assumeLand)
   {
     this->assumeLand=assumeLand;
   }
@@ -614,6 +621,21 @@ namespace osmscout {
   void ImportParameter::SetAltLangOrder(const std::vector<std::string>& altLangOrder)
   {
     this->altLangOrder = altLangOrder;
+  }
+
+  void ImportParameter::SetFirstFreeOSMId(OSMId id)
+  {
+    firstFreeOSMId=id;
+  }
+
+  void ImportParameter::SetFillWaterArea(size_t fillWaterArea)
+  {
+    this->fillWaterArea=fillWaterArea;
+  }
+
+  size_t ImportParameter::GetFillWaterArea() const
+  {
+    return fillWaterArea;
   }
 
   void ImportModuleDescription::SetName(const std::string& name)

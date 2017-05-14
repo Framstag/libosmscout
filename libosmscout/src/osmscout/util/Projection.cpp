@@ -155,21 +155,25 @@ namespace osmscout {
     // Absolute Y mercator coordinate for latitude
     latOffset=atanh(sin(lat*gradtorad));
 
+    // top left
     double tlLat;
     double tlLon;
 
     PixelToGeo(0.0,(double)height,tlLon,tlLat);
 
+    // top right
     double trLat;
     double trLon;
 
     PixelToGeo((double)width,(double)height,trLon,trLat);
 
+    // bottom left
     double blLat;
     double blLon;
 
     PixelToGeo(0.0,0.0,blLon,blLat);
 
+    // bottom right
     double brLat;
     double brLon;
 

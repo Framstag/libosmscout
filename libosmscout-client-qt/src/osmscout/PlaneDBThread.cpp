@@ -99,7 +99,7 @@ void PlaneDBThread::Initialize()
 void PlaneDBThread::onStylesheetFilenameChanged()
 {
   {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
     QMutexLocker finishedLocker(&finishedMutex);
     for (auto db:databases){
       if (db->styleConfig){
@@ -223,7 +223,7 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
 
   osmscout::log.Debug() << "Start data loading...";
   {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
     // CancelCurrentDataLoading();
 
     currentWidth=request.width;
@@ -232,11 +232,28 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
     currentAngle=request.angle;
     currentMagnification=request.magnification;
 
+    projection.Set(currentCoord,
+                   currentAngle,
+                   currentMagnification,
+                   mapDpi,
+                   currentWidth,
+                   currentHeight);
+
+    osmscout::GeoBox requestBox;
+    projection.GetDimensions(requestBox);
+
     for (auto db:databases){
       if (db->database->IsOpen() &&
           db->styleConfig) {
-        osmscout::AreaSearchParameter searchParameter;
 
+        osmscout::GeoBox dbBox;
+        db->database->GetBoundingBox(dbBox);
+        if (!dbBox.Intersects(requestBox)){
+          osmscout::log.Debug() << "Skip loading from database " << db->path.toStdString();
+          continue;
+        }
+
+        osmscout::AreaSearchParameter searchParameter;
         db->dataLoadingBreaker->Reset();
         searchParameter.SetBreaker(db->dataLoadingBreaker);
 
@@ -249,13 +266,6 @@ void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
 
         searchParameter.SetUseMultithreading(true);
         searchParameter.SetUseLowZoomOptimization(true);
-
-        projection.Set(currentCoord,
-                       currentAngle,
-                       currentMagnification,
-                       mapDpi,
-                       currentWidth,
-                       currentHeight);
 
         std::list<osmscout::TileRef> tiles;
 
@@ -302,7 +312,7 @@ void PlaneDBThread::InvalidateVisualCache()
 
 void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile)
 {
-  QMutexLocker locker(&mutex);
+  QReadLocker locker(&lock);
 
   bool relevant=false;
   for (auto &db: databases){
@@ -355,9 +365,9 @@ void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
  */
 void PlaneDBThread::DrawMap()
 {
-  osmscout::log.Debug() << "DrawMap()";  
+  osmscout::log.Debug() << "DrawMap()";
   {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
     if (databases.isEmpty()){
       osmscout::log.Warn() << " No databases!";
       return;
@@ -396,6 +406,10 @@ void PlaneDBThread::DrawMap()
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugData(false);
     drawParameter.SetDebugPerformance(true);
+    // We want to get notified, if we have more than 1000 objects from a certain type (=> move type rendering to a higher zoom level?)
+    drawParameter.SetWarningObjectCountLimit(1000);
+    // We want to get notified, if we have more than 20000 coords from a certain type (=> move type rendering to a higher zoom level?)
+    drawParameter.SetWarningCoordCountLimit(20000);
 
     // optimize process can reduce number of nodes before rendering
     // it helps for slow renderer backend, but it cost some cpu
@@ -441,6 +455,15 @@ void PlaneDBThread::DrawMap()
     for (auto &db:databases){
       std::list<osmscout::TileRef> tiles;
       osmscout::MapData            data; // TODO: make sence cache these data?
+      osmscout::GeoBox             dbBox;
+      osmscout::GeoBox             renderBox;
+
+      db->database->GetBoundingBox(dbBox);
+      renderProjection.GetDimensions(renderBox);
+      if (!dbBox.Intersects(renderBox)){
+        osmscout::log.Debug() << "Skip database " << db->path.toStdString();
+        continue;
+      }
 
       db->mapService->LookupTiles(renderProjection,tiles);
       db->mapService->AddTileDataToMapData(tiles,data);
@@ -450,10 +473,10 @@ void PlaneDBThread::DrawMap()
                                        data.groundTiles);
       }
 
-      success&=db->painter->DrawMap(renderProjection,
-                                    drawParameter,
-                                    data,
-                                    &p);
+      success&=db->GetPainter()->DrawMap(renderProjection,
+                                         drawParameter,
+                                         data,
+                                         &p);
 
     }
     p.end();

@@ -21,7 +21,6 @@
 #if !defined(osmscout_oss_PARSER_H)
 #define osmscout_oss_PARSER_H
 
-#include <iostream>
 #include <limits>
 #include <list>
 #include <sstream>
@@ -124,7 +123,17 @@ StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
 
-inline std::string Destring(const char* str)
+enum class ValueType
+{
+  NO_VALUE,
+  IDENT,
+  STRING,
+  COLOR,
+  NUMBER,
+  CONSTANT
+};
+
+std::string Destring(const char* str)
 {
   std::string result(str);
 
@@ -137,7 +146,7 @@ inline std::string Destring(const char* str)
   return result;
 }
 
-inline bool StringToDouble(const char* string, double& value)
+bool StringToDouble(const char* string, double& value)
 {
   std::istringstream buffer(string);
 
@@ -148,7 +157,7 @@ inline bool StringToDouble(const char* string, double& value)
   return !buffer.fail() && !buffer.bad() && buffer.eof();
 }
 
-inline size_t GetHexDigitValue(char c)
+size_t GetHexDigitValue(char c)
 {
   if (c>='0' && c<='9') {
     return c-'0';
@@ -161,21 +170,35 @@ inline size_t GetHexDigitValue(char c)
   return 0;
 }
 
-inline void ToRGBA(const std::string& str, Color& color)
+void AddFeatureToFilter(StyleFilter& filter,
+                        const std::string& featureName,
+                        TypeInfoSet& resultTypes)
 {
-  double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
-  double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
-  double b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
-  double a;
+  FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 
-  if (str.length()==9) {
-    a=(16*GetHexDigitValue(str[7])+GetHexDigitValue(str[8]))/255.0;
-  }
-  else {
-    a=1.0;
+  if (!feature) {
+    std::string e="Unknown feature '"+featureName+"'";
+
+    SemErr(e.c_str());
+    return;
   }
 
-  color=Color(r,g,b,a);
+  for (const auto& type : config.GetTypeConfig()->GetTypes()) {
+    if (type->HasFeature(featureName)) {
+      if (!filter.FiltersByType() ||
+          filter.HasType(type)) {
+        // Add type only if the filter either has no types or 
+        // if the the type is already filtered  
+        resultTypes.Set(type);
+      }
+    }
+  }
+
+  if (!resultTypes.Empty()) {
+    size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
+  
+    filter.AddFeature(featureFilterIndex);
+  }
 }
 
 
@@ -231,8 +254,6 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STYLEFILTER_TYPE(StyleFilter& filter);
 	void STYLEFILTER_MAG(StyleFilter& filter);
 	void STYLEFILTER_ONEWAY(StyleFilter& filter);
-	void STYLEFILTER_BRIDGE(StyleFilter& filter);
-	void STYLEFILTER_TUNNEL(StyleFilter& filter);
 	void STYLEFILTER_SIZE(StyleFilter& filter);
 	void SIZECONDITION(SizeConditionRef& condition);
 	void NODESTYLEDEF(StyleFilter filter, bool state);
@@ -256,15 +277,11 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void AREABORDERSTYLE(StyleFilter filter, bool state);
 	void AREABORDERTEXTSTYLE(StyleFilter filter, bool state);
 	void AREABORDERSYMBOLSTYLE(StyleFilter filter, bool state);
-	void UDISPLAYSIZE(double& value);
-	void UMAPSIZE(double& value);
-	void DISPLAYSIZE(double& value);
-	void MAPSIZE(double& value);
-	void CAPSTYLE(LineStyle::CapStyle& style);
-	void INT(int& value);
+	void ATTRIBUTE(PartialStyleBase& style, const StyleDescriptor& descriptor);
+	void ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescriptor& descriptor);
+	void COLOR_VALUE(Color& color);
+	void CONSTANT(StyleConstantRef& constant);
 	void STRING(std::string& value);
-	void TEXTLABEL(LabelProviderRef& label);
-	void LABELSTYLE(TextStyle::Style& style);
 
   void Parse();
 

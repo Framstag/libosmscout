@@ -4,6 +4,7 @@
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/util/TagErrorReporter.h>
 
 std::string AccessToString(uint8_t access)
 {
@@ -99,7 +100,7 @@ bool CheckParseSuccess(bool canFoot,
                        uint8_t expectedAccessValue,
                        const std::unordered_map<std::string,std::string>& stringTags)
 {
-  osmscout::SilentProgress                        progress;
+  osmscout::SilentTagErrorReporter                reporter;
   osmscout::TypeConfig                            typeConfig;
   osmscout::TypeInfoRef                           testType=std::make_shared<osmscout::TypeInfo>("TestType");
   osmscout::FeatureRef                            accessFeature;
@@ -134,7 +135,7 @@ bool CheckParseSuccess(bool canFoot,
 
   buffer.SetType(testType);
 
-  accessFeature->Parse(progress,
+  accessFeature->Parse(reporter,
                        typeConfig,
                        featureInstance,
                        osmscout::ObjectOSMRef(1,osmscout::osmRefWay),

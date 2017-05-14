@@ -114,6 +114,42 @@ namespace osmscout {
   }
 
   /**
+   * Add a description of the feature for the given language code
+   * @param languageCode
+   *    language code like for example 'en'or 'de'
+   * @param description
+   *    description of the type
+   * @return
+   *    type info instance
+   */
+  void Feature::AddDescription(const std::string& languageCode,
+                               const std::string& description)
+  {
+    descriptions[languageCode]=description;
+  }
+
+  /**
+   * Returns the description for the given language code. Returns an empty string, if
+   * no description is available for the given language code.
+   *
+   * @param languageCode
+   *    languageCode like for example 'en' or 'de'
+   * @return
+   *    Description or empty string
+   */
+  std::string Feature::GetDescription(const std::string& languageCode) const
+  {
+    auto entry=descriptions.find(languageCode);
+
+    if (entry!=descriptions.end()) {
+      return entry->second;
+    }
+    else {
+      return "";
+    }
+  }
+
+  /**
    * Just to make the compiler happy :-/
    */
   FeatureInstance::FeatureInstance()
@@ -272,13 +308,13 @@ namespace osmscout {
     }
   }
 
-  void FeatureValueBuffer::Parse(Progress& progress,
+  void FeatureValueBuffer::Parse(TagErrorReporter& errorReporter,
                                  const TypeConfig& typeConfig,
                                  const ObjectOSMRef& object,
                                  const TagMap& tags)
   {
     for (const auto &feature : type->GetFeatures()) {
-      feature.GetFeature()->Parse(progress,
+      feature.GetFeature()->Parse(errorReporter,
                                   typeConfig,
                                   feature,
                                   object,
@@ -764,6 +800,23 @@ namespace osmscout {
     return *this;
   }
 
+  /**
+   * Add a description of the type for the given language code
+   * @param languageCode
+   *    language code like for example 'en'or 'de'
+   * @param description
+   *    description of the type
+   * @return
+   *    type info instance
+   */
+  TypeInfo& TypeInfo::AddDescription(const std::string& languageCode,
+                                     const std::string& description)
+  {
+    descriptions[languageCode]=description;
+
+    return *this;
+  }
+
   bool TypeInfo::HasFeature(const std::string& featureName) const
   {
     return nameToFeatureMap.find(featureName)!=nameToFeatureMap.end();
@@ -804,6 +857,27 @@ namespace osmscout {
     }
 
     return access;
+  }
+
+  /**
+   * Returns the description for the given language code. Returns an empty string, if
+   * no description is available for the given language code.
+   *
+   * @param languageCode
+   *    languageCode like for example 'en' or 'de'
+   * @return
+   *    Description or empty string
+   */
+  std::string TypeInfo::GetDescription(const std::string& languageCode) const
+  {
+    auto entry=descriptions.find(languageCode);
+
+    if (entry!=descriptions.end()) {
+      return entry->second;
+    }
+    else {
+      return "";
+    }
   }
 
   TypeInfoSet::TypeInfoSet()
@@ -1010,6 +1084,7 @@ namespace osmscout {
 
     RegisterTag("area");
     RegisterTag("natural");
+    RegisterTag("datapolygon");
     RegisterTag("type");
     RegisterTag("restriction");
     RegisterTag("junction");
@@ -1062,6 +1137,9 @@ namespace osmscout {
 
     featureTunnel=std::make_shared<TunnelFeature>();
     RegisterFeature(featureTunnel);
+
+    featureEmbankment=std::make_shared<EmbankmentFeature>();
+    RegisterFeature(featureEmbankment);
 
     featureRoundabout=std::make_shared<RoundaboutFeature>();
     RegisterFeature(featureRoundabout);
@@ -1126,12 +1204,14 @@ namespace osmscout {
 
     tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
+    tagDataPolygon=GetTagId("datapolygon");
     tagType=GetTagId("type");
     tagRestriction=GetTagId("restriction");
     tagJunction=GetTagId("junction");
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);
+    assert(tagDataPolygon!=tagIgnore);
     assert(tagType!=tagIgnore);
     assert(tagRestriction!=tagIgnore);
     assert(tagJunction!=tagIgnore);
@@ -1250,6 +1330,9 @@ namespace osmscout {
       }
       if (!typeInfo->HasFeature(TunnelFeature::NAME)) {
         typeInfo->AddFeature(featureTunnel);
+      }
+      if (!typeInfo->HasFeature(EmbankmentFeature::NAME)) {
+        typeInfo->AddFeature(featureEmbankment);
       }
       if (!typeInfo->HasFeature(RoundaboutFeature::NAME)) {
         typeInfo->AddFeature(featureRoundabout);
@@ -1662,13 +1745,42 @@ namespace osmscout {
         return false;
       }
 
+      // Features
+      uint32_t featureCount;
+
+      scanner.ReadNumber(featureCount);
+
+      for (uint32_t f=1; f<=featureCount; f++) {
+        std::string featureName;
+        uint32_t    descriptionCount;
+        FeatureRef  feature;
+
+        scanner.Read(featureName);
+        scanner.ReadNumber(descriptionCount);
+
+        feature=GetFeature(featureName);
+
+        for (uint32_t d=1; d<=descriptionCount; d++) {
+          std::string languageCode;
+          std::string description;
+
+          scanner.Read(languageCode);
+          scanner.Read(description);
+
+          if (feature) {
+            feature->AddDescription(languageCode,
+                                   description);
+          }
+        }
+      }
+
       // Types
 
       uint32_t typeCount;
 
       scanner.ReadNumber(typeCount);
 
-      for (size_t i=1; i<=typeCount; i++) {
+      for (uint32_t i=1; i<=typeCount; i++) {
         std::string name;
         bool        canBeNode;
         bool        canBeWay;
@@ -1736,7 +1848,7 @@ namespace osmscout {
 
         scanner.ReadNumber(featureCount);
 
-        for (size_t f=0; f<featureCount; f++) {
+        for (uint32_t f=0; f<featureCount; f++) {
           std::string featureName;
 
           scanner.Read(featureName);
@@ -1757,12 +1869,29 @@ namespace osmscout {
 
         scanner.ReadNumber(groupCount);
 
-        for (size_t g=0; g<groupCount; g++) {
+        for (uint32_t g=0; g<groupCount; g++) {
           std::string groupName;
 
           scanner.Read(groupName);
 
           typeInfo->AddGroup(groupName);
+        }
+
+        // Descriptions
+
+        uint32_t descriptionCount;
+
+        scanner.ReadNumber(descriptionCount);
+
+        for (uint32_t d=1; d<=descriptionCount; d++) {
+          std::string languageCode;
+          std::string description;
+
+          scanner.Read(languageCode);
+          scanner.Read(description);
+
+          typeInfo->AddDescription(languageCode,
+                                   description);
         }
 
         RegisterType(typeInfo);
@@ -1803,10 +1932,32 @@ namespace osmscout {
       writer.Write(FILE_FORMAT_VERSION);
 
       uint32_t typeCount=0;
+      uint32_t featureCount=0;
 
       for (auto type : GetTypes()) {
         if (!type->IsInternal()) {
           typeCount++;
+        }
+      }
+
+      for (auto feature : GetFeatures()) {
+        if (!feature->GetDescriptions().empty()) {
+          featureCount++;
+        }
+      }
+
+      writer.WriteNumber(featureCount);
+
+      for (auto feature : GetFeatures()) {
+        if (feature->GetDescriptions().empty()) {
+          continue;
+        }
+
+        writer.Write(feature->GetName());
+        writer.WriteNumber((uint32_t)feature->GetDescriptions().size());
+        for (const auto& descriptionEntry : feature->GetDescriptions()) {
+          writer.Write(descriptionEntry.first);
+          writer.Write(descriptionEntry.second);
         }
       }
 
@@ -1838,13 +1989,19 @@ namespace osmscout {
         writer.Write(type->GetIgnore());
 
         writer.WriteNumber((uint32_t)type->GetFeatures().size());
-        for (const auto &feature : type->GetFeatures()) {
+        for (const auto& feature : type->GetFeatures()) {
           writer.Write(feature.GetFeature()->GetName());
         }
 
         writer.WriteNumber((uint32_t)type->GetGroups().size());
-        for (const auto &groupName : type->GetGroups()) {
+        for (const auto& groupName : type->GetGroups()) {
           writer.Write(groupName);
+        }
+
+        writer.WriteNumber((uint32_t)type->GetDescriptions().size());
+        for (const auto& descriptionEntry : type->GetDescriptions()) {
+          writer.Write(descriptionEntry.first);
+          writer.Write(descriptionEntry.second);
         }
       }
 

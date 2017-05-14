@@ -24,6 +24,7 @@
 #include <vector>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/Coord.h>
 #include <osmscout/Pixel.h>
 
 #include <osmscout/GroundTile.h>
@@ -53,6 +54,12 @@ namespace osmscout {
       coast   = 3  //! The coast itself => a coast tile
     };
 
+    enum Direction {
+      out   = -1,
+      touch = 0,
+      in    = 1
+    };
+
     /**
      * Information about a single intersection of a coastline with a cell
      */
@@ -62,18 +69,18 @@ namespace osmscout {
       size_t        prevWayPointIndex;  //! The index of the path point before the intersection
       GeoCoord      point;              //! The intersection point
       double        distanceSquare;     //! The distance^2 between the path point and the intersectionPoint
-      char          direction;          //! 1 in, 0 touch, -1 out
+      Direction     direction;          //! 1 in, 0 touch, -1 out
       unsigned char borderIndex;        //! The index of the border that gets intersected [0..3]
     };
 
-    typedef Intersection *IntersectionPtr;
+    typedef std::shared_ptr<Intersection> IntersectionRef;
 
     /**
      * Sort intersections in path order
      */
     struct IntersectionByPathComparator
     {
-      inline bool operator()(const IntersectionPtr& a, const IntersectionPtr& b) const
+      inline bool operator()(const IntersectionRef& a, const IntersectionRef& b) const
       {
         if (a->prevWayPointIndex==b->prevWayPointIndex) {
           return a->distanceSquare<b->distanceSquare;
@@ -89,7 +96,7 @@ namespace osmscout {
      */
     struct IntersectionCWComparator
     {
-      inline bool operator()(const IntersectionPtr& a, const IntersectionPtr& b) const
+      inline bool operator()(const IntersectionRef& a, const IntersectionRef& b) const
       {
         if (a->borderIndex==b->borderIndex) {
           switch (a->borderIndex) {
@@ -149,6 +156,48 @@ namespace osmscout {
     };
 
     /**
+     * Helper for cell boundaries
+     */
+    struct CellBoundaries
+    {
+      double lonMin;
+      double lonMax;
+      double latMin;
+      double latMax;
+
+      GroundTile::Coord borderCoords[4];
+      GeoCoord borderPoints[4];
+
+      inline CellBoundaries(const Level &level, const Pixel &cell){
+        lonMin=(level.cellXStart+cell.x)*level.cellWidth-180.0;
+        lonMax=(level.cellXStart+cell.x+1)*level.cellWidth-180.0;
+        latMin=(level.cellYStart+cell.y)*level.cellHeight-90.0;
+        latMax=(level.cellYStart+cell.y+1)*level.cellHeight-90.0;
+
+        borderPoints[0]=GeoCoord(latMax,lonMin); // top left
+        borderPoints[1]=GeoCoord(latMax,lonMax); // top right
+        borderPoints[2]=GeoCoord(latMin,lonMax); // bottom right
+        borderPoints[3]=GeoCoord(latMin,lonMin); // bottom left
+
+        borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                           // top left
+        borderCoords[1].Set(GroundTile::Coord::CELL_MAX,GroundTile::Coord::CELL_MAX,false); // top right
+        borderCoords[2].Set(GroundTile::Coord::CELL_MAX,0,false);                           // bottom right
+        borderCoords[3].Set(0,0,false);                                                     // bottom left
+      }
+    };
+
+    /**
+     * State that defines area type left from the Coast
+     * - for area Coast define inner and outer type
+     */
+    enum class CoastState {
+      undefined = 0, //! We do not know yet
+      land      = 1, //! land
+      water     = 2, //! water
+      unknown   = 3, //! unknown
+    };
+
+    /**
      * A individual coastline
      */
     struct Coast
@@ -159,6 +208,8 @@ namespace osmscout {
       Id                 frontNodeId;
       Id                 backNodeId;
       std::vector<Point> coast;
+      CoastState         left;
+      CoastState         right;
     };
 
     typedef std::shared_ptr<Coast> CoastRef;
@@ -169,22 +220,28 @@ namespace osmscout {
      */
     struct CoastlineData
     {
-      Id                                        id;                 //! The id of the coastline
-      bool                                      isArea;             //! true,if the boundary forms an area
-      bool                                      isCompletelyInCell; //! true, if the complete coastline is within one cell
-      Pixel                                     cell;               //! The cell that completely contains the coastline
-      std::vector<GeoCoord>                     points;             //! The points of the coastline
-      std::map<Pixel,std::list<Intersection> >  cellIntersections;  //! All intersections for each cell
+      Id                                         id;                 //! The id of the coastline
+      bool                                       isArea;             //! true,if the boundary forms an area
+      bool                                       isCompletelyInCell; //! true, if the complete coastline is within one cell
+      Pixel                                      cell;               //! The cell that completely contains the coastline
+      std::vector<GeoCoord>                      points;             //! The points of the coastline
+      std::map<Pixel,std::list<IntersectionRef>> cellIntersections;  //! All intersections for each cell
+      CoastState                                 left;
+      CoastState                                 right;
     };
+
+    typedef std::shared_ptr<CoastlineData> CoastlineDataRef;
 
     struct Data
     {
-      std::vector<CoastlineData>         coastlines;         //! data for each coastline
-      std::map<Pixel,std::list<size_t> > cellCoastlines;     //! Contains for each cell the list of coastlines
+      std::vector<CoastlineDataRef>     coastlines;            //! data for each coastline
+      std::map<Pixel,std::list<size_t>> cellCoastlines;        //! Contains for each cell the list of *intersecting* coastlines
+      std::map<Pixel,std::list<size_t>> cellCoveredCoastlines; //! Contains for each cell the list of covered coastlines
     };
 
   private:
     std::string StateToString(State state) const;
+    std::string TypeToString(GroundTile::Type type) const;
 
     GroundTile::Coord Transform(const GeoCoord& point,
                                 const Level& level,
@@ -192,12 +249,32 @@ namespace osmscout {
                                 double cellMinLon,
                                 bool coast);
 
+    bool LoadRawBoundaries(const ImportParameter& parameter,
+                           Progress& progress,
+                           std::list<CoastRef>& coastlines,
+                           const char* rawFile,
+                           CoastState leftState,
+                           CoastState rightState);
+
     bool LoadCoastlines(const ImportParameter& parameter,
                         Progress& progress,
                         std::list<CoastRef>& coastlines);
 
+    bool LoadDataPolygon(const ImportParameter& parameter,
+                         Progress& progress,
+                         std::list<CoastRef>& coastlines);
+
+    void SynthetizeCoastlines2(Progress& progress,
+                               const std::list<CoastRef>& dataPolygons,
+                               const std::list<CoastRef>& coastlines,
+                               std::list<CoastRef> &synthetized);
+
     void MergeCoastlines(Progress& progress,
                          std::list<CoastRef>& coastlines);
+
+    void SynthetizeCoastlines(Progress& progress,
+                              std::list<CoastRef>& coastlines,
+                              std::list<CoastRef>& dataPolygon);
 
     void MarkCoastlineCells(Progress& progress,
                             Level& level,
@@ -223,11 +300,11 @@ namespace osmscout {
     void GetCellIntersections(const Level& level,
                               const std::vector<GeoCoord>& points,
                               size_t coastline,
-                              std::map<Pixel,std::list<Intersection> >& cellIntersections);
+                              std::map<Pixel,std::list<IntersectionRef>>& cellIntersections);
 
     void GetCoastlineData(const ImportParameter& parameter,
                           Progress& progress,
-                          Projection& projection,
+                          const Projection& projection,
                           const Level& level,
                           const std::list<CoastRef>& coastlines,
                           Data& data);
@@ -237,9 +314,31 @@ namespace osmscout {
                     const TypeConfig& typeConfig,
                     Level& level);
 
+    bool IsCellInDataPolygon(const CellBoundaries &cellBoundary,
+                             const std::list<CoastRef>& dataPolygon);
+
     void FillWater(Progress& progress,
                    Level& level,
-                   size_t tileCount);
+                   size_t tileCount,
+                   const std::list<CoastRef>& dataPolygon);
+
+    bool ContainsCoord(const std::list<GroundTile> &tiles,
+                       const GroundTile::Coord &coord,
+                       GroundTile::Type type);
+
+    bool ContainsCoord(const std::list<GroundTile> &tiles,
+                       const GroundTile::Coord &coord);
+
+    bool ContainsWater(const Pixel &coord,
+                       const Level &level,
+                       const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
+                       const GroundTile::Coord &testCoord1,
+                       const GroundTile::Coord &testCoord2);
+
+    void FillWaterAroundIsland(Progress& progress,
+                               Level& level,
+                               std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
+                               const std::list<CoastRef>& dataPolygon);
 
     void FillLand(Progress& progress,
                   Level& level);
@@ -253,34 +352,94 @@ namespace osmscout {
                                                Data& data,
                                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
-    IntersectionPtr GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
-                                            const IntersectionPtr& current);
+    IntersectionRef GetPreviousIntersection(std::list<IntersectionRef>& intersectionsPathOrder,
+                                            const IntersectionRef& current);
 
     void WalkBorderCW(GroundTile& groundTile,
                       const Level& level,
                       double cellMinLat,
                       double cellMinLon,
-                      const IntersectionPtr& incoming,
-                      const IntersectionPtr& outgoing,
+                      const IntersectionRef& incoming,
+                      const IntersectionRef& outgoing,
                       const GroundTile::Coord borderCoords[]);
 
-    IntersectionPtr GetNextCW(const std::list<IntersectionPtr>& intersectionsCW,
-                              const IntersectionPtr& current) const;
+    IntersectionRef GetNextCW(const std::list<IntersectionRef>& intersectionsCW,
+                              const IntersectionRef& current) const;
 
     void WalkPathBack(GroundTile& groundTile,
                       const Level& level,
                       double cellMinLat,
                       double cellMinLon,
-                      const IntersectionPtr& outgoing,
-                      const IntersectionPtr& incoming,
+                      const IntersectionRef& pathStart,
+                      const IntersectionRef& pathEnd,
                       const std::vector<GeoCoord>& points,
                       bool isArea);
 
-    void HandleCoastlinesPartiallyInACell(Progress& progress,
-                                          const std::list<CoastRef>& coastlines,
-                                          const Level& level,
-                                          std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
-                                          Data& data);
+    void WalkPathForward(GroundTile& groundTile,
+                         const Level& level,
+                         double cellMinLat,
+                         double cellMinLon,
+                         const IntersectionRef& pathStart,
+                         const IntersectionRef& pathEnd,
+                         const std::vector<GeoCoord>& points,
+                         bool isArea);
+
+    IntersectionRef FindSiblingIntersection(const IntersectionRef &intersection,
+                                            const std::list<IntersectionRef> &intersectionsCW,
+                                            bool isArea);
+
+    bool WalkFromTripoint(GroundTile &groundTile,
+                          const Level& level,
+                          const CellBoundaries &cellBoundaries,
+                          IntersectionRef &pathStart,
+                          IntersectionRef &pathEnd,
+                          Data &data,
+                          const std::list<IntersectionRef> &intersectionsCW,
+                          const std::vector<size_t> &containingPaths);
+
+    void WalkPath(GroundTile &groundTile,
+                  const Level& level,
+                  const CellBoundaries &cellBoundaries,
+                  const IntersectionRef pathStart,
+                  const IntersectionRef pathEnd,
+                  CoastlineDataRef coastline);
+
+    bool WalkBoundaryCW(GroundTile &groundTile,
+                          const Level &level,
+                          const IntersectionRef outIntersection,
+                          const std::list<IntersectionRef> &intersectionsCW,
+                          std::set<IntersectionRef> &visitedIntersections,
+                          const CellBoundaries &cellBoundaries,
+                          Data& data,
+                          const std::vector<size_t> &containingPaths);
+
+      void HandleCoastlineCell(Progress& progress,
+                               const Pixel &cell,
+                               const std::list<size_t>& intersectCoastlines,
+                               const Level& level,
+                               std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
+                               Data& data);
+
+      void HandleCoastlinesPartiallyInACell(Progress& progress,
+                                            const Level& level,
+                                            std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
+                                            Data& data);
+
+      void buildTiles(const TypeConfigRef& typeConfig,
+                      const ImportParameter& parameter,
+                      Progress &progress,
+                      const MercatorProjection &projection,
+                      Level &levelStruct,
+                      std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                      const std::list<CoastRef> &coastlines,
+                      Data &data,
+                      const std::list<CoastRef>& dataPolygon);
+
+      void writeTiles(Progress &progress,
+                      const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+                      const uint32_t level,
+                      Level &levelStruct,
+                      FileWriter &writer);
 
   public:
     void GetDescription(const ImportParameter& parameter,

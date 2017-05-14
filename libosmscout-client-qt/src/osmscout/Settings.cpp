@@ -30,7 +30,7 @@
 #include <QJsonObject>
 
 #include <osmscout/Settings.h>
-#include <osmscout/DBThread.h>
+#include <osmscout/OSMScoutQt.h>
 
 Settings::Settings(QSettings *providedStorage):
   storage(providedStorage)
@@ -296,7 +296,7 @@ const QString Settings::GetHttpCacheDir() const
 
 QmlSettings::QmlSettings()
 {
-    settings=DBThread::GetInstance()->GetSettings();
+    settings=OSMScoutQt::GetInstance().GetSettings();
 
     connect(settings.get(), SIGNAL(MapDPIChange(double)),
             this, SIGNAL(MapDPIChange(double)));

@@ -9,6 +9,8 @@ libosmscoutclientqt_la_LDFLAGS  = -no-undefined \
 
 libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/moc_DBThread.cpp \
+                                 osmscout/DBInstance.cpp \
+                                 osmscout/moc_DBInstance.cpp \
                                  osmscout/RoutingModel.cpp \
                                  osmscout/moc_RoutingModel.cpp \
                                  osmscout/InputHandler.cpp \
@@ -52,30 +54,40 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/MapStyleModel.cpp \
                                  osmscout/moc_MapStyleModel.cpp \
                                  osmscout/StyleFlagsModel.cpp \
-                                 osmscout/moc_StyleFlagsModel.cpp
+                                 osmscout/moc_StyleFlagsModel.cpp \
+                                 osmscout/OSMScoutQt.cpp \
+                                 osmscout/moc_OSMScoutQt.cpp \
+                                 osmscout/DBJob.cpp \
+                                 osmscout/moc_DBJob.cpp \
+                                 osmscout/LookupModule.cpp \
+                                 osmscout/moc_LookupModule.cpp
 
 osmscout/moc_%.cpp: $(top_srcdir)/include/osmscout/%.h
 	@MOC@ -o$@ $<
 
 MOSTLYCLEANFILES = osmscout/moc_DBThread.cpp \
-	     osmscout/moc_MapWidget.cpp \
-	     osmscout/moc_RoutingModel.cpp \
-	     osmscout/moc_LocationEntry.cpp \
-	     osmscout/moc_SearchLocationModel.cpp \
-	     osmscout/moc_Settings.cpp \
-	     osmscout/moc_LocationInfoModel.cpp \
-	     osmscout/moc_TiledDBThread.cpp \
-	     osmscout/moc_OsmTileDownloader.cpp \
-	     osmscout/moc_OSMTile.cpp \
-	     osmscout/moc_TileCache.cpp \
-	     osmscout/moc_MapProvider.cpp \
-	     osmscout/moc_AvailableMapsModel.cpp \
-	     osmscout/moc_MapManager.cpp \
-	     osmscout/moc_MapDownloadsModel.cpp \
-	     osmscout/moc_MapObjectInfoModel.cpp \
-	     osmscout/moc_MapStyleModel.cpp \
-	     osmscout/moc_StyleFlagsModel.cpp \
-	     osmscout/moc_InputHandler.cpp \
-	     osmscout/moc_OnlineTileProvider.cpp \
-	     osmscout/moc_OnlineTileProviderModel.cpp \
-	     osmscout/moc_PlaneDBThread.cpp
+                   osmscout/moc_DBInstance.cpp \
+                   osmscout/moc_MapWidget.cpp \
+                   osmscout/moc_RoutingModel.cpp \
+                   osmscout/moc_LocationEntry.cpp \
+                   osmscout/moc_SearchLocationModel.cpp \
+                   osmscout/moc_Settings.cpp \
+                   osmscout/moc_LocationInfoModel.cpp \
+                   osmscout/moc_TiledDBThread.cpp \
+                   osmscout/moc_OsmTileDownloader.cpp \
+                   osmscout/moc_OSMTile.cpp \
+                   osmscout/moc_TileCache.cpp \
+                   osmscout/moc_MapProvider.cpp \
+                   osmscout/moc_AvailableMapsModel.cpp \
+                   osmscout/moc_MapManager.cpp \
+                   osmscout/moc_MapDownloadsModel.cpp \
+                   osmscout/moc_MapObjectInfoModel.cpp \
+                   osmscout/moc_MapStyleModel.cpp \
+                   osmscout/moc_StyleFlagsModel.cpp \
+                   osmscout/moc_InputHandler.cpp \
+                   osmscout/moc_OnlineTileProvider.cpp \
+                   osmscout/moc_OnlineTileProviderModel.cpp \
+                   osmscout/moc_PlaneDBThread.cpp \
+                   osmscout/moc_OSMScoutQt.cpp \
+                   osmscout/moc_DBJob.cpp \
+                   osmscout/moc_LookupModule.cpp

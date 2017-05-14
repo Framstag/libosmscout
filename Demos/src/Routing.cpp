@@ -266,16 +266,28 @@ static void NextLine(size_t& lineCount)
 
 static void DumpStartDescription(size_t& lineCount,
                                  const osmscout::RouteDescription::StartDescriptionRef& startDescription,
+                                 const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
                                  const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
 {
   NextLine(lineCount);
   std::cout << "Start at '" << startDescription->GetDescription() << "'" << std::endl;
 
+  NextLine(lineCount);
+  std::cout << "Drive along";
+
+  if (typeNameDescription) {
+    std::cout << " " << typeNameDescription->GetDescription();
+  }
+
   if (nameDescription &&
       nameDescription->HasName()) {
-    NextLine(lineCount);
-    std::cout << "Drive along '" << nameDescription->GetDescription() << "'" << std::endl;
+    std::cout << " '" << nameDescription->GetDescription() << "'";
   }
+  else {
+    std::cout << " <unknown name>";
+  }
+
+  std::cout << std::endl;
 }
 
 static void DumpTargetDescription(size_t& lineCount,
@@ -290,6 +302,7 @@ static void DumpTurnDescription(size_t& lineCount,
                                 const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
                                 const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
                                 const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                                const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
                                 const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
 {
   std::string crossingWaysString;
@@ -311,9 +324,19 @@ static void DumpTurnDescription(size_t& lineCount,
     std::cout << "Turn";
   }
 
+  std::cout << " into";
+
+  if (typeNameDescription) {
+    std::cout << " " << typeNameDescription->GetDescription();
+  }
+
   if (nameDescription &&
       nameDescription->HasName()) {
-    std::cout << " into '" << nameDescription->GetDescription() << "'";
+
+    std::cout << " '" << nameDescription->GetDescription() << "'";
+  }
+  else {
+    std::cout << " <unknown name>";
   }
 
   std::cout << std::endl;
@@ -668,6 +691,7 @@ int main(int argc, char* argv[])
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>("Start"));
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>("Target"));
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::WayNamePostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::WayTypePostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
@@ -753,6 +777,7 @@ int main(int argc, char* argv[])
     osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
     osmscout::RouteDescription::MotorwayJunctionDescriptionRef motorwayJunctionDescription;
     osmscout::RouteDescription::MaxSpeedDescriptionRef         maxSpeedDescription;
+    osmscout::RouteDescription::TypeNameDescriptionRef         typeNameDescription;
 
     desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
     if (desc) {
@@ -825,6 +850,11 @@ int main(int argc, char* argv[])
       maxSpeedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MaxSpeedDescription>(desc);
     }
 
+    desc=node->GetDescription(osmscout::RouteDescription::WAY_TYPE_NAME_DESC);
+    if (desc) {
+      typeNameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TypeNameDescription>(desc);
+    }
+
     if (crossingWaysDescription &&
         roundaboutCrossingCounter>0 &&
         crossingWaysDescription->GetExitCount()>1) {
@@ -890,6 +920,7 @@ int main(int argc, char* argv[])
     if (startDescription) {
       DumpStartDescription(lineCount,
                            startDescription,
+                           typeNameDescription,
                            nameDescription);
     }
     else if (targetDescription) {
@@ -900,6 +931,7 @@ int main(int argc, char* argv[])
                           turnDescription,
                           crossingWaysDescription,
                           directionDescription,
+                          typeNameDescription,
                           nameDescription);
     }
     else if (roundaboutEnterDescription) {

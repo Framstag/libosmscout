@@ -101,18 +101,18 @@ TiledDBThread::~TiledDBThread()
 void TiledDBThread::Initialize()
 {
   {
-  QMutexLocker locker(&mutex);
-  qDebug() << "Initialize";
+    QWriteLocker locker(&lock);
+    qDebug() << "Initialize";
 
-  // create tile downloader in correct thread
-  tileDownloader = new OsmTileDownloader(tileCacheDirectory);
-  connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-          Qt::QueuedConnection);
+    // create tile downloader in correct thread
+    tileDownloader = new OsmTileDownloader(tileCacheDirectory);
+    connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+            this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+            Qt::QueuedConnection);
 
-  connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
-          this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
-          Qt::QueuedConnection);
+    connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
+            this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+            Qt::QueuedConnection);
   }
 
 
@@ -139,19 +139,19 @@ void TiledDBThread::onDatabaseLoaded(osmscout::GeoBox boundingBox)
 void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
         size_t width, size_t height, size_t lookupWidth, size_t lookupHeight)
 {
-    QMutexLocker locker(&mutex);
+    QReadLocker locker(&lock);
 
     for (auto db:databases){
       if (!db->database->IsOpen() || (!db->styleConfig)) {
-          qWarning() << " Not initialized! " << db->path;
+          osmscout::log.Warn() << " Not initialized! " << db->path.toStdString();
           return;
       }
     }
     QTime timer;
 
-    qDebug() << "Render tile offline " << QString::fromStdString(center.GetDisplayText()) << " zoom " << z << " WxH: " << width << " x " << height;
+    osmscout::log.Debug() << "Render tile offline " << center.GetDisplayText() << " zoom " << z << " WxH: " << width << " x " << height;
     for (auto db:databases){
-      std::cout << "Database " << db->path.toStdString() << " stats:" << std::endl;
+      osmscout::log.Debug() << "Database " << db->path.toStdString() << " stats:";
       db->database->DumpStatistics();
     }
 
@@ -229,56 +229,49 @@ void TiledDBThread::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32
       osmscout::GeoBox lookupBox;
       lookupProjection.GetDimensions(lookupBox);
       if (!dbBox.Intersects(lookupBox)){
-        std::cout << "Skip database" << db->path.toStdString() << std::endl;
+        osmscout::log.Debug() << "Skip database " << db->path.toStdString();
         continue;
       }
-      std::cout << "Database " << db->path.toStdString() << " draw:" << std::endl;
-      qDebug() << "prepare:   " << timer.elapsed();
+      osmscout::log.Debug() << "Database " << db->path.toStdString() << " draw:";
+      osmscout::log.Debug() << "prepare:   " << timer.elapsed();
       timer.restart();
 
       db->mapService->LookupTiles(lookupProjection,tiles);
 
-      qDebug() << "lookup:    " << timer.elapsed();
+      osmscout::log.Debug() << "lookup:    " << timer.elapsed();
       timer.restart();
-      /*
-      if (!mapService->LoadMissingTileDataAsync(searchParameter,*styleConfig,tiles)) {
-        qDebug() << "*** Loading of data has error or was interrupted";
-        return;
-      }
-       */
+
       // load tiles synchronous
       db->mapService->LoadMissingTileData(searchParameter,*db->styleConfig,tiles);
 
-      qDebug() << "load data: " << timer.elapsed();
+      osmscout::log.Debug() << "load data: " << timer.elapsed();
       timer.restart();
       //mapService->DumpCacheStatistics();
 
       db->mapService->AddTileDataToMapData(tiles,data);
 
-      qDebug() << "convert:   " << timer.elapsed();
+      osmscout::log.Debug() << "convert:   " << timer.elapsed();
       timer.restart();
 
       if (drawParameter.GetRenderSeaLand()) {
         db->mapService->GetGroundTiles(projection, data.groundTiles);
       }
 
-      //p.begin(currentImage);
       p.setRenderHint(QPainter::Antialiasing);
       p.setRenderHint(QPainter::TextAntialiasing);
       p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-      success|=db->painter->DrawMap(projection,
-                                    drawParameter,
-                                    data,
-                                    &p);
+      success|=db->GetPainter()->DrawMap(projection,
+                                         drawParameter,
+                                         data,
+                                         &p);
 
-      qDebug() << "draw:      " << timer.elapsed();
+      osmscout::log.Debug() << "draw:      " << timer.elapsed();
       timer.restart();
-      //p.end();
     }
 
     if (!success)  {
-        qWarning() << "*** Rendering of data has error or was interrupted";
+        osmscout::log.Warn() << "*** Rendering of data has error or was interrupted";
         return;
     }
 }
@@ -553,7 +546,7 @@ void TiledDBThread::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32
           databaseCoverageOfTile(zoomLevel, xtile, ytile) == DatabaseCoverage::Covered));
 
     if (requestedFromWeb){
-        QMutexLocker locker(&mutex);
+        QReadLocker locker(&lock);
         if (tileDownloader == NULL){
             qWarning() << "tile requested but donwloader is not initialized yet";
             emit tileDownloadFailed(zoomLevel, xtile, ytile, false);
@@ -711,7 +704,7 @@ void TiledDBThread::onlineTileProviderChanged()
 void TiledDBThread::onlineTilesEnabledChanged(bool b)
 {
     {
-        QMutexLocker threadLocker(&mutex);
+        QWriteLocker locker(&lock);
         onlineTilesEnabled = b;
 
         QMutexLocker cacheLocker(&tileCacheMutex);
@@ -724,7 +717,7 @@ void TiledDBThread::onlineTilesEnabledChanged(bool b)
 void TiledDBThread::onOfflineMapChanged(bool b)
 {
     {
-        QMutexLocker threadLocker(&mutex);
+        QWriteLocker locker(&lock);
         offlineTilesEnabled = b;
 
         QMutexLocker cacheLocker(&tileCacheMutex);

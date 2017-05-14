@@ -29,6 +29,7 @@
 namespace osmscout {
 
   const char* const ImportErrorReporter::FILENAME_INDEX_HTML    = "index.html";
+  const char* const ImportErrorReporter::FILENAME_TAG_HTML      = "tag.html";
   const char* const ImportErrorReporter::FILENAME_WAY_HTML      = "way.html";
   const char* const ImportErrorReporter::FILENAME_RELATION_HTML = "relation.html";
   const char* const ImportErrorReporter::FILENAME_LOCATION_HTML = "location.html";
@@ -39,11 +40,18 @@ namespace osmscout {
     : progress(progress),
       typeConfig(typeConfig),
       destinationDirectory(destinationDirectory),
+      tagErrorCount(0),
       wayErrorCount(0),
       relationErrorCount(0),
       locationErrorCount(0)
   {
     nameTagId=typeConfig->GetTagId("name");
+
+    tagReport.Open(AppendFileToDir(destinationDirectory,FILENAME_TAG_HTML));
+    tagReport.WriteDocumentStart();
+    tagReport.WriteHeader("Tag value errors","Import errors related to tags","","..stylesheet.css");
+    tagReport.WriteBodyStart();
+    tagReport.WriteListStart();
 
     wayReport.Open(AppendFileToDir(destinationDirectory,FILENAME_WAY_HTML));
     wayReport.WriteDocumentStart();
@@ -68,6 +76,10 @@ namespace osmscout {
     index.WriteHeader("Index","Index of all reports","","..stylesheet.css");
     index.WriteBodyStart();
     index.WriteListStart();
+
+    index.WriteListEntryStart();
+    index.WriteLink("tag.html","List of tag import errors");
+    index.WriteListEntryEnd();
 
     index.WriteListEntryStart();
     index.WriteLink("way.html","List of way import errors");
@@ -109,6 +121,13 @@ namespace osmscout {
     wayReport.WriteDocumentEnd();
 
     wayReport.CloseFailsafe();
+
+    tagReport.WriteListEnd();
+    tagReport.WriteText(NumberToString(tagErrorCount)+" errors");
+    tagReport.WriteBodyEnd();
+    tagReport.WriteDocumentEnd();
+
+    tagReport.CloseFailsafe();
   }
 
   std::string ImportErrorReporter::GetName(const ObjectOSMRef& object,
@@ -127,6 +146,25 @@ namespace osmscout {
     }
 
     return buffer.str();
+  }
+
+  void ImportErrorReporter::ReportTag(const ObjectOSMRef& object,
+                                      const TagMap& tags,
+                                      const std::string& error)
+  {
+    std::unique_lock <std::mutex> lock(mutex);
+
+    std::string name(GetName(object,tags));
+
+    progress.Warning(name+" - "+error);
+
+    tagReport.WriteListEntryStart();
+    tagReport.WriteOSMObjectLink(object,name);
+    tagReport.WriteText(" - ");
+    tagReport.WriteText(error);
+    tagReport.WriteListEntryEnd();
+
+    tagErrorCount++;
   }
 
   void ImportErrorReporter::ReportWay(OSMId id,
