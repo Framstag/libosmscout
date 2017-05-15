@@ -211,6 +211,9 @@ void PlaneMapRenderer::DrawMap()
       return;
     }
     osmscout::log.Debug() << "DrawMap()";
+    if (thread!=QThread::currentThread()){
+      osmscout::log.Warn() << "Incorrect thread!";
+    }
 
     if (currentImage==NULL ||
         currentImage->width()!=(int)currentWidth ||
