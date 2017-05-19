@@ -32,6 +32,12 @@
 #if defined(HAVE_CODECVT)
 #include <codecvt>
 #endif
+
+#if defined(HAVE_ICONV)
+#include <iconv.h>
+#endif
+
+#include <string.h>
 #include <iostream>
 namespace osmscout {
 
@@ -334,7 +340,100 @@ namespace osmscout {
     }
   }
 
-#if defined(HAVE_CODECVT)
+#if defined(HAVE_ICONV)
+  std::wstring UTF8StringToWString(const std::string& text)
+  {
+    std::wstring res;
+    iconv_t      handle;
+
+    handle=iconv_open("WCHAR_T","UTF-8");
+    if (handle==(iconv_t)-1) {
+      std::cerr << "Error in UTF8StringToWString()" << strerror(errno) << std::endl;
+      return L"";
+    }
+
+    // length+1+1 to handle a potential BOM if ICONV_WCHAR_T is UTF-16 and to convert of \0
+    size_t inCount=text.length()+1;
+    size_t outCount=(text.length()+2)*sizeof(wchar_t);
+
+    char    *in=const_cast<char*>(text.data());
+    wchar_t *out=new wchar_t[text.length()+2];
+
+    char *tmpOut=(char*)out;
+    size_t tmpOutCount=outCount;
+    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
+      iconv_close(handle);
+      delete [] out;
+      std::cerr << "Error in UTF8StringToWString()" << strerror(errno) << std::endl;
+      return L"";
+    }
+
+    iconv_close(handle);
+
+    // remove potential byte order marks
+    if (sizeof(wchar_t)==4) {
+      // strip off potential BOM if ICONV_WCHAR_T is UTF-32
+      if (out[0]==0xfeff) {
+        res=std::wstring(out+1,(outCount-tmpOutCount)/sizeof(wchar_t)-2);
+      }
+      else {
+        res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+      }
+    }
+    else if (sizeof(wchar_t)==2) {
+      // strip off potential BOM if ICONV_WCHAR_T is UTF-16
+      if (out[0]==0xfeff || out[0]==0xfffe) {
+        res=std::wstring(out+1,(outCount-tmpOutCount)/sizeof(wchar_t)-2);
+      }
+      else {
+        res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+      }
+    }
+    else {
+      res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+    }
+
+    delete [] out;
+
+    return res;
+  }
+
+  std::string WStringToUTF8String(const std::wstring& text)
+  {
+    iconv_t handle;
+
+    handle=iconv_open("UTF-8","WCHAR_T");
+    if (handle==(iconv_t)-1) {
+      std::cerr << "Error iconv_open in WStringToUTF8String() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    // length+1 to get the result '\0'-terminated
+    size_t inCount=(text.length()+1)*sizeof(wchar_t);
+    size_t outCount=text.length()*4+1; // Up to 4 bytes for one UTF-8 character
+
+    char *in=const_cast<char*>((const char*)text.c_str());
+    char *out=new char[outCount];
+
+    char   *tmpOut=out;
+    size_t tmpOutCount=outCount;
+
+    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
+      iconv_close(handle);
+      delete [] out;
+      std::cerr << "Error iconv in WStringToUTF8String() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    std::string res=out;
+
+    delete [] out;
+
+    iconv_close(handle);
+
+    return res;
+  }
+#elif defined(HAVE_CODECVT)
   std::wstring UTF8StringToWString(const std::string& text)
   {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;

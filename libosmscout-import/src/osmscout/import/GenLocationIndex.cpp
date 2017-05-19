@@ -602,8 +602,14 @@ namespace osmscout {
             out << " ";
           }
 
-          out << " @ " << address.name << " " << address.postalCode
-              << " " << address.object.GetTypeName() << " " << address.object.GetFileOffset() << std::endl;
+          out << " @ " << address.name;
+
+          if (!address.postalCode.empty()) {
+            out << " " << address.postalCode;
+
+          }
+
+          out << " " << address.object.GetTypeName() << " " << address.object.GetFileOffset() << std::endl;
         }
       }
 
@@ -908,7 +914,7 @@ namespace osmscout {
     }
 
     for (auto& regionList : regionIndex.index) {
-      regionList.second.sort([](const RegionRef& a, const RegionRef& b) {
+      regionList.second.sort([](const RegionRef& a, const RegionRef& b) -> bool {
         return a->GetBoundingBox().GetSize()<b->GetBoundingBox().GetSize();
       });
     }

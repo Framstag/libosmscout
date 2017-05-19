@@ -72,6 +72,8 @@ dnl SSE support
 AS_IF([test "x$ax_cv_have_sse2_ext" = xyes],
       [AC_DEFINE([OSMSCOUT_HAVE_SSE2],[1],[SSE2 processor extension available])])
 
+AM_ICONV
+
 AM_CONDITIONAL(OSMSCOUT_HAVE_SSE2,[test "x$ax_cv_have_sse2_ext" = xyes])
 
 AS_IF([test "$enable_openmp_support" != "no"],
@@ -94,7 +96,7 @@ CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
                          [],
-                         [-losmscout $PTHREAD_CFLAGS $PTHREAD_LIBS $MARISA_LIBS],
+                         [-losmscout $PTHREAD_CFLAGS $PTHREAD_LIBS $LIBICONV $MARISA_LIBS],
                          [libosmscout base library],
                          [$PTHREAD_CFLAGS $OPENMP_CXXFLAGS $SIMD_FLAGS $MARISA_CFLAGS],
                          [$OPENMP_CXXFLAGS])

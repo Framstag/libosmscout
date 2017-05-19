@@ -584,7 +584,7 @@ namespace osmscout {
              std::vector<ValueType>& data) const;
     bool Get(const std::set<I>& ids,
              std::vector<ValueType>& data) const;
-    
+
     bool Get(const std::set<I>& ids,
              std::unordered_map<I,ValueType>& data) const;
 
