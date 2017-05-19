@@ -39,6 +39,7 @@ if [ "$TARGET" = "build" ]; then
     fi
 
     brew install gettext protobuf qt5
+	brew link --force gettext
   fi
 elif [ "$TARGET" = "importer" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
