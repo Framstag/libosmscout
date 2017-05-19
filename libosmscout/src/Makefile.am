@@ -11,7 +11,7 @@ libosmscout_la_LDFLAGS = -no-undefined \
                          $(PTHREAD_CFLAGS) \
                          $(PTHREAD_LIBS) \
                          $(OPENMP_CXXFLAGS) \
-                         $(LIBICONV) \
+                         $(LTLIBICONV) \
                          $(MARISA_LIBS)
 
 libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
