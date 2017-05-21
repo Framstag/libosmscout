@@ -41,6 +41,12 @@ RESULT_ubuntu_16_10_gcc_autoconf=$?
 ./ubuntu_16.10_gcc_cmake/run.sh     "$@" 
 RESULT_ubuntu_16_10_gcc_cmake=$?
 
+./ubuntu_17.04_gcc_autoconf/run.sh  "$@" 
+RESULT_ubuntu_17_04_gcc_autoconf=$?
+
+./ubuntu_17.04_gcc_cmake/run.sh     "$@" 
+RESULT_ubuntu_17_04_gcc_cmake=$?
+
 # print results
 set +x
 echo 
@@ -83,3 +89,9 @@ if [ $RESULT_ubuntu_16_10_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "ubuntu_16.10_gcc_cmake       "
 if [ $RESULT_ubuntu_16_10_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_17.04_gcc_autoconf    "
+if [ $RESULT_ubuntu_17_04_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_17.04_gcc_cmake       "
+if [ $RESULT_ubuntu_17_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
