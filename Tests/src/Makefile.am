@@ -4,8 +4,7 @@ bin_PROGRAMS = CachePerformance \
                CoordinateEncoding \
                ReaderScannerPerformance \
                MultiDBRouting  \
-               ThreadedDatabase \
-               WStringStringConversion
+               ThreadedDatabase
 
 check_PROGRAMS = CalculateResolution \
 		 ColorParse \
@@ -21,7 +20,8 @@ check_PROGRAMS = CalculateResolution \
                  NumberSet \
                  ScanConversion \
                  TransPolygon \
-		 GeoBox
+		             GeoBox \
+		             WStringStringConversion
 
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               -I$(top_srcdir)/include
