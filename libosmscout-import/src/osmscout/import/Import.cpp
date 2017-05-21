@@ -1132,6 +1132,7 @@ namespace osmscout {
   std::list<std::string> Importer::GetProvidedReportFiles() const
   {
     std::list<std::string> providedFiles={ImportErrorReporter::FILENAME_INDEX_HTML,
+                                          ImportErrorReporter::FILENAME_TAG_HTML,
                                           ImportErrorReporter::FILENAME_WAY_HTML,
                                           ImportErrorReporter::FILENAME_RELATION_HTML,
                                           ImportErrorReporter::FILENAME_LOCATION_HTML};
