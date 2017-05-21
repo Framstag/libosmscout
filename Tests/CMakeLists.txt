@@ -67,15 +67,13 @@ endif()
 
 
 if(${OSMSCOUT_BUILD_MAP_QT})
-  set(CMAKE_AUTOMOC ON)
-
-  add_executable(DrawTextQt src/DrawTextQt.cpp include/DrawWindow.h)
+  set(src_files src/DrawTextQt.cpp include/DrawWindow.h)
+  qt5_wrap_cpp(src_files include/DrawWindow.h)
+  add_executable(DrawTextQt ${src_files})
   set_property(TARGET DrawTextQt PROPERTY CXX_STANDARD 11)
   target_include_directories(DrawTextQt PRIVATE include ${CMAKE_CURRENT_BINARY_DIR} ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS})
   target_link_libraries(DrawTextQt osmscout osmscout_map osmscout_map_qt ${Qt5Widgets_LIBRARIES})
   target_compile_definitions(DrawTextQt PRIVATE ${Qt5Widgets_DEFINITIONS})
-  
-  set(CMAKE_AUTOMOC OFF)
 else()
 	message("Skip DrawTextQt test, libosmscout-map-qt is missing.")
 endif()
