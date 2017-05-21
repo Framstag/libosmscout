@@ -341,6 +341,14 @@
 #cmakedefine HAVE_LIB_ZLIB 1
 #endif
 
+/* iconv detected */
+#ifndef HAVE_ICONV
+#cmakedefine HAVE_ICONV 1
+#endif
+#ifndef ICONV_CONST
+#define ICONV_CONST @ICONV_CONST@
+#endif
+
 /* libagg detected */
 #ifndef HAVE_LIB_AGG
 #cmakedefine HAVE_LIB_AGG 1
