@@ -490,39 +490,29 @@ namespace osmscout
 						coords[uj * 2 + 1] = iter->GetY();
 						iter++;
 					}
-					uint64_t hash = crc64((const unsigned char *)coords, data.size() * sizeof(double));
-					GeometryMap::const_iterator g = m_Polygons.find(hash);
-					if (g != m_Polygons.end())
+					ID2D1PathGeometry* pPathGeometry = nullptr;
+					HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
+					if (SUCCEEDED(hr))
 					{
-						m_pRenderTarget->FillGeometry(g->second, GetColorBrush(polygon->GetFillStyle()->GetFillColor()));
-						if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(polygon->GetBorderStyle()->GetColor()), borderWidth, GetStrokeStyle(polygon->GetBorderStyle()->GetDash()));
-					}
-					else
-					{
-						ID2D1PathGeometry* pPathGeometry;
-						HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
+						ID2D1GeometrySink *pSink = NULL;
+						hr = pPathGeometry->Open(&pSink);
 						if (SUCCEEDED(hr))
 						{
-							ID2D1GeometrySink *pSink = NULL;
-							hr = pPathGeometry->Open(&pSink);
-							if (SUCCEEDED(hr))
-							{
-								pSink->BeginFigure(D2D1::Point2F(coords[0], coords[1]), D2D1_FIGURE_BEGIN_HOLLOW);
+							pSink->BeginFigure(D2D1::Point2F(coords[0], coords[1]), D2D1_FIGURE_BEGIN_HOLLOW);
 
-								for (size_t uj = 1; uj < data.size(); uj++)
-								{
-									pSink->AddLine(D2D1::Point2F(coords[uj * 2 + 0], coords[uj * 2 + 1]));
-								}
-								pSink->EndFigure(D2D1_FIGURE_END_OPEN);
-								hr = pSink->Close();
-								pSink->Release();
-								pSink = NULL;
+							for (size_t uj = 1; uj < data.size(); uj++)
+							{
+								pSink->AddLine(D2D1::Point2F(coords[uj * 2 + 0], coords[uj * 2 + 1]));
 							}
+							pSink->EndFigure(D2D1_FIGURE_END_OPEN);
+							hr = pSink->Close();
+							pSink->Release();
+							pSink = NULL;
 						}
-						m_Polygons.insert(std::make_pair(hash, pPathGeometry));
-						m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(polygon->GetFillStyle()->GetFillColor()));
-						if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(polygon->GetBorderStyle()->GetColor()), borderWidth, GetStrokeStyle(polygon->GetBorderStyle()->GetDash()));
 					}
+					m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(polygon->GetFillStyle()->GetFillColor()));
+					if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(polygon->GetBorderStyle()->GetColor()), borderWidth, GetStrokeStyle(polygon->GetBorderStyle()->GetDash()));
+					pPathGeometry->Release();
 					delete coords;
 				}
 			}
@@ -571,6 +561,7 @@ namespace osmscout
 			}
 		}
 		m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(color), width, GetStrokeStyle(dash));
+		pPathGeometry->Release();
 	}
 
 	void MapPainterDirectX::DrawContourLabel(const Projection& projection,
@@ -602,9 +593,32 @@ namespace osmscout
 		bool hasBorder = borderStyle && borderStyle->GetWidth() > 0.0 && borderStyle->GetColor().IsVisible();
 		double borderWidth = hasBorder ? projection.ConvertWidthToPixel(borderStyle->GetWidth()) : 0.0;
 
-		uint64_t hash = (((uint32_t)area.transStart) << 32) | ((uint32_t)area.transEnd);
-		GeometryMap::const_iterator g = m_Geometries.find(hash);
-		if (g == m_Geometries.end()) {
+		ID2D1PathGeometry* pPathGeometry;
+		HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
+		if (SUCCEEDED(hr))
+		{
+			ID2D1GeometrySink *pSink = NULL;
+			hr = pPathGeometry->Open(&pSink);
+			if (SUCCEEDED(hr))
+			{
+				pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[area.transStart].GetX(), coordBuffer->buffer[area.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+				for (size_t i = area.transStart + 1; i <= area.transEnd; i++) {
+					pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
+				}
+				pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+				hr = pSink->Close();
+				pSink->Release();
+				pSink = NULL;
+			}
+		}
+		m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
+		if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+		pPathGeometry->Release();
+
+		for (std::list<PolyData>::const_iterator c = area.clippings.begin();
+			c != area.clippings.end();
+			c++) {
+			const PolyData    &data = *c;
 			ID2D1PathGeometry* pPathGeometry;
 			HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
 			if (SUCCEEDED(hr))
@@ -613,8 +627,9 @@ namespace osmscout
 				hr = pPathGeometry->Open(&pSink);
 				if (SUCCEEDED(hr))
 				{
-					pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[area.transStart].GetX(), coordBuffer->buffer[area.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
-					for (size_t i = area.transStart + 1; i <= area.transEnd; i++) {
+					pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[data.transStart].GetX(), coordBuffer->buffer[data.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+
+					for (size_t i = data.transStart + 1; i <= data.transEnd; i++) {
 						pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
 					}
 					pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
@@ -623,40 +638,9 @@ namespace osmscout
 					pSink = NULL;
 				}
 			}
-			g = m_Geometries.insert(std::make_pair(hash, pPathGeometry)).first;
-		}
-		m_pRenderTarget->FillGeometry(g->second, GetColorBrush(fillStyle->GetFillColor()));
-		if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
-		for (std::list<PolyData>::const_iterator c = area.clippings.begin();
-			c != area.clippings.end();
-			c++) {
-			const PolyData    &data = *c;
-			hash = (((uint32_t)data.transStart) << 32) | ((uint32_t)data.transEnd);
-			g = m_Geometries.find(hash);
-			if (g == m_Geometries.end()) {
-				ID2D1PathGeometry* pPathGeometry;
-				HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
-				if (SUCCEEDED(hr))
-				{
-					ID2D1GeometrySink *pSink = NULL;
-					hr = pPathGeometry->Open(&pSink);
-					if (SUCCEEDED(hr))
-					{
-						pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[data.transStart].GetX(), coordBuffer->buffer[data.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
-
-						for (size_t i = data.transStart + 1; i <= data.transEnd; i++) {
-							pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
-						}
-						pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
-						hr = pSink->Close();
-						pSink->Release();
-						pSink = NULL;
-					}
-				}
-				g = m_Geometries.insert(std::make_pair(hash, pPathGeometry)).first;
-			}
-			m_pRenderTarget->FillGeometry(g->second, GetColorBrush(fillStyle->GetFillColor()));
-			if (hasBorder) m_pRenderTarget->DrawGeometry(g->second, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+			m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
+			if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+			pPathGeometry->Release();
 		}
 	}
 
