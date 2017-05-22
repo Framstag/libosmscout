@@ -34,14 +34,74 @@
 class OSMSCOUT_CLIENT_QT_API TiledMapRenderer : public MapRenderer {
   Q_OBJECT
 
+private:
+  QString                       tileCacheDirectory;
+
+  // tile caches
+  // Rendered tile is combined from both sources.
+  //
+  // Online cache may contain NULL images (QImage::isNull() is true) for areas
+  // covered by offline database and offline cache can contain NULL images
+  // for areas not coverred by database.
+  //
+  // Offline tiles should be in ARGB format on database area interface.
+  mutable QMutex                tileCacheMutex;
+  TileCache                     onlineTileCache;
+  TileCache                     offlineTileCache;
+
+  OsmTileDownloader             *tileDownloader;
+
+  bool                          onlineTilesEnabled;
+  bool                          offlineTilesEnabled;
+
+  int                           screenWidth;
+  int                           screenHeight;
+
 public slots:
   virtual void InvalidateVisualCache();
+  void onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
+  void offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
+  void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
+  void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
+  void onDatabaseLoaded(osmscout::GeoBox boundingBox);
+
+  void onStylesheetFilenameChanged();
+
+  void onlineTileProviderChanged();
+  void onlineTilesEnabledChanged(bool);
+
+  void onOfflineMapChanged(bool);
+
+  void DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
+        size_t width, size_t height, size_t lookupWidth, size_t lookupHeight);
+
+private:
+
+  /**
+   * lookup tile in cache, if not found, try upper zoom level for substitute.
+   * (It is better upscaled tile than empty space)
+   * Is is repeated up to zoomLevel - upLimit
+   */
+  bool lookupAndDrawTile(TileCache& tileCache, QPainter& painter,
+        double x, double y, double renderTileWidth, double renderTileHeight,
+        uint32_t zoomLevel, uint32_t xtile, uint32_t ytile,
+        uint32_t upLimit, uint32_t downLimit);
+
+  void lookupAndDrawBottomTileRecursive(TileCache& tileCache, QPainter& painter,
+        double x, double y, double renderTileWidth, double renderTileHeight, double overlap,
+        uint32_t zoomLevel, uint32_t xtile, uint32_t ytile,
+        uint32_t downLimit);
+
+  DatabaseCoverage databaseCoverageOfTile(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
 
 public:
   TiledMapRenderer(QThread *thread,
                    SettingsRef settings,
                    DBThreadRef dbThread,
-                   QString iconDirectory);
+                   QString iconDirectory,
+                   QString tileCacheDirectory,
+                   size_t onlineTileCacheSize,
+                   size_t offlineTileCacheSize);
 
   virtual ~TiledMapRenderer();
 

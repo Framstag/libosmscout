@@ -110,7 +110,10 @@ bool OSMScoutQtBuilder::Init(bool tiledInstance)
   osmScoutInstance=new OSMScoutQt(thread,
                                   settings,
                                   std::shared_ptr<DBThread>(dbThread),
-                                  iconDirectory);
+                                  iconDirectory,
+                                  cacheLocation,
+                                  onlineTileCacheSize,
+                                  offlineTileCacheSize);
 
   return true;
 }
@@ -157,11 +160,17 @@ void OSMScoutQt::FreeInstance()
 OSMScoutQt::OSMScoutQt(QThread *backgroundThread,
                        SettingsRef settings,
                        DBThreadRef dbThread,
-                       QString iconDirectory):
+                       QString iconDirectory,
+                       QString cacheLocation,
+                       size_t onlineTileCacheSize,
+                       size_t offlineTileCacheSize):
         backgroundThread(backgroundThread),
         settings(settings),
         dbThread(dbThread),
-        iconDirectory(iconDirectory)
+        iconDirectory(iconDirectory),
+        cacheLocation(cacheLocation),
+        onlineTileCacheSize(onlineTileCacheSize),
+        offlineTileCacheSize(offlineTileCacheSize)
 {
 }
 
@@ -198,7 +207,13 @@ MapRendererRef OSMScoutQt::MakeMapRenderer(RenderingType type)
   thread->setObjectName("MapRenderer");
   MapRendererRef mapRenderer;
   if (type==RenderingType::TiledRendering){
-    mapRenderer=std::make_shared<TiledMapRenderer>(thread,settings,dbThread,iconDirectory);
+    mapRenderer=std::make_shared<TiledMapRenderer>(thread,
+                                                   settings,
+                                                   dbThread,
+                                                   iconDirectory,
+                                                   cacheLocation,
+                                                   onlineTileCacheSize,
+                                                   offlineTileCacheSize);
   }else{
     mapRenderer=std::make_shared<PlaneMapRenderer>(thread,settings,dbThread,iconDirectory);
   }

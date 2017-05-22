@@ -149,12 +149,18 @@ private:
   SettingsRef settings;
   DBThreadRef dbThread;
   QString     iconDirectory;
+  QString     cacheLocation;
+  size_t      onlineTileCacheSize;
+  size_t      offlineTileCacheSize;
 
 private:
   OSMScoutQt(QThread *backgroundThread,
              SettingsRef settings,
              DBThreadRef dbThread,
-             QString iconDirectory);
+             QString iconDirectory,
+             QString cacheLocation,
+             size_t onlineTileCacheSize,
+             size_t offlineTileCacheSize);
 public:
   virtual ~OSMScoutQt();
 
