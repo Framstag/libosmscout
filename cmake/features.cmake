@@ -122,6 +122,11 @@ set(Matlab_FIND_COMPONENTS MX_LIBRARY)
 find_package(MATLAB QUIET)
 find_package(Gperftools QUIET)
 find_package(Direct2D QUIET)
+find_package(Threads REQUIRED)
+if(THREADS_HAVE_PTHREAD_ARG)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${THREADS_PTHREAD_ARG}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${THREADS_PTHREAD_ARG}")
+endif()
 
 # prepare cmake variables for configuration files
 set(OSMSCOUT_HAVE_INT16_T ${HAVE_INT16_T})
