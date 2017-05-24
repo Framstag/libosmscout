@@ -37,12 +37,14 @@ private:
   osmscout::MapParameter *drawParameter;
   QPainter *p;
   bool success;
+  bool drawCanvasBackground;
 
 public:
   DBRenderJob(osmscout::MercatorProjection renderProjection,
               QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
               osmscout::MapParameter *drawParameter,
-              QPainter *p);
+              QPainter *p,
+              bool drawCanvasBackground);
   virtual ~DBRenderJob();
 
   virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);

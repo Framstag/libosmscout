@@ -286,7 +286,8 @@ void PlaneMapRenderer::DrawMap()
       DBRenderJob job(renderProjection,
                       loadJob->GetAllTiles(),
                       &drawParameter,
-                      &p);
+                      &p,
+                      /*drawCanvasBackground*/ true);
       dbThread->RunJob(&job);
       success=job.IsSuccess();
     }

@@ -104,12 +104,14 @@ void MapRenderer::onFontSizeChanged(double fontSize)
 DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
                          QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
                          osmscout::MapParameter *drawParameter,
-                         QPainter *p):
+                         QPainter *p,
+                         bool drawCanvasBackground):
   renderProjection(renderProjection),
   tiles(tiles),
   drawParameter(drawParameter),
   p(p),
-  success(false)
+  success(false),
+  drawCanvasBackground(drawCanvasBackground)
 {
 }
 
@@ -128,25 +130,27 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
       osmscout::log.Debug() << "Skip database " << db->path.toStdString();
       continue;
     }
-    // fill background with "unknown" color
-    if (!backgroundRendered && db->styleConfig){
-        osmscout::FillStyleRef unknownFillStyle;
-        db->styleConfig->GetUnknownFillStyle(renderProjection, unknownFillStyle);
-        if (unknownFillStyle){
-          osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
-          p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
-                      QColor::fromRgbF(backgroundColor.GetR(),
-                                       backgroundColor.GetG(),
-                                       backgroundColor.GetB(),
-                                       1));
-          backgroundRendered=true;
-        }
-    }
-    if (!backgroundRendered){
-      // as backup, when "unknown" style is not defined, use black color
-      p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
-                  QBrush(QColor::fromRgbF(0,0,0,1)));
-      backgroundRendered=true;
+    if (drawCanvasBackground){
+      // fill background with "unknown" color
+      if (!backgroundRendered && db->styleConfig){
+          osmscout::FillStyleRef unknownFillStyle;
+          db->styleConfig->GetUnknownFillStyle(renderProjection, unknownFillStyle);
+          if (unknownFillStyle){
+            osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
+            p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
+                        QColor::fromRgbF(backgroundColor.GetR(),
+                                         backgroundColor.GetG(),
+                                         backgroundColor.GetB(),
+                                         1));
+            backgroundRendered=true;
+          }
+      }
+      if (!backgroundRendered){
+        // as backup, when "unknown" style is not defined, use black color
+        p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
+                    QBrush(QColor::fromRgbF(0,0,0,1)));
+        backgroundRendered=true;
+      }
     }
     std::list<osmscout::TileRef> tileList=tiles[db->path].values().toStdList();
     osmscout::MapData            data;
@@ -164,7 +168,7 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
                                        p);
 
   }
-  if (!backgroundRendered){
+  if (drawCanvasBackground && !backgroundRendered){
     p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                 QBrush(QColor::fromRgbF(0,0,0,1)));
   }

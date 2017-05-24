@@ -642,7 +642,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
       DBRenderJob job(projection,
                       tiles,
                       &drawParameter,
-                      &p);
+                      &p,
+                      /*drawCanvasBackground*/ false);
       dbThread->RunJob(&job);
       success=job.IsSuccess();
     }
