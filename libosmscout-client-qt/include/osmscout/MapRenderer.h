@@ -45,7 +45,7 @@ public:
               QPainter *p);
   virtual ~DBRenderJob();
 
-  virtual void Run(QList<DBInstanceRef> &databases, QReadLocker *locker);
+  virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);
 
   inline bool IsSuccess(){
     return success;

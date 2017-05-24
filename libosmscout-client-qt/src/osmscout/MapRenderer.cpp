@@ -117,7 +117,7 @@ DBRenderJob::~DBRenderJob()
 {
 }
 
-void DBRenderJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
+void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
 {
   DBJob::Run(databases,locker);
   bool backgroundRendered=false;

@@ -368,7 +368,7 @@ void PlaneDBThread::DrawMap()
   osmscout::log.Debug() << "DrawMap()";
   {
     QReadLocker locker(&lock);
-    if (databases.isEmpty()){
+    if (databases.size()==0){
       osmscout::log.Warn() << " No databases!";
       return;
     }

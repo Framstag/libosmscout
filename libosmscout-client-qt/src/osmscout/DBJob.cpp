@@ -32,7 +32,7 @@ DBJob::~DBJob()
   Close();
 }
 
-void DBJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
+void DBJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
 {
   if (thread!=QThread::currentThread()){
     qWarning() << "Run from non Job thread";
@@ -80,11 +80,11 @@ DBLoadJob::~DBLoadJob()
   Close();
 }
 
-void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
+void DBLoadJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
 {
   osmscout::GeoBox lookupBox;
   lookupProjection.GetDimensions(lookupBox);
-  QList<DBInstanceRef> relevantDatabases;
+  std::list<DBInstanceRef> relevantDatabases;
   for (auto &db:databases){
     if (!db->database->IsOpen() || (!db->styleConfig)) {
       qDebug() << "Database is not ready" << db->path;
@@ -96,7 +96,7 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
       qDebug() << "Skip database" << db->path;
       continue;
     }
-    relevantDatabases << db;
+    relevantDatabases.push_back(db);
   }
 
   DBJob::Run(relevantDatabases,locker);

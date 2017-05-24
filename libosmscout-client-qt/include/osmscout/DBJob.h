@@ -38,15 +38,15 @@ class OSMSCOUT_CLIENT_QT_API DBJob : public QObject{
   Q_OBJECT
 
 protected:
-  QList<DBInstanceRef> databases; //!< borrowed databases
-  QReadLocker          *locker;   //!< database locker
-  QThread              *thread;   //!< job thread
+  std::list<DBInstanceRef> databases; //!< borrowed databases
+  QReadLocker              *locker;   //!< database locker
+  QThread                  *thread;   //!< job thread
 
 public:
   DBJob();
   virtual ~DBJob();
 
-  virtual void Run(QList<DBInstanceRef> &databases, QReadLocker *locker);
+  virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);
   virtual void Close();
 };
 
@@ -83,7 +83,7 @@ public:
             bool closeOnFinish=true);
   virtual ~DBLoadJob();
 
-  virtual void Run(QList<DBInstanceRef> &databases, QReadLocker *locker);
+  virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);
   virtual void Close();
 
   bool IsFinished() const;

@@ -358,6 +358,9 @@ void PlaneMapRenderer::TriggerMapRendering(const RenderMapRequest& request)
       delete loadJob;
       loadJob=NULL;
     }
+    if (thread!=QThread::currentThread()){
+      osmscout::log.Warn() << "Incorrect thread!";
+    }
 
     currentWidth=request.width;
     currentHeight=request.height;
@@ -410,7 +413,7 @@ void PlaneMapRenderer::onStylesheetFilenameChanged()
     QMutexLocker finishedLocker(&finishedMutex);
 
     dbThread->RunSynchronousJob(
-      [this](const QList<DBInstanceRef>& databases) {
+      [this](const std::list<DBInstanceRef>& databases) {
         for (auto &db:databases){
           if (db->styleConfig){
             db->styleConfig->GetUnknownFillStyle(projection, finishedUnknownFillStyle);

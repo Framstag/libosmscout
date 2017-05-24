@@ -118,7 +118,7 @@ class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
   Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
 
 public:
-  typedef std::function<void(const QList<DBInstanceRef>&)> SynchronousDBJob;
+  typedef std::function<void(const std::list<DBInstanceRef>&)> SynchronousDBJob;
 
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
@@ -194,7 +194,7 @@ protected:
   mutable QReadWriteLock        lock;
   
   osmscout::DatabaseParameter   databaseParameter;
-  QList<DBInstanceRef>          databases;
+  std::list<DBInstanceRef>      databases;
   osmscout::RouterParameter     routerParameter;
   osmscout::RoutePostprocessor  routePostprocessor;
 

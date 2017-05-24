@@ -331,13 +331,13 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
     osmscout::MapServiceRef mapService = std::make_shared<osmscout::MapService>(database);
     osmscout::MapService::CallbackId callbackId=mapService->RegisterTileStateCallback(callback);
 
-    databases << std::make_shared<DBInstance>(databaseDirectory.absolutePath(),
-                                              database,
-                                              std::make_shared<osmscout::LocationService>(database),
-                                              mapService,
-                                              callbackId,
-                                              std::make_shared<QBreaker>(),
-                                              styleConfig);
+    databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath(),
+                                                     database,
+                                                     std::make_shared<osmscout::LocationService>(database),
+                                                     mapService,
+                                                     callbackId,
+                                                     std::make_shared<QBreaker>(),
+                                                     styleConfig));
   }
 
   emit databaseLoadFinished(boundingBox);
