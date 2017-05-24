@@ -32,6 +32,7 @@
 #include <osmscout/MapRenderer.h>
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/InputHandler.h>
+#include <osmscout/OSMScoutQt.h>
 
 /**
  * \defgroup QtAPI Qt API
@@ -62,6 +63,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(bool     showCurrentPosition READ getShowCurrentPosition WRITE setShowCurrentPosition)
   Q_PROPERTY(bool     lockToPosition READ isLockedToPosition WRITE setLockToPosition NOTIFY lockToPossitionChanged)
   Q_PROPERTY(QString  stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
+  Q_PROPERTY(QString  renderingType READ GetRenderingType WRITE SetRenderingType NOTIFY renderingTypeChanged)
   
   Q_PROPERTY(bool stylesheetHasErrors           READ stylesheetHasErrors              NOTIFY styleErrorsChanged)
   Q_PROPERTY(int stylesheetErrorLine            READ firstStylesheetErrorLine         NOTIFY styleErrorsChanged)
@@ -84,6 +86,7 @@ private:
   osmscout::GeoCoord currentPosition;
   bool horizontalAccuracyValid;
   double horizontalAccuracy;
+  RenderingType renderingType;
   
   QMap<int, osmscout::GeoCoord> marks;
 
@@ -101,6 +104,7 @@ signals:
   void stylesheetFilenameChanged();
   void styleErrorsChanged();
   void databaseLoaded(osmscout::GeoBox);
+  void renderingTypeChanged(QString type);
   
 public slots:
   void changeView(const MapView &view);
@@ -273,6 +277,9 @@ public:
   bool isDatabaseLoaded();
   Q_INVOKABLE bool isInDatabaseBoundingBox(double lat, double lon);
   Q_INVOKABLE QPointF screenPosition(double lat, double lon);
+
+  QString GetRenderingType() const;
+  void SetRenderingType(QString type);
 };
 
 #endif

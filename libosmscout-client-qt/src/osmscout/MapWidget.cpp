@@ -34,13 +34,15 @@ MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
       inputHandler(NULL), 
       showCurrentPosition(false),
-      finished(false)
+      finished(false),
+      renderingType(RenderingType::PlaneRendering)
 {
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);
     setAcceptHoverEvents(true);
 
-    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(RenderingType::PlaneRendering);
+    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
     
     mapDpi = dbThread->GetSettings()->GetMapDPI();
@@ -50,10 +52,6 @@ MapWidget::MapWidget(QQuickItem* parent)
   
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
-    //setFocusPolicy(Qt::StrongFocus);
-
-    connect(dbThread.get(),SIGNAL(Redraw()),
-            this,SLOT(redraw()));
     connect(renderer.get(),SIGNAL(Redraw()),
             this,SLOT(redraw()));
     connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
@@ -689,4 +687,24 @@ bool MapWidget::toggleInfo()
     osmscout::log.Info(!osmscout::log.IsInfo());
 
     return osmscout::log.IsInfo();
+}
+
+QString MapWidget::GetRenderingType() const
+{
+  if (renderingType==RenderingType::TiledRendering)
+    return "tiled";
+  return "plane";
+}
+
+void MapWidget::SetRenderingType(QString strType)
+{
+  RenderingType type=RenderingType::PlaneRendering;
+  if (strType=="tiled"){
+    type=RenderingType::TiledRendering;
+  }
+  if (type!=renderingType){
+    renderingType=type;
+    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    emit renderingTypeChanged(GetRenderingType());
+  }
 }
