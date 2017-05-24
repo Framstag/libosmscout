@@ -122,7 +122,7 @@ public:
     return *this;
   }
 
-  bool Init(bool tiledInstance=false);
+  bool Init();
 };
 
 /**

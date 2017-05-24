@@ -21,8 +21,6 @@
 #include <osmscout/MapService.h>
 
 #include <osmscout/DBThread.h>
-#include <osmscout/TiledDBThread.h>
-#include <osmscout/PlaneDBThread.h>
 #include <osmscout/private/Config.h>
 #include "osmscout/MapManager.h"
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
@@ -84,7 +82,7 @@ DBThread::DBThread(QStringList databaseLookupDirs,
 
 DBThread::~DBThread()
 {
-  osmscout::log.Debug() << "DBThread::~TiledDBThread()";
+  osmscout::log.Debug() << "DBThread::~DBThread()";
 
   for (auto db:databases){
     db->close();
@@ -205,18 +203,11 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
   return DatabaseCoverage::Outside;
 }
 
-void DBThread::TileStateCallback(const osmscout::TileRef& /*changedTile*/)
-{
-
-}
-
-bool DBThread::InitializeDatabases()
+void DBThread::Initialize()
 {
   QReadLocker locker(&lock);
   qDebug() << "Initialize databases";
   mapManager->lookupDatabases();
-
-  return true;
 }
 
 void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
@@ -327,15 +318,12 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       continue;
     }
 
-    osmscout::MapService::TileStateCallback callback=[this](const osmscout::TileRef& tile) {TileStateCallback(tile);};
     osmscout::MapServiceRef mapService = std::make_shared<osmscout::MapService>(database);
-    osmscout::MapService::CallbackId callbackId=mapService->RegisterTileStateCallback(callback);
 
     databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath(),
                                                      database,
                                                      std::make_shared<osmscout::LocationService>(database),
                                                      mapService,
-                                                     callbackId,
                                                      std::make_shared<QBreaker>(),
                                                      styleConfig));
   }
@@ -418,9 +406,7 @@ void DBThread::LoadStyle(QString stylesheetFilename,
     qWarning()<<"Failed to load stylesheet"<<(stylesheetFilename+suffix);
     emit styleErrorsChanged();
   }
-  InvalidateVisualCache();
   emit stylesheetFilenameChanged();
-  emit Redraw();
 }
 
 bool DBThread::GetObjectDetails(DBInstanceRef db,
@@ -821,12 +807,10 @@ bool DBThread::TransformRouteDataToWay(const QString databasePath,
 
 void DBThread::ClearRoute()
 {
-  emit Redraw();
 }
 
 void DBThread::AddRoute(const osmscout::Way& /*way*/)
 {
-  emit Redraw();
 }
 
 osmscout::RoutePosition DBThread::GetClosestRoutableNode(const QString databasePath,
@@ -984,8 +968,6 @@ void DBThread::onMapDPIChange(double dpi)
     QWriteLocker locker(&lock);
     mapDpi = dpi;
   }
-  InvalidateVisualCache();
-  emit Redraw();
 }
 
 void DBThread::onRenderSeaChanged(bool b)
@@ -994,8 +976,6 @@ void DBThread::onRenderSeaChanged(bool b)
     QWriteLocker locker(&lock);
     renderSea = b;
   }
-  InvalidateVisualCache();
-  emit Redraw();
 }
 
 void DBThread::onFontNameChanged(const QString fontName)
@@ -1004,8 +984,6 @@ void DBThread::onFontNameChanged(const QString fontName)
     QWriteLocker locker(&lock);
     this->fontName=fontName;
   }
-  InvalidateVisualCache();
-  emit Redraw();
 }
 
 void DBThread::onFontSizeChanged(double fontSize)
@@ -1014,8 +992,6 @@ void DBThread::onFontSizeChanged(double fontSize)
     QWriteLocker locker(&lock);
     this->fontSize=fontSize;
   }
-  InvalidateVisualCache();
-  emit Redraw();
 }
 
 osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) const

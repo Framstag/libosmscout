@@ -197,10 +197,6 @@ void DBInstance::close()
   qDeleteAll(painterHolder);
   painterHolder.clear();
 
-  if (callbackId){
-    mapService->DeregisterTileStateCallback(callbackId);
-  }
-  callbackId = 0;
   if (database->IsOpen()) {
     database->Close();
   }

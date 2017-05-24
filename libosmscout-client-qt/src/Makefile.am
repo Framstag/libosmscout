@@ -19,8 +19,6 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/moc_OnlineTileProvider.cpp \
                                  osmscout/OnlineTileProviderModel.cpp \
                                  osmscout/moc_OnlineTileProviderModel.cpp \
-                                 osmscout/PlaneDBThread.cpp \
-                                 osmscout/moc_PlaneDBThread.cpp \
                                  osmscout/SearchLocationModel.cpp \
                                  osmscout/moc_SearchLocationModel.cpp \
                                  osmscout/Settings.cpp \
@@ -31,8 +29,6 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/moc_LocationEntry.cpp \
                                  osmscout/LocationInfoModel.cpp \
                                  osmscout/moc_LocationInfoModel.cpp \
-                                 osmscout/TiledDBThread.cpp \
-                                 osmscout/moc_TiledDBThread.cpp \
                                  osmscout/OsmTileDownloader.cpp \
                                  osmscout/moc_OsmTileDownloader.cpp \
                                  osmscout/OSMTile.cpp \
@@ -79,7 +75,6 @@ MOSTLYCLEANFILES = osmscout/moc_DBThread.cpp \
                    osmscout/moc_SearchLocationModel.cpp \
                    osmscout/moc_Settings.cpp \
                    osmscout/moc_LocationInfoModel.cpp \
-                   osmscout/moc_TiledDBThread.cpp \
                    osmscout/moc_OsmTileDownloader.cpp \
                    osmscout/moc_OSMTile.cpp \
                    osmscout/moc_TileCache.cpp \
@@ -93,7 +88,6 @@ MOSTLYCLEANFILES = osmscout/moc_DBThread.cpp \
                    osmscout/moc_InputHandler.cpp \
                    osmscout/moc_OnlineTileProvider.cpp \
                    osmscout/moc_OnlineTileProviderModel.cpp \
-                   osmscout/moc_PlaneDBThread.cpp \
                    osmscout/moc_OSMScoutQt.cpp \
                    osmscout/moc_DBJob.cpp \
                    osmscout/moc_LookupModule.cpp \

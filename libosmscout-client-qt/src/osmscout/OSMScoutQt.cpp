@@ -24,8 +24,6 @@
 #include <osmscout/Settings.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/DataTileCache.h>
-#include <osmscout/PlaneDBThread.h>
-#include <osmscout/TiledDBThread.h>
 #include <osmscout/MapWidget.h>
 #include <osmscout/PlaneMapRenderer.h>
 #include <osmscout/TiledMapRenderer.h>
@@ -60,7 +58,7 @@ OSMScoutQtBuilder::OSMScoutQtBuilder():
 {
 }
 
-bool OSMScoutQtBuilder::Init(bool tiledInstance)
+bool OSMScoutQtBuilder::Init()
 {
   if (osmScoutInstance!=NULL){
     return false;
@@ -84,19 +82,9 @@ bool OSMScoutQtBuilder::Init(bool tiledInstance)
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
 
-  DBThread* dbThread;
-  if (tiledInstance){
-    dbThread=new TiledDBThread(mapLookupDirectories,
-                               iconDirectory,
-                               settings,
-                               cacheLocation + QDir::separator() + "OSMScoutTileCache",
-                               onlineTileCacheSize,
-                               offlineTileCacheSize);
-  }else{
-    dbThread=new PlaneDBThread(mapLookupDirectories,
-                               iconDirectory,
-                               settings);
-  }
+  DBThread* dbThread=new DBThread(mapLookupDirectories,
+                                  iconDirectory,
+                                  settings);
 
   QThread *thread=new QThread();
   thread->setObjectName("DBThread");

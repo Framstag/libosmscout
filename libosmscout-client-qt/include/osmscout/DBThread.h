@@ -123,8 +123,6 @@ public:
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void TriggerInitialRendering();
-  void TriggerDrawMap();
-  void Redraw();
   void locationDescription(const osmscout::GeoCoord location, 
                            const QString database,
                            const osmscout::LocationDescription description,
@@ -145,8 +143,7 @@ public slots:
   void LoadStyle(QString stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
                  const QString &suffix="");
-  virtual void Initialize() = 0;
-  virtual void InvalidateVisualCache() = 0;
+  void Initialize();
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
   void Finalize();
 
@@ -213,15 +210,9 @@ protected:
   double                        fontSize;
 
 protected:
-
-  DBThread(QStringList databaseLookupDirectories,
-           QString iconDirectory,
-           SettingsRef settings);
   
   bool AssureRouter(osmscout::Vehicle vehicle);
 
-  virtual void TileStateCallback(const osmscout::TileRef& changedTile);
- 
   static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
                                           const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
@@ -243,13 +234,15 @@ protected:
                         osmscout::GeoCoord& coordinates,
                         osmscout::GeoBox& bbox);
 
-  bool InitializeDatabases();
-
   void CancelCurrentDataLoading();
 
   bool isInitializedInternal();
 
 public:
+  DBThread(QStringList databaseLookupDirectories,
+           QString iconDirectory,
+           SettingsRef settings);
+
   virtual ~DBThread();
 
   bool isInitialized(); 
@@ -270,15 +263,6 @@ public:
   double GetMapDpi() const;
   
   double GetPhysicalDpi() const;
-  
-  /**
-   * Render map defined by request to painter 
-   * @param painter
-   * @param request
-   * @return true if rendered map is complete 
-   */
-  virtual bool RenderMap(QPainter& painter,
-                         const RenderMapRequest& request) = 0;
   
   bool CalculateRoute(const QString databasePath,
                       const osmscout::RoutingProfile& routingProfile,
