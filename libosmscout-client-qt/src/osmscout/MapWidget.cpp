@@ -705,6 +705,8 @@ void MapWidget::SetRenderingType(QString strType)
   if (type!=renderingType){
     renderingType=type;
     renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    connect(renderer.get(),SIGNAL(Redraw()),
+            this,SLOT(redraw()));
     emit renderingTypeChanged(GetRenderingType());
   }
 }
