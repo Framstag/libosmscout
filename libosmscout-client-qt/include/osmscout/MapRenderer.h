@@ -73,6 +73,8 @@ signals:
   void TriggerDrawMap();
 
 public slots:
+  virtual void Initialize() = 0;
+
   virtual void InvalidateVisualCache() = 0;
 
   virtual void onMapDPIChange(double dpi);

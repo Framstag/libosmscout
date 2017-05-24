@@ -60,9 +60,11 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
   connect(&pendingRenderingTimer,SIGNAL(timeout()),
           this,SLOT(DrawMap()));
 
+  /*
   connect(this,SIGNAL(TileStatusChanged(const osmscout::TileRef&)),
           this,SLOT(HandleTileStatusChanged(const osmscout::TileRef&)),
           Qt::QueuedConnection);
+  */
 
   connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
           this,SLOT(onStylesheetFilenameChanged()),
@@ -198,6 +200,10 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   }
 
   return needsNoRepaint;
+}
+
+void PlaneMapRenderer::Initialize()
+{
 }
 
 /**

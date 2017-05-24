@@ -32,7 +32,8 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   tileCacheDirectory(tileCacheDirectory),
   onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
   offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
-  tileDownloader(NULL) // it will be created in different thread
+  tileDownloader(NULL), // it will be created in different thread
+  loadJob(NULL)
 {
   QScreen *srn=QGuiApplication::primaryScreen();
   screenWidth=srn->availableSize().width();
@@ -71,17 +72,35 @@ TiledMapRenderer::~TiledMapRenderer()
   if (tileDownloader != NULL){
     delete tileDownloader;
   }
+  if (loadJob!=NULL){
+    delete loadJob;
+  }
+}
+
+void TiledMapRenderer::Initialize()
+{
+  {
+    QMutexLocker locker(&lock);
+    qDebug() << "Initialize";
+
+    // create tile downloader in correct thread
+    tileDownloader = new OsmTileDownloader(tileCacheDirectory);
+    connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+            this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+            Qt::QueuedConnection);
+
+    connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
+            this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+            Qt::QueuedConnection);
+  }
+
+
+  // invalidate tile cache and Redraw()
+  InvalidateVisualCache();
 }
 
 void TiledMapRenderer::InvalidateVisualCache()
 {
-  // invalidate tile cache
-  QMutexLocker locker(&tileCacheMutex);
-  offlineTileCache.invalidate();
-  offlineTileCache.clearPendingRequests();
-}
-
-void TiledMapRenderer::onStylesheetFilenameChanged(){
   // invalidate tile cache and emit Redraw
   {
       QMutexLocker locker(&tileCacheMutex);
@@ -89,6 +108,10 @@ void TiledMapRenderer::onStylesheetFilenameChanged(){
       offlineTileCache.clearPendingRequests();
   }
   emit Redraw();
+}
+
+void TiledMapRenderer::onStylesheetFilenameChanged(){
+  InvalidateVisualCache();
 }
 
 /**
@@ -397,7 +420,12 @@ void TiledMapRenderer::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uin
 
 void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
 {
-    // TODO: just start loading
+    // just start loading
+    QMutexLocker locker(&lock);
+    if (loadJob!=NULL){
+        // wait until previous loading is not finished
+        return;
+    }
     {
         QMutexLocker locker(&tileCacheMutex);
         if (!offlineTileCache.startRequestProcess(zoomLevel, xtile, ytile)) // request was canceled or started already
@@ -410,62 +438,50 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
         // tile rendering have sub-linear complexity with area size
         // it means that it is advatage to merge more tile requests with same zoom
         // and render bigger area
-        uint32_t xFrom;
-        uint32_t xTo;
-        uint32_t yFrom;
-        uint32_t yTo;
         {
             QMutexLocker locker(&tileCacheMutex);
             offlineTileCache.mergeAndStartRequests(zoomLevel, xtile, ytile,
-                                                   xFrom, xTo, yFrom, yTo,
+                                                   loadXFrom, loadXTo, loadYFrom, loadYTo,
                                                    /*maxWidth*/ 5, /*maxHeight*/ 5);
         }
-        uint32_t width = (xTo - xFrom + 1);
-        uint32_t height = (yTo - yFrom + 1);
+        uint32_t width = (loadXTo - loadXFrom + 1);
+        uint32_t height = (loadYTo - loadYFrom + 1);
+        loadZ=zoomLevel;
+
 
         //osmscout::GeoBox tileBoundingBox = OSMTile::tileBoundingBox(zoomLevel, xtile, ytile);
         osmscout::GeoCoord tileVisualCenter = OSMTile::tileRelativeCoord(zoomLevel,
-                (double)xFrom + (double)width/2.0,
-                (double)yFrom + (double)height/2.0);
+                (double)loadXFrom + (double)width/2.0,
+                (double)loadYFrom + (double)height/2.0);
 
         double osmTileDimension = (double)OSMTile::osmTileOriginalWidth() * (mapDpi / OSMTile::tileDPI() ); // pixels
 
-        QImage canvas(
-                (double)width * osmTileDimension,
-                (double)height * osmTileDimension,
-                QImage::Format_ARGB32_Premultiplied); // TODO: verify best format with profiler (callgrind)
+        osmscout::Magnification magnification;
+        magnification.SetLevel(zoomLevel);
 
-        QColor transparent = QColor::fromRgbF(1, 1, 1, 0.0);
-        canvas.fill(transparent);
+        osmscout::MercatorProjection projection;
+        projection.Set(tileVisualCenter,
+                       /*currentAngle*/ 0.0,
+                       magnification,
+                       mapDpi,
+                       ((double)width * osmTileDimension)+osmTileDimension,
+                       ((double)height * osmTileDimension)+osmTileDimension);
 
-        QPainter p;
-        p.begin(&canvas);
-
-        DrawMap(p, tileVisualCenter, zoomLevel, canvas.width(), canvas.height(),
-                canvas.width() + osmTileDimension, canvas.height() + osmTileDimension);
-
-        p.end();
-        {
-            QMutexLocker locker(&tileCacheMutex);
-            if (width == 1 && height == 1){
-                offlineTileCache.put(zoomLevel, xtile, ytile, canvas);
-            }else{
-                for (uint32_t y = yFrom; y <= yTo; ++y){
-                    for (uint32_t x = xFrom; x <= xTo; ++x){
-
-                        QImage tile = canvas.copy(
-                                (double)(x - xFrom) * osmTileDimension,
-                                (double)(y - yFrom) * osmTileDimension,
-                                osmTileDimension, osmTileDimension
-                                );
-
-                        offlineTileCache.put(zoomLevel, x, y, tile);
-                    }
-                }
-            }
+        unsigned long maximumAreaLevel=4;
+        if (magnification.GetLevel() >= 15) {
+          maximumAreaLevel=6;
         }
-        Redraw();
-        //std::cout << "  put offline: " << zoomLevel << " xtile: " << xtile << " ytile: " << ytile << std::endl;
+
+        loadJob=new DBLoadJob(projection,
+                              maximumAreaLevel,
+                              /* lowZoomOptimization */ true,
+                              /* closeOnFinish */ false);
+
+        connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)),
+                this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)));
+
+        dbThread->RunJob(loadJob);
+
     }else{
         // put Null image
         {
@@ -544,15 +560,125 @@ void TiledMapRenderer::onOfflineMapChanged(bool b)
     emit Redraw();
 }
 
-/**
- * Actual map drawing into the back buffer
- *
- * have to be called with acquiered mutex
- */
-void TiledMapRenderer::DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
-        size_t width, size_t height, size_t lookupWidth, size_t lookupHeight)
+void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles)
 {
+    // just start loading
     QMutexLocker locker(&lock);
+    if (loadJob==NULL){
+        // no running load job
+        return;
+    }
+    
+    uint32_t width = (loadXTo - loadXFrom + 1);
+    uint32_t height = (loadYTo - loadYFrom + 1);
 
-    // TODO
+    osmscout::GeoCoord tileVisualCenter = OSMTile::tileRelativeCoord(loadZ,
+            (double)loadXFrom + (double)width/2.0,
+            (double)loadYFrom + (double)height/2.0);
+
+    double osmTileDimension = (double)OSMTile::osmTileOriginalWidth() * (mapDpi / OSMTile::tileDPI() ); // pixels
+
+    QImage canvas((double)width * osmTileDimension,
+                  (double)height * osmTileDimension,
+                  QImage::Format_ARGB32_Premultiplied); // TODO: verify best format with profiler (callgrind)
+
+    QColor transparent = QColor::fromRgbF(1, 1, 1, 0.0);
+    canvas.fill(transparent);
+
+    QPainter p;
+    p.begin(&canvas);
+
+    //loadJob->AddTileDataToMapData()
+    osmscout::MapParameter        drawParameter;
+    std::list<std::string>        paths;
+
+    paths.push_back(iconDirectory.toLocal8Bit().data());
+
+    drawParameter.SetIconPaths(paths);
+    drawParameter.SetPatternPaths(paths);
+    drawParameter.SetDebugData(false);
+    drawParameter.SetDebugPerformance(true);
+
+    // optimize process can reduce number of nodes before rendering
+    // it helps for slow renderer backend, but it cost some cpu
+    // it seems that it is ok disable it for Qt
+    drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::none);
+    drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::none);
+
+    drawParameter.SetRenderBackground(false);
+    drawParameter.SetRenderUnknowns(false); // it is necessary to disable it with multiple sources
+    drawParameter.SetRenderSeaLand(renderSea);
+
+    drawParameter.SetFontName(fontName.toStdString());
+    drawParameter.SetFontSize(fontSize);
+
+    drawParameter.SetLabelLineMinCharCount(15);
+    drawParameter.SetLabelLineMaxCharCount(30);
+    drawParameter.SetLabelLineFitToArea(true);
+    drawParameter.SetLabelLineFitToWidth(std::min(screenWidth, screenHeight));
+
+    // see Tiler.cpp example...
+
+    // To get accurate label drawing at tile borders, we take into account labels
+    // of other than the current tile, too.
+    if (loadZ >= 14) {
+        // but not for high zoom levels, it is too expensive
+        drawParameter.SetDropNotVisiblePointLabels(true);
+    }else{
+        drawParameter.SetDropNotVisiblePointLabels(false);
+    }
+
+    // setup projection for these tiles
+    osmscout::MercatorProjection projection;
+    osmscout::Magnification magnification;
+    magnification.SetLevel(loadZ);
+    projection.Set(tileVisualCenter, /* angle */ 0, magnification, mapDpi,
+                   canvas.width(), canvas.height());
+    projection.SetLinearInterpolationUsage(loadZ >= 10);
+
+    //DrawMap(p, tileVisualCenter, loadZ, canvas.width(), canvas.height());
+    bool success;
+    {
+      DBRenderJob job(projection,
+                      tiles,
+                      &drawParameter,
+                      &p);
+      dbThread->RunJob(&job);
+      success=job.IsSuccess();
+    }
+    if (!success)  {
+      osmscout::log.Error() << "*** Rendering of data has error or was interrupted";
+      return;
+    }
+
+    p.end();
+
+    {
+        QMutexLocker locker(&tileCacheMutex);
+        if (width == 1 && height == 1){
+            offlineTileCache.put(loadZ, loadXFrom, loadYFrom, canvas);
+        }else{
+            for (uint32_t y = loadYFrom; y <= loadYTo; ++y){
+                for (uint32_t x = loadXFrom; x <= loadXTo; ++x){
+
+                    QImage tile = canvas.copy(
+                            (double)(x - loadXFrom) * osmTileDimension,
+                            (double)(y - loadYFrom) * osmTileDimension,
+                            osmTileDimension, osmTileDimension
+                            );
+
+                    offlineTileCache.put(loadZ, x, y, tile);
+                }
+            }
+        }
+
+        // we don't process offline tile requests while there is active
+        // loading job, so we reemit requests again...
+        offlineTileCache.reemitRequests();
+    }
+
+    delete loadJob;
+    loadJob=NULL;
+    emit Redraw();
+    //std::cout << "  put offline: " << loadZ << " xtile: " << xtile << " ytile: " << ytile << std::endl;
 }

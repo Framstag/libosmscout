@@ -27,6 +27,7 @@ MapRenderer::MapRenderer(QThread *thread,
   thread(thread),
   settings(settings),
   dbThread(dbThread),
+  lock(QMutex::Recursive),
   iconDirectory(iconDirectory)
 {
   mapDpi = settings->GetMapDPI();
@@ -48,6 +49,8 @@ MapRenderer::MapRenderer(QThread *thread,
   connect(settings.get(), SIGNAL(FontSizeChanged(double)),
           this, SLOT(onFontSizeChanged(double)),
           Qt::QueuedConnection);
+  connect(thread, SIGNAL(started()),
+          this, SLOT(Initialize()));
 }
 
 MapRenderer::~MapRenderer()

@@ -57,13 +57,23 @@ private:
   int                           screenWidth;
   int                           screenHeight;
 
+  // data loading request
+  DBLoadJob                     *loadJob;
+  uint32_t                      loadXFrom;
+  uint32_t                      loadXTo;
+  uint32_t                      loadYFrom;
+  uint32_t                      loadYTo;
+  uint32_t                      loadZ;
+
 public slots:
+  virtual void Initialize();
   virtual void InvalidateVisualCache();
   void onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
   void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
   void onDatabaseLoaded(osmscout::GeoBox boundingBox);
+  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
 
   void onStylesheetFilenameChanged();
 
@@ -71,9 +81,6 @@ public slots:
   void onlineTilesEnabledChanged(bool);
 
   void onOfflineMapChanged(bool);
-
-  void DrawMap(QPainter &p, const osmscout::GeoCoord center, uint32_t z,
-        size_t width, size_t height, size_t lookupWidth, size_t lookupHeight);
 
 private:
 

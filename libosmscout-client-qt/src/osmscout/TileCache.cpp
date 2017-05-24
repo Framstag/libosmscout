@@ -67,7 +67,8 @@ bool TileCache::isRequestQueueEmpty() const
 }
 
 void TileCache::mergeAndStartRequests(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile, 
-    uint32_t &xFrom, uint32_t &xTo, uint32_t &yFrom, uint32_t &yTo, uint32_t maxWidth, uint32_t maxHeight)
+                                      uint32_t &xFrom, uint32_t &xTo, uint32_t &yFrom, uint32_t &yTo,
+                                      uint32_t maxWidth, uint32_t maxHeight)
 {
     xFrom = xtile;
     xTo = xtile;
@@ -124,6 +125,14 @@ bool TileCache::request(uint32_t zoomLevel, uint32_t x, uint32_t y)
     requests.insert(key, state);
     emit tileRequested(zoomLevel, x, y);
     return true;
+}
+
+bool TileCache::reemitRequests()
+{
+    for (const auto &request: requests.keys()){
+      emit tileRequested(request.zoomLevel, request.xtile, request.ytile);
+    }
+    return !requests.isEmpty();
 }
 
 bool TileCache::containsRequest(uint32_t zoomLevel, uint32_t x, uint32_t y)

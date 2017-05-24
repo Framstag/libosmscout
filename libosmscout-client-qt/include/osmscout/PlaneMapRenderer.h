@@ -68,13 +68,14 @@ signals:
   void TriggerInitialRendering();
 
 public slots:
+  virtual void Initialize();
+  virtual void InvalidateVisualCache();
   void DrawMap();
   void HandleTileStatusChanged(QString dbPath,const osmscout::TileRef tile);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
   void TriggerMapRendering(const RenderMapRequest& request);
   void HandleInitialRenderingRequest();
   void onStylesheetFilenameChanged();
-  virtual void InvalidateVisualCache();
 
 public:
   PlaneMapRenderer(QThread *thread,
