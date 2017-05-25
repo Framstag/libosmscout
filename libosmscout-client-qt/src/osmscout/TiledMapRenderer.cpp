@@ -152,6 +152,14 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   double osmMinLon = OSMTile::minLon();
   double osmMaxLon = OSMTile::maxLon();
 
+  // check if request center is defined in Mercator projection
+  if (!osmscout::GeoBox(osmscout::GeoCoord(osmMinLat, osmMinLon),
+                       osmscout::GeoCoord(osmMaxLat, osmMaxLon))
+                       .Includes(request.coord)){
+    qWarning() << "Outside projection";
+    return false;
+  }
+
   uint32_t osmTileRes = OSMTile::worldRes(projection.GetMagnification().GetLevel());
   double x1;
   double y1;
