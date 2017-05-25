@@ -171,4 +171,11 @@ add_executable(GeoBox src/GeoBox.cpp)
 set_property(TARGET GeoBox PROPERTY CXX_STANDARD 11)
 target_include_directories(GeoBox PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 target_link_libraries(GeoBox osmscout)
-add_test(NAME GeoBox COMMAND TransPolygon)
+add_test(NAME GeoBox COMMAND GeoBox)
+
+#---- OSTAndOSSCheck
+add_executable(OSTAndOSSCheck src/OSTAndOSSCheck.cpp)
+set_property(TARGET OSTAndOSSCheck PROPERTY CXX_STANDARD 11)
+target_include_directories(OSTAndOSSCheck PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(OSTAndOSSCheck osmscout)
+add_test(NAME OSTAndOSSCheck COMMAND OSTAndOSSCheck)
