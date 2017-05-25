@@ -51,14 +51,22 @@ MapRenderer::MapRenderer(QThread *thread,
           Qt::QueuedConnection);
   connect(thread, SIGNAL(started()),
           this, SLOT(Initialize()));
+  connect(dbThread.get(), SIGNAL(stylesheetFilenameChanged()),
+          this, SLOT(onStylesheetFilenameChanged()),
+          Qt::QueuedConnection);
 }
 
 MapRenderer::~MapRenderer()
 {
+  qDebug() << "~MapRenderer";
   if (thread!=NULL){
     thread->quit();
     thread->deleteLater();
   }
+}
+
+void MapRenderer::onStylesheetFilenameChanged(){
+  InvalidateVisualCache();
 }
 
 void MapRenderer::onMapDPIChange(double dpi)

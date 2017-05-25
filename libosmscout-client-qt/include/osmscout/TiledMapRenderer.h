@@ -75,8 +75,6 @@ public slots:
   void onDatabaseLoaded(osmscout::GeoBox boundingBox);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
 
-  void onStylesheetFilenameChanged();
-
   void onlineTileProviderChanged();
   void onlineTilesEnabledChanged(bool);
 

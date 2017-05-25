@@ -78,6 +78,7 @@ public slots:
   virtual void Initialize() = 0;
 
   virtual void InvalidateVisualCache() = 0;
+  virtual void onStylesheetFilenameChanged();
 
   virtual void onMapDPIChange(double dpi);
   virtual void onRenderSeaChanged(bool);

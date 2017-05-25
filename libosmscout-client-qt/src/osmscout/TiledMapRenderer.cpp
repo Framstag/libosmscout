@@ -44,14 +44,18 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   offlineTilesEnabled = settings->GetOfflineMap();
 
   connect(settings.get(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
-          this, SLOT(onlineTileProviderChanged()));
+          this, SLOT(onlineTileProviderChanged()),
+          Qt::QueuedConnection);
   connect(settings.get(), SIGNAL(OnlineTilesEnabledChanged(bool)),
-          this, SLOT(onlineTilesEnabledChanged(bool)));
+          this, SLOT(onlineTilesEnabledChanged(bool)),
+          Qt::QueuedConnection);
   connect(settings.get(), SIGNAL(OfflineMapChanged(bool)),
-          this, SLOT(onOfflineMapChanged(bool)));
+          this, SLOT(onOfflineMapChanged(bool)),
+          Qt::QueuedConnection);
 
   connect(dbThread.get(), SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
-          this, SLOT(onDatabaseLoaded(osmscout::GeoBox)));
+          this, SLOT(onDatabaseLoaded(osmscout::GeoBox)),
+          Qt::QueuedConnection);
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
@@ -69,6 +73,7 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
 
 TiledMapRenderer::~TiledMapRenderer()
 {
+  qDebug() << "~TiledMapRenderer";
   if (tileDownloader != NULL){
     delete tileDownloader;
   }
@@ -108,10 +113,6 @@ void TiledMapRenderer::InvalidateVisualCache()
       offlineTileCache.clearPendingRequests();
   }
   emit Redraw();
-}
-
-void TiledMapRenderer::onStylesheetFilenameChanged(){
-  InvalidateVisualCache();
 }
 
 /**

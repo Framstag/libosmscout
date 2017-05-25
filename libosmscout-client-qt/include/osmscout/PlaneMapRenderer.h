@@ -75,7 +75,7 @@ public slots:
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
   void TriggerMapRendering(const RenderMapRequest& request);
   void HandleInitialRenderingRequest();
-  void onStylesheetFilenameChanged();
+  virtual void onStylesheetFilenameChanged();
 
 public:
   PlaneMapRenderer(QThread *thread,

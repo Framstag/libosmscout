@@ -81,6 +81,7 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
 
 PlaneMapRenderer::~PlaneMapRenderer()
 {
+  qDebug() << "~PlaneMapRenderer";
   if (currentImage!=NULL)
     delete currentImage;
   if (finishedImage!=NULL)
@@ -427,5 +428,6 @@ void PlaneMapRenderer::onStylesheetFilenameChanged()
     );
   }
 
+  MapRenderer::onStylesheetFilenameChanged();
   emit Redraw();
 }
