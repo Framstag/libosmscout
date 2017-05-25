@@ -36,10 +36,7 @@ DBThread::DBThread(QStringList databaseLookupDirs,
     physicalDpi(-1),
     lock(QReadWriteLock::Recursive),
     iconDirectory(iconDirectory),
-    daylight(true),
-    renderSea(true),
-    fontName("sans-serif"),
-    fontSize(2.0)
+    daylight(true)
 {
   // fix Qt signals with uint32_t on x86_64:
   //
@@ -58,21 +55,12 @@ DBThread::DBThread(QStringList databaseLookupDirs,
   mapDpi = settings->GetMapDPI();
   osmscout::log.Debug() << "Map DPI override: " << mapDpi;
 
-  renderSea=settings->GetRenderSea();
-  fontName=settings->GetFontName();
-  fontSize=settings->GetFontSize();
   stylesheetFilename=settings->GetStyleSheetAbsoluteFile();
   stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
   connect(settings.get(), SIGNAL(MapDPIChange(double)),
           this, SLOT(onMapDPIChange(double)),
-          Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
-          this, SLOT(onFontNameChanged(const QString)),
-          Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(FontSizeChanged(double)),
-          this, SLOT(onFontSizeChanged(double)),
           Qt::QueuedConnection);
 
   connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
@@ -960,38 +948,6 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
   }
 
   emit locationDescriptionFinished(location);
-}
-
-void DBThread::onMapDPIChange(double dpi)
-{
-  {
-    QWriteLocker locker(&lock);
-    mapDpi = dpi;
-  }
-}
-
-void DBThread::onRenderSeaChanged(bool b)
-{
-  {
-    QWriteLocker locker(&lock);
-    renderSea = b;
-  }
-}
-
-void DBThread::onFontNameChanged(const QString fontName)
-{
-  {
-    QWriteLocker locker(&lock);
-    this->fontName=fontName;
-  }
-}
-
-void DBThread::onFontSizeChanged(double fontSize)
-{
-  {
-    QWriteLocker locker(&lock);
-    this->fontSize=fontSize;
-  }
 }
 
 osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) const
