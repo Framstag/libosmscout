@@ -63,6 +63,8 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
   breaker(std::make_shared<QBreaker>()),
   lookupProjection(lookupProjection)
 {
+  //qDebug() << "create: " << this << " in " << QThread::currentThread();
+
   searchParameter.SetMaximumAreaLevel(maximumAreaLevel);
   searchParameter.SetUseMultithreading(true);
   searchParameter.SetUseLowZoomOptimization(lowZoomOptimization);
@@ -75,9 +77,12 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
 
 DBLoadJob::~DBLoadJob()
 {
+  //qDebug() << "destroying:" << this << "in" << QThread::currentThread();
+
   // we have to call Close from ~DBLoadJob
   // it (DBLoadJob::Close) is unreachable when ~DBJob is called
   Close();
+  //qDebug() << "destroyed:" << this << "in" << QThread::currentThread();
 }
 
 void DBLoadJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
@@ -141,8 +146,9 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
   if (!tile->IsComplete()){
     return; // ignore incomplete
   }
+  // qDebug() << "Callback:" << this << "in" << QThread::currentThread();
   if (thread!=QThread::currentThread()){
-    qWarning() << "Tile callback from non Job thread";
+    qWarning() << "Tile callback from non Job thread" << this << "in" << QThread::currentThread();
   }
   if (!loadingTiles.contains(dbPath)){
     return; // loaded already
@@ -164,7 +170,7 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
     emit databaseLoaded(dbPath,loadedTileMap.values());
     if (loadingTiles.isEmpty()){ // all databases are finished
       emit finished(loadedTiles);
-      qDebug() << "Loaded completely";
+      //qDebug() << "Loaded completely:" << this << "in" << QThread::currentThread();
       if (closeOnFinish){
         Close();
       }
@@ -180,7 +186,7 @@ void DBLoadJob::Close()
   // deregister callbacks
   for (auto &db:databases){
     if (callbacks.contains(db->path)){
-      //std::cout << "Remove callback for job: " << this << ": " << callbacks[db->path] << std::endl;
+      //qDebug() << "Remove callback for job:" << this << ":" << callbacks[db->path] << "in" << QThread::currentThread();
       db->mapService->DeregisterTileStateCallback(callbacks[db->path]);
       callbacks.remove(db->path);
     }

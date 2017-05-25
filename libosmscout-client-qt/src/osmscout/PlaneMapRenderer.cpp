@@ -311,7 +311,7 @@ void PlaneMapRenderer::DrawMap()
     }
 
     if (loadJob->IsFinished()){
-      delete loadJob;
+      loadJob->deleteLater();
       loadJob=NULL;
     }
   }
@@ -357,7 +357,7 @@ void PlaneMapRenderer::TriggerMapRendering(const RenderMapRequest& request)
     QMutexLocker locker(&lock);
     if (loadJob!=NULL){
       // TODO: check if job contains same tiles...
-      delete loadJob;
+      loadJob->deleteLater();
       loadJob=NULL;
     }
     if (thread!=QThread::currentThread()){

@@ -679,7 +679,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
         offlineTileCache.reemitRequests();
     }
 
-    delete loadJob;
+    // this slot is called from DBLoadJob, we can't delete it now
+    loadJob->deleteLater();
     loadJob=NULL;
     emit Redraw();
     //std::cout << "  put offline: " << loadZ << " xtile: " << xtile << " ytile: " << ytile << std::endl;
