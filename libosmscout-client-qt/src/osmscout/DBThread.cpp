@@ -356,6 +356,14 @@ void DBThread::ToggleDaylight()
   qDebug() << "Toggling daylight done.";
 }
 
+void DBThread::onMapDPIChange(double dpi)
+{
+  {
+    QWriteLocker locker(&lock);
+    mapDpi = dpi;
+  }
+}
+
 void DBThread::SetStyleFlag(const QString &key, bool value)
 {
   {

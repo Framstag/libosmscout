@@ -138,6 +138,7 @@ signals:
 
 public slots:
   void ToggleDaylight();
+  void onMapDPIChange(double dpi);
   void SetStyleFlag(const QString &key, bool value);
   void ReloadStyle(const QString &suffix="");
   void LoadStyle(QString stylesheetFilename,
