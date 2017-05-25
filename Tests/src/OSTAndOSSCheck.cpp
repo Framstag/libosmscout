@@ -30,12 +30,12 @@ using namespace std;
 
 int main(int /*argc*/, char** /*argv*/)
 {
-  std::list<std::string> ostFiles={"map.ost"};
-  std::list<std::string> ossFiles={"standard.oss",
-                                   "winter-sports.oss",
-                                   "boundaries.oss",
-                                   "railways.oss",
-                                   "motorways.oss"};
+  const std::list<std::string> ostFiles={"map.ost"};
+  const std::list<std::string> ossFiles={"standard.oss",
+                                         "winter-sports.oss",
+                                         "boundaries.oss",
+                                         "railways.oss",
+                                         "motorways.oss"};
 
   char*        testsTopDirEnv=getenv("TESTS_TOP_DIR");
 
