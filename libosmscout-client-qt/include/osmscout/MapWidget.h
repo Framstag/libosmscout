@@ -71,7 +71,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString stylesheetErrorDescription READ firstStylesheetErrorDescription  NOTIFY styleErrorsChanged)  
 
 private:
-  MapRendererRef   renderer;
+  MapRenderer      *renderer;
 
   MapView          *view;
   double           mapDpi;

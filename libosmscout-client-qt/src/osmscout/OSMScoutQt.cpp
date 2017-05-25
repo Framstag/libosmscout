@@ -189,21 +189,21 @@ LookupModuleRef OSMScoutQt::MakeLookupModule()
   return module;
 }
 
-MapRendererRef OSMScoutQt::MakeMapRenderer(RenderingType type)
+MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
 {
   QThread *thread=new QThread();
   thread->setObjectName("MapRenderer");
-  MapRendererRef mapRenderer;
+  MapRenderer* mapRenderer;
   if (type==RenderingType::TiledRendering){
-    mapRenderer=std::make_shared<TiledMapRenderer>(thread,
-                                                   settings,
-                                                   dbThread,
-                                                   iconDirectory,
-                                                   cacheLocation,
-                                                   onlineTileCacheSize,
-                                                   offlineTileCacheSize);
+    mapRenderer=new TiledMapRenderer(thread,
+                                     settings,
+                                     dbThread,
+                                     iconDirectory,
+                                     cacheLocation,
+                                     onlineTileCacheSize,
+                                     offlineTileCacheSize);
   }else{
-    mapRenderer=std::make_shared<PlaneMapRenderer>(thread,settings,dbThread,iconDirectory);
+    mapRenderer=new PlaneMapRenderer(thread,settings,dbThread,iconDirectory);
   }
   mapRenderer->moveToThread(thread);
   thread->start();

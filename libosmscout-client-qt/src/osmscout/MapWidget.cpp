@@ -32,6 +32,7 @@ static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
+      renderer(NULL),
       inputHandler(NULL), 
       showCurrentPosition(false),
       finished(false),
@@ -52,7 +53,7 @@ MapWidget::MapWidget(QQuickItem* parent)
   
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
-    connect(renderer.get(),SIGNAL(Redraw()),
+    connect(renderer,SIGNAL(Redraw()),
             this,SLOT(redraw()));
     connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
             this,SIGNAL(stylesheetFilenameChanged()));
@@ -79,6 +80,10 @@ MapWidget::~MapWidget()
 {
     delete inputHandler;
     delete view;
+    if (renderer!=NULL){
+      renderer->deleteLater();
+      renderer=NULL;
+    }
 }
 
 void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states)
@@ -704,8 +709,11 @@ void MapWidget::SetRenderingType(QString strType)
   }
   if (type!=renderingType){
     renderingType=type;
+    if (renderer!=NULL){
+      renderer->deleteLater();
+    }
     renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
-    connect(renderer.get(),SIGNAL(Redraw()),
+    connect(renderer,SIGNAL(Redraw()),
             this,SLOT(redraw()));
     emit renderingTypeChanged(GetRenderingType());
   }

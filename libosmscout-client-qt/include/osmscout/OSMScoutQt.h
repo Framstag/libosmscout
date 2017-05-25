@@ -167,7 +167,7 @@ public:
   DBThreadRef GetDBThread();
   SettingsRef GetSettings();
   LookupModuleRef MakeLookupModule();
-  MapRendererRef MakeMapRenderer(RenderingType type);
+  MapRenderer* MakeMapRenderer(RenderingType type);
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,
