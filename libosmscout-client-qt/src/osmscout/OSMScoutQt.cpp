@@ -179,11 +179,11 @@ SettingsRef OSMScoutQt::GetSettings()
   return settings;
 }
 
-LookupModuleRef OSMScoutQt::MakeLookupModule()
+LookupModule* OSMScoutQt::MakeLookupModule()
 {
   QThread *thread=new QThread();
   thread->setObjectName("LookupModule");
-  LookupModuleRef module=std::make_shared<LookupModule>(thread,dbThread);
+  LookupModule *module=new LookupModule(thread,dbThread);
   module->moveToThread(thread);
   thread->start();
   return module;

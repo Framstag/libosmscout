@@ -84,7 +84,7 @@ private:
 
 public:
   MapObjectInfoModel();
-  virtual inline ~MapObjectInfoModel(){};
+  virtual ~MapObjectInfoModel();
 
   Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
   {
@@ -110,7 +110,7 @@ private:
   int screenY;
   QList<osmscout::MapData> mapData;
   double mapDpi;
-  LookupModuleRef lookupModule;
+  LookupModule* lookupModule;
 };
 
 #endif /* MAPOBJECTINFOMODEL_H */
