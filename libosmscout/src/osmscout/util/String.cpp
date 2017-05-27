@@ -358,7 +358,7 @@ namespace osmscout {
     }
 
     delete [] out;
-    
+
     return result;
   }
 
@@ -379,10 +379,10 @@ namespace osmscout {
     }
 
     delete [] out;
-    
+
     return result;
   }
-  
+
 #if defined(HAVE_ICONV)
   std::wstring UTF8StringToWString(const std::string& text)
   {
@@ -554,7 +554,7 @@ namespace osmscout {
 
     // length+1 to get the result '\0'-terminated
     size_t inCount=text.length()+1;
-    size_t outCount=text.length()*4+1; // Up to 4 bytes for one UTF-8 character
+    size_t outCount=text.length()*4+2; // Up to 4 bytes for one UTF-8 character and space for a byte order mark
 
     char *in=const_cast<char*>(text.data());
     char *out=new char[outCount];
@@ -583,7 +583,7 @@ namespace osmscout {
     return WStringToLocaleString(UTF8StringToWString(text));
   }
 #endif
-  
+
   std::string UTF8StringToUpper(const std::string& text)
   {
     //std::cout << "* O \"" << text << std::endl;

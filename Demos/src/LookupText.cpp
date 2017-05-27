@@ -35,17 +35,21 @@ void badInput()
 void printDetails(const osmscout::FeatureValueBuffer& features)
 {
   std::cout << "   - type:     " << features.GetType()->GetName() << std::endl;
-  for (auto featureInstance :features.GetType()->GetFeatures()){
-    if (features.HasFeature(featureInstance.GetIndex())){
+
+  for (auto featureInstance :features.GetType()->GetFeatures()) {
+    if (features.HasFeature(featureInstance.GetIndex())) {
       osmscout::FeatureRef feature=featureInstance.GetFeature();
-      if (feature->HasValue() && feature->HasLabel()){
+
+      if (feature->HasValue() && feature->HasLabel()) {
         osmscout::FeatureValue *value=features.GetValue(featureInstance.GetIndex());
-        if (value->GetLabel().empty()){
+        if (value->GetLabel().empty()) {
           std::cout << "   + feature " << feature->GetName() << std::endl;
-        }else{
-          std::cout << "   + feature " << feature->GetName() << ": " << value->GetLabel() << std::endl;
         }
-      }else{
+        else {
+          std::cout << "   + feature " << feature->GetName() << ": " << osmscout::UTF8StringToLocaleString(value->GetLabel()) << std::endl;
+        }
+      }
+      else {
         std::cout << "   + feature " << feature->GetName() << std::endl;
       }
     }
@@ -59,9 +63,17 @@ int main (int argc, char *argv[])
     return -1;
   }
 
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
+  }
+
   // load text data files
   std::string path(argv[1]);
   osmscout::TextSearchIndex textSearch;
+
   if(!textSearch.Load(path)) {
     std::cout << "ERROR: Failed to load text files!"
                  "(are you sure you passed the right path?)"
@@ -76,9 +88,10 @@ int main (int argc, char *argv[])
 
 
   while(true) {
-    std::cout << std::endl;
-    std::cout << "Enter a search term:"<<std::endl;
     std::string searchInput;
+
+    std::cout << std::endl;
+    std::cout << "Enter a search term:"<< std::endl;
     std::getline(std::cin,searchInput);
 
     if(searchInput.size() < 3) {
@@ -94,7 +107,8 @@ int main (int argc, char *argv[])
 
     // search using the text input as the query
     osmscout::TextSearchIndex::ResultsMap results;
-    textSearch.Search(searchInput,true,true,true,true,results);
+
+    textSearch.Search(osmscout::LocaleStringToUTF8String(searchInput),true,true,true,true,results);
 
     if(results.empty()) {
       std::cout << "No results found." << std::endl;
@@ -102,7 +116,7 @@ int main (int argc, char *argv[])
     }
 
     osmscout::DatabaseParameter databaseParameter;
-    osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+    osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
     if (!database->Open(path.c_str())) {
       std::cerr << "Cannot open database" << std::endl;
       return 1;
