@@ -16,6 +16,9 @@ git clone -b "$BRANCH" "$REPO" libosmscout
 
 cd libosmscout
 . ./setupAutoconf.sh
+
+export LANG="C.Utf8"
 env
+
 make full
 cd Tests && make check

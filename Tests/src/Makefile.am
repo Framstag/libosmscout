@@ -4,11 +4,10 @@ bin_PROGRAMS = CachePerformance \
                CoordinateEncoding \
                ReaderScannerPerformance \
                MultiDBRouting  \
-               ThreadedDatabase \
-               WStringStringConversion
+               ThreadedDatabase
 
 check_PROGRAMS = CalculateResolution \
-		 ColorParse \
+                 ColorParse \
                  NumberSetPerformance \
                  WorkQueue \
                  MapRotate \
@@ -21,7 +20,9 @@ check_PROGRAMS = CalculateResolution \
                  NumberSet \
                  ScanConversion \
                  TransPolygon \
-		 GeoBox
+		             GeoBox \
+		             WStringStringConversion \
+		             OSTAndOSSCheck
 
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               -I$(top_srcdir)/include
@@ -129,5 +130,12 @@ GeoBox_SOURCES = GeoBox.cpp
 GeoBox_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 GeoBox_LDADD = $(LIBOSMSCOUT_LIBS)
 
+OSTAndOSSCheck_SOURCES = OSTAndOSSCheck.cpp
+OSTAndOSSCheck_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS) \
+                          $(LIBOSMSCOUTMAP_CFLAGS)
+OSTAndOSSCheck_LDADD = $(LIBOSMSCOUT_LIBS) \
+                       $(LIBOSMSCOUTMAP_LIBS)
+
 TESTS = $(check_PROGRAMS)
 
+AM_TESTS_ENVIRONMENT = TESTS_TOP_DIR=$(top_srcdir); export TESTS_TOP_DIR;

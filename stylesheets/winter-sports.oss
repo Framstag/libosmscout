@@ -1257,7 +1257,6 @@ STYLE
    }
 
    [MAG proximity-] {
-     [TYPE landuse_farm] AREA { color: @farmColor; }
      // Semiransparent overlay
      [TYPE landuse_military] {
        AREA { color: @militaryColor; }
@@ -1304,8 +1303,7 @@ STYLE
    }
 
    [MAG close-] {
-     [TYPE landuse_farm,
-           landuse_farmland,
+     [TYPE landuse_farmland,
            landuse_farmyard,
            landuse_quarry,
            landuse_landfill,

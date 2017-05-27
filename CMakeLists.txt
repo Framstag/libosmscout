@@ -86,7 +86,7 @@ if(MINGW)
 endif()
 
 if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC) AND NOT MINGW)
-  add_definitions( -Wall -pedantic -fPIC )
+  add_definitions( -Wall -pedantic )
   check_cxx_compiler_flag(-fvisibility=hidden OSMSCOUT_GCC_VISIBILITY)
   if(OSMSCOUT_GCC_VISIBILITY)
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE OSMSCOUT_GCC_VERSION)

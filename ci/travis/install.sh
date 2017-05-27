@@ -23,6 +23,7 @@ if [ "$TARGET" = "build" ]; then
 
     sudo apt-get install -y \
       pkg-config \
+      gettext \
       libxml2-dev \
       libprotobuf-dev protobuf-compiler \
       libagg-dev libfreetype6-dev \
@@ -37,7 +38,8 @@ if [ "$TARGET" = "build" ]; then
       brew install cmake || true
     fi
 
-    brew install protobuf qt5
+    brew install gettext protobuf qt5
+	brew link --force gettext
   fi
 elif [ "$TARGET" = "importer" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then

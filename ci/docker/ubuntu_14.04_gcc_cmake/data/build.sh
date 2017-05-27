@@ -14,6 +14,7 @@ fi
 
 git clone -b "$BRANCH" "$REPO" libosmscout
 
+export LANG="C.Utf8"
 env
 
 cd libosmscout

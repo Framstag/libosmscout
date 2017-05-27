@@ -90,7 +90,7 @@ namespace osmscout {
 
     typedef std::shared_ptr<Router> RouterRef;
 
-    enum class OSMSCOUT_IMPORT_API AssumeLandStrategy
+    enum class AssumeLandStrategy
     {
       disable   = 0, // disable land detection by database objects
       enable    = 1, // enable land detection

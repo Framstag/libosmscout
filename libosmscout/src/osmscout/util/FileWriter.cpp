@@ -130,6 +130,15 @@ namespace osmscout {
     }
 
     return (FileOffset)filepos;
+#elif defined(HAVE__FTELLI64)
+    __int64 filepos=_ftelli64(file);
+
+    if (filepos==-1) {
+      hasError=true;
+      throw IOException(filename,"Cannot read position in file");
+    }
+
+    return (FileOffset)filepos;
 #else
     long filepos=ftell(file);
 
@@ -155,6 +164,8 @@ namespace osmscout {
 
 #if defined(HAVE_FSEEKO)
     hasError=fseeko(file,(off_t)pos,SEEK_SET)!=0;
+#elif defined(HAVE__FTELLI64)
+    hasError=_fseeki64(file,(__int64)pos,SEEK_SET)!=0;
 #else
     hasError=fseek(file,pos,SEEK_SET)!=0;
 #endif

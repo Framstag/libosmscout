@@ -174,6 +174,12 @@ if(MARISA_FOUND)
     target_include_directories(osmscout PRIVATE ${MARISA_INCLUDE_DIRS})
     target_link_libraries(osmscout ${MARISA_LIBRARIES})
 endif()
+if (ICONV_FOUND)
+  target_link_libraries(osmscout ${ICONV_LIBRARIES})
+endif()
+if(CMAKE_THREAD_LIBS_INIT)
+  target_link_libraries(osmscout ${CMAKE_THREAD_LIBS_INIT})
+endif()
 target_compile_definitions(osmscout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
 install(TARGETS osmscout
         RUNTIME DESTINATION bin

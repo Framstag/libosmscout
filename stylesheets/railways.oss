@@ -5,66 +5,75 @@ OSS
     COLOR unknownColor               = @waterColor;
 
   SYMBOL place_city
-    CIRCLE 0,0 1.25 {color: #ff0000aa; }
+    CIRCLE 0,0 1.25 {
+      AREA {color: #ff0000aa; }
+    }
 
   SYMBOL place_town
-    CIRCLE 0,0 0.75 {color: #ff000055; }
+    CIRCLE 0,0 0.75 {
+      AREA {color: #ff000055; }
+    }
    
   SYMBOL railway_station
-    CIRCLE 0,0 1.25 {color: #00ff0055; }
+    CIRCLE 0,0 1.25 {
+      AREA {color: #00ff0055; }
+    }
 
   SYMBOL railway_halt
-    CIRCLE 0,0 0.75 {color: #00ff0055; }
+    CIRCLE 0,0 0.75 {
+      AREA {color: #00ff0055; }
+    }
 
-  [TYPE _tile_sea] AREA {color: @waterColor;}
-  [TYPE _tile_coast] AREA {color: @waterColor;}
-  [TYPE _tile_land] AREA {color: @landColor;}
-  [TYPE _tile_unknown] AREA {color: @unknownColor;}
+  STYLE
+    [TYPE _tile_sea] AREA {color: @waterColor;}
+    [TYPE _tile_coast] AREA {color: @waterColor;}
+    [TYPE _tile_land] AREA {color: @landColor;}
+    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
-  [MAG continent-] {
-    [TYPE railway_rail] {
-      [SIZE 5m 0.25mm:3px<] {
-        WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
-        WAY {color: #939393; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m;}
+    [MAG continent-] {
+      [TYPE railway_rail] {
+        [SIZE 5m 0.25mm:3px<] {
+          WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
+          WAY {color: #939393; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 5m;}
+        }
+        [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
       }
-      [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
     }
-  }
 
-  [TYPE railway_station] {
-    AREA {color: #cb4040;}
+    [TYPE railway_station] {
+      AREA {color: #cb4040;}
 
-    AREA.ICON {symbol: railway_station; }
-    NODE.ICON {symbol: railway_station; }
+      AREA.ICON {symbol: railway_station; }
+      NODE.ICON {symbol: railway_station; }
 
-    [MAG county-] {
-      AREA.TEXT {label: name; style: normal; priority: 6;}
-      NODE.TEXT {label: name; style: normal; priority: 6;}
+      [MAG county-] {
+        AREA.TEXT {label: Name.name; style: normal; priority: 6;}
+        NODE.TEXT {label: Name.name; style: normal; priority: 6;}
+      }
     }
-  }
 
-  [TYPE railway_halt] {
-    [MAG county-] NODE.ICON {symbol: railway_halt;}
-    [MAG region-] NODE.TEXT {label: name; color: #aaaaaa; priority: 7;}
-  }
+    [TYPE railway_halt] {
+      [MAG county-] NODE.ICON {symbol: railway_halt;}
+      [MAG region-] NODE.TEXT {label: Name.name; color: #aaaaaa; priority: 7;}
+    }
 
-  [TYPE place_millioncity MAG stateOver-] {
-    NODE.ICON {symbol: place_city; }
-    NODE.TEXT {style: emphasize; size: 1.3; priority: 2;}
-  }
+    [TYPE place_millioncity MAG stateOver-] {
+      NODE.ICON {symbol: place_city; }
+      NODE.TEXT {style: emphasize; size: 1.3; priority: 2;}
+    }
 
-  [TYPE place_bigcity MAG stateOver-] {
-    NODE.ICON {symbol: place_city; }
-    NODE.TEXT {label: name; style: emphasize; size: 1.2; priority: 3;}
-  }
+    [TYPE place_bigcity MAG stateOver-] {
+      NODE.ICON {symbol: place_city; }
+      NODE.TEXT {label: Name.name; style: emphasize; size: 1.2; priority: 3;}
+    }
 
-  [TYPE place_city MAG stateOver-] {
-    NODE.ICON {symbol: place_city; }
-    NODE.TEXT {label: name; style: emphasize; size: 1.1; priority: 4;}
-  }
+    [TYPE place_city MAG stateOver-] {
+      NODE.ICON {symbol: place_city; }
+      NODE.TEXT {label: Name.name; style: emphasize; size: 1.1; priority: 4;}
+    }
 
-  [TYPE place_town MAG county-] {
-    NODE.TEXT {label: name; style: normal;  priority: 5;}
-    NODE.ICON {symbol: place_town;}
-  }
+    [TYPE place_town MAG county-] {
+      NODE.TEXT {label: Name.name; style: normal;  priority: 5;}
+      NODE.ICON {symbol: place_town;}
+    }
 END
