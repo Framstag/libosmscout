@@ -45,6 +45,11 @@ elif [ -f "$defaultOpt" ]; then
   . "$defaultOpt"
 fi
 
+boundingPolygonFile="$scriptDirectory/${mappingFileBase}.poly"
+
+if [ "$boundingPolygonFile" ]; then
+  options="$options --bounding-polygon $boundingPolygonFile"
+fi
 
 if [ ! -d "$targetDirectory" ]; then
   echo "Creating target directory $targetDirectory..."
