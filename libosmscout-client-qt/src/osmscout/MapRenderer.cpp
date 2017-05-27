@@ -58,10 +58,12 @@ MapRenderer::MapRenderer(QThread *thread,
 
 MapRenderer::~MapRenderer()
 {
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
   qDebug() << "~MapRenderer";
   if (thread!=NULL){
     thread->quit();
-    thread->deleteLater();
   }
 }
 

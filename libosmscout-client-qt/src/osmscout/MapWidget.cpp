@@ -132,7 +132,7 @@ void MapWidget::setupInputHandler(InputHandler *newGesture)
     bool locked = false; 
     if (inputHandler != NULL){
         locked = inputHandler->isLockedToPosition();
-        delete inputHandler;
+        inputHandler->deleteLater();
     }
     inputHandler = newGesture;
     

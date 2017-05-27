@@ -29,13 +29,16 @@ DBJob::DBJob():
 
 DBJob::~DBJob()
 {
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Destroy" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
+  }
   Close();
 }
 
 void DBJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
 {
   if (thread!=QThread::currentThread()){
-    qWarning() << "Run from non Job thread";
+    qWarning() << "Run" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   this->databases=databases;
   this->locker=locker;
@@ -47,7 +50,7 @@ void DBJob::Close()
     return;
   }
   if (thread!=QThread::currentThread()){
-    qWarning() << "Closing from non Job thread";
+    qWarning() << "Closing" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   delete locker;
   locker=NULL;
@@ -148,7 +151,7 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
   }
   // qDebug() << "Callback:" << this << "in" << QThread::currentThread();
   if (thread!=QThread::currentThread()){
-    qWarning() << "Tile callback from non Job thread" << this << "in" << QThread::currentThread();
+    qWarning() << "Tile callback" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   if (!loadingTiles.contains(dbPath)){
     return; // loaded already

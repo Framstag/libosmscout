@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <QObject>
 #include <QMetaType>
 #include <QQmlEngine>
 
@@ -92,6 +93,9 @@ bool OSMScoutQtBuilder::Init()
   dbThread->connect(thread, SIGNAL(started()), SLOT(Initialize()));
   dbThread->connect(thread, SIGNAL(finished()), SLOT(Finalize()));
 
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
+
   dbThread->moveToThread(thread);
   thread->start();
 
@@ -165,8 +169,6 @@ OSMScoutQt::OSMScoutQt(QThread *backgroundThread,
 OSMScoutQt::~OSMScoutQt()
 {
   backgroundThread->quit();
-  backgroundThread->wait();
-  delete backgroundThread;
 }
 
 DBThreadRef OSMScoutQt::GetDBThread()
@@ -186,6 +188,8 @@ LookupModule* OSMScoutQt::MakeLookupModule()
   LookupModule *module=new LookupModule(thread,dbThread);
   module->moveToThread(thread);
   thread->start();
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
   return module;
 }
 
@@ -207,5 +211,8 @@ MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
   }
   mapRenderer->moveToThread(thread);
   thread->start();
+
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
   return mapRenderer;
 }
