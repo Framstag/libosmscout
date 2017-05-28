@@ -946,11 +946,6 @@ int main(int argc, char* argv[])
     if (!parameter.GetBoundingPolygonFile().empty()) {
       std::string boundingPolygonFile=parameter.GetBoundingPolygonFile();
 
-      if (boundingPolygonFile.size()<6 || boundingPolygonFile.substr(boundingPolygonFile.size()-5)!=".poly") {
-        progress.Error("Bounding polygon file  "+boundingPolygonFile+" is not a polygon file (*.poly)!");
-        return 1;
-      }
-
       if (!osmscout::ExistsInFilesystem(boundingPolygonFile)) {
         progress.Error("Bounding polygon file '"+boundingPolygonFile+"' does not exist!");
       }
