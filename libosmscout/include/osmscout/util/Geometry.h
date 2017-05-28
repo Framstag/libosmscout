@@ -976,6 +976,14 @@ namespace osmscout {
                                                       double bLon, double bLat);
 
   /**
+   * \ingroup Geometry
+   *Calculates the final bearing for a line from one coordinate two the other coordinate
+   *on a sphere.
+   */
+  extern OSMSCOUT_API double GetSphericalBearingFinal(const GeoCoord& a,
+                                                      const GeoCoord& b);
+
+  /**
    * COnvert the bearing to to a direction description in releation tothe compass.
    */
   extern OSMSCOUT_API std::string BearingDisplayString(double bearing);
