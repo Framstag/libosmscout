@@ -1501,6 +1501,7 @@ namespace osmscout {
     }
     else {
       assert(false);
+      return GeoCoord();
     }
   }
 
