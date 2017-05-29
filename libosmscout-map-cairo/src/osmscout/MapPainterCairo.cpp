@@ -1191,6 +1191,8 @@ namespace osmscout {
       FillStyleRef   fillStyle=primitive->GetFillStyle();
       BorderStyleRef borderStyle=primitive->GetBorderStyle();
 
+      cairo_new_path(draw);
+
       DrawPrimitivePath(projection,
                         parameter,
                         primitive,
