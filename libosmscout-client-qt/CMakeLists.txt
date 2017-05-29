@@ -26,14 +26,12 @@ set(HEADER_FILES
     include/osmscout/OnlineTileProviderModel.h
     include/osmscout/OsmTileDownloader.h
     include/osmscout/OSMTile.h
-    include/osmscout/PlaneDBThread.h
     include/osmscout/private
     include/osmscout/private/ClientQtImportExport.h
     include/osmscout/RoutingModel.h
     include/osmscout/SearchLocationModel.h
     include/osmscout/Settings.h
     include/osmscout/TileCache.h
-    include/osmscout/TiledDBThread.h
     include/osmscout/MapProvider.h
     include/osmscout/AvailableMapsModel.h
     include/osmscout/PersistentCookieJar.h
@@ -45,6 +43,9 @@ set(HEADER_FILES
     include/osmscout/OSMScoutQt.h
     include/osmscout/DBJob.h
     include/osmscout/LookupModule.h
+    include/osmscout/MapRenderer.h
+    include/osmscout/PlaneMapRenderer.h
+    include/osmscout/TiledMapRenderer.h
 )
 
 set(SOURCE_FILES
@@ -59,12 +60,10 @@ set(SOURCE_FILES
     src/osmscout/OnlineTileProviderModel.cpp
     src/osmscout/OSMTile.cpp
     src/osmscout/OsmTileDownloader.cpp
-    src/osmscout/PlaneDBThread.cpp
     src/osmscout/RoutingModel.cpp
     src/osmscout/SearchLocationModel.cpp
     src/osmscout/Settings.cpp
     src/osmscout/TileCache.cpp
-    src/osmscout/TiledDBThread.cpp
     src/osmscout/MapProvider.cpp
     src/osmscout/AvailableMapsModel.cpp
     src/osmscout/MapManager.cpp
@@ -75,6 +74,9 @@ set(SOURCE_FILES
     src/osmscout/OSMScoutQt.cpp
     src/osmscout/DBJob.cpp
     src/osmscout/LookupModule.cpp
+    src/osmscout/MapRenderer.cpp
+    src/osmscout/PlaneMapRenderer.cpp
+    src/osmscout/TiledMapRenderer.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})

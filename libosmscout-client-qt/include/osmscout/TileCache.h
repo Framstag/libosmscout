@@ -69,7 +69,7 @@ Q_DECLARE_METATYPE(TileCacheVal)
  */
 struct RequestState
 {
-    bool pending;
+    bool pending; //!< if pending is false, request is currently processing
 };
 
 Q_DECLARE_METATYPE(RequestState)
@@ -108,6 +108,11 @@ public:
    * true. Otherwise false.
    */
   bool request(uint32_t zoomLevel, uint32_t x, uint32_t y);
+
+  /**
+   * trigger request signal for all pending requests
+   */
+  bool reemitRequests();
   bool contains(uint32_t zoomLevel, uint32_t x, uint32_t y);
   bool containsRequest(uint32_t zoomLevel, uint32_t x, uint32_t y);  
   TileCacheVal get(uint32_t zoomLevel, uint32_t x, uint32_t y);

@@ -139,6 +139,7 @@ MapManager::MapManager(QStringList databaseLookupDirs):
 void MapManager::lookupDatabases()
 {
   databaseDirectories.clear();
+  QSet<QString> uniqPahts;
 
   for (QString lookupDir:databaseLookupDirs){
     QDirIterator dirIt(lookupDir, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
@@ -147,7 +148,10 @@ void MapManager::lookupDatabases()
       QFileInfo fInfo(dirIt.filePath());
       if (fInfo.isFile() && fInfo.fileName() == osmscout::TypeConfig::FILE_TYPES_DAT){
         qDebug() << "found database: " << fInfo.dir().absolutePath();
-        databaseDirectories << fInfo.dir();
+        if (!uniqPahts.contains(fInfo.absolutePath())){
+          databaseDirectories << fInfo.dir();
+          uniqPahts << fInfo.absolutePath();
+        }
       }
     }
   }

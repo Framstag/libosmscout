@@ -1,7 +1,7 @@
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2010  Tim Teulings
-  Copyright (C) 2016  Lukáš Karas
+  Copyright (C) 2017  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -18,19 +18,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <iostream>
-
-#include <QMutexLocker>
-#include <QDebug>
-#include <QDir>
-#include <QRegExp>
-
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/StopClock.h>
-#include <osmscout/system/Math.h>
-
-#include <osmscout/DBThread.h>
-#include <osmscout/PlaneDBThread.h>
+#include <osmscout/PlaneMapRenderer.h>
 
 // Timeout for the first rendering after rerendering was triggered (render what ever data is available)
 static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
@@ -38,19 +26,21 @@ static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
 // Timeout for the updated rendering after rerendering was triggered (more rendering data is available)
 static int UPDATED_DATA_RENDERING_TIMEOUT = 200;
 
-PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
-                             QString iconDirectory,
-                             SettingsRef renderingSettings)
- : DBThread(databaseLookupDirs, iconDirectory, renderingSettings),
-   canvasOverrun(1.5),
-   pendingRenderingTimer(this),
-   currentImage(NULL),
-   currentCoord(0.0,0.0),
-   currentAngle(0.0),
-   currentMagnification(0),
-   finishedImage(NULL),
-   finishedCoord(0.0,0.0),
-   finishedMagnification(0)
+PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
+                                   SettingsRef settings,
+                                   DBThreadRef dbThread,
+                                   QString iconDirectory):
+  MapRenderer(thread,settings,dbThread,iconDirectory),
+  canvasOverrun(1.5),
+  loadJob(NULL),
+  pendingRenderingTimer(this),
+  currentImage(NULL),
+  currentCoord(0.0,0.0),
+  currentAngle(0.0),
+  currentMagnification(0),
+  finishedImage(NULL),
+  finishedCoord(0.0,0.0),
+  finishedMagnification(0)
 {
   pendingRenderingTimer.setSingleShot(true);
 
@@ -70,12 +60,18 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
   connect(&pendingRenderingTimer,SIGNAL(timeout()),
           this,SLOT(DrawMap()));
 
+  /*
   connect(this,SIGNAL(TileStatusChanged(const osmscout::TileRef&)),
           this,SLOT(HandleTileStatusChanged(const osmscout::TileRef&)),
           Qt::QueuedConnection);
+  */
 
-  connect(this,SIGNAL(stylesheetFilenameChanged()),
+  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
           this,SLOT(onStylesheetFilenameChanged()),
+          Qt::QueuedConnection);
+
+  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
+          this,SLOT(InvalidateVisualCache()),
           Qt::QueuedConnection);
 
   connect(this,SIGNAL(TriggerDrawMap()),
@@ -83,39 +79,34 @@ PlaneDBThread::PlaneDBThread(QStringList databaseLookupDirs,
           Qt::QueuedConnection);
 }
 
-PlaneDBThread::~PlaneDBThread()
+PlaneMapRenderer::~PlaneMapRenderer()
 {
-
+  qDebug() << "~PlaneMapRenderer";
+  if (currentImage!=NULL)
+    delete currentImage;
+  if (finishedImage!=NULL)
+    delete finishedImage;
+  if (loadJob!=NULL)
+    delete loadJob;
 }
 
-void PlaneDBThread::Initialize()
+void PlaneMapRenderer::InvalidateVisualCache()
 {
-
-  osmscout::log.Debug() << "Initialize";
-  // invalidate tile cache and init base
-  DBThread::InitializeDatabases();
+  QMutexLocker finishedLocker(&finishedMutex);
+  osmscout::log.Debug() << "Invalidate finished image";
+  if (finishedImage)
+    delete finishedImage;
+  finishedImage=NULL;
 }
 
-void PlaneDBThread::onStylesheetFilenameChanged()
-{
-  {
-    QReadLocker locker(&lock);
-    QMutexLocker finishedLocker(&finishedMutex);
-    for (auto db:databases){
-      if (db->styleConfig){
-        db->styleConfig->GetUnknownFillStyle(projection, finishedUnknownFillStyle);
-        if (finishedUnknownFillStyle){
-          break;
-        }
-      }
-    }
-  }
-
-  emit Redraw();
-}
-
-bool PlaneDBThread::RenderMap(QPainter& painter,
-                              const RenderMapRequest& request)
+/**
+ * Render map defined by request to painter
+ * @param painter
+ * @param request
+ * @return true if rendered map is complete
+ */
+bool PlaneMapRenderer::RenderMap(QPainter& painter,
+                                 const RenderMapRequest& request)
 {
   //qDebug() << "RenderMap()";
 
@@ -212,179 +203,23 @@ bool PlaneDBThread::RenderMap(QPainter& painter,
   return needsNoRepaint;
 }
 
-void PlaneDBThread::TriggerMapRendering(const RenderMapRequest& request)
+void PlaneMapRenderer::Initialize()
 {
-  {
-    QMutexLocker reqLocker(&lastRequestMutex);
-    if (request!=lastRequest){
-      return;
-    }
-  }
-
-  osmscout::log.Debug() << "Start data loading...";
-  {
-    QReadLocker locker(&lock);
-    // CancelCurrentDataLoading();
-
-    currentWidth=request.width;
-    currentHeight=request.height;
-    currentCoord=request.coord;
-    currentAngle=request.angle;
-    currentMagnification=request.magnification;
-
-    projection.Set(currentCoord,
-                   currentAngle,
-                   currentMagnification,
-                   mapDpi,
-                   currentWidth,
-                   currentHeight);
-
-    osmscout::GeoBox requestBox;
-    projection.GetDimensions(requestBox);
-
-    for (auto db:databases){
-      if (db->database->IsOpen() &&
-          db->styleConfig) {
-
-        osmscout::GeoBox dbBox;
-        db->database->GetBoundingBox(dbBox);
-        if (!dbBox.Intersects(requestBox)){
-          osmscout::log.Debug() << "Skip loading from database " << db->path.toStdString();
-          continue;
-        }
-
-        osmscout::AreaSearchParameter searchParameter;
-        db->dataLoadingBreaker->Reset();
-        searchParameter.SetBreaker(db->dataLoadingBreaker);
-
-        if (currentMagnification.GetLevel()>=15) {
-          searchParameter.SetMaximumAreaLevel(6);
-        }
-        else {
-          searchParameter.SetMaximumAreaLevel(4);
-        }
-
-        searchParameter.SetUseMultithreading(true);
-        searchParameter.SetUseLowZoomOptimization(true);
-
-        std::list<osmscout::TileRef> tiles;
-
-        db->mapService->LookupTiles(projection,tiles);
-        if (tiles.size()>db->mapService->GetCacheSize()){
-          osmscout::log.Debug() << "Increase tile cache size to " << tiles.size();
-          db->mapService->SetCacheSize(tiles.size());
-          // lookup tiles again
-          db->mapService->LookupTiles(projection,tiles);
-        }
-        if (!db->mapService->LoadMissingTileDataAsync(searchParameter,*(db->styleConfig),tiles)) {
-          osmscout::log.Error() << "*** Loading of data has error or was interrupted";
-          continue;
-        }
-      }
-      else {
-        osmscout::log.Error() << "Cannot draw map: " << db->database->IsOpen() << " " << db->styleConfig.get();
-        //QPainter p;
-        //RenderMessage(p,request.width,request.height,"Database not open");
-      }
-    }
-  }
-  emit TriggerInitialRendering();
-}
-
-void PlaneDBThread::HandleInitialRenderingRequest()
-{
-  if (pendingRenderingTimer.isActive())
-    return; // avoid repeated draw postpone (data loading may be called very fast)
-
-  osmscout::log.Debug() << "Start rendering timer:" << INITIAL_DATA_RENDERING_TIMEOUT << "ms";
-  pendingRenderingTimer.stop();
-  pendingRenderingTimer.start(INITIAL_DATA_RENDERING_TIMEOUT);
-}
-
-void PlaneDBThread::InvalidateVisualCache()
-{
-  QMutexLocker finishedLocker(&finishedMutex);
-  osmscout::log.Debug() << "Invalidate finished image";
-  if (finishedImage)
-    delete finishedImage;
-  finishedImage=NULL;
-}
-
-void PlaneDBThread::HandleTileStatusChanged(const osmscout::TileRef& changedTile)
-{
-  QReadLocker locker(&lock);
-
-  bool relevant=false;
-  for (auto &db: databases){
-    std::list<osmscout::TileRef> tiles;
-
-    db->mapService->LookupTiles(projection,tiles);
-
-    for (const auto tile : tiles) {
-      if (tile==changedTile) {
-        relevant|=true;
-        break;
-      }
-    }
-  }
-
-  if (!relevant) {
-    return;
-  }
-
-  int elapsedTime=lastRendering.elapsed();
-
-  //qDebug() << "Relevant tile changed, elapsed:" << elapsedTime;
-
-  if (pendingRenderingTimer.isActive()) {
-    //qDebug() << "Waiting for timer in" << pendingRenderingTimer.remainingTime() ;
-  }
-  else if (elapsedTime>UPDATED_DATA_RENDERING_TIMEOUT) {
-    osmscout::log.Debug() << "TriggerDrawMap, last rendering" << elapsedTime << "ms before";
-    emit TriggerDrawMap();
-  }
-  else {
-    osmscout::log.Debug() << "Start rendering timer:" << UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime << "ms";
-    pendingRenderingTimer.start(UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime);
-  }
-}
-
-void PlaneDBThread::TileStateCallback(const osmscout::TileRef& changedTile)
-{
-  // parent
-  DBThread::TileStateCallback(changedTile);
-
-  //printTileInfo(changedTile);
-
-  // We are in the context of one of the libosmscout worker threads
-  emit TileStatusChanged(changedTile);
 }
 
 /**
  * Actual map drawing into the back buffer
  */
-void PlaneDBThread::DrawMap()
+void PlaneMapRenderer::DrawMap()
 {
-  osmscout::log.Debug() << "DrawMap()";
   {
-    QReadLocker locker(&lock);
-    if (databases.isEmpty()){
-      osmscout::log.Warn() << " No databases!";
+    QMutexLocker locker(&lock);
+    if (loadJob==NULL){
       return;
     }
-    osmscout::FillStyleRef unknownFillStyle;
-    for (auto db:databases){
-      if (!db->database->IsOpen() || (!db->styleConfig)) {
-          osmscout::log.Warn() << " Not initialized! " << db->path.toLocal8Bit().data();
-          return;
-      }
-      if (db->styleConfig && !unknownFillStyle){
-        db->styleConfig->GetUnknownFillStyle(projection, unknownFillStyle);
-      }
-    }
-    if (!unknownFillStyle){
-      osmscout::log.Warn() << " Can't retrieve UnknownFillStyle";
-      return;
+    osmscout::log.Debug() << "DrawMap()";
+    if (thread!=QThread::currentThread()){
+      osmscout::log.Warn() << "Incorrect thread!";
     }
 
     if (currentImage==NULL ||
@@ -446,39 +281,18 @@ void PlaneDBThread::DrawMap()
     p.setRenderHint(QPainter::Antialiasing);
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
-    p.fillRect(QRectF(0,0,projection.GetWidth(),projection.GetHeight()),
-                      QBrush(QColor::fromRgbF(unknownFillStyle->GetFillColor().GetR(),
-                                              unknownFillStyle->GetFillColor().GetG(),
-                                              unknownFillStyle->GetFillColor().GetB(),
-                                              1)));
-    bool success=true;
-    for (auto &db:databases){
-      std::list<osmscout::TileRef> tiles;
-      osmscout::MapData            data; // TODO: make sence cache these data?
-      osmscout::GeoBox             dbBox;
-      osmscout::GeoBox             renderBox;
 
-      db->database->GetBoundingBox(dbBox);
-      renderProjection.GetDimensions(renderBox);
-      if (!dbBox.Intersects(renderBox)){
-        osmscout::log.Debug() << "Skip database " << db->path.toStdString();
-        continue;
-      }
-
-      db->mapService->LookupTiles(renderProjection,tiles);
-      db->mapService->AddTileDataToMapData(tiles,data);
-
-      if (drawParameter.GetRenderSeaLand()) {
-        db->mapService->GetGroundTiles(renderProjection,
-                                       data.groundTiles);
-      }
-
-      success&=db->GetPainter()->DrawMap(renderProjection,
-                                         drawParameter,
-                                         data,
-                                         &p);
-
+    bool success;
+    {
+      DBRenderJob job(renderProjection,
+                      loadJob->GetAllTiles(),
+                      &drawParameter,
+                      &p,
+                      /*drawCanvasBackground*/ true);
+      dbThread->RunJob(&job);
+      success=job.IsSuccess();
     }
+
     p.end();
 
     if (!success)  {
@@ -495,7 +309,125 @@ void PlaneDBThread::DrawMap()
 
       lastRendering=QTime::currentTime();
     }
+
+    if (loadJob->IsFinished()){
+      loadJob->deleteLater();
+      loadJob=NULL;
+    }
+  }
+  emit Redraw();
+}
+
+void PlaneMapRenderer::HandleTileStatusChanged(QString /*dbPath*/,const osmscout::TileRef /*changedTile*/)
+{
+  QMutexLocker locker(&lock);
+  int elapsedTime=lastRendering.elapsed();
+
+  //qDebug() << "Relevant tile changed, elapsed:" << elapsedTime;
+
+  if (pendingRenderingTimer.isActive()) {
+    //qDebug() << "Waiting for timer in" << pendingRenderingTimer.remainingTime() ;
+  }
+  else if (elapsedTime>UPDATED_DATA_RENDERING_TIMEOUT) {
+    osmscout::log.Debug() << "TriggerDrawMap, last rendering" << elapsedTime << "ms before";
+    emit TriggerDrawMap();
+  }
+  else {
+    osmscout::log.Debug() << "Start rendering timer:" << UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime << "ms";
+    pendingRenderingTimer.start(UPDATED_DATA_RENDERING_TIMEOUT-elapsedTime);
+  }
+}
+
+void PlaneMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)
+{
+  emit TriggerDrawMap();
+}
+
+void PlaneMapRenderer::TriggerMapRendering(const RenderMapRequest& request)
+{
+  {
+    QMutexLocker reqLocker(&lastRequestMutex);
+    if (request!=lastRequest){
+      return;
+    }
   }
 
+  osmscout::log.Debug() << "Start data loading...";
+  {
+    QMutexLocker locker(&lock);
+    if (loadJob!=NULL){
+      // TODO: check if job contains same tiles...
+      loadJob->deleteLater();
+      loadJob=NULL;
+    }
+    if (thread!=QThread::currentThread()){
+      osmscout::log.Warn() << "Incorrect thread!";
+    }
+
+    currentWidth=request.width;
+    currentHeight=request.height;
+    currentCoord=request.coord;
+    currentAngle=request.angle;
+    currentMagnification=request.magnification;
+
+    projection.Set(currentCoord,
+                   currentAngle,
+                   currentMagnification,
+                   mapDpi,
+                   currentWidth,
+                   currentHeight);
+
+    unsigned long maximumAreaLevel=4;
+    if (currentMagnification.GetLevel() >= 15) {
+      maximumAreaLevel=6;
+    }
+
+    loadJob=new DBLoadJob(projection,
+                          maximumAreaLevel,
+                          /* lowZoomOptimization */ true,
+                          /* closeOnFinish */ false);
+
+    connect(loadJob, SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
+            this, SLOT(HandleTileStatusChanged(QString,const osmscout::TileRef)),
+            Qt::QueuedConnection);
+    connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)),
+            this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)));
+
+    dbThread->RunJob(loadJob);
+  }
+  emit TriggerInitialRendering();
+}
+
+void PlaneMapRenderer::HandleInitialRenderingRequest()
+{
+  if (pendingRenderingTimer.isActive())
+    return; // avoid repeated draw postpone (data loading may be called very fast)
+
+  osmscout::log.Debug() << "Start rendering timer:" << INITIAL_DATA_RENDERING_TIMEOUT << "ms";
+  pendingRenderingTimer.stop();
+  pendingRenderingTimer.start(INITIAL_DATA_RENDERING_TIMEOUT);
+}
+
+void PlaneMapRenderer::onStylesheetFilenameChanged()
+{
+  {
+    QMutexLocker locker(&lock);
+    QMutexLocker finishedLocker(&finishedMutex);
+
+    dbThread->RunSynchronousJob(
+      [this](const std::list<DBInstanceRef>& databases) {
+        for (auto &db:databases){
+          if (db->styleConfig){
+            db->styleConfig->GetUnknownFillStyle(projection, finishedUnknownFillStyle);
+            if (finishedUnknownFillStyle){
+              break;
+            }
+          }
+        }
+      }
+    );
+  }
+
+  MapRenderer::onStylesheetFilenameChanged();
   emit Redraw();
 }

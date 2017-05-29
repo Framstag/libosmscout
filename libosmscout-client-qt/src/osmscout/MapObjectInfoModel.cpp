@@ -24,7 +24,7 @@
 #include <osmscout/OSMScoutQt.h>
 
 MapObjectInfoModel::MapObjectInfoModel():
-ready(false), setup(false), view()
+ready(false), setup(false), view(), lookupModule(NULL)
 {
 
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
@@ -32,17 +32,25 @@ ready(false), setup(false), view()
 
   qRegisterMetaType<osmscout::MapData>("osmscout::MapData");
 
-  connect(lookupModule.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
+  connect(lookupModule, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
           this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
           Qt::QueuedConnection);
 
   connect(this, SIGNAL(objectsRequested(const RenderMapRequest &)),
-          lookupModule.get(), SLOT(requestObjectsOnView(const RenderMapRequest&)),
+          lookupModule, SLOT(requestObjectsOnView(const RenderMapRequest&)),
           Qt::QueuedConnection);
 
-  connect(lookupModule.get(), SIGNAL(viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
+  connect(lookupModule, SIGNAL(viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
           this, SLOT(onViewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
           Qt::QueuedConnection);
+}
+
+MapObjectInfoModel::~MapObjectInfoModel()
+{
+  if (lookupModule!=NULL){
+    lookupModule->deleteLater();
+    lookupModule=NULL;
+  }
 }
 
 void MapObjectInfoModel::dbInitialized(const DatabaseLoadedResponse&)
