@@ -947,7 +947,7 @@ namespace osmscout {
 
       cairo_move_to(draw,
                     label.x,
-                    label.y+fontExtents.ascent);
+                    label.y+(label.by2-label.by1-fontExtents.height)/2);
 
       cairo_show_text(draw,label.text.c_str());
       cairo_stroke(draw);
