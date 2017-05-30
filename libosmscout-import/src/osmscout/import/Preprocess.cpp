@@ -19,6 +19,7 @@
 
 #include <osmscout/import/Preprocess.h>
 
+#include <functional>
 #include <limits>
 
 #include <osmscout/system/Math.h>
