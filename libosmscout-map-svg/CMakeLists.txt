@@ -26,8 +26,8 @@ target_link_libraries(osmscout_map_svg
 		osmscout
 		osmscout_map)
 if(PANGOFT2_FOUND)
-  target_include_directories(osmscout_map_svg PRIVATE ${PANGO_INCLUDE_DIRS})
-  target_link_libraries(osmscout_map_svg ${PANGO_LIBRARIES})
+  target_include_directories(osmscout_map_svg PRIVATE ${PANGOFT2_INCLUDE_DIRS})
+  target_link_libraries(osmscout_map_svg ${PANGOFT2_LIBRARIES})
 endif()
 target_compile_definitions(osmscout_map_svg PRIVATE -DOSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
 install(TARGETS osmscout_map_svg
