@@ -1004,28 +1004,25 @@ namespace osmscout {
       }
     }
     else {
-      for (size_t i=0; i<deltaBuffer.size(); i++) {
-        size_t byteBufferPos=0;
+      size_t byteBufferPos=0;
+      for (size_t i=0; i<deltaBuffer.size(); i+=2) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+        ++byteBufferPos;
 
-        for (size_t i=0; i<deltaBuffer.size(); i+=2) {
-          byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8) & 0xff;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8) & 0xff;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=deltaBuffer[i] >> 16;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=deltaBuffer[i] >> 16;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=deltaBuffer[i+1] & 0xff;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=deltaBuffer[i+1] & 0xff;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=(deltaBuffer[i+1] >> 8) & 0xff;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=(deltaBuffer[i+1] >> 8) & 0xff;
-          ++byteBufferPos;
-
-          byteBuffer[byteBufferPos]=deltaBuffer[i+1] >> 16;
-          ++byteBufferPos;
-        }
+        byteBuffer[byteBufferPos]=deltaBuffer[i+1] >> 16;
+        ++byteBufferPos;
       }
     }
 
