@@ -74,13 +74,13 @@ namespace osmscout {
   std::string WaterIndexGenerator::TypeToString(GroundTile::Type type) const
   {
     switch (type) {
-    case unknown:
+    case GroundTile::unknown:
       return "unknown";
-    case land:
+    case GroundTile::land:
       return "land";
-    case water:
+    case GroundTile::water:
       return "water";
-    case coast:
+    case GroundTile::coast:
       return "coast";
     default:
       return "???";
@@ -333,8 +333,8 @@ namespace osmscout {
    * Cut path `src` from point `start` (inclusive)
    * to `end` (exclusive) and store result to `dst`
    */
-  void cutPath(std::vector<Point> &dst,
-               const std::vector<Point> &src,
+  void CutPath(std::vector<Point>& dst,
+               const std::vector<Point>& src,
                size_t start,
                size_t end,
                double startDistanceSquare,
@@ -386,7 +386,7 @@ namespace osmscout {
     gpxFile.close();
   }
 
-  void WriteGpx(const std::vector<Point> &path, const std::string name)
+  void WriteGpx(const std::vector<Point> &path, const std::string& name)
   {
     WriteGpx(path.begin(), path.end(), name);
   }
@@ -485,9 +485,9 @@ namespace osmscout {
 
           CoastRef part=std::make_shared<Coast>();
           part->coast.push_back(Point(0,int1.point));
-          cutPath(part->coast, c->coast,
-                  int1.aIndex+1, int2.aIndex+1,
-                  int1.aDistanceSquare, int2.aDistanceSquare);
+          CutPath(part->coast,c->coast,
+                  int1.aIndex+1,int2.aIndex+1,
+                  int1.aDistanceSquare,int2.aDistanceSquare);
           part->coast.push_back(Point(0,int2.point));
           part->left=int1.orientation>0 ? CoastState::water : CoastState::land;
           assert(int1.orientation>0 ? int2.orientation<0 : int2.orientation>0);
@@ -547,9 +547,9 @@ namespace osmscout {
 
         CoastRef part=std::make_shared<Coast>();
         part->coast.push_back(Point(0,int1.point));
-        cutPath(part->coast, coastline->coast,
-                int1.bIndex+1, int2.bIndex+1,
-                int1.bDistanceSquare, int2.bDistanceSquare);
+        CutPath(part->coast,coastline->coast,
+                int1.bIndex+1,int2.bIndex+1,
+                int1.bDistanceSquare,int2.bDistanceSquare);
         part->coast.push_back(Point(0,int2.point));
         part->left=coastline->left;
         part->right=coastline->right;
@@ -799,16 +799,16 @@ namespace osmscout {
       for (const auto& tile : tileEntry.second) {
         State tileState=State::unknown;
         switch(tile.type){
-          case unknown:
+          case GroundTile::unknown:
             tileState=State::unknown;
             break;
-          case land:
+          case GroundTile::land:
             tileState=State::land;
             break;
-          case water:
+          case GroundTile::water:
             tileState=State::water;
             break;
-          case coast:
+          case GroundTile::coast:
             tileState=State::unknown;
             break;
         }
@@ -1877,7 +1877,7 @@ namespace osmscout {
       return NULL;
     }
 
-    currentIter--;
+    --currentIter;
 
     return *currentIter;
   }
@@ -2296,8 +2296,8 @@ namespace osmscout {
           if (coastline->isArea){
             return false; // area can't be part of tripoint, it should not happen
           }
-          GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
   #if defined(DEBUG_COASTLINE)
+          GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
           std::cout << "     found tripoint " << tripoint.GetDisplayText() << std::endl;
   #endif
 
