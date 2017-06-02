@@ -56,7 +56,7 @@ fi
 
 boundingPolygonFile="$scriptDirectory/${mappingFileBase}.poly"
 
-if [ "$boundingPolygonFile" ]; then
+if [ -f "$boundingPolygonFile" ]; then
   options="$options --bounding-polygon $boundingPolygonFile"
 fi
 
