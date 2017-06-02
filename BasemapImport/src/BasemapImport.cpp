@@ -74,7 +74,12 @@ public:
     coastline->isArea=true;
     coastline->left=osmscout::WaterIndexGenerator::CoastState::water;
     coastline->right=osmscout::WaterIndexGenerator::CoastState::land;
-    coastline->coast=coords;
+
+    coastline->coast.reserve(coords.size());
+
+    for (auto& coord : coords) {
+      coastline->coast.push_back(osmscout::Point(0,coord));
+    }
 
     currentId--;
   }

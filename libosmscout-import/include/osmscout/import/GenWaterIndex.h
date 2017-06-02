@@ -195,7 +195,8 @@ namespace osmscout {
       GroundTile::Coord borderCoords[4];
       GeoCoord borderPoints[4];
 
-      inline CellBoundaries(const Level &level, const Pixel &cell){
+      inline CellBoundaries(const Level &level, const Pixel &cell)
+      {
         lonMin=(level.cellXStart+cell.x)*level.cellWidth-180.0;
         lonMax=(level.cellXStart+cell.x+1)*level.cellWidth-180.0;
         latMin=(level.cellYStart+cell.y)*level.cellHeight-90.0;
@@ -259,12 +260,12 @@ namespace osmscout {
                         Progress& progress,
                         std::list<CoastRef>& coastlines);
 
-    bool LoadDataPolygon(const ImportParameter& parameter,
-                         Progress& progress,
-                         std::list<CoastRef>& coastlines);
+    bool LoadBoundingPolygons(const ImportParameter& parameter,
+                              Progress& progress,
+                              std::list<CoastRef>& boundingPolygons);
 
     void SynthetizeCoastlines2(Progress& progress,
-                               const std::list<CoastRef>& dataPolygons,
+                               const std::list<CoastRef>& boundingPolygons,
                                const std::list<CoastRef>& coastlines,
                                std::list<CoastRef> &synthetized);
 
@@ -273,7 +274,7 @@ namespace osmscout {
 
     void SynthetizeCoastlines(Progress& progress,
                               std::list<CoastRef>& coastlines,
-                              std::list<CoastRef>& dataPolygon);
+                              std::list<CoastRef>& boundingPolygons);
 
     void MarkCoastlineCells(Progress& progress,
                             Level& level,
@@ -313,13 +314,13 @@ namespace osmscout {
                     const TypeConfig& typeConfig,
                     Level& level);
 
-    bool IsCellInDataPolygon(const CellBoundaries &cellBoundary,
-                             const std::list<CoastRef>& dataPolygon);
+    bool IsCellInBoundingPolygon(const CellBoundaries& cellBoundary,
+                                 const std::list<CoastRef>& boundingPolygons);
 
     void FillWater(Progress& progress,
                    Level& level,
                    size_t tileCount,
-                   const std::list<CoastRef>& dataPolygon);
+                   const std::list<CoastRef>& boundingPolygons);
 
     bool ContainsCoord(const std::list<GroundTile> &tiles,
                        const GroundTile::Coord &coord,
@@ -337,7 +338,7 @@ namespace osmscout {
     void FillWaterAroundIsland(Progress& progress,
                                Level& level,
                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
-                               const std::list<CoastRef>& dataPolygon);
+                               const std::list<CoastRef>& boundingPolygons);
 
     void FillLand(Progress& progress,
                   Level& level);
@@ -431,7 +432,7 @@ namespace osmscout {
                       Level& levelStruct,
                       std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                       const std::list<CoastRef>& coastlines,
-                      const std::list<CoastRef>& dataPolygon);
+                      const std::list<CoastRef>& boundingPolygons);
 
       void WriteTiles(Progress& progress,
                       const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,

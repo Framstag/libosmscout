@@ -184,14 +184,14 @@ namespace osmscout {
                              CoastState::water);
   }
 
-  bool WaterIndexGenerator::LoadDataPolygon(const ImportParameter& parameter,
-                       Progress& progress,
-                       std::list<CoastRef>& coastlines)
+  bool WaterIndexGenerator::LoadBoundingPolygons(const ImportParameter& parameter,
+                                                 Progress& progress,
+                                                 std::list<CoastRef>& boundingPolygons)
   {
     progress.SetAction("Scanning data polygon");
     return LoadRawBoundaries(parameter,
                              progress,
-                             coastlines,
+                             boundingPolygons,
                              Preprocess::RAWDATAPOLYGON_DAT,
                              CoastState::undefined,
                              CoastState::unknown);
@@ -409,13 +409,13 @@ namespace osmscout {
   }
 
   void WaterIndexGenerator::SynthetizeCoastlines2(Progress& progress,
-                                                  const std::list<CoastRef>& dataPolygons,
+                                                  const std::list<CoastRef>& boundingPolygons,
                                                   const std::list<CoastRef>& coastlines,
                                                   std::list<CoastRef>& synthetized)
   {
     std::vector<CoastRef> candidates;
 
-    for (const auto &polygon:dataPolygons){
+    for (const auto &polygon:boundingPolygons){
       CoastRef candidate=std::make_shared<Coast>();
       candidate->isArea=true;
       candidate->coast=polygon->coast;
@@ -521,7 +521,7 @@ namespace osmscout {
       if (intersections.empty()) {
         if (coastline->isArea) {
           // test island without intersections if it is inside data polygon...
-          for (const auto &poly:dataPolygons){
+          for (const auto &poly:boundingPolygons){
             if (IsAreaAtLeastPartlyInArea(coastline->coast,poly->coast)){
               synthetized.push_back(coastline);
               break;
@@ -680,13 +680,13 @@ namespace osmscout {
    *
    * @param progress
    * @param coastlines
-   * @param dataPolygon
+   * @param boundingPolygons
    */
   void WaterIndexGenerator::SynthetizeCoastlines(Progress& progress,
                                                  std::list<CoastRef>& coastlines,
-                                                 std::list<CoastRef>& dataPolygon)
+                                                 std::list<CoastRef>& boundingPolygons)
   {
-    if (dataPolygon.empty()){
+    if (boundingPolygons.empty()){
       return;
     }
 
@@ -701,7 +701,7 @@ namespace osmscout {
 
     osmscout::StopClock clock;
     SynthetizeCoastlines2(progress,
-                          dataPolygon,
+                          boundingPolygons,
                           allCoastlines,
                           synthetized);
 
@@ -725,7 +725,7 @@ namespace osmscout {
     }
 
     clock.Stop();
-    progress.Info(NumberToString(dataPolygon.size())+" data polygon(s), and "+
+    progress.Info(NumberToString(boundingPolygons.size())+" data polygon(s), and "+
                   NumberToString(allCoastlines.size())+" coastline(s) synthetized into "+
                   NumberToString(synthetized.size())+" coastlines(s), tooks "+
                   clock.ResultString() +" s"
@@ -1012,16 +1012,16 @@ namespace osmscout {
     return true;
   }
 
-  bool WaterIndexGenerator::IsCellInDataPolygon(const CellBoundaries &cellBoundary,
-                                                const std::list<CoastRef>& dataPolygon)
+  bool WaterIndexGenerator::IsCellInBoundingPolygon(const CellBoundaries& cellBoundary,
+                                                    const std::list<CoastRef>& boundingPolygons)
   {
-    if (dataPolygon.empty()){
+    if (boundingPolygons.empty()){
       return true;
     }
 
     std::vector<GeoCoord> cellCoords;
     cellCoords.assign(cellBoundary.borderPoints, cellBoundary.borderPoints + 4);
-    for (const auto &poly:dataPolygon){
+    for (const auto &poly:boundingPolygons){
       if (IsAreaAtLeastPartlyInArea(cellCoords,poly->coast)){
         return true;
       }
@@ -1038,7 +1038,7 @@ namespace osmscout {
   void WaterIndexGenerator::FillWater(Progress& progress,
                                       Level& level,
                                       size_t tileCount,
-                                      const std::list<CoastRef>& dataPolygon)
+                                      const std::list<CoastRef>& boundingPolygons)
   {
     progress.Info("Filling water");
 
@@ -1050,7 +1050,7 @@ namespace osmscout {
           if (level.GetState(x,y)==water) {
 
             // avoid filling of water outside data polygon
-            if (!IsCellInDataPolygon(CellBoundaries(level,Pixel(x,y)),dataPolygon)){
+            if (!IsCellInBoundingPolygon(CellBoundaries(level,Pixel(x,y)),boundingPolygons)){
               continue;
             }
 
@@ -1149,7 +1149,7 @@ namespace osmscout {
   void WaterIndexGenerator::FillWaterAroundIsland(Progress& progress,
                                                   Level& level,
                                                   std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
-                                                  const std::list<CoastRef>& dataPolygon)
+                                                  const std::list<CoastRef>& boundingPolygons)
   {
     progress.Info("Filling water around islands");
 
@@ -1167,7 +1167,7 @@ namespace osmscout {
       // => it contains island(s)
 
       // avoid filling of water outside data polygon
-      if (!IsCellInDataPolygon(CellBoundaries(level,coord),dataPolygon)){
+      if (!IsCellInBoundingPolygon(CellBoundaries(level,coord),boundingPolygons)){
         continue;
       }
 
@@ -2529,7 +2529,7 @@ namespace osmscout {
                                        Level& levelStruct,
                                        std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                                        const std::list<CoastRef>& coastlines,
-                                       const std::list<CoastRef>& dataPolygon)
+                                       const std::list<CoastRef>& boundingPolygons)
   {
     Data data;
 
@@ -2566,7 +2566,7 @@ namespace osmscout {
                               cellGroundTileMap);
 
     if (parameter.GetAssumeLand()==ImportParameter::AssumeLandStrategy::enable ||
-        (parameter.GetAssumeLand()==ImportParameter::AssumeLandStrategy::automatic && dataPolygon.empty())) {
+        (parameter.GetAssumeLand()==ImportParameter::AssumeLandStrategy::automatic && boundingPolygons.empty())) {
       // Assume cell type 'land' for cells that intersect with 'land' object types
       AssumeLand(parameter,
                  progress,
@@ -2579,12 +2579,12 @@ namespace osmscout {
       FillWater(progress,
                 levelStruct,
                 parameter.GetFillWaterArea(),
-                dataPolygon);
+                boundingPolygons);
 
       FillWaterAroundIsland(progress,
                             levelStruct,
                             cellGroundTileMap,
-                            dataPolygon);
+                            boundingPolygons);
     }
 
     // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
@@ -2810,9 +2810,9 @@ namespace osmscout {
     // Loat data polygon
     //
 
-    if (!LoadDataPolygon(parameter,
-                         progress,
-                         dataPolygon)) {
+    if (!LoadBoundingPolygons(parameter,
+                              progress,
+                              dataPolygon)) {
       return false;
     }
 
