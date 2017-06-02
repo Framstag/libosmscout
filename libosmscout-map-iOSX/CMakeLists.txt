@@ -21,6 +21,8 @@ add_library(osmscout_map_iosx ${SOURCE_FILES} ${HEADER_FILES})
 
 set_property(TARGET osmscout_map_iosx PROPERTY CXX_STANDARD 11)
 
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map-iosx")
+
 find_library(FOUNDATION Foundation)
 find_library(COCOA Cocoa)
 find_library(APPKIT AppKit)
