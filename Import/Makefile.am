@@ -2,6 +2,4 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src
 
-EXTRA_DIST = autogen.sh \
-             standard.oss \
-             map.ost
+EXTRA_DIST = autogen.sh
