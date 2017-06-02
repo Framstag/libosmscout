@@ -229,7 +229,7 @@ endif()
 if(APPLE)
   option(OSMSCOUT_BUILD_MAP_IOSX "Enable build of iOS/OSX map drawing backend" ${OSMSCOUT_BUILD_MAP})
   if(OSMSCOUT_BUILD_MAP_IOSX)
-    #ntbf
+  add_subdirectory(libosmscout-map-iosx)
   endif()
 else()
   set(OSMSCOUT_BUILD_MAP_IOSX OFF CACHE INTERNAL "" FORCE)
