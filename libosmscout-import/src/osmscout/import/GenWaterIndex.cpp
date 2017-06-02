@@ -46,11 +46,11 @@
 #include <osmscout/WayDataFile.h>
 
 #if !defined(DEBUG_COASTLINE)
-#define DEBUG_COASTLINE
+//#define DEBUG_COASTLINE
 #endif
 
 #if !defined(DEBUG_TILING)
-#define DEBUG_TILING
+//#define DEBUG_TILING
 #endif
 
 namespace osmscout {
@@ -1134,7 +1134,7 @@ namespace osmscout {
                                                   const std::list<CoastRef>& dataPolygon)
   {
     progress.Info("Filling water around islands");
-    
+
     for (const auto &entry:cellGroundTileMap){
       Pixel coord=entry.first;
       CellBoundaries cellBoundaries(level,coord);
@@ -2147,7 +2147,7 @@ namespace osmscout {
         continue;
       }
       Direction direction=tripoint.IsEqual(path->points.front()) ? Direction::out : Direction::in;
-      if ((direction==Direction::out && walkType!=path->right) || 
+      if ((direction==Direction::out && walkType!=path->right) ||
           (direction==Direction::in && walkType!=path->left)){
         continue;
       }
@@ -2161,7 +2161,7 @@ namespace osmscout {
       if ((!outgoing) || (outgoing && angle < outgoingAngle)){
         outgoingAngle=angle;
         outgoingCoastline=path;
-        
+
         outgoing=std::make_shared<Intersection>();
         outgoing->coastline=pathIndex;
         outgoing->prevWayPointIndex=(direction==Direction::in) ? path->points.size()-1 : 0;
@@ -2215,7 +2215,7 @@ namespace osmscout {
     // finally, walk from the tripoint (outgoing) to (outgoingEnd)
     WalkPath(groundTile, level, cellBoundaries, outgoing, outgoingEnd, outgoingCoastline);
     pathStart=outgoing;
-    return true;   
+    return true;
   }
 
   void WaterIndexGenerator::WalkPath(GroundTile &groundTile,
@@ -2330,7 +2330,7 @@ namespace osmscout {
         std::cout << "   too many steps, give up... " << step << std::endl;
         return false;
       }
-      
+
       pathStart=GetNextCW(intersectionsCW,
                           pathEnd);
 
@@ -2341,7 +2341,7 @@ namespace osmscout {
                    pathEnd,
                    pathStart,
                    cellBoundaries.borderCoords);
-      
+
     }
 
 
@@ -2358,7 +2358,7 @@ namespace osmscout {
       std::list<IntersectionRef>    intersectionsCW;        // Intersections in clock wise order over all coastlines
       std::set<IntersectionRef>     visitedIntersections;
       CellBoundaries                cellBoundaries(level,cell);
-   
+
       // For every coastline by index intersecting the current cell
       for (const auto& currentCoastline : intersectCoastlines) {
         CoastlineDataRef coastData=data.coastlines[currentCoastline];
@@ -2459,14 +2459,14 @@ namespace osmscout {
     }
   }
 
-  void WaterIndexGenerator::buildTiles(const TypeConfigRef &typeConfig,
-                                       const ImportParameter &parameter,
-                                       Progress &progress,
-                                       const MercatorProjection &projection,
-                                       Level &levelStruct,
-                                       std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
-                                       const std::list<CoastRef> &coastlines,
-                                       Data &data,
+  void WaterIndexGenerator::BuildTiles(const TypeConfigRef& typeConfig,
+                                       const ImportParameter& parameter,
+                                       Progress& progress,
+                                       const MercatorProjection& projection,
+                                       Level& levelStruct,
+                                       std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
+                                       const std::list<CoastRef>& coastlines,
+                                       Data& data,
                                        const std::list<CoastRef>& dataPolygon)
   {
     if (!coastlines.empty()) {
@@ -2554,11 +2554,11 @@ namespace osmscout {
     }
   }
 
-  void WaterIndexGenerator::writeTiles(Progress &progress,
-                                       const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+  void WaterIndexGenerator::WriteTiles(Progress& progress,
+                                       const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                                        const uint32_t level,
-                                       Level &levelStruct,
-                                       FileWriter &writer)
+                                       Level& levelStruct,
+                                       FileWriter& writer)
   {
     if (levelStruct.hasCellData) {
 
@@ -2795,7 +2795,7 @@ namespace osmscout {
 
         progress.SetAction("Building tiles for level "+NumberToString(level));
 
-        buildTiles(typeConfig,
+        BuildTiles(typeConfig,
                    parameter,
                    progress,
                    projection,
@@ -2805,7 +2805,7 @@ namespace osmscout {
                    data,
                    dataPolygon);
 
-        writeTiles(progress,
+        WriteTiles(progress,
                    cellGroundTileMap,
                    level,
                    levelStruct,

@@ -45,6 +45,35 @@ namespace osmscout {
    */
   class WaterIndexGenerator CLASS_FINAL : public ImportModule
   {
+  public:
+    /**
+     * State that defines area type left from the Coast
+     * - for area Coast define inner and outer type
+     */
+    enum class CoastState {
+      undefined = 0, //! We do not know yet
+      land      = 1, //! land
+      water     = 2, //! water
+      unknown   = 3, //! unknown
+    };
+
+    /**
+     * A individual coastline
+     */
+    struct Coast
+    {
+      Id                 id;
+      bool               isArea;
+      double             sortCriteria;
+      Id                 frontNodeId;
+      Id                 backNodeId;
+      std::vector<Point> coast;
+      CoastState         left;
+      CoastState         right;
+    };
+
+    typedef std::shared_ptr<Coast> CoastRef;
+
   private:
     /** State of a cell */
     enum State {
@@ -185,34 +214,6 @@ namespace osmscout {
         borderCoords[3].Set(0,0,false);                                                     // bottom left
       }
     };
-
-    /**
-     * State that defines area type left from the Coast
-     * - for area Coast define inner and outer type
-     */
-    enum class CoastState {
-      undefined = 0, //! We do not know yet
-      land      = 1, //! land
-      water     = 2, //! water
-      unknown   = 3, //! unknown
-    };
-
-    /**
-     * A individual coastline
-     */
-    struct Coast
-    {
-      Id                 id;
-      bool               isArea;
-      double             sortCriteria;
-      Id                 frontNodeId;
-      Id                 backNodeId;
-      std::vector<Point> coast;
-      CoastState         left;
-      CoastState         right;
-    };
-
-    typedef std::shared_ptr<Coast> CoastRef;
 
     /**
      * Holds all generated, calculated and extracted information about an
@@ -425,21 +426,21 @@ namespace osmscout {
                                             std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                             Data& data);
 
-      void buildTiles(const TypeConfigRef& typeConfig,
+      void BuildTiles(const TypeConfigRef& typeConfig,
                       const ImportParameter& parameter,
-                      Progress &progress,
-                      const MercatorProjection &projection,
-                      Level &levelStruct,
-                      std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
-                      const std::list<CoastRef> &coastlines,
-                      Data &data,
+                      Progress& progress,
+                      const MercatorProjection& projection,
+                      Level& levelStruct,
+                      std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
+                      const std::list<CoastRef>& coastlines,
+                      Data& data,
                       const std::list<CoastRef>& dataPolygon);
 
-      void writeTiles(Progress &progress,
-                      const std::map<Pixel,std::list<GroundTile>> &cellGroundTileMap,
+      void WriteTiles(Progress& progress,
+                      const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                       const uint32_t level,
-                      Level &levelStruct,
-                      FileWriter &writer);
+                      Level& levelStruct,
+                      FileWriter& writer);
 
   public:
     void GetDescription(const ImportParameter& parameter,
