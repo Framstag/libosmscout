@@ -5,12 +5,12 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
-if [[ -x ../build/Import/Import ]]; then
-  importExe=../build/Import/Import
-elif [[ -x ../Import/src/Import ]]; then
+if [[ -x ../Import/src/Import ]]; then
   importExe=../Import/src/Import
+elif [[ -x ../build/Import/Import ]]; then
+  importExe=../build/Import/Import
 else
-  echo „Cannot find Import executable!“
+  echo "Cannot find Import executable!"
   exit 1
 fi
 
