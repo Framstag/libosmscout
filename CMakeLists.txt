@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
+
 project(libosmscout C CXX)
+
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # build should fail when compiler don't support standard defined by CMAKE_CXX_STANDARD
 set(CMAKE_MACOSX_RPATH 1)
@@ -243,6 +245,7 @@ endif()
 option(OSMSCOUT_BUILD_TOOL_IMPORT "Enable build of import applications" ${OSMSCOUT_BUILD_IMPORT})
 if(OSMSCOUT_BUILD_TOOL_IMPORT)
   add_subdirectory(Import)
+  add_subdirectory(BasemapImport)
 endif()
 
 option(OSMSCOUT_BUILD_DEMOS "Enable build of demo applications" TRUE)
@@ -319,7 +322,7 @@ message(STATUS " - Map drawing backend for iOS and OS X: ${OSMSCOUT_BUILD_MAP_IO
 message(STATUS "client libraries:")
 message(STATUS " - Qt client library:                    ${OSMSCOUT_BUILD_CLIENT_QT}")
 message(STATUS "tools:")
-message(STATUS " - Import:                               ${OSMSCOUT_BUILD_TOOL_IMPORT}")
+message(STATUS " - Import/BasemapImport:                 ${OSMSCOUT_BUILD_TOOL_IMPORT}")
 message(STATUS " - DumpData:                             ${OSMSCOUT_BUILD_TOOL_DUMPDATA}")
 message(STATUS " - OSMScout2:                            ${OSMSCOUT_BUILD_TOOL_OSMSCOUT2}")
 message(STATUS " - StyleEditor:                          ${OSMSCOUT_BUILD_TOOL_STYLEEDITOR}")
