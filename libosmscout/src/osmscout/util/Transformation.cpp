@@ -183,6 +183,31 @@ namespace osmscout {
   }
 
   void TransPolygon::TransformGeoToPixel(const Projection& projection,
+                                         const std::vector<GeoCoord>& nodes)
+  {
+    Projection::BatchTransformer batchTransformer(projection);
+
+    if (!nodes.empty()) {
+      start=0;
+      length=nodes.size();
+      end=length-1;
+
+      for (size_t i=start; i<=end; i++) {
+        batchTransformer.GeoToPixel(nodes[i].GetLon(),
+                                    nodes[i].GetLat(),
+                                    points[i].x,
+                                    points[i].y);
+        points[i].draw=true;
+      }
+    }
+    else {
+      start=0;
+      end=0;
+      length=0;
+    }
+  }
+
+  void TransPolygon::TransformGeoToPixel(const Projection& projection,
                                          const std::vector<Point>& nodes)
   {
     Projection::BatchTransformer batchTransformer(projection);
@@ -407,6 +432,58 @@ namespace osmscout {
 
   void TransPolygon::TransformArea(const Projection& projection,
                                    OptimizeMethod optimize,
+                                   const std::vector<GeoCoord>& nodes,
+                                   double optimizeErrorTolerance,
+                                   OutputConstraint constraint)
+  {
+    if (nodes.size()<2) {
+      length=0;
+
+      return;
+    }
+
+    if (pointsSize<nodes.size()) {
+      delete [] points;
+
+      points=new TransPoint[nodes.size()];
+      pointsSize=nodes.size();
+    }
+
+    TransformGeoToPixel(projection,
+                        nodes);
+    if (optimize!=none) {
+      if (optimize==fast) {
+        DropSimilarPoints(optimizeErrorTolerance);
+        DropRedundantPointsFast(optimizeErrorTolerance);
+      }
+      else {
+        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
+      }
+      if (constraint==simple){
+        EnsureSimple(true);
+      }
+
+      length=0;
+      start=nodes.size();
+      end=0;
+
+      // Calculate start, end and length
+      for (size_t i=0; i<nodes.size(); i++) {
+        if (points[i].draw) {
+          length++;
+
+          if (i<start) {
+            start=i;
+          }
+
+          end=i;
+        }
+      }
+    }
+  }
+
+  void TransPolygon::TransformArea(const Projection& projection,
+                                   OptimizeMethod optimize,
                                    const std::vector<Point>& nodes,
                                    double optimizeErrorTolerance,
                                    OutputConstraint constraint)
@@ -451,6 +528,59 @@ namespace osmscout {
             start=i;
           }
 
+          end=i;
+        }
+      }
+    }
+  }
+
+  void TransPolygon::TransformWay(const Projection& projection,
+                                  OptimizeMethod optimize,
+                                  const std::vector<GeoCoord>& nodes,
+                                  double optimizeErrorTolerance,
+                                  OutputConstraint constraint)
+  {
+    if (nodes.empty()) {
+      length=0;
+
+      return;
+    }
+
+    if (pointsSize<nodes.size()) {
+      delete [] points;
+
+      points=new TransPoint[nodes.size()];
+      pointsSize=nodes.size();
+    }
+
+    TransformGeoToPixel(projection,
+                        nodes);
+    if (optimize!=none) {
+
+      DropSimilarPoints(optimizeErrorTolerance);
+
+      if (optimize==fast) {
+        DropRedundantPointsFast(optimizeErrorTolerance);
+      }
+      else {
+        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
+      }
+      if (constraint==simple){
+        EnsureSimple(false);
+      }
+
+      length=0;
+      start=nodes.size();
+      end=0;
+
+      // Calculate start & end
+      for (size_t i=0; i<nodes.size(); i++) {
+        if (points[i].draw) {
+          length++;
+
+          if (i<start) {
+            start=i;
+          }
           end=i;
         }
       }
