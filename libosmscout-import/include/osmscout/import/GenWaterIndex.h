@@ -43,7 +43,7 @@ namespace osmscout {
    * and the assumption that land is always left of the coast (in line direction)
    * and water is always right.
    */
-  class WaterIndexGenerator CLASS_FINAL : public ImportModule
+  class OSMSCOUT_IMPORT_API WaterIndexGenerator CLASS_FINAL : public ImportModule
   {
   public:
     /**
@@ -151,7 +151,6 @@ namespace osmscout {
     struct Level
     {
       // Transient
-
       FileOffset                 indexEntryOffset; //!< File offset of this entry on disk
       double                     cellWidth;        //!< With of an cell
       double                     cellHeight;       //!< Height of an cell
@@ -159,7 +158,6 @@ namespace osmscout {
       uint32_t                   cellYCount;       //!< Number of cells in vertical direction (height of bounding box in cells)
 
       // Persistent
-
       bool                       hasCellData;      //!< If true, we have cell data
       uint8_t                    dataOffsetBytes;  //!< Number of bytes per entry in bitmap
       State                      defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
@@ -433,7 +431,6 @@ namespace osmscout {
                       Level& levelStruct,
                       std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                       const std::list<CoastRef>& coastlines,
-                      Data& data,
                       const std::list<CoastRef>& dataPolygon);
 
       void WriteTiles(Progress& progress,

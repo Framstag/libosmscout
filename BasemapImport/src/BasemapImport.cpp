@@ -32,14 +32,17 @@
 #include <osmscout/import/Import.h>
 #include <osmscout/import/ShapeFileScanner.h>
 
+#include <osmscout/import/GenWaterIndex.h>
+
 class CoastlineShapeFileVisitor : public osmscout::ShapeFileVisitor
 {
 private:
-  osmscout::Progress              &progress;
-  osmscout::FileWriter            coastlineFile;
-  uint32_t                        coastlineCount;
-  bool                            continuation;
-  std::vector<osmscout::GeoCoord> coordBuffer;
+  osmscout::Progress                                   &progress;
+  uint32_t                                             coastlineCount;
+  bool                                                 continuation;
+  std::vector<osmscout::GeoCoord>                      coordBuffer;
+  std::vector<osmscout::WaterIndexGenerator::CoastRef> coasts;
+  osmscout::Id                                         currentId;
 
 public:
   CoastlineShapeFileVisitor(const std::string& destinationDirectory,
@@ -47,17 +50,11 @@ public:
                             osmscout::Progress& progress)
     : progress(progress)
   {
-    std::string filename=osmscout::AppendFileToDir(destinationDirectory,
-                                                   "worldcoastlines.dat");
-
     progress.SetAction("Scanning world coastline file '"+coastlineShapeFile+"'");
 
     coastlineCount=0;
     continuation=false;
-
-    coastlineFile.Open(filename);
-
-    coastlineFile.Write(coastlineCount);
+    currentId=std::numeric_limits<osmscout::Id>::max();
   }
 
   ~CoastlineShapeFileVisitor()
@@ -66,12 +63,20 @@ public:
       progress.Error("Last element is not properly closed");
     }
 
-    coastlineFile.GotoBegin();
-    coastlineFile.Write(coastlineCount);
+    progress.Info("Found "+osmscout::NumberToString(coastlineCount)+ " coastline(s)");
+  }
 
-    progress.Info("Wrote "+osmscout::NumberToString(coastlineCount)+ " coastline(s)");
+  void AddCoast(const std::vector<osmscout::GeoCoord>& coords)
+  {
+    osmscout::WaterIndexGenerator::CoastRef coastline=std::make_shared<osmscout::WaterIndexGenerator::Coast>();
 
-    coastlineFile.Close();
+    coastline->id=currentId;
+    coastline->isArea=true;
+    coastline->left=osmscout::WaterIndexGenerator::CoastState::water;
+    coastline->right=osmscout::WaterIndexGenerator::CoastState::land;
+    coastline->coast=coords;
+
+    currentId--;
   }
 
   void OnProgress(double current,
@@ -87,7 +92,7 @@ public:
     if (continuation) {
       if (coords.size()<1000 || coordBuffer.front()==coords.back()) {
         coordBuffer.insert(coordBuffer.end(),coords.begin(),coords.end());
-        coastlineFile.Write(coordBuffer);
+        AddCoast(coordBuffer);
         coastlineCount++;
         continuation=false;
       }
@@ -96,7 +101,7 @@ public:
       }
     }
     else if (coords.size()<1000 || coords.front()==coords.back()) {
-      coastlineFile.Write(coords);
+      AddCoast(coords);
       coastlineCount++;
     }
     else {
