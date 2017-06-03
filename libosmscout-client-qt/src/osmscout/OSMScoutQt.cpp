@@ -83,7 +83,8 @@ bool OSMScoutQtBuilder::Init()
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
 
-  DBThread* dbThread=new DBThread(mapLookupDirectories,
+  DBThread* dbThread=new DBThread(basemapLookupDirectory,
+                                  mapLookupDirectories,
                                   iconDirectory,
                                   settings);
 

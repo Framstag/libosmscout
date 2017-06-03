@@ -689,6 +689,13 @@ namespace osmscout {
                                                coastlineLine->GetWidth());
               data.startIsClosed=false;
               data.endIsClosed=false;
+
+              /*
+              DrawWay(styleConfig,
+                      projection,
+                      parameter,
+                      data);*/
+
               wayData.push_back(data);
             }
 

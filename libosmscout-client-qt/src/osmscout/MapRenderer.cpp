@@ -129,12 +129,40 @@ DBRenderJob::~DBRenderJob()
 {
 }
 
-void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
+void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                      const std::list<DBInstanceRef> &databases,
+                      QReadLocker *locker)
 {
-  DBJob::Run(databases,locker);
+  DBJob::Run(basemapDatabase,databases,locker);
+
   bool backgroundRendered=false;
   success=true;
-  
+
+  if (basemapDatabase && !databases.empty()) {
+    osmscout::MapPainterQt* mapPainter=databases.front()->GetPainter();
+    osmscout::WaterIndexRef waterIndex=basemapDatabase->GetWaterIndex();
+
+    if (mapPainter && waterIndex) {
+      osmscout::GeoBox                boundingBox;
+      std::list<osmscout::GroundTile> tiles;
+
+      renderProjection.GetDimensions(boundingBox);
+      if (waterIndex->GetRegions(boundingBox,
+                                 renderProjection.GetMagnification(),
+                                 tiles)) {
+
+        std::cout << "Rendering " << tiles.size() << " ground tiles for region " << boundingBox.GetDisplayText() << std::endl;
+
+        mapPainter->DrawGroundTiles(renderProjection,
+                                    *drawParameter,
+                                    tiles,
+                                    p);
+
+        backgroundRendered=true;
+      }
+    }
+  }
+
   for (auto &db:databases){
     if (!tiles.contains(db->path)){
       osmscout::log.Debug() << "Skip database " << db->path.toStdString();
@@ -147,6 +175,7 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
           db->styleConfig->GetUnknownFillStyle(renderProjection, unknownFillStyle);
           if (unknownFillStyle){
             osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
+            std::cout << "Rendering background using fill style 'unknown'" << std::endl;
             p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                         QColor::fromRgbF(backgroundColor.GetR(),
                                          backgroundColor.GetG(),
@@ -157,6 +186,7 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
       }
       if (!backgroundRendered){
         // as backup, when "unknown" style is not defined, use black color
+        std::cout << "Rendering background using black color (1)" << std::endl;
         p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                     QBrush(QColor::fromRgbF(0,0,0,1)));
         backgroundRendered=true;
@@ -164,7 +194,7 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
     }
     std::list<osmscout::TileRef> tileList=tiles[db->path].values().toStdList();
     osmscout::MapData            data;
-    
+
     db->mapService->AddTileDataToMapData(tileList,data);
 
     if (drawParameter->GetRenderSeaLand()) {
@@ -176,11 +206,12 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
                                        *drawParameter,
                                        data,
                                        p);
-
   }
   if (drawCanvasBackground && !backgroundRendered){
+    std::cout << "Rendering background using black color (2)" << std::endl;
     p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                 QBrush(QColor::fromRgbF(0,0,0,1)));
   }
+
   Close();
 }

@@ -27,10 +27,12 @@
 #include <osmscout/TextSearchIndex.h>
 #endif
 
-DBThread::DBThread(QStringList databaseLookupDirs,
+DBThread::DBThread(QString basemapLookupDirectory,
+                   QStringList databaseLookupDirs,
                    QString iconDirectory,
                    SettingsRef settings)
   : mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
+    basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
     mapDpi(-1),
     physicalDpi(-1),
@@ -71,6 +73,11 @@ DBThread::DBThread(QStringList databaseLookupDirs,
 DBThread::~DBThread()
 {
   osmscout::log.Debug() << "DBThread::~DBThread()";
+
+  if (basemapDatabase) {
+    basemapDatabase->Close();
+    basemapDatabase=NULL;
+  }
 
   for (auto db:databases){
     db->close();
@@ -202,6 +209,11 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 {
   QWriteLocker locker(&lock);
 
+  if (basemapDatabase) {
+    basemapDatabase->Close();
+    basemapDatabase=NULL;
+  }
+
   for (auto db:databases){
     db->close();
   }
@@ -271,6 +283,18 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
   }
 #endif
 
+  if (!basemapLookupDirectory.isEmpty()) {
+    osmscout::BasemapDatabaseRef database = std::make_shared<osmscout::BasemapDatabase>(basemapDatabaseParameter);
+
+    if (database->Open(basemapLookupDirectory.toLocal8Bit().data())) {
+      basemapDatabase=database;
+      qInfo() << "Basemap found and loaded!";
+    }
+    else {
+      qWarning() << "Cannot open basemap database '" << basemapLookupDirectory << "'!";
+    }
+  }
+
   for (auto &databaseDirectory:databaseDirectories){
     osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
     osmscout::StyleConfigRef styleConfig;
@@ -286,17 +310,17 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
         }
 
         if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
-          qDebug() << "Cannot load style sheet!";
+          qWarning() << "Cannot load style sheet '" << stylesheetFilename << "'!";
           styleConfig=NULL;
         }
       }
       else {
-        qDebug() << "TypeConfig invalid!";
+        qWarning() << "TypeConfig invalid!";
         styleConfig=NULL;
       }
     }
     else {
-      qWarning() << "Cannot open database!";
+      qWarning() << "Cannot open database '" << databaseDirectory.absolutePath() << "'!";
       continue;
     }
 
@@ -985,14 +1009,14 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
       }
     }
   }
-  
+
   return flags;
 }
 
 void DBThread::RunJob(DBJob *job)
 {
   QReadLocker *locker=new QReadLocker(&lock);
-  job->Run(databases,locker);
+  job->Run(basemapDatabase,databases,locker);
 }
 
 void DBThread::RunSynchronousJob(SynchronousDBJob job)

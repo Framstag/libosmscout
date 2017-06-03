@@ -1144,6 +1144,306 @@ namespace osmscout {
     }
   }
 
+  void MapPainterQt::DrawGroundTiles(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const std::list<GroundTile>& groundTiles,
+                                     QPainter* painter)
+  {
+    std::lock_guard<std::mutex> guard(mutex);
+#if defined(DEBUG_GROUNDTILES)
+    std::set<GeoCoord>          drawnLabels;
+#endif
+
+    this->painter=painter;
+
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::TextAntialiasing);
+
+    FillStyleRef      landFill;
+
+
+    styleConfig->GetLandFillStyle(projection,
+                                  landFill);
+
+    if (!landFill) {
+      return;
+    }
+
+    if (parameter.GetRenderBackground()) {
+      DrawGround(projection,
+                 parameter,
+                 *landFill);
+    }
+
+    FillStyleRef       seaFill;
+    FillStyleRef       coastFill;
+    FillStyleRef       unknownFill;
+    LineStyleRef       coastlineLine;
+    std::vector<Point> points;
+    size_t             start=0; // Make the compiler happy
+    size_t             end=0;   // Make the compiler happy
+
+    styleConfig->GetSeaFillStyle(projection,
+                                 seaFill);
+    styleConfig->GetCoastFillStyle(projection,
+                                   coastFill);
+    styleConfig->GetUnknownFillStyle(projection,
+                                     unknownFill);
+    styleConfig->GetCoastlineLineStyle(projection,
+                                       coastlineLine);
+
+    if (!seaFill) {
+      return;
+    }
+
+    double             errorTolerancePixel=projection.ConvertWidthToPixel(parameter.GetOptimizeErrorToleranceMm());
+    FeatureValueBuffer coastlineSegmentAttributes;
+
+    for (const auto& tile : groundTiles) {
+      AreaData areaData;
+
+      if (tile.type==GroundTile::unknown &&
+          !parameter.GetRenderUnknowns()) {
+        continue;
+      }
+
+      switch (tile.type) {
+      case GroundTile::land:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=landFill;
+        break;
+      case GroundTile::water:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=seaFill;
+        break;
+      case GroundTile::coast:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=coastFill;
+        break;
+      case GroundTile::unknown:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=unknownFill;
+        break;
+      }
+      if (!areaData.fillStyle){
+        continue;
+      }
+
+      GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
+                        tile.xAbs*tile.cellWidth-180.0);
+      GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
+                        minCoord.GetLon()+tile.cellWidth);
+
+      areaData.boundingBox.Set(minCoord,maxCoord);
+
+      if (tile.coords.empty()) {
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= fill" << std::endl;
+#endif
+        // Fill the cell completely with the fill for the given cell type
+        points.resize(5);
+
+        points[0].SetCoord(areaData.boundingBox.GetMinCoord());
+        points[1].SetCoord(GeoCoord(areaData.boundingBox.GetMinCoord().GetLat(),
+                                    areaData.boundingBox.GetMaxCoord().GetLon()));
+        points[2].SetCoord(areaData.boundingBox.GetMaxCoord());
+        points[3].SetCoord(GeoCoord(areaData.boundingBox.GetMaxCoord().GetLat(),
+                                    areaData.boundingBox.GetMinCoord().GetLon()));
+        points[4]=points[0];
+
+        transBuffer.transPolygon.TransformArea(projection,
+                                               TransPolygon::none,
+                                               points,
+                                               errorTolerancePixel);
+
+        size_t s=transBuffer.transPolygon.GetStart();
+
+        start=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+0].x),
+                                            ceil(transBuffer.transPolygon.points[s+0].y));
+
+
+        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+1].x),
+                                      ceil(transBuffer.transPolygon.points[s+1].y));
+
+        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+2].x),
+                                      floor(transBuffer.transPolygon.points[s+2].y));
+
+        transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+3].x),
+                                      floor(transBuffer.transPolygon.points[s+3].y));
+
+        end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+4].x),
+                                          ceil(transBuffer.transPolygon.points[s+4].y));
+      }
+      else {
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= sub" << std::endl;
+#endif
+        points.resize(tile.coords.size());
+
+        for (size_t i=0; i<tile.coords.size(); i++) {
+          double lat;
+          double lon;
+
+          lat=areaData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=areaData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
+
+          points[i].SetCoord(GeoCoord(lat,lon));
+        }
+
+        transBuffer.transPolygon.TransformArea(projection,
+                                               TransPolygon::none,
+                                               points,
+                                               errorTolerancePixel);
+
+        for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
+          double x,y;
+
+          if (tile.coords[i].x==0) {
+            x=floor(transBuffer.transPolygon.points[i].x);
+          }
+          else if (tile.coords[i].x==GroundTile::Coord::CELL_MAX) {
+            x=ceil(transBuffer.transPolygon.points[i].x);
+          }
+          else {
+            x=transBuffer.transPolygon.points[i].x;
+          }
+
+          if (tile.coords[i].y==0) {
+            y=ceil(transBuffer.transPolygon.points[i].y);
+          }
+          else if (tile.coords[i].y==GroundTile::Coord::CELL_MAX) {
+            y=floor(transBuffer.transPolygon.points[i].y);
+          }
+          else {
+            y=transBuffer.transPolygon.points[i].y;
+          }
+
+          size_t idx=transBuffer.buffer->PushCoord(x,y);
+
+          if (i==transBuffer.transPolygon.GetStart()) {
+            start=idx;
+          }
+          else if (i==transBuffer.transPolygon.GetEnd()) {
+            end=idx;
+          }
+        }
+
+        if (coastlineLine) {
+          size_t lineStart=0;
+          size_t lineEnd;
+
+          while (lineStart<tile.coords.size()) {
+            while (lineStart<tile.coords.size() &&
+                   !tile.coords[lineStart].coast) {
+              lineStart++;
+            }
+
+            if (lineStart>=tile.coords.size()) {
+              continue;
+            }
+
+            lineEnd=lineStart;
+
+            while (lineEnd<tile.coords.size() &&
+                   tile.coords[lineEnd].coast) {
+              lineEnd++;
+            }
+
+            if (lineStart!=lineEnd) {
+              WayData data;
+
+              data.buffer=&coastlineSegmentAttributes;
+              data.layer=0;
+              data.lineStyle=coastlineLine;
+              data.wayPriority=std::numeric_limits<int>::max();
+              data.transStart=start+lineStart;
+              data.transEnd=start+lineEnd;
+              data.lineWidth=GetProjectedWidth(projection,
+                                               projection.ConvertWidthToPixel(coastlineLine->GetDisplayWidth()),
+                                               coastlineLine->GetWidth());
+              data.startIsClosed=false;
+              data.endIsClosed=false;
+
+              DrawWay(*styleConfig,
+                      projection,
+                      parameter,
+                      data);
+            }
+
+            lineStart=lineEnd+1;
+          }
+        }
+      }
+
+      areaData.ref=ObjectFileRef();
+      areaData.transStart=start;
+      areaData.transEnd=end;
+
+      DrawArea(projection,parameter,areaData);
+
+#if defined(DEBUG_GROUNDTILES)
+      size_t   labelId=nextLabelId++;
+      GeoCoord cc=areaData.boundingBox.GetCenter();
+
+      std::string label;
+
+      size_t x=(cc.GetLon()+180)/tile.cellWidth;
+      size_t y=(cc.GetLat()+90)/tile.cellHeight;
+
+      label=NumberToString(tile.xRel)+","+NumberToString(tile.yRel);
+
+      double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
+      double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
+
+      double px;
+      double py;
+
+      projection.GeoToPixel(GeoCoord(lat,lon),
+                            px,py);
+
+      if (drawnLabels.find(GeoCoord(x,y))!=drawnLabels.end()) {
+        continue;
+      }
+
+      LabelLayoutData labelData;
+
+      labelData.fontSize=debugLabel->GetSize();
+
+      GetTextDimension(projection,
+                       parameter,
+                       -1,
+                       labelData.fontSize,
+                       label,
+                       labelData.xOff,
+                       labelData.yOff,
+                       labelData.width,
+                       labelData.height);
+
+      labelData.alpha=debugLabel->GetAlpha();
+      labelData.position=0;
+      labelData.label=label;
+      labelData.textStyle=debugLabel;
+      labelData.icon=false;
+
+      RegisterPointLabel(projection,
+                         parameter,
+                         labelData,
+                         px,py,
+                         labelId);
+
+      drawnLabels.insert(GeoCoord(x,y));
+#endif
+    }
+  }
+
   bool MapPainterQt::DrawMap(const Projection& projection,
                              const MapParameter& parameter,
                              const MapData& data,

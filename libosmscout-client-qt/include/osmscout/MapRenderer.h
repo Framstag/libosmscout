@@ -47,7 +47,9 @@ public:
               bool drawCanvasBackground);
   virtual ~DBRenderJob();
 
-  virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);
+  virtual void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                   const std::list<DBInstanceRef> &databases,
+                   QReadLocker *locker);
 
   inline bool IsSuccess(){
     return success;
@@ -62,7 +64,7 @@ protected:
   SettingsRef settings;
   DBThreadRef dbThread;
   QMutex      lock;
-  
+
   double      mapDpi;
   bool        renderSea;
 

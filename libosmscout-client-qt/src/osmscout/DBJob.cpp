@@ -35,7 +35,9 @@ DBJob::~DBJob()
   Close();
 }
 
-void DBJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
+void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                const std::list<DBInstanceRef> &databases,
+                QReadLocker *locker)
 {
   if (thread!=QThread::currentThread()){
     qWarning() << "Run" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
@@ -72,7 +74,7 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
   searchParameter.SetUseMultithreading(true);
   searchParameter.SetUseLowZoomOptimization(lowZoomOptimization);
   searchParameter.SetBreaker(breaker);
-  
+
   connect(this,SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
           this,SLOT(onTileStateChanged(QString,const osmscout::TileRef)),
           Qt::QueuedConnection);
@@ -88,7 +90,9 @@ DBLoadJob::~DBLoadJob()
   //qDebug() << "destroyed:" << this << "in" << QThread::currentThread();
 }
 
-void DBLoadJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
+void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                    const std::list<DBInstanceRef> &databases,
+                    QReadLocker *locker)
 {
   osmscout::GeoBox lookupBox;
   lookupProjection.GetDimensions(lookupBox);
@@ -107,7 +111,7 @@ void DBLoadJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lock
     relevantDatabases.push_back(db);
   }
 
-  DBJob::Run(relevantDatabases,locker);
+  DBJob::Run(basemapDatabase,relevantDatabases,locker);
   for (auto &db:relevantDatabases){
     std::list<osmscout::TileRef> tiles;
     db->mapService->LookupTiles(lookupProjection,tiles);
@@ -117,7 +121,7 @@ void DBLoadJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lock
       //std::cout << "callback called for job: " << this << std::endl;
       emit tileStateChanged(path,tile);
     };
-    
+
     osmscout::MapService::CallbackId callbackId=db->mapService->RegisterTileStateCallback(callback);
     //std::cout << "callback registered for job: " << this << " " << db->path.toStdString() << ": " << callbackId  << std::endl ;
     callbacks[db->path]=callbackId;

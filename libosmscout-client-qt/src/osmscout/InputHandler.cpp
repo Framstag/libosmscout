@@ -264,7 +264,9 @@ void MoveHandler::onTimeout()
         return;
     }
 
-    projection.Move(_move.x() * scale, _move.y() * scale * -1.0);
+    if (!projection.Move(_move.x() * scale, _move.y() * scale * -1.0)) {
+        return;
+    }
 
     view.magnification = projection.GetMagnification();
     view.center=projection.GetCenter();
@@ -359,7 +361,9 @@ bool MoveHandler::moveNow(QVector2D move)
         return false;
     }
 
-    projection.Move(move.x(), move.y() * -1.0);
+    if (!projection.Move(move.x(), move.y() * -1.0)) {
+        return false;
+    }
 
     view.center=projection.GetCenter();
     if (view.center.GetLon() < OSMTile::minLon()){
@@ -643,7 +647,11 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
 {
     if (locationValid){
         osmscout::MercatorProjection projection;
-        projection.Set(view.center, view.magnification, dpi, 1000, 1000);
+
+        if (!projection.Set(view.center, view.magnification, dpi, 1000, 1000)) {
+            return false;
+        }
+
         double x;
         double y;
         projection.GeoToPixel(currentPosition, x, y);
