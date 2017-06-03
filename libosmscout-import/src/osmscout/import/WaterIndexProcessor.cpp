@@ -1294,43 +1294,67 @@ namespace osmscout {
      * (line coastlines) and islands (area coastlines) to remove the most visible
      * errors. Detecting intersections between all islands is too expensive.
      */
-    /*
-    progress.Info("Filter intersecting islands");
+
+    bool haveAreas=false;
+    bool haveWays=false;
+
     for (size_t i=0; i<transformedCoastlines.size(); i++) {
-      progress.SetProgress(i,transformedCoastlines.size());
+      if (!transformedCoastlines[i]) {
+        continue;
+      }
 
-      for (size_t j=i+1; j<transformedCoastlines.size(); j++) {
-        CoastlineDataRef a=transformedCoastlines[i];
-        CoastlineDataRef b=transformedCoastlines[j];
+      if (transformedCoastlines[i]->isArea) {
+        haveAreas=true;
+      }
 
-        if (!a || !b || (a->isArea == b->isArea)) {
-          // ignore possible intersections between two coastline ways (it may be touching)
-          // or two coastline areas (it is not so problematic and its computation is expensive)
-          continue;
-        }
+      if (!transformedCoastlines[i]->isArea) {
+        haveWays=true;
+      }
 
-        std::vector<PathIntersection> intersections;
+      if (haveAreas && haveWays) {
+        break;
+      }
+    }
 
-        FindPathIntersections(a->points,
-                              b->points,
-                              a->isArea,
-                              b->isArea,
-                              intersections);
+    if (haveAreas && haveWays) {
+      progress.Info("Filter intersecting islands");
+      
+      for (size_t i=0; i<transformedCoastlines.size(); i++) {
+        progress.SetProgress(i,transformedCoastlines.size());
 
-        if (!intersections.empty()) {
-          progress.Warning("Detected intersection "+NumberToString(coasts[i]->id)+" <> "+NumberToString(coasts[j]->id));
+        for (size_t j=i+1; j<transformedCoastlines.size(); j++) {
+          CoastlineDataRef a=transformedCoastlines[i];
+          CoastlineDataRef b=transformedCoastlines[j];
 
-          if (a->isArea && !b->isArea) {
-            transformedCoastlines[i]=NULL;
-            coasts[i]=NULL;
+          if (!a || !b || (a->isArea == b->isArea)) {
+            // ignore possible intersections between two coastline ways (it may be touching)
+            // or two coastline areas (it is not so problematic and its computation is expensive)
+            continue;
           }
-          else if (b->isArea && !a->isArea) {
-            transformedCoastlines[j]=NULL;
-            coasts[j]=NULL;
+
+          std::vector<PathIntersection> intersections;
+
+          FindPathIntersections(a->points,
+                                b->points,
+                                a->isArea,
+                                b->isArea,
+                                intersections);
+
+          if (!intersections.empty()) {
+            progress.Warning("Detected intersection "+NumberToString(coasts[i]->id)+" <> "+NumberToString(coasts[j]->id));
+
+            if (a->isArea && !b->isArea) {
+              transformedCoastlines[i]=NULL;
+              coasts[i]=NULL;
+            }
+            else if (b->isArea && !a->isArea) {
+              transformedCoastlines[j]=NULL;
+              coasts[j]=NULL;
+            }
           }
         }
       }
-    }*/
+    }
 
     progress.Info("Calculate covered tiles");
     size_t curCoast=0;
