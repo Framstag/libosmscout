@@ -427,10 +427,10 @@ namespace osmscout {
                       const ImportParameter& parameter,
                       Progress& progress,
                       const MercatorProjection& projection,
-                      Level& level,
-                      std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                       const std::list<CoastRef>& coastlines,
-                      const std::list<CoastRef>& boundingPolygons);
+                      const std::list<CoastRef>& boundingPolygons,
+                      Level& level,
+                      std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap);
 
       void WriteTiles(Progress& progress,
                       const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
