@@ -1318,7 +1318,7 @@ namespace osmscout {
 
     if (haveAreas && haveWays) {
       progress.Info("Filter intersecting islands");
-      
+
       for (size_t i=0; i<transformedCoastlines.size(); i++) {
         progress.SetProgress(i,transformedCoastlines.size());
 

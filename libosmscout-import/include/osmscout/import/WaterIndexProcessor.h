@@ -98,7 +98,7 @@ namespace osmscout {
     /**
      * A individual coastline
      */
-    struct Coast
+    struct OSMSCOUT_IMPORT_API Coast
     {
       Id                 id;
       bool               isArea;
@@ -123,7 +123,7 @@ namespace osmscout {
       coast   = 3  //! The coast itself => a coast tile
     };
 
-    class StateMap
+    class OSMSCOUT_IMPORT_API StateMap
     {
     private:
       double               cellWidth;  //!< With of an cell
@@ -208,7 +208,7 @@ namespace osmscout {
     /**
      * A tile bitmap/zoom level.
      */
-    struct Level
+    struct OSMSCOUT_IMPORT_API Level
     {
       // Transient
       uint32_t             level;            //!< The actual zoom level
@@ -237,7 +237,7 @@ namespace osmscout {
     /**
      * Information about a single intersection of a coastline with a cell
      */
-    struct Intersection
+    struct OSMSCOUT_IMPORT_API Intersection
     {
       size_t        coastline;          //! Running number of the intersecting coastline
       size_t        prevWayPointIndex;  //! The index of the path point before the intersection
@@ -253,7 +253,7 @@ namespace osmscout {
      * Holds all generated, calculated and extracted information about an
      * individual coastline
      */
-    struct CoastlineData
+    struct OSMSCOUT_IMPORT_API CoastlineData
     {
       Id                                         id;                 //! The id of the coastline
       bool                                       isArea;             //! true,if the boundary forms an area
@@ -267,7 +267,7 @@ namespace osmscout {
 
     typedef std::shared_ptr<CoastlineData> CoastlineDataRef;
 
-    struct Data
+    struct OSMSCOUT_IMPORT_API Data
     {
       std::vector<CoastlineDataRef>     coastlines;            //! data for each coastline
       std::map<Pixel,std::list<size_t>> cellCoastlines;        //! Contains for each cell the list of *intersecting* coastlines
