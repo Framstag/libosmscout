@@ -50,7 +50,8 @@ namespace osmscout {
      * State that defines area type left from the Coast
      * - for area Coast define inner and outer type
      */
-    enum class CoastState {
+    enum class CoastState : uint8_t
+    {
       undefined = 0, //! We do not know yet
       land      = 1, //! land
       water     = 2, //! water
@@ -74,16 +75,91 @@ namespace osmscout {
 
     typedef std::shared_ptr<Coast> CoastRef;
 
-  private:
-    /** State of a cell */
-    enum State {
+    /**
+     * State of a cell
+     */
+    enum State : uint8_t
+    {
       unknown = 0, //! We do not know yet
       land    = 1, //! left side of the coast => a land tile
       water   = 2, //! right side of the coast => a water tile
       coast   = 3  //! The coast itself => a coast tile
     };
 
-    enum Direction {
+    class StateMap
+    {
+    private:
+      uint32_t             cellXStart; //!< First x-axis coordinate of cells
+      uint32_t             cellXEnd;   //!< Last x-axis coordinate cells
+      uint32_t             cellYStart; //!< First y-axis coordinate of cells
+      uint32_t             cellYEnd;   //!< Last x-axis coordinate cells
+      uint32_t             cellXCount; //!< Number of cells in horizontal direction (with of bounding box in cells)
+      uint32_t             cellYCount; //!< Number of cells in vertical direction (height of bounding box in cells)
+      std::vector<uint8_t> area;       //!< Actual index data
+
+    public:
+      void SetBox(const GeoBox& boundingBox,
+                  double cellWidth,
+                  double cellHeight);
+
+      inline uint32_t GetXStart() const
+      {
+        return cellXStart;
+      }
+
+      inline uint32_t GetYStart() const
+      {
+        return cellYStart;
+      }
+
+      inline uint32_t GetXEnd() const
+      {
+        return cellXEnd;
+      }
+
+      inline uint32_t GetYEnd() const
+      {
+        return cellYEnd;
+      }
+
+      inline uint32_t GetXCount() const
+      {
+        return cellXCount;
+      }
+
+      inline uint32_t GetYCount() const
+      {
+        return cellYCount;
+      }
+
+      inline bool IsInAbsolute(uint32_t x, uint32_t y) const
+      {
+        return x>=cellXStart &&
+               x<=cellXEnd &&
+               y>=cellYStart &&
+               y<=cellYEnd;
+      }
+
+      State GetState(uint32_t x, uint32_t y) const;
+      inline State GetStateAbsolute(uint32_t x, uint32_t y) const
+      {
+        return GetState(x-cellXStart,
+                        y-cellYStart);
+      }
+
+      void SetState(uint32_t x, uint32_t y, State state);
+      inline void SetStateAbsolute(uint32_t x, uint32_t y, State state)
+      {
+        SetState(x-cellXStart,
+                 y-cellYStart,
+                 state);
+      }
+    };
+
+  private:
+
+    enum Direction : int8_t
+    {
       out   = -1,
       touch = 0,
       in    = 1
@@ -151,36 +227,22 @@ namespace osmscout {
     struct Level
     {
       // Transient
-      size_t                     level;            //!< The actual zoom level
-      FileOffset                 indexEntryOffset; //!< File offset of this entry on disk
-      double                     cellWidth;        //!< With of an cell
-      double                     cellHeight;       //!< Height of an cell
-      uint32_t                   cellXCount;       //!< Number of cells in horizontal direction (with of bounding box in cells)
-      uint32_t                   cellYCount;       //!< Number of cells in vertical direction (height of bounding box in cells)
+      size_t               level;            //!< The actual zoom level
+      FileOffset           indexEntryOffset; //!< File offset of this entry on disk
+      double               cellWidth;        //!< With of an cell
+      double               cellHeight;       //!< Height of an cell
 
       // Persistent
-      bool                       hasCellData;      //!< If true, we have cell data
-      uint8_t                    dataOffsetBytes;  //!< Number of bytes per entry in bitmap
-      State                      defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
-      FileOffset                 indexDataOffset;  //!< File offset of start cell state data on disk
+      bool                 hasCellData;      //!< If true, we have cell data
+      uint8_t              dataOffsetBytes;  //!< Number of bytes per entry in bitmap
+      State                defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
+      FileOffset           indexDataOffset;  //!< File offset of start cell state data on disk
 
-      uint32_t                   cellXStart;       //!< First x-axis coordinate of cells
-      uint32_t                   cellXEnd;         //!< Last x-axis coordinate cells
-      uint32_t                   cellYStart;       //!< First y-axis coordinate of cells
-      uint32_t                   cellYEnd;         //!< Last x-axis coordinate cells
-
-      std::vector<unsigned char> area;             //!< Actual index data
+      StateMap             stateMap;         //!< Index to handle state of cells
 
       void SetBox(const GeoBox& boundingBox,
                   double cellWidth,
                   double cellHeight);
-
-      bool IsInAbsolute(uint32_t x, uint32_t y) const;
-      State GetState(uint32_t x, uint32_t y) const;
-      State GetStateAbsolute(uint32_t x, uint32_t y) const;
-
-      void SetState(uint32_t x, uint32_t y, State state);
-      void SetStateAbsolute(uint32_t x, uint32_t y, State state);
     };
 
     /**
@@ -198,10 +260,10 @@ namespace osmscout {
 
       inline CellBoundaries(const Level &level, const Pixel &cell)
       {
-        lonMin=(level.cellXStart+cell.x)*level.cellWidth-180.0;
-        lonMax=(level.cellXStart+cell.x+1)*level.cellWidth-180.0;
-        latMin=(level.cellYStart+cell.y)*level.cellHeight-90.0;
-        latMax=(level.cellYStart+cell.y+1)*level.cellHeight-90.0;
+        lonMin=(level.stateMap.GetXStart()+cell.x)*level.cellWidth-180.0;
+        lonMax=(level.stateMap.GetXStart()+cell.x+1)*level.cellWidth-180.0;
+        latMin=(level.stateMap.GetYStart()+cell.y)*level.cellHeight-90.0;
+        latMax=(level.stateMap.GetYStart()+cell.y+1)*level.cellHeight-90.0;
 
         borderPoints[0]=GeoCoord(latMax,lonMin); // top left
         borderPoints[1]=GeoCoord(latMax,lonMax); // top right
@@ -282,7 +344,7 @@ namespace osmscout {
                             const Data& data);
 
     void CalculateCoastEnvironment(Progress& progress,
-                                   Level& level,
+                                   StateMap& stateMap,
                                    const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
     void GetCells(const Level& level,
@@ -331,7 +393,7 @@ namespace osmscout {
                        const GroundTile::Coord &coord);
 
     bool ContainsWater(const Pixel &coord,
-                       const Level &level,
+                       const StateMap &stateMap,
                        const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                        const GroundTile::Coord &testCoord1,
                        const GroundTile::Coord &testCoord2);
@@ -342,7 +404,7 @@ namespace osmscout {
                                const std::list<CoastRef>& boundingPolygons);
 
     void FillLand(Progress& progress,
-                  Level& level);
+                  StateMap& stateMap);
 
     void DumpIndexHeader(const ImportParameter& parameter,
                          FileWriter& writer,
