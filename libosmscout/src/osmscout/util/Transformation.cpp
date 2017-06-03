@@ -697,7 +697,7 @@ namespace osmscout {
                                           double optimizeErrorTolerance,
                                           TransPolygon::OutputConstraint constraint)
   {
-    std::vector<GeoCoord> coords(5);
+    std::vector<GeoCoord> coords(4);
 
     // left bottom
     coords.push_back(GeoCoord(boundingBox.GetMinLat(),
@@ -711,9 +711,6 @@ namespace osmscout {
     // right bottom
     coords.push_back(GeoCoord(boundingBox.GetMinLat(),
                               boundingBox.GetMaxLon()));
-    // left bottom (closing the rectangle)
-    coords.push_back(GeoCoord(boundingBox.GetMinLat(),
-                              boundingBox.GetMinLon()));
 
     TransformArea(projection,
                   optimize,
