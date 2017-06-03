@@ -89,6 +89,8 @@ namespace osmscout {
     class StateMap
     {
     private:
+      double               cellWidth;  //!< With of an cell
+      double               cellHeight; //!< Height of an cell
       uint32_t             cellXStart; //!< First x-axis coordinate of cells
       uint32_t             cellXEnd;   //!< Last x-axis coordinate cells
       uint32_t             cellYStart; //!< First y-axis coordinate of cells
@@ -101,6 +103,16 @@ namespace osmscout {
       void SetBox(const GeoBox& boundingBox,
                   double cellWidth,
                   double cellHeight);
+
+      inline double GetCellWidth() const
+      {
+        return cellWidth;
+      }
+
+      inline double GetCellHeight() const
+      {
+        return cellHeight;
+      }
 
       inline uint32_t GetXStart() const
       {
@@ -154,6 +166,28 @@ namespace osmscout {
                  y-cellYStart,
                  state);
       }
+    };
+
+    /**
+     * A tile bitmap/zoom level.
+     */
+    struct Level
+    {
+      // Transient
+      size_t               level;            //!< The actual zoom level
+      FileOffset           indexEntryOffset; //!< File offset of this entry on disk
+
+      // Persistent
+      bool                 hasCellData;      //!< If true, we have cell data
+      uint8_t              dataOffsetBytes;  //!< Number of bytes per entry in bitmap
+      State                defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
+      FileOffset           indexDataOffset;  //!< File offset of start cell state data on disk
+
+      StateMap             stateMap;         //!< Index to handle state of cells
+
+      void SetBox(const GeoBox& boundingBox,
+                  double cellWidth,
+                  double cellHeight);
     };
 
   private:
@@ -222,30 +256,6 @@ namespace osmscout {
     };
 
     /**
-     * A tile bitmap/zoom level.
-     */
-    struct Level
-    {
-      // Transient
-      size_t               level;            //!< The actual zoom level
-      FileOffset           indexEntryOffset; //!< File offset of this entry on disk
-      double               cellWidth;        //!< With of an cell
-      double               cellHeight;       //!< Height of an cell
-
-      // Persistent
-      bool                 hasCellData;      //!< If true, we have cell data
-      uint8_t              dataOffsetBytes;  //!< Number of bytes per entry in bitmap
-      State                defaultCellData;  //!< If hasCellData is false, this is the vaue to be returned for all cells
-      FileOffset           indexDataOffset;  //!< File offset of start cell state data on disk
-
-      StateMap             stateMap;         //!< Index to handle state of cells
-
-      void SetBox(const GeoBox& boundingBox,
-                  double cellWidth,
-                  double cellHeight);
-    };
-
-    /**
      * Helper for cell boundaries
      */
     struct CellBoundaries
@@ -258,12 +268,12 @@ namespace osmscout {
       GroundTile::Coord borderCoords[4];
       GeoCoord borderPoints[4];
 
-      inline CellBoundaries(const Level &level, const Pixel &cell)
+      inline CellBoundaries(const StateMap &stateMap, const Pixel &cell)
       {
-        lonMin=(level.stateMap.GetXStart()+cell.x)*level.cellWidth-180.0;
-        lonMax=(level.stateMap.GetXStart()+cell.x+1)*level.cellWidth-180.0;
-        latMin=(level.stateMap.GetYStart()+cell.y)*level.cellHeight-90.0;
-        latMax=(level.stateMap.GetYStart()+cell.y+1)*level.cellHeight-90.0;
+        lonMin=(stateMap.GetXStart()+cell.x)*stateMap.GetCellWidth()-180.0;
+        lonMax=(stateMap.GetXStart()+cell.x+1)*stateMap.GetCellWidth()-180.0;
+        latMin=(stateMap.GetYStart()+cell.y)*stateMap.GetCellHeight()-90.0;
+        latMax=(stateMap.GetYStart()+cell.y+1)*stateMap.GetCellHeight()-90.0;
 
         borderPoints[0]=GeoCoord(latMax,lonMin); // top left
         borderPoints[1]=GeoCoord(latMax,lonMax); // top right
@@ -307,7 +317,7 @@ namespace osmscout {
     std::string TypeToString(GroundTile::Type type) const;
 
     GroundTile::Coord Transform(const GeoCoord& point,
-                                const Level& level,
+                                const StateMap& stateMap,
                                 double cellMinLat,
                                 double cellMinLon,
                                 bool coast);
@@ -340,27 +350,27 @@ namespace osmscout {
                               std::list<CoastRef>& boundingPolygons);
 
     void MarkCoastlineCells(Progress& progress,
-                            Level& level,
+                            StateMap& stateMap,
                             const Data& data);
 
     void CalculateCoastEnvironment(Progress& progress,
                                    StateMap& stateMap,
                                    const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
-    void GetCells(const Level& level,
+    void GetCells(const StateMap& stateMap,
                   const GeoCoord& a,
                   const GeoCoord& b,
                   std::set<Pixel>& cellIntersections);
 
-    void GetCells(const Level& level,
+    void GetCells(const StateMap& stateMap,
                   const std::vector<GeoCoord>& points,
                   std::set<Pixel>& cellIntersections);
 
-    void GetCells(const Level& level,
+    void GetCells(const StateMap& stateMap,
                   const std::vector<Point>& points,
                   std::set<Pixel>& cellIntersections);
 
-    void GetCellIntersections(const Level& level,
+    void GetCellIntersections(const StateMap& stateMap,
                               const std::vector<GeoCoord>& points,
                               size_t coastline,
                               std::map<Pixel,std::list<IntersectionRef>>& cellIntersections);
@@ -368,14 +378,14 @@ namespace osmscout {
     void CalculateCoastlineData(const ImportParameter& parameter,
                                 Progress& progress,
                                 const Projection& projection,
-                                const Level& level,
+                                const StateMap& stateMap,
                                 const std::list<CoastRef>& coastlines,
                                 Data& data);
 
     bool AssumeLand(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,
-                    Level& level);
+                    StateMap& stateMap);
 
     bool IsCellInBoundingPolygon(const CellBoundaries& cellBoundary,
                                  const std::list<CoastRef>& boundingPolygons);
@@ -399,7 +409,7 @@ namespace osmscout {
                        const GroundTile::Coord &testCoord2);
 
     void FillWaterAroundIsland(Progress& progress,
-                               Level& level,
+                               StateMap& stateMap,
                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                const std::list<CoastRef>& boundingPolygons);
 
@@ -411,12 +421,12 @@ namespace osmscout {
                          std::vector<Level>&  levels);
 
     void HandleAreaCoastlinesCompletelyInACell(Progress& progress,
-                                               const Level& level,
+                                               const StateMap& stateMap,
                                                Data& data,
                                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
     void WalkBorderCW(GroundTile& groundTile,
-                      const Level& level,
+                      const StateMap& stateMap,
                       double cellMinLat,
                       double cellMinLon,
                       const IntersectionRef& incoming,
@@ -427,7 +437,7 @@ namespace osmscout {
                               const IntersectionRef& current) const;
 
     void WalkPathBack(GroundTile& groundTile,
-                      const Level& level,
+                      const StateMap& stateMap,
                       double cellMinLat,
                       double cellMinLon,
                       const IntersectionRef& pathStart,
@@ -436,7 +446,7 @@ namespace osmscout {
                       bool isArea);
 
     void WalkPathForward(GroundTile& groundTile,
-                         const Level& level,
+                         const StateMap& stateMap,
                          double cellMinLat,
                          double cellMinLon,
                          const IntersectionRef& pathStart,
@@ -449,7 +459,7 @@ namespace osmscout {
                                             bool isArea);
 
     bool WalkFromTripoint(GroundTile &groundTile,
-                          const Level& level,
+                          const StateMap& stateMap,
                           const CellBoundaries &cellBoundaries,
                           IntersectionRef &pathStart,
                           IntersectionRef &pathEnd,
@@ -458,14 +468,14 @@ namespace osmscout {
                           const std::vector<size_t> &containingPaths);
 
     void WalkPath(GroundTile &groundTile,
-                  const Level& level,
+                  const StateMap& stateMap,
                   const CellBoundaries &cellBoundaries,
                   const IntersectionRef pathStart,
                   const IntersectionRef pathEnd,
                   CoastlineDataRef coastline);
 
     bool WalkBoundaryCW(GroundTile &groundTile,
-                          const Level &level,
+                          const StateMap &stateMap,
                           const IntersectionRef outIntersection,
                           const std::list<IntersectionRef> &intersectionsCW,
                           std::set<IntersectionRef> &visitedIntersections,
@@ -476,14 +486,17 @@ namespace osmscout {
       void HandleCoastlineCell(Progress& progress,
                                const Pixel &cell,
                                const std::list<size_t>& intersectCoastlines,
-                               const Level& level,
+                               const StateMap& stateMap,
                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                Data& data);
 
       void HandleCoastlinesPartiallyInACell(Progress& progress,
-                                            const Level& level,
+                                            const StateMap& stateMap,
                                             std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                             Data& data);
+
+      void CalculateHasCellData(WaterIndexGenerator::Level& level,
+                                const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap) const;
 
       void BuildTiles(const TypeConfigRef& typeConfig,
                       const ImportParameter& parameter,

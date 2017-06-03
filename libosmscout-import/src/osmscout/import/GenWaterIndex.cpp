@@ -65,6 +65,9 @@ namespace osmscout {
     const GeoCoord minCoord=boundingBox.GetMinCoord();
     const GeoCoord maxCoord=boundingBox.GetMaxCoord();
 
+    this->cellWidth=cellWidth;
+    this->cellHeight=cellHeight;
+
     cellXStart=(uint32_t)floor((minCoord.GetLon()+180.0)/cellWidth);
     cellXEnd=(uint32_t)floor((maxCoord.GetLon()+180.0)/cellWidth);
     cellYStart=(uint32_t)floor((minCoord.GetLat()+90.0)/cellHeight);
@@ -137,15 +140,30 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Transform the given geo coordinate to a corresponding GroundTile coordinate
+   *
+   * @param point
+   *    geo coordinate to transform
+   * @param stateMap
+   *    the StateMap, holding information about cell dimensions
+   * @param cellMinLat
+   *    offset of the ground map
+   * @param cellMinLon
+   *    offset of the ground map
+   * @param coast
+   *    Flag to be copied into the GroundTile coordinate
+   * @return
+   */
   GroundTile::Coord WaterIndexGenerator::Transform(const GeoCoord& point,
-                                                   const Level& level,
+                                                   const StateMap& stateMap,
                                                    double cellMinLat,
                                                    double cellMinLon,
                                                    bool coast)
   {
     //std::cout << "       " << (coast?"*":"+") << " " << point.GetDisplayText() << std::endl;
-    GroundTile::Coord coord(floor((point.GetLon()-cellMinLon)/level.cellWidth*GroundTile::Coord::CELL_MAX+0.5),
-                            floor((point.GetLat()-cellMinLat)/level.cellHeight*GroundTile::Coord::CELL_MAX+0.5),
+    GroundTile::Coord coord(floor((point.GetLon()-cellMinLon)/stateMap.GetCellWidth()*GroundTile::Coord::CELL_MAX+0.5),
+                            floor((point.GetLat()-cellMinLat)/stateMap.GetCellHeight()*GroundTile::Coord::CELL_MAX+0.5),
                             coast);
 
     return coord;
@@ -159,9 +177,6 @@ namespace osmscout {
                                           double cellHeight)
   {
     indexEntryOffset=0;
-
-    this->cellWidth=cellWidth;
-    this->cellHeight=cellHeight;
 
     hasCellData=false;
     defaultCellData=State::unknown;
@@ -762,7 +777,7 @@ namespace osmscout {
    *
    */
   void WaterIndexGenerator::MarkCoastlineCells(Progress& progress,
-                                               Level& level,
+                                               StateMap& stateMap,
                                                const Data& data)
   {
     progress.Info("Marking cells containing coastlines");
@@ -771,17 +786,17 @@ namespace osmscout {
       // Marks cells on the path as coast
       std::set<Pixel> coords;
 
-      GetCells(level,
+      GetCells(stateMap,
                coastline->points,
                coords);
 
       for (const auto& coord : coords) {
-        if (level.stateMap.IsInAbsolute(coord.x,coord.y)) {
-          if (level.stateMap.GetStateAbsolute(coord.x,coord.y)==unknown) {
+        if (stateMap.IsInAbsolute(coord.x,coord.y)) {
+          if (stateMap.GetStateAbsolute(coord.x,coord.y)==unknown) {
 #if defined(DEBUG_TILING)
             std::cout << "Coastline: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " " << coastline->id << std::endl;
 #endif
-            level.stateMap.SetStateAbsolute(coord.x,coord.y,coast);
+            stateMap.SetStateAbsolute(coord.x,coord.y,coast);
           }
         }
       }
@@ -974,7 +989,7 @@ namespace osmscout {
   bool WaterIndexGenerator::AssumeLand(const ImportParameter& parameter,
                                        Progress& progress,
                                        const TypeConfig& typeConfig,
-                                       Level& level)
+                                       StateMap& stateMap)
   {
     progress.Info("Assume land");
 
@@ -1011,15 +1026,17 @@ namespace osmscout {
             way.nodes.size()>=2) {
           std::set<Pixel> coords;
 
-          GetCells(level,way.nodes,coords);
+          GetCells(stateMap,
+                   way.nodes,
+                   coords);
 
           for (const auto& coord : coords) {
-            if (level.stateMap.IsInAbsolute(coord.x,coord.y)) {
-              if (level.stateMap.GetStateAbsolute(coord.x,coord.y)==unknown) {
+            if (stateMap.IsInAbsolute(coord.x,coord.y)) {
+              if (stateMap.GetStateAbsolute(coord.x,coord.y)==unknown) {
 #if defined(DEBUG_TILING)
                 std::cout << "Assume land: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
 #endif
-                level.stateMap.SetStateAbsolute(coord.x,coord.y,land);
+                stateMap.SetStateAbsolute(coord.x,coord.y,land);
               }
             }
           }
@@ -1074,7 +1091,9 @@ namespace osmscout {
           if (level.stateMap.GetState(x,y)==water) {
 
             // avoid filling of water outside data polygon
-            if (!IsCellInBoundingPolygon(CellBoundaries(level,Pixel(x,y)),boundingPolygons)){
+            if (!IsCellInBoundingPolygon(CellBoundaries(level.stateMap,
+                                                        Pixel(x,y)),
+                                         boundingPolygons)){
               continue;
             }
 
@@ -1175,7 +1194,7 @@ namespace osmscout {
   }
 
   void WaterIndexGenerator::FillWaterAroundIsland(Progress& progress,
-                                                  Level& level,
+                                                  StateMap& stateMap,
                                                   std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                                                   const std::list<CoastRef>& boundingPolygons)
   {
@@ -1183,7 +1202,7 @@ namespace osmscout {
 
     for (const auto &entry:cellGroundTileMap){
       Pixel coord=entry.first;
-      CellBoundaries cellBoundaries(level,coord);
+      CellBoundaries cellBoundaries(stateMap,coord);
 
       if (ContainsCoord(entry.second, cellBoundaries.borderCoords[0]) ||
           ContainsCoord(entry.second, cellBoundaries.borderCoords[1]) ||
@@ -1195,7 +1214,8 @@ namespace osmscout {
       // => it contains island(s)
 
       // avoid filling of water outside data polygon
-      if (!IsCellInBoundingPolygon(CellBoundaries(level,coord),boundingPolygons)){
+      if (!IsCellInBoundingPolygon(CellBoundaries(stateMap,coord),
+                                   boundingPolygons)){
         continue;
       }
 
@@ -1205,7 +1225,7 @@ namespace osmscout {
 
       // top
       if (!fillWater && coord.y>0 && ContainsWater(Pixel(coord.x,coord.y-1),
-                                                   level.stateMap,
+                                                   stateMap,
                                                    cellGroundTileMap,
                                                    cellBoundaries.borderCoords[0],
                                                    cellBoundaries.borderCoords[1])){
@@ -1213,7 +1233,7 @@ namespace osmscout {
       }
       // bottom
       if (!fillWater && ContainsWater(Pixel(coord.x, coord.y+1),
-                                      level.stateMap,
+                                      stateMap,
                                       cellGroundTileMap,
                                       cellBoundaries.borderCoords[2],
                                       cellBoundaries.borderCoords[3])){
@@ -1221,7 +1241,7 @@ namespace osmscout {
       }
       // left
       if (!fillWater && coord.x>0 && ContainsWater(Pixel(coord.x-1, coord.y),
-                                                   level.stateMap,
+                                                   stateMap,
                                                    cellGroundTileMap,
                                                    cellBoundaries.borderCoords[0],
                                                    cellBoundaries.borderCoords[3])){
@@ -1229,7 +1249,7 @@ namespace osmscout {
       }
       // right
       if (!fillWater && ContainsWater(Pixel(coord.x+1, coord.y),
-                                      level.stateMap,
+                                      stateMap,
                                       cellGroundTileMap,
                                       cellBoundaries.borderCoords[1],
                                       cellBoundaries.borderCoords[2])){
@@ -1404,7 +1424,7 @@ namespace osmscout {
    * @param cellGroundTileMap
    */
   void WaterIndexGenerator::HandleAreaCoastlinesCompletelyInACell(Progress& progress,
-                                                                  const Level& level,
+                                                                  const StateMap& stateMap,
                                                                   Data& data,
                                                                   std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap)
   {
@@ -1421,12 +1441,12 @@ namespace osmscout {
         continue;
       }
 
-      if (!level.stateMap.IsInAbsolute(coastline->cell.x,coastline->cell.y)) {
+      if (!stateMap.IsInAbsolute(coastline->cell.x,coastline->cell.y)) {
         continue;
       }
 
-      Pixel            coord(coastline->cell.x-level.stateMap.GetXStart(),
-                             coastline->cell.y-level.stateMap.GetYStart());
+      Pixel            coord(coastline->cell.x-stateMap.GetXStart(),
+                             coastline->cell.y-stateMap.GetYStart());
       GroundTile::Type type=GroundTile::land;
 
       if (coastline->left==CoastState::unknown) {
@@ -1438,13 +1458,16 @@ namespace osmscout {
 
       GroundTile groundTile(type);
 
-      double cellMinLat=level.cellHeight*coastline->cell.y-90.0;
-      double cellMinLon=level.cellWidth*coastline->cell.x-180.0;
+      double cellMinLat=stateMap.GetCellHeight()*coastline->cell.y-90.0;
+      double cellMinLon=stateMap.GetCellWidth()*coastline->cell.x-180.0;
 
       groundTile.coords.reserve(coastline->points.size());
 
       for (size_t p=0; p<coastline->points.size(); p++) {
-        groundTile.coords.push_back(Transform(coastline->points[p],level,cellMinLat,cellMinLon,true));
+        groundTile.coords.push_back(Transform(coastline->points[p],
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              true));
       }
 
       if (!groundTile.coords.empty()) {
@@ -1477,16 +1500,29 @@ namespace osmscout {
     return false;
   }
 
-  void WaterIndexGenerator::GetCells(const Level& level,
+  /**
+   * Return the list of StateMap cells a line between coordinate a and coordinate b
+   * intersects with.
+   *
+   * @param stateMap
+   *    StateMap defining the cell structure
+   * @param a
+   *    Start of the line
+   * @param b
+   *    End of the line
+   * @param cellIntersections
+   *    List of cells, the line intersects with
+   */
+  void WaterIndexGenerator::GetCells(const StateMap& stateMap,
                                      const GeoCoord& a,
                                      const GeoCoord& b,
                                      std::set<Pixel>& cellIntersections)
   {
-    uint32_t cx1=(uint32_t)((a.GetLon()+180.0)/level.cellWidth);
-    uint32_t cy1=(uint32_t)((a.GetLat()+90.0)/level.cellHeight);
+    uint32_t cx1=(uint32_t)((a.GetLon()+180.0)/stateMap.GetCellWidth());
+    uint32_t cy1=(uint32_t)((a.GetLat()+90.0)/stateMap.GetCellHeight());
 
-    uint32_t cx2=(uint32_t)((b.GetLon()+180.0)/level.cellWidth);
-    uint32_t cy2=(uint32_t)((b.GetLat()+90.0)/level.cellHeight);
+    uint32_t cx2=(uint32_t)((b.GetLon()+180.0)/stateMap.GetCellWidth());
+    uint32_t cy2=(uint32_t)((b.GetLat()+90.0)/stateMap.GetCellHeight());
 
     cellIntersections.insert(Pixel(cx1,cy1));
 
@@ -1498,10 +1534,10 @@ namespace osmscout {
           GeoCoord borderPoints[5];
           double   lonMin,lonMax,latMin,latMax;
 
-          lonMin=x*level.cellWidth-180.0;
-          lonMax=lonMin+level.cellWidth;
-          latMin=y*level.cellHeight-90.0;
-          latMax=latMin+level.cellHeight;
+          lonMin=x*stateMap.GetCellWidth()-180.0;
+          lonMax=lonMin+stateMap.GetCellWidth();
+          latMin=y*stateMap.GetCellHeight()-90.0;
+          latMax=latMin+stateMap.GetCellHeight();
 
           borderPoints[0].Set(latMax,lonMin); // top left
           borderPoints[1].Set(latMax,lonMax); // top right
@@ -1528,54 +1564,74 @@ namespace osmscout {
     }
   }
 
-  void WaterIndexGenerator::GetCells(const Level& level,
+  /**
+   * Return the list of StateMap cells the given path intersects with
+   *
+   * @param stateMap
+   *    StateMap defining the cell structure
+   * @param points
+   *    Path
+   * @param cellIntersections
+   *    List of cells, the path intersects with
+   */
+  void WaterIndexGenerator::GetCells(const StateMap& stateMap,
                                      const std::vector<GeoCoord>& points,
                                      std::set<Pixel>& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
-      GetCells(level,points[p],points[p+1],cellIntersections);
+      GetCells(stateMap,points[p],points[p+1],cellIntersections);
     }
   }
 
-  void WaterIndexGenerator::GetCells(const Level& level,
+  /**
+   * Return the list of StateMap cells the given path intersects with
+   *
+   * @param stateMap
+   *    StateMap defining the cell structure
+   * @param points
+   *    Path
+   * @param cellIntersections
+   *    List of cells, the path intersects with
+   */
+  void WaterIndexGenerator::GetCells(const StateMap& stateMap,
                                      const std::vector<Point>& points,
                                      std::set<Pixel>& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
-      GetCells(level,points[p].GetCoord(),points[p+1].GetCoord(),cellIntersections);
+      GetCells(stateMap,points[p].GetCoord(),points[p+1].GetCoord(),cellIntersections);
     }
   }
 
-  void WaterIndexGenerator::GetCellIntersections(const Level& level,
+  void WaterIndexGenerator::GetCellIntersections(const StateMap& stateMap,
                                                  const std::vector<GeoCoord>& points,
                                                  size_t coastline,
                                                  std::map<Pixel,std::list<IntersectionRef>>& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
       // Cell coordinates of the current and the next point
-      uint32_t cx1=(uint32_t)((points[p].GetLon()+180.0)/level.cellWidth);
-      uint32_t cy1=(uint32_t)((points[p].GetLat()+90.0)/level.cellHeight);
+      uint32_t cx1=(uint32_t)((points[p].GetLon()+180.0)/stateMap.GetCellWidth());
+      uint32_t cy1=(uint32_t)((points[p].GetLat()+90.0)/stateMap.GetCellHeight());
 
-      uint32_t cx2=(uint32_t)((points[p+1].GetLon()+180.0)/level.cellWidth);
-      uint32_t cy2=(uint32_t)((points[p+1].GetLat()+90.0)/level.cellHeight);
+      uint32_t cx2=(uint32_t)((points[p+1].GetLon()+180.0)/stateMap.GetCellWidth());
+      uint32_t cy2=(uint32_t)((points[p+1].GetLat()+90.0)/stateMap.GetCellHeight());
 
       if (cx1!=cx2 || cy1!=cy2) {
         for (uint32_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
           for (uint32_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
 
-            if (!level.stateMap.IsInAbsolute(x,y)) {
+            if (!stateMap.IsInAbsolute(x,y)) {
               continue;
             }
 
-            Pixel    coord(x-level.stateMap.GetXStart(),
-                           y-level.stateMap.GetYStart());
+            Pixel    coord(x-stateMap.GetXStart(),
+                           y-stateMap.GetYStart());
             GeoCoord borderPoints[5];
             double   lonMin,lonMax,latMin,latMax;
 
-            lonMin=x*level.cellWidth-180.0;
-            lonMax=(x+1)*level.cellWidth-180.0;
-            latMin=y*level.cellHeight-90.0;
-            latMax=(y+1)*level.cellHeight-90.0;
+            lonMin=x*stateMap.GetCellWidth()-180.0;
+            lonMax=(x+1)*stateMap.GetCellWidth()-180.0;
+            latMin=y*stateMap.GetCellHeight()-90.0;
+            latMax=(y+1)*stateMap.GetCellHeight()-90.0;
 
             borderPoints[0].Set(latMax,lonMin); // top left
             borderPoints[1].Set(latMax,lonMax); // top right
@@ -1747,7 +1803,7 @@ namespace osmscout {
   void WaterIndexGenerator::CalculateCoastlineData(const ImportParameter& parameter,
                                                    Progress& progress,
                                                    const Projection& projection,
-                                                   const Level& level,
+                                                   const StateMap& stateMap,
                                                    const std::list<CoastRef>& coastlines,
                                                    Data& data)
   {
@@ -1921,10 +1977,10 @@ namespace osmscout {
 
       uint32_t cxMin,cxMax,cyMin,cyMax;
 
-      cxMin=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/level.cellWidth);
-      cxMax=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/level.cellWidth);
-      cyMin=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/level.cellHeight);
-      cyMax=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/level.cellHeight);
+      cxMin=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/stateMap.GetCellWidth());
+      cxMax=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/stateMap.GetCellWidth());
+      cyMin=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/stateMap.GetCellHeight());
+      cyMax=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/stateMap.GetCellHeight());
 
       if (cxMin==cxMax &&
           cyMin==cyMax) {
@@ -1932,9 +1988,9 @@ namespace osmscout {
         coastline->cell.y=cyMin;
         coastline->isCompletelyInCell=true;
 
-        if (level.stateMap.IsInAbsolute(coastline->cell.x,coastline->cell.y)) {
-          Pixel coord(coastline->cell.x-level.stateMap.GetXStart(),
-                      coastline->cell.y-level.stateMap.GetYStart());
+        if (stateMap.IsInAbsolute(coastline->cell.x,coastline->cell.y)) {
+          Pixel coord(coastline->cell.x-stateMap.GetXStart(),
+                      coastline->cell.y-stateMap.GetYStart());
           data.cellCoveredCoastlines[coord].push_back(curCoast);
         }
       }
@@ -1942,7 +1998,7 @@ namespace osmscout {
         coastline->isCompletelyInCell=false;
 
         // Calculate all intersections for all path steps for all cells covered
-        GetCellIntersections(level,
+        GetCellIntersections(stateMap,
                              coastline->points,
                              curCoast,
                              coastline->cellIntersections);
@@ -1966,7 +2022,7 @@ namespace osmscout {
    * wise around the cell border.
    */
   void WaterIndexGenerator::WalkBorderCW(GroundTile& groundTile,
-                                         const Level& level,
+                                         const StateMap& stateMap,
                                          double cellMinLat,
                                          double cellMinLon,
                                          const IntersectionRef& incoming,
@@ -1993,7 +2049,10 @@ namespace osmscout {
       groundTile.coords.push_back(borderCoords[borderPoint]);
     }
 
-    groundTile.coords.push_back(Transform(outgoing->point,level,cellMinLat,cellMinLon,false));
+    groundTile.coords.push_back(Transform(outgoing->point,
+                                          stateMap,
+                                          cellMinLat,cellMinLon,
+                                          false));
   }
 
 
@@ -2021,7 +2080,7 @@ namespace osmscout {
   }
 
   void WaterIndexGenerator::WalkPathBack(GroundTile& groundTile,
-                                         const Level& level,
+                                         const StateMap& stateMap,
                                          double cellMinLat,
                                          double cellMinLon,
                                          const IntersectionRef& pathStart,
@@ -2034,7 +2093,10 @@ namespace osmscout {
     if (isArea) {
       if (pathStart->prevWayPointIndex==pathEnd->prevWayPointIndex &&
           pathStart->distanceSquare>pathEnd->distanceSquare) {
-        groundTile.coords.push_back(Transform(pathEnd->point,level,cellMinLat,cellMinLon,false));
+        groundTile.coords.push_back(Transform(pathEnd->point,
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              false));
       }
       else {
         size_t idx=pathStart->prevWayPointIndex;
@@ -2045,7 +2107,10 @@ namespace osmscout {
         }
 
         while (idx!=targetIdx) {
-          groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
+          groundTile.coords.push_back(Transform(points[idx],
+                                                stateMap,
+                                                cellMinLat,cellMinLon,
+                                                true));
 
           if (idx>0) {
             idx--;
@@ -2055,9 +2120,15 @@ namespace osmscout {
           }
         }
 
-        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
+        groundTile.coords.push_back(Transform(points[idx],
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              true));
 
-        groundTile.coords.push_back(Transform(pathEnd->point,level,cellMinLat,cellMinLon,false));
+        groundTile.coords.push_back(Transform(pathEnd->point,
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              false));
       }
     }
     else {
@@ -2066,15 +2137,21 @@ namespace osmscout {
       for (size_t idx=pathStart->prevWayPointIndex;
           idx>=targetIdx;
           idx--) {
-        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
+        groundTile.coords.push_back(Transform(points[idx],
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              true));
       }
 
-      groundTile.coords.push_back(Transform(pathEnd->point,level,cellMinLat,cellMinLon,false));
+      groundTile.coords.push_back(Transform(pathEnd->point,
+                                            stateMap,
+                                            cellMinLat,cellMinLon,
+                                            false));
     }
   }
 
   void WaterIndexGenerator::WalkPathForward(GroundTile& groundTile,
-                                            const Level& level,
+                                            const StateMap& stateMap,
                                             double cellMinLat,
                                             double cellMinLon,
                                             const IntersectionRef& pathStart,
@@ -2087,7 +2164,10 @@ namespace osmscout {
     if (isArea) {
       if (pathStart->prevWayPointIndex==pathEnd->prevWayPointIndex &&
           pathStart->distanceSquare<pathEnd->distanceSquare) {
-        groundTile.coords.push_back(Transform(pathEnd->point,level,cellMinLat,cellMinLon,false));
+        groundTile.coords.push_back(Transform(pathEnd->point,
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              false));
       }
       else {
         size_t idx=pathStart->prevWayPointIndex+1;
@@ -2098,7 +2178,10 @@ namespace osmscout {
         }
 
         while (idx!=targetIdx) {
-          groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
+          groundTile.coords.push_back(Transform(points[idx],
+                                                stateMap,
+                                                cellMinLat,cellMinLon,
+                                                true));
 
           if (idx>=points.size()-1) {
             idx=0;
@@ -2108,9 +2191,15 @@ namespace osmscout {
           }
         }
 
-        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
+        groundTile.coords.push_back(Transform(points[idx],
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              true));
 
-        groundTile.coords.push_back(Transform(pathEnd->point,level,cellMinLat,cellMinLon,false));
+        groundTile.coords.push_back(Transform(pathEnd->point,
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              false));
       }
     }
     else {
@@ -2119,10 +2208,16 @@ namespace osmscout {
       for (size_t idx=pathStart->prevWayPointIndex+1;
           idx<=targetIdx;
           idx++) {
-        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
+        groundTile.coords.push_back(Transform(points[idx],
+                                              stateMap,
+                                              cellMinLat,cellMinLon,
+                                              true));
       }
 
-      groundTile.coords.push_back(Transform(pathEnd->point,level,cellMinLat,cellMinLon,false));
+      groundTile.coords.push_back(Transform(pathEnd->point,
+                                            stateMap,
+                                            cellMinLat,cellMinLon,
+                                            false));
     }
   }
 
@@ -2185,7 +2280,7 @@ namespace osmscout {
   }
 
   bool WaterIndexGenerator::WalkFromTripoint(GroundTile& groundTile,
-                                             const Level& level,
+                                             const StateMap& stateMap,
                                              const CellBoundaries& cellBoundaries,
                                              IntersectionRef& pathStart, // incoming path
                                              IntersectionRef& pathEnd,
@@ -2314,14 +2409,19 @@ namespace osmscout {
     }
 
     // finally, walk from the tripoint (outgoing) to (outgoingEnd)
-    WalkPath(groundTile, level, cellBoundaries, outgoing, outgoingEnd, outgoingCoastline);
+    WalkPath(groundTile,
+             stateMap,
+             cellBoundaries,
+             outgoing,
+             outgoingEnd,
+             outgoingCoastline);
     pathStart=outgoing;
 
     return true;
   }
 
   void WaterIndexGenerator::WalkPath(GroundTile &groundTile,
-                                     const Level& level,
+                                     const StateMap& stateMap,
                                      const CellBoundaries &cellBoundaries,
                                      const IntersectionRef pathStart,
                                      const IntersectionRef pathEnd,
@@ -2333,7 +2433,7 @@ namespace osmscout {
 #endif
       if (pathStart->direction==Direction::out){
         WalkPathBack(groundTile,
-                     level,
+                     stateMap,
                      cellBoundaries.latMin,
                      cellBoundaries.lonMin,
                      pathStart,
@@ -2342,7 +2442,7 @@ namespace osmscout {
                      coastline->isArea);
       }else{
         WalkPathForward(groundTile,
-                        level,
+                        stateMap,
                         cellBoundaries.latMin,
                         cellBoundaries.lonMin,
                         pathStart,
@@ -2353,7 +2453,7 @@ namespace osmscout {
   }
 
   bool WaterIndexGenerator::WalkBoundaryCW(GroundTile &groundTile,
-                                           const Level& level,
+                                           const StateMap& stateMap,
                                            const IntersectionRef startIntersection,
                                            const std::list<IntersectionRef>& intersectionsCW,
                                            std::set<IntersectionRef>& visitedIntersections,
@@ -2366,7 +2466,8 @@ namespace osmscout {
         " from " << startIntersection->point.GetDisplayText() << std::endl;
 #endif
 
-    groundTile.coords.push_back(Transform(startIntersection->point,level,
+    groundTile.coords.push_back(Transform(startIntersection->point,
+                                          stateMap,
                                           cellBoundaries.latMin,
                                           cellBoundaries.lonMin,
                                           false));
@@ -2396,7 +2497,12 @@ namespace osmscout {
         end->direction=(pathStart->direction==Direction::in) ? Direction::out : Direction::in;
         end->borderIndex=0; // ?
 
-        WalkPath(groundTile, level, cellBoundaries, pathStart, end, coastline);
+        WalkPath(groundTile,
+                 stateMap,
+                 cellBoundaries,
+                 pathStart,
+                 end,
+                 coastline);
 
         while (!pathEnd) {
           if (coastline->isArea) {
@@ -2409,7 +2515,7 @@ namespace osmscout {
 
           // handle coastline Tripoint
           if (!WalkFromTripoint(groundTile,
-                                level,
+                                stateMap,
                                 cellBoundaries,
                                 pathStart,
                                 pathEnd,
@@ -2428,7 +2534,12 @@ namespace osmscout {
         }
       }
       else {
-        WalkPath(groundTile, level, cellBoundaries, pathStart, pathEnd, coastline);
+        WalkPath(groundTile,
+                 stateMap,
+                 cellBoundaries,
+                 pathStart,
+                 pathEnd,
+                 coastline);
       }
 
       step++;
@@ -2442,7 +2553,7 @@ namespace osmscout {
                           pathEnd);
 
       WalkBorderCW(groundTile,
-                   level,
+                   stateMap,
                    cellBoundaries.latMin,
                    cellBoundaries.lonMin,
                    pathEnd,
@@ -2458,13 +2569,13 @@ namespace osmscout {
   void WaterIndexGenerator::HandleCoastlineCell(Progress& progress,
                                                 const Pixel &cell,
                                                 const std::list<size_t>& intersectCoastlines,
-                                                const Level& level,
+                                                const StateMap& stateMap,
                                                 std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                                 Data& data)
   {
       std::list<IntersectionRef> intersectionsCW;        // Intersections in clock wise order over all coastlines
       std::set<IntersectionRef>  visitedIntersections;
-      CellBoundaries             cellBoundaries(level,cell);
+      CellBoundaries             cellBoundaries(stateMap,cell);
 
       // For every coastline by index intersecting the current cell
       for (const auto& currentCoastline : intersectCoastlines) {
@@ -2532,7 +2643,7 @@ namespace osmscout {
         }
 
         if (!WalkBoundaryCW(groundTile,
-                            level,
+                            stateMap,
                             intersection,
                             intersectionsCW,
                             visitedIntersections,
@@ -2551,7 +2662,7 @@ namespace osmscout {
    * Fills coords information for cells that intersect a coastline
    */
   void WaterIndexGenerator::HandleCoastlinesPartiallyInACell(Progress& progress,
-                                                             const Level& level,
+                                                             const StateMap& stateMap,
                                                              std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                                              Data& data)
   {
@@ -2571,7 +2682,7 @@ namespace osmscout {
       HandleCoastlineCell(progress,
                           cellEntry.first,
                           cellEntry.second,
-                          level,
+                          stateMap,
                           cellGroundTileMap,
                           data);
     }
@@ -2593,24 +2704,24 @@ namespace osmscout {
       CalculateCoastlineData(parameter,
                              progress,
                              projection,
-                             level,
+                             level.stateMap,
                              coastlines,
                              data);
 
       // Mark cells that intersect a coastline as coast
       MarkCoastlineCells(progress,
-                         level,
+                         level.stateMap,
                          data);
 
       // Fills coords information for cells that intersect a coastline
       HandleCoastlinesPartiallyInACell(progress,
-                                       level,
+                                       level.stateMap,
                                        cellGroundTileMap,
                                        data);
 
       // Fills coords information for cells that completely contain a coastline
       HandleAreaCoastlinesCompletelyInACell(progress,
-                                            level,
+                                            level.stateMap,
                                             data,
                                             cellGroundTileMap);
     }
@@ -2626,7 +2737,7 @@ namespace osmscout {
       AssumeLand(parameter,
                  progress,
                  *typeConfig,
-                 level);
+                 level.stateMap);
     }
 
     if (!coastlines.empty()) {
@@ -2637,7 +2748,7 @@ namespace osmscout {
                 boundingPolygons);
 
       FillWaterAroundIsland(progress,
-                            level,
+                            level.stateMap,
                             cellGroundTileMap,
                             boundingPolygons);
     }
@@ -2646,6 +2757,13 @@ namespace osmscout {
     FillLand(progress,
              level.stateMap);
 
+    CalculateHasCellData(level,
+                         cellGroundTileMap);
+  }
+
+  void WaterIndexGenerator::CalculateHasCellData(WaterIndexGenerator::Level& level,
+                                                 const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap) const
+  {
     level.hasCellData=false;
     level.defaultCellData=unknown;
 
