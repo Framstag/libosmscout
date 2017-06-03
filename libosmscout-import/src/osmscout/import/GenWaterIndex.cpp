@@ -104,10 +104,13 @@ namespace osmscout {
   /**
    * Sets the size of the bitmap and initializes state of all tiles to "unknown"
    */
-  void WaterIndexGenerator::Level::SetBox(const GeoCoord& minCoord,
-                                          const GeoCoord& maxCoord,
-                                          double cellWidth, double cellHeight)
+  void WaterIndexGenerator::Level::SetBox(const GeoBox& boundingBox,
+                                          double cellWidth,
+                                          double cellHeight)
   {
+    const GeoCoord minCoord=boundingBox.GetMinCoord();
+    const GeoCoord maxCoord=boundingBox.GetMaxCoord();
+
     indexEntryOffset=0;
 
     this->cellWidth=cellWidth;
@@ -408,64 +411,80 @@ namespace osmscout {
     return i1.bIndex < i2.bIndex;
   }
 
-  void WaterIndexGenerator::SynthetizeCoastlines2(Progress& progress,
+  /**
+   * Take the given coastlines and bounding polygons and create a list of synthesized
+   * coastlines that fuly encircle the imported region. Coastlines are either
+   * real-life coastlines or emulated coastlines based on the bounding
+   * polygons.
+   *
+   * @param progress
+   * @param boundingPolygons
+   * @param coastlines
+   * @param synthesized
+   */
+  void WaterIndexGenerator::SynthesizeCoastlines2(Progress& progress,
                                                   const std::list<CoastRef>& boundingPolygons,
                                                   const std::list<CoastRef>& coastlines,
-                                                  std::list<CoastRef>& synthetized)
+                                                  std::list<CoastRef>& synthesized)
   {
     std::vector<CoastRef> candidates;
 
-    for (const auto &polygon:boundingPolygons){
+    for (const auto& polygon : boundingPolygons) {
       CoastRef candidate=std::make_shared<Coast>();
+
       candidate->isArea=true;
       candidate->coast=polygon->coast;
       candidate->left=polygon->left;
       candidate->right=polygon->right;
       candidates.push_back(candidate);
     }
-    std::vector<std::vector<PathIntersection>> wayIntersections(coastlines.size());
+
+    std::vector<std::vector<PathIntersection>> wayIntersections(coastlines.size()); // List of intersections for each coastline
 
     /**
-     * create matrix of intersection candidates x coastlines
+     * create matrix of intersections between bounding polygons and coastlines
      * split candidate and ways separately
      */
-    for (size_t ci=0; ci<candidates.size(); ci++) {
-      CoastRef c=candidates[ci];
+    for (const auto& c : candidates) {
       //WriteGpx(c->coast,"candidate"+NumberToString(ci)+".gpx");
       std::vector<PathIntersection> candidateIntersections;
 
       size_t wi=0;
-      for (const auto &coastline:coastlines) {
+      for (const auto& coastline : coastlines) {
 
         //WriteGpx(coastline->coast,"coastline-"+NumberToString(coastline->id)+".gpx");
         // try to find intersections between this candidate and way
         std::vector<PathIntersection> intersections;
 
-        FindPathIntersections(c->coast,coastline->coast,
-                              c->isArea,coastline->isArea,
+        FindPathIntersections(c->coast,
+                              coastline->coast,
+                              c->isArea,
+                              coastline->isArea,
                               intersections);
 
-        // filter out intersections when part of coasline and data area is same
-        // intersection.orientation==0.0
+        // filter out intersections when part of coastline and bounding polygon area is same
+        // intersection.orientation==0.0 (paths only touch but do not cross each other)
         size_t valid=0;
 
         for (auto &intersection:intersections) {
-          if (intersection.orientation!=0.0){
+          if (intersection.orientation!=0.0) {
             candidateIntersections.push_back(intersection);
             wayIntersections[wi].push_back(intersection);
             valid++;
           }
         }
+
         if (valid%2!=0) {
           progress.Warning("Odd count ("+NumberToString(valid)+") of valid intersections. "+
                            "Coastline "+NumberToString(coastline->id));
         }
+
         wi++;
       }
 
       // cut candidate
       if (candidateIntersections.empty()) {
-        synthetized.push_back(candidates[ci]);
+        synthesized.push_back(c);
       }
       else {
         if (candidateIntersections.size()%2!=0) {
@@ -493,10 +512,16 @@ namespace osmscout {
           CoastRef part=std::make_shared<Coast>();
 
           part->coast.push_back(Point(0,int1.point));
-          CutPath(part->coast,c->coast,
-                  int1.aIndex+1,int2.aIndex+1,
-                  int1.aDistanceSquare,int2.aDistanceSquare);
+
+          CutPath(part->coast,
+                  c->coast,
+                  int1.aIndex+1,
+                  int2.aIndex+1,
+                  int1.aDistanceSquare,
+                  int2.aDistanceSquare);
+
           part->coast.push_back(Point(0,int2.point));
+
           part->left=int1.orientation>0 ? CoastState::water : CoastState::land;
 
           assert(int1.orientation>0 ? int2.orientation<0 : int2.orientation>0);
@@ -506,7 +531,7 @@ namespace osmscout {
           part->sortCriteria=c->sortCriteria;
           part->isArea=false;
 
-          synthetized.push_back(part);
+          synthesized.push_back(part);
 
           //WriteGpx(part->coast,"data.gpx");
         }
@@ -515,19 +540,22 @@ namespace osmscout {
 
     // cut ways
     size_t wi=0;
-    for (const auto &coastline:coastlines){
-      std::vector<PathIntersection> intersections=wayIntersections[wi];
+    for (const auto& coastline : coastlines) {
+      std::vector<PathIntersection> &intersections=wayIntersections[wi];
+
       wi++;
       if (intersections.empty()) {
         if (coastline->isArea) {
           // test island without intersections if it is inside data polygon...
-          for (const auto &poly:boundingPolygons){
-            if (IsAreaAtLeastPartlyInArea(coastline->coast,poly->coast)){
-              synthetized.push_back(coastline);
+          for (const auto& poly : boundingPolygons) {
+            if (IsAreaAtLeastPartlyInArea(coastline->coast,
+                                          poly->coast)) {
+              synthesized.push_back(coastline);
               break;
             }
           }
         }
+
         continue;
       }
 
@@ -542,10 +570,12 @@ namespace osmscout {
 
       size_t limit=coastline->isArea?intersections.size():intersections.size()-1;
 
-      for (size_t ii=0;ii<limit;ii++) {
+      for (size_t ii=0; ii<limit; ii++) {
         PathIntersection int1=intersections[ii];
         PathIntersection int2=intersections[(ii+1)%intersections.size()];
+
         assert(int1.orientation>0 ? int2.orientation<0 : int2.orientation>0);
+
         if (int1.orientation<0){
           continue;
         }
@@ -573,7 +603,7 @@ namespace osmscout {
         part->sortCriteria=coastline->sortCriteria;
         part->isArea=false;
 
-        synthetized.push_back(part);
+        synthesized.push_back(part);
 
         //WriteGpx(part->coast,"cut.gpx");
       }
@@ -676,48 +706,42 @@ namespace osmscout {
 
   /**
    * try to synthetize coastline segments from all way coastlines
-   * that intersects with data polygon
+   * that intersect with the bounding polygon
    *
    * @param progress
    * @param coastlines
    * @param boundingPolygons
    */
-  void WaterIndexGenerator::SynthetizeCoastlines(Progress& progress,
+  void WaterIndexGenerator::SynthesizeCoastlines(Progress& progress,
                                                  std::list<CoastRef>& coastlines,
                                                  std::list<CoastRef>& boundingPolygons)
   {
-    if (boundingPolygons.empty()){
-      return;
-    }
-
     progress.SetAction("Synthetize coastlines");
 
-    std::list<CoastRef> synthetized;
-    std::list<CoastRef> allCoastlines;
-
-    for (const auto& coastline : coastlines) {
-      allCoastlines.push_back(coastline);
-    }
+    std::list<CoastRef> allCoastlines(coastlines);
+    std::list<CoastRef> synthesized;
 
     osmscout::StopClock clock;
-    SynthetizeCoastlines2(progress,
+    SynthesizeCoastlines2(progress,
                           boundingPolygons,
                           allCoastlines,
-                          synthetized);
+                          synthesized);
 
     // define coastline states if there are still some undefined
-    for (auto const &coastline:synthetized) {
+    for (const auto& coastline : synthesized) {
       if (coastline->right==CoastState::undefined) {
         coastline->right=CoastState::unknown;
       }
+
       if (coastline->left==CoastState::undefined && coastline->isArea) {
-        for (auto const &testCoast:synthetized) {
+        for (const auto& testCoast : synthesized) {
           if (testCoast->right==CoastState::water &&
               IsAreaAtLeastPartlyInArea(testCoast->coast,coastline->coast)) {
             coastline->left=CoastState::water;
           }
         }
       }
+
       if (coastline->left==CoastState::undefined) {
         // still undefined, it is land probably
         coastline->left=CoastState::land;
@@ -725,13 +749,13 @@ namespace osmscout {
     }
 
     clock.Stop();
-    progress.Info(NumberToString(boundingPolygons.size())+" data polygon(s), and "+
-                  NumberToString(allCoastlines.size())+" coastline(s) synthetized into "+
-                  NumberToString(synthetized.size())+" coastlines(s), tooks "+
+    progress.Info(NumberToString(boundingPolygons.size())+" bouding polygon(s), and "+
+                  NumberToString(allCoastlines.size())+" coastline(s) synthesized into "+
+                  NumberToString(synthesized.size())+" coastlines(s), took "+
                   clock.ResultString() +" s"
     );
 
-    coastlines=synthetized;
+    coastlines=synthesized;
   }
 
   /**
@@ -959,11 +983,12 @@ namespace osmscout {
     TunnelFeatureReader tunnelFeatureRader(typeConfig);
     EmbankmentFeatureReader embankmentFeatureRader(typeConfig);
     FileScanner         scanner;
-    uint32_t            wayCount=0;
 
     // We do not yet know if we handle borders as ways or areas
 
     try {
+      uint32_t wayCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    WayDataFile::WAYS_DAT),
                    FileScanner::Sequential,
@@ -1385,13 +1410,16 @@ namespace osmscout {
         continue;
       }
 
-      Pixel      coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
-
+      Pixel            coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
       GroundTile::Type type=GroundTile::land;
-      if (coastline->left==CoastState::unknown)
+
+      if (coastline->left==CoastState::unknown) {
         type=GroundTile::unknown;
-      if (coastline->left==CoastState::water)
+      }
+      else if (coastline->left==CoastState::water) {
         type=GroundTile::water; // should not happen on the Earth
+      }
+
       GroundTile groundTile(type);
 
       double cellMinLat=level.cellHeight*coastline->cell.y-90.0;
@@ -1699,12 +1727,12 @@ namespace osmscout {
   /**
    * Collects, calculates and generates a number of data about a coastline.
    */
-  void WaterIndexGenerator::GetCoastlineData(const ImportParameter& parameter,
-                                             Progress& progress,
-                                             const Projection& projection,
-                                             const Level& level,
-                                             const std::list<CoastRef>& coastlines,
-                                             Data& data)
+  void WaterIndexGenerator::CalculateCoastlineData(const ImportParameter& parameter,
+                                                   Progress& progress,
+                                                   const Projection& projection,
+                                                   const Level& level,
+                                                   const std::list<CoastRef>& coastlines,
+                                                   Data& data)
   {
     progress.Info("Calculate coastline data");
 
@@ -1792,16 +1820,17 @@ namespace osmscout {
     }
 
     /* In some countries are islands too close to land or other islands
-     * that its coastlines intersects after polygon optimisation.
+     * that its coastlines intersect after polygon optimisation.
+     *
      * It may cause problems in following computation, that strongly rely
      * on the fact that coastlines don't intersect.
      *
      * For that reason, we will try to detect such intersections between land
-     * (line coastlines) and inslands (area coastlines) to remove the most visible
+     * (line coastlines) and islands (area coastlines) to remove the most visible
      * errors. Detecting intersections between all islands is too expensive.
      */
     progress.Info("Filter intersecting islands");
-    for (size_t i=0;i<transformedCoastlines.size();i++) {
+    for (size_t i=0; i<transformedCoastlines.size(); i++) {
       progress.SetProgress(i,transformedCoastlines.size());
 
       for (size_t j=i+1; j<transformedCoastlines.size(); j++) {
@@ -1810,15 +1839,19 @@ namespace osmscout {
 
         if (!a || !b || (a->isArea == b->isArea)) {
           // ignore possible intersections between two coastline ways (it may be touching)
-          // or two coastline areas (it is not so problematic and its computaion is expensive)
+          // or two coastline areas (it is not so problematic and its computation is expensive)
           continue;
         }
 
         std::vector<PathIntersection> intersections;
 
-        FindPathIntersections(a->points,b->points,a->isArea,b->isArea,intersections);
+        FindPathIntersections(a->points,
+                              b->points,
+                              a->isArea,
+                              b->isArea,
+                              intersections);
 
-        if (!intersections.empty()){
+        if (!intersections.empty()) {
           progress.Warning("Detected intersection "+NumberToString(coasts[i]->id)+" <> "+NumberToString(coasts[j]->id));
 
           if (a->isArea && !b->isArea) {
@@ -1895,32 +1928,9 @@ namespace osmscout {
     progress.Info("Initial "+NumberToString(coastlines.size())+" coastline(s) transformed to "+NumberToString(data.coastlines.size())+" coastline(s)");
   }
 
-  WaterIndexGenerator::IntersectionRef WaterIndexGenerator::GetPreviousIntersection(std::list<IntersectionRef>& intersectionsPathOrder,
-                                                                                    const IntersectionRef& current)
-  {
-    std::list<IntersectionRef>::iterator currentIter=intersectionsPathOrder.begin();
-
-    while (currentIter!=intersectionsPathOrder.end() &&
-           (*currentIter)!=current) {
-      ++currentIter;
-    }
-
-    if (currentIter==intersectionsPathOrder.end()) {
-      return NULL;
-    }
-
-    if (currentIter==intersectionsPathOrder.begin()) {
-      return NULL;
-    }
-
-    --currentIter;
-
-    return *currentIter;
-  }
-
   /**
-   * Closes the sling from the incoming intersection to the outgoing intersection traveling clock wise around the cell
-   * border.
+   * Closes the sling from the incoming intersection to the outgoing intersection traveling clock
+   * wise around the cell border.
    */
   void WaterIndexGenerator::WalkBorderCW(GroundTile& groundTile,
                                          const Level& level,
@@ -2371,7 +2381,7 @@ namespace osmscout {
 
           step++;
           if (step>1000) { // last fuse
-            // put breakpoint here if coputation stucks in this loop :-/
+            // put breakpoint here if computation stucks in this loop :-/
             std::cout << "   too many steps, give up... " << step << std::endl;
             return false;
           }
@@ -2382,8 +2392,8 @@ namespace osmscout {
       }
 
       step++;
-      if (step>1000) { // last fuse
-        // put breakpoint here if coputation stucks in this loop :-/
+      if (step>1000) { // last use
+        // put breakpoint here if computation stucks in this loop :-/
         std::cout << "   too many steps, give up... " << step << std::endl;
         return false;
       }
@@ -2420,16 +2430,21 @@ namespace osmscout {
       for (const auto& currentCoastline : intersectCoastlines) {
         CoastlineDataRef coastData=data.coastlines[currentCoastline];
         std::map<Pixel,std::list<IntersectionRef>>::iterator cellData=coastData->cellIntersections.find(cell);
+
         assert(cellData!=coastData->cellIntersections.end());
+
         intersectionsCW.insert(intersectionsCW.end(), cellData->second.begin(), cellData->second.end());
       }
+
       intersectionsCW.sort(IntersectionCWComparator());
 
       // collect fully contained coastline paths (may be part of tripoints)
       std::vector<size_t> containingPaths;
+
       const auto &cellCoastlineEntry=data.cellCoveredCoastlines.find(cell);
+
       if (cellCoastlineEntry!=data.cellCoveredCoastlines.end()) {
-        for (size_t i:cellCoastlineEntry->second) {
+        for (size_t i : cellCoastlineEntry->second) {
           if (!data.coastlines[i]->isArea && data.coastlines[i]->isCompletelyInCell) {
             containingPaths.push_back(i);
           }
@@ -2453,7 +2468,7 @@ namespace osmscout {
       }
 #endif
 
-      for (const auto &intersection: intersectionsCW) {
+      for (const auto& intersection : intersectionsCW) {
         if (intersection->direction==Direction::touch) {
           continue; // TODO: what to do?
         }
@@ -2526,7 +2541,7 @@ namespace osmscout {
                                        const ImportParameter& parameter,
                                        Progress& progress,
                                        const MercatorProjection& projection,
-                                       Level& levelStruct,
+                                       Level& level,
                                        std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                                        const std::list<CoastRef>& coastlines,
                                        const std::list<CoastRef>& boundingPolygons)
@@ -2535,34 +2550,34 @@ namespace osmscout {
 
     if (!coastlines.empty()) {
       // Collects, calculates and generates a number of data about a coastline
-      GetCoastlineData(parameter,
-                       progress,
-                       projection,
-                       levelStruct,
-                       coastlines,
-                       data);
+      CalculateCoastlineData(parameter,
+                             progress,
+                             projection,
+                             level,
+                             coastlines,
+                             data);
 
       // Mark cells that intersect a coastline as coast
       MarkCoastlineCells(progress,
-                         levelStruct,
+                         level,
                          data);
 
       // Fills coords information for cells that intersect a coastline
       HandleCoastlinesPartiallyInACell(progress,
-                                       levelStruct,
+                                       level,
                                        cellGroundTileMap,
                                        data);
 
       // Fills coords information for cells that completely contain a coastline
       HandleAreaCoastlinesCompletelyInACell(progress,
-                                            levelStruct,
+                                            level,
                                             data,
                                             cellGroundTileMap);
     }
 
     // Calculate the cell type for cells directly around coast cells
     CalculateCoastEnvironment(progress,
-                              levelStruct,
+                              level,
                               cellGroundTileMap);
 
     if (parameter.GetAssumeLand()==ImportParameter::AssumeLandStrategy::enable ||
@@ -2571,46 +2586,46 @@ namespace osmscout {
       AssumeLand(parameter,
                  progress,
                  *typeConfig,
-                 levelStruct);
+                 level);
     }
 
     if (!coastlines.empty()) {
       // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
       FillWater(progress,
-                levelStruct,
+                level,
                 parameter.GetFillWaterArea(),
                 boundingPolygons);
 
       FillWaterAroundIsland(progress,
-                            levelStruct,
+                            level,
                             cellGroundTileMap,
                             boundingPolygons);
     }
 
     // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
     FillLand(progress,
-             levelStruct);
+             level);
 
-    levelStruct.hasCellData=false;
-    levelStruct.defaultCellData=unknown;
+    level.hasCellData=false;
+    level.defaultCellData=unknown;
 
-    if (levelStruct.cellXCount>0 && levelStruct.cellYCount>0) {
-      levelStruct.defaultCellData=levelStruct.GetState(0,0);
+    if (level.cellXCount>0 && level.cellYCount>0) {
+      level.defaultCellData=level.GetState(0,0);
 
       if (cellGroundTileMap.size()>0) {
-        levelStruct.hasCellData=true;
+        level.hasCellData=true;
       }
       else {
-        for (uint32_t y=0; y<levelStruct.cellYCount; y++) {
-          for (uint32_t x=0; x<levelStruct.cellXCount; x++) {
-            levelStruct.hasCellData=levelStruct.GetState(x,y)!=levelStruct.defaultCellData;
+        for (uint32_t y=0; y<level.cellYCount; y++) {
+          for (uint32_t x=0; x<level.cellXCount; x++) {
+            level.hasCellData=level.GetState(x,y)!=level.defaultCellData;
 
-            if (levelStruct.hasCellData) {
+            if (level.hasCellData) {
               break;
             }
           }
 
-          if (levelStruct.hasCellData) {
+          if (level.hasCellData) {
             break;
           }
         }
@@ -2620,11 +2635,10 @@ namespace osmscout {
 
   void WaterIndexGenerator::WriteTiles(Progress& progress,
                                        const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
-                                       const uint32_t level,
-                                       Level& levelStruct,
+                                       Level& level,
                                        FileWriter& writer)
   {
-    if (levelStruct.hasCellData) {
+    if (level.hasCellData) {
 
       //
       // Calculate size of data
@@ -2649,27 +2663,27 @@ namespace osmscout {
         }
       }
 
-      levelStruct.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
+      level.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
       progress.Info("Writing index for level "+
-                    NumberToString(level)+", "+
-                    NumberToString(levelStruct.cellXCount*levelStruct.cellXCount)+" cells, "+
+                    NumberToString(level.level)+", "+
+                    NumberToString(level.cellXCount*level.cellXCount)+" cells, "+
                     NumberToString(cellGroundTileMap.size())+" entries, "+
-                    NumberToString(levelStruct.dataOffsetBytes)+" bytes/entry, "+
-                    ByteSizeToString(1.0*levelStruct.cellXCount*levelStruct.cellYCount*levelStruct.dataOffsetBytes+dataSize));
+                    NumberToString(level.dataOffsetBytes)+" bytes/entry, "+
+                    ByteSizeToString(1.0*level.cellXCount*level.cellYCount*level.dataOffsetBytes+dataSize));
 
       //
       // Write bitmap
       //
 
-      levelStruct.indexDataOffset=writer.GetPos();
+      level.indexDataOffset=writer.GetPos();
 
-      for (uint32_t y=0; y<levelStruct.cellYCount; y++) {
-        for (uint32_t x=0; x<levelStruct.cellXCount; x++) {
-          State state=levelStruct.GetState(x,y);
+      for (uint32_t y=0; y<level.cellYCount; y++) {
+        for (uint32_t x=0; x<level.cellXCount; x++) {
+          State state=level.GetState(x,y);
 
           writer.WriteFileOffset((FileOffset) state,
-                                 levelStruct.dataOffsetBytes);
+                                 level.dataOffsetBytes);
         }
       }
 
@@ -2706,28 +2720,28 @@ namespace osmscout {
         }
 
         FileOffset endPos;
-        uint32_t   cellId=coord.first.y*levelStruct.cellXCount+coord.first.x;
-        size_t     index =cellId*levelStruct.dataOffsetBytes;
+        uint32_t   cellId=coord.first.y*level.cellXCount+coord.first.x;
+        size_t     index =cellId*level.dataOffsetBytes;
 
         endPos=writer.GetPos();
 
-        writer.SetPos(levelStruct.indexDataOffset+index);
+        writer.SetPos(level.indexDataOffset+index);
         writer.WriteFileOffset(startPos-dataOffset,
-                               levelStruct.dataOffsetBytes);
+                               level.dataOffsetBytes);
         writer.SetPos(endPos);
       }
     }
     else {
-      progress.Info("All cells have state '"+StateToString(levelStruct.defaultCellData)+"' and no coastlines, no cell index needed");
+      progress.Info("All cells have state '"+StateToString(level.defaultCellData)+"' and no coastlines, no cell index needed");
     }
 
     FileOffset currentPos=writer.GetPos();
 
-    writer.SetPos(levelStruct.indexEntryOffset);
-    writer.Write(levelStruct.hasCellData);
-    writer.Write(levelStruct.dataOffsetBytes);
-    writer.Write((uint8_t) levelStruct.defaultCellData);
-    writer.WriteFileOffset(levelStruct.indexDataOffset);
+    writer.SetPos(level.indexEntryOffset);
+    writer.Write(level.hasCellData);
+    writer.Write(level.dataOffsetBytes);
+    writer.Write((uint8_t) level.defaultCellData);
+    writer.WriteFileOffset(level.indexDataOffset);
     writer.SetPos(currentPos);
   }
 
@@ -2755,19 +2769,11 @@ namespace osmscout {
                                    Progress& progress)
   {
     std::list<CoastRef> coastlines;
-    std::list<CoastRef> dataPolygon;
-
-    FileScanner         scanner;
+    std::list<CoastRef> boundingPolygons;
 
     GeoBox              boundingBox;
-    GeoCoord            minCoord;
-    GeoCoord            maxCoord;
 
     std::vector<Level>  levels;
-
-    // Calculate size of tile cells for the maximum zoom level
-    double              cellWidth;
-    double              cellHeight;
 
     //
     // Read bounding box
@@ -2782,37 +2788,40 @@ namespace osmscout {
     }
 
     boundingBox=boundingBoxDataFile.GetBoundingBox();
-    minCoord=boundingBox.GetMinCoord();
-    maxCoord=boundingBox.GetMaxCoord();
 
     //
     // Initialize levels
     //
 
-    levels.resize(parameter.GetWaterIndexMaxMag()-parameter.GetWaterIndexMinMag()+1);
+    levels.reserve(parameter.GetWaterIndexMaxMag()-parameter.GetWaterIndexMinMag()+1);
 
-    cellWidth=360.0;
-    cellHeight=180.0;
+    double cellWidth=360.0;
+    double cellHeight=180.0;
 
-    for (size_t level=0; level<=parameter.GetWaterIndexMaxMag(); level++) {
-      if (level>=parameter.GetWaterIndexMinMag() &&
-          level<=parameter.GetWaterIndexMaxMag()) {
-        levels[level-parameter.GetWaterIndexMinMag()].SetBox(minCoord,
-                                                             maxCoord,
-                                                             cellWidth,cellHeight);
+    for (size_t zoomLevel=0; zoomLevel<=parameter.GetWaterIndexMaxMag(); zoomLevel++) {
+      if (zoomLevel>=parameter.GetWaterIndexMinMag() &&
+          zoomLevel<=parameter.GetWaterIndexMaxMag()) {
+        Level level;
+
+        level.level=zoomLevel;
+        level.SetBox(boundingBox,
+                     cellWidth,
+                     cellHeight);
+
+        levels.push_back(level);
       }
 
-      cellWidth=cellWidth/2;
-      cellHeight=cellHeight/2;
+      cellWidth=cellWidth/2.0;
+      cellHeight=cellHeight/2.0;
     }
 
     //
-    // Loat data polygon
+    // Load data polygon
     //
 
     if (!LoadBoundingPolygons(parameter,
                               progress,
-                              dataPolygon)) {
+                              boundingPolygons)) {
       return false;
     }
 
@@ -2828,9 +2837,11 @@ namespace osmscout {
 
     MergeCoastlines(progress,coastlines);
 
-    SynthetizeCoastlines(progress,
-                         coastlines,
-                         dataPolygon);
+    if (!boundingPolygons.empty()) {
+      SynthesizeCoastlines(progress,
+                           coastlines,
+                           boundingPolygons);
+    }
 
     progress.SetAction("Writing 'water.idx'");
 
@@ -2845,33 +2856,29 @@ namespace osmscout {
                       levels);
       progress.Info("Generating index for level "+NumberToString(parameter.GetWaterIndexMinMag())+" to "+NumberToString(parameter.GetWaterIndexMaxMag()));
 
-      for (size_t levelIndex=0; levelIndex<levels.size(); levelIndex++) {
+      for (auto& level : levels) {
         Magnification                          magnification;
         MercatorProjection                     projection;
         std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
 
-        uint32_t level=levelIndex+parameter.GetWaterIndexMinMag();
-        Level &levelStruct=levels[levelIndex];
-
-        magnification.SetLevel(level);
+        magnification.SetLevel(level.level);
 
         projection.Set(GeoCoord(0.0,0.0),magnification,72,640,480);
 
-        progress.SetAction("Building tiles for level "+NumberToString(level));
+        progress.SetAction("Building tiles for level "+NumberToString(level.level));
 
         BuildTiles(typeConfig,
                    parameter,
                    progress,
                    projection,
-                   levelStruct,
+                   level,
                    cellGroundTileMap,
                    coastlines,
-                   dataPolygon);
+                   boundingPolygons);
 
         WriteTiles(progress,
                    cellGroundTileMap,
                    level,
-                   levelStruct,
                    writer);
       }
 

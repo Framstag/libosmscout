@@ -1028,13 +1028,13 @@ namespace osmscout {
    */
   struct OSMSCOUT_API PathIntersection
   {
-    GeoCoord point;         // intersection point
-    size_t aIndex;          // "a path" point index before intersection
-    size_t bIndex;          // "b path" point index before intersection
-    double orientation;     // angle between a -> intersection -> b
-                            //   orientation > 0 = left angle
-    double aDistanceSquare; // distance^2 between "a path" point and intersection
-    double bDistanceSquare; // distance^2 between "b path" point and intersection
+    GeoCoord point;           //!< intersection point
+    size_t   aIndex;          //!< "a path" point index before intersection
+    size_t   bIndex;          //!< "b path" point index before intersection
+    double   orientation;     //!< angle between a -> intersection -> b
+                              //!<   orientation > 0 = left angle
+    double   aDistanceSquare; //!< distance^2 between "a path" point and intersection
+    double   bDistanceSquare; //!< distance^2 between "b path" point and intersection
   };
 
   /**
