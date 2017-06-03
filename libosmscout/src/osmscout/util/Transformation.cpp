@@ -503,6 +503,7 @@ namespace osmscout {
 
     TransformGeoToPixel(projection,
                         nodes);
+
     if (optimize!=none) {
       if (optimize==fast) {
         DropSimilarPoints(optimizeErrorTolerance);
@@ -688,6 +689,37 @@ namespace osmscout {
     cy=ymin+(ymax-ymin)/2;
 
     return true;
+  }
+
+  void TransPolygon::TransformBoundingBox(const Projection& projection,
+                                          TransPolygon::OptimizeMethod optimize,
+                                          const GeoBox& boundingBox,
+                                          double optimizeErrorTolerance,
+                                          TransPolygon::OutputConstraint constraint)
+  {
+    std::vector<GeoCoord> coords(5);
+
+    // left bottom
+    coords.push_back(GeoCoord(boundingBox.GetMinLat(),
+                              boundingBox.GetMinLon()));
+    // left top
+    coords.push_back(GeoCoord(boundingBox.GetMaxLat(),
+                              boundingBox.GetMinLon()));
+    // right top
+    coords.push_back(GeoCoord(boundingBox.GetMaxLat(),
+                              boundingBox.GetMaxLon()));
+    // right bottom
+    coords.push_back(GeoCoord(boundingBox.GetMinLat(),
+                              boundingBox.GetMaxLon()));
+    // left bottom (closing the rectangle)
+    coords.push_back(GeoCoord(boundingBox.GetMinLat(),
+                              boundingBox.GetMinLon()));
+
+    TransformArea(projection,
+                  optimize,
+                  coords,
+                  optimizeErrorTolerance,
+                  constraint);
   }
 
   CoordBuffer::~CoordBuffer()

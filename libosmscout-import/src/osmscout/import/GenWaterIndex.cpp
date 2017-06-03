@@ -1749,22 +1749,20 @@ namespace osmscout {
 
       TransPolygon polygon;
 
+      // For areas we first transform the bounding box to make sure, that
+      // the area coastline will be big enough to be actually visible
       if (coast->isArea) {
-        polygon.TransformArea(projection,
-                              parameter.GetOptimizationWayMethod(),
-                              coast->coast,
-                              1.0,
-                              TransPolygon::simple);
-      }
-      else {
-        polygon.TransformWay(projection,
-                             parameter.GetOptimizationWayMethod(),
-                             coast->coast,
-                             1.0,
-                             TransPolygon::simple);
-      }
+        GeoBox boundingBox;
 
-      if (coast->isArea) {
+        GetBoundingBox(coast->coast,
+                       boundingBox);
+
+        polygon.TransformBoundingBox(projection,
+                                     parameter.GetOptimizationWayMethod(),
+                                     boundingBox,
+                                     1.0,
+                                     TransPolygon::simple);
+
         double minX=polygon.points[polygon.GetStart()].x;
         double minY=polygon.points[polygon.GetStart()].y;
         double maxX=minX;
@@ -1787,6 +1785,21 @@ namespace osmscout {
             pixelHeight<=4.0) {
           continue;
         }
+      }
+
+      if (coast->isArea) {
+        polygon.TransformArea(projection,
+                              parameter.GetOptimizationWayMethod(),
+                              coast->coast,
+                              1.0,
+                              TransPolygon::simple);
+      }
+      else {
+        polygon.TransformWay(projection,
+                             parameter.GetOptimizationWayMethod(),
+                             coast->coast,
+                             1.0,
+                             TransPolygon::simple);
       }
 
       CoastlineDataRef coastline=std::make_shared<CoastlineData>();
