@@ -1,8 +1,7 @@
 baseurl = "http://libosmscout.sourceforge.net/"
 languageCode = "en-us"
 title = "libosmscout"
-disableRSS = true
-disableSitemap = true
+disableKinds = ["RSS", "sitemap"]
 pluralizeListTitles = false
 PygmentsCodeFences = true
 pygmentsuseclasses = true

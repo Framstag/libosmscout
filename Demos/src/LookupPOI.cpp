@@ -71,6 +71,13 @@ int main(int argc, char* argv[])
     typeNames.push_back(std::string(argv[i]));
   }
 
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
+  }
+
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
   osmscout::POIServiceRef     poiService(new osmscout::POIService(database));
@@ -141,19 +148,19 @@ int main(int argc, char* argv[])
   for (const auto &node : nodes) {
     std::cout << "+ Node " << node->GetFileOffset();
     std::cout << " " << node->GetType()->GetName();
-    std::cout << " " << nameLabelReader.GetLabel((node->GetFeatureValueBuffer())) << std::endl;
+    std::cout << " " << osmscout::UTF8StringToLocaleString(nameLabelReader.GetLabel((node->GetFeatureValueBuffer()))) << std::endl;
   }
 
   for (const auto &way :ways) {
     std::cout << "+ Way " << way->GetFileOffset();
     std::cout << " " << way->GetType()->GetName();
-    std::cout << " " << nameLabelReader.GetLabel(way->GetFeatureValueBuffer()) << std::endl;
+    std::cout << " " << osmscout::UTF8StringToLocaleString(nameLabelReader.GetLabel(way->GetFeatureValueBuffer())) << std::endl;
   }
 
   for (const auto &area : areas) {
     std::cout << "+ Area " << area->GetFileOffset();
     std::cout << " " << area->GetType()->GetName();
-    std::cout << " " << nameLabelReader.GetLabel(area->rings.front().GetFeatureValueBuffer()) << std::endl;
+    std::cout << " " << osmscout::UTF8StringToLocaleString(nameLabelReader.GetLabel(area->rings.front().GetFeatureValueBuffer())) << std::endl;
   }
 
   return 0;

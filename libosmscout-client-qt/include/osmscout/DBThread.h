@@ -116,12 +116,13 @@ class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 
   Q_OBJECT
   Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
-  
+
+public:
+  typedef std::function<void(const std::list<DBInstanceRef>&)> SynchronousDBJob;
+
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void TriggerInitialRendering();
-  void TriggerDrawMap();
-  void Redraw();
   void locationDescription(const osmscout::GeoCoord location, 
                            const QString database,
                            const osmscout::LocationDescription description,
@@ -137,13 +138,13 @@ signals:
 
 public slots:
   void ToggleDaylight();
+  void onMapDPIChange(double dpi);
   void SetStyleFlag(const QString &key, bool value);
   void ReloadStyle(const QString &suffix="");
   void LoadStyle(QString stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
                  const QString &suffix="");
-  virtual void Initialize() = 0;
-  virtual void InvalidateVisualCache() = 0;
+  void Initialize();
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
   void Finalize();
 
@@ -158,11 +159,6 @@ public slots:
    * @param location
    */
   void requestLocationDescription(const osmscout::GeoCoord location);
-
-  virtual void onMapDPIChange(double dpi);
-  virtual void onRenderSeaChanged(bool);
-  virtual void onFontNameChanged(const QString);
-  virtual void onFontSizeChanged(double);
 
   /**
    * Start object search by some pattern. 
@@ -191,7 +187,7 @@ protected:
   mutable QReadWriteLock        lock;
   
   osmscout::DatabaseParameter   databaseParameter;
-  QList<DBInstanceRef>          databases;
+  std::list<DBInstanceRef>      databases;
   osmscout::RouterParameter     routerParameter;
   osmscout::RoutePostprocessor  routePostprocessor;
 
@@ -200,25 +196,14 @@ protected:
   std::unordered_map<std::string,bool>
                                 stylesheetFlags;
   bool                          daylight;
-  
-  bool                          renderSea;
 
   bool                          renderError;
   QList<StyleError>             styleErrors;
 
-  QString                       fontName;
-  double                        fontSize;
-
 protected:
-
-  DBThread(QStringList databaseLookupDirectories,
-           QString iconDirectory,
-           SettingsRef settings);
   
   bool AssureRouter(osmscout::Vehicle vehicle);
 
-  virtual void TileStateCallback(const osmscout::TileRef& changedTile);
- 
   static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
                                           const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
@@ -240,13 +225,15 @@ protected:
                         osmscout::GeoCoord& coordinates,
                         osmscout::GeoBox& bbox);
 
-  bool InitializeDatabases();
-
   void CancelCurrentDataLoading();
 
   bool isInitializedInternal();
 
 public:
+  DBThread(QStringList databaseLookupDirectories,
+           QString iconDirectory,
+           SettingsRef settings);
+
   virtual ~DBThread();
 
   bool isInitialized(); 
@@ -267,15 +254,6 @@ public:
   double GetMapDpi() const;
   
   double GetPhysicalDpi() const;
-  
-  /**
-   * Render map defined by request to painter 
-   * @param painter
-   * @param request
-   * @return true if rendered map is complete 
-   */
-  virtual bool RenderMap(QPainter& painter,
-                         const RenderMapRequest& request) = 0;
   
   bool CalculateRoute(const QString databasePath,
                       const osmscout::RoutingProfile& routingProfile,
@@ -327,6 +305,7 @@ public:
   const QMap<QString,bool> GetStyleFlags() const;
 
   void RunJob(DBJob *job);
+  void RunSynchronousJob(SynchronousDBJob job);
 
   static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);

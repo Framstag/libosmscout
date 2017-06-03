@@ -214,6 +214,13 @@ int main(int argc, char* argv[])
 
   map=argv[1];
 
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
+  }
+
   std::string searchPattern;
 
   for (int i=2; i<argc; i++) {
@@ -225,7 +232,7 @@ int main(int argc, char* argv[])
   }
 
   std::cout << "Searching for pattern \"" <<searchPattern  << "\"" << std::endl;
-  
+
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
@@ -235,7 +242,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::LocationServiceRef                            locationService(new osmscout::LocationService(database));
+  osmscout::LocationServiceRef                            locationService=std::make_shared<osmscout::LocationService>(database);
   osmscout::LocationSearch                                search;
   osmscout::LocationSearchResult                          searchResult;
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;

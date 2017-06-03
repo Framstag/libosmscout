@@ -976,6 +976,14 @@ namespace osmscout {
                                                       double bLon, double bLat);
 
   /**
+   * \ingroup Geometry
+   *Calculates the final bearing for a line from one coordinate two the other coordinate
+   *on a sphere.
+   */
+  extern OSMSCOUT_API double GetSphericalBearingFinal(const GeoCoord& a,
+                                                      const GeoCoord& b);
+
+  /**
    * COnvert the bearing to to a direction description in releation tothe compass.
    */
   extern OSMSCOUT_API std::string BearingDisplayString(double bearing);
@@ -1020,13 +1028,13 @@ namespace osmscout {
    */
   struct OSMSCOUT_API PathIntersection
   {
-    GeoCoord point;         // intersection point
-    size_t aIndex;          // "a path" point index before intersection
-    size_t bIndex;          // "b path" point index before intersection
-    double orientation;     // angle between a -> intersection -> b
-                            //   orientation > 0 = left angle
-    double aDistanceSquare; // distance^2 between "a path" point and intersection
-    double bDistanceSquare; // distance^2 between "b path" point and intersection
+    GeoCoord point;           //!< intersection point
+    size_t   aIndex;          //!< "a path" point index before intersection
+    size_t   bIndex;          //!< "b path" point index before intersection
+    double   orientation;     //!< angle between a -> intersection -> b
+                              //!<   orientation > 0 = left angle
+    double   aDistanceSquare; //!< distance^2 between "a path" point and intersection
+    double   bDistanceSquare; //!< distance^2 between "b path" point and intersection
   };
 
   /**

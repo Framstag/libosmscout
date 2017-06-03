@@ -14,18 +14,24 @@
 
 %include <osmscout/Types.i>
 
-%include <osmscout/GeoCoord.i>
 %include <osmscout/ObjectRef.i>
-%include <osmscout/Point.i>
+
+%include <osmscout/util/Magnification.i>
+
+%include <osmscout/GeoCoord.i>
 
 %include <osmscout/util/GeoBox.i>
+%include <osmscout/Point.i>
+
 %include <osmscout/util/FileScanner.i>
 %include <osmscout/util/FileWriter.i>
-%include <osmscout/util/Magnification.i>
 %include <osmscout/util/Parsing.i>
 %include <osmscout/util/Progress.i>
 
 %include <osmscout/Tag.i>
+
+%include <osmscout/util/TagErrorReporter.i>
+
 %include <osmscout/TypeConfig.i>
 %include <osmscout/BoundingBoxDataFile.i>
 

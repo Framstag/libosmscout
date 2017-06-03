@@ -16,7 +16,7 @@ AC_PROG_INSTALL
 LT_INIT([win32-dll disable-static])
 gl_VISIBILITY
 AS_IF([test "$HAVE_VISIBILITY" == "1"],
-      [AC_DEFINE([OSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
+      [AC_DEFINE([OSMSCOUT_MAP_IOSX_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])])
 
 AC_LANG(Objective C++)
 

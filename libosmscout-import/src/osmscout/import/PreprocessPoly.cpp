@@ -17,12 +17,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/import/PreprocessPoly.h>
+
 #include <osmscout/util/String.h>
 #include <osmscout/util/Geometry.h>
 
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
-#include <osmscout/import/PreprocessPoly.h>
 
 #include <osmscout/private/Config.h>
 

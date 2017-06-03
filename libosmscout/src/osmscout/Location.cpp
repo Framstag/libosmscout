@@ -103,6 +103,10 @@ namespace osmscout {
     // no oce
   }
 
+  /**
+   * Returns a textual representation of the place in
+   * @return
+   */
   std::string Place::GetDisplayString() const
   {
     std::ostringstream stream;
@@ -111,7 +115,7 @@ namespace osmscout {
     stream.imbue(std::locale());
 
     if (poi) {
-      stream << poi->name;
+      stream << UTF8StringToLocaleString(poi->name);
       empty=false;
     }
 
@@ -120,7 +124,7 @@ namespace osmscout {
         stream << ", ";
       }
 
-      stream << location->name << " " << address->name;
+      stream << UTF8StringToLocaleString(location->name) << " " << UTF8StringToLocaleString(address->name);
       empty=false;
     }
     else if (location) {
@@ -128,7 +132,7 @@ namespace osmscout {
         stream << ", ";
       }
 
-      stream << location->name;
+      stream << UTF8StringToLocaleString(location->name);
       empty=false;
     }
     else if (address) {
@@ -136,7 +140,7 @@ namespace osmscout {
         stream << ", ";
       }
 
-      stream << address->name;
+      stream << UTF8StringToLocaleString(address->name);
       empty=false;
     }
 
@@ -146,10 +150,10 @@ namespace osmscout {
       }
 
       if (!adminRegion->aliasName.empty()) {
-        stream << adminRegion->aliasName;
+        stream << UTF8StringToLocaleString(adminRegion->aliasName);
       }
       else {
-        stream << adminRegion->name;
+        stream << UTF8StringToLocaleString(adminRegion->name);
       }
     }
 

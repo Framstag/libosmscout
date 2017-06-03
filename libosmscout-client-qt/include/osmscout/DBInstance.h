@@ -105,7 +105,6 @@ public: // TODO: make it private, ensure thread safety
 
   osmscout::LocationServiceRef     locationService;
   osmscout::MapServiceRef          mapService;
-  osmscout::MapService::CallbackId callbackId;
   osmscout::BreakerRef             dataLoadingBreaker;
 
   osmscout::RoutingServiceRef      router;
@@ -115,14 +114,12 @@ public: // TODO: make it private, ensure thread safety
                     osmscout::DatabaseRef database,
                     osmscout::LocationServiceRef locationService,
                     osmscout::MapServiceRef mapService,
-                    osmscout::MapService::CallbackId callbackId,
                     osmscout::BreakerRef dataLoadingBreaker,
                     osmscout::StyleConfigRef styleConfig):
     path(path),
     database(database),
     locationService(locationService),
     mapService(mapService),
-    callbackId(callbackId),
     dataLoadingBreaker(dataLoadingBreaker),
     styleConfig(styleConfig)
   {

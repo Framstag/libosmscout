@@ -12,6 +12,7 @@ programs = libosmscout \
            libosmscout-map-svg \
            DumpData \
            Demos \
+           BasemapImport \
            Import \
            OSMScout2 \
            StyleEditor \
@@ -30,6 +31,7 @@ programs = libosmscout \
         libosmscout-map-svg \
         DumpData \
         Demos \
+        BasemapImport \
         Import \
         OSMScout2 \
         StyleEditor \
@@ -47,6 +49,7 @@ all: libosmscout \
      libosmscout-map-svg \
      DumpData \
      Demos \
+     BasemapImport \
      Import \
      OSMScout2 \
      StyleEditor \
@@ -168,6 +171,9 @@ Demos: libosmscout \
 
 DumpData: libosmscout
 	(cd DumpData && $(MAKE))
+
+BasemapImport: libosmscout libosmscout-import
+	(cd BasemapImport && $(MAKE))
 
 Import: libosmscout libosmscout-import
 	(cd Import && $(MAKE))

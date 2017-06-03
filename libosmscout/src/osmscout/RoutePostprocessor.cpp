@@ -426,29 +426,18 @@ namespace osmscout {
       if (prevNode!=description.Nodes().end() &&
           nextNode!=description.Nodes().end() &&
           nextNode->HasPathObject()) {
-        double prevLat;
-        double prevLon;
 
-        double lat;
-        double lon;
+        GeoCoord prevCoord=postprocessor.GetCoordinates(prevNode->GetPathObject(),
+                                                        prevNode->GetCurrentNodeIndex());
 
-        double nextLat;
-        double nextLon;
+        GeoCoord coord=postprocessor.GetCoordinates(node->GetPathObject(),
+                                                    node->GetCurrentNodeIndex());
 
-        postprocessor.GetCoordinates(prevNode->GetPathObject(),
-                                     prevNode->GetCurrentNodeIndex(),
-                                     prevLat,prevLon);
+        GeoCoord nextCoord=postprocessor.GetCoordinates(nextNode->GetPathObject(),
+                                                        nextNode->GetCurrentNodeIndex());
 
-        postprocessor.GetCoordinates(node->GetPathObject(),
-                                     node->GetCurrentNodeIndex(),
-                                     lat,lon);
-
-        postprocessor.GetCoordinates(nextNode->GetPathObject(),
-                                     nextNode->GetCurrentNodeIndex(),
-                                     nextLat,nextLon);
-
-        double inBearing=GetSphericalBearingFinal(prevLon,prevLat,lon,lat)*180/M_PI;
-        double outBearing=GetSphericalBearingInitial(lon,lat,nextLon,nextLat)*180/M_PI;
+        double inBearing=GetSphericalBearingFinal(prevCoord,coord)*180/M_PI;
+        double outBearing=GetSphericalBearingInitial(coord,nextCoord)*180/M_PI;
 
         double turnAngle=NormalizeRelativeAngel(outBearing-inBearing);
 
@@ -480,20 +469,13 @@ namespace osmscout {
 
             forwardDistance+=lookup->GetDistance()-curveB->GetDistance();
 
-            double curveBLat;
-            double curveBLon;
-            double lookupLat;
-            double lookupLon;
+            GeoCoord curveBCoord=postprocessor.GetCoordinates(curveB->GetPathObject(),
+                                                              curveB->GetCurrentNodeIndex());
 
-            postprocessor.GetCoordinates(curveB->GetPathObject(),
-                                         curveB->GetCurrentNodeIndex(),
-                                         curveBLat,curveBLon);
+            GeoCoord lookupCoord=postprocessor.GetCoordinates(lookup->GetPathObject(),
+                                                              lookup->GetCurrentNodeIndex());
 
-            postprocessor.GetCoordinates(lookup->GetPathObject(),
-                                         lookup->GetCurrentNodeIndex(),
-                                         lookupLat,lookupLon);
-
-            double lookupBearing=GetSphericalBearingInitial(curveBLon,curveBLat,lookupLon,lookupLat)*180/M_PI;
+            double lookupBearing=GetSphericalBearingInitial(curveBCoord,lookupCoord)*180/M_PI;
 
 
             double lookupAngle=NormalizeRelativeAngel(lookupBearing-currentBearing);
@@ -1504,28 +1486,22 @@ namespace osmscout {
     }
   }
 
-  void RoutePostprocessor::GetCoordinates(const ObjectFileRef& object,
-                                          size_t nodeIndex,
-                                          double& lat,
-                                          double& lon) const
+  GeoCoord RoutePostprocessor::GetCoordinates(const ObjectFileRef& object,
+                                              size_t nodeIndex) const
   {
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(object.GetFileOffset());
 
-      GeoCoord coord=area->rings.front().GetCoord(nodeIndex);
-
-      lat=coord.GetLat();
-      lon=coord.GetLon();
+      return area->rings.front().GetCoord(nodeIndex);
     }
     else if (object.GetType()==refWay) {
-      WayRef   way=GetWay(object.GetFileOffset());
-      GeoCoord coord=way->GetCoord(nodeIndex);
+      WayRef way=GetWay(object.GetFileOffset());
 
-      lat=coord.GetLat();
-      lon=coord.GetLon();
+      return way->GetCoord(nodeIndex);
     }
     else {
       assert(false);
+      return GeoCoord();
     }
   }
 

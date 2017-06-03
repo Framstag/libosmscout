@@ -25,6 +25,7 @@
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/LookupModule.h>
+#include <osmscout/MapRenderer.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -121,7 +122,7 @@ public:
     return *this;
   }
 
-  bool Init(bool tiledInstance=false);
+  bool Init();
 };
 
 /**
@@ -132,24 +133,41 @@ typedef std::shared_ptr<OSMScoutQtBuilder> OSMScoutQtBuilderRef;
 /**
  * \ingroup QtAPI
  */
+enum OSMSCOUT_CLIENT_QT_API RenderingType{
+  PlaneRendering = 0,
+  TiledRendering = 1
+};
+
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
   friend class OSMScoutQtBuilder;
 
 private:
-  QThread *backgroundThread;
+  QThread     *backgroundThread;
   SettingsRef settings;
   DBThreadRef dbThread;
+  QString     iconDirectory;
+  QString     cacheLocation;
+  size_t      onlineTileCacheSize;
+  size_t      offlineTileCacheSize;
 
 private:
   OSMScoutQt(QThread *backgroundThread,
              SettingsRef settings,
-             DBThreadRef dbThread);
+             DBThreadRef dbThread,
+             QString iconDirectory,
+             QString cacheLocation,
+             size_t onlineTileCacheSize,
+             size_t offlineTileCacheSize);
 public:
   virtual ~OSMScoutQt();
 
   DBThreadRef GetDBThread();
   SettingsRef GetSettings();
-  LookupModuleRef MakeLookupModule();
+  LookupModule* MakeLookupModule();
+  MapRenderer* MakeMapRenderer(RenderingType type);
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

@@ -5,6 +5,15 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+if [[ -x ../Import/src/Import ]]; then
+  importExe=../Import/src/Import
+elif [[ -x ../build/Import/Import ]]; then
+  importExe=../build/Import/Import
+else
+  echo "Cannot find Import executable!"
+  exit 1
+fi
+
 scriptDirectory="${BASH_SOURCE%/*}"
 if [ ! -d "$scriptDirectory" ]; then scriptDirectory="$PWD"; fi
 
@@ -45,6 +54,11 @@ elif [ -f "$defaultOpt" ]; then
   . "$defaultOpt"
 fi
 
+boundingPolygonFile="$scriptDirectory/${mappingFileBase}.poly"
+
+if [ -f "$boundingPolygonFile" ]; then
+  options="$options --bounding-polygon $boundingPolygonFile"
+fi
 
 if [ ! -d "$targetDirectory" ]; then
   echo "Creating target directory $targetDirectory..."
@@ -58,6 +72,6 @@ echo " $outputFile" | tee -a $outputFile
 echo "Options:" | tee -a $outputFile
 echo " $options" | tee -a $outputFile
 echo "Call:" | tee -a $outputFile
-echo " ../Import/src/Import $options --typefile ../stylesheets/map.ost --destinationDirectory $targetDirectory $@" | tee -a $outputFile
+echo " $importExe $options --typefile ../stylesheets/map.ost --destinationDirectory $targetDirectory $@" | tee -a $outputFile
 
-../Import/src/Import $options --typefile ../stylesheets/map.ost --destinationDirectory "$targetDirectory" "$@" 2>&1 | tee -a $outputFile
+$importExe $options --typefile ../stylesheets/map.ost --destinationDirectory "$targetDirectory" "$@" 2>&1 | tee -a $outputFile

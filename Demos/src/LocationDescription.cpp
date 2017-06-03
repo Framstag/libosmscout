@@ -43,20 +43,22 @@
 
 void DumpFeatures(const osmscout::FeatureValueBuffer &features, std::string indent="  ")
 {
-    for (auto featureInstance :features.GetType()->GetFeatures()){
-      if (features.HasFeature(featureInstance.GetIndex())){
+    for (auto featureInstance :features.GetType()->GetFeatures()) {
+      if (features.HasFeature(featureInstance.GetIndex())) {
         osmscout::FeatureRef feature=featureInstance.GetFeature();
         std::cout << indent << "+ feature " << feature->GetName();
-        if (feature->HasValue()){
+
+        if (feature->HasValue()) {
           osmscout::FeatureValue *value=features.GetValue(featureInstance.GetIndex());
-          if (feature->HasLabel()){
-            if (!value->GetLabel().empty()){
-              std::cout << ": " << value->GetLabel();
+          if (feature->HasLabel()) {
+            if (!value->GetLabel().empty()) {
+              std::cout << ": " << osmscout::UTF8StringToLocaleString(value->GetLabel());
             }
-          }else{
+          }
+          else {
             // print other values without defined label
             const auto *adminLevel=dynamic_cast<const osmscout::AdminLevelFeatureValue*>(value);
-            if (adminLevel!=NULL){
+            if (adminLevel!=NULL) {
               std::cout << ": " << (int)adminLevel->GetAdminLevel();
             }
           }
@@ -80,27 +82,27 @@ void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& descri
   }
 
   if (place.GetPOI()) {
-    std::cout << "  - POI:      " << place.GetPOI()->name << std::endl;
+    std::cout << "  - POI:      " << osmscout::UTF8StringToLocaleString(place.GetPOI()->name) << std::endl;
     if (place.GetObjectFeatures()){
       std::cout << "  - type:     " << place.GetObjectFeatures()->GetType()->GetName() << std::endl;
     }
   }
 
   if (place.GetAddress()) {
-    std::cout << "  - address:  " << place.GetAddress()->name << std::endl;
+    std::cout << "  - address:  " << osmscout::UTF8StringToLocaleString(place.GetAddress()->name) << std::endl;
   }
 
   if (place.GetLocation()) {
-    std::cout << "  - location: " << place.GetLocation()->name << std::endl;
+    std::cout << "  - location: " << osmscout::UTF8StringToLocaleString(place.GetLocation()->name) << std::endl;
   }
 
   if (place.GetAdminRegion()) {
-    std::cout << "  - region:   " << place.GetAdminRegion()->name << std::endl;
+    std::cout << "  - region:   " << osmscout::UTF8StringToLocaleString(place.GetAdminRegion()->name) << std::endl;
   }
-  
+
   // print all features of this place
   std::cout << std::endl;
-  if (place.GetObjectFeatures()){
+  if (place.GetObjectFeatures()) {
     DumpFeatures(*place.GetObjectFeatures());
   }
 }
@@ -123,7 +125,7 @@ void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
     if (offset!=adminRegion->regionOffset){
       std::cout << "parent ";
     }
-    std::cout << "region: " << region->name << std::endl;
+    std::cout << "region: " << osmscout::UTF8StringToLocaleString(region->name) << std::endl;
 
     if(region->object.type==osmscout::RefType::refArea){
       osmscout::AreaRef area;
@@ -156,6 +158,14 @@ int main(int argc, char* argv[])
     std::cerr << "lat is not numeric!" << std::endl;
     return 1;
   }
+
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
+  }
+
   osmscout::log.Debug(false);
 
   osmscout::GeoCoord location(lat,lon);
