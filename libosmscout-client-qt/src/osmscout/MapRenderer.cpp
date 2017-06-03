@@ -151,8 +151,6 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                                  renderProjection.GetMagnification(),
                                  tiles)) {
 
-        std::cout << "Rendering " << tiles.size() << " ground tiles for region " << boundingBox.GetDisplayText() << std::endl;
-
         mapPainter->DrawGroundTiles(renderProjection,
                                     *drawParameter,
                                     tiles,
@@ -175,7 +173,6 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           db->styleConfig->GetUnknownFillStyle(renderProjection, unknownFillStyle);
           if (unknownFillStyle){
             osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
-            std::cout << "Rendering background using fill style 'unknown'" << std::endl;
             p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                         QColor::fromRgbF(backgroundColor.GetR(),
                                          backgroundColor.GetG(),
@@ -186,7 +183,6 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
       }
       if (!backgroundRendered){
         // as backup, when "unknown" style is not defined, use black color
-        std::cout << "Rendering background using black color (1)" << std::endl;
         p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                     QBrush(QColor::fromRgbF(0,0,0,1)));
         backgroundRendered=true;
@@ -208,7 +204,6 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                                        p);
   }
   if (drawCanvasBackground && !backgroundRendered){
-    std::cout << "Rendering background using black color (2)" << std::endl;
     p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                 QBrush(QColor::fromRgbF(0,0,0,1)));
   }
