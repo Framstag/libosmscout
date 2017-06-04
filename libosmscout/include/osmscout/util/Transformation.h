@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include <iostream>
-#include <unordered_set>
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>
