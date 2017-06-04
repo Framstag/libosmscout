@@ -37,91 +37,59 @@
 
 namespace osmscout {
 
-  struct WayShieldData
-  {
-    PathShieldStyleRef shieldStyle;
-    std::string        label;
-    WayRef             way;
-  };
-
-  /*
   static void GetGridPoints(const std::vector<Point>& nodes,
-                            double gridSize,
-                            std::unordered_set<ScanCell>& cells)
+                            double gridSizeHoriz,
+                            double gridSizeVert,
+                            std::set<GeoCoord>& intersections)
   {
     assert(nodes.size()>=2);
 
-    size_t start=0;
-    size_t end=nodes.size()-1;
+    for (size_t i=0; i<nodes.size()-1; i++) {
+      size_t cellXStart=(size_t)((nodes[i].GetLon()+180.0)/gridSizeHoriz);
+      size_t cellYStart=(size_t)((nodes[i].GetLat()+90.0)/gridSizeVert);
 
-    //std::cout << ">>>" << std::endl;
+      size_t cellXEnd=(size_t)((nodes[i+1].GetLon()+180.0)/gridSizeHoriz);
+      size_t cellYEnd=(size_t)((nodes[i+1].GetLat()+90.0)/gridSizeVert);
 
-    double gridHalf=gridSize/2.0;
-    size_t current=start;
-    size_t next=current+1;
-    double cGridX=floor((buffer[current].GetX())/gridSize);
-    double cGridY=floor((buffer[current].GetY())/gridSize);
+      if (cellXStart!=cellXEnd) {
+        double lower=std::min(cellYStart,cellYEnd)*gridSizeVert-90.0;
+        double upper=(std::max(cellYStart,cellYEnd)+1)*gridSizeVert-90.0;
 
-    while (next<=end) {
-      double nGridX=floor((buffer[next].GetX())/gridSize);
-      double nGridY=floor((buffer[next].GetY())/gridSize);
+        for (size_t xIndex=cellXStart+1; xIndex<=cellXEnd; xIndex++) {
+          GeoCoord intersection;
 
-      //std::cout << cGridX << "," << cGridY << " " << nGridX << "," << nGridY << std::endl;
+          double xCoord=xIndex*gridSizeHoriz-180.0;
 
-      if (cGridX!=nGridX) {
-        for (double g=cGridX+1; g<=nGridX; g++) {
-          double   vLineX      =g*gridSize;
-          double   vLineY1     =cGridY*gridSize;
-          double   vLineY2     =(cGridY+1)*gridSize;
-          ScanCell line1       =ScanCell(buffer[current].GetX(),
-                                         buffer[current].GetY());
-          ScanCell line2       =ScanCell(buffer[next].GetX(),
-                                         buffer[next].GetY());
-          ScanCell vLine1      =ScanCell((int)vLineX,(int)vLineY1);
-          ScanCell vLine2      =ScanCell((int)vLineX,(int)vLineY2);
-          ScanCell intersection=ScanCell(0,0);
-
-          //std::cout << "Intersect X: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
-          //std::cout << " vs. " << vLine1.GetX() << "," <<  vLine1.GetY() << " - " << vLine2.GetX() << "," << vLine2.GetY() << std::endl;
-
-          if (GetLineIntersectionPixel(line1,line2,vLine1,vLine2,intersection)) {
-            //std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
-            cells.insert(intersection);
+          if (GetLineIntersection(nodes[i].GetCoord(),
+                                  nodes[i+1].GetCoord(),
+                                  GeoCoord(lower,xCoord),
+                                  GeoCoord(upper,xCoord),
+                                  intersection)) {
+            intersections.insert(intersection);
           }
         }
       }
 
-      if (cGridY!=nGridY) {
-        for (double g=cGridY+1; g<=nGridY; g++) {
-          double hLineX1       =cGridX*gridSize;
-          double hLineX2       =(cGridX+1)*gridSize;
-          double hLineY        =g*gridSize;
-          ScanCell line1       =ScanCell(buffer[current].GetX(),
-                                         buffer[current].GetY());
-          ScanCell line2       =ScanCell(buffer[next].GetX(),
-                                         buffer[next].GetY());
-          ScanCell hLine1      =ScanCell((int) hLineX1,(int) hLineY);
-          ScanCell hLine2      =ScanCell((int) hLineX2,(int) hLineY);
-          ScanCell intersection=ScanCell(0,0);
+      if (cellYStart!=cellYEnd) {
+        double lower=std::min(cellXStart,cellXEnd)*gridSizeHoriz-180.0;
+        double upper=(std::max(cellXStart,cellXEnd)+1)*gridSizeHoriz-180.0;
 
-          //std::cout << "Intersect Y: " << line1.GetX() << "," << line1.GetY() << " - " << line2.GetX() << "," << line2.GetY();
-          //std::cout << " vs. " << hLine1.GetX() << "," <<  hLine1.GetY() << " - " << hLine2.GetX() << "," << hLine2.GetY() << std::endl;
+        for (size_t yIndex=cellYStart+1; yIndex<=cellYEnd; yIndex++) {
+          GeoCoord intersection;
 
-          if (GetLineIntersectionPixel(line1,line2,hLine1,hLine2,intersection)) {
-            //std::cout << "=> " << intersection.GetX() << "," << intersection.GetY() << std::endl;
-            cells.insert(intersection);
+          double yCoord=yIndex*gridSizeVert-90.0;
+
+          if (GetLineIntersection(nodes[i].GetCoord(),
+                                  nodes[i+1].GetCoord(),
+                                  GeoCoord(yCoord,lower),
+                                  GeoCoord(yCoord,upper),
+                                  intersection)) {
+            intersections.insert(intersection);
           }
         }
       }
-
-      cGridX=nGridX;
-      cGridY=nGridY;
-      current++;
-      next++;
     }
-
-    //std::cout << "<<<" << std::endl;
-  }*/
+  }
 
   /**
    * Return if a > b, a should be drawn before b
@@ -857,10 +825,13 @@ namespace osmscout {
                                          const std::string& text,
                                          const std::vector<Point>& nodes)
   {
-    /*
-    double                       fontHeight;
-    const LabelStyleRef&         style=shieldStyle->GetShieldStyle();
-    std::unordered_set<ScanCell> gridPoints;
+    if (text!="A 2") {
+      //return;
+    }
+
+    double               fontHeight;
+    const LabelStyleRef& style=shieldStyle->GetShieldStyle();
+    std::set<GeoCoord>   gridPoints;
 
     GetFontHeight(projection,
                   parameter,
@@ -868,10 +839,17 @@ namespace osmscout {
                   fontHeight);
 
     SymbolRef symbol=styleConfig->GetSymbol("marker");
-    double    gridSize=projection.ConvertWidthToPixel(30.0);
+
+    double gridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
+    double gridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
+
+    GeoBox dimensions;
+
+    projection.GetDimensions(dimensions);
 
     GetGridPoints(nodes,
-                  gridSize,
+                  gridSizeHoriz,
+                  gridSizeVert,
                   gridPoints);
 
     double frameHoriz=5;
@@ -886,30 +864,26 @@ namespace osmscout {
                      text,
                      xOff,yOff,width,height);
 
-    if (text=="A 46") {
-      std::cout << text << " " << gridSize << ":" << std::endl;
-    }
-    for (const auto& gridPoint : gridPoints) {
-      if (gridPoint.x<0 || gridPoint.x>projection.GetWidth()) {
-        continue;
-      }
-      if (gridPoint.y<0 || gridPoint.y>projection.GetHeight()) {
-        continue;
-      }
 
-      if (text=="A 46") {
-        std::cout << gridPoint.x << "," << gridPoint.y << " ";
+    for (const auto& gridPoint : gridPoints) {
+      double x,y;
+
+      projection.GeoToPixel(gridPoint,x,y);
+
+      /*
+      if (x<0 || x>projection.GetWidth()) {
+        continue;
+      }
+      if (y<0 || y>projection.GetHeight()) {
+        continue;
       }
 
       DrawSymbol(projection,
                  parameter,
                  *symbol,
-                 gridPoint.x,gridPoint.y);
-      continue;
+                 x,y);*/
 
       LabelData labelBox;
-      double    x=gridPoint.GetX();
-      double    y=gridPoint.GetY();
 
       labelBox.id=nextLabelId++;
       labelBox.bx1=x-width/2-frameHoriz;
@@ -929,9 +903,6 @@ namespace osmscout {
       labels.Placelabel(labelBox,
                         label);
     }
-    if (text=="A 46") {
-      std::cout << std::endl;
-    }*/
   }
 
   /**
@@ -1618,64 +1589,19 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const MapData& data)
   {
-    std::vector<WayShieldData> shieldData;
-    double                     gridSize=projection.ConvertWidthToPixel(30.0);
-    GeoBox                     boundingBox;
-
-    projection.GetDimensions(boundingBox);
-
-    std::cout << "3cm => " << gridSize << " pixel => " << boundingBox.GetWidth()*gridSize/projection.GetWidth() << " delta lon " << boundingBox.GetHeight()*gridSize/projection.GetHeight() << " delta lat" << std::endl;
-
-    shieldData.reserve(data.ways.size()+data.poiWays.size());
-
     for (const auto& way : data.ways) {
-      PathShieldStyleRef shieldStyle;
-
-      styleConfig.GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
-                                        projection,
-                                        shieldStyle);
-
-      if (!shieldStyle) {
-        continue;
-      }
-
-      std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
-                                                                way->GetFeatureValueBuffer());
-
-      if (shieldLabel.empty()) {
-        continue;
-      }
-
-      shieldData.push_back(WayShieldData{shieldStyle,shieldLabel,way});
+      DrawWayShieldLabel(styleConfig,
+                         projection,
+                         parameter,
+                         *way);
     }
 
     for (const auto& way : data.poiWays) {
-      PathShieldStyleRef shieldStyle;
-
-      styleConfig.GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
-                                        projection,
-                                        shieldStyle);
-
-      if (!shieldStyle) {
-        continue;
-      }
-
-      std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
-                                                                way->GetFeatureValueBuffer());
-
-      if (shieldLabel.empty()) {
-        continue;
-      }
-
-      shieldData.push_back(WayShieldData{shieldStyle,shieldLabel,way});
+      DrawWayShieldLabel(styleConfig,
+                         projection,
+                         parameter,
+                         *way);
     }
-
-    /*
-    DrawWayShieldLabel(styleConfig,
-                       projection,
-                       parameter,
-                       *way);*/
-
   }
 
   void MapPainter::DrawWayContourLabels(const StyleConfig& styleConfig,
