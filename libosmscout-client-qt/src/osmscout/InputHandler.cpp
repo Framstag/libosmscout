@@ -255,9 +255,11 @@ void MoveHandler::onTimeout()
     //qDebug() << "move: " << QString::fromStdString(view.center.GetDisplayText()) << "   by: " << move;
     double startMag = startMapView.magnification.GetMagnification();
     double targetMag = targetMagnification.GetMagnification();
-    projection.Set(startMapView.center,
-            osmscout::Magnification(startMag + ((targetMag - startMag) * scale) ),
-            dpi, 1000, 1000);
+    if (!projection.Set(startMapView.center,
+                        osmscout::Magnification(startMag + ((targetMag - startMag) * scale) ),
+                        dpi, 1000, 1000)) {
+      return;
+    }
 
     if (!projection.IsValid()) {
         //TriggerMapRendering();
@@ -329,6 +331,7 @@ bool MoveHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRe
     timer.setInterval(ANIMATION_TICK);
     timer.start();
     onTimeout();
+
     return true;
 }
 
@@ -354,7 +357,9 @@ bool MoveHandler::moveNow(QVector2D move)
 
     //qDebug() << "move: " << QString::fromStdString(view.center.GetDisplayText()) << "   by: " << move;
 
-    projection.Set(view.center, view.magnification, dpi, 1000, 1000);
+    if (!projection.Set(view.center, view.magnification, dpi, 1000, 1000)) {
+      return false;
+    }
 
     if (!projection.IsValid()) {
         //TriggerMapRendering();

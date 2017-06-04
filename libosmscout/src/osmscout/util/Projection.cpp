@@ -309,6 +309,31 @@ namespace osmscout {
       return true;
     }
 
+    // Copy of the old state
+
+    double        oldLon=this->lon;
+    double        oldLat=this->lat;
+    double        oldAngle=this->angle;
+    Magnification oldMagnification=this->magnification;
+    double        oldDpi=this->dpi;
+    size_t        oldWidth=this->width;
+    size_t        oldHeight=this->height;
+
+    double        oldPixelSize=this->pixelSize;
+    double        oldMeterInPixel=this->meterInPixel;
+    double        oldMeterInMM=this->meterInMM;
+
+    bool          oldValid=valid;
+
+    double        oldLatOffset=this->latOffset;
+    double        oldAngleSin=this->angleSin;
+    double        oldAngleCos=this->angleCos;
+    double        oldAngleNegSin=this->angleNegSin;
+    double        oldAngleNegCos=this->angleNegCos;
+
+    double        oldScale=this->scale;
+    double        oldScaleGradtoRad=this->scaleGradtorad;
+
     valid=true;
 
     // Make a copy of the context information
@@ -345,12 +370,12 @@ namespace osmscout {
     // Width of the visible area at the equator
     double groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
 
+    // Width of the visible area in meter
+    double groundWidthVisibleMeter=groundWidthEquatorMeter*cos(lat*gradtorad);
+
     // Resulting projection scale factor
     scale=width/(2*M_PI*groundWidthEquatorMeter/earthExtentMeter);
     scaleGradtorad=scale*gradtorad;
-
-    // Width of the visible area in meter
-    double groundWidthVisibleMeter=groundWidthEquatorMeter*cos(lat*gradtorad);
 
     // Size of one pixel in meter
     pixelSize=groundWidthVisibleMeter/width;
@@ -386,11 +411,44 @@ namespace osmscout {
 
     PixelToGeo((double)width,0.0,brLon,brLat);
 
-    latMin=std::min(std::min(tlLat,trLat),std::min(blLat,brLat));
-    latMax=std::max(std::max(tlLat,trLat),std::max(blLat,brLat));
+    double latMin=std::min(std::min(tlLat,trLat),std::min(blLat,brLat));
+    double latMax=std::max(std::max(tlLat,trLat),std::max(blLat,brLat));
 
-    lonMin=std::min(std::min(tlLon,trLon),std::min(blLon,brLon));
-    lonMax=std::max(std::max(tlLon,trLon),std::max(blLon,brLon));
+    double lonMin=std::min(std::min(tlLon,trLon),std::min(blLon,brLon));
+    double lonMax=std::max(std::max(tlLon,trLon),std::max(blLon,brLon));
+
+    if (lonMin<-180.0 || lonMax>180.0 || latMin<-90.0 || latMax>90.0) {
+      // Reset state to old state
+      this->lon=oldLon;
+      this->lat=oldLat;
+      this->angle=oldAngle;
+      this->magnification=oldMagnification;
+      this->dpi=oldDpi;
+      this->width=oldWidth;
+      this->height=oldHeight;
+
+      this->pixelSize=oldPixelSize;
+      this->meterInPixel=oldMeterInPixel;
+      this->meterInMM=oldMeterInMM;
+
+      this->valid=oldValid;
+
+      this->latOffset=oldLatOffset;
+      this->angleSin=oldAngleSin;
+      this->angleCos=oldAngleCos;
+      this->angleNegSin=oldAngleNegSin;
+      this->angleNegCos=oldAngleNegCos;
+
+      this->scale=oldScale;
+      this->scaleGradtorad=oldScaleGradtoRad;
+
+      return false;
+    }
+
+    this->latMin=latMin;
+    this->latMax=latMax;
+    this->lonMin=lonMin;
+    this->lonMax=lonMax;
 
     // derivation of "latToYPixel" function in projection center
     double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
