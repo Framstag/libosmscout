@@ -518,7 +518,7 @@ namespace osmscout
 
             OptimizeAreas(allAreas[type->GetIndex()],
                           optimizedAreas,
-                          1280,768,
+                          800,480,
                           dpi,
                           pixel,
                           magnification,
