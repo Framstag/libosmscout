@@ -2253,7 +2253,7 @@ namespace osmscout {
       }
       else {
         if (candidateIntersections.size()%2!=0) {
-          progress.Warning("Odd count of intersections: "+candidateIntersections.size());
+          progress.Warning("Odd count of intersections: "+NumberToString(candidateIntersections.size()));
           continue;
         }
 
@@ -2325,7 +2325,7 @@ namespace osmscout {
       }
 
       if (intersections.size()%2!=0) {
-        progress.Warning("Odd count of intersections: "+intersections.size());
+        progress.Warning("Odd count of intersections: "+NumberToString(intersections.size()));
         continue;
       }
 
