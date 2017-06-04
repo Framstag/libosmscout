@@ -33,7 +33,7 @@ summerized as "map data".
 ## The `Database`
 
 The `Database` class wraps most of the above files, controlling initialisation,
-deinitialsation and access to these files. `Databse` is mainly a convinience
+deinitialsation and access to these files. `Database` is mainly a convinience
 wrapper to the low level data and index classes.
 
 ## Characteristics of map data as retrieved the Database

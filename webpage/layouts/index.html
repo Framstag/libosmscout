@@ -4,21 +4,23 @@
 {{ partial "head.html" . }}
 
 <body>
+
 {{ partial "header.html" . }}
-{{ partial "navigation.html" . }}
 
 <div id="content">
+{{ partial "navigation.html" . }}
 
-<section>
-{{ range where .Data.Pages "Title" "About" }}
-  <h1>{{ .Title }}</h1>
-  {{ .Content }}
-{{ end }}
-</section>
+<main>
+<h1>{{ .Title }}</h1>
+{{ .Content }}
+</main>
+
+<div id="secondary">
+</div>
 
 </div>
 
-{{partial "footer.html" . }}
+{{ partial "footer.html" . }}
 
 </body>
 </html>

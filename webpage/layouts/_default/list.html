@@ -6,16 +6,24 @@
 <body>
 
 {{ partial "header.html" . }}
-{{ partial "navigation.html" . }}
 
 <div id="content">
+{{ partial "navigation.html" . }}
+
+<main>
 <h1>{{ .Title }}</h1>
+{{ .Content }}
 
 <ul>
   {{ range .Data.Pages }}
     {{ .Render "li"}}
   {{ end }}
 </ul>
+</main>
+
+<div id="secondary">
+</div>
+
 </div>
 
 {{ partial "footer.html" . }}
