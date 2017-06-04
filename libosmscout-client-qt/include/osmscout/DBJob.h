@@ -39,9 +39,10 @@ class OSMSCOUT_CLIENT_QT_API DBJob : public QObject{
   Q_OBJECT
 
 protected:
-  std::list<DBInstanceRef> databases; //!< borrowed databases
-  QReadLocker              *locker;   //!< database locker
-  QThread                  *thread;   //!< job thread
+  osmscout::BasemapDatabaseRef basemapDatabase; //!< Optional reference to the basemap database
+  std::list<DBInstanceRef>     databases;       //!< borrowed databases
+  QReadLocker                  *locker;         //!< database locker
+  QThread                      *thread;         //!< job thread
 
 public:
   DBJob();

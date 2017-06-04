@@ -42,6 +42,7 @@ void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   if (thread!=QThread::currentThread()){
     qWarning() << "Run" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
+  this->basemapDatabase=basemapDatabase;
   this->databases=databases;
   this->locker=locker;
 }
