@@ -115,13 +115,15 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
                          QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
                          osmscout::MapParameter *drawParameter,
                          QPainter *p,
-                         bool drawCanvasBackground):
+                         bool drawCanvasBackground,
+                         bool renderBasemap):
   renderProjection(renderProjection),
   tiles(tiles),
   drawParameter(drawParameter),
   p(p),
   success(false),
-  drawCanvasBackground(drawCanvasBackground)
+  drawCanvasBackground(drawCanvasBackground),
+  renderBasemap(renderBasemap)
 {
 }
 
@@ -138,7 +140,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   bool backgroundRendered=false;
   success=true;
 
-  if (basemapDatabase && !databases.empty()) {
+  if (renderBasemap && basemapDatabase && !databases.empty()) {
     osmscout::MapPainterQt* mapPainter=databases.front()->GetPainter();
     osmscout::WaterIndexRef waterIndex=basemapDatabase->GetWaterIndex();
 
