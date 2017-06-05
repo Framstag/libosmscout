@@ -825,10 +825,6 @@ namespace osmscout {
                                          const std::string& text,
                                          const std::vector<Point>& nodes)
   {
-    if (text!="A 2") {
-      //return;
-    }
-
     double               fontHeight;
     const LabelStyleRef& style=shieldStyle->GetShieldStyle();
     std::set<GeoCoord>   gridPoints;
@@ -840,16 +836,9 @@ namespace osmscout {
 
     SymbolRef symbol=styleConfig->GetSymbol("marker");
 
-    double gridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
-    double gridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
-
-    GeoBox dimensions;
-
-    projection.GetDimensions(dimensions);
-
     GetGridPoints(nodes,
-                  gridSizeHoriz,
-                  gridSizeVert,
+                  shieldGridSizeHoriz,
+                  shieldGridSizeVert,
                   gridPoints);
 
     double frameHoriz=5;
@@ -2110,6 +2099,9 @@ namespace osmscout {
     areaMinDimension   =projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
     contourLabelOffset =projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
     contourLabelSpace  =projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
+
+    shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
+    shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
 
     waysSegments  =0;
     waysDrawn     =0;

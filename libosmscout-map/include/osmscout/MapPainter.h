@@ -279,6 +279,8 @@ namespace osmscout {
     FillStyle                    areaMarkStyle;      //!< Marker fill style for internal debugging
     double                       contourLabelOffset; //!< Same value as in MapParameter but converted to pixel
     double                       contourLabelSpace;  //!< Same value as in MapParameter but converted to pixel
+    double                       shieldGridSizeHoriz;//!< Width of a cell for shield label placement
+    double                       shieldGridSizeVert; //!< Height of a cell for shield label placement
     //@}
 
   private:
