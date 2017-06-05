@@ -1,8 +1,30 @@
+/*
+  This source is part of the libosmscout-map library
+  Copyright (C) 2017  Fanny Monori
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+*/
+
+#include <GL/glew.h>
+
 #include <GLFW/glfw3.h>
 #include <iostream>
 
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
+#include <osmscout/MapPainterOpenGL.h>
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -85,22 +107,24 @@ int main(int argc, char* argv[])
 
   osmscout::GeoBox BoundingBox;
   bool b = database.get()->GetBoundingBox(BoundingBox);
-  std::cout << " " << BoundingBox.GetCenter().GetLat() << " " << BoundingBox.GetCenter().GetLon() << std::endl;
+
 
   osmscout::MercatorProjection  projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
 
-  projection.Set(BoundingBox.GetCenter(),
-                 osmscout::Magnification(1),
-                 100,
+  std::list<osmscout::TileRef> tiles;
+
+  drawParameter.SetFontSize(3.0);
+
+  projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
+                 osmscout::Magnification(10000),
+                 96,
                  width,
                  height);
 
-  std::list<osmscout::TileRef> tiles;
-
-  mapService->LookupTiles(projection,tiles);
+  mapService->LookupTiles(10000,BoundingBox, tiles);
   mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
   mapService->AddTileDataToMapData(tiles,data);
 
@@ -108,7 +132,7 @@ int main(int argc, char* argv[])
   if (!glfwInit())
     return -1;
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   window = glfwCreateWindow(width, height, "OSMScoutOpenGL", NULL, NULL);
   if (!window)
   {
@@ -121,11 +145,16 @@ int main(int argc, char* argv[])
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
+  osmscout::MapPainterOpenGL *renderer = new osmscout::MapPainterOpenGL();
+  renderer->loadData(data, drawParameter, projection, styleConfig);
+
   while (!glfwWindowShouldClose(window))
   {
-    glClear(GL_COLOR_BUFFER_BIT);
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    renderer->DrawMap();
+
   }
 
   glfwDestroyWindow(window);
