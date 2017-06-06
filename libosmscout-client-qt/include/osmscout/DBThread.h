@@ -147,7 +147,6 @@ public slots:
                  const QString &suffix="");
   void Initialize();
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
-  void Finalize();
 
   /**
    * Start retrieving place informations based on objects on or near the location.
@@ -179,6 +178,7 @@ public slots:
   void SearchForLocations(const QString searchPattern, int limit);
 
 protected:
+  QThread                            *backgroundThread;
   MapManagerRef                      mapManager;
   QString                            basemapLookupDirectory;
   SettingsRef                        settings;
@@ -234,7 +234,8 @@ protected:
   bool isInitializedInternal();
 
 public:
-  DBThread(QString basemapLookupDirectory,
+  DBThread(QThread *backgroundThread,
+           QString basemapLookupDirectory,
            QStringList databaseLookupDirectories,
            QString iconDirectory,
            SettingsRef settings);
