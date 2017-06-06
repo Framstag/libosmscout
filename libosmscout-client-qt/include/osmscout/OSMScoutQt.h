@@ -161,8 +161,7 @@ private:
   size_t      offlineTileCacheSize;
 
 private:
-  OSMScoutQt(QThread *backgroundThread,
-             SettingsRef settings,
+  OSMScoutQt(SettingsRef settings,
              DBThreadRef dbThread,
              QString iconDirectory,
              QString cacheLocation,
