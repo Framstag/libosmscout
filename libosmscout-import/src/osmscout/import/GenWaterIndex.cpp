@@ -355,7 +355,7 @@ namespace osmscout {
             if (stateMap.IsInAbsolute(coord.x,coord.y)) {
               if (stateMap.GetStateAbsolute(coord.x,coord.y)==WaterIndexProcessor::unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Assume land: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
+                std::cout << "Assume land: " << coord.x-stateMap.GetXStart() << "," << coord.y-stateMap.GetYStart() << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
 #endif
                 stateMap.SetStateAbsolute(coord.x,coord.y,WaterIndexProcessor::land);
               }

@@ -68,6 +68,9 @@ namespace osmscout {
     cellXCount=cellXEnd-cellXStart+1;
     cellYCount=cellYEnd-cellYStart+1;
 
+#if defined(DEBUG_TILING)
+    std::cout << "Setting state box to: " << cellXStart << " - " << cellXEnd << " x " << cellYStart << " - " << cellYEnd << std::endl;
+#endif
     uint32_t size=(cellXCount*cellYCount)/4;
 
     if ((cellXCount*cellYCount)%4>0) {
@@ -245,7 +248,7 @@ namespace osmscout {
         if (stateMap.IsInAbsolute(coord.x,coord.y)) {
           if (stateMap.GetStateAbsolute(coord.x,coord.y)==unknown) {
 #if defined(DEBUG_TILING)
-            std::cout << "Coastline: " << coord.x-level.cellXStart << "," << coord.y-level.cellYStart << " " << coastline->id << std::endl;
+            std::cout << "Coastline: " << coord.x-stateMap.GetXStart() << "," << coord.y-stateMap.GetYStart() << " " << coastline->id << std::endl;
 #endif
             stateMap.SetStateAbsolute(coord.x,coord.y,coast);
           }
@@ -634,7 +637,7 @@ namespace osmscout {
         fillWater=true;
       }
 
-      if (fillWater){
+      if (fillWater) {
         GroundTile groundTile(GroundTile::water);
 #if defined(DEBUG_TILING)
         std::cout << "Add water base to tile with islands: " << coord.x << "," << coord.y << std::endl;

@@ -79,12 +79,12 @@ CONST
   UINT labelPrioMillionCity         = 6;
   UINT labelPrioBigCity             = 7;
   UINT labelPrioCity                = 8;
-  
+
   UINT labelShieldMotorway          = 9;
   UINT labelShieldTrunk             = 11;
   UINT labelShieldPrimary           = 11;
-  
-  
+
+
   UINT labelPrioTown                = 12;
   UINT labelPrioVillage             = 13;
   UINT labelPrioHamlet              = 14;
@@ -492,7 +492,6 @@ STYLE
 
     [TYPE _tile_sea] AREA {color: @waterColor;}
     //[TYPE _tile_coast] AREA {color: /*@coastColor;*/@waterColor;}
-    //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
     [TYPE _tile_land] AREA {color: @landColor;}
     [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
