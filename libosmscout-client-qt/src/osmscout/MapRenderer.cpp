@@ -115,13 +115,15 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
                          QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
                          osmscout::MapParameter *drawParameter,
                          QPainter *p,
-                         bool drawCanvasBackground):
+                         bool drawCanvasBackground,
+                         bool renderBasemap):
   renderProjection(renderProjection),
   tiles(tiles),
   drawParameter(drawParameter),
   p(p),
   success(false),
-  drawCanvasBackground(drawCanvasBackground)
+  drawCanvasBackground(drawCanvasBackground),
+  renderBasemap(renderBasemap)
 {
 }
 
@@ -129,12 +131,38 @@ DBRenderJob::~DBRenderJob()
 {
 }
 
-void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker)
+void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                      const std::list<DBInstanceRef> &databases,
+                      QReadLocker *locker)
 {
-  DBJob::Run(databases,locker);
+  DBJob::Run(basemapDatabase,databases,locker);
+
   bool backgroundRendered=false;
   success=true;
-  
+
+  if (renderBasemap && basemapDatabase && !databases.empty()) {
+    osmscout::MapPainterQt* mapPainter=databases.front()->GetPainter();
+    osmscout::WaterIndexRef waterIndex=basemapDatabase->GetWaterIndex();
+
+    if (mapPainter && waterIndex) {
+      osmscout::GeoBox                boundingBox;
+      std::list<osmscout::GroundTile> tiles;
+
+      renderProjection.GetDimensions(boundingBox);
+      if (waterIndex->GetRegions(boundingBox,
+                                 renderProjection.GetMagnification(),
+                                 tiles)) {
+
+        mapPainter->DrawGroundTiles(renderProjection,
+                                    *drawParameter,
+                                    tiles,
+                                    p);
+
+        backgroundRendered=true;
+      }
+    }
+  }
+
   for (auto &db:databases){
     if (!tiles.contains(db->path)){
       osmscout::log.Debug() << "Skip database " << db->path.toStdString();
@@ -164,7 +192,7 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
     }
     std::list<osmscout::TileRef> tileList=tiles[db->path].values().toStdList();
     osmscout::MapData            data;
-    
+
     db->mapService->AddTileDataToMapData(tileList,data);
 
     if (drawParameter->GetRenderSeaLand()) {
@@ -176,11 +204,11 @@ void DBRenderJob::Run(const std::list<DBInstanceRef> &databases, QReadLocker *lo
                                        *drawParameter,
                                        data,
                                        p);
-
   }
   if (drawCanvasBackground && !backgroundRendered){
     p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                 QBrush(QColor::fromRgbF(0,0,0,1)));
   }
+
   Close();
 }

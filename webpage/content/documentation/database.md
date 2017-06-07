@@ -2,12 +2,12 @@
 date: "2016-05-29T19:50:42+02:00"
 title: "Database files"
 description: "Description of the indivudal database files and their function"
-weight: 7
+weight: 8
 
 menu:
   main:
     Parent: "documentation"
-    Weight: 7
+    Weight: 8
 ---
 
 This document list the files that are processed as part of an import.

@@ -38,16 +38,20 @@ private:
   QPainter *p;
   bool success;
   bool drawCanvasBackground;
+  bool renderBasemap;
 
 public:
   DBRenderJob(osmscout::MercatorProjection renderProjection,
               QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
               osmscout::MapParameter *drawParameter,
               QPainter *p,
-              bool drawCanvasBackground);
+              bool drawCanvasBackground=true,
+              bool renderBasemap=true);
   virtual ~DBRenderJob();
 
-  virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);
+  virtual void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                   const std::list<DBInstanceRef> &databases,
+                   QReadLocker *locker);
 
   inline bool IsSuccess(){
     return success;
@@ -62,7 +66,7 @@ protected:
   SettingsRef settings;
   DBThreadRef dbThread;
   QMutex      lock;
-  
+
   double      mapDpi;
   bool        renderSea;
 

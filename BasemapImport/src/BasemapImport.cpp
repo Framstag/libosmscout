@@ -17,8 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include <iostream>
 #include <memory>
@@ -32,21 +32,21 @@
 #include <osmscout/import/Import.h>
 #include <osmscout/import/ShapeFileScanner.h>
 
-#include <osmscout/import/GenWaterIndex.h>
+#include <osmscout/import/WaterIndexProcessor.h>
 
 class CoastlineShapeFileVisitor : public osmscout::ShapeFileVisitor
 {
 private:
-  osmscout::Progress                                   &progress;
-  uint32_t                                             coastlineCount;
-  bool                                                 continuation;
-  std::vector<osmscout::GeoCoord>                      coordBuffer;
-  std::vector<osmscout::WaterIndexGenerator::CoastRef> coasts;
-  osmscout::Id                                         currentId;
+  osmscout::Progress                                 &progress;
+  uint32_t                                           coastlineCount;
+  bool                                               continuation;
+  std::vector<osmscout::GeoCoord>                    coordBuffer;
+  osmscout::Id                                       currentId;
+public:
+  std::list<osmscout::WaterIndexProcessor::CoastRef> coasts;
 
 public:
-  CoastlineShapeFileVisitor(const std::string& destinationDirectory,
-                            const std::string& coastlineShapeFile,
+  CoastlineShapeFileVisitor(const std::string& coastlineShapeFile,
                             osmscout::Progress& progress)
     : progress(progress)
   {
@@ -68,18 +68,20 @@ public:
 
   void AddCoast(const std::vector<osmscout::GeoCoord>& coords)
   {
-    osmscout::WaterIndexGenerator::CoastRef coastline=std::make_shared<osmscout::WaterIndexGenerator::Coast>();
+    osmscout::WaterIndexProcessor::CoastRef coastline=std::make_shared<osmscout::WaterIndexProcessor::Coast>();
 
     coastline->id=currentId;
     coastline->isArea=true;
-    coastline->left=osmscout::WaterIndexGenerator::CoastState::water;
-    coastline->right=osmscout::WaterIndexGenerator::CoastState::land;
+    coastline->left=osmscout::WaterIndexProcessor::CoastState::water;
+    coastline->right=osmscout::WaterIndexProcessor::CoastState::land;
 
     coastline->coast.reserve(coords.size());
 
     for (auto& coord : coords) {
       coastline->coast.push_back(osmscout::Point(0,coord));
     }
+
+    coasts.push_back(coastline);
 
     currentId--;
   }
@@ -238,18 +240,133 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
 {
   progress.SetAction("Reading coastline shape file");
 
+  osmscout::FileWriter                              writer;
+  osmscout::WaterIndexProcessor                     processor;
+  std::vector<osmscout::WaterIndexProcessor::Level> levels;
+  size_t                                            indexMinMag=4;
+  size_t                                            indexMaxMag=10;
+
+  levels.reserve(indexMaxMag-indexMinMag+1);
+
+  double cellWidth=360.0;
+  double cellHeight=180.0;
+
+  osmscout::GeoBox boundingBox(osmscout::GeoCoord(-90.0,-180.0),
+                               osmscout::GeoCoord(90.0,180.0));
+
+  for (size_t zoomLevel=0; zoomLevel<=indexMaxMag; zoomLevel++) {
+    if (zoomLevel>=indexMinMag &&
+        zoomLevel<=indexMaxMag) {
+      osmscout::WaterIndexProcessor::Level level;
+
+      level.level=zoomLevel;
+      level.SetBox(boundingBox,
+                   cellWidth,
+                   cellHeight);
+
+      levels.push_back(level);
+    }
+
+    cellWidth=cellWidth/2.0;
+    cellHeight=cellHeight/2.0;
+  }
+
   try {
     osmscout::ShapeFileScanner shapefileScanner(coastlineShapeFile);
-    CoastlineShapeFileVisitor  visitor(destinationDirectory,
-                                       coastlineShapeFile,
+    CoastlineShapeFileVisitor  visitor(coastlineShapeFile,
                                        progress);
 
     shapefileScanner.Open();
     shapefileScanner.Visit(visitor);
     shapefileScanner.Close();
+
+    writer.Open(osmscout::AppendFileToDir(destinationDirectory,
+                                          "water.idx"));
+
+    processor.DumpIndexHeader(writer,
+                              levels);
+    progress.Info("Generating index for level "+osmscout::NumberToString(indexMinMag)+" to "+osmscout::NumberToString(indexMaxMag));
+
+    for (auto& level : levels) {
+      osmscout::Magnification                                    magnification;
+      osmscout::MercatorProjection                               projection;
+      std::list<osmscout::WaterIndexProcessor::CoastRef>         boundingPolygons;
+      std::map<osmscout::Pixel,std::list<osmscout::GroundTile> > cellGroundTileMap;
+
+      magnification.SetLevel(level.level);
+
+      projection.Set(osmscout::GeoCoord(0.0,0.0),magnification,72,640,480);
+
+      progress.SetAction("Building tiles for level "+osmscout::NumberToString(level.level));
+
+      if (!visitor.coasts.empty()) {
+        osmscout::WaterIndexProcessor::Data data;
+
+        // Collects, calculates and generates a number of data about a coastline
+        processor.CalculateCoastlineData(progress,
+                                         osmscout::TransPolygon::fast,
+                                         10.0,
+                                         1.0,
+                                         projection,
+                                         level.stateMap,
+                                         visitor.coasts,
+                                         data);
+
+        // Mark cells that intersect a coastline as coast
+        processor.MarkCoastlineCells(progress,
+                                     level.stateMap,
+                                     data);
+
+        // Fills coords information for cells that intersect a coastline
+        processor.HandleCoastlinesPartiallyInACell(progress,
+                                                   level.stateMap,
+                                                   cellGroundTileMap,
+                                                   data);
+
+        // Fills coords information for cells that completely contain a coastline
+        processor.HandleAreaCoastlinesCompletelyInACell(progress,
+                                                        level.stateMap,
+                                                        data,
+                                                        cellGroundTileMap);
+      }
+
+      // Calculate the cell type for cells directly around coast cells
+      processor.CalculateCoastEnvironment(progress,
+                                          level.stateMap,
+                                          cellGroundTileMap);
+
+      if (!visitor.coasts.empty()) {
+        // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
+        processor.FillWater(progress,
+                            level,
+                            20,
+                            boundingPolygons);
+
+        processor.FillWaterAroundIsland(progress,
+                                        level.stateMap,
+                                        cellGroundTileMap,
+                                        boundingPolygons);
+      }
+
+      // Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
+      processor.FillLand(progress,
+                         level.stateMap);
+
+      processor.CalculateHasCellData(level,
+                                     cellGroundTileMap);
+
+      processor.WriteTiles(progress,
+                           cellGroundTileMap,
+                           level,
+                           writer);
+    }
+
+    writer.Close();
   }
   catch (osmscout::IOException& e) {
     progress.Error(e.GetDescription());
+
+    writer.CloseFailsafe();
 
     return false;
   }

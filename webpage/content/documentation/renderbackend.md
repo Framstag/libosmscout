@@ -2,12 +2,12 @@
 date: "2016-08-10T19:48:00+02:00"
 title: "Render backend requirements"
 description: "Requires to full for render backends"
-weight: 10
+weight: 11
 
 menu:
   main:
     Parent: "documentation"
-    Weight: 10
+    Weight: 11
 ---
 
 The following gives you a list of functionalities a render backend must

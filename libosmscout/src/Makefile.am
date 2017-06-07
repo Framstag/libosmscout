@@ -80,6 +80,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/TypeDistributionDataFile.cpp \
                         osmscout/Database.cpp \
                         osmscout/DebugDatabase.cpp \
+                        osmscout/BasemapDatabase.cpp \
                         osmscout/SRTM.cpp \
                         osmscout/LocationService.cpp \
                         osmscout/POIService.cpp \

@@ -83,25 +83,24 @@ bool OSMScoutQtBuilder::Init()
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
 
-  DBThread* dbThread=new DBThread(mapLookupDirectories,
-                                  iconDirectory,
-                                  settings);
-
   QThread *thread=new QThread();
+  DBThreadRef dbThread=std::make_shared<DBThread>(thread,
+                                                  basemapLookupDirectory,
+                                                  mapLookupDirectories,
+                                                  iconDirectory,
+                                                  settings);
+
   thread->setObjectName("DBThread");
 
   dbThread->connect(thread, SIGNAL(started()), SLOT(Initialize()));
-  dbThread->connect(thread, SIGNAL(finished()), SLOT(Finalize()));
-
   QObject::connect(thread, SIGNAL(finished()),
                    thread, SLOT(deleteLater()));
 
   dbThread->moveToThread(thread);
   thread->start();
 
-  osmScoutInstance=new OSMScoutQt(thread,
-                                  settings,
-                                  std::shared_ptr<DBThread>(dbThread),
+  osmScoutInstance=new OSMScoutQt(settings,
+                                  dbThread,
                                   iconDirectory,
                                   cacheLocation,
                                   onlineTileCacheSize,
@@ -149,14 +148,12 @@ void OSMScoutQt::FreeInstance()
   osmScoutInstance=NULL;
 }
 
-OSMScoutQt::OSMScoutQt(QThread *backgroundThread,
-                       SettingsRef settings,
+OSMScoutQt::OSMScoutQt(SettingsRef settings,
                        DBThreadRef dbThread,
                        QString iconDirectory,
                        QString cacheLocation,
                        size_t onlineTileCacheSize,
                        size_t offlineTileCacheSize):
-        backgroundThread(backgroundThread),
         settings(settings),
         dbThread(dbThread),
         iconDirectory(iconDirectory),
@@ -168,7 +165,6 @@ OSMScoutQt::OSMScoutQt(QThread *backgroundThread,
 
 OSMScoutQt::~OSMScoutQt()
 {
-  backgroundThread->quit();
 }
 
 DBThreadRef OSMScoutQt::GetDBThread()

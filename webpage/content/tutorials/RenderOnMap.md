@@ -2,12 +2,12 @@
 date: "2016-09-25T17:21:58+02:00"
 title:  "Render on top of the map"
 description: "How to render on top of the map"
-weight: 4
+weight: 5
 
 menu:
   main:
     Parent: "tutorials"
-    Weight: 4
+    Weight: 5
 ---
 
 ## Goal of the tutorial

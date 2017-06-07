@@ -53,9 +53,9 @@
 
 #include <osmscout/Route.h>
 
-#include <osmscout/util/Breaker.h>
 #include <osmscout/util/GeoBox.h>
-#include <osmscout/util/StopClock.h>
+
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 
@@ -73,11 +73,10 @@ namespace osmscout {
     The following attributes are currently available:
     * cache sizes.
     */
-  class OSMSCOUT_API DatabaseParameter
+  class OSMSCOUT_API DatabaseParameter CLASS_FINAL
   {
   private:
     unsigned long areaAreaIndexCacheSize;
-    unsigned long areaNodeIndexCacheSize;
 
     unsigned long nodeDataCacheSize;
     unsigned long wayDataCacheSize;
@@ -91,12 +90,9 @@ namespace osmscout {
     DatabaseParameter();
 
     void SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize);
-    void SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize);
     void SetNodeDataCacheSize(unsigned long  size);
     void SetWayDataCacheSize(unsigned long  size);
     void SetAreaDataCacheSize(unsigned long  size);
-    void SetOptimisedWaysDataCacheSize(unsigned long  size);
-    void SetOptimisedAreasDataCacheSize(unsigned long  size);
 
     void SetRouterDataMMap(bool mmap);
     void SetNodesDataMMap(bool mmap);
@@ -104,12 +100,9 @@ namespace osmscout {
     void SetWaysDataMMap(bool mmap);
 
     unsigned long GetAreaAreaIndexCacheSize() const;
-    unsigned long GetAreaNodeIndexCacheSize() const;
     unsigned long GetNodeDataCacheSize() const;
     unsigned long GetWayDataCacheSize() const;
     unsigned long GetAreaDataCacheSize() const;
-    unsigned long GetOptimisedWaysDataCacheSize() const;
-    unsigned long GetOptimisedAreasDataCacheSize() const;
 
     bool GetRouterDataMMap() const;
     bool GetNodesDataMMap() const;
@@ -128,7 +121,7 @@ namespace osmscout {
    * The Database is opened by passing the directory that contains
    * all database files.
    */
-  class OSMSCOUT_API Database
+  class OSMSCOUT_API Database CLASS_FINAL
   {
   private:
     DatabaseParameter               parameter;                //!< Parameterization of this database object

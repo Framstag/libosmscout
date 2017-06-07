@@ -652,7 +652,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
                       tiles,
                       &drawParameter,
                       &p,
-                      /*drawCanvasBackground*/ false);
+                      /*drawCanvasBackground*/ false,
+                      /*renderBasemap*/ !onlineTilesEnabled);
       dbThread->RunJob(&job);
       success=job.IsSuccess();
     }

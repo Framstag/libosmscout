@@ -36,7 +36,6 @@ namespace osmscout {
 
   DatabaseParameter::DatabaseParameter()
   : areaAreaIndexCacheSize(5000),
-    areaNodeIndexCacheSize(1000),
     nodeDataCacheSize(5000),
     wayDataCacheSize(10000),
     areaDataCacheSize(5000),
@@ -51,11 +50,6 @@ namespace osmscout {
   void DatabaseParameter::SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize)
   {
     this->areaAreaIndexCacheSize=areaAreaIndexCacheSize;
-  }
-
-  void DatabaseParameter::SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize)
-  {
-    this->areaNodeIndexCacheSize=areaNodeIndexCacheSize;
   }
 
   void DatabaseParameter::SetNodeDataCacheSize(unsigned long size)
@@ -96,11 +90,6 @@ namespace osmscout {
   unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
     return areaAreaIndexCacheSize;
-  }
-
-  unsigned long DatabaseParameter::GetAreaNodeIndexCacheSize() const
-  {
-    return areaNodeIndexCacheSize;
   }
 
   unsigned long DatabaseParameter::GetNodeDataCacheSize() const
@@ -373,7 +362,7 @@ namespace osmscout {
     }
 
     if (!areaNodeIndex) {
-      areaNodeIndex=std::make_shared<AreaNodeIndex>(/*parameter.GetAreaNodeIndexCacheSize()*/);
+      areaNodeIndex=std::make_shared<AreaNodeIndex>();
 
       StopClock timer;
 

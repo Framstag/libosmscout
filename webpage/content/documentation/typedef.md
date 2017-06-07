@@ -1,13 +1,13 @@
 ---
 date: "2016-06-30T19:50:42+02:00"
 title: "Type definition"
-description: "Typedefnition using *.ost files"
-weight: 9
+description: "Typedefinition using *.ost files"
+weight: 10
 
 menu:
   main:
     Parent: "documentation"
-    Weight: 9
+    Weight: 10
 ---
 
 The OST file defines how data is parsed from the OSM export files (exported
