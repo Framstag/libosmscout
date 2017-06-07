@@ -237,7 +237,7 @@ namespace osmscout {
           std::cout << "DROPPING lower prio '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
 #endif
 
-          // Remobving old label and restart inserting
+          // Removing old label and restart inserting
           DeleteEventsForLabel(event);
           labels.erase(oldLabel);
 
@@ -247,14 +247,35 @@ namespace osmscout {
         else if (label.priority==event->label->priority) {
           LabelDataRef oldLabel=event->label;
 
+          if (event->label->text==label.text) {
+            if (label.bx1<=event->label->bx1) {
 #if defined(LABEL_LAYOUTER_DEBUG)
-          std::cout << "DROPPING same prio and exit '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
+              std::cout << "DROPPING intersecting label with same prio and text '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
 #endif
-          // Drop old and new label
-          DeleteEventsForLabel(event);
-          labels.erase(oldLabel);
+              // Removing old label and restart inserting
+              DeleteEventsForLabel(event);
+              labels.erase(oldLabel);
 
-          return false;
+              // Restart the search :-/
+              event=events.lower_bound(searchEvent);
+            }
+            else {
+#if defined(LABEL_LAYOUTER_DEBUG)
+              std::cout << "CANCEL because intersecting label with same prio and text '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
+#endif
+              return false;
+            }
+          }
+          else {
+#if defined(LABEL_LAYOUTER_DEBUG)
+            std::cout << "DROPPING same prio and exit '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
+#endif
+            // Drop old and new label
+            DeleteEventsForLabel(event);
+            labels.erase(oldLabel);
+
+            return false;
+          }
         }
         else {
 #if defined(LABEL_LAYOUTER_DEBUG)
@@ -266,7 +287,7 @@ namespace osmscout {
       }
       else {
 #if defined(LABEL_LAYOUTER_DEBUG)
-        std::cout << "IGNORING '" << event->label->text << "'" << std::endl;
+        //std::cout << "IGNORING '" << event->label->text << "'" << std::endl;
 #endif
         event++;
       }
