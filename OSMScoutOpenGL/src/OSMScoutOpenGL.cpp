@@ -17,14 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <GL/glew.h>
-
-#include <GLFW/glfw3.h>
 #include <iostream>
-
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
+#include <GLFW/glfw3.h>
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -132,7 +129,7 @@ int main(int argc, char* argv[])
   if (!glfwInit())
     return -1;
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   window = glfwCreateWindow(width, height, "OSMScoutOpenGL", NULL, NULL);
   if (!window)
   {
