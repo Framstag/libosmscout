@@ -27,11 +27,13 @@
 #include <osmscout/TextSearchIndex.h>
 #endif
 
-DBThread::DBThread(QString basemapLookupDirectory,
+DBThread::DBThread(QThread *backgroundThread,
+                   QString basemapLookupDirectory,
                    QStringList databaseLookupDirs,
                    QString iconDirectory,
                    SettingsRef settings)
-  : mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
+  : backgroundThread(backgroundThread),
+    mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
     basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
     mapDpi(-1),
@@ -72,6 +74,7 @@ DBThread::DBThread(QString basemapLookupDirectory,
 
 DBThread::~DBThread()
 {
+  QWriteLocker locker(&lock);
   osmscout::log.Debug() << "DBThread::~DBThread()";
 
   if (basemapDatabase) {
@@ -83,6 +86,7 @@ DBThread::~DBThread()
     db->close();
   }
   databases.clear();
+  backgroundThread->quit(); // deleteLater() is invoked when thread is finished
 }
 
 
@@ -342,17 +346,6 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
   emit databaseLoadFinished(boundingBox);
   emit stylesheetFilenameChanged();
-}
-
-void DBThread::Finalize()
-{
-  QWriteLocker locker(&lock);
-  qDebug() << "Finalize";
-
-  for (auto db:databases){
-    db->close();
-  }
-  databases.clear();
 }
 
 void DBThread::CancelCurrentDataLoading()
