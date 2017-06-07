@@ -40,7 +40,7 @@ if [ "$TARGET" = "build" ]; then
       brew install cmake || true
     fi
 
-    brew install gettext libxml2 protobuf cairo pango qt5
+    brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew
     brew link --force gettext
     brew link --force libxml2
     brew link --force qt5
