@@ -1,7 +1,7 @@
 if(NOT ${OSMSCOUT_BUILD_MAP_OPENGL})
 	message(SEND_ERROR "The OpenGL map drawing backend is required for OSMScoutOpenGL application")
 endif()
-find_package(GLEW 2.0 REQUIRED)
+find_package(GLEW REQUIRED)
 find_package(glfw3 3.2 REQUIRED)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

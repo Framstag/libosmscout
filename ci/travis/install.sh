@@ -30,7 +30,9 @@ if [ "$TARGET" = "build" ]; then
       libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev \
       qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev \
       freeglut3 freeglut3-dev \
-      libmarisa-dev
+      libmarisa-dev \
+      libglew2.0 libglew-dev \
+      libglfw3 libglfw3-dev
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
     brew update
 
