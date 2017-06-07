@@ -79,209 +79,6 @@ namespace osmscout {
     // no code
   }
 
-  MercatorProjectionOld::MercatorProjectionOld()
-    : valid(false),
-      latOffset(0.0),
-      scale(1),
-      scaleGradtorad(0)
-  {
-    // no code
-  }
-
-  bool MercatorProjectionOld::Set(double lon, double lat,
-                                  double angle,
-                                  const Magnification& magnification,
-                                  double dpi,
-                                  size_t width, size_t height)
-  {
-    if (valid &&
-        this->lon==lon &&
-        this->lat==lat &&
-        this->angle==angle &&
-        this->magnification==magnification &&
-        this->dpi==dpi &&
-        this->width==width &&
-        this->height==height) {
-      return true;
-    }
-
-    valid=true;
-
-    // Make a copy of the context information
-    this->lon=lon;
-    this->lat=lat;
-    this->angle=angle;
-    this->magnification=magnification;
-    this->dpi=dpi;
-    this->width=width;
-    this->height=height;
-
-    if (angle!=0.0) {
-      angleSin=sin(angle);
-      angleCos=cos(angle);
-      angleNegSin=-angleSin;
-      angleNegCos=angleCos;
-    }
-    else {
-      angleSin=0;
-      angleNegSin=0;
-      angleCos=1;
-      angleNegCos=1;
-    }
-
-    // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level
-    double resolution=tileWidthZoom0Aquator/256.0*cos(lat*gradtorad)/magnification.GetMagnification();
-
-    double groundWidthMeter=width*tileDPI/dpi*resolution;
-
-    //
-    // Calculation of bounds and scaling factors
-    //
-    // We have three projections:
-    // * Mercator projection of longitude to X-coordinate
-    // * Mercator projection of latitude to Y-coordinate
-    // * Projection of X and Y coordinate as result of mercator projection to on screen coordinates
-    //
-
-    double boxWidth=360.0*groundWidthMeter/earthExtentMeter; // Part of the full earth circle that has to be shown, in degree
-
-    scale=width/(gradtorad*boxWidth);
-    scaleGradtorad = scale * gradtorad;
-
-    pixelSize=groundWidthMeter/width;
-    meterInPixel=1.0/pixelSize;
-    meterInMM=meterInPixel*25.4/dpi;
-
-    // Absolute Y mercator coordinate for latitude
-    latOffset=atanh(sin(lat*gradtorad));
-
-    // top left
-    double tlLat;
-    double tlLon;
-
-    PixelToGeo(0.0,(double)height,tlLon,tlLat);
-
-    // top right
-    double trLat;
-    double trLon;
-
-    PixelToGeo((double)width,(double)height,trLon,trLat);
-
-    // bottom left
-    double blLat;
-    double blLon;
-
-    PixelToGeo(0.0,0.0,blLon,blLat);
-
-    // bottom right
-    double brLat;
-    double brLon;
-
-    PixelToGeo((double)width,0.0,brLon,brLat);
-
-    latMin=std::min(std::min(tlLat,trLat),std::min(blLat,brLat));
-    latMax=std::max(std::max(tlLat,trLat),std::max(blLat,brLat));
-
-    lonMin=std::min(std::min(tlLon,trLon),std::min(blLon,brLon));
-    lonMax=std::max(std::max(tlLon,trLon),std::max(blLon,brLon));
-
-    /*
-    std::cout << "Center: " << lat << "° lat " << lon << "° lon" << std::endl;
-    std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
-    std::cout << "Screen dimension: " << width << "x" << height << " " << dpi << " DPI " << std::endl;
-
-    std::cout << "Box: " << latMin << "° - " << latMax << "° lat x " << lonMin << "° -" << lonMax << "° lon, " << groundWidthMeter << " " << std::endl;
-
-    std::cout << "Scale: 1 : " << scale << std::endl;*/
-
-    return true;
-  }
-
-  bool MercatorProjectionOld::PixelToGeo(double x, double y,
-                                         double& lon, double& lat) const
-  {
-    assert(valid);
-
-    // Transform to center-based coordinate
-    x-=width/2;
-    y=height/2-y;
-
-    if (angle!=0.0) {
-      double xn=x*angleCos-y*angleSin;
-      double yn=x*angleSin+y*angleCos;
-
-      x=xn;
-      y=yn;
-    }
-
-    // Transform to absolute geo coordinate
-    lon=this->lon+x/scaleGradtorad;
-    lat=atan(sinh(y/scale+latOffset))/gradtorad;
-
-    return true;
-  }
-
-  void MercatorProjectionOld::GeoToPixel(const GeoCoord& coord,
-                                         double& x, double& y) const
-  {
-    assert(valid);
-
-    // Screen coordinate relative to center of image
-    x=(coord.GetLon()-this->lon)*scaleGradtorad;
-    y=(atanh(sin(coord.GetLat()*gradtorad))-latOffset)*scale;
-
-    if (angle!=0.0) {
-      double xn=x*angleNegCos-y*angleNegSin;
-      double yn=x*angleNegSin+y*angleNegCos;
-
-      x=xn;
-      y=yn;
-    }
-
-    // Transform to canvas coordinate
-    y=height/2-y;
-    x+=width/2;
-  }
-
-  void MercatorProjectionOld::GeoToPixel(const BatchTransformer& /*transformData*/) const
-  {
-    assert(false); //should not be called
-  }
-
-  bool MercatorProjectionOld::Move(double horizPixel,
-                                   double vertPixel)
-  {
-    double x;
-    double y;
-
-    GeoToPixel(GeoCoord(lat,lon),
-               x,y);
-
-    double lat;
-    double lon;
-
-    if (!PixelToGeo(x+horizPixel,
-                    y-vertPixel,
-                    lon,lat)) {
-      return false;
-    }
-
-    if (lat <-85.0511 || lat>85.0511) {
-      return false;
-    }
-
-    if (lon<-180.0 || lon>180.0) {
-      return false;
-    }
-
-    return Set(lon,lat,
-               angle,
-               magnification,
-               dpi,
-               width,
-               height);
-  }
-
   MercatorProjection::MercatorProjection()
   : valid(false),
     latOffset(0.0),
@@ -308,6 +105,31 @@ namespace osmscout {
         this->height==height) {
       return true;
     }
+
+    // Copy of the old state
+
+    double        oldLon=this->lon;
+    double        oldLat=this->lat;
+    double        oldAngle=this->angle;
+    Magnification oldMagnification=this->magnification;
+    double        oldDpi=this->dpi;
+    size_t        oldWidth=this->width;
+    size_t        oldHeight=this->height;
+
+    double        oldPixelSize=this->pixelSize;
+    double        oldMeterInPixel=this->meterInPixel;
+    double        oldMeterInMM=this->meterInMM;
+
+    bool          oldValid=valid;
+
+    double        oldLatOffset=this->latOffset;
+    double        oldAngleSin=this->angleSin;
+    double        oldAngleCos=this->angleCos;
+    double        oldAngleNegSin=this->angleNegSin;
+    double        oldAngleNegCos=this->angleNegCos;
+
+    double        oldScale=this->scale;
+    double        oldScaleGradtoRad=this->scaleGradtorad;
 
     valid=true;
 
@@ -345,12 +167,12 @@ namespace osmscout {
     // Width of the visible area at the equator
     double groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
 
+    // Width of the visible area in meter
+    double groundWidthVisibleMeter=groundWidthEquatorMeter*cos(lat*gradtorad);
+
     // Resulting projection scale factor
     scale=width/(2*M_PI*groundWidthEquatorMeter/earthExtentMeter);
     scaleGradtorad=scale*gradtorad;
-
-    // Width of the visible area in meter
-    double groundWidthVisibleMeter=groundWidthEquatorMeter*cos(lat*gradtorad);
 
     // Size of one pixel in meter
     pixelSize=groundWidthVisibleMeter/width;
@@ -386,11 +208,44 @@ namespace osmscout {
 
     PixelToGeo((double)width,0.0,brLon,brLat);
 
-    latMin=std::min(std::min(tlLat,trLat),std::min(blLat,brLat));
-    latMax=std::max(std::max(tlLat,trLat),std::max(blLat,brLat));
+    double latMin=std::min(std::min(tlLat,trLat),std::min(blLat,brLat));
+    double latMax=std::max(std::max(tlLat,trLat),std::max(blLat,brLat));
 
-    lonMin=std::min(std::min(tlLon,trLon),std::min(blLon,brLon));
-    lonMax=std::max(std::max(tlLon,trLon),std::max(blLon,brLon));
+    double lonMin=std::min(std::min(tlLon,trLon),std::min(blLon,brLon));
+    double lonMax=std::max(std::max(tlLon,trLon),std::max(blLon,brLon));
+
+    if (lonMin<-180.0 || lonMax>180.0 || latMin<-90.0 || latMax>90.0) {
+      // Reset state to old state
+      this->lon=oldLon;
+      this->lat=oldLat;
+      this->angle=oldAngle;
+      this->magnification=oldMagnification;
+      this->dpi=oldDpi;
+      this->width=oldWidth;
+      this->height=oldHeight;
+
+      this->pixelSize=oldPixelSize;
+      this->meterInPixel=oldMeterInPixel;
+      this->meterInMM=oldMeterInMM;
+
+      this->valid=oldValid;
+
+      this->latOffset=oldLatOffset;
+      this->angleSin=oldAngleSin;
+      this->angleCos=oldAngleCos;
+      this->angleNegSin=oldAngleNegSin;
+      this->angleNegCos=oldAngleNegCos;
+
+      this->scale=oldScale;
+      this->scaleGradtorad=oldScaleGradtoRad;
+
+      return false;
+    }
+
+    this->latMin=latMin;
+    this->latMax=latMax;
+    this->lonMin=lonMin;
+    this->lonMax=lonMax;
 
     // derivation of "latToYPixel" function in projection center
     double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);

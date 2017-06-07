@@ -70,7 +70,7 @@ as described here.
 
 Please use the cmake based build for VisualStudio project setup. You just need
 to import the `CMakeLists.txt` into VisualStudio. There is currently no automatic
-#setup or installation guide for installing dependencies.
+setup or installation guide for installing dependencies.
 
 ### Setup for Mac OS X
 

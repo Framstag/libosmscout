@@ -117,6 +117,14 @@ int main(int argc, char* argv[])
   QStringList mapLookupDirectories;
   if (cmdLineArgs.size() > 1){
     mapLookupDirectories << cmdLineArgs.at(1);
+
+    QDir dir(cmdLineArgs.at(1));
+
+    if (dir.cdUp()) {
+      if (dir.cd("world")) {
+        builder.WithBasemapLookupDirectory(dir.absolutePath());
+      }
+    }
   }
 
   if (cmdLineArgs.size() > 2){

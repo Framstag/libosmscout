@@ -8,6 +8,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/RawRelIndexedDataFile.h \
                         osmscout/import/RawWay.h \
                         osmscout/import/RawWayIndexedDataFile.h \
+                        osmscout/import/WaterIndexProcessor.h \
                         osmscout/import/GenAreaAreaIndex.h \
                         osmscout/import/GenAreaNodeIndex.h \
                         osmscout/import/GenAreaWayIndex.h \

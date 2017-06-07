@@ -2,12 +2,12 @@
 date: "2016-09-15T19:25:58+02:00"
 title:  "Creating new type features"
 description: "How to create new type features"
-weight: 3
+weight: 4
 
 menu:
   main:
     Parent: "tutorials"
-    Weight: 3
+    Weight: 4
 ---
 
 ## Goal of the tutorial

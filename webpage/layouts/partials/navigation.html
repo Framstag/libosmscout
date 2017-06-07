@@ -1,42 +1,39 @@
 <nav>
-  <div id="leftnav">
-    <ul>
-      {{ $currentNode := . }}
-      {{ range .Site.Menus.main }}
-        {{ if .HasChildren }}
-        <li {{if $currentNode.IsMenuCurrent "main" . }}class="active"{{end}}>
-          {{if $currentNode.IsMenuCurrent "main" . }}
-            <span>{{ .Name }}</span>
-          {{else}}
-            <a href="{{.URL}}">{{ .Pre }}<span>{{ .Name }}</span></a>
-          {{end}}
-          {{if or ($currentNode.IsMenuCurrent "main" .) ($currentNode.HasMenuCurrent "main" .) }}
-          <ul>
-            {{ range .Children }}
-            <li{{if $currentNode.IsMenuCurrent "main" . }} class="active"{{end}}>
-              {{if $currentNode.IsMenuCurrent "main" . }}
-              <span>{{ .Name }}</span>
-              {{else}}
-              <a href="{{.URL}}">{{ .Pre }}<span>{{ .Name }}</span></a>
-              {{end}}
-            </li>
-            {{ end }}
-          </ul>
-            {{ end }}
+  <ul>
+    {{ $currentNode := . }}
+    {{ range .Site.Menus.main.ByWeight }}
+      {{ if .HasChildren }}
+      <li {{if $currentNode.IsMenuCurrent "main" . }}class="active"{{end}}>
+        {{if $currentNode.IsMenuCurrent "main" . }}
+          <div>{{ .Name }}</div>
         {{else}}
-        <li {{if $currentNode.IsMenuCurrent "main" . }}class="active"{{end}}>
-          {{if $currentNode.IsMenuCurrent "main" . }}
-            <span>{{ .Name }}</span>
+          <a href="{{.URL}}">{{ .Pre }}<span>{{ .Name }}</span></a>
+        {{end}}
+        {{if or ($currentNode.IsMenuCurrent "main" .) ($currentNode.HasMenuCurrent "main" .) }}
+        <ul>
+          {{ range .Children }}
+          <li{{if $currentNode.IsMenuCurrent "main" . }} class="active"{{end}}>
+            {{if $currentNode.IsMenuCurrent "main" . }}
+            <div>{{ .Name }}</div>
             {{else}}
             <a href="{{.URL}}">{{ .Pre }}<span>{{ .Name }}</span></a>
-          {{end}}
+            {{end}}
+          </li>
+          {{ end }}
+        </ul>
+          {{ end }}
+      {{else}}
+      <li {{if $currentNode.IsMenuCurrent "main" . }}class="active"{{end}}>
+        {{if $currentNode.IsMenuCurrent "main" . }}
+          <div>{{ .Name }}</div>
+        {{else}}
+          <a href="{{.URL}}">{{ .Pre }}<div>{{ .Name }}</div></a>
         {{end}}
-        </li>
       {{end}}
-      <li>
-<a href="https://sourceforge.net/p/libosmscout/" rel="nofollow"><span><img alt="Project page" src="https://sourceforge.net/sflogo.php?type=10&group_id=268607"></span></a>
-      <li>
-    </ul>
-    
-  </div>
+      </li>
+    {{end}}
+    <li>
+      <a href="https://sourceforge.net/p/libosmscout/" rel="nofollow"><span><img alt="Project page" src="https://sourceforge.net/sflogo.php?type=10&group_id=268607"></span></a>
+    </li>
+  </ul>    
 </nav>

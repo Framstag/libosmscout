@@ -24,6 +24,7 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/RawRelIndexedDataFile.cpp \
                                osmscout/import/RawWay.cpp \
                                osmscout/import/RawWayIndexedDataFile.cpp \
+                               osmscout/import/WaterIndexProcessor.cpp \
                                osmscout/import/GenAreaAreaIndex.cpp \
                                osmscout/import/GenAreaNodeIndex.cpp \
                                osmscout/import/GenAreaWayIndex.cpp \

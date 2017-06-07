@@ -141,20 +141,26 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   }
 
   osmscout::MercatorProjection requestProjection;
-  requestProjection.Set(request.coord,
-                 request.angle,
-                 request.magnification,
-                 mapDpi,
-                 request.width,
-                 request.height);
+
+  if (!requestProjection.Set(request.coord,
+                             request.angle,
+                             request.magnification,
+                             mapDpi,
+                             request.width,
+                             request.height)) {
+    //return false;
+  }
 
   osmscout::MercatorProjection finalImgProjection;
-  finalImgProjection.Set(finishedCoord,
-                 finishedAngle,
-                 finishedMagnification,
-                 mapDpi,
-                 finishedImage->width(),
-                 finishedImage->height());
+
+  if (!finalImgProjection.Set(finishedCoord,
+                              finishedAngle,
+                              finishedMagnification,
+                              mapDpi,
+                              finishedImage->width(),
+                              finishedImage->height())) {
+    //return false;
+  }
 
   osmscout::GeoBox finalImgBoundingBox;
   finalImgProjection.GetDimensions(finalImgBoundingBox);

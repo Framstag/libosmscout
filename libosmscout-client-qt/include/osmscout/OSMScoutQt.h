@@ -42,6 +42,7 @@ private:
   QString onlineTileProviders;
   QString mapProviders;
   QStringList mapLookupDirectories;
+  QString basemapLookupDirectory;
   QString cacheLocation;
   QString iconDirectory;
 
@@ -56,7 +57,7 @@ private:
 
 public:
   OSMScoutQtBuilder();
- 
+
   virtual ~OSMScoutQtBuilder();
 
   inline OSMScoutQtBuilder& WithSettingsStorage(QSettings *providedStorage)
@@ -80,6 +81,12 @@ public:
   inline OSMScoutQtBuilder& WithMapLookupDirectories(QStringList mapLookupDirectories)
   {
     this->mapLookupDirectories=mapLookupDirectories;
+    return *this;
+  };
+
+  inline OSMScoutQtBuilder& WithBasemapLookupDirectory(QString basemapLookupDirectory)
+  {
+    this->basemapLookupDirectory=basemapLookupDirectory;
     return *this;
   };
 
@@ -154,8 +161,7 @@ private:
   size_t      offlineTileCacheSize;
 
 private:
-  OSMScoutQt(QThread *backgroundThread,
-             SettingsRef settings,
+  OSMScoutQt(SettingsRef settings,
              DBThreadRef dbThread,
              QString iconDirectory,
              QString cacheLocation,

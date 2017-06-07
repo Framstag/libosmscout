@@ -26,6 +26,7 @@
 #include <QThread>
 #include <QReadWriteLock>
 
+#include <osmscout/BasemapDatabase.h>
 #include <osmscout/DBInstance.h>
 #include <osmscout/DataTileCache.h>
 
@@ -38,15 +39,17 @@ class OSMSCOUT_CLIENT_QT_API DBJob : public QObject{
   Q_OBJECT
 
 protected:
-  std::list<DBInstanceRef> databases; //!< borrowed databases
-  QReadLocker              *locker;   //!< database locker
-  QThread                  *thread;   //!< job thread
+  osmscout::BasemapDatabaseRef basemapDatabase; //!< Optional reference to the basemap database
+  std::list<DBInstanceRef>     databases;       //!< borrowed databases
+  QReadLocker                  *locker;         //!< database locker
+  QThread                      *thread;         //!< job thread
 
 public:
   DBJob();
   virtual ~DBJob();
 
-  virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);
+  virtual void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
+                   const std::list<DBInstanceRef> &databases, QReadLocker *locker);
   virtual void Close();
 };
 
@@ -83,7 +86,9 @@ public:
             bool closeOnFinish=true);
   virtual ~DBLoadJob();
 
-  virtual void Run(const std::list<DBInstanceRef> &databases, QReadLocker *locker);
+  virtual void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
+                   const std::list<DBInstanceRef> &databases,
+                   QReadLocker *locker);
   virtual void Close();
 
   bool IsFinished() const;

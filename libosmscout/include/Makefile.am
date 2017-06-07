@@ -72,6 +72,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/TypeDistributionDataFile.h \
                         osmscout/Database.h \
                         osmscout/DebugDatabase.h \
+                        osmscout/BasemapDatabase.h \
                         osmscout/SRTM.h \
                         osmscout/LocationService.h \
                         osmscout/POIService.h \

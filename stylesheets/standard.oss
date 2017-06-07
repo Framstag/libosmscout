@@ -499,7 +499,7 @@ STYLE
     //[TYPE _osm_tile_border] WAY {color: #222222; displayWidth: 0.2mm; }
     //[TYPE _osm_subtile_border] WAY {color: #444444; displayWidth: 0.1mm; }
 
-    [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
+    // [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
 
     //[TYPE boundary_country] WAY {color: @countryBorderColor; displayWidth: 0.4mm; dash: 7,3;}
     //[TYPE boundary_country] AREA.BORDER {color: @countryBorderColor; width: 0.4mm; dash: 7,3;}

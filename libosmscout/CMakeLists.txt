@@ -48,6 +48,7 @@ set(HEADER_FILES
     include/osmscout/TypeDistributionDataFile.h
     include/osmscout/Database.h
     include/osmscout/DataFile.h
+    include/osmscout/BasemapDatabase.h
     include/osmscout/DebugDatabase.h
     include/osmscout/GeoCoord.h
     include/osmscout/GroundTile.h
@@ -83,7 +84,7 @@ set(HEADER_FILES
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h
-        include/osmscout/system/Compiler.h)
+    include/osmscout/system/Compiler.h)
 
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
@@ -125,6 +126,7 @@ set(SOURCE_FILES
     src/osmscout/TypeDistributionDataFile.cpp
     src/osmscout/Database.cpp
     src/osmscout/DebugDatabase.cpp
+    src/osmscout/BasemapDatabase.cpp
     src/osmscout/GeoCoord.cpp
     src/osmscout/GroundTile.cpp
     src/osmscout/Intersection.cpp

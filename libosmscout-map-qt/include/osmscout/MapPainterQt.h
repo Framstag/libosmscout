@@ -171,6 +171,10 @@ namespace osmscout {
     MapPainterQt(const StyleConfigRef& styleConfig);
     virtual ~MapPainterQt();
 
+    void DrawGroundTiles(const Projection& projection,
+                         const MapParameter& parameter,
+                         const std::list<GroundTile>& groundTiles,
+                         QPainter* painter);
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
