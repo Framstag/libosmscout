@@ -834,7 +834,7 @@ namespace osmscout {
                   style->GetSize(),
                   fontHeight);
 
-    SymbolRef symbol=styleConfig->GetSymbol("marker");
+    //SymbolRef symbol=styleConfig->GetSymbol("marker");
 
     GetGridPoints(nodes,
                   shieldGridSizeHoriz,
@@ -2100,8 +2100,8 @@ namespace osmscout {
     contourLabelOffset =projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
     contourLabelSpace  =projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
 
-    shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
-    shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+2));
+    shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
+    shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
 
     waysSegments  =0;
     waysDrawn     =0;
