@@ -64,63 +64,63 @@ public:
   {
     this->settingsStorage=providedStorage;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithOnlineTileProviders(QString onlineTileProviders)
   {
     this->onlineTileProviders=onlineTileProviders;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithMapProviders(QString mapProviders)
   {
     this->mapProviders=mapProviders;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithMapLookupDirectories(QStringList mapLookupDirectories)
   {
     this->mapLookupDirectories=mapLookupDirectories;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithBasemapLookupDirectory(QString basemapLookupDirectory)
   {
     this->basemapLookupDirectory=basemapLookupDirectory;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& AddMapLookupDirectories(QString mapLookupDirectory)
   {
     this->mapLookupDirectories << mapLookupDirectory;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithCacheLocation(QString cacheLocation)
   {
     this->cacheLocation=cacheLocation;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithIconDirectory(QString iconDirectory)
   {
     this->iconDirectory=iconDirectory;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithStyleSheetDirectory(QString styleSheetDirectory)
   {
     this->styleSheetDirectory=styleSheetDirectory;
     this->styleSheetDirectoryConfigured=true;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithStyleSheetFile(QString styleSheetFile)
   {
     this->styleSheetFile=styleSheetFile;
     this->styleSheetFileConfigured=true;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithTileCacheSizes(size_t onlineTileCacheSize,
                                                size_t offlineTileCacheSize){
@@ -140,7 +140,7 @@ typedef std::shared_ptr<OSMScoutQtBuilder> OSMScoutQtBuilderRef;
 /**
  * \ingroup QtAPI
  */
-enum OSMSCOUT_CLIENT_QT_API RenderingType{
+enum RenderingType {
   PlaneRendering = 0,
   TiledRendering = 1
 };
