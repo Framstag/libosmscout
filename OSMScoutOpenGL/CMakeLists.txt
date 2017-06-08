@@ -24,7 +24,7 @@ target_link_libraries(OSMScoutOpenGL
         osmscout
         osmscout_map
 		osmscout_map_opengl
-		GL GLU
+		${OPENGL_LIBRARIES}
 		glfw
 )
 

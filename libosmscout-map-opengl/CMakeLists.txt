@@ -31,7 +31,8 @@ target_include_directories(osmscout_map_opengl PRIVATE
 target_link_libraries(osmscout_map_opengl
 		osmscout
 		osmscout_map
-		GL GLU GLEW
+		${OPENGL_LIBRARIES}
+		GLEW
 		)
 target_compile_definitions(osmscout_map_opengl PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
 install(TARGETS osmscout_map_opengl
