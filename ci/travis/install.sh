@@ -39,7 +39,7 @@ if [ "$TARGET" = "build" ]; then
 
     sudo apt-get -qq update
 
-    sudo apt-get install libglfw3 libglfw3-dev
+    sudo apt-get --yes --force-yes install libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
     brew update
