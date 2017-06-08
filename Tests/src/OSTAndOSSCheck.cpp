@@ -42,7 +42,7 @@ int main(int /*argc*/, char** /*argv*/)
   if (testsTopDirEnv==NULL) {
     std::cerr << "Expected environment variable 'TESTS_TOP_DIR' not set" << std::endl;
     // CMake-based tests would fail, if we do not exit here
-    return 0;
+    return 1;
   }
 
   std::string   testsTopDir=testsTopDirEnv;

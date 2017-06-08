@@ -2,6 +2,25 @@
   Layout
  */
 
+html {
+  overflow-y: scroll;
+}
+
+/* flexbox layout from top to bottom, contains:
+   - header
+   - content
+     - nav
+     - main
+     - secondary
+   - footer
+*/
+body {
+  display: flex;
+  flex-flow: column nowrap;
+  margin: 0px;
+  padding: 0px;
+}
+
 /* Header of each page */
 
 header {
@@ -51,23 +70,7 @@ footer {
   font-weight: bold;
 }
 
-/*
-  Normal page layout
-*/
-
-/* flexbox layout from top to bottom, contains:
-   - header
-   - content
-   - footer
-*/
-body {
-  display: flex;
-  flex-flow: column nowrap;
-  margin: 0px;
-  padding: 0px;
-}
-
-/* Content contains nav and main */
+/* Content contains nav and main and secondary */
 #content {
   display: flex;
   flex-flow: row wrap;
@@ -75,9 +78,11 @@ body {
   justify-content: space-between;
 }
 
+/* Navigation area */
 #content nav {
   box-sizing: border-box;
-  flex: 1 2 auto;
+  /* grow shrink basis */
+  flex: 1 2 25%;
   margin-left: 10px;
   margin-right: 10px;
 }
@@ -85,16 +90,88 @@ body {
 /* Content-Area */
 #content main {
   box-sizing: border-box;
+  /* grow shrink basis */
   flex: 0 1 800px;
   margin-left: 10px;
   margin-right: 10px;
 }
 
+/* Currently empty space on the right side */
 #content #secondary {
   box-sizing: border-box;
-  flex: 1 2 auto;
-  margin-left: 10px;
-  margin-right: 10px;
+  /* grow shrink basis */
+}
+
+/* One column layout: Navigation on top, content below */
+@media (max-width: 800px) {
+  /* Columnar layout */
+  #content  {  
+    flex-flow: column nowrap;
+  }
+  
+  /* Navigation left aligned */
+  nav li {
+    text-align: left;
+  }
+
+  nav li.active > div {
+    background-image:linear-gradient(to right, black 0%, white 50%)  
+  }  
+  
+  /* Secondary is empty */
+  #secondary {
+    flex: 0 0 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}
+
+/* Two column layout: navigation left, content right */
+@media (min-width: 801px) and (max-width: 1279px) {
+  /* Row layout */
+  #content  {  
+    flex-flow: row nowrap;
+  }
+
+  /* Navigation right aligned */
+  nav li {
+    text-align: right;
+  }
+
+  nav li.active > div {
+    background-image:linear-gradient(to left, black 0%, white 50%)  
+  }  
+  
+  /* Secondary is empty */
+  #secondary {
+    flex: 0 0 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}
+
+/* Three column layout: navigation left, content center, empty column on the right */
+@media (min-width: 1280px) {
+  /* Row layout */
+  #content  {  
+    flex-flow: row nowrap;
+  }
+  
+  /* Navigation right aligned */
+  nav li {
+    text-align: right;
+  }
+
+  nav li.active > div {
+    background-image:linear-gradient(to left, black 0%, white 50%)  
+  }  
+  
+  #secondary {
+    flex: 0 0 0%;
+    flex: 1 2 25%;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
 }
 
 /*
@@ -112,7 +189,7 @@ nav li {
   display: block;
   margin: 0px;
   padding: 0px;
-  text-align: right;
+/*  text-align: right;*/
 }
 
 /** Nested menu entry is smaller */
@@ -136,56 +213,6 @@ nav li.active > div {
   background-color: black;
   font-weight: bold;
 }
-
-/*
-   Homepage layout
- */
-
-#homepage {
-  max-width: none;
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  position: fixed;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  justify-content: center;
-}
-
-#homepage main {
-  order: 1;
-  flex-grow: 0;
-}
-
-#homepage h1 {
-  font-weight: normal;
-  font-size: 300%;
-  text-align: center;
-  text-decoration: underline;  
-  padding: 0px;
-  margin: 0px;
-}
-
-#homepage nav {
-  font-size: 150%;
-  order: 2;
-  flex-grow: 0;
-}
-
-#homepage nav li {
-  text-align: center;
-}
-
-/*#homepage_background {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  
-  min-width: 100%;
-  min-height: 100%;
-}*/
 
 /*
   General text styling
@@ -387,7 +414,7 @@ highlight .hll { background-color: #ffffcc }
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
 
 code {
-  font-size: 14px;
+  font-size: 12px;
   color: #555555;
 }
 

@@ -4,7 +4,6 @@
 #  LIBAGG_FOUND - system has libagg
 #  LIBAGG_INCLUDE_DIRS - the libagg include directories
 #  LIBAGG_LIBRARIES - link these to use libagg
-#  LIBAGGFT2_FOUND - system has aggfontfreetype
 #  LIBAGGFT2_LIBRARIES - link these to connect agg and freetype
 #
 FIND_PACKAGE(PkgConfig)
@@ -52,7 +51,4 @@ IF(LIBAGG_FOUND)
               /libagg/lib
         PATH_SUFFIXES agg agg2
     )
-    IF(LIBAGGFT2_LIBRARIES)
-        SET(LIBAGG_LIBRARIES ${LIBAGG_LIBRARIES} ${LIBAGGFT2_LIBRARIES})
-    ENDIF()
 ENDIF()

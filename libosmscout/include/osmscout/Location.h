@@ -224,12 +224,12 @@ namespace osmscout {
   class OSMSCOUT_API Place
   {
   private:
-    ObjectFileRef  object;      //!< Object the location is in
-    FeatureValueBufferRef objectFeatures;
-    AdminRegionRef adminRegion; //!< Region the object is in, if set
-    POIRef         poi;         //!< POI data, if set
-    LocationRef    location;    //!< Location data, if set
-    AddressRef     address;     //!< Address data if set
+    ObjectFileRef         object;         //!< Object the location is in
+    FeatureValueBufferRef objectFeatures; //!< Features of the object
+    AdminRegionRef        adminRegion;    //!< Region the object is in, if set
+    POIRef                poi;            //!< POI data, if set
+    LocationRef           location;       //!< Location data, if set
+    AddressRef            address;        //!< Address data if set
 
   public:
     Place(const ObjectFileRef& object,

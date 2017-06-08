@@ -150,6 +150,21 @@ namespace osmscout {
     {
       return coord==other.coord;
     }
+
+    /**
+     * While we do not want to compare using operator== we at least want to
+     * manage points in containers. So we need to implement operator<.
+     *
+     * @param other
+     *    Other point to compare to
+     * @return
+     *    true or false
+     */
+    inline bool operator<(const Point& other) const
+    {
+      return coord<other.GetCoord() ||
+        (coord==other.GetCoord() && serial < other.serial);
+    }
   };
 }
 

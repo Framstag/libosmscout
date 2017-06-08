@@ -1,6 +1,9 @@
 if(NOT LIBAGG_FOUND)
 	message(SEND_ERROR "libagg is required for agg map drawing backend")
 endif()
+if(NOT LIBAGGFT2_LIBRARIES)
+	message(SEND_ERROR "libagg is required for agg map drawing backend")
+endif()
 if(NOT FREETYPE_FOUND)
 	message(SEND_ERROR "freetype2 is required for agg map drawing backend")
 endif()
@@ -23,7 +26,7 @@ add_library(osmscout_map_agg ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout_map_agg PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapAggFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "libosmscout-map-agg")
-target_include_directories(osmscout_map_agg PRIVATE 
+target_include_directories(osmscout_map_agg PRIVATE
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
@@ -34,6 +37,7 @@ target_link_libraries(osmscout_map_agg
 		osmscout
 		osmscout_map
 		${LIBAGG_LIBRARIES}
+		${LIBAGGFT2_LIBRARIES}
 		${FREETYPE_LIBRARIES})
 target_compile_definitions(osmscout_map_agg PRIVATE -DOSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
 install(TARGETS osmscout_map_agg

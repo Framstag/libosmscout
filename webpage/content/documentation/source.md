@@ -175,7 +175,8 @@ Real life example for building using VisualStudio:
 ```bash
 mkdir build
 cd build
-cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0 -DCMAKE_INSTALL_PREFIX=D:\Mine\OpenSource\osmlib
+cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0 \
+  -DCMAKE_INSTALL_PREFIX=D:\Mine\OpenSource\osmlib
 cmake --build . --config Release --target install
 ```
 
