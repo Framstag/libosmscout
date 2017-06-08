@@ -301,8 +301,11 @@ namespace osmscout {
 
     /**
      * Converts a geo coordinate to a pixel coordinate.
+     *
+     * Return true on success,
+     * false if given coordinate is not valid for this projection.
      */
-    virtual void GeoToPixel(const GeoCoord& coord,
+    virtual bool GeoToPixel(const GeoCoord& coord,
                             double& x, double& y) const = 0;
 
   protected:
@@ -414,7 +417,7 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    void GeoToPixel(const GeoCoord& coord,
+    bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     bool Move(double horizPixel,
@@ -533,7 +536,7 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    void GeoToPixel(const GeoCoord& coord,
+    bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     inline bool IsLinearInterpolationEnabled()

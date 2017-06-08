@@ -242,7 +242,7 @@ namespace osmscout {
     return IsValidFor(GeoCoord(lat,lon));
   }
 
-  void MercatorProjection::GeoToPixel(const GeoCoord& coord,
+  bool MercatorProjection::GeoToPixel(const GeoCoord& coord,
                                       double& x, double& y) const
   {
     assert(valid);
@@ -268,6 +268,8 @@ namespace osmscout {
     // Transform to canvas coordinate
     y=height/2-y;
     x+=width/2;
+
+    return IsValidFor(coord);
   }
 
   void MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
@@ -422,11 +424,12 @@ namespace osmscout {
 
   #ifdef OSMSCOUT_HAVE_SSE2
 
-    void TileProjection::GeoToPixel(const GeoCoord& coord,
+    bool TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
       x=coord.GetLon()*scaleGradtorad-lonOffset;
       y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
+      return IsValidFor(coord);
     }
 
     //this basically transforms 2 coordinates in 1 call
@@ -445,7 +448,7 @@ namespace osmscout {
 
   #else
 
-    void TileProjection::GeoToPixel(const GeoCoord& coord,
+    bool TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
       x=coord.GetLon()*scaleGradtorad-lonOffset;
@@ -456,6 +459,7 @@ namespace osmscout {
       else {
         y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);
       }
+      return IsValidFor(coord);
     }
 
     void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
