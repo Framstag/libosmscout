@@ -1,9 +1,9 @@
 if(NOT ${OSMSCOUT_BUILD_MAP})
 	message(SEND_ERROR "The main map drawing interface is required for OpenGL map drawing backend")
 endif()
-if(NOT ${GLEW_FOUND})
-	message(SEND_ERROR "GLEW is required for OpenGL map drawing backend")
-endif()
+
+find_package(GLEW REQUIRED)
+find_package(glm REQUIRED)
 
 set(HEADER_FILES
 		#include/osmscout/private/Config.h
@@ -27,13 +27,17 @@ target_include_directories(osmscout_map_opengl PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${OPENGL_INCLUDE_DIR}
 		${GLEW_INCLUDE_DIRS}
+		${GLM_INCLUDE_DIRS}
 		)
+
 target_link_libraries(osmscout_map_opengl
 		osmscout
 		osmscout_map
 		${OPENGL_LIBRARIES}
-		GLEW
+		${GLEW_LIBRARIES}
+		${GLM_LIBRARIES}
 		)
+
 target_compile_definitions(osmscout_map_opengl PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
 install(TARGETS osmscout_map_opengl
 		RUNTIME DESTINATION bin
