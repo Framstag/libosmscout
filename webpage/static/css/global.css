@@ -113,6 +113,10 @@ footer {
   nav li {
     text-align: left;
   }
+
+  nav li.active > div {
+    background-image:linear-gradient(to right, black 0%, white 50%)  
+  }  
   
   /* Secondary is empty */
   #secondary {
@@ -133,6 +137,10 @@ footer {
   nav li {
     text-align: right;
   }
+
+  nav li.active > div {
+    background-image:linear-gradient(to left, black 0%, white 50%)  
+  }  
   
   /* Secondary is empty */
   #secondary {
@@ -153,6 +161,10 @@ footer {
   nav li {
     text-align: right;
   }
+
+  nav li.active > div {
+    background-image:linear-gradient(to left, black 0%, white 50%)  
+  }  
   
   #secondary {
     flex: 0 0 0%;
@@ -200,7 +212,6 @@ nav li.active > div {
   color: white;
   background-color: black;
   font-weight: bold;
-  background-image:linear-gradient(to left, black 0%, white 50%)  
 }
 
 /*
