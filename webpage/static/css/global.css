@@ -2,6 +2,25 @@
   Layout
  */
 
+html {
+  overflow-y: scroll;
+}
+
+/* flexbox layout from top to bottom, contains:
+   - header
+   - content
+     - nav
+     - main
+     - secondary
+   - footer
+*/
+body {
+  display: flex;
+  flex-flow: column nowrap;
+  margin: 0px;
+  padding: 0px;
+}
+
 /* Header of each page */
 
 header {
@@ -51,23 +70,7 @@ footer {
   font-weight: bold;
 }
 
-/*
-  Normal page layout
-*/
-
-/* flexbox layout from top to bottom, contains:
-   - header
-   - content
-   - footer
-*/
-body {
-  display: flex;
-  flex-flow: column nowrap;
-  margin: 0px;
-  padding: 0px;
-}
-
-/* Content contains nav and main */
+/* Content contains nav and main and secondary */
 #content {
   display: flex;
   flex-flow: row wrap;
@@ -75,6 +78,7 @@ body {
   justify-content: space-between;
 }
 
+/* Navigation area */
 #content nav {
   box-sizing: border-box;
   flex: 1 2 auto;
@@ -90,6 +94,7 @@ body {
   margin-right: 10px;
 }
 
+/* Currently empty space on the right side */
 #content #secondary {
   box-sizing: border-box;
   flex: 1 2 auto;
@@ -136,56 +141,6 @@ nav li.active > div {
   background-color: black;
   font-weight: bold;
 }
-
-/*
-   Homepage layout
- */
-
-#homepage {
-  max-width: none;
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  position: fixed;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  justify-content: center;
-}
-
-#homepage main {
-  order: 1;
-  flex-grow: 0;
-}
-
-#homepage h1 {
-  font-weight: normal;
-  font-size: 300%;
-  text-align: center;
-  text-decoration: underline;  
-  padding: 0px;
-  margin: 0px;
-}
-
-#homepage nav {
-  font-size: 150%;
-  order: 2;
-  flex-grow: 0;
-}
-
-#homepage nav li {
-  text-align: center;
-}
-
-/*#homepage_background {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  
-  min-width: 100%;
-  min-height: 100%;
-}*/
 
 /*
   General text styling
