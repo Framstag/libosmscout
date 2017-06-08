@@ -33,6 +33,14 @@ if [ "$TARGET" = "build" ]; then
       libmarisa-dev \
       libglew-dev \
       libglm-dev
+
+    echo "deb http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list.d/fillwave_ext.list
+    echo "deb-src http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list.d/fillwave_ext.list
+
+    sudo apt-get -qq update
+
+    sudo apt-get install libglfw3 libglfw3-dev
+
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
     brew update
 
@@ -40,7 +48,7 @@ if [ "$TARGET" = "build" ]; then
       brew install cmake || true
     fi
 
-    brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew
+    brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew glm
     brew link --force gettext
     brew link --force libxml2
     brew link --force qt5
