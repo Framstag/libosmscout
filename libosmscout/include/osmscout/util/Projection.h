@@ -141,6 +141,11 @@ namespace osmscout {
     virtual bool CanBatch() const = 0;
     virtual bool IsValid() const = 0;
 
+    /**
+     * Return true if given coordinate is valid for this projection
+     */
+    virtual bool IsValidFor(const GeoCoord& coord) const = 0;
+
     inline GeoCoord GetCenter() const
     {
       return GeoCoord(lat,lon);
@@ -285,13 +290,17 @@ namespace osmscout {
     }
 
     /**
-     * Converts a pixel coordinate to a geo coordinate
+     * Converts a pixel coordinate to a geo coordinate.
+     *
+     * Return true on success,
+     * false if returned coordinate is not valid
+     * for this projection.
      */
     virtual bool PixelToGeo(double x, double y,
                             double& lon, double& lat) const = 0;
 
     /**
-     * Converts a geo coordinate to a pixel coordinate
+     * Converts a geo coordinate to a pixel coordinate.
      */
     virtual void GeoToPixel(const GeoCoord& coord,
                             double& x, double& y) const = 0;
@@ -330,6 +339,11 @@ namespace osmscout {
     bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
 
   public:
+    static const double MaxLat;
+    static const double MinLat;
+    static const double MaxLon;
+    static const double MinLon;
+
     MercatorProjection();
 
     inline bool CanBatch() const
@@ -340,6 +354,12 @@ namespace osmscout {
     inline bool IsValid() const
     {
       return valid;
+    }
+
+    inline bool IsValidFor(const GeoCoord& coord) const
+    {
+      return coord.GetLat() >= MinLat && coord.GetLat() <= MaxLat &&
+             coord.GetLon() >= MinLon && coord.GetLon() <= MaxLon;
     }
 
     inline bool Set(const GeoCoord& coord,
@@ -365,6 +385,26 @@ namespace osmscout {
       return Set(coord,0.0,magnification,dpi,width,height);
     }
 
+    /**
+     * Setup projection parameters.
+     *
+     * Return true on success,
+     * false if arguments are not valid for Mercator projection,
+     * projection parameters are unchnaged in such case.
+     *
+     * Note that coord (center) have to be valid coordinate
+     * in Mercator projection. But it is possible setup dimensions
+     * (width and height) that projection will cover area bigger
+     * than the one valid for Mercator projection. Bounding box
+     * is adjusted then to be valid for projection.
+     *
+     * In code:
+     *
+     *   projection.GetDimensions(bbox);
+     *   projection.GeoToPixel(bbox.GetMinCoord(),x,y)
+     *
+     * may be x >= 0
+     */
     bool Set(const GeoCoord& coord,
              double angle,
              const Magnification& magnification,
@@ -465,6 +505,12 @@ namespace osmscout {
     inline bool IsValid() const
     {
       return valid;
+    }
+
+    inline bool IsValidFor(const GeoCoord& coord) const
+    {
+      return coord.GetLat() >= -85.0511 && coord.GetLat() <= +85.0511 &&
+             coord.GetLon() >= -180.0   && coord.GetLon() <= +180.0;
     }
 
     inline bool Set(const OSMTileId& tile,
