@@ -37,6 +37,11 @@ IF %COMPILER%==msvc2015 (
   SET "CMAKE_INCLUDE_PATH=C:\Qt\5.8\msvc2015_64\include"
   SET "CMAKE_LIBRARY_PATH=C:\Qt\5.8\msvc2015_64\lib"
 
+  echo "Show content of c:\Qt\"
+  DIR c:\Qt
+  echo "Show content of c:\Qt\5.8\"
+  DIR /S C:\Qt\5.8\msvc2015_64\
+
   mkdir build
   cd build
   cmake -G "Visual Studio 14 2015 Win64" ..
