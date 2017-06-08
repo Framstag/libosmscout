@@ -34,13 +34,7 @@ IF %COMPILER%==msvc2015 (
   @echo on
   echo "Compiling libosmscout using Visual Studio 2015..."
   echo "Using build tool 'cmake'..."
-  SET "CMAKE_INCLUDE_PATH=C:\Qt\5.8\msvc2015_64\include"
-  SET "CMAKE_LIBRARY_PATH=C:\Qt\5.8\msvc2015_64\lib"
-
-  echo "Show content of c:\Qt\"
-  DIR c:\Qt
-  echo "Show content of c:\Qt\5.8\"
-  DIR /S C:\Qt\5.8\msvc2015_64\
+  SET "CMAKE_PREFIX_PATH=C:\Qt\5.8\msvc2015_64"
 
   mkdir build
   cd build
