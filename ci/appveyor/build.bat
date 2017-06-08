@@ -34,6 +34,8 @@ IF %COMPILER%==msvc2015 (
   @echo on
   echo "Compiling libosmscout using Visual Studio 2015..."
   echo "Using build tool 'cmake'..."
+  export CMAKE_INCLUDE_PATH=C:\Qt\5.8\msvc2015_64\include
+  export CMAKE_LIBRARY_PATH=C:\Qt\5.8\msvc2015_64\lib
 
   mkdir build
   cd build
