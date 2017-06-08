@@ -263,7 +263,7 @@ if(OSMSCOUT_BUILD_TOOL_OSMSCOUT2)
   add_subdirectory(OSMScout2)
 endif()
 
-option(OSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL "Enable build of OSMScoutOpenGL applications" ${OSMSCOUT_BUILD_MAP})
+option(OSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL "Enable build of OSMScoutOpenGL applications" ${OSMSCOUT_BUILD_MAP_OPENGL})
 if(OSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL)
   add_subdirectory(OSMScoutOpenGL)
 endif()
