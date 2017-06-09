@@ -1,3 +1,5 @@
+set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
+
 set(HEADER_FILES
     #include/osmscout/import/pbf/fileformat.pb.h
     #include/osmscout/import/pbf/osmformat.pb.h
@@ -73,7 +75,7 @@ set(SOURCE_FILES
     src/osmscout/import/ImportErrorReporter.cpp
     src/osmscout/import/MergeAreaData.cpp
     src/osmscout/import/Preprocess.cpp
-    src/osmscout/import/Preprocessor.cpp    
+    src/osmscout/import/Preprocessor.cpp
     src/osmscout/import/PreprocessPoly.cpp
     src/osmscout/import/RawCoastline.cpp
     src/osmscout/import/RawCoord.cpp
@@ -105,7 +107,7 @@ if (PROTOBUF_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/import/PreprocessPBF.cpp)
     list(APPEND HEADER_FILES ${PROTO_HDRS})
     list(APPEND SOURCE_FILES ${PROTO_SRCS})
-endif()  
+endif()
 
 add_library(osmscout_import ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout_import PROPERTY CXX_STANDARD 11)
@@ -117,7 +119,7 @@ target_include_directories(osmscout_import PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		)
-		
+
 if (PROTOBUF_FOUND)
   target_include_directories(osmscout_import PRIVATE ${PROTOBUF_INCLUDE_DIRS})
   target_link_libraries(osmscout_import ${PROTOBUF_LIBRARIES})
@@ -132,12 +134,12 @@ if (ICONV_FOUND)
   target_include_directories(osmscout_import PRIVATE ${ICONV_INCLUDE_DIRS})
   target_link_libraries(osmscout_import ${ICONV_LIBRARIES})
 endif()
-  
+
 if (ZLIB_FOUND)
   target_include_directories(osmscout_import PRIVATE ${ZLIB_INCLUDE_DIRS})
   target_link_libraries(osmscout_import ${ZLIB_LIBRARIES})
 endif()
-  
+
 if(LIBXML2_FOUND)
   target_include_directories(osmscout_import PRIVATE ${LIBXML2_INCLUDE_DIR})
   target_link_libraries(osmscout_import ${LIBXML2_LIBRARIES})
