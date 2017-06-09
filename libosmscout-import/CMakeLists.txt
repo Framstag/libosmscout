@@ -143,7 +143,7 @@ if (ZLIB_FOUND)
   target_link_libraries(osmscout_import ${ZLIB_LIBRARIES})
 endif()
 
-if(ZLIB_FOUND AND LIBLZMA_FOUND AND LIBXML2_FOUND)
+if(ZLIB_FOUND AND LIBLZMA_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
   target_include_directories(osmscout_import PRIVATE ${LIBXML2_INCLUDE_DIR})
   target_link_libraries(osmscout_import ${LIBXML2_LIBRARIES})
 endif()
