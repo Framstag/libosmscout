@@ -20,12 +20,22 @@ target_include_directories(OSMScoutOpenGL PRIVATE
 		${OPENGL_INCLUDE_DIR}
 		)
 
-target_link_libraries(OSMScoutOpenGL
-		osmscout
-		osmscout_map
-		osmscout_map_opengl
-		${OPENGL_LIBRARIES}
-		glfw
-		)
+if(MSVS OR MSYS OR MINGW)
+	target_link_libraries(OSMScoutOpenGL
+			osmscout
+			osmscout_map
+			osmscout_map_opengl
+			${OPENGL_LIBRARIES}
+			glfw3
+			)
+else()
+	target_link_libraries(OSMScoutOpenGL
+			osmscout
+			osmscout_map
+			osmscout_map_opengl
+			${OPENGL_LIBRARIES}
+			glfw
+			)
+endif()
 
 set_property(TARGET OSMScoutOpenGL PROPERTY CXX_STANDARD 11)
