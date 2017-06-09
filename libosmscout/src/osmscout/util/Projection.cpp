@@ -49,6 +49,11 @@ namespace osmscout {
   //< DPI of a classical OSM tile
   static const double tileDPI=96.0;
 
+  const double MercatorProjection::MaxLat = +85.0511;
+  const double MercatorProjection::MinLat = -85.0511;
+  const double MercatorProjection::MaxLon = +180.0;
+  const double MercatorProjection::MinLon = -180.0;
+
 #ifdef OSMSCOUT_HAVE_SSE2
   static const ALIGN16_BEG double sseGradtorad[] ALIGN16_END = {2*M_PI/360, 2*M_PI/360};
 #endif
@@ -105,31 +110,9 @@ namespace osmscout {
         this->height==height) {
       return true;
     }
-
-    // Copy of the old state
-
-    double        oldLon=this->lon;
-    double        oldLat=this->lat;
-    double        oldAngle=this->angle;
-    Magnification oldMagnification=this->magnification;
-    double        oldDpi=this->dpi;
-    size_t        oldWidth=this->width;
-    size_t        oldHeight=this->height;
-
-    double        oldPixelSize=this->pixelSize;
-    double        oldMeterInPixel=this->meterInPixel;
-    double        oldMeterInMM=this->meterInMM;
-
-    bool          oldValid=valid;
-
-    double        oldLatOffset=this->latOffset;
-    double        oldAngleSin=this->angleSin;
-    double        oldAngleCos=this->angleCos;
-    double        oldAngleNegSin=this->angleNegSin;
-    double        oldAngleNegCos=this->angleNegCos;
-
-    double        oldScale=this->scale;
-    double        oldScaleGradtoRad=this->scaleGradtorad;
+    if (!IsValidFor(coord)){
+      return false;
+    }
 
     valid=true;
 
@@ -188,64 +171,36 @@ namespace osmscout {
 
     //std::cout << "Pixel size " << pixelSize << " meterInPixel " << meterInPixel << " meterInMM " << meterInMM << std::endl;
 
+    // top left
     double tlLat;
     double tlLon;
 
-    PixelToGeo(0.0,(double)height,tlLon,tlLat);
+    PixelToGeo(0.0,0.0,tlLon,tlLat);
 
+    // top right
     double trLat;
     double trLon;
 
-    PixelToGeo((double)width,(double)height,trLon,trLat);
+    PixelToGeo((double)width,0.0,trLon,trLat);
 
+    // bottom left
     double blLat;
     double blLon;
 
-    PixelToGeo(0.0,0.0,blLon,blLat);
+    PixelToGeo(0.0,(double)height,blLon,blLat);
 
+    // bottom right
     double brLat;
     double brLon;
 
-    PixelToGeo((double)width,0.0,brLon,brLat);
+    PixelToGeo((double)width,(double)height,brLon,brLat);
 
-    double latMin=std::min(std::min(tlLat,trLat),std::min(blLat,brLat));
-    double latMax=std::max(std::max(tlLat,trLat),std::max(blLat,brLat));
+    // evaluate bounding box, crop bounding box to valid Mercator area
+    latMin=std::max(MinLat,std::min(std::min(tlLat,trLat),std::min(blLat,brLat)));
+    latMax=std::min(MaxLat,std::max(std::max(tlLat,trLat),std::max(blLat,brLat)));
 
-    double lonMin=std::min(std::min(tlLon,trLon),std::min(blLon,brLon));
-    double lonMax=std::max(std::max(tlLon,trLon),std::max(blLon,brLon));
-
-    if (lonMin<-180.0 || lonMax>180.0 || latMin<-90.0 || latMax>90.0) {
-      // Reset state to old state
-      this->lon=oldLon;
-      this->lat=oldLat;
-      this->angle=oldAngle;
-      this->magnification=oldMagnification;
-      this->dpi=oldDpi;
-      this->width=oldWidth;
-      this->height=oldHeight;
-
-      this->pixelSize=oldPixelSize;
-      this->meterInPixel=oldMeterInPixel;
-      this->meterInMM=oldMeterInMM;
-
-      this->valid=oldValid;
-
-      this->latOffset=oldLatOffset;
-      this->angleSin=oldAngleSin;
-      this->angleCos=oldAngleCos;
-      this->angleNegSin=oldAngleNegSin;
-      this->angleNegCos=oldAngleNegCos;
-
-      this->scale=oldScale;
-      this->scaleGradtorad=oldScaleGradtoRad;
-
-      return false;
-    }
-
-    this->latMin=latMin;
-    this->latMax=latMax;
-    this->lonMin=lonMin;
-    this->lonMax=lonMax;
+    lonMin=std::max(MinLon,std::min(std::min(tlLon,trLon),std::min(blLon,brLon)));
+    lonMax=std::min(MaxLon,std::max(std::max(tlLon,trLon),std::max(blLon,brLon)));
 
     // derivation of "latToYPixel" function in projection center
     double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
@@ -284,10 +239,10 @@ namespace osmscout {
     lon=this->lon+x/scaleGradtorad;
     lat=atan(sinh(y/scale+latOffset))/gradtorad;
 
-    return true;
+    return IsValidFor(GeoCoord(lat,lon));
   }
 
-  void MercatorProjection::GeoToPixel(const GeoCoord& coord,
+  bool MercatorProjection::GeoToPixel(const GeoCoord& coord,
                                       double& x, double& y) const
   {
     assert(valid);
@@ -313,6 +268,8 @@ namespace osmscout {
     // Transform to canvas coordinate
     y=height/2-y;
     x+=width/2;
+
+    return IsValidFor(coord);
   }
 
   void MercatorProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
@@ -462,16 +419,17 @@ namespace osmscout {
     lon=(x+lonOffset)/(scale*gradtorad);
     lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
 
-    return true;
+    return IsValidFor(GeoCoord(lat,lon));
   }
 
   #ifdef OSMSCOUT_HAVE_SSE2
 
-    void TileProjection::GeoToPixel(const GeoCoord& coord,
+    bool TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
       x=coord.GetLon()*scaleGradtorad-lonOffset;
       y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
+      return IsValidFor(coord);
     }
 
     //this basically transforms 2 coordinates in 1 call
@@ -490,7 +448,7 @@ namespace osmscout {
 
   #else
 
-    void TileProjection::GeoToPixel(const GeoCoord& coord,
+    bool TileProjection::GeoToPixel(const GeoCoord& coord,
                                     double& x, double& y) const
     {
       x=coord.GetLon()*scaleGradtorad-lonOffset;
@@ -501,6 +459,7 @@ namespace osmscout {
       else {
         y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);
       }
+      return IsValidFor(coord);
     }
 
     void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
