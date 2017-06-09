@@ -123,9 +123,19 @@ target_include_directories(osmscout_import PRIVATE
 
 target_link_libraries(osmscout_import osmscout)
 
+if(ZLIB_FOUND AND LIBLZMA_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${LIBXML2_INCLUDE_DIR})
+    target_link_libraries(osmscout_import ${LIBXML2_LIBRARIES})
+endif()
+
 if (PROTOBUF_FOUND)
-  target_include_directories(osmscout_import PRIVATE ${PROTOBUF_INCLUDE_DIRS})
-  target_link_libraries(osmscout_import ${PROTOBUF_LIBRARIES})
+    target_include_directories(osmscout_import PRIVATE ${PROTOBUF_INCLUDE_DIRS})
+    target_link_libraries(osmscout_import ${PROTOBUF_LIBRARIES})
+endif()
+
+if (ICONV_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${ICONV_INCLUDE_DIRS})
+    target_link_libraries(osmscout_import ${ICONV_LIBRARIES})
 endif()
 
 if (LIBLZMA_FOUND)
@@ -133,19 +143,9 @@ if (LIBLZMA_FOUND)
   target_link_libraries(osmscout_import ${LIBLZMA_LIBRARIES})
 endif()
 
-if (ICONV_FOUND)
-  target_include_directories(osmscout_import PRIVATE ${ICONV_INCLUDE_DIRS})
-  target_link_libraries(osmscout_import ${ICONV_LIBRARIES})
-endif()
-
 if (ZLIB_FOUND)
   target_include_directories(osmscout_import PRIVATE ${ZLIB_INCLUDE_DIRS})
   target_link_libraries(osmscout_import ${ZLIB_LIBRARIES})
-endif()
-
-if(ZLIB_FOUND AND LIBLZMA_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
-  target_include_directories(osmscout_import PRIVATE ${LIBXML2_INCLUDE_DIR})
-  target_link_libraries(osmscout_import ${LIBXML2_LIBRARIES})
 endif()
 
 if(MARISA_FOUND)
