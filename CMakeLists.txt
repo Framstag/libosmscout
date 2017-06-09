@@ -253,7 +253,7 @@ if(OSMSCOUT_BUILD_DEMOS)
   add_subdirectory(Demos)
 endif()
 
-option(OSMSCOUT_BUILD_TOOL_DUMPDATA "Enable build of dump tool" ${OSMSCOUT_BUILD_IMPORT})
+option(OSMSCOUT_BUILD_TOOL_DUMPDATA "Enable build of dump tool" TRUE)
 if(OSMSCOUT_BUILD_TOOL_DUMPDATA)
   add_subdirectory(DumpData)
 endif()
