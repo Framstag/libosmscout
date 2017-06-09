@@ -119,38 +119,37 @@ target_include_directories(osmscout_import PRIVATE
 		include/osmscout/import/pbf
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${LIBXML2_INCLUDE_DIR}
-		${PROTOBUF_INCLUDE_DIR}
-		${ICONV_INCLUDE_DIR}
-		${LIBLZMA_INCLUDE_DIR}
-		${ZLIB_INCLUDE_DIR}
-		${MARISA_INCLUDE_DIR}
 		)
 
 target_link_libraries(osmscout_import osmscout)
 
 if(ZLIB_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
-    message("Link With libxml2")
+    target_include_directories(osmscout_import PRIVATE ${LIBXML2_INCLUDE_DIR})
     target_link_libraries(osmscout_import ${LIBXML2_LIBRARIES})
 endif()
 
 if (PROTOBUF_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${PROTOBUF_INCLUDE_DIRS})
     target_link_libraries(osmscout_import ${PROTOBUF_LIBRARIES})
 endif()
 
 if (ICONV_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${ICONV_INCLUDE_DIRS})
     target_link_libraries(osmscout_import ${ICONV_LIBRARIES})
 endif()
 
 if (LIBLZMA_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${LIBLZMA_INCLUDE_DIRS})
   target_link_libraries(osmscout_import ${LIBLZMA_LIBRARIES})
 endif()
 
 if (ZLIB_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${ZLIB_INCLUDE_DIRS})
   target_link_libraries(osmscout_import ${ZLIB_LIBRARIES})
 endif()
 
 if(MARISA_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${MARISA_INCLUDE_DIRS})
     target_link_libraries(osmscout_import ${MARISA_LIBRARIES})
 endif()
 
