@@ -29,14 +29,20 @@ DBJob::DBJob():
 
 DBJob::~DBJob()
 {
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Destroy" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
+  }
   Close();
 }
 
-void DBJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
+void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                const std::list<DBInstanceRef> &databases,
+                QReadLocker *locker)
 {
   if (thread!=QThread::currentThread()){
-    qWarning() << "Run from non Job thread";
+    qWarning() << "Run" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
+  this->basemapDatabase=basemapDatabase;
   this->databases=databases;
   this->locker=locker;
 }
@@ -47,7 +53,7 @@ void DBJob::Close()
     return;
   }
   if (thread!=QThread::currentThread()){
-    qWarning() << "Closing from non Job thread";
+    qWarning() << "Closing" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   delete locker;
   locker=NULL;
@@ -56,16 +62,20 @@ void DBJob::Close()
 
 DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
                      unsigned long maximumAreaLevel,
-                     bool lowZoomOptimization):
+                     bool lowZoomOptimization,
+                     bool closeOnFinish):
   DBJob(),
+  closeOnFinish(closeOnFinish),
   breaker(std::make_shared<QBreaker>()),
   lookupProjection(lookupProjection)
 {
+  //qDebug() << "create: " << this << " in " << QThread::currentThread();
+
   searchParameter.SetMaximumAreaLevel(maximumAreaLevel);
   searchParameter.SetUseMultithreading(true);
   searchParameter.SetUseLowZoomOptimization(lowZoomOptimization);
   searchParameter.SetBreaker(breaker);
-  
+
   connect(this,SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
           this,SLOT(onTileStateChanged(QString,const osmscout::TileRef)),
           Qt::QueuedConnection);
@@ -73,16 +83,21 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
 
 DBLoadJob::~DBLoadJob()
 {
+  //qDebug() << "destroying:" << this << "in" << QThread::currentThread();
+
   // we have to call Close from ~DBLoadJob
   // it (DBLoadJob::Close) is unreachable when ~DBJob is called
   Close();
+  //qDebug() << "destroyed:" << this << "in" << QThread::currentThread();
 }
 
-void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
+void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+                    const std::list<DBInstanceRef> &databases,
+                    QReadLocker *locker)
 {
   osmscout::GeoBox lookupBox;
   lookupProjection.GetDimensions(lookupBox);
-  QList<DBInstanceRef> relevantDatabases;
+  std::list<DBInstanceRef> relevantDatabases;
   for (auto &db:databases){
     if (!db->database->IsOpen() || (!db->styleConfig)) {
       qDebug() << "Database is not ready" << db->path;
@@ -94,10 +109,10 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
       qDebug() << "Skip database" << db->path;
       continue;
     }
-    relevantDatabases << db;
+    relevantDatabases.push_back(db);
   }
 
-  DBJob::Run(relevantDatabases,locker);
+  DBJob::Run(basemapDatabase,relevantDatabases,locker);
   for (auto &db:relevantDatabases){
     std::list<osmscout::TileRef> tiles;
     db->mapService->LookupTiles(lookupProjection,tiles);
@@ -107,7 +122,7 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
       //std::cout << "callback called for job: " << this << std::endl;
       emit tileStateChanged(path,tile);
     };
-    
+
     osmscout::MapService::CallbackId callbackId=db->mapService->RegisterTileStateCallback(callback);
     //std::cout << "callback registered for job: " << this << " " << db->path.toStdString() << ": " << callbackId  << std::endl ;
     callbacks[db->path]=callbackId;
@@ -116,6 +131,7 @@ void DBLoadJob::Run(QList<DBInstanceRef> &databases, QReadLocker *locker)
     for (auto &tile:tiles){
       tileMap[tile->GetId()]=tile;
     }
+    allTiles[db->path]=tileMap;
     loadingTiles[db->path]=tileMap;
 
     // load tiles asynchronous
@@ -138,8 +154,9 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
   if (!tile->IsComplete()){
     return; // ignore incomplete
   }
+  // qDebug() << "Callback:" << this << "in" << QThread::currentThread();
   if (thread!=QThread::currentThread()){
-    qWarning() << "Tile callback from non Job thread";
+    qWarning() << "Tile callback" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   if (!loadingTiles.contains(dbPath)){
     return; // loaded already
@@ -161,8 +178,10 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
     emit databaseLoaded(dbPath,loadedTileMap.values());
     if (loadingTiles.isEmpty()){ // all databases are finished
       emit finished(loadedTiles);
-      qDebug() << "Loaded completely";
-      Close();
+      //qDebug() << "Loaded completely:" << this << "in" << QThread::currentThread();
+      if (closeOnFinish){
+        Close();
+      }
     }
   }
 }
@@ -175,13 +194,23 @@ void DBLoadJob::Close()
   // deregister callbacks
   for (auto &db:databases){
     if (callbacks.contains(db->path)){
-      //std::cout << "Remove callback for job: " << this << ": " << callbacks[db->path] << std::endl;
+      //qDebug() << "Remove callback for job:" << this << ":" << callbacks[db->path] << "in" << QThread::currentThread();
       db->mapService->DeregisterTileStateCallback(callbacks[db->path]);
       callbacks.remove(db->path);
     }
   }
 
   DBJob::Close();
+}
+
+bool DBLoadJob::IsFinished() const
+{
+  return loadingTiles.isEmpty();
+}
+
+QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> DBLoadJob::GetAllTiles() const
+{
+  return allTiles;
 }
 
 bool DBLoadJob::AddTileDataToMapData(QString dbPath,

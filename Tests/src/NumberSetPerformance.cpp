@@ -46,7 +46,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
   osmscout::StopClock insertsetTimer;
 
-  std::set<unsigned long> set;
+  std::set<osmscout::Id> set;
 
   for (size_t i=0; i<ids.size(); i++) {
     set.insert(ids[i]);

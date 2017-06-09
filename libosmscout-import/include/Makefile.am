@@ -8,6 +8,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/RawRelIndexedDataFile.h \
                         osmscout/import/RawWay.h \
                         osmscout/import/RawWayIndexedDataFile.h \
+                        osmscout/import/WaterIndexProcessor.h \
                         osmscout/import/GenAreaAreaIndex.h \
                         osmscout/import/GenAreaNodeIndex.h \
                         osmscout/import/GenAreaWayIndex.h \
@@ -30,13 +31,15 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenWayAreaDat.h \
                         osmscout/import/GenWayWayDat.h \
                         osmscout/import/MergeAreaData.h \
+                        osmscout/import/ShapeFileScanner.h \
                         osmscout/import/SortDat.h \
                         osmscout/import/SortNodeDat.h \
                         osmscout/import/SortWayDat.h \
                         osmscout/import/Import.h \
                         osmscout/import/ImportErrorReporter.h \
                         osmscout/import/Preprocessor.h \
-                        osmscout/import/Preprocess.h
+                        osmscout/import/Preprocess.h \
+                        osmscout/import/PreprocessPoly.h
 
 if HAVE_LIB_XML
 nobase_include_HEADERS += osmscout/import/PreprocessOSM.h

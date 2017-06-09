@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <QObject>
 #include <QMetaType>
 #include <QQmlEngine>
 
@@ -24,9 +25,9 @@
 #include <osmscout/Settings.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/DataTileCache.h>
-#include <osmscout/PlaneDBThread.h>
-#include <osmscout/TiledDBThread.h>
 #include <osmscout/MapWidget.h>
+#include <osmscout/PlaneMapRenderer.h>
+#include <osmscout/TiledMapRenderer.h>
 
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/LocationInfoModel.h>
@@ -58,7 +59,7 @@ OSMScoutQtBuilder::OSMScoutQtBuilder():
 {
 }
 
-bool OSMScoutQtBuilder::Init(bool tiledInstance)
+bool OSMScoutQtBuilder::Init()
 {
   if (osmScoutInstance!=NULL){
     return false;
@@ -82,32 +83,28 @@ bool OSMScoutQtBuilder::Init(bool tiledInstance)
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
 
-  DBThread* dbThread;
-  if (tiledInstance){
-    dbThread=new TiledDBThread(mapLookupDirectories,
-                               iconDirectory,
-                               settings,
-                               cacheLocation + QDir::separator() + "OSMScoutTileCache",
-                               onlineTileCacheSize,
-                               offlineTileCacheSize);
-  }else{
-    dbThread=new PlaneDBThread(mapLookupDirectories,
-                               iconDirectory,
-                               settings);
-  }
-
   QThread *thread=new QThread();
+  DBThreadRef dbThread=std::make_shared<DBThread>(thread,
+                                                  basemapLookupDirectory,
+                                                  mapLookupDirectories,
+                                                  iconDirectory,
+                                                  settings);
+
   thread->setObjectName("DBThread");
 
   dbThread->connect(thread, SIGNAL(started()), SLOT(Initialize()));
-  dbThread->connect(thread, SIGNAL(finished()), SLOT(Finalize()));
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
 
   dbThread->moveToThread(thread);
   thread->start();
 
-  osmScoutInstance=new OSMScoutQt(thread,
-                                  settings,
-                                  std::shared_ptr<DBThread>(dbThread));
+  osmScoutInstance=new OSMScoutQt(settings,
+                                  dbThread,
+                                  iconDirectory,
+                                  cacheLocation,
+                                  onlineTileCacheSize,
+                                  offlineTileCacheSize);
 
   return true;
 }
@@ -151,20 +148,23 @@ void OSMScoutQt::FreeInstance()
   osmScoutInstance=NULL;
 }
 
-OSMScoutQt::OSMScoutQt(QThread *backgroundThread,
-                       SettingsRef settings,
-                       DBThreadRef dbThread):
-        backgroundThread(backgroundThread),
+OSMScoutQt::OSMScoutQt(SettingsRef settings,
+                       DBThreadRef dbThread,
+                       QString iconDirectory,
+                       QString cacheLocation,
+                       size_t onlineTileCacheSize,
+                       size_t offlineTileCacheSize):
         settings(settings),
-        dbThread(dbThread)
+        dbThread(dbThread),
+        iconDirectory(iconDirectory),
+        cacheLocation(cacheLocation),
+        onlineTileCacheSize(onlineTileCacheSize),
+        offlineTileCacheSize(offlineTileCacheSize)
 {
 }
 
 OSMScoutQt::~OSMScoutQt()
 {
-  backgroundThread->quit();
-  backgroundThread->wait();
-  delete backgroundThread;
 }
 
 DBThreadRef OSMScoutQt::GetDBThread()
@@ -177,12 +177,38 @@ SettingsRef OSMScoutQt::GetSettings()
   return settings;
 }
 
-LookupModuleRef OSMScoutQt::MakeLookupModule()
+LookupModule* OSMScoutQt::MakeLookupModule()
 {
   QThread *thread=new QThread();
   thread->setObjectName("LookupModule");
-  LookupModuleRef module=std::make_shared<LookupModule>(thread,dbThread);
+  LookupModule *module=new LookupModule(thread,dbThread);
   module->moveToThread(thread);
   thread->start();
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
   return module;
+}
+
+MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
+{
+  QThread *thread=new QThread();
+  thread->setObjectName("MapRenderer");
+  MapRenderer* mapRenderer;
+  if (type==RenderingType::TiledRendering){
+    mapRenderer=new TiledMapRenderer(thread,
+                                     settings,
+                                     dbThread,
+                                     iconDirectory,
+                                     cacheLocation,
+                                     onlineTileCacheSize,
+                                     offlineTileCacheSize);
+  }else{
+    mapRenderer=new PlaneMapRenderer(thread,settings,dbThread,iconDirectory);
+  }
+  mapRenderer->moveToThread(thread);
+  thread->start();
+
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
+  return mapRenderer;
 }

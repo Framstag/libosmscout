@@ -32,14 +32,18 @@ static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
+      renderer(NULL),
       inputHandler(NULL), 
       showCurrentPosition(false),
-      finished(false)
+      finished(false),
+      renderingType(RenderingType::PlaneRendering)
 {
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);
     setAcceptHoverEvents(true);
-    
+
+    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
     
     mapDpi = dbThread->GetSettings()->GetMapDPI();
@@ -49,10 +53,8 @@ MapWidget::MapWidget(QQuickItem* parent)
   
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
-    //setFocusPolicy(Qt::StrongFocus);
-
-    connect(dbThread.get(),SIGNAL(Redraw()),
-            this,SLOT(redraw()));    
+    connect(renderer,SIGNAL(Redraw()),
+            this,SLOT(redraw()));
     connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
             this,SIGNAL(stylesheetFilenameChanged()));
     connect(dbThread.get(),SIGNAL(styleErrorsChanged()),
@@ -78,6 +80,10 @@ MapWidget::~MapWidget()
 {
     delete inputHandler;
     delete view;
+    if (renderer!=NULL){
+      renderer->deleteLater();
+      renderer=NULL;
+    }
 }
 
 void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states)
@@ -126,7 +132,7 @@ void MapWidget::setupInputHandler(InputHandler *newGesture)
     bool locked = false; 
     if (inputHandler != NULL){
         locked = inputHandler->isLockedToPosition();
-        delete inputHandler;
+        inputHandler->deleteLater();
     }
     inputHandler = newGesture;
     
@@ -221,7 +227,7 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
-    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
+    //DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
 
     bool animationInProgress = inputHandler->animationInProgress();
     
@@ -240,7 +246,8 @@ void MapWidget::paint(QPainter *painter)
     request.height = boundingBox.height();
 
     bool oldFinished = finished;
-    finished = dbThread->RenderMap(*painter,request);
+    //finished = dbThread->RenderMap(*painter,request);
+    finished = renderer->RenderMap(*painter,request);
     if (oldFinished != finished){
         emit finishedChanged(finished);
     }
@@ -685,4 +692,29 @@ bool MapWidget::toggleInfo()
     osmscout::log.Info(!osmscout::log.IsInfo());
 
     return osmscout::log.IsInfo();
+}
+
+QString MapWidget::GetRenderingType() const
+{
+  if (renderingType==RenderingType::TiledRendering)
+    return "tiled";
+  return "plane";
+}
+
+void MapWidget::SetRenderingType(QString strType)
+{
+  RenderingType type=RenderingType::PlaneRendering;
+  if (strType=="tiled"){
+    type=RenderingType::TiledRendering;
+  }
+  if (type!=renderingType){
+    renderingType=type;
+    if (renderer!=NULL){
+      renderer->deleteLater();
+    }
+    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    connect(renderer,SIGNAL(Redraw()),
+            this,SLOT(redraw()));
+    emit renderingTypeChanged(GetRenderingType());
+  }
 }

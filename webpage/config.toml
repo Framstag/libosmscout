@@ -1,8 +1,7 @@
 baseurl = "http://libosmscout.sourceforge.net/"
 languageCode = "en-us"
 title = "libosmscout"
-disableRSS = true
-disableSitemap = true
+disableKinds = ["RSS", "sitemap"]
 pluralizeListTitles = false
 PygmentsCodeFences = true
 pygmentsuseclasses = true
@@ -14,34 +13,10 @@ pygmentsuseclasses = true
     url = "/"
 
 [[menu.main]]
-    name = "Features"
-    weight = 2
-    identifier = "features"
-    url = "/features/"
-
-[[menu.main]]
-    name = "Documentation"
-    weight = 3
-    identifier = "documentation"
-    url = "/documentation/"
-
-[[menu.main]]
     name = "API Documentation"
     weight = 4
     identifier = "api-doc"
     url = "/api-doc/html/index.html"
-
-[[menu.main]]
-    name = "Tutorials"
-    weight = 5
-    identifier = "tutorials"
-    url = "/tutorials/"
-
-[[menu.main]]
-    name = "Examples"
-    weight = 6
-    identifier = "examples"
-    url = "/examples/"
 
 [[menu.main]]
     name = "Companion projects"

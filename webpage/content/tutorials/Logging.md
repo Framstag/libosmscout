@@ -2,12 +2,12 @@
 date: "2016-05-29T19:40:58+02:00"
 title:  "How to log"
 description: "How to log"
-weight: 2
+weight: 3
 
 menu:
   main:
     Parent: "tutorials"
-    Weight: 2
+    Weight: 3
 ---
         
 Logging is implemented via the global class instance `osmscout::log`.

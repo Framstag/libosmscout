@@ -40,16 +40,18 @@ namespace osmscout {
   class PreprocessPoly CLASS_FINAL : public Preprocessor
   {
   private:
-    PreprocessorCallback&            callback;
+    PreprocessorCallback& callback;
 
-    enum Context{
+    enum Context
+    {
      Root,
      Section,
      IncludedPolygon,
      ExcludedPolygon
     };
 
-    struct Node{
+    struct Node
+    {
       double x;
       double y;
     };

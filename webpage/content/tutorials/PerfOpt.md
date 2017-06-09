@@ -2,12 +2,12 @@
 date: "2016-08-28T15:25:58+02:00"
 title:  "Performance optimizations"
 description: "How to optimize import and rendering"
-weight: 4
+weight: 5
 
 menu:
   main:
     Parent: "tutorials"
-    Weight: 4
+    Weight: 5
 ---
 
 ## General notes

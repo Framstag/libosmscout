@@ -90,7 +90,7 @@ namespace osmscout {
 
     typedef std::shared_ptr<Router> RouterRef;
 
-    enum class OSMSCOUT_IMPORT_API AssumeLandStrategy
+    enum class AssumeLandStrategy
     {
       disable   = 0, // disable land detection by database objects
       enable    = 1, // enable land detection
@@ -106,6 +106,7 @@ namespace osmscout {
 
     size_t                       startStep;                //<! Starting step for import
     size_t                       endStep;                  //<! End step for import
+    std::string                  boundingPolygonFile;      //<! Polygon file containing the bounding polygon of the current import
     bool                         eco;                      //<! Eco modus, deletes temporary files ASAP
     std::list<Router>            router;                   //<! Definition of router
 
@@ -176,6 +177,7 @@ namespace osmscout {
     const std::list<std::string>& GetMapfiles() const;
     std::string GetTypefile() const;
     std::string GetDestinationDirectory() const;
+    std::string GetBoundingPolygonFile() const;
 
     ImportErrorReporterRef GetErrorReporter() const;
 
@@ -247,6 +249,7 @@ namespace osmscout {
     void SetMapfiles(const std::list<std::string>& mapfile);
     void SetTypefile(const std::string& typefile);
     void SetDestinationDirectory(const std::string& destinationDirectory);
+    void SetBoundingPolygonFile(const std::string& boundingPolygonFile);
 
     void SetErrorReporter(const ImportErrorReporterRef& errorReporter);
 

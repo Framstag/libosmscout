@@ -43,20 +43,22 @@
 
 void DumpFeatures(const osmscout::FeatureValueBuffer &features, std::string indent="  ")
 {
-    for (auto featureInstance :features.GetType()->GetFeatures()){
-      if (features.HasFeature(featureInstance.GetIndex())){
+    for (auto featureInstance :features.GetType()->GetFeatures()) {
+      if (features.HasFeature(featureInstance.GetIndex())) {
         osmscout::FeatureRef feature=featureInstance.GetFeature();
         std::cout << indent << "+ feature " << feature->GetName();
-        if (feature->HasValue()){
+
+        if (feature->HasValue()) {
           osmscout::FeatureValue *value=features.GetValue(featureInstance.GetIndex());
-          if (feature->HasLabel()){
-            if (!value->GetLabel().empty()){
-              std::cout << ": " << value->GetLabel();
+          if (feature->HasLabel()) {
+            if (!value->GetLabel().empty()) {
+              std::cout << ": " << osmscout::UTF8StringToLocaleString(value->GetLabel());
             }
-          }else{
+          }
+          else {
             // print other values without defined label
             const auto *adminLevel=dynamic_cast<const osmscout::AdminLevelFeatureValue*>(value);
-            if (adminLevel!=NULL){
+            if (adminLevel!=NULL) {
               std::cout << ": " << (int)adminLevel->GetAdminLevel();
             }
           }
@@ -66,42 +68,63 @@ void DumpFeatures(const osmscout::FeatureValueBuffer &features, std::string inde
     }
 }
 
-void DumpLocationAtPlaceDescription(osmscout::LocationAtPlaceDescription& description)
+void DumpLocationAtPlaceDescription(const std::string& label,
+                                    osmscout::LocationAtPlaceDescription& description)
 {
+  std::cout << label << ":" << std::endl;
   osmscout::Place place = description.GetPlace();
   if (description.IsAtPlace()) {
-    std::cout << "* Is at address: " << place.GetDisplayString() << std::endl;
+    std::cout << "  * You are at '" << place.GetDisplayString() << "' (" << place.GetObject().GetTypeName() << ")" << std::endl;
   }
   else {
     std::cout.precision(1);
-    std::cout << "* "  << std::fixed << description.GetDistance() << "m ";
+    std::cout << "  * You are "  << std::fixed << description.GetDistance() << "m ";
     std::cout << osmscout::BearingDisplayString(description.GetBearing());
-    std::cout << " of address: " << place.GetDisplayString() << std::endl;
+    std::cout << " of '" << place.GetDisplayString() << "' (" << place.GetObject().GetTypeName() << ")" <<std::endl;
   }
 
   if (place.GetPOI()) {
-    std::cout << "  - POI:      " << place.GetPOI()->name << std::endl;
+    std::cout << "  - POI:      " << osmscout::UTF8StringToLocaleString(place.GetPOI()->name) << std::endl;
     if (place.GetObjectFeatures()){
       std::cout << "  - type:     " << place.GetObjectFeatures()->GetType()->GetName() << std::endl;
     }
   }
 
   if (place.GetAddress()) {
-    std::cout << "  - address:  " << place.GetAddress()->name << std::endl;
+    std::cout << "  - address:  " << osmscout::UTF8StringToLocaleString(place.GetAddress()->name) << std::endl;
   }
 
   if (place.GetLocation()) {
-    std::cout << "  - location: " << place.GetLocation()->name << std::endl;
+    std::cout << "  - location: " << osmscout::UTF8StringToLocaleString(place.GetLocation()->name) << std::endl;
   }
 
   if (place.GetAdminRegion()) {
-    std::cout << "  - region:   " << place.GetAdminRegion()->name << std::endl;
+    std::cout << "  - region:   " << osmscout::UTF8StringToLocaleString(place.GetAdminRegion()->name) << std::endl;
   }
-  
+
   // print all features of this place
   std::cout << std::endl;
-  if (place.GetObjectFeatures()){
+  if (place.GetObjectFeatures()) {
     DumpFeatures(*place.GetObjectFeatures());
+  }
+}
+
+void DumpCrossingDescription(const std::string& label,
+                             osmscout::LocationCrossingDescription& description)
+{
+  std::cout << label << ":" << std::endl;
+  if (description.IsAtPlace()) {
+    std::cout << "  * You are at crossing:" << std::endl;
+  }
+  else {
+    std::cout.precision(1);
+    std::cout << "  * Your are "  << std::fixed << description.GetDistance() << "m ";
+    std::cout << osmscout::BearingDisplayString(description.GetBearing());
+    std::cout << " of crossing:"  << std::endl;
+  }
+
+  for (const auto& wayPlace : description.GetWays()) {
+    std::cout << "  - " << wayPlace.GetDisplayString() << std::endl;
   }
 }
 
@@ -123,7 +146,7 @@ void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
     if (offset!=adminRegion->regionOffset){
       std::cout << "parent ";
     }
-    std::cout << "region: " << region->name << std::endl;
+    std::cout << "region: " << osmscout::UTF8StringToLocaleString(region->name) << std::endl;
 
     if(region->object.type==osmscout::RefType::refArea){
       osmscout::AreaRef area;
@@ -156,6 +179,14 @@ int main(int argc, char* argv[])
     std::cerr << "lat is not numeric!" << std::endl;
     return 1;
   }
+
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
+  }
+
   osmscout::log.Debug(false);
 
   osmscout::GeoCoord location(lat,lon);
@@ -181,28 +212,38 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::LocationCoordDescriptionRef coordDescription=description.GetCoordDescription();
-  osmscout::LocationAtPlaceDescriptionRef atNameDescription=description.GetAtNameDescription();
-  osmscout::LocationAtPlaceDescriptionRef atAddressDescription=description.GetAtAddressDescription();
-  osmscout::LocationAtPlaceDescriptionRef atPOIDescription=description.GetAtPOIDescription();
+  osmscout::LocationCoordDescriptionRef    coordDescription=description.GetCoordDescription();
+  osmscout::LocationAtPlaceDescriptionRef  atNameDescription=description.GetAtNameDescription();
+  osmscout::LocationAtPlaceDescriptionRef  atAddressDescription=description.GetAtAddressDescription();
+  osmscout::LocationAtPlaceDescriptionRef  atPOIDescription=description.GetAtPOIDescription();
+  osmscout::LocationCrossingDescriptionRef crossingDescription=description.GetCrossingDescription();
 
   if (coordDescription) {
     std::cout << "* Coordinate: " << coordDescription->GetLocation().GetDisplayText() << std::endl;
   }
 
   if (atNameDescription) {
-    DumpLocationAtPlaceDescription(*atNameDescription);
+    std::cout << std::endl;
+    DumpLocationAtPlaceDescription("Nearest namable object",*atNameDescription);
     DumpParentAdminRegions(locationService, database, atNameDescription->GetPlace().GetAdminRegion());
   }
 
   if (atAddressDescription) {
-    DumpLocationAtPlaceDescription(*atAddressDescription);
+    std::cout << std::endl;
+    DumpLocationAtPlaceDescription("Nearest address",*atAddressDescription);
     DumpParentAdminRegions(locationService, database, atAddressDescription->GetPlace().GetAdminRegion());
   }
 
   if (atPOIDescription) {
-    DumpLocationAtPlaceDescription(*atPOIDescription);
+    std::cout << std::endl;
+    DumpLocationAtPlaceDescription("Nearest POI",*atPOIDescription);
     DumpParentAdminRegions(locationService, database, atPOIDescription->GetPlace().GetAdminRegion());
+  }
+
+  if (crossingDescription) {
+    std::cout << std::endl;
+    DumpCrossingDescription("Nearest crossing",*crossingDescription);
+    DumpParentAdminRegions(locationService, database, crossingDescription->GetWays().front().GetAdminRegion());
   }
 
   database->Close();

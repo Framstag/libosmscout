@@ -5,14 +5,18 @@
 
 <body>
 {{ partial "header.html" . }}
+
+<div id="content">
 {{ partial "navigation.html" . }}
     
-<div id="content">
-<h1>{{ .Title }}</h1>
-
 <main>
+  <h1>{{ .Title }}</h1>
   {{ .Content }}
 </main>
+
+<div id="secondary">
+</div>
+
 </div>
 
 {{partial "footer.html" . }}

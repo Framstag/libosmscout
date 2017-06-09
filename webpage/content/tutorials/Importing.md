@@ -76,7 +76,8 @@ You can use these polygon files directly as Import tool input beside standard da
   $ .../Import/src/Import  \
     --typefile ../stylesheets/map.ost \
     --destinationDirectory nordrhein-westfalen \
-    nordrhein-westfalen.osm.pbf nordrhein-westfalen.poly
+    --bounding-polygon nordrhein-westfalen.poly\
+    nordrhein-westfalen.osm.pbf 
 ```
 
 Italy without defined data polygon:

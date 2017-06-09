@@ -15,5 +15,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/StyleFlagsModel.h \
                         osmscout/OSMScoutQt.h \
                         osmscout/DBJob.h \
-                        osmscout/LookupModule.h
-
+                        osmscout/LookupModule.h \
+                        osmscout/MapRenderer.h \
+                        osmscout/PlaneMapRenderer.h \
+                        osmscout/TiledMapRenderer.h

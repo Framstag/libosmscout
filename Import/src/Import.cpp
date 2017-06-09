@@ -87,20 +87,24 @@ static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
 
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
-  std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]..." << std::endl;
+  std::cout << "Import -h -d -s <start step> -e <end step> [*.osm|*.pbf]..." << std::endl;
   std::cout << " -h|--help                            show this help" << std::endl;
   std::cout << " -d                                   show debug output" << std::endl;
-  std::cout << " -s <start step>                      set starting step" << std::endl;
-  std::cout << " -e <end step>                        set final step" << std::endl;
-  std::cout << " --eco true|false                     do delete temporary fiels ASAP" << std::endl;
-  std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
+  std::cout << " -s <number>                          set starting processing step" << std::endl;
+  std::cout << " -e <number>                          set final processing step" << std::endl;
+  std::cout << " --typefile <*.ost>                   path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
+  std::cout << std::endl;
+  std::cout << " --bounding-polygon <*.poly>          optional polygon file containing the bounding polygon of the import area" << std::endl;
+  std::cout << std::endl;
 
   std::cout << " --router <router description>        definition of a router (default: car,bicycle,foot:router)" << std::endl;
+  std::cout << std::endl;
 
   std::cout << " --strictAreas true|false             assure that areas are simple (default: " << BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
 
-  std::cout << " --processingQueueSize <number>       size of of the processing worker queus (default: " << parameter.GetProcessingQueueSize() << ")" << std::endl;
+  std::cout << " --processingQueueSize <number>       size of of the processing worker queues (default: " << parameter.GetProcessingQueueSize() << ")" << std::endl;
+  std::cout << std::endl;
 
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
 
@@ -127,9 +131,12 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
 
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
+  std::cout << std::endl;
   std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
             << "                                      # is the default language (no :language) (default: #)" << std::endl;
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
+  std::cout << std::endl;
+  std::cout << " --eco true|false                     do delete temporary fiels ASAP" << std::endl;
   std::cout << " --delete-temporary-files true|false  deletes all temporary files after execution of the importer" << std::endl;
   std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
   std::cout << " --delete-analysis-files true|false   deletes all analysis files after execution of the importer" << std::endl;
@@ -334,8 +341,8 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
                 osmscout::NumberToString(parameter.GetStartStep())+
                 " - "+
                 osmscout::NumberToString(parameter.GetEndStep()));
-  progress.Info(std::string("Eco: ")+
-                (parameter.IsEco() ? "true" : "false"));
+
+
 
   for (const auto& router : parameter.GetRouter()) {
     progress.Info(std::string("Router: ")+VehcileMaskToString(router.GetVehicleMask())+ " - '"+router.GetFilenamebase()+"'");
@@ -390,6 +397,9 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
 
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
+
+  progress.Info(std::string("Eco: ")+
+                (parameter.IsEco() ? "true" : "false"));
 }
 
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
@@ -555,6 +565,19 @@ int main(int argc, char* argv[])
                               i,
                               destinationDirectory)) {
         parameter.SetDestinationDirectory(destinationDirectory);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--bounding-polygon")==0) {
+      std::string boundingPolygonFile;
+
+      if (ParseStringArgument(argc,
+                              argv,
+                              i,
+                              boundingPolygonFile)) {
+        parameter.SetBoundingPolygonFile(boundingPolygonFile);
       }
       else {
         parameterError=true;
@@ -910,12 +933,25 @@ int main(int argc, char* argv[])
 
     for (auto mapfile: mapfiles){
       if (!osmscout::ExistsInFilesystem(mapfile)) {
-        progress.Error("Input "+mapfile+" does not exist!");
+        progress.Error("Input '"+mapfile+"' does not exist!");
         return 1;
       }
 
       if (osmscout::IsDirectory(mapfile)) {
-        progress.Error("Input "+mapfile+" is a directory!");
+        progress.Error("Input '"+mapfile+"' is a directory!");
+        return 1;
+      }
+    }
+
+    if (!parameter.GetBoundingPolygonFile().empty()) {
+      std::string boundingPolygonFile=parameter.GetBoundingPolygonFile();
+
+      if (!osmscout::ExistsInFilesystem(boundingPolygonFile)) {
+        progress.Error("Bounding polygon file '"+boundingPolygonFile+"' does not exist!");
+      }
+
+      if (osmscout::IsDirectory(boundingPolygonFile)) {
+        progress.Error("Bounding polygon file '"+boundingPolygonFile+"' is a directory!");
         return 1;
       }
     }

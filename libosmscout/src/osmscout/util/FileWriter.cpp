@@ -130,6 +130,15 @@ namespace osmscout {
     }
 
     return (FileOffset)filepos;
+#elif defined(HAVE__FTELLI64)
+    __int64 filepos=_ftelli64(file);
+
+    if (filepos==-1) {
+      hasError=true;
+      throw IOException(filename,"Cannot read position in file");
+    }
+
+    return (FileOffset)filepos;
 #else
     long filepos=ftell(file);
 
@@ -155,6 +164,8 @@ namespace osmscout {
 
 #if defined(HAVE_FSEEKO)
     hasError=fseeko(file,(off_t)pos,SEEK_SET)!=0;
+#elif defined(HAVE__FTELLI64)
+    hasError=_fseeki64(file,(__int64)pos,SEEK_SET)!=0;
 #else
     hasError=fseek(file,pos,SEEK_SET)!=0;
 #endif
@@ -765,6 +776,197 @@ namespace osmscout {
     }
   }
 
+  void FileWriter::Write(const std::vector<GeoCoord>& nodes)
+  {
+    // Quick exit for empty vector arrays
+    if (nodes.empty()) {
+      uint8_t size=0;
+
+      Write(size);
+
+      return;
+    }
+
+    size_t nodesSize=nodes.size();
+
+    assert(nodesSize<=MAX_NODES);
+
+    // A lat and a lon delta for each coordinate delta
+    deltaBuffer.resize((nodesSize-1)*2);
+
+    //
+    // Calculate deltas and required space
+    //
+
+    uint32_t lastLat=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
+    uint32_t lastLon=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+    size_t   deltaBufferPos=0;
+    size_t   coordBitSize=16;
+
+    for (size_t i=1; i<nodesSize; i++) {
+      uint32_t currentLat=(uint32_t)round((nodes[i].GetLat()+90.0)*latConversionFactor);
+      uint32_t currentLon=(uint32_t)round((nodes[i].GetLon()+180.0)*lonConversionFactor);
+
+      // lat
+
+      int32_t latDelta=currentLat-lastLat;
+
+      if (latDelta>=-128 && latDelta<=127) {
+        coordBitSize=std::max(coordBitSize,(size_t)16); // 2x 8 bit
+      }
+      else if (latDelta>=-32768 && latDelta<=32767) {
+        coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
+      }
+      else if (latDelta>=-8388608 && latDelta<=8388608) {
+        coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        throw IOException(filename,"Cannot write coordinate","Delta between coordinates too big");
+      }
+
+      deltaBuffer[deltaBufferPos]=latDelta;
+      deltaBufferPos++;
+
+      // lon
+
+      int32_t lonDelta=currentLon-lastLon;
+
+      if (lonDelta>=-128 && lonDelta<=127) {
+        coordBitSize=std::max(coordBitSize,(size_t)16); // 2x 8 bit
+      }
+      else if (lonDelta>=-32768 && lonDelta<=32767) {
+        coordBitSize=std::max(coordBitSize,(size_t)32); // 2* 16 bit
+      }
+      else if (lonDelta>=-8388608 && lonDelta<=8388608) {
+        coordBitSize=std::max(coordBitSize,(size_t)48); // 2 * 24 bit
+      }
+      else {
+        throw IOException(filename,"Cannot write coordinate","Delta between coordinates too big");
+      }
+
+      deltaBuffer[deltaBufferPos]=lonDelta;
+      deltaBufferPos++;
+
+      lastLat=currentLat;
+      lastLon=currentLon;
+    }
+
+    size_t bytesNeeded=(nodesSize-1)*coordBitSize/8; // all coordinates in the same encoding
+
+    //
+    // Write starting length / signal bit section
+    //
+
+    // We use the first two bits to signal encoding size for coordinates
+
+    uint8_t coordSizeFlags;
+
+    if (coordBitSize==16) {
+      coordSizeFlags=0x00;
+    }
+    else if (coordBitSize==32) {
+      coordSizeFlags=0x01;
+    }
+    else {
+      coordSizeFlags=0x02;
+    }
+
+    if (nodesSize<=0x1f) {    // 2^5 (8 bits - 2 flag bit -1 continuation bit)
+      uint8_t nodeSize1=(nodesSize & 0x1f) << 2;
+      uint8_t size=coordSizeFlags | nodeSize1;
+
+      Write(size);
+    }
+    else if (nodesSize<=0xfff) { // 2^(5+7)=2^12 (16-2-1-1)
+      uint8_t size[2];
+      uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=nodesSize >> 5; // The final bits
+
+      size[0]=coordSizeFlags | nodeSize1;
+      size[1]=nodeSize2;
+
+      Write((char*)size,2);
+    }
+    else if (nodesSize<=0x7ffff) { // 2^(12+7)=2^19 (24-2-1-1-1)
+      uint8_t size[3];
+      uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+      uint8_t nodeSize3=nodesSize >> 12; // The final bits
+
+      size[0]=coordSizeFlags | nodeSize1;
+      size[1]=nodeSize2;
+      size[2]=nodeSize3;
+
+      Write((char*)size,3);
+    }
+    else { // 2^(19+8)2^27 (32-2-1-1-1)
+      uint8_t size[4];
+      uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
+      uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
+      uint8_t nodeSize3=((nodesSize >> 12) & 0x7f) | 0x80; // further 7 bits + continuation bit
+      uint8_t nodeSize4=nodesSize >> 19; // The final bits
+
+      size[0]=coordSizeFlags | nodeSize1;
+      size[1]=nodeSize2;
+      size[2]=nodeSize3;
+      size[3]=nodeSize4;
+
+      Write((char*)size,4);
+    }
+
+    //
+    // Write data array
+    //
+
+    WriteCoord(nodes[0]);
+
+    byteBuffer.resize(bytesNeeded);
+
+    if (coordBitSize==16) {
+      size_t byteBufferPos=0;
+
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i];
+        byteBufferPos++;
+      }
+    }
+    else if (coordBitSize==32) {
+      size_t byteBufferPos=0;
+
+      for (size_t i=0; i<deltaBuffer.size(); i++) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8);
+        ++byteBufferPos;
+      }
+    }
+    else {
+      size_t byteBufferPos=0;
+      for (size_t i=0; i<deltaBuffer.size(); i+=2) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8) & 0xff;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=deltaBuffer[i] >> 16;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=deltaBuffer[i+1] & 0xff;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=(deltaBuffer[i+1] >> 8) & 0xff;
+        ++byteBufferPos;
+
+        byteBuffer[byteBufferPos]=deltaBuffer[i+1] >> 16;
+        ++byteBufferPos;
+      }
+    }
+
+    Write((char*)byteBuffer.data(),byteBuffer.size());
+  }
+
   void FileWriter::Write(const std::vector<Point>& nodes, bool writeIds)
   {
     // Quick exit for empty vector arrays
@@ -993,28 +1195,25 @@ namespace osmscout {
       }
     }
     else {
-      for (size_t i=0; i<deltaBuffer.size(); i++) {
-        size_t byteBufferPos=0;
+      size_t byteBufferPos=0;
+      for (size_t i=0; i<deltaBuffer.size(); i+=2) {
+        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+        ++byteBufferPos;
 
-        for (size_t i=0; i<deltaBuffer.size(); i+=2) {
-          byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8) & 0xff;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8) & 0xff;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=deltaBuffer[i] >> 16;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=deltaBuffer[i] >> 16;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=deltaBuffer[i+1] & 0xff;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=deltaBuffer[i+1] & 0xff;
-          ++byteBufferPos;
+        byteBuffer[byteBufferPos]=(deltaBuffer[i+1] >> 8) & 0xff;
+        ++byteBufferPos;
 
-          byteBuffer[byteBufferPos]=(deltaBuffer[i+1] >> 8) & 0xff;
-          ++byteBufferPos;
-
-          byteBuffer[byteBufferPos]=deltaBuffer[i+1] >> 16;
-          ++byteBufferPos;
-        }
+        byteBuffer[byteBufferPos]=deltaBuffer[i+1] >> 16;
+        ++byteBufferPos;
       }
     }
 

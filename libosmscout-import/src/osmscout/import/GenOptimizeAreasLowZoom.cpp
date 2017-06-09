@@ -197,7 +197,8 @@ namespace osmscout
 
       size_t r=0;
       while (r<area->rings.size()) {
-        if (!area->rings[r].IsMasterRing()) {
+        if (!(area->rings[r].IsMasterRing() &&
+              area->rings[r].nodes.empty())) {
           polygon.TransformArea(projection,
                                 optimizeAreaMethod,
                                 area->rings[r].nodes,
@@ -223,9 +224,10 @@ namespace osmscout
 
         newRings.push_back(area->rings[r]);
 
-        newRings.back().nodes.clear();
+        if (!(area->rings[r].IsMasterRing() &&
+              area->rings[r].nodes.empty())) {
+          newRings.back().nodes.clear();
 
-        if (!area->rings[r].IsMasterRing()) {
           for (size_t i=polygon.GetStart();
                i<=polygon.GetEnd();
                i++) {
@@ -238,9 +240,26 @@ namespace osmscout
         r++;
       }
 
-      if ((area->rings.size()>1 && newRings.size()<=1) ||
-          (area->rings.size()==1 && newRings.size()==0)) {
-        continue;
+      // MAster ring can have nodes, but does not need to have
+      if (area->rings.front().IsMasterRing()) {
+        if (area->rings.front().nodes.empty()) {
+          if (newRings.size()==1) {
+            // Master ring is empty and the only one left => skip
+            continue;
+          }
+        }
+        else {
+          if (newRings.size()==0) {
+            // Master ring is not empty and all rings were dropped => skip
+            continue;
+          }
+        }
+      }
+      else {
+        if (newRings.size()==0) {
+          // No master ring is and all rings were dropped => skip
+          continue;
+        }
       }
 
       AreaRef copiedArea=std::make_shared<Area>(*area);
@@ -518,7 +537,7 @@ namespace osmscout
 
             OptimizeAreas(allAreas[type->GetIndex()],
                           optimizedAreas,
-                          1280,768,
+                          800,480,
                           dpi,
                           pixel,
                           magnification,

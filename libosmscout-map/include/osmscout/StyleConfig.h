@@ -304,7 +304,7 @@ namespace osmscout {
     virtual void SetStringValue(int attribute, const std::string& value) = 0;
     virtual void SetColorValue(int attribute, const Color& value) = 0;
     virtual void SetMagnificationValue(int attribute, const Magnification& value) = 0;
-    virtual void SetDoubleValue(int attribute, const double value) = 0;
+    virtual void SetDoubleValue(int attribute, double value) = 0;
     virtual void SetDoubleArrayValue(int attribute, const std::vector<double>& value) = 0;
     virtual void SetSymbolValue(int attribute, const SymbolRef& value) = 0;
     virtual void SetIntValue(int attribute, int value) = 0;
@@ -1074,7 +1074,7 @@ namespace osmscout {
 
     void SetLabelValue(int attribute, const LabelProviderRef& value);
     void SetColorValue(int attribute, const Color& value);
-    void SetDoubleValue(int attribute, const double value);
+    void SetDoubleValue(int attribute, double value);
     void SetUIntValue(int attribute, size_t value);
 
     PathShieldStyle& SetLabel(const LabelProviderRef& label);

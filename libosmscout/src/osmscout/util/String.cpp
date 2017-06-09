@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cwchar>
 #include <iomanip>
 #include <locale>
 #include <sstream>
@@ -32,6 +33,12 @@
 #if defined(HAVE_CODECVT)
 #include <codecvt>
 #endif
+
+#if defined(HAVE_ICONV)
+#include <iconv.h>
+#endif
+
+#include <string.h>
 #include <iostream>
 namespace osmscout {
 
@@ -334,14 +341,153 @@ namespace osmscout {
     }
   }
 
-#if defined(HAVE_CODECVT)
+  std::wstring LocaleStringToWString(const std::string& text)
+  {
+    std::mbstate_t state;
+
+    const char     *in=text.c_str();
+    wchar_t        *out=new wchar_t[text.length()+2];
+    size_t         size;
+    std::wstring   result;
+
+    memset(&state,0,sizeof(state));
+
+    size=std::mbsrtowcs(out,&in,text.length()+2,&state);
+    if (size!=(size_t)-1 && in==NULL) {
+      result=std::wstring(out,size);
+    }
+
+    delete [] out;
+
+    return result;
+  }
+
+  std::string WStringToLocaleString(const std::wstring& text)
+  {
+    std::mbstate_t state;
+
+    const wchar_t  *in=text.c_str();
+    char           *out=new char[text.length()*4+1];
+    size_t         size;
+    std::string    result;
+
+    memset(&state,0,sizeof(state));
+
+    size=std::wcsrtombs(out,&in,text.length()*4+1,&state);
+    if (size!=(size_t)-1 && in==NULL) {
+      result=std::string(out,size);
+    }
+
+    delete [] out;
+
+    return result;
+  }
+
+#if defined(HAVE_ICONV)
+  std::wstring UTF8StringToWString(const std::string& text)
+  {
+    std::wstring res;
+    iconv_t      handle;
+
+    handle=iconv_open("WCHAR_T","UTF-8");
+    if (handle==(iconv_t)-1) {
+      std::cerr << "Error in UTF8StringToWString()" << strerror(errno) << std::endl;
+      return L"";
+    }
+
+    // length+1+1 to handle a potential BOM if ICONV_WCHAR_T is UTF-16 and to convert of \0
+    size_t inCount=text.length()+1;
+    size_t outCount=(text.length()+2)*sizeof(wchar_t);
+
+    char    *in=const_cast<char*>(text.data());
+    wchar_t *out=new wchar_t[text.length()+2];
+
+    char *tmpOut=(char*)out;
+    size_t tmpOutCount=outCount;
+    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
+      iconv_close(handle);
+      delete [] out;
+      std::cerr << "Error in UTF8StringToWString()" << strerror(errno) << std::endl;
+      return L"";
+    }
+
+    iconv_close(handle);
+
+    // remove potential byte order marks
+    if (sizeof(wchar_t)==4) {
+      // strip off potential BOM if ICONV_WCHAR_T is UTF-32
+      if (out[0]==0xfeff) {
+        res=std::wstring(out+1,(outCount-tmpOutCount)/sizeof(wchar_t)-2);
+      }
+      else {
+        res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+      }
+    }
+    else if (sizeof(wchar_t)==2) {
+      // strip off potential BOM if ICONV_WCHAR_T is UTF-16
+      if (out[0]==0xfeff || out[0]==0xfffe) {
+        res=std::wstring(out+1,(outCount-tmpOutCount)/sizeof(wchar_t)-2);
+      }
+      else {
+        res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+      }
+    }
+    else {
+      res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+    }
+
+    delete [] out;
+
+    return res;
+  }
+#elif defined(HAVE_CODECVT)
   std::wstring UTF8StringToWString(const std::string& text)
   {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
 
     return conv.from_bytes(text);
   }
+#else
+  #error "Missing implementation for std::wstring UTF8StringToWString(const std::string& text)"
+#endif
 
+#if defined(HAVE_ICONV)
+  std::string WStringToUTF8String(const std::wstring& text)
+  {
+    iconv_t handle;
+
+    handle=iconv_open("UTF-8","WCHAR_T");
+    if (handle==(iconv_t)-1) {
+      std::cerr << "Error iconv_open in WStringToUTF8String() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    // length+1 to get the result '\0'-terminated
+    size_t inCount=(text.length()+1)*sizeof(wchar_t);
+    size_t outCount=text.length()*4+1; // Up to 4 bytes for one UTF-8 character
+
+    char *in=const_cast<char*>((const char*)text.c_str());
+    char *out=new char[outCount];
+
+    char   *tmpOut=out;
+    size_t tmpOutCount=outCount;
+
+    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
+      iconv_close(handle);
+      delete [] out;
+      std::cerr << "Error iconv in WStringToUTF8String() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    std::string res=out;
+
+    delete [] out;
+
+    iconv_close(handle);
+
+    return res;
+  }
+#elif defined(HAVE_CODECVT)
   std::string WStringToUTF8String(const std::wstring& text)
   {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
@@ -349,293 +495,92 @@ namespace osmscout {
     return conv.to_bytes(text);
   }
 #else
-  /**
-    The following string conversion code is a modified version of code copied
-    from the source of the ConvertUTF tool, as can be found for example at
-    http://www.unicode.org/Public/PROGRAMS/CVTUTF/
-
-    It is free to copy and use.
-  */
-
-  #define UNI_SUR_HIGH_START  0xD800
-  #define UNI_SUR_HIGH_END    0xDBFF
-  #define UNI_SUR_LOW_START   0xDC00
-  #define UNI_SUR_LOW_END     0xDFFF
-  #define UNI_MAX_BMP         0x0000FFFF
-  #define UNI_MAX_UTF16       0x0010FFFF
-  #define UNI_MAX_LEGAL_UTF32 0x0010FFFF
-
-  static const unsigned long offsetsFromUTF8[6] = {
-    0x00000000UL, 0x00003080UL, 0x000E2080UL,
-    0x03C82080UL, 0xFA082080UL, 0x82082080UL
-  };
-
-  static const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
-
-  static const char trailingBytesForUTF8[256] = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
-  };
-
-  std::string WStringToUTF8String(const std::wstring& text)
-  {
-    std::string         result;
-    char                buffer[4];
-    const unsigned long byteMask=0xBF;
-    const unsigned long byteMark=0x80;
-
-    result.reserve(text.length()*4);
-
-#if SIZEOF_WCHAR_T==4
-
-    for (size_t i=0; i<text.length(); i++) {
-      wchar_t             ch=text[i];
-      unsigned short      bytesToWrite = 0;
-
-      /* UTF-16 surrogate values are illegal in UTF-32 */
-      if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_LOW_END) {
-        return result;
-      }
-
-      /*
-       * Figure out how many bytes the result will require. Turn any
-       * illegally large UTF32 things (> Plane 17) into replacement chars.
-      */
-      if (ch<0x80) {
-        bytesToWrite=1;
-      }
-      else if (ch<0x800) {
-        bytesToWrite=2;
-      }
-      else if (ch<0x10000) {
-        bytesToWrite=3;
-      }
-      else if (ch<=UNI_MAX_LEGAL_UTF32) {
-        bytesToWrite=4;
-      }
-      else {
-        return result;
-      }
-
-      switch (bytesToWrite) { /* note: everything falls through. */
-      case 4:
-        buffer[3]=(char)((ch | byteMark) & byteMask);
-        ch>>=6;
-      case 3:
-        buffer[2]=(char)((ch | byteMark) & byteMask);
-        ch>>=6;
-      case 2:
-        buffer[1]=(char)((ch | byteMark) & byteMask);
-        ch>>=6;
-      case 1:
-        buffer[0]=(char)(ch | firstByteMark[bytesToWrite]);
-      }
-
-      result.append(buffer,bytesToWrite);
-    }
-
-#elif SIZEOF_WCHAR_T==2
-
-    static const int halfShift=10; /* used for shifting by 10 bits */
-    static const unsigned long halfBase=0x0010000UL;
-
-    const wchar_t* source=text.c_str();
-
-    while (source!=text.c_str()+text.length()) {
-      wchar_t             ch;
-      unsigned short      bytesToWrite=0;
-
-      ch=*source++;
-
-      /* If we have a surrogate pair, convert to UTF32 first. */
-      if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_HIGH_END) {
-        if (source>=text.c_str()+text.length()) {
-          return result;
-        }
-        /* If the 16 bits following the high surrogate are in the source buffer... */
-        unsigned long ch2 = *source++;
-        /* If it's a low surrogate, convert to UTF32. */
-        if (ch2>=UNI_SUR_LOW_START && ch2<=UNI_SUR_LOW_END) {
-          ch=(wchar_t)(((ch-UNI_SUR_HIGH_START) << halfShift) + (ch2-UNI_SUR_LOW_START) + halfBase);
-        }
-        else { /* it's an unpaired high surrogate */
-          return result;
-        }
-      }
-      else {
-        /* UTF-16 surrogate values are illegal in UTF-32 */
-        if (ch>=UNI_SUR_LOW_START && ch<=UNI_SUR_LOW_END) {
-          return result;
-        }
-      }
-
-      /* Figure out how many bytes the result will require */
-      if (ch<0x80) {
-        bytesToWrite=1;
-      }
-      else if (ch<0x800) {
-        bytesToWrite=2;
-      }
-      else if (ch<0x10000) {
-        bytesToWrite=3;
-      }
-      else if (ch<0x110000) {
-        bytesToWrite=4;
-      }
-      else {
-        return result;
-      }
-
-      switch (bytesToWrite) { /* note: everything falls through. */
-      case 4:
-        buffer[3]=(char)((ch | byteMark) & byteMask);
-        ch>>=6;
-      case 3:
-        buffer[2]=(char)((ch | byteMark) & byteMask);
-        ch>>=6;
-      case 2:
-        buffer[1]=(char)((ch | byteMark) & byteMask);
-        ch>>=6;
-      case 1:
-        buffer[0]=(char)(ch | firstByteMark[bytesToWrite]);
-      }
-
-      result.append(buffer,bytesToWrite);
-    }
+  #error "Missing implementation for std::string WStringToUTF8String(const std::wstring& text)"
 #endif
 
-    return result;
+#if defined(HAVE_ICONV)
+  std::string LocaleStringToUTF8String(const std::string& text)
+  {
+    iconv_t handle;
+
+    handle=iconv_open("UTF-8","");
+    if (handle==(iconv_t)-1) {
+      std::cerr << "Error iconv_open in LocaleStringToUTF8String() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    // length+1 to get the result '\0'-terminated
+    size_t inCount=text.length()+1;
+    size_t outCount=text.length()*4+1; // Up to 4 bytes for one UTF-8 character
+
+    char *in=const_cast<char*>(text.data());
+    char *out=new char[outCount];
+
+    char   *tmpOut=out;
+    size_t tmpOutCount=outCount;
+
+    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
+      iconv_close(handle);
+      delete [] out;
+      std::cerr << "Error iconv in LocaleStringToUTF8String() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    std::string res=out;
+
+    delete [] out;
+
+    iconv_close(handle);
+
+    return res;
   }
-
-  std::wstring UTF8StringToWString(const std::string& text)
+#else
+  std::string LocaleStringToUTF8String(const std::string& text)
   {
-    std::wstring result;
-
-    result.reserve(text.length());
-
-#if SIZEOF_WCHAR_T==4
-    const char* source=text.c_str();
-
-    while (source!=text.c_str()+text.length()) {
-      unsigned long  ch = 0;
-      unsigned short extraBytesToRead=trailingBytesForUTF8[(unsigned char)*source];
-
-      /*
-       * The cases all fall through. See "Note A" below.
-       */
-      switch (extraBytesToRead) {
-      case 5:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 4:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 3:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 2:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 1:
-        ch+=(unsigned char)(*source);
-        source++;
-        ch<<=6;
-      case 0:
-        ch+=(unsigned char)(*source);
-        source++;
-      }
-      ch-=offsetsFromUTF8[extraBytesToRead];
-
-      if (ch<=UNI_MAX_LEGAL_UTF32) {
-        /*
-         * UTF-16 surrogate values are illegal in UTF-32, and anything
-         * over Plane 17 (> 0x10FFFF) is illegal.
-         */
-        if (ch>=UNI_SUR_HIGH_START && ch<=UNI_SUR_LOW_END) {
-          return result;
-        }
-        else {
-          result.append(1,(wchar_t)ch);
-        }
-      }
-      else { /* i.e., ch > UNI_MAX_LEGAL_UTF32 */
-        return result;
-      }
-    }
-#elif SIZEOF_WCHAR_T==2
-    static const int halfShift=10; /* used for shifting by 10 bits */
-    static const unsigned long halfBase=0x0010000UL;
-    static const unsigned long halfMask=0x3FFUL;
-
-    size_t idx=0;
-
-    while (idx<text.length()) {
-      unsigned long  ch=0;
-      unsigned short extraBytesToRead=trailingBytesForUTF8[(unsigned char)text[idx]];
-
-      /*
-       * The cases all fall through. See "Note A" below.
-       */
-
-      switch (extraBytesToRead) {
-      case 5:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6; /* remember, illegal UTF-8 */
-      case 4:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6; /* remember, illegal UTF-8 */
-      case 3:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6;
-      case 2:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6;
-      case 1:
-        ch+=(unsigned char)text[idx];
-        idx++;
-        ch<<=6;
-      case 0:
-        ch+=(unsigned char)text[idx];
-        idx++;
-      }
-      ch-=offsetsFromUTF8[extraBytesToRead];
-
-      if (ch <= UNI_MAX_BMP) { /* Target is a character <= 0xFFFF */
-        /* UTF-16 surrogate values are illegal in UTF-32 */
-        if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-          return result;
-        }
-        else {
-          result.append(1,(wchar_t)ch); /* normal case */
-        }
-      }
-      else if (ch > UNI_MAX_UTF16) {
-        return result;
-      }
-      else {
-        /* target is a character in range 0xFFFF - 0x10FFFF. */
-        ch -= halfBase;
-        result.append(1,(wchar_t)((ch >> halfShift) + UNI_SUR_HIGH_START));
-        result.append(1,(wchar_t)((ch & halfMask) + UNI_SUR_LOW_START));
-      }
-    }
+    return WStringToUTF8String(LocaleStringToWString(text));
+  }
 #endif
 
-    return result;
+#if defined(HAVE_ICONV)
+  std::string UTF8StringToLocaleString(const std::string& text)
+  {
+    iconv_t handle;
+
+    handle=iconv_open("","UTF-8");
+    if (handle==(iconv_t)-1) {
+      std::cerr << "Error iconv_open in UTF8StringToLocaleString() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    // length+1 to get the result '\0'-terminated
+    size_t inCount=text.length()+1;
+    size_t outCount=text.length()*4+2; // Up to 4 bytes for one UTF-8 character and space for a byte order mark
+
+    char *in=const_cast<char*>(text.data());
+    char *out=new char[outCount];
+
+    char   *tmpOut=out;
+    size_t tmpOutCount=outCount;
+
+    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
+      iconv_close(handle);
+      delete [] out;
+      std::cerr << "Error iconv in UTF8StringToLocaleString() " << strerror(errno) << std::endl;
+      return "";
+    }
+
+    std::string res=out;
+
+    delete [] out;
+
+    iconv_close(handle);
+
+    return res;
+  }
+#else
+  std::string UTF8StringToLocaleString(const std::string& text)
+  {
+    return WStringToLocaleString(UTF8StringToWString(text));
   }
 #endif
 

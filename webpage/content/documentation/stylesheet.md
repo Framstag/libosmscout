@@ -2,12 +2,12 @@
 date: "2016-06-30T19:50:42+02:00"
 title: "Style sheet syntax"
 description: "Description of the style sheet syntax in *.oss files"
-weight: 8
+weight: 9
 
 menu:
   main:
     Parent: "documentation"
-    Weight: 8
+    Weight: 9
 ---
 
 

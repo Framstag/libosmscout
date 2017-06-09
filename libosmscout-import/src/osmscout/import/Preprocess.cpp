@@ -19,6 +19,7 @@
 
 #include <osmscout/import/Preprocess.h>
 
+#include <functional>
 #include <limits>
 
 #include <osmscout/system/Math.h>
@@ -935,7 +936,7 @@ namespace osmscout {
       }
       else if (filename.length()>=5 &&
             filename.substr(filename.length()-5)==".poly") {
-        
+
         PreprocessPoly preprocess(callback);
 
         if (!preprocess.Import(typeConfig,
@@ -947,6 +948,17 @@ namespace osmscout {
       }
       else {
         progress.Error("Sorry, this file type is not yet supported!");
+        return false;
+      }
+    }
+
+    if (!parameter.GetBoundingPolygonFile().empty()) {
+      PreprocessPoly preprocess(callback);
+
+      if (!preprocess.Import(typeConfig,
+                             parameter,
+                             progress,
+                             parameter.GetBoundingPolygonFile())) {
         return false;
       }
     }

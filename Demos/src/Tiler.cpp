@@ -267,8 +267,10 @@ int main(int argc, char* argv[])
 
     magnification.SetLevel(level);
 
-    osmscout::OSMTileId     tileA(osmscout::GeoCoord(latBottom,lonLeft).GetOSMTile(magnification));
-    osmscout::OSMTileId     tileB(osmscout::GeoCoord(latTop,lonRight).GetOSMTile(magnification));
+    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latBottom,lonLeft),
+                                                                  magnification));
+    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latTop,lonRight),
+                                                                  magnification));
     uint32_t                xTileStart=std::min(tileA.GetX(),tileB.GetX());
     uint32_t                xTileEnd=std::max(tileA.GetX(),tileB.GetX());
     uint32_t                xTileCount=xTileEnd-xTileStart+1;

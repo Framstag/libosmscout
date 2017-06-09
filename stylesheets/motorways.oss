@@ -8,54 +8,61 @@ OSS
     COLOR unknownColor               = @waterColor;
 
   SYMBOL highway_services
-    CIRCLE 0,0 0.75 {color: #00ff0055; }
+    CIRCLE 0,0 0.75 {
+      AREA {color: #00ff0055; }
+    }
 
   SYMBOL place_city
-    CIRCLE 0,0 1.25 {color: #ff0000aa; }
+    CIRCLE 0,0 1.25 {
+      AREA {color: #ff0000aa; }
+    }
 
   SYMBOL place_town
-    CIRCLE 0,0 0.75 {color: #ff000055; }
-
-  [TYPE _tile_sea] AREA {color: @waterColor;}
-  [TYPE _tile_coast] AREA {color: @waterColor;}
-  [TYPE _tile_land] AREA {color: @landColor;}
-  [TYPE _tile_unknown] AREA {color: @unknownColor;}
-
-  [TYPE highway_motorway] {
-    WAY { color: #809bc0; displayWidth: 0.45mm; width: 20m; }
-
-    [MAG state-] {
-      WAY.SHIELD {label: ref; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 5; }
+    CIRCLE 0,0 0.75 {
+      AREA {color: #ff000055; }
     }
-  }
 
-  [TYPE highway_services] {
-    AREA {color: #cb9999; }
-    NODE.ICON {symbol: highway_services; }
+  STYLE
+    [TYPE _tile_sea] AREA {color: @waterColor;}
+    [TYPE _tile_coast] AREA {color: @waterColor;}
+    [TYPE _tile_land] AREA {color: @landColor;}
+    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
-    [MAG county-] {
-      AREA.TEXT {label: name; style: normal; priority: 10;}
-      NODE.TEXT {label: name; style: normal; priority: 10;}
+    [TYPE highway_motorway] {
+      WAY { color: #809bc0; displayWidth: 0.45mm; width: 20m; }
+
+      [MAG state-] {
+        WAY.SHIELD {label: Ref.name; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 5; }
+      }
     }
-  }
 
-  [TYPE place_millioncity MAG stateOver-] {
-    NODE.ICON {symbol: place_city; }
-	NODE.TEXT {style: emphasize; size: 1.3; priority: 1;}
-  }
+    [TYPE highway_services] {
+      AREA {color: #cb9999; }
+      NODE.ICON {symbol: highway_services; }
 
-  [TYPE place_bigcity MAG stateOver-] {
-    NODE.ICON {symbol: place_city; }
-    NODE.TEXT {label: name; style: emphasize; size: 1.2; priority: 2;}
-  }
+      [MAG county-] {
+        AREA.TEXT {label: Name.name; style: normal; priority: 10;}
+        NODE.TEXT {label: Name.name; style: normal; priority: 10;}
+      }
+    }
 
-  [TYPE place_city MAG stateOver-] {
-    NODE.ICON {symbol: place_city; }
-    NODE.TEXT {label: name; style: emphasize; size: 1.1; priority: 3;}
-  }
+    [TYPE place_millioncity MAG stateOver-] {
+      NODE.ICON {symbol: place_city; }
+	  NODE.TEXT {style: emphasize; size: 1.3; priority: 1;}
+    }
 
-  [TYPE place_town MAG county-] {
-    NODE.ICON {symbol: place_town;}
-    NODE.TEXT {label: name; style: normal; size: 1.0; priority: 4;}
-  }
+    [TYPE place_bigcity MAG stateOver-] {
+      NODE.ICON {symbol: place_city; }
+      NODE.TEXT {label: Name.name; style: emphasize; size: 1.2; priority: 2;}
+    }
+
+    [TYPE place_city MAG stateOver-] {
+      NODE.ICON {symbol: place_city; }
+      NODE.TEXT {label: Name.name; style: emphasize; size: 1.1; priority: 3;}
+    }
+
+    [TYPE place_town MAG county-] {
+      NODE.ICON {symbol: place_town;}
+      NODE.TEXT {label: Name.name; style: normal; size: 1.0; priority: 4;}
+    }
 END

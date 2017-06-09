@@ -176,10 +176,8 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
     }
   }
 
-  for (std::list<osmscout::RouteDescription::NameDescriptionRef>::const_iterator name=crossingWaysDescription.GetDescriptions().begin();
-      name!=crossingWaysDescription.GetDescriptions().end();
-      ++name) {
-    std::string nameString=(*name)->GetDescription();
+  for (const auto& name : crossingWaysDescription.GetDescriptions()) {
+    std::string nameString=name->GetDescription();
 
     if (!nameString.empty()) {
       names.insert(nameString);

@@ -96,6 +96,10 @@ namespace osmscout {
     {
       return NumberToString(x)+","+NumberToString(y);
     }
+
+    static OSMTileId GetOSMTile(const GeoCoord& coord,
+                                const Magnification& magnification);
+
   };
 
   class OSMSCOUT_API OSMTileIdBoxConstIterator CLASS_FINAL : public std::iterator<std::input_iterator_tag, const OSMTileId>

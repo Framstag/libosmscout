@@ -2,12 +2,12 @@
 date: "2016-08-10T19:48:00+02:00"
 title: "Render process"
 description: "From Database to map: Description of the render process"
-weight: 11
+weight: 12
 
 menu:
   main:
     Parent: "documentation"
-    Weight: 11
+    Weight: 12
 ---
 
 The following chapters give an overview starting from data loading via the
@@ -33,7 +33,7 @@ summerized as "map data".
 ## The `Database`
 
 The `Database` class wraps most of the above files, controlling initialisation,
-deinitialsation and access to these files. `Databse` is mainly a convinience
+deinitialsation and access to these files. `Database` is mainly a convinience
 wrapper to the low level data and index classes.
 
 ## Characteristics of map data as retrieved the Database

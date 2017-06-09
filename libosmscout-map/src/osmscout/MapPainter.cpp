@@ -37,6 +37,60 @@
 
 namespace osmscout {
 
+  static void GetGridPoints(const std::vector<Point>& nodes,
+                            double gridSizeHoriz,
+                            double gridSizeVert,
+                            std::set<GeoCoord>& intersections)
+  {
+    assert(nodes.size()>=2);
+
+    for (size_t i=0; i<nodes.size()-1; i++) {
+      size_t cellXStart=(size_t)((nodes[i].GetLon()+180.0)/gridSizeHoriz);
+      size_t cellYStart=(size_t)((nodes[i].GetLat()+90.0)/gridSizeVert);
+
+      size_t cellXEnd=(size_t)((nodes[i+1].GetLon()+180.0)/gridSizeHoriz);
+      size_t cellYEnd=(size_t)((nodes[i+1].GetLat()+90.0)/gridSizeVert);
+
+      if (cellXStart!=cellXEnd) {
+        double lower=std::min(cellYStart,cellYEnd)*gridSizeVert-90.0;
+        double upper=(std::max(cellYStart,cellYEnd)+1)*gridSizeVert-90.0;
+
+        for (size_t xIndex=cellXStart+1; xIndex<=cellXEnd; xIndex++) {
+          GeoCoord intersection;
+
+          double xCoord=xIndex*gridSizeHoriz-180.0;
+
+          if (GetLineIntersection(nodes[i].GetCoord(),
+                                  nodes[i+1].GetCoord(),
+                                  GeoCoord(lower,xCoord),
+                                  GeoCoord(upper,xCoord),
+                                  intersection)) {
+            intersections.insert(intersection);
+          }
+        }
+      }
+
+      if (cellYStart!=cellYEnd) {
+        double lower=std::min(cellXStart,cellXEnd)*gridSizeHoriz-180.0;
+        double upper=(std::max(cellXStart,cellXEnd)+1)*gridSizeHoriz-180.0;
+
+        for (size_t yIndex=cellYStart+1; yIndex<=cellYEnd; yIndex++) {
+          GeoCoord intersection;
+
+          double yCoord=yIndex*gridSizeVert-90.0;
+
+          if (GetLineIntersection(nodes[i].GetCoord(),
+                                  nodes[i+1].GetCoord(),
+                                  GeoCoord(yCoord,lower),
+                                  GeoCoord(yCoord,upper),
+                                  intersection)) {
+            intersections.insert(intersection);
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Return if a > b, a should be drawn before b
    */
@@ -689,6 +743,13 @@ namespace osmscout {
                                                coastlineLine->GetWidth());
               data.startIsClosed=false;
               data.endIsClosed=false;
+
+              /*
+              DrawWay(styleConfig,
+                      projection,
+                      parameter,
+                      data);*/
+
               wayData.push_back(data);
             }
 
@@ -762,23 +823,23 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const PathShieldStyleRef& shieldStyle,
                                          const std::string& text,
-                                         size_t transStart, size_t transEnd)
+                                         const std::vector<Point>& nodes)
   {
     double               fontHeight;
     const LabelStyleRef& style=shieldStyle->GetShieldStyle();
+    std::set<GeoCoord>   gridPoints;
 
     GetFontHeight(projection,
                   parameter,
                   style->GetSize(),
                   fontHeight);
 
-    wayScanlines.clear();
+    //SymbolRef symbol=styleConfig->GetSymbol("marker");
 
-    size_t               stepSizeInPixel=(size_t)projection.ConvertWidthToPixel(2*fontHeight/*shieldStyle->GetShieldSpace()*/);
-
-    transBuffer.buffer->ScanConvertLine(transStart,
-                                        transEnd,
-                                        wayScanlines);
+    GetGridPoints(nodes,
+                  shieldGridSizeHoriz,
+                  shieldGridSizeVert,
+                  gridPoints);
 
     double frameHoriz=5;
     double frameVert=5;
@@ -787,16 +848,31 @@ namespace osmscout {
 
     GetTextDimension(projection,
                      parameter,
-                     /*objectWidth*/ -1,
+                     -1,
                      style->GetSize(),
                      text,
                      xOff,yOff,width,height);
 
-    size_t i=0;
-    while (i<wayScanlines.size()) {
+
+    for (const auto& gridPoint : gridPoints) {
+      double x,y;
+
+      projection.GeoToPixel(gridPoint,x,y);
+
+      /*
+      if (x<0 || x>projection.GetWidth()) {
+        continue;
+      }
+      if (y<0 || y>projection.GetHeight()) {
+        continue;
+      }
+
+      DrawSymbol(projection,
+                 parameter,
+                 *symbol,
+                 x,y);*/
+
       LabelData labelBox;
-      double    x=wayScanlines[i].x+0.5;
-      double    y=wayScanlines[i].y+0.5;
 
       labelBox.id=nextLabelId++;
       labelBox.bx1=x-width/2-frameHoriz;
@@ -815,8 +891,6 @@ namespace osmscout {
 
       labels.Placelabel(labelBox,
                         label);
-
-      i+=stepSizeInPixel;
     }
   }
 
@@ -1422,28 +1496,32 @@ namespace osmscout {
   void MapPainter::DrawWayShieldLabel(const StyleConfig& styleConfig,
                                       const Projection& projection,
                                       const MapParameter& parameter,
-                                      const WayPathData& data)
+                                      const Way& data)
   {
     PathShieldStyleRef shieldStyle;
 
-    styleConfig.GetWayPathShieldStyle(*data.buffer,
+    styleConfig.GetWayPathShieldStyle(data.GetFeatureValueBuffer(),
                                       projection,
                                       shieldStyle);
 
-    if (shieldStyle) {
-      std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
-                                                                *data.buffer);
-
-      if (!shieldLabel.empty()) {
-        RegisterPointWayLabel(projection,
-                              parameter,
-                              shieldStyle,
-                              shieldLabel,
-                              data.transStart,
-                              data.transEnd);
-        waysLabelDrawn++;
-      }
+    if (!shieldStyle) {
+      return;
     }
+
+    std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
+                                                              data.GetFeatureValueBuffer());
+
+    if (shieldLabel.empty()) {
+      return;
+    }
+
+
+    RegisterPointWayLabel(projection,
+                          parameter,
+                          shieldStyle,
+                          shieldLabel,
+                          data.nodes);
+    waysLabelDrawn++;
   }
 
   void MapPainter::DrawWayContourLabel(const StyleConfig& styleConfig,
@@ -1497,13 +1575,21 @@ namespace osmscout {
 
   void MapPainter::DrawWayShieldLabels(const StyleConfig& styleConfig,
                                        const Projection& projection,
-                                       const MapParameter& parameter)
+                                       const MapParameter& parameter,
+                                       const MapData& data)
   {
-    for (const auto& way : wayPathData) {
+    for (const auto& way : data.ways) {
       DrawWayShieldLabel(styleConfig,
                          projection,
                          parameter,
-                         way);
+                         *way);
+    }
+
+    for (const auto& way : data.poiWays) {
+      DrawWayShieldLabel(styleConfig,
+                         projection,
+                         parameter,
+                         *way);
     }
   }
 
@@ -1571,8 +1657,10 @@ namespace osmscout {
 
     projection.GetDimensions(boundingBox);
 
-    osmscout::OSMTileId     tileA(boundingBox.GetMinCoord().GetOSMTile(magnification));
-    osmscout::OSMTileId     tileB(boundingBox.GetMaxCoord().GetOSMTile(magnification));
+    osmscout::OSMTileId     tileA(OSMTileId::GetOSMTile(boundingBox.GetMinCoord(),
+                                                        magnification));
+    osmscout::OSMTileId     tileB(OSMTileId::GetOSMTile(boundingBox.GetMaxCoord(),
+                                                        magnification));
     uint32_t                startTileX=std::min(tileA.GetX(),tileB.GetX());
     uint32_t                endTileX=std::max(tileA.GetX(),tileB.GetX());
     uint32_t                startTileY=std::min(tileA.GetY(),tileB.GetY());
@@ -2012,6 +2100,9 @@ namespace osmscout {
     contourLabelOffset =projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
     contourLabelSpace  =projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
 
+    shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
+    shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
+
     waysSegments  =0;
     waysDrawn     =0;
     waysLabelDrawn=0;
@@ -2183,7 +2274,8 @@ namespace osmscout {
 
     DrawWayShieldLabels(*styleConfig,
                         projection,
-                        parameter);
+                        parameter,
+                        data);
 
     pathShieldLabelsTimer.Stop();
 

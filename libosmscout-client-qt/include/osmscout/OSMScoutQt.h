@@ -25,6 +25,7 @@
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/LookupModule.h>
+#include <osmscout/MapRenderer.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -41,6 +42,7 @@ private:
   QString onlineTileProviders;
   QString mapProviders;
   QStringList mapLookupDirectories;
+  QString basemapLookupDirectory;
   QString cacheLocation;
   QString iconDirectory;
 
@@ -55,64 +57,70 @@ private:
 
 public:
   OSMScoutQtBuilder();
- 
+
   virtual ~OSMScoutQtBuilder();
 
   inline OSMScoutQtBuilder& WithSettingsStorage(QSettings *providedStorage)
   {
     this->settingsStorage=providedStorage;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithOnlineTileProviders(QString onlineTileProviders)
   {
     this->onlineTileProviders=onlineTileProviders;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithMapProviders(QString mapProviders)
   {
     this->mapProviders=mapProviders;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithMapLookupDirectories(QStringList mapLookupDirectories)
   {
     this->mapLookupDirectories=mapLookupDirectories;
     return *this;
-  };
+  }
+
+  inline OSMScoutQtBuilder& WithBasemapLookupDirectory(QString basemapLookupDirectory)
+  {
+    this->basemapLookupDirectory=basemapLookupDirectory;
+    return *this;
+  }
 
   inline OSMScoutQtBuilder& AddMapLookupDirectories(QString mapLookupDirectory)
   {
     this->mapLookupDirectories << mapLookupDirectory;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithCacheLocation(QString cacheLocation)
   {
     this->cacheLocation=cacheLocation;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithIconDirectory(QString iconDirectory)
   {
     this->iconDirectory=iconDirectory;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithStyleSheetDirectory(QString styleSheetDirectory)
   {
     this->styleSheetDirectory=styleSheetDirectory;
     this->styleSheetDirectoryConfigured=true;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithStyleSheetFile(QString styleSheetFile)
   {
     this->styleSheetFile=styleSheetFile;
     this->styleSheetFileConfigured=true;
     return *this;
-  };
+  }
 
   inline OSMScoutQtBuilder& WithTileCacheSizes(size_t onlineTileCacheSize,
                                                size_t offlineTileCacheSize){
@@ -121,7 +129,7 @@ public:
     return *this;
   }
 
-  bool Init(bool tiledInstance=false);
+  bool Init();
 };
 
 /**
@@ -132,24 +140,40 @@ typedef std::shared_ptr<OSMScoutQtBuilder> OSMScoutQtBuilderRef;
 /**
  * \ingroup QtAPI
  */
+enum RenderingType {
+  PlaneRendering = 0,
+  TiledRendering = 1
+};
+
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
   friend class OSMScoutQtBuilder;
 
 private:
-  QThread *backgroundThread;
+  QThread     *backgroundThread;
   SettingsRef settings;
   DBThreadRef dbThread;
+  QString     iconDirectory;
+  QString     cacheLocation;
+  size_t      onlineTileCacheSize;
+  size_t      offlineTileCacheSize;
 
 private:
-  OSMScoutQt(QThread *backgroundThread,
-             SettingsRef settings,
-             DBThreadRef dbThread);
+  OSMScoutQt(SettingsRef settings,
+             DBThreadRef dbThread,
+             QString iconDirectory,
+             QString cacheLocation,
+             size_t onlineTileCacheSize,
+             size_t offlineTileCacheSize);
 public:
   virtual ~OSMScoutQt();
 
   DBThreadRef GetDBThread();
   SettingsRef GetSettings();
-  LookupModuleRef MakeLookupModule();
+  LookupModule* MakeLookupModule();
+  MapRenderer* MakeMapRenderer(RenderingType type);
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

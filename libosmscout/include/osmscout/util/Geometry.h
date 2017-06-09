@@ -21,6 +21,7 @@
 */
 
 #include <algorithm>
+#include <functional>
 #include <list>
 #include <unordered_map>
 #include <utility>
@@ -267,6 +268,69 @@ namespace osmscout {
     return false;
   }
 
+  /**
+   * \ingroup Geometry
+   *
+   * Returns true, if the lines defined by the given coordinates intersect. Returns the intersection.
+   */
+  template<typename N>
+  bool GetLineIntersectionPixel(const N& a1,
+                                const N& a2,
+                                const N& b1,
+                                const N& b2,
+                                N& intersection)
+  {
+    if (a1.IsEqual(b1) ||
+        a1.IsEqual(b2)){
+      intersection.Set(a1.GetX(),a1.GetY());
+      return true;
+    }
+    if (a2.IsEqual(b1) ||
+        a2.IsEqual(b2)) {
+      intersection.Set(a2.GetX(),a2.GetY());
+      return true;
+    }
+    if (a1.IsEqual(a2) &&
+        b1.IsEqual(b2)){
+      // two different zero size vectors can't intersects
+      return false;
+    }
+
+    double denr=(b2.GetY()-b1.GetY())*(a2.GetX()-a1.GetX())-
+                (b2.GetX()-b1.GetX())*(a2.GetY()-a1.GetY());
+
+    double ua_numr=(b2.GetX()-b1.GetX())*(a1.GetY()-b1.GetY())-
+                   (b2.GetY()-b1.GetY())*(a1.GetX()-b1.GetX());
+    double ub_numr=(a2.GetX()-a1.GetX())*(a1.GetY()-b1.GetY())-
+                   (a2.GetY()-a1.GetY())*(a1.GetX()-b1.GetX());
+
+    if (denr==0.0) {
+      if (ua_numr==0.0 && ub_numr==0.0) {
+        // This gives currently false hits because of number resolution problems, if two lines are very
+        // close together and for example are part of a very details node curve intersections are detected.
+
+        // FIXME: setup intersection
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+
+    double ua=ua_numr/denr;
+    double ub=ub_numr/denr;
+
+    if (ua>=0.0 &&
+        ua<=1.0 &&
+        ub>=0.0 &&
+        ub<=1.0) {
+      intersection.Set(a1.GetX()+ua*(a2.GetX()-a1.GetX()),
+                       a1.GetY()+ua*(a2.GetY()-a1.GetY()));
+      return true;
+    }
+
+    return false;
+  }
 
   template<typename N>
   double DistanceSquare(const N& a,
@@ -976,6 +1040,14 @@ namespace osmscout {
                                                       double bLon, double bLat);
 
   /**
+   * \ingroup Geometry
+   *Calculates the final bearing for a line from one coordinate two the other coordinate
+   *on a sphere.
+   */
+  extern OSMSCOUT_API double GetSphericalBearingFinal(const GeoCoord& a,
+                                                      const GeoCoord& b);
+
+  /**
    * COnvert the bearing to to a direction description in releation tothe compass.
    */
   extern OSMSCOUT_API std::string BearingDisplayString(double bearing);
@@ -992,6 +1064,32 @@ namespace osmscout {
     int y;
 
     ScanCell(int x, int y);
+
+    inline void Set(int x, int y)
+    {
+      this->x=x;
+      this->y=y;
+    }
+
+    inline bool operator==(const ScanCell& other) const
+    {
+      return x==other.x && y==other.y;
+    }
+
+    inline bool IsEqual(const ScanCell& other) const
+    {
+      return x==other.x && y==other.y;
+    }
+
+    inline int GetX() const
+    {
+      return x;
+    }
+
+    inline int GetY() const
+    {
+      return y;
+    }
   };
 
   /**
@@ -1020,13 +1118,13 @@ namespace osmscout {
    */
   struct OSMSCOUT_API PathIntersection
   {
-    GeoCoord point;         // intersection point
-    size_t aIndex;          // "a path" point index before intersection
-    size_t bIndex;          // "b path" point index before intersection
-    double orientation;     // angle between a -> intersection -> b
-                            //   orientation > 0 = left angle
-    double aDistanceSquare; // distance^2 between "a path" point and intersection
-    double bDistanceSquare; // distance^2 between "b path" point and intersection
+    GeoCoord point;           //!< intersection point
+    size_t   aIndex;          //!< "a path" point index before intersection
+    size_t   bIndex;          //!< "b path" point index before intersection
+    double   orientation;     //!< angle between a -> intersection -> b
+                              //!<   orientation > 0 = left angle
+    double   aDistanceSquare; //!< distance^2 between "a path" point and intersection
+    double   bDistanceSquare; //!< distance^2 between "b path" point and intersection
   };
 
   /**
@@ -1253,6 +1351,17 @@ namespace osmscout {
   const size_t CELL_DIMENSION_COUNT = CELL_DIMENSION_MAX+1;
 
   extern OSMSCOUT_API CellDimension cellDimension[CELL_DIMENSION_COUNT];
+}
+
+namespace std {
+  template <>
+  struct hash<osmscout::ScanCell>
+  {
+    size_t operator()(const osmscout::ScanCell& cell) const
+    {
+      return hash<int>{}(cell.GetX()) ^ (hash<int>{}(cell.GetY()) << 1);
+    }
+  };
 }
 
 #endif

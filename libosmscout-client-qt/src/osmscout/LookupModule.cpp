@@ -32,9 +32,11 @@ LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
 
 LookupModule::~LookupModule()
 {
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
   if (thread!=NULL){
     thread->quit();
-    thread->deleteLater();
   }
 }
 

@@ -410,6 +410,30 @@ namespace osmscout {
   /**
    * \ingroup Util
    *
+   * Converts the given std::string with content in the current locale to a std::wstring
+   *
+   * @param text
+   *    String to get converted
+   * @return
+   *    corresponding std::wstring
+   */
+  extern OSMSCOUT_API std::wstring LocaleStringToWString(const std::string& text);
+
+  /**
+   * \ingroup Util
+   *
+   * Converts the given std::wstring to a std::string with content in the current locale
+   *
+   * @param text
+   *    String to get converted
+   * @return
+   *    corresponding std::string
+   */
+  extern OSMSCOUT_API std::string WStringToLocaleString(const std::wstring& text);
+  
+  /**
+   * \ingroup Util
+   *
    * Convert the given std::string containign a UTF8 character sequence to a std::wstring
    *
    * @param text
@@ -431,6 +455,32 @@ namespace osmscout {
    */
   extern OSMSCOUT_API std::string WStringToUTF8String(const std::wstring& text);
 
+  /**
+   * \ingroup Util
+   *
+   * Convert the given std::string in the current locale to a std::string containing a corresponding
+   * UTF8 character sequence
+   *
+   * @param text
+   *    the std::wstring to get converted
+   * @return
+   *    the converted std::string
+   */
+  extern OSMSCOUT_API std::string LocaleStringToUTF8String(const std::string& text);
+
+  /**
+   * \ingroup Util
+   *
+   * Convert the given std::string in UTF-8 a std::string containing to corresponding string in the
+   * current locale.
+   *
+   * @param text
+   *    the std::wstring to get converted
+   * @return
+   *    the converted std::string
+   */
+  extern OSMSCOUT_API std::string UTF8StringToLocaleString(const std::string& text);
+  
   /**
    * Convert the given std::string containing a UTF8 character sequence to upper case using
    * the current global locale.

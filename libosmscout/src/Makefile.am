@@ -11,6 +11,7 @@ libosmscout_la_LDFLAGS = -no-undefined \
                          $(PTHREAD_CFLAGS) \
                          $(PTHREAD_LIBS) \
                          $(OPENMP_CXXFLAGS) \
+                         $(LTLIBICONV) \
                          $(MARISA_LIBS)
 
 libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
@@ -79,10 +80,11 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/TypeDistributionDataFile.cpp \
                         osmscout/Database.cpp \
                         osmscout/DebugDatabase.cpp \
+                        osmscout/BasemapDatabase.cpp \
                         osmscout/SRTM.cpp \
                         osmscout/LocationService.cpp \
                         osmscout/POIService.cpp \
-                        osmscout/RoutingService.cpp                         
+                        osmscout/RoutingService.cpp
 
 if OSMSCOUT_HAVE_SSE2
 libosmscout_la_SOURCES+=osmscout/system/SSEMath.cpp

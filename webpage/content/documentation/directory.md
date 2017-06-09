@@ -67,6 +67,10 @@ DumpData/
 Import/
 : The importer, creating an libosmscout-specific database from OSM export files.
 
+BasemapImport/
+: A second importer, that allows you to create a world-wide basic map, to be used
+  as background for the actual more details maps based on the normal import.
+
 StyelEditor/
 : Variant of the Qt demo application that allows editing the style sheet in the
   application, showing results of the change directly in the map.

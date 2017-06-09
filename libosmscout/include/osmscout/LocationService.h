@@ -51,12 +51,12 @@ namespace osmscout {
   class OSMSCOUT_API LocationDescriptionCandicate
   {
   private:
-    ObjectFileRef ref;
-    std::string   name;
-    double        distance;
-    double        bearing;
-    bool          atPlace;
-    double        size;
+    ObjectFileRef ref;      //!< Reference to the actual object
+    std::string   name;     //!< Name of the object
+    double        distance; //!< Distance to the object
+    double        bearing;  //!< Direction towards the object
+    bool          atPlace;  //!< We are at the place or only near the place
+    double        size;     //!< The size o the place (size of the geographic bounding box)
 
   public:
     inline LocationDescriptionCandicate(const ObjectFileRef &ref,
@@ -72,6 +72,7 @@ namespace osmscout {
       atPlace(atPlace),
       size(size)
     {
+      // no code
     }
 
     inline ObjectFileRef GetRef() const
@@ -161,6 +162,69 @@ namespace osmscout {
   //! Reference counted reference to a LocationAtPlaceDescription instance
   typedef std::shared_ptr<LocationAtPlaceDescription> LocationAtPlaceDescriptionRef;
 
+  /**
+   * \ingroup Location
+   *
+   * Description of a location based on a nearby crossing
+   */
+  class OSMSCOUT_API LocationCrossingDescription
+  {
+  private:
+    GeoCoord         crossing;  //!< The coordinates of the crossing
+    bool             atPlace;   //!< 'true' if at the place itself
+    std::list<Place> ways;      //!< List of streets
+    double           distance;  //!< distance to the place
+    double           bearing;   //!< bearing to take from place to reach location
+
+  public:
+    LocationCrossingDescription(const GeoCoord& crossing,
+                               const std::list<Place>& ways);
+
+    LocationCrossingDescription(const GeoCoord& crossing,
+                                const std::list<Place>& ways,
+                                double distance,
+                                double bearing);
+    /**
+     * Return the place this information is refering to
+     */
+    inline const std::list<Place> GetWays() const
+    {
+      return ways;
+    }
+
+    /**
+     * 'true' if the location is at the place itself (in spite of 'close to...')
+     */
+    inline bool IsAtPlace() const
+    {
+      return atPlace;
+    }
+
+    /**
+     * Return the distance to the location in meter
+     */
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+
+    /**
+     * Return the bearing you have to go to from the place for 'distance' meter to reach the location
+     */
+    inline double GetBearing() const
+    {
+      return bearing;
+    }
+
+    inline GeoCoord GetCrossing() const
+    {
+      return crossing;
+    }
+  };
+
+  //! \ingroup Location
+  //! Reference counted reference to a LocationCrossingDescription instance
+  typedef std::shared_ptr<LocationCrossingDescription> LocationCrossingDescriptionRef;
 
   /**
    * \ingroup Location
@@ -171,16 +235,18 @@ namespace osmscout {
   class OSMSCOUT_API LocationDescription
   {
   private:
-    LocationCoordDescriptionRef   coordDescription;
-    LocationAtPlaceDescriptionRef atNameDescription;
-    LocationAtPlaceDescriptionRef atAddressDescription;
-    LocationAtPlaceDescriptionRef atPOIDescription;
+    LocationCoordDescriptionRef    coordDescription;
+    LocationAtPlaceDescriptionRef  atNameDescription;
+    LocationAtPlaceDescriptionRef  atAddressDescription;
+    LocationAtPlaceDescriptionRef  atPOIDescription;
+    LocationCrossingDescriptionRef crossingDescription;
 
   public:
     void SetCoordDescription(const LocationCoordDescriptionRef& description);
     void SetAtNameDescription(const LocationAtPlaceDescriptionRef& description);
     void SetAtAddressDescription(const LocationAtPlaceDescriptionRef& description);
     void SetAtPOIDescription(const LocationAtPlaceDescriptionRef& description);
+    void SetCrossingDescription(const LocationCrossingDescriptionRef& description);
 
     /**
      * Return the location is geo coordinates
@@ -205,6 +271,12 @@ namespace osmscout {
      * @return
      */
     LocationAtPlaceDescriptionRef GetAtPOIDescription() const;
+
+    /**
+     * Return the location in relation to a close crossing
+     * @return
+     */
+    LocationCrossingDescriptionRef GetCrossingDescription() const;
   };
 
   /**
@@ -498,11 +570,29 @@ namespace osmscout {
                               std::list<ReverseLookupResult>& result) const;
 
     bool DescribeLocation(const GeoCoord& location,
-                          LocationDescription& description);
+                          LocationDescription& description,
+                          const double lookupDistance=100,
+                          const double sizeFilter=1.0);
+
+    /**
+     * @see LoadNearAreas
+     */
+    bool LoadNearNodes(const GeoCoord& location,
+                       const TypeInfoSet &types,
+                       std::vector<LocationDescriptionCandicate> &candidates,
+                       const double maxDistance=100);
+
+    /**
+     * @see LoadNearAreas
+     */
+    bool LoadNearWays(const GeoCoord& location,
+                      const TypeInfoSet &types,
+                      std::vector<WayRef> &candidates,
+                      const double maxDistance=100);
 
     /**
      * Load areas of given types near to location.
-     * 
+     *
      * @param location
      * @param types
      * @param candidates - unsorted result buffer
@@ -510,13 +600,6 @@ namespace osmscout {
      * @return true if no error (it don't indicate non-empty result)
      */
     bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates,
-                       const double maxDistance=100);
-
-    /**
-     * @see LoadNearAreas
-     */
-    bool LoadNearNodes(const GeoCoord& location, const TypeInfoSet &types,
                        std::vector<LocationDescriptionCandicate> &candidates,
                        const double maxDistance=100);
 
@@ -534,6 +617,10 @@ namespace osmscout {
                                LocationDescription& description,
                                const double lookupDistance=100,
                                const double sizeFilter=1.0);
+
+    bool DescribeLocationByCrossing(const GeoCoord& location,
+                                    LocationDescription& description,
+                                    const double lookupDistance=100);
   };
 
   //! \ingroup Service

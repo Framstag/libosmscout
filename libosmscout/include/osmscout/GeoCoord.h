@@ -56,9 +56,6 @@ namespace osmscout {
    */
   const size_t coordByteSize=7;
 
-  // forward declaration to avoid circular header includes
-  class OSMTileId;
-
   /**
    * \ingroup Geometry
    *
@@ -255,8 +252,6 @@ namespace osmscout {
     *    The difference in height between the two points is neglected.
     */
     GeoCoord Add(double bearing, double distance);
-
-    OSMTileId GetOSMTile(const Magnification& magnification) const;
 
     /**
      * Return true if both coordinates are equals (using == operator)

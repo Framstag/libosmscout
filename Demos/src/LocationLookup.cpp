@@ -20,6 +20,7 @@
 #include <cctype>
 #include <iostream>
 #include <iomanip>
+#include <locale>
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
@@ -41,14 +42,14 @@ bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService
       path.append("/");
     }
 
-    path.append(adminRegion->aliasName);
+    path.append(osmscout::UTF8StringToLocaleString(adminRegion->aliasName));
   }
 
   if (!path.empty()) {
     path.append("/");
   }
 
-  path.append(adminRegion->name);
+  path.append(osmscout::UTF8StringToLocaleString(adminRegion->name));
 
   osmscout::FileOffset parentRegionOffset=adminRegion->parentRegionOffset;
 
@@ -65,7 +66,7 @@ bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService
       path.append("/");
     }
 
-    path.append(parentRegion->name);
+    path.append(osmscout::UTF8StringToLocaleString(parentRegion->name));
 
     parentRegionOffset=parentRegion->parentRegionOffset;
   }
@@ -84,7 +85,8 @@ std::string GetAddress(const osmscout::LocationSearchResult::Entry& entry)
     label="~ ";
   }
 
-  label+="Address ("+entry.address->name+" "+entry.address->postalCode+")";
+  label+="Address ("+osmscout::UTF8StringToLocaleString(entry.address->name)+
+  " "+osmscout::UTF8StringToLocaleString(entry.address->postalCode)+")";
 
   return label;
 }
@@ -100,7 +102,7 @@ std::string GetLocation(const osmscout::LocationSearchResult::Entry& entry)
     label="~ ";
   }
 
-  label+="Location ("+entry.location->name+")";
+  label+="Location ("+osmscout::UTF8StringToLocaleString(entry.location->name)+")";
 
   return label;
 }
@@ -116,7 +118,7 @@ std::string GetPOI(const osmscout::LocationSearchResult::Entry& entry)
     label=" ~ ";
   }
 
-  label+="POI ("+entry.poi->name+")";
+  label+="POI ("+osmscout::UTF8StringToLocaleString(entry.poi->name)+")";
 
   return label;
 }
@@ -133,10 +135,10 @@ std::string GetAdminRegion(const osmscout::LocationSearchResult::Entry& entry)
   }
 
   if (!entry.adminRegion->aliasName.empty()) {
-    label.append(entry.adminRegion->aliasName);
+    label.append(osmscout::UTF8StringToLocaleString(entry.adminRegion->aliasName));
   }
   else {
-    label.append(entry.adminRegion->name);
+    label.append(osmscout::UTF8StringToLocaleString(entry.adminRegion->name));
   }
 
   return label;
@@ -212,6 +214,13 @@ int main(int argc, char* argv[])
 
   map=argv[1];
 
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
+  }
+
   std::string searchPattern;
 
   for (int i=2; i<argc; i++) {
@@ -222,6 +231,8 @@ int main(int argc, char* argv[])
     searchPattern.append(argv[i]);
   }
 
+  std::cout << "Searching for pattern \"" <<searchPattern  << "\"" << std::endl;
+
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
@@ -231,14 +242,14 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::LocationServiceRef                            locationService(new osmscout::LocationService(database));
+  osmscout::LocationServiceRef                            locationService=std::make_shared<osmscout::LocationService>(database);
   osmscout::LocationSearch                                search;
   osmscout::LocationSearchResult                          searchResult;
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
 
   search.limit=50;
 
-  if (!locationService->InitializeLocationSearchEntries(searchPattern,
+  if (!locationService->InitializeLocationSearchEntries(osmscout::LocaleStringToUTF8String(searchPattern),
                                                         search)) {
     std::cerr << "Error while parsing search string" << std::endl;
     return false;
@@ -255,7 +266,9 @@ int main(int argc, char* argv[])
     if (entry.adminRegion &&
         entry.location &&
         entry.address) {
-      std::cout << GetLocation(entry) << " " << GetAddress(entry) << " " << GetAdminRegion(entry) << std::endl;
+      std::cout << GetLocation(entry) << " ";
+      std::cout << GetAddress(entry) << " ";
+      std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
@@ -268,7 +281,8 @@ int main(int argc, char* argv[])
     }
     else if (entry.adminRegion &&
              entry.location) {
-      std::cout << GetLocation(entry) << " " << GetAdminRegion(entry) << std::endl;
+      std::cout << GetLocation(entry) << " ";
+      std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,
@@ -282,7 +296,8 @@ int main(int argc, char* argv[])
     }
     else if (entry.adminRegion &&
              entry.poi) {
-      std::cout << GetPOI(entry) << " " << GetAdminRegion(entry) << std::endl;
+      std::cout << GetPOI(entry) << " ";
+      std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
                                                       adminRegionMap,

@@ -65,17 +65,6 @@ macro(OPJ_TEST_LARGE_FILES VARIABLE)
             endif()
         endif()
 
-
-        #if(NOT FILE64_OK)
-        #    # now check for Windows stuff
-        #    try_compile(FILE64_OK "${PROJECT_BINARY_DIR}"
-        #                "${PROJECT_SOURCE_DIR}/cmake/TestWindowsFSeek.c")
-        #    if(FILE64_OK)
-        #        message(STATUS "Checking for 64-bit off_t - present with _fseeki64")
-        #        set(HAVE__FSEEKI64 1)
-        #    endif()
-        #endif()
-
         if(NOT FILE64_OK)
             message(STATUS "Checking for 64-bit off_t - not present")
         endif()
@@ -87,6 +76,21 @@ macro(OPJ_TEST_LARGE_FILES VARIABLE)
         # Set the flags we might have determined to be required above
         configure_file("${PROJECT_SOURCE_DIR}/cmake/TestLargeFiles.c.cmake.in"
                        "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestLargeFiles.c")
+
+        message(STATUS "Checking for _fseeki64/_ftelli64")
+
+        # now check for Windows stuff
+        try_compile(FSEEKI64_COMPILE_OK "${PROJECT_BINARY_DIR}"
+                    "${PROJECT_SOURCE_DIR}/cmake/TestWindowsFSeek.c")
+
+	    if(FSEEKI64_COMPILE_OK)
+            message(STATUS "Checking for _fseeki64/_ftelli64 - present")
+            set(HAVE__FSEEKI64 1 ON CACHE INTERNAL "Result of test for _fseeki64/_ftelli64")
+            set(HAVE__FTELLI64 1 ON CACHE INTERNAL "Result of test for _fseeki64/_ftelli64")
+        else()
+            message(STATUS "Checking for _fseeki64/_ftelli64 - not found")
+            set(HAVE_FSEEKO OFF CACHE INTERNAL "Result of test for _fseeki64/_ftelli64")
+        endif()
 
         message(STATUS "Checking for fseeko/ftello")
 

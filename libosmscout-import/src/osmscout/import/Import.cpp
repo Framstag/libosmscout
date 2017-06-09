@@ -164,6 +164,11 @@ namespace osmscout {
     return destinationDirectory;
   }
 
+  std::string ImportParameter::GetBoundingPolygonFile() const
+  {
+    return boundingPolygonFile;
+  }
+
   ImportErrorReporterRef ImportParameter::GetErrorReporter() const
   {
     return errorReporter;
@@ -397,6 +402,11 @@ namespace osmscout {
   void ImportParameter::SetDestinationDirectory(const std::string& destinationDirectory)
   {
     this->destinationDirectory=destinationDirectory;
+  }
+
+  void ImportParameter::SetBoundingPolygonFile(const std::string& boundingPolygonFile)
+  {
+    this->boundingPolygonFile=boundingPolygonFile;
   }
 
   void ImportParameter::SetErrorReporter(const ImportErrorReporterRef& errorReporter)
@@ -1132,6 +1142,7 @@ namespace osmscout {
   std::list<std::string> Importer::GetProvidedReportFiles() const
   {
     std::list<std::string> providedFiles={ImportErrorReporter::FILENAME_INDEX_HTML,
+                                          ImportErrorReporter::FILENAME_TAG_HTML,
                                           ImportErrorReporter::FILENAME_WAY_HTML,
                                           ImportErrorReporter::FILENAME_RELATION_HTML,
                                           ImportErrorReporter::FILENAME_LOCATION_HTML};

@@ -141,6 +141,11 @@ namespace osmscout {
     virtual bool CanBatch() const = 0;
     virtual bool IsValid() const = 0;
 
+    /**
+     * Return true if given coordinate is valid for this projection
+     */
+    virtual bool IsValidFor(const GeoCoord& coord) const = 0;
+
     inline GeoCoord GetCenter() const
     {
       return GeoCoord(lat,lon);
@@ -285,120 +290,28 @@ namespace osmscout {
     }
 
     /**
-     * Converts a pixel coordinate to a geo coordinate
+     * Converts a pixel coordinate to a geo coordinate.
+     *
+     * Return true on success,
+     * false if returned coordinate is not valid
+     * for this projection.
      */
     virtual bool PixelToGeo(double x, double y,
                             double& lon, double& lat) const = 0;
 
     /**
-     * Converts a geo coordinate to a pixel coordinate
+     * Converts a geo coordinate to a pixel coordinate.
+     *
+     * Return true on success,
+     * false if given coordinate is not valid for this projection.
      */
-    virtual void GeoToPixel(const GeoCoord& coord,
+    virtual bool GeoToPixel(const GeoCoord& coord,
                             double& x, double& y) const = 0;
 
   protected:
     virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;
 
     friend class BatchTransformer;
-  };
-
-  /**
-   * Mercator projection that tries to render the resulting map in the same
-   * physical size on all devices. If the physical DPI of the device is
-   * correctly given, objects on any device has the same size. Bigger devices
-   * will show "more" map thus.
-   *
-   * Scale is calculated based on the assumption that the original OpenStreetMap
-   * tiles were designed for 96 DPI displays.
-   *
-   */
-  class OSMSCOUT_API MercatorProjectionOld : public Projection
-  {
-  protected:
-    bool   valid;          //!< projection is valid
-
-    double latOffset;      //!< Absolute and untransformed screen position of lat coordinate
-    double angleSin;
-    double angleCos;
-    double angleNegSin;
-    double angleNegCos;
-
-    double scale;
-    double scaleGradtorad; //!< Precalculated scale*Gradtorad
-
-  public:
-    MercatorProjectionOld();
-
-    inline bool CanBatch() const
-    {
-      return false;
-    }
-
-    inline bool IsValid() const
-    {
-      return valid;
-    }
-
-    inline bool Set(double lon,double lat,
-                    const Magnification& magnification,
-                    size_t width,size_t height)
-    {
-      return Set(lon,lat,0,magnification,GetDPI(),width,height);
-    }
-
-    inline bool Set(double lon, double lat,
-                    double angle,
-                    const Magnification& magnification,
-                    size_t width, size_t height)
-    {
-      return Set(lon,lat,angle,magnification,GetDPI(),width,height);
-    }
-
-    inline bool Set(double lon, double lat,
-                    const Magnification& magnification,
-                    double dpi,
-                    size_t width, size_t height)
-    {
-      return Set(lon,lat,0,magnification,dpi,width,height);
-    }
-
-    bool Set(double lon, double lat,
-             double angle,
-             const Magnification& magnification,
-             double dpi,
-             size_t width, size_t height);
-
-    bool PixelToGeo(double x, double y,
-                    double& lon, double& lat) const;
-
-    void GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
-
-    bool Move(double horizPixel,
-              double vertPixel);
-
-    inline bool MoveUp(double pixel)
-    {
-      return Move(0,pixel);
-    }
-
-    inline bool MoveDown(double pixel)
-    {
-      return Move(0,-pixel);
-    }
-
-    inline bool MoveLeft(double pixel)
-    {
-      return Move(-pixel,0);
-    }
-
-    inline bool MoveRight(double pixel)
-    {
-      return Move(pixel,0);
-    }
-
-  protected:
-     void GeoToPixel(const BatchTransformer& transformData) const;
   };
 
   /**
@@ -429,6 +342,11 @@ namespace osmscout {
     bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
 
   public:
+    static const double MaxLat;
+    static const double MinLat;
+    static const double MaxLon;
+    static const double MinLon;
+
     MercatorProjection();
 
     inline bool CanBatch() const
@@ -439,6 +357,12 @@ namespace osmscout {
     inline bool IsValid() const
     {
       return valid;
+    }
+
+    inline bool IsValidFor(const GeoCoord& coord) const
+    {
+      return coord.GetLat() >= MinLat && coord.GetLat() <= MaxLat &&
+             coord.GetLon() >= MinLon && coord.GetLon() <= MaxLon;
     }
 
     inline bool Set(const GeoCoord& coord,
@@ -464,6 +388,26 @@ namespace osmscout {
       return Set(coord,0.0,magnification,dpi,width,height);
     }
 
+    /**
+     * Setup projection parameters.
+     *
+     * Return true on success,
+     * false if arguments are not valid for Mercator projection,
+     * projection parameters are unchnaged in such case.
+     *
+     * Note that coord (center) have to be valid coordinate
+     * in Mercator projection. But it is possible setup dimensions
+     * (width and height) that projection will cover area bigger
+     * than the one valid for Mercator projection. Bounding box
+     * is adjusted then to be valid for projection.
+     *
+     * In code:
+     *
+     *   projection.GetDimensions(bbox);
+     *   projection.GeoToPixel(bbox.GetMinCoord(),x,y)
+     *
+     * may be x >= 0
+     */
     bool Set(const GeoCoord& coord,
              double angle,
              const Magnification& magnification,
@@ -473,7 +417,7 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    void GeoToPixel(const GeoCoord& coord,
+    bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     bool Move(double horizPixel,
@@ -566,6 +510,12 @@ namespace osmscout {
       return valid;
     }
 
+    inline bool IsValidFor(const GeoCoord& coord) const
+    {
+      return coord.GetLat() >= -85.0511 && coord.GetLat() <= +85.0511 &&
+             coord.GetLon() >= -180.0   && coord.GetLon() <= +180.0;
+    }
+
     inline bool Set(const OSMTileId& tile,
                     const Magnification& magnification,
                     size_t width, size_t height)
@@ -586,7 +536,7 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
-    void GeoToPixel(const GeoCoord& coord,
+    bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
     inline bool IsLinearInterpolationEnabled()

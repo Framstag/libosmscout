@@ -115,7 +115,6 @@ int main(int argc, char* argv[])
     osmscout::DatabaseParameter databaseParameter;
 
     databaseParameter.SetAreaAreaIndexCacheSize(0);
-    databaseParameter.SetAreaNodeIndexCacheSize(0);
 
     osmscout::DatabaseRef database(new osmscout::Database(databaseParameter));
     osmscout::MapServiceRef mapService(new osmscout::MapService(database));

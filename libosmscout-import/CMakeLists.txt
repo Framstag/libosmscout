@@ -37,7 +37,7 @@ set(HEADER_FILES
     include/osmscout/import/GenWayAreaDat.h
     include/osmscout/import/GenWayWayDat.h
     include/osmscout/import/Import.h
-	include/osmscout/import/ImportErrorReporter.h
+    include/osmscout/import/ImportErrorReporter.h
     include/osmscout/import/MergeAreaData.h
     include/osmscout/import/Preprocess.h
     include/osmscout/import/Preprocessor.h
@@ -51,6 +51,8 @@ set(HEADER_FILES
     include/osmscout/import/RawRelIndexedDataFile.h
     include/osmscout/import/RawWay.h
     include/osmscout/import/RawWayIndexedDataFile.h
+    include/osmscout/import/ShapeFileScanner.h
+    include/osmscout/import/WaterIndexProcessor.h
     include/osmscout/import/SortDat.h
     include/osmscout/import/SortNodeDat.h
     include/osmscout/import/SortWayDat.h
@@ -85,7 +87,7 @@ set(SOURCE_FILES
     src/osmscout/import/GenWayAreaDat.cpp
     src/osmscout/import/GenWayWayDat.cpp
     src/osmscout/import/Import.cpp
-	src/osmscout/import/ImportErrorReporter.cpp
+    src/osmscout/import/ImportErrorReporter.cpp
     src/osmscout/import/MergeAreaData.cpp
     src/osmscout/import/Preprocess.cpp
     src/osmscout/import/Preprocessor.cpp
@@ -99,6 +101,8 @@ set(SOURCE_FILES
     src/osmscout/import/RawRelIndexedDataFile.cpp
     src/osmscout/import/RawWay.cpp
     src/osmscout/import/RawWayIndexedDataFile.cpp
+    src/osmscout/import/ShapeFileScanner.cpp
+    src/osmscout/import/WaterIndexProcessor.cpp
     src/osmscout/import/SortDat.cpp
     src/osmscout/import/SortNodeDat.cpp
     src/osmscout/import/SortWayDat.cpp
@@ -145,12 +149,12 @@ elseif (LIBLZMA_FOUND)
     ${LIBXML2_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${LIBLZMA_LIBRARIES}
-    )    
+    )
 else()
   target_link_libraries(osmscout_import
     ${LIBXML2_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    )    
+    )
 endif()
 
 if(MARISA_FOUND)

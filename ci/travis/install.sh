@@ -23,6 +23,7 @@ if [ "$TARGET" = "build" ]; then
 
     sudo apt-get install -y \
       pkg-config \
+      gettext \
       libxml2-dev \
       libprotobuf-dev protobuf-compiler \
       libagg-dev libfreetype6-dev \
@@ -37,7 +38,10 @@ if [ "$TARGET" = "build" ]; then
       brew install cmake || true
     fi
 
-    brew install protobuf qt5
+    brew install gettext libxml2 protobuf cairo pango qt5
+    brew link --force gettext
+    brew link --force libxml2
+    brew link --force qt5
   fi
 elif [ "$TARGET" = "importer" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
@@ -58,8 +62,8 @@ elif [ "$TARGET" = "importer" ]; then
 elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
 
-  wget https://github.com/spf13/hugo/releases/download/v0.20.7/hugo_0.20.7_Linux-64bit.deb
-  sudo dpkg -i hugo_0.20.7_Linux-64bit.deb
+  wget https://github.com/spf13/hugo/releases/download/v0.21/hugo_0.21_Linux-64bit.deb
+  sudo dpkg -i hugo_0.21_Linux-64bit.deb
 
   sudo apt-get -qq update
   sudo apt-get install -y python3-pygments python-pygments doxygen lftp

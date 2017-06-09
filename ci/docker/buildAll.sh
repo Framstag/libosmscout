@@ -15,3 +15,5 @@ set -xe
 ./ubuntu_16.04_gcc_cmake/build.sh
 ./ubuntu_16.10_gcc_autoconf/build.sh
 ./ubuntu_16.10_gcc_cmake/build.sh
+./ubuntu_17.04_gcc_autoconf/build.sh
+./ubuntu_17.04_gcc_cmake/build.sh

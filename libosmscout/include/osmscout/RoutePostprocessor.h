@@ -312,10 +312,8 @@ namespace osmscout {
                                   size_t nodeIndex,
                                   const ObjectFileRef& object) const;
 
-    void GetCoordinates(const ObjectFileRef& object,
-                        size_t nodeIndex,
-                        double& lat,
-                        double& lon) const;
+    GeoCoord GetCoordinates(const ObjectFileRef& object,
+                            size_t nodeIndex) const;
 
     bool PostprocessRouteDescription(RouteDescription& description,
                                      const RoutingProfile& profile,
