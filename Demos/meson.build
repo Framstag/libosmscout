@@ -7,12 +7,14 @@ DumpOSS = executable('DumpOSS',
                       link_with: [osmscout, osmscoutmap],
                       install: true)
 
-LookupText = executable('LookupText',
-                        'src/LookupText.cpp',
-                        include_directories: [osmscoutIncDir, osmscoutmapIncDir],
-                        dependencies: [mathDep],        
-                        link_with: [osmscout, osmscoutmap],
-                        install: true)                      
+if marisaDep.found()
+  LookupText = executable('LookupText',
+                          'src/LookupText.cpp',
+                          include_directories: [osmscoutIncDir, osmscoutmapIncDir],
+                          dependencies: [mathDep],        
+                          link_with: [osmscout, osmscoutmap],
+                          install: true)                      
+endif
 
 LocationLookup = executable('LocationLookup',
                             'src/LocationLookup.cpp',
@@ -35,13 +37,31 @@ ReverseLocationLookup = executable('ReverseLocationLookup',
                                    link_with: [osmscout],
                                    install: true)
 
-PerformanceTest = executable('PerformanceTest',
-                             'src/PerformanceTest.cpp',
-                             cpp_args: ['-fPIC'],
-                             include_directories: [demosIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir, osmscoutmapqtIncDir],
-                             dependencies: [mathDep, pangocairoDep, qt5WidgetsDep],        
-                             link_with: [osmscout, osmscoutmap, osmscoutmapcairo, osmscoutmapqt],
-                             install: true)
+if buildMapCairo or buildMapQt
+  includes = [demosIncDir, osmscoutIncDir, osmscoutmapIncDir]
+  deps = [mathDep]
+  links = [osmscout, osmscoutmap]
+  
+  if buildMapCairo and pangocairoDep.found()
+    includes += osmscoutmapcairoIncDir
+    deps += pangocairoDep
+    links += osmscoutmapcairo
+  endif
+  
+  if buildMapQt
+    includes += osmscoutmapqtIncDir
+    deps += qt5WidgetsDep
+    links += osmscoutmapqt
+  endif
+
+  PerformanceTest = executable('PerformanceTest',
+                               'src/PerformanceTest.cpp',
+                               cpp_args: ['-fPIC'],
+                               include_directories: includes,
+                               dependencies: deps,        
+                               link_with: links,
+                               install: true)
+endif
 
 ResourceConsumption = executable('ResourceConsumption',
                                  'src/ResourceConsumption.cpp',
@@ -50,13 +70,15 @@ ResourceConsumption = executable('ResourceConsumption',
                                  link_with: [osmscout, osmscoutmap],
                                  install: true)
 
-ResourceConsumptionQt = executable('ResourceConsumptionQt',
-                                   'src/ResourceConsumptionQt.cpp',
-                                   cpp_args: ['-fPIC'],
-                                   include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
-                                   dependencies: [mathDep, qt5WidgetsDep],        
-                                   link_with: [osmscout, osmscoutmap, osmscoutmapqt],
-                                   install: true)
+if buildMapQt
+  ResourceConsumptionQt = executable('ResourceConsumptionQt',
+                                     'src/ResourceConsumptionQt.cpp',
+                                     cpp_args: ['-fPIC'],
+                                     include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
+                                     dependencies: [mathDep, qt5WidgetsDep],        
+                                     link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                                     install: true)
+endif
 
 Routing = executable('Routing',
                      'src/Routing.cpp',
@@ -83,18 +105,21 @@ Srtm = executable('Srtm',
 # TODO: DrawMapAgg
 # TODO: Tiler
 
-DrawMapCairo = executable('DrawMapCairo',
-                          'src/DrawMapCairo.cpp',
-                          include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
-                          dependencies: [mathDep, cairoDep, pangoDep, pangocairoDep],        
-                          link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
-                          install: true)
-                          
-DrawMapQt = executable('DrawMapQt',
-                       'src/DrawMapQt.cpp',
-                       cpp_args: ['-fPIC'],
-                       include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
-                       dependencies: [mathDep, qt5GuiDep, qt5WidgetsDep],        
-                       link_with: [osmscout, osmscoutmap, osmscoutmapqt],
-                       install: true)                          
+if buildMapCairo
+  DrawMapCairo = executable('DrawMapCairo',
+                            'src/DrawMapCairo.cpp',
+                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
+                            dependencies: [mathDep, cairoDep, pangoDep, pangocairoDep],        
+                            link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+                            install: true)
+endif
 
+if buildMapQt
+  DrawMapQt = executable('DrawMapQt',
+                         'src/DrawMapQt.cpp',
+                         cpp_args: ['-fPIC'],
+                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
+                         dependencies: [mathDep, qt5GuiDep, qt5WidgetsDep],        
+                         link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                         install: true)                          
+endif

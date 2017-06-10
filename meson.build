@@ -56,12 +56,14 @@ pangoDep = dependency('pango', required : false)
 pangocairoDep = dependency('pangocairo', required : false)
 pngDep = dependency('libpng', required: false)
 
+#build_machine.system() != 'darwin' ? 'auto' : 'qmake'
+
 qt5 = import('qt5')
-qt5GuiDep = dependency('Qt5Gui')
-qt5QmlDep = dependency('Qt5Qml')
-qt5QuickDep = dependency('Qt5Quick')
-qt5WidgetsDep = dependency('Qt5Widgets')
-qt5LocationDep = dependency('Qt5Location')
+qt5GuiDep = dependency('Qt5Gui', required: false)
+qt5QmlDep = dependency('Qt5Qml', required: false)
+qt5QuickDep = dependency('Qt5Quick', required: false)
+qt5WidgetsDep = dependency('Qt5Widgets', required: false)
+qt5LocationDep = dependency('Qt5Location', required: false)
 
 if cairoDep.found()
   buildMapCairo=true
