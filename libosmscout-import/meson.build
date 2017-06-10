@@ -20,8 +20,8 @@ osmscoutimport = library('osmscoutimport',
                          protoSrc,
                          include_directories: [osmscoutimportIncDir, osmscoutIncDir],
                          cpp_args: cppArgs,
-                         dependencies: [mathDep, threadDep, xml2Dep, marisaDep, protobufDep, zlibDep],
+                         dependencies: [mathDep, threadDep, wsock32Dep, xml2Dep, marisaDep, protobufDep, zlibDep],
                          link_with: [osmscout],
                          install: true)
-        
+
 # TODO: Generate PKG_CONFIG file        
