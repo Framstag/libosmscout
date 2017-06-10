@@ -75,7 +75,7 @@ if buildMapQt
                                      'src/ResourceConsumptionQt.cpp',
                                      cpp_args: ['-fPIC'],
                                      include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
-                                     dependencies: [mathDep, qt5WidgetsDep],        
+                                     dependencies: [mathDep, qt5GuiDep, qt5WidgetsDep],        
                                      link_with: [osmscout, osmscoutmap, osmscoutmapqt],
                                      install: true)
 endif

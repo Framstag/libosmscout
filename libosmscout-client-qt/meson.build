@@ -27,7 +27,7 @@ osmscoutclientqt = library('osmscout-client-qt',
                            osmscoutclientqtSrc,
                            include_directories: [osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                            cpp_args: cppArgs,
-                           dependencies: [mathDep, threadDep, qt5GuiDep, qt5QuickDep, qt5WidgetsDep],
+                           dependencies: [mathDep, threadDep, qt5GuiDep, qt5QmlDep, qt5QuickDep, qt5WidgetsDep, qt5NetworkDep],
                            link_with: [osmscout, osmscoutmap, osmscoutmapqt],
                            install: true)
         

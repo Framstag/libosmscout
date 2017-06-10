@@ -59,10 +59,11 @@ pngDep = dependency('libpng', required: false)
 #build_machine.system() != 'darwin' ? 'auto' : 'qmake'
 
 qt5 = import('qt5')
-qt5GuiDep = dependency('qt5', modules: 'Gui', required: false)
+qt5GuiDep = dependency('qt5', modules: [ 'Core', 'Gui'], required: false)
 qt5QmlDep = dependency('qt5', modules: 'Qml', required: false)
 qt5QuickDep = dependency('qt5', modules: 'Quick', required: false)
 qt5WidgetsDep = dependency('qt5', modules: 'Widgets', required: false)
+qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
 qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
 
 if cairoDep.found()
@@ -71,7 +72,7 @@ else
   buildMapCairo=false
 endif
 
-if qt5GuiDep.found() and qt5QuickDep.found() and qt5WidgetsDep.found()
+if qt5GuiDep.found() and qt5QmlDep.found() and qt5QuickDep.found() and qt5WidgetsDep.found() and qt5NetworkDep.found()
   buildClientQt=true
   buildMapQt=true
 else
