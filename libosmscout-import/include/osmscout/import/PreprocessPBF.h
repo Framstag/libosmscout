@@ -31,8 +31,13 @@
 
 #include <osmscout/import/Preprocessor.h>
 
-#include <osmscout/import/pbf/fileformat.pb.h>
-#include <osmscout/import/pbf/osmformat.pb.h>
+#if defined(OSMSCOUT_IMPORT_MESON_BUILD)
+  #include <fileformat.pb.h>
+  #include <osmformat.pb.h>
+#else
+  #include <osmscout/import/pbf/fileformat.pb.h>
+  #include <osmscout/import/pbf/osmformat.pb.h>
+#endif
 
 #include <osmscout/system/Compiler.h>
 

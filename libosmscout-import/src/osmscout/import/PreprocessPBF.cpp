@@ -17,9 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/private/Config.h>
-
 #include <osmscout/import/PreprocessPBF.h>
+
+#include <osmscout/private/Config.h>
+#include <osmscout/ImportFeatures.h>
 
 #include <cstdio>
 
@@ -34,7 +35,7 @@
   #include <arpa/inet.h>
 #endif
 
-#if defined(HAVE_LIB_ZLIB)
+#if defined(HAVE_LIB_ZLIB) || defined(OSMSCOUT_IMPORT_HAVE_PROTOBUF_SUPPORT)
   #include <zlib.h>
 #endif
 
@@ -163,7 +164,7 @@ namespace osmscout {
       memcpy(buffer,blob.raw().data(),(size_t)length);
     }
     else if (blob.has_zlib_data()) {
-#if defined(HAVE_LIB_ZLIB)
+#if defined(HAVE_LIB_ZLIB) || defined(OSMSCOUT_IMPORT_HAVE_PROTOBUF_SUPPORT)
       length=blob.raw_size();
       AssureBlockSize(length);
 
@@ -240,7 +241,7 @@ namespace osmscout {
       memcpy(buffer,blob.raw().data(),(size_t)length);
     }
     else if (blob.has_zlib_data()) {
-#if defined(HAVE_LIB_ZLIB)
+#if defined(HAVE_LIB_ZLIB) || defined(OSMSCOUT_IMPORT_HAVE_PROTOBUF_SUPPORT)
       length=blob.raw_size();
       AssureBlockSize(length);
 
