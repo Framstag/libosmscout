@@ -23,6 +23,7 @@ endif
 
 fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
+iconvAvailable = compiler.has_header('iconv.h')
 codecvtAvailable = compiler.has_header('codecvt')
 
 sharedMutexAvailable = compiler.has_header_symbol('shared_mutex','shared_mutex', prefix: 'using namespace std;')

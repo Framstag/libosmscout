@@ -9,7 +9,9 @@ coreCfg.set('HAVE_MMAP',mmapAvailable, description: 'mmap() is available')
 coreCfg.set('HAVE_POSIX_FADVISE',posixfadviceAvailable, description: 'posixfadvice() is available')
 coreCfg.set('HAVE_POSIX_MADVISE',posixmadviceAvailable, description: 'posixmadvice() is available')
 coreCfg.set('SIZEOF_WCHAR_T',sizeOfWChar, description: 'byte size of wchar_t')
-
+coreCfg.set('HAVE_ICONV',iconvAvailable, description: 'iconv library available')
+## TODO
+coreCfg.set('ICONV_CONST','', description: 'Signature of scond parameter of the iconv() function')
 
 configure_file(output: 'Config.h',
                configuration: coreCfg)
