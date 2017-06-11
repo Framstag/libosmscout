@@ -56,7 +56,7 @@ set(SOURCE_FILES
 )
 
 set(RESOURCE_FILES
-    res.qrc
+    StyleEditor.qrc
 )
 
 add_executable(StyleEditor ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})

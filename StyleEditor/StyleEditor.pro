@@ -48,4 +48,4 @@ OTHER_FILES += \
     qml/MapControl.qml
 
 RESOURCES += \
-    res.qrc
+    StyleEditor.qrc

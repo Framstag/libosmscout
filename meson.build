@@ -59,13 +59,12 @@ pangocairoDep = dependency('pangocairo', required : false)
 pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false)
 
-#build_machine.system() != 'darwin' ? 'auto' : 'qmake'
-
 qt5 = import('qt5')
 qt5GuiDep = dependency('qt5', modules: [ 'Core', 'Gui'], required: false)
 qt5QmlDep = dependency('qt5', modules: 'Qml', required: false)
 qt5QuickDep = dependency('qt5', modules: 'Quick', required: false)
 qt5WidgetsDep = dependency('qt5', modules: 'Widgets', required: false)
+qt5SvgDep = dependency('qt5', modules: 'Svg', required: false)
 qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
 qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
 
@@ -106,6 +105,7 @@ subdir('Import')
 subdir('Demos')
 subdir('DumpData')
 
-if buildMapQt and buildClientQt
+if buildMapQt and buildClientQt and qt5SvgDep.found()
   subdir('OSMScout2')
+  subdir('StyleEditor')
 endif
