@@ -17,6 +17,9 @@ if [ "$TARGET" = "build" ]; then
 
     if [ "$BUILDTOOL" = "autoconf" ]; then
       sudo apt-get install -y autoconf
+    elif [ "$BUILDTOOL" = "meson" ]; then
+      sudo apt-get install -y meson
+    fi
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi
