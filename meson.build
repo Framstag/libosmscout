@@ -55,6 +55,7 @@ aggDep = dependency('libagg', required : false)
 cairoDep = dependency('cairo', required : false)
 pangoDep = dependency('pango', required : false)
 pangocairoDep = dependency('pangocairo', required : false)
+pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false)
 
 #build_machine.system() != 'darwin' ? 'auto' : 'qmake'
@@ -92,6 +93,8 @@ endif
 if buildMapQt
   subdir('libosmscout-map-qt')
 endif
+
+subdir('libosmscout-map-svg')
 
 if buildClientQt
   subdir('libosmscout-client-qt')

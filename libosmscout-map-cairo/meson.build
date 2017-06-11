@@ -15,10 +15,10 @@ subdir('src')
 
 osmscoutmapcairo = library('osmscout-map-cairo',
                            osmscoutmapcairoSrc,
-                           include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
+                           include_directories: [osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
                            cpp_args: cppArgs,
                            dependencies: [mathDep, threadDep, cairoDep, pangoDep, pangocairoDep, pngDep],
-                           link_with: [osmscout, osmscoutmap],
+                           link_with: [osmscoutmap, osmscout],
                            install: true)
         
 # TODO: Generate PKG_CONFIG file        
