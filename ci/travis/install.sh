@@ -26,7 +26,6 @@ if [ "$TARGET" = "build" ]; then
       sudo apt-get install python3-pip python3-dev build-essential
       pip3 install --upgrade --user pip
       pip3 install --user meson
-      meson --version
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi

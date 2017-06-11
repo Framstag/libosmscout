@@ -27,7 +27,6 @@ if [ "$TARGET" = "build" ]; then
     meson -Dbuildtype=debugoptimized debug
     cd debug
     ninja
-    (cd Tests && make check)
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
