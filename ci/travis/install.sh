@@ -18,9 +18,11 @@ if [ "$TARGET" = "build" ]; then
     if [ "$BUILDTOOL" = "autoconf" ]; then
       sudo apt-get install -y autoconf
     elif [ "$BUILDTOOL" = "meson" ]; then
-      sudo apt-get install -y meson
+      sudo apt-get install ninja python3-pip python3-dev build-essential
+      sudo pip3 install --upgrade pip3
+      sudo pip3 install meson
+      meson.py --version
       meson --version
-    fi
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi
