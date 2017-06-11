@@ -74,7 +74,8 @@ qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
 
 # OpenGL
 openGLDep = dependency('gl', required: false)
-glutDep = dependency('freeglut', required: false)
+glutDep = dependency('glut', required: false)
+freeglutDep = dependency('freeglut', required: false)
 glewDep = dependency('glew', required: false)
 glfwDep = dependency('glfw3', required: false)
 
