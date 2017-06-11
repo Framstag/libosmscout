@@ -51,14 +51,18 @@ wsock32Dep=compiler.find_library('wsock32', required: false)
 protocCmd = find_program('protoc')
 
 # Backends
+
+# Agg
 aggDep = dependency('libagg', required : false)
 
+# cairo
 cairoDep = dependency('cairo', required : false)
 pangoDep = dependency('pango', required : false)
 pangocairoDep = dependency('pangocairo', required : false)
 pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false)
 
+# Qt
 qt5 = import('qt5')
 qt5GuiDep = dependency('qt5', modules: [ 'Core', 'Gui'], required: false)
 qt5QmlDep = dependency('qt5', modules: 'Qml', required: false)
@@ -67,6 +71,18 @@ qt5WidgetsDep = dependency('qt5', modules: 'Widgets', required: false)
 qt5SvgDep = dependency('qt5', modules: 'Svg', required: false)
 qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
 qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
+
+# OpenGL
+openGLDep = dependency('gl', required: false)
+glutDep = dependency('freeglut', required: false)
+glewDep = dependency('glew', required: false)
+glfwDep = dependency('glfw3', required: false)
+
+if aggDep.found()
+  buildMapAgg=true
+else
+  buildMapAgg=false  
+endif
 
 if cairoDep.found()
   buildMapCairo=true
@@ -82,9 +98,19 @@ else
   buildMapQt=false
 endif
 
+if openGLDep.found() and glutDep.found() and glewDep.found()
+  buildMapOpenGL=true
+else
+  buildMapOpenGL=false
+endif  
+
 subdir('libosmscout')
 subdir('libosmscout-import')
 subdir('libosmscout-map')
+
+if buildMapAgg
+  # TODO: Build libosmsocut-map-agg
+endif  
 
 if buildMapCairo
   subdir('libosmscout-map-cairo')
@@ -92,6 +118,12 @@ endif
 
 if buildMapQt
   subdir('libosmscout-map-qt')
+endif
+
+# TODO: Build libosmscout-map-iosx
+
+if buildMapOpenGL
+  subdir('libosmscout-map-opengl')
 endif
 
 subdir('libosmscout-map-svg')
@@ -109,3 +141,9 @@ if buildMapQt and buildClientQt and qt5SvgDep.found()
   subdir('OSMScout2')
   subdir('StyleEditor')
 endif
+
+if buildMapOpenGL and glfwDep.found()
+  subdir('OSMScoutOpenGL')
+endif
+
+# TODO: Tests

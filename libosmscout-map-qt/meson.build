@@ -15,7 +15,7 @@ subdir('src')
 
 osmscoutmapqt = library('osmscout-map-qt',
                         osmscoutmapqtSrc,
-                        include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
+                        include_directories: [osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                         cpp_args: cppArgs,
                         dependencies: [mathDep, threadDep, qt5GuiDep],
                         link_with: [osmscout, osmscoutmap],
