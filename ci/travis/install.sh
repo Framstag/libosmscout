@@ -18,7 +18,12 @@ if [ "$TARGET" = "build" ]; then
     if [ "$BUILDTOOL" = "autoconf" ]; then
       sudo apt-get install -y autoconf
     elif [ "$BUILDTOOL" = "meson" ]; then
-      sudo apt-get install ninja python3-pip python3-dev build-essential
+      wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
+      unzip ninja-linux.zip
+      mkdir ~/bin
+      mv ninja ~/bin
+      export PATH=~/bin:$PATH
+      sudo apt-get install python3-pip python3-dev build-essential
       pip3 install --upgrade --user pip
       pip3 install --user meson
       meson --version
