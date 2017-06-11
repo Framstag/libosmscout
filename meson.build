@@ -74,10 +74,21 @@ qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
 
 # OpenGL
 openGLDep = dependency('gl', required: false)
+
 glutDep = dependency('glut', required: false)
-freeglutDep = dependency('freeglut', required: false)
+
+if not glutDep.found()
+  glutDep = dependency('freeglut', required: false)
+endif
+
+if not glutDep.found()
+  glutDep = compiler.find_library('glut', required: false)
+endif
+  
 glewDep = dependency('glew', required: false)
-glfwDep = dependency('glfw3', required: false)
+
+# Workaround for dependency, else error under Ubuntu 14.04
+glfwDep = compiler.find_library('glfw', required: false)
 
 if aggDep.found()
   buildMapAgg=true
