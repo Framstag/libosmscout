@@ -40,6 +40,7 @@ fseekoAvailable = compiler.has_function('fseeko')
 # Base
 mathDep = compiler.find_library('m', required : false)
 threadDep = dependency('threads')
+iconvDep = compiler.find_library('iconv', required: false)
 marisaDep = dependency('marisa', required : false)
 
 # Import
@@ -72,6 +73,14 @@ qt5SvgDep = dependency('qt5', modules: 'Svg', required: false)
 qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
 qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
 
+if qt5GuiDep.found() and qt5QmlDep.found() and qt5QuickDep.found() and qt5WidgetsDep.found() and qt5NetworkDep.found()
+  buildClientQt=true
+  buildMapQt=true
+else
+  buildClientQt=false
+  buildMapQt=false
+endif
+
 # OpenGL
 openGLDep = dependency('gl', required: false)
 
@@ -88,26 +97,11 @@ endif
 glewDep = dependency('glew', required: false)
 
 # Workaround for dependency, else error under Ubuntu 14.04
-glfwDep = compiler.find_library('glfw', required: false)
 
-if aggDep.found()
-  buildMapAgg=true
-else
-  buildMapAgg=false  
-endif
+glfwDep=dependency('glfw3', required: false)
 
-if cairoDep.found()
-  buildMapCairo=true
-else
-  buildMapCairo=false
-endif
-
-if qt5GuiDep.found() and qt5QmlDep.found() and qt5QuickDep.found() and qt5WidgetsDep.found() and qt5NetworkDep.found()
-  buildClientQt=true
-  buildMapQt=true
-else
-  buildClientQt=false
-  buildMapQt=false
+if not glfwDep.found()
+  glfwDep = compiler.find_library('glfw', required: false)
 endif
 
 if openGLDep.found() and glutDep.found() and glewDep.found()
@@ -115,6 +109,20 @@ if openGLDep.found() and glutDep.found() and glewDep.found()
 else
   buildMapOpenGL=false
 endif  
+
+# Agg
+if aggDep.found()
+  buildMapAgg=true
+else
+  buildMapAgg=false  
+endif
+
+# Cairo
+if cairoDep.found()
+  buildMapCairo=true
+else
+  buildMapCairo=false
+endif
 
 subdir('libosmscout')
 subdir('libosmscout-import')

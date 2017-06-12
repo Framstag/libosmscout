@@ -22,7 +22,7 @@ osmscout = library('osmscout',
                    osmscoutSrc,
                    include_directories: osmscoutIncDir,
                    cpp_args: cppArgs,
-                   dependencies: [mathDep, threadDep, marisaDep],        
+                   dependencies: [mathDep, threadDep, iconvDep, marisaDep],        
                    install: true)
         
 # TODO: Generate PKG_CONFIG file        
