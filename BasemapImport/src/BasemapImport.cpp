@@ -301,6 +301,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
         if (std::abs(coastline->coast.front().GetLon())>179.999 &&
             std::abs(coastline->coast.front().GetLon()-coastline->coast.back().GetLon())<0.001){
           coastline->isArea=true;
+          coastline->coast.push_back(coastline->coast.front());
         }else if (coastline->coast.front().GetLon()<-179.999 && // reverse direction than OSM data!
                   coastline->coast.back().GetLon()>+179.999 &&
                   coastline->coast.front().GetLat()<-56 &&
