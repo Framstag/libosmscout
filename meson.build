@@ -110,7 +110,7 @@ glmDep = dependency('glm', required: false)
 
 if not glmDep.found()
   glmDep = compiler.find_library('glm', required: false)
-#endif
+endif
 
 glewDep = dependency('glew', required: false)
 
