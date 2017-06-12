@@ -65,7 +65,7 @@ endif
 
 ResourceConsumption = executable('ResourceConsumption',
                                  'src/ResourceConsumption.cpp',
-                                 include_directories: [osmscoutIncDir, osmscoutmapIncDir],
+                                 include_directories: [osmscoutmapIncDir, osmscoutIncDir],
                                  dependencies: [mathDep],        
                                  link_with: [osmscout, osmscoutmap],
                                  install: true)

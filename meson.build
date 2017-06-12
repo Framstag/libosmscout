@@ -107,6 +107,11 @@ endif
 
 
 glmDep = dependency('glm', required: false)
+
+if not glmDep.found()
+  glmDep = compiler.find_library('glm', required: false)
+#endif
+
 glewDep = dependency('glew', required: false)
 
 # Workaround for dependency, else error under Ubuntu 14.04
@@ -117,7 +122,7 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and glutDep.found() and glewDep.found()
+if openGLDep.found() and glutDep.found() and glmDep.found() and glewDep.found()
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
