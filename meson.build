@@ -1,8 +1,15 @@
 project('libosmscout',
         'cpp',
         meson_version: '>=0.40.0',
-        default_options: ['cpp_std=c++11'],
+        default_options: ['cpp_std=c++11', 'buildtype=debugoptimized', 'warning_level=3'],
         license: ['LGPL'])
+
+if build_machine.system()=='darwin'
+  add_languages(['objcpp'])
+  # Workarounds...
+  add_global_arguments(['-fobjc-arc', '-std=c++11'], language: 'objcpp')
+  add_global_link_arguments(['-dynamiclib'], language: 'objcpp')
+endif  
 
 compiler = meson.get_compiler('cpp')
 
@@ -84,23 +91,29 @@ endif
 # OpenGL
 openGLDep = dependency('gl', required: false)
 
-glutDep = dependency('glut', required: false)
+if build_machine.system()=='darwin'
+  glutDep = dependency('appleframeworks', modules: 'glut', required: false)
+else
+  glutDep = dependency('glut', required: false)
 
-if not glutDep.found()
-  glutDep = dependency('freeglut', required: false)
+  if not glutDep.found()
+    glutDep = dependency('freeglut', required: false)
+  endif
+
+  if not glutDep.found()
+   glutDep = compiler.find_library('glut', required: false)
+  endif
 endif
 
-if not glutDep.found()
-  glutDep = compiler.find_library('glut', required: false)
-endif
-  
+
+glmDep = dependency('glm', required: false)
 glewDep = dependency('glew', required: false)
 
 # Workaround for dependency, else error under Ubuntu 14.04
 
-glfwDep=dependency('glfw3', required: false)
-
-if not glfwDep.found()
+if build_machine.system()=='darwin'
+  glfwDep=dependency('glfw3', required: false)
+else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
@@ -124,6 +137,9 @@ else
   buildMapCairo=false
 endif
 
+# iOSX
+buildMapIOSX=build_machine.system()=='darwin'
+
 subdir('libosmscout')
 subdir('libosmscout-import')
 subdir('libosmscout-map')
@@ -140,7 +156,10 @@ if buildMapQt
   subdir('libosmscout-map-qt')
 endif
 
-# TODO: Build libosmscout-map-iosx
+if buildMapIOSX
+# Does not yet work, because we are not able to active std11 support, fixed in meson trunk
+#  subdir('libosmscout-map-iosx')
+endif
 
 if buildMapOpenGL
   subdir('libosmscout-map-opengl')

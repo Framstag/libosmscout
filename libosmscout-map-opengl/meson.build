@@ -17,7 +17,7 @@ osmscoutmapopengl = library('osmscout-map-opengl',
                             osmscoutmapopenglSrc,
                             include_directories: [osmscoutmapopenglIncDir, osmscoutmapIncDir, osmscoutIncDir],
                             cpp_args: cppArgs,
-                            dependencies: [mathDep, threadDep, openGLDep, glutDep, glewDep],
+                            dependencies: [mathDep, threadDep, openGLDep, glutDep, glmDep, glewDep],
                             link_with: [osmscout, osmscoutmap],
                             install: true)
         
