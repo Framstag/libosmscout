@@ -68,12 +68,18 @@ public:
 
   void AddCoast(const std::vector<osmscout::GeoCoord>& coords)
   {
+    if (coords.size()<2){
+      return;
+    }
     osmscout::WaterIndexProcessor::CoastRef coastline=std::make_shared<osmscout::WaterIndexProcessor::Coast>();
 
     coastline->id=currentId;
-    coastline->isArea=true;
+    coastline->isArea=coords.front()==coords.back();
+    // note that shapefile coastlines has reverse direction than OSM!
     coastline->left=osmscout::WaterIndexProcessor::CoastState::water;
     coastline->right=osmscout::WaterIndexProcessor::CoastState::land;
+    coastline->frontNodeId=coords.front().GetHash();
+    coastline->backNodeId=coords.back().GetHash();
 
     coastline->coast.reserve(coords.size());
 
@@ -280,6 +286,41 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
     shapefileScanner.Visit(visitor);
     shapefileScanner.Close();
 
+    processor.MergeCoastlines(progress,visitor.coasts);
+
+    // - close coastlines crossing antimeridian
+    //  -- splitted to two ways in OSM data
+    // - close Antarctica coastline
+    // - remove rest of unclosed ways
+    size_t removedCoastlines=0;
+    auto it=visitor.coasts.begin();
+    while (it!=visitor.coasts.end()){
+      osmscout::WaterIndexProcessor::CoastRef coastline=*it;
+      if (!coastline->isArea){
+        // close ways touching antimeridian
+        if (std::abs(coastline->coast.front().GetLon())>179.999 &&
+            std::abs(coastline->coast.front().GetLon()-coastline->coast.back().GetLon())<0.001){
+          coastline->isArea=true;
+        }else if (coastline->coast.front().GetLon()<-179.999 && // reverse direction than OSM data!
+                  coastline->coast.back().GetLon()>+179.999 &&
+                  coastline->coast.front().GetLat()<-56 &&
+                  coastline->coast.back().GetLat()<-56){
+          // hack for Antarctica
+          coastline->isArea=true;
+          coastline->coast.push_back(osmscout::Point(0,osmscout::GeoCoord(-90,+180)));
+          coastline->coast.push_back(osmscout::Point(0,osmscout::GeoCoord(-90,-180)));
+        }else{
+          it=visitor.coasts.erase(it);
+          removedCoastlines++;
+          continue;
+        }
+      }
+      it++;
+    }
+    if (removedCoastlines>0){
+      progress.Warning("Removed "+osmscout::NumberToString(removedCoastlines)+" unclosed coastlines");
+    }
+
     writer.Open(osmscout::AppendFileToDir(destinationDirectory,
                                           "water.idx"));
 
@@ -305,8 +346,8 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
         // Collects, calculates and generates a number of data about a coastline
         processor.CalculateCoastlineData(progress,
                                          osmscout::TransPolygon::fast,
-                                         10.0,
-                                         1.0,
+                                         /*tolerance*/ 10.0,
+                                         /*minObjectDimension*/ 1.0,
                                          projection,
                                          level.stateMap,
                                          visitor.coasts,
