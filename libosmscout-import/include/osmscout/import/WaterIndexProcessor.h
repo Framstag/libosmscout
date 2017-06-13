@@ -455,6 +455,9 @@ namespace osmscout {
                              Data& data);
 
 public:
+    void MergeCoastlines(Progress& progress,
+                         std::list<WaterIndexProcessor::CoastRef>& coastlines);
+
     void GetCells(const StateMap& stateMap,
                   const std::vector<GeoCoord>& points,
                   std::set<Pixel>& cellIntersections) const;
