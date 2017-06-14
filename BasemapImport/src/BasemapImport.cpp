@@ -156,6 +156,8 @@ void DumpHelp()
   std::cout << " -h|--help                     show this help" << std::endl;
   std::cout << " -d                            show debug output" << std::endl;
   std::cout << " --destinationDirectory <path> destination for generated map files" << std::endl;
+  std::cout << " --minIndexLevel <number>      minimum water index zoom level (default 4)" << std::endl;
+  std::cout << " --maxIndexLevel <number>      maximum water index zoom level (default 10)" << std::endl;
   std::cout << std::endl;
   std::cout << " --coastlines <*.shape>        optional shape file containing world-wide coastlines" << std::endl;
   std::cout << std::endl;
@@ -242,15 +244,15 @@ static void InitializeLocale(osmscout::Progress& progress)
 
 static bool ImportCoastlines(const std::string& destinationDirectory,
                              const std::string& coastlineShapeFile,
-                             osmscout::Progress& progress)
+                             osmscout::Progress& progress,
+                             size_t indexMinMag,
+                             size_t indexMaxMag)
 {
   progress.SetAction("Reading coastline shape file");
 
   osmscout::FileWriter                              writer;
   osmscout::WaterIndexProcessor                     processor;
   std::vector<osmscout::WaterIndexProcessor::Level> levels;
-  size_t                                            indexMinMag=4;
-  size_t                                            indexMaxMag=10;
 
   levels.reserve(indexMaxMag-indexMinMag+1);
 
@@ -420,6 +422,8 @@ int main(int argc, char* argv[])
 {
   std::string               destinationDirectory;
   std::string               coastlineShapeFile;
+  size_t                    minIndexLevel=4;
+  size_t                    maxIndexLevel=10;
   osmscout::ConsoleProgress progress;
   bool                      parameterError=false;
 
@@ -460,6 +464,26 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--minIndexLevel")==0) {
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             minIndexLevel)) {
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--maxIndexLevel")==0) {
+      if (ParseSizeTArgument(argc,
+                             argv,
+                             i,
+                             maxIndexLevel)) {
+      }
+      else {
+        parameterError=true;
+      }
+    }
     else if (strncmp(argv[i],"--",2)==0) {
       progress.Error("Unknown option: "+std::string(argv[i]));
 
@@ -476,6 +500,10 @@ int main(int argc, char* argv[])
 
   if (destinationDirectory.empty()) {
     progress.Error("Mandatory destination directory not set");
+    parameterError=true;
+  }
+  if (minIndexLevel>maxIndexLevel || maxIndexLevel>20) {
+    progress.Error("Invalid min/max index level");
     parameterError=true;
   }
 
@@ -511,7 +539,9 @@ int main(int argc, char* argv[])
     if (!coastlineShapeFile.empty()) {
       ImportCoastlines(destinationDirectory,
                        coastlineShapeFile,
-                       progress);
+                       progress,
+                       minIndexLevel,
+                       maxIndexLevel);
     }
   }
   catch (osmscout::IOException& e) {
