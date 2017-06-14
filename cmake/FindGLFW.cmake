@@ -77,6 +77,8 @@ find_path( GLFW_INCLUDE_DIR
         "The directory where GL/glfw.h resides"
 )
 
+set (GLFW_DEPENDENCIES_FOUND "true")
+
 if (WIN32)
     if(CYGWIN)
         find_library( GLFW_glfw_LIBRARY 
@@ -138,28 +140,43 @@ else ()
     else ()
         # (*)NIX
         
-        find_package(Threads REQUIRED)
+        find_package(Threads QUIET)
 
-        find_package(X11 REQUIRED)
-        
+        find_package(X11 QUIET)
+
+        if(NOT Threads_FOUND)
+            message(STATUS "Threads not found - required for GLFW")
+            set (GLFW_DEPENDENCIES_FOUND false)
+        endif()
+
+        if(NOT X11_FOUND)
+            message(STATUS "X11 library not found - required for GLFW")
+            set (GLFW_DEPENDENCIES_FOUND false)
+        endif()
+
         if(NOT X11_Xrandr_FOUND)
-            message(FATAL_ERROR "Xrandr library not found - required for GLFW")
+            message(STATUS "Xrandr library not found - required for GLFW")
+            set (GLFW_DEPENDENCIES_FOUND false)
         endif()
 
         if(NOT X11_xf86vmode_FOUND)
-            message(FATAL_ERROR "xf86vmode library not found - required for GLFW")
+            message(STATUS "xf86vmode library not found - required for GLFW")
+            set (GLFW_DEPENDENCIES_FOUND false)
         endif()
 
         if(NOT X11_Xcursor_FOUND)
-            message(FATAL_ERROR "Xcursor library not found - required for GLFW")
+            message(STATUS "Xcursor library not found - required for GLFW")
+            set (GLFW_DEPENDENCIES_FOUND false)
         endif()
 
         if(NOT X11_Xinerama_FOUND)
-            message(FATAL_ERROR "Xinerama library not found - required for GLFW")
+            message(STATUS "Xinerama library not found - required for GLFW")
+            set (GLFW_DEPENDENCIES_FOUND false)
         endif()
 
         if(NOT X11_Xi_FOUND)
-            message(FATAL_ERROR "Xi library not found - required for GLFW")
+            message(STATUS "Xi library not found - required for GLFW")
+            set (GLFW_DEPENDENCIES_FOUND false)
         endif()
 
         list(APPEND GLFW_x11_LIBRARY "${X11_Xrandr_LIB}" "${X11_Xxf86vm_LIB}" "${X11_Xcursor_LIB}" "${X11_Xinerama_LIB}" "${X11_Xi_LIB}" "${X11_LIBRARIES}" "${CMAKE_THREAD_LIBS_INIT}" -lrt -ldl)
@@ -190,7 +207,7 @@ endif (WIN32)
 
 set( GLFW_FOUND "NO" )
 
-if(GLFW_INCLUDE_DIR)
+if(GLFW_INCLUDE_DIR AND GLFW_DEPENDENCIES_FOUND)
 
     if(GLFW_glfw_LIBRARY)
         set( GLFW_LIBRARIES "${GLFW_glfw_LIBRARY}"
@@ -238,7 +255,7 @@ if(GLFW_INCLUDE_DIR)
         mark_as_advanced(GLFW_VERSION)
     endif()
     
-endif(GLFW_INCLUDE_DIR)
+endif(GLFW_INCLUDE_DIR AND GLFW_DEPENDENCIES_FOUND)
 
 include(FindPackageHandleStandardArgs)
 
