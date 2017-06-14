@@ -552,7 +552,10 @@ void TiledMapRenderer::onlineTilesEnabledChanged(bool b)
         onlineTileCache.invalidate();
         onlineTileCache.clearPendingRequests();
     }
-    emit Redraw();
+
+    // when online tiles are disabled, basemap is rendered
+    // we need to invalidate offline tiles on this change
+    InvalidateVisualCache();
 }
 
 void TiledMapRenderer::onOfflineMapChanged(bool b)
