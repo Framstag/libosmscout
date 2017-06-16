@@ -13,7 +13,7 @@ subdir('include/osmscout')
 subdir('include/osmscout/private')
 subdir('src')
 
-mapaggDep = [mathDep, threadDep, aggDep]
+mapaggDep = [mathDep, threadDep, aggDep, ftDep]
 
 if aggftpicDep.found()
   mapaggDep += aggftpicDep
