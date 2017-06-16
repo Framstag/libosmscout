@@ -117,6 +117,7 @@ NumberSetPerformance = executable('NumberSetPerformance',
              link_with: [osmscout],
              install: false)
 
+
 OSTAndOSSCheck = executable('OSTAndOSSCheck',
              'src/OSTAndOSSCheck.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
@@ -166,6 +167,10 @@ WStringStringConversion = executable('WStringStringConversion',
              link_with: [osmscout],
              install: false)
 
+ostandossEnv = environment()
+
+ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+
 test('Check parsing of access rights', AccessParse)
 test('Check encoding of numbers', BitsAndBytesNeeded)
 test('Check parsing of colors', ColorParse)
@@ -176,7 +181,7 @@ test('Check parsing of geo coordinates', GeoCoordParse)
 test('Check impl. of geometric functions', Geometry)
 test('Check rotation of maps', MapRotate)
 test('Check correctness of NumberSet class', NumberSet)
-#test('Check standard OST and OSS files', OSTAndOSSCheck)
+test('Check standard OST and OSS files', OSTAndOSSCheck, env: ostandossEnv)
 test('Check scan conversion code', ScanConversion)
 test('Check polygon transformation code', TransPolygon)
 test('Check implementation of work queue', WorkQueue)
