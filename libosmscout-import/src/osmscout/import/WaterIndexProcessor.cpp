@@ -135,21 +135,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Transform the given geo coordinate to a corresponding GroundTile coordinate
-   *
-   * @param point
-   *    geo coordinate to transform
-   * @param stateMap
-   *    the StateMap, holding information about cell dimensions
-   * @param cellMinLat
-   *    offset of the ground map
-   * @param cellMinLon
-   *    offset of the ground map
-   * @param coast
-   *    Flag to be copied into the GroundTile coordinate
-   * @return
-   */
   GroundTile::Coord WaterIndexProcessor::Transform(const GeoCoord& point,
                                                    const StateMap& stateMap,
                                                    double cellMinLat,
@@ -228,7 +213,6 @@ namespace osmscout {
 
   /**
    * Markes a cell as "coast", if one of the coastlines intersects with it.
-   *
    */
   void WaterIndexProcessor::MarkCoastlineCells(Progress& progress,
                                                StateMap& stateMap,
@@ -258,12 +242,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Calculate the cell type for cells directly around coast cells
-   * @param progress
-   * @param stateMap
-   * @param cellGroundTileMap
-   */
   void WaterIndexProcessor::CalculateCoastEnvironment(Progress& progress,
                                                       StateMap& stateMap,
                                                       const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap)
@@ -451,12 +429,6 @@ namespace osmscout {
     return false;
   }
 
-  /**
-   * Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
-   *
-   * Converts all cells of state "unknown" that touch a tile with state
-   * "water" to state "water", too.
-   */
   void WaterIndexProcessor::FillWater(Progress& progress,
                                       Level& level,
                                       size_t tileCount,
@@ -654,12 +626,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
-   *
-   * Scanning from left to right and bottom to top: Every tile that is unknown
-   * but is placed between land and coast or land cells must be land, too.
-   */
   void WaterIndexProcessor::FillLand(Progress& progress,
                                      StateMap& stateMap)
   {
@@ -795,14 +761,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Fills coords information for cells that completely contain a coastline
-   *
-   * @param progress
-   * @param level
-   * @param data
-   * @param cellGroundTileMap
-   */
   void WaterIndexProcessor::HandleAreaCoastlinesCompletelyInACell(Progress& progress,
                                                                   const StateMap& stateMap,
                                                                   Data& data,
@@ -880,19 +838,6 @@ namespace osmscout {
     return false;
   }
 
-  /**
-   * Return the list of StateMap cells a line between coordinate a and coordinate b
-   * intersects with.
-   *
-   * @param stateMap
-   *    StateMap defining the cell structure
-   * @param a
-   *    Start of the line
-   * @param b
-   *    End of the line
-   * @param cellIntersections
-   *    List of cells, the line intersects with
-   */
   void WaterIndexProcessor::GetCells(const StateMap& stateMap,
                                      const GeoCoord& a,
                                      const GeoCoord& b,
@@ -944,16 +889,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Return the list of StateMap cells the given path intersects with
-   *
-   * @param stateMap
-   *    StateMap defining the cell structure
-   * @param points
-   *    Path
-   * @param cellIntersections
-   *    List of cells, the path intersects with
-   */
   void WaterIndexProcessor::GetCells(const StateMap& stateMap,
                                      const std::vector<GeoCoord>& points,
                                      std::set<Pixel>& cellIntersections) const
@@ -963,16 +898,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Return the list of StateMap cells the given path intersects with
-   *
-   * @param stateMap
-   *    StateMap defining the cell structure
-   * @param points
-   *    Path
-   * @param cellIntersections
-   *    List of cells, the path intersects with
-   */
   void WaterIndexProcessor::GetCells(const StateMap& stateMap,
                                      const std::vector<Point>& points,
                                      std::set<Pixel>& cellIntersections) const
@@ -1424,10 +1349,6 @@ namespace osmscout {
     progress.Info("Initial "+NumberToString(coastlines.size())+" coastline(s) transformed to "+NumberToString(data.coastlines.size())+" coastline(s)");
   }
 
-  /**
-   * Closes the sling from the incoming intersection to the outgoing intersection traveling clock
-   * wise around the cell border.
-   */
   void WaterIndexProcessor::WalkBorderCW(GroundTile& groundTile,
                                          const StateMap& stateMap,
                                          double cellMinLat,
@@ -1628,10 +1549,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * If intersection->direction==Direction::in, we are searching next OUT intersection,
-   * previos IN intersection othervise.
-   */
   WaterIndexProcessor::IntersectionRef WaterIndexProcessor::FindSiblingIntersection(const IntersectionRef &intersection,
                                                                                     const std::list<IntersectionRef> &intersectionsCW,
                                                                                     bool isArea)
@@ -2124,14 +2041,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * try to synthetize coastline segments from all way coastlines
-   * that intersect with the bounding polygon
-   *
-   * @param progress
-   * @param coastlines
-   * @param boundingPolygons
-   */
   void WaterIndexProcessor::SynthesizeCoastlines(Progress& progress,
                                                  std::list<CoastRef>& coastlines,
                                                  std::list<CoastRef>& boundingPolygons)
@@ -2271,17 +2180,6 @@ namespace osmscout {
     coastlines=mergedCoastlines;
   }
 
-  /**
-   * Take the given coastlines and bounding polygons and create a list of synthesized
-   * coastlines that fuly encircle the imported region. Coastlines are either
-   * real-life coastlines or emulated coastlines based on the bounding
-   * polygons.
-   *
-   * @param progress
-   * @param boundingPolygons
-   * @param coastlines
-   * @param synthesized
-   */
   void WaterIndexProcessor::SynthesizeCoastlines2(Progress& progress,
                                                   const std::list<CoastRef>& boundingPolygons,
                                                   const std::list<CoastRef>& coastlines,
