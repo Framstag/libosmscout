@@ -107,10 +107,8 @@ endif
 
 
 glmDep = dependency('glm', required: false)
+glmAvailable = compiler.has_header('glm/glm.hpp', dependencies: glmDep)
 
-if not glmDep.found()
-  glmDep = compiler.find_library('glm', required: false)
-endif
 
 glewDep = dependency('glew', required: false)
 
@@ -122,7 +120,7 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and glutDep.found() and glmDep.found() and glewDep.found()
+if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found()
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
@@ -191,3 +189,4 @@ if buildMapOpenGL and glfwDep.found()
 endif
 
 # TODO: Tests
+subdir('Tests')
