@@ -66,7 +66,7 @@ ftDep = dependency('freetype2', required: false)
 aggftpicDep = compiler.find_library('aggfontfreetype_pic', required: false)
 aggftDep = compiler.find_library('aggfontfreetype', required: false)
 
-if ftpDep.found() and aggftpicDep.found()
+if ftDep.found() and aggftpicDep.found()
 aggftAvailable = compiler.links('''
 #include <agg2/agg_font_freetype.h>
 
@@ -76,7 +76,7 @@ int main() {
 return 0;
 }
 ''', dependencies: [aggDep, aggftpicDep, ftDep])
-elif ftpDep.found() and aggftpicDep.found()
+elif ftDep.found() and aggftpicDep.found()
 aggftAvailable = compiler.links('''
 #include <agg2/agg_font_freetype.h>
 
