@@ -42,6 +42,18 @@ CoordinateEncoding = executable('CoordinateEncoding',
              link_with: [osmscout],
              install: false)
 
+if buildMapQt
+  drawtextMocs = qt5.preprocess(moc_headers : ['include/DrawWindow.h'])
+
+  DrawTextQt = executable('DrawTextQt',
+               'src/DrawTextQt.cpp',
+               drawtextMocs,
+               include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, qt5GuiDep, qt5WidgetsDep],        
+               link_with: [osmscoutmapqt, osmscoutmap, osmscout],
+               install: false)
+endif
+
 EncodeNumber = executable('EncodeNumber',
              'src/EncodeNumber.cpp',
              include_directories: [osmscoutIncDir],
