@@ -62,6 +62,33 @@ protocCmd = find_program('protoc')
 
 # Agg
 aggDep = dependency('libagg', required : false)
+ftDep = dependency('freetype2', required: false)
+aggftpicDep = compiler.find_library('aggfontfreetype_pic', required: false)
+aggftDep = compiler.find_library('aggfontfreetype', required: false)
+
+if aggftpicDep.found()
+aggftAvailable = compiler.links('''
+#include <agg2/agg_font_freetype.h>
+
+agg::font_engine_freetype_int32 fontEngine;
+
+int main() {
+return 0;
+}
+''', dependencies: [aggDep, aggftpicDep, ftDep])
+elif aggftpicDep.found()
+aggftAvailable = compiler.links('''
+#include <agg2/agg_font_freetype.h>
+
+agg::font_engine_freetype_int32 fontEngine;
+
+int main() {
+return 0;
+}
+''', dependencies: [aggDep, aggftDep, ftDep])
+else
+  aggftAvailable = false
+endif
 
 # cairo
 cairoDep = dependency('cairo', required : false)
@@ -148,7 +175,7 @@ subdir('libosmscout-import')
 subdir('libosmscout-map')
 
 if buildMapAgg
-  # TODO: Build libosmsocut-map-agg
+  subdir('libosmscout-map-agg')
 endif  
 
 if buildMapCairo

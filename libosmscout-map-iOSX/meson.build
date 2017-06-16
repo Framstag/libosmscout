@@ -2,7 +2,7 @@ subdir('include')
 subdir('include/osmscout/private')
 subdir('src')
 
-osmscoutmapiosx = library('osmscout-map-iosx',
+osmscoutmapiosx = library('osmscout_map_iosx',
                            osmscoutmapiosxSrc,
                            include_directories: [osmscoutmapiosxIncDir, osmscoutmapIncDir, osmscoutIncDir],
                            dependencies: [mathDep, threadDep],

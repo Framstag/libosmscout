@@ -22,7 +22,7 @@ endforeach
 
 mocFiles = qt5.preprocess(moc_headers : mocHeaders)
 
-osmscoutclientqt = library('osmscout-client-qt',
+osmscoutclientqt = library('osmscout_client_qt',
                            mocFiles,
                            osmscoutclientqtSrc,
                            include_directories: [osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],

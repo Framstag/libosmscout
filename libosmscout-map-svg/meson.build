@@ -13,7 +13,7 @@ subdir('include/osmscout')
 subdir('include/osmscout/private')
 subdir('src')
 
-osmscoutmapsvg = library('osmscout-map-svg',
+osmscoutmapsvg = library('osmscout_map_svg',
                          osmscoutmapsvgSrc,
                          include_directories: [osmscoutmapsvgIncDir, osmscoutmapIncDir, osmscoutIncDir],
                          cpp_args: cppArgs,

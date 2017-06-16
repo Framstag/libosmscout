@@ -13,7 +13,7 @@ subdir('include/osmscout')
 subdir('include/osmscout/private')
 subdir('src')
 
-osmscoutmapopengl = library('osmscout-map-opengl',
+osmscoutmapopengl = library('osmscout_map_opengl',
                             osmscoutmapopenglSrc,
                             include_directories: [osmscoutmapopenglIncDir, osmscoutmapIncDir, osmscoutIncDir],
                             cpp_args: cppArgs,

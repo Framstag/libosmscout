@@ -13,7 +13,7 @@ subdir('include/osmscout')
 subdir('include/osmscout/private')
 subdir('src')
 
-osmscoutmap = library('osmscout-map',
+osmscoutmap = library('osmscout_map',
                       osmscoutmapSrc,
                       include_directories: [osmscoutmapIncDir, osmscoutIncDir],
                       cpp_args: cppArgs,

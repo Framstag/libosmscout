@@ -13,7 +13,7 @@ subdir('include/osmscout')
 subdir('include/osmscout/private')
 subdir('src')
 
-osmscoutmapcairo = library('osmscout-map-cairo',
+osmscoutmapcairo = library('osmscout_map_cairo',
                            osmscoutmapcairoSrc,
                            include_directories: [osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
                            cpp_args: cppArgs,
