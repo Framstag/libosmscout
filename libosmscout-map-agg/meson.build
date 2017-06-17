@@ -13,13 +13,15 @@ subdir('include/osmscout')
 subdir('include/osmscout/private')
 subdir('src')
 
-mapaggDep = [mathDep, threadDep, aggDep, ftDep]
+mapaggDep = [mathDep, threadDep, aggDep]
 
 if aggftpicDep.found()
   mapaggDep += aggftpicDep
 else
   mapaggDep += aggftDep
 endif  
+
+mappaggDep += ftpDep
 
 osmscoutmapagg = library('osmscout_map_agg',
                            osmscoutmapaggSrc,
