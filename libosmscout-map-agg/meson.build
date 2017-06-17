@@ -21,7 +21,7 @@ else
   mapaggDep += aggftDep
 endif  
 
-mappaggDep += ftpDep
+mappaggDep += ftDep
 
 osmscoutmapagg = library('osmscout_map_agg',
                            osmscoutmapaggSrc,
