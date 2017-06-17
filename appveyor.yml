@@ -28,6 +28,13 @@ environment:
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
+    BUILDTOOL: meson
+    TARGET: build
+  - COMPILER: msys2
+    PLATFORM: x64
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
     BUILDTOOL: autoconf
     TARGET: build
   - COMPILER: msys2

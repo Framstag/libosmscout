@@ -19,6 +19,9 @@ IF %COMPILER%==msys2 (
   IF %BUILDTOOL%==autoconf (
     echo "Using build tool 'autoconf'..."
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
+  ) ELSE IF %BUILDTOOL%==autoconf (
+    echo "Using build tool 'meson'..."
+    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ninja"
   ) ELSE (
     echo "Using build tool 'cmake'..."
     IF %TARGET%==importer (
