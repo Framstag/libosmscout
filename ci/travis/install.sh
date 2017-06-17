@@ -55,6 +55,8 @@ if [ "$TARGET" = "build" ]; then
 
     if [ "$BUILDTOOL" = "cmake" ]; then
       brew install cmake || true
+    elif [ "$BUILDTOOL" = "meson" ]; then
+      brew install meson || true
     fi
 
     brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew glm
