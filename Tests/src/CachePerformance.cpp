@@ -84,6 +84,8 @@ bool TestData()
     DataCache::CacheEntry entry(i,data);
 
     DataCache::CacheRef ref(cache.SetEntry(entry));
+
+    unused(ref);
   }
 
   insertTimer.Stop();
@@ -103,6 +105,8 @@ bool TestData()
     entry.value.value2.resize(10,i);
 
     DataCache::CacheRef ref(cache.SetEntry(entry));
+
+    unused(ref);
   }
 
   updateTimer.Stop();
