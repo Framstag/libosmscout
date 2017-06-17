@@ -140,6 +140,7 @@ static bool StringToBool(const char* string, bool& value)
   return false;
 }
 
+/*
 static const char* BoolToString(bool value)
 {
   if (value) {
@@ -148,7 +149,7 @@ static const char* BoolToString(bool value)
   else {
     return "false";
   }
-}
+}*/
 
 void DumpHelp()
 {
