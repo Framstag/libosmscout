@@ -112,14 +112,14 @@ if buildMapAgg
   DrawMapAgg = executable('DrawMapAgg',
                           'src/DrawMapAgg.cpp',
                           include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapaggIncDir],
-                          dependencies: [mathDep, aggDep],
+                          dependencies: [mathDep, aggDep, ftDep],
                           link_with: [osmscout, osmscoutmap, osmscoutmapagg],
                           install: true)
 
   Tiler = executable('Tiler',
                      'src/Tiler.cpp',
                      include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapaggIncDir],
-                     dependencies: [mathDep, aggDep],
+                     dependencies: [mathDep, aggDep, ftDep],
                      link_with: [osmscout, osmscoutmap, osmscoutmapagg],
                      install: true)
 endif
