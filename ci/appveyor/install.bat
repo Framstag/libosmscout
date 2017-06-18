@@ -23,14 +23,18 @@ IF %COMPILER%==msys2 (
   bash -lc "pacman -Syyu --noconfirm"
 
   IF %BUILDTOOL%==autoconf (
-  echo Installing autoconf tools...
-  bash -lc "pacman -S --needed --noconfirm autoconf automake make"
-  ) ELSE IF %BUILDTOOL%==meson (
-  echo Installing meson build tool...
-  bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja mingw-w64-%MSYS2_ARCH%-meson"
-  ) ELSE (
-  echo Installing cmake build tool...
-  bash -lc "pacman -S --needed --noconfirm make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"
+    echo Installing autoconf tools...
+    bash -lc "pacman -S --needed --noconfirm autoconf automake make"
+  )
+
+  IF %BUILDTOOL%==meson (
+    echo Installing meson build tool...
+    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja mingw-w64-%MSYS2_ARCH%-meson"
+  )
+
+  IF %BUILDTOOL%==cmake (
+    echo Installing cmake build tool...
+    bash -lc "pacman -S --needed --noconfirm make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"
   )
 
   echo Installing build and compile time dependencies...
