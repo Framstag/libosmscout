@@ -76,6 +76,8 @@ IF %COMPILER%==msvc2015 (
     SET "PYTHON=C:\Python36-x64"
     DIR %PYTHON%
     SET "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
+    echo %PYTHON%
+    echo %PATH%
     python.exe --version
     pip.exe --version
     pip.exe install meson
