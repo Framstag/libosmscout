@@ -6,6 +6,7 @@ osmscoutHeader = [
             'osmscout/system/SSEMath.h',
             'osmscout/util/Breaker.h',
             'osmscout/util/Cache.h',
+            'osmscout/util/CmdLineParsing.h',
             'osmscout/util/Color.h',
             'osmscout/util/Exception.h',
             'osmscout/util/File.h',
@@ -74,9 +75,9 @@ osmscoutHeader = [
             'osmscout/Way.h',
             'osmscout/WayDataFile.h'
           ]
-          
+
 if marisaDep.found()
   osmscoutHeader += ['osmscout/TextSearchIndex.h']
-endif          
-          
+endif
+
 install_headers(osmscoutHeader)

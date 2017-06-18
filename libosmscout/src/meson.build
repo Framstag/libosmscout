@@ -5,6 +5,7 @@ osmscoutSrc = [
             'src/osmscout/system/SSEMath.cpp',
             'src/osmscout/util/Breaker.cpp',
             'src/osmscout/util/Cache.cpp',
+            'src/osmscout/util/CmdLineParsing.cpp',
             'src/osmscout/util/Color.cpp',
             'src/osmscout/util/Exception.cpp',
             'src/osmscout/util/File.cpp',
@@ -73,7 +74,7 @@ osmscoutSrc = [
             'src/osmscout/Way.cpp',
             'src/osmscout/WayDataFile.cpp'
           ]
-          
+
 if marisaDep.found()
   osmscoutSrc += ['src/osmscout/TextSearchIndex.cpp']
-endif          
+endif

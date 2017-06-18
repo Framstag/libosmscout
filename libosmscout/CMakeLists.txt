@@ -84,7 +84,7 @@ set(HEADER_FILES
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h
-    include/osmscout/system/Compiler.h)
+    include/osmscout/system/Compiler.h include/osmscout/util/CmdLineParsing.h)
 
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
@@ -160,7 +160,7 @@ set(SOURCE_FILES
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp
-)
+        src/osmscout/util/CmdLineParsing.cpp)
 
 if(MARISA_FOUND)
     list(APPEND HEADER_FILES include/osmscout/TextSearchIndex.h)

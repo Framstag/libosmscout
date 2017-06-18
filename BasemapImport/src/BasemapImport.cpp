@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
@@ -124,22 +125,6 @@ public:
   }
 };
 
-static bool StringToBool(const char* string, bool& value)
-{
-  if (strcmp(string,"true")==0) {
-    value=true;
-
-    return true;
-  }
-  else if (strcmp(string,"false")==0) {
-    value=false;
-
-    return true;
-  }
-
-  return false;
-}
-
 /*
 static const char* BoolToString(bool value)
 {
@@ -162,74 +147,6 @@ void DumpHelp()
   std::cout << std::endl;
   std::cout << " --coastlines <*.shape>        optional shape file containing world-wide coastlines" << std::endl;
   std::cout << std::endl;
-}
-
-bool ParseBoolArgument(int argc,
-                       char* argv[],
-                       int& currentIndex,
-                       bool& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  if (!StringToBool(argv[argumentIndex],
-                    value)) {
-    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
-bool ParseStringArgument(int argc,
-                         char* argv[],
-                         int& currentIndex,
-                         std::string& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  value=argv[argumentIndex];
-
-  return true;
-}
-
-bool ParseSizeTArgument(int argc,
-                        char* argv[],
-                        int& currentIndex,
-                        size_t& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  if (!osmscout::StringToNumber(argv[argumentIndex],
-                                value)) {
-    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  return true;
 }
 
 static void InitializeLocale(osmscout::Progress& progress)
@@ -446,40 +363,40 @@ int main(int argc, char* argv[])
       i++;
     }
     else if (strcmp(argv[i],"--destinationDirectory")==0) {
-      if (ParseStringArgument(argc,
-                              argv,
-                              i,
-                              destinationDirectory)) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        destinationDirectory)) {
       }
       else {
         parameterError=true;
       }
     }
     else if (strcmp(argv[i],"--coastlines")==0) {
-      if (ParseStringArgument(argc,
-                              argv,
-                              i,
-                              coastlineShapeFile)) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        coastlineShapeFile)) {
       }
       else {
         parameterError=true;
       }
     }
     else if (strcmp(argv[i],"--minIndexLevel")==0) {
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             minIndexLevel)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       minIndexLevel)) {
       }
       else {
         parameterError=true;
       }
     }
     else if (strcmp(argv[i],"--maxIndexLevel")==0) {
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             maxIndexLevel)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       maxIndexLevel)) {
       }
       else {
         parameterError=true;
