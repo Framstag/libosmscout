@@ -71,4 +71,9 @@ IF %COMPILER%==msvc2015 (
     7z x iconv-1.14-win32-x86_64.7z -oiconv -y > nul
     7z x libxml2-2.9.3-win32-x86_64.7z -olibxml2 -y > nul
   )
+
+  if %BUILDTOOL%==meson (
+    set "PATH=C:\Python36-x64;%PATH%"
+    pip3 install meson
+  )
 )

@@ -19,10 +19,10 @@ IF %COMPILER%==msys2 (
   IF %BUILDTOOL%==autoconf (
     echo "Using build tool 'autoconf'..."
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
-  ) ELSE IF %BUILDTOOL%==autoconf (
+  ) ELSE IF %BUILDTOOL%==meson (
     echo "Using build tool 'meson'..."
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ninja"
-  ) ELSE (
+  ) ELSE IF %BUILDTOOL%==cmake (
     echo "Using build tool 'cmake'..."
     IF %TARGET%==importer (
       bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && . packaging/import/windows/build_import.sh"
@@ -36,11 +36,18 @@ IF %COMPILER%==msys2 (
 IF %COMPILER%==msvc2015 (
   @echo on
   echo "Compiling libosmscout using Visual Studio 2015..."
-  echo "Using build tool 'cmake'..."
-  SET "CMAKE_PREFIX_PATH=C:\Qt\5.8\msvc2015_64"
 
-  mkdir build
-  cd build
-  cmake -G "Visual Studio 14 2015 Win64" ..
-  cmake --build .
+  IF $BUILDTOOL%==cmake (
+    echo "Using build tool 'cmake'..."
+    SET "CMAKE_PREFIX_PATH=C:\Qt\5.8\msvc2015_64"
+    mkdir build
+    cd build
+    cmake -G "Visual Studio 14 2015 Win64" ..
+    cmake --build .
+  )
+  ELSE IF $BUILDTOOL%==meson (
+    echo "Using build tool 'meson'..."
+    mkdir debug
+    meson debug --backend vs2015
+  )
 )
