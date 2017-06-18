@@ -56,6 +56,8 @@ IF %COMPILER%==msvc2015 (
 
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
+    mkdir debug
+    meson debug --backend vs2015
     echo Finished meson build
   )
 )

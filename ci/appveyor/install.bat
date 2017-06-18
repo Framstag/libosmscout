@@ -81,13 +81,13 @@ IF %COMPILER%==msvc2015 (
     7z x zlib-1.2.8-win32-x86_64.7z -ozlib -y > nul
     7z x iconv-1.14-win32-x86_64.7z -oiconv -y > nul
     7z x libxml2-2.9.3-win32-x86_64.7z -olibxml2 -y > nul
+    echo ...done
   )
 
   IF %BUILDTOOL%==meson (
     echo Installing meson build tool...
     set "PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%"
-    python.exe --version
-    pip.exe --version
     pip.exe install meson
+    echo ...done
   )
 )
