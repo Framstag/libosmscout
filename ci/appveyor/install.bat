@@ -27,7 +27,7 @@ IF %COMPILER%==msys2 (
   bash -lc "pacman -S --needed --noconfirm autoconf automake make"
   ) ELSE IF %BUILDTOOL%==meson (
   echo Installing meson build tool...
-  bash -lc "pacman -S --needed --noconfirm ninja meson"
+  bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja mingw-w64-%MSYS2_ARCH%-meson"
   ) ELSE (
   echo Installing cmake build tool...
   bash -lc "pacman -S --needed --noconfirm make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"
@@ -73,7 +73,8 @@ IF %COMPILER%==msvc2015 (
   )
 
   if %BUILDTOOL%==meson (
-    set "PATH=C:\Python36-x64;%PATH%"
-    pip3 install meson
+    SET "PYTHON=C:\Python36-x64"
+    set "PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%"
+    pip.exe install meson
   )
 )
