@@ -42,6 +42,31 @@
 #include <iostream>
 namespace osmscout {
 
+  bool StringToBool(const char* string, bool& value)
+  {
+    if (strcmp(string,"true")==0) {
+      value=true;
+
+      return true;
+    }
+    else if (strcmp(string,"false")==0) {
+      value=false;
+
+      return true;
+    }
+
+    return false;
+  }
+
+  const char* BoolToString(bool value)
+  {
+    if (value) {
+      return "true";
+    }
+    else {
+      return "false";
+    }
+  }
 
   bool GetDigitValue(char digit, size_t& result)
   {

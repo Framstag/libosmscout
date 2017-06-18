@@ -16,6 +16,7 @@ libosmscout_la_LDFLAGS = -no-undefined \
 
 libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Cache.cpp \
+                        osmscout/util/CmdLineParsing.cpp \
                         osmscout/util/Color.cpp \
                         osmscout/util/Exception.cpp \
                         osmscout/util/File.cpp \

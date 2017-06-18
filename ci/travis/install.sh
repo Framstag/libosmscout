@@ -17,6 +17,15 @@ if [ "$TARGET" = "build" ]; then
 
     if [ "$BUILDTOOL" = "autoconf" ]; then
       sudo apt-get install -y autoconf
+    elif [ "$BUILDTOOL" = "meson" ]; then
+      wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
+      unzip ninja-linux.zip
+      mkdir ~/bin
+      mv ninja ~/bin
+      export PATH=~/bin:$PATH
+      sudo apt-get install python3-pip python3-dev build-essential
+      pip3 install --upgrade --user pip
+      pip3 install --user meson
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi
@@ -46,6 +55,8 @@ if [ "$TARGET" = "build" ]; then
 
     if [ "$BUILDTOOL" = "cmake" ]; then
       brew install cmake || true
+    elif [ "$BUILDTOOL" = "meson" ]; then
+      brew install meson || true
     fi
 
     brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew glm

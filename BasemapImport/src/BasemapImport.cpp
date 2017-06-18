@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
@@ -68,12 +69,18 @@ public:
 
   void AddCoast(const std::vector<osmscout::GeoCoord>& coords)
   {
+    if (coords.size()<2){
+      return;
+    }
     osmscout::WaterIndexProcessor::CoastRef coastline=std::make_shared<osmscout::WaterIndexProcessor::Coast>();
 
     coastline->id=currentId;
-    coastline->isArea=true;
+    coastline->isArea=coords.front()==coords.back();
+    // note that shapefile coastlines has reverse direction than OSM!
     coastline->left=osmscout::WaterIndexProcessor::CoastState::water;
     coastline->right=osmscout::WaterIndexProcessor::CoastState::land;
+    coastline->frontNodeId=coords.front().GetHash();
+    coastline->backNodeId=coords.back().GetHash();
 
     coastline->coast.reserve(coords.size());
 
@@ -118,22 +125,7 @@ public:
   }
 };
 
-static bool StringToBool(const char* string, bool& value)
-{
-  if (strcmp(string,"true")==0) {
-    value=true;
-
-    return true;
-  }
-  else if (strcmp(string,"false")==0) {
-    value=false;
-
-    return true;
-  }
-
-  return false;
-}
-
+/*
 static const char* BoolToString(bool value)
 {
   if (value) {
@@ -142,7 +134,7 @@ static const char* BoolToString(bool value)
   else {
     return "false";
   }
-}
+}*/
 
 void DumpHelp()
 {
@@ -150,77 +142,11 @@ void DumpHelp()
   std::cout << " -h|--help                     show this help" << std::endl;
   std::cout << " -d                            show debug output" << std::endl;
   std::cout << " --destinationDirectory <path> destination for generated map files" << std::endl;
+  std::cout << " --minIndexLevel <number>      minimum water index zoom level (default 4)" << std::endl;
+  std::cout << " --maxIndexLevel <number>      maximum water index zoom level (default 10)" << std::endl;
   std::cout << std::endl;
   std::cout << " --coastlines <*.shape>        optional shape file containing world-wide coastlines" << std::endl;
   std::cout << std::endl;
-}
-
-bool ParseBoolArgument(int argc,
-                       char* argv[],
-                       int& currentIndex,
-                       bool& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  if (!StringToBool(argv[argumentIndex],
-                    value)) {
-    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
-bool ParseStringArgument(int argc,
-                         char* argv[],
-                         int& currentIndex,
-                         std::string& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  value=argv[argumentIndex];
-
-  return true;
-}
-
-bool ParseSizeTArgument(int argc,
-                        char* argv[],
-                        int& currentIndex,
-                        size_t& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  if (!osmscout::StringToNumber(argv[argumentIndex],
-                                value)) {
-    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  return true;
 }
 
 static void InitializeLocale(osmscout::Progress& progress)
@@ -236,15 +162,15 @@ static void InitializeLocale(osmscout::Progress& progress)
 
 static bool ImportCoastlines(const std::string& destinationDirectory,
                              const std::string& coastlineShapeFile,
-                             osmscout::Progress& progress)
+                             osmscout::Progress& progress,
+                             size_t indexMinMag,
+                             size_t indexMaxMag)
 {
   progress.SetAction("Reading coastline shape file");
 
   osmscout::FileWriter                              writer;
   osmscout::WaterIndexProcessor                     processor;
   std::vector<osmscout::WaterIndexProcessor::Level> levels;
-  size_t                                            indexMinMag=4;
-  size_t                                            indexMaxMag=10;
 
   levels.reserve(indexMaxMag-indexMinMag+1);
 
@@ -280,6 +206,42 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
     shapefileScanner.Visit(visitor);
     shapefileScanner.Close();
 
+    processor.MergeCoastlines(progress,visitor.coasts);
+
+    // - close coastlines crossing antimeridian
+    //  -- splitted to two ways in OSM data
+    // - close Antarctica coastline
+    // - remove rest of unclosed ways
+    size_t removedCoastlines=0;
+    auto it=visitor.coasts.begin();
+    while (it!=visitor.coasts.end()){
+      osmscout::WaterIndexProcessor::CoastRef coastline=*it;
+      if (!coastline->isArea){
+        // close ways touching antimeridian
+        if (std::abs(coastline->coast.front().GetLon())>179.999 &&
+            std::abs(coastline->coast.front().GetLon()-coastline->coast.back().GetLon())<0.001){
+          coastline->isArea=true;
+          coastline->coast.push_back(coastline->coast.front());
+        }else if (coastline->coast.front().GetLon()<-179.999 && // reverse direction than OSM data!
+                  coastline->coast.back().GetLon()>+179.999 &&
+                  coastline->coast.front().GetLat()<-56 &&
+                  coastline->coast.back().GetLat()<-56){
+          // hack for Antarctica
+          coastline->isArea=true;
+          coastline->coast.push_back(osmscout::Point(0,osmscout::GeoCoord(-90,+180)));
+          coastline->coast.push_back(osmscout::Point(0,osmscout::GeoCoord(-90,-180)));
+        }else{
+          it=visitor.coasts.erase(it);
+          removedCoastlines++;
+          continue;
+        }
+      }
+      it++;
+    }
+    if (removedCoastlines>0){
+      progress.Warning("Removed "+osmscout::NumberToString(removedCoastlines)+" unclosed coastlines");
+    }
+
     writer.Open(osmscout::AppendFileToDir(destinationDirectory,
                                           "water.idx"));
 
@@ -305,8 +267,8 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
         // Collects, calculates and generates a number of data about a coastline
         processor.CalculateCoastlineData(progress,
                                          osmscout::TransPolygon::fast,
-                                         10.0,
-                                         1.0,
+                                         /*tolerance*/ 10.0,
+                                         /*minObjectDimension*/ 1.0,
                                          projection,
                                          level.stateMap,
                                          visitor.coasts,
@@ -378,6 +340,8 @@ int main(int argc, char* argv[])
 {
   std::string               destinationDirectory;
   std::string               coastlineShapeFile;
+  size_t                    minIndexLevel=4;
+  size_t                    maxIndexLevel=10;
   osmscout::ConsoleProgress progress;
   bool                      parameterError=false;
 
@@ -399,20 +363,40 @@ int main(int argc, char* argv[])
       i++;
     }
     else if (strcmp(argv[i],"--destinationDirectory")==0) {
-      if (ParseStringArgument(argc,
-                              argv,
-                              i,
-                              destinationDirectory)) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        destinationDirectory)) {
       }
       else {
         parameterError=true;
       }
     }
     else if (strcmp(argv[i],"--coastlines")==0) {
-      if (ParseStringArgument(argc,
-                              argv,
-                              i,
-                              coastlineShapeFile)) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        coastlineShapeFile)) {
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--minIndexLevel")==0) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       minIndexLevel)) {
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--maxIndexLevel")==0) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       maxIndexLevel)) {
       }
       else {
         parameterError=true;
@@ -434,6 +418,10 @@ int main(int argc, char* argv[])
 
   if (destinationDirectory.empty()) {
     progress.Error("Mandatory destination directory not set");
+    parameterError=true;
+  }
+  if (minIndexLevel>maxIndexLevel || maxIndexLevel>20) {
+    progress.Error("Invalid min/max index level");
     parameterError=true;
   }
 
@@ -469,7 +457,9 @@ int main(int argc, char* argv[])
     if (!coastlineShapeFile.empty()) {
       ImportCoastlines(destinationDirectory,
                        coastlineShapeFile,
-                       progress);
+                       progress,
+                       minIndexLevel,
+                       maxIndexLevel);
     }
   }
   catch (osmscout::IOException& e) {

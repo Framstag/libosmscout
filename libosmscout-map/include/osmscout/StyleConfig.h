@@ -300,6 +300,8 @@ namespace osmscout {
 
   struct PartialStyleBase
   {
+    virtual ~PartialStyleBase() {}
+
     virtual void SetBoolValue(int attribute, bool value) = 0;
     virtual void SetStringValue(int attribute, const std::string& value) = 0;
     virtual void SetColorValue(int attribute, const Color& value) = 0;

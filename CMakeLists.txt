@@ -6,7 +6,8 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # build should fail when compiler don't support standard defined by CMAKE_CXX_STANDARD
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QTDIR}" "${QTDIR}" "$ENV{QTDIR}/lib/cmake" "${QTDIR}/lib/cmake")
-
+set(CMAKE_ENABLE_COMPILE_COMMANDS ON)
+#
 # default build type
 if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build, options are: None (CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
@@ -156,47 +157,46 @@ include(features)
 
 set(OSMSCOUT_BUILD_CORE OFF CACHE INTERNAL "" FORCE)
 add_subdirectory(libosmscout)
-if(LIBXML2_FOUND AND PROTOBUF_FOUND AND ZLIB_FOUND)
-  set(OSMSCOUT_BUILD_IMPORT_CACHE ON)
-else()
-  set(OSMSCOUT_BUILD_IMPORT_CACHE OFF)
-endif()
-if(MSVC AND NOT (MSVC_VERSION GREATER 1800))
-  set(OSMSCOUT_BUILD_IMPORT_CACHE OFF)
-endif()
-option(OSMSCOUT_BUILD_IMPORT "Enable build of import library" ${OSMSCOUT_BUILD_IMPORT_CACHE})
-if(OSMSCOUT_BUILD_IMPORT)
-  add_subdirectory(libosmscout-import)
-endif()
+
+set(OSMSCOUT_BUILD_IMPORT OFF CACHE INTERNAL "" FORCE)
+add_subdirectory(libosmscout-import)
+
 set(OSMSCOUT_BUILD_MAP OFF CACHE INTERNAL "" FORCE)
 add_subdirectory(libosmscout-map)
+
 if(LIBAGG_FOUND AND LIBAGGFT2_LIBRARIES AND FREETYPE_FOUND AND OSMSCOUT_BUILD_MAP)
   set(OSMSCOUT_BUILD_MAP_AGG_CACHE ON)
 else()
   set(OSMSCOUT_BUILD_MAP_AGG_CACHE OFF)
 endif()
+
 option(OSMSCOUT_BUILD_MAP_AGG "Enable build of agg map drawing backend" ${OSMSCOUT_BUILD_MAP_AGG_CACHE})
 if(OSMSCOUT_BUILD_MAP_AGG)
   add_subdirectory(libosmscout-map-agg)
 endif()
+
 if(CAIRO_FOUND AND OSMSCOUT_BUILD_MAP)
   set(OSMSCOUT_BUILD_MAP_CAIRO_CACHE ON)
 else()
   set(OSMSCOUT_BUILD_MAP_CAIRO_CACHE OFF)
 endif()
+
 option(OSMSCOUT_BUILD_MAP_CAIRO "Enable build of cairo map drawing backend" ${OSMSCOUT_BUILD_MAP_CAIRO_CACHE})
 if(OSMSCOUT_BUILD_MAP_CAIRO)
   add_subdirectory(libosmscout-map-cairo)
 endif()
-if(OPENGL_FOUND AND GLUT_FOUND AND OSMSCOUT_BUILD_MAP)
+
+if(OPENGL_FOUND AND GLEW_FOUND AND GLM_FOUND AND GLFW_FOUND AND GLUT_FOUND AND OSMSCOUT_BUILD_MAP)
   set(OSMSCOUT_BUILD_MAP_OPENGL_CACHE ON)
 else()
   set(OSMSCOUT_BUILD_MAP_OPENGL_CACHE OFF)
 endif()
+
 option(OSMSCOUT_BUILD_MAP_OPENGL "Enable build of OpenGL map drawing backend" ${OSMSCOUT_BUILD_MAP_OPENGL_CACHE})
 if(OSMSCOUT_BUILD_MAP_OPENGL)
   add_subdirectory(libosmscout-map-opengl)
 endif()
+
 if(Direct2D_FOUND AND OSMSCOUT_BUILD_MAP AND MSVC)
   set(OSMSCOUT_BUILD_MAP_DIRECTX_CACHE ON)
 else()
@@ -206,6 +206,7 @@ option(OSMSCOUT_BUILD_MAP_DIRECTX "Enable build of DirectX map drawing backend" 
 if(OSMSCOUT_BUILD_MAP_DIRECTX)
   add_subdirectory(libosmscout-map-directx)
 endif()
+
 if(Qt5Gui_FOUND AND OSMSCOUT_BUILD_MAP)
   set(OSMSCOUT_BUILD_MAP_QT_CACHE ON)
 else()
@@ -215,6 +216,7 @@ option(OSMSCOUT_BUILD_MAP_QT "Enable build of Qt map drawing backend" ${OSMSCOUT
 if(OSMSCOUT_BUILD_MAP_QT)
   add_subdirectory(libosmscout-map-qt)
 endif()
+
 if(Qt5Gui_FOUND AND OSMSCOUT_BUILD_MAP_QT)
   set(OSMSCOUT_BUILD_CLIENT_QT_CACHE ON)
 else()
@@ -224,10 +226,12 @@ option(OSMSCOUT_BUILD_CLIENT_QT "Enable build of Qt client library" ${OSMSCOUT_B
 if(OSMSCOUT_BUILD_CLIENT_QT)
   add_subdirectory(libosmscout-client-qt)
 endif()
+
 option(OSMSCOUT_BUILD_MAP_SVG "Enable build of SVG map drawing backend" ${OSMSCOUT_BUILD_MAP})
 if(OSMSCOUT_BUILD_MAP_SVG)
   add_subdirectory(libosmscout-map-svg)
 endif()
+
 if(APPLE)
   option(OSMSCOUT_BUILD_MAP_IOSX "Enable build of iOS/OSX map drawing backend" ${OSMSCOUT_BUILD_MAP})
   if(OSMSCOUT_BUILD_MAP_IOSX)
@@ -236,6 +240,7 @@ if(APPLE)
 else()
   set(OSMSCOUT_BUILD_MAP_IOSX OFF CACHE INTERNAL "" FORCE)
 endif()
+
 if(GPERFTOOLS_FOUND)
   set(GPERFTOOLS_USAGE ON)
 else()

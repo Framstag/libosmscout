@@ -207,99 +207,6 @@ namespace osmscout {
     return true;
   }
 
-  void WaterIndexGenerator::MergeCoastlines(Progress& progress,
-                                            std::list<WaterIndexProcessor::CoastRef>& coastlines)
-  {
-    progress.SetAction("Merging coastlines");
-
-    std::map<Id,WaterIndexProcessor::CoastRef> coastStartMap;
-    std::list<WaterIndexProcessor::CoastRef>   mergedCoastlines;
-    std::set<Id>                               blacklist;
-    size_t                                     wayCoastCount=0;
-    size_t                                     areaCoastCount=0;
-
-    std::list<WaterIndexProcessor::CoastRef>::iterator c=coastlines.begin();
-    while (c!=coastlines.end()) {
-      WaterIndexProcessor::CoastRef coast=*c;
-
-      if (coast->isArea) {
-        areaCoastCount++;
-        mergedCoastlines.push_back(coast);
-
-        c=coastlines.erase(c);
-      }
-      else {
-        coastStartMap.insert(std::make_pair(coast->frontNodeId,coast));
-
-        c++;
-      }
-    }
-
-    bool merged=true;
-
-    while (merged) {
-      merged=false;
-
-      for (const auto& coast : coastlines) {
-        if (blacklist.find(coast->id)!=blacklist.end()) {
-          continue;
-        }
-
-        std::map<Id,WaterIndexProcessor::CoastRef>::iterator other=coastStartMap.find(coast->backNodeId);
-
-        if (other!=coastStartMap.end() &&
-            blacklist.find(other->second->id)==blacklist.end() &&
-            coast->id!=other->second->id) {
-          for (size_t i=1; i<other->second->coast.size(); i++) {
-            coast->coast.push_back(other->second->coast[i]);
-          }
-
-          coast->backNodeId=coast->coast.back().GetId();
-
-          // Immediately reduce memory
-          other->second->coast.clear();
-
-          blacklist.insert(other->second->id);
-          coastStartMap.erase(other);
-
-          merged=true;
-        }
-      }
-    }
-
-    // Gather merged coastlines
-    for (const auto& coastline : coastlines) {
-      if (blacklist.find(coastline->id)!=blacklist.end()) {
-        continue;
-      }
-
-      if (coastline->frontNodeId==coastline->backNodeId) {
-        coastline->isArea=true;
-        coastline->coast.pop_back();
-
-        areaCoastCount++;
-      }
-      else {
-        wayCoastCount++;
-      }
-
-      if ((coastline->isArea && coastline->coast.size()<=2) || coastline->coast.size()<2) {
-        progress.Warning("Dropping to short coastline with id "+NumberToString(coastline->id));
-        continue;
-      }
-
-      //if (!coastline->isArea){
-      //  WriteGpx(coastline->coast, "coastway-"+NumberToString(coastline->id)+".gpx");
-      //}
-
-      mergedCoastlines.push_back(coastline);
-    }
-
-    progress.Info(NumberToString(wayCoastCount)+" way coastline(s), "+NumberToString(areaCoastCount)+" area coastline(s)");
-
-    coastlines=mergedCoastlines;
-  }
-
   /**
   * Assume cell type 'land' for cells that intersect with 'land' object types
   *
@@ -466,7 +373,7 @@ namespace osmscout {
       return false;
     }
 
-    MergeCoastlines(progress,coastlines);
+    processor.MergeCoastlines(progress,coastlines);
 
     if (!boundingPolygons.empty()) {
       processor.SynthesizeCoastlines(progress,

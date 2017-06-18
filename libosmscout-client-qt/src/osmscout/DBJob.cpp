@@ -147,6 +147,13 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
 
   }
+  if (relevantDatabases.empty()){
+    emit finished(loadedTiles);
+    //qDebug() << "Loaded completely (no relevant databases):" << this << "in" << QThread::currentThread();
+    if (closeOnFinish){
+      Close();
+    }
+  }
 }
 
 void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
