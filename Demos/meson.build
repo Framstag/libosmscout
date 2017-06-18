@@ -101,7 +101,6 @@ Srtm = executable('Srtm',
                   link_with: [osmscout],
                   install: true)
 
-# TODO: Tiler
 DrawMapSVG = executable('DrawMapSVG',
                         'src/DrawMapSVG.cpp',
                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapsvgIncDir],

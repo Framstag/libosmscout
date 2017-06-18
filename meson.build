@@ -13,6 +13,8 @@ endif
 
 compiler = meson.get_compiler('cpp')
 
+# Check for specific compiler options
+
 if get_option('default_library')=='shared'
   if compiler.get_id()=='gcc' and compiler.version().version_compare('>=4.8.0')
     haveVisibility=true
@@ -47,6 +49,9 @@ posixmadviceAvailable = compiler.has_function('posix_madvise')
 fseeki64Available = compiler.has_function('_fseeki64')
 ftelli64Available = compiler.has_function('_ftelli64')
 fseekoAvailable = compiler.has_function('fseeko')
+
+# Check for external programs
+swigExe = find_program('swig')
 
 # Base
 mathDep = compiler.find_library('m', required : false)
