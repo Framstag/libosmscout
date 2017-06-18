@@ -37,15 +37,14 @@ IF %COMPILER%==msvc2015 (
   @echo on
   echo "Compiling libosmscout using Visual Studio 2015..."
 
-  IF $BUILDTOOL%==cmake (
+  IF %BUILDTOOL%==cmake (
     echo "Using build tool 'cmake'..."
     SET "CMAKE_PREFIX_PATH=C:\Qt\5.8\msvc2015_64"
     mkdir build
     cd build
     cmake -G "Visual Studio 14 2015 Win64" ..
     cmake --build .
-  )
-  ELSE IF $BUILDTOOL%==meson (
+  ) ELSE IF %BUILDTOOL%==meson (
     echo "Using build tool 'meson'..."
     mkdir debug
     meson debug --backend vs2015

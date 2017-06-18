@@ -72,7 +72,7 @@ IF %COMPILER%==msvc2015 (
     7z x libxml2-2.9.3-win32-x86_64.7z -olibxml2 -y > nul
   )
 
-  if %BUILDTOOL%==meson (
+  IF %BUILDTOOL%==meson (
     SET "PYTHON=C:\Python36-x64"
     set "PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%"
     python.exe --version
