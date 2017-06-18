@@ -258,11 +258,6 @@ void MoveHandler::onTimeout()
     if (!projection.Set(startMapView.center,
                         osmscout::Magnification(startMag + ((targetMag - startMag) * scale) ),
                         dpi, 1000, 1000)) {
-      return;
-    }
-
-    if (!projection.IsValid()) {
-        //TriggerMapRendering();
         return;
     }
 
@@ -358,11 +353,6 @@ bool MoveHandler::moveNow(QVector2D move)
     //qDebug() << "move: " << QString::fromStdString(view.center.GetDisplayText()) << "   by: " << move;
 
     if (!projection.Set(view.center, view.magnification, dpi, 1000, 1000)) {
-      return false;
-    }
-
-    if (!projection.IsValid()) {
-        //TriggerMapRendering();
         return false;
     }
 

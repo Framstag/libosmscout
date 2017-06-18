@@ -32,6 +32,8 @@ void DumpFillStyleAttributes(const std::set<osmscout::FillStyle::Attribute> attr
     case osmscout::FillStyle::attrFillColor:
       std::cout << "color: " << "#" << style->GetFillColor().ToHexString() << ";";
       break;
+    default:
+      break;
     }
   }
 
@@ -47,6 +49,8 @@ void DumpTextStyleAttributes(const std::set<osmscout::TextStyle::Attribute> attr
     switch (attribute) {
     case osmscout::TextStyle::attrLabel:
       std::cout << "label: " << style->GetLabel()->GetName() << ";";
+      break;
+    default:
       break;
     }
   }

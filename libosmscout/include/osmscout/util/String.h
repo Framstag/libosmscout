@@ -41,6 +41,29 @@ namespace osmscout {
 
   /**
    * \ingroup Util
+   * Convert the given string to a boolean value
+   *
+   * @param string
+   *    string with a potential boolean value (either 'true' or 'false')
+   * @param value
+   *    value to copy the result to if no error occured
+   * @return
+   *    'true' if the value was parsed, else 'false'
+   */
+  extern OSMSCOUT_API bool StringToBool(const char* string, bool& value);
+
+  /**
+   * Rteurns a string representation of the given boolean value (either 'true' or 'false')
+   *
+   * @param value
+   *    value to return
+   * @return
+   *    result of the conversion
+   */
+  extern OSMSCOUT_API const char* BoolToString(bool value);
+
+  /**
+   * \ingroup Util
    * Returns the numerical value of the given character, if the character
    * is a digit in a numerical value. The current code allows digits
    * in the range from 0-9 and a-f and A-F. And thus supports
@@ -430,7 +453,7 @@ namespace osmscout {
    *    corresponding std::string
    */
   extern OSMSCOUT_API std::string WStringToLocaleString(const std::wstring& text);
-  
+
   /**
    * \ingroup Util
    *
@@ -480,7 +503,7 @@ namespace osmscout {
    *    the converted std::string
    */
   extern OSMSCOUT_API std::string UTF8StringToLocaleString(const std::string& text);
-  
+
   /**
    * Convert the given std::string containing a UTF8 character sequence to upper case using
    * the current global locale.

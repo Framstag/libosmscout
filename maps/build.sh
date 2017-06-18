@@ -7,6 +7,8 @@ fi
 
 if [[ -x ../Import/src/Import ]]; then
   importExe=../Import/src/Import
+elif [[ -x ../debug/Import/Import ]]; then
+  importExe=../debug/Import/Import
 elif [[ -x ../build/Import/Import ]]; then
   importExe=../build/Import/Import
 else

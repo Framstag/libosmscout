@@ -37,12 +37,13 @@
 #include <osmscout/import/RawWay.h>
 
 #include <osmscout/private/Config.h>
+#include <osmscout/ImportFeatures.h>
 
-#if defined(HAVE_LIB_XML)
+#if defined(HAVE_LIB_XML) || defined(OSMSCOUT_IMPORT_HAVE_XML_SUPPORT)
   #include <osmscout/import/PreprocessOSM.h>
 #endif
 
-#if defined(HAVE_LIB_PROTOBUF)
+#if defined(HAVE_LIB_PROTOBUF) || defined(OSMSCOUT_IMPORT_HAVE_PROTOBUF_SUPPORT)
   #include <osmscout/import/PreprocessPBF.h>
 #endif
 
@@ -903,7 +904,7 @@ namespace osmscout {
       if (filename.length()>=4 &&
           filename.substr(filename.length()-4)==".osm")  {
 
-#if defined(HAVE_LIB_XML)
+#if defined(HAVE_LIB_XML) || defined(OSMSCOUT_IMPORT_HAVE_XML_SUPPORT)
         PreprocessOSM preprocess(callback);
 
         if (!preprocess.Import(typeConfig,
@@ -920,7 +921,7 @@ namespace osmscout {
       else if (filename.length()>=4 &&
             filename.substr(filename.length()-4)==".pbf") {
 
-#if defined(HAVE_LIB_PROTOBUF)
+#if defined(HAVE_LIB_PROTOBUF) || defined(OSMSCOUT_IMPORT_HAVE_PROTOBUF_SUPPORT)
         PreprocessPBF preprocess(callback);
 
         if (!preprocess.Import(typeConfig,

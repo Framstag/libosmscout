@@ -52,9 +52,6 @@ namespace osmscout {
                               Progress& progress,
                               std::list<WaterIndexProcessor::CoastRef>& boundingPolygons);
 
-    void MergeCoastlines(Progress& progress,
-                         std::list<WaterIndexProcessor::CoastRef>& coastlines);
-
     bool AssumeLand(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,

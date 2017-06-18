@@ -8,42 +8,57 @@ os: Visual Studio 2015
 
 environment:
   matrix:
-  - COMPILER: msys2
-    PLATFORM: x64
-    MSYS2_ARCH: x86_64
-    MSYS2_DIR: msys64
-    MSYSTEM: MINGW64
-    BUILDTOOL: cmake
-    TARGET: importer
   - COMPILER: msvc2015
-    PLATFORM: x64
+    BUILDTOOL: meson
     CONFIGURATION: Debug
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
-    BUILDTOOL: cmake
     TARGET: build
-  - COMPILER: msys2
     PLATFORM: x64
+  - COMPILER: msys2
+    BUILDTOOL: meson
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
+    TARGET: build
+    PLATFORM: x64
+  - COMPILER: msys2
+    BUILDTOOL: cmake
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    TARGET: importer
+    PLATFORM: x64
+  - COMPILER: msvc2015
+    BUILDTOOL: cmake
+    CONFIGURATION: Debug
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    TARGET: build
+    PLATFORM: x64
+  - COMPILER: msys2
     BUILDTOOL: autoconf
-    TARGET: build
-  - COMPILER: msys2
-    PLATFORM: x64
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
-    BUILDTOOL: cmake
     TARGET: build
-  - COMPILER: msys2
     PLATFORM: x64
+  - COMPILER: msys2
+    BUILDTOOL: cmake
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    TARGET: build
+    PLATFORM: x64
+  - COMPILER: msys2
+    BUILDTOOL: cmake
     MSYS2_ARCH: i686
     MSYS2_DIR: msys64
     MSYSTEM: MINGW32
-    BUILDTOOL: cmake
     TARGET: build
+    PLATFORM: x64
 
 install:
   - set

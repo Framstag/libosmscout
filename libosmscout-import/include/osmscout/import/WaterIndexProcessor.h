@@ -44,7 +44,7 @@ namespace osmscout {
 
   /**
     * Just for debug. It exports path to gpx file that may be
-    * open in external editor (josm for example). It is very userful
+    * open in external editor (josm for example). It is very useful
     * to visual check that path is generated/cutted/walk (...) correctly.
     *
     * Just call this method from some place, add breakpoint after it
@@ -76,15 +76,39 @@ namespace osmscout {
   extern void WriteGpx(const std::vector<Point> &path, const std::string& name);
 
   /**
-   * Generator that calculates land, water and coast tiles based on passed costline data
-   * and the assumption that land is always left of the coast (in line direction)
-   * and water is always right.
+   * Generator that calculates land, water and coast tiles based on passed costline data.
+   * For more details how index is stored look to `WaterIndex` and description of tiles (cells)
+   * look to `GroundTile` struct.
+   *
+   * For OSM data is usual that land is always left of the coast (in line direction)
+   * and water is always right. But this generator don't require it, just Coast rigth/left
+   * state have to be defined correctly.
+   *
+   * See GenWaterIndex for usage. It is expected that methods are
+   * executed in this order:
+   *
+   *  - MergeCoastlines - merge short coastline ways to bigger one and create areas if possible
+   *  - SynthesizeCoastlines - cut coastlines by data polygon
+   *  - DumpIndexHeader - write index file header
+   *
+   *  - then for each index level:
+   *    -- CalculateCoastlineData - Collects, calculates and generates
+   *              a number of data about a coastline
+   *    -- MarkCoastlineCells - Mark cells that intersect a coastline as coast
+   *    -- HandleCoastlinesPartiallyInACell - Fills coords information for cells that intersect a coastline
+   *    -- HandleAreaCoastlinesCompletelyInACell - Fills coords information for cells that completely contain a coastline
+   *    -- CalculateCoastEnvironment - Calculate the cell type for cells directly around coast cells
+   *    -- FillWater - Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
+   *    -- FillWaterAroundIsland - fill water (bottom layer) on tiles that fully contains some island(s)
+   *    -- FillLand - Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
+   *    -- CalculateHasCellData - lookup if level contains some cells, setup `level.hasCellData` in such case
+   *    -- WriteTiles - write data to index file
    */
   class OSMSCOUT_IMPORT_API WaterIndexProcessor CLASS_FINAL
   {
   public:
     /**
-     * State that defines area type left from the Coast
+     * State that defines area type left or right from the Coast
      * - for area Coast define inner and outer type
      */
     enum class CoastState : uint8_t
@@ -97,6 +121,11 @@ namespace osmscout {
 
     /**
      * A individual coastline
+     *
+     * There may be two kind of "coastlines":
+     *  - classic coastlines: define border between land and water (see)
+     *  - data polygon: define area where database (and classic coastlines) are defined.
+     *     It usually have right/left state unknown/udefined
      */
     struct OSMSCOUT_IMPORT_API Coast
     {
@@ -123,6 +152,9 @@ namespace osmscout {
       coast   = 3  //! The coast itself => a coast tile
     };
 
+    /**
+     * State of Level
+     */
     class OSMSCOUT_IMPORT_API StateMap
     {
     private:
@@ -227,6 +259,9 @@ namespace osmscout {
                   double cellHeight);
     };
 
+    /**
+     * Direction of Intersection (index cell and coastline)
+     */
     enum Direction : int8_t
     {
       out   = -1,
@@ -267,6 +302,9 @@ namespace osmscout {
 
     typedef std::shared_ptr<CoastlineData> CoastlineDataRef;
 
+    /**
+     * Computed data for one index level
+     */
     struct OSMSCOUT_IMPORT_API Data
     {
       std::vector<CoastlineDataRef>     coastlines;            //! data for each coastline
@@ -353,38 +391,92 @@ namespace osmscout {
     std::string StateToString(State state) const;
     std::string TypeToString(GroundTile::Type type) const;
 
+    /**
+     * Transform the given geo coordinate to a corresponding GroundTile coordinate
+     *
+     * @param point
+     *    geo coordinate to transform
+     * @param stateMap
+     *    the StateMap, holding information about cell dimensions
+     * @param cellMinLat
+     *    offset of the ground map
+     * @param cellMinLon
+     *    offset of the ground map
+     * @param coast
+     *    Flag to be copied into the GroundTile coordinate
+     * @return
+     */
     GroundTile::Coord Transform(const GeoCoord& point,
                                 const StateMap& stateMap,
                                 double cellMinLat,
                                 double cellMinLon,
                                 bool coast);
 
+    /**
+     * Return the list of StateMap cells a line between coordinate a and coordinate b
+     * intersects with.
+     *
+     * @param stateMap
+     *    StateMap defining the cell structure
+     * @param a
+     *    Start of the line
+     * @param b
+     *    End of the line
+     * @param cellIntersections
+     *    List of cells, the line intersects with
+     */
     void GetCells(const StateMap& stateMap,
                   const GeoCoord& a,
                   const GeoCoord& b,
                   std::set<Pixel>& cellIntersections) const;
 
+    /**
+     * Compute all cell intersections for specific coastline (with index `coastline`, and path `points`)
+     * with index cells. Computed intesections are stored to `cellIntersections` map.
+     *
+     * @param stateMap - state of index level
+     * @param points - coastline way
+     * @param coastline - index of coastline
+     * @param cellIntersections - map of all intersections for specific cell
+     */
     void GetCellIntersections(const StateMap& stateMap,
                               const std::vector<GeoCoord>& points,
                               size_t coastline,
                               std::map<Pixel,std::list<IntersectionRef>>& cellIntersections);
 
+    /**
+     * Return true if cell defined by `cellBoundary` at least partly belongs in some bounding polygon.
+     */
     bool IsCellInBoundingPolygon(const CellBoundaries& cellBoundary,
                                  const std::list<CoastRef>& boundingPolygons);
 
+    /**
+     * Return true if some tile from `tiles` contains `coord` with `type`
+     */
     bool ContainsCoord(const std::list<GroundTile> &tiles,
                        const GroundTile::Coord &coord,
                        GroundTile::Type type);
 
+    /**
+     * Return true if some tile from `tiles` contains `coord`
+     */
     bool ContainsCoord(const std::list<GroundTile> &tiles,
                        const GroundTile::Coord &coord);
 
+    /**
+     * Return true if cell `coord` contains water (its state is water or contains water coord)
+     */
     bool ContainsWater(const Pixel &coord,
                        const StateMap &stateMap,
                        const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                        const GroundTile::Coord &testCoord1,
                        const GroundTile::Coord &testCoord2);
 
+    /**
+     * Closes the sling from the `incoming` intersection to the `outgoing` intersection 
+     * traveling clock wise around the cell border.
+     * Walk points are stored to given groundTile.
+     */
     void WalkBorderCW(GroundTile& groundTile,
                       const StateMap& stateMap,
                       double cellMinLat,
@@ -393,9 +485,16 @@ namespace osmscout {
                       const IntersectionRef& outgoing,
                       const GroundTile::Coord borderCoords[]);
 
+    /**
+     * Return next clock wise intersection (from `current`)
+     */
     IntersectionRef GetNextCW(const std::list<IntersectionRef>& intersectionsCW,
                               const IntersectionRef& current) const;
 
+    /**
+     * Walk path/area (defined by `points`, `isArea`) back from `pathStart` to `pathEnd`
+     * and store walked points to given groundTile
+     */
     void WalkPathBack(GroundTile& groundTile,
                       const StateMap& stateMap,
                       double cellMinLat,
@@ -405,6 +504,10 @@ namespace osmscout {
                       const std::vector<GeoCoord>& points,
                       bool isArea);
 
+    /**
+     * Walk path/area (defined by `points`, `isArea`) from `pathStart` to `pathEnd`
+     * and store walked points to given groundTile
+     */
     void WalkPathForward(GroundTile& groundTile,
                          const StateMap& stateMap,
                          double cellMinLat,
@@ -414,10 +517,26 @@ namespace osmscout {
                          const std::vector<GeoCoord>& points,
                          bool isArea);
 
+    /**
+     * Return following (or previous) intersection for same coastline.
+     *
+     * If intersection->direction==Direction::in, we are searching next OUT intersection,
+     * previos IN intersection othervise.
+     */
     IntersectionRef FindSiblingIntersection(const IntersectionRef &intersection,
                                             const std::list<IntersectionRef> &intersectionsCW,
                                             bool isArea);
 
+    /**
+     * Walk from "tripoint" in `pathEnd` via "next" coastline.
+     * Walked points are stored to given groundTile.
+     *
+     * Tripoing is point where three different coastlines are met:
+     *  - water / land
+     *  - land / unknown
+     *  - unkwnon / water
+     * It can't be merged in such case (different types).
+     */
     bool WalkFromTripoint(GroundTile &groundTile,
                           const StateMap& stateMap,
                           const CellBoundaries &cellBoundaries,
@@ -427,6 +546,10 @@ namespace osmscout {
                           const std::list<IntersectionRef> &intersectionsCW,
                           const std::vector<size_t> &containingPaths);
 
+    /**
+     * Walk path/area (defined by `points`, `isArea`) from `pathStart` to `pathEnd`
+     * and store walked points to given groundTile
+     */
     void WalkPath(GroundTile &groundTile,
                   const StateMap& stateMap,
                   const CellBoundaries &cellBoundaries,
@@ -434,6 +557,11 @@ namespace osmscout {
                   const IntersectionRef pathEnd,
                   CoastlineDataRef coastline);
 
+    /**
+     * Walk from `outIntersection` clock wise via coastline paths and cell borders
+     * back to starting point (`outIntersection`).
+     * Walked points are stored to given `groundTile`.
+     */
     bool WalkBoundaryCW(GroundTile &groundTile,
                         const StateMap &stateMap,
                         const IntersectionRef outIntersection,
@@ -443,10 +571,25 @@ namespace osmscout {
                         Data& data,
                         const std::vector<size_t> &containingPaths);
 
+    /**
+     * Take the given coastlines and bounding polygons and create a list of synthesized
+     * coastlines that fuly encircle the imported region. Coastlines are either
+     * real-life coastlines or emulated coastlines based on the bounding
+     * polygons.
+     *
+     * @param progress
+     * @param boundingPolygons
+     * @param coastlines
+     * @param synthesized
+     */
     void SynthesizeCoastlines2(Progress& progress,
                                const std::list<CoastRef>& boundingPolygons,
                                const std::list<CoastRef>& coastlines,
                                std::list<CoastRef>& synthesized);
+
+    /**
+     * Generate all ground tiles (store to `cellGroundTileMap`) for given `cell`.
+     */
     void HandleCoastlineCell(Progress& progress,
                              const Pixel &cell,
                              const std::list<size_t>& intersectCoastlines,
@@ -455,18 +598,55 @@ namespace osmscout {
                              Data& data);
 
 public:
+    /**
+     * Merge short coastline ways to bigger one and create areas if possible.
+     */
+    void MergeCoastlines(Progress& progress,
+                         std::list<WaterIndexProcessor::CoastRef>& coastlines);
+
+    /**
+     * Return the list of StateMap cells the given path intersects with
+     *
+     * @param stateMap
+     *    StateMap defining the cell structure
+     * @param points
+     *    Path
+     * @param cellIntersections
+     *    List of cells, the path intersects with
+     */
     void GetCells(const StateMap& stateMap,
                   const std::vector<GeoCoord>& points,
                   std::set<Pixel>& cellIntersections) const;
 
+    /**
+     * Return the list of StateMap cells the given path intersects with
+     *
+     * @param stateMap
+     *    StateMap defining the cell structure
+     * @param points
+     *    Path
+     * @param cellIntersections
+     *    List of cells, the path intersects with
+     */
     void GetCells(const StateMap& stateMap,
                   const std::vector<Point>& points,
                   std::set<Pixel>& cellIntersections) const;
 
+    /**
+     * try to synthetize coastline segments from all way coastlines
+     * that intersect with the bounding polygon
+     *
+     * @param progress
+     * @param coastlines
+     * @param boundingPolygons
+     */
     void SynthesizeCoastlines(Progress& progress,
-                              std::list<CoastRef>& coastlines,
-                              std::list<CoastRef>& boundingPolygons);
+                            std::list<CoastRef>& coastlines,
+                            std::list<CoastRef>& boundingPolygons);
 
+    /**
+     * Collects, calculates and generates a number of data about a coastline.
+     */
     void CalculateCoastlineData(Progress& progress,
                                 TransPolygon::OptimizeMethod optimizationMethod,
                                 double tolerance,
@@ -476,43 +656,88 @@ public:
                                 const std::list<CoastRef>& coastlines,
                                 Data& data);
 
+    /**
+     * Markes a cell as "coast", if one of the coastlines intersects with it.
+     */
     void MarkCoastlineCells(Progress& progress,
                             StateMap& stateMap,
                             const Data& data);
 
+    /**
+     * Fills coords information for cells that completely contain a coastline
+     *
+     * @param progress
+     * @param level
+     * @param data
+     * @param cellGroundTileMap
+     */
     void HandleAreaCoastlinesCompletelyInACell(Progress& progress,
                                                const StateMap& stateMap,
                                                Data& data,
                                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
+    /**
+     * Fills coords information for cells that intersect a coastline
+     */
     void HandleCoastlinesPartiallyInACell(Progress& progress,
                                           const StateMap& stateMap,
                                           std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                           Data& data);
 
+    /**
+     * Calculate the cell type for cells directly around coast cells
+     * 
+     * @param progress
+     * @param stateMap
+     * @param cellGroundTileMap
+     */
     void CalculateCoastEnvironment(Progress& progress,
                                    StateMap& stateMap,
                                    const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
+    /**
+     * fill water (bottom layer) on tiles that fully contains some island(s)
+     */
     void FillWaterAroundIsland(Progress& progress,
                                StateMap& stateMap,
                                std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                const std::list<CoastRef>& boundingPolygons);
 
+    /**
+     * Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
+     *
+     * Converts all cells of state "unknown" that touch a tile with state
+     * "water" to state "water", too.
+     */
     void FillWater(Progress& progress,
                    Level& level,
                    size_t tileCount,
                    const std::list<CoastRef>& boundingPolygons);
 
+    /**
+     * Marks all still 'unknown' cells between 'coast' or 'land' and 'land' cells as 'land', too
+     *
+     * Scanning from left to right and bottom to top: Every tile that is unknown
+     * but is placed between land and coast or land cells must be land, too.
+     */
     void FillLand(Progress& progress,
                   StateMap& stateMap);
 
+    /**
+     * Lookup if level contains some cells, setup `level.hasCellData` in such case
+     */
     void CalculateHasCellData(Level& level,
                               const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap) const;
 
+    /**
+     * write index file header
+     */
     void DumpIndexHeader(FileWriter& writer,
                          std::vector<Level>& levels);
 
+    /**
+     * write data to index file
+     */
     void WriteTiles(Progress& progress,
                     const std::map<Pixel,std::list<GroundTile>>& cellGroundTileMap,
                     Level& level,

@@ -1,15 +1,4 @@
-if(NOT LIBXML2_FOUND)
-	message(SEND_ERROR "libxml2 is required for import library")
-endif()
-if(NOT PROTOBUF_FOUND)
-	message(SEND_ERROR "protobuf is required for import library")
-endif()
-if(NOT ZLIB_FOUND)
-	message(SEND_ERROR "zlib is required for import library")
-endif()
-if(MSVC AND NOT (MSVC_VERSION GREATER 1800))
-	message(SEND_ERROR "Microsoft Visual Studio 2015+ is required for import library")
-endif()
+set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
     #include/osmscout/import/pbf/fileformat.pb.h
@@ -31,7 +20,6 @@ set(HEADER_FILES
     include/osmscout/import/GenRawWayIndex.h
     include/osmscout/import/GenRelAreaDat.h
     include/osmscout/import/GenRouteDat.h
-    #include/osmscout/import/GenTextIndex.h
     include/osmscout/import/GenTypeDat.h
     include/osmscout/import/GenWaterIndex.h
     include/osmscout/import/GenWayAreaDat.h
@@ -41,8 +29,6 @@ set(HEADER_FILES
     include/osmscout/import/MergeAreaData.h
     include/osmscout/import/Preprocess.h
     include/osmscout/import/Preprocessor.h
-    include/osmscout/import/PreprocessOSM.h
-    include/osmscout/import/PreprocessPBF.h
     include/osmscout/import/PreprocessPoly.h
     include/osmscout/import/RawCoastline.h
     include/osmscout/import/RawCoord.h
@@ -81,7 +67,6 @@ set(SOURCE_FILES
     src/osmscout/import/GenRawWayIndex.cpp
     src/osmscout/import/GenRelAreaDat.cpp
     src/osmscout/import/GenRouteDat.cpp
-    #src/osmscout/import/GenTextIndex.cpp
     src/osmscout/import/GenTypeDat.cpp
     src/osmscout/import/GenWaterIndex.cpp
     src/osmscout/import/GenWayAreaDat.cpp
@@ -91,8 +76,6 @@ set(SOURCE_FILES
     src/osmscout/import/MergeAreaData.cpp
     src/osmscout/import/Preprocess.cpp
     src/osmscout/import/Preprocessor.cpp
-    src/osmscout/import/PreprocessOSM.cpp
-    src/osmscout/import/PreprocessPBF.cpp
     src/osmscout/import/PreprocessPoly.cpp
     src/osmscout/import/RawCoastline.cpp
     src/osmscout/import/RawCoord.cpp
@@ -113,58 +96,68 @@ if(MARISA_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/import/GenTextIndex.cpp)
 endif()
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
+if(LIBXML2_FOUND)
+    list(APPEND HEADER_FILES include/osmscout/import/PreprocessOSM.h)
+    list(APPEND SOURCE_FILES src/osmscout/import/PreprocessOSM.cpp)
+endif()
 
-add_library(osmscout_import ${SOURCE_FILES} ${HEADER_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
+if (PROTOBUF_FOUND)
+  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
+    list(APPEND HEADER_FILES include/osmscout/import/PreprocessPBF.h)
+    list(APPEND SOURCE_FILES src/osmscout/import/PreprocessPBF.cpp)
+    list(APPEND HEADER_FILES ${PROTO_HDRS})
+    list(APPEND SOURCE_FILES ${PROTO_SRCS})
+endif()
+
+add_library(osmscout_import ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout_import PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ImportFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ImportFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-import")
+
 target_include_directories(osmscout_import PRIVATE
 		include
 		include/osmscout/import/pbf
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${ZLIB_INCLUDE_DIRS}
-		${LIBXML2_INCLUDE_DIR}
-		${PROTOBUF_INCLUDE_DIRS})
-target_link_libraries(osmscout_import
-		osmscout
-		${PROTOBUF_LIBRARIES})
+		)
 
-if (LIBLZMA_FOUND AND ICONV_FOUND)
-  target_link_libraries(osmscout_import
-               ${LIBXML2_LIBRARIES}
-               ${ZLIB_LIBRARIES}
-               ${ICONV_LIBRARIES}
-               ${LIBLZMA_LIBRARIES}
-               )
-elseif (ICONV_FOUND)
-  target_link_libraries(osmscout_import
-    ${LIBXML2_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${ICONV_LIBRARIES}
-    )
-elseif (LIBLZMA_FOUND)
-  target_link_libraries(osmscout_import
-    ${LIBXML2_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${LIBLZMA_LIBRARIES}
-    )
-else()
-  target_link_libraries(osmscout_import
-    ${LIBXML2_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    )
+target_link_libraries(osmscout_import osmscout)
+
+if(ZLIB_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${LIBXML2_INCLUDE_DIR})
+    target_link_libraries(osmscout_import ${LIBXML2_LIBRARIES})
+endif()
+
+if (PROTOBUF_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${PROTOBUF_INCLUDE_DIRS})
+    target_link_libraries(osmscout_import ${PROTOBUF_LIBRARIES})
+endif()
+
+if (ICONV_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${ICONV_INCLUDE_DIRS})
+    target_link_libraries(osmscout_import ${ICONV_LIBRARIES})
+endif()
+
+if (LIBLZMA_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${LIBLZMA_INCLUDE_DIRS})
+  target_link_libraries(osmscout_import ${LIBLZMA_LIBRARIES})
+endif()
+
+if (ZLIB_FOUND)
+    target_include_directories(osmscout_import PRIVATE ${ZLIB_INCLUDE_DIRS})
+  target_link_libraries(osmscout_import ${ZLIB_LIBRARIES})
 endif()
 
 if(MARISA_FOUND)
     target_include_directories(osmscout_import PRIVATE ${MARISA_INCLUDE_DIRS})
     target_link_libraries(osmscout_import ${MARISA_LIBRARIES})
 endif()
+
 if(WIN32)
   target_link_libraries(osmscout_import Ws2_32.lib)
   target_compile_definitions(osmscout_import PRIVATE -DPROTOBUF_USE_DLLS)
 endif()
+
 target_compile_definitions(osmscout_import PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})
 install(TARGETS osmscout_import
         RUNTIME DESTINATION bin

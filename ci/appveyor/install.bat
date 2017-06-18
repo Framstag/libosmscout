@@ -14,20 +14,31 @@ echo Start updating build dependencies...
 
 IF %COMPILER%==msys2 (
   @echo on
-  echo MSYS build...
+  echo Installtion MSYS2 build preconditions...
+
   echo Extending path to MSYS...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
-  echo "Updating dependencies...
+
+  echo Updating pacman...
   bash -lc "pacman -S --needed --noconfirm pacman-mirrors"
-  bash -lc "pacman -S --needed --noconfirm git"
   bash -lc "pacman -Syyu --noconfirm"
 
+  echo Installing git...
+  bash -lc "pacman -S --needed --noconfirm git"
+
   IF %BUILDTOOL%==autoconf (
-  echo Installing autoconf tools...
-  bash -lc "pacman -S --needed --noconfirm git autoconf automake make"
-  ) ELSE (
-  echo Installing cmake tools...
-  bash -lc "pacman -S --needed --noconfirm git make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"
+    echo Installing autoconf tools...
+    bash -lc "pacman -S --needed --noconfirm autoconf automake make"
+  )
+
+  IF %BUILDTOOL%==meson (
+    echo Installing meson build tool...
+    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja mingw-w64-%MSYS2_ARCH%-meson"
+  )
+
+  IF %BUILDTOOL%==cmake (
+    echo Installing cmake build tool...
+    bash -lc "pacman -S --needed --noconfirm make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"
   )
 
   echo Installing build and compile time dependencies...
@@ -46,15 +57,18 @@ IF %COMPILER%==msys2 (
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && cd protobuf-3.1.0 && ./configure --disable-shared && make -j2 && make install"
 
   ) ELSE (
-    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-toolchain mingw-w64-%MSYS2_ARCH%-libtool mingw-w64-%MSYS2_ARCH%-libiconv mingw-w64-%MSYS2_ARCH%-protobuf mingw-w64-%MSYS2_ARCH%-libxml2 mingw-w64-%MSYS2_ARCH%-cairo mingw-w64-%MSYS2_ARCH%-pango mingw-w64-%MSYS2_ARCH%-qt5"
+    echo Installing common dependencies
+    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-toolchain mingw-w64-%MSYS2_ARCH%-libtool mingw-w64-%MSYS2_ARCH%-libiconv mingw-w64-%MSYS2_ARCH%-protobuf mingw-w64-%MSYS2_ARCH%-libxml2 mingw-w64-%MSYS2_ARCH%-cairo mingw-w64-%MSYS2_ARCH%-pango mingw-w64-%MSYS2_ARCH%-qt5 mingw-w64-%MSYS2_ARCH%-glew mingw-w64-%MSYS2_ARCH%-glfw mingw-w64-%MSYS2_ARCH%-glm"
   )
+
+  echo Finished installing MSYS2 build preconditions
 )
 
 IF %COMPILER%==msvc2015 (
   @echo on
   echo MSVC2015 build...
-  echo Installing wget...
 
+  echo Installing wget...
   cinst wget -x86
 
   IF %PLATFORM%==x64 (
@@ -67,5 +81,13 @@ IF %COMPILER%==msvc2015 (
     7z x zlib-1.2.8-win32-x86_64.7z -ozlib -y > nul
     7z x iconv-1.14-win32-x86_64.7z -oiconv -y > nul
     7z x libxml2-2.9.3-win32-x86_64.7z -olibxml2 -y > nul
+    echo ...done
+  )
+
+  IF %BUILDTOOL%==meson (
+    echo Installing meson build tool...
+    set "PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%"
+    pip.exe install meson
+    echo ...done
   )
 )
