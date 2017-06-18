@@ -9,7 +9,7 @@ if build_machine.system()=='darwin'
   # Workarounds...
   add_global_arguments(['-fobjc-arc', '-std=c++11'], language: 'objcpp')
   add_global_link_arguments(['-dynamiclib'], language: 'objcpp')
-endif  
+endif
 
 compiler = meson.get_compiler('cpp')
 
@@ -17,10 +17,10 @@ if get_option('default_library')=='shared'
   if compiler.get_id()=='gcc' and compiler.version().version_compare('>=4.8.0')
     haveVisibility=true
   else
-    haveVisibility=false  
+    haveVisibility=false
   endif
 else
-  haveVisibility=false      
+  haveVisibility=false
 endif
 
 if compiler.has_argument('-fopenmp')
@@ -28,15 +28,19 @@ if compiler.has_argument('-fopenmp')
   add_global_link_arguments('-fopenmp', language: 'cpp')
 endif
 
+# Check for headers
 fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
 iconvAvailable = compiler.has_header('iconv.h')
 codecvtAvailable = compiler.has_header('codecvt')
 
+# Check for header symbols
 sharedMutexAvailable = compiler.has_header_symbol('shared_mutex','shared_mutex', prefix: 'using namespace std;')
 
+# Check for datatype sizes
 sizeOfWChar = compiler.sizeof('wchar_t')
 
+# Check for specific functions
 mmapAvailable = compiler.has_function('mmap')
 posixfadviceAvailable = compiler.has_function('posix_fadvise')
 posixmadviceAvailable = compiler.has_function('posix_madvise')
@@ -151,13 +155,13 @@ if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) an
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
-endif  
+endif
 
 # Agg
 if aggDep.found() and aggftAvailable
   buildMapAgg=true
 else
-  buildMapAgg=false  
+  buildMapAgg=false
 endif
 
 # Cairo
@@ -170,13 +174,34 @@ endif
 # iOSX
 buildMapIOSX=build_machine.system()=='darwin'
 
+buildOSMScout2=buildMapQt and buildClientQt and qt5SvgDep.found()
+buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
+
+message('libosmscout:            @0@'.format(true))
+message('libosmscout-import:     @0@'.format(true))
+message('libosmscout-map:        @0@'.format(true))
+message('libosmscout-map-agg:    @0@'.format(buildMapAgg))
+message('libosmscout-map-cairo:  @0@'.format(buildMapCairo))
+message('libosmscout-map-qt:     @0@'.format(buildMapQt))
+#message('libosmscout-map-iosx:   @0@'.format(buildMapIOSX))
+message('libosmscout-map-iosx:   @0@'.format(false))
+message('libosmscout-map-svg:    @0@'.format(true))
+message('libosmscout-map-opengl: @0@'.format(buildMapOpenGL))
+message('BasemapImport:          @0@'.format(true))
+message('Import:                 @0@'.format(true))
+message('Demos:                  @0@'.format(true))
+message('DumpData:               @0@'.format(true))
+message('OSMScout2:              @0@'.format(buildOSMScout2))
+message('StyleEditor:            @0@'.format(buildStyleEditor))
+message('Tests:                  @0@'.format(true))
+
 subdir('libosmscout')
 subdir('libosmscout-import')
 subdir('libosmscout-map')
 
 if buildMapAgg
   subdir('libosmscout-map-agg')
-endif  
+endif
 
 if buildMapCairo
   subdir('libosmscout-map-cairo')
@@ -200,7 +225,7 @@ subdir('libosmscout-map-svg')
 if buildClientQt
   subdir('libosmscout-client-qt')
 endif
-  
+
 subdir('BasemapImport')
 subdir('Import')
 subdir('Demos')
@@ -215,5 +240,4 @@ if buildMapOpenGL and glfwDep.found()
   subdir('OSMScoutOpenGL')
 endif
 
-# TODO: Tests
 subdir('Tests')
