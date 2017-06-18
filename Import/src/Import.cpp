@@ -904,7 +904,7 @@ int main(int argc, char* argv[])
       i++;
     }
     else {
-      mapfiles.push_back(argv[i]);
+      mapfiles.push_back(std::string(argv[i]));
 
       i++;
     }
