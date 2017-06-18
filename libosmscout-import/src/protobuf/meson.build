@@ -4,5 +4,7 @@ if protobufDep.found() and protocCmd.found()
                        arguments : ['--cpp_out=@BUILD_DIR@','--proto_path=@SOURCE_DIR@/libosmscout-import/src/protobuf','@INPUT@'])
 
   protoSrc = protoGen.process('fileformat.proto', 'osmformat.proto')
-endif  
+else
+  protoSrc = []
+endif
 
