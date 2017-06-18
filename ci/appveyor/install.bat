@@ -75,6 +75,9 @@ IF %COMPILER%==msvc2015 (
   if %BUILDTOOL%==meson (
     SET "PYTHON=C:\Python36-x64"
     set "PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%"
+    python.exe --version
+    pip.exe --version
+    pip2.exe --version
     pip.exe install meson
   )
 )

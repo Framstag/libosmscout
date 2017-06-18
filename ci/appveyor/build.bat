@@ -21,7 +21,7 @@ IF %COMPILER%==msys2 (
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
   ) ELSE IF %BUILDTOOL%==meson (
     echo "Using build tool 'meson'..."
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ninja"
+    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson.py debug && cd debug && ninja"
   ) ELSE IF %BUILDTOOL%==cmake (
     echo "Using build tool 'cmake'..."
     IF %TARGET%==importer (
