@@ -21,55 +21,90 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
+#include <thread>
 #include <GLFW/glfw3.h>
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+osmscout::DatabaseParameter databaseParameter;
+osmscout::DatabaseRef database;
+osmscout::MapServiceRef mapService;
+osmscout::StyleConfigRef styleConfig;
+osmscout::GeoBox BoundingBox;
+osmscout::MercatorProjection projection;
+osmscout::MapParameter drawParameter;
+osmscout::AreaSearchParameter searchParameter;
+osmscout::MapData data;
+std::list<osmscout::TileRef> tiles;
+osmscout::MapPainterOpenGL *renderer;
+
+int zoomLevel;
+
+int zoom = 0;
+int startTime;
+
+double prevX = 0;
+double prevY = 0;
+
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 }
 
 bool button_down = false;
 
-static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
-  if(button == GLFW_MOUSE_BUTTON_LEFT)
-  {
-	if(action == GLFW_PRESS)
-	{
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (action == GLFW_PRESS) {
       button_down = true;
-	}
-    else if(action == GLFW_RELEASE)
-    {
+      double x, y;
+      glfwGetCursorPos(window, &x, &y);
+      prevX = x;
+      prevY = y;
+    } else if (action == GLFW_RELEASE) {
       button_down = false;
     }
   }
 
-  if(button_down){
+  if (button_down) {
     std::cout << "click" << std::endl;
   }
 
 }
 
-static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-  std::cout << "scroll" << std::endl;
+
+static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+  zoomLevel += yoffset;
+  double x, y;
+  glfwGetCursorPos(window, &x, &y);
+  tiles.empty();
+  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
+  mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
+  mapService->AddTileDataToMapData(tiles, data);
+  renderer->onZoom(yoffset);
+  renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
+
 }
 
-static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+/*static void scrollTime()
 {
-  if(button_down){
-    std::cout << "drag" << std::endl;
+  if(zoom == 1 && (abs(glfwGetTime() - startTime) >= ))
+}*/
+
+static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
+  if (button_down) {
+    //std::cout << "drag " << prevX - xpos << " " << prevY - ypos << std::endl;
+    renderer->onTranslation(prevX, prevY, xpos, ypos);
+    //renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
+    prevX = xpos;
+    prevY = ypos;
   }
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   std::string map;
   std::string style;
-  size_t width,height;
+  size_t width, height;
 
-  if(argc != 5){
+  if (argc != 5) {
     std::cerr << argc << " usage: ./OSMScoutOpenGL <path/to/map> <style-file> <width> <height>" << std::endl;
     return 1;
   }
@@ -77,62 +112,63 @@ int main(int argc, char* argv[])
   map = argv[1];
   style = argv[2];
 
-  if (!osmscout::StringToNumber(argv[3],width)) {
+  if (!osmscout::StringToNumber(argv[3], width)) {
     std::cerr << "width is not numeric!" << std::endl;
     return 1;
   }
 
-  if (!osmscout::StringToNumber(argv[4],height)) {
+  if (!osmscout::StringToNumber(argv[4], height)) {
     std::cerr << "height is not numeric!" << std::endl;
     return 1;
   }
 
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
+
+  database = osmscout::DatabaseRef(new osmscout::Database(databaseParameter));
+  mapService = osmscout::MapServiceRef(new osmscout::MapService(database));
 
   if (!database->Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
 
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
+  styleConfig = osmscout::StyleConfigRef(new osmscout::StyleConfig(database->GetTypeConfig()));
 
   if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  osmscout::GeoBox BoundingBox;
-  bool b = database.get()->GetBoundingBox(BoundingBox);
+  database.get()->GetBoundingBox(BoundingBox);
 
-
-  osmscout::MercatorProjection  projection;
-  osmscout::MapParameter        drawParameter;
-  osmscout::AreaSearchParameter searchParameter;
-  osmscout::MapData             data;
-
-  std::list<osmscout::TileRef> tiles;
 
   drawParameter.SetFontSize(3.0);
 
+  zoomLevel = 1000;
   projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
-                 osmscout::Magnification(10000),
+                 osmscout::Magnification(zoomLevel),
                  96,
                  width,
                  height);
 
-  mapService->LookupTiles(10000,BoundingBox, tiles);
-  mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-  mapService->AddTileDataToMapData(tiles,data);
+  //osmscout::GeoBox g;
+  //projection.GetDimensions(g);
 
-  GLFWwindow* window;
+  //osmscout::GeoCoord ge(BoundingBox.GetMinLon() + 0.1,BoundingBox.GetMaxLon()+0.1);
+  //osmscout::GeoCoord ge2(BoundingBox.GetMinLat() - 0.1,BoundingBox.GetMaxLat()-0.1);
+  //BoundingBox.Set(ge, ge2);
+
+  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
+  //mapService->GetGroundTiles(BoundingBox, 5000, tiles);
+  //mapService->LookupTiles(projection,tiles);
+  mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
+  mapService->AddTileDataToMapData(tiles, data);
+
+  GLFWwindow *window;
   if (!glfwInit())
     return -1;
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   window = glfwCreateWindow(width, height, "OSMScoutOpenGL", NULL, NULL);
-  if (!window)
-  {
+  if (!window) {
     glfwTerminate();
     return -1;
   }
@@ -142,11 +178,10 @@ int main(int argc, char* argv[])
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
-  osmscout::MapPainterOpenGL *renderer = new osmscout::MapPainterOpenGL();
-  renderer->loadData(data, drawParameter, projection, styleConfig);
+  renderer = new osmscout::MapPainterOpenGL(width, height);
+  renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
 
-  while (!glfwWindowShouldClose(window))
-  {
+  while (!glfwWindowShouldClose(window)) {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
