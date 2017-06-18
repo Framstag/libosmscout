@@ -65,7 +65,7 @@ xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false)
 zlibDep = dependency('zlib', required : false)
 wsock32Dep=compiler.find_library('wsock32', required: false)
 
-protocCmd = find_program('protoc')
+protocCmd = find_program('protoc', required: false)
 
 # Backends
 
