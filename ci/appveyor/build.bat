@@ -13,17 +13,21 @@ echo Target: %TARGET%
 
 IF %COMPILER%==msys2 (
   @echo on
-  echo "Compiling libosmscout using msys2..."
+  echo Compiling libosmscout using msys2...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
 
   IF %BUILDTOOL%==autoconf (
-    echo "Using build tool 'autoconf'..."
+    echo Using build tool 'autoconf'...
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
-  ) ELSE IF %BUILDTOOL%==meson (
-    echo "Using build tool 'meson'..."
+  )
+
+  IF %BUILDTOOL%==meson (
+    echo Using build tool 'meson'...
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson.py debug && cd debug && ninja"
-  ) ELSE IF %BUILDTOOL%==cmake (
-    echo "Using build tool 'cmake'..."
+  )
+
+  IF %BUILDTOOL%==cmake (
+    echo Using build tool 'cmake'...
     IF %TARGET%==importer (
       bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && . packaging/import/windows/build_import.sh"
       appveyor PushArtifact build\libosmscout-importer-Windows-x86_64.zip
