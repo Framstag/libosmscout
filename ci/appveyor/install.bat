@@ -56,8 +56,8 @@ IF %COMPILER%==msys2 (
 IF %COMPILER%==msvc2015 (
   @echo on
   echo MSVC2015 build...
-  echo Installing wget...
 
+  echo Installing wget...
   cinst wget -x86
 
   IF %PLATFORM%==x64 (
@@ -76,8 +76,8 @@ IF %COMPILER%==msvc2015 (
     SET "PYTHON=C:\Python36-x64"
     DIR %PYTHON%
     SET "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
-    echo %PYTHON%
-    echo %PATH%
+    echo PYTHON: %PYTHON%
+    echo PATH: %PATH%
     python.exe --version
     pip.exe --version
     pip.exe install meson

@@ -46,6 +46,11 @@ IF %COMPILER%==msvc2015 (
     cmake --build .
   ) ELSE IF %BUILDTOOL%==meson (
     echo "Using build tool 'meson'..."
+    SET "PYTHON=C:\Python36-x64"
+    DIR %PYTHON%
+    SET "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
+    echo PYTHON: %PYTHON%
+    echo PATH: %PATH%
     mkdir debug
     meson debug --backend vs2015
   )
