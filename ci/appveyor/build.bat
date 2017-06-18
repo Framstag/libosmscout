@@ -19,11 +19,13 @@ IF %COMPILER%==msys2 (
   IF %BUILDTOOL%==autoconf (
     echo Using build tool 'autoconf'...
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
+    echo Finished autoconf build
   )
 
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson.py debug && cd debug && ninja"
+    echo Finished mason build
   )
 
   IF %BUILDTOOL%==cmake (
@@ -34,30 +36,26 @@ IF %COMPILER%==msys2 (
     ) ELSE (
         bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && mkdir build && cd build && CXX=g++ CC=gcc cmake -G 'MSYS Makefiles' .. && cmake -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -LAH .. && make -j2"
     )
+    echo Finished cmake build
   )
 )
 
 IF %COMPILER%==msvc2015 (
   @echo on
-  echo "Compiling libosmscout using Visual Studio 2015..."
+  echo Compiling libosmscout using Visual Studio 2015...
 
   IF %BUILDTOOL%==cmake (
-    echo "Using build tool 'cmake'..."
+    echo Using build tool 'cmake'...
     SET "CMAKE_PREFIX_PATH=C:\Qt\5.8\msvc2015_64"
     mkdir build
     cd build
     cmake -G "Visual Studio 14 2015 Win64" ..
     cmake --build .
+    echo Finished cmake build
   )
 
   IF %BUILDTOOL%==meson (
-    echo "Using build tool 'meson'..."
-    SET "PYTHON=C:\Python36-x64"
-    DIR %PYTHON%
-    SET "PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%"
-    echo PYTHON: %PYTHON%
-    echo PATH: %PATH%
-    mkdir debug
-    meson debug --backend vs2015
+    echo Using build tool 'meson'...
+    echo Finished meson build
   )
 )
