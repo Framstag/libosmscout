@@ -48,7 +48,9 @@ IF %COMPILER%==msvc2015 (
     cd build
     cmake -G "Visual Studio 14 2015 Win64" ..
     cmake --build .
-  ) ELSE IF %BUILDTOOL%==meson (
+  )
+
+  IF %BUILDTOOL%==meson (
     echo "Using build tool 'meson'..."
     SET "PYTHON=C:\Python36-x64"
     DIR %PYTHON%
