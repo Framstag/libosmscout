@@ -51,7 +51,7 @@ ftelli64Available = compiler.has_function('_ftelli64')
 fseekoAvailable = compiler.has_function('fseeko')
 
 # Check for external programs
-swigExe = find_program('swig')
+swigExe = find_program('swig', required: false)
 
 # Base
 mathDep = compiler.find_library('m', required : false)
