@@ -30,14 +30,14 @@ if(MSVS OR MSYS OR MINGW)
 			osmscout
 			osmscout_map
 			${OPENGL_LIBRARIES}
-			glew32
+			glew32 # TODO: ${GLEW_LIBRARIES} is not setup correctly on Windows?
 			)
 else()
 	target_link_libraries(osmscout_map_opengl
 			osmscout
 			osmscout_map
 			${OPENGL_LIBRARIES}
-			GLEW
+			${GLEW_LIBRARIES}
 			)
 endif()
 target_compile_definitions(osmscout_map_opengl PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
