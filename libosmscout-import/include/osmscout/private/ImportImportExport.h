@@ -23,7 +23,7 @@
 #include <osmscout/ImportFeatures.h>
 
 // Shared library support
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #if defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
     #if defined(DLL_EXPORT) || defined(_WINDLL)
       #define OSMSCOUT_IMPORT_EXPTEMPL
@@ -40,7 +40,7 @@
 #else
   #define OSMSCOUT_IMPORT_IMPORT
   #define OSMSCOUT_IMPORT_EXPTEMPL
-  
+
   #if defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
     #define OSMSCOUT_IMPORT_EXPORT __attribute__ ((visibility("default")))
     #define OSMSCOUT_IMPORT_DLLLOCAL __attribute__ ((visibility("hidden")))
@@ -58,7 +58,7 @@
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api) api
 #elif defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
   #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api) OSMSCOUT_IMPORT_EXPORT
@@ -68,6 +68,6 @@
 
 #if defined(_MSC_VER)
   #define OSMSCOUT_IMPORT_INSTANTIATE_TEMPLATES
-#endif  
+#endif
 #endif
 
