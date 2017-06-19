@@ -31,7 +31,7 @@ if compiler.has_argument('-fopenmp')
 endif
 
 if compiler.get_id()=='msvc'
-  add_global_arguments(['-D_CRT_SECURE_NO_DEPRECATE', '-D_CRT_NONSTDC_NO_DEPRECATE'], language: 'cpp')
+  add_global_arguments(['-D_CRT_SECURE_NO_DEPRECATE', '-D_CRT_NONSTDC_NO_DEPRECATE', '/fp:fast', '/wd4251'], language: 'cpp')
 
   if get_option('default_library')=='shared'
     # TODO: Should only be set for library builds, not executables
