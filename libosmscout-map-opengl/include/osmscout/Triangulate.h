@@ -20,14 +20,19 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-class Triangulate {
-public:
-  Triangulate();
-  ~Triangulate();
+#include <GL/glew.h>
+#include <iostream>
+#include <osmscout/MapPainter.h>
 
-  void triangulate(std::vector<Point> nodes);
+namespace osmscout {
+  class Triangulate {
+  public:
 
-};
+    static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::Point> points);
 
+    static std::vector<GLfloat> TriangulateWithHoles(std::vector<std::vector<osmscout::Point>> points);
+
+  };
+}
 
 #endif //LIBOSMSCOUT_TRIANGULATE_H

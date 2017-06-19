@@ -21,49 +21,78 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#define GLEW_STATIC
+
+#include <GL/glew.h>
+
 #include <osmscout/MapOpenGLFeatures.h>
 
 #include <osmscout/OpenGLMapData.h>
 
 #include <osmscout/private/MapOpenGLImportExport.h>
+#include <mutex>
 
 namespace osmscout {
-    class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL
-    {
-     private:
+  class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL {
+  private:
+    int width;
+    int height;
 
-      OpenGLMapData AreaRenderer;
-      OpenGLMapData GroundTileRenderer;
-      OpenGLMapData PathRenderer;
-      OpenGLMapData ImageRenderer;
-      OpenGLMapData SymbolRenderer;
-      OpenGLMapData LabelRenderer;
+    float zoomLevel;
+    float minLon;
+    float minLat;
+    float maxLon;
+    float maxLat;
 
-      FillStyleRef landFill;
+    float lookX;
+    float lookY;
 
-      void processAreaData(const osmscout::MapData &data);
+    OpenGLMapData AreaRenderer;
+    OpenGLMapData GroundRenderer;
+    OpenGLMapData PathRenderer;
+    OpenGLMapData ImageRenderer;
+    OpenGLMapData SymbolRenderer;
+    OpenGLMapData LabelRenderer;
 
-      void processGroundData();
+    osmscout::MapData MapData;
+    osmscout::StyleConfigRef styleConfig;
+    osmscout::MapParameter Parameter;
+    osmscout::FillStyleRef landFill;
 
-      void processPathData();
+    std::vector<std::vector<osmscout::Point>> areas;
 
-      void processImageData();
+    void ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                         const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
+                         const osmscout::GeoBox &BoundingBox);
 
-      void processLabelData();
+    void ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                           const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
+                           const osmscout::GeoBox &BoundingBox);
 
-    public:
-      MapPainterOpenGL();
-      ~MapPainterOpenGL();
+    void ProcessPathData();
 
-      void loadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter, const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
+    void ProcessImageData();
 
-      void onZoom(int zoomSize);
+    void ProcessLabelData();
 
-      void onTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
+  public:
+    MapPainterOpenGL();
 
-      void DrawMap();
+    MapPainterOpenGL(int width, int height);
 
-    };
+    ~MapPainterOpenGL();
+
+    void loadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                  const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
+                  const osmscout::GeoBox &BoundingBox);
+
+    void onZoom(float zoomSize);
+
+    void onTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
+
+    void DrawMap();
+
+  };
 }
 
 #endif
