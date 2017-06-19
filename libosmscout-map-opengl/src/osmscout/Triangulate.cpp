@@ -18,6 +18,9 @@
 */
 //#include <utility>
 #include <osmscout/Triangulate.h>
+
+#include <osmscout/system/Math.h>
+
 #include <poly2tri/poly2tri.h>
 
 namespace osmscout {
