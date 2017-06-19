@@ -84,16 +84,9 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) 
 
 }
 
-/*static void scrollTime()
-{
-  if(zoom == 1 && (abs(glfwGetTime() - startTime) >= ))
-}*/
-
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
   if (button_down) {
-    //std::cout << "drag " << prevX - xpos << " " << prevY - ypos << std::endl;
     renderer->onTranslation(prevX, prevY, xpos, ypos);
-    //renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
     prevX = xpos;
     prevY = ypos;
   }
@@ -149,16 +142,7 @@ int main(int argc, char *argv[]) {
                  width,
                  height);
 
-  //osmscout::GeoBox g;
-  //projection.GetDimensions(g);
-
-  //osmscout::GeoCoord ge(BoundingBox.GetMinLon() + 0.1,BoundingBox.GetMaxLon()+0.1);
-  //osmscout::GeoCoord ge2(BoundingBox.GetMinLat() - 0.1,BoundingBox.GetMaxLat()-0.1);
-  //BoundingBox.Set(ge, ge2);
-
   mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
-  //mapService->GetGroundTiles(BoundingBox, 5000, tiles);
-  //mapService->LookupTiles(projection,tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
 

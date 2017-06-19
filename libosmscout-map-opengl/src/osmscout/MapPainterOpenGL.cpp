@@ -115,8 +115,6 @@ namespace osmscout {
         for (size_t i = 0; i < area->rings.size(); i++) {
           const Area::Ring &ring = area->rings[i];
 
-          //std::cout << area->rings[i].nodes.size() << std::endl;
-
           if (ring.IsMasterRing()) {
             continue;
           }
@@ -132,8 +130,6 @@ namespace osmscout {
 
           if (!ring.IsOuterRing() && ring.GetType()->GetIgnore())
             continue;
-
-          //if(osmscout::)
 
           TypeInfoRef type;
           FillStyleRef fillStyle;
@@ -332,11 +328,6 @@ namespace osmscout {
     maxLon -= (zoom / ((height / (float) width) * 100));
     maxLat -= (zoom / ((width / (float) height) * 100));
 
-    //double offsetx = width - x;
-    //double offsety = width - y;
-
-    //AreaRenderer.SetZoom(AreaRenderer.GetZoom() + (zoom / 100));
-
     AreaRenderer.AddUniform("minLon", minLon);
     AreaRenderer.AddUniform("minLat", minLat);
     AreaRenderer.AddUniform("maxLon", maxLon);
@@ -368,9 +359,8 @@ namespace osmscout {
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GroundRenderer.Draw();
+    //GroundRenderer.Draw();
     AreaRenderer.Draw();
-    //PathRenderer.Draw();
   }
 
 

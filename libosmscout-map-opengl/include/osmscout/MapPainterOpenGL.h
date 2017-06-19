@@ -35,9 +35,6 @@
 namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL {
   private:
-
-    std::mutex m;
-
     int width;
     int height;
 
