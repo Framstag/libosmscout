@@ -204,6 +204,10 @@ else()
 endif()
 option(OSMSCOUT_BUILD_MAP_DIRECTX "Enable build of DirectX map drawing backend" ${OSMSCOUT_BUILD_MAP_DIRECTX_CACHE})
 if(OSMSCOUT_BUILD_MAP_DIRECTX)
+  message("DirectX root dir: ${DirectX_ROOT_DIR}")
+  message("DirectX includes: ${Direct2D_INCLUDE_DIRS}")
+  message("DirectX libs:     ${Direct2D_LIBRARIES}")
+
   add_subdirectory(libosmscout-map-directx)
 endif()
 
