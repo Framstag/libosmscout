@@ -302,6 +302,41 @@ namespace osmscout {
         GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
         GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
       }
+      else{
+        std::vector<osmscout::Point> p;
+        for (size_t i=0; i<tile.coords.size(); i++) {
+          double lat;
+          double lon;
+          lat=minCoord.GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=minCoord.GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
+          osmscout::GeoCoord g = osmscout::GeoCoord(lat,lon);
+          osmscout::Point pt;
+          pt.SetCoord(g);
+          p.push_back(pt);
+        }
+
+        std::vector<GLfloat> points;
+        points = osmscout::Triangulate::TriangulatePolygon(p);
+
+        for (int t = 0; t < points.size(); t++) {
+          if (t % 2 == 0) {
+            GroundRenderer.AddNewVertex(points[t]);
+          } else {
+            GroundRenderer.AddNewVertex(points[t]);
+            GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
+            GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
+            GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
+
+            if (GroundRenderer.GetNumOfVertices() <= 5) {
+              GroundRenderer.AddNewElement(0);
+            } else {
+              GroundRenderer.AddNewElement(GroundRenderer.GetVerticesNumber() - 1);
+            }
+
+          }
+        }
+
+      }
 
     }
 
