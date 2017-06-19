@@ -19,6 +19,7 @@ target_include_directories(OSMScoutOpenGL PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-opengl/include
 		${OPENGL_INCLUDE_DIR}
 		${GLEW_INCLUDE_DIRS}
+		${GLFW_INCLUDE_DIR}
 		)
 
 if(MSVS OR MSYS OR MINGW)
@@ -27,7 +28,7 @@ if(MSVS OR MSYS OR MINGW)
 			osmscout_map
 			osmscout_map_opengl
 			${OPENGL_LIBRARIES}
-			glfw3
+			glfw3 # TODO: check if ${GLFW_LIBRARIES} is setup correctly on Windows
 			)
 else()
 	target_link_libraries(OSMScoutOpenGL
@@ -35,7 +36,7 @@ else()
 			osmscout_map
 			osmscout_map_opengl
 			${OPENGL_LIBRARIES}
-			glfw
+			${GLFW_LIBRARIES}
 			)
 endif()
 
