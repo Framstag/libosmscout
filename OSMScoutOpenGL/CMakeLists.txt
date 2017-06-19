@@ -18,6 +18,7 @@ target_include_directories(OSMScoutOpenGL PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-opengl/include
 		${OPENGL_INCLUDE_DIR}
+		${GLEW_INCLUDE_DIRS}
 		)
 
 if(MSVS OR MSYS OR MINGW)
