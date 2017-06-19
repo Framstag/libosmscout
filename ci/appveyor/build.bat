@@ -58,7 +58,8 @@ IF %COMPILER%==msvc2015 (
     echo Using build tool 'meson'...
     mkdir debug
     meson debug --backend vs2015
-    dir debug
+    cd debug
+    nmake.exe libosmscout.sln
     echo Finished meson build
   )
 )
