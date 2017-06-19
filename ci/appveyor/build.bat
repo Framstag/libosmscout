@@ -44,7 +44,7 @@ IF %COMPILER%==msvc2015 (
   @echo on
   echo Compiling libosmscout using Visual Studio 2015...
 
-  echo Initializing visualStudio command line build environment
+  echo Initializing VisualStudio command line build environment
   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 
   IF %BUILDTOOL%==cmake (
@@ -62,7 +62,7 @@ IF %COMPILER%==msvc2015 (
     mkdir debug
     meson debug --backend vs2015
     cd debug
-    msbuild.exe libosmscout.sln
+    msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
     echo Finished meson build
   )
 )
