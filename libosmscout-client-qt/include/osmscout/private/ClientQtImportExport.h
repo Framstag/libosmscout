@@ -23,7 +23,7 @@
 #include <osmscout/ClientQtFeatures.h>
 
 // Shared library support
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #if defined(OSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
     #if defined(DLL_EXPORT) || defined(_WINDLL)
       #define OSMSCOUT_CLIENT_QT_EXPTEMPL
@@ -40,7 +40,7 @@
 #else
   #define OSMSCOUT_CLIENT_QT_IMPORT
   #define OSMSCOUT_CLIENT_QT_EXPTEMPL
-  
+
   #if defined(OSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
     #define OSMSCOUT_CLIENT_QT_EXPORT __attribute__ ((visibility("default")))
     #define OSMSCOUT_CLIENT_QT_DLLLOCAL __attribute__ ((visibility("hidden")))
@@ -58,7 +58,7 @@
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #define OSMSCOUT_CLIENT_QT_EXCEPTIONAPI(api) api
 #elif defined(OSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
   #define OSMSCOUT_CLIENT_QT_EXCEPTIONAPI(api) OSMSCOUT_CLIENT_QT_EXPORT
@@ -68,6 +68,6 @@
 
 #if defined(_MSC_VER)
   #define OSMSCOUT_CLIENT_QT_INSTANTIATE_TEMPLATES
-#endif  
+#endif
 #endif
 
