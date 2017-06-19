@@ -30,6 +30,15 @@ if compiler.has_argument('-fopenmp')
   add_global_link_arguments('-fopenmp', language: 'cpp')
 endif
 
+if compiler.get_id()=='msvc'
+  add_global_arguments(['-D_CRT_SECURE_NO_DEPRECATE', '-D_CRT_NONSTDC_NO_DEPRECATE'])
+
+  if get_option('default_library')=='shared'
+    # TODO: Should only be set for library builds, not executables
+    add_global_arguments('-DDLL_EXPORT')
+  endif
+endif
+
 # Check for headers
 fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
