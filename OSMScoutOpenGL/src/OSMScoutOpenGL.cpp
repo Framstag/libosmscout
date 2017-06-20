@@ -44,6 +44,11 @@ int startTime;
 double prevX = 0;
 double prevY = 0;
 
+void ErrorCallback(int, const char* err_str)
+{
+  std::cerr << "GLFW Error: " << err_str << std::endl;
+}
+
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
@@ -147,6 +152,7 @@ int main(int argc, char *argv[]) {
   mapService->AddTileDataToMapData(tiles, data);
 
   GLFWwindow *window;
+  glfwSetErrorCallback(ErrorCallback);
   if (!glfwInit())
     return -1;
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
