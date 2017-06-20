@@ -38,14 +38,6 @@ namespace osmscout {
       return;
     }
 
-    GroundRenderer.LoadVertexShader("AreaVertexShader.vert");
-    GroundRenderer.LoadFragmentShader("AreaFragmentShader.frag");
-    success = GroundRenderer.InitContext();
-    if (!success) {
-      std::cerr << "Could not initialize context for ground rendering!" << std::endl;
-      return;
-    }
-
     zoomLevel = 45.0f;
   }
 
@@ -63,14 +55,6 @@ namespace osmscout {
       return;
     }
 
-    GroundRenderer.LoadVertexShader("AreaVertexShader.vert");
-    GroundRenderer.LoadFragmentShader("AreaFragmentShader.frag");
-    success = GroundRenderer.InitContext();
-    if (!success) {
-      std::cerr << "Could not initialize context for ground rendering!" << std::endl;
-      return;
-    }
-
     zoomLevel = 45.0f;
   }
 
@@ -83,6 +67,7 @@ namespace osmscout {
                                             const osmscout::StyleConfigRef &styleConfig,
                                             const osmscout::GeoBox &BoundingBox) {
     styleConfig.get()->GetLandFillStyle(projection, landFill);
+    styleConfig.get()->GetSeaFillStyle(projection, seaFill);
     if (minLat == 0)
       minLat = BoundingBox.GetMinLat();
     if (minLon == 0)
@@ -91,8 +76,13 @@ namespace osmscout {
       maxLat = BoundingBox.GetMaxLat();
     if (maxLon == 0)
       maxLon = BoundingBox.GetMaxLon();
-    ProcessAreaData(data, parameter, projection, styleConfig, BoundingBox);
+
+    AreaRenderer.clearData();
+    AreaRenderer.SetVerticesSize(5);
+
     ProcessGroundData(data, parameter, projection, styleConfig, BoundingBox);
+    //ProcessAreaData(data, parameter, projection, styleConfig, BoundingBox);
+    FinishProcess();
   }
 
   void
@@ -100,10 +90,6 @@ namespace osmscout {
                                               const osmscout::Projection &projection,
                                               const osmscout::StyleConfigRef &styleConfig,
                                               const osmscout::GeoBox &BoundingBox) {
-
-    AreaRenderer.clearData();
-
-    AreaRenderer.SetVerticesSize(5);
 
     for (const auto &area : data.areas) {
       size_t ringId = Area::outerRingId;
@@ -209,7 +195,161 @@ namespace osmscout {
         ringId++;
       }
     }
+  }
 
+  void
+  osmscout::MapPainterOpenGL::ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                                                const osmscout::Projection &projection,
+                                                const osmscout::StyleConfigRef &styleConfig,
+                                                const osmscout::GeoBox &BoundingBox) {
+
+    FillStyleRef landFill;
+
+    styleConfig->GetLandFillStyle(projection,
+                                  landFill);
+
+    if (!landFill) {
+      landFill = this->landFill;
+    }
+
+    FillStyleRef seaFill;
+    FillStyleRef coastFill;
+    FillStyleRef unknownFill;
+    std::vector<Point> points;
+
+    styleConfig->GetSeaFillStyle(projection,
+                                 seaFill);
+    styleConfig->GetCoastFillStyle(projection,
+                                   coastFill);
+    styleConfig->GetUnknownFillStyle(projection,
+                                     unknownFill);
+
+    if (!seaFill) {
+      seaFill = this->seaFill;
+    }
+
+    for (const auto &tile : data.groundTiles) {
+      if (tile.type == GroundTile::unknown &&
+          !parameter.GetRenderUnknowns()) {
+        continue;
+      }
+
+      FillStyleRef fill;
+
+      switch (tile.type) {
+        case GroundTile::land:
+          fill = landFill;
+          break;
+        case GroundTile::water:
+          fill = seaFill;
+          break;
+        case GroundTile::coast:
+          fill = seaFill;
+          break;
+        case GroundTile::unknown:
+          fill = unknownFill;
+          break;
+      }
+
+      GeoCoord minCoord(tile.yAbs * tile.cellHeight - 90.0,
+                        tile.xAbs * tile.cellWidth - 180.0);
+      GeoCoord maxCoord(minCoord.GetLat() + tile.cellHeight,
+                        minCoord.GetLon() + tile.cellWidth);
+
+      if (tile.coords.empty()) {
+        AreaRenderer.AddNewVertex(minCoord.GetLon());
+        AreaRenderer.AddNewVertex(minCoord.GetLat());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetR());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetG());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetB());
+        AreaRenderer.AddNewVertex(maxCoord.GetLon());
+        AreaRenderer.AddNewVertex(minCoord.GetLat());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetR());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetG());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetB());
+        AreaRenderer.AddNewVertex(maxCoord.GetLon());
+        AreaRenderer.AddNewVertex(maxCoord.GetLat());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetR());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetG());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetB());
+
+        AreaRenderer.AddNewVertex(minCoord.GetLon());
+        AreaRenderer.AddNewVertex(minCoord.GetLat());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetR());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetG());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetB());
+        AreaRenderer.AddNewVertex(minCoord.GetLon());
+        AreaRenderer.AddNewVertex(maxCoord.GetLat());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetR());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetG());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetB());
+        AreaRenderer.AddNewVertex(maxCoord.GetLon());
+        AreaRenderer.AddNewVertex(maxCoord.GetLat());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetR());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetG());
+        AreaRenderer.AddNewVertex(fill->GetFillColor().GetB());
+
+        int num;
+        if (AreaRenderer.GetVerticesNumber() <= 6)
+          num = 0;
+        else
+          num = AreaRenderer.GetVerticesNumber();
+        for (int i = 0; i < 6; i++)
+          AreaRenderer.AddNewElement(num + i);
+
+      } else {
+        std::vector<osmscout::Point> p;
+        for (int i = 0; i < tile.coords.size(); i++) {
+          double lat;
+          double lon;
+          lat = minCoord.GetLat() + tile.coords[i].y * tile.cellHeight / GroundTile::Coord::CELL_MAX;
+          lon = minCoord.GetLon() + tile.coords[i].x * tile.cellWidth / GroundTile::Coord::CELL_MAX;
+
+          int dupl = 0;
+          for (int j = 0; j < p.size(); j++) {
+            if (fabs(p[j].GetLat() - lat) < 0.00000001 && fabs(p[j].GetLon() - lon) < 0.000000001) {
+              dupl = 1;
+            }
+          }
+
+          if (dupl == 1)
+            continue;
+
+          osmscout::GeoCoord g = osmscout::GeoCoord(lat, lon);
+          osmscout::Point pt;
+          pt.SetCoord(g);
+          p.push_back(pt);
+
+        }
+
+        std::vector<GLfloat> points;
+        points = osmscout::Triangulate::TriangulatePolygon(p);
+
+        for (int t = 0; t < points.size(); t++) {
+          if (t % 2 == 0) {
+            AreaRenderer.AddNewVertex(points[t]);
+          } else {
+            AreaRenderer.AddNewVertex(points[t]);
+            AreaRenderer.AddNewVertex(fill->GetFillColor().GetR());
+            AreaRenderer.AddNewVertex(fill->GetFillColor().GetG());
+            AreaRenderer.AddNewVertex(fill->GetFillColor().GetB());
+
+            if (AreaRenderer.GetNumOfVertices() <= 5) {
+              AreaRenderer.AddNewElement(0);
+            } else {
+              AreaRenderer.AddNewElement(AreaRenderer.GetVerticesNumber() - 1);
+            }
+
+          }
+        }
+
+      }
+
+    }
+
+  }
+
+  void osmscout::MapPainterOpenGL::FinishProcess() {
     AreaRenderer.LoadVertices();
     AreaRenderer.LoadProgram();
     AreaRenderer.SetProjection(width, height);
@@ -222,139 +362,6 @@ namespace osmscout {
     AreaRenderer.AddUniform("minLat", minLat);
     AreaRenderer.AddUniform("maxLon", maxLon);
     AreaRenderer.AddUniform("maxLat", maxLat);
-
-  }
-
-  void osmscout::MapPainterOpenGL::ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                                                     const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
-                                                     const osmscout::GeoBox &BoundingBox) {
-    GroundRenderer.clearData();
-
-    GroundRenderer.SetVerticesSize(5);
-
-    FillStyleRef       seaFill;
-    FillStyleRef       coastFill;
-    FillStyleRef       unknownFill;
-    LineStyleRef       coastlineLine;
-    std::vector<Point> points;
-
-    styleConfig->GetSeaFillStyle(projection,
-                                seaFill);
-    styleConfig->GetCoastFillStyle(projection,
-                                  coastFill);
-    styleConfig->GetUnknownFillStyle(projection,
-                                    unknownFill);
-    styleConfig->GetCoastlineLineStyle(projection,
-                                      coastlineLine);
-
-    for (const auto& tile : data.groundTiles) {
-      if (tile.type==GroundTile::unknown &&
-          !parameter.GetRenderUnknowns()) {
-        continue;
-      }
-
-      FillStyleRef fill;
-
-      switch (tile.type) {
-        case GroundTile::land:
-          fill=landFill;
-          break;
-        case GroundTile::water:
-          fill=seaFill;
-          break;
-        case GroundTile::coast:
-          fill=coastFill;
-          break;
-        case GroundTile::unknown:
-          fill=unknownFill;
-          break;
-      }
-
-      GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
-                        tile.xAbs*tile.cellWidth-180.0);
-      GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
-                        minCoord.GetLon()+tile.cellWidth);
-
-      if (tile.coords.empty()) {
-        GroundRenderer.AddNewVertex(minCoord.GetLon()); GroundRenderer.AddNewVertex(minCoord.GetLat());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
-        GroundRenderer.AddNewVertex(maxCoord.GetLon()); GroundRenderer.AddNewVertex(minCoord.GetLat());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
-        GroundRenderer.AddNewVertex(maxCoord.GetLon()); GroundRenderer.AddNewVertex(maxCoord.GetLat());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
-        //
-        GroundRenderer.AddNewVertex(minCoord.GetLon()); GroundRenderer.AddNewVertex(minCoord.GetLat());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
-        GroundRenderer.AddNewVertex(minCoord.GetLon()); GroundRenderer.AddNewVertex(maxCoord.GetLat());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
-        GroundRenderer.AddNewVertex(maxCoord.GetLon()); GroundRenderer.AddNewVertex(maxCoord.GetLat());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
-        GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
-      }
-      else{
-        std::vector<osmscout::Point> p;
-        for (size_t i=0; i<tile.coords.size(); i++) {
-          double lat;
-          double lon;
-          lat=minCoord.GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
-          lon=minCoord.GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
-          osmscout::GeoCoord g = osmscout::GeoCoord(lat,lon);
-          osmscout::Point pt;
-          pt.SetCoord(g);
-          p.push_back(pt);
-        }
-
-        std::vector<GLfloat> points;
-        points = osmscout::Triangulate::TriangulatePolygon(p);
-
-        for (int t = 0; t < points.size(); t++) {
-          if (t % 2 == 0) {
-            GroundRenderer.AddNewVertex(points[t]);
-          } else {
-            GroundRenderer.AddNewVertex(points[t]);
-            GroundRenderer.AddNewVertex(fill->GetFillColor().GetR());
-            GroundRenderer.AddNewVertex(fill->GetFillColor().GetG());
-            GroundRenderer.AddNewVertex(fill->GetFillColor().GetB());
-
-            if (GroundRenderer.GetNumOfVertices() <= 5) {
-              GroundRenderer.AddNewElement(0);
-            } else {
-              GroundRenderer.AddNewElement(GroundRenderer.GetVerticesNumber() - 1);
-            }
-
-          }
-        }
-
-      }
-
-    }
-
-    if(GroundRenderer.GetNumOfVertices() != 0) {
-      GroundRenderer.LoadVertices();
-      GroundRenderer.LoadProgram();
-      GroundRenderer.SetProjection(width, height);
-      GroundRenderer.SetModel();
-      GroundRenderer.SetView(lookX, lookY);
-      GroundRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-      GroundRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-
-      GroundRenderer.AddUniform("minLon", minLon);
-      GroundRenderer.AddUniform("minLat", minLat);
-      GroundRenderer.AddUniform("maxLon", maxLon);
-      GroundRenderer.AddUniform("maxLat", maxLat);
-    }
-
   }
 
   void osmscout::MapPainterOpenGL::onZoom(float zoom) {
@@ -367,10 +374,6 @@ namespace osmscout {
     AreaRenderer.AddUniform("minLat", minLat);
     AreaRenderer.AddUniform("maxLon", maxLon);
     AreaRenderer.AddUniform("maxLat", maxLat);
-    GroundRenderer.AddUniform("minLon", minLon);
-    GroundRenderer.AddUniform("minLat", minLat);
-    GroundRenderer.AddUniform("maxLon", maxLon);
-    GroundRenderer.AddUniform("maxLat", maxLat);
   }
 
   void osmscout::MapPainterOpenGL::onTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
@@ -381,8 +384,6 @@ namespace osmscout {
     lookY += offsetY / 1000;
 
     AreaRenderer.SetView(lookX, lookY);
-    GroundRenderer.SetView(lookX, lookY);
-
   }
 
   void osmscout::MapPainterOpenGL::DrawMap() {
@@ -394,7 +395,6 @@ namespace osmscout {
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //GroundRenderer.Draw();
     AreaRenderer.Draw();
   }
 

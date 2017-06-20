@@ -58,6 +58,7 @@ namespace osmscout {
     osmscout::StyleConfigRef styleConfig;
     osmscout::MapParameter Parameter;
     osmscout::FillStyleRef landFill;
+    osmscout::FillStyleRef seaFill;
 
     std::vector<std::vector<osmscout::Point>> areas;
 
@@ -74,6 +75,8 @@ namespace osmscout {
     void ProcessImageData();
 
     void ProcessLabelData();
+
+    void FinishProcess();
 
   public:
     MapPainterOpenGL();
