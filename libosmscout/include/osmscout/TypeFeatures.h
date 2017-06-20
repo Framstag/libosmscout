@@ -1341,6 +1341,8 @@ namespace osmscout {
   {
   private:
     TagId tagDestination;
+    TagId tagDestinationRef;
+    TagId tagDestinationForward;
 
   public:
     /** Name of this feature */
@@ -1789,6 +1791,7 @@ namespace osmscout {
   typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
   typedef FeatureValueReader<PostalCodeFeature,PostalCodeFeatureValue>             PostalCodeFeatureValueReader;
   typedef FeatureValueReader<IsInFeature,IsInFeatureValue>                         IsInFeatureValueReader;
+  typedef FeatureValueReader<DestinationFeature,DestinationFeatureValue>           DestinationFeatureValueReader;
 
   template <class F, class V>
   class FeatureLabelReader
