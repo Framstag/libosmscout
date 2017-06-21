@@ -146,29 +146,33 @@ RouteStep::RouteStep(const RouteStep& other)
     // no code
 }
 
+RouteStep& RouteStep::operator=(const RouteStep& other)
+{
+  if (this!=&other) {
+    setParent(other.parent());
+    distance=other.distance;
+    distanceDelta=other.distanceDelta;
+    time=other.time;
+    timeDelta=other.timeDelta;
+    description=other.description;
+  }
+
+  return *this;
+}
+
 RoutingListModel::RoutingListModel(QObject* parent)
 : QAbstractListModel(parent)
 {
-    // no code
-}
-
-RouteStep& RouteStep::operator=(const RouteStep& other)
-{
-    if (this!=&other) {
-      setParent(other.parent());
-      distance=other.distance;
-      distanceDelta=other.distanceDelta;
-      time=other.time;
-      timeDelta=other.timeDelta;
-      description=other.description;
-    }
-
-    return *this;
+  router=OSMScoutQt::GetInstance().MakeRouter();
 }
 
 RoutingListModel::~RoutingListModel()
 {
-    route.routeSteps.clear();
+  route.routeSteps.clear();
+  if (router!=NULL){
+    router->deleteLater();
+    router=NULL;
+  }
 }
 
 void RoutingListModel::GetCarSpeedTable(std::map<std::string,double>& map)

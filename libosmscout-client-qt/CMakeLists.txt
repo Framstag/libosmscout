@@ -29,6 +29,7 @@ set(HEADER_FILES
     include/osmscout/private
     include/osmscout/private/ClientQtImportExport.h
     include/osmscout/RoutingModel.h
+    include/osmscout/Router.h
     include/osmscout/SearchLocationModel.h
     include/osmscout/Settings.h
     include/osmscout/TileCache.h
@@ -61,6 +62,7 @@ set(SOURCE_FILES
     src/osmscout/OSMTile.cpp
     src/osmscout/OsmTileDownloader.cpp
     src/osmscout/RoutingModel.cpp
+    src/osmscout/Router.cpp
     src/osmscout/SearchLocationModel.cpp
     src/osmscout/Settings.cpp
     src/osmscout/TileCache.cpp

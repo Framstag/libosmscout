@@ -32,6 +32,7 @@
 
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/Router.h>
 
 /**
  * \ingroup QtAPI
@@ -98,6 +99,7 @@ public slots:
     void clear();
 
 private:
+    Router *router;
     struct RouteSelection
     {
       osmscout::RouteData        routeData;
@@ -147,6 +149,14 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
     Q_INVOKABLE RouteStep* get(int row) const;
+
+    /**
+     * Create LocationEntry from geographic coordinate with optional label.
+     * It may be used from QML when selecting route start/end via point on map.
+     */
+    inline Q_INVOKABLE LocationEntry* locationEntryFromPosition(double lat, double lon, QString label=""){
+      return new LocationEntry(label,osmscout::GeoCoord(lat,lon));
+    }
 };
 
 #endif

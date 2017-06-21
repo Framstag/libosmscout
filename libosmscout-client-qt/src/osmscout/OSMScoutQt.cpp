@@ -38,6 +38,7 @@
 #include <osmscout/RoutingModel.h>
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/StyleFlagsModel.h>
+#include <osmscout/Router.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
@@ -211,4 +212,18 @@ MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
   QObject::connect(thread, SIGNAL(finished()),
                    thread, SLOT(deleteLater()));
   return mapRenderer;
+}
+
+Router* OSMScoutQt::MakeRouter()
+{
+  QThread *thread=new QThread();
+  thread->setObjectName("Router");
+
+  Router *router=new Router(thread,settings,dbThread);
+  router->moveToThread(thread);
+  thread->start();
+
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
+  return router;
 }

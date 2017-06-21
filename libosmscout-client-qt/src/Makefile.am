@@ -13,6 +13,8 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/moc_DBInstance.cpp \
                                  osmscout/RoutingModel.cpp \
                                  osmscout/moc_RoutingModel.cpp \
+                                 osmscout/Router.cpp \
+                                 osmscout/moc_Router.cpp \
                                  osmscout/InputHandler.cpp \
                                  osmscout/moc_InputHandler.cpp \
                                  osmscout/OnlineTileProvider.cpp \
@@ -71,6 +73,7 @@ MOSTLYCLEANFILES = osmscout/moc_DBThread.cpp \
                    osmscout/moc_DBInstance.cpp \
                    osmscout/moc_MapWidget.cpp \
                    osmscout/moc_RoutingModel.cpp \
+                   osmscout/moc_Router.cpp \
                    osmscout/moc_LocationEntry.cpp \
                    osmscout/moc_SearchLocationModel.cpp \
                    osmscout/moc_Settings.cpp \
