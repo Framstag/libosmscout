@@ -48,6 +48,7 @@ namespace osmscout {
     float lookY;
 
     OpenGLMapData AreaRenderer;
+    OpenGLMapData GroundTileRenderer;
     OpenGLMapData GroundRenderer;
     OpenGLMapData PathRenderer;
     OpenGLMapData ImageRenderer;
