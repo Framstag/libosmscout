@@ -23,7 +23,7 @@
 #include <osmscout/MapAggFeatures.h>
 
 // Shared library support
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #if defined(OSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
     #if defined(DLL_EXPORT) || defined(_WINDLL)
       #define OSMSCOUT_MAP_AGG_EXPTEMPL
@@ -40,7 +40,7 @@
 #else
   #define OSMSCOUT_MAP_AGG_IMPORT
   #define OSMSCOUT_MAP_AGG_EXPTEMPL
-  
+
   #if defined(OSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
     #define OSMSCOUT_MAP_AGG_EXPORT __attribute__ ((visibility("default")))
     #define OSMSCOUT_MAP_AGG_DLLLOCAL __attribute__ ((visibility("hidden")))
@@ -58,7 +58,7 @@
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #define OSMSCOUT_MAP_AGG_EXCEPTIONAPI(api) api
 #elif defined(OSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
   #define OSMSCOUT_MAP_AGG_EXCEPTIONAPI(api) OSMSCOUT_MAP_AGG_EXPORT
@@ -68,6 +68,6 @@
 
 #if defined(_MSC_VER)
   #define OSMSCOUT_MAP_AGG_INSTANTIATE_TEMPLATES
-#endif  
+#endif
 #endif
 

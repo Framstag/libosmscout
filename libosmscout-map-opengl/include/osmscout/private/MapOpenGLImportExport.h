@@ -23,7 +23,7 @@
 #include <osmscout/MapOpenGLFeatures.h>
 
 // Shared library support
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #if defined(OSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
     #if defined(DLL_EXPORT) || defined(_WINDLL)
       #define OSMSCOUT_MAP_OPENGL_EXPTEMPL
@@ -58,7 +58,7 @@
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #define OSMSCOUT_MAP_OPENGL_EXCEPTIONAPI(api) api
 #elif defined(OSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
   #define OSMSCOUT_MAP_OPENGL_EXCEPTIONAPI(api) OSMSCOUT_MAP_OPENGL_EXPORT

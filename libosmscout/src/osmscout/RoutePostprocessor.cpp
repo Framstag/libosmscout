@@ -643,6 +643,82 @@ namespace osmscout {
      return true;
   }
 
+  RoutePostprocessor::DestinationPostprocessor::DestinationPostprocessor()
+  {
+    // no code
+  }
+
+  bool RoutePostprocessor::DestinationPostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                             const RoutingProfile& /*profile*/,
+                                                             RouteDescription& description,
+                                                             Database& database)
+  {
+    std::list<RouteDescription::Node>::iterator lastJunction=description.Nodes().end();
+    ObjectFileRef                               prevObject;
+    ObjectFileRef                               curObject;
+    AreaRef                                     area;
+    WayRef                                      way;
+    const TypeConfigRef                         typeConfig(database.GetTypeConfig());
+    DestinationFeatureValueReader               destinationReader(*typeConfig);
+
+    for (auto node=description.Nodes().begin(); node!=description.Nodes().end(); ++node) {
+      if (!node->GetObjects().empty()) {
+        lastJunction=node;
+      }
+
+      // The last node does not have a pathWayId set, since we are not going anywhere!
+      if (node->HasPathObject()) {
+        // Only load the next way, if it is different from the old one
+        curObject=node->GetPathObject();
+
+        if (curObject!=prevObject) {
+          switch (node->GetPathObject().GetType()) {
+          case refNone:
+            assert(false);
+            break;
+          case refNode:
+            assert(false);
+            break;
+          case refArea:
+            area=postprocessor.GetArea(node->GetPathObject().GetFileOffset());
+
+            break;
+          case refWay:
+            way=postprocessor.GetWay(node->GetPathObject().GetFileOffset());
+
+            DestinationFeatureValue *destinationValue=destinationReader.GetValue(way->GetFeatureValueBuffer());
+
+            if (destinationValue!=NULL &&
+                lastJunction!=description.Nodes().end()) {
+              std::string destination=destinationValue->GetDestination();
+
+              std::cout << "Found destination '" << destination << "' for object " << way->GetObjectFileRef().GetName() << std::endl;
+
+              lastJunction->AddDescription(RouteDescription::CROSSING_DESTINATION_DESC,
+                                           std::make_shared<RouteDescription::DestinationDescription>(destination));
+
+            }
+            else {
+              //speed=0;
+            }
+
+            break;
+          }
+        }
+
+        /*
+        if (speed!=0) {
+          node.AddDescription(RouteDescription::WAY_MAXSPEED_DESC,
+                              std::make_shared<RouteDescription::MaxSpeedDescription>(speed));
+        }  */
+
+        prevObject=curObject;
+      }
+    }
+
+    return true;
+  }
+
   bool RoutePostprocessor::MaxSpeedPostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                           const RoutingProfile& /*profile*/,
                                                           RouteDescription& description,

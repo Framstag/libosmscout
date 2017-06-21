@@ -289,6 +289,11 @@ namespace osmscout {
                  fontSize);
 
     height=pango_font_description_get_size(font)/PANGO_SCALE;
+#else
+      unused(projection);
+      unused(parameter);
+      unused(fontSize);
+      height=0.0;
 #endif
   }
 
@@ -322,6 +327,16 @@ namespace osmscout {
     height=pango_font_description_get_size(font)/PANGO_SCALE;
 
     g_object_unref(layout);
+#else
+      unused(projection);
+      unused(parameter);
+      unused(fontSize);
+      unused(text);
+      xOff=0.0;
+      yOff=0.0;
+      width=0.0;
+      height=0.0;
+
 #endif
   }
 

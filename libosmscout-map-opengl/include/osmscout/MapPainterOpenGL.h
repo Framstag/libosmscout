@@ -4,6 +4,7 @@
 /*
   This source is part of the libosmscout-map library
   Copyright (C) 2013  Tim Teulings
+  Copyright (C) 2017  Fanny Monori
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,112 +21,77 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#define GLEW_STATIC
+
+#include <GL/glew.h>
+
 #include <osmscout/MapOpenGLFeatures.h>
 
+#include <osmscout/OpenGLMapData.h>
+
 #include <osmscout/private/MapOpenGLImportExport.h>
-
-#include <osmscout/MapPainter.h>
-
-#if defined(__APPLE__) && defined(__MACH__)
-  #include <GLUT/glut.h>
-#else
-  #if defined(OSMSCOUT_MAP_OPENGL_HAVE_GL_GLUT_H)
-    #include <GL/glut.h>
-  #elif defined(OSMSCOUT_MAP_OPENGL_HAVE_GLUT_GLUT_H)
-    #include <GLUT/glut.h>
-  #else
-    #error "no glut.h"
-  #endif
-#endif
+#include <mutex>
 
 namespace osmscout {
-
-  class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL : public MapPainter
-  {
+  class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL {
   private:
-    CoordBufferImpl<Vertex3D> *coordBuffer;
-    GLUtesselator             *tesselator;
+    int width;
+    int height;
 
-  protected:
-    bool HasIcon(const StyleConfig& styleConfig,
-                 const MapParameter& parameter,
-                 IconStyle& style);
+    float zoomLevel;
+    float minLon;
+    float minLat;
+    float maxLon;
+    float maxLat;
 
-    bool HasPattern(const MapParameter& parameter,
-                    const FillStyle& style);
+    float lookX;
+    float lookY;
 
-    void GetFontHeight(const Projection& projection,
-                       const MapParameter& parameter,
-                       double fontSize,
-                       double& height);
+    OpenGLMapData AreaRenderer;
+    OpenGLMapData GroundRenderer;
+    OpenGLMapData PathRenderer;
+    OpenGLMapData ImageRenderer;
+    OpenGLMapData SymbolRenderer;
+    OpenGLMapData LabelRenderer;
 
-    void GetTextDimension(const Projection& projection,
-                          const MapParameter& parameter,
-                          double objectWidth,
-                          double fontSize,
-                          const std::string& text,
-                          double& xOff,
-                          double& yOff,
-                          double& width,
-                          double& height);
+    osmscout::MapData MapData;
+    osmscout::StyleConfigRef styleConfig;
+    osmscout::MapParameter Parameter;
+    osmscout::FillStyleRef landFill;
 
-    void DrawGround(const Projection& projection,
-                    const MapParameter& parameter,
-                    const FillStyle& style);
+    std::vector<std::vector<osmscout::Point>> areas;
 
-    void DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const LabelData& label);
+    void ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                         const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
+                         const osmscout::GeoBox &BoundingBox);
 
-    void DrawPrimitivePath(const Projection& projection,
-                           const MapParameter& parameter,
-                           const DrawPrimitiveRef& primitive,
-                           double x, double y,
-                           double minX,
-                           double minY,
-                           double maxX,
-                           double maxY);
+    void ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                           const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
+                           const osmscout::GeoBox &BoundingBox);
 
-    void DrawSymbol(const Projection& projection,
-                    const MapParameter& parameter,
-                    const Symbol& symbol,
-                    double x, double y);
+    void ProcessPathData();
 
-    void DrawIcon(const IconStyle* style,
-                  double x, double y);
+    void ProcessImageData();
 
-    void DrawPath(const Projection& projection,
-                  const MapParameter& parameter,
-                  const Color& color,
-                  double width,
-                  const std::vector<double>& dash,
-                  LineStyle::CapStyle startCap,
-                  LineStyle::CapStyle endCap,
-                  size_t transStart, size_t transEnd);
-
-    void DrawContourSymbol(const Projection& projection,
-                           const MapParameter& parameter,
-                           const Symbol& symbol,
-                           double space,
-                           size_t transStart, size_t transEnd);
-
-    void DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd);
-
-    void DrawArea(const Projection& projection,
-                  const MapParameter& parameter,
-                  const AreaData& area);
+    void ProcessLabelData();
 
   public:
-    MapPainterOpenGL(const StyleConfigRef& styleConfig);
-    virtual ~MapPainterOpenGL();
+    MapPainterOpenGL();
 
-    bool DrawMap(const Projection& projection,
-                 const MapParameter& parameter,
-                 const MapData& data);
+    MapPainterOpenGL(int width, int height);
+
+    ~MapPainterOpenGL();
+
+    void loadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                  const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
+                  const osmscout::GeoBox &BoundingBox);
+
+    void onZoom(float zoomSize);
+
+    void onTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
+
+    void DrawMap();
+
   };
 }
 

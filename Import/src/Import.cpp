@@ -26,36 +26,11 @@
 #include <string>
 #include <vector>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/Import.h>
-
-static bool StringToBool(const char* string, bool& value)
-{
-  if (strcmp(string,"true")==0) {
-    value=true;
-
-    return true;
-  }
-  else if (strcmp(string,"false")==0) {
-    value=false;
-
-    return true;
-  }
-
-  return false;
-}
-
-static const char* BoolToString(bool value)
-{
-  if (value) {
-    return "true";
-  }
-  else {
-    return "false";
-  }
-}
 
 static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
 {
@@ -101,7 +76,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --router <router description>        definition of a router (default: car,bicycle,foot:router)" << std::endl;
   std::cout << std::endl;
 
-  std::cout << " --strictAreas true|false             assure that areas are simple (default: " << BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
+  std::cout << " --strictAreas true|false             assure that areas are simple (default: " << osmscout::BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
 
   std::cout << " --processingQueueSize <number>       size of of the processing worker queues (default: " << parameter.GetProcessingQueueSize() << ")" << std::endl;
   std::cout << std::endl;
@@ -110,24 +85,24 @@ void DumpHelp(osmscout::ImportParameter& parameter)
 
   std::cout << " --rawCoordBlockSize <number>         number of raw coords resolved in block (default: " << parameter.GetRawCoordBlockSize() << ")" << std::endl;
 
-  std::cout << " --rawNodeDataMemoryMaped true|false  memory maped raw node data file access (default: " << BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawNodeDataMemoryMaped true|false  memory maped raw node data file access (default: " << osmscout::BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
 
-  std::cout << " --rawWayIndexMemoryMaped true|false  memory maped raw way index file access (default: " << BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
-  std::cout << " --rawWayDataMemoryMaped true|false   memory maped raw way data file access (default: " << BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawWayIndexMemoryMaped true|false  memory maped raw way index file access (default: " << osmscout::BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawWayDataMemoryMaped true|false   memory maped raw way data file access (default: " << osmscout::BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --rawWayIndexCacheSize <number>      raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
   std::cout << " --rawWayBlockSize <number>           number of raw ways resolved in block (default: " << parameter.GetRawWayBlockSize() << ")" << std::endl;
 
   std::cout << " --noSort                             do not sort objects" << std::endl;
   std::cout << " --sortBlockSize <number>             size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
 
-  std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << osmscout::BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
   std::cout << " --coordBlockSize <number>            number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
 
-  std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << osmscout::BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
 
-  std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << osmscout::BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
 
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
@@ -141,74 +116,6 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
   std::cout << " --delete-analysis-files true|false   deletes all analysis files after execution of the importer" << std::endl;
   std::cout << " --delete-report-files true|false     deletes all report files after execution of the importer" << std::endl;
-}
-
-bool ParseBoolArgument(int argc,
-                       char* argv[],
-                       int& currentIndex,
-                       bool& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  if (!StringToBool(argv[argumentIndex],
-                    value)) {
-    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
-bool ParseStringArgument(int argc,
-                         char* argv[],
-                         int& currentIndex,
-                         std::string& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  value=argv[argumentIndex];
-
-  return true;
-}
-
-bool ParseSizeTArgument(int argc,
-                        char* argv[],
-                        int& currentIndex,
-                        size_t& value)
-{
-  int parameterIndex=currentIndex;
-  int argumentIndex=currentIndex+1;
-
-  currentIndex+=2;
-
-  if (argumentIndex>=argc) {
-    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  if (!osmscout::StringToNumber(argv[argumentIndex],
-                                value)) {
-    std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
-    return false;
-  }
-
-  return true;
 }
 
 osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
@@ -500,10 +407,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"-s")==0) {
       size_t startStep;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             startStep)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       startStep)) {
         parameter.SetSteps(startStep,
                            parameter.GetEndStep());
       }
@@ -514,10 +421,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"-e")==0) {
       size_t endStep;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             endStep)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       endStep)) {
         parameter.SetSteps(parameter.GetStartStep(),
                            endStep);
 
@@ -529,10 +436,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--eco")==0) {
       bool eco;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            eco)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      eco)) {
         parameter.SetEco(eco);
       }
       else {
@@ -547,10 +454,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--typefile")==0) {
       std::string typefile;
 
-      if (ParseStringArgument(argc,
-                              argv,
-                              i,
-                              typefile)) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        typefile)) {
         parameter.SetTypefile(typefile);
       }
       else {
@@ -560,10 +467,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--destinationDirectory")==0) {
       std::string destinationDirectory;
 
-      if (ParseStringArgument(argc,
-                              argv,
-                              i,
-                              destinationDirectory)) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        destinationDirectory)) {
         parameter.SetDestinationDirectory(destinationDirectory);
       }
       else {
@@ -573,10 +480,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--bounding-polygon")==0) {
       std::string boundingPolygonFile;
 
-      if (ParseStringArgument(argc,
-                              argv,
-                              i,
-                              boundingPolygonFile)) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        boundingPolygonFile)) {
         parameter.SetBoundingPolygonFile(boundingPolygonFile);
       }
       else {
@@ -603,10 +510,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--strictAreas")==0) {
       bool strictAreas;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            strictAreas)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      strictAreas)) {
         parameter.SetStrictAreas(strictAreas);
       }
       else {
@@ -616,10 +523,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--processingQueueSize")==0) {
       size_t processingQueueSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             processingQueueSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       processingQueueSize)) {
         parameter.SetProcessingQueueSize(processingQueueSize);
       }
       else {
@@ -629,10 +536,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--numericIndexPageSize")==0) {
       size_t numericIndexPageSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             numericIndexPageSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       numericIndexPageSize)) {
         parameter.SetNumericIndexPageSize(numericIndexPageSize);
       }
       else {
@@ -642,10 +549,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--rawCoordBlockSize")==0) {
       size_t rawCoordBlockSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             rawCoordBlockSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       rawCoordBlockSize)) {
         parameter.SetRawCoordBlockSize(rawCoordBlockSize);
       }
       else {
@@ -655,10 +562,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--rawNodeDataMemoryMaped")==0) {
       bool rawNodeDataMemoryMaped;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            rawNodeDataMemoryMaped)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      rawNodeDataMemoryMaped)) {
         parameter.SetRawNodeDataMemoryMaped(rawNodeDataMemoryMaped);
       }
       else {
@@ -668,10 +575,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--rawWayIndexMemoryMaped")==0) {
       bool rawWayIndexMemoryMaped;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            rawWayIndexMemoryMaped)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      rawWayIndexMemoryMaped)) {
         parameter.SetRawWayIndexMemoryMaped(rawWayIndexMemoryMaped);
       }
       else {
@@ -681,10 +588,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--rawWayDataMemoryMaped")==0) {
       bool rawWayDataMemoryMaped;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            rawWayDataMemoryMaped)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      rawWayDataMemoryMaped)) {
         parameter.SetRawWayDataMemoryMaped(rawWayDataMemoryMaped);
       }
       else {
@@ -694,10 +601,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--rawWayIndexCacheSize")==0) {
       size_t rawWayIndexCacheSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             rawWayIndexCacheSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       rawWayIndexCacheSize)) {
         parameter.SetRawWayIndexCacheSize(rawWayIndexCacheSize);
       }
       else {
@@ -707,10 +614,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--rawWayBlockSize")==0) {
       size_t rawWayBlockSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             rawWayBlockSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       rawWayBlockSize)) {
         parameter.SetRawWayBlockSize(rawWayBlockSize);
       }
       else {
@@ -725,10 +632,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--sortBlockSize")==0) {
       size_t sortBlockSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             sortBlockSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       sortBlockSize)) {
         parameter.SetSortBlockSize(sortBlockSize);
       }
       else {
@@ -738,10 +645,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--coordDataMemoryMaped")==0) {
       bool coordDataMemoryMaped;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            coordDataMemoryMaped)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      coordDataMemoryMaped)) {
         parameter.SetCoordDataMemoryMaped(coordDataMemoryMaped);
       }
       else {
@@ -751,10 +658,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--coordIndexCacheSize")==0) {
       size_t coordIndexCacheSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             coordIndexCacheSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       coordIndexCacheSize)) {
         parameter.SetCoordIndexCacheSize(coordIndexCacheSize);
       }
       else {
@@ -764,10 +671,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--coordBlockSize")==0) {
       size_t coordBlockSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             coordBlockSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       coordBlockSize)) {
         parameter.SetCoordBlockSize(coordBlockSize);
       }
       else {
@@ -777,10 +684,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--areaDataMemoryMaped")==0) {
       bool areaDataMemoryMaped;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            areaDataMemoryMaped)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      areaDataMemoryMaped)) {
         parameter.SetAreaDataMemoryMaped(areaDataMemoryMaped);
       }
       else {
@@ -790,10 +697,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--areaDataCacheSize")==0) {
       size_t areaDataCacheSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             areaDataCacheSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       areaDataCacheSize)) {
         parameter.SetAreaDataCacheSize(areaDataCacheSize);
       }
       else {
@@ -803,10 +710,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--wayDataMemoryMaped")==0) {
       bool wayDataMemoryMaped;
 
-      if (ParseBoolArgument(argc,
-                            argv,
-                            i,
-                            wayDataMemoryMaped)) {
+      if (osmscout::ParseBoolArgument(argc,
+                                      argv,
+                                      i,
+                                      wayDataMemoryMaped)) {
         parameter.SetWayDataMemoryMaped(wayDataMemoryMaped);
       }
       else {
@@ -816,10 +723,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--wayDataCacheSize")==0) {
       size_t wayDataCacheSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             wayDataCacheSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       wayDataCacheSize)) {
         parameter.SetWayDataCacheSize(wayDataCacheSize);
       }
       else {
@@ -829,10 +736,10 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"--routeNodeBlockSize")==0) {
       size_t routeNodeBlockSize;
 
-      if (ParseSizeTArgument(argc,
-                             argv,
-                             i,
-                             routeNodeBlockSize)) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       routeNodeBlockSize)) {
         parameter.SetRouteNodeBlockSize(routeNodeBlockSize);
       }
       else {
@@ -866,34 +773,34 @@ int main(int argc, char* argv[])
         }
     }
     else if (strcmp(argv[i],"--delete-temporary-files")==0) {
-      if (!ParseBoolArgument(argc,
-                             argv,
-                             i,
-                             deleteTemporaries)) {
+      if (!osmscout::ParseBoolArgument(argc,
+                                       argv,
+                                       i,
+                                       deleteTemporaries)) {
         parameterError=true;
       }
     }
     else if (strcmp(argv[i],"--delete-debugging-files")==0) {
-      if (!ParseBoolArgument(argc,
-                             argv,
-                             i,
-                             deleteDebugging)) {
+      if (!osmscout::ParseBoolArgument(argc,
+                                       argv,
+                                       i,
+                                       deleteDebugging)) {
         parameterError=true;
       }
     }
     else if (strcmp(argv[i],"--delete-analysis-files")==0) {
-      if (!ParseBoolArgument(argc,
-                             argv,
-                             i,
-                             deleteAnalysis)) {
+      if (!osmscout::ParseBoolArgument(argc,
+                                       argv,
+                                       i,
+                                       deleteAnalysis)) {
         parameterError=true;
       }
     }
     else if (strcmp(argv[i],"--delete-report-files")==0) {
-      if (!ParseBoolArgument(argc,
-                             argv,
-                             i,
-                             deleteReport)) {
+      if (!osmscout::ParseBoolArgument(argc,
+                                       argv,
+                                       i,
+                                       deleteReport)) {
         parameterError=true;
       }
     }
@@ -904,7 +811,7 @@ int main(int argc, char* argv[])
       i++;
     }
     else {
-      mapfiles.push_back(argv[i]);
+      mapfiles.push_back(std::string(argv[i]));
 
       i++;
     }

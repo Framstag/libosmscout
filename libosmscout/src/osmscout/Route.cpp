@@ -53,6 +53,8 @@ namespace osmscout {
   const char* const RouteDescription::MOTORWAY_LEAVE_DESC    = "MotorwayLeave";
   /** Constant for a description of motorway junction (MotorwayJunctionDescription) */
   const char* const RouteDescription::MOTORWAY_JUNCTION_DESC = "MotorwayJunction";
+  /** Constant for a description of a destination to choose at a junction */
+  const char* const RouteDescription::CROSSING_DESTINATION_DESC = "CrossingDestination";
   /** Constant for a description of the maximum speed for the given way */
   const char* const RouteDescription::WAY_MAXSPEED_DESC      = "MaxSpeed";
   /** Constant for a description of type name of the way (TypeNameDescription) */
@@ -387,6 +389,22 @@ namespace osmscout {
   std::string RouteDescription::MotorwayJunctionDescription::GetDebugString() const
   {
     return "motorway junction";
+  }
+
+  RouteDescription::DestinationDescription::DestinationDescription(const std::string& description)
+    : description(description)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::DestinationDescription::GetDebugString() const
+  {
+    return "Start: '"+description+"'";
+  }
+
+  std::string RouteDescription::DestinationDescription::GetDescription() const
+  {
+    return description;
   }
 
   RouteDescription::MaxSpeedDescription::MaxSpeedDescription(uint8_t speed)
