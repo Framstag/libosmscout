@@ -52,7 +52,7 @@ IF %COMPILER%==msvc2015 (
     SET "CMAKE_PREFIX_PATH=C:\Qt\5.8\msvc2015_64"
     mkdir build
     cd build
-    cmake -G "Visual Studio 14 2015 Win64" ..
+    cmake -G "Visual Studio 14 2015 Win64" .. -DCMAKE_SYSTEM_VERSION=10.0.10586.0
     cmake --build .
     echo Finished cmake build
   )

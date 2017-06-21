@@ -402,7 +402,8 @@ static void DumpMotorwayEnterDescription(size_t& lineCount,
 
 static void DumpMotorwayChangeDescription(size_t& lineCount,
                                           const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
-                                          const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription)
+                                          const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                                          const osmscout::RouteDescription::DestinationDescriptionRef& crossingDestinationDescription)
 {
   NextLine(lineCount);
 
@@ -432,6 +433,10 @@ static void DumpMotorwayChangeDescription(size_t& lineCount,
   if (motorwayChangeDescription->GetToDescription() &&
       motorwayChangeDescription->GetToDescription()->HasName()) {
     std::cout << " to '" << motorwayChangeDescription->GetToDescription()->GetDescription() << "'";
+  }
+
+  if (crossingDestinationDescription) {
+    std::cout << " destination '" << crossingDestinationDescription->GetDescription() << "'";
   }
 
   std::cout << std::endl;
@@ -693,6 +698,7 @@ int main(int argc, char* argv[])
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
 
   osmscout::RoutePostprocessor::InstructionPostprocessorRef instructionProcessor=std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>();
@@ -774,6 +780,7 @@ int main(int argc, char* argv[])
     osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
     osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
     osmscout::RouteDescription::MotorwayJunctionDescriptionRef motorwayJunctionDescription;
+    osmscout::RouteDescription::DestinationDescriptionRef      crossingDestinationDescription;
     osmscout::RouteDescription::MaxSpeedDescriptionRef         maxSpeedDescription;
     osmscout::RouteDescription::TypeNameDescriptionRef         typeNameDescription;
 
@@ -841,6 +848,11 @@ int main(int argc, char* argv[])
     desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_JUNCTION_DESC);
     if (desc) {
       motorwayJunctionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayJunctionDescription>(desc);
+    }
+
+    desc=node->GetDescription(osmscout::RouteDescription::CROSSING_DESTINATION_DESC);
+    if (desc) {
+      crossingDestinationDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::DestinationDescription>(desc);
     }
 
     desc=node->GetDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
@@ -954,7 +966,8 @@ int main(int argc, char* argv[])
     else if (motorwayChangeDescription) {
       DumpMotorwayChangeDescription(lineCount,
                                     motorwayChangeDescription,
-                                    motorwayJunctionDescription);
+                                    motorwayJunctionDescription,
+                                    crossingDestinationDescription);
     }
     else if (motorwayLeaveDescription) {
       DumpMotorwayLeaveDescription(lineCount,

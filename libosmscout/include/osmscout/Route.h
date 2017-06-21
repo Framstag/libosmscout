@@ -75,6 +75,8 @@ namespace osmscout {
     static const char* const MOTORWAY_LEAVE_DESC;
     /** Constant for a description of node describing a motorway junction */
     static const char* const MOTORWAY_JUNCTION_DESC;
+    /** Constant for a description of a destination to choose at a junction */
+    static const char* const CROSSING_DESTINATION_DESC;
     /** Constant for a description of the maximum speed for the given way */
     static const char* const WAY_MAXSPEED_DESC;
     /** Constant for a description of type name of the way (TypeNameDescription) */
@@ -447,6 +449,25 @@ namespace osmscout {
     };
 
     typedef std::shared_ptr<MotorwayJunctionDescription> MotorwayJunctionDescriptionRef;
+
+    /**
+     * \ingroup Routing
+     * Destination of the route
+     */
+    class OSMSCOUT_API DestinationDescription : public Description
+    {
+    private:
+      std::string description;
+
+    public:
+      DestinationDescription(const std::string& description);
+
+      std::string GetDebugString() const;
+
+      std::string GetDescription() const;
+    };
+
+    typedef std::shared_ptr<DestinationDescription> DestinationDescriptionRef;
 
     /**
      * \ingroup Routing

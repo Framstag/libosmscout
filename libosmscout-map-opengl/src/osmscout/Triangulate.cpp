@@ -17,9 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 //#include <utility>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Constrained_Delaunay_triangulation_2.h>
 #include <osmscout/Triangulate.h>
+
+#include <osmscout/system/Math.h>
+
 #include <poly2tri/poly2tri.h>
 
 namespace osmscout {

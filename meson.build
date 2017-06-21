@@ -31,7 +31,21 @@ if compiler.has_argument('-fopenmp')
 endif
 
 if compiler.get_id()=='msvc'
-  add_global_arguments(['-D_CRT_SECURE_NO_DEPRECATE', '-D_CRT_NONSTDC_NO_DEPRECATE'], language: 'cpp')
+  # Allow the compiler to fork itself for faster compiling
+  add_global_arguments('/MP', language: 'cpp')
+
+  # Allow the compiler to create bigger object files
+  add_global_arguments('/bigobj', language: 'cpp')
+
+  # Do not warn regarding insecure function calls
+  add_global_arguments('-D_CRT_SECURE_NO_DEPRECATE', language: 'cpp')
+  add_global_arguments('-D_CRT_NONSTDC_NO_DEPRECATE', language: 'cpp')
+
+  # Fast floating point processing
+  add_global_arguments('/fp:fast', language: 'cpp')
+
+  # Disable some over-eager compiler warnings
+  add_global_arguments(['/wd4251', '/wd4458'], language: 'cpp')
 
   if get_option('default_library')=='shared'
     # TODO: Should only be set for library builds, not executables
