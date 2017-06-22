@@ -71,13 +71,13 @@ namespace osmscout {
   public:
     virtual ~CmdLineArgParser();
 
-    virtual std::string GetArgTemplate(const std::string& arg) = 0;
+    virtual std::string GetArgTemplate(const std::string& arg) const = 0;
     virtual CmdLineParseResult Parse(CmdLineScanner& scanner) = 0;
   };
 
   typedef std::shared_ptr<CmdLineArgParser> CmdLineArgParserRef;
 
-  class OSMSCOUT_API CmdLineFlagArgParser : public CmdLineArgParser
+  class CmdLineFlagArgParser : public CmdLineArgParser
   {
   public:
     typedef std::function<void(const bool&)> SetterFunction;
@@ -99,7 +99,7 @@ namespace osmscout {
       // no code
     }
 
-    std::string GetArgTemplate(const std::string& arg)
+    std::string GetArgTemplate(const std::string& arg) const
     {
       return arg;
     }
@@ -112,7 +112,7 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_API CmdLineBoolArgParser : public CmdLineArgParser
+  class CmdLineBoolArgParser : public CmdLineArgParser
   {
   public:
     typedef std::function<void(const bool&)> SetterFunction;
@@ -134,7 +134,7 @@ namespace osmscout {
       // no code
     }
 
-    std::string GetArgTemplate(const std::string& arg)
+    std::string GetArgTemplate(const std::string& arg) const
     {
       return arg+" <true|false>";
     }
@@ -161,7 +161,7 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_API CmdLineStringArgParser : public CmdLineArgParser
+  class CmdLineStringArgParser : public CmdLineArgParser
   {
   public:
     typedef std::function<void(const std::string&)> SetterFunction;
@@ -183,7 +183,7 @@ namespace osmscout {
       // no code
     }
 
-    std::string GetArgTemplate(const std::string& arg)
+    std::string GetArgTemplate(const std::string& arg) const
     {
       return arg+" <string>";
     }
@@ -203,7 +203,7 @@ namespace osmscout {
   };
 
   template<typename N>
-  class OSMSCOUT_API CmdLineNumberArgParser : public CmdLineArgParser
+  class CmdLineNumberArgParser : public CmdLineArgParser
   {
   public:
     typedef std::function<void(const N&)> SetterFunction;
@@ -225,7 +225,7 @@ namespace osmscout {
       // no code
     }
 
-    std::string GetArgTemplate(const std::string& arg)
+    std::string GetArgTemplate(const std::string& arg) const
     {
       return arg+" <number>";
     }
