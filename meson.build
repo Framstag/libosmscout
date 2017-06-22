@@ -108,7 +108,7 @@ int main() {
 return 0;
 }
 ''', dependencies: [aggDep, aggftpicDep, ftDep])
-elif ftDep.found() and aggftpicDep.found()
+elif ftDep.found() and aggftDep.found()
 aggftAvailable = compiler.links('''
 #include <agg2/agg_font_freetype.h>
 
