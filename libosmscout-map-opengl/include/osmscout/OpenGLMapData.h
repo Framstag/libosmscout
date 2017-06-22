@@ -31,8 +31,10 @@
 #include <fstream>
 
 namespace osmscout {
+
   class OpenGLMapData {
   private:
+
     std::vector<GLfloat> Vertices;
     std::vector<GLuint> Elements;
 
@@ -99,6 +101,10 @@ namespace osmscout {
     void clearData() {
       Vertices.clear();
       Elements.clear();
+    }
+
+    void BindBuffers() {
+      glBindVertexArray(VAO);
     }
 
     bool InitContext() {
@@ -168,7 +174,6 @@ namespace osmscout {
     }
 
     void LoadVertices() {
-      int i = 0;
       LoadVBO();
       LoadEBO();
     }
@@ -250,9 +255,15 @@ namespace osmscout {
       glUniform1f(uniform, value);
     }
 
+    GLuint getVAO() {
+      return this->VAO;
+    }
+
+    GLuint getShaderProgram() {
+      return this->shaderProgram;
+    }
+
     void Draw() {
-      glUseProgram(shaderProgram);
-      glBindVertexArray(VAO);
       glDrawElements(GL_TRIANGLES, (GLsizei) Elements.size(), GL_UNSIGNED_INT, 0);
     }
 

@@ -21,7 +21,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
-#include <thread>
 #include <GLFW/glfw3.h>
 
 osmscout::DatabaseParameter databaseParameter;
@@ -39,7 +38,6 @@ osmscout::MapPainterOpenGL *renderer;
 int zoomLevel;
 
 int zoom = 0;
-int startTime;
 
 double prevX = 0;
 double prevY = 0;
@@ -84,6 +82,7 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) 
   mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
+  mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
   renderer->onZoom(yoffset);
   renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
 
@@ -150,6 +149,7 @@ int main(int argc, char *argv[]) {
   mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
+  mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
 
   GLFWwindow *window;
   glfwSetErrorCallback(ErrorCallback);
