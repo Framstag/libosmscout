@@ -113,7 +113,7 @@ endif()
 #---- AccessParse
 add_executable(AccessParse src/AccessParse.cpp)
 set_property(TARGET AccessParse PROPERTY CXX_STANDARD 11)
-target_include_directories(AccessParse PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_include_directories(AccessParse PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 target_link_libraries(AccessParse osmscout)
 add_test(NAME AccessParse COMMAND AccessParse)
 

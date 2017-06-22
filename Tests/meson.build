@@ -2,7 +2,7 @@ testIncDir = include_directories('include')
 
 AccessParse =  executable('AccessParse',
              'src/AccessParse.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
              install: false)

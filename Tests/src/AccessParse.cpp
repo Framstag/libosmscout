@@ -6,6 +6,9 @@
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/util/TagErrorReporter.h>
 
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
 std::string AccessToString(uint8_t access)
 {
   std::stringstream buffer;
@@ -94,11 +97,11 @@ std::string AccessToString(uint8_t access)
   return buffer.str();
 }
 
-bool CheckParseSuccess(bool canFoot,
+void CheckParseSuccess(bool canFoot,
                        bool canBicycle,
                        bool canCar,
-                       uint8_t expectedAccessValue,
-                       const std::unordered_map<std::string,std::string>& stringTags)
+                       const std::unordered_map<std::string,std::string>& stringTags,
+                       uint8_t& actualAccessValue)
 {
   osmscout::SilentTagErrorReporter                reporter;
   osmscout::TypeConfig                            typeConfig;
@@ -126,7 +129,7 @@ bool CheckParseSuccess(bool canFoot,
                             featureInstanceIndex)) {
     std::cout << "FAIL: internal error" << std::endl;
 
-    return false;
+    return;
   }
 
   osmscout::FeatureInstance featureInstance=testType->GetFeature(featureInstanceIndex);
@@ -146,109 +149,98 @@ bool CheckParseSuccess(bool canFoot,
 
   osmscout::AccessFeatureValue *accessFeatureValue=accessValueReader.GetValue(buffer);
 
-  uint8_t accessValue;
-
   if (accessFeatureValue!=NULL) {
-    accessValue=accessFeatureValue->GetAccess();
+    actualAccessValue=accessFeatureValue->GetAccess();
   }
   else {
-    accessValue=testType->GetDefaultAccess();
-  }
-
-  if (expectedAccessValue==accessValue) {
-    std::cout << "OK" << std::endl;
-    return true;
-  }
-  else {
-    std::cout << "FAIL: " << "expected " << AccessToString(expectedAccessValue) << " got " << AccessToString(accessValue) << std::endl;
-    return false;
+    actualAccessValue=testType->GetDefaultAccess();
   }
 }
 
-int main()
-{
-  int errors=0;
-
+TEST_CASE("Highway=path (FOOT, BICYCLE) with bicycle explicitly forbidden") {
   std::unordered_map<std::string,std::string> tags;
+  uint8_t expectedValue=osmscout::AccessFeatureValue::footForward|osmscout::AccessFeatureValue::footBackward;
+  uint8_t actualValue=0;
 
-  // Highway=path (FOOT, BICYCLE) with bicycle explicitly forbidden
-
-  tags.clear();
   tags["access"]="agricultural";
   tags["bicycle"]="no";
   tags["foot"]="yes";
 
-  if (!CheckParseSuccess(true,
-                         true,
-                         false,
-                         osmscout::AccessFeatureValue::footForward|osmscout::AccessFeatureValue::footBackward,
-                         tags)) {
-    errors++;
-  }
+  CheckParseSuccess(true,
+                    true,
+                    false,
+                    tags,
+                    actualValue);
 
-  // Highway=footway (FOOT) with bicycle explicitly allowed
+  REQUIRE(AccessToString(actualValue)==AccessToString(expectedValue));
+}
 
-  tags.clear();
+TEST_CASE("Highway=footway (FOOT) with bicycle explicitly allowed") {
+  std::unordered_map<std::string,std::string> tags;
+  uint8_t expectedValue=osmscout::AccessFeatureValue::footForward|osmscout::AccessFeatureValue::footBackward|osmscout::AccessFeatureValue::bicycleForward|osmscout::AccessFeatureValue::bicycleBackward;
+  uint8_t actualValue=0;
+
   tags["bicycle"]="yes";
 
-  if (!CheckParseSuccess(true,
-                         false,
-                         false,
-                         osmscout::AccessFeatureValue::footForward|osmscout::AccessFeatureValue::footBackward|
-                         osmscout::AccessFeatureValue::bicycleForward|osmscout::AccessFeatureValue::bicycleBackward,
-                         tags)) {
-    errors++;
-  }
+  CheckParseSuccess(true,
+                    false,
+                    false,
+                    tags,
+                    actualValue);
 
-  // Highway=track (FOOT) with bicycle explicitly forbidden
+  REQUIRE(AccessToString(actualValue)==AccessToString(expectedValue));
+}
 
-  tags.clear();
+TEST_CASE("Highway=track (FOOT) with bicycle explicitly forbidden") {
+  std::unordered_map<std::string,std::string> tags;
+  uint8_t expectedValue=osmscout::AccessFeatureValue::footForward|osmscout::AccessFeatureValue::footBackward;
+  uint8_t actualValue=0;
+
   tags["bicycle"]="no";
 
-  if (!CheckParseSuccess(true,
-                         true,
-                         false,
-                         osmscout::AccessFeatureValue::footForward|osmscout::AccessFeatureValue::footBackward,
-                         tags)) {
-    errors++;
-  }
+  CheckParseSuccess(true,
+                    true,
+                    false,
+                    tags,
+                    actualValue);
 
-  // Highway=motorway (CAR) with foot and bicycle explicitly forbidden
+  REQUIRE(AccessToString(actualValue)==AccessToString(expectedValue));
+}
 
-  tags.clear();
+TEST_CASE("Highway=motorway (CAR) with foot and bicycle explicitly forbidden") {
+  std::unordered_map<std::string,std::string> tags;
+  uint8_t expectedValue=osmscout::AccessFeatureValue::onewayForward|osmscout::AccessFeatureValue::carForward;
+  uint8_t actualValue=0;
+
   tags["foot"]="no";
   tags["bicycle"]="no";
   tags["oneway"]="yes";
 
-  if (!CheckParseSuccess(false,
-                         false,
-                         true,
-                         osmscout::AccessFeatureValue::onewayForward|osmscout::AccessFeatureValue::carForward,
-                         tags)) {
-    errors++;
-  }
+  CheckParseSuccess(false,
+                    false,
+                    true,
+                    tags,
+                    actualValue);
 
-  // Highway=motorway (CAR) with no access at all, but oneway
+  REQUIRE(AccessToString(actualValue)==AccessToString(expectedValue));
+}
 
-  tags.clear();
+TEST_CASE("Highway=motorway (CAR) with no access at all, but oneway") {
+  std::unordered_map<std::string,std::string> tags;
+  uint8_t expectedValue=osmscout::AccessFeatureValue::onewayForward|osmscout::AccessFeatureValue::carForward;
+  uint8_t actualValue=0;
+
   tags["access"]="no";
   tags["oneway"]="yes";
   tags["bus"]="destination";
   tags["psv"]="yes";
   tags["motor_vehicle"]="private";
 
-  if (!CheckParseSuccess(false,
-                         false,
-                         false,
-                         osmscout::AccessFeatureValue::onewayForward|osmscout::AccessFeatureValue::carForward,
-                         tags)) {
-    errors++;
-  }
+  CheckParseSuccess(false,
+                    false,
+                    false,
+                    tags,
+                    actualValue);
 
-  if (errors!=0) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
+  REQUIRE(AccessToString(actualValue)==AccessToString(expectedValue));
 }
