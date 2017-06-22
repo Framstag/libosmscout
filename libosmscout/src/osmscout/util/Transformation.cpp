@@ -374,6 +374,33 @@ namespace osmscout {
     }
   }
 
+  void TransPolygon::DropEqualPoints()
+  {
+    size_t current=0;
+    while (current<length) {
+      if (!points[current].draw) {
+        current++;
+        continue;
+      }
+
+      size_t next=current+1;
+      while (next<length && !points[next].draw) {
+        next++;
+      }
+
+      if (next>=length) {
+        return;
+      }
+
+      if (points[current].x==points[next].x &&
+          points[current].y==points[next].y) {
+        points[next].draw=false;
+      }
+
+      current=next;
+    }
+  }
+
   void TransPolygon::EnsureSimple(bool isArea)
   {
     // copy points to vector of TransPointRef for easy manipulation
@@ -388,13 +415,13 @@ namespace osmscout {
     if (optimised.size()<=3) {
       return;
     }
-    if (isArea){
+    if (isArea) {
       optimised.push_back(optimised.front());
     }
 
     bool modified=false;
     bool isSimple=false;
-    while (!isSimple){
+    while (!isSimple) {
       isSimple=true;
 
       size_t i=0;
@@ -402,8 +429,8 @@ namespace osmscout {
       bool updated=true;
       // following while is just performance optimisation,
       // we don't start searching intersections from start again
-      while (updated){
-        if (FindIntersection(optimised,i,j)){
+      while (updated) {
+        if (FindIntersection(optimised,i,j)) {
           isSimple=false;
           modified=true;
           if (isArea && j-i > i+(optimised.size()-j)){
@@ -411,20 +438,23 @@ namespace osmscout {
             optimised.erase(optimised.begin(), optimised.begin()+i);
             optimised.push_back(optimised.front());
             i=0;
-          }else{
+          }
+          else {
             optimised.erase(optimised.begin()+i+1, optimised.begin()+j+1);
           }
-        }else{
+        }
+        else {
           updated=false;
         }
       }
     }
-    if (modified){
+    if (modified) {
       // setup draw property for points remaining in optimised vector
-      for (size_t i=0;i<length;i++){
+      for (size_t i=0;i<length;i++) {
         points[i].draw=false;
       }
-      for (TransPointRef &ref:optimised){
+
+      for (TransPointRef &ref:optimised) {
         ref.p->draw=true;
       }
     }
@@ -459,6 +489,9 @@ namespace osmscout {
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
       }
+
+      DropEqualPoints();
+
       if (constraint==simple){
         EnsureSimple(true);
       }
@@ -512,7 +545,10 @@ namespace osmscout {
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
       }
-      if (constraint==simple){
+
+      DropEqualPoints();
+
+      if (constraint==simple) {
         EnsureSimple(true);
       }
 
@@ -566,6 +602,9 @@ namespace osmscout {
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
       }
+
+      DropEqualPoints();
+
       if (constraint==simple){
         EnsureSimple(false);
       }
@@ -619,6 +658,9 @@ namespace osmscout {
       else {
         DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
       }
+
+      DropEqualPoints();
+
       if (constraint==simple){
         EnsureSimple(false);
       }

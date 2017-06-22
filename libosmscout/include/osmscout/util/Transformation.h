@@ -102,6 +102,7 @@ namespace osmscout {
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
+    void DropEqualPoints();
     void EnsureSimple(bool isArea);
 
   public:
