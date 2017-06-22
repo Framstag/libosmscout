@@ -27,6 +27,9 @@
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>
+
+#include <osmscout/GeoCoord.h>
+
 #include <osmscout/util/String.h>
 
 #include <iostream>
@@ -77,7 +80,7 @@ namespace osmscout {
 
   typedef std::shared_ptr<CmdLineArgParser> CmdLineArgParserRef;
 
-  class CmdLineFlagArgParser : public CmdLineArgParser
+  class OSMSCOUT_API CmdLineFlagArgParser : public CmdLineArgParser
   {
   public:
     typedef std::function<void(const bool&)> SetterFunction;
@@ -86,33 +89,14 @@ namespace osmscout {
      SetterFunction setter;
 
   public:
-    CmdLineFlagArgParser(SetterFunction&& setter)
-    : setter(setter)
-    {
-      // no code
-    }
+    CmdLineFlagArgParser(SetterFunction&& setter);
 
-    template <class C, class F>
-    CmdLineFlagArgParser(C&& object, F&& setter)
-      : setter(std::bind(setter,object,std::placeholders::_1))
-    {
-      // no code
-    }
+    std::string GetArgTemplate(const std::string& arg) const;
 
-    std::string GetArgTemplate(const std::string& arg) const
-    {
-      return arg;
-    }
-
-    CmdLineParseResult Parse(CmdLineScanner& /*scanner*/)
-    {
-      setter(true);
-
-      return CmdLineParseResult();
-    }
+    CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
 
-  class CmdLineBoolArgParser : public CmdLineArgParser
+  class OSMSCOUT_API CmdLineBoolArgParser : public CmdLineArgParser
   {
   public:
     typedef std::function<void(const bool&)> SetterFunction;
@@ -121,47 +105,14 @@ namespace osmscout {
     SetterFunction setter;
 
   public:
-    CmdLineBoolArgParser(SetterFunction&& setter)
-      : setter(setter)
-    {
-      // no code
-    }
+    CmdLineBoolArgParser(SetterFunction&& setter);
 
-    template <class C, class F>
-    CmdLineBoolArgParser(C&& object, F&& setter)
-      : setter(std::bind(setter,object,std::placeholders::_1))
-    {
-      // no code
-    }
+    std::string GetArgTemplate(const std::string& arg) const;
 
-    std::string GetArgTemplate(const std::string& arg) const
-    {
-      return arg+" <true|false>";
-    }
-
-    CmdLineParseResult Parse(CmdLineScanner& scanner)
-    {
-      if (!scanner.HasNextArg()) {
-        return CmdLineParseResult("Missing value for boolean option '"+scanner.GetCurrentArg()+"'");
-      }
-
-      std::string value=scanner.Advance();
-
-      if (value=="true") {
-        setter(true);
-        return CmdLineParseResult();
-      }
-      else if (value=="false") {
-        setter(false);
-        return CmdLineParseResult();
-      }
-      else {
-        return CmdLineParseResult("Value for boolean option '"+scanner.GetCurrentArg()+"' must be either 'true' or 'false' but not '"+value+"'");
-      }
-    }
+    CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
 
-  class CmdLineStringArgParser : public CmdLineArgParser
+  class OSMSCOUT_API CmdLineStringArgParser : public CmdLineArgParser
   {
   public:
     typedef std::function<void(const std::string&)> SetterFunction;
@@ -170,36 +121,11 @@ namespace osmscout {
     SetterFunction setter;
 
   public:
-    CmdLineStringArgParser(SetterFunction&& setter)
-      : setter(setter)
-    {
-      // no code
-    }
+    CmdLineStringArgParser(SetterFunction&& setter);
 
-    template <class C, class F>
-    CmdLineStringArgParser(C&& object, F&& setter)
-      : setter(std::bind(setter,object,std::placeholders::_1))
-    {
-      // no code
-    }
+    std::string GetArgTemplate(const std::string& arg) const;
 
-    std::string GetArgTemplate(const std::string& arg) const
-    {
-      return arg+" <string>";
-    }
-
-    CmdLineParseResult Parse(CmdLineScanner& scanner)
-    {
-      if (!scanner.HasNextArg()) {
-        return CmdLineParseResult("Missing value for string option '"+scanner.GetCurrentArg()+"'");
-      }
-
-      std::string value=scanner.Advance();
-
-      setter(value);
-
-      return CmdLineParseResult();
-    }
+    CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
 
   template<typename N>
@@ -214,13 +140,6 @@ namespace osmscout {
   public:
     CmdLineNumberArgParser(SetterFunction&& setter)
       : setter(setter)
-    {
-      // no code
-    }
-
-    template <class C, class F>
-    CmdLineNumberArgParser(C&& object, F&& setter)
-      : setter(std::bind(setter,object,std::placeholders::_1))
     {
       // no code
     }
@@ -247,6 +166,22 @@ namespace osmscout {
         return CmdLineParseResult("Value for number option '"+scanner.GetCurrentArg()+"' is not a valid number '"+valueString+"'");
       }
     }
+  };
+
+  class OSMSCOUT_API CmdLineGeoCoordArgParser : public CmdLineArgParser
+  {
+  public:
+    typedef std::function<void(const GeoCoord&)> SetterFunction;
+
+  private:
+    SetterFunction setter;
+
+  public:
+    CmdLineGeoCoordArgParser(SetterFunction&& setter);
+
+    std::string GetArgTemplate(const std::string& arg) const;
+
+    CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
 
   template<class ...Args>
@@ -307,6 +242,12 @@ namespace osmscout {
   CmdLineArgParserRef CmdLineDoubleOption(Args&& ...args)
   {
     return std::make_shared<CmdLineNumberArgParser<double>>(std::forward<Args>(args)...);
+  }
+
+  template<class ...Args>
+  CmdLineArgParserRef CmdLineGeoCoordOption(Args&& ...args)
+  {
+    return std::make_shared<CmdLineGeoCoordArgParser>(std::forward<Args>(args)...);
   }
 
   class OSMSCOUT_API CmdLineParser

@@ -8,11 +8,12 @@
 class Arguments
 {
 private:
-  bool        magicFlag;
-  bool        witchyFlag;
-  size_t      distance;
-  double      doubleTrouble;
-  std::string path;
+  bool               magicFlag;
+  bool               witchyFlag;
+  size_t             distance;
+  double             doubleTrouble;
+  osmscout::GeoCoord location;
+  std::string        path;
 
 private:
   friend std::ostream & operator<<(std::ostream &os, const Arguments& args);
@@ -22,7 +23,8 @@ public:
   : magicFlag(false),
     witchyFlag(false),
     distance(0),
-    doubleTrouble(0.0)
+    doubleTrouble(0.0),
+    location(osmscout::GeoCoord(0.0,0.0))
   {
     // no code
   }
@@ -47,6 +49,11 @@ public:
     this->doubleTrouble=doubleTrouble;
   }
 
+  void SetLocation(const osmscout::GeoCoord& location)
+  {
+    this->location=location;
+  }
+
   void SetPath(const std::string& path)
   {
     this->path=path;
@@ -58,6 +65,7 @@ public:
            this->witchyFlag==other.witchyFlag &&
            this->distance==other.distance &&
            this->doubleTrouble==other.doubleTrouble &&
+           this->location==other.location &&
            this->path==other.path;
   }
 
@@ -69,6 +77,7 @@ std::ostream &operator<<(std::ostream &out, const Arguments& args)
   out << " witchyFlag " << args.witchyFlag;
   out << " distance " << args.distance;
   out << " doubleTrouble " << args.doubleTrouble;
+  out << " location " << args.location.GetDisplayText();
   out << " path " << args.path;
 
   return out;
@@ -80,23 +89,39 @@ void CallParser(const std::vector<std::string>& arguments,
 {
   osmscout::CmdLineParser parser(arguments);
 
-  parser.AddOptionalArg(osmscout::CmdLineFlag(std::ref(actualData),&Arguments::SetMagicFlag),
+  parser.AddOptionalArg(osmscout::CmdLineFlag([&actualData](const bool& flag) {
+                          actualData.SetMagicFlag(flag);
+                        }),
                         "set some magic flag",
                         "--magicFlag");
 
-  parser.AddOptionalArg(osmscout::CmdLineBoolOption(std::ref(actualData),&Arguments::SetWitchyFlag),
+  parser.AddOptionalArg(osmscout::CmdLineBoolOption([&actualData](const bool& flag) {
+                          actualData.SetWitchyFlag(flag);
+                        }),
                         "set some witchy flag",
                         "--witchyFlag");
 
-  parser.AddOptionalArg(osmscout::CmdLineSizeTOption(std::ref(actualData),&Arguments::SetDistance),
+  parser.AddOptionalArg(osmscout::CmdLineSizeTOption([&actualData](const size_t& value) {
+                          actualData.SetDistance(value);
+                        }),
                         "set distance",
                         "--distance");
 
-  parser.AddOptionalArg(osmscout::CmdLineDoubleOption(std::ref(actualData),&Arguments::SetDoubleTrouble),
+  parser.AddOptionalArg(osmscout::CmdLineDoubleOption([&actualData](const double& value) {
+                          actualData.SetDoubleTrouble(value);
+                        }),
                         "set double trouble",
                         "--doubleTrouble");
 
-  parser.AddOptionalArg(osmscout::CmdLineStringOption(std::ref(actualData),&Arguments::SetPath),
+  parser.AddOptionalArg(osmscout::CmdLineGeoCoordOption([&actualData](const osmscout::GeoCoord& value) {
+                          actualData.SetLocation(value);
+                        }),
+                        "set location",
+                        "--location");
+
+  parser.AddOptionalArg(osmscout::CmdLineStringOption([&actualData](const std::string& value) {
+                          actualData.SetPath(value);
+                        }),
                         "set path",
                         "--path");
 
@@ -223,5 +248,49 @@ TEST_CASE("Parsing of string option with valid value") {
              actualData);
 
   REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of geo coordinate option with valid value") {
+  std::vector<std::string> arguments={"Test", "--location", "34.5", "-77.8"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  expectedData.SetLocation(osmscout::GeoCoord(34.5,-77.8));
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of geo coordinate option with invalid value") {
+  std::vector<std::string> arguments={"Test", "--location", "120.0", "-77.8"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.HasError());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of unknown option") {
+  std::vector<std::string> arguments={"Test", "--unknown"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.HasError());
   REQUIRE(actualData==expectedData);
 }

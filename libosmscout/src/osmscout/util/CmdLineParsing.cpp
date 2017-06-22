@@ -26,12 +26,14 @@
 
 #include <osmscout/util/String.h>
 
+#include <osmscout/system/Assert.h>
+
 namespace osmscout {
 
   CmdLineScanner::CmdLineScanner(int argc, char* argv[])
     : nextArg(0)
   {
-    arguments.reserve(argc);
+    arguments.reserve((size_t)argc);
 
     for (int i=0; i<=argc; i++) {
       arguments.push_back(std::string(argv[i]));
@@ -53,15 +55,15 @@ namespace osmscout {
 
   std::string CmdLineScanner::PeakNextArg() const
   {
-    // TODO: Assert
-    // TODO: Needed?
-
+    assert(nextArg<arguments.size());
     return arguments[nextArg];
   }
 
   std::string CmdLineScanner::Advance()
   {
-    int currentArg=nextArg;
+    assert(nextArg<arguments.size());
+
+    size_t currentArg=nextArg;
 
     nextArg++;
 
@@ -70,7 +72,7 @@ namespace osmscout {
 
   std::string CmdLineScanner::GetCurrentArg() const
   {
-    // TODO: Assert
+    assert(nextArg>0);
     return arguments[nextArg-1];
   }
 
@@ -105,6 +107,128 @@ namespace osmscout {
   CmdLineArgParser::~CmdLineArgParser()
   {
     // no code
+  }
+
+  CmdLineFlagArgParser::CmdLineFlagArgParser(SetterFunction&& setter)
+  : setter(setter)
+  {
+    // no code
+  }
+
+  std::string CmdLineFlagArgParser::GetArgTemplate(const std::string& arg) const
+  {
+    return arg;
+  }
+
+  CmdLineParseResult CmdLineFlagArgParser::Parse(CmdLineScanner& /*scanner*/)
+  {
+    setter(true);
+
+    return CmdLineParseResult();
+  }
+
+  CmdLineBoolArgParser::CmdLineBoolArgParser(SetterFunction&& setter)
+  : setter(setter)
+  {
+    // no code
+  }
+
+  std::string CmdLineBoolArgParser::GetArgTemplate(const std::string& arg) const
+  {
+    return arg+" <true|false>";
+  }
+
+  CmdLineParseResult CmdLineBoolArgParser::Parse(CmdLineScanner& scanner)
+  {
+    if (!scanner.HasNextArg()) {
+      return CmdLineParseResult("Missing value for boolean option '"+scanner.GetCurrentArg()+"'");
+    }
+
+    std::string value=scanner.Advance();
+
+    if (value=="true") {
+      setter(true);
+      return CmdLineParseResult();
+    }
+    else if (value=="false") {
+      setter(false);
+      return CmdLineParseResult();
+    }
+    else {
+      return CmdLineParseResult("Value for boolean option '"+scanner.GetCurrentArg()+"' must be either 'true' or 'false' but not '"+value+"'");
+    }
+  }
+
+  CmdLineStringArgParser::CmdLineStringArgParser(SetterFunction&& setter)
+  : setter(setter)
+  {
+    // no code
+  }
+
+  std::string CmdLineStringArgParser::GetArgTemplate(const std::string& arg) const
+  {
+    return arg+" <string>";
+  }
+
+  CmdLineParseResult CmdLineStringArgParser::Parse(CmdLineScanner& scanner)
+  {
+    if (!scanner.HasNextArg()) {
+      return CmdLineParseResult("Missing value for string option '"+scanner.GetCurrentArg()+"'");
+    }
+
+    std::string value=scanner.Advance();
+
+    setter(value);
+
+    return CmdLineParseResult();
+  }
+
+  CmdLineGeoCoordArgParser::CmdLineGeoCoordArgParser(SetterFunction&& setter)
+  : setter(setter)
+  {
+    // no code
+  }
+
+  std::string CmdLineGeoCoordArgParser::GetArgTemplate(const std::string& arg) const
+  {
+    return arg+" <double> <double>";
+  }
+
+  CmdLineParseResult CmdLineGeoCoordArgParser::Parse(CmdLineScanner& scanner)
+  {
+    if (!scanner.HasNextArg()) {
+      return CmdLineParseResult("Missing value for lat value of option '"+scanner.GetCurrentArg()+"'");
+    }
+
+    std::string latString=scanner.Advance();
+
+    if (!scanner.HasNextArg()) {
+      return CmdLineParseResult("Missing value for lon value of option '"+scanner.GetCurrentArg()+"'");
+    }
+
+    std::string lonString=scanner.Advance();
+
+    double lat,lon;
+
+    if (!StringToNumber(latString,lat)) {
+      return CmdLineParseResult("Lat value of option '"+scanner.GetCurrentArg()+"' is not in valid format");
+    }
+
+    if (!StringToNumber(lonString,lon)) {
+      return CmdLineParseResult("Lon value of option '"+scanner.GetCurrentArg()+"' is not in valid format");
+    }
+
+    if (lat<-90.0 || lat>90.0) {
+      return CmdLineParseResult("Lat value of option '"+scanner.GetCurrentArg()+"' is not in valid range [-90.0,90.0]");
+    }
+
+    if (lon<-180.0 || lon>180.0) {
+      return CmdLineParseResult("Lon value of option '"+scanner.GetCurrentArg()+"' is not in valid range [-180.0,180.0]");
+    }
+
+    setter(GeoCoord(lat,lon));
+
+    return CmdLineParseResult();
   }
 
   CmdLineParser::CmdLineParser(int argc, char* argv[])
@@ -148,14 +272,17 @@ namespace osmscout {
       scanner.Advance();
     }
 
+    // Parse options until some was found that is not an option
     while (scanner.HasNextArg()) {
-      std::string currentArg=scanner.Advance();
+      std::string currentArg=scanner.PeakNextArg();
 
       auto option=options.find(currentArg);
 
       if (option==options.end()) {
-        return CmdLineParseResult("Unknown command line argument '" + currentArg + "'!");
+        break;
       }
+
+      /* ignore */ scanner.Advance();
 
       CmdLineParseResult result=option->second.parser->Parse(scanner);
 
@@ -164,6 +291,9 @@ namespace osmscout {
       }
     }
 
+    if (scanner.HasNextArg()) {
+      return CmdLineParseResult("Unknown command line argument '"+scanner.PeakNextArg()+"'");
+    }
 
     // Alles OK
     return CmdLineParseResult();
