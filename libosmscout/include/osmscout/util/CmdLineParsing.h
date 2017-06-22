@@ -303,6 +303,12 @@ namespace osmscout {
     return std::make_shared<CmdLineNumberArgParser<size_t>>(std::forward<Args>(args)...);
   }
 
+  template<class ...Args>
+  CmdLineArgParserRef CmdLineDoubleOption(Args&& ...args)
+  {
+    return std::make_shared<CmdLineNumberArgParser<double>>(std::forward<Args>(args)...);
+  }
+
   class OSMSCOUT_API CmdLineParser
   {
   private:

@@ -11,6 +11,7 @@ private:
   bool        magicFlag;
   bool        witchyFlag;
   size_t      distance;
+  double      doubleTrouble;
   std::string path;
 
 private:
@@ -20,7 +21,8 @@ public:
   Arguments()
   : magicFlag(false),
     witchyFlag(false),
-    distance(0)
+    distance(0),
+    doubleTrouble(0.0)
   {
     // no code
   }
@@ -40,6 +42,11 @@ public:
     this->distance=distance;
   }
 
+  void SetDoubleTrouble(const double& doubleTrouble)
+  {
+    this->doubleTrouble=doubleTrouble;
+  }
+
   void SetPath(const std::string& path)
   {
     this->path=path;
@@ -50,6 +57,7 @@ public:
     return this->magicFlag==other.magicFlag &&
            this->witchyFlag==other.witchyFlag &&
            this->distance==other.distance &&
+           this->doubleTrouble==other.doubleTrouble &&
            this->path==other.path;
   }
 
@@ -60,6 +68,7 @@ std::ostream &operator<<(std::ostream &out, const Arguments& args)
   out << "magicFlag: " << args.magicFlag;
   out << " witchyFlag " << args.witchyFlag;
   out << " distance " << args.distance;
+  out << " doubleTrouble " << args.doubleTrouble;
   out << " path " << args.path;
 
   return out;
@@ -82,6 +91,10 @@ void CallParser(const std::vector<std::string>& arguments,
   parser.AddOptionalArg(osmscout::CmdLineSizeTOption(std::ref(actualData),&Arguments::SetDistance),
                         "set distance",
                         "--distance");
+
+  parser.AddOptionalArg(osmscout::CmdLineDoubleOption(std::ref(actualData),&Arguments::SetDoubleTrouble),
+                        "set double trouble",
+                        "--doubleTrouble");
 
   parser.AddOptionalArg(osmscout::CmdLineStringOption(std::ref(actualData),&Arguments::SetPath),
                         "set path",
@@ -150,7 +163,7 @@ TEST_CASE("Parsing of bool option with wrong value") {
   REQUIRE(actualData==expectedData);
 }
 
-TEST_CASE("Parsing of number option with valid value") {
+TEST_CASE("Parsing of size_t option with valid value") {
   std::vector<std::string> arguments={"Test", "--distance", "1000"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
@@ -166,7 +179,7 @@ TEST_CASE("Parsing of number option with valid value") {
   REQUIRE(actualData==expectedData);
 }
 
-TEST_CASE("Parsing of number option with invalid value") {
+TEST_CASE("Parsing of size_t option with negative value") {
   std::vector<std::string> arguments={"Test", "--distance", "-1000"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
@@ -178,6 +191,22 @@ TEST_CASE("Parsing of number option with invalid value") {
              actualData);
 
   REQUIRE(actualResult.HasError());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of double option with valid value") {
+  std::vector<std::string> arguments={"Test", "--doubleTrouble", "1000.0"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  expectedData.SetDoubleTrouble(1000.0);
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.Success());
   REQUIRE(actualData==expectedData);
 }
 
