@@ -30,14 +30,14 @@ CalculateResolution = executable('CalculateResolution',
 
 CmdLineParsing = executable('CmdLineParsing',
              'src/CmdLineParsing.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
              install: false)
 
 ColorParse = executable('ColorParse',
              'src/ColorParse.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
              install: false)

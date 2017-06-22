@@ -2,6 +2,9 @@
 
 #include <osmscout/util/CmdLineParsing.h>
 
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
 class Arguments
 {
 private:
@@ -62,133 +65,134 @@ std::ostream &operator<<(std::ostream &out, const Arguments& args)
   return out;
 }
 
-bool CheckParsing(const std::string& testName,
-                  const std::vector<std::string>& arguments,
-                  bool success,
-                  const Arguments& expectedResult)
+void CallParser(const std::vector<std::string>& arguments,
+                osmscout::CmdLineParseResult& actualResult,
+                Arguments& actualData)
 {
-  Arguments               actualResult;
   osmscout::CmdLineParser parser(arguments);
 
-  std::cout << testName << std::endl;
-
-  parser.AddOptionalArg(osmscout::CmdLineFlag(std::ref(actualResult),&Arguments::SetMagicFlag),
+  parser.AddOptionalArg(osmscout::CmdLineFlag(std::ref(actualData),&Arguments::SetMagicFlag),
                         "set some magic flag",
                         "--magicFlag");
 
-  parser.AddOptionalArg(osmscout::CmdLineBoolOption(std::ref(actualResult),&Arguments::SetWitchyFlag),
+  parser.AddOptionalArg(osmscout::CmdLineBoolOption(std::ref(actualData),&Arguments::SetWitchyFlag),
                         "set some witchy flag",
                         "--witchyFlag");
 
-  parser.AddOptionalArg(osmscout::CmdLineSizeTOption(std::ref(actualResult),&Arguments::SetDistance),
+  parser.AddOptionalArg(osmscout::CmdLineSizeTOption(std::ref(actualData),&Arguments::SetDistance),
                         "set distance",
                         "--distance");
 
-  parser.AddOptionalArg(osmscout::CmdLineStringOption(std::ref(actualResult),&Arguments::SetPath),
+  parser.AddOptionalArg(osmscout::CmdLineStringOption(std::ref(actualData),&Arguments::SetPath),
                         "set path",
                         "--path");
 
-  std::cout << parser.GetHelp() << std::endl;
-
-  osmscout::CmdLineParseResult result=parser.Parse();
-
-  if (result.Success()!=success) {
-    std::cerr << testName << ": expected success " << success << ", but actual success was " << result.Success() << " " << result.GetErrorDescription() << std::endl;
-    return false;
-  }
-
-  if (actualResult==expectedResult) {
-    return true;
-  }
-  else {
-    std::cerr << testName << ": expected result was not equal to actual result" << std::endl;
-    std::cout << "Expected: " << expectedResult << std::endl;
-    std::cout << "Actual: " << actualResult << std::endl;
-    return false;
-  }
+  actualResult=parser.Parse();
 }
 
-int main()
-{
-  int errors=0;
+TEST_CASE("Parsing of flag option") {
+  std::vector<std::string> arguments={"Test", "--magicFlag"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
 
-  {
-    // Simple flag parsing
-    std::vector<std::string> arguments={"Test", "--magicFlag"};
-    Arguments                expectedResult;
+  expectedData.SetMagicFlag(true);
 
-    expectedResult.SetMagicFlag(true);
+  CallParser(arguments,
+             actualResult,
+             actualData);
 
-    if (!CheckParsing("Test 1",
-                      arguments,
-                      true,
-                      expectedResult)) {
-      errors++;
-    }
-  }
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
+}
 
-  {
-    // bool option without value => Error expectedc
-    std::vector<std::string> arguments={"Test", "--witchyFlag"};
-    Arguments                expectedResult;
+TEST_CASE("Parsing of bool option with valid value") {
+  std::vector<std::string> arguments={"Test", "--witchyFlag", "true"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
 
-    if (!CheckParsing("Test 2",
-                      arguments,
-                      false,
-                      expectedResult)) {
-      errors++;
-    }
-  }
+  expectedData.SetWitchyFlag(true);
 
-  {
-    // Bool option with parameter
-    std::vector<std::string> arguments={"Test", "--witchyFlag", "true"};
-    Arguments                expectedResult;
+  CallParser(arguments,
+             actualResult,
+             actualData);
 
-    expectedResult.SetWitchyFlag(true);
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
+}
 
-    if (!CheckParsing("Test 3",
-                      arguments,
-                      true,
-                      expectedResult)) {
-      errors++;
-    }
-  }
+TEST_CASE("Parsing of bool option without value") {
+  std::vector<std::string> arguments={"Test", "--witchyFlag"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
 
-  {
-    // Number option with parameter
-    std::vector<std::string> arguments={"Test", "--distance", "1000"};
-    Arguments                expectedResult;
+  CallParser(arguments,
+             actualResult,
+             actualData);
 
-    expectedResult.SetDistance(1000);
+  REQUIRE(actualResult.HasError());
+  REQUIRE(actualData==expectedData);
+}
 
-    if (!CheckParsing("Test 4",
-                      arguments,
-                      true,
-                      expectedResult)) {
-      errors++;
-    }
-  }
+TEST_CASE("Parsing of bool option with wrong value") {
+  std::vector<std::string> arguments={"Test", "--witchyFlag", "witchy"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
 
-  {
-    // String option with parameter
-    std::vector<std::string> arguments={"Test", "--path", "/dev/null"};
-    Arguments                expectedResult;
+  CallParser(arguments,
+             actualResult,
+             actualData);
 
-    expectedResult.SetPath("/dev/null");
+  REQUIRE(actualResult.HasError());
+  REQUIRE(actualData==expectedData);
+}
 
-    if (!CheckParsing("Test 5",
-                      arguments,
-                      true,
-                      expectedResult)) {
-      errors++;
-    }
-  }
+TEST_CASE("Parsing of number option with valid value") {
+  std::vector<std::string> arguments={"Test", "--distance", "1000"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
 
-  if (errors!=0) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
+  expectedData.SetDistance(1000);
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of number option with invalid value") {
+  std::vector<std::string> arguments={"Test", "--distance", "-1000"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.HasError());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of string option with valid value") {
+  std::vector<std::string> arguments={"Test", "--path", "/dev/null"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  expectedData.SetPath("/dev/null");
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
 }

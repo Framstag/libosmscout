@@ -14,14 +14,14 @@ add_test(NAME CalculateResolution COMMAND CalculateResolution)
 #---- CmdLineParsing
 add_executable(CmdLineParsing src/CmdLineParsing.cpp)
 set_property(TARGET CmdLineParsing PROPERTY CXX_STANDARD 11)
-target_include_directories(CmdLineParsing PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_include_directories(CmdLineParsing PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 target_link_libraries(CmdLineParsing osmscout)
 add_test(NAME CmdLineParsing COMMAND CmdLineParsing)
 
 #---- ColorParse
 add_executable(ColorParse src/ColorParse.cpp)
 set_property(TARGET ColorParse PROPERTY CXX_STANDARD 11)
-target_include_directories(ColorParse PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_include_directories(ColorParse PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 target_link_libraries(ColorParse osmscout)
 add_test(NAME ColorParse COMMAND ColorParse)
 
