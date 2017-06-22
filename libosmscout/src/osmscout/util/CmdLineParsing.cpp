@@ -21,10 +21,180 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 
 #include <osmscout/util/String.h>
 
 namespace osmscout {
+
+  CmdLineScanner::CmdLineScanner(int argc, char* argv[])
+    : nextArg(0)
+  {
+    arguments.reserve(argc);
+
+    for (int i=0; i<=argc; i++) {
+      arguments.push_back(std::string(argv[i]));
+    }
+
+  }
+
+  CmdLineScanner::CmdLineScanner(const std::vector<std::string>& arguments)
+    : arguments(arguments),
+      nextArg(0)
+  {
+    // no code
+  }
+
+  bool CmdLineScanner::HasNextArg() const
+  {
+    return nextArg<arguments.size();
+  }
+
+  std::string CmdLineScanner::PeakNextArg() const
+  {
+    // TODO: Assert
+    // TODO: Needed?
+
+    return arguments[nextArg];
+  }
+
+  std::string CmdLineScanner::Advance()
+  {
+    int currentArg=nextArg;
+
+    nextArg++;
+
+    return arguments[currentArg];
+  }
+
+  std::string CmdLineScanner::GetCurrentArg() const
+  {
+    // TODO: Assert
+    return arguments[nextArg-1];
+  }
+
+  CmdLineParseResult::CmdLineParseResult()
+    : hasError(false)
+  {
+    // no code
+  }
+
+  CmdLineParseResult::CmdLineParseResult(const std::string& errorDescription)
+    : hasError(true),
+      errorDescription(errorDescription)
+  {
+    // no code
+  }
+
+  bool CmdLineParseResult::Success() const
+  {
+    return !hasError;
+  }
+
+  bool CmdLineParseResult::HasError() const
+  {
+    return hasError;
+  }
+
+  std::string CmdLineParseResult::GetErrorDescription() const
+  {
+    return errorDescription;
+  }
+
+  CmdLineArgParser::~CmdLineArgParser()
+  {
+    // no code
+  }
+
+  CmdLineParser::CmdLineParser(int argc, char* argv[])
+    : scanner(argc,argv)
+  {
+    // no code
+  }
+
+  CmdLineParser::CmdLineParser(const std::vector<std::string>& arguments)
+    : scanner(arguments)
+  {
+    // no code
+  }
+
+  void CmdLineParser::AddOptionalArg(const CmdLineArgParserRef& parser,
+                                     const std::string& helpString,
+                                     const std::string& argumentName)
+  {
+    CmdLineArgDesc desc(parser,helpString,true);
+    CmdLineArgHelp help(parser->GetArgTemplate(argumentName),helpString);
+
+    options.insert(std::make_pair(argumentName,desc));
+    helps.push_back(help);
+  }
+
+  void CmdLineParser::AddPositionalArg(const CmdLineArgParserRef& parser,
+                                       const std::string& helpString,
+                                       const std::string& argumentName)
+  {
+    CmdLineArgDesc desc(parser,helpString,true);
+    CmdLineArgHelp help(parser->GetArgTemplate(argumentName),helpString);
+
+    positionals.push_back(desc);
+    helps.push_back(help);
+  }
+
+  CmdLineParseResult CmdLineParser::Parse()
+  {
+    // Skip the initial parameter naming the programm
+    if (scanner.HasNextArg()) {
+      scanner.Advance();
+    }
+
+    while (scanner.HasNextArg()) {
+      std::string currentArg=scanner.Advance();
+
+      auto option=options.find(currentArg);
+
+      if (option==options.end()) {
+        return CmdLineParseResult("Unknown command line argument '" + currentArg + "'!");
+      }
+
+      CmdLineParseResult result=option->second.parser->Parse(scanner);
+
+      if (result.HasError()) {
+        return result;
+      }
+    }
+
+
+    // Alles OK
+    return CmdLineParseResult();
+  }
+
+  std::string CmdLineParser::GetHelp(size_t indent) const
+  {
+    std::ostringstream stream;
+
+    size_t maxNameLength=0;
+
+    for (const auto& help : helps) {
+      maxNameLength=std::max(maxNameLength,help.argTemplate.length());
+    }
+
+    for (const auto& help : helps) {
+      for (size_t i=0; i<indent; i++) {
+        stream << ' ';
+      }
+
+      stream << help.argTemplate;
+
+      for (size_t i=0; i<maxNameLength-help.argTemplate.length(); i++) {
+        stream << ' ';
+      }
+
+      stream << ' ' << help.helpString << std::endl;
+    }
+
+    return stream.str();
+
+  }
 
   bool ParseBoolArgument(int argc,
                          char* argv[],
