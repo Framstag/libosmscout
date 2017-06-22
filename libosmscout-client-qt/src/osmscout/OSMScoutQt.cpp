@@ -114,10 +114,14 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
                                   int versionMajor,
                                   int versionMinor)
 {
+  // register osmscout + standard types for usage in Qt signals/slots
   qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
   qRegisterMetaType<osmscout::TileRef>();
+  qRegisterMetaType<osmscout::Vehicle>();
+  qRegisterMetaType<RouteSelection>();
 
+  // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
   qmlRegisterType<LocationEntry>(uri, versionMajor, versionMinor, "LocationEntry");
   qmlRegisterType<LocationInfoModel>(uri, versionMajor, versionMinor, "LocationInfoModel");
