@@ -25,6 +25,8 @@
 
 #include <osmscout/util/String.h>
 
+#include <osmscout/system/Math.h>
+
 namespace osmscout {
 
   CmdLineScanner::CmdLineScanner(int argc, char* argv[])
