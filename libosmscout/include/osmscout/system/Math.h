@@ -21,11 +21,9 @@
 */
 
 
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #define _USE_MATH_DEFINES
 #endif
-
-#include <osmscout/CoreFeatures.h>
 
 #include <cmath>
 

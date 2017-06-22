@@ -19,13 +19,12 @@
 
 #include <osmscout/util/CmdLineParsing.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
 
 #include <osmscout/util/String.h>
-
-#include <osmscout/system/Math.h>
 
 namespace osmscout {
 
