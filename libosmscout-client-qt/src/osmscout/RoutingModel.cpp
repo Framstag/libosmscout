@@ -71,11 +71,10 @@ void RoutingListModel::onRouteComputed(RouteSelection route,
   }
   beginResetModel();
   this->route=route;
+  endResetModel();
 
   computing=false;
   emit computingChanged();
-
-  endResetModel();
 }
 
 void RoutingListModel::onRouteFailed(QString reason,
@@ -84,12 +83,13 @@ void RoutingListModel::onRouteFailed(QString reason,
   if (requestId!=this->requestId){
     return;
   }
+
+  clear();
+
   computing=false;
   emit computingChanged();
   emit routeFailed(reason);
   osmscout::log.Error() << reason.toStdString();
-
-  clear();
 }
 
 void RoutingListModel::clear()
