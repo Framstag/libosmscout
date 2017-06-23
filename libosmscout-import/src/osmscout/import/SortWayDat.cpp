@@ -35,10 +35,11 @@ namespace osmscout {
   class WayLocationProcessorFilter : public SortDataGenerator<Way>::ProcessingFilter
   {
   private:
-    FileWriter                 writer;
-    uint32_t                   overallDataCount;
-    NameFeatureValueReader     *nameReader;
-    LocationFeatureValueReader *locationReader;
+    FileWriter                   writer;
+    uint32_t                     overallDataCount;
+    NameFeatureValueReader       *nameReader;
+    LocationFeatureValueReader   *locationReader;
+    PostalCodeFeatureValueReader *postalCodeReader;
 
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
@@ -61,6 +62,7 @@ namespace osmscout {
 
     nameReader=new NameFeatureValueReader(typeConfig);
     locationReader=new LocationFeatureValueReader(typeConfig);
+    postalCodeReader=new PostalCodeFeatureValueReader(typeConfig);
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -87,18 +89,23 @@ namespace osmscout {
         return true;
       }
 
-      NameFeatureValue     *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
+      NameFeatureValue       *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
 
       if (nameValue==NULL) {
         return true;
       }
 
-      LocationFeatureValue *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
-      std::string          name;
-      std::string          location;
-      std::string          address;
+      LocationFeatureValue   *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
+      PostalCodeFeatureValue *postalCodeValue=postalCodeReader->GetValue(way.GetFeatureValueBuffer());
+      std::string            name;
+      std::string            postalCode;
+      std::string            location;
 
       name=nameValue->GetName();
+
+      if (postalCodeValue!=NULL) {
+        postalCode=postalCodeValue->GetPostalCode();
+      }
 
       if (locationValue!=NULL) {
         location=locationValue->GetLocation();
@@ -106,8 +113,11 @@ namespace osmscout {
 
       writer.WriteFileOffset(offset);
       writer.WriteNumber(way.GetType()->GetWayId());
+
       writer.Write(name);
+      writer.Write(postalCode);
       writer.Write(location);
+
       writer.Write(way.nodes,false);
 
       overallDataCount++;
@@ -130,6 +140,9 @@ namespace osmscout {
 
     delete locationReader;
     locationReader=NULL;
+
+    delete postalCodeReader;
+    postalCodeReader=NULL;
 
     writer.SetPos(0);
     writer.Write(overallDataCount);

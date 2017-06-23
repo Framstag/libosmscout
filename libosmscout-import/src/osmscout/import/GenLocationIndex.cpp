@@ -1353,26 +1353,28 @@ namespace osmscout {
                                                  const RegionIndex& regionIndex)
   {
     FileScanner scanner;
-    uint32_t    areaCount;
-    size_t      addressFound=0;
-    size_t      poiFound=0;
 
     try {
+      uint32_t           areaCount;
+      size_t             addressFound=0;
+      size_t             poiFound=0;
+      size_t             postalCodeFound=0;
+      FileOffset         fileOffset;
+      uint32_t           tmpType;
+      TypeId             typeId;
+      TypeInfoRef        type;
+      std::string        name;
+      std::string        postalCode;
+      std::string        location;
+      std::string        address;
+      std::vector<Point> nodes;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    AreaAreaIndexGenerator::AREAADDRESS_DAT),
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
       scanner.Read(areaCount);
-
-      FileOffset            fileOffset;
-      uint32_t              tmpType;
-      TypeId                typeId;
-      TypeInfoRef           type;
-      std::string           name;
-      std::string           location;
-      std::string           address;
-      std::vector<Point>    nodes;
 
       for (uint32_t a=1; a<=areaCount; a++) {
         progress.SetProgress(a,areaCount);
@@ -1381,6 +1383,7 @@ namespace osmscout {
         scanner.ReadNumber(tmpType);
 
         scanner.Read(name);
+        scanner.Read(postalCode);
         scanner.Read(location);
         scanner.Read(address);
         scanner.Read(nodes,false);
@@ -1392,6 +1395,10 @@ namespace osmscout {
                        !address.empty();
         bool isPOI=!name.empty() &&
                    type->GetIndexAsPOI();
+
+        if (!postalCode.empty()) {
+          postalCodeFound++;
+        }
 
         if (!isAddress && !isPOI) {
           continue;
@@ -1439,7 +1446,10 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(areaCount)+" areas analyzed, "+NumberToString(addressFound)+" addresses founds, "+NumberToString(poiFound)+" POIs founds");
+      progress.Info(NumberToString(areaCount)+" areas analyzed, "+
+                    NumberToString(addressFound)+" addresses founds, "+
+                    NumberToString(poiFound)+" POIs founds, "+
+                    NumberToString(postalCodeFound)+" postal codes found");
 
       scanner.Close();
     }
@@ -1576,11 +1586,20 @@ namespace osmscout {
                                                 const RegionIndex& regionIndex)
   {
     FileScanner scanner;
-    uint32_t    wayCount;
-    //size_t      addressFound=0;
-    size_t      poiFound=0;
 
     try {
+      uint32_t           wayCount=0;
+      size_t             poiFound=0;
+      size_t             postalCodeFound=0;
+      FileOffset         fileOffset;
+      uint32_t           tmpType;
+      TypeId             typeId;
+      TypeInfoRef        type;
+      std::string        name;
+      std::string        postalCode;
+      std::string        location;
+      std::vector<Point> nodes;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    SortWayDataGenerator::WAYADDRESS_DAT),
                    FileScanner::Sequential,
@@ -1588,20 +1607,14 @@ namespace osmscout {
 
       scanner.Read(wayCount);
 
-      FileOffset            fileOffset;
-      uint32_t              tmpType;
-      TypeId                typeId;
-      TypeInfoRef           type;
-      std::string           name;
-      std::string           location;
-      std::vector<Point>    nodes;
-
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
 
         scanner.ReadFileOffset(fileOffset);
         scanner.ReadNumber(tmpType);
+
         scanner.Read(name);
+        scanner.Read(postalCode);
         scanner.Read(location);
         scanner.Read(nodes,false);
 
@@ -1610,6 +1623,10 @@ namespace osmscout {
 
         bool isPOI=!name.empty() &&
                    type->GetIndexAsPOI();
+
+        if (!postalCode.empty()) {
+          postalCodeFound++;
+        }
 
         if (!isPOI) {
           continue;
@@ -1622,27 +1639,6 @@ namespace osmscout {
 
         RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                       boundingBox.GetCenter());
-
-        /*
-        if (isAddress) {
-          bool added=false;
-
-          AddAddressWayToRegion(progress,
-                                region,
-                                fileOffset,
-                                location,
-                                address,
-                                nodes,
-                                minlon,
-                                minlat,
-                                maxlon,
-                                maxlat,
-                                added);
-
-        if (added) {
-          addressFound++;
-          }
-        }*/
 
         if (isPOI) {
           bool added=false;
@@ -1661,7 +1657,11 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(wayCount)+" ways analyzed, "/*+NumberToString(addressFound)+" addresses founds, "*/+NumberToString(poiFound)+" POIs founds");
+      progress.Info(NumberToString(wayCount)+" ways analyzed, "+NumberToString(poiFound)+" POIs founds");
+
+      progress.Info(NumberToString(wayCount)+" ways analyzed, "+
+                    NumberToString(poiFound)+" POIs founds, "+
+                    NumberToString(postalCodeFound)+" postal codes found");
 
       scanner.Close();
     }
@@ -1779,12 +1779,22 @@ namespace osmscout {
                                                  const RegionIndex& regionIndex)
   {
     FileScanner scanner;
-    uint32_t    nodeCount;
-    size_t      addressFound=0;
-    size_t      poiFound=0;
-    size_t      postalCodeFound=0;
 
     try {
+      uint32_t    nodeCount;
+      size_t      addressFound=0;
+      size_t      poiFound=0;
+      size_t      postalCodeFound=0;
+      FileOffset  fileOffset;
+      uint32_t    tmpType;
+      TypeId      typeId;
+      TypeInfoRef type;
+      std::string name;
+      std::string postalCode;
+      std::string location;
+      std::string address;
+      GeoCoord    coord;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    SortNodeDataGenerator::NODEADDRESS_DAT),
                    FileScanner::Sequential,
@@ -1792,21 +1802,12 @@ namespace osmscout {
 
       scanner.Read(nodeCount);
 
-      FileOffset  fileOffset;
-      uint32_t    tmpType;
-      TypeId      typeId;
-      TypeInfoRef type;
-      std::string name;
-      std::string location;
-      std::string address;
-      std::string postalCode;
-      GeoCoord    coord;
-
       for (uint32_t n=1; n<=nodeCount; n++) {
         progress.SetProgress(n,nodeCount);
 
         scanner.ReadFileOffset(fileOffset);
         scanner.ReadNumber(tmpType);
+
         scanner.Read(name);
         scanner.Read(postalCode);
         scanner.Read(location);
@@ -1821,9 +1822,8 @@ namespace osmscout {
                        !address.empty();
         bool isPOI=!name.empty() &&
                    type->GetIndexAsPOI();
-        bool hasPostalCode=!postalCode.empty();
 
-        if (hasPostalCode)
+        if (postalCode.empty())
           postalCodeFound++;
 
         if (!isAddress && !isPOI) {
