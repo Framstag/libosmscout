@@ -67,6 +67,8 @@ FocusScope {
 
         routingPopup.parent = desktop
         routingPopup.visible = true
+
+        console.log("Show routing result; dialog height: "+routingBox.height);
     }
 
     Rectangle {
@@ -230,6 +232,9 @@ FocusScope {
 
             RoutingListModel {
                 id: routingModel
+                onReadyChanged: {
+                  showRoutingResult();
+                }
             }
 
             ListView {
