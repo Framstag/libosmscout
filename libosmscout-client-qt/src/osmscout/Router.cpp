@@ -26,6 +26,7 @@
 #include <osmscout/system/Math.h>
 #include <osmscout/OSMScoutQt.h>
 #include <osmscout/Router.h>
+#include <osmscout/RoutingProfile.h>
 
 RouteStep::RouteStep()
 {
@@ -421,6 +422,225 @@ void Router::DumpNameChangedDescription(RouteSelection &route,
   route.routeSteps.push_back(changed);
 }
 
+osmscout::RoutePosition Router::GetClosestRoutableNode(const QString databasePath,
+                                                       const osmscout::ObjectFileRef& refObject,
+                                                       const osmscout::RoutingProfile& routingProfile,
+                                                       double radius)
+{
+  osmscout::RoutePosition position;
+  dbThread->RunSynchronousJob(
+    [this,&position,databasePath,&refObject,&routingProfile,radius]
+    (const std::list<DBInstanceRef>& databases) {
+
+      DBInstanceRef database;
+      for (auto &db:databases){
+        if (db->path==databasePath){
+          database=db;
+          break;
+        }
+      }
+      if (!database){
+        return;
+      }
+
+      if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
+        return;
+      }
+
+      if (refObject.GetType()==osmscout::refNode) {
+        osmscout::NodeRef node;
+
+        if (!database->database->GetNodeByOffset(refObject.GetFileOffset(), node)) {
+          return;
+        }
+
+        position=database->router->GetClosestRoutableNode(node->GetCoords(),
+                                                          routingProfile,
+                                                          radius);
+        return;
+      }
+      else if (refObject.GetType()==osmscout::refArea) {
+        osmscout::AreaRef area;
+
+        if (!database->database->GetAreaByOffset(refObject.GetFileOffset(), area)) {
+          return;
+        }
+
+        osmscout::GeoCoord center;
+
+        area->GetCenter(center);
+
+        position=database->router->GetClosestRoutableNode(center,
+                                                          routingProfile,
+                                                          radius);
+        return;
+      }
+      else if (refObject.GetType()==osmscout::refWay) {
+        osmscout::WayRef way;
+
+        if (!database->database->GetWayByOffset(refObject.GetFileOffset(), way)) {
+          return;
+        }
+
+        position=database->router->GetClosestRoutableNode(way->nodes[0].GetCoord(),
+                                                          routingProfile,
+                                                          radius);
+        return;
+      }
+
+    }
+  );
+
+  return position;
+}
+
+bool Router::CalculateRoute(const QString databasePath,
+                            const osmscout::RoutingProfile& routingProfile,
+                            const osmscout::RoutePosition& start,
+                            const osmscout::RoutePosition& target,
+                            osmscout::RouteData& route)
+{
+  bool success;
+
+  dbThread->RunSynchronousJob(
+    [this,&success,databasePath,&routingProfile,&start,&target,&route]
+    (const std::list<DBInstanceRef>& databases) {
+
+      DBInstanceRef database;
+      for (auto &db:databases){
+        if (db->path==databasePath){
+          database=db;
+          break;
+        }
+      }
+      if (!database){
+        success=false;
+        return;
+      }
+
+      if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
+        success=false;
+        return;
+      }
+
+      osmscout::RoutingResult    result;
+      osmscout::RoutingParameter parameter;
+
+      result=database->router->CalculateRoute(routingProfile,
+                                              start,
+                                              target,
+                                              parameter);
+
+      success=result.Success();
+
+      route=std::move(result.GetRoute());
+    }
+  );
+
+  return success;
+}
+
+bool Router::TransformRouteDataToWay(const QString databasePath,
+                                     osmscout::Vehicle vehicle,
+                                     const osmscout::RouteData& data,
+                                     osmscout::Way& way)
+{
+  bool success;
+
+  dbThread->RunSynchronousJob(
+    [this,&success,databasePath,vehicle,&data,&way]
+    (const std::list<DBInstanceRef>& databases) {
+
+      DBInstanceRef database;
+      for (auto &db:databases){
+        if (db->path==databasePath){
+          database=db;
+          break;
+        }
+      }
+      if (!database){
+        success=false;
+        return;
+      }
+
+
+      if (!database->AssureRouter(vehicle, routerParameter)) {
+        success=false;
+        return;
+      }
+
+      success=database->router->TransformRouteDataToWay(data,way);
+      return;
+    }
+  );
+  return success;
+}
+
+bool Router::TransformRouteDataToRouteDescription(const QString databasePath,
+                                                  const osmscout::RoutingProfile& routingProfile,
+                                                  const osmscout::RouteData& data,
+                                                  osmscout::RouteDescription& description,
+                                                  const std::string& start,
+                                                  const std::string& target)
+{
+  bool success=false;
+
+  dbThread->RunSynchronousJob(
+    [this,&success,databasePath,&routingProfile,&data,&description,&start,&target]
+    (const std::list<DBInstanceRef>& databases) {
+
+      DBInstanceRef database;
+      for (auto &db:databases){
+        if (db->path==databasePath){
+          database=db;
+          break;
+        }
+      }
+      if (!database){
+        return;
+      }
+
+      if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
+        return;
+      }
+
+      if (!database->router->TransformRouteDataToRouteDescription(data,description)) {
+        return;
+      }
+
+      osmscout::TypeConfigRef typeConfig=database->router->GetTypeConfig();
+
+      std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
+
+      postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>());
+      postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>(start));
+      postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>(target));
+      postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::WayNamePostprocessor>());
+      postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
+      postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
+
+      osmscout::RoutePostprocessor::InstructionPostprocessorRef instructionProcessor=std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>();
+
+      instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
+      instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
+      instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
+      instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
+      instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
+      instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
+      postprocessors.push_back(instructionProcessor);
+
+      if (!routePostprocessor.PostprocessRouteDescription(description,
+                                                          routingProfile,
+                                                          *(database->database),
+                                                          postprocessors)) {
+        return;
+      }
+      success=true;
+    }
+  );
+  return success;
+}
+
 void Router::onRouteRequest(LocationEntry* start,
                             LocationEntry* target,
                             osmscout::Vehicle vehicle,
@@ -446,15 +666,24 @@ void Router::onRouteRequest(LocationEntry* start,
   route.routeSteps.clear();
 
   QString                             databasePath=start->getDatabase();
-  osmscout::TypeConfigRef             typeConfig=OSMScoutQt::GetInstance().GetDBThread()->GetTypeConfig(databasePath);
+
+  osmscout::TypeConfigRef             typeConfig;
+  dbThread->RunSynchronousJob(
+    [&typeConfig,&databasePath](const std::list<DBInstanceRef>& databases) {
+      for (auto &db:databases){
+        if (db->path == databasePath){
+          typeConfig=db->database->GetTypeConfig();
+          return;
+        }
+      }
+    }
+  );
   if (!typeConfig){
     osmscout::log.Warn() << "Can't find database: " << databasePath.toStdString();
     emit routeFailed(QString("Can't find database: %1").arg(databasePath),requestId);
     return;
   }
   osmscout::FastestPathRoutingProfile routingProfile(typeConfig);
-  osmscout::Way                       routeWay;
-  //osmscout::Vehicle                   vehicle=osmscout::vehicleCar;//settings->GetRoutingVehicle();
 
   if (vehicle==osmscout::vehicleFoot) {
     routingProfile.ParametrizeForFoot(*typeConfig,
@@ -474,49 +703,43 @@ void Router::onRouteRequest(LocationEntry* start,
                                      160.0);
   }
 
-  osmscout::RoutePosition startPosition=OSMScoutQt::GetInstance().GetDBThread()
-    ->GetClosestRoutableNode(databasePath,
-                             start->getReferences().front(),
-                             routingProfile,
-                             1000);
+  osmscout::RoutePosition startPosition=GetClosestRoutableNode(databasePath,
+                                start->getReferences().front(),
+                                routingProfile,
+                                1000);
 
   if (!startPosition.IsValid()) {
-    //std::cerr << "Cannot find a routing node close to the start location" << std::endl;
     emit routeFailed("Cannot find a routing node close to the start location",requestId);
     return;
   }
 
-  osmscout::RoutePosition targetPosition=OSMScoutQt::GetInstance().GetDBThread()
-    ->GetClosestRoutableNode(databasePath,
+  osmscout::RoutePosition targetPosition=GetClosestRoutableNode(databasePath,
                              target->getReferences().front(),
                              routingProfile,
                              1000);
 
   if (!targetPosition.IsValid()) {
-    //std::cerr << "Cannot find a routing node close to the target location" << std::endl;
     emit routeFailed("Cannot find a routing node close to the target location",requestId);
     return;
   }
 
-  if (!OSMScoutQt::GetInstance().GetDBThread()->CalculateRoute(databasePath,
-                                                               routingProfile,
-                                                               startPosition,
-                                                               targetPosition,
-                                                               route.routeData)) {
-    //std::cerr << "There was an error while routing!" << std::endl;
+  if (!CalculateRoute(databasePath,
+                      routingProfile,
+                      startPosition,
+                      targetPosition,
+                      route.routeData)) {
     emit routeFailed("There was an error while routing!",requestId);
     return;
   }
 
   osmscout::log.Debug() << "Route calculated";
 
-  OSMScoutQt::GetInstance().GetDBThread()
-      ->TransformRouteDataToRouteDescription(databasePath,
-                                             routingProfile,
-                                             route.routeData,
-                                             route.routeDescription,
-                                             start->getLabel().toUtf8().constData(),
-                                             target->getLabel().toUtf8().constData());
+  TransformRouteDataToRouteDescription(databasePath,
+                                       routingProfile,
+                                       route.routeData,
+                                       route.routeDescription,
+                                       start->getLabel().toUtf8().constData(),
+                                       target->getLabel().toUtf8().constData());
 
   osmscout::log.Debug() << "Route transformed";
 
@@ -690,16 +913,10 @@ void Router::onRouteRequest(LocationEntry* start,
     prevNode=node;
   }
 
-  DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-  if (dbThread->TransformRouteDataToWay(databasePath,
-                                        vehicle,
-                                        route.routeData,
-                                        routeWay)) {
-    dbThread->ClearRoute();
-    dbThread->AddRoute(routeWay);
-  }
-  else {
-    // std::cerr << "Error while transforming route" << std::endl;
+  if (!TransformRouteDataToWay(databasePath,
+                               vehicle,
+                               route.routeData,
+                               route.routeWay)) {
     emit routeFailed("Error while transforming route",requestId);
     return;
   }

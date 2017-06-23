@@ -26,6 +26,7 @@
 
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/RoutePostprocessor.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -90,6 +91,7 @@ struct RouteSelection
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
   QList<RouteStep>           routeSteps;
+  osmscout::Way              routeWay;
 };
 
 Q_DECLARE_METATYPE(RouteSelection)
@@ -105,6 +107,9 @@ private:
   SettingsRef settings;
   DBThreadRef dbThread;
   QMutex      lock;
+
+  osmscout::RouterParameter       routerParameter;
+  osmscout::RoutePostprocessor    routePostprocessor;
 
 public slots:
   void Initialize();
@@ -172,6 +177,29 @@ private:
   
   void DumpNameChangedDescription(RouteSelection &route,
                                   const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
+
+  osmscout::RoutePosition GetClosestRoutableNode(const QString databasePath,
+                                                 const osmscout::ObjectFileRef& refObject,
+                                                 const osmscout::RoutingProfile& routingProfile,
+                                                 double radius);
+
+  bool CalculateRoute(const QString databasePath,
+                      const osmscout::RoutingProfile& routingProfile,
+                      const osmscout::RoutePosition& start,
+                      const osmscout::RoutePosition& target,
+                      osmscout::RouteData& route);
+
+  bool TransformRouteDataToWay(const QString databasePath,
+                               osmscout::Vehicle vehicle,
+                               const osmscout::RouteData& data,
+                               osmscout::Way& way);
+
+  bool TransformRouteDataToRouteDescription(const QString databasePath,
+                                            const osmscout::RoutingProfile& routingProfile,
+                                            const osmscout::RouteData& data,
+                                            osmscout::RouteDescription& description,
+                                            const std::string& start,
+                                            const std::string& target);
 
 public:
   Router(QThread *thread,
