@@ -1051,14 +1051,12 @@ namespace osmscout {
                                3,
                                slices);
 
-      for (std::list< std::list<std::string> >::const_iterator slice=slices.begin();
-          slice!=slices.end();
-          ++slice) {
+      for (const auto slice : slices) {
         std::list<std::string>::const_iterator text1;
         std::list<std::string>::const_iterator text2;
         std::list<std::string>::const_iterator text3;
 
-        text1=slice->begin();
+        text1=slice.begin();
         text2=text1;
         text2++;
         text3=text2;
