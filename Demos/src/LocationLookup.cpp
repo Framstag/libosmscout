@@ -126,13 +126,12 @@ std::string GetPostalArea(const osmscout::LocationSearchResult::Entry& entry)
 {
   std::string label;
 
-  /*
-  if (entry.locationMatchQuality==osmscout::LocationSearchResult::match) {
+  if (entry.postalAreaMatchQuality==osmscout::LocationSearchResult::match) {
     label="= ";
   }
   else {
     label="~ ";
-  }*/
+  }
 
   label+="PostalArea ("+osmscout::UTF8StringToLocaleString(entry.postalArea->name)+")";
 

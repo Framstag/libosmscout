@@ -298,6 +298,7 @@ namespace osmscout {
     {
     public:
       std::string adminRegionPattern; //!< name pattern, the admin region must match, empty if no filtering by admin region requested
+      std::string postalCodePattern;  //!< name pattern, the admin region must match, empty if no filtering by admin region requested
       std::string locationPattern;    //!< name pattern, the location must match, empty if no filtering by location requested
       std::string addressPattern;     //!< name pattern, the address must match, empty if no filtering by address requested
     };
@@ -330,6 +331,7 @@ namespace osmscout {
       AdminRegionRef adminRegion;
       MatchQuality   adminRegionMatchQuality;
       PostalAreaRef  postalArea;
+      MatchQuality   postalAreaMatchQuality;
       LocationRef    location;
       MatchQuality   locationMatchQuality;
       POIRef         poi;
@@ -413,10 +415,38 @@ namespace osmscout {
       bool                         limitReached;
 
     public:
-      AdminRegionMatchVisitor(const std::string& pattern,
+      AdminRegionMatchVisitor(const std::string& adminRegionPattern,
                               size_t limit);
 
       Action Visit(const AdminRegion& region);
+    };
+
+    class PostalAreaMatchVisitor
+    {
+    public:
+      class PostalAreaResult
+      {
+      public:
+        AdminRegionRef adminRegion;
+        PostalAreaRef  postalArea;
+        bool           isMatch;
+      };
+
+    private:
+      AdminRegionRef              adminRegion;
+      std::string                 postalAreaPattern;
+      size_t                      limit;
+
+    public:
+      std::list<PostalAreaResult> results;
+      bool                        limitReached;
+
+    public:
+      PostalAreaMatchVisitor(const AdminRegionRef& adminRegion,
+                             const std::string& postalAreaPattern,
+                             size_t limit);
+
+      bool Visit(const PostalArea& postalArea);
     };
 
     /**
@@ -441,13 +471,11 @@ namespace osmscout {
       size_t            limit;
 
     public:
-      AdminRegionRef    adminRegion;
       std::list<Result> results;
       bool              limitReached;
 
     public:
-      LocationMatchVisitor(const AdminRegionRef& adminRegion,
-                           const std::string& pattern,
+      LocationMatchVisitor(const std::string& pattern,
                            size_t limit);
 
       bool Visit(const AdminRegion& adminRegion,
@@ -558,6 +586,7 @@ namespace osmscout {
     bool HandleAdminRegionLocation(const LocationSearch& search,
                                    const LocationSearch::Entry& searchEntry,
                                    const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                   const PostalAreaMatchVisitor::PostalAreaResult& postalAreaResult,
                                    const LocationMatchVisitor::Result& locationResult,
                                    LocationSearchResult& result) const;
 
@@ -568,6 +597,7 @@ namespace osmscout {
 
     bool HandleAdminRegionLocationAddress(const LocationSearch& search,
                                           const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
+                                          const PostalAreaMatchVisitor::PostalAreaResult& postalAreaResult,
                                           const LocationMatchVisitor::Result& locationResult,
                                           const AddressMatchVisitor::AddressResult& addressResult,
                                           LocationSearchResult& result) const;
