@@ -82,10 +82,10 @@ namespace osmscout {
 
     struct RegionLocation
     {
-      std::unordered_map<std::string,size_t> names;         //!< map of names in different case used for this location and their use count
-      FileOffset                   addressOffset; //!< Offset of place where the address list offset is stored
-      std::list<ObjectFileRef>     objects;       //!< Objects that represent this location
-      std::list<RegionAddress>     addresses;     //!< Addresses at this location
+      std::unordered_map<std::string,size_t> names;  //!< map of names in different case used for this location and their use count
+      FileOffset                   addressOffset;    //!< Offset of place where the address list offset is stored
+      std::list<ObjectFileRef>     objects;          //!< Objects that represent this location
+      std::list<RegionAddress>     addresses;        //!< Addresses at this location
 
       std::string GetName() const;
     };
@@ -291,6 +291,7 @@ namespace osmscout {
                                 const FileOffset& fileOffset,
                                 const std::string& location,
                                 const std::string& address,
+                                const std::string &postalCode,
                                 const std::vector<Point>& nodes,
                                 const GeoBox& boundingBox,
                                 bool& added);

@@ -1277,6 +1277,7 @@ namespace osmscout {
                                                       const FileOffset& fileOffset,
                                                       const std::string& location,
                                                       const std::string& address,
+                                                      const std::string &postalCode,
                                                       const std::vector<Point>& nodes,
                                                       const GeoBox& boundingBox,
                                                       bool& added)
@@ -1291,6 +1292,7 @@ namespace osmscout {
                                    fileOffset,
                                    location,
                                    address,
+                                   postalCode,
                                    nodes,
                                    boundingBox,
                                    added);
@@ -1317,6 +1319,7 @@ namespace osmscout {
     RegionAddress regionAddress;
 
     regionAddress.name=address;
+    regionAddress.postalCode=postalCode;
     regionAddress.object.Set(fileOffset,refArea);
 
     loc->second.addresses.push_back(regionAddress);
@@ -1434,6 +1437,7 @@ namespace osmscout {
                                  fileOffset,
                                  location,
                                  address,
+                                 postalCode,
                                  nodes,
                                  boundingBox,
                                  added);
