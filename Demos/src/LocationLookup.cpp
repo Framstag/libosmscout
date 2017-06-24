@@ -85,8 +85,7 @@ std::string GetAddress(const osmscout::LocationSearchResult::Entry& entry)
     label="~ ";
   }
 
-  label+="Address ("+osmscout::UTF8StringToLocaleString(entry.address->name)+
-  " "+osmscout::UTF8StringToLocaleString(entry.address->postalCode)+")";
+  label+="Address ("+osmscout::UTF8StringToLocaleString(entry.address->name)+")";
 
   return label;
 }
@@ -119,6 +118,23 @@ std::string GetPOI(const osmscout::LocationSearchResult::Entry& entry)
   }
 
   label+="POI ("+osmscout::UTF8StringToLocaleString(entry.poi->name)+")";
+
+  return label;
+}
+
+std::string GetPostalArea(const osmscout::LocationSearchResult::Entry& entry)
+{
+  std::string label;
+
+  /*
+  if (entry.locationMatchQuality==osmscout::LocationSearchResult::match) {
+    label="= ";
+  }
+  else {
+    label="~ ";
+  }*/
+
+  label+="PostalArea ("+osmscout::UTF8StringToLocaleString(entry.postalArea->name)+")";
 
   return label;
 }
@@ -202,10 +218,13 @@ std::string GetAdminRegionHierachie(const osmscout::LocationServiceRef& location
 
 int main(int argc, char* argv[])
 {
+  /*
+  osmscout::log.Debug(true);
+  osmscout::log.Info(true);
+  osmscout::log.Warn(true);
+  osmscout::log.Error(true);*/
+
   std::string map;
-  std::string areaPattern;
-  std::string locationPattern;
-  std::string addressPattern;
 
   if (argc<3) {
     std::cerr << "LocationLookup <map directory> [location [address]] <area>" << std::endl;
@@ -268,6 +287,7 @@ int main(int argc, char* argv[])
         entry.address) {
       std::cout << GetLocation(entry) << " ";
       std::cout << GetAddress(entry) << " ";
+      std::cout << GetPostalArea(entry) << " ";
       std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
@@ -282,6 +302,7 @@ int main(int argc, char* argv[])
     else if (entry.adminRegion &&
              entry.location) {
       std::cout << GetLocation(entry) << " ";
+      std::cout << GetPostalArea(entry) << " ";
       std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,

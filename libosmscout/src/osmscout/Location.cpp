@@ -53,6 +53,11 @@ namespace osmscout {
     // no code
   }
 
+  POIVisitor::~POIVisitor()
+  {
+    // no code
+  }
+
   LocationVisitor::~LocationVisitor()
   {
     // no code
@@ -71,12 +76,14 @@ namespace osmscout {
   }
 
   bool AddressListVisitor::Visit(const AdminRegion& adminRegion,
+                                 const PostalArea& postalArea,
                                  const Location& location,
                                  const Address& address)
   {
     AddressResult result;
 
     result.adminRegion=std::make_shared<AdminRegion>(adminRegion);
+    result.postalArea=std::make_shared<PostalArea>(postalArea);
     result.location=std::make_shared<Location>(location);
     result.address=std::make_shared<Address>(address);
 

@@ -329,6 +329,7 @@ namespace osmscout {
     public:
       AdminRegionRef adminRegion;
       MatchQuality   adminRegionMatchQuality;
+      PostalAreaRef  postalArea;
       LocationRef    location;
       MatchQuality   locationMatchQuality;
       POIRef         poi;
@@ -427,30 +428,22 @@ namespace osmscout {
     class LocationMatchVisitor : public LocationVisitor, public VisitorMatcher
     {
     public:
-      class POIResult
+      class Result
       {
       public:
         AdminRegionRef adminRegion;
-        POIRef         poi;
-        bool           isMatch;
-      };
-
-      class LocationResult
-      {
-      public:
-        AdminRegionRef adminRegion;
+        PostalAreaRef  postalArea;
         LocationRef    location;
         bool           isMatch;
       };
 
     private:
-      size_t              limit;
+      size_t            limit;
 
     public:
-      AdminRegionRef            adminRegion;
-      std::list<POIResult>      poiResults;
-      std::list<LocationResult> locationResults;
-      bool                      limitReached;
+      AdminRegionRef    adminRegion;
+      std::list<Result> results;
+      bool              limitReached;
 
     public:
       LocationMatchVisitor(const AdminRegionRef& adminRegion,
@@ -458,9 +451,42 @@ namespace osmscout {
                            size_t limit);
 
       bool Visit(const AdminRegion& adminRegion,
-                 const POI &poi);
-      bool Visit(const AdminRegion& adminRegion,
+                 const PostalArea& postalArea,
                  const Location &location);
+    };
+
+    /**
+     * \ingroup Location
+     *
+     * Visitor that gets called for every location found in the given region.
+     * It is the task of the visitor to decide if a location matches the given criteria.
+     */
+    class POIMatchVisitor : public POIVisitor, public VisitorMatcher
+    {
+    public:
+      class Result
+      {
+      public:
+        AdminRegionRef adminRegion;
+        POIRef         poi;
+        bool           isMatch;
+      };
+
+    private:
+      size_t            limit;
+
+    public:
+      AdminRegionRef    adminRegion;
+      std::list<Result> results;
+      bool              limitReached;
+
+    public:
+      POIMatchVisitor(const AdminRegionRef& adminRegion,
+                      const std::string& pattern,
+                      size_t limit);
+
+      bool Visit(const AdminRegion& adminRegion,
+                 const POI &poi);
     };
 
     /**
@@ -474,6 +500,7 @@ namespace osmscout {
       {
       public:
         AdminRegionRef adminRegion;
+        PostalAreaRef  postalArea;
         LocationRef    location;
         AddressRef     address;
         bool           isMatch;
@@ -491,6 +518,7 @@ namespace osmscout {
                           size_t limit);
 
       bool Visit(const AdminRegion& adminRegion,
+                 const PostalArea& postalArea,
                  const Location& location,
                  const Address& address);
     };
@@ -505,6 +533,7 @@ namespace osmscout {
     {
       ObjectFileRef  object;      //!< object used for lookup
       AdminRegionRef adminRegion; //!< Region the object is in, if set
+      PostalAreaRef  postalArea;  //!< Postal area the object is in, if set
       POIRef         poi;         //!< POI data, if set
       LocationRef    location;    //!< Location data, if set
       AddressRef     address;     //!< Address data if set
@@ -529,17 +558,17 @@ namespace osmscout {
     bool HandleAdminRegionLocation(const LocationSearch& search,
                                    const LocationSearch::Entry& searchEntry,
                                    const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                                   const LocationMatchVisitor::LocationResult& locationResult,
+                                   const LocationMatchVisitor::Result& locationResult,
                                    LocationSearchResult& result) const;
 
     bool HandleAdminRegionPOI(const LocationSearch& search,
                               const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                              const LocationMatchVisitor::POIResult& poiResult,
+                              const POIMatchVisitor::Result& poiResult,
                               LocationSearchResult& result) const;
 
     bool HandleAdminRegionLocationAddress(const LocationSearch& search,
                                           const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                                          const LocationMatchVisitor::LocationResult& locationResult,
+                                          const LocationMatchVisitor::Result& locationResult,
                                           const AddressMatchVisitor::AddressResult& addressResult,
                                           LocationSearchResult& result) const;
 
@@ -549,9 +578,14 @@ namespace osmscout {
     bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
 
     bool VisitAdminRegionLocations(const AdminRegion& region,
+                                   const PostalArea& postalArea,
                                    LocationVisitor& visitor) const;
 
+    bool VisitAdminRegionPOIs(const AdminRegion& region,
+                              POIVisitor& visitor) const;
+
     bool VisitLocationAddresses(const AdminRegion& region,
+                                const PostalArea& postalArea,
                                 const Location& location,
                                 AddressVisitor& visitor) const;
 

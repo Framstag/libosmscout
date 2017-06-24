@@ -60,6 +60,33 @@ namespace osmscout {
   const char* const LocationIndexGenerator::FILENAME_LOCATION_REGION_TXT = "location_region.txt";
   const char* const LocationIndexGenerator::FILENAME_LOCATION_FULL_TXT = "location_full.txt";
 
+  void LocationIndexGenerator::PostalArea::AddLocationObject(const std::string& name,
+                                                             const ObjectFileRef& objectRef)
+  {
+    std::string locationNameLower=UTF8StringToLower(name);
+
+    RegionLocation& location=locations[locationNameLower];
+
+    std::unordered_map<std::string,size_t>::iterator nameEntry=location.names.find(name);
+
+    if (nameEntry!=location.names.end()) {
+      nameEntry->second++;
+    }
+    else {
+      location.names[name]=1;
+    }
+
+    location.objects.push_back(objectRef);
+  }
+
+  LocationIndexGenerator::Region::Region()
+  {
+    PostalArea postalArea("");
+
+    // Always add a empty postal area for fallback to the index, to avoid "lookup and insert" on demand coast-
+    defaultPostalArea=postalAreas.insert(std::make_pair(postalArea.name, postalArea)).first;
+  }
+
   void LocationIndexGenerator::Region::CalculateMinMax()
   {
     bool isStart=true;
@@ -218,7 +245,7 @@ namespace osmscout {
     size_t curr_subarea = 0;
     const size_t nareas = areas.size();
 
-    size_t quorum_isin = child.probePoints.size() * 0.9;
+    size_t quorum_isin = (size_t)round(child.probePoints.size() * 0.9);
     size_t quorum_isout = child.probePoints.size() - quorum_isin;
 
     for (const GeoCoord& p: child.probePoints)
@@ -243,23 +270,25 @@ namespace osmscout {
     return (in > quorum_isin);
   }
 
-  void LocationIndexGenerator::Region::AddLocationObject(const std::string& locationName,
+  void LocationIndexGenerator::Region::AddLocationObject(const std::string& name,
+                                                         const std::string& postalCode,
                                                          const ObjectFileRef& objectRef)
   {
-    std::string locationNameLower=UTF8StringToLower(locationName);
+    if (!postalCode.empty()) {
+      auto postalAreaEntry=postalAreas.find(postalCode);
 
-    RegionLocation& location=locations[locationNameLower];
+      if (postalAreaEntry==postalAreas.end()) {
+        PostalArea postalArea(postalCode);
 
-    std::unordered_map<std::string,size_t>::iterator nameEntry=location.names.find(locationName);
+        postalAreaEntry=postalAreas.insert(std::make_pair(postalCode,postalArea)).first;
+      }
 
-    if (nameEntry!=location.names.end()) {
-      nameEntry->second++;
+      postalAreaEntry->second.AddLocationObject(name,
+                                                objectRef);
     }
-    else {
-      location.names[locationName]=1;
-    }
 
-    location.objects.push_back(objectRef);
+    defaultPostalArea->second.AddLocationObject(name,
+                                                objectRef);
   }
 
 
@@ -355,7 +384,7 @@ namespace osmscout {
         }
 
         std::list<std::string>::const_iterator nextToken=token;
-        nextToken++;
+        ++nextToken;
 
         if (nextToken!=tokens.end() && nextToken->length()<=5) {
           std::string composition=*token+" "+*nextToken;
@@ -430,10 +459,12 @@ namespace osmscout {
                                    blacklist);
     }
 
-    for (const auto& nodeEntry : region.locations) {
-      AnalyseStringForIgnoreTokens(nodeEntry.first,
-                                   ignoreTokens,
-                                   blacklist);
+    for (const auto& postalAreaEntry : region.postalAreas) {
+      for (const auto& nodeEntry : postalAreaEntry.second.locations) {
+        AnalyseStringForIgnoreTokens(nodeEntry.first,
+                                     ignoreTokens,
+                                     blacklist);
+      }
     }
 
     // recursion...
@@ -522,6 +553,14 @@ namespace osmscout {
         out << " = " << alias.name << " Node " << alias.reference << std::endl;
       }
 
+      for (const auto& postalAreaEntry : childRegion->postalAreas) {
+        for (size_t i=0; i<indent+2; i++) {
+          out << " ";
+        }
+
+        out << " # " << postalAreaEntry.second.name << std::endl;
+      }
+
       DumpRegion(*childRegion,
                  indent+2,
                  out);
@@ -583,33 +622,36 @@ namespace osmscout {
         out << " * " << poi.name << " " << poi.object.GetTypeName() << " " << poi.object.GetFileOffset() << std::endl;
       }
 
-      for (const auto& nodeEntry : childRegion->locations) {
+      for (const auto& postalAreaEntry : childRegion->postalAreas) {
         for (size_t i=0; i<indent+2; i++) {
           out << " ";
         }
-        out << " - " << nodeEntry.second.GetName() << std::endl;
 
-        for (const auto& object : nodeEntry.second.objects) {
+        out << " # " << postalAreaEntry.second.name << std::endl;
+
+        for (const auto& nodeEntry : postalAreaEntry.second.locations) {
           for (size_t i=0; i<indent+4; i++) {
             out << " ";
           }
+          out << " - " << nodeEntry.second.GetName() << std::endl;
 
-          out << " = " << object.GetTypeName() << " " << object.GetFileOffset() << std::endl;
-        }
+          for (const auto& object : nodeEntry.second.objects) {
+            for (size_t i=0; i<indent+6; i++) {
+              out << " ";
+            }
 
-        for (const auto& address : nodeEntry.second.addresses) {
-          for (size_t i=0; i<indent+6; i++) {
-            out << " ";
+            out << " = " << object.GetTypeName() << " " << object.GetFileOffset() << std::endl;
           }
 
-          out << " @ " << address.name;
+          for (const auto& address : nodeEntry.second.addresses) {
+            for (size_t i=0; i<indent+8; i++) {
+              out << " ";
+            }
 
-          if (!address.postalCode.empty()) {
-            out << " " << address.postalCode;
+            out << " @ " << address.name;
 
+            out << " " << address.object.GetTypeName() << " " << address.object.GetFileOffset() << std::endl;
           }
-
-          out << " " << address.object.GetTypeName() << " " << address.object.GetFileOffset() << std::endl;
         }
       }
 
@@ -790,13 +832,14 @@ namespace osmscout {
                                                 Progress& progress,
                                                 Region& rootRegion)
   {
-    FileScanner            scanner;
-    uint32_t               areaCount;
-    size_t                 areasFound=0;
-    NameFeatureValueReader nameReader(typeConfig);
-    IsInFeatureValueReader isInReader(typeConfig);
+    FileScanner scanner;
 
     try {
+      uint32_t               areaCount;
+      size_t                 areasFound=0;
+      NameFeatureValueReader nameReader(typeConfig);
+      IsInFeatureValueReader isInReader(typeConfig);
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    AreaDataFile::AREAS_DAT),
                    FileScanner::Sequential,
@@ -951,12 +994,13 @@ namespace osmscout {
                                                 RegionRef& rootRegion,
                                                 const RegionIndex& regionIndex)
   {
-    FileScanner            scanner;
-    uint32_t               nodeCount;
-    size_t                 citiesFound=0;
-    NameFeatureValueReader nameReader(*typeConfig);
+    FileScanner scanner;
 
     try {
+      uint32_t               nodeCount;
+      size_t                 citiesFound=0;
+      NameFeatureValueReader nameReader(*typeConfig);
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    NodeDataFile::NODES_DAT),
                    FileScanner::Sequential,
@@ -1012,6 +1056,7 @@ namespace osmscout {
                                                        const Area& area,
                                                        const std::vector<Point>& nodes,
                                                        const std::string& name,
+                                                       const std::string& postalCode,
                                                        const GeoBox& boundingBox)
   {
     for (const auto& childRegion : region.regions) {
@@ -1022,7 +1067,12 @@ namespace osmscout {
           bool match=IsCoordInArea(nodes[0],childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationAreaToRegion(*childRegion,area,nodes,name,boundingBox);
+            bool completeMatch=AddLocationAreaToRegion(*childRegion,
+                                                       area,
+                                                       nodes,
+                                                       name,
+                                                       postalCode,
+                                                       boundingBox);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -1035,7 +1085,9 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.AddLocationObject(name,ObjectFileRef(area.GetFileOffset(),refArea));
+    region.AddLocationObject(name,
+                             postalCode,
+                             ObjectFileRef(area.GetFileOffset(),refArea));
 
     for (size_t i=0; i<region.areas.size(); i++) {
       if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
@@ -1057,6 +1109,7 @@ namespace osmscout {
                                                        const Area& area,
                                                        const Area::Ring& ring,
                                                        const std::string& name,
+                                                       const std::string& postalCode,
                                                        const RegionIndex& regionIndex)
   {
     if (ring.IsMasterRing() &&
@@ -1074,6 +1127,7 @@ namespace osmscout {
                                   area,
                                   r.nodes,
                                   name,
+                                  postalCode,
                                   boundingBox);
         }
       }
@@ -1090,6 +1144,7 @@ namespace osmscout {
                               area,
                               ring.nodes,
                               name,
+                              postalCode,
                               boundingBox);
     }
   }
@@ -1133,12 +1188,11 @@ namespace osmscout {
 
             PostalCodeFeatureValue *postalCodeValue=postalCodeReader.GetValue(ring.GetFeatureValueBuffer());
 
-            // TODO
-
             AddLocationAreaToRegion(rootRegion,
                                     area,
                                     ring,
                                     nameValue->GetName(),
+                                    postalCodeValue!=NULL ? postalCodeValue->GetPostalCode() : "",
                                     regionIndex);
 
             areasFound++;
@@ -1168,6 +1222,7 @@ namespace osmscout {
   bool LocationIndexGenerator::AddLocationWayToRegion(Region& region,
                                                       const Way& way,
                                                       const std::string& name,
+                                                      const std::string& postalCode,
                                                       const GeoBox& boundingBox)
   {
     for (const auto& childRegion : region.regions) {
@@ -1178,7 +1233,11 @@ namespace osmscout {
           bool match=IsAreaAtLeastPartlyInArea(way.nodes,childRegion->areas[i]);
 
           if (match) {
-            bool completeMatch=AddLocationWayToRegion(*childRegion,way,name,boundingBox);
+            bool completeMatch=AddLocationWayToRegion(*childRegion,
+                                                      way,
+                                                      name,
+                                                      postalCode,
+                                                      boundingBox);
 
             if (completeMatch) {
               // We are done, the object is completely enclosed by one of our sub areas
@@ -1191,7 +1250,9 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.AddLocationObject(name,ObjectFileRef(way.GetFileOffset(),refWay));
+    region.AddLocationObject(name,
+                             postalCode,
+                             ObjectFileRef(way.GetFileOffset(),refWay));
 
     for (size_t i=0; i<region.areas.size(); i++) {
       if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
@@ -1243,8 +1304,6 @@ namespace osmscout {
 
         PostalCodeFeatureValue *postalCodeValue=postalCodeReader.GetValue(way.GetFeatureValueBuffer());
 
-        // TODO
-
         GeoBox boundingBox;
 
         way.GetBoundingBox(boundingBox);
@@ -1255,6 +1314,7 @@ namespace osmscout {
         AddLocationWayToRegion(*region,
                                way,
                                nameValue->GetName(),
+                               postalCodeValue!=NULL ? postalCodeValue->GetPostalCode() : "",
                                boundingBox);
 
         waysFound++;
@@ -1270,6 +1330,89 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  void LocationIndexGenerator::AddAddressToRegion(Progress& progress,
+                                                  Region& region,
+                                                  const ObjectFileRef& object,
+                                                  const std::string& location,
+                                                  const std::string& address,
+                                                  const std::string &postalCode,
+                                                  bool allowDuplicates,
+                                                  bool& added)
+  {
+    std::map<std::string,RegionLocation>::iterator loc;
+    auto                                           postalAreaEntry=region.postalAreas.end();
+    bool                                           foundInDefaultArea=false;
+    bool                                           locFound=false;
+
+
+    // Is postal code available: Search for the postal area for the given postal code
+    if (!postalCode.empty()) {
+      postalAreaEntry=region.postalAreas.find(postalCode);
+
+      // If the postal areas does not exist yet, create one
+      if (postalAreaEntry==region.postalAreas.end()) {
+        PostalArea postalArea(postalCode);
+
+        postalAreaEntry=region.postalAreas.insert(std::make_pair(postalCode,postalArea)).first;
+      }
+    }
+
+    // If we have found a postal area, search there for the location first
+    if (postalAreaEntry!=region.postalAreas.end()) {
+      loc=FindLocation(progress,
+                       region,
+                       postalAreaEntry->second,
+                       location);
+
+      locFound=loc!=postalAreaEntry->second.locations.end();
+    }
+
+    if (!locFound) {
+      // Now search in the default postal area
+      loc=FindLocation(progress,
+                       region,
+                       region.defaultPostalArea->second,
+                       location);
+      locFound=loc!=region.defaultPostalArea->second.locations.end();
+      foundInDefaultArea=true;
+    }
+
+    if (!locFound) {
+      errorReporter->ReportLocationDebug(object,
+                                         std::string("Street '")+location +"' of address '"+address+"' cannot be resolved in region '"+region.name+"'");
+      return;
+    }
+
+    // If there is a non-default postal area but the location is in the default postal area => make a copy
+    if (foundInDefaultArea &&
+        postalAreaEntry!=region.postalAreas.end()) {
+      std::string locationNameLower=UTF8StringToLower(loc->second.GetName());
+
+      auto newLoc=postalAreaEntry->second.locations.insert(std::make_pair(locationNameLower,
+                                                                          loc->second)).first;
+
+      newLoc->second.addresses.clear();
+
+      loc=newLoc;
+    }
+
+    if (!allowDuplicates) {
+      // Check for duplicates
+      for (const auto& regionAddress : loc->second.addresses) {
+        if (regionAddress.name==address) {
+          return;
+        }
+      }
+    }
+
+    RegionAddress regionAddress(address,
+                                object);
+
+    loc->second.addresses.push_back(regionAddress);
+
+    added=true;
   }
 
   void LocationIndexGenerator::AddAddressAreaToRegion(Progress& progress,
@@ -1302,29 +1445,14 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region,location);
-
-    if (loc==region.locations.end()) {
-      errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refArea),
-                                         std::string("Street '")+location +"' of address '"+address+"' cannot be resolved in region '"+region.name+"'");
-      return;
-    }
-
-    for (const auto& regionAddress : loc->second.addresses) {
-      if (regionAddress.name==address) {
-        return;
-      }
-    }
-
-    RegionAddress regionAddress;
-
-    regionAddress.name=address;
-    regionAddress.postalCode=postalCode;
-    regionAddress.object.Set(fileOffset,refArea);
-
-    loc->second.addresses.push_back(regionAddress);
-
-    added=true;
+    AddAddressToRegion(progress,
+                       region,
+                       ObjectFileRef(fileOffset,refArea),
+                       location,
+                       address,
+                       postalCode,
+                       false,
+                       added);
   }
 
   void LocationIndexGenerator::AddPOIAreaToRegion(Progress& progress,
@@ -1353,10 +1481,7 @@ namespace osmscout {
       }
     }
 
-    RegionPOI poi;
-
-    poi.name=name;
-    poi.object.Set(fileOffset,refArea);
+    RegionPOI poi(name,ObjectFileRef(fileOffset,refArea));
 
     region.pois.push_back(poi);
 
@@ -1514,28 +1639,14 @@ namespace osmscout {
       }
     }
 
-    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region,location);
-
-    if (loc==region.locations.end()) {
-      errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refWay),
-                                         std::string("Street '")+location +"' of address '"+address+"' cannot be resolved in region '"+region.name+"'");
-    }
-    else {
-      for (const auto& regionAddress : loc->second.addresses) {
-        if (regionAddress.name==address) {
-          return false;
-        }
-      }
-
-      RegionAddress regionAddress;
-
-      regionAddress.name=address;
-      regionAddress.object.Set(fileOffset,refWay);
-
-      loc->second.addresses.push_back(regionAddress);
-
-      added=true;
-    }
+    AddAddressToRegion(progress,
+                       region,
+                       ObjectFileRef(fileOffset,refWay),
+                       location,
+                       address,
+                       "",
+                       false,
+                       added);
 
     for (size_t i=0; i<region.areas.size(); i++) {
       if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
@@ -1579,10 +1690,7 @@ namespace osmscout {
       }
     }
 
-    RegionPOI poi;
-
-    poi.name=name;
-    poi.object.Set(fileOffset,refWay);
+    RegionPOI poi(name,ObjectFileRef(fileOffset,refWay));
 
     region.pois.push_back(poi);
 
@@ -1705,9 +1813,10 @@ namespace osmscout {
    */
   std::map<std::string,LocationIndexGenerator::RegionLocation>::iterator LocationIndexGenerator::FindLocation(Progress& progress,
                                                                                                               Region& region,
+                                                                                                              PostalArea& postalArea,
                                                                                                               const std::string &locationName)
   {
-    std::map<std::string,RegionLocation>           &locations=region.locations;
+    std::map<std::string,RegionLocation>           &locations=postalArea.locations;
     std::string                                    locationNameSearch=UTF8StringToLower(locationName);
     std::map<std::string,RegionLocation>::iterator loc=locations.find(locationNameSearch);
 
@@ -1721,7 +1830,8 @@ namespace osmscout {
     std::string regionNameLower=UTF8StringToLower(region.name);
 
     if (regionNameLower==locationNameSearch) {
-      region.AddLocationObject(region.name,region.reference);
+      postalArea.AddLocationObject(region.name,
+                                   region.reference);
 
       progress.Debug(std::string("Create virtual location for region '")+region.name+"'");
       return locations.find(region.name);
@@ -1731,7 +1841,8 @@ namespace osmscout {
       std::string regionAliasNameLower=UTF8StringToLower(alias.name);
 
       if (regionAliasNameLower==locationNameSearch) {
-        region.AddLocationObject(alias.name,ObjectFileRef(alias.reference,refNode));
+        postalArea.AddLocationObject(alias.name,
+                                     ObjectFileRef(alias.reference,refNode));
 
         progress.Debug(std::string("Create virtual location for '")+alias.name+"' (alias of region "+region.name+")");
         return locations.find(alias.name);
@@ -1749,28 +1860,14 @@ namespace osmscout {
                                                       const std::string &postalCode,
                                                       bool& added)
   {
-    std::map<std::string,RegionLocation>::iterator loc=FindLocation(progress,region,location);
-
-    if (loc==region.locations.end()) {
-      errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refNode),
-                                         std::string("Street of address '")+location+
-                                         "' '"+address+"' cannot be resolved in region '"+region.name+"'");
-      return;
-    }
-
-    // It is possible that the address is already available at the location
-    // We add it anyway. It is possible that multiple nodes share the same address (because their are in the
-    // same building) and an area (the building) might hold the address, too.
-
-    RegionAddress regionAddress;
-
-    regionAddress.name=address;
-    regionAddress.postalCode=postalCode;
-    regionAddress.object.Set(fileOffset,refNode);
-
-    loc->second.addresses.push_back(regionAddress);
-
-    added=true;
+    AddAddressToRegion(progress,
+                       region,
+                       ObjectFileRef(fileOffset,refNode),
+                       location,
+                       address,
+                       postalCode,
+                       true,
+                       added);
   }
 
   void LocationIndexGenerator::AddPOINodeToRegion(Region& region,
@@ -1778,10 +1875,7 @@ namespace osmscout {
                                                   const std::string& name,
                                                   bool& added)
   {
-    RegionPOI poi;
-
-    poi.name=name;
-    poi.object.Set(fileOffset,refNode);
+    RegionPOI poi(name,ObjectFileRef(fileOffset,refNode));
 
     region.pois.push_back(poi);
 
@@ -1896,6 +1990,78 @@ namespace osmscout {
     return true;
   }
 
+  void LocationIndexGenerator::CleanupPostalAreas(LocationIndexGenerator::Region& region)
+  {
+    //
+    // Remove addresses from locations in the default postal area, that are indexed by non-default postal areas
+    //
+    std::set<ObjectFileRef> addresses;
+
+    for (const auto& postalAreaEntry : region.postalAreas) {
+      if (!postalAreaEntry.second.name.empty()) {
+        // for each location in postal area
+        for (const auto& location : postalAreaEntry.second.locations) {
+          // add all objects for each address to set
+          std::for_each(location.second.addresses.begin(),location.second.addresses.end(),[&addresses](const RegionAddress& address) {
+            addresses.insert(address.object);
+          });
+        }
+      }
+    }
+
+    for (auto& locationEntry : region.defaultPostalArea->second.locations) {
+      // Location does not have any addresses
+      if (!locationEntry.second.addresses.empty()) {
+        auto addressIter=locationEntry.second.addresses.begin();
+        while (addressIter!=locationEntry.second.addresses.end()) {
+          // we have an address for this location in the default postal area that is not in another postal area
+          if (addresses.find(addressIter->object)!=addresses.end()) {
+            addressIter=locationEntry.second.addresses.erase(addressIter);
+          }
+          else {
+            ++addressIter;
+          }
+        }
+      }
+    }
+
+    addresses.clear();
+
+    //
+    // Remove locations from default postal area, that are are completely indexed by non-default postal areas
+    //
+
+    std::set<std::string> locations;
+
+    for (const auto& postalAreaEntry : region.postalAreas) {
+      if (!postalAreaEntry.second.name.empty()) {
+        // for each location in postal area
+        for (const auto& location : postalAreaEntry.second.locations) {
+          locations.insert(location.first);
+        }
+      }
+    }
+
+    auto locationIter=region.defaultPostalArea->second.locations.begin();
+    while (locationIter!=region.defaultPostalArea->second.locations.end()) {
+      // we have an object for this location in the default postal area that is not in another postal area
+      if (locations.find(locationIter->first)!=locations.end()) {
+        locationIter=region.defaultPostalArea->second.locations.erase(locationIter);
+      }
+      else {
+        ++locationIter;
+      }
+    }
+
+    locations.clear();
+
+    // ... Recursion ...
+
+    for (const auto& childRegion : region.regions) {
+      CleanupPostalAreas(*childRegion);
+    }
+  }
+
   void LocationIndexGenerator::WriteIgnoreTokens(FileWriter& writer,
                                                  const std::list<std::string>& regionIgnoreTokens,
                                                  const std::list<std::string>& locationIgnoreTokens)
@@ -1910,6 +2076,18 @@ namespace osmscout {
 
     for (const auto& token : locationIgnoreTokens) {
       writer.Write(token);
+    }
+  }
+
+  void LocationIndexGenerator::WriteRegionIndex(FileWriter& writer,
+                                                Region& rootRegion)
+  {
+    writer.WriteNumber((uint32_t)rootRegion.regions.size());
+
+    for (const auto& childRegion : rootRegion.regions) {
+      WriteRegionIndexEntry(writer,
+                            rootRegion,
+                            *childRegion);
     }
   }
 
@@ -1934,50 +2112,43 @@ namespace osmscout {
                              bytesForNodeFileOffset);
     }
 
+    writer.WriteNumber((uint32_t)region.postalAreas.size());
+    for (auto& postalArea : region.postalAreas) {
+      writer.Write(postalArea.second.name);
+      postalArea.second.dataOffsetOffset=writer.GetPos();
+      writer.WriteFileOffset(0);
+    }
+
     writer.WriteNumber((uint32_t)region.regions.size());
 
-    for (const auto& childRegion : region.regions) {
-      FileOffset nextChildOffsetOffset;
+    std::list<FileOffset> childrenOffsetOffsets;
 
-      nextChildOffsetOffset=writer.GetPos();
-
+    for (size_t i=0; i<region.regions.size(); i++) {
+      childrenOffsetOffsets.push_back(writer.GetPos());
       writer.WriteFileOffset(0);
+    }
+
+    for (const auto& childRegion : region.regions) {
+      FileOffset currentOffset=writer.GetPos();
+
+      writer.SetPos(childrenOffsetOffsets.front());
+      writer.WriteFileOffset(currentOffset);
+      childrenOffsetOffsets.pop_front();
+
+      writer.SetPos(currentOffset);
 
       WriteRegionIndexEntry(writer,
                             region,
                             *childRegion);
-
-      FileOffset nextChildOffset;
-
-      nextChildOffset=writer.GetPos();
-      writer.SetPos(nextChildOffsetOffset);
-      writer.WriteFileOffset(nextChildOffset);
-      writer.SetPos(nextChildOffset);
     }
   }
 
-  void LocationIndexGenerator::WriteRegionIndex(FileWriter& writer,
-                                                Region& rootRegion)
+  void LocationIndexGenerator::WriteRegionData(FileWriter& writer,
+                                               Region& rootRegion)
   {
-    writer.WriteNumber((uint32_t)rootRegion.regions.size());
-
     for (const auto& childRegion : rootRegion.regions) {
-      FileOffset nextChildOffsetOffset;
-
-      nextChildOffsetOffset=writer.GetPos();
-
-      writer.WriteFileOffset(0);
-
-      WriteRegionIndexEntry(writer,
-                            rootRegion,
-                            *childRegion);
-
-      FileOffset nextChildOffset=0;
-
-      nextChildOffset=writer.GetPos();
-      writer.SetPos(nextChildOffsetOffset);
-      writer.WriteFileOffset(nextChildOffset);
-      writer.SetPos(nextChildOffset);
+      WriteRegionDataEntry(writer,
+                           *childRegion);
     }
   }
 
@@ -2002,8 +2173,32 @@ namespace osmscout {
       objectFileRefWriter.Write(poi.object);
     }
 
-    writer.WriteNumber((uint32_t)region.locations.size());
-    for (auto& location : region.locations) {
+    writer.WriteNumber((uint32_t)region.postalAreas.size());
+
+    for (auto& postalAreaEntry : region.postalAreas) {
+      WritePostalArea(writer,
+                     postalAreaEntry.second);
+    }
+
+    for (const auto& childRegion : region.regions) {
+      WriteRegionDataEntry(writer,
+                           *childRegion);
+    }
+  }
+
+  void LocationIndexGenerator::WritePostalArea(FileWriter& writer,
+                                               PostalArea& postalArea)
+  {
+    ObjectFileRefStreamWriter objectFileRefWriter(writer);
+
+    FileOffset currentPos=writer.GetPos();
+
+    writer.SetPos(postalArea.dataOffsetOffset);
+    writer.WriteFileOffset(currentPos);
+    writer.SetPos(currentPos);
+
+    writer.WriteNumber((uint32_t)postalArea.locations.size());
+    for (auto& location : postalArea.locations) {
       location.second.objects.sort(ObjectFileRefByFileOffsetComparator());
 
       writer.Write(location.second.GetName());
@@ -2011,7 +2206,7 @@ namespace osmscout {
 
       if (!location.second.addresses.empty()) {
         writer.Write(true);
-        location.second.addressOffset=writer.GetPos();
+        location.second.dataOffsetOffset=writer.GetPos();
         writer.WriteFileOffset(0);
       }
       else {
@@ -2024,46 +2219,31 @@ namespace osmscout {
         objectFileRefWriter.Write(object);
       }
     }
-
-    for (const auto& childRegion : region.regions) {
-      WriteRegionDataEntry(writer,
-                           *childRegion);
-    }
-  }
-
-  void LocationIndexGenerator::WriteRegionData(FileWriter& writer,
-                                                 Region& rootRegion)
-  {
-    for (const auto& childRegion : rootRegion.regions) {
-      WriteRegionDataEntry(writer,
-                           *childRegion);
-    }
   }
 
   void LocationIndexGenerator::WriteAddressDataEntry(FileWriter& writer,
                                                      Region& region)
   {
-    for (auto& location : region.locations) {
-      if (!location.second.addresses.empty()) {
-        FileOffset offset;
+    for (auto& postalAreaEntry : region.postalAreas) {
+      for (auto& location : postalAreaEntry.second.locations) {
+        if (!location.second.addresses.empty()) {
+          FileOffset currentOffset=writer.GetPos();
 
-        offset=writer.GetPos();
+          writer.SetPos(location.second.dataOffsetOffset);
+          writer.WriteFileOffset(currentOffset);
+          writer.SetPos(currentOffset);
 
-        writer.SetPos(location.second.addressOffset);
-        writer.WriteFileOffset(offset);
-        writer.SetPos(offset);
+          location.second.addresses.sort();
 
-        location.second.addresses.sort();
+          writer.WriteNumber((uint32_t)location.second.addresses.size());
 
-        writer.WriteNumber((uint32_t)location.second.addresses.size());
+          ObjectFileRefStreamWriter objectFileRefWriter(writer);
 
-        ObjectFileRefStreamWriter objectFileRefWriter(writer);
+          for (const auto& address : location.second.addresses) {
+            writer.Write(address.name);
 
-        for (const auto& address : location.second.addresses) {
-          writer.Write(address.name);
-          writer.Write(address.postalCode);
-
-          objectFileRefWriter.Write(address.object);
+            objectFileRefWriter.Write(address.object);
+          }
         }
       }
     }
@@ -2250,7 +2430,9 @@ namespace osmscout {
         size_t count=0;
 
         for (const auto& region : regionTree[i]) {
-          count+=region->locations.size();
+          for (const auto& postalAreaEntry : region->postalAreas) {
+            count+=postalAreaEntry.second.locations.size();
+          }
         }
 
         progress.Info(std::string("Area tree index ")+NumberToString(i)+" object count size: "+NumberToString(count));
@@ -2285,6 +2467,10 @@ namespace osmscout {
                              regionIndex)) {
         return false;
       }
+
+      progress.SetAction("Cleanup location tree");
+
+      CleanupPostalAreas(*rootRegion);
 
       progress.SetAction("Calculate ignore tokens");
 
