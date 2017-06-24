@@ -1,3 +1,10 @@
+#---- Bearing
+add_executable(Bearing src/Bearing.cpp)
+set_property(TARGET Bearing PROPERTY CXX_STANDARD 11)
+target_include_directories(Bearing PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(Bearing osmscout)
+add_test(NAME Bearing COMMAND Bearing)
+
 #---- CachePerformance
 add_executable(CachePerformance src/CachePerformance.cpp)
 set_property(TARGET CachePerformance PROPERTY CXX_STANDARD 11)
