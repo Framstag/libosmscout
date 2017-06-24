@@ -38,7 +38,6 @@ namespace osmscout {
     FileWriter                   writer;
     uint32_t                     overallDataCount;
     NameFeatureValueReader       *nameReader;
-    LocationFeatureValueReader   *locationReader;
     PostalCodeFeatureValueReader *postalCodeReader;
 
   public:
@@ -61,7 +60,6 @@ namespace osmscout {
     overallDataCount=0;
 
     nameReader=new NameFeatureValueReader(typeConfig);
-    locationReader=new LocationFeatureValueReader(typeConfig);
     postalCodeReader=new PostalCodeFeatureValueReader(typeConfig);
 
     try {
@@ -95,11 +93,9 @@ namespace osmscout {
         return true;
       }
 
-      LocationFeatureValue   *locationValue=locationReader->GetValue(way.GetFeatureValueBuffer());
       PostalCodeFeatureValue *postalCodeValue=postalCodeReader->GetValue(way.GetFeatureValueBuffer());
       std::string            name;
       std::string            postalCode;
-      std::string            location;
 
       name=nameValue->GetName();
 
@@ -107,16 +103,11 @@ namespace osmscout {
         postalCode=postalCodeValue->GetPostalCode();
       }
 
-      if (locationValue!=NULL) {
-        location=locationValue->GetLocation();
-      }
-
       writer.WriteFileOffset(offset);
       writer.WriteNumber(way.GetType()->GetWayId());
 
       writer.Write(name);
       writer.Write(postalCode);
-      writer.Write(location);
 
       writer.Write(way.nodes,false);
 
@@ -137,9 +128,6 @@ namespace osmscout {
   {
     delete nameReader;
     nameReader=NULL;
-
-    delete locationReader;
-    locationReader=NULL;
 
     delete postalCodeReader;
     postalCodeReader=NULL;

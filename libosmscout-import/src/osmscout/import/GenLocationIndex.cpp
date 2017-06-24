@@ -1100,12 +1100,14 @@ namespace osmscout {
                                                   RegionRef& rootRegion,
                                                   const RegionIndex& regionIndex)
   {
-    FileScanner            scanner;
-    uint32_t               areaCount;
-    size_t                 areasFound=0;
-    NameFeatureValueReader nameReader(typeConfig);
+    FileScanner scanner;
 
     try {
+      uint32_t                     areaCount;
+      size_t                       areasFound=0;
+      NameFeatureValueReader       nameReader(typeConfig);
+      PostalCodeFeatureValueReader postalCodeReader(typeConfig);
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    AreaDataFile::AREAS_DAT),
                    FileScanner::Sequential,
@@ -1125,15 +1127,21 @@ namespace osmscout {
           if (!ring.GetType()->GetIgnore() && ring.GetType()->GetIndexAsLocation()) {
             NameFeatureValue *nameValue=nameReader.GetValue(ring.GetFeatureValueBuffer());
 
-            if (nameValue!=NULL) {
-              AddLocationAreaToRegion(rootRegion,
-                                      area,
-                                      ring,
-                                      nameValue->GetName(),
-                                      regionIndex);
-
-              areasFound++;
+            if (nameValue==NULL) {
+              continue;
             }
+
+            PostalCodeFeatureValue *postalCodeValue=postalCodeReader.GetValue(ring.GetFeatureValueBuffer());
+
+            // TODO
+
+            AddLocationAreaToRegion(rootRegion,
+                                    area,
+                                    ring,
+                                    nameValue->GetName(),
+                                    regionIndex);
+
+            areasFound++;
           }
         }
       }
@@ -1194,18 +1202,20 @@ namespace osmscout {
     return false;
   }
 
-  bool LocationIndexGenerator::IndexLocationWays(const TypeConfigRef& typeConfig,
+  bool LocationIndexGenerator::IndexLocationWays(const TypeConfig& typeConfig,
                                                  const ImportParameter& parameter,
                                                  Progress& progress,
                                                  RegionRef& rootRegion,
                                                  const RegionIndex& regionIndex)
   {
-    FileScanner            scanner;
-    uint32_t               wayCount;
-    size_t                 waysFound=0;
-    NameFeatureValueReader nameReader(*typeConfig);
+    FileScanner scanner;
 
     try {
+      uint32_t                     wayCount;
+      size_t                       waysFound=0;
+      NameFeatureValueReader       nameReader(typeConfig);
+      PostalCodeFeatureValueReader postalCodeReader(typeConfig);
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    WayDataFile::WAYS_DAT),
                    FileScanner::Sequential,
@@ -1218,7 +1228,7 @@ namespace osmscout {
 
         Way way;
 
-        way.Read(*typeConfig,
+        way.Read(typeConfig,
                  scanner);
 
         if (!way.GetType()->GetIndexAsLocation()) {
@@ -1230,6 +1240,10 @@ namespace osmscout {
         if (nameValue==NULL) {
           continue;
         }
+
+        PostalCodeFeatureValue *postalCodeValue=postalCodeReader.GetValue(way.GetFeatureValueBuffer());
+
+        // TODO
 
         GeoBox boundingBox;
 
@@ -1597,7 +1611,6 @@ namespace osmscout {
       TypeInfoRef        type;
       std::string        name;
       std::string        postalCode;
-      std::string        location;
       std::vector<Point> nodes;
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -1615,7 +1628,6 @@ namespace osmscout {
 
         scanner.Read(name);
         scanner.Read(postalCode);
-        scanner.Read(location);
         scanner.Read(nodes,false);
 
         typeId=(TypeId)tmpType;
@@ -2222,7 +2234,7 @@ namespace osmscout {
 
       progress.SetAction("Index location ways");
 
-      if (!IndexLocationWays(typeConfig,
+      if (!IndexLocationWays(*typeConfig,
                              parameter,
                              progress,
                              rootRegion,

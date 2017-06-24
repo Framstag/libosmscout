@@ -280,7 +280,7 @@ namespace osmscout {
                                 const std::string& name,
                                 const GeoBox& boundingBox);
 
-    bool IndexLocationWays(const TypeConfigRef& typeConfig,
+    bool IndexLocationWays(const TypeConfig& typeConfig,
                            const ImportParameter& parameter,
                            Progress& progress,
                            RegionRef& rootRegion,
