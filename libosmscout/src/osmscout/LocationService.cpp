@@ -538,6 +538,7 @@ namespace osmscout {
   {
     ObjectFileRef  object=lookupResult.front().object;
     AdminRegionRef adminRegion;
+    PostalAreaRef  postalArea;
     POIRef         poi;
     LocationRef    location;
     AddressRef     address;
@@ -545,6 +546,10 @@ namespace osmscout {
     for (const auto& entry : lookupResult) {
       if (entry.adminRegion && !adminRegion) {
         adminRegion=entry.adminRegion;
+      }
+
+      if (entry.postalArea && !postalArea) {
+        postalArea=entry.postalArea;
       }
 
       if (entry.poi && !poi) {
@@ -563,6 +568,7 @@ namespace osmscout {
     return Place(object,
                  GetObjectFeatureBuffer(object),
                  adminRegion,
+                 postalArea,
                  poi,
                  location,
                  address);
@@ -1212,58 +1218,57 @@ namespace osmscout {
       return error;
     }
 
-    for (std::list<SearchEntry>::const_iterator entry=searchEntries.begin();
-        entry!=searchEntries.end();
-        ++entry) {
-      if (region.Match(entry->object)) {
+    // Test for direct match
+    for (const auto& searchEntry : searchEntries) {
+      if (region.Match(searchEntry.object)) {
         LocationService::ReverseLookupResult result;
 
-        result.object=entry->object;
+        result.object=searchEntry.object;
         result.adminRegion=std::make_shared<AdminRegion>(region);
 
         results.push_back(result);
       }
+    }
 
-      bool candidate=false;
+    // Test for inclusion
+    bool candidate=false;
+    for (size_t r=0; r<area->rings.size(); r++) {
+      if (!area->rings[r].IsOuterRing()) {
+        continue;
+      }
 
-      for (size_t r=0; r<area->rings.size(); r++) {
-        if (!area->rings[r].IsOuterRing()) {
-          continue;
-        }
-
-        for (const auto& entry : searchEntries) {
-          if (entry.coords.size()==1) {
-            if (!IsCoordInArea(entry.coords.front(),
-                               area->rings[r].nodes)) {
-              continue;
-            }
+      for (const auto& searchEntry : searchEntries) {
+        if (searchEntry.coords.size()==1) {
+          if (!IsCoordInArea(searchEntry.coords.front(),
+                             area->rings[r].nodes)) {
+            continue;
           }
-          else {
-            GeoBox ringBBox;
-            area->rings[r].GetBoundingBox(ringBBox);
-            if (!IsAreaAtLeastPartlyInArea(entry.coords,
-                                           area->rings[r].nodes,
-                                           entry.bbox,
-                                           ringBBox)) {
-              continue;
-            }
+        }
+        else {
+          GeoBox ringBBox;
+          area->rings[r].GetBoundingBox(ringBBox);
+          if (!IsAreaAtLeastPartlyInArea(searchEntry.coords,
+                                         area->rings[r].nodes,
+                                         searchEntry.bbox,
+                                         ringBBox)) {
+            continue;
           }
-
-          // candidate
-          candidate=true;
-          break;
         }
 
-        if (candidate) {
-          break;
-        }
+        // candidate
+        candidate=true;
+        break;
       }
 
       if (candidate) {
-        atLeastOneCandidate = true;
-        adminRegions.insert(std::make_pair(region.regionOffset,
-                                           std::make_shared<AdminRegion>(region)));
+        break;
       }
+    }
+
+    if (candidate) {
+      atLeastOneCandidate=true;
+      adminRegions.insert(std::make_pair(region.regionOffset,
+                                         std::make_shared<AdminRegion>(region)));
     }
 
     if (atLeastOneCandidate) {
@@ -1815,7 +1820,6 @@ namespace osmscout {
             if (!atPlace &&
                 currentDistance<distance) {
               distance=currentDistance;
-              //distance=GetEllipsoidalDistance(location,intersection);
               bearing=GetSphericalBearingInitial(intersection,location);
             }
           }
@@ -1942,6 +1946,7 @@ namespace osmscout {
       }
       else if (!candidate.GetName().empty()) {
         AdminRegionRef adminRegion;
+        PostalAreaRef  postalArea;
         POIRef         poi=std::make_shared<POI>();
         LocationRef    location;
         AddressRef     address;
@@ -1953,6 +1958,7 @@ namespace osmscout {
         Place place(candidate.GetRef(),
                     GetObjectFeatureBuffer(candidate.GetRef()),
                     adminRegion,
+                    postalArea,
                     poi,
                     location,
                     address);
@@ -2019,7 +2025,7 @@ namespace osmscout {
       if (!LoadNearNodes(location,
                          addressTypes,
                          candidates,
-                         lookupDistance)){
+                         lookupDistance)) {
         return false;
       }
     }
@@ -2032,7 +2038,7 @@ namespace osmscout {
     std::sort(candidates.begin(),candidates.end(),DistanceComparator);
 
     for (const auto &candidate : candidates) {
-      if (candidate.GetSize() > sizeFilter){
+      if (candidate.GetSize()>sizeFilter) {
         continue;
       }
 
@@ -2056,6 +2062,9 @@ namespace osmscout {
                             candidate.GetDistance()*1000, candidate.GetBearing()));
         }
         return true;
+      }
+      else {
+        std::cerr << "Cannot lockup!!!" << std::endl;
       }
     }
 
@@ -2173,7 +2182,7 @@ namespace osmscout {
 
     TypeInfoSet wayTypes;
 
-    // near addressable areas
+    // near addressable ways
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeWay() &&
           type->CanRouteCar() &&
@@ -2186,7 +2195,7 @@ namespace osmscout {
       if (!LoadNearWays(location,
                         wayTypes,
                         candidates,
-                        lookupDistance)){
+                        lookupDistance)) {
         return false;
       }
     }
@@ -2226,7 +2235,7 @@ namespace osmscout {
     double candidateDistance=std::numeric_limits<double>::max();
 
     for (const auto& entry : crossings) {
-      double distance=GetEllipsoidalDistance(location,entry.GetCoord());
+      double distance=GetEllipsoidalDistance(entry.GetCoord(),location);
 
       if (distance<candidateDistance) {
         candidate=entry;
@@ -2248,7 +2257,9 @@ namespace osmscout {
 
     for (const auto& way : crossingWays) {
       std::list<ReverseLookupResult> result;
-      if (!ReverseLookupObject(way->GetObjectFileRef(), result)) {
+
+      if (!ReverseLookupObject(way->GetObjectFileRef(),
+                               result)) {
         return false;
       }
 
@@ -2262,10 +2273,12 @@ namespace osmscout {
                                                                         places);
     }
     else {
-      double distance=GetEllipsoidalDistance(candidate.GetCoord(),
-                                             location);
+      double distance=GetEllipsoidalDistance(location,
+                                             candidate.GetCoord());
       double bearing=GetSphericalBearingInitial(candidate.GetCoord(),
                                                 location);
+
+      std::cout << location.GetDisplayText() << " " << candidate.GetCoord().GetDisplayText() << " " << bearing << std::endl;
 
       crossingDescription=std::make_shared<LocationCrossingDescription>(candidate.GetCoord(),
                                                                         places,

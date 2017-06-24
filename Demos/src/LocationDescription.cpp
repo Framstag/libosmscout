@@ -98,6 +98,10 @@ void DumpLocationAtPlaceDescription(const std::string& label,
     std::cout << "  - location: " << osmscout::UTF8StringToLocaleString(place.GetLocation()->name) << std::endl;
   }
 
+  if (place.GetPostalArea()) {
+    std::cout << "  - postal area:  " << osmscout::UTF8StringToLocaleString(place.GetPostalArea()->name) << std::endl;
+  }
+
   if (place.GetAdminRegion()) {
     std::cout << "  - region:   " << osmscout::UTF8StringToLocaleString(place.GetAdminRegion()->name) << std::endl;
   }
@@ -124,7 +128,7 @@ void DumpCrossingDescription(const std::string& label,
   }
 
   for (const auto& wayPlace : description.GetWays()) {
-    std::cout << "  - " << wayPlace.GetDisplayString() << std::endl;
+    std::cout << "  - " << wayPlace.GetDisplayString() << " " << wayPlace.GetObject().GetName() << std::endl;
   }
 }
 

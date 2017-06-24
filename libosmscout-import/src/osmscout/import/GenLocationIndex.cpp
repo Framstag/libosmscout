@@ -350,7 +350,7 @@ namespace osmscout {
                              bytesForWayFileOffset);
       break;
     default:
-      std::cout << "type: " << (int) object.GetType() << std::endl;
+      //std::cout << "type: " << (int) object.GetType() << std::endl;
       throw IOException(writer.GetFilename(),"Cannot write ObjectFileRef","Unknown object file type");
     }
   }
@@ -2031,13 +2031,16 @@ namespace osmscout {
     // Remove locations from default postal area, that are are completely indexed by non-default postal areas
     //
 
-    std::set<std::string> locations;
+    std::set<ObjectFileRef> locations;
 
     for (const auto& postalAreaEntry : region.postalAreas) {
       if (!postalAreaEntry.second.name.empty()) {
         // for each location in postal area
         for (const auto& location : postalAreaEntry.second.locations) {
-          locations.insert(location.first);
+          // add all objects for each address to set
+          std::for_each(location.second.objects.begin(),location.second.objects.end(),[&locations](const ObjectFileRef& object) {
+            locations.insert(object);
+          });
         }
       }
     }
@@ -2045,7 +2048,15 @@ namespace osmscout {
     auto locationIter=region.defaultPostalArea->second.locations.begin();
     while (locationIter!=region.defaultPostalArea->second.locations.end()) {
       // we have an object for this location in the default postal area that is not in another postal area
-      if (locations.find(locationIter->first)!=locations.end()) {
+      bool foundAll=true;
+
+      for (const auto& object : locationIter->second.objects) {
+        if (locations.find(object)==locations.end()) {
+          foundAll=false;
+        }
+      }
+
+      if (foundAll) {
         locationIter=region.defaultPostalArea->second.locations.erase(locationIter);
       }
       else {

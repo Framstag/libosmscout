@@ -253,6 +253,7 @@ namespace osmscout {
     ObjectFileRef         object;         //!< Object the location is in
     FeatureValueBufferRef objectFeatures; //!< Features of the object
     AdminRegionRef        adminRegion;    //!< Region the object is in, if set
+    PostalAreaRef         postalArea;     //!< Postal area the object is in, if set
     POIRef                poi;            //!< POI data, if set
     LocationRef           location;       //!< Location data, if set
     AddressRef            address;        //!< Address data if set
@@ -261,6 +262,7 @@ namespace osmscout {
     Place(const ObjectFileRef& object,
           const FeatureValueBufferRef objectFeatureBuff,
           const AdminRegionRef& adminRegion,
+          const PostalAreaRef& postalArea,
           const POIRef& poi,
           const LocationRef& location,
           const AddressRef& address);
@@ -280,6 +282,11 @@ namespace osmscout {
       return adminRegion;
     }
 
+    inline PostalAreaRef GetPostalArea() const
+    {
+      return postalArea;
+    }
+
     inline POIRef GetPOI() const
     {
       return poi;
@@ -289,6 +296,7 @@ namespace osmscout {
     {
       return location;
     }
+
 
     inline AddressRef GetAddress() const
     {

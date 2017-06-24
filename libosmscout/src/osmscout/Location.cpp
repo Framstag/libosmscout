@@ -97,12 +97,14 @@ namespace osmscout {
   Place::Place(const ObjectFileRef& object,
                const FeatureValueBufferRef objectFeatures,
                const AdminRegionRef& adminRegion,
+               const PostalAreaRef& postalArea,
                const POIRef& poi,
                const LocationRef& location,
                const AddressRef& address)
   : object(object),
     objectFeatures(objectFeatures),
     adminRegion(adminRegion),
+    postalArea(postalArea),
     poi(poi),
     location(location),
     address(address)
@@ -154,6 +156,10 @@ namespace osmscout {
     if (adminRegion) {
       if (!empty) {
         stream << ", ";
+      }
+
+      if (postalArea) {
+        stream << UTF8StringToLocaleString(postalArea->name) << " ";
       }
 
       if (!adminRegion->aliasName.empty()) {
