@@ -246,13 +246,13 @@ int main(int argc, char* argv[])
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
-                          "database",
+                          "DATABASE",
                           "Directory of the database to use");
 
   argParser.AddPositional(osmscout::CmdLineStringListOption([&args](const std::string& value) {
                             args.location.push_back(value);
                           }),
-                          "location",
+                          "LOCATION",
                           "list of location search attributes");
 
   osmscout::CmdLineParseResult result=argParser.Parse();

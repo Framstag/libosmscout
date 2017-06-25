@@ -125,9 +125,14 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineFlagArgParser::GetFormatHint() const
+  std::string CmdLineFlagArgParser::GetOptionHint() const
   {
     return "";
+  }
+
+  std::string CmdLineFlagArgParser::GetPositionalHint(const std::string& positional) const
+  {
+    return positional;
   }
 
   CmdLineParseResult CmdLineFlagArgParser::Parse(CmdLineScanner& /*scanner*/)
@@ -143,9 +148,14 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineBoolArgParser::GetFormatHint() const
+  std::string CmdLineBoolArgParser::GetOptionHint() const
   {
     return "true|false";
+  }
+
+  std::string CmdLineBoolArgParser::GetPositionalHint(const std::string& positional) const
+  {
+    return positional;
   }
 
   CmdLineParseResult CmdLineBoolArgParser::Parse(CmdLineScanner& scanner)
@@ -175,9 +185,14 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineStringArgParser::GetFormatHint() const
+  std::string CmdLineStringArgParser::GetOptionHint() const
   {
     return "string";
+  }
+
+  std::string CmdLineStringArgParser::GetPositionalHint(const std::string& positional) const
+  {
+    return positional;
   }
 
   CmdLineParseResult CmdLineStringArgParser::Parse(CmdLineScanner& scanner)
@@ -199,9 +214,14 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineStringListArgParser::GetFormatHint() const
+  std::string CmdLineStringListArgParser::GetOptionHint() const
   {
     return "string...";
+  }
+
+  std::string CmdLineStringListArgParser::GetPositionalHint(const std::string& positional) const
+  {
+    return positional+"...";
   }
 
   CmdLineParseResult CmdLineStringListArgParser::Parse(CmdLineScanner& scanner)
@@ -225,9 +245,14 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineGeoCoordArgParser::GetFormatHint() const
+  std::string CmdLineGeoCoordArgParser::GetOptionHint() const
   {
     return "double double";
+  }
+
+  std::string CmdLineGeoCoordArgParser::GetPositionalHint(const std::string& positional) const
+  {
+    return positional;
   }
 
   CmdLineParseResult CmdLineGeoCoordArgParser::Parse(CmdLineScanner& scanner)
@@ -311,7 +336,7 @@ namespace osmscout {
     options.insert(std::make_pair(option.option,option));
 
     std::string callDescription=option.option;
-    std::string argumentType=parser->GetFormatHint();
+    std::string argumentType=parser->GetOptionHint();
 
     if (!argumentType.empty()) {
       callDescription+=" <"+argumentType+">";
@@ -353,7 +378,7 @@ namespace osmscout {
       options.insert(std::make_pair(option.option,option));
 
       std::string callDescription=option.option;
-      std::string argumentType=parser->GetFormatHint();
+      std::string argumentType=parser->GetOptionHint();
 
       if (!argumentType.empty()) {
         callDescription+=" <"+argumentType+">";
@@ -377,7 +402,7 @@ namespace osmscout {
 
     CmdLinePositional desc(parser,argumentName);
 
-    std::string callDescription="<"+argumentName+">";
+    std::string callDescription=argumentName;
 
     CmdLineArgHelp help(callDescription,helpString);
 
@@ -439,11 +464,11 @@ namespace osmscout {
     stream << appName;
 
     if (!options.empty()) {
-      stream << " " << "[option]...";
+      stream << " " << "[OPTION]...";
     }
 
-    for (const auto& help : positionalHelps) {
-      stream << " " << help.argTemplates.front();
+    for (const auto& positional : positionals) {
+      stream << " " << positional.parser->GetPositionalHint(positional.positional);
     }
 
     stream << std::endl;

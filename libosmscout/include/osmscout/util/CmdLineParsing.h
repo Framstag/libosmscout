@@ -81,7 +81,8 @@ namespace osmscout {
 
     void SetArgumentName(const std::string& argumentName);
 
-    virtual std::string GetFormatHint() const = 0;
+    virtual std::string GetOptionHint() const = 0;
+    virtual std::string GetPositionalHint(const std::string& positional) const = 0;
     virtual CmdLineParseResult Parse(CmdLineScanner& scanner) = 0;
   };
 
@@ -98,7 +99,8 @@ namespace osmscout {
   public:
     CmdLineFlagArgParser(SetterFunction&& setter);
 
-    std::string GetFormatHint() const;
+    std::string GetOptionHint() const;
+    std::string GetPositionalHint(const std::string& positional) const;
 
     CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
@@ -114,7 +116,8 @@ namespace osmscout {
   public:
     CmdLineBoolArgParser(SetterFunction&& setter);
 
-    std::string GetFormatHint() const;
+    std::string GetOptionHint() const;
+    std::string GetPositionalHint(const std::string& positional) const;
 
     CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
@@ -130,7 +133,8 @@ namespace osmscout {
   public:
     CmdLineStringArgParser(SetterFunction&& setter);
 
-    std::string GetFormatHint() const;
+    std::string GetOptionHint() const;
+    std::string GetPositionalHint(const std::string& positional) const;
 
     CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
@@ -146,7 +150,8 @@ namespace osmscout {
   public:
     CmdLineStringListArgParser(AppendFunction&& appender);
 
-    std::string GetFormatHint() const;
+    std::string GetOptionHint() const;
+    std::string GetPositionalHint(const std::string& positional) const;
 
     CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
@@ -167,9 +172,14 @@ namespace osmscout {
       // no code
     }
 
-    std::string GetFormatHint() const
+    std::string GetOptionHint() const
     {
       return "number";
+    }
+
+    std::string GetPositionalHint(const std::string& positional) const
+    {
+      return positional;
     }
 
     CmdLineParseResult Parse(CmdLineScanner& scanner)
@@ -202,7 +212,8 @@ namespace osmscout {
   public:
     CmdLineGeoCoordArgParser(SetterFunction&& setter);
 
-    std::string GetFormatHint() const;
+    std::string GetOptionHint() const;
+    std::string GetPositionalHint(const std::string& positional) const;
 
     CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
