@@ -692,8 +692,6 @@ namespace osmscout {
                 lastJunction!=description.Nodes().end()) {
               std::string destination=destinationValue->GetDestination();
 
-              std::cout << "Found destination '" << destination << "' for object " << way->GetObjectFileRef().GetName() << std::endl;
-
               lastJunction->AddDescription(RouteDescription::CROSSING_DESTINATION_DESC,
                                            std::make_shared<RouteDescription::DestinationDescription>(destination));
 
