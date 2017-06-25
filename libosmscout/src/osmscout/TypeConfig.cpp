@@ -33,7 +33,6 @@
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
-#include <iostream>
 namespace osmscout {
 
   FeatureValue::FeatureValue()

@@ -23,9 +23,12 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/private/Config.h>
 #include "osmscout/MapManager.h"
+
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/TextSearchIndex.h>
 #endif
+
+#include <osmscout/util/Logger.h>
 
 DBThread::DBThread(QThread *backgroundThread,
                    QString basemapLookupDirectory,
@@ -740,7 +743,7 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
 
     std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
     if (!db->locationService->DescribeLocationByAddress(location, description)) {
-      std::cerr << "Error during generation of location description" << std::endl;
+      osmscout::log.Error() << "Error during generation of location description";
       continue;
     }
 
@@ -753,7 +756,7 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
     }
 
     if (!db->locationService->DescribeLocationByPOI(location, description)) {
-      std::cerr << "Error during generation of location description" << std::endl;
+      osmscout::log.Error() << "Error during generation of location description";
       continue;
     }
 

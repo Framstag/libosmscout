@@ -19,11 +19,6 @@
 
 #include <osmscout/MapTileCache.h>
 
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/String.h>
-#include <osmscout/util/Tiling.h>
-
-#include <iostream>
 namespace osmscout {
 
   /**

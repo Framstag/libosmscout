@@ -18,6 +18,7 @@
 */
 
 #include <cstdlib>
+#include <iostream>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/StyleConfig.h>

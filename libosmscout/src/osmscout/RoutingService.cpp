@@ -20,8 +20,6 @@
 #include <osmscout/RoutingService.h>
 
 #include <algorithm>
-#include <iomanip>
-#include <iostream>
 
 #include <osmscout/RoutingProfile.h>
 
@@ -32,6 +30,9 @@
 #include <osmscout/util/StopClock.h>
 
 //#define DEBUG_ROUTING
+
+#include <iomanip>
+#include <iostream>
 
 namespace osmscout {
 

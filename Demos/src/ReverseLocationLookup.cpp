@@ -19,6 +19,7 @@
 
 #include <cctype>
 #include <cstring>
+#include <iostream>
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>

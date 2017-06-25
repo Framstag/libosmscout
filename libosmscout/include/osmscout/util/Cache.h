@@ -22,8 +22,6 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <iostream>
-
 #include <limits>
 #include <list>
 #include <unordered_map>
@@ -32,6 +30,8 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/Types.h>
+
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -308,7 +308,7 @@ namespace osmscout {
       */
     void DumpStatistics(const char* cacheName, const ValueSizer& sizer)
     {
-      std::cout << cacheName << " entries: " << size << ", memory " << GetMemory(sizer) << std::endl;
+      log.Debug() << cacheName << " entries: " << size << ", memory " << GetMemory(sizer);
     }
   };
 }

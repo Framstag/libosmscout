@@ -23,7 +23,6 @@
 
 #include <set>
 
-#include <iostream>
 #include <sstream>
 
 #include <osmscout/system/Assert.h>
@@ -3326,7 +3325,7 @@ namespace osmscout {
 
       file=fopen(styleFile.c_str(),"rb");
       if (file==NULL) {
-        std::cerr << "Cannot open file '" << styleFile << "'" << std::endl;
+        log.Error() << "Cannot open file '" << styleFile << "'";
 
         return false;
       }
@@ -3334,7 +3333,7 @@ namespace osmscout {
       unsigned char* content=new unsigned char[fileSize];
 
       if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
-        std::cerr << "Cannot load file '" << styleFile << "'" << std::endl;
+        log.Error() << "Cannot load file '" << styleFile << "'";
         delete [] content;
         fclose(file);
 

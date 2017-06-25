@@ -626,7 +626,7 @@ namespace osmscout {
     // Initial collection of all relation and way ids of the top level relation
 
     bool hasMaxWayError = false;
-    
+
     for (const auto& member : rawRelation.members) {
       if (member.type==RawRelation::memberWay &&
           (member.role=="inner" ||
@@ -746,7 +746,7 @@ namespace osmscout {
                       NumberToString(wayIds.size())+")");
       return false;
     }
-    
+
     // Now load all ways and collect all coordinate ids
 
     std::vector<RawWayRef> ways;
@@ -1149,7 +1149,7 @@ namespace osmscout {
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
-      std::cerr << "Cannot open coord data files!" << std::endl;
+      log.Error() << "Cannot open coord data files!";
       return false;
     }
 
@@ -1157,7 +1157,7 @@ namespace osmscout {
                           parameter.GetDestinationDirectory(),
                           parameter.GetRawWayIndexMemoryMaped(),
                           parameter.GetRawWayDataMemoryMaped())) {
-      std::cerr << "Cannot open raw way data files!" << std::endl;
+      log.Error() << "Cannot open raw way data files!";
       return false;
     }
 
@@ -1165,7 +1165,7 @@ namespace osmscout {
                           parameter.GetDestinationDirectory(),
                           true,
                           true)) {
-      std::cerr << "Cannot open raw relation data files!" << std::endl;
+      log.Error() << "Cannot open raw relation data files!";
       return false;
     }
 

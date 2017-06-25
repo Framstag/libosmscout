@@ -42,6 +42,7 @@
 
 #include <osmscout/system/Assert.h>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/oss/Scanner.h>
@@ -2386,7 +2387,7 @@ void Errors::SynErr(int line, int col, int n)
 
   coco_string_delete(s);
 
-  std::cout << error.line << "," << error.column << " " << "Symbol: " << error.text << std::endl;
+  log.Error() << error.line << "," << error.column << " " << "Symbol: " << error.text;
 
   errors.push_back(error);
   hasErrors=true;
@@ -2401,7 +2402,7 @@ void Errors::Error(int line, int col, const char *s)
   error.column=col;
   error.text=s;
 
-  std::cout << error.line << "," << error.column << " " << "Error: " << error.text << std::endl;
+  log.Error() << error.line << "," << error.column << " " << "Error: " << error.text;
 
   errors.push_back(error);
   hasErrors=true;
@@ -2416,7 +2417,7 @@ void Errors::Warning(int line, int col, const char *s)
   error.column=col;
   error.text=s;
 
-  std::cout << error.line << "," << error.column << " " << "Warning: " << error.text << std::endl;
+  log.Warn() << error.line << "," << error.column << " " << "Warning: " << error.text;
 
   errors.push_back(error);
 }
@@ -2430,7 +2431,7 @@ void Errors::Warning(const char *s)
   error.column=0;
   error.text=s;
 
-  std::cout << error.line << "," << error.column << " " << "Warning: " << error.text << std::endl;
+  log.Warn() << error.line << "," << error.column << " " << "Warning: " << error.text;
 
   errors.push_back(error);
 }
@@ -2444,7 +2445,7 @@ void Errors::Exception(const char* s)
   error.column=0;
   error.text=s;
 
-  std::cout << error.line << "," << error.column << " " << "Exception: " << error.text << std::endl;
+  log.Error() << error.line << "," << error.column << " " << "Exception: " << error.text;
 
   errors.push_back(error);
   hasErrors=true;

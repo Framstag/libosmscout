@@ -270,7 +270,7 @@ namespace osmscout {
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
-      std::cerr << "Cannot open coord data file!" << std::endl;
+      log.Error() << "Cannot open coord data file!";
       return false;
     }
 
@@ -326,7 +326,7 @@ namespace osmscout {
 
           if (!coordDataFile.Get(nodeIds,
                                  coordsMap)) {
-            std::cerr << "Cannot read coordinates!" << std::endl;
+            log.Error() << "Cannot read coordinates!";
             return false;
           }
 
@@ -351,7 +351,7 @@ namespace osmscout {
 
         if (!coordDataFile.Get(nodeIds,
                                coordsMap)) {
-          std::cerr << "Cannot read nodes!" << std::endl;
+          log.Error() << "Cannot read nodes!";
           return false;
         }
 

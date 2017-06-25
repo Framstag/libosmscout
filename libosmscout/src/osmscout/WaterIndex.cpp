@@ -26,7 +26,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Logger.h>
-#include <iostream>
+
 namespace osmscout {
 
   const char* WaterIndex::WATER_IDX="water.idx";

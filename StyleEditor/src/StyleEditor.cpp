@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <osmscout/util/Logger.h>
+
 // Qt includes
 #include <QGuiApplication>
 #include <QQuickView>
@@ -50,14 +52,14 @@ int main(int argc, char* argv[])
   OSMScoutQt::RegisterQmlTypes();
 
   qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
-    
+
   OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
 
   // setup paths
-  QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);  
+  QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
   QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
   QStringList cmdLineArgs = QApplication::arguments();
-  
+
   QStringList mapLookupDirectories;
   if (cmdLineArgs.size() > 1){
     mapLookupDirectories << cmdLineArgs.at(1);
@@ -65,13 +67,13 @@ int main(int argc, char* argv[])
     mapLookupDirectories << QDir::currentPath();
     mapLookupDirectories << documentsLocation + QDir::separator() + "Maps";
   }
-  
+
   if (cmdLineArgs.size() > 2){
     QFileInfo stylesheetFile(cmdLineArgs.at(2));
     builder.WithStyleSheetDirectory(stylesheetFile.dir().path())
      .WithStyleSheetFile(stylesheetFile.fileName());
   }
-  
+
   QString iconDirectory;
   if (cmdLineArgs.size() > 3){
     iconDirectory = cmdLineArgs.at(3);
@@ -89,7 +91,7 @@ int main(int argc, char* argv[])
     .WithOnlineTileProviders(":/resources/online-tile-providers.json");
 
   if (!builder.Init()){
-    std::cerr << "Cannot initialize OSMScout library" << std::endl;
+    osmscout::log.Error() << "Cannot initialize OSMScout library";
     return 1;
   }
 

@@ -23,7 +23,6 @@
 // For memcpy
 #include <string.h>
 
-#include <iostream>
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>
@@ -32,6 +31,7 @@
 #include <osmscout/Pixel.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/Projection.h>
 
 #include <osmscout/system/Assert.h>
@@ -247,7 +247,7 @@ namespace osmscout {
 
       memcpy(newBuffer,buffer,sizeof(P)*usedPoints);
 
-      std::cout << "*** Buffer reallocation: " << bufferSize << std::endl;
+      log.Warn() << "*** Buffer reallocation: " << bufferSize;
 
       delete [] buffer;
 

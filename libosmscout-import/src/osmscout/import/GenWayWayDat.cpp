@@ -424,7 +424,7 @@ namespace osmscout {
 
     return true;
   }
-  
+
   bool WayWayDataGenerator::SplitLongWays(Progress& progress,
                      std::list<RawWayRef>& ways,
                      CoordDataFile::ResultMap& coordsMap)
@@ -472,16 +472,16 @@ namespace osmscout {
         msg += " and real length " + std::to_string(length) + " km";
       }
       progress.Debug(msg);
-      
+
       double segmentLength=0.0;
       size_t segmentNodeCnt=1;
       RawWayRef segment = std::make_shared<RawWay>();
-      
+
       auto osmIdIt = way->GetNodes().begin();
       auto endIt = way->GetNodes().end();
       auto segmentStart = osmIdIt;
       auto segmentEnd = osmIdIt;
-      
+
       auto prev = coordsMap.find(*osmIdIt);
       // jump to first valid node
       while (prev==coordsMap.end() && osmIdIt != endIt) {
@@ -490,7 +490,7 @@ namespace osmscout {
                        " for way "+
                        NumberToString(way->GetId())+
                        ", skipping");
-        osmIdIt ++;    
+        osmIdIt ++;
         segmentStart = osmIdIt;
         if (osmIdIt != endIt){
           prev = coordsMap.find(*osmIdIt);
@@ -500,7 +500,7 @@ namespace osmscout {
       osmIdIt ++;
       segmentEnd=osmIdIt;
       while (osmIdIt!=endIt) {
-        
+
         if (segment->GetId()==0) {
           segment->SetId(way->GetId());
           segment->SetType(way->GetType(), way->IsArea());
@@ -523,9 +523,9 @@ namespace osmscout {
 
           segment->SetNodes(currentSegmentStart, osmIdIt);
           newWays.push_back(segment);
-          //std::cout << "  - New segment " << segment->GetId() << 
+          //std::cout << "  - New segment " << segment->GetId() <<
           //  " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
-          
+
           // skip invalid nodes
           while (prev==coordsMap.end() && osmIdIt != endIt){
             progress.Error("Cannot resolve node with id "+
@@ -533,7 +533,7 @@ namespace osmscout {
                            " for way "+
                            NumberToString(way->GetId())+
                            ", splitting");
-            osmIdIt ++;    
+            osmIdIt ++;
             segmentStart = osmIdIt;
             if (osmIdIt != endIt){
               prev = coordsMap.find(*osmIdIt);
@@ -547,18 +547,18 @@ namespace osmscout {
         }
         else {
           prev = current;
-          osmIdIt ++;          
+          osmIdIt ++;
           segmentEnd=osmIdIt;
         }
       }
       if (segment->GetId() != 0 && segmentNodeCnt >= 2) {
         segment->SetNodes(segmentStart, segmentEnd);
-        newWays.push_back(segment);        
-        //std::cout << "  - New segment (last) " << segment->GetId() << 
+        newWays.push_back(segment);
+        //std::cout << "  - New segment (last) " << segment->GetId() <<
         //    " with " << segment->GetNodeCount() << " nodes and real length " << segmentLength << " km" << std::endl;
       }
     }
-    
+
     ways.clear();
 
     for (auto way: newWays) {
@@ -737,7 +737,7 @@ namespace osmscout {
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
-      std::cerr << "Cannot open coord data file!" << std::endl;
+      log.Error() << "Cannot open coord data file!";
       return false;
     }
 
@@ -785,7 +785,7 @@ namespace osmscout {
             MergeWays(progress,
                       waysByType[typeIdx],
                       restrictions);
-            
+
 #pragma omp critical
             if (waysByType[typeIdx].size()<originalWayCount) {
               progress.Info("Reduced ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
@@ -826,8 +826,8 @@ namespace osmscout {
           size_t originalWayCount=waysByType[typeIdx].size();
 
           if (originalWayCount>0) {
-            SplitLongWays(progress, waysByType[typeIdx], coordsMap);        
-            
+            SplitLongWays(progress, waysByType[typeIdx], coordsMap);
+
 #pragma omp critical
             if (waysByType[typeIdx].size()>originalWayCount) {
               progress.Info("Splitted long ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+

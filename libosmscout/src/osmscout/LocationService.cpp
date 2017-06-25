@@ -2125,9 +2125,6 @@ namespace osmscout {
         }
         return true;
       }
-      else {
-        std::cerr << "Cannot lockup!!!" << std::endl;
-      }
     }
 
     return true;

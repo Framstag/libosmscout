@@ -26,7 +26,6 @@
  */
 
 #include <cstdlib>
-#include <iostream>
 #include <ostream>
 #include <sstream>
 
