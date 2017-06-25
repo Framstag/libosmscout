@@ -1,9 +1,23 @@
+#---- AccessParse
+add_executable(AccessParse src/AccessParse.cpp)
+set_property(TARGET AccessParse PROPERTY CXX_STANDARD 11)
+target_include_directories(AccessParse PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(AccessParse osmscout)
+add_test(NAME AccessParse COMMAND AccessParse)
+
 #---- Bearing
 add_executable(Bearing src/Bearing.cpp)
 set_property(TARGET Bearing PROPERTY CXX_STANDARD 11)
 target_include_directories(Bearing PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 target_link_libraries(Bearing osmscout)
 add_test(NAME Bearing COMMAND Bearing)
+
+#---- BitsAndBytesNeeded
+add_executable(BitsAndBytesNeeded src/BitsAndBytesNeeded.cpp)
+set_property(TARGET BitsAndBytesNeeded PROPERTY CXX_STANDARD 11)
+target_include_directories(BitsAndBytesNeeded PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_link_libraries(BitsAndBytesNeeded osmscout)
+add_test(NAME BitsAndBytesNeeded COMMAND BitsAndBytesNeeded)
 
 #---- CachePerformance
 add_executable(CachePerformance src/CachePerformance.cpp)
@@ -116,20 +130,6 @@ if(${OSMSCOUT_BUILD_MAP})
 else()
 	message("Skip MapRotate test libosmscout-map, is missing.")
 endif()
-
-#---- AccessParse
-add_executable(AccessParse src/AccessParse.cpp)
-set_property(TARGET AccessParse PROPERTY CXX_STANDARD 11)
-target_include_directories(AccessParse PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
-target_link_libraries(AccessParse osmscout)
-add_test(NAME AccessParse COMMAND AccessParse)
-
-#---- BitsAndBytesNeeded
-add_executable(BitsAndBytesNeeded src/BitsAndBytesNeeded.cpp)
-set_property(TARGET BitsAndBytesNeeded PROPERTY CXX_STANDARD 11)
-target_include_directories(BitsAndBytesNeeded PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
-target_link_libraries(BitsAndBytesNeeded osmscout)
-add_test(NAME BitsAndBytesNeeded COMMAND BitsAndBytesNeeded)
 
 #---- EncodeNumber
 add_executable(EncodeNumber src/EncodeNumber.cpp)

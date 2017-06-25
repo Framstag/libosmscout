@@ -16,7 +16,7 @@ Bearing = executable('Bearing',
 
 BitsAndBytesNeeded = executable('BitsAndBytesNeeded',
              'src/BitsAndBytesNeeded.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
              install: false)
