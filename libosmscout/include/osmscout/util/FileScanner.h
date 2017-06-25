@@ -36,7 +36,7 @@
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/GeoBox.h>
 
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #include <windows.h>
   #undef max
   #undef min
