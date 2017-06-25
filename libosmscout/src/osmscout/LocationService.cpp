@@ -2281,7 +2281,9 @@ namespace osmscout {
       }
     }
 
-    std::vector<Point> crossings(routeNodeUseCount.size());
+    std::vector<Point> crossings;
+
+    crossings.reserve(routeNodeUseCount.size());
 
     for (const auto& entry : routeNodeUseCount) {
       if (entry.second.size()>=2) {
@@ -2339,8 +2341,6 @@ namespace osmscout {
                                              candidate.GetCoord());
       double bearing=GetSphericalBearingInitial(candidate.GetCoord(),
                                                 location);
-
-      std::cout << location.GetDisplayText() << " " << candidate.GetCoord().GetDisplayText() << " " << bearing << std::endl;
 
       crossingDescription=std::make_shared<LocationCrossingDescription>(candidate.GetCoord(),
                                                                         places,
