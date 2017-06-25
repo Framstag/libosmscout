@@ -31,11 +31,12 @@
 //add_definitions(-DUNICODE -D_UNICODE)
 
 #if defined(UNICODE) || defined(_UNICODE) || defined(_MBCS) || defined(MBCS)
-#define MBUC
-#define __T(x)      L ## x
+  #define MBUC
+  #define __T(x)      L ## x
 #else
-#define __T(x)           x
+  #define __T(x)           x
 #endif
+
 #define _T(x)       __T(x)
 
 namespace osmscout
