@@ -35,7 +35,7 @@ namespace osmscout {
   {
     arguments.reserve((size_t)argc);
 
-    for (int i=0; i<=argc; i++) {
+    for (int i=0; i<argc; i++) {
       arguments.push_back(std::string(argv[i]));
     }
 
@@ -109,15 +109,25 @@ namespace osmscout {
     // no code
   }
 
+  void CmdLineArgParser::SetArgumentName(const std::string& argumentName)
+  {
+    this->argumentName=argumentName;
+  }
+
+  std::string CmdLineArgParser::GetArgumentName() const
+  {
+    return argumentName;
+  }
+
   CmdLineFlagArgParser::CmdLineFlagArgParser(SetterFunction&& setter)
   : setter(setter)
   {
     // no code
   }
 
-  std::string CmdLineFlagArgParser::GetArgTemplate(const std::string& arg) const
+  std::string CmdLineFlagArgParser::GetFormatHint() const
   {
-    return arg;
+    return "";
   }
 
   CmdLineParseResult CmdLineFlagArgParser::Parse(CmdLineScanner& /*scanner*/)
@@ -133,15 +143,15 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineBoolArgParser::GetArgTemplate(const std::string& arg) const
+  std::string CmdLineBoolArgParser::GetFormatHint() const
   {
-    return arg+" <true|false>";
+    return "true|false";
   }
 
   CmdLineParseResult CmdLineBoolArgParser::Parse(CmdLineScanner& scanner)
   {
     if (!scanner.HasNextArg()) {
-      return CmdLineParseResult("Missing value for boolean option '"+scanner.GetCurrentArg()+"'");
+      return CmdLineParseResult("Missing value for boolean Argument '"+GetArgumentName()+"'");
     }
 
     std::string value=scanner.Advance();
@@ -155,7 +165,7 @@ namespace osmscout {
       return CmdLineParseResult();
     }
     else {
-      return CmdLineParseResult("Value for boolean option '"+scanner.GetCurrentArg()+"' must be either 'true' or 'false' but not '"+value+"'");
+      return CmdLineParseResult("Value for boolean argument '"+GetArgumentName()+"' must be either 'true' or 'false' but not '"+value+"'");
     }
   }
 
@@ -165,15 +175,15 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineStringArgParser::GetArgTemplate(const std::string& arg) const
+  std::string CmdLineStringArgParser::GetFormatHint() const
   {
-    return arg+" <string>";
+    return "string";
   }
 
   CmdLineParseResult CmdLineStringArgParser::Parse(CmdLineScanner& scanner)
   {
     if (!scanner.HasNextArg()) {
-      return CmdLineParseResult("Missing value for string option '"+scanner.GetCurrentArg()+"'");
+      return CmdLineParseResult("Missing value for string argument '"+GetArgumentName()+"'");
     }
 
     std::string value=scanner.Advance();
@@ -189,21 +199,21 @@ namespace osmscout {
     // no code
   }
 
-  std::string CmdLineGeoCoordArgParser::GetArgTemplate(const std::string& arg) const
+  std::string CmdLineGeoCoordArgParser::GetFormatHint() const
   {
-    return arg+" <double> <double>";
+    return "double double";
   }
 
   CmdLineParseResult CmdLineGeoCoordArgParser::Parse(CmdLineScanner& scanner)
   {
     if (!scanner.HasNextArg()) {
-      return CmdLineParseResult("Missing value for lat value of option '"+scanner.GetCurrentArg()+"'");
+      return CmdLineParseResult("Missing value for lat value of argument '"+GetArgumentName()+"'");
     }
 
     std::string latString=scanner.Advance();
 
     if (!scanner.HasNextArg()) {
-      return CmdLineParseResult("Missing value for lon value of option '"+scanner.GetCurrentArg()+"'");
+      return CmdLineParseResult("Missing value for lon value of argument '"+GetArgumentName()+"'");
     }
 
     std::string lonString=scanner.Advance();
@@ -211,19 +221,19 @@ namespace osmscout {
     double lat,lon;
 
     if (!StringToNumber(latString,lat)) {
-      return CmdLineParseResult("Lat value of option '"+scanner.GetCurrentArg()+"' is not in valid format");
+      return CmdLineParseResult("Lat value of argument '"+GetArgumentName()+"' is not in valid format");
     }
 
     if (!StringToNumber(lonString,lon)) {
-      return CmdLineParseResult("Lon value of option '"+scanner.GetCurrentArg()+"' is not in valid format");
+      return CmdLineParseResult("Lon value of argument '"+GetArgumentName()+"' is not in valid format");
     }
 
     if (lat<-90.0 || lat>90.0) {
-      return CmdLineParseResult("Lat value of option '"+scanner.GetCurrentArg()+"' is not in valid range [-90.0,90.0]");
+      return CmdLineParseResult("Lat value of argument '"+GetArgumentName()+"' is not in valid range [-90.0,90.0]");
     }
 
     if (lon<-180.0 || lon>180.0) {
-      return CmdLineParseResult("Lon value of option '"+scanner.GetCurrentArg()+"' is not in valid range [-180.0,180.0]");
+      return CmdLineParseResult("Lon value of argument '"+GetArgumentName()+"' is not in valid range [-180.0,180.0]");
     }
 
     setter(GeoCoord(lat,lon));
@@ -243,26 +253,106 @@ namespace osmscout {
     // no code
   }
 
-  void CmdLineParser::AddOptionalArg(const CmdLineArgParserRef& parser,
-                                     const std::string& helpString,
-                                     const std::string& argumentName)
+  void CmdLineParser::AddOption(const CmdLineArgParserRef& parser,
+                                const std::string& optionName,
+                                const std::string& helpString,
+                                bool stopParsing)
   {
-    CmdLineArgDesc desc(parser,helpString,true);
-    CmdLineArgHelp help(parser->GetArgTemplate(argumentName),helpString);
+    assert(optionName.length()>=1);
+    assert(optionName[0]!='-');
 
-    options.insert(std::make_pair(argumentName,desc));
-    helps.push_back(help);
+    std::string argument;
+
+    if (optionName.length()==1) {
+      argument="-"+optionName;
+    }
+    else {
+      argument="--"+optionName;
+    }
+
+    parser->SetArgumentName(argument);
+
+    CmdLineOption option(parser,
+                         argument,
+                         stopParsing);
+
+    assert(options.find(option.option)==options.end());
+
+    options.insert(std::make_pair(option.option,option));
+
+    std::string callDescription=option.option;
+    std::string argumentType=parser->GetFormatHint();
+
+    if (!argumentType.empty()) {
+      callDescription+=" <"+argumentType+">";
+    }
+
+    CmdLineArgHelp help(callDescription,helpString);
+
+    optionHelps.push_back(help);
   }
 
-  void CmdLineParser::AddPositionalArg(const CmdLineArgParserRef& parser,
-                                       const std::string& helpString,
-                                       const std::string& argumentName)
+  void CmdLineParser::AddOption(const CmdLineArgParserRef& parser,
+                                const std::vector<std::string>& optionNames,
+                                const std::string& helpString,
+                                bool stopParsing)
   {
-    CmdLineArgDesc desc(parser,helpString,true);
-    CmdLineArgHelp help(parser->GetArgTemplate(argumentName),helpString);
+    std::vector<std::string> callDescriptions;
+
+    for (const auto& optionName : optionNames) {
+      assert(optionName.length()>=1);
+      assert(optionName[0]!='-');
+
+      std::string argument;
+
+      if (optionName.length()==1) {
+        argument="-"+optionName;
+      }
+      else {
+        argument="--"+optionName;
+      }
+
+      parser->SetArgumentName(argument);
+
+      CmdLineOption option(parser,
+                           argument,
+                           stopParsing);
+
+      assert(options.find(option.option)==options.end());
+
+      options.insert(std::make_pair(option.option,option));
+
+      std::string callDescription=option.option;
+      std::string argumentType=parser->GetFormatHint();
+
+      if (!argumentType.empty()) {
+        callDescription+=" <"+argumentType+">";
+      }
+
+      callDescriptions.push_back(callDescription);
+    }
+
+    CmdLineArgHelp help(callDescriptions,helpString);
+
+    optionHelps.push_back(help);
+  }
+
+  void CmdLineParser::AddPositional(const CmdLineArgParserRef& parser,
+                                    const std::string& argumentName,
+                                    const std::string& helpString)
+  {
+    assert(argumentName[0]!='-');
+
+    parser->SetArgumentName(argumentName);
+
+    CmdLinePositional desc(parser,argumentName);
+
+    std::string callDescription="<"+argumentName+">";
+
+    CmdLineArgHelp help(callDescription,helpString);
 
     positionals.push_back(desc);
-    helps.push_back(help);
+    positionalHelps.push_back(help);
   }
 
   CmdLineParseResult CmdLineParser::Parse()
@@ -279,12 +369,25 @@ namespace osmscout {
       auto option=options.find(currentArg);
 
       if (option==options.end()) {
+        // Quit option parsing and continue with parsing of positionals
         break;
       }
 
       /* ignore */ scanner.Advance();
 
       CmdLineParseResult result=option->second.parser->Parse(scanner);
+
+      if (result.HasError()) {
+        return result;
+      }
+
+      if (option->second.stopParsing) {
+        return CmdLineParseResult();
+      }
+    }
+
+    for (const auto& positional : positionals) {
+      CmdLineParseResult result=positional.parser->Parse(scanner);
 
       if (result.HasError()) {
         return result;
@@ -299,28 +402,90 @@ namespace osmscout {
     return CmdLineParseResult();
   }
 
-  std::string CmdLineParser::GetHelp(size_t indent) const
+  std::string CmdLineParser::GetHelp(const std::string& appName,
+                                     size_t indent) const
   {
     std::ostringstream stream;
 
-    size_t maxNameLength=0;
+    stream << appName;
 
-    for (const auto& help : helps) {
-      maxNameLength=std::max(maxNameLength,help.argTemplate.length());
+    if (!options.empty()) {
+      stream << " " << "[option]...";
     }
 
-    for (const auto& help : helps) {
-      for (size_t i=0; i<indent; i++) {
-        stream << ' ';
+    for (const auto& help : positionalHelps) {
+      stream << " " << help.argTemplates.front();
+    }
+
+    stream << std::endl;
+
+    size_t maxNameLength=0;
+
+    for (const auto& help : optionHelps) {
+      for (const auto& argTemplate : help.argTemplates) {
+        if (help.argTemplates.size()>1) {
+          // for the ',' in the argument list
+          maxNameLength=std::max(maxNameLength,argTemplate.length()+1);
+        }
+        else {
+          maxNameLength=std::max(maxNameLength,argTemplate.length());
+        }
       }
+    }
 
-      stream << help.argTemplate;
+    for (const auto& help : positionalHelps) {
+      maxNameLength=std::max(maxNameLength,help.argTemplates.front().length());
+    }
 
-      for (size_t i=0; i<maxNameLength-help.argTemplate.length(); i++) {
-        stream << ' ';
+    if (!positionalHelps.empty()) {
+      stream << std::endl;
+      stream << "Mandatory arguments:" << std::endl;
+
+      for (const auto& help : positionalHelps) {
+        for (size_t t=0; t<help.argTemplates.size(); t++) {
+          for (size_t i=0; i<indent; i++) {
+            stream << ' ';
+          }
+
+          stream << help.argTemplates[t];
+
+          if (t<help.argTemplates.size()-1) {
+            stream << ',' << std::endl;
+          }
+          else {
+            for (size_t i=0; i<maxNameLength-help.argTemplates[t].length(); i++) {
+              stream << ' ';
+            }
+
+            stream << ' ' << help.helpString << std::endl;
+          }
+        }
       }
+    }
 
-      stream << ' ' << help.helpString << std::endl;
+    if (!optionHelps.empty()) {
+      stream << std::endl;
+      stream << "Options:" << std::endl;
+      for (const auto& help : optionHelps) {
+        for (size_t t=0; t<help.argTemplates.size(); t++) {
+          for (size_t i=0; i<indent; i++) {
+            stream << ' ';
+          }
+
+          stream << help.argTemplates[t];
+
+          if (t<help.argTemplates.size()-1) {
+            stream << ',' << std::endl;
+          }
+          else {
+            for (size_t i=0; i<maxNameLength-help.argTemplates[t].length(); i++) {
+              stream << ' ';
+            }
+
+            stream << ' ' << help.helpString << std::endl;
+          }
+        }
+      }
     }
 
     return stream.str();

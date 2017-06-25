@@ -8,25 +8,38 @@
 class Arguments
 {
 private:
+  bool               help;
   bool               magicFlag;
   bool               witchyFlag;
   size_t             distance;
   double             doubleTrouble;
   osmscout::GeoCoord location;
   std::string        path;
+  std::string        file;
 
 private:
   friend std::ostream & operator<<(std::ostream &os, const Arguments& args);
 
 public:
   Arguments()
-  : magicFlag(false),
+  : help(false),
+    magicFlag(false),
     witchyFlag(false),
     distance(0),
     doubleTrouble(0.0),
     location(osmscout::GeoCoord(0.0,0.0))
   {
     // no code
+  }
+
+  void SetHelp(const bool& help)
+  {
+    this->help=help;
+  }
+
+  bool GetHelp() const
+  {
+    return help;
   }
 
   void SetMagicFlag(const bool& magicFlag)
@@ -59,26 +72,35 @@ public:
     this->path=path;
   }
 
+  void SetFile(const std::string& file)
+  {
+    this->file=file;
+  }
+
   bool operator==(const Arguments& other) const
   {
-    return this->magicFlag==other.magicFlag &&
+    return this->help==other.help &&
+           this->magicFlag==other.magicFlag &&
            this->witchyFlag==other.witchyFlag &&
            this->distance==other.distance &&
            this->doubleTrouble==other.doubleTrouble &&
            this->location==other.location &&
-           this->path==other.path;
+           this->path==other.path &&
+           this->file==other.file;
   }
 
 };
 
 std::ostream &operator<<(std::ostream &out, const Arguments& args)
 {
-  out << "magicFlag: " << args.magicFlag;
+  out << "help: " << args.help;
+  out << " magicFlag: " << args.magicFlag;
   out << " witchyFlag " << args.witchyFlag;
   out << " distance " << args.distance;
   out << " doubleTrouble " << args.doubleTrouble;
   out << " location " << args.location.GetDisplayText();
   out << " path " << args.path;
+  out << " file " << args.file;
 
   return out;
 }
@@ -89,52 +111,104 @@ void CallParser(const std::vector<std::string>& arguments,
 {
   osmscout::CmdLineParser parser(arguments);
 
-  parser.AddOptionalArg(osmscout::CmdLineFlag([&actualData](const bool& flag) {
-                          actualData.SetMagicFlag(flag);
-                        }),
-                        "set some magic flag",
-                        "--magicFlag");
+  std::vector<std::string> helpArgs={"h","help"};
 
-  parser.AddOptionalArg(osmscout::CmdLineBoolOption([&actualData](const bool& flag) {
-                          actualData.SetWitchyFlag(flag);
-                        }),
-                        "set some witchy flag",
-                        "--witchyFlag");
+  parser.AddOption(osmscout::CmdLineFlag([&actualData](const bool& flag) {
+                     actualData.SetHelp(flag);
+                   }),
+                   helpArgs,
+                   "show some help",
+                   true);
 
-  parser.AddOptionalArg(osmscout::CmdLineSizeTOption([&actualData](const size_t& value) {
-                          actualData.SetDistance(value);
-                        }),
-                        "set distance",
-                        "--distance");
+  parser.AddOption(osmscout::CmdLineFlag([&actualData](const bool& flag) {
+                     actualData.SetMagicFlag(flag);
+                   }),
+                   "magicFlag",
+                   "set some magic flag");
 
-  parser.AddOptionalArg(osmscout::CmdLineDoubleOption([&actualData](const double& value) {
-                          actualData.SetDoubleTrouble(value);
-                        }),
-                        "set double trouble",
-                        "--doubleTrouble");
+  parser.AddOption(osmscout::CmdLineBoolOption([&actualData](const bool& flag) {
+                     actualData.SetWitchyFlag(flag);
+                   }),
+                   "witchyFlag",
+                   "set some witchy flag");
 
-  parser.AddOptionalArg(osmscout::CmdLineGeoCoordOption([&actualData](const osmscout::GeoCoord& value) {
-                          actualData.SetLocation(value);
-                        }),
-                        "set location",
-                        "--location");
+  parser.AddOption(osmscout::CmdLineSizeTOption([&actualData](const size_t& value) {
+                     actualData.SetDistance(value);
+                   }),
+                   "distance",
+                   "set distance");
 
-  parser.AddOptionalArg(osmscout::CmdLineStringOption([&actualData](const std::string& value) {
-                          actualData.SetPath(value);
-                        }),
-                        "set path",
-                        "--path");
+  parser.AddOption(osmscout::CmdLineDoubleOption([&actualData](const double& value) {
+                     actualData.SetDoubleTrouble(value);
+                   }),
+                   "doubleTrouble",
+                   "set double trouble");
+
+  parser.AddOption(osmscout::CmdLineGeoCoordOption([&actualData](const osmscout::GeoCoord& value) {
+                     actualData.SetLocation(value);
+                   }),
+                   "location",
+                   "set location");
+
+  parser.AddOption(osmscout::CmdLineStringOption([&actualData](const std::string& value) {
+                     actualData.SetPath(value);
+                   }),
+                   "path",
+                   "set path");
+
+  parser.AddPositional(osmscout::CmdLineStringOption([&actualData](const std::string& value) {
+                         actualData.SetFile(value);
+                       }),
+                       "file",
+                       "set file");
 
   actualResult=parser.Parse();
+
+  if (actualData.GetHelp()) {
+    std::cout << parser.GetHelp("Test") << std::endl;
+  }
+}
+
+TEST_CASE("Parsing of short help option") {
+  std::vector<std::string> arguments={"Test", "-h"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  expectedData.SetHelp(true);
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of long help option") {
+  std::vector<std::string> arguments={"Test", "--help"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  expectedData.SetHelp(true);
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
 }
 
 TEST_CASE("Parsing of flag option") {
-  std::vector<std::string> arguments={"Test", "--magicFlag"};
+  std::vector<std::string> arguments={"Test", "--magicFlag", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
 
   expectedData.SetMagicFlag(true);
+  expectedData.SetFile("filename");
 
   CallParser(arguments,
              actualResult,
@@ -145,12 +219,13 @@ TEST_CASE("Parsing of flag option") {
 }
 
 TEST_CASE("Parsing of bool option with valid value") {
-  std::vector<std::string> arguments={"Test", "--witchyFlag", "true"};
+  std::vector<std::string> arguments={"Test", "--witchyFlag", "true", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
 
   expectedData.SetWitchyFlag(true);
+  expectedData.SetFile("filename");
 
   CallParser(arguments,
              actualResult,
@@ -175,7 +250,7 @@ TEST_CASE("Parsing of bool option without value") {
 }
 
 TEST_CASE("Parsing of bool option with wrong value") {
-  std::vector<std::string> arguments={"Test", "--witchyFlag", "witchy"};
+  std::vector<std::string> arguments={"Test", "--witchyFlag", "witchy", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
@@ -189,12 +264,13 @@ TEST_CASE("Parsing of bool option with wrong value") {
 }
 
 TEST_CASE("Parsing of size_t option with valid value") {
-  std::vector<std::string> arguments={"Test", "--distance", "1000"};
+  std::vector<std::string> arguments={"Test", "--distance", "1000", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
 
   expectedData.SetDistance(1000);
+  expectedData.SetFile("filename");
 
   CallParser(arguments,
              actualResult,
@@ -205,11 +281,10 @@ TEST_CASE("Parsing of size_t option with valid value") {
 }
 
 TEST_CASE("Parsing of size_t option with negative value") {
-  std::vector<std::string> arguments={"Test", "--distance", "-1000"};
+  std::vector<std::string> arguments={"Test", "--distance", "-1000", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
-
 
   CallParser(arguments,
              actualResult,
@@ -220,12 +295,13 @@ TEST_CASE("Parsing of size_t option with negative value") {
 }
 
 TEST_CASE("Parsing of double option with valid value") {
-  std::vector<std::string> arguments={"Test", "--doubleTrouble", "1000.0"};
+  std::vector<std::string> arguments={"Test", "--doubleTrouble", "1000.0", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
 
   expectedData.SetDoubleTrouble(1000.0);
+  expectedData.SetFile("filename");
 
   CallParser(arguments,
              actualResult,
@@ -236,12 +312,13 @@ TEST_CASE("Parsing of double option with valid value") {
 }
 
 TEST_CASE("Parsing of string option with valid value") {
-  std::vector<std::string> arguments={"Test", "--path", "/dev/null"};
+  std::vector<std::string> arguments={"Test", "--path", "/dev/null", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
 
   expectedData.SetPath("/dev/null");
+  expectedData.SetFile("filename");
 
   CallParser(arguments,
              actualResult,
@@ -252,12 +329,13 @@ TEST_CASE("Parsing of string option with valid value") {
 }
 
 TEST_CASE("Parsing of geo coordinate option with valid value") {
-  std::vector<std::string> arguments={"Test", "--location", "34.5", "-77.8"};
+  std::vector<std::string> arguments={"Test", "--location", "34.5", "-77.8", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
 
   expectedData.SetLocation(osmscout::GeoCoord(34.5,-77.8));
+  expectedData.SetFile("filename");
 
   CallParser(arguments,
              actualResult,
@@ -268,7 +346,7 @@ TEST_CASE("Parsing of geo coordinate option with valid value") {
 }
 
 TEST_CASE("Parsing of geo coordinate option with invalid value") {
-  std::vector<std::string> arguments={"Test", "--location", "120.0", "-77.8"};
+  std::vector<std::string> arguments={"Test", "--location", "120.0", "-77.8", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
@@ -282,10 +360,12 @@ TEST_CASE("Parsing of geo coordinate option with invalid value") {
 }
 
 TEST_CASE("Parsing of unknown option") {
-  std::vector<std::string> arguments={"Test", "--unknown"};
+  std::vector<std::string> arguments={"Test", "--unknown", "filename"};
   osmscout::CmdLineParseResult actualResult;
   Arguments                    actualData;
   Arguments                    expectedData;
+
+  expectedData.SetFile("--unknown");
 
   CallParser(arguments,
              actualResult,

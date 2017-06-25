@@ -25,6 +25,21 @@
 #include <osmscout/LocationService.h>
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/util/CmdLineParsing.h>
+
+struct Arguments
+{
+  bool               help;
+  std::string        map;
+  osmscout::GeoCoord location;
+
+  Arguments()
+  : help(false)
+  {
+    // no code
+  }
+};
+
 /**
  * Examples:
  *
@@ -164,24 +179,40 @@ void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
 
 int main(int argc, char* argv[])
 {
-  std::string map;
-  double      lon,lat;
+  osmscout::CmdLineParser   argParser(argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
-  if (argc<4) {
-    std::cerr << "LocationDescription <map directory> <lat> <lon>" << std::endl;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.map=value;
+                          }),
+                          "database",
+                          "Directory of the database to use");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.location=value;
+                          }),
+                          "location",
+                          "Geographic coordinate to describe");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp("LocationDescription") << std::endl;
     return 1;
   }
+  else if (args.help) {
+    std::cout << argParser.GetHelp("LocatioNDescription") << std::endl;
+    return 0;
 
-  map=argv[1];
-
-  if (sscanf(argv[2],"%lf",&lat)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[3],"%lf",&lon)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
   }
 
   try {
@@ -193,12 +224,10 @@ int main(int argc, char* argv[])
 
   osmscout::log.Debug(false);
 
-  osmscout::GeoCoord location(lat,lon);
-
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(args.map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -208,7 +237,7 @@ int main(int argc, char* argv[])
 
   osmscout::LocationDescription description;
 
-  if (!locationService->DescribeLocation(location,
+  if (!locationService->DescribeLocation(args.location,
                                          description)) {
     std::cerr << "Error during generation of location description" << std::endl;
     database->Close();
