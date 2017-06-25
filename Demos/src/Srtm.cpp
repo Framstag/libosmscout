@@ -34,6 +34,7 @@
  */
 
 #include <cstring>
+#include <iostream>
 
 #include <osmscout/SRTM.h>
 
