@@ -174,7 +174,7 @@ namespace osmscout {
         }
       }
       else {
-        *it=tolower(*it);
+        *it=(char)tolower(*it);
       }
     }
   }
