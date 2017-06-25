@@ -268,7 +268,7 @@ namespace osmscout {
     }
 
     for (long i=(long)nodeIndex-1; i>=0; i--) {
-      routeNodeDataFile.Get(way->GetId(i),
+      routeNodeDataFile.Get(way->GetId((size_t)i),
                             routeNode);
 
       if (routeNode) {
@@ -448,7 +448,7 @@ namespace osmscout {
 
       for (long i=(long)startNodeIndex-1; i>(long)targetNodeIndex+1; i--) {
         route.AddEntry(0,
-                       i,
+                       (size_t)i,
                        object,
                        (size_t)i-1);
       }
@@ -1110,6 +1110,8 @@ namespace osmscout {
     std::vector<size_t>                  nodeIndexes;
     std::vector<osmscout::ObjectFileRef> objects;
 
+    assert(!via.empty());
+
     for (const auto& etap : via) {
       RoutePosition target=GetClosestRoutableNode(etap,
                                                   profile,
@@ -1123,7 +1125,7 @@ namespace osmscout {
       objects.push_back(target.GetObjectFileRef());
     }
 
-    for (int index=0; index<(int)nodeIndexes.size()-1; index++) {
+    for (size_t index=0; index<nodeIndexes.size()-1; index++) {
       size_t                     fromNodeIndex=nodeIndexes.at(index);
       osmscout::ObjectFileRef    fromObject=objects.at(index);
       size_t                     toNodeIndex=nodeIndexes.at(index+1);
@@ -1142,7 +1144,7 @@ namespace osmscout {
 
       /* In intermediary via points the end of the previous part is the start of the */
       /* next part, we need to remove the duplicate point in the calculated route */
-      if (index<(int)nodeIndexes.size()-2) {
+      if (index<nodeIndexes.size()-2) {
         result.GetRoute().PopEntry();
       }
 
@@ -1225,15 +1227,15 @@ namespace osmscout {
     }
 
     if (startForwardNode) {
-      std::pair<OpenListRef,bool> result=openList.insert(startForwardNode);
+      std::pair<OpenListRef,bool> insertResult=openList.insert(startForwardNode);
 
-      openMap[startForwardNode->nodeOffset]=result.first;
+      openMap[startForwardNode->nodeOffset]=insertResult.first;
     }
 
     if (startBackwardNode) {
-      std::pair<OpenListRef,bool> result=openList.insert(startBackwardNode);
+      std::pair<OpenListRef,bool> insertResult=openList.insert(startBackwardNode);
 
-      openMap[startBackwardNode->nodeOffset]=result.first;
+      openMap[startBackwardNode->nodeOffset]=insertResult.first;
     }
 
 
@@ -1437,8 +1439,8 @@ namespace osmscout {
 
           openList.erase(openEntry->second);
 
-          std::pair<OpenListRef,bool> result=openList.insert(node);
-          openEntry->second=result.first;
+          std::pair<OpenListRef,bool> insertResult=openList.insert(node);
+          openEntry->second=insertResult.first;
         }
         else {
           RNodeRef node=std::make_shared<RNode>(path.offset,
@@ -1457,8 +1459,8 @@ namespace osmscout {
           std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
 #endif
 
-          std::pair<OpenListRef,bool> result=openList.insert(node);
-          openMap[node->nodeOffset]=result.first;
+          std::pair<OpenListRef,bool> insertResult=openList.insert(node);
+          openMap[node->nodeOffset]=insertResult.first;
         }
 
         i++;

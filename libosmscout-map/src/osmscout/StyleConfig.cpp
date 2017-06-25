@@ -1660,17 +1660,21 @@ namespace osmscout {
     // no code
   }
 
-  DrawPrimitive::DrawPrimitive(const FillStyleRef& fillStyle,
+  DrawPrimitive::DrawPrimitive(ProjectionMode projectionMode,
+                               const FillStyleRef& fillStyle,
                                const BorderStyleRef& borderStyle)
-  : fillStyle(fillStyle),
+  : projectionMode(projectionMode),
+    fillStyle(fillStyle),
     borderStyle(borderStyle)
   {
     // no code
   }
 
-  PolygonPrimitive::PolygonPrimitive(const FillStyleRef& fillStyle,
+  PolygonPrimitive::PolygonPrimitive(ProjectionMode projectionMode,
+                                     const FillStyleRef& fillStyle,
                                      const BorderStyleRef& borderStyle)
-  : DrawPrimitive(fillStyle,
+  : DrawPrimitive(projectionMode,
+                  fillStyle,
                   borderStyle)
   {
     // no code
@@ -1700,12 +1704,14 @@ namespace osmscout {
     coords.push_back(coord);
   }
 
-  RectanglePrimitive::RectanglePrimitive(const Vertex2D& topLeft,
+  RectanglePrimitive::RectanglePrimitive(ProjectionMode projectionMode,
+                                         const Vertex2D& topLeft,
                                          double width,
                                          double height,
                                          const FillStyleRef& fillStyle,
                                          const BorderStyleRef& borderStyle)
-  : DrawPrimitive(fillStyle,
+  : DrawPrimitive(projectionMode,
+                  fillStyle,
                   borderStyle),
     topLeft(topLeft),
     width(width),
@@ -1726,11 +1732,13 @@ namespace osmscout {
     maxY=topLeft.GetY();
   }
 
-  CirclePrimitive::CirclePrimitive(const Vertex2D& center,
+  CirclePrimitive::CirclePrimitive(ProjectionMode projectionMode,
+                                   const Vertex2D& center,
                                    double radius,
                                    const FillStyleRef& fillStyle,
                                    const BorderStyleRef& borderStyle)
-  : DrawPrimitive(fillStyle,
+  : DrawPrimitive(projectionMode,
+                  fillStyle,
                   borderStyle),
     center(center),
     radius(radius)
