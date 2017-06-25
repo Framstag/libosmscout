@@ -109,7 +109,8 @@ void CallParser(const std::vector<std::string>& arguments,
                 osmscout::CmdLineParseResult& actualResult,
                 Arguments& actualData)
 {
-  osmscout::CmdLineParser parser(arguments);
+  osmscout::CmdLineParser parser("Test",
+                                 arguments);
 
   std::vector<std::string> helpArgs={"h","help"};
 
@@ -165,7 +166,7 @@ void CallParser(const std::vector<std::string>& arguments,
   actualResult=parser.Parse();
 
   if (actualData.GetHelp()) {
-    std::cout << parser.GetHelp("Test") << std::endl;
+    std::cout << parser.GetHelp() << std::endl;
   }
 }
 

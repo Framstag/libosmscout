@@ -193,6 +193,32 @@ namespace osmscout {
     return CmdLineParseResult();
   }
 
+  CmdLineStringListArgParser::CmdLineStringListArgParser(AppendFunction&& appender)
+    : appender(appender)
+  {
+    // no code
+  }
+
+  std::string CmdLineStringListArgParser::GetFormatHint() const
+  {
+    return "string...";
+  }
+
+  CmdLineParseResult CmdLineStringListArgParser::Parse(CmdLineScanner& scanner)
+  {
+    if (!scanner.HasNextArg()) {
+      return CmdLineParseResult("Missing value for string list argument '"+GetArgumentName()+"'");
+    }
+
+    while (scanner.HasNextArg()) {
+      std::string value=scanner.Advance();
+
+      appender(value);
+    }
+
+    return CmdLineParseResult();
+  }
+
   CmdLineGeoCoordArgParser::CmdLineGeoCoordArgParser(SetterFunction&& setter)
   : setter(setter)
   {
@@ -241,14 +267,18 @@ namespace osmscout {
     return CmdLineParseResult();
   }
 
-  CmdLineParser::CmdLineParser(int argc, char* argv[])
-    : scanner(argc,argv)
+  CmdLineParser::CmdLineParser(const std::string& appName,
+                               int argc, char* argv[])
+    : appName(appName),
+      scanner(argc,argv)
   {
     // no code
   }
 
-  CmdLineParser::CmdLineParser(const std::vector<std::string>& arguments)
-    : scanner(arguments)
+  CmdLineParser::CmdLineParser(const std::string& appName,
+                               const std::vector<std::string>& arguments)
+    : appName(appName),
+      scanner(arguments)
   {
     // no code
   }
@@ -402,8 +432,7 @@ namespace osmscout {
     return CmdLineParseResult();
   }
 
-  std::string CmdLineParser::GetHelp(const std::string& appName,
-                                     size_t indent) const
+  std::string CmdLineParser::GetHelp(size_t indent) const
   {
     std::ostringstream stream;
 

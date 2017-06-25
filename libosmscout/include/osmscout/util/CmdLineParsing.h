@@ -135,6 +135,22 @@ namespace osmscout {
     CmdLineParseResult Parse(CmdLineScanner& scanner);
   };
 
+  class OSMSCOUT_API CmdLineStringListArgParser : public CmdLineArgParser
+  {
+  public:
+    typedef std::function<void(const std::string&)> AppendFunction;
+
+  private:
+    AppendFunction appender;
+
+  public:
+    CmdLineStringListArgParser(AppendFunction&& appender);
+
+    std::string GetFormatHint() const;
+
+    CmdLineParseResult Parse(CmdLineScanner& scanner);
+  };
+
   template<typename N>
   class CmdLineNumberArgParser : public CmdLineArgParser
   {
@@ -207,6 +223,12 @@ namespace osmscout {
   CmdLineArgParserRef CmdLineStringOption(Args&& ...args)
   {
     return std::make_shared<CmdLineStringArgParser>(std::forward<Args>(args)...);
+  }
+
+  template<class ...Args>
+  CmdLineArgParserRef CmdLineStringListOption(Args&& ...args)
+  {
+    return std::make_shared<CmdLineStringListArgParser>(std::forward<Args>(args)...);
   }
 
   template<class T, class ...Args>
@@ -313,6 +335,7 @@ namespace osmscout {
     };
 
   private:
+    std::string    appName;
     CmdLineScanner scanner;
 
     std::map<std::string,CmdLineOption> options;
@@ -321,8 +344,10 @@ namespace osmscout {
     std::list<CmdLineArgHelp>           positionalHelps;
 
   public:
-    CmdLineParser(int argc, char* argv[]);
-    CmdLineParser(const std::vector<std::string>& arguments);
+    CmdLineParser(const std::string& appName,
+                  int argc, char* argv[]);
+    CmdLineParser(const std::string& appName,
+                  const std::vector<std::string>& arguments);
 
     void AddOption(const CmdLineArgParserRef& parser,
                    const std::string& optionName,
@@ -340,8 +365,7 @@ namespace osmscout {
 
     CmdLineParseResult Parse();
 
-    std::string GetHelp(const std::string& appName,
-                        size_t indent=2) const;
+    std::string GetHelp(size_t indent=2) const;
   };
 
   extern OSMSCOUT_API bool ParseBoolArgument(int argc,

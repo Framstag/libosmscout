@@ -25,7 +25,21 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/String.h>
+
+struct Arguments
+{
+  bool                   help;
+  std::string            databaseDirectory;
+  std::list<std::string> location;
+
+  Arguments()
+    : help(false)
+  {
+    // no code
+  }
+};
 
 bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
                              const osmscout::AdminRegionRef& adminRegion,
@@ -217,20 +231,47 @@ std::string GetAdminRegionHierachie(const osmscout::LocationServiceRef& location
 
 int main(int argc, char* argv[])
 {
+  osmscout::CmdLineParser   argParser("LocationLookup",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "database",
+                          "Directory of the database to use");
+
+  argParser.AddPositional(osmscout::CmdLineStringListOption([&args](const std::string& value) {
+                            args.location.push_back(value);
+                          }),
+                          "location",
+                          "list of location search attributes");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+    return 1;
+  }
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
+  }
+
   /*
   osmscout::log.Debug(true);
   osmscout::log.Info(true);
   osmscout::log.Warn(true);
   osmscout::log.Error(true);*/
-
-  std::string map;
-
-  if (argc<3) {
-    std::cerr << "LocationLookup <map directory> [location [address]] <area>" << std::endl;
-    return 1;
-  }
-
-  map=argv[1];
 
   try {
     std::locale::global(std::locale(""));
@@ -241,12 +282,12 @@ int main(int argc, char* argv[])
 
   std::string searchPattern;
 
-  for (int i=2; i<argc; i++) {
+  for (const auto& location : args.location) {
     if (!searchPattern.empty()) {
       searchPattern.append(" ");
     }
 
-    searchPattern.append(argv[i]);
+    searchPattern.append(location);
   }
 
   std::cout << "Searching for pattern \"" <<searchPattern  << "\"" << std::endl;
@@ -254,7 +295,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;

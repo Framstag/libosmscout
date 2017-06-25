@@ -30,7 +30,7 @@
 struct Arguments
 {
   bool               help;
-  std::string        map;
+  std::string        databaseDirectory;
   osmscout::GeoCoord location;
 
   Arguments()
@@ -179,7 +179,8 @@ void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
 
 int main(int argc, char* argv[])
 {
-  osmscout::CmdLineParser   argParser(argc,argv);
+  osmscout::CmdLineParser   argParser("LocationDescription",
+                                      argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
   Arguments                 args;
 
@@ -191,7 +192,7 @@ int main(int argc, char* argv[])
                       true);
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.map=value;
+                            args.databaseDirectory=value;
                           }),
                           "database",
                           "Directory of the database to use");
@@ -206,13 +207,12 @@ int main(int argc, char* argv[])
 
   if (result.HasError()) {
     std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
-    std::cout << argParser.GetHelp("LocationDescription") << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
   else if (args.help) {
-    std::cout << argParser.GetHelp("LocatioNDescription") << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 0;
-
   }
 
   try {
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
-  if (!database->Open(args.map.c_str())) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
