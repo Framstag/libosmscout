@@ -38,6 +38,9 @@ namespace osmscout {
     int width;
     int height;
 
+    int screenWidth;
+    int screenHeight;
+
     float zoomLevel;
     float minLon;
     float minLat;
@@ -60,6 +63,7 @@ namespace osmscout {
     osmscout::MapParameter Parameter;
     osmscout::FillStyleRef landFill;
     osmscout::FillStyleRef seaFill;
+    std::vector<osmscout::LineStyleRef> lineStyles;
 
     std::vector<std::vector<osmscout::Point>> areas;
 
@@ -71,7 +75,10 @@ namespace osmscout {
                            const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
                            const osmscout::GeoBox &BoundingBox);
 
-    void ProcessPathData();
+    void ProcessPathData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                         const osmscout::Projection &projection,
+                         const osmscout::StyleConfigRef &styleConfig,
+                         const osmscout::GeoBox &BoundingBox);
 
     void ProcessImageData();
 
@@ -82,7 +89,7 @@ namespace osmscout {
   public:
     MapPainterOpenGL();
 
-    MapPainterOpenGL(int width, int height);
+    MapPainterOpenGL(int width, int height, int screenWidth, int screenHeight);
 
     ~MapPainterOpenGL();
 
