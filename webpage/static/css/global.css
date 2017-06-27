@@ -105,19 +105,19 @@ footer {
 /* One column layout: Navigation on top, content below */
 @media (max-width: 800px) {
   /* Columnar layout */
-  #content  {  
+  #content  {
     flex-flow: column nowrap;
   }
-  
+
   /* Navigation left aligned */
   nav li {
     text-align: left;
   }
 
   nav li.active > div {
-    background-image:linear-gradient(to right, black 0%, white 50%)  
-  }  
-  
+    background-image:linear-gradient(to right, black 0%, white 50%)
+  }
+
   /* Secondary is empty */
   #secondary {
     flex: 0 0 0px;
@@ -129,7 +129,7 @@ footer {
 /* Two column layout: navigation left, content right */
 @media (min-width: 801px) and (max-width: 1279px) {
   /* Row layout */
-  #content  {  
+  #content  {
     flex-flow: row nowrap;
   }
 
@@ -139,9 +139,9 @@ footer {
   }
 
   nav li.active > div {
-    background-image:linear-gradient(to left, black 0%, white 50%)  
-  }  
-  
+    background-image:linear-gradient(to left, black 0%, white 50%)
+  }
+
   /* Secondary is empty */
   #secondary {
     flex: 0 0 0px;
@@ -153,19 +153,19 @@ footer {
 /* Three column layout: navigation left, content center, empty column on the right */
 @media (min-width: 1280px) {
   /* Row layout */
-  #content  {  
+  #content  {
     flex-flow: row nowrap;
   }
-  
+
   /* Navigation right aligned */
   nav li {
     text-align: right;
   }
 
   nav li.active > div {
-    background-image:linear-gradient(to left, black 0%, white 50%)  
-  }  
-  
+    background-image:linear-gradient(to left, black 0%, white 50%)
+  }
+
   #secondary {
     flex: 0 0 0%;
     flex: 1 2 25%;
@@ -285,12 +285,14 @@ table tr th {
   border-style:solid;
   border-color:black;
   border-width:1px 1px 1px 1px;
+  padding: 4px;
 }
 
 table tr td {
   border-style:solid;
   border-color:black;
   border-width:1px 1px 1px 1px;
+  padding: 4px;
 }
 
 /* Tables sheets */

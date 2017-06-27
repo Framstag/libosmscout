@@ -422,7 +422,7 @@ namespace osmscout {
       grad+=360;
     }
 
-    if (grad>0 && grad<=45) {
+    if (grad>=0 && grad<=45) {
       return "N";
     }
     else if (grad>45 && grad<=135) {
@@ -434,7 +434,7 @@ namespace osmscout {
     else if (grad>225 && grad<=315) {
       return "W";
     }
-    else if (grad>315 && grad<=360) {
+    else if (grad>315 && grad<360) {
       return "N";
     }
 

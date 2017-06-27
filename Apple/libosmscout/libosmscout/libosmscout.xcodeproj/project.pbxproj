@@ -16,6 +16,10 @@
 		4DD803321DEEE16F0054A504 /* BoundingBoxDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032C1DEEE15C0054A504 /* BoundingBoxDataFile.cpp */; };
 		4DD803331DEEE1730054A504 /* ObjectVariantDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032D1DEEE15C0054A504 /* ObjectVariantDataFile.cpp */; };
 		4DD803341DEEE1730054A504 /* TypeDistributionDataFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8032E1DEEE15C0054A504 /* TypeDistributionDataFile.cpp */; };
+		E5429DFA1F01A57B00839A60 /* BasemapDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5429DF91F01A57B00839A60 /* BasemapDatabase.cpp */; };
+		E5429DFC1F01A62000839A60 /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
+		E5429DFD1F01A62200839A60 /* TextSearchIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A66AC81A46F5E7007AD752 /* TextSearchIndex.cpp */; };
+		E5429DFE1F01A62B00839A60 /* BasemapDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5429DF91F01A57B00839A60 /* BasemapDatabase.cpp */; };
 		F51E3EA3161A5F4000D51926 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F51E3EA2161A5F4000D51926 /* Foundation.framework */; };
 		F51E3EFF161A5FEC00D51926 /* AreaAreaIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */; };
 		F51E3F00161A5FEC00D51926 /* AreaNodeIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EB4161A5FEC00D51926 /* AreaNodeIndex.cpp */; };
@@ -182,6 +186,8 @@
 		4DD8032C1DEEE15C0054A504 /* BoundingBoxDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BoundingBoxDataFile.cpp; path = ../../../../libosmscout/src/osmscout/BoundingBoxDataFile.cpp; sourceTree = "<group>"; };
 		4DD8032D1DEEE15C0054A504 /* ObjectVariantDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjectVariantDataFile.cpp; path = ../../../../libosmscout/src/osmscout/ObjectVariantDataFile.cpp; sourceTree = "<group>"; };
 		4DD8032E1DEEE15C0054A504 /* TypeDistributionDataFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeDistributionDataFile.cpp; path = ../../../../libosmscout/src/osmscout/TypeDistributionDataFile.cpp; sourceTree = "<group>"; };
+		E5429DF91F01A57B00839A60 /* BasemapDatabase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BasemapDatabase.cpp; path = ../../../../libosmscout/src/osmscout/BasemapDatabase.cpp; sourceTree = "<group>"; };
+		E5429DFB1F01A59400839A60 /* BasemapDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasemapDatabase.h; sourceTree = "<group>"; };
 		F51E3E9F161A5F4000D51926 /* libosmscout.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscout.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		F51E3EA2161A5F4000D51926 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		F51E3EB3161A5FEC00D51926 /* AreaAreaIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AreaAreaIndex.cpp; path = ../../../../libosmscout/src/osmscout/AreaAreaIndex.cpp; sourceTree = "<group>"; };
@@ -392,6 +398,7 @@
 		F51E3EB0161A5F7300D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				E5429DF91F01A57B00839A60 /* BasemapDatabase.cpp */,
 				4DD8032C1DEEE15C0054A504 /* BoundingBoxDataFile.cpp */,
 				4DD8032D1DEEE15C0054A504 /* ObjectVariantDataFile.cpp */,
 				4DD8032E1DEEE15C0054A504 /* TypeDistributionDataFile.cpp */,
@@ -504,6 +511,7 @@
 		F51E3F30161A604300D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				E5429DFB1F01A59400839A60 /* BasemapDatabase.h */,
 				4DD803291DEEE12F0054A504 /* BoundingBoxDataFile.h */,
 				4DD8032A1DEEE12F0054A504 /* ObjectVariantDataFile.h */,
 				4DD8032B1DEEE12F0054A504 /* TypeDistributionDataFile.h */,
@@ -741,6 +749,7 @@
 				F51E3F08161A5FEC00D51926 /* ObjectRef.cpp in Sources */,
 				F556F00019C6E36700EAAA8B /* TypeFeatures.cpp in Sources */,
 				F51E3F0A161A5FEC00D51926 /* Parser.cpp in Sources */,
+				E5429DFA1F01A57B00839A60 /* BasemapDatabase.cpp in Sources */,
 				F54DAA5F1815DAFB00625DDA /* NodeUseMap.cpp in Sources */,
 				F51E3F0B161A5FEC00D51926 /* Scanner.cpp in Sources */,
 				F51E3F0C161A5FEC00D51926 /* Path.cpp in Sources */,
@@ -772,6 +781,7 @@
 				F51E3F22161A5FEC00D51926 /* FileWriter.cpp in Sources */,
 				F54DAA4F1815DA6500625DDA /* OptimizeAreasLowZoom.cpp in Sources */,
 				F51E3F23161A5FEC00D51926 /* Geometry.cpp in Sources */,
+				E5429DFC1F01A62000839A60 /* TextSearchIndex.cpp in Sources */,
 				F51E3F26161A5FEC00D51926 /* Number.cpp in Sources */,
 				F51E3F27161A5FEC00D51926 /* NumberSet.cpp in Sources */,
 				F51E3F28161A5FEC00D51926 /* Progress.cpp in Sources */,
@@ -802,6 +812,7 @@
 				F53BD1A61638866B006C7AE1 /* AreaAreaIndex.cpp in Sources */,
 				4DD803211DEEDF770054A504 /* Exception.cpp in Sources */,
 				F58399411AF6E19B00F79DFF /* Logger.cpp in Sources */,
+				E5429DFD1F01A62200839A60 /* TextSearchIndex.cpp in Sources */,
 				F556EFFF19C6E36700EAAA8B /* NodeDataFile.cpp in Sources */,
 				F53BD1A71638866B006C7AE1 /* AreaNodeIndex.cpp in Sources */,
 				F53BD1A81638866B006C7AE1 /* AreaWayIndex.cpp in Sources */,
@@ -866,6 +877,7 @@
 				F53BD1D5163886B2006C7AE1 /* String.cpp in Sources */,
 				F53BD1D6163886B2006C7AE1 /* Transformation.cpp in Sources */,
 				F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */,
+				E5429DFE1F01A62B00839A60 /* BasemapDatabase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -896,6 +908,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SYSTEM_HEADER_SEARCH_PATHS = ../../../../marisa/lib;
 			};
 			name = Debug;
 		};
@@ -915,6 +928,7 @@
 				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				SDKROOT = iphoneos;
+				SYSTEM_HEADER_SEARCH_PATHS = ../../../../marisa/lib;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

@@ -52,13 +52,6 @@ environment:
     MSYSTEM: MINGW64
     TARGET: build
     PLATFORM: x64
-  - COMPILER: msys2
-    BUILDTOOL: cmake
-    MSYS2_ARCH: i686
-    MSYS2_DIR: msys64
-    MSYSTEM: MINGW32
-    TARGET: build
-    PLATFORM: x64
 
 install:
   - set

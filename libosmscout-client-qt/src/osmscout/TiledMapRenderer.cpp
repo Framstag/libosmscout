@@ -19,7 +19,10 @@
  */
 
 #include <osmscout/TiledMapRenderer.h>
+
 #include <osmscout/OSMTile.h>
+
+#include <osmscout/util/Logger.h>
 
 TiledMapRenderer::TiledMapRenderer(QThread *thread,
                                    SettingsRef settings,
@@ -202,7 +205,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   QMutexLocker locker(&tileCacheMutex);
   int elapsed = start.elapsed();
   if (elapsed > 1){
-      std::cout << "Mutex acquiere took " << elapsed << " ms" << std::endl;
+      osmscout::log.Warn() << "Mutex acquiere took " << elapsed << " ms";
   }
 
   onlineTileCache.clearPendingRequests();
@@ -580,7 +583,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
         // no running load job
         return;
     }
-    
+
     uint32_t width = (loadXTo - loadXFrom + 1);
     uint32_t height = (loadYTo - loadYFrom + 1);
 

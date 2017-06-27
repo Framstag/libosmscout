@@ -367,6 +367,10 @@ namespace osmscout {
       ::f(string,number,base);
   }
 
+
+  extern OSMSCOUT_API bool StringToNumber(const char* string, double& value);
+  extern OSMSCOUT_API bool StringToNumber(const std::string& string, double& value);
+
   /**
    * \ingroup Util
    *

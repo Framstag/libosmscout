@@ -30,7 +30,6 @@
 
 #include <osmscout/util/Tiling.h>
 
-#include <iostream>
 namespace osmscout {
 
   /*

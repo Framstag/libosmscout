@@ -11,6 +11,12 @@
 		4DD803271DEEE0C40054A504 /* LabelLayouter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD803261DEEE0C40054A504 /* LabelLayouter.cpp */; };
 		4DD803281DEEE0C90054A504 /* LabelLayouter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD803261DEEE0C40054A504 /* LabelLayouter.cpp */; };
 		4DD803351DEEE1A50054A504 /* TileId.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5778A031D59DD1400CD56BD /* TileId.cpp */; };
+		E5429DF51F01A50000839A60 /* LabelProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5429DF31F01A50000839A60 /* LabelProvider.cpp */; };
+		E5429DF61F01A50000839A60 /* StyleDescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5429DF41F01A50000839A60 /* StyleDescription.cpp */; };
+		E5429DFF1F01A63D00839A60 /* LabelProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5429DF31F01A50000839A60 /* LabelProvider.cpp */; };
+		E5429E001F01A64600839A60 /* StyleDescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5429DF41F01A50000839A60 /* StyleDescription.cpp */; };
+		E5429E011F01A65100839A60 /* MapPainterNoOp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B6E31C1C04700200A3EC39 /* MapPainterNoOp.cpp */; };
+		E5429E021F01A65800839A60 /* MapTileCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5778A021D59DD1400CD56BD /* MapTileCache.cpp */; };
 		E5778A041D59DD1400CD56BD /* DataTileCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5778A011D59DD1400CD56BD /* DataTileCache.cpp */; };
 		E5778A051D59DD1400CD56BD /* MapTileCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5778A021D59DD1400CD56BD /* MapTileCache.cpp */; };
 		E5778A061D59DD1400CD56BD /* TileId.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5778A031D59DD1400CD56BD /* TileId.cpp */; };
@@ -48,6 +54,10 @@
 /* Begin PBXFileReference section */
 		4DD803251DEEE08D0054A504 /* LabelLayouter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LabelLayouter.h; sourceTree = "<group>"; };
 		4DD803261DEEE0C40054A504 /* LabelLayouter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LabelLayouter.cpp; path = "../../../../libosmscout-map/src/osmscout/LabelLayouter.cpp"; sourceTree = "<group>"; };
+		E5429DF31F01A50000839A60 /* LabelProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LabelProvider.cpp; path = "../../../../libosmscout-map/src/osmscout/LabelProvider.cpp"; sourceTree = "<group>"; };
+		E5429DF41F01A50000839A60 /* StyleDescription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StyleDescription.cpp; path = "../../../../libosmscout-map/src/osmscout/StyleDescription.cpp"; sourceTree = "<group>"; };
+		E5429DF71F01A51900839A60 /* LabelProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LabelProvider.h; sourceTree = "<group>"; };
+		E5429DF81F01A51900839A60 /* StyleDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StyleDescription.h; sourceTree = "<group>"; };
 		E5778A011D59DD1400CD56BD /* DataTileCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataTileCache.cpp; path = "../../../../libosmscout-map/src/osmscout/DataTileCache.cpp"; sourceTree = "<group>"; };
 		E5778A021D59DD1400CD56BD /* MapTileCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapTileCache.cpp; path = "../../../../libosmscout-map/src/osmscout/MapTileCache.cpp"; sourceTree = "<group>"; };
 		E5778A031D59DD1400CD56BD /* TileId.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TileId.cpp; path = "../../../../libosmscout-map/src/osmscout/TileId.cpp"; sourceTree = "<group>"; };
@@ -140,6 +150,8 @@
 		F51E3F92161A653C00D51926 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				E5429DF31F01A50000839A60 /* LabelProvider.cpp */,
+				E5429DF41F01A50000839A60 /* StyleDescription.cpp */,
 				4DD803261DEEE0C40054A504 /* LabelLayouter.cpp */,
 				F5B6E31C1C04700200A3EC39 /* MapPainterNoOp.cpp */,
 				E5778A011D59DD1400CD56BD /* DataTileCache.cpp */,
@@ -175,6 +187,8 @@
 		F51E3FA2161A65C000D51926 /* osmscout */ = {
 			isa = PBXGroup;
 			children = (
+				E5429DF71F01A51900839A60 /* LabelProvider.h */,
+				E5429DF81F01A51900839A60 /* StyleDescription.h */,
 				4DD803251DEEE08D0054A504 /* LabelLayouter.h */,
 				E5778A071D59DD3400CD56BD /* DataTileCache.h */,
 				E5778A081D59DD3400CD56BD /* MapTileCache.h */,
@@ -302,11 +316,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				E5778A051D59DD1400CD56BD /* MapTileCache.cpp in Sources */,
+				E5429DF51F01A50000839A60 /* LabelProvider.cpp in Sources */,
 				F5B6E31D1C04700200A3EC39 /* MapPainterNoOp.cpp in Sources */,
 				E5778A061D59DD1400CD56BD /* TileId.cpp in Sources */,
 				F51E3F9D161A658300D51926 /* MapPainter.cpp in Sources */,
 				F5A66ACC1A4A0782007AD752 /* MapService.cpp in Sources */,
 				E57A2E201AB07734009B323C /* MapParameter.cpp in Sources */,
+				E5429DF61F01A50000839A60 /* StyleDescription.cpp in Sources */,
 				F51E3F9E161A658300D51926 /* Parser.cpp in Sources */,
 				F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */,
 				4DD803271DEEE0C40054A504 /* LabelLayouter.cpp in Sources */,
@@ -320,14 +336,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				F53BD1D71638871C006C7AE1 /* MapPainter.cpp in Sources */,
+				E5429E021F01A65800839A60 /* MapTileCache.cpp in Sources */,
 				F5A66ACD1A4A0782007AD752 /* MapService.cpp in Sources */,
 				E57A2E211AB07739009B323C /* MapParameter.cpp in Sources */,
 				F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */,
+				E5429E011F01A65100839A60 /* MapPainterNoOp.cpp in Sources */,
 				F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */,
 				4DD803231DEEDFE80054A504 /* DataTileCache.cpp in Sources */,
 				F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */,
+				E5429E001F01A64600839A60 /* StyleDescription.cpp in Sources */,
 				4DD803351DEEE1A50054A504 /* TileId.cpp in Sources */,
 				4DD803281DEEE0C90054A504 /* LabelLayouter.cpp in Sources */,
+				E5429DFF1F01A63D00839A60 /* LabelProvider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

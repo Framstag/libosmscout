@@ -38,6 +38,7 @@
 #include <osmscout/RoutingModel.h>
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/StyleFlagsModel.h>
+#include <osmscout/Router.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
@@ -113,10 +114,14 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
                                   int versionMajor,
                                   int versionMinor)
 {
+  // register osmscout + standard types for usage in Qt signals/slots
   qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
   qRegisterMetaType<osmscout::TileRef>();
+  qRegisterMetaType<osmscout::Vehicle>();
+  qRegisterMetaType<RouteSelection>();
 
+  // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
   qmlRegisterType<LocationEntry>(uri, versionMajor, versionMinor, "LocationEntry");
   qmlRegisterType<LocationInfoModel>(uri, versionMajor, versionMinor, "LocationInfoModel");
@@ -211,4 +216,18 @@ MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
   QObject::connect(thread, SIGNAL(finished()),
                    thread, SLOT(deleteLater()));
   return mapRenderer;
+}
+
+Router* OSMScoutQt::MakeRouter()
+{
+  QThread *thread=new QThread();
+  thread->setObjectName("Router");
+
+  Router *router=new Router(thread,settings,dbThread);
+  router->moveToThread(thread);
+  thread->start();
+
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
+  return router;
 }

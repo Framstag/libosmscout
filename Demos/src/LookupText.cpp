@@ -22,15 +22,19 @@
 #include <osmscout/Database.h>
 #include <algorithm>
 
+#include <osmscout/util/CmdLineParsing.h>
 
-void badInput()
+struct Arguments
 {
-  std::cout << "ERROR: Bad arguments" << std::endl;
-  std::cout << "* Pass in the directory containing the text data files,\n"
-               "  ie. text(poi,loc,region,other).dat" << std::endl;
-  std::cout << "ex:" << std::endl;
-  std::cout << "./LookupText /path/to/imported/map/data" << std::endl;
-}
+  bool        help;
+  std::string databaseDirectory;
+
+  Arguments()
+    : help(false)
+  {
+    // no code
+  }
+};
 
 void printDetails(const osmscout::FeatureValueBuffer& features)
 {
@@ -58,9 +62,34 @@ void printDetails(const osmscout::FeatureValueBuffer& features)
 
 int main (int argc, char *argv[])
 {
-  if(argc != 2) {
-    badInput();
-    return -1;
+  osmscout::CmdLineParser   argParser("LookupText",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the database to use");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+    return 1;
+  }
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
 
   try {
@@ -71,10 +100,9 @@ int main (int argc, char *argv[])
   }
 
   // load text data files
-  std::string path(argv[1]);
   osmscout::TextSearchIndex textSearch;
 
-  if(!textSearch.Load(path)) {
+  if(!textSearch.Load(args.databaseDirectory)) {
     std::cout << "ERROR: Failed to load text files!"
                  "(are you sure you passed the right path?)"
               << std::endl;
@@ -117,7 +145,7 @@ int main (int argc, char *argv[])
 
     osmscout::DatabaseParameter databaseParameter;
     osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
-    if (!database->Open(path.c_str())) {
+    if (!database->Open(args.databaseDirectory)) {
       std::cerr << "Cannot open database" << std::endl;
       return 1;
     }

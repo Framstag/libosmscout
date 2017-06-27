@@ -19,6 +19,8 @@
 
 #include <osmscout/DBInstance.h>
 
+#include <osmscout/util/Logger.h>
+
 QBreaker::QBreaker()
   : osmscout::Breaker(),
     aborted(false)
@@ -118,7 +120,7 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     // Recreate
     styleConfig=newStyleConfig;
 
-    std::cout << "Create new style with " << stylesheetFilename.toStdString() << std::endl;
+    osmscout::log.Info()<< "Create new style with " << stylesheetFilename.toStdString();
   }
   else {
     std::list<std::string> errorsStrings=newStyleConfig->GetErrors();

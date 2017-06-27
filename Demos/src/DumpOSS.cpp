@@ -18,11 +18,27 @@
 */
 
 #include <cstdlib>
+#include <iostream>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/StyleConfig.h>
 
-void DumpFillStyleAttributes(const std::set<osmscout::FillStyle::Attribute> attributes,
+#include <osmscout/util/CmdLineParsing.h>
+
+struct Arguments
+{
+  bool        help;
+  std::string ostFile;
+  std::string ossFile;
+
+  Arguments()
+    : help(false)
+  {
+    // no code
+  }
+};
+
+void DumpFillStyleAttributes(const std::set<osmscout::FillStyle::Attribute>& attributes,
                              const osmscout::FillStyleRef& style)
 {
   std::cout << "{";
@@ -40,7 +56,7 @@ void DumpFillStyleAttributes(const std::set<osmscout::FillStyle::Attribute> attr
   std::cout << "}";
 }
 
-void DumpTextStyleAttributes(const std::set<osmscout::TextStyle::Attribute> attributes,
+void DumpTextStyleAttributes(const std::set<osmscout::TextStyle::Attribute>& attributes,
                              const osmscout::TextStyleRef& style)
 {
   std::cout << "{";
@@ -220,28 +236,53 @@ void DumpOSSFile(const osmscout::TypeConfigRef& typeConfig,
 
 int main(int argc, char* argv[])
 {
-  std::string                      ostFile;
-  std::string                      ossFile;
+  osmscout::CmdLineParser   argParser("DumpOSS",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
-  if (argc!=3) {
-    std::cerr << "DumpOSS <OST file> <OSS file>" << std::endl;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.ostFile=value;
+                          }),
+                          "OST",
+                          "Path to the OST file");
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.ossFile=value;
+                          }),
+                          "OSS",
+                          "Path to the OSS file");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+    return 1;
+  }
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
+  }
+
+  osmscout::TypeConfigRef typeConfig=std::make_shared<osmscout::TypeConfig>();
+
+  if (!typeConfig->LoadFromOSTFile(args.ostFile)) {
+    std::cerr << "Cannot load OST file '" << args.ostFile << "'" << std::endl;
     return 1;
   }
 
-  ostFile=argv[1];
-  ossFile=argv[2];
+  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
-  osmscout::TypeConfigRef typeConfig(new osmscout::TypeConfig());
-
-  if (!typeConfig->LoadFromOSTFile(ostFile)) {
-    std::cerr << "Cannot load OST file '" << ostFile << "'" << std::endl;
-    return 1;
-  }
-
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(typeConfig));
-
-  if (!styleConfig->Load(ossFile)) {
-    std::cerr << "Cannot load OSS file '" << ostFile << "'" << std::endl;
+  if (!styleConfig->Load(args.ossFile)) {
+    std::cerr << "Cannot load OSS file '" << args.ostFile << "'" << std::endl;
     return 1;
   }
 

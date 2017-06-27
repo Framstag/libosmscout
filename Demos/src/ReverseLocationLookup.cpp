@@ -1,5 +1,5 @@
 /*
-  AddressLookup - a demo program for libosmscout
+  ReverseLocationLookup - a demo program for libosmscout
   Copyright (C) 2010  Tim Teulings
 
   This program is free software; you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 
 #include <cctype>
 #include <cstring>
+#include <iostream>
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
@@ -31,7 +32,7 @@ int main(int argc, char* argv[])
   std::list<osmscout::ObjectFileRef> objects;
 
   if (argc<4 || argc%2!=0) {
-    std::cerr << "AddressLookup <map directory> <ObjectType> <FileOffset>..." << std::endl;
+    std::cerr << "ReverseLocationLookup <map directory> <ObjectType> <FileOffset>..." << std::endl;
     return 1;
   }
 
@@ -93,7 +94,13 @@ int main(int argc, char* argv[])
       std::cout << entry.object.GetTypeName() << " " << entry.object.GetFileOffset() << " matches";
 
       if (entry.adminRegion) {
-        std::cout << " region '" << entry.adminRegion->name << "'";
+        std::cout << " region";
+
+        if (entry.postalArea) {
+          std::cout << " " << entry.postalArea->name;
+        }
+
+        std::cout << " '" << entry.adminRegion->name << "'";
       }
 
       if (entry.poi) {

@@ -187,8 +187,8 @@ void AddFeatureToFilter(StyleFilter& filter,
     if (type->HasFeature(featureName)) {
       if (!filter.FiltersByType() ||
           filter.HasType(type)) {
-        // Add type only if the filter either has no types or 
-        // if the the type is already filtered  
+        // Add type only if the filter either has no types or
+        // if the the type is already filtered
         resultTypes.Set(type);
       }
     }
@@ -196,7 +196,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 
   if (!resultTypes.Empty()) {
     size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
-  
+
     filter.AddFeature(featureFilterIndex);
   }
 }

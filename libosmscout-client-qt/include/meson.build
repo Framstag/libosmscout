@@ -5,6 +5,7 @@ osmscoutclientqtHeader = [
             'osmscout/DBThread.h',
             'osmscout/DBInstance.h',
             'osmscout/RoutingModel.h',
+            'osmscout/Router.h',
             'osmscout/InputHandler.h',
             'osmscout/OnlineTileProvider.h',
             'osmscout/OnlineTileProviderModel.h',

@@ -23,7 +23,6 @@
 #include <osmscout/util/String.h>
 #include <osmscout/util/Tiling.h>
 
-#include <iostream>
 namespace osmscout {
 
   /**
