@@ -151,6 +151,7 @@ int main(int argc, char *argv[]) {
   mapService->AddTileDataToMapData(tiles, data);
   mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
 
+  glfwWindowHint(GLFW_SAMPLES, 4);
   GLFWwindow *window;
   glfwSetErrorCallback(ErrorCallback);
   if (!glfwInit())
@@ -159,6 +160,10 @@ int main(int argc, char *argv[]) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+  int screenWidth = mode->width;
+  int screenHeight = mode->height;
   
   window = glfwCreateWindow(width, height, "OSMScoutOpenGL", NULL, NULL);
   if (!window) {
@@ -171,7 +176,7 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
-  renderer = new osmscout::MapPainterOpenGL(width, height);
+  renderer = new osmscout::MapPainterOpenGL(width, height, screenWidth, screenHeight);
   renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
 
   while (!glfwWindowShouldClose(window)) {

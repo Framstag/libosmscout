@@ -20,15 +20,26 @@
 
 #include <utility>
 #include <GL/glew.h>
+#include <osmscout/MapPainter.h>
 #include <osmscout/MapPainterOpenGL.h>
 #include <osmscout/Triangulate.h>
 #include <iostream>
 
 namespace osmscout {
 
-  osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height) : width(width), height(height), minLat(0),
-                                                                        minLon(0), maxLat(0), maxLon(0), lookX(0.0),
-                                                                        lookY(0.0) {
+  osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, int screenWidth, int screenHeight) : width(width),
+                                                                                                           height(
+                                                                                                               height),
+                                                                                                           minLat(0),
+                                                                                                           minLon(0),
+                                                                                                           maxLat(0),
+                                                                                                           maxLon(0),
+                                                                                                           lookX(0.0),
+                                                                                                           lookY(0.0),
+                                                                                                           screenHeight(
+                                                                                                               screenHeight),
+                                                                                                           screenWidth(
+                                                                                                               screenWidth) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -51,6 +62,14 @@ namespace osmscout {
     GroundRenderer.LoadVertexShader("GroundVertexShader.vert");
     GroundRenderer.LoadFragmentShader("GroundFragmentShader.frag");
     success = GroundRenderer.InitContext();
+    if (!success) {
+      std::cerr << "Could not initialize context for area rendering!" << std::endl;
+      return;
+    }
+
+    PathRenderer.LoadVertexShader("PathVertexShader.vert");
+    PathRenderer.LoadFragmentShader("PathFragmentShader.frag");
+    success = PathRenderer.InitContext();
     if (!success) {
       std::cerr << "Could not initialize context for area rendering!" << std::endl;
       return;
@@ -86,6 +105,11 @@ namespace osmscout {
     GroundRenderer.SetVerticesSize(5);
 
     ProcessGroundData(data, parameter, projection, styleConfig, BoundingBox);
+
+    PathRenderer.clearData();
+    PathRenderer.SetVerticesSize(11);
+
+    ProcessPathData(data, parameter, projection, styleConfig, BoundingBox);
   }
 
   void
@@ -214,6 +238,165 @@ namespace osmscout {
     AreaRenderer.AddUniform("maxLon", maxLon);
     AreaRenderer.AddUniform("maxLat", maxLat);
 
+  }
+
+  void
+  osmscout::MapPainterOpenGL::ProcessPathData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                                              const osmscout::Projection &projection,
+                                              const osmscout::StyleConfigRef &styleConfig,
+                                              const osmscout::GeoBox &BoundingBox) {
+
+    WidthFeatureValueReader widthReader(*styleConfig->GetTypeConfig());
+    LayerFeatureValueReader layerReader(*styleConfig->GetTypeConfig());
+
+    for (const auto &way: data.ways) {
+      styleConfig->GetWayLineStyles(way->GetFeatureValueBuffer(),
+                                    projection,
+                                    lineStyles);
+
+      if (lineStyles.empty()) {
+        return;
+      }
+
+      FeatureValueBuffer buffer(way->GetFeatureValueBuffer());
+
+      for (const auto &lineStyle : lineStyles) {
+        double lineWidth = 0.0;
+        double lineOffset = 0.0;
+
+        if (lineStyle->GetWidth() > 0.0) {
+          WidthFeatureValue *widthValue = widthReader.GetValue(buffer);
+
+
+          if (widthValue != NULL) {
+            lineWidth += widthValue->GetWidth() / projection.GetPixelSize();
+          } else {
+            lineWidth += lineStyle->GetWidth() / projection.GetPixelSize();
+          }
+        }
+
+        if (lineStyle->GetDisplayWidth() > 0.0) {
+          lineWidth += projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
+        }
+
+        if (lineWidth == 0.0) {
+          continue;
+        }
+
+        if (lineStyle->GetOffset() != 0.0) {
+          lineOffset += lineStyle->GetOffset() / projection.GetPixelSize();
+        }
+
+        if (lineStyle->GetDisplayOffset() != 0.0) {
+          lineOffset += projection.ConvertWidthToPixel(lineStyle->GetDisplayOffset());
+        }
+
+        for (int i = 0; i < way->nodes.size() - 1; i++) {
+          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
+          if (i == 0) {
+            PathRenderer.AddNewVertex(way->nodes[i].GetLon());
+            PathRenderer.AddNewVertex(way->nodes[i].GetLat());
+          } else {
+            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLon());
+            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLat());
+          }
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
+          if (i == 0)
+            PathRenderer.AddNewVertex(1.0);
+          else
+            PathRenderer.AddNewVertex(5.0);
+          PathRenderer.AddNewVertex(lineWidth);
+
+          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
+          if (i == 0) {
+            PathRenderer.AddNewVertex(way->nodes[i].GetLon());
+            PathRenderer.AddNewVertex(way->nodes[i].GetLat());
+          } else {
+            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLon());
+            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLat());
+          }
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
+          if (i == 0)
+            PathRenderer.AddNewVertex(2.0);
+          else
+            PathRenderer.AddNewVertex(6.0);
+          PathRenderer.AddNewVertex(lineWidth);
+
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
+          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
+          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLat());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
+          if (i == way->nodes.size() - 2)
+            PathRenderer.AddNewVertex(7.0);
+          else
+            PathRenderer.AddNewVertex(3.0);
+          PathRenderer.AddNewVertex(lineWidth);
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
+          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
+          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLon());
+          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLat());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
+          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
+          if (i == way->nodes.size() - 2)
+            PathRenderer.AddNewVertex(8.0);
+          else
+            PathRenderer.AddNewVertex(4.0);
+          PathRenderer.AddNewVertex(lineWidth);
+
+          int num;
+          if (PathRenderer.GetNumOfVertices() <= 44) {
+            num = 0;
+          } else {
+            num = PathRenderer.GetVerticesNumber() - 4;
+          }
+          PathRenderer.AddNewElement(num);
+          PathRenderer.AddNewElement(num + 1);
+          PathRenderer.AddNewElement(num + 2);
+          PathRenderer.AddNewElement(num + 2);
+          PathRenderer.AddNewElement(num + 1);
+          PathRenderer.AddNewElement(num + 3);
+        }
+      }
+    }
+
+    PathRenderer.BindBuffers();
+
+    PathRenderer.LoadProgram();
+    PathRenderer.LoadVertices();
+
+    PathRenderer.SetProjection(width, height);
+    PathRenderer.SetModel();
+    PathRenderer.SetView(lookX, lookY);
+    PathRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    PathRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("color", 3, GL_FLOAT, 6 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("index", 1, GL_FLOAT, 9 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+    PathRenderer.AddUniform("minLon", minLon);
+    PathRenderer.AddUniform("minLat", minLat);
+    PathRenderer.AddUniform("maxLon", maxLon);
+    PathRenderer.AddUniform("maxLat", maxLat);
+    PathRenderer.AddUniform("screenWidth", screenWidth);
+    PathRenderer.AddUniform("screenHeight", screenHeight);
   }
 
   void
@@ -458,6 +641,12 @@ namespace osmscout {
     AreaRenderer.AddUniform("minLat", minLat);
     AreaRenderer.AddUniform("maxLon", maxLon);
     AreaRenderer.AddUniform("maxLat", maxLat);
+    PathRenderer.AddUniform("minLon", minLon);
+    PathRenderer.AddUniform("minLat", minLat);
+    PathRenderer.AddUniform("maxLon", maxLon);
+    PathRenderer.AddUniform("maxLat", maxLat);
+    PathRenderer.AddUniform("screenWidth", screenWidth);
+    PathRenderer.AddUniform("screenHeight", screenHeight);
     GroundTileRenderer.AddUniform("minLon", minLon);
     GroundTileRenderer.AddUniform("minLat", minLat);
     GroundTileRenderer.AddUniform("maxLon", maxLon);
@@ -478,6 +667,7 @@ namespace osmscout {
     AreaRenderer.SetView(lookX, lookY);
     GroundTileRenderer.SetView(lookX, lookY);
     GroundRenderer.SetView(lookX, lookY);
+    PathRenderer.SetView(lookX, lookY);
   }
 
   void osmscout::MapPainterOpenGL::DrawMap() {
@@ -509,7 +699,7 @@ namespace osmscout {
     GroundTileRenderer.Draw();
 
     glBindVertexArray(GroundRenderer.getVAO());
-    //glUseProgram(GroundRenderer.getShaderProgram());
+    glUseProgram(GroundRenderer.getShaderProgram());
 
     GroundRenderer.AddUniform("minLon", minLon);
     GroundRenderer.AddUniform("minLat", minLat);
@@ -535,6 +725,25 @@ namespace osmscout {
     AreaRenderer.SetModel();
     AreaRenderer.SetView(lookX, lookY);
     AreaRenderer.Draw();
+
+    glBindVertexArray(PathRenderer.getVAO());
+    glUseProgram(PathRenderer.getShaderProgram());
+
+    PathRenderer.AddUniform("minLon", minLon);
+    PathRenderer.AddUniform("minLat", minLat);
+    PathRenderer.AddUniform("maxLon", maxLon);
+    PathRenderer.AddUniform("maxLat", maxLat);
+    PathRenderer.AddUniform("screenWidth", screenWidth);
+    PathRenderer.AddUniform("screenHeight", screenHeight);
+
+    PathRenderer.BindBuffers();
+
+    PathRenderer.LoadVertices();
+    PathRenderer.SetProjection(width, height);
+    PathRenderer.SetModel();
+    PathRenderer.SetView(lookX, lookY);
+
+    PathRenderer.Draw();
 
   }
 
