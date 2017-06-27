@@ -67,40 +67,16 @@ void main() {
         result = miter;
 	}
 	else if(index == 4.0){
-        float nx = (x - x_prev);
-        float ny = (y - y_prev);
-        normal = vec2(-ny, nx);
-
-        float nx2 = (x_next - x);
-        float ny2 = (y_next - y);
-        vec2 normal2 = vec2(-ny2, nx2);
-
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(-tangent.y, tangent.x);
         result = miter;
 	}
 	else if(index == 5.0){
-	    float nx = (x_next - x);
-        float ny = (y_next - y);
-        normal = vec2(ny, -nx);
-
-        float nx2 = (x - x_prev);
-        float ny2 = (y - y_prev);
-        vec2 normal2 = vec2(ny2, -nx2);
-
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(tangent.y, -tangent.x);
         result = miter;
 	}
 	else if(index == 6.0){
-		float nx = (x_next - x);
-         float ny = (y_next - y);
-	    normal = vec2(-ny, nx);
-
-        float nx2 = (x - x_prev);
-        float ny2 = (y - y_prev);
-        vec2 normal2 = vec2(-ny2, nx2);
-
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(-tangent.y, tangent.x);
         result = miter;
