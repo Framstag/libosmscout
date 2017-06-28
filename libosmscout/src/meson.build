@@ -73,6 +73,7 @@ osmscoutSrc = [
             'src/osmscout/WaterIndex.cpp',
             'src/osmscout/Way.cpp',
             'src/osmscout/WayDataFile.cpp'
+            'src/osmscout/MultiDBRouting.cpp'
           ]
 
 if marisaDep.found()

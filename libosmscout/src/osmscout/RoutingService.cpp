@@ -100,9 +100,6 @@ namespace osmscout {
    *    A valid reference to a database instance
    * @param parameter
    *    An instance to the parameter object holding further paramterization
-   * @param vehicle
-   *    The vehicle to route for (this results in loading a
-   *    routing network for the given vehicle).
    */
   RoutingService::RoutingService(const DatabaseRef& database,
                                  const RouterParameter& parameter,
@@ -1812,17 +1809,9 @@ namespace osmscout {
    * @param coord
    *    coordinate of the search center
    * @param profile
-   *    Routing profile to use
-   * @param vehicle
-   *    Vehicle to use (may differ from the vehicle the router was initialized
-   *    but tin this case the route will not return a valid route based on this
-   *    object).
+   *    Routing profile to use. It defines Vehicle to use
    * @param radius
    *    The maximum radius to search in from the search center in meter
-   * @param object
-   *    The resulting object if one was found
-   * @param nodeIndex
-   *    The index of the closed node to the search center.
    * @return
    */
   RoutePosition RoutingService::GetClosestRoutableNode(const GeoCoord& coord,

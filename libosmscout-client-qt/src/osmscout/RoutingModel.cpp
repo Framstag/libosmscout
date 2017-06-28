@@ -89,7 +89,7 @@ void RoutingListModel::onRouteFailed(QString reason,
   computing=false;
   emit computingChanged();
   emit routeFailed(reason);
-  osmscout::log.Error() << reason.toStdString();
+  osmscout::log.Warn() << "Route computation failed: " << reason.toStdString();
 }
 
 void RoutingListModel::clear()

@@ -62,7 +62,7 @@ namespace osmscout {
   /**
    * \ingroup Routing
    *
-   * Start or end position of a rout calculation
+   * Start or end position of a route calculation
    */
   class OSMSCOUT_API RoutePosition CLASS_FINAL
   {

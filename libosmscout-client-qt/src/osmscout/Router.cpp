@@ -641,13 +641,24 @@ bool Router::TransformRouteDataToRouteDescription(const QString databasePath,
   return success;
 }
 
+std::string vehicleStr(osmscout::Vehicle vehicle){
+  switch (vehicle){
+    case osmscout::vehicleCar : return "Car";
+    case osmscout::vehicleBicycle : return "Bicycle";
+    case osmscout::vehicleFoot : return "Foot";
+    default : return "Unknown";
+  }
+}
+
 void Router::onRouteRequest(LocationEntry* start,
                             LocationEntry* target,
                             osmscout::Vehicle vehicle,
                             int requestId)
 {
   RouteSelection route;
-  osmscout::log.Debug() << "Routing from '" << start->getLabel().toLocal8Bit().data() << "' to '" << target->getLabel().toLocal8Bit().data() << "'";
+  osmscout::log.Debug() << "Routing from '" << start->getLabel().toLocal8Bit().data() << 
+    "' to '" << target->getLabel().toLocal8Bit().data() << "'" <<
+    " by '" << vehicleStr(vehicle) << "'";
 
   // TODO:
   //  - handle location entries with typeCoordinate that don't have database

@@ -121,9 +121,35 @@ bool ReadRouteNodesForCells(osmscout::Database& database,
 
 int main(int argc, char* argv[])
 {
-  if (argc!=3) {
-    std::cerr << "MultiDBRouting <database directory1> <database directory2>" << std::endl;
+  if (argc!=7) {
+    std::cerr << "MultiDBRouting" << std::endl;
+    std::cerr << "  <database directory1> <database directory2>" << std::endl;
+    std::cerr << "  <start lat> <start lon>" << std::endl;
+    std::cerr << "  <target lat> <target lon>" << std::endl;
 
+    return 1;
+  }
+
+  double  startLat;
+  double  startLon;
+
+  double  targetLat;
+  double  targetLon;
+
+  if (sscanf(argv[3],"%lf",&startLat)!=1) {
+    std::cerr << "lat is not numeric!" << std::endl;
+    return 1;
+  }
+  if (sscanf(argv[4],"%lf",&startLon)!=1) {
+    std::cerr << "lon is not numeric!" << std::endl;
+    return 1;
+  }
+  if (sscanf(argv[5],"%lf",&targetLat)!=1) {
+    std::cerr << "lat is not numeric!" << std::endl;
+    return 1;
+  }
+  if (sscanf(argv[6],"%lf",&targetLon)!=1) {
+    std::cerr << "lon is not numeric!" << std::endl;
     return 1;
   }
 
