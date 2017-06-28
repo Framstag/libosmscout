@@ -43,9 +43,11 @@ namespace osmscout {
   }
 
   RoutePosition::RoutePosition(const ObjectFileRef& object,
-                               size_t nodeIndex)
+                               size_t nodeIndex,
+                               std::string databasePath)
   : object(object),
-    nodeIndex(nodeIndex)
+    nodeIndex(nodeIndex),
+    databasePath(databasePath)
   {
     // no code
   }
@@ -1130,8 +1132,8 @@ namespace osmscout {
       RoutingResult              partialResult;
 
       partialResult=CalculateRoute(profile,
-                                   RoutePosition(fromObject,fromNodeIndex),
-                                   RoutePosition(toObject,toNodeIndex),
+                                   RoutePosition(fromObject,fromNodeIndex,path),
+                                   RoutePosition(toObject,toNodeIndex,path),
                                    parameter);
       if (!partialResult.Success()) {
         result.GetRoute().Clear();
@@ -1911,7 +1913,7 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
 
-          position=RoutePosition(area->GetObjectFileRef(),i);
+          position=RoutePosition(area->GetObjectFileRef(),i,path);
         }
       }
     }
@@ -1931,7 +1933,7 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
 
-          position=RoutePosition(way->GetObjectFileRef(),i);
+          position=RoutePosition(way->GetObjectFileRef(),i,path);
         }
       }
     }

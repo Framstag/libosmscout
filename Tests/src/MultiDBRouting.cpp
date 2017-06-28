@@ -25,6 +25,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/Pixel.h>
 #include <osmscout/RoutingService.h>
+#include <osmscout/MultiDBRouting.h>
 
 #include <osmscout/util/FileScanner.h>
 
@@ -119,6 +120,29 @@ bool ReadRouteNodesForCells(osmscout::Database& database,
   return true;
 }
 
+void GetCarSpeedTable(std::map<std::string,double>& map)
+{
+  map["highway_motorway"]=110.0;
+  map["highway_motorway_trunk"]=100.0;
+  map["highway_motorway_primary"]=70.0;
+  map["highway_motorway_link"]=60.0;
+  map["highway_motorway_junction"]=60.0;
+  map["highway_trunk"]=100.0;
+  map["highway_trunk_link"]=60.0;
+  map["highway_primary"]=70.0;
+  map["highway_primary_link"]=60.0;
+  map["highway_secondary"]=60.0;
+  map["highway_secondary_link"]=50.0;
+  map["highway_tertiary"]=55.0;
+  map["highway_tertiary_link"]=55.0;
+  map["highway_unclassified"]=50.0;
+  map["highway_road"]=50.0;
+  map["highway_residential"]=40.0;
+  map["highway_roundabout"]=40.0;
+  map["highway_living_street"]=10.0;
+  map["highway_service"]=30.0;
+}
+
 int main(int argc, char* argv[])
 {
   if (argc!=7) {
@@ -153,12 +177,20 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  osmscout::GeoCoord startCoord(startLat,startLon);
+  osmscout::GeoCoord targetCoord(targetLat,targetLon);
+
   // Database
 
   osmscout::DatabaseParameter dbParameter;
   osmscout::DatabaseRef       database1=std::make_shared<osmscout::Database>(dbParameter);
   osmscout::DatabaseRef       database2=std::make_shared<osmscout::Database>(dbParameter);
   osmscout::RouterParameter   routerParameter;
+
+  osmscout::log.Debug(true);
+  osmscout::log.Info(true);
+  osmscout::log.Warn(true);
+  osmscout::log.Error(true);
 
   routerParameter.SetDebugPerformance(true);
 
@@ -181,6 +213,45 @@ int main(int argc, char* argv[])
   }
 
   std::cout << "Done." << std::endl;
+
+  std::vector<osmscout::DatabaseRef> databases(2);
+  databases[0]=database1;
+  databases[1]=database2;
+
+  osmscout::MultiDBRouting router(databases);
+
+  std::cout << "Opening router..." << std::endl;
+
+  osmscout::MultiDBRouting::RoutingProfileBuilder profileBuilder=
+      [](const osmscout::DatabaseRef &database){
+        auto profile=std::make_shared<osmscout::FastestPathRoutingProfile>(database->GetTypeConfig());
+        std::map<std::string,double> speedMap;
+        GetCarSpeedTable(speedMap);
+        profile->ParametrizeForCar(*(database->GetTypeConfig()),speedMap,160.0);
+        return profile;
+      };
+
+  if (!router.Open(profileBuilder,routerParameter)) {
+    
+    std::cerr << "Cannot open router" << std::endl;
+    return 1;
+  }
+  std::cout << "Done." << std::endl;
+
+  osmscout::RoutePosition startNode=router.GetClosestRoutableNode(startCoord);
+  if (!startNode.IsValid()){
+    std::cerr << "Can't found route node near start coord " << startCoord.GetDisplayText() << std::endl;
+    return 1;
+  }
+  osmscout::RoutePosition targetNode=router.GetClosestRoutableNode(targetCoord);
+  if (!targetNode.IsValid()){
+    std::cerr << "Can't found route node near target coord " << targetCoord.GetDisplayText() << std::endl;
+    return 1;
+  }
+
+  router.Close();
+
+
 
   osmscout::RoutingServiceRef routingService1=std::make_shared<osmscout::RoutingService>(database1,
                                                                                          routerParameter,

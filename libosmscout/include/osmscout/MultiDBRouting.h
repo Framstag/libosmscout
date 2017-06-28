@@ -26,15 +26,32 @@ namespace osmscout {
   /**
    * \ingroup Routing
    *
-   * Start or end position of a route calculation
+   * Util class for routing cross databases
    */
   class OSMSCOUT_API MultiDBRouting CLASS_FINAL
   {
+  public:
+    typedef std::function<RoutingProfileRef(const DatabaseRef&)> RoutingProfileBuilder;
+
   private:
+    std::map<std::string,DatabaseRef>       databases;
+    std::map<std::string,RoutingServiceRef> services;
+    std::map<std::string,RoutingProfileRef> profiles;
+
+    bool                   isOpen;
 
   public:
-    MultiDBRouting();
+    MultiDBRouting(std::vector<DatabaseRef> databases);
     virtual ~MultiDBRouting();
+
+    bool Open(RoutingProfileBuilder routingProfileBuilder,
+              RouterParameter routerParameter);
+    void Close();
+
+    RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
+                                         double radius=1000,
+                                         std::string databaseHint="") const;
+
   };
 }
 

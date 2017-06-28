@@ -69,11 +69,13 @@ namespace osmscout {
   private:
     ObjectFileRef object;
     size_t        nodeIndex;
+    std::string   databasePath;
 
   public:
     RoutePosition();
     RoutePosition(const ObjectFileRef& object,
-                  size_t nodeIndex);
+                  size_t nodeIndex,
+                  std::string databasePath);
 
     inline bool IsValid() const
     {
@@ -88,6 +90,11 @@ namespace osmscout {
     inline size_t GetNodeIndex() const
     {
       return nodeIndex;
+    }
+
+    inline std::string GetDatabasePath() const
+    {
+      return databasePath;
     }
   };
 
