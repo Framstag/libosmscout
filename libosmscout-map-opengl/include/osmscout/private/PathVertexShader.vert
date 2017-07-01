@@ -33,19 +33,35 @@ void main() {
     float minLat_m = (log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
     float maxLat_m = (log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
 
-    float x = (2*(position.x - (minLon))/((maxLon)-(minLon)))-1;
+    /*float x = (2*(position.x - (minLon))/((maxLon)-(minLon)))-1;
     float y = (2*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-1;
     float x_next = (2*(next.x - (minLon))/((maxLon)-(minLon)))-1;
     float y_next = (2*(merc_y_next - (minLat_m))/((maxLat_m)-(minLat_m)))-1;
     float x_prev = (2*(previous.x - (minLon))/((maxLon)-(minLon)))-1;
     float y_prev = (2*(merc_y_prev - (minLat_m))/((maxLat_m)-(minLat_m)))-1;
-    float thickness_norm = thickness/((screenWidth/thickness)/2);
+    float thickness_norm = thickness/((screenWidth/thickness)/2);*/
+
+     float height = abs(minLat_m - maxLat_m);
+     float width = abs(minLon - maxLon);
+     float x_width = width/height;
+     float y_height = 1;
+
+     float x = ((2*x_width)*(position.x - (minLon))/((maxLon)-(minLon)))-x_width;
+     float y = ((2*y_height)*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
+     float x_next = ((2*x_width)*(next.x - (minLon))/((maxLon)-(minLon)))-x_width;
+     float y_next = ((2*y_height)*(merc_y_next - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
+     float x_prev = ((2*x_width)*(previous.x - (minLon))/((maxLon)-(minLon)))-x_width;
+     float y_prev = ((2*y_height)*(merc_y_prev - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
+     float thickness_norm = thickness/((screenWidth/thickness)/2);
+     //float x = ((2*x_width)*(position.x - (minLon))/((maxLon)-(minLon)))-x_width;
+     //float y = ((2*y_height)*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
 
     vec2 n = vec2(x_next, y_next);
     vec2 c = vec2(x, y);
     vec2 p = vec2(x_prev, y_prev);
 
     vec4 pos = Projection * View * Model * vec4(x, y, 0, 1);
+    //vec4 pos = View * Model * vec4(x, y, 0, 1);
 
     vec2 normal;
     vec2 result;

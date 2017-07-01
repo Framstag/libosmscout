@@ -25,9 +25,18 @@ void main() {
     float minLat_m = (log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
     float maxLat_m = (log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
 
-    float x = (2*(position.x - (minLon))/((maxLon)-(minLon)))-1;
-    float y = (2*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-1;
+    float height = abs(minLat_m - maxLat_m);
+    float width = abs(minLon - maxLon);
+    float x_width = width/height;
+    float y_height = 1;
+
+    float x = ((2*x_width)*(position.x - (minLon))/((maxLon)-(minLon)))-x_width;
+    float y = ((2*y_height)*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
+
+    /*float x = (2*(position.x - (minLon))/((maxLon)-(minLon)))-1;
+    float y = (2*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-1;*/
     gl_Position = Projection * View * Model * vec4(x, y, 0.0, 1.0);
+    //gl_Position = View * Model * vec4(x, y, 0.0, 1.0);
     //gl_Position = View * Model * vec4(x, y, 0.0, 1.0);
     //gl_Position = vec4(position, 0.0, 1.0);
 }
