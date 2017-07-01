@@ -230,8 +230,8 @@ namespace osmscout {
     }
 
     void SetProjection(float width, float height) {
-      Projection = glm::perspective(glm::radians((float) zoom), (float) width / (float) height, 0.1f, 10.0f);
-      // Projection = glm::ortho(0.0f, (float) width, 0.0f, (float) height, -1.0f, 100.0f);
+      Projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.1f, 10.0f);
+      //Projection = glm::ortho(0.0f, -1.333f, 1.333f, 0.0f, -1.0f, 100.0f);
       GLint uniProj = glGetUniformLocation(shaderProgram, "Projection");
       glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(Projection));
     }

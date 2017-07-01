@@ -632,10 +632,18 @@ namespace osmscout {
   }
 
   void osmscout::MapPainterOpenGL::onZoom(float zoom) {
-    minLon += (zoom / ((height / (float) width) * 100));
+    /*minLon += (zoom / ((height / (float) width) * 100));
     minLat += (zoom / ((width / (float) height) * 100));
     maxLon -= (zoom / ((height / (float) width) * 100));
-    maxLat -= (zoom / ((width / (float) height) * 100));
+    maxLat -= (zoom / ((width / (float) height) * 100));*/
+
+    float w = fabs(minLon - maxLon);
+    float h = fabs(minLat - maxLat);
+
+    minLon += (zoom / ((h / (float) w) * 100));
+    minLat += (zoom / ((w / (float) h) * 100));
+    maxLon -= (zoom / ((h / (float) w) * 100));
+    maxLat -= (zoom / ((w / (float) h) * 100));
 
     AreaRenderer.AddUniform("minLon", minLon);
     AreaRenderer.AddUniform("minLat", minLat);

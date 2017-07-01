@@ -146,6 +146,7 @@ int main(int argc, char *argv[]) {
                  width,
                  height);
 
+  searchParameter.SetUseLowZoomOptimization(false);
   mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
@@ -184,7 +185,6 @@ int main(int argc, char *argv[]) {
     glfwPollEvents();
 
     renderer->DrawMap();
-
   }
 
   glfwDestroyWindow(window);
