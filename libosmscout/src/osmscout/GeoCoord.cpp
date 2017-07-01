@@ -318,9 +318,8 @@ namespace osmscout {
 
       return true;
     }
-    else {
-      return false;
-    }
+
+    return false;
   }
 
   double GeoCoord::GetDistance(GeoCoord target) const
@@ -330,10 +329,15 @@ namespace osmscout {
 
   GeoCoord GeoCoord::Add(double bearing, double distance)
   {
-      if (distance == 0.0) return GeoCoord(GetLat(), GetLon());
+      if (distance == 0.0) {
+        return GeoCoord(GetLat(), GetLon());
+      }
+
       double lat = GetLat();
       double lon = GetLon();
+
       GetEllipsoidalDistance(GetLat(), GetLon(), bearing, distance, lat, lon);
+
       return GeoCoord(lat, lon);
   }
 }

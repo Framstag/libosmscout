@@ -56,7 +56,7 @@ namespace osmscout {
     allocating real memory) resulting in measurable speed increase because of
     exchanging buffered file access with in memory array access.
     */
-  class OSMSCOUT_API FileScanner
+  class OSMSCOUT_API FileScanner CLASS_FINAL
   {
   public:
     enum Mode
