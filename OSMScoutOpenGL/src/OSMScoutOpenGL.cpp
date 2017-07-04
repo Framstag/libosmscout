@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
     if (loadData) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
-      if ((std::abs(currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+      if (((currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
       }
