@@ -641,40 +641,6 @@ namespace osmscout {
     PathRenderer.ScaleModel(zoomScale * zoom);
   }
 
-  void osmscout::MapPainterOpenGL::onZoom(float zoom) {
-    /*minLon += (zoom / ((height / (float) width) * 100));
-    minLat += (zoom / ((width / (float) height) * 100));
-    maxLon -= (zoom / ((height / (float) width) * 100));
-    maxLat -= (zoom / ((width / (float) height) * 100));*/
-
-    float w = fabs(minLon - maxLon);
-    float h = fabs(minLat - maxLat);
-
-    minLon += (zoom / ((h / (float) w) * 100));
-    minLat += (zoom / ((w / (float) h) * 100));
-    maxLon -= (zoom / ((h / (float) w) * 100));
-    maxLat -= (zoom / ((w / (float) h) * 100));
-
-    AreaRenderer.AddUniform("minLon", minLon);
-    AreaRenderer.AddUniform("minLat", minLat);
-    AreaRenderer.AddUniform("maxLon", maxLon);
-    AreaRenderer.AddUniform("maxLat", maxLat);
-    PathRenderer.AddUniform("minLon", minLon);
-    PathRenderer.AddUniform("minLat", minLat);
-    PathRenderer.AddUniform("maxLon", maxLon);
-    PathRenderer.AddUniform("maxLat", maxLat);
-    PathRenderer.AddUniform("screenWidth", screenWidth);
-    PathRenderer.AddUniform("screenHeight", screenHeight);
-    GroundTileRenderer.AddUniform("minLon", minLon);
-    GroundTileRenderer.AddUniform("minLat", minLat);
-    GroundTileRenderer.AddUniform("maxLon", maxLon);
-    GroundTileRenderer.AddUniform("maxLat", maxLat);
-    GroundRenderer.AddUniform("minLon", minLon);
-    GroundRenderer.AddUniform("minLat", minLat);
-    GroundRenderer.AddUniform("maxLon", maxLon);
-    GroundRenderer.AddUniform("maxLat", maxLat);
-  }
-
   void osmscout::MapPainterOpenGL::onTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
     float offsetX = startPointX - endPointX;
     float offsetY = endPointY - startPointY;

@@ -30,13 +30,10 @@
 #include <osmscout/OpenGLMapData.h>
 
 #include <osmscout/private/MapOpenGLImportExport.h>
-#include <mutex>
 
 namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL {
   private:
-
-    std::mutex m;
 
     int width;
     int height;
@@ -98,8 +95,6 @@ namespace osmscout {
     void SwapData();
 
     void onZoom(float zoom, float zoomScale);
-
-    void onZoom(float zoom);
 
     void onTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
 
