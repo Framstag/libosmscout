@@ -17,13 +17,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstdlib>
 #include <iostream>
+#include <future>
+#include <chrono>
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
-#include <future>
-#include <chrono>
-#include <cmath>
 #include <GLFW/glfw3.h>
 
 osmscout::DatabaseParameter databaseParameter;
