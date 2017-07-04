@@ -23,6 +23,7 @@
 #include <osmscout/MapPainterOpenGL.h>
 #include <future>
 #include <chrono>
+#include <cmath>
 #include <GLFW/glfw3.h>
 
 osmscout::DatabaseParameter databaseParameter;
@@ -211,7 +212,7 @@ int main(int argc, char *argv[]) {
     if (loadData) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
-      if ((abs(currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+      if ((std::abs(currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
       }
