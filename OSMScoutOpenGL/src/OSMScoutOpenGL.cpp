@@ -21,6 +21,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
+#include <future>
+#include <chrono>
 #include <GLFW/glfw3.h>
 
 osmscout::DatabaseParameter databaseParameter;
@@ -34,16 +36,41 @@ osmscout::AreaSearchParameter searchParameter;
 osmscout::MapData data;
 std::list<osmscout::TileRef> tiles;
 osmscout::MapPainterOpenGL *renderer;
+std::string map;
+std::string style;
+std::future<bool> result;
 
 int zoomLevel;
-
 int zoom = 0;
-
 double prevX = 0;
 double prevY = 0;
+unsigned long long lastZoom;
+bool loadData = 0;
+bool loadingInProgress = 0;
 
-void ErrorCallback(int, const char* err_str)
-{
+size_t width;
+size_t height;
+
+bool LoadData() {
+  data.ClearDBData();
+  tiles.clear();
+  projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
+                 osmscout::Magnification(zoomLevel),
+                 96,
+                 width,
+                 height);
+
+  searchParameter.SetUseLowZoomOptimization(false);
+  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
+  mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
+  mapService->AddTileDataToMapData(tiles, data);
+  mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
+  renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
+
+  return true;
+}
+
+void ErrorCallback(int, const char *err_str) {
   std::cerr << "GLFW Error: " << err_str << std::endl;
 }
 
@@ -75,17 +102,13 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 
 
 static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-  zoomLevel += yoffset;
+  zoomLevel += yoffset * 10;
   double x, y;
   glfwGetCursorPos(window, &x, &y);
-  tiles.empty();
-  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
-  mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
-  mapService->AddTileDataToMapData(tiles, data);
-  mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
-  renderer->onZoom(yoffset);
-  renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
-
+  renderer->onZoom(yoffset, 0.01);
+  lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::steady_clock::now().time_since_epoch()).count();
+  loadData = 1;
 }
 
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
@@ -97,9 +120,6 @@ static void cursor_position_callback(GLFWwindow *window, double xpos, double ypo
 }
 
 int main(int argc, char *argv[]) {
-  std::string map;
-  std::string style;
-  size_t width, height;
 
   if (argc != 5) {
     std::cerr << argc << " usage: ./OSMScoutOpenGL <path/to/map> <style-file> <width> <height>" << std::endl;
@@ -162,10 +182,10 @@ int main(int argc, char *argv[]) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+  const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
   int screenWidth = mode->width;
   int screenHeight = mode->height;
-  
+
   window = glfwCreateWindow(width, height, "OSMScoutOpenGL", NULL, NULL);
   if (!window) {
     glfwTerminate();
@@ -179,12 +199,35 @@ int main(int argc, char *argv[]) {
 
   renderer = new osmscout::MapPainterOpenGL(width, height, screenWidth, screenHeight);
   renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
+  renderer->SwapData();
 
+  unsigned long long currentTime;
   while (!glfwWindowShouldClose(window)) {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
     renderer->DrawMap();
+
+    if (loadData) {
+      currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+          std::chrono::steady_clock::now().time_since_epoch()).count();
+      if ((abs(currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+        result = std::future<bool>(std::async(std::launch::async, LoadData));
+        loadingInProgress = 1;
+      }
+
+      if (loadingInProgress) {
+        auto status = result.wait_for(std::chrono::milliseconds(0));
+
+        if (status == std::future_status::ready) {
+          loadData = 0;
+          loadingInProgress = 0;
+          auto success = result.get();
+          if (success)
+            renderer->SwapData();
+        }
+      }
+    }
   }
 
   glfwDestroyWindow(window);
