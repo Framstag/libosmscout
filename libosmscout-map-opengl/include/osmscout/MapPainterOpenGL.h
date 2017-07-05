@@ -30,11 +30,11 @@
 #include <osmscout/OpenGLMapData.h>
 
 #include <osmscout/private/MapOpenGLImportExport.h>
-#include <mutex>
 
 namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL {
   private:
+
     int width;
     int height;
 
@@ -64,8 +64,7 @@ namespace osmscout {
     osmscout::FillStyleRef landFill;
     osmscout::FillStyleRef seaFill;
     std::vector<osmscout::LineStyleRef> lineStyles;
-
-    std::vector<std::vector<osmscout::Point>> areas;
+    osmscout::GeoBox BoundingBox;
 
     void ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
@@ -84,11 +83,7 @@ namespace osmscout {
 
     void ProcessLabelData();
 
-    void FinishProcess();
-
   public:
-    MapPainterOpenGL();
-
     MapPainterOpenGL(int width, int height, int screenWidth, int screenHeight);
 
     ~MapPainterOpenGL();
@@ -97,7 +92,9 @@ namespace osmscout {
                   const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
                   const osmscout::GeoBox &BoundingBox);
 
-    void onZoom(float zoomSize);
+    void SwapData();
+
+    void onZoom(float zoom, float zoomScale);
 
     void onTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
 

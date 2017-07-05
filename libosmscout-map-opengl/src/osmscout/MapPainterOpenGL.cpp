@@ -75,7 +75,14 @@ namespace osmscout {
       return;
     }
 
-    zoomLevel = 45.0f;
+    AreaRenderer.clearData();
+    AreaRenderer.SetVerticesSize(5);
+    GroundTileRenderer.clearData();
+    GroundTileRenderer.SetVerticesSize(5);
+    GroundRenderer.clearData();
+    GroundRenderer.SetVerticesSize(5);
+    PathRenderer.clearData();
+    PathRenderer.SetVerticesSize(11);
   }
 
   void osmscout::MapPainterOpenGL::loadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
@@ -93,23 +100,90 @@ namespace osmscout {
     if (maxLon == 0)
       maxLon = BoundingBox.GetMaxLon();
 
-    AreaRenderer.clearData();
-    AreaRenderer.SetVerticesSize(5);
+    this->BoundingBox = BoundingBox;
 
     ProcessAreaData(data, parameter, projection, styleConfig, BoundingBox);
 
-    GroundTileRenderer.clearData();
-    GroundTileRenderer.SetVerticesSize(5);
-
-    GroundRenderer.clearData();
-    GroundRenderer.SetVerticesSize(5);
-
-    ProcessGroundData(data, parameter, projection, styleConfig, BoundingBox);
-
-    PathRenderer.clearData();
-    PathRenderer.SetVerticesSize(11);
+    //ProcessGroundData(data, parameter, projection, styleConfig, BoundingBox);
 
     ProcessPathData(data, parameter, projection, styleConfig, BoundingBox);
+  }
+
+  void osmscout::MapPainterOpenGL::SwapData() {
+
+    AreaRenderer.SwapData();
+
+    AreaRenderer.BindBuffers();
+    AreaRenderer.LoadProgram();
+    AreaRenderer.LoadVertices();
+
+    AreaRenderer.SetProjection(width, height);
+    AreaRenderer.SetModel();
+    AreaRenderer.SetView(lookX, lookY);
+    AreaRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    AreaRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
+
+    AreaRenderer.AddUniform("minLon", minLon);
+    AreaRenderer.AddUniform("minLat", minLat);
+    AreaRenderer.AddUniform("maxLon", maxLon);
+    AreaRenderer.AddUniform("maxLat", maxLat);
+
+    /*GroundTileRenderer.SwapData();
+
+    GroundTileRenderer.BindBuffers();
+    GroundTileRenderer.LoadProgram();
+    GroundTileRenderer.LoadVertices();
+
+    GroundTileRenderer.SetProjection(width, height);
+    GroundTileRenderer.SetModel();
+    GroundTileRenderer.SetView(lookX, lookY);
+    GroundTileRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    GroundTileRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
+
+    GroundTileRenderer.AddUniform("minLon", minLon);
+    GroundTileRenderer.AddUniform("minLat", minLat);
+    GroundTileRenderer.AddUniform("maxLon", maxLon);
+    GroundTileRenderer.AddUniform("maxLat", maxLat);
+
+    GroundRenderer.SwapData();
+
+    GroundRenderer.BindBuffers();
+
+    GroundRenderer.LoadProgram();
+    GroundRenderer.LoadVertices();
+
+    GroundRenderer.SetProjection(width, height);
+    GroundRenderer.SetModel();
+    GroundRenderer.SetView(lookX, lookY);
+    GroundRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    GroundRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
+
+    GroundRenderer.AddUniform("minLon", minLon);
+    GroundRenderer.AddUniform("minLat", minLat);
+    GroundRenderer.AddUniform("maxLon", maxLon);
+    GroundRenderer.AddUniform("maxLat", maxLat);*/
+
+    PathRenderer.SwapData();
+
+    PathRenderer.BindBuffers();
+    PathRenderer.LoadProgram();
+    PathRenderer.LoadVertices();
+
+    PathRenderer.SetProjection(width, height);
+    PathRenderer.SetModel();
+    PathRenderer.SetView(lookX, lookY);
+    PathRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    PathRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("color", 3, GL_FLOAT, 6 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("index", 1, GL_FLOAT, 9 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+    PathRenderer.AddUniform("minLon", minLon);
+    PathRenderer.AddUniform("minLat", minLat);
+    PathRenderer.AddUniform("maxLon", maxLon);
+    PathRenderer.AddUniform("maxLat", maxLat);
+    PathRenderer.AddUniform("screenWidth", screenWidth);
+    PathRenderer.AddUniform("screenHeight", screenHeight);
   }
 
   void
@@ -117,7 +191,6 @@ namespace osmscout {
                                               const osmscout::Projection &projection,
                                               const osmscout::StyleConfigRef &styleConfig,
                                               const osmscout::GeoBox &BoundingBox) {
-    AreaRenderer.BindBuffers();
 
     for (const auto &area : data.areas) {
       size_t ringId = Area::outerRingId;
@@ -223,21 +296,6 @@ namespace osmscout {
         ringId++;
       }
     }
-
-    AreaRenderer.LoadProgram();
-    AreaRenderer.LoadVertices();
-
-    AreaRenderer.SetProjection(width, height);
-    AreaRenderer.SetModel();
-    AreaRenderer.SetView(lookX, lookY);
-    AreaRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    AreaRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-
-    AreaRenderer.AddUniform("minLon", minLon);
-    AreaRenderer.AddUniform("minLat", minLat);
-    AreaRenderer.AddUniform("maxLon", maxLon);
-    AreaRenderer.AddUniform("maxLat", maxLat);
-
   }
 
   void
@@ -376,27 +434,6 @@ namespace osmscout {
         }
       }
     }
-
-    PathRenderer.BindBuffers();
-
-    PathRenderer.LoadProgram();
-    PathRenderer.LoadVertices();
-
-    PathRenderer.SetProjection(width, height);
-    PathRenderer.SetModel();
-    PathRenderer.SetView(lookX, lookY);
-    PathRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    PathRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("color", 3, GL_FLOAT, 6 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("index", 1, GL_FLOAT, 9 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 10 * sizeof(GLfloat));
-    PathRenderer.AddUniform("minLon", minLon);
-    PathRenderer.AddUniform("minLat", minLat);
-    PathRenderer.AddUniform("maxLon", maxLon);
-    PathRenderer.AddUniform("maxLat", maxLat);
-    PathRenderer.AddUniform("screenWidth", screenWidth);
-    PathRenderer.AddUniform("screenHeight", screenHeight);
   }
 
   void
@@ -498,7 +535,7 @@ namespace osmscout {
         GroundTileRenderer.AddNewVertex(fill->GetFillColor().GetB());
 
 
-        /*GroundTileRenderer.AddNewVertex(minCoord.GetLon());
+        GroundTileRenderer.AddNewVertex(minCoord.GetLon());
         GroundTileRenderer.AddNewVertex(minCoord.GetLat());
         GroundTileRenderer.AddNewVertex(fill->GetFillColor().GetR());
         GroundTileRenderer.AddNewVertex(fill->GetFillColor().GetG());
@@ -533,7 +570,7 @@ namespace osmscout {
         GroundTileRenderer.AddNewVertex(maxCoord.GetLat());
         GroundTileRenderer.AddNewVertex(fill->GetFillColor().GetR());
         GroundTileRenderer.AddNewVertex(fill->GetFillColor().GetG());
-        GroundTileRenderer.AddNewVertex(fill->GetFillColor().GetB());*/
+        GroundTileRenderer.AddNewVertex(fill->GetFillColor().GetB());
 
         int num;
         if (GroundTileRenderer.GetVerticesNumber() <= 6)
@@ -595,74 +632,13 @@ namespace osmscout {
       }
 
     }
-
-    GroundTileRenderer.BindBuffers();
-
-    GroundTileRenderer.BindBuffers();
-    GroundTileRenderer.LoadProgram();
-    GroundTileRenderer.LoadVertices();
-
-    GroundTileRenderer.SetProjection(width, height);
-    GroundTileRenderer.SetModel();
-    GroundTileRenderer.SetView(lookX, lookY);
-    GroundTileRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    GroundTileRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-
-    GroundTileRenderer.AddUniform("minLon", minLon);
-    GroundTileRenderer.AddUniform("minLat", minLat);
-    GroundTileRenderer.AddUniform("maxLon", maxLon);
-    GroundTileRenderer.AddUniform("maxLat", maxLat);
-
-    GroundRenderer.BindBuffers();
-
-    GroundRenderer.LoadProgram();
-    GroundRenderer.LoadVertices();
-
-    GroundRenderer.SetProjection(width, height);
-    GroundRenderer.SetModel();
-    GroundRenderer.SetView(lookX, lookY);
-    GroundRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    GroundRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-
-    GroundRenderer.AddUniform("minLon", minLon);
-    GroundRenderer.AddUniform("minLat", minLat);
-    GroundRenderer.AddUniform("maxLon", maxLon);
-    GroundRenderer.AddUniform("maxLat", maxLat);
-
   }
 
-  void osmscout::MapPainterOpenGL::onZoom(float zoom) {
-    /*minLon += (zoom / ((height / (float) width) * 100));
-    minLat += (zoom / ((width / (float) height) * 100));
-    maxLon -= (zoom / ((height / (float) width) * 100));
-    maxLat -= (zoom / ((width / (float) height) * 100));*/
-
-    float w = fabs(minLon - maxLon);
-    float h = fabs(minLat - maxLat);
-
-    minLon += (zoom / ((h / (float) w) * 100));
-    minLat += (zoom / ((w / (float) h) * 100));
-    maxLon -= (zoom / ((h / (float) w) * 100));
-    maxLat -= (zoom / ((w / (float) h) * 100));
-
-    AreaRenderer.AddUniform("minLon", minLon);
-    AreaRenderer.AddUniform("minLat", minLat);
-    AreaRenderer.AddUniform("maxLon", maxLon);
-    AreaRenderer.AddUniform("maxLat", maxLat);
-    PathRenderer.AddUniform("minLon", minLon);
-    PathRenderer.AddUniform("minLat", minLat);
-    PathRenderer.AddUniform("maxLon", maxLon);
-    PathRenderer.AddUniform("maxLat", maxLat);
-    PathRenderer.AddUniform("screenWidth", screenWidth);
-    PathRenderer.AddUniform("screenHeight", screenHeight);
-    GroundTileRenderer.AddUniform("minLon", minLon);
-    GroundTileRenderer.AddUniform("minLat", minLat);
-    GroundTileRenderer.AddUniform("maxLon", maxLon);
-    GroundTileRenderer.AddUniform("maxLat", maxLat);
-    GroundRenderer.AddUniform("minLon", minLon);
-    GroundRenderer.AddUniform("minLat", minLat);
-    GroundRenderer.AddUniform("maxLon", maxLon);
-    GroundRenderer.AddUniform("maxLat", maxLat);
+  void osmscout::MapPainterOpenGL::onZoom(float zoom, float zoomScale) {
+    AreaRenderer.ScaleModel(zoomScale * zoom);
+    GroundRenderer.ScaleModel(zoomScale * zoom);
+    GroundTileRenderer.ScaleModel(zoomScale * zoom);
+    PathRenderer.ScaleModel(zoomScale * zoom);
   }
 
   void osmscout::MapPainterOpenGL::onTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
@@ -673,8 +649,8 @@ namespace osmscout {
     lookY += offsetY / 1000;
 
     AreaRenderer.SetView(lookX, lookY);
-    GroundTileRenderer.SetView(lookX, lookY);
-    GroundRenderer.SetView(lookX, lookY);
+    //GroundTileRenderer.SetView(lookX, lookY);
+    //GroundRenderer.SetView(lookX, lookY);
     PathRenderer.SetView(lookX, lookY);
   }
 
@@ -692,7 +668,7 @@ namespace osmscout {
     glDepthFunc(GL_LEQUAL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glBindVertexArray(GroundTileRenderer.getVAO());
+    /*glBindVertexArray(GroundTileRenderer.getVAO());
     glUseProgram(GroundTileRenderer.getShaderProgram());
 
     GroundTileRenderer.AddUniform("minLon", minLon);
@@ -700,7 +676,6 @@ namespace osmscout {
     GroundTileRenderer.AddUniform("maxLon", maxLon);
     GroundTileRenderer.AddUniform("maxLat", maxLat);
 
-    GroundTileRenderer.LoadVertices();
     GroundTileRenderer.SetProjection(width, height);
     GroundTileRenderer.SetModel();
     GroundTileRenderer.SetView(lookX, lookY);
@@ -718,7 +693,7 @@ namespace osmscout {
     GroundRenderer.SetProjection(width, height);
     GroundRenderer.SetModel();
     GroundRenderer.SetView(lookX, lookY);
-    GroundRenderer.Draw();
+    GroundRenderer.Draw();*/
 
     glBindVertexArray(AreaRenderer.getVAO());
     glUseProgram(AreaRenderer.getShaderProgram());
@@ -728,7 +703,6 @@ namespace osmscout {
     AreaRenderer.AddUniform("maxLon", maxLon);
     AreaRenderer.AddUniform("maxLat", maxLat);
 
-    AreaRenderer.LoadVertices();
     AreaRenderer.SetProjection(width, height);
     AreaRenderer.SetModel();
     AreaRenderer.SetView(lookX, lookY);
@@ -744,13 +718,9 @@ namespace osmscout {
     PathRenderer.AddUniform("screenWidth", screenWidth);
     PathRenderer.AddUniform("screenHeight", screenHeight);
 
-    PathRenderer.BindBuffers();
-
-    PathRenderer.LoadVertices();
     PathRenderer.SetProjection(width, height);
     PathRenderer.SetModel();
     PathRenderer.SetView(lookX, lookY);
-
     PathRenderer.Draw();
 
   }
