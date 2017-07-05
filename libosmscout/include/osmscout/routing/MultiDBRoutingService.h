@@ -124,12 +124,6 @@ namespace osmscout {
     virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                   std::unordered_map<DBFileOffset,AreaRef> &areaMap);
 
-    /*
-    virtual void ResolveRNodeChainToList(DBFileOffset finalRouteNode,
-                                         const ClosedSet& closedSet,
-                                         std::list<VNode>& nodes);
-     */
-
     virtual bool ResolveRouteDataJunctions(RouteData& route);
 
     virtual bool GetRouteNode(const DatabaseId &database,
@@ -178,5 +172,4 @@ namespace osmscout {
   };
 }
 
-#endif /* MULTIDBROUTING_H */
-
+#endif /* OSMSCOUT_MULTIDBROUTINGSERVICE_H */

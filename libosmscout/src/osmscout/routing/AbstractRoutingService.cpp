@@ -74,7 +74,7 @@ namespace osmscout {
   }
 
   template <class RoutingState>
-  void AbstractRoutingService<RoutingState>::GetStartForwardRouteNode(const RoutingState& profile,
+  void AbstractRoutingService<RoutingState>::GetStartForwardRouteNode(const RoutingState& state,
                                                                       const DatabaseId& database,
                                                                       const WayRef& way,
                                                                       size_t nodeIndex,
@@ -83,7 +83,7 @@ namespace osmscout {
   {
     routeNode=NULL;
 
-    if (!CanUseForward(profile,database,way)) {
+    if (!CanUseForward(state,database,way)) {
       return;
     }
 
@@ -106,7 +106,7 @@ namespace osmscout {
   }
 
   template <class RoutingState>
-  void AbstractRoutingService<RoutingState>::GetStartBackwardRouteNode(const RoutingState& profile,
+  void AbstractRoutingService<RoutingState>::GetStartBackwardRouteNode(const RoutingState& state,
                                                                        const DatabaseId& database,
                                                                        const WayRef& way,
                                                                        size_t nodeIndex,
@@ -119,15 +119,11 @@ namespace osmscout {
       return;
     }
 
-    if (!CanUseBackward(profile,database,way)) {
+    if (!CanUseBackward(state,database,way)) {
       return;
     }
 
     for (long i=(long)nodeIndex-1; i>=0; i--) {
-      /*
-      routeNodeDataFile.Get(way->GetId((size_t)i),
-                            routeNode);
-       */
       GetRouteNode(database,
                    way->GetId((size_t)i),
                    routeNode);
@@ -145,7 +141,7 @@ namespace osmscout {
    * will have a smaller index then the given node index.
    */
   template <class RoutingState>
-  void AbstractRoutingService<RoutingState>::GetTargetForwardRouteNode(const RoutingState& profile,
+  void AbstractRoutingService<RoutingState>::GetTargetForwardRouteNode(const RoutingState& state,
                                                                        const DatabaseId& database,
                                                                        const WayRef& way,
                                                                        size_t nodeIndex,
@@ -157,15 +153,11 @@ namespace osmscout {
       return;
     }
 
-    if (!CanUseForward(profile,database,way)) {
+    if (!CanUseForward(state,database,way)) {
       return;
     }
 
     for (long i=(long)nodeIndex-1; i>=0; i--) {
-      /*
-      routeNodeDataFile.Get(way->GetId(i),
-                            routeNode);
-       */
       GetRouteNode(database,
                    way->GetId((size_t)i),
                    routeNode);
@@ -182,7 +174,7 @@ namespace osmscout {
    * will have a bigger or equal index then the given node index.
    */
   template <class RoutingState>
-  void AbstractRoutingService<RoutingState>::GetTargetBackwardRouteNode(const RoutingState& profile,
+  void AbstractRoutingService<RoutingState>::GetTargetBackwardRouteNode(const RoutingState& state,
                                                                         const DatabaseId& database,
                                                                         const WayRef& way,
                                                                         size_t nodeIndex,
@@ -190,17 +182,13 @@ namespace osmscout {
   {
     routeNode=NULL;
 
-    if (!CanUseBackward(profile,database,way)) {
+    if (!CanUseBackward(state,database,way)) {
       return;
     }
 
     // TODO: What if the way is a roundabout?
 
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
-      /*
-      routeNodeDataFile.Get(way->GetId(i),
-                            routeNode);
-       */
       GetRouteNode(database,
                    way->GetId(i),
                    routeNode);
@@ -213,7 +201,7 @@ namespace osmscout {
   }
 
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::GetRNode(const RoutingState& profile,
+  bool AbstractRoutingService<RoutingState>::GetRNode(const RoutingState& state,
                                                       const RoutePosition& position,
                                                       const WayRef& way,
                                                       size_t routeNodeIndex,
@@ -226,9 +214,6 @@ namespace osmscout {
 
     node=NULL;
 
-    // if (!routeNodeDataFile.GetOffset(routeNode->GetId(),
-    //                                  offset)) {
-    
     // TODO: can be routeNode->GetFileOffset() used here?
     if (!GetRouteNodeOffset(position.GetDatabaseId(),
                             routeNode->GetId(),
@@ -242,12 +227,12 @@ namespace osmscout {
                                  routeNode,
                                  position.GetObjectFileRef());
 
-    node->currentCost=GetCosts(profile,
+    node->currentCost=GetCosts(state,
                                position.GetDatabaseId(),
                                way,
                                GetSphericalDistance(startCoord,
                                                     way->nodes[routeNodeIndex].GetCoord()));
-    node->estimateCost=GetEstimateCosts(profile,
+    node->estimateCost=GetEstimateCosts(state,
                                         position.GetDatabaseId(),
                                         GetSphericalDistance(startCoord,targetCoord));
 
@@ -261,8 +246,8 @@ namespace osmscout {
    * the object. Return the closest route node and routing node either in the
    * forward or backward direction or both.
    *
-   * @param profile
-   *    The routing profile
+   * @param state
+   *    The routing state
    * @param position
    *    The start position
    * @param startCoord
@@ -281,7 +266,7 @@ namespace osmscout {
    *    True, if at least one route node was found. If not or in case of technical errors false is returned.
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::GetWayStartNodes(const RoutingState& profile,
+  bool AbstractRoutingService<RoutingState>::GetWayStartNodes(const RoutingState& state,
                                                               const RoutePosition& position,
                                                               GeoCoord& startCoord,
                                                               const GeoCoord& targetCoord,
@@ -290,27 +275,12 @@ namespace osmscout {
                                                               RNodeRef& forwardRNode,
                                                               RNodeRef& backwardRNode)
   {
-    /*
-    WayDataFileRef  wayDataFile(database->GetWayDataFile());
-
-    if (!wayDataFile) {
-      return false;
-    }
-     */
-
     assert(position.GetObjectFileRef().GetType()==refWay);
 
     WayRef     way;
     size_t     forwardNodePos;
     size_t     backwardNodePos;
 
-    /*
-    if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
-                                  way)) {
-      log.Error() << "Cannot get start way!";
-      return false;
-    }
-     */
     if (!GetWayByOffset(DBFileOffset(position.GetDatabaseId(),
                                      position.GetObjectFileRef().GetFileOffset()),
                         way)) {
@@ -329,23 +299,19 @@ namespace osmscout {
     GetRouteNode(position.GetDatabaseId(),
                  way->GetId(position.GetNodeIndex()),
                  forwardRouteNode);
-    /*
-    routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
-                          forwardRouteNode);
-     */
 
     if (forwardRouteNode) {
       forwardNodePos=position.GetNodeIndex();
     }
     else {
-      GetStartForwardRouteNode(profile,
+      GetStartForwardRouteNode(state,
                                position.GetDatabaseId(),
                                way,
                                position.GetNodeIndex(),
                                forwardRouteNode,
                                forwardNodePos);
 
-      GetStartBackwardRouteNode(profile,
+      GetStartBackwardRouteNode(state,
                                 position.GetDatabaseId(),
                                 way,
                                 position.GetNodeIndex(),
@@ -360,7 +326,7 @@ namespace osmscout {
     }
 
     if (forwardRouteNode &&
-        !GetRNode(profile,
+        !GetRNode(state,
                   position,
                   way,
                   forwardNodePos,
@@ -372,7 +338,7 @@ namespace osmscout {
     }
 
     if (backwardRouteNode &&
-        !GetRNode(profile,
+        !GetRNode(state,
                   position,
                   way,
                   backwardNodePos,
@@ -391,8 +357,8 @@ namespace osmscout {
    * the object. Return the closest route node and routing node either in the
    * forward or backward direction or both.
    *
-   * @param profile
-   *    The routing profile
+   * @param state
+   *    The routing state
    * @param position
    *    The start position
    * @param startCoord
@@ -411,7 +377,7 @@ namespace osmscout {
    *    True, if at least one route node was found. If not or in case of technical errors false is returned.
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::GetStartNodes(const RoutingState& profile,
+  bool AbstractRoutingService<RoutingState>::GetStartNodes(const RoutingState& state,
                                                            const RoutePosition& position,
                                                            GeoCoord& startCoord,
                                                            const GeoCoord& targetCoord,
@@ -420,18 +386,8 @@ namespace osmscout {
                                                            RNodeRef& forwardRNode,
                                                            RNodeRef& backwardRNode)
   {
-    /*
-    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
-    WayDataFileRef  wayDataFile(database->GetWayDataFile());
-
-    if (!areaDataFile ||
-        !wayDataFile) {
-      return false;
-    }
-    */
-
     if (position.GetObjectFileRef().GetType()==refWay) {
-      return GetWayStartNodes(profile,
+      return GetWayStartNodes(state,
                               position,
                               startCoord,
                               targetCoord,
@@ -451,8 +407,8 @@ namespace osmscout {
    * the object. Return the closest route node and routing node either in the
    * forward or backward direction or both.
    *
-   * @param profile
-   *    The routing profile
+   * @param state
+   *    The routing state
    * @param position
    *    The start position
    * @param targetCoord
@@ -465,26 +421,17 @@ namespace osmscout {
    *    True, if at least one route node was found. If not or in case of technical errors false is returned.
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::GetWayTargetNodes(const RoutingState& profile,
-                                               const RoutePosition& position,
-                                               GeoCoord& targetCoord,
-                                               RouteNodeRef& forwardNode,
-                                               RouteNodeRef& backwardNode)
+  bool AbstractRoutingService<RoutingState>::GetWayTargetNodes(const RoutingState& state,
+                                                               const RoutePosition& position,
+                                                               GeoCoord& targetCoord,
+                                                               RouteNodeRef& forwardNode,
+                                                               RouteNodeRef& backwardNode)
   {
-    /*
-    WayDataFileRef wayDataFile(database->GetWayDataFile());
-
-    if (!wayDataFile) {
-      return false;
-    }
-    */
 
     assert(position.GetObjectFileRef().GetType()==refWay);
 
     WayRef way;
 
-    // if (!wayDataFile->GetByOffset(position.GetObjectFileRef().GetFileOffset(),
-    //                               way)) {
     if (!GetWayByOffset(DBFileOffset(position.GetDatabaseId(),
                                      position.GetObjectFileRef().GetFileOffset()),
                         way)) {
@@ -500,21 +447,17 @@ namespace osmscout {
     targetCoord=way->nodes[position.GetNodeIndex()].GetCoord();
 
     // Check, if the current node is already the route node
-    /*
-    routeNodeDataFile.Get(way->GetId(position.GetNodeIndex()),
-                          forwardNode);
-     */
     GetRouteNode(position.GetDatabaseId(),
                  way->GetId(position.GetNodeIndex()),
                  forwardNode);
 
     if (!forwardNode) {
-      GetTargetForwardRouteNode(profile,
+      GetTargetForwardRouteNode(state,
                                 position.GetDatabaseId(),
                                 way,
                                 position.GetNodeIndex(),
                                 forwardNode);
-      GetTargetBackwardRouteNode(profile,
+      GetTargetBackwardRouteNode(state,
                                  position.GetDatabaseId(),
                                  way,
                                  position.GetNodeIndex(),
@@ -535,8 +478,8 @@ namespace osmscout {
    * the object. Return the closest route node and routing node either in the
    * forward or backward direction or both.
    *
-   * @param profile
-   *    The routing profile
+   * @param state
+   *    The routing state
    * @param position
    *    The start position
    * @param targetCoord
@@ -549,14 +492,14 @@ namespace osmscout {
    *    True, if at least one route node was found. If not or in case of technical errors false is returned.
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::GetTargetNodes(const RoutingState& profile,
-                                            const RoutePosition& position,
-                                            GeoCoord& targetCoord,
-                                            RouteNodeRef& forwardNode,
-                                            RouteNodeRef& backwardNode)
+  bool AbstractRoutingService<RoutingState>::GetTargetNodes(const RoutingState& state,
+                                                            const RoutePosition& position,
+                                                            GeoCoord& targetCoord,
+                                                            RouteNodeRef& forwardNode,
+                                                            RouteNodeRef& backwardNode)
   {
     if (position.GetObjectFileRef().GetType()==refWay) {
-      return GetWayTargetNodes(profile,
+      return GetWayTargetNodes(state,
                                position,
                                targetCoord,
                                forwardNode,
@@ -571,8 +514,8 @@ namespace osmscout {
   /**
    * Calculate a route
    *
-   * @param profile
-   *    Profile to use
+   * @param state
+   *    State to use
    * @param start
    *    Start of the route
    * @param target
@@ -585,13 +528,13 @@ namespace osmscout {
    *    True, if the engine was able to find a route, else false
    */
   template <class RoutingState>
-  RoutingResult AbstractRoutingService<RoutingState>::CalculateRoute(RoutingState& profile,
+  RoutingResult AbstractRoutingService<RoutingState>::CalculateRoute(RoutingState& state,
                                                                      const RoutePosition& start,
                                                                      const RoutePosition& target,
                                                                      const RoutingParameter& parameter)
   {
     RoutingResult            result;
-    Vehicle                  vehicle=GetVehicle(profile);
+    Vehicle                  vehicle=GetVehicle(state);
     RouteNodeRef             startForwardRouteNode;
     RouteNodeRef             startBackwardRouteNode;
     RNodeRef                 startForwardNode;
@@ -617,7 +560,7 @@ namespace osmscout {
     openMap.reserve(10000);
     closedSet.reserve(300000);
 
-    if (!GetTargetNodes(profile,
+    if (!GetTargetNodes(state,
                         target,
                         targetCoord,
                         targetForwardRouteNode,
@@ -625,7 +568,7 @@ namespace osmscout {
       return result;
     }
 
-    if (!GetStartNodes(profile,
+    if (!GetStartNodes(state,
                        start,
                        startCoord,
                        targetCoord,
@@ -657,8 +600,8 @@ namespace osmscout {
     double currentMaxDistance=0.0;
     double overallDistance=GetSphericalDistance(startCoord,
                                                 targetCoord);
-    double overallCost=GetEstimateCosts(profile,start.GetDatabaseId(),overallDistance);
-    double costLimit=GetCostLimit(profile,start.GetDatabaseId(),overallDistance);
+    double overallCost=GetEstimateCosts(state,start.GetDatabaseId(),overallDistance);
+    double costLimit=GetCostLimit(state,start.GetDatabaseId(),overallDistance);
 
     result.SetOverallDistance(overallDistance);
     result.SetCurrentMaxDistance(currentMaxDistance);
@@ -728,7 +671,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!CanUse(profile,
+        if (!CanUse(state,
                     dbId,
                     *currentRouteNode,
                     /*pathIndex*/ i)) {
@@ -781,7 +724,7 @@ namespace osmscout {
           }
         }
 
-        double currentCost=current->currentCost+GetCosts(profile,dbId,*currentRouteNode,i);
+        double currentCost=current->currentCost+GetCosts(state,dbId,*currentRouteNode,i);
 
         OpenMap::iterator openEntry=openMap.find(DBFileOffset(current->nodeOffset.database,
                                                               path.offset));
@@ -820,7 +763,7 @@ namespace osmscout {
         result.SetCurrentMaxDistance(currentMaxDistance);
 
         // Estimate costs for the rest of the distance to the target
-        double estimateCost=GetEstimateCosts(profile,dbId,distanceToTarget);
+        double estimateCost=GetEstimateCosts(state,dbId,distanceToTarget);
         double overallCost=currentCost+estimateCost;
 
         if (overallCost>costLimit) {
@@ -1009,7 +952,7 @@ namespace osmscout {
       return result;
     }
 
-    if (!ResolveRNodesToRouteData(profile,
+    if (!ResolveRNodesToRouteData(state,
                                   nodes,
                                   start,
                                   target,
@@ -1137,7 +1080,7 @@ namespace osmscout {
   }
 
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::ResolveRNodesToRouteData(const RoutingState& profile,
+  bool AbstractRoutingService<RoutingState>::ResolveRNodesToRouteData(const RoutingState& state,
                                                                       const std::list<VNode>& nodes,
                                                                       const RoutePosition& start,
                                                                       const RoutePosition& target,
@@ -1157,13 +1100,6 @@ namespace osmscout {
 
     std::vector<Point>                          *ids=NULL;
     bool                                        oneway=false;
-
-    /*
-    if (!areaDataFile ||
-        !wayDataFile) {
-      return false;
-    }
-     */
 
     // Collect all route node file offsets on the path and also
     // all area/way file offsets on the path
@@ -1218,24 +1154,12 @@ namespace osmscout {
       return false;
     }
 
-    /*
-    if (!areaDataFile->GetByOffset(areaOffsets.begin(),
-                                   areaOffsets.end(),
-                                   areaOffsets.size(),
-                                   areaMap)) {
-     */
     if (!GetAreasByOffset(areaOffsets,
                           areaMap)) {
       log.Error() << "Cannot load areas";
       return false;
     }
 
-    /*
-    if (!wayDataFile->GetByOffset(wayOffsets.begin(),
-                                  wayOffsets.end(),
-                                  wayOffsets.size(),
-                                  wayMap)) {
-     */
     if (!GetWaysByOffset(wayOffsets,
                          wayMap)) {
       log.Error() << "Cannot load ways";
@@ -1261,7 +1185,7 @@ namespace osmscout {
       assert(entry!=wayMap.end());
 
       ids=&entry->second->nodes;
-      oneway=!CanUseBackward(profile,entry->first.database,entry->second);
+      oneway=!CanUseBackward(state,entry->first.database,entry->second);
     }
 
     if (nodes.empty()) {
@@ -1347,7 +1271,7 @@ namespace osmscout {
           assert(entry!=wayMap.end());
 
           ids=&entry->second->nodes;
-          oneway=!CanUseBackward(profile,entry->first.database,entry->second);
+          oneway=!CanUseBackward(state,entry->first.database,entry->second);
         }
 
         size_t currentNodeIndex=0;
@@ -1399,7 +1323,7 @@ namespace osmscout {
         assert(entry!=wayMap.end());
 
         ids=&entry->second->nodes;
-        oneway=!CanUseBackward(profile,entry->first.database,entry->second);
+        oneway=!CanUseBackward(state,entry->first.database,entry->second);
       }
 
       size_t currentNodeIndex=0;
