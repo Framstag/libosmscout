@@ -25,6 +25,7 @@
 
 #include <osmscout/Path.h>
 #include <osmscout/Types.h>
+#include <osmscout/routing/DBFileOffset.h>
 
 namespace osmscout {
 
@@ -37,6 +38,7 @@ namespace osmscout {
     class OSMSCOUT_API RouteEntry
     {
     private:
+      DatabaseId                 database;
       Id                         currentNodeId;
       size_t                     currentNodeIndex;
       std::vector<ObjectFileRef> objects;
@@ -44,7 +46,8 @@ namespace osmscout {
       size_t                     targetNodeIndex;
 
     public:
-      RouteEntry(Id currentNodeId,
+      RouteEntry(DatabaseId database,
+                 Id currentNodeId,
                  size_t currentNodeIndex,
                  const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
@@ -54,6 +57,11 @@ namespace osmscout {
       inline Id GetCurrentNodeId() const
       {
         return currentNodeId;
+      }
+
+      inline DatabaseId GetDatabaseId() const
+      {
+        return database;
       }
 
       inline size_t GetCurrentNodeIndex() const
@@ -88,7 +96,8 @@ namespace osmscout {
       return entries.empty();
     }
 
-    void AddEntry(Id currentNodeId,
+    void AddEntry(DatabaseId database,
+                  Id currentNodeId,
                   size_t currentNodeIndex,
                   const ObjectFileRef& pathObject,
                   size_t targetNodeIndex);

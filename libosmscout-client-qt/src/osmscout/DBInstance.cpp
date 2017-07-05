@@ -157,9 +157,9 @@ bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
       router=NULL;
     }
 
-    router=std::make_shared<osmscout::RoutingService>(database,
-                                                      routerParameter,
-                                                      osmscout::RoutingService::DEFAULT_FILENAME_BASE);
+    router=std::make_shared<osmscout::SimpleRoutingService>(database,
+                                                            routerParameter,
+                                                            osmscout::RoutingService::DEFAULT_FILENAME_BASE);
 
     if (!router->Open()) {
       return false;

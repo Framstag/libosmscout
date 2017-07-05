@@ -85,6 +85,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/SRTM.cpp \
                         osmscout/LocationService.cpp \
                         osmscout/POIService.cpp \
+                        osmscout/AbstractRoutingService.cpp \
                         osmscout/RoutingService.cpp \
                         osmscout/MultiDBRouting.cpp
 

@@ -34,8 +34,8 @@
 #include <osmscout/Database.h>
 
 // Routing
-#include <osmscout/RouteData.h>
-#include <osmscout/RoutingProfile.h>
+#include <osmscout/routing/RouteData.h>
+#include <osmscout/routing/RoutingProfile.h>
 
 namespace osmscout {
 

@@ -34,7 +34,7 @@
 
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/RouteNode.h>
+#include <osmscout/routing/RouteNode.h>
 
 // Datafiles
 #include <osmscout/DataFile.h>
@@ -43,9 +43,10 @@
 
 // Routing
 #include <osmscout/Intersection.h>
-#include <osmscout/Route.h>
-#include <osmscout/RouteData.h>
-#include <osmscout/RoutingProfile.h>
+#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteData.h>
+#include <osmscout/routing/RoutingProfile.h>
+#include <osmscout/routing/DBFileOffset.h>
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/Cache.h>
@@ -69,13 +70,13 @@ namespace osmscout {
   private:
     ObjectFileRef object;
     size_t        nodeIndex;
-    std::string   databasePath;
+    DatabaseId    database;
 
   public:
     RoutePosition();
     RoutePosition(const ObjectFileRef& object,
                   size_t nodeIndex,
-                  std::string databasePath);
+                  DatabaseId database);
 
     inline bool IsValid() const
     {
@@ -92,9 +93,9 @@ namespace osmscout {
       return nodeIndex;
     }
 
-    inline std::string GetDatabasePath() const
+    inline DatabaseId GetDatabaseId() const
     {
-      return databasePath;
+      return database;
     }
   };
 
@@ -232,20 +233,12 @@ namespace osmscout {
   };
 
   /**
-   * \ingroup Service
    * \ingroup Routing
-   * The RoutingService implements functionality in the context of routing.
-   * The following functions are available:
-   * - Calculation of a route from a start node to a target node
-   * - Transformation of the resulting route to a Way
-   * - Transformation of the resulting route to a simple list of points
-   * - Transformation of the resulting route to a routing description with is the base
-   * for further transformations to a textual or visual description of the route
-   * - Returning the closest routeable node to  given geolocation
+   *
+   * Abstract algorithms for routing
    */
-  class OSMSCOUT_API RoutingService
-  {
-  private:
+  class OSMSCOUT_API RoutingService{
+  protected:
     /**
      * \ingroup Routing
      *
@@ -254,9 +247,9 @@ namespace osmscout {
      */
     struct RNode
     {
-      FileOffset    nodeOffset;    //!< The file offset of the current route node
+      DBFileOffset  nodeOffset;    //!< The file offset of the current route node
       RouteNodeRef  node;          //!< The current route node
-      FileOffset    prev;          //!< The file offset of the previous route node
+      DBFileOffset  prev;          //!< The file offset of the previous route node
       ObjectFileRef object;        //!< The object (way/area) visited from the current route node
 
       double        currentCost;   //!< The cost of the current up to the current node
@@ -266,17 +259,17 @@ namespace osmscout {
       bool          access;        //!< Flags to signal, if we had access ("access restrictions") to this node
 
       RNode()
-      : nodeOffset(0)
+      : nodeOffset()
       {
         // no code
       }
 
-      RNode(FileOffset nodeOffset,
+      RNode(DBFileOffset nodeOffset,
             const RouteNodeRef& node,
             const ObjectFileRef& object)
       : nodeOffset(nodeOffset),
         node(node),
-        prev(0),
+        prev(),
         object(object),
         currentCost(0),
         estimateCost(0),
@@ -286,10 +279,10 @@ namespace osmscout {
         // no code
       }
 
-      RNode(FileOffset nodeOffset,
+      RNode(DBFileOffset nodeOffset,
             const RouteNodeRef& node,
             const ObjectFileRef& object,
-            FileOffset prev)
+            DBFileOffset prev)
       : nodeOffset(nodeOffset),
         node(node),
         prev(prev),
@@ -342,8 +335,8 @@ namespace osmscout {
      */
     struct VNode
     {
-      FileOffset    currentNode;   //!< FileOffset of this route node
-      FileOffset    previousNode;  //!< FileOffset of the previous route node
+      DBFileOffset currentNode;   //!< FileOffset of this route node
+      DBFileOffset previousNode;  //!< FileOffset of the previous route node
       ObjectFileRef object;        //!< The object (way/area) visited from the current route node
 
       /**
@@ -366,9 +359,9 @@ namespace osmscout {
        * @param currentNode
        *    Offset of the node to search for
        */
-      inline VNode(FileOffset currentNode)
+      inline VNode(DBFileOffset currentNode)
         : currentNode(currentNode),
-          previousNode(0)
+          previousNode()
       {
         // no code
       }
@@ -383,9 +376,9 @@ namespace osmscout {
        * @param previousNode
        *    FileOffset of the previous route node visited
        */
-      VNode(FileOffset currentNode,
-                 const ObjectFileRef& object,
-                 FileOffset previousNode)
+      VNode(DBFileOffset currentNode,
+            const ObjectFileRef& object,
+            DBFileOffset previousNode)
       : currentNode(currentNode),
         previousNode(previousNode),
         object(object)
@@ -402,14 +395,15 @@ namespace osmscout {
     {
       inline size_t operator()(const VNode& node) const
       {
-        return std::hash<FileOffset>()(node.currentNode);
+        return std::hash<FileOffset>()(node.currentNode.offset) ^
+               std::hash<uint32_t>()(node.currentNode.database);
       }
     };
 
     typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
     typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
-    typedef std::unordered_map<FileOffset,OpenListRef>    OpenMap;
+    typedef std::unordered_map<DBFileOffset,OpenListRef>  OpenMap;
     typedef std::unordered_set<VNode,ClosedNodeHasher>    ClosedSet;
 
   public:
@@ -421,149 +415,16 @@ namespace osmscout {
     //! Relative filebase name for touting data as generated by default by the importer
     static const char* const DEFAULT_FILENAME_BASE;
 
-  private:
-    DatabaseRef                          database;              //!< Database object, holding all index and data files
-    std::string                          filenamebase;          //!< Common base name for all router files
-    AccessFeatureValueReader             accessReader;          //!< Read access information from objects
-    bool                                 isOpen;                //!< true, if opened
-    bool                                 debugPerformance;
-
-    std::string                          path;                  //!< Path to the directory containing all files
-
-    IndexedDataFile<Id,RouteNode>        routeNodeDataFile;     //!< Cached access to the 'route.dat' file
-    IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
-    ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loadinfg object variant data
-
-  private:
-    std::string GetDataFilename(const std::string& filenamebase) const;
-    std::string GetData2Filename(const std::string& filenamebase) const;
-    std::string GetIndexFilename(const std::string& filenamebase) const;
-
-    bool HasNodeWithId(const std::vector<Point>& nodes) const;
-
-    void GetStartForwardRouteNode(const RoutingProfile& profile,
-                                  const WayRef& way,
-                                  size_t nodeIndex,
-                                  RouteNodeRef& routeNode,
-                                  size_t& routeNodeIndex);
-    void GetStartBackwardRouteNode(const RoutingProfile& profile,
-                                   const WayRef& way,
-                                   size_t nodeIndex,
-                                   RouteNodeRef& routeNode,
-                                   size_t& routeNodeIndex);
-    void GetTargetForwardRouteNode(const RoutingProfile& profile,
-                                   const WayRef& way,
-                                   size_t nodeIndex,
-                                   RouteNodeRef& routeNode);
-    void GetTargetBackwardRouteNode(const RoutingProfile& profile,
-                                    const WayRef& way,
-                                    size_t nodeIndex,
-                                    RouteNodeRef& routeNode);
-
-    bool GetRNode(const RoutingProfile& profile,
-                  const RoutePosition& position,
-                  const WayRef& way,
-                  size_t routeNodeIndex,
-                  const RouteNodeRef& routeNode,
-                  const GeoCoord& startCoord,
-                  const GeoCoord& targetCoord,
-                  RNodeRef& node);
-
-    bool GetWayStartNodes(const RoutingProfile& profile,
-                          const RoutePosition& position,
-                          GeoCoord& startCoord,
-                          const GeoCoord& targetCoord,
-                          RouteNodeRef& forwardRouteNode,
-                          RouteNodeRef& backwardRouteNode,
-                          RNodeRef& forwardRNode,
-                          RNodeRef& backwardRNode);
-
-    bool GetStartNodes(const RoutingProfile& profile,
-                       const RoutePosition& position,
-                       GeoCoord& startCoord,
-                       const GeoCoord& targetCoord,
-                       RouteNodeRef& forwardRouteNode,
-                       RouteNodeRef& backwardRouteNode,
-                       RNodeRef& forwardRNode,
-                       RNodeRef& backwardRNode);
-
-    bool GetWayTargetNodes(const RoutingProfile& profile,
-                           const RoutePosition& position,
-                           GeoCoord& targetCoord,
-                           RouteNodeRef& forwardNode,
-                           RouteNodeRef& backwardNode);
-
-    bool GetTargetNodes(const RoutingProfile& profile,
-                        const RoutePosition& position,
-                        GeoCoord& targetCoord,
-                        RouteNodeRef& forwardNode,
-                        RouteNodeRef& backwardNode);
-
-    void ResolveRNodeChainToList(FileOffset finalRouteNode,
-                                 const ClosedSet& closedSet,
-                                 std::list<VNode>& nodes);
-    bool ResolveRNodesToRouteData(const RoutingProfile& profile,
-                                  const std::list<VNode>& nodes,
-                                  const RoutePosition& start,
-                                  const RoutePosition& target,
-                                  RouteData& route);
-
-    bool ResolveRouteDataJunctions(RouteData& route);
-
-    void AddNodes(RouteData& route,
-                  Id startNodeId,
-                  size_t startNodeIndex,
-                  const ObjectFileRef& object,
-                  size_t idCount,
-                  bool oneway,
-                  size_t targetNodeIndex);
+    static std::string GetDataFilename(const std::string& filenamebase);
+    static std::string GetData2Filename(const std::string& filenamebase);
+    static std::string GetIndexFilename(const std::string& filenamebase);
 
   public:
-    RoutingService(const DatabaseRef& database,
-                   const RouterParameter& parameter,
-                   const std::string& filenamebase);
+    RoutingService();
     virtual ~RoutingService();
-
-    bool Open();
-    bool IsOpen() const;
-    void Close();
-
-    TypeConfigRef GetTypeConfig() const;
-
-    RoutingResult CalculateRoute(const RoutingProfile& profile,
-                                 const RoutePosition& start,
-                                 const RoutePosition& target,
-                                 const RoutingParameter& parameter);
-
-    RoutingResult CalculateRoute(const RoutingProfile& profile,
-                                 std::vector<GeoCoord> via,
-                                 double radius,
-                                 const RoutingParameter& parameter);
-
-    bool TransformRouteDataToWay(const RouteData& data,
-                                 Way& way);
-
-    bool TransformRouteDataToPoints(const RouteData& data,
-                                    std::list<Point>& points);
-
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
-
-    RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
-                                         const RoutingProfile& profile,
-                                         double radius) const;
-
-    void DumpStatistics();
   };
 
-  //! \ingroup Service
-  //! Reference counted reference to an RoutingService instance
-  typedef std::shared_ptr<RoutingService> RoutingServiceRef;
-
-  /**
-   * \defgroup Routing Routing based data structures and services
-   * Classes and methods for handling routing aspects of object in the libosmscout database
-   */
 }
 
-#endif
+#endif /* ROUTINGSERVICE_H */
+

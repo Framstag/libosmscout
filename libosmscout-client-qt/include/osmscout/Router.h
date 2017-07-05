@@ -26,7 +26,7 @@
 
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
-#include <osmscout/RoutePostprocessor.h>
+#include <osmscout/routing/RoutePostprocessor.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -184,7 +184,7 @@ private:
                                                  double radius);
 
   bool CalculateRoute(const QString databasePath,
-                      const osmscout::RoutingProfile& routingProfile,
+                      osmscout::RoutingProfile& routingProfile,
                       const osmscout::RoutePosition& start,
                       const osmscout::RoutePosition& target,
                       osmscout::RouteData& route);

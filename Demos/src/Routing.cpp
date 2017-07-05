@@ -26,8 +26,8 @@
 #include <sstream>
 
 #include <osmscout/Database.h>
-#include <osmscout/RoutingService.h>
-#include <osmscout/RoutePostprocessor.h>
+#include <osmscout/routing/SimpleRoutingService.h>
+#include <osmscout/routing/RoutePostprocessor.h>
 
 #include <osmscout/util/Geometry.h>
 
@@ -608,9 +608,10 @@ int main(int argc, char* argv[])
     routerParameter.SetDebugPerformance(true);
   }
 
-  osmscout::RoutingServiceRef router=std::make_shared<osmscout::RoutingService>(database,
-                                                                                routerParameter,
-                                                                                routerFilenamebase);
+  osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(
+                                                    database,
+                                                    routerParameter,
+                                                    routerFilenamebase);
 
   if (!router->Open()) {
     std::cerr << "Cannot open routing database" << std::endl;

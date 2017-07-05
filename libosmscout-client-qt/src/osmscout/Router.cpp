@@ -26,7 +26,7 @@
 #include <osmscout/system/Math.h>
 #include <osmscout/OSMScoutQt.h>
 #include <osmscout/Router.h>
-#include <osmscout/RoutingProfile.h>
+#include <osmscout/routing/RoutingProfile.h>
 
 RouteStep::RouteStep()
 {
@@ -495,7 +495,7 @@ osmscout::RoutePosition Router::GetClosestRoutableNode(const QString databasePat
 }
 
 bool Router::CalculateRoute(const QString databasePath,
-                            const osmscout::RoutingProfile& routingProfile,
+                            osmscout::RoutingProfile& routingProfile,
                             const osmscout::RoutePosition& start,
                             const osmscout::RoutePosition& target,
                             osmscout::RouteData& route)

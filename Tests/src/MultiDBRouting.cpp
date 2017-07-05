@@ -24,8 +24,8 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/Pixel.h>
-#include <osmscout/RoutingService.h>
-#include <osmscout/MultiDBRouting.h>
+#include <osmscout/routing/RoutingService.h>
+#include <osmscout/routing/MultiDBRoutingService.h>
 
 #include <osmscout/util/FileScanner.h>
 
@@ -127,11 +127,13 @@ int main(int argc, char* argv[])
   databases[0]=database1;
   databases[1]=database2;
 
-  osmscout::MultiDBRouting router(databases);
+  osmscout::RouterParameter routerParam;
+  routerParam.SetDebugPerformance(true);
+  osmscout::MultiDBRoutingService router(routerParam,databases);
 
   std::cout << "Opening router..." << std::endl;
 
-  osmscout::MultiDBRouting::RoutingProfileBuilder profileBuilder=
+  osmscout::MultiDBRoutingService::RoutingProfileBuilder profileBuilder=
       [](const osmscout::DatabaseRef &database){
         auto profile=std::make_shared<osmscout::FastestPathRoutingProfile>(database->GetTypeConfig());
         std::map<std::string,double> speedMap;
@@ -140,7 +142,7 @@ int main(int argc, char* argv[])
         return profile;
       };
 
-  if (!router.Open(profileBuilder,routerParameter)) {
+  if (!router.Open(profileBuilder)) {
     
     std::cerr << "Cannot open router" << std::endl;
     return 1;
@@ -159,7 +161,8 @@ int main(int argc, char* argv[])
   }
 
   osmscout::RoutingParameter parameter;
-  if (!router.CalculateRoute(startNode,targetNode,parameter)){
+  osmscout::RoutingResult route=router.CalculateRoute(startNode,targetNode,parameter);
+  if (!route.Success()){
     std::cerr << "Route failed" << std::endl;
     return 1;
   }
