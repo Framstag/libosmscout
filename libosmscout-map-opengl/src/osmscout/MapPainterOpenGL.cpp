@@ -257,6 +257,9 @@ namespace osmscout {
             }
           }
 
+          if(p.size() < 3)
+            continue;
+
           size_t j = i + 1;
           int hasClippings = 0;
           while (j < area->rings.size() &&
@@ -273,6 +276,17 @@ namespace osmscout {
 
           std::vector<GLfloat> points;
           if (hasClippings == 1) {
+            for(auto &ring: r){
+              for (int i = ring.nodes.size() - 1; i >= 0; i--) {
+                for (int j = 0; j < i; j++) {
+                  if (fabs(ring.nodes[i].GetLat() - ring.nodes[j].GetLat()) < 0.000000001 &&
+                      fabs(ring.nodes[i].GetLon() - ring.nodes[j].GetLon()) < 0.0000000001) {
+                    ring.nodes.erase(ring.nodes.begin() + i);
+                  }
+                }
+              }
+            }
+
             std::vector<std::vector<osmscout::Point>> polygons;
             polygons.push_back(p);
             for (const auto &ring: r) {
