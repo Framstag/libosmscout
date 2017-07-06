@@ -412,8 +412,8 @@ namespace osmscout {
   }
 
   bool MultiDBRoutingService::ReadRouteNodeEntries(DatabaseRef &database,
-                                            std::set<Id> &commonRouteNodes,
-                                            std::unordered_map<Id,osmscout::RouteNodeRef> &routeNodeEntries)
+                                                   std::set<Id> &commonRouteNodes,
+                                                   std::unordered_map<Id,osmscout::RouteNodeRef> &routeNodeEntries)
   {
     osmscout::IndexedDataFile<Id,osmscout::RouteNode> routeNodeFile(std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".dat",
                                                                     std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".idx",
@@ -573,6 +573,13 @@ namespace osmscout {
     return true;
   }
 
+  std::vector<DBFileOffset> MultiDBRoutingService::GetNodeTwins(const MultiDBRoutingState& state,
+                                                                const DatabaseId database,
+                                                                const Id id)
+  {
+    return state.GetNodeTwins(database,id);
+  }
+
   bool MultiDBRoutingService::GetRouteNode(const DatabaseId &database,
                                            const Id &id,
                                            RouteNodeRef &node)
@@ -641,7 +648,9 @@ namespace osmscout {
     MultiDBRoutingState state(start.GetDatabaseId(),
                               target.GetDatabaseId(),
                               profiles[start.GetDatabaseId()],
-                              profiles[target.GetDatabaseId()]);
+                              profiles[target.GetDatabaseId()],
+                              routeNodeEntries1,
+                              routeNodeEntries2);
     
     return AbstractRoutingService<MultiDBRoutingState>::CalculateRoute(state,
                                                                        start,

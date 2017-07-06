@@ -45,17 +45,25 @@ namespace osmscout {
     RoutingProfileRef   profile1;
     RoutingProfileRef   profile2;
 
+    std::unordered_map<Id,osmscout::RouteNodeRef> overlapNodes1;
+    std::unordered_map<Id,osmscout::RouteNodeRef> overlapNodes2;
+
   public:
     MultiDBRoutingState(DatabaseId dbId1,
                         DatabaseId dbId2,
                         RoutingProfileRef profile1,
-                        RoutingProfileRef profile2);
+                        RoutingProfileRef profile2,
+                        std::unordered_map<Id,osmscout::RouteNodeRef> overlapNodes1,
+                        std::unordered_map<Id,osmscout::RouteNodeRef> overlapNodes2);
 
     virtual ~MultiDBRoutingState();
 
     Vehicle GetVehicle() const;
 
     RoutingProfileRef GetProfile(DatabaseId database) const;
+
+    std::vector<DBFileOffset> GetNodeTwins(const DatabaseId database,
+                                           const Id id) const;
   };
 
 }

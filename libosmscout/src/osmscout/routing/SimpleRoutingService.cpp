@@ -397,6 +397,14 @@ namespace osmscout {
     return junctionDataFile.Close();
   }
 
+  std::vector<DBFileOffset> SimpleRoutingService::GetNodeTwins(const RoutingProfile& /*state*/,
+                                                               const DatabaseId /*database*/,
+                                                               const Id /*id*/)
+  {
+    std::vector<DBFileOffset> result;
+    return result;
+  }
+
   /**
    * Calculate a route
    *

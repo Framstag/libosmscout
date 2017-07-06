@@ -145,7 +145,9 @@ namespace osmscout {
 
     virtual bool ResolveRouteDataJunctions(RouteData& route);
 
-
+    virtual std::vector<DBFileOffset> GetNodeTwins(const RoutingProfile& state,
+                                                   const DatabaseId database,
+                                                   const Id id);
   public:
     SimpleRoutingService(const DatabaseRef& database,
                          const RouterParameter& parameter,

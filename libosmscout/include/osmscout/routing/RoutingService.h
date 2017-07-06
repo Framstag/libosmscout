@@ -396,7 +396,7 @@ namespace osmscout {
       inline size_t operator()(const VNode& node) const
       {
         return std::hash<FileOffset>()(node.currentNode.offset) ^
-               std::hash<uint32_t>()(node.currentNode.database);
+               std::hash<DatabaseId>()(node.currentNode.database);
       }
     };
 

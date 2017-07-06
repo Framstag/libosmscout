@@ -93,10 +93,6 @@ namespace osmscout {
       GetRouteNode(database,
                    way->GetId(i),
                    routeNode);
-      /*
-      routeNodeDataFile.Get(way->GetId(i),
-                            routeNode);
-       */
 
       if (routeNode) {
         routeNodeIndex=i;
@@ -778,6 +774,59 @@ namespace osmscout {
           i++;
 
           continue;
+        }
+
+        // add twin nodes to nextNode from other databases to open list
+        std::vector<DBFileOffset> twins=GetNodeTwins(state,
+                                                     current->nodeOffset.database,
+                                                     nextNode->GetId());
+        for (auto &twin:twins){
+          OpenMap::iterator twinIt=openMap.find(twin);
+          if (twinIt!=openMap.end()){
+            RNodeRef rn=(*twinIt->second);
+            if (rn->currentCost > currentCost){
+              // this is cheaper path to twin
+              RouteNodeRef node;
+              if (!GetRouteNodeByOffset(twin,node)){
+                return result;
+              }
+              rn->prev=DBFileOffset(current->nodeOffset.database,
+                                    nextNode->GetFileOffset());
+              rn->object=node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
+
+              rn->currentCost=currentCost;
+              rn->estimateCost=estimateCost;
+              rn->overallCost=overallCost;
+              rn->access=!path.IsRestricted(vehicle);
+
+              openList.erase(twinIt->second);
+
+              std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
+              twinIt->second=insertResult.first;
+
+              std::cout << "Better transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+            }
+          }else{
+            RouteNodeRef node;
+            if (!GetRouteNodeByOffset(twin,node)){
+              return result;
+            }
+            RNodeRef rn=std::make_shared<RNode>(twin,
+                                                node,
+                                                node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
+                                                /*prev*/DBFileOffset(current->nodeOffset.database,
+                                                                     nextNode->GetFileOffset()));
+
+            rn->currentCost=currentCost;
+            rn->estimateCost=estimateCost;
+            rn->overallCost=overallCost;
+            rn->access=!path.IsRestricted(vehicle);
+
+            std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
+            openMap[rn->nodeOffset]=insertResult.first;
+
+            std::cout << "Transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+          }
         }
 
         if (parameter.GetProgress()) {

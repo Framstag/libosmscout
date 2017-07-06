@@ -115,6 +115,10 @@ namespace osmscout {
 
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
 
+    virtual std::vector<DBFileOffset> GetNodeTwins(const RoutingState& state,
+                                                   const DatabaseId database,
+                                                   const Id id) = 0;
+
     void GetStartForwardRouteNode(const RoutingState& profile,
                                   const DatabaseId& database,
                                   const WayRef& way,
