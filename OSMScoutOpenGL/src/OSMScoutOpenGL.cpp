@@ -106,7 +106,7 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) 
   zoomLevel += yoffset * 10;
   double x, y;
   glfwGetCursorPos(window, &x, &y);
-  renderer->onZoom(yoffset, 0.01);
+  renderer->onZoom(yoffset, 0.05);
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
