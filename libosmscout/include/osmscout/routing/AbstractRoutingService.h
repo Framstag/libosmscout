@@ -228,8 +228,6 @@ namespace osmscout {
     virtual ~AbstractRoutingService();
   };
 
-  template class AbstractRoutingService<RoutingProfile>;
-  template class AbstractRoutingService<MultiDBRoutingState>;
 }
 
 #endif /* ABSTRACTROUTINGSERVICE_H */

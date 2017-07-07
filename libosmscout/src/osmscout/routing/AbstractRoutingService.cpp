@@ -1465,4 +1465,7 @@ namespace osmscout {
 
     return true;
   }
+
+  template class AbstractRoutingService<RoutingProfile>;
+  template class AbstractRoutingService<MultiDBRoutingState>;
 }
