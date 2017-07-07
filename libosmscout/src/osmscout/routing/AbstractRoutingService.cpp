@@ -60,7 +60,7 @@ namespace osmscout {
     assert(current!=closedSet.end());
 
     while (current->previousNode.IsValid()) {
-      std::cout << "Chain item " << current->currentNode << " -> " << current->previousNode < std::endl;
+      std::cout << "Chain item " << current->currentNode << " -> " << current->previousNode << std::endl;
       ClosedSet::const_iterator prev=closedSet.find(VNode(current->previousNode));
 
       assert(prev!=closedSet.end());
@@ -955,7 +955,7 @@ namespace osmscout {
       //
 
       if (!accessViolation) {
-        std::cout << "Closing " << current->nodeOffset << " (previous " << current->prev << ")" << std::end;
+        std::cout << "Closing " << current->nodeOffset << " (previous " << current->prev << ")" << std::endl;
         closedSet.insert(VNode(current->nodeOffset,
                                current->object,
                                current->prev));
