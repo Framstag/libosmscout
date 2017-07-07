@@ -29,7 +29,7 @@ namespace osmscout {
 
   osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, int screenWidth, int screenHeight) : width(width),
                                                                                                            height(
-                                                                                                               height),
+                                                                                                                   height),
                                                                                                            minLat(0),
                                                                                                            minLon(0),
                                                                                                            maxLat(0),
@@ -37,9 +37,9 @@ namespace osmscout {
                                                                                                            lookX(0.0),
                                                                                                            lookY(0.0),
                                                                                                            screenHeight(
-                                                                                                               screenHeight),
+                                                                                                                   screenHeight),
                                                                                                            screenWidth(
-                                                                                                               screenWidth) {
+                                                                                                                   screenWidth) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -248,6 +248,18 @@ namespace osmscout {
           std::vector<Point> p = area->rings[i].nodes;
           std::vector<osmscout::Area::Ring> r;
 
+          for (int i = p.size() - 1; i >= 0; i--) {
+            for (int j = 0; j < i; j++) {
+              if (fabs(p[i].GetLat() - p[j].GetLat()) < 0.000000001 &&
+                  fabs(p[i].GetLon() - p[j].GetLon()) < 0.0000000001) {
+                p.erase(p.begin() + i);
+              }
+            }
+          }
+
+          if(p.size() < 3)
+            continue;
+
           size_t j = i + 1;
           int hasClippings = 0;
           while (j < area->rings.size() &&
@@ -264,6 +276,17 @@ namespace osmscout {
 
           std::vector<GLfloat> points;
           if (hasClippings == 1) {
+            for(auto &ring: r){
+              for (int i = ring.nodes.size() - 1; i >= 0; i--) {
+                for (int j = 0; j < i; j++) {
+                  if (fabs(ring.nodes[i].GetLat() - ring.nodes[j].GetLat()) < 0.000000001 &&
+                      fabs(ring.nodes[i].GetLon() - ring.nodes[j].GetLon()) < 0.0000000001) {
+                    ring.nodes.erase(ring.nodes.begin() + i);
+                  }
+                }
+              }
+            }
+
             std::vector<std::vector<osmscout::Point>> polygons;
             polygons.push_back(p);
             for (const auto &ring: r) {
@@ -589,22 +612,20 @@ namespace osmscout {
           lat = minCoord.GetLat() + tile.coords[i].y * tile.cellHeight / GroundTile::Coord::CELL_MAX;
           lon = minCoord.GetLon() + tile.coords[i].x * tile.cellWidth / GroundTile::Coord::CELL_MAX;
 
-          int dupl = 0;
-          for (int j = 0; j < p.size(); j++) {
-            if (fabs(p[j].GetLat() - lat) < 0.000000001 && fabs(p[j].GetLon() - lon) < 0.0000000001) {
-              dupl = 1;
-            }
-          }
-
-          if (dupl == 1)
-            continue;
-
-
           osmscout::GeoCoord g = osmscout::GeoCoord(lat, lon);
           osmscout::Point pt;
           pt.SetCoord(g);
           p.push_back(pt);
 
+        }
+
+        for (int i = p.size() - 1; i >= 0; i--) {
+          for (int j = 0; j < i; j++) {
+            if (fabs(p[i].GetLat() - p[j].GetLat()) < 0.000000001 &&
+                fabs(p[i].GetLon() - p[j].GetLon()) < 0.0000000001) {
+              p.erase(p.begin() + i);
+            }
+          }
         }
 
         std::vector<GLfloat> points;

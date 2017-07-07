@@ -103,10 +103,10 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 
 
 static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-  zoomLevel += yoffset * 10;
+  zoomLevel += yoffset * 100;
   double x, y;
   glfwGetCursorPos(window, &x, &y);
-  renderer->onZoom(yoffset, 0.01);
+  renderer->onZoom(yoffset, 0.05);
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 
   drawParameter.SetFontSize(3.0);
 
-  zoomLevel = 1000;
+  zoomLevel = 100;
   projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
                  osmscout::Magnification(zoomLevel),
                  96,
