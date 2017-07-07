@@ -24,6 +24,7 @@
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/AbstractRoutingService.h>
 #include <osmscout/Pixel.h>
+#include <osmscout/ObjectRef.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -59,6 +60,7 @@ namespace osmscout {
     assert(current!=closedSet.end());
 
     while (current->previousNode.IsValid()) {
+      std::cout << "Chain item " << current->currentNode << " -> " << current->previousNode < std::endl;
       ClosedSet::const_iterator prev=closedSet.find(VNode(current->previousNode));
 
       assert(prev!=closedSet.end());
@@ -507,6 +509,279 @@ namespace osmscout {
     }
   }
 
+  template <class RoutingState>
+  bool AbstractRoutingService<RoutingState>::WalkToOtherDatabases(const RoutingState& state,
+                                                                  RNodeRef &current,
+                                                                  RouteNodeRef &currentRouteNode,
+                                                                  OpenList &openList,
+                                                                  OpenMap &openMap,
+                                                                  const ClosedSet &closedSet)
+  {
+    // add twin nodes to nextNode from other databases to open list
+    std::vector<DBFileOffset> twins=GetNodeTwins(state,
+                                                 current->nodeOffset.database,
+                                                 currentRouteNode->GetId());
+    for (auto &twin:twins){
+      if (closedSet.find(VNode(twin))!=closedSet.end()){
+        std::cout << "Twin node " << twin << " is closed already, ignore it" << std::endl;
+        continue;
+      }
+      OpenMap::iterator twinIt=openMap.find(twin);
+      if (twinIt!=openMap.end()){
+        RNodeRef rn=(*twinIt->second);
+        if (rn->currentCost > current->currentCost){
+          // this is cheaper path to twin
+
+          rn->prev=current->nodeOffset;
+          //rn->object=node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
+
+          rn->currentCost=current->currentCost;
+          rn->estimateCost=current->estimateCost;
+          rn->overallCost=current->overallCost;
+          rn->access=current->access;
+
+          openList.erase(twinIt->second);
+
+          std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
+          twinIt->second=insertResult.first;
+
+          std::cout << "Better transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+        }
+      }else{
+        RouteNodeRef node;
+        if (!GetRouteNodeByOffset(twin,node)){
+          return false;
+        }
+        RNodeRef rn=std::make_shared<RNode>(twin,
+                                            node,
+                                            //node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
+                                            ObjectFileRef(), // TODO: have to be valid Object here?
+                                            /*prev*/current->nodeOffset);
+
+        rn->currentCost=current->currentCost;
+        rn->estimateCost=current->estimateCost;
+        rn->overallCost=current->overallCost;
+        rn->access=current->access;
+
+        std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
+        openMap[rn->nodeOffset]=insertResult.first;
+
+        std::cout << "Transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+      }
+    }
+    return true;
+  }
+
+  template <class RoutingState>
+  bool AbstractRoutingService<RoutingState>::WalkPaths(const RoutingState &state,
+                                                       RNodeRef &current,
+                                                       RouteNodeRef &currentRouteNode,
+                                                       OpenList &openList,
+                                                       OpenMap &openMap,
+                                                       ClosedSet &closedSet,
+                                                       RoutingResult &result,
+                                                       const RoutingParameter& parameter,
+                                                       const GeoCoord &targetCoord,
+                                                       const Vehicle &vehicle,
+                                                       bool &accessViolation,
+                                                       size_t &nodesIgnoredCount,
+                                                       double &currentMaxDistance,
+                                                       const double &overallDistance,
+                                                       const double &costLimit)
+  {
+    DatabaseId dbId=current->nodeOffset.database;
+    size_t i=0;
+    for (const auto& path : currentRouteNode->paths) {
+      if (path.offset==current->prev.offset) {
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Skipping route";
+        std::cout << " to " << path.offset;
+        std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+        std::cout << " => back to the last node visited" << std::endl;
+#endif
+        nodesIgnoredCount++;
+        i++;
+
+        continue;
+      }
+
+      if (!current->access &&
+          !path.IsRestricted(vehicle)) {
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Skipping route";
+        std::cout << " to " << path.offset;
+        std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+        std::cout << " => moving from non-accessible way back to accessible way" << std::endl;
+#endif
+        nodesIgnoredCount++;
+        i++;
+
+        accessViolation=true;
+
+        continue;
+      }
+
+      if (!CanUse(state,
+                  dbId,
+                  *currentRouteNode,
+                  /*pathIndex*/ i)) {
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Skipping route";
+        std::cout << " to " << path.offset;
+        std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+        std::cout << " => Cannot be used"<< std::endl;
+#endif
+        nodesIgnoredCount++;
+        i++;
+
+        continue;
+      }
+
+      if (closedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedSet.end()) {
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Skipping route";
+        std::cout << " to " << dbId << " / " << path.offset;
+        std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+        std::cout << " => already calculated" << std::endl;
+#endif
+        i++;
+
+        continue;
+      }
+
+      if (!currentRouteNode->excludes.empty()) {
+        bool canTurnedInto=true;
+
+        for (const auto& exclude : currentRouteNode->excludes) {
+          if (exclude.source==current->object &&
+              currentRouteNode->objects[exclude.targetIndex].object==currentRouteNode->objects[path.objectIndex].object) {
+#if defined(DEBUG_ROUTING)
+            std::cout << "  Skipping route";
+            std::cout << " to " << dbId << " / " << path.offset;
+            std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+            std::cout << " => turn not allowed" << std::endl;
+#endif
+            canTurnedInto=false;
+            break;
+          }
+        }
+
+        if (!canTurnedInto) {
+          nodesIgnoredCount++;
+          i++;
+
+          continue;
+        }
+      }
+
+      double currentCost=current->currentCost+GetCosts(state,dbId,*currentRouteNode,i);
+
+      OpenMap::iterator openEntry=openMap.find(DBFileOffset(current->nodeOffset.database,
+                                                            path.offset));
+
+      // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
+      // into the open list
+      if (openEntry!=openMap.end() &&
+          (*openEntry->second)->currentCost<=currentCost) {
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Skipping route";
+        std::cout << " to " << path.offset;
+        std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+        std::cout << "  => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << std::endl;
+#endif
+        i++;
+
+        continue;
+      }
+
+      RouteNodeRef nextNode;
+
+      if (openEntry!=openMap.end()) {
+        nextNode=(*openEntry->second)->node;
+      }
+      else if (!GetRouteNodeByOffset(DBFileOffset(current->nodeOffset.database,
+                                                  path.offset),
+                                     nextNode)) {
+        log.Error() << "Cannot load route node with id " << path.offset;
+        return false;
+      }
+
+      double distanceToTarget=GetSphericalDistance(nextNode->GetCoord(),
+                                                   targetCoord);
+
+      currentMaxDistance=std::max(currentMaxDistance,overallDistance-distanceToTarget);
+      result.SetCurrentMaxDistance(currentMaxDistance);
+
+      // Estimate costs for the rest of the distance to the target
+      double estimateCost=GetEstimateCosts(state,dbId,distanceToTarget);
+      double overallCost=currentCost+estimateCost;
+
+      if (overallCost>costLimit) {
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Skipping route";
+            std::cout << " to " << path.offset;
+            std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+            std::cout << " => cost limit reached (" << overallCost << ">" << costLimit << ")" << std::endl;
+#endif
+
+        nodesIgnoredCount++;
+        i++;
+
+        continue;
+      }
+
+      if (parameter.GetProgress()) {
+        parameter.GetProgress()->Progress(currentMaxDistance,overallDistance);
+      }
+
+      // If we already have the node in the open list, but the new path is cheaper,
+      // update the existing entry
+      if (openEntry!=openMap.end()) {
+        RNodeRef node=*openEntry->second;
+
+        node->prev=current->nodeOffset;
+        node->object=currentRouteNode->objects[path.objectIndex].object;
+
+        node->currentCost=currentCost;
+        node->estimateCost=estimateCost;
+        node->overallCost=overallCost;
+        node->access=!currentRouteNode->paths[i].IsRestricted(vehicle);
+
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
+#endif
+
+        openList.erase(openEntry->second);
+
+        std::pair<OpenListRef,bool> insertResult=openList.insert(node);
+        openEntry->second=insertResult.first;
+      }
+      else {
+        RNodeRef node=std::make_shared<RNode>(DBFileOffset(dbId,path.offset),
+                                              nextNode,
+                                              currentRouteNode->objects[path.objectIndex].object,
+                                              current->nodeOffset);
+
+        node->currentCost=currentCost;
+        node->estimateCost=estimateCost;
+        node->overallCost=overallCost;
+        node->access=!path.IsRestricted(vehicle);
+
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Inserting route to " << path.offset;
+        std::cout <<  " (" << node->object.GetTypeName() << " " << node->object.GetFileOffset() << ")";
+        std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
+#endif
+
+        std::pair<OpenListRef,bool> insertResult=openList.insert(node);
+        openMap[node->nodeOffset]=insertResult.first;
+      }
+
+      i++;
+    }
+    return true;
+  }
+
   /**
    * Calculate a route
    *
@@ -632,258 +907,55 @@ namespace osmscout {
       // Get potential follower in the current way
 
 #if defined(DEBUG_ROUTING)
-      std::cout << "Analysing follower of node " << currentRouteNode->GetFileOffset();
+      std::cout << "Analysing follower of node " << dbId << " / " << currentRouteNode->GetFileOffset();
       std::cout << " (" << current->object.GetTypeName() << " " << current->object.GetFileOffset() << "["  << currentRouteNode->GetId() << "]" << ")";
       std::cout << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
-      size_t i=0;
-      for (const auto& path : currentRouteNode->paths) {
-        if (path.offset==current->prev.offset) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route";
-          std::cout << " to " << path.offset;
-          std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-          std::cout << " => back to the last node visited" << std::endl;
-#endif
-          nodesIgnoredCount++;
-          i++;
 
-          continue;
-        }
+      if (!WalkPaths(state,
+                     current,
+                     currentRouteNode,
+                     openList,
+                     openMap,
+                     closedSet,
+                     result,
+                     parameter,
+                     targetCoord,
+                     vehicle,
+                     accessViolation,
+                     nodesIgnoredCount,
+                     currentMaxDistance,
+                     overallDistance,
+                     costLimit)){
 
-        if (!current->access &&
-            !path.IsRestricted(vehicle)) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route";
-          std::cout << " to " << path.offset;
-          std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-          std::cout << " => moving from non-accessible way back to accessible way" << std::endl;
-#endif
-          nodesIgnoredCount++;
-          i++;
-
-          accessViolation=true;
-
-          continue;
-        }
-
-        if (!CanUse(state,
-                    dbId,
-                    *currentRouteNode,
-                    /*pathIndex*/ i)) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route";
-          std::cout << " to " << path.offset;
-          std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-          std::cout << " => Cannot be used"<< std::endl;
-#endif
-          nodesIgnoredCount++;
-          i++;
-
-          continue;
-        }
-
-        if (closedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedSet.end()) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route";
-          std::cout << " to " << dbId << " / " << path.offset;
-          std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-          std::cout << " => already calculated" << std::endl;
-#endif
-          i++;
-
-          continue;
-        }
-
-        if (!currentRouteNode->excludes.empty()) {
-          bool canTurnedInto=true;
-
-          for (const auto& exclude : currentRouteNode->excludes) {
-            if (exclude.source==current->object &&
-                currentRouteNode->objects[exclude.targetIndex].object==currentRouteNode->objects[path.objectIndex].object) {
-#if defined(DEBUG_ROUTING)
-              std::cout << "  Skipping route";
-              std::cout << " to " << dbId << " / " << path.offset;
-              std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-              std::cout << " => turn not allowed" << std::endl;
-#endif
-              canTurnedInto=false;
-              break;
-            }
-          }
-
-          if (!canTurnedInto) {
-            nodesIgnoredCount++;
-            i++;
-
-            continue;
-          }
-        }
-
-        double currentCost=current->currentCost+GetCosts(state,dbId,*currentRouteNode,i);
-
-        OpenMap::iterator openEntry=openMap.find(DBFileOffset(current->nodeOffset.database,
-                                                              path.offset));
-
-        // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
-        // into the open list
-        if (openEntry!=openMap.end() &&
-            (*openEntry->second)->currentCost<=currentCost) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route";
-          std::cout << " to " << path.offset;
-          std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-          std::cout << "  => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << std::endl;
-#endif
-          i++;
-
-          continue;
-        }
-
-        RouteNodeRef nextNode;
-
-        if (openEntry!=openMap.end()) {
-          nextNode=(*openEntry->second)->node;
-        }
-        else if (!GetRouteNodeByOffset(DBFileOffset(current->nodeOffset.database,
-                                                    path.offset),
-                                       nextNode)) {
-          log.Error() << "Cannot load route node with id " << path.offset;
-          return result;
-        }
-
-        double distanceToTarget=GetSphericalDistance(nextNode->GetCoord(),
-                                                     targetCoord);
-
-        currentMaxDistance=std::max(currentMaxDistance,overallDistance-distanceToTarget);
-        result.SetCurrentMaxDistance(currentMaxDistance);
-
-        // Estimate costs for the rest of the distance to the target
-        double estimateCost=GetEstimateCosts(state,dbId,distanceToTarget);
-        double overallCost=currentCost+estimateCost;
-
-        if (overallCost>costLimit) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route";
-              std::cout << " to " << path.offset;
-              std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-              std::cout << " => cost limit reached (" << overallCost << ">" << costLimit << ")" << std::endl;
-#endif
-
-          nodesIgnoredCount++;
-          i++;
-
-          continue;
-        }
-
-        // add twin nodes to nextNode from other databases to open list
-        std::vector<DBFileOffset> twins=GetNodeTwins(state,
-                                                     current->nodeOffset.database,
-                                                     nextNode->GetId());
-        for (auto &twin:twins){
-          OpenMap::iterator twinIt=openMap.find(twin);
-          if (twinIt!=openMap.end()){
-            RNodeRef rn=(*twinIt->second);
-            if (rn->currentCost > currentCost){
-              // this is cheaper path to twin
-              RouteNodeRef node;
-              if (!GetRouteNodeByOffset(twin,node)){
-                return result;
-              }
-              rn->prev=DBFileOffset(current->nodeOffset.database,
-                                    nextNode->GetFileOffset());
-              rn->object=node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
-
-              rn->currentCost=currentCost;
-              rn->estimateCost=estimateCost;
-              rn->overallCost=overallCost;
-              rn->access=!path.IsRestricted(vehicle);
-
-              openList.erase(twinIt->second);
-
-              std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
-              twinIt->second=insertResult.first;
-
-              std::cout << "Better transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
-            }
-          }else{
-            RouteNodeRef node;
-            if (!GetRouteNodeByOffset(twin,node)){
-              return result;
-            }
-            RNodeRef rn=std::make_shared<RNode>(twin,
-                                                node,
-                                                node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
-                                                /*prev*/DBFileOffset(current->nodeOffset.database,
-                                                                     nextNode->GetFileOffset()));
-
-            rn->currentCost=currentCost;
-            rn->estimateCost=estimateCost;
-            rn->overallCost=overallCost;
-            rn->access=!path.IsRestricted(vehicle);
-
-            std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
-            openMap[rn->nodeOffset]=insertResult.first;
-
-            std::cout << "Transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
-          }
-        }
-
-        if (parameter.GetProgress()) {
-          parameter.GetProgress()->Progress(currentMaxDistance,overallDistance);
-        }
-
-        // If we already have the node in the open list, but the new path is cheaper,
-        // update the existing entry
-        if (openEntry!=openMap.end()) {
-          RNodeRef node=*openEntry->second;
-
-          node->prev=current->nodeOffset;
-          node->object=currentRouteNode->objects[path.objectIndex].object;
-
-          node->currentCost=currentCost;
-          node->estimateCost=estimateCost;
-          node->overallCost=overallCost;
-          node->access=!currentRouteNode->paths[i].IsRestricted(vehicle);
-
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
-#endif
-
-          openList.erase(openEntry->second);
-
-          std::pair<OpenListRef,bool> insertResult=openList.insert(node);
-          openEntry->second=insertResult.first;
-        }
-        else {
-          RNodeRef node=std::make_shared<RNode>(DBFileOffset(dbId,path.offset),
-                                                nextNode,
-                                                currentRouteNode->objects[path.objectIndex].object,
-                                                current->nodeOffset);
-
-          node->currentCost=currentCost;
-          node->estimateCost=estimateCost;
-          node->overallCost=overallCost;
-          node->access=!path.IsRestricted(vehicle);
-
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Inserting route to " << path.offset;
-          std::cout <<  " (" << node->object.GetTypeName() << " " << node->object.GetFileOffset() << ")";
-          std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
-#endif
-
-          std::pair<OpenListRef,bool> insertResult=openList.insert(node);
-          openMap[node->nodeOffset]=insertResult.first;
-        }
-
-        i++;
+        log.Error() << "Failed to walk paths from " << dbId << " / " << currentRouteNode->GetFileOffset();
+        return result;
       }
 
       //
-      // Added current node to close map
+      // Add current node twins (nodes from another databases with same Id)
+      // to openList/openMap or update it
       //
 
       if (!accessViolation) {
+        if (!WalkToOtherDatabases(state,
+                                  current,
+                                  currentRouteNode,
+                                  openList,
+                                  openMap,
+                                  closedSet)){
+
+          log.Error() << "Failed to walk to other databases from " << dbId << " / " << currentRouteNode->GetFileOffset();
+          return result;
+        }
+      }
+
+      //
+      // Add current node to close map
+      //
+
+      if (!accessViolation) {
+        std::cout << "Closing " << current->nodeOffset << " (previous " << current->prev << ")" << std::end;
         closedSet.insert(VNode(current->nodeOffset,
                                current->object,
                                current->prev));
@@ -1135,10 +1207,6 @@ namespace osmscout {
                                                                       const RoutePosition& target,
                                                                       RouteData& route)
   {
-    // DatabaseId                                  dbId=start.GetDatabaseId();
-    // AreaDataFileRef                             areaDataFile(database->GetAreaDataFile());
-    // WayDataFileRef                              wayDataFile(database->GetWayDataFile());
-
     std::set<DBFileOffset>                        routeNodeOffsets;
     std::set<DBFileOffset>                        wayOffsets;
     std::set<DBFileOffset>                        areaOffsets;
@@ -1191,12 +1259,6 @@ namespace osmscout {
     // Load data
     //
 
-    /*
-    if (!routeNodeDataFile.GetByOffset(routeNodeOffsets.begin(),
-                                       routeNodeOffsets.end(),
-                                       routeNodeOffsets.size(),
-                                       routeNodeMap)) {
-     */
     if (!GetRouteNodesByOffset(routeNodeOffsets,
                                routeNodeMap)) {
       log.Error() << "Cannot load route nodes";

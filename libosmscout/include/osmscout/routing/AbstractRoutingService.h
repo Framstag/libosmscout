@@ -119,30 +119,30 @@ namespace osmscout {
                                                    const DatabaseId database,
                                                    const Id id) = 0;
 
-    void GetStartForwardRouteNode(const RoutingState& profile,
+    void GetStartForwardRouteNode(const RoutingState& state,
                                   const DatabaseId& database,
                                   const WayRef& way,
                                   size_t nodeIndex,
                                   RouteNodeRef& routeNode,
                                   size_t& routeNodeIndex);
-    void GetStartBackwardRouteNode(const RoutingState& profile,
+    void GetStartBackwardRouteNode(const RoutingState& state,
                                    const DatabaseId& database,
                                    const WayRef& way,
                                    size_t nodeIndex,
                                    RouteNodeRef& routeNode,
                                    size_t& routeNodeIndex);
-    void GetTargetForwardRouteNode(const RoutingState& profile,
+    void GetTargetForwardRouteNode(const RoutingState& state,
                                    const DatabaseId& database,
                                    const WayRef& way,
                                    size_t nodeIndex,
                                    RouteNodeRef& routeNode);
-    void GetTargetBackwardRouteNode(const RoutingState& profile,
+    void GetTargetBackwardRouteNode(const RoutingState& state,
                                     const DatabaseId& database,
                                     const WayRef& way,
                                     size_t nodeIndex,
                                     RouteNodeRef& routeNode);
 
-    bool GetStartNodes(const RoutingState& profile,
+    bool GetStartNodes(const RoutingState& state,
                        const RoutePosition& position,
                        GeoCoord& startCoord,
                        const GeoCoord& targetCoord,
@@ -151,19 +151,19 @@ namespace osmscout {
                        RNodeRef& forwardRNode,
                        RNodeRef& backwardRNode);
 
-    bool GetWayTargetNodes(const RoutingState& profile,
+    bool GetWayTargetNodes(const RoutingState& state,
                            const RoutePosition& position,
                            GeoCoord& targetCoord,
                            RouteNodeRef& forwardNode,
                            RouteNodeRef& backwardNode);
 
-    bool GetTargetNodes(const RoutingState& profile,
+    bool GetTargetNodes(const RoutingState& state,
                         const RoutePosition& position,
                         GeoCoord& targetCoord,
                         RouteNodeRef& forwardNode,
                         RouteNodeRef& backwardNode);
 
-    bool GetRNode(const RoutingState& profile,
+    bool GetRNode(const RoutingState& state,
                   const RoutePosition& position,
                   const WayRef& way,
                   size_t routeNodeIndex,
@@ -181,20 +181,43 @@ namespace osmscout {
                   bool oneway,
                   size_t targetNodeIndex);
     
-    bool GetWayStartNodes(const RoutingState& profile,
-                                  const RoutePosition& position,
-                                  GeoCoord& startCoord,
-                                  const GeoCoord& targetCoord,
-                                  RouteNodeRef& forwardRouteNode,
-                                  RouteNodeRef& backwardRouteNode,
-                                  RNodeRef& forwardRNode,
-                                  RNodeRef& backwardRNode);
+    bool GetWayStartNodes(const RoutingState& state,
+                          const RoutePosition& position,
+                          GeoCoord& startCoord,
+                          const GeoCoord& targetCoord,
+                          RouteNodeRef& forwardRouteNode,
+                          RouteNodeRef& backwardRouteNode,
+                          RNodeRef& forwardRNode,
+                          RNodeRef& backwardRNode);
 
-    bool ResolveRNodesToRouteData(const RoutingState& profile,
+    bool ResolveRNodesToRouteData(const RoutingState& state,
                                   const std::list<VNode>& nodes,
                                   const RoutePosition& start,
                                   const RoutePosition& target,
                                   RouteData& route);
+
+    bool WalkToOtherDatabases(const RoutingState& state,
+                              RNodeRef &current,
+                              RouteNodeRef &currentRouteNode,
+                              OpenList &openList,
+                              OpenMap &openMap,
+                              const ClosedSet &closedSet);
+
+    bool WalkPaths(const RoutingState& state,
+                   RNodeRef &current,
+                   RouteNodeRef &currentRouteNode,
+                   OpenList &openList,
+                   OpenMap &openMap,
+                   ClosedSet &closedSet,
+                   RoutingResult &result,
+                   const RoutingParameter& parameter,
+                   const GeoCoord &targetCoord,
+                   const Vehicle &vehicle,
+                   bool &accessViolation,
+                   size_t &nodesIgnoredCount,
+                   double &currentMaxDistance,
+                   const double &overallDistance,
+                   const double &costLimit);
 
     RoutingResult CalculateRoute(RoutingState& state,
                                  const RoutePosition& start,
