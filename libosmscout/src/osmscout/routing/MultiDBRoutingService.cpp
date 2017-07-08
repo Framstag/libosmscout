@@ -462,7 +462,11 @@ namespace osmscout {
     }
     for (const auto &entry:offsetMap){
       std::vector<RouteNodeRef> nodes;
-      if (!routerFiles[entry.first]->routeNodeDataFile.Get(entry.second,nodes)){
+      const std::set<FileOffset> &offsets=entry.second;
+      if (!routerFiles[entry.first]->routeNodeDataFile.GetByOffset(offsets.begin(),
+                                                                   offsets.end(),
+                                                                   offsets.size(),
+                                                                   nodes)){
         return false;
       }
       for (const auto &node:nodes){
