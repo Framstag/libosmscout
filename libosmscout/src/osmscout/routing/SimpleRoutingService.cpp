@@ -634,37 +634,6 @@ namespace osmscout {
     return true;
   }
 
-  /**
-   * Transform the route into a RouteDescription. The RouteDescription can be further transformed
-   * to enhanced textual and/or visual description of the route containing additional information.
-   * @param data
-   *    Route data
-   * @param description
-   *    An initialized description on success
-   * @return
-   *    True on success, else false
-   */
-  bool SimpleRoutingService::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                            RouteDescription& description)
-  {
-    description.Clear();
-
-    if (data.Entries().empty()) {
-      return true;
-    }
-
-    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
-         iter!=data.Entries().end();
-         ++iter) {
-      description.AddNode(iter->GetCurrentNodeIndex(),
-                          iter->GetObjects(),
-                          iter->GetPathObject(),
-                          iter->GetTargetNodeIndex());
-    }
-
-    return true;
-  }
-
   void SimpleRoutingService::DumpStatistics()
   {
     if (database) {

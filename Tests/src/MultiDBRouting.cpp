@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 
   osmscout::RouterParameter routerParam;
   routerParam.SetDebugPerformance(true);
-  osmscout::MultiDBRoutingService router(routerParam,databases);
+  osmscout::MultiDBRoutingServiceRef router=std::make_shared<osmscout::MultiDBRoutingService>(routerParam,databases);
 
   std::cout << "Opening router..." << std::endl;
 
@@ -142,34 +142,37 @@ int main(int argc, char* argv[])
         return profile;
       };
 
-  if (!router.Open(profileBuilder)) {
+  if (!router->Open(profileBuilder)) {
     
     std::cerr << "Cannot open router" << std::endl;
     return 1;
   }
   std::cout << "Done." << std::endl;
 
-  osmscout::RoutePosition startNode=router.GetClosestRoutableNode(startCoord);
+  osmscout::RoutePosition startNode=router->GetClosestRoutableNode(startCoord);
   if (!startNode.IsValid()){
     std::cerr << "Can't found route node near start coord " << startCoord.GetDisplayText() << std::endl;
     return 1;
   }
-  osmscout::RoutePosition targetNode=router.GetClosestRoutableNode(targetCoord);
+  osmscout::RoutePosition targetNode=router->GetClosestRoutableNode(targetCoord);
   if (!targetNode.IsValid()){
     std::cerr << "Can't found route node near target coord " << targetCoord.GetDisplayText() << std::endl;
     return 1;
   }
 
   osmscout::RoutingParameter parameter;
-  osmscout::RoutingResult route=router.CalculateRoute(startNode,targetNode,parameter);
+  osmscout::RoutingResult route=router->CalculateRoute(startNode,targetNode,parameter);
   if (!route.Success()){
     std::cerr << "Route failed" << std::endl;
     return 1;
   }
 
+  osmscout::RouteDescription description;
+  router->TransformRouteDataToRouteDescription(route.GetRoute(),description);
+
   std::cout << "Closing RoutingServices and databases..." << std::endl;
 
-  router.Close();
+  router->Close();
 
   database1->Close();
   database1=NULL;

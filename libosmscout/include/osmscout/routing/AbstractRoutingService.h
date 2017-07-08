@@ -29,13 +29,13 @@
 #include <unordered_set>
 
 #include <osmscout/CoreFeatures.h>
-
-#include <osmscout/Point.h>
-
 #include <osmscout/TypeConfig.h>
-
-#include <osmscout/routing/RouteNode.h>
+#include <osmscout/Point.h>
 #include <osmscout/Pixel.h>
+
+#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteData.h>
+#include <osmscout/routing/RouteNode.h>
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/MultiDBRoutingState.h>
 
@@ -226,8 +226,12 @@ namespace osmscout {
   public:
     AbstractRoutingService(const RouterParameter& parameter);
     virtual ~AbstractRoutingService();
+
+    bool TransformRouteDataToRouteDescription(const RouteData& data,
+                                              RouteDescription& description);
+
   };
 
 }
 
-#endif /* ABSTRACTROUTINGSERVICE_H */
+#endif /* OSMSCOUT_ABSTRACTROUTINGSERVICE_H */

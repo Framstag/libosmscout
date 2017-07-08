@@ -169,7 +169,15 @@ namespace osmscout {
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,
                                  const RoutingParameter &parameter);
+
+    bool TransformRouteDataToRouteDescription(const RouteData& data,
+                                              RouteDescription& description);
   };
+
+  //! \ingroup Service
+  //! Reference counted reference to an RoutingService instance
+  typedef std::shared_ptr<MultiDBRoutingService> MultiDBRoutingServiceRef;
+
 }
 
 #endif /* OSMSCOUT_MULTIDBROUTINGSERVICE_H */

@@ -192,9 +192,6 @@ namespace osmscout {
     bool TransformRouteDataToPoints(const RouteData& data,
                                     std::list<Point>& points);
 
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
-
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
                                          const RoutingProfile& profile,
                                          double radius) const;

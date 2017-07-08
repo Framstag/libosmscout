@@ -640,4 +640,11 @@ namespace osmscout {
                                                                        target,
                                                                        parameter);
   }
+
+  bool MultiDBRoutingService::TransformRouteDataToRouteDescription(const RouteData& data,
+                                                                   RouteDescription& description)
+  {
+    return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToRouteDescription(data,description);
+  }
+
 }
