@@ -146,10 +146,6 @@ namespace osmscout {
     bool FindCommonRoutingNodes(DatabaseRef &database1,
                                 DatabaseRef &database2,
                                 std::set<Id> &commonRouteNodes);
-    
-    bool ReadRouteNodeEntries(DatabaseRef &database,
-                              std::set<Id> &commonRouteNodes,
-                              std::unordered_map<osmscout::Id,osmscout::RouteNodeRef> &routeNodeEntries);
 
     virtual bool CanUse(const MultiDBRoutingState& state,
                         const DatabaseId database,

@@ -27,14 +27,12 @@ namespace osmscout {
                                            DatabaseId dbId2,
                                            RoutingProfileRef profile1,
                                            RoutingProfileRef profile2,
-                                           std::unordered_map<Id,osmscout::RouteNodeRef> overlapNodes1,
-                                           std::unordered_map<Id,osmscout::RouteNodeRef> overlapNodes2):
+                                           std::set<Id> overlapNodes):
     dbId1(dbId1),
     dbId2(dbId2),
     profile1(profile1),
     profile2(profile2),
-    overlapNodes1(overlapNodes1),
-    overlapNodes2(overlapNodes2)
+    overlapNodes(overlapNodes)
   {
   }
 
@@ -57,21 +55,16 @@ namespace osmscout {
     assert(false);
   }
 
-  std::vector<DBFileOffset> MultiDBRoutingState::GetNodeTwins(const DatabaseId database,
-                                                              const Id id) const
+  void MultiDBRoutingState::GetOverlappingDatabases(const DatabaseId &database,
+                                                    const Id &nodeId,
+                                                    std::set<DatabaseId> &overlappingDatabases) const
   {
-    std::vector<DBFileOffset> result;
-    if (database==dbId1){
-      auto it=overlapNodes2.find(id);
-      if (it!=overlapNodes2.end()){
-        result.push_back(DBFileOffset(dbId2,it->second->GetFileOffset()));
-      }
-    } else if (database==dbId2){
-      auto it=overlapNodes1.find(id);
-      if (it!=overlapNodes1.end()){
-        result.push_back(DBFileOffset(dbId1,it->second->GetFileOffset()));
+    if (overlapNodes.find(nodeId)!=overlapNodes.end()){
+      if (database==dbId1){
+        overlappingDatabases.insert(dbId2);
+      } else if (database==dbId2){
+        overlappingDatabases.insert(dbId1);
       }
     }
-    return result;
   }
 }

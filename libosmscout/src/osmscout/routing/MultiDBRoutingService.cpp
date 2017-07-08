@@ -411,37 +411,6 @@ namespace osmscout {
     return true;
   }
 
-  bool MultiDBRoutingService::ReadRouteNodeEntries(DatabaseRef &database,
-                                                   std::set<Id> &commonRouteNodes,
-                                                   std::unordered_map<Id,osmscout::RouteNodeRef> &routeNodeEntries)
-  {
-    osmscout::IndexedDataFile<Id,osmscout::RouteNode> routeNodeFile(std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".dat",
-                                                                    std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".idx",
-                                                                    /*indexCacheSize*/12000,
-                                                                    /*dataCacheSize*/1000);
-
-    std::cout << "Opening routing database..." << std::endl;
-
-    if (!routeNodeFile.Open(database->GetTypeConfig(),
-                            database->GetPath(),
-                            true,
-                            true)) {
-      std::cerr << "Cannot open routing database" << std::endl;
-      return false;
-    }
-
-
-
-    if (!routeNodeFile.Get(commonRouteNodes,
-                           routeNodeEntries)) {
-      std::cerr << "Cannot retrieve route nodes" << std::endl;
-      routeNodeFile.Close();
-      return false;
-    }
-    routeNodeFile.Close();
-    return true;
-  }
-
   bool MultiDBRoutingService::CanUse(const MultiDBRoutingState& /*state*/,
                                      const DatabaseId database,
                                      const RouteNode& routeNode,
@@ -581,7 +550,20 @@ namespace osmscout {
                                                                 const DatabaseId database,
                                                                 const Id id)
   {
-    return state.GetNodeTwins(database,id);
+    std::set<DatabaseId> overlappingDatabases;
+    state.GetOverlappingDatabases(database,id,overlappingDatabases);
+
+    std::vector<DBFileOffset> twins;
+    twins.reserve(overlappingDatabases.size());
+    for (const auto &dbId:overlappingDatabases){
+      FileOffset offset;
+      if (!routerFiles[dbId]->routeNodeDataFile.GetOffset(id,offset)){
+        log.Error() << "Failed to retrieve file offset";
+        continue;
+      }
+      twins.push_back(DBFileOffset(dbId,offset));
+    }
+    return twins;
   }
 
   bool MultiDBRoutingService::GetRouteNode(const DatabaseId &database,
@@ -636,25 +618,11 @@ namespace osmscout {
       return result;
     }
 
-    std::unordered_map<Id,osmscout::RouteNodeRef> routeNodeEntries1;
-    if (!ReadRouteNodeEntries(database1,commonRouteNodes,routeNodeEntries1)){
-      return result;
-    }
-    std::unordered_map<Id,osmscout::RouteNodeRef> routeNodeEntries2;
-    if (!ReadRouteNodeEntries(database2,commonRouteNodes,routeNodeEntries2)){
-      return result;
-    }
-
-    for (const auto& routeNodeEntry : routeNodeEntries1) {
-      std::cout << routeNodeEntry.second->GetId() << " " << routeNodeEntry.second->GetCoord().GetDisplayText() << std::endl;
-    }
-
     MultiDBRoutingState state(start.GetDatabaseId(),
                               target.GetDatabaseId(),
                               profiles[start.GetDatabaseId()],
                               profiles[target.GetDatabaseId()],
-                              routeNodeEntries1,
-                              routeNodeEntries2);
+                              commonRouteNodes);
     
     return AbstractRoutingService<MultiDBRoutingState>::CalculateRoute(state,
                                                                        start,
