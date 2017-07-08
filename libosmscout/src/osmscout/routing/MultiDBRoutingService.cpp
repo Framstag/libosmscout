@@ -283,7 +283,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (osmscout::IOException& e) {
-      std::cerr << "Error while reading '" << fullFilename << "': " << e.GetDescription() << std::endl;
+      log.Error() << "Error while reading '" << fullFilename << "': " << e.GetDescription();
       return false;
     }
 
@@ -324,7 +324,7 @@ namespace osmscout {
       scanner.Close();
     }
     catch (osmscout::IOException& e) {
-      std::cerr << "Error while reading '" << fullFilename << "': " << e.GetDescription() << std::endl;
+      log.Error() << "Error while reading '" << fullFilename << "': " << e.GetDescription();
       return false;
     }
 
@@ -339,25 +339,29 @@ namespace osmscout {
     std::unordered_set<uint64_t> cells1;
     std::unordered_set<uint64_t> cells2;
 
+#if defined(DEBUG_ROUTING)
     std::cout << "Reading route node cells of database 1..." << std::endl;
+#endif
 
     if (!ReadCellsForRoutingTree(*database1,
                                  cells1)){
       return false;
     }
 
+#if defined(DEBUG_ROUTING)
     std::cout << "Found route nodes in " << cells1.size() << " cells" << std::endl;
-
     std::cout << "Reading route node cells of database 2..." << std::endl;
+#endif
 
     if (!ReadCellsForRoutingTree(*database2,
                                  cells2)){
       return false;
     }
 
+#if defined(DEBUG_ROUTING)
     std::cout << "Found route nodes in " << cells2.size() << " cells" << std::endl;
-
     std::cout << "Detecting common cells..." << std::endl;
+#endif
 
     std::unordered_set<uint64_t> commonCells;
 
@@ -370,12 +374,16 @@ namespace osmscout {
     cells1.clear();
     cells2.clear();
 
+#if defined(DEBUG_ROUTING)
     std::cout << "There are " << commonCells.size() << " common cells" << std::endl;
+#endif
 
     std::unordered_set<Id> routeNodes1;
     std::unordered_set<Id> routeNodes2;
 
+#if defined(DEBUG_ROUTING)
     std::cout << "Reading route nodes in common cells of database 1..." << std::endl;
+#endif
 
     if (!ReadRouteNodesForCells(*database1,
                                 commonCells,
@@ -383,9 +391,10 @@ namespace osmscout {
       return false;
     }
 
+#if defined(DEBUG_ROUTING)
     std::cout << "Found " << routeNodes1.size() << " route nodes in common cells" << std::endl;
-
     std::cout << "Reading route nodes in common cells of database 2..." << std::endl;
+#endif
 
     if (!ReadRouteNodesForCells(*database2,
                                 commonCells,
@@ -393,10 +402,10 @@ namespace osmscout {
       return false;
     }
 
+#if defined(DEBUG_ROUTING)
     std::cout << "Found " << routeNodes2.size() << " route nodes in common cells" << std::endl;
-
     std::cout << "Detecting common route nodes..." << std::endl;
-
+#endif
 
     for (const auto routeNode : routeNodes1) {
       if (routeNodes2.find(routeNode)!=routeNodes2.end()) {
@@ -407,7 +416,9 @@ namespace osmscout {
     routeNodes1.clear();
     routeNodes2.clear();
 
+#if defined(DEBUG_ROUTING)
     std::cout << "There are " << commonRouteNodes.size() << " common route nodes" << std::endl;
+#endif
     return true;
   }
 
@@ -592,29 +603,29 @@ namespace osmscout {
     // start and target databases are different, try to find common route nodes
     auto it=databases.find(start.GetDatabaseId());
     if (it==databases.end()){
-      std::cerr << "Can't find start database " << start.GetDatabaseId() << std::endl;
+      log.Error() << "Can't find start database " << start.GetDatabaseId();
       return result;
     }
     DatabaseRef database1=it->second;
 
     it=databases.find(target.GetDatabaseId());
     if (it==databases.end()){
-      std::cerr << "Can't find target database " << target.GetDatabaseId() << std::endl;
+      log.Error() << "Can't find target database " << target.GetDatabaseId();
       return result;
     }
     DatabaseRef database2=it->second;
 
     std::set<Id> commonRouteNodes;
     if (!FindCommonRoutingNodes(database1,database2,commonRouteNodes)){
-      std::cerr << "Can't find common routing nodes for databases " <<
+      log.Error() << "Can't find common routing nodes for databases " <<
         database1->GetPath() << ", " <<
-        database2->GetPath() << std::endl;
+        database2->GetPath();
       return result;
     }
     if (commonRouteNodes.empty()){
-      std::cerr << "Can't find common routing nodes for databases " <<
+      log.Warn() << "Can't find common routing nodes for databases " <<
         database1->GetPath() << ", " <<
-        database2->GetPath() << std::endl;
+        database2->GetPath();
       return result;
     }
 

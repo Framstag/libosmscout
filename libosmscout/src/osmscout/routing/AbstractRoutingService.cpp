@@ -60,7 +60,9 @@ namespace osmscout {
     assert(current!=closedSet.end());
 
     while (current->previousNode.IsValid()) {
+#if defined(DEBUG_ROUTING)
       std::cout << "Chain item " << current->currentNode << " -> " << current->previousNode << std::endl;
+#endif
       ClosedSet::const_iterator prev=closedSet.find(VNode(current->previousNode));
 
       assert(prev!=closedSet.end());
@@ -523,7 +525,9 @@ namespace osmscout {
                                                  currentRouteNode->GetId());
     for (auto &twin:twins){
       if (closedSet.find(VNode(twin))!=closedSet.end()){
+#if defined(DEBUG_ROUTING)
         std::cout << "Twin node " << twin << " is closed already, ignore it" << std::endl;
+#endif
         continue;
       }
       OpenMap::iterator twinIt=openMap.find(twin);
@@ -545,7 +549,9 @@ namespace osmscout {
           std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
           twinIt->second=insertResult.first;
 
+#if defined(DEBUG_ROUTING)
           std::cout << "Better transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+#endif
         }
       }else{
         RouteNodeRef node;
@@ -566,7 +572,9 @@ namespace osmscout {
         std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
         openMap[rn->nodeOffset]=insertResult.first;
 
+#if defined(DEBUG_ROUTING)
         std::cout << "Transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+#endif
       }
     }
     return true;
@@ -958,7 +966,9 @@ namespace osmscout {
       //
 
       if (!accessViolation) {
+#if defined(DEBUG_ROUTING)
         std::cout << "Closing " << current->nodeOffset << " (previous " << current->prev << ")" << std::endl;
+#endif
         closedSet.insert(VNode(current->nodeOffset,
                                current->object,
                                current->prev));
@@ -1055,7 +1065,7 @@ namespace osmscout {
 
     if (!((targetForwardRouteNode && currentRouteNode->GetId()==targetForwardRouteNode->GetId()) ||
           (targetBackwardRouteNode && currentRouteNode->GetId()==targetBackwardRouteNode->GetId()))) {
-      std::cout << "No route found!" << std::endl;
+      log.Warn() << "No route found!";
 
       return result;
     }
