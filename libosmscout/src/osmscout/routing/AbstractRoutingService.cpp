@@ -1320,7 +1320,13 @@ namespace osmscout {
       return true;
     }
 
-    RouteNodeRef initialNode=routeNodeMap.find(nodes.front().currentNode)->second;
+    auto entry=routeNodeMap.find(nodes.front().currentNode);
+    if (entry==routeNodeMap.end()){
+      log.Error() << "Can't found route node " << nodes.front().currentNode.database <<
+        ", " << nodes.front().currentNode.offset;
+      return false;
+    }
+    RouteNodeRef initialNode=entry->second;
 
     //
     // Add The path from the start node to the first routing node
@@ -1414,6 +1420,12 @@ namespace osmscout {
       }
 
       RouteNodeRef nextNode=routeNodeMap.find(nn->currentNode)->second;
+
+      if (n->currentNode.database!=nn->currentNode.database &&
+          node->GetId()==nextNode->GetId()){
+        // there is no way between database transition nodes
+        continue;
+      }
 
       assert(nn->object.GetType()==refArea ||
              nn->object.GetType()==refWay);
