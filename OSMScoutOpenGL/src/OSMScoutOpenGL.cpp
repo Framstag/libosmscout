@@ -110,6 +110,9 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) 
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
+  std::cout << "Magnification: " << std::endl;
+  std::cout << "BoundingBox: [" << BoundingBox.GetMinLon() << " "  << BoundingBox.GetMinLat() << " "
+                                << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "] \n";
 }
 
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
@@ -213,6 +216,7 @@ int main(int argc, char *argv[]) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
       if (((currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+        std::cout << "Loading data..." << std::endl;
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
       }
@@ -226,6 +230,7 @@ int main(int argc, char *argv[]) {
           auto success = result.get();
           if (success)
             renderer->SwapData();
+          std::cout << "Data loading ended." << std::endl;
         }
       }
     }
