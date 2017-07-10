@@ -142,7 +142,7 @@ namespace osmscout {
         std::vector<GLchar> errorLog(maxLength);
         glGetShaderInfoLog(VertexShader, maxLength, &maxLength, &errorLog[0]);
 
-        for (int i = 0; i < errorLog.size(); i++)
+        for (uint i = 0; i < errorLog.size(); i++)
           std::cout << errorLog.at(i);
 
         std::cout << std::endl;
@@ -164,7 +164,7 @@ namespace osmscout {
         std::vector<GLchar> errorLog(maxLength);
         glGetShaderInfoLog(FragmentShader, maxLength, &maxLength, &errorLog[0]);
 
-        for (int i = 0; i < errorLog.size(); i++)
+        for (uint i = 0; i < errorLog.size(); i++)
           std::cout << errorLog.at(i);
 
         std::cout << std::endl;

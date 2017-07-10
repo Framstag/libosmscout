@@ -67,17 +67,14 @@ namespace osmscout {
     osmscout::GeoBox BoundingBox;
 
     void ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                         const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
-                         const osmscout::GeoBox &BoundingBox);
+                         const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                           const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
-                           const osmscout::GeoBox &BoundingBox);
+                           const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessPathData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection,
-                         const osmscout::StyleConfigRef &styleConfig,
-                         const osmscout::GeoBox &BoundingBox);
+                         const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessImageData();
 

@@ -75,14 +75,14 @@ void ErrorCallback(int, const char *err_str) {
   std::cerr << "GLFW Error: " << err_str << std::endl;
 }
 
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int action, int /*mods*/) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 }
 
 bool button_down = false;
 
-static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int /*mods*/) {
   if (button == GLFW_MOUSE_BUTTON_LEFT) {
     if (action == GLFW_PRESS) {
       button_down = true;
@@ -102,7 +102,7 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 }
 
 
-static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffset) {
   zoomLevel += yoffset * 100;
   double x, y;
   glfwGetCursorPos(window, &x, &y);
@@ -112,7 +112,7 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) 
   loadData = 1;
 }
 
-static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
+static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
   if (button_down) {
     renderer->onTranslation(prevX, prevY, xpos, ypos);
     prevX = xpos;
