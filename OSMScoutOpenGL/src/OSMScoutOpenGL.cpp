@@ -24,7 +24,25 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
+#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/util/Logger.h>
 #include <GLFW/glfw3.h>
+
+
+struct Arguments
+{
+  bool               help;
+  std::string        databaseDirectory;
+  std::string        styleFileDirectory;
+  size_t             width;
+  size_t             height;
+
+  Arguments()
+          : help(false)
+  {
+    // no code
+  }
+};
 
 osmscout::DatabaseParameter databaseParameter;
 osmscout::DatabaseRef database;
@@ -78,6 +96,38 @@ void ErrorCallback(int, const char *err_str) {
 static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int action, int /*mods*/) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
+  }
+  if(key == GLFW_KEY_LEFT){
+    renderer->onTranslation(prevX, prevY, prevX + 10, prevY);
+    prevX = prevX + 10;
+  }
+  if(key == GLFW_KEY_RIGHT){
+    renderer->onTranslation(prevX, prevY, prevX - 10, prevY);
+    prevX = prevX - 10;
+  }
+  if(key == GLFW_KEY_UP){
+    renderer->onTranslation(prevX, prevY, prevX, prevY + 10);
+    prevY = prevY + 10;
+  }
+  if(key == GLFW_KEY_DOWN){
+    renderer->onTranslation(prevX, prevY, prevX, prevY - 10);
+    prevY = prevY - 10;
+  }
+  if(key == GLFW_KEY_KP_ADD){
+    zoomLevel += 100;
+    renderer->onZoom(1, 0.05);
+    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
+    loadData = 1;
+  }
+  if(key == GLFW_KEY_KP_SUBTRACT){
+    zoomLevel -= 100;
+    renderer->onZoom(-1, 0.05);
+    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
+    loadData = 1;
+  }
+
 }
 
 bool button_down = false;
@@ -101,7 +151,6 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 
 }
 
-
 static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffset) {
   zoomLevel += yoffset * 100;
   double x, y;
@@ -110,6 +159,9 @@ static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffs
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
+  osmscout::log.Info() << "Magnification: " << zoomLevel;
+  osmscout::log.Info() << "BoundingBox: [" << BoundingBox.GetMinLon() << " "  << BoundingBox.GetMinLat() << " "
+                                << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "]";
 }
 
 static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
@@ -122,38 +174,70 @@ static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 5) {
-    std::cerr << argc << " usage: ./OSMScoutOpenGL <path/to/map> <style-file> <width> <height>" << std::endl;
+  osmscout::CmdLineParser   argParser("OSMScoutOpenGL",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the database to use");
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.styleFileDirectory=value;
+                          }),
+                          "STYLEFILE",
+                          "Directory of the stylefile to use");
+
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
+                            args.width=value;
+                          }),
+                          "WIDTH",
+                          "Width of the window");
+
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
+                            args.height=value;
+                          }),
+                          "HEIGHT",
+                          "Height of the window");
+
+  osmscout::CmdLineParseResult cmdResult=argParser.Parse();
+
+  if (cmdResult.HasError()) {
+    std::cerr << "ERROR: " << cmdResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-
-  map = argv[1];
-  style = argv[2];
-
-  if (!osmscout::StringToNumber(argv[3], width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
-
-  if (!osmscout::StringToNumber(argv[4], height)) {
-    std::cerr << "height is not numeric!" << std::endl;
-    return 1;
-  }
-
 
   database = osmscout::DatabaseRef(new osmscout::Database(databaseParameter));
   mapService = osmscout::MapServiceRef(new osmscout::MapService(database));
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
 
   styleConfig = osmscout::StyleConfigRef(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!styleConfig->Load(style)) {
+  if (!styleConfig->Load(args.styleFileDirectory)) {
     std::cerr << "Cannot open style" << std::endl;
   }
+
+  width = args.width;
+  height = args.height;
 
   database.get()->GetBoundingBox(BoundingBox);
 
@@ -213,6 +297,7 @@ int main(int argc, char *argv[]) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
       if (((currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+        osmscout::log.Info() << "Loading data...";
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
       }
@@ -226,6 +311,7 @@ int main(int argc, char *argv[]) {
           auto success = result.get();
           if (success)
             renderer->SwapData();
+          osmscout::log.Info() << "Data loading ended.";
         }
       }
     }
