@@ -77,8 +77,40 @@ void ErrorCallback(int, const char *err_str) {
 }
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, true);
+  }
+  if(key == GLFW_KEY_LEFT){
+    renderer->onTranslation(prevX, prevY, prevX + 10, prevY);
+    prevX = prevX + 10;
+  }
+  if(key == GLFW_KEY_RIGHT){
+    renderer->onTranslation(prevX, prevY, prevX - 10, prevY);
+    prevX = prevX - 10;
+  }
+  if(key == GLFW_KEY_UP){
+    renderer->onTranslation(prevX, prevY, prevX, prevY + 10);
+    prevY = prevY + 10;
+  }
+  if(key == GLFW_KEY_DOWN){
+    renderer->onTranslation(prevX, prevY, prevX, prevY - 10);
+    prevY = prevY - 10;
+  }
+  if(key == GLFW_KEY_KP_ADD){
+    zoomLevel += 100;
+    renderer->onZoom(1, 0.05);
+    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
+    loadData = 1;
+  }
+  if(key == GLFW_KEY_KP_SUBTRACT){
+    zoomLevel -= 100;
+    renderer->onZoom(-1, 0.05);
+    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
+    loadData = 1;
+  }
+
 }
 
 bool button_down = false;
@@ -101,7 +133,6 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
   }
 
 }
-
 
 static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
   zoomLevel += yoffset * 100;
