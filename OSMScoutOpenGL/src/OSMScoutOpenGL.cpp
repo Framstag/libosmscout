@@ -24,7 +24,24 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
+#include <osmscout/util/CmdLineParsing.h>
 #include <GLFW/glfw3.h>
+
+
+struct Arguments
+{
+  bool               help;
+  std::string        databaseDirectory;
+  std::string        styleFileDirectory;
+  size_t             width;
+  size_t             height;
+
+  Arguments()
+          : help(false)
+  {
+    // no code
+  }
+};
 
 osmscout::DatabaseParameter databaseParameter;
 osmscout::DatabaseRef database;
@@ -122,38 +139,70 @@ static void cursor_position_callback(GLFWwindow *window, double xpos, double ypo
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 5) {
-    std::cerr << argc << " usage: ./OSMScoutOpenGL <path/to/map> <style-file> <width> <height>" << std::endl;
+  osmscout::CmdLineParser   argParser("OSMScoutOpenGL",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the database to use");
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.styleFileDirectory=value;
+                          }),
+                          "STYLEFILE",
+                          "Directory of the stylefile to use");
+
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
+                            args.width=value;
+                          }),
+                          "WIDTH",
+                          "Width of the window");
+
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
+                            args.height=value;
+                          }),
+                          "HEIGHT",
+                          "Height of the window");
+
+  osmscout::CmdLineParseResult cmdResult=argParser.Parse();
+
+  if (cmdResult.HasError()) {
+    std::cerr << "ERROR: " << cmdResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-
-  map = argv[1];
-  style = argv[2];
-
-  if (!osmscout::StringToNumber(argv[3], width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
-
-  if (!osmscout::StringToNumber(argv[4], height)) {
-    std::cerr << "height is not numeric!" << std::endl;
-    return 1;
-  }
-
 
   database = osmscout::DatabaseRef(new osmscout::Database(databaseParameter));
   mapService = osmscout::MapServiceRef(new osmscout::MapService(database));
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
 
   styleConfig = osmscout::StyleConfigRef(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!styleConfig->Load(style)) {
+  if (!styleConfig->Load(args.styleFileDirectory)) {
     std::cerr << "Cannot open style" << std::endl;
   }
+
+  width = args.width;
+  height = args.height;
 
   database.get()->GetBoundingBox(BoundingBox);
 
