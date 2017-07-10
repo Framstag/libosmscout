@@ -24,6 +24,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
+#include <osmscout/util/Logger.h>
 #include <GLFW/glfw3.h>
 
 osmscout::DatabaseParameter databaseParameter;
@@ -110,6 +111,9 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) 
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
+  osmscout::log.Info() << "Magnification: " << zoomLevel;
+  osmscout::log.Info() << "BoundingBox: [" << BoundingBox.GetMinLon() << " "  << BoundingBox.GetMinLat() << " "
+                                << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "]";
 }
 
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
@@ -213,6 +217,7 @@ int main(int argc, char *argv[]) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
       if (((currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+        osmscout::log.Info() << "Loading data...";
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
       }
@@ -226,6 +231,7 @@ int main(int argc, char *argv[]) {
           auto success = result.get();
           if (success)
             renderer->SwapData();
+          osmscout::log.Info() << "Data loading ended.";
         }
       }
     }
