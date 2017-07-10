@@ -28,18 +28,15 @@
 namespace osmscout {
 
   osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, int screenWidth, int screenHeight) : width(width),
-                                                                                                           height(
-                                                                                                                   height),
-                                                                                                           minLat(0),
+                                                                                                           height(height),
+                                                                                                           screenWidth(screenWidth),
+                                                                                                           screenHeight(screenHeight),
                                                                                                            minLon(0),
-                                                                                                           maxLat(0),
+                                                                                                           minLat(0),
                                                                                                            maxLon(0),
+                                                                                                           maxLat(0),
                                                                                                            lookX(0.0),
-                                                                                                           lookY(0.0),
-                                                                                                           screenHeight(
-                                                                                                                   screenHeight),
-                                                                                                           screenWidth(
-                                                                                                                   screenWidth) {
+                                                                                                           lookY(0.0){
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -102,11 +99,11 @@ namespace osmscout {
 
     this->BoundingBox = BoundingBox;
 
-    ProcessAreaData(data, parameter, projection, styleConfig, BoundingBox);
+    ProcessAreaData(data, parameter, projection, styleConfig);
 
-    //ProcessGroundData(data, parameter, projection, styleConfig, BoundingBox);
+    //ProcessGroundData(data, parameter, projection, styleConfig);
 
-    ProcessPathData(data, parameter, projection, styleConfig, BoundingBox);
+    ProcessPathData(data, parameter, projection, styleConfig);
   }
 
   void osmscout::MapPainterOpenGL::SwapData() {
@@ -187,10 +184,9 @@ namespace osmscout {
   }
 
   void
-  osmscout::MapPainterOpenGL::ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+  osmscout::MapPainterOpenGL::ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &/*parameter*/,
                                               const osmscout::Projection &projection,
-                                              const osmscout::StyleConfigRef &styleConfig,
-                                              const osmscout::GeoBox &BoundingBox) {
+                                              const osmscout::StyleConfigRef &styleConfig) {
 
     for (const auto &area : data.areas) {
       size_t ringId = Area::outerRingId;
@@ -297,7 +293,7 @@ namespace osmscout {
             points = osmscout::Triangulate::TriangulatePolygon(p);
           }
 
-          for (int t = 0; t < points.size(); t++) {
+          for (size_t t = 0; t < points.size(); t++) {
             if (t % 2 == 0) {
               AreaRenderer.AddNewVertex(points[t]);
             } else {
@@ -322,10 +318,9 @@ namespace osmscout {
   }
 
   void
-  osmscout::MapPainterOpenGL::ProcessPathData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+  osmscout::MapPainterOpenGL::ProcessPathData(const osmscout::MapData &data, const osmscout::MapParameter &/*parameter*/,
                                               const osmscout::Projection &projection,
-                                              const osmscout::StyleConfigRef &styleConfig,
-                                              const osmscout::GeoBox &BoundingBox) {
+                                              const osmscout::StyleConfigRef &styleConfig) {
 
     WidthFeatureValueReader widthReader(*styleConfig->GetTypeConfig());
     LayerFeatureValueReader layerReader(*styleConfig->GetTypeConfig());
@@ -372,7 +367,7 @@ namespace osmscout {
           lineOffset += projection.ConvertWidthToPixel(lineStyle->GetDisplayOffset());
         }
 
-        for (int i = 0; i < way->nodes.size() - 1; i++) {
+        for (size_t i = 0; i < way->nodes.size() - 1; i++) {
           PathRenderer.AddNewVertex(way->nodes[i].GetLon());
           PathRenderer.AddNewVertex(way->nodes[i].GetLat());
           if (i == 0) {
@@ -462,8 +457,7 @@ namespace osmscout {
   void
   osmscout::MapPainterOpenGL::ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                                                 const osmscout::Projection &projection,
-                                                const osmscout::StyleConfigRef &styleConfig,
-                                                const osmscout::GeoBox &BoundingBox) {
+                                                const osmscout::StyleConfigRef &styleConfig) {
     FillStyleRef landFill;
 
     styleConfig->GetLandFillStyle(projection,
@@ -600,13 +594,13 @@ namespace osmscout {
           num = 0;
         else
           num = GroundTileRenderer.GetVerticesNumber();
-        for (int i = 0; i < 6; i++)
+        for (size_t i = 0; i < 6; i++)
           GroundTileRenderer.AddNewElement(num + i);
 
       } else {
 
         std::vector<osmscout::Point> p;
-        for (int i = 0; i < tile.coords.size(); i++) {
+        for (size_t i = 0; i < tile.coords.size(); i++) {
           double lat;
           double lon;
           lat = minCoord.GetLat() + tile.coords[i].y * tile.cellHeight / GroundTile::Coord::CELL_MAX;
@@ -632,7 +626,7 @@ namespace osmscout {
 
         points = osmscout::Triangulate::TriangulatePolygon(p);
 
-        for (int t = 0; t < points.size(); t++) {
+        for (size_t t = 0; t < points.size(); t++) {
           if (t % 2 == 0) {
             GroundRenderer.AddNewVertex(points[t]);
           } else {
