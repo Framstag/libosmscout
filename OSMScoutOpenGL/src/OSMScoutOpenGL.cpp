@@ -24,6 +24,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterOpenGL.h>
+#include <osmscout/util/Logger.h>
 #include <GLFW/glfw3.h>
 
 osmscout::DatabaseParameter databaseParameter;
@@ -110,9 +111,9 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) 
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
-  std::cout << "Magnification: " << std::endl;
-  std::cout << "BoundingBox: [" << BoundingBox.GetMinLon() << " "  << BoundingBox.GetMinLat() << " "
-                                << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "] \n";
+  osmscout::log.Info() << "Magnification: " << zoomLevel;
+  osmscout::log.Info() << "BoundingBox: [" << BoundingBox.GetMinLon() << " "  << BoundingBox.GetMinLat() << " "
+                                << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "]";
 }
 
 static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
