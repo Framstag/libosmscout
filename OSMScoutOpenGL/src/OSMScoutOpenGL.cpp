@@ -217,7 +217,7 @@ int main(int argc, char *argv[]) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
       if (((currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
-        std::cout << "Loading data..." << std::endl;
+        osmscout::log.Info() << "Loading data...";
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
       }
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
           auto success = result.get();
           if (success)
             renderer->SwapData();
-          std::cout << "Data loading ended." << std::endl;
+          osmscout::log.Info() << "Data loading ended.";
         }
       }
     }
