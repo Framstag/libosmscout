@@ -113,14 +113,14 @@ static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int acti
     renderer->onTranslation(prevX, prevY, prevX, prevY - 10);
     prevY = prevY - 10;
   }
-  if(key == GLFW_KEY_KP_ADD){
+  if(key == GLFW_KEY_KP_ADD || key == GLFW_KEY_I){
     zoomLevel += 100;
     renderer->onZoom(1, 0.05);
     lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();
     loadData = 1;
   }
-  if(key == GLFW_KEY_KP_SUBTRACT){
+  if(key == GLFW_KEY_KP_SUBTRACT || key == GLFW_KEY_O){
     zoomLevel -= 100;
     renderer->onZoom(-1, 0.05);
     lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
