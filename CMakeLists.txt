@@ -159,8 +159,11 @@ include(features)
 set(OSMSCOUT_BUILD_CORE OFF CACHE INTERNAL "" FORCE)
 add_subdirectory(libosmscout)
 
-set(OSMSCOUT_BUILD_IMPORT OFF CACHE INTERNAL "" FORCE)
-add_subdirectory(libosmscout-import)
+option(OSMSCOUT_BUILD_IMPORT "Enable build of import library" ON)
+if(OSMSCOUT_BUILD_IMPORT)
+   set(OSMSCOUT_BUILD_IMPORT OFF CACHE INTERNAL "" FORCE)
+   add_subdirectory(libosmscout-import)
+endif()
 
 set(OSMSCOUT_BUILD_MAP OFF CACHE INTERNAL "" FORCE)
 add_subdirectory(libosmscout-map)
