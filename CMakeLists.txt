@@ -112,7 +112,7 @@ if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_G
       endif()
     endif()
   endif()
-  if(OSMSCOUT_PLATFORM_X64 AND NOT APPLE)
+  if(NOT APPLE)
     add_definitions(-fPIC)
   endif()
 endif()
