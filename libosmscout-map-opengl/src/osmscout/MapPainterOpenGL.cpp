@@ -624,6 +624,25 @@ namespace osmscout {
     PathRenderer.ScaleModel(zoomScale * zoom);
   }
 
+  void osmscout::MapPainterOpenGL::ZoomTo(float zoom, float zoomScale, float x, float y){
+    AreaRenderer.ScaleModel(zoomScale * zoom);
+    GroundRenderer.ScaleModel(zoomScale * zoom);
+    GroundTileRenderer.ScaleModel(zoomScale * zoom);
+    PathRenderer.ScaleModel(zoomScale * zoom);
+
+    double OffsetX = x - (width/2);
+    double OffsetY = y - (height/2);
+
+    lookX += OffsetX / 10000;
+    lookY += OffsetY / 10000;
+
+    AreaRenderer.SetView(lookX, lookY);
+    GroundTileRenderer.SetView(lookX, lookY);
+    GroundRenderer.SetView(lookX, lookY);
+    PathRenderer.SetView(lookX, lookY);
+
+  }
+
   void osmscout::MapPainterOpenGL::onTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
     float offsetX = startPointX - endPointX;
     float offsetY = endPointY - startPointY;

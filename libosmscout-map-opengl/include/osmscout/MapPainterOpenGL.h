@@ -92,6 +92,7 @@ namespace osmscout {
     void SwapData();
 
     void onZoom(float zoom, float zoomScale);
+    void ZoomTo(float zoom, float zoomScale, float x, float y);
 
     void onTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
 

@@ -29,17 +29,15 @@
 #include <GLFW/glfw3.h>
 
 
-struct Arguments
-{
-  bool               help;
-  std::string        databaseDirectory;
-  std::string        styleFileDirectory;
-  size_t             width;
-  size_t             height;
+struct Arguments {
+  bool help;
+  std::string databaseDirectory;
+  std::string styleFileDirectory;
+  size_t width;
+  size_t height;
 
   Arguments()
-          : help(false)
-  {
+      : help(false) {
     // no code
   }
 };
@@ -61,9 +59,8 @@ std::future<bool> result;
 
 int zoomLevel;
 osmscout::GeoCoord center;
-int zoom = 0;
-double prevX = 0;
-double prevY = 0;
+double prevX;
+double prevY;
 unsigned long long lastZoom;
 bool loadData = 0;
 bool loadingInProgress = 0;
@@ -98,34 +95,34 @@ static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int acti
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, true);
   }
-  if(key == GLFW_KEY_LEFT){
+  if (key == GLFW_KEY_LEFT) {
     renderer->onTranslation(prevX, prevY, prevX + 10, prevY);
     prevX = prevX + 10;
   }
-  if(key == GLFW_KEY_RIGHT){
+  if (key == GLFW_KEY_RIGHT) {
     renderer->onTranslation(prevX, prevY, prevX - 10, prevY);
     prevX = prevX - 10;
   }
-  if(key == GLFW_KEY_UP){
+  if (key == GLFW_KEY_UP) {
     renderer->onTranslation(prevX, prevY, prevX, prevY + 10);
     prevY = prevY + 10;
   }
-  if(key == GLFW_KEY_DOWN){
+  if (key == GLFW_KEY_DOWN) {
     renderer->onTranslation(prevX, prevY, prevX, prevY - 10);
     prevY = prevY - 10;
   }
-  if(key == GLFW_KEY_KP_ADD || key == GLFW_KEY_I){
+  if (key == GLFW_KEY_KP_ADD || key == GLFW_KEY_I) {
     zoomLevel += 100;
     renderer->onZoom(1, 0.05);
     lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     loadData = 1;
   }
-  if(key == GLFW_KEY_KP_SUBTRACT || key == GLFW_KEY_O){
+  if (key == GLFW_KEY_KP_SUBTRACT || key == GLFW_KEY_O) {
     zoomLevel -= 100;
     renderer->onZoom(-1, 0.05);
     lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     loadData = 1;
   }
 
@@ -156,73 +153,73 @@ static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffs
   zoomLevel += yoffset * 100;
   double x, y;
   glfwGetCursorPos(window, &x, &y);
-  renderer->onZoom(yoffset, 0.05);
+  //renderer->onZoom(yoffset, 0.05);
+  renderer->ZoomTo(yoffset, 0.05, x, y);
+  center = renderer->PixelToGeo(glm::vec4((width / 2), (height / 2), 0.0, 1.0));
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
   osmscout::log.Info() << "Magnification: " << zoomLevel;
-  osmscout::log.Info() << "BoundingBox: [" << BoundingBox.GetMinLon() << " "  << BoundingBox.GetMinLat() << " "
-                                << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "]";
+  osmscout::log.Info() << "BoundingBox: [" << BoundingBox.GetMinLon() << " " << BoundingBox.GetMinLat() << " "
+                       << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "]";
+  osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLon() << "]";
 }
 
 static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
   if (button_down) {
     renderer->onTranslation(prevX, prevY, xpos, ypos);
-    osmscout::GeoCoord g = renderer->PixelToGeo(glm::vec4(width/(float)2,height/(float)2,0.0, 1.0));
-    //osmscout::GeoCoord g = renderer->PixelToGeo(glm::vec4(xpos,ypos,0.0, 1.0));
+    osmscout::GeoCoord g = renderer->PixelToGeo(glm::vec4(width / (float) 2, height / (float) 2, 0.0, 1.0));
     center = g;
-    std::cout << "geo: " << g.GetLon() << " " << g.GetLat() << std::endl;
-    prevX = xpos;
-    prevY = ypos;
   }
+  prevX = xpos;
+  prevY = ypos;
 }
 
 int main(int argc, char *argv[]) {
 
-  osmscout::CmdLineParser   argParser("OSMScoutOpenGL",
-                                      argc,argv);
-  std::vector<std::string>  helpArgs{"h","help"};
-  Arguments                 args;
+  osmscout::CmdLineParser argParser("OSMScoutOpenGL",
+                                    argc, argv);
+  std::vector<std::string> helpArgs{"h", "help"};
+  Arguments args;
 
-  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
-                        args.help=value;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool &value) {
+                        args.help = value;
                       }),
                       helpArgs,
                       "Return argument help",
                       true);
 
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.databaseDirectory=value;
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
+                            args.databaseDirectory = value;
                           }),
                           "DATABASE",
                           "Directory of the database to use");
 
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.styleFileDirectory=value;
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
+                            args.styleFileDirectory = value;
                           }),
                           "STYLEFILE",
                           "Directory of the stylefile to use");
 
-  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
-                            args.width=value;
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t &value) {
+                            args.width = value;
                           }),
                           "WIDTH",
                           "Width of the window");
 
-  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
-                            args.height=value;
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t &value) {
+                            args.height = value;
                           }),
                           "HEIGHT",
                           "Height of the window");
 
-  osmscout::CmdLineParseResult cmdResult=argParser.Parse();
+  osmscout::CmdLineParseResult cmdResult = argParser.Parse();
 
   if (cmdResult.HasError()) {
     std::cerr << "ERROR: " << cmdResult.GetErrorDescription() << std::endl;
     std::cout << argParser.GetHelp() << std::endl;
     return 1;
-  }
-  else if (args.help) {
+  } else if (args.help) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
