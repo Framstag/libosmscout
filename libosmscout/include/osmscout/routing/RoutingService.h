@@ -426,5 +426,5 @@ namespace osmscout {
 
 }
 
-#endif /* ROUTINGSERVICE_H */
+#endif /* OSMSCOUT_ROUTINGSERVICE_H */
 

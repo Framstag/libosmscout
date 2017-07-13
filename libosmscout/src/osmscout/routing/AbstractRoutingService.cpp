@@ -947,7 +947,7 @@ namespace osmscout {
 
       // TODO: why we should not add node with accessViolation
       // to closedSet? It is legal to use such nodes as route target...
-      accessViolation=false;
+      //accessViolation=false;
       if (!accessViolation) {
         if (!WalkToOtherDatabases(state,
                                   current,

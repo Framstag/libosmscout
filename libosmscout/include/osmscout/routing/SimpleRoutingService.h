@@ -69,7 +69,7 @@ namespace osmscout {
    * for further transformations to a textual or visual description of the route
    * - Returning the closest routeable node to  given geolocation
    */
-  class OSMSCOUT_API SimpleRoutingService CLASS_FINAL: public AbstractRoutingService<RoutingProfile>
+  class OSMSCOUT_API SimpleRoutingService: public AbstractRoutingService<RoutingProfile>
   {
 
   private:
@@ -84,7 +84,7 @@ namespace osmscout {
     IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
     ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loading object variant data
 
-  private:
+  protected:
     virtual Vehicle GetVehicle(const RoutingProfile& profile);
 
     virtual bool CanUse(const RoutingProfile& profile,
