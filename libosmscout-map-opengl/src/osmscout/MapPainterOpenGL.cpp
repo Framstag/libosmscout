@@ -101,11 +101,11 @@ namespace osmscout {
 
     this->BoundingBox = BoundingBox;
 
-    ProcessAreaData(data, parameter, projection, styleConfig);
+    //ProcessAreaData(data, parameter, projection, styleConfig);
 
     ProcessGroundData(data, parameter, projection, styleConfig);
 
-    ProcessPathData(data, parameter, projection, styleConfig);
+    //ProcessPathData(data, parameter, projection, styleConfig);
   }
 
   void osmscout::MapPainterOpenGL::SwapData() {
@@ -572,6 +572,9 @@ namespace osmscout {
           lon = minCoord.GetLon() + tile.coords[i].x * tile.cellWidth / GroundTile::Coord::CELL_MAX;
 
           osmscout::GeoCoord g = osmscout::GeoCoord(lat, lon);
+          //std::cout << "geo1: " << lon << " " << lat << std::endl;
+          //glm::vec4 pos = GeoToPixel(g);
+          //PixelToGeo(pos);
           osmscout::Point pt;
           pt.SetCoord(g);
           p.push_back(pt);
@@ -632,6 +635,121 @@ namespace osmscout {
     GroundTileRenderer.SetView(lookX, lookY);
     GroundRenderer.SetView(lookX, lookY);
     PathRenderer.SetView(lookX, lookY);
+  }
+
+  glm::vec4
+      osmscout::MapPainterOpenGL::GeoToOpenGLPixel(osmscout::GeoCoord gc) {
+    float PI = 3.1415926535897;
+    float R = 6378137.0;
+
+    float deg_rad = 180 / PI;
+    float y1 = std::log(tan((gc.GetLat() / deg_rad) / 2 + PI / 4));
+    float merc_y = y1 * deg_rad;
+
+    std::cout << "Merc: " << gc.GetLon() << " " << merc_y <<  std::endl;
+
+    float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
+    float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
+
+    float height = abs(minLat_m - maxLat_m);
+    float width = abs(minLon - maxLon);
+    float x_width = width/height;
+    float y_height = 1;
+
+    float x = ((2*x_width)*(gc.GetLon() - (minLon))/((maxLon)-(minLon)))-x_width;
+    float y = ((2*y_height)*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
+
+    std::cout << x << " " << y << std::endl;
+
+    /*float x = (2*(position.x - (minLon))/((maxLon)-(minLon)))-1;
+    float y = (2*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-1;*/
+    glm::vec4 lel = glm::vec4(x,y,0.0,1.0);
+    //glm::vec3 lel2 = glm::vec3(x,y,0.0);
+
+    //glm::vec4 viewport = glm::vec4(-1 * x_width/(float)2,-1, x_width, 1);
+    //glm::vec3 pixels = glm::project(lel2, GroundRenderer.GetModel() , GroundRenderer.GetProjection(), viewport);
+
+
+    std::cout << "before proj: " << x << " " << y << std::endl;// << pixels.x << " " << pixels.y << std::endl;
+    glm::mat4x4 mvp =  GroundRenderer.GetProjection() * GroundRenderer.GetView() * GroundRenderer.GetModel();
+    glm::vec4 pixelPos = mvp * lel;
+
+    std::cout << "screen: " << glm::to_string(pixelPos) << std::endl;
+
+    return pixelPos;
+
+  }
+
+  /*glm::vec2
+  osmscout::MapPainterOpenGL::GeoToPixel(osmscout::GeoCoord gc) {
+
+
+
+    return;
+  }*/
+
+  osmscout::GeoCoord
+  osmscout::MapPainterOpenGL::PixelToGeo(glm::vec4 pixel) {
+    float PI = 3.1415926535897;
+    float R = 6378137.0;
+
+    std::cout << "p: " << pixel.x << " " << pixel.y << std::endl;
+
+    float deg_rad = 180 / PI;
+    float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
+    float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
+
+    float height = abs(minLat_m - maxLat_m);
+    float width = abs(minLon - maxLon);
+    float x_width = width/height;
+    float y_height = 1;
+
+    float openlgx = ((2*x_width)*(pixel.x)/((this->width)))-x_width;
+    float opengly = ((2*y_height)*(pixel.y)/((this->height)))-y_height;
+
+    std::cout << "op: " << openlgx << " " << opengly << std::endl;
+
+    glm::vec4 p = glm::vec4(openlgx,opengly, 0.0, 1.0);
+    return OpenGLPixelToGeo(p);
+  }
+
+  osmscout::GeoCoord
+  osmscout::MapPainterOpenGL::OpenGLPixelToGeo(glm::vec4 pixel) {
+
+    float PI = 3.1415926535897;
+    float R = 6378137.0;
+
+    float deg_rad = 180 / PI;
+    float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
+    float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
+
+    float x_width = this->width/this->height;
+    float minx = -1 * x_width / (float)2;
+    float miny = -1;
+    float maxx = x_width / (float)2;
+    float maxy = 1;
+    float lonwidth = maxLon - minLon;
+    float latheight = maxLat_m - minLat_m;
+
+    glm::mat4x4 inv = glm::inverse(( GroundRenderer.GetProjection() * GroundRenderer.GetModel() * GroundRenderer.GetView()));
+    glm::vec4 pixelPos = inv * pixel;
+    //glm::vec3 pixelPos = glm::project(lel, GroundRenderer.GetModel() , GroundRenderer.GetProjection(), viewport)
+    //std::cout << "before: " << glm::to_string(pixel) << " after: " << glm::to_string(pixelPos) << std::endl;
+
+    float OldRangeX = (maxx - minx);
+    float NewRangeX = (maxLon - minLon);
+    float OldRangeY = (maxy - miny);
+    float NewRangeY = (maxLat_m - minLat_m);
+    float x = (((pixelPos.x - minx) * NewRangeX) / OldRangeX) + minLon;
+    float y = (((pixelPos.y - miny) * NewRangeY) / OldRangeY) + minLat_m;
+
+    //std::cout << "lel: " << x << " " << y << std::endl;
+
+    float y1 = ( atan(exp( (y / deg_rad) )) * 2 - M_PI/2 ) * deg_rad;
+
+    //std::cout << "newgeo: " << x << " "  << y1 << std::endl;
+    osmscout::GeoCoord g(x, y1);
+    return g;
   }
 
   void osmscout::MapPainterOpenGL::DrawMap() {

@@ -97,6 +97,14 @@ namespace osmscout {
 
     void DrawMap();
 
+    glm::vec4 GeoToOpenGLPixel(osmscout::GeoCoord gc);
+
+    glm::vec2 GeoToPixel(osmscout::GeoCoord gc);
+
+    osmscout::GeoCoord OpenGLPixelToGeo(glm::vec4 pixel);
+
+    osmscout::GeoCoord PixelToGeo(glm::vec4 pixel);
+
   };
 }
 

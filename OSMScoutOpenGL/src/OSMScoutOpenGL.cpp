@@ -60,6 +60,7 @@ std::string style;
 std::future<bool> result;
 
 int zoomLevel;
+osmscout::GeoCoord center;
 int zoom = 0;
 double prevX = 0;
 double prevY = 0;
@@ -73,7 +74,7 @@ size_t height;
 bool LoadData() {
   data.ClearDBData();
   tiles.clear();
-  projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
+  projection.Set(osmscout::GeoCoord(center),
                  osmscout::Magnification(zoomLevel),
                  96,
                  width,
@@ -167,6 +168,10 @@ static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffs
 static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
   if (button_down) {
     renderer->onTranslation(prevX, prevY, xpos, ypos);
+    osmscout::GeoCoord g = renderer->PixelToGeo(glm::vec4(width/(float)2,height/(float)2,0.0, 1.0));
+    //osmscout::GeoCoord g = renderer->PixelToGeo(glm::vec4(xpos,ypos,0.0, 1.0));
+    center = g;
+    std::cout << "geo: " << g.GetLon() << " " << g.GetLat() << std::endl;
     prevX = xpos;
     prevY = ypos;
   }
@@ -245,6 +250,7 @@ int main(int argc, char *argv[]) {
   drawParameter.SetFontSize(3.0);
 
   zoomLevel = 100;
+  center = BoundingBox.GetCenter();
   projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
                  osmscout::Magnification(zoomLevel),
                  96,

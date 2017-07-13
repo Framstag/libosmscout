@@ -268,6 +268,18 @@ namespace osmscout {
       return this->shaderProgram;
     }
 
+    const glm::mat4 &GetModel() const {
+      return Model;
+    }
+
+    const glm::mat4 &GetView() const {
+      return View;
+    }
+
+    const glm::mat4 &GetProjection() const {
+      return Projection;
+    }
+
     void Draw() {
       glDrawElements(GL_TRIANGLES, (GLsizei) Elements.size(), GL_UNSIGNED_INT, 0);
     }
