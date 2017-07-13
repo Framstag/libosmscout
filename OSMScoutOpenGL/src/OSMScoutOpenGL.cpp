@@ -55,11 +55,13 @@ osmscout::AreaSearchParameter searchParameter;
 osmscout::MapData data;
 std::list<osmscout::TileRef> tiles;
 osmscout::MapPainterOpenGL *renderer;
+osmscout::Magnification m;
 std::string map;
 std::string style;
 std::future<bool> result;
 
 int zoomLevel;
+int level;
 int zoom = 0;
 double prevX = 0;
 double prevY = 0;
@@ -73,8 +75,17 @@ size_t height;
 bool LoadData() {
   data.ClearDBData();
   tiles.clear();
+  //m.SetMagnification(zoomLevel);
+  level++;
+  m.SetLevel(level);
+  osmscout::MagnificationConverter mm;
+  //float l = pow(2.0,zoomLevel);
+  //std::cout << "l: " << l << std::endl;
+  std::string s;
+  mm.Convert(m.GetLevel(),s);
+  std::cout << "mag: " << s << std::endl;
   projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
-                 osmscout::Magnification(zoomLevel),
+                 m,
                  96,
                  width,
                  height);
@@ -155,7 +166,15 @@ static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffs
   zoomLevel += yoffset * 100;
   double x, y;
   glfwGetCursorPos(window, &x, &y);
-  renderer->onZoom(yoffset, 0.05);
+  //renderer->onZoom(yoffset, 0.05);
+  renderer->onZoom(yoffset, 0.05 + std::pow(2,level)/(float)100000);
+
+
+std::cout << m.GetLevel() << " " << m.GetMagnification() << " " << std::pow(2,level)/(float)100000 << std::endl;
+
+
+  //m.SetLevel(zoomLevel);
+  //std::cout << m.GetLevel() << " " << m.GetMagnification() << std::endl;
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
@@ -245,8 +264,10 @@ int main(int argc, char *argv[]) {
   drawParameter.SetFontSize(3.0);
 
   zoomLevel = 100;
+  level = 10;
+  m.SetLevel(level);
   projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
-                 osmscout::Magnification(zoomLevel),
+                 m,
                  96,
                  width,
                  height);

@@ -345,16 +345,19 @@ namespace osmscout {
         double lineWidth = 0.0;
         double lineOffset = 0.0;
 
-        if (lineStyle->GetWidth() > 0.0) {
+        /*if (lineStyle->GetWidth() > 0.0) {
           WidthFeatureValue *widthValue = widthReader.GetValue(buffer);
 
+          std::cout << "width " << widthValue << " " << lineStyle->GetWidth() << std::endl;
 
           if (widthValue != NULL) {
             lineWidth += widthValue->GetWidth() / projection.GetPixelSize();
           } else {
             lineWidth += lineStyle->GetWidth() / projection.GetPixelSize();
           }
-        }
+
+          std::cout << "width2 " << lineWidth << std::endl;
+        }*/
 
         if (lineStyle->GetDisplayWidth() > 0.0) {
           lineWidth += projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
@@ -371,6 +374,10 @@ namespace osmscout {
         if (lineStyle->GetDisplayOffset() != 0.0) {
           lineOffset += projection.ConvertWidthToPixel(lineStyle->GetDisplayOffset());
         }
+
+        //if(lineWidth < 1)
+        //  continue;
+        //std::cout << lineWidth << " " << lineOffset << " " << lineStyle->GetDisplayWidth() << " " << lineStyle->GetWidth() << std::endl;
 
         for (size_t i = 0; i < way->nodes.size() - 1; i++) {
           PathRenderer.AddNewVertex(way->nodes[i].GetLon());
@@ -615,6 +622,12 @@ namespace osmscout {
   }
 
   void osmscout::MapPainterOpenGL::onZoom(float zoom, float zoomScale) {
+    /*float l = pow(2.0,zoomScale * zoom);
+    std::cout << "l: " << l << std::endl;*/
+    /*AreaRenderer.ScaleModel(zoomScale * zoom);
+    GroundRenderer.ScaleModel(zoomScale * zoom);
+    GroundTileRenderer.ScaleModel(zoomScale * zoom);
+    PathRenderer.ScaleModel(zoomScale * zoom);*/
     AreaRenderer.ScaleModel(zoomScale * zoom);
     GroundRenderer.ScaleModel(zoomScale * zoom);
     GroundTileRenderer.ScaleModel(zoomScale * zoom);
