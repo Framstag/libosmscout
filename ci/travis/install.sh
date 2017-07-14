@@ -20,7 +20,9 @@ if [ "$TARGET" = "build" ]; then
     elif [ "$BUILDTOOL" = "meson" ]; then
       wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
       unzip ninja-linux.zip
-      mkdir ~/bin
+      if [ ! -e "~/bin" ]; then
+        mkdir ~/bin
+      fi
       mv ninja ~/bin
       export PATH=~/bin:$PATH
       sudo apt-get install python3-pip python3-dev build-essential
