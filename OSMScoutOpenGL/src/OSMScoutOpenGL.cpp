@@ -53,6 +53,7 @@ osmscout::AreaSearchParameter searchParameter;
 osmscout::MapData data;
 std::list<osmscout::TileRef> tiles;
 osmscout::MapPainterOpenGL *renderer;
+osmscout::Magnification m;
 std::string map;
 std::string style;
 std::future<bool> result;
@@ -61,9 +62,12 @@ int zoomLevel;
 osmscout::GeoCoord center;
 double prevX;
 double prevY;
+int level;
+int zoom = 0;
 unsigned long long lastZoom;
 bool loadData = 0;
 bool loadingInProgress = 0;
+int offset;
 
 size_t width;
 size_t height;
@@ -71,20 +75,35 @@ size_t height;
 bool LoadData() {
   data.ClearDBData();
   tiles.clear();
+  //m.SetMagnification(zoomLevel);
+  level++;
+  m.SetLevel(level);
+  osmscout::MagnificationConverter mm;
+  //float l = pow(2.0,zoomLevel);
+  //std::cout << "l: " << l << std::endl;
+  std::string s;
+  mm.Convert(m.GetLevel(),s);
+  std::cout << "mag: " << s << std::endl;
+  //projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
   projection.Set(osmscout::GeoCoord(center),
-                 osmscout::Magnification(zoomLevel),
+                 m,
                  96,
                  width,
                  height);
 
   searchParameter.SetUseLowZoomOptimization(false);
-  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
+  mapService->LookupTiles(m.GetMagnification(), BoundingBox, tiles);
+  //mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
   mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
   renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
 
   return true;
+}
+
+bool LoadTile(osmscout::TileRef){
+
 }
 
 void ErrorCallback(int, const char *err_str) {
@@ -151,18 +170,31 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 
 static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffset) {
   zoomLevel += yoffset * 100;
-  double x, y;
-  glfwGetCursorPos(window, &x, &y);
+
   //renderer->onZoom(yoffset, 0.05);
-  renderer->ZoomTo(yoffset, 0.05, x, y);
+  //renderer->ZoomTo(yoffset, 0.05, x, y);
+  //renderer->onZoom(yoffset, 0.05 + std::pow(2,level)/(float)100000);
+
+  double x, y;
+  offset = yoffset;
+  /*glfwGetCursorPos(window, &x, &y);
   center = renderer->PixelToGeo(glm::vec4((width / 2), (height / 2), 0.0, 1.0));
+  renderer->ZoomTo(yoffset, 0.05 + std::pow(2,level)/(float)10000, x, y);*/
+
+  //std::cout << m.GetLevel() << " " << m.GetMagnification() << " " << (0.05 + std::pow(2,level)/(float)10000) << std::endl;
+
+
+  std::cout << "scroll " << yoffset << std::endl;
+
+  //m.SetLevel(zoomLevel);
+  //std::cout << m.GetLevel() << " " << m.GetMagnification() << std::endl;
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
-  osmscout::log.Info() << "Magnification: " << zoomLevel;
+  /*osmscout::log.Info() << "Magnification: " << zoomLevel;
   osmscout::log.Info() << "BoundingBox: [" << BoundingBox.GetMinLon() << " " << BoundingBox.GetMinLat() << " "
                        << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "]";
-  osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLon() << "]";
+  osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLon() << "]";*/
 }
 
 static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
@@ -248,14 +280,17 @@ int main(int argc, char *argv[]) {
 
   zoomLevel = 100;
   center = BoundingBox.GetCenter();
+  level = 5;
+  m.SetLevel(level);
   projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
-                 osmscout::Magnification(zoomLevel),
+                 m,
                  96,
                  width,
                  height);
 
   searchParameter.SetUseLowZoomOptimization(false);
-  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
+  mapService->LookupTiles(m.GetMagnification(), BoundingBox, tiles);
+  //mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
   mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
@@ -299,7 +334,11 @@ int main(int argc, char *argv[]) {
     if (loadData) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
-      if (((currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+      if (((currentTime - lastZoom) > 20) && (!loadingInProgress)) {
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        center = renderer->PixelToGeo(glm::vec4((width / 2), (height / 2), 0.0, 1.0));
+        renderer->ZoomTo(offset, 0.1 + std::pow(2,level)/(float)1000, x, y);
         osmscout::log.Info() << "Loading data...";
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
