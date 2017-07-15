@@ -126,7 +126,7 @@ signals:
   void downloadJobsChanged();
 
 public:
-  MapManager(QStringList databaseLookupDirs);
+  MapManager(QStringList databaseLookupDirs, SettingsRef settings);
   
   virtual ~MapManager();
 

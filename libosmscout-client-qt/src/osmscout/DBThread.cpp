@@ -36,7 +36,7 @@ DBThread::DBThread(QThread *backgroundThread,
                    QString iconDirectory,
                    SettingsRef settings)
   : backgroundThread(backgroundThread),
-    mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
+    mapManager(std::make_shared<MapManager>(databaseLookupDirs, settings)),
     basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
     mapDpi(-1),
