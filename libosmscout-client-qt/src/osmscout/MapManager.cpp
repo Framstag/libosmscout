@@ -18,7 +18,6 @@
 */
 
 #include <QDirIterator>
-#include <QTimer>
 #include <QDebug>
 
 #include <osmscout/MapManager.h>
