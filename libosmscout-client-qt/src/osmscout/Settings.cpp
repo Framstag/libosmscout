@@ -296,7 +296,6 @@ const QString Settings::GetHttpCacheDir() const
 
 const QByteArray Settings::GetCookieData() const
 {
-  qDebug() << "Settings::GetCookieData";
   return storage->value("OSMScoutLib/General/Cookies").toByteArray();
 }
 
