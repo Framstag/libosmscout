@@ -106,7 +106,7 @@ bool OSMScoutQtBuilder::Init()
                                   cacheLocation,
                                   onlineTileCacheSize,
                                   offlineTileCacheSize);
-
+                                  
   return true;
 }
 
