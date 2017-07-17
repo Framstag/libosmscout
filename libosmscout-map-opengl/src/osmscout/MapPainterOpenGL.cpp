@@ -27,18 +27,14 @@
 
 namespace osmscout {
 
-  osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, int screenWidth, int screenHeight) : width(width),
-                                                                                                           height(height),
-                                                                                                           screenWidth(
-                                                                                                                   screenWidth),
-                                                                                                           screenHeight(
-                                                                                                                   screenHeight),
-                                                                                                           minLon(0),
-                                                                                                           minLat(0),
-                                                                                                           maxLon(0),
-                                                                                                           maxLat(0),
-                                                                                                           lookX(0.0),
-                                                                                                           lookY(0.0){
+  osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight)
+          : width(width),
+            height(height),
+            dpi(dpi),
+            screenWidth(
+                    screenWidth),
+            screenHeight(
+                    screenHeight) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -84,22 +80,12 @@ namespace osmscout {
     PathRenderer.SetVerticesSize(11);
   }
 
-  void osmscout::MapPainterOpenGL::loadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+  void osmscout::MapPainterOpenGL::LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                                             const osmscout::Projection &projection,
-                                            const osmscout::StyleConfigRef &styleConfig,
-                                            const osmscout::GeoBox &BoundingBox) {
+                                            const osmscout::StyleConfigRef &styleConfig) {
     styleConfig.get()->GetLandFillStyle(projection, landFill);
     styleConfig.get()->GetSeaFillStyle(projection, seaFill);
-    if (minLat == 0)
-      minLat = BoundingBox.GetMinLat();
-    if (minLon == 0)
-      minLon = BoundingBox.GetMinLon();
-    if (maxLat == 0)
-      maxLat = BoundingBox.GetMaxLat();
-    if (maxLon == 0)
-      maxLon = BoundingBox.GetMaxLon();
 
-    this->BoundingBox = BoundingBox;
     this->Magnification = projection.GetMagnification();
     this->Center = projection.GetCenter();
 
@@ -124,15 +110,12 @@ namespace osmscout {
     AreaRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
     AreaRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
 
-    AreaRenderer.AddUniform("minLon", minLon);
-    AreaRenderer.AddUniform("minLat", minLat);
-    AreaRenderer.AddUniform("maxLon", maxLon);
-    AreaRenderer.AddUniform("maxLat", maxLat);
     AreaRenderer.AddUniform("windowWidth", width);
     AreaRenderer.AddUniform("windowHeight", height);
     AreaRenderer.AddUniform("centerLat", Center.GetLat());
     AreaRenderer.AddUniform("centerLon", Center.GetLon());
     AreaRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    AreaRenderer.AddUniform("dpi", dpi);
 
 
     GroundTileRenderer.SwapData();
@@ -147,12 +130,12 @@ namespace osmscout {
     GroundTileRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
     GroundTileRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
 
-    GroundTileRenderer.AddUniform("minLon", minLon);
-    GroundTileRenderer.AddUniform("minLat", minLat);
-    GroundTileRenderer.AddUniform("maxLon", maxLon);
-    GroundTileRenderer.AddUniform("maxLat", maxLat);
     GroundTileRenderer.AddUniform("windowWidth", width);
     GroundTileRenderer.AddUniform("windowHeight", height);
+    GroundTileRenderer.AddUniform("centerLat", Center.GetLat());
+    GroundTileRenderer.AddUniform("centerLon", Center.GetLon());
+    GroundTileRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    GroundTileRenderer.AddUniform("dpi", dpi);
 
     GroundRenderer.SwapData();
 
@@ -167,10 +150,11 @@ namespace osmscout {
     GroundRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
     GroundRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
 
-    GroundRenderer.AddUniform("minLon", minLon);
-    GroundRenderer.AddUniform("minLat", minLat);
-    GroundRenderer.AddUniform("maxLon", maxLon);
-    GroundRenderer.AddUniform("maxLat", maxLat);
+    GroundRenderer.AddUniform("centerLat", Center.GetLat());
+    GroundRenderer.AddUniform("centerLon", Center.GetLon());
+    GroundRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    GroundRenderer.AddUniform("dpi", dpi);
+
 
     PathRenderer.SwapData();
 
@@ -187,15 +171,12 @@ namespace osmscout {
     PathRenderer.AddAttrib("color", 3, GL_FLOAT, 6 * sizeof(GLfloat));
     PathRenderer.AddAttrib("index", 1, GL_FLOAT, 9 * sizeof(GLfloat));
     PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 10 * sizeof(GLfloat));
-    PathRenderer.AddUniform("minLon", minLon);
-    PathRenderer.AddUniform("minLat", minLat);
-    PathRenderer.AddUniform("maxLon", maxLon);
-    PathRenderer.AddUniform("maxLat", maxLat);
     PathRenderer.AddUniform("windowWidth", width);
     PathRenderer.AddUniform("windowHeight", height);
     PathRenderer.AddUniform("centerLat", Center.GetLat());
     PathRenderer.AddUniform("centerLon", Center.GetLon());
     PathRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    PathRenderer.AddUniform("dpi", dpi);
   }
 
   void
@@ -203,6 +184,8 @@ namespace osmscout {
                                               const osmscout::MapParameter &parameter,
                                               const osmscout::Projection &projection,
                                               const osmscout::StyleConfigRef &styleConfig) {
+
+    osmscout::log.Info() << "Area: " << data.areas.size();
 
     for (const auto &area : data.areas) {
 
@@ -262,9 +245,6 @@ namespace osmscout {
           std::vector<osmscout::Area::Ring> r;
 
           for (int i = p.size() - 1; i >= 0; i--) {
-            osmscout::GeoCoord g = osmscout::GeoCoord(ring.nodes[i].GetLat(), ring.nodes[i].GetLon());
-            //std::cout << "geo1: " << ring.nodes[i].GetLon() << " " << ring.nodes[i].GetLat() << std::endl;
-            glm::vec2 pos = GeoToOpenGLPixel(g);
             for (int j = 0; j < i; j++) {
               if (fabs(p[i].GetLat() - p[j].GetLat()) < 0.000000001 &&
                   fabs(p[i].GetLon() - p[j].GetLon()) < 0.0000000001) {
@@ -348,14 +328,18 @@ namespace osmscout {
     WidthFeatureValueReader widthReader(*styleConfig->GetTypeConfig());
     LayerFeatureValueReader layerReader(*styleConfig->GetTypeConfig());
 
+    osmscout::log.Info() << "Ways: " << data.ways.size();
+
     for (const auto &way: data.ways) {
+
+      std::vector<LineStyleRef> styles;
+
       styleConfig->GetWayLineStyles(way->GetFeatureValueBuffer(),
                                     projection,
-                                    lineStyles);
+                                    styles);
 
-      if (lineStyles.empty()) {
-        return;
-      }
+      if (!styles.empty())
+        lineStyles = styles;
 
       FeatureValueBuffer buffer(way->GetFeatureValueBuffer());
 
@@ -363,19 +347,15 @@ namespace osmscout {
         double lineWidth = 0.0;
         double lineOffset = 0.0;
 
-        /*if (lineStyle->GetWidth() > 0.0) {
+        if (lineStyle->GetWidth() > 0.0) {
           WidthFeatureValue *widthValue = widthReader.GetValue(buffer);
-
-          std::cout << "width " << widthValue << " " << lineStyle->GetWidth() << std::endl;
 
           if (widthValue != NULL) {
             lineWidth += widthValue->GetWidth() / projection.GetPixelSize();
           } else {
             lineWidth += lineStyle->GetWidth() / projection.GetPixelSize();
           }
-
-          std::cout << "width2 " << lineWidth << std::endl;
-        }*/
+        }
 
         if (lineStyle->GetDisplayWidth() > 0.0) {
           lineWidth += projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
@@ -392,10 +372,6 @@ namespace osmscout {
         if (lineStyle->GetDisplayOffset() != 0.0) {
           lineOffset += projection.ConvertWidthToPixel(lineStyle->GetDisplayOffset());
         }
-
-        //if(lineWidth < 1)
-        //  continue;
-        //std::cout << lineWidth << " " << lineOffset << " " << lineStyle->GetDisplayWidth() << " " << lineStyle->GetWidth() << std::endl;
 
         for (size_t i = 0; i < way->nodes.size() - 1; i++) {
           PathRenderer.AddNewVertex(way->nodes[i].GetLon());
@@ -639,335 +615,115 @@ namespace osmscout {
     }
   }
 
-  void osmscout::MapPainterOpenGL::onZoom(float zoom, float zoomScale) {
-    /*float l = pow(2.0,zoomScale * zoom);
-    std::cout << "l: " << l << std::endl;*/
-    /*AreaRenderer.ScaleModel(zoomScale * zoom);
-    GroundRenderer.ScaleModel(zoomScale * zoom);
-    GroundTileRenderer.ScaleModel(zoomScale * zoom);
-    PathRenderer.ScaleModel(zoomScale * zoom);*/
-    AreaRenderer.ScaleModel(zoomScale * zoom);
-    GroundRenderer.ScaleModel(zoomScale * zoom);
-    GroundTileRenderer.ScaleModel(zoomScale * zoom);
-    PathRenderer.ScaleModel(zoomScale * zoom);
-
-    /*lookX += (zoomScale * zoom);
-    lookY += (zoomScale * zoom);
-
-    AreaRenderer.SetView(lookX, lookY);
-    GroundTileRenderer.SetView(lookX, lookY);
-    GroundRenderer.SetView(lookX, lookY);
-    PathRenderer.SetView(lookX, lookY);*/
-
+  void osmscout::MapPainterOpenGL::OnZoom(float zoomDirection) {
+    if (zoomDirection < 0)
+      Magnification.SetLevel(Magnification.GetLevel() - 1);
+    else if (zoomDirection > 0)
+      Magnification.SetLevel(Magnification.GetLevel() + 1);
   }
 
-  void osmscout::MapPainterOpenGL::ZoomTo(float zoom, float zoomScale, float x, float y){
-    AreaRenderer.ScaleModel(zoomScale * zoom);
-    GroundRenderer.ScaleModel(zoomScale * zoom);
-    GroundTileRenderer.ScaleModel(zoomScale * zoom);
-    PathRenderer.ScaleModel(zoomScale * zoom);
+  void osmscout::MapPainterOpenGL::OnTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
+    double endLat, endLon, startLat, startLon;
+    PixelToGeoOrig(startPointX, startPointY, startLon, startLat);
+    PixelToGeoOrig(endPointX, endPointY, endLon, endLat);
+    double offsetX = (startLon - endLon);
+    double offsetY = (startLat - endLat);
 
-    double OffsetX = x - (width/2);
-    double OffsetY = y - (height/2);
-
-    /*this->minLon += OffsetX / 100000;
-    this->minLat += OffsetY / 100000;
-    this->maxLon += OffsetX / 100000;
-    this->maxLat += OffsetY / 100000;*/
-
-    lookX += OffsetX / 10000;
-    lookY += OffsetY / 10000;
-
-    AreaRenderer.SetView(lookX, lookY);
-    GroundTileRenderer.SetView(lookX, lookY);
-    GroundRenderer.SetView(lookX, lookY);
-    PathRenderer.SetView(lookX, lookY);
-
-  }
-
-  void osmscout::MapPainterOpenGL::SetCenter(osmscout::GeoCoord){
-
-  }
-
-  void osmscout::MapPainterOpenGL::onTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
-    float offsetX = startPointX - endPointX;
-    float offsetY = endPointY - startPointY;
-
-    /*lookX += offsetX / 1000;
-    lookY += offsetY / 1000;*/
-
-    this->minLon += offsetX / 500;
-    this->minLat += offsetY / 500;
-    this->maxLon += offsetX / 500;
-    this->maxLat += offsetY / 500;
-
-    GeoCoord g = osmscout::GeoCoord(Center.GetLat() + offsetY / 500, Center.GetLon() + offsetX / 500);
+    GeoCoord g = osmscout::GeoCoord(Center.GetLat() + offsetY / 2, Center.GetLon() + offsetX / 2);
     Center = g;
-
-    /*AreaRenderer.SetView(lookX, lookY);
-    GroundTileRenderer.SetView(lookX, lookY);
-    GroundRenderer.SetView(lookX, lookY);
-    PathRenderer.SetView(lookX, lookY);*/
   }
 
-
-  float latOffset;
-
-  glm::vec4
-      osmscout::MapPainterOpenGL::GeoToOpenGLPixel(osmscout::GeoCoord gc) {
+  /*glm::vec4
+  osmscout::MapPainterOpenGL::GeoToOpenGLPixel(osmscout::GeoCoord gc) {
     float PI = 3.1415926535897;
     float R = 6378137.0;
-
-    /*float deg_rad = 180 / PI;
-    float y1 = std::log(tan((gc.GetLat() / deg_rad) / 2 + PI / 4));
-    float merc_y = y1 * deg_rad;
-
-    //std::cout << "Merc: " << gc.GetLon() << " " << merc_y <<  std::endl;
-
-    float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-    float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-
-    float height = abs(minLat_m - maxLat_m);
-    float width = abs(minLon - maxLon);
-    float x_width = width/height;
-    float y_height = 1;
-
-    float x = ((2*x_width)*(gc.GetLon() - (minLon))/((maxLon)-(minLon)))-x_width;
-    float y = ((2*y_height)*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
-
-    glm::vec4 lel = glm::vec4(x,y,0.0,1.0);
-    glm::mat4x4 mvp =  GroundRenderer.GetProjection() * GroundRenderer.GetView() * GroundRenderer.GetModel();
-    glm::vec4 pixelPos = mvp * lel;*/
-
-    /*float latMin=std::max(MinLat,std::min(std::min(tlLat,trLat),std::min(blLat,brLat)));
-    float latMax=std::min(MaxLat,std::max(std::max(tlLat,trLat),std::max(blLat,brLat)));
-
-    float lonMin=std::max(MinLon,std::min(std::min(tlLon,trLon),std::min(blLon,brLon)));
-    float lonMax=std::min(MaxLon,std::max(std::max(tlLon,trLon),std::max(blLon,brLon)));*/
-
-    // Resulting projection scale factor
-
     double tlLat;
     double tlLon;
-
-    PixelToGeoOrig(0.0,0.0,tlLon,tlLat);
-
-    // top right
+    PixelToGeoOrig(0.0, 0.0, tlLon, tlLat);
     double trLat;
     double trLon;
-
-    PixelToGeoOrig((double)width,0.0,trLon,trLat);
-
-    // bottom left
+    PixelToGeoOrig((double) width, 0.0, trLon, trLat);
     double blLat;
     double blLon;
-
-    PixelToGeoOrig(0.0,(double)height,blLon,blLat);
-
-    // bottom right
+    PixelToGeoOrig(0.0, (double) height, blLon, blLat);
     double brLat;
     double brLon;
-
-    PixelToGeoOrig((double)width,(double)height,brLon,brLat);
-
+    PixelToGeoOrig((double) width, (double) height, brLon, brLat);
     double MaxLat = +85.0511;
     double MinLat = -85.0511;
     double MaxLon = +180.0;
     double MinLon = -180.0;
-
-    float latMin=std::max(MinLat,std::min(std::min(tlLat,trLat),std::min(blLat,brLat)));
-    float latMax=std::min(MaxLat,std::max(std::max(tlLat,trLat),std::max(blLat,brLat)));
-
-    float lonMin=std::max(MinLon,std::min(std::min(tlLon,trLon),std::min(blLon,brLon)));
-    float lonMax=std::min(MaxLon,std::max(std::max(tlLon,trLon),std::max(blLon,brLon)));
-
-    std::cout << lonMin << " " << latMin << " - " << lonMax << " " << latMax << std::endl;
-
-    float tileDPI=96.0;
-    float gradtorad=2*M_PI/360;
-    float earthRadiusMeter=6378137.0;
-    float earthExtentMeter=2*M_PI*earthRadiusMeter;
-    float tileWidthZoom0Aquator=earthExtentMeter;
-    float equatorTileWidth=tileWidthZoom0Aquator/Magnification.GetMagnification();
-    float equatorTileResolution=equatorTileWidth/256.0;
-    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/96;
-    float groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
-    float groundWidthVisibleMeter=groundWidthEquatorMeter*cos(gc.GetLat()*gradtorad);
-
-    float scale=width/(2*M_PI*groundWidthEquatorMeter/earthExtentMeter);
-    float scaleGradtorad=scale*gradtorad;
-
-    //float lonOffset=lonMin*scaleGradtorad;
-    latOffset=atanh(sin(Center.GetLat()*gradtorad));
-
-    double latDeriv = 1.0 / sin( (2 * Center.GetLat() * gradtorad + M_PI) /  2);
+    float latMin = std::max(MinLat, std::min(std::min(tlLat, trLat), std::min(blLat, brLat)));
+    float latMax = std::min(MaxLat, std::max(std::max(tlLat, trLat), std::max(blLat, brLat)));
+    float lonMin = std::max(MinLon, std::min(std::min(tlLon, trLon), std::min(blLon, brLon)));
+    float lonMax = std::min(MaxLon, std::max(std::max(tlLon, trLon), std::max(blLon, brLon)));
+    float tileDPI = 96.0;
+    float gradtorad = 2 * M_PI / 360;
+    float earthRadiusMeter = 6378137.0;
+    float earthExtentMeter = 2 * M_PI * earthRadiusMeter;
+    float tileWidthZoom0Aquator = earthExtentMeter;
+    float equatorTileWidth = tileWidthZoom0Aquator / Magnification.GetMagnification();
+    float equatorTileResolution = equatorTileWidth / 256.0;
+    float equatorCorrectedEquatorTileResolution = equatorTileResolution * tileDPI / 96;
+    float groundWidthEquatorMeter = width * equatorCorrectedEquatorTileResolution;
+    float groundWidthVisibleMeter = groundWidthEquatorMeter * cos(gc.GetLat() * gradtorad);
+    float scale = width / (2 * M_PI * groundWidthEquatorMeter / earthExtentMeter);
+    float scaleGradtorad = scale * gradtorad;
+    float latOffset = atanh(sin(Center.GetLat() * gradtorad));
+    double latDeriv = 1.0 / sin((2 * Center.GetLat() * gradtorad + M_PI) / 2);
     float scaledLatDeriv = latDeriv * gradtorad * scale;
-
-    float x2=(gc.GetLon()-Center.GetLon())*scaledLatDeriv;
-
-
-    //float y2=(atanh(sin(gc.GetLat()*gradtorad)))*scale;
-    float y2=(atanh(sin(gc.GetLat()*gradtorad))-latOffset)*scale;
-    //float y2 = (gc.GetLat()-Center.GetLat())*scaledLatDeriv;;
-
-    std::cout << "gradtorad: " << gradtorad << std::endl;
-    std::cout << "y " << y2 << " " << latOffset  << std::endl;
-
-    y2=height/2-y2;
-    x2 += width/2;
-
+    float x2 = (gc.GetLon() - Center.GetLon()) * scaledLatDeriv;
+    float y2 = (atanh(sin(gc.GetLat() * gradtorad)) - latOffset) * scale;
+    y2 = height / 2 - y2;
+    x2 += width / 2;
     float deg_rad = 180 / PI;
     float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
     float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
 
-    /*float height = abs(minLat_m - maxLat_m);
-    float width = abs(minLon - maxLon);
-    float x_width = width/height;
+    float minx = (lonMin - Center.GetLon()) * scaledLatDeriv + width / 2;
+    float miny = height / 2 - (atanh(sin(latMin * gradtorad)) - latOffset) * scale;
+    float maxx = (lonMax - Center.GetLon()) * scaledLatDeriv + width / 2;
+    float maxy = height / 2 - (atanh(sin(latMax * gradtorad)) - latOffset) * scale;
+
+    float x_width = width / height;
     float y_height = 1;
 
-    float x3 = ((2*x_width)*(x2)/((width)))-x_width;
-    float y3 = ((2*y_height)*(y2)/((height)))-y_height;*/
+    float x3 = ((2 * x_width) * (x2 - (minx)) / ((maxx) - (minx))) - x_width;
+    float y3 = ((2 * y_height) * (y2 - (miny)) / ((maxy) - (miny))) - y_height;
 
-    //glm::vec4 pixelP = glm::vec4(x3, y3, 0.0, 1.0);
-    glm::vec4 pixelPos = AreaRenderer.GetProjection() * AreaRenderer.GetView() * AreaRenderer.GetModel() * pixelPos;
-
-    std::cout << "screen: " << x2 << " " << y2 << " " << glm::to_string(pixelPos) << std::endl;
+    glm::vec4 pixelPos = glm::vec4(x3, y3, 0.0, 1.0);
+    pixelPos = AreaRenderer.GetProjection() * AreaRenderer.GetView() * AreaRenderer.GetModel() * pixelPos;
 
     return pixelPos;
-
-  }
+  }*/
 
   bool osmscout::MapPainterOpenGL::PixelToGeoOrig(double x, double y,
-                                      double& lon, double& lat)
-  {
+                                                  double &lon, double &lat) {
+    float tileDPI = 96.0;
+    float gradtorad = 2 * M_PI / 360;
+    float earthRadiusMeter = 6378137.0;
+    float earthExtentMeter = 2 * M_PI * earthRadiusMeter;
+    float tileWidthZoom0Aquator = earthExtentMeter;
+    float equatorTileWidth = tileWidthZoom0Aquator / Magnification.GetMagnification();
+    float equatorTileResolution = equatorTileWidth / 256.0;
+    float equatorCorrectedEquatorTileResolution = equatorTileResolution * tileDPI / dpi;
+    float groundWidthEquatorMeter = width * equatorCorrectedEquatorTileResolution;
+    float latOffset = atanh(sin(Center.GetLat() * gradtorad));
 
-    /*if (angle!=0.0) {
-      double xn=x*angleCos-y*angleSin;
-      double yn=x*angleSin+y*angleCos;
+    float scale = width / (2 * M_PI * groundWidthEquatorMeter / earthExtentMeter);
+    float scaleGradtorad = scale * gradtorad;
 
-      x=xn;
-      y=yn;
-    }*/
+    x -= width / 2;
+    y = height / 2 - y;
 
-    float tileDPI=96.0;
-    float gradtorad=2*M_PI/360;
-    float earthRadiusMeter=6378137.0;
-    float earthExtentMeter=2*M_PI*earthRadiusMeter;
-    float tileWidthZoom0Aquator=earthExtentMeter;
-    float equatorTileWidth=tileWidthZoom0Aquator/Magnification.GetMagnification();
-    float equatorTileResolution=equatorTileWidth/256.0;
-    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/96;
-    float groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
-    //float groundWidthVisibleMeter=groundWidthEquatorMeter*cos(gc.GetLat()*gradtorad);
-
-    float scale=width/(2*M_PI*groundWidthEquatorMeter/earthExtentMeter);
-    float scaleGradtorad=scale*gradtorad;
-
-    x-=width/2;
-    y=height/2-y;
-
-    // Transform to absolute geo coordinate
-    lon=Center.GetLon()+x/scaleGradtorad;
-    lat=atan(sinh(y/scale+latOffset))/gradtorad;
+    lon = Center.GetLon() + x / scaleGradtorad;
+    lat = atan(sinh(y / scale + latOffset)) / gradtorad;
 
     return true;
   }
 
-
-  /*glm::vec2
-  osmscout::MapPainterOpenGL::GeoToPixel(osmscout::GeoCoord gc) {
-
-
-
-    return;
-  }*/
-
-  osmscout::GeoCoord
-  osmscout::MapPainterOpenGL::PixelToGeo(glm::vec4 pixel) {
-    float PI = 3.1415926535897;
-    float R = 6378137.0;
-
-   // std::cout << "p: " << pixel.x << " " << pixel.y << std::endl;
-
-    float deg_rad = 180 / PI;
-    float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-    float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-
-    float height = abs(minLat_m - maxLat_m);
-    float width = abs(minLon - maxLon);
-    float x_width = width/height;
-    float y_height = 1;
-
-    float openlgx = ((2*x_width)*(pixel.x)/((this->width)))-x_width;
-    float opengly = ((2*y_height)*(pixel.y)/((this->height)))-y_height;
-
-    std::cout << "op: " << openlgx << " " << opengly << std::endl;
-
-    glm::vec4 p = glm::vec4(openlgx,opengly, 0.0, 1.0);
-    return OpenGLPixelToGeo(p);
-  }
-
-  /*osmscout::MapPainterOpenGL::PixelToGeo(glm::vec4 pixel) {
-  float PI = 3.1415926535897;
-  float R = 6378137.0;
-
-  // std::cout << "p: " << pixel.x << " " << pixel.y << std::endl;
-
-  float deg_rad = 180 / PI;
-  float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-  float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-
-  float height = abs(minLat_m - maxLat_m);
-  float width = abs(minLon - maxLon);
-  float x_width = width/height;
-  float y_height = 1;
-
-  float openlgx = ((2*x_width)*(pixel.x)/((this->width)))-x_width;
-  float opengly = ((2*y_height)*(pixel.y)/((this->height)))-y_height;
-
-  // std::cout << "op: " << openlgx << " " << opengly << std::endl;
-
-  glm::vec4 p = glm::vec4(openlgx,opengly, 0.0, 1.0);
-  return p;
-}*/
-
-  osmscout::GeoCoord
-  osmscout::MapPainterOpenGL::OpenGLPixelToGeo(glm::vec4 pixel) {
-
-    float PI = 3.1415926535897;
-    float R = 6378137.0;
-
-    float deg_rad = 180 / PI;
-    float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-    float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-
-    float x_width = this->width/this->height;
-    float minx = -1 * x_width / (float)2;
-    float miny = -1;
-    float maxx = x_width / (float)2;
-    float maxy = 1;
-    float lonwidth = maxLon - minLon;
-    float latheight = maxLat_m - minLat_m;
-
-    glm::mat4x4 inv = glm::inverse(( GroundRenderer.GetProjection() * GroundRenderer.GetModel() * GroundRenderer.GetView()));
-    glm::vec4 pixelPos = inv * pixel;
-    //glm::vec3 pixelPos = glm::project(lel, GroundRenderer.GetModel() , GroundRenderer.GetProjection(), viewport)
-    //std::cout << "before: " << glm::to_string(pixel) << " after: " << glm::to_string(pixelPos) << std::endl;
-
-    float OldRangeX = (maxx - minx);
-    float NewRangeX = (maxLon - minLon);
-    float OldRangeY = (maxy - miny);
-    float NewRangeY = (maxLat_m - minLat_m);
-    float x = (((pixelPos.x - minx) * NewRangeX) / OldRangeX) + minLon;
-    float y = (((pixelPos.y - miny) * NewRangeY) / OldRangeY) + minLat_m;
-
-    //std::cout << "lel: " << x << " " << y << std::endl;
-
-    float y1 = ( atan(exp( (y / deg_rad) )) * 2 - M_PI/2 ) * deg_rad;
-
-    //std::cout << "newgeo: " << x << " "  << y1 << std::endl;
-    osmscout::GeoCoord g(x, y1);
-    return g;
+  osmscout::GeoCoord osmscout::MapPainterOpenGL::GetCenter() {
+    return Center;
   }
 
   void osmscout::MapPainterOpenGL::DrawMap() {
@@ -987,15 +743,12 @@ namespace osmscout {
     glBindVertexArray(GroundTileRenderer.getVAO());
     glUseProgram(GroundTileRenderer.getShaderProgram());
 
-    GroundTileRenderer.AddUniform("minLon", minLon);
-    GroundTileRenderer.AddUniform("minLat", minLat);
-    GroundTileRenderer.AddUniform("maxLon", maxLon);
-    GroundTileRenderer.AddUniform("maxLat", maxLat);
     GroundTileRenderer.AddUniform("windowWidth", width);
     GroundTileRenderer.AddUniform("windowHeight", height);
     GroundTileRenderer.AddUniform("centerLat", Center.GetLat());
     GroundTileRenderer.AddUniform("centerLon", Center.GetLon());
     GroundTileRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    GroundTileRenderer.AddUniform("dpi", dpi);
 
     GroundTileRenderer.SetProjection(width, height);
     GroundTileRenderer.SetModel();
@@ -1005,15 +758,12 @@ namespace osmscout {
     glBindVertexArray(GroundRenderer.getVAO());
     glUseProgram(GroundRenderer.getShaderProgram());
 
-    GroundRenderer.AddUniform("minLon", minLon);
-    GroundRenderer.AddUniform("minLat", minLat);
-    GroundRenderer.AddUniform("maxLon", maxLon);
-    GroundRenderer.AddUniform("maxLat", maxLat);
     GroundRenderer.AddUniform("windowWidth", width);
     GroundRenderer.AddUniform("windowHeight", height);
     GroundRenderer.AddUniform("centerLat", Center.GetLat());
     GroundRenderer.AddUniform("centerLon", Center.GetLon());
     GroundRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    GroundRenderer.AddUniform("dpi", dpi);
 
     GroundRenderer.SetProjection(width, height);
     GroundRenderer.SetModel();
@@ -1023,15 +773,12 @@ namespace osmscout {
     glBindVertexArray(AreaRenderer.getVAO());
     glUseProgram(AreaRenderer.getShaderProgram());
 
-    AreaRenderer.AddUniform("minLon", minLon);
-    AreaRenderer.AddUniform("minLat", minLat);
-    AreaRenderer.AddUniform("maxLon", maxLon);
-    AreaRenderer.AddUniform("maxLat", maxLat);
     AreaRenderer.AddUniform("windowWidth", width);
     AreaRenderer.AddUniform("windowHeight", height);
     AreaRenderer.AddUniform("centerLat", Center.GetLat());
     AreaRenderer.AddUniform("centerLon", Center.GetLon());
     AreaRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    AreaRenderer.AddUniform("dpi", dpi);
 
     AreaRenderer.SetProjection(width, height);
     AreaRenderer.SetModel();
@@ -1041,15 +788,12 @@ namespace osmscout {
     glBindVertexArray(PathRenderer.getVAO());
     glUseProgram(PathRenderer.getShaderProgram());
 
-    PathRenderer.AddUniform("minLon", minLon);
-    PathRenderer.AddUniform("minLat", minLat);
-    PathRenderer.AddUniform("maxLon", maxLon);
-    PathRenderer.AddUniform("maxLat", maxLat);
     PathRenderer.AddUniform("windowWidth", width);
     PathRenderer.AddUniform("windowHeight", height);
     PathRenderer.AddUniform("centerLat", Center.GetLat());
     PathRenderer.AddUniform("centerLon", Center.GetLon());
     PathRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    PathRenderer.AddUniform("dpi", dpi);
 
     PathRenderer.SetProjection(width, height);
     PathRenderer.SetModel();

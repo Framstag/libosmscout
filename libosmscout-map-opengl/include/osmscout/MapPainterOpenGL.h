@@ -37,11 +37,11 @@ namespace osmscout {
 
     int width;
     int height;
+    double dpi;
 
     int screenWidth;
     int screenHeight;
 
-    float zoomLevel;
     float minLon;
     float minLat;
     float maxLon;
@@ -64,10 +64,6 @@ namespace osmscout {
     osmscout::FillStyleRef landFill;
     osmscout::FillStyleRef seaFill;
     std::vector<osmscout::LineStyleRef> lineStyles;
-    osmscout::GeoBox BoundingBox;
-
-    //osmscout::TransBuffer                  transBuffer;
-    //osmscout::CoordBuffer *coordBuffer;
     osmscout::GeoCoord Center;
     osmscout::Magnification Magnification;
 
@@ -82,45 +78,30 @@ namespace osmscout {
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
 
-    void ProcessImageData();
+    // void ProcessImageData();
 
-    void ProcessLabelData();
+    // void ProcessLabelData();
 
   public:
-    MapPainterOpenGL(int width, int height, int screenWidth, int screenHeight);
+    MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
 
     ~MapPainterOpenGL();
 
-    void loadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                  const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig,
-                  const osmscout::GeoBox &BoundingBox);
+    void LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                  const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
     void SwapData();
 
-    void onZoom(float zoom, float zoomScale);
-    void ZoomTo(float zoom, float zoomScale, float x, float y);
-
-    void onTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
-
     void DrawMap();
 
-    glm::vec4 GeoToOpenGLPixel(osmscout::GeoCoord gc);
+    void OnZoom(float zoomDirection);
 
-    glm::vec2 GeoToPixel(osmscout::GeoCoord gc);
+    void OnTranslation(int startPointX, int startPointY, int endPointX, int endPointY);
 
-    osmscout::GeoCoord OpenGLPixelToGeo(glm::vec4 pixel);
-
-    osmscout::GeoCoord PixelToGeo(glm::vec4 pixel);
-
-    glm::vec4 PixelToOpenGLPixel(glm::vec4 pixel);
-
-    float PixelWidthToOpenGLPixelWidth(float width);
-
-    void SetCenter(osmscout::GeoCoord);
-
+    osmscout::GeoCoord GetCenter();
 
     bool PixelToGeoOrig(double x, double y,
-                    double& lon, double& lat);
+                        double &lon, double &lat);
 
   };
 }

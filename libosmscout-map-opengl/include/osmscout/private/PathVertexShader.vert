@@ -22,9 +22,7 @@ uniform float centerLon;
 uniform float magnification;
 uniform float dpi = 96.0;
 
-//uniforms for Mercator projection
 uniform float PI = 3.1415926535897;
-uniform float R = 6378137.0;
 
 vec2 PixelToGeo(in float x, in float y, in float latOffset)
 {
@@ -35,9 +33,8 @@ vec2 PixelToGeo(in float x, in float y, in float latOffset)
     float tileWidthZoom0Aquator=earthExtentMeter;
     float equatorTileWidth=tileWidthZoom0Aquator/magnification;
     float equatorTileResolution=equatorTileWidth/256.0;
-    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/96;
+    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/dpi;
     float groundWidthEquatorMeter=windowWidth*equatorCorrectedEquatorTileResolution;
-    //float groundWidthVisibleMeter=groundWidthEquatorMeter*cos(gc.GetLat()*gradtorad);
 
     float scale=windowWidth/(2*PI*groundWidthEquatorMeter/earthExtentMeter);
     float scaleGradtorad=scale*gradtorad;
@@ -45,12 +42,11 @@ vec2 PixelToGeo(in float x, in float y, in float latOffset)
     x-=windowWidth/2;
     y=windowHeight/2-y;
 
-    // Transform to absolute geo coordinate
     float lon=centerLon+x/scaleGradtorad;
     float lat=atan(sinh(y/scale+latOffset))/gradtorad;
 
-    vec2 r = vec2(lon,lat);
-    return (r);
+    vec2 result = vec2(lon,lat);
+    return (result);
 }
 
 vec2 GeoToPixel(in float posx, in float posy){
@@ -61,7 +57,7 @@ vec2 GeoToPixel(in float posx, in float posy){
     float tileWidthZoom0Aquator=earthExtentMeter;
     float equatorTileWidth=tileWidthZoom0Aquator/magnification;
     float equatorTileResolution=equatorTileWidth/256.0;
-    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/96;
+    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/dpi;
     float groundWidthEquatorMeter=windowWidth*equatorCorrectedEquatorTileResolution;
     float groundWidthVisibleMeter=groundWidthEquatorMeter*cos(posy*gradtorad);
 
@@ -86,50 +82,44 @@ vec2 GeoToPixel(in float posx, in float posy){
     float scale=windowWidth/(2*PI*groundWidthEquatorMeter/earthExtentMeter);
     float scaleGradtorad=scale*gradtorad;
 
-    //float lonOffset=lonMin*scaleGradtorad;
-
-
     float latDeriv = 1.0 / sin( (2 * centerLat * gradtorad + PI) /  2);
     float scaledLatDeriv = latDeriv * gradtorad * scale;
 
-    float x2=(posx-centerLon)*scaledLatDeriv;
-    //float y2 = (posy-centerLat)*scaledLatDeriv;
-    float y2=(atanh(sin(posy*gradtorad))-latOffset)*scale;
+    float windowPosX=(posx-centerLon)*scaledLatDeriv;
+    float windowPosY=(atanh(sin(posy*gradtorad))-latOffset)*scale;
 
-    y2=windowHeight/2-y2;
-    x2 += windowWidth/2;
+    windowPosY=windowHeight/2-windowPosY;
+    windowPosX += windowWidth/2;
 
-    float deg_rad = 180 / PI;
-    float minLat_m = (log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-    float maxLat_m = (log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
+    float MinX = (lonMin-centerLon)*scaledLatDeriv + windowWidth/2;
+    float MinY = windowHeight/2 - (atanh(sin(latMin*gradtorad))-latOffset)*scale;
+    float MaxX = (lonMax-centerLon)*scaledLatDeriv + windowWidth/2;
+    float MaxY = windowHeight/2 - (atanh(sin(latMax*gradtorad))-latOffset)*scale;
 
-    float height = abs(minLat_m - maxLat_m);
-    float width = abs(minLon - maxLon);
-    float x_width = width/height;
-    float y_height = 1;
+    float newWidth = windowWidth/windowHeight;
+    float newHeight = 1;
 
-    float x3 = ((2*x_width)*(x2)/((windowWidth)))-x_width;
-    float y3 = ((2*y_height)*(y2)/((windowHeight)))-y_height;
+    float screenX = ((2*newWidth)*(windowPosX - (MinX))/((MaxX)-(MinX)))-newWidth;
+    float screenY = ((2*newHeight)*(windowPosY - (MinY))/((MaxY)-(MinY)))-newHeight;
 
-    vec2 v = vec2(x2, y2);
-    return(v);
+    vec2 result = vec2(screenX, screenY);
+    return(result);
 }
 
 
 void main() {
     Color = color;
-    float thickness_norm = thickness/((windowWidth/thickness)/2);
+    float thickness_norm = ceil(thickness)/windowWidth;
 
     vec2 n = GeoToPixel(next.x, next.y);
     vec2 c = GeoToPixel(position.x, position.y);
     vec2 p = GeoToPixel(previous.x, previous.y);
 
-    n = vec2(n.x, -n.y);
-    c = vec2(c.x, -c.y);
-    p = vec2(p.x, -p.y);
+    n = vec2(n.x, n.y);
+    c = vec2(c.x, c.y);
+    p = vec2(p.x, p.y);
 
     vec4 pos = Projection * View * Model * vec4(c.x, c.y, 0, 1);
-    //vec4 pos = View * Model * vec4(x, y, 0, 1);
 
     vec2 normal;
     vec2 result;
@@ -180,123 +170,4 @@ void main() {
 
     vec4 delta = vec4(result * thickness_norm, 0, 0);
     gl_Position = (pos + delta);
-    //float rx, ry;
-
-    //float x3 = ((2*x_width)*(x2)/((800)))-x_width;
-    //float y3 = ((2*y_height)*(y2)/((600)))-y_height;
-
-//gl_Position = Projection * View * Model * vec4(x, y, 0.0, 1.0);
-//Color = vec3(pos.x, pos.y, 0);
-//Color = vec3(0.92, 0.0, 0.0);
-    //gl_Position = Projection * View * Model * vec4(pos.x, -pos.y, 0.0, 1.0);
-    //gl_Position = Projection * View * Model * vec4(x, y, 0.0, 1.0);
-    //gl_Position = View * Model * vec4(x, y, 0.0, 1.0);
-    //gl_Position = View * Modecl * vec4(x, y, 0.0, 1.0);
-    //gl_Position = vec4(position, 0.0, 1.0);
 }
-
-/*#version 150 core
-in vec2 position;
-in vec2 previous;
-in vec2 next;
-in vec3 color;
-in float index;
-in float thickness;
-out vec3 Color;
-uniform mat4 Model;
-uniform mat4 View;
-uniform mat4 Projection;
-uniform float minLon;
-uniform float minLat;
-uniform float maxLon;
-uniform float maxLat;
-uniform float screenHeight;
-uniform float screenWidth;
-
-//uniforms for Mercator projection
-uniform float PI = 3.1415926535897;
-uniform float R = 6378137.0;
-
-void main() {
-    Color = color;
-    float deg_rad = 180 / PI;
-    float y1 = log(tan((position.y / deg_rad) / 2 + PI / 4));
-    float y1_next = log(tan((next.y / deg_rad) / 2 + PI / 4));
-    float y1_prev = log(tan((previous.y / deg_rad) / 2 + PI / 4));
-    float merc_y = y1 * deg_rad;
-    float merc_y_next = y1_next * deg_rad;
-    float merc_y_prev = y1_prev * deg_rad;
-
-    float minLat_m = (log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-    float maxLat_m = (log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-
-     float height = abs(minLat_m - maxLat_m);
-     float width = abs(minLon - maxLon);
-     float x_width = width/height;
-     float y_height = 1;
-
-     float x = ((2*x_width)*(position.x - (minLon))/((maxLon)-(minLon)))-x_width;
-     float y = ((2*y_height)*(merc_y - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
-     float x_next = ((2*x_width)*(next.x - (minLon))/((maxLon)-(minLon)))-x_width;
-     float y_next = ((2*y_height)*(merc_y_next - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
-     float x_prev = ((2*x_width)*(previous.x - (minLon))/((maxLon)-(minLon)))-x_width;
-     float y_prev = ((2*y_height)*(merc_y_prev - (minLat_m))/((maxLat_m)-(minLat_m)))-y_height;
-     float thickness_norm = thickness/((screenWidth/thickness)/2);
-
-    vec2 n = vec2(x_next, y_next);
-    vec2 c = vec2(x, y);
-    vec2 p = vec2(x_prev, y_prev);
-
-    vec4 pos = Projection * View * Model * vec4(x, y, 0, 1);
-    //vec4 pos = View * Model * vec4(x, y, 0, 1);
-
-    vec2 normal;
-    vec2 result;
-	if(index == 1.0){
-	    float nx = (x_next - x);
-        float ny = (y_next - y);
-        normal = normalize(vec2(ny, -nx));
-        result = normal;
-    }
-	else if(index == 2.0){
-    	float nx = (x_next - x);
-        float ny = (y_next - y);
-        normal = normalize(vec2(-ny, nx));
-        result = normal;
-	}
-	else if(index == 3.0){
-        vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
-        vec2 miter = vec2(tangent.y, -tangent.x);
-        result = miter;
-	}
-	else if(index == 4.0){
-        vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
-        vec2 miter = vec2(-tangent.y, tangent.x);
-        result = miter;
-	}
-	else if(index == 5.0){
-        vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
-        vec2 miter = vec2(tangent.y, -tangent.x);
-        result = miter;
-	}
-	else if(index == 6.0){
-        vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
-        vec2 miter = vec2(-tangent.y, tangent.x);
-        result = miter;
-	}
-	else if(index == 7.0){
-	    float nx = (x - x_prev);
-        float ny = (y - y_prev);
-        normal = normalize(vec2(ny, -nx));
-        result = normal;
-	}
-	else{
-	    float nx = (x - x_prev);
-        float ny = (y - y_prev);
-        normal = normalize(vec2(-ny, nx));
-        result = normal;
-	}
-
-    vec4 delta = vec4(result * thickness_norm, 0, 0);
-    gl_Position = (pos + delta);
-}*/
