@@ -135,7 +135,10 @@ public:
   double GetFontSize() const;
   void SetFontSize(double fontSize);
 
-  const QString GetHttpCacheDir() const;  
+  const QString GetHttpCacheDir() const;
+  
+  const QByteArray GetCookieData() const;
+  void SetCookieData(QByteArray data);
 };
 
 /**
