@@ -66,6 +66,12 @@ namespace osmscout {
     std::vector<osmscout::LineStyleRef> lineStyles;
     osmscout::GeoBox BoundingBox;
 
+    //osmscout::TransBuffer                  transBuffer;
+    //osmscout::CoordBuffer *coordBuffer;
+    osmscout::GeoCoord Center;
+    osmscout::Magnification Magnification;
+
+
     void ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
@@ -105,6 +111,16 @@ namespace osmscout {
     osmscout::GeoCoord OpenGLPixelToGeo(glm::vec4 pixel);
 
     osmscout::GeoCoord PixelToGeo(glm::vec4 pixel);
+
+    glm::vec4 PixelToOpenGLPixel(glm::vec4 pixel);
+
+    float PixelWidthToOpenGLPixelWidth(float width);
+
+    void SetCenter(osmscout::GeoCoord);
+
+
+    bool PixelToGeoOrig(double x, double y,
+                    double& lon, double& lat);
 
   };
 }
