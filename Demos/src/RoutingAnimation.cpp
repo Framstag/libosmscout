@@ -69,6 +69,10 @@
 
   Very short: "In den Hüchten" Dortmund => "Kaiserstrasse" Dortmund
      51.5717798 7.4587852  51.5143553 7.4932118
+
+ Video can be assembled from generated frames by avconv:
+ avconv -r 10 -i  animation/%07d.png -b:v 1000k test.mp4
+
 */
 
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
@@ -148,7 +152,8 @@ public:
                                     osmscout::RouteNodeRef &/*currentRouteNode*/,
                                     osmscout::RoutingService::OpenList &openList,
                                     osmscout::RoutingService::OpenMap &/*openMap*/,
-                                    const osmscout::RoutingService::ClosedSet &closedSet)
+                                    const osmscout::RoutingService::ClosedSet &closedSet,
+                                    const ClosedSet &closedRestrictedSet)
   {
     double x1,y1;
     double x2,y2;
@@ -164,6 +169,7 @@ public:
     QColor green  =QColor::fromRgbF(0,1,0, 0.8);
     QColor red    =QColor::fromRgbF(1,0,0, 0.8);
     QColor yellow =QColor::fromRgbF(0.5,0.5,0.0, 1.0);
+    QColor grey   =QColor::fromRgbF(0.2,0.2,0.2, 0.7);
 
     QPen pen;
     pen.setWidth(5);
@@ -181,7 +187,27 @@ public:
           !GetRouteNodeByOffset(closedNode.previousNode,n2)){
         return false;
       }
-      
+
+      projection.GeoToPixel(n1->GetCoord(),x1,y1);
+      projection.GeoToPixel(n2->GetCoord(),x2,y2);
+      painter.setPen(pen);
+      painter.drawLine(x1,y1,x2,y2);
+    }
+    
+    // closed, restricted
+    painter.setBrush(QBrush(grey));
+    pen.setColor(grey);
+
+    for (const auto &closedNode:closedRestrictedSet){
+      if (!closedNode.currentNode.IsValid() ||
+          !closedNode.previousNode.IsValid()){
+        continue;
+      }
+      if (!GetRouteNodeByOffset(closedNode.currentNode,n1) ||
+          !GetRouteNodeByOffset(closedNode.previousNode,n2)){
+        return false;
+      }
+
       projection.GeoToPixel(n1->GetCoord(),x1,y1);
       projection.GeoToPixel(n2->GetCoord(),x2,y2);
       painter.setPen(pen);

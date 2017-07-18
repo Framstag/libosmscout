@@ -111,6 +111,7 @@ namespace osmscout {
 
     void ResolveRNodeChainToList(DBFileOffset finalRouteNode,
                                  const ClosedSet& closedSet,
+                                 const ClosedSet &closedRestrictedSet,
                                  std::list<VNode>& nodes);
 
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
@@ -201,7 +202,8 @@ namespace osmscout {
                                       RouteNodeRef &currentRouteNode,
                                       OpenList &openList,
                                       OpenMap &openMap,
-                                      const ClosedSet &closedSet);
+                                      const ClosedSet &closedSet,
+                                      const ClosedSet &closedRestrictedSet);
 
     virtual bool WalkPaths(const RoutingState& state,
                            RNodeRef &current,
@@ -209,11 +211,11 @@ namespace osmscout {
                            OpenList &openList,
                            OpenMap &openMap,
                            ClosedSet &closedSet,
+                           ClosedSet &closedRestrictedSet,
                            RoutingResult &result,
                            const RoutingParameter& parameter,
                            const GeoCoord &targetCoord,
                            const Vehicle &vehicle,
-                           bool &accessViolation,
                            size_t &nodesIgnoredCount,
                            double &currentMaxDistance,
                            const double &overallDistance,
