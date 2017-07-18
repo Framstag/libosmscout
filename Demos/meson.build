@@ -80,6 +80,16 @@ if buildMapQt
                                      install: true)
 endif
 
+if buildMapQt
+  RoutingAnimation = executable('RoutingAnimation',
+                                'src/RoutingAnimation.cpp',
+                                cpp_args: ['-fPIC'],
+                                include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
+                                dependencies: [mathDep, qt5GuiDep, qt5WidgetsDep],
+                                link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                                install: true)
+endif
+
 Routing = executable('Routing',
                      'src/Routing.cpp',
                      include_directories: [osmscoutIncDir],

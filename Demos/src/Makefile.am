@@ -18,7 +18,8 @@ endif
 
 if HAVE_LIB_OSMSCOUTMAPQT
 bin_PROGRAMS += DrawMapQt \
-                ResourceConsumptionQt
+                ResourceConsumptionQt \
+                RoutingAnimation
 endif
 
 if HAVE_LIB_OSMSCOUTMAPAGG
@@ -110,6 +111,15 @@ ResourceConsumptionQt_CXXFLAGS = -fPIC \
 ResourceConsumptionQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
                               $(LIBOSMSCOUTMAP_LIBS) \
                               $(LIBOSMSCOUT_LIBS)
+
+RoutingAnimation_SOURCES = RoutingAnimation.cpp
+RoutingAnimation_CXXFLAGS = -fPIC \
+                            $(LIBOSMSCOUTMAPQT_CFLAGS) \
+                            $(LIBOSMSCOUTMAP_CFLAGS) \
+                            $(LIBOSMSCOUT_CFLAGS)
+RoutingAnimation_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
+                         $(LIBOSMSCOUTMAP_LIBS) \
+                         $(LIBOSMSCOUT_LIBS)
 
 Routing_SOURCES = Routing.cpp
 Routing_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
