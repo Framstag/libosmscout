@@ -227,6 +227,7 @@ namespace osmscout {
 
     void ScaleModel(float zoomSize) {
       scaleSize += zoomSize;
+      //scaleSize = zoomSize;
       Model = glm::mat4(1.0f);
       Model = glm::scale(Model, glm::vec3(scaleSize, scaleSize, scaleSize));
       SetModel();
@@ -236,6 +237,7 @@ namespace osmscout {
       View = glm::lookAt(
           glm::vec3(lookX, lookY, 1.0f), //position
           glm::vec3(lookX, lookY, 0.0f), //look
+          //glm::vec3(0.0f, 0.0f, 0.0f), //look
           glm::vec3(0.0f, 1.0f, 0.0f) //up
       );
       GLint uniView = glGetUniformLocation(shaderProgram, "View");
@@ -244,7 +246,7 @@ namespace osmscout {
 
     void SetProjection(float width, float height) {
       Projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.1f, 10.0f);
-      //Projection = glm::ortho(0.0f, -1.333f, 1.333f, 0.0f, -1.0f, 100.0f);
+      //Projection = glm::ortho(0.0f,(float) width, 0.0f, (float) height,0.1f, 10.0f);
       GLint uniProj = glGetUniformLocation(shaderProgram, "Projection");
       glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(Projection));
     }
@@ -266,6 +268,18 @@ namespace osmscout {
 
     GLuint getShaderProgram() {
       return this->shaderProgram;
+    }
+
+    const glm::mat4 &GetModel() const {
+      return Model;
+    }
+
+    const glm::mat4 &GetView() const {
+      return View;
+    }
+
+    const glm::mat4 &GetProjection() const {
+      return Projection;
     }
 
     void Draw() {

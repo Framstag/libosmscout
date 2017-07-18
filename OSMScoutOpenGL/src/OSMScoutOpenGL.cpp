@@ -28,63 +28,70 @@
 #include <osmscout/util/Logger.h>
 #include <GLFW/glfw3.h>
 
-
-struct Arguments
-{
-  bool               help;
-  std::string        databaseDirectory;
-  std::string        styleFileDirectory;
-  size_t             width;
-  size_t             height;
+struct Arguments {
+  bool help;
+  std::string databaseDirectory;
+  std::string styleFileDirectory;
+  size_t width;
+  size_t height;
 
   Arguments()
-          : help(false)
-  {
+      : help(false) {
     // no code
   }
 };
 
 osmscout::DatabaseParameter databaseParameter;
+osmscout::AreaSearchParameter searchParameter;
+osmscout::MapParameter drawParameter;
 osmscout::DatabaseRef database;
 osmscout::MapServiceRef mapService;
 osmscout::StyleConfigRef styleConfig;
-osmscout::GeoBox BoundingBox;
-osmscout::MercatorProjection projection;
-osmscout::MapParameter drawParameter;
-osmscout::AreaSearchParameter searchParameter;
+std::list <osmscout::TileRef> tiles;
 osmscout::MapData data;
-std::list<osmscout::TileRef> tiles;
+
+osmscout::MercatorProjection projection;
+osmscout::Magnification magnification;
+osmscout::GeoBox boundingBox;
+osmscout::GeoCoord center;
+
 osmscout::MapPainterOpenGL *renderer;
+
 std::string map;
 std::string style;
+size_t width;
+size_t height;
 std::future<bool> result;
 
-int zoomLevel;
-int zoom = 0;
-double prevX = 0;
-double prevY = 0;
+double prevX;
+double prevY;
+int level;
+int zoom;
 unsigned long long lastZoom;
 bool loadData = 0;
 bool loadingInProgress = 0;
-
-size_t width;
-size_t height;
+int offset;
 
 bool LoadData() {
   data.ClearDBData();
   tiles.clear();
-  projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
-                 osmscout::Magnification(zoomLevel),
+  magnification.SetLevel(level);
+  osmscout::MagnificationConverter mm;
+  std::string s;
+  mm.Convert(magnification.GetLevel(), s);
+  osmscout::log.Info() << "Zoom level: " << s << " " << magnification.GetLevel();
+  projection.Set(center,
+                 magnification,
                  96,
                  width,
                  height);
 
   searchParameter.SetUseLowZoomOptimization(false);
-  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
+  mapService->LookupTiles(projection, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
-  mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
-  renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
+  mapService->GetGroundTiles(projection, data.groundTiles);
+  renderer->LoadData(data, drawParameter, projection, styleConfig);
 
   return true;
 }
@@ -97,36 +104,43 @@ static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int acti
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, true);
   }
-  if(key == GLFW_KEY_LEFT){
-    renderer->onTranslation(prevX, prevY, prevX + 10, prevY);
+  if (key == GLFW_KEY_LEFT) {
+    renderer->OnTranslation(prevX, prevY, prevX + 10, prevY);
     prevX = prevX + 10;
+    center = renderer->GetCenter();
+    loadData = 1;
   }
-  if(key == GLFW_KEY_RIGHT){
-    renderer->onTranslation(prevX, prevY, prevX - 10, prevY);
+  if (key == GLFW_KEY_RIGHT) {
+    renderer->OnTranslation(prevX, prevY, prevX - 10, prevY);
     prevX = prevX - 10;
+    center = renderer->GetCenter();
+    loadData = 1;
   }
-  if(key == GLFW_KEY_UP){
-    renderer->onTranslation(prevX, prevY, prevX, prevY + 10);
+  if (key == GLFW_KEY_UP) {
+    renderer->OnTranslation(prevX, prevY, prevX, prevY + 10);
     prevY = prevY + 10;
+    center = renderer->GetCenter();
+    loadData = 1;
   }
-  if(key == GLFW_KEY_DOWN){
-    renderer->onTranslation(prevX, prevY, prevX, prevY - 10);
+  if (key == GLFW_KEY_DOWN) {
+    renderer->OnTranslation(prevX, prevY, prevX, prevY - 10);
     prevY = prevY - 10;
-  }
-  if(key == GLFW_KEY_KP_ADD || key == GLFW_KEY_I){
-    zoomLevel += 100;
-    renderer->onZoom(1, 0.05);
-    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
+    center = renderer->GetCenter();
     loadData = 1;
   }
-  if(key == GLFW_KEY_KP_SUBTRACT || key == GLFW_KEY_O){
-    zoomLevel -= 100;
-    renderer->onZoom(-1, 0.05);
-    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
+  if (key == GLFW_KEY_KP_ADD || key == GLFW_KEY_I) {
+    offset = 1;
+    zoom = 1;
     loadData = 1;
   }
+  if (key == GLFW_KEY_KP_SUBTRACT || key == GLFW_KEY_O) {
+    offset = -1;
+    zoom = 1;
+    loadData = 1;
+  }
+
+  lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
+          std::chrono::steady_clock::now().time_since_epoch()).count();
 
 }
 
@@ -151,73 +165,76 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 
 }
 
-static void scroll_callback(GLFWwindow *window, double /*xoffset*/, double yoffset) {
-  zoomLevel += yoffset * 100;
-  double x, y;
-  glfwGetCursorPos(window, &x, &y);
-  renderer->onZoom(yoffset, 0.05);
+static void scroll_callback(GLFWwindow */*window*/, double /*xoffset*/, double yoffset) {
+  offset = yoffset;
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now().time_since_epoch()).count();
   loadData = 1;
-  osmscout::log.Info() << "Magnification: " << zoomLevel;
-  osmscout::log.Info() << "BoundingBox: [" << BoundingBox.GetMinLon() << " "  << BoundingBox.GetMinLat() << " "
-                                << BoundingBox.GetMaxLon() << " " << BoundingBox.GetMaxLat() << "]";
+  zoom = 1;
+  osmscout::log.Info() << "Zoom level: " << magnification.GetLevel();
+  osmscout::log.Info() << "Magnification: " << magnification.GetMagnification();
+  osmscout::log.Info() << "BoundingBox: [" << boundingBox.GetMinLon() << " " << boundingBox.GetMinLat() << " "
+                       << boundingBox.GetMaxLon() << " " << boundingBox.GetMaxLat() << "]";
+  osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLon() << "]";
 }
 
 static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
   if (button_down) {
-    renderer->onTranslation(prevX, prevY, xpos, ypos);
-    prevX = xpos;
-    prevY = ypos;
+    renderer->OnTranslation(prevX, prevY, xpos, ypos);
+    center = renderer->GetCenter();
+    loadData = 1;
+    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
   }
+  prevX = xpos;
+  prevY = ypos;
 }
 
 int main(int argc, char *argv[]) {
 
-  osmscout::CmdLineParser   argParser("OSMScoutOpenGL",
-                                      argc,argv);
-  std::vector<std::string>  helpArgs{"h","help"};
-  Arguments                 args;
+  osmscout::CmdLineParser argParser("OSMScoutOpenGL",
+                                    argc, argv);
+  std::vector <std::string> helpArgs{"h", "help"};
+  Arguments args;
 
-  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
-                        args.help=value;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool &value) {
+                        args.help = value;
                       }),
                       helpArgs,
                       "Return argument help",
                       true);
 
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.databaseDirectory=value;
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
+                            args.databaseDirectory = value;
                           }),
                           "DATABASE",
                           "Directory of the database to use");
 
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.styleFileDirectory=value;
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
+                            args.styleFileDirectory = value;
                           }),
                           "STYLEFILE",
                           "Directory of the stylefile to use");
 
-  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
-                            args.width=value;
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t &value) {
+                            args.width = value;
                           }),
                           "WIDTH",
                           "Width of the window");
 
-  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t& value) {
-                            args.height=value;
+  argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t &value) {
+                            args.height = value;
                           }),
                           "HEIGHT",
                           "Height of the window");
 
-  osmscout::CmdLineParseResult cmdResult=argParser.Parse();
+  osmscout::CmdLineParseResult cmdResult = argParser.Parse();
 
   if (cmdResult.HasError()) {
     std::cerr << "ERROR: " << cmdResult.GetErrorDescription() << std::endl;
     std::cout << argParser.GetHelp() << std::endl;
     return 1;
-  }
-  else if (args.help) {
+  } else if (args.help) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
@@ -239,23 +256,25 @@ int main(int argc, char *argv[]) {
   width = args.width;
   height = args.height;
 
-  database.get()->GetBoundingBox(BoundingBox);
-
+  database.get()->GetBoundingBox(boundingBox);
 
   drawParameter.SetFontSize(3.0);
 
-  zoomLevel = 100;
-  projection.Set(osmscout::GeoCoord(BoundingBox.GetCenter()),
-                 osmscout::Magnification(zoomLevel),
+  center = boundingBox.GetCenter();
+  level = 5;
+  magnification.SetLevel(level);
+
+  projection.Set(center,
+                 magnification,
                  96,
                  width,
                  height);
 
   searchParameter.SetUseLowZoomOptimization(false);
-  mapService->LookupTiles(zoomLevel, BoundingBox, tiles);
+  mapService->LookupTiles(projection, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
-  mapService->GetGroundTiles(BoundingBox, zoomLevel, data.groundTiles);
+  mapService->GetGroundTiles(projection, data.groundTiles);
 
   glfwWindowHint(GLFW_SAMPLES, 4);
   GLFWwindow *window;
@@ -271,6 +290,11 @@ int main(int argc, char *argv[]) {
   int screenWidth = mode->width;
   int screenHeight = mode->height;
 
+  int widthMM, heightMM;
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
+  const double dpi = mode->width / (widthMM / 25.4);
+
   window = glfwCreateWindow(width, height, "OSMScoutOpenGL", NULL, NULL);
   if (!window) {
     glfwTerminate();
@@ -282,10 +306,9 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
-  renderer = new osmscout::MapPainterOpenGL(width, height, screenWidth, screenHeight);
-  renderer->loadData(data, drawParameter, projection, styleConfig, BoundingBox);
+  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight);
+  renderer->LoadData(data, drawParameter, projection, styleConfig);
   renderer->SwapData();
-
   unsigned long long currentTime;
   while (!glfwWindowShouldClose(window)) {
     glfwSwapBuffers(window);
@@ -296,7 +319,17 @@ int main(int argc, char *argv[]) {
     if (loadData) {
       currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
           std::chrono::steady_clock::now().time_since_epoch()).count();
-      if (((currentTime - lastZoom) > 1000) && (!loadingInProgress)) {
+      if (((currentTime - lastZoom) > 100) && (!loadingInProgress)) {
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        if(zoom) {
+          renderer->OnZoom(offset);
+          if (offset < 0 && level > 0)
+            level--;
+          else if(offset > 0 && level < 20)
+            level++;
+        }
+        zoom = 0;
         osmscout::log.Info() << "Loading data...";
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
@@ -309,8 +342,10 @@ int main(int argc, char *argv[]) {
           loadData = 0;
           loadingInProgress = 0;
           auto success = result.get();
-          if (success)
+          if (success) {
             renderer->SwapData();
+          }
+
           osmscout::log.Info() << "Data loading ended.";
         }
       }
