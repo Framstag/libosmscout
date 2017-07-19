@@ -104,7 +104,7 @@ namespace osmscout {
 
     ProcessPathData(data, parameter, projection, styleConfig);
 
-    ProcessImageData(data, parameter, projection, styleConfig);
+    ProcessNodeData(data, parameter, projection, styleConfig);
   }
 
   void osmscout::MapPainterOpenGL::SwapData() {
@@ -625,7 +625,7 @@ namespace osmscout {
   }
 
   void
-  osmscout::MapPainterOpenGL::ProcessImageData(const osmscout::MapData &data,
+  osmscout::MapPainterOpenGL::ProcessNodeData(const osmscout::MapData &data,
                                                const osmscout::MapParameter &parameter,
                                                const osmscout::Projection &projection,
                                                const osmscout::StyleConfigRef &styleConfig) {

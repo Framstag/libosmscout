@@ -78,11 +78,9 @@ namespace osmscout {
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
 
-    void ProcessImageData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+    void ProcessNodeData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                           const osmscout::Projection &projection,
                           const osmscout::StyleConfigRef &styleConfig);
-
-    // void ProcessLabelData();
 
   public:
     MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
