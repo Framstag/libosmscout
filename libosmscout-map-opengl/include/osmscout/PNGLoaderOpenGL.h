@@ -1,9 +1,10 @@
-#ifndef LIBOSMSCOUT_TRIANGULATE_H
-#define LIBOSMSCOUT_TRIANGULATE_H
+#ifndef OSMSCOUT_MAP_PNGLOADER_H
+#define OSMSCOUT_MAP_PNGLOADER_H
 
 /*
   This source is part of the libosmscout-map library
-  Copyright (C) 2017 Fanny Monori
+  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2017  Fanny Monori
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,23 +21,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <GL/glew.h>
-#include <iostream>
-#include <osmscout/MapPainter.h>
+#include <string>
+
+#include <osmscout/private/MapOpenGLImportExport.h>
 
 namespace osmscout {
-  class Triangulate {
-  public:
 
-    static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::Point> points);
-
-    static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::Vertex2D> points);
-
-    static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::GeoCoord> points);
-
-    static std::vector<GLfloat> TriangulateWithHoles(std::vector<std::vector<osmscout::Point>> points);
-
-  };
+  OSMSCOUT_MAP_OPENGL_API unsigned char* LoadPNGChar(const std::string& filename);
 }
 
-#endif //LIBOSMSCOUT_TRIANGULATE_H
+#endif

@@ -32,9 +32,9 @@ struct Arguments {
   bool help;
   std::string databaseDirectory;
   std::string styleFileDirectory;
+  std::string iconDirectory;
   size_t width;
   size_t height;
-
   Arguments()
       : help(false) {
     // no code
@@ -160,7 +160,6 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
   }
 
   if (button_down) {
-    std::cout << "click" << std::endl;
   }
 
 }
@@ -216,6 +215,12 @@ int main(int argc, char *argv[]) {
                           "STYLEFILE",
                           "Directory of the stylefile to use");
 
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
+                            args.iconDirectory = value;
+                          }),
+                          "ICONS",
+                          "Directory of the icons");
+
   argParser.AddPositional(osmscout::CmdLineSizeTOption([&args](const size_t &value) {
                             args.width = value;
                           }),
@@ -259,7 +264,9 @@ int main(int argc, char *argv[]) {
   database.get()->GetBoundingBox(boundingBox);
 
   drawParameter.SetFontSize(3.0);
-
+  std::list<std::string>       paths;
+  paths.push_back(args.iconDirectory);
+  drawParameter.SetIconPaths(paths);
   center = boundingBox.GetCenter();
   level = 5;
   magnification.SetLevel(level);

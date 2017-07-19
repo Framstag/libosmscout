@@ -50,6 +50,58 @@ namespace osmscout {
 
   }
 
+  std::vector<GLfloat> osmscout::Triangulate::TriangulatePolygon(std::vector<osmscout::Vertex2D> points) {
+    std::vector<GLfloat> result;
+
+    std::vector<p2t::Point *> polyline;
+    std::for_each(points.begin(), points.end(),
+                  [&polyline](osmscout::Vertex2D p) { polyline.push_back(new p2t::Point(p.GetX(), p.GetY())); });
+    p2t::CDT *cdt = new p2t::CDT(polyline);
+    cdt->Triangulate();
+    std::vector<p2t::Triangle *> triangles;
+    triangles = cdt->GetTriangles();
+    for (int i = 0; i < triangles.size(); i++) {
+      p2t::Point &a = *triangles[i]->GetPoint(0);
+      p2t::Point &b = *triangles[i]->GetPoint(1);
+      p2t::Point &c = *triangles[i]->GetPoint(2);
+      result.emplace_back(a.x);
+      result.emplace_back(a.y);
+      result.emplace_back(b.x);
+      result.emplace_back(b.y);
+      result.emplace_back(c.x);
+      result.emplace_back(c.y);
+    }
+
+    return result;
+
+  }
+
+  std::vector<GLfloat> osmscout::Triangulate::TriangulatePolygon(std::vector<osmscout::GeoCoord> points) {
+    std::vector<GLfloat> result;
+
+    std::vector<p2t::Point *> polyline;
+    std::for_each(points.begin(), points.end(),
+                  [&polyline](osmscout::GeoCoord g) { polyline.push_back(new p2t::Point(g.GetLon(), g.GetLat())); });
+    p2t::CDT *cdt = new p2t::CDT(polyline);
+    cdt->Triangulate();
+    std::vector<p2t::Triangle *> triangles;
+    triangles = cdt->GetTriangles();
+    for (int i = 0; i < triangles.size(); i++) {
+      p2t::Point &a = *triangles[i]->GetPoint(0);
+      p2t::Point &b = *triangles[i]->GetPoint(1);
+      p2t::Point &c = *triangles[i]->GetPoint(2);
+      result.emplace_back(a.x);
+      result.emplace_back(a.y);
+      result.emplace_back(b.x);
+      result.emplace_back(b.y);
+      result.emplace_back(c.x);
+      result.emplace_back(c.y);
+    }
+
+    return result;
+
+  }
+
   std::vector<GLfloat> osmscout::Triangulate::TriangulateWithHoles(std::vector<std::vector<osmscout::Point>> points) {
     std::vector<GLfloat> result;
     std::vector<p2t::Point *> polyline;

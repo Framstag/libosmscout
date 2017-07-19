@@ -26,15 +26,13 @@
 #include <png.h>
 
 namespace osmscout {
-/*
-  cairo_user_data_key_t imageDataKey;
 
   static bool IsLowerByteSet(unsigned char *bytes)
   {
     return bytes[0]!=0;
   }
 
-  cairo_surface_t* LoadPNG(const std::string& filename)
+  unsigned char* LoadPNGChar(const std::string& filename)
   {
     std::FILE       *file;
     png_structp     png_ptr;
@@ -47,7 +45,6 @@ namespace osmscout {
     png_bytepp      row_pointers=NULL;
     unsigned char   *image_data=NULL;
     unsigned char   *data;
-    cairo_surface_t *image;
     bool            littleEndian;
 
     int endian=1;
@@ -160,11 +157,7 @@ namespace osmscout {
 
     png_read_end(png_ptr,NULL);
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
-    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32,width);
-#else
     int stride = width*4;
-#endif
     data=(unsigned char *)malloc(stride*height);
 
     // TODO: Handle stride offsets
@@ -223,21 +216,10 @@ namespace osmscout {
       }
     }
 
-    image=cairo_image_surface_create_for_data(data,
-                                              CAIRO_FORMAT_ARGB32,
-                                              width,height,stride);
-    if (image!=NULL) {
-      cairo_surface_set_user_data(image,&imageDataKey,
-                                  data,&free);
-    }
-    else {
-      free(data);
-    }
-
     png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
     free(image_data);
     std::fclose(file);
 
-    return image;
-  }*/
+    return data;
+  }
 }
