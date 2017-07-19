@@ -24,7 +24,7 @@ set(SOURCE_FILES
 		src/poly2tri/sweep/sweep.cc
 		src/poly2tri/sweep/sweep_context.cc
 		src/poly2tri/sweep/advancing_front.cc
-		)
+        src/osmscout/PNGLoader.cpp)
 
 add_library(osmscout_map_opengl ${SOURCE_FILES} ${HEADER_FILES})
 set_property(TARGET osmscout_map_opengl PROPERTY CXX_STANDARD 11)

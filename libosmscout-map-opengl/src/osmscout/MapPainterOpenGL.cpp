@@ -94,6 +94,8 @@ namespace osmscout {
     ProcessGroundData(data, parameter, projection, styleConfig);
 
     ProcessPathData(data, parameter, projection, styleConfig);
+
+    ProcessImageData(data, parameter, projection, styleConfig);
   }
 
   void osmscout::MapPainterOpenGL::SwapData() {
@@ -613,6 +615,40 @@ namespace osmscout {
       }
 
     }
+  }
+
+  void
+  osmscout::MapPainterOpenGL::ProcessImageData(const osmscout::MapData &data,
+                                              const osmscout::MapParameter &parameter,
+                                              const osmscout::Projection &projection,
+                                              const osmscout::StyleConfigRef &styleConfig){
+    LabelLayouter labels;
+    labels.Initialize(projection, parameter);
+
+    osmscout::log.Info() << "Labels: " << labels.Size();
+    osmscout::log.Info() << "Nodes: " << data.nodes.size();
+
+    for(const auto& node: data.nodes){
+      IconStyleRef iconStyle;
+      styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                    projection,
+                                    iconStyle);
+
+      std::vector<TextStyleRef> textStyles;
+      styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
+                                    projection,
+                                    textStyles);
+
+      osmscout::GeoCoord coords = node->GetCoords();
+
+      if(iconStyle){
+        if(iconStyle->GetSymbol()){
+          log.Info() << iconStyle->GetPosition();
+        }
+      }
+
+    }
+
   }
 
   void osmscout::MapPainterOpenGL::OnZoom(float zoomDirection) {

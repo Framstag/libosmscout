@@ -78,7 +78,9 @@ namespace osmscout {
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
 
-    // void ProcessImageData();
+    void ProcessImageData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                          const osmscout::Projection &projection,
+                          const osmscout::StyleConfigRef &styleConfig);
 
     // void ProcessLabelData();
 
