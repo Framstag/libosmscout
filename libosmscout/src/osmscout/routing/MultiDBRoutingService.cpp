@@ -87,7 +87,7 @@ namespace osmscout {
   }
 
   MultiDBRoutingService::MultiDBRoutingService(const RouterParameter& parameter,
-                                               std::vector<DatabaseRef> databases):
+                                               const std::vector<DatabaseRef> &databases):
     AbstractRoutingService<MultiDBRoutingState>(parameter),
     isOpen(false)
   {
@@ -495,6 +495,12 @@ namespace osmscout {
     return true;
   }
 
+  bool MultiDBRoutingService::GetAreaByOffset(const DBFileOffset &offset,
+                                              AreaRef &area)
+  {
+    return databases[offset.database]->GetAreaByOffset(offset.offset,area);
+  }
+
   bool MultiDBRoutingService::GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                                std::unordered_map<DBFileOffset,AreaRef> &areaMap)
   {
@@ -641,10 +647,23 @@ namespace osmscout {
                                                                        parameter);
   }
 
+  // FIXME: I don't understand why these methods should be here...
   bool MultiDBRoutingService::TransformRouteDataToRouteDescription(const RouteData& data,
                                                                    RouteDescription& description)
   {
     return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToRouteDescription(data,description);
+  }
+
+  bool MultiDBRoutingService::TransformRouteDataToPoints(const RouteData& data,
+                                                         std::list<Point>& points)
+  {
+    return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToPoints(data,points);
+  }
+
+  bool MultiDBRoutingService::TransformRouteDataToWay(const RouteData& data,
+                                                      Way& way)
+  {
+    return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToWay(data,way);
   }
 
 }

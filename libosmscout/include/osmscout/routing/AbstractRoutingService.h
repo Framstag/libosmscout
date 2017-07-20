@@ -106,6 +106,9 @@ namespace osmscout {
     virtual bool GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
                                  std::unordered_map<DBFileOffset,WayRef> &wayMap) = 0;
 
+    virtual bool GetAreaByOffset(const DBFileOffset &offset,
+                                 AreaRef &area) = 0;
+
     virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                   std::unordered_map<DBFileOffset,AreaRef> &areaMap) = 0;
 
@@ -232,6 +235,11 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
+    bool TransformRouteDataToPoints(const RouteData& data,
+                                    std::list<Point>& points);
+
+    bool TransformRouteDataToWay(const RouteData& data,
+                                 Way& way);
   };
 
 }

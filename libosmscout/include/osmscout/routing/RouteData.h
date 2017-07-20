@@ -59,6 +59,11 @@ namespace osmscout {
         return currentNodeId;
       }
 
+      inline DBFileOffset GetDBFileOffset() const
+      {
+        return DBFileOffset(GetDatabaseId(),GetPathObject().GetFileOffset());
+      }
+
       inline DatabaseId GetDatabaseId() const
       {
         return database;

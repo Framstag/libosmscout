@@ -67,7 +67,7 @@ namespace osmscout {
 
   private:
     std::map<std::string,DatabaseId>              databaseMap;
-    // TODO: replace with std::vector indexed by DatabaseId
+
     std::map<DatabaseId,DatabaseRef>              databases;
     std::map<DatabaseId,SimpleRoutingServiceRef>  services;
     std::map<DatabaseId,RoutingProfileRef>        profiles;
@@ -121,6 +121,9 @@ namespace osmscout {
     virtual bool GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
                                  std::unordered_map<DBFileOffset,WayRef> &wayMap);
 
+    virtual bool GetAreaByOffset(const DBFileOffset &offset,
+                                 AreaRef &area);
+
     virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                   std::unordered_map<DBFileOffset,AreaRef> &areaMap);
 
@@ -154,7 +157,7 @@ namespace osmscout {
 
   public:
     MultiDBRoutingService(const RouterParameter& parameter,
-                          std::vector<DatabaseRef> databases);
+                          const std::vector<DatabaseRef> &databases);
 
     virtual ~MultiDBRoutingService();
 
@@ -172,6 +175,12 @@ namespace osmscout {
 
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
+
+    bool TransformRouteDataToPoints(const RouteData& data,
+                                    std::list<Point>& points);
+
+    bool TransformRouteDataToWay(const RouteData& data,
+                                 Way& way);
   };
 
   //! \ingroup Service

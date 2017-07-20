@@ -1549,6 +1549,112 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Transforms the route into a Way (with empty type)
+   * @param data
+   *    Route data
+   * @param way
+   *    Way to get initialized to the route on success
+   * @return
+   *    True, if the way could be build, else false
+   */
+  template <class RoutingState>
+  bool AbstractRoutingService<RoutingState>::TransformRouteDataToWay(const RouteData& data,
+                                                                     Way& way)
+  {
+    std::list<Point> points;
+    if (!TransformRouteDataToPoints(data,points)){
+      return false;
+    }
+    way.nodes.clear();
+    way.SetLayerToMax();
+    way.nodes.reserve(data.Entries().size());
+    for (const auto &p:points){
+      way.nodes.push_back(p);
+    }
+    return true;
+  }
+
+  /**
+   * Transforms the route into a list of points.
+   * @param data
+   *    Route data
+   * @param points
+   *    A list of the points holding route nodes
+   * @return
+   *    True, if the way could be build, else false
+   */
+  template <class RoutingState>
+  bool AbstractRoutingService<RoutingState>::TransformRouteDataToPoints(const RouteData& data,
+                                                                        std::list<Point>& points)
+
+  {
+    AreaRef       a;
+    DBFileOffset  aId;
+
+    WayRef        w;
+    DBFileOffset  wId;
+
+    points.clear();
+
+    if (data.Entries().empty()) {
+      return true;
+    }
+
+    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
+         iter!=data.Entries().end();
+         ++iter) {
+      if (iter->GetPathObject().Valid()) {
+        if (iter->GetPathObject().GetType()==refArea) {
+          if (!a ||
+              aId!=iter->GetDBFileOffset()) {
+            if (!GetAreaByOffset(iter->GetDBFileOffset(),a)) {
+              log.Error() << "Cannot load area with id " << iter->GetPathObject().GetFileOffset();
+              return false;
+            }
+            aId=iter->GetDBFileOffset();
+          }
+
+          // Initial starting point
+          if (iter==data.Entries().begin()) {
+            size_t index=iter->GetCurrentNodeIndex();
+
+            points.push_back(a->rings.front().nodes[index]);
+          }
+
+          // target node of current path
+          size_t index=iter->GetTargetNodeIndex();
+
+          points.push_back(a->rings.front().nodes[index]);
+        }
+        else if (iter->GetPathObject().GetType()==refWay) {
+          if (!w ||
+              wId!=iter->GetDBFileOffset()) {
+            if (!GetWayByOffset(iter->GetDBFileOffset(),w)) {
+              log.Error() << "Cannot load way with id " << iter->GetPathObject().GetFileOffset();
+              return false;
+            }
+            wId=iter->GetDBFileOffset();
+          }
+
+          // Initial starting point
+          if (iter==data.Entries().begin()) {
+            size_t index=iter->GetCurrentNodeIndex();
+
+            points.push_back(w->GetPoint(index));
+          }
+
+          // target node of current path
+          size_t index=iter->GetTargetNodeIndex();
+
+          points.push_back(w->GetPoint(index));
+        }
+      }
+    }
+
+    return true;
+  }
+
   template class AbstractRoutingService<RoutingProfile>;
   template class AbstractRoutingService<MultiDBRoutingState>;
 }

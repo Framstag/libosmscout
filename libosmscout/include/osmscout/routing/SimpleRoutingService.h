@@ -140,6 +140,9 @@ namespace osmscout {
     virtual bool GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
                                  std::unordered_map<DBFileOffset,WayRef> &wayMap);
 
+    virtual bool GetAreaByOffset(const DBFileOffset &offset,
+                                 AreaRef &area);
+
     virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                   std::unordered_map<DBFileOffset,AreaRef> &areaMap);
 
@@ -185,12 +188,6 @@ namespace osmscout {
                                  std::vector<GeoCoord> via,
                                  double radius,
                                  const RoutingParameter& parameter);
-
-    bool TransformRouteDataToWay(const RouteData& data,
-                                 Way& way);
-
-    bool TransformRouteDataToPoints(const RouteData& data,
-                                    std::list<Point>& points);
 
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
                                          const RoutingProfile& profile,

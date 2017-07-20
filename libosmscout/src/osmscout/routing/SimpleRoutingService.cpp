@@ -315,6 +315,16 @@ namespace osmscout {
     return true;
   }
 
+  bool SimpleRoutingService::GetAreaByOffset(const DBFileOffset &offset,
+                                             AreaRef &area)
+  {
+    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
+    if (!areaDataFile){
+      return false;
+    }
+    return areaDataFile->GetByOffset(offset.offset,area);
+  }
+
   bool SimpleRoutingService::GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                               std::unordered_map<DBFileOffset,AreaRef> &areaMap)
   {
@@ -467,171 +477,6 @@ namespace osmscout {
     }
 
     return result;
-  }
-
-  /**
-   * Transforms the route into a Way
-   * @param data
-   *    Route data
-   * @param way
-   *    Way to get initialized to the route on success
-   * @return
-   *    True, if the way could be build, else false
-   */
-  bool SimpleRoutingService::TransformRouteDataToWay(const RouteData& data,
-                                               Way& way)
-  {
-    TypeConfigRef   typeConfig=database->GetTypeConfig();
-    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
-    WayDataFileRef  wayDataFile(database->GetWayDataFile());
-
-    Way             tmp;
-
-    if (!typeConfig ||
-        !areaDataFile ||
-        !wayDataFile) {
-      return false;
-    }
-
-    TypeInfoRef routeType=typeConfig->GetTypeInfo("_route");
-
-    assert(routeType!=typeConfig->typeInfoIgnore);
-
-    way=tmp;
-
-    way.SetType(routeType);
-    way.SetLayerToMax();
-    way.nodes.reserve(data.Entries().size());
-
-    if (data.Entries().empty()) {
-      return true;
-    }
-
-    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
-         iter!=data.Entries().end();
-         ++iter) {
-      if (iter->GetPathObject().Valid()) {
-        if (iter->GetPathObject().GetType()==refArea) {
-          AreaRef a;
-
-          if (!areaDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
-            return false;
-          }
-
-          // Initial starting point
-          if (iter==data.Entries().begin()) {
-            size_t index=iter->GetCurrentNodeIndex();
-
-            way.nodes.push_back(a->rings.front().nodes[index]);
-          }
-
-          size_t index=iter->GetTargetNodeIndex();
-
-          way.nodes.push_back(a->rings.front().nodes[index]);
-        }
-        else if (iter->GetPathObject().GetType()==refWay) {
-          WayRef w;
-
-          if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
-            return false;
-          }
-
-          // Initial starting point
-          if (iter==data.Entries().begin()) {
-            size_t index=iter->GetCurrentNodeIndex();
-
-            way.nodes.push_back(w->nodes[index]);
-          }
-
-          size_t index=iter->GetTargetNodeIndex();
-
-          way.nodes.push_back(w->nodes[index]);
-        }
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Transforms the route into a list of points.
-   * @param data
-   *    Route data
-   * @param points
-   *    A list of the points holding route nodes
-   * @return
-   *    True, if the way could be build, else false
-   */
-  bool SimpleRoutingService::TransformRouteDataToPoints(const RouteData& data,
-                                                  std::list<Point>& points)
-  {
-    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
-    WayDataFileRef  wayDataFile(database->GetWayDataFile());
-
-    if (!areaDataFile ||
-        !wayDataFile) {
-      return false;
-    }
-
-    AreaRef a;
-    WayRef  w;
-
-    points.clear();
-
-    if (data.Entries().empty()) {
-      return true;
-    }
-
-    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
-         iter!=data.Entries().end();
-         ++iter) {
-      if (iter->GetPathObject().Valid()) {
-        if (iter->GetPathObject().GetType()==refArea) {
-          if (!a ||
-              a->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
-            if (!areaDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
-              log.Error() << "Cannot load area with id " << iter->GetPathObject().GetFileOffset();
-              return false;
-            }
-          }
-
-          // Initial starting point
-          if (iter==data.Entries().begin()) {
-            size_t index=iter->GetCurrentNodeIndex();
-
-            points.push_back(a->rings.front().nodes[index]);
-          }
-
-          // target node of current path
-          size_t index=iter->GetTargetNodeIndex();
-
-          points.push_back(a->rings.front().nodes[index]);
-        }
-        else if (iter->GetPathObject().GetType()==refWay) {
-          if (!w ||
-              w->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
-            if (!wayDataFile->GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
-              log.Error() << "Cannot load way with id " << iter->GetPathObject().GetFileOffset();
-              return false;
-            }
-          }
-
-          // Initial starting point
-          if (iter==data.Entries().begin()) {
-            size_t index=iter->GetCurrentNodeIndex();
-
-            points.push_back(w->GetPoint(index));
-          }
-
-          // target node of current path
-          size_t index=iter->GetTargetNodeIndex();
-
-          points.push_back(w->GetPoint(index));
-        }
-      }
-    }
-
-    return true;
   }
 
   void SimpleRoutingService::DumpStatistics()

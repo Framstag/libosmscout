@@ -26,7 +26,6 @@
 
 namespace osmscout{
 
-  //typedef std::string DatabaseId;
   typedef uint32_t DatabaseId;
 
   struct DBFileOffset{
@@ -56,6 +55,11 @@ namespace osmscout{
     inline bool operator==(const DBFileOffset& other) const
     {
       return database==other.database && offset==other.offset;
+    }
+
+    inline bool operator!=(const DBFileOffset& other) const
+    {
+      return database!=other.database || offset!=other.offset;
     }
 
     inline bool operator<(const DBFileOffset& other) const
