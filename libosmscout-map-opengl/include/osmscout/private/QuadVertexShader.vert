@@ -3,8 +3,6 @@
 in vec2 position;
 in vec3 color;
 in float index;
-in float quadWidth;
-in float quadHeight;
 out vec3 Color;
 uniform mat4 Model;
 uniform mat4 View;
@@ -17,6 +15,7 @@ uniform float windowWidth;
 uniform float windowHeight;
 uniform float centerLat;
 uniform float centerLon;
+uniform float quadWidth;
 
 uniform float magnification;
 uniform float dpi = 96.0;
@@ -109,7 +108,7 @@ vec2 GeoToPixel(in float posx, in float posy){
 void main() {
     Color = color;
     float width_norm = ceil(quadWidth)/windowWidth;
-    float height_norm = ceil(quadHeight)/windowWidth;
+    float height_norm = ceil(quadWidth)/windowWidth;
     vec2 c = GeoToPixel(position.x, position.y);
     vec4 pos = Projection * View * Model * vec4(c.x, c.y, 0, 1);
 
