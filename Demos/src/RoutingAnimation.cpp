@@ -37,6 +37,7 @@
 
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/CmdLineParsing.h>
 
 #include <osmscout/MapPainterQt.h>
 
@@ -124,22 +125,36 @@ void drawDot(QPainter &painter,
 
 class RoutingServiceAnimation: public osmscout::SimpleRoutingService{
 private:
+  size_t stepCounter;
   size_t frameCounter;
   osmscout::MercatorProjection  projection;
   QPixmap *pixmap;
   QString directory;
+
+  size_t                  frameStep;
+  size_t                  startStep;
+  int64_t                 endStep;
+
 public:
   RoutingServiceAnimation(const osmscout::DatabaseRef& database,
                           const osmscout::RouterParameter& parameter,
                           const std::string& filenamebase,
                           osmscout::MercatorProjection  projection,
                           QPixmap *pixmap,
-                          QString directory):
+                          QString directory,
+                          size_t frameStep,
+                          size_t startStep,
+                          int64_t endStep,
+                          size_t startFrame):
     osmscout::SimpleRoutingService(database,parameter,filenamebase),
-    frameCounter(0),
+    stepCounter(0),
+    frameCounter(startFrame),
     projection(projection),
     pixmap(pixmap),
-    directory(directory)
+    directory(directory),
+    frameStep(frameStep),
+    startStep(startStep),
+    endStep(endStep)
   {
   }
 
@@ -155,6 +170,16 @@ public:
                                     const osmscout::RoutingService::ClosedSet &closedSet,
                                     const ClosedSet &closedRestrictedSet)
   {
+    if (stepCounter<startStep || (endStep>0 && (int64_t)stepCounter>endStep)){
+      stepCounter++;
+      return true;
+    }
+    if (((stepCounter-startStep) % frameStep) != 0){
+      stepCounter++;
+      return true;
+    }
+    stepCounter++;
+
     double x1,y1;
     double x2,y2;
     osmscout::RouteNodeRef n1;
@@ -669,123 +694,210 @@ static void DumpNameChangedDescription(size_t& lineCount,
   std::cout << "'" << std::endl;
 }
 
+struct Arguments
+{
+  bool                    help;
+  std::string             databaseDirectory;
+  std::string             routerFilenamebase;
+
+  osmscout::Vehicle       vehicle;
+
+  osmscout::GeoCoord      start;
+  osmscout::GeoCoord      target;
+
+  std::string             style;
+  std::string             output;
+  size_t                  width;
+  size_t                  height;
+  osmscout::GeoCoord      center;
+  osmscout::Magnification zoom;
+
+  size_t                  frameStep;
+  size_t                  startStep;
+  int64_t                 endStep;
+  size_t                  startFrame;
+
+  Arguments(): 
+    help(false),
+    routerFilenamebase(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
+    vehicle(osmscout::vehicleCar),
+    style("stylesheets/standard.oss"),
+    output("./animation"),
+    width(1920),
+    height(1080),
+    center(-1000,-1000),
+    frameStep(1),
+    startStep(0),
+    endStep(-1),
+    startFrame(0)
+  {
+    zoom.SetMagnification(osmscout::Magnification::magVeryClose);
+  }
+};
+
 int main(int argc, char* argv[])
 {
-  std::string                               routerFilenamebase=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
-  osmscout::Vehicle                         vehicle=osmscout::vehicleCar;
-  std::string                               mapDirectory;
-  bool                                      outputGPX=false;
-  bool                                      argumentError=false;
+  
+  osmscout::CmdLineParser   argParser("RoutingAnimation",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
-  double                                    startLat;
-  double                                    startLon;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
 
-  double                                    targetLat;
-  double                                    targetLon;
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.routerFilenamebase=value;
+                      }),
+                      "router",
+                      "router filename base",
+                      false);
 
-  int currentArg=1;
-  while (currentArg<argc) {
-    if (strcmp(argv[currentArg],"--router")==0) {
-      currentArg++;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& /*value*/) {
+                        args.vehicle=osmscout::vehicleFoot;
+                      }),
+                      "foot",
+                      "use routing for foot",
+                      false);
 
-      if (currentArg>=argc) {
-        argumentError=true;
-      }
-      else {
-        routerFilenamebase=argv[currentArg];
-        currentArg++;
-      }
-    }
-    else if (strcmp(argv[currentArg],"--foot")==0) {
-      vehicle=osmscout::vehicleFoot;
-      currentArg++;
-    }
-    else if (strcmp(argv[currentArg],"--bicycle")==0) {
-      vehicle=osmscout::vehicleBicycle;
-      currentArg++;
-    }
-    else if (strcmp(argv[currentArg],"--car")==0) {
-      vehicle=osmscout::vehicleCar;
-      currentArg++;
-    }
-    else if (strcmp(argv[currentArg],"--gpx")==0) {
-      outputGPX=true;
-      currentArg++;
-    }
-    else {
-      // No more "special" arguments
-      break;
-    }
-  }
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& /*value*/) {
+                        args.vehicle=osmscout::vehicleBicycle;
+                      }),
+                      "bicycle",
+                      "use routing for bicycle",
+                      false);
 
-  if (argumentError ||
-      argc-currentArg!=5) {
-    std::cout << "Routing" << std::endl;
-    std::cout << "  [--router <router filename base>]" << std::endl;
-    std::cout << "  [--foot | --bicycle | --car]" << std::endl;
-    std::cout << "  [--gpx]" << std::endl;
-    std::cout << "  <map directory>" << std::endl;
-    std::cout << "  <start lat> <start lon>" << std::endl;
-    std::cout << "  <target lat> <target lon>" << std::endl;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& /*value*/) {
+                        args.vehicle=osmscout::vehicleCar;
+                      }),
+                      "car",
+                      "use routing for car (default)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.style=value;
+                      }),
+                      "style",
+                      "map stylesheet file (default stylesheets/standard.oss)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.output=value;
+                      }),
+                      "output",
+                      "output directory for animation frames (default ./animation)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.width=value;
+                      }),
+                      "width",
+                      "width of animation frames (default 1920)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.height=value;
+                      }),
+                      "height",
+                      "height of animation frames (default 1080)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.zoom.SetLevel(value);
+                      }),
+                      "zoom",
+                      "zoom level of animation frames (default 16)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.frameStep=value;
+                      }),
+                      "frame-step",
+                      "how many routing steps between animation frame (default 1)",
+                      false);
+
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.startStep=value;
+                      }),
+                      "start-step",
+                      "first rendered routing step (default 0)",
+                      false);
+    
+  argParser.AddOption(osmscout::CmdLineIntOption([&args](const int& value) {
+                        args.endStep=value;
+                      }),
+                      "end-step",
+                      "last rendered routing step (default -1)",
+                      false);
+    
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.startFrame=value;
+                      }),
+                      "start-frame",
+                      "first frame number (default 0)",
+                      false);
+    
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the database to use");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.start=value;
+                          }),
+                          "start",
+                          "Route start");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.target=value;
+                          }),
+                          "target",
+                          "Route target");
+
+  osmscout::CmdLineParseResult argResult=argParser.Parse();
+
+  if (argResult.HasError()) {
+    std::cerr << "ERROR: " << argResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-
-  mapDirectory=argv[currentArg];
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lf",&startLat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
-  currentArg++;
 
-  if (sscanf(argv[currentArg],"%lf",&startLon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
+  if (args.center.GetLat()==-1000 && args.center.GetLon()==-1000){
+    args.center=args.start;
   }
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lf",&targetLat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lf",&targetLon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-  currentArg++;
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
   osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
 
-  if (!database->Open(mapDirectory.c_str())) {
+  if (!database->Open(args.databaseDirectory.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
   }
 
-  std::string style="../stylesheets/standard.oss";
-  std::string output="./animation";
-  size_t width=1920;
-  size_t height=1080;
-  double lat=51.5064;
-  double lon=7.4953;
-  double zoom=osmscout::Magnification::magVeryClose;
-
+  
   QApplication application(argc,argv,true);
 
   osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!styleConfig->Load(style)) {
+  if (!styleConfig->Load(args.style)) {
     std::cerr << "Cannot open style" << std::endl;
     return 1;
   }
 
   osmscout::MercatorProjection  projection;
-  QPixmap *pixmap=new QPixmap(width,height);
+  QPixmap *pixmap=new QPixmap(args.width,args.height);
 
   if (pixmap!=NULL) {
     QPainter* painter=new QPainter(pixmap);
@@ -799,11 +911,11 @@ int main(int argc, char* argv[])
 
       drawParameter.SetFontSize(3.0);
 
-      projection.Set(osmscout::GeoCoord(lat,lon),
-                     osmscout::Magnification(zoom),
+      projection.Set(args.center,
+                     args.zoom,
                      dpi,
-                     width,
-                     height);
+                     args.width,
+                     args.height);
 
       std::list<osmscout::TileRef> tiles;
 
@@ -819,8 +931,8 @@ int main(int argc, char* argv[])
         painter->setBrush(QBrush(QColor::fromRgbF(0,0,0, .9)));
         painter->setPen(QColor::fromRgbF(0.0, 0.5, 0.0, 0.9));
 
-        drawDot(*painter,projection,osmscout::GeoCoord(startLat,startLon));
-        drawDot(*painter,projection,osmscout::GeoCoord(targetLat,targetLon));
+        drawDot(*painter,projection,args.start);
+        drawDot(*painter,projection,args.target);
 
       }else{
           std::cerr << "Cannot draw map" << std::endl;
@@ -845,17 +957,19 @@ int main(int argc, char* argv[])
   osmscout::FastestPathRoutingProfile routingProfile(database->GetTypeConfig());
   osmscout::RouterParameter           routerParameter;
 
-  if (!outputGPX) {
-    routerParameter.SetDebugPerformance(true);
-  }
+  routerParameter.SetDebugPerformance(true);
 
   RoutingServiceAnimationRef router=std::make_shared<RoutingServiceAnimation>(
                                                     database,
                                                     routerParameter,
-                                                    routerFilenamebase,
+                                                    args.routerFilenamebase,
                                                     projection,
                                                     pixmap,
-                                                    QString::fromStdString(output));
+                                                    QString::fromStdString(args.output),
+                                                    args.frameStep,
+                                                    args.startStep,
+                                                    args.endStep,
+                                                    args.startFrame);
 
   if (!router->Open()) {
     std::cerr << "Cannot open routing database" << std::endl;
@@ -870,7 +984,7 @@ int main(int argc, char* argv[])
 
   parameter.SetProgress(std::make_shared<ConsoleRoutingProgress>());
 
-  switch (vehicle) {
+  switch (args.vehicle) {
   case osmscout::vehicleFoot:
     routingProfile.ParametrizeForFoot(*typeConfig,
                                       5.0);
@@ -887,7 +1001,7 @@ int main(int argc, char* argv[])
     break;
   }
 
-  osmscout::RoutePosition start=router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
+  osmscout::RoutePosition start=router->GetClosestRoutableNode(args.start,
                                                                routingProfile,
                                                                1000);
 
@@ -900,9 +1014,9 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
-  osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
-                                                               routingProfile,
-                                                               1000);
+  osmscout::RoutePosition target=router->GetClosestRoutableNode(args.target,
+                                                                routingProfile,
+                                                                1000);
 
   if (!target.IsValid()) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;
@@ -960,40 +1074,6 @@ int main(int argc, char* argv[])
   size_t                       roundaboutCrossingCounter=0;
 
   std::list<osmscout::Point> points;
-
-  if(outputGPX) {
-    if (!router->TransformRouteDataToPoints(result.GetRoute(),
-                                            points)) {
-      std::cerr << "Error during route conversion" << std::endl;
-    }
-    std::cout.precision(8);
-    std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << std::endl;
-    std::cout << "<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"bin2gpx\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">" << std::endl;
-
-    std::cout << "\t<wpt lat=\""<< startLat << "\" lon=\""<< startLon << "\">" << std::endl;
-    std::cout << "\t\t<name>Start</name>" << std::endl;
-    std::cout << "\t\t<fix>2d</fix>" << std::endl;
-    std::cout << "\t</wpt>" << std::endl;
-
-    std::cout << "\t<wpt lat=\""<< targetLat << "\" lon=\""<< targetLon << "\">" << std::endl;
-    std::cout << "\t\t<name>Target</name>" << std::endl;
-    std::cout << "\t\t<fix>2d</fix>" << std::endl;
-    std::cout << "\t</wpt>" << std::endl;
-
-    std::cout << "\t<trk>" << std::endl;
-    std::cout << "\t\t<name>Route</name>" << std::endl;
-    std::cout << "\t\t<trkseg>" << std::endl;
-    for (const auto &point : points) {
-      std::cout << "\t\t\t<trkpt lat=\""<< point.GetLat() << "\" lon=\""<< point.GetLon() <<"\">" << std::endl;
-      std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
-      std::cout << "\t\t\t</trkpt>" << std::endl;
-    }
-    std::cout << "\t\t</trkseg>" << std::endl;
-    std::cout << "\t</trk>" << std::endl;
-    std::cout << "</gpx>" << std::endl;
-
-    return 0;
-  }
 
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  routingProfile,
