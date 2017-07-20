@@ -41,6 +41,8 @@ namespace osmscout {
     std::vector<GLfloat> VerticesBuffer;
     std::vector<GLuint> Elements;
     std::vector<GLuint> ElementsBuffer;
+    std::vector<GLuint> TextureCoordinates;
+    std::vector<unsigned char*> Textures;
 
     GLuint shaderProgram;
     GLuint VAO;
@@ -220,6 +222,14 @@ namespace osmscout {
       return this->VerticesBuffer.size();
     }
 
+    size_t GetTexturesSize(){
+      return Textures.size();
+    }
+
+    void AddNewTexture(unsigned char* texture){
+      Textures.push_back(texture);
+    }
+
     void SetModel() {
       GLuint uniform = glGetUniformLocation(shaderProgram, "Model");
       glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(Model));
@@ -235,9 +245,10 @@ namespace osmscout {
 
     void SetView(float lookX, float lookY) {
       View = glm::lookAt(
-          glm::vec3(lookX, lookY, 1.0f), //position
-          glm::vec3(lookX, lookY, 0.0f), //look
-          //glm::vec3(0.0f, 0.0f, 0.0f), //look
+          //glm::vec3(lookX, lookY, 1.0f), //position
+          glm::vec3(0.0, 0.0, 1.0f), //position
+          //glm::vec3(lookX, lookY, 0.0f), //look
+          glm::vec3(0.0f, 0.0f, 0.0f), //look
           glm::vec3(0.0f, 1.0f, 0.0f) //up
       );
       GLint uniView = glGetUniformLocation(shaderProgram, "View");

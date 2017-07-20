@@ -78,9 +78,9 @@ namespace osmscout {
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
 
-    // void ProcessImageData();
-
-    // void ProcessLabelData();
+    void ProcessNodeData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                          const osmscout::Projection &projection,
+                          const osmscout::StyleConfigRef &styleConfig);
 
   public:
     MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
@@ -100,8 +100,11 @@ namespace osmscout {
 
     osmscout::GeoCoord GetCenter();
 
-    bool PixelToGeoOrig(double x, double y,
-                        double &lon, double &lat);
+    bool PixelToGeo(double x, double y, double &lon, double &lat);
+
+    //osmscout::GeoCoord PixelToGeo(double x, double y);
+
+    //osmscout::Vertex2D GeoToPixel(osmscout::GeoCoord gc);
 
   };
 }
