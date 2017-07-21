@@ -97,6 +97,7 @@ namespace osmscout {
 
     this->Magnification = projection.GetMagnification();
     this->Center = projection.GetCenter();
+    this->Parameter = parameter;
 
     ProcessAreaData(data, parameter, projection, styleConfig);
 
@@ -265,6 +266,19 @@ namespace osmscout {
           if (p.size() < 3)
             continue;
 
+          if(!osmscout::AreaIsSimple(p))
+            continue;
+
+          osmscout::GeoBox ringBoundingBox;
+          ring.GetBoundingBox(ringBoundingBox);
+
+          double  borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
+
+          if (!IsVisibleArea(projection,
+                             ringBoundingBox,
+                             borderWidth/2.0))
+            continue;
+
           size_t j = i + 1;
           int hasClippings = 0;
           while (j < area->rings.size() &&
@@ -326,6 +340,42 @@ namespace osmscout {
         ringId++;
       }
     }
+  }
+
+  bool osmscout::MapPainterOpenGL::IsVisibleArea(const Projection& projection, const GeoBox& boundingBox,
+                                 double pixelOffset)
+  {
+    double x1;
+    double x2;
+    double y1;
+    double y2;
+
+    projection.GeoToPixel(boundingBox.GetMinCoord(),
+                          x1,
+                          y1);
+
+    projection.GeoToPixel(boundingBox.GetMaxCoord(),
+                          x2,
+                          y2);
+
+    double xMin=std::min(x1,x2)-pixelOffset;
+    double xMax=std::max(x1,x2)+pixelOffset;
+    double yMin=std::min(y1,y2)-pixelOffset;
+    double yMax=std::max(y1,y2)+pixelOffset;
+
+    osmscout::GeoBox gb;
+    projection.GetDimensions(gb);
+    double areaMinDimension=projection.ConvertWidthToPixel(Parameter.GetAreaMinDimensionMM());
+
+    if (xMax-xMin<=areaMinDimension &&
+        yMax-yMin<=areaMinDimension) {
+      return false;
+    }
+
+    return !(xMin>=projection.GetWidth() ||
+             yMin>=projection.GetHeight() ||
+             xMax<0 ||
+             yMax<0);
   }
 
   void

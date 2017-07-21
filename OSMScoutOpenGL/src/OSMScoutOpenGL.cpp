@@ -86,12 +86,14 @@ bool LoadData() {
                  width,
                  height);
 
-  searchParameter.SetUseLowZoomOptimization(false);
+  searchParameter.SetUseLowZoomOptimization(true);
   mapService->LookupTiles(projection, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
   mapService->GetGroundTiles(projection, data.groundTiles);
+  osmscout::log.Info() << "Start processing data...";
   renderer->LoadData(data, drawParameter, projection, styleConfig);
+  osmscout::log.Info() << "Ended processing data.";
 
   return true;
 }
@@ -172,9 +174,7 @@ static void scroll_callback(GLFWwindow */*window*/, double /*xoffset*/, double y
   zoom = 1;
   osmscout::log.Info() << "Zoom level: " << magnification.GetLevel();
   osmscout::log.Info() << "Magnification: " << magnification.GetMagnification();
-  osmscout::log.Info() << "BoundingBox: [" << boundingBox.GetMinLon() << " " << boundingBox.GetMinLat() << " "
-                       << boundingBox.GetMaxLon() << " " << boundingBox.GetMaxLat() << "]";
-  osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLon() << "]";
+  projection.GetDimensions(boundingBox);
 }
 
 static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
@@ -184,6 +184,9 @@ static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double
     loadData = 1;
     lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count();
+    osmscout::log.Info() << "BoundingBox: [" << boundingBox.GetMinLon() << " " << boundingBox.GetMinLat() << " "
+                         << boundingBox.GetMaxLon() << " " << boundingBox.GetMaxLat() << "]";
+    osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLat() << "]";
   }
   prevX = xpos;
   prevY = ypos;
