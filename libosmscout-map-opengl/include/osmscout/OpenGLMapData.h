@@ -34,6 +34,13 @@
 
 namespace osmscout {
 
+  class OpenGLTexture{
+  public:
+    size_t width;
+    size_t height;
+    unsigned char* data;
+  };
+
   class OpenGLMapData {
   private:
 
@@ -42,12 +49,14 @@ namespace osmscout {
     std::vector<GLuint> Elements;
     std::vector<GLuint> ElementsBuffer;
     std::vector<GLuint> TextureCoordinates;
-    std::vector<unsigned char*> Textures;
+    std::vector<unsigned char> Textures;
+    std::vector<unsigned char> TexturesBuffer;
 
     GLuint shaderProgram;
     GLuint VAO;
     GLuint VBO;
     GLuint EBO;
+    GLuint Tex;
 
     int VerticesSize;
     float zoom;
@@ -109,11 +118,14 @@ namespace osmscout {
       this->Elements.clear();
       this->Elements = this->ElementsBuffer;
       this->ElementsBuffer.clear();
+      this->Textures = this->TexturesBuffer;
+      this->TexturesBuffer.clear();
     }
 
     void clearData() {
       Vertices.clear();
       Elements.clear();
+      Textures.clear();
     }
 
     void BindBuffers() {
@@ -125,6 +137,7 @@ namespace osmscout {
       glBindVertexArray(VAO);
       glGenBuffers(1, &VBO);
       glGenBuffers(1, &EBO);
+      glGenTextures(1,&Tex);
 
       zoom = 45.0f;
       Model = glm::mat4(1.0f);
@@ -178,6 +191,13 @@ namespace osmscout {
 
     }
 
+    void LoadTextures(size_t width, size_t height){
+      glBindTexture(GL_TEXTURE_2D, Tex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, Textures.size()/(width*height), GL_RGB, sizeof(unsigned char), &Textures[0]);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    }
+
     void LoadFragmentShader(std::string fileName) {
       FragmentShaderSource = this->LoadShader(fileName);
       FragmentShaderLength = FragmentShaderSource.length();
@@ -223,11 +243,26 @@ namespace osmscout {
     }
 
     size_t GetTexturesSize(){
-      return Textures.size();
+      return TexturesBuffer.size();
     }
 
-    void AddNewTexture(unsigned char* texture){
-      Textures.push_back(texture);
+    size_t GetNumberOfTextures(){
+      return TexturesBuffer.size()/(14*14);
+    }
+
+    void AddNewTexture(OpenGLTexture texture){
+      //Textures.push_back(texture);
+      for(unsigned int i = 0; i < texture.height*texture.width; i++){
+        TexturesBuffer.push_back(texture.data[i]);
+      }
+    }
+
+    void CreateNewTexture(OpenGLTexture texture){
+      //GLuint tex;
+      //glGenTextures(1,&tex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGB, sizeof(unsigned char), texture.data);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     }
 
     void SetModel() {

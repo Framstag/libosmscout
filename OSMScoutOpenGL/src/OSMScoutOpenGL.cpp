@@ -86,7 +86,7 @@ bool LoadData() {
                  width,
                  height);
 
-  searchParameter.SetUseLowZoomOptimization(false);
+  searchParameter.SetUseLowZoomOptimization(true);
   mapService->LookupTiles(projection, tiles);
   mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
   mapService->AddTileDataToMapData(tiles, data);
