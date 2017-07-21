@@ -102,6 +102,8 @@ namespace osmscout {
 
     bool PixelToGeo(double x, double y, double &lon, double &lat);
 
+    bool IsVisibleArea(const Projection& projection, const GeoBox& boundingBox, double pixelOffset);
+
     //osmscout::GeoCoord PixelToGeo(double x, double y);
 
     //osmscout::Vertex2D GeoToPixel(osmscout::GeoCoord gc);
