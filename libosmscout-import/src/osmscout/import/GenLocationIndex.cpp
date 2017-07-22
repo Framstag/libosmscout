@@ -1089,8 +1089,8 @@ namespace osmscout {
                              postalCode,
                              ObjectFileRef(area.GetFileOffset(),refArea));
 
-    for (size_t i=0; i<region.areas.size(); i++) {
-      if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
+    for (const auto& area : region.areas) {
+      if (IsAreaCompletelyInArea(nodes,area)) {
         return true;
       }
     }
@@ -1254,8 +1254,8 @@ namespace osmscout {
                              postalCode,
                              ObjectFileRef(way.GetFileOffset(),refWay));
 
-    for (size_t i=0; i<region.areas.size(); i++) {
-      if (IsAreaCompletelyInArea(way.nodes,region.areas[i])) {
+    for (const auto& area : region.areas) {
+      if (IsAreaCompletelyInArea(way.nodes,area)) {
         return true;
       }
     }
@@ -1648,8 +1648,8 @@ namespace osmscout {
                        false,
                        added);
 
-    for (size_t i=0; i<region.areas.size(); i++) {
-      if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
+    for (const auto& area : region.areas) {
+      if (IsAreaCompletelyInArea(nodes,area)) {
         return true;
       }
     }
@@ -1696,8 +1696,8 @@ namespace osmscout {
 
     added=true;
 
-    for (size_t i=0; i<region.areas.size(); i++) {
-      if (IsAreaCompletelyInArea(nodes,region.areas[i])) {
+    for (const auto& area : region.areas) {
+      if (IsAreaCompletelyInArea(nodes,area)) {
         return true;
       }
     }
@@ -1816,9 +1816,9 @@ namespace osmscout {
                                                                                                               PostalArea& postalArea,
                                                                                                               const std::string &locationName)
   {
-    std::map<std::string,RegionLocation>           &locations=postalArea.locations;
-    std::string                                    locationNameSearch=UTF8StringToLower(locationName);
-    std::map<std::string,RegionLocation>::iterator loc=locations.find(locationNameSearch);
+    std::map<std::string,RegionLocation> &locations=postalArea.locations;
+    std::string                          locationNameSearch=UTF8StringToLower(locationName);
+    auto                                 loc=locations.find(locationNameSearch);
 
     if (loc!=locations.end()) {
       // case insensitive match
@@ -2093,9 +2093,24 @@ namespace osmscout {
   void LocationIndexGenerator::WriteRegionIndex(FileWriter& writer,
                                                 Region& rootRegion)
   {
+    std::list<FileOffset> childrenOffsetOffsets;
+
     writer.WriteNumber((uint32_t)rootRegion.regions.size());
 
+    for (size_t i=0; i<rootRegion.regions.size(); i++) {
+      childrenOffsetOffsets.push_back(writer.GetPos());
+      writer.WriteFileOffset(0);
+    }
+
     for (const auto& childRegion : rootRegion.regions) {
+      FileOffset currentOffset=writer.GetPos();
+
+      writer.SetPos(childrenOffsetOffsets.front());
+      writer.WriteFileOffset(currentOffset);
+      childrenOffsetOffsets.pop_front();
+
+      writer.SetPos(currentOffset);
+
       WriteRegionIndexEntry(writer,
                             rootRegion,
                             *childRegion);

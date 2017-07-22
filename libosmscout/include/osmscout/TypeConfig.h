@@ -1122,7 +1122,7 @@ namespace osmscout {
 
   typedef std::shared_ptr<FeatureValueBuffer> FeatureValueBufferRef;
 
-  static const uint32_t FILE_FORMAT_VERSION=14;
+  static const uint32_t FILE_FORMAT_VERSION=15;
 
   /**
    * \ingroup type
