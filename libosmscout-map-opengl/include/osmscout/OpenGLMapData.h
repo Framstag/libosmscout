@@ -51,6 +51,8 @@ namespace osmscout {
     std::vector<GLuint> TextureCoordinates;
     std::vector<unsigned char> Textures;
     std::vector<unsigned char> TexturesBuffer;
+    unsigned char* text;
+    int textureSize;
 
     GLuint shaderProgram;
     GLuint VAO;
@@ -118,7 +120,14 @@ namespace osmscout {
       this->Elements.clear();
       this->Elements = this->ElementsBuffer;
       this->ElementsBuffer.clear();
-      this->Textures = this->TexturesBuffer;
+      //this->Textures = this->TexturesBuffer;
+
+      this->text = new unsigned char [TexturesBuffer.size()];
+      for(int i = 0; i < TexturesBuffer.size(); i++)
+        text[i] = TexturesBuffer[i];
+
+      textureSize = TexturesBuffer.size();
+
       this->TexturesBuffer.clear();
     }
 
@@ -192,10 +201,19 @@ namespace osmscout {
     }
 
     void LoadTextures(size_t width, size_t height){
-      glBindTexture(GL_TEXTURE_2D, Tex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, Textures.size()/(width*height), GL_RGB, sizeof(unsigned char), &Textures[0]);
+      //glBindTexture(GL_TEXTURE_2D, Tex);
+      glBindTexture(GL_TEXTURE_2D_ARRAY, Tex);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_BGRA, width, height, textureSize / (14*14));
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureSize/2, textureSize/2, 0, GL_BGRA, GL_UNSIGNED_BYTE, text);
+      //glGenerateMipmap(GL_TEXTURE_2D);
     }
 
     void LoadFragmentShader(std::string fileName) {
@@ -247,22 +265,21 @@ namespace osmscout {
     }
 
     size_t GetNumberOfTextures(){
-      return TexturesBuffer.size()/(14*14);
+      //return TexturesBuffer.size()/(14*14);
+      return textureSize/(14*14);
     }
 
-    void AddNewTexture(OpenGLTexture texture){
+    void AddNewTexture(OpenGLTexture *texture){
       //Textures.push_back(texture);
-      for(unsigned int i = 0; i < texture.height*texture.width; i++){
-        TexturesBuffer.push_back(texture.data[i]);
+      //Textures.resize(14*14);
+      //TexturesBuffer.resize(14*14);
+      for(unsigned int i = 0; i < texture->height*texture->width; i++){
+        TexturesBuffer.push_back(texture->data[i]);
       }
     }
 
-    void CreateNewTexture(OpenGLTexture texture){
-      //GLuint tex;
-      //glGenTextures(1,&tex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGB, sizeof(unsigned char), texture.data);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    void AddNewText(unsigned char* texture){
+      text = texture;
     }
 
     void SetModel() {
@@ -310,6 +327,10 @@ namespace osmscout {
 
     GLuint getVAO() {
       return this->VAO;
+    }
+
+    GLuint GetTexture(){
+      return this->Tex;
     }
 
     GLuint getShaderProgram() {

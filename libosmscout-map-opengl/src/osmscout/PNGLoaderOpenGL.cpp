@@ -384,7 +384,7 @@ namespace osmscout {
       green=green*alpha/256;
       blue=blue*alpha/256;
 
-      if (littleEndian) {
+      //if (littleEndian) {
         data[off]=blue;
         off++;
         data[off]=green;
@@ -393,8 +393,8 @@ namespace osmscout {
         off++;
         data[off]=alpha;
         off++;
-      }
-      else {
+      //}
+      /*else {
         data[off]=alpha;
         off++;
         data[off]=red;
@@ -403,7 +403,7 @@ namespace osmscout {
         off++;
         data[off]=blue;
         off++;
-      }
+      }*/
     }
 
     png_destroy_read_struct(&png_ptr,&info_ptr,NULL);

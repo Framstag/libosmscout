@@ -656,10 +656,17 @@ namespace osmscout {
                                                const osmscout::MapParameter &parameter,
                                                const osmscout::Projection &projection,
                                                const osmscout::StyleConfigRef &styleConfig) {
+    int loaded = 0;
+
     LabelLayouter labels;
     labels.Initialize(projection, parameter);
 
     osmscout::log.Info() << "Nodes: " << data.nodes.size();
+
+    //OpenGLTexture *image = osmscout::LoadPNGOpenGL("/home/fanny/git/libosmscout/libosmscout/data/icons/14x14/standard/bus_stop.png");
+    //unsigned char *image = osmscout::LoadPNGChar("/home/fanny/git/libosmscout/libosmscout/data/icons/14x14/standard/bus_stop.png");
+    //ImageRenderer.AddNewTexture(image);
+    //ImageRenderer.AddNewText(image);
 
     for (const auto &node: data.nodes) {
       IconStyleRef iconStyle;
@@ -672,14 +679,16 @@ namespace osmscout {
                                      projection,
                                      textStyles);
 
+
       if (iconStyle) {
         //has icon?
         bool hasIcon = false;
-        /*for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
+        for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
              path != parameter.GetIconPaths().end();
              ++path) {
           std::string filename = *path + iconStyle->GetIconName() + ".png";
 
+          std::cout << filename << std::endl;
           //unsigned char *image = osmscout::LoadPNGChar(filename);
           OpenGLTexture *image = osmscout::LoadPNGOpenGL(filename);
 
@@ -689,20 +698,23 @@ namespace osmscout {
             //if (idx >= ImageRenderer.GetTexturesSize()) {
             //  Im.resize(idx + 1, NULL);
            //}
-            //ImageRenderer.AddNewTexture(image);
+            ImageRenderer.AddNewTexture(image);
+            //;
 
-            ImageRenderer.AddNewTexture(*image);
+            //if(loaded < 1)
+            //  ImageRenderer.AddNewTexture(*image);
 
+            loaded = 1;
             osmscout::log.Info() << "Loaded image '" << filename << "'";
 
             hasIcon = true;
 
             break;
           }
-        }*/
+        }
 
         if (!iconStyle->GetIconName().empty() && hasIcon) {
-          Color c = osmscout::Color(255, 0, 0);
+          Color c = osmscout::Color(1.0, 0.0, 0.0);
           osmscout::GeoCoord coords = node->GetCoords();
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
@@ -1040,6 +1052,7 @@ namespace osmscout {
     PathRenderer.Draw();
 
     glBindVertexArray(ImageRenderer.getVAO());
+    glBindTexture(GL_TEXTURE_2D, ImageRenderer.GetTexture());
     glUseProgram(ImageRenderer.getShaderProgram());
 
     ImageRenderer.AddUniform("windowWidth", width);

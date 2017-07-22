@@ -116,26 +116,30 @@ void main() {
     Texcoord = texcoords;
     TextureIndex = textureIndex;
     NumOfTextures = numOfTextures;
-    float width_norm = ceil(quadWidth)/windowWidth;
-    float height_norm = ceil(quadWidth)/windowWidth;
+    float width_norm = (ceil(quadWidth)/windowWidth) * 4;
+    float height_norm = (ceil(quadWidth)/windowWidth) * 4;
     vec2 c = GeoToPixel(position.x, position.y);
     vec4 pos = Projection * View * Model * vec4(c.x, c.y, 0, 1);
 
 gl_Position = pos;
 	if(index == 1.0){
         gl_Position = pos;
-        Texcoord = vec2(0.0, 0.0);
+        Texcoord = vec2(1.0, 1.0);
+        //Texcoord = vec2(1.0/NumOfTextures, 1.0/NumOfTextures);
     }
 	else if(index == 2.0){
 	    gl_Position = vec4(pos.x + width_norm, pos.y, pos.z, pos.w);
-	    Texcoord = vec2(1.0, 0.0);
+	    Texcoord = vec2(0.0, 1.0);
+	    //Texcoord = vec2(0.0, 1.0/NumOfTextures);
 	}
 	else if(index == 3.0){
 	    gl_Position = vec4(pos.x + width_norm, pos.y + height_norm, pos.z, pos.w);
-	    Texcoord = vec2(1.0, 1.0);
+	    Texcoord = vec2(0.0, 0.0);
+	    //Texcoord = vec2(0.0, 0.0);
 	}
 	else{
 	    gl_Position = vec4(pos.x, pos.y + height_norm, pos.z, pos.w);
-	    Texcoord = vec2(0.0, 1.0);
+	    Texcoord = vec2(1.0, 0.0);
+	    //Texcoord = vec2(1.0/NumOfTextures, 0.0);
 	}
 }
