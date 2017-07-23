@@ -27,12 +27,13 @@ SWIG_SOURCES=osmscout/util/FileScanner.i\
              osmscout/OptimizeAreasLowZoom.i\
              osmscout/OptimizeWaysLowZoom.i\
              osmscout/Point.i\
-             osmscout/Route.i\
-             osmscout/RouteData.i\
-             osmscout/RouteNode.i\
-             osmscout/RoutePostprocessor.i\
-             osmscout/RoutingProfile.i\
-             osmscout/RoutingService.i\
+             osmscout/routing/DBFileOffset.i\
+             osmscout/routing/Route.i\
+             osmscout/routing/RouteData.i\
+             osmscout/routing/RouteNode.i\
+             osmscout/routing/RoutePostprocessor.i\
+             osmscout/routing/RoutingProfile.i\
+             osmscout/routing/RoutingService.i\
              osmscout/Tag.i\
              osmscout/TypeConfig.i\
              osmscout/Types.i\

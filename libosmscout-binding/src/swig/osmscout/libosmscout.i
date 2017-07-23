@@ -59,10 +59,11 @@
 %include <osmscout/Database.i>
 %include <osmscout/LocationService.i>
 
-%include <osmscout/Route.i>
-%include <osmscout/RouteData.i>
-%include <osmscout/RouteNode.i>
-%include <osmscout/RoutingProfile.i>
-%include <osmscout/RoutePostprocessor.i>
-%include <osmscout/RoutingService.i>
+%include <osmscout/routing/DBFileOffset.i>
+%include <osmscout/routing/Route.i>
+%include <osmscout/routing/RouteData.i>
+%include <osmscout/routing/RouteNode.i>
+%include <osmscout/routing/RoutingProfile.i>
+%include <osmscout/routing/RoutePostprocessor.i>
+%include <osmscout/routing/RoutingService.i>
 
