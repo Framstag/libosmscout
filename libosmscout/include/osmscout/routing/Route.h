@@ -29,6 +29,7 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
 #include <osmscout/GeoCoord.h>
+#include <osmscout/routing/DBFileOffset.h>
 
 namespace osmscout {
 
@@ -520,6 +521,7 @@ namespace osmscout {
     class OSMSCOUT_API Node
     {
     private:
+      DatabaseId                                     database;
       size_t                                         currentNodeIndex;
       std::vector<ObjectFileRef>                     objects;
       ObjectFileRef                                  pathObject;
@@ -531,7 +533,8 @@ namespace osmscout {
       std::list<DescriptionRef>                      descriptions;
 
     public:
-      Node(size_t currentNodeIndex,
+      Node(DatabaseId database,
+           size_t currentNodeIndex,
            const std::vector<ObjectFileRef>& objects,
            const ObjectFileRef& pathObject,
            size_t targetNodeIndex);
@@ -564,6 +567,16 @@ namespace osmscout {
       inline bool HasPathObject() const
       {
         return pathObject.Valid();
+      }
+
+      inline DatabaseId GetDatabaseId() const
+      {
+        return database;
+      }
+
+      inline DBFileOffset GetDBFileOffset() const
+      {
+        return DBFileOffset(GetDatabaseId(),GetPathObject().GetFileOffset());
       }
 
       /**
@@ -626,7 +639,8 @@ namespace osmscout {
 
     void Clear();
 
-    void AddNode(size_t currentNodeIndex,
+    void AddNode(DatabaseId database,
+                 size_t currentNodeIndex,
                  const std::vector<ObjectFileRef>& objects,
                  const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);

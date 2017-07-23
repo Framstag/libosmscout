@@ -95,6 +95,15 @@ target_include_directories(Routing PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmsco
 target_link_libraries(Routing osmscout)
 install(TARGETS Routing RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
+if(${OSMSCOUT_BUILD_MAP_QT})
+  #---- RoutingAnimation
+  add_executable(RoutingAnimation src/RoutingAnimation.cpp)
+  set_property(TARGET RoutingAnimation PROPERTY CXX_STANDARD 11)
+  target_include_directories(RoutingAnimation PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS})
+  target_link_libraries(RoutingAnimation osmscout osmscout_map osmscout_map_qt ${Qt5Widgets_LIBRARIES})
+  install(TARGETS RoutingAnimation RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+endif()
+
 #----
 if(${OSMSCOUT_BUILD_MAP_AGG})
     add_executable(Tiler src/Tiler.cpp)

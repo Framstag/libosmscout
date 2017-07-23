@@ -51,7 +51,7 @@
 // Water index
 #include <osmscout/WaterIndex.h>
 
-#include <osmscout/Route.h>
+#include <osmscout/routing/Route.h>
 
 #include <osmscout/util/GeoBox.h>
 

@@ -26,7 +26,7 @@
 #include <QAbstractListModel>
 
 #include <osmscout/Location.h>
-#include <osmscout/Route.h>
+#include <osmscout/routing/Route.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 

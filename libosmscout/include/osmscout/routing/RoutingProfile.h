@@ -28,10 +28,9 @@
 #include <osmscout/TypeFeatures.h>
 
 #include <osmscout/Way.h>
+#include <osmscout/Area.h>
 
-#include <osmscout/RouteNode.h>
-
-#include "Area.h"
+#include <osmscout/routing/RouteNode.h>
 
 namespace osmscout {
 

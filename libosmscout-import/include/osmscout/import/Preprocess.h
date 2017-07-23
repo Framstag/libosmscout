@@ -26,7 +26,7 @@
 
 #include <osmscout/Coord.h>
 #include <osmscout/Tag.h>
-#include <osmscout/TurnRestriction.h>
+#include <osmscout/routing/TurnRestriction.h>
 
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/WorkQueue.h>

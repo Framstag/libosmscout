@@ -23,7 +23,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/DebugDatabase.h>
 
-#include <osmscout/RouteNode.h>
+#include <osmscout/routing/RouteNode.h>
 #include <osmscout/TypeFeatures.h>
 
 #include <list>

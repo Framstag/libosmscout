@@ -22,7 +22,7 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/RouteNode.h>
+#include <osmscout/routing/RouteNode.h>
 #include <osmscout/TypeConfig.h>
 
 namespace osmscout {
@@ -34,7 +34,7 @@ namespace osmscout {
    * routing graph. The object variat data contains a lookup table for path
    * attributes. Since the number of attribute value combinations is much
    * smaller then the actual bumber of elements in the route graph it makes
-   * sense to store all ossible combinations in a lookup table and just
+   * sense to store all possible combinations in a lookup table and just
    * index them from the routing graph paths.
    */
   class OSMSCOUT_API ObjectVariantDataFile

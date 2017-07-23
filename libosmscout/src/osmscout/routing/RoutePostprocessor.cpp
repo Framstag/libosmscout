@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/RoutePostprocessor.h>
+#include <osmscout/routing/RoutePostprocessor.h>
 
 #include <osmscout/system/Math.h>
 
@@ -38,9 +38,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::StartPostprocessor::Process(const RoutePostprocessor& /*postprocessor*/,
-                                                       const RoutingProfile& /*profile*/,
-                                                       RouteDescription& description,
-                                                       Database& /*database*/)
+                                                       RouteDescription& description)
   {
     if (!description.Nodes().empty()) {
       description.Nodes().front().AddDescription(RouteDescription::NODE_START_DESC,
@@ -57,9 +55,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::TargetPostprocessor::Process(const RoutePostprocessor& /*postprocessor*/,
-                                                        const RoutingProfile& /*profile*/,
-                                                        RouteDescription& description,
-                                                        Database& /*database*/)
+                                                        RouteDescription& description)
   {
     if (!description.Nodes().empty()) {
       description.Nodes().back().AddDescription(RouteDescription::NODE_TARGET_DESC,
@@ -74,10 +70,8 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::DistanceAndTimePostprocessor::Process(const RoutePostprocessor& /*postprocessor*/,
-                                                                 const RoutingProfile& profile,
-                                                                 RouteDescription& description,
-                                                                 Database& database)
+  bool RoutePostprocessor::DistanceAndTimePostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                                 RouteDescription& description)
   {
     ObjectFileRef prevObject;
     GeoCoord      prevCoord(0.0,0.0);
@@ -104,16 +98,10 @@ namespace osmscout {
             assert(false);
             break;
           case refArea:
-            if (!database.GetAreaByOffset(curObject.GetFileOffset(),area)) {
-              log.Error() << "Error while loading area with offset " << curObject.GetFileOffset();
-              return false;
-            }
+            area=postprocessor.GetArea(node.GetDBFileOffset());
             break;
           case refWay:
-            if (!database.GetWayByOffset(curObject.GetFileOffset(),way)) {
-              log.Error() << "Error while loading way with offset " << curObject.GetFileOffset();
-              return false;
-            }
+            way=postprocessor.GetWay(node.GetDBFileOffset());
             break;
           }
         }
@@ -138,12 +126,14 @@ namespace osmscout {
           double deltaTime=0.0;
 
           if (node.GetPathObject().GetType()==refArea) {
-            deltaTime=profile.GetTime(*area,
-                                      deltaDistance);
+            deltaTime=postprocessor.GetTime(node.GetDatabaseId(),
+                                            *area,
+                                            deltaDistance);
           }
           else if (node.GetPathObject().GetType()==refWay) {
-            deltaTime=profile.GetTime(*way,
-                                      deltaDistance);
+            deltaTime=postprocessor.GetTime(node.GetDatabaseId(),
+                                            *way,
+                                            deltaDistance);
           }
 
           distance+=deltaDistance;
@@ -168,9 +158,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::WayNamePostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                         const RoutingProfile& /*profile*/,
-                                                         RouteDescription& description,
-                                                         Database& /*database*/)
+                                                         RouteDescription& description)
   {
     //
     // Store the name of each way
@@ -185,17 +173,16 @@ namespace osmscout {
       }
 
       if (node->GetPathObject().GetType()==refArea) {
-        AreaRef                              area=postprocessor.GetArea(node->GetPathObject().GetFileOffset());
-        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(*area);
+        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(*node);
 
         node->AddDescription(RouteDescription::WAY_NAME_DESC,
                              nameDesc);
       }
       else if (node->GetPathObject().GetType()==refWay) {
-        WayRef                               way=postprocessor.GetWay(node->GetPathObject().GetFileOffset());
-        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(*way);
+        WayRef                               way=postprocessor.GetWay(node->GetDBFileOffset());
+        RouteDescription::NameDescriptionRef nameDesc=postprocessor.GetNameDescription(node->GetDatabaseId(),*way);
 
-        if (postprocessor.IsBridge(*way) &&
+        if (postprocessor.IsBridge(*node) &&
             node!=description.Nodes().begin()) {
           std::list<RouteDescription::Node>::iterator lastNode=node;
 
@@ -226,9 +213,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::WayTypePostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                         const RoutingProfile& /*profile*/,
-                                                         RouteDescription& description,
-                                                         Database& /*database*/)
+                                                         RouteDescription& description)
   {
     //
     // Store the name of each way
@@ -243,14 +228,14 @@ namespace osmscout {
       }
 
       if (node->GetPathObject().GetType()==refArea) {
-        AreaRef                                  area=postprocessor.GetArea(node->GetPathObject().GetFileOffset());
+        AreaRef                                  area=postprocessor.GetArea(node->GetDBFileOffset());
         RouteDescription::TypeNameDescriptionRef typeNameDesc=std::make_shared<RouteDescription::TypeNameDescription>(area->GetType()->GetName());
 
         node->AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
                              typeNameDesc);
       }
       else if (node->GetPathObject().GetType()==refWay) {
-        WayRef                                   way=postprocessor.GetWay(node->GetPathObject().GetFileOffset());
+        WayRef                                   way=postprocessor.GetWay(node->GetDBFileOffset());
         RouteDescription::TypeNameDescriptionRef typeNameDesc=std::make_shared<RouteDescription::TypeNameDescription>(way->GetType()->GetName());
 
         node->AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
@@ -276,8 +261,7 @@ namespace osmscout {
       // Way is origin way and starts or ends here so it is not an additional crossing way
       if (originObject.Valid() &&
           object==originObject &&
-          postprocessor.IsNodeStartOrEndOfObject(node.GetPathObject(),
-                                                 node.GetCurrentNodeIndex(),
+          postprocessor.IsNodeStartOrEndOfObject(node,
                                                  originObject)) {
         continue;
       }
@@ -285,8 +269,7 @@ namespace osmscout {
       // Way is target way and starts or ends here so it is not an additional crossing way
       if (targetObject.Valid() &&
           object==targetObject &&
-          postprocessor.IsNodeStartOrEndOfObject(node.GetPathObject(),
-                                                 node.GetCurrentNodeIndex(),
+          postprocessor.IsNodeStartOrEndOfObject(node,
                                                  targetObject)) {
         continue;
       }
@@ -299,14 +282,12 @@ namespace osmscout {
         continue;
       }
 
-      description->AddDescription(postprocessor.GetNameDescription(object));
+      description->AddDescription(postprocessor.GetNameDescription(node.GetDatabaseId(),object));
     }
   }
 
   bool RoutePostprocessor::CrossingWaysPostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                              const RoutingProfile& profile,
-                                                              RouteDescription& description,
-                                                              Database& /*database*/)
+                                                              RouteDescription& description)
   {
     //
     // Analyze crossing
@@ -338,19 +319,18 @@ namespace osmscout {
       // node
       size_t exitCount=0;
 
-      Id nodeId=postprocessor.GetNodeId(node->GetPathObject(),
-                                        node->GetCurrentNodeIndex());
+      Id nodeId=postprocessor.GetNodeId(*node);
 
-      size_t currentNodeIndexOnLastPath=postprocessor.GetNodeIndex(lastNode->GetPathObject(),
+      size_t currentNodeIndexOnLastPath=postprocessor.GetNodeIndex(*lastNode,
                                                                    nodeId);
 
       for (std::vector<ObjectFileRef>::const_iterator object=node->GetObjects().begin();
           object!=node->GetObjects().end();
           ++object) {
-        bool canUseForward=postprocessor.CanUseForward(profile,
+        bool canUseForward=postprocessor.CanUseForward(node->GetDatabaseId(),
                                                        nodeId,
                                                        *object);
-        bool canUseBackward=postprocessor.CanUseBackward(profile,
+        bool canUseBackward=postprocessor.CanUseBackward(node->GetDatabaseId(),
                                                          nodeId,
                                                          *object);
 
@@ -358,7 +338,7 @@ namespace osmscout {
         if (canUseForward) {
           // And it is not the way back to the last routing node
           if (lastNode->GetPathObject()!=*object ||
-              postprocessor.IsRoundabout(*object) ||
+              postprocessor.IsRoundabout(*node) ||
               !postprocessor.IsForwardPath(lastNode->GetPathObject(),
                                            currentNodeIndexOnLastPath,
                                            lastNode->GetCurrentNodeIndex())) {
@@ -379,8 +359,8 @@ namespace osmscout {
       }
 
       RouteDescription::CrossingWaysDescriptionRef desc=std::make_shared<RouteDescription::CrossingWaysDescription>(exitCount,
-                                                                                                                    postprocessor.GetNameDescription(lastNode->GetPathObject()),
-                                                                                                                    postprocessor.GetNameDescription(node->GetPathObject()));
+                                                                                                                    postprocessor.GetNameDescription(*lastNode),
+                                                                                                                    postprocessor.GetNameDescription(*node));
       AddCrossingWaysDescriptions(postprocessor,
                                   desc,
                                   *node,
@@ -411,9 +391,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::DirectionPostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                           const RoutingProfile& /*profile*/,
-                                                           RouteDescription& description,
-                                                           Database& /*database*/)
+                                                           RouteDescription& description)
   {
     std::list<RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
     for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
@@ -427,13 +405,13 @@ namespace osmscout {
           nextNode!=description.Nodes().end() &&
           nextNode->HasPathObject()) {
 
-        GeoCoord prevCoord=postprocessor.GetCoordinates(prevNode->GetPathObject(),
+        GeoCoord prevCoord=postprocessor.GetCoordinates(*prevNode,
                                                         prevNode->GetCurrentNodeIndex());
 
-        GeoCoord coord=postprocessor.GetCoordinates(node->GetPathObject(),
+        GeoCoord coord=postprocessor.GetCoordinates(*node,
                                                     node->GetCurrentNodeIndex());
 
-        GeoCoord nextCoord=postprocessor.GetCoordinates(nextNode->GetPathObject(),
+        GeoCoord nextCoord=postprocessor.GetCoordinates(*nextNode,
                                                         nextNode->GetCurrentNodeIndex());
 
         double inBearing=GetSphericalBearingFinal(prevCoord,coord)*180/M_PI;
@@ -469,10 +447,10 @@ namespace osmscout {
 
             forwardDistance+=lookup->GetDistance()-curveB->GetDistance();
 
-            GeoCoord curveBCoord=postprocessor.GetCoordinates(curveB->GetPathObject(),
+            GeoCoord curveBCoord=postprocessor.GetCoordinates(*curveB,
                                                               curveB->GetCurrentNodeIndex());
 
-            GeoCoord lookupCoord=postprocessor.GetCoordinates(lookup->GetPathObject(),
+            GeoCoord lookupCoord=postprocessor.GetCoordinates(*lookup,
                                                               lookup->GetCurrentNodeIndex());
 
             double lookupBearing=GetSphericalBearingInitial(curveBCoord,lookupCoord)*180/M_PI;
@@ -511,37 +489,17 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::MotorwayJunctionPostprocessor::Process(const RoutePostprocessor& /*postprocessor*/,
-                                                                  const RoutingProfile& /*profile*/,
-                                                                  RouteDescription& description,
-                                                                  Database& database)
+  bool RoutePostprocessor::MotorwayJunctionPostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                                  RouteDescription& description)
   {
      ObjectFileRef           prevObject;
+     DatabaseId              prevDatabase;
      ObjectFileRef           curObject;
-     AreaRef                 area;
+     DatabaseId              curDatabase;
+     
      WayRef                  way;
-     double                  delta=1E-7;
      std::string             junctionRef;
      std::string             junctionName;
-     std::vector<FileOffset> nodeOffsets;
-     std::vector<NodeRef>    nodes;
-     AreaNodeIndexRef        areaNodeIndex=database.GetAreaNodeIndex();
-
-     if (!areaNodeIndex) {
-       return false;
-     }
-
-     TypeInfoRef typeInfo=database.GetTypeConfig()->GetTypeInfo("highway_motorway_junction");
-     TypeInfoSet nodeTypes;
-
-     if (!typeInfo) {
-       return false;
-     }
-
-     nodeTypes.Set(typeInfo);
-
-     RefFeatureValueReader  refReader(*database.GetTypeConfig());
-     NameFeatureValueReader nameReader(*database.GetTypeConfig());
 
      for (auto& node: description.Nodes()) {
        junctionName="";
@@ -554,8 +512,9 @@ namespace osmscout {
 
        // Only load the next way, if it is different from the old one
        curObject=node.GetPathObject();
+       curDatabase=node.GetDatabaseId();
 
-       if (curObject==prevObject) {
+       if (curObject==prevObject && curDatabase==prevDatabase) {
          continue;
        }
 
@@ -567,64 +526,18 @@ namespace osmscout {
          assert(false);
          break;
        case refArea:
-         if (!database.GetAreaByOffset(curObject.GetFileOffset(),
-                                       area)) {
-           log.Error()<< "Error while loading area with offset " << curObject.GetFileOffset();
-           return false;
-         }
+         // TODO: junction in area?
          break;
        case refWay:
-         if (!database.GetWayByOffset(curObject.GetFileOffset(),
-                                      way)) {
-           log.Error() << "Error while loading way with offset " << curObject.GetFileOffset();
+         way=postprocessor.GetWay(node.GetDBFileOffset());
+
+         GeoCoord coord=way->GetCoord(node.GetCurrentNodeIndex());
+         if (!postprocessor.LoadJunction(curDatabase,
+                                         coord,
+                                         junctionRef,
+                                         junctionName)){
+           log.Error() << "Error loading junction!";
            return false;
-         }
-
-         GeoCoord    coord=way->GetCoord(node.GetCurrentNodeIndex());
-         TypeInfoSet loadedTypes;
-
-         GeoBox boundingBox(GeoCoord(coord.GetLat()-delta,coord.GetLon()-delta),
-                            GeoCoord(coord.GetLat()+delta,coord.GetLon()+delta));
-
-         nodeOffsets.clear();
-         if (!areaNodeIndex->GetOffsets(boundingBox,
-                                        nodeTypes,
-                                        nodeOffsets,
-                                        loadedTypes)) {
-           log.Error() << "Error getting nodes from area node index!";
-           return false;
-         }
-
-         if (nodeOffsets.empty()) {
-           continue;
-         }
-
-         nodes.clear();
-         std::sort(nodeOffsets.begin(),nodeOffsets.end());
-
-         if (!database.GetNodesByOffset(nodeOffsets,
-                                        nodes)) {
-           log.Error() << "Error reading nodes in area!";
-           return false;
-         }
-
-         for (size_t i=0; i<nodes.size(); i++) {
-           if (fabs(nodes[i]->GetCoords().GetLat() - coord.GetLat()) < delta &&
-               fabs(nodes[i]->GetCoords().GetLon() - coord.GetLon()) < delta) {
-             RefFeatureValue *refFeatureValue=refReader.GetValue(nodes[i]->GetFeatureValueBuffer());
-
-             if (refFeatureValue!=NULL) {
-               junctionRef=refFeatureValue->GetRef();
-             }
-
-             NameFeatureValue *nameFeatureValue=nameReader.GetValue(nodes[i]->GetFeatureValueBuffer());
-
-             if (nameFeatureValue!=NULL) {
-               junctionName = nameFeatureValue->GetName();
-             }
-
-             break;
-           }
          }
 
          break;
@@ -638,6 +551,7 @@ namespace osmscout {
        }
 
        prevObject=curObject;
+       prevDatabase=curDatabase;
      }
 
      return true;
@@ -649,17 +563,13 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::DestinationPostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                             const RoutingProfile& /*profile*/,
-                                                             RouteDescription& description,
-                                                             Database& database)
+                                                             RouteDescription& description)
   {
     std::list<RouteDescription::Node>::iterator lastJunction=description.Nodes().end();
     ObjectFileRef                               prevObject;
+    DatabaseId                                  prevDb;
     ObjectFileRef                               curObject;
-    AreaRef                                     area;
-    WayRef                                      way;
-    const TypeConfigRef                         typeConfig(database.GetTypeConfig());
-    DestinationFeatureValueReader               destinationReader(*typeConfig);
+    DatabaseId                                  curDb;
 
     for (auto node=description.Nodes().begin(); node!=description.Nodes().end(); ++node) {
       if (!node->GetObjects().empty()) {
@@ -670,47 +580,22 @@ namespace osmscout {
       if (node->HasPathObject()) {
         // Only load the next way, if it is different from the old one
         curObject=node->GetPathObject();
+        curDb=node->GetDatabaseId();
 
-        if (curObject!=prevObject) {
-          switch (node->GetPathObject().GetType()) {
-          case refNone:
-            assert(false);
-            break;
-          case refNode:
-            assert(false);
-            break;
-          case refArea:
-            area=postprocessor.GetArea(node->GetPathObject().GetFileOffset());
+        if (curObject==prevObject && curDb==prevDb){
+          continue;
+        }
 
-            break;
-          case refWay:
-            way=postprocessor.GetWay(node->GetPathObject().GetFileOffset());
-
-            DestinationFeatureValue *destinationValue=destinationReader.GetValue(way->GetFeatureValueBuffer());
-
-            if (destinationValue!=NULL &&
-                lastJunction!=description.Nodes().end()) {
-              std::string destination=destinationValue->GetDestination();
-
-              lastJunction->AddDescription(RouteDescription::CROSSING_DESTINATION_DESC,
-                                           std::make_shared<RouteDescription::DestinationDescription>(destination));
-
-            }
-            else {
-              //speed=0;
-            }
-
-            break;
+        if (lastJunction!=description.Nodes().end()){
+          RouteDescription::DestinationDescriptionRef dest=postprocessor.GetDestination(*node);
+          if (dest){
+            lastJunction->AddDescription(RouteDescription::CROSSING_DESTINATION_DESC,
+                                         dest);
           }
         }
 
-        /*
-        if (speed!=0) {
-          node.AddDescription(RouteDescription::WAY_MAXSPEED_DESC,
-                              std::make_shared<RouteDescription::MaxSpeedDescription>(speed));
-        }  */
-
         prevObject=curObject;
+        prevDb=curDb;
       }
     }
 
@@ -718,51 +603,24 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::MaxSpeedPostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                          const RoutingProfile& /*profile*/,
-                                                          RouteDescription& description,
-                                                          Database& database)
+                                                          RouteDescription& description)
   {
     ObjectFileRef              prevObject;
+    DatabaseId                 prevDb;
     ObjectFileRef              curObject;
-    AreaRef                    area;
-    WayRef                     way;
+    DatabaseId                 curDb;
+
     uint8_t                    speed=0;
-    const TypeConfigRef        typeConfig(database.GetTypeConfig());
-    MaxSpeedFeatureValueReader maxSpeedReader(*typeConfig);
 
     for (auto& node : description.Nodes()) {
       // The last node does not have a pathWayId set, since we are not going anywhere!
       if (node.HasPathObject()) {
         // Only load the next way, if it is different from the old one
         curObject=node.GetPathObject();
+        curDb=node.GetDatabaseId();
 
-        if (curObject!=prevObject) {
-          switch (node.GetPathObject().GetType()) {
-          case refNone:
-            assert(false);
-            break;
-          case refNode:
-            assert(false);
-            break;
-          case refArea:
-            area=postprocessor.GetArea(node.GetPathObject().GetFileOffset());
-            speed=0;
-
-            break;
-          case refWay:
-            way=postprocessor.GetWay(node.GetPathObject().GetFileOffset());
-
-            MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader.GetValue(way->GetFeatureValueBuffer());
-
-            if (maxSpeedValue!=NULL) {
-              speed=maxSpeedValue->GetMaxSpeed();
-            }
-            else {
-              speed=0;
-            }
-
-            break;
-          }
+        if (curObject!=prevObject || curDb!=prevDb) {
+          speed=postprocessor.GetMaxSpeed(node);
         }
 
         if (speed!=0) {
@@ -771,6 +629,7 @@ namespace osmscout {
         }
 
         prevObject=curObject;
+        prevDb=curDb;
       }
     }
 
@@ -785,32 +644,15 @@ namespace osmscout {
       return street;
     }
 
-    if (postprocessor.IsRoundabout(node.GetPathObject())) {
+    if (postprocessor.IsRoundabout(node)) {
       return roundabout;
     }
 
-    if (node.GetPathObject().GetType()==refArea) {
-      AreaRef area=postprocessor.GetArea(node.GetPathObject().GetFileOffset());
-
-      if (motorwayLinkTypes.IsSet(area->GetType())) {
+    if (postprocessor.IsMotorwayLink(node)){
         return link;
-      }
-      else if (motorwayTypes.IsSet(area->GetType())) {
-        return motorway;
-      }
     }
-    else if (node.GetPathObject().GetType()==refWay) {
-      WayRef way=postprocessor.GetWay(node.GetPathObject().GetFileOffset());
-
-      if (motorwayLinkTypes.IsSet(way->GetType())) {
-        return link;
-      }
-      else if (motorwayTypes.IsSet(way->GetType())) {
+    if (postprocessor.IsMotorway(node)){
         return motorway;
-      }
-    }
-    else {
-      return street;
     }
 
     return street;
@@ -957,22 +799,10 @@ namespace osmscout {
     return false;
   }
 
-  void RoutePostprocessor::InstructionPostprocessor::AddMotorwayType(const TypeInfoRef& type)
-  {
-    motorwayTypes.Set(type);
-  }
-
-  void RoutePostprocessor::InstructionPostprocessor::AddMotorwayLinkType(const TypeInfoRef& type)
-  {
-    motorwayLinkTypes.Set(type);
-  }
-
   bool RoutePostprocessor::InstructionPostprocessor::Process(const RoutePostprocessor& postprocessor,
-                                                             const RoutingProfile& /*profile*/,
-                                                             RouteDescription& description,
-                                                             Database& /*database*/)
+                                                             RouteDescription& description)
   {
-   //
+    //
     // Detect initial state
     //
 
@@ -1010,8 +840,8 @@ namespace osmscout {
         targetName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
       }
 
-      if (!postprocessor.IsRoundabout(lastNode->GetPathObject()) &&
-          postprocessor.IsRoundabout(node->GetPathObject())) {
+      if (!postprocessor.IsRoundabout(*lastNode) &&
+          postprocessor.IsRoundabout(*node)) {
         inRoundabout=true;
         roundaboutCrossingCounter=0;
 
@@ -1022,8 +852,8 @@ namespace osmscout {
         continue;
       }
 
-      if (postprocessor.IsRoundabout(lastNode->GetPathObject()) &&
-          !postprocessor.IsRoundabout(node->GetPathObject())) {
+      if (postprocessor.IsRoundabout(*lastNode) &&
+          !postprocessor.IsRoundabout(*node)) {
         HandleRoundaboutNode(*node);
 
         HandleRoundaboutLeave(*node);
@@ -1036,12 +866,9 @@ namespace osmscout {
       }
 
       // Non-Link, non-motorway to motorway (enter motorway))
-      if (!postprocessor.IsOfType(lastNode->GetPathObject(),
-                                  motorwayLinkTypes) &&
-          !postprocessor.IsOfType(lastNode->GetPathObject(),
-                                  motorwayTypes) &&
-          postprocessor.IsOfType(node->GetPathObject(),
-                                 motorwayTypes)) {
+      if (!postprocessor.IsMotorwayLink(*lastNode) &&
+          !postprocessor.IsMotorway(*lastNode) &&
+          postprocessor.IsMotorway(*node)) {
         HandleDirectMotorwayEnter(*node,
                                   targetName);
 
@@ -1051,12 +878,9 @@ namespace osmscout {
       }
 
       // motorway to Non-Link, non-motorway /leave motorway)
-      if (postprocessor.IsOfType(lastNode->GetPathObject(),
-                                 motorwayTypes) &&
-          !postprocessor.IsOfType(node->GetPathObject(),
-                                  motorwayLinkTypes) &&
-          !postprocessor.IsOfType(node->GetPathObject(),
-                                  motorwayTypes)) {
+      if (postprocessor.IsMotorway(*lastNode) &&
+          !postprocessor.IsMotorwayLink(*node) &&
+          !postprocessor.IsMotorway(*node)) {
         HandleDirectMotorwayLeave(*node,
                                   originName);
 
@@ -1065,12 +889,9 @@ namespace osmscout {
         continue;
       }
 
-      else if (!postprocessor.IsOfType(lastNode->GetPathObject(),
-                                       motorwayLinkTypes) &&
-          postprocessor.IsOfType(node->GetPathObject(),
-                                 motorwayLinkTypes)) {
-        bool                                        originIsMotorway=postprocessor.IsOfType(lastNode->GetPathObject(),
-                                                                                            motorwayTypes);
+      else if (!postprocessor.IsMotorwayLink(*lastNode) &&
+               postprocessor.IsMotorwayLink(*node)) {
+        bool                                        originIsMotorway=postprocessor.IsMotorway(*lastNode);
         bool                                        targetIsMotorway=false;
         std::list<RouteDescription::Node>::iterator next=node;
         RouteDescription::NameDescriptionRef        nextName;
@@ -1081,8 +902,7 @@ namespace osmscout {
 
           nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(next->GetDescription(RouteDescription::WAY_NAME_DESC));
 
-          if (!postprocessor.IsOfType(next->GetPathObject(),
-                                      motorwayLinkTypes)) {
+          if (!postprocessor.IsMotorwayLink(*next)) {
             break;
           }
 
@@ -1090,8 +910,7 @@ namespace osmscout {
         }
 
         if (next->GetPathObject().Valid()) {
-          targetIsMotorway=postprocessor.IsOfType(next->GetPathObject(),
-                                                  motorwayTypes);
+          targetIsMotorway=postprocessor.IsMotorway(*next);
         }
 
         if (originIsMotorway && targetIsMotorway) {
@@ -1165,15 +984,11 @@ namespace osmscout {
   }
 
   RoutePostprocessor::RoutePostprocessor()
-  : nameReader(NULL),
-    refReader(NULL),
-    bridgeReader(NULL),
-    roundaboutReader(NULL)
   {
-
   }
 
   bool RoutePostprocessor::ResolveAllAreasAndWays(const RouteDescription& description,
+                                                  DatabaseId dbId,
                                                   Database& database)
   {
     std::set<FileOffset>         areaOffsets;
@@ -1183,6 +998,9 @@ namespace osmscout {
     std::vector<WayRef>          ways;
 
     for (const auto &node : description.Nodes()) {
+      if (node.GetDatabaseId()!=dbId){
+        continue;
+      }
       if (node.HasPathObject()) {
         switch (node.GetPathObject().GetType()) {
         case refNone:
@@ -1222,7 +1040,7 @@ namespace osmscout {
     wayOffsets.clear();
 
     for (const auto& way : ways) {
-      wayMap[way->GetFileOffset()]=way;
+      wayMap[DBFileOffset(dbId,way->GetFileOffset())]=way;
     }
 
     ways.clear();
@@ -1235,7 +1053,7 @@ namespace osmscout {
     areaOffsets.clear();
 
     for (const auto& area : areas) {
-      areaMap[area->GetFileOffset()]=area;
+      areaMap[DBFileOffset(dbId,area->GetFileOffset())]=area;
     }
 
     areas.clear();
@@ -1248,21 +1066,41 @@ namespace osmscout {
     areaMap.clear();
     wayMap.clear();
 
+    motorwayTypes.clear();
+    motorwayLinkTypes.clear();
 
-    delete nameReader;
-    nameReader=NULL;
+    for (const auto p:nameReaders){
+      delete p.second;
+    }
+    nameReaders.clear();
 
-    delete refReader;
-    refReader=NULL;
+    for (const auto p:refReaders){
+      delete p.second;
+    }
+    refReaders.clear();
 
-    delete bridgeReader;
-    bridgeReader=NULL;
+    for (const auto p:bridgeReaders){
+      delete p.second;
+    }
+    bridgeReaders.clear();
 
-    delete roundaboutReader;
-    roundaboutReader=NULL;
+    for (const auto p:roundaboutReaders){
+      delete p.second;
+    }
+    roundaboutReaders.clear();
+
+    for (const auto p:destinationReaders){
+      delete p.second;
+    }
+    destinationReaders.clear();
+
+    for (const auto p:maxSpeedReaders){
+      delete p.second;
+    }
+    maxSpeedReaders.clear();
   }
 
-  AreaRef RoutePostprocessor::GetArea(FileOffset offset) const
+  AreaRef RoutePostprocessor::GetArea(const DBFileOffset &offset) const
   {
     auto entry=areaMap.find(offset);
 
@@ -1271,7 +1109,7 @@ namespace osmscout {
     return entry->second;
   }
 
-  WayRef RoutePostprocessor::GetWay(FileOffset offset) const
+  WayRef RoutePostprocessor::GetWay(const DBFileOffset &offset) const
   {
     auto entry=wayMap.find(offset);
 
@@ -1280,19 +1118,39 @@ namespace osmscout {
     return entry->second;
   }
 
-  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const ObjectFileRef& object) const
+  double RoutePostprocessor::GetTime(DatabaseId dbId,const Area& area,double deltaDistance) const
+  {
+    auto profile=profiles.find(dbId);
+    assert(profile!=profiles.end());
+    return profile->second->GetTime(area,deltaDistance);
+  }
+
+  double RoutePostprocessor::GetTime(DatabaseId dbId,const Way& way,double deltaDistance) const
+  {
+    auto profile=profiles.find(dbId);
+    assert(profile!=profiles.end());
+    return profile->second->GetTime(way,deltaDistance);
+  }
+
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const RouteDescription::Node& node) const
+  {
+    return GetNameDescription(node.GetDatabaseId(),node.GetPathObject());
+  }
+
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const DatabaseId dbId,
+                                                                              const ObjectFileRef& object) const
   {
     RouteDescription::NameDescriptionRef description;
 
     if (object.GetType()==refArea) {
-      AreaRef area=GetArea(object.GetFileOffset());
+      AreaRef area=GetArea(DBFileOffset(dbId,object.GetFileOffset()));
 
-      return GetNameDescription(*area);
+      return GetNameDescription(dbId,*area);
     }
     else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+      WayRef way=GetWay(DBFileOffset(dbId,object.GetFileOffset()));
 
-      return GetNameDescription(*way);
+      return GetNameDescription(dbId,*way);
     }
     else {
       assert(false);
@@ -1301,9 +1159,12 @@ namespace osmscout {
     return description;
   }
 
-  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const Area& area) const
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const DatabaseId dbId,
+                                                                              const Area& area) const
   {
-    NameFeatureValue *nameValue=nameReader->GetValue(area.rings.front().GetFeatureValueBuffer());
+    auto nameReader=nameReaders.find(dbId);
+    assert(nameReader!=nameReaders.end());
+    NameFeatureValue *nameValue=nameReader->second->GetValue(area.rings.front().GetFeatureValueBuffer());
     std::string      name;
 
     if (nameValue!=NULL) {
@@ -1313,10 +1174,16 @@ namespace osmscout {
     return std::make_shared<RouteDescription::NameDescription>(name);
   }
 
-  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const Way& way) const
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const DatabaseId dbId,
+                                                                              const Way& way) const
   {
-    NameFeatureValue *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
-    RefFeatureValue  *refValue=refReader->GetValue(way.GetFeatureValueBuffer());
+    auto nameReader=nameReaders.find(dbId);
+    assert(nameReader!=nameReaders.end());
+    auto refReader=refReaders.find(dbId);
+    assert(refReader!=refReaders.end());
+
+    NameFeatureValue *nameValue=nameReader->second->GetValue(way.GetFeatureValueBuffer());
+    RefFeatureValue  *refValue=refReader->second->GetValue(way.GetFeatureValueBuffer());
     std::string      name;
     std::string      ref;
 
@@ -1328,19 +1195,133 @@ namespace osmscout {
       ref=refValue->GetRef();
     }
 
-    return std::make_shared<RouteDescription::NameDescription>(name,
-                                                               ref);
+    return std::make_shared<RouteDescription::NameDescription>(name,ref);
   }
 
-  bool RoutePostprocessor::IsRoundabout(const ObjectFileRef& object) const
+  bool RoutePostprocessor::LoadJunction(DatabaseId dbId,
+                                        GeoCoord coord,
+                                        std::string junctionRef,
+                                        std::string junctionName) const
   {
-    if (object.GetType()==refArea) {
+    double                  delta=1E-7;
+    std::vector<FileOffset> nodeOffsets;
+    std::vector<NodeRef>    nodes;
+    
+    auto nameReaderIt=nameReaders.find(dbId);
+    assert(nameReaderIt!=nameReaders.end());
+    NameFeatureValueReader* nameReader=nameReaderIt->second;
+
+    auto refReaderIt=refReaders.find(dbId);
+    assert(refReaderIt!=refReaders.end());
+    RefFeatureValueReader* refReader=refReaderIt->second;
+
+    auto databaseIt=databases.find(dbId);
+    assert(databaseIt!=databases.end());
+    DatabaseRef database=databaseIt->second;
+
+    AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
+
+    if (!areaNodeIndex) {
       return false;
     }
-    else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
 
-      return roundaboutReader->IsSet(way->GetFeatureValueBuffer());
+    auto it=junctionTypes.find(dbId);
+    assert(it!=junctionTypes.end());
+    TypeInfoSet nodeTypes=it->second;
+
+    TypeInfoSet loadedTypes;
+    GeoBox boundingBox(GeoCoord(coord.GetLat()-delta,coord.GetLon()-delta),
+                       GeoCoord(coord.GetLat()+delta,coord.GetLon()+delta));
+
+    nodeOffsets.clear();
+    if (!areaNodeIndex->GetOffsets(boundingBox,
+                                   nodeTypes,
+                                   nodeOffsets,
+                                   loadedTypes)) {
+      log.Error() << "Error getting nodes from area node index!";
+      return false;
+    }
+
+    if (nodeOffsets.empty()) {
+      return true;
+    }
+
+    nodes.clear();
+    std::sort(nodeOffsets.begin(),nodeOffsets.end());
+
+    if (!database->GetNodesByOffset(nodeOffsets,
+                                   nodes)) {
+      log.Error() << "Error reading nodes in area!";
+      return false;
+    }
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (fabs(nodes[i]->GetCoords().GetLat() - coord.GetLat()) < delta &&
+          fabs(nodes[i]->GetCoords().GetLon() - coord.GetLon()) < delta) {
+        RefFeatureValue *refFeatureValue=refReader->GetValue(nodes[i]->GetFeatureValueBuffer());
+
+        if (refFeatureValue!=NULL) {
+          junctionRef=refFeatureValue->GetRef();
+        }
+
+        NameFeatureValue *nameFeatureValue=nameReader->GetValue(nodes[i]->GetFeatureValueBuffer());
+
+        if (nameFeatureValue!=NULL) {
+          junctionName = nameFeatureValue->GetName();
+        }
+
+        break;
+      }
+    }
+
+    return true;
+  }
+
+  bool RoutePostprocessor::IsMotorwayLink(const RouteDescription::Node& node) const
+  {
+    auto types=motorwayLinkTypes.find(node.GetDatabaseId());
+    assert(types!=motorwayLinkTypes.end());
+
+    if (node.GetPathObject().GetType()==refArea) {
+      AreaRef area=GetArea(node.GetDBFileOffset());
+      return types->second.IsSet(area->GetType());
+    }
+    else if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
+      return types->second.IsSet(way->GetType());
+    }
+
+    return false;
+  }
+
+  bool RoutePostprocessor::IsMotorway(const RouteDescription::Node& node) const
+  {
+    auto types=motorwayTypes.find(node.GetDatabaseId());
+    assert(types!=motorwayTypes.end());
+
+    if (node.GetPathObject().GetType()==refArea) {
+      AreaRef area=GetArea(node.GetDBFileOffset());
+      return types->second.IsSet(area->GetType());
+    }
+    else if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
+      return types->second.IsSet(way->GetType());
+    }
+
+    return false;
+  }
+
+  bool RoutePostprocessor::IsRoundabout(const RouteDescription::Node& node) const
+  {
+    if (node.GetPathObject().GetType()==refArea) {
+      return false;
+    }
+    else if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
+
+      auto roundaboutReader=roundaboutReaders.find(node.GetDatabaseId());
+      assert(roundaboutReader!=roundaboutReaders.end());
+      return roundaboutReader->second->IsSet(way->GetFeatureValueBuffer());
     }
     else {
       assert(false);
@@ -1349,41 +1330,64 @@ namespace osmscout {
     }
   }
 
-  bool RoutePostprocessor::IsBridge(const Way& way) const
+  bool RoutePostprocessor::IsBridge(const RouteDescription::Node& node) const
   {
-    return bridgeReader->IsSet(way.GetFeatureValueBuffer());
+    if (node.GetPathObject().GetType()==refWay) {
+      auto bridgeReader=bridgeReaders.find(node.GetDatabaseId());
+      assert(bridgeReader!=bridgeReaders.end());
+      WayRef way=GetWay(node.GetDBFileOffset());
+      return bridgeReader->second->IsSet(way->GetFeatureValueBuffer());
+    }
+    return false;
   }
 
-  bool RoutePostprocessor::IsOfType(const ObjectFileRef& object,
-                                    const TypeInfoSet& types) const
+  RouteDescription::DestinationDescriptionRef RoutePostprocessor::GetDestination(const RouteDescription::Node& node) const
   {
-    if (object.GetType()==refArea) {
-      AreaRef area=GetArea(object.GetFileOffset());
+    RouteDescription::DestinationDescriptionRef dest;
+    if (node.GetPathObject().GetType()==refWay) {
+      auto destinationReader=destinationReaders.find(node.GetDatabaseId());
+      assert(destinationReader!=destinationReaders.end());
+      WayRef way=GetWay(node.GetDBFileOffset());
 
-      return types.IsSet(area->GetType());
+      DestinationFeatureValue *destinationValue=destinationReader->second->GetValue(way->GetFeatureValueBuffer());
+      if (destinationValue!=NULL){
+        std::string destination=destinationValue->GetDestination();
+        dest=std::make_shared<RouteDescription::DestinationDescription>(destination);
+      }
     }
-    else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
-
-      return types.IsSet(way->GetType());
-    }
-    else {
-      assert(false);
-
-      return false;
-    }
+    return dest;
   }
 
-  Id RoutePostprocessor::GetNodeId(const ObjectFileRef& object,
-                                   size_t nodeIndex) const
+  uint8_t RoutePostprocessor::GetMaxSpeed(const RouteDescription::Node& node) const
   {
+    uint8_t speed=0;
+    if (node.GetPathObject().GetType()==refWay) {
+      auto maxSpeedReader=maxSpeedReaders.find(node.GetDatabaseId());
+      assert(maxSpeedReader!=maxSpeedReaders.end());
+      WayRef way=GetWay(node.GetDBFileOffset());
+
+      MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader->second->GetValue(way->GetFeatureValueBuffer());
+      if (maxSpeedValue!=NULL) {
+        speed=maxSpeedValue->GetMaxSpeed();
+      }
+      else {
+        speed=0;
+      }
+    }
+    return speed;
+  }
+
+  Id RoutePostprocessor::GetNodeId(const RouteDescription::Node& node) const
+  {
+    const ObjectFileRef& object=node.GetPathObject();
+    size_t nodeIndex=node.GetCurrentNodeIndex();
     if (object.GetType()==refArea) {
-      AreaRef area=GetArea(object.GetFileOffset());
+      AreaRef area=GetArea(node.GetDBFileOffset());
 
       return area->rings.front().nodes[nodeIndex].GetId();
     }
     else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+      WayRef way=GetWay(node.GetDBFileOffset());
 
       return way->GetId(nodeIndex);
     }
@@ -1394,11 +1398,12 @@ namespace osmscout {
     }
   }
 
-  size_t RoutePostprocessor::GetNodeIndex(const ObjectFileRef& object,
+  size_t RoutePostprocessor::GetNodeIndex(const RouteDescription::Node& node,
                                           Id nodeId) const
   {
+    const ObjectFileRef& object=node.GetPathObject();
     if (object.GetType()==refArea) {
-      AreaRef area=GetArea(object.GetFileOffset());
+      AreaRef area=GetArea(node.GetDBFileOffset());
 
       for (size_t i=0; i<area->rings.front().nodes.size(); i++) {
         if (area->rings.front().nodes[i].GetId()==nodeId) {
@@ -1412,7 +1417,7 @@ namespace osmscout {
       return 0;
     }
     else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+      WayRef way=GetWay(node.GetDBFileOffset());
 
       size_t index;
 
@@ -1430,17 +1435,20 @@ namespace osmscout {
     }
   }
 
-  bool RoutePostprocessor::CanUseBackward(const RoutingProfile& profile,
+  bool RoutePostprocessor::CanUseBackward(const DatabaseId& dbId,
                                           Id fromNodeId,
                                           const ObjectFileRef& object) const
   {
-    if (object.GetType()==refArea) {
-      AreaRef area=GetArea(object.GetFileOffset());
+    auto profile=profiles.find(dbId);
+    assert(profile!=profiles.end());
 
-      return profile.CanUse(*area);
+    if (object.GetType()==refArea) {
+      AreaRef area=GetArea(DBFileOffset(dbId,object.GetFileOffset()));
+
+      return profile->second->CanUse(*area);
     }
     else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+      WayRef way=GetWay(DBFileOffset(dbId,object.GetFileOffset()));
 
       size_t fromNodeIndex;
 
@@ -1450,7 +1458,7 @@ namespace osmscout {
       }
 
       return fromNodeIndex>0 &&
-             profile.CanUseBackward(*way);
+             profile->second->CanUseBackward(*way);
     }
     else {
       assert(false);
@@ -1459,17 +1467,20 @@ namespace osmscout {
     }
   }
 
-  bool RoutePostprocessor::CanUseForward(const RoutingProfile& profile,
+  bool RoutePostprocessor::CanUseForward(const DatabaseId& dbId,
                                          Id fromNodeId,
                                          const ObjectFileRef& object) const
   {
-    if (object.GetType()==refArea) {
-      AreaRef area=GetArea(object.GetFileOffset());
+    auto profile=profiles.find(dbId);
+    assert(profile!=profiles.end());
 
-      return profile.CanUse(*area);
+    if (object.GetType()==refArea) {
+      AreaRef area=GetArea(DBFileOffset(dbId,object.GetFileOffset()));
+
+      return profile->second->CanUse(*area);
     }
     else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+      WayRef way=GetWay(DBFileOffset(dbId,object.GetFileOffset()));
 
       size_t fromNodeIndex;
 
@@ -1479,7 +1490,7 @@ namespace osmscout {
       }
 
       return fromNodeIndex!=way->nodes.size()-1 &&
-             profile.CanUseForward(*way);
+             profile->second->CanUseForward(*way);
     }
     else {
       assert(false);
@@ -1522,19 +1533,19 @@ namespace osmscout {
     }
   }
 
-  bool RoutePostprocessor::IsNodeStartOrEndOfObject(const ObjectFileRef& nodeObject,
-                                                    size_t nodeIndex,
+  bool RoutePostprocessor::IsNodeStartOrEndOfObject(const RouteDescription::Node& node,
                                                     const ObjectFileRef& object) const
   {
+    size_t nodeIndex=node.GetCurrentNodeIndex();
     Id nodeId;
 
-    if (nodeObject.GetType()==refArea) {
-      AreaRef area=GetArea(nodeObject.GetFileOffset());
+    if (node.GetPathObject().GetType()==refArea) {
+      AreaRef area=GetArea(node.GetDBFileOffset());
 
       nodeId=area->rings.front().GetId(nodeIndex);
     }
-    else if (nodeObject.GetType()==refWay) {
-      WayRef way=GetWay(nodeObject.GetFileOffset());
+    else if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
 
       nodeId=way->GetId(nodeIndex);
     }
@@ -1548,7 +1559,7 @@ namespace osmscout {
       return false;
     }
     else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+      WayRef way=GetWay(DBFileOffset(node.GetDatabaseId(),object.GetFileOffset()));
 
       return way->GetFrontId()==nodeId ||
              way->GetBackId()==nodeId;
@@ -1560,16 +1571,16 @@ namespace osmscout {
     }
   }
 
-  GeoCoord RoutePostprocessor::GetCoordinates(const ObjectFileRef& object,
+  GeoCoord RoutePostprocessor::GetCoordinates(const RouteDescription::Node& node,
                                               size_t nodeIndex) const
   {
-    if (object.GetType()==refArea) {
-      AreaRef area=GetArea(object.GetFileOffset());
+    if (node.GetPathObject().GetType()==refArea) {
+      AreaRef area=GetArea(node.GetDBFileOffset());
 
       return area->rings.front().GetCoord(nodeIndex);
     }
-    else if (object.GetType()==refWay) {
-      WayRef way=GetWay(object.GetFileOffset());
+    else if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
 
       return way->GetCoord(nodeIndex);
     }
@@ -1580,30 +1591,57 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::PostprocessRouteDescription(RouteDescription& description,
-                                                       const RoutingProfile& profile,
-                                                       Database& database,
-                                                       std::list<PostprocessorRef> processors)
+                                                       std::map<DatabaseId,RoutingProfileRef> &profiles,
+                                                       std::map<DatabaseId,DatabaseRef>& databases,
+                                                       std::list<PostprocessorRef> processors,
+                                                       std::set<std::string> motorwayTypeNames,
+                                                       std::set<std::string> motorwayLinkTypeNames,
+                                                       std::set<std::string> junctionTypeNames)
   {
     Cleanup(); // We do not trust ourself ;-)
 
-    nameReader=new NameFeatureValueReader(*database.GetTypeConfig());
-    refReader=new RefFeatureValueReader(*database.GetTypeConfig());
-    bridgeReader=new BridgeFeatureReader(*database.GetTypeConfig());
-    roundaboutReader=new RoundaboutFeatureReader(*database.GetTypeConfig());
+    this->databases=databases;
+    this->profiles=profiles;
 
-    if (!ResolveAllAreasAndWays(description,
-                                database)) {
-      Cleanup();
+    for (const auto &pair:databases){
+      // init feature readers
+      DatabaseId dbId=pair.first;
+      DatabaseRef database=pair.second;
+      TypeConfigRef typeConfig=database->GetTypeConfig();
 
-      return false;
+      nameReaders[dbId]=new NameFeatureValueReader(*typeConfig);
+      refReaders[dbId]=new RefFeatureValueReader(*typeConfig);
+      bridgeReaders[dbId]=new BridgeFeatureReader(*typeConfig);
+      roundaboutReaders[dbId]=new RoundaboutFeatureReader(*typeConfig);
+      destinationReaders[dbId]=new DestinationFeatureValueReader(*typeConfig);
+      maxSpeedReaders[dbId]=new MaxSpeedFeatureValueReader(*typeConfig);
+
+      // init types
+      for (const std::string &typeName:motorwayTypeNames){
+        TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
+        motorwayTypes[dbId].Set(type);
+      }
+      for (const std::string &typeName:motorwayLinkTypeNames){
+        TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
+        motorwayLinkTypes[dbId].Set(type);
+      }
+      for (const std::string &typeName:junctionTypeNames){
+        TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
+        junctionTypes[dbId].Set(type);
+      }
+
+      // load objects
+      if (!ResolveAllAreasAndWays(description,
+                                  dbId,
+                                  *database)) {
+        Cleanup();
+        return false;
+      }
     }
 
     size_t pos=1;
     for (const auto& processor : processors) {
-      if (!processor->Process(*this,
-                              profile,
-                              description,
-                              database)) {
+      if (!processor->Process(*this,description)) {
         log.Error() << "Error during execution of postprocessor " << pos;
         Cleanup();
 
@@ -1618,4 +1656,3 @@ namespace osmscout {
     return true;
   }
 }
-

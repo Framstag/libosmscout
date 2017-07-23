@@ -33,8 +33,8 @@
 #include <osmscout/import/GenRawWayIndex.h>
 #include <osmscout/import/GenRawRelIndex.h>
 
-#include <osmscout/RoutingService.h>
-#include <osmscout/RouteNode.h>
+#include <osmscout/routing/RoutingService.h>
+#include <osmscout/routing/RouteNode.h>
 #include <osmscout/Intersection.h>
 
 #include <osmscout/import/GenTypeDat.h>

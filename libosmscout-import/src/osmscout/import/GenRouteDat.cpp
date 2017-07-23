@@ -25,7 +25,7 @@
 
 #include <osmscout/CoordDataFile.h>
 
-#include <osmscout/RoutingService.h>
+#include <osmscout/routing/RoutingService.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
