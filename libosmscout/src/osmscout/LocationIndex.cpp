@@ -77,6 +77,11 @@ namespace osmscout {
         locationIgnoreTokens.insert(token);
       }
 
+      scanner.ReadNumber(maxRegionWords);
+      scanner.ReadNumber(maxPOIWords);
+      scanner.ReadNumber(maxLocationWords);
+      scanner.ReadNumber(maxAddressWords);
+
       indexOffset=scanner.GetPos();
 
       scanner.Close();

@@ -43,6 +43,16 @@ namespace osmscout {
     static const char* const FILENAME_LOCATION_FULL_TXT;
 
   private:
+    struct RegionMetrics CLASS_FINAL
+    {
+      size_t maxRegionWords;
+      size_t maxPOIWords;
+      size_t maxLocationWords;
+      size_t maxAddressWords;
+
+      RegionMetrics();
+    };
+
     /**
      * An area can contain an number of location nodes. Since they do not have
      * their own area we define the node name as an alias for the containing
@@ -228,6 +238,9 @@ namespace osmscout {
                                std::list<std::string>& locationTokens);
 
 
+    void CalculateRegionMetrics(const Region& region,
+                                RegionMetrics& metrics);
+
     void DumpRegion(const Region& parent,
                     size_t indent,
                     std::ostream& out);
@@ -411,6 +424,9 @@ namespace osmscout {
     void WriteIgnoreTokens(FileWriter& writer,
                            const std::list<std::string>& regionIgnoreTokens,
                            const std::list<std::string>& locationIgnoreTokens);
+
+    void WriteRegionMetrics(FileWriter& writer,
+                            const RegionMetrics& metrics);
 
     void WriteRegionIndexEntry(FileWriter& writer,
                                const Region& parentRegion,

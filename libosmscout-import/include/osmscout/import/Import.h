@@ -167,6 +167,8 @@ namespace osmscout {
                                                            //<! place_name[:lang] tags
     std::vector<std::string>     altLangOrder;             //<! the same as langOrder but for a alt (second) lang
 
+    size_t                       maxAdminLevel;            //<! Maximum admin level that gets evalutated
+
     OSMId                        firstFreeOSMId;           //<! first id available for synthetic objects (parsed polygon files)
     size_t                       fillWaterArea;            //<! count of tiles around coastlines flooded by water
 
@@ -246,6 +248,8 @@ namespace osmscout {
     const std::vector<std::string>& GetLangOrder () const;
     const std::vector<std::string>& GetAltLangOrder () const;
 
+    size_t GetMaxAdminLevel() const;
+
     void SetMapfiles(const std::list<std::string>& mapfile);
     void SetTypefile(const std::string& typefile);
     void SetDestinationDirectory(const std::string& destinationDirectory);
@@ -317,6 +321,8 @@ namespace osmscout {
 
     void SetLangOrder(const std::vector<std::string>& langOrder);
     void SetAltLangOrder(const std::vector<std::string>& altLangOrder);
+
+    void SetMaxAdminLevel(size_t maxAdminLevel);
 
     void SetFirstFreeOSMId(OSMId id);
 
