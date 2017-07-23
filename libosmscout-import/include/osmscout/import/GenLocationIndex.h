@@ -45,10 +45,10 @@ namespace osmscout {
   private:
     struct RegionMetrics CLASS_FINAL
     {
-      size_t maxRegionWords;
-      size_t maxPOIWords;
-      size_t maxLocationWords;
-      size_t maxAddressWords;
+      uint32_t maxRegionWords;
+      uint32_t maxPOIWords;
+      uint32_t maxLocationWords;
+      uint32_t maxAddressWords;
 
       RegionMetrics();
     };

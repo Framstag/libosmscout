@@ -538,22 +538,22 @@ namespace osmscout {
   void LocationIndexGenerator::CalculateRegionMetrics(const LocationIndexGenerator::Region& region,
                                                       LocationIndexGenerator::RegionMetrics& metrics)
   {
-    metrics.maxRegionWords=std::max(metrics.maxRegionWords,CountWords(region.name));
+    metrics.maxRegionWords=std::max(metrics.maxRegionWords,(uint32_t)CountWords(region.name));
 
     for (const auto& alias : region.aliases) {
-      metrics.maxRegionWords=std::max(metrics.maxRegionWords,CountWords(alias.name));
+      metrics.maxRegionWords=std::max(metrics.maxRegionWords,(uint32_t)CountWords(alias.name));
     }
 
     for (const auto& poi : region.pois) {
-      metrics.maxPOIWords=std::max(metrics.maxPOIWords,CountWords(poi.name));
+      metrics.maxPOIWords=std::max(metrics.maxPOIWords,(uint32_t)CountWords(poi.name));
     }
 
     for (const auto& postalAreaEntry : region.postalAreas) {
       for (const auto& locationEntry : postalAreaEntry.second.locations) {
-        metrics.maxLocationWords=std::max(metrics.maxLocationWords,CountWords(locationEntry.second.GetName()));
+        metrics.maxLocationWords=std::max(metrics.maxLocationWords,(uint32_t)CountWords(locationEntry.second.GetName()));
 
         for (const auto& address : locationEntry.second.addresses) {
-          metrics.maxAddressWords=std::max(metrics.maxAddressWords,CountWords(address.name));
+          metrics.maxAddressWords=std::max(metrics.maxAddressWords,(uint32_t)CountWords(address.name));
         }
       }
     }
