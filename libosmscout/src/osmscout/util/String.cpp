@@ -64,9 +64,8 @@ namespace osmscout {
     if (value) {
       return "true";
     }
-    else {
-      return "false";
-    }
+
+    return "false";
   }
 
   bool GetDigitValue(char digit, size_t& result)
@@ -158,9 +157,7 @@ namespace osmscout {
   {
     std::string result;
 
-    for (std::list<std::string>::const_iterator element=list.begin();
-        element!=list.end();
-        ++element) {
+    for (auto element=list.begin(); element!=list.end(); ++element) {
       if (element==list.begin()) {
        result.append(*element);
       }
@@ -171,6 +168,37 @@ namespace osmscout {
     }
 
     return result;
+  }
+
+  size_t CountWords(const std::string& text)
+  {
+    size_t wordCount=0;
+    bool   inWord=false;
+    size_t nextPos=0;
+
+    // Leading space
+    while (nextPos<text.length() && std::isspace(text[nextPos])!=0) {
+      nextPos++;
+    }
+
+    // We are counting the number of transitions from inWord=false to inWord=true
+    while (nextPos<text.length()) {
+      if (inWord) {
+        if (std::isspace(text[nextPos])!=0) {
+          inWord=false;
+        }
+      }
+      else {
+        if (!std::isspace(text[nextPos])!=0) {
+          inWord=true;
+          wordCount++;
+        }
+      }
+
+      nextPos++;
+    }
+
+    return wordCount;
   }
 
   std::string ByteSizeToString(FileOffset value)
@@ -216,7 +244,7 @@ namespace osmscout {
 
     while (wordBegin<input.length()) {
       while (wordBegin<input.length() &&
-             std::isspace(input[wordBegin])) {
+             std::isspace(input[wordBegin])!=0) {
         wordBegin++;
       }
 
@@ -227,7 +255,7 @@ namespace osmscout {
       wordEnd=wordBegin;
 
       while (wordEnd+1<input.length() &&
-             !std::isspace((unsigned char)input[wordEnd + 1])) {
+             !std::isspace((unsigned char)input[wordEnd + 1])!=0) {
         wordEnd++;
       }
 
@@ -250,9 +278,8 @@ namespace osmscout {
     if (pos==std::string::npos) {
       return stringList;
     }
-    else {
-      return stringList.substr(0,pos);
-    }
+
+    return stringList.substr(0,pos);
   }
 
   void TokenizeString(const std::string& input,
@@ -263,7 +290,7 @@ namespace osmscout {
 
     while (wordBegin<input.length()) {
       while (wordBegin<input.length() &&
-             (std::isspace(input[wordBegin]) ||
+             (std::isspace(input[wordBegin])!=0 ||
               input[wordBegin]==',')) {
         wordBegin++;
       }
@@ -275,7 +302,7 @@ namespace osmscout {
       wordEnd=wordBegin;
 
       while (wordEnd+1<input.length() &&
-             (!std::isspace(input[wordEnd+1]) &&
+             (!std::isspace(input[wordEnd+1])!=0 &&
               input[wordEnd+1]!=',')) {
         wordEnd++;
       }
@@ -290,13 +317,13 @@ namespace osmscout {
 
   void SimplifyTokenList(std::list<std::string>& tokens)
   {
-    std::list<std::string>::iterator current=tokens.begin();
-    std::list<std::string>::iterator next=current;
+    auto current=tokens.begin();
+    auto next=current;
 
     next++;
     while (next!=tokens.end()) {
-      if (std::isupper(current->at(0)) &&
-          std::islower(next->at(0))) {
+      if (std::isupper(current->at(0))!=0 &&
+          std::islower(next->at(0))!=0) {
         current->append(" ");
         current->append(*next);
         next=tokens.erase(next);
@@ -335,9 +362,9 @@ namespace osmscout {
     }
 
     for (size_t i=1; i<=listSize-parts+1; i++) {
-      size_t                                 count=0;
-      std::string                            value;
-      std::list<std::string>::const_iterator t=token;
+      size_t      count=0;
+      std::string value;
+      auto        t=token;
 
       while (count<i) {
         if (!value.empty()) {
