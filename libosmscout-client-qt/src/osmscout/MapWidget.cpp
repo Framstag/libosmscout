@@ -557,6 +557,28 @@ void MapWidget::removePositionMark(int id)
     update();
 }
 
+void MapWidget::addOverlayWay(int id,QObject *o)
+{
+    const OverlayWay *way = dynamic_cast<const OverlayWay*>(o);
+    if (way == NULL){
+        qWarning() << "Failed to cast " << o << " to OverlayWay*.";
+        return;
+    }
+    qDebug() << "TODO";
+}
+
+void MapWidget::removeOverlayWay(int id)
+{
+    qDebug() << "TODO";
+}
+
+OverlayWay *MapWidget::createOverlayWay(QString type)
+{
+  OverlayWay *result=new OverlayWay();
+  result->setTypeName(type);
+  return result;
+}
+
 void MapWidget::onTap(const QPoint p)
 {
     qDebug() << "tap " << p;
