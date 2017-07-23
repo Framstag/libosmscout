@@ -35,6 +35,7 @@
 
 // Routing
 #include <osmscout/routing/RouteData.h>
+#include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/routing/RoutingProfile.h>
 
 namespace osmscout {
@@ -51,9 +52,7 @@ namespace osmscout {
       virtual ~Postprocessor();
 
       virtual bool Process(const RoutePostprocessor& postprocessor,
-                           const RoutingProfile& profile,
-                           RouteDescription& description,
-                           Database& database) = 0;
+                           RouteDescription& description) = 0;
     };
 
     typedef std::shared_ptr<Postprocessor> PostprocessorRef;
@@ -71,9 +70,7 @@ namespace osmscout {
       StartPostprocessor(const std::string& startDescription);
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -89,9 +86,7 @@ namespace osmscout {
       TargetPostprocessor(const std::string& targetDescription);
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -104,9 +99,7 @@ namespace osmscout {
       DistanceAndTimePostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -119,9 +112,7 @@ namespace osmscout {
       WayNamePostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -134,9 +125,7 @@ namespace osmscout {
       WayTypePostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -156,9 +145,7 @@ namespace osmscout {
       CrossingWaysPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -178,9 +165,7 @@ namespace osmscout {
       DirectionPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -193,9 +178,7 @@ namespace osmscout {
       MotorwayJunctionPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     /**
@@ -208,9 +191,7 @@ namespace osmscout {
       DestinationPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
 
     class OSMSCOUT_API MaxSpeedPostprocessor : public RoutePostprocessor::Postprocessor
@@ -219,10 +200,9 @@ namespace osmscout {
       MaxSpeedPostprocessor() : Postprocessor() {};
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
     };
+
     /**
      * \ingroup Routing
      * Generates drive instructions
@@ -238,8 +218,6 @@ namespace osmscout {
       };
 
     private:
-      TypeInfoSet motorwayTypes;
-      TypeInfoSet motorwayLinkTypes;
 
       bool                     inRoundabout;
       size_t                   roundaboutCrossingCounter;
@@ -263,55 +241,78 @@ namespace osmscout {
 
     public:
       bool Process(const RoutePostprocessor& postprocessor,
-                   const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
+                   RouteDescription& description);
 
-      void AddMotorwayType(const TypeInfoRef& type);
-      void AddMotorwayLinkType(const TypeInfoRef& type);
     };
 
     typedef std::shared_ptr<InstructionPostprocessor> InstructionPostprocessorRef;
 
   private:
-    std::unordered_map<FileOffset,AreaRef> areaMap;
-    std::unordered_map<FileOffset,WayRef>  wayMap;
-    NameFeatureValueReader                 *nameReader;
-    RefFeatureValueReader                  *refReader;
-    BridgeFeatureReader                    *bridgeReader;
-    RoundaboutFeatureReader                *roundaboutReader;
+    std::map<DatabaseId,RoutingProfileRef>    profiles;
+    std::map<DatabaseId,DatabaseRef>          databases;
+
+    std::unordered_map<DBFileOffset,AreaRef>  areaMap;
+    std::unordered_map<DBFileOffset,WayRef>   wayMap;
+
+    std::map<DatabaseId,NameFeatureValueReader*>        nameReaders;
+    std::map<DatabaseId,RefFeatureValueReader*>         refReaders;
+    std::map<DatabaseId,BridgeFeatureReader*>           bridgeReaders;
+    std::map<DatabaseId,RoundaboutFeatureReader*>       roundaboutReaders;
+    std::map<DatabaseId,DestinationFeatureValueReader*> destinationReaders;
+    std::map<DatabaseId,MaxSpeedFeatureValueReader *>   maxSpeedReaders;
+
+    std::map<DatabaseId,TypeInfoSet> motorwayTypes;
+    std::map<DatabaseId,TypeInfoSet> motorwayLinkTypes;
+    std::map<DatabaseId,TypeInfoSet> junctionTypes;
 
   private:
     bool ResolveAllAreasAndWays(const RouteDescription& description,
+                                DatabaseId dbId,
                                 Database& database);
     void Cleanup();
 
   public:
     RoutePostprocessor();
 
-    AreaRef GetArea(FileOffset offset) const;
-    WayRef GetWay(FileOffset offset) const;
+    AreaRef GetArea(const DBFileOffset &offset) const;
+    WayRef GetWay(const DBFileOffset &offset) const;
 
-    RouteDescription::NameDescriptionRef GetNameDescription(const ObjectFileRef& object) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const Area& area) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const Way& way) const;
+    double GetTime(DatabaseId dbId,const Area& area,double deltaDistance) const;
+    double GetTime(DatabaseId dbId,const Way& way,double deltaDistance) const;
 
-    bool IsRoundabout(const ObjectFileRef& object) const;
-    bool IsBridge(const Way& way) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const RouteDescription::Node& node) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+                                                            const ObjectFileRef& object) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+                                                            const Area& area) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+                                                            const Way& way) const;
 
-    bool IsOfType(const ObjectFileRef& object,
-                  const TypeInfoSet& types) const;
+    bool LoadJunction(DatabaseId database,
+                      GeoCoord coord,
+                      std::string junctionRef,
+                      std::string junctionName) const;
 
-    Id GetNodeId(const ObjectFileRef& object,
-                 size_t nodeIndex) const;
-    size_t GetNodeIndex(const ObjectFileRef& object,
+    bool IsMotorwayLink(const RouteDescription::Node& node) const;
+    bool IsMotorway(const RouteDescription::Node& node) const;
+
+    bool IsRoundabout(const RouteDescription::Node& node) const;
+    bool IsBridge(const RouteDescription::Node& node) const;
+
+    RouteDescription::DestinationDescriptionRef GetDestination(const RouteDescription::Node& node) const;
+    
+    uint8_t GetMaxSpeed(const RouteDescription::Node& node) const;
+
+    Id GetNodeId(const RouteDescription::Node& node) const;
+
+    size_t GetNodeIndex(const RouteDescription::Node& node,
                         Id nodeId) const;
 
-    bool CanUseBackward(const RoutingProfile& profile,
+    bool CanUseBackward(const DatabaseId& dbId,
                         Id fromNodeId,
                         const ObjectFileRef& object) const;
 
-    bool CanUseForward(const RoutingProfile& profile,
+    bool CanUseForward(const DatabaseId& dbId,
                        Id fromNodeId,
                        const ObjectFileRef& object) const;
 
@@ -323,17 +324,19 @@ namespace osmscout {
                        size_t fromNodeIndex,
                        size_t toNodeIndex) const;
 
-    bool IsNodeStartOrEndOfObject(const ObjectFileRef& nodeObject,
-                                  size_t nodeIndex,
+    bool IsNodeStartOrEndOfObject(const RouteDescription::Node& node,
                                   const ObjectFileRef& object) const;
 
-    GeoCoord GetCoordinates(const ObjectFileRef& object,
+    GeoCoord GetCoordinates(const RouteDescription::Node& node,
                             size_t nodeIndex) const;
 
     bool PostprocessRouteDescription(RouteDescription& description,
-                                     const RoutingProfile& profile,
-                                     Database& database,
-                                     std::list<PostprocessorRef> processors);
+                                     std::map<DatabaseId,RoutingProfileRef> &profiles,
+                                     std::map<DatabaseId,DatabaseRef>& databases,
+                                     std::list<PostprocessorRef> processors,
+                                     std::set<std::string> motorwayTypeNames,
+                                     std::set<std::string> motorwayLinkTypeNames,
+                                     std::set<std::string> junctionTypeNames);
   };
 }
 

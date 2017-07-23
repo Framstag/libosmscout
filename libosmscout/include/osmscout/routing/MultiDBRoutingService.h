@@ -24,8 +24,8 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/routing/AbstractRoutingService.h>
 #include <osmscout/routing/SimpleRoutingService.h>
-
-#include "DBFileOffset.h"
+#include <osmscout/routing/DBFileOffset.h>
+#include <osmscout/routing/RoutePostprocessor.h>
 
 namespace osmscout {
 
@@ -146,7 +146,8 @@ namespace osmscout {
                                 std::unordered_set<uint64_t>& cells,
                                 std::unordered_set<osmscout::Id>& routeNodes);
 
-    bool FindCommonRoutingNodes(DatabaseRef &database1,
+    bool FindCommonRoutingNodes(const BreakerRef &breaker,
+                                DatabaseRef &database1,
                                 DatabaseRef &database2,
                                 std::set<Id> &commonRouteNodes);
 
@@ -181,6 +182,9 @@ namespace osmscout {
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);
+
+    bool PostProcessRouteDescription(RouteDescription &description,
+                                     const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors);
   };
 
   //! \ingroup Service

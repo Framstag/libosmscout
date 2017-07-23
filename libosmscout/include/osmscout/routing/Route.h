@@ -569,6 +569,16 @@ namespace osmscout {
         return pathObject.Valid();
       }
 
+      inline DatabaseId GetDatabaseId() const
+      {
+        return database;
+      }
+
+      inline DBFileOffset GetDBFileOffset() const
+      {
+        return DBFileOffset(GetDatabaseId(),GetPathObject().GetFileOffset());
+      }
+
       /**
        * Return the path object that connects the current node to the next node.
        */

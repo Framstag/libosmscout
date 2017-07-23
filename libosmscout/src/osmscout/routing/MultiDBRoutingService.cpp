@@ -331,7 +331,8 @@ namespace osmscout {
     return true;
   }
 
-  bool MultiDBRoutingService::FindCommonRoutingNodes(DatabaseRef &database1,
+  bool MultiDBRoutingService::FindCommonRoutingNodes(const BreakerRef &breaker,
+                                                     DatabaseRef &database1,
                                                      DatabaseRef &database2,
                                                      std::set<Id> &commonRouteNodes)
   {
@@ -347,6 +348,10 @@ namespace osmscout {
                                  cells1)){
       return false;
     }
+    if (breaker &&
+        breaker->IsAborted()) {
+      return true;
+    }
 
 #if defined(DEBUG_ROUTING)
     std::cout << "Found route nodes in " << cells1.size() << " cells" << std::endl;
@@ -356,6 +361,10 @@ namespace osmscout {
     if (!ReadCellsForRoutingTree(*database2,
                                  cells2)){
       return false;
+    }
+    if (breaker &&
+        breaker->IsAborted()) {
+      return true;
     }
 
 #if defined(DEBUG_ROUTING)
@@ -390,6 +399,10 @@ namespace osmscout {
                                 routeNodes1)){
       return false;
     }
+    if (breaker &&
+        breaker->IsAborted()) {
+      return true;
+    }
 
 #if defined(DEBUG_ROUTING)
     std::cout << "Found " << routeNodes1.size() << " route nodes in common cells" << std::endl;
@@ -400,6 +413,10 @@ namespace osmscout {
                                 commonCells,
                                 routeNodes2)){
       return false;
+    }
+    if (breaker &&
+        breaker->IsAborted()) {
+      return true;
     }
 
 #if defined(DEBUG_ROUTING)
@@ -622,10 +639,14 @@ namespace osmscout {
     DatabaseRef database2=it->second;
 
     std::set<Id> commonRouteNodes;
-    if (!FindCommonRoutingNodes(database1,database2,commonRouteNodes)){
+    if (!FindCommonRoutingNodes(parameter.GetBreaker(),database1,database2,commonRouteNodes)){
       log.Error() << "Can't find common routing nodes for databases " <<
         database1->GetPath() << ", " <<
         database2->GetPath();
+      return result;
+    }
+    if (parameter.GetBreaker() &&
+        parameter.GetBreaker()->IsAborted()) {
       return result;
     }
     if (commonRouteNodes.empty()){
@@ -645,6 +666,38 @@ namespace osmscout {
                                                                        start,
                                                                        target,
                                                                        parameter);
+  }
+
+  bool MultiDBRoutingService::PostProcessRouteDescription(RouteDescription &description,
+                                                          const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors)
+  {
+    std::set<std::string> motorwayTypeNames;
+    std::set<std::string> motorwayLinkTypeNames;
+    std::set<std::string> junctionTypeNames;
+
+    junctionTypeNames.insert("highway_motorway_junction");
+
+    motorwayTypeNames.insert("highway_motorway");
+    motorwayLinkTypeNames.insert("highway_motorway_link");
+
+    motorwayTypeNames.insert("highway_motorway_trunk");
+    motorwayTypeNames.insert("highway_trunk");
+    
+    motorwayLinkTypeNames.insert("highway_trunk_link");
+    motorwayTypeNames.insert("highway_motorway_primary");
+
+    RoutePostprocessor routePostprocessor;
+    if (!routePostprocessor.PostprocessRouteDescription(description,
+                                                        profiles,
+                                                        databases,
+                                                        postprocessors,
+                                                        motorwayTypeNames,
+                                                        motorwayLinkTypeNames,
+                                                        junctionTypeNames)) {
+      return false;
+    }
+
+    return true;
   }
 
   // FIXME: I don't understand why these methods should be here...
