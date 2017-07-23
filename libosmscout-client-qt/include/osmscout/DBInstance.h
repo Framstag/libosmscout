@@ -29,7 +29,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/MapService.h>
-#include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/MapPainterQt.h>
 
 #include <osmscout/util/Breaker.h>
@@ -107,7 +106,6 @@ public: // TODO: make it private, ensure thread safety
   osmscout::MapServiceRef           mapService;
   osmscout::BreakerRef              dataLoadingBreaker;
 
-  osmscout::SimpleRoutingServiceRef router;
   osmscout::StyleConfigRef          styleConfig;
 
   inline DBInstance(QString path,
@@ -133,9 +131,6 @@ public: // TODO: make it private, ensure thread safety
   bool LoadStyle(QString stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
                  QList<StyleError> &errors);
-
-  bool AssureRouter(osmscout::Vehicle vehicle,
-                    osmscout::RouterParameter routerParameter);
 
   /**
    * Get or create thread local MapPainter instance for this map

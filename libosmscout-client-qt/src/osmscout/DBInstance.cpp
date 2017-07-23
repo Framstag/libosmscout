@@ -139,36 +139,6 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
   return true;
 }
 
-
-bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
-                              osmscout::RouterParameter routerParameter)
-{
-  QMutexLocker locker(&mutex);
-  if (!database->IsOpen()) {
-    return false;
-  }
-
-  if (!router/* ||
-      (router && router->GetVehicle()!=vehicle)*/) {
-    if (router) {
-      if (router->IsOpen()) {
-        router->Close();
-      }
-      router=NULL;
-    }
-
-    router=std::make_shared<osmscout::SimpleRoutingService>(database,
-                                                            routerParameter,
-                                                            osmscout::RoutingService::DEFAULT_FILENAME_BASE);
-
-    if (!router->Open()) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 osmscout::MapPainterQt* DBInstance::GetPainter()
 {
   QMutexLocker locker(&mutex);
@@ -192,9 +162,6 @@ void DBInstance::onThreadFinished()
 void DBInstance::close()
 {
   QMutexLocker locker(&mutex);
-  if (router && router->IsOpen()) {
-    router->Close();
-  }
 
   qDeleteAll(painterHolder);
   painterHolder.clear();
