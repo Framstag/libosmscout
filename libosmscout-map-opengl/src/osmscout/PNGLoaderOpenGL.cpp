@@ -350,15 +350,8 @@ namespace osmscout {
     int stride = width*4;
     data=(unsigned char *)malloc(stride*height);
 
-    // TODO: Handle stride offsets
-
-
-    //  Calculate premultiplied alpha values and handle endian specific
-    //  byte packging for cairo.
-
-
-    size_t off=0; // Index in cairo data
-    size_t s=0;   // Index in PNG data
+    size_t off=0;
+    size_t s=0;
     while (s<width*height*channels) {
       unsigned int alpha;
       unsigned char red;
@@ -384,26 +377,26 @@ namespace osmscout {
       green=green*alpha/256;
       blue=blue*alpha/256;
 
-      //if (littleEndian) {
-        data[off]=blue;
-        off++;
-        data[off]=green;
+      if (littleEndian) {
+      data[off]=red;
+      off++;
+      data[off]=green;
+      off++;
+      data[off]=blue;
+      off++;
+      data[off]=alpha;
+      off++;
+      }
+      else {
+        data[off]=alpha;
         off++;
         data[off]=red;
         off++;
-        data[off]=alpha;
-        off++;
-      //}
-      /*else {
-        data[off]=alpha;
-        off++;
-        data[off]=red;
-        off++;
         data[off]=green;
         off++;
         data[off]=blue;
         off++;
-      }*/
+      }
     }
 
     png_destroy_read_struct(&png_ptr,&info_ptr,NULL);

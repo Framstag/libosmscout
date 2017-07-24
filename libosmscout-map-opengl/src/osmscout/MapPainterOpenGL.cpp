@@ -29,13 +29,13 @@
 namespace osmscout {
 
   osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight)
-          : width(width),
-            height(height),
-            dpi(dpi),
-            screenWidth(
-                    screenWidth),
-            screenHeight(
-                    screenHeight) {
+      : width(width),
+        height(height),
+        dpi(dpi),
+        screenWidth(
+            screenWidth),
+        screenHeight(
+            screenHeight) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -88,7 +88,7 @@ namespace osmscout {
     PathRenderer.clearData();
     PathRenderer.SetVerticesSize(11);
     ImageRenderer.clearData();
-    ImageRenderer.SetVerticesSize(7);
+    ImageRenderer.SetVerticesSize(5);
   }
 
   void osmscout::MapPainterOpenGL::LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
@@ -194,19 +194,19 @@ namespace osmscout {
     ImageRenderer.BindBuffers();
     ImageRenderer.LoadProgram();
     ImageRenderer.LoadVertices();
-    ImageRenderer.LoadTextures(14,14);
+    ImageRenderer.LoadTextures();
 
     ImageRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    ImageRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-    ImageRenderer.AddAttrib("index", 1, GL_FLOAT, 5 * sizeof(GLfloat));
-    ImageRenderer.AddAttrib("textureIndex", 1, GL_FLOAT, 6 * sizeof(GLfloat));
+    ImageRenderer.AddAttrib("index", 1, GL_FLOAT, 2 * sizeof(GLfloat));
+    ImageRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 3 * sizeof(GLfloat));
+    ImageRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 4 * sizeof(GLfloat));
     ImageRenderer.AddUniform("windowWidth", width);
     ImageRenderer.AddUniform("windowHeight", height);
     ImageRenderer.AddUniform("centerLat", Center.GetLat());
     ImageRenderer.AddUniform("centerLon", Center.GetLon());
     ImageRenderer.AddUniform("quadWidth", 14);
     ImageRenderer.AddUniform("magnification", Magnification.GetMagnification());
-    ImageRenderer.AddUniform("numOfTextures", ImageRenderer.GetNumberOfTextures());
+    ImageRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
     ImageRenderer.AddUniform("dpi", dpi);
 
     ImageRenderer.SetProjection(width, height);
@@ -653,20 +653,13 @@ namespace osmscout {
 
   void
   osmscout::MapPainterOpenGL::ProcessNodeData(const osmscout::MapData &data,
-                                               const osmscout::MapParameter &parameter,
-                                               const osmscout::Projection &projection,
-                                               const osmscout::StyleConfigRef &styleConfig) {
-    int loaded = 0;
-
+                                              const osmscout::MapParameter &parameter,
+                                              const osmscout::Projection &projection,
+                                              const osmscout::StyleConfigRef &styleConfig) {
     LabelLayouter labels;
     labels.Initialize(projection, parameter);
 
     osmscout::log.Info() << "Nodes: " << data.nodes.size();
-
-    //OpenGLTexture *image = osmscout::LoadPNGOpenGL("/home/fanny/git/libosmscout/libosmscout/data/icons/14x14/standard/bus_stop.png");
-    //unsigned char *image = osmscout::LoadPNGChar("/home/fanny/git/libosmscout/libosmscout/data/icons/14x14/standard/bus_stop.png");
-    //ImageRenderer.AddNewTexture(image);
-    //ImageRenderer.AddNewText(image);
 
     for (const auto &node: data.nodes) {
       IconStyleRef iconStyle;
@@ -679,93 +672,68 @@ namespace osmscout {
                                      projection,
                                      textStyles);
 
-
       if (iconStyle) {
         //has icon?
         bool hasIcon = false;
+        OpenGLTexture *image;
         for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
              path != parameter.GetIconPaths().end();
              ++path) {
           std::string filename = *path + iconStyle->GetIconName() + ".png";
 
-          std::cout << filename << std::endl;
-          //unsigned char *image = osmscout::LoadPNGChar(filename);
-          OpenGLTexture *image = osmscout::LoadPNGOpenGL(filename);
-
-          size_t idx = iconStyle->GetIconId() - 1;
+          image = osmscout::LoadPNGOpenGL(filename);
 
           if (image != NULL) {
-            //if (idx >= ImageRenderer.GetTexturesSize()) {
-            //  Im.resize(idx + 1, NULL);
-           //}
             ImageRenderer.AddNewTexture(image);
-            //;
-
-            //if(loaded < 1)
-            //  ImageRenderer.AddNewTexture(*image);
-
-            loaded = 1;
             osmscout::log.Info() << "Loaded image '" << filename << "'";
-
             hasIcon = true;
-
             break;
           }
         }
 
         if (!iconStyle->GetIconName().empty() && hasIcon) {
-          Color c = osmscout::Color(1.0, 0.0, 0.0);
           osmscout::GeoCoord coords = node->GetCoords();
-          ImageRenderer.AddNewVertex(coords.GetLon());
-          ImageRenderer.AddNewVertex(coords.GetLat());
-          ImageRenderer.AddNewVertex(c.GetR());
-          ImageRenderer.AddNewVertex(c.GetG());
-          ImageRenderer.AddNewVertex(c.GetB());
-          ImageRenderer.AddNewVertex(1);
-          ImageRenderer.AddNewVertex(ImageRenderer.GetNumberOfTextures());
+          size_t textureIndex = ImageRenderer.GetTextureBufferSize();
+          size_t startWidth = ImageRenderer.GetTextureBufferWidth() - image->width;
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
-          ImageRenderer.AddNewVertex(c.GetR());
-          ImageRenderer.AddNewVertex(c.GetG());
-          ImageRenderer.AddNewVertex(c.GetB());
+          ImageRenderer.AddNewVertex(1);
+          ImageRenderer.AddNewVertex(startWidth);
+          ImageRenderer.AddNewVertex(image->width);
+
+          ImageRenderer.AddNewVertex(coords.GetLon());
+          ImageRenderer.AddNewVertex(coords.GetLat());
           ImageRenderer.AddNewVertex(2);
-          ImageRenderer.AddNewVertex(ImageRenderer.GetNumberOfTextures());
+          ImageRenderer.AddNewVertex(startWidth);
+          ImageRenderer.AddNewVertex(image->width);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
-          ImageRenderer.AddNewVertex(c.GetR());
-          ImageRenderer.AddNewVertex(c.GetG());
-          ImageRenderer.AddNewVertex(c.GetB());
           ImageRenderer.AddNewVertex(3);
-          ImageRenderer.AddNewVertex(ImageRenderer.GetNumberOfTextures());
+          ImageRenderer.AddNewVertex(startWidth);
+          ImageRenderer.AddNewVertex(image->width);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
-          ImageRenderer.AddNewVertex(c.GetR());
-          ImageRenderer.AddNewVertex(c.GetG());
-          ImageRenderer.AddNewVertex(c.GetB());
           ImageRenderer.AddNewVertex(3);
-          ImageRenderer.AddNewVertex(ImageRenderer.GetNumberOfTextures());
+          ImageRenderer.AddNewVertex(startWidth);
+          ImageRenderer.AddNewVertex(image->width);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
-          ImageRenderer.AddNewVertex(c.GetR());
-          ImageRenderer.AddNewVertex(c.GetG());
-          ImageRenderer.AddNewVertex(c.GetB());
           ImageRenderer.AddNewVertex(1);
-          ImageRenderer.AddNewVertex(ImageRenderer.GetNumberOfTextures());
+          ImageRenderer.AddNewVertex(startWidth);
+          ImageRenderer.AddNewVertex(image->width);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
-          ImageRenderer.AddNewVertex(c.GetR());
-          ImageRenderer.AddNewVertex(c.GetG());
-          ImageRenderer.AddNewVertex(c.GetB());
           ImageRenderer.AddNewVertex(4);
-          ImageRenderer.AddNewVertex(ImageRenderer.GetNumberOfTextures());
+          ImageRenderer.AddNewVertex(startWidth);
+          ImageRenderer.AddNewVertex(image->width);
 
           int num;
-          if (ImageRenderer.GetNumOfVertices() <= 43) {
+          if (ImageRenderer.GetNumOfVertices() <= 30) {
             num = 0;
           } else {
             num = ImageRenderer.GetVerticesNumber() - 6;
@@ -797,8 +765,8 @@ namespace osmscout {
             if (dynamic_cast<PolygonPrimitive *>(primitive) != NULL) {
               PolygonPrimitive *polygon = dynamic_cast<PolygonPrimitive *>(primitive);
               double meterPerPixelLat = (40075.016686 * 1000) * std::cos(node->GetCoords().GetLat()) /
-                                       (float) (std::pow(2, (Magnification.GetLevel() + 9)));
-              double meterPerPixel = (40075.016686 * 1000) / (float)(std::pow(2, (Magnification.GetLevel() + 9)));
+                                        (float) (std::pow(2, (Magnification.GetLevel() + 9)));
+              double meterPerPixel = (40075.016686 * 1000) / (float) (std::pow(2, (Magnification.GetLevel() + 9)));
               std::vector<osmscout::Vertex2D> vertices;
               for (const auto &pixel : polygon->GetCoords()) {
                 double meterToDegreeLat = std::cos(node->GetCoords().GetLat()) * 0.00001;
@@ -806,7 +774,8 @@ namespace osmscout {
                 double scale = -1 * meterPerPixel * meterToDegree;
                 double scaleLat = -1 * meterPerPixelLat * meterToDegreeLat;
 
-                double x = node->GetCoords().GetLon() + (projection.ConvertWidthToPixel(pixel.GetX() - centerX) * scale);
+                double x =
+                    node->GetCoords().GetLon() + (projection.ConvertWidthToPixel(pixel.GetX() - centerX) * scale);
                 double y = node->GetCoords().GetLat() +
                            (projection.ConvertWidthToPixel(maxY - pixel.GetY() - centerY) * scaleLat);
 
@@ -923,7 +892,7 @@ namespace osmscout {
   }*/
 
   bool osmscout::MapPainterOpenGL::PixelToGeo(double x, double y,
-                                                  double &lon, double &lat) {
+                                              double &lon, double &lat) {
     double tileDPI = 96.0;
     double gradtorad = 2 * M_PI / 360;
     double earthRadiusMeter = 6378137.0;
@@ -1061,7 +1030,7 @@ namespace osmscout {
     ImageRenderer.AddUniform("centerLon", Center.GetLon());
     ImageRenderer.AddUniform("quadWidth", 14);
     ImageRenderer.AddUniform("magnification", Magnification.GetMagnification());
-    ImageRenderer.AddUniform("numOfTextures", ImageRenderer.GetNumberOfTextures());
+    ImageRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
     ImageRenderer.AddUniform("dpi", dpi);
 
     ImageRenderer.SetProjection(width, height);
