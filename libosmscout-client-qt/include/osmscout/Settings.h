@@ -24,7 +24,7 @@
 
 #include <QSettings>
 
-#include <osmscout/RoutingProfile.h>
+#include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/InputHandler.h>
 #include <osmscout/OnlineTileProvider.h>
 #include <osmscout/MapProvider.h>

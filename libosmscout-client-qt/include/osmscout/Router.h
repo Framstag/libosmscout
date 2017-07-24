@@ -26,7 +26,10 @@
 
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
-#include <osmscout/RoutePostprocessor.h>
+#include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/routing/MultiDBRoutingService.h>
+#include <osmscout/routing/RoutingProfile.h>
+#include <osmscout/routing/DBFileOffset.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -108,8 +111,8 @@ private:
   DBThreadRef dbThread;
   QMutex      lock;
 
-  osmscout::RouterParameter       routerParameter;
-  osmscout::RoutePostprocessor    routePostprocessor;
+  osmscout::RouterParameter           routerParameter;
+  //osmscout::RoutePostprocessor        routePostprocessor;
 
 public slots:
   void Initialize();
@@ -178,28 +181,27 @@ private:
   void DumpNameChangedDescription(RouteSelection &route,
                                   const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
 
-  osmscout::RoutePosition GetClosestRoutableNode(const QString databasePath,
-                                                 const osmscout::ObjectFileRef& refObject,
-                                                 const osmscout::RoutingProfile& routingProfile,
-                                                 double radius);
+  void GenerateRouteSteps(RouteSelection &route);
 
-  bool CalculateRoute(const QString databasePath,
-                      const osmscout::RoutingProfile& routingProfile,
+  void ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingService,
+                           LocationEntry* start,
+                           LocationEntry* target,
+                           osmscout::Vehicle vehicle,
+                           int requestId);
+
+  bool CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                       const osmscout::RoutePosition& start,
                       const osmscout::RoutePosition& target,
                       osmscout::RouteData& route);
 
-  bool TransformRouteDataToWay(const QString databasePath,
-                               osmscout::Vehicle vehicle,
-                               const osmscout::RouteData& data,
-                               osmscout::Way& way);
-
-  bool TransformRouteDataToRouteDescription(const QString databasePath,
-                                            const osmscout::RoutingProfile& routingProfile,
+  bool TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
                                             const osmscout::RouteData& data,
                                             osmscout::RouteDescription& description,
                                             const std::string& start,
                                             const std::string& target);
+
+  osmscout::MultiDBRoutingServiceRef MakeRoutingService(const std::list<DBInstanceRef>& databases,
+                                                        const osmscout::Vehicle vehicle);
 
 public:
   Router(QThread *thread,

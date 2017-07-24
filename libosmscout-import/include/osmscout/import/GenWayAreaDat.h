@@ -28,7 +28,7 @@
 
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/NumericIndex.h>
-#include <osmscout/TurnRestriction.h>
+#include <osmscout/routing/TurnRestriction.h>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>

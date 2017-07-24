@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Route.h>
+#include <osmscout/routing/Route.h>
 
 #include <sstream>
 
@@ -418,11 +418,13 @@ namespace osmscout {
     return std::string("Max. Speed")+NumberToString(maxSpeed)+"km/h";
   }
 
-  RouteDescription::Node::Node(size_t currentNodeIndex,
+  RouteDescription::Node::Node(DatabaseId database,
+                               size_t currentNodeIndex,
                                const std::vector<ObjectFileRef>& objects,
                                const ObjectFileRef& pathObject,
                                size_t targetNodeIndex)
-  : currentNodeIndex(currentNodeIndex),
+  : database(database),
+    currentNodeIndex(currentNodeIndex),
     objects(objects),
     pathObject(pathObject),
     targetNodeIndex(targetNodeIndex),
@@ -524,12 +526,14 @@ namespace osmscout {
     nodes.clear();
   }
 
-  void RouteDescription::AddNode(size_t currentNodeIndex,
+  void RouteDescription::AddNode(DatabaseId database,
+                                 size_t currentNodeIndex,
                                  const std::vector<ObjectFileRef>& objects,
                                  const ObjectFileRef& pathObject,
                                  size_t targetNodeIndex)
   {
-    nodes.push_back(Node(currentNodeIndex,
+    nodes.push_back(Node(database,
+                         currentNodeIndex,
                          objects,
                          pathObject,
                          targetNodeIndex));

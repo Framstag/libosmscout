@@ -30,6 +30,18 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Tiling.h \
                         osmscout/util/Transformation.h \
                         osmscout/util/WorkQueue.h \
+			osmscout/routing/Route.h \
+			osmscout/routing/RouteData.h \
+			osmscout/routing/RouteNode.h \
+			osmscout/routing/RoutePostprocessor.h \
+			osmscout/routing/RoutingProfile.h \
+			osmscout/routing/RoutingService.h \
+			osmscout/routing/AbstractRoutingService.h \
+			osmscout/routing/SimpleRoutingService.h \
+			osmscout/routing/MultiDBRoutingService.h \
+			osmscout/routing/DBFileOffset.h \
+			osmscout/routing/TurnRestriction.h \
+			osmscout/routing/MultiDBRoutingState.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/TypeConfig.h \
@@ -47,7 +59,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Intersection.h \
                         osmscout/Location.h \
                         osmscout/Tag.h \
-                        osmscout/TurnRestriction.h \
                         osmscout/Way.h \
                         osmscout/ObjectRef.h \
                         osmscout/NumericIndex.h \
@@ -64,11 +75,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/OptimizeWaysLowZoom.h \
                         osmscout/WaterIndex.h \
                         osmscout/ObjectVariantDataFile.h \
-                        osmscout/Route.h \
-                        osmscout/RouteData.h \
-                        osmscout/RouteNode.h \
-                        osmscout/RoutePostprocessor.h \
-                        osmscout/RoutingProfile.h \
                         osmscout/BoundingBoxDataFile.h \
                         osmscout/TypeDistributionDataFile.h \
                         osmscout/Database.h \
@@ -76,8 +82,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/BasemapDatabase.h \
                         osmscout/SRTM.h \
                         osmscout/LocationService.h \
-                        osmscout/POIService.h \
-                        osmscout/RoutingService.h
+                        osmscout/POIService.h
 
 if OSMSCOUT_HAVE_SSE2
 nobase_include_HEADERS+=osmscout/system/SSEMath.h

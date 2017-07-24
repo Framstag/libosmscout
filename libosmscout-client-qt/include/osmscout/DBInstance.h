@@ -29,7 +29,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/MapService.h>
-#include <osmscout/RoutingService.h>
 #include <osmscout/MapPainterQt.h>
 
 #include <osmscout/util/Breaker.h>
@@ -100,15 +99,14 @@ public slots:
   void onThreadFinished();
 
 public: // TODO: make it private, ensure thread safety
-  QString                          path;
-  osmscout::DatabaseRef            database;
+  QString                           path;
+  osmscout::DatabaseRef             database;
 
-  osmscout::LocationServiceRef     locationService;
-  osmscout::MapServiceRef          mapService;
-  osmscout::BreakerRef             dataLoadingBreaker;
+  osmscout::LocationServiceRef      locationService;
+  osmscout::MapServiceRef           mapService;
+  osmscout::BreakerRef              dataLoadingBreaker;
 
-  osmscout::RoutingServiceRef      router;
-  osmscout::StyleConfigRef         styleConfig;
+  osmscout::StyleConfigRef          styleConfig;
 
   inline DBInstance(QString path,
                     osmscout::DatabaseRef database,
@@ -133,9 +131,6 @@ public: // TODO: make it private, ensure thread safety
   bool LoadStyle(QString stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
                  QList<StyleError> &errors);
-
-  bool AssureRouter(osmscout::Vehicle vehicle,
-                    osmscout::RouterParameter routerParameter);
 
   /**
    * Get or create thread local MapPainter instance for this map

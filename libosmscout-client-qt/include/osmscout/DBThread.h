@@ -34,8 +34,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/MapService.h>
-#include <osmscout/RoutingService.h>
-#include <osmscout/RoutePostprocessor.h>
 #include <osmscout/MapPainterQt.h>
 
 #include <osmscout/Settings.h>

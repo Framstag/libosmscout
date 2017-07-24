@@ -1174,7 +1174,7 @@ namespace osmscout {
                                                  search.limit);
 
       if (!VisitAdminRegions(adminRegionVisitor)) {
-        log.Error() << "Error during sarch for region '" << searchEntry.adminRegionPattern << "' in region tree";
+        log.Error() << "Error during search for region '" << searchEntry.adminRegionPattern << "' in region tree";
         return false;
       }
 
@@ -1190,8 +1190,6 @@ namespace osmscout {
       std::set<FileOffset> visitedAdminHierachie;
 
       for (const auto& regionResult : adminRegionVisitor.results) {
-        //std::cout << "- '" << regionResult.adminRegion->name << "', '" << regionResult.adminRegion->aliasName << "'..." << std::endl;
-
         std::map<FileOffset,AdminRegionRef> adminHierachie;
         bool                                visited=false;
 

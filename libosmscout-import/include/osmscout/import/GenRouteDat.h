@@ -26,8 +26,8 @@
 #include <vector>
 
 #include <osmscout/NumericIndex.h>
-#include <osmscout/RouteNode.h>
-#include <osmscout/TurnRestriction.h>
+#include <osmscout/routing/RouteNode.h>
+#include <osmscout/routing/TurnRestriction.h>
 
 #include <osmscout/Types.h>
 #include <osmscout/TypeFeatures.h>
