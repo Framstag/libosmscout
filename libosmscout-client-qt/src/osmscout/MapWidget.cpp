@@ -564,12 +564,16 @@ void MapWidget::addOverlayWay(int id,QObject *o)
         qWarning() << "Failed to cast " << o << " to OverlayWay*.";
         return;
     }
-    qDebug() << "TODO";
+
+    // create shared pointer copy
+    OverlayWayRef wo=std::make_shared<OverlayWay>();
+    wo->set(*way);
+    renderer->addOverlayWay(id,wo);
 }
 
 void MapWidget::removeOverlayWay(int id)
 {
-    qDebug() << "TODO";
+    renderer->removeOverlayWay(id);
 }
 
 OverlayWay *MapWidget::createOverlayWay(QString type)
@@ -731,10 +735,14 @@ void MapWidget::SetRenderingType(QString strType)
   }
   if (type!=renderingType){
     renderingType=type;
-    if (renderer!=NULL){
-      renderer->deleteLater();
-    }
+
+    std::map<int,OverlayWayRef> overlayWays=renderer->getOverlayWays();
+    renderer->deleteLater();
+    
     renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    for (auto &p:overlayWays){
+      renderer->addOverlayWay(p.first,p.second);
+    }
     connect(renderer,SIGNAL(Redraw()),
             this,SLOT(redraw()));
     emit renderingTypeChanged(GetRenderingType());

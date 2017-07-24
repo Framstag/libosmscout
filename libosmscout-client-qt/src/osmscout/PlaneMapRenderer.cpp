@@ -302,12 +302,19 @@ void PlaneMapRenderer::DrawMap()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
+    // overlay ways
+    std::vector<OverlayWayRef> overlayWays;
+    osmscout::GeoBox renderBox;
+    projection.GetDimensions(renderBox);
+    getOverlayWays(overlayWays,renderBox);
+
     bool success;
     {
       DBRenderJob job(renderProjection,
                       loadJob->GetAllTiles(),
                       &drawParameter,
                       &p,
+                      overlayWays,
                       /*drawCanvasBackground*/ true);
       dbThread->RunJob(&job);
       success=job.IsSuccess();

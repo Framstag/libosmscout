@@ -22,6 +22,8 @@
  */
 
 #include <QObject>
+#include <QMutex>
+#include <QMutexLocker>
 
 #include <osmscout/Way.h>
 #include <osmscout/util/GeoBox.h>
@@ -43,6 +45,7 @@ private:
   QString                       typeName;
   std::vector<osmscout::Point>  nodes;
   osmscout::GeoBox              box;
+  mutable QMutex                lock;
 
 public slots:
   void clear();
@@ -55,16 +58,19 @@ public:
              QString typeName="_route",
              QObject *parent=Q_NULLPTR);
 
-  OverlayWay(const OverlayWay &other);
   
   virtual ~OverlayWay();
 
+  void set(const OverlayWay &other);
+  
   inline QString getTypeName() const
   {
+    QMutexLocker locker(&lock);
     return typeName;
   }
 
   inline void setTypeName(QString name){
+    QMutexLocker locker(&lock);
     typeName=name;
   }
 
@@ -72,8 +78,8 @@ public:
     return nodes.size();
   }
 
-  bool toWay(osmscout::Way &way,
-             const osmscout::TypeConfig typeConfig) const;
+  bool toWay(osmscout::WayRef &way,
+             const osmscout::TypeConfig &typeConfig) const;
 
   osmscout::GeoBox boundingBox();
 };

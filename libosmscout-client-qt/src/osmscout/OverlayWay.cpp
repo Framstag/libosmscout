@@ -9,7 +9,7 @@
   version 2.1 of the License, or (at your option) any later version.
 
   This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
 
@@ -36,42 +36,48 @@ OverlayWay::OverlayWay(const std::vector<osmscout::Point> &nodes,
 {
 }
 
-OverlayWay::OverlayWay(const OverlayWay &other):
-  typeName(other.typeName),
-  nodes(other.nodes)
-{
-}
-
 OverlayWay::~OverlayWay()
 {
 }
 
-bool OverlayWay::toWay(osmscout::Way &way,
-                       const osmscout::TypeConfig typeConfig) const
+void OverlayWay::set(const OverlayWay &other)
 {
+  QMutexLocker locker(&lock);
+  typeName=other.typeName;
+  nodes=other.nodes;
+}
+
+bool OverlayWay::toWay(osmscout::WayRef &way,
+                       const osmscout::TypeConfig &typeConfig) const
+{
+  QMutexLocker locker(&lock);
   osmscout::TypeInfoRef type=typeConfig.GetTypeInfo(typeName.toStdString());
   if (!type){
     return false;
   }
-  way.SetType(type);
-  way.nodes=nodes;
+  way->SetType(type);
+  way->SetLayerToMax();
+  way->nodes=nodes;
   return true;
 }
 
 void OverlayWay::clear()
 {
+  QMutexLocker locker(&lock);
   nodes.clear();
   box.Invalidate();
 }
 
 void OverlayWay::addPoint(double lat, double lon)
 {
+  QMutexLocker locker(&lock);
   nodes.push_back(osmscout::Point(0,osmscout::GeoCoord(lat,lon)));
   box.Invalidate();
 }
 
 osmscout::GeoBox OverlayWay::boundingBox()
 {
+  QMutexLocker locker(&lock);
   if (!box.IsValid() && !nodes.empty()){
     osmscout::GetBoundingBox(nodes,box);
   }

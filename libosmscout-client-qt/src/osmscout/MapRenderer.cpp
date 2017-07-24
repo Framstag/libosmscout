@@ -111,10 +111,71 @@ void MapRenderer::onFontSizeChanged(double fontSize)
   emit Redraw();
 }
 
+void MapRenderer::addOverlayWay(int id,OverlayWayRef way)
+{
+  {
+    QMutexLocker locker(&overlayLock);
+    overlayWayMap[id]=way;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void MapRenderer::removeOverlayWay(int id)
+{
+  {
+    QMutexLocker locker(&overlayLock);
+    overlayWayMap.erase(id);
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+std::map<int,OverlayWayRef> MapRenderer::getOverlayWays() const
+{
+  {
+    QMutexLocker locker(&overlayLock);
+    return overlayWayMap;
+  }
+}
+
+osmscout::GeoBox MapRenderer::overlayObjectsBox() const
+{
+  {
+    QMutexLocker locker(&overlayLock);
+    osmscout::GeoBox box;
+    for (auto &p:overlayWayMap){
+      osmscout::GeoBox wayBox=p.second->boundingBox();
+      if (wayBox.IsValid()){
+        if (box.IsValid()){
+          box.Include(wayBox);
+        } else {
+          box=wayBox;
+        }
+      }
+    }
+    return box;
+  }
+}
+
+void MapRenderer::getOverlayWays(std::vector<OverlayWayRef> &ways,
+                                 osmscout::GeoBox requestBox) const
+{
+  QMutexLocker locker(&overlayLock);
+  ways.clear();
+  ways.reserve(overlayWayMap.size());
+  for (auto &p:overlayWayMap){
+    if (requestBox.Intersects(p.second->boundingBox())){
+      ways.push_back(p.second);
+    }
+  }
+}
+
 DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
                          QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
                          osmscout::MapParameter *drawParameter,
                          QPainter *p,
+                         std::vector<OverlayWayRef> overlayWays,
                          bool drawCanvasBackground,
                          bool renderBasemap):
   renderProjection(renderProjection),
@@ -123,7 +184,8 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
   p(p),
   success(false),
   drawCanvasBackground(drawCanvasBackground),
-  renderBasemap(renderBasemap)
+  renderBasemap(renderBasemap),
+  overlayWays(overlayWays)
 {
 }
 
@@ -197,15 +259,35 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   }
 
   // draw databases
+  size_t i=0;
+  bool last;
+
   for (auto &db:databases){
-    if (!tiles.contains(db->path)){
-      osmscout::log.Debug() << "Skip database " << db->path.toStdString();
-      continue;
+    last=(i==databases.size()-1);
+    ++i;
+
+    std::list<osmscout::TileRef> tileList;
+    if (tiles.contains(db->path)){
+      tileList=tiles[db->path].values().toStdList();
+    }else{
+      if (!last){
+        osmscout::log.Debug() << "Skip database " << db->path.toStdString();
+        continue;
+      }
     }
-    std::list<osmscout::TileRef> tileList=tiles[db->path].values().toStdList();
-    osmscout::MapData            data;
+    
+    osmscout::MapData data;
 
     db->mapService->AddTileDataToMapData(tileList,data);
+    if (last){
+      osmscout::TypeConfigRef typeConfig=db->database->GetTypeConfig();
+      for (auto const &ow:overlayWays){
+        osmscout::WayRef w=std::make_shared<osmscout::Way>();
+        if (ow->toWay(w,*typeConfig)){
+          data.poiWays.push_back(w);
+        }
+      }
+    }
 
     if (drawParameter->GetRenderSeaLand()) {
       db->mapService->GetGroundTiles(renderProjection,
