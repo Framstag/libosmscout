@@ -27,9 +27,6 @@
 #include <osmscout/OpenGLMapData.h>
 
 namespace osmscout {
-
-  OSMSCOUT_MAP_OPENGL_API unsigned char* LoadPNGChar(const std::string& filename);
-
   OSMSCOUT_MAP_OPENGL_API osmscout::OpenGLTexture* LoadPNGOpenGL(const std::string& filename);
 }
 

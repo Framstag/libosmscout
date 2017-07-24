@@ -292,6 +292,18 @@ namespace osmscout {
       return textureWidthBuffer;
     }
 
+    int GetTextureWidth(int index){
+      return TexturesBuffer[index]->width;
+    }
+
+    int GetTextureWidthSum(int index){
+      int sum = 0;
+      for(int i = 0; i < index+1; i++)
+        sum += TexturesBuffer[i]->width;
+
+      return sum;
+    }
+
     void SetModel() {
       GLuint uniform = glGetUniformLocation(shaderProgram, "Model");
       glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(Model));

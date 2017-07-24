@@ -119,18 +119,18 @@ void main() {
 gl_Position = pos;
 	if(index == 1.0){
         gl_Position = pos;
-        Texcoord = vec2(i, 1.0);
+        Texcoord = vec2(j, 1.0);
     }
 	else if(index == 2.0){
 	    gl_Position = vec4(pos.x + width_norm, pos.y, pos.z, pos.w);
-	    Texcoord = vec2(j, 1.0);
+	    Texcoord = vec2(i, 1.0);
 	}
 	else if(index == 3.0){
 	    gl_Position = vec4(pos.x + width_norm, pos.y + height_norm, pos.z, pos.w);
-	    Texcoord = vec2(j, 0.0);
+	    Texcoord = vec2(i, 0.0);
 	}
 	else{
 	    gl_Position = vec4(pos.x, pos.y + height_norm, pos.z, pos.w);
-	    Texcoord = vec2(i, 0.0);
+	    Texcoord = vec2(j, 0.0);
 	}
 }

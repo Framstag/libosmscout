@@ -661,6 +661,7 @@ namespace osmscout {
 
     osmscout::log.Info() << "Nodes: " << data.nodes.size();
 
+    std::vector<int> icons;
     for (const auto &node: data.nodes) {
       IconStyleRef iconStyle;
       styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
@@ -676,61 +677,77 @@ namespace osmscout {
         //has icon?
         bool hasIcon = false;
         OpenGLTexture *image;
+        int IconIndex;
         for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
              path != parameter.GetIconPaths().end();
              ++path) {
           std::string filename = *path + iconStyle->GetIconName() + ".png";
 
+          int id = iconStyle->GetIconId();
+          bool loaded = false;
+          for(int i = 0; i < icons.size(); i++) {
+            if (id == icons[i]) {
+              IconIndex = i;
+              hasIcon = true;
+              loaded = true;
+              break;
+            }
+          }
+
+          if(loaded)
+            break;
+
           image = osmscout::LoadPNGOpenGL(filename);
 
           if (image != NULL) {
             ImageRenderer.AddNewTexture(image);
-            osmscout::log.Info() << "Loaded image '" << filename << "'";
+            icons.push_back(id);
             hasIcon = true;
+            IconIndex = icons.size()-1;
             break;
           }
         }
 
         if (!iconStyle->GetIconName().empty() && hasIcon) {
           osmscout::GeoCoord coords = node->GetCoords();
-          size_t textureIndex = ImageRenderer.GetTextureBufferSize();
-          size_t startWidth = ImageRenderer.GetTextureBufferWidth() - image->width;
+          size_t textureWidth = ImageRenderer.GetTextureWidth(IconIndex);
+          size_t startWidth = ImageRenderer.GetTextureWidthSum(IconIndex) - textureWidth;
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
           ImageRenderer.AddNewVertex(1);
           ImageRenderer.AddNewVertex(startWidth);
-          ImageRenderer.AddNewVertex(image->width);
+          ImageRenderer.AddNewVertex(textureWidth);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
           ImageRenderer.AddNewVertex(2);
           ImageRenderer.AddNewVertex(startWidth);
-          ImageRenderer.AddNewVertex(image->width);
+          ImageRenderer.AddNewVertex(textureWidth);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
           ImageRenderer.AddNewVertex(3);
           ImageRenderer.AddNewVertex(startWidth);
-          ImageRenderer.AddNewVertex(image->width);
+          ImageRenderer.AddNewVertex(textureWidth);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
           ImageRenderer.AddNewVertex(3);
           ImageRenderer.AddNewVertex(startWidth);
-          ImageRenderer.AddNewVertex(image->width);
+          ImageRenderer.AddNewVertex(textureWidth);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
           ImageRenderer.AddNewVertex(1);
           ImageRenderer.AddNewVertex(startWidth);
-          ImageRenderer.AddNewVertex(image->width);
+          ImageRenderer.AddNewVertex(textureWidth);
 
           ImageRenderer.AddNewVertex(coords.GetLon());
           ImageRenderer.AddNewVertex(coords.GetLat());
           ImageRenderer.AddNewVertex(4);
           ImageRenderer.AddNewVertex(startWidth);
-          ImageRenderer.AddNewVertex(image->width);
+          ImageRenderer.AddNewVertex(textureWidth);
 
           int num;
           if (ImageRenderer.GetNumOfVertices() <= 30) {
