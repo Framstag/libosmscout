@@ -18,8 +18,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef MAPRENDERER_H
-#define MAPRENDERER_H
+#ifndef OSMSCOUT_CLIENT_QT_MAPRENDERER_H
+#define OSMSCOUT_CLIENT_QT_MAPRENDERER_H
 
 #include <QObject>
 #include <QSettings>
@@ -28,6 +28,7 @@
 #include <osmscout/DBThread.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/OverlayWay.h>
 
 class OSMSCOUT_CLIENT_QT_API DBRenderJob : public DBJob{
   Q_OBJECT
@@ -39,12 +40,14 @@ private:
   bool success;
   bool drawCanvasBackground;
   bool renderBasemap;
+  std::vector<OverlayWayRef> overlayWays;
 
 public:
   DBRenderJob(osmscout::MercatorProjection renderProjection,
               QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
               osmscout::MapParameter *drawParameter,
               QPainter *p,
+              std::vector<OverlayWayRef> overlayWays,
               bool drawCanvasBackground=true,
               bool renderBasemap=true);
   virtual ~DBRenderJob();
@@ -74,6 +77,9 @@ protected:
   double      fontSize;
   QString     iconDirectory;
 
+  mutable QMutex              overlayLock;
+  std::map<int,OverlayWayRef> overlayWayMap; // <! map guarded by overlayLock, OverlayWay object is multithread
+
 signals:
   void Redraw();
   void TriggerDrawMap();
@@ -95,6 +101,11 @@ protected:
               DBThreadRef dbThread,
               QString iconDirectory);
 
+  osmscout::GeoBox overlayObjectsBox() const;
+  
+  void getOverlayWays(std::vector<OverlayWayRef> &ways,
+                      osmscout::GeoBox requestBox) const;
+
 public:
   virtual ~MapRenderer();
 
@@ -106,9 +117,15 @@ public:
    */
   virtual bool RenderMap(QPainter& painter,
                          const RenderMapRequest& request) = 0;
+
+  void addOverlayWay(int id,OverlayWayRef way);
+
+  void removeOverlayWay(int id);
+
+  std::map<int,OverlayWayRef> getOverlayWays() const;
 };
 
 typedef std::shared_ptr<MapRenderer> MapRendererRef;
 
-#endif /* MAPRENDERER_H */
+#endif /* OSMSCOUT_CLIENT_QT_MAPRENDERER_H */
 

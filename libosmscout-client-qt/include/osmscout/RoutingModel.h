@@ -33,6 +33,7 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/Router.h>
+#include <osmscout/OverlayWay.h>
 
 /**
  * \ingroup QtAPI
@@ -42,6 +43,7 @@ class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
   Q_OBJECT
   Q_PROPERTY(int count READ rowCount)
   Q_PROPERTY(bool ready READ isReady NOTIFY computingChanged)
+  Q_PROPERTY(QObject *routeWay READ getRouteWay)
 
 signals:
   void routeRequest(LocationEntry* start,
@@ -112,6 +114,11 @@ public:
   inline Q_INVOKABLE LocationEntry* locationEntryFromPosition(double lat, double lon, QString label="")
   {
     return new LocationEntry(label,osmscout::GeoCoord(lat,lon));
+  }
+
+  inline OverlayWay* getRouteWay()
+  {
+    return new OverlayWay(route.routeWay.nodes);
   }
 };
 
