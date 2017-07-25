@@ -1,6 +1,7 @@
 osmscoutmapopenglSrc = [
             'src/osmscout/MapPainterOpenGL.cpp',
             'src/osmscout/Triangulate.cpp',
+            'src/osmscout/PNGLoaderOpenGL.cpp',
             'src/poly2tri/sweep/cdt.cc',
             'src/poly2tri/common/shapes.cc',
             'src/poly2tri/sweep/sweep.cc',

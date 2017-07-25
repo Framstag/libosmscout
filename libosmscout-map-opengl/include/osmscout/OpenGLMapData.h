@@ -34,6 +34,13 @@
 
 namespace osmscout {
 
+  class OpenGLTexture {
+  public:
+    size_t width;
+    size_t height;
+    unsigned char *data;
+  };
+
   class OpenGLMapData {
   private:
 
@@ -41,17 +48,22 @@ namespace osmscout {
     std::vector<GLfloat> VerticesBuffer;
     std::vector<GLuint> Elements;
     std::vector<GLuint> ElementsBuffer;
-    std::vector<GLuint> TextureCoordinates;
-    std::vector<unsigned char*> Textures;
+    unsigned char *Textures;
+    std::vector<OpenGLTexture*> TexturesBuffer;
+    int textureSize;
+    int textureSizeBuffer;
+    int textureWidth;
+    int textureWidthBuffer;
+    int textureHeight;
 
     GLuint shaderProgram;
     GLuint VAO;
     GLuint VBO;
     GLuint EBO;
+    GLuint Tex;
 
     int VerticesSize;
     float zoom;
-    float scaleSize;
 
     GLuint VertexShader;
     GLuint FragmentShader;
@@ -109,11 +121,34 @@ namespace osmscout {
       this->Elements.clear();
       this->Elements = this->ElementsBuffer;
       this->ElementsBuffer.clear();
+
+      textureSize = textureSizeBuffer;
+      textureSizeBuffer = 0;
+      textureWidth = textureWidthBuffer;
+      textureWidthBuffer = 0;
+
+      this->Textures = new unsigned char[textureWidth*textureHeight*4];
+
+      int index = 0;
+      for (int i = 0; i < textureHeight; i++) {
+        for (int j = 0; j < TexturesBuffer.size(); j++) {
+          int start = i * TexturesBuffer[j]->width * 4;
+          for (int k = start; k < start + (TexturesBuffer[j]->width * 4); k++) {
+            Textures[index] = (TexturesBuffer[j]->data[k]);
+            index++;
+          }
+        }
+      }
+
+      TexturesBuffer.clear();
     }
 
     void clearData() {
       Vertices.clear();
       Elements.clear();
+      textureSize = 0;
+      textureWidth = 0;
+      textureHeight = 0;
     }
 
     void BindBuffers() {
@@ -125,10 +160,14 @@ namespace osmscout {
       glBindVertexArray(VAO);
       glGenBuffers(1, &VBO);
       glGenBuffers(1, &EBO);
+      glGenTextures(1, &Tex);
 
       zoom = 45.0f;
       Model = glm::mat4(1.0f);
-      scaleSize = 1.0f;
+      textureSize = 0;
+      textureSizeBuffer = 0;
+      textureWidth = 0;
+      textureHeight = 0;
 
       VertexShader = glCreateShader(GL_VERTEX_SHADER);
       const char *VertexSourceC = VertexShaderSource.c_str();
@@ -178,6 +217,16 @@ namespace osmscout {
 
     }
 
+    void LoadTextures() {
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, Tex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, Textures);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    }
+
     void LoadFragmentShader(std::string fileName) {
       FragmentShaderSource = this->LoadShader(fileName);
       FragmentShaderLength = FragmentShaderSource.length();
@@ -222,12 +271,37 @@ namespace osmscout {
       return this->VerticesBuffer.size();
     }
 
-    size_t GetTexturesSize(){
-      return Textures.size();
+    void AddNewTexture(OpenGLTexture *texture) {
+      TexturesBuffer.push_back(texture);
+
+      textureWidthBuffer += texture->width;
+      textureHeight = texture->height;
+
+      textureSizeBuffer++;
     }
 
-    void AddNewTexture(unsigned char* texture){
-      Textures.push_back(texture);
+    int GetTextureBufferSize() {
+      return textureSizeBuffer;
+    }
+
+    int GetTextureWidth(){
+      return textureWidth;
+    }
+
+    int GetTextureBufferWidth(){
+      return textureWidthBuffer;
+    }
+
+    int GetTextureWidth(int index){
+      return TexturesBuffer[index]->width;
+    }
+
+    int GetTextureWidthSum(int index){
+      int sum = 0;
+      for(int i = 0; i < index+1; i++)
+        sum += TexturesBuffer[i]->width;
+
+      return sum;
     }
 
     void SetModel() {
@@ -235,19 +309,17 @@ namespace osmscout {
       glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(Model));
     }
 
-    void ScaleModel(float zoomSize) {
+    /*void ScaleModel(float zoomSize) {
       scaleSize += zoomSize;
       //scaleSize = zoomSize;
       Model = glm::mat4(1.0f);
       Model = glm::scale(Model, glm::vec3(scaleSize, scaleSize, scaleSize));
       SetModel();
-    }
+    }*/
 
     void SetView(float lookX, float lookY) {
       View = glm::lookAt(
-          //glm::vec3(lookX, lookY, 1.0f), //position
           glm::vec3(0.0, 0.0, 1.0f), //position
-          //glm::vec3(lookX, lookY, 0.0f), //look
           glm::vec3(0.0f, 0.0f, 0.0f), //look
           glm::vec3(0.0f, 1.0f, 0.0f) //up
       );
@@ -275,6 +347,10 @@ namespace osmscout {
 
     GLuint getVAO() {
       return this->VAO;
+    }
+
+    GLuint GetTexture() {
+      return this->Tex;
     }
 
     GLuint getShaderProgram() {
