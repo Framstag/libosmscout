@@ -416,14 +416,18 @@ namespace osmscout {
   }
 
   /**
-   * Calculate a route
+   * Calculate a route going through all the via points
    *
    * @param profile
    *    Profile to use
-   * @param route
-   *    The route object holding the resulting route on success
+   * @param via
+   *    A vector of via points
+   * @param radius
+   *    The maximum radius to search in from the search center in meter
+   * @param parameter
+   *    A RoutingParamater object
    * @return
-   *    True, if the engine was able to find a route, else false
+   *    A RoutingResult object
    */
 
   RoutingResult SimpleRoutingService::CalculateRoute(RoutingProfile& profile,
@@ -470,7 +474,7 @@ namespace osmscout {
       /* In intermediary via points the end of the previous part is the start of the */
       /* next part, we need to remove the duplicate point in the calculated route */
       if (index<nodeIndexes.size()-2) {
-        result.GetRoute().PopEntry();
+        partialResult.GetRoute().PopEntry();
       }
 
       result.GetRoute().Append(partialResult.GetRoute());
