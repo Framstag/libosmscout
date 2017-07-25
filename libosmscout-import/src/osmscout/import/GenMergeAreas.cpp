@@ -30,6 +30,19 @@ namespace osmscout {
 
   const char* MergeAreasGenerator::AREAS2_TMP="areas2.tmp";
 
+  static bool HasNoDuplicateNodes(const std::vector<Point>& points)
+  {
+    std::set<GeoCoord> coordSet;
+
+    for (const auto& point : points) {
+      if (!coordSet.insert(point.GetCoord()).second) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   void MergeAreasGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                            ImportModuleDescription& description) const
   {
@@ -378,10 +391,11 @@ namespace osmscout {
           }
 
           // Flag as visited (the areas might be registered for other
-          // nodes shared by both areas, too) and we not want to
+          // nodes shared by both areas, too) and we do not want to
           // analyze it again
           visitedAreas.insert(candidateArea);
 
+          // Areas do not have the same feature value buffer values, skip
           if (area.rings[firstOuterRing].GetFeatureValueBuffer()!=candidateArea->rings[secondOuterRing].GetFeatureValueBuffer()) {
             //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " because of different feature values" << std::endl;
             candidate++;
@@ -398,7 +412,7 @@ namespace osmscout {
           std::list<PolygonMerger::Polygon> result;
 
           if (merger.Merge(result)) {
-            if (result.size()==1) {
+            if (result.size()==1 && HasNoDuplicateNodes(result.front().coords)) {
               //std::cout << "MERGE areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
 
               area.rings[firstOuterRing].nodes=result.front().coords;
@@ -549,10 +563,9 @@ namespace osmscout {
                                    const ImportParameter& parameter,
                                    Progress& progress)
   {
-    TypeInfoSet                    mergeTypes;
-    FileScanner                    scanner;
-    FileWriter                     writer;
-    uint32_t                       areasWritten=0;
+    TypeInfoSet mergeTypes;
+    FileScanner scanner;
+    FileWriter  writer;
 
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeArea() &&
@@ -564,6 +577,7 @@ namespace osmscout {
     std::unordered_set<Id> nodeUseMap;
 
     try {
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    MergeAreaDataGenerator::AREAS_TMP),
                    FileScanner::Sequential,
@@ -578,6 +592,7 @@ namespace osmscout {
       }
 
       uint32_t nodeCount=nodeUseMap.size();
+      uint32_t areasWritten=0;
 
       progress.Info("Found "+NumberToString(nodeCount)+" nodes as possible connection points for areas");
 

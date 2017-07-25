@@ -45,8 +45,12 @@ elif [ "$TARGET" = "website" ]; then
     cd webpage
     hugo --verbose
 
-    echo "Copying web site content to sourceforge..."
-    lftp -c "open --user $SOURCEFORGE_USER --password $SOURCEFORGE_PASSWORD sftp://web.sourceforge.net; cd /home/project-web/libosmscout/htdocs/; mirror -R -n --verbose=3 public ."
+    if [ -z "$SOURCEFORGE_USER" ]; then
+      echo "Copying web site content to sourceforge..."
+      lftp -c "open --user $SOURCEFORGE_USER --password $SOURCEFORGE_PASSWORD sftp://web.sourceforge.net; cd /home/project-web/libosmscout/htdocs/; mirror -R -n --verbose=3 public ."
+    else
+      echo "No user name for web page upload given"
+    fi;
   else
     echo "This build was triggered from a pull request or a branch, skipping generation of documentation"
   fi

@@ -58,13 +58,13 @@ int AvailableMapsModelMap::getVersion() const
 
 AvailableMapsModel::AvailableMapsModel()
 {
-  SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
+  SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
   mapProviders = settings->GetMapProviders();
 
-  connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT(listDownloaded(QNetworkReply*)));    
+  connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT(listDownloaded(QNetworkReply*)));
   diskCache.setCacheDirectory(settings->GetHttpCacheDir());
   webCtrl.setCache(&diskCache);
-  webCtrl.setCookieJar(new PersistentCookieJar());
+  webCtrl.setCookieJar(new PersistentCookieJar(settings));
 
   QLocale locale;
   for (auto &provider: mapProviders){

@@ -23,7 +23,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/DebugDatabase.h>
 
-#include <osmscout/RouteNode.h>
+#include <osmscout/routing/RouteNode.h>
 #include <osmscout/TypeFeatures.h>
 
 #include <list>
@@ -65,11 +65,29 @@ static bool ParseArguments(int argc,
                            char* argv[],
                            std::string& map,
                            std::set<osmscout::OSMId>& coordIds,
-                           std::set<osmscout::OSMId>& routeNodeIds,
+                           std::set<osmscout::OSMId>& routeNodeCoordIds,
+                           std::set<osmscout::Id>& routeNodeIds,
+                           std::set<osmscout::FileOffset>& routeNodeOffsets,
                            std::list<Job>& jobs)
 {
   if (argc<2) {
-    std::cerr << "DumpData <map directory> {-c <OSMId>|-n <OSMId>|-no <FileOffset>|-w <OSMId>|-wo <FileOffset>|-r <OSMId>|-ao <FileOffset>|-rn <OSMId>}" << std::endl;
+    std::cerr << "DumpData <map directory> {Search arguments}" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "Search arguments:" << std::endl;
+    std::cerr << "   -c  <OSMId>        OSM coord ids" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "   -n  <OSMId>        OSM node id" << std::endl;
+    std::cerr << "   -no <FileOffset>   osmscout node file offset" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "   -w  <OSMId>        OSM way id" << std::endl;
+    std::cerr << "   -wo <FileOffset>   osmscout way file offset" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "   -r  <OSMId>        OSM relation id" << std::endl;
+    std::cerr << "   -ao <FileOffset>   osmscout area file offset" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "   -rn <OSMId>        route node by OSM node id" << std::endl;
+    std::cerr << "   -ri <RouteNodeId>  osmscout route node id" << std::endl;
+    std::cerr << "   -ro <FileOffset>   osmscout route node file offset" << std::endl;
     return false;
   }
 
@@ -167,11 +185,47 @@ static bool ParseArguments(int argc,
       }
 
       if (sscanf(argv[arg],"%lu",&id)!=1) {
+        std::cerr << "Route node coord id is not numeric!" << std::endl;
+        return false;
+      }
+
+      routeNodeCoordIds.insert(id);
+
+      arg++;
+    }
+    else if (strcmp(argv[arg],"-ri")==0) {
+      unsigned long id;
+
+      arg++;
+      if (arg>=argc) {
+        std::cerr << "Option -ri requires parameter!" << std::endl;
+        return false;
+      }
+
+      if (sscanf(argv[arg],"%lu",&id)!=1) {
         std::cerr << "Route node id is not numeric!" << std::endl;
         return false;
       }
 
       routeNodeIds.insert(id);
+
+      arg++;
+    }
+    else if (strcmp(argv[arg],"-ro")==0) {
+      unsigned long id;
+
+      arg++;
+      if (arg>=argc) {
+        std::cerr << "Option -ro requires parameter!" << std::endl;
+        return false;
+      }
+
+      if (sscanf(argv[arg],"%lu",&id)!=1) {
+        std::cerr << "Route node file offset is not numeric!" << std::endl;
+        return false;
+      }
+
+      routeNodeOffsets.insert(id);
 
       arg++;
     }
@@ -704,8 +758,10 @@ int main(int argc, char* argv[])
   std::string                    map;
   std::list<Job>                 jobs;
   std::set<osmscout::OSMId>      coordIds;
+
   std::set<osmscout::OSMId>      routeNodeCoordIds;
   std::set<osmscout::Id>         routeNodeIds;
+  std::set<osmscout::FileOffset> routeNodeOffsets;
 
   try {
     std::locale::global(std::locale(""));
@@ -719,6 +775,8 @@ int main(int argc, char* argv[])
                       map,
                       coordIds,
                       routeNodeCoordIds,
+                      routeNodeIds,
+                      routeNodeOffsets,
                       jobs)) {
     return 1;
   }
@@ -915,6 +973,20 @@ int main(int argc, char* argv[])
       std::cerr << "Cannot find route node with id " << id << std::endl;
     }
 
+    firstRouteNode=false;
+  }
+
+  for (const auto offset:routeNodeOffsets){
+    osmscout::RouteNodeRef routeNodeRef;
+    if (routeNodeDataFile.GetByOffset(offset,routeNodeRef)){
+      if (!firstRouteNode) {
+        std::cout << std::endl;
+      }
+
+      DumpRouteNode(*routeNodeRef);
+    }else{
+      std::cerr << "Cannot find route node with offset " << offset << std::endl;
+    }
     firstRouteNode=false;
   }
 

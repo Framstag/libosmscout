@@ -24,7 +24,9 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/ext.hpp>
 #include <osmscout/MapParameter.h>
 #include <osmscout/MapPainter.h>
 #include <iostream>
@@ -36,7 +38,11 @@ namespace osmscout {
   private:
 
     std::vector<GLfloat> Vertices;
+    std::vector<GLfloat> VerticesBuffer;
     std::vector<GLuint> Elements;
+    std::vector<GLuint> ElementsBuffer;
+    std::vector<GLuint> TextureCoordinates;
+    std::vector<unsigned char*> Textures;
 
     GLuint shaderProgram;
     GLuint VAO;
@@ -45,9 +51,7 @@ namespace osmscout {
 
     int VerticesSize;
     float zoom;
-
-    std::vector<GLint> Attributes;
-    std::vector<GLuint> Uniforms;
+    float scaleSize;
 
     GLuint VertexShader;
     GLuint FragmentShader;
@@ -98,6 +102,15 @@ namespace osmscout {
 
   public:
 
+    void SwapData() {
+      this->Vertices.clear();
+      this->Vertices = this->VerticesBuffer;
+      this->VerticesBuffer.clear();
+      this->Elements.clear();
+      this->Elements = this->ElementsBuffer;
+      this->ElementsBuffer.clear();
+    }
+
     void clearData() {
       Vertices.clear();
       Elements.clear();
@@ -114,6 +127,8 @@ namespace osmscout {
       glGenBuffers(1, &EBO);
 
       zoom = 45.0f;
+      Model = glm::mat4(1.0f);
+      scaleSize = 1.0f;
 
       VertexShader = glCreateShader(GL_VERTEX_SHADER);
       const char *VertexSourceC = VertexShaderSource.c_str();
@@ -129,7 +144,7 @@ namespace osmscout {
         std::vector<GLchar> errorLog(maxLength);
         glGetShaderInfoLog(VertexShader, maxLength, &maxLength, &errorLog[0]);
 
-        for (int i = 0; i < errorLog.size(); i++)
+        for (glm::uint i = 0; i < errorLog.size(); i++)
           std::cout << errorLog.at(i);
 
         std::cout << std::endl;
@@ -151,7 +166,7 @@ namespace osmscout {
         std::vector<GLchar> errorLog(maxLength);
         glGetShaderInfoLog(FragmentShader, maxLength, &maxLength, &errorLog[0]);
 
-        for (int i = 0; i < errorLog.size(); i++)
+        for (glm::uint i = 0; i < errorLog.size(); i++)
           std::cout << errorLog.at(i);
 
         std::cout << std::endl;
@@ -179,16 +194,15 @@ namespace osmscout {
     }
 
     void AddNewVertex(GLfloat vertex) {
-      this->Vertices.push_back(vertex);
+      this->VerticesBuffer.push_back(vertex);
     }
 
     void AddNewElement(GLuint element) {
-      this->Elements.push_back(element);
+      this->ElementsBuffer.push_back(element);
     }
 
-
     int GetVerticesNumber() {
-      return (this->Vertices.size()) / (this->VerticesSize);
+      return (this->VerticesBuffer.size()) / (this->VerticesSize);
     }
 
     void LoadProgram() {
@@ -204,25 +218,37 @@ namespace osmscout {
       this->VerticesSize = size;
     }
 
-    int GetVerticesSize() {
-      return this->VerticesSize;
+    int GetNumOfVertices() {
+      return this->VerticesBuffer.size();
     }
 
-    int GetNumOfVertices() {
-      return this->Vertices.size();
+    size_t GetTexturesSize(){
+      return Textures.size();
+    }
+
+    void AddNewTexture(unsigned char* texture){
+      Textures.push_back(texture);
     }
 
     void SetModel() {
-      Model = glm::mat4(1.0f);
       GLuint uniform = glGetUniformLocation(shaderProgram, "Model");
       glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(Model));
-      this->Uniforms.push_back(uniform);
+    }
+
+    void ScaleModel(float zoomSize) {
+      scaleSize += zoomSize;
+      //scaleSize = zoomSize;
+      Model = glm::mat4(1.0f);
+      Model = glm::scale(Model, glm::vec3(scaleSize, scaleSize, scaleSize));
+      SetModel();
     }
 
     void SetView(float lookX, float lookY) {
       View = glm::lookAt(
-          glm::vec3(lookX, lookY, 1.0f), //position
-          glm::vec3(lookX, lookY, 0.0f), //look
+          //glm::vec3(lookX, lookY, 1.0f), //position
+          glm::vec3(0.0, 0.0, 1.0f), //position
+          //glm::vec3(lookX, lookY, 0.0f), //look
+          glm::vec3(0.0f, 0.0f, 0.0f), //look
           glm::vec3(0.0f, 1.0f, 0.0f) //up
       );
       GLint uniView = glGetUniformLocation(shaderProgram, "View");
@@ -230,18 +256,10 @@ namespace osmscout {
     }
 
     void SetProjection(float width, float height) {
-      Projection = glm::perspective(glm::radians((float) zoom), (float) width / (float) height, 0.1f, 10.0f);
-      // Projection = glm::ortho(0.0f, (float) width, 0.0f, (float) height, -1.0f, 100.0f);
+      Projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.1f, 10.0f);
+      //Projection = glm::ortho(0.0f,(float) width, 0.0f, (float) height,0.1f, 10.0f);
       GLint uniProj = glGetUniformLocation(shaderProgram, "Projection");
       glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(Projection));
-    }
-
-    void SetZoom(float zoom) {
-      this->zoom = zoom;
-    }
-
-    float GetZoom() {
-      return this->zoom;
     }
 
     void AddAttrib(std::string attribName, GLint length, GLuint type, size_t positionOffset) {
@@ -261,6 +279,18 @@ namespace osmscout {
 
     GLuint getShaderProgram() {
       return this->shaderProgram;
+    }
+
+    const glm::mat4 &GetModel() const {
+      return Model;
+    }
+
+    const glm::mat4 &GetView() const {
+      return View;
+    }
+
+    const glm::mat4 &GetProjection() const {
+      return Projection;
     }
 
     void Draw() {

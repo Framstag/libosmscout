@@ -33,6 +33,7 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMScoutQt.h>
+#include <osmscout/OverlayWay.h>
 
 /**
  * \defgroup QtAPI Qt API
@@ -139,9 +140,29 @@ public slots:
   void showLocation(LocationEntry* location);
 
   void locationChanged(bool locationValid, double lat, double lon, bool horizontalAccuracyValid, double horizontalAccuracy);
-  
+
+  /**
+   * Add "mark" (small red circle) on top of map.
+   * It will be rendered in UI thread, count of marks should be limited.
+   */
   void addPositionMark(int id, double lat, double lon);
   void removePositionMark(int id);
+
+  /**
+   * Method for registering map overlay way.
+   * Usage from QML:
+   *
+   *    var way=map.createOverlayWay();
+   *    way.addPoint(50.09180646851823, 14.498789861494872);
+   *    way.addPoint(50.09180646851823, 14.60);
+   *    map.addOverlayWay(0,way);
+   *
+   * @param id
+   * @param o
+   */
+  void addOverlayWay(int id,QObject *o);
+  void removeOverlayWay(int id);
+  OverlayWay *createOverlayWay(QString type="_route");
 
   bool toggleDebug();
   bool toggleInfo();

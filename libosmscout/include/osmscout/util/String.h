@@ -378,6 +378,8 @@ namespace osmscout {
   extern OSMSCOUT_API std::string StringListToString(const std::list<std::string>& list,
                                                      const std::string& separator="/");
 
+  extern OSMSCOUT_API size_t CountWords(const std::string& text);
+
   /**
    * \ingroup Util
    * Converts the given string into a list of whitespace separated (std::isspace()) strings.

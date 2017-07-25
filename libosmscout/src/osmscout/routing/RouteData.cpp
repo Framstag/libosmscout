@@ -17,15 +17,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/RouteData.h>
+#include <osmscout/routing/RouteData.h>
 
 namespace osmscout {
 
-  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
+  RouteData::RouteEntry::RouteEntry(DatabaseId database,
+                                    Id currentNodeId,
                                     size_t currentNodeIndex,
                                     const ObjectFileRef& pathObject,
                                     size_t targetNodeIndex)
-   : currentNodeId(currentNodeId),
+   : database(database),
+     currentNodeId(currentNodeId),
      currentNodeIndex(currentNodeIndex),
      pathObject(pathObject),
      targetNodeIndex(targetNodeIndex)
@@ -43,12 +45,14 @@ namespace osmscout {
     entries.clear();
   }
 
-  void RouteData::AddEntry(Id currentNodeId,
+  void RouteData::AddEntry(DatabaseId database,
+                           Id currentNodeId,
                            size_t currentNodeIndex,
                            const ObjectFileRef& pathObject,
                            size_t targetNodeIndex)
   {
-    entries.push_back(RouteEntry(currentNodeId,
+    entries.push_back(RouteEntry(database,
+                                 currentNodeId,
                                  currentNodeIndex,
                                  pathObject,
                                  targetNodeIndex));

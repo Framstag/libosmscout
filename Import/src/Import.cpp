@@ -111,6 +111,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
             << "                                      # is the default language (no :language) (default: #)" << std::endl;
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
   std::cout << std::endl;
+  std::cout << " --maxAdminLevel <number>             maximum admin level evaluated (default: " << parameter.GetMaxAdminLevel() << ")" << std::endl;
+  std::cout << std::endl;
   std::cout << " --eco true|false                     do delete temporary fiels ASAP" << std::endl;
   std::cout << " --delete-temporary-files true|false  deletes all temporary files after execution of the importer" << std::endl;
   std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
@@ -304,6 +306,10 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
 
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
+
+
+  progress.Info(std::string("MaxAdminLevel: ")+
+                osmscout::NumberToString(parameter.GetMaxAdminLevel()));
 
   progress.Info(std::string("Eco: ")+
                 (parameter.IsEco() ? "true" : "false"));
@@ -771,6 +777,19 @@ int main(int argc, char* argv[])
         else {
             parameterError=true;
         }
+    }
+    else if (strcmp(argv[i],"--maxAdminLevel")==0) {
+      size_t maxAdminLevel;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       maxAdminLevel)) {
+        parameter.SetMaxAdminLevel(maxAdminLevel);
+      }
+      else {
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--delete-temporary-files")==0) {
       if (!osmscout::ParseBoolArgument(argc,

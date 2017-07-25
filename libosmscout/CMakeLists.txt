@@ -36,6 +36,18 @@ set(HEADER_FILES
     include/osmscout/util/Tiling.h
     include/osmscout/util/Transformation.h
     include/osmscout/util/WorkQueue.h
+    include/osmscout/routing/Route.h
+    include/osmscout/routing/RouteData.h
+    include/osmscout/routing/RouteNode.h
+    include/osmscout/routing/RoutePostprocessor.h
+    include/osmscout/routing/RoutingProfile.h
+    include/osmscout/routing/RoutingService.h
+    include/osmscout/routing/AbstractRoutingService.h
+    include/osmscout/routing/SimpleRoutingService.h
+    include/osmscout/routing/MultiDBRoutingService.h
+    include/osmscout/routing/DBFileOffset.h
+    include/osmscout/routing/TurnRestriction.h
+    include/osmscout/routing/MultiDBRoutingState.h
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
@@ -68,23 +80,18 @@ set(HEADER_FILES
     include/osmscout/Point.h
     include/osmscout/POIService.h
     include/osmscout/ObjectVariantDataFile.h
-    include/osmscout/Route.h
-    include/osmscout/RouteData.h
-    include/osmscout/RouteNode.h
-    include/osmscout/RoutePostprocessor.h
-    include/osmscout/RoutingProfile.h
-    include/osmscout/RoutingService.h
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
     #include/osmscout/TextSearchIndex.h
-    include/osmscout/TurnRestriction.h
     include/osmscout/TypeConfig.h
     include/osmscout/TypeFeatures.h
     include/osmscout/Types.h
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h
-    include/osmscout/system/Compiler.h include/osmscout/util/CmdLineParsing.h)
+    include/osmscout/system/Compiler.h 
+    include/osmscout/util/CmdLineParsing.h
+)
 
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
@@ -115,6 +122,17 @@ set(SOURCE_FILES
     src/osmscout/util/Transformation.cpp
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/TagErrorReporter.cpp
+    src/osmscout/routing/Route.cpp
+    src/osmscout/routing/RouteData.cpp
+    src/osmscout/routing/RouteNode.cpp
+    src/osmscout/routing/RoutePostprocessor.cpp
+    src/osmscout/routing/RoutingProfile.cpp
+    src/osmscout/routing/RoutingService.cpp
+    src/osmscout/routing/AbstractRoutingService.cpp
+    src/osmscout/routing/SimpleRoutingService.cpp
+    src/osmscout/routing/MultiDBRoutingService.cpp
+    src/osmscout/routing/TurnRestriction.cpp
+    src/osmscout/routing/MultiDBRoutingState.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp
@@ -144,23 +162,17 @@ set(SOURCE_FILES
     src/osmscout/Point.cpp
     src/osmscout/POIService.cpp
     src/osmscout/ObjectVariantDataFile.cpp
-    src/osmscout/Route.cpp
-    src/osmscout/RouteData.cpp
-    src/osmscout/RouteNode.cpp
-    src/osmscout/RoutePostprocessor.cpp
-    src/osmscout/RoutingProfile.cpp
-    src/osmscout/RoutingService.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     #src/osmscout/TextSearchIndex.cpp
-    src/osmscout/TurnRestriction.cpp
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeatures.cpp
     src/osmscout/Types.cpp
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp
-        src/osmscout/util/CmdLineParsing.cpp)
+    src/osmscout/util/CmdLineParsing.cpp
+)
 
 if(MARISA_FOUND)
     list(APPEND HEADER_FILES include/osmscout/TextSearchIndex.h)

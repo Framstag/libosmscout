@@ -1,6 +1,10 @@
+#ifndef OSMSCOUT_MAP_PNGLOADER_H
+#define OSMSCOUT_MAP_PNGLOADER_H
+
 /*
-  This source is part of the libosmscout library
+  This source is part of the libosmscout-map library
   Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2017  Fanny Monori
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,38 +21,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/TurnRestriction.h>
+#include <string>
+
+#include <osmscout/private/MapOpenGLImportExport.h>
 
 namespace osmscout {
 
-  /**
-   * Reads the TurnRestriction data from the given FileScanner
-   *
-   * @throws IOException
-   */
-  void TurnRestriction::Read(FileScanner& scanner)
-  {
-    uint32_t typeValue;
-
-    scanner.ReadNumber(typeValue);
-    this->type=(Type)typeValue;
-
-    scanner.ReadNumber(from);
-    scanner.ReadNumber(via);
-    scanner.ReadNumber(to);
-  }
-
-  /**
-   * Write the TurnRestriction data to the given FileWriter
-   *
-   * @throws IOException
-   */
-  void TurnRestriction::Write(FileWriter& writer) const
-  {
-    writer.WriteNumber((uint32_t)type);
-
-    writer.WriteNumber(from);
-    writer.WriteNumber(via);
-    writer.WriteNumber(to);
-  }
+  OSMSCOUT_MAP_OPENGL_API unsigned char* LoadPNGChar(const std::string& filename);
 }
+
+#endif

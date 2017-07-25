@@ -30,6 +30,10 @@ namespace osmscout {
 
     static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::Point> points);
 
+    static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::Vertex2D> points);
+
+    static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::GeoCoord> points);
+
     static std::vector<GLfloat> TriangulateWithHoles(std::vector<std::vector<osmscout::Point>> points);
 
   };

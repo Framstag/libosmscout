@@ -54,6 +54,10 @@ namespace osmscout {
     mutable uint8_t                 bytesForWayFileOffset;
     std::unordered_set<std::string> regionIgnoreTokens;
     std::unordered_set<std::string> locationIgnoreTokens;
+    uint32_t                        maxRegionWords;
+    uint32_t                        maxPOIWords;
+    uint32_t                        maxLocationWords;
+    uint32_t                        maxAddressWords;
     FileOffset                      indexOffset;
 
   private:
