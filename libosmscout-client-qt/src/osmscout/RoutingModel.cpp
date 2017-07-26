@@ -36,11 +36,16 @@ RoutingListModel::RoutingListModel(QObject* parent)
   connect(router,SIGNAL(routeFailed(QString,int)),
           this,SLOT(onRouteFailed(QString,int)),
           Qt::QueuedConnection);
+  connect(router,SIGNAL(routingProgress(int,int)),
+          this,SLOT(onRoutingProgress(int,int)),
+          Qt::QueuedConnection);
 }
 
 RoutingListModel::~RoutingListModel()
 {
-  route->routeSteps.clear();
+  if (route){
+    route->routeSteps.clear();
+  }
   if (router!=NULL){
     router->deleteLater();
     router=NULL;
@@ -66,7 +71,7 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
 void RoutingListModel::onRouteComputed(RouteSelectionRef route,
                                        int requestId)
 {
-  if (requestId!=this->requestId){
+  if (!route || requestId!=this->requestId){
     return;
   }
   beginResetModel();
@@ -92,8 +97,21 @@ void RoutingListModel::onRouteFailed(QString reason,
   osmscout::log.Warn() << "Route computation failed: " << reason.toStdString();
 }
 
+void RoutingListModel::onRoutingProgress(int percent,
+                                         int requestId)
+{
+  if (requestId!=this->requestId){
+    return;
+  }
+  emit routingProgress(percent);
+  osmscout::log.Debug() << "Route progress: " << percent;
+}
+
 void RoutingListModel::clear()
 {
+  if (!route){
+    return;
+  }
   beginResetModel();
 
   ++requestId;
@@ -104,12 +122,15 @@ void RoutingListModel::clear()
 
 int RoutingListModel::rowCount(const QModelIndex& ) const
 {
-    return route->routeSteps.size();
+  if (!route){
+    return 0;
+  }
+  return route->routeSteps.size();
 }
 
 QVariant RoutingListModel::data(const QModelIndex &index, int role) const
 {
-    if(index.row() < 0 || index.row() >= route->routeSteps.size()) {
+    if(!route || index.row() < 0 || index.row() >= route->routeSteps.size()) {
         return QVariant();
     }
 
@@ -146,7 +167,7 @@ QHash<int, QByteArray> RoutingListModel::roleNames() const
 
 RouteStep* RoutingListModel::get(int row) const
 {
-    if(row < 0 || row >= route->routeSteps.size()) {
+    if(!route || row < 0 || row >= route->routeSteps.size()) {
         return NULL;
     }
 

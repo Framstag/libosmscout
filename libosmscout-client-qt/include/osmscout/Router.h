@@ -102,12 +102,55 @@ struct RouteSelection
 typedef std::shared_ptr<RouteSelection> RouteSelectionRef;
 
 Q_DECLARE_METATYPE(RouteSelection)
+Q_DECLARE_METATYPE(RouteSelectionRef)
 
 /**
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API Router : public QObject{
   Q_OBJECT
+
+private:
+  typedef std::function<void(size_t)> ProgressReporter;
+
+  class QtRoutingProgress : public osmscout::RoutingProgress
+  {
+  private:
+    std::chrono::system_clock::time_point lastDump;
+    double                                maxPercent;
+    ProgressReporter                      reporter;
+
+  public:
+    QtRoutingProgress(ProgressReporter reporter)
+    : lastDump(std::chrono::system_clock::now()),
+      maxPercent(0.0),
+      reporter(reporter)
+    {
+      // no code
+    }
+
+    void Reset()
+    {
+      lastDump=std::chrono::system_clock::now();
+      maxPercent=0.0;
+    }
+
+    void Progress(double currentMaxDistance,
+                  double overallDistance)
+    {
+      double currentPercent=(currentMaxDistance*100.0)/overallDistance;
+
+      std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
+
+      maxPercent=std::max(maxPercent,currentPercent);
+
+      if (std::chrono::duration_cast<std::chrono::milliseconds>(now-lastDump).count()>100) {
+        //std::cout << (size_t)maxPercent << "%" << std::endl;
+        reporter((size_t)maxPercent);
+        lastDump=now;
+      }
+    }
+  };
 
 private:
   QThread     *thread;
@@ -144,6 +187,9 @@ signals:
 
   void routeFailed(QString reason,
                    int requestId);
+
+  void routingProgress(int percent,
+                       int requestId);
 
 private:
   void GetCarSpeedTable(std::map<std::string,double>& map);
@@ -195,7 +241,8 @@ private:
   bool CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                       const osmscout::RoutePosition& start,
                       const osmscout::RoutePosition& target,
-                      osmscout::RouteData& route);
+                      osmscout::RouteData& route,
+                      int requestId);
 
   bool TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
                                             const osmscout::RouteData& data,

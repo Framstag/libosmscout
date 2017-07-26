@@ -121,6 +121,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<osmscout::TileRef>();
   qRegisterMetaType<osmscout::Vehicle>();
   qRegisterMetaType<RouteSelection>();
+  qRegisterMetaType<RouteSelectionRef>();
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");

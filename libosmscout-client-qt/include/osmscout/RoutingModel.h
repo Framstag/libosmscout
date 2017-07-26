@@ -55,6 +55,8 @@ signals:
 
   void routeFailed(QString reason);
 
+  void routingProgress(int percent);
+
 public slots:
   void setStartAndTarget(LocationEntry* start,
                          LocationEntry* target,
@@ -67,6 +69,9 @@ public slots:
 
   void onRouteFailed(QString reason,
                      int requestId);
+
+  void onRoutingProgress(int percent,
+                         int requestId);
 
 private:
   Router            *router;
@@ -118,6 +123,9 @@ public:
 
   inline OverlayWay* getRouteWay()
   {
+    if (!route){
+      return NULL;
+    }
     return new OverlayWay(route->routeWay.nodes);
   }
 };

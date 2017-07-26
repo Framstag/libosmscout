@@ -466,11 +466,18 @@ osmscout::MultiDBRoutingServiceRef Router::MakeRoutingService(const std::list<DB
 bool Router::CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                             const osmscout::RoutePosition& start,
                             const osmscout::RoutePosition& target,
-                            osmscout::RouteData& route)
+                            osmscout::RouteData& route,
+                            int requestId)
 {
   osmscout::RoutingResult    result;
   // TODO: report progress
   osmscout::RoutingParameter parameter;
+
+  parameter.SetProgress(std::make_shared<QtRoutingProgress>(
+    [this,requestId](size_t percent){
+      emit routingProgress(percent,requestId);
+    }
+  ));
 
   result=routingService->CalculateRoute(start,
                                         target,
@@ -731,7 +738,8 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
   if (!CalculateRoute(routingService,
                       startNode,
                       targetNode,
-                      route->routeData)) {
+                      route->routeData,
+                      requestId)) {
     emit routeFailed("There was an error while routing!",requestId);
     return;
   }
