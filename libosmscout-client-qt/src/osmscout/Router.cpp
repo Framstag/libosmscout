@@ -727,11 +727,11 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
     return;
   }
 
-  RouteSelection route;
+  RouteSelectionRef route=std::make_shared<RouteSelection>();
   if (!CalculateRoute(routingService,
                       startNode,
                       targetNode,
-                      route.routeData)) {
+                      route->routeData)) {
     emit routeFailed("There was an error while routing!",requestId);
     return;
   }
@@ -739,16 +739,16 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
   osmscout::log.Debug() << "Route calculated";
 
   TransformRouteDataToRouteDescription(routingService,
-                                       route.routeData,
-                                       route.routeDescription,
+                                       route->routeData,
+                                       route->routeDescription,
                                        start->getLabel().toUtf8().constData(),
                                        target->getLabel().toUtf8().constData());
 
   osmscout::log.Debug() << "Route transformed";
 
-  GenerateRouteSteps(route);
+  GenerateRouteSteps(*route);
 
-  if (!routingService->TransformRouteDataToWay(route.routeData,route.routeWay)) {
+  if (!routingService->TransformRouteDataToWay(route->routeData,route->routeWay)) {
     emit routeFailed("Error while transforming route",requestId);
     return;
   }

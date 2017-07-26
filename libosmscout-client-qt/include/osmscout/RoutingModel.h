@@ -62,17 +62,17 @@ public slots:
 
   void clear();
 
-  void onRouteComputed(RouteSelection route,
+  void onRouteComputed(RouteSelectionRef route,
                        int requestId);
 
   void onRouteFailed(QString reason,
                      int requestId);
 
 private:
-  Router          *router;
-  RouteSelection  route;
-  int             requestId;
-  bool            computing;
+  Router            *router;
+  RouteSelectionRef route;
+  int               requestId;
+  bool              computing;
 
 public:
   enum Roles {
@@ -118,7 +118,7 @@ public:
 
   inline OverlayWay* getRouteWay()
   {
-    return new OverlayWay(route.routeWay.nodes);
+    return new OverlayWay(route->routeWay.nodes);
   }
 };
 

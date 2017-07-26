@@ -21,6 +21,8 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
+#include <memory>
+
 #include <QObject>
 #include <QSettings>
 
@@ -97,6 +99,8 @@ struct RouteSelection
   osmscout::Way              routeWay;
 };
 
+typedef std::shared_ptr<RouteSelection> RouteSelectionRef;
+
 Q_DECLARE_METATYPE(RouteSelection)
 
 /**
@@ -111,8 +115,7 @@ private:
   DBThreadRef dbThread;
   QMutex      lock;
 
-  osmscout::RouterParameter           routerParameter;
-  //osmscout::RoutePostprocessor        routePostprocessor;
+  osmscout::RouterParameter routerParameter;
 
 public slots:
   void Initialize();
@@ -136,7 +139,7 @@ public slots:
                       osmscout::Vehicle vehicle,
                       int requestId);
 signals:
-  void routeComputed(RouteSelection route,
+  void routeComputed(RouteSelectionRef route,
                      int requestId);
 
   void routeFailed(QString reason,
