@@ -47,8 +47,8 @@ class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
   Q_PROPERTY(QObject *routeWay READ getRouteWay)
 
 signals:
-  void routeRequest(LocationEntry* start,
-                    LocationEntry* target,
+  void routeRequest(LocationEntryRef start,
+                    LocationEntryRef target,
                     osmscout::Vehicle vehicle,
                     int requestId,
                     osmscout::BreakerRef breaker);

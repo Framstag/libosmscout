@@ -26,8 +26,8 @@ RoutingListModel::RoutingListModel(QObject* parent)
 {
   router=OSMScoutQt::GetInstance().MakeRouter();
 
-  connect(this,SIGNAL(routeRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int,osmscout::BreakerRef)),
-          router,SLOT(onRouteRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int,osmscout::BreakerRef)),
+  connect(this,SIGNAL(routeRequest(LocationEntryRef,LocationEntryRef,osmscout::Vehicle,int,osmscout::BreakerRef)),
+          router,SLOT(onRouteRequest(LocationEntryRef,LocationEntryRef,osmscout::Vehicle,int,osmscout::BreakerRef)),
           Qt::QueuedConnection);
 
   connect(router,SIGNAL(routeComputed(RouteSelectionRef,int)),
@@ -66,7 +66,14 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   computing=true;
   breaker=std::make_shared<osmscout::ThreadedBreaker>();
   emit computingChanged();
-  emit routeRequest(start,target,vehicle,++requestId,breaker);
+
+  // make copy to shared ptr, remove owhership
+  LocationEntryRef startRef=std::make_shared<LocationEntry>(*start);
+  startRef->setParent(Q_NULLPTR);
+  LocationEntryRef targetRef=std::make_shared<LocationEntry>(*target);
+  targetRef->setParent(Q_NULLPTR);
+
+  emit routeRequest(startRef,targetRef,vehicle,++requestId,breaker);
 }
 
 void RoutingListModel::onRouteComputed(RouteSelectionRef route,

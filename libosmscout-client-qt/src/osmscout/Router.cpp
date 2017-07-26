@@ -709,8 +709,8 @@ std::string vehicleStr(osmscout::Vehicle vehicle){
 }
 
 void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingService,
-                                 LocationEntry* start,
-                                 LocationEntry* target,
+                                 const LocationEntryRef &start,
+                                 const LocationEntryRef &target,
                                  osmscout::Vehicle /*vehicle*/,
                                  int requestId,
                                  const osmscout::BreakerRef &breaker)
@@ -774,8 +774,8 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
   emit routeComputed(route,requestId);
 }
 
-void Router::onRouteRequest(LocationEntry* start,
-                            LocationEntry* target,
+void Router::onRouteRequest(LocationEntryRef start,
+                            LocationEntryRef target,
                             osmscout::Vehicle vehicle,
                             int requestId,
                             osmscout::BreakerRef breaker)

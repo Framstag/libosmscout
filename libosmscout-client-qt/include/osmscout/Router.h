@@ -177,8 +177,8 @@ public slots:
    * @param requestId - id used later in routeComputed/routeFailed signals
    * @param breaker - breaker that may be used for cancel routing computation
    */
-  void onRouteRequest(LocationEntry* start,
-                      LocationEntry* target,
+  void onRouteRequest(LocationEntryRef start,
+                      LocationEntryRef target,
                       osmscout::Vehicle vehicle,
                       int requestId,
                       osmscout::BreakerRef breaker);
@@ -236,8 +236,8 @@ private:
   void GenerateRouteSteps(RouteSelection &route);
 
   void ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingService,
-                           LocationEntry* start,
-                           LocationEntry* target,
+                           const LocationEntryRef &start,
+                           const LocationEntryRef &target,
                            osmscout::Vehicle vehicle,
                            int requestId,
                            const osmscout::BreakerRef &breaker);
