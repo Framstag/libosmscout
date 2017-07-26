@@ -470,7 +470,7 @@ bool Router::CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                             int requestId)
 {
   osmscout::RoutingResult    result;
-  // TODO: report progress
+  // TODO: make routing computation cancelable
   osmscout::RoutingParameter parameter;
 
   parameter.SetProgress(std::make_shared<QtRoutingProgress>(
