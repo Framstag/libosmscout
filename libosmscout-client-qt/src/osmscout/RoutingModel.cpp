@@ -26,8 +26,8 @@ RoutingListModel::RoutingListModel(QObject* parent)
 {
   router=OSMScoutQt::GetInstance().MakeRouter();
 
-  connect(this,SIGNAL(routeRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int)),
-          router,SLOT(onRouteRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int)),
+  connect(this,SIGNAL(routeRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int,osmscout::BreakerRef)),
+          router,SLOT(onRouteRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int,osmscout::BreakerRef)),
           Qt::QueuedConnection);
 
   connect(router,SIGNAL(routeComputed(RouteSelectionRef,int)),
@@ -64,8 +64,9 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   }
   clear();
   computing=true;
+  breaker=std::make_shared<osmscout::ThreadedBreaker>();
   emit computingChanged();
-  emit routeRequest(start,target,vehicle,++requestId);
+  emit routeRequest(start,target,vehicle,++requestId,breaker);
 }
 
 void RoutingListModel::onRouteComputed(RouteSelectionRef route,
@@ -79,6 +80,7 @@ void RoutingListModel::onRouteComputed(RouteSelectionRef route,
   endResetModel();
 
   computing=false;
+  breaker.reset();
   emit computingChanged();
 }
 
@@ -92,6 +94,7 @@ void RoutingListModel::onRouteFailed(QString reason,
   clear();
 
   computing=false;
+  breaker.reset();
   emit computingChanged();
   emit routeFailed(reason);
   osmscout::log.Warn() << "Route computation failed: " << reason.toStdString();
@@ -118,6 +121,15 @@ void RoutingListModel::clear()
   route->routeSteps.clear();
 
   endResetModel();
+}
+
+void RoutingListModel::cancel()
+{
+  if (breaker){
+    breaker->Break();
+  }
+  computing=false;
+  ++requestId; // ignore future callbacks
 }
 
 int RoutingListModel::rowCount(const QModelIndex& ) const

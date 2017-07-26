@@ -120,6 +120,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<DatabaseLoadedResponse>();
   qRegisterMetaType<osmscout::TileRef>();
   qRegisterMetaType<osmscout::Vehicle>();
+  qRegisterMetaType<osmscout::BreakerRef>();
   qRegisterMetaType<RouteSelection>();
   qRegisterMetaType<RouteSelectionRef>();
 

@@ -26,6 +26,7 @@
 #include <QAbstractListModel>
 
 #include <osmscout/Location.h>
+#include <osmscout/util/Breaker.h>
 #include <osmscout/routing/Route.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
@@ -49,7 +50,8 @@ signals:
   void routeRequest(LocationEntry* start,
                     LocationEntry* target,
                     osmscout::Vehicle vehicle,
-                    int requestId);
+                    int requestId,
+                    osmscout::BreakerRef breaker);
 
   void computingChanged();
 
@@ -64,6 +66,8 @@ public slots:
 
   void clear();
 
+  void cancel();
+
   void onRouteComputed(RouteSelectionRef route,
                        int requestId);
 
@@ -74,10 +78,11 @@ public slots:
                          int requestId);
 
 private:
-  Router            *router;
-  RouteSelectionRef route;
-  int               requestId;
-  bool              computing;
+  Router                *router;
+  RouteSelectionRef     route;
+  int                   requestId;
+  bool                  computing;
+  osmscout::BreakerRef  breaker;
 
 public:
   enum Roles {

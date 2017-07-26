@@ -156,7 +156,6 @@ private:
   QThread     *thread;
   SettingsRef settings;
   DBThreadRef dbThread;
-  QMutex      lock;
 
   osmscout::RouterParameter routerParameter;
 
@@ -176,17 +175,21 @@ public slots:
    * @param target - end position for route computation
    * @param vehicle - used vehicle for route
    * @param requestId - id used later in routeComputed/routeFailed signals
+   * @param breaker - breaker that may be used for cancel routing computation
    */
   void onRouteRequest(LocationEntry* start,
                       LocationEntry* target,
                       osmscout::Vehicle vehicle,
-                      int requestId);
+                      int requestId,
+                      osmscout::BreakerRef breaker);
 signals:
   void routeComputed(RouteSelectionRef route,
                      int requestId);
 
   void routeFailed(QString reason,
                    int requestId);
+
+  void routeCanceled(int requestId);
 
   void routingProgress(int percent,
                        int requestId);
@@ -236,13 +239,15 @@ private:
                            LocationEntry* start,
                            LocationEntry* target,
                            osmscout::Vehicle vehicle,
-                           int requestId);
+                           int requestId,
+                           const osmscout::BreakerRef &breaker);
 
   bool CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                       const osmscout::RoutePosition& start,
                       const osmscout::RoutePosition& target,
                       osmscout::RouteData& route,
-                      int requestId);
+                      int requestId,
+                      const osmscout::BreakerRef &breaker);
 
   bool TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
                                             const osmscout::RouteData& data,
