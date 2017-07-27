@@ -32,6 +32,7 @@
 
 class OSMScoutQt;
 Q_DECLARE_METATYPE(osmscout::TileRef)
+Q_DECLARE_METATYPE(osmscout::BreakerRef)
 
 /**
  * \ingroup QtAPI

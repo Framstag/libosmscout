@@ -26,6 +26,7 @@
 #include <QAbstractListModel>
 
 #include <osmscout/Location.h>
+#include <osmscout/util/Breaker.h>
 #include <osmscout/routing/Route.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
@@ -46,14 +47,17 @@ class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
   Q_PROPERTY(QObject *routeWay READ getRouteWay)
 
 signals:
-  void routeRequest(LocationEntry* start,
-                    LocationEntry* target,
+  void routeRequest(LocationEntryRef start,
+                    LocationEntryRef target,
                     osmscout::Vehicle vehicle,
-                    int requestId);
+                    int requestId,
+                    osmscout::BreakerRef breaker);
 
   void computingChanged();
 
   void routeFailed(QString reason);
+
+  void routingProgress(int percent);
 
 public slots:
   void setStartAndTarget(LocationEntry* start,
@@ -62,17 +66,23 @@ public slots:
 
   void clear();
 
-  void onRouteComputed(RouteSelection route,
+  void cancel();
+
+  void onRouteComputed(RouteSelectionRef route,
                        int requestId);
 
   void onRouteFailed(QString reason,
                      int requestId);
 
+  void onRoutingProgress(int percent,
+                         int requestId);
+
 private:
-  Router          *router;
-  RouteSelection  route;
-  int             requestId;
-  bool            computing;
+  Router                *router;
+  RouteSelectionRef     route;
+  int                   requestId;
+  bool                  computing;
+  osmscout::BreakerRef  breaker;
 
 public:
   enum Roles {
@@ -118,7 +128,10 @@ public:
 
   inline OverlayWay* getRouteWay()
   {
-    return new OverlayWay(route.routeWay.nodes);
+    if (!route){
+      return NULL;
+    }
+    return new OverlayWay(route->routeWay.nodes);
   }
 };
 

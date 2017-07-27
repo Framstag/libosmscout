@@ -21,6 +21,8 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
+#include <memory>
+
 #include <QObject>
 #include <QSettings>
 
@@ -97,7 +99,10 @@ struct RouteSelection
   osmscout::Way              routeWay;
 };
 
+typedef std::shared_ptr<RouteSelection> RouteSelectionRef;
+
 Q_DECLARE_METATYPE(RouteSelection)
+Q_DECLARE_METATYPE(RouteSelectionRef)
 
 /**
  * \ingroup QtAPI
@@ -106,13 +111,53 @@ class OSMSCOUT_CLIENT_QT_API Router : public QObject{
   Q_OBJECT
 
 private:
+  typedef std::function<void(size_t)> ProgressReporter;
+
+  class QtRoutingProgress : public osmscout::RoutingProgress
+  {
+  private:
+    std::chrono::system_clock::time_point lastDump;
+    double                                maxPercent;
+    ProgressReporter                      reporter;
+
+  public:
+    QtRoutingProgress(ProgressReporter reporter)
+    : lastDump(std::chrono::system_clock::now()),
+      maxPercent(0.0),
+      reporter(reporter)
+    {
+      // no code
+    }
+
+    void Reset()
+    {
+      lastDump=std::chrono::system_clock::now();
+      maxPercent=0.0;
+    }
+
+    void Progress(double currentMaxDistance,
+                  double overallDistance)
+    {
+      double currentPercent=(currentMaxDistance*100.0)/overallDistance;
+
+      std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
+
+      maxPercent=std::max(maxPercent,currentPercent);
+
+      if (std::chrono::duration_cast<std::chrono::milliseconds>(now-lastDump).count()>100) {
+        //std::cout << (size_t)maxPercent << "%" << std::endl;
+        reporter((size_t)maxPercent);
+        lastDump=now;
+      }
+    }
+  };
+
+private:
   QThread     *thread;
   SettingsRef settings;
   DBThreadRef dbThread;
-  QMutex      lock;
 
-  osmscout::RouterParameter           routerParameter;
-  //osmscout::RoutePostprocessor        routePostprocessor;
+  osmscout::RouterParameter routerParameter;
 
 public slots:
   void Initialize();
@@ -130,17 +175,24 @@ public slots:
    * @param target - end position for route computation
    * @param vehicle - used vehicle for route
    * @param requestId - id used later in routeComputed/routeFailed signals
+   * @param breaker - breaker that may be used for cancel routing computation
    */
-  void onRouteRequest(LocationEntry* start,
-                      LocationEntry* target,
+  void onRouteRequest(LocationEntryRef start,
+                      LocationEntryRef target,
                       osmscout::Vehicle vehicle,
-                      int requestId);
+                      int requestId,
+                      osmscout::BreakerRef breaker);
 signals:
-  void routeComputed(RouteSelection route,
+  void routeComputed(RouteSelectionRef route,
                      int requestId);
 
   void routeFailed(QString reason,
                    int requestId);
+
+  void routeCanceled(int requestId);
+
+  void routingProgress(int percent,
+                       int requestId);
 
 private:
   void GetCarSpeedTable(std::map<std::string,double>& map);
@@ -184,15 +236,18 @@ private:
   void GenerateRouteSteps(RouteSelection &route);
 
   void ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingService,
-                           LocationEntry* start,
-                           LocationEntry* target,
+                           const LocationEntryRef &start,
+                           const LocationEntryRef &target,
                            osmscout::Vehicle vehicle,
-                           int requestId);
+                           int requestId,
+                           const osmscout::BreakerRef &breaker);
 
   bool CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                       const osmscout::RoutePosition& start,
                       const osmscout::RoutePosition& target,
-                      osmscout::RouteData& route);
+                      osmscout::RouteData& route,
+                      int requestId,
+                      const osmscout::BreakerRef &breaker);
 
   bool TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
                                             const osmscout::RouteData& data,

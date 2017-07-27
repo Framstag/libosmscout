@@ -26,21 +26,26 @@ RoutingListModel::RoutingListModel(QObject* parent)
 {
   router=OSMScoutQt::GetInstance().MakeRouter();
 
-  connect(this,SIGNAL(routeRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int)),
-          router,SLOT(onRouteRequest(LocationEntry*,LocationEntry*,osmscout::Vehicle,int)),
+  connect(this,SIGNAL(routeRequest(LocationEntryRef,LocationEntryRef,osmscout::Vehicle,int,osmscout::BreakerRef)),
+          router,SLOT(onRouteRequest(LocationEntryRef,LocationEntryRef,osmscout::Vehicle,int,osmscout::BreakerRef)),
           Qt::QueuedConnection);
 
-  connect(router,SIGNAL(routeComputed(RouteSelection,int)),
-          this,SLOT(onRouteComputed(RouteSelection,int)),
+  connect(router,SIGNAL(routeComputed(RouteSelectionRef,int)),
+          this,SLOT(onRouteComputed(RouteSelectionRef,int)),
           Qt::QueuedConnection);
   connect(router,SIGNAL(routeFailed(QString,int)),
           this,SLOT(onRouteFailed(QString,int)),
+          Qt::QueuedConnection);
+  connect(router,SIGNAL(routingProgress(int,int)),
+          this,SLOT(onRoutingProgress(int,int)),
           Qt::QueuedConnection);
 }
 
 RoutingListModel::~RoutingListModel()
 {
-  route.routeSteps.clear();
+  if (route){
+    route->routeSteps.clear();
+  }
   if (router!=NULL){
     router->deleteLater();
     router=NULL;
@@ -59,14 +64,22 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   }
   clear();
   computing=true;
+  breaker=std::make_shared<osmscout::ThreadedBreaker>();
   emit computingChanged();
-  emit routeRequest(start,target,vehicle,++requestId);
+
+  // make copy to shared ptr, remove owhership
+  LocationEntryRef startRef=std::make_shared<LocationEntry>(*start);
+  startRef->setParent(Q_NULLPTR);
+  LocationEntryRef targetRef=std::make_shared<LocationEntry>(*target);
+  targetRef->setParent(Q_NULLPTR);
+
+  emit routeRequest(startRef,targetRef,vehicle,++requestId,breaker);
 }
 
-void RoutingListModel::onRouteComputed(RouteSelection route,
+void RoutingListModel::onRouteComputed(RouteSelectionRef route,
                                        int requestId)
 {
-  if (requestId!=this->requestId){
+  if (!route || requestId!=this->requestId){
     return;
   }
   beginResetModel();
@@ -74,6 +87,7 @@ void RoutingListModel::onRouteComputed(RouteSelection route,
   endResetModel();
 
   computing=false;
+  breaker.reset();
   emit computingChanged();
 }
 
@@ -87,33 +101,59 @@ void RoutingListModel::onRouteFailed(QString reason,
   clear();
 
   computing=false;
+  breaker.reset();
   emit computingChanged();
   emit routeFailed(reason);
   osmscout::log.Warn() << "Route computation failed: " << reason.toStdString();
 }
 
+void RoutingListModel::onRoutingProgress(int percent,
+                                         int requestId)
+{
+  if (requestId!=this->requestId){
+    return;
+  }
+  emit routingProgress(percent);
+  osmscout::log.Debug() << "Route progress: " << percent;
+}
+
 void RoutingListModel::clear()
 {
+  if (!route){
+    return;
+  }
   beginResetModel();
 
   ++requestId;
-  route.routeSteps.clear();
+  route->routeSteps.clear();
 
   endResetModel();
 }
 
+void RoutingListModel::cancel()
+{
+  if (breaker){
+    breaker->Break();
+  }
+  computing=false;
+  ++requestId; // ignore future callbacks
+}
+
 int RoutingListModel::rowCount(const QModelIndex& ) const
 {
-    return route.routeSteps.size();
+  if (!route){
+    return 0;
+  }
+  return route->routeSteps.size();
 }
 
 QVariant RoutingListModel::data(const QModelIndex &index, int role) const
 {
-    if(index.row() < 0 || index.row() >= route.routeSteps.size()) {
+    if(!route || index.row() < 0 || index.row() >= route->routeSteps.size()) {
         return QVariant();
     }
 
-    RouteStep step=route.routeSteps.at(index.row());
+    RouteStep step=route->routeSteps.at(index.row());
 
     switch (role) {
     case Qt::DisplayRole:
@@ -146,11 +186,11 @@ QHash<int, QByteArray> RoutingListModel::roleNames() const
 
 RouteStep* RoutingListModel::get(int row) const
 {
-    if(row < 0 || row >= route.routeSteps.size()) {
+    if(!route || row < 0 || row >= route->routeSteps.size()) {
         return NULL;
     }
 
-    RouteStep step=route.routeSteps.at(row);
+    RouteStep step=route->routeSteps.at(row);
 
     return new RouteStep(step);
 }
