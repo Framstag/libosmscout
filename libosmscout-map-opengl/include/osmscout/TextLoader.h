@@ -21,7 +21,7 @@
 */
 
 #include <string>
-#include <ft2build.h>
+#include <freetype2/ft2build.h>
 #include FT_FREETYPE_H
 #include <freetype/ftglyph.h>
 #include <osmscout/OpenGLMapData.h>
