@@ -2,7 +2,10 @@ if(NOT ${OSMSCOUT_BUILD_MAP})
 	message(SEND_ERROR "The main map drawing interface is required for OpenGL map drawing backend")
 endif()
 if(NOT PNG_FOUND)
-	message(SEND_ERROR "libpng is required for cairo map drawing backend")
+	message(SEND_ERROR "libpng is required for opengl map drawing backend")
+endif()
+if(NOT FREETYPE_FOUND)
+	message(SEND_ERROR "freetype is required for opengl map drawing backend")
 endif()
 
 set(HEADER_FILES
@@ -12,6 +15,7 @@ set(HEADER_FILES
 		include/osmscout/MapPainterOpenGL.h
 		include/osmscout/Triangulate.h
 		include/osmscout/PNGLoaderOpenGL.h
+		include/osmscout/TextLoader.h
 		include/poly2tri/poly2tri.h
 		include/poly2tri/sweep/cdt.h
 		include/poly2tri/sweep/sweep.h
@@ -24,6 +28,7 @@ set(SOURCE_FILES
 		src/osmscout/MapPainterOpenGL.cpp
 		src/osmscout/Triangulate.cpp
 		src/osmscout/PNGLoaderOpenGL.cpp
+		src/osmscout/TextLoader.cpp
 		src/poly2tri/sweep/cdt.cc
 		src/poly2tri/common/shapes.cc
 		src/poly2tri/sweep/sweep.cc
@@ -42,6 +47,7 @@ target_include_directories(osmscout_map_opengl PRIVATE
 		${OPENGL_INCLUDE_DIR}
 		${GLEW_INCLUDE_DIRS}
 		${PNG_INCLUDE_DIRS}
+		${FREETYPE_INCLUDE_DIRS}
 		)
 
 if(MSVS OR MSYS OR MINGW)
@@ -50,6 +56,7 @@ if(MSVS OR MSYS OR MINGW)
 			osmscout_map
 			${OPENGL_LIBRARIES}
 			${PNG_LIBRARIES}
+			${FREETYPE_LIBRARIES}
 			glew32 # TODO: ${GLEW_LIBRARIES} is not setup correctly on Windows?
 			)
 else()
@@ -59,6 +66,7 @@ else()
 			${OPENGL_LIBRARIES}
 			${GLEW_LIBRARIES}
 			${PNG_LIBRARIES}
+			${FREETYPE_LIBRARIES}
 			)
 endif()
 target_compile_definitions(osmscout_map_opengl PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
