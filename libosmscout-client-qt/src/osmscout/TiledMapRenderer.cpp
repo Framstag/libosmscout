@@ -386,7 +386,12 @@ DatabaseCoverage TiledMapRenderer::databaseCoverageOfTile(uint32_t zoomLevel, ui
   osmscout::GeoBox tileBoundingBox = OSMTile::tileBoundingBox(zoomLevel, xtile, ytile);
   osmscout::Magnification magnification;
   magnification.SetLevel(zoomLevel);
-  return dbThread->databaseCoverage(magnification,tileBoundingBox);
+  DatabaseCoverage state=dbThread->databaseCoverage(magnification,tileBoundingBox);
+  if (state==DatabaseCoverage::Outside &&
+      overlayObjectsBox().Intersects(tileBoundingBox)){
+    return DatabaseCoverage::Intersects;
+  }
+  return state;
 }
 
 void TiledMapRenderer::onDatabaseLoaded(osmscout::GeoBox boundingBox)
@@ -650,6 +655,12 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
     projection.Set(tileVisualCenter, /* angle */ 0, magnification, mapDpi,
                    canvas.width(), canvas.height());
     projection.SetLinearInterpolationUsage(loadZ >= 10);
+    
+    // overlay ways
+    std::vector<OverlayWayRef> overlayWays;
+    osmscout::GeoBox renderBox;
+    projection.GetDimensions(renderBox);
+    getOverlayWays(overlayWays,renderBox);
 
     //DrawMap(p, tileVisualCenter, loadZ, canvas.width(), canvas.height());
     bool success;
@@ -658,6 +669,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
                       tiles,
                       &drawParameter,
                       &p,
+                      overlayWays,
                       /*drawCanvasBackground*/ false,
                       /*renderBasemap*/ !onlineTilesEnabled);
       dbThread->RunJob(&job);

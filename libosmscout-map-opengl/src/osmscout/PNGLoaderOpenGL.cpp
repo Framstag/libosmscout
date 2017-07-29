@@ -32,8 +32,7 @@ namespace osmscout {
     return bytes[0]!=0;
   }
 
-  unsigned char* LoadPNGChar(const std::string& filename)
-  {
+  osmscout::OpenGLTexture* LoadPNGOpenGL(const std::string& filename){
     std::FILE       *file;
     png_structp     png_ptr;
     png_infop       info_ptr;
@@ -160,15 +159,8 @@ namespace osmscout {
     int stride = width*4;
     data=(unsigned char *)malloc(stride*height);
 
-    // TODO: Handle stride offsets
-
-
-    //  Calculate premultiplied alpha values and handle endian specific
-    //  byte packging for cairo.
-
-
-    size_t off=0; // Index in cairo data
-    size_t s=0;   // Index in PNG data
+    size_t off=0;
+    size_t s=0;
     while (s<width*height*channels) {
       unsigned int alpha;
       unsigned char red;
@@ -195,14 +187,14 @@ namespace osmscout {
       blue=blue*alpha/256;
 
       if (littleEndian) {
-        data[off]=blue;
-        off++;
-        data[off]=green;
-        off++;
-        data[off]=red;
-        off++;
-        data[off]=alpha;
-        off++;
+      data[off]=red;
+      off++;
+      data[off]=green;
+      off++;
+      data[off]=blue;
+      off++;
+      data[off]=alpha;
+      off++;
       }
       else {
         data[off]=alpha;
@@ -220,6 +212,12 @@ namespace osmscout {
     free(image_data);
     std::fclose(file);
 
-    return data;
+    osmscout::OpenGLTexture *texture = new osmscout::OpenGLTexture();
+    texture->width = width;
+    texture->height = height;
+    texture->data = data;
+
+    return texture;
   }
+
 }

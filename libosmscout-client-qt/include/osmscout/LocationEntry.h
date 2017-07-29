@@ -89,4 +89,7 @@ public:
     const QList<osmscout::ObjectFileRef>& getReferences() const;
 };
 
+typedef std::shared_ptr<LocationEntry> LocationEntryRef;
+Q_DECLARE_METATYPE(LocationEntryRef)
+
 #endif

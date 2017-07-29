@@ -493,7 +493,7 @@ namespace osmscout {
                                                                   RouteDescription& description)
   {
      ObjectFileRef           prevObject;
-     DatabaseId              prevDatabase;
+     DatabaseId              prevDatabase=0;
      ObjectFileRef           curObject;
      DatabaseId              curDatabase;
      
@@ -567,7 +567,7 @@ namespace osmscout {
   {
     std::list<RouteDescription::Node>::iterator lastJunction=description.Nodes().end();
     ObjectFileRef                               prevObject;
-    DatabaseId                                  prevDb;
+    DatabaseId                                  prevDb=0;
     ObjectFileRef                               curObject;
     DatabaseId                                  curDb;
 
@@ -606,7 +606,7 @@ namespace osmscout {
                                                           RouteDescription& description)
   {
     ObjectFileRef              prevObject;
-    DatabaseId                 prevDb;
+    DatabaseId                 prevDb=0;
     ObjectFileRef              curObject;
     DatabaseId                 curDb;
 

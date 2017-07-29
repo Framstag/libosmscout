@@ -28,6 +28,7 @@
 #include <osmscout/MapWidget.h>
 #include <osmscout/PlaneMapRenderer.h>
 #include <osmscout/TiledMapRenderer.h>
+#include <osmscout/OverlayWay.h>
 
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/LocationInfoModel.h>
@@ -119,7 +120,10 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<DatabaseLoadedResponse>();
   qRegisterMetaType<osmscout::TileRef>();
   qRegisterMetaType<osmscout::Vehicle>();
+  qRegisterMetaType<osmscout::BreakerRef>();
   qRegisterMetaType<RouteSelection>();
+  qRegisterMetaType<RouteSelectionRef>();
+  qRegisterMetaType<LocationEntryRef>();
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -135,6 +139,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<RouteStep>(uri, versionMajor, versionMinor, "RouteStep");
   qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");
   qmlRegisterType<StyleFlagsModel>(uri, versionMajor, versionMinor, "StyleFlagsModel");
+  qmlRegisterType<OverlayWay>(uri, versionMajor, versionMinor, "OverlayWay");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
