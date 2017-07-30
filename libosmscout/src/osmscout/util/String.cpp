@@ -549,7 +549,12 @@ namespace osmscout {
 #elif defined(HAVE_CODECVT)
   std::u32string UTF8StringToU32String(const std::string& text)
   {
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+    // See https://stackoverflow.com/questions/30765256/linker-error-using-vs-2015-rc-cant-find-symbol-related-to-stdcodecvt
+    std::wstring_convert<std::codecvt_utf8<__int32>, __int32> conv;
+#else
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
+#endif
 
     return conv.from_bytes(text);
   }
