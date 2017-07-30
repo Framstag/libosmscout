@@ -207,6 +207,8 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
 static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
 {
 #if defined(ROUTE_DEBUG)
+  unused(node);
+
   return true;
 #else
   if (node.HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
@@ -763,7 +765,7 @@ int main(int argc, char* argv[])
 
   profiles[0]=routingProfile;
   databases[0]=database;
-  
+
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  profiles,
                                                  databases,
