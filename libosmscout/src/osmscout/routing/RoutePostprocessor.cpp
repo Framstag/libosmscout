@@ -1616,14 +1616,19 @@ namespace osmscout {
       maxSpeedReaders[dbId]=new MaxSpeedFeatureValueReader(*typeConfig);
 
       // init types
+      motorwayTypes[dbId]; // insert empty TypeInfoSet
       for (const std::string &typeName:motorwayTypeNames){
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
         motorwayTypes[dbId].Set(type);
       }
+
+      motorwayLinkTypes[dbId]; // insert empty TypeInfoSet
       for (const std::string &typeName:motorwayLinkTypeNames){
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
         motorwayLinkTypes[dbId].Set(type);
       }
+      
+      junctionTypes[dbId]; // insert empty TypeInfoSet
       for (const std::string &typeName:junctionTypeNames){
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
         junctionTypes[dbId].Set(type);
