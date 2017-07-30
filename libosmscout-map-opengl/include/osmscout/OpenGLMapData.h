@@ -38,7 +38,11 @@ namespace osmscout {
   public:
     size_t width;
     size_t height;
+    size_t size;
     unsigned char *data;
+
+    size_t fromOriginY;
+
   };
 
   class OpenGLMapData {
@@ -127,13 +131,44 @@ namespace osmscout {
       textureWidth = textureWidthBuffer;
       textureWidthBuffer = 0;
 
+      textureHeight = 14;
+
       this->Textures = new unsigned char[textureWidth*textureHeight*4];
 
       int index = 0;
       for (int i = 0; i < textureHeight; i++) {
-        for (int j = 0; j < TexturesBuffer.size(); j++) {
+        for (unsigned int j = 0; j < TexturesBuffer.size(); j++) {
           int start = i * TexturesBuffer[j]->width * 4;
-          for (int k = start; k < start + (TexturesBuffer[j]->width * 4); k++) {
+          for (unsigned int k = start; k < start + (TexturesBuffer[j]->width * 4); k++) {
+            Textures[index] = (TexturesBuffer[j]->data[k]);
+            index++;
+          }
+        }
+      }
+
+      TexturesBuffer.clear();
+    }
+
+    void SwapData(int stride) {
+      this->Vertices.clear();
+      this->Vertices = this->VerticesBuffer;
+      this->VerticesBuffer.clear();
+      this->Elements.clear();
+      this->Elements = this->ElementsBuffer;
+      this->ElementsBuffer.clear();
+
+      textureSize = textureSizeBuffer;
+      textureSizeBuffer = 0;
+      textureWidth = textureWidthBuffer;
+      textureWidthBuffer = 0;
+
+      this->Textures = new unsigned char[textureWidth*textureHeight*stride];
+
+      int index = 0;
+      for (int i = 0; i < textureHeight; i++) {
+        for (unsigned int j = 0; j < TexturesBuffer.size(); j++) {
+          int start = i * TexturesBuffer[j]->width * stride;
+          for (unsigned int k = start; k < start + (TexturesBuffer[j]->width * stride); k++) {
             Textures[index] = (TexturesBuffer[j]->data[k]);
             index++;
           }
@@ -146,9 +181,10 @@ namespace osmscout {
     void clearData() {
       Vertices.clear();
       Elements.clear();
+      Textures = NULL;
+      TexturesBuffer.clear();
       textureSize = 0;
       textureWidth = 0;
-      textureHeight = 0;
     }
 
     void BindBuffers() {
@@ -167,6 +203,7 @@ namespace osmscout {
       textureSize = 0;
       textureSizeBuffer = 0;
       textureWidth = 0;
+      textureWidthBuffer = 0;
       textureHeight = 0;
 
       VertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -227,6 +264,17 @@ namespace osmscout {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
 
+    void LoadGreyTextures() {
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, Tex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, textureWidth, textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, Textures);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    }
+
     void LoadFragmentShader(std::string fileName) {
       FragmentShaderSource = this->LoadShader(fileName);
       FragmentShaderLength = FragmentShaderSource.length();
@@ -275,21 +323,16 @@ namespace osmscout {
       TexturesBuffer.push_back(texture);
 
       textureWidthBuffer += texture->width;
-      textureHeight = texture->height;
 
       textureSizeBuffer++;
-    }
-
-    int GetTextureBufferSize() {
-      return textureSizeBuffer;
     }
 
     int GetTextureWidth(){
       return textureWidth;
     }
 
-    int GetTextureBufferWidth(){
-      return textureWidthBuffer;
+    int GetTextureHeight(){
+      return textureHeight;
     }
 
     int GetTextureWidth(int index){
@@ -304,20 +347,16 @@ namespace osmscout {
       return sum;
     }
 
+    void SetTextureHeight(int textheight){
+      textureHeight = textheight;
+    }
+
     void SetModel() {
       GLuint uniform = glGetUniformLocation(shaderProgram, "Model");
       glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(Model));
     }
 
-    /*void ScaleModel(float zoomSize) {
-      scaleSize += zoomSize;
-      //scaleSize = zoomSize;
-      Model = glm::mat4(1.0f);
-      Model = glm::scale(Model, glm::vec3(scaleSize, scaleSize, scaleSize));
-      SetModel();
-    }*/
-
-    void SetView(float lookX, float lookY) {
+    void SetView(float /*lookX*/, float /*lookY*/) {
       View = glm::lookAt(
           glm::vec3(0.0, 0.0, 1.0f), //position
           glm::vec3(0.0f, 0.0f, 0.0f), //look
@@ -329,7 +368,6 @@ namespace osmscout {
 
     void SetProjection(float width, float height) {
       Projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.1f, 10.0f);
-      //Projection = glm::ortho(0.0f,(float) width, 0.0f, (float) height,0.1f, 10.0f);
       GLint uniProj = glGetUniformLocation(shaderProgram, "Projection");
       glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(Projection));
     }

@@ -186,7 +186,7 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found()
+if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found()
   buildMapOpenGL=true
 else
   buildMapOpenGL=false

@@ -30,6 +30,7 @@
 #include <osmscout/OpenGLMapData.h>
 
 #include <osmscout/private/MapOpenGLImportExport.h>
+#include <osmscout/TextLoader.h>
 
 namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL {
@@ -55,8 +56,9 @@ namespace osmscout {
     OpenGLMapData GroundRenderer;
     OpenGLMapData PathRenderer;
     OpenGLMapData ImageRenderer;
-    OpenGLMapData SymbolRenderer;
-    OpenGLMapData LabelRenderer;
+    OpenGLMapData TextRenderer;
+
+    TextLoader Textloader;
 
     osmscout::MapData MapData;
     osmscout::StyleConfigRef styleConfig;
@@ -79,11 +81,13 @@ namespace osmscout {
                          const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessNodeData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                          const osmscout::Projection &projection,
-                          const osmscout::StyleConfigRef &styleConfig);
+                         const osmscout::Projection &projection,
+                         const osmscout::StyleConfigRef &styleConfig);
 
   public:
-    MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
+    //MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
+
+    MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight, std::string fontPath);
 
     ~MapPainterOpenGL();
 
@@ -103,10 +107,6 @@ namespace osmscout {
     bool PixelToGeo(double x, double y, double &lon, double &lat);
 
     bool IsVisibleArea(const Projection& projection, const GeoBox& boundingBox, double pixelOffset);
-
-    //osmscout::GeoCoord PixelToGeo(double x, double y);
-
-    //osmscout::Vertex2D GeoToPixel(osmscout::GeoCoord gc);
 
   };
 }

@@ -28,14 +28,16 @@
 
 namespace osmscout {
 
-  osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight)
+  osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight,
+                                               std::string fontPath)
       : width(width),
         height(height),
         dpi(dpi),
         screenWidth(
             screenWidth),
         screenHeight(
-            screenHeight) {
+            screenHeight),
+        Textloader(fontPath) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -79,6 +81,14 @@ namespace osmscout {
       return;
     }
 
+    TextRenderer.LoadVertexShader("TextVertexShader.vert");
+    TextRenderer.LoadFragmentShader("TextFragmentShader.frag");
+    success = TextRenderer.InitContext();
+    if (!success) {
+      std::cerr << "Could not initialize context for text rendering!" << std::endl;
+      return;
+    }
+
     AreaRenderer.clearData();
     AreaRenderer.SetVerticesSize(5);
     GroundTileRenderer.clearData();
@@ -89,6 +99,10 @@ namespace osmscout {
     PathRenderer.SetVerticesSize(11);
     ImageRenderer.clearData();
     ImageRenderer.SetVerticesSize(5);
+    ImageRenderer.SetTextureHeight(7);
+    TextRenderer.clearData();
+    TextRenderer.SetVerticesSize(11);
+    TextRenderer.SetTextureHeight(Textloader.GetHeight());
   }
 
   void osmscout::MapPainterOpenGL::LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
@@ -214,6 +228,38 @@ namespace osmscout {
     ImageRenderer.SetModel();
     ImageRenderer.SetView(lookX, lookY);
     ImageRenderer.Draw();
+
+    //Text
+    TextRenderer.SwapData(1);
+
+    TextRenderer.BindBuffers();
+    TextRenderer.LoadProgram();
+    TextRenderer.LoadVertices();
+    TextRenderer.SetTextureHeight(Textloader.GetHeight());
+    TextRenderer.LoadGreyTextures();
+
+    TextRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    TextRenderer.AddAttrib("color", 4, GL_FLOAT, 2 * sizeof(GLfloat));
+    TextRenderer.AddAttrib("index", 1, GL_FLOAT, 6 * sizeof(GLfloat));
+    TextRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 7 * sizeof(GLfloat));
+    TextRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 8 * sizeof(GLfloat));
+    TextRenderer.AddAttrib("positionOffset", 1, GL_FLOAT, 9 * sizeof(GLfloat));
+    TextRenderer.AddAttrib("fontSize", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+    TextRenderer.AddUniform("windowWidth", width);
+    TextRenderer.AddUniform("windowHeight", height);
+    TextRenderer.AddUniform("centerLat", Center.GetLat());
+    TextRenderer.AddUniform("centerLon", Center.GetLon());
+    TextRenderer.AddUniform("textureHeight", TextRenderer.GetTextureHeight());
+    TextRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    TextRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
+    TextRenderer.AddUniform("dpi", dpi);
+
+    TextRenderer.SetProjection(width, height);
+    TextRenderer.SetModel();
+    TextRenderer.SetView(lookX, lookY);
+    TextRenderer.Draw();
+
+
   }
 
   void
@@ -293,17 +339,17 @@ namespace osmscout {
           if (p.size() < 3)
             continue;
 
-          if(!osmscout::AreaIsSimple(p))
+          if (!osmscout::AreaIsSimple(p))
             continue;
 
           osmscout::GeoBox ringBoundingBox;
           ring.GetBoundingBox(ringBoundingBox);
 
-          double  borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
+          double borderWidth = borderStyle ? borderStyle->GetWidth() : 0.0;
 
           if (!IsVisibleArea(projection,
                              ringBoundingBox,
-                             borderWidth/2.0))
+                             borderWidth / 2.0))
             continue;
 
           size_t j = i + 1;
@@ -369,9 +415,8 @@ namespace osmscout {
     }
   }
 
-  bool osmscout::MapPainterOpenGL::IsVisibleArea(const Projection& projection, const GeoBox& boundingBox,
-                                 double pixelOffset)
-  {
+  bool osmscout::MapPainterOpenGL::IsVisibleArea(const Projection &projection, const GeoBox &boundingBox,
+                                                 double pixelOffset) {
     double x1;
     double x2;
     double y1;
@@ -385,24 +430,24 @@ namespace osmscout {
                           x2,
                           y2);
 
-    double xMin=std::min(x1,x2)-pixelOffset;
-    double xMax=std::max(x1,x2)+pixelOffset;
-    double yMin=std::min(y1,y2)-pixelOffset;
-    double yMax=std::max(y1,y2)+pixelOffset;
+    double xMin = std::min(x1, x2) - pixelOffset;
+    double xMax = std::max(x1, x2) + pixelOffset;
+    double yMin = std::min(y1, y2) - pixelOffset;
+    double yMax = std::max(y1, y2) + pixelOffset;
 
     osmscout::GeoBox gb;
     projection.GetDimensions(gb);
-    double areaMinDimension=projection.ConvertWidthToPixel(Parameter.GetAreaMinDimensionMM());
+    double areaMinDimension = projection.ConvertWidthToPixel(Parameter.GetAreaMinDimensionMM());
 
-    if (xMax-xMin<=areaMinDimension &&
-        yMax-yMin<=areaMinDimension) {
+    if (xMax - xMin <= areaMinDimension &&
+        yMax - yMin <= areaMinDimension) {
       return false;
     }
 
-    return !(xMin>=projection.GetWidth() ||
-             yMin>=projection.GetHeight() ||
-             xMax<0 ||
-             yMax<0);
+    return !(xMin >= projection.GetWidth() ||
+             yMin >= projection.GetHeight() ||
+             xMax < 0 ||
+             yMax < 0);
   }
 
   void
@@ -713,6 +758,7 @@ namespace osmscout {
 
     std::vector<int> icons;
     for (const auto &node: data.nodes) {
+      FeatureValueBuffer buffer = node->GetFeatureValueBuffer();
       IconStyleRef iconStyle;
       styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                     projection,
@@ -727,7 +773,7 @@ namespace osmscout {
         //has icon?
         bool hasIcon = false;
         OpenGLTexture *image;
-        int IconIndex;
+        int IconIndex = 0;
         for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
              path != parameter.GetIconPaths().end();
              ++path) {
@@ -735,7 +781,7 @@ namespace osmscout {
 
           int id = iconStyle->GetIconId();
           bool loaded = false;
-          for(int i = 0; i < icons.size(); i++) {
+          for (unsigned int i = 0; i < icons.size(); i++) {
             if (id == icons[i]) {
               IconIndex = i;
               hasIcon = true;
@@ -744,7 +790,7 @@ namespace osmscout {
             }
           }
 
-          if(loaded)
+          if (loaded)
             break;
 
           image = osmscout::LoadPNGOpenGL(filename);
@@ -753,7 +799,7 @@ namespace osmscout {
             ImageRenderer.AddNewTexture(image);
             icons.push_back(id);
             hasIcon = true;
-            IconIndex = icons.size()-1;
+            IconIndex = icons.size() - 1;
             break;
           }
         }
@@ -873,7 +919,78 @@ namespace osmscout {
           }
         }
       }
+
+      for (const auto textStyle : textStyles) {
+        std::string label = textStyle->GetLabel()->GetLabel(parameter,
+                                                            buffer);
+
+        if (label.empty()) {
+          continue;
+        }
+
+        double alpha = 1.0;
+        double fontSize = 1.0;
+
+        if (projection.GetMagnification() > textStyle->GetScaleAndFadeMag() &&
+            parameter.GetDrawFadings()) {
+          double factor = projection.GetMagnification().GetLevel() - textStyle->GetScaleAndFadeMag().GetLevel();
+          fontSize = textStyle->GetSize() * pow(1.5, factor);
+          alpha = std::min(textStyle->GetAlpha() / factor, 1.0);
+
+        } else if (textStyle->GetAutoSize()) {
+          alpha = textStyle->GetAlpha();
+          //TODO
+          continue;
+        } else {
+          fontSize = textStyle->GetSize();
+          alpha = textStyle->GetAlpha();
+        }
+
+        Color color = textStyle->GetTextColor();
+        std::vector<int> textureAtlasIndices = Textloader.AddCharactersToTextureAtlas(label);
+        int widthSum = 0;
+        for (int index: textureAtlasIndices) {
+          osmscout::GeoCoord coords = node->GetCoords();
+          size_t textureWidth = Textloader.GetWidth(index);
+          size_t startWidth = Textloader.GetStartWidth(index);
+
+          int shaderIndices[] = {1, 2, 3, 3, 1, 4};
+          for (int i: shaderIndices) {
+            TextRenderer.AddNewVertex(coords.GetLon());
+            TextRenderer.AddNewVertex(coords.GetLat());
+            TextRenderer.AddNewVertex(color.GetR());
+            TextRenderer.AddNewVertex(color.GetG());
+            TextRenderer.AddNewVertex(color.GetB());
+            TextRenderer.AddNewVertex(alpha);
+            TextRenderer.AddNewVertex(i);
+            TextRenderer.AddNewVertex(startWidth);
+            TextRenderer.AddNewVertex(textureWidth);
+            TextRenderer.AddNewVertex(widthSum);
+            TextRenderer.AddNewVertex(fontSize);
+          }
+
+          widthSum += textureWidth + 1;
+
+          int num;
+          if (TextRenderer.GetNumOfVertices() <= 60) {
+            num = 0;
+          } else {
+            num = TextRenderer.GetVerticesNumber() - 6;
+          }
+          TextRenderer.AddNewElement(num);
+          TextRenderer.AddNewElement(num + 1);
+          TextRenderer.AddNewElement(num + 2);
+          TextRenderer.AddNewElement(num + 3);
+          TextRenderer.AddNewElement(num + 4);
+          TextRenderer.AddNewElement(num + 5);
+
+        }
+      }
     }
+
+    OpenGLTexture *t = Textloader.CreateTexture();
+    TextRenderer.AddNewTexture(t);
+
   }
 
   void osmscout::MapPainterOpenGL::OnZoom(float zoomDirection) {
@@ -893,70 +1010,6 @@ namespace osmscout {
     GeoCoord g = osmscout::GeoCoord(Center.GetLat() + offsetY / 2, Center.GetLon() + offsetX / 2);
     Center = g;
   }
-
-  /*glm::vec4
-  osmscout::MapPainterOpenGL::GeoToOpenGLPixel(osmscout::GeoCoord gc) {
-    float PI = 3.1415926535897;
-    float R = 6378137.0;
-    double tlLat;
-    double tlLon;
-    PixelToGeoOrig(0.0, 0.0, tlLon, tlLat);
-    double trLat;
-    double trLon;
-    PixelToGeoOrig((double) width, 0.0, trLon, trLat);
-    double blLat;
-    double blLon;
-    PixelToGeoOrig(0.0, (double) height, blLon, blLat);
-    double brLat;
-    double brLon;
-    PixelToGeoOrig((double) width, (double) height, brLon, brLat);
-    double MaxLat = +85.0511;
-    double MinLat = -85.0511;
-    double MaxLon = +180.0;
-    double MinLon = -180.0;
-    float latMin = std::max(MinLat, std::min(std::min(tlLat, trLat), std::min(blLat, brLat)));
-    float latMax = std::min(MaxLat, std::max(std::max(tlLat, trLat), std::max(blLat, brLat)));
-    float lonMin = std::max(MinLon, std::min(std::min(tlLon, trLon), std::min(blLon, brLon)));
-    float lonMax = std::min(MaxLon, std::max(std::max(tlLon, trLon), std::max(blLon, brLon)));
-    float tileDPI = 96.0;
-    float gradtorad = 2 * M_PI / 360;
-    float earthRadiusMeter = 6378137.0;
-    float earthExtentMeter = 2 * M_PI * earthRadiusMeter;
-    float tileWidthZoom0Aquator = earthExtentMeter;
-    float equatorTileWidth = tileWidthZoom0Aquator / Magnification.GetMagnification();
-    float equatorTileResolution = equatorTileWidth / 256.0;
-    float equatorCorrectedEquatorTileResolution = equatorTileResolution * tileDPI / 96;
-    float groundWidthEquatorMeter = width * equatorCorrectedEquatorTileResolution;
-    float groundWidthVisibleMeter = groundWidthEquatorMeter * cos(gc.GetLat() * gradtorad);
-    float scale = width / (2 * M_PI * groundWidthEquatorMeter / earthExtentMeter);
-    float scaleGradtorad = scale * gradtorad;
-    float latOffset = atanh(sin(Center.GetLat() * gradtorad));
-    double latDeriv = 1.0 / sin((2 * Center.GetLat() * gradtorad + M_PI) / 2);
-    float scaledLatDeriv = latDeriv * gradtorad * scale;
-    float x2 = (gc.GetLon() - Center.GetLon()) * scaledLatDeriv;
-    float y2 = (atanh(sin(gc.GetLat() * gradtorad)) - latOffset) * scale;
-    y2 = height / 2 - y2;
-    x2 += width / 2;
-    float deg_rad = 180 / PI;
-    float minLat_m = (std::log(tan((minLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-    float maxLat_m = (std::log(tan((maxLat / deg_rad) / 2 + PI / 4))) * deg_rad;
-
-    float minx = (lonMin - Center.GetLon()) * scaledLatDeriv + width / 2;
-    float miny = height / 2 - (atanh(sin(latMin * gradtorad)) - latOffset) * scale;
-    float maxx = (lonMax - Center.GetLon()) * scaledLatDeriv + width / 2;
-    float maxy = height / 2 - (atanh(sin(latMax * gradtorad)) - latOffset) * scale;
-
-    float x_width = width / height;
-    float y_height = 1;
-
-    float x3 = ((2 * x_width) * (x2 - (minx)) / ((maxx) - (minx))) - x_width;
-    float y3 = ((2 * y_height) * (y2 - (miny)) / ((maxy) - (miny))) - y_height;
-
-    glm::vec4 pixelPos = glm::vec4(x3, y3, 0.0, 1.0);
-    pixelPos = AreaRenderer.GetProjection() * AreaRenderer.GetView() * AreaRenderer.GetModel() * pixelPos;
-
-    return pixelPos;
-  }*/
 
   bool osmscout::MapPainterOpenGL::PixelToGeo(double x, double y,
                                               double &lon, double &lat) {
@@ -982,32 +1035,6 @@ namespace osmscout {
 
     return true;
   }
-
-  /*osmscout::GeoCoord osmscout::MapPainterOpenGL::PixelToGeo(double x, double y) {
-    double tileDPI = 96.0;
-    double gradtorad = 2 * M_PI / 360;
-    double earthRadiusMeter = 6378137.0;
-    double earthExtentMeter = 2 * M_PI * earthRadiusMeter;
-    double tileWidthZoom0Aquator = earthExtentMeter;
-    double equatorTileWidth = tileWidthZoom0Aquator / Magnification.GetMagnification();
-    double equatorTileResolution = equatorTileWidth / 256.0;
-    double equatorCorrectedEquatorTileResolution = equatorTileResolution * tileDPI / dpi;
-    double groundWidthEquatorMeter = width * equatorCorrectedEquatorTileResolution;
-
-    double scale = width / (2 * M_PI * groundWidthEquatorMeter / earthExtentMeter);
-    double scaleGradtorad = scale * gradtorad;
-
-    double latOffset = atanh(sin(Center.GetLat() * gradtorad));
-
-    x -= width / 2;
-    y = height / 2 - y;
-
-    double lon = Center.GetLon() + x / scaleGradtorad;
-    double lat = atan(sinh(y / scale + latOffset)) / gradtorad;
-
-    osmscout::GeoCoord result = osmscout::GeoCoord(lat, lon);
-    return (result);
-  }*/
 
   osmscout::GeoCoord osmscout::MapPainterOpenGL::GetCenter() {
     return Center;
@@ -1104,6 +1131,24 @@ namespace osmscout {
     ImageRenderer.SetModel();
     ImageRenderer.SetView(lookX, lookY);
     ImageRenderer.Draw();
+
+    glBindVertexArray(TextRenderer.getVAO());
+    glBindTexture(GL_TEXTURE_2D, TextRenderer.GetTexture());
+    glUseProgram(TextRenderer.getShaderProgram());
+
+    TextRenderer.AddUniform("windowWidth", width);
+    TextRenderer.AddUniform("windowHeight", height);
+    TextRenderer.AddUniform("centerLat", Center.GetLat());
+    TextRenderer.AddUniform("centerLon", Center.GetLon());
+    TextRenderer.AddUniform("textureHeight", TextRenderer.GetTextureHeight());
+    TextRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    TextRenderer.AddUniform("textureWidthSum", TextRenderer.GetTextureWidth());
+    TextRenderer.AddUniform("dpi", dpi);
+
+    TextRenderer.SetProjection(width, height);
+    TextRenderer.SetModel();
+    TextRenderer.SetView(lookX, lookY);
+    TextRenderer.Draw();
 
   }
 
