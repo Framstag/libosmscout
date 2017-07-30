@@ -35,6 +35,7 @@ struct Arguments {
   std::string iconDirectory;
   size_t width;
   size_t height;
+  std::string fontPath;
   Arguments()
       : help(false) {
     // no code
@@ -142,7 +143,7 @@ static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int acti
   }
 
   lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-          std::chrono::steady_clock::now().time_since_epoch()).count();
+      std::chrono::steady_clock::now().time_since_epoch()).count();
 
 }
 
@@ -206,6 +207,13 @@ int main(int argc, char *argv[]) {
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.fontPath=value;
+                      }),
+                      "font",
+                      "Font file (.ttf)",
+                      false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
                             args.databaseDirectory = value;
                           }),
@@ -235,6 +243,7 @@ int main(int argc, char *argv[]) {
                           }),
                           "HEIGHT",
                           "Height of the window");
+
 
   osmscout::CmdLineParseResult cmdResult = argParser.Parse();
 
@@ -271,7 +280,7 @@ int main(int argc, char *argv[]) {
   paths.push_back(args.iconDirectory);
   drawParameter.SetIconPaths(paths);
   center = boundingBox.GetCenter();
-  level = 5;
+  level = 6;
   magnification.SetLevel(level);
 
   projection.Set(center,
@@ -316,7 +325,7 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
-  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight);
+  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath);
   renderer->LoadData(data, drawParameter, projection, styleConfig);
   renderer->SwapData();
   unsigned long long currentTime;
