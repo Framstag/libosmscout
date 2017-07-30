@@ -65,6 +65,15 @@ if test "x$ac_cv_header_GLUT_glut_h" = xyes; then
             [GLUT is defined by header GLUT/glut.h])
 fi
 
+PKG_CHECK_MODULES(LIBFREETYPE, [freetype2],
+                  HASLIBFREETYPE=true
+                  [AC_SUBST(LIBFREETYPE_CFLAGS)
+                   AC_SUBST(LIBFREETYPE_LIBS)
+                   AC_DEFINE(HAVE_LIB_FREETYPE,1,[libfreetype found])],
+                   [HASFREETYPE=false])
+
+AM_CONDITIONAL(HAVE_LIB_FREETYPE,[test "$HASLIBFREETYPE" = "true"])
+
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AX_CREATE_PKGCONFIG_INFO([],
