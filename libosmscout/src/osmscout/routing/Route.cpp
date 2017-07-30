@@ -415,7 +415,7 @@ namespace osmscout {
 
   std::string RouteDescription::MaxSpeedDescription::GetDebugString() const
   {
-    return std::string("Max. Speed")+NumberToString(maxSpeed)+"km/h";
+    return std::string("Max. speed ")+NumberToString(maxSpeed)+"km/h";
   }
 
   RouteDescription::Node::Node(DatabaseId database,
