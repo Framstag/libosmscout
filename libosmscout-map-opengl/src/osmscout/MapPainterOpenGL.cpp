@@ -264,7 +264,7 @@ namespace osmscout {
 
   void
   osmscout::MapPainterOpenGL::ProcessAreaData(const osmscout::MapData &data,
-                                              const osmscout::MapParameter &parameter,
+                                              const osmscout::MapParameter &/*parameter*/,
                                               const osmscout::Projection &projection,
                                               const osmscout::StyleConfigRef &styleConfig) {
 

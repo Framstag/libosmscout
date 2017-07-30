@@ -176,16 +176,6 @@ namespace osmscout {
       ::f(number);
   }
 
-  /**
-   * \ingroup Util
-   */
-  extern OSMSCOUT_API bool StringToNumber(const char* string, double& value);
-
-  /**
-   * \ingroup Util
-   */
-  extern OSMSCOUT_API bool StringToNumber(const std::string& string, double& value);
-
   template<typename N>
   bool StringToNumberSigned(const std::string& string,
                             N& number,
@@ -367,8 +357,14 @@ namespace osmscout {
       ::f(string,number,base);
   }
 
-
+  /**
+   * \ingroup Util
+   */
   extern OSMSCOUT_API bool StringToNumber(const char* string, double& value);
+
+  /**
+   * \ingroup Util
+   */
   extern OSMSCOUT_API bool StringToNumber(const std::string& string, double& value);
 
   /**
