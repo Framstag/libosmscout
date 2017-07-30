@@ -58,6 +58,7 @@ fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
 iconvAvailable = compiler.has_header('iconv.h')
 codecvtAvailable = compiler.has_header('codecvt')
+codecvtAvailable = compiler.has_header('jni.h')
 
 # Check for header symbols
 sharedMutexAvailable = compiler.has_header_symbol('shared_mutex','shared_mutex', prefix: 'using namespace std;')
@@ -135,7 +136,7 @@ d2d1Dep = compiler.find_library('d2d1', required: false)
 dwriteDep = compiler.find_library('dwrite', required: false)
 winCodecsDep = compiler.find_library('Windowscodecs', required: false)
 d2dlHeaderAvailable = compiler.has_header('d2d1.h')
-  
+
 # Qt
 qt5 = import('qt5')
 qt5GuiDep = dependency('qt5', modules: [ 'Core', 'Gui'], required: false)
@@ -212,10 +213,18 @@ if d2d1Dep.found() and dwriteDep.found() and winCodecsDep.found() and d2dlHeader
   buildMapDirectX=true
 else
   buildMapDirectX=false
-endif  
+endif
 
 # iOSX
 buildMapIOSX=build_machine.system()=='darwin'
+
+# Binding
+
+if swigExe.found()
+  buildBinding=true
+else
+  buildBinding=false
+endif
 
 buildOSMScout2=buildMapQt and buildClientQt and qt5SvgDep.found()
 buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
@@ -237,6 +246,7 @@ message('Demos:                   @0@'.format(true))
 message('DumpData:                @0@'.format(true))
 message('OSMScout2:               @0@'.format(buildOSMScout2))
 message('StyleEditor:             @0@'.format(buildStyleEditor))
+message('libosmscout-binding:     @0@'.format(buildBinding))
 message('Tests:                   @0@'.format(true))
 
 subdir('libosmscout')
@@ -284,8 +294,12 @@ if buildMapQt and buildClientQt and qt5SvgDep.found()
   subdir('StyleEditor')
 endif
 
-if buildMapOpenGL and glfwDep.found()
+if buildMapOpenGL and glfwDep.found() and ftDep.found()
   subdir('OSMScoutOpenGL')
 endif
 
 subdir('Tests')
+
+if buildBinding
+#  subdir('libosmscout-binding')
+endif
