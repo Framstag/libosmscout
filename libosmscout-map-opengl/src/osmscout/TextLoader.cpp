@@ -17,9 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <iostream>
 #include <osmscout/TextLoader.h>
-#include <codecvt>
+
+#include <iostream>
 #include <locale>
 
 namespace osmscout {
@@ -35,8 +35,7 @@ namespace osmscout {
   std::vector<int> TextLoader::AddCharactersToTextureAtlas(std::string text) {
     std::vector<int> indices;
 
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-    std::u32string utf32 = cvt.from_bytes(text);
+    std::u32string utf32=UTF8StringToU32String(text);
 
     for (char32_t &i : utf32) {
 
