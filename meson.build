@@ -58,7 +58,7 @@ fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
 iconvAvailable = compiler.has_header('iconv.h')
 codecvtAvailable = compiler.has_header('codecvt')
-codecvtAvailable = compiler.has_header('jni.h')
+jniAvailable = compiler.has_header('jni.h')
 
 # Check for header symbols
 sharedMutexAvailable = compiler.has_header_symbol('shared_mutex','shared_mutex', prefix: 'using namespace std;')
