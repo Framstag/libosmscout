@@ -334,9 +334,9 @@ namespace osmscout {
                                      std::map<DatabaseId,RoutingProfileRef> &profiles,
                                      std::map<DatabaseId,DatabaseRef>& databases,
                                      std::list<PostprocessorRef> processors,
-                                     std::set<std::string> motorwayTypeNames,
-                                     std::set<std::string> motorwayLinkTypeNames,
-                                     std::set<std::string> junctionTypeNames);
+                                     std::set<std::string> motorwayTypeNames=std::set<std::string>(),
+                                     std::set<std::string> motorwayLinkTypeNames=std::set<std::string>(),
+                                     std::set<std::string> junctionTypeNames=std::set<std::string>());
   };
 }
 
