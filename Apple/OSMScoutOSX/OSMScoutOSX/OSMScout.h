@@ -15,7 +15,7 @@
 #include <osmscout/Tag.h>
 #include <osmscout/WayDataFile.h>
 #include <osmscout/util/Geometry.h>
-#include <osmscout/RoutePostprocessor.h>
+#include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/MapPainterIOS.h>
 #include <osmscout/MapService.h>
