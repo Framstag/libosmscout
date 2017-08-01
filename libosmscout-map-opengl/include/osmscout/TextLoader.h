@@ -33,6 +33,7 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_OPENGL_API TextLoader {
   private:
+    FT_Library ft;
     FT_Face face;
 
     long height;

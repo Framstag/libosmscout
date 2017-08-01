@@ -25,6 +25,9 @@
 namespace osmscout {
 
   TextLoader::TextLoader(std::string path) {
+    if (FT_Init_FreeType(&ft))
+      std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+
     sumwidth = 0;
     if(path.empty())
       LoadFace();
@@ -127,8 +130,8 @@ namespace osmscout {
     std::string dirPath = filePath.substr(0, filePath.rfind("/src"));
 #endif
 
-    //std::string fontPath = dirPath + "/data/fonts/arial.ttf";
-    std::string fontPath = "";
+    //Liberation Sans is licensed under SIL Open Font License (OFL)
+    std::string fontPath = dirPath + "/data/fonts/LiberationSans-Regular.ttf";
     const char *path = fontPath.c_str();
 
     if (FT_New_Face(ft, path, 0, &face))
@@ -145,15 +148,14 @@ namespace osmscout {
   }
 
   void TextLoader::LoadFace(std::string path) {
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft))
-      std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-
     std::string fontPath = path;
     const char *pathCstr = fontPath.c_str();
 
-    if (FT_New_Face(ft, pathCstr, 0, &face))
-      std::cout << "ERROR::FREETYPE: Failed to load font from path" << std::endl;
+    if (FT_New_Face(ft, pathCstr, 0, &face)) {
+      std::cout << "ERROR::FREETYPE: Failed to load font from path. Loading default font." << std::endl;
+      LoadFace();
+      return;
+    }
 
     FT_Set_Char_Size(face, 10 << 6, 10 << 6, 96, 96);
 
