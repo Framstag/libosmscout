@@ -23,7 +23,7 @@
 #include <limits>
 
 #include <osmscout/GeoCoord.h>
-#include <osmscout/Route.h>
+#include <osmscout/routing/Route.h>
 
 #include <osmscout/util/Geometry.h>
 

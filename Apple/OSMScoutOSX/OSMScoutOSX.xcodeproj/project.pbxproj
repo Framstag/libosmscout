@@ -16,6 +16,7 @@
 		E50B856815E0219200C685B3 /* OSMScoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B856715E0219200C685B3 /* OSMScoutViewController.m */; };
 		E50B856B15E021DD00C685B3 /* OSMScoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B856A15E021DD00C685B3 /* OSMScoutView.m */; };
 		E50B856E15E024D400C685B3 /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
+		E55CFDAD1F2FAD95004AAA59 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */; };
 		F50CBE8A15E59EAC00F0B370 /* bus_stop.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8315E59EAC00F0B370 /* bus_stop.png */; };
 		F50CBE8B15E59EAC00F0B370 /* cemetery.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8415E59EAC00F0B370 /* cemetery.png */; };
 		F50CBE8C15E59EAC00F0B370 /* forest.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8515E59EAC00F0B370 /* forest.png */; };
@@ -166,6 +167,7 @@
 		E50B856A15E021DD00C685B3 /* OSMScoutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSMScoutView.m; sourceTree = "<group>"; };
 		E50B856D15E024D400C685B3 /* OSMScout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OSMScout.mm; path = OSMScoutOSX/OSMScout.mm; sourceTree = "<group>"; };
 		E50B856F15E029A800C685B3 /* OSMScout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OSMScout.h; path = OSMScoutOSX/OSMScout.h; sourceTree = "<group>"; };
+		E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		E5A61D4615E0612D0078BD02 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		F50CBE8315E59EAC00F0B370 /* bus_stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bus_stop.png; sourceTree = "<group>"; };
 		F50CBE8415E59EAC00F0B370 /* cemetery.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cemetery.png; sourceTree = "<group>"; };
@@ -209,6 +211,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E55CFDAD1F2FAD95004AAA59 /* libiconv.tbd in Frameworks */,
 				F53BD1A2163885E9006C7AE1 /* libosmscout-OSX.a in Frameworks */,
 				F53BD1A3163885ED006C7AE1 /* libosmscoutmap-OSX.a in Frameworks */,
 				F53BD1A4163885F3006C7AE1 /* libosmscoutmapiosx-OSX.a in Frameworks */,
@@ -263,6 +266,7 @@
 		E50B832015E0136800C685B3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */,
 				F539E72F188834C300059073 /* CoreLocation.framework */,
 				F539E72D188831A800059073 /* CoreLocation.framework */,
 				F539E72B18882EEB00059073 /* MapKit.framework */,
