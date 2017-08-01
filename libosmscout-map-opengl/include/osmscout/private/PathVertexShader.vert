@@ -6,6 +6,7 @@ in vec2 next;
 in vec3 color;
 in float index;
 in float thickness;
+out vec2 Normal;
 out vec3 Color;
 uniform mat4 Model;
 uniform mat4 View;
@@ -109,7 +110,9 @@ vec2 GeoToPixel(in float posx, in float posy){
 
 void main() {
     Color = color;
-    float thickness_norm = ceil(thickness)/windowWidth;
+
+    //+0.001 so lines dont disappear because of anti-aliasing
+    float thickness_norm = (ceil(thickness)/windowWidth)+0.001;
 
     vec2 n = GeoToPixel(next.x, next.y);
     vec2 c = GeoToPixel(position.x, position.y);
@@ -128,44 +131,52 @@ void main() {
         float ny = (n.y - c.y);
         normal = normalize(vec2(ny, -nx));
         result = normal;
+        Normal = normal;
     }
 	else if(index == 2.0){
     	float nx = (n.x - c.x);
         float ny = (n.y - c.y);
         normal = normalize(vec2(-ny, nx));
         result = normal;
+        Normal = normal;
 	}
 	else if(index == 3.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(tangent.y, -tangent.x);
         result = miter;
+        Normal = miter;
 	}
 	else if(index == 4.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(-tangent.y, tangent.x);
         result = miter;
+        Normal = miter;
 	}
 	else if(index == 5.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(tangent.y, -tangent.x);
         result = miter;
+        Normal = miter;
 	}
 	else if(index == 6.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(-tangent.y, tangent.x);
         result = miter;
+        Normal = miter;
 	}
 	else if(index == 7.0){
 	    float nx = (c.x - p.x);
         float ny = (c.y - p.y);
         normal = normalize(vec2(ny, -nx));
         result = normal;
+        Normal = normal;
 	}
 	else{
 	    float nx = (c.x - p.x);
         float ny = (c.y - p.y);
         normal = normalize(vec2(-ny, nx));
         result = normal;
+        Normal = normal;
 	}
 
     vec4 delta = vec4(result * thickness_norm, 0, 0);
