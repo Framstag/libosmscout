@@ -147,6 +147,22 @@ int RoutingListModel::rowCount(const QModelIndex& ) const
   return route->routeSteps.size();
 }
 
+double RoutingListModel::getRouteLength() const
+{
+  if (!route || route->routeDescription.Nodes().empty()){
+    return 0;
+  }
+  return route->routeDescription.Nodes().back().GetDistance() * 1000;
+}
+
+double RoutingListModel::getRouteDuration() const
+{
+  if (!route || route->routeDescription.Nodes().empty()){
+    return 0;
+  }
+  return route->routeDescription.Nodes().back().GetTime() * 3600;
+}
+
 QVariant RoutingListModel::data(const QModelIndex &index, int role) const
 {
     if(!route || index.row() < 0 || index.row() >= route->routeSteps.size()) {
