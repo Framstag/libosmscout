@@ -24,15 +24,20 @@
 #include <iostream>
 #include <osmscout/MapPainter.h>
 
-namespace osmscout {
+namespace osmscout{
+
   class Triangulate {
   public:
 
     static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::Point> points);
 
+    static std::vector<std::vector<osmscout::Point>> TriangulateP(std::vector<osmscout::Point> points);
+
     static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::Vertex2D> points);
 
     static std::vector<GLfloat> TriangulatePolygon(std::vector<osmscout::GeoCoord> points);
+
+    static void TriangulatePolygon(std::vector<osmscout::Point> points, std::vector<osmscout::Point>  &result);
 
     static std::vector<GLfloat> TriangulateWithHoles(std::vector<std::vector<osmscout::Point>> points);
 

@@ -69,6 +69,16 @@ namespace osmscout {
     osmscout::GeoCoord Center;
     osmscout::Magnification Magnification;
 
+  public:
+    //MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
+
+    MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight, std::string fontPath);
+
+    ~MapPainterOpenGL();
+
+    void LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+                  const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
+
 
     void ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
@@ -83,16 +93,6 @@ namespace osmscout {
     void ProcessNodeData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
-
-  public:
-    //MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
-
-    MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight, std::string fontPath);
-
-    ~MapPainterOpenGL();
-
-    void LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                  const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
     void SwapData();
 
