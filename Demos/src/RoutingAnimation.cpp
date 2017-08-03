@@ -186,10 +186,13 @@ public:
     osmscout::RouteNodeRef n2;
 
     QString output=(directory + "/" + QString("%1").arg(frameCounter, 7, 10, QChar('0')) + ".png");
-    qDebug() << "Store frame " << output;
+    qDebug() << "Store frame " << output << "(step" << stepCounter << ")";
 
     QPixmap copy=*pixmap;
     QPainter painter(&copy);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
 
     QColor green  =QColor::fromRgbF(0,1,0, 0.8);
     QColor red    =QColor::fromRgbF(1,0,0, 0.8);
@@ -424,6 +427,13 @@ int main(int argc, char* argv[])
                       }),
                       "zoom",
                       "zoom level of animation frames (default 16)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                        args.center=value;
+                      }),
+                      "center",
+                      "geographical center of animation frames (default start position)",
                       false);
 
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
