@@ -89,14 +89,6 @@ namespace osmscout {
       return;
     }
 
-    CircleRenderer.LoadVertexShader("CircleVertexShader.vert");
-    CircleRenderer.LoadFragmentShader("CircleFragmentShader.frag");
-    success = CircleRenderer.InitContext();
-    if (!success) {
-      std::cerr << "Could not initialize context for circle rendering!" << std::endl;
-      return;
-    }
-
     AreaRenderer.clearData();
     AreaRenderer.SetVerticesSize(5);
     GroundTileRenderer.clearData();
@@ -104,7 +96,6 @@ namespace osmscout {
     GroundRenderer.clearData();
     GroundRenderer.SetVerticesSize(5);
     PathRenderer.clearData();
-    //PathRenderer.SetVerticesSize(11);
     PathRenderer.SetVerticesSize(14);
     ImageRenderer.clearData();
     ImageRenderer.SetVerticesSize(5);
@@ -112,11 +103,6 @@ namespace osmscout {
     TextRenderer.clearData();
     TextRenderer.SetVerticesSize(11);
     TextRenderer.SetTextureHeight(Textloader.GetHeight());
-
-    CircleRenderer.clearData();
-    //CircleRenderer.SetVerticesSize(7);
-    CircleRenderer.SetVerticesSize(6);
-
   }
 
   void osmscout::MapPainterOpenGL::LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
@@ -131,11 +117,11 @@ namespace osmscout {
 
     ProcessAreaData(data, parameter, projection, styleConfig);
 
-    //ProcessGroundData(data, parameter, projection, styleConfig);
+    ProcessGroundData(data, parameter, projection, styleConfig);
 
     ProcessPathData(data, parameter, projection, styleConfig);
 
-    //ProcessNodeData(data, parameter, projection, styleConfig);
+    ProcessNodeData(data, parameter, projection, styleConfig);
   }
 
   void osmscout::MapPainterOpenGL::SwapData() {
@@ -221,28 +207,6 @@ namespace osmscout {
     PathRenderer.AddUniform("magnification", Magnification.GetMagnification());
     PathRenderer.AddUniform("dpi", dpi);
 
-
-    CircleRenderer.SwapData();
-
-    CircleRenderer.BindBuffers();
-    CircleRenderer.LoadProgram();
-    CircleRenderer.LoadVertices();
-
-    CircleRenderer.SetProjection(width, height);
-    CircleRenderer.SetModel();
-    CircleRenderer.SetView(lookX, lookY);
-    CircleRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    CircleRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-    CircleRenderer.AddAttrib("diameter", 1, GL_FLOAT, 5 * sizeof(GLfloat));
-    //CircleRenderer.AddAttrib("index", 1, GL_FLOAT, 6 * sizeof(GLfloat));
-    CircleRenderer.AddUniform("windowWidth", width);
-    CircleRenderer.AddUniform("windowHeight", height);
-    CircleRenderer.AddUniform("centerLat", Center.GetLat());
-    CircleRenderer.AddUniform("centerLon", Center.GetLon());
-    CircleRenderer.AddUniform("magnification", Magnification.GetMagnification());
-    CircleRenderer.AddUniform("dpi", dpi);
-
-
     ImageRenderer.SwapData();
 
     ImageRenderer.BindBuffers();
@@ -266,9 +230,7 @@ namespace osmscout {
     ImageRenderer.SetProjection(width, height);
     ImageRenderer.SetModel();
     ImageRenderer.SetView(lookX, lookY);
-    //ImageRenderer.Draw();
 
-    //Text
     TextRenderer.SwapData(1);
 
     TextRenderer.BindBuffers();
@@ -296,7 +258,6 @@ namespace osmscout {
     TextRenderer.SetProjection(width, height);
     TextRenderer.SetModel();
     TextRenderer.SetView(lookX, lookY);
-    //TextRenderer.Draw();
   }
 
   void
@@ -559,7 +520,6 @@ namespace osmscout {
                         way->nodes[i + 2],
                         color, (i == way->nodes.size() - 2 ? 7 : 3), lineWidth,
                         glm::vec3(0,0,1));
-
           //second triangle
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
@@ -586,7 +546,6 @@ namespace osmscout {
           PathRenderer.AddNewElement(num + 4);
           PathRenderer.AddNewElement(num + 5);
 
-////////////////////////////////////////////////////////2222222222222222222
 
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
@@ -603,9 +562,7 @@ namespace osmscout {
                         way->nodes[i + 1],
                         color, i == 0 ? 2 : 6, lineWidth,
                         glm::vec3(0,1,1));
-
-          /////////////////
-
+          //
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
@@ -629,22 +586,6 @@ namespace osmscout {
           PathRenderer.AddNewElement(num + 3);
           PathRenderer.AddNewElement(num + 4);
           PathRenderer.AddNewElement(num + 5);
-
-          if (i == 0 || i == way->nodes.size() - 1) {
-            CircleRenderer.AddNewVertex(way->nodes[i].GetLon());
-            CircleRenderer.AddNewVertex(way->nodes[i].GetLat());
-            CircleRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
-            CircleRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
-            CircleRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
-            CircleRenderer.AddNewVertex(lineWidth);
-
-            if (CircleRenderer.GetNumOfVertices() <= 6) {
-              CircleRenderer.AddNewElement(0);
-            } else {
-              CircleRenderer.AddNewElement(CircleRenderer.GetVerticesNumber() - 1);
-            }
-
-          }
 
         }
       }
@@ -1198,23 +1139,6 @@ namespace osmscout {
     PathRenderer.SetModel();
     PathRenderer.SetView(lookX, lookY);
     PathRenderer.Draw();
-
-    glBindVertexArray(CircleRenderer.getVAO());
-    glUseProgram(CircleRenderer.getShaderProgram());
-
-    CircleRenderer.AddUniform("windowWidth", width);
-    CircleRenderer.AddUniform("windowHeight", height);
-    CircleRenderer.AddUniform("centerLat", Center.GetLat());
-    CircleRenderer.AddUniform("centerLon", Center.GetLon());
-    CircleRenderer.AddUniform("magnification", Magnification.GetMagnification());
-    CircleRenderer.AddUniform("dpi", dpi);
-
-    CircleRenderer.SetProjection(width, height);
-    CircleRenderer.SetModel();
-    CircleRenderer.SetView(lookX, lookY);
-    //CircleRenderer.Draw();
-    CircleRenderer.DrawPoint();
-
 
     glBindVertexArray(ImageRenderer.getVAO());
     glBindTexture(GL_TEXTURE_2D, ImageRenderer.GetTexture());
