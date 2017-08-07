@@ -2,7 +2,6 @@
 
 in vec2 position;
 in vec3 color;
-in float br;
 out vec3 Color;
 uniform mat4 Model;
 uniform mat4 View;
