@@ -96,7 +96,7 @@ namespace osmscout {
     GroundRenderer.clearData();
     GroundRenderer.SetVerticesSize(5);
     PathRenderer.clearData();
-    PathRenderer.SetVerticesSize(11);
+    PathRenderer.SetVerticesSize(14);
     ImageRenderer.clearData();
     ImageRenderer.SetVerticesSize(5);
     ImageRenderer.SetTextureHeight(7);
@@ -197,6 +197,9 @@ namespace osmscout {
     PathRenderer.AddAttrib("color", 3, GL_FLOAT, 6 * sizeof(GLfloat));
     PathRenderer.AddAttrib("index", 1, GL_FLOAT, 9 * sizeof(GLfloat));
     PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("barycentricX", 1, GL_FLOAT, 11 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("barycentricY", 1, GL_FLOAT, 12 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("barycentricZ", 1, GL_FLOAT, 13 * sizeof(GLfloat));
     PathRenderer.AddUniform("windowWidth", width);
     PathRenderer.AddUniform("windowHeight", height);
     PathRenderer.AddUniform("centerLat", Center.GetLat());
@@ -227,9 +230,7 @@ namespace osmscout {
     ImageRenderer.SetProjection(width, height);
     ImageRenderer.SetModel();
     ImageRenderer.SetView(lookX, lookY);
-    ImageRenderer.Draw();
 
-    //Text
     TextRenderer.SwapData(1);
 
     TextRenderer.BindBuffers();
@@ -257,9 +258,6 @@ namespace osmscout {
     TextRenderer.SetProjection(width, height);
     TextRenderer.SetModel();
     TextRenderer.SetView(lookX, lookY);
-    TextRenderer.Draw();
-
-
   }
 
   void
@@ -505,90 +503,118 @@ namespace osmscout {
         }
 
         for (size_t i = 0; i < way->nodes.size() - 1; i++) {
-          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
-          if (i == 0) {
-            PathRenderer.AddNewVertex(way->nodes[i].GetLon());
-            PathRenderer.AddNewVertex(way->nodes[i].GetLat());
-          } else {
-            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLon());
-            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLat());
-          }
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
-          if (i == 0)
-            PathRenderer.AddNewVertex(1.0);
-          else
-            PathRenderer.AddNewVertex(5.0);
-          PathRenderer.AddNewVertex(lineWidth);
-
-          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
-          if (i == 0) {
-            PathRenderer.AddNewVertex(way->nodes[i].GetLon());
-            PathRenderer.AddNewVertex(way->nodes[i].GetLat());
-          } else {
-            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLon());
-            PathRenderer.AddNewVertex(way->nodes[i - 1].GetLat());
-          }
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
-          if (i == 0)
-            PathRenderer.AddNewVertex(2.0);
-          else
-            PathRenderer.AddNewVertex(6.0);
-          PathRenderer.AddNewVertex(lineWidth);
-
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
-          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
-          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLat());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
-          if (i == way->nodes.size() - 2)
-            PathRenderer.AddNewVertex(7.0);
-          else
-            PathRenderer.AddNewVertex(3.0);
-          PathRenderer.AddNewVertex(lineWidth);
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i + 1].GetLat());
-          PathRenderer.AddNewVertex(way->nodes[i].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i].GetLat());
-          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLon());
-          PathRenderer.AddNewVertex(way->nodes[i + 2].GetLat());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetR());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetG());
-          PathRenderer.AddNewVertex(lineStyle->GetLineColor().GetB());
-          if (i == way->nodes.size() - 2)
-            PathRenderer.AddNewVertex(8.0);
-          else
-            PathRenderer.AddNewVertex(4.0);
-          PathRenderer.AddNewVertex(lineWidth);
+          Color color = lineStyle->GetLineColor();
+          //first triangle
+          AddPathVertex(way->nodes[i],
+                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                        way->nodes[i + 1],
+                        color, i == 0 ? 1 : 5, lineWidth,
+                        glm::vec3(1,0,1));
+          AddPathVertex(way->nodes[i],
+                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                        way->nodes[i + 1],
+                        color, i == 0 ? 2 : 6, lineWidth,
+                        glm::vec3(0,1,1));
+          AddPathVertex(way->nodes[i + 1],
+                        way->nodes[i],
+                        way->nodes[i + 2],
+                        color, (i == way->nodes.size() - 2 ? 7 : 3), lineWidth,
+                        glm::vec3(0,0,1));
+          //second triangle
+          AddPathVertex(way->nodes[i + 1],
+                        way->nodes[i],
+                        way->nodes[i + 2],
+                        color, (i == way->nodes.size() - 2) ? 7 : 3, lineWidth,
+                        glm::vec3(1,1,0));
+          AddPathVertex(way->nodes[i],
+                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                        way->nodes[i + 1],
+                        color, i == 0 ? 2 : 6, lineWidth,
+                        glm::vec3(0,1,0));
+          AddPathVertex(way->nodes[i + 1],
+                        way->nodes[i],
+                        way->nodes[i + 2],
+                        color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
+                        glm::vec3(0,1,1));
 
           int num;
-          if (PathRenderer.GetNumOfVertices() <= 44) {
-            num = 0;
-          } else {
-            num = PathRenderer.GetVerticesNumber() - 4;
-          }
+          num = PathRenderer.GetVerticesNumber() - 6;
           PathRenderer.AddNewElement(num);
           PathRenderer.AddNewElement(num + 1);
           PathRenderer.AddNewElement(num + 2);
-          PathRenderer.AddNewElement(num + 2);
-          PathRenderer.AddNewElement(num + 1);
           PathRenderer.AddNewElement(num + 3);
+          PathRenderer.AddNewElement(num + 4);
+          PathRenderer.AddNewElement(num + 5);
+
+
+          AddPathVertex(way->nodes[i],
+                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                        way->nodes[i + 1],
+                        color, i == 0 ? 1 : 5, lineWidth,
+                        glm::vec3(1,1,0));
+          AddPathVertex(way->nodes[i + 1],
+                        way->nodes[i],
+                        way->nodes[i + 2],
+                        color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
+                        glm::vec3(0,1,0));
+          AddPathVertex(way->nodes[i],
+                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                        way->nodes[i + 1],
+                        color, i == 0 ? 2 : 6, lineWidth,
+                        glm::vec3(0,1,1));
+          //
+          AddPathVertex(way->nodes[i],
+                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                        way->nodes[i + 1],
+                        color, i == 0 ? 1 : 5, lineWidth,
+                        glm::vec3(1,0,0));
+          AddPathVertex(way->nodes[i + 1],
+                        way->nodes[i],
+                        way->nodes[i + 2],
+                        color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
+                        glm::vec3(1,1,0));
+          AddPathVertex(way->nodes[i + 1],
+                        way->nodes[i],
+                        way->nodes[i + 2],
+                        color, i == way->nodes.size() - 2 ? 7 : 3, lineWidth,
+                        glm::vec3(1,0,1));
+
+          num = PathRenderer.GetVerticesNumber() - 6;
+          PathRenderer.AddNewElement(num);
+          PathRenderer.AddNewElement(num + 1);
+          PathRenderer.AddNewElement(num + 2);
+          PathRenderer.AddNewElement(num + 3);
+          PathRenderer.AddNewElement(num + 4);
+          PathRenderer.AddNewElement(num + 5);
+
         }
       }
     }
+  }
+
+  void
+  osmscout::MapPainterOpenGL::AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
+                                            osmscout::Color color, int type, float width, glm::vec3 barycentric) {
+    PathRenderer.AddNewVertex(current.GetLon());
+    PathRenderer.AddNewVertex(current.GetLat());
+
+    PathRenderer.AddNewVertex(previous.GetLon());
+    PathRenderer.AddNewVertex(previous.GetLat());
+
+    PathRenderer.AddNewVertex(next.GetLon());
+    PathRenderer.AddNewVertex(next.GetLat());
+
+    PathRenderer.AddNewVertex(color.GetR());
+    PathRenderer.AddNewVertex(color.GetG());
+    PathRenderer.AddNewVertex(color.GetB());
+
+    PathRenderer.AddNewVertex(type);
+
+    PathRenderer.AddNewVertex(width);
+
+    PathRenderer.AddNewVertex(barycentric.x);
+    PathRenderer.AddNewVertex(barycentric.y);
+    PathRenderer.AddNewVertex(barycentric.z);
   }
 
   void

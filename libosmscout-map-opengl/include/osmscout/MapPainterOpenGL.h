@@ -84,6 +84,8 @@ namespace osmscout {
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
 
+    void AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next, osmscout::Color color, int type, float width, glm::vec3 barycentric);
+
   public:
     //MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
 

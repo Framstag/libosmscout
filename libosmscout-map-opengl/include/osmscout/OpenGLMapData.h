@@ -250,6 +250,8 @@ namespace osmscout {
         return false;
       }
 
+      glEnable(GL_PROGRAM_POINT_SIZE);
+
       return true;
 
     }
