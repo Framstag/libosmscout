@@ -6,8 +6,13 @@ in vec2 next;
 in vec3 color;
 in float index;
 in float thickness;
+in float barycentricX;
+in float barycentricY;
+in float barycentricZ;
 out vec2 Normal;
 out vec3 Color;
+out vec3 Barycentric;
+out float RenderingMode;
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
@@ -112,7 +117,17 @@ void main() {
     Color = color;
 
     //+0.001 so lines dont disappear because of anti-aliasing
-    float thickness_norm = (ceil(thickness)/windowWidth)+0.001;
+    //float thickness_norm = (ceil(thickness)/windowWidth) + 0.001;
+    float thickness_norm;
+    //Lines that are really thin, needs other type of rendering
+    if(thickness < 2){
+        RenderingMode = 1;
+        thickness_norm = (ceil(thickness)/windowWidth) + 0.001;
+    }
+    else{
+        RenderingMode = -1;
+        thickness_norm = (ceil(thickness)/windowWidth);
+    }
 
     vec2 n = GeoToPixel(next.x, next.y);
     vec2 c = GeoToPixel(position.x, position.y);
@@ -123,6 +138,8 @@ void main() {
     p = vec2(p.x, p.y);
 
     vec4 pos = Projection * View * Model * vec4(c.x, c.y, 0, 1);
+
+    Barycentric = vec3(barycentricX, barycentricY, barycentricZ);
 
     vec2 normal;
     vec2 result;

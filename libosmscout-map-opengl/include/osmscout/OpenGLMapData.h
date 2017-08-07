@@ -250,6 +250,8 @@ namespace osmscout {
         return false;
       }
 
+      glEnable(GL_PROGRAM_POINT_SIZE);
+
       return true;
 
     }
@@ -409,6 +411,11 @@ namespace osmscout {
 
     void Draw() {
       glDrawElements(GL_TRIANGLES, (GLsizei) Elements.size(), GL_UNSIGNED_INT, 0);
+    }
+
+    void DrawPoint(){
+      glDrawArrays(GL_POINTS, 0,(GLsizei) Vertices.size());
+      //glDrawElements(GL_POINT, (GLsizei) Elements.size(), GL_UNSIGNED_INT, 0);
     }
 
     ~OpenGLMapData() {
