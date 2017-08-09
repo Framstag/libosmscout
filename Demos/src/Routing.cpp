@@ -684,6 +684,7 @@ int main(int argc, char* argv[])
   }
 
 #ifdef DATA_DEBUG
+  std::cout << "Route raw data:" << std::endl;
   for (const auto &entry : result.GetRoute().Entries()) {
     std::cout << entry.GetPathObject().GetName() << "[" << entry.GetCurrentNodeIndex() << "]" << " = " << entry.GetCurrentNodeId() << " => " << entry.GetTargetNodeIndex() << std::endl;
   }

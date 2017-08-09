@@ -237,7 +237,7 @@ namespace osmscout {
     if (!GetRouteNodeOffset(position.GetDatabaseId(),
                             routeNode->GetId(),
                             offset)) {
-      log.Error() << "Cannot get offset of startForwardRouteNode";
+      log.Error() << "Cannot get offset of route node";
 
       return false;
     }
@@ -253,7 +253,8 @@ namespace osmscout {
                                                     way->nodes[routeNodeIndex].GetCoord()));
     node->estimateCost=GetEstimateCosts(state,
                                         position.GetDatabaseId(),
-                                        GetSphericalDistance(startCoord,targetCoord));
+                                        GetSphericalDistance(way->nodes[routeNodeIndex].GetCoord(),
+                                                             targetCoord));
 
     node->overallCost=node->currentCost+node->estimateCost;
 
@@ -685,7 +686,7 @@ namespace osmscout {
 #if defined(DEBUG_ROUTING)
             std::cout << "  Skipping route";
             std::cout << " to " << dbId << " / " << path.offset;
-            std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+            std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetName() << ")";
             std::cout << " => turn not allowed" << std::endl;
 #endif
             canTurnedInto=false;
@@ -712,9 +713,9 @@ namespace osmscout {
           (*openEntry->second)->currentCost<=currentCost) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
-        std::cout << " to " << path.offset;
-        std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
-        std::cout << "  => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << std::endl;
+        std::cout << " to " << dbId << " / " << path.offset;
+        std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetName() << ")";
+        std::cout << " => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->object.GetName() << " " << (*openEntry->second)->node->GetId() << " " << (*openEntry->second)->currentCost << std::endl;
 #endif
         i++;
 
@@ -884,6 +885,25 @@ namespace osmscout {
       return result;
     }
 
+#if defined(DEBUG_ROUTING)
+    if (startForwardNode) {
+      std::cout << "StartForwardNode:   " << start.GetObjectFileRef().GetName() << " " << startForwardRouteNode->GetId() << " "
+                << startForwardNode->currentCost << " " << startForwardNode->estimateCost << " " << startForwardNode->overallCost
+                << std::endl;
+    }
+    if (startBackwardNode) {
+      std::cout << "StartBackwardNode:  " << start.GetObjectFileRef().GetName() << " " << startBackwardRouteNode->GetId() << " "
+                << startBackwardNode->currentCost << " " << startBackwardNode->estimateCost << " " << startBackwardNode->overallCost
+                << std::endl;
+    }
+    if (targetForwardRouteNode) {
+      std::cout << "TargetForwardNode:  " << target.GetObjectFileRef().GetName() << " " << targetForwardRouteNode->GetId() << std::endl;
+    }
+    if (startBackwardNode) {
+      std::cout << "TargetBackwardNode: " << target.GetObjectFileRef().GetName() << " " << targetBackwardRouteNode->GetId() << std::endl;
+    }
+#endif
+
     if (parameter.GetBreaker() &&
         parameter.GetBreaker()->IsAborted()) {
       return result;
@@ -940,7 +960,7 @@ namespace osmscout {
 
 #if defined(DEBUG_ROUTING)
       std::cout << "Analysing follower of node " << dbId << " / " << currentRouteNode->GetFileOffset();
-      std::cout << " (" << current->object.GetTypeName() << " " << current->object.GetFileOffset() << "["  << currentRouteNode->GetId() << "]" << ")";
+      std::cout << " (" << current->object.GetName() << "["  << currentRouteNode->GetId() << "]" << ")";
       std::cout << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
 
@@ -1008,13 +1028,13 @@ namespace osmscout {
         std::cout << "No more alternatives, stopping" << std::endl;
       }
 
-      if (targetForwardRouteNode && 
+      if (targetForwardRouteNode &&
           current->nodeOffset.offset==targetForwardRouteNode->GetFileOffset() &&
           current->nodeOffset.database==target.GetDatabaseId()) {
         std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->GetFileOffset() << " (forward)" << std::endl;
       }
 
-      if (targetBackwardRouteNode && 
+      if (targetBackwardRouteNode &&
           current->nodeOffset.offset==targetBackwardRouteNode->GetFileOffset() &&
           current->nodeOffset.database==target.GetDatabaseId()) {
         std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->GetFileOffset() << " (backward)" << std::endl;
