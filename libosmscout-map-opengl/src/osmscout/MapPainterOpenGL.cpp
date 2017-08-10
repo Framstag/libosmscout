@@ -90,7 +90,6 @@ namespace osmscout {
     }
 
     AreaRenderer.clearData();
-    //AreaRenderer.SetVerticesSize(5);
     AreaRenderer.SetVerticesSize(6);
     GroundTileRenderer.clearData();
     GroundTileRenderer.SetVerticesSize(5);
@@ -118,11 +117,11 @@ namespace osmscout {
 
     ProcessAreaData(data, parameter, projection, styleConfig);
 
-    //ProcessGroundData(data, parameter, projection, styleConfig);
+    ProcessGroundData(data, parameter, projection, styleConfig);
 
     ProcessPathData(data, parameter, projection, styleConfig);
 
-    //ProcessNodeData(data, parameter, projection, styleConfig);
+    ProcessNodeData(data, parameter, projection, styleConfig);
   }
 
   void osmscout::MapPainterOpenGL::SwapData() {
@@ -137,8 +136,7 @@ namespace osmscout {
     AreaRenderer.SetModel();
     AreaRenderer.SetView(lookX, lookY);
     AreaRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    AreaRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-    AreaRenderer.AddAttrib("br", 1, GL_FLOAT, 5 * sizeof(GLfloat));
+    AreaRenderer.AddAttrib("color", 4, GL_FLOAT, 2 * sizeof(GLfloat));
 
     AreaRenderer.AddUniform("windowWidth", width);
     AreaRenderer.AddUniform("windowHeight", height);
@@ -270,8 +268,17 @@ namespace osmscout {
 
     osmscout::log.Info() << "Area: " << data.areas.size();
 
-    for (const auto &area : data.areas) {
+    std::vector<AreaRef> areas = data.areas;
 
+    std::sort(areas.begin(), areas.end(),
+         [](const AreaRef & a, const AreaRef & b) -> bool
+         {
+           GeoBox b1; GeoBox b2;
+           a->GetBoundingBox(b1); b->GetBoundingBox(b2);
+           return b1.GetHeight() * b1.GetWidth() > b2.GetHeight() * b2.GetWidth();
+         });
+
+    for (const auto &area : areas) {
       size_t ringId = Area::outerRingId;
       bool foundRing = true;
 
@@ -300,7 +307,6 @@ namespace osmscout {
           TypeInfoRef type;
           FillStyleRef fillStyle;
           std::vector<BorderStyleRef> borderStyles;
-          BorderStyleRef borderStyle;
 
           if (ring.IsOuterRing()) {
             type = area->GetType();
@@ -345,13 +351,6 @@ namespace osmscout {
           osmscout::GeoBox ringBoundingBox;
           ring.GetBoundingBox(ringBoundingBox);
 
-          double borderWidth = borderStyle ? borderStyle->GetWidth() : 0.0;
-
-          if (!IsVisibleArea(projection,
-                             ringBoundingBox,
-                             borderWidth / 2.0))
-            continue;
-
           size_t j = i + 1;
           int hasClippings = 0;
           while (j < area->rings.size() &&
@@ -362,15 +361,33 @@ namespace osmscout {
             hasClippings = 1;
           }
 
-          //border TODO
+          std::vector<GLfloat> points;
+
+          if (!fillStyle && borderStyles.empty()) {
+            continue;
+          }
 
           Color c = fillStyle->GetFillColor();
 
-          //std::vector<GLfloat> points;
-          //std::vector<osmscout::GeoCoord> *points;
-          std::vector<GLfloat> points;
-          std::vector<std::vector<osmscout::Point>> points2;
-          /*if (hasClippings == 1) {
+          BorderStyleRef borderStyle;
+          size_t borderStyleIndex=0;
+
+          if (!borderStyles.empty() &&
+              borderStyles.front()->GetDisplayOffset()==0.0 &&
+              borderStyles.front()->GetOffset()==0.0) {
+            borderStyle=borderStyles[borderStyleIndex];
+            borderStyleIndex++;
+          }
+
+          double borderWidth = borderStyle ? borderStyle->GetWidth() : 0.0;
+
+          if (!IsVisibleArea(projection,
+                             ringBoundingBox,
+                             borderWidth / 2.0))
+            continue;
+
+
+          if (hasClippings == 1) {
             for (auto &ring: r) {
               for (int i = ring.nodes.size() - 1; i >= 0; i--) {
                 for (int j = 0; j < i; j++) {
@@ -385,49 +402,16 @@ namespace osmscout {
             std::vector<std::vector<osmscout::Point>> polygons;
             polygons.push_back(p);
             for (const auto &ring: r) {
-              if (ring.nodes.size() >= 3)
+              if (ring.nodes.size() >= 3) {
                 polygons.push_back(ring.nodes);
-            }
-
-            //points = osmscout::Triangulate::TriangulateWithHoles(polygons);
-          } else {*/
-           // osmscout::Triangulate::TriangulatePolygon(p,points2);
-          //points = osmscout::Triangulate::TriangulatePolygon(p);
-            //points = osmscout::Triangulate::TriangulatePolygon(p);
-          //}
-
-          points2 = osmscout::Triangulate::TriangulateP(p);
-
-
-          //std::cout << "Point size: "  << p.size() << " " << points2.size() << std::endl;
-
-          int count = 0;
-          for (size_t t = 0; t < points2.size(); t++) {
-            for(size_t t2 = 0; t2 < 3; t2++){
-
-             /* for(size_t h = 0; h < p.size(); h++)
-                if(fabs(p[h].GetLon() - points2[t][t2].GetLon()) < 0.0000000000001
-                    && fabs(p[h].GetLat() - points2[t][t2].GetLat()) < 0.0000000000001)
-                  std::cout << "same: " << count << " " << points2.size() << std::endl;*/
-
-              AreaRenderer.AddNewVertex(points2[t][t2].GetLon());
-              AreaRenderer.AddNewVertex(points2[t][t2].GetLat());
-              AreaRenderer.AddNewVertex(c.GetR());
-              AreaRenderer.AddNewVertex(c.GetG());
-              AreaRenderer.AddNewVertex(c.GetB());
-              AreaRenderer.AddNewVertex(t2%3);
-
-              if (AreaRenderer.GetNumOfVertices() <= 5) {
-                AreaRenderer.AddNewElement(0);
-              } else {
-                AreaRenderer.AddNewElement(AreaRenderer.GetVerticesNumber() - 1);
               }
-
-              count++;
             }
+            points = osmscout::Triangulate::TriangulateWithHoles(polygons);
+          } else {
+            points = osmscout::Triangulate::TriangulatePolygon(p);
           }
 
-          /*for (size_t t = 0; t < points.size(); t++) {
+          for (size_t t = 0; t < points.size(); t++) {
             if (t % 2 == 0) {
               AreaRenderer.AddNewVertex(points[t]);
             } else {
@@ -435,15 +419,68 @@ namespace osmscout {
               AreaRenderer.AddNewVertex(c.GetR());
               AreaRenderer.AddNewVertex(c.GetG());
               AreaRenderer.AddNewVertex(c.GetB());
+              AreaRenderer.AddNewVertex(c.GetA());
 
-              if (AreaRenderer.GetNumOfVertices() <= 5) {
+              if (AreaRenderer.GetNumOfVertices() <= 6) {
                 AreaRenderer.AddNewElement(0);
               } else {
                 AreaRenderer.AddNewElement(AreaRenderer.GetVerticesNumber() - 1);
               }
-
             }
-          }*/
+          }
+
+          p.push_back(p[0]);
+          for (size_t idx=0;
+               idx<borderStyles.size();
+               idx++) {
+            borderStyle=borderStyles[idx];
+
+            for (size_t t = 0; t < p.size() - 1; t++) {
+
+              Color color = borderStyle->GetColor();
+              //first triangle
+              AddPathVertex(p[t],
+                            t == 0 ? p[t] : p[t - 1],
+                            p[t + 1],
+                            color, t == 0 ? 1 : 5, 1.0,
+                            glm::vec3(1, 0, 0));
+              AddPathVertex(p[t],
+                            t == 0 ? p[t] : p[t - 1],
+                            p[t + 1],
+                            color, t == 0 ? 2 : 6, 1.0,
+                            glm::vec3(0, 1, 0));
+              AddPathVertex(p[t + 1],
+                            p[t],
+                            p[t + 2],
+                            color, (t == p.size() - 2 ? 7 : 3), 1.0,
+                            glm::vec3(0, 0, 1));
+              //second triangle
+              AddPathVertex(p[t + 1],
+                            p[t],
+                            p[t + 2],
+                            color, (t == p.size() - 2) ? 7 : 3, 1.0,
+                            glm::vec3(1, 0, 0));
+              AddPathVertex(p[t],
+                            t == 0 ? p[t] : p[t - 1],
+                            p[t + 1],
+                            color, t == 0 ? 2 : 6, 1.0,
+                            glm::vec3(0, 1, 0));
+              AddPathVertex(p[t + 1],
+                            p[t],
+                            p[t + 2],
+                            color, t == p.size() - 2 ? 8 : 4, 1.0,
+                            glm::vec3(0, 0, 1));
+
+              int num;
+              num = PathRenderer.GetVerticesNumber() - 6;
+              PathRenderer.AddNewElement(num);
+              PathRenderer.AddNewElement(num + 1);
+              PathRenderer.AddNewElement(num + 2);
+              PathRenderer.AddNewElement(num + 3);
+              PathRenderer.AddNewElement(num + 4);
+              PathRenderer.AddNewElement(num + 5);
+            }
+          }
 
         }
         ringId++;
@@ -971,8 +1008,9 @@ namespace osmscout {
                   AreaRenderer.AddNewVertex(color.GetR());
                   AreaRenderer.AddNewVertex(color.GetG());
                   AreaRenderer.AddNewVertex(color.GetB());
+                  AreaRenderer.AddNewVertex(color.GetA());
 
-                  if (AreaRenderer.GetNumOfVertices() <= 5) {
+                  if (AreaRenderer.GetNumOfVertices() <= 6) {
                     AreaRenderer.AddNewElement(0);
                   } else {
                     AreaRenderer.AddNewElement(AreaRenderer.GetVerticesNumber() - 1);
