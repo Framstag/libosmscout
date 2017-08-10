@@ -442,33 +442,33 @@ namespace osmscout {
               AddPathVertex(p[t],
                             t == 0 ? p[t] : p[t - 1],
                             p[t + 1],
-                            color, t == 0 ? 1 : 5, 1.0,
+                            color, t == 0 ? 1 : 5, borderWidth,
                             glm::vec3(1, 0, 0));
               AddPathVertex(p[t],
                             t == 0 ? p[t] : p[t - 1],
                             p[t + 1],
-                            color, t == 0 ? 2 : 6, 1.0,
+                            color, t == 0 ? 2 : 6, borderWidth,
                             glm::vec3(0, 1, 0));
               AddPathVertex(p[t + 1],
                             p[t],
                             p[t + 2],
-                            color, (t == p.size() - 2 ? 7 : 3), 1.0,
+                            color, (t == p.size() - 2 ? 7 : 3), borderWidth,
                             glm::vec3(0, 0, 1));
               //second triangle
               AddPathVertex(p[t + 1],
                             p[t],
                             p[t + 2],
-                            color, (t == p.size() - 2) ? 7 : 3, 1.0,
+                            color, (t == p.size() - 2) ? 7 : 3, borderWidth,
                             glm::vec3(1, 0, 0));
               AddPathVertex(p[t],
                             t == 0 ? p[t] : p[t - 1],
                             p[t + 1],
-                            color, t == 0 ? 2 : 6, 1.0,
+                            color, t == 0 ? 2 : 6, borderWidth,
                             glm::vec3(0, 1, 0));
               AddPathVertex(p[t + 1],
                             p[t],
                             p[t + 2],
-                            color, t == p.size() - 2 ? 8 : 4, 1.0,
+                            color, t == p.size() - 2 ? 8 : 4, borderWidth,
                             glm::vec3(0, 0, 1));
 
               int num;
