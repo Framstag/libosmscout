@@ -23,8 +23,10 @@
 #include <GL/glew.h>
 #include <iostream>
 #include <osmscout/MapPainter.h>
+#include <glm/vec3.hpp>
 
-namespace osmscout {
+namespace osmscout{
+
   class Triangulate {
   public:
 

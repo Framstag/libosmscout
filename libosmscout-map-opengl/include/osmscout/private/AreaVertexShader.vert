@@ -1,8 +1,8 @@
 #version 150 core
 
 in vec2 position;
-in vec3 color;
-out vec3 Color;
+in vec4 color;
+out vec4 Color;
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
@@ -105,5 +105,6 @@ vec2 GeoToPixel(in float posx, in float posy){
 void main() {
     Color = color;
     vec2 result = GeoToPixel(position.x, position.y);
+
     gl_Position = Projection * View * Model * vec4(result.x, result.y, 0.0, 1.0);
 }
