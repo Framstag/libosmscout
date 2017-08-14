@@ -65,12 +65,10 @@ namespace osmscout {
     osmscout::MapParameter Parameter;
     osmscout::FillStyleRef landFill;
     osmscout::FillStyleRef seaFill;
-    std::vector<osmscout::LineStyleRef> lineStyles;
     osmscout::GeoCoord Center;
     osmscout::Magnification Magnification;
 
   public:
-    //MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight);
 
     MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight, std::string fontPath);
 
@@ -80,22 +78,22 @@ namespace osmscout {
                   const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
 
-    void ProcessAreaData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+    void ProcessAreas(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
-    void ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+    void ProcessGround(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                            const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
-    void ProcessPathData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+    void ProcessWays(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
 
-    void ProcessNodeData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+    void ProcessNodes(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                          const osmscout::Projection &projection,
                          const osmscout::StyleConfigRef &styleConfig);
 
-    void AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next, osmscout::Color color, int type, float width, glm::vec3 barycentric);
-
+    void AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
+    osmscout::Color color, int type, float width, glm::vec3 barycentric, int border = 0, double z = 0);
 
     void SwapData();
 

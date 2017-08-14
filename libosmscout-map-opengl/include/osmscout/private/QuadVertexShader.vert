@@ -21,6 +21,7 @@ uniform float textureWidthSum;
 
 uniform float magnification;
 uniform float dpi = 96.0;
+uniform float z;
 
 uniform float PI = 3.1415926535897;
 
@@ -110,7 +111,7 @@ void main() {
     float width_norm = (ceil(quadWidth)/windowWidth);
     float height_norm = (ceil(quadWidth)/windowHeight);
     vec2 c = GeoToPixel(position.x, position.y);
-    vec4 pos = Projection * View * Model * vec4(c.x, c.y, 0, 1);
+    vec4 pos = Projection * View * Model * vec4(c.x, c.y, z, 1);
 
     float unit = 1/textureWidthSum;
     float i = (unit*textureStart) + (unit*textureWidth);

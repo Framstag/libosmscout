@@ -96,7 +96,7 @@ namespace osmscout {
     GroundRenderer.clearData();
     GroundRenderer.SetVerticesSize(5);
     PathRenderer.clearData();
-    PathRenderer.SetVerticesSize(14);
+    PathRenderer.SetVerticesSize(17);
     ImageRenderer.clearData();
     ImageRenderer.SetVerticesSize(5);
     ImageRenderer.SetTextureHeight(7);
@@ -115,13 +115,13 @@ namespace osmscout {
     this->Center = projection.GetCenter();
     this->Parameter = parameter;
 
-    ProcessAreaData(data, parameter, projection, styleConfig);
+    ProcessAreas(data, parameter, projection, styleConfig);
 
-    ProcessGroundData(data, parameter, projection, styleConfig);
+    ProcessGround(data, parameter, projection, styleConfig);
 
-    ProcessPathData(data, parameter, projection, styleConfig);
+    ProcessWays(data, parameter, projection, styleConfig);
 
-    ProcessNodeData(data, parameter, projection, styleConfig);
+    ProcessNodes(data, parameter, projection, styleConfig);
   }
 
   void osmscout::MapPainterOpenGL::SwapData() {
@@ -194,12 +194,12 @@ namespace osmscout {
     PathRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
     PathRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
     PathRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("color", 3, GL_FLOAT, 6 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("index", 1, GL_FLOAT, 9 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 10 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("barycentricX", 1, GL_FLOAT, 11 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("barycentricY", 1, GL_FLOAT, 12 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("barycentricZ", 1, GL_FLOAT, 13 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("color", 4, GL_FLOAT, 6 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("index", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 11 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("border", 1, GL_FLOAT, 12 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("barycentric", 3, GL_FLOAT, 13 * sizeof(GLfloat));
+    PathRenderer.AddAttrib("z", 1, GL_FLOAT, 16 * sizeof(GLfloat));
     PathRenderer.AddUniform("windowWidth", width);
     PathRenderer.AddUniform("windowHeight", height);
     PathRenderer.AddUniform("centerLat", Center.GetLat());
@@ -226,6 +226,7 @@ namespace osmscout {
     ImageRenderer.AddUniform("magnification", Magnification.GetMagnification());
     ImageRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
     ImageRenderer.AddUniform("dpi", dpi);
+    ImageRenderer.AddUniform("z", 0.001);
 
     ImageRenderer.SetProjection(width, height);
     ImageRenderer.SetModel();
@@ -254,6 +255,7 @@ namespace osmscout {
     TextRenderer.AddUniform("magnification", Magnification.GetMagnification());
     TextRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
     TextRenderer.AddUniform("dpi", dpi);
+    TextRenderer.AddUniform("z", 0.001);
 
     TextRenderer.SetProjection(width, height);
     TextRenderer.SetModel();
@@ -261,7 +263,7 @@ namespace osmscout {
   }
 
   void
-  osmscout::MapPainterOpenGL::ProcessAreaData(const osmscout::MapData &data,
+  osmscout::MapPainterOpenGL::ProcessAreas(const osmscout::MapData &data,
                                               const osmscout::MapParameter &/*parameter*/,
                                               const osmscout::Projection &projection,
                                               const osmscout::StyleConfigRef &styleConfig) {
@@ -524,7 +526,7 @@ namespace osmscout {
   }
 
   void
-  osmscout::MapPainterOpenGL::ProcessPathData(const osmscout::MapData &data,
+  osmscout::MapPainterOpenGL::ProcessWays(const osmscout::MapData &data,
                                               const osmscout::MapParameter &/*parameter*/,
                                               const osmscout::Projection &projection,
                                               const osmscout::StyleConfigRef &styleConfig) {
@@ -536,81 +538,96 @@ namespace osmscout {
 
     for (const auto &way: data.ways) {
 
-      std::vector<LineStyleRef> styles;
+      std::vector<LineStyleRef> lineStyles;
 
       styleConfig->GetWayLineStyles(way->GetFeatureValueBuffer(),
                                     projection,
-                                    styles);
+                                    lineStyles);
 
-      if (!styles.empty())
-        lineStyles = styles;
+      if (lineStyles.empty()) {
+        continue;
+      }
 
       FeatureValueBuffer buffer(way->GetFeatureValueBuffer());
 
-      for (const auto &lineStyle : lineStyles) {
+      for (int l = lineStyles.size() - 1; l >= 0; l--) {
+        Color color = lineStyles[l]->GetLineColor();
+        int border = l;
         double lineWidth = 0.0;
         double lineOffset = 0.0;
+        double z;
+        if(l == 0)
+          z = 0.001;
+        else
+          z = 0.0;
 
-        if (lineStyle->GetWidth() > 0.0) {
+        if (lineStyles[l]->GetWidth() > 0.0) {
           WidthFeatureValue *widthValue = widthReader.GetValue(buffer);
 
           if (widthValue != NULL) {
             lineWidth += widthValue->GetWidth() / projection.GetPixelSize();
           } else {
-            lineWidth += lineStyle->GetWidth() / projection.GetPixelSize();
+            lineWidth += lineStyles[l]->GetWidth() / projection.GetPixelSize();
           }
         }
 
-        if (lineStyle->GetDisplayWidth() > 0.0) {
-          lineWidth += projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
+        if (lineStyles[l]->GetDisplayWidth() > 0.0) {
+          lineWidth += projection.ConvertWidthToPixel(lineStyles[l]->GetDisplayWidth());
         }
 
         if (lineWidth == 0.0) {
-          continue;
+          return;
         }
 
-        if (lineStyle->GetOffset() != 0.0) {
-          lineOffset += lineStyle->GetOffset() / projection.GetPixelSize();
+        if (lineStyles[l]->GetOffset() != 0.0) {
+          lineOffset += lineStyles[l]->GetOffset() / projection.GetPixelSize();
         }
 
-        if (lineStyle->GetDisplayOffset() != 0.0) {
-          lineOffset += projection.ConvertWidthToPixel(lineStyle->GetDisplayOffset());
+        if (lineStyles[l]->GetDisplayOffset() != 0.0) {
+          lineOffset += projection.ConvertWidthToPixel(lineStyles[l]->GetDisplayOffset());
         }
+
 
         for (size_t i = 0; i < way->nodes.size() - 1; i++) {
-          Color color = lineStyle->GetLineColor();
+
           //first triangle
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
                         color, i == 0 ? 1 : 5, lineWidth,
-                        glm::vec3(1,0,1));
+                        glm::vec3(1,0,1),
+                        border, z);
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
                         color, i == 0 ? 2 : 6, lineWidth,
-                        glm::vec3(0,1,1));
+                        glm::vec3(0,1,1),
+                        border, z);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
                         color, (i == way->nodes.size() - 2 ? 7 : 3), lineWidth,
-                        glm::vec3(0,0,1));
+                        glm::vec3(0,0,1),
+                        border, z);
           //second triangle
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
                         color, (i == way->nodes.size() - 2) ? 7 : 3, lineWidth,
-                        glm::vec3(1,1,0));
+                        glm::vec3(1,1,0),
+                        border, z);
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
                         color, i == 0 ? 2 : 6, lineWidth,
-                        glm::vec3(0,1,0));
+                        glm::vec3(0,1,0),
+                        border, z);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
                         color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
-                        glm::vec3(0,1,1));
+                        glm::vec3(0,1,1),
+                        border, z);
 
           int num;
           num = PathRenderer.GetVerticesNumber() - 6;
@@ -626,33 +643,39 @@ namespace osmscout {
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
                         color, i == 0 ? 1 : 5, lineWidth,
-                        glm::vec3(1,1,0));
+                        glm::vec3(1,1,0),
+                        border, z);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
                         color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
-                        glm::vec3(0,1,0));
+                        glm::vec3(0,1,0),
+                        border, z);
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
                         color, i == 0 ? 2 : 6, lineWidth,
-                        glm::vec3(0,1,1));
+                        glm::vec3(0,1,1),
+                        border, z);
           //
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
                         color, i == 0 ? 1 : 5, lineWidth,
-                        glm::vec3(1,0,0));
+                        glm::vec3(1,0,0),
+                        border, z);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
                         color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
-                        glm::vec3(1,1,0));
+                        glm::vec3(1,1,0),
+                        border, z);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
                         color, i == way->nodes.size() - 2 ? 7 : 3, lineWidth,
-                        glm::vec3(1,0,1));
+                        glm::vec3(1,0,1),
+                        border, z);
 
           num = PathRenderer.GetVerticesNumber() - 6;
           PathRenderer.AddNewElement(num);
@@ -669,7 +692,7 @@ namespace osmscout {
 
   void
   osmscout::MapPainterOpenGL::AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
-                                            osmscout::Color color, int type, float width, glm::vec3 barycentric) {
+                                            osmscout::Color color, int type, float width, glm::vec3 barycentric, int border, double z) {
     PathRenderer.AddNewVertex(current.GetLon());
     PathRenderer.AddNewVertex(current.GetLat());
 
@@ -682,18 +705,23 @@ namespace osmscout {
     PathRenderer.AddNewVertex(color.GetR());
     PathRenderer.AddNewVertex(color.GetG());
     PathRenderer.AddNewVertex(color.GetB());
+    PathRenderer.AddNewVertex(color.GetA());
 
     PathRenderer.AddNewVertex(type);
 
     PathRenderer.AddNewVertex(width);
 
+    PathRenderer.AddNewVertex(border);
+
     PathRenderer.AddNewVertex(barycentric.x);
     PathRenderer.AddNewVertex(barycentric.y);
     PathRenderer.AddNewVertex(barycentric.z);
+
+    PathRenderer.AddNewVertex(z);
   }
 
   void
-  osmscout::MapPainterOpenGL::ProcessGroundData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+  osmscout::MapPainterOpenGL::ProcessGround(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                                                 const osmscout::Projection &projection,
                                                 const osmscout::StyleConfigRef &styleConfig) {
     FillStyleRef landFill;
@@ -848,7 +876,7 @@ namespace osmscout {
   }
 
   void
-  osmscout::MapPainterOpenGL::ProcessNodeData(const osmscout::MapData &data,
+  osmscout::MapPainterOpenGL::ProcessNodes(const osmscout::MapData &data,
                                               const osmscout::MapParameter &parameter,
                                               const osmscout::Projection &projection,
                                               const osmscout::StyleConfigRef &styleConfig) {
@@ -1228,6 +1256,7 @@ namespace osmscout {
     ImageRenderer.AddUniform("magnification", Magnification.GetMagnification());
     ImageRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
     ImageRenderer.AddUniform("dpi", dpi);
+    ImageRenderer.AddUniform("z", 0.001);
 
     ImageRenderer.SetProjection(width, height);
     ImageRenderer.SetModel();
@@ -1246,6 +1275,7 @@ namespace osmscout {
     TextRenderer.AddUniform("magnification", Magnification.GetMagnification());
     TextRenderer.AddUniform("textureWidthSum", TextRenderer.GetTextureWidth());
     TextRenderer.AddUniform("dpi", dpi);
+    TextRenderer.AddUniform("z", 0.001);
 
     TextRenderer.SetProjection(width, height);
     TextRenderer.SetModel();
