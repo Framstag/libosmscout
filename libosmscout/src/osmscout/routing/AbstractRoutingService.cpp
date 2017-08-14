@@ -32,10 +32,10 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
 
-//#define DEBUG_ROUTING
-
 #include <iomanip>
 #include <iostream>
+
+//#define DEBUG_ROUTING
 
 namespace osmscout {
 
@@ -1133,7 +1133,9 @@ namespace osmscout {
 
       std::cout << "Air-line distance:   " << std::fixed << std::setprecision(1) << overallDistance << "km" << std::endl;
       std::cout << "Minimum cost:        " << overallCost << std::endl;
-      std::cout << "Actual cost:         " << targetFinalNode->currentCost << std::endl;
+      if (targetFinalNode) {
+        std::cout << "Actual cost:         " << targetFinalNode->currentCost << std::endl;
+      }
       std::cout << "Cost limit:          " << costLimit << std::endl;
       std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
       std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
