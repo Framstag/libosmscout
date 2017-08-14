@@ -3,14 +3,14 @@
 in vec2 position;
 in vec2 previous;
 in vec2 next;
-in vec3 color;
+in vec4 color;
 in float index;
 in float thickness;
-in float barycentricX;
-in float barycentricY;
-in float barycentricZ;
+in float border;
+in vec3 barycentric;
+in float z;
 out vec2 Normal;
-out vec3 Color;
+out vec4 Color;
 out vec3 Barycentric;
 out float RenderingMode;
 uniform mat4 Model;
@@ -127,6 +127,8 @@ void main() {
     else{
         RenderingMode = -1;
         thickness_norm = (ceil(thickness)/windowWidth);
+        if(border != 0)
+            thickness_norm += thickness_norm/10;
     }
 
     vec2 n = GeoToPixel(next.x, next.y);
@@ -137,9 +139,9 @@ void main() {
     c = vec2(c.x, c.y);
     p = vec2(p.x, p.y);
 
-    vec4 pos = Projection * View * Model * vec4(c.x, c.y, 0, 1);
+    vec4 pos = Projection * View * Model * vec4(c.x, c.y, z, 1);
 
-    Barycentric = vec3(barycentricX, barycentricY, barycentricZ);
+    Barycentric = barycentric;
 
     vec2 normal;
     vec2 result;
