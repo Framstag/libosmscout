@@ -4,15 +4,22 @@ in vec2 position;
 in vec2 previous;
 in vec2 next;
 in vec4 color;
+in vec4 gapcolor;
 in float index;
 in float thickness;
 in float border;
 in vec3 barycentric;
 in float z;
+in float dashsize;
+in float length;
 out vec2 Normal;
 out vec4 Color;
+out vec4 GapColor;
 out vec3 Barycentric;
 out float RenderingMode;
+out float Dashed;
+flat out float DashSize;
+out float Dash;
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
@@ -115,6 +122,8 @@ vec2 GeoToPixel(in float posx, in float posy){
 
 void main() {
     Color = color;
+    GapColor = gapcolor;
+    Barycentric = barycentric;
 
     //+0.001 so lines dont disappear because of anti-aliasing
     //float thickness_norm = (ceil(thickness)/windowWidth) + 0.001;
@@ -131,6 +140,7 @@ void main() {
             thickness_norm += thickness_norm/10;
     }
 
+    //Mercator projection, convertion to screen coordinates
     vec2 n = GeoToPixel(next.x, next.y);
     vec2 c = GeoToPixel(position.x, position.y);
     vec2 p = GeoToPixel(previous.x, previous.y);
@@ -141,7 +151,12 @@ void main() {
 
     vec4 pos = Projection * View * Model * vec4(c.x, c.y, z, 1);
 
-    Barycentric = barycentric;
+    //Calculations for dashed lines
+    float dist = length / windowWidth;
+    float dash = dashsize/windowWidth;
+    float normalized_dash = (dash)/(dist);
+    Dashed = (dashsize == 0) ? -1 : 1;
+    DashSize = normalized_dash;
 
     vec2 normal;
     vec2 result;
@@ -151,6 +166,7 @@ void main() {
         normal = normalize(vec2(ny, -nx));
         result = normal;
         Normal = normal;
+        Dash = 0.0;
     }
 	else if(index == 2.0){
     	float nx = (n.x - c.x);
@@ -158,30 +174,35 @@ void main() {
         normal = normalize(vec2(-ny, nx));
         result = normal;
         Normal = normal;
+        Dash = 0.0;
 	}
 	else if(index == 3.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(tangent.y, -tangent.x);
         result = miter;
         Normal = miter;
+        Dash = 1.0;
 	}
 	else if(index == 4.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(-tangent.y, tangent.x);
         result = miter;
         Normal = miter;
+        Dash = 1.0;
 	}
 	else if(index == 5.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(tangent.y, -tangent.x);
         result = miter;
         Normal = miter;
+        Dash = 0.0;
 	}
 	else if(index == 6.0){
         vec2 tangent = normalize(normalize(n-c) + normalize(c-p));
         vec2 miter = vec2(-tangent.y, tangent.x);
         result = miter;
         Normal = miter;
+        Dash = 0.0;
 	}
 	else if(index == 7.0){
 	    float nx = (c.x - p.x);
@@ -189,6 +210,7 @@ void main() {
         normal = normalize(vec2(ny, -nx));
         result = normal;
         Normal = normal;
+        Dash = 1.0;
 	}
 	else{
 	    float nx = (c.x - p.x);
@@ -196,6 +218,7 @@ void main() {
         normal = normalize(vec2(-ny, nx));
         result = normal;
         Normal = normal;
+        Dash = 1.0;
 	}
 
     vec4 delta = vec4(result * thickness_norm, 0, 0);
