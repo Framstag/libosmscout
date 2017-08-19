@@ -33,8 +33,8 @@
 #include <osmscout/import/GenRawWayIndex.h>
 #include <osmscout/import/GenRawRelIndex.h>
 
-#include <osmscout/RoutingService.h>
-#include <osmscout/RouteNode.h>
+#include <osmscout/routing/RoutingService.h>
+#include <osmscout/routing/RouteNode.h>
 #include <osmscout/Intersection.h>
 
 #include <osmscout/import/GenTypeDat.h>
@@ -138,6 +138,7 @@ namespace osmscout {
      routeNodeBlockSize(500000),
      assumeLand(AssumeLandStrategy::automatic),
      langOrder({"#"}),
+     maxAdminLevel(10),
      firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2)),
      fillWaterArea(20)
   {
@@ -389,6 +390,11 @@ namespace osmscout {
     return this->altLangOrder;
   }
 
+  size_t ImportParameter::GetMaxAdminLevel() const
+  {
+    return maxAdminLevel;
+  }
+
   void ImportParameter::SetMapfiles(const std::list<std::string>& mapfiles)
   {
     this->mapfiles=mapfiles;
@@ -631,6 +637,11 @@ namespace osmscout {
   void ImportParameter::SetAltLangOrder(const std::vector<std::string>& altLangOrder)
   {
     this->altLangOrder = altLangOrder;
+  }
+
+  void ImportParameter::SetMaxAdminLevel(size_t maxAdminLevel)
+  {
+    this->maxAdminLevel=maxAdminLevel;
   }
 
   void ImportParameter::SetFirstFreeOSMId(OSMId id)

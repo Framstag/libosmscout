@@ -87,8 +87,8 @@ void AddFeatureToFilter(StyleFilter& filter,
     if (type->HasFeature(featureName)) {
       if (!filter.FiltersByType() ||
           filter.HasType(type)) {
-        // Add type only if the filter either has no types or 
-        // if the the type is already filtered  
+        // Add type only if the filter either has no types or
+        // if the the type is already filtered
         resultTypes.Set(type);
       }
     }
@@ -96,7 +96,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 
   if (!resultTypes.Empty()) {
     size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
-  
+
     filter.AddFeature(featureFilterIndex);
   }
 }
@@ -316,14 +316,14 @@ PRODUCTIONS
   AREASYMBOLSTYLE<FillPartialStyle& fillStyle, BorderPartialStyle& borderStyle>
               = SYNC "{"
                 {
-                  SYNC "AREA" 
-                  (  
+                  SYNC "AREA"
+                  (
                     AREAFILLSYMSTYLE<fillStyle>
                   | "."
                     (
                       AREABORDERSYMSTYLE<borderStyle>
-                    )  
-                  )  
+                    )
+                  )
                 }
                 SYNC "}"
                 .
@@ -332,12 +332,22 @@ PRODUCTIONS
               = SYNC "POLYGON"
                 (.
                   StyleFilter         filter;
+                  DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
                   FillPartialStyle    fillStyle;
                   BorderPartialStyle  borderStyle;
-                  PolygonPrimitiveRef polygon=std::make_shared<PolygonPrimitive>(fillStyle.style,
-                                                                                 borderStyle.style);
+                  PolygonPrimitiveRef polygon;
                   Vertex2D            coord;
                 .)
+                [
+                  "GROUND" (. projectionMode=DrawPrimitive::ProjectionMode::GROUND; .)
+                ]
+
+                (.
+                  polygon=std::make_shared<PolygonPrimitive>(projectionMode,
+                                                             fillStyle.style,
+                                                             borderStyle.style);
+                .)
+
                 COORD<coord>   (. polygon->AddCoord(coord); .)
                 COORD<coord>   (. polygon->AddCoord(coord); .)
                 {
@@ -351,12 +361,16 @@ PRODUCTIONS
               = SYNC "RECTANGLE"
                 (.
                   StyleFilter        filter;
+                  DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
                   FillPartialStyle   fillStyle;
                   BorderPartialStyle borderStyle;
                   Vertex2D           topLeft;
                   double             width;
                   double             height;
                 .)
+                [
+                  "GROUND" (. projectionMode=DrawPrimitive::ProjectionMode::GROUND; .)
+                ]
                 COORD<topLeft>
                 UDOUBLE<width>
                 "x"
@@ -364,7 +378,8 @@ PRODUCTIONS
 
                 AREASYMBOLSTYLE<fillStyle,borderStyle>
                 (.
-                  symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(topLeft,
+                  symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(projectionMode,
+                                                                           topLeft,
                                                                            width,height,
                                                                            fillStyle.style,
                                                                            borderStyle.style));
@@ -374,17 +389,22 @@ PRODUCTIONS
   CIRCLE<Symbol& symbol>
               = SYNC "CIRCLE"
                 (.
-                  Vertex2D           center;
-                  double             radius;
-                  StyleFilter        filter;
-                  FillPartialStyle   fillStyle;
-                  BorderPartialStyle borderStyle;
+                  StyleFilter                   filter;
+                  DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
+                  FillPartialStyle              fillStyle;
+                  BorderPartialStyle            borderStyle;
+                  Vertex2D                      center;
+                  double                        radius;
                 .)
+                [
+                  "GROUND" (. projectionMode=DrawPrimitive::ProjectionMode::GROUND; .)
+                ]
                 COORD<center>
                 UDOUBLE<radius>
                 AREASYMBOLSTYLE<fillStyle,borderStyle>
                 (.
-                  symbol.AddPrimitive(std::make_shared<CirclePrimitive>(center,
+                  symbol.AddPrimitive(std::make_shared<CirclePrimitive>(projectionMode,
+                                                                        center,
                                                                         radius,
                                                                         fillStyle.style,
                                                                         borderStyle.style));
@@ -693,7 +713,7 @@ PRODUCTIONS
                 (.
                   AddFeatureToFilter(filter,
                                      featureName,
-                                     types);                  
+                                     types);
                 .)
                 {
                   ","
@@ -701,7 +721,7 @@ PRODUCTIONS
                   (.
                     AddFeatureToFilter(filter,
                                        featureName,
-                                       types);                  
+                                       types);
                   .)
                 }
 
@@ -1155,17 +1175,17 @@ PRODUCTIONS
                 .
 
   LINESTYLEATTR<LinePartialStyle& style>
-              = 
+              =
                 ATTRIBUTE<style,*LineStyle::GetDescriptor()>
                 .
 
   FILLSTYLEATTR<FillPartialStyle& style>
-              =   
+              =
                 ATTRIBUTE<style,*FillStyle::GetDescriptor()>
                 .
 
   BORDERSTYLEATTR<BorderPartialStyle& style>
-              = 
+              =
                 ATTRIBUTE<style,*BorderStyle::GetDescriptor()>
                 .
 
@@ -1175,22 +1195,22 @@ PRODUCTIONS
                 .
 
   PATHSHIELDSTYLEATTR<PathShieldPartialStyle& style>
-              = 
-                ATTRIBUTE<style,*PathShieldStyle::GetDescriptor()>              
+              =
+                ATTRIBUTE<style,*PathShieldStyle::GetDescriptor()>
                 .
 
   PATHTEXTSTYLEATTR<PathTextPartialStyle& style>
-              = 
+              =
                 ATTRIBUTE<style,*PathTextStyle::GetDescriptor()>
                 .
 
   PATHSYMBOLSTYLEATTR<PathSymbolPartialStyle& style>
-              = 
+              =
                 ATTRIBUTE<style,*PathSymbolStyle::GetDescriptor()>
                 .
 
   ICONSTYLEATTR<IconPartialStyle& style>
-              = 
+              =
                 ATTRIBUTE<style,*IconStyle::GetDescriptor()>
                 .
 
@@ -1202,17 +1222,17 @@ PRODUCTIONS
                  .)
                  (
                    IDENT<attributeName>
-                 | "name" (. attributeName="name"; .)  
+                 | "name" (. attributeName="name"; .)
                  )
-                 
+
                  (.
                    attributeDescriptor=descriptor.GetAttribute(attributeName);
-                   
+
                    if (!attributeDescriptor) {
                      std::string e="'"+attributeName+"' is not a known attribute of the given style";
 
                      SemErr(e.c_str());
-                     
+
                      attributeDescriptor=std::make_shared<StyleVoidAttributeDescriptor>();
                    }
                   .)
@@ -1227,7 +1247,7 @@ PRODUCTIONS
     COLOR,
     NUMBER,
     CONSTANT
-    
+
     and the following target types (types we should return):
     BOOL,
     STRING,
@@ -1244,7 +1264,7 @@ PRODUCTIONS
     INT,
     UINT,
     LABEL,
-    SYMBOL    
+    SYMBOL
 
    (in both cases besides "VOID")
   */
@@ -1264,12 +1284,12 @@ PRODUCTIONS
                    Color                  color;
                    StyleConstantRef       constant;
                   .)
-                  
+
                  (
                    (
                      IDENT<ident> (. valueType=ValueType::IDENT; .)
-                   | "lighten"    (. ident="lighten"; valueType=ValueType::IDENT; .)  
-                   | "darken"     (. ident="darken"; valueType=ValueType::IDENT; .)  
+                   | "lighten"    (. ident="lighten"; valueType=ValueType::IDENT; .)
+                   | "darken"     (. ident="darken"; valueType=ValueType::IDENT; .)
                    )
                    [
                      (
@@ -1291,9 +1311,9 @@ PRODUCTIONS
                        "."
                        (
                          IDENT<subIdent>
-                       | "name" (. subIdent="name"; .)  
+                       | "name" (. subIdent="name"; .)
                        )
-                     )  
+                     )
                    ]
                  | STRING<stringValue>
                    (. valueType=ValueType::STRING; .)
@@ -1311,7 +1331,7 @@ PRODUCTIONS
                          IDENT<unit>
                        | "mm" (. unit="mm"; .)
                        | "m"  (. unit="m"; .)
-                       )  
+                       )
                      ]
                      {
                        ","
@@ -1319,18 +1339,18 @@ PRODUCTIONS
                          number (. numberList.push_back(t->val); .)
                        | double (. numberList.push_back(t->val); .)
                        )
-                     }  
+                     }
                    | double
                      (.
                        number=t->val;
                        valueType=ValueType::NUMBER;
-                     .)  
+                     .)
                      [
                        (
                          IDENT<unit>
                        | "mm" (. unit="mm"; .)
                        | "m"  (. unit="m"; .)
-                       )  
+                       )
                      ]
                      {
                        ","
@@ -1338,14 +1358,14 @@ PRODUCTIONS
                          number (. numberList.push_back(t->val); .)
                        | double (. numberList.push_back(t->val); .)
                        )
-                     }  
-                   )                   
+                     }
+                   )
                  | COLOR_VALUE<color>
                    (. valueType=ValueType::COLOR; .)
                  | CONSTANT<constant>
                    (. valueType=ValueType::CONSTANT; .)
                  )
-                 
+
                  (.
                    if (descriptor.GetType()==StyleAttributeType::TYPE_BOOL) {
                      if (valueType==ValueType::IDENT) {
@@ -1357,13 +1377,13 @@ PRODUCTIONS
                        }
                        else {
                          std::string e="Attribute '"+descriptor.GetName()+"' requires a boolean value ('true' or 'false')";
-                        
+
                          SemErr(e.c_str());
                        }
                      }
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
@@ -1374,7 +1394,7 @@ PRODUCTIONS
                        }
                        else {
                          std::string e="Attribute '"+descriptor.GetName()+"' requires a simple IDENT as value";
-                       
+
                          SemErr(e.c_str());
                        }
                      }
@@ -1383,7 +1403,7 @@ PRODUCTIONS
                      }
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
@@ -1401,14 +1421,14 @@ PRODUCTIONS
                            color=colorConstant->GetColor();
                          }
                        }
-                     
+
                        if (!function.empty()) {
                          if (factor<0.0 && factor>1.0) {
                           std::string e="Factor must be in the range [0..1]";
 
                            SemErr(e.c_str());
                          }
-                       
+
                          if (function=="lighten") {
                            if (!errors->hasErrors) {
                              style.SetColorValue(descriptor.GetAttribute(),color.Lighten(factor));
@@ -1425,7 +1445,7 @@ PRODUCTIONS
                            SemErr(e.c_str());
                          }
                        }
-                       else {                     
+                       else {
                          style.SetColorValue(descriptor.GetAttribute(),color);
                        }
                      }
@@ -1447,14 +1467,14 @@ PRODUCTIONS
                      }
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_MAGNIFICATION) {
                      if (valueType==ValueType::IDENT) {
                        Magnification magnification;
-                       
+
                        if (subIdent.empty() && magnificationConverter.Convert(ident,magnification)) {
                          style.SetMagnificationValue(descriptor.GetAttribute(),magnification);
                        }
@@ -1467,7 +1487,7 @@ PRODUCTIONS
                      else if (valueType==ValueType::NUMBER) {
                        Magnification magnification;
                        size_t        level;
-                       
+
                        if (StringToNumber(number,level)) {
                          magnification.SetLevel((uint32_t)level);
                        }
@@ -1495,47 +1515,47 @@ PRODUCTIONS
                      }
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_ENUM) {
                      const StyleEnumAttributeDescriptor& enumDescriptor=dynamic_cast<const StyleEnumAttributeDescriptor&>(descriptor);
-                     
+
                      if (valueType==ValueType::IDENT) {
                        int value=enumDescriptor.GetEnumValue(ident);
-                       
+
                        if (value>=0) {
                          style.SetIntValue(descriptor.GetAttribute(),value);
                        }
                        else {
                          std::string e="'"+ident+"' is not a valid enumeration value for this attribute";
-                       
+
                          SemErr(e.c_str());
                        }
                      }
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_DISPLAY_SIZE) {
-                     if (valueType==ValueType::NUMBER) {                     
+                     if (valueType==ValueType::NUMBER) {
                        double value;
-                       
+
                        if (unit!="mm") {
                          std::string e="Value must have unit 'mm' and not '"+unit+"'";
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          if (negate) {
                            value=-value;
@@ -1545,9 +1565,9 @@ PRODUCTIONS
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_UDISPLAY_SIZE) {
-                     if (valueType==ValueType::NUMBER) {                     
+                     if (valueType==ValueType::NUMBER) {
                        double value;
-                       
+
                        if (negate) {
                          std::string e="Negative numbers not allowed here";
 
@@ -1559,34 +1579,34 @@ PRODUCTIONS
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          style.SetDoubleValue(descriptor.GetAttribute(),value);
                        }
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_MAP_SIZE) {
-                     if (valueType==ValueType::NUMBER) {                     
+                     if (valueType==ValueType::NUMBER) {
                        double value;
-                       
+
                        if (unit!="m") {
                          std::string e="Value must have unit 'm' and not '"+unit+"'";
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          if (negate) {
                            value=-value;
@@ -1596,9 +1616,9 @@ PRODUCTIONS
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_UMAP_SIZE) {
-                     if (valueType==ValueType::NUMBER) {                     
+                     if (valueType==ValueType::NUMBER) {
                        double value;
-                       
+
                        if (negate) {
                          std::string e="Negative numbers not allowed here";
 
@@ -1610,34 +1630,34 @@ PRODUCTIONS
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          style.SetDoubleValue(descriptor.GetAttribute(),value);
                        }
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_DOUBLE) {
-                     if (valueType==ValueType::NUMBER) {                     
+                     if (valueType==ValueType::NUMBER) {
                        double value;
-                       
+
                        if (!unit.empty()) {
                          std::string e="Value must not have a unit";
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          if (negate) {
                            value=-value;
@@ -1647,9 +1667,9 @@ PRODUCTIONS
                      }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_UDOUBLE) {
-                     if (valueType==ValueType::NUMBER) {                     
+                     if (valueType==ValueType::NUMBER) {
                        double value;
-                       
+
                        if (negate) {
                          std::string e="Negative numbers not allowed here";
 
@@ -1661,13 +1681,13 @@ PRODUCTIONS
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          style.SetDoubleValue(descriptor.GetAttribute(),value);
                        }
@@ -1677,7 +1697,7 @@ PRODUCTIONS
                      if (valueType==ValueType::NUMBER) {
                        double              value;
                        std::vector<double> valueList(numberList.size()+1);
-                       
+
                        if (negate) {
                          std::string e="Negative numbers not allowed here";
 
@@ -1689,25 +1709,25 @@ PRODUCTIONS
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        valueList.push_back(value);
-                       
+
                        for (const auto number : numberList) {
                          if (!StringToNumber(number,value)) {
                            std::string e="Cannot parse number '"+number+"'";
 
                            SemErr(e.c_str());
                          }
-                         
+
                          valueList.push_back(value);
                        }
-                       
+
                        if (!errors->hasErrors) {
                          style.SetDoubleArrayValue(descriptor.GetAttribute(),valueList);
                        }
@@ -1740,7 +1760,7 @@ PRODUCTIONS
                          }
                          else {
                            LabelProviderRef label;
-                           
+
                            label=std::make_shared<DynamicFeatureLabelReader>(*config.GetTypeConfig(),
                                                                              ident,
                                                                              subIdent);
@@ -1750,7 +1770,7 @@ PRODUCTIONS
                      }
                      else {
                        LabelProviderRef label;
-                       
+
                        label=config.GetLabelProvider(ident);
 
                        if (!label) {
@@ -1778,26 +1798,26 @@ PRODUCTIONS
                      }
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
-                   else if (descriptor.GetType()==StyleAttributeType::TYPE_INT) {                   
-                     if (valueType==ValueType::NUMBER) {                     
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_INT) {
+                     if (valueType==ValueType::NUMBER) {
                        int value;
-                       
+
                        if (!unit.empty()) {
                          std::string e="Vaue must not have a unit";
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          if (negate) {
                            value=-value;
@@ -1823,14 +1843,14 @@ PRODUCTIONS
                      }*/
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
-                   else if (descriptor.GetType()==StyleAttributeType::TYPE_UINT) {                   
-                     if (valueType==ValueType::NUMBER) {                     
+                   else if (descriptor.GetType()==StyleAttributeType::TYPE_UINT) {
+                     if (valueType==ValueType::NUMBER) {
                        size_t value;
-                       
+
                        if (negate) {
                          std::string e="Negative numbers not allowed here";
 
@@ -1842,13 +1862,13 @@ PRODUCTIONS
 
                          SemErr(e.c_str());
                        }
-                      
+
                        if (!StringToNumber(number,value)) {
                          std::string e="Cannot parse number '"+number+"'";
 
                          SemErr(e.c_str());
                        }
-                       
+
                        if (!errors->hasErrors) {
                          style.SetUIntValue(descriptor.GetAttribute(),value);
                        }
@@ -1871,7 +1891,7 @@ PRODUCTIONS
                      }
                      else {
                        std::string e="Attribute '"+descriptor.GetName()+"' has incompatible type for value";
-                       
+
                        SemErr(e.c_str());
                      }
                    }
@@ -1880,25 +1900,25 @@ PRODUCTIONS
 
   COLOR_VALUE<Color& color>
                =
-                color 
+                color
                 (.
                   std::string c(t->val);
 
                   if (c.length()!=7 &&
                       c.length()!=9) {
                     std::string e="Illegal color value";
-                    
+
                     SemErr(e.c_str());
                   }
 
                   if (!errors->hasErrors) {
                     color=osmscout::Color::FromHexString(c);
                   }
-                .) 
-               . 
+                .)
+               .
 
   CONSTANT<StyleConstantRef& constant>
-               = 
+               =
                  (.
                    constant=NULL;
                  .)
@@ -1912,7 +1932,7 @@ PRODUCTIONS
                      SemErr(e.c_str());
                    }
                  .)
-               . 
+               .
 
   STRING<std::string& value>
               = string
@@ -1922,12 +1942,12 @@ PRODUCTIONS
                 .
 
   COLOR<Color& color>
-              =  
+              =
                 (.
                    StyleConstantRef constant;
                    double           factor;
                 .)
-                ( 
+                (
                   "lighten" "(" COLOR<color> "," UDOUBLE<factor> ")"
                   (.
                     if (factor>=0.0 && factor<=1.0) {
@@ -1970,11 +1990,11 @@ PRODUCTIONS
                       color=colorConstant->GetColor();
                     }
                   .)
-                )  
+                )
                 .
 
   MAG<Magnification& magnification>
-              = 
+              =
                 (
                   (. std::string name; .)
                   IDENT<name>
@@ -2020,7 +2040,7 @@ PRODUCTIONS
                       magnification=magConstant->GetMag();
                     }
                   .)
-                )  
+                )
               .
 
   IDENT<std::string& value>

@@ -43,12 +43,22 @@ namespace osmscout {
     static const char* const FILENAME_LOCATION_FULL_TXT;
 
   private:
+    struct RegionMetrics CLASS_FINAL
+    {
+      uint32_t maxRegionWords;
+      uint32_t maxPOIWords;
+      uint32_t maxLocationWords;
+      uint32_t maxAddressWords;
+
+      RegionMetrics();
+    };
+
     /**
      * An area can contain an number of location nodes. Since they do not have
      * their own area we define the node name as an alias for the containing
      * area, since this is the best approximation.
      */
-    struct RegionAlias
+    struct RegionAlias CLASS_FINAL
     {
       FileOffset  reference; //!< Reference to the node that is the alias
       std::string name;      //!< The alias itself
@@ -57,10 +67,18 @@ namespace osmscout {
     /**
      * A POI within a region
      */
-    struct RegionPOI
+    struct RegionPOI CLASS_FINAL
     {
-      ObjectFileRef object; //!< Object
       std::string   name;   //!< Name of the POI
+      ObjectFileRef object; //!< Object
+
+      RegionPOI(const std::string& name,
+               const ObjectFileRef& object)
+      : name(name),
+        object(object)
+      {
+        // no code
+      }
 
       bool operator<(const RegionPOI& other) const
       {
@@ -68,11 +86,18 @@ namespace osmscout {
       }
     };
 
-    struct RegionAddress
+    struct RegionAddress CLASS_FINAL
     {
-      ObjectFileRef object;     //!< Object with the given address
       std::string   name;       //!< The house number
-      std::string   postalCode; //!< The postal code
+      ObjectFileRef object;     //!< Object with the given address
+
+      RegionAddress(const std::string& name,
+                    const ObjectFileRef& object)
+      : name(name),
+        object(object)
+      {
+        // no code
+      }
 
       bool operator<(const RegionAddress& other) const
       {
@@ -80,12 +105,13 @@ namespace osmscout {
       }
     };
 
-    struct RegionLocation
+    struct RegionLocation CLASS_FINAL
     {
-      std::unordered_map<std::string,size_t> names;         //!< map of names in different case used for this location and their use count
-      FileOffset                   addressOffset; //!< Offset of place where the address list offset is stored
-      std::list<ObjectFileRef>     objects;       //!< Objects that represent this location
-      std::list<RegionAddress>     addresses;     //!< Addresses at this location
+      std::unordered_map<std::string,
+                         size_t>      names;            //!< map of names in different case used for this location and their use count
+      FileOffset                      dataOffsetOffset; //!< Offset of place where the address list offset is stored
+      std::list<ObjectFileRef>        objects;          //!< Objects that represent this location
+      std::list<RegionAddress>        addresses;        //!< Addresses at this location
 
       std::string GetName() const;
     };
@@ -94,36 +120,58 @@ namespace osmscout {
 
     typedef std::shared_ptr<Region> RegionRef;
 
+    struct PostalArea CLASS_FINAL
+    {
+      std::string                          name;             //!< name of the postal area
+      FileOffset                           dataOffsetOffset; //!< Offset into the index file
+      std::map<std::string,RegionLocation> locations;        //!< list of indexed objects in this region
+
+      PostalArea(const std::string& name)
+      : name(name)
+      {
+        // no code
+      }
+
+      void AddLocationObject(const std::string& name,
+                             const ObjectFileRef& objectRef);
+    };
+
     /**
       An area. An area is a administrative region, a city, a country, ...
       An area can have child areas (suburbs, ...).
       An area has a name and also a number of locations, which are possibly
       within the area but area currently also represented by this area.
       */
-    class Region
+    class Region CLASS_FINAL
     {
+    public:
+      typedef std::unordered_map<std::string,PostalArea> PostalAreaMap;
+
     private:
-      std::vector<GeoBox>                  boundingBoxes; //!< bounding box of each area building the region
-      GeoBox                               boundingBox;   //!< Overall bounding box of all areas
-      std::vector<GeoCoord>                probePoints;   //!< Points within the region that can be used to check region containment
+      std::vector<GeoBox>                boundingBoxes;      //!< bounding box of each area building up the region (see areas)
+      GeoBox                             boundingBox;        //!< Overall bounding box of all areas
+      std::vector<GeoCoord>              probePoints;        //!< Points within the region that can be used to check region containment
 
     public:
-      FileOffset                           indexOffset;   //!< Offset into the index file
-      FileOffset                           dataOffset;    //!< Offset into the index file
+      FileOffset                         indexOffset;        //!< Offset into the index file
+      FileOffset                         dataOffset;         //!< Offset into the index file
 
-      ObjectFileRef                        reference;     //!< Reference to the object this area is based on
-      std::string                          name;          //!< The name of this area
-      std::string                          isIn;          //!< Name of the parent region as stated in OSM (is_in tag)
-      std::list<RegionAlias>               aliases;       //!< Location that are represented by this region
-      int                                  level{-1};     //!< Admin level or -1 if not set
+      ObjectFileRef                      reference;          //!< Reference to the object this area is based on
+      std::string                        name;               //!< The name of this area
+      std::string                        isIn;               //!< Name of the parent region as stated in OSM (is_in tag)
+      std::list<RegionAlias>             aliases;            //!< Location that are represented by this region
+      int                                level{-1};          //!< Admin level or -1 if not set
 
-      std::vector<std::vector<GeoCoord> >  areas;         //!< the geometric area of this region
-      std::list<RegionPOI>                 pois;          //!< A list of POIs in this region
-      std::map<std::string,RegionLocation> locations;     //!< list of indexed objects in this region
+      std::vector<std::vector<GeoCoord>> areas;              //!< the geometric area of this region
+      std::list<RegionPOI>               pois;               //!< A list of POIs in this region
+      PostalAreaMap                      postalAreas;        //!< Collection of objects without a postal code
+      PostalAreaMap::iterator            defaultPostalArea;  //!< PostalArea for postal code ""
 
-      std::list<RegionRef>                 regions;       //!< A list of sub regions
+      std::list<RegionRef>               regions;            //!< A list of sub regions
 
     public:
+      Region();
+
       void CalculateMinMax();
       bool CouldContain(const GeoBox& boundingBox) const;
       bool CouldContain(const Region& region, bool strict) const;
@@ -140,7 +188,9 @@ namespace osmscout {
         return boundingBoxes;
       }
 
-      void AddLocationObject(const std::string& locationName, const ObjectFileRef& objectRef);
+      void AddLocationObject(const std::string& name,
+                             const std::string& postalCode,
+                             const ObjectFileRef& objectRef);
 
     protected:
       void CalculateProbePoints();                           //! Finds probe points for this to be used for containment test
@@ -148,7 +198,7 @@ namespace osmscout {
                                        size_t refinement=0);
     };
 
-    class RegionIndex
+    class RegionIndex CLASS_FINAL
     {
     public:
       std::map<Pixel,std::list<RegionRef> > index;
@@ -158,21 +208,6 @@ namespace osmscout {
     public:
       RegionRef GetRegionForNode(RegionRef& rootRegion,
                                  const GeoCoord& coord) const;
-    };
-
-    /**
-     * Reference to an area
-     */
-    struct RegionReference
-    {
-      ObjectFileRef          reference; //!< Reference of the object that
-                                        //!< is the alias
-      FileOffset             offset;    //!< File offset of the area
-
-      inline bool operator<(const RegionReference& other) const
-      {
-        return reference<other.reference;
-      }
     };
 
   private:
@@ -202,6 +237,9 @@ namespace osmscout {
                                std::list<std::string>& regionTokens,
                                std::list<std::string>& locationTokens);
 
+
+    void CalculateRegionMetrics(const Region& region,
+                                RegionMetrics& metrics);
 
     void DumpRegion(const Region& parent,
                     size_t indent,
@@ -261,12 +299,14 @@ namespace osmscout {
                                  const Area& area,
                                  const std::vector<Point>& nodes,
                                  const std::string& name,
+                                 const std::string& postalCode,
                                  const GeoBox& boundingBox);
 
     void AddLocationAreaToRegion(RegionRef& rootRegion,
                                  const Area& area,
                                  const Area::Ring& ring,
                                  const std::string& name,
+                                 const std::string& postalCode,
                                  const RegionIndex& regionIndex);
 
     bool IndexLocationAreas(const TypeConfig& typeConfig,
@@ -278,19 +318,30 @@ namespace osmscout {
     bool AddLocationWayToRegion(Region& region,
                                 const Way& way,
                                 const std::string& name,
+                                const std::string& postalCode,
                                 const GeoBox& boundingBox);
 
-    bool IndexLocationWays(const TypeConfigRef& typeConfig,
+    bool IndexLocationWays(const TypeConfig& typeConfig,
                            const ImportParameter& parameter,
                            Progress& progress,
                            RegionRef& rootRegion,
                            const RegionIndex& regionIndex);
+
+    void AddAddressToRegion(Progress& progress,
+                            Region& region,
+                            const ObjectFileRef& object,
+                            const std::string& location,
+                            const std::string& address,
+                            const std::string &postalCode,
+                            bool allowDuplicates,
+                            bool& added);
 
     void AddAddressAreaToRegion(Progress& progress,
                                 Region& region,
                                 const FileOffset& fileOffset,
                                 const std::string& location,
                                 const std::string& address,
+                                const std::string &postalCode,
                                 const std::vector<Point>& nodes,
                                 const GeoBox& boundingBox,
                                 bool& added);
@@ -335,7 +386,7 @@ namespace osmscout {
     /**
      * Find location by its name in region.locations map.
      *
-     * OSM data dont have strict rules how data should be organized.
+     * OSM data does not have strict rules how data should be organized.
      * Sometimes tag "addr:street" (`locationName` in this method) contains
      * not existent place (entry in `locations` map don't exists),
      * many times it contains typos or lowercase/uppercase errors.
@@ -346,6 +397,7 @@ namespace osmscout {
      */
     std::map<std::string,RegionLocation>::iterator FindLocation(Progress& progress,
                                                                 Region& region,
+                                                                PostalArea& postalArea,
                                                                 const std::string &locationName);
 
     void AddAddressNodeToRegion(Progress& progress,
@@ -367,9 +419,14 @@ namespace osmscout {
                            RegionRef& rootRegion,
                            const RegionIndex& regionIndex);
 
+    void CleanupPostalAreas(Region& region);
+
     void WriteIgnoreTokens(FileWriter& writer,
                            const std::list<std::string>& regionIgnoreTokens,
                            const std::list<std::string>& locationIgnoreTokens);
+
+    void WriteRegionMetrics(FileWriter& writer,
+                            const RegionMetrics& metrics);
 
     void WriteRegionIndexEntry(FileWriter& writer,
                                const Region& parentRegion,
@@ -383,6 +440,9 @@ namespace osmscout {
 
     void WriteRegionData(FileWriter& writer,
                          Region& root);
+
+    void WritePostalArea(FileWriter& writer,
+                         PostalArea& postalArea);
 
     void WriteAddressDataEntry(FileWriter& writer,
                                Region& region);

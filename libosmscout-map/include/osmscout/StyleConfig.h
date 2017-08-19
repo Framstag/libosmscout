@@ -1310,14 +1310,27 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API DrawPrimitive
   {
+  public:
+    enum class ProjectionMode {
+      MAP,
+      GROUND
+    };
+
   private:
+    ProjectionMode projectionMode;
     FillStyleRef   fillStyle;
     BorderStyleRef borderStyle;
 
   public:
-    DrawPrimitive(const FillStyleRef& fillStyle,
+    DrawPrimitive(ProjectionMode projectionMode,
+                  const FillStyleRef& fillStyle,
                   const BorderStyleRef& borderStyle);
     virtual ~DrawPrimitive();
+
+    inline ProjectionMode GetProjectionMode() const
+    {
+      return projectionMode;
+    }
 
     inline const FillStyleRef& GetFillStyle() const
     {
@@ -1347,7 +1360,8 @@ namespace osmscout {
     std::list<Vertex2D> coords;
 
   public:
-    PolygonPrimitive(const FillStyleRef& fillStyle,
+    PolygonPrimitive(ProjectionMode projectionMode,
+                     const FillStyleRef& fillStyle,
                      const BorderStyleRef& borderStyle);
 
     void AddCoord(const Vertex2D& coord);
@@ -1377,7 +1391,8 @@ namespace osmscout {
     double   height;
 
   public:
-    RectanglePrimitive(const Vertex2D& topLeft,
+    RectanglePrimitive(ProjectionMode projectionMode,
+                       const Vertex2D& topLeft,
                        double width,
                        double height,
                        const FillStyleRef& fillStyle,
@@ -1417,7 +1432,8 @@ namespace osmscout {
     double   radius;
 
   public:
-    CirclePrimitive(const Vertex2D& center,
+    CirclePrimitive(ProjectionMode projectionMode,
+                    const Vertex2D& center,
                     double radius,
                     const FillStyleRef& fillStyle,
                     const BorderStyleRef& borderStyle);

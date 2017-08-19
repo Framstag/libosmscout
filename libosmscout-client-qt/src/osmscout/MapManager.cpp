@@ -128,10 +128,11 @@ QString MapDownloadJob::getDownloadingFile()
   return "";
 }
 
-MapManager::MapManager(QStringList databaseLookupDirs):
+MapManager::MapManager(QStringList databaseLookupDirs, SettingsRef settings):
   databaseLookupDirs(databaseLookupDirs)
 {
-  webCtrl.setCookieJar(new PersistentCookieJar());
+  qDebug() << "MapManager ctor";
+  webCtrl.setCookieJar(new PersistentCookieJar(settings));
   // we don't use disk cache here
 
 }

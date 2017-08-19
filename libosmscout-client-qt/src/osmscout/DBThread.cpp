@@ -23,9 +23,12 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/private/Config.h>
 #include "osmscout/MapManager.h"
+
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/TextSearchIndex.h>
 #endif
+
+#include <osmscout/util/Logger.h>
 
 DBThread::DBThread(QThread *backgroundThread,
                    QString basemapLookupDirectory,
@@ -33,7 +36,7 @@ DBThread::DBThread(QThread *backgroundThread,
                    QString iconDirectory,
                    SettingsRef settings)
   : backgroundThread(backgroundThread),
-    mapManager(std::make_shared<MapManager>(databaseLookupDirs)),
+    mapManager(std::make_shared<MapManager>(databaseLookupDirs, settings)),
     basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
     mapDpi(-1),
@@ -87,17 +90,6 @@ DBThread::~DBThread()
   }
   databases.clear();
   backgroundThread->quit(); // deleteLater() is invoked when thread is finished
-}
-
-
-bool DBThread::AssureRouter(osmscout::Vehicle vehicle)
-{
-  for (auto db:databases){
-    if (!db->AssureRouter(vehicle, routerParameter)){
-      return false;
-    }
-  }
-  return true;
 }
 
 /**
@@ -695,201 +687,6 @@ void DBThread::SearchForLocations(const QString searchPattern, int limit)
   emit searchFinished(searchPattern, /*error*/ false);
 }
 
-bool DBThread::CalculateRoute(const QString databasePath,
-                              const osmscout::RoutingProfile& routingProfile,
-                              const osmscout::RoutePosition& start,
-                              const osmscout::RoutePosition target,
-                              osmscout::RouteData& route)
-{
-  QReadLocker locker(&lock);
-
-  DBInstanceRef database;
-  for (auto &db:databases){
-    if (db->path==databasePath){
-      database=db;
-      break;
-    }
-  }
-  if (!database){
-    return false;
-  }
-
-  if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
-    return false;
-  }
-
-  osmscout::RoutingResult    result;
-  osmscout::RoutingParameter parameter;
-
-  result=database->router->CalculateRoute(routingProfile,
-                                          start,
-                                          target,
-                                          parameter);
-
-  bool success=result.Success();
-
-  route=std::move(result.GetRoute());
-
-  return success;
-}
-
-bool DBThread::TransformRouteDataToRouteDescription(const QString databasePath,
-                                                    const osmscout::RoutingProfile& routingProfile,
-                                                    const osmscout::RouteData& data,
-                                                    osmscout::RouteDescription& description,
-                                                    const std::string& start,
-                                                    const std::string& target)
-{
-  QReadLocker locker(&lock);
-
-  DBInstanceRef database;
-  for (auto &db:databases){
-    if (db->path==databasePath){
-      database=db;
-      break;
-    }
-  }
-  if (!database){
-    return false;
-  }
-
-  if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
-    return false;
-  }
-
-  if (!database->router->TransformRouteDataToRouteDescription(data,description)) {
-    return false;
-  }
-
-  osmscout::TypeConfigRef typeConfig=database->router->GetTypeConfig();
-
-  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
-
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>(start));
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>(target));
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::WayNamePostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
-
-  osmscout::RoutePostprocessor::InstructionPostprocessorRef instructionProcessor=std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>();
-
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
-  postprocessors.push_back(instructionProcessor);
-
-  if (!routePostprocessor.PostprocessRouteDescription(description,
-                                                      routingProfile,
-                                                      *(database->database),
-                                                      postprocessors)) {
-    return false;
-  }
-
-  return true;
-}
-
-bool DBThread::TransformRouteDataToWay(const QString databasePath,
-                                       osmscout::Vehicle vehicle,
-                                       const osmscout::RouteData& data,
-                                       osmscout::Way& way)
-{
-  QReadLocker locker(&lock);
-
-  DBInstanceRef database;
-  for (auto &db:databases){
-    if (db->path==databasePath){
-      database=db;
-      break;
-    }
-  }
-  if (!database){
-    return false;
-  }
-
-
-  if (!database->AssureRouter(vehicle, routerParameter)) {
-    return false;
-  }
-
-  return database->router->TransformRouteDataToWay(data,way);
-}
-
-void DBThread::ClearRoute()
-{
-}
-
-void DBThread::AddRoute(const osmscout::Way& /*way*/)
-{
-}
-
-osmscout::RoutePosition DBThread::GetClosestRoutableNode(const QString databasePath,
-                                                         const osmscout::ObjectFileRef& refObject,
-                                                         const osmscout::RoutingProfile& routingProfile,
-                                                         double radius)
-{
-  QReadLocker locker(&lock);
-  osmscout::RoutePosition position;
-
-  DBInstanceRef database;
-  for (auto &db:databases){
-    if (db->path==databasePath){
-      database=db;
-      break;
-    }
-  }
-  if (!database){
-    return position;
-  }
-
-  if (!database->AssureRouter(routingProfile.GetVehicle(), routerParameter)) {
-    return position;
-  }
-
-  if (refObject.GetType()==osmscout::refNode) {
-    osmscout::NodeRef node;
-
-    if (!database->database->GetNodeByOffset(refObject.GetFileOffset(), node)) {
-      return position;
-    }
-
-    return database->router->GetClosestRoutableNode(node->GetCoords(),
-                                                    routingProfile,
-                                                    radius);
-  }
-  else if (refObject.GetType()==osmscout::refArea) {
-    osmscout::AreaRef area;
-
-    if (!database->database->GetAreaByOffset(refObject.GetFileOffset(), area)) {
-      return position;
-    }
-
-    osmscout::GeoCoord center;
-
-    area->GetCenter(center);
-
-    return database->router->GetClosestRoutableNode(center,
-                                                    routingProfile,
-                                                    radius);
-  }
-  else if (refObject.GetType()==osmscout::refWay) {
-    osmscout::WayRef way;
-
-    if (!database->database->GetWayByOffset(refObject.GetFileOffset(), way)) {
-      return position;
-    }
-
-    return database->router->GetClosestRoutableNode(way->nodes[0].GetCoord(),
-                                                    routingProfile,
-                                                    radius);
-  }
-
-  return position;
-}
-
 QStringList DBThread::BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
                                            std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
 {
@@ -946,7 +743,7 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
 
     std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
     if (!db->locationService->DescribeLocationByAddress(location, description)) {
-      std::cerr << "Error during generation of location description" << std::endl;
+      osmscout::log.Error() << "Error during generation of location description";
       continue;
     }
 
@@ -959,7 +756,7 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
     }
 
     if (!db->locationService->DescribeLocationByPOI(location, description)) {
-      std::cerr << "Error during generation of location description" << std::endl;
+      osmscout::log.Error() << "Error during generation of location description";
       continue;
     }
 
@@ -973,17 +770,6 @@ void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
   }
 
   emit locationDescriptionFinished(location);
-}
-
-osmscout::TypeConfigRef DBThread::GetTypeConfig(const QString databasePath) const
-{
-  QReadLocker locker(&lock);
-  for (auto &db:databases){
-    if (db->path == databasePath){
-      return db->database->GetTypeConfig();
-    }
-  }
-  return osmscout::TypeConfigRef();
 }
 
 const QMap<QString,bool> DBThread::GetStyleFlags() const

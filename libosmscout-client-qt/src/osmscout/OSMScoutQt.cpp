@@ -28,6 +28,7 @@
 #include <osmscout/MapWidget.h>
 #include <osmscout/PlaneMapRenderer.h>
 #include <osmscout/TiledMapRenderer.h>
+#include <osmscout/OverlayWay.h>
 
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/LocationInfoModel.h>
@@ -38,6 +39,7 @@
 #include <osmscout/RoutingModel.h>
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/StyleFlagsModel.h>
+#include <osmscout/Router.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
@@ -105,7 +107,7 @@ bool OSMScoutQtBuilder::Init()
                                   cacheLocation,
                                   onlineTileCacheSize,
                                   offlineTileCacheSize);
-
+                                  
   return true;
 }
 
@@ -113,10 +115,17 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
                                   int versionMajor,
                                   int versionMinor)
 {
+  // register osmscout + standard types for usage in Qt signals/slots
   qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
   qRegisterMetaType<osmscout::TileRef>();
+  qRegisterMetaType<osmscout::Vehicle>();
+  qRegisterMetaType<osmscout::BreakerRef>();
+  qRegisterMetaType<RouteSelection>();
+  qRegisterMetaType<RouteSelectionRef>();
+  qRegisterMetaType<LocationEntryRef>();
 
+  // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
   qmlRegisterType<LocationEntry>(uri, versionMajor, versionMinor, "LocationEntry");
   qmlRegisterType<LocationInfoModel>(uri, versionMajor, versionMinor, "LocationInfoModel");
@@ -130,6 +139,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<RouteStep>(uri, versionMajor, versionMinor, "RouteStep");
   qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");
   qmlRegisterType<StyleFlagsModel>(uri, versionMajor, versionMinor, "StyleFlagsModel");
+  qmlRegisterType<OverlayWay>(uri, versionMajor, versionMinor, "OverlayWay");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
@@ -211,4 +221,18 @@ MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
   QObject::connect(thread, SIGNAL(finished()),
                    thread, SLOT(deleteLater()));
   return mapRenderer;
+}
+
+Router* OSMScoutQt::MakeRouter()
+{
+  QThread *thread=new QThread();
+  thread->setObjectName("Router");
+
+  Router *router=new Router(thread,settings,dbThread);
+  router->moveToThread(thread);
+  thread->start();
+
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
+  return router;
 }

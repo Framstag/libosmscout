@@ -32,8 +32,6 @@
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
 
-#include <iostream>
-
 namespace osmscout
 {
   const char* OptimizeAreasLowZoom::FILE_AREASOPT_DAT = "areasopt.dat";

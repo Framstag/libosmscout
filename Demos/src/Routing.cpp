@@ -26,8 +26,9 @@
 #include <sstream>
 
 #include <osmscout/Database.h>
-#include <osmscout/RoutingService.h>
-#include <osmscout/RoutePostprocessor.h>
+#include <osmscout/routing/SimpleRoutingService.h>
+#include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/routing/DBFileOffset.h>
 
 #include <osmscout/util/Geometry.h>
 
@@ -206,6 +207,8 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
 static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
 {
 #if defined(ROUTE_DEBUG)
+  unused(node);
+
   return true;
 #else
   if (node.HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
@@ -601,16 +604,17 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::FastestPathRoutingProfile routingProfile(database->GetTypeConfig());
-  osmscout::RouterParameter           routerParameter;
+  osmscout::FastestPathRoutingProfileRef routingProfile=std::make_shared<osmscout::FastestPathRoutingProfile>(database->GetTypeConfig());
+  osmscout::RouterParameter              routerParameter;
 
   if (!outputGPX) {
     routerParameter.SetDebugPerformance(true);
   }
 
-  osmscout::RoutingServiceRef router=std::make_shared<osmscout::RoutingService>(database,
-                                                                                routerParameter,
-                                                                                routerFilenamebase);
+  osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(
+                                                    database,
+                                                    routerParameter,
+                                                    routerFilenamebase);
 
   if (!router->Open()) {
     std::cerr << "Cannot open routing database" << std::endl;
@@ -627,23 +631,23 @@ int main(int argc, char* argv[])
 
   switch (vehicle) {
   case osmscout::vehicleFoot:
-    routingProfile.ParametrizeForFoot(*typeConfig,
+    routingProfile->ParametrizeForFoot(*typeConfig,
                                       5.0);
     break;
   case osmscout::vehicleBicycle:
-    routingProfile.ParametrizeForBicycle(*typeConfig,
+    routingProfile->ParametrizeForBicycle(*typeConfig,
                                          20.0);
     break;
   case osmscout::vehicleCar:
     GetCarSpeedTable(carSpeedTable);
-    routingProfile.ParametrizeForCar(*typeConfig,
+    routingProfile->ParametrizeForCar(*typeConfig,
                                      carSpeedTable,
                                      160.0);
     break;
   }
 
   osmscout::RoutePosition start=router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
-                                                               routingProfile,
+                                                               *routingProfile,
                                                                1000);
 
   if (!start.IsValid()) {
@@ -656,7 +660,7 @@ int main(int argc, char* argv[])
   }
 
   osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
-                                                               routingProfile,
+                                                               *routingProfile,
                                                                1000);
 
   if (!target.IsValid()) {
@@ -668,7 +672,7 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
 
-  osmscout::RoutingResult result=router->CalculateRoute(routingProfile,
+  osmscout::RoutingResult result=router->CalculateRoute(*routingProfile,
                                                         start,
                                                         target,
                                                         parameter);
@@ -680,6 +684,7 @@ int main(int argc, char* argv[])
   }
 
 #ifdef DATA_DEBUG
+  std::cout << "Route raw data:" << std::endl;
   for (const auto &entry : result.GetRoute().Entries()) {
     std::cout << entry.GetPathObject().GetName() << "[" << entry.GetCurrentNodeIndex() << "]" << " = " << entry.GetCurrentNodeId() << " => " << entry.GetTargetNodeIndex() << std::endl;
   }
@@ -700,16 +705,7 @@ int main(int argc, char* argv[])
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
-
-  osmscout::RoutePostprocessor::InstructionPostprocessorRef instructionProcessor=std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>();
-
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_motorway_link"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_trunk"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_motorway_primary"));
-  instructionProcessor->AddMotorwayType(typeConfig->GetTypeInfo("highway_trunk"));
-  instructionProcessor->AddMotorwayLinkType(typeConfig->GetTypeInfo("highway_trunk_link"));
-  postprocessors.push_back(instructionProcessor);
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>());
 
   osmscout::RoutePostprocessor postprocessor;
   size_t                       roundaboutCrossingCounter=0;
@@ -750,10 +746,34 @@ int main(int argc, char* argv[])
     return 0;
   }
 
+  std::set<std::string> motorwayTypeNames;
+  std::set<std::string> motorwayLinkTypeNames;
+  std::set<std::string> junctionTypeNames;
+
+  junctionTypeNames.insert("highway_motorway_junction");
+
+  motorwayTypeNames.insert("highway_motorway");
+  motorwayLinkTypeNames.insert("highway_motorway_link");
+
+  motorwayTypeNames.insert("highway_motorway_trunk");
+  motorwayTypeNames.insert("highway_trunk");
+
+  motorwayLinkTypeNames.insert("highway_trunk_link");
+  motorwayTypeNames.insert("highway_motorway_primary");
+
+  std::map<osmscout::DatabaseId,osmscout::RoutingProfileRef> profiles;
+  std::map<osmscout::DatabaseId,osmscout::DatabaseRef> databases;
+
+  profiles[0]=routingProfile;
+  databases[0]=database;
+
   if (!postprocessor.PostprocessRouteDescription(description,
-                                                 routingProfile,
-                                                 *database,
-                                                 postprocessors)) {
+                                                 profiles,
+                                                 databases,
+                                                 postprocessors,
+                                                 motorwayTypeNames,
+                                                 motorwayLinkTypeNames,
+                                                 junctionTypeNames)) {
     std::cerr << "Error during route postprocessing" << std::endl;
   }
 

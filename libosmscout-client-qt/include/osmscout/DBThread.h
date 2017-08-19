@@ -34,8 +34,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/MapService.h>
-#include <osmscout/RoutingService.h>
-#include <osmscout/RoutePostprocessor.h>
 #include <osmscout/MapPainterQt.h>
 
 #include <osmscout/Settings.h>
@@ -192,8 +190,6 @@ protected:
   osmscout::BasemapDatabaseRef       basemapDatabase;
   osmscout::DatabaseParameter        databaseParameter;
   std::list<DBInstanceRef>           databases;
-  osmscout::RouterParameter          routerParameter;
-  osmscout::RoutePostprocessor       routePostprocessor;
 
   QString                            stylesheetFilename;
   QString                            iconDirectory;
@@ -205,8 +201,6 @@ protected:
   QList<StyleError>                  styleErrors;
 
 protected:
-
-  bool AssureRouter(osmscout::Vehicle vehicle);
 
   static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
                                           const osmscout::AdminRegionRef& adminRegion,
@@ -260,33 +254,6 @@ public:
   double GetMapDpi() const;
 
   double GetPhysicalDpi() const;
-
-  bool CalculateRoute(const QString databasePath,
-                      const osmscout::RoutingProfile& routingProfile,
-                      const osmscout::RoutePosition& start,
-                      const osmscout::RoutePosition target,
-                      osmscout::RouteData& route);
-
-  bool TransformRouteDataToRouteDescription(const QString databasePath,
-                                            const osmscout::RoutingProfile& routingProfile,
-                                            const osmscout::RouteData& data,
-                                            osmscout::RouteDescription& description,
-                                            const std::string& start,
-                                            const std::string& target);
-
-  bool TransformRouteDataToWay(const QString databasePath,
-                               osmscout::Vehicle vehicle,
-                               const osmscout::RouteData& data,
-                               osmscout::Way& way);
-
-  osmscout::RoutePosition GetClosestRoutableNode(const QString databasePath,
-                                                 const osmscout::ObjectFileRef& refObject,
-                                                 const osmscout::RoutingProfile& routingProfile,
-                                                 double radius);
-
-  void ClearRoute();
-  void AddRoute(const osmscout::Way& way);
-  osmscout::TypeConfigRef GetTypeConfig(const QString databasePath) const;
 
   inline MapManagerRef GetMapManager() const
   {

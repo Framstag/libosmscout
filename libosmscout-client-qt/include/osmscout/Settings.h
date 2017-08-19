@@ -24,7 +24,7 @@
 
 #include <QSettings>
 
-#include <osmscout/RoutingProfile.h>
+#include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/InputHandler.h>
 #include <osmscout/OnlineTileProvider.h>
 #include <osmscout/MapProvider.h>
@@ -135,7 +135,10 @@ public:
   double GetFontSize() const;
   void SetFontSize(double fontSize);
 
-  const QString GetHttpCacheDir() const;  
+  const QString GetHttpCacheDir() const;
+  
+  const QByteArray GetCookieData() const;
+  void SetCookieData(QByteArray data);
 };
 
 /**

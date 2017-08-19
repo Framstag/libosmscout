@@ -18,6 +18,8 @@
 */
 
 #include <cstdlib>
+#include <iostream>
+
 #include <TestWay.h>
 
 #include <osmscout/util/Geometry.h>

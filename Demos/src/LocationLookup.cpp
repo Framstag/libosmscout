@@ -25,7 +25,21 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/String.h>
+
+struct Arguments
+{
+  bool                   help;
+  std::string            databaseDirectory;
+  std::list<std::string> location;
+
+  Arguments()
+    : help(false)
+  {
+    // no code
+  }
+};
 
 bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
                              const osmscout::AdminRegionRef& adminRegion,
@@ -85,8 +99,7 @@ std::string GetAddress(const osmscout::LocationSearchResult::Entry& entry)
     label="~ ";
   }
 
-  label+="Address ("+osmscout::UTF8StringToLocaleString(entry.address->name)+
-  " "+osmscout::UTF8StringToLocaleString(entry.address->postalCode)+")";
+  label+="Address ("+osmscout::UTF8StringToLocaleString(entry.address->name)+")";
 
   return label;
 }
@@ -119,6 +132,22 @@ std::string GetPOI(const osmscout::LocationSearchResult::Entry& entry)
   }
 
   label+="POI ("+osmscout::UTF8StringToLocaleString(entry.poi->name)+")";
+
+  return label;
+}
+
+std::string GetPostalArea(const osmscout::LocationSearchResult::Entry& entry)
+{
+  std::string label;
+
+  if (entry.postalAreaMatchQuality==osmscout::LocationSearchResult::match) {
+    label="= ";
+  }
+  else {
+    label="~ ";
+  }
+
+  label+="PostalArea ("+osmscout::UTF8StringToLocaleString(entry.postalArea->name)+")";
 
   return label;
 }
@@ -202,17 +231,47 @@ std::string GetAdminRegionHierachie(const osmscout::LocationServiceRef& location
 
 int main(int argc, char* argv[])
 {
-  std::string map;
-  std::string areaPattern;
-  std::string locationPattern;
-  std::string addressPattern;
+  osmscout::CmdLineParser   argParser("LocationLookup",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
-  if (argc<3) {
-    std::cerr << "LocationLookup <map directory> [location [address]] <area>" << std::endl;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the database to use");
+
+  argParser.AddPositional(osmscout::CmdLineStringListOption([&args](const std::string& value) {
+                            args.location.push_back(value);
+                          }),
+                          "LOCATION",
+                          "list of location search attributes");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
+  }
 
-  map=argv[1];
+  /*
+  osmscout::log.Debug(true);
+  osmscout::log.Info(true);
+  osmscout::log.Warn(true);
+  osmscout::log.Error(true);*/
 
   try {
     std::locale::global(std::locale(""));
@@ -223,12 +282,12 @@ int main(int argc, char* argv[])
 
   std::string searchPattern;
 
-  for (int i=2; i<argc; i++) {
+  for (const auto& location : args.location) {
     if (!searchPattern.empty()) {
       searchPattern.append(" ");
     }
 
-    searchPattern.append(argv[i]);
+    searchPattern.append(location);
   }
 
   std::cout << "Searching for pattern \"" <<searchPattern  << "\"" << std::endl;
@@ -236,7 +295,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -268,6 +327,7 @@ int main(int argc, char* argv[])
         entry.address) {
       std::cout << GetLocation(entry) << " ";
       std::cout << GetAddress(entry) << " ";
+      std::cout << GetPostalArea(entry) << " ";
       std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,
@@ -282,6 +342,7 @@ int main(int argc, char* argv[])
     else if (entry.adminRegion &&
              entry.location) {
       std::cout << GetLocation(entry) << " ";
+      std::cout << GetPostalArea(entry) << " ";
       std::cout << GetAdminRegion(entry) << std::endl;
 
       std::cout << "   * " << GetAdminRegionHierachie(locationService,

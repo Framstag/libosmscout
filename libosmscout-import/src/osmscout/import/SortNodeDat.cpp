@@ -30,11 +30,11 @@ namespace osmscout {
   class NodeLocationProcessorFilter : public SortDataGenerator<Node>::ProcessingFilter
   {
   private:
-    FileWriter                 writer;
-    uint32_t                   overallDataCount;
-    NameFeatureValueReader     *nameReader;
-    LocationFeatureValueReader *locationReader;
-    AddressFeatureValueReader  *addressReader;
+    FileWriter                   writer;
+    uint32_t                     overallDataCount;
+    NameFeatureValueReader       *nameReader;
+    LocationFeatureValueReader   *locationReader;
+    AddressFeatureValueReader    *addressReader;
     PostalCodeFeatureValueReader *postalCodeReader;
 
   public:
@@ -106,7 +106,8 @@ namespace osmscout {
         name=nameValue->GetName();
       }
 
-      if (addressValue!=NULL && locationValue!=NULL) {
+      if (addressValue!=NULL &&
+          locationValue!=NULL) {
         location=locationValue->GetLocation();
         address=addressValue->GetAddress();
       }
@@ -115,15 +116,26 @@ namespace osmscout {
         postalCode=postalCodeValue->GetPostalCode();
       }
 
+      // We only need location info during import up to this point
+      // Thus we delete it now to safe disk space
       if (locationValue!=NULL) {
-        // We do not need the location info here anymore, it is only relevant for
-        // the location index and that one will be build using the here generated
-        // location file.
         size_t locationIndex;
 
         if (locationReader->GetIndex(node.GetFeatureValueBuffer(),
-                                     locationIndex)) {
+                                     locationIndex) &&
+          node.GetFeatureValueBuffer().HasFeature(locationIndex)) {
           node.UnsetFeature(locationIndex);
+        }
+      }
+
+      // Same for postal code
+      if (postalCodeValue!=NULL) {
+        size_t postalCodeIndex;
+
+        if (postalCodeReader->GetIndex(node.GetFeatureValueBuffer(),
+                                       postalCodeIndex) &&
+          node.GetFeatureValueBuffer().HasFeature(postalCodeIndex)) {
+          node.UnsetFeature(postalCodeIndex);
         }
       }
 
@@ -139,6 +151,7 @@ namespace osmscout {
       writer.Write(postalCode);
       writer.Write(location);
       writer.Write(address);
+
       writer.WriteCoord(node.GetCoords());
 
       overallDataCount++;
@@ -164,6 +177,9 @@ namespace osmscout {
 
     delete addressReader;
     addressReader=NULL;
+
+    delete postalCodeReader;
+    postalCodeReader=NULL;
 
     try {
       writer.SetPos(0);

@@ -23,6 +23,9 @@
 #include <unordered_map>
 
 #include <osmscout/MapDirectXFeatures.h>
+
+#include <osmscout/private/MapDirectXImportExport.h>
+
 #include <osmscout/private/MapDirectXPaint.h>
 #include <osmscout/MapPainter.h>
 

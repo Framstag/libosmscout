@@ -19,7 +19,7 @@
 
 #include <osmscout/import/GenIntersectionIndex.h>
 
-#include <osmscout/RoutingService.h>
+#include <osmscout/routing/RoutingService.h>
 
 namespace osmscout {
 

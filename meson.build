@@ -32,7 +32,7 @@ endif
 
 if compiler.get_id()=='msvc'
   # Allow the compiler to fork itself for faster compiling
-  add_global_arguments('/MP', language: 'cpp')
+  # add_global_arguments('/MP', language: 'cpp')
 
   # Allow the compiler to create bigger object files
   add_global_arguments('/bigobj', language: 'cpp')
@@ -45,7 +45,7 @@ if compiler.get_id()=='msvc'
   add_global_arguments('/fp:fast', language: 'cpp')
 
   # Disable some over-eager compiler warnings
-  add_global_arguments(['/wd4251', '/wd4458'], language: 'cpp')
+  add_global_arguments(['/wd4251', '/wd4456', '/wd4458'], language: 'cpp')
 
   if get_option('default_library')=='shared'
     # TODO: Should only be set for library builds, not executables
@@ -58,6 +58,7 @@ fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
 iconvAvailable = compiler.has_header('iconv.h')
 codecvtAvailable = compiler.has_header('codecvt')
+jniAvailable = compiler.has_header('jni.h')
 
 # Check for header symbols
 sharedMutexAvailable = compiler.has_header_symbol('shared_mutex','shared_mutex', prefix: 'using namespace std;')
@@ -108,7 +109,7 @@ int main() {
 return 0;
 }
 ''', dependencies: [aggDep, aggftpicDep, ftDep])
-elif ftDep.found() and aggftpicDep.found()
+elif ftDep.found() and aggftDep.found()
 aggftAvailable = compiler.links('''
 #include <agg2/agg_font_freetype.h>
 
@@ -128,6 +129,13 @@ pangoDep = dependency('pango', required : false)
 pangocairoDep = dependency('pangocairo', required : false)
 pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false)
+
+# DirectX
+
+d2d1Dep = compiler.find_library('d2d1', required: false)
+dwriteDep = compiler.find_library('dwrite', required: false)
+winCodecsDep = compiler.find_library('Windowscodecs', required: false)
+d2dlHeaderAvailable = compiler.has_header('d2d1.h')
 
 # Qt
 qt5 = import('qt5')
@@ -179,7 +187,7 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found()
+if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found()
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
@@ -199,29 +207,47 @@ else
   buildMapCairo=false
 endif
 
+#DirectX
+
+if d2d1Dep.found() and dwriteDep.found() and winCodecsDep.found() and d2dlHeaderAvailable
+  buildMapDirectX=true
+else
+  buildMapDirectX=false
+endif
+
 # iOSX
 buildMapIOSX=build_machine.system()=='darwin'
+
+# Binding
+
+if swigExe.found()
+  buildBinding=true
+else
+  buildBinding=false
+endif
 
 buildOSMScout2=buildMapQt and buildClientQt and qt5SvgDep.found()
 buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
 
-message('libosmscout:            @0@'.format(true))
-message('libosmscout-import:     @0@'.format(true))
-message('libosmscout-map:        @0@'.format(true))
-message('libosmscout-map-agg:    @0@'.format(buildMapAgg))
-message('libosmscout-map-cairo:  @0@'.format(buildMapCairo))
-message('libosmscout-map-qt:     @0@'.format(buildMapQt))
+message('libosmscout:             @0@'.format(true))
+message('libosmscout-import:      @0@'.format(true))
+message('libosmscout-map:         @0@'.format(true))
+message('libosmscout-map-agg:     @0@'.format(buildMapAgg))
+message('libosmscout-map-cairo:   @0@'.format(buildMapCairo))
+message('libosmscout-map-directx: @0@'.format(buildMapDirectX))
 #message('libosmscout-map-iosx:   @0@'.format(buildMapIOSX))
-message('libosmscout-map-iosx:   @0@'.format(false))
-message('libosmscout-map-svg:    @0@'.format(true))
-message('libosmscout-map-opengl: @0@'.format(buildMapOpenGL))
-message('BasemapImport:          @0@'.format(true))
-message('Import:                 @0@'.format(true))
-message('Demos:                  @0@'.format(true))
-message('DumpData:               @0@'.format(true))
-message('OSMScout2:              @0@'.format(buildOSMScout2))
-message('StyleEditor:            @0@'.format(buildStyleEditor))
-message('Tests:                  @0@'.format(true))
+message('libosmscout-map-iosx:    @0@'.format(false))
+message('libosmscout-map-opengl:  @0@'.format(buildMapOpenGL))
+message('libosmscout-map-qt:      @0@'.format(buildMapQt))
+message('libosmscout-map-svg:     @0@'.format(true))
+message('BasemapImport:           @0@'.format(true))
+message('Import:                  @0@'.format(true))
+message('Demos:                   @0@'.format(true))
+message('DumpData:                @0@'.format(true))
+message('OSMScout2:               @0@'.format(buildOSMScout2))
+message('StyleEditor:             @0@'.format(buildStyleEditor))
+message('libosmscout-binding:     @0@'.format(buildBinding))
+message('Tests:                   @0@'.format(true))
 
 subdir('libosmscout')
 subdir('libosmscout-import')
@@ -235,8 +261,8 @@ if buildMapCairo
   subdir('libosmscout-map-cairo')
 endif
 
-if buildMapQt
-  subdir('libosmscout-map-qt')
+if buildMapDirectX
+  subdir('libosmscout-map-directx')
 endif
 
 if buildMapIOSX
@@ -246,6 +272,10 @@ endif
 
 if buildMapOpenGL
   subdir('libosmscout-map-opengl')
+endif
+
+if buildMapQt
+  subdir('libosmscout-map-qt')
 endif
 
 subdir('libosmscout-map-svg')
@@ -264,8 +294,12 @@ if buildMapQt and buildClientQt and qt5SvgDep.found()
   subdir('StyleEditor')
 endif
 
-if buildMapOpenGL and glfwDep.found()
+if buildMapOpenGL and glfwDep.found() and ftDep.found()
   subdir('OSMScoutOpenGL')
 endif
 
 subdir('Tests')
+
+if buildBinding
+#  subdir('libosmscout-binding')
+endif

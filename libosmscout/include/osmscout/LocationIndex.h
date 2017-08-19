@@ -54,6 +54,10 @@ namespace osmscout {
     mutable uint8_t                 bytesForWayFileOffset;
     std::unordered_set<std::string> regionIgnoreTokens;
     std::unordered_set<std::string> locationIgnoreTokens;
+    uint32_t                        maxRegionWords;
+    uint32_t                        maxPOIWords;
+    uint32_t                        maxLocationWords;
+    uint32_t                        maxAddressWords;
     FileOffset                      indexOffset;
 
   private:
@@ -63,24 +67,36 @@ namespace osmscout {
     bool LoadAdminRegion(FileScanner& scanner,
                          AdminRegion& region) const;
 
-    AdminRegionVisitor::Action VisitRegionEntries(FileScanner& scanner,
+    AdminRegionVisitor::Action VisitRegionEntries(const AdminRegion& region,
+                                                  FileScanner& scanner,
                                                   AdminRegionVisitor& visitor) const;
 
-    bool VisitRegionLocationEntries(FileScanner& scanner,
-                                    LocationVisitor& visitor,
-                                    bool recursive,
-                                    bool& stopped) const;
+    bool VisitRegionPOIs(const AdminRegion& region,
+                         FileScanner& scanner,
+                         POIVisitor& visitor,
+                         bool recursive,
+                         bool& stopped) const;
 
-    bool LoadRegionDataEntry(FileScanner& scanner,
-                             const AdminRegion& region,
-                             LocationVisitor& visitor,
-                             bool& stopped) const;
+    bool VisitPostalArea(const AdminRegion& adminRegion,
+                         const PostalArea& postalArea,
+                         FileScanner& scanner,
+                         LocationVisitor& visitor,
+                         bool recursive,
+                         bool& stopped) const;
 
-    bool VisitLocationAddressEntries(FileScanner& scanner,
-                                     const AdminRegion& region,
-                                     const Location& location,
-                                     AddressVisitor& visitor,
-                                     bool& stopped) const;
+
+    bool VisitPostalAreaLocations(const AdminRegion& adminRegion,
+                                  const PostalArea& postalArea,
+                                  FileScanner& scanner,
+                                  LocationVisitor& visitor,
+                                  bool& stopped) const;
+
+    bool VisitLocation(FileScanner& scanner,
+                       const AdminRegion& region,
+                       const PostalArea& postalArea,
+                       const Location& location,
+                       AddressVisitor& visitor,
+                       bool& stopped) const;
 
   public:
     LocationIndex();
@@ -97,18 +113,27 @@ namespace osmscout {
     bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
 
     /**
+     * Visit all POIs within the given admin region
+     */
+    bool VisitPOIs(const AdminRegion& region,
+                   POIVisitor& visitor,
+                   bool recursive=true) const;
+
+    /**
      * Visit all locations within the given admin region
      */
-    bool VisitAdminRegionLocations(const AdminRegion& region,
-                                   LocationVisitor& visitor,
-                                   bool recursive=true) const;
+    bool VisitLocations(const AdminRegion& adminRegion,
+                        const PostalArea& postalArea,
+                        LocationVisitor& visitor,
+                        bool recursive=true) const;
 
     /**
      * Visit all addresses for a given location (in a given AdminRegion)
      */
-    bool VisitLocationAddresses(const AdminRegion& region,
-                                const Location& location,
-                                AddressVisitor& visitor) const;
+    bool VisitAddresses(const AdminRegion& region,
+                        const PostalArea& postalArea,
+                        const Location& location,
+                        AddressVisitor& visitor) const;
 
     bool ResolveAdminRegionHierachie(const AdminRegionRef& region,
                                      std::map<FileOffset,AdminRegionRef>& refs) const;

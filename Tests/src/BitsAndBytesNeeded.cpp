@@ -4,6 +4,9 @@
 
 int errors=0;
 
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
 bool CheckBitsNeededToEncodeNumber(unsigned long number, uint8_t expectedBits)
 {
   uint8_t actualBits=osmscout::BitsNeededToEncodeNumber(number);
@@ -28,72 +31,22 @@ bool CheckBytesNeededToEncodeNumber(unsigned long number, uint8_t expectedBytes)
   return true;
 }
 
-int main()
-{
-  // Bits
+TEST_CASE("CheckBitsNeededToEncodeNumber") {
+  REQUIRE(CheckBitsNeededToEncodeNumber(0,1));
+  REQUIRE(CheckBitsNeededToEncodeNumber(1,1));
+  REQUIRE(CheckBitsNeededToEncodeNumber(7,3));
+  REQUIRE(CheckBitsNeededToEncodeNumber(8,4));
+  REQUIRE(CheckBitsNeededToEncodeNumber(255,8));
+  REQUIRE(CheckBitsNeededToEncodeNumber(256,9));
+  REQUIRE(CheckBitsNeededToEncodeNumber(65535,16));
+  REQUIRE(CheckBitsNeededToEncodeNumber(65536,17));
+}
 
-  if (!CheckBitsNeededToEncodeNumber(0,1)) {
-    errors++;
-  }
-
-  if (!CheckBitsNeededToEncodeNumber(1,1)) {
-    errors++;
-  }
-
-  if (!CheckBitsNeededToEncodeNumber(7,3)) {
-    errors++;
-  }
-
-  if (!CheckBitsNeededToEncodeNumber(8,4)) {
-    errors++;
-  }
-
-  if (!CheckBitsNeededToEncodeNumber(255,8)) {
-    errors++;
-  }
-
-  if (!CheckBitsNeededToEncodeNumber(256,9)) {
-    errors++;
-  }
-
-  if (!CheckBitsNeededToEncodeNumber(65535,16)) {
-    errors++;
-  }
-
-  if (!CheckBitsNeededToEncodeNumber(65536,17)) {
-    errors++;
-  }
-
-  // Bytes
-
-  if (!CheckBytesNeededToEncodeNumber(0,1)) {
-    errors++;
-  }
-
-  if (!CheckBytesNeededToEncodeNumber(1,1)) {
-    errors++;
-  }
-
-  if (!CheckBytesNeededToEncodeNumber(255,1)) {
-    errors++;
-  }
-
-  if (!CheckBytesNeededToEncodeNumber(256,2)) {
-    errors++;
-  }
-
-  if (!CheckBytesNeededToEncodeNumber(65535,2)) {
-    errors++;
-  }
-
-  if (!CheckBytesNeededToEncodeNumber(65536,3)) {
-    errors++;
-  }
-
-  if (errors!=0) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
+TEST_CASE("CheckBytesNeededToEncodeNumber") {
+  REQUIRE(CheckBytesNeededToEncodeNumber(0,1));
+  REQUIRE(CheckBytesNeededToEncodeNumber(1,1));
+  REQUIRE(CheckBytesNeededToEncodeNumber(255,1));
+  REQUIRE(CheckBytesNeededToEncodeNumber(256,2));
+  REQUIRE(CheckBytesNeededToEncodeNumber(65535,2));
+  REQUIRE(CheckBytesNeededToEncodeNumber(65536,3));
 }

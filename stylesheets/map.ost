@@ -216,7 +216,7 @@ TYPES
       DESC
         en: "motorway"
         de: "Autobahn"
-        
+
   TYPE highway_motorway_trunk
     = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
       {Name, NameAlt, Ref, Destination}
@@ -224,12 +224,12 @@ TYPES
       DESC
         en: "trunk"
         de: "Schnellstraße"
-        
+
   TYPE highway_motorway_primary
     = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
       {Name, NameAlt, Ref, Destination}
       PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
-      
+
   TYPE highway_motorway_link
     = WAY ("highway"=="motorway_link")
       {Name, NameAlt, Ref, Destination}
@@ -401,7 +401,6 @@ TYPES
   TYPE highway_bus_stop
     = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND "public_transport"=="platform"))
       {Name, NameAlt}
-      POI
 
   TYPE highway_turning_cycle
     = NODE ("highway"=="turning_cycle")
@@ -528,7 +527,7 @@ TYPES
       {Bridge, Tunnel, Width}
 
   TYPE railway_narrow_gauge
-    = WAY ("railway"=="narrow_gauge")
+    = WAY ("railway"=="narrow_gauge" OR "railway"=="preserved")
       PATH
 
   TYPE railway_monorail
@@ -551,7 +550,6 @@ TYPES
   TYPE railway_tram_stop
     = NODE ("railway"=="tram_stop")
       {Name, NameAlt}
-      POI
 
   TYPE railway_crossing
     = NODE ("railway"=="crossing")
@@ -1042,7 +1040,6 @@ TYPES
   TYPE amenity_atm
     = NODE AREA ("amenity"=="atm")
       {Name, NameAlt}
-      POI
       GROUP amenity
 
   TYPE amenity_bank_building
@@ -1929,7 +1926,7 @@ TYPES
   TYPE place_peninsula IGNORE
     = NODE AREA ("place"=="peninsula")
       {Name, NameAlt}
-      
+
   TYPE place_country
     = NODE ("place"=="country")
       {Name, NameAlt, IsIn}

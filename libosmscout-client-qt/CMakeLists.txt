@@ -29,6 +29,7 @@ set(HEADER_FILES
     include/osmscout/private
     include/osmscout/private/ClientQtImportExport.h
     include/osmscout/RoutingModel.h
+    include/osmscout/Router.h
     include/osmscout/SearchLocationModel.h
     include/osmscout/Settings.h
     include/osmscout/TileCache.h
@@ -46,6 +47,7 @@ set(HEADER_FILES
     include/osmscout/MapRenderer.h
     include/osmscout/PlaneMapRenderer.h
     include/osmscout/TiledMapRenderer.h
+    include/osmscout/OverlayWay.h
 )
 
 set(SOURCE_FILES
@@ -61,6 +63,7 @@ set(SOURCE_FILES
     src/osmscout/OSMTile.cpp
     src/osmscout/OsmTileDownloader.cpp
     src/osmscout/RoutingModel.cpp
+    src/osmscout/Router.cpp
     src/osmscout/SearchLocationModel.cpp
     src/osmscout/Settings.cpp
     src/osmscout/TileCache.cpp
@@ -77,6 +80,7 @@ set(SOURCE_FILES
     src/osmscout/MapRenderer.cpp
     src/osmscout/PlaneMapRenderer.cpp
     src/osmscout/TiledMapRenderer.cpp
+    src/osmscout/OverlayWay.cpp
 )
 
 add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})

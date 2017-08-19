@@ -26,11 +26,13 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/LookupModule.h>
 #include <osmscout/MapRenderer.h>
+#include <osmscout/Router.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
 class OSMScoutQt;
 Q_DECLARE_METATYPE(osmscout::TileRef)
+Q_DECLARE_METATYPE(osmscout::BreakerRef)
 
 /**
  * \ingroup QtAPI
@@ -174,6 +176,7 @@ public:
   SettingsRef GetSettings();
   LookupModule* MakeLookupModule();
   MapRenderer* MakeMapRenderer(RenderingType type);
+  Router* MakeRouter();
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

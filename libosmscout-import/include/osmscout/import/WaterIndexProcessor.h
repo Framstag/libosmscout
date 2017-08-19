@@ -129,7 +129,7 @@ namespace osmscout {
      */
     struct OSMSCOUT_IMPORT_API Coast
     {
-      Id                 id;
+      OSMId              id;
       bool               isArea;
       double             sortCriteria;
       Id                 frontNodeId;
@@ -473,7 +473,7 @@ namespace osmscout {
                        const GroundTile::Coord &testCoord2);
 
     /**
-     * Closes the sling from the `incoming` intersection to the `outgoing` intersection 
+     * Closes the sling from the `incoming` intersection to the `outgoing` intersection
      * traveling clock wise around the cell border.
      * Walk points are stored to given groundTile.
      */
@@ -686,7 +686,7 @@ public:
 
     /**
      * Calculate the cell type for cells directly around coast cells
-     * 
+     *
      * @param progress
      * @param stateMap
      * @param cellGroundTileMap

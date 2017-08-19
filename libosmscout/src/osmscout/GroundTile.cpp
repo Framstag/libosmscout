@@ -19,8 +19,6 @@
 
 #include <osmscout/GroundTile.h>
 
-#include <iostream>
-
 namespace osmscout {
   const uint16_t GroundTile::Coord::CELL_MAX=32767;
 }

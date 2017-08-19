@@ -294,6 +294,16 @@ const QString Settings::GetHttpCacheDir() const
   return cacheLocation + QDir::separator() + "OSMScoutHttpCache";
 }
 
+const QByteArray Settings::GetCookieData() const
+{
+  return storage->value("OSMScoutLib/General/Cookies").toByteArray();
+}
+
+void Settings::SetCookieData(const QByteArray data)
+{
+  storage->setValue("OSMScoutLib/General/Cookies", data);
+}
+
 QmlSettings::QmlSettings()
 {
     settings=OSMScoutQt::GetInstance().GetSettings();

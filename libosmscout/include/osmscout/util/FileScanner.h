@@ -36,7 +36,7 @@
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/GeoBox.h>
 
-#if defined(__WIN32__) || defined(WIN32)
+#if defined(_WIN32)
   #include <windows.h>
   #undef max
   #undef min
@@ -56,7 +56,7 @@ namespace osmscout {
     allocating real memory) resulting in measurable speed increase because of
     exchanging buffered file access with in memory array access.
     */
-  class OSMSCOUT_API FileScanner
+  class OSMSCOUT_API FileScanner CLASS_FINAL
   {
   public:
     enum Mode

@@ -43,10 +43,140 @@ Currently the library does compile without any external dependencies, however
 since you need to be able to import OSM data to make any use of the library
 you should at least have libxml2 or protobuf available.
 
-## Build systems supported
+## Supprted Build systems, operating systems and compiler
 
-Libosmscout supports autoconf based builds for Unix and Unix-like systems. It also
-support cmake. 
+Libosmscout supports autotools based builds for Unix and Unix-like systems. It also
+support cmake and finally meson.
+ 
+We plan to support cmake because of its wide-spread use and tools support and
+meson for its elegance. We plan to drop autoconf supports for environments where
+a cmake and/or meson based build is a viable alternative. So if you start using
+Libosmscout try to use cmake or meson instead of autoconf.
+
+We also do support 32bit and also 64bit builds on all platforms, though 32bit builds
+are not actively tested and thus deprecated.
+
+Support matrix:
+
+<table class="sheet">
+<thead>
+<tr>
+<th style="text-align: left; width: 35%">OS</th>
+<th style="text-align: left">Compiler</th>
+<th style="text-align: left">Build tool</th>
+<th style="text-align: left">Comments</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+<td style="text-align: left">Linux</td>
+<td style="text-align: left">gcc</td>
+<td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Linux</td>
+<td style="text-align: left">clang</td>
+<td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Linux</td>
+<td style="text-align: left">gcc</td>
+<td style="text-align: left">Meson</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Linux</td>
+<td style="text-align: left">clang</td>
+<td style="text-align: left">Meson</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Linux</td>
+<td style="text-align: left">gcc</td>
+<td style="text-align: left">Autotools</td>
+<td style="text-align: left">deprecated</td>
+</tr>
+
+<tr>
+<td style="text-align: left">Linux</td>
+<td style="text-align: left">clang</td>
+<td style="text-align: left">Autotools</td>
+<td style="text-align: left">deprecated</td>
+</tr>
+
+<tr>
+<td style="text-align: left">Windows</td>
+<td style="text-align: left">MSYS2</td>
+<td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Windows</td>
+<td style="text-align: left">MSYS2</td>
+<td style="text-align: left">Meson</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Windows</td>
+<td style="text-align: left">MSYS2</td>
+<td style="text-align: left">Autotools</td>
+<td style="text-align: left">deprecated</td>
+</tr>
+
+<tr>
+<td style="text-align: left">Windows</td>
+<td style="text-align: left">Visual Studio 2015</td>
+<td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Windows</td>
+<td style="text-align: left">Visual Studio 2015</td>
+<td style="text-align: left">Meson</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Windows</td>
+<td style="text-align: left">Visual Studio 2017</td>
+<td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Windows</td>
+<td style="text-align: left">Visual Studio 2017</td>
+<td style="text-align: left">Meson</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Mac OS/iOS</td>
+<td style="text-align: left">XCode/Clang</td>
+<td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
+</tr>
+
+<tr>
+<td style="text-align: left">Mac OS/iOS</td>
+<td style="text-align: left">XCode</td>
+<td style="text-align: left">Meson</td>
+<td style="text-align: left"></td>
+</tr>
+
+</tbody>
+</table>
+
 
 ## Preparations
 
@@ -138,25 +268,6 @@ as described here. See the Appveyor configuration for setup details.
 You can also find detailed build (but old and potentially not correct anymore)
 instructions [in the OpenStreetMap wiki](http://wiki.openstreetmap.org/wiki/Libosmscout).
 
-### autoconf based build
-
-In the top level directory type:
-
-```bash
-  $ . setupAutoconf.sh
-  $ make full
-```
-
-The `setupAutoconf.sh script` will extend `PKG_CONFIG_PATH` and
-`LD_LIBRARY_PATH` so that the individual library projects are found during
-the `configure` step and that the libraries are found by the loader
-after they have been build.
-
-The top level Makefile should first generate the configure scripts for all
-project subdirectories, then it calls the configure scripts for all
-sub directories and finally (if a Makefile was generated during the
-configure call) call make for all project sub directories.
-
 ### cmake based build
 
 In the top level directory type:
@@ -188,6 +299,45 @@ cmake -G "Xcode" ..
 ```
 
 You can then import the Xcode project created in the build directory.
+
+### meson based build
+
+For ninja based builds: In the top level directory type:
+```bash
+mkdir debug
+meson debug
+cd debug
+ninja
+```
+
+For VisualStudio based builds:
+
+```bash
+mkdir debug
+meson debug --backend vs2015
+cd debug
+msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
+```
+
+### autoconf based build
+
+In the top level directory type:
+
+```bash
+  $ . setupAutoconf.sh
+  $ make full
+```
+
+The `setupAutoconf.sh script` will extend `PKG_CONFIG_PATH` and
+`LD_LIBRARY_PATH` so that the individual library projects are found during
+the `configure` step and that the libraries are found by the loader
+after they have been build.
+
+The top level Makefile should first generate the configure scripts for all
+project subdirectories, then it calls the configure scripts for all
+sub directories and finally (if a Makefile was generated during the
+configure call) call make for all project sub directories.
+
 
 ## Building of OSMScout2
 

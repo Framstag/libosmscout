@@ -35,19 +35,13 @@ matrix:
       sudo: required
       compiler: clang
       env:
-        - BUILDTOOL=autoconf
-        - TARGET=build
-    - os: osx
-      osx_image: xcode7.3
-      compiler: clang
-      env:
         - BUILDTOOL=meson
         - TARGET=build
     - os: osx
       osx_image: xcode7.3
       compiler: clang
       env:
-        - BUILDTOOL=autoconf
+        - BUILDTOOL=meson
         - TARGET=build
     - os: osx
       osx_image: xcode7.3

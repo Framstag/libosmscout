@@ -13,6 +13,8 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/moc_DBInstance.cpp \
                                  osmscout/RoutingModel.cpp \
                                  osmscout/moc_RoutingModel.cpp \
+                                 osmscout/Router.cpp \
+                                 osmscout/moc_Router.cpp \
                                  osmscout/InputHandler.cpp \
                                  osmscout/moc_InputHandler.cpp \
                                  osmscout/OnlineTileProvider.cpp \
@@ -62,7 +64,9 @@ libosmscoutclientqt_la_SOURCES = osmscout/DBThread.cpp \
                                  osmscout/PlaneMapRenderer.cpp \
                                  osmscout/moc_PlaneMapRenderer.cpp \
                                  osmscout/TiledMapRenderer.cpp \
-                                 osmscout/moc_TiledMapRenderer.cpp
+                                 osmscout/moc_TiledMapRenderer.cpp \
+                                 osmscout/OverlayWay.cpp \
+                                 osmscout/moc_OverlayWay.cpp
 
 osmscout/moc_%.cpp: $(top_srcdir)/include/osmscout/%.h
 	@MOC@ -o$@ $<
@@ -71,6 +75,7 @@ MOSTLYCLEANFILES = osmscout/moc_DBThread.cpp \
                    osmscout/moc_DBInstance.cpp \
                    osmscout/moc_MapWidget.cpp \
                    osmscout/moc_RoutingModel.cpp \
+                   osmscout/moc_Router.cpp \
                    osmscout/moc_LocationEntry.cpp \
                    osmscout/moc_SearchLocationModel.cpp \
                    osmscout/moc_Settings.cpp \
@@ -93,4 +98,5 @@ MOSTLYCLEANFILES = osmscout/moc_DBThread.cpp \
                    osmscout/moc_LookupModule.cpp \
                    osmscout/moc_MapRenderer.cpp \
                    osmscout/moc_PlaneMapRenderer.cpp \
-                   osmscout/moc_TiledMapRenderer.cpp
+                   osmscout/moc_TiledMapRenderer.cpp \
+                   osmscout/moc_OverlayWay.cpp

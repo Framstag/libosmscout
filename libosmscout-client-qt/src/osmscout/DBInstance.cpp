@@ -19,6 +19,8 @@
 
 #include <osmscout/DBInstance.h>
 
+#include <osmscout/util/Logger.h>
+
 QBreaker::QBreaker()
   : osmscout::Breaker(),
     aborted(false)
@@ -118,7 +120,7 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     // Recreate
     styleConfig=newStyleConfig;
 
-    std::cout << "Create new style with " << stylesheetFilename.toStdString() << std::endl;
+    osmscout::log.Info()<< "Create new style with " << stylesheetFilename.toStdString();
   }
   else {
     std::list<std::string> errorsStrings=newStyleConfig->GetErrors();
@@ -132,36 +134,6 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     styleConfig=NULL;
 
     return false;
-  }
-
-  return true;
-}
-
-
-bool DBInstance::AssureRouter(osmscout::Vehicle /*vehicle*/,
-                              osmscout::RouterParameter routerParameter)
-{
-  QMutexLocker locker(&mutex);
-  if (!database->IsOpen()) {
-    return false;
-  }
-
-  if (!router/* ||
-      (router && router->GetVehicle()!=vehicle)*/) {
-    if (router) {
-      if (router->IsOpen()) {
-        router->Close();
-      }
-      router=NULL;
-    }
-
-    router=std::make_shared<osmscout::RoutingService>(database,
-                                                      routerParameter,
-                                                      osmscout::RoutingService::DEFAULT_FILENAME_BASE);
-
-    if (!router->Open()) {
-      return false;
-    }
   }
 
   return true;
@@ -190,9 +162,6 @@ void DBInstance::onThreadFinished()
 void DBInstance::close()
 {
   QMutexLocker locker(&mutex);
-  if (router && router->IsOpen()) {
-    router->Close();
-  }
 
   qDeleteAll(painterHolder);
   painterHolder.clear();

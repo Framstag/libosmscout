@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <iostream>
 
 #include <osmscout/Database.h>
 
@@ -24,7 +25,24 @@
 
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/GeoBox.h>
+
+struct Arguments
+{
+  bool                   help;
+  std::string            databaseDirectory;
+  osmscout::GeoCoord     topLeft;
+  osmscout::GeoCoord     bottomRight;
+  std::list<std::string> typeNames;
+
+  Arguments()
+    : help(false)
+  {
+    // no code
+  }
+};
+
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
@@ -36,39 +54,52 @@
 
 int main(int argc, char* argv[])
 {
-  std::string            map;
-  double                 latTop,latBottom,lonLeft,lonRight;
-  std::list<std::string> typeNames;
+  osmscout::CmdLineParser   argParser("LookupPOI",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
-  if (argc<6) {
-    std::cerr << "LookupPOI <map directory> <lat_top> <lon_left> <lat_bottom> <lon_right> {type}" << std::endl;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the database to use");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.topLeft=value;
+                          }),
+                          "TOP_LEFT",
+                          "Top left coordinate of search bounding box");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.bottomRight=value;
+                          }),
+                          "BOTTOM_RIGHT",
+                          "Bottom right coordinate of search bounding box");
+
+  argParser.AddPositional(osmscout::CmdLineStringListOption([&args](const std::string& value) {
+                            args.typeNames.push_back(value);
+                          }),
+                          "TYPE",
+                          "list of search types");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-
-  map=argv[1];
-
-  if (sscanf(argv[2],"%lf",&latTop)!=1) {
-    std::cerr << "lat_top is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[3],"%lf",&lonLeft)!=1) {
-    std::cerr << "lon_left is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[4],"%lf",&latBottom)!=1) {
-    std::cerr << "lat_bottom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5],"%lf",&lonRight)!=1) {
-    std::cerr << "lon_right is not numeric!" << std::endl;
-    return 1;
-  }
-
-  for (int i=6; i<argc; i++) {
-    typeNames.push_back(std::string(argv[i]));
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
 
   try {
@@ -81,10 +112,10 @@ int main(int argc, char* argv[])
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
   osmscout::POIServiceRef     poiService(new osmscout::POIService(database));
-  osmscout::GeoBox            boundingBox(osmscout::GeoCoord(latTop,lonLeft),
-                                          osmscout::GeoCoord(latBottom,lonRight));
+  osmscout::GeoBox            boundingBox(args.topLeft,
+                                          args.bottomRight);
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -98,15 +129,15 @@ int main(int argc, char* argv[])
   osmscout::TypeInfoSet            areaTypes(*typeConfig);
   osmscout::NameFeatureLabelReader nameLabelReader(*typeConfig);
 
-  for (const auto &name : typeNames) {
-    osmscout::TypeInfoRef type=typeConfig->GetTypeInfo(name);
+  for (const auto &typeName : args.typeNames) {
+    osmscout::TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
 
     if (type->GetIgnore()) {
-      std::cerr << "Cannot resolve type name '" << name << "'" << std::endl;
+      std::cerr << "Cannot resolve type name '" << typeName << "'" << std::endl;
       continue;
     }
 
-    std::cout << "- Searching for '" << name << "' as";
+    std::cout << "- Searching for '" << typeName << "' as";
 
 
     if (!type->GetIgnore()) {

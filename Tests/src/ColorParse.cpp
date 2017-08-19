@@ -2,59 +2,33 @@
 
 #include <osmscout/util/Color.h>
 
-bool CheckConversion(const std::string& colorString, const osmscout::Color& expectedColor)
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
+struct TestData
 {
-  osmscout::Color parsedColor=osmscout::Color::FromHexString(colorString);
+  std::string     colorString;
+  osmscout::Color value;
+};
 
-  std::string printedColor=parsedColor.ToHexString();
+static std::vector<TestData> testData = {
+  {"#000000", osmscout::Color::BLACK},
+  {"#ffffff", osmscout::Color::WHITE},
+  {"#ff0000",osmscout::Color::RED},
+  {"#00ff00",osmscout::Color::GREEN},
+  {"#0000ff",osmscout::Color::BLUE}
+};
 
-  if (colorString==printedColor && parsedColor==expectedColor) {
-    return true;
-  }
-  else {
-   std::cerr << "Failure: original: " << colorString << " RGBA: " << parsedColor.GetR() << " " << parsedColor.GetG() << " " << parsedColor.GetB() << " " << parsedColor.GetA() << " printed: " << printedColor << " expected: " << expectedColor.ToHexString() << std::endl;
-    return false;
-  }
-}
+TEST_CASE("Parsing of #XXXXXX syntax") {
+  for (const auto& test : testData) {
+    SECTION("Conversion of "+test.colorString) {
+      std::string colorString=test.colorString;
+      osmscout::Color parsedColor=osmscout::Color::FromHexString(colorString);
 
-int main()
-{
-  int errors=0;
+      std::string printedColor=parsedColor.ToHexString();
 
-  osmscout::Color color=osmscout::Color::FromHexString("#4440ec");
-  osmscout::Color darkenColor=color.Darken(0.4);
-
-  std::cout << color.ToHexString() << " " << darkenColor.ToHexString() << std::endl;
-
-  if (!CheckConversion("#000000",
-                       osmscout::Color::BLACK)) {
-    errors++;
-  }
-
-  if (!CheckConversion("#ffffff",
-                       osmscout::Color::WHITE)) {
-    errors++;
-  }
-
-  if (!CheckConversion("#ff0000",
-                       osmscout::Color::RED)) {
-    errors++;
-  }
-
-  if (!CheckConversion("#00ff00",
-                       osmscout::Color::GREEN)) {
-    errors++;
-  }
-
-  if (!CheckConversion("#0000ff",
-                       osmscout::Color::BLUE)) {
-    errors++;
-  }
-
-  if (errors!=0) {
-    return 1;
-  }
-  else {
-    return 0;
+      REQUIRE(colorString==printedColor);
+      REQUIRE(parsedColor==test.value);
+    }
   }
 }

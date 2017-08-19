@@ -2,6 +2,7 @@ osmscoutclientqtSrc = [
             'src/osmscout/DBThread.cpp',
             'src/osmscout/DBInstance.cpp',
             'src/osmscout/RoutingModel.cpp',
+            'src/osmscout/Router.cpp',
             'src/osmscout/InputHandler.cpp',
             'src/osmscout/OnlineTileProvider.cpp',
             'src/osmscout/OnlineTileProviderModel.cpp',
@@ -26,6 +27,7 @@ osmscoutclientqtSrc = [
             'src/osmscout/LookupModule.cpp',
             'src/osmscout/MapRenderer.cpp',
             'src/osmscout/PlaneMapRenderer.cpp',
-            'src/osmscout/TiledMapRenderer.cpp'
+            'src/osmscout/TiledMapRenderer.cpp',
+            'src/osmscout/OverlayWay.cpp'
           ]
 

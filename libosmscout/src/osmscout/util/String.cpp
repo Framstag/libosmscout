@@ -21,12 +21,15 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <cwchar>
 #include <iomanip>
 #include <locale>
 #include <sstream>
 
 #include <osmscout/system/Math.h>
+
+#include <osmscout/util/Logger.h>
 
 #include <osmscout/private/Config.h>
 
@@ -38,18 +41,16 @@
 #include <iconv.h>
 #endif
 
-#include <string.h>
-#include <iostream>
 namespace osmscout {
 
   bool StringToBool(const char* string, bool& value)
   {
-    if (strcmp(string,"true")==0) {
+    if (std::strcmp(string,"true")==0) {
       value=true;
 
       return true;
     }
-    else if (strcmp(string,"false")==0) {
+    else if (std::strcmp(string,"false")==0) {
       value=false;
 
       return true;
@@ -63,9 +64,8 @@ namespace osmscout {
     if (value) {
       return "true";
     }
-    else {
-      return "false";
-    }
+
+    return "false";
   }
 
   bool GetDigitValue(char digit, size_t& result)
@@ -157,9 +157,7 @@ namespace osmscout {
   {
     std::string result;
 
-    for (std::list<std::string>::const_iterator element=list.begin();
-        element!=list.end();
-        ++element) {
+    for (auto element=list.begin(); element!=list.end(); ++element) {
       if (element==list.begin()) {
        result.append(*element);
       }
@@ -170,6 +168,37 @@ namespace osmscout {
     }
 
     return result;
+  }
+
+  size_t CountWords(const std::string& text)
+  {
+    size_t wordCount=0;
+    bool   inWord=false;
+    size_t nextPos=0;
+
+    // Leading space
+    while (nextPos<text.length() && std::isspace(text[nextPos])!=0) {
+      nextPos++;
+    }
+
+    // We are counting the number of transitions from inWord=false to inWord=true
+    while (nextPos<text.length()) {
+      if (inWord) {
+        if (std::isspace(text[nextPos])!=0) {
+          inWord=false;
+        }
+      }
+      else {
+        if (!std::isspace(text[nextPos])!=0) {
+          inWord=true;
+          wordCount++;
+        }
+      }
+
+      nextPos++;
+    }
+
+    return wordCount;
   }
 
   std::string ByteSizeToString(FileOffset value)
@@ -215,7 +244,7 @@ namespace osmscout {
 
     while (wordBegin<input.length()) {
       while (wordBegin<input.length() &&
-             std::isspace(input[wordBegin])) {
+             std::isspace(input[wordBegin])!=0) {
         wordBegin++;
       }
 
@@ -226,7 +255,7 @@ namespace osmscout {
       wordEnd=wordBegin;
 
       while (wordEnd+1<input.length() &&
-             !std::isspace((unsigned char)input[wordEnd + 1])) {
+             !std::isspace((unsigned char)input[wordEnd + 1])!=0) {
         wordEnd++;
       }
 
@@ -249,9 +278,8 @@ namespace osmscout {
     if (pos==std::string::npos) {
       return stringList;
     }
-    else {
-      return stringList.substr(0,pos);
-    }
+
+    return stringList.substr(0,pos);
   }
 
   void TokenizeString(const std::string& input,
@@ -262,7 +290,7 @@ namespace osmscout {
 
     while (wordBegin<input.length()) {
       while (wordBegin<input.length() &&
-             (std::isspace(input[wordBegin]) ||
+             (std::isspace(input[wordBegin])!=0 ||
               input[wordBegin]==',')) {
         wordBegin++;
       }
@@ -274,7 +302,7 @@ namespace osmscout {
       wordEnd=wordBegin;
 
       while (wordEnd+1<input.length() &&
-             (!std::isspace(input[wordEnd+1]) &&
+             (!std::isspace(input[wordEnd+1])!=0 &&
               input[wordEnd+1]!=',')) {
         wordEnd++;
       }
@@ -289,13 +317,13 @@ namespace osmscout {
 
   void SimplifyTokenList(std::list<std::string>& tokens)
   {
-    std::list<std::string>::iterator current=tokens.begin();
-    std::list<std::string>::iterator next=current;
+    auto current=tokens.begin();
+    auto next=current;
 
     next++;
     while (next!=tokens.end()) {
-      if (std::isupper(current->at(0)) &&
-          std::islower(next->at(0))) {
+      if (std::isupper(current->at(0))!=0 &&
+          std::islower(next->at(0))!=0) {
         current->append(" ");
         current->append(*next);
         next=tokens.erase(next);
@@ -334,9 +362,9 @@ namespace osmscout {
     }
 
     for (size_t i=1; i<=listSize-parts+1; i++) {
-      size_t                                 count=0;
-      std::string                            value;
-      std::list<std::string>::const_iterator t=token;
+      size_t      count=0;
+      std::string value;
+      auto        t=token;
 
       while (count<i) {
         if (!value.empty()) {
@@ -416,7 +444,7 @@ namespace osmscout {
 
     handle=iconv_open("WCHAR_T","UTF-8");
     if (handle==(iconv_t)-1) {
-      std::cerr << "Error in UTF8StringToWString()" << strerror(errno) << std::endl;
+      log.Error() << "Error in UTF8StringToWString()" << strerror(errno);
       return L"";
     }
 
@@ -432,7 +460,7 @@ namespace osmscout {
     if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
       iconv_close(handle);
       delete [] out;
-      std::cerr << "Error in UTF8StringToWString()" << strerror(errno) << std::endl;
+      log.Error() << "Error in UTF8StringToWString()" << strerror(errno);
       return L"";
     }
 
@@ -477,13 +505,72 @@ namespace osmscout {
 #endif
 
 #if defined(HAVE_ICONV)
+  std::u32string UTF8StringToU32String(const std::string& text)
+  {
+    std::u32string res;
+    iconv_t        handle;
+
+    handle=iconv_open("UTF32","UTF-8");
+    if (handle==(iconv_t)-1) {
+      log.Error() << "Error in UTF8StringToU32String()" << strerror(errno);
+      return std::u32string();
+    }
+
+    // length+1+1 to handle a potential BOM and to convert of \0
+    size_t inCount=text.length()+1;
+    size_t outCount=(text.length()+2)*sizeof(char32_t);
+
+    char     *in=const_cast<char*>(text.data());
+    char32_t *out=new char32_t[text.length()+2];
+
+    char *tmpOut=(char*)out;
+    size_t tmpOutCount=outCount;
+    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
+      iconv_close(handle);
+      delete [] out;
+      log.Error() << "Error in UTF8StringToU32String()" << strerror(errno);
+      return std::u32string();
+    }
+
+    iconv_close(handle);
+
+    // remove potential byte order marks
+    if (out[0]==0xfeff) {
+      res=std::u32string(out+1,(outCount-tmpOutCount)/sizeof(char32_t)-2);
+    }
+    else {
+      res=std::u32string(out,(outCount-tmpOutCount)/sizeof(char32_t)-1);
+    }
+
+    delete [] out;
+
+    return res;
+  }
+#elif defined(HAVE_CODECVT)
+  std::u32string UTF8StringToU32String(const std::string& text)
+  {
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+    // See https://stackoverflow.com/questions/30765256/linker-error-using-vs-2015-rc-cant-find-symbol-related-to-stdcodecvt
+    std::wstring_convert<std::codecvt_utf8<int32_t>, int32_t> conv;
+    return reinterpret_cast<const char32_t*>(conv.from_bytes(text).c_str());
+#else
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
+    return conv.from_bytes(text);
+#endif
+
+  }
+#else
+  #error "Missing implementation for std::wstring UTF8StringToU32String(const std::string& text)"
+#endif
+
+#if defined(HAVE_ICONV)
   std::string WStringToUTF8String(const std::wstring& text)
   {
     iconv_t handle;
 
     handle=iconv_open("UTF-8","WCHAR_T");
     if (handle==(iconv_t)-1) {
-      std::cerr << "Error iconv_open in WStringToUTF8String() " << strerror(errno) << std::endl;
+      log.Error() << "Error iconv_open in WStringToUTF8String() " << strerror(errno);
       return "";
     }
 
@@ -500,7 +587,7 @@ namespace osmscout {
     if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
       iconv_close(handle);
       delete [] out;
-      std::cerr << "Error iconv in WStringToUTF8String() " << strerror(errno) << std::endl;
+      log.Error() << "Error iconv in WStringToUTF8String() " << strerror(errno);
       return "";
     }
 
@@ -530,7 +617,7 @@ namespace osmscout {
 
     handle=iconv_open("UTF-8","");
     if (handle==(iconv_t)-1) {
-      std::cerr << "Error iconv_open in LocaleStringToUTF8String() " << strerror(errno) << std::endl;
+      log.Error() << "Error iconv_open in LocaleStringToUTF8String() " << strerror(errno);
       return "";
     }
 
@@ -547,7 +634,7 @@ namespace osmscout {
     if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
       iconv_close(handle);
       delete [] out;
-      std::cerr << "Error iconv in LocaleStringToUTF8String() " << strerror(errno) << std::endl;
+      log.Error() << "Error iconv in LocaleStringToUTF8String() " << strerror(errno);
       return "";
     }
 
@@ -573,7 +660,7 @@ namespace osmscout {
 
     handle=iconv_open("","UTF-8");
     if (handle==(iconv_t)-1) {
-      std::cerr << "Error iconv_open in UTF8StringToLocaleString() " << strerror(errno) << std::endl;
+      log.Error() << "Error iconv_open in UTF8StringToLocaleString() " << strerror(errno);
       return "";
     }
 
@@ -590,7 +677,7 @@ namespace osmscout {
     if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
       iconv_close(handle);
       delete [] out;
-      std::cerr << "Error iconv in UTF8StringToLocaleString() " << strerror(errno) << std::endl;
+      log.Error() << "Error iconv in UTF8StringToLocaleString() " << strerror(errno);
       return "";
     }
 
