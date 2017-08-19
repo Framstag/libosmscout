@@ -32,18 +32,12 @@
 namespace osmscout {
 
   class OSMSCOUT_MAP_OPENGL_API CharacterTexture {
-  public:
     char32_t character;
     OpenGLTexture *texture;
     long baselineY;
     long height;
 
-    CharacterTexture();
-
-    CharacterTexture(char32_t character, OpenGLTexture *texture) {
-      this->character = character;
-      this->texture = texture;
-    }
+  public:
 
     char32_t GetCharacter() const {
       return character;

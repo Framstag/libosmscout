@@ -37,7 +37,7 @@ namespace osmscout {
             screenWidth),
         screenHeight(
             screenHeight),
-        Textloader(fontPath,10) {
+        Textloader(fontPath, 10) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -603,8 +603,8 @@ namespace osmscout {
           double length = 1;
           double dashSize = 0;
           if (!lineStyles[l]->GetDash().empty() && (l == 0)) {
-            for(int d = 0; d < lineStyles[l]->GetDash().size(); d++){
-              if(lineStyles[l]->GetDash()[d] != 0){
+            for (int d = 0; d < lineStyles[l]->GetDash().size(); d++) {
+              if (lineStyles[l]->GetDash()[d] != 0) {
                 dashSize = lineStyles[l]->GetDash()[d];
                 break;
               }
@@ -656,7 +656,7 @@ namespace osmscout {
 
           int num;
           num = PathRenderer.GetVerticesNumber() - 6;
-          for(unsigned int n = 0; n < 6; n++)
+          for (unsigned int n = 0; n < 6; n++)
             PathRenderer.AddNewElement(num + n);
 
           AddPathVertex(way->nodes[i],
@@ -698,7 +698,7 @@ namespace osmscout {
                         border, z, dashSize, length, gapColor);
 
           num = PathRenderer.GetVerticesNumber() - 6;
-          for(unsigned int n = 0; n < 6; n++)
+          for (unsigned int n = 0; n < 6; n++)
             PathRenderer.AddNewElement(num + n);
         }
       }
@@ -708,7 +708,8 @@ namespace osmscout {
   void
   osmscout::MapPainterOpenGL::AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
                                             osmscout::Color color, int type, float width, glm::vec3 barycentric,
-                                            int border, double z, float dashsize, float length, osmscout::Color gapcolor) {
+                                            int border, double z, float dashsize, float length,
+                                            osmscout::Color gapcolor) {
     PathRenderer.AddNewVertex(current.GetLon());
     PathRenderer.AddNewVertex(current.GetLat());
 
@@ -1085,7 +1086,7 @@ namespace osmscout {
           continue;
         }
 
-        if(hasIcon)
+        if (hasIcon)
           offset = 15;
 
         double alpha = 1.0;
@@ -1108,7 +1109,7 @@ namespace osmscout {
         }
 
         Color color = textStyle->GetTextColor();
-        std::vector<int> textureAtlasIndices = Textloader.AddCharactersToTextureAtlas(label,fontSize);
+        std::vector<int> textureAtlasIndices = Textloader.AddCharactersToTextureAtlas(label, fontSize);
         int widthSum = 0;
         for (int index: textureAtlasIndices) {
           osmscout::GeoCoord coords = node->GetCoords();

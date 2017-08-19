@@ -37,58 +37,6 @@ namespace osmscout {
       LoadFace(path);
   }
 
-  /*std::vector<int> TextLoader::AddCharactersToTextureAtlas(std::string text) {
-    std::vector<int> indices;
-
-    std::u32string utf32=UTF8StringToU32String(text);
-
-    for (char32_t &i : utf32) {
-
-      if (!(characterIndices.find(i) == characterIndices.end())) {
-        indices.push_back(characterIndices[i]);
-        continue;
-      }
-
-      FT_UInt glyph_index = FT_Get_Char_Index(face, i);
-      if (FT_Load_Glyph(face, glyph_index, FT_LOAD_RENDER)) {
-        std::cout << "Error while loading glyph" << std::endl;
-        continue;
-      }
-
-      FT_Glyph gl;
-      FT_Get_Glyph(face->glyph, &gl);
-      FT_Glyph_To_Bitmap(&gl, ft_render_mode_normal, 0, 1);
-      FT_BitmapGlyph bitg = (FT_BitmapGlyph) gl;
-      FT_Bitmap &bit = bitg->bitmap;
-
-      OpenGLTexture *texture = new osmscout::OpenGLTexture;
-      //space or not space?
-      if(i == 32) {
-        unsigned char* spaceBitmap = new unsigned char[height*2];
-        for(int i = 0; i < height*2; i++)
-          spaceBitmap[i] = 0;
-        texture->data = spaceBitmap;
-        texture->width = 2;
-        texture->height = height;
-        texture->fromOriginY = 0;
-        sumwidth += 2;
-      }
-      else{
-        texture->data = bit.buffer;
-        texture->width = bit.width;
-        texture->height = bit.rows;
-        texture->fromOriginY = face->glyph->bitmap_top;
-        sumwidth += bit.width;
-      }
-
-      this->characters.push_back(texture);
-      characterIndices.emplace(i, characters.size() - 1);
-      indices.push_back(characters.size() - 1);
-    }
-
-    return indices;
-  }*/
-
   std::vector<int> TextLoader::AddCharactersToTextureAtlas(std::string text, double size) {
     std::vector<int> indices;
 
@@ -122,7 +70,6 @@ namespace osmscout {
       OpenGLTexture *texture = new osmscout::OpenGLTexture;
       //space or not space?
       if (i == 32) {
-        //unsigned char* spaceBitmap = new unsigned char[height*2];
         unsigned char *spaceBitmap = new unsigned char[h * 4];
         for (int j = 0; j < h * 4; j++)
           spaceBitmap[j] = 0;
@@ -141,7 +88,7 @@ namespace osmscout {
 
       maxHeight = maxHeight < h ? h : maxHeight;
 
-      CharacterTexture *character = new osmscout::CharacterTexture(i, texture);
+      CharacterTexture *character = new osmscout::CharacterTexture();
       character->SetCharacter(i);
       character->SetTexture(texture);
       character->SetBaselineY(abs(face->size->metrics.descender / 64));
@@ -164,13 +111,14 @@ namespace osmscout {
     int index = 0;
     for (int i = 0; i < maxHeight; i++) {
       for (unsigned int j = 0; j < characters.size(); j++) {
-        int start = i * characters[j]->texture->width;
-        for (unsigned int k = start; k < start + (characters[j]->texture->width); k++) {
-          size_t start2 = maxHeight - (characters[j]->GetBaselineY() + characters[j]->texture->fromOriginY);
-          size_t end = start2 + characters[j]->texture->height;
+        OpenGLTexture* tx = characters[j]->GetTexture();
+        int start = i * tx->width;
+        for (unsigned int k = start; k < start + (tx->width); k++) {
+          size_t start2 = maxHeight - (characters[j]->GetBaselineY() + tx->fromOriginY);
+          size_t end = start2 + tx->height;
           if (i >= start2 && i < end) {
-            int ind = k - (start2 * characters[j]->texture->width);
-            image[index] = (characters[j]->texture->data[ind]);
+            int ind = k - (start2 * tx->width);
+            image[index] = (tx->data[ind]);
             index++;
           } else {
             index++;
@@ -236,14 +184,14 @@ namespace osmscout {
   int TextLoader::GetStartWidth(int index) {
     int width = 0;
     for (int i = 0; i < index; i++) {
-      width += characters[i]->texture->width;
+      width += characters[i]->GetTexture()->width;
     }
 
     return width;
   }
 
   size_t TextLoader::GetWidth(int index) {
-    return characters[index]->texture->width;
+    return characters[index]->GetTexture()->width;
   }
 
   long TextLoader::GetHeight() {
