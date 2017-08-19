@@ -527,7 +527,7 @@ TYPES
       {Bridge, Tunnel, Width}
 
   TYPE railway_narrow_gauge
-    = WAY ("railway"=="narrow_gauge")
+    = WAY ("railway"=="narrow_gauge" OR "railway"=="preserved")
       PATH
 
   TYPE railway_monorail

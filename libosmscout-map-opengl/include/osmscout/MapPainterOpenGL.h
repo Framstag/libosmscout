@@ -79,21 +79,23 @@ namespace osmscout {
 
 
     void ProcessAreas(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                         const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
+                      const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessGround(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                           const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
+                       const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessWays(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                         const osmscout::Projection &projection,
-                         const osmscout::StyleConfigRef &styleConfig);
+                     const osmscout::Projection &projection,
+                     const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessNodes(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                         const osmscout::Projection &projection,
-                         const osmscout::StyleConfigRef &styleConfig);
+                      const osmscout::Projection &projection,
+                      const osmscout::StyleConfigRef &styleConfig);
 
     void AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
-    osmscout::Color color, int type, float width, glm::vec3 barycentric, int border = 0, double z = 0);
+                       osmscout::Color color, int type, float width, glm::vec3 barycentric, int border = 0,
+                       double z = 0, float dashsize = 0.0, float length = 1,
+                       osmscout::Color gapcolor = osmscout::Color(1.0, 1.0, 1.0, 1.0));
 
     void SwapData();
 
@@ -107,7 +109,7 @@ namespace osmscout {
 
     bool PixelToGeo(double x, double y, double &lon, double &lat);
 
-    bool IsVisibleArea(const Projection& projection, const GeoBox& boundingBox, double pixelOffset);
+    bool IsVisibleArea(const Projection &projection, const GeoBox &boundingBox, double pixelOffset);
 
   };
 }
