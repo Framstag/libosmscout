@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
 
   database.get()->GetBoundingBox(boundingBox);
 
-  drawParameter.SetFontSize(3.0);
+  drawParameter.SetFontSize(12);
   std::list<std::string>       paths;
   paths.push_back(args.iconDirectory);
   drawParameter.SetIconPaths(paths);
