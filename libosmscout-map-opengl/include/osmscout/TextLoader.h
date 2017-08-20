@@ -31,17 +31,60 @@
 
 namespace osmscout {
 
+  class OSMSCOUT_MAP_OPENGL_API CharacterTexture {
+    char32_t character;
+    OpenGLTexture *texture;
+    long baselineY;
+    long height;
+
+  public:
+
+    char32_t GetCharacter() const {
+      return character;
+    }
+
+    void SetCharacter(char32_t character) {
+      this->character = character;
+    }
+
+    OpenGLTexture *GetTexture() const {
+      return texture;
+    }
+
+    void SetTexture(OpenGLTexture *texture) {
+      this->texture = texture;
+    }
+
+    long GetBaselineY() const {
+      return baselineY;
+    }
+
+    void SetBaselineY(long baselineY) {
+      this->baselineY = baselineY;
+    }
+
+    long GetHeight() const {
+      return height;
+    }
+
+    void SetHeight(long height) {
+      this->height = height;
+    }
+
+  };
+
   class OSMSCOUT_MAP_OPENGL_API TextLoader {
   private:
     FT_Library ft;
     FT_Face face;
 
-    long height;
-    long baseLineY;
-    int sumwidth;
+    long defaultFontSize;
 
-    std::map<char32_t, int> characterIndices;
-    std::vector<osmscout::OpenGLTexture *> characters;
+    long maxHeight;
+    int sumWidth;
+
+    std::map<std::pair<char32_t, int>, int> characterIndices;
+    std::vector<osmscout::CharacterTexture *> characters;
 
     void LoadFace();
 
@@ -49,18 +92,21 @@ namespace osmscout {
 
   public:
 
-    TextLoader(std::string path);
+    TextLoader(std::string path, long defaultSize);
+
+    size_t GetWidth(int index);
 
     int GetStartWidth(int index);
 
     long GetHeight();
 
-    size_t GetWidth(int index);
+    long GetDefaultFontSize() const;
+
+    void SetDefaultFontSize(long defaultFontSize);
 
     OpenGLTexture *CreateTexture();
 
-    std::vector<int> AddCharactersToTextureAtlas(std::string text);
-
+    std::vector<int> AddCharactersToTextureAtlas(std::string text, double size);
   };
 }
 

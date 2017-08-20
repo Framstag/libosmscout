@@ -6,7 +6,7 @@ in float index;
 in float textureStart;
 in float textureWidth;
 in float positionOffset;
-in float fontSize;
+in float startOffset;
 out vec2 Texcoord;
 out vec4 Color;
 uniform mat4 Model;
@@ -114,10 +114,10 @@ vec2 GeoToPixel(in float posx, in float posy){
 void main() {
     Color = color;
 
-    float width_norm = (ceil(textureWidth)/windowWidth) * fontSize;
-    float height_norm = (ceil(textureHeight)/windowHeight) * fontSize;
+    float width_norm = (ceil(textureWidth)/windowWidth);
+    float height_norm = (ceil(textureHeight)/windowHeight);
 
-    float offset = (ceil(positionOffset)/windowWidth) * fontSize;
+    float offset = (ceil(positionOffset)/windowWidth) + (ceil(startOffset)/windowWidth);
 
     vec2 c = GeoToPixel(position.x, position.y);
     vec4 pos = Projection * View * Model * vec4(c.x, c.y, z, 1);

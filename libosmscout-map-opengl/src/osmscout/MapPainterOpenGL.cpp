@@ -37,7 +37,7 @@ namespace osmscout {
             screenWidth),
         screenHeight(
             screenHeight),
-        Textloader(fontPath) {
+        Textloader(fontPath, 10) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -102,7 +102,6 @@ namespace osmscout {
     ImageRenderer.SetTextureHeight(7);
     TextRenderer.clearData();
     TextRenderer.SetVerticesSize(11);
-    TextRenderer.SetTextureHeight(Textloader.GetHeight());
   }
 
   void osmscout::MapPainterOpenGL::LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
@@ -110,6 +109,8 @@ namespace osmscout {
                                             const osmscout::StyleConfigRef &styleConfig) {
     styleConfig.get()->GetLandFillStyle(projection, landFill);
     styleConfig.get()->GetSeaFillStyle(projection, seaFill);
+
+    Textloader.SetDefaultFontSize(parameter.GetFontSize());
 
     this->Magnification = projection.GetMagnification();
     this->Center = projection.GetCenter();
@@ -235,12 +236,12 @@ namespace osmscout {
     ImageRenderer.SetModel();
     ImageRenderer.SetView(lookX, lookY);
 
+    TextRenderer.SetTextureHeight(Textloader.GetHeight());
     TextRenderer.SwapData(1);
 
     TextRenderer.BindBuffers();
     TextRenderer.LoadProgram();
     TextRenderer.LoadVertices();
-    TextRenderer.SetTextureHeight(Textloader.GetHeight());
     TextRenderer.LoadGreyTextures();
 
     TextRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
@@ -249,12 +250,12 @@ namespace osmscout {
     TextRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 7 * sizeof(GLfloat));
     TextRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 8 * sizeof(GLfloat));
     TextRenderer.AddAttrib("positionOffset", 1, GL_FLOAT, 9 * sizeof(GLfloat));
-    TextRenderer.AddAttrib("fontSize", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+    TextRenderer.AddAttrib("startOffset", 1, GL_FLOAT, 10 * sizeof(GLfloat));
     TextRenderer.AddUniform("windowWidth", width);
     TextRenderer.AddUniform("windowHeight", height);
     TextRenderer.AddUniform("centerLat", Center.GetLat());
     TextRenderer.AddUniform("centerLon", Center.GetLon());
-    TextRenderer.AddUniform("textureHeight", TextRenderer.GetTextureHeight());
+    TextRenderer.AddUniform("textureHeight", Textloader.GetHeight());
     TextRenderer.AddUniform("magnification", Magnification.GetMagnification());
     TextRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
     TextRenderer.AddUniform("dpi", dpi);
@@ -602,8 +603,8 @@ namespace osmscout {
           double length = 1;
           double dashSize = 0;
           if (!lineStyles[l]->GetDash().empty() && (l == 0)) {
-            for(int d = 0; d < lineStyles[l]->GetDash().size(); d++){
-              if(lineStyles[l]->GetDash()[d] != 0){
+            for (int d = 0; d < lineStyles[l]->GetDash().size(); d++) {
+              if (lineStyles[l]->GetDash()[d] != 0) {
                 dashSize = lineStyles[l]->GetDash()[d];
                 break;
               }
@@ -655,7 +656,7 @@ namespace osmscout {
 
           int num;
           num = PathRenderer.GetVerticesNumber() - 6;
-          for(unsigned int n = 0; n < 6; n++)
+          for (unsigned int n = 0; n < 6; n++)
             PathRenderer.AddNewElement(num + n);
 
           AddPathVertex(way->nodes[i],
@@ -697,7 +698,7 @@ namespace osmscout {
                         border, z, dashSize, length, gapColor);
 
           num = PathRenderer.GetVerticesNumber() - 6;
-          for(unsigned int n = 0; n < 6; n++)
+          for (unsigned int n = 0; n < 6; n++)
             PathRenderer.AddNewElement(num + n);
         }
       }
@@ -707,7 +708,8 @@ namespace osmscout {
   void
   osmscout::MapPainterOpenGL::AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
                                             osmscout::Color color, int type, float width, glm::vec3 barycentric,
-                                            int border, double z, float dashsize, float length, osmscout::Color gapcolor) {
+                                            int border, double z, float dashsize, float length,
+                                            osmscout::Color gapcolor) {
     PathRenderer.AddNewVertex(current.GetLon());
     PathRenderer.AddNewVertex(current.GetLat());
 
@@ -922,9 +924,9 @@ namespace osmscout {
                                      projection,
                                      textStyles);
 
+      bool hasIcon = false;
       if (iconStyle) {
         //has icon?
-        bool hasIcon = false;
         OpenGLTexture *image;
         int IconIndex = 0;
         for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
@@ -1078,9 +1080,14 @@ namespace osmscout {
         std::string label = textStyle->GetLabel()->GetLabel(parameter,
                                                             buffer);
 
+        int offset = 0;
+
         if (label.empty()) {
           continue;
         }
+
+        if (hasIcon)
+          offset = 15;
 
         double alpha = 1.0;
         double fontSize = 1.0;
@@ -1092,6 +1099,7 @@ namespace osmscout {
           alpha = std::min(textStyle->GetAlpha() / factor, 1.0);
 
         } else if (textStyle->GetAutoSize()) {
+          //fontSize = textStyle->GetSize();
           alpha = textStyle->GetAlpha();
           //TODO
           continue;
@@ -1101,7 +1109,7 @@ namespace osmscout {
         }
 
         Color color = textStyle->GetTextColor();
-        std::vector<int> textureAtlasIndices = Textloader.AddCharactersToTextureAtlas(label);
+        std::vector<int> textureAtlasIndices = Textloader.AddCharactersToTextureAtlas(label, fontSize);
         int widthSum = 0;
         for (int index: textureAtlasIndices) {
           osmscout::GeoCoord coords = node->GetCoords();
@@ -1120,7 +1128,7 @@ namespace osmscout {
             TextRenderer.AddNewVertex(startWidth);
             TextRenderer.AddNewVertex(textureWidth);
             TextRenderer.AddNewVertex(widthSum);
-            TextRenderer.AddNewVertex(fontSize);
+            TextRenderer.AddNewVertex(offset);
           }
 
           widthSum += textureWidth + 1;
