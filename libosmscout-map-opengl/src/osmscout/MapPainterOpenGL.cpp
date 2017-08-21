@@ -927,7 +927,7 @@ namespace osmscout {
       bool hasIcon = false;
       if (iconStyle) {
         //has icon?
-        OpenGLTexture *image;
+        OpenGLTextureRef image;
         int IconIndex = 0;
         for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
              path != parameter.GetIconPaths().end();
@@ -1150,7 +1150,7 @@ namespace osmscout {
       }
     }
 
-    OpenGLTexture *t = Textloader.CreateTexture();
+    OpenGLTextureRef t = Textloader.CreateTexture();
     TextRenderer.AddNewTexture(t);
 
   }

@@ -33,7 +33,7 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_OPENGL_API CharacterTexture {
     char32_t character;
-    OpenGLTexture *texture;
+    OpenGLTextureRef texture;
     long baselineY;
     long height;
 
@@ -47,11 +47,11 @@ namespace osmscout {
       this->character = character;
     }
 
-    OpenGLTexture *GetTexture() const {
+    OpenGLTextureRef GetTexture() const {
       return texture;
     }
 
-    void SetTexture(OpenGLTexture *texture) {
+    void SetTexture(OpenGLTextureRef texture) {
       this->texture = texture;
     }
 
@@ -73,6 +73,8 @@ namespace osmscout {
 
   };
 
+  typedef std::shared_ptr<CharacterTexture> CharacterTextureRef;
+
   class OSMSCOUT_MAP_OPENGL_API TextLoader {
   private:
     FT_Library ft;
@@ -84,13 +86,15 @@ namespace osmscout {
     int sumWidth;
 
     std::map<std::pair<char32_t, int>, int> characterIndices;
-    std::vector<osmscout::CharacterTexture *> characters;
+    std::vector<osmscout::CharacterTextureRef> characters;
 
     void LoadFace();
 
     void LoadFace(std::string);
 
   public:
+
+    ~TextLoader();
 
     TextLoader(std::string path, long defaultSize);
 
@@ -104,7 +108,7 @@ namespace osmscout {
 
     void SetDefaultFontSize(long defaultFontSize);
 
-    OpenGLTexture *CreateTexture();
+    OpenGLTextureRef CreateTexture();
 
     std::vector<int> AddCharactersToTextureAtlas(std::string text, double size);
   };

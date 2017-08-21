@@ -35,9 +35,9 @@ namespace osmscout {
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
     for (int i = 0; i < triangles.size(); i++) {
-      p2t::Point &a = *triangles[i]->GetPoint(0);
-      p2t::Point &b = *triangles[i]->GetPoint(1);
-      p2t::Point &c = *triangles[i]->GetPoint(2);
+      p2t::Point a = *triangles[i]->GetPoint(0);
+      p2t::Point b = *triangles[i]->GetPoint(1);
+      p2t::Point c = *triangles[i]->GetPoint(2);
       result.emplace_back(a.x);
       result.emplace_back(a.y);
       result.emplace_back(b.x);
@@ -45,6 +45,10 @@ namespace osmscout {
       result.emplace_back(c.x);
       result.emplace_back(c.y);
     }
+
+    std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
+    delete cdt;
+    cdt = NULL;
 
     return result;
 
@@ -61,9 +65,9 @@ namespace osmscout {
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
     for (int i = 0; i < triangles.size(); i++) {
-      p2t::Point &a = *triangles[i]->GetPoint(0);
-      p2t::Point &b = *triangles[i]->GetPoint(1);
-      p2t::Point &c = *triangles[i]->GetPoint(2);
+      p2t::Point a = *triangles[i]->GetPoint(0);
+      p2t::Point b = *triangles[i]->GetPoint(1);
+      p2t::Point c = *triangles[i]->GetPoint(2);
       result.emplace_back(a.x);
       result.emplace_back(a.y);
       result.emplace_back(b.x);
@@ -71,6 +75,10 @@ namespace osmscout {
       result.emplace_back(c.x);
       result.emplace_back(c.y);
     }
+
+    std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
+    delete cdt;
+    cdt = NULL;
 
     return result;
 
@@ -87,9 +95,9 @@ namespace osmscout {
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
     for (int i = 0; i < triangles.size(); i++) {
-      p2t::Point &a = *triangles[i]->GetPoint(0);
-      p2t::Point &b = *triangles[i]->GetPoint(1);
-      p2t::Point &c = *triangles[i]->GetPoint(2);
+      p2t::Point a = *triangles[i]->GetPoint(0);
+      p2t::Point b = *triangles[i]->GetPoint(1);
+      p2t::Point c = *triangles[i]->GetPoint(2);
       result.emplace_back(a.x);
       result.emplace_back(a.y);
       result.emplace_back(b.x);
@@ -97,6 +105,10 @@ namespace osmscout {
       result.emplace_back(c.x);
       result.emplace_back(c.y);
     }
+
+    std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
+    delete cdt;
+    cdt = NULL;
 
     return result;
 
@@ -109,20 +121,25 @@ namespace osmscout {
                   [&polyline](osmscout::Point p) { polyline.push_back(new p2t::Point(p.GetLon(), p.GetLat())); });
     p2t::CDT *cdt = new p2t::CDT(polyline);
 
+    std::vector<std::vector<p2t::Point *>> holes;
+
     for (int i = 1; i < points.size(); i++) {
       std::vector<p2t::Point *> hole;
       std::for_each(points[i].begin(), points[i].end(),
                     [&hole](osmscout::Point p) { hole.push_back(new p2t::Point(p.GetLon(), p.GetLat())); });
-      cdt->AddHole(hole);
+      holes.push_back(hole);
     }
+
+    for (const auto& hole: holes)
+      cdt->AddHole(hole);
 
     cdt->Triangulate();
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
     for (int i = 0; i < triangles.size(); i++) {
-      p2t::Point &a = *triangles[i]->GetPoint(0);
-      p2t::Point &b = *triangles[i]->GetPoint(1);
-      p2t::Point &c = *triangles[i]->GetPoint(2);
+      p2t::Point a = *triangles[i]->GetPoint(0);
+      p2t::Point b = *triangles[i]->GetPoint(1);
+      p2t::Point c = *triangles[i]->GetPoint(2);
       result.emplace_back(a.x);
       result.emplace_back(a.y);
       result.emplace_back(b.x);
@@ -130,6 +147,15 @@ namespace osmscout {
       result.emplace_back(c.x);
       result.emplace_back(c.y);
     }
+
+    std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
+
+    for(int i = 0; i < holes.size(); i++){
+      std::for_each(holes[i].begin(), holes[i].end(), [](p2t::Point *p){delete p;});
+    }
+
+    delete cdt;
+    cdt = NULL;
 
     return result;
 

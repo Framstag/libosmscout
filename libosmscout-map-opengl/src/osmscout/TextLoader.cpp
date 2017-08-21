@@ -67,7 +67,7 @@ namespace osmscout {
       FT_Bitmap &bit = bitg->bitmap;
 
       long h = abs(face->size->metrics.descender / 64) + (face->size->metrics.ascender / 64) + 1;
-      OpenGLTexture *texture = new osmscout::OpenGLTexture;
+      OpenGLTextureRef texture(new osmscout::OpenGLTexture);
       //space or not space?
       if (i == 32) {
         unsigned char *spaceBitmap = new unsigned char[h * 4];
@@ -79,7 +79,9 @@ namespace osmscout {
         texture->fromOriginY = 0;
         sumWidth += 2;
       } else {
-        texture->data = bit.buffer;
+        texture->data = new unsigned char[bit.width*bit.rows];
+        for(int t = 0; t < bit.rows*bit.width; t++)
+          texture->data[t] = bit.buffer[t];
         texture->width = bit.width;
         texture->height = bit.rows;
         texture->fromOriginY = face->glyph->bitmap_top;
@@ -88,7 +90,7 @@ namespace osmscout {
 
       maxHeight = maxHeight < h ? h : maxHeight;
 
-      CharacterTexture *character = new osmscout::CharacterTexture();
+      CharacterTextureRef character(new osmscout::CharacterTexture());
       character->SetCharacter(i);
       character->SetTexture(texture);
       character->SetBaselineY(abs(face->size->metrics.descender / 64));
@@ -96,12 +98,14 @@ namespace osmscout {
       characters.push_back(character);
       characterIndices.emplace(p, characters.size() - 1);
       indices.push_back(characters.size() - 1);
+
+      FT_Done_Glyph(gl);
     }
 
     return indices;
   }
 
-  OpenGLTexture *TextLoader::CreateTexture() {
+  OpenGLTextureRef TextLoader::CreateTexture() {
 
     unsigned char *image = new unsigned char[maxHeight * sumWidth];
     for (int i = 0; i < maxHeight * sumWidth; i++) {
@@ -111,7 +115,7 @@ namespace osmscout {
     int index = 0;
     for (int i = 0; i < maxHeight; i++) {
       for (unsigned int j = 0; j < characters.size(); j++) {
-        OpenGLTexture* tx = characters[j]->GetTexture();
+        OpenGLTextureRef tx = characters[j]->GetTexture();
         int start = i * tx->width;
         for (unsigned int k = start; k < start + (tx->width); k++) {
           size_t start2 = maxHeight - (characters[j]->GetBaselineY() + tx->fromOriginY);
@@ -127,7 +131,7 @@ namespace osmscout {
       }
     }
 
-    OpenGLTexture *result = new OpenGLTexture;
+    OpenGLTextureRef result(new osmscout::OpenGLTexture());
     result->width = sumWidth;
     result->height = maxHeight;
     result->data = image;
@@ -204,6 +208,11 @@ namespace osmscout {
 
   void TextLoader::SetDefaultFontSize(long defaultFontSize) {
     this->defaultFontSize = defaultFontSize;
+  }
+
+  TextLoader::~TextLoader() {
+    FT_Done_Face    ( face );
+    FT_Done_FreeType( ft );
   }
 
 }

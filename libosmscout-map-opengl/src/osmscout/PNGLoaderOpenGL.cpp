@@ -32,7 +32,7 @@ namespace osmscout {
     return bytes[0]!=0;
   }
 
-  osmscout::OpenGLTexture* LoadPNGOpenGL(const std::string& filename){
+  osmscout::OpenGLTextureRef LoadPNGOpenGL(const std::string& filename){
     std::FILE       *file;
     png_structp     png_ptr;
     png_infop       info_ptr;
@@ -212,7 +212,7 @@ namespace osmscout {
     free(image_data);
     std::fclose(file);
 
-    osmscout::OpenGLTexture *texture = new osmscout::OpenGLTexture();
+    osmscout::OpenGLTextureRef texture(new osmscout::OpenGLTexture());
     texture->width = width;
     texture->height = height;
     texture->data = data;
