@@ -43,7 +43,13 @@ namespace osmscout {
 
     size_t fromOriginY;
 
+    ~OpenGLTexture(){
+      delete []data;
+    }
+
   };
+
+  typedef std::shared_ptr<OpenGLTexture> OpenGLTextureRef;
 
   class OpenGLMapData {
   private:
@@ -53,7 +59,7 @@ namespace osmscout {
     std::vector<GLuint> Elements;
     std::vector<GLuint> ElementsBuffer;
     unsigned char *Textures;
-    std::vector<OpenGLTexture*> TexturesBuffer;
+    std::vector<OpenGLTextureRef> TexturesBuffer;
     int textureSize;
     int textureSizeBuffer;
     int textureWidth;
@@ -119,6 +125,7 @@ namespace osmscout {
   public:
 
     void SwapData() {
+      delete[] Textures;
       this->Vertices.clear();
       this->Vertices = this->VerticesBuffer;
       this->VerticesBuffer.clear();
@@ -150,6 +157,7 @@ namespace osmscout {
     }
 
     void SwapData(int stride) {
+      delete[] Textures;
       this->Vertices.clear();
       this->Vertices = this->VerticesBuffer;
       this->VerticesBuffer.clear();
@@ -321,13 +329,22 @@ namespace osmscout {
       return this->VerticesBuffer.size();
     }
 
-    void AddNewTexture(OpenGLTexture *texture) {
+    /*void AddNewTexture(OpenGLTexture *texture) {
+      TexturesBuffer.push_back(texture);
+
+      textureWidthBuffer += texture->width;
+
+      textureSizeBuffer++;
+    }*/
+
+    void AddNewTexture(OpenGLTextureRef texture) {
       TexturesBuffer.push_back(texture);
 
       textureWidthBuffer += texture->width;
 
       textureSizeBuffer++;
     }
+
 
     int GetTextureWidth(){
       return textureWidth;
