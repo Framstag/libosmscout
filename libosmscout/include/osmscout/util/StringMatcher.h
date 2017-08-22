@@ -20,16 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <limits>
-#include <list>
 #include <memory>
 #include <string>
 
 #include <osmscout/private/CoreImportExport.h>
-
-#include <osmscout/Types.h>
-
-#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -77,6 +71,5 @@ namespace osmscout {
   public:
     StringMatcherRef CreateMatcher(const std::string& pattern) const override;
   };
-
 }
 #endif

@@ -19,6 +19,8 @@
 
 #include <osmscout/util/StringMatcher.h>
 
+#include <osmscout/util/String.h>
+
 namespace osmscout {
 
   StringMatcherCI::StringMatcherCI(const std::string& pattern)
