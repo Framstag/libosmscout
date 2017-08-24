@@ -401,7 +401,7 @@ static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessVal
     std::cout << "oneway: backward" << std::endl;
   }
 
-  if (accessValue.CanRouteFoot()) {
+  if (accessValue.CanRouteFootForward() && accessValue.CanRouteFootBackward()) {
     DumpIndent(indent+2);
     std::cout << "foot: both" << std::endl;
   }
@@ -414,7 +414,7 @@ static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessVal
     std::cout << "foot: backward" << std::endl;
   }
 
-  if (accessValue.CanRouteBicycle()) {
+  if (accessValue.CanRouteBicycleForward() && accessValue.CanRouteBicycleBackward()) {
     DumpIndent(indent+2);
     std::cout << "bicycle: both" << std::endl;
   }
@@ -427,7 +427,7 @@ static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessVal
     std::cout << "bicycle: backward" << std::endl;
   }
 
-  if (accessValue.CanRouteCar()) {
+  if (accessValue.CanRouteCarForward() && accessValue.CanRouteCarBackward()) {
     DumpIndent(indent+2);
     std::cout << "car: both" << std::endl;
   }
