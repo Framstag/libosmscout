@@ -98,18 +98,39 @@ namespace osmscout {
 
     TextLoader(std::string path, long defaultSize);
 
+    /**
+     * Returns width of a texture at given index in pixel.
+     */
     size_t GetWidth(int index);
 
+    /**
+    * Returns the sum width of a texture at given index in pixel.
+    */
     int GetStartWidth(int index);
 
+    /**
+     * Returns the height of the texture atlas in pixel.
+     */
     long GetHeight();
 
+    /**
+     * Returns the default font size.
+     */
     long GetDefaultFontSize() const;
 
+    /**
+     * Sets the default font size.
+     */
     void SetDefaultFontSize(long defaultFontSize);
 
+    /**
+     * Creates one texture from the character textures.
+     */
     OpenGLTextureRef CreateTexture();
 
+    /**
+     * Add new characters to the texture atlas and returns its indices in the atlas.
+     */
     std::vector<int> AddCharactersToTextureAtlas(std::string text, double size);
   };
 }
