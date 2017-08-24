@@ -78,11 +78,6 @@ namespace osmscout {
     // no code
   }
 
-  Projection::~Projection()
-  {
-    // no code
-  }
-
   MercatorProjection::MercatorProjection()
   : valid(false),
     latOffset(0.0),

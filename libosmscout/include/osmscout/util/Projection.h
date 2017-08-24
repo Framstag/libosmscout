@@ -136,7 +136,7 @@ namespace osmscout {
     };
 
     Projection();
-    virtual ~Projection();
+    virtual ~Projection() = default;
 
     virtual bool CanBatch() const = 0;
     virtual bool IsValid() const = 0;
