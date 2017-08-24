@@ -170,7 +170,7 @@ namespace osmscout {
   class OSMSCOUT_API CoordBuffer
   {
   public:
-    virtual ~CoordBuffer();
+    virtual ~CoordBuffer() =default;
 
     virtual void Reset() = 0;
     virtual size_t PushCoord(double x, double y) = 0;
