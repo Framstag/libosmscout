@@ -46,7 +46,6 @@ namespace osmscout {
 
   public:
     Intersection();
-    virtual ~Intersection();
 
     inline Id GetId() const
     {

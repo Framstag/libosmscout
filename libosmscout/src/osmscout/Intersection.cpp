@@ -29,11 +29,6 @@ namespace osmscout {
     // no code
   }
 
-  Intersection::~Intersection()
-  {
-    // no code
-  }
-
   bool Intersection::Read(FileScanner& scanner)
   {
     try {
