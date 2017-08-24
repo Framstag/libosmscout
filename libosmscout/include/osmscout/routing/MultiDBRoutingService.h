@@ -173,6 +173,10 @@ namespace osmscout {
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,
                                  const RoutingParameter &parameter);
+      
+    RoutingResult CalculateRoute(std::vector<osmscout::GeoCoord> via,
+                                 double radius,
+                                 const RoutingParameter& parameter);
 
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
