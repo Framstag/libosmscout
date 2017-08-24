@@ -21,11 +21,6 @@
 
 namespace osmscout {
 
-  Breaker::~Breaker()
-  {
-    // no code
-  }
-
   ThreadedBreaker::ThreadedBreaker()
   : aborted(false)
   {
