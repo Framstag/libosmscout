@@ -31,7 +31,7 @@
 namespace osmscout {
 
   /**
-   * Represation of a type-less OSM node, just representing a geographic
+   * Representation of a type-less OSM node, just representing a geographic
    * coordinate.
    */
   class RawCoord CLASS_FINAL
@@ -42,7 +42,6 @@ namespace osmscout {
 
   public:
     RawCoord();
-    virtual ~RawCoord();
 
     /**
      * Return the OSM node id
