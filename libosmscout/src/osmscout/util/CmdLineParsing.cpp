@@ -104,11 +104,6 @@ namespace osmscout {
     return errorDescription;
   }
 
-  CmdLineArgParser::~CmdLineArgParser()
-  {
-    // no code
-  }
-
   void CmdLineArgParser::SetArgumentName(const std::string& argumentName)
   {
     this->argumentName=argumentName;
