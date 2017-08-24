@@ -77,6 +77,11 @@ namespace osmscout {
                      const MapParameter& parameter,
                      const MapData& data,
                      CGContextRef paintCG);
+        
+        void DrawGroundTiles(const Projection& projection,
+                             const MapParameter& parameter,
+                             const std::list<GroundTile>& groundTiles,
+                             CGContextRef paintCG);
     protected:
         bool HasIcon(const StyleConfig& styleConfig,
                      const MapParameter& parameter,

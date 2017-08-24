@@ -506,7 +506,7 @@ namespace osmscout {
 
     inline bool CanRouteFoot() const
     {
-      return (access & footForward)!=0 &&
+      return (access & footForward)!=0 ||
              (access & footBackward)!=0;
     }
 
@@ -522,7 +522,7 @@ namespace osmscout {
 
     inline bool CanRouteBicycle() const
     {
-      return (access & bicycleForward)!=0 &&
+      return (access & bicycleForward)!=0 ||
              (access & bicycleBackward)!=0;
     }
 
@@ -538,7 +538,7 @@ namespace osmscout {
 
     inline bool CanRouteCar() const
     {
-      return (access & carForward)!=0 &&
+      return (access & carForward)!=0 ||
              (access & carBackward)!=0;
     }
 

@@ -668,6 +668,63 @@ namespace osmscout {
                                                                        parameter);
   }
 
+    /**
+     * Calculate a route going through all the via points
+     *
+     * @param via
+     *    A vector of via points
+     * @param radius
+     *    The maximum radius to search in from the search center in meter
+     * @param parameter
+     *    A RoutingParamater object
+     * @return
+     *    A RoutingResult object
+     */
+    RoutingResult MultiDBRoutingService::CalculateRoute(std::vector<osmscout::GeoCoord> via,
+                                                        double radius,
+                                                        const RoutingParameter& parameter)
+    {
+        RoutingResult               result;
+        std::vector<RoutePosition>  routePositions;
+        
+        assert(!via.empty());
+        
+        for (const auto& etap : via) {
+            RoutePosition target = GetClosestRoutableNode(etap, radius, "");
+            
+            if (!target.IsValid()) {
+                return result;
+            }
+            
+            routePositions.push_back(target);
+        }
+        
+        RoutingResult partialResult;
+        for (size_t index=0; index<routePositions.size() - 1; index++) {
+            RoutePosition fromRoutePosition=routePositions[index];
+            RoutePosition toRoutePosition=routePositions[index+1];
+            
+            partialResult=CalculateRoute(fromRoutePosition,
+                                         toRoutePosition,
+                                         parameter);
+            if (!partialResult.Success()) {
+                result.GetRoute().Clear();
+                
+                return result;
+            }
+            
+            /* In intermediary via points the end of the previous part is the start of the */
+            /* next part, we need to remove the duplicate point in the calculated route */
+            if (index<routePositions.size() - 2) {
+                partialResult.GetRoute().PopEntry();
+            }
+            
+            result.GetRoute().Append(partialResult.GetRoute());
+        }
+        
+        return result;
+    }
+
   bool MultiDBRoutingService::PostProcessRouteDescription(RouteDescription &description,
                                                           const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors)
   {
