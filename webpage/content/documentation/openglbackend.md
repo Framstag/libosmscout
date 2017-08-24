@@ -19,6 +19,7 @@ the backend works and how you can integrate it into your app.
 
 The MapPainterOpenGL class is the part of the backend that offers the interface to the data processing and the drawing calls.
 In order to incorporate the backend in an application one would need to follow these steps:
+
 1. Create an OpenGl context with some library. OSMScoutOpenGL demo uses GLFW, but one can use other libraries as well
 (for example SDL, Qt).
 2. ProcessData() function processes the map data and converts it to
@@ -30,6 +31,7 @@ See OSMScoutOpenGL demo for reference.
 
 ## Dependencies
 The OpenGL backend needs the following libraries in order to function correctly:
+
 * glew
 * FreeType
 * glm
@@ -47,8 +49,10 @@ Link: [poly2tri] (https://github.com/greenm01/poly2tri)
 ## Ways
 A way is given as a sequence of coordinates. The OpenGL backend renders them as a sequence of quads, which is
 consists of two triangles.
+
 You can read about the math behind the way rendering here. The backend does not work the exact same as described here,
  but similar.
+ 
 * [Thick lines using geometry shader] (https://forum.libcinder.org/topic/smooth-thick-lines-using-geometry-shader)
 * [Drawing lines in OpenGL] (https://mattdesl.svbtle.com/drawing-lines-is-hard)
 
@@ -73,6 +77,7 @@ and triangulated geographic data in to the buffers as required by OpenGL. After 
 shader programs. Shaders are small programs that runs on the graphics processor, and they do the transformations
 (like Mercator projection, and world-to-screen projection), and fragment manipulation (anti-aliasing, coloring).
 You can read more about the OpenGL rendering pipeline here:
+
 * [OpenGL rendering pipeline] (https://www.khronos.org/opengl/wiki/Rendering_Pipeline_Overview)
 And about the shaders here:
 * [Shaders] (https://www.khronos.org/opengl/wiki/Shader)
