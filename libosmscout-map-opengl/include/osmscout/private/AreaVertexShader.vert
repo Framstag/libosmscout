@@ -1,8 +1,10 @@
 #version 150 core
 
-in vec2 position;
-in vec4 color;
+in vec2 position;        // Geographic coordinates of vertex
+in vec4 color;           // Color of the area
+
 out vec4 Color;
+
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
@@ -20,6 +22,9 @@ uniform float dpi;
 
 uniform float PI = 3.1415926535897;
 
+/**
+*  Converts a screen pixel to geographic coordinates
+*/
 vec2 PixelToGeo(in float x, in float y, in float latOffset)
 {
     float tileDPI=96.0;
@@ -45,7 +50,11 @@ vec2 PixelToGeo(in float x, in float y, in float latOffset)
     return (result);
 }
 
+/**
+*  Converts a geographic coordinate to screen pixel
+*/
 vec2 GeoToPixel(in float posx, in float posy){
+    //Calculations for Mercator projection
     float tileDPI=96.0;
     float gradtorad=2*PI/360;
     float earthRadiusMeter=6378137.0;
@@ -84,6 +93,7 @@ vec2 GeoToPixel(in float posx, in float posy){
     float windowPosX=(posx-centerLon)*scaledLatDeriv;
     float windowPosY=(atanh(sin(posy*gradtorad))-latOffset)*scale;
 
+    // Window position in pixel
     windowPosY=windowHeight/2-windowPosY;
     windowPosX += windowWidth/2;
 
@@ -95,6 +105,7 @@ vec2 GeoToPixel(in float posx, in float posy){
     float newWidth = windowWidth/windowHeight;
     float newHeight = 1;
 
+    // OpenGL position
     float screenX = ((2*newWidth)*(windowPosX - (MinX))/((MaxX)-(MinX)))-newWidth;
     float screenY = ((2*newHeight)*(windowPosY - (MinY))/((MaxY)-(MinY)))-newHeight;
 

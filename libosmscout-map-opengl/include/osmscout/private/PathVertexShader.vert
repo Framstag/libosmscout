@@ -1,17 +1,21 @@
 #version 150 core
 
-in vec2 position;
-in vec2 previous;
-in vec2 next;
-in vec4 color;
-in vec4 gapcolor;
-in float index;
-in float thickness;
-in float border;
-in vec3 barycentric;
-in float z;
-in float dashsize;
-in float length;
+in vec2 position;        // Geographic coordinates of vertex
+in vec2 previous;        // Geographic coordinates of previous vertex
+in vec2 next;            // Geographic coordinates of next vertex
+in vec4 color;           // Color of the way
+in vec4 gapcolor;        // Color of the gap if it is a dashed line
+in float index;          // Type of the vertex. It is necessary for creating the quad out of the coordinates, and rendering
+                         // the joints correctly.
+                         // It represents which vertex is it in the quad, and is it the first/last vertex
+                         // or is it one of the middle ones.
+in float thickness;      // Thickness of way in pixel
+in float border;         // Decides whether it is a border or not
+in vec3 barycentric;     // Barycentric coordinates a vertex. Necessary for anti-aliasing
+in float z;              // Z coordinate
+in float dashsize;       // Length of one dash if it is a dashed line
+in float length;         // Full length of way in pixel
+
 out vec2 Normal;
 out vec4 Color;
 out vec4 GapColor;
@@ -20,6 +24,7 @@ out float RenderingMode;
 out float Dashed;
 flat out float DashSize;
 out float Dash;
+
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
@@ -37,6 +42,9 @@ uniform float dpi = 96.0;
 
 uniform float PI = 3.1415926535897;
 
+/**
+*  Converts a screen pixel to geographic coordinates
+*/
 vec2 PixelToGeo(in float x, in float y, in float latOffset)
 {
     float tileDPI=96.0;
@@ -62,7 +70,11 @@ vec2 PixelToGeo(in float x, in float y, in float latOffset)
     return (result);
 }
 
+/**
+*  Converts a geographic coordinate to screen pixel
+*/
 vec2 GeoToPixel(in float posx, in float posy){
+    //Calculations for Mercator projection
     float tileDPI=96.0;
     float gradtorad=2*PI/360;
     float earthRadiusMeter=6378137.0;
@@ -101,6 +113,7 @@ vec2 GeoToPixel(in float posx, in float posy){
     float windowPosX=(posx-centerLon)*scaledLatDeriv;
     float windowPosY=(atanh(sin(posy*gradtorad))-latOffset)*scale;
 
+    // Window position in pixel
     windowPosY=windowHeight/2-windowPosY;
     windowPosX += windowWidth/2;
 
@@ -112,6 +125,7 @@ vec2 GeoToPixel(in float posx, in float posy){
     float newWidth = windowWidth/windowHeight;
     float newHeight = 1;
 
+    // OpenGL position
     float screenX = ((2*newWidth)*(windowPosX - (MinX))/((MaxX)-(MinX)))-newWidth;
     float screenY = ((2*newHeight)*(windowPosY - (MinY))/((MaxY)-(MinY)))-newHeight;
 
