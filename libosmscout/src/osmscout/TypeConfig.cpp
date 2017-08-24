@@ -40,11 +40,6 @@ namespace osmscout {
     // no code
   }
 
-  FeatureValue::~FeatureValue()
-  {
-    // no code
-  }
-
   FeatureValue& FeatureValue::operator=(const FeatureValue& /*other*/)
   {
     assert(false);
@@ -73,11 +68,6 @@ namespace osmscout {
   }
 
   Feature::Feature()
-  {
-    // no code
-  }
-
-  Feature::~Feature()
   {
     // no code
   }
@@ -671,11 +661,6 @@ namespace osmscout {
    * @param other
    */
   TypeInfo::TypeInfo(const TypeInfo& /*other*/)
-  {
-    // no code
-  }
-
-  TypeInfo::~TypeInfo()
   {
     // no code
   }
