@@ -46,9 +46,4 @@ namespace osmscout {
     this->targetNodeIndex=other.targetNodeIndex;
     this->traversable=other.traversable;
   }
-
-  Path::~Path()
-  {
-    // no code
-  }
 }
