@@ -35,7 +35,7 @@ namespace osmscout {
    *
    * Collection of Parameter that parametrize and influence drawing of the map.
    */
-  class OSMSCOUT_MAP_API MapParameter
+  class OSMSCOUT_MAP_API MapParameter CLASS_FINAL
   {
   private:
     std::string                  fontName;                  //!< Name of the font to use
@@ -85,7 +85,6 @@ namespace osmscout {
 
   public:
     MapParameter();
-    virtual ~MapParameter();
 
     void SetFontName(const std::string& fontName);
     void SetFontSize(double fontSize);

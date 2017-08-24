@@ -53,11 +53,6 @@ namespace osmscout {
     // no code
   }
 
-  MapParameter::~MapParameter()
-  {
-    // no code
-  }
-
   void MapParameter::SetFontName(const std::string& fontName)
   {
     this->fontName=fontName;
