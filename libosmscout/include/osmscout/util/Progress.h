@@ -38,7 +38,7 @@ namespace osmscout {
     Progress();
 
   public:
-    virtual ~Progress();
+    virtual ~Progress() =default;
 
     void SetOutputDebug(bool outputDebug);
     bool OutputDebug() const;
@@ -57,8 +57,6 @@ namespace osmscout {
 
   class OSMSCOUT_API SilentProgress : public Progress
   {
-  public:
-    virtual ~SilentProgress();
   };
 
   class OSMSCOUT_API ConsoleProgress : public Progress

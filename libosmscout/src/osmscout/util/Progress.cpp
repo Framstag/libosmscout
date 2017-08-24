@@ -30,11 +30,6 @@ namespace osmscout {
     // no code
   }
 
-  Progress::~Progress()
-  {
-    // no code
-  }
-
   void Progress::SetOutputDebug(bool outputDebug)
   {
     this->outputDebug=outputDebug;
@@ -99,11 +94,6 @@ namespace osmscout {
     // no code
   }
 
-  SilentProgress::~SilentProgress()
-  {
-    // no code
-  }
-
   void ConsoleProgress::SetStep(const std::string& step)
   {
     std::cout << "+ " << step << "..." << std::endl;
@@ -137,7 +127,7 @@ namespace osmscout {
   {
     SetProgress((double)current, (double)total);
   }
-  
+
   void ConsoleProgress::SetProgress(unsigned long current, unsigned long total)
   {
     SetProgress((double)current,(double)total);
