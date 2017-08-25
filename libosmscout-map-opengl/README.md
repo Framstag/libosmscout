@@ -9,6 +9,10 @@ You can view the project here:
 https://summerofcode.withgoogle.com/projects/#4992829691527168
 
 A few screenshot of the renderer:
+
 ![Santorini](http://i.imgur.com/DuyWuBWm.png)
+
 ![Naples](http://i.imgur.com/8Z8ELhbm.png)
+
 ![Debrecen](http://i.imgur.com/71Y9prAm.png)
+
