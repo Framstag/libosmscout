@@ -10,6 +10,6 @@ https://summerofcode.withgoogle.com/projects/#4992829691527168
 
 A few screenshot of the renderer:
 
-![Santorini](http://i.imgur.com/4Rhs514.png)
-![Naples](http://i.imgur.com/eWk4yCC.png)
-![Debrecen](http://i.imgur.com/aKSOHXx.png)
+![Santorini](http://i.imgur.com/DuyWuBW.png)
+![Naples](http://i.imgur.com/8Z8ELhb.png)
+![Debrecen](http://i.imgur.com/71Y9prA.png)
