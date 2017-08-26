@@ -99,6 +99,11 @@ namespace osmscout {
     // no code
   }
 
+  SilentProgress::~SilentProgress()
+  {
+    // no code
+  }
+
   void ConsoleProgress::SetStep(const std::string& step)
   {
     std::cout << "+ " << step << "..." << std::endl;
