@@ -87,10 +87,6 @@
         NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
         [NSGraphicsContext setCurrentContext:nsgc];
         CGContextRef cg = [nsgc graphicsPort];
-        CGFloat contentScale = [UIScreen mainScreen].scale;
-        if(contentScale!=1.0){
-          CGContextScaleCTM(cg, 1/contentScale, 1/contentScale);
-        }
         CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, kOSMScoutDefaultTileSize*_scaleFactor);
         CGContextConcatCTM(cg, flipVertical);
         [_osmScout drawMapTo:cg x:_x y:_y zoom:1<<_zoom width:kOSMScoutDefaultTileSize height:kOSMScoutDefaultTileSize];
