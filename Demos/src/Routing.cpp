@@ -663,7 +663,7 @@ int main(int argc, char* argv[])
   radius = 1000.0;
   osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
                                                                *routingProfile,
-                                                               radius;
+                                                               radius);
 
   if (!target.IsValid()) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;
