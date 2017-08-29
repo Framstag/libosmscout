@@ -153,39 +153,23 @@ namespace osmscout {
   }
 
   RoutePosition MultiDBRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
-                                                              double radius,
-                                                              std::string databasePathHint) const
+                                                              double radius) const
   {
-    RoutePosition position;
+    RoutePosition position, closestPosition;
 
-    // first try to find in hinted database
-    auto databaseHint=databaseMap.find(databasePathHint);
-    if (databaseHint!=databaseMap.end()){
-      auto it=services.find(databaseHint->second);
-      if (it!=services.end()){
-        position=it->second->GetClosestRoutableNode(coord,*(profiles.at(it->first)),radius);
-        if (position.IsValid()){
-          return RoutePosition(position.GetObjectFileRef(),
-                               position.GetNodeIndex(),
-                               /*database*/ it->first);
-        }
-      }
-    }
-
-    // try all other databases
+    double minDistance = std::numeric_limits<double>::max();
+    double distance;
     for (auto &entry:services){
-      if (databaseHint!=databaseMap.end() && entry.first==databaseHint->second){
-        continue;
-      }
-
-      position=entry.second->GetClosestRoutableNode(coord,*(profiles.at(entry.first)),radius);
-      if (position.IsValid()){
-          return RoutePosition(position.GetObjectFileRef(),
+      distance = radius;
+      position=entry.second->GetClosestRoutableNode(coord,*(profiles.at(entry.first)),distance);
+      if (position.IsValid() && distance < minDistance){
+          closestPosition =  RoutePosition(position.GetObjectFileRef(),
                                position.GetNodeIndex(),
                                /*database*/ entry.first);
+          minDistance = distance;
       }
     }
-    return position;
+    return closestPosition;
   }
 
   const double MultiDBRoutingService::CELL_MAGNIFICATION=std::pow(2,16);
@@ -690,7 +674,7 @@ namespace osmscout {
         assert(!via.empty());
         
         for (const auto& etap : via) {
-            RoutePosition target = GetClosestRoutableNode(etap, radius, "");
+            RoutePosition target = GetClosestRoutableNode(etap, radius);
             
             if (!target.IsValid()) {
                 return result;

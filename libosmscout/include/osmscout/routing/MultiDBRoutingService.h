@@ -167,8 +167,7 @@ namespace osmscout {
     void Close();
 
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
-                                         double radius=1000,
-                                         std::string databasePathHint="") const;
+                                         double radius=1000) const;
 
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,

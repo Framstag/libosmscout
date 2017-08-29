@@ -505,12 +505,13 @@ namespace osmscout {
    * @param profile
    *    Routing profile to use. It defines Vehicle to use
    * @param radius
-   *    The maximum radius to search in from the search center in meter
+   *    The maximum radius to search in from the search center in meter, at
+   *    return is set to the minimum distance found
    * @return
    */
   RoutePosition SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                              const RoutingProfile& profile,
-                                                             double radius) const
+                                                             double& radius) const
   {
     TypeConfigRef    typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
@@ -637,7 +638,8 @@ namespace osmscout {
         }
       }
     }
-
+      
+    radius = minDistance;
     return position;
   }
 }

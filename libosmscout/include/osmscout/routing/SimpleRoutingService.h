@@ -191,7 +191,7 @@ namespace osmscout {
 
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
                                          const RoutingProfile& profile,
-                                         double radius) const;
+                                         double& radius) const;
 
     void DumpStatistics();
   };

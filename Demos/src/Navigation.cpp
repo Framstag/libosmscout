@@ -565,9 +565,10 @@ int main(int argc, char *argv[]){
             break;
     }
     
+    double radius = 1000.0;
     osmscout::RoutePosition start=router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
                                                                  *routingProfile,
-                                                                 1000);
+                                                                 radius);
     
     if (!start.IsValid()) {
         std::cerr << "Error while searching for routing node near start location!" << std::endl;
@@ -578,9 +579,10 @@ int main(int argc, char *argv[]){
         std::cerr << "Cannot find start node for start location!" << std::endl;
     }
     
+    radius = 1000.0;
     osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
                                                                   *routingProfile,
-                                                                  1000);
+                                                                  radius);
     
     if (!target.IsValid()) {
         std::cerr << "Error while searching for routing node near target location!" << std::endl;
