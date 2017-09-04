@@ -516,7 +516,7 @@ TYPES
 
   TYPE railway_preserved
     = WAY ("railway"=="preserved")
-      {Bridge, Tunnel, Width}
+      {Name, Bridge, Tunnel, Width}
 
   TYPE railway_disused
     = WAY ("railway"=="disused")
@@ -527,16 +527,16 @@ TYPES
       {Bridge, Tunnel, Width}
 
   TYPE railway_narrow_gauge
-    = WAY ("railway"=="narrow_gauge" OR "railway"=="preserved")
-      PATH
+    = WAY ("railway"=="narrow_gauge")
+      {Name, Bridge, Tunnel, Width}
 
   TYPE railway_monorail
     = WAY ("railway"=="monorail")
-      PATH
+      {Name, Bridge, Tunnel, Width}
 
   TYPE railway_funicular
     = WAY ("railway"=="funicular")
-      {Name}
+      {Name, Bridge, Tunnel, Width}
 
   TYPE railway_station
     = NODE AREA ("railway"=="station")
