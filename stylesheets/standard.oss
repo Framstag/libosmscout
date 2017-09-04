@@ -14,23 +14,24 @@ OSS
 */
 
 FLAG
-  daylight        = true;
-  waterway        = true;
-  wood            = true;
+  daylight          = true;
+  waterway          = true;
+  wood              = true;
+  elevationContours = true;
 
   IF daylight {
-    natural       = true;
-    railway       = true;
-    leisure       = true;
-    building      = true;
-    minorBuilding = true;
+    natural         = true;
+    railway         = true;
+    leisure         = true;
+    building        = true;
+    minorBuilding   = true;
   }
   ELSE {
-    natural       = false;
-    railway       = false;
-    leisure       = false;
-    building      = false;
-    minorBuilding = false;
+    natural         = false;
+    railway         = false;
+    leisure         = false;
+    building        = false;
+    minorBuilding   = false;
   }
 
 ORDER WAYS
@@ -509,21 +510,23 @@ STYLE
   // contour lines
   //
 
-  [MAG suburb-] {
-    [TYPE elevation_contour_major] {
-      WAY {color: @majorContourColor; displayWidth: 0.150mm; }
-      WAY.TEXT { label: Ele.inMeter; }
-    }
-  }
-
-  [MAG detail-] {
-    [TYPE elevation_contour_medium] {
-      WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
-      WAY.TEXT { label: Ele.inMeter; }
+  IF elevationContours {
+    [MAG suburb-] {
+      [TYPE elevation_contour_major] {
+        WAY {color: @majorContourColor; displayWidth: 0.150mm; }
+        WAY.TEXT { label: Ele.inMeter; }
+      }
     }
 
-    [TYPE elevation_contour_minor] {
-      WAY {color: @minorContourColor; displayWidth: 0.075mm; }
+    [MAG detail-] {
+      [TYPE elevation_contour_medium] {
+        WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
+        WAY.TEXT { label: Ele.inMeter; }
+      }
+
+      [TYPE elevation_contour_minor] {
+        WAY {color: @minorContourColor; displayWidth: 0.075mm; }
+      }
     }
   }
 
