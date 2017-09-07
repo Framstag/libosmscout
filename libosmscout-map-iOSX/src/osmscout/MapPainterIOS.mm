@@ -465,16 +465,38 @@ namespace osmscout {
                                          double& height){
         Font *font = GetFont(projection,parameter,fontSize);
         NSString *str = [NSString stringWithUTF8String:text.c_str()];
+        CGRect rect = CGRectZero;
+
 #if TARGET_OS_IPHONE
-        CGSize size = [str sizeWithFont:font];
+        NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+        textStyle.lineBreakMode = NSLineBreakByWordWrapping;
+        textStyle.alignment = NSTextAlignmentCenter;
+        
+        if(objectWidth > 0){
+            CGSize averageFontSize = [@"a" sizeWithFont:font];
+            CGFloat proposedWidth = proposedLabelWidth(parameter,
+                                                       averageFontSize.width,
+                                                       objectWidth,
+                                                       text.length());
+            
+            rect = [str boundingRectWithSize: CGSizeMake(proposedWidth, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin
+                                  attributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}
+                                     context:nil];
+        } else {
+            CGSize size = [str sizeWithAttributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}];
+            rect.size.width = size.width;
+            rect.size.height = size.height;
+        }
 #else
         NSRect stringBounds = [str boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
         CGSize size = stringBounds.size;
+        rect.size.width = size.width;
+        rect.size.height = size.height;
 #endif
-        xOff = 0;
-        yOff = 0;
-        width = size.width;
-        height = size.height;
+        xOff = rect.origin.x;
+        yOff = rect.origin.y;
+        width = rect.size.width;
+        height = rect.size.height;
     }
  
     double MapPainterIOS::textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
@@ -503,16 +525,10 @@ namespace osmscout {
                    const LabelData& label){
         
         if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
-            if(label.y <= MapPainterIOS::yLabelMargin ||
-               label.y >= projection.GetHeight() - MapPainterIOS::yLabelMargin){
-                return;
-            }
-            
             const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
             double           r=style->GetTextColor().GetR();
             double           g=style->GetTextColor().GetG();
             double           b=style->GetTextColor().GetB();
-            
             
             CGContextSaveGState(cg);
             CGContextSetTextDrawingMode(cg, kCGTextFill);
@@ -520,10 +536,18 @@ namespace osmscout {
             NSString *str = [NSString stringWithCString:label.text.c_str() encoding:NSUTF8StringEncoding];
             //std::cout << "label : "<< label.text << " font size : " << label.fontSize << std::endl;
             
+#if TARGET_OS_IPHONE
+            NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+            textStyle.lineBreakMode = NSLineBreakByWordWrapping;
+            textStyle.alignment = NSTextAlignmentCenter;
+            NSDictionary *attrDict = @{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle};
+            CGRect rect = CGRectMake(label.bx1, label.by1, label.bx2 - label.bx1, label.by2 - label.by1);
+#endif
+            
             if (style->GetStyle()==TextStyle::normal) {
                 CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
 #if TARGET_OS_IPHONE
-                [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
+                [str drawInRect:rect withAttributes:attrDict];
 #else
                 NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
                 NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
@@ -536,7 +560,7 @@ namespace osmscout {
                 CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, static_cast<CGFloat>(label.alpha) });
                 CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
 #if TARGET_OS_IPHONE
-                [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
+                [str drawInRect:rect withAttributes:attrDict];
 #else
                 NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
                 NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
