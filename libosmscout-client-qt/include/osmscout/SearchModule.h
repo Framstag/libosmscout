@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_CLIENT_QT_LOOKUPMODULE_H
-#define OSMSCOUT_CLIENT_QT_LOOKUPMODULE_H
+#ifndef OSMSCOUT_CLIENT_QT_SEARCHMODULE_H
+#define OSMSCOUT_CLIENT_QT_SEARCHMODULE_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -20,43 +20,34 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+
 #include <QObject>
 #include <QThread>
 #include <osmscout/DBThread.h>
+#include <osmscout/LookupModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API LookupModule:public QObject{
+class OSMSCOUT_CLIENT_QT_API SearchModule:public QObject{
   Q_OBJECT
 
 private:
   QMutex           mutex;
   QThread          *thread;
   DBThreadRef      dbThread;
-  DBLoadJob        *loadJob;
-  RenderMapRequest view;
+  LookupModule     *lookupModule;
 
 signals:
-  void InitialisationFinished(const DatabaseLoadedResponse& response);
-  void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
 
 public slots:
-  void requestObjectsOnView(const RenderMapRequest&);
-  void onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles);
-  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles);
 
 public:
-  LookupModule(QThread *thread,DBThreadRef dbThread);
-  virtual ~LookupModule();
+  SearchModule(QThread *thread,DBThreadRef dbThread,LookupModule *lookupModule);
+  virtual ~SearchModule();
 };
 
-/**
- * \ingroup QtAPI
- */
-typedef std::shared_ptr<LookupModule> LookupModuleRef;
-
-#endif /* OSMSCOUT_CLIENT_QT_LOOKUPMODULE_H */
+#endif /* OSMSCOUT_CLIENT_QT_SEARCHMODULE_H */
 

@@ -199,6 +199,18 @@ LookupModule* OSMScoutQt::MakeLookupModule()
   return module;
 }
 
+SearchModule* OSMScoutQt::MakeSearchModule()
+{
+  QThread *thread=new QThread();
+  thread->setObjectName("SearchModule");
+  SearchModule *module=new SearchModule(thread,dbThread,MakeLookupModule());
+  module->moveToThread(thread);
+  thread->start();
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
+  return module;
+}
+
 MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
 {
   QThread *thread=new QThread();
