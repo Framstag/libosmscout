@@ -19,6 +19,7 @@
 
 #include <osmscout/SearchModule.h>
 #include <osmscout/OSMScoutQt.h>
+#include <osmscout/LookupModule.h>
 
 #include <osmscout/util/Logger.h>
 
@@ -169,9 +170,9 @@ bool SearchModule::BuildLocationEntry(const osmscout::ObjectFileRef& object,
     if (db->locationService->ReverseLookupObject(object, result)){
         for (const osmscout::LocationService::ReverseLookupResult& entry : result){
             if (entry.adminRegion){
-              adminRegionList=DBThread::BuildAdminRegionList(db->locationService,
-                                                             entry.adminRegion,
-                                                             adminRegionMap);
+              adminRegionList=LookupModule::BuildAdminRegionList(db->locationService,
+                                                                 entry.adminRegion,
+                                                                 adminRegionMap);
               break;
             }
         }
@@ -196,7 +197,7 @@ bool SearchModule::BuildLocationEntry(const osmscout::LocationSearchResult::Entr
       db->locationService->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
     }
 
-    QStringList adminRegionList = DBThread::BuildAdminRegionList(entry.adminRegion, adminRegionMap);
+    QStringList adminRegionList=LookupModule::BuildAdminRegionList(entry.adminRegion, adminRegionMap);
     QString objectType;
     osmscout::GeoCoord coordinates;
     osmscout::GeoBox bbox;

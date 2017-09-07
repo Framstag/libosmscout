@@ -221,13 +221,6 @@ public:
   void RunJob(DBJob *job);
   void RunSynchronousJob(SynchronousDBJob job);
 
-  static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
-                                          const osmscout::AdminRegionRef& adminRegion,
-                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
-
-  static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
-                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
-
 };
 
 typedef std::shared_ptr<DBThread> DBThreadRef;

@@ -404,43 +404,6 @@ void DBThread::LoadStyle(QString stylesheetFilename,
   emit stylesheetFilenameChanged();
 }
 
-QStringList DBThread::BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
-                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
-{
-  return BuildAdminRegionList(osmscout::LocationServiceRef(), adminRegion, regionMap);
-}
-
-QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
-                                           const osmscout::AdminRegionRef& adminRegion,
-                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
-{
-  if (!adminRegion){
-    return QStringList();
-  }
-
-  QStringList list;
-  if (locationService){
-    locationService->ResolveAdminRegionHierachie(adminRegion, regionMap);
-  }
-  QString name = QString::fromStdString(adminRegion->name);
-  list << name;
-  QString last = name;
-  osmscout::FileOffset parentOffset = adminRegion->parentRegionOffset;
-  while (parentOffset != 0){
-    const auto &it = regionMap.find(parentOffset);
-    if (it==regionMap.end())
-      break;
-    const osmscout::AdminRegionRef region=it->second;
-    name = QString::fromStdString(region->name);
-    if (last != name){ // skip duplicates in admin region names
-      list << name;
-    }
-    last = name;
-    parentOffset = region->parentRegionOffset;
-  }
-  return list;
-}
-
 const QMap<QString,bool> DBThread::GetStyleFlags() const
 {
   QReadLocker locker(&lock);

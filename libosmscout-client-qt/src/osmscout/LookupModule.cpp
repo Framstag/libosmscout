@@ -109,7 +109,7 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
 
           auto place = description.GetAtAddressDescription()->GetPlace();
           emit locationDescription(location, db->path, description,
-                                   DBThread::BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
+                                   BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
         }
 
         if (!db->locationService->DescribeLocationByPOI(location, description)) {
@@ -122,11 +122,48 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
 
           auto place = description.GetAtPOIDescription()->GetPlace();
           emit locationDescription(location, db->path, description,
-                                   DBThread::BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
+                                   BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
         }
       }
 
       emit locationDescriptionFinished(location);
     }
   );
+}
+
+QStringList LookupModule::BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
+                                               std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
+{
+  return BuildAdminRegionList(osmscout::LocationServiceRef(), adminRegion, regionMap);
+}
+
+QStringList LookupModule::BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
+                                               const osmscout::AdminRegionRef& adminRegion,
+                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
+{
+  if (!adminRegion){
+    return QStringList();
+  }
+
+  QStringList list;
+  if (locationService){
+    locationService->ResolveAdminRegionHierachie(adminRegion, regionMap);
+  }
+  QString name = QString::fromStdString(adminRegion->name);
+  list << name;
+  QString last = name;
+  osmscout::FileOffset parentOffset = adminRegion->parentRegionOffset;
+  while (parentOffset != 0){
+    const auto &it = regionMap.find(parentOffset);
+    if (it==regionMap.end())
+      break;
+    const osmscout::AdminRegionRef region=it->second;
+    name = QString::fromStdString(region->name);
+    if (last != name){ // skip duplicates in admin region names
+      list << name;
+    }
+    last = name;
+    parentOffset = region->parentRegionOffset;
+  }
+  return list;
 }

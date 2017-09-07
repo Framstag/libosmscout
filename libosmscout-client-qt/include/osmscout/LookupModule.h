@@ -32,6 +32,8 @@
 class OSMSCOUT_CLIENT_QT_API LookupModule:public QObject{
   Q_OBJECT
 
+  friend class SearchModule;
+
 private:
   QMutex           mutex;
   QThread          *thread;
@@ -68,6 +70,14 @@ public slots:
 public:
   LookupModule(QThread *thread,DBThreadRef dbThread);
   virtual ~LookupModule();
+
+private:
+  static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
+                                          const osmscout::AdminRegionRef& adminRegion,
+                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
+
+  static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
+                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
 };
 
 /**
