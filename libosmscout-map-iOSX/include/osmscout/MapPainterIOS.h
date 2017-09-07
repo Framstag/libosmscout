@@ -60,7 +60,6 @@ namespace osmscout {
         std::map<size_t,Font *>     fonts;          // Cached fonts
         
         static constexpr double plateLabelMargin = 10.0;
-        static constexpr double yLabelMargin = 10.0;
         static constexpr double contourLabelMargin = 50.0;
         static constexpr double contourLabelSpace = 200.0;
         static constexpr int labelRepeatMaxCount = 25;
