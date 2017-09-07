@@ -27,10 +27,7 @@ LocationInfoModel::LocationInfoModel():
 ready(false), setup(false)
 {
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-    
-    qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
-    qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");
-    
+
     connect(dbThread.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
             this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
             Qt::QueuedConnection);

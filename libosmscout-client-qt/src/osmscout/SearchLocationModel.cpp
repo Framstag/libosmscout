@@ -28,9 +28,7 @@ LocationListModel::LocationListModel(QObject* parent)
 : QAbstractListModel(parent), searching(false)
 {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    
-    qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
-    
+
     connect(this, SIGNAL(SearchRequested(const QString, int)), 
             dbThread.get(), SLOT(SearchForLocations(const QString, int)),
             Qt::QueuedConnection);

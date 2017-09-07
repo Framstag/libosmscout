@@ -45,16 +45,6 @@ DBThread::DBThread(QThread *backgroundThread,
     iconDirectory(iconDirectory),
     daylight(true)
 {
-  // fix Qt signals with uint32_t on x86_64:
-  //
-  // QObject::connect: Cannot queue arguments of type 'uint32_t'
-  // (Make sure 'uint32_t' is registered using qRegisterMetaType().)
-  qRegisterMetaType < uint32_t >("uint32_t");
-
-  // other types used in signals/slots
-  qRegisterMetaType<QList<QDir>>("QList<QDir>");
-  qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
-
   QScreen *srn=QGuiApplication::screens().at(0);
 
   physicalDpi = (double)srn->physicalDotsPerInch();
