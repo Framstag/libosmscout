@@ -83,7 +83,7 @@ DBThread::~DBThread()
 }
 
 /**
- * check if DBThread is initialized without acquire mutex
+ * check if DBThread is initialized without acquire lock
  *
  * @return true if all databases are open
  */
@@ -441,55 +441,6 @@ QStringList DBThread::BuildAdminRegionList(const osmscout::LocationServiceRef& l
   return list;
 }
 
-void DBThread::requestLocationDescription(const osmscout::GeoCoord location)
-{
-  QReadLocker locker(&lock);
-  if (!isInitializedInternal()){
-      return; // ignore request if db is not initialized
-  }
-
-  int count = 0;
-  for (auto db:databases){
-    osmscout::LocationDescription description;
-    osmscout::GeoBox dbBox;
-    if (!db->database->GetBoundingBox(dbBox)){
-      continue;
-    }
-    if (!dbBox.Includes(location)){
-      continue;
-    }
-
-    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
-    if (!db->locationService->DescribeLocationByAddress(location, description)) {
-      osmscout::log.Error() << "Error during generation of location description";
-      continue;
-    }
-
-    if (description.GetAtAddressDescription()){
-      count++;
-
-      auto place = description.GetAtAddressDescription()->GetPlace();
-      emit locationDescription(location, db->path, description,
-                               BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
-    }
-
-    if (!db->locationService->DescribeLocationByPOI(location, description)) {
-      osmscout::log.Error() << "Error during generation of location description";
-      continue;
-    }
-
-    if (description.GetAtPOIDescription()){
-      count++;
-
-      auto place = description.GetAtPOIDescription()->GetPlace();
-      emit locationDescription(location, db->path, description,
-                               BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
-    }
-  }
-
-  emit locationDescriptionFinished(location);
-}
-
 const QMap<QString,bool> DBThread::GetStyleFlags() const
 {
   QReadLocker locker(&lock);
@@ -513,11 +464,20 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
 void DBThread::RunJob(DBJob *job)
 {
   QReadLocker *locker=new QReadLocker(&lock);
+  if (!isInitializedInternal()){
+    delete locker;
+    osmscout::log.Warn() << "ignore request, dbs is not initialized";
+    return;
+  }
   job->Run(basemapDatabase,databases,locker);
 }
 
 void DBThread::RunSynchronousJob(SynchronousDBJob job)
 {
   QReadLocker locker(&lock);
+  if (!isInitializedInternal()){
+    osmscout::log.Warn() << "ignore request, dbs is not initialized";
+    return;
+  }
   job(databases);
 }

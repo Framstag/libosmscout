@@ -122,11 +122,6 @@ public:
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void TriggerInitialRendering();
-  void locationDescription(const osmscout::GeoCoord location,
-                           const QString database,
-                           const osmscout::LocationDescription description,
-                           const QStringList regions);
-  void locationDescriptionFinished(const osmscout::GeoCoord location);
   void stylesheetFilenameChanged();
   void databaseLoadFinished(osmscout::GeoBox boundingBox);
   void styleErrorsChanged();
@@ -141,18 +136,6 @@ public slots:
                  const QString &suffix="");
   void Initialize();
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
-
-  /**
-   * Start retrieving place informations based on objects on or near the location.
-   *
-   * DBThread then emits locationDescription signals followed by locationDescriptionFinished.
-   *
-   * User of this function should use Qt::QueuedConnection for invoking
-   * this slot, operation may generate IO load and may tooks long time.
-   *
-   * @param location
-   */
-  void requestLocationDescription(const osmscout::GeoCoord location);
 
 protected:
   QThread                            *backgroundThread;

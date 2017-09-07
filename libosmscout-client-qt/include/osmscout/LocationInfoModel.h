@@ -27,7 +27,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
 
-#include <osmscout/DBThread.h>
+#include <osmscout/LookupModule.h>
 
 /**
  * \ingroup QtAPI
@@ -113,6 +113,7 @@ private:
 
     QList<ObjectKey> objectSet; // set of objects already inserted to model
     QList<QMap<int, QVariant>> model;
+    LookupModule* lookupModule;
     
 };
 

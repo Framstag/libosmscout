@@ -42,11 +42,28 @@ private:
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
+  void locationDescription(const osmscout::GeoCoord location,
+                           const QString database,
+                           const osmscout::LocationDescription description,
+                           const QStringList regions);
+  void locationDescriptionFinished(const osmscout::GeoCoord location);
 
 public slots:
   void requestObjectsOnView(const RenderMapRequest&);
   void onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles);
+
+  /**
+   * Start retrieving place informations based on objects on or near the location.
+   *
+   * DBThread then emits locationDescription signals followed by locationDescriptionFinished.
+   *
+   * User of this function should use Qt::QueuedConnection for invoking
+   * this slot, operation may generate IO load and may tooks long time.
+   *
+   * @param location
+   */
+  void requestLocationDescription(const osmscout::GeoCoord location);
 
 public:
   LookupModule(QThread *thread,DBThreadRef dbThread);

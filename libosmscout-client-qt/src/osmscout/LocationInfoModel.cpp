@@ -24,26 +24,26 @@
 #include <osmscout/OSMScoutQt.h>
 
 LocationInfoModel::LocationInfoModel(): 
-ready(false), setup(false)
+  ready(false), setup(false)
 {
-    DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
+    lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
 
-    connect(dbThread.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
+    connect(lookupModule, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
             this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
             Qt::QueuedConnection);
     
     connect(this, SIGNAL(locationDescriptionRequested(const osmscout::GeoCoord)), 
-            dbThread.get(), SLOT(requestLocationDescription(const osmscout::GeoCoord)),
+            lookupModule, SLOT(requestLocationDescription(const osmscout::GeoCoord)),
             Qt::QueuedConnection);
     
-    connect(dbThread.get(), SIGNAL(locationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)),
+    connect(lookupModule, SIGNAL(locationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)),
             this, SLOT(onLocationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)),
             Qt::QueuedConnection);
     
-    connect(dbThread.get(), SIGNAL(locationDescriptionFinished(const osmscout::GeoCoord)),
+    connect(lookupModule, SIGNAL(locationDescriptionFinished(const osmscout::GeoCoord)),
             this, SLOT(onLocationDescriptionFinished(const osmscout::GeoCoord)),
             Qt::QueuedConnection);    
-    
+
 }
 
 void LocationInfoModel::setLocation(const double lat, const double lon)
