@@ -68,16 +68,16 @@ namespace osmscout {
         WayLabelsMap wayLabels;
 
     public:
-        MapPainterIOS(const StyleConfigRef& styleConfig);
+        OSMSCOUT_API MapPainterIOS(const StyleConfigRef& styleConfig);
         virtual ~MapPainterIOS();
         
-        bool DrawMap(const StyleConfig& styleConfig,
+        OSMSCOUT_API bool DrawMap(const StyleConfig& styleConfig,
                      const Projection& projection,
                      const MapParameter& parameter,
                      const MapData& data,
                      CGContextRef paintCG);
         
-        void DrawGroundTiles(const Projection& projection,
+        OSMSCOUT_API void DrawGroundTiles(const Projection& projection,
                              const MapParameter& parameter,
                              const std::list<GroundTile>& groundTiles,
                              CGContextRef paintCG);

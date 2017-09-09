@@ -67,19 +67,35 @@ target_include_directories(OSMScout2 PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-client-qt/include
 )
 
-target_link_libraries(OSMScout2
-        osmscout
-        osmscout_map
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Widgets
-        Qt5::Qml
-        Qt5::Quick
-        Qt5::Svg
-        Qt5::Positioning
-        osmscout_map_qt
-        osmscout_client_qt
-)
+if(APPLE)
+	target_link_libraries(OSMScout2
+		OSMScout
+        	OSMScoutMap
+        	Qt5::Core
+        	Qt5::Gui
+        	Qt5::Widgets
+        	Qt5::Qml
+        	Qt5::Quick
+        	Qt5::Svg
+        	Qt5::Positioning
+        	OSMScoutMapQt
+        	OSMScoutClientQt
+	)
+else()
+	target_link_libraries(OSMScout2
+		osmscout
+        	osmscout_map
+        	Qt5::Core
+        	Qt5::Gui
+        	Qt5::Widgets
+        	Qt5::Qml
+        	Qt5::Quick
+        	Qt5::Svg
+        	Qt5::Positioning
+        	osmscout_map_qt
+        	osmscout_client_qt
+	)
+endif()
 # enable QML debuger
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)

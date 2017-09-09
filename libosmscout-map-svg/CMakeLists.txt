@@ -13,26 +13,45 @@ set(SOURCE_FILES
     src/osmscout/MapPainterSVG.cpp
 )
 
-add_library(osmscout_map_svg ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET osmscout_map_svg PROPERTY CXX_STANDARD 11)
+if(APPLE)
+  set(THE_TARGET_NAME "OSMScoutMapSVG") 
+else()
+  set(THE_TARGET_NAME "osmscout_map_svg") 
+endif()
+
+if(IOS)
+  add_library(${THE_TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+else()
+  add_library(${THE_TARGET_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+endif()
+
+set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapSVGFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map-svg")
-target_include_directories(osmscout_map_svg PRIVATE 
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include)
-target_link_libraries(osmscout_map_svg
+if(APPLE)
+target_link_libraries(${THE_TARGET_NAME}
+		OSMScout
+		OSMScoutMap)
+else()
+target_link_libraries(${THE_TARGET_NAME}
 		osmscout
 		osmscout_map)
-if(PANGOFT2_FOUND)
-  target_include_directories(osmscout_map_svg PRIVATE ${PANGOFT2_INCLUDE_DIRS})
-  target_link_libraries(osmscout_map_svg ${PANGOFT2_LIBRARIES})
 endif()
-target_compile_definitions(osmscout_map_svg PRIVATE -DOSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
-install(TARGETS osmscout_map_svg
+
+if(PANGOFT2_FOUND)
+  target_include_directories(${THE_TARGET_NAME} PRIVATE ${PANGOFT2_INCLUDE_DIRS})
+  target_link_libraries(${THE_TARGET_NAME} ${PANGOFT2_LIBRARIES})
+endif()
+target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
+install(TARGETS ${THE_TARGET_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        ARCHIVE DESTINATION lib
+        FRAMEWORK DESTINATION lib)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
 install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapSVGFeatures.h DESTINATION include/osmscout)

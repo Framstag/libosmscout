@@ -83,11 +83,22 @@ set(SOURCE_FILES
     src/osmscout/OverlayWay.cpp
 )
 
-add_library(osmscout_client_qt ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET osmscout_client_qt PROPERTY CXX_STANDARD 11)
+if(APPLE)
+  set(THE_TARGET_NAME "OSMScoutClientQt") 
+else()
+  set(THE_TARGET_NAME "osmscout_client_qt") 
+endif()
+
+if(IOS)
+  add_library(${THE_TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+else()
+  add_library(${THE_TARGET_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+endif()
+
+set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ClientQtFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-client-qt")
-target_include_directories(osmscout_client_qt PRIVATE 
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
@@ -95,19 +106,47 @@ target_include_directories(osmscout_client_qt PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
 		${Qt5Gui_INCLUDE_DIRS})
 if(MARISA_FOUND)
-    target_include_directories(osmscout_client_qt PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_include_directories(${THE_TARGET_NAME} PRIVATE ${MARISA_INCLUDE_DIRS})
 endif()
-target_link_libraries(osmscout_client_qt
+
+if(${IOS})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
+endif()
+
+if(APPLE)
+set_target_properties(${THE_TARGET_NAME} PROPERTIES
+  FRAMEWORK TRUE
+  FRAMEWORK_VERSION C
+  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+  PUBLIC_HEADER     "${HEADER_FILES}"
+  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+)
+endif()
+
+if(APPLE)
+target_link_libraries(${THE_TARGET_NAME}
+		OSMScout
+		OSMScoutMap
+		OSMScoutMapQt
+		Qt5::Core
+		Qt5::Gui
+		Qt5::Quick)
+else()
+target_link_libraries(${THE_TARGET_NAME}
 		osmscout
 		osmscout_map
 		osmscout_map_qt
 		Qt5::Core
 		Qt5::Gui
 		Qt5::Quick)
-target_compile_definitions(osmscout_client_qt PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS ${Qt5Gui_DEFINITIONS})
-install(TARGETS osmscout_client_qt
+endif()
+
+target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS ${Qt5Gui_DEFINITIONS})
+install(TARGETS ${THE_TARGET_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        ARCHIVE DESTINATION lib
+        FRAMEWORK DESTINATION lib)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
 install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ClientQtFeatures.h DESTINATION include/osmscout)
