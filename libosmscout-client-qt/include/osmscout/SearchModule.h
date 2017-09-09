@@ -23,9 +23,12 @@
 
 #include <QObject>
 #include <QThread>
-#include <osmscout/TextSearchIndex.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/LookupModule.h>
+
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+#include <osmscout/TextSearchIndex.h>
+#endif
 
 #include <osmscout/private/ClientQtImportExport.h>
 
