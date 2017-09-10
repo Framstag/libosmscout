@@ -1877,7 +1877,7 @@ namespace osmscout {
                                    region.reference);
 
       progress.Debug(std::string("Create virtual location for region '")+region.name+"'");
-      return locations.find(region.name);
+      return locations.find(regionNameLower);
     }
 
     for (auto &alias: region.aliases) {
@@ -1888,7 +1888,7 @@ namespace osmscout {
                                      ObjectFileRef(alias.reference,refNode));
 
         progress.Debug(std::string("Create virtual location for '")+alias.name+"' (alias of region "+region.name+")");
-        return locations.find(alias.name);
+        return locations.find(regionAliasNameLower);
       }
     }
 
