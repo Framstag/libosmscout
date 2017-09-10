@@ -30,11 +30,6 @@ namespace osmscout {
     // no code
   }
 
-  NodeUseMap::~NodeUseMap()
-  {
-    // no code
-  }
-
   void NodeUseMap::SetNodeUsed(Id id)
   {
     PageId resolvedId=id+std::numeric_limits<Id>::min();

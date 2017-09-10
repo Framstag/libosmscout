@@ -32,6 +32,7 @@ set(HEADER_FILES
     include/osmscout/util/Projection.h
     include/osmscout/util/StopClock.h
     include/osmscout/util/String.h
+    include/osmscout/util/StringMatcher.h
     include/osmscout/util/TagErrorReporter.h
     include/osmscout/util/Tiling.h
     include/osmscout/util/Transformation.h
@@ -89,7 +90,7 @@ set(HEADER_FILES
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h
-    include/osmscout/system/Compiler.h 
+    include/osmscout/system/Compiler.h
     include/osmscout/util/CmdLineParsing.h
 )
 
@@ -118,6 +119,7 @@ set(SOURCE_FILES
     src/osmscout/util/Projection.cpp
     src/osmscout/util/StopClock.cpp
     src/osmscout/util/String.cpp
+    src/osmscout/util/StringMatcher.cpp
     src/osmscout/util/Tiling.cpp
     src/osmscout/util/Transformation.cpp
     src/osmscout/util/WorkQueue.cpp
@@ -171,8 +173,7 @@ set(SOURCE_FILES
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp
-    src/osmscout/util/CmdLineParsing.cpp
-)
+    src/osmscout/util/CmdLineParsing.cpp)
 
 if(MARISA_FOUND)
     list(APPEND HEADER_FILES include/osmscout/TextSearchIndex.h)

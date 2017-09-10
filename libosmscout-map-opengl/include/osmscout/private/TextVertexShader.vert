@@ -1,12 +1,13 @@
 #version 150 core
 
-in vec2 position;
-in vec4 color;
-in float index;
-in float textureStart;
-in float textureWidth;
-in float positionOffset;
-in float fontSize;
+in vec2 position;           // Geographic coordinates of vertex
+in vec4 color;              // Color of the text
+in float index;             // Type of the vertex. Necessary for creating the quad out of the coordinates.
+in float textureStart;      // Where does its texture start in the texture atlas
+in float textureWidth;      // Width of the texture of the quad in pixel
+in float positionOffset;    // The text is rendered character by character, so if it is not the first character in the
+                            // label, it needs to be offsetted by the sum width of the previous characters
+in float startOffset;       // If there's an icon before the text it needs an offset in the x position
 out vec2 Texcoord;
 out vec4 Color;
 uniform mat4 Model;
@@ -29,6 +30,9 @@ uniform float z;
 
 uniform float PI = 3.1415926535897;
 
+/**
+*  Converts a screen pixel to geographic coordinates
+*/
 vec2 PixelToGeo(in float x, in float y, in float latOffset)
 {
     float tileDPI=96.0;
@@ -54,6 +58,9 @@ vec2 PixelToGeo(in float x, in float y, in float latOffset)
     return (result);
 }
 
+/**
+*  Converts a geographic coordinate to screen pixel
+*/
 vec2 GeoToPixel(in float posx, in float posy){
     float tileDPI=96.0;
     float gradtorad=2*PI/360;
@@ -114,10 +121,10 @@ vec2 GeoToPixel(in float posx, in float posy){
 void main() {
     Color = color;
 
-    float width_norm = (ceil(textureWidth)/windowWidth) * fontSize;
-    float height_norm = (ceil(textureHeight)/windowHeight) * fontSize;
+    float width_norm = (ceil(textureWidth)/windowWidth);
+    float height_norm = (ceil(textureHeight)/windowHeight);
 
-    float offset = (ceil(positionOffset)/windowWidth) * fontSize;
+    float offset = (ceil(positionOffset)/windowWidth) + (ceil(startOffset)/windowWidth);
 
     vec2 c = GeoToPixel(position.x, position.y);
     vec4 pos = Projection * View * Model * vec4(c.x, c.y, z, 1);

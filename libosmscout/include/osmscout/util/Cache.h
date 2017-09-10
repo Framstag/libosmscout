@@ -96,10 +96,7 @@ namespace osmscout {
     class ValueSizer
     {
     public:
-      virtual ~ValueSizer()
-      {
-        // no code
-      }
+      virtual ~ValueSizer() = default;
 
       virtual size_t GetSize(const V& value) const = 0;
     };

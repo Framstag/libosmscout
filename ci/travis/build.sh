@@ -45,7 +45,7 @@ elif [ "$TARGET" = "website" ]; then
     cd webpage
     hugo --verbose
 
-    if [ -z "$SOURCEFORGE_USER" ]; then
+    if [ -n "$SOURCEFORGE_USER" ]; then
       echo "Copying web site content to sourceforge..."
       lftp -c "open --user $SOURCEFORGE_USER --password $SOURCEFORGE_PASSWORD sftp://web.sourceforge.net; cd /home/project-web/libosmscout/htdocs/; mirror -R -n --verbose=3 public ."
     else

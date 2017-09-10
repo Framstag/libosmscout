@@ -30,3 +30,6 @@ pygmentsuseclasses = true
     identifier = "contact"
     url = "/documentation/contact"
 
+[blackfriday]
+angledQuotes = true
+smartypantsQuotesNBSP = true

@@ -505,12 +505,13 @@ namespace osmscout {
    * @param profile
    *    Routing profile to use. It defines Vehicle to use
    * @param radius
-   *    The maximum radius to search in from the search center in meter
+   *    The maximum radius to search in from the search center in meter, at
+   *    return is set to the minimum distance found
    * @return
    */
   RoutePosition SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                              const RoutingProfile& profile,
-                                                             double radius) const
+                                                             double& radius) const
   {
     TypeConfigRef    typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
@@ -610,6 +611,7 @@ namespace osmscout {
       }
     }
 
+    double minDistanceLat = std::numeric_limits<double>::max(), minDistanceLon = std::numeric_limits<double>::max();
     for (const auto& way : ways) {
       if (!profile.CanUse(*way)) {
         continue;
@@ -619,17 +621,25 @@ namespace osmscout {
         continue;
       }
 
-      for (size_t i=0;  i<way->nodes.size(); i++) {
-        double distance=sqrt((way->nodes[i].GetLat()-coord.GetLat())*(way->nodes[i].GetLat()-coord.GetLat())+
-                             (way->nodes[i].GetLon()-coord.GetLon())*(way->nodes[i].GetLon()-coord.GetLon()));
+
+      for (size_t i=0;  i<way->nodes.size()-1; i++) {
+        double r, intersectLon, intersectLat;
+        double distance=DistanceToSegment(coord.GetLon(),coord.GetLat(),way->nodes[i].GetLon(),way->nodes[i].GetLat(),
+                                          way->nodes[i+1].GetLon(),way->nodes[i+1].GetLat(), r, intersectLon, intersectLat);
         if (distance<minDistance) {
           minDistance=distance;
-
-          position=RoutePosition(way->GetObjectFileRef(),i,/*database*/0);
+          minDistanceLat = intersectLat;
+          minDistanceLon = intersectLon;
+          if(r<0.5){
+            position=RoutePosition(way->GetObjectFileRef(),i,/*database*/0);
+          } else {
+            position=RoutePosition(way->GetObjectFileRef(),i+1,/*database*/0);
+          }
         }
       }
     }
-
+      
+    radius = minDistance;
     return position;
   }
 }

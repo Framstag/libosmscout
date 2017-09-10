@@ -17,6 +17,10 @@
 		E50B856B15E021DD00C685B3 /* OSMScoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B856A15E021DD00C685B3 /* OSMScoutView.m */; };
 		E50B856E15E024D400C685B3 /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
 		E55CFDAD1F2FAD95004AAA59 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */; };
+		E5653B591F4EF59D00EF6212 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */; };
+		E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5D1F4EF66E00EF6212 /* UIKit.framework */; };
+		E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5F1F4EF6B700EF6212 /* MapKit.framework */; };
+		E5653B621F4EF79900EF6212 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B611F4EF79900EF6212 /* CoreLocation.framework */; };
 		F50CBE8A15E59EAC00F0B370 /* bus_stop.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8315E59EAC00F0B370 /* bus_stop.png */; };
 		F50CBE8B15E59EAC00F0B370 /* cemetery.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8415E59EAC00F0B370 /* cemetery.png */; };
 		F50CBE8C15E59EAC00F0B370 /* forest.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8515E59EAC00F0B370 /* forest.png */; };
@@ -24,8 +28,6 @@
 		F50CBE8E15E59EAC00F0B370 /* parking.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8715E59EAC00F0B370 /* parking.png */; };
 		F50CBE8F15E59EAC00F0B370 /* pharmacy.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8815E59EAC00F0B370 /* pharmacy.png */; };
 		F50CBE9015E59EAC00F0B370 /* scrub.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8915E59EAC00F0B370 /* scrub.png */; };
-		F539E72C18882EEB00059073 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539E72B18882EEB00059073 /* MapKit.framework */; };
-		F539E72E188831A900059073 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539E72D188831A800059073 /* CoreLocation.framework */; };
 		F539E730188834C300059073 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539E72F188834C300059073 /* CoreLocation.framework */; };
 		F53BD1511638829E006C7AE1 /* libosmscout.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953EA5163880BC0026B30F /* libosmscout.a */; };
 		F53BD152163882A2006C7AE1 /* libosmscoutmap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953E9F163880A40026B30F /* libosmscoutmap.a */; };
@@ -36,9 +38,6 @@
 		F5D603611887566400D8242B /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5D603601887566400D8242B /* MapKit.framework */; };
 		F5D6036A18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
 		F5D6036B18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
-		F5DD1BB6160B880500084E83 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5DD1BB5160B880400084E83 /* UIKit.framework */; };
-		F5DD1BB8160B880500084E83 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5DD1BB7160B880500084E83 /* Foundation.framework */; };
-		F5DD1BBA160B880500084E83 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5DD1BB9160B880500084E83 /* CoreGraphics.framework */; };
 		F5DD1BC0160B880500084E83 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BBE160B880500084E83 /* InfoPlist.strings */; };
 		F5DD1BC2160B880500084E83 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC1160B880500084E83 /* main.m */; };
 		F5DD1BC6160B880500084E83 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC5160B880500084E83 /* AppDelegate.m */; };
@@ -160,7 +159,6 @@
 		E50B833315E0136800C685B3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		E50B833415E0136800C685B3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		E50B833715E0136900C685B3 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		E50B833F15E0136900C685B3 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		E50B856615E0219200C685B3 /* OSMScoutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSMScoutViewController.h; sourceTree = "<group>"; };
 		E50B856715E0219200C685B3 /* OSMScoutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSMScoutViewController.m; sourceTree = "<group>"; };
 		E50B856915E021DD00C685B3 /* OSMScoutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSMScoutView.h; sourceTree = "<group>"; };
@@ -168,6 +166,10 @@
 		E50B856D15E024D400C685B3 /* OSMScout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OSMScout.mm; path = OSMScoutOSX/OSMScout.mm; sourceTree = "<group>"; };
 		E50B856F15E029A800C685B3 /* OSMScout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OSMScout.h; path = OSMScoutOSX/OSMScout.h; sourceTree = "<group>"; };
 		E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
+		E5653B5D1F4EF66E00EF6212 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		E5653B5F1F4EF6B700EF6212 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/MapKit.framework; sourceTree = DEVELOPER_DIR; };
+		E5653B611F4EF79900EF6212 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
 		E5A61D4615E0612D0078BD02 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		F50CBE8315E59EAC00F0B370 /* bus_stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bus_stop.png; sourceTree = "<group>"; };
 		F50CBE8415E59EAC00F0B370 /* cemetery.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cemetery.png; sourceTree = "<group>"; };
@@ -176,8 +178,6 @@
 		F50CBE8715E59EAC00F0B370 /* parking.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = parking.png; sourceTree = "<group>"; };
 		F50CBE8815E59EAC00F0B370 /* pharmacy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pharmacy.png; sourceTree = "<group>"; };
 		F50CBE8915E59EAC00F0B370 /* scrub.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scrub.png; sourceTree = "<group>"; };
-		F539E72B18882EEB00059073 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/System/Library/Frameworks/MapKit.framework; sourceTree = DEVELOPER_DIR; };
-		F539E72D188831A800059073 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
 		F539E72F188834C300059073 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libosmscoutmapiosx.xcodeproj; path = ../libosmscout/libosmscoutmapiosx/libosmscoutmapiosx.xcodeproj; sourceTree = "<group>"; };
 		F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libosmscoutmap.xcodeproj; path = ../libosmscout/libosmscoutmap/libosmscoutmap.xcodeproj; sourceTree = "<group>"; };
@@ -186,9 +186,6 @@
 		F5D6036818875EE000D8242B /* OSMScoutMKTileOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OSMScoutMKTileOverlay.h; path = OSMScoutOSX/OSMScoutMKTileOverlay.h; sourceTree = "<group>"; };
 		F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OSMScoutMKTileOverlay.m; path = OSMScoutOSX/OSMScoutMKTileOverlay.m; sourceTree = "<group>"; };
 		F5DD1BB3160B880400084E83 /* OSMScoutiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OSMScoutiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F5DD1BB5160B880400084E83 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
-		F5DD1BB7160B880500084E83 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		F5DD1BB9160B880500084E83 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		F5DD1BBD160B880500084E83 /* OSMScoutiOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OSMScoutiOS-Info.plist"; sourceTree = "<group>"; };
 		F5DD1BBF160B880500084E83 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F5DD1BC1160B880500084E83 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -225,14 +222,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5653B621F4EF79900EF6212 /* CoreLocation.framework in Frameworks */,
+				E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */,
+				E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */,
+				E5653B591F4EF59D00EF6212 /* CoreGraphics.framework in Frameworks */,
 				F53BD153163882A5006C7AE1 /* libosmscoutmapiosx.a in Frameworks */,
 				F53BD152163882A2006C7AE1 /* libosmscoutmap.a in Frameworks */,
 				F53BD1511638829E006C7AE1 /* libosmscout.a in Frameworks */,
-				F5DD1BB6160B880500084E83 /* UIKit.framework in Frameworks */,
-				F5DD1BB8160B880500084E83 /* Foundation.framework in Frameworks */,
-				F5DD1BBA160B880500084E83 /* CoreGraphics.framework in Frameworks */,
-				F539E72E188831A900059073 /* CoreLocation.framework in Frameworks */,
-				F539E72C18882EEB00059073 /* MapKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,17 +262,12 @@
 		E50B832015E0136800C685B3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E5653B5A1F4EF5AA00EF6212 /* iOS frameworks */,
 				E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */,
 				F539E72F188834C300059073 /* CoreLocation.framework */,
-				F539E72D188831A800059073 /* CoreLocation.framework */,
-				F539E72B18882EEB00059073 /* MapKit.framework */,
 				F5D603601887566400D8242B /* MapKit.framework */,
 				E5A61D4615E0612D0078BD02 /* ApplicationServices.framework */,
 				E50B832115E0136800C685B3 /* Cocoa.framework */,
-				E50B833F15E0136900C685B3 /* SenTestingKit.framework */,
-				F5DD1BB5160B880400084E83 /* UIKit.framework */,
-				F5DD1BB7160B880500084E83 /* Foundation.framework */,
-				F5DD1BB9160B880500084E83 /* CoreGraphics.framework */,
 				E50B832315E0136800C685B3 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -317,6 +308,17 @@
 				E50B833015E0136800C685B3 /* Credits.rtf */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E5653B5A1F4EF5AA00EF6212 /* iOS frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E5653B611F4EF79900EF6212 /* CoreLocation.framework */,
+				E5653B5F1F4EF6B700EF6212 /* MapKit.framework */,
+				E5653B5D1F4EF66E00EF6212 /* UIKit.framework */,
+				E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */,
+			);
+			name = "iOS frameworks";
 			sourceTree = "<group>";
 		};
 		F50CBE7E15E59E7F00F0B370 /* Resources */ = {

@@ -50,11 +50,11 @@ namespace osmscout {
   public:
     MultiDBRoutingState(DatabaseId dbId1,
                         DatabaseId dbId2,
-                        RoutingProfileRef profile1,
-                        RoutingProfileRef profile2,
-                        std::set<Id> overlapNodes);
+                        const RoutingProfileRef& profile1,
+                        const RoutingProfileRef& profile2,
+                        const std::set<Id>& overlapNodes);
 
-    virtual ~MultiDBRoutingState();
+    virtual ~MultiDBRoutingState() =default;
 
     Vehicle GetVehicle() const;
 

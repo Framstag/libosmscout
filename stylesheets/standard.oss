@@ -14,23 +14,24 @@ OSS
 */
 
 FLAG
-  daylight        = true;
-  waterway        = true;
-  wood            = true;
+  daylight          = true;
+  waterway          = true;
+  wood              = true;
+  elevationContours = true;
 
   IF daylight {
-    natural       = true;
-    railway       = true;
-    leisure       = true;
-    building      = true;
-    minorBuilding = true;
+    natural         = true;
+    railway         = true;
+    leisure         = true;
+    building        = true;
+    minorBuilding   = true;
   }
   ELSE {
-    natural       = false;
-    railway       = false;
-    leisure       = false;
-    building      = false;
-    minorBuilding = false;
+    natural         = false;
+    railway         = false;
+    leisure         = false;
+    building        = false;
+    minorBuilding   = false;
   }
 
 ORDER WAYS
@@ -48,7 +49,7 @@ ORDER WAYS
         aeroway_runway, aeroway_taxiway
   GROUP highway_living_street, highway_service, highway_bus_guideway,
         railway_tram, railway_light_rail, railway_subway, public_transport_platform,
-        railway_narrow_gauge,
+        railway_narrow_gauge, railway_preserved,
         aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
         highway_footway, highway_bridleway, highway_construction,
@@ -509,21 +510,23 @@ STYLE
   // contour lines
   //
 
-  [MAG suburb-] {
-    [TYPE elevation_contour_major] {
-      WAY {color: @majorContourColor; displayWidth: 0.150mm; }
-      WAY.TEXT { label: Ele.inMeter; }
-    }
-  }
-
-  [MAG detail-] {
-    [TYPE elevation_contour_medium] {
-      WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
-      WAY.TEXT { label: Ele.inMeter; }
+  IF elevationContours {
+    [MAG suburb-] {
+      [TYPE elevation_contour_major] {
+        WAY {color: @majorContourColor; displayWidth: 0.150mm; }
+        WAY.TEXT { label: Ele.inMeter; }
+      }
     }
 
-    [TYPE elevation_contour_minor] {
-      WAY {color: @minorContourColor; displayWidth: 0.075mm; }
+    [MAG detail-] {
+      [TYPE elevation_contour_medium] {
+        WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
+        WAY.TEXT { label: Ele.inMeter; }
+      }
+
+      [TYPE elevation_contour_minor] {
+        WAY {color: @minorContourColor; displayWidth: 0.075mm; }
+      }
     }
   }
 
@@ -1174,7 +1177,7 @@ STYLE
 
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
      [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
-     [TYPE railway_narrow_gauge] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
+     [TYPE railway_narrow_gauge, railway_preserved] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
      [TYPE railway_funicular] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
 
      [TYPE railway_subway] {
@@ -1186,6 +1189,7 @@ STYLE
      [TYPE railway_tram,
            railway_light_rail,
            railway_narrow_gauge,
+           railway_preserved,
            railway_funicular
          SIZE 5m 0.25mm:3px<] {
        [FEATURE Tunnel] {
@@ -1235,6 +1239,7 @@ STYLE
            railway_tram,
            railway_light_rail,
            railway_narrow_gauge,
+           railway_preserved,
            railway_funicular,
            railway_subway,
            public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; }

@@ -27,21 +27,22 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Projection.h \
                         osmscout/util/StopClock.h \
                         osmscout/util/String.h \
+                        osmscout/util/StringMatcher.h \
                         osmscout/util/Tiling.h \
                         osmscout/util/Transformation.h \
                         osmscout/util/WorkQueue.h \
-			osmscout/routing/Route.h \
-			osmscout/routing/RouteData.h \
-			osmscout/routing/RouteNode.h \
-			osmscout/routing/RoutePostprocessor.h \
-			osmscout/routing/RoutingProfile.h \
-			osmscout/routing/RoutingService.h \
-			osmscout/routing/AbstractRoutingService.h \
-			osmscout/routing/SimpleRoutingService.h \
-			osmscout/routing/MultiDBRoutingService.h \
-			osmscout/routing/DBFileOffset.h \
-			osmscout/routing/TurnRestriction.h \
-			osmscout/routing/MultiDBRoutingState.h \
+                        osmscout/routing/Route.h \
+                        osmscout/routing/RouteData.h \
+                        osmscout/routing/RouteNode.h \
+                        osmscout/routing/RoutePostprocessor.h \
+                        osmscout/routing/RoutingProfile.h \
+                        osmscout/routing/RoutingService.h \
+                        osmscout/routing/AbstractRoutingService.h \
+                        osmscout/routing/SimpleRoutingService.h \
+                        osmscout/routing/MultiDBRoutingService.h \
+                        osmscout/routing/DBFileOffset.h \
+                        osmscout/routing/TurnRestriction.h \
+                        osmscout/routing/MultiDBRoutingState.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/TypeConfig.h \

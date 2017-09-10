@@ -65,7 +65,7 @@ namespace osmscout {
     class OSMSCOUT_API Destination
     {
     public:
-      virtual ~Destination();
+      virtual ~Destination() = default;
 
       /**
        * Print a std::string
@@ -210,7 +210,7 @@ namespace osmscout {
 
   public:
     Logger();
-    virtual ~Logger();
+    virtual ~Logger() = default;
 
     /**
      * Start logging a line of debug output

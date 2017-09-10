@@ -72,7 +72,7 @@ namespace osmscout {
     void SetProgress(double current, double total);
     void SetProgress(unsigned int current, unsigned int total);
     void SetProgress(unsigned long current, unsigned long total);
-    virtual void SetProgress(unsigned long long current, unsigned long long total);
+    void SetProgress(unsigned long long current, unsigned long long total);
 
     void Debug(const std::string& text);
     void Info(const std::string& text);

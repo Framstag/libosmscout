@@ -137,7 +137,7 @@ namespace osmscout {
   {
     SetProgress((double)current, (double)total);
   }
-  
+
   void ConsoleProgress::SetProgress(unsigned long current, unsigned long total)
   {
     SetProgress((double)current,(double)total);

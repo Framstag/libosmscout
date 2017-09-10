@@ -1,6 +1,6 @@
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2012  Tim Teulings
+  Copyright (C) 2017  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,33 +17,36 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Path.h>
+#include <osmscout/util/StringMatcher.h>
+
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
-  Path::Path(ObjectFileRef object,
-             size_t targetNodeIndex)
-  : object(object),
-    targetNodeIndex(targetNodeIndex),
-    traversable(true)
+  StringMatcherCI::StringMatcherCI(const std::string& pattern)
+    : pattern(UTF8StringToUpper(pattern))
   {
     // no code
   }
 
-  Path::Path(ObjectFileRef object,
-             size_t targetNodeIndex,
-             bool traversable)
-  : object(object),
-    targetNodeIndex(targetNodeIndex),
-    traversable(traversable)
+  StringMatcher::Result StringMatcherCI::Match(const std::string& text) const
   {
-    // no code
+    auto transformedText=UTF8StringToUpper(text);
+    auto pos            =transformedText.find(pattern);
+
+    if (pos==std::string::npos) {
+      return noMatch;
+    }
+
+    if (pos==0 && pattern.length()==transformedText.length()) {
+      return match;
+    }
+
+    return partialMatch;
   }
 
-  Path::Path(const Path& other)
+  StringMatcherRef StringMatcherCIFactory::CreateMatcher(const std::string& pattern) const
   {
-    this->object=other.object;
-    this->targetNodeIndex=other.targetNodeIndex;
-    this->traversable=other.traversable;
+    return std::make_shared<StringMatcherCI>(pattern);
   }
 }

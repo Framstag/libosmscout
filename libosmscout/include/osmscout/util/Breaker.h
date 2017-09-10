@@ -37,7 +37,7 @@ namespace osmscout {
   class OSMSCOUT_API Breaker
   {
   public:
-    virtual ~Breaker();
+    virtual ~Breaker() = default;
 
     /**
      * Stop the processing. This is just a setting a flag that must actively get polled

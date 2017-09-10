@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include <freetype2/ft2build.h>
+#include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
@@ -31,17 +31,62 @@
 
 namespace osmscout {
 
+  class OSMSCOUT_MAP_OPENGL_API CharacterTexture {
+    char32_t character;
+    OpenGLTextureRef texture;
+    long baselineY;
+    long height;
+
+  public:
+
+    char32_t GetCharacter() const {
+      return character;
+    }
+
+    void SetCharacter(char32_t character) {
+      this->character = character;
+    }
+
+    OpenGLTextureRef GetTexture() const {
+      return texture;
+    }
+
+    void SetTexture(OpenGLTextureRef texture) {
+      this->texture = texture;
+    }
+
+    long GetBaselineY() const {
+      return baselineY;
+    }
+
+    void SetBaselineY(long baselineY) {
+      this->baselineY = baselineY;
+    }
+
+    long GetHeight() const {
+      return height;
+    }
+
+    void SetHeight(long height) {
+      this->height = height;
+    }
+
+  };
+
+  typedef std::shared_ptr<CharacterTexture> CharacterTextureRef;
+
   class OSMSCOUT_MAP_OPENGL_API TextLoader {
   private:
     FT_Library ft;
     FT_Face face;
 
-    long height;
-    long baseLineY;
-    int sumwidth;
+    long defaultFontSize;
 
-    std::map<char32_t, int> characterIndices;
-    std::vector<osmscout::OpenGLTexture *> characters;
+    long maxHeight;
+    int sumWidth;
+
+    std::map<std::pair<char32_t, int>, int> characterIndices;
+    std::vector<osmscout::CharacterTextureRef> characters;
 
     void LoadFace();
 
@@ -49,18 +94,44 @@ namespace osmscout {
 
   public:
 
-    TextLoader(std::string path);
+    ~TextLoader();
 
-    int GetStartWidth(int index);
+    TextLoader(std::string path, long defaultSize);
 
-    long GetHeight();
-
+    /**
+     * Returns width of a texture at given index in pixel.
+     */
     size_t GetWidth(int index);
 
-    OpenGLTexture *CreateTexture();
+    /**
+    * Returns the sum width of a texture at given index in pixel.
+    */
+    int GetStartWidth(int index);
 
-    std::vector<int> AddCharactersToTextureAtlas(std::string text);
+    /**
+     * Returns the height of the texture atlas in pixel.
+     */
+    long GetHeight();
 
+    /**
+     * Returns the default font size.
+     */
+    long GetDefaultFontSize() const;
+
+    /**
+     * Sets the default font size.
+     */
+    void SetDefaultFontSize(long defaultFontSize);
+
+    /**
+     * Creates one texture from the character textures.
+     */
+    OpenGLTextureRef CreateTexture();
+
+    /**
+     * Add new characters to the texture atlas and returns its indices in the atlas.
+     */
+    std::vector<int> AddCharactersToTextureAtlas(std::string text, double size);
   };
 }
 

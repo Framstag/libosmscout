@@ -24,7 +24,7 @@ IF %COMPILER%==msys2 (
 
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson.py debug && cd debug && ninja"
+    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ninja"
     echo Finished mason build
   )
 

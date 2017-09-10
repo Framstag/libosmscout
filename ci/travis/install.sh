@@ -20,12 +20,7 @@ if [ "$TARGET" = "build" ]; then
     elif [ "$BUILDTOOL" = "meson" ]; then
       wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
       unzip ninja-linux.zip
-      echo "Home directory contents:"
-      ls -l ~/
-      if [ ! -e ~/bin ]; then
-        echo "~/bin does not exist, creating it"
-        mkdir -p ~/bin
-      fi
+      mkdir -p ~/bin
       mv ninja ~/bin
       export PATH=~/bin:$PATH
       sudo apt-get install python3-pip python3-dev build-essential
@@ -88,8 +83,8 @@ elif [ "$TARGET" = "importer" ]; then
 elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
 
-  wget https://github.com/spf13/hugo/releases/download/v0.21/hugo_0.21_Linux-64bit.deb
-  sudo dpkg -i hugo_0.21_Linux-64bit.deb
+  wget https://github.com/spf13/hugo/releases/download/v0.26/hugo_0.26_Linux-64bit.deb
+  sudo dpkg -i hugo_0.26_Linux-64bit.deb
 
   sudo apt-get -qq update
   sudo apt-get install -y python3-pygments python-pygments doxygen lftp

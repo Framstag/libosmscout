@@ -27,11 +27,6 @@ namespace osmscout {
     // no code
   }
 
-  RawCoord::~RawCoord()
-  {
-    // no code
-  }
-
   void RawCoord::SetOSMId(OSMId id)
   {
     this->id=id;

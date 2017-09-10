@@ -36,21 +36,22 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Projection.cpp \
                         osmscout/util/StopClock.cpp \
                         osmscout/util/String.cpp \
+                        osmscout/util/StringMatcher.cpp \
                         osmscout/util/Tiling.cpp \
                         osmscout/util/Transformation.cpp \
                         osmscout/util/WorkQueue.cpp \
                         osmscout/util/TagErrorReporter.cpp \
-			osmscout/routing/Route.cpp \
-			osmscout/routing/RouteData.cpp \
-			osmscout/routing/RouteNode.cpp \
-			osmscout/routing/RoutePostprocessor.cpp \
-			osmscout/routing/RoutingProfile.cpp \
-			osmscout/routing/RoutingService.cpp \
-			osmscout/routing/AbstractRoutingService.cpp \
-			osmscout/routing/SimpleRoutingService.cpp \
-			osmscout/routing/MultiDBRoutingService.cpp \
-			osmscout/routing/TurnRestriction.cpp \
-			osmscout/routing/MultiDBRoutingState.cpp \
+                        osmscout/routing/Route.cpp \
+                        osmscout/routing/RouteData.cpp \
+                        osmscout/routing/RouteNode.cpp \
+                        osmscout/routing/RoutePostprocessor.cpp \
+                        osmscout/routing/RoutingProfile.cpp \
+                        osmscout/routing/RoutingService.cpp \
+                        osmscout/routing/AbstractRoutingService.cpp \
+                        osmscout/routing/SimpleRoutingService.cpp \
+                        osmscout/routing/MultiDBRoutingService.cpp \
+                        osmscout/routing/TurnRestriction.cpp \
+                        osmscout/routing/MultiDBRoutingState.cpp \
                         osmscout/Types.cpp \
                         osmscout/TypeConfig.cpp \
                         osmscout/TypeFeatures.cpp \

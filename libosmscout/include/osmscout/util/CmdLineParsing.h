@@ -77,7 +77,7 @@ namespace osmscout {
     std::string GetArgumentName() const;
 
   public:
-    virtual ~CmdLineArgParser();
+    virtual ~CmdLineArgParser() =default;
 
     void SetArgumentName(const std::string& argumentName);
 

@@ -28,11 +28,6 @@ namespace osmscout {
   // Global logger
   Log log;
 
-  Logger::Destination::~Destination()
-  {
-    // no code
-  }
-
   Logger::Line::Line(Destination& destination)
   : destination(destination)
   {
@@ -82,11 +77,6 @@ namespace osmscout {
   }
 
   Logger::Logger()
-  {
-    // no code
-  }
-
-  Logger::~Logger()
   {
     // no code
   }

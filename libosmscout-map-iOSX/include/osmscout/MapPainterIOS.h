@@ -60,7 +60,6 @@ namespace osmscout {
         std::map<size_t,Font *>     fonts;          // Cached fonts
         
         static constexpr double plateLabelMargin = 10.0;
-        static constexpr double yLabelMargin = 10.0;
         static constexpr double contourLabelMargin = 50.0;
         static constexpr double contourLabelSpace = 200.0;
         static constexpr int labelRepeatMaxCount = 25;
@@ -77,6 +76,11 @@ namespace osmscout {
                      const MapParameter& parameter,
                      const MapData& data,
                      CGContextRef paintCG);
+        
+        void DrawGroundTiles(const Projection& projection,
+                             const MapParameter& parameter,
+                             const std::list<GroundTile>& groundTiles,
+                             CGContextRef paintCG);
     protected:
         bool HasIcon(const StyleConfig& styleConfig,
                      const MapParameter& parameter,

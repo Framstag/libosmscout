@@ -257,6 +257,18 @@ It looks like the qmake based build does not handle rpath for shared
 libraries correctly so OSMScout2 does not find the referenced locally
 build libosmscout binaries. The cmake based does not have this problem.
 
+For custom installation directories for Qt you have to pass a hint to cmake:
+
+```bash
+cmake . -DCMAKE_PREFIX_PATH=[QT5_Installation_prefix]
+```
+
+Note also that native XCode projects doe not have dependency autodetection.
+As such the dependencies of the libosmsocout libraries and the XCode projects
+may differ and have to be adapted. In concrete, the XCode projects assume that
+marisa support was build in to the libomscout library, but as this is an
+optional library, you may have choosen differently.
+
 ### Setup for MinGW/MSYS
 
 Note that there is also a central Appveyor build, that uses a similar setup

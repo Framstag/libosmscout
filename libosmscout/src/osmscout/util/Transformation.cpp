@@ -761,11 +761,6 @@ namespace osmscout {
                   constraint);
   }
 
-  CoordBuffer::~CoordBuffer()
-  {
-    // no code
-  }
-
   TransBuffer::TransBuffer(CoordBuffer* buffer)
   : buffer(buffer)
   {

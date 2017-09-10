@@ -37,7 +37,7 @@ namespace osmscout {
             screenWidth),
         screenHeight(
             screenHeight),
-        Textloader(fontPath) {
+        Textloader(fontPath, 10) {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -65,9 +65,9 @@ namespace osmscout {
       return;
     }
 
-    PathRenderer.LoadVertexShader("PathVertexShader.vert");
-    PathRenderer.LoadFragmentShader("PathFragmentShader.frag");
-    success = PathRenderer.InitContext();
+    WayRenderer.LoadVertexShader("PathVertexShader.vert");
+    WayRenderer.LoadFragmentShader("PathFragmentShader.frag");
+    success = WayRenderer.InitContext();
     if (!success) {
       std::cerr << "Could not initialize context for area rendering!" << std::endl;
       return;
@@ -95,21 +95,22 @@ namespace osmscout {
     GroundTileRenderer.SetVerticesSize(5);
     GroundRenderer.clearData();
     GroundRenderer.SetVerticesSize(5);
-    PathRenderer.clearData();
-    PathRenderer.SetVerticesSize(23);
+    WayRenderer.clearData();
+    WayRenderer.SetVerticesSize(23);
     ImageRenderer.clearData();
     ImageRenderer.SetVerticesSize(5);
     ImageRenderer.SetTextureHeight(7);
     TextRenderer.clearData();
     TextRenderer.SetVerticesSize(11);
-    TextRenderer.SetTextureHeight(Textloader.GetHeight());
   }
 
-  void osmscout::MapPainterOpenGL::LoadData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+  void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                                             const osmscout::Projection &projection,
                                             const osmscout::StyleConfigRef &styleConfig) {
     styleConfig.get()->GetLandFillStyle(projection, landFill);
     styleConfig.get()->GetSeaFillStyle(projection, seaFill);
+
+    Textloader.SetDefaultFontSize(parameter.GetFontSize());
 
     this->Magnification = projection.GetMagnification();
     this->Center = projection.GetCenter();
@@ -126,6 +127,13 @@ namespace osmscout {
 
   void osmscout::MapPainterOpenGL::SwapData() {
 
+    SwapAreaData();
+    SwapGroundData();
+    SwapWayData();
+    SwapNodeData();
+  }
+
+  void osmscout::MapPainterOpenGL::SwapAreaData() {
     AreaRenderer.SwapData();
 
     AreaRenderer.BindBuffers();
@@ -144,7 +152,9 @@ namespace osmscout {
     AreaRenderer.AddUniform("centerLon", Center.GetLon());
     AreaRenderer.AddUniform("magnification", Magnification.GetMagnification());
     AreaRenderer.AddUniform("dpi", dpi);
+  }
 
+  void osmscout::MapPainterOpenGL::SwapGroundData() {
     GroundTileRenderer.SwapData();
 
     GroundTileRenderer.BindBuffers();
@@ -181,35 +191,9 @@ namespace osmscout {
     GroundRenderer.AddUniform("centerLon", Center.GetLon());
     GroundRenderer.AddUniform("magnification", Magnification.GetMagnification());
     GroundRenderer.AddUniform("dpi", dpi);
+  }
 
-    PathRenderer.SwapData();
-
-    PathRenderer.BindBuffers();
-    PathRenderer.LoadProgram();
-    PathRenderer.LoadVertices();
-
-    PathRenderer.SetProjection(width, height);
-    PathRenderer.SetModel();
-    PathRenderer.SetView(lookX, lookY);
-    PathRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    PathRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("color", 4, GL_FLOAT, 6 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("gapcolor", 4, GL_FLOAT, 10 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("index", 1, GL_FLOAT, 14 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("thickness", 1, GL_FLOAT, 15 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("border", 1, GL_FLOAT, 16 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("barycentric", 3, GL_FLOAT, 17 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("z", 1, GL_FLOAT, 20 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("dashsize", 1, GL_FLOAT, 21 * sizeof(GLfloat));
-    PathRenderer.AddAttrib("length", 1, GL_FLOAT, 22 * sizeof(GLfloat));
-    PathRenderer.AddUniform("windowWidth", width);
-    PathRenderer.AddUniform("windowHeight", height);
-    PathRenderer.AddUniform("centerLat", Center.GetLat());
-    PathRenderer.AddUniform("centerLon", Center.GetLon());
-    PathRenderer.AddUniform("magnification", Magnification.GetMagnification());
-    PathRenderer.AddUniform("dpi", dpi);
-
+  void osmscout::MapPainterOpenGL::SwapNodeData() {
     ImageRenderer.SwapData();
 
     ImageRenderer.BindBuffers();
@@ -235,12 +219,12 @@ namespace osmscout {
     ImageRenderer.SetModel();
     ImageRenderer.SetView(lookX, lookY);
 
+    TextRenderer.SetTextureHeight(Textloader.GetHeight());
     TextRenderer.SwapData(1);
 
     TextRenderer.BindBuffers();
     TextRenderer.LoadProgram();
     TextRenderer.LoadVertices();
-    TextRenderer.SetTextureHeight(Textloader.GetHeight());
     TextRenderer.LoadGreyTextures();
 
     TextRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
@@ -249,12 +233,12 @@ namespace osmscout {
     TextRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 7 * sizeof(GLfloat));
     TextRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 8 * sizeof(GLfloat));
     TextRenderer.AddAttrib("positionOffset", 1, GL_FLOAT, 9 * sizeof(GLfloat));
-    TextRenderer.AddAttrib("fontSize", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+    TextRenderer.AddAttrib("startOffset", 1, GL_FLOAT, 10 * sizeof(GLfloat));
     TextRenderer.AddUniform("windowWidth", width);
     TextRenderer.AddUniform("windowHeight", height);
     TextRenderer.AddUniform("centerLat", Center.GetLat());
     TextRenderer.AddUniform("centerLon", Center.GetLon());
-    TextRenderer.AddUniform("textureHeight", TextRenderer.GetTextureHeight());
+    TextRenderer.AddUniform("textureHeight", Textloader.GetHeight());
     TextRenderer.AddUniform("magnification", Magnification.GetMagnification());
     TextRenderer.AddUniform("textureWidthSum", ImageRenderer.GetTextureWidth());
     TextRenderer.AddUniform("dpi", dpi);
@@ -263,6 +247,36 @@ namespace osmscout {
     TextRenderer.SetProjection(width, height);
     TextRenderer.SetModel();
     TextRenderer.SetView(lookX, lookY);
+  }
+
+  void osmscout::MapPainterOpenGL::SwapWayData() {
+    WayRenderer.SwapData();
+
+    WayRenderer.BindBuffers();
+    WayRenderer.LoadProgram();
+    WayRenderer.LoadVertices();
+
+    WayRenderer.SetProjection(width, height);
+    WayRenderer.SetModel();
+    WayRenderer.SetView(lookX, lookY);
+    WayRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    WayRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("color", 4, GL_FLOAT, 6 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("gapcolor", 4, GL_FLOAT, 10 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("index", 1, GL_FLOAT, 14 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("thickness", 1, GL_FLOAT, 15 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("border", 1, GL_FLOAT, 16 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("barycentric", 3, GL_FLOAT, 17 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("z", 1, GL_FLOAT, 20 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("dashsize", 1, GL_FLOAT, 21 * sizeof(GLfloat));
+    WayRenderer.AddAttrib("length", 1, GL_FLOAT, 22 * sizeof(GLfloat));
+    WayRenderer.AddUniform("windowWidth", width);
+    WayRenderer.AddUniform("windowHeight", height);
+    WayRenderer.AddUniform("centerLat", Center.GetLat());
+    WayRenderer.AddUniform("centerLon", Center.GetLon());
+    WayRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    WayRenderer.AddUniform("dpi", dpi);
   }
 
   void
@@ -478,13 +492,13 @@ namespace osmscout {
                             glm::vec3(0, 0, 1));
 
               int num;
-              num = PathRenderer.GetVerticesNumber() - 6;
-              PathRenderer.AddNewElement(num);
-              PathRenderer.AddNewElement(num + 1);
-              PathRenderer.AddNewElement(num + 2);
-              PathRenderer.AddNewElement(num + 3);
-              PathRenderer.AddNewElement(num + 4);
-              PathRenderer.AddNewElement(num + 5);
+              num = WayRenderer.GetVerticesNumber() - 6;
+              WayRenderer.AddNewElement(num);
+              WayRenderer.AddNewElement(num + 1);
+              WayRenderer.AddNewElement(num + 2);
+              WayRenderer.AddNewElement(num + 3);
+              WayRenderer.AddNewElement(num + 4);
+              WayRenderer.AddNewElement(num + 5);
             }
           }
 
@@ -602,8 +616,8 @@ namespace osmscout {
           double length = 1;
           double dashSize = 0;
           if (!lineStyles[l]->GetDash().empty() && (l == 0)) {
-            for(int d = 0; d < lineStyles[l]->GetDash().size(); d++){
-              if(lineStyles[l]->GetDash()[d] != 0){
+            for (int d = 0; d < lineStyles[l]->GetDash().size(); d++) {
+              if (lineStyles[l]->GetDash()[d] != 0) {
                 dashSize = lineStyles[l]->GetDash()[d];
                 break;
               }
@@ -654,9 +668,9 @@ namespace osmscout {
                         border, z, dashSize, length, gapColor);
 
           int num;
-          num = PathRenderer.GetVerticesNumber() - 6;
-          for(unsigned int n = 0; n < 6; n++)
-            PathRenderer.AddNewElement(num + n);
+          num = WayRenderer.GetVerticesNumber() - 6;
+          for (unsigned int n = 0; n < 6; n++)
+            WayRenderer.AddNewElement(num + n);
 
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
@@ -696,9 +710,9 @@ namespace osmscout {
                         glm::vec3(1, 0, 1),
                         border, z, dashSize, length, gapColor);
 
-          num = PathRenderer.GetVerticesNumber() - 6;
-          for(unsigned int n = 0; n < 6; n++)
-            PathRenderer.AddNewElement(num + n);
+          num = WayRenderer.GetVerticesNumber() - 6;
+          for (unsigned int n = 0; n < 6; n++)
+            WayRenderer.AddNewElement(num + n);
         }
       }
     }
@@ -707,41 +721,42 @@ namespace osmscout {
   void
   osmscout::MapPainterOpenGL::AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
                                             osmscout::Color color, int type, float width, glm::vec3 barycentric,
-                                            int border, double z, float dashsize, float length, osmscout::Color gapcolor) {
-    PathRenderer.AddNewVertex(current.GetLon());
-    PathRenderer.AddNewVertex(current.GetLat());
+                                            int border, double z, float dashsize, float length,
+                                            osmscout::Color gapcolor) {
+    WayRenderer.AddNewVertex(current.GetLon());
+    WayRenderer.AddNewVertex(current.GetLat());
 
-    PathRenderer.AddNewVertex(previous.GetLon());
-    PathRenderer.AddNewVertex(previous.GetLat());
+    WayRenderer.AddNewVertex(previous.GetLon());
+    WayRenderer.AddNewVertex(previous.GetLat());
 
-    PathRenderer.AddNewVertex(next.GetLon());
-    PathRenderer.AddNewVertex(next.GetLat());
+    WayRenderer.AddNewVertex(next.GetLon());
+    WayRenderer.AddNewVertex(next.GetLat());
 
-    PathRenderer.AddNewVertex(color.GetR());
-    PathRenderer.AddNewVertex(color.GetG());
-    PathRenderer.AddNewVertex(color.GetB());
-    PathRenderer.AddNewVertex(color.GetA());
+    WayRenderer.AddNewVertex(color.GetR());
+    WayRenderer.AddNewVertex(color.GetG());
+    WayRenderer.AddNewVertex(color.GetB());
+    WayRenderer.AddNewVertex(color.GetA());
 
-    PathRenderer.AddNewVertex(gapcolor.GetR());
-    PathRenderer.AddNewVertex(gapcolor.GetG());
-    PathRenderer.AddNewVertex(gapcolor.GetB());
-    PathRenderer.AddNewVertex(gapcolor.GetA());
+    WayRenderer.AddNewVertex(gapcolor.GetR());
+    WayRenderer.AddNewVertex(gapcolor.GetG());
+    WayRenderer.AddNewVertex(gapcolor.GetB());
+    WayRenderer.AddNewVertex(gapcolor.GetA());
 
-    PathRenderer.AddNewVertex(type);
+    WayRenderer.AddNewVertex(type);
 
-    PathRenderer.AddNewVertex(width);
+    WayRenderer.AddNewVertex(width);
 
-    PathRenderer.AddNewVertex(border);
+    WayRenderer.AddNewVertex(border);
 
-    PathRenderer.AddNewVertex(barycentric.x);
-    PathRenderer.AddNewVertex(barycentric.y);
-    PathRenderer.AddNewVertex(barycentric.z);
+    WayRenderer.AddNewVertex(barycentric.x);
+    WayRenderer.AddNewVertex(barycentric.y);
+    WayRenderer.AddNewVertex(barycentric.z);
 
-    PathRenderer.AddNewVertex(z);
+    WayRenderer.AddNewVertex(z);
 
-    PathRenderer.AddNewVertex(dashsize);
+    WayRenderer.AddNewVertex(dashsize);
 
-    PathRenderer.AddNewVertex(length);
+    WayRenderer.AddNewVertex(length);
   }
 
   void
@@ -922,10 +937,10 @@ namespace osmscout {
                                      projection,
                                      textStyles);
 
+      bool hasIcon = false;
       if (iconStyle) {
         //has icon?
-        bool hasIcon = false;
-        OpenGLTexture *image;
+        OpenGLTextureRef image;
         int IconIndex = 0;
         for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
              path != parameter.GetIconPaths().end();
@@ -1078,9 +1093,14 @@ namespace osmscout {
         std::string label = textStyle->GetLabel()->GetLabel(parameter,
                                                             buffer);
 
+        int offset = 0;
+
         if (label.empty()) {
           continue;
         }
+
+        if (hasIcon)
+          offset = 15;
 
         double alpha = 1.0;
         double fontSize = 1.0;
@@ -1092,6 +1112,7 @@ namespace osmscout {
           alpha = std::min(textStyle->GetAlpha() / factor, 1.0);
 
         } else if (textStyle->GetAutoSize()) {
+          //fontSize = textStyle->GetSize();
           alpha = textStyle->GetAlpha();
           //TODO
           continue;
@@ -1101,7 +1122,7 @@ namespace osmscout {
         }
 
         Color color = textStyle->GetTextColor();
-        std::vector<int> textureAtlasIndices = Textloader.AddCharactersToTextureAtlas(label);
+        std::vector<int> textureAtlasIndices = Textloader.AddCharactersToTextureAtlas(label, fontSize);
         int widthSum = 0;
         for (int index: textureAtlasIndices) {
           osmscout::GeoCoord coords = node->GetCoords();
@@ -1120,7 +1141,7 @@ namespace osmscout {
             TextRenderer.AddNewVertex(startWidth);
             TextRenderer.AddNewVertex(textureWidth);
             TextRenderer.AddNewVertex(widthSum);
-            TextRenderer.AddNewVertex(fontSize);
+            TextRenderer.AddNewVertex(offset);
           }
 
           widthSum += textureWidth + 1;
@@ -1142,7 +1163,7 @@ namespace osmscout {
       }
     }
 
-    OpenGLTexture *t = Textloader.CreateTexture();
+    OpenGLTextureRef t = Textloader.CreateTexture();
     TextRenderer.AddNewTexture(t);
 
   }
@@ -1253,20 +1274,20 @@ namespace osmscout {
     AreaRenderer.SetView(lookX, lookY);
     AreaRenderer.Draw();
 
-    glBindVertexArray(PathRenderer.getVAO());
-    glUseProgram(PathRenderer.getShaderProgram());
+    glBindVertexArray(WayRenderer.getVAO());
+    glUseProgram(WayRenderer.getShaderProgram());
 
-    PathRenderer.AddUniform("windowWidth", width);
-    PathRenderer.AddUniform("windowHeight", height);
-    PathRenderer.AddUniform("centerLat", Center.GetLat());
-    PathRenderer.AddUniform("centerLon", Center.GetLon());
-    PathRenderer.AddUniform("magnification", Magnification.GetMagnification());
-    PathRenderer.AddUniform("dpi", dpi);
+    WayRenderer.AddUniform("windowWidth", width);
+    WayRenderer.AddUniform("windowHeight", height);
+    WayRenderer.AddUniform("centerLat", Center.GetLat());
+    WayRenderer.AddUniform("centerLon", Center.GetLon());
+    WayRenderer.AddUniform("magnification", Magnification.GetMagnification());
+    WayRenderer.AddUniform("dpi", dpi);
 
-    PathRenderer.SetProjection(width, height);
-    PathRenderer.SetModel();
-    PathRenderer.SetView(lookX, lookY);
-    PathRenderer.Draw();
+    WayRenderer.SetProjection(width, height);
+    WayRenderer.SetModel();
+    WayRenderer.SetView(lookX, lookY);
+    WayRenderer.Draw();
 
     glBindVertexArray(ImageRenderer.getVAO());
     glBindTexture(GL_TEXTURE_2D, ImageRenderer.GetTexture());

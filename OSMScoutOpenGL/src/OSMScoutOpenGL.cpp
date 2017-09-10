@@ -93,7 +93,7 @@ bool LoadData() {
   mapService->AddTileDataToMapData(tiles, data);
   mapService->GetGroundTiles(projection, data.groundTiles);
   osmscout::log.Info() << "Start processing data...";
-  renderer->LoadData(data, drawParameter, projection, styleConfig);
+  renderer->ProcessData(data, drawParameter, projection, styleConfig);
   osmscout::log.Info() << "Ended processing data.";
 
   return true;
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
 
   database.get()->GetBoundingBox(boundingBox);
 
-  drawParameter.SetFontSize(3.0);
+  drawParameter.SetFontSize(12);
   std::list<std::string>       paths;
   paths.push_back(args.iconDirectory);
   drawParameter.SetIconPaths(paths);
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
   glfwMakeContextCurrent(window);
 
   renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath);
-  renderer->LoadData(data, drawParameter, projection, styleConfig);
+  renderer->ProcessData(data, drawParameter, projection, styleConfig);
   renderer->SwapData();
   unsigned long long currentTime;
   while (!glfwWindowShouldClose(window)) {
