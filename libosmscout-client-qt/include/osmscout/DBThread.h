@@ -122,18 +122,9 @@ public:
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void TriggerInitialRendering();
-  void locationDescription(const osmscout::GeoCoord location,
-                           const QString database,
-                           const osmscout::LocationDescription description,
-                           const QStringList regions);
-  void locationDescriptionFinished(const osmscout::GeoCoord location);
   void stylesheetFilenameChanged();
   void databaseLoadFinished(osmscout::GeoBox boundingBox);
   void styleErrorsChanged();
-
-  void searchResult(const QString searchPattern, const QList<LocationEntry>);
-
-  void searchFinished(const QString searchPattern, bool error);
 
 public slots:
   void ToggleDaylight();
@@ -145,35 +136,6 @@ public slots:
                  const QString &suffix="");
   void Initialize();
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
-
-  /**
-   * Start retrieving place informations based on objects on or near the location.
-   *
-   * DBThread then emits locationDescription signals followed by locationDescriptionFinished.
-   *
-   * User of this function should use Qt::QueuedConnection for invoking
-   * this slot, operation may generate IO load and may tooks long time.
-   *
-   * @param location
-   */
-  void requestLocationDescription(const osmscout::GeoCoord location);
-
-  /**
-   * Start object search by some pattern.
-   *
-   * DBThread then emits searchResult signals followed by searchFinished
-   * for this pattern.
-   *
-   * User of this function should use Qt::QueuedConnection for invoking
-   * this slot, search may generate IO load and may tooks long time.
-   *
-   * Keep in mind that entries retrieved by searchResult signal can contains
-   * duplicates, because search may use various databases and indexes.
-   *
-   * @param searchPattern
-   * @param limit - suggested limit for count of retrieved entries from one database
-   */
-  void SearchForLocations(const QString searchPattern, int limit);
 
 protected:
   QThread                            *backgroundThread;
@@ -201,27 +163,6 @@ protected:
   QList<StyleError>                  styleErrors;
 
 protected:
-
-  static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
-                                          const osmscout::AdminRegionRef& adminRegion,
-                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
-
-  bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
-                          const QString title,
-                          DBInstanceRef db,
-                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
-                          QList<LocationEntry> &locations
-                          );
-  bool BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
-                          DBInstanceRef db,
-                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
-                          QList<LocationEntry> &locations
-                          );
-
-  bool GetObjectDetails(DBInstanceRef db, const osmscout::ObjectFileRef& object,
-                        QString &typeName,
-                        osmscout::GeoCoord& coordinates,
-                        osmscout::GeoBox& bbox);
 
   void CancelCurrentDataLoading();
 
@@ -279,9 +220,6 @@ public:
 
   void RunJob(DBJob *job);
   void RunSynchronousJob(SynchronousDBJob job);
-
-  static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
-                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
 
 };
 

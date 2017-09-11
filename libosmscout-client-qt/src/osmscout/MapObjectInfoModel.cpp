@@ -30,8 +30,6 @@ ready(false), setup(false), view(), lookupModule(NULL)
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
   this->mapDpi=OSMScoutQt::GetInstance().GetSettings()->GetMapDPI();
 
-  qRegisterMetaType<osmscout::MapData>("osmscout::MapData");
-
   connect(lookupModule, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
           this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
           Qt::QueuedConnection);

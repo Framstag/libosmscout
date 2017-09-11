@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H
+#define OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2017 Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef QTOSMSCOUT_H
-#define QTOSMSCOUT_H
-
 #include <QSettings>
 
 #include <osmscout/DataTileCache.h>
@@ -27,6 +27,7 @@
 #include <osmscout/LookupModule.h>
 #include <osmscout/MapRenderer.h>
 #include <osmscout/Router.h>
+#include <osmscout/SearchModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -177,6 +178,7 @@ public:
   LookupModule* MakeLookupModule();
   MapRenderer* MakeMapRenderer(RenderingType type);
   Router* MakeRouter();
+  SearchModule *MakeSearchModule();
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,
@@ -187,5 +189,5 @@ public:
   static void FreeInstance();
 };
 
-#endif /* QTOSMSCOUT_H */
+#endif /* OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H */
 

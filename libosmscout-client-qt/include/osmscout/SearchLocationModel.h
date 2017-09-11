@@ -27,6 +27,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/LocationEntry.h>
 #include <osmscout/LocationService.h>
+#include <osmscout/SearchModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -55,6 +56,7 @@ private:
     QString lastRequestPattern;
     QList<LocationEntry*> locations;
     bool searching;
+    SearchModule* searchModule;
 
 public:
     enum Roles {

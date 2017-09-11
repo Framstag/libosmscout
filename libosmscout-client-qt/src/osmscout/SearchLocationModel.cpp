@@ -27,19 +27,17 @@
 LocationListModel::LocationListModel(QObject* parent)
 : QAbstractListModel(parent), searching(false)
 {
-    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    
-    qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
-    
+    searchModule=OSMScoutQt::GetInstance().MakeSearchModule();
+
     connect(this, SIGNAL(SearchRequested(const QString, int)), 
-            dbThread.get(), SLOT(SearchForLocations(const QString, int)),
+            searchModule, SLOT(SearchForLocations(const QString, int)),
             Qt::QueuedConnection);
     
-    connect(dbThread.get(), SIGNAL(searchResult(const QString, const QList<LocationEntry>)),
+    connect(searchModule, SIGNAL(searchResult(const QString, const QList<LocationEntry>)),
             this, SLOT(onSearchResult(const QString, const QList<LocationEntry>)),
             Qt::QueuedConnection);
     
-    connect(dbThread.get(), SIGNAL(searchFinished(const QString, bool)),
+    connect(searchModule, SIGNAL(searchFinished(const QString, bool)),
             this, SLOT(onSearchFinished(const QString, bool)),
             Qt::QueuedConnection);
 }

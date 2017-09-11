@@ -1,5 +1,5 @@
-#ifndef LOOKUPMODULE_H
-#define LOOKUPMODULE_H
+#ifndef OSMSCOUT_CLIENT_QT_LOOKUPMODULE_H
+#define OSMSCOUT_CLIENT_QT_LOOKUPMODULE_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -32,6 +32,8 @@
 class OSMSCOUT_CLIENT_QT_API LookupModule:public QObject{
   Q_OBJECT
 
+  friend class SearchModule;
+
 private:
   QMutex           mutex;
   QThread          *thread;
@@ -42,15 +44,40 @@ private:
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
+  void locationDescription(const osmscout::GeoCoord location,
+                           const QString database,
+                           const osmscout::LocationDescription description,
+                           const QStringList regions);
+  void locationDescriptionFinished(const osmscout::GeoCoord location);
 
 public slots:
   void requestObjectsOnView(const RenderMapRequest&);
   void onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles);
 
+  /**
+   * Start retrieving place informations based on objects on or near the location.
+   *
+   * DBThread then emits locationDescription signals followed by locationDescriptionFinished.
+   *
+   * User of this function should use Qt::QueuedConnection for invoking
+   * this slot, operation may generate IO load and may tooks long time.
+   *
+   * @param location
+   */
+  void requestLocationDescription(const osmscout::GeoCoord location);
+
 public:
   LookupModule(QThread *thread,DBThreadRef dbThread);
   virtual ~LookupModule();
+
+private:
+  static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
+                                          const osmscout::AdminRegionRef& adminRegion,
+                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
+
+  static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
+                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
 };
 
 /**
@@ -58,5 +85,5 @@ public:
  */
 typedef std::shared_ptr<LookupModule> LookupModuleRef;
 
-#endif /* LOOKUPMODULE_H */
+#endif /* OSMSCOUT_CLIENT_QT_LOOKUPMODULE_H */
 

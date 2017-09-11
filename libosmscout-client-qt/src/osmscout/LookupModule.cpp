@@ -18,6 +18,7 @@
  */
 
 #include <osmscout/LookupModule.h>
+#include <osmscout/OSMScoutQt.h>
 
 LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
   QObject(),
@@ -79,4 +80,90 @@ void LookupModule::onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tile
 void LookupModule::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> /*tiles*/)
 {
   emit viewObjectsLoaded(view, osmscout::MapData());
+}
+
+void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
+{
+  QMutexLocker locker(&mutex);
+  OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
+    [this,location](const std::list<DBInstanceRef> &databases){
+      int count = 0;
+      for (auto db:databases){
+        osmscout::LocationDescription description;
+        osmscout::GeoBox dbBox;
+        if (!db->database->GetBoundingBox(dbBox)){
+          continue;
+        }
+        if (!dbBox.Includes(location)){
+          continue;
+        }
+
+        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
+        if (!db->locationService->DescribeLocationByAddress(location, description)) {
+          osmscout::log.Error() << "Error during generation of location description";
+          continue;
+        }
+
+        if (description.GetAtAddressDescription()){
+          count++;
+
+          auto place = description.GetAtAddressDescription()->GetPlace();
+          emit locationDescription(location, db->path, description,
+                                   BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
+        }
+
+        if (!db->locationService->DescribeLocationByPOI(location, description)) {
+          osmscout::log.Error() << "Error during generation of location description";
+          continue;
+        }
+
+        if (description.GetAtPOIDescription()){
+          count++;
+
+          auto place = description.GetAtPOIDescription()->GetPlace();
+          emit locationDescription(location, db->path, description,
+                                   BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
+        }
+      }
+
+      emit locationDescriptionFinished(location);
+    }
+  );
+}
+
+QStringList LookupModule::BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
+                                               std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
+{
+  return BuildAdminRegionList(osmscout::LocationServiceRef(), adminRegion, regionMap);
+}
+
+QStringList LookupModule::BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
+                                               const osmscout::AdminRegionRef& adminRegion,
+                                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap)
+{
+  if (!adminRegion){
+    return QStringList();
+  }
+
+  QStringList list;
+  if (locationService){
+    locationService->ResolveAdminRegionHierachie(adminRegion, regionMap);
+  }
+  QString name = QString::fromStdString(adminRegion->name);
+  list << name;
+  QString last = name;
+  osmscout::FileOffset parentOffset = adminRegion->parentRegionOffset;
+  while (parentOffset != 0){
+    const auto &it = regionMap.find(parentOffset);
+    if (it==regionMap.end())
+      break;
+    const osmscout::AdminRegionRef region=it->second;
+    name = QString::fromStdString(region->name);
+    if (last != name){ // skip duplicates in admin region names
+      list << name;
+    }
+    last = name;
+    parentOffset = region->parentRegionOffset;
+  }
+  return list;
 }
