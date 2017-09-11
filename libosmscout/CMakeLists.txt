@@ -180,26 +180,54 @@ if(MARISA_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
 endif()
 
-add_library(osmscout ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET osmscout PROPERTY CXX_STANDARD 11)
+if(APPLE)
+  set(THE_TARGET_NAME "OSMScout") 
+else()
+  set(THE_TARGET_NAME "osmscout") 
+endif()
+
+if(IOS)
+  add_library(${THE_TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+else()
+  add_library(${THE_TARGET_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+endif()
+
+set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout")
-target_include_directories(osmscout PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/include)
 if(MARISA_FOUND)
-    target_include_directories(osmscout PRIVATE ${MARISA_INCLUDE_DIRS})
-    target_link_libraries(osmscout ${MARISA_LIBRARIES})
+    target_include_directories(${THE_TARGET_NAME} PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(${THE_TARGET_NAME} ${MARISA_LIBRARIES})
 endif()
 if (ICONV_FOUND)
-  target_link_libraries(osmscout ${ICONV_LIBRARIES})
+  target_link_libraries(${THE_TARGET_NAME} ${ICONV_LIBRARIES})
 endif()
 if(CMAKE_THREAD_LIBS_INIT)
-  target_link_libraries(osmscout ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(${THE_TARGET_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
-target_compile_definitions(osmscout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
-install(TARGETS osmscout
+
+if(${IOS})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
+endif()
+
+if(APPLE)
+set_target_properties(${THE_TARGET_NAME} PROPERTIES
+  FRAMEWORK TRUE
+  FRAMEWORK_VERSION C
+  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+  PUBLIC_HEADER     "${HEADER_FILES}"
+  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+)
+endif()
+
+target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
+install(TARGETS ${THE_TARGET_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        ARCHIVE DESTINATION lib
+        FRAMEWORK DESTINATION lib)
 if(MARISA_FOUND)
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
 else()

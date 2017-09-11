@@ -17,24 +17,59 @@ set(SOURCE_FILES
     src/osmscout/SimplifiedPath.cpp
 )
 
-add_library(osmscout_map_qt ${SOURCE_FILES} ${HEADER_FILES})
-set_property(TARGET osmscout_map_qt PROPERTY CXX_STANDARD 11)
+if(APPLE)
+  set(THE_TARGET_NAME "OSMScoutMapQt") 
+else()
+  set(THE_TARGET_NAME "osmscout_map_qt") 
+endif()
+
+if(IOS)
+  add_library(${THE_TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+else()
+  add_library(${THE_TARGET_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+endif()
+
+set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapQtFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapQtFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map-qt")
-target_include_directories(osmscout_map_qt PRIVATE 
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE 
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${Qt5Gui_INCLUDE_DIRS})
-target_link_libraries(osmscout_map_qt
+
+if(${IOS})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
+endif()
+
+if(APPLE)
+set_target_properties(${THE_TARGET_NAME} PROPERTIES
+  FRAMEWORK TRUE
+  FRAMEWORK_VERSION C
+  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+  PUBLIC_HEADER     "${HEADER_FILES}"
+  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+)
+endif()
+
+if(APPLE)
+target_link_libraries(${THE_TARGET_NAME}
+		OSMScout
+		OSMScoutMap
+		${Qt5Gui_LIBRARIES})
+else()
+target_link_libraries(${THE_TARGET_NAME}
 		osmscout
 		osmscout_map
 		${Qt5Gui_LIBRARIES})
-target_compile_definitions(osmscout_map_qt PRIVATE -DOSMSCOUT_MAP_QT_EXPORT_SYMBOLS ${Qt5Gui_DEFINITIONS})
-install(TARGETS osmscout_map_qt
+endif()
+target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_MAP_QT_EXPORT_SYMBOLS ${Qt5Gui_DEFINITIONS})
+install(TARGETS ${THE_TARGET_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        ARCHIVE DESTINATION lib
+        FRAMEWORK DESTINATION lib)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
 install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapQtFeatures.h DESTINATION include/osmscout)

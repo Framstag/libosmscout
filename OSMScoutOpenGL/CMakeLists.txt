@@ -32,6 +32,15 @@ if(MSVS OR MSYS OR MINGW)
 			glfw3 # TODO: check if ${GLFW_LIBRARIES} is setup correctly on Windows
 			${FREETYPE_LIBRARIES}
 			)
+elseif(APPLE)
+	target_link_libraries(OSMScoutOpenGL
+			OSMScout
+			OSMScoutMap
+			OSMScoutMapOpenGL
+			${OPENGL_LIBRARIES}
+			${GLFW_LIBRARIES}
+			${FREETYPE_LIBRARIES}
+			)
 else()
 	target_link_libraries(OSMScoutOpenGL
 			osmscout
