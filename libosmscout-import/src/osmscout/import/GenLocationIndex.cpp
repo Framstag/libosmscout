@@ -72,9 +72,9 @@ namespace osmscout {
   void LocationIndexGenerator::PostalArea::AddLocationObject(const std::string& name,
                                                              const ObjectFileRef& objectRef)
   {
-    std::string locationNameLower=UTF8StringToLower(name);
+    std::string locationNameNorm=UTF8NormForLookup(name);
 
-    RegionLocation& location=locations[locationNameLower];
+    RegionLocation& location=locations[locationNameNorm];
 
     std::unordered_map<std::string,size_t>::iterator nameEntry=location.names.find(name);
 
@@ -1431,9 +1431,9 @@ namespace osmscout {
     // If there is a non-default postal area but the location is in the default postal area => make a copy
     if (foundInDefaultArea &&
         postalAreaEntry!=region.postalAreas.end()) {
-      std::string locationNameLower=UTF8StringToLower(loc->second.GetName());
+      std::string locationNameNorm=UTF8NormForLookup(loc->second.GetName());
 
-      auto newLoc=postalAreaEntry->second.locations.insert(std::make_pair(locationNameLower,
+      auto newLoc=postalAreaEntry->second.locations.insert(std::make_pair(locationNameNorm,
                                                                           loc->second)).first;
 
       newLoc->second.addresses.clear();
@@ -1860,7 +1860,7 @@ namespace osmscout {
                                                                                                               const std::string &locationName)
   {
     std::map<std::string,RegionLocation> &locations=postalArea.locations;
-    std::string                          locationNameSearch=UTF8StringToLower(locationName);
+    std::string                          locationNameSearch=UTF8NormForLookup(locationName);
     auto                                 loc=locations.find(locationNameSearch);
 
     if (loc!=locations.end()) {
@@ -1870,25 +1870,25 @@ namespace osmscout {
 
     // if locationName is same as region.name (or one of its name aliases) add new location entry
     // it is usual case for addresses without street and defined addr:place
-    std::string regionNameLower=UTF8StringToLower(region.name);
+    std::string regionNameNorm=UTF8NormForLookup(region.name);
 
-    if (regionNameLower==locationNameSearch) {
+    if (regionNameNorm==locationNameSearch) {
       postalArea.AddLocationObject(region.name,
                                    region.reference);
 
       progress.Debug(std::string("Create virtual location for region '")+region.name+"'");
-      return locations.find(regionNameLower);
+      return locations.find(regionNameNorm);
     }
 
     for (auto &alias: region.aliases) {
-      std::string regionAliasNameLower=UTF8StringToLower(alias.name);
+      std::string regionAliasNameNorm=UTF8NormForLookup(alias.name);
 
-      if (regionAliasNameLower==locationNameSearch) {
+      if (regionAliasNameNorm==locationNameSearch) {
         postalArea.AddLocationObject(alias.name,
                                      ObjectFileRef(alias.reference,refNode));
 
         progress.Debug(std::string("Create virtual location for '")+alias.name+"' (alias of region "+region.name+")");
-        return locations.find(regionAliasNameLower);
+        return locations.find(regionAliasNameNorm);
       }
     }
 

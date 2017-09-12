@@ -725,4 +725,31 @@ namespace osmscout {
 
     return WStringToUTF8String(wstr);
   }
+
+  std::string UTF8NormForLookup(const std::string& text)
+  {
+    std::wstring wstr=UTF8StringToWString(text);
+
+    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
+
+    // convert to lower and replace all whitespaces with simple space
+    std::transform(wstr.begin(), wstr.end(), wstr.begin(),
+                   [&f](wchar_t c) -> wchar_t {
+                     // std::iswspace don't recognize no-break space and others
+                     // so-space characters as space -> we are using switch here...
+                     switch(c){
+                       case ' ':
+                       case L'\u0009': // tabular
+                       case L'\u00A0': // no-break space (&nbsp;)
+                       case L'\u2007': // figure space
+                       case L'\u202F': // narrow no-break space
+                         return ' ';
+                       default:
+                         return f.tolower(c); // to lower
+                     }});
+
+    // TODO: remove multiple following spaces by one
+
+    return WStringToUTF8String(wstr);
+  }
 }

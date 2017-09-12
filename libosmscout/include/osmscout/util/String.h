@@ -543,6 +543,21 @@ namespace osmscout {
    * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8StringToLower(const std::string& text);
+
+  /**
+   * Normalise the given std::string containing a UTF8 character sequence
+   * for tolerant comparison. It may be used for string lookup typed by human,
+   * for example street name, where string are not binary equals,
+   * but are "same" for human - for example "Baker Street" and "Baker  street"
+   *
+   * @param text
+   *    Text to get converted
+   * @return
+   *    Converted text
+   *
+   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
+   */
+  extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
 }
 
 #endif
