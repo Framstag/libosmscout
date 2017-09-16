@@ -366,8 +366,6 @@ TEST_CASE("Parsing of unknown option") {
   Arguments                    actualData;
   Arguments                    expectedData;
 
-  expectedData.SetFile("--unknown");
-
   CallParser(arguments,
              actualResult,
              actualData);
