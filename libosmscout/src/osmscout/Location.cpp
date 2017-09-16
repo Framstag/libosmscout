@@ -48,26 +48,6 @@ namespace osmscout {
     return false;
   }
 
-  AdminRegionVisitor::~AdminRegionVisitor()
-  {
-    // no code
-  }
-
-  POIVisitor::~POIVisitor()
-  {
-    // no code
-  }
-
-  LocationVisitor::~LocationVisitor()
-  {
-    // no code
-  }
-
-  AddressVisitor::~AddressVisitor()
-  {
-    // no code
-  }
-
   AddressListVisitor::AddressListVisitor(size_t limit)
   : limit(limit),
     limitReached(false)

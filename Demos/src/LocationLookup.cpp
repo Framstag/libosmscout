@@ -20,7 +20,6 @@
 #include <cctype>
 #include <iostream>
 #include <iomanip>
-#include <locale>
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
@@ -30,15 +29,17 @@
 
 struct Arguments
 {
-  bool                   help;
+  bool                   help=false;
   std::string            databaseDirectory;
+  std::string            defaultAdminRegion;
+  bool                   searchForLocation=true;
+  bool                   searchForPOI=true;
+  bool                   adminRegionOnlyMatch=false;
+  bool                   poiOnlyMatch=false;
+  bool                   locationOnlyMatch=false;
+  bool                   addressOnlyMatch=true;
+  size_t                 limit=30;
   std::list<std::string> location;
-
-  Arguments()
-    : help(false)
-  {
-    // no code
-  }
 };
 
 bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
@@ -68,7 +69,7 @@ bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService
   osmscout::FileOffset parentRegionOffset=adminRegion->parentRegionOffset;
 
   while (parentRegionOffset!=0) {
-    std::map<osmscout::FileOffset,osmscout::AdminRegionRef>::const_iterator entry=adminRegionMap.find(parentRegionOffset);
+    auto entry=adminRegionMap.find(parentRegionOffset);
 
     if (entry==adminRegionMap.end()) {
       break;
@@ -128,7 +129,7 @@ std::string GetPOI(const osmscout::LocationSearchResult::Entry& entry)
     label="= ";
   }
   else {
-    label=" ~ ";
+    label="~ ";
   }
 
   label+="POI ("+osmscout::UTF8StringToLocaleString(entry.poi->name)+")";
@@ -164,10 +165,10 @@ std::string GetAdminRegion(const osmscout::LocationSearchResult::Entry& entry)
   }
 
   if (!entry.adminRegion->aliasName.empty()) {
-    label.append(osmscout::UTF8StringToLocaleString(entry.adminRegion->aliasName));
+    label+="Region ("+osmscout::UTF8StringToLocaleString(entry.adminRegion->aliasName)+")";
   }
   else {
-    label.append(osmscout::UTF8StringToLocaleString(entry.adminRegion->name));
+    label+="Region ("+osmscout::UTF8StringToLocaleString(entry.adminRegion->name)+")";
   }
 
   return label;
@@ -214,8 +215,8 @@ std::string GetObject(const osmscout::DatabaseRef& database,
 }
 
 std::string GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
-                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap,
-                                    const osmscout::LocationSearchResult::Entry& entry)
+                                    const osmscout::LocationSearchResult::Entry& entry,
+                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef>& adminRegionMap)
 {
   std::string path;
 
@@ -227,6 +228,86 @@ std::string GetAdminRegionHierachie(const osmscout::LocationServiceRef& location
   }
 
   return path;
+}
+
+void DumpResult(const osmscout::DatabaseRef& database,
+                const osmscout::LocationServiceRef& locationService,
+                const osmscout::LocationSearchResult& searchResult)
+{
+  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
+
+  for (const auto&entry : searchResult.results) {
+    if (entry.adminRegion &&
+        entry.location &&
+        entry.address) {
+      std::cout << GetLocation(entry) << " ";
+      std::cout << GetAddress(entry) << " ";
+      std::cout << GetPostalArea(entry) << " ";
+      std::cout << GetAdminRegion(entry) << std::endl;
+
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      entry,
+                                                      adminRegionMap);
+      std::cout << std::endl;
+
+      std::cout << "   - " << GetObject(database,entry.address->object);
+
+      std::cout << std::endl;
+    }
+    else if (entry.adminRegion &&
+             entry.location) {
+      std::cout << GetLocation(entry) << " ";
+      std::cout << GetPostalArea(entry) << " ";
+      std::cout << GetAdminRegion(entry) << std::endl;
+
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      entry,
+                                                      adminRegionMap);
+
+      std::cout << std::endl;
+
+      for (const auto &object : entry.location->objects) {
+        std::cout << "   - " << GetObject(database,object) << std::endl;
+      }
+    }
+    else if (entry.adminRegion &&
+             entry.poi) {
+      std::cout << GetPOI(entry) << " ";
+      std::cout << GetAdminRegion(entry) << std::endl;
+
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      entry,
+                                                      adminRegionMap);
+
+      std::cout << std::endl;
+
+      std::cout << "   - " << GetObject(database,entry.poi->object);
+
+      std::cout << std::endl;
+    }
+    else if (entry.adminRegion) {
+      std::cout << GetAdminRegion(entry) << std::endl;
+
+      std::cout << "   * " << GetAdminRegionHierachie(locationService,
+                                                      entry,
+                                                      adminRegionMap);
+
+      std::cout << std::endl;
+
+      if (entry.adminRegion->aliasObject.Valid()) {
+        std::cout << "   - " << GetObject(database,entry.adminRegion->aliasObject);
+      }
+      else {
+        std::cout << "   - " << GetObject(database,entry.adminRegion->object);
+      }
+
+      std::cout << std::endl;
+    }
+  }
+
+  if (searchResult.limitReached) {
+    std::cout << "<limit reached!>" << std::endl;
+  }
 }
 
 int main(int argc, char* argv[])
@@ -243,6 +324,54 @@ int main(int argc, char* argv[])
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
+                        args.searchForLocation=value;
+                      }),
+                      "location",
+                      "Search for a location");
+
+  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
+                        args.searchForPOI=value;
+                      }),
+                      "poi",
+                      "Search for a point of interest (POI)");
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.defaultAdminRegion=value;
+                      }),
+                      "adminRegion",
+                      "The default admin region to search in");
+
+  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
+                        args.adminRegionOnlyMatch=value;
+                      }),
+                      "adminRegionOnlyMatch",
+                      "Return only exact matches for the admin region");
+
+  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
+                        args.poiOnlyMatch=value;
+                      }),
+                      "poiOnlyMatch",
+                      "Return only exact matches for the POI");
+
+  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
+                        args.locationOnlyMatch=value;
+                      }),
+                      "locationOnlyMatch",
+                      "Return only exact matches for the location");
+
+  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
+                        args.addressOnlyMatch=value;
+                      }),
+                      "addressOnlyMatch",
+                      "Return only exact matches for the address");
+
+  argParser.AddOption(osmscout::CmdLineSizeTOption([&args](size_t value) {
+                        args.limit=value;
+                      }),
+                      "limit",
+                      "Maximum number of results");
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -253,7 +382,7 @@ int main(int argc, char* argv[])
                             args.location.push_back(value);
                           }),
                           "LOCATION",
-                          "list of location search attributes");
+                          "List of location search attributes");
 
   osmscout::CmdLineParseResult result=argParser.Parse();
 
@@ -262,7 +391,8 @@ int main(int argc, char* argv[])
     std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-  else if (args.help) {
+
+  if (args.help) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
@@ -290,8 +420,6 @@ int main(int argc, char* argv[])
     searchPattern.append(location);
   }
 
-  std::cout << "Searching for pattern \"" <<searchPattern  << "\"" << std::endl;
-
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
@@ -301,100 +429,87 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::LocationServiceRef                            locationService=std::make_shared<osmscout::LocationService>(database);
-  osmscout::LocationSearch                                search;
-  osmscout::LocationSearchResult                          searchResult;
-  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
+  osmscout::StringMatcherFactoryRef matcherFactory=std::make_shared<osmscout::StringMatcherCIFactory>();
+  osmscout::LocationServiceRef     locationService=std::make_shared<osmscout::LocationService>(database);
+  osmscout::LocationSearchResult   searchResult;
 
-  search.limit=50;
+  osmscout::LocationStringSearchParameter searchParameter(osmscout::LocaleStringToUTF8String(searchPattern));
 
-  if (!locationService->InitializeLocationSearchEntries(osmscout::LocaleStringToUTF8String(searchPattern),
-                                                        search)) {
-    std::cerr << "Error while parsing search string" << std::endl;
-    return false;
+  searchParameter.SetSearchForLocation(args.searchForLocation);
+  searchParameter.SetSearchForPOI(args.searchForPOI);
+  searchParameter.SetAdminRegionOnlyMatch(args.adminRegionOnlyMatch);
+  searchParameter.SetPOIOnlyMatch(args.poiOnlyMatch);
+  searchParameter.SetLocationOnlyMatch(args.locationOnlyMatch);
+  searchParameter.SetAddressOnlyMatch(args.addressOnlyMatch);
+  searchParameter.SetStringMatcherFactory(matcherFactory);
+  searchParameter.SetLimit(args.limit);
+
+  if (!args.defaultAdminRegion.empty()) {
+    osmscout::StopClock                   adminRegionSearchTime;
+    osmscout::LocationFormSearchParameter patternSearchParams;
+    osmscout::LocationSearchResult        adminRegionSearchResult;
+
+    patternSearchParams.SetStringMatcherFactory(matcherFactory);
+    patternSearchParams.SetAdminRegionSearchString(args.defaultAdminRegion);
+    patternSearchParams.SetLimit(50);
+
+    if (!locationService->SearchForLocationByForm(patternSearchParams,
+                                                  adminRegionSearchResult)) {
+      std::cerr << "Error while resolving default admin region" << std::endl;
+      return 1;
+    }
+
+    for (const auto& adminRegionResult : adminRegionSearchResult.results) {
+      if (adminRegionResult.adminRegion &&
+          adminRegionResult.adminRegionMatchQuality==osmscout::LocationSearchResult::match) {
+        searchParameter.SetAdminRegionOnlyMatch(true);
+        searchParameter.SetDefaultAdminRegion(adminRegionResult.adminRegion);
+        break;
+      }
+    }
+
+    adminRegionSearchTime.Stop();
+
+    std::cout << "Admin region search time: " << adminRegionSearchTime.ResultString() << std::endl;
+    std::cout << std::endl;
   }
 
-  if (!locationService->SearchForLocations(search,
-                                           searchResult)) {
+  std::cout << "Database:                " << args.databaseDirectory << std::endl;
+  std::cout << "Search pattern:          " << searchParameter.GetSearchString() << std::endl;
+  std::cout << "Search for location:     " << (searchParameter.GetSearchForLocation() ? "true" : "false") << std::endl;
+  std::cout << "Search for POI:          " << (searchParameter.GetSearchForPOI() ? "true" : "false") << std::endl;
+  std::cout << "Admin region only match: " << (searchParameter.GetAdminRegionOnlyMatch() ? "true" : "false") << std::endl;
+  std::cout << "POI only match:          " << (searchParameter.GetPOIOnlyMatch() ? "true" : "false") << std::endl;
+  std::cout << "Location only match:     " << (searchParameter.GetLocationOnlyMatch() ? "true" : "false") << std::endl;
+  std::cout << "Address only match:      " << (searchParameter.GetAddressOnlyMatch() ? "true" : "false") << std::endl;
+
+  if (searchParameter.GetDefaultAdminRegion()) {
+    std::cout << "Default admin region:    " << searchParameter.GetDefaultAdminRegion()->name << " (" << searchParameter.GetDefaultAdminRegion()->object.GetName() << ")" << std::endl;
+  }
+
+  std::cout << "Limit:                   " << searchParameter.GetLimit() << std::endl;
+
+  std::cout << std::endl;
+
+  osmscout::StopClock locationSearchTime;
+
+  if (!locationService->SearchForLocationByString(searchParameter,
+                                                  searchResult)) {
     std::cerr << "Error while searching for location" << std::endl;
-    return false;
+    return 1;
   }
 
+  locationSearchTime.Stop();
 
-  for (const auto &entry : searchResult.results) {
-    if (entry.adminRegion &&
-        entry.location &&
-        entry.address) {
-      std::cout << GetLocation(entry) << " ";
-      std::cout << GetAddress(entry) << " ";
-      std::cout << GetPostalArea(entry) << " ";
-      std::cout << GetAdminRegion(entry) << std::endl;
+  std::cout << "Location search time: " << locationSearchTime.ResultString() << std::endl;
+  std::cout << std::endl;
 
-      std::cout << "   * " << GetAdminRegionHierachie(locationService,
-                                                      adminRegionMap,
-                                                      entry);
-      std::cout << std::endl;
-
-      std::cout << "   - " << GetObject(database,entry.address->object);
-
-      std::cout << std::endl;
-    }
-    else if (entry.adminRegion &&
-             entry.location) {
-      std::cout << GetLocation(entry) << " ";
-      std::cout << GetPostalArea(entry) << " ";
-      std::cout << GetAdminRegion(entry) << std::endl;
-
-      std::cout << "   * " << GetAdminRegionHierachie(locationService,
-                                                      adminRegionMap,
-                                                      entry);
-
-      std::cout << std::endl;
-
-      for (const auto &object : entry.location->objects) {
-        std::cout << "   - " << GetObject(database,object) << std::endl;
-      }
-    }
-    else if (entry.adminRegion &&
-             entry.poi) {
-      std::cout << GetPOI(entry) << " ";
-      std::cout << GetAdminRegion(entry) << std::endl;
-
-      std::cout << "   * " << GetAdminRegionHierachie(locationService,
-                                                      adminRegionMap,
-                                                      entry);
-
-      std::cout << std::endl;
-
-      std::cout << "   - " << GetObject(database,entry.poi->object);
-
-      std::cout << std::endl;
-    }
-    else if (entry.adminRegion) {
-      std::cout << GetAdminRegion(entry) << std::endl;
-
-      std::cout << "   * " << GetAdminRegionHierachie(locationService,
-                                                      adminRegionMap,
-                                                      entry);
-
-      std::cout << std::endl;
-
-      if (entry.adminRegion->aliasObject.Valid()) {
-        std::cout << "   - " << GetObject(database,entry.adminRegion->aliasObject);
-      }
-      else {
-        std::cout << "   - " << GetObject(database,entry.adminRegion->object);
-      }
-
-      std::cout << std::endl;
-    }
-  }
-
-  if (searchResult.limitReached) {
-    std::cout << "<limit reached!>" << std::endl;
-  }
+  DumpResult(database,
+             locationService,
+             searchResult);
 
   database->Close();
 
   return 0;
 }
+

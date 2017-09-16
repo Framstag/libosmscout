@@ -236,35 +236,43 @@ namespace osmscout {
     return buffer.str();
   }
 
-  void SplitStringAtSpace(const std::string& input,
-                          std::list<std::string>& tokens)
+  std::list<std::string> SplitStringAtSpace(const std::string& input)
   {
+    std::list<std::string> tokens;
     std::string::size_type wordBegin=0;
     std::string::size_type wordEnd=0;
 
+    // While not at end of string
     while (wordBegin<input.length()) {
+      // skip all whitespace characters
       while (wordBegin<input.length() &&
              std::isspace(input[wordBegin])!=0) {
         wordBegin++;
       }
 
+      // if we at the end => finish, else we have found the next word
       if (wordBegin>=input.length()) {
-        return;
+        return tokens;
       }
 
       wordEnd=wordBegin;
 
+      // Collect characters until whitespace or end of string
       while (wordEnd+1<input.length() &&
              std::isspace((unsigned char)input[wordEnd + 1])==0) {
         wordEnd++;
       }
 
+      // Copy token
       std::string token=input.substr(wordBegin,wordEnd-wordBegin+1);
 
       tokens.push_back(token);
 
+      // next iteration
       wordBegin=wordEnd+1;
     }
+
+    return tokens;
   }
 
   std::string GetFirstInStringList(const std::string& stringList,
@@ -333,6 +341,53 @@ namespace osmscout {
         ++next;
       }
     }
+  }
+
+  std::string GetTokensFromStart(const std::list<std::string>& tokens,
+                                 size_t count)
+  {
+    assert(count<=tokens.size());
+
+    std::string result;
+    auto        startToken=tokens.begin();
+    auto        currentToken=startToken;
+
+    for (size_t i=0; i<count; i++) {
+      if (currentToken!=startToken) {
+        result+=' ';
+      }
+
+      result=result+*currentToken;
+
+      ++currentToken;
+    }
+
+    return result;
+  }
+
+  std::string GetTokensFromEnd(const std::list<std::string>& tokens,
+                               size_t count)
+  {
+    assert(count<=tokens.size());
+
+    std::string result;
+    auto        startToken=tokens.begin();
+
+    std::advance(startToken,tokens.size()-count);
+
+    auto        currentToken=startToken;
+
+    for (size_t i=0; i<count; i++) {
+      if (currentToken!=startToken) {
+        result+=' ';
+      }
+
+      result=result+*currentToken;
+
+      ++currentToken;
+    }
+
+    return result;
   }
 
   void GroupStringListToStrings(std::list<std::string>::const_iterator token,

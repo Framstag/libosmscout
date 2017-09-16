@@ -22,6 +22,7 @@
 
 #include <limits>
 #include <list>
+#include <memory>
 #include <string>
 
 #include <osmscout/CoreFeatures.h>
@@ -380,8 +381,7 @@ namespace osmscout {
    * \ingroup Util
    * Converts the given string into a list of whitespace separated (std::isspace()) strings.
    */
-  extern OSMSCOUT_API void SplitStringAtSpace(const std::string& input,
-                                              std::list<std::string>& tokens);
+  extern OSMSCOUT_API std::list<std::string> SplitStringAtSpace(const std::string& input);
 
   /**
    * \ingroup Util
@@ -410,6 +410,12 @@ namespace osmscout {
    * case letter.
    */
   extern OSMSCOUT_API void SimplifyTokenList(std::list<std::string>& tokens);
+
+  extern OSMSCOUT_API std::string GetTokensFromStart(const std::list<std::string>& tokens,
+                                                    size_t count);
+
+  extern OSMSCOUT_API std::string GetTokensFromEnd(const std::list<std::string>& tokens,
+                                                   size_t count);
 
   /**
    * \ingroup Util
