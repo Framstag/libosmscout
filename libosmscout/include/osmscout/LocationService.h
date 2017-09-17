@@ -316,25 +316,37 @@ namespace osmscout {
   {
   private:
     std::string             adminRegionSearchString; //!< The search string to match the admin region name against
-    AdminRegionRef          defaultAdminRegion;      //!< A default admin region to use, if no admin region was found based on the search string
-
     std::string             poiSearchString;         //! The search string to match the postal area name against
 
+    bool                    adminRegionOnlyMatch;    //!< Evaluate on direct admin region matches
+    bool                    poiOnlyMatch;            //!< Evaluate on direct poi matches
+
     StringMatcherFactoryRef stringMatcherFactory; //!< String matcher factory to use
+
     size_t                  limit;                //!< The maximum number of results over all sub searches requested
 
   public:
-    /*
-    explicit POIPatternSearchParameter(const std::string& searchString);
+    explicit POIFormSearchParameter();
 
-    AdminRegionRef GetDefaultAdminRegion() const;
+    std::string GetAdminRegionSearchString() const;
+    std::string GetPOISearchString() const;
+
+    bool GetAdminRegionOnlyMatch() const;
+    bool GetPOIOnlyMatch() const;
+
     StringMatcherFactoryRef GetStringMatcherFactory() const;
 
     size_t GetLimit() const;
 
-    void SetDefaultAdminRegion(const AdminRegionRef& adminRegion);
     void SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory);
-    void SetLimit(size_t limit);*/
+
+    void SetAdminRegionSearchString(const std::string& adminRegionSearchString);
+    void SetPOISearchString(const std::string& poiSearchString);
+
+    void SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch);
+    void SetPOIOnlyMatch(bool poiOnlyMatch);
+
+    void SetLimit(size_t limit);
   };
 
   /**
@@ -763,6 +775,9 @@ namespace osmscout {
 
     bool SearchForLocationByForm(const LocationFormSearchParameter& searchParameter,
                                  LocationSearchResult& result) const;
+
+    bool SearchForPOIByForm(const POIFormSearchParameter& searchParameter,
+                            LocationSearchResult& result) const;
 
     bool SearchForLocations(const LocationSearch& search,
                             LocationSearchResult& result) const;

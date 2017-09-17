@@ -30,6 +30,13 @@ LocationLookupForm = executable('LocationLookupForm',
                             link_with: [osmscout],
                             install: true)
 
+POILookupForm = executable('POILookupForm',
+                            'src/POILookupForm.cpp',
+                            include_directories: [osmscoutIncDir],
+                            dependencies: [mathDep],
+                            link_with: [osmscout],
+                            install: true)
+
 LocationDescription = executable('LocationDescription',
                                  'src/LocationDescription.cpp',
                                  include_directories: [osmscoutIncDir],

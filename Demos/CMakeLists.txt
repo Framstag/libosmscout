@@ -46,6 +46,17 @@ else()
 endif()
 install(TARGETS LocationLookupForm RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
+#---- POILookupForm
+add_executable(POILookupForm src/POILookupForm.cpp)
+set_property(TARGET POILookupForm PROPERTY CXX_STANDARD 11)
+target_include_directories(POILookupForm PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+if(APPLE)
+    target_link_libraries(POILookupForm OSMScout)
+else()
+    target_link_libraries(POILookupForm osmscout)
+endif()
+install(TARGETS POILookupForm RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
 #---- LookupPOI
 add_executable(LookupPOI src/LookupPOI.cpp)
 set_property(TARGET LookupPOI PROPERTY CXX_STANDARD 11)

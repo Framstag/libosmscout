@@ -158,7 +158,11 @@ namespace osmscout {
   };
 
   LocationFormSearchParameter::LocationFormSearchParameter()
-    : stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
+    : adminRegionOnlyMatch(false),
+      postalAreaOnlyMatch(false),
+      locationOnlyMatch(false),
+      addressOnlyMatch(false),
+      stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
       limit(100)
   {
     // no code
@@ -264,6 +268,74 @@ namespace osmscout {
     this->limit=limit;
   }
 
+  POIFormSearchParameter::POIFormSearchParameter()
+    : adminRegionOnlyMatch(false),
+      poiOnlyMatch(false),
+      stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
+      limit(100)
+  {
+    // no code
+  }
+
+  size_t POIFormSearchParameter::GetLimit() const
+  {
+    return limit;
+  }
+
+  StringMatcherFactoryRef POIFormSearchParameter::GetStringMatcherFactory() const
+  {
+    return stringMatcherFactory;
+  }
+
+  std::string POIFormSearchParameter::GetAdminRegionSearchString() const
+  {
+    return adminRegionSearchString;
+  }
+
+  std::string POIFormSearchParameter::GetPOISearchString() const
+  {
+    return poiSearchString;
+  }
+
+  void POIFormSearchParameter::SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory)
+  {
+    this->stringMatcherFactory=stringMatcherFactory;
+  }
+
+  void POIFormSearchParameter::SetAdminRegionSearchString(const std::string& adminRegionSearchString)
+  {
+    POIFormSearchParameter::adminRegionSearchString=adminRegionSearchString;
+  }
+
+  void POIFormSearchParameter::SetPOISearchString(const std::string& poiSearchString)
+  {
+    POIFormSearchParameter::poiSearchString=poiSearchString;
+  }
+
+  void POIFormSearchParameter::SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch)
+  {
+    this->adminRegionOnlyMatch=adminRegionOnlyMatch;
+  }
+
+  void POIFormSearchParameter::SetPOIOnlyMatch(bool poiOnlyMatch)
+  {
+    this->poiOnlyMatch=poiOnlyMatch;
+  }
+
+  bool POIFormSearchParameter::GetAdminRegionOnlyMatch() const
+  {
+    return adminRegionOnlyMatch;
+  }
+
+  bool POIFormSearchParameter::GetPOIOnlyMatch() const
+  {
+    return poiOnlyMatch;
+  }
+
+  void POIFormSearchParameter::SetLimit(size_t limit)
+  {
+    this->limit=limit;
+  }
 
   LocationStringSearchParameter::LocationStringSearchParameter(const std::string& searchString)
     : searchForLocation(true),
@@ -2173,7 +2245,7 @@ namespace osmscout {
 
   static bool SearchForPOIForRegion(LocationIndexRef& locationIndex,
                                     const SearchParameter& parameter,
-                                    const std::list<std::string>& locationTokens,
+                                    const std::list<std::string>& poiTokens,
                                     const AdminRegionSearchVisitor::Result& regionMatch,
                                     LocationSearchResult::MatchQuality regionMatchQuality,
                                     LocationSearchResult& result)
@@ -2186,7 +2258,7 @@ namespace osmscout {
 
     // Build Location search patterns
 
-    std::list<TokenStringRef> poiSearchPatterns=GenerateSearchPatterns(locationTokens,
+    std::list<TokenStringRef> poiSearchPatterns=GenerateSearchPatterns(poiTokens,
                                                                        poiIgnoreTokenSet,
                                                                        locationIndex->GetPOIMaxWords());
 
@@ -2204,10 +2276,10 @@ namespace osmscout {
 
     for (const auto& poiMatch : poiVisitor.matches) {
       //std::cout << "Found poi match '" << poiMatch.poi->name << "' for pattern '" << poiMatch.tokenString->text << "'" << std::endl;
-      std::list<std::string> addressTokens=BuildStringListFromSubToken(poiMatch.tokenString,
-                                                                       locationTokens);
+      std::list<std::string> restTokens=BuildStringListFromSubToken(poiMatch.tokenString,
+                                                                    poiTokens);
 
-      if (addressTokens.empty()) {
+      if (restTokens.empty()) {
         AddPOIResult(parameter,
                      regionMatchQuality,
                      poiMatch,
@@ -2219,16 +2291,69 @@ namespace osmscout {
     if (!parameter.locationOnlyMatch) {
       for (const auto& poiMatch : poiVisitor.partialMatches) {
         //std::cout << "Found poi candidate '" << poiMatch.poi->name << "' for pattern '" << poiMatch.tokenString->text << "'" << std::endl;
-        std::list<std::string> addressTokens=BuildStringListFromSubToken(poiMatch.tokenString,
-                                                                         locationTokens);
+        std::list<std::string> restTokens=BuildStringListFromSubToken(poiMatch.tokenString,
+                                                                      poiTokens);
 
-        if (addressTokens.empty()) {
+        if (restTokens.empty()) {
           AddPOIResult(parameter,
                        regionMatchQuality,
                        poiMatch,
                        LocationSearchResult::candidate,
                        result);
         }
+      }
+    }
+
+    return true;
+  }
+
+  static bool SearchForPOIForRegion(LocationIndexRef& locationIndex,
+                                    const SearchParameter& parameter,
+                                    const std::string& poiPattern,
+                                    const AdminRegionSearchVisitor::Result& regionMatch,
+                                    LocationSearchResult::MatchQuality regionMatchQuality,
+                                    LocationSearchResult& result)
+  {
+    std::unordered_set<std::string> poiIgnoreTokenSet;
+
+    for (const auto& token : locationIndex->GetPOIIgnoreTokens()) {
+      poiIgnoreTokenSet.insert(UTF8StringToUpper(token));
+    }
+
+    // Build Location search patterns
+
+
+    std::list<TokenStringRef> poiSearchPatterns;
+
+    poiSearchPatterns.push_back(std::make_shared<TokenString>(poiPattern));
+
+    CleanupSearchPatterns(poiSearchPatterns);
+
+    // Search for locations
+
+    POISearchVisitor poiVisitor(parameter.stringMatcherFactory,
+                                poiSearchPatterns);
+
+    if (!locationIndex->VisitPOIs(*regionMatch.adminRegion,
+                                  poiVisitor)) {
+      return false;
+    }
+
+    for (const auto& poiMatch : poiVisitor.matches) {
+      AddPOIResult(parameter,
+                   regionMatchQuality,
+                   poiMatch,
+                   LocationSearchResult::match,
+                   result);
+    }
+
+    if (!parameter.locationOnlyMatch) {
+      for (const auto& poiMatch : poiVisitor.partialMatches) {
+        AddPOIResult(parameter,
+                     regionMatchQuality,
+                     poiMatch,
+                     LocationSearchResult::candidate,
+                     result);
       }
     }
 
@@ -2521,6 +2646,116 @@ namespace osmscout {
                                    regionMatch,
                                    LocationSearchResult::candidate,
                                    result);
+
+        if (result.results.size()==currentResultSize) {
+          // If we have not found any result for the given search entry, we create one for the "upper" object
+          // so that partial results are not lost
+          AddRegionResult(parameter,
+                          LocationSearchResult::candidate,
+                          regionMatch,
+                          result);
+        }
+      }
+    }
+
+    result.results.sort();
+    result.results.unique();
+
+    return true;
+  }
+
+  bool LocationService::SearchForPOIByForm(const POIFormSearchParameter& searchParameter,
+                                           LocationSearchResult& result) const
+  {
+    LocationIndexRef                locationIndex=database->GetLocationIndex();
+    std::unordered_set<std::string> regionIgnoreTokenSet;
+    SearchParameter                 parameter;
+
+    parameter.searchForLocation=false;
+    parameter.searchForPOI=true;
+    parameter.adminRegionOnlyMatch=searchParameter.GetAdminRegionOnlyMatch();
+    parameter.poiOnlyMatch=searchParameter.GetPOIOnlyMatch();
+    parameter.locationOnlyMatch=true;
+    parameter.addressOnlyMatch=true;
+    parameter.stringMatcherFactory=searchParameter.GetStringMatcherFactory();
+    parameter.limit=searchParameter.GetLimit();
+
+    result.limitReached=false;
+    result.results.clear();
+
+    if (!locationIndex) {
+      return false;
+    }
+
+    for (const auto& token : locationIndex->GetRegionIgnoreTokens()) {
+      regionIgnoreTokenSet.insert(UTF8StringToUpper(token));
+    }
+
+    if (searchParameter.GetAdminRegionSearchString().empty()) {
+      return true;
+    }
+
+    // Build Region search patterns
+
+    std::list<TokenStringRef> regionSearchPatterns;
+
+    regionSearchPatterns.push_back(std::make_shared<TokenString>(searchParameter.GetAdminRegionSearchString()));
+
+    // Search for region name
+
+    AdminRegionSearchVisitor adminRegionVisitor(searchParameter.GetStringMatcherFactory(),
+                                                regionSearchPatterns);
+
+    locationIndex->VisitAdminRegions(adminRegionVisitor);
+
+    for (const auto& regionMatch : adminRegionVisitor.matches) {
+      //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+
+      if (searchParameter.GetPOISearchString().empty()) {
+        AddRegionResult(parameter,
+                        LocationSearchResult::match,
+                        regionMatch,
+                        result);
+      }
+      else {
+        size_t currentResultSize=result.results.size();
+
+        SearchForPOIForRegion(locationIndex,
+                              parameter,
+                              searchParameter.GetPOISearchString(),
+                              regionMatch,
+                              LocationSearchResult::match,
+                              result);
+
+        if (result.results.size()==currentResultSize) {
+          // If we have not found any result for the given search entry, we create one for the "upper" object
+          // so that partial results are not lost
+          AddRegionResult(parameter,
+                          LocationSearchResult::match,
+                          regionMatch,
+                          result);
+        }
+      }
+    }
+
+    for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
+      //std::cout << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+
+      if (searchParameter.GetPOISearchString().empty()) {
+        AddRegionResult(parameter,
+                        LocationSearchResult::candidate,
+                        regionMatch,
+                        result);
+      }
+      else {
+        size_t currentResultSize=result.results.size();
+
+        SearchForPOIForRegion(locationIndex,
+                              parameter,
+                              searchParameter.GetPOISearchString(),
+                              regionMatch,
+                              LocationSearchResult::candidate,
+                              result);
 
         if (result.results.size()==currentResultSize) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
