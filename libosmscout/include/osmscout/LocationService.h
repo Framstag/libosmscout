@@ -337,15 +337,21 @@ namespace osmscout {
     void SetLimit(size_t limit);*/
   };
 
+  /**
+   * Parameter object for form based search of a location
+   */
   class OSMSCOUT_API LocationFormSearchParameter CLASS_FINAL
   {
   private:
     std::string             adminRegionSearchString; //!< The search string to match the admin region name against
-    AdminRegionRef          defaultAdminRegion;      //!< A default admin region to use, if no admin region was found based on the search string
+    std::string             postalAreaSearchString;  //!< The search string to match the postal area name against
+    std::string             locationSearchString;    //!< The search string to match the postal location name against
+    std::string             addressSearchString;     //!< The search string to match the address name against
 
-    std::string             postalAreaSearchString;  //! The search string to match the postal area name against
-    std::string             locationSearchString;    //! The search string to match the postal location name against
-    std::string             addressSearchString;     //! The search string to match the address name against
+    bool                    adminRegionOnlyMatch;    //!< Evaluate on direct admin region matches
+    bool                    postalAreaOnlyMatch;     //!< Evaluate on direct postal area matches
+    bool                    locationOnlyMatch;       //!< Evaluate on direct location matches
+    bool                    addressOnlyMatch;        //!< Evaluate on direct address matches
 
     StringMatcherFactoryRef stringMatcherFactory;    //!< String matcher factory to use
     size_t                  limit;                   //!< The maximum number of results over all sub searches requested
@@ -353,18 +359,20 @@ namespace osmscout {
   public:
     explicit LocationFormSearchParameter();
 
-    AdminRegionRef GetDefaultAdminRegion() const;
-
     std::string GetAdminRegionSearchString() const;
     std::string GetPostalAreaSearchString() const;
     std::string GetLocationSearchString() const;
     std::string GetAddressSearchString() const;
 
+    bool GetAdminRegionOnlyMatch() const;
+    bool GetPostalAreaOnlyMatch() const;
+    bool GetLocationOnlyMatch() const;
+    bool GetAddressOnlyMatch() const;
+
     StringMatcherFactoryRef GetStringMatcherFactory() const;
 
     size_t GetLimit() const;
 
-    void SetDefaultAdminRegion(const AdminRegionRef& adminRegion);
     void SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory);
 
     void SetAdminRegionSearchString(const std::string& adminRegionSearchString);
@@ -372,21 +380,33 @@ namespace osmscout {
     void SetLocationSearchString(const std::string& locationSearchString);
     void SetAddressSearchString(const std::string& addressSearchString);
 
+    void SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch);
+    void SetPostalAreaOnlyMatch(bool postalAreaOnlyMatch);
+    void SetLocationOnlyMatch(bool locationOnlyMatch);
+    void SetAddressOnlyMatch(bool addressOnlyMatch);
+
     void SetLimit(size_t limit);
   };
 
+  /**
+   * Parameter object for string pattern based search for a location or a POI
+   */
   class OSMSCOUT_API LocationStringSearchParameter CLASS_FINAL
   {
   private:
     AdminRegionRef          defaultAdminRegion;   //!< A default admin region to use, if no admin region was found based on the search string
+
     bool                    searchForLocation;    //!< Search for a location
     bool                    searchForPOI;         //!< Search for a POI
+
     bool                    adminRegionOnlyMatch; //!< Evaluate on direct admin region matches
     bool                    poiOnlyMatch;         //!< Evaluate on direct poi matches
     bool                    locationOnlyMatch;    //!< Evaluate on direct location matches
     bool                    addressOnlyMatch;     //!< Evaluate on direct address matches
+
     std::string             searchString;         //!< The search string itself, must bot be empty
     StringMatcherFactoryRef stringMatcherFactory; //!< String matcher factory to use
+
     size_t                  limit;                //!< The maximum number of results over all sub searches requested
 
   public:

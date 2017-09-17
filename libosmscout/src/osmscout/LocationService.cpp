@@ -164,11 +164,6 @@ namespace osmscout {
     // no code
   }
 
-  AdminRegionRef LocationFormSearchParameter::GetDefaultAdminRegion() const
-  {
-    return defaultAdminRegion;
-  }
-
   size_t LocationFormSearchParameter::GetLimit() const
   {
     return limit;
@@ -204,11 +199,6 @@ namespace osmscout {
     this->stringMatcherFactory=stringMatcherFactory;
   }
 
-  void LocationFormSearchParameter::SetDefaultAdminRegion(const AdminRegionRef& adminRegion)
-  {
-    this->defaultAdminRegion=adminRegion;
-  }
-
   void LocationFormSearchParameter::SetAdminRegionSearchString(const std::string& adminRegionSearchString)
   {
     LocationFormSearchParameter::adminRegionSearchString=adminRegionSearchString;
@@ -227,6 +217,46 @@ namespace osmscout {
   void LocationFormSearchParameter::SetAddressSearchString(const std::string& addressSearchString)
   {
     LocationFormSearchParameter::addressSearchString=addressSearchString;
+  }
+
+  void LocationFormSearchParameter::SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch)
+  {
+    this->adminRegionOnlyMatch=adminRegionOnlyMatch;
+  }
+
+  void LocationFormSearchParameter::SetPostalAreaOnlyMatch(bool postalAreaOnlyMatch)
+  {
+    this->postalAreaOnlyMatch=postalAreaOnlyMatch;
+  }
+
+  void LocationFormSearchParameter::SetLocationOnlyMatch(bool locationOnlyMatch)
+  {
+    this->locationOnlyMatch=locationOnlyMatch;
+  }
+
+  void LocationFormSearchParameter::SetAddressOnlyMatch(bool addressOnlyMatch)
+  {
+    this->addressOnlyMatch=addressOnlyMatch;
+  }
+
+  bool LocationFormSearchParameter::GetAdminRegionOnlyMatch() const
+  {
+    return adminRegionOnlyMatch;
+  }
+
+  bool LocationFormSearchParameter::GetPostalAreaOnlyMatch() const
+  {
+    return postalAreaOnlyMatch;
+  }
+
+  bool LocationFormSearchParameter::GetLocationOnlyMatch() const
+  {
+    return locationOnlyMatch;
+  }
+
+  bool LocationFormSearchParameter::GetAddressOnlyMatch() const
+  {
+    return addressOnlyMatch;
   }
 
   void LocationFormSearchParameter::SetLimit(size_t limit)
@@ -1265,7 +1295,7 @@ namespace osmscout {
                                3,
                                slices);
 
-      for (const auto slice : slices) {
+      for (const auto& slice : slices) {
         std::list<std::string>::const_iterator text1;
         std::list<std::string>::const_iterator text2;
         std::list<std::string>::const_iterator text3;
@@ -1378,7 +1408,7 @@ namespace osmscout {
       // no code
     }
 
-    TokenString(const std::string& text)
+    explicit TokenString(const std::string& text)
       : start(0),
         length(text.length()),
         text(text)
@@ -2402,15 +2432,14 @@ namespace osmscout {
   {
     LocationIndexRef                locationIndex=database->GetLocationIndex();
     std::unordered_set<std::string> regionIgnoreTokenSet;
-    AdminRegionRef                  defaultAdminRegion=searchParameter.GetDefaultAdminRegion();
     SearchParameter                 parameter;
 
-    parameter.searchForLocation=true;//searchParameter.GetSearchForLocation();
-    parameter.searchForPOI=true;//searchParameter.GetSearchForPOI();
-    parameter.adminRegionOnlyMatch=false;//searchParameter.GetAdminRegionOnlyMatch();
-    parameter.poiOnlyMatch=false;//searchParameter.GetPOIOnlyMatch();
-    parameter.locationOnlyMatch=false;//searchParameter.GetLocationOnlyMatch();
-    parameter.addressOnlyMatch=false;//searchParameter.GetAddressOnlyMatch();
+    parameter.searchForLocation=true;
+    parameter.searchForPOI=false;
+    parameter.adminRegionOnlyMatch=searchParameter.GetAdminRegionOnlyMatch();
+    parameter.poiOnlyMatch=false;
+    parameter.locationOnlyMatch=searchParameter.GetLocationOnlyMatch();
+    parameter.addressOnlyMatch=searchParameter.GetAddressOnlyMatch();
     parameter.stringMatcherFactory=searchParameter.GetStringMatcherFactory();
     parameter.limit=searchParameter.GetLimit();
 
@@ -2423,31 +2452,6 @@ namespace osmscout {
 
     for (const auto& token : locationIndex->GetRegionIgnoreTokens()) {
       regionIgnoreTokenSet.insert(UTF8StringToUpper(token));
-    }
-
-    if (defaultAdminRegion) {
-      TokenStringRef tokenString=std::make_shared<TokenString>(0,defaultAdminRegion->name.length(),defaultAdminRegion->name);
-
-      AdminRegionSearchVisitor::Result regionMatch(tokenString,
-                                                   defaultAdminRegion,
-                                                   defaultAdminRegion->name);
-
-
-      if (searchParameter.GetLocationSearchString().empty()) {
-        AddRegionResult(parameter,
-                        LocationSearchResult::match,
-                        regionMatch,
-                        result);
-      }
-      else {
-        SearchForLocationForRegion(locationIndex,
-                                   parameter,
-                                   searchParameter.GetLocationSearchString(),
-                                   searchParameter.GetAddressSearchString(),
-                                   regionMatch,
-                                   LocationSearchResult::candidate,
-                                   result);
-      }
     }
 
     if (searchParameter.GetAdminRegionSearchString().empty()) {
@@ -2743,7 +2747,7 @@ namespace osmscout {
     std::list<Result>                         result;
 
   public:
-    POIReverseLookupVisitor(std::list<LocationService::ReverseLookupResult>& results);
+    explicit POIReverseLookupVisitor(std::list<LocationService::ReverseLookupResult>& results);
 
     void AddObject(const ObjectFileRef& object);
 
@@ -2796,7 +2800,7 @@ namespace osmscout {
     std::list<Result>                          result;
 
   public:
-    LocationReverseLookupVisitor(std::list<LocationService::ReverseLookupResult>& results);
+    explicit LocationReverseLookupVisitor(std::list<LocationService::ReverseLookupResult>& results);
 
     void AddObject(const ObjectFileRef& object);
 
@@ -2852,7 +2856,7 @@ namespace osmscout {
     std::set<ObjectFileRef>                          objects;
 
   public:
-    AddressReverseLookupVisitor(std::list<LocationService::ReverseLookupResult>& results);
+    explicit AddressReverseLookupVisitor(std::list<LocationService::ReverseLookupResult>& results);
     void AddObject(const ObjectFileRef& object);
 
     bool Visit(const AdminRegion& adminRegion,
