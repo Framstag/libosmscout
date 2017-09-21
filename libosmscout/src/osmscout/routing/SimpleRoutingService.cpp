@@ -611,7 +611,6 @@ namespace osmscout {
       }
     }
 
-    double minDistanceLat = std::numeric_limits<double>::max(), minDistanceLon = std::numeric_limits<double>::max();
     for (const auto& way : ways) {
       if (!profile.CanUse(*way)) {
         continue;
@@ -628,8 +627,6 @@ namespace osmscout {
                                           way->nodes[i+1].GetLon(),way->nodes[i+1].GetLat(), r, intersectLon, intersectLat);
         if (distance<minDistance) {
           minDistance=distance;
-          minDistanceLat = intersectLat;
-          minDistanceLon = intersectLon;
           if(r<0.5){
             position=RoutePosition(way->GetObjectFileRef(),i,/*database*/0);
           } else {
