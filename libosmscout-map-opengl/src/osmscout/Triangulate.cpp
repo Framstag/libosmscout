@@ -34,7 +34,7 @@ namespace osmscout {
     cdt->Triangulate();
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
-    for (int i = 0; i < triangles.size(); i++) {
+    for (size_t i = 0; i < triangles.size(); i++) {
       p2t::Point a = *triangles[i]->GetPoint(0);
       p2t::Point b = *triangles[i]->GetPoint(1);
       p2t::Point c = *triangles[i]->GetPoint(2);
@@ -64,7 +64,7 @@ namespace osmscout {
     cdt->Triangulate();
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
-    for (int i = 0; i < triangles.size(); i++) {
+    for (size_t i = 0; i < triangles.size(); i++) {
       p2t::Point a = *triangles[i]->GetPoint(0);
       p2t::Point b = *triangles[i]->GetPoint(1);
       p2t::Point c = *triangles[i]->GetPoint(2);
@@ -94,7 +94,7 @@ namespace osmscout {
     cdt->Triangulate();
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
-    for (int i = 0; i < triangles.size(); i++) {
+    for (size_t i = 0; i < triangles.size(); i++) {
       p2t::Point a = *triangles[i]->GetPoint(0);
       p2t::Point b = *triangles[i]->GetPoint(1);
       p2t::Point c = *triangles[i]->GetPoint(2);
@@ -123,7 +123,7 @@ namespace osmscout {
 
     std::vector<std::vector<p2t::Point *>> holes;
 
-    for (int i = 1; i < points.size(); i++) {
+    for (size_t i = 1; i < points.size(); i++) {
       std::vector<p2t::Point *> hole;
       std::for_each(points[i].begin(), points[i].end(),
                     [&hole](osmscout::Point p) { hole.push_back(new p2t::Point(p.GetLon(), p.GetLat())); });
@@ -136,7 +136,7 @@ namespace osmscout {
     cdt->Triangulate();
     std::vector<p2t::Triangle *> triangles;
     triangles = cdt->GetTriangles();
-    for (int i = 0; i < triangles.size(); i++) {
+    for (size_t i = 0; i < triangles.size(); i++) {
       p2t::Point a = *triangles[i]->GetPoint(0);
       p2t::Point b = *triangles[i]->GetPoint(1);
       p2t::Point c = *triangles[i]->GetPoint(2);
@@ -150,7 +150,7 @@ namespace osmscout {
 
     std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
 
-    for(int i = 0; i < holes.size(); i++){
+    for(size_t i = 0; i < holes.size(); i++){
       std::for_each(holes[i].begin(), holes[i].end(), [](p2t::Point *p){delete p;});
     }
 
