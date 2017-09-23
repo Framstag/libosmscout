@@ -126,7 +126,7 @@ AC_MSG_CHECKING([for Agg compilation])
 #include <agg2/agg_conv_stroke.h>
 #include <agg2/agg_ellipse.h>
 #include <agg2/agg_trans_single_path.h>
-]],
+#include <agg2/agg_font_freetype.h>]],
     [[bool test;]])],
     [AC_MSG_RESULT([yes])
      AGGPASSED=true],
