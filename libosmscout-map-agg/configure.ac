@@ -92,45 +92,46 @@ if test "$HASLIBFREETYPE" == "true"; then
       [AC_MSG_RESULT([no])])
   fi
 
+  AC_MSG_CHECKING([for Agg compilation])
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+  [[
+  #include <mutex>
+  #include <agg2/agg_conv_curve.h>
+  #include <agg2/agg_conv_contour.h>
+  #include <agg2/agg_path_storage.h>
+  #include <agg2/agg_pixfmt_rgb.h>
+  #include <agg2/agg_rasterizer_scanline_aa.h>
+  #include <agg2/agg_renderer_base.h>
+  #include <agg2/agg_rendering_buffer.h>
+  #include <agg2/agg_renderer_scanline.h>
+  #include <agg2/agg_scanline_p.h>
+  #include <agg2/agg_scanline_u.h>
+  #include <agg2/agg_conv_bspline.h>
+  #include <agg2/agg_conv_dash.h>
+  #include <agg2/agg_conv_segmentator.h>
+  #include <agg2/agg_conv_stroke.h>
+  #include <agg2/agg_ellipse.h>
+  #include <agg2/agg_trans_single_path.h>
+  #include <iostream>
+  #include <limits>
+  #include <agg2/agg_conv_bspline.h>
+  #include <agg2/agg_conv_dash.h>
+  #include <agg2/agg_conv_segmentator.h>
+  #include <agg2/agg_conv_stroke.h>
+  #include <agg2/agg_ellipse.h>
+  #include <agg2/agg_trans_single_path.h>
+  #include <agg2/agg_font_freetype.h>]],
+      [[bool test;]])],
+      [AC_MSG_RESULT([yes])
+       AGGPASSED=true],
+      [AC_MSG_FAILURE([cannot compile simple agg program])])
+
   LIBS=$SAVED_LIBS
   LDFLAGS=$SAVED_LDFLAGS
   CXXFLAGS=$SAVED_CXXFLAGS
 fi
 
-AC_MSG_CHECKING([for Agg compilation])
-  AC_LINK_IFELSE(
-    [AC_LANG_PROGRAM(
-[[
-#include <mutex>
-#include <agg2/agg_conv_curve.h>
-#include <agg2/agg_conv_contour.h>
-#include <agg2/agg_path_storage.h>
-#include <agg2/agg_pixfmt_rgb.h>
-#include <agg2/agg_rasterizer_scanline_aa.h>
-#include <agg2/agg_renderer_base.h>
-#include <agg2/agg_rendering_buffer.h>
-#include <agg2/agg_renderer_scanline.h>
-#include <agg2/agg_scanline_p.h>
-#include <agg2/agg_scanline_u.h>
-#include <agg2/agg_conv_bspline.h>
-#include <agg2/agg_conv_dash.h>
-#include <agg2/agg_conv_segmentator.h>
-#include <agg2/agg_conv_stroke.h>
-#include <agg2/agg_ellipse.h>
-#include <agg2/agg_trans_single_path.h>
-#include <iostream>
-#include <limits>
-#include <agg2/agg_conv_bspline.h>
-#include <agg2/agg_conv_dash.h>
-#include <agg2/agg_conv_segmentator.h>
-#include <agg2/agg_conv_stroke.h>
-#include <agg2/agg_ellipse.h>
-#include <agg2/agg_trans_single_path.h>
-#include <agg2/agg_font_freetype.h>]],
-    [[bool test;]])],
-    [AC_MSG_RESULT([yes])
-     AGGPASSED=true],
-    [AC_MSG_FAILURE([cannot compile simple agg program])])
 
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
