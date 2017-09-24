@@ -49,17 +49,20 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
   QList<LocationEntry> locations;
   std::string stdSearchPattern=searchPattern.toUtf8().constData();
 
-  // Search by location
-  osmscout::LocationSearch search;
-  search.limit=limit;
+  osmscout::LocationStringSearchParameter searchParameter(stdSearchPattern);
+
+  // searchParameter.SetSearchForLocation(args.searchForLocation);
+  // searchParameter.SetSearchForPOI(args.searchForPOI);
+  // searchParameter.SetAdminRegionOnlyMatch(args.adminRegionOnlyMatch);
+  // searchParameter.SetPOIOnlyMatch(args.poiOnlyMatch);
+  // searchParameter.SetLocationOnlyMatch(args.locationOnlyMatch);
+  // searchParameter.SetAddressOnlyMatch(args.addressOnlyMatch);
+  // searchParameter.SetStringMatcherFactory(matcherFactory);
+  searchParameter.SetLimit(limit);
+
   osmscout::LocationSearchResult result;
 
-  if (!db->locationService->InitializeLocationSearchEntries(stdSearchPattern, search)) {
-    emit searchFinished(searchPattern, /*error*/ true);
-    return;
-  }
-
-  if (!db->locationService->SearchForLocations(search, result)){
+  if (!db->locationService->SearchForLocationByString(searchParameter, result)){
     emit searchFinished(searchPattern, /*error*/ true);
     return;
   }
@@ -164,7 +167,7 @@ bool SearchModule::BuildLocationEntry(const osmscout::ObjectFileRef& object,
     osmscout::log.Debug() << "obj:    " << title.toStdString() << " (" << objectType.toStdString() << ")";
 
     // Reverse lookup is slow for all search entries
-    // TODO: move it to SeachModel and make it asynchrous
+    // TODO: move it to SearchModel and make it asynchrous
     /*
     std::list<osmscout::LocationService::ReverseLookupResult> result;
     if (db->locationService->ReverseLookupObject(object, result)){
