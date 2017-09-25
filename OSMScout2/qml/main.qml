@@ -235,6 +235,8 @@ Window {
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 desktop: map
+                searchCenterLat: map.lat
+                searchCenterLon: map.lon
 
                 onShowLocation: {
                     console.log("location: "+location);

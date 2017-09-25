@@ -22,6 +22,7 @@
 #include <osmscout/LookupModule.h>
 
 #include <osmscout/util/Logger.h>
+#include <iostream>
 
 SearchModule::SearchModule(QThread *thread,DBThreadRef dbThread,LookupModule *lookupModule):
   thread(thread),dbThread(dbThread),lookupModule(lookupModule)
@@ -127,7 +128,7 @@ void SearchModule::FreeTextSearch(DBInstanceRef &db,
 #endif
 }
 
-void SearchModule::SearchForLocations(const QString searchPattern,int limit)
+void SearchModule::SearchForLocations(const QString searchPattern,int limit,osmscout::GeoCoord searchCenter)
 {
   QMutexLocker locker(&mutex);
 
@@ -136,8 +137,36 @@ void SearchModule::SearchForLocations(const QString searchPattern,int limit)
   timer.start();
 
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
-    [this,searchPattern,limit](const std::list<DBInstanceRef>& databases) {
-      for (auto db:databases){
+    [this,&searchPattern,&limit,&searchCenter](const std::list<DBInstanceRef>& databases) {
+
+      // sort databases by distance from search center
+      // to provide nearest results first
+      std::list<DBInstanceRef> sortedDbs=databases;
+      sortedDbs.sort(
+          [&searchCenter](const DBInstanceRef &a,const DBInstanceRef &b){
+            osmscout::GeoBox abox;
+            osmscout::GeoBox bbox;
+            a->database->GetBoundingBox(abox);
+            b->database->GetBoundingBox(bbox);
+            bool ain=abox.Includes(searchCenter);
+            bool bin=bbox.Includes(searchCenter);
+            //std::cout << "  " << a->path.toStdString() << " ? " << b->path.toStdString() << std::endl;
+            if (bin && !ain){
+              return false;
+            }
+            if (ain && !bin){
+              return true;
+            }
+            // (ain==bin)
+            double adist=osmscout::DistanceSquare(searchCenter,abox.GetCenter());
+            double bdist=osmscout::DistanceSquare(searchCenter,bbox.GetCenter());
+            return adist<bdist;
+          });
+
+      //std::cout << "Sorted databases:" << std::endl;
+
+      for (auto db:sortedDbs){
+        //std::cout << "  " << db->path.toStdString() << std::endl;
         std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
         SearchLocations(db,searchPattern,limit,adminRegionMap);
         FreeTextSearch(db,searchPattern,limit,adminRegionMap);

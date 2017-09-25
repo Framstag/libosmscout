@@ -8,6 +8,8 @@ LineEdit {
 
     property Item desktop;
     property LocationEntry location;
+    property double searchCenterLat;
+    property double searchCenterLon;
 
     // Internal constant
     property int listCellHeight: Theme.textFontSize*2+4
@@ -21,6 +23,7 @@ LineEdit {
             return;
         }
 
+        setupSearchCenter();
         suggestionModel.setPattern(searchEdit.text)
 
         if (suggestionModel.count>=1) {
@@ -39,7 +42,13 @@ LineEdit {
 
     // Private
 
+    function setupSearchCenter() {
+        suggestionModel.lat=searchCenterLat;
+        suggestionModel.lon=searchCenterLon;
+    }
+
     function updateSuggestions() {
+        setupSearchCenter();
         suggestionModel.setPattern(searchEdit.text)
 
         if (suggestionModel.count>=1 &&
@@ -89,6 +98,7 @@ LineEdit {
 
         hidePopup()
 
+        setupSearchCenter();
         suggestionModel.setPattern(searchEdit.text)
     }
 
@@ -219,6 +229,7 @@ LineEdit {
 
     LocationListModel {
         id: suggestionModel
+
         onCountChanged:{
             if (focus){
               updatePopup();
