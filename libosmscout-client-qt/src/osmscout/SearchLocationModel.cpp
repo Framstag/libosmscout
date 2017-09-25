@@ -25,12 +25,12 @@
 #include <osmscout/OSMScoutQt.h>
     
 LocationListModel::LocationListModel(QObject* parent)
-: QAbstractListModel(parent), searching(false)
+: QAbstractListModel(parent), searching(false), searchCenter(0,0), resultLimit(50)
 {
     searchModule=OSMScoutQt::GetInstance().MakeSearchModule();
 
-    connect(this, SIGNAL(SearchRequested(const QString, int)), 
-            searchModule, SLOT(SearchForLocations(const QString, int)),
+    connect(this, SIGNAL(SearchRequested(const QString, int, osmscout::GeoCoord)),
+            searchModule, SLOT(SearchForLocations(const QString, int, osmscout::GeoCoord)),
             Qt::QueuedConnection);
     
     connect(searchModule, SIGNAL(searchResult(const QString, const QList<LocationEntry>)),
@@ -81,7 +81,7 @@ void LocationListModel::onSearchFinished(const QString searchPattern, bool /*err
   if (lastRequestPattern!=pattern){
     qDebug() << "Search postponed" << pattern;
     lastRequestPattern=pattern;
-    emit SearchRequested(pattern, 50);
+    emit SearchRequested(pattern, resultLimit, searchCenter);
   }else{
     searching = false;
     emit SearchingChanged(false);
@@ -130,7 +130,7 @@ void LocationListModel::setPattern(const QString& pattern)
   searching = true;
   lastRequestPattern = pattern;
   emit SearchingChanged(true);
-  emit SearchRequested(pattern, 50);
+  emit SearchRequested(pattern, resultLimit, searchCenter);
 }
 
 int LocationListModel::rowCount(const QModelIndex& ) const

@@ -36,55 +36,84 @@
  */
 class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
 {
-    Q_OBJECT
-    Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
-    Q_PROPERTY(bool searching READ isSearching NOTIFY SearchingChanged)
+  Q_OBJECT
+  Q_PROPERTY(int     count       READ rowCount    NOTIFY countChanged)
+  Q_PROPERTY(bool    searching   READ isSearching NOTIFY SearchingChanged)
+  Q_PROPERTY(double  lat         READ GetLat      WRITE SetLat)
+  Q_PROPERTY(double  lon         READ GetLon      WRITE SetLon)
+  Q_PROPERTY(int     resultLimit READ GetResultLimit WRITE SetResultLimit)
 
 signals:
-    void SearchRequested(const QString searchPattern, int limit);
-    void SearchingChanged(bool);
-    void countChanged(int);
+  void SearchRequested(const QString searchPattern, int limit, osmscout::GeoCoord searchCenter);
+  void SearchingChanged(bool);
+  void countChanged(int);
 
 public slots:
-    void setPattern(const QString& pattern);
-    void onSearchResult(const QString searchPattern, 
-                        const QList<LocationEntry>);
-    void onSearchFinished(const QString searchPattern, bool error);
+  void setPattern(const QString& pattern);
+  void onSearchResult(const QString searchPattern,
+                      const QList<LocationEntry>);
+  void onSearchFinished(const QString searchPattern, bool error);
   
 private:
-    QString pattern;
-    QString lastRequestPattern;
-    QList<LocationEntry*> locations;
-    bool searching;
-    SearchModule* searchModule;
+  QString pattern;
+  QString lastRequestPattern;
+  QList<LocationEntry*> locations;
+  bool searching;
+  SearchModule* searchModule;
+  osmscout::GeoCoord searchCenter;
+  int resultLimit;
 
 public:
-    enum Roles {
-        LabelRole = Qt::UserRole,
-        TypeRole = Qt::UserRole +1,
-        RegionRole = Qt::UserRole +2,
-        LatRole = Qt::UserRole +3,
-        LonRole = Qt::UserRole +4
-    };
+  enum Roles {
+    LabelRole = Qt::UserRole,
+    TypeRole = Qt::UserRole +1,
+    RegionRole = Qt::UserRole +2,
+    LatRole = Qt::UserRole +3,
+    LonRole = Qt::UserRole +4
+  };
 
 public:
-    LocationListModel(QObject* parent = 0);
-    virtual ~LocationListModel();
+  LocationListModel(QObject* parent = 0);
+  virtual ~LocationListModel();
 
-    Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
+  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
 
-    Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-    Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-    virtual QHash<int, QByteArray> roleNames() const;
+  virtual QHash<int, QByteArray> roleNames() const;
 
-    Q_INVOKABLE LocationEntry* get(int row) const;
-    
-    inline bool isSearching() const
-    {
-      return searching;
-    }
+  Q_INVOKABLE LocationEntry* get(int row) const;
+
+  inline bool isSearching() const
+  {
+    return searching;
+  }
+
+  inline double GetLat() const {
+    return searchCenter.GetLat();
+  }
+
+  inline double GetLon() const {
+    return searchCenter.GetLon();
+  }
+
+  inline void SetLat(double lat){
+    searchCenter.Set(lat,searchCenter.GetLon());
+  }
+
+  inline void SetLon(double lon){
+    searchCenter.Set(searchCenter.GetLat(),lon);
+  }
+
+  inline int GetResultLimit() const {
+    return resultLimit;
+  }
+
+  inline void SetResultLimit(int limit){
+    resultLimit=limit;
+  }
 };
 
 #endif
