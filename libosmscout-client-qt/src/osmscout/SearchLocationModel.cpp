@@ -29,8 +29,8 @@ LocationListModel::LocationListModel(QObject* parent)
 {
     searchModule=OSMScoutQt::GetInstance().MakeSearchModule();
 
-    connect(this, SIGNAL(SearchRequested(const QString, int, osmscout::GeoCoord)),
-            searchModule, SLOT(SearchForLocations(const QString, int, osmscout::GeoCoord)),
+    connect(this, SIGNAL(SearchRequested(const QString, int, osmscout::GeoCoord,osmscout::BreakerRef)),
+            searchModule, SLOT(SearchForLocations(const QString, int, osmscout::GeoCoord,osmscout::BreakerRef)),
             Qt::QueuedConnection);
     
     connect(searchModule, SIGNAL(searchResult(const QString, const QList<LocationEntry>)),
@@ -44,13 +44,22 @@ LocationListModel::LocationListModel(QObject* parent)
 
 LocationListModel::~LocationListModel()
 {
-    for (QList<LocationEntry*>::iterator location=locations.begin();
-         location!=locations.end();
-         ++location) {
-        delete *location;
-    }
+  for (QList<LocationEntry*>::iterator location=locations.begin();
+       location!=locations.end();
+       ++location) {
+      delete *location;
+  }
 
-    locations.clear();
+  locations.clear();
+
+  if (breaker){
+    breaker->Break();
+    breaker.reset();
+  }
+  if (searchModule!=NULL){
+    searchModule->deleteLater();
+    searchModule=NULL;
+  }
 }
 
 void LocationListModel::onSearchResult(const QString searchPattern, 
@@ -81,7 +90,8 @@ void LocationListModel::onSearchFinished(const QString searchPattern, bool /*err
   if (lastRequestPattern!=pattern){
     qDebug() << "Search postponed" << pattern;
     lastRequestPattern=pattern;
-    emit SearchRequested(pattern, resultLimit, searchCenter);
+    breaker=std::make_shared<osmscout::ThreadedBreaker>();
+    emit SearchRequested(pattern,resultLimit,searchCenter,breaker);
   }else{
     searching = false;
     emit SearchingChanged(false);
@@ -120,6 +130,9 @@ void LocationListModel::setPattern(const QString& pattern)
   }
   emit countChanged(locations.size());
 
+  if (breaker){
+    breaker->Break();
+  }
   if (searching){
     // we are still waiting for previous request, postpone current
     qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern;
@@ -130,12 +143,13 @@ void LocationListModel::setPattern(const QString& pattern)
   searching = true;
   lastRequestPattern = pattern;
   emit SearchingChanged(true);
-  emit SearchRequested(pattern, resultLimit, searchCenter);
+  breaker=std::make_shared<osmscout::ThreadedBreaker>();
+  emit SearchRequested(pattern,resultLimit,searchCenter,breaker);
 }
 
 int LocationListModel::rowCount(const QModelIndex& ) const
 {
-    return locations.size();
+  return locations.size();
 }
 
 QVariant LocationListModel::data(const QModelIndex &index, int role) const

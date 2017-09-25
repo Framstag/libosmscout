@@ -128,7 +128,10 @@ void SearchModule::FreeTextSearch(DBInstanceRef &db,
 #endif
 }
 
-void SearchModule::SearchForLocations(const QString searchPattern,int limit,osmscout::GeoCoord searchCenter)
+void SearchModule::SearchForLocations(const QString searchPattern,
+                                      int limit,
+                                      osmscout::GeoCoord searchCenter,
+                                      osmscout::BreakerRef breaker)
 {
   QMutexLocker locker(&mutex);
 
@@ -137,7 +140,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,int limit,osms
   timer.start();
 
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
-    [this,&searchPattern,&limit,&searchCenter](const std::list<DBInstanceRef>& databases) {
+    [this,&searchPattern,&limit,&searchCenter,&breaker](const std::list<DBInstanceRef>& databases) {
 
       // sort databases by distance from search center
       // to provide nearest results first
@@ -168,7 +171,17 @@ void SearchModule::SearchForLocations(const QString searchPattern,int limit,osms
       for (auto db:sortedDbs){
         //std::cout << "  " << db->path.toStdString() << std::endl;
         std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
+
+        if (breaker && breaker->IsAborted()){
+          emit searchFinished(searchPattern, /*error*/ false);
+          break;
+        }
         SearchLocations(db,searchPattern,limit,adminRegionMap);
+
+        if (breaker && breaker->IsAborted()){
+          emit searchFinished(searchPattern, /*error*/ false);
+          break;
+        }
         FreeTextSearch(db,searchPattern,limit,adminRegionMap);
       }
     }

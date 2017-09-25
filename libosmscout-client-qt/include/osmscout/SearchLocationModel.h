@@ -44,7 +44,10 @@ class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
   Q_PROPERTY(int     resultLimit READ GetResultLimit WRITE SetResultLimit)
 
 signals:
-  void SearchRequested(const QString searchPattern, int limit, osmscout::GeoCoord searchCenter);
+  void SearchRequested(const QString searchPattern,
+                       int limit,
+                       osmscout::GeoCoord searchCenter,
+                       osmscout::BreakerRef breaker);
   void SearchingChanged(bool);
   void countChanged(int);
 
@@ -62,6 +65,7 @@ private:
   SearchModule* searchModule;
   osmscout::GeoCoord searchCenter;
   int resultLimit;
+  osmscout::BreakerRef breaker;
 
 public:
   enum Roles {
