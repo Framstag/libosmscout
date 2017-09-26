@@ -231,10 +231,10 @@ void LookupModule::requestRegionLookup(const osmscout::GeoCoord location) {
             QList<AdminRegionInfoRef> adminRegionList=BuildAdminRegionInfoList(bottomAdminRegion,
                                                                                adminRegionMap);
 
-            std::cout << "Region list:" << std::endl;
-            for (const auto &region:adminRegionList) {
-              std::cout << "  " << region->adminLevel << ": " << region->name.toStdString() << std::endl;
-            }
+            // std::cout << "Region list:" << std::endl;
+            // for (const auto &region:adminRegionList) {
+            //   std::cout << "  " << region->adminLevel << ": " << region->name.toStdString() << std::endl;
+            // }
             emit locationAdminRegions(location,
                                       adminRegionList);
           }

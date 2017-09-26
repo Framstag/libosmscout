@@ -45,6 +45,26 @@ class OSMSCOUT_CLIENT_QT_API LookupModule:public QObject{
 
   friend class SearchModule;
 
+public:
+
+  /**
+   * Common sence of administrative region levels.
+   *
+   * Note that levels may have different meaning in various countries...
+   * https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative
+   */
+  enum AdminRegionLevel {
+    NA1              = 1,
+    Country          = 2,
+    Territory        = 3,
+    State            = 4,
+    NA5              = 5,
+    Region           = 6,
+    District         = 7,
+    Town             = 8,
+    Neighbourhood    = 9
+  };
+
 private:
   QMutex           mutex;
   QThread          *thread;

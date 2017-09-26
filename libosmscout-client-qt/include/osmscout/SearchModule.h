@@ -68,6 +68,7 @@ public slots:
   void SearchForLocations(const QString searchPattern,
                           int limit,
                           osmscout::GeoCoord,
+                          AdminRegionInfoRef defaultRegion,
                           osmscout::BreakerRef breaker);
 
 public:
@@ -82,6 +83,7 @@ private:
 
   void SearchLocations(DBInstanceRef &db,
                        const QString searchPattern,
+                       const osmscout::AdminRegionRef defaultRegion,
                        int limit,
                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
 

@@ -44,6 +44,7 @@ SearchModule::~SearchModule()
 
 void SearchModule::SearchLocations(DBInstanceRef &db,
                                    const QString searchPattern,
+                                   const osmscout::AdminRegionRef defaultRegion,
                                    int limit,
                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
 {
@@ -59,6 +60,9 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
   // searchParameter.SetLocationOnlyMatch(args.locationOnlyMatch);
   // searchParameter.SetAddressOnlyMatch(args.addressOnlyMatch);
   // searchParameter.SetStringMatcherFactory(matcherFactory);
+  if (defaultRegion)
+    searchParameter.SetDefaultAdminRegion(defaultRegion);
+
   searchParameter.SetLimit(limit);
 
   osmscout::LocationSearchResult result;
@@ -131,6 +135,7 @@ void SearchModule::FreeTextSearch(DBInstanceRef &db,
 void SearchModule::SearchForLocations(const QString searchPattern,
                                       int limit,
                                       osmscout::GeoCoord searchCenter,
+                                      AdminRegionInfoRef defaultRegionInfo,
                                       osmscout::BreakerRef breaker)
 {
   QMutexLocker locker(&mutex);
@@ -140,7 +145,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,
   timer.start();
 
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
-    [this,&searchPattern,&limit,&searchCenter,&breaker](const std::list<DBInstanceRef>& databases) {
+    [this,&searchPattern,&limit,&searchCenter,&breaker,&defaultRegionInfo](const std::list<DBInstanceRef>& databases) {
 
       // sort databases by distance from search center
       // to provide nearest results first
@@ -176,7 +181,11 @@ void SearchModule::SearchForLocations(const QString searchPattern,
           emit searchFinished(searchPattern, /*error*/ false);
           break;
         }
-        SearchLocations(db,searchPattern,limit,adminRegionMap);
+        osmscout::AdminRegionRef defaultRegion;
+        if (defaultRegionInfo && defaultRegionInfo->database==db->path){
+          defaultRegion=defaultRegionInfo->adminRegion;
+        }
+        SearchLocations(db,searchPattern,defaultRegion,limit,adminRegionMap);
 
         if (breaker && breaker->IsAborted()){
           emit searchFinished(searchPattern, /*error*/ false);
