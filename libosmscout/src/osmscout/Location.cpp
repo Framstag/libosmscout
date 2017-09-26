@@ -27,6 +27,10 @@ namespace osmscout {
 
   bool AdminRegion::Match(const ObjectFileRef& object) const
   {
+    if (!object.Valid()) {
+      return false;
+    }
+
     if (this->object==object) {
       return true;
     }

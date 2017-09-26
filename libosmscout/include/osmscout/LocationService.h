@@ -782,6 +782,9 @@ namespace osmscout {
     bool SearchForLocations(const LocationSearch& search,
                             LocationSearchResult& result) const;
 
+    bool ReverseLookupRegion(const GeoCoord &coord,
+                             std::list<ReverseLookupResult>& result) const;
+
     bool ReverseLookupObjects(const std::list<ObjectFileRef>& objects,
                               std::list<ReverseLookupResult>& result) const;
     bool ReverseLookupObject(const ObjectFileRef& object,
