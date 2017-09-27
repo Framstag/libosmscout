@@ -170,21 +170,31 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   finalImgProjection.GetDimensions(finalImgBoundingBox);
 
   // projection bounding box may be smaller than projection dimensions...
-  double srcX;
-  double srcY;
+  double scale=computeScale(finalImgProjection,requestProjection);
+  
+  QRectF sourceRectangle(0,
+                         0,
+                         finalImgProjection.GetWidth(),
+                         finalImgProjection.GetHeight());
 
-  finalImgProjection.GeoToPixel(finalImgBoundingBox.GetCenter(),srcX,srcY);
-  srcX-=finalImgProjection.GetWidth()*0.5;
-  srcY-=finalImgProjection.GetHeight()*0.5;
+  double targetCenterX;
+  double targetCenterY;
 
-  double x;
-  double y;
+  requestProjection.GeoToPixel(finalImgBoundingBox.GetCenter(),targetCenterX,targetCenterY);
+  double targetTopLeftX=targetCenterX-requestProjection.GetWidth()*canvasOverrun*scale*0.5;
+  double targetTopLeftY=targetCenterY-requestProjection.GetHeight()*canvasOverrun*scale*0.5;
 
-  requestProjection.GeoToPixel(finalImgBoundingBox.GetCenter(),x,y);
-  x-=requestProjection.GetWidth()*canvasOverrun*0.5;
-  y-=requestProjection.GetHeight()*canvasOverrun*0.5;
+  QRectF targetRectangle(targetTopLeftX,
+                         targetTopLeftY,
+                         requestProjection.GetWidth()*canvasOverrun*scale,
+                         requestProjection.GetHeight()*canvasOverrun*scale);
 
-  if (x>0 || y>0) {
+
+  // check if transformed final img cover current canvas...
+  if (finalImgProjection.GetAngle()!=requestProjection.GetAngle() ||
+      targetRectangle.top()>0 || targetRectangle.left()>0 ||
+      targetRectangle.bottom()<requestProjection.GetHeight() || targetRectangle.right()<requestProjection.GetWidth()) {
+    // ...if not, there is necessary to draw some background
     painter.fillRect(0,
                      0,
                      request.width,
@@ -195,17 +205,16 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                       backgroundColor.GetA()));
   }
 
-  //qDebug() << "Draw final image to canvas:" << QRectF(x1,y1,x2-x1,y2-y1);
+  if (finalImgProjection.GetAngle()!=requestProjection.GetAngle()){
+    // rotate final image
+    painter.translate(request.width/2.0,request.height/2.0);
+    painter.rotate(qRadiansToDegrees(requestProjection.GetAngle()-finalImgProjection.GetAngle()));
+    painter.translate(request.width/-2.0,request.height/-2.0);
+  }
 
-  painter.drawImage(QRectF(x,
-                           y,
-                           requestProjection.GetWidth()*canvasOverrun,
-                           requestProjection.GetHeight()*canvasOverrun),
+  painter.drawImage(targetRectangle,
                     *finishedImage,
-                    QRectF(srcX,
-                           srcY,
-                           finalImgProjection.GetWidth(),
-                           finalImgProjection.GetHeight()));
+                    sourceRectangle);
 
   RenderMapRequest extendedRequest=request;
   extendedRequest.width*=canvasOverrun;
@@ -225,6 +234,30 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   }
 
   return needsNoRepaint;
+}
+
+double PlaneMapRenderer::computeScale(const osmscout::MercatorProjection &previousProjection,
+                                      const osmscout::MercatorProjection &currentProjection)
+{
+  double currentDiagonal=sqrt(pow(currentProjection.GetWidth(),2) + pow(currentProjection.GetHeight(),2));
+
+  double topLeftLon;
+  double topLeftLat;
+  currentProjection.PixelToGeo(0,0,topLeftLon,topLeftLat);
+  double bottomRightLon;
+  double bottomRightLat;
+  currentProjection.PixelToGeo(currentProjection.GetWidth(),currentProjection.GetHeight(),
+                               bottomRightLon,bottomRightLat);
+
+  double x1;
+  double y1;
+  previousProjection.GeoToPixel(osmscout::GeoCoord(topLeftLat,topLeftLon),x1,y1);
+  double x2;
+  double y2;
+  previousProjection.GeoToPixel(osmscout::GeoCoord(bottomRightLat,bottomRightLon),x2,y2);
+
+  double previousDiagonal=sqrt(pow(x2-x1,2) + pow(y2-y1,2));
+  return currentDiagonal / previousDiagonal;
 }
 
 void PlaneMapRenderer::Initialize()
