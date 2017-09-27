@@ -65,7 +65,11 @@ public slots:
    * @param searchPattern
    * @param limit - suggested limit for count of retrieved entries from one database
    */
-  void SearchForLocations(const QString searchPattern,int limit,osmscout::GeoCoord);
+  void SearchForLocations(const QString searchPattern,
+                          int limit,
+                          osmscout::GeoCoord,
+                          AdminRegionInfoRef defaultRegion,
+                          osmscout::BreakerRef breaker);
 
 public:
   SearchModule(QThread *thread,DBThreadRef dbThread,LookupModule *lookupModule);
@@ -79,6 +83,7 @@ private:
 
   void SearchLocations(DBInstanceRef &db,
                        const QString searchPattern,
+                       const osmscout::AdminRegionRef defaultRegion,
                        int limit,
                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
 

@@ -3131,6 +3131,29 @@ namespace osmscout {
     return true;
   }
 
+  bool LocationService::ReverseLookupRegion(const GeoCoord &coord,
+                                            std::list<ReverseLookupResult>& result) const
+  {
+    result.clear();
+    AdminRegionReverseLookupVisitor adminRegionVisitor(*database,
+                                                       result);
+    AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
+    searchEntry.coords.push_back(coord);
+    adminRegionVisitor.AddSearchEntry(searchEntry);
+
+    if (!VisitAdminRegions(adminRegionVisitor)) {
+      return false;
+    }
+
+    for (const auto &region:adminRegionVisitor.adminRegions){
+      ReverseLookupResult regionResult;
+      regionResult.adminRegion=region.second;
+      result.push_back(regionResult);
+    }
+
+    return true;
+  }
+
   /**
    * Lookups location descriptions for the given objects.
    * @param objects

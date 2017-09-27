@@ -44,24 +44,36 @@ class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
   Q_PROPERTY(int     resultLimit READ GetResultLimit WRITE SetResultLimit)
 
 signals:
-  void SearchRequested(const QString searchPattern, int limit, osmscout::GeoCoord searchCenter);
+  void SearchRequested(const QString searchPattern,
+                       int limit,
+                       osmscout::GeoCoord searchCenter,
+                       AdminRegionInfoRef defaultRegion,
+                       osmscout::BreakerRef breaker);
   void SearchingChanged(bool);
   void countChanged(int);
+  void regionLookupRequested(osmscout::GeoCoord);
 
 public slots:
   void setPattern(const QString& pattern);
   void onSearchResult(const QString searchPattern,
                       const QList<LocationEntry>);
   void onSearchFinished(const QString searchPattern, bool error);
-  
+
+  void onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>);
+  void onLocationAdminRegionFinished(const osmscout::GeoCoord);
+
 private:
   QString pattern;
   QString lastRequestPattern;
   QList<LocationEntry*> locations;
   bool searching;
   SearchModule* searchModule;
+  LookupModule* lookupModule;
   osmscout::GeoCoord searchCenter;
   int resultLimit;
+  osmscout::BreakerRef breaker;
+  AdminRegionInfoRef defaultRegion;
+  AdminRegionInfoRef lastRequestDefaultRegion;
 
 public:
   enum Roles {
@@ -100,11 +112,17 @@ public:
   }
 
   inline void SetLat(double lat){
-    searchCenter.Set(lat,searchCenter.GetLon());
+    if (lat!=searchCenter.GetLat()) {
+      searchCenter.Set(lat, searchCenter.GetLon());
+      lookupRegion();
+    }
   }
 
   inline void SetLon(double lon){
-    searchCenter.Set(searchCenter.GetLat(),lon);
+    if (lon!=searchCenter.GetLon()) {
+      searchCenter.Set(searchCenter.GetLat(), lon);
+      lookupRegion();
+    }
   }
 
   inline int GetResultLimit() const {
@@ -114,6 +132,10 @@ public:
   inline void SetResultLimit(int limit){
     resultLimit=limit;
   }
+
+private:
+  void lookupRegion();
+
 };
 
 #endif
