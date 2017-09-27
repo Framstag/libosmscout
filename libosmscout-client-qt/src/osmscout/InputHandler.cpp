@@ -255,7 +255,20 @@ void MoveHandler::onTimeout()
     //qDebug() << "move: " << QString::fromStdString(view.center.GetDisplayText()) << "   by: " << move;
     double startMag = startMapView.magnification.GetMagnification();
     double targetMag = targetMagnification.GetMagnification();
+
+    double startAngle = startMapView.angle;
+    double finalAngle = startAngle + ((targetAngel-startAngle) * scale);
+
+    if (finalAngle > 2*M_PI) {
+        finalAngle -= 2*M_PI;
+    }
+
+    if (finalAngle < 0) {
+        finalAngle = 2*M_PI + finalAngle;
+    }
+
     if (!projection.Set(startMapView.center,
+                        finalAngle,
                         osmscout::Magnification(startMag + ((targetMag - startMag) * scale) ),
                         dpi, 1000, 1000)) {
         return;
@@ -267,6 +280,7 @@ void MoveHandler::onTimeout()
 
     view.magnification = projection.GetMagnification();
     view.center=projection.GetCenter();
+    view.angle=projection.GetAngle();
     if (view.center.GetLon() < OSMTile::minLon()){
         view.center.Set(view.center.GetLat(),OSMTile::minLon());
     }else if (view.center.GetLon() > OSMTile::maxLon()){
@@ -289,7 +303,7 @@ bool MoveHandler::animationInProgress()
 bool MoveHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension)
 {
     startMapView = view;
-
+    targetAngel = view.GetAngle();
     // compute event distance from center
     QPoint distance = widgetPosition;
     distance -= QPoint(widgetDimension.width() / 2, widgetDimension.height() / 2);
@@ -334,6 +348,8 @@ bool MoveHandler::move(QVector2D move)
 {
     startMapView = view;
     targetMagnification = view.magnification;
+    targetAngel = view.GetAngle();
+
     _move.setX(move.x());
     _move.setY(move.y());
 
@@ -352,7 +368,7 @@ bool MoveHandler::moveNow(QVector2D move)
 
     //qDebug() << "move: " << QString::fromStdString(view.center.GetDisplayText()) << "   by: " << move;
 
-    if (!projection.Set(view.center, view.magnification, dpi, 1000, 1000)) {
+    if (!projection.Set(view.center, view.angle, view.magnification, dpi, 1000, 1000)) {
         return false;
     }
 
@@ -375,22 +391,25 @@ bool MoveHandler::moveNow(QVector2D move)
     emit viewChanged(view);
     return true;
 }
-bool MoveHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
+bool MoveHandler::rotateBy(double /*angleStep*/, double angleChange)
 {
-    return false; // FIXME: rotation is broken in current version. discard rotation for now
-    /*
-    view.angle=round(view.angle/angleStep)*angleStep + angleStep;
 
-    if (view.angle < 0) {
-        view.angle+=2*M_PI;
-    }
-    if (view.angle <= 2*M_PI) {
-        view.angle-=2*M_PI;
-    }
+    startMapView = view;
+    targetMagnification = view.magnification;
 
-    emit viewChanged(view);
+    targetAngel = view.angle+angleChange;
+
+    _move.setX(0);
+    _move.setY(0);
+
+    animationDuration = ROTATE_ANIMATION_DURATION;
+    animationStart.restart();
+    timer.setInterval(ANIMATION_TICK);
+    timer.start();
+    onTimeout();
+
     return true;
-    */
+
 }
 
 

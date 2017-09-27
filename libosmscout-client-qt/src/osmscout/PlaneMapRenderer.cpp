@@ -169,26 +169,22 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   osmscout::GeoBox finalImgBoundingBox;
   finalImgProjection.GetDimensions(finalImgBoundingBox);
 
-  finalImgProjection.GetDimensions(finalImgBoundingBox);
-
   // projection bounding box may be smaller than projection dimensions...
-  double srcX1;
-  double srcY1;
-  double srcX2;
-  double srcY2;
+  double srcX;
+  double srcY;
 
-  finalImgProjection.GeoToPixel(finalImgBoundingBox.GetMaxCoord(),srcX2,srcY1); // max coord => right top
-  finalImgProjection.GeoToPixel(finalImgBoundingBox.GetMinCoord(),srcX1,srcY2); // min coord => left bottom
+  finalImgProjection.GeoToPixel(finalImgBoundingBox.GetCenter(),srcX,srcY);
+  srcX-=finalImgProjection.GetWidth()*0.5;
+  srcY-=finalImgProjection.GetHeight()*0.5;
 
-  double x1;
-  double y1;
-  double x2;
-  double y2;
+  double x;
+  double y;
 
-  requestProjection.GeoToPixel(finalImgBoundingBox.GetMaxCoord(),x2,y1); // max coord => right top
-  requestProjection.GeoToPixel(finalImgBoundingBox.GetMinCoord(),x1,y2); // min coord => left bottom
+  requestProjection.GeoToPixel(finalImgBoundingBox.GetCenter(),x,y);
+  x-=requestProjection.GetWidth()*canvasOverrun*0.5;
+  y-=requestProjection.GetHeight()*canvasOverrun*0.5;
 
-  if (x1>0 || y1>0 || x2<request.width || y2<request.height) {
+  if (x>0 || y>0) {
     painter.fillRect(0,
                      0,
                      request.width,
@@ -199,9 +195,17 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                       backgroundColor.GetA()));
   }
 
-  // TODO: handle angle
   //qDebug() << "Draw final image to canvas:" << QRectF(x1,y1,x2-x1,y2-y1);
-  painter.drawImage(QRectF(x1,y1,x2-x1,y2-y1),*finishedImage,QRectF(srcX1,srcY1,srcX2-srcX1,srcY2-srcY1));
+
+  painter.drawImage(QRectF(x,
+                           y,
+                           requestProjection.GetWidth()*canvasOverrun,
+                           requestProjection.GetHeight()*canvasOverrun),
+                    *finishedImage,
+                    QRectF(srcX,
+                           srcY,
+                           finalImgProjection.GetWidth(),
+                           finalImgProjection.GetHeight()));
 
   RenderMapRequest extendedRequest=request;
   extendedRequest.width*=canvasOverrun;
