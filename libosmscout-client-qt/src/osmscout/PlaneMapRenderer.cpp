@@ -207,9 +207,11 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
 
   if (finalImgProjection.GetAngle()!=requestProjection.GetAngle()){
     // rotate final image
-    painter.translate(request.width/2.0,request.height/2.0);
+    QPointF rotationCenter(targetRectangle.x()+targetRectangle.width()/2.0,
+                           targetRectangle.y()+targetRectangle.height()/2.0);
+    painter.translate(rotationCenter);
     painter.rotate(qRadiansToDegrees(requestProjection.GetAngle()-finalImgProjection.GetAngle()));
-    painter.translate(request.width/-2.0,request.height/-2.0);
+    painter.translate(rotationCenter*-1.0);
   }
 
   painter.drawImage(targetRectangle,
