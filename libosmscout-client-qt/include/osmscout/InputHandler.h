@@ -269,10 +269,12 @@ private:
     MapView startMapView;
     QVector2D _move;
     osmscout::Magnification targetMagnification;
+    double targetAngel;
     int animationDuration;
 
     const int MOVE_ANIMATION_DURATION = 1000; // ms
     const int ZOOM_ANIMATION_DURATION = 500; // ms
+    const int ROTATE_ANIMATION_DURATION = 1000; //ms
     const int ANIMATION_TICK = 16;
 
 private slots:

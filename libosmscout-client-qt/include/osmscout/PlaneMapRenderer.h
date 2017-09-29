@@ -93,6 +93,10 @@ public:
    */
   virtual bool RenderMap(QPainter& painter,
                          const RenderMapRequest& request);
+
+private:
+  double computeScale(const osmscout::MercatorProjection &previousProjection,
+                      const osmscout::MercatorProjection &currentProjection);
 };
 
 #endif /* PLANEMAPRENDERER_H */
