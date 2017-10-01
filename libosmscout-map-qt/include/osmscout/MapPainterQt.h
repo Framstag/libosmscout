@@ -66,8 +66,6 @@ namespace osmscout {
     };
 
   private:
-    CoordBuffer                *coordBuffer;
-
     QPainter                   *painter;
 
     std::vector<QImage>        images;        //! vector of QImage for icons

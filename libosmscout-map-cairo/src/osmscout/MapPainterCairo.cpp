@@ -317,8 +317,7 @@ namespace osmscout {
 
   MapPainterCairo::MapPainterCairo(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
-               new CoordBuffer()),
-    coordBuffer(transBuffer.buffer)
+               new CoordBuffer())
   {
     // no code
   }

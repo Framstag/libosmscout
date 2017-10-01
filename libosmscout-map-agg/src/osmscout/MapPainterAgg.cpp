@@ -39,8 +39,7 @@ namespace osmscout {
 
   MapPainterAgg::MapPainterAgg(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
-               new CoordBuffer()),
-    coordBuffer(transBuffer.buffer)
+               new CoordBuffer())
   {
     // no code
   }

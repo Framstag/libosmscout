@@ -43,9 +43,6 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
-  private:
-    CoordBuffer                            *coordBuffer;
-
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     typedef PangoFontDescription*          Font;
 #else

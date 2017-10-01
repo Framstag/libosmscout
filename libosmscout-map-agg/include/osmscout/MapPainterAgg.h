@@ -59,8 +59,6 @@ namespace osmscout {
     typedef agg::conv_contour<AggTextCurveConverter>           AggTextContourConverter;
 
   private:
-    CoordBuffer               *coordBuffer;
-
     AggPixelFormat            *pf;
     AggRenderBase             *renderer_base;
     AggScanlineRasterizer     *rasterizer;
