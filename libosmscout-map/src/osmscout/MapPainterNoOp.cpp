@@ -26,7 +26,7 @@ namespace osmscout {
 
   MapPainterNoOp::MapPainterNoOp(const StyleConfigRef& styleConfig)
           : MapPainter(styleConfig,
-                       new CoordBufferImpl<Vertex2D>())
+                       new CoordBuffer())
   {
     // no code
   }

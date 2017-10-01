@@ -152,24 +152,6 @@ namespace osmscout {
     return stream.eof();
   }
 
-  std::string StringListToString(const std::list<std::string>& list,
-                                 const std::string& separator)
-  {
-    std::string result;
-
-    for (auto element=list.begin(); element!=list.end(); ++element) {
-      if (element==list.begin()) {
-       result.append(*element);
-      }
-      else {
-        result.append(separator);
-        result.append(*element);
-      }
-    }
-
-    return result;
-  }
-
   size_t CountWords(const std::string& text)
   {
     size_t wordCount=0;
@@ -357,7 +339,7 @@ namespace osmscout {
         result+=' ';
       }
 
-      result=result+*currentToken;
+      result.append(*currentToken);
 
       ++currentToken;
     }
@@ -461,7 +443,7 @@ namespace osmscout {
     memset(&state,0,sizeof(state));
 
     size=std::mbsrtowcs(out,&in,text.length()+2,&state);
-    if (size!=(size_t)-1 && in==NULL) {
+    if (size!=(size_t)-1 && in==nullptr) {
       result=std::wstring(out,size);
     }
 
@@ -482,7 +464,7 @@ namespace osmscout {
     memset(&state,0,sizeof(state));
 
     size=std::wcsrtombs(out,&in,text.length()*4+1,&state);
-    if (size!=(size_t)-1 && in==NULL) {
+    if (size!=(size_t)-1 && in==nullptr) {
       result=std::string(out,size);
     }
 

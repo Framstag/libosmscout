@@ -35,8 +35,8 @@ namespace osmscout {
 
   MapPainterSVG::MapPainterSVG(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
-               new CoordBufferImpl<Vertex2D>()),
-    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
+               new CoordBuffer()),
+    coordBuffer(transBuffer.buffer),
     stream(NULL),
     typeConfig(NULL)
   {

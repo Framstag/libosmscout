@@ -336,7 +336,7 @@ namespace osmscout {
    * one dimensional projection, too.
    */
   extern OSMSCOUT_API uint64_t InterleaveNumbers(uint32_t a,
-                                    uint32_t b);
+                                                 uint32_t b);
 }
 
 #endif

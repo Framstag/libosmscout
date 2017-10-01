@@ -284,35 +284,6 @@ namespace osmscout {
     lon2=lon1+L*180.0/M_PI;
   }
 
-  /**
-   * Taken the path from A to B over a sphere return the bearing (0..2PI) at the starting point A.
-   */
-  double GetSphericalBearingInitial(double aLon, double aLat,
-                                    double bLon, double bLat)
-  {
-    aLon=aLon*M_PI/180;
-    aLat=aLat*M_PI/180;
-
-    bLon=bLon*M_PI/180;
-    bLat=bLat*M_PI/180;
-
-    double dLon=bLon-aLon;
-
-    double sindLon, sinaLat, sinbLat;
-    double cosdLon, cosaLat, cosbLat;
-    sincos(dLon, sindLon, cosdLon);
-    sincos(aLat, sinaLat, cosaLat);
-    sincos(bLat, sinbLat, cosbLat);
-
-    double y=sindLon*cosbLat;
-    double x=cosaLat*sinbLat-sinaLat*cosbLat*cosdLon;
-
-    double bearing=atan2(y,x);
-    //double bearing=fmod(atan2(y,x)+2*M_PI,2*M_PI);
-
-    return bearing;
-  }
-
   double GetSphericalBearingInitial(const GeoCoord& a,
                                     const GeoCoord& b)
   {
@@ -334,43 +305,6 @@ namespace osmscout {
     double x=cosaLat*sinbLat-sinaLat*cosbLat*cosdLon;
 
     double bearing=atan2(y,x);
-
-    return bearing;
-  }
-
-  /**
-   * Taken the path from A to B over a sphere return the bearing (0..2PI) at the destination point B.
-   */
-  double GetSphericalBearingFinal(double aLon, double aLat,
-                                  double bLon, double bLat)
-  {
-    aLon=aLon*M_PI/180;
-    aLat=aLat*M_PI/180;
-
-    bLon=bLon*M_PI/180;
-    bLat=bLat*M_PI/180;
-
-    double dLon=aLon-bLon;
-
-    double sindLon, sinaLat, sinbLat;
-    double cosdLon, cosaLat, cosbLat;
-    sincos(dLon, sindLon, cosdLon);
-    sincos(aLat, sinaLat, cosaLat);
-    sincos(bLat, sinbLat, cosbLat);
-
-    double y=sindLon*cosaLat;
-    double x=cosbLat*sinaLat-sinbLat*cosaLat*cosdLon;
-
-    double bearing=atan2(y,x);
-
-    if (bearing>=0) {
-      bearing-=M_PI;
-    }
-    else {
-      bearing+=M_PI;
-    }
-
-    //double bearing=fmod(atan2(y,x)+3*M_PI,2*M_PI);
 
     return bearing;
   }

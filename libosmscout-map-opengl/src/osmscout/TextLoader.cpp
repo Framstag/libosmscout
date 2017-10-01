@@ -80,7 +80,7 @@ namespace osmscout {
         sumWidth += 2;
       } else {
         texture->data = new unsigned char[bit.width*bit.rows];
-        for(int t = 0; t < bit.rows*bit.width; t++)
+        for(size_t t = 0; t < bit.rows*bit.width; t++)
           texture->data[t] = bit.buffer[t];
         texture->width = bit.width;
         texture->height = bit.rows;

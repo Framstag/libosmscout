@@ -322,7 +322,7 @@ namespace osmscout {
   template<typename N>
   struct StringToNumberTemplated<true, N>
   {
-    static inline unsigned int f(const std::string& string,
+    static inline bool f(const std::string& string,
                                  N& number,
                                  size_t base=10)
     {
@@ -333,7 +333,7 @@ namespace osmscout {
   template<typename N>
   struct StringToNumberTemplated<false, N>
   {
-    static inline unsigned int f(const std::string& string,
+    static inline bool f(const std::string& string,
                                  N& number,
                                  size_t base=10)
     {
@@ -350,7 +350,7 @@ namespace osmscout {
    *  "-13" => -13
    */
   template<typename N>
-  inline unsigned int StringToNumber(const std::string& string,
+  inline bool StringToNumber(const std::string& string,
                                      N& number,
                                      size_t base=10)
   {
@@ -372,8 +372,6 @@ namespace osmscout {
    * \ingroup Util
    *
    */
-  extern OSMSCOUT_API std::string StringListToString(const std::list<std::string>& list,
-                                                     const std::string& separator="/");
 
   extern OSMSCOUT_API size_t CountWords(const std::string& text);
 

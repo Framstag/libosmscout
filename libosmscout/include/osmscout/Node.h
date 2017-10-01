@@ -57,11 +57,6 @@ namespace osmscout {
       return fileOffset;
     }
 
-    inline FileOffset GetNextFileOffset() const
-    {
-      return nextFileOffset;
-    }
-
     inline ObjectFileRef GetObjectFileRef() const
     {
       return ObjectFileRef(fileOffset,refNode);
@@ -103,11 +98,6 @@ namespace osmscout {
     inline const FeatureInstance& GetFeature(size_t idx) const
     {
       return featureValueBuffer.GetType()->GetFeature(idx);
-    }
-
-    inline FeatureValue* GetFeatureValue(size_t idx) const
-    {
-      return featureValueBuffer.GetValue(idx);
     }
 
     inline void UnsetFeature(size_t idx)

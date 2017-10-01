@@ -110,7 +110,7 @@ namespace osmscout {
       Destination& destination;
 
     public:
-      Line(Destination& destination);
+      explicit Line(Destination& destination);
       virtual ~Line();
 
       inline Line& operator<<(const std::string& value)
@@ -248,62 +248,62 @@ namespace osmscout {
     class OSMSCOUT_API NoOpDestination : public Destination
     {
     public:
-      inline void Print(const std::string& /*value*/)
+      inline void Print(const std::string& /*value*/) override
       {
         // no code
       }
 
-      inline void Print(const char* /*value*/)
+      inline void Print(const char* /*value*/) override
       {
         // no code
       }
 
-      inline void Print(bool /*value*/)
+      inline void Print(bool /*value*/) override
       {
         // no code
       }
 
-      inline void Print(short /*value*/)
+      inline void Print(short /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned short /*value*/)
+      inline void Print(unsigned short /*value*/) override
       {
         // no code
       }
 
-      inline void Print(int /*value*/)
+      inline void Print(int /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned int /*value*/)
+      inline void Print(unsigned int /*value*/) override
       {
         // no code
       }
 
-      inline void Print(long /*value*/)
+      inline void Print(long /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned long /*value*/)
+      inline void Print(unsigned long /*value*/) override
       {
         // no code
       }
 
-      inline void Print(long long /*value*/)
+      inline void Print(long long /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned long long /*value*/)
+      inline void Print(unsigned long long /*value*/) override
       {
         // no code
       }
 
-      inline void PrintLn()
+      inline void PrintLn() override
       {
         // no code
       }
@@ -313,7 +313,7 @@ namespace osmscout {
     NoOpDestination destination;
 
   public:
-    inline Line Log(Level /*level*/)
+    inline Line Log(Level /*level*/) override
     {
       return Line(destination);
     }
@@ -339,20 +339,20 @@ namespace osmscout {
       std::ostream& stream;
 
     public:
-      StreamDestination(std::ostream& stream);
+      explicit StreamDestination(std::ostream& stream);
 
-      void Print(const std::string& value);
-      void Print(const char* value);
-      void Print(bool value);
-      void Print(short value);
-      void Print(unsigned short value);
-      void Print(int value);
-      void Print(unsigned int value);
-      void Print(long value);
-      void Print(unsigned long value);
-      void Print(long long value);
-      void Print(unsigned long long value);
-      void PrintLn();
+      void Print(const std::string& value) override;
+      void Print(const char* value) override;
+      void Print(bool value) override;
+      void Print(short value) override;
+      void Print(unsigned short value) override;
+      void Print(int value) override;
+      void Print(unsigned int value) override;
+      void Print(long value) override;
+      void Print(unsigned long value) override;
+      void Print(long long value) override;
+      void Print(unsigned long long value) override;
+      void PrintLn() override;
     };
 
   private:
@@ -363,7 +363,7 @@ namespace osmscout {
     StreamLogger(std::ostream& infoStream,
                  std::ostream& errorStream);
 
-    Line Log(Level level);
+    Line Log(Level level) override;
   };
 
   /**
