@@ -677,14 +677,13 @@ namespace osmscout
 	}
 
 	MapPainterDirectX::MapPainterDirectX(const StyleConfigRef& styleConfig, ID2D1Factory* pDirect2dFactory, IDWriteFactory* pWriteFactory)
-		: MapPainter(styleConfig, new CoordBufferImpl<Vertex2D>()),
+		: MapPainter(styleConfig, new CoordBuffer()),
 		m_pDirect2dFactory(pDirect2dFactory),
 		m_pWriteFactory(pWriteFactory),
 		m_pRenderTarget(NULL),
 		m_pImagingFactory(NULL),
 		dpiX(0.0f),
 		dpiY(0.0f),
-		coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
 		typeConfig(NULL)
 	{
 		pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);

@@ -61,7 +61,7 @@ namespace osmscout {
     {
       return nextFileOffset;
     }
-    
+
     inline ObjectFileRef GetObjectFileRef() const
     {
       return ObjectFileRef(fileOffset,refNode);

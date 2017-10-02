@@ -55,7 +55,6 @@ namespace osmscout {
 		ID2D1RenderTarget* m_pRenderTarget;
 		IWICImagingFactory* m_pImagingFactory;
 		FLOAT dpiX, dpiY;
-		CoordBufferImpl<Vertex2D>* coordBuffer;
 		std::map<FillStyle, std::string> fillStyleNameMap;
 		std::map<BorderStyle, std::string> borderStyleNameMap;
 		std::map<LineStyle, std::string> lineStyleNameMap;
