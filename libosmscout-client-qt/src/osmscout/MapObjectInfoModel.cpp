@@ -30,7 +30,7 @@ ready(false), setup(false), view(), lookupModule(NULL)
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
   this->mapDpi=OSMScoutQt::GetInstance().GetSettings()->GetMapDPI();
 
-  connect(lookupModule, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
+  connect(lookupModule, SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
           this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
           Qt::QueuedConnection);
 

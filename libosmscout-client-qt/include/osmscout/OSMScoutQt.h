@@ -28,6 +28,7 @@
 #include <osmscout/MapRenderer.h>
 #include <osmscout/Router.h>
 #include <osmscout/SearchModule.h>
+#include <osmscout/StyleModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -179,6 +180,7 @@ public:
   MapRenderer* MakeMapRenderer(RenderingType type);
   Router* MakeRouter();
   SearchModule *MakeSearchModule();
+  StyleModule *MakeStyleModule();
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

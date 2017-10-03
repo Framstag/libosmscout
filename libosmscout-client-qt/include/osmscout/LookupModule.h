@@ -74,7 +74,7 @@ private:
   std::map<QString,std::map<osmscout::FileOffset,AdminRegionInfoRef>> adminRegionCache;
 
 signals:
-  void InitialisationFinished(const DatabaseLoadedResponse& response);
+  void initialisationFinished(const DatabaseLoadedResponse& response);
   void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
 
   void locationDescription(const osmscout::GeoCoord location,

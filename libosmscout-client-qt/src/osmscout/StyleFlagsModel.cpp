@@ -24,22 +24,36 @@
 StyleFlagsModel::StyleFlagsModel():
   QAbstractListModel()
 {
-  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
-          this,SLOT(onStyleChanged()),
+  styleModule=OSMScoutQt::GetInstance().MakeStyleModule();
+
+  connect(styleModule,SIGNAL(styleFlagsChanged(QMap<QString,bool>)),
+          this,SLOT(onStyleFlagsChanged(QMap<QString,bool>)),
           Qt::QueuedConnection);
-  onStyleChanged();
+  connect(this,SIGNAL(styleFlagsRequested()),
+          styleModule,SLOT(onStyleFlagsRequested()),
+          Qt::QueuedConnection);
+  connect(this,SIGNAL(setFlagRequest(QString,bool)),
+          styleModule,SLOT(onSetFlagRequest(QString,bool)),
+          Qt::QueuedConnection);
+  connect(styleModule,SIGNAL(flagSet(QString,bool)),
+          this,SLOT(onFlagSet(QString,bool)),
+          Qt::QueuedConnection);
+
+  emit styleFlagsRequested();
 }
 
 StyleFlagsModel::~StyleFlagsModel()
 {
+  if (styleModule!=NULL){
+    styleModule->deleteLater();
+    styleModule=NULL;
+  }
 }
 
-void StyleFlagsModel::onStyleChanged()
+void StyleFlagsModel::onStyleFlagsChanged(QMap<QString,bool> flags)
 {
   beginResetModel();
-  DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  mapFlags=dbThread->GetStyleFlags();
+  mapFlags=flags;
   endResetModel();
 }
 
@@ -56,6 +70,8 @@ QVariant StyleFlagsModel::data(const QModelIndex &index, int role) const
       return key;
     case ValueRole:
       return mapFlags[key];
+    case InProgressRole:
+      return inProgressFlags.contains(key);
   }
   return QVariant();
 }
@@ -64,8 +80,9 @@ QHash<int, QByteArray> StyleFlagsModel::roleNames() const
 {
   QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
 
-  roles[KeyRole]   = "key";
-  roles[ValueRole] = "value";
+  roles[KeyRole]        = "key";
+  roles[ValueRole]      = "value";
+  roles[InProgressRole] = "inProgress";
 
   return roles;
 }
@@ -73,22 +90,32 @@ QHash<int, QByteArray> StyleFlagsModel::roleNames() const
 Qt::ItemFlags StyleFlagsModel::flags(const QModelIndex &index) const
 {
   if(!index.isValid()) {
-      return Qt::ItemIsEnabled;
+    return Qt::ItemIsEnabled;
   }
 
   return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
+void StyleFlagsModel::onFlagSet(QString key, bool value)
+{
+  beginResetModel();
+  qDebug() << "Setup style flag" << key << "to" << value;
+  inProgressFlags.remove(key);
+  endResetModel();
+}
+
 Q_INVOKABLE void StyleFlagsModel::setFlag(const QString &key, bool value)
 {
-  qDebug() << "Setup style flag" << key << "to" << value;
-  DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-  dbThread->SetStyleFlag(key, value);
-  QMap<QString,bool> updated=dbThread->GetStyleFlags();
-  
+  beginResetModel();
+  qDebug() << "Request style flag" << key << "to" << value;
+  inProgressFlags.insert(key);
+  mapFlags[key]=value;
+  endResetModel();
+  emit setFlagRequest(key, value);
+
   std::unordered_map<std::string,bool> flags;
-  for (const auto &key:updated.keys()){
-    flags[key.toStdString()]=updated[key];
+  for (const auto &key:mapFlags.keys()){
+    flags[key.toStdString()]=mapFlags[key];
   }
   SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
   settings->SetStyleSheetFlags(flags);

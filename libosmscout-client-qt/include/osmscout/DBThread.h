@@ -120,7 +120,7 @@ public:
   typedef std::function<void(const std::list<DBInstanceRef>&)> SynchronousDBJob;
 
 signals:
-  void InitialisationFinished(const DatabaseLoadedResponse& response);
+  void initialisationFinished(const DatabaseLoadedResponse& response);
   void TriggerInitialRendering();
   void stylesheetFilenameChanged();
   void databaseLoadFinished(osmscout::GeoBox boundingBox);

@@ -133,6 +133,8 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<uint32_t>("uint32_t");
   qRegisterMetaType<AdminRegionInfoRef>("AdminRegionInfoRef");
   qRegisterMetaType<QList<AdminRegionInfoRef>>("QList<AdminRegionInfoRef>");
+  qRegisterMetaType<std::unordered_map<std::string,bool>>("std::unordered_map<std::string,bool>");
+  qRegisterMetaType<QMap<QString,bool>>("QMap<QString,bool>");
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -213,6 +215,18 @@ SearchModule* OSMScoutQt::MakeSearchModule()
   QThread *thread=new QThread();
   thread->setObjectName("SearchModule");
   SearchModule *module=new SearchModule(thread,dbThread,MakeLookupModule());
+  module->moveToThread(thread);
+  thread->start();
+  QObject::connect(thread, SIGNAL(finished()),
+                   thread, SLOT(deleteLater()));
+  return module;
+}
+
+StyleModule* OSMScoutQt::MakeStyleModule()
+{
+  QThread *thread=new QThread();
+  thread->setObjectName("StyleModule");
+  StyleModule *module=new StyleModule(thread,dbThread);
   module->moveToThread(thread);
   thread->start();
   QObject::connect(thread, SIGNAL(finished()),
