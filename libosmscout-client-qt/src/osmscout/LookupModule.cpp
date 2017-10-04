@@ -28,8 +28,8 @@ LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
   loadJob(NULL)
 {
 
-  connect(dbThread.get(), SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
-          this, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)));
+  connect(dbThread.get(), SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
+          this, SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)));
 }
 
 LookupModule::~LookupModule()
@@ -42,7 +42,7 @@ LookupModule::~LookupModule()
   }
 }
 
-void LookupModule::requestObjectsOnView(const RenderMapRequest &view)
+void LookupModule::requestObjectsOnView(const MapViewStruct &view)
 {
   double mapDpi=dbThread->GetMapDpi();
 

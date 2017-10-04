@@ -28,7 +28,7 @@ LocationInfoModel::LocationInfoModel():
 {
     lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
 
-    connect(lookupModule, SIGNAL(InitialisationFinished(const DatabaseLoadedResponse&)),
+    connect(lookupModule, SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
             this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
             Qt::QueuedConnection);
     

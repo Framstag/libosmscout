@@ -30,6 +30,9 @@
 #include <osmscout/private/ClientQtImportExport.h>
 #include <osmscout/OverlayWay.h>
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API DBRenderJob : public DBJob{
   Q_OBJECT
 private:
@@ -61,6 +64,9 @@ public:
   };
 };
 
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API MapRenderer : public QObject {
   Q_OBJECT
 
@@ -116,7 +122,7 @@ public:
    * @return true if rendered map is complete
    */
   virtual bool RenderMap(QPainter& painter,
-                         const RenderMapRequest& request) = 0;
+                         const MapViewStruct& request) = 0;
 
   void addOverlayWay(int id,OverlayWayRef way);
 

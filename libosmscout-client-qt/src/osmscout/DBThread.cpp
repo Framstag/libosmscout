@@ -32,11 +32,11 @@
 
 DBThread::DBThread(QThread *backgroundThread,
                    QString basemapLookupDirectory,
-                   QStringList databaseLookupDirs,
                    QString iconDirectory,
-                   SettingsRef settings)
+                   SettingsRef settings,
+                   MapManagerRef mapManager)
   : backgroundThread(backgroundThread),
-    mapManager(std::make_shared<MapManager>(databaseLookupDirs, settings)),
+    mapManager(mapManager),
     basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
     mapDpi(-1),
