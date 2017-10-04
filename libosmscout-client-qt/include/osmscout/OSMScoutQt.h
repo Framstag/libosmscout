@@ -151,6 +151,36 @@ enum RenderingType {
 
 /**
  * \ingroup QtAPI
+ *
+ * Singleton that provides access to high level modules of OSMScout library.
+ * On application start should be registered Qt types by static method \ref RegisterQmlTypes().
+ * OSMScoutQt instance may be created by \ref NewInstance() and accessed
+ * by \ref GetInstance() then.
+ * To free resources should be called \ref FreeInstance()
+ * before program exits.
+ *
+ * Example:
+ * ```
+ * OSMScoutQt::RegisterQmlTypes();
+ *
+ * bool success=OSMScoutQt::NewInstance()
+ *      .WithBasemapLookupDirectory(basemapDir)
+ *      .WithStyleSheetDirectory(stylesheetDir)
+ *      .WithStyleSheetFile(stylesheetFileName)
+ *      .WithIconDirectory(iconDirectory)
+ *      .WithMapLookupDirectories(mapLookupDirectories)
+ *      .WithOnlineTileProviders(":/resources/online-tile-providers.json")
+ *      .WithMapProviders(":/resources/map-providers.json")
+ *      .Init();
+ *
+ * if (!success){
+ *   // terminate program, or just report error - something is really bad
+ * }
+ *
+ * // now it is possible to access OSMScoutQt by OSMScoutQt::GetInstance()
+ *
+ * OSMScoutQt::FreeInstance();
+ * ```
  */
 class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
   friend class OSMScoutQtBuilder;
