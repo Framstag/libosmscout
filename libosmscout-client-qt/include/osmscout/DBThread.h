@@ -46,7 +46,7 @@
 /**
  * \ingroup QtAPI
  */
-struct RenderMapRequest
+struct MapViewStruct
 {
   osmscout::GeoCoord      coord;
   double                  angle;
@@ -55,9 +55,9 @@ struct RenderMapRequest
   size_t                  height;
 };
 
-Q_DECLARE_METATYPE(RenderMapRequest)
+Q_DECLARE_METATYPE(MapViewStruct)
 
-inline bool operator!=(const RenderMapRequest &r1, const RenderMapRequest &r2)
+inline bool operator!=(const MapViewStruct &r1, const MapViewStruct &r2)
 {
     return r1.coord!=r2.coord ||
       r1.angle!=r2.angle ||
@@ -76,6 +76,10 @@ struct DatabaseLoadedResponse
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)
 
+/**
+ * \ingroup QtAPI
+ * \see DBThread::databaseCoverage
+ */
 enum DatabaseCoverage{
   Outside = 0,
   Covered = 1,
@@ -85,29 +89,16 @@ enum DatabaseCoverage{
 /**
  * \ingroup QtAPI
  *
- * Abstract object that manage osmscout database intances (\ref DBInstance)
- * and provides simple thread-safe, asynchronous api for it.
- * It don't provide map rendering, it is implented in its sublasses (\ref TiledDBThread
- * and \ref PlaneDBThread).
+ * Central object that manage database instances (\ref DBInstance),
+ * its map styles (there is one global map style now)
+ * and provides simple thread-safe, asynchronous api for accessing it.
  *
- * DBThread is singleton, it should be initialized at application start by calling
- * static function DBThread::InitializeTiledInstance or DBThread::InitializePlaneInstance
- * (it depends what map redering implementation do you want to use).
+ * DBThread is de facto singleton, that is created and accessible by OSMScoutQt.
  *
- * After initialization, it should be moved to some non gui thread, to be sure that
- * database operations will not block UI.
- *
- * ```
- * QThread thread;
- * DBThread* dbThread=DBThread::GetInstance();
- *
- * dbThread->connect(&thread, SIGNAL(started()), SLOT(Initialize()));
- * dbThread->connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
- *
- * dbThread->moveToThread(&thread);
- * ```
- *
- * Before application exits, resources should be released by calling static function DBThread::FreeInstance.
+ * List of databases is protected by read-write lock. There may be multiple
+ * readers at one time. DBThread warrants that none database will be closed
+ * or modified (except thread-safe caches) when read lock is hodl.
+ * Databases may be accessed via \see RunJob or \see RunSynchronousJob methods.
  */
 class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 {
@@ -171,9 +162,9 @@ protected:
 public:
   DBThread(QThread *backgroundThread,
            QString basemapLookupDirectory,
-           QStringList databaseLookupDirectories,
            QString iconDirectory,
-           SettingsRef settings);
+           SettingsRef settings,
+           MapManagerRef mapManager);
 
   virtual ~DBThread();
 
@@ -196,16 +187,6 @@ public:
 
   double GetPhysicalDpi() const;
 
-  inline MapManagerRef GetMapManager() const
-  {
-    return mapManager;
-  }
-
-  inline SettingsRef GetSettings() const
-  {
-    return settings;
-  }
-
   inline QString GetStylesheetFilename() const
   {
     return stylesheetFilename;
@@ -218,7 +199,34 @@ public:
 
   const QMap<QString,bool> GetStyleFlags() const;
 
+  /**
+   * Submit asynchronous job that will retrieve list
+   * of initialized databases and pointer to \ref QReadLocker.
+   * Job is responsible for releasing lock when its task
+   * is finished.
+   *
+   * @param job
+   */
   void RunJob(DBJob *job);
+
+  /**
+   * Submit synchronous job (simple lambda function)
+   * that will get access to list of initialized databases.
+   * Database read lock is hold until job is running.
+   * Lock is released automatically then. Database instances
+   * should not be accessed after it.
+   *
+   * Example:
+   * ```
+   * dbThread->RunSynchronousJob(
+   *   [&](const std::list<DBInstanceRef> &databases){
+   *     // read data from databases...
+   *   }
+   * );
+   * ```
+   *
+   * @param job
+   */
   void RunSynchronousJob(SynchronousDBJob job);
 
 };

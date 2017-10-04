@@ -156,16 +156,18 @@ class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
   friend class OSMScoutQtBuilder;
 
 private:
-  QThread     *backgroundThread;
-  SettingsRef settings;
-  DBThreadRef dbThread;
-  QString     iconDirectory;
-  QString     cacheLocation;
-  size_t      onlineTileCacheSize;
-  size_t      offlineTileCacheSize;
+  QThread       *backgroundThread;
+  SettingsRef   settings;
+  MapManagerRef mapManager;
+  DBThreadRef   dbThread;
+  QString       iconDirectory;
+  QString       cacheLocation;
+  size_t        onlineTileCacheSize;
+  size_t        offlineTileCacheSize;
 
 private:
   OSMScoutQt(SettingsRef settings,
+             MapManagerRef mapManager,
              DBThreadRef dbThread,
              QString iconDirectory,
              QString cacheLocation,
@@ -174,8 +176,10 @@ private:
 public:
   virtual ~OSMScoutQt();
 
-  DBThreadRef GetDBThread();
-  SettingsRef GetSettings();
+  DBThreadRef GetDBThread() const;
+  SettingsRef GetSettings() const;
+  MapManagerRef GetMapManager() const;
+
   LookupModule* MakeLookupModule();
   MapRenderer* MakeMapRenderer(RenderingType type);
   Router* MakeRouter();

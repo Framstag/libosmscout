@@ -52,8 +52,8 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
   // else we might get into a dead lock
   //
 
-  connect(this,SIGNAL(TriggerMapRenderingSignal(const RenderMapRequest&)),
-          this,SLOT(TriggerMapRendering(const RenderMapRequest&)),
+  connect(this,SIGNAL(TriggerMapRenderingSignal(const MapViewStruct&)),
+          this,SLOT(TriggerMapRendering(const MapViewStruct&)),
           Qt::QueuedConnection);
 
   connect(this,SIGNAL(TriggerInitialRendering()),
@@ -108,7 +108,7 @@ void PlaneMapRenderer::InvalidateVisualCache()
  * @return true if rendered map is complete
  */
 bool PlaneMapRenderer::RenderMap(QPainter& painter,
-                                 const RenderMapRequest& request)
+                                 const MapViewStruct& request)
 {
   //qDebug() << "RenderMap()";
 
@@ -218,7 +218,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                     *finishedImage,
                     sourceRectangle);
 
-  RenderMapRequest extendedRequest=request;
+  MapViewStruct extendedRequest=request;
   extendedRequest.width*=canvasOverrun;
   extendedRequest.height*=canvasOverrun;
   bool needsNoRepaint=finishedImage->width()==(int) extendedRequest.width &&
@@ -409,7 +409,7 @@ void PlaneMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
   emit TriggerDrawMap();
 }
 
-void PlaneMapRenderer::TriggerMapRendering(const RenderMapRequest& request)
+void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
 {
   {
     QMutexLocker reqLocker(&lastRequestMutex);

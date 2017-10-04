@@ -70,12 +70,12 @@ private:
   QThread          *thread;
   DBThreadRef      dbThread;
   DBLoadJob        *loadJob;
-  RenderMapRequest view;
+  MapViewStruct view;
   std::map<QString,std::map<osmscout::FileOffset,AdminRegionInfoRef>> adminRegionCache;
 
 signals:
   void initialisationFinished(const DatabaseLoadedResponse& response);
-  void viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
+  void viewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&);
 
   void locationDescription(const osmscout::GeoCoord location,
                            const QString database,
@@ -88,7 +88,7 @@ signals:
   void locationAdminRegionFinished(const osmscout::GeoCoord location);
 
 public slots:
-  void requestObjectsOnView(const RenderMapRequest&);
+  void requestObjectsOnView(const MapViewStruct&);
   void onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles);
 

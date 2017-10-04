@@ -85,12 +85,14 @@ bool OSMScoutQtBuilder::Init()
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
 
+  MapManagerRef mapManager=std::make_shared<MapManager>(mapLookupDirectories, settings);
+
   QThread *thread=new QThread();
   DBThreadRef dbThread=std::make_shared<DBThread>(thread,
                                                   basemapLookupDirectory,
-                                                  mapLookupDirectories,
                                                   iconDirectory,
-                                                  settings);
+                                                  settings,
+                                                  mapManager);
 
   thread->setObjectName("DBThread");
 
@@ -102,6 +104,7 @@ bool OSMScoutQtBuilder::Init()
   thread->start();
 
   osmScoutInstance=new OSMScoutQt(settings,
+                                  mapManager,
                                   dbThread,
                                   iconDirectory,
                                   cacheLocation,
@@ -127,7 +130,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<osmscout::Vehicle>("osmscout::Vehicle");
   qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
   qRegisterMetaType<QList<QDir>>("QList<QDir>");
-  qRegisterMetaType<RenderMapRequest>("RenderMapRequest");
+  qRegisterMetaType<MapViewStruct>("MapViewStruct");
   qRegisterMetaType<RouteSelectionRef>("RouteSelectionRef");
   qRegisterMetaType<RouteSelection>("RouteSelection");
   qRegisterMetaType<uint32_t>("uint32_t");
@@ -170,12 +173,14 @@ void OSMScoutQt::FreeInstance()
 }
 
 OSMScoutQt::OSMScoutQt(SettingsRef settings,
+                       MapManagerRef mapManager,
                        DBThreadRef dbThread,
                        QString iconDirectory,
                        QString cacheLocation,
                        size_t onlineTileCacheSize,
                        size_t offlineTileCacheSize):
         settings(settings),
+        mapManager(mapManager),
         dbThread(dbThread),
         iconDirectory(iconDirectory),
         cacheLocation(cacheLocation),
@@ -188,14 +193,19 @@ OSMScoutQt::~OSMScoutQt()
 {
 }
 
-DBThreadRef OSMScoutQt::GetDBThread()
+DBThreadRef OSMScoutQt::GetDBThread() const
 {
   return dbThread;
 }
 
-SettingsRef OSMScoutQt::GetSettings()
+SettingsRef OSMScoutQt::GetSettings() const
 {
   return settings;
+}
+
+MapManagerRef OSMScoutQt::GetMapManager() const
+{
+  return mapManager;
 }
 
 LookupModule* OSMScoutQt::MakeLookupModule()

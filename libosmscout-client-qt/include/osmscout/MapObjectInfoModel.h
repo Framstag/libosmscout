@@ -52,14 +52,14 @@ public:
 
 signals:
   void readyChange(bool ready);
-  void objectsRequested(const RenderMapRequest &view);
+  void objectsRequested(const MapViewStruct &view);
 
 public slots:
   void dbInitialized(const DatabaseLoadedResponse&);
   void setPosition(QObject *mapView,
                    const int width, const int height,
                    const int screenX, const int screenY);
-  void onViewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&);
+  void onViewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&);
 
 private:
   void update();
@@ -105,7 +105,7 @@ private:
   bool setup;
   QList<ObjectKey> objectSet; // set of objects already inserted to model
   QList<QMap<int, QVariant>> model;
-  RenderMapRequest view;
+  MapViewStruct view;
   int screenX;
   int screenY;
   QList<osmscout::MapData> mapData;

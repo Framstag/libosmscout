@@ -34,12 +34,12 @@ ready(false), setup(false), view(), lookupModule(NULL)
           this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
           Qt::QueuedConnection);
 
-  connect(this, SIGNAL(objectsRequested(const RenderMapRequest &)),
-          lookupModule, SLOT(requestObjectsOnView(const RenderMapRequest&)),
+  connect(this, SIGNAL(objectsRequested(const MapViewStruct &)),
+          lookupModule, SLOT(requestObjectsOnView(const MapViewStruct&)),
           Qt::QueuedConnection);
 
-  connect(lookupModule, SIGNAL(viewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
-          this, SLOT(onViewObjectsLoaded(const RenderMapRequest&, const osmscout::MapData&)),
+  connect(lookupModule, SIGNAL(viewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&)),
+          this, SLOT(onViewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&)),
           Qt::QueuedConnection);
 }
 
@@ -104,7 +104,7 @@ void MapObjectInfoModel::setPosition(QObject *o,
       qWarning() << "Failed to cast " << o << " to MapView*.";
       return;
   }
-  RenderMapRequest r;
+  MapViewStruct r;
   r.angle=mapView->angle;
   r.coord=mapView->center;
   r.width=width;
@@ -129,7 +129,7 @@ void MapObjectInfoModel::setPosition(QObject *o,
   setup=true;
 }
 
-void MapObjectInfoModel::onViewObjectsLoaded(const RenderMapRequest &view,
+void MapObjectInfoModel::onViewObjectsLoaded(const MapViewStruct &view,
                                              const osmscout::MapData &data)
 {
   if (this->view!=view){

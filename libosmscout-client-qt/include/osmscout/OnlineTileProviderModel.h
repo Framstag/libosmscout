@@ -82,8 +82,8 @@ class OSMSCOUT_CLIENT_QT_API OnlineTileProviderModel : public QAbstractListModel
 public:
   inline OnlineTileProviderModel()
   {
-      DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-      onlineProviders=dbThread->GetSettings()->GetOnlineProviders();
+    auto settings=OSMScoutQt::GetInstance().GetSettings();
+    onlineProviders=settings->GetOnlineProviders();
   };
   
   virtual inline ~OnlineTileProviderModel(){};

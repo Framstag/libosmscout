@@ -42,7 +42,7 @@ LookupModule::~LookupModule()
   }
 }
 
-void LookupModule::requestObjectsOnView(const RenderMapRequest &view)
+void LookupModule::requestObjectsOnView(const MapViewStruct &view)
 {
   double mapDpi=dbThread->GetMapDpi();
 
