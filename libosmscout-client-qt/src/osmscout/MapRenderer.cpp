@@ -294,10 +294,16 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                                      data.groundTiles);
     }
 
-    success&=db->GetPainter()->DrawMap(renderProjection,
-                                       *drawParameter,
-                                       data,
-                                       p);
+    auto painter=db->GetPainter();
+    if (painter) {
+      success &= painter->DrawMap(renderProjection,
+                                  *drawParameter,
+                                  data,
+                                  p);
+    }else{
+      osmscout::log.Warn() << "Painter is not available for database: " << db->path.toStdString();
+      success=false;
+    }
   }
   Close();
 }

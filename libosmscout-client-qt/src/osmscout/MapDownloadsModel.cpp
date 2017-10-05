@@ -24,7 +24,7 @@
 MapDownloadsModel::MapDownloadsModel(QObject *parent):
   QAbstractListModel(parent){
 
-  mapManager=OSMScoutQt::GetInstance().GetDBThread()->GetMapManager();
+  mapManager=OSMScoutQt::GetInstance().GetMapManager();
   connect(mapManager.get(), SIGNAL(downloadJobsChanged()), this, SLOT(onDownloadJobsChanged()));
   connect(mapManager.get(), SIGNAL(mapDownloadFails(QString)), this, SIGNAL(mapDownloadFails(QString)));
   onDownloadJobsChanged();
@@ -32,7 +32,7 @@ MapDownloadsModel::MapDownloadsModel(QObject *parent):
 
 QString MapDownloadsModel::suggestedDirectory(QVariant mapVar, QString rootDirectory)
 {
-  auto mapManager=OSMScoutQt::GetInstance().GetDBThread()->GetMapManager();
+  auto mapManager=OSMScoutQt::GetInstance().GetMapManager();
   auto directories=mapManager->getLookupDirectories();
   auto it=directories.begin();
   QString path=rootDirectory;

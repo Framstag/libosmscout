@@ -136,8 +136,8 @@ public: // TODO: make it private, ensure thread safety
    * Get or create thread local MapPainter instance for this map
    * \note To make sure that painter will not be destroyed during usage,
    * read-lock for databases should be held.
-   * \warning It may be null when styleConfig is not provided!
-   * @return
+   * \warning It may be null when styleConfig is not loaded!
+   * @return pointer to thread-local painter
    */
   osmscout::MapPainterQt* GetPainter();
 

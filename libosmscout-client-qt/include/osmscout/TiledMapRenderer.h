@@ -117,7 +117,7 @@ public:
    * @return true if rendered map is complete
    */
   virtual bool RenderMap(QPainter& painter,
-                         const RenderMapRequest& request);
+                         const MapViewStruct& request);
 };
 
 #endif /* TILEDMAPRENDERER_H */

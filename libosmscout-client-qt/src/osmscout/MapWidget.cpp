@@ -43,12 +43,13 @@ MapWidget::MapWidget(QQuickItem* parent)
     setAcceptHoverEvents(true);
 
     renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    auto settings=OSMScoutQt::GetInstance().GetSettings();
 
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
 
-    mapDpi = dbThread->GetSettings()->GetMapDPI();
+    mapDpi = settings->GetMapDPI();
 
-    connect(dbThread->GetSettings().get(), SIGNAL(MapDPIChange(double)),
+    connect(settings.get(), SIGNAL(MapDPIChange(double)),
             this, SLOT(onMapDPIChange(double)));
 
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
@@ -230,8 +231,6 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
-    //DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-
     bool animationInProgress = inputHandler->animationInProgress();
 
     painter->setRenderHint(QPainter::Antialiasing, !animationInProgress);
@@ -239,8 +238,8 @@ void MapWidget::paint(QPainter *painter)
     painter->setRenderHint(QPainter::SmoothPixmapTransform, !animationInProgress);
     painter->setRenderHint(QPainter::HighQualityAntialiasing, !animationInProgress);
 
-    RenderMapRequest request;
-    QRectF           boundingBox = contentsBoundingRect();
+    MapViewStruct request;
+    QRectF        boundingBox = contentsBoundingRect();
 
     request.coord = view->center;
     request.angle = view->angle;
