@@ -133,6 +133,8 @@ if(THREADS_HAVE_PTHREAD_ARG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${THREADS_PTHREAD_ARG}")
 endif()
 
+find_program(HUGO_PATH hugo)
+
 # prepare cmake variables for configuration files
 set(OSMSCOUT_HAVE_INT16_T ${HAVE_INT16_T})
 set(OSMSCOUT_HAVE_INT32_T ${HAVE_INT32_T})
