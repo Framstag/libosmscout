@@ -52,10 +52,20 @@ namespace osmscout {
     mutable uint8_t                 bytesForNodeFileOffset;
     mutable uint8_t                 bytesForAreaFileOffset;
     mutable uint8_t                 bytesForWayFileOffset;
-    std::unordered_set<std::string> regionIgnoreTokens;
-    std::unordered_set<std::string> locationIgnoreTokens;
+    std::vector<std::string>        regionIgnoreTokens;
+    std::unordered_set<std::string> regionIgnoreTokenSet;
+    std::vector<std::string>        poiIgnoreTokens;
+    std::unordered_set<std::string> poiIgnoreTokenSet;
+    std::vector<std::string>        locationIgnoreTokens;
+    std::unordered_set<std::string> locationIgnoreTokenSet;
+    uint32_t                        minRegionChars;
+    uint32_t                        maxRegionChars;
+    uint32_t                        minRegionWords;
     uint32_t                        maxRegionWords;
     uint32_t                        maxPOIWords;
+    uint32_t                        minLocationChars;
+    uint32_t                        maxLocationChars;
+    uint32_t                        minLocationWords;
     uint32_t                        maxLocationWords;
     uint32_t                        maxAddressWords;
     FileOffset                      indexOffset;
@@ -85,6 +95,11 @@ namespace osmscout {
                          bool& stopped) const;
 
 
+    bool VisitLocations(const AdminRegion& adminRegion,
+                        FileScanner& scanner,
+                        LocationVisitor& visitor,
+                        bool& stopped) const;
+
     bool VisitPostalAreaLocations(const AdminRegion& adminRegion,
                                   const PostalArea& postalArea,
                                   FileScanner& scanner,
@@ -99,13 +114,48 @@ namespace osmscout {
                        bool& stopped) const;
 
   public:
-    LocationIndex();
-    virtual ~LocationIndex();
+    LocationIndex() = default;
+    virtual ~LocationIndex() = default;
 
     bool Load(const std::string& path);
 
+    const std::vector<std::string>& GetRegionIgnoreTokens() const
+    {
+      return regionIgnoreTokens;
+    }
+
+    const std::vector<std::string>& GetPOIIgnoreTokens() const
+    {
+      return poiIgnoreTokens;
+    }
+
+    const std::vector<std::string>& GetLocationIgnoreTokens() const
+    {
+      return locationIgnoreTokens;
+    }
+
     bool IsRegionIgnoreToken(const std::string& token) const;
     bool IsLocationIgnoreToken(const std::string& token) const;
+
+    inline uint32_t GetRegionMaxWords() const
+    {
+      return maxRegionWords;
+    }
+
+    inline uint32_t GetPOIMaxWords() const
+    {
+      return maxPOIWords;
+    }
+
+    inline uint32_t GetLocationMaxWords() const
+    {
+      return maxLocationWords;
+    }
+
+    inline uint32_t GetAddressMaxWords() const
+    {
+      return maxAddressWords;
+    }
 
     /**
      * Visit all admin regions
@@ -120,7 +170,13 @@ namespace osmscout {
                    bool recursive=true) const;
 
     /**
-     * Visit all locations within the given admin region
+     * Visit all locations within the given admin region and its children
+     */
+    bool VisitLocations(const AdminRegion& adminRegion,
+                        LocationVisitor& visitor) const;
+
+    /**
+     * Visit all locations within the given admin region and postal region
      */
     bool VisitLocations(const AdminRegion& adminRegion,
                         const PostalArea& postalArea,

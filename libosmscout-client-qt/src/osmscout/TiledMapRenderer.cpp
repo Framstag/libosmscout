@@ -125,7 +125,7 @@ void TiledMapRenderer::InvalidateVisualCache()
  * @return true if rendered map is complete
  */
 bool TiledMapRenderer::RenderMap(QPainter& painter,
-                                 const RenderMapRequest& request)
+                                 const MapViewStruct& request)
 {
   osmscout::MercatorProjection projection;
 

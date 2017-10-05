@@ -1,5 +1,5 @@
-#ifndef MAPSTYLEMODEL_H
-#define	MAPSTYLEMODEL_H
+#ifndef OSMSCOUT_CLIENT_QT_MAPSTYLEMODEL_H
+#define	OSMSCOUT_CLIENT_QT_MAPSTYLEMODEL_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -24,6 +24,7 @@
 #include <QAbstractListModel>
 #include <QFileInfo>
 
+#include <osmscout/StyleModule.h>
 #include <osmscout/private/ClientQtImportExport.h>
 
 /**
@@ -34,8 +35,12 @@ class OSMSCOUT_CLIENT_QT_API MapStyleModel: public QAbstractListModel
   Q_OBJECT
   Q_PROPERTY(QString  style  READ getStyle  WRITE setStyle  NOTIFY styleChanged)
 
+private:
+  StyleModule *styleModule;
+
 signals:
   void styleChanged();
+  void loadStyleRequested(QString,std::unordered_map<std::string,bool>);
   
 public:
   enum Roles {
@@ -48,7 +53,7 @@ public:
   virtual ~MapStyleModel();
  
   QString getStyle() const;
-  void setStyle(const QString &style) const;
+  void setStyle(const QString &style);
 
   Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
   {
@@ -66,5 +71,5 @@ private:
   QList<QFileInfo> stylesheets;
 };
 
-#endif	/* MAPSTYLEHELPER_H */
+#endif	/* OSMSCOUT_CLIENT_QT_MAPSTYLEHELPER_H */
 

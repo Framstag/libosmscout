@@ -26,6 +26,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
@@ -37,7 +39,7 @@ namespace osmscout {
    * Implementation is OS specific, if GetValue() retutns 0.0 for each value there is likely no
    * implementation for your OS.
    */
-  class OSMSCOUT_API MemoryMonitor
+  class OSMSCOUT_API MemoryMonitor CLASS_FINAL
   {
   private:
     std::atomic<bool> quit;

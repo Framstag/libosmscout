@@ -35,10 +35,9 @@ namespace osmscout {
 
   MapPainterSVG::MapPainterSVG(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
-               new CoordBufferImpl<Vertex2D>()),
-    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
-    stream(NULL),
-    typeConfig(NULL)
+               new CoordBuffer()),
+    stream(nullptr),
+    typeConfig(nullptr)
   {
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
 #if !defined(GLIB_VERSION_2_36)
@@ -59,7 +58,7 @@ namespace osmscout {
     for (FontMap::const_iterator entry=fonts.begin();
          entry!=fonts.end();
          ++entry) {
-      if (entry->second!=NULL) {
+      if (entry->second!=nullptr) {
         pango_font_description_free(entry->second);
       }
     }

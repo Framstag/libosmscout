@@ -23,7 +23,7 @@
 
 namespace osmscout {
 
-  class LineSegment
+  class LineSegment CLASS_FINAL
   {
   private:
     TransPolygon::TransPoint ref;
@@ -59,11 +59,6 @@ namespace osmscout {
       double dy=cy-u*ydelta; // *-1 but we square below
 
       return dx*dx+dy*dy;
-    }
-
-    double CalculateDistance(const TransPolygon::TransPoint& p)
-    {
-      return sqrt(CalculateDistanceSquared(p));
     }
   };
 
@@ -167,12 +162,124 @@ namespace osmscout {
                                    optimizeErrorToleranceSquared);
   }
 
+  CoordBuffer::CoordBuffer()
+    : bufferSize(131072),
+      usedPoints(0),
+      buffer(new Vertex2D[bufferSize])
+  {
+    // no code
+  }
+
+  CoordBuffer::~CoordBuffer()
+  {
+    delete [] buffer;
+  }
+
+  void CoordBuffer::Reset()
+  {
+    usedPoints=0;
+  }
+
+  size_t CoordBuffer::PushCoord(double x, double y)
+  {
+    if (usedPoints>=bufferSize) {
+      bufferSize=bufferSize*2;
+
+      Vertex2D* newBuffer=new Vertex2D[bufferSize];
+
+      memcpy(newBuffer,buffer,sizeof(Vertex2D)*usedPoints);
+
+      log.Warn() << "*** Buffer reallocation: " << bufferSize;
+
+      delete [] buffer;
+
+      buffer=newBuffer;
+    }
+
+    buffer[usedPoints].Set(x,y);
+
+    return usedPoints++;
+  }
+
+  bool CoordBuffer::GenerateParallelWay(size_t orgStart,
+                                        size_t orgEnd,
+                                        double offset,
+                                        size_t& start,
+                                        size_t& end)
+  {
+    if (orgStart+1>orgEnd) {
+      // To avoid "not initialized" warnings
+      return false;
+    }
+
+    double oax,oay;
+    double obx,oby;
+
+
+    Normalize(buffer[orgStart].GetY()-buffer[orgStart+1].GetY(),
+              buffer[orgStart+1].GetX()-buffer[orgStart].GetX(),
+              oax, oay);
+
+    oax=offset*oax;
+    oay=offset*oay;
+
+    start=PushCoord(buffer[orgStart].GetX()+oax,
+                    buffer[orgStart].GetY()+oay);
+
+    for (size_t i=orgStart+1; i<orgEnd; i++) {
+      Normalize(buffer[i-1].GetY()-buffer[i].GetY(),
+                buffer[i].GetX()-buffer[i-1].GetX(),
+                oax, oay);
+
+      oax=offset*oax;
+      oay=offset*oay;
+
+      Normalize(buffer[i].GetY()-buffer[i+1].GetY(),
+                buffer[i+1].GetX()-buffer[i].GetX(),
+                obx, oby);
+
+      obx=offset*obx;
+      oby=offset*oby;
+
+
+      double det1=Det(obx-oax,
+                      oby-oay,
+                      buffer[i+1].GetX()-buffer[i].GetX(),
+                      buffer[i+1].GetY()-buffer[i].GetY());
+      double det2=Det(buffer[i].GetX()-buffer[i-1].GetX(),
+                      buffer[i].GetY()-buffer[i-1].GetY(),
+                      buffer[i+1].GetX()-buffer[i].GetX(),
+                      buffer[i+1].GetY()-buffer[i].GetY());
+
+      if (fabs(det2)>0.0001) {
+        PushCoord(buffer[i].GetX()+oax+det1/det2*(buffer[i].GetX()-buffer[i-1].GetX()),
+                  buffer[i].GetY()+oay+det1/det2*(buffer[i].GetY()-buffer[i-1].GetY()));
+      }
+      else {
+        PushCoord(buffer[i].GetX()+oax,
+                  buffer[i].GetY()+oay);
+      }
+    }
+
+    Normalize(buffer[orgEnd-1].GetY()-buffer[orgEnd].GetY(),
+              buffer[orgEnd].GetX()-buffer[orgEnd-1].GetX(),
+              oax, oay);
+
+    oax=offset*oax;
+    oay=offset*oay;
+
+    end=PushCoord(buffer[orgEnd].GetX()+oax,
+                  buffer[orgEnd].GetY()+oay);
+
+    return true;
+  }
+
   TransPolygon::TransPolygon()
   : pointsSize(0),
     length(0),
     start(0),
     end(0),
-    points(NULL)
+    points(nullptr)
   {
     // no code
   }
@@ -715,24 +822,6 @@ namespace osmscout {
     return true;
   }
 
-  bool TransPolygon::GetCenterPixel(double& cx,
-                                    double& cy) const
-  {
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-
-    if (!GetBoundingBox(xmin,ymin,xmax,ymax)) {
-      return false;
-    }
-
-    cx=xmin+(xmax-xmin)/2;
-    cy=ymin+(ymax-ymin)/2;
-
-    return true;
-  }
-
   void TransPolygon::TransformBoundingBox(const Projection& projection,
                                           TransPolygon::OptimizeMethod optimize,
                                           const GeoBox& boundingBox,
@@ -742,17 +831,17 @@ namespace osmscout {
     std::vector<GeoCoord> coords(4);
 
     // left bottom
-    coords.push_back(GeoCoord(boundingBox.GetMinLat(),
-                              boundingBox.GetMinLon()));
+    coords.emplace_back(boundingBox.GetMinLat(),
+                        boundingBox.GetMinLon());
     // left top
-    coords.push_back(GeoCoord(boundingBox.GetMaxLat(),
-                              boundingBox.GetMinLon()));
+    coords.emplace_back(boundingBox.GetMaxLat(),
+                        boundingBox.GetMinLon());
     // right top
-    coords.push_back(GeoCoord(boundingBox.GetMaxLat(),
-                              boundingBox.GetMaxLon()));
+    coords.emplace_back(boundingBox.GetMaxLat(),
+                        boundingBox.GetMaxLon());
     // right bottom
-    coords.push_back(GeoCoord(boundingBox.GetMinLat(),
-                              boundingBox.GetMaxLon()));
+    coords.emplace_back(boundingBox.GetMinLat(),
+                        boundingBox.GetMaxLon());
 
     TransformArea(projection,
                   optimize,

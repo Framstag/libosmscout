@@ -39,7 +39,7 @@ private:
   osmscout::MercatorProjection  projection;
 
   mutable QMutex                lastRequestMutex;
-  RenderMapRequest              lastRequest;
+  MapViewStruct              lastRequest;
 
   DBLoadJob                     *loadJob;
 
@@ -64,7 +64,7 @@ private:
 
 signals:
   //void TileStatusChanged(const osmscout::TileRef& tile);
-  void TriggerMapRenderingSignal(const RenderMapRequest& request);
+  void TriggerMapRenderingSignal(const MapViewStruct& request);
   void TriggerInitialRendering();
 
 public slots:
@@ -73,7 +73,7 @@ public slots:
   void DrawMap();
   void HandleTileStatusChanged(QString dbPath,const osmscout::TileRef tile);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
-  void TriggerMapRendering(const RenderMapRequest& request);
+  void TriggerMapRendering(const MapViewStruct& request);
   void HandleInitialRenderingRequest();
   virtual void onStylesheetFilenameChanged();
 
@@ -92,7 +92,11 @@ public:
    * @return true if rendered map is complete
    */
   virtual bool RenderMap(QPainter& painter,
-                         const RenderMapRequest& request);
+                         const MapViewStruct& request);
+
+private:
+  double computeScale(const osmscout::MercatorProjection &previousProjection,
+                      const osmscout::MercatorProjection &currentProjection);
 };
 
 #endif /* PLANEMAPRENDERER_H */

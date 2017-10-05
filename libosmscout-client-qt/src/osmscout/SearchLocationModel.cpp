@@ -23,36 +23,62 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/OSMScoutQt.h>
-    
+
+#define INVALID_COORD -1000.0
+
 LocationListModel::LocationListModel(QObject* parent)
-: QAbstractListModel(parent), searching(false)
+: QAbstractListModel(parent), searching(false), searchCenter(INVALID_COORD,INVALID_COORD), resultLimit(50)
 {
-    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    
-    qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
-    
-    connect(this, SIGNAL(SearchRequested(const QString, int)), 
-            dbThread.get(), SLOT(SearchForLocations(const QString, int)),
-            Qt::QueuedConnection);
-    
-    connect(dbThread.get(), SIGNAL(searchResult(const QString, const QList<LocationEntry>)),
-            this, SLOT(onSearchResult(const QString, const QList<LocationEntry>)),
-            Qt::QueuedConnection);
-    
-    connect(dbThread.get(), SIGNAL(searchFinished(const QString, bool)),
-            this, SLOT(onSearchFinished(const QString, bool)),
-            Qt::QueuedConnection);
+  searchModule=OSMScoutQt::GetInstance().MakeSearchModule();
+  lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
+
+  connect(this, SIGNAL(SearchRequested(const QString, int, osmscout::GeoCoord, AdminRegionInfoRef, osmscout::BreakerRef)),
+          searchModule, SLOT(SearchForLocations(const QString, int, osmscout::GeoCoord, AdminRegionInfoRef, osmscout::BreakerRef)),
+          Qt::QueuedConnection);
+
+  connect(searchModule, SIGNAL(searchResult(const QString, const QList<LocationEntry>)),
+          this, SLOT(onSearchResult(const QString, const QList<LocationEntry>)),
+          Qt::QueuedConnection);
+
+  connect(searchModule, SIGNAL(searchFinished(const QString, bool)),
+          this, SLOT(onSearchFinished(const QString, bool)),
+          Qt::QueuedConnection);
+
+  connect(this, SIGNAL(regionLookupRequested(osmscout::GeoCoord)),
+          lookupModule, SLOT(requestRegionLookup(osmscout::GeoCoord)),
+          Qt::QueuedConnection);
+
+  connect(lookupModule, SIGNAL(locationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
+          this, SLOT(onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
+          Qt::QueuedConnection);
+
+  connect(lookupModule, SIGNAL(locationAdminRegionFinished(const osmscout::GeoCoord)),
+          this, SLOT(onLocationAdminRegionFinished(const osmscout::GeoCoord)),
+          Qt::QueuedConnection);
 }
 
 LocationListModel::~LocationListModel()
 {
-    for (QList<LocationEntry*>::iterator location=locations.begin();
-         location!=locations.end();
-         ++location) {
-        delete *location;
-    }
+  for (QList<LocationEntry*>::iterator location=locations.begin();
+       location!=locations.end();
+       ++location) {
+      delete *location;
+  }
 
-    locations.clear();
+  locations.clear();
+
+  if (breaker){
+    breaker->Break();
+    breaker.reset();
+  }
+  if (searchModule!=NULL){
+    searchModule->deleteLater();
+    searchModule=NULL;
+  }
+  if (lookupModule!=NULL){
+    lookupModule->deleteLater();
+    lookupModule=NULL;
+  }
 }
 
 void LocationListModel::onSearchResult(const QString searchPattern, 
@@ -75,15 +101,43 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   qDebug() << "added " << foundLocations.size() << ", model size" << locations.size();
 }
 
+void LocationListModel::onLocationAdminRegions(const osmscout::GeoCoord location,
+                                               QList<AdminRegionInfoRef> adminRegionList)
+{
+  if (location==searchCenter){
+    bool first=true;
+    for (const auto &info:adminRegionList){
+      // adminRegionList is sorted by decreasing admin level
+      if (first || (info->adminLevel >= LookupModule::Town && defaultRegion!=info)){
+        defaultRegion=info;
+        first=false;
+      }
+    }
+  }
+}
+
+void LocationListModel::onLocationAdminRegionFinished(const osmscout::GeoCoord location)
+{
+  if (location==searchCenter &&
+      !pattern.isEmpty() &&
+      defaultRegion &&
+      lastRequestDefaultRegion!=defaultRegion){
+    osmscout::log.Debug() << "Search again with new default region: " << defaultRegion->name.toStdString();
+    setPattern(pattern);
+  }
+}
+
 void LocationListModel::onSearchFinished(const QString searchPattern, bool /*error*/)
 {
   if (this->lastRequestPattern!=searchPattern){
-    return; // result is not for us
+    return; // result is not actual
   }
-  if (lastRequestPattern!=pattern){
+  if (lastRequestPattern!=pattern || lastRequestDefaultRegion!=defaultRegion){
     qDebug() << "Search postponed" << pattern;
     lastRequestPattern=pattern;
-    emit SearchRequested(pattern, 50);
+    lastRequestDefaultRegion=defaultRegion;
+    breaker=std::make_shared<osmscout::ThreadedBreaker>();
+    emit SearchRequested(pattern,resultLimit,searchCenter,defaultRegion,breaker);
   }else{
     searching = false;
     emit SearchingChanged(false);
@@ -122,22 +176,28 @@ void LocationListModel::setPattern(const QString& pattern)
   }
   emit countChanged(locations.size());
 
+  if (breaker){
+    breaker->Break();
+    breaker.reset();
+  }
   if (searching){
     // we are still waiting for previous request, postpone current
-    qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern;
+    qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern << "(default region:" << (defaultRegion?defaultRegion->name:"NULL") << ")";
     return;
   }
   
-  qDebug() << "Clear (" << locations.size() << ") search" << pattern;
+  qDebug() << "Clear (" << locations.size() << ") search" << pattern << "(default region:" << (defaultRegion?defaultRegion->name:"NULL") << ")";
   searching = true;
   lastRequestPattern = pattern;
+  lastRequestDefaultRegion=defaultRegion;
   emit SearchingChanged(true);
-  emit SearchRequested(pattern, 50);
+  breaker=std::make_shared<osmscout::ThreadedBreaker>();
+  emit SearchRequested(pattern,resultLimit,searchCenter,defaultRegion,breaker);
 }
 
 int LocationListModel::rowCount(const QModelIndex& ) const
 {
-    return locations.size();
+  return locations.size();
 }
 
 QVariant LocationListModel::data(const QModelIndex &index, int role) const
@@ -201,4 +261,11 @@ LocationEntry* LocationListModel::get(int row) const
     LocationEntry* location=locations.at(row);
     // QML will take ownerhip
     return new LocationEntry(*location);
+}
+
+void LocationListModel::lookupRegion()
+{
+  if (searchCenter.GetLat()!=INVALID_COORD && searchCenter.GetLon()!=INVALID_COORD){
+    emit regionLookupRequested(searchCenter);
+  }
 }

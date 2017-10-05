@@ -616,7 +616,7 @@ namespace osmscout {
           double length = 1;
           double dashSize = 0;
           if (!lineStyles[l]->GetDash().empty() && (l == 0)) {
-            for (int d = 0; d < lineStyles[l]->GetDash().size(); d++) {
+            for (size_t d = 0; d < lineStyles[l]->GetDash().size(); d++) {
               if (lineStyles[l]->GetDash()[d] != 0) {
                 dashSize = lineStyles[l]->GetDash()[d];
                 break;

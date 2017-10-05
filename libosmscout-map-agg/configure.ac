@@ -45,9 +45,7 @@ PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout libosmscout-map],
 PKG_CHECK_MODULES(LIBFREETYPE, [freetype2],
                   HASLIBFREETYPE=true
                   [AC_SUBST(LIBFREETYPE_CFLAGS)
-                   AC_SUBST(LIBFREETYPE_LIBS)
-                   AC_DEFINE(HAVE_LIB_FREETYPE,1,[libfreetype found])],
-                   [HASFREETYPE=false])
+                   AC_SUBST(LIBFREETYPE_LIBS)])
 
 AM_CONDITIONAL(HAVE_LIB_FREETYPE,[test "$HASLIBFREETYPE" = "true"])
 
@@ -58,43 +56,37 @@ PKG_CHECK_MODULES(LIBAGG, [libagg],
 dnl The name dof the agg freetype support library differs between Linux distributions
 dnl Since the library is not returned by pkg-config, we have to find the correct
 dnl name ourself :-/
-if test "$HASLIBFREETYPE" == "true"; then
-  SAVED_CXXFLAGS=$CXXFLAGS
-  SAVED_LDFLAGS=$LDFLAGS
-  SAVED_LIBS=$LIBS
+SAVED_CXXFLAGS=$CXXFLAGS
+SAVED_LDFLAGS=$LDFLAGS
+SAVED_LIBS=$LIBS
 
-  CXXFLAGS="$SAVED_CXXFLAGS $LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS"
-  LDFLAGS="$SAVED_LDFLAGS $LIBAGG_LDFLAGS $LIBFREETYPE_LDFLAGS"
+CXXFLAGS="$SAVED_CXXFLAGS $LIBAGG_CFLAGS $LIBFREETYPE_CFLAGS"
+LDFLAGS="$SAVED_LDFLAGS $LIBAGG_LDFLAGS $LIBFREETYPE_LDFLAGS"
 
-  HASAGGFREETYPE="false"
+HASAGGFREETYPE="false"
 
-  AC_MSG_CHECKING([for libagg support library 'aggfontfreetype_pic'])
-  LIBS="$SAVED_LIBS -laggfontfreetype_pic $LIBAGG_LIBS $LIBFREETYPE_LIBS"
+AC_MSG_CHECKING([for libagg support library 'aggfontfreetype_pic'])
+LIBS="$SAVED_LIBS -laggfontfreetype_pic $LIBAGG_LIBS $LIBFREETYPE_LIBS"
 
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM([#include <agg2/agg_font_freetype.h>],
+                   [ agg::font_engine_freetype_int32 fontEngine;])],
+  [AC_MSG_RESULT([yes])
+   LIBAGG_LIBS="-laggfontfreetype_pic $LIBAGG_LIBS"
+   HASAGGFREETYPE=true],
+  [AC_MSG_RESULT([no])])
+
+if test "$HASAGGFREETYPE" == "false"; then
+
+  AC_MSG_CHECKING([for libagg support library 'aggfontfreetype'])
+  LIBS="$SAVED_LIBS -laggfontfreetype $LIBAGG_LIBS $LIBFREETYPE_LIBS"
   AC_LINK_IFELSE(
     [AC_LANG_PROGRAM([#include <agg2/agg_font_freetype.h>],
                      [ agg::font_engine_freetype_int32 fontEngine;])],
     [AC_MSG_RESULT([yes])
-     LIBAGG_LIBS="-laggfontfreetype_pic $LIBAGG_LIBS"
+     LIBAGG_LIBS="-laggfontfreetype $LIBAGG_LIBS"
      HASAGGFREETYPE=true],
     [AC_MSG_RESULT([no])])
-
-  if test "$HASAGGFREETYPE" == "false"; then
-
-    AC_MSG_CHECKING([for libagg support library 'aggfontfreetype'])
-    LIBS="$SAVED_LIBS -laggfontfreetype $LIBAGG_LIBS $LIBFREETYPE_LIBS"
-    AC_LINK_IFELSE(
-      [AC_LANG_PROGRAM([#include <agg2/agg_font_freetype.h>],
-                       [ agg::font_engine_freetype_int32 fontEngine;])],
-      [AC_MSG_RESULT([yes])
-       LIBAGG_LIBS="-laggfontfreetype $LIBAGG_LIBS"
-       HASAGGFREETYPE=true],
-      [AC_MSG_RESULT([no])])
-  fi
-
-  LIBS=$SAVED_LIBS
-  LDFLAGS=$SAVED_LDFLAGS
-  CXXFLAGS=$SAVED_CXXFLAGS
 fi
 
 AC_MSG_CHECKING([for Agg compilation])
@@ -126,12 +118,15 @@ AC_MSG_CHECKING([for Agg compilation])
 #include <agg2/agg_conv_stroke.h>
 #include <agg2/agg_ellipse.h>
 #include <agg2/agg_trans_single_path.h>
-]],
+#include <agg2/agg_font_freetype.h>]],
     [[bool test;]])],
     [AC_MSG_RESULT([yes])
      AGGPASSED=true],
     [AC_MSG_FAILURE([cannot compile simple agg program])])
 
+LIBS=$SAVED_LIBS
+LDFLAGS=$SAVED_LDFLAGS
+CXXFLAGS=$SAVED_CXXFLAGS
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 

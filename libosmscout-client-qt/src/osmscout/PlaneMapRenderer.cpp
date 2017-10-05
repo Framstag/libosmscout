@@ -52,8 +52,8 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
   // else we might get into a dead lock
   //
 
-  connect(this,SIGNAL(TriggerMapRenderingSignal(const RenderMapRequest&)),
-          this,SLOT(TriggerMapRendering(const RenderMapRequest&)),
+  connect(this,SIGNAL(TriggerMapRenderingSignal(const MapViewStruct&)),
+          this,SLOT(TriggerMapRendering(const MapViewStruct&)),
           Qt::QueuedConnection);
 
   connect(this,SIGNAL(TriggerInitialRendering()),
@@ -108,7 +108,7 @@ void PlaneMapRenderer::InvalidateVisualCache()
  * @return true if rendered map is complete
  */
 bool PlaneMapRenderer::RenderMap(QPainter& painter,
-                                 const RenderMapRequest& request)
+                                 const MapViewStruct& request)
 {
   //qDebug() << "RenderMap()";
 
@@ -169,26 +169,32 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   osmscout::GeoBox finalImgBoundingBox;
   finalImgProjection.GetDimensions(finalImgBoundingBox);
 
-  finalImgProjection.GetDimensions(finalImgBoundingBox);
-
   // projection bounding box may be smaller than projection dimensions...
-  double srcX1;
-  double srcY1;
-  double srcX2;
-  double srcY2;
+  double scale=computeScale(finalImgProjection,requestProjection);
+  
+  QRectF sourceRectangle(0,
+                         0,
+                         finalImgProjection.GetWidth(),
+                         finalImgProjection.GetHeight());
 
-  finalImgProjection.GeoToPixel(finalImgBoundingBox.GetMaxCoord(),srcX2,srcY1); // max coord => right top
-  finalImgProjection.GeoToPixel(finalImgBoundingBox.GetMinCoord(),srcX1,srcY2); // min coord => left bottom
+  double targetCenterX;
+  double targetCenterY;
 
-  double x1;
-  double y1;
-  double x2;
-  double y2;
+  requestProjection.GeoToPixel(finalImgBoundingBox.GetCenter(),targetCenterX,targetCenterY);
+  double targetTopLeftX=targetCenterX-requestProjection.GetWidth()*canvasOverrun*scale*0.5;
+  double targetTopLeftY=targetCenterY-requestProjection.GetHeight()*canvasOverrun*scale*0.5;
 
-  requestProjection.GeoToPixel(finalImgBoundingBox.GetMaxCoord(),x2,y1); // max coord => right top
-  requestProjection.GeoToPixel(finalImgBoundingBox.GetMinCoord(),x1,y2); // min coord => left bottom
+  QRectF targetRectangle(targetTopLeftX,
+                         targetTopLeftY,
+                         requestProjection.GetWidth()*canvasOverrun*scale,
+                         requestProjection.GetHeight()*canvasOverrun*scale);
 
-  if (x1>0 || y1>0 || x2<request.width || y2<request.height) {
+
+  // check if transformed final img cover current canvas...
+  if (finalImgProjection.GetAngle()!=requestProjection.GetAngle() ||
+      targetRectangle.top()>0 || targetRectangle.left()>0 ||
+      targetRectangle.bottom()<requestProjection.GetHeight() || targetRectangle.right()<requestProjection.GetWidth()) {
+    // ...if not, there is necessary to draw some background
     painter.fillRect(0,
                      0,
                      request.width,
@@ -199,11 +205,20 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                       backgroundColor.GetA()));
   }
 
-  // TODO: handle angle
-  //qDebug() << "Draw final image to canvas:" << QRectF(x1,y1,x2-x1,y2-y1);
-  painter.drawImage(QRectF(x1,y1,x2-x1,y2-y1),*finishedImage,QRectF(srcX1,srcY1,srcX2-srcX1,srcY2-srcY1));
+  if (finalImgProjection.GetAngle()!=requestProjection.GetAngle()){
+    // rotate final image
+    QPointF rotationCenter(targetRectangle.x()+targetRectangle.width()/2.0,
+                           targetRectangle.y()+targetRectangle.height()/2.0);
+    painter.translate(rotationCenter);
+    painter.rotate(qRadiansToDegrees(requestProjection.GetAngle()-finalImgProjection.GetAngle()));
+    painter.translate(rotationCenter*-1.0);
+  }
 
-  RenderMapRequest extendedRequest=request;
+  painter.drawImage(targetRectangle,
+                    *finishedImage,
+                    sourceRectangle);
+
+  MapViewStruct extendedRequest=request;
   extendedRequest.width*=canvasOverrun;
   extendedRequest.height*=canvasOverrun;
   bool needsNoRepaint=finishedImage->width()==(int) extendedRequest.width &&
@@ -221,6 +236,30 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   }
 
   return needsNoRepaint;
+}
+
+double PlaneMapRenderer::computeScale(const osmscout::MercatorProjection &previousProjection,
+                                      const osmscout::MercatorProjection &currentProjection)
+{
+  double currentDiagonal=sqrt(pow(currentProjection.GetWidth(),2) + pow(currentProjection.GetHeight(),2));
+
+  double topLeftLon;
+  double topLeftLat;
+  currentProjection.PixelToGeo(0,0,topLeftLon,topLeftLat);
+  double bottomRightLon;
+  double bottomRightLat;
+  currentProjection.PixelToGeo(currentProjection.GetWidth(),currentProjection.GetHeight(),
+                               bottomRightLon,bottomRightLat);
+
+  double x1;
+  double y1;
+  previousProjection.GeoToPixel(osmscout::GeoCoord(topLeftLat,topLeftLon),x1,y1);
+  double x2;
+  double y2;
+  previousProjection.GeoToPixel(osmscout::GeoCoord(bottomRightLat,bottomRightLon),x2,y2);
+
+  double previousDiagonal=sqrt(pow(x2-x1,2) + pow(y2-y1,2));
+  return currentDiagonal / previousDiagonal;
 }
 
 void PlaneMapRenderer::Initialize()
@@ -370,7 +409,7 @@ void PlaneMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
   emit TriggerDrawMap();
 }
 
-void PlaneMapRenderer::TriggerMapRendering(const RenderMapRequest& request)
+void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
 {
   {
     QMutexLocker reqLocker(&lastRequestMutex);

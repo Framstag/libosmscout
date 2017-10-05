@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H
+#define OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2017 Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef QTOSMSCOUT_H
-#define QTOSMSCOUT_H
-
 #include <QSettings>
 
 #include <osmscout/DataTileCache.h>
@@ -27,6 +27,8 @@
 #include <osmscout/LookupModule.h>
 #include <osmscout/MapRenderer.h>
 #include <osmscout/Router.h>
+#include <osmscout/SearchModule.h>
+#include <osmscout/StyleModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -149,21 +151,53 @@ enum RenderingType {
 
 /**
  * \ingroup QtAPI
+ *
+ * Singleton that provides access to high level modules of OSMScout library.
+ * On application start should be registered Qt types by static method \ref RegisterQmlTypes().
+ * OSMScoutQt instance may be created by \ref NewInstance() and accessed
+ * by \ref GetInstance() then.
+ * To free resources should be called \ref FreeInstance()
+ * before program exits.
+ *
+ * Example:
+ * ```
+ * OSMScoutQt::RegisterQmlTypes();
+ *
+ * bool success=OSMScoutQt::NewInstance()
+ *      .WithBasemapLookupDirectory(basemapDir)
+ *      .WithStyleSheetDirectory(stylesheetDir)
+ *      .WithStyleSheetFile(stylesheetFileName)
+ *      .WithIconDirectory(iconDirectory)
+ *      .WithMapLookupDirectories(mapLookupDirectories)
+ *      .WithOnlineTileProviders(":/resources/online-tile-providers.json")
+ *      .WithMapProviders(":/resources/map-providers.json")
+ *      .Init();
+ *
+ * if (!success){
+ *   // terminate program, or just report error - something is really bad
+ * }
+ *
+ * // now it is possible to access OSMScoutQt by OSMScoutQt::GetInstance()
+ *
+ * OSMScoutQt::FreeInstance();
+ * ```
  */
 class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
   friend class OSMScoutQtBuilder;
 
 private:
-  QThread     *backgroundThread;
-  SettingsRef settings;
-  DBThreadRef dbThread;
-  QString     iconDirectory;
-  QString     cacheLocation;
-  size_t      onlineTileCacheSize;
-  size_t      offlineTileCacheSize;
+  QThread       *backgroundThread;
+  SettingsRef   settings;
+  MapManagerRef mapManager;
+  DBThreadRef   dbThread;
+  QString       iconDirectory;
+  QString       cacheLocation;
+  size_t        onlineTileCacheSize;
+  size_t        offlineTileCacheSize;
 
 private:
   OSMScoutQt(SettingsRef settings,
+             MapManagerRef mapManager,
              DBThreadRef dbThread,
              QString iconDirectory,
              QString cacheLocation,
@@ -172,11 +206,15 @@ private:
 public:
   virtual ~OSMScoutQt();
 
-  DBThreadRef GetDBThread();
-  SettingsRef GetSettings();
+  DBThreadRef GetDBThread() const;
+  SettingsRef GetSettings() const;
+  MapManagerRef GetMapManager() const;
+
   LookupModule* MakeLookupModule();
   MapRenderer* MakeMapRenderer(RenderingType type);
   Router* MakeRouter();
+  SearchModule *MakeSearchModule();
+  StyleModule *MakeStyleModule();
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,
@@ -187,5 +225,5 @@ public:
   static void FreeInstance();
 };
 
-#endif /* QTOSMSCOUT_H */
+#endif /* OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H */
 

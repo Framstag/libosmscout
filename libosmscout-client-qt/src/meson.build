@@ -25,6 +25,8 @@ osmscoutclientqtSrc = [
             'src/osmscout/OSMScoutQt.cpp',
             'src/osmscout/DBJob.cpp',
             'src/osmscout/LookupModule.cpp',
+            'src/osmscout/SearchModule.cpp',
+            'src/osmscout/StyleModule.cpp',
             'src/osmscout/MapRenderer.cpp',
             'src/osmscout/PlaneMapRenderer.cpp',
             'src/osmscout/TiledMapRenderer.cpp',

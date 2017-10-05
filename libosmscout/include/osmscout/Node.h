@@ -105,11 +105,6 @@ namespace osmscout {
       return featureValueBuffer.GetType()->GetFeature(idx);
     }
 
-    inline FeatureValue* GetFeatureValue(size_t idx) const
-    {
-      return featureValueBuffer.GetValue(idx);
-    }
-
     inline void UnsetFeature(size_t idx)
     {
       featureValueBuffer.FreeValue(idx);

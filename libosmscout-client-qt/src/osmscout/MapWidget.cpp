@@ -33,7 +33,7 @@ static double DELTA_ANGLE=2*M_PI/16.0;
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
       renderer(NULL),
-      inputHandler(NULL), 
+      inputHandler(NULL),
       showCurrentPosition(false),
       finished(false),
       renderingType(RenderingType::PlaneRendering)
@@ -43,14 +43,15 @@ MapWidget::MapWidget(QQuickItem* parent)
     setAcceptHoverEvents(true);
 
     renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    auto settings=OSMScoutQt::GetInstance().GetSettings();
 
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-    
-    mapDpi = dbThread->GetSettings()->GetMapDPI();
 
-    connect(dbThread->GetSettings().get(), SIGNAL(MapDPIChange(double)),
+    mapDpi = settings->GetMapDPI();
+
+    connect(settings.get(), SIGNAL(MapDPIChange(double)),
             this, SLOT(onMapDPIChange(double)));
-  
+
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
     connect(renderer,SIGNAL(Redraw()),
@@ -61,14 +62,17 @@ MapWidget::MapWidget(QQuickItem* parent)
             this,SIGNAL(styleErrorsChanged()));
     connect(dbThread.get(),SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
             this,SIGNAL(databaseLoaded(osmscout::GeoBox)));
-        
+
     connect(&tapRecognizer, SIGNAL(tap(const QPoint)),        this, SLOT(onTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(doubleTap(const QPoint)),  this, SLOT(onDoubleTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(longTap(const QPoint)),    this, SLOT(onLongTap(const QPoint)));
     connect(&tapRecognizer, SIGNAL(tapLongTap(const QPoint)), this, SLOT(onTapLongTap(const QPoint)));
-    
+
     // TODO, open last position, move to current position or get as constructor argument...
-    view = new MapView(this, osmscout::GeoCoord(0.0, 0.0), /*angle*/ 0, osmscout::Magnification::magContinent);
+    view = new MapView(this,
+                       osmscout::GeoCoord(0.0, 0.0),
+                       /*angle*/ 0,
+                       osmscout::Magnification::magContinent);
     setupInputHandler(new InputHandler(*view));
     setKeepTouchGrab(true);
 
@@ -94,7 +98,7 @@ void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states
     touchPoint.setPressure(1);
     touchPoint.setPos(mEvent->pos());
     touchPoint.setState(states);
-    
+
     QList<QTouchEvent::TouchPoint> points;
     points << touchPoint;
     QTouchEvent *touchEvnt = new QTouchEvent(QEvent::TouchBegin,0, Qt::NoModifier, 0, points);
@@ -126,17 +130,17 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
         translateToTouch(event, Qt::TouchPointReleased);
     }
 }
- 
+
 void MapWidget::setupInputHandler(InputHandler *newGesture)
 {
-    bool locked = false; 
+    bool locked = false;
     if (inputHandler != NULL){
         locked = inputHandler->isLockedToPosition();
         inputHandler->deleteLater();
     }
     inputHandler = newGesture;
-    
-    connect(inputHandler, SIGNAL(viewChanged(const MapView&)), 
+
+    connect(inputHandler, SIGNAL(viewChanged(const MapView&)),
             this, SLOT(changeView(const MapView&)));
 
     if (locked != inputHandler->isLockedToPosition()){
@@ -167,7 +171,7 @@ void MapWidget::changeView(const MapView &updated)
 
 void MapWidget::touchEvent(QTouchEvent *event)
 {
-  
+
     if (!inputHandler->touch(event)){
         if (event->touchPoints().size() == 1){
             QTouchEvent::TouchPoint tp = event->touchPoints()[0];
@@ -179,17 +183,17 @@ void MapWidget::touchEvent(QTouchEvent *event)
     }
 
     tapRecognizer.touch(event);
-    
+
     event->accept();
-  
+
     /*
     qDebug() << "touchEvent:";
     QList<QTouchEvent::TouchPoint> relevantTouchPoints;
     for (QTouchEvent::TouchPoint tp: event->touchPoints()){
       Qt::TouchPointStates state(tp.state());
-      qDebug() << "  " << state <<" " << tp.id() << 
-              " pos " << tp.pos().x() << "x" << tp.pos().y() << 
-              " @ " << tp.pressure();    
+      qDebug() << "  " << state <<" " << tp.id() <<
+              " pos " << tp.pos().x() << "x" << tp.pos().y() <<
+              " @ " << tp.pressure();
     }
     */
  }
@@ -227,17 +231,15 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
-    //DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-
     bool animationInProgress = inputHandler->animationInProgress();
-    
+
     painter->setRenderHint(QPainter::Antialiasing, !animationInProgress);
     painter->setRenderHint(QPainter::TextAntialiasing, !animationInProgress);
     painter->setRenderHint(QPainter::SmoothPixmapTransform, !animationInProgress);
     painter->setRenderHint(QPainter::HighQualityAntialiasing, !animationInProgress);
-    
-    RenderMapRequest request;
-    QRectF           boundingBox = contentsBoundingRect();
+
+    MapViewStruct request;
+    QRectF        boundingBox = contentsBoundingRect();
 
     request.coord = view->center;
     request.angle = view->angle;
@@ -255,12 +257,12 @@ void MapWidget::paint(QPainter *painter)
     // render current position spot
     if (showCurrentPosition && locationValid){
         osmscout::MercatorProjection projection = getProjection();
-        
+
         double x;
         double y;
         projection.GeoToPixel(osmscout::GeoCoord(currentPosition.GetLat(), currentPosition.GetLon()), x, y);
         if (boundingBox.contains(x, y)){
-            
+
             if (horizontalAccuracyValid){
                 double diameter = horizontalAccuracy * projection.GetMeterInPixel();
                 if (diameter > 25.0 && diameter < std::max(request.width, request.height)){
@@ -269,18 +271,18 @@ void MapWidget::paint(QPainter *painter)
                     painter->drawEllipse(x - (diameter /2.0), y - (diameter /2.0), diameter, diameter);
                 }
             }
-            
+
             // TODO: take DPI into account
             painter->setBrush(QBrush(QColor::fromRgbF(0,1,0, .6)));
             painter->setPen(QColor::fromRgbF(0.0, 0.5, 0.0, 0.9));
             painter->drawEllipse(x - 10, y - 10, 20, 20);
         }
     }
-    
+
     // render marks
     if (!marks.isEmpty()){
         osmscout::MercatorProjection projection = getProjection();
-        
+
         double x;
         double y;
         painter->setBrush(QBrush());
@@ -288,7 +290,7 @@ void MapWidget::paint(QPainter *painter)
         pen.setColor(QColor::fromRgbF(0.8, 0.0, 0.0, 0.9));
         pen.setWidth(6);
         painter->setPen(pen);
-        
+
         for (auto &entry: marks){
             projection.GeoToPixel(osmscout::GeoCoord(entry.GetLat(), entry.GetLon()), x, y);
             if (boundingBox.contains(x, y)){
@@ -308,7 +310,7 @@ void MapWidget::recenter()
   }
   double dimension = osmscout::GetEllipsoidalDistance(resp.boundingBox.GetMinCoord(),
                                                       resp.boundingBox.GetMaxCoord());
-  
+
   showCoordinates(resp.boundingBox.GetCenter(), magnificationByDimension(dimension));
 }
 
@@ -357,7 +359,7 @@ void MapWidget::zoom(double zoomFactor, const QPoint widgetPosition)
 {
   if (zoomFactor == 1)
     return;
-  
+
   if (!inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()))){
     setupInputHandler(new MoveHandler(*view, mapDpi));
     inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()));
@@ -437,7 +439,7 @@ void MapWidget::reloadStyle()
 void MapWidget::reloadTmpStyle() {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
     dbThread->ReloadStyle(TMP_SUFFIX);
-    redraw();    
+    redraw();
 }
 
 void MapWidget::setLockToPosition(bool lock){
@@ -466,7 +468,7 @@ void MapWidget::showCoordinates(double lat, double lon)
 
 void MapWidget::showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Magnification magnification)
 {
-    
+
     MapView newView = *view;
     newView.magnification = magnification;
     newView.center = coord;
@@ -476,7 +478,7 @@ void MapWidget::showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Mag
 
 void MapWidget::showCoordinatesInstantly(double lat, double lon)
 {
-    showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);    
+    showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);
 }
 
 osmscout::Magnification MapWidget::magnificationByDimension(double dimension)
@@ -516,7 +518,7 @@ void MapWidget::showLocation(LocationEntry* location)
     return;
   }
   qDebug() << "Show location: " << location;
-    
+
   osmscout::GeoCoord center;
   double dimension = 0.01; // km
   if (location->getBBox().IsValid()){
@@ -526,8 +528,8 @@ void MapWidget::showLocation(LocationEntry* location)
   }else{
     center = location->getCoord();
   }
-  
-       
+
+
   showCoordinates(center, magnificationByDimension(dimension));
 }
 
@@ -624,7 +626,7 @@ void MapWidget::onTapLongTap(const QPoint p)
 void MapWidget::onMapDPIChange(double dpi)
 {
     mapDpi = dpi;
-    
+
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
 }
@@ -695,7 +697,7 @@ int MapWidget::firstStylesheetErrorColumn() const
     QList<StyleError> errors=dbThread->GetStyleErrors();
     if (errors.isEmpty())
       return -1;
-    return errors.first().GetColumn();  
+    return errors.first().GetColumn();
 }
 QString MapWidget::firstStylesheetErrorDescription() const
 {
@@ -738,7 +740,7 @@ void MapWidget::SetRenderingType(QString strType)
 
     std::map<int,OverlayWayRef> overlayWays=renderer->getOverlayWays();
     renderer->deleteLater();
-    
+
     renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
     for (auto &p:overlayWays){
       renderer->addOverlayWay(p.first,p.second);

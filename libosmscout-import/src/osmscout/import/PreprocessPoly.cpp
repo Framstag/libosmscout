@@ -159,9 +159,8 @@ namespace osmscout {
               break;
             }
 
-            std::list<std::string> tokens;
+            std::list<std::string> tokens=SplitStringAtSpace(line);
 
-            SplitStringAtSpace(line, tokens);
             if (tokens.size()!=2) {
               throw IOException(filename, "Invalid format on line "+NumberToStringUnsigned(lineNum), "");
             }

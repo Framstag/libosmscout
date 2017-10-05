@@ -33,7 +33,8 @@
 #include <osmscout/TextLoader.h>
 
 namespace osmscout {
-  class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL {
+  class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL
+   {
   private:
 
     int width;

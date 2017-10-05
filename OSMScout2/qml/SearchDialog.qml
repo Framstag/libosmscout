@@ -9,6 +9,8 @@ FocusScope {
     id: searchDialog
 
     property Item desktop;
+    property double searchCenterLat;
+    property double searchCenterLon;
 
     property alias startLocation: searchEdit.location;
     property alias destinationLocation: destinationEdit.location;
@@ -90,6 +92,9 @@ FocusScope {
             LocationSearch {
                 id: searchEdit;
 
+                searchCenterLat: searchDialog.searchCenterLat
+                searchCenterLon: searchDialog.searchCenterLon
+
                 focus: true
 
                 Layout.column: 1
@@ -149,6 +154,9 @@ FocusScope {
 
             LocationSearch {
                 id: destinationEdit;
+
+                searchCenterLat: searchDialog.searchCenterLat
+                searchCenterLon: searchDialog.searchCenterLon
 
                 visible: false
 

@@ -40,7 +40,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_SVG_API MapPainterSVG : public MapPainter
   {
   private:
-    CoordBufferImpl<Vertex2D>        *coordBuffer;
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
     typedef std::unordered_map<size_t,PangoFontDescription*>  FontMap;          //! Map type for mapping  font sizes to font
 
@@ -75,26 +74,26 @@ namespace osmscout {
     void AfterPreprocessing(const StyleConfig& styleConfig,
                             const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data);
+                            const MapData& data) override;
 
     void BeforeDrawing(const StyleConfig& styleConfig,
                        const Projection& projection,
                        const MapParameter& parameter,
-                       const MapData& data);
+                       const MapData& data) override;
 
     void AfterDrawing(const StyleConfig& styleConfig,
                       const Projection& projection,
                       const MapParameter& parameter,
-                      const MapData& data);
+                      const MapData& data) override;
 
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,
-                 IconStyle& style);
+                 IconStyle& style) override;
 
     void GetFontHeight(const Projection& projection,
                        const MapParameter& parameter,
                        double fontSize,
-                       double& height);
+                       double& height) override;
 
     void GetTextDimension(const Projection& projection,
                           const MapParameter& parameter,
@@ -104,23 +103,23 @@ namespace osmscout {
                           double& xOff,
                           double& yOff,
                           double& width,
-                          double& height);
+                          double& height) override;
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
-                    const FillStyle& style);
+                    const FillStyle& style) override;
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const LabelData& label);
+                   const LabelData& label) override;
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& style,
-                    double x, double y);
+                    double x, double y) override;
 
     void DrawIcon(const IconStyle* style,
-                  double x, double y);
+                  double x, double y) override;
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
@@ -129,7 +128,7 @@ namespace osmscout {
                   const std::vector<double>& dash,
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
-                  size_t transStart, size_t transEnd);
+                  size_t transStart, size_t transEnd) override;
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
@@ -147,27 +146,27 @@ namespace osmscout {
     void DrawWay(const StyleConfig& styleConfig,
                  const Projection& projection,
                  const MapParameter& parameter,
-                 const WayData& data);
+                 const WayData& data) override;
 
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
                           const PathTextStyle& style,
                           const std::string& text,
-                          size_t transStart, size_t transEnd);
+                          size_t transStart, size_t transEnd) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
                            const Symbol& symbol,
                            double space,
-                           size_t transStart, size_t transEnd);
+                           size_t transStart, size_t transEnd) override;
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
-                  const AreaData& area);
+                  const AreaData& area) override;
 
   public:
-    MapPainterSVG(const StyleConfigRef& styleConfig);
-    virtual ~MapPainterSVG();
+    explicit MapPainterSVG(const StyleConfigRef& styleConfig);
+    ~MapPainterSVG() override;
 
 
     bool DrawMap(const Projection& projection,

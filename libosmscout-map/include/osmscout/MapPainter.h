@@ -192,9 +192,10 @@ namespace osmscout {
       IconStyleRef iconStyle;  //!< The icon style for a icon or symbol
     };
 
-  private:
+  protected:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
 
+  private:
     double                       errorTolerancePixel;
 
     std::list<AreaData>          areaData;

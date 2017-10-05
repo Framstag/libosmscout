@@ -43,9 +43,6 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
-  private:
-    CoordBufferImpl<Vertex2D>              *coordBuffer;
-
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     typedef PangoFontDescription*          Font;
 #else
@@ -79,7 +76,7 @@ namespace osmscout {
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,
-                 IconStyle& style);
+                 IconStyle& style) override;
 
     bool HasPattern(const MapParameter& parameter,
                     const FillStyle& style);
@@ -87,7 +84,7 @@ namespace osmscout {
     void GetFontHeight(const Projection& projection,
                        const MapParameter& parameter,
                        double fontSize,
-                       double& height);
+                       double& height) override;
 
     void GetTextDimension(const Projection& projection,
                           const MapParameter& parameter,
@@ -97,15 +94,15 @@ namespace osmscout {
                           double& xOff,
                           double& yOff,
                           double& width,
-                          double& height);
+                          double& height) override;
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
-                    const FillStyle& style);
+                    const FillStyle& style) override;
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const LabelData& label);
+                   const LabelData& label) override;
 
     void DrawPrimitivePath(const Projection& projection,
                            const MapParameter& parameter,
@@ -119,10 +116,10 @@ namespace osmscout {
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& symbol,
-                    double x, double y);
+                    double x, double y) override;
 
     void DrawIcon(const IconStyle* style,
-                  double x, double y);
+                  double x, double y) override;
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
@@ -131,27 +128,27 @@ namespace osmscout {
                   const std::vector<double>& dash,
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
-                  size_t transStart, size_t transEnd);
+                  size_t transStart, size_t transEnd) override;
 
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
                           const PathTextStyle& style,
                           const std::string& text,
-                          size_t transStart, size_t transEnd);
+                          size_t transStart, size_t transEnd) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
                            const Symbol& symbol,
                            double space,
-                           size_t transStart, size_t transEnd);
+                           size_t transStart, size_t transEnd) override;
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
-                  const AreaData& area);
+                  const AreaData& area) override;
 
   public:
-    MapPainterCairo(const StyleConfigRef& styleConfig);
-    virtual ~MapPainterCairo();
+    explicit MapPainterCairo(const StyleConfigRef& styleConfig);
+    ~MapPainterCairo() override;
 
 
     bool DrawMap(const Projection& projection,

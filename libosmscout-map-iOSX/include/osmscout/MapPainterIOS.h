@@ -4,17 +4,17 @@
 /*
  This source is part of the libosmscout-map library
  Copyright (C) 2010  Tim Teulings, Vladimir Vyskocil
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
@@ -48,17 +48,16 @@ namespace osmscout {
         size_t nVertex;
         ssize_t direction;
     } FollowPathHandle;
-    
+
     class MapPainterIOS : public MapPainter {
     private:
         CGContextRef                cg;
-        CoordBufferImpl<Vertex2D>   *coordBuffer;
         CGFloat                     contentScale;
 
         std::vector<Image>          images;         // Cached CGImage for icons
         std::vector<Image>          patternImages;  // Cached CGImage for patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
-        
+
         static constexpr double plateLabelMargin = 10.0;
         static constexpr double contourLabelMargin = 50.0;
         static constexpr double contourLabelSpace = 200.0;
@@ -68,16 +67,16 @@ namespace osmscout {
         WayLabelsMap wayLabels;
 
     public:
-        MapPainterIOS(const StyleConfigRef& styleConfig);
+        OSMSCOUT_API MapPainterIOS(const StyleConfigRef& styleConfig);
         virtual ~MapPainterIOS();
-        
-        bool DrawMap(const StyleConfig& styleConfig,
+
+        OSMSCOUT_API bool DrawMap(const StyleConfig& styleConfig,
                      const Projection& projection,
                      const MapParameter& parameter,
                      const MapData& data,
                      CGContextRef paintCG);
-        
-        void DrawGroundTiles(const Projection& projection,
+
+        OSMSCOUT_API void DrawGroundTiles(const Projection& projection,
                              const MapParameter& parameter,
                              const std::list<GroundTile>& groundTiles,
                              CGContextRef paintCG);
@@ -85,15 +84,15 @@ namespace osmscout {
         bool HasIcon(const StyleConfig& styleConfig,
                      const MapParameter& parameter,
                      IconStyle& style);
-        
+
         bool HasPattern(const MapParameter& parameter,
                         const FillStyle& style);
-        
+
         void GetFontHeight(const Projection& projection,
                            const MapParameter& parameter,
                            double fontSize,
                            double& height);
-        
+
         void GetTextDimension(const Projection& projection,
                               const MapParameter& parameter,
                               double objectWidth,
@@ -103,31 +102,31 @@ namespace osmscout {
                               double& yOff,
                               double& width,
                               double& height);
-        
+
         void DrawContourSymbol(const Projection& projection,
                                const MapParameter& parameter,
                                const Symbol& symbol,
                                double space,
                                size_t transStart, size_t transEnd);
-        
+
         void DrawLabel(const Projection& projection,
                        const MapParameter& parameter,
                        const LabelData& label);
-        
+
         void DrawContourLabel(const Projection& projection,
                               const MapParameter& parameter,
                               const PathTextStyle& style,
                               const std::string& text,
                               size_t transStart, size_t transEnd);
-        
+
         void DrawIcon(const IconStyle* style,
                       double x, double y);
-                
+
         void DrawSymbol(const Projection& projection,
                         const MapParameter& parameter,
                         const Symbol& symbol,
                         double x, double y);
-        
+
         void DrawPath(const Projection& projection,
                       const MapParameter& parameter,
                       const Color& color,
@@ -136,31 +135,31 @@ namespace osmscout {
                       LineStyle::CapStyle startCap,
                       LineStyle::CapStyle endCap,
                       size_t transStart, size_t transEnd);
-        
+
         void DrawArea(const Projection& projection,
                       const MapParameter& parameter,
                       const AreaData& area);
-                
+
         void DrawGround(const Projection& projection,
                         const MapParameter& parameter,
                         const FillStyle& style);
-        
+
         void SetBorder(const Projection& projection,
                        const MapParameter& parameter,
                        const BorderStyle& borderStyle);
-        
+
         void SetFill(const Projection& projection,
                      const MapParameter& parameter,
                      const FillStyle& fillStyle,
                      CGFloat xOffset=0.0,
                      CGFloat yOffset=0.0);
-        
+
         void SetPen(const LineStyle& style,
                     double lineWidth);
 
         double textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text);
         double textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text);
-        
+
     private:
         Font *GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
         double pathLength(size_t transStart, size_t transEnd);

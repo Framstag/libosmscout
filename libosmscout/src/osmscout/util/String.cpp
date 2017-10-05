@@ -152,24 +152,6 @@ namespace osmscout {
     return stream.eof();
   }
 
-  std::string StringListToString(const std::list<std::string>& list,
-                                 const std::string& separator)
-  {
-    std::string result;
-
-    for (auto element=list.begin(); element!=list.end(); ++element) {
-      if (element==list.begin()) {
-       result.append(*element);
-      }
-      else {
-        result.append(separator);
-        result.append(*element);
-      }
-    }
-
-    return result;
-  }
-
   size_t CountWords(const std::string& text)
   {
     size_t wordCount=0;
@@ -236,35 +218,43 @@ namespace osmscout {
     return buffer.str();
   }
 
-  void SplitStringAtSpace(const std::string& input,
-                          std::list<std::string>& tokens)
+  std::list<std::string> SplitStringAtSpace(const std::string& input)
   {
+    std::list<std::string> tokens;
     std::string::size_type wordBegin=0;
     std::string::size_type wordEnd=0;
 
+    // While not at end of string
     while (wordBegin<input.length()) {
+      // skip all whitespace characters
       while (wordBegin<input.length() &&
              std::isspace(input[wordBegin])!=0) {
         wordBegin++;
       }
 
+      // if we at the end => finish, else we have found the next word
       if (wordBegin>=input.length()) {
-        return;
+        return tokens;
       }
 
       wordEnd=wordBegin;
 
+      // Collect characters until whitespace or end of string
       while (wordEnd+1<input.length() &&
              std::isspace((unsigned char)input[wordEnd + 1])==0) {
         wordEnd++;
       }
 
+      // Copy token
       std::string token=input.substr(wordBegin,wordEnd-wordBegin+1);
 
       tokens.push_back(token);
 
+      // next iteration
       wordBegin=wordEnd+1;
     }
+
+    return tokens;
   }
 
   std::string GetFirstInStringList(const std::string& stringList,
@@ -333,6 +323,53 @@ namespace osmscout {
         ++next;
       }
     }
+  }
+
+  std::string GetTokensFromStart(const std::list<std::string>& tokens,
+                                 size_t count)
+  {
+    assert(count<=tokens.size());
+
+    std::string result;
+    auto        startToken=tokens.begin();
+    auto        currentToken=startToken;
+
+    for (size_t i=0; i<count; i++) {
+      if (currentToken!=startToken) {
+        result+=' ';
+      }
+
+      result.append(*currentToken);
+
+      ++currentToken;
+    }
+
+    return result;
+  }
+
+  std::string GetTokensFromEnd(const std::list<std::string>& tokens,
+                               size_t count)
+  {
+    assert(count<=tokens.size());
+
+    std::string result;
+    auto        startToken=tokens.begin();
+
+    std::advance(startToken,tokens.size()-count);
+
+    auto        currentToken=startToken;
+
+    for (size_t i=0; i<count; i++) {
+      if (currentToken!=startToken) {
+        result+=' ';
+      }
+
+      result=result+*currentToken;
+
+      ++currentToken;
+    }
+
+    return result;
   }
 
   void GroupStringListToStrings(std::list<std::string>::const_iterator token,
@@ -406,7 +443,7 @@ namespace osmscout {
     memset(&state,0,sizeof(state));
 
     size=std::mbsrtowcs(out,&in,text.length()+2,&state);
-    if (size!=(size_t)-1 && in==NULL) {
+    if (size!=(size_t)-1 && in==nullptr) {
       result=std::wstring(out,size);
     }
 
@@ -427,7 +464,7 @@ namespace osmscout {
     memset(&state,0,sizeof(state));
 
     size=std::wcsrtombs(out,&in,text.length()*4+1,&state);
-    if (size!=(size_t)-1 && in==NULL) {
+    if (size!=(size_t)-1 && in==nullptr) {
       result=std::string(out,size);
     }
 
@@ -722,6 +759,33 @@ namespace osmscout {
 
     f.tolower(&wstr[0],&wstr[0]+wstr.size());
     //std::wcout << "* c \"" << wstr << std::endl;
+
+    return WStringToUTF8String(wstr);
+  }
+
+  std::string UTF8NormForLookup(const std::string& text)
+  {
+    std::wstring wstr=UTF8StringToWString(text);
+
+    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
+
+    // convert to lower and replace all whitespaces with simple space
+    std::transform(wstr.begin(), wstr.end(), wstr.begin(),
+                   [&f](wchar_t c) -> wchar_t {
+                     // std::iswspace don't recognize no-break space and others
+                     // so-space characters as space -> we are using switch here...
+                     switch(c){
+                       case ' ':
+                       case L'\u0009': // tabular
+                       case L'\u00A0': // no-break space (&nbsp;)
+                       case L'\u2007': // figure space
+                       case L'\u202F': // narrow no-break space
+                         return ' ';
+                       default:
+                         return f.tolower(c); // to lower
+                     }});
+
+    // TODO: remove multiple following spaces by one
 
     return WStringToUTF8String(wstr);
   }

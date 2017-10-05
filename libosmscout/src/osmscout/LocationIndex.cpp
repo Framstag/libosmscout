@@ -24,20 +24,10 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
-
+#include <iostream>
 namespace osmscout {
 
   const char* const LocationIndex::FILENAME_LOCATION_IDX = "location.idx";
-
-  LocationIndex::LocationIndex()
-  {
-    // no code
-  }
-
-  LocationIndex::~LocationIndex()
-  {
-    // no code
-  }
 
   bool LocationIndex::Load(const std::string& path)
   {
@@ -58,27 +48,49 @@ namespace osmscout {
       uint32_t ignoreTokenCount;
 
       scanner.ReadNumber(ignoreTokenCount);
+      regionIgnoreTokens.reserve(ignoreTokenCount);
 
       for (size_t i=0; i<ignoreTokenCount; i++) {
         std::string token;
 
         scanner.Read(token);
 
-        regionIgnoreTokens.insert(token);
+        regionIgnoreTokens.push_back(token);
+        regionIgnoreTokenSet.insert(token);
       }
 
       scanner.ReadNumber(ignoreTokenCount);
+      poiIgnoreTokens.reserve(ignoreTokenCount);
 
       for (size_t i=0; i<ignoreTokenCount; i++) {
         std::string token;
 
         scanner.Read(token);
 
-        locationIgnoreTokens.insert(token);
+        poiIgnoreTokens.push_back(token);
+        poiIgnoreTokenSet.insert(token);
       }
 
+      scanner.ReadNumber(ignoreTokenCount);
+      locationIgnoreTokens.reserve(ignoreTokenCount);
+
+      for (size_t i=0; i<ignoreTokenCount; i++) {
+        std::string token;
+
+        scanner.Read(token);
+
+        locationIgnoreTokens.push_back(token);
+        locationIgnoreTokenSet.insert(token);
+      }
+
+      scanner.ReadNumber(minRegionChars);
+      scanner.ReadNumber(maxRegionChars);
+      scanner.ReadNumber(minRegionWords);
       scanner.ReadNumber(maxRegionWords);
       scanner.ReadNumber(maxPOIWords);
+      scanner.ReadNumber(minLocationChars);
+      scanner.ReadNumber(maxLocationChars);
+      scanner.ReadNumber(minLocationWords);
       scanner.ReadNumber(maxLocationWords);
       scanner.ReadNumber(maxAddressWords);
 
@@ -97,12 +109,12 @@ namespace osmscout {
 
   bool LocationIndex::IsRegionIgnoreToken(const std::string& token) const
   {
-    return regionIgnoreTokens.find(token)!=regionIgnoreTokens.end();
+    return regionIgnoreTokenSet.find(token)!=regionIgnoreTokenSet.end();
   }
 
   bool LocationIndex::IsLocationIgnoreToken(const std::string& token) const
   {
-    return locationIgnoreTokens.find(token)!=locationIgnoreTokens.end();
+    return locationIgnoreTokenSet.find(token)!=locationIgnoreTokenSet.end();
   }
 
   void LocationIndex::Read(FileScanner& scanner,
@@ -119,22 +131,27 @@ namespace osmscout {
     case refNode:
       scanner.ReadFileOffset(fileOffset,
                              bytesForNodeFileOffset);
+      object.Set(fileOffset,
+                 refNode);
       break;
     case refArea:
       scanner.ReadFileOffset(fileOffset,
                              bytesForAreaFileOffset);
+      object.Set(fileOffset,
+                 refArea);
       break;
     case refWay:
       scanner.ReadFileOffset(fileOffset,
                              bytesForWayFileOffset);
+      object.Set(fileOffset,
+                 refWay);
       break;
     default:
       //std::cout << "type: " << (int) type << std::endl;
-      throw IOException(scanner.GetFilename(),"Cannot read ObjectFileRef","Unknown object file type");
+      throw IOException(scanner.GetFilename(),
+                        "Cannot read ObjectFileRef",
+                        "Unknown object file type");
     }
-
-    object.Set(fileOffset,
-               (RefType)type);
   }
 
   bool LocationIndex::LoadAdminRegion(FileScanner& scanner,
@@ -250,12 +267,100 @@ namespace osmscout {
     }
   }
 
+  bool LocationIndex::VisitLocations(const AdminRegion& adminRegion,
+                                     FileScanner& scanner,
+                                     LocationVisitor& visitor,
+                                     bool& stopped) const
+  {
+    //std::cout << "Visiting locations for " << adminRegion.name << std::endl;
+    uint32_t                  locationCount;
+    ObjectFileRefStreamReader objectFileRefReader(scanner);
+
+    for (const auto& postalArea : adminRegion.postalAreas) {
+      scanner.SetPos(postalArea.objectOffset);
+      scanner.ReadNumber(locationCount);
+
+      for (size_t i=0; i<locationCount; i++) {
+        Location location;
+        uint32_t objectCount;
+
+        location.locationOffset=scanner.GetPos();
+
+        scanner.Read(location.name);
+
+        location.regionOffset=adminRegion.regionOffset;
+
+        scanner.ReadNumber(objectCount);
+
+        location.objects.reserve(objectCount);
+
+        bool hasAddresses;
+
+        scanner.Read(hasAddresses);
+
+        if (hasAddresses) {
+          scanner.ReadFileOffset(location.addressesOffset);
+        }
+        else {
+          location.addressesOffset=0;
+        }
+
+        objectFileRefReader.Reset();
+
+        for (size_t j=0; j<objectCount; j++) {
+          ObjectFileRef ref;
+
+          objectFileRefReader.Read(ref);
+
+          location.objects.push_back(ref);
+        }
+
+        //std::cout << "Passing location " << location.name << " " << postalArea.name << " " << adminRegion.name << " to visitor" << std::endl;
+
+        if (!visitor.Visit(adminRegion,
+                           postalArea,
+                           location)) {
+          stopped=true;
+
+          return true;
+        }
+      }
+    }
+
+    for (const auto offset : adminRegion.childrenOffsets) {
+      AdminRegion childRegion;
+
+      scanner.SetPos(offset);
+
+      if (!LoadAdminRegion(scanner,
+                           childRegion)) {
+        return false;
+      }
+
+      //std::cout << "Visiting child region " << childRegion.name << " of " << adminRegion.name << std::endl;
+
+      if (!VisitLocations(childRegion,
+                          scanner,
+                          visitor,
+                          stopped)) {
+        return false;
+      }
+
+      if (stopped) {
+        break;
+      }
+    }
+
+    return !scanner.HasError();
+  }
+
   bool LocationIndex::VisitPostalAreaLocations(const AdminRegion& adminRegion,
                                                const PostalArea& postalArea,
                                                FileScanner& scanner,
                                                LocationVisitor& visitor,
                                                bool& stopped) const
   {
+    //std::cout << "Visiting locations for " << postalArea.name << " " << adminRegion.name << std::endl;
     uint32_t                  locationCount;
     ObjectFileRefStreamReader objectFileRefReader(scanner);
 
@@ -296,6 +401,8 @@ namespace osmscout {
 
         location.objects.push_back(ref);
       }
+
+      //std::cout << "Passing location " << location.name << " " << postalArea.name << " " << adminRegion.name << " to visitor" << std::endl;
 
       if (!visitor.Visit(adminRegion,
                          postalArea,
@@ -398,7 +505,10 @@ namespace osmscout {
         return false;
       }
 
+      //std::cout << "Visiting child region " << childRegion.name << " of " << postalArea.name << " " << adminRegion.name << std::endl;
+
       for (const auto& childPostalArea : childRegion.postalAreas) {
+        //std::cout << "Visiting child region " << childPostalArea.name << " " << childRegion.name << " of " << postalArea.name << " " << adminRegion.name << std::endl;
         if (!VisitPostalArea(childRegion,
                              childPostalArea,
                              scanner,
@@ -551,6 +661,38 @@ namespace osmscout {
                            visitor,
                            recursive,
                            stopped)) {
+        scanner.Close();
+        return false;
+      }
+
+      scanner.Close();
+
+      return true;
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
+    }
+  }
+
+  bool LocationIndex::VisitLocations(const AdminRegion& adminRegion,
+                                     LocationVisitor& visitor) const
+  {
+    FileScanner scanner;
+
+    try {
+      bool stopped=false;
+
+      scanner.Open(AppendFileToDir(path,
+                                   FILENAME_LOCATION_IDX),
+                   FileScanner::LowMemRandom,
+                   true);
+
+      if (!VisitLocations(adminRegion,
+                          scanner,
+                          visitor,
+                          stopped)) {
         scanner.Close();
         return false;
       }

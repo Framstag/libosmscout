@@ -41,12 +41,19 @@ namespace osmscout {
   public:
     static const char* const FILENAME_LOCATION_REGION_TXT;
     static const char* const FILENAME_LOCATION_FULL_TXT;
+    static const char* const FILENAME_LOCATION_METRICS_TXT;
 
   private:
     struct RegionMetrics CLASS_FINAL
     {
+      uint32_t minRegionChars;
+      uint32_t maxRegionChars;
+      uint32_t minRegionWords;
       uint32_t maxRegionWords;
       uint32_t maxPOIWords;
+      uint32_t minLocationChars;
+      uint32_t maxLocationChars;
+      uint32_t minLocationWords;
       uint32_t maxLocationWords;
       uint32_t maxAddressWords;
 
@@ -229,12 +236,17 @@ namespace osmscout {
                                          std::unordered_map<std::string,size_t>& ignoreTokens,
                                          std::unordered_set<std::string>& blacklist);
 
+    void CalculatePOINameIgnoreTokens(const Region& parent,
+                                      std::unordered_map<std::string,size_t>& ignoreTokens,
+                                      std::unordered_set<std::string>& blacklist);
+
     void CalculateLocationNameIgnoreTokens(const Region& parent,
                                            std::unordered_map<std::string,size_t>& ignoreTokens,
                                            std::unordered_set<std::string>& blacklist);
 
     bool CalculateIgnoreTokens(const Region& rootRegion,
                                std::list<std::string>& regionTokens,
+                               std::list<std::string>& poiTokens,
                                std::list<std::string>& locationTokens);
 
 
@@ -256,6 +268,13 @@ namespace osmscout {
     bool DumpLocationTree(Progress& progress,
                           const Region& rootRegion,
                           const std::string& filename);
+
+    bool DumpLocationMetrics(Progress& progress,
+                             const std::string& filename,
+                             const LocationIndexGenerator::RegionMetrics& metrics,
+                             const std::list<std::string>& regionIgnoreTokens,
+                             const std::list<std::string>& poiIgnoreTokens,
+                             const std::list<std::string>& locationIgnoreTokens);
 
     bool AddRegion(Region& parent,
                    RegionRef& region,
@@ -423,6 +442,7 @@ namespace osmscout {
 
     void WriteIgnoreTokens(FileWriter& writer,
                            const std::list<std::string>& regionIgnoreTokens,
+                           const std::list<std::string>& poiIgnoreTokens,
                            const std::list<std::string>& locationIgnoreTokens);
 
     void WriteRegionMetrics(FileWriter& writer,

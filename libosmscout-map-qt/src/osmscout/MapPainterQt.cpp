@@ -38,9 +38,8 @@ namespace osmscout {
 
   MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
-               new CoordBufferImpl<Vertex2D>()),
-    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
-    painter(NULL)
+               new CoordBuffer()),
+    painter(nullptr)
   {
     sin.resize(360*10);
 
@@ -219,8 +218,7 @@ namespace osmscout {
     qreal        proposedWidth=proposedLabelWidth(parameter,
                                                   fontMetrics.averageCharWidth(),
                                                   objectWidth,
-                                                  string.length()
-                                                  );
+                                                  string.length());
 
     width=0;
     height=0;
@@ -298,11 +296,11 @@ namespace osmscout {
 
     textLayout.setCacheEnabled(true);
 
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
-      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
-      double           r=style->GetTextColor().GetR();
-      double           g=style->GetTextColor().GetG();
-      double           b=style->GetTextColor().GetB();
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
+      const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
+      double      r=style->GetTextColor().GetR();
+      double      g=style->GetTextColor().GetG();
+      double      b=style->GetTextColor().GetB();
 
       if (style->GetStyle()==TextStyle::normal) {
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
@@ -369,12 +367,12 @@ namespace osmscout {
                                 label.y+boundingBox.y()));
       }
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
-      const ShieldStyle *style=dynamic_cast<const ShieldStyle*>(label.style.get());
-      QColor             textColor=QColor::fromRgbF(style->GetTextColor().GetR(),
-                                                    style->GetTextColor().GetG(),
-                                                    style->GetTextColor().GetB(),
-                                                    style->GetTextColor().GetA());
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+      const auto *style=dynamic_cast<const ShieldStyle*>(label.style.get());
+      QColor     textColor=QColor::fromRgbF(style->GetTextColor().GetR(),
+                                            style->GetTextColor().GetG(),
+                                            style->GetTextColor().GetB(),
+                                            style->GetTextColor().GetA());
       QRectF             boundingBox;
 
       // Shield background
@@ -742,10 +740,10 @@ namespace osmscout {
     for (const auto& primitive : symbol.GetPrimitives()) {
       const DrawPrimitive *primitivePtr=primitive.get();
 
-      if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=NULL) {
-        const PolygonPrimitive *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
-        FillStyleRef           fillStyle=polygon->GetFillStyle();
-        BorderStyleRef         borderStyle=polygon->GetBorderStyle();
+      if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=nullptr) {
+        const auto     *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+        FillStyleRef   fillStyle=polygon->GetFillStyle();
+        BorderStyleRef borderStyle=polygon->GetBorderStyle();
 
         if (fillStyle) {
           SetFill(projection,
@@ -768,7 +766,7 @@ namespace osmscout {
         QPainterPath path;
 
         if (polygon->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
-          for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
+          for (auto pixel=polygon->GetCoords().begin();
                pixel!=polygon->GetCoords().end();
                ++pixel) {
             if (pixel==polygon->GetCoords().begin()) {
@@ -782,7 +780,7 @@ namespace osmscout {
           }
         }
         else {
-          for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
+          for (auto pixel=polygon->GetCoords().begin();
                pixel!=polygon->GetCoords().end();
                ++pixel) {
             if (pixel==polygon->GetCoords().begin()) {
@@ -799,10 +797,10 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=NULL) {
-        const RectanglePrimitive *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
-        FillStyleRef             fillStyle=rectangle->GetFillStyle();
-        BorderStyleRef           borderStyle=rectangle->GetBorderStyle();
+      else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=nullptr) {
+        const auto     *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+        FillStyleRef   fillStyle=rectangle->GetFillStyle();
+        BorderStyleRef borderStyle=rectangle->GetBorderStyle();
 
         if (fillStyle) {
           SetFill(projection,
@@ -839,12 +837,12 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=NULL) {
-        const CirclePrimitive *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
-        FillStyleRef          fillStyle=circle->GetFillStyle();
-        BorderStyleRef        borderStyle=circle->GetBorderStyle();
-        QPointF               center;
-        double                radius;
+      else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=nullptr) {
+        const auto     *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
+        FillStyleRef   fillStyle=circle->GetFillStyle();
+        BorderStyleRef borderStyle=circle->GetBorderStyle();
+        QPointF        center;
+        double         radius;
 
         if (circle->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
           center=QPointF(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
@@ -922,7 +920,7 @@ namespace osmscout {
     pen.setWidthF(width);
     pen.setJoinStyle(Qt::RoundJoin);
 
-   if (startCap==LineStyle::capButt ||
+    if (startCap==LineStyle::capButt ||
        endCap==LineStyle::capButt) {
       pen.setCapStyle(Qt::FlatCap);
     }
@@ -1110,8 +1108,8 @@ namespace osmscout {
     else {
       QVector<qreal> dashes;
 
-      for (size_t i=0; i<style.GetDash().size(); i++) {
-        dashes << style.GetDash()[i];
+      for (double i : style.GetDash()) {
+        dashes << i;
       }
 
       pen.setDashPattern(dashes);
@@ -1165,8 +1163,8 @@ namespace osmscout {
       else {
         QVector<qreal> dashes;
 
-        for (size_t i=0; i<borderStyle.GetDash().size(); i++) {
-          dashes << borderStyle.GetDash()[i];
+        for (double i : borderStyle.GetDash()) {
+          dashes << i;
         }
 
         pen.setDashPattern(dashes);
@@ -1269,7 +1267,8 @@ namespace osmscout {
         areaData.fillStyle=unknownFill;
         break;
       }
-      if (!areaData.fillStyle){
+
+      if (!areaData.fillStyle) {
         continue;
       }
 

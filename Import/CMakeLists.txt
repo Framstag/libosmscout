@@ -11,7 +11,11 @@ target_include_directories(Import PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include)
-target_link_libraries(Import osmscout_import)
+if(APPLE)
+  target_link_libraries(Import OSMScoutImport)
+else()
+  target_link_libraries(Import osmscout_import)
+endif()
 
 if(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
   set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")

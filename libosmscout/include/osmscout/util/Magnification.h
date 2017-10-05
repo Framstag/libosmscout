@@ -90,7 +90,7 @@ namespace osmscout {
       return level;
     }
 
-    inline const Magnification& operator=(const Magnification& other)
+    inline Magnification& operator=(const Magnification& other)
     {
       if (this!=&other) {
         this->magnification=other.magnification;

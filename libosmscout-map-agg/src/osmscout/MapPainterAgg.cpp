@@ -39,8 +39,7 @@ namespace osmscout {
 
   MapPainterAgg::MapPainterAgg(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
-               new CoordBufferImpl<Vertex2D>()),
-    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
+               new CoordBuffer())
   {
     // no code
   }

@@ -41,9 +41,9 @@ namespace osmscout {
     bool          traversable;
 
   public:
-    Path(ObjectFileRef Object,
+    Path(const ObjectFileRef& Object,
          size_t targetNodeIndex);
-    Path(ObjectFileRef object,
+    Path(const ObjectFileRef& object,
          size_t targetNodeIndex,
          bool traversable);
     Path(const Path& other);

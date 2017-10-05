@@ -35,12 +35,14 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainterNoOp : public MapPainter
   {
   protected:
-    bool HasIcon(const StyleConfig& styleConfig,const MapParameter& parameter,IconStyle& style);
+    bool HasIcon(const StyleConfig& styleConfig,
+                 const MapParameter& parameter,
+                 IconStyle& style) override;
 
     void GetFontHeight(const Projection& projection,
                        const MapParameter& parameter,
                        double fontSize,
-                       double& height);
+                       double& height) override;
 
     void GetTextDimension(const Projection& projection,
                           const MapParameter& parameter,
@@ -50,25 +52,25 @@ namespace osmscout {
                           double& xOff,
                           double& yOff,
                           double& width,
-                          double& height);
+                          double& height) override;
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
-                    const FillStyle& style);
+                    const FillStyle& style) override;
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const LabelData& label);
+                   const LabelData& label) override;
 
     void DrawIcon(const IconStyle* style,
                   double x,
-                  double y);
+                  double y) override;
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& symbol,
                     double x,
-                    double y);
+                    double y) override;
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
@@ -78,26 +80,28 @@ namespace osmscout {
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
                   size_t transStart,
-                  size_t transEnd);
+                  size_t transEnd) override;
 
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
                           const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart,
-                          size_t transEnd);
+                          size_t transEnd) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
                            const Symbol& symbol,
                            double space,
                            size_t transStart,
-                           size_t transEnd);
+                           size_t transEnd) override;
 
-    void DrawArea(const Projection& projection,const MapParameter& parameter,const AreaData& area);
+    void DrawArea(const Projection& projection,
+                  const MapParameter& parameter,
+                  const AreaData& area) override;
 
   public:
-    MapPainterNoOp(const StyleConfigRef& styleConfig);
+    explicit MapPainterNoOp(const StyleConfigRef& styleConfig);
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,

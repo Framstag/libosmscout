@@ -58,7 +58,7 @@ namespace osmscout {
   class OSMSCOUT_API SilentProgress : public Progress
   {
   public:
-    virtual ~SilentProgress();
+    virtual ~SilentProgress() override;
   };
 
   class OSMSCOUT_API ConsoleProgress : public Progress
@@ -67,17 +67,17 @@ namespace osmscout {
     std::time_t lastProgressDump;
 
   public:
-    void SetStep(const std::string& step);
-    void SetAction(const std::string& action);
-    void SetProgress(double current, double total);
-    void SetProgress(unsigned int current, unsigned int total);
-    void SetProgress(unsigned long current, unsigned long total);
-    void SetProgress(unsigned long long current, unsigned long long total);
+    void SetStep(const std::string& step) override;
+    void SetAction(const std::string& action) override;
+    void SetProgress(double current, double total) override;
+    void SetProgress(unsigned int current, unsigned int total) override;
+    void SetProgress(unsigned long current, unsigned long total) override;
+    void SetProgress(unsigned long long current, unsigned long long total) override;
 
-    void Debug(const std::string& text);
-    void Info(const std::string& text);
-    void Warning(const std::string& text);
-    void Error(const std::string& text);
+    void Debug(const std::string& text) override;
+    void Info(const std::string& text) override;
+    void Warning(const std::string& text) override;
+    void Error(const std::string& text) override;
   };
 }
 

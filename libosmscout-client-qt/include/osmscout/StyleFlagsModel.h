@@ -26,6 +26,7 @@
 #include <QObject>
 #include <QAbstractListModel>
 
+#include <osmscout/StyleModule.h>
 #include <osmscout/private/ClientQtImportExport.h>
 
 /**
@@ -35,13 +36,24 @@ class OSMSCOUT_CLIENT_QT_API StyleFlagsModel: public QAbstractListModel
 {
   Q_OBJECT
 
+private:
+  StyleModule         *styleModule;
+  QMap<QString,bool>  mapFlags;
+  QSet<QString>       inProgressFlags;
+
+signals:
+  void styleFlagsRequested();
+  void setFlagRequest(QString key, bool value);
+
 private slots:
-  void onStyleChanged();
+  void onStyleFlagsChanged(QMap<QString,bool>);
+  void onFlagSet(QString key, bool value);
 
 public:
   enum Roles {
-      KeyRole   = Qt::UserRole,
-      ValueRole = Qt::UserRole+1,
+    KeyRole        = Qt::UserRole,
+    ValueRole      = Qt::UserRole+1,
+    InProgressRole = Qt::UserRole+2,
   };
 
   StyleFlagsModel();
@@ -57,8 +69,6 @@ public:
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
   Q_INVOKABLE void setFlag(const QString &key, bool value);
-private:
-  QMap<QString,bool> mapFlags;
 };
 
 #endif /* STYLEFLAGSMODEL_H */

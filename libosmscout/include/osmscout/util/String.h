@@ -22,6 +22,7 @@
 
 #include <limits>
 #include <list>
+#include <memory>
 #include <string>
 
 #include <osmscout/CoreFeatures.h>
@@ -321,7 +322,7 @@ namespace osmscout {
   template<typename N>
   struct StringToNumberTemplated<true, N>
   {
-    static inline unsigned int f(const std::string& string,
+    static inline bool f(const std::string& string,
                                  N& number,
                                  size_t base=10)
     {
@@ -332,7 +333,7 @@ namespace osmscout {
   template<typename N>
   struct StringToNumberTemplated<false, N>
   {
-    static inline unsigned int f(const std::string& string,
+    static inline bool f(const std::string& string,
                                  N& number,
                                  size_t base=10)
     {
@@ -349,7 +350,7 @@ namespace osmscout {
    *  "-13" => -13
    */
   template<typename N>
-  inline unsigned int StringToNumber(const std::string& string,
+  inline bool StringToNumber(const std::string& string,
                                      N& number,
                                      size_t base=10)
   {
@@ -371,8 +372,6 @@ namespace osmscout {
    * \ingroup Util
    *
    */
-  extern OSMSCOUT_API std::string StringListToString(const std::list<std::string>& list,
-                                                     const std::string& separator="/");
 
   extern OSMSCOUT_API size_t CountWords(const std::string& text);
 
@@ -380,8 +379,7 @@ namespace osmscout {
    * \ingroup Util
    * Converts the given string into a list of whitespace separated (std::isspace()) strings.
    */
-  extern OSMSCOUT_API void SplitStringAtSpace(const std::string& input,
-                                              std::list<std::string>& tokens);
+  extern OSMSCOUT_API std::list<std::string> SplitStringAtSpace(const std::string& input);
 
   /**
    * \ingroup Util
@@ -410,6 +408,12 @@ namespace osmscout {
    * case letter.
    */
   extern OSMSCOUT_API void SimplifyTokenList(std::list<std::string>& tokens);
+
+  extern OSMSCOUT_API std::string GetTokensFromStart(const std::list<std::string>& tokens,
+                                                    size_t count);
+
+  extern OSMSCOUT_API std::string GetTokensFromEnd(const std::list<std::string>& tokens,
+                                                   size_t count);
 
   /**
    * \ingroup Util
@@ -543,6 +547,21 @@ namespace osmscout {
    * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8StringToLower(const std::string& text);
+
+  /**
+   * Normalise the given std::string containing a UTF8 character sequence
+   * for tolerant comparison. It may be used for string lookup typed by human,
+   * for example street name, where string are not binary equals,
+   * but are "same" for human - for example "Baker Street" and "Baker  street"
+   *
+   * @param text
+   *    Text to get converted
+   * @return
+   *    Converted text
+   *
+   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
+   */
+  extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
 }
 
 #endif

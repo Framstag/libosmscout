@@ -104,8 +104,6 @@ namespace osmscout {
       return coord<other.coord;
     }
   };
-
-  typedef std::shared_ptr<Coord> CoordRef;
 }
 
 #endif

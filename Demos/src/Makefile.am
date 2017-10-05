@@ -1,6 +1,8 @@
 bin_PROGRAMS = DumpOSS \
                LocationDescription \
                LocationLookup \
+               LocationLookupForm \
+               POILookupForm \
                ReverseLocationLookup \
                PerformanceTest \
                ResourceConsumption \
@@ -40,6 +42,14 @@ DumpOSS_LDADD = $(LIBOSMSCOUTMAP_LIBS) \
 LocationLookup_SOURCES = LocationLookup.cpp
 LocationLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 LocationLookup_LDADD = $(LIBOSMSCOUT_LIBS)
+
+LocationLookupForm_SOURCES = LocationLookupForm.cpp
+LocationLookupForm_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+LocationLookupForm_LDADD = $(LIBOSMSCOUT_LIBS)
+
+POILookupForm_SOURCES = POILookupForm.cpp
+POILookupForm_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
+POILookupForm_LDADD = $(LIBOSMSCOUT_LIBS)
 
 LocationDescription_SOURCES = LocationDescription.cpp
 LocationDescription_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)

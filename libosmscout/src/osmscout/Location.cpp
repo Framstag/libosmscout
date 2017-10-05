@@ -27,6 +27,10 @@ namespace osmscout {
 
   bool AdminRegion::Match(const ObjectFileRef& object) const
   {
+    if (!object.Valid()) {
+      return false;
+    }
+
     if (this->object==object) {
       return true;
     }
@@ -46,26 +50,6 @@ namespace osmscout {
     }
 
     return false;
-  }
-
-  AdminRegionVisitor::~AdminRegionVisitor()
-  {
-    // no code
-  }
-
-  POIVisitor::~POIVisitor()
-  {
-    // no code
-  }
-
-  LocationVisitor::~LocationVisitor()
-  {
-    // no code
-  }
-
-  AddressVisitor::~AddressVisitor()
-  {
-    // no code
   }
 
   AddressListVisitor::AddressListVisitor(size_t limit)

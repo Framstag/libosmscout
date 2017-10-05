@@ -57,12 +57,19 @@ namespace osmscout {
 
   static const size_t REGION_INDEX_LEVEL=14;
 
-  const char* const LocationIndexGenerator::FILENAME_LOCATION_REGION_TXT = "location_region.txt";
-  const char* const LocationIndexGenerator::FILENAME_LOCATION_FULL_TXT = "location_full.txt";
+  const char* const LocationIndexGenerator::FILENAME_LOCATION_REGION_TXT  = "location_region.txt";
+  const char* const LocationIndexGenerator::FILENAME_LOCATION_FULL_TXT    = "location_full.txt";
+  const char* const LocationIndexGenerator::FILENAME_LOCATION_METRICS_TXT = "location_metrics.txt";
 
   LocationIndexGenerator::RegionMetrics::RegionMetrics()
-  : maxRegionWords(0),
+  : minRegionChars(std::numeric_limits<uint32_t>::max()),
+    maxRegionChars(0),
+    minRegionWords(std::numeric_limits<uint32_t>::max()),
+    maxRegionWords(0),
     maxPOIWords(0),
+    minLocationChars(std::numeric_limits<uint32_t>::max()),
+    maxLocationChars(0),
+    minLocationWords(std::numeric_limits<uint32_t>::max()),
     maxLocationWords(0),
     maxAddressWords(0)
   {
@@ -72,9 +79,9 @@ namespace osmscout {
   void LocationIndexGenerator::PostalArea::AddLocationObject(const std::string& name,
                                                              const ObjectFileRef& objectRef)
   {
-    std::string locationNameLower=UTF8StringToLower(name);
+    std::string locationNameNorm=UTF8NormForLookup(name);
 
-    RegionLocation& location=locations[locationNameLower];
+    RegionLocation& location=locations[locationNameNorm];
 
     std::unordered_map<std::string,size_t>::iterator nameEntry=location.names.find(name);
 
@@ -364,6 +371,15 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Ignore 1 or 2 word tokens for strings with more than two tokens, where each token must not have more than 5
+   * characters. Blacklist strings that in turn consists of 2 or less tokens, where tokens have 5 or less
+   * characters.
+   *
+   * @param string
+   * @param ignoreTokens
+   * @param blacklist
+   */
   void LocationIndexGenerator::AnalyseStringForIgnoreTokens(const std::string& string,
                                                             std::unordered_map<std::string,size_t>& ignoreTokens,
                                                             std::unordered_set<std::string>& blacklist)
@@ -372,13 +388,10 @@ namespace osmscout {
       return;
     }
 
-    std::list<std::string> tokens;
+    std::list<std::string> tokens=SplitStringAtSpace(string);
 
-    SplitStringAtSpace(string,
-                       tokens);
-
-    if (tokens.size()>1) {
-      for (std::list<std::string>::const_iterator token=tokens.begin();
+    if (tokens.size()>2) {
+      for (auto token=tokens.begin();
           token!=tokens.end();
           ++token) {
         if (token->length()<=5) {
@@ -392,10 +405,11 @@ namespace osmscout {
           }
         }
 
-        std::list<std::string>::const_iterator nextToken=token;
+        auto nextToken=token;
         ++nextToken;
 
-        if (nextToken!=tokens.end() && nextToken->length()<=5) {
+        if (nextToken!=tokens.end() &&
+            nextToken->length()<=5) {
           std::string composition=*token+" "+*nextToken;
 
           auto entry=ignoreTokens.find(composition);
@@ -409,10 +423,6 @@ namespace osmscout {
         }
       }
     }
-    else if (tokens.size()==1 &&
-             tokens.front().length()<=5) {
-      blacklist.insert(tokens.front());
-    }
     else if (tokens.size()==2) {
       std::list<std::string>::const_iterator token=tokens.begin();
       std::list<std::string>::const_iterator nextToken=token;
@@ -422,8 +432,17 @@ namespace osmscout {
         blacklist.insert(*token+" "+*nextToken);
       }
     }
+    else if (tokens.size()==1 &&
+             tokens.front().length()<=5) {
+      blacklist.insert(tokens.front());
+    }
   }
 
+  /**
+   * @param region
+   * @param ignoreTokens
+   * @param blacklist
+   */
   void LocationIndexGenerator::CalculateRegionNameIgnoreTokens(const Region& region,
                                                                std::unordered_map<std::string,size_t>& ignoreTokens,
                                                                std::unordered_set<std::string>& blacklist)
@@ -438,17 +457,6 @@ namespace osmscout {
                                    blacklist);
     }
 
-    /*
-    for (const auto& poi : region.pois) {
-      AnalyseStringForIgnoreTokens(poi.name,
-                                ignoreTokenCounts);
-    }
-
-    for (const auto& nodeEntry : region.locations) {
-      AnalyseStringForIgnoreTokens(nodeEntry.first,
-                                ignoreTokenCounts);
-    }*/
-
     // recursion...
 
     for (const auto& childRegion : region.regions) {
@@ -458,9 +466,9 @@ namespace osmscout {
     }
   }
 
-  void LocationIndexGenerator::CalculateLocationNameIgnoreTokens(const Region& region,
-                                                                 std::unordered_map<std::string,size_t>& ignoreTokens,
-                                                                 std::unordered_set<std::string>& blacklist)
+  void LocationIndexGenerator::CalculatePOINameIgnoreTokens(const Region& region,
+                                                            std::unordered_map<std::string,size_t>& ignoreTokens,
+                                                            std::unordered_set<std::string>& blacklist)
   {
     for (const auto& poi : region.pois) {
       AnalyseStringForIgnoreTokens(poi.name,
@@ -468,6 +476,19 @@ namespace osmscout {
                                    blacklist);
     }
 
+    // recursion...
+
+    for (const auto& childRegion : region.regions) {
+      CalculatePOINameIgnoreTokens(*childRegion,
+                                   ignoreTokens,
+                                   blacklist);
+    }
+  }
+
+  void LocationIndexGenerator::CalculateLocationNameIgnoreTokens(const Region& region,
+                                                                 std::unordered_map<std::string,size_t>& ignoreTokens,
+                                                                 std::unordered_set<std::string>& blacklist)
+  {
     for (const auto& postalAreaEntry : region.postalAreas) {
       for (const auto& nodeEntry : postalAreaEntry.second.locations) {
         AnalyseStringForIgnoreTokens(nodeEntry.first,
@@ -487,48 +508,95 @@ namespace osmscout {
 
   bool LocationIndexGenerator::CalculateIgnoreTokens(const Region& rootRegion,
                                                      std::list<std::string>& regionTokens,
+                                                     std::list<std::string>& poiTokens,
                                                      std::list<std::string>& locationTokens)
   {
-    std::unordered_map<std::string,size_t> ignoreTokens;
-    std::unordered_set<std::string>        blacklist;
+    std::unordered_map<std::string,size_t> regionIgnoreTokens;
+    std::unordered_set<std::string>        regionBlacklist;
+    std::unordered_map<std::string,size_t> poiIgnoreTokens;
+    std::unordered_set<std::string>        poiBlacklist;
+    std::unordered_map<std::string,size_t> locationIgnoreTokens;
+    std::unordered_set<std::string>        locationBlacklist;
 
     regionTokens.clear();
+    poiTokens.clear();
     locationTokens.clear();
 
     CalculateRegionNameIgnoreTokens(rootRegion,
-                                    ignoreTokens,
-                                    blacklist);
+                                    regionIgnoreTokens,
+                                    regionBlacklist);
 
-    size_t limit=ignoreTokens.size()/100;
+    CalculatePOINameIgnoreTokens(rootRegion,
+                                 poiIgnoreTokens,
+                                 poiBlacklist);
 
-    if (limit<5) {
-      limit=5;
+    CalculateLocationNameIgnoreTokens(rootRegion,
+                                      locationIgnoreTokens,
+                                      locationBlacklist);
+
+    size_t regionLimit=regionIgnoreTokens.size()/100;
+
+    if (regionLimit<5) {
+      regionLimit=5;
     }
 
-    for (const auto& tokenEntry : ignoreTokens) {
-      if (tokenEntry.second>=limit &&
-          blacklist.find(tokenEntry.first)==blacklist.end()) {
-        regionTokens.push_back(tokenEntry.first);
+    size_t poiLimit=poiIgnoreTokens.size()/100;
+
+    if (poiLimit<5) {
+      poiLimit=5;
+    }
+
+    size_t locationLimit=locationIgnoreTokens.size()/100;
+
+    if (locationLimit<5) {
+      locationLimit=5;
+    }
+
+    for (const auto& tokenEntry : regionIgnoreTokens) {
+      if (tokenEntry.second>=regionLimit) {
+        if (regionBlacklist.find(tokenEntry.first)==regionBlacklist.end()) {
+          regionTokens.push_back(tokenEntry.first);
+        }
+
+        if (poiBlacklist.find(tokenEntry.first)==poiBlacklist.end()) {
+          poiTokens.push_back(tokenEntry.first);
+        }
+
+        if (locationBlacklist.find(tokenEntry.first)==locationBlacklist.end()) {
+          locationTokens.push_back(tokenEntry.first);
+        }
       }
     }
 
-    ignoreTokens.clear();
-    blacklist.clear();
+    for (const auto& tokenEntry : poiIgnoreTokens) {
+      if (tokenEntry.second>=poiLimit) {
+        if (regionBlacklist.find(tokenEntry.first)==regionBlacklist.end()) {
+          regionTokens.push_back(tokenEntry.first);
+        }
 
-    CalculateLocationNameIgnoreTokens(rootRegion,
-                                      ignoreTokens,
-                                      blacklist);
+        if (poiBlacklist.find(tokenEntry.first)==poiBlacklist.end()) {
+          poiTokens.push_back(tokenEntry.first);
+        }
 
-    limit=ignoreTokens.size()/100;
-
-    if (limit<5) {
-      limit=5;
+        if (locationBlacklist.find(tokenEntry.first)==locationBlacklist.end()) {
+          locationTokens.push_back(tokenEntry.first);
+        }
+      }
     }
 
-    for (const auto& tokenEntry : ignoreTokens) {
-      if (tokenEntry.second>=limit &&
-          blacklist.find(tokenEntry.first)==blacklist.end()) {
-        locationTokens.push_back(tokenEntry.first);
+    for (const auto& tokenEntry : locationIgnoreTokens) {
+      if (tokenEntry.second>=locationLimit) {
+        if (regionBlacklist.find(tokenEntry.first)==regionBlacklist.end()) {
+          regionTokens.push_back(tokenEntry.first);
+        }
+
+        if (poiBlacklist.find(tokenEntry.first)==poiBlacklist.end()) {
+          poiTokens.push_back(tokenEntry.first);
+        }
+
+        if (locationBlacklist.find(tokenEntry.first)==locationBlacklist.end()) {
+          locationTokens.push_back(tokenEntry.first);
+        }
       }
     }
 
@@ -538,9 +606,15 @@ namespace osmscout {
   void LocationIndexGenerator::CalculateRegionMetrics(const LocationIndexGenerator::Region& region,
                                                       LocationIndexGenerator::RegionMetrics& metrics)
   {
+    metrics.minRegionChars=std::min(metrics.minRegionChars,(uint32_t)region.name.length());
+    metrics.maxRegionChars=std::max(metrics.maxRegionChars,(uint32_t)region.name.length());
+    metrics.minRegionWords=std::min(metrics.minRegionWords,(uint32_t)CountWords(region.name));
     metrics.maxRegionWords=std::max(metrics.maxRegionWords,(uint32_t)CountWords(region.name));
 
     for (const auto& alias : region.aliases) {
+      metrics.minRegionChars=std::min(metrics.minRegionChars,(uint32_t)alias.name.length());
+      metrics.maxRegionChars=std::max(metrics.maxRegionChars,(uint32_t)alias.name.length());
+      metrics.minRegionWords=std::min(metrics.minRegionWords,(uint32_t)CountWords(alias.name));
       metrics.maxRegionWords=std::max(metrics.maxRegionWords,(uint32_t)CountWords(alias.name));
     }
 
@@ -550,6 +624,9 @@ namespace osmscout {
 
     for (const auto& postalAreaEntry : region.postalAreas) {
       for (const auto& locationEntry : postalAreaEntry.second.locations) {
+        metrics.minLocationChars=std::min(metrics.minLocationChars,(uint32_t)locationEntry.second.GetName().length());
+        metrics.maxLocationChars=std::max(metrics.maxLocationChars,(uint32_t)locationEntry.second.GetName().length());
+        metrics.minLocationWords=std::min(metrics.minLocationWords,(uint32_t)CountWords(locationEntry.second.GetName()));
         metrics.maxLocationWords=std::max(metrics.maxLocationWords,(uint32_t)CountWords(locationEntry.second.GetName()));
 
         for (const auto& address : locationEntry.second.addresses) {
@@ -718,6 +795,56 @@ namespace osmscout {
     DumpRegionAndData(rootRegion,
                       0,
                       debugStream);
+    debugStream.close();
+
+    return true;
+  }
+
+  bool LocationIndexGenerator::DumpLocationMetrics(Progress& progress,
+                                                   const std::string& filename,
+                                                   const LocationIndexGenerator::RegionMetrics& metrics,
+                                                   const std::list<std::string>& regionIgnoreTokens,
+                                                   const std::list<std::string>& poiIgnoreTokens,
+                                                   const std::list<std::string>& locationIgnoreTokens)
+  {
+    std::ofstream debugStream;
+
+    debugStream.imbue(std::locale::classic());
+    debugStream.open(filename.c_str(),
+                     std::ios::out|std::ios::trunc);
+
+    if (!debugStream.is_open()) {
+      progress.Error("Cannot open '"+filename+"'");
+
+      return false;
+    }
+
+    debugStream << "Region ignore Tokens:" << std::endl;
+    for (const auto& token : regionIgnoreTokens) {
+      debugStream << "* " << token << std::endl;
+    }
+    debugStream << std::endl;
+
+    debugStream << "POI ignore Tokens:" << std::endl;
+    for (const auto& token : poiIgnoreTokens) {
+      debugStream << "* " << token << std::endl;
+    }
+    debugStream << std::endl;
+
+    debugStream << "Location ignore Tokens:" << std::endl;
+    for (const auto& token : locationIgnoreTokens) {
+      debugStream << "* " << token << std::endl;
+    }
+    debugStream << std::endl;
+
+    debugStream << "Metrics:" << std::endl;
+    debugStream << "* Region chars: " << metrics.minRegionChars << " - " << metrics.maxRegionChars << std::endl;
+    debugStream << "* Region words: " << metrics.minRegionWords << " - " << metrics.maxRegionWords << std::endl;
+    debugStream << "* Location chars: " << metrics.minLocationChars << " - " << metrics.maxLocationChars << std::endl;
+    debugStream << "* Location words: " << metrics.minLocationWords << " - " << metrics.maxLocationWords << std::endl;
+    debugStream << "* Max address words: " << metrics.maxAddressWords << std::endl;
+    debugStream << "* Max POI words: " << metrics.maxPOIWords << std::endl;
+
     debugStream.close();
 
     return true;
@@ -1431,9 +1558,9 @@ namespace osmscout {
     // If there is a non-default postal area but the location is in the default postal area => make a copy
     if (foundInDefaultArea &&
         postalAreaEntry!=region.postalAreas.end()) {
-      std::string locationNameLower=UTF8StringToLower(loc->second.GetName());
+      std::string locationNameNorm=UTF8NormForLookup(loc->second.GetName());
 
-      auto newLoc=postalAreaEntry->second.locations.insert(std::make_pair(locationNameLower,
+      auto newLoc=postalAreaEntry->second.locations.insert(std::make_pair(locationNameNorm,
                                                                           loc->second)).first;
 
       newLoc->second.addresses.clear();
@@ -1860,7 +1987,7 @@ namespace osmscout {
                                                                                                               const std::string &locationName)
   {
     std::map<std::string,RegionLocation> &locations=postalArea.locations;
-    std::string                          locationNameSearch=UTF8StringToLower(locationName);
+    std::string                          locationNameSearch=UTF8NormForLookup(locationName);
     auto                                 loc=locations.find(locationNameSearch);
 
     if (loc!=locations.end()) {
@@ -1870,25 +1997,25 @@ namespace osmscout {
 
     // if locationName is same as region.name (or one of its name aliases) add new location entry
     // it is usual case for addresses without street and defined addr:place
-    std::string regionNameLower=UTF8StringToLower(region.name);
+    std::string regionNameNorm=UTF8NormForLookup(region.name);
 
-    if (regionNameLower==locationNameSearch) {
+    if (regionNameNorm==locationNameSearch) {
       postalArea.AddLocationObject(region.name,
                                    region.reference);
 
       progress.Debug(std::string("Create virtual location for region '")+region.name+"'");
-      return locations.find(region.name);
+      return locations.find(regionNameNorm);
     }
 
     for (auto &alias: region.aliases) {
-      std::string regionAliasNameLower=UTF8StringToLower(alias.name);
+      std::string regionAliasNameNorm=UTF8NormForLookup(alias.name);
 
-      if (regionAliasNameLower==locationNameSearch) {
+      if (regionAliasNameNorm==locationNameSearch) {
         postalArea.AddLocationObject(alias.name,
                                      ObjectFileRef(alias.reference,refNode));
 
         progress.Debug(std::string("Create virtual location for '")+alias.name+"' (alias of region "+region.name+")");
-        return locations.find(alias.name);
+        return locations.find(regionAliasNameNorm);
       }
     }
 
@@ -2118,11 +2245,18 @@ namespace osmscout {
 
   void LocationIndexGenerator::WriteIgnoreTokens(FileWriter& writer,
                                                  const std::list<std::string>& regionIgnoreTokens,
+                                                 const std::list<std::string>& poiIgnoreTokens,
                                                  const std::list<std::string>& locationIgnoreTokens)
   {
     writer.WriteNumber((uint32_t)regionIgnoreTokens.size());
 
     for (const auto& token : regionIgnoreTokens) {
+      writer.Write(token);
+    }
+
+    writer.WriteNumber((uint32_t)poiIgnoreTokens.size());
+
+    for (const auto& token : poiIgnoreTokens) {
       writer.Write(token);
     }
 
@@ -2136,8 +2270,14 @@ namespace osmscout {
   void LocationIndexGenerator::WriteRegionMetrics(FileWriter& writer,
                                                   const RegionMetrics& metrics)
   {
+    writer.WriteNumber(metrics.minRegionChars);
+    writer.WriteNumber(metrics.maxRegionChars);
+    writer.WriteNumber(metrics.minRegionWords);
     writer.WriteNumber(metrics.maxRegionWords);
     writer.WriteNumber(metrics.maxPOIWords);
+    writer.WriteNumber(metrics.minLocationChars);
+    writer.WriteNumber(metrics.maxLocationChars);
+    writer.WriteNumber(metrics.minLocationWords);
     writer.WriteNumber(metrics.maxLocationWords);
     writer.WriteNumber(metrics.maxAddressWords);
   }
@@ -2373,6 +2513,7 @@ namespace osmscout {
     TypeInfoSet                        boundaryTypes(*typeConfig);
     std::vector<std::list<RegionRef>>  boundaryAreas;
     std::list<std::string>             regionIgnoreTokens;
+    std::list<std::string>             poiIgnoreTokens;
     std::list<std::string>             locationIgnoreTokens;
 
     errorReporter=parameter.GetErrorReporter();
@@ -2554,6 +2695,7 @@ namespace osmscout {
 
       CalculateIgnoreTokens(*rootRegion,
                             regionIgnoreTokens,
+                            poiIgnoreTokens,
                             locationIgnoreTokens);
 
       progress.Info("Detected "+NumberToString(regionIgnoreTokens.size())+" token(s) to ignore");
@@ -2565,9 +2707,9 @@ namespace osmscout {
       CalculateRegionMetrics(*rootRegion,
                              metrics);
 
-      progress.Info("Max region words: "+NumberToString(metrics.maxRegionWords));
+      progress.Info("Region words: "+NumberToString(metrics.minRegionWords)+" - "+NumberToString(metrics.maxRegionWords));
       progress.Info("Max POI words: "+NumberToString(metrics.maxPOIWords));
-      progress.Info("Max location words: "+NumberToString(metrics.maxLocationWords));
+      progress.Info("Location words: "+NumberToString(metrics.minLocationWords)+" - "+NumberToString(metrics.maxLocationWords));
       progress.Info("Max address words: "+NumberToString(metrics.maxAddressWords));
 
       progress.SetAction("Dumping region tree");
@@ -2584,6 +2726,15 @@ namespace osmscout {
                        AppendFileToDir(parameter.GetDestinationDirectory(),
                                        FILENAME_LOCATION_FULL_TXT));
 
+
+      DumpLocationMetrics(progress,
+                          AppendFileToDir(parameter.GetDestinationDirectory(),
+                                          FILENAME_LOCATION_METRICS_TXT),
+                          metrics,
+                          regionIgnoreTokens,
+                          poiIgnoreTokens,
+                          locationIgnoreTokens);
+
       //
       // Generate file with all areas, where areas reference parent and children by offset
       //
@@ -2599,6 +2750,7 @@ namespace osmscout {
 
       WriteIgnoreTokens(writer,
                         regionIgnoreTokens,
+                        poiIgnoreTokens,
                         locationIgnoreTokens);
 
       WriteRegionMetrics(writer,

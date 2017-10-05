@@ -26,6 +26,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/Location.h>
 
+#include <osmscout/util/StringMatcher.h>
+
 namespace osmscout {
 
   /**
@@ -33,13 +35,13 @@ namespace osmscout {
    *
    * Description of a location based on the GeoCoord of that location.
    */
-  class OSMSCOUT_API LocationCoordDescription
+  class OSMSCOUT_API LocationCoordDescription CLASS_FINAL
   {
   private:
     GeoCoord location;
 
   public:
-    LocationCoordDescription(const GeoCoord& location);
+    explicit LocationCoordDescription(const GeoCoord& location);
 
     GeoCoord GetLocation() const;
   };
@@ -48,7 +50,7 @@ namespace osmscout {
   //! Reference counted reference to a LocationCoordDescription instance
   typedef std::shared_ptr<LocationCoordDescription> LocationCoordDescriptionRef;
 
-  class OSMSCOUT_API LocationDescriptionCandicate
+  class OSMSCOUT_API LocationDescriptionCandicate CLASS_FINAL
   {
   private:
     ObjectFileRef ref;      //!< Reference to the actual object
@@ -111,7 +113,7 @@ namespace osmscout {
    *
    * Description of a location based on the GeoCoord of that location.
    */
-  class OSMSCOUT_API LocationAtPlaceDescription
+  class OSMSCOUT_API LocationAtPlaceDescription CLASS_FINAL
   {
   private:
     Place  place;     //!< Place
@@ -120,7 +122,7 @@ namespace osmscout {
     double bearing;   //!< bearing to take from place to reach location
 
   public:
-    LocationAtPlaceDescription(const Place& place);
+    explicit LocationAtPlaceDescription(const Place& place);
     LocationAtPlaceDescription(const Place& place,
                                double distance,
                                double bearing);
@@ -167,7 +169,7 @@ namespace osmscout {
    *
    * Description of a location based on a nearby crossing
    */
-  class OSMSCOUT_API LocationCrossingDescription
+  class OSMSCOUT_API LocationCrossingDescription CLASS_FINAL
   {
   private:
     GeoCoord         crossing;  //!< The coordinates of the crossing
@@ -232,7 +234,7 @@ namespace osmscout {
    * A LocationDescription objects holds various alternative (and optional) descriptions
    * of the given locations.
    */
-  class OSMSCOUT_API LocationDescription
+  class OSMSCOUT_API LocationDescription CLASS_FINAL
   {
   private:
     LocationCoordDescriptionRef    coordDescription;
@@ -286,7 +288,7 @@ namespace osmscout {
    * or more locations based on search patterns for the
    * region, the location and a address.
    */
-  class OSMSCOUT_API LocationSearch
+  class OSMSCOUT_API LocationSearch CLASS_FINAL
   {
   public:
     /**
@@ -308,6 +310,149 @@ namespace osmscout {
     size_t           limit;    //!< The maximum number of results over all sub searches requested
 
     LocationSearch();
+  };
+
+  class OSMSCOUT_API POIFormSearchParameter CLASS_FINAL
+  {
+  private:
+    std::string             adminRegionSearchString; //!< The search string to match the admin region name against
+    std::string             poiSearchString;         //! The search string to match the postal area name against
+
+    bool                    adminRegionOnlyMatch;    //!< Evaluate on direct admin region matches
+    bool                    poiOnlyMatch;            //!< Evaluate on direct poi matches
+
+    StringMatcherFactoryRef stringMatcherFactory; //!< String matcher factory to use
+
+    size_t                  limit;                //!< The maximum number of results over all sub searches requested
+
+  public:
+    explicit POIFormSearchParameter();
+
+    std::string GetAdminRegionSearchString() const;
+    std::string GetPOISearchString() const;
+
+    bool GetAdminRegionOnlyMatch() const;
+    bool GetPOIOnlyMatch() const;
+
+    StringMatcherFactoryRef GetStringMatcherFactory() const;
+
+    size_t GetLimit() const;
+
+    void SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory);
+
+    void SetAdminRegionSearchString(const std::string& adminRegionSearchString);
+    void SetPOISearchString(const std::string& poiSearchString);
+
+    void SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch);
+    void SetPOIOnlyMatch(bool poiOnlyMatch);
+
+    void SetLimit(size_t limit);
+  };
+
+  /**
+   * Parameter object for form based search of a location
+   */
+  class OSMSCOUT_API LocationFormSearchParameter CLASS_FINAL
+  {
+  private:
+    std::string             adminRegionSearchString; //!< The search string to match the admin region name against
+    std::string             postalAreaSearchString;  //!< The search string to match the postal area name against
+    std::string             locationSearchString;    //!< The search string to match the postal location name against
+    std::string             addressSearchString;     //!< The search string to match the address name against
+
+    bool                    adminRegionOnlyMatch;    //!< Evaluate on direct admin region matches
+    bool                    postalAreaOnlyMatch;     //!< Evaluate on direct postal area matches
+    bool                    locationOnlyMatch;       //!< Evaluate on direct location matches
+    bool                    addressOnlyMatch;        //!< Evaluate on direct address matches
+
+    StringMatcherFactoryRef stringMatcherFactory;    //!< String matcher factory to use
+    size_t                  limit;                   //!< The maximum number of results over all sub searches requested
+
+  public:
+    explicit LocationFormSearchParameter();
+
+    std::string GetAdminRegionSearchString() const;
+    std::string GetPostalAreaSearchString() const;
+    std::string GetLocationSearchString() const;
+    std::string GetAddressSearchString() const;
+
+    bool GetAdminRegionOnlyMatch() const;
+    bool GetPostalAreaOnlyMatch() const;
+    bool GetLocationOnlyMatch() const;
+    bool GetAddressOnlyMatch() const;
+
+    StringMatcherFactoryRef GetStringMatcherFactory() const;
+
+    size_t GetLimit() const;
+
+    void SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory);
+
+    void SetAdminRegionSearchString(const std::string& adminRegionSearchString);
+    void SetPostalAreaSearchString(const std::string& postalAreaSearchString);
+    void SetLocationSearchString(const std::string& locationSearchString);
+    void SetAddressSearchString(const std::string& addressSearchString);
+
+    void SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch);
+    void SetPostalAreaOnlyMatch(bool postalAreaOnlyMatch);
+    void SetLocationOnlyMatch(bool locationOnlyMatch);
+    void SetAddressOnlyMatch(bool addressOnlyMatch);
+
+    void SetLimit(size_t limit);
+  };
+
+  /**
+   * Parameter object for string pattern based search for a location or a POI
+   */
+  class OSMSCOUT_API LocationStringSearchParameter CLASS_FINAL
+  {
+  private:
+    AdminRegionRef          defaultAdminRegion;   //!< A default admin region to use, if no admin region was found based on the search string
+
+    bool                    searchForLocation;    //!< Search for a location
+    bool                    searchForPOI;         //!< Search for a POI
+
+    bool                    adminRegionOnlyMatch; //!< Evaluate on direct admin region matches
+    bool                    poiOnlyMatch;         //!< Evaluate on direct poi matches
+    bool                    locationOnlyMatch;    //!< Evaluate on direct location matches
+    bool                    addressOnlyMatch;     //!< Evaluate on direct address matches
+
+    std::string             searchString;         //!< The search string itself, must bot be empty
+    StringMatcherFactoryRef stringMatcherFactory; //!< String matcher factory to use
+
+    size_t                  limit;                //!< The maximum number of results over all sub searches requested
+
+  public:
+    explicit LocationStringSearchParameter(const std::string& searchString);
+
+    AdminRegionRef GetDefaultAdminRegion() const;
+
+    bool GetSearchForLocation() const;
+    bool GetSearchForPOI() const;
+
+    bool GetAdminRegionOnlyMatch() const;
+    bool GetPOIOnlyMatch() const;
+    bool GetLocationOnlyMatch() const;
+    bool GetAddressOnlyMatch() const;
+
+    std::string GetSearchString() const;
+
+    StringMatcherFactoryRef GetStringMatcherFactory() const;
+
+    size_t GetLimit() const;
+
+    void SetDefaultAdminRegion(const AdminRegionRef& adminRegion);
+
+    void SetSearchForLocation(bool searchForLocation);
+    void SetSearchForPOI(bool searchForPOI);
+
+    void SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch);
+    void SetPOIOnlyMatch(bool poiOnlyMatch);
+    void SetLocationOnlyMatch(bool locationOnlyMatch);
+    void SetAddressOnlyMatch(bool addressOnlyMatch);
+
+    void SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory);
+
+    void SetLimit(size_t limit);
   };
 
   /**
@@ -383,7 +528,7 @@ namespace osmscout {
      class VisitorMatcher
      {
      public:
-       VisitorMatcher(const std::string& pattern);
+       explicit VisitorMatcher(const std::string& pattern);
 
      protected:
        std::string              pattern;
@@ -418,7 +563,7 @@ namespace osmscout {
       AdminRegionMatchVisitor(const std::string& adminRegionPattern,
                               size_t limit);
 
-      Action Visit(const AdminRegion& region);
+      Action Visit(const AdminRegion& region) override;
     };
 
     class PostalAreaMatchVisitor
@@ -480,7 +625,7 @@ namespace osmscout {
 
       bool Visit(const AdminRegion& adminRegion,
                  const PostalArea& postalArea,
-                 const Location &location);
+                 const Location &location) override;
     };
 
     /**
@@ -514,7 +659,7 @@ namespace osmscout {
                       size_t limit);
 
       bool Visit(const AdminRegion& adminRegion,
-                 const POI &poi);
+                 const POI &poi) override;
     };
 
     /**
@@ -548,7 +693,7 @@ namespace osmscout {
       bool Visit(const AdminRegion& adminRegion,
                  const PostalArea& postalArea,
                  const Location& location,
-                 const Address& address);
+                 const Address& address) override;
     };
 
   public:
@@ -603,7 +748,7 @@ namespace osmscout {
                                           LocationSearchResult& result) const;
 
   public:
-    LocationService(const DatabaseRef& database);
+    explicit LocationService(const DatabaseRef& database);
 
     bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
 
@@ -625,8 +770,20 @@ namespace osmscout {
     bool InitializeLocationSearchEntries(const std::string& searchPattern,
                                          LocationSearch& search);
 
+    bool SearchForLocationByString(const LocationStringSearchParameter& searchParameter,
+                                   LocationSearchResult& result) const;
+
+    bool SearchForLocationByForm(const LocationFormSearchParameter& searchParameter,
+                                 LocationSearchResult& result) const;
+
+    bool SearchForPOIByForm(const POIFormSearchParameter& searchParameter,
+                            LocationSearchResult& result) const;
+
     bool SearchForLocations(const LocationSearch& search,
                             LocationSearchResult& result) const;
+
+    bool ReverseLookupRegion(const GeoCoord &coord,
+                             std::list<ReverseLookupResult>& result) const;
 
     bool ReverseLookupObjects(const std::list<ObjectFileRef>& objects,
                               std::list<ReverseLookupResult>& result) const;

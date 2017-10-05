@@ -102,7 +102,7 @@ namespace osmscout {
     };
 
   public:
-    virtual ~AdminRegionVisitor();
+    virtual ~AdminRegionVisitor() = default;
 
     virtual Action Visit(const AdminRegion& region) = 0;
   };
@@ -130,7 +130,7 @@ namespace osmscout {
   class OSMSCOUT_API POIVisitor
   {
   public:
-    virtual ~POIVisitor();
+    virtual ~POIVisitor() = default;
 
     virtual bool Visit(const AdminRegion& adminRegion,
                        const POI &poi) = 0;
@@ -163,7 +163,7 @@ namespace osmscout {
   class OSMSCOUT_API LocationVisitor
   {
   public:
-    virtual ~LocationVisitor();
+    virtual ~LocationVisitor() = default;
 
     virtual bool Visit(const AdminRegion& adminRegion,
                        const PostalArea& postalArea,
@@ -195,7 +195,7 @@ namespace osmscout {
   class OSMSCOUT_API AddressVisitor
   {
   public:
-    virtual ~AddressVisitor();
+    virtual ~AddressVisitor() = default;
 
     virtual bool Visit(const AdminRegion& adminRegion,
                        const PostalArea& postalArea,

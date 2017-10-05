@@ -1,6 +1,6 @@
 /*
-  LocationLookup - a demo program for libosmscout
-  Copyright (C) 2010  Tim Teulings
+  LocationLookupForm - a demo program for libosmscout
+  Copyright (C) 2017  Tim Teulings
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -31,15 +31,15 @@ struct Arguments
 {
   bool                   help=false;
   std::string            databaseDirectory;
-  std::string            defaultAdminRegion;
-  bool                   searchForLocation=true;
-  bool                   searchForPOI=true;
+  std::string            adminRegion;
+  std::string            postalArea;
+  std::string            location;
+  std::string            address;
   bool                   adminRegionOnlyMatch=false;
-  bool                   poiOnlyMatch=false;
+  bool                   postalAreaOnlyMatch=true;
   bool                   locationOnlyMatch=false;
   bool                   addressOnlyMatch=true;
   size_t                 limit=30;
-  std::list<std::string> location;
 };
 
 bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
@@ -324,23 +324,29 @@ int main(int argc, char* argv[])
                       "Return argument help",
                       true);
 
-  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
-                        args.searchForLocation=value;
-                      }),
-                      "location",
-                      "Search for a location");
-
-  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
-                        args.searchForPOI=value;
-                      }),
-                      "poi",
-                      "Search for a point of interest (POI)");
-
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                        args.defaultAdminRegion=value;
+                        args.adminRegion=value;
                       }),
                       "adminRegion",
-                      "The default admin region to search in");
+                      "The admin region to search for");
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.postalArea=value;
+                      }),
+                      "postalArea",
+                      "The postalArea to search for");
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.location=value;
+                      }),
+                      "location",
+                      "The location to search for");
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.address=value;
+                      }),
+                      "address",
+                      "The adddress to search for");
 
   argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
                         args.adminRegionOnlyMatch=value;
@@ -349,10 +355,10 @@ int main(int argc, char* argv[])
                       "Return only exact matches for the admin region");
 
   argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
-                        args.poiOnlyMatch=value;
+                        args.postalAreaOnlyMatch=value;
                       }),
-                      "poiOnlyMatch",
-                      "Return only exact matches for the POI");
+                      "postalAreaOnlyMatch",
+                      "Return only exact matches for the postalArea");
 
   argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
                         args.locationOnlyMatch=value;
@@ -377,12 +383,6 @@ int main(int argc, char* argv[])
                           }),
                           "DATABASE",
                           "Directory of the database to use");
-
-  argParser.AddPositional(osmscout::CmdLineStringListOption([&args](const std::string& value) {
-                            args.location.push_back(value);
-                          }),
-                          "LOCATION",
-                          "List of location search attributes");
 
   osmscout::CmdLineParseResult result=argParser.Parse();
 
@@ -410,16 +410,6 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
   }
 
-  std::string searchPattern;
-
-  for (const auto& location : args.location) {
-    if (!searchPattern.empty()) {
-      searchPattern.append(" ");
-    }
-
-    searchPattern.append(location);
-  }
-
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
@@ -433,59 +423,31 @@ int main(int argc, char* argv[])
   osmscout::LocationServiceRef     locationService=std::make_shared<osmscout::LocationService>(database);
   osmscout::LocationSearchResult   searchResult;
 
-  osmscout::LocationStringSearchParameter searchParameter(osmscout::LocaleStringToUTF8String(searchPattern));
+  osmscout::LocationFormSearchParameter searchParameter;
 
-  searchParameter.SetSearchForLocation(args.searchForLocation);
-  searchParameter.SetSearchForPOI(args.searchForPOI);
+  searchParameter.SetAdminRegionSearchString(args.adminRegion);
+  searchParameter.SetPostalAreaSearchString(args.postalArea);
+  searchParameter.SetLocationSearchString(args.location);
+  searchParameter.SetAddressSearchString(args.address);
+
   searchParameter.SetAdminRegionOnlyMatch(args.adminRegionOnlyMatch);
-  searchParameter.SetPOIOnlyMatch(args.poiOnlyMatch);
+  searchParameter.SetPostalAreaOnlyMatch(args.postalAreaOnlyMatch);
   searchParameter.SetLocationOnlyMatch(args.locationOnlyMatch);
   searchParameter.SetAddressOnlyMatch(args.addressOnlyMatch);
+
   searchParameter.SetStringMatcherFactory(matcherFactory);
   searchParameter.SetLimit(args.limit);
 
-  if (!args.defaultAdminRegion.empty()) {
-    osmscout::StopClock                   adminRegionSearchTime;
-    osmscout::LocationFormSearchParameter patternSearchParams;
-    osmscout::LocationSearchResult        adminRegionSearchResult;
-
-    patternSearchParams.SetStringMatcherFactory(matcherFactory);
-    patternSearchParams.SetAdminRegionSearchString(args.defaultAdminRegion);
-    patternSearchParams.SetLimit(50);
-
-    if (!locationService->SearchForLocationByForm(patternSearchParams,
-                                                  adminRegionSearchResult)) {
-      std::cerr << "Error while resolving default admin region" << std::endl;
-      return 1;
-    }
-
-    for (const auto& adminRegionResult : adminRegionSearchResult.results) {
-      if (adminRegionResult.adminRegion &&
-          adminRegionResult.adminRegionMatchQuality==osmscout::LocationSearchResult::match) {
-        searchParameter.SetAdminRegionOnlyMatch(true);
-        searchParameter.SetDefaultAdminRegion(adminRegionResult.adminRegion);
-        break;
-      }
-    }
-
-    adminRegionSearchTime.Stop();
-
-    std::cout << "Admin region search time: " << adminRegionSearchTime.ResultString() << std::endl;
-    std::cout << std::endl;
-  }
-
   std::cout << "Database:                " << args.databaseDirectory << std::endl;
-  std::cout << "Search pattern:          " << searchParameter.GetSearchString() << std::endl;
-  std::cout << "Search for location:     " << (searchParameter.GetSearchForLocation() ? "true" : "false") << std::endl;
-  std::cout << "Search for POI:          " << (searchParameter.GetSearchForPOI() ? "true" : "false") << std::endl;
+  std::cout << "AdminRegion:             " << searchParameter.GetAdminRegionSearchString() << std::endl;
+  std::cout << "PostalArea:              " << searchParameter.GetPostalAreaSearchString() << std::endl;
+  std::cout << "Location:                " << searchParameter.GetLocationSearchString() << std::endl;
+  std::cout << "Address:                 " << searchParameter.GetAddressSearchString() << std::endl;
+
   std::cout << "Admin region only match: " << (searchParameter.GetAdminRegionOnlyMatch() ? "true" : "false") << std::endl;
-  std::cout << "POI only match:          " << (searchParameter.GetPOIOnlyMatch() ? "true" : "false") << std::endl;
+  std::cout << "PostalArea only match:   " << (searchParameter.GetPostalAreaOnlyMatch() ? "true" : "false") << std::endl;
   std::cout << "Location only match:     " << (searchParameter.GetLocationOnlyMatch() ? "true" : "false") << std::endl;
   std::cout << "Address only match:      " << (searchParameter.GetAddressOnlyMatch() ? "true" : "false") << std::endl;
-
-  if (searchParameter.GetDefaultAdminRegion()) {
-    std::cout << "Default admin region:    " << searchParameter.GetDefaultAdminRegion()->name << " (" << searchParameter.GetDefaultAdminRegion()->object.GetName() << ")" << std::endl;
-  }
 
   std::cout << "Limit:                   " << searchParameter.GetLimit() << std::endl;
 
@@ -493,8 +455,8 @@ int main(int argc, char* argv[])
 
   osmscout::StopClock locationSearchTime;
 
-  if (!locationService->SearchForLocationByString(searchParameter,
-                                                  searchResult)) {
+  if (!locationService->SearchForLocationByForm(searchParameter,
+                                                searchResult)) {
     std::cerr << "Error while searching for location" << std::endl;
     return 1;
   }

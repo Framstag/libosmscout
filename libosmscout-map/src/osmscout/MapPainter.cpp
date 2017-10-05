@@ -1348,7 +1348,7 @@ namespace osmscout {
   {
     for (const auto& area : areaData)
     {
-      if (area.buffer==NULL) {
+      if (area.buffer==nullptr) {
         continue;
       }
 
@@ -1929,8 +1929,8 @@ namespace osmscout {
 
             a.ref=area->GetObjectFileRef();
             a.type=type;
-            a.buffer=NULL;
-            a.fillStyle=NULL;
+            a.buffer=nullptr;
+            a.fillStyle=nullptr;
             a.borderStyle=borderStyle;
             a.transStart=transStart;
             a.transEnd=transEnd;
@@ -1975,7 +1975,7 @@ namespace osmscout {
         WidthFeatureValue *widthValue=widthReader.GetValue(buffer);
 
 
-        if (widthValue!=NULL) {
+        if (widthValue!=nullptr) {
           lineWidth+=GetProjectedWidth(projection,
                                        widthValue->GetWidth());
         }

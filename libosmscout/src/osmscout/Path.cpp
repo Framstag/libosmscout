@@ -21,7 +21,7 @@
 
 namespace osmscout {
 
-  Path::Path(ObjectFileRef object,
+  Path::Path(const ObjectFileRef& object,
              size_t targetNodeIndex)
   : object(object),
     targetNodeIndex(targetNodeIndex),
@@ -30,7 +30,7 @@ namespace osmscout {
     // no code
   }
 
-  Path::Path(ObjectFileRef object,
+  Path::Path(const ObjectFileRef& object,
              size_t targetNodeIndex,
              bool traversable)
   : object(object),

@@ -45,8 +45,8 @@ namespace osmscout {
    */
   static double* CalculatePathSegmentLengths(cairo_path_t *path)
   {
-    cairo_path_data_t *startPoint=NULL;
-    cairo_path_data_t *currentPoint=NULL;
+    cairo_path_data_t *startPoint=nullptr;
+    cairo_path_data_t *currentPoint=nullptr;
     double            *parametrization;
 
     parametrization=new double[path->num_data];
@@ -104,14 +104,14 @@ namespace osmscout {
   static void PathPointTransformer(double& x,
                                    double& y,
                                    cairo_path_t *path,
-                                   double *pathSegmentLengths)
+                                   const double *pathSegmentLengths)
   {
     int               i;
     double            the_y=y;
     double            the_x=x;
     cairo_path_data_t *data;
-    cairo_path_data_t *startPoint=NULL;
-    cairo_path_data_t *currentPoint=NULL;
+    cairo_path_data_t *startPoint=nullptr;
+    cairo_path_data_t *currentPoint=nullptr;
 
     // Find the segment on the line that is "x" away from the start
     for (i=0;
@@ -133,12 +133,12 @@ namespace osmscout {
         break;
       case CAIRO_PATH_CURVE_TO:
         assert(false);
-        break;
+        return;
       case CAIRO_PATH_CLOSE_PATH:
         break;
       default:
         assert(false);
-        break;
+        return;
       }
     }
 
@@ -317,44 +317,35 @@ namespace osmscout {
 
   MapPainterCairo::MapPainterCairo(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
-               new CoordBufferImpl<Vertex2D>()),
-    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
+               new CoordBuffer())
   {
     // no code
   }
 
   MapPainterCairo::~MapPainterCairo()
   {
-    for (std::vector<cairo_surface_t*>::iterator image=images.begin();
-         image!=images.end();
-         ++image) {
-      if (*image!=NULL) {
-        cairo_surface_destroy(*image);
+    for (const auto& image : images) {
+      if (image!=nullptr) {
+        cairo_surface_destroy(image);
       }
     }
 
-    for (std::vector<cairo_pattern_t*>::iterator pattern=patterns.begin();
-         pattern!=patterns.end();
-         ++pattern) {
-      if (*pattern!=NULL) {
-        cairo_pattern_destroy(*pattern);
+    for (const auto& pattern : patterns) {
+      if (pattern!=nullptr) {
+        cairo_pattern_destroy(pattern);
       }
     }
 
-    for (std::vector<cairo_surface_t*>::iterator image=patternImages.begin();
-         image!=patternImages.end();
-         ++image) {
-      if (*image!=NULL) {
-        cairo_surface_destroy(*image);
+    for (const auto& image : patternImages) {
+      if (image!=nullptr) {
+        cairo_surface_destroy(image);
       }
     }
 
-    for (FontMap::const_iterator entry=fonts.begin();
-         entry!=fonts.end();
-         ++entry) {
-      if (entry->second!=NULL) {
+    for (const auto& entry : fonts) {
+      if (entry.second!=NULL) {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-        pango_font_description_free(entry->second);
+        pango_font_description_free(entry.second);
 #else
         cairo_scaled_font_destroy(entry->second);
 #endif
@@ -440,7 +431,7 @@ namespace osmscout {
     cairo_set_line_width(draw,width);
 
     if (dash.empty()) {
-      cairo_set_dash(draw,NULL,0,0);
+      cairo_set_dash(draw,nullptr,0,0);
     }
     else {
       for (size_t i=0; i<dash.size(); i++) {
@@ -465,7 +456,7 @@ namespace osmscout {
         size_t idx=fill->GetPatternId()-1;
 
         assert(idx<patterns.size());
-        assert(patterns[idx]!=NULL);
+        assert(patterns[idx]!=nullptr);
 
         cairo_set_source(draw,patterns[idx]);
         hasFill=true;
@@ -522,7 +513,7 @@ namespace osmscout {
 
     // Already cached?
     if (idx<images.size() &&
-        images[idx]!=NULL) {
+        images[idx]!=nullptr) {
       return true;
     }
 
@@ -533,9 +524,9 @@ namespace osmscout {
 
       cairo_surface_t *image=osmscout::LoadPNG(filename);
 
-      if (image!=NULL) {
+      if (image!=nullptr) {
         if (idx>=images.size()) {
-          images.resize(idx+1,NULL);
+          images.resize(idx+1,nullptr);
         }
 
         images[idx]=image;
@@ -566,7 +557,7 @@ namespace osmscout {
 
     // Already cached?
     if (idx<patterns.size() &&
-        patterns[idx]!=NULL) {
+        patterns[idx]!=nullptr) {
       return true;
     }
 
@@ -577,15 +568,15 @@ namespace osmscout {
 
       cairo_surface_t *image=osmscout::LoadPNG(filename);
 
-      if (image!=NULL) {
+      if (image!=nullptr) {
         if (idx>=patternImages.size()) {
-          patternImages.resize(idx+1,NULL);
+          patternImages.resize(idx+1,nullptr);
         }
 
         patternImages[idx]=image;
 
         if (idx>=patterns.size()) {
-          patterns.resize(idx+1,NULL);
+          patterns.resize(idx+1,nullptr);
         }
 
         patterns[idx]=cairo_pattern_create_for_surface(patternImages[idx]);
@@ -798,8 +789,8 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
-      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
+      const auto* style=dynamic_cast<const TextStyle*>(label.style.get());
       double           r=style->GetTextColor().GetR();
       double           g=style->GetTextColor().GetG();
       double           b=style->GetTextColor().GetB();
@@ -879,10 +870,10 @@ namespace osmscout {
       }
 #endif
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
-      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+      const auto* style=dynamic_cast<const ShieldStyle*>(label.style.get());
 
-      cairo_set_dash(draw,NULL,0,0);
+      cairo_set_dash(draw,nullptr,0,0);
       cairo_set_line_width(draw,1);
       cairo_set_source_rgba(draw,
                             style->GetBgColor().GetR(),
@@ -1019,7 +1010,7 @@ namespace osmscout {
     pango_layout_set_text(layout,
                           text.c_str(),
                           text.length());
-    pango_layout_get_pixel_extents(layout,&extends,NULL);
+    pango_layout_get_pixel_extents(layout,&extends,nullptr);
 
     double spaceLeft=lineLength-extends.width-2*contourLabelOffset;
 
@@ -1135,10 +1126,10 @@ namespace osmscout {
     double         centerX=(minX+maxX)/2;
     double         centerY=(minY+maxY)/2;
 
-    if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-      PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+    if (dynamic_cast<PolygonPrimitive*>(primitive)!=nullptr) {
+      const auto* polygon=dynamic_cast<const PolygonPrimitive*>(primitive);
 
-      for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
+      for (auto pixel=polygon->GetCoords().begin();
            pixel!=polygon->GetCoords().end();
            ++pixel) {
         if (pixel==polygon->GetCoords().begin()) {
@@ -1155,8 +1146,8 @@ namespace osmscout {
 
       cairo_close_path(draw);
     }
-    else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-      RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+    else if (dynamic_cast<RectanglePrimitive*>(primitive)!=nullptr) {
+      const auto* rectangle=dynamic_cast<const RectanglePrimitive*>(primitive);
 
       cairo_rectangle(draw,
                       x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
@@ -1164,8 +1155,8 @@ namespace osmscout {
                       projection.ConvertWidthToPixel(rectangle->GetWidth()),
                       projection.ConvertWidthToPixel(rectangle->GetHeight()));
     }
-    else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-      CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+    else if (dynamic_cast<CirclePrimitive*>(primitive)!=nullptr) {
+      const auto* circle=dynamic_cast<const CirclePrimitive*>(primitive);
 
       cairo_arc(draw,
                 x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
@@ -1215,7 +1206,7 @@ namespace osmscout {
     size_t idx=style->GetIconId()-1;
 
     assert(idx<images.size());
-    assert(images[idx]!=NULL);
+    assert(images[idx]!=nullptr);
 
     cairo_set_source_surface(draw,images[idx],x-7,y-7);
     cairo_paint(draw);
@@ -1232,7 +1223,7 @@ namespace osmscout {
   {
     SetLineAttributes(color,width,dash);
 
-   if (startCap==LineStyle::capButt ||
+    if (startCap==LineStyle::capButt ||
        endCap==LineStyle::capButt) {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
@@ -1266,7 +1257,7 @@ namespace osmscout {
       if (startCap==LineStyle::capRound) {
         cairo_new_path(draw);
         cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-        cairo_set_dash(draw,NULL,0,0);
+        cairo_set_dash(draw,nullptr,0,0);
         cairo_set_line_width(draw,width);
 
         cairo_move_to(draw,
@@ -1281,7 +1272,7 @@ namespace osmscout {
       if (endCap==LineStyle::capRound) {
         cairo_new_path(draw);
         cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-        cairo_set_dash(draw,NULL,0,0);
+        cairo_set_dash(draw,nullptr,0,0);
         cairo_set_line_width(draw,width);
 
         cairo_move_to(draw,
@@ -1318,11 +1309,7 @@ namespace osmscout {
 
     if (!area.clippings.empty()) {
       // Clip areas within the area by using CAIRO_FILL_RULE_EVEN_ODD
-      for (std::list<PolyData>::const_iterator c=area.clippings.begin();
-          c!=area.clippings.end();
-          c++) {
-        const PolyData& data=*c;
-
+      for (const auto& data : area.clippings) {
         cairo_new_sub_path(draw);
         cairo_set_line_width(draw,0.0);
         cairo_move_to(draw,
