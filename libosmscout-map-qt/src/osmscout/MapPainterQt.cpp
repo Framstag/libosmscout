@@ -455,26 +455,27 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const PathTextStyle& style,
                                       const std::string& text,
-                                      size_t transStart, size_t transEnd)
+                                      size_t transStart,
+                                      size_t transEnd)
   {
-    double fontSize=style.GetSize();
-    double r=style.GetTextColor().GetR();
-    double g=style.GetTextColor().GetG();
-    double b=style.GetTextColor().GetB();
-    double a=style.GetTextColor().GetA();
+    double  fontSize=style.GetSize();
+    double  r=style.GetTextColor().GetR();
+    double  g=style.GetTextColor().GetG();
+    double  b=style.GetTextColor().GetB();
+    double  a=style.GetTextColor().GetA();
 
-    QPen          pen;
-    QFont         font(GetFont(projection,
-                               parameter,
-                               fontSize));
-    QString       string=QString::fromUtf8(text.c_str());
+    QPen    pen;
+    QFont   font(GetFont(projection,
+                         parameter,
+                         fontSize));
+    int     fontPixelSize=font.pixelSize();
+    QString string=QString::fromUtf8(text.c_str());
 
     QTextLayout textLayout(string,font,painter->device());
     // evaluate layout
     textLayout.beginLayout();
     while (textLayout.createLine().isValid()){};
     textLayout.endLayout();
-    int fontPixelSize=font.pixelSize();
 
     QList<QGlyphRun> glyphs=textLayout.glyphRuns();
     double stringWidth=textLayout.boundingRect().width();
@@ -485,12 +486,15 @@ namespace osmscout {
 
     // build path
     SimplifiedPath p;
+
+    // Path has direction left => right
     if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
         p.AddPoint(coordBuffer->buffer[j].GetX(),
                    coordBuffer->buffer[j].GetY());
       }
     }
+      // Path has direction right => left
     else {
       for (size_t j=0; j<=transEnd-transStart; j++) {
         size_t idx=transEnd-j;
@@ -499,7 +503,10 @@ namespace osmscout {
       }
     }
 
+    // Length of path in pixel
     qreal pLength=p.GetLength();
+    // Space left if we substract the label offset for both ends of the path and the width
+    // of the text itself
     qreal spaceLeft=pLength-stringWidth-2*contourLabelOffset;
 
     // If space around labels left is < offset on both sides, do not render at all
@@ -507,52 +514,64 @@ namespace osmscout {
       return;
     }
 
+    // Space left, if we have drawn al labels
     spaceLeft=fmod(spaceLeft,stringWidth+contourLabelSpace);
 
+    // Resulting offset of the first label
     qreal labelInstanceOffset=spaceLeft/2+contourLabelOffset;
+    // Current offset for the next label
     qreal offset=labelInstanceOffset;
 
     QVector<quint32> indexes(1);
     QVector<QPointF> positions(1);
-    while (offset<pLength) {
 
+    // While we have not reached the end of the path...
+    while (offset<pLength) {
       // skip string rendering when path is too much squiggly at this offset
       if (!p.TestAngleVariance(offset,offset+stringWidth,M_PI/4)){
+        // skip drawing current label and let offset point to the next instance
         offset+=stringWidth+contourLabelSpace;
         continue;
       }
 
+      // direction of path at the label drawing starting point
       qreal initialAngle=std::abs(p.AngleAtLengthDeg(offset));
       bool upwards=initialAngle>90 && initialAngle<270;
 
       // draw glyphs
-      for (const QGlyphRun &glypRun: glyphs){
-        for (int g=0; g<glypRun.glyphIndexes().size(); g++){
-          auto index=glypRun.glyphIndexes().at(g);
-          auto pos=glypRun.positions().at(g);
+      for (const QGlyphRun& glypRun: glyphs) {
+        for (int idx=0; idx<glypRun.glyphIndexes().size(); idx++) {
+          auto index=glypRun.glyphIndexes().at(idx);
+          auto pos=glypRun.positions().at(idx);
+
           indexes[0]=index;
           positions[0]=QPointF(0,pos.y());
+
           QRectF boundingRect=glypRun.rawFont().boundingRect(index);
 
           qreal glyphOffset=upwards? (offset+stringWidth-pos.x()) : offset+pos.x();
+
           if (glyphOffset>pLength)
             continue;
 
           QPointF point=p.PointAtLength(glyphOffset);
-          // check if current glyph can be visible
           qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
+
+          // check if current glyph can be visible
           if (!painter->viewport().intersects(QRect(QPoint(point.x()-diagonal, point.y()-diagonal),
                                                     QPoint(point.x()+diagonal, point.y()+diagonal)))){
             continue;
           }
+
           qreal angle=p.AngleAtLengthDeg(glyphOffset);
-          if (upwards){
+          if (upwards) {
             angle-=180;
           }
 
           setupTransformation(painter, point, angle, fontPixelSize*-0.7);
 
           QGlyphRun orphanGlyph;
+
           orphanGlyph.setBoundingRect(boundingRect);
           orphanGlyph.setFlags(glypRun.flags());
           orphanGlyph.setGlyphIndexes(indexes);

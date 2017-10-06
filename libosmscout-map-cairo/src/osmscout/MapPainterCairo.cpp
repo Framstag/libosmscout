@@ -953,12 +953,17 @@ namespace osmscout {
                                          size_t transStart, size_t transEnd)
   {
     double lineLength=0;
-    double xo=0;
-    double yo=0;
+
+    // Make the way path known to cairo and at the same time calculate the length
+    // of the path
 
     cairo_new_path(draw);
 
     if (coordBuffer->buffer[transStart].GetX()<=coordBuffer->buffer[transEnd].GetX()) {
+      // coordinates of previous point
+      double xo=0;
+      double yo=0;
+
       for (size_t j=transStart; j<=transEnd; j++) {
         if (j==transStart) {
           cairo_move_to(draw,
@@ -978,6 +983,11 @@ namespace osmscout {
       }
     }
     else {
+      // coordinates of previous point
+
+      double xo=0;
+      double yo=0;
+
       for (size_t j=0; j<=transEnd-transStart; j++) {
         size_t idx=transEnd-j;
 
