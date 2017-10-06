@@ -22,6 +22,7 @@
 
 #include <ostream>
 #include <map>
+#include <mutex>
 #include <unordered_map>
 #include <set>
 
@@ -51,6 +52,7 @@ namespace osmscout {
      std::map<LineStyle,std::string> lineStyleNameMap;
      std::ostream                    stream;
      TypeConfigRef                   typeConfig;
+    std::mutex                       mutex;         //! Mutex for locking concurrent calls
 
   private:
     std::string GetColorValue(const Color& color);

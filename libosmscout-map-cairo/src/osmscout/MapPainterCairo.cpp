@@ -1361,11 +1361,9 @@ namespace osmscout {
 
     minimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/projection.GetDPI();
 
-    Draw(projection,
-         parameter,
-         data);
-
-    return true;
+    return Draw(projection,
+                parameter,
+                data);
   }
 }
 

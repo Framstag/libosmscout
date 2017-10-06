@@ -753,16 +753,18 @@ namespace osmscout
 
 	bool MapPainterDirectX::DrawMap(const Projection& projection, const MapParameter& parameter, const MapData& data, ID2D1RenderTarget* renderTarget)
 	{
+		bool result=true;
+
 		if (m_pDirect2dFactory == NULL) return false;
 		typeConfig = styleConfig->GetTypeConfig();
 		m_pRenderTarget = renderTarget;
 
-		Draw(projection, parameter, data);
+		result=Draw(projection, parameter, data);
 
 		fillStyleNameMap.clear();
 		lineStyleNameMap.clear();
 
-		return true;
+		return result;
 	}
 }
 

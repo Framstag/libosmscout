@@ -598,21 +598,24 @@ namespace osmscout {
                               const MapData& data,
                               std::ostream& stream)
   {
+    std::lock_guard<std::mutex> guard(mutex);
+    bool                        result=true;
+
     this->stream.rdbuf(stream.rdbuf());
     typeConfig=styleConfig->GetTypeConfig();
 
     WriteHeader(projection.GetWidth(),projection.GetHeight());
 
-    Draw(projection,
-         parameter,
-         data);
+    result=Draw(projection,
+                parameter,
+                data);
 
     WriteFooter();
 
     fillStyleNameMap.clear();
     lineStyleNameMap.clear();
 
-    return true;
+    return result;
   }
 }
 

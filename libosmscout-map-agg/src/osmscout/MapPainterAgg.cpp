@@ -766,6 +766,7 @@ namespace osmscout {
                               AggPixelFormat* pf)
   {
     std::lock_guard<std::mutex> guard(mutex);
+    bool                        result=true;
 
     this->pf=pf;
 
@@ -782,9 +783,9 @@ namespace osmscout {
 
     convTextContours= new AggTextContourConverter(*convTextCurves);
 
-    Draw(projection,
-         parameter,
-         data);
+    result=Draw(projection,
+                parameter,
+                data);
 
     delete convTextCurves;
     delete convTextContours;
@@ -796,6 +797,6 @@ namespace osmscout {
     delete rasterizer;
     delete renderer_base;
 
-    return true;
+    return result;
   }
 }
