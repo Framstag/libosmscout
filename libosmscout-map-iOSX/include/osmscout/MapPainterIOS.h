@@ -93,15 +93,11 @@ namespace osmscout {
                            double fontSize,
                            double& height);
 
-        void GetTextDimension(const Projection& projection,
-                              const MapParameter& parameter,
-                              double objectWidth,
-                              double fontSize,
-                              const std::string& text,
-                              double& xOff,
-                              double& yOff,
-                              double& width,
-                              double& height);
+        TextDimension GetTextDimension(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       double objectWidth,
+                                       double fontSize,
+                                       const std::string& text);
 
         void DrawContourSymbol(const Projection& projection,
                                const MapParameter& parameter,

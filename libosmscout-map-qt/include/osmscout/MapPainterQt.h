@@ -81,9 +81,6 @@ namespace osmscout {
                   const MapParameter& parameter,
                   double fontSize);
 
-    void SetPen(const LineStyle& style,
-                double lineWidth);
-
     void SetFill(const Projection& projection,
                  const MapParameter& parameter,
                  const FillStyle& fillStyle);
@@ -96,7 +93,7 @@ namespace osmscout {
     void FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
                         bool isClosed, bool keepOrientation);
 
-    void setupTransformation(QPainter *painter,
+    void SetupTransformation(QPainter* painter,
                              const QPointF center,
                              const qreal angle,
                              const qreal baseline) const;
@@ -114,15 +111,11 @@ namespace osmscout {
                        double fontSize,
                        double& height) override;
 
-    void GetTextDimension(const Projection& projection,
-                          const MapParameter& parameter,
-                          double objectWidth,
-                          double fontSize,
-                          const std::string& text,
-                          double& xOff,
-                          double& yOff,
-                          double& width,
-                          double& height) override;
+    TextDimension GetTextDimension(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   double objectWidth,
+                                   double fontSize,
+                                   const std::string& text) override;
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,

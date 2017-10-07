@@ -117,26 +117,18 @@ namespace osmscout {
     height=fontEngine->height();
   }
 
-  void MapPainterAgg::GetTextDimension(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       double /*objectWidth*/,
-                                       double fontSize,
-                                       const std::string& text,
-                                       double& xOff,
-                                       double& yOff,
-                                       double& width,
-                                       double& height)
+  MapPainter::TextDimension MapPainterAgg::GetTextDimension(const Projection& projection,
+                                                            const MapParameter& parameter,
+                                                            double /*objectWidth*/,
+                                                            double fontSize,
+                                                            const std::string& text)
   {
     std::wstring wideText(UTF8StringToWString(text));
+    double       width=0.0;
 
     SetFont(projection,
             parameter,
             fontSize);
-
-    xOff=0;
-    yOff=0;
-    width=0;
-    height=fontEngine->height();
 
     for (wchar_t i : wideText) {
       const agg::glyph_cache* glyph=fontCacheManager->glyph(i);
@@ -145,6 +137,11 @@ namespace osmscout {
         width+=glyph->advance_x;
       }
     }
+
+    return TextDimension(0.0,
+                         0.0,
+                         width,
+                         fontEngine->height());
   }
 
   void MapPainterAgg::DrawText(double x,

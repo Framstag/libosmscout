@@ -792,15 +792,11 @@ namespace osmscout {
 
       labelData.fontSize=debugLabel->GetSize();
 
-      GetTextDimension(projection,
-                       parameter,
-                       -1,
-                       labelData.fontSize,
-                       label,
-                       labelData.xOff,
-                       labelData.yOff,
-                       labelData.width,
-                       labelData.height);
+      labelData.dimension=GetTextDimension(projection,
+                                           parameter,
+                                           -1,
+                                           labelData.fontSize,
+                                           label);
 
       labelData.alpha=debugLabel->GetAlpha();
       labelData.position=0;
@@ -844,14 +840,11 @@ namespace osmscout {
     double frameHoriz=5;
     double frameVert=5;
 
-    double xOff,yOff,width,height;
-
-    GetTextDimension(projection,
-                     parameter,
-                     -1,
-                     style->GetSize(),
-                     text,
-                     xOff,yOff,width,height);
+    TextDimension dimension=GetTextDimension(projection,
+                                             parameter,
+                                             -1,
+                                             style->GetSize(),
+                                             text);
 
 
     for (const auto& gridPoint : gridPoints) {
@@ -875,13 +868,13 @@ namespace osmscout {
       LabelData labelBox;
 
       labelBox.id=nextLabelId++;
-      labelBox.bx1=x-width/2-frameHoriz;
-      labelBox.bx2=x+width/2+frameHoriz;
-      labelBox.by1=y-height/2-frameVert;
-      labelBox.by2=y+height/2+frameVert;
+      labelBox.bx1=x-dimension.width/2-frameHoriz;
+      labelBox.bx2=x+dimension.width/2+frameHoriz;
+      labelBox.by1=y-dimension.height/2-frameVert;
+      labelBox.by2=y+dimension.height/2+frameVert;
       labelBox.priority=style->GetPriority();
-      labelBox.x=x-xOff-width/2;
-      labelBox.y=y-yOff-height/2;
+      labelBox.x=x-dimension.xOff-dimension.width/2;
+      labelBox.y=y-dimension.yOff-dimension.height/2;
       labelBox.alpha=1.0;
       labelBox.fontSize=style->GetSize();
       labelBox.style=style;
@@ -912,13 +905,13 @@ namespace osmscout {
     LabelData labelBox;
 
     labelBox.id=id;
-    labelBox.bx1=x-data.width/2;
-    labelBox.bx2=x+data.width/2;
-    labelBox.by1=y-data.height/2;
-    labelBox.by2=y+data.height/2;
+    labelBox.bx1=x-data.dimension.width/2;
+    labelBox.bx2=x+data.dimension.width/2;
+    labelBox.by1=y-data.dimension.height/2;
+    labelBox.by2=y+data.dimension.height/2;
     labelBox.priority=data.textStyle->GetPriority();
-    labelBox.x=x-data.xOff-data.width/2;
-    labelBox.y=y-data.yOff-data.height/2;
+    labelBox.x=x-data.dimension.xOff-data.dimension.width/2;
+    labelBox.y=y-data.dimension.yOff-data.dimension.height/2;
     labelBox.alpha=data.alpha;
     labelBox.fontSize=data.fontSize;
     labelBox.style=data.textStyle;
@@ -976,10 +969,7 @@ namespace osmscout {
         LabelLayoutData data;
 
         data.position=iconStyle->GetPosition();
-        data.xOff=0;
-        data.yOff=0;
-        data.width=14;  // TODO
-        data.height=14; // TODO
+        data.dimension=TextDimension(0.0,0.0,14.0,14.0);
         data.icon=true;
         data.iconStyle=iconStyle;
 
@@ -991,10 +981,9 @@ namespace osmscout {
         LabelLayoutData data;
 
         data.position=iconStyle->GetPosition();
-        data.xOff=0;
-        data.yOff=0;
-        data.width=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth());
-        data.height=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
+        data.dimension=TextDimension(0.0,0.0,
+                                     projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth()),
+                                     projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight()));
         data.icon=false;
         data.iconStyle=iconStyle;
 
@@ -1019,15 +1008,11 @@ namespace osmscout {
         double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
         data.fontSize=textStyle->GetSize()*pow(1.5,factor);
 
-        GetTextDimension(projection,
-                         parameter,
-                         objectWidth,
-                         data.fontSize,
-                         label,
-                         data.xOff,
-                         data.yOff,
-                         data.width,
-                         data.height);
+        data.dimension=GetTextDimension(projection,
+                                        parameter,
+                                        objectWidth,
+                                        data.fontSize,
+                                        label);
 
         data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
@@ -1053,28 +1038,20 @@ namespace osmscout {
         data.fontSize=height/standardFontSize;
         data.alpha=alpha;
 
-        GetTextDimension(projection,
-                         parameter,
-                         objectWidth,
-                         data.fontSize,
-                         label,
-                         data.xOff,
-                         data.yOff,
-                         data.width,
-                         data.height);
+        data.dimension=GetTextDimension(projection,
+                                        parameter,
+                                        objectWidth,
+                                        data.fontSize,
+                                        label);
       }
       else {
         data.fontSize=textStyle->GetSize();
 
-        GetTextDimension(projection,
-                         parameter,
-                         objectWidth,
-                         data.fontSize,
-                         label,
-                         data.xOff,
-                         data.yOff,
-                         data.width,
-                         data.height);
+        data.dimension=GetTextDimension(projection,
+                                        parameter,
+                                        objectWidth,
+                                        data.fontSize,
+                                        label);
 
         data.alpha=textStyle->GetAlpha();
       }
@@ -1084,7 +1061,7 @@ namespace osmscout {
       data.textStyle=textStyle;
       data.icon=false;
 
-      overallTextHeight+=data.height;
+      overallTextHeight+=data.dimension.height;
 
       labelLayoutData.push_back(data);
     }
@@ -1109,7 +1086,7 @@ namespace osmscout {
         RegisterPointLabel(projection,
                            parameter,
                            data,
-                           x,offset+data.height/2,
+                           x,offset+data.dimension.height/2,
                            labelId);
       }
       else if (data.icon) {
@@ -1125,7 +1102,7 @@ namespace osmscout {
                    x,offset);
       }
 
-      offset+=data.height;
+      offset+=data.dimension.height;
     }
     //std::cout << "<<<" << std::endl;
   }

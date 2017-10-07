@@ -79,6 +79,32 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainter
   {
   public:
+
+    /*
+     * Dimension of a text
+     */
+    struct OSMSCOUT_MAP_API TextDimension
+    {
+      double xOff;
+      double yOff;
+      double width;
+      double height;
+
+      TextDimension() = default;
+
+      TextDimension(double xOff,
+                    double yOff,
+                    double width,
+                    double height)
+      : xOff(xOff),
+        yOff(yOff),
+        width(width),
+        height(height)
+      {
+        // no code
+      }
+    };
+
     /**
      * Structure used for internal statistic collection
      */
@@ -179,17 +205,14 @@ namespace osmscout {
 
     struct OSMSCOUT_MAP_API LabelLayoutData
     {
-      size_t       position;   //!< Relative position of the label
-      double       xOff;       //!< Optional horizontal offset within the label
-      double       yOff;       //!< Optional vertical offset within the label
-      double       width;      //!< Width of the label
-      double       height;     //!< Height of the label
-      std::string  label;      //!< The text of the label (only used if TextStyle is set)
-      double       fontSize;   //!< The font size (only used if TextStyle is set)
-      double       alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
-      TextStyleRef textStyle;  //!< The text style for a textual label (optional)
-      bool         icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
-      IconStyleRef iconStyle;  //!< The icon style for a icon or symbol
+      size_t        position;   //!< Relative position of the label
+      std::string   label;      //!< The text of the label (only used if TextStyle is set)
+      TextDimension dimension;  //!< Dimension of the label object (coul dbe text, sybol, icon...)
+      double        fontSize;   //!< The font size (only used if TextStyle is set)
+      double        alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
+      TextStyleRef  textStyle;  //!< The text style for a textual label (optional)
+      bool          icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
+      IconStyleRef  iconStyle;  //!< The icon style for a icon or symbol
     };
 
   protected:
@@ -500,15 +523,11 @@ namespace osmscout {
       that later calls to corresponding DrawXXX methods will honour the initial
       bounding box.
       */
-    virtual void GetTextDimension(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  double objectWidth,
-                                  double fontSize,
-                                  const std::string& text,
-                                  double& xOff,
-                                  double& yOff,
-                                  double& width,
-                                  double& height) = 0;
+    virtual TextDimension GetTextDimension(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           double objectWidth,
+                                           double fontSize,
+                                           const std::string& text) = 0;
 
     /**
       (Optionally) fills the area with the given default color

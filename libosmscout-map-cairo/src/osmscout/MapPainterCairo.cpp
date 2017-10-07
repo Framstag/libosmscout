@@ -626,15 +626,11 @@ namespace osmscout {
 #endif
   }
 
-  void MapPainterCairo::GetTextDimension(const Projection& projection,
-                                         const MapParameter& parameter,
-                                         double objectWidth,
-                                         double fontSize,
-                                         const std::string& text,
-                                         double& xOff,
-                                         double& yOff,
-                                         double& width,
-                                         double& height)
+  MapPainter::TextDimension MapPainterCairo::GetTextDimension(const Projection& projection,
+                                                              const MapParameter& parameter,
+                                                              double objectWidth,
+                                                              double fontSize,
+                                                              const std::string& text)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     Font             font=GetFont(projection,
@@ -661,21 +657,28 @@ namespace osmscout {
     pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
     pango_layout_set_width(layout,proposedWidth);
 
-    pango_layout_get_pixel_extents(layout,NULL,&extends);
+    pango_layout_get_pixel_extents(layout,nullptr,&extends);
 
-    xOff=extends.x;
-    yOff=extends.y;
-    width=extends.width;
+    TextDimension dimension;
 
     if (pango_layout_get_line_count(layout)<=1) {
-      height=pango_font_description_get_size(font)/PANGO_SCALE;
+      dimension=TextDimension(extends.x,
+                              extends.y,
+                              extends.width,
+                              pango_font_description_get_size(font)/PANGO_SCALE);
+
     }
     else {
-      height=extends.height;
+      dimension=TextDimension(extends.x,
+                              extends.y,
+                              extends.width,
+                              extends.height);
     }
 
     pango_font_metrics_unref(metrics);
     g_object_unref(layout);
+
+    return dimension;
 #else
     Font                 font;
     cairo_text_extents_t textExtents;
@@ -691,10 +694,10 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    xOff=textExtents.x_bearing;
-    yOff=textExtents.y_bearing;
-    width=textExtents.width;
-    height=fontExtents.height;
+    return TextDimension(textExtents.x_bearing,
+                         textExtents.y_bearing,
+                         textExtents.width,
+                         fontExtents.height);
 #endif
   }
 

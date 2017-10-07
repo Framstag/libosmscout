@@ -95,15 +95,11 @@ namespace osmscout {
 			double fontSize,
 			double& height);
 
-		virtual void GetTextDimension(const Projection& projection,
+		TextDimension void GetTextDimension(const Projection& projection,
 			const MapParameter& parameter,
       double objectWidth,
 			double fontSize,
-			const std::string& text,
-			double& xOff,
-			double& yOff,
-			double& width,
-			double& height);
+			const std::string& text);
 
 		/*virtual void GetLabelFrame(const LabelStyle& style,
 			double& horizontal,

@@ -389,8 +389,10 @@ namespace osmscout
 		}
 	}
 
-	void MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double objectWidth, double fontSize, const std::string& text, double& xOff, double& yOff, double& width, double& height)
+	TextDimension MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double objectWidth, double fontSize, const std::string& text)
 	{
+		TextDimension dimension;
+
 #ifdef MBUC
 		std::wstring sample = s2w(text);
 #else
@@ -406,26 +408,28 @@ namespace osmscout
 			size * 2.0f,
 			size,
 			&pDWriteTextLayout);
-		xOff = 0.0;
-		yOff = 0.0;
+		dimension.xOff = 0.0;
+		dimension.yOff = 0.0;
 		if (FAILED(hr))
 		{
-			width = 0.0;
-			height = 0.0;
+			dimension.width = 0.0;
+			dimension.height = 0.0;
 			return;
 		}
 		DWRITE_TEXT_METRICS textMetrics;
 		hr = pDWriteTextLayout->GetMetrics(&textMetrics);
 		pDWriteTextLayout->Release();
 		if (FAILED(hr)) {
-			width = 0.0;
-			height = 0.0;
+			dimension.width = 0.0;
+			dimension.height = 0.0;
 		}
 		else
 		{
-			width = textMetrics.width;
-			height = textMetrics.height;
+			dimension.width = textMetrics.width;
+			dimension.height = textMetrics.height;
 		}
+
+		return dimension;
 	}
 
 	/*void MapPainterDirectX::GetLabelFrame(const LabelStyle& style, double& horizontal, double& vertical)

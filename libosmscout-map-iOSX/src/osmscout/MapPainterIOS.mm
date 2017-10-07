@@ -453,15 +453,11 @@ namespace osmscout {
     /*
      * GetTextDimension()
      */
-    void MapPainterIOS::GetTextDimension(const Projection& projection,
-                                         const MapParameter& parameter,
-                                         double objectWidth,
-                                         double fontSize,
-                                         const std::string& text,
-                                         double& xOff,
-                                         double& yOff,
-                                         double& width,
-                                         double& height){
+    TextDimension MapPainterIOS::GetTextDimension(const Projection& projection,
+                                                  const MapParameter& parameter,
+                                                  double objectWidth,
+                                                  double fontSize,
+                                                  const std::string& text){
         Font *font = GetFont(projection,parameter,fontSize);
         NSString *str = [NSString stringWithUTF8String:text.c_str()];
         CGRect rect = CGRectZero;
@@ -492,28 +488,23 @@ namespace osmscout {
         rect.size.width = size.width;
         rect.size.height = size.height;
 #endif
-        xOff = rect.origin.x;
-        yOff = rect.origin.y;
-        width = rect.size.width;
-        height = rect.size.height;
+
+        return TextDimension(rect.origin.x,
+                             rect.origin.y,
+                             rect.origin.width,
+                             rect.origin.height);
     }
 
     double MapPainterIOS::textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        double xOff;
-        double yOff;
-        double width;
-        double height;
-        GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text,xOff,yOff,width,height);
-        return width;
+        TextDimension dimension=GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text);
+
+        return dimension.width;
     }
 
     double MapPainterIOS::textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        double xOff;
-        double yOff;
-        double width;
-        double height;
-        GetTextDimension(projection, parameter,/*objectWidth*/-1,fontSize,text,xOff,yOff,width,height);
-        return height;
+        TextDimension dimension=GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text);
+
+        return dimension.height;
     }
 
     /*

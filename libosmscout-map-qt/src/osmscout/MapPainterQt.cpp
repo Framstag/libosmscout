@@ -197,31 +197,28 @@ namespace osmscout {
     height=metrics.height();
   }
 
-  void MapPainterQt::GetTextDimension(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      double objectWidth,
-                                      double fontSize,
-                                      const std::string& text,
-                                      double& xOff,
-                                      double& yOff,
-                                      double& width,
-                                      double& height)
+  MapPainter::TextDimension MapPainterQt::GetTextDimension(const Projection& projection,
+                                                           const MapParameter& parameter,
+                                                           double objectWidth,
+                                                           double fontSize,
+                                                           const std::string& text)
   {
-    QFont        font(GetFont(projection,
-                              parameter,
-                              fontSize));
-    QFontMetrics fontMetrics=QFontMetrics(font);
-    QString      string=QString::fromUtf8(text.c_str());
-    QTextLayout  textLayout(string,font);
-    qreal        leading=fontMetrics.leading() ;
+    QFont         font(GetFont(projection,
+                               parameter,
+                               fontSize));
+    QFontMetrics  fontMetrics=QFontMetrics(font);
+    QString       string=QString::fromUtf8(text.c_str());
+    QTextLayout   textLayout(string,font);
+    qreal         leading=fontMetrics.leading() ;
 
-    qreal        proposedWidth=GetProposedLabelWidth(parameter,
-                                                     fontMetrics.averageCharWidth(),
-                                                     objectWidth,
-                                                     string.length());
+    qreal         proposedWidth=GetProposedLabelWidth(parameter,
+                                                      fontMetrics.averageCharWidth(),
+                                                      objectWidth,
+                                                      string.length());
+    TextDimension  dimension;
 
-    width=0;
-    height=0;
+    dimension.width=0;
+    dimension.height=0;
 
     textLayout.beginLayout();
     while (true) {
@@ -230,17 +227,19 @@ namespace osmscout {
         break;
 
       line.setLineWidth(proposedWidth);
-      height+=leading;
-      line.setPosition(QPointF(0.0,height));
-      width=std::max(width,(double)line.naturalTextWidth());
-      height+=line.height();
+      dimension.height+=leading;
+      line.setPosition(QPointF(0.0,dimension.height));
+      dimension.width=std::max(dimension.width,(double)line.naturalTextWidth());
+      dimension.height+=line.height();
     }
     textLayout.endLayout();
 
     QRectF boundingBox=textLayout.boundingRect();
 
-    xOff=boundingBox.x();
-    yOff=boundingBox.y();
+    dimension.xOff=boundingBox.x();
+    dimension.yOff=boundingBox.y();
+
+    return dimension;
   }
 
   void LayoutTextLayout(const QFontMetrics& fontMetrics,
@@ -420,7 +419,7 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::setupTransformation(QPainter *painter,
+  void MapPainterQt::SetupTransformation(QPainter* painter,
                                          const QPointF center,
                                          const qreal angle,
                                          const qreal baseline) const
@@ -569,7 +568,7 @@ namespace osmscout {
             angle-=180;
           }
 
-          setupTransformation(painter, point, angle, fontPixelSize*-0.7);
+          SetupTransformation(painter,point,angle,fontPixelSize*-0.7);
 
           QGlyphRun orphanGlyph;
 
@@ -1108,35 +1107,6 @@ namespace osmscout {
                                               style.GetFillColor().GetG(),
                                               style.GetFillColor().GetB(),
                                               1)));
-  }
-
-  void MapPainterQt::SetPen(const LineStyle& style,
-                            double lineWidth)
-  {
-    QPen pen;
-
-    pen.setColor(QColor::fromRgbF(style.GetLineColor().GetR(),
-                                  style.GetLineColor().GetG(),
-                                  style.GetLineColor().GetB(),
-                                  style.GetLineColor().GetA()));
-    pen.setWidthF(lineWidth);
-
-    if (style.GetDash().empty()) {
-      pen.setStyle(Qt::SolidLine);
-      pen.setCapStyle(Qt::RoundCap);
-    }
-    else {
-      QVector<qreal> dashes;
-
-      for (double i : style.GetDash()) {
-        dashes << i;
-      }
-
-      pen.setDashPattern(dashes);
-      pen.setCapStyle(Qt::FlatCap);
-    }
-
-    painter->setPen(pen);
   }
 
   void MapPainterQt::SetFill(const Projection& projection,

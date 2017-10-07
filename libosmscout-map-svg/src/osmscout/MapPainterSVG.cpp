@@ -296,15 +296,11 @@ namespace osmscout {
 #endif
   }
 
-  void MapPainterSVG::GetTextDimension(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       double /*objectWidth*/,
-                                       double fontSize,
-                                       const std::string& text,
-                                       double& xOff,
-                                       double& yOff,
-                                       double& width,
-                                       double& height)
+  MapPainter::TextDimension MapPainterSVG::GetTextDimension(const Projection& projection,
+                                                            const MapParameter& parameter,
+                                                            double /*objectWidth*/,
+                                                            double fontSize,
+                                                            const std::string& text)
   {
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
     PangoFontDescription *font;
@@ -320,22 +316,19 @@ namespace osmscout {
 
     pango_layout_get_pixel_extents(layout,&extends,NULL);
 
-    xOff=extends.x;
-    yOff=extends.y;
-    width=extends.width;
-    height=pango_font_description_get_size(font)/PANGO_SCALE;
-
     g_object_unref(layout);
-#else
-      unused(projection);
-      unused(parameter);
-      unused(fontSize);
-      unused(text);
-      xOff=0.0;
-      yOff=0.0;
-      width=0.0;
-      height=0.0;
 
+    return TextDimension(extends.x,
+                         extends.y,
+                         extends.width,
+                         pango_font_description_get_size(font)/PANGO_SCALE);
+#else
+    unused(projection);
+    unused(parameter);
+    unused(fontSize);
+    unused(text);
+
+    return TextDimension();
 #endif
   }
 
