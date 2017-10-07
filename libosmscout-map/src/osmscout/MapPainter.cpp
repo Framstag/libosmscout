@@ -1130,22 +1130,31 @@ namespace osmscout {
     //std::cout << "<<<" << std::endl;
   }
 
-  double MapPainter::proposedLabelWidth(const MapParameter& parameter,
-                                        double averageCharWidth,
-                                        double objectWidth,
-                                        size_t stringLength)
+  double MapPainter::GetProposedLabelWidth(const MapParameter& parameter,
+                                           double averageCharWidth,
+                                           double objectWidth,
+                                           size_t stringLength)
   {
     double proposedWidth;
     // If there is just a few characters (less than LabelLineMinCharCount)
     // we should not wrap the words at all.
-    if (stringLength>parameter.GetLabelLineMinCharCount()){
-      proposedWidth=objectWidth>0 && parameter.GetLabelLineFitToArea() ?
-        std::min(objectWidth,parameter.GetLabelLineFitToWidth()) : parameter.GetLabelLineFitToWidth();
-      proposedWidth=std::min(proposedWidth,(double)parameter.GetLabelLineMaxCharCount()*averageCharWidth);
-      proposedWidth=std::max(proposedWidth,(double)parameter.GetLabelLineMinCharCount()*averageCharWidth);
-    }else{
+    if (stringLength>parameter.GetLabelLineMinCharCount()) {
+      if (objectWidth>0 && parameter.GetLabelLineFitToArea()) {
+        std::min(objectWidth,parameter.GetLabelLineFitToWidth());
+      }
+      else {
+        parameter.GetLabelLineFitToWidth();
+      }
+
+      proposedWidth=std::min(proposedWidth,
+                             (double)parameter.GetLabelLineMaxCharCount()*averageCharWidth);
+      proposedWidth=std::max(proposedWidth,
+                             (double)parameter.GetLabelLineMinCharCount()*averageCharWidth);
+    }
+    else {
       proposedWidth=parameter.GetLabelLineMaxCharCount()*averageCharWidth;
     }
+
     return proposedWidth;
   }
 

@@ -215,10 +215,10 @@ namespace osmscout {
     QTextLayout  textLayout(string,font);
     qreal        leading=fontMetrics.leading() ;
 
-    qreal        proposedWidth=proposedLabelWidth(parameter,
-                                                  fontMetrics.averageCharWidth(),
-                                                  objectWidth,
-                                                  string.length());
+    qreal        proposedWidth=GetProposedLabelWidth(parameter,
+                                                     fontMetrics.averageCharWidth(),
+                                                     objectWidth,
+                                                     string.length());
 
     width=0;
     height=0;
@@ -477,8 +477,9 @@ namespace osmscout {
     while (textLayout.createLine().isValid()){};
     textLayout.endLayout();
 
-    QList<QGlyphRun> glyphs=textLayout.glyphRuns();
     double stringWidth=textLayout.boundingRect().width();
+
+    QList<QGlyphRun> glyphs=textLayout.glyphRuns();
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     painter->setPen(pen);
@@ -514,7 +515,7 @@ namespace osmscout {
       return;
     }
 
-    // Space left, if we have drawn al labels
+    // Space left, if we have drawn all labels
     spaceLeft=fmod(spaceLeft,stringWidth+contourLabelSpace);
 
     // Resulting offset of the first label

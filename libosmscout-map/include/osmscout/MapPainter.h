@@ -587,10 +587,10 @@ namespace osmscout {
       Compute suggested label width for given parameters.
       It may be used by backend for layout labels with wrapping words.
      */
-    virtual double proposedLabelWidth(const MapParameter& parameter,
-                                      double averageCharWidth,
-                                      double objectWidth,
-                                      size_t stringLength);
+    virtual double GetProposedLabelWidth(const MapParameter& parameter,
+                                         double averageCharWidth,
+                                         double objectWidth,
+                                         size_t stringLength);
 
     /**
       Med level drawing routines that are already implemented by the base class, but which can be overwritten

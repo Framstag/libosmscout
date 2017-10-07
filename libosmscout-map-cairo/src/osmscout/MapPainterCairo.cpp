@@ -649,10 +649,10 @@ namespace osmscout {
                                                         font,
                                                         pango_context_get_language(context));
 
-    double proposedWidth=proposedLabelWidth(parameter,
-                                            pango_font_metrics_get_approximate_char_width(metrics),
-                                            objectWidth,
-                                            text.length());
+    double proposedWidth=GetProposedLabelWidth(parameter,
+                                               pango_font_metrics_get_approximate_char_width(metrics),
+                                               objectWidth,
+                                               text.length());
 
     PangoRectangle   extends;
 
