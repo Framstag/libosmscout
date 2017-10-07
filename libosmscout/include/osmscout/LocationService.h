@@ -167,6 +167,43 @@ namespace osmscout {
   /**
    * \ingroup Location
    *
+   * Description of a location based on a nearby way
+   */
+  class OSMSCOUT_API LocationWayDescription CLASS_FINAL
+  {
+  private:
+    Place  way;      //!< the nearest way
+    double distance; //!< distance to the way
+
+  public:
+    LocationWayDescription(const Place& way);
+
+    LocationWayDescription(const Place& way,
+                           double distance);
+    /**
+     * Return the place this information is refering to
+     */
+    inline const Place GetWay() const
+    {
+      return way;
+    }
+
+    /**
+     * Return the distance to the location in meter
+     */
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+  };
+  
+  //! \ingroup Location
+  //! Reference counted reference to a LocationWayDescription instance
+  typedef std::shared_ptr<LocationWayDescription> LocationWayDescriptionRef;
+
+  /**
+   * \ingroup Location
+   *
    * Description of a location based on a nearby crossing
    */
   class OSMSCOUT_API LocationCrossingDescription CLASS_FINAL
@@ -223,7 +260,7 @@ namespace osmscout {
       return crossing;
     }
   };
-
+  
   //! \ingroup Location
   //! Reference counted reference to a LocationCrossingDescription instance
   typedef std::shared_ptr<LocationCrossingDescription> LocationCrossingDescriptionRef;
@@ -241,6 +278,7 @@ namespace osmscout {
     LocationAtPlaceDescriptionRef  atNameDescription;
     LocationAtPlaceDescriptionRef  atAddressDescription;
     LocationAtPlaceDescriptionRef  atPOIDescription;
+    LocationWayDescriptionRef      wayDescription;
     LocationCrossingDescriptionRef crossingDescription;
 
   public:
@@ -248,6 +286,7 @@ namespace osmscout {
     void SetAtNameDescription(const LocationAtPlaceDescriptionRef& description);
     void SetAtAddressDescription(const LocationAtPlaceDescriptionRef& description);
     void SetAtPOIDescription(const LocationAtPlaceDescriptionRef& description);
+    void SetWayDescription(const LocationWayDescriptionRef& description);
     void SetCrossingDescription(const LocationCrossingDescriptionRef& description);
 
     /**
@@ -273,6 +312,12 @@ namespace osmscout {
      * @return
      */
     LocationAtPlaceDescriptionRef GetAtPOIDescription() const;
+
+    /**
+     * Return the location in relation to a close way
+     * @return
+     */
+    LocationWayDescriptionRef GetWayDescription() const;
 
     /**
      * Return the location in relation to a close crossing
@@ -842,6 +887,10 @@ namespace osmscout {
     bool DescribeLocationByCrossing(const GeoCoord& location,
                                     LocationDescription& description,
                                     const double lookupDistance=100);
+
+    bool DescribeLocationByWay(const GeoCoord& location,
+                               LocationDescription& description,
+                               const double lookupDistance=100);
   };
 
   //! \ingroup Service

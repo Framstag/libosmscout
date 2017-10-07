@@ -128,6 +128,25 @@ void DumpLocationAtPlaceDescription(const std::string& label,
   }
 }
 
+void DumpWayDescription(const std::string& label,
+                        osmscout::LocationWayDescription& description)
+{
+  std::cout << label << ":" << std::endl;
+
+  std::cout.precision(1);
+  std::cout << "  * Your are "  << std::fixed << description.GetDistance() << "m";
+  std::cout << " away from way:"  << std::endl;
+
+  std::cout << "  - " << description.GetWay().GetDisplayString() << " " << description.GetWay().GetObject().GetName() << std::endl;
+  
+  // print all features of this place
+  std::cout << std::endl;
+  if (description.GetWay().GetObjectFeatures()) {
+    DumpFeatures(*description.GetWay().GetObjectFeatures());
+  }
+ 
+}
+
 void DumpCrossingDescription(const std::string& label,
                              osmscout::LocationCrossingDescription& description)
 {
@@ -249,6 +268,7 @@ int main(int argc, char* argv[])
   osmscout::LocationAtPlaceDescriptionRef  atNameDescription=description.GetAtNameDescription();
   osmscout::LocationAtPlaceDescriptionRef  atAddressDescription=description.GetAtAddressDescription();
   osmscout::LocationAtPlaceDescriptionRef  atPOIDescription=description.GetAtPOIDescription();
+  osmscout::LocationWayDescriptionRef      wayDescription=description.GetWayDescription();
   osmscout::LocationCrossingDescriptionRef crossingDescription=description.GetCrossingDescription();
 
   if (coordDescription) {
@@ -273,6 +293,12 @@ int main(int argc, char* argv[])
     DumpParentAdminRegions(locationService, database, atPOIDescription->GetPlace().GetAdminRegion());
   }
 
+  if (wayDescription) {
+    std::cout << std::endl;
+    DumpWayDescription("Nearest way",*wayDescription);
+    DumpParentAdminRegions(locationService, database, wayDescription->GetWay().GetAdminRegion());
+  }
+  
   if (crossingDescription) {
     std::cout << std::endl;
     DumpCrossingDescription("Nearest crossing",*crossingDescription);

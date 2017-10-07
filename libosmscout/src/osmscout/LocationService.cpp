@@ -58,7 +58,22 @@ namespace osmscout {
   {
     // no code
   }
+  
+  LocationWayDescription::LocationWayDescription(const Place& way)
+  : way(way),
+    distance(0.0)
+  {
+    // no code
+  }
 
+  LocationWayDescription::LocationWayDescription(const Place& way,
+                                                 double distance)
+    : way(way),
+      distance(distance)
+  {
+    // no code
+  }
+  
   LocationCrossingDescription::LocationCrossingDescription(const GeoCoord& crossing,
                                                            const std::list<Place>& ways)
   : crossing(crossing),
@@ -103,6 +118,11 @@ namespace osmscout {
     this->atPOIDescription=description;
   }
 
+  void LocationDescription::SetWayDescription(const LocationWayDescriptionRef& description)
+  {
+    this->wayDescription=description;
+  }
+  
   void LocationDescription::SetCrossingDescription(const LocationCrossingDescriptionRef& description)
   {
     this->crossingDescription=description;
@@ -128,6 +148,11 @@ namespace osmscout {
     return atPOIDescription;
   }
 
+  LocationWayDescriptionRef LocationDescription::GetWayDescription() const
+  {
+    return wayDescription;
+  }
+  
   LocationCrossingDescriptionRef LocationDescription::GetCrossingDescription() const
   {
     return crossingDescription;
@@ -3996,7 +4021,84 @@ namespace osmscout {
 
     return true;
   }
+  
+  /**
+   * Returns ways (roads that can be driven by cars and which have a name feature)
+   *
+   * @param location
+   *    Location to search for the closest ways
+   * @param description
+   *    The description returned
+   * @param lookupDistance
+   *    The range to look in
+   * @return
+   */
+  bool LocationService::DescribeLocationByWay(const GeoCoord& location,
+                                               LocationDescription& description,
+                                               const double lookupDistance)
+  {
+    TypeConfigRef          typeConfig=database->GetTypeConfig();
+    NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
 
+    if (!typeConfig) {
+      return false;
+    }
+
+    std::vector<WayRef> candidates;
+
+    TypeInfoSet wayTypes;
+
+    // near addressable ways
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeWay() &&
+          type->HasFeature(NameFeature::NAME)) {
+        wayTypes.Set(type);
+      }
+    }
+
+    if (!wayTypes.Empty()) {
+      if (!LoadNearWays(location,
+                        wayTypes,
+                        candidates,
+                        lookupDistance)) {
+        return false;
+      }
+    }
+
+    // Remove candidates if they do no have a name
+    candidates.erase(std::remove_if(candidates.begin(),candidates.end(),[&nameFeatureLabelReader](const WayRef& candidate) -> bool {
+      return nameFeatureLabelReader.GetLabel(candidate->GetFeatureValueBuffer()).empty();
+    }),candidates.end());
+
+    if (candidates.empty()) {
+      return true;
+    }
+
+    WayRef way;
+    double dist = std::numeric_limits<double>::max();
+    for (const auto& candidate : candidates) {
+      for (const auto& point : candidate->nodes) {
+        if (GetEllipsoidalDistance(point.GetCoord(),location) < dist) {
+          dist = GetEllipsoidalDistance(point.GetCoord(),location);
+          way = candidate;
+        }
+      }
+    }
+
+    std::list<ReverseLookupResult> result;
+    if (!ReverseLookupObject(way->GetObjectFileRef(), result)) {
+      return false;
+    }
+
+    Place place = GetPlace(result);
+    LocationWayDescriptionRef wayDescription;
+    wayDescription=std::make_shared<LocationWayDescription>(place, dist*1000);
+
+    description.SetWayDescription(wayDescription);
+
+    return true;
+  }
+  
   bool LocationService::DescribeLocation(const GeoCoord& location,
                                          LocationDescription& description,
                                          const double lookupDistance,
@@ -4022,6 +4124,12 @@ namespace osmscout {
                                description,
                                lookupDistance,
                                sizeFilter)) {
+      return false;
+    }
+
+    if (!DescribeLocationByWay(location,
+                               description,
+                               lookupDistance)) {
       return false;
     }
 
