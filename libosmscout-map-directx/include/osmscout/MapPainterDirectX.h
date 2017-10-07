@@ -95,7 +95,7 @@ namespace osmscout {
 			double fontSize,
 			double& height);
 
-		TextDimension void GetTextDimension(const Projection& projection,
+		TextDimension GetTextDimension(const Projection& projection,
 			const MapParameter& parameter,
       double objectWidth,
 			double fontSize,
