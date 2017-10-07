@@ -96,10 +96,10 @@ namespace osmscout {
     width=0;
     height=fontEngine->height();
 
-    for (size_t i=0; i<text.length(); i++) {
-      const agg::glyph_cache* glyph=fontCacheManager->glyph(text[i]);
+    for (wchar_t i : text) {
+      const agg::glyph_cache* glyph=fontCacheManager->glyph(i);
 
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         width+=glyph->advance_x;
       }
     }
@@ -138,10 +138,10 @@ namespace osmscout {
     width=0;
     height=fontEngine->height();
 
-    for (size_t i=0; i<wideText.length(); i++) {
-      const agg::glyph_cache* glyph=fontCacheManager->glyph(wideText[i]);
+    for (wchar_t i : wideText) {
+      const agg::glyph_cache* glyph=fontCacheManager->glyph(i);
 
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         width+=glyph->advance_x;
       }
     }
@@ -151,10 +151,10 @@ namespace osmscout {
                                double y,
                                const std::wstring& text)
   {
-    for (size_t i=0; i<text.length(); i++) {
-      const agg::glyph_cache* glyph = fontCacheManager->glyph(text[i]);
+    for (wchar_t i : text) {
+      const agg::glyph_cache* glyph = fontCacheManager->glyph(i);
 
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         if (true) {
           fontCacheManager->add_kerning(&x, &y);
         }
@@ -205,10 +205,10 @@ namespace osmscout {
   {
     convTextContours->width(width);
 
-    for (size_t i=0; i<text.length(); i++) {
-      const agg::glyph_cache* glyph = fontCacheManager->glyph(text[i]);
+    for (wchar_t i : text) {
+      const agg::glyph_cache* glyph = fontCacheManager->glyph(i);
 
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         if (true) {
           fontCacheManager->add_kerning(&x, &y);
         }
@@ -321,7 +321,7 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const LabelData& label)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
       const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
       double           r=style->GetTextColor().GetR();
       double           g=style->GetTextColor().GetG();
@@ -711,10 +711,7 @@ namespace osmscout {
     rasterizer->add_path(path);
 
     if (!area.clippings.empty()) {
-      for (std::list<PolyData>::const_iterator c=area.clippings.begin();
-          c!=area.clippings.end();
-          c++) {
-        const PolyData    &data=*c;
+      for (const auto& data : area.clippings) {
         agg::path_storage clipPath;
 
          clipPath.move_to(coordBuffer->buffer[data.transStart].GetX(),
@@ -764,7 +761,7 @@ namespace osmscout {
                               AggPixelFormat* pf)
   {
     std::lock_guard<std::mutex> guard(mutex);
-    bool                        result=true;
+    bool                        result;
 
     this->pf=pf;
 
