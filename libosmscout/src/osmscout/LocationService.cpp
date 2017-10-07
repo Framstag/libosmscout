@@ -4075,11 +4075,14 @@ namespace osmscout {
     }
 
     WayRef way;
-    double dist = std::numeric_limits<double>::max();
+    double minDistance = std::numeric_limits<double>::max();
     for (const auto& candidate : candidates) {
-      for (const auto& point : candidate->nodes) {
-        if (GetEllipsoidalDistance(point.GetCoord(),location) < dist) {
-          dist = GetEllipsoidalDistance(point.GetCoord(),location);
+      for (size_t i = 0;  i < candidate->nodes.size() - 1; i++) {
+        double r, intersectLon, intersectLat;
+        double distance = DistanceToSegment(location.GetLon(),location.GetLat(),candidate->nodes[i].GetLon(),candidate->nodes[i].GetLat(),
+                        candidate->nodes[i+1].GetLon(),candidate->nodes[i+1].GetLat(), r, intersectLon, intersectLat);
+        if (distance < minDistance) {
+          minDistance = distance;
           way = candidate;
         }
       }
@@ -4092,7 +4095,7 @@ namespace osmscout {
 
     Place place = GetPlace(result);
     LocationWayDescriptionRef wayDescription;
-    wayDescription=std::make_shared<LocationWayDescription>(place, dist*1000);
+    wayDescription=std::make_shared<LocationWayDescription>(place, minDistance*1000);
 
     description.SetWayDescription(wayDescription);
 
