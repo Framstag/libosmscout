@@ -509,10 +509,9 @@ namespace osmscout {
     /**
      * Returns the height of the font.
      */
-    virtual void GetFontHeight(const Projection& projection,
+    virtual double GetFontHeight(const Projection& projection,
                                const MapParameter& parameter,
-                               double fontSize,
-                               double& height) = 0;
+                               double fontSize) = 0;
 
     /**
       Return the bounding box of the given text. The method is call

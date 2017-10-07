@@ -821,14 +821,8 @@ namespace osmscout {
                                          const std::string& text,
                                          const std::vector<Point>& nodes)
   {
-    double               fontHeight;
     const LabelStyleRef& style=shieldStyle->GetShieldStyle();
     std::set<GeoCoord>   gridPoints;
-
-    GetFontHeight(projection,
-                  parameter,
-                  style->GetSize(),
-                  fontHeight);
 
     //SymbolRef symbol=styleConfig->GetSymbol("marker");
 
@@ -2108,10 +2102,9 @@ namespace osmscout {
 
     transBuffer.Reset();
 
-    GetFontHeight(projection,
-                  parameter,
-                  1.0,
-                  standardFontSize);
+    standardFontSize=GetFontHeight(projection,
+                                   parameter,
+                                   1.0);
 
     if (parameter.IsAborted()) {
       return false;

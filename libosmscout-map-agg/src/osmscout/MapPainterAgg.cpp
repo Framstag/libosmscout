@@ -105,16 +105,15 @@ namespace osmscout {
     }
   }
 
-  void MapPainterAgg::GetFontHeight(const Projection& projection,
+  double MapPainterAgg::GetFontHeight(const Projection& projection,
                                     const MapParameter& parameter,
-                                    double fontSize,
-                                    double& height)
+                                    double fontSize)
   {
     SetFont(projection,
             parameter,
             fontSize);
 
-    height=fontEngine->height();
+    return fontEngine->height();
   }
 
   MapPainter::TextDimension MapPainterAgg::GetTextDimension(const Projection& projection,

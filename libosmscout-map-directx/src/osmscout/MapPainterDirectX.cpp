@@ -376,20 +376,21 @@ namespace osmscout
 		return false;
 	}
 
-	void MapPainterDirectX::GetFontHeight(const Projection& projection,
+	double MapPainterDirectX::GetFontHeight(const Projection& projection,
 																				const MapParameter& parameter,
 																				double fontSize,
 																				double& height)
 	{
 		if (fontHeightMap.find(fontSize) != fontHeightMap.end())
-			height = fontHeightMap[fontSize];
+			return fontHeightMap[fontSize];
 		else
 		{
 			TextDimension dimension;
 
 			dimension=GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
 			fontHeightMap[fontSize] = dimension.height;
-			height = dimension.height;
+
+			return dimension.height;
 		}
 	}
 
@@ -418,15 +419,18 @@ namespace osmscout
 			&pDWriteTextLayout);
 		dimension.xOff = 0.0;
 		dimension.yOff = 0.0;
+
 		if (FAILED(hr))
 		{
 			dimension.width = 0.0;
 			dimension.height = 0.0;
-			return;
+
+			return dimension;
 		}
 		DWRITE_TEXT_METRICS textMetrics;
 		hr = pDWriteTextLayout->GetMetrics(&textMetrics);
 		pDWriteTextLayout->Release();
+
 		if (FAILED(hr)) {
 			dimension.width = 0.0;
 			dimension.height = 0.0;

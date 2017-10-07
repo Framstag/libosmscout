@@ -275,10 +275,9 @@ namespace osmscout {
     return false;
   }
 
-  void MapPainterSVG::GetFontHeight(const Projection& projection,
+  double MapPainterSVG::GetFontHeight(const Projection& projection,
                                     const MapParameter& parameter,
-                                    double fontSize,
-                                    double& height)
+                                    double fontSize)
   {
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
     PangoFontDescription *font;
@@ -287,12 +286,13 @@ namespace osmscout {
                  parameter,
                  fontSize);
 
-    height=pango_font_description_get_size(font)/PANGO_SCALE;
+    return pango_font_description_get_size(font)/PANGO_SCALE;
 #else
       unused(projection);
       unused(parameter);
       unused(fontSize);
-      height=0.0;
+
+      return 0.0;
 #endif
   }
 

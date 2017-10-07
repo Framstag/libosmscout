@@ -38,12 +38,11 @@ namespace osmscout {
     return false;
   }
 
-  void MapPainterNoOp::GetFontHeight(const Projection& /*projection*/,
+  double MapPainterNoOp::GetFontHeight(const Projection& /*projection*/,
                                      const MapParameter& /*parameter*/,
-                                     double fontSize,
-                                     double& height)
+                                     double fontSize)
   {
-    height=FONT_HEIGHT_FACTOR*fontSize;
+    return FONT_HEIGHT_FACTOR*fontSize;
   }
 
   MapPainter::TextDimension MapPainterNoOp::GetTextDimension(const Projection& /*projection*/,
