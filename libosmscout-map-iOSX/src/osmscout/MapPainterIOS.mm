@@ -778,7 +778,7 @@ namespace osmscout {
         NSUInteger charsCount = [nsText length];
         Vertex2D *coords = new Vertex2D[charsCount];
         double *slopes = new double[charsCount];
-        double nww,nhh,xOff,yOff;
+        TextDimension dimension;
         int labelRepeatCount = 0;
         while(labelRepeatCount++ < labelRepeatMaxCount){
             int i = 0;
@@ -786,10 +786,10 @@ namespace osmscout {
 
                 NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
 
-                GetTextDimension(projection, parameter,/*objectWidth*/-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
+                dimension=GetTextDimension(projection, parameter,/*objectWidth*/-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding]);
                 x1 = charOrigin.GetX();
                 y1 = charOrigin.GetY();
-                if(!followPath(followPathHnd,nww, charOrigin)){
+                if(!followPath(followPathHnd,dimension.width, charOrigin)){
                     goto exit;
                 }
                 x2 = charOrigin.GetX();
@@ -817,7 +817,7 @@ namespace osmscout {
 #if TARGET_OS_IPHONE
                 [str drawAtPoint:CGPointMake(0,-nhh/2) withFont:font];
 #else
-                [str drawAtPoint:CGPointMake(0,-nhh/2) withAttributes:attrsDictionary];
+                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withAttributes:attrsDictionary];
 #endif
                 CGContextRestoreGState(cg);
             }
