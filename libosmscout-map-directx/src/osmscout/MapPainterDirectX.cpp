@@ -378,8 +378,7 @@ namespace osmscout
 
 	double MapPainterDirectX::GetFontHeight(const Projection& projection,
 																				const MapParameter& parameter,
-																				double fontSize,
-																				double& height)
+																				double fontSize)
 	{
 		if (fontHeightMap.find(fontSize) != fontHeightMap.end())
 			return fontHeightMap[fontSize];
