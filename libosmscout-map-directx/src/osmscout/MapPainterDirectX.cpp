@@ -376,20 +376,28 @@ namespace osmscout
 		return false;
 	}
 
-	void MapPainterDirectX::GetFontHeight(const Projection& projection, const MapParameter& parameter, double fontSize, double& height)
+	void MapPainterDirectX::GetFontHeight(const Projection& projection,
+																				const MapParameter& parameter,
+																				double fontSize,
+																				double& height)
 	{
 		if (fontHeightMap.find(fontSize) != fontHeightMap.end())
 			height = fontHeightMap[fontSize];
 		else
 		{
-			double x, y, w, h;
-			GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App", x, y, w, h);
-			fontHeightMap[fontSize] = h;
-			height = h;
+			TextDimension dimension;
+
+			dimension=GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
+			fontHeightMap[fontSize] = dimension.height;
+			height = dimension.height;
 		}
 	}
 
-	TextDimension MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double objectWidth, double fontSize, const std::string& text)
+	MapPainter::TextDimension MapPainterDirectX::GetTextDimension(const Projection& projection,
+																																const MapParameter& parameter,
+																																double objectWidth,
+																																double fontSize,
+																																const std::string& text)
 	{
 		TextDimension dimension;
 
