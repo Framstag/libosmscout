@@ -21,13 +21,6 @@ matrix:
       sudo: required
       compiler: gcc
       env:
-        - BUILDTOOL=autoconf
-        - TARGET=build
-    - os: linux
-      dist: trusty
-      sudo: required
-      compiler: gcc
-      env:
         - BUILDTOOL=cmake
         - TARGET=build
     - os: linux

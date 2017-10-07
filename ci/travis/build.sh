@@ -20,10 +20,7 @@ if [ "$TARGET" = "build" ]; then
     export PATH="/usr/local/opt/libxml2/bin:$PATH"
   fi
 
-  if [ "$BUILDTOOL" = "autoconf" ]; then
-    make full
-    (cd Tests && make check)
-  elif [ "$BUILDTOOL" = "meson" ]; then
+  if [ "$BUILDTOOL" = "meson" ]; then
     meson debug
     cd debug
     ninja

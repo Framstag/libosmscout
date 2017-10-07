@@ -26,11 +26,6 @@ IF %COMPILER%==msys2 (
   echo Installing git...
   bash -lc "pacman -S --needed --noconfirm git"
 
-  IF %BUILDTOOL%==autoconf (
-    echo Installing autoconf tools...
-    bash -lc "pacman -S --needed --noconfirm autoconf automake make"
-  )
-
   IF %BUILDTOOL%==meson (
     echo Installing meson build tool...
     bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja mingw-w64-%MSYS2_ARCH%-meson"
