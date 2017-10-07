@@ -986,7 +986,6 @@ namespace osmscout {
     }
     else {
       // coordinates of previous point
-
       double xo=0;
       double yo=0;
 

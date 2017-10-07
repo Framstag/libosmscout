@@ -932,7 +932,7 @@ namespace osmscout {
   void MapPainter::LayoutPointLabels(const Projection& projection,
                                      const MapParameter& parameter,
                                      const FeatureValueBuffer& buffer,
-                                     const IconStyleRef iconStyle,
+                                     const IconStyleRef& iconStyle,
                                      const std::vector<TextStyleRef>& textStyles,
                                      double x,
                                      double y,

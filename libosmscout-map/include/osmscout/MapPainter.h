@@ -364,7 +364,7 @@ namespace osmscout {
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const FeatureValueBuffer& buffer,
-                           const IconStyleRef iconStyle,
+                           const IconStyleRef& iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
                            double x, double y,
                            double objectWidth=0,
@@ -514,13 +514,13 @@ namespace osmscout {
                                double fontSize) = 0;
 
     /**
-      Return the bounding box of the given text. The method is call
+      Return the bounding box of the given text. The method is called
       every time a label for a node or an area has to be drawn (which means
       "not for contour labels").
 
-      The backend may decide to relayout the given text, however it must assure
-      that later calls to corresponding DrawXXX methods will honour the initial
-      bounding box.
+      The backend may decide to relayout the given text (by adding virtual line breaks),
+      however it must assure that later calls to corresponding DrawXXX methods will
+      honour the bounding box.
       */
     virtual TextDimension GetTextDimension(const Projection& projection,
                                            const MapParameter& parameter,
