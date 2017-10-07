@@ -453,11 +453,11 @@ namespace osmscout {
     /*
      * GetTextDimension()
      */
-    TextDimension MapPainterIOS::GetTextDimension(const Projection& projection,
-                                                  const MapParameter& parameter,
-                                                  double objectWidth,
-                                                  double fontSize,
-                                                  const std::string& text){
+    MapPainter::TextDimension MapPainterIOS::GetTextDimension(const Projection& projection,
+                                                              const MapParameter& parameter,
+                                                              double objectWidth,
+                                                              double fontSize,
+                                                              const std::string& text){
         Font *font = GetFont(projection,parameter,fontSize);
         NSString *str = [NSString stringWithUTF8String:text.c_str()];
         CGRect rect = CGRectZero;
@@ -491,8 +491,8 @@ namespace osmscout {
 
         return TextDimension(rect.origin.x,
                              rect.origin.y,
-                             rect.origin.width,
-                             rect.origin.height);
+                             rect.size.width,
+                             rect.size.height);
     }
 
     double MapPainterIOS::textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
