@@ -133,7 +133,8 @@ namespace osmscout {
 			const MapParameter& parameter,
 			const PathTextStyle& style,
 			const std::string& text,
-			size_t transStart, size_t transEnd);
+			size_t transStart, size_t transEnd,
+      ContourLabelHelper& helper);
 
 		virtual void DrawContourSymbol(const Projection& projection,
 			const MapParameter& parameter,

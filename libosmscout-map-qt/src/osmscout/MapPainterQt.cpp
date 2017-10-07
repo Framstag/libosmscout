@@ -454,7 +454,8 @@ namespace osmscout {
                                       const PathTextStyle& style,
                                       const std::string& text,
                                       size_t transStart,
-                                      size_t transEnd)
+                                      size_t transEnd,
+                                      ContourLabelHelper& helper)
   {
     double  fontSize=style.GetSize();
     double  r=style.GetTextColor().GetR();
@@ -475,7 +476,7 @@ namespace osmscout {
     while (textLayout.createLine().isValid()){};
     textLayout.endLayout();
 
-    double stringWidth=textLayout.boundingRect().width();
+    double textWidth=textLayout.boundingRect().width();
 
     QList<QGlyphRun> glyphs=textLayout.glyphRuns();
 
@@ -493,7 +494,7 @@ namespace osmscout {
                    coordBuffer->buffer[j].GetY());
       }
     }
-      // Path has direction right => left
+    // Path has direction right => left
     else {
       for (size_t j=0; j<=transEnd-transStart; j++) {
         size_t idx=transEnd-j;
@@ -503,33 +504,24 @@ namespace osmscout {
     }
 
     // Length of path in pixel
-    qreal pLength=p.GetLength();
-    // Space left if we substract the label offset for both ends of the path and the width
-    // of the text itself
-    qreal spaceLeft=pLength-stringWidth-2*contourLabelOffset;
+    qreal pathLength=p.GetLength();
 
-    // If space around labels left is < offset on both sides, do not render at all
-    if (spaceLeft<0.0) {
+    if (!helper.Init(pathLength,
+                     textWidth)) {
       return;
     }
-
-    // Space left, if we have drawn all labels
-    spaceLeft=fmod(spaceLeft,stringWidth+contourLabelSpace);
-
-    // Resulting offset of the first label
-    qreal labelInstanceOffset=spaceLeft/2+contourLabelOffset;
-    // Current offset for the next label
-    qreal offset=labelInstanceOffset;
 
     QVector<quint32> indexes(1);
     QVector<QPointF> positions(1);
 
     // While we have not reached the end of the path...
-    while (offset<pLength) {
+    while (helper.ContinueDrawing()) {
+      double offset=helper.GetCurrentOffset();
       // skip string rendering when path is too much squiggly at this offset
-      if (!p.TestAngleVariance(offset,offset+stringWidth,M_PI/4)){
+      if (!p.TestAngleVariance(offset,offset+textWidth,M_PI/4)){
         // skip drawing current label and let offset point to the next instance
-        offset+=stringWidth+contourLabelSpace;
+        helper.AdvanceText();
+        helper.AdvanceSpace();
         continue;
       }
 
@@ -548,9 +540,9 @@ namespace osmscout {
 
           QRectF boundingRect=glypRun.rawFont().boundingRect(index);
 
-          qreal glyphOffset=upwards? (offset+stringWidth-pos.x()) : offset+pos.x();
+          qreal glyphOffset=upwards? (offset+textWidth-pos.x()) : offset+pos.x();
 
-          if (glyphOffset>pLength)
+          if (glyphOffset>pathLength)
             continue;
 
           QPointF point=p.PointAtLength(glyphOffset);
@@ -585,7 +577,8 @@ namespace osmscout {
         }
       }
 
-      offset+=stringWidth+contourLabelSpace;
+      helper.AdvanceText();
+      helper.AdvanceSpace();
     }
 
     painter->resetTransform();

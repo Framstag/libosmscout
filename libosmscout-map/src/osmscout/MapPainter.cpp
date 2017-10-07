@@ -94,7 +94,7 @@ namespace osmscout {
   /**
    * Return if a > b, a should be drawn before b
    */
-  static inline bool AreaSorter(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
+  static bool AreaSorter(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
   {
     if (a.fillStyle && b.fillStyle) {
       if (a.fillStyle->GetFillColor().IsSolid() && !b.fillStyle->GetFillColor().IsSolid()) {
@@ -146,6 +146,29 @@ namespace osmscout {
                                            const MapPainter::LabelLayoutData& b)
   {
     return a.position<b.position;
+  }
+
+  MapPainter::ContourLabelHelper::ContourLabelHelper(const MapPainter& painter)
+  : contourLabelOffset(painter.contourLabelOffset),
+    contourLabelSpace(painter.contourLabelSpace)
+  {
+    // no code
+  }
+
+  bool MapPainter::ContourLabelHelper::Init(double pathLength,
+                                            double textWidth)
+  {
+    this->pathLength=pathLength;
+    this->textWidth=textWidth;
+
+    if (pathLength-textWidth-2*contourLabelOffset<=0.0) {
+      return false;
+    }
+
+    currentOffset=fmod(pathLength-textWidth-2*contourLabelOffset,
+                  textWidth+contourLabelSpace)/2+contourLabelOffset;
+
+    return true;
   }
 
   MapPainter::MapPainter(const StyleConfigRef& styleConfig,
@@ -1269,12 +1292,15 @@ namespace osmscout {
                                        transEnd);
     }
 
+    ContourLabelHelper helper(*this);
+
     DrawContourLabel(projection,
                      parameter,
                      *borderTextStyle,
                      label,
                      transStart,
-                     transEnd);
+                     transEnd,
+                     helper);
   }
 
   void MapPainter::DrawAreaBorderSymbol(const StyleConfig& styleConfig,
@@ -1543,12 +1569,15 @@ namespace osmscout {
     }
 
     if (!textLabel.empty()) {
+      ContourLabelHelper helper(*this);
+
       DrawContourLabel(projection,
                        parameter,
                        *pathTextStyle,
                        textLabel,
                        transStart,
-                       transEnd);
+                       transEnd,
+                       helper);
       waysLabelDrawn++;
     }
   }

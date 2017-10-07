@@ -613,12 +613,23 @@ namespace osmscout
 		}
 	}
 
-	void MapPainterDirectX::DrawContourLabel(const Projection& projection, const MapParameter& parameter, const PathTextStyle& style, const std::string& text, size_t transStart, size_t transEnd)
+	void MapPainterDirectX::DrawContourLabel(const Projection& projection,
+																					 const MapParameter& parameter,
+																					 const PathTextStyle& style,
+																					 const std::string& text,
+																					 size_t transStart,
+																					 size_t transEnd,
+																					 ContourLabelHelper& helper)
 	{
 		// Not implemented yet
 	}
 
-	void MapPainterDirectX::DrawContourSymbol(const Projection& projection, const MapParameter& parameter, const Symbol& symbol, double space, size_t transStart, size_t transEnd)
+	void MapPainterDirectX::DrawContourSymbol(const Projection& projection,
+																						const MapParameter& parameter,
+																						const Symbol& symbol,
+																						double space,
+																						size_t transStart,
+																						size_t transEnd)
 	{
 		// Not implemented yet
 	}

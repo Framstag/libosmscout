@@ -132,6 +132,9 @@ namespace osmscout {
       }
     };
 
+    /**
+     * Data structure for holding temporary data about ways
+     */
     struct OSMSCOUT_MAP_API WayData
     {
       ObjectFileRef            ref;
@@ -176,6 +179,10 @@ namespace osmscout {
       }
     };
 
+    /**
+     * Data structure for holding temporary data about way paths (a way may consist of
+     * multiple paths/lines rendered)
+     */
     struct OSMSCOUT_MAP_API WayPathData
     {
       ObjectFileRef            ref;
@@ -190,6 +197,9 @@ namespace osmscout {
       size_t                   transEnd;        //!< End of coordinates in transformation buffer
     };
 
+    /**
+     * Data structure for holding temporary data about areas
+     */
     struct OSMSCOUT_MAP_API AreaData
     {
       ObjectFileRef            ref;
@@ -203,6 +213,9 @@ namespace osmscout {
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
+    /**
+     * Represents one entry in a label.
+     */
     struct OSMSCOUT_MAP_API LabelLayoutData
     {
       size_t        position;   //!< Relative position of the label
@@ -213,6 +226,52 @@ namespace osmscout {
       TextStyleRef  textStyle;  //!< The text style for a textual label (optional)
       bool          icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
       IconStyleRef  iconStyle;  //!< The icon style for a icon or symbol
+    };
+
+    /**
+     * Helper class for drawing contours. Allows the MapPainter base class
+     * to inject itself at certain points in the contour label rendeirng code of
+     * the actual backend.
+     */
+    class OSMSCOUT_MAP_API ContourLabelHelper CLASS_FINAL
+    {
+    private:
+      double contourLabelOffset;
+      double contourLabelSpace;
+      double pathLength;
+      double textWidth;
+      double currentOffset;
+
+    public:
+      ContourLabelHelper(const MapPainter& painter);
+
+      bool Init(double pathLength,
+                double textWidth);
+
+      inline bool ContinueDrawing() const
+      {
+        return currentOffset<pathLength;
+      }
+
+      inline double GetCurrentOffset() const
+      {
+        return currentOffset;
+      }
+
+      inline void AdvancePartial(double width)
+      {
+        currentOffset+=width;
+      }
+
+      inline void AdvanceText()
+      {
+        currentOffset+=textWidth;
+      }
+
+      inline void AdvanceSpace()
+      {
+        currentOffset+=contourLabelSpace;
+      }
     };
 
   protected:
@@ -580,7 +639,8 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const PathTextStyle& style,
                                   const std::string& text,
-                                  size_t transStart, size_t transEnd) = 0;
+                                  size_t transStart, size_t transEnd,
+                                  ContourLabelHelper& helper) = 0;
 
     /**
       Draw the given text as a contour of the given path in a style defined

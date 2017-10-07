@@ -112,7 +112,8 @@ namespace osmscout {
                               const MapParameter& parameter,
                               const PathTextStyle& style,
                               const std::string& text,
-                              size_t transStart, size_t transEnd);
+                              size_t transStart, size_t transEnd,
+                              ContourLabelHelper& helper);
 
         void DrawIcon(const IconStyle* style,
                       double x, double y);

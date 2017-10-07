@@ -368,7 +368,8 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const PathTextStyle& style,
                                        const std::string& text,
-                                       size_t transStart, size_t transEnd)
+                                       size_t transStart, size_t transEnd,
+                                       ContourLabelHelper& helper)
   {
     double       fontSize=style.GetSize();
     double       r=style.GetTextColor().GetR();
@@ -432,17 +433,10 @@ namespace osmscout {
 
     GetTextDimension(wideText,textWidth,textHeight);
 
-    double spaceLeft=pathLength-textWidth-2*contourLabelOffset;
-
-    // If space around labels left is < offset on both sides, do not render at all
-    if (spaceLeft<0.0) {
+    if (!helper.Init(pathLength,
+                     textWidth)) {
       return;
     }
-
-    spaceLeft=fmod(spaceLeft,textWidth+contourLabelSpace);
-
-    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
-    double       offset=labelInstanceOffset;
 
     /*
     typedef agg::conv_bspline<agg::path_storage> conv_bspline_type;
@@ -464,13 +458,14 @@ namespace osmscout {
 
     double y=-textHeight/2+fontEngine->ascender();
 
-    while (offset<pathLength) {
+    while (helper.ContinueDrawing()) {
       for (wchar_t i : wideText) {
         const agg::glyph_cache* glyph=fontCacheManager->glyph(i);
+        double currentOffset=helper.GetCurrentOffset();
 
         if (glyph!=nullptr) {
-          fontCacheManager->add_kerning(&offset,&y);
-          fontCacheManager->init_embedded_adaptors(glyph,offset,y);
+          fontCacheManager->add_kerning(&currentOffset,&y);
+          fontCacheManager->init_embedded_adaptors(glyph,currentOffset,y);
 
           if (glyph->data_type==agg::glyph_data_outline) {
             rasterizer->reset();
@@ -482,12 +477,12 @@ namespace osmscout {
           }
 
           // increment pen position
-          offset+=glyph->advance_x;
+          helper.AdvancePartial(glyph->advance_x);
           y+=glyph->advance_y;
         }
       }
 
-      offset+=contourLabelSpace;
+      helper.AdvanceSpace();
     }
   }
 

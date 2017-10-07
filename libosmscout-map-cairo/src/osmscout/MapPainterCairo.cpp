@@ -952,9 +952,10 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const PathTextStyle& style,
                                          const std::string& text,
-                                         size_t transStart, size_t transEnd)
+                                         size_t transStart, size_t transEnd,
+                                         ContourLabelHelper& helper)
   {
-    double lineLength=0;
+    double pathLength=0;
 
     // Make the way path known to cairo and at the same time calculate the length
     // of the path
@@ -976,7 +977,7 @@ namespace osmscout {
           cairo_line_to(draw,
                         coordBuffer->buffer[j].GetX(),
                         coordBuffer->buffer[j].GetY());
-          lineLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
+          pathLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
                            pow(coordBuffer->buffer[j].GetY()-yo,2));
         }
 
@@ -1001,7 +1002,7 @@ namespace osmscout {
           cairo_line_to(draw,
                         coordBuffer->buffer[idx].GetX(),
                         coordBuffer->buffer[idx].GetY());
-          lineLength+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
+          pathLength+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
                            pow(coordBuffer->buffer[idx].GetY()-yo,2));
         }
 
@@ -1023,18 +1024,15 @@ namespace osmscout {
                           text.length());
     pango_layout_get_pixel_extents(layout,&extends,nullptr);
 
-    double spaceLeft=lineLength-extends.width-2*contourLabelOffset;
+    double textWidth=extends.width;
 
-    // If space around labels left is < offset on both sides, do not render at all
-    if (spaceLeft<0.0) {
+    if (!helper.Init(pathLength,
+                     textWidth)) {
       g_object_unref(layout);
       return;
     }
 
-    spaceLeft=fmod(spaceLeft,extends.width+contourLabelSpace);
-
-    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
-    double       offset=labelInstanceOffset;
+    // Current offset for the next label
     cairo_path_t *path;
 
     /* Decrease tolerance a bit, since it's going to be magnified */
@@ -1058,15 +1056,15 @@ namespace osmscout {
                           style.GetTextColor().GetB(),
                           style.GetTextColor().GetA());
 
-    while (offset<lineLength) {
+    while (helper.ContinueDrawing()) {
       DrawContourLabelPangoCairo(draw,
                                  path,
-                                 offset-extends.x,
+                                 helper.GetCurrentOffset()-extends.x,
                                  layout,
                                  extends);
 
-
-      offset=offset+extends.width+contourLabelSpace;
+      helper.AdvanceText();
+      helper.AdvanceSpace();
     }
 
     cairo_path_destroy(path);
@@ -1082,17 +1080,17 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    double spaceLeft=lineLength-textExtents.width-2*contourLabelOffset;
+    double textWidth=textExtends.width;
 
-    // If space around labels left is < offset on both sides, do not render at all
-    if (spaceLeft<0.0) {
+    if (!helper.Init(pathLength,
+                     textWidth)) {
+      g_object_unref(layout);
       return;
     }
 
-    spaceLeft=fmod(spaceLeft,textExtents.width+contourLabelSpace);
-
-    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
-    double       offset=labelInstanceOffset;
+    // Current offset for the next label
+    double offset=helper.GetInitialOffset(pathLength,
+                                          textWidth);
 
     cairo_font_extents_t fontExtents;
     cairo_path_t         *path;
@@ -1117,7 +1115,7 @@ namespace osmscout {
                             textExtents.height,
                             text);
 
-      offset=offset+textExtents.width+contourLabelSpace;
+      offset=offset+textWidth+contourLabelSpace;
     }
 
     cairo_path_destroy(path);

@@ -82,7 +82,8 @@ namespace osmscout {
                           const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart,
-                          size_t transEnd) override;
+                          size_t transEnd,
+                          ContourLabelHelper& helper) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
