@@ -730,19 +730,19 @@ namespace osmscout {
             }
 
             if (lineStart!=lineEnd) {
-              WayData data;
+              WayData wd;
 
-              data.buffer=&coastlineSegmentAttributes;
-              data.layer=0;
-              data.lineStyle=coastlineLine;
-              data.wayPriority=std::numeric_limits<int>::max();
-              data.transStart=start+lineStart;
-              data.transEnd=start+lineEnd;
-              data.lineWidth=GetProjectedWidth(projection,
+              wd.buffer=&coastlineSegmentAttributes;
+              wd.layer=0;
+              wd.lineStyle=coastlineLine;
+              wd.wayPriority=std::numeric_limits<int>::max();
+              wd.transStart=start+lineStart;
+              wd.transEnd=start+lineEnd;
+              wd.lineWidth=GetProjectedWidth(projection,
                                                projection.ConvertWidthToPixel(coastlineLine->GetDisplayWidth()),
                                                coastlineLine->GetWidth());
-              data.startIsClosed=false;
-              data.endIsClosed=false;
+              wd.startIsClosed=false;
+              wd.endIsClosed=false;
 
               /*
               DrawWay(styleConfig,
@@ -750,7 +750,7 @@ namespace osmscout {
                       parameter,
                       data);*/
 
-              wayData.push_back(data);
+              wayData.push_back(wd);
             }
 
             lineStart=lineEnd+1;
@@ -1004,7 +1004,7 @@ namespace osmscout {
       }
     }
 
-    for (const auto textStyle : textStyles) {
+    for (const auto& textStyle : textStyles) {
       std::string label=textStyle->GetLabel()->GetLabel(parameter,
                                                         buffer);
 
@@ -1140,10 +1140,10 @@ namespace osmscout {
     // we should not wrap the words at all.
     if (stringLength>parameter.GetLabelLineMinCharCount()) {
       if (objectWidth>0 && parameter.GetLabelLineFitToArea()) {
-        std::min(objectWidth,parameter.GetLabelLineFitToWidth());
+        proposedWidth=std::min(objectWidth,parameter.GetLabelLineFitToWidth());
       }
       else {
-        parameter.GetLabelLineFitToWidth();
+        proposedWidth=parameter.GetLabelLineFitToWidth();
       }
 
       proposedWidth=std::min(proposedWidth,
@@ -1803,7 +1803,7 @@ namespace osmscout {
 
     //Areas
     for (const auto& area : data.areas) {
-      std::vector<PolyData> data(area->rings.size());
+      std::vector<PolyData> td(area->rings.size());
 
       for (size_t i=0; i<area->rings.size(); i++) {
         // The master ring does not have any nodes, skipping...
@@ -1814,7 +1814,7 @@ namespace osmscout {
         transBuffer.TransformArea(projection,
                                   parameter.GetOptimizeAreaNodes(),
                                   area->rings[i].nodes,
-                                  data[i].transStart,data[i].transEnd,
+                                  td[i].transStart,td[i].transEnd,
                                   errorTolerancePixel);
       }
 
@@ -1894,7 +1894,7 @@ namespace osmscout {
           while (j<area->rings.size() &&
                  area->rings[j].GetRing()==ringId+1 &&
                  area->rings[j].GetType()->GetIgnore()) {
-            a.clippings.push_back(data[j]);
+            a.clippings.push_back(td[j]);
 
             j++;
           }
@@ -1904,8 +1904,8 @@ namespace osmscout {
           a.buffer=&ring.GetFeatureValueBuffer();
           a.fillStyle=fillStyle;
           a.borderStyle=borderStyle;
-          a.transStart=data[i].transStart;
-          a.transEnd=data[i].transEnd;
+          a.transStart=td[i].transStart;
+          a.transEnd=td[i].transEnd;
 
           areaData.push_back(a);
 
@@ -1916,8 +1916,8 @@ namespace osmscout {
 
             double offset=0.0;
 
-            size_t transStart=data[i].transStart;
-            size_t transEnd=data[i].transEnd;
+            size_t transStart=td[i].transStart;
+            size_t transEnd=td[i].transEnd;
 
             if (borderStyle->GetOffset()!=0.0) {
               offset+=GetProjectedWidth(projection,
