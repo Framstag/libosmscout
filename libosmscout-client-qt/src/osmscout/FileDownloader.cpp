@@ -19,6 +19,7 @@
 
 #include <osmscout/FileDownloader.h>
 #include <osmscout/Settings.h>
+#include <osmscout/OSMScoutQt.h>
 
 #include <QUrl>
 #include <QDir>
@@ -123,7 +124,7 @@ void FileDownloader::startDownload()
   // start download
   QNetworkRequest request(m_url);
   request.setHeader(QNetworkRequest::UserAgentHeader,
-                    QString(OSMSCOUT_USER_AGENT).arg(OSMSCOUT_VERSION_STRING));
+                    OSMScoutQt::GetInstance().GetUserAgent());
 
   if (m_downloaded > 0)
     {

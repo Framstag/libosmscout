@@ -151,7 +151,8 @@ int main(int argc, char* argv[])
     .WithIconDirectory(iconDirectory)
     .WithMapLookupDirectories(mapLookupDirectories)
     .WithOnlineTileProviders(":/resources/online-tile-providers.json")
-    .WithMapProviders(":/resources/map-providers.json");
+    .WithMapProviders(":/resources/map-providers.json")
+    .WithUserAgent("OSMScout2DemoApp", "v?");
 
   if (!builder.Init()){
     std::cerr << "Cannot initialize OSMScout library" << std::endl;

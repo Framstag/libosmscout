@@ -85,7 +85,7 @@ void OsmTileDownloader::download(uint32_t zoomLevel, uint32_t x, uint32_t y)
   requests.insert(tileUrl, key);
   
   QNetworkRequest request(tileUrl);
-  request.setHeader(QNetworkRequest::UserAgentHeader, QString(OSMSCOUT_USER_AGENT).arg(OSMSCOUT_VERSION_STRING));
+  request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
   //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
   webCtrl.get(request);
 }
