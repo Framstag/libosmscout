@@ -74,7 +74,7 @@ AvailableMapsModel::AvailableMapsModel()
     QNetworkRequest request(url);
     requests[url]=provider;
     
-    request.setHeader(QNetworkRequest::UserAgentHeader, QString(OSMSCOUT_USER_AGENT).arg(OSMSCOUT_VERSION_STRING));
+    request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
     //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
     webCtrl.get(request);
   }

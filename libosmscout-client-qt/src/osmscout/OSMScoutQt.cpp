@@ -48,7 +48,9 @@ OSMScoutQtBuilder::OSMScoutQtBuilder():
   onlineTileCacheSize(100),
   offlineTileCacheSize(200),
   styleSheetDirectoryConfigured(false),
-  styleSheetFileConfigured(false)
+  styleSheetFileConfigured(false),
+  appName("UnspecifiedApp"),
+  appVersion("v?")
 {
   QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
   mapLookupDirectories << QDir::currentPath();
@@ -103,13 +105,19 @@ bool OSMScoutQtBuilder::Init()
   dbThread->moveToThread(thread);
   thread->start();
 
+  QString userAgent=QString("%1/%2 libosmscout/%3 Qt/%4")
+      .arg(appName).arg(appVersion)
+      .arg(LIBOSMSCOUT_VERSION_STRING)
+      .arg(QT_VERSION_STR);
+
   osmScoutInstance=new OSMScoutQt(settings,
                                   mapManager,
                                   dbThread,
                                   iconDirectory,
                                   cacheLocation,
                                   onlineTileCacheSize,
-                                  offlineTileCacheSize);
+                                  offlineTileCacheSize,
+                                  userAgent);
                                   
   return true;
 }
@@ -178,14 +186,16 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                        QString iconDirectory,
                        QString cacheLocation,
                        size_t onlineTileCacheSize,
-                       size_t offlineTileCacheSize):
+                       size_t offlineTileCacheSize,
+                       QString userAgent):
         settings(settings),
         mapManager(mapManager),
         dbThread(dbThread),
         iconDirectory(iconDirectory),
         cacheLocation(cacheLocation),
         onlineTileCacheSize(onlineTileCacheSize),
-        offlineTileCacheSize(offlineTileCacheSize)
+        offlineTileCacheSize(offlineTileCacheSize),
+        userAgent(userAgent)
 {
 }
 
@@ -280,4 +290,8 @@ Router* OSMScoutQt::MakeRouter()
   QObject::connect(thread, SIGNAL(finished()),
                    thread, SLOT(deleteLater()));
   return router;
+}
+
+QString OSMScoutQt::GetUserAgent(){
+  return userAgent;
 }
