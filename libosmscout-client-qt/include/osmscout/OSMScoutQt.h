@@ -59,6 +59,9 @@ private:
   QString styleSheetFile;
   bool styleSheetFileConfigured;
 
+  QString appName;
+  QString appVersion;
+
 public:
   OSMScoutQtBuilder();
 
@@ -133,6 +136,13 @@ public:
     return *this;
   }
 
+  inline OSMScoutQtBuilder& WithUserAgent(QString appName,
+                                          QString appVersion){
+    this->appName=appName;
+    this->appVersion=appVersion;
+    return *this;
+  }
+
   bool Init();
 };
 
@@ -194,6 +204,7 @@ private:
   QString       cacheLocation;
   size_t        onlineTileCacheSize;
   size_t        offlineTileCacheSize;
+  QString       userAgent;
 
 private:
   OSMScoutQt(SettingsRef settings,
@@ -202,7 +213,8 @@ private:
              QString iconDirectory,
              QString cacheLocation,
              size_t onlineTileCacheSize,
-             size_t offlineTileCacheSize);
+             size_t offlineTileCacheSize,
+             QString userAgent);
 public:
   virtual ~OSMScoutQt();
 
@@ -215,6 +227,8 @@ public:
   Router* MakeRouter();
   SearchModule *MakeSearchModule();
   StyleModule *MakeStyleModule();
+
+  QString GetUserAgent();
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,
