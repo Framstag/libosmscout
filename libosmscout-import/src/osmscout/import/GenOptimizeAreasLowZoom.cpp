@@ -174,7 +174,8 @@ namespace osmscout
     return !scanner.HasError();
   }
 
-  void OptimizeAreasLowZoomGenerator::OptimizeAreas(const std::list<AreaRef>& areas,
+  void OptimizeAreasLowZoomGenerator::OptimizeAreas(Progress& progress,
+                                                    const std::list<AreaRef>& areas,
                                                     std::list<AreaRef>& optimizedAreas,
                                                     size_t width,
                                                     size_t height,
@@ -265,6 +266,14 @@ namespace osmscout
       AreaRef copiedArea=std::make_shared<Area>(*area);
 
       copiedArea->rings=newRings;
+
+      for (const auto& ring : copiedArea->rings) {
+        if (!IsValidToWrite(ring.nodes)) {
+          progress.Error("Area coordinates are not dense enough to be written for area "+
+                         NumberToString(area->GetFileOffset()));
+          continue;
+        }
+      }
 
       optimizedAreas.push_back(copiedArea);
     }
@@ -535,7 +544,8 @@ namespace osmscout
 
             magnification.SetLevel(level);
 
-            OptimizeAreas(allAreas[type->GetIndex()],
+            OptimizeAreas(progress,
+                          allAreas[type->GetIndex()],
                           optimizedAreas,
                           800,480,
                           dpi,

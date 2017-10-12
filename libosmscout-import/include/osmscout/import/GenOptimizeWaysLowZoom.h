@@ -99,7 +99,8 @@ namespace osmscout {
                           const std::list<WayRef>& ways,
                           TypeData& typeData);
 
-    void OptimizeWays(const std::list<WayRef>& ways,
+    void OptimizeWays(Progress& progress,
+                      const std::list<WayRef>& ways,
                       std::list<WayRef>& optimizedWays,
                       size_t width,
                       size_t height,

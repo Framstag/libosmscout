@@ -434,7 +434,8 @@ namespace osmscout
     }
   }
 
-  void OptimizeWaysLowZoomGenerator::OptimizeWays(const std::list<WayRef>& ways,
+  void OptimizeWaysLowZoomGenerator::OptimizeWays(Progress& progress,
+                                                  const std::list<WayRef>& ways,
                                                   std::list<WayRef>& optimizedWays,
                                                   size_t width,
                                                   size_t height,
@@ -480,6 +481,12 @@ namespace osmscout
       WayRef copiedWay=std::make_shared<Way>(*way);
 
       copiedWay->nodes=newNodes;
+
+      if (!IsValidToWrite(copiedWay->nodes)) {
+        progress.Error("Way coordinates are not dense enough to be written for way "+
+                       NumberToString(way->GetFileOffset()));
+        continue;
+      }
 
       optimizedWays.push_back(copiedWay);
     }
@@ -690,7 +697,8 @@ namespace osmscout
             magnification.SetLevel(level);
 
             // TODO: Wee need to make import parameters for the width and the height
-            OptimizeWays(newWays,
+            OptimizeWays(progress,
+                         newWays,
                          optimizedWays,
                          800,480,
                          dpi,
