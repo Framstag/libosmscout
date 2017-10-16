@@ -42,6 +42,7 @@ class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
   Q_PROPERTY(double  lat         READ GetLat      WRITE SetLat)
   Q_PROPERTY(double  lon         READ GetLon      WRITE SetLon)
   Q_PROPERTY(int     resultLimit READ GetResultLimit WRITE SetResultLimit)
+  Q_PROPERTY(QString pattern     READ getPattern  WRITE setPattern)
 
 signals:
   void SearchRequested(const QString searchPattern,
@@ -131,6 +132,10 @@ public:
 
   inline void SetResultLimit(int limit){
     resultLimit=limit;
+  }
+
+  inline QString getPattern() const {
+    return pattern;
   }
 
 private:
