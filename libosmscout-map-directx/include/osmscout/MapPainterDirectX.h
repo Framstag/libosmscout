@@ -50,6 +50,7 @@ namespace osmscout {
 		BitmapMap m_Bitmaps;
 		typedef std::unordered_map<uint64_t, ID2D1StrokeStyle*> StrokeStyleMap;
 		StrokeStyleMap m_StrokeStyles;
+		ID2D1StrokeStyle* m_dashLessStrokeStyle;
 
 		ID2D1Factory* m_pDirect2dFactory;
 		IDWriteFactory* m_pWriteFactory;

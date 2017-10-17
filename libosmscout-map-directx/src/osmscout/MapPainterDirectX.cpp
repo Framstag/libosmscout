@@ -136,8 +136,8 @@ namespace osmscout
 				ID2D1StrokeStyle* pStrokeStyle = NULL;
 				HRESULT hr = m_pDirect2dFactory->CreateStrokeStyle(
 					D2D1::StrokeStyleProperties(
-						D2D1_CAP_STYLE_FLAT,
-						D2D1_CAP_STYLE_FLAT,
+						D2D1_CAP_STYLE_ROUND,
+						D2D1_CAP_STYLE_ROUND,
 						D2D1_CAP_STYLE_ROUND,
 						D2D1_LINE_JOIN_MITER,
 						10.0f,
@@ -153,7 +153,22 @@ namespace osmscout
 				}
 			}
 		}
-		return NULL;
+		if (m_dashLessStrokeStyle == NULL)
+		{
+			m_pDirect2dFactory->CreateStrokeStyle(
+				D2D1::StrokeStyleProperties(
+					D2D1_CAP_STYLE_ROUND,
+					D2D1_CAP_STYLE_ROUND,
+					D2D1_CAP_STYLE_ROUND,
+					D2D1_LINE_JOIN_MITER,
+					10.0f,
+					D2D1_DASH_STYLE_SOLID,
+					0.0f),
+				NULL,
+				0,
+				&m_dashLessStrokeStyle);
+		}
+		return m_dashLessStrokeStyle;
 	}
 
 	void MapPainterDirectX::_DrawText(const Projection& projection, const MapParameter& parameter, double x, double y, double fontSize, const Color& color, std::string text)
@@ -706,6 +721,7 @@ namespace osmscout
 
 	MapPainterDirectX::MapPainterDirectX(const StyleConfigRef& styleConfig, ID2D1Factory* pDirect2dFactory, IDWriteFactory* pWriteFactory)
 		: MapPainter(styleConfig, new CoordBuffer()),
+		m_dashLessStrokeStyle(NULL),
 		m_pDirect2dFactory(pDirect2dFactory),
 		m_pWriteFactory(pWriteFactory),
 		m_pRenderingParams(NULL),
