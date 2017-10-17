@@ -97,8 +97,13 @@ HRESULT PathTextRenderer::DrawGlyphRun(
   // Set up a partial glyph run that we can modify.
   DWRITE_GLYPH_RUN workingGlyphRun = *glyphRun;
 
+  float totalRunLength = 0;
+  for (int idx = 0; idx < glyphRun->glyphCount; ++idx) {
+    totalRunLength += glyphRun->glyphAdvances[idx];
+  }
+
   // Set the initial length along the path.
-  float workingLength = baselineOriginX;
+  float workingLength = baselineOriginX + (maxLength - totalRunLength) / 2;
 
   // Set the index of the first glyph in the current glyph cluster.
   unsigned clusterStartIdx = 0;
@@ -146,7 +151,7 @@ HRESULT PathTextRenderer::DrawGlyphRun(
     );
 
     // Create a translation matrix to center the cluster on the tangent point.
-    auto translation = D2D1::Matrix3x2F::Translation(-clusterWidth / 2, glyphRun->fontEmSize/4);
+    auto translation = D2D1::Matrix3x2F::Translation(-clusterWidth / 2, glyphRun->fontEmSize / 4);
 
     // Apply the transformations
     dc->d2DContext->SetTransform(translation * rotation * prevTransform);
