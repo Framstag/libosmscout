@@ -19,6 +19,7 @@
 
 
 #include "osmscout/PathTextRenderer.h"
+#include <cmath>
 
 // The identity matrix
 const DWRITE_MATRIX identityTransform =
@@ -103,7 +104,7 @@ HRESULT PathTextRenderer::DrawGlyphRun(
   }
 
   // Set the initial length along the path.
-  float workingLength = baselineOriginX + (maxLength - totalRunLength) / 2;
+  float workingLength = baselineOriginX + max((maxLength - totalRunLength) / 2, 0);
 
   // Set the index of the first glyph in the current glyph cluster.
   unsigned clusterStartIdx = 0;
