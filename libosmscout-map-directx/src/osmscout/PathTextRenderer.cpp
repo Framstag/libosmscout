@@ -146,7 +146,7 @@ HRESULT PathTextRenderer::DrawGlyphRun(
     );
 
     // Create a translation matrix to center the cluster on the tangent point.
-    auto translation = D2D1::Matrix3x2F::Translation(-clusterWidth / 2, 0);
+    auto translation = D2D1::Matrix3x2F::Translation(-clusterWidth / 2, glyphRun->fontEmSize/4);
 
     // Apply the transformations
     dc->d2DContext->SetTransform(translation * rotation * prevTransform);
