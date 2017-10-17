@@ -5,10 +5,12 @@ endif()
 set(HEADER_FILES
     include/osmscout/private/MapDirectXPaint.h
     include/osmscout/MapPainterDirectX.h
+    include/osmscout/PathTextRenderer.h
 )
 
 set(SOURCE_FILES
     src/osmscout/MapPainterDirectX.cpp
+    src/osmscout/PathTextRenderer.cpp
 )
 
 add_library(osmscout_map_directx SHARED ${SOURCE_FILES} ${HEADER_FILES})

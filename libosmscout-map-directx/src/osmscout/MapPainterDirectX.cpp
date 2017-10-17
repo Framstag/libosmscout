@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/MapPainterDirectX.h>
+#include <osmscout/PathTextRenderer.h>
 
 #include <iostream>
 #include <iomanip>
@@ -572,7 +573,66 @@ namespace osmscout
 																					 size_t transEnd,
 																					 ContourLabelHelper& helper)
 	{
-		// Not implemented yet
+		ID2D1PathGeometry* pPathGeometry;
+		HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
+		if (SUCCEEDED(hr))
+		{
+			ID2D1GeometrySink *pSink = NULL;
+			hr = pPathGeometry->Open(&pSink);
+			if (SUCCEEDED(hr))
+			{
+				Vertex2D* coords = coordBuffer->buffer;
+				size_t start, end;
+				int delta;
+				if (coords[transStart].GetX() <= coords[transEnd].GetX()) {
+					pSink->BeginFigure(D2D1::Point2F(coords[transStart].GetX(), coords[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
+					start = transStart + 1;
+					end = transEnd;
+					delta = 1;
+				}
+				else {
+					pSink->BeginFigure(D2D1::Point2F(coords[transEnd].GetX(), coords[transEnd].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
+					start = transEnd - 1;
+					end = transStart;
+					delta = -1;
+				}
+				for (size_t i = start; i != end; i += delta) {
+					pSink->AddLine(D2D1::Point2F(coords[i].GetX(), coords[i].GetY()));
+				}
+				pSink->EndFigure(D2D1_FIGURE_END_OPEN);
+				hr = pSink->Close();
+				pSink->Release();
+				pSink = NULL;
+			}
+		}
+#ifdef MBUC
+		std::wstring enc = s2w(text);
+#else
+		std::string enc = text;
+#endif
+		FLOAT size = style.attrSize * 20.0f * text.length();
+		IDWriteTextFormat* tf = GetFont(projection, parameter, style.attrSize);
+		IDWriteTextLayout* pDWriteTextLayout = NULL;
+		hr = m_pWriteFactory->CreateTextLayout(
+			enc.c_str(),
+			enc.length(),
+			tf,
+			size * 2.0f,
+			size,
+			&pDWriteTextLayout);
+		if (SUCCEEDED(hr)) {
+
+			PathTextDrawingContext context = { m_pRenderTarget, pPathGeometry, GetColorBrush(style.GetTextColor()) };
+
+			pDWriteTextLayout->Draw(
+				&context,
+				m_pPathTextRenderer,
+				0,
+				0
+			);
+			pDWriteTextLayout->Release();
+		}
+		pPathGeometry->Release();
 	}
 
 	void MapPainterDirectX::DrawContourSymbol(const Projection& projection,
@@ -648,6 +708,7 @@ namespace osmscout
 		: MapPainter(styleConfig, new CoordBuffer()),
 		m_pDirect2dFactory(pDirect2dFactory),
 		m_pWriteFactory(pWriteFactory),
+		m_pRenderingParams(NULL),
 		m_pRenderTarget(NULL),
 		m_pImagingFactory(NULL),
 		dpiX(0.0f),
@@ -727,7 +788,33 @@ namespace osmscout
 		typeConfig = styleConfig->GetTypeConfig();
 		m_pRenderTarget = renderTarget;
 
-		result=Draw(projection, parameter, data);
+		IDWriteRenderingParams* renderingParams;
+		HRESULT hr = m_pWriteFactory->CreateRenderingParams(&renderingParams);
+		if (FAILED(hr))
+			return false;
+
+		PathTextRenderer::CreatePathTextRenderer(this->dpiX / 96.0f, &m_pPathTextRenderer);
+
+		hr = m_pWriteFactory->CreateCustomRenderingParams(
+			renderingParams->GetGamma(),
+			renderingParams->GetEnhancedContrast(),
+			renderingParams->GetClearTypeLevel(),
+			renderingParams->GetPixelGeometry(),
+			DWRITE_RENDERING_MODE_OUTLINE,
+			&m_pRenderingParams
+		);
+
+		renderTarget->SetTextRenderingParams(m_pRenderingParams);
+		if (FAILED(hr))
+			return false;
+
+		renderingParams->Release();
+
+		result = Draw(projection, parameter, data);
+
+		m_pRenderingParams->Release();
+
+		PathTextRenderer::DestroyPathTextRenderer(m_pPathTextRenderer);
 
 		return result;
 	}
