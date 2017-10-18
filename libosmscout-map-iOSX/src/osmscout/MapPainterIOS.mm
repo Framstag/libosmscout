@@ -468,7 +468,7 @@ namespace osmscout {
 
         if(objectWidth > 0){
             CGSize averageFontSize = [@"a" sizeWithFont:font];
-            CGFloat proposedWidth = proposedLabelWidth(parameter,
+            CGFloat proposedWidth = GetProposedLabelWidth(parameter,
                                                        averageFontSize.width,
                                                        objectWidth,
                                                        text.length());
@@ -815,7 +815,7 @@ namespace osmscout {
                 ct = CGAffineTransformMakeRotation(slopes[i]);
                 CGContextConcatCTM(cg, ct);
 #if TARGET_OS_IPHONE
-                [str drawAtPoint:CGPointMake(0,-nhh/2) withFont:font];
+                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withFont:font];
 #else
                 [str drawAtPoint:CGPointMake(0,-dimension.height/2) withAttributes:attrsDictionary];
 #endif
