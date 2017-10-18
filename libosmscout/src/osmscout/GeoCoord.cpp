@@ -91,10 +91,10 @@ namespace osmscout {
     return currentPos;
   }
 
-  static bool ScanCoordinate(const std::string& text,
-                             size_t& currentPos,
-                             double& value,
-                             size_t maxDigits)
+  static bool ScanNumber(const std::string& text,
+                         size_t& currentPos,
+                         double& value,
+                         size_t maxDigits)
   {
     size_t digits=0;
 
@@ -140,6 +140,64 @@ namespace osmscout {
 
         factor=factor*10;
         currentPos++;
+      }
+    }
+
+    return true;
+  }
+
+  static bool ScanCoordinate(const std::string& text,
+                             size_t& currentPos,
+                             double& value,
+                             size_t maxDigits)
+  {
+    if (!ScanNumber(text,currentPos,value,maxDigits)){
+      return false;
+    }
+    if (currentPos+1<text.length() && (text[currentPos]==(char)248 || // ascii degree character "°"
+        (text[currentPos]==(char)0xc2 && text[currentPos+1]==(char)0xb0))) { // UTF8 sequence 0xc2b0: degree sign
+
+      if (text[currentPos]==(char)248) {
+        currentPos += 1;
+      }else{
+        currentPos += 2;
+      }
+
+      // try pattern:
+      // DD°[D[.DDD]'[D[.DDD]"]]
+      // parse minutes
+      if (currentPos<text.length() &&
+          text[currentPos]>='0' &&
+          text[currentPos]<='9') {
+        double minutes;
+        if (!ScanNumber(text,currentPos,minutes,2)){
+          return false;
+        }
+        if (currentPos<text.length() &&
+            text[currentPos]=='\''){
+          value+=(minutes/60.0);
+          currentPos+=1;
+
+          // parse seconds
+          if (currentPos<text.length() &&
+              text[currentPos]>='0' &&
+              text[currentPos]<='9') {
+            double seconds;
+            if (!ScanNumber(text,currentPos,seconds,2)){
+              return false;
+            }
+            if (currentPos<text.length() &&
+                text[currentPos]=='"') {
+              value += (seconds / 3600.0);
+              currentPos+=1;
+            }else{
+              return false;
+            }
+          }
+
+        }else{
+          return false;
+        }
       }
     }
 

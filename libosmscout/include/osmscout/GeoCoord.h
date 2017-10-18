@@ -207,7 +207,11 @@ namespace osmscout {
      *
      * The text should follow the following expression:
      *
-     * [+|-|N|S] DD[.DDDDD] [N|S] [+|-|W|E] DDD[.DDDDD] [W|E]
+     * [+|-|N|S] <coordinate> [N|S] [+|-|W|E] <coordinate> [W|E]
+     *
+     * coordinate may have one of these formats:
+     *  DDD[.DDDDD]
+     *  DD°[D[.DDD]'[D[.DDD]"]]
      *
      * The means:
      * * You first define the latitude, then the longitude value
