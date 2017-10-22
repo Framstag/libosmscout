@@ -23,6 +23,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
+#include <QJSValue>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/LocationEntry.h>
@@ -43,6 +44,8 @@ class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
   Q_PROPERTY(double  lon         READ GetLon      WRITE SetLon)
   Q_PROPERTY(int     resultLimit READ GetResultLimit WRITE SetResultLimit)
   Q_PROPERTY(QString pattern     READ getPattern  WRITE setPattern)
+  Q_PROPERTY(QJSValue compare    READ getCompare  WRITE setCompare)
+  Q_PROPERTY(QJSValue equals     READ getEquals   WRITE setEquals)
 
 signals:
   void SearchRequested(const QString searchPattern,
@@ -75,6 +78,8 @@ private:
   osmscout::BreakerRef breaker;
   AdminRegionInfoRef defaultRegion;
   AdminRegionInfoRef lastRequestDefaultRegion;
+  QJSValue compareFn;
+  QJSValue equalsFn;
 
 public:
   enum Roles {
@@ -82,12 +87,31 @@ public:
     TypeRole = Qt::UserRole +1,
     RegionRole = Qt::UserRole +2,
     LatRole = Qt::UserRole +3,
-    LonRole = Qt::UserRole +4
+    LonRole = Qt::UserRole +4,
+    DistanceRole = Qt::UserRole +5,
+    BearingRole = Qt::UserRole +6,
+    LocationObjectRole = Qt::UserRole +7
   };
 
 public:
   LocationListModel(QObject* parent = 0);
   virtual ~LocationListModel();
+
+  QJSValue getCompare() const {
+    return compareFn;
+  }
+
+  void setCompare(const QJSValue &fn){
+    compareFn=fn;
+  }
+
+  QJSValue getEquals() const{
+    return equalsFn;
+  }
+
+  void setEquals(const QJSValue &fn){
+    equalsFn=fn;
+  }
 
   Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
 
@@ -99,8 +123,7 @@ public:
 
   Q_INVOKABLE LocationEntry* get(int row) const;
 
-  inline bool isSearching() const
-  {
+  inline bool isSearching() const {
     return searching;
   }
 
