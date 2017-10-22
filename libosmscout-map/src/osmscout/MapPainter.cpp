@@ -501,23 +501,51 @@ namespace osmscout {
     osmscout::GetBoundingBox(nodes,
                              boundingBox);
 
-    double x1;
-    double x2;
-    double y1;
-    double y2;
+    double x;
+    double y;
 
     projection.GeoToPixel(boundingBox.GetMinCoord(),
-                          x1,
-                          y1);
+                          x,
+                          y);
+
+    double xMin=x;
+    double xMax=x;
+    double yMin=y;
+    double yMax=y;
 
     projection.GeoToPixel(boundingBox.GetMaxCoord(),
-                          x2,
-                          y2);
+                          x,
+                          y);
 
-    double xMin=std::min(x1,x2)-pixelOffset;
-    double xMax=std::max(x1,x2)+pixelOffset;
-    double yMin=std::min(y1,y2)-pixelOffset;
-    double yMax=std::max(y1,y2)+pixelOffset;
+    xMin=std::min(xMin,x);
+    xMax=std::max(xMax,x);
+    yMin=std::min(yMin,y);
+    yMax=std::max(yMax,y);
+
+    projection.GeoToPixel(GeoCoord(boundingBox.GetMinLat(),
+                                   boundingBox.GetMaxLon()),
+                          x,
+                          y);
+
+    xMin=std::min(xMin,x);
+    xMax=std::max(xMax,x);
+    yMin=std::min(yMin,y);
+    yMax=std::max(yMax,y);
+
+    projection.GeoToPixel(GeoCoord(boundingBox.GetMaxLat(),
+                                   boundingBox.GetMinLon()),
+                          x,
+                          y);
+
+    xMin=std::min(xMin,x);
+    xMax=std::max(xMax,x);
+    yMin=std::min(yMin,y);
+    yMax=std::max(yMax,y);
+
+    xMin=xMin-pixelOffset;
+    xMax=xMax+pixelOffset;
+    yMin=yMin-pixelOffset;
+    yMax=yMax+pixelOffset;
 
     return !(xMin>=projection.GetWidth() ||
              yMin>=projection.GetHeight() ||
