@@ -22,7 +22,7 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/OSMScoutQt.h>
 
-#include <QtQml/QQmlEngine>
+#include <QtQml>
 
 #include <iostream>
 
