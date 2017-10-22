@@ -230,6 +230,12 @@ namespace osmscout {
                latMax<this->latMin);
     }
 
+    inline GeoBox GetDimensions() const
+    {
+      return GeoBox(GeoCoord(latMin,lonMin),
+                    GeoCoord(latMax,lonMax));
+    }
+
     /**
      * Returns the bounding box of the area covered
      */

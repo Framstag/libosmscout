@@ -101,11 +101,12 @@ namespace osmscout {
      *    True, if there is intersection, else false.
      */
     template<typename P> inline bool Includes(const P& coord,
-                                              bool openInterval=true) const
+                             bool openInterval=true) const
     {
       if (!valid){
         return false;
       }
+
       if (openInterval) {
         return minCoord.GetLat()<=coord.GetLat() &&
                maxCoord.GetLat()>coord.GetLat() &&
@@ -134,9 +135,10 @@ namespace osmscout {
     inline bool Intersects(const GeoBox& other,
                            bool openInterval=true) const
     {
-      if (!valid || !other.valid){
+      if (!valid || !other.valid) {
         return false;
       }
+
       if (openInterval) {
         return !(other.GetMaxLon()<minCoord.GetLon() ||
                  other.GetMinLon()>=maxCoord.GetLon() ||
