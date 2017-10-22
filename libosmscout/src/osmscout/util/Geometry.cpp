@@ -100,9 +100,9 @@ namespace osmscout {
   }
 
   /**
-    Calculating basic cost for the A* algorithm based on the
-    spherical distance of two points on earth
-    */
+   * Calculating basic cost for the A* algorithm based on the
+   * spherical distance of two points on earth [km].
+   */
   double GetSphericalDistance(const GeoCoord& a,
                               const GeoCoord& b)
   {
@@ -124,9 +124,9 @@ namespace osmscout {
   }
 
   /**
-    Calculating Vincenty's inverse for getting the ellipsoidal distance
-    of two points on earth.
-    */
+   * Calculating Vincenty's inverse for getting the ellipsoidal distance
+   * of two points on earth [km].
+   */
   double GetEllipsoidalDistance(double aLon, double aLat,
                                 double bLon, double bLat)
   {
