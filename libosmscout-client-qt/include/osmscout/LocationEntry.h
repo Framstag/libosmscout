@@ -38,55 +38,67 @@
  */
 class OSMSCOUT_CLIENT_QT_API LocationEntry : public QObject
 {
-    Q_OBJECT
-    Q_PROPERTY(QString label READ getLabel)
+  Q_OBJECT
+  Q_PROPERTY(QString label      READ getLabel)
+  Q_PROPERTY(QString type       READ getTypeString)
+  Q_PROPERTY(QString objectType READ getObjectType)
+  Q_PROPERTY(double  lat        READ getLat)
+  Q_PROPERTY(double  lon        READ getLon)
+
 public:
-    enum Type {
-        typeNone,
-        typeObject,
-        typeCoordinate
-    };
+  enum Type {
+    typeNone,
+    typeObject,
+    typeCoordinate
+  };
 
 private:
-    Type                           type;
-    QString                        label;
-    QString                        objectType;
-    QStringList                    adminRegionList;
-    QString                        database;
-    QList<osmscout::ObjectFileRef> references;
-    osmscout::GeoCoord             coord;
-    osmscout::GeoBox               bbox;
+  Type                           type;
+  QString                        label;
+  QString                        objectType;
+  QStringList                    adminRegionList;
+  QString                        database;
+  QList<osmscout::ObjectFileRef> references;
+  osmscout::GeoCoord             coord;
+  osmscout::GeoBox               bbox;
 
 public:
-    LocationEntry(Type type,
-                  const QString& label,
-                  const QString& objectType,
-                  const QStringList& adminRegionList,
-                  const QString database,
-                  const osmscout::GeoCoord coord,
-                  const osmscout::GeoBox bbox,
-                  QObject* parent = 0);
+  LocationEntry(Type type,
+                const QString& label,
+                const QString& objectType,
+                const QStringList& adminRegionList,
+                const QString database,
+                const osmscout::GeoCoord coord,
+                const osmscout::GeoBox bbox,
+                QObject* parent = 0);
 
-    LocationEntry(const QString& label,
-                  const osmscout::GeoCoord& coord,
-                  QObject* parent = 0);
+  LocationEntry(const QString& label,
+                const osmscout::GeoCoord& coord,
+                QObject* parent = 0);
 
-    LocationEntry(QObject* parent = 0);
-    LocationEntry(const LocationEntry& other);
-    virtual ~LocationEntry();
+  LocationEntry(QObject* parent = 0);
+  LocationEntry(const LocationEntry& other);
+  virtual ~LocationEntry();
 
-    void operator=(const LocationEntry&);
-    
-    void addReference(const osmscout::ObjectFileRef reference);
+  void operator=(const LocationEntry&);
 
-    Type getType() const;
-    QString getObjectType() const;
-    QString getLabel() const;
-    QStringList getAdminRegionList() const;
-    QString getDatabase() const;
-    osmscout::GeoCoord getCoord() const;
-    osmscout::GeoBox getBBox() const;
-    const QList<osmscout::ObjectFileRef>& getReferences() const;
+  void addReference(const osmscout::ObjectFileRef reference);
+
+  void mergeWith(const LocationEntry &location);
+
+  Q_INVOKABLE double distanceTo(double lat, double lon) const;
+
+  Type getType() const;
+  QString getTypeString() const;
+  QString getObjectType() const;
+  QString getLabel() const;
+  QStringList getAdminRegionList() const;
+  QString getDatabase() const;
+  osmscout::GeoCoord getCoord() const;
+  osmscout::GeoBox getBBox() const;
+  const QList<osmscout::ObjectFileRef>& getReferences() const;
+  double getLat() const;
+  double getLon() const;
 };
 
 typedef std::shared_ptr<LocationEntry> LocationEntryRef;
