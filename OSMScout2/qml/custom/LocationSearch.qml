@@ -238,11 +238,15 @@ LineEdit {
             } else if (loc.type=="object"){
                 var rank=1;
 
-                if (loc.objectType=="boundary_administrative"){
+                if (loc.objectType=="boundary_country"){
+                    rank*=1;
+                }else if (loc.objectType=="boundary_state"){
+                    rank*=0.93;
+                } else if (loc.objectType=="boundary_administrative" ||
+                           loc.objectType=="place_town"){
                     rank*=0.9;
                 } else if (loc.objectType=="highway_residential" ||
-                           loc.objectType=="address"
-                           ){
+                           loc.objectType=="address"){
                     rank*=0.8;
                 } else if (loc.objectType=="railway_station" ||
                            loc.objectType=="railway_tram_stop" ||
@@ -256,7 +260,7 @@ LineEdit {
                 var distance=loc.distanceTo(searchCenterLat, searchCenterLon);
                 rank*= 1 / Math.log( (distance/1000) + Math.E);
 
-                // console.log("rank " + loc.label + ": " + rank + "");
+                //console.log("rank " + loc.label + ": " + rank + "");
                 return rank;
             }
 
