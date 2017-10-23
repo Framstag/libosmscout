@@ -1371,6 +1371,9 @@ STYLE
        AREA.BORDER { color: @natureReserveBorderColor; width: 0.2mm;}
        AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
      }
+     [TYPE leisure_swimming_pool] {
+       AREA { color: #74daff;}
+     }
    }
 
    [MAG cityOver-] {
