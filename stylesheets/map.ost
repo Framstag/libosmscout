@@ -985,7 +985,7 @@ TYPES
       ADDRESS OPTIMIZE_LOW_ZOOM POI
 
   TYPE leisure_swimming_pool
-    = NODE AREA ("leisure"=="swimming_pool")
+    = NODE AREA ("leisure"=="swimming_pool" AND !("covered" IN ["yes"]) AND !("indoor" IN ["yes"]))
       {Name, NameAlt}
       ADDRESS OPTIMIZE_LOW_ZOOM POI
 
