@@ -62,20 +62,6 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
   connect(&pendingRenderingTimer,SIGNAL(timeout()),
           this,SLOT(DrawMap()));
 
-  /*
-  connect(this,SIGNAL(TileStatusChanged(const osmscout::TileRef&)),
-          this,SLOT(HandleTileStatusChanged(const osmscout::TileRef&)),
-          Qt::QueuedConnection);
-  */
-
-  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
-          this,SLOT(onStylesheetFilenameChanged()),
-          Qt::QueuedConnection);
-
-  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
-          this,SLOT(InvalidateVisualCache()),
-          Qt::QueuedConnection);
-
   connect(this,SIGNAL(TriggerDrawMap()),
           this,SLOT(DrawMap()),
           Qt::QueuedConnection);
