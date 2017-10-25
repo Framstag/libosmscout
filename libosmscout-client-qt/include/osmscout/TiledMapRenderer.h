@@ -31,6 +31,8 @@
 
 #include <osmscout/private/ClientQtImportExport.h>
 
+#include <atomic>
+
 class OSMSCOUT_CLIENT_QT_API TiledMapRenderer : public MapRenderer {
   Q_OBJECT
 
@@ -51,8 +53,8 @@ private:
 
   OsmTileDownloader             *tileDownloader;
 
-  bool                          onlineTilesEnabled;
-  bool                          offlineTilesEnabled;
+  std::atomic_bool              onlineTilesEnabled;
+  std::atomic_bool              offlineTilesEnabled;
 
   int                           screenWidth;
   int                           screenHeight;

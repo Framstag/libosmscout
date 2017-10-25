@@ -72,7 +72,6 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   connect(&offlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
           this,SLOT(offlineTileRequest(uint32_t, uint32_t, uint32_t)),
           Qt::QueuedConnection);
-
 }
 
 TiledMapRenderer::~TiledMapRenderer()
@@ -445,9 +444,9 @@ void TiledMapRenderer::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uin
             return;
     }
 
-    // TODO: mutex?
     bool requestedFromWeb = onlineTilesEnabled && (!(offlineTilesEnabled &&
-          databaseCoverageOfTile(zoomLevel, xtile, ytile) == DatabaseCoverage::Covered));
+                                                  databaseCoverageOfTile(zoomLevel, xtile, ytile) ==
+                                                  DatabaseCoverage::Covered));
 
     if (requestedFromWeb){
         QMutexLocker locker(&lock);
@@ -481,7 +480,8 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
     }
 
     DatabaseCoverage state = databaseCoverageOfTile(zoomLevel, xtile, ytile);
-    bool render = (state != DatabaseCoverage::Outside);
+    // render offline map when area is fully covered by database or online tiles are disabled -> render basemap
+    bool render = (state != DatabaseCoverage::Outside) || (!onlineTilesEnabled);
     if (render) {
         // tile rendering have sub-linear complexity with area size
         // it means that it is advatage to merge more tile requests with same zoom
@@ -584,7 +584,6 @@ void TiledMapRenderer::onlineTileProviderChanged()
 void TiledMapRenderer::onlineTilesEnabledChanged(bool b)
 {
     {
-        QMutexLocker locker(&lock);
         onlineTilesEnabled = b;
 
         QMutexLocker cacheLocker(&tileCacheMutex);
