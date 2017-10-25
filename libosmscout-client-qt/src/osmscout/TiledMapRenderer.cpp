@@ -36,7 +36,8 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
   offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
   tileDownloader(NULL), // it will be created in different thread
-  loadJob(NULL)
+  loadJob(NULL),
+  unknownColor(QColor::fromRgbF(1.0,1.0,1.0)) // white
 {
   QScreen *srn=QGuiApplication::primaryScreen();
   screenWidth=srn->availableSize().width();
@@ -102,9 +103,42 @@ void TiledMapRenderer::Initialize()
             Qt::QueuedConnection);
   }
 
+  // it is possible that databases are loaded already,
+  // call style change callback as part of our initialisation
+  onStylesheetFilenameChanged();
 
   // invalidate tile cache and Redraw()
   InvalidateVisualCache();
+}
+
+void TiledMapRenderer::onStylesheetFilenameChanged()
+{
+  {
+    QMutexLocker locker(&tileCacheMutex);
+
+    osmscout::FillStyleRef        unknownFillStyle;
+    osmscout::MercatorProjection  projection;
+
+    dbThread->RunSynchronousJob(
+      [this,&unknownFillStyle,&projection](const std::list<DBInstanceRef>& databases) {
+        for (auto &db:databases){
+          if (db->styleConfig) {
+            db->styleConfig->GetUnknownFillStyle(projection, unknownFillStyle);
+            if (unknownFillStyle) {
+              osmscout::Color fillColor = unknownFillStyle->GetFillColor();
+              unknownColor.setRgbF(fillColor.GetR(),
+                                   fillColor.GetG(),
+                                   fillColor.GetB(),
+                                   fillColor.GetA());
+              break;
+            }
+          }
+        }
+      }
+    );
+  }
+
+  MapRenderer::onStylesheetFilenameChanged();
 }
 
 void TiledMapRenderer::InvalidateVisualCache()
@@ -140,14 +174,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
 
   projection.GetDimensions(boundingBox);
 
-
-  QColor white = QColor::fromRgbF(1.0,1.0,1.0);
-  //QColor grey = QColor::fromRgbF(0.5,0.5,0.5);
   QColor grey2 = QColor::fromRgbF(0.8,0.8,0.8);
-
-  painter.fillRect( 0,0,
-                    projection.GetWidth(),projection.GetHeight(),
-                    white);
 
   // OpenStreetMap render its tiles up to latitude +-85.0511
   double osmMinLat = OSMTile::minLat();
@@ -207,6 +234,10 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   if (elapsed > 1){
       osmscout::log.Warn() << "Mutex acquiere took " << elapsed << " ms";
   }
+
+  painter.fillRect(0,0,
+                   projection.GetWidth(),projection.GetHeight(),
+                   unknownColor);
 
   onlineTileCache.clearPendingRequests();
   offlineTileCache.clearPendingRequests();

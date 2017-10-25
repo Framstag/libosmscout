@@ -65,9 +65,13 @@ private:
   uint32_t                      loadYTo;
   uint32_t                      loadZ;
 
+  QColor                        unknownColor;
+
 public slots:
   virtual void Initialize();
   virtual void InvalidateVisualCache();
+  virtual void onStylesheetFilenameChanged();
+
   void onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
