@@ -22,6 +22,7 @@
 
 #include <ostream>
 #include <map>
+#include <mutex>
 #include <unordered_map>
 #include <set>
 
@@ -51,6 +52,7 @@ namespace osmscout {
      std::map<LineStyle,std::string> lineStyleNameMap;
      std::ostream                    stream;
      TypeConfigRef                   typeConfig;
+    std::mutex                       mutex;         //! Mutex for locking concurrent calls
 
   private:
     std::string GetColorValue(const Color& color);
@@ -90,20 +92,15 @@ namespace osmscout {
                  const MapParameter& parameter,
                  IconStyle& style) override;
 
-    void GetFontHeight(const Projection& projection,
+    double GetFontHeight(const Projection& projection,
                        const MapParameter& parameter,
-                       double fontSize,
-                       double& height) override;
+                       double fontSize) override;
 
-    void GetTextDimension(const Projection& projection,
-                          const MapParameter& parameter,
-                          double objectWidth,
-                          double fontSize,
-                          const std::string& text,
-                          double& xOff,
-                          double& yOff,
-                          double& width,
-                          double& height) override;
+    TextDimension GetTextDimension(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   double objectWidth,
+                                   double fontSize,
+                                   const std::string& text) override;
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
@@ -152,7 +149,8 @@ namespace osmscout {
                           const MapParameter& parameter,
                           const PathTextStyle& style,
                           const std::string& text,
-                          size_t transStart, size_t transEnd) override;
+                          size_t transStart, size_t transEnd,
+                          ContourLabelHelper& helper) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

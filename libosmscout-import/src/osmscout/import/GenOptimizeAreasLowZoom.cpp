@@ -153,7 +153,7 @@ namespace osmscout
           TypeInfoRef victimType;
 
           for (auto &type : loadedTypes) {
-            if (areas[type->GetIndex()].size()>0 &&
+            if (!areas[type->GetIndex()].empty() &&
                 (!victimType ||
                  areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size())) {
               victimType=type;
@@ -174,7 +174,8 @@ namespace osmscout
     return !scanner.HasError();
   }
 
-  void OptimizeAreasLowZoomGenerator::OptimizeAreas(const std::list<AreaRef>& areas,
+  void OptimizeAreasLowZoomGenerator::OptimizeAreas(Progress& progress,
+                                                    const std::list<AreaRef>& areas,
                                                     std::list<AreaRef>& optimizedAreas,
                                                     size_t width,
                                                     size_t height,
@@ -249,14 +250,14 @@ namespace osmscout
           }
         }
         else {
-          if (newRings.size()==0) {
+          if (newRings.empty()) {
             // Master ring is not empty and all rings were dropped => skip
             continue;
           }
         }
       }
       else {
-        if (newRings.size()==0) {
+        if (newRings.empty()) {
           // No master ring is and all rings were dropped => skip
           continue;
         }
@@ -265,6 +266,20 @@ namespace osmscout
       AreaRef copiedArea=std::make_shared<Area>(*area);
 
       copiedArea->rings=newRings;
+      bool skip=false;
+
+      for (const auto& ring : copiedArea->rings) {
+        if (!IsValidToWrite(ring.nodes)) {
+          progress.Error("Area coordinates are not dense enough to be written for area "+
+                         NumberToString(area->GetFileOffset()));
+          skip=true;
+          break;
+        }
+      }
+
+      if (skip) {
+        continue;
+      }
 
       optimizedAreas.push_back(copiedArea);
     }
@@ -379,8 +394,8 @@ namespace osmscout
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
     for (const auto& area : areas) {
-      GeoBox                                  boundingBox;
-      FileOffsetFileOffsetMap::const_iterator offset=offsets.find(area->GetFileOffset());
+      GeoBox boundingBox;
+      auto   offset=offsets.find(area->GetFileOffset());
 
       if (offset==offsets.end()) {
         continue;
@@ -416,9 +431,9 @@ namespace osmscout
 
       FileOffset previousOffset=0;
       for (const auto& offset : cell.second) {
-        FileOffset data=offset-previousOffset;
+        FileOffset dataOffset=offset-previousOffset;
 
-        dataSize+=EncodeNumber(data,buffer);
+        dataSize+=EncodeNumber(dataOffset,buffer);
 
         previousOffset=offset;
       }
@@ -535,7 +550,8 @@ namespace osmscout
 
             magnification.SetLevel(level);
 
-            OptimizeAreas(allAreas[type->GetIndex()],
+            OptimizeAreas(progress,
+                          allAreas[type->GetIndex()],
                           optimizedAreas,
                           800,480,
                           dpi,
@@ -633,7 +649,6 @@ namespace osmscout
   {
     FileOffset          indexOffset=0;
     FileWriter          writer;
-    Magnification       magnification; // Magnification, we optimize for
     TypeInfoSet         areaTypes;     // Types we optimize
     std::list<TypeData> areaTypesData;
 

@@ -59,13 +59,13 @@ IF(PANGO_FOUND)
 		  SET(PANGO_INCLUDE_DIRS ${PANGO_INCLUDE_DIRS} ${GLIB2_INCLUDE_DIRS})
       SET(PANGO_LIBRARIES ${PANGO_LIBRARIES} ${GLIB2_LIBRARIES})
 	  ENDIF()
-	
+
 	  FIND_PACKAGE(GObject REQUIRED)
 	  IF(GLIB2_FOUND)
 		  SET(PANGO_INCLUDE_DIRS ${PANGO_INCLUDE_DIRS} ${GOBJECT_INCLUDE_DIRS})
       SET(PANGO_LIBRARIES ${PANGO_LIBRARIES} ${GOBJECT_LIBRARIES})
-	  ENDIF()	
-	
+	  ENDIF()
+
     # pangocairo
     PKG_CHECK_MODULES(PC_PANGOCAIRO QUIET pangocairo)
     FIND_PATH(PANGOCAIRO_INCLUDE_DIRS
@@ -76,7 +76,7 @@ IF(PANGO_FOUND)
               $ENV{PANGOCAIRO_ROOT}/include
               /pangocairo/include
               ${PANGO_INCLUDE_HINTS}
-        PATH_SUFFIXES pango pangocairo libpangocairo-1.0 pangocairo1.0
+        PATH_SUFFIXES pango pango-1.0 pangocairo libpangocairo-1.0 pangocairo1.0
     )
     IF(PANGOCAIRO_INCLUDE_DIRS)
         SET(PANGO_INCLUDE_DIRS ${PANGO_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIRS})
@@ -88,7 +88,7 @@ IF(PANGO_FOUND)
               $ENV{PANGOCAIRO_HOME}/lib
               $ENV{PANGOCAIRO_ROOT}/lib
               ${PANGO_LIBRARY_HINTS}
-        PATH_SUFFIXES pango pangocairo libpangocairo-1.0 pangocairo1.0
+        PATH_SUFFIXES pango pango-1.0 pangocairo libpangocairo-1.0 pangocairo1.0
     )
     IF(PANGOCAIRO_LIBRARIES)
         SET(PANGO_LIBRARIES ${PANGO_LIBRARIES} ${PANGOCAIRO_LIBRARIES})

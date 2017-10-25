@@ -16,12 +16,6 @@ IF %COMPILER%==msys2 (
   echo Compiling libosmscout using msys2...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
 
-  IF %BUILDTOOL%==autoconf (
-    echo Using build tool 'autoconf'...
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && make full"
-    echo Finished autoconf build
-  )
-
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ninja"

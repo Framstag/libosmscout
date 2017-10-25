@@ -1331,14 +1331,15 @@ namespace osmscout {
 
   bool IsValidToWrite(const std::vector<Point>& nodes)
   {
-    if (nodes.size()<=1) {
+    size_t nodeSize=nodes.size();
+    if (nodeSize<=1) {
       return true;
     }
 
     uint32_t lastLat=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
     uint32_t lastLon=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
 
-    for (size_t i=1; i<nodes.size(); i++) {
+    for (size_t i=1; i<nodeSize; i++) {
       uint32_t currentLat=(uint32_t)round((nodes[i].GetLat()+90.0)*latConversionFactor);
       uint32_t currentLon=(uint32_t)round((nodes[i].GetLon()+180.0)*lonConversionFactor);
 

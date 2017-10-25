@@ -15,9 +15,7 @@ if [ "$TARGET" = "build" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get -qq update
 
-    if [ "$BUILDTOOL" = "autoconf" ]; then
-      sudo apt-get install -y autoconf
-    elif [ "$BUILDTOOL" = "meson" ]; then
+    if [ "$BUILDTOOL" = "meson" ]; then
       wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
       unzip ninja-linux.zip
       mkdir -p ~/bin
@@ -68,9 +66,7 @@ elif [ "$TARGET" = "importer" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get -qq update
 
-    if [ "$BUILDTOOL" = "autoconf" ]; then
-      sudo apt-get install -y autoconf
-    elif [ "$BUILDTOOL" = "cmake" ]; then
+    if [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi
 

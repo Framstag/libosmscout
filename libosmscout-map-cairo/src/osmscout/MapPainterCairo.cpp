@@ -599,10 +599,9 @@ namespace osmscout {
     return false;
   }
 
-  void MapPainterCairo::GetFontHeight(const Projection& projection,
+  double MapPainterCairo::GetFontHeight(const Projection& projection,
                                       const MapParameter& parameter,
-                                      double fontSize,
-                                      double& height)
+                                      double fontSize)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     Font           font;
@@ -611,7 +610,7 @@ namespace osmscout {
                  parameter,
                  fontSize);
 
-    height=pango_font_description_get_size(font)/PANGO_SCALE;
+    return pango_font_description_get_size(font)/PANGO_SCALE;
 #else
     Font                 font;
     cairo_font_extents_t fontExtents;
@@ -622,19 +621,15 @@ namespace osmscout {
 
     cairo_scaled_font_extents(font,&fontExtents);
 
-    height=fontExtents.height;
+    return fontExtents.height;
 #endif
   }
 
-  void MapPainterCairo::GetTextDimension(const Projection& projection,
-                                         const MapParameter& parameter,
-                                         double objectWidth,
-                                         double fontSize,
-                                         const std::string& text,
-                                         double& xOff,
-                                         double& yOff,
-                                         double& width,
-                                         double& height)
+  MapPainter::TextDimension MapPainterCairo::GetTextDimension(const Projection& projection,
+                                                              const MapParameter& parameter,
+                                                              double objectWidth,
+                                                              double fontSize,
+                                                              const std::string& text)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     Font             font=GetFont(projection,
@@ -649,10 +644,10 @@ namespace osmscout {
                                                         font,
                                                         pango_context_get_language(context));
 
-    double proposedWidth=proposedLabelWidth(parameter,
-                                            pango_font_metrics_get_approximate_char_width(metrics),
-                                            objectWidth,
-                                            text.length());
+    double proposedWidth=GetProposedLabelWidth(parameter,
+                                               pango_font_metrics_get_approximate_char_width(metrics),
+                                               objectWidth,
+                                               text.length());
 
     PangoRectangle   extends;
 
@@ -661,21 +656,28 @@ namespace osmscout {
     pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
     pango_layout_set_width(layout,proposedWidth);
 
-    pango_layout_get_pixel_extents(layout,NULL,&extends);
+    pango_layout_get_pixel_extents(layout,nullptr,&extends);
 
-    xOff=extends.x;
-    yOff=extends.y;
-    width=extends.width;
+    TextDimension dimension;
 
     if (pango_layout_get_line_count(layout)<=1) {
-      height=pango_font_description_get_size(font)/PANGO_SCALE;
+      dimension=TextDimension(extends.x,
+                              extends.y,
+                              extends.width,
+                              pango_font_description_get_size(font)/PANGO_SCALE);
+
     }
     else {
-      height=extends.height;
+      dimension=TextDimension(extends.x,
+                              extends.y,
+                              extends.width,
+                              extends.height);
     }
 
     pango_font_metrics_unref(metrics);
     g_object_unref(layout);
+
+    return dimension;
 #else
     Font                 font;
     cairo_text_extents_t textExtents;
@@ -691,10 +693,10 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    xOff=textExtents.x_bearing;
-    yOff=textExtents.y_bearing;
-    width=textExtents.width;
-    height=fontExtents.height;
+    return TextDimension(textExtents.x_bearing,
+                         textExtents.y_bearing,
+                         textExtents.width,
+                         fontExtents.height);
 #endif
   }
 
@@ -950,15 +952,21 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const PathTextStyle& style,
                                          const std::string& text,
-                                         size_t transStart, size_t transEnd)
+                                         size_t transStart, size_t transEnd,
+                                         ContourLabelHelper& helper)
   {
-    double lineLength=0;
-    double xo=0;
-    double yo=0;
+    double pathLength=0;
+
+    // Make the way path known to cairo and at the same time calculate the length
+    // of the path
 
     cairo_new_path(draw);
 
     if (coordBuffer->buffer[transStart].GetX()<=coordBuffer->buffer[transEnd].GetX()) {
+      // coordinates of previous point
+      double xo=0;
+      double yo=0;
+
       for (size_t j=transStart; j<=transEnd; j++) {
         if (j==transStart) {
           cairo_move_to(draw,
@@ -969,7 +977,7 @@ namespace osmscout {
           cairo_line_to(draw,
                         coordBuffer->buffer[j].GetX(),
                         coordBuffer->buffer[j].GetY());
-          lineLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
+          pathLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
                            pow(coordBuffer->buffer[j].GetY()-yo,2));
         }
 
@@ -978,6 +986,10 @@ namespace osmscout {
       }
     }
     else {
+      // coordinates of previous point
+      double xo=0;
+      double yo=0;
+
       for (size_t j=0; j<=transEnd-transStart; j++) {
         size_t idx=transEnd-j;
 
@@ -990,7 +1002,7 @@ namespace osmscout {
           cairo_line_to(draw,
                         coordBuffer->buffer[idx].GetX(),
                         coordBuffer->buffer[idx].GetY());
-          lineLength+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
+          pathLength+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
                            pow(coordBuffer->buffer[idx].GetY()-yo,2));
         }
 
@@ -1012,18 +1024,15 @@ namespace osmscout {
                           text.length());
     pango_layout_get_pixel_extents(layout,&extends,nullptr);
 
-    double spaceLeft=lineLength-extends.width-2*contourLabelOffset;
+    double textWidth=extends.width;
 
-    // If space around labels left is < offset on both sides, do not render at all
-    if (spaceLeft<0.0) {
+    if (!helper.Init(pathLength,
+                     textWidth)) {
       g_object_unref(layout);
       return;
     }
 
-    spaceLeft=fmod(spaceLeft,extends.width+contourLabelSpace);
-
-    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
-    double       offset=labelInstanceOffset;
+    // Current offset for the next label
     cairo_path_t *path;
 
     /* Decrease tolerance a bit, since it's going to be magnified */
@@ -1047,15 +1056,15 @@ namespace osmscout {
                           style.GetTextColor().GetB(),
                           style.GetTextColor().GetA());
 
-    while (offset<lineLength) {
+    while (helper.ContinueDrawing()) {
       DrawContourLabelPangoCairo(draw,
                                  path,
-                                 offset-extends.x,
+                                 helper.GetCurrentOffset()-extends.x,
                                  layout,
                                  extends);
 
-
-      offset=offset+extends.width+contourLabelSpace;
+      helper.AdvanceText();
+      helper.AdvanceSpace();
     }
 
     cairo_path_destroy(path);
@@ -1071,17 +1080,17 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    double spaceLeft=lineLength-textExtents.width-2*contourLabelOffset;
+    double textWidth=textExtends.width;
 
-    // If space around labels left is < offset on both sides, do not render at all
-    if (spaceLeft<0.0) {
+    if (!helper.Init(pathLength,
+                     textWidth)) {
+      g_object_unref(layout);
       return;
     }
 
-    spaceLeft=fmod(spaceLeft,textExtents.width+contourLabelSpace);
-
-    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
-    double       offset=labelInstanceOffset;
+    // Current offset for the next label
+    double offset=helper.GetInitialOffset(pathLength,
+                                          textWidth);
 
     cairo_font_extents_t fontExtents;
     cairo_path_t         *path;
@@ -1106,7 +1115,7 @@ namespace osmscout {
                             textExtents.height,
                             text);
 
-      offset=offset+textExtents.width+contourLabelSpace;
+      offset=offset+textWidth+contourLabelSpace;
     }
 
     cairo_path_destroy(path);
@@ -1361,11 +1370,9 @@ namespace osmscout {
 
     minimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/projection.GetDPI();
 
-    Draw(projection,
-         parameter,
-         data);
-
-    return true;
+    return Draw(projection,
+                parameter,
+                data);
   }
 }
 

@@ -1371,6 +1371,9 @@ STYLE
        AREA.BORDER { color: @natureReserveBorderColor; width: 0.2mm;}
        AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
      }
+     [TYPE leisure_swimming_pool] {
+       AREA { color: #74daff;}
+     }
    }
 
    [MAG cityOver-] {
@@ -1835,6 +1838,11 @@ STYLE
          place_islet] {
      NODE.TEXT {label: IName; style: emphasize; size: 1.3; priority: @labelPrioIsland;}
      AREA.TEXT { label: IName; style: emphasize; priority: @labelPrioIsland; autoSize: true; }
+   }
+ }
+ [MAG region-] {
+   [TYPE place_island,
+         place_islet] {
      AREA {color: @landColor;}
    }
  }

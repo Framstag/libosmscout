@@ -39,13 +39,6 @@ environment:
     TARGET: build
     PLATFORM: x64
   - COMPILER: msys2
-    BUILDTOOL: autoconf
-    MSYS2_ARCH: x86_64
-    MSYS2_DIR: msys64
-    MSYSTEM: MINGW64
-    TARGET: build
-    PLATFORM: x64
-  - COMPILER: msys2
     BUILDTOOL: cmake
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64

@@ -81,20 +81,15 @@ namespace osmscout {
     bool HasPattern(const MapParameter& parameter,
                     const FillStyle& style);
 
-    void GetFontHeight(const Projection& projection,
+    double GetFontHeight(const Projection& projection,
                        const MapParameter& parameter,
-                       double fontSize,
-                       double& height) override;
+                       double fontSize) override;
 
-    void GetTextDimension(const Projection& projection,
-                          const MapParameter& parameter,
-                          double objectWidth,
-                          double fontSize,
-                          const std::string& text,
-                          double& xOff,
-                          double& yOff,
-                          double& width,
-                          double& height) override;
+    TextDimension GetTextDimension(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   double objectWidth,
+                                   double fontSize,
+                                   const std::string& text) override;
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
@@ -134,7 +129,8 @@ namespace osmscout {
                           const MapParameter& parameter,
                           const PathTextStyle& style,
                           const std::string& text,
-                          size_t transStart, size_t transEnd) override;
+                          size_t transStart, size_t transEnd,
+                          ContourLabelHelper& helper) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

@@ -19,6 +19,7 @@
  */
 
 #include <osmscout/LocationEntry.h>
+#include <osmscout/util/Geometry.h>
 
 #include <iostream>
 
@@ -97,9 +98,38 @@ void LocationEntry::addReference(const osmscout::ObjectFileRef reference)
     references.push_back(reference);
 }
 
+void LocationEntry::mergeWith(const LocationEntry &location)
+{
+  assert(type==typeObject);
+  assert(location.type==typeObject);
+
+  bbox.Include(location.bbox);
+  for (auto &ref:location.getReferences()) {
+    addReference(ref);
+  }
+  coord=bbox.GetCenter();
+}
+
+Q_INVOKABLE double LocationEntry::distanceTo(double lat, double lon) const
+{
+  return osmscout::GetSphericalDistance(coord, osmscout::GeoCoord(lat, lon)) * 1000;
+}
+
 LocationEntry::Type LocationEntry::getType() const
 {
     return type;
+}
+
+QString LocationEntry::getTypeString() const
+{
+  switch (type){
+    case typeObject:
+      return "object";
+    case typeCoordinate:
+      return "coordinate";
+    default:
+      return "none";
+  }
 }
 
 QString LocationEntry::getObjectType() const
@@ -135,4 +165,14 @@ osmscout::GeoBox LocationEntry::getBBox() const
 const QList<osmscout::ObjectFileRef>& LocationEntry::getReferences() const
 {
     return references;
+}
+
+double LocationEntry::getLat() const
+{
+  return coord.GetLat();
+}
+
+double LocationEntry::getLon() const
+{
+  return coord.GetLon();
 }

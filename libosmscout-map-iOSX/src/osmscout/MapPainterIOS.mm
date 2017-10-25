@@ -436,10 +436,9 @@ namespace osmscout {
     /**
      * Returns the height of the font.
      */
-    void MapPainterIOS::GetFontHeight(const Projection& projection,
+    double MapPainterIOS::GetFontHeight(const Projection& projection,
                                       const MapParameter& parameter,
-                                      double fontSize,
-                                      double& height){
+                                      double fontSize){
         Font *font = GetFont(projection,parameter,fontSize);
 #if TARGET_OS_IPHONE
         CGSize size = [@"Aj" sizeWithFont:font];
@@ -447,21 +446,17 @@ namespace osmscout {
         NSRect stringBounds = [@"Aj" boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
         CGSize size = stringBounds.size;
 #endif
-        height = size.height;
+        return size.height;
     }
 
     /*
      * GetTextDimension()
      */
-    void MapPainterIOS::GetTextDimension(const Projection& projection,
-                                         const MapParameter& parameter,
-                                         double objectWidth,
-                                         double fontSize,
-                                         const std::string& text,
-                                         double& xOff,
-                                         double& yOff,
-                                         double& width,
-                                         double& height){
+    MapPainter::TextDimension MapPainterIOS::GetTextDimension(const Projection& projection,
+                                                              const MapParameter& parameter,
+                                                              double objectWidth,
+                                                              double fontSize,
+                                                              const std::string& text){
         Font *font = GetFont(projection,parameter,fontSize);
         NSString *str = [NSString stringWithUTF8String:text.c_str()];
         CGRect rect = CGRectZero;
@@ -473,7 +468,7 @@ namespace osmscout {
 
         if(objectWidth > 0){
             CGSize averageFontSize = [@"a" sizeWithFont:font];
-            CGFloat proposedWidth = proposedLabelWidth(parameter,
+            CGFloat proposedWidth = GetProposedLabelWidth(parameter,
                                                        averageFontSize.width,
                                                        objectWidth,
                                                        text.length());
@@ -492,28 +487,23 @@ namespace osmscout {
         rect.size.width = size.width;
         rect.size.height = size.height;
 #endif
-        xOff = rect.origin.x;
-        yOff = rect.origin.y;
-        width = rect.size.width;
-        height = rect.size.height;
+
+        return TextDimension(rect.origin.x,
+                             rect.origin.y,
+                             rect.size.width,
+                             rect.size.height);
     }
 
     double MapPainterIOS::textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        double xOff;
-        double yOff;
-        double width;
-        double height;
-        GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text,xOff,yOff,width,height);
-        return width;
+        TextDimension dimension=GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text);
+
+        return dimension.width;
     }
 
     double MapPainterIOS::textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        double xOff;
-        double yOff;
-        double width;
-        double height;
-        GetTextDimension(projection, parameter,/*objectWidth*/-1,fontSize,text,xOff,yOff,width,height);
-        return height;
+        TextDimension dimension=GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text);
+
+        return dimension.height;
     }
 
     /*
@@ -752,7 +742,8 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const PathTextStyle& style,
                                          const std::string& text,
-                                         size_t transStart, size_t transEnd){
+                                         size_t transStart, size_t transEnd,
+                                         ContourLabelHelper& helper){
         Font *font = GetFont(projection, parameter, style.GetSize());
         Vertex2D charOrigin;
         FollowPathHandle followPathHnd;
@@ -787,7 +778,7 @@ namespace osmscout {
         NSUInteger charsCount = [nsText length];
         Vertex2D *coords = new Vertex2D[charsCount];
         double *slopes = new double[charsCount];
-        double nww,nhh,xOff,yOff;
+        TextDimension dimension;
         int labelRepeatCount = 0;
         while(labelRepeatCount++ < labelRepeatMaxCount){
             int i = 0;
@@ -795,10 +786,10 @@ namespace osmscout {
 
                 NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
 
-                GetTextDimension(projection, parameter,/*objectWidth*/-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding], xOff, yOff, nww, nhh);
+                dimension=GetTextDimension(projection, parameter,/*objectWidth*/-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding]);
                 x1 = charOrigin.GetX();
                 y1 = charOrigin.GetY();
-                if(!followPath(followPathHnd,nww, charOrigin)){
+                if(!followPath(followPathHnd,dimension.width, charOrigin)){
                     goto exit;
                 }
                 x2 = charOrigin.GetX();
@@ -824,9 +815,9 @@ namespace osmscout {
                 ct = CGAffineTransformMakeRotation(slopes[i]);
                 CGContextConcatCTM(cg, ct);
 #if TARGET_OS_IPHONE
-                [str drawAtPoint:CGPointMake(0,-nhh/2) withFont:font];
+                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withFont:font];
 #else
-                [str drawAtPoint:CGPointMake(0,-nhh/2) withAttributes:attrsDictionary];
+                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withAttributes:attrsDictionary];
 #endif
                 CGContextRestoreGState(cg);
             }

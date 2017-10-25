@@ -79,6 +79,32 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainter
   {
   public:
+
+    /*
+     * Dimension of a text
+     */
+    struct OSMSCOUT_MAP_API TextDimension
+    {
+      double xOff;
+      double yOff;
+      double width;
+      double height;
+
+      TextDimension() = default;
+
+      TextDimension(double xOff,
+                    double yOff,
+                    double width,
+                    double height)
+      : xOff(xOff),
+        yOff(yOff),
+        width(width),
+        height(height)
+      {
+        // no code
+      }
+    };
+
     /**
      * Structure used for internal statistic collection
      */
@@ -106,6 +132,9 @@ namespace osmscout {
       }
     };
 
+    /**
+     * Data structure for holding temporary data about ways
+     */
     struct OSMSCOUT_MAP_API WayData
     {
       ObjectFileRef            ref;
@@ -150,6 +179,10 @@ namespace osmscout {
       }
     };
 
+    /**
+     * Data structure for holding temporary data about way paths (a way may consist of
+     * multiple paths/lines rendered)
+     */
     struct OSMSCOUT_MAP_API WayPathData
     {
       ObjectFileRef            ref;
@@ -164,6 +197,9 @@ namespace osmscout {
       size_t                   transEnd;        //!< End of coordinates in transformation buffer
     };
 
+    /**
+     * Data structure for holding temporary data about areas
+     */
     struct OSMSCOUT_MAP_API AreaData
     {
       ObjectFileRef            ref;
@@ -177,19 +213,65 @@ namespace osmscout {
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
+    /**
+     * Represents one entry in a label.
+     */
     struct OSMSCOUT_MAP_API LabelLayoutData
     {
-      size_t       position;   //!< Relative position of the label
-      double       xOff;       //!< Optional horizontal offset within the label
-      double       yOff;       //!< Optional vertical offset within the label
-      double       width;      //!< Width of the label
-      double       height;     //!< Height of the label
-      std::string  label;      //!< The text of the label (only used if TextStyle is set)
-      double       fontSize;   //!< The font size (only used if TextStyle is set)
-      double       alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
-      TextStyleRef textStyle;  //!< The text style for a textual label (optional)
-      bool         icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
-      IconStyleRef iconStyle;  //!< The icon style for a icon or symbol
+      size_t        position;   //!< Relative position of the label
+      std::string   label;      //!< The text of the label (only used if TextStyle is set)
+      TextDimension dimension;  //!< Dimension of the label object (coul dbe text, sybol, icon...)
+      double        fontSize;   //!< The font size (only used if TextStyle is set)
+      double        alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
+      TextStyleRef  textStyle;  //!< The text style for a textual label (optional)
+      bool          icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
+      IconStyleRef  iconStyle;  //!< The icon style for a icon or symbol
+    };
+
+    /**
+     * Helper class for drawing contours. Allows the MapPainter base class
+     * to inject itself at certain points in the contour label rendeirng code of
+     * the actual backend.
+     */
+    class OSMSCOUT_MAP_API ContourLabelHelper CLASS_FINAL
+    {
+    private:
+      double contourLabelOffset;
+      double contourLabelSpace;
+      double pathLength;
+      double textWidth;
+      double currentOffset;
+
+    public:
+      ContourLabelHelper(const MapPainter& painter);
+
+      bool Init(double pathLength,
+                double textWidth);
+
+      inline bool ContinueDrawing() const
+      {
+        return currentOffset<pathLength;
+      }
+
+      inline double GetCurrentOffset() const
+      {
+        return currentOffset;
+      }
+
+      inline void AdvancePartial(double width)
+      {
+        currentOffset+=width;
+      }
+
+      inline void AdvanceText()
+      {
+        currentOffset+=textWidth;
+      }
+
+      inline void AdvanceSpace()
+      {
+        currentOffset+=contourLabelSpace;
+      }
     };
 
   protected:
@@ -341,7 +423,7 @@ namespace osmscout {
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const FeatureValueBuffer& buffer,
-                           const IconStyleRef iconStyle,
+                           const IconStyleRef& iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
                            double x, double y,
                            double objectWidth=0,
@@ -486,29 +568,24 @@ namespace osmscout {
     /**
      * Returns the height of the font.
      */
-    virtual void GetFontHeight(const Projection& projection,
+    virtual double GetFontHeight(const Projection& projection,
                                const MapParameter& parameter,
-                               double fontSize,
-                               double& height) = 0;
+                               double fontSize) = 0;
 
     /**
-      Return the bounding box of the given text. The method is call
+      Return the bounding box of the given text. The method is called
       every time a label for a node or an area has to be drawn (which means
       "not for contour labels").
 
-      The backend may decide to relayout the given text, however it must assure
-      that later calls to corresponding DrawXXX methods will honour the initial
-      bounding box.
+      The backend may decide to relayout the given text (by adding virtual line breaks),
+      however it must assure that later calls to corresponding DrawXXX methods will
+      honour the bounding box.
       */
-    virtual void GetTextDimension(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  double objectWidth,
-                                  double fontSize,
-                                  const std::string& text,
-                                  double& xOff,
-                                  double& yOff,
-                                  double& width,
-                                  double& height) = 0;
+    virtual TextDimension GetTextDimension(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           double objectWidth,
+                                           double fontSize,
+                                           const std::string& text) = 0;
 
     /**
       (Optionally) fills the area with the given default color
@@ -562,7 +639,8 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const PathTextStyle& style,
                                   const std::string& text,
-                                  size_t transStart, size_t transEnd) = 0;
+                                  size_t transStart, size_t transEnd,
+                                  ContourLabelHelper& helper) = 0;
 
     /**
       Draw the given text as a contour of the given path in a style defined
@@ -587,10 +665,10 @@ namespace osmscout {
       Compute suggested label width for given parameters.
       It may be used by backend for layout labels with wrapping words.
      */
-    virtual double proposedLabelWidth(const MapParameter& parameter,
-                                      double averageCharWidth,
-                                      double objectWidth,
-                                      size_t stringLength);
+    virtual double GetProposedLabelWidth(const MapParameter& parameter,
+                                         double averageCharWidth,
+                                         double objectWidth,
+                                         size_t stringLength);
 
     /**
       Med level drawing routines that are already implemented by the base class, but which can be overwritten

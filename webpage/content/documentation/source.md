@@ -312,6 +312,22 @@ cmake -G "Xcode" ..
 
 You can then import the Xcode project created in the build directory.
 
+If you are using a non standard Qt installation directory (likely under Windows),
+you might add some additional hints to the cmake call. Relevant are the
+variables `QTDIR` and `CMAKE_PREFIX_PATH`. 
+
+Example (with also some other libosmscout specific options):
+
+```bash
+cmake -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.##### .. \
+-DCMAKE_INSTALL_PREFIX=.\output -DOSMSCOUT_BUILD_IMPORT=OFF \
+-DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_TESTS=OFF \
+-DQTDIR=D:/Tools/Qt/5.9.2/msvc2015 \
+-DCMAKE_PREFIX_PATH=D:/Tools/Qt/5.9.2/msvc2015/lib/cmake
+```
+
+
+
 ### meson based build
 
 For ninja based builds: In the top level directory type:

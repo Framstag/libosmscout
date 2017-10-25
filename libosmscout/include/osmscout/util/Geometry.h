@@ -43,7 +43,12 @@ namespace osmscout {
 
   inline double DegToRad(double deg)
   {
-    return  deg * M_PI / 180;
+    return deg*M_PI/180.0;
+  }
+
+  inline double RadToDeg(double rad)
+  {
+    return rad*180.0/M_PI;
   }
 
   /**
@@ -985,7 +990,7 @@ namespace osmscout {
   /**
    * \ingroup Geometry
    * Calculates the spherical distance between the two given points
-   * on the sphere.
+   * on the sphere [km].
    */
   extern OSMSCOUT_API double GetSphericalDistance(const GeoCoord& a,
                                                   const GeoCoord& b);
@@ -993,15 +998,15 @@ namespace osmscout {
   /**
    * \ingroup Geometry
    * Calculates the ellipsoidal (WGS-84) distance between the two given points
-   * on the ellipsoid.
+   * on the ellipsoid [km].
    */
   extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
-                                                   double bLon, double bLat);
+                                                    double bLon, double bLat);
 
   /**
    * \ingroup Geometry
    * Calculates the ellipsoidal (WGS-84) distance between the two given points
-   * on the ellipsoid.
+   * on the ellipsoid [km].
    */
   extern OSMSCOUT_API double GetEllipsoidalDistance(const GeoCoord& a,
                                                     const GeoCoord& b);
@@ -1017,8 +1022,8 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
-   *Calculates the initial bearing for a line from one coordinate to the other coordinate
-   *on a sphere.
+   * Calculates the initial bearing for a line from one coordinate to the other coordinate
+   * on a sphere.
    */
   extern OSMSCOUT_API double GetSphericalBearingInitial(const GeoCoord& a,
                                                         const GeoCoord& b);

@@ -376,21 +376,31 @@ namespace osmscout
 		return false;
 	}
 
-	void MapPainterDirectX::GetFontHeight(const Projection& projection, const MapParameter& parameter, double fontSize, double& height)
+	double MapPainterDirectX::GetFontHeight(const Projection& projection,
+																				const MapParameter& parameter,
+																				double fontSize)
 	{
 		if (fontHeightMap.find(fontSize) != fontHeightMap.end())
-			height = fontHeightMap[fontSize];
+			return fontHeightMap[fontSize];
 		else
 		{
-			double x, y, w, h;
-			GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App", x, y, w, h);
-			fontHeightMap[fontSize] = h;
-			height = h;
+			TextDimension dimension;
+
+			dimension=GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
+			fontHeightMap[fontSize] = dimension.height;
+
+			return dimension.height;
 		}
 	}
 
-	void MapPainterDirectX::GetTextDimension(const Projection& projection, const MapParameter& parameter, double objectWidth, double fontSize, const std::string& text, double& xOff, double& yOff, double& width, double& height)
+	MapPainter::TextDimension MapPainterDirectX::GetTextDimension(const Projection& projection,
+																																const MapParameter& parameter,
+																																double objectWidth,
+																																double fontSize,
+																																const std::string& text)
 	{
+		TextDimension dimension;
+
 #ifdef MBUC
 		std::wstring sample = s2w(text);
 #else
@@ -406,26 +416,31 @@ namespace osmscout
 			size * 2.0f,
 			size,
 			&pDWriteTextLayout);
-		xOff = 0.0;
-		yOff = 0.0;
+		dimension.xOff = 0.0;
+		dimension.yOff = 0.0;
+
 		if (FAILED(hr))
 		{
-			width = 0.0;
-			height = 0.0;
-			return;
+			dimension.width = 0.0;
+			dimension.height = 0.0;
+
+			return dimension;
 		}
 		DWRITE_TEXT_METRICS textMetrics;
 		hr = pDWriteTextLayout->GetMetrics(&textMetrics);
 		pDWriteTextLayout->Release();
+
 		if (FAILED(hr)) {
-			width = 0.0;
-			height = 0.0;
+			dimension.width = 0.0;
+			dimension.height = 0.0;
 		}
 		else
 		{
-			width = textMetrics.width;
-			height = textMetrics.height;
+			dimension.width = textMetrics.width;
+			dimension.height = textMetrics.height;
 		}
+
+		return dimension;
 	}
 
 	/*void MapPainterDirectX::GetLabelFrame(const LabelStyle& style, double& horizontal, double& vertical)
@@ -598,12 +613,23 @@ namespace osmscout
 		}
 	}
 
-	void MapPainterDirectX::DrawContourLabel(const Projection& projection, const MapParameter& parameter, const PathTextStyle& style, const std::string& text, size_t transStart, size_t transEnd)
+	void MapPainterDirectX::DrawContourLabel(const Projection& projection,
+																					 const MapParameter& parameter,
+																					 const PathTextStyle& style,
+																					 const std::string& text,
+																					 size_t transStart,
+																					 size_t transEnd,
+																					 ContourLabelHelper& helper)
 	{
 		// Not implemented yet
 	}
 
-	void MapPainterDirectX::DrawContourSymbol(const Projection& projection, const MapParameter& parameter, const Symbol& symbol, double space, size_t transStart, size_t transEnd)
+	void MapPainterDirectX::DrawContourSymbol(const Projection& projection,
+																						const MapParameter& parameter,
+																						const Symbol& symbol,
+																						double space,
+																						size_t transStart,
+																						size_t transEnd)
 	{
 		// Not implemented yet
 	}
@@ -753,16 +779,18 @@ namespace osmscout
 
 	bool MapPainterDirectX::DrawMap(const Projection& projection, const MapParameter& parameter, const MapData& data, ID2D1RenderTarget* renderTarget)
 	{
+		bool result=true;
+
 		if (m_pDirect2dFactory == NULL) return false;
 		typeConfig = styleConfig->GetTypeConfig();
 		m_pRenderTarget = renderTarget;
 
-		Draw(projection, parameter, data);
+		result=Draw(projection, parameter, data);
 
 		fillStyleNameMap.clear();
 		lineStyleNameMap.clear();
 
-		return true;
+		return result;
 	}
 }
 

@@ -305,6 +305,16 @@ if(OSMSCOUT_BUILD_DOC_API)
   add_subdirectory(Documentation)
 endif()
 
+if (HUGO_PATH)
+  set(OSMSCOUT_BUILD_WEBPAGE_CACHE ON)
+else()
+  set(OSMSCOUT_BUILD_WEBPAGE_CACHE OFF)
+endif()
+option(OSMSCOUT_BUILD_WEBPAGE "Enable generation of webpage" ${OSMSCOUT_BUILD_WEBPAGE_CACHE})
+if(OSMSCOUT_BUILD_WEBPAGE)
+  add_subdirectory(webpage)
+endif()
+
 if(SWIG_FOUND AND JNI_FOUND)
   set(OSMSCOUT_BUILD_BINDING_JAVA_CACHE ON)
 else()
@@ -357,5 +367,6 @@ message(STATUS " - C# binding:                           ${OSMSCOUT_BUILD_BINDIN
 message(STATUS "external interfaces:")
 message(STATUS " - MATLAB mex function:                  ${OSMSCOUT_BUILD_EXTERN_MATLAB}")
 message(STATUS "documentation:                           ${OSMSCOUT_BUILD_DOC_API}")
+message(STATUS "webpage:                                 ${OSMSCOUT_BUILD_WEBPAGE}")
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share)

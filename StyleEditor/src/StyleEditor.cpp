@@ -88,7 +88,8 @@ int main(int argc, char* argv[])
   builder
     .WithIconDirectory(iconDirectory)
     .WithMapLookupDirectories(mapLookupDirectories)
-    .WithOnlineTileProviders(":/resources/online-tile-providers.json");
+    .WithOnlineTileProviders(":/resources/online-tile-providers.json")
+    .WithUserAgent("OSMScoutStyleEditor", "v?");
 
   if (!builder.Init()){
     osmscout::log.Error() << "Cannot initialize OSMScout library";

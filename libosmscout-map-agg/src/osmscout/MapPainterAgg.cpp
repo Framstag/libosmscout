@@ -96,65 +96,61 @@ namespace osmscout {
     width=0;
     height=fontEngine->height();
 
-    for (size_t i=0; i<text.length(); i++) {
-      const agg::glyph_cache* glyph=fontCacheManager->glyph(text[i]);
+    for (wchar_t i : text) {
+      const agg::glyph_cache* glyph=fontCacheManager->glyph(i);
 
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         width+=glyph->advance_x;
       }
     }
   }
 
-  void MapPainterAgg::GetFontHeight(const Projection& projection,
+  double MapPainterAgg::GetFontHeight(const Projection& projection,
                                     const MapParameter& parameter,
-                                    double fontSize,
-                                    double& height)
+                                    double fontSize)
   {
     SetFont(projection,
             parameter,
             fontSize);
 
-    height=fontEngine->height();
+    return fontEngine->height();
   }
 
-  void MapPainterAgg::GetTextDimension(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       double /*objectWidth*/,
-                                       double fontSize,
-                                       const std::string& text,
-                                       double& xOff,
-                                       double& yOff,
-                                       double& width,
-                                       double& height)
+  MapPainter::TextDimension MapPainterAgg::GetTextDimension(const Projection& projection,
+                                                            const MapParameter& parameter,
+                                                            double /*objectWidth*/,
+                                                            double fontSize,
+                                                            const std::string& text)
   {
     std::wstring wideText(UTF8StringToWString(text));
+    double       width=0.0;
 
     SetFont(projection,
             parameter,
             fontSize);
 
-    xOff=0;
-    yOff=0;
-    width=0;
-    height=fontEngine->height();
+    for (wchar_t i : wideText) {
+      const agg::glyph_cache* glyph=fontCacheManager->glyph(i);
 
-    for (size_t i=0; i<wideText.length(); i++) {
-      const agg::glyph_cache* glyph=fontCacheManager->glyph(wideText[i]);
-
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         width+=glyph->advance_x;
       }
     }
+
+    return TextDimension(0.0,
+                         0.0,
+                         width,
+                         fontEngine->height());
   }
 
   void MapPainterAgg::DrawText(double x,
                                double y,
                                const std::wstring& text)
   {
-    for (size_t i=0; i<text.length(); i++) {
-      const agg::glyph_cache* glyph = fontCacheManager->glyph(text[i]);
+    for (wchar_t i : text) {
+      const agg::glyph_cache* glyph = fontCacheManager->glyph(i);
 
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         if (true) {
           fontCacheManager->add_kerning(&x, &y);
         }
@@ -205,10 +201,10 @@ namespace osmscout {
   {
     convTextContours->width(width);
 
-    for (size_t i=0; i<text.length(); i++) {
-      const agg::glyph_cache* glyph = fontCacheManager->glyph(text[i]);
+    for (wchar_t i : text) {
+      const agg::glyph_cache* glyph = fontCacheManager->glyph(i);
 
-      if (glyph!=NULL) {
+      if (glyph!=nullptr) {
         if (true) {
           fontCacheManager->add_kerning(&x, &y);
         }
@@ -321,7 +317,7 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const LabelData& label)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
       const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
       double           r=style->GetTextColor().GetR();
       double           g=style->GetTextColor().GetG();
@@ -372,7 +368,8 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const PathTextStyle& style,
                                        const std::string& text,
-                                       size_t transStart, size_t transEnd)
+                                       size_t transStart, size_t transEnd,
+                                       ContourLabelHelper& helper)
   {
     double       fontSize=style.GetSize();
     double       r=style.GetTextColor().GetR();
@@ -436,17 +433,10 @@ namespace osmscout {
 
     GetTextDimension(wideText,textWidth,textHeight);
 
-    double spaceLeft=pathLength-textWidth-2*contourLabelOffset;
-
-    // If space around labels left is < offset on both sides, do not render at all
-    if (spaceLeft<0.0) {
+    if (!helper.Init(pathLength,
+                     textWidth)) {
       return;
     }
-
-    spaceLeft=fmod(spaceLeft,textWidth+contourLabelSpace);
-
-    double       labelInstanceOffset=spaceLeft/2+contourLabelOffset;
-    double       offset=labelInstanceOffset;
 
     /*
     typedef agg::conv_bspline<agg::path_storage> conv_bspline_type;
@@ -468,13 +458,14 @@ namespace osmscout {
 
     double y=-textHeight/2+fontEngine->ascender();
 
-    while (offset<pathLength) {
-      for (size_t i=0; i<wideText.length(); i++) {
-        const agg::glyph_cache* glyph=fontCacheManager->glyph(wideText[i]);
+    while (helper.ContinueDrawing()) {
+      for (wchar_t i : wideText) {
+        const agg::glyph_cache* glyph=fontCacheManager->glyph(i);
+        double currentOffset=helper.GetCurrentOffset();
 
-        if (glyph!=NULL) {
-          fontCacheManager->add_kerning(&offset,&y);
-          fontCacheManager->init_embedded_adaptors(glyph,offset,y);
+        if (glyph!=nullptr) {
+          fontCacheManager->add_kerning(&currentOffset,&y);
+          fontCacheManager->init_embedded_adaptors(glyph,currentOffset,y);
 
           if (glyph->data_type==agg::glyph_data_outline) {
             rasterizer->reset();
@@ -486,12 +477,12 @@ namespace osmscout {
           }
 
           // increment pen position
-          offset+=glyph->advance_x;
+          helper.AdvancePartial(glyph->advance_x);
           y+=glyph->advance_y;
         }
       }
 
-      offset+=contourLabelSpace;
+      helper.AdvanceSpace();
     }
   }
 
@@ -527,13 +518,11 @@ namespace osmscout {
     centerX=maxX-minX;
     centerY=maxY-minY;
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-         p!=symbol.GetPrimitives().end();
-         ++p) {
-      DrawPrimitive* primitive=p->get();
+    for (const auto& primitive : symbol.GetPrimitives()) {
+      const DrawPrimitive *primitivePtr=primitive.get();
 
-      if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-        PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+      if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=nullptr) {
+        const auto        *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
         FillStyleRef      fillStyle=polygon->GetFillStyle();
         BorderStyleRef    borderStyle=polygon->GetBorderStyle();
         agg::path_storage path;
@@ -561,15 +550,15 @@ namespace osmscout {
                  borderStyle,
                  path);
       }
-      else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-        RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-        FillStyleRef        fillStyle=rectangle->GetFillStyle();
-        BorderStyleRef      borderStyle=rectangle->GetBorderStyle();
-        agg::path_storage   path;
-        double              xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX);
-        double              yPos=y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY);
-        double              width=projection.ConvertWidthToPixel(rectangle->GetWidth());
-        double              height=projection.ConvertWidthToPixel(rectangle->GetHeight());
+      else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=nullptr) {
+        const auto        *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+        FillStyleRef      fillStyle=rectangle->GetFillStyle();
+        BorderStyleRef    borderStyle=rectangle->GetBorderStyle();
+        agg::path_storage path;
+        double            xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX);
+        double            yPos=y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY);
+        double            width=projection.ConvertWidthToPixel(rectangle->GetWidth());
+        double            height=projection.ConvertWidthToPixel(rectangle->GetHeight());
 
         path.move_to(xPos,yPos);
         path.line_to(xPos+width,yPos);
@@ -586,8 +575,8 @@ namespace osmscout {
                  borderStyle,
                  path);
       }
-      else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-        CirclePrimitive*  circle=dynamic_cast<CirclePrimitive*>(primitive);
+      else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=nullptr) {
+        const auto        *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
         FillStyleRef      fillStyle=circle->GetFillStyle();
         BorderStyleRef    borderStyle=circle->GetBorderStyle();
         agg::path_storage path;
@@ -713,10 +702,7 @@ namespace osmscout {
     rasterizer->add_path(path);
 
     if (!area.clippings.empty()) {
-      for (std::list<PolyData>::const_iterator c=area.clippings.begin();
-          c!=area.clippings.end();
-          c++) {
-        const PolyData    &data=*c;
+      for (const auto& data : area.clippings) {
         agg::path_storage clipPath;
 
          clipPath.move_to(coordBuffer->buffer[data.transStart].GetX(),
@@ -766,6 +752,7 @@ namespace osmscout {
                               AggPixelFormat* pf)
   {
     std::lock_guard<std::mutex> guard(mutex);
+    bool                        result;
 
     this->pf=pf;
 
@@ -782,9 +769,9 @@ namespace osmscout {
 
     convTextContours= new AggTextContourConverter(*convTextCurves);
 
-    Draw(projection,
-         parameter,
-         data);
+    result=Draw(projection,
+                parameter,
+                data);
 
     delete convTextCurves;
     delete convTextContours;
@@ -796,6 +783,6 @@ namespace osmscout {
     delete rasterizer;
     delete renderer_base;
 
-    return true;
+    return result;
   }
 }

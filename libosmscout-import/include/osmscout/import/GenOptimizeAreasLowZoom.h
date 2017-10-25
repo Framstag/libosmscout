@@ -111,7 +111,8 @@ namespace osmscout {
                      const TypeInfoSet& types,
                      std::list<TypeData>& typesData);
 
-    void OptimizeAreas(const std::list<AreaRef>& areas,
+    void OptimizeAreas(Progress& progress,
+                       const std::list<AreaRef>& areas,
                        std::list<AreaRef>& optimizedAreas,
                        size_t width,
                        size_t height,
