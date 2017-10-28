@@ -112,6 +112,7 @@ int main(int argc, char* argv[])
       double                        dpi=application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
 
       drawParameter.SetFontSize(3.0);
+      drawParameter.SetRenderSeaLand(true);
 
       projection.Set(osmscout::GeoCoord(lat,lon),
                      osmscout::Magnification(zoom),
@@ -124,6 +125,7 @@ int main(int argc, char* argv[])
       mapService->LookupTiles(projection,tiles);
       mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
       mapService->AddTileDataToMapData(tiles,data);
+      mapService->GetGroundTiles(projection,data.groundTiles);
 
       if (mapPainter.DrawMap(projection,
                              drawParameter,
