@@ -36,7 +36,8 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
   offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
   tileDownloader(NULL), // it will be created in different thread
-  loadJob(NULL)
+  loadJob(NULL),
+  unknownColor(QColor::fromRgbF(1.0,1.0,1.0)) // white
 {
   QScreen *srn=QGuiApplication::primaryScreen();
   screenWidth=srn->availableSize().width();
@@ -71,7 +72,6 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   connect(&offlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
           this,SLOT(offlineTileRequest(uint32_t, uint32_t, uint32_t)),
           Qt::QueuedConnection);
-
 }
 
 TiledMapRenderer::~TiledMapRenderer()
@@ -102,9 +102,42 @@ void TiledMapRenderer::Initialize()
             Qt::QueuedConnection);
   }
 
+  // it is possible that databases are loaded already,
+  // call style change callback as part of our initialisation
+  onStylesheetFilenameChanged();
 
   // invalidate tile cache and Redraw()
   InvalidateVisualCache();
+}
+
+void TiledMapRenderer::onStylesheetFilenameChanged()
+{
+  {
+    QMutexLocker locker(&tileCacheMutex);
+
+    osmscout::FillStyleRef        unknownFillStyle;
+    osmscout::MercatorProjection  projection;
+
+    dbThread->RunSynchronousJob(
+      [this,&unknownFillStyle,&projection](const std::list<DBInstanceRef>& databases) {
+        for (auto &db:databases){
+          if (db->styleConfig) {
+            db->styleConfig->GetUnknownFillStyle(projection, unknownFillStyle);
+            if (unknownFillStyle) {
+              osmscout::Color fillColor = unknownFillStyle->GetFillColor();
+              unknownColor.setRgbF(fillColor.GetR(),
+                                   fillColor.GetG(),
+                                   fillColor.GetB(),
+                                   fillColor.GetA());
+              break;
+            }
+          }
+        }
+      }
+    );
+  }
+
+  MapRenderer::onStylesheetFilenameChanged();
 }
 
 void TiledMapRenderer::InvalidateVisualCache()
@@ -140,14 +173,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
 
   projection.GetDimensions(boundingBox);
 
-
-  QColor white = QColor::fromRgbF(1.0,1.0,1.0);
-  //QColor grey = QColor::fromRgbF(0.5,0.5,0.5);
   QColor grey2 = QColor::fromRgbF(0.8,0.8,0.8);
-
-  painter.fillRect( 0,0,
-                    projection.GetWidth(),projection.GetHeight(),
-                    white);
 
   // OpenStreetMap render its tiles up to latitude +-85.0511
   double osmMinLat = OSMTile::minLat();
@@ -207,6 +233,10 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   if (elapsed > 1){
       osmscout::log.Warn() << "Mutex acquiere took " << elapsed << " ms";
   }
+
+  painter.fillRect(0,0,
+                   projection.GetWidth(),projection.GetHeight(),
+                   unknownColor);
 
   onlineTileCache.clearPendingRequests();
   offlineTileCache.clearPendingRequests();
@@ -414,9 +444,9 @@ void TiledMapRenderer::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uin
             return;
     }
 
-    // TODO: mutex?
     bool requestedFromWeb = onlineTilesEnabled && (!(offlineTilesEnabled &&
-          databaseCoverageOfTile(zoomLevel, xtile, ytile) == DatabaseCoverage::Covered));
+                                                  databaseCoverageOfTile(zoomLevel, xtile, ytile) ==
+                                                  DatabaseCoverage::Covered));
 
     if (requestedFromWeb){
         QMutexLocker locker(&lock);
@@ -450,7 +480,8 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
     }
 
     DatabaseCoverage state = databaseCoverageOfTile(zoomLevel, xtile, ytile);
-    bool render = (state != DatabaseCoverage::Outside);
+    // render offline map when area is fully covered by database or online tiles are disabled -> render basemap
+    bool render = (state != DatabaseCoverage::Outside) || (!onlineTilesEnabled);
     if (render) {
         // tile rendering have sub-linear complexity with area size
         // it means that it is advatage to merge more tile requests with same zoom
@@ -553,7 +584,6 @@ void TiledMapRenderer::onlineTileProviderChanged()
 void TiledMapRenderer::onlineTilesEnabledChanged(bool b)
 {
     {
-        QMutexLocker locker(&lock);
         onlineTilesEnabled = b;
 
         QMutexLocker cacheLocker(&tileCacheMutex);
@@ -675,6 +705,11 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
       dbThread->RunJob(&job);
       success=job.IsSuccess();
     }
+
+    // this slot is called from DBLoadJob, we can't delete it now
+    loadJob->deleteLater();
+    loadJob=NULL;
+
     if (!success)  {
       osmscout::log.Error() << "*** Rendering of data has error or was interrupted";
       return;
@@ -706,9 +741,6 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
         offlineTileCache.reemitRequests();
     }
 
-    // this slot is called from DBLoadJob, we can't delete it now
-    loadJob->deleteLater();
-    loadJob=NULL;
     emit Redraw();
     //std::cout << "  put offline: " << loadZ << " xtile: " << xtile << " ytile: " << ytile << std::endl;
 }
