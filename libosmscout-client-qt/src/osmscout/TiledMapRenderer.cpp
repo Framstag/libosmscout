@@ -705,6 +705,11 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
       dbThread->RunJob(&job);
       success=job.IsSuccess();
     }
+
+    // this slot is called from DBLoadJob, we can't delete it now
+    loadJob->deleteLater();
+    loadJob=NULL;
+
     if (!success)  {
       osmscout::log.Error() << "*** Rendering of data has error or was interrupted";
       return;
@@ -736,9 +741,6 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
         offlineTileCache.reemitRequests();
     }
 
-    // this slot is called from DBLoadJob, we can't delete it now
-    loadJob->deleteLater();
-    loadJob=NULL;
     emit Redraw();
     //std::cout << "  put offline: " << loadZ << " xtile: " << xtile << " ytile: " << ytile << std::endl;
 }

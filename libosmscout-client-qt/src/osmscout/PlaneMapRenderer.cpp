@@ -347,6 +347,12 @@ void PlaneMapRenderer::DrawMap()
 
     p.end();
 
+    if (loadJob->IsFinished()){
+      // this slot is may be called from DBLoadJob, we can't delete it now
+      loadJob->deleteLater();
+      loadJob=NULL;
+    }
+
     if (!success)  {
       osmscout::log.Error() << "*** Rendering of data has error or was interrupted";
       return;
@@ -360,11 +366,6 @@ void PlaneMapRenderer::DrawMap()
       finishedMagnification=currentMagnification;
 
       lastRendering=QTime::currentTime();
-    }
-
-    if (loadJob->IsFinished()){
-      loadJob->deleteLater();
-      loadJob=NULL;
     }
   }
   emit Redraw();
