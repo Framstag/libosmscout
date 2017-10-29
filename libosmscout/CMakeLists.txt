@@ -181,9 +181,9 @@ if(MARISA_FOUND)
 endif()
 
 if(APPLE)
-  set(THE_TARGET_NAME "OSMScout") 
+  set(THE_TARGET_NAME "OSMScout")
 else()
-  set(THE_TARGET_NAME "osmscout") 
+  set(THE_TARGET_NAME "osmscout")
 endif()
 
 if(IOS)
@@ -196,13 +196,17 @@ set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout")
 target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
 if(MARISA_FOUND)
     target_include_directories(${THE_TARGET_NAME} PRIVATE ${MARISA_INCLUDE_DIRS})
     target_link_libraries(${THE_TARGET_NAME} ${MARISA_LIBRARIES})
 endif()
+
 if (ICONV_FOUND)
-  target_link_libraries(${THE_TARGET_NAME} ${ICONV_LIBRARIES})
+    target_include_directories(${THE_TARGET_NAME} PRIVATE ${ICONV_INCLUDE_DIRS})
+    target_link_libraries(${THE_TARGET_NAME} ${ICONV_LIBRARIES})
 endif()
+
 if(CMAKE_THREAD_LIBS_INIT)
   target_link_libraries(${THE_TARGET_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
@@ -228,9 +232,11 @@ install(TARGETS ${THE_TARGET_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         FRAMEWORK DESTINATION lib)
+
 if(MARISA_FOUND)
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
 else()
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE PATTERN TextSearchIndex.h EXCLUDE)
 endif()
+
 install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h DESTINATION include/osmscout)
