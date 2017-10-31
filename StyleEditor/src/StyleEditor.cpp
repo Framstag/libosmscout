@@ -108,6 +108,7 @@ int main(int argc, char* argv[])
       QFile::remove(tmpStylesheet);
   }
 
+  dbThread.reset(); // release dbThread before cleanup library resources
   OSMScoutQt::FreeInstance();
 
   return result;
