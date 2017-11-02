@@ -167,7 +167,7 @@ Map{
   property var overlayWay: map.createOverlayWay("_route");
   onTap: {
     overlayWay.addPoint(lat, lon);
-    map.addOverlayWay(0, overlayWay);
+    map.addOverlayObject(0, overlayWay);
   }
 }
 ```
@@ -248,7 +248,7 @@ RoutingListModel{
     if (route.count>0){
         console.log("route length: " + route.length + " m");
         console.log("route commands: " + route.count);
-        map.addOverlayWay(0,route.routeWay);
+        map.addOverlayObject(0,route.routeWay);
     }
   }
 }

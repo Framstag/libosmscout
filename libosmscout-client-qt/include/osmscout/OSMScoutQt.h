@@ -49,6 +49,7 @@ private:
   QString basemapLookupDirectory;
   QString cacheLocation;
   QString iconDirectory;
+  QStringList customPoiTypes;
 
   size_t onlineTileCacheSize;
   size_t offlineTileCacheSize;
@@ -100,6 +101,18 @@ public:
   inline OSMScoutQtBuilder& AddMapLookupDirectories(QString mapLookupDirectory)
   {
     this->mapLookupDirectories << mapLookupDirectory;
+    return *this;
+  }
+
+  inline OSMScoutQtBuilder& WithCustomPoiTypes(QStringList customPoiTypes)
+  {
+    this->customPoiTypes=customPoiTypes;
+    return *this;
+  }
+
+  inline OSMScoutQtBuilder& AddCustomPoiType(QString typeName)
+  {
+    this->customPoiTypes << typeName;
     return *this;
   }
 

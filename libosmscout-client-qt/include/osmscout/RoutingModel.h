@@ -34,7 +34,7 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/Router.h>
-#include <osmscout/OverlayWay.h>
+#include <osmscout/OverlayObject.h>
 
 /**
  * \ingroup QtAPI

@@ -70,7 +70,7 @@ FocusScope {
         routingPopup.parent = desktop
         routingPopup.visible = true
 
-        map.addOverlayWay(0,routingModel.routeWay);
+        map.addOverlayObject(0,routingModel.routeWay);
         console.log("Show routing result; dialog height: "+routingBox.height);
     }
 

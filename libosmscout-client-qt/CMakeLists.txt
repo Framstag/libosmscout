@@ -49,7 +49,7 @@ set(HEADER_FILES
     include/osmscout/MapRenderer.h
     include/osmscout/PlaneMapRenderer.h
     include/osmscout/TiledMapRenderer.h
-    include/osmscout/OverlayWay.h
+    include/osmscout/OverlayObject.h
 )
 
 set(SOURCE_FILES
@@ -84,7 +84,7 @@ set(SOURCE_FILES
     src/osmscout/MapRenderer.cpp
     src/osmscout/PlaneMapRenderer.cpp
     src/osmscout/TiledMapRenderer.cpp
-    src/osmscout/OverlayWay.cpp
+    src/osmscout/OverlayObject.cpp
 )
 
 if(APPLE)
