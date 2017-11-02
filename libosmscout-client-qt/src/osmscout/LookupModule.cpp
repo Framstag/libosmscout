@@ -71,6 +71,50 @@ void LookupModule::requestObjectsOnView(const MapViewStruct &view)
   dbThread->RunJob(loadJob);
 }
 
+void LookupModule::requestObjects(const LocationEntry &entry)
+{
+  osmscout::MapData mapData;
+
+  dbThread->RunSynchronousJob(
+    [&](const std::list<DBInstanceRef> &databases){
+      for (const auto &db:databases) {
+        if (db->path==entry.getDatabase()){
+
+          std::set<osmscout::FileOffset>         areaOffsets;
+          std::set<osmscout::FileOffset>         wayOffsets;
+          std::set<osmscout::FileOffset>         nodeOffsets;
+
+          for (const osmscout::ObjectFileRef &ref: entry.getReferences()){
+            switch (ref.type){
+              case osmscout::RefType::refArea:
+                areaOffsets.insert(ref.offset);
+                break;
+              case osmscout::RefType::refWay:
+                wayOffsets.insert(ref.offset);
+                break;
+              case osmscout::RefType::refNode:
+                nodeOffsets.insert(ref.offset);
+                break;
+              default:
+                break;
+            }
+          }
+
+          qDebug() << "Lookup objects for location entry" << entry.getLabel() << ":"
+                   << areaOffsets.size() << wayOffsets.size() << nodeOffsets.size()
+                   << "(areas, ways, nodes) in database" << entry.getDatabase();
+
+          db->database->GetAreasByOffset(areaOffsets, mapData.areas);
+          db->database->GetWaysByOffset(wayOffsets, mapData.ways);
+          db->database->GetNodesByOffset(nodeOffsets, mapData.nodes);
+        }
+      }
+    }
+  );
+
+  emit objectsLoaded(entry, mapData);
+}
+
 void LookupModule::onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles)
 {
   osmscout::MapData data;
