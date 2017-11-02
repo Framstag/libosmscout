@@ -131,6 +131,20 @@ void MapRenderer::removeOverlayObject(int id)
   emit Redraw();
 }
 
+void MapRenderer::removeAllOverlayObjects()
+{
+  bool change;
+  {
+    QMutexLocker locker(&overlayLock);
+    change=!overlayObjectMap.empty();
+    overlayObjectMap.clear();
+  }
+  if (change) {
+    InvalidateVisualCache();
+    emit Redraw();
+  }
+}
+
 std::map<int,OverlayObjectRef> MapRenderer::getOverlayObjects() const
 {
   {

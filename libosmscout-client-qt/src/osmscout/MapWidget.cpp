@@ -586,6 +586,11 @@ void MapWidget::removeOverlayObject(int id)
   renderer->removeOverlayObject(id);
 }
 
+void MapWidget::removeAllOverlayObjects()
+{
+  renderer->removeAllOverlayObjects();
+}
+
 OverlayWay *MapWidget::createOverlayWay(QString type)
 {
   OverlayWay *result=new OverlayWay();

@@ -127,6 +127,7 @@ public:
   void addOverlayObject(int id, OverlayObjectRef obj);
 
   void removeOverlayObject(int id);
+  void removeAllOverlayObjects();
 
   std::map<int,OverlayObjectRef> getOverlayObjects() const;
 };

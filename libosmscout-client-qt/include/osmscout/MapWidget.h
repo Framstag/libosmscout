@@ -162,6 +162,7 @@ public slots:
    */
   void addOverlayObject(int id, QObject *o);
   void removeOverlayObject(int id);
+  void removeAllOverlayObjects();
 
   OverlayWay *createOverlayWay(QString type="_route");
   OverlayArea *createOverlayArea(QString type="_highlighted");
