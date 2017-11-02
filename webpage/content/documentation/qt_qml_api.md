@@ -157,10 +157,10 @@ Map{
   
   <a href="/images/qt-place-mark.png"><img src="/images/qt-place-mark.png" width="460" alt="Place mark"/></a>
   
-#### Custom way
+#### Custom way, area or node
 
-This overlay type is used for displaying routing result, but it may be used 
-for displaying custom way with any style defined in [stylesheet](/documentation/stylesheet/).
+This overlay type is used for displaying routing result for example, but it may be used 
+for displaying any custom object with any style defined in [stylesheet](/documentation/stylesheet/).
 
 ```qml
 Map{
@@ -173,7 +173,10 @@ Map{
 ```
 
   <a href="/images/qt-custom-way.png"><img src="/images/qt-custom-way.png" width="460" alt="Place mark"/></a>
-  
+
+Overlay types that don't exists in database, should be defined on library startup 
+by `OSMScoutQtBuilder::AddCustomPoiType` method.
+
 ## Location info
 
 `LocationInfoModel` provides description for place on map based on nearest POI object 
