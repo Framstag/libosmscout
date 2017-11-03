@@ -22,6 +22,7 @@
 
 #include <osmscout/MapObjectInfoModel.h>
 #include <osmscout/OSMScoutQt.h>
+#include <iostream>
 
 MapObjectInfoModel::MapObjectInfoModel():
 ready(false), setup(false), view(), lookupModule(NULL)
@@ -30,16 +31,24 @@ ready(false), setup(false), view(), lookupModule(NULL)
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
   this->mapDpi=OSMScoutQt::GetInstance().GetSettings()->GetMapDPI();
 
-  connect(lookupModule, SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
-          this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
+  connect(lookupModule, SIGNAL(initialisationFinished(const DatabaseLoadedResponse)),
+          this, SLOT(dbInitialized(const DatabaseLoadedResponse)),
           Qt::QueuedConnection);
 
-  connect(this, SIGNAL(objectsRequested(const MapViewStruct &)),
+  connect(this, SIGNAL(objectsRequested(const MapViewStruct&)),
           lookupModule, SLOT(requestObjectsOnView(const MapViewStruct&)),
           Qt::QueuedConnection);
 
   connect(lookupModule, SIGNAL(viewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&)),
           this, SLOT(onViewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&)),
+          Qt::QueuedConnection);
+
+  connect(this, SIGNAL(objectsRequested(const LocationEntry &)),
+          lookupModule, SLOT(requestObjects(const LocationEntry&)),
+          Qt::QueuedConnection);
+
+  connect(lookupModule, SIGNAL(objectsLoaded(const LocationEntry&, const osmscout::MapData&)),
+          this, SLOT(onObjectsLoaded(const LocationEntry&, const osmscout::MapData&)),
           Qt::QueuedConnection);
 }
 
@@ -71,12 +80,39 @@ QHash<int, QByteArray> MapObjectInfoModel::roleNames() const
 {
   QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
 
-  roles[LabelRole]="label";
-  roles[TypeRole] ="type";
-  roles[IdRole]   ="id";
-  roles[NameRole] ="name";
+  roles[LabelRole] ="label";
+  roles[TypeRole]  ="type";
+  roles[IdRole]    ="id";
+  roles[NameRole]  ="name";
+  roles[ObjectRole]="object";
   
   return roles;
+}
+
+QObject* MapObjectInfoModel::createOverlayObject(int row) const
+{
+  OverlayObject *o=NULL;
+  if(row < 0 || row >= model.size()) {
+    qDebug() << "Undefined row" << row;
+    return o;
+  }
+  const ObjectInfo &obj = model.at(row);
+  if (!obj.points.empty()){
+    if (obj.type=="node"){
+      o=new OverlayNode();
+    } else if (obj.type=="way"){
+      o=new OverlayWay();
+    } else if (obj.type=="area"){
+      o=new OverlayArea();
+    }
+    if (o!=NULL) {
+      for (auto const p:obj.points) {
+        o->addPoint(p.GetLat(), p.GetLon());
+      }
+    }
+  }
+
+  return o;
 }
 
 QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
@@ -87,12 +123,29 @@ QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
     qDebug() << "Undefined row" << index.row();
     return QVariant();
   }
-  QMap<int, QVariant> obj = model.at(index.row());
-  if (!obj.contains(role)){
-    //qDebug() << "Undefined role" << role << "("<<LabelRole<<"..."<<NameRole<<")";
-    return QVariant();
+  const ObjectInfo &obj = model.at(index.row());
+
+  if (role==LabelRole){
+    return QVariant::fromValue(obj.type);
   }
-  return obj[role];
+  if (role==TypeRole){
+    return QVariant::fromValue(obj.objectType);
+  }
+  if (role==IdRole){
+    return QVariant::fromValue(obj.id);
+  }
+  if (role==NameRole){
+    if (obj.name.isEmpty())
+      return QVariant();
+    return QVariant::fromValue(obj.name);
+  }
+
+  if (role==ObjectRole){
+    return QVariant::fromValue(createOverlayObject(index.row()));
+  }
+
+  //qDebug() << "Undefined role" << role << "("<<LabelRole<<"..."<<NameRole<<")";
+  return QVariant();
 }
 
 void MapObjectInfoModel::setPosition(QObject *o,
@@ -129,8 +182,37 @@ void MapObjectInfoModel::setPosition(QObject *o,
   setup=true;
 }
 
-void MapObjectInfoModel::onViewObjectsLoaded(const MapViewStruct &view,
-                                             const osmscout::MapData &data)
+void MapObjectInfoModel::setLocationEntry(QObject *o)
+{
+  LocationEntry *location = dynamic_cast<LocationEntry*>(o);
+  if (location == NULL){
+    qWarning() << "Failed to cast " << o << " to LocationEntry*.";
+    return;
+  }
+  locationEntry=*location;
+
+  beginResetModel();
+  model.clear();
+  mapData.clear();
+  endResetModel();
+
+  this->ready=false;
+  emit readyChange(ready);
+  emit objectsRequested(*location);
+}
+
+void MapObjectInfoModel::onObjectsLoaded(const LocationEntry &entry, const osmscout::MapData& data)
+{
+  if (locationEntry.getDatabase()!=entry.getDatabase() ||
+      locationEntry.getReferences()!=entry.getReferences()){
+    return; // ignore
+  }
+
+  mapData << data;
+  update();
+}
+
+void MapObjectInfoModel::onViewObjectsLoaded(const MapViewStruct &view, const osmscout::MapData &data)
 {
   if (this->view!=view){
     return;
@@ -161,7 +243,13 @@ void MapObjectInfoModel::update()
     for (auto const &n:d.nodes){
       projection.GeoToPixel(n->GetCoords(),x,y);
       if (rectangle.contains(x,y)){
-        fillObjectInfo("node",n);
+        std::vector<osmscout::Point> nodes;
+        nodes.push_back(osmscout::Point(0, n->GetCoords()));
+
+        addObjectInfo("node",
+                      n->GetObjectFileRef().GetFileOffset(),
+                      nodes,
+                      n);
       }
     }
 
@@ -173,7 +261,10 @@ void MapObjectInfoModel::update()
       projection.GeoToPixel(bbox.GetMinCoord(),x,y);
       projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
       if (rectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
-        fillObjectInfo("way",w);
+        addObjectInfo("way",
+                      w->GetObjectFileRef().GetFileOffset(),
+                      w->nodes,
+                      w);
       }
     }
 
@@ -185,7 +276,14 @@ void MapObjectInfoModel::update()
       projection.GeoToPixel(bbox.GetMinCoord(),x,y);
       projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
       if (rectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
-        fillObjectInfo("area",a);
+        for (const auto &ring:a->rings) {
+          if (!ring.GetType()->GetIgnore()) {
+            addObjectInfo("area",
+                          a->GetObjectFileRef().GetFileOffset(),
+                          ring.nodes,
+                          &ring);
+          }
+        }
       }
     }
   }

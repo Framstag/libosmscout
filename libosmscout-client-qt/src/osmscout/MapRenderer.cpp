@@ -111,31 +111,45 @@ void MapRenderer::onFontSizeChanged(double fontSize)
   emit Redraw();
 }
 
-void MapRenderer::addOverlayWay(int id,OverlayWayRef way)
+void MapRenderer::addOverlayObject(int id, OverlayObjectRef obj)
 {
   {
     QMutexLocker locker(&overlayLock);
-    overlayWayMap[id]=way;
+    overlayObjectMap[id]=obj;
   }
   InvalidateVisualCache();
   emit Redraw();
 }
 
-void MapRenderer::removeOverlayWay(int id)
+void MapRenderer::removeOverlayObject(int id)
 {
   {
     QMutexLocker locker(&overlayLock);
-    overlayWayMap.erase(id);
+    overlayObjectMap.erase(id);
   }
   InvalidateVisualCache();
   emit Redraw();
 }
 
-std::map<int,OverlayWayRef> MapRenderer::getOverlayWays() const
+void MapRenderer::removeAllOverlayObjects()
+{
+  bool change;
+  {
+    QMutexLocker locker(&overlayLock);
+    change=!overlayObjectMap.empty();
+    overlayObjectMap.clear();
+  }
+  if (change) {
+    InvalidateVisualCache();
+    emit Redraw();
+  }
+}
+
+std::map<int,OverlayObjectRef> MapRenderer::getOverlayObjects() const
 {
   {
     QMutexLocker locker(&overlayLock);
-    return overlayWayMap;
+    return overlayObjectMap;
   }
 }
 
@@ -144,7 +158,7 @@ osmscout::GeoBox MapRenderer::overlayObjectsBox() const
   {
     QMutexLocker locker(&overlayLock);
     osmscout::GeoBox box;
-    for (auto &p:overlayWayMap){
+    for (auto &p:overlayObjectMap){
       osmscout::GeoBox wayBox=p.second->boundingBox();
       if (wayBox.IsValid()){
         if (box.IsValid()){
@@ -158,15 +172,15 @@ osmscout::GeoBox MapRenderer::overlayObjectsBox() const
   }
 }
 
-void MapRenderer::getOverlayWays(std::vector<OverlayWayRef> &ways,
-                                 osmscout::GeoBox requestBox) const
+void MapRenderer::getOverlayObjects(std::vector<OverlayObjectRef> &objs,
+                                    osmscout::GeoBox requestBox) const
 {
   QMutexLocker locker(&overlayLock);
-  ways.clear();
-  ways.reserve(overlayWayMap.size());
-  for (auto &p:overlayWayMap){
+  objs.clear();
+  objs.reserve(overlayObjectMap.size());
+  for (auto &p:overlayObjectMap){
     if (requestBox.Intersects(p.second->boundingBox())){
-      ways.push_back(p.second);
+      objs.push_back(p.second);
     }
   }
 }
@@ -175,7 +189,7 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
                          QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
                          osmscout::MapParameter *drawParameter,
                          QPainter *p,
-                         std::vector<OverlayWayRef> overlayWays,
+                         std::vector<OverlayObjectRef> overlayObjects,
                          bool drawCanvasBackground,
                          bool renderBasemap):
   renderProjection(renderProjection),
@@ -185,7 +199,7 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
   success(false),
   drawCanvasBackground(drawCanvasBackground),
   renderBasemap(renderBasemap),
-  overlayWays(overlayWays)
+  overlayObjects(overlayObjects)
 {
 }
 
@@ -281,10 +295,32 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     db->mapService->AddTileDataToMapData(tileList,data);
     if (last){
       osmscout::TypeConfigRef typeConfig=db->database->GetTypeConfig();
-      for (auto const &ow:overlayWays){
-        osmscout::WayRef w=std::make_shared<osmscout::Way>();
-        if (ow->toWay(w,*typeConfig)){
-          data.poiWays.push_back(w);
+      for (auto const &o:overlayObjects){
+
+        if (o->getObjectType()==osmscout::RefType::refWay){
+          OverlayWay *ow=dynamic_cast<OverlayWay*>(o.get());
+          if (ow != NULL) {
+            osmscout::WayRef w = std::make_shared<osmscout::Way>();
+            if (ow->toWay(w, *typeConfig)) {
+              data.poiWays.push_back(w);
+            }
+          }
+        } else if (o->getObjectType()==osmscout::RefType::refArea){
+          OverlayArea *oa=dynamic_cast<OverlayArea*>(o.get());
+          if (oa != NULL) {
+            osmscout::AreaRef a = std::make_shared<osmscout::Area>();
+            if (oa->toArea(a, *typeConfig)) {
+              data.poiAreas.push_back(a);
+            }
+          }
+        } else if (o->getObjectType()==osmscout::RefType::refNode){
+          OverlayNode *oo=dynamic_cast<OverlayNode*>(o.get());
+          if (oo != NULL) {
+            osmscout::NodeRef n = std::make_shared<osmscout::Node>();
+            if (oo->toNode(n, *typeConfig)) {
+              data.poiNodes.push_back(n);
+            }
+          }
         }
       }
     }

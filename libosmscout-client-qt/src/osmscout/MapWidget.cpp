@@ -559,23 +559,36 @@ void MapWidget::removePositionMark(int id)
     update();
 }
 
-void MapWidget::addOverlayWay(int id,QObject *o)
+void MapWidget::addOverlayObject(int id, QObject *o)
 {
-    const OverlayWay *way = dynamic_cast<const OverlayWay*>(o);
-    if (way == NULL){
-        qWarning() << "Failed to cast " << o << " to OverlayWay*.";
-        return;
-    }
+  OverlayObjectRef copy;
+  const OverlayObject *obj = dynamic_cast<const OverlayObject*>(o);
+  if (obj == NULL){
+      qWarning() << "Failed to cast " << o << " to OverlayObject.";
+      return;
+  }
+  // create shared pointer copy
+  if (obj->getObjectType()==osmscout::refWay){
+    copy=std::make_shared<OverlayWay>();
+  }else if (obj->getObjectType()==osmscout::refArea){
+    copy=std::make_shared<OverlayArea>();
+  }else if (obj->getObjectType()==osmscout::refNode){
+    copy=std::make_shared<OverlayNode>();
+  }
 
-    // create shared pointer copy
-    OverlayWayRef wo=std::make_shared<OverlayWay>();
-    wo->set(*way);
-    renderer->addOverlayWay(id,wo);
+  if (copy && copy->set(*obj)) {
+    renderer->addOverlayObject(id, copy);
+  }
 }
 
-void MapWidget::removeOverlayWay(int id)
+void MapWidget::removeOverlayObject(int id)
 {
-    renderer->removeOverlayWay(id);
+  renderer->removeOverlayObject(id);
+}
+
+void MapWidget::removeAllOverlayObjects()
+{
+  renderer->removeAllOverlayObjects();
 }
 
 OverlayWay *MapWidget::createOverlayWay(QString type)
@@ -584,6 +597,21 @@ OverlayWay *MapWidget::createOverlayWay(QString type)
   result->setTypeName(type);
   return result;
 }
+
+OverlayArea *MapWidget::createOverlayArea(QString type)
+{
+  OverlayArea *result=new OverlayArea();
+  result->setTypeName(type);
+  return result;
+}
+
+OverlayNode *MapWidget::createOverlayNode(QString type)
+{
+  OverlayNode *result=new OverlayNode();
+  result->setTypeName(type);
+  return result;
+}
+
 
 void MapWidget::onTap(const QPoint p)
 {
@@ -738,12 +766,12 @@ void MapWidget::SetRenderingType(QString strType)
   if (type!=renderingType){
     renderingType=type;
 
-    std::map<int,OverlayWayRef> overlayWays=renderer->getOverlayWays();
+    std::map<int,OverlayObjectRef> overlayWays = renderer->getOverlayObjects();
     renderer->deleteLater();
 
     renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
     for (auto &p:overlayWays){
-      renderer->addOverlayWay(p.first,p.second);
+      renderer->addOverlayObject(p.first, p.second);
     }
     connect(renderer,SIGNAL(Redraw()),
             this,SLOT(redraw()));

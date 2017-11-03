@@ -687,10 +687,10 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
     projection.SetLinearInterpolationUsage(loadZ >= 10);
     
     // overlay ways
-    std::vector<OverlayWayRef> overlayWays;
+    std::vector<OverlayObjectRef> overlayObjects;
     osmscout::GeoBox renderBox;
     projection.GetDimensions(renderBox);
-    getOverlayWays(overlayWays,renderBox);
+  getOverlayObjects(overlayObjects, renderBox);
 
     //DrawMap(p, tileVisualCenter, loadZ, canvas.width(), canvas.height());
     bool success;
@@ -699,7 +699,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
                       tiles,
                       &drawParameter,
                       &p,
-                      overlayWays,
+                      overlayObjects,
                       /*drawCanvasBackground*/ false,
                       /*renderBasemap*/ !onlineTilesEnabled);
       dbThread->RunJob(&job);

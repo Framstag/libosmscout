@@ -33,7 +33,7 @@
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMScoutQt.h>
-#include <osmscout/OverlayWay.h>
+#include <osmscout/OverlayObject.h>
 
 /**
  * \defgroup QtAPI Qt API
@@ -149,20 +149,24 @@ public slots:
   void removePositionMark(int id);
 
   /**
-   * Method for registering map overlay way.
+   * Method for registering map overlay objects.
    * Usage from QML:
    *
    *    var way=map.createOverlayWay();
    *    way.addPoint(50.09180646851823, 14.498789861494872);
    *    way.addPoint(50.09180646851823, 14.60);
-   *    map.addOverlayWay(0,way);
+   *    map.addOverlayObject(0,way);
    *
    * @param id
    * @param o
    */
-  void addOverlayWay(int id,QObject *o);
-  void removeOverlayWay(int id);
+  void addOverlayObject(int id, QObject *o);
+  void removeOverlayObject(int id);
+  void removeAllOverlayObjects();
+
   OverlayWay *createOverlayWay(QString type="_route");
+  OverlayArea *createOverlayArea(QString type="_highlighted");
+  OverlayNode *createOverlayNode(QString type="_highlighted");
 
   bool toggleDebug();
   bool toggleInfo();

@@ -285,7 +285,7 @@ namespace osmscout {
     std::string                                 name;                    //!< Name of the type
     size_t                                      index;                   //!< Internal unique index of the type
 
-    bool                                        internal;                //!< This typ eis only internally used, there is no OSM date for this type
+    bool                                        internal;                //!< This type is only internally used, there is no OSM date for this type
 
     std::list<TypeCondition>                    conditions;              //!< One of this conditions must be fulfilled for a object to match this type
     std::unordered_map<std::string,size_t>      nameToFeatureMap;

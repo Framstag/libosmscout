@@ -34,7 +34,8 @@ DBThread::DBThread(QThread *backgroundThread,
                    QString basemapLookupDirectory,
                    QString iconDirectory,
                    SettingsRef settings,
-                   MapManagerRef mapManager)
+                   MapManagerRef mapManager,
+                   const std::vector<std::string> &customPoiTypes)
   : backgroundThread(backgroundThread),
     mapManager(mapManager),
     basemapLookupDirectory(basemapLookupDirectory),
@@ -43,7 +44,8 @@ DBThread::DBThread(QThread *backgroundThread,
     physicalDpi(-1),
     lock(QReadWriteLock::Recursive),
     iconDirectory(iconDirectory),
-    daylight(true)
+    daylight(true),
+    customPoiTypes(customPoiTypes)
 {
   QScreen *srn=QGuiApplication::screens().at(0);
 
@@ -288,6 +290,16 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
       if (typeConfig) {
+
+        for (const std::string &typeName:customPoiTypes){
+          osmscout::TypeInfoRef highlighted=std::make_shared<osmscout::TypeInfo>(typeName);
+          highlighted->SetInternal()
+            .CanBeWay(true)
+            .CanBeArea(true)
+            .CanBeNode(true);
+          typeConfig->RegisterType(highlighted);
+        }
+
         styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
         // setup flag overrides before load

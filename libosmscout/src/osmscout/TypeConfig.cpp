@@ -1714,7 +1714,7 @@ namespace osmscout {
    * Loads the type configuration from the given binary data file.
    *
    * Note:
-   * Make sure that you load from afile only onto a freshly initialized
+   * Make sure that you load from file only onto a freshly initialized
    * TypeConfig instance.
    *
    * @param directory

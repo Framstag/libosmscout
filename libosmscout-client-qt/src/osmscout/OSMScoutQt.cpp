@@ -28,7 +28,7 @@
 #include <osmscout/MapWidget.h>
 #include <osmscout/PlaneMapRenderer.h>
 #include <osmscout/TiledMapRenderer.h>
-#include <osmscout/OverlayWay.h>
+#include <osmscout/OverlayObject.h>
 
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/LocationInfoModel.h>
@@ -87,6 +87,11 @@ bool OSMScoutQtBuilder::Init()
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
 
+  std::vector<std::string> customPoiTypeVector;
+  for (const auto &typeName:customPoiTypes){
+    customPoiTypeVector.push_back(typeName.toStdString());
+  }
+
   MapManagerRef mapManager=std::make_shared<MapManager>(mapLookupDirectories, settings);
 
   QThread *thread=new QThread();
@@ -94,7 +99,8 @@ bool OSMScoutQtBuilder::Init()
                                                   basemapLookupDirectory,
                                                   iconDirectory,
                                                   settings,
-                                                  mapManager);
+                                                  mapManager,
+                                                  customPoiTypeVector);
 
   thread->setObjectName("DBThread");
 
@@ -146,6 +152,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QList<AdminRegionInfoRef>>("QList<AdminRegionInfoRef>");
   qRegisterMetaType<std::unordered_map<std::string,bool>>("std::unordered_map<std::string,bool>");
   qRegisterMetaType<QMap<QString,bool>>("QMap<QString,bool>");
+  qRegisterMetaType<LocationEntry>("LocationEntry");
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -158,6 +165,8 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<MapWidget>(uri, versionMajor, versionMinor, "Map");
   qmlRegisterType<OnlineTileProviderModel>(uri, versionMajor, versionMinor, "OnlineTileProviderModel");
   qmlRegisterType<OverlayWay>(uri, versionMajor, versionMinor, "OverlayWay");
+  qmlRegisterType<OverlayArea>(uri, versionMajor, versionMinor, "OverlayArea");
+  qmlRegisterType<OverlayNode>(uri, versionMajor, versionMinor, "OverlayNode");
   qmlRegisterType<QmlSettings>(uri, versionMajor, versionMinor, "Settings");
   qmlRegisterType<RouteStep>(uri, versionMajor, versionMinor, "RouteStep");
   qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");

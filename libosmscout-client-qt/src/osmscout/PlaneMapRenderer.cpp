@@ -327,11 +327,11 @@ void PlaneMapRenderer::DrawMap()
     p.setRenderHint(QPainter::TextAntialiasing);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    // overlay ways
-    std::vector<OverlayWayRef> overlayWays;
+    // overlay objects
+    std::vector<OverlayObjectRef> overlayObjects;
     osmscout::GeoBox renderBox;
     projection.GetDimensions(renderBox);
-    getOverlayWays(overlayWays,renderBox);
+    getOverlayObjects(overlayObjects, renderBox);
 
     bool success;
     {
@@ -339,7 +339,7 @@ void PlaneMapRenderer::DrawMap()
                       loadJob->GetAllTiles(),
                       &drawParameter,
                       &p,
-                      overlayWays,
+                      overlayObjects,
                       /*drawCanvasBackground*/ true);
       dbThread->RunJob(&job);
       success=job.IsSuccess();

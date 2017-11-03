@@ -395,6 +395,11 @@ namespace osmscout {
                       const MapParameter& parameter,
                       const MapData& data);
 
+    void PrepareArea(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const MapParameter& parameter,
+                      const AreaRef &area);
+
     void PrepareWay(const StyleConfig& styleConfig,
                     const Projection& projection,
                     const MapParameter& parameter,
