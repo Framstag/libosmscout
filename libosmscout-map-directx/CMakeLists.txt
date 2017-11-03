@@ -26,7 +26,7 @@ target_link_libraries(osmscout_map_directx
 		osmscout_map
 		${Direct2D_LIBRARIES}
 		Windowscodecs)
-target_compile_definitions(osmscout_map_directx PRIVATE -DOSMSCOUT_MAP_DIRECTX_EXPORT_SYMBOLS)
+target_compile_definitions(osmscout_map_directx PRIVATE -DOSMSCOUT_MAP_DIRECTX_EXPORT_SYMBOLS -DUNICODE -D_UNICODE)
 install(TARGETS osmscout_map_directx
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
