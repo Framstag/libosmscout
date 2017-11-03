@@ -42,7 +42,7 @@ class OSMSCOUT_CLIENT_QT_API OverlayObject : public QObject
   Q_OBJECT
   Q_PROPERTY(QString type READ getTypeName WRITE setTypeName)
   Q_PROPERTY(int size READ getSize)
-  Q_PROPERTY(osmscout::RefType objectType READ getObjectType)
+  Q_PROPERTY(QString objectType READ getObjectTypeStr)
 
 protected:
   QString                       typeName;
@@ -65,6 +65,19 @@ public:
 
   virtual osmscout::RefType getObjectType() const{
     return osmscout::RefType::refNone;
+  }
+
+  QString getObjectTypeStr() const {
+    switch (getObjectType()){
+      case osmscout::RefType::refArea:
+        return "area";
+      case osmscout::RefType::refWay:
+        return "way";
+      case osmscout::RefType::refNode:
+        return "node";
+      default:
+        return "none";
+    }
   }
 
   bool set(const OverlayObject &other);
