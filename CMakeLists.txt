@@ -61,6 +61,8 @@ include(TestLargeFiles)
 OPJ_TEST_LARGE_FILES(OPJ_HAVE_LARGEFILES)
 
 if(MSVC)
+  # Make sure C test using check_prototype_definition() will fail
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /we4028")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /wd4251")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Oi")
   if(CMAKE_CL_64)
@@ -353,6 +355,7 @@ message(STATUS " - Map drawing backend for iOS and OS X: ${OSMSCOUT_BUILD_MAP_IO
 message(STATUS "client libraries:")
 message(STATUS " - Qt client library:                    ${OSMSCOUT_BUILD_CLIENT_QT}")
 message(STATUS "tools:")
+message(STATUS " - Import/Import:                        ${OSMSCOUT_BUILD_TOOL_IMPORT}")
 message(STATUS " - Import/BasemapImport:                 ${OSMSCOUT_BUILD_TOOL_IMPORT}")
 message(STATUS " - DumpData:                             ${OSMSCOUT_BUILD_TOOL_DUMPDATA}")
 message(STATUS " - OSMScout2:                            ${OSMSCOUT_BUILD_TOOL_OSMSCOUT2}")
