@@ -32,6 +32,7 @@ public:
   osmscout::AdminRegionRef adminRegion;
   QString name;
   QString altName;
+  QString type;
   int adminLevel;
 };
 
