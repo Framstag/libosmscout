@@ -41,7 +41,6 @@ int main(int argc, char* argv[])
 #endif
 
   QGuiApplication app(argc,argv);
-  MainWindow      *window;
   int             result;
 
   app.setOrganizationName("libosmscout");
@@ -96,19 +95,19 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-  window=new MainWindow(dbThread);
 
-  result=app.exec();
+  {
+    DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
 
-  delete window;
+    MainWindow window(dbThread);
+    result = app.exec();
 
-  QString tmpStylesheet(dbThread->GetStylesheetFilename()+TMP_SUFFIX);
-  if(QFile::exists(tmpStylesheet)){
+    QString tmpStylesheet(dbThread->GetStylesheetFilename()+TMP_SUFFIX);
+    if(QFile::exists(tmpStylesheet)){
       QFile::remove(tmpStylesheet);
+    }
   }
 
-  dbThread.reset(); // release dbThread before cleanup library resources
   OSMScoutQt::FreeInstance();
 
   return result;
