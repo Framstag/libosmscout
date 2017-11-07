@@ -56,7 +56,8 @@
 
 class OSMSCOUT_CLIENT_QT_API PersistentCookieJar : public QNetworkCookieJar {
 public:
-    PersistentCookieJar(SettingsRef settings, QObject *parent = Q_NULLPTR) : QNetworkCookieJar(parent) { load(settings); }
+    PersistentCookieJar(SettingsRef settings, QObject *parent = Q_NULLPTR) :
+        QNetworkCookieJar(parent), settings(settings) { load(); }
     virtual ~PersistentCookieJar() { save(); }
 
     virtual QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const
@@ -83,11 +84,11 @@ private:
                 data.append("\n");
             }
         }
-        SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
+
         settings->SetCookieData(data);
     }
 
-    void load(SettingsRef settings)
+    void load()
     {
         QMutexLocker lock(&mutex);
         const QByteArray data = settings->GetCookieData();
@@ -95,6 +96,7 @@ private:
     }
 
     mutable QMutex mutex;
+    SettingsRef settings;
 };
 
 #endif	/* PERSISTENTCOOKIEJAR_H */
