@@ -22,5 +22,5 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/MapRenderer.h \
                         osmscout/PlaneMapRenderer.h \
                         osmscout/TiledMapRenderer.h \
-                        osmscout/OverlayWay.h
+                        osmscout/OverlayObject.h
 

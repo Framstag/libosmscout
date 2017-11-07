@@ -39,11 +39,13 @@ if(NOT ICONV_LIBRARIES AND UNIX)
 endif()
 
 if(ICONV_INCLUDE_DIR AND ICONV_LIBRARIES)
+    set(CMAKE_REQUIRED_INCLUDES ${ICONV_INCLUDE_DIR})
     check_prototype_definition("iconv"
             "size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)"
             "-1"
             "iconv.h"
             ICONV_SECOND_ARGUMENT_IS_CONST)
+    set(CMAKE_REQUIRED_INCLUDES)
 endif()
 
 include(FindPackageHandleStandardArgs)

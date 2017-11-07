@@ -76,6 +76,7 @@ private:
 signals:
   void initialisationFinished(const DatabaseLoadedResponse& response);
   void viewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&);
+  void objectsLoaded(const LocationEntry&, const osmscout::MapData&);
 
   void locationDescription(const osmscout::GeoCoord location,
                            const QString database,
@@ -89,6 +90,7 @@ signals:
 
 public slots:
   void requestObjectsOnView(const MapViewStruct&);
+  void requestObjects(const LocationEntry&);
   void onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles);
 

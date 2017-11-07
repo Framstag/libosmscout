@@ -22,8 +22,7 @@
 #ifndef MAPOBJECTINFOMODEL_H
 #define MAPOBJECTINFOMODEL_H
 
-#include <QObject>
-#include <QAbstractListModel>
+#include <osmscout/OverlayObject.h>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
@@ -34,6 +33,10 @@
 #include <osmscout/LocationInfoModel.h>
 #include <osmscout/private/ClientQtImportExport.h>
 
+#include <QObject>
+#include <QAbstractListModel>
+
+
 /**
  * \ingroup QtAPI
  */
@@ -42,17 +45,28 @@ class OSMSCOUT_CLIENT_QT_API MapObjectInfoModel: public QAbstractListModel
   Q_OBJECT
   Q_PROPERTY(bool ready READ isReady NOTIFY readyChange)
 
+  class ObjectInfo {
+  public:
+    QString type;
+    QString objectType;
+    QString name;
+    uint64_t id;
+    std::vector<osmscout::Point> points;
+  };
+
 public:
   enum Roles {
-      LabelRole = Qt::UserRole,
-      TypeRole  = Qt::UserRole+1,
-      IdRole    = Qt::UserRole+2,
-      NameRole  = Qt::UserRole+3,
+      LabelRole  = Qt::UserRole,
+      TypeRole   = Qt::UserRole+1,
+      IdRole     = Qt::UserRole+2,
+      NameRole   = Qt::UserRole+3,
+      ObjectRole = Qt::UserRole+4,
   };
 
 signals:
   void readyChange(bool ready);
   void objectsRequested(const MapViewStruct &view);
+  void objectsRequested(const LocationEntry &entry);
 
 public slots:
   void dbInitialized(const DatabaseLoadedResponse&);
@@ -60,24 +74,33 @@ public slots:
                    const int width, const int height,
                    const int screenX, const int screenY);
   void onViewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&);
+  void setLocationEntry(QObject *o);
+
+  void onObjectsLoaded(const LocationEntry &entry, const osmscout::MapData&);
 
 private:
   void update();
 
-  template<class T> void fillObjectInfo(QString type, const T &o)
+  template<class T> void addObjectInfo(QString type,
+                                       uint64_t id,
+                                       const std::vector<osmscout::Point> &points,
+                                       const T &o)
   {
+    ObjectInfo info;
     //std::cout << " - "<<type.toStdString()<<": " << o->GetType()->GetName() << " " << o->GetObjectFileRef().GetFileOffset();
-    QMap<int, QVariant> info;
-    info[LabelRole]=QString::fromStdString(o->GetType()->GetName());
-    info[TypeRole]=type;
-    info[IdRole]=QVariant::fromValue<uint64_t>(o->GetObjectFileRef().GetFileOffset());
+
+    info.type=type;
+    info.objectType=QString::fromStdString(o->GetType()->GetName());
+    info.id=id;
 
     const osmscout::FeatureValueBuffer &features=o->GetFeatureValueBuffer();
     const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
     if (name!=NULL){
-      info[NameRole]=QString::fromStdString(name->GetLabel());
+      info.name=QString::fromStdString(name->GetLabel());
       //std::cout << " \"" << name->GetLabel() << "\"";
     }
+    info.points=points;
+
     //std::cout << std::endl;
     model << info;
   }
@@ -96,6 +119,8 @@ public:
       return ready;
   };
 
+  Q_INVOKABLE QObject* createOverlayObject(int row) const;
+
   Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
   virtual QHash<int, QByteArray> roleNames() const;
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -104,8 +129,9 @@ private:
   bool ready;
   bool setup;
   QList<ObjectKey> objectSet; // set of objects already inserted to model
-  QList<QMap<int, QVariant>> model;
+  QList<ObjectInfo> model;
   MapViewStruct view;
+  LocationEntry locationEntry;
   int screenX;
   int screenY;
   QList<osmscout::MapData> mapData;

@@ -153,6 +153,8 @@ protected:
   bool                               renderError;
   QList<StyleError>                  styleErrors;
 
+  std::vector<std::string>           customPoiTypes;
+
 protected:
 
   void CancelCurrentDataLoading();
@@ -164,7 +166,8 @@ public:
            QString basemapLookupDirectory,
            QString iconDirectory,
            SettingsRef settings,
-           MapManagerRef mapManager);
+           MapManagerRef mapManager,
+           const std::vector<std::string> &customPoiTypes);
 
   virtual ~DBThread();
 

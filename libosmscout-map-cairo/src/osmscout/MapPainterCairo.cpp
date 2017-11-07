@@ -644,19 +644,26 @@ namespace osmscout {
                                                         font,
                                                         pango_context_get_language(context));
 
-    double proposedWidth=GetProposedLabelWidth(parameter,
-                                               pango_font_metrics_get_approximate_char_width(metrics),
-                                               objectWidth,
-                                               text.length());
-
     PangoRectangle   extends;
 
-    pango_layout_set_text(layout,text.c_str(),text.length());
+    pango_layout_set_text(layout,
+                          text.c_str(),
+                          (int)text.length());
     pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
     pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
-    pango_layout_set_width(layout,proposedWidth);
 
-    pango_layout_get_pixel_extents(layout,nullptr,&extends);
+    if (objectWidth>0) {
+      double proposedWidth=GetProposedLabelWidth(parameter,
+                                                 pango_font_metrics_get_approximate_char_width(metrics),
+                                                 objectWidth,
+                                                 text.length());
+
+      pango_layout_set_width(layout,(int)proposedWidth);
+    }
+
+    pango_layout_get_pixel_extents(layout,
+                                   nullptr,
+                                   &extends);
 
     TextDimension dimension;
 
@@ -809,9 +816,11 @@ namespace osmscout {
       PangoFontMetrics *metrics=pango_context_get_metrics(context,
                                                           font,
                                                           pango_context_get_language(context));
-      size_t           proposedWidth=std::floor(label.bx2-label.bx1)+1;
+      int              proposedWidth=(int)std::floor(label.bx2-label.bx1)+1;
 
-      pango_layout_set_text(layout,label.text.c_str(),label.text.length());
+      pango_layout_set_text(layout,
+                            label.text.c_str(),
+                            (int)label.text.length());
       pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
       pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
       pango_layout_set_width(layout,proposedWidth);
@@ -827,7 +836,7 @@ namespace osmscout {
                                 layout);
         cairo_stroke(draw);
       }
-      else {
+      else /* emphasize */ {
         pango_cairo_layout_path(draw,
                                 layout);
 
@@ -907,7 +916,7 @@ namespace osmscout {
                             style->GetTextColor().GetR(),
                             style->GetTextColor().GetG(),
                             style->GetTextColor().GetB(),
-                            style->GetTextColor().GetA());
+                            label.alpha);
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
       Font        font=GetFont(projection,
                                parameter,
@@ -916,7 +925,7 @@ namespace osmscout {
 
       pango_layout_set_font_description(layout,font);
       pango_layout_set_text(layout,label.text.c_str(),
-                            label.text.length());
+                            (int)label.text.length());
 
       cairo_move_to(draw,
                     label.x,
