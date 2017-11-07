@@ -185,6 +185,10 @@ OSMScoutQt& OSMScoutQt::GetInstance()
 
 void OSMScoutQt::FreeInstance()
 {
+  // wait up to 5 seconds for release dbThread from other threads
+  if (!osmScoutInstance->waitForReleasingResources(100, 50)){
+    osmscout::log.Warn() << "Some resources still acquired from other components";
+  }
   delete osmScoutInstance;
   osmScoutInstance=NULL;
 }
@@ -210,6 +214,14 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
 
 OSMScoutQt::~OSMScoutQt()
 {
+}
+
+bool OSMScoutQt::waitForReleasingResources(unsigned long mSleep, unsigned long maxCount) const
+{
+  for (unsigned long count=0; count < maxCount && dbThread.use_count()>1; count++){
+    QThread::msleep(mSleep);
+  };
+  return dbThread.use_count() == 1;
 }
 
 DBThreadRef OSMScoutQt::GetDBThread() const
