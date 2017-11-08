@@ -159,9 +159,10 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
-
-  result=app.exec();
+  {
+    QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
+    result = app.exec();
+  }
 
   OSMScoutQt::FreeInstance();
 

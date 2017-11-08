@@ -32,6 +32,8 @@
 
 #include <osmscout/private/ClientQtImportExport.h>
 
+#include <atomic>
+
 class OSMScoutQt;
 Q_DECLARE_METATYPE(osmscout::TileRef)
 Q_DECLARE_METATYPE(osmscout::BreakerRef)
@@ -205,31 +207,52 @@ enum RenderingType {
  * OSMScoutQt::FreeInstance();
  * ```
  */
-class OSMSCOUT_CLIENT_QT_API OSMScoutQt{
+class OSMSCOUT_CLIENT_QT_API OSMScoutQt : public QObject {
+  Q_OBJECT
   friend class OSMScoutQtBuilder;
 
 private:
-  QThread       *backgroundThread;
-  SettingsRef   settings;
-  MapManagerRef mapManager;
-  DBThreadRef   dbThread;
-  QString       iconDirectory;
-  QString       cacheLocation;
-  size_t        onlineTileCacheSize;
-  size_t        offlineTileCacheSize;
-  QString       userAgent;
+  SettingsRef     settings;
+  MapManagerRef   mapManager;
+  DBThreadRef     dbThread;
+  QString         iconDirectory;
+  QString         cacheLocation;
+  size_t          onlineTileCacheSize;
+  size_t          offlineTileCacheSize;
+  QString         userAgent;
+  std::atomic_int liveBackgroundThreads;
 
 private:
   OSMScoutQt(SettingsRef settings,
              MapManagerRef mapManager,
-             DBThreadRef dbThread,
+             QString basemapLookupDirectory,
              QString iconDirectory,
              QString cacheLocation,
              size_t onlineTileCacheSize,
              size_t offlineTileCacheSize,
-             QString userAgent);
+             QString userAgent,
+             QStringList customPoiTypes);
+
+  QThread *makeThread(QString name);
+
+public slots:
+  void threadFinished();
+
 public:
   virtual ~OSMScoutQt();
+
+  /**
+   * Wait for releasing of dbThread shared pointer from other threads.
+   * This waiting has configurable timeout, up to [mSleep * maxCount] milliseconds.
+   *
+   * Note that on success, this method don't guarantee that that dbThread
+   * is not used from another thread, see std::shared_ptr::use_count() documentation.
+   *
+   * @param mSleep wait period between checks (in milliseconds)
+   * @param maxCount maximul count
+   * @return true if dbThread is holding just from current thread (dbThread.use_count() == 1)
+   */
+  bool waitForReleasingResources(unsigned long mSleep, unsigned long maxCount) const;
 
   DBThreadRef GetDBThread() const;
   SettingsRef GetSettings() const;
