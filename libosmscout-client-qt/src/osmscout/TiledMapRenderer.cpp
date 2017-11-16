@@ -451,7 +451,7 @@ void TiledMapRenderer::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uin
     if (requestedFromWeb){
         QMutexLocker locker(&lock);
         if (tileDownloader == NULL){
-            qWarning() << "tile requested but donwloader is not initialized yet";
+            qWarning() << "tile requested but downloader is not initialized yet";
             emit tileDownloadFailed(zoomLevel, xtile, ytile, false);
         }else{
             emit tileDownloader->download(zoomLevel, xtile, ytile);

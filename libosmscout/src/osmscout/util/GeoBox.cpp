@@ -109,10 +109,6 @@ namespace osmscout {
     return "[" + minCoord.GetDisplayText() + " - " + maxCoord.GetDisplayText() + "]";
   }
 
-  /**
-   * Return an GeoBox based on the center and the radius of a circle around the center.
-   * The resulting box will cross the circle in its corners.
-   */
   GeoBox GeoBox::BoxByCenterAndRadius(const GeoCoord& center,
                                       double radius)
   {
