@@ -250,6 +250,10 @@ namespace osmscout {
      */
     std::string GetDisplayText() const;
 
+    /**
+     * Return an GeoBox based on the center and the radius [meters] of a circle around the center.
+     * The resulting box will cross the circle in its corners.
+     */
     static GeoBox BoxByCenterAndRadius(const GeoCoord& center,double radius);
   };
 }
