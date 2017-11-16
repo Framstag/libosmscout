@@ -42,8 +42,19 @@ LocationInfoModel::LocationInfoModel():
     
     connect(lookupModule, SIGNAL(locationDescriptionFinished(const osmscout::GeoCoord)),
             this, SLOT(onLocationDescriptionFinished(const osmscout::GeoCoord)),
-            Qt::QueuedConnection);    
+            Qt::QueuedConnection);
 
+    connect(this, SIGNAL(regionLookupRequested(osmscout::GeoCoord)),
+            lookupModule, SLOT(requestRegionLookup(osmscout::GeoCoord)),
+            Qt::QueuedConnection);
+
+    connect(lookupModule, SIGNAL(locationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
+              this, SLOT(onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
+              Qt::QueuedConnection);
+
+    connect(lookupModule, SIGNAL(locationAdminRegionFinished(const osmscout::GeoCoord)),
+            this, SLOT(onLocationAdminRegionFinished(const osmscout::GeoCoord)),
+            Qt::QueuedConnection);
 }
 
 void LocationInfoModel::setLocation(const double lat, const double lon)
@@ -117,6 +128,12 @@ bool LocationInfoModel::distanceComparator(const QMap<int, QVariant> &obj1,
   QVariant dist2 = obj2.contains(DistanceRole) ? obj2[DistanceRole] : QVariant();
 
   return dist1.toReal() < dist2.toReal();
+}
+
+bool LocationInfoModel::adminRegionComparator(const AdminRegionInfoRef& reg1,
+                                              const AdminRegionInfoRef& reg2)
+{
+  return reg1->adminLevel > reg2->adminLevel;
 }
 
 bool operator==(const ObjectKey &k1, const ObjectKey &k2){
@@ -251,13 +268,68 @@ void LocationInfoModel::onLocationDescriptionFinished(const osmscout::GeoCoord l
     if (location != this->location){
         return; // not our request
     }
-    
-    ready = true;
-    emit readyChange(ready);      
+    if (model.isEmpty()){
+      // if model is empty, request for location region
+      emit regionLookupRequested(location);
+    } else {
+      ready = true;
+      emit readyChange(ready);
+    }
 }
 
+void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location,
+                                               QList<AdminRegionInfoRef> regions)
+{
+  if (location != this->location || regions.empty()){
+    return; // not our request
+  }
+  beginResetModel();
+
+  QMap<int, QVariant> obj;
+
+  qSort(regions.begin(),regions.end(),adminRegionComparator);
+
+  const AdminRegionInfoRef bottom=regions.first();
+  QStringList regionNames;
+  QString lastName=bottom->name;
+  for (const auto &region:regions){
+    // remove duplicate names
+    if (region->name!=lastName) {
+      regionNames << region->name;
+    }
+    lastName=region->name;
+  }
+
+  obj[LabelRole] = bottom->name;
+  obj[RegionRole] = regionNames;
+  obj[AddressRole] = bottom->name;
+  obj[InPlaceRole] = true;
+  obj[DistanceRole] = 0;
+  obj[BearingRole] = "";
+  obj[PoiRole] = "";
+  obj[TypeRole] = bottom->type;
+  obj[PostalCodeRole] = "";
+  obj[WebsiteRole] = "";
+  obj[PhoneRole] = "";
+
+
+  model << obj;
+  qSort(model.begin(),model.end(),distanceComparator);
+  endResetModel();
+}
+
+void LocationInfoModel::onLocationAdminRegionFinished(const osmscout::GeoCoord)
+{
+  if (location != this->location){
+    return; // not our request
+  }
+  ready = true;
+  emit readyChange(ready);
+}
+
+
 double LocationInfoModel::distance(double lat1, double lon1, 
-                                    double lat2, double lon2)
+                                   double lat2, double lon2)
 {
     
 

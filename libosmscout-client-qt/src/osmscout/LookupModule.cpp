@@ -203,18 +203,21 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(DBInstanceRef &db,
       if (db->database->GetNodeByOffset(region->object.GetFileOffset(), node)) {
         altNameValue=altNameReader.GetValue(node->GetFeatureValueBuffer());
         adminLevelValue=adminLevelReader.GetValue(node->GetFeatureValueBuffer());
+        info->type=QString::fromStdString(node->GetType()->GetName());
       }
       break;
     case osmscout::refWay:
       if (db->database->GetWayByOffset(region->object.GetFileOffset(), way)) {
         altNameValue=altNameReader.GetValue(way->GetFeatureValueBuffer());
         adminLevelValue=adminLevelReader.GetValue(way->GetFeatureValueBuffer());
+        info->type=QString::fromStdString(way->GetType()->GetName());
       }
       break;
     case osmscout::refArea:
       if (db->database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
         altNameValue=altNameReader.GetValue(area->GetFeatureValueBuffer());
         adminLevelValue=adminLevelReader.GetValue(area->GetFeatureValueBuffer());
+        info->type=QString::fromStdString(area->GetType()->GetName());
       }
       break;
     case osmscout::refNone:
