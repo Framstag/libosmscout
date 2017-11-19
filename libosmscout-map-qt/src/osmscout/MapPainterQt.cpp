@@ -290,7 +290,7 @@ namespace osmscout {
     QString      string=QString::fromUtf8(label.text.c_str());
     QFontMetrics fontMetrics=QFontMetrics(font);
     QTextLayout  textLayout(string,font);
-    qreal        proposedWidth=std::floor(label.bx2-label.bx1)+1; // try to make word wrapping more stable
+    qreal        proposedWidth=std::ceil(label.bx2-label.bx1); // try to make word wrapping more stable
 
     textLayout.setCacheEnabled(true);
 
