@@ -278,3 +278,20 @@ if(${OSMSCOUT_BUILD_MAP_DIRECTX})
 else()
 	message("Skip DrawMapDirectX demo, libosmscout-map-directx is missing.")
 endif()
+
+if(${LIBXML2_FOUND})
+    #---- GpxImport
+    add_executable(GpxImport src/GpxImport.cpp)
+    set_property(TARGET GpxImport PROPERTY CXX_STANDARD 11)
+    target_include_directories(GpxImport PRIVATE
+            ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+            ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-gpx/include)
+    if(APPLE)
+        target_link_libraries(GpxImport OSMScout OSMScoutGpx)
+    else()
+        target_link_libraries(GpxImport osmscout osmscout_gpx)
+    endif()
+    install(TARGETS GpxImport RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+else()
+    message("Skip GpxImport demo, libxml is missing.")
+endif()
