@@ -551,7 +551,7 @@ namespace osmscout {
 #if TARGET_OS_IPHONE
                 [str drawInRect:rect withAttributes:attrDict];
 #else
-                NSColor *cowlor = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
+                NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
                 NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
                 [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
 #endif
