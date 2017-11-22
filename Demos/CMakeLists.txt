@@ -285,7 +285,10 @@ if(${LIBXML2_FOUND})
     set_property(TARGET GpxImport PROPERTY CXX_STANDARD 11)
     target_include_directories(GpxImport PRIVATE
             ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-            ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-gpx/include)
+            ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-gpx/include
+            ${LIBXML2_INCLUDE_DIR}
+            )
+
     if(APPLE)
         target_link_libraries(GpxImport OSMScout OSMScoutGpx)
     else()

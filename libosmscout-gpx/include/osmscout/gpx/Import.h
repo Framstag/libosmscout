@@ -21,11 +21,16 @@
 */
 
 #include <osmscout/gpx/GpxFile.h>
-
 #include <osmscout/private/GPXImportExport.h>
 
-#include <string>
+#include <osmscout/util/File.h>
+#include <osmscout/util/Exception.h>
 #include <osmscout/util/Breaker.h>
+
+#include <libxml/parser.h>
+
+#include <cstdio>
+#include <string>
 
 namespace osmscout {
 
@@ -47,6 +52,7 @@ public:
 typedef std::shared_ptr<ImportCallback> ImportCallbackRef;
 
 class OSMSCOUT_GPX_API Import {
+
 public:
   static bool ImportGpx(const std::string &filePath,
                         GpxFile &output,

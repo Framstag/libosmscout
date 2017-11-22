@@ -40,7 +40,14 @@ create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Conf
 target_include_directories(${THE_TARGET_NAME} PRIVATE
 		include
 		${CMAKE_CURRENT_BINARY_DIR}/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+        )
+
+if(LIBXML2_FOUND)
+    target_include_directories(${THE_TARGET_NAME} PRIVATE ${LIBXML2_INCLUDE_DIR})
+    target_link_libraries(${THE_TARGET_NAME} ${LIBXML2_LIBRARIES})
+endif()
+
 if(APPLE)
   target_link_libraries(${THE_TARGET_NAME} OSMScout)
 else()
