@@ -183,7 +183,7 @@ namespace osmscout
 #else
 		std::string enc = text;
 #endif
-		FLOAT size = fontSize * fontSizeFactor* text.length();
+		FLOAT size = float(fontSize * fontSizeFactor* text.length());
 		IDWriteTextFormat* tf = GetFont(projection, parameter, fontSize);
 		IDWriteTextLayout* pDWriteTextLayout = NULL;
 		HRESULT hr = m_pWriteFactory->CreateTextLayout(
@@ -279,7 +279,7 @@ namespace osmscout
 	IDWriteTextFormat* MapPainterDirectX::GetFont(const Projection& projection, const MapParameter& parameter, double fontSize)
 	{
 		FontMap::const_iterator f;
-		fontSize = fontSize * projection.ConvertWidthToPixel(parameter.GetFontSize());
+		fontSize = fontSize * float(projection.ConvertWidthToPixel(parameter.GetFontSize()));
 
 		uint32_t hash = GetFontHash(parameter.GetFontName().c_str(), fontSize);
 		f = m_Fonts.find(hash);
@@ -299,7 +299,7 @@ namespace osmscout
 			DWRITE_FONT_WEIGHT_NORMAL,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			fontSize,
+			float(fontSize),
 			_T(""),
 			&pTextFormat
 			);
@@ -395,7 +395,7 @@ namespace osmscout
 #else
 		std::string sample = text;
 #endif
-		FLOAT size = fontSize * fontSizeFactor * text.length();
+		FLOAT size = float(fontSize * fontSizeFactor * text.length());
 		IDWriteTextFormat* font = GetFont(projection, parameter, fontSize);
 		IDWriteTextLayout* pDWriteTextLayout = NULL;
 		HRESULT hr = m_pWriteFactory->CreateTextLayout(
@@ -496,19 +496,19 @@ namespace osmscout
 			FillStyleRef   fillStyle = primitive->GetFillStyle();
 			BorderStyleRef borderStyle = primitive->GetBorderStyle();
 			bool hasBorder = borderStyle && borderStyle->GetWidth() > 0.0 && borderStyle->GetColor().IsVisible();
-			double borderWidth = hasBorder ? projection.ConvertWidthToPixel(borderStyle->GetWidth()) : 0.0;
+			float borderWidth = hasBorder ? float(projection.ConvertWidthToPixel(borderStyle->GetWidth())) : 0.0f;
 			if (dynamic_cast<PolygonPrimitive*>(primitive) != NULL)
 			{
 				PolygonPrimitive* polygon = dynamic_cast<PolygonPrimitive*>(primitive);
 				const std::list<osmscout::Vertex2D> data = polygon->GetCoords();
 				if (data.size() > 2)
 				{
-					double* coords = new double[data.size() * 2];
+					float* coords = new float[data.size() * 2];
 					std::list<osmscout::Vertex2D>::const_iterator iter = data.begin();
 					for (size_t uj = 0; iter != data.end(); uj++)
 					{
-						coords[uj * 2 + 0] = iter->GetX();
-						coords[uj * 2 + 1] = iter->GetY();
+						coords[uj * 2 + 0] = float(iter->GetX());
+						coords[uj * 2 + 1] = float(iter->GetY());
 						iter++;
 					}
 					ID2D1PathGeometry* pPathGeometry = nullptr;
@@ -550,7 +550,7 @@ namespace osmscout
 			else if (dynamic_cast<CirclePrimitive*>(primitive) != NULL)
 			{
 				CirclePrimitive* circle = dynamic_cast<CirclePrimitive*>(primitive);
-				D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(centerX, centerY), projection.ConvertWidthToPixel(circle->GetRadius()), projection.ConvertWidthToPixel(circle->GetRadius()));
+				D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(centerX, centerY), float(projection.ConvertWidthToPixel(circle->GetRadius())), float(projection.ConvertWidthToPixel(circle->GetRadius())));
 				m_pRenderTarget->FillEllipse(ellipse, GetColorBrush(fillStyle->GetFillColor()));
 				if (hasBorder) m_pRenderTarget->DrawEllipse(ellipse, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
 			}
@@ -581,7 +581,7 @@ namespace osmscout
 				pSink = NULL;
 			}
 		}
-		m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(color), width, GetStrokeStyle(dash));
+		m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(color), float(width), GetStrokeStyle(dash));
 		pPathGeometry->Release();
 	}
 
@@ -671,7 +671,7 @@ namespace osmscout
 		std::shared_ptr<BorderStyle> borderStyle = area.borderStyle;
 
 		bool hasBorder = borderStyle && borderStyle->GetWidth() > 0.0 && borderStyle->GetColor().IsVisible();
-		double borderWidth = hasBorder ? projection.ConvertWidthToPixel(borderStyle->GetWidth()) : 0.0;
+		float borderWidth = hasBorder ? float(projection.ConvertWidthToPixel(borderStyle->GetWidth())) : 0.0f;
 
 		ID2D1PathGeometry* pPathGeometry;
 		HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
