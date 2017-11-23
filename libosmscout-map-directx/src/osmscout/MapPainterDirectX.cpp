@@ -40,6 +40,8 @@
 
 #define _T(x)       __T(x)
 
+#define POINTF(x, y) D2D1::Point2F(float(x), float(y))
+
 namespace osmscout
 {
 	static const float fontSizeFactor = 20.0;
@@ -516,11 +518,11 @@ namespace osmscout
 						hr = pPathGeometry->Open(&pSink);
 						if (SUCCEEDED(hr))
 						{
-							pSink->BeginFigure(D2D1::Point2F(coords[0], coords[1]), D2D1_FIGURE_BEGIN_HOLLOW);
+							pSink->BeginFigure(POINTF(coords[0], coords[1]), D2D1_FIGURE_BEGIN_HOLLOW);
 
 							for (size_t uj = 1; uj < data.size(); uj++)
 							{
-								pSink->AddLine(D2D1::Point2F(coords[uj * 2 + 0], coords[uj * 2 + 1]));
+								pSink->AddLine(POINTF(coords[uj * 2 + 0], coords[uj * 2 + 1]));
 							}
 							pSink->EndFigure(D2D1_FIGURE_END_OPEN);
 							hr = pSink->Close();
@@ -547,7 +549,7 @@ namespace osmscout
 			else if (dynamic_cast<CirclePrimitive*>(primitive) != NULL)
 			{
 				CirclePrimitive* circle = dynamic_cast<CirclePrimitive*>(primitive);
-				D2D1_ELLIPSE ellipse = D2D1::Ellipse(D2D1::Point2F(centerX, centerY), projection.ConvertWidthToPixel(circle->GetRadius()), projection.ConvertWidthToPixel(circle->GetRadius()));
+				D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(centerX, centerY), projection.ConvertWidthToPixel(circle->GetRadius()), projection.ConvertWidthToPixel(circle->GetRadius()));
 				m_pRenderTarget->FillEllipse(ellipse, GetColorBrush(fillStyle->GetFillColor()));
 				if (hasBorder) m_pRenderTarget->DrawEllipse(ellipse, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
 			}
@@ -567,10 +569,10 @@ namespace osmscout
 			hr = pPathGeometry->Open(&pSink);
 			if (SUCCEEDED(hr))
 			{
-				pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[transStart].GetX(), coordBuffer->buffer[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
+				pSink->BeginFigure(POINTF(coordBuffer->buffer[transStart].GetX(), coordBuffer->buffer[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
 
 				for (size_t i = transStart + 1; i <= transEnd; i++) {
-					pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
+					pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
 				}
 				pSink->EndFigure(D2D1_FIGURE_END_OPEN);
 				hr = pSink->Close();
@@ -602,19 +604,19 @@ namespace osmscout
 				size_t start, end;
 				int delta;
 				if (coords[transStart].GetX() <= coords[transEnd].GetX()) {
-					pSink->BeginFigure(D2D1::Point2F(coords[transStart].GetX(), coords[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
+					pSink->BeginFigure(POINTF(coords[transStart].GetX(), coords[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
 					start = transStart + 1;
 					end = transEnd;
 					delta = 1;
 				}
 				else {
-					pSink->BeginFigure(D2D1::Point2F(coords[transEnd].GetX(), coords[transEnd].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
+					pSink->BeginFigure(POINTF(coords[transEnd].GetX(), coords[transEnd].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
 					start = transEnd - 1;
 					end = transStart;
 					delta = -1;
 				}
 				for (size_t i = start; i != end; i += delta) {
-					pSink->AddLine(D2D1::Point2F(coords[i].GetX(), coords[i].GetY()));
+					pSink->AddLine(POINTF(coords[i].GetX(), coords[i].GetY()));
 				}
 				pSink->EndFigure(D2D1_FIGURE_END_OPEN);
 				hr = pSink->Close();
@@ -678,9 +680,9 @@ namespace osmscout
 			hr = pPathGeometry->Open(&pSink);
 			if (SUCCEEDED(hr))
 			{
-				pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[area.transStart].GetX(), coordBuffer->buffer[area.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+				pSink->BeginFigure(POINTF(coordBuffer->buffer[area.transStart].GetX(), coordBuffer->buffer[area.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
 				for (size_t i = area.transStart + 1; i <= area.transEnd; i++) {
-					pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
+					pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
 				}
 				pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
 				hr = pSink->Close();
@@ -704,10 +706,10 @@ namespace osmscout
 				hr = pPathGeometry->Open(&pSink);
 				if (SUCCEEDED(hr))
 				{
-					pSink->BeginFigure(D2D1::Point2F(coordBuffer->buffer[data.transStart].GetX(), coordBuffer->buffer[data.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+					pSink->BeginFigure(POINTF(coordBuffer->buffer[data.transStart].GetX(), coordBuffer->buffer[data.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
 
 					for (size_t i = data.transStart + 1; i <= data.transEnd; i++) {
-						pSink->AddLine(D2D1::Point2F(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
+						pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
 					}
 					pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
 					hr = pSink->Close();
