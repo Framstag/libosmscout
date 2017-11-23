@@ -54,6 +54,7 @@ public:
   virtual GpxParserContext* StartElement(const std::string &name,
                                          const std::unordered_map<std::string, std::string> &/*atts*/);
 
+  virtual void Characters(std::string str){};
 };
 
 
@@ -109,6 +110,7 @@ public:
     saxParser.endDocument=EndDocumentHandler;
     saxParser.getEntity=GetEntity;
     saxParser.startElement=StartElement;
+    saxParser.characters=Characters;
     saxParser.endElement=EndElement;
     saxParser.warning=WarningHandler;
     saxParser.error=ErrorHandler;
@@ -199,7 +201,16 @@ public:
   {
     assert(!contextStack.empty());
     GpxParserContext *top=contextStack.back();
-    contextStack.push_back(top->StartElement(name, atts));
+    contextStack.push_back(top==NULL? NULL : top->StartElement(name, atts));
+  }
+
+  void Characters(std::string str)
+  {
+    assert(!contextStack.empty());
+    GpxParserContext *top=contextStack.back();
+    if (top!=NULL) {
+      top->Characters(str);
+    }
   }
 
   void PopContext(){
@@ -243,6 +254,12 @@ public:
       }
     }
     parser->StartElement(std::string((const char *)name),attsMap);
+  }
+
+  static void Characters(void *data, const xmlChar *ch, int len)
+  {
+    GpxParser* parser=static_cast<GpxParser*>(data);
+    parser->Characters(std::string((const char *)ch,len));
   }
 
   static void EndElement(void *data, const xmlChar *name)
@@ -290,7 +307,7 @@ public:
 };
 
 GpxParserContext* GpxParserContext::StartElement(const std::string &name,
-                                       const std::unordered_map<std::string, std::string> &/*atts*/)
+                                                 const std::unordered_map<std::string, std::string> &/*atts*/)
 {
   xmlParserError(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
   parser.Error("Unexpected element");
@@ -307,6 +324,15 @@ public:
   {
     return "Trk";
   };
+
+  virtual GpxParserContext* StartElement(const std::string &name,
+                                         const std::unordered_map<std::string, std::string> &atts)
+  {
+    // if (name=="trk"){
+    //   return new TrkContext(ctxt,output,parser);
+    // }
+    return GpxParserContext::StartElement(name, atts);
+  }
 };
 
 class GpxDocumentContext : public GpxParserContext {
