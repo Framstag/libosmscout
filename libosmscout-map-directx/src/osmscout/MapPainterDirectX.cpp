@@ -41,6 +41,7 @@
 #define _T(x)       __T(x)
 
 #define POINTF(x, y) D2D1::Point2F(float(x), float(y))
+#define RECTF(left, top, right, bottom) D2D1::RectF(float(left), float(top), float(right), float(bottom))
 
 namespace osmscout
 {
@@ -198,7 +199,7 @@ namespace osmscout
 		hr = pDWriteTextLayout->GetMetrics(&textMetrics);
 		pDWriteTextLayout->Release();
 		if (SUCCEEDED(hr)) {
-			m_pRenderTarget->DrawText(enc.c_str(), enc.length(), tf, D2D1::RectF((FLOAT)x, (FLOAT)y, (FLOAT)x + textMetrics.width * 1.1f, (FLOAT)y + textMetrics.height * 1.1f), GetColorBrush(color));
+			m_pRenderTarget->DrawText(enc.c_str(), enc.length(), tf, RECTF(x, y, x + textMetrics.width * 1.1f, y + textMetrics.height * 1.1f), GetColorBrush(color));
 		}
 	}
 
@@ -438,7 +439,7 @@ namespace osmscout
 
 	void MapPainterDirectX::DrawGround(const Projection& projection, const MapParameter& parameter, const FillStyle& style)
 	{
-		m_pRenderTarget->FillRectangle(D2D1::RectF(0.0f, 0.0f, projection.GetWidth(), projection.GetHeight()), GetColorBrush(style.GetFillColor()));
+		m_pRenderTarget->FillRectangle(RECTF(0.0f, 0.0f, projection.GetWidth(), projection.GetHeight()), GetColorBrush(style.GetFillColor()));
 	}
 
 	void MapPainterDirectX::DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
@@ -456,10 +457,10 @@ namespace osmscout
 			double g = style->GetTextColor().GetG();
 			double b = style->GetTextColor().GetB();
 			// Shield background
-			D2D1_RECT_F shieldRectangle = D2D1::RectF(label.bx1, label.by1, label.bx2 + 1, label.by2 + 1);
+			D2D1_RECT_F shieldRectangle = RECTF(label.bx1, label.by1, label.bx2 + 1, label.by2 + 1);
 			m_pRenderTarget->FillRectangle(shieldRectangle, GetColorBrush(style->GetBgColor()));
 			// Shield border
-			shieldRectangle = D2D1::RectF(label.bx1 + 2, label.by1 + 2, label.bx2 + 1 - 4, label.by2 + 1 - 4);
+			shieldRectangle = RECTF(label.bx1 + 2, label.by1 + 2, label.bx2 + 1 - 4, label.by2 + 1 - 4);
 			m_pRenderTarget->DrawRectangle(shieldRectangle, GetColorBrush(style->GetBorderColor()));
 			_DrawText(projection, parameter, label.x, label.y, label.fontSize, Color(r, g, b, label.alpha), label.text);
 		}
@@ -475,7 +476,7 @@ namespace osmscout
 		D2D1_SIZE_U size = m_Bitmaps[idx]->GetPixelSize();
 		FLOAT dx = (FLOAT)size.width / 2.0f;
 		FLOAT dy = (FLOAT)size.height / 2.0f;
-		m_pRenderTarget->DrawBitmap(m_Bitmaps[idx], D2D1::RectF(x - dx, y - dy, x + dx, y + dy));
+		m_pRenderTarget->DrawBitmap(m_Bitmaps[idx], RECTF(x - dx, y - dy, x + dx, y + dy));
 	}
 
 	void MapPainterDirectX::DrawSymbol(const Projection& projection, const MapParameter& parameter, const Symbol& symbol, double x, double y)
@@ -539,7 +540,7 @@ namespace osmscout
 			else if (dynamic_cast<RectanglePrimitive*>(primitive) != NULL)
 			{
 				RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
-				D2D1_RECT_F rect = D2D1::RectF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX),
+				D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX),
 					y + projection.ConvertWidthToPixel(maxY - rectangle->GetTopLeft().GetY() - centerY),
 					x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX) + projection.ConvertWidthToPixel(rectangle->GetWidth()),
 					y + projection.ConvertWidthToPixel(maxY - rectangle->GetTopLeft().GetY() - centerY) + projection.ConvertWidthToPixel(rectangle->GetHeight()));
