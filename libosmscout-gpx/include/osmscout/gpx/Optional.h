@@ -23,16 +23,34 @@ public:
 
   static Optional<T> of(T *v);
 
+  Optional(): value{nullptr} {}
+
+  Optional(const Optional<T> &o){
+    value = (o.value == nullptr) ? nullptr : new T(*o.value);
+  };
+
+  Optional(Optional<T> &&o) {
+    std::swap(value, o.value);
+  };
+
+  ~Optional() { if (value != nullptr) delete value; }
+
+  void operator=(const Optional<T> &o){
+    value = (o.value == nullptr) ? nullptr : new T(o.value);
+  };
+
+  void operator=(Optional<T> &&o) {
+    std::swap(value, o.value);
+  };
+
   T get() const;
 
   bool hasValue() const;
 
-  ~Optional() { if (value != nullptr) delete value; }
-
 private:
   Optional(T *v) : value{v} {}
 
-  const T *value;
+  T *value{nullptr};
 };
 
 template<typename T>
