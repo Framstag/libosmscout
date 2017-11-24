@@ -21,24 +21,24 @@
 */
 
 #include <osmscout/gpx/Optional.h>
+#include <osmscout/gpx/TrackPoint.h>
 
 #include <osmscout/GeoCoord.h>
 
 #include <osmscout/private/GPXImportExport.h>
 
-#include <ctime>
 #include <string>
 
 namespace osmscout {
+namespace gpx {
 
-class OSMSCOUT_GPX_API Waypoint{
+class OSMSCOUT_GPX_API Waypoint {
 public:
-  Waypoint(GeoCoord coord):
-      coord(coord)
-  {
+  Waypoint(GeoCoord coord) :
+      coord(coord) {
   }
 
-  Optional<std::string> name;
+  Optional <std::string> name;
 
   osmscout::GeoCoord coord;
   Optional<double> elevation; // meters above sea
@@ -48,6 +48,7 @@ public:
   Optional<double> vdop; // meters
   Optional<double> pdop; // meters
 };
+}
 }
 
 #endif //OSMSCOUT_GPX_WAYPOINT_H

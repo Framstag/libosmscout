@@ -11,15 +11,21 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-	src/osmscout/gpx/GpxFile.cpp
+    src/osmscout/gpx/GpxFile.cpp
+    src/osmscout/gpx/Track.cpp
+    src/osmscout/gpx/TrackSegment.cpp
     )
 
 if(LIBXML2_FOUND)
 	list(APPEND HEADER_FILES
-            include/osmscout/gpx/Import.h)
+			include/osmscout/gpx/Import.h
+			include/osmscout/gpx/Export.h
+			)
 
 	list(APPEND SOURCE_FILES
-            src/osmscout/gpx/Import.cpp)
+			src/osmscout/gpx/Import.cpp
+			src/osmscout/gpx/Export.cpp
+			)
 endif()
 
 if(APPLE)

@@ -29,15 +29,15 @@
 #include <chrono>
 
 namespace osmscout {
+namespace gpx {
 
 typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> Timestamp;
 
 class OSMSCOUT_GPX_API TrackPoint {
 public:
 
-  inline TrackPoint(const GeoCoord coord):
-    coord(coord)
-  {
+  inline TrackPoint(const GeoCoord coord) :
+      coord(coord) {
   }
 
   osmscout::GeoCoord coord;
@@ -48,6 +48,7 @@ public:
   Optional<double> vdop; // meters
   Optional<double> pdop; // meters
 };
+}
 }
 
 #endif //OSMSCOUT_GPX_TRACKPOINT_H

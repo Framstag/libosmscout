@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_GPX_TRACK_H
-#define OSMSCOUT_GPX_TRACK_H
+#ifndef LIBOSMSCOUT_GPX_EXPORT_H
+#define LIBOSMSCOUT_GPX_EXPORT_H
 
 /*
   This source is part of the libosmscout-gpx library
@@ -20,29 +20,31 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/TrackSegment.h>
-
+#include <osmscout/gpx/GpxFile.h>
+#include <osmscout/gpx/Import.h>
 #include <osmscout/private/GPXImportExport.h>
 
+#include <osmscout/util/File.h>
+#include <osmscout/util/Exception.h>
+#include <osmscout/util/Breaker.h>
+
+#include <libxml/parser.h>
+
+#include <cstdio>
 #include <string>
-#include <vector>
 
 namespace osmscout {
 namespace gpx {
 
-class OSMSCOUT_GPX_API Track {
-public:
-  Optional<std::string> name;
-  Optional<std::string> desc;
-  std::vector<TrackSegment> segments;
+class OSMSCOUT_GPX_API Export {
 
-  /**
-   * Compute track length in meters
-   * @return
-   */
-  double GetLength() const;
+public:
+  static bool ExportGpx(const GpxFile &gpxFile,
+                        const std::string &filePath,
+                        BreakerRef breaker = NULL,
+                        ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
 };
 }
 }
 
-#endif //OSMSCOUT_GPX_TRACK_H
+#endif //LIBOSMSCOUT_GPX_EXPORT_H

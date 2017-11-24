@@ -28,10 +28,19 @@
 #include <vector>
 
 namespace osmscout {
+namespace gpx {
+
 class OSMSCOUT_GPX_API TrackSegment {
 public:
   std::vector<TrackPoint> points;
+
+  /**
+   * Compute track length in meters
+   * @return
+   */
+  double GetLength() const;
 };
+}
 }
 
 #endif //OSMSCOUT_GPX_TRACKSEGMENT_H

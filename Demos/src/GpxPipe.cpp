@@ -18,16 +18,19 @@
 */
 
 #include <osmscout/gpx/Import.h>
+#include <osmscout/gpx/Export.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/File.h>
 
 #include <iostream>
 
 struct Arguments
 {
   bool               help;
-  std::string        gpxFile;
+  std::string        gpxInput;
+  std::string        gpxOutput;
 
   Arguments()
       : help(false)
@@ -51,10 +54,16 @@ int main(int argc, char* argv[])
                       true);
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.gpxFile=value;
+                            args.gpxInput=value;
                           }),
-                          "GPXFILE",
+                          "GPXFILEINPUT",
                           "Gpx file for import");
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.gpxOutput=value;
+                          }),
+                          "GPXFILEOUTPUT",
+                          "Gpx file for export");
 
   osmscout::CmdLineParseResult result=argParser.Parse();
 
@@ -62,8 +71,11 @@ int main(int argc, char* argv[])
     std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
     std::cout << argParser.GetHelp() << std::endl;
     return 1;
-  }
-  else if (args.help) {
+  } else if (!osmscout::ExistsInFilesystem(args.gpxInput)) {
+    std::cerr << "ERROR: Input file " << args.gpxInput << " don't exists" << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+    return 1;
+  } else if (args.help) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
@@ -77,10 +89,24 @@ int main(int argc, char* argv[])
 
   osmscout::log.Debug(true);
 
-  osmscout::GpxFile gpxFile;
+  osmscout::gpx::GpxFile gpxFile;
 
-  if (!osmscout::Import::ImportGpx(args.gpxFile, gpxFile)){
+  if (!osmscout::gpx::Import::ImportGpx(args.gpxInput, gpxFile)){
     return 1;
+  }
+
+  for (const auto &track:gpxFile.tracks){
+    if (track.name.hasValue()) {
+      std::cout << "Track \"" << track.name.get() << "\":" << std::endl;
+    }else{
+      std::cout << "Unnamed track:" << std::endl;
+    }
+    std::cout << "  count of segments: " << track.segments.size() << std::endl;
+    std::cout << "  \"raw\" length: " << (track.GetLength()/1000) << " km" << std::endl;
+  }
+
+  if (!osmscout::gpx::Export::ExportGpx(gpxFile, args.gpxOutput)){
+
   }
 
   return 0;

@@ -28,11 +28,14 @@
 #include <string>
 
 namespace osmscout {
+namespace gpx {
+
 class OSMSCOUT_GPX_API Route {
 public:
-  Optional<std::string> name;
+  Optional <std::string> name;
   std::vector<TrackPoint> points;
 };
+}
 }
 
 #endif //OSMSCOUT_GPX_ROUTE_H

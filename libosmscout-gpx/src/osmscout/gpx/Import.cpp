@@ -28,13 +28,14 @@
 #include <iostream>
 
 using namespace osmscout;
+using namespace osmscout::gpx;
 
-void ImportCallback::progress(double)
+void ProcessCallback::Progress(double)
 {
   // no-op
 }
 
-void ImportCallback::error(std::string error)
+void ProcessCallback::Error(std::string error)
 {
   osmscout::log.Error() << error;
 }
@@ -90,7 +91,7 @@ private:
 
   GpxFile           &output;
   BreakerRef        breaker;
-  ImportCallbackRef callback;
+  ProcessCallbackRef callback;
 
   size_t            errorCnt;
 
@@ -98,7 +99,7 @@ public:
   GpxParser(const std::string &filePath,
          GpxFile &output,
          BreakerRef breaker,
-         ImportCallbackRef callback):
+         ProcessCallbackRef callback):
   file(NULL),
   ctxt(NULL),
   fileSize(0),
@@ -124,7 +125,7 @@ public:
     try{
       fileSize=GetFileSize(filePath);
     }catch(const IOException &e){
-      callback->error("Can't get file size: "+e.GetErrorMsg());
+      callback->Error("Can't get file size: " + e.GetErrorMsg());
     }
 
     file=std::fopen(filePath.c_str(),"rb");
@@ -175,13 +176,13 @@ public:
       }
       if (breaker && breaker->IsAborted()){
         if (callback) {
-          callback->error("aborted");
+          callback->Error("aborted");
         }
         return false;
       }
       position+=res;
       if (callback) {
-        callback->progress(std::min(1.0, ((double) position) / ((double) fileSize)));
+        callback->Progress(std::min(1.0, ((double) position) / ((double) fileSize)));
       }
     }
 
@@ -238,7 +239,7 @@ public:
   {
     errorCnt++;
     if (callback){
-      callback->error(msg);
+      callback->Error(msg);
     }
   }
 
@@ -747,7 +748,7 @@ GpxParserContext* DocumentContext::StartElement(const std::string &name,
 bool Import::ImportGpx(const std::string &filePath,
                        GpxFile &output,
                        BreakerRef breaker,
-                       ImportCallbackRef callback)
+                       ProcessCallbackRef callback)
 {
 
   GpxParser parser(filePath, output, breaker, callback);

@@ -33,33 +33,34 @@
 #include <string>
 
 namespace osmscout {
+namespace gpx {
 
-class OSMSCOUT_GPX_API ImportCallback {
+class OSMSCOUT_GPX_API ProcessCallback {
 public:
   /**
    * Callback for reporting import progress
    * @param p - progress in range 0.0 .. 1.0
    */
-  virtual void progress(double p);
+  virtual void Progress(double p);
 
   /**
    * Error while importing gpx
    * @param error
    */
-  virtual void error(std::string error);
+  virtual void Error(std::string error);
 };
 
-typedef std::shared_ptr<ImportCallback> ImportCallbackRef;
+typedef std::shared_ptr<ProcessCallback> ProcessCallbackRef;
 
 class OSMSCOUT_GPX_API Import {
 
 public:
   static bool ImportGpx(const std::string &filePath,
                         GpxFile &output,
-                        BreakerRef breaker=NULL,
-                        ImportCallbackRef callback=std::make_shared<ImportCallback>());
+                        BreakerRef breaker = NULL,
+                        ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
 };
 }
-
+}
 
 #endif //LIBOSMSCOUT_GPX_IMPORT_H

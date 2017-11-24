@@ -1,6 +1,3 @@
-#ifndef OSMSCOUT_GPX_TRACK_H
-#define OSMSCOUT_GPX_TRACK_H
-
 /*
   This source is part of the libosmscout-gpx library
   Copyright (C) 2017 Lukas Karas
@@ -22,27 +19,23 @@
 
 #include <osmscout/gpx/TrackSegment.h>
 
-#include <osmscout/private/GPXImportExport.h>
+#include <osmscout/util/Geometry.h>
 
-#include <string>
-#include <vector>
+using namespace osmscout;
+using namespace osmscout::gpx;
 
-namespace osmscout {
-namespace gpx {
-
-class OSMSCOUT_GPX_API Track {
-public:
-  Optional<std::string> name;
-  Optional<std::string> desc;
-  std::vector<TrackSegment> segments;
-
-  /**
-   * Compute track length in meters
-   * @return
-   */
-  double GetLength() const;
-};
+double TrackSegment::GetLength() const
+{
+  double result=0;
+  auto it=points.begin();
+  if (it==points.end()){
+    return 0;
+  }
+  GeoCoord previous=it->coord;
+  it++;
+  for (; it!=points.end(); it++){
+    result+=GetEllipsoidalDistance(previous, it->coord);
+    previous=it->coord;
+  }
+  return result*1000.0;
 }
-}
-
-#endif //OSMSCOUT_GPX_TRACK_H

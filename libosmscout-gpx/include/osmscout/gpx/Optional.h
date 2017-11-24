@@ -11,8 +11,10 @@
 #include <osmscout/private/GPXImportExport.h>
 
 #include <stdexcept>
+#include <functional>
 
 namespace osmscout {
+namespace gpx {
 
 template<typename T>
 class OSMSCOUT_GPX_API Optional {
@@ -23,9 +25,9 @@ public:
 
   static Optional<T> of(T *v);
 
-  Optional(): value{nullptr} {}
+  Optional() : value{nullptr} {}
 
-  Optional(const Optional<T> &o){
+  Optional(const Optional<T> &o) {
     value = (o.value == nullptr) ? nullptr : new T(*o.value);
   };
 
@@ -35,7 +37,7 @@ public:
 
   ~Optional() { if (value != nullptr) delete value; }
 
-  void operator=(const Optional<T> &o){
+  void operator=(const Optional<T> &o) {
     value = (o.value == nullptr) ? nullptr : new T(o.value);
   };
 
@@ -44,6 +46,8 @@ public:
   };
 
   T get() const;
+  T getOrElse(T defaultValue) const;
+  T getOrElse(std::function<T()> defaultValueSupplier) const;
 
   bool hasValue() const;
 
@@ -55,7 +59,6 @@ private:
 
 template<typename T>
 const Optional<T> Optional<T>::empty = Optional::of(nullptr);
-
 
 
 template<typename T>
@@ -81,6 +84,18 @@ T Optional<T>::get() const {
 }
 
 template<typename T>
+T Optional<T>::getOrElse(T defaultValue) const {
+  if (!hasValue()) return defaultValue;
+  return *value;
+}
+
+template<typename T>
+T Optional<T>::getOrElse(std::function<T()> defaultValueSupplier) const {
+  if (!hasValue()) return defaultValueSupplier();
+  return *value;
+}
+
+template<typename T>
 bool operator==(const Optional<T> &t1, const Optional<T> &t2) {
   if (!t1.hasValue() && !t2.hasValue()) return true;
   else if (!t1.hasValue() || !t2.hasValue()) return false;
@@ -90,6 +105,7 @@ bool operator==(const Optional<T> &t1, const Optional<T> &t2) {
 template<typename T>
 bool operator!=(const Optional<T> &t1, const Optional<T> &t2) {
   return !(t1 == t2);
+}
 }
 }
 
