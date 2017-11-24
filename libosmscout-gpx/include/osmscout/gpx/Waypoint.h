@@ -30,15 +30,23 @@
 #include <string>
 
 namespace osmscout {
-class OSMSCOUT_GPX_API Waypoint {
+
+class OSMSCOUT_GPX_API Waypoint{
 public:
-  std::string name;
+  Waypoint(GeoCoord coord):
+      coord(coord)
+  {
+  }
+
+  Optional<std::string> name;
+
   osmscout::GeoCoord coord;
   Optional<double> elevation; // meters above sea
-  Optional<time_t> time;
+  Optional<Timestamp> time;
+  Optional<double> course; // degrees, 0.0 <= value < 360.0
   Optional<double> hdop; // meters
   Optional<double> vdop; // meters
-
+  Optional<double> pdop; // meters
 };
 }
 

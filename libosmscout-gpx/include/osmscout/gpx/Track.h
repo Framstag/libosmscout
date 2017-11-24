@@ -30,8 +30,8 @@
 namespace osmscout {
 class OSMSCOUT_GPX_API Track {
 public:
-  std::string name;
-  std::string desc;
+  Optional<std::string> name;
+  Optional<std::string> desc;
   std::vector<TrackSegment> segments;
 };
 }
