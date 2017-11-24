@@ -19,10 +19,13 @@
 
 #include <osmscout/gpx/Import.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/String.h>
 
 #include <cstring>
-#include <list>
 #include <cassert>
+#include <functional>
+#include <iomanip>
+#include <iostream>
 
 using namespace osmscout;
 
@@ -41,12 +44,11 @@ class GpxParser;
 class GpxParserContext {
 protected:
   xmlParserCtxtPtr  ctxt;
-  GpxFile           &output;
   GpxParser         &parser;
 
 public:
-  GpxParserContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser):
-      ctxt(ctxt),output(output), parser(parser) { }
+  GpxParserContext(xmlParserCtxtPtr ctxt, GpxParser &parser):
+      ctxt(ctxt), parser(parser) { }
   virtual ~GpxParserContext() { }
 
   virtual const char *ContextName() const = 0;
@@ -54,14 +56,16 @@ public:
   virtual GpxParserContext* StartElement(const std::string &name,
                                          const std::unordered_map<std::string, std::string> &/*atts*/);
 
-  virtual void Characters(std::string str){};
+  virtual void Characters(const std::string &/*str*/){};
 };
 
 
 class DocumentContext : public GpxParserContext {
+private:
+  GpxFile &output;
 public:
   DocumentContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser) :
-      GpxParserContext(ctxt, output, parser) {}
+      GpxParserContext(ctxt, parser), output(output) {}
 
   virtual ~DocumentContext() {}
 
@@ -142,7 +146,6 @@ public:
     }
   }
 
-
   bool Process()
   {
     if (file==NULL) {
@@ -204,7 +207,7 @@ public:
     contextStack.push_back(top==NULL? NULL : top->StartElement(name, atts));
   }
 
-  void Characters(std::string str)
+  void Characters(const std::string &str)
   {
     assert(!contextStack.empty());
     GpxParserContext *top=contextStack.back();
@@ -222,7 +225,7 @@ public:
     contextStack.pop_back();
   }
 
-  void EndElement(const std::string &name) {
+  void EndElement(const std::string &/*name*/) {
     PopContext();
   }
 
@@ -242,6 +245,57 @@ public:
   void Warning(std::string msg)
   {
     osmscout::log.Warn() << msg;
+  }
+
+  bool ParseDoubleAttr(const std::unordered_map<std::string, std::string> &atts,
+                       const std::string &attName,
+                       double &target) const
+  {
+    auto it=atts.find(attName);
+    if (it==atts.end()){
+      return false;
+    }
+    const std::string value=it->second;
+    return StringToNumber(value,target);
+  }
+
+  bool ParseTime(Timestamp timestamp, const std::string timeStr)
+  {
+    // ISO 8601 allows milliseconds in date optionally
+    // but std::get_time provides just second accuracy
+    // so, we use sscanf for parse string and convert
+    // to millisecond time point then
+    int y,M,d,h,m;
+    float s;
+    int ret=std::sscanf(timeStr.c_str(), "%d-%d-%dT%d:%d:%fZ", &y, &M, &d, &h, &m, &s);
+    if (ret!=6){
+      return false;
+    }
+
+    std::tm time{};
+
+    time.tm_year = y - 1900; // Year since 1900
+    time.tm_mon = M - 1;     // 0-11
+    time.tm_mday = d;        // 1-31
+    time.tm_hour = h;        // 0-23
+    time.tm_min = m;         // 0-59
+    time.tm_sec = 0;  // we will add seconds (and milliseconds) to time point later
+# ifdef	__USE_MISC
+    time.tm_gmtoff = 0;
+    time.tm_zone=NULL;
+# else
+    time.__tm_gmtoff = 0;
+    time.__tm_zone = NULL;
+# endif
+    using namespace std;
+    using namespace std::chrono;
+
+    time_t tt = timegm(&time);
+    time_point<system_clock, nanoseconds> timePoint=system_clock::from_time_t(tt);
+    timestamp=time_point_cast<milliseconds,system_clock,nanoseconds>(timePoint);
+    timestamp+=milliseconds((int64_t)(s*1000));
+
+    return true;
   }
 
   static void StartElement(void *data, const xmlChar *name, const xmlChar **atts)
@@ -314,11 +368,167 @@ GpxParserContext* GpxParserContext::StartElement(const std::string &name,
   return NULL;
 }
 
+class SimpleValueContext : public GpxParserContext {
+
+  typedef std::function<void(const std::string &)> Callback;
+
+private:
+  std::string name;
+  std::string buffer;
+  Callback callback;
+public:
+  SimpleValueContext(std::string name,
+                     xmlParserCtxtPtr ctxt,
+                     GpxParser &parser,
+                     Callback callback):
+      GpxParserContext(ctxt, parser), name(name), callback(callback) { }
+  virtual ~SimpleValueContext() {
+    callback(buffer);
+  }
+
+  virtual const char *ContextName() const
+  {
+    return name.c_str();
+  };
+
+  virtual void Characters(const std::string &str){
+    buffer+=str;
+  };
+
+};
+
+class TrkptContext : public GpxParserContext {
+private:
+  TrackSegment &segment;
+  TrackPoint point;
+public:
+  TrkptContext(xmlParserCtxtPtr ctxt, TrackSegment &segment, GpxParser &parser, double lat, double lon) :
+      GpxParserContext(ctxt, parser), segment(segment), point(GeoCoord(lat,lon)) { }
+
+  virtual ~TrkptContext() {
+    segment.points.push_back(std::move(point));
+  }
+
+  virtual const char *ContextName() const
+  {
+    return "Trkpt";
+  }
+
+  virtual GpxParserContext* StartElement(const std::string &name,
+                                         const std::unordered_map<std::string, std::string> &atts) {
+    if (name == "ele") {
+      return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
+        double ele;
+        if (StringToNumber(value, ele)){
+          point.elevation=Optional<double>::of(ele);
+        }else{
+          xmlParserError(ctxt,"Can't parse Ele value\n");
+          parser.Error("Can't parse Ele value");
+        }
+      });
+    } else if (name == "course") {
+      return new SimpleValueContext("CourseContext", ctxt, parser, [&](const std::string &value){
+        double course;
+        if (StringToNumber(value, course)){
+          point.course=Optional<double>::of(course);
+        }else{
+          xmlParserError(ctxt,"Can't parse Course value\n");
+          parser.Error("Can't parse Course value");
+        }
+      });
+    } else if (name == "hdop") {
+      return new SimpleValueContext("HDopContext", ctxt, parser, [&](const std::string &value){
+        double hdop;
+        if (StringToNumber(value, hdop)){
+          point.hdop=Optional<double>::of(hdop);
+        }else{
+          xmlParserError(ctxt,"Can't parse HDop value\n");
+          parser.Error("Can't parse HDop value");
+        }
+      });
+    } else if (name == "vdop") {
+      return new SimpleValueContext("VDopContext", ctxt, parser, [&](const std::string &value){
+        double vdop;
+        if (StringToNumber(value, vdop)){
+          point.vdop=Optional<double>::of(vdop);
+        }else{
+          xmlParserError(ctxt,"Can't parse Ele value\n");
+          parser.Error("Can't parse Ele value");
+        }
+      });
+    } else if (name == "pdop") {
+      return new SimpleValueContext("PDopContext", ctxt, parser, [&](const std::string &value){
+        double pdop;
+        if (StringToNumber(value, pdop)){
+          point.pdop=Optional<double>::of(pdop);
+        }else{
+          xmlParserError(ctxt,"Can't parse PDop value\n");
+          parser.Error("Can't parse PDop value");
+        }
+      });
+    } else if (name == "time") {
+      return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
+        Timestamp time;
+        if (parser.ParseTime(time, value)){
+          point.time=Optional<Timestamp>::of(time);
+        }else{
+          xmlParserError(ctxt,"Can't parse PDop value\n");
+          parser.Error("Can't parse PDop value");
+        }
+      });
+    }
+
+    return GpxParserContext::StartElement(name, atts);
+  }
+};
+
+class TrkSegContext : public GpxParserContext {
+private:
+  Track &track;
+  TrackSegment segment;
+public:
+  TrkSegContext(xmlParserCtxtPtr ctxt, Track &track, GpxParser &parser) :
+      GpxParserContext(ctxt, parser), track(track) {}
+
+  virtual ~TrkSegContext() {
+    track.segments.push_back(std::move(segment));
+  }
+
+  virtual const char *ContextName() const {
+    return "TrkSeg";
+  }
+
+  virtual GpxParserContext* StartElement(const std::string &name,
+                                         const std::unordered_map<std::string, std::string> &atts)
+  {
+    if (name=="trkpt"){
+      double lat;
+      double lon;
+      if (parser.ParseDoubleAttr(atts, "lat", lat) &&
+          parser.ParseDoubleAttr(atts, "lon", lon)
+          ) {
+        return new TrkptContext(ctxt, segment, parser, lat, lon);
+      }else{
+        xmlParserError(ctxt,"Can't parse trkpt lan/lon\n");
+        parser.Error("Can't parse trkpt lan/lon");
+        return NULL;
+      }
+    }
+
+    return GpxParserContext::StartElement(name, atts);
+  }
+};
+
 class TrkContext : public GpxParserContext {
+private:
+  Track track;
+  GpxFile &output;
 public:
   TrkContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser):
-      GpxParserContext(ctxt, output, parser) { }
-  virtual ~TrkContext() { }
+      GpxParserContext(ctxt, parser), output(output) { }
+  virtual ~TrkContext() {
+    output.tracks.push_back(std::move(track));
+  }
 
   virtual const char *ContextName() const
   {
@@ -328,17 +538,27 @@ public:
   virtual GpxParserContext* StartElement(const std::string &name,
                                          const std::unordered_map<std::string, std::string> &atts)
   {
-    // if (name=="trk"){
-    //   return new TrkContext(ctxt,output,parser);
-    // }
+    if (name=="name"){
+      return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
+        track.name=name;
+      });
+    } else if (name=="desc"){
+      return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &desc){
+        track.desc=desc;
+      });
+    }else if (name=="trkseg"){
+      return new TrkSegContext(ctxt, track, parser);
+    }
+
     return GpxParserContext::StartElement(name, atts);
   }
 };
 
 class GpxDocumentContext : public GpxParserContext {
+  GpxFile &output;
 public:
   GpxDocumentContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser):
-      GpxParserContext(ctxt, output, parser) {}
+      GpxParserContext(ctxt, parser), output(output) {}
   virtual ~GpxDocumentContext() {}
 
   virtual const char *ContextName() const {
