@@ -57,10 +57,10 @@ if [ "$TARGET" = "build" ]; then
       brew install meson || true
     fi
 
-    brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew glm
+    brew install gettext libxml2 protobuf cairo pango qt glfw3 glew glm
     brew link --force gettext
     brew link --force libxml2
-    brew link --force qt5
+    brew link --force qt
   fi
 elif [ "$TARGET" = "importer" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
