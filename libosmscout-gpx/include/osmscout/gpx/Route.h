@@ -29,7 +29,8 @@
 
 namespace osmscout {
 class OSMSCOUT_GPX_API Route {
-  std::string name;
+public:
+  Optional<std::string> name;
   std::vector<TrackPoint> points;
 };
 }

@@ -363,8 +363,8 @@ public:
 GpxParserContext* GpxParserContext::StartElement(const std::string &name,
                                                  const std::unordered_map<std::string, std::string> &/*atts*/)
 {
-  xmlParserError(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
-  parser.Error("Unexpected element");
+  xmlParserWarning(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
+  parser.Warning("Unexpected element");
   return NULL;
 }
 
@@ -397,22 +397,14 @@ public:
 
 };
 
-class TrkptContext : public GpxParserContext {
-private:
-  TrackSegment &segment;
+class PointLikeContext : public GpxParserContext {
+protected:
   TrackPoint point;
 public:
-  TrkptContext(xmlParserCtxtPtr ctxt, TrackSegment &segment, GpxParser &parser, double lat, double lon) :
-      GpxParserContext(ctxt, parser), segment(segment), point(GeoCoord(lat,lon)) { }
+  PointLikeContext(xmlParserCtxtPtr ctxt, GpxParser &parser, double lat, double lon) :
+      GpxParserContext(ctxt, parser), point(GeoCoord(lat,lon)) { }
 
-  virtual ~TrkptContext() {
-    segment.points.push_back(std::move(point));
-  }
-
-  virtual const char *ContextName() const
-  {
-    return "Trkpt";
-  }
+  virtual ~PointLikeContext() {}
 
   virtual GpxParserContext* StartElement(const std::string &name,
                                          const std::unordered_map<std::string, std::string> &/*atts*/) {
@@ -422,8 +414,8 @@ public:
         if (StringToNumber(value, ele)){
           point.elevation=Optional<double>::of(ele);
         }else{
-          xmlParserError(ctxt,"Can't parse Ele value\n");
-          parser.Error("Can't parse Ele value");
+          xmlParserWarning(ctxt,"Can't parse Ele value\n");
+          parser.Warning("Can't parse Ele value");
         }
       });
     } else if (name == "course") {
@@ -432,8 +424,8 @@ public:
         if (StringToNumber(value, course)){
           point.course=Optional<double>::of(course);
         }else{
-          xmlParserError(ctxt,"Can't parse Course value\n");
-          parser.Error("Can't parse Course value");
+          xmlParserWarning(ctxt,"Can't parse Course value\n");
+          parser.Warning("Can't parse Course value");
         }
       });
     } else if (name == "hdop") {
@@ -442,8 +434,8 @@ public:
         if (StringToNumber(value, hdop)){
           point.hdop=Optional<double>::of(hdop);
         }else{
-          xmlParserError(ctxt,"Can't parse HDop value\n");
-          parser.Error("Can't parse HDop value");
+          xmlParserWarning(ctxt,"Can't parse HDop value\n");
+          parser.Warning("Can't parse HDop value");
         }
       });
     } else if (name == "vdop") {
@@ -452,8 +444,8 @@ public:
         if (StringToNumber(value, vdop)){
           point.vdop=Optional<double>::of(vdop);
         }else{
-          xmlParserError(ctxt,"Can't parse Ele value\n");
-          parser.Error("Can't parse Ele value");
+          xmlParserWarning(ctxt,"Can't parse Ele value\n");
+          parser.Warning("Can't parse Ele value");
         }
       });
     } else if (name == "pdop") {
@@ -462,8 +454,8 @@ public:
         if (StringToNumber(value, pdop)){
           point.pdop=Optional<double>::of(pdop);
         }else{
-          xmlParserError(ctxt,"Can't parse PDop value\n");
-          parser.Error("Can't parse PDop value");
+          xmlParserWarning(ctxt,"Can't parse PDop value\n");
+          parser.Warning("Can't parse PDop value");
         }
       });
     } else if (name == "time") {
@@ -472,13 +464,47 @@ public:
         if (parser.ParseTime(time, value)){
           point.time=Optional<Timestamp>::of(time);
         }else{
-          xmlParserError(ctxt,"Can't parse PDop value\n");
-          parser.Error("Can't parse PDop value");
+          xmlParserWarning(ctxt,"Can't parse PDop value\n");
+          parser.Warning("Can't parse PDop value");
         }
       });
     }
 
     return NULL; // silently ignore unknown elements
+  }
+};
+
+class TrkptContext : public PointLikeContext {
+private:
+  TrackSegment &segment;
+public:
+  TrkptContext(xmlParserCtxtPtr ctxt, TrackSegment &segment, GpxParser &parser, double lat, double lon) :
+      PointLikeContext(ctxt, parser, lat, lon), segment(segment) {}
+
+  virtual ~TrkptContext() {
+    segment.points.push_back(std::move(point));
+  }
+
+  virtual const char *ContextName() const
+  {
+    return "Trkpt";
+  }
+};
+
+class RteptContext : public PointLikeContext {
+private:
+  Route &route;
+public:
+  RteptContext(xmlParserCtxtPtr ctxt, Route &route, GpxParser &parser, double lat, double lon) :
+    PointLikeContext(ctxt, parser, lat, lon), route(route) {}
+
+  virtual ~RteptContext() {
+    route.points.push_back(std::move(point));
+  }
+
+  virtual const char *ContextName() const
+  {
+    return "Rtept";
   }
 };
 
@@ -511,8 +537,8 @@ public:
         if (StringToNumber(value, ele)){
           waypoint.elevation=Optional<double>::of(ele);
         }else{
-          xmlParserError(ctxt,"Can't parse Ele value\n");
-          parser.Error("Can't parse Ele value");
+          xmlParserWarning(ctxt,"Can't parse Ele value\n");
+          parser.Warning("Can't parse Ele value");
         }
       });
     } else if (name == "hdop") {
@@ -521,8 +547,8 @@ public:
         if (StringToNumber(value, hdop)){
           waypoint.hdop=Optional<double>::of(hdop);
         }else{
-          xmlParserError(ctxt,"Can't parse HDop value\n");
-          parser.Error("Can't parse HDop value");
+          xmlParserWarning(ctxt,"Can't parse HDop value\n");
+          parser.Warning("Can't parse HDop value");
         }
       });
     } else if (name == "vdop") {
@@ -531,8 +557,8 @@ public:
         if (StringToNumber(value, vdop)){
           waypoint.vdop=Optional<double>::of(vdop);
         }else{
-          xmlParserError(ctxt,"Can't parse Ele value\n");
-          parser.Error("Can't parse Ele value");
+          xmlParserWarning(ctxt,"Can't parse Ele value\n");
+          parser.Warning("Can't parse Ele value");
         }
       });
     } else if (name == "pdop") {
@@ -541,8 +567,8 @@ public:
         if (StringToNumber(value, pdop)){
           waypoint.pdop=Optional<double>::of(pdop);
         }else{
-          xmlParserError(ctxt,"Can't parse PDop value\n");
-          parser.Error("Can't parse PDop value");
+          xmlParserWarning(ctxt,"Can't parse PDop value\n");
+          parser.Warning("Can't parse PDop value");
         }
       });
     } else if (name == "time") {
@@ -551,8 +577,8 @@ public:
         if (parser.ParseTime(time, value)){
           waypoint.time=Optional<Timestamp>::of(time);
         }else{
-          xmlParserError(ctxt,"Can't parse PDop value\n");
-          parser.Error("Can't parse PDop value");
+          xmlParserWarning(ctxt,"Can't parse Time value\n");
+          parser.Warning("Can't parse Time value");
         }
       });
     }
@@ -598,6 +624,47 @@ public:
   }
 };
 
+class RouteContext : public GpxParserContext {
+private:
+  GpxFile &output;
+  Route route;
+public:
+  RouteContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser) :
+  GpxParserContext(ctxt, parser), output(output) {}
+
+  virtual ~RouteContext() {
+    output.routes.push_back(std::move(route));
+  }
+
+  virtual const char *ContextName() const {
+    return "Route";
+  }
+
+  virtual GpxParserContext* StartElement(const std::string &name,
+                                         const std::unordered_map<std::string, std::string> &atts)
+  {
+    if (name=="rtept") {
+      double lat;
+      double lon;
+      if (parser.ParseDoubleAttr(atts, "lat", lat) &&
+          parser.ParseDoubleAttr(atts, "lon", lon)
+          ) {
+        return new RteptContext(ctxt, route, parser, lat, lon);
+      } else {
+        xmlParserError(ctxt, "Can't parse trkpt lan/lon\n");
+        parser.Error("Can't parse trkpt lan/lon");
+        return NULL;
+      }
+    } else if (name=="name"){
+      return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
+        route.name=Optional<std::string>::of(name);
+      });
+    }
+
+    return NULL; // silently ignore unknown elements
+  }
+};
+
 class TrkContext : public GpxParserContext {
 private:
   Track track;
@@ -615,7 +682,7 @@ public:
   };
 
   virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &atts)
+                                         const std::unordered_map<std::string, std::string> &/*atts*/)
   {
     if (name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
@@ -629,7 +696,7 @@ public:
       return new TrkSegContext(ctxt, track, parser);
     }
 
-    return GpxParserContext::StartElement(name, atts);
+    return NULL; // silently ignore unknown elements
   }
 };
 
@@ -661,6 +728,8 @@ public:
         parser.Error("Can't parse wpt lan/lon");
         return NULL;
       }
+    } else if (name=="rte"){
+      return new RouteContext(ctxt,output,parser);
     }
     return NULL; // silently ignore unknown elements
   }
