@@ -1009,6 +1009,28 @@ namespace osmscout {
     return true;
   }
 
+  /**
+   * Request layout of a point label
+   * @param projection
+   *    Projection instance to use
+   * @param parameter
+   *    General map drawing parameter that might influence the result
+   * @param buffer
+   *    The FeatureValueBuffer of the object that owns the label
+   * @param iconStyle
+   *    An optional icon style to use
+   * @param textStyles
+   *    A list of text styles to use (the object could have more than
+   *    label styles attached)
+   * @param x
+   *    X position to place the label at (currently always the center of the area or the coordinate of the node)
+   * @param y
+   *    Y position to place the label at (currently always the center of the area or the coordinate of the node)
+   * @param objectWidth
+   *    The (rough) width of the object
+   * @param objectHeight
+   *    The (rough) height of the object
+   */
   void MapPainter::LayoutPointLabels(const Projection& projection,
                                      const MapParameter& parameter,
                                      const FeatureValueBuffer& buffer,
@@ -1160,20 +1182,23 @@ namespace osmscout {
         RegisterPointLabel(projection,
                            parameter,
                            data,
-                           x,offset+data.dimension.height/2,
+                           x,
+                           offset+data.dimension.height/2,
                            labelId);
       }
       else if (data.icon) {
         //std::cout << "# Icon " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
         DrawIcon(data.iconStyle.get(),
-                 x,offset);
+                 x,
+                 offset);
       }
       else {
         //std::cout << "# Symbol " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
         DrawSymbol(projection,
                    parameter,
                    *data.iconStyle->GetSymbol(),
-                   x,offset);
+                   x,
+                   offset);
       }
 
       offset+=data.dimension.height;

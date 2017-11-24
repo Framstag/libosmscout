@@ -109,6 +109,10 @@ int main(int argc, char* argv[])
       osmscout::MapPainterCairo     painter(styleConfig);
 
       drawParameter.SetFontSize(3.0);
+      drawParameter.SetLabelLineMinCharCount(15);
+      drawParameter.SetLabelLineMaxCharCount(30);
+      drawParameter.SetLabelLineFitToArea(true);
+      drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight()));
 
       projection.Set(osmscout::GeoCoord(lat,lon),
                      osmscout::Magnification(zoom),

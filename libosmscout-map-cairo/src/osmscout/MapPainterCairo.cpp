@@ -649,21 +649,24 @@ namespace osmscout {
     pango_layout_set_text(layout,
                           text.c_str(),
                           (int)text.length());
-    pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
+    // Do not set an alignment here, since this will set toe X coordinate of
+    // the extends to the center of the text. Since we do "center of" calculation already
+    // in the MapPainter, this will result in broken coordinates.
     pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
 
     if (objectWidth>0) {
       double proposedWidth=GetProposedLabelWidth(parameter,
-                                                 pango_font_metrics_get_approximate_char_width(metrics),
+                                                 pango_font_metrics_get_approximate_char_width(metrics)/PANGO_SCALE,
                                                  objectWidth,
                                                  text.length());
 
-      pango_layout_set_width(layout,(int)proposedWidth);
+      pango_layout_set_width(layout,
+                             (int)(proposedWidth*PANGO_SCALE));
     }
 
     pango_layout_get_pixel_extents(layout,
-                                   nullptr,
-                                   &extends);
+                                   &extends,
+                                   nullptr);
 
     TextDimension dimension;
 
@@ -816,14 +819,21 @@ namespace osmscout {
       PangoFontMetrics *metrics=pango_context_get_metrics(context,
                                                           font,
                                                           pango_context_get_language(context));
-      int              proposedWidth=(int)std::floor(label.bx2-label.bx1)+1;
+      int              proposedWidth=(int)std::ceil(label.bx2-label.bx1);
 
       pango_layout_set_text(layout,
                             label.text.c_str(),
                             (int)label.text.length());
       pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
       pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
-      pango_layout_set_width(layout,proposedWidth);
+
+      pango_layout_set_width(layout,proposedWidth*PANGO_SCALE);
+
+      PangoRectangle extends;
+
+      pango_layout_get_pixel_extents(layout,
+                                     nullptr,
+                                     &extends);
 
       cairo_set_source_rgba(draw,r,g,b,label.alpha);
 
