@@ -33,8 +33,8 @@ namespace gpx {
 
 class OSMSCOUT_GPX_API GpxFile {
 public:
-  std::vector<Track> tracks;
-  std::vector<Route> routes;
+  std::vector<Track>    tracks;
+  std::vector<Route>    routes;
   std::vector<Waypoint> waypoints;
 };
 }

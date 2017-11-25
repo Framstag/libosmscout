@@ -22,6 +22,15 @@
 using namespace osmscout;
 using namespace osmscout::gpx;
 
+size_t Track::GetPointCount() const
+{
+  size_t result=0;
+  for (const auto &segment:segments){
+    result+=segment.points.size();
+  }
+  return result;
+}
+
 double Track::GetLength() const
 {
   double result=0;

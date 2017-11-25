@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
       std::cout << "Unnamed track:" << std::endl;
     }
     std::cout << "  count of segments: " << track.segments.size() << std::endl;
+    std::cout << "  \"raw\" point count: " << track.GetPointCount() << std::endl;
     std::cout << "  \"raw\" length: " << (track.GetLength()/1000) << " km" << std::endl;
   }
 

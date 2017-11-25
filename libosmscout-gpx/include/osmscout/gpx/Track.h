@@ -41,6 +41,7 @@ public:
    * @return
    */
   double GetLength() const;
+  size_t GetPointCount() const;
 };
 }
 }

@@ -260,16 +260,15 @@ public:
     return StringToNumber(value,target);
   }
 
-  bool ParseTime(Timestamp timestamp, const std::string timeStr)
+  bool ParseTime(Timestamp &timestamp, const std::string timeStr)
   {
     // ISO 8601 allows milliseconds in date optionally
     // but std::get_time provides just second accuracy
     // so, we use sscanf for parse string and convert
     // to millisecond time point then
-    int y,M,d,h,m;
-    float s;
-    int ret=std::sscanf(timeStr.c_str(), "%d-%d-%dT%d:%d:%fZ", &y, &M, &d, &h, &m, &s);
-    if (ret!=6){
+    int y,M,d,h,m,s,mill;
+    int ret=std::sscanf(timeStr.c_str(), "%d-%d-%dT%d:%d:%d.%dZ", &y, &M, &d, &h, &m, &s, &mill);
+    if (ret<6){
       return false;
     }
 
@@ -280,7 +279,7 @@ public:
     time.tm_mday = d;        // 1-31
     time.tm_hour = h;        // 0-23
     time.tm_min = m;         // 0-59
-    time.tm_sec = 0;  // we will add seconds (and milliseconds) to time point later
+    time.tm_sec = s;         // 0-60
 # ifdef	__USE_MISC
     time.tm_gmtoff = 0;
     time.tm_zone=NULL;
@@ -294,7 +293,10 @@ public:
     time_t tt = timegm(&time);
     time_point<system_clock, nanoseconds> timePoint=system_clock::from_time_t(tt);
     timestamp=time_point_cast<milliseconds,system_clock,nanoseconds>(timePoint);
-    timestamp+=milliseconds((int64_t)(s*1000));
+    // add milliseconds
+    if (ret>6) {
+      timestamp += milliseconds(mill);
+    }
 
     return true;
   }
