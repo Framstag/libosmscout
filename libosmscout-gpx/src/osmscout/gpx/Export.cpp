@@ -178,7 +178,7 @@ bool GpxWritter::WriteTextElement(const char *elementName, const std::string &te
   if (writer==NULL){
     return false;
   }
-  if (xmlTextWriterWriteElement(writer, (const xmlChar *)elementName, (const xmlChar *)text.c_str())) {
+  if (xmlTextWriterWriteElement(writer, (const xmlChar *)elementName, (const xmlChar *)text.c_str()) < 0) {
     if (callback) {
       callback->Error("Error at xmlTextWriterWriteElement");
     }
