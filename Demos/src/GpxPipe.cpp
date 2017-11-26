@@ -1,5 +1,5 @@
 /*
-  GpxImport - a demo program for libosmscout
+  GpxPipe - a demo program for libosmscout
   Copyright (C) 2017 Lukas Karas
 
   This program is free software; you can redistribute it and/or modify
