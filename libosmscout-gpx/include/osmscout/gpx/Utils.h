@@ -30,18 +30,20 @@ namespace osmscout {
 namespace gpx {
 
 class OSMSCOUT_GPX_API ProcessCallback {
-    public:
-    /**
-     * Callback for reporting import progress
-     * @param p - progress in range 0.0 .. 1.0
-     */
-    virtual void Progress(double p);
+public:
+  virtual ~ProcessCallback(){};
 
-    /**
-     * Error while importing gpx
-     * @param error
-     */
-    virtual void Error(std::string error);
+  /**
+   * Callback for reporting import progress
+   * @param p - progress in range 0.0 .. 1.0
+   */
+  virtual void Progress(double p);
+
+  /**
+   * Error while importing gpx
+   * @param error
+   */
+  virtual void Error(std::string error);
 };
 
 typedef std::shared_ptr<ProcessCallback> ProcessCallbackRef;
