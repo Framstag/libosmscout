@@ -789,4 +789,65 @@ namespace osmscout {
 
     return WStringToUTF8String(wstr);
   }
+
+  bool ParseISO8601TimeString(const std::string &timeStr, Timestamp &timestamp)
+  {
+    // ISO 8601 allows milliseconds in date optionally
+    // but std::get_time provides just second accuracy
+    // so, we use sscanf for parse string and add
+    // milliseconds timestamp later
+    int y,M,d,h,m,s,mill;
+    int ret=std::sscanf(timeStr.c_str(), "%d-%d-%dT%d:%d:%d.%dZ", &y, &M, &d, &h, &m, &s, &mill);
+    if (ret<6){
+      return false;
+    }
+
+    std::tm time{};
+
+    time.tm_year = y - 1900; // Year since 1900
+    time.tm_mon = M - 1;     // 0-11
+    time.tm_mday = d;        // 1-31
+    time.tm_hour = h;        // 0-23
+    time.tm_min = m;         // 0-59
+    time.tm_sec = s;         // 0-60
+  # ifdef	__USE_MISC
+    time.tm_gmtoff = 0;
+    time.tm_zone = NULL;
+  # else
+    time.__tm_gmtoff = 0;
+    time.__tm_zone = NULL;
+  # endif
+    using namespace std;
+    using namespace std::chrono;
+
+    time_t tt = timegm(&time);
+    time_point<system_clock, nanoseconds> timePoint=system_clock::from_time_t(tt);
+    timestamp=time_point_cast<milliseconds,system_clock,nanoseconds>(timePoint);
+    // add milliseconds
+    if (ret>6) {
+      timestamp += milliseconds(mill);
+    }
+
+    return true;
+  }
+
+  std::string TimestampToISO8601TimeString(const Timestamp &timestamp){
+    using namespace std::chrono;
+
+    std::ostringstream stream;
+
+    std::time_t tt = std::chrono::system_clock::to_time_t(timestamp);
+    std::tm tm = *std::gmtime(&tt);
+
+    std::array<char, 64> buff;
+    std::strftime(buff.data(), buff.size(), "%FT%T.", &tm);
+
+    stream << buff.data();
+
+    // add milliseconds
+    long millisFromEpoch = timestamp.time_since_epoch().count();
+    stream << (millisFromEpoch - ((millisFromEpoch / 1000) * 1000));
+    stream << "Z";
+    return stream.str();
+  }
 }

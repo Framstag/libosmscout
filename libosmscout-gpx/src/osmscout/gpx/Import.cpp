@@ -260,47 +260,6 @@ public:
     return StringToNumber(value,target);
   }
 
-  bool ParseTime(Timestamp &timestamp, const std::string timeStr)
-  {
-    // ISO 8601 allows milliseconds in date optionally
-    // but std::get_time provides just second accuracy
-    // so, we use sscanf for parse string and convert
-    // to millisecond time point then
-    int y,M,d,h,m,s,mill;
-    int ret=std::sscanf(timeStr.c_str(), "%d-%d-%dT%d:%d:%d.%dZ", &y, &M, &d, &h, &m, &s, &mill);
-    if (ret<6){
-      return false;
-    }
-
-    std::tm time{};
-
-    time.tm_year = y - 1900; // Year since 1900
-    time.tm_mon = M - 1;     // 0-11
-    time.tm_mday = d;        // 1-31
-    time.tm_hour = h;        // 0-23
-    time.tm_min = m;         // 0-59
-    time.tm_sec = s;         // 0-60
-# ifdef	__USE_MISC
-    time.tm_gmtoff = 0;
-    time.tm_zone=NULL;
-# else
-    time.__tm_gmtoff = 0;
-    time.__tm_zone = NULL;
-# endif
-    using namespace std;
-    using namespace std::chrono;
-
-    time_t tt = timegm(&time);
-    time_point<system_clock, nanoseconds> timePoint=system_clock::from_time_t(tt);
-    timestamp=time_point_cast<milliseconds,system_clock,nanoseconds>(timePoint);
-    // add milliseconds
-    if (ret>6) {
-      timestamp += milliseconds(mill);
-    }
-
-    return true;
-  }
-
   static void StartElement(void *data, const xmlChar *name, const xmlChar **atts)
   {
     GpxParser* parser=static_cast<GpxParser*>(data);
@@ -464,7 +423,7 @@ public:
     } else if (name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
-        if (parser.ParseTime(time, value)){
+        if (ParseISO8601TimeString(value, time)){
           point.time=Optional<Timestamp>::of(time);
         }else{
           xmlParserWarning(ctxt,"Can't parse PDop value\n");
@@ -577,7 +536,7 @@ public:
     } else if (name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
-        if (parser.ParseTime(time, value)){
+        if (ParseISO8601TimeString(value, time)){
           waypoint.time=Optional<Timestamp>::of(time);
         }else{
           xmlParserWarning(ctxt,"Can't parse Time value\n");

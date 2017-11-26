@@ -200,24 +200,7 @@ bool GpxWritter::WriteTextElement(const char *elementName, double value, std::st
 
 bool GpxWritter::WriteTextElement(const char *elementName, const Timestamp &timestamp)
 {
-  using namespace std::chrono;
-
-  std::ostringstream stream;
-
-  std::time_t tt = std::chrono::system_clock::to_time_t(timestamp);
-  std::tm tm = *std::gmtime(&tt);
-
-  std::array<char, 100> buff;
-  std::strftime(buff.data(), buff.size(), "%FT%T.", &tm);
-
-  stream << buff.data();
-
-  // add milliseconds
-  long millisFromEpoch = timestamp.time_since_epoch().count();
-  stream << (millisFromEpoch - ((millisFromEpoch / 1000) * 1000));
-  stream << "Z";
-
-  return WriteTextElement(elementName, stream.str().c_str());
+  return WriteTextElement(elementName, TimestampToISO8601TimeString(timestamp).c_str());
 }
 
 bool GpxWritter::WriteAttribute(const char *name, const char *content)
