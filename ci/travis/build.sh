@@ -2,9 +2,6 @@
 
 set -e
 
-echo "Original locale settings:"
-locale
-
 echo "Setting LANG to C.UTF-8:"
 export LANG="C.UTF-8"
 
@@ -14,7 +11,7 @@ locale
 echo "Build start time: `date`"
 
 if [ "$TARGET" = "build" ]; then
-  if  [ "$TRAVIS_OS_NAME" = "osx" ]; then
+  if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ] ; then
     export PATH="/usr/local/opt/qt/bin:$PATH"
     export PATH="/usr/local/opt/gettext/bin:$PATH"
     export PATH="/usr/local/opt/libxml2/bin:$PATH"
@@ -27,7 +24,13 @@ if [ "$TARGET" = "build" ]; then
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
-    cmake ..
+
+  if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config  ..
+    else
+      cmake ..
+    fi
+
     make
     make test
   fi

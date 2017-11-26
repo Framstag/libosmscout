@@ -16,7 +16,7 @@ if [ "$TARGET" = "build" ]; then
     sudo apt-get -qq update
 
     if [ "$BUILDTOOL" = "meson" ]; then
-      wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
+      wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
       unzip ninja-linux.zip
       mkdir -p ~/bin
       mv ninja ~/bin
@@ -57,10 +57,12 @@ if [ "$TARGET" = "build" ]; then
       brew install meson || true
     fi
 
-    brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew glm
-    brew link --force gettext
-    brew link --force libxml2
-    brew link --force qt5
+    if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
+      brew install gettext libxml2 protobuf cairo pango qt5 glfw3 glew glm
+      brew link --force gettext
+      brew link --force libxml2
+      brew link --force qt5
+    fi
   fi
 elif [ "$TARGET" = "importer" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
@@ -79,8 +81,8 @@ elif [ "$TARGET" = "importer" ]; then
 elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
 
-  wget https://github.com/spf13/hugo/releases/download/v0.30.2/hugo_0.30.2_Linux-64bit.deb
-  sudo dpkg -i hugo_0.30.2_Linux-64bit.deb
+  wget https://github.com/spf13/hugo/releases/download/v0.31/hugo_0.31_Linux-64bit.deb
+  sudo dpkg -i hugo_0.31_Linux-64bit.deb
 
   sudo apt-get -qq update
   sudo apt-get install -y python3-pygments python-pygments doxygen lftp
