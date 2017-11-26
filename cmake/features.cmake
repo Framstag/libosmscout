@@ -90,7 +90,9 @@ check_function_exists(posix_madvise HAVE_POSIX_MADVISE)
 check_function_exists(mallinfo HAVE_MALLINFO)
 
 # check libraries and tools
+if(NOT IOS)
 find_package(Marisa)
+endif()
 find_package(LibXml2)
 find_package(MyProtobuf) # Modified FindProtobuf
 find_package(ZLIB)
