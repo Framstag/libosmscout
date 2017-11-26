@@ -44,9 +44,29 @@ public:
   Optional<double> elevation; // meters above sea
   Optional<Timestamp> time;
   Optional<double> course; // degrees, 0.0 <= value < 360.0
-  Optional<double> hdop; // meters
-  Optional<double> vdop; // meters
-  Optional<double> pdop; // meters
+
+  /**
+   * Dilution of precision (horizontal, vertical, position)
+   * don't provide information about exact inaccuracy in meters!
+   * https://en.wikipedia.org/wiki/Dilution_of_precision_(navigation)
+   *
+   * See https://gis.stackexchange.com/a/97779 :
+   * "HDOP is calculated mathematically from the positions of the satellites
+   * and at the same time, at the same place HDOP is the same for all receivers."
+   *
+   * But majority of high-level location apis (Qt for example)
+   * provides inaccuracy in meters and hide raw dilution values.
+   * Sadly, GPX format don't provide elements to store computed
+   * inaccuracy in meters.
+   *
+   * ...I think that it is fair enough to use hdop/vdop
+   * for accuracy values, majority of software do it this way.
+   * But keep in mind, that you can't be sure what is meaning
+   * of these values :-(
+   */
+  Optional<double> hdop;
+  Optional<double> vdop;
+  Optional<double> pdop;
 };
 }
 }
