@@ -47,22 +47,25 @@ public:
 
   /**
    * Dilution of precision (horizontal, vertical, position)
-   * don't provide information about exact inaccuracy in meters!
+   * don't provide information about approximate inaccuracy in meters!
    * https://en.wikipedia.org/wiki/Dilution_of_precision_(navigation)
    *
    * See https://gis.stackexchange.com/a/97779 :
    * "HDOP is calculated mathematically from the positions of the satellites
    * and at the same time, at the same place HDOP is the same for all receivers."
+   * Inaccuracy is computed from signal strength, used satelites
+   * and receiver accuracy...
    *
    * But majority of high-level location apis (Qt for example)
-   * provides inaccuracy in meters and hide raw dilution values.
+   * provides estimated inaccuracy in meters and hide raw dilution values.
    * Sadly, GPX format don't provide elements to store computed
-   * inaccuracy in meters.
+   * inaccuracy in meters, so majority of software store accuracy
+   * to dilution tags.
    *
-   * ...I think that it is fair enough to use hdop/vdop
-   * for accuracy values, majority of software do it this way.
-   * But keep in mind, that you can't be sure what is meaning
+   * So keep in mind, that you can't be sure what is meaning
    * of these values :-(
+   * ...I think that it is ok to assume that hdop/vdop represents
+   * accuracy in meters.
    */
   Optional<double> hdop;
   Optional<double> vdop;

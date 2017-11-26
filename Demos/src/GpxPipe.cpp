@@ -22,7 +22,6 @@
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/Logger.h>
-#include <osmscout/util/File.h>
 
 #include <iostream>
 
@@ -41,7 +40,7 @@ struct Arguments
 
 int main(int argc, char* argv[])
 {
-  osmscout::CmdLineParser   argParser("GpxImport",
+  osmscout::CmdLineParser   argParser("GpxPipe",
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
   Arguments                 args;
@@ -91,9 +90,12 @@ int main(int argc, char* argv[])
 
   osmscout::gpx::GpxFile gpxFile;
 
-  if (!osmscout::gpx::Import::ImportGpx(args.gpxInput, gpxFile)){
+  if (!ImportGpx(args.gpxInput, gpxFile)){
     return 1;
   }
+
+  osmscout::gpx::GpxFile filteredFile(gpxFile);
+  filteredFile.tracks.clear();
 
   for (const auto &track:gpxFile.tracks){
     if (track.name.hasValue()) {
@@ -104,10 +106,19 @@ int main(int argc, char* argv[])
     std::cout << "  count of segments: " << track.segments.size() << std::endl;
     std::cout << "  \"raw\" point count: " << track.GetPointCount() << std::endl;
     std::cout << "  \"raw\" length: " << (track.GetLength()/1000) << " km" << std::endl;
+
+    osmscout::gpx::Track filtered(track);
+    filtered.FilterPoints([](std::vector<osmscout::gpx::TrackPoint> &points){
+      osmscout::gpx::FilterInaccuratePoints(points, 15);
+      osmscout::gpx::FilterNearPoints(points, 10);
+    });
+    std::cout << "  filtered point count: " << filtered.GetPointCount() << std::endl;
+    std::cout << "  filtered length: " << (filtered.GetLength()/1000) << " km" << std::endl;
+    filteredFile.tracks.push_back(filtered);
   }
 
-  if (!osmscout::gpx::Export::ExportGpx(gpxFile, args.gpxOutput)){
-
+  if (!ExportGpx(filteredFile, args.gpxOutput)){
+    return 1;
   }
 
   return 0;

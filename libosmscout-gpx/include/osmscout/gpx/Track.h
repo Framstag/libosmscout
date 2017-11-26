@@ -38,10 +38,13 @@ public:
 
   /**
    * Compute track length in meters
-   * @return
+   * @return length
    */
   double GetLength() const;
+
   size_t GetPointCount() const;
+
+  void FilterPoints(std::function<void(std::vector<TrackPoint> &)> filter);
 };
 }
 }

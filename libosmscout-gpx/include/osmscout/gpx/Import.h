@@ -21,6 +21,7 @@
 */
 
 #include <osmscout/gpx/GpxFile.h>
+#include <osmscout/gpx/Utils.h>
 #include <osmscout/private/GPXImportExport.h>
 
 #include <osmscout/util/File.h>
@@ -35,31 +36,12 @@
 namespace osmscout {
 namespace gpx {
 
-class OSMSCOUT_GPX_API ProcessCallback {
-public:
-  /**
-   * Callback for reporting import progress
-   * @param p - progress in range 0.0 .. 1.0
-   */
-  virtual void Progress(double p);
 
-  /**
-   * Error while importing gpx
-   * @param error
-   */
-  virtual void Error(std::string error);
-};
+extern OSMSCOUT_GPX_API bool ImportGpx(const std::string &filePath,
+                                       GpxFile &output,
+                                       BreakerRef breaker = NULL,
+                                       ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
 
-typedef std::shared_ptr<ProcessCallback> ProcessCallbackRef;
-
-class OSMSCOUT_GPX_API Import {
-
-public:
-  static bool ImportGpx(const std::string &filePath,
-                        GpxFile &output,
-                        BreakerRef breaker = NULL,
-                        ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
-};
 }
 }
 

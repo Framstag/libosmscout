@@ -36,14 +36,10 @@
 namespace osmscout {
 namespace gpx {
 
-class OSMSCOUT_GPX_API Export {
-
-public:
-  static bool ExportGpx(const GpxFile &gpxFile,
-                        const std::string &filePath,
-                        BreakerRef breaker = NULL,
-                        ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
-};
+extern OSMSCOUT_GPX_API bool ExportGpx(const GpxFile &gpxFile,
+                                       const std::string &filePath,
+                                       BreakerRef breaker = NULL,
+                                       ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
 }
 }
 

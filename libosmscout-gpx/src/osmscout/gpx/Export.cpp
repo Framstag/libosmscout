@@ -424,10 +424,10 @@ bool GpxWritter::WriteWaypoints(const std::vector<Waypoint> &waypoints)
   return true;
 }
 
-bool Export::ExportGpx(const GpxFile &gpxFile,
-                       const std::string &filePath,
-                       BreakerRef breaker,
-                       ProcessCallbackRef callback)
+bool gpx::ExportGpx(const GpxFile &gpxFile,
+                    const std::string &filePath,
+                    BreakerRef breaker,
+                    ProcessCallbackRef callback)
 {
   GpxWritter writter(gpxFile, filePath, breaker, callback);
   return writter.Process();

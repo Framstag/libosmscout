@@ -39,3 +39,11 @@ double Track::GetLength() const
   }
   return result;
 }
+
+void Track::FilterPoints(std::function<void(std::vector<TrackPoint> &)> filter)
+{
+  for (auto &segment:segments){
+    filter(segment.points);
+  }
+}
+

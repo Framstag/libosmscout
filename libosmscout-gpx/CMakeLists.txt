@@ -8,12 +8,14 @@ set(HEADER_FILES
 	include/osmscout/gpx/Waypoint.h
 	include/osmscout/gpx/TrackPoint.h
 	include/osmscout/gpx/TrackSegment.h
+	include/osmscout/gpx/Utils.h
 )
 
 set(SOURCE_FILES
     src/osmscout/gpx/GpxFile.cpp
     src/osmscout/gpx/Track.cpp
-    src/osmscout/gpx/TrackSegment.cpp
+	src/osmscout/gpx/TrackSegment.cpp
+	src/osmscout/gpx/Utils.cpp
     )
 
 if(LIBXML2_FOUND)

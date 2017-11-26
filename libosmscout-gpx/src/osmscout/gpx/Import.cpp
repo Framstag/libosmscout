@@ -706,10 +706,10 @@ GpxParserContext* DocumentContext::StartElement(const std::string &name,
   return GpxParserContext::StartElement(name, atts);
 }
 
-bool Import::ImportGpx(const std::string &filePath,
-                       GpxFile &output,
-                       BreakerRef breaker,
-                       ProcessCallbackRef callback)
+bool gpx::ImportGpx(const std::string &filePath,
+                    GpxFile &output,
+                    BreakerRef breaker,
+                    ProcessCallbackRef callback)
 {
 
   GpxParser parser(filePath, output, breaker, callback);
