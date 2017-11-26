@@ -48,10 +48,10 @@ private:
   bool EndElement();
 
   bool WriteAttribute(const char *name, const char *content);
-  bool WriteAttribute(const char *name, double value, std::streamsize precision=10);
+  bool WriteAttribute(const char *name, double value, std::streamsize precision=6);
 
   bool WriteTextElement(const char *elementName, const std::string &text);
-  bool WriteTextElement(const char *elementName, double value, std::streamsize precision=10);
+  bool WriteTextElement(const char *elementName, double value, std::streamsize precision=6);
 
   /**
    * Writes timestamp in ISO 8601 format, GTM timezone
@@ -273,27 +273,27 @@ bool GpxWritter::WriteWaypoint(const Waypoint &waypoint)
     }
   }
   if (waypoint.elevation.hasValue()){
-    if (!WriteTextElement("ele", waypoint.elevation.get(), 7)){
+    if (!WriteTextElement("ele", waypoint.elevation.get(), 2)){
       return false;
     }
   }
   if (waypoint.course.hasValue()){
-    if (!WriteTextElement("course", waypoint.course.get(), 4)){
+    if (!WriteTextElement("course", waypoint.course.get(), 2)){
       return false;
     }
   }
   if (waypoint.hdop.hasValue()){
-    if (!WriteTextElement("hdop", waypoint.hdop.get(), 4)){
+    if (!WriteTextElement("hdop", waypoint.hdop.get(), 2)){
       return false;
     }
   }
   if (waypoint.vdop.hasValue()){
-    if (!WriteTextElement("vdop", waypoint.vdop.get(), 4)){
+    if (!WriteTextElement("vdop", waypoint.vdop.get(), 2)){
       return false;
     }
   }
   if (waypoint.pdop.hasValue()){
-    if (!WriteTextElement("pdop", waypoint.pdop.get(), 4)){
+    if (!WriteTextElement("pdop", waypoint.pdop.get(), 2)){
       return false;
     }
   }
@@ -313,27 +313,27 @@ bool GpxWritter::WriteTrackPoint(const char *elemName, const TrackPoint &point)
     }
   }
   if (point.elevation.hasValue()){
-    if (!WriteTextElement("ele", point.elevation.get(), 7)){
+    if (!WriteTextElement("ele", point.elevation.get(), 2)){
       return false;
     }
   }
   if (point.course.hasValue()){
-    if (!WriteTextElement("course", point.course.get(), 4)){
+    if (!WriteTextElement("course", point.course.get(), 2)){
       return false;
     }
   }
   if (point.hdop.hasValue()){
-    if (!WriteTextElement("hdop", point.hdop.get(), 4)){
+    if (!WriteTextElement("hdop", point.hdop.get(), 2)){
       return false;
     }
   }
   if (point.vdop.hasValue()){
-    if (!WriteTextElement("vdop", point.vdop.get(), 4)){
+    if (!WriteTextElement("vdop", point.vdop.get(), 2)){
       return false;
     }
   }
   if (point.pdop.hasValue()){
-    if (!WriteTextElement("pdop", point.pdop.get(), 4)){
+    if (!WriteTextElement("pdop", point.pdop.get(), 2)){
       return false;
     }
   }
