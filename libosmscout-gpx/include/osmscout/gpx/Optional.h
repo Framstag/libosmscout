@@ -6,7 +6,7 @@
 // https://codereview.stackexchange.com/questions/103737/c-optional-implementation
 
 
-// TODO: use std::optional after transition to c++14
+// TODO: consider to use std::optional after transition to c++14
 
 #include <osmscout/private/GPXImportExport.h>
 
