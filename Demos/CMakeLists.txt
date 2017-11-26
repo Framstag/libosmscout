@@ -290,7 +290,7 @@ if(${LIBXML2_FOUND})
             )
 
     if(APPLE)
-        target_link_libraries(GpxPipe OSMScout OSMScoutGpx)
+        target_link_libraries(GpxPipe OSMScout OSMScoutGPX)
     else()
         target_link_libraries(GpxPipe osmscout osmscout_gpx)
     endif()

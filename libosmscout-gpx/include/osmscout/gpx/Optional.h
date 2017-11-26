@@ -12,6 +12,7 @@
 
 #include <stdexcept>
 #include <functional>
+#include <algorithm>
 
 namespace osmscout {
 namespace gpx {
@@ -38,7 +39,7 @@ public:
   ~Optional() { if (value != nullptr) delete value; }
 
   void operator=(const Optional<T> &o) {
-    value = (o.value == nullptr) ? nullptr : new T(o.value);
+    value = (o.value == nullptr) ? nullptr : new T(*o.value);
   };
 
   void operator=(Optional<T> &&o) {

@@ -20,11 +20,23 @@
 #include <osmscout/gpx/Utils.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
 
 #include <algorithm>
 
 using namespace osmscout;
 using namespace osmscout::gpx;
+
+void ProcessCallback::Progress(double)
+{
+  // no-op
+}
+
+void ProcessCallback::Error(std::string error)
+{
+  osmscout::log.Error() << error;
+}
+
 
 void gpx::FilterNearPoints(std::vector<TrackPoint> &points,
                            double minDistance)

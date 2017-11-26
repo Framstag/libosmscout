@@ -30,16 +30,6 @@
 using namespace osmscout;
 using namespace osmscout::gpx;
 
-void ProcessCallback::Progress(double)
-{
-  // no-op
-}
-
-void ProcessCallback::Error(std::string error)
-{
-  osmscout::log.Error() << error;
-}
-
 class GpxParser;
 
 class GpxParserContext {

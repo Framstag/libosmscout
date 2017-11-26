@@ -23,6 +23,7 @@
 #include <osmscout/gpx/Optional.h>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/util/String.h>
 
 #include <osmscout/private/GPXImportExport.h>
 
@@ -30,8 +31,6 @@
 
 namespace osmscout {
 namespace gpx {
-
-typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> Timestamp;
 
 class OSMSCOUT_GPX_API TrackPoint {
 public:

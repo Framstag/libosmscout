@@ -26,6 +26,8 @@
 #include <iomanip>
 #include <locale>
 #include <sstream>
+#include <array>
+#include <ctime>
 
 #include <osmscout/system/Math.h>
 
@@ -790,8 +792,45 @@ namespace osmscout {
     return WStringToUTF8String(wstr);
   }
 
+  /**
+   * returns the utc timezone offset
+   * (e.g. -8 hours for PST)
+   */
+  int GetUtcOffset() {
+
+    time_t zero = 24*60*60L;
+    struct tm * timeptr;
+    int gmtimeHours;
+
+    // get the local time for Jan 2, 1900 00:00 UTC
+    timeptr = localtime( &zero );
+    gmtimeHours = timeptr->tm_hour;
+
+    // if the local time is the "day before" the UTC, subtract 24 hours
+    // from the hours to get the UTC offset
+    if(timeptr->tm_mday < 2) {
+      gmtimeHours -= 24;
+    }
+
+    return gmtimeHours;
+  }
+
+  /**
+   * https://stackoverflow.com/a/9088549/1632737
+   *
+   * the utc analogue of mktime,
+   * (much like timegm on some systems)
+   */
+  time_t MkTimeUTC(struct tm *timeptr) {
+    // gets the epoch time relative to the local time zone,
+    // and then adds the appropriate number of seconds to make it UTC
+    return mktime(timeptr) + GetUtcOffset() * 3600;
+  }
+
   bool ParseISO8601TimeString(const std::string &timeStr, Timestamp &timestamp)
   {
+    using namespace std::chrono;
+
     // ISO 8601 allows milliseconds in date optionally
     // but std::get_time provides just second accuracy
     // so, we use sscanf for parse string and add
@@ -810,17 +849,9 @@ namespace osmscout {
     time.tm_hour = h;        // 0-23
     time.tm_min = m;         // 0-59
     time.tm_sec = s;         // 0-60
-  # ifdef	__USE_MISC
-    time.tm_gmtoff = 0;
-    time.tm_zone = NULL;
-  # else
-    time.__tm_gmtoff = 0;
-    time.__tm_zone = NULL;
-  # endif
-    using namespace std;
-    using namespace std::chrono;
 
-    time_t tt = timegm(&time);
+    std::time_t tt = MkTimeUTC(&time);
+
     time_point<system_clock, nanoseconds> timePoint=system_clock::from_time_t(tt);
     timestamp=time_point_cast<milliseconds,system_clock,nanoseconds>(timePoint);
     // add milliseconds
@@ -836,7 +867,7 @@ namespace osmscout {
 
     std::ostringstream stream;
 
-    std::time_t tt = std::chrono::system_clock::to_time_t(timestamp);
+    std::time_t tt = system_clock::to_time_t(timestamp);
     std::tm tm = *std::gmtime(&tt);
 
     std::array<char, 64> buff;
