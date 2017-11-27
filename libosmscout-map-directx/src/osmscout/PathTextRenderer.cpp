@@ -17,9 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#define NOMINMAX
 
 #include "osmscout/PathTextRenderer.h"
 #include <cmath>
+#include <algorithm>
 
 // The identity matrix
 const DWRITE_MATRIX identityTransform =
@@ -104,7 +106,7 @@ HRESULT PathTextRenderer::DrawGlyphRun(
   }
 
   // Set the initial length along the path.
-  float workingLength = baselineOriginX + max((maxLength - totalRunLength) / 2, 0);
+  float workingLength = baselineOriginX + std::max((maxLength - totalRunLength) / 2, 0.f);
 
   // Set the index of the first glyph in the current glyph cluster.
   unsigned clusterStartIdx = 0;
