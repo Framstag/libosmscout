@@ -230,6 +230,7 @@ buildOSMScout2=buildMapQt and buildClientQt and qt5SvgDep.found()
 buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
 
 message('libosmscout:             @0@'.format(true))
+message('libosmscout-gpx:         @0@'.format(true))
 message('libosmscout-import:      @0@'.format(true))
 message('libosmscout-map:         @0@'.format(true))
 message('libosmscout-map-agg:     @0@'.format(buildMapAgg))
@@ -252,6 +253,7 @@ message('Tests:                   @0@'.format(true))
 subdir('libosmscout')
 subdir('libosmscout-import')
 subdir('libosmscout-map')
+subdir('libosmscout-gpx')
 
 if buildMapAgg
   subdir('libosmscout-map-agg')

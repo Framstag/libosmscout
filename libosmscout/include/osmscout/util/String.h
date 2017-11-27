@@ -24,6 +24,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <chrono>
 
 #include <osmscout/CoreFeatures.h>
 
@@ -351,8 +352,8 @@ namespace osmscout {
    */
   template<typename N>
   inline bool StringToNumber(const std::string& string,
-                                     N& number,
-                                     size_t base=10)
+                             N& number,
+                             size_t base=10)
   {
     return StringToNumberTemplated<std::numeric_limits<N>::is_signed, N>
       ::f(string,number,base);
@@ -562,6 +563,30 @@ namespace osmscout {
    * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
+
+  typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> Timestamp;
+
+  /**
+   * Parse time string in ISO 8601 format "2017-11-26T13:46:12.124Z" (UTC timezone)
+   * to Timestamp (std::chrono::time_point with millisecond accuracy).
+   *
+   * Note that format is not locale specific
+   *
+   * @param timeStr
+   * @param timestamp
+   * @return true on success
+   */
+  extern OSMSCOUT_API bool ParseISO8601TimeString(const std::string &timeStr, Timestamp &timestamp);
+
+  /**
+   * Format Timestamp to string in ISO8601 format "2017-11-26T13:46:12.124Z"
+   * for UTC timezone.
+   *
+   * @param timestamp
+   * @return time string
+   */
+  extern OSMSCOUT_API std::string TimestampToISO8601TimeString(const Timestamp &timestamp);
+
 }
 
 #endif

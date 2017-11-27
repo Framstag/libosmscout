@@ -25,14 +25,19 @@ if [ "$TARGET" = "build" ]; then
     mkdir build
     cd build
 
-  if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
+    if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config  ..
     else
       cmake ..
     fi
 
     make
-    make test
+
+    if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
+        echo "Skip test execution for iOS platform"
+    else
+        make test
+    fi
   fi
 elif [ "$TARGET" = "importer" ]; then
     packaging/import/linux/build_import.sh
