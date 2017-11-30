@@ -425,6 +425,17 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const;
 
+    inline bool PixelToGeo(double x, double y,
+                           GeoCoord &coord) const
+    {
+      double lat,lon;
+      if (PixelToGeo(x,y,lon,lat)){
+        coord.Set(lat,lon);
+        return true;
+      }
+      return false;
+    }
+
     bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const;
 
