@@ -466,6 +466,11 @@ namespace osmscout {
       return cacheSize;
     }
 
+    inline size_t GetCurrentSize() const
+    {
+      return tileCache.size();
+    }
+
     void CleanupCache();
 
     void InvalidateCache();
