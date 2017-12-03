@@ -270,7 +270,7 @@ private:
     MapView startMapView;
     QVector2D _move;
     osmscout::Magnification targetMagnification;
-    double targetAngel;
+    double targetAngle;
     int animationDuration;
 
     const int MOVE_ANIMATION_DURATION = 1000; // ms

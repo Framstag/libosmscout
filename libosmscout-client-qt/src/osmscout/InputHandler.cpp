@@ -261,7 +261,7 @@ void MoveHandler::onTimeout()
     double targetMag = targetMagnification.GetMagnification();
 
     double startAngle = startMapView.angle;
-    double finalAngle = startAngle + ((targetAngel-startAngle) * scale);
+    double finalAngle = startAngle + ((targetAngle-startAngle) * scale);
 
     if (finalAngle > 2*M_PI) {
         finalAngle = fmod(finalAngle, 2*M_PI);
@@ -307,7 +307,7 @@ bool MoveHandler::animationInProgress()
 bool MoveHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension)
 {
     startMapView = view;
-    targetAngel = view.GetAngle();
+    targetAngle = view.GetAngle();
     // compute event distance from center
     QPoint distance = widgetPosition;
     distance -= QPoint(widgetDimension.width() / 2, widgetDimension.height() / 2);
@@ -352,7 +352,7 @@ bool MoveHandler::move(QVector2D move)
 {
     startMapView = view;
     targetMagnification = view.magnification;
-    targetAngel = view.GetAngle();
+    targetAngle = view.GetAngle();
 
     _move.setX(move.x());
     _move.setY(move.y());
@@ -401,9 +401,9 @@ bool MoveHandler::rotateTo(double angle)
     startMapView = view;
     targetMagnification = view.magnification;
 
-    targetAngel = angle;
-    if (abs(targetAngel-view.angle)>M_PI){
-        targetAngel+=2*M_PI;
+    targetAngle = angle;
+    if (abs(targetAngle-view.angle)>M_PI){
+        targetAngle+=2*M_PI;
     }
 
     _move.setX(0);
@@ -424,7 +424,7 @@ bool MoveHandler::rotateBy(double /*angleStep*/, double angleChange)
     startMapView = view;
     targetMagnification = view.magnification;
 
-    targetAngel = view.angle+angleChange;
+    targetAngle = view.angle+angleChange;
 
     _move.setX(0);
     _move.setY(0);
