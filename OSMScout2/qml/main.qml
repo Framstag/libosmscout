@@ -304,6 +304,15 @@ Window {
                 spacing: Theme.mapButtonSpace
 
                 MapButton {
+                    id: resetRotation
+                    label: "|"
+
+                    onClicked: {
+                        map.rotateTo(0);
+                    }
+                }
+
+                MapButton {
                     id: recenter
                     label: "*"
 

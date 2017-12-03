@@ -404,19 +404,27 @@ void MapWidget::down()
     move(QVector2D( 0, height()/+3 ));
 }
 
+void MapWidget::rotateTo(double angle)
+{
+    if (!inputHandler->rotateTo(angle)){
+        setupInputHandler(new MoveHandler(*view, mapDpi));
+        inputHandler->rotateTo(angle);
+    }
+}
+
 void MapWidget::rotateLeft()
 {
-    if (!inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE)){
+    if (!inputHandler->rotateBy(-DELTA_ANGLE)){
         setupInputHandler(new MoveHandler(*view, mapDpi));
-        inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE);
+        inputHandler->rotateBy(-DELTA_ANGLE);
     }
 }
 
 void MapWidget::rotateRight()
 {
-    if (!inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE)){
+    if (!inputHandler->rotateBy(DELTA_ANGLE)){
         setupInputHandler(new MoveHandler(*view, mapDpi));
-        inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE);
+        inputHandler->rotateBy(DELTA_ANGLE);
     }
 }
 

@@ -100,6 +100,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                  const MapViewStruct& request)
 {
   //qDebug() << "RenderMap()";
+  painter.save();
 
   QMutexLocker locker(&finishedMutex);
 
@@ -248,6 +249,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     emit TriggerMapRenderingSignal(extendedRequest);
   }
 
+  painter.restore();
   return needsNoRepaint;
 }
 

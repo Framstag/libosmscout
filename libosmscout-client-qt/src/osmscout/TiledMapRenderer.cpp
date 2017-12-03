@@ -22,7 +22,11 @@
 
 #include <osmscout/OSMTile.h>
 
+#include <osmscout/system/Math.h>
 #include <osmscout/util/Logger.h>
+
+// uncomment or define by compiler parameter to render various debug marks
+// #define DRAW_DEBUG
 
 TiledMapRenderer::TiledMapRenderer(QThread *thread,
                                    SettingsRef settings,
@@ -160,14 +164,41 @@ void TiledMapRenderer::InvalidateVisualCache()
 bool TiledMapRenderer::RenderMap(QPainter& painter,
                                  const MapViewStruct& request)
 {
+  painter.save();
   osmscout::MercatorProjection projection;
 
+  // compute canvas transformation from angle
+  double width, height;
+  QPointF translateVector;
+  if (request.angle==0) {
+    width = request.width;
+    height = request.height;
+  } else {
+    double cosAlpha=cos(request.angle);
+    double cosBeta=cos(M_PI_2 - request.angle);
+    double rw=request.width;
+    double rh=request.height;
+    height=abs(rw*cosBeta)+abs(rh*cosAlpha);
+    width=abs(rw*cosAlpha)+abs(rh*cosBeta);
+    if (request.angle>0 && request.angle<=M_PI_2) {
+      translateVector.setY(cosBeta*rw*-1);
+    } else if (request.angle<=M_PI) {
+      translateVector.setY(height*-1);
+      translateVector.setX(cosAlpha * rw);
+    } else if (request.angle<=M_PI+M_PI_2) {
+      translateVector.setX(width*-1);
+      translateVector.setY(height*-1 - cosBeta*rw);
+    } else {
+      translateVector.setX(width*-1 + cosAlpha*rw);
+    }
+  }
+
   projection.Set(request.coord,
-                 request.angle,
+                 0,
                  request.magnification,
                  mapDpi,
-                 request.width,
-                 request.height);
+                 width,
+                 height);
 
   osmscout::GeoBox boundingBox;
 
@@ -200,29 +231,11 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   double renderTileWidth = (x2 - x1) / osmTileRes; // pixels
   double renderTileHeight = (y2 - y1) / osmTileRes; // pixels
 
-  painter.setPen(grey2);
-
   uint32_t osmTileFromX = std::max(0.0, (double)osmTileRes * ((boundingBox.GetMinLon() + (double)180.0) / (double)360.0));
   double maxLatRad = boundingBox.GetMaxLat() * GRAD_TO_RAD;
   uint32_t osmTileFromY = std::max(0.0, (double)osmTileRes * ((double)1.0 - (log(tan(maxLatRad) + (double)1.0 / cos(maxLatRad)) / M_PI)) / (double)2.0);
 
-  //std::cout << osmTileRes << " * (("<< boundingBox.GetMinLon()<<" + 180.0) / 360.0) = " << osmTileFromX << std::endl;
-  //std::cout <<  osmTileRes<<" * (1.0 - (log(tan("<<maxLatRad<<") + 1.0 / cos("<<maxLatRad<<")) / "<<M_PI<<")) / 2.0 = " << osmTileFromY << std::endl;
-
   uint32_t zoomLevel = projection.GetMagnification().GetLevel();
-
-  /*
-  double osmTileDimension = (double)OSMTile::osmTileOriginalWidth() * (dpi / OSMTile::tileDPI() ); // pixels
-  std::cout <<
-    "level: " << zoomLevel <<
-    " request WxH " << request.width << " x " << request.height <<
-    " osmTileRes: " << osmTileRes <<
-    " scaled tile dimension: " << osmTileWidth << " x " << osmTileHeight << " (" << osmTileDimension << ")"<<
-    " osmTileFromX: " << osmTileFromX << " cnt " << (projection.GetWidth() / (uint32_t)osmTileWidth) <<
-    " osmTileFromY: " << osmTileFromY << " cnt " << (projection.GetHeight() / (uint32_t)osmTileHeight) <<
-    " current thread : " << QThread::currentThread() <<
-    std::endl;
-   */
 
   // render available tiles
   double x;
@@ -234,6 +247,13 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
       osmscout::log.Warn() << "Mutex acquiere took " << elapsed << " ms";
   }
 
+  if (request.angle!=0) {
+    painter.rotate(qRadiansToDegrees(request.angle));
+    painter.translate(translateVector);
+  }
+
+  painter.setPen(grey2);
+
   painter.fillRect(0,0,
                    projection.GetWidth(),projection.GetHeight(),
                    unknownColor);
@@ -244,7 +264,6 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
         (ty <= (projection.GetHeight() / (uint32_t)renderTileHeight)+1) && ((osmTileFromY + ty) < osmTileRes);
         ty++ ){
 
-    //for (uint32_t i = 1; i< osmTileRes; i++){
     uint32_t ytile = (osmTileFromY + ty);
     double ytileLatRad = atan(sinh(M_PI * (1 - 2 * (double)ytile / (double)osmTileRes)));
     double ytileLatDeg = ytileLatRad * 180.0 / M_PI;
@@ -257,11 +276,6 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
       double xtileDeg = (double)xtile / (double)osmTileRes * 360.0 - 180.0;
 
       projection.GeoToPixel(osmscout::GeoCoord(ytileLatDeg, xtileDeg), x, y);
-      //double x = x1 + (double)xtile * osmTileWidth;
-
-      //std::cout << "  xtile: " << xtile << " ytile: " << ytile << " x: " << x << " y: " << y << "" << std::endl;
-
-      //bool lookupTileFound = false;
 
       bool lookupTileFound = false;
       if (onlineTilesEnabled){
@@ -285,15 +299,31 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
       }
     }
   }
-  /*
-  painter.setPen(grey);
+#ifdef DRAW_DEBUG
+  painter.setPen(QColor::fromRgbF(1,0,0));
+  painter.drawLine(0,0,width,height);
+  painter.drawLine(width,0,0,height);
+
+  painter.drawLine(0,0,width,0);
+  painter.drawLine(0,height,width,height);
+  painter.drawLine(0,0,0,height);
+  painter.drawLine(width,0,width,height);
+
+  painter.setPen(grey2);
   painter.drawText(20, 30, QString("%1").arg(projection.GetMagnification().GetLevel()));
 
   double centerLat;
   double centerLon;
   projection.PixelToGeo(projection.GetWidth() / 2.0, projection.GetHeight() / 2.0, centerLon, centerLat);
   painter.drawText(20, 60, QString::fromStdString(osmscout::GeoCoord(centerLat, centerLon).GetDisplayText()));
-  */
+
+  painter.restore();
+  painter.setPen(QColor::fromRgbF(0,0,1));
+  painter.drawLine(0,0,request.width,request.height);
+  painter.drawLine(request.width,0,0,request.height);
+#else
+  painter.restore();
+#endif
   return onlineTileCache.isRequestQueueEmpty() && offlineTileCache.isRequestQueueEmpty();
 }
 
