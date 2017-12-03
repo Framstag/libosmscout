@@ -126,6 +126,7 @@ public slots:
   void right();
   void up();
   void down();
+  void rotateTo(double angle);
   void rotateLeft();
   void rotateRight();
 

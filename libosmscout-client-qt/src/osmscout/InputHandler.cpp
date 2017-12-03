@@ -198,6 +198,10 @@ bool InputHandler::move(QVector2D /*move*/)
 {
     return false;
 }
+bool InputHandler::rotateTo(double /*angle*/)
+{
+    return false;
+}
 bool InputHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
 {
     return false;
@@ -260,11 +264,11 @@ void MoveHandler::onTimeout()
     double finalAngle = startAngle + ((targetAngel-startAngle) * scale);
 
     if (finalAngle > 2*M_PI) {
-        finalAngle -= 2*M_PI;
+        finalAngle = fmod(finalAngle, 2*M_PI);
     }
 
     if (finalAngle < 0) {
-        finalAngle = 2*M_PI + finalAngle;
+        finalAngle = 2*M_PI + fmod(finalAngle, 2*M_PI);
     }
 
     if (!projection.Set(startMapView.center,
@@ -391,6 +395,29 @@ bool MoveHandler::moveNow(QVector2D move)
     emit viewChanged(view);
     return true;
 }
+
+bool MoveHandler::rotateTo(double angle)
+{
+    startMapView = view;
+    targetMagnification = view.magnification;
+
+    targetAngel = angle;
+    if (abs(targetAngel-view.angle)>M_PI){
+        targetAngel+=2*M_PI;
+    }
+
+    _move.setX(0);
+    _move.setY(0);
+
+    animationDuration = ROTATE_ANIMATION_DURATION;
+    animationStart.restart();
+    timer.setInterval(ANIMATION_TICK);
+    timer.start();
+    onTimeout();
+
+    return true;
+}
+
 bool MoveHandler::rotateBy(double /*angleStep*/, double angleChange)
 {
 
@@ -409,7 +436,6 @@ bool MoveHandler::rotateBy(double /*angleStep*/, double angleChange)
     onTimeout();
 
     return true;
-
 }
 
 

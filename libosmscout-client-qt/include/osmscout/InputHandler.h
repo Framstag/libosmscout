@@ -241,6 +241,7 @@ public:
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
+    virtual bool rotateTo(double angle);
     virtual bool rotateBy(double angleStep, double angleChange);
     virtual bool touch(QTouchEvent *event);
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
@@ -296,6 +297,7 @@ public:
 
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
+    virtual bool rotateTo(double angle);
     virtual bool rotateBy(double angleStep, double angleChange);
     virtual bool touch(QTouchEvent *event);
 
