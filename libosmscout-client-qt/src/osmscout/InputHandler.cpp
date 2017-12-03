@@ -202,7 +202,7 @@ bool InputHandler::rotateTo(double /*angle*/)
 {
     return false;
 }
-bool InputHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
+bool InputHandler::rotateBy(double /*angleChange*/)
 {
     return false;
 }
@@ -418,7 +418,7 @@ bool MoveHandler::rotateTo(double angle)
     return true;
 }
 
-bool MoveHandler::rotateBy(double /*angleStep*/, double angleChange)
+bool MoveHandler::rotateBy(double angleChange)
 {
 
     startMapView = view;
@@ -550,7 +550,7 @@ bool DragHandler::move(QVector2D /*move*/)
 {
     return false; // finger on screen discard move
 }
-bool DragHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
+bool DragHandler::rotateBy(double /*angleChange*/)
 {
     return false; // finger on screen discard rotation ... TODO like zoom
 }
@@ -581,7 +581,7 @@ bool MultitouchHandler::move(QVector2D /*vector*/)
 {
     return false;
 }
-bool MultitouchHandler::rotateBy(double /*angleStep*/, double /*angleChange*/)
+bool MultitouchHandler::rotateBy(double /*angleChange*/)
 {
     return false;
 }

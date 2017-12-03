@@ -414,17 +414,17 @@ void MapWidget::rotateTo(double angle)
 
 void MapWidget::rotateLeft()
 {
-    if (!inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE)){
+    if (!inputHandler->rotateBy(-DELTA_ANGLE)){
         setupInputHandler(new MoveHandler(*view, mapDpi));
-        inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE);
+        inputHandler->rotateBy(-DELTA_ANGLE);
     }
 }
 
 void MapWidget::rotateRight()
 {
-    if (!inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE)){
+    if (!inputHandler->rotateBy(DELTA_ANGLE)){
         setupInputHandler(new MoveHandler(*view, mapDpi));
-        inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE);
+        inputHandler->rotateBy(DELTA_ANGLE);
     }
 }
 

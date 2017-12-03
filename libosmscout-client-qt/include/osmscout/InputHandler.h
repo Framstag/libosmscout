@@ -242,7 +242,7 @@ public:
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
     virtual bool rotateTo(double angle);
-    virtual bool rotateBy(double angleStep, double angleChange);
+    virtual bool rotateBy(double angleChange);
     virtual bool touch(QTouchEvent *event);
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
     virtual bool isLockedToPosition();
@@ -298,7 +298,7 @@ public:
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
     virtual bool rotateTo(double angle);
-    virtual bool rotateBy(double angleStep, double angleChange);
+    virtual bool rotateBy(double angleChange);
     virtual bool touch(QTouchEvent *event);
 
 private:
@@ -348,7 +348,7 @@ public:
 
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
-    virtual bool rotateBy(double angleStep, double angleChange);
+    virtual bool rotateBy(double angleChange);
 
     virtual bool touch(QTouchEvent *event);
 
@@ -378,7 +378,7 @@ public:
 
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
-    virtual bool rotateBy(double angleStep, double angleChange);
+    virtual bool rotateBy(double angleChange);
 
     virtual bool touch(QTouchEvent *event);
 private:
