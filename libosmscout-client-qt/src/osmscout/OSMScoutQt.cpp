@@ -39,6 +39,7 @@
 #include <osmscout/RoutingModel.h>
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/StyleFlagsModel.h>
+#include <osmscout/TiledMapOverlay.h>
 #include <osmscout/Router.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
@@ -132,6 +133,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<std::unordered_map<std::string,bool>>("std::unordered_map<std::string,bool>");
   qRegisterMetaType<QMap<QString,bool>>("QMap<QString,bool>");
   qRegisterMetaType<LocationEntry>("LocationEntry");
+  qRegisterMetaType<OnlineTileProvider>("OnlineTileProvider");
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -150,6 +152,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<RouteStep>(uri, versionMajor, versionMinor, "RouteStep");
   qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");
   qmlRegisterType<StyleFlagsModel>(uri, versionMajor, versionMinor, "StyleFlagsModel");
+  qmlRegisterType<TiledMapOverlay>(uri, versionMajor, versionMinor, "TiledMapOverlay");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
@@ -325,4 +328,14 @@ Router* OSMScoutQt::MakeRouter()
 
 QString OSMScoutQt::GetUserAgent(){
   return userAgent;
+}
+
+QString OSMScoutQt::GetCacheLocation()
+{
+  return cacheLocation;
+}
+
+size_t OSMScoutQt::GetOnlineTileCacheSize()
+{
+  return onlineTileCacheSize;
 }

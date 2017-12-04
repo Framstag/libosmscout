@@ -265,6 +265,8 @@ public:
   StyleModule *MakeStyleModule();
 
   QString GetUserAgent();
+  QString GetCacheLocation();
+  size_t  GetOnlineTileCacheSize();
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

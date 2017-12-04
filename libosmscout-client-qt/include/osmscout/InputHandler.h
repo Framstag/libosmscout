@@ -166,7 +166,7 @@ class OSMSCOUT_CLIENT_QT_API MapView: public QObject
   Q_PROPERTY(double   mapDpi    READ GetMapDpi)
 
 public:
-  inline MapView(){}
+  inline MapView(QObject *parent=0): QObject(parent) {}
 
   inline MapView(QObject *parent, osmscout::GeoCoord center, double angle, osmscout::Magnification magnification, double mapDpi):
     QObject(parent), center(center), angle(angle), magnification(magnification), mapDpi(mapDpi) {}
