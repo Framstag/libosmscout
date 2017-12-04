@@ -58,12 +58,14 @@ class OSMSCOUT_CLIENT_QT_API TiledMapOverlay : public MapOverlay
 {
   Q_OBJECT
   Q_PROPERTY(QJsonValue provider READ getProvider WRITE setProvider)
+  Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled)
 
 private:
   mutable QMutex      tileCacheMutex;
   TileCache           onlineTileCache;
   QJsonValue          providerJson;
   TileLoaderThread    *loader;
+  bool                enabled;
 
 public slots:
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
@@ -81,6 +83,9 @@ public:
 
   QJsonValue getProvider();
   void setProvider(QJsonValue jv);
+
+  bool isEnabled();
+  void setEnabled(bool b);
 };
 
 #endif //LIBOSMSCOUT_TILEMAPOVERLAY_H

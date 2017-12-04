@@ -68,7 +68,8 @@ void TileLoaderThread::onProviderChanged(const OnlineTileProvider &newProvider)
 
 TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
     MapOverlay(parent),
-    onlineTileCache(OSMScoutQt::GetInstance().GetOnlineTileCacheSize())
+    onlineTileCache(OSMScoutQt::GetInstance().GetOnlineTileCacheSize()),
+    enabled(true)
 {
 
   QThread *thread=new QThread();
@@ -109,6 +110,9 @@ TiledMapOverlay::~TiledMapOverlay()
 
 void TiledMapOverlay::paint(QPainter *painter)
 {
+  if (!enabled){
+    return;
+  }
   QMutexLocker locker(&tileCacheMutex);
   QList<TileCache*> layerCaches;
 
@@ -191,4 +195,18 @@ void TiledMapOverlay::setProvider(QJsonValue jv)
   }
   providerJson=jv;
   emit providerChanged(provider);
+}
+
+bool TiledMapOverlay::isEnabled()
+{
+  return enabled;
+}
+
+void TiledMapOverlay::setEnabled(bool b)
+{
+  enabled=b;
+  if (!enabled){
+    QMutexLocker locker(&tileCacheMutex);
+    onlineTileCache.cleanupCache();
+  }
 }
