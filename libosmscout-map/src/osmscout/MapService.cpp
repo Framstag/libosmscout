@@ -312,11 +312,13 @@ namespace osmscout {
 
     if (!optimizeAreasLowZoom) {
       tile->GetOptimizedAreaData().SetComplete();
+      NotifyTileStateCallbacks(tile);
       return false;
     }
 
     if (!optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
       tile->GetOptimizedAreaData().SetComplete();
+      NotifyTileStateCallbacks(tile);
       return true;
     }
 
@@ -464,11 +466,13 @@ namespace osmscout {
 
     if (!optimizeWaysLowZoom) {
       tile->GetOptimizedWayData().SetComplete();
+      NotifyTileStateCallbacks(tile);
       return false;
     }
 
     if (!optimizeWaysLowZoom->HasOptimizations(magnification.GetMagnification())) {
       tile->GetOptimizedWayData().SetComplete();
+      NotifyTileStateCallbacks(tile);
       return true;
     }
 

@@ -78,7 +78,7 @@ namespace osmscout {
     }
 
     /**
-     * Marks the tile as inpcomplete again, without actually clearing data and types.
+     * Marks the tile as incomplete again, without actually clearing data and types.
      */
     void Invalidate()
     {
