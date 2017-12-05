@@ -32,7 +32,6 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
                                        const QColor &unknownColor,
                                        double overlap)
 {
-  painter.save();
   osmscout::MercatorProjection projection;
 
   // compute canvas transformation from angle
@@ -115,6 +114,7 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
   double x;
   double y;
 
+  painter.save();
   if (request.angle!=0) {
     painter.rotate(qRadiansToDegrees(request.angle));
     painter.translate(translateVector);
