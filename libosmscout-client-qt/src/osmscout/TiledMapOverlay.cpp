@@ -69,14 +69,13 @@ void TileLoaderThread::onProviderChanged(const OnlineTileProvider &newProvider)
 TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
     MapOverlay(parent),
     onlineTileCache(OSMScoutQt::GetInstance().GetOnlineTileCacheSize()),
-    enabled(true)
+    enabled(true),
+    transparentColor(QColor::fromRgbF(0,0,0,0))
 {
+  QThread *thread=OSMScoutQt::GetInstance().makeThread("OverlayTileLoader");
 
-  QThread *thread=new QThread();
-  thread->setObjectName("OverlayTileLoader");
-  QObject::connect(thread, SIGNAL(finished()),
-                   thread, SLOT(deleteLater()));
   loader=new TileLoaderThread(thread);
+  loader->moveToThread(thread);
   connect(thread, SIGNAL(started()),
           loader, SLOT(init()));
   thread->start();
@@ -133,9 +132,7 @@ void TiledMapOverlay::paint(QPainter *painter)
   request.width = boundingBox.width();
   request.height = boundingBox.height();
 
-  QColor unknownColor=QColor::fromRgbF(0,0,0,0);
-
-  TiledRenderingHelper::RenderTiles(*painter,request,layerCaches,view->mapDpi,unknownColor, /*overlap*/ 0);
+  TiledRenderingHelper::RenderTiles(*painter,request,layerCaches,view->mapDpi,transparentColor, /*overlap*/ 0);
 }
 
 void TiledMapOverlay::download(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile) {

@@ -27,8 +27,10 @@
 
 #include <QImage>
 
-
-class TileLoaderThread: public QObject {
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API TileLoaderThread: public QObject {
 Q_OBJECT
 
 private:
@@ -66,6 +68,7 @@ private:
   QJsonValue          providerJson;
   TileLoaderThread    *loader;
   bool                enabled;
+  QColor              transparentColor;
 
 public slots:
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);

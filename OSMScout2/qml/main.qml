@@ -139,6 +139,7 @@ Window {
             TiledMapOverlay {
                 anchors.fill: parent
                 view: map.view
+                enabled: false
                 opacity: 0.5
                 // If you intend to use tiles from OpenMapSurfer services in your own applications please contact us.
                 // https://korona.geog.uni-heidelberg.de/contact.html
