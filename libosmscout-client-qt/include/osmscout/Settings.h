@@ -67,6 +67,7 @@ signals:
   void MapDPIChange(double dpi);
   void OnlineTilesEnabledChanged(bool);
   void OnlineTileProviderIdChanged(const QString id);
+  void OnlineTileProviderChanged(const OnlineTileProvider &provider);
   void OfflineMapChanged(bool);
   void RenderSeaChanged(bool);
   void StyleSheetDirectoryChanged(const QString dir);

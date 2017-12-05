@@ -88,21 +88,6 @@ public slots:
 
 private:
 
-  /**
-   * lookup tile in cache, if not found, try upper zoom level for substitute.
-   * (It is better upscaled tile than empty space)
-   * Is is repeated up to zoomLevel - upLimit
-   */
-  bool lookupAndDrawTile(TileCache& tileCache, QPainter& painter,
-        double x, double y, double renderTileWidth, double renderTileHeight,
-        uint32_t zoomLevel, uint32_t xtile, uint32_t ytile,
-        uint32_t upLimit, uint32_t downLimit);
-
-  void lookupAndDrawBottomTileRecursive(TileCache& tileCache, QPainter& painter,
-        double x, double y, double renderTileWidth, double renderTileHeight, double overlap,
-        uint32_t zoomLevel, uint32_t xtile, uint32_t ytile,
-        uint32_t downLimit);
-
   DatabaseCoverage databaseCoverageOfTile(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
 
 public:

@@ -75,7 +75,6 @@ private:
   MapRenderer      *renderer;
 
   MapView          *view;
-  double           mapDpi;
 
   InputHandler     *inputHandler;
   TapRecognizer    tapRecognizer;     
@@ -279,7 +278,7 @@ public:
     projection.Set(GetCenter(),
                view->angle,
                view->magnification,
-               mapDpi,
+               view->mapDpi,
                // to avoid invalid projection when scene is not finished yet
                w==0? 100:w,
                h==0? 100:h);

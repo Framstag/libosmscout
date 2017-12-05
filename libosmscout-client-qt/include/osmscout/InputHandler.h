@@ -163,15 +163,16 @@ class OSMSCOUT_CLIENT_QT_API MapView: public QObject
   Q_PROPERTY(double   angle     READ GetAngle)
   Q_PROPERTY(double   mag       READ GetMag)
   Q_PROPERTY(uint32_t magLevel  READ GetMagLevel)
+  Q_PROPERTY(double   mapDpi    READ GetMapDpi)
 
 public:
-  inline MapView(){}
+  inline MapView(QObject *parent=0): QObject(parent) {}
 
-  inline MapView(QObject *parent, osmscout::GeoCoord center, double angle, osmscout::Magnification magnification):
-    QObject(parent), center(center), angle(angle), magnification(magnification) {}
+  inline MapView(QObject *parent, osmscout::GeoCoord center, double angle, osmscout::Magnification magnification, double mapDpi):
+    QObject(parent), center(center), angle(angle), magnification(magnification), mapDpi(mapDpi) {}
 
-  inline MapView(osmscout::GeoCoord center, double angle, osmscout::Magnification magnification):
-    center(center), angle(angle), magnification(magnification) {}
+  inline MapView(osmscout::GeoCoord center, double angle, osmscout::Magnification magnification, double mapDpi):
+    center(center), angle(angle), magnification(magnification), mapDpi(mapDpi) {}
 
   /**
    * This copy constructor don't transfer ownership
@@ -179,7 +180,7 @@ public:
    * @param mv
    */
   inline MapView(const MapView &mv):
-    QObject(), center(mv.center), angle(mv.angle), magnification(mv.magnification) {}
+    QObject(), center(mv.center), angle(mv.angle), magnification(mv.magnification), mapDpi(mv.mapDpi) {}
 
   virtual inline ~MapView(){}
 
@@ -188,24 +189,27 @@ public:
   inline double GetAngle(){ return angle; }
   inline double GetMag(){ return magnification.GetMagnification(); }
   inline double GetMagLevel(){ return magnification.GetLevel(); }
+  inline double GetMapDpi(){ return mapDpi; }
 
   void inline operator=(const MapView &mv)
   {
     center = mv.center;
     angle = mv.angle;
     magnification = mv.magnification;
+    mapDpi = mv.mapDpi;
   }
 
   osmscout::GeoCoord           center;
-  double                       angle;
+  double                       angle{0};
   osmscout::Magnification      magnification;
+  double                       mapDpi{0};
 };
 
 Q_DECLARE_METATYPE(MapView)
 
 inline bool operator==(const MapView& a, const MapView& b)
 {
-  return a.center == b.center && a.angle == b.angle && a.magnification == b.magnification;
+  return a.center == b.center && a.angle == b.angle && a.magnification == b.magnification && a.mapDpi == b.mapDpi;
 }
 inline bool operator!=(const MapView& a, const MapView& b)
 {
@@ -282,7 +286,7 @@ private slots:
     void onTimeout();
 
 public:
-    MoveHandler(MapView view, double dpi);
+    MoveHandler(MapView view);
     virtual ~MoveHandler();
 
     virtual bool animationInProgress();
@@ -301,8 +305,6 @@ public:
     virtual bool rotateBy(double angleChange);
     virtual bool touch(QTouchEvent *event);
 
-private:
-    double dpi;
 };
 
 /**
@@ -341,7 +343,7 @@ public:
 class OSMSCOUT_CLIENT_QT_API DragHandler : public MoveHandler {
     Q_OBJECT
 public:
-    DragHandler(MapView view, double dpi);
+    DragHandler(MapView view);
     virtual ~DragHandler();
 
     virtual bool animationInProgress();
@@ -371,7 +373,7 @@ private:
 class OSMSCOUT_CLIENT_QT_API MultitouchHandler : public MoveHandler {
     Q_OBJECT
 public:
-    MultitouchHandler(MapView view, double dpi);
+    MultitouchHandler(MapView view);
     virtual ~MultitouchHandler();
 
     virtual bool animationInProgress();
@@ -401,11 +403,10 @@ private:
 class OSMSCOUT_CLIENT_QT_API LockHandler : public JumpHandler {
     Q_OBJECT
 protected:
-    double dpi;
     double moveTolerance;
 public:
-    inline LockHandler(MapView view, double dpi, double moveTolerance):
-      JumpHandler(view), dpi(dpi), moveTolerance(moveTolerance)
+    inline LockHandler(MapView view, double moveTolerance):
+      JumpHandler(view), moveTolerance(moveTolerance)
     {};
 
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);

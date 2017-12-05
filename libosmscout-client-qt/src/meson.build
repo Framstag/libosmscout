@@ -30,6 +30,9 @@ osmscoutclientqtSrc = [
             'src/osmscout/MapRenderer.cpp',
             'src/osmscout/PlaneMapRenderer.cpp',
             'src/osmscout/TiledMapRenderer.cpp',
-            'src/osmscout/OverlayObject.cpp'
+            'src/osmscout/OverlayObject.cpp',
+            'src/osmscout/MapOverlay.cpp',
+            'src/osmscout/TiledMapOverlay.cpp',
+            'src/osmscout/TiledRenderingHelper.cpp'
           ]
 
