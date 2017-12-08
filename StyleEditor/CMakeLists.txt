@@ -19,9 +19,6 @@ endif()
 if(NOT Qt5Quick_FOUND)
 	message(SEND_ERROR "Qt5Quick is required for StyleEditor application")
 endif()
-if(NOT Qt5Svg_FOUND)
-	message(SEND_ERROR "Qt5Svg is required for StyleEditor application")
-endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -78,7 +75,6 @@ if(APPLE)
         	Qt5::Widgets
         	Qt5::Qml
         	Qt5::Quick
-        	Qt5::Svg
         	OSMScoutMapQt
         	OSMScoutClientQt
 	)
@@ -91,10 +87,13 @@ else()
         	Qt5::Widgets
         	Qt5::Qml
         	Qt5::Quick
-        	Qt5::Svg
         	osmscout_map_qt
         	osmscout_client_qt
 	)
+endif()
+
+if (Qt5Svg_FOUND)
+	target_link_libraries(StyleEditor Qt5::Svg)
 endif()
 
 # enable QML debuger

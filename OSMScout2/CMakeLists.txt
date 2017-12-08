@@ -19,12 +19,6 @@ endif()
 if(NOT Qt5Quick_FOUND)
 	message(SEND_ERROR "Qt5Quick is required for OSMScout2 application")
 endif()
-if(NOT Qt5Svg_FOUND)
-	message(SEND_ERROR "Qt5Svg is required for OSMScout2 application")
-endif()
-if(NOT Qt5Positioning_FOUND)
-	message(SEND_ERROR "Qt5Positioning is required for OSMScout2 application")
-endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -79,7 +73,6 @@ if(APPLE)
         	Qt5::Widgets
         	Qt5::Qml
         	Qt5::Quick
-        	Qt5::Svg
         	Qt5::Positioning
         	OSMScoutMapQt
         	OSMScoutClientQt
@@ -93,12 +86,20 @@ else()
         	Qt5::Widgets
         	Qt5::Qml
         	Qt5::Quick
-        	Qt5::Svg
         	Qt5::Positioning
         	osmscout_map_qt
         	osmscout_client_qt
 	)
 endif()
+
+if (Qt5Svg_FOUND)
+	target_link_libraries(OSMScout2 Qt5::Svg)
+endif()
+
+if (Qt5Positioning_FOUND)
+	target_link_libraries(OSMScout2 Qt5::Positioning)
+endif()
+
 # enable QML debuger
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)
