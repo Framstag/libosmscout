@@ -1,10 +1,6 @@
 machine:
   timezone: Europe/Berlin
 
-checkout:
-  post:
-    - mkdir build
-
 general:
   branches:
     only:
@@ -13,9 +9,16 @@ general:
 
 compile:
   override:
+    - pwd
+    - ls -l
+    - mkdir build
+    - cd build
     - cmake ..
     - make
 
 test:
   override:
+    - pwd
+    - ls -l
+    - mkdir build
     - make test
