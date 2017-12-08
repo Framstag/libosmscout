@@ -2152,7 +2152,7 @@ namespace osmscout {
 
       LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
 
-      if (layerValue!=NULL) {
+      if (layerValue!=nullptr) {
         data.layer=layerValue->GetLayer();
       }
 
