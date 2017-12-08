@@ -22,6 +22,7 @@ endif()
 if(NOT Qt5Svg_FOUND)
 	message(SEND_ERROR "Qt5Svg is required for StyleEditor application")
 endif()
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -61,7 +62,7 @@ set(RESOURCE_FILES
 
 add_executable(StyleEditor ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
-target_include_directories(StyleEditor PRIVATE 
+target_include_directories(StyleEditor PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
