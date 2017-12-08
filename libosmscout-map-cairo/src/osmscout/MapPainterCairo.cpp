@@ -1106,10 +1106,6 @@ namespace osmscout {
       return;
     }
 
-    // Current offset for the next label
-    double offset=helper.GetInitialOffset(pathLength,
-                                          textWidth);
-
     cairo_font_extents_t fontExtents;
     cairo_path_t         *path;
 
