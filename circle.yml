@@ -5,7 +5,6 @@ general:
   branches:
     only:
       - master
-  build_dir: build
 
 compile:
   override:
