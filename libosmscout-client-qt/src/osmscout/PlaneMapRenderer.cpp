@@ -100,7 +100,6 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                  const MapViewStruct& request)
 {
   //qDebug() << "RenderMap()";
-
   QMutexLocker locker(&finishedMutex);
 
   osmscout::Color backgroundColor;
@@ -196,6 +195,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                       backgroundColor.GetA()));
   }
 
+  painter.save();
   if (finalImgProjection.GetAngle()!=requestProjection.GetAngle()){
     // rotate final image
     QPointF rotationCenter(targetRectangle.x()+targetRectangle.width()/2.0,
@@ -248,6 +248,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     emit TriggerMapRenderingSignal(extendedRequest);
   }
 
+  painter.restore();
   return needsNoRepaint;
 }
 

@@ -136,6 +136,24 @@ Window {
                 }
             }
 
+            TiledMapOverlay {
+                anchors.fill: parent
+                view: map.view
+                enabled: false
+                opacity: 0.5
+                // If you intend to use tiles from OpenMapSurfer services in your own applications please contact us.
+                // https://korona.geog.uni-heidelberg.de/contact.html
+                provider: {
+                      "id": "ASTER_GDEM",
+                      "name": "Hillshade",
+                      "servers": [
+                        "https://korona.geog.uni-heidelberg.de/tiles/asterh/x=%2&y=%3&z=%1"
+                      ],
+                      "maximumZoomLevel": 18,
+                      "copyright": "© IAT, METI, NASA, NOAA",
+                    }
+            }
+
             onTap: {
                 console.log("tap: " + screenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
                 map.focus=true;
@@ -302,6 +320,15 @@ Window {
                 y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
+
+                MapButton {
+                    id: resetRotation
+                    label: "|"
+
+                    onClicked: {
+                        map.rotateTo(0);
+                    }
+                }
 
                 MapButton {
                     id: recenter

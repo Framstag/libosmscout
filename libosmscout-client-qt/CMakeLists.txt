@@ -50,6 +50,9 @@ set(HEADER_FILES
     include/osmscout/PlaneMapRenderer.h
     include/osmscout/TiledMapRenderer.h
     include/osmscout/OverlayObject.h
+    include/osmscout/MapOverlay.h
+    include/osmscout/TiledMapOverlay.h
+    include/osmscout/TiledRenderingHelper.h
 )
 
 set(SOURCE_FILES
@@ -85,6 +88,9 @@ set(SOURCE_FILES
     src/osmscout/PlaneMapRenderer.cpp
     src/osmscout/TiledMapRenderer.cpp
     src/osmscout/OverlayObject.cpp
+    src/osmscout/MapOverlay.cpp
+    src/osmscout/TiledMapOverlay.cpp
+    src/osmscout/TiledRenderingHelper.cpp
 )
 
 if(APPLE)

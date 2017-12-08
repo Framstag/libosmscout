@@ -126,6 +126,7 @@ void Settings::SetOnlineTileProviderId(QString id){
     if (GetOnlineTileProviderId() != id){
         storage->setValue("OSMScoutLib/Rendering/OnlineTileProvider", id);
         emit OnlineTileProviderIdChanged(id);
+        emit OnlineTileProviderChanged(GetOnlineTileProvider());
     }
 }
 

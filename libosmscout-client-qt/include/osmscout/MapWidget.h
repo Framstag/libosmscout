@@ -75,7 +75,6 @@ private:
   MapRenderer      *renderer;
 
   MapView          *view;
-  double           mapDpi;
 
   InputHandler     *inputHandler;
   TapRecognizer    tapRecognizer;     
@@ -126,6 +125,12 @@ public slots:
   void right();
   void up();
   void down();
+
+  /**
+   * Rotate view to specified angle [radians; [0 ~ 2*PI) ]
+   * @param angle
+   */
+  void rotateTo(double angle);
   void rotateLeft();
   void rotateRight();
 
@@ -273,7 +278,7 @@ public:
     projection.Set(GetCenter(),
                view->angle,
                view->magnification,
-               mapDpi,
+               view->mapDpi,
                // to avoid invalid projection when scene is not finished yet
                w==0? 100:w,
                h==0? 100:h);

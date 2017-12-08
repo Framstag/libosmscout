@@ -47,8 +47,6 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
 
-    mapDpi = settings->GetMapDPI();
-
     connect(settings.get(), SIGNAL(MapDPIChange(double)),
             this, SLOT(onMapDPIChange(double)));
 
@@ -72,7 +70,8 @@ MapWidget::MapWidget(QQuickItem* parent)
     view = new MapView(this,
                        osmscout::GeoCoord(0.0, 0.0),
                        /*angle*/ 0,
-                       osmscout::Magnification::magContinent);
+                       osmscout::Magnification::magContinent,
+                       settings->GetMapDPI());
     setupInputHandler(new InputHandler(*view));
     setKeepTouchGrab(true);
 
@@ -175,9 +174,9 @@ void MapWidget::touchEvent(QTouchEvent *event)
     if (!inputHandler->touch(event)){
         if (event->touchPoints().size() == 1){
             QTouchEvent::TouchPoint tp = event->touchPoints()[0];
-            setupInputHandler(new DragHandler(*view, mapDpi));
+            setupInputHandler(new DragHandler(*view));
         }else{
-            setupInputHandler(new MultitouchHandler(*view, mapDpi));
+            setupInputHandler(new MultitouchHandler(*view));
         }
         inputHandler->touch(event);
     }
@@ -361,7 +360,7 @@ void MapWidget::zoom(double zoomFactor, const QPoint widgetPosition)
     return;
 
   if (!inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()))){
-    setupInputHandler(new MoveHandler(*view, mapDpi));
+    setupInputHandler(new MoveHandler(*view));
     inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()));
   }
 }
@@ -379,7 +378,7 @@ void MapWidget::zoomOut(double zoomFactor, const QPoint widgetPosition)
 void MapWidget::move(QVector2D vector)
 {
     if (!inputHandler->move(vector)){
-        setupInputHandler(new MoveHandler(*view, mapDpi));
+        setupInputHandler(new MoveHandler(*view));
         inputHandler->move(vector);
     }
 }
@@ -404,19 +403,27 @@ void MapWidget::down()
     move(QVector2D( 0, height()/+3 ));
 }
 
+void MapWidget::rotateTo(double angle)
+{
+    if (!inputHandler->rotateTo(angle)){
+        setupInputHandler(new MoveHandler(*view));
+        inputHandler->rotateTo(angle);
+    }
+}
+
 void MapWidget::rotateLeft()
 {
-    if (!inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE)){
-        setupInputHandler(new MoveHandler(*view, mapDpi));
-        inputHandler->rotateBy(DELTA_ANGLE, -DELTA_ANGLE);
+    if (!inputHandler->rotateBy(-DELTA_ANGLE)){
+        setupInputHandler(new MoveHandler(*view));
+        inputHandler->rotateBy(-DELTA_ANGLE);
     }
 }
 
 void MapWidget::rotateRight()
 {
-    if (!inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE)){
-        setupInputHandler(new MoveHandler(*view, mapDpi));
-        inputHandler->rotateBy(DELTA_ANGLE, DELTA_ANGLE);
+    if (!inputHandler->rotateBy(DELTA_ANGLE)){
+        setupInputHandler(new MoveHandler(*view));
+        inputHandler->rotateBy(DELTA_ANGLE);
     }
 }
 
@@ -445,7 +452,7 @@ void MapWidget::reloadTmpStyle() {
 void MapWidget::setLockToPosition(bool lock){
     if (lock){
         if (!inputHandler->currentPosition(locationValid, currentPosition)){
-            setupInputHandler(new LockHandler(*view, mapDpi, std::min(width(), height()) / 3));
+            setupInputHandler(new LockHandler(*view, std::min(width(), height()) / 3));
             inputHandler->currentPosition(locationValid, currentPosition);
         }
     }else{
@@ -653,7 +660,7 @@ void MapWidget::onTapLongTap(const QPoint p)
 
 void MapWidget::onMapDPIChange(double dpi)
 {
-    mapDpi = dpi;
+    view->mapDpi = dpi;
 
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
