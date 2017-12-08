@@ -63,5 +63,6 @@ You can find automatic builds for Windows at
 for using MinGW (autoconf, cmake) and VisualStudio (cmake).
 
 Current build status:
-* Linux, OS X: [![Build Status](https://travis-ci.org/Framstag/libosmscout.svg?branch=master)](https://travis-ci.org/Framstag/libosmscout)
-* Windows: [![Build status](https://ci.appveyor.com/api/projects/status/s38jd7v5cwhwra8t?svg=true)](https://ci.appveyor.com/project/Framstag/libosmscout)
+* Linux, OS X (Travis-CI): [![Build Status](https://travis-ci.org/Framstag/libosmscout.svg?branch=master)](https://travis-ci.org/Framstag/libosmscout)
+* Windows (Appveyor): [![Build status](https://ci.appveyor.com/api/projects/status/s38jd7v5cwhwra8t?svg=true)](https://ci.appveyor.com/project/Framstag/libosmscout)
+* Linux (Circle CI): [![Build Status](https://circleci.com/gh/Framstag/libosmscout.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/Framstag/libosmscout)

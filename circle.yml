@@ -1,0 +1,21 @@
+machine:
+  timezone: Europe/Berlin
+
+checkout:
+  post:
+    - mkdir build
+
+general:
+  branches:
+    only:
+      - master
+  build_dir: build
+
+compile:
+  override:
+    - cmake ..
+    - make
+
+test:
+  override:
+    - make test
