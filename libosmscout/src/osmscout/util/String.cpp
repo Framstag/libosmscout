@@ -841,7 +841,7 @@ namespace osmscout {
       return false;
     }
 
-    std::tm time{};
+    std::tm time;
 
     time.tm_year = y - 1900; // Year since 1900
     time.tm_mon = M - 1;     // 0-11
