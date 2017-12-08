@@ -10,14 +10,10 @@ compile:
   override:
     - pwd
     - ls -l
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make
+    - mkdir build && cd build && cmake .. && make
 
 test:
   override:
     - pwd
     - ls -l
-    - mkdir build
-    - make test
+    - cd build && make test
