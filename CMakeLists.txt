@@ -341,12 +341,14 @@ else()
   set(OSMSCOUT_BUILD_BINDING_JAVA_CACHE OFF)
 endif()
 option(OSMSCOUT_BUILD_BINDING_JAVA "Enable generation of java binding" ${OSMSCOUT_BUILD_BINDING_JAVA_CACHE})
+
 if(SWIG_FOUND AND MSVC)
   set(OSMSCOUT_BUILD_BINDING_CSHARP_CACHE ON)
 else()
   set(OSMSCOUT_BUILD_BINDING_CSHARP_CACHE OFF)
 endif()
 option(OSMSCOUT_BUILD_BINDING_CSHARP "Enable generation of c# binding" ${OSMSCOUT_BUILD_BINDING_CSHARP_CACHE})
+
 add_subdirectory(libosmscout-binding)
 
 if(MATLAB_FOUND)

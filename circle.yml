@@ -10,7 +10,7 @@ compile:
   override:
     - pwd
     - ls -l
-    - mkdir build && cd build && cmake .. && make
+    - mkdir build && cd build && cmake .. -DOSMSCOUT_BUILD_BINDING_JAVA=OFF && make
 
 test:
   override:
