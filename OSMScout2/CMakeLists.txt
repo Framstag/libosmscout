@@ -25,6 +25,7 @@ endif()
 if(NOT Qt5Positioning_FOUND)
 	message(SEND_ERROR "Qt5Positioning is required for OSMScout2 application")
 endif()
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -57,6 +58,8 @@ set(SOURCE_FILES
 qt5_add_resources(RESOURCE_FILES
     res.qrc
 )
+
+set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 
 add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
