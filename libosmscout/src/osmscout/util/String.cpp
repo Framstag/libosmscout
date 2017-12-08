@@ -366,7 +366,7 @@ namespace osmscout {
         result+=' ';
       }
 
-      result=result+*currentToken;
+      result+=*currentToken;
 
       ++currentToken;
     }
