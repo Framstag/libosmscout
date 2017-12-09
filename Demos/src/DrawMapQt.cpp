@@ -31,11 +31,101 @@
 #include <osmscout/MapPainterQt.h>
 
 /*
-  Example for the nordrhein-westfalen.osm (to be executed in the Demos top
-  level directory):
+  Example for the nordrhein-westfalen.osm.pbf:
 
-  src/DrawMapQt ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.png
+  Demos/DrawMapQt ../maps/Dortmund ../stylesheets/standard.oss 1000 800 7.465 51.514 40000 test.png
 */
+
+static const double MIN_YEAR=1800;
+static const double MAX_YEAR=2020;
+
+class ConstructionProcessor : public osmscout::FillStyleProcessor
+{
+private:
+  osmscout::NameFeatureLabelReader             labelReader;
+  osmscout::ConstructionYearFeatureValueReader reader;
+
+public:
+  explicit ConstructionProcessor(const osmscout::TypeConfig& typeConfig)
+  : labelReader(typeConfig),
+    reader(typeConfig)
+  {
+    // no code
+  }
+
+  osmscout::FillStyleRef Process(const osmscout::FeatureValueBuffer& features,
+                                 const osmscout::FillStyleRef& fillStyle) const override
+  {
+
+    osmscout::ConstructionYearFeatureValue* value=reader.GetValue(features);
+
+    if (value!=nullptr)  {
+      std::cout << labelReader.GetLabel(features) << ": " << value->GetStartYear() << "-" << value->GetEndYear()
+                << std::endl;
+
+      if (value->GetStartYear()>=MIN_YEAR && value->GetStartYear()<=MAX_YEAR) {
+        double                 factor     =(value->GetStartYear()-MIN_YEAR)/(MAX_YEAR-MIN_YEAR+1);
+        osmscout::FillStyleRef customStyle=std::make_shared<osmscout::FillStyle>();
+
+        customStyle->SetFillColor(osmscout::Color(factor,0.0,0.0));
+
+        return customStyle;
+      }
+    }
+
+    return fillStyle;
+  }
+};
+
+class AddressProcessor : public osmscout::FillStyleProcessor
+{
+private:
+  osmscout::NameFeatureLabelReader    labelReader;
+  osmscout::AddressFeatureValueReader reader;
+
+public:
+  explicit AddressProcessor(const osmscout::TypeConfig& typeConfig)
+    : labelReader(typeConfig),
+      reader(typeConfig)
+  {
+    // no code
+  }
+
+  osmscout::FillStyleRef Process(const osmscout::FeatureValueBuffer& features,
+                                 const osmscout::FillStyleRef& fillStyle) const override
+  {
+
+    osmscout::AddressFeatureValue* value=reader.GetValue(features);
+
+    if (value!=nullptr)  {
+      std::cout << labelReader.GetLabel(features) << ": " << value->GetAddress() << std::endl;
+
+      size_t addressNumber;
+
+      if (osmscout::StringToNumber(value->GetAddress(),addressNumber)) {
+        osmscout::FillStyleRef customStyle=std::make_shared<osmscout::FillStyle>();
+
+        if (addressNumber%2==0) {
+          customStyle->SetFillColor(osmscout::Color::BLUE);
+        }
+        else {
+          customStyle->SetFillColor(osmscout::Color::GREEN);
+        }
+
+        return customStyle;
+      }
+      else {
+        osmscout::FillStyleRef customStyle=std::make_shared<osmscout::FillStyle>();
+
+        customStyle->SetFillColor(osmscout::Color::RED);
+
+        return customStyle;
+      }
+    }
+
+    return fillStyle;
+  }
+};
 
 int main(int argc, char* argv[])
 {
@@ -86,7 +176,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
   osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(map)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -100,54 +190,57 @@ int main(int argc, char* argv[])
 
   QPixmap *pixmap=new QPixmap(width,height);
 
-  if (pixmap!=NULL) {
-    QPainter* painter=new QPainter(pixmap);
+  QPainter* painter=new QPainter(pixmap);
 
-    if (painter!=NULL) {
-      osmscout::MercatorProjection  projection;
-      osmscout::MapParameter        drawParameter;
-      osmscout::AreaSearchParameter searchParameter;
-      osmscout::MapData             data;
-      osmscout::MapPainterQt        mapPainter(styleConfig);
-      double                        dpi=application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
+  osmscout::MercatorProjection  projection;
+  osmscout::MapParameter        drawParameter;
+  osmscout::AreaSearchParameter searchParameter;
+  osmscout::MapData             data;
+  osmscout::MapPainterQt        mapPainter(styleConfig);
+  double                        dpi=application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
+  osmscout::TypeInfoRef         buildingType=database->GetTypeConfig()->GetTypeInfo("building");
 
-      drawParameter.SetFontSize(3.0);
-      drawParameter.SetRenderSeaLand(true);
 
-      projection.Set(osmscout::GeoCoord(lat,lon),
-                     osmscout::Magnification(zoom),
-                     dpi,
-                     width,
-                     height);
+  if (buildingType!=nullptr) {
+    /*
+    osmscout::FillStyleProcessorRef constructionProcessor=std::make_shared<ConstructionProcessor>(*database->GetTypeConfig());
+    drawParameter.RegisterFillStyleProcessor(buildingType->GetIndex(),
+                                             constructionProcessor);*/
 
-      std::list<osmscout::TileRef> tiles;
-
-      mapService->LookupTiles(projection,tiles);
-      mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-      mapService->AddTileDataToMapData(tiles,data);
-      mapService->GetGroundTiles(projection,data.groundTiles);
-
-      if (mapPainter.DrawMap(projection,
-                             drawParameter,
-                             data,
-                             painter)) {
-        if (!pixmap->save(output.c_str(),"PNG",-1)) {
-          std::cerr << "Cannot write PNG" << std::endl;
-        }
-
-      }
-
-      delete painter;
-    }
-    else {
-      std::cout << "Cannot create QPainter" << std::endl;
-    }
-
-    delete pixmap;
+    /*
+    osmscout::FillStyleProcessorRef addressProcessor=std::make_shared<AddressProcessor>(*database->GetTypeConfig());
+    drawParameter.RegisterFillStyleProcessor(buildingType->GetIndex(),
+                                          addressProcessor);*/
   }
-  else {
-    std::cerr << "Cannot create QPixmap" << std::endl;
+
+  drawParameter.SetFontSize(3.0);
+  drawParameter.SetRenderSeaLand(true);
+
+  projection.Set(osmscout::GeoCoord(lat,lon),
+                 osmscout::Magnification(zoom),
+                 dpi,
+                 width,
+                 height);
+
+  std::list<osmscout::TileRef> tiles;
+
+  mapService->LookupTiles(projection,tiles);
+  mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+  mapService->AddTileDataToMapData(tiles,data);
+  mapService->GetGroundTiles(projection,data.groundTiles);
+
+  if (mapPainter.DrawMap(projection,
+                         drawParameter,
+                         data,
+                         painter)) {
+    if (!pixmap->save(output.c_str(),"PNG",-1)) {
+      std::cerr << "Cannot write PNG" << std::endl;
+    }
+
   }
+
+  delete painter;
+  delete pixmap;
 
   return 0;
 }

@@ -22,7 +22,7 @@ Here are some map renderings of colone taken with increasing zoom level.
 <a class="screenshot" href="/images/Colone_2.png"><img src="/images/Colone_2.png" width="25%" height="25%" alt="Colone"/></a>
 <a class="screenshot" href="/images/Colone_1.png"><img src="/images/Colone_1.png" width="25%" height="25%" alt="Colone"/></a>
 
-## Dynamic styleing of objects
+## Dynamic styling of objects
 
 <a class="screenshot" href="/images/ConstructionYear.png"><img src="/images/ConstructionYear.png" width="25%" height="25%" alt="Show age of building using different colors"/></a>
 <a class="screenshot" href="/images/OddEvenHousenumbers.png"><img src="/images/OddEvenHousenumbers.png" width="25%" height="25%" alt="Color buildings with odd an even house numbers differently"/></a>

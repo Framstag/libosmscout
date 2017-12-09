@@ -25,6 +25,8 @@
 
 #include <osmscout/private/MapImportExport.h>
 
+#include <osmscout/StyleProcessor.h>
+
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/Transformation.h>
 
@@ -38,50 +40,52 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter CLASS_FINAL
   {
   private:
-    std::string                  fontName;                  //!< Name of the font to use
-    double                       fontSize;                  //!< Metric size of base font (aka font size 100%) in millimeter
+    std::string                         fontName;                  //!< Name of the font to use
+    double                              fontSize;                  //!< Metric size of base font (aka font size 100%) in millimeter
 
-    std::list<std::string>       iconPaths;                 //!< List of paths to search for images for icons
-    std::list<std::string>       patternPaths;              //!< List of paths to search for images for patterns
+    std::list<std::string>              iconPaths;                 //!< List of paths to search for images for icons
+    std::list<std::string>              patternPaths;              //!< List of paths to search for images for patterns
 
-    double                       lineMinWidthPixel;         //!< Minimum width of an line to be drawn
-    double                       areaMinDimensionMM;        //!< Minimum dimension (either width or height) of an area in mm
+    double                              lineMinWidthPixel;         //!< Minimum width of an line to be drawn
+    double                              areaMinDimensionMM;        //!< Minimum dimension (either width or height) of an area in mm
 
-    TransPolygon::OptimizeMethod optimizeWayNodes;          //!< Try to reduce the number of nodes for
-    TransPolygon::OptimizeMethod optimizeAreaNodes;         //!< Try to reduce the number of nodes for
-    double                       optimizeErrorToleranceMm;  //!< The maximum error to allow when optimizing lines, in mm
-    bool                         drawFadings;               //!< Draw label fadings (default: true)
-    bool                         drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
+    TransPolygon::OptimizeMethod        optimizeWayNodes;          //!< Try to reduce the number of nodes for
+    TransPolygon::OptimizeMethod        optimizeAreaNodes;         //!< Try to reduce the number of nodes for
+    double                              optimizeErrorToleranceMm;  //!< The maximum error to allow when optimizing lines, in mm
+    bool                                drawFadings;               //!< Draw label fadings (default: true)
+    bool                                drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
 
     // Node and area labels
-    size_t                       labelLineMinCharCount;     //!< Labels will be _never_ word wrapped if they are shorter then the given characters
-    size_t                       labelLineMaxCharCount;     //!< Labels will be word wrapped if they are longer then the given characters
-    bool                         labelLineFitToArea;        //!< Labels will be word wrapped to fit object area
-    double                       labelLineFitToWidth;       //!< Labels will be word wrapped to fit given width in pixels
+    size_t                              labelLineMinCharCount;     //!< Labels will be _never_ word wrapped if they are shorter then the given characters
+    size_t                              labelLineMaxCharCount;     //!< Labels will be word wrapped if they are longer then the given characters
+    bool                                labelLineFitToArea;        //!< Labels will be word wrapped to fit object area
+    double                              labelLineFitToWidth;       //!< Labels will be word wrapped to fit given width in pixels
 
-    double                       labelSpace;                //!< Space between point labels in mm (default 3).
-    double                       plateLabelSpace;           //!< Space between plates in mm (default 5).
-    double                       sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
-    bool                         dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
+    double                              labelSpace;                //!< Space between point labels in mm (default 3).
+    double                              plateLabelSpace;           //!< Space between plates in mm (default 5).
+    double                              sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
+    bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
   private:
 // Contour labels
-    double                       contourLabelOffset;        //!< Offset in mm for beginning and end of an contour label in relation to contour begin and end
-    double                       contourLabelSpace;         //!< Space in mm between repetive labels on the same contour
+    double                              contourLabelOffset;        //!< Offset in mm for beginning and end of an contour label in relation to contour begin and end
+    double                              contourLabelSpace;         //!< Space in mm between repetive labels on the same contour
 
-    bool                         renderBackground;          //!< Render any background features, else render like the background should be transparent
-    bool                         renderSeaLand;             //!< Rendering of sea/land tiles
-    bool                         renderUnknowns;            //!< Unknown areas are not rendered (transparent)
+    bool                                renderBackground;          //!< Render any background features, else render like the background should be transparent
+    bool                                renderSeaLand;             //!< Rendering of sea/land tiles
+    bool                                renderUnknowns;            //!< Unknown areas are not rendered (transparent)
 
-    bool                         debugData;                 //!< Print out some performance relvant information about the data
-    bool                         debugPerformance;          //!< Print out some performance information
+    bool                                debugData;                 //!< Print out some performance relvant information about the data
+    bool                                debugPerformance;          //!< Print out some performance information
 
-    size_t                       warnObjectCountLimit;      //!< Limit for objects/type. If limit is reached a warning is created
-    size_t                       warnCoordCountLimit;       //!< Limit for coords/type. If limit is reached a warning is created
+    size_t                              warnObjectCountLimit;      //!< Limit for objects/type. If limit is reached a warning is created
+    size_t                              warnCoordCountLimit;       //!< Limit for coords/type. If limit is reached a warning is created
 
-    bool                         showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
+    bool                                showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
 
-    BreakerRef                   breaker;                   //!< Breaker to abort processing on external request
+    std::vector<FillStyleProcessorRef > fillProcessors;            //!< List of processors for FillStyles for types
+
+    BreakerRef                          breaker;                   //!< Breaker to abort processing on external request
 
   public:
     MapParameter();
@@ -126,6 +130,11 @@ namespace osmscout {
     void SetWarningCoordCountLimit(size_t limit);
 
     void SetShowAltLanguage(bool showAltLanguage);
+
+    void RegisterFillStyleProcessor(size_t typeIndex,
+                                    const FillStyleProcessorRef& processor);
+
+    FillStyleProcessorRef GetFillStyleProcessor(size_t typeIndex) const;
 
     void SetBreaker(const BreakerRef& breaker);
 

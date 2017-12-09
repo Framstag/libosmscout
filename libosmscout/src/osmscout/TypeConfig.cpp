@@ -1134,6 +1134,8 @@ namespace osmscout {
 
     RegisterFeature(std::make_shared<IsInFeature>());
 
+    RegisterFeature(std::make_shared<ConstructionYearFeature>());
+
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
     typeInfoIgnore=std::make_shared<TypeInfo>("");

@@ -1931,6 +1931,13 @@ namespace osmscout {
                                      projection,
                                      fillStyle);
 
+        FillStyleProcessorRef fillProcessor=parameter.GetFillStyleProcessor(ring.GetType()->GetIndex());
+
+        if (fillProcessor) {
+          fillStyle=fillProcessor->Process(ring.GetFeatureValueBuffer(),
+                                           fillStyle);
+        }
+
         styleConfig.GetAreaBorderStyles(type,
                                         ring.GetFeatureValueBuffer(),
                                         projection,

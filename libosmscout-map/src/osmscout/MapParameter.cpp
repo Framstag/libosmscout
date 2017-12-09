@@ -197,4 +197,21 @@ namespace osmscout {
   {
     this->breaker=breaker;
   }
+
+  void MapParameter::RegisterFillStyleProcessor(size_t typeIndex,
+                                                const FillStyleProcessorRef& processor)
+  {
+    fillProcessors.resize(std::max(fillProcessors.size(),(size_t)(typeIndex+1)));
+
+    fillProcessors[typeIndex]=processor;
+  }
+
+  FillStyleProcessorRef MapParameter::GetFillStyleProcessor(size_t typeIndex) const
+  {
+    if (typeIndex<fillProcessors.size()) {
+      return fillProcessors[typeIndex];
+    }
+
+    return nullptr;
+  }
 }

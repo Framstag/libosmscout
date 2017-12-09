@@ -11,8 +11,10 @@ set(HEADER_FILES
 	include/osmscout/MapParameter.h
 	include/osmscout/MapService.h
 	include/osmscout/LabelProvider.h
+	include/osmscout/Styles.h
 	include/osmscout/StyleDescription.h
 	include/osmscout/StyleConfig.h
+	include/osmscout/StyleProcessor.h
 	include/osmscout/TileId.h
 	include/osmscout/DataTileCache.h
 	include/osmscout/MapTileCache.h
@@ -27,8 +29,10 @@ set(SOURCE_FILES
 	src/osmscout/MapParameter.cpp
 	src/osmscout/MapService.cpp
 	src/osmscout/LabelProvider.cpp
+	src/osmscout/Styles.cpp
 	src/osmscout/StyleDescription.cpp
 	src/osmscout/StyleConfig.cpp
+	src/osmscout/StyleProcessor.cpp
 	src/osmscout/TileId.cpp
 	src/osmscout/DataTileCache.cpp
 	src/osmscout/MapTileCache.cpp
@@ -36,9 +40,9 @@ set(SOURCE_FILES
 )
 
 if(APPLE)
-set(THE_TARGET_NAME "OSMScoutMap") 
+set(THE_TARGET_NAME "OSMScoutMap")
 else()
-set(THE_TARGET_NAME "osmscout_map") 
+set(THE_TARGET_NAME "osmscout_map")
 endif()
 
 if(IOS)
