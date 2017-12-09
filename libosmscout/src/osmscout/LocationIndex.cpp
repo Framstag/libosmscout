@@ -640,6 +640,35 @@ namespace osmscout {
     }
   }
 
+  bool LocationIndex::VisitAdminRegions(const AdminRegion& adminRegion,
+                                        AdminRegionVisitor& visitor) const
+  {
+    FileScanner scanner;
+
+    try {
+      scanner.Open(AppendFileToDir(path,
+                                   FILENAME_LOCATION_IDX),
+                   FileScanner::LowMemRandom,
+                   true);
+
+      if (!VisitRegionEntries(adminRegion,
+                              scanner,
+                              visitor)) {
+        scanner.Close();
+        return false;
+      }
+
+      scanner.Close();
+
+      return true;
+    }
+    catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      scanner.CloseFailsafe();
+      return false;
+    }
+  }
+
   bool LocationIndex::VisitPOIs(const AdminRegion& region,
                                 POIVisitor& visitor,
                                 bool recursive) const

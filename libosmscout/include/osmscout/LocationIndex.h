@@ -94,7 +94,6 @@ namespace osmscout {
                          bool recursive,
                          bool& stopped) const;
 
-
     bool VisitLocations(const AdminRegion& adminRegion,
                         FileScanner& scanner,
                         LocationVisitor& visitor,
@@ -161,6 +160,12 @@ namespace osmscout {
      * Visit all admin regions
      */
     bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
+
+    /**
+     * Visit given admin region and all sub regions
+     */
+    bool VisitAdminRegions(const AdminRegion& adminRegion,
+                           AdminRegionVisitor& visitor) const;
 
     /**
      * Visit all POIs within the given admin region

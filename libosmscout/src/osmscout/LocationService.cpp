@@ -38,6 +38,7 @@ namespace osmscout {
     bool                    searchForPOI;
     bool                    adminRegionOnlyMatch;
     bool                    poiOnlyMatch;
+    bool                    postalAreaOnlyMatch;
     bool                    locationOnlyMatch;
     bool                    addressOnlyMatch;
 
@@ -55,6 +56,7 @@ namespace osmscout {
       postalAreaOnlyMatch(false),
       locationOnlyMatch(false),
       addressOnlyMatch(false),
+      partialMatch(false),
       stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
       limit(100)
   {
@@ -89,6 +91,11 @@ namespace osmscout {
   std::string LocationFormSearchParameter::GetAddressSearchString() const
   {
     return addressSearchString;
+  }
+
+  bool LocationFormSearchParameter::GetPartialMatch() const
+  {
+    return partialMatch;
   }
 
   void LocationFormSearchParameter::SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory)
@@ -154,6 +161,11 @@ namespace osmscout {
   bool LocationFormSearchParameter::GetAddressOnlyMatch() const
   {
     return addressOnlyMatch;
+  }
+
+  void LocationFormSearchParameter::SetPartialMatch(bool partialMatch)
+  {
+    this->partialMatch=partialMatch;
   }
 
   void LocationFormSearchParameter::SetLimit(size_t limit)
@@ -676,14 +688,14 @@ namespace osmscout {
         StringMatcher::Result matchResult=pattern.matcher->Match(region.name);
 
         if (matchResult==StringMatcher::match) {
-          //std::cout << "Match region name '" << region.name << "'" << std::endl;
+          //std::cout << "Match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'" << std::endl;
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(region),
                                region.name);
 
         }
         else if (matchResult==StringMatcher::partialMatch) {
-          //std::cout << "Partial match region name '" << region.name << "'" << std::endl;
+          //std::cout << "Partial match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'" << std::endl;
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(region),
                                       region.name);
@@ -705,6 +717,91 @@ namespace osmscout {
               partialMatches.emplace_back(pattern.tokenString,
                                           std::make_shared<AdminRegion>(region),
                                           alias.name);
+            }
+          }
+        }
+      }
+
+      return visitChildren;
+    }
+  };
+
+  class PostalAreaSearchVisitor : public AdminRegionVisitor
+  {
+  public:
+    struct Result
+    {
+      TokenStringRef tokenString;
+      AdminRegionRef adminRegion;
+      PostalAreaRef  postalArea;
+      std::string    name;
+
+      Result(const TokenStringRef& tokenString,
+             const AdminRegionRef& adminRegion,
+             const PostalAreaRef& postalArea,
+             const std::string& name)
+        : tokenString(tokenString),
+          adminRegion(adminRegion),
+          postalArea(postalArea),
+          name(name)
+      {
+        // no code
+      }
+    };
+
+  public:
+    std::list<TokenSearch> patterns;
+    std::list<Result>      matches;
+    std::list<Result>      partialMatches;
+
+  public:
+    PostalAreaSearchVisitor(const StringMatcherFactoryRef& matcherFactory,
+                            const std::list<TokenStringRef>& patterns)
+    {
+      for (const auto& pattern : patterns) {
+        this->patterns.emplace_back(pattern,
+                                    matcherFactory->CreateMatcher(pattern->text));
+      }
+    }
+
+    Action Visit(const AdminRegion& region) override
+    {
+      //std::cout << "Visiting admin region: " << region.name << std::endl;
+
+      for (const auto& area : region.postalAreas) {
+        if (patterns.empty()) {
+          //std::cout << "Match postal area name '" << area.name << "'" << std::endl;
+          matches.emplace_back(std::make_shared<TokenString>(0,0,""),
+                                      std::make_shared<AdminRegion>(region),
+                                      std::make_shared<PostalArea>(area),
+                                      area.name);
+        }
+        else {
+          for (const auto& pattern : patterns) {
+            StringMatcher::Result matchResult;
+
+            if (area.name.empty()) {
+              // the empty postal area always matches any pattern
+              matchResult=StringMatcher::match;
+            }
+            else {
+              matchResult=pattern.matcher->Match(area.name);
+            }
+
+            if (matchResult==StringMatcher::match) {
+              //std::cout << "Match postal area name '" << area.name << "'" << std::endl;
+              matches.emplace_back(pattern.tokenString,
+                                   std::make_shared<AdminRegion>(region),
+                                   std::make_shared<PostalArea>(area),
+                                   area.name);
+
+            }
+            else if (matchResult==StringMatcher::partialMatch) {
+              //std::cout << "Partial match postal area name '" << area.name << "'" << std::endl;
+              partialMatches.emplace_back(pattern.tokenString,
+                                          std::make_shared<AdminRegion>(region),
+                                          std::make_shared<PostalArea>(area),
+                                          area.name);
             }
           }
         }
@@ -813,6 +910,8 @@ namespace osmscout {
                const PostalArea& postalArea,
                const Location& location) override
     {
+      //std::cout << "Visiting " << adminRegion.name << " " << postalArea.name << "..." << std::endl;
+
       for (const auto& pattern : patterns) {
         StringMatcher::Result matchResult=pattern.matcher->Match(location.name);
 
@@ -1029,8 +1128,37 @@ namespace osmscout {
     }
   }
 
+  static void AddPostalAreaResult(const SearchParameter& parameter,
+                                  LocationSearchResult::MatchQuality regionMatchQuality,
+                                  const PostalAreaSearchVisitor::Result& postalAreaMatch,
+                                  LocationSearchResult::MatchQuality postalAreaMatchQuality,
+                                  LocationSearchResult& result)
+  {
+    if (result.results.size()>parameter.limit) {
+      result.limitReached=true;
+    }
+    else {
+      LocationSearchResult::Entry entry;
+
+      //std::cout << "Add location: " << locationMatch.location->name << " " << locationMatch.postalArea->name << " " << locationMatch.adminRegion->name << std::endl;
+
+      entry.adminRegion=postalAreaMatch.adminRegion;
+      entry.adminRegionMatchQuality=regionMatchQuality;
+      entry.poiMatchQuality=LocationSearchResult::none;
+      entry.postalArea=postalAreaMatch.postalArea;
+      entry.postalAreaMatchQuality=postalAreaMatchQuality;
+      entry.locationMatchQuality=LocationSearchResult::none;
+      entry.addressMatchQuality=LocationSearchResult::none;
+
+      result.results.push_back(entry);
+      result.results.sort();
+      result.results.unique();
+    }
+  }
+
   static void AddLocationResult(const SearchParameter& parameter,
                                 LocationSearchResult::MatchQuality regionMatchQuality,
+                                LocationSearchResult::MatchQuality postalAreaMatchQuality,
                                 const LocationSearchVisitor::Result& locationMatch,
                                 LocationSearchResult::MatchQuality locationMatchQuality,
                                 LocationSearchResult& result)
@@ -1047,7 +1175,7 @@ namespace osmscout {
       entry.adminRegionMatchQuality=regionMatchQuality;
       entry.poiMatchQuality=LocationSearchResult::none;
       entry.postalArea=locationMatch.postalArea;
-      entry.postalAreaMatchQuality=LocationSearchResult::none;
+      entry.postalAreaMatchQuality=postalAreaMatchQuality;
       entry.location=locationMatch.location;
       entry.locationMatchQuality=locationMatchQuality;
       entry.addressMatchQuality=LocationSearchResult::none;
@@ -1201,6 +1329,7 @@ namespace osmscout {
       if (addressTokens.empty()) {
         AddLocationResult(parameter,
                           regionMatchQuality,
+                          LocationSearchResult::candidate,
                           locationMatch,
                           LocationSearchResult::match,
                           result);
@@ -1221,6 +1350,7 @@ namespace osmscout {
           // so that partial results are not lost
           AddLocationResult(parameter,
                             regionMatchQuality,
+                            LocationSearchResult::candidate,
                             locationMatch,
                             LocationSearchResult::match,
                             result);
@@ -1237,6 +1367,7 @@ namespace osmscout {
         if (addressTokens.empty()) {
           AddLocationResult(parameter,
                             regionMatchQuality,
+                            LocationSearchResult::candidate,
                             locationMatch,
                             LocationSearchResult::candidate,
                             result);
@@ -1257,6 +1388,7 @@ namespace osmscout {
             // so that partial results are not lost
             AddLocationResult(parameter,
                               regionMatchQuality,
+                              LocationSearchResult::candidate,
                               locationMatch,
                               LocationSearchResult::candidate,
                               result);
@@ -1268,13 +1400,14 @@ namespace osmscout {
     return true;
   }
 
-  static bool SearchForLocationForRegion(LocationIndexRef& locationIndex,
-                                         const SearchParameter& parameter,
-                                         const std::string& locationPattern,
-                                         const std::string& addressPattern,
-                                         const AdminRegionSearchVisitor::Result& regionMatch,
-                                         LocationSearchResult::MatchQuality regionMatchQuality,
-                                         LocationSearchResult& result)
+  static bool SearchForLocationForPostalArea(LocationIndexRef& locationIndex,
+                                             const SearchParameter& parameter,
+                                             const std::string& locationPattern,
+                                             const std::string& addressPattern,
+                                             const PostalAreaSearchVisitor::Result& postalAreaMatch,
+                                             LocationSearchResult::MatchQuality regionMatchQuality,
+                                             LocationSearchResult::MatchQuality postalAreaMatchQuality,
+                                             LocationSearchResult& result)
   {
     std::unordered_set<std::string> locationIgnoreTokenSet;
 
@@ -1293,12 +1426,13 @@ namespace osmscout {
     LocationSearchVisitor locationVisitor(parameter.stringMatcherFactory,
                                           locationSearchPatterns);
 
-    for (const auto& postalArea : regionMatch.adminRegion->postalAreas) {
-      if (!locationIndex->VisitLocations(*regionMatch.adminRegion,
-                                         postalArea,
-                                         locationVisitor)) {
-        return false;
-      }
+    //std::cout << "Search for location for " << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "..." << std::endl;
+
+    if (!locationIndex->VisitLocations(*postalAreaMatch.adminRegion,
+                                       *postalAreaMatch.postalArea,
+                                       locationVisitor,
+                                       false)) {
+      return false;
     }
 
     for (const auto& locationMatch : locationVisitor.matches) {
@@ -1306,6 +1440,7 @@ namespace osmscout {
       if (addressPattern.empty()) {
         AddLocationResult(parameter,
                           regionMatchQuality,
+                          postalAreaMatchQuality,
                           locationMatch,
                           LocationSearchResult::match,
                           result);
@@ -1324,11 +1459,13 @@ namespace osmscout {
                                     LocationSearchResult::match,
                                     result);
 
-        if (result.results.size()==currentResultSize && parameter.partialMatch) {
+        if (result.results.size()==currentResultSize &&
+            parameter.partialMatch) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
           // so that partial results are not lost
           AddLocationResult(parameter,
                             regionMatchQuality,
+                            postalAreaMatchQuality,
                             locationMatch,
                             LocationSearchResult::match,
                             result);
@@ -1342,6 +1479,7 @@ namespace osmscout {
         if (addressPattern.empty()) {
           AddLocationResult(parameter,
                             regionMatchQuality,
+                            postalAreaMatchQuality,
                             locationMatch,
                             LocationSearchResult::candidate,
                             result);
@@ -1360,14 +1498,134 @@ namespace osmscout {
                                       LocationSearchResult::candidate,
                                       result);
 
-          if (result.results.size()==currentResultSize && parameter.partialMatch) {
+          if (result.results.size()==currentResultSize &&
+              parameter.partialMatch) {
             // If we have not found any result for the given search entry, we create one for the "upper" object
             // so that partial results are not lost
             AddLocationResult(parameter,
                               regionMatchQuality,
+                              postalAreaMatchQuality,
                               locationMatch,
                               LocationSearchResult::candidate,
                               result);
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  static bool SearchForPostalAreaForRegion(LocationIndexRef& locationIndex,
+                                           const SearchParameter& parameter,
+                                           const std::string& postalAreaPattern,
+                                           const std::string& locationPattern,
+                                           const std::string& addressPattern,
+                                           const AdminRegionSearchVisitor::Result& regionMatch,
+                                           LocationSearchResult::MatchQuality regionMatchQuality,
+                                           LocationSearchResult& result)
+  {
+    /*
+    std::unordered_set<std::string> postalAreaIgnoreTokenSet;
+
+    for (const auto& token : locationIndex->GetLocationIgnoreTokens()) {
+      locationIgnoreTokenSet.insert(UTF8StringToUpper(token));
+    }*/
+
+    // Build Location search patterns
+
+    //std::cout << "Search for postal area '" << postalAreaPattern << "'" << std::endl;
+
+    std::list<TokenStringRef> postalAreaSearchPatterns;
+
+    if (!postalAreaPattern.empty()) {
+      postalAreaSearchPatterns.push_back(std::make_shared<TokenString>(postalAreaPattern));
+    }
+
+    // Search for locations
+
+    PostalAreaSearchVisitor postalAreaVisitor(parameter.stringMatcherFactory,
+                                               postalAreaSearchPatterns);
+
+    if (!locationIndex->VisitAdminRegions(*regionMatch.adminRegion,
+                                          postalAreaVisitor)) {
+      return false;
+    }
+
+    for (const auto& postalAreaMatch : postalAreaVisitor.matches) {
+      //std::cout << "Found postal area match '" << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "' for pattern '" << postalAreaMatch.tokenString->text << "'" << std::endl;
+
+      if (locationPattern.empty() &&
+          addressPattern.empty()) {
+        AddPostalAreaResult(parameter,
+                            regionMatchQuality,
+                            postalAreaMatch,
+                            LocationSearchResult::match,
+                            result);
+      }
+      else {
+        std::list<std::string> locationTokens;
+        size_t                 currentResultSize=result.results.size();
+
+        locationTokens.push_back(locationPattern);
+
+        SearchForLocationForPostalArea(locationIndex,
+                                       parameter,
+                                       locationPattern,
+                                       addressPattern,
+                                       postalAreaMatch,
+                                       regionMatchQuality,
+                                       LocationSearchResult::match,
+                                       result);
+
+        if (result.results.size()==currentResultSize &&
+            parameter.partialMatch) {
+          // If we have not found any result for the given search entry, we create one for the "upper" object
+          // so that partial results are not lost
+          AddPostalAreaResult(parameter,
+                              regionMatchQuality,
+                              postalAreaMatch,
+                              LocationSearchResult::match,
+                              result);
+        }
+      }
+    }
+
+    if (!parameter.postalAreaOnlyMatch) {
+      for (const auto& postalAreaMatch : postalAreaVisitor.partialMatches) {
+        //std::cout << "Found postal area candidate '" << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "' for pattern '" << postalAreaMatch.tokenString->text << "'" << std::endl;
+        if (locationPattern.empty() &&
+            addressPattern.empty()) {
+          AddPostalAreaResult(parameter,
+                              regionMatchQuality,
+                              postalAreaMatch,
+                              LocationSearchResult::candidate,
+                              result);
+        }
+        else {
+          std::list<std::string> locationTokens;
+          size_t                 currentResultSize=result.results.size();
+
+          locationTokens.push_back(locationPattern);
+
+          SearchForLocationForPostalArea(locationIndex,
+                                         parameter,
+                                         locationPattern,
+                                         addressPattern,
+                                         postalAreaMatch,
+                                         regionMatchQuality,
+                                         LocationSearchResult::candidate,
+                                         result);
+
+          if (result.results.size()==currentResultSize &&
+              parameter.partialMatch) {
+            // If we have not found any result for the given search entry, we create one for the "upper" object
+            // so that partial results are not lost
+            AddPostalAreaResult(parameter,
+                                regionMatchQuality,
+                                postalAreaMatch,
+                                LocationSearchResult::candidate,
+                                result);
           }
         }
       }
@@ -1506,6 +1764,7 @@ namespace osmscout {
     parameter.searchForPOI=searchParameter.GetSearchForPOI();
     parameter.adminRegionOnlyMatch=searchParameter.GetAdminRegionOnlyMatch();
     parameter.poiOnlyMatch=searchParameter.GetPOIOnlyMatch();
+    parameter.postalAreaOnlyMatch=false;
     parameter.locationOnlyMatch=searchParameter.GetLocationOnlyMatch();
     parameter.addressOnlyMatch=searchParameter.GetAddressOnlyMatch();
     parameter.partialMatch=searchParameter.GetPartialMatch();
@@ -1695,9 +1954,10 @@ namespace osmscout {
     parameter.searchForPOI=false;
     parameter.adminRegionOnlyMatch=searchParameter.GetAdminRegionOnlyMatch();
     parameter.poiOnlyMatch=false;
+    parameter.postalAreaOnlyMatch=searchParameter.GetPostalAreaOnlyMatch();
     parameter.locationOnlyMatch=searchParameter.GetLocationOnlyMatch();
     parameter.addressOnlyMatch=searchParameter.GetAddressOnlyMatch();
-    parameter.partialMatch=true;
+    parameter.partialMatch=searchParameter.GetPartialMatch();
     parameter.stringMatcherFactory=searchParameter.GetStringMatcherFactory();
     parameter.limit=searchParameter.GetLimit();
 
@@ -1732,7 +1992,9 @@ namespace osmscout {
     for (const auto& regionMatch : adminRegionVisitor.matches) {
       //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
 
-      if (searchParameter.GetLocationSearchString().empty()) {
+      if (searchParameter.GetPostalAreaSearchString().empty() &&
+          searchParameter.GetLocationSearchString().empty() &&
+          searchParameter.GetAddressSearchString().empty()) {
         AddRegionResult(parameter,
                         LocationSearchResult::match,
                         regionMatch,
@@ -1741,15 +2003,17 @@ namespace osmscout {
       else {
         size_t currentResultSize=result.results.size();
 
-        SearchForLocationForRegion(locationIndex,
-                                   parameter,
-                                   searchParameter.GetLocationSearchString(),
-                                   searchParameter.GetAddressSearchString(),
-                                   regionMatch,
-                                   LocationSearchResult::match,
-                                   result);
+        SearchForPostalAreaForRegion(locationIndex,
+                                     parameter,
+                                     searchParameter.GetPostalAreaSearchString(),
+                                     searchParameter.GetLocationSearchString(),
+                                     searchParameter.GetAddressSearchString(),
+                                     regionMatch,
+                                     LocationSearchResult::match,
+                                     result);
 
-        if (result.results.size()==currentResultSize) {
+        if (result.results.size()==currentResultSize &&
+            searchParameter.GetPartialMatch()) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
           // so that partial results are not lost
           AddRegionResult(parameter,
@@ -1763,7 +2027,9 @@ namespace osmscout {
     for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
       //std::cout << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
 
-      if (searchParameter.GetLocationSearchString().empty()) {
+      if (searchParameter.GetPostalAreaSearchString().empty() &&
+          searchParameter.GetLocationSearchString().empty() &&
+          searchParameter.GetAddressSearchString().empty()) {
         AddRegionResult(parameter,
                         LocationSearchResult::candidate,
                         regionMatch,
@@ -1772,15 +2038,17 @@ namespace osmscout {
       else {
         size_t currentResultSize=result.results.size();
 
-        SearchForLocationForRegion(locationIndex,
-                                   parameter,
-                                   searchParameter.GetLocationSearchString(),
-                                   searchParameter.GetAddressSearchString(),
-                                   regionMatch,
-                                   LocationSearchResult::candidate,
-                                   result);
+        SearchForPostalAreaForRegion(locationIndex,
+                                     parameter,
+                                     searchParameter.GetPostalAreaSearchString(),
+                                     searchParameter.GetLocationSearchString(),
+                                     searchParameter.GetAddressSearchString(),
+                                     regionMatch,
+                                     LocationSearchResult::candidate,
+                                     result);
 
-        if (result.results.size()==currentResultSize) {
+        if (result.results.size()==currentResultSize &&
+            searchParameter.GetPartialMatch()) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
           // so that partial results are not lost
           AddRegionResult(parameter,
