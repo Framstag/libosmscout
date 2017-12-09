@@ -98,8 +98,8 @@ namespace osmscout {
                       std::unique_ptr<OSMPBF::PrimitiveBlock>&& block);
 
   public:
-    PreprocessPBF(PreprocessorCallback& callback);
-    ~PreprocessPBF();
+    explicit PreprocessPBF(PreprocessorCallback& callback);
+    ~PreprocessPBF() override;
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress,

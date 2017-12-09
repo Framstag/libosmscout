@@ -32,7 +32,7 @@ namespace osmscout {
     PreprocessorCallback& callback;
 
   public:
-    PreprocessOSM(PreprocessorCallback& callback);
+    explicit PreprocessOSM(PreprocessorCallback& callback);
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
