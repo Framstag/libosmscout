@@ -196,7 +196,7 @@ namespace osmscout {
       return distance;
     }
   };
-  
+
   //! \ingroup Location
   //! Reference counted reference to a LocationWayDescription instance
   typedef std::shared_ptr<LocationWayDescription> LocationWayDescriptionRef;
@@ -260,7 +260,7 @@ namespace osmscout {
       return crossing;
     }
   };
-  
+
   //! \ingroup Location
   //! Reference counted reference to a LocationCrossingDescription instance
   typedef std::shared_ptr<LocationCrossingDescription> LocationCrossingDescriptionRef;
@@ -324,37 +324,6 @@ namespace osmscout {
      * @return
      */
     LocationCrossingDescriptionRef GetCrossingDescription() const;
-  };
-
-  /**
-   * \ingroup Location
-   *
-   * Object holding a search request for to lookup one
-   * or more locations based on search patterns for the
-   * region, the location and a address.
-   */
-  class OSMSCOUT_API LocationSearch CLASS_FINAL
-  {
-  public:
-    /**
-     * \ingroup Location
-     *
-     * One singular name pattern match query
-     */
-    class OSMSCOUT_API Entry
-    {
-    public:
-      std::string adminRegionPattern; //!< name pattern, the admin region must match, empty if no filtering by admin region requested
-      std::string postalCodePattern;  //!< name pattern, the admin region must match, empty if no filtering by admin region requested
-      std::string locationPattern;    //!< name pattern, the location must match, empty if no filtering by location requested
-      std::string addressPattern;     //!< name pattern, the address must match, empty if no filtering by address requested
-    };
-
-  public:
-    std::list<Entry> searches; //!< List of search entries, the queries are OR'ed
-    size_t           limit;    //!< The maximum number of results over all sub searches requested
-
-    LocationSearch();
   };
 
   class OSMSCOUT_API POIFormSearchParameter CLASS_FINAL
@@ -768,30 +737,6 @@ namespace osmscout {
 
     Place GetPlace(const std::list<ReverseLookupResult>& lookupResult);
 
-    bool HandleAdminRegion(const LocationSearch& search,
-                           const LocationSearch::Entry& searchEntry,
-                           const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                           LocationSearchResult& result) const;
-
-    bool HandleAdminRegionLocation(const LocationSearch& search,
-                                   const LocationSearch::Entry& searchEntry,
-                                   const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                                   const PostalAreaMatchVisitor::PostalAreaResult& postalAreaResult,
-                                   const LocationMatchVisitor::Result& locationResult,
-                                   LocationSearchResult& result) const;
-
-    bool HandleAdminRegionPOI(const LocationSearch& search,
-                              const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                              const POIMatchVisitor::Result& poiResult,
-                              LocationSearchResult& result) const;
-
-    bool HandleAdminRegionLocationAddress(const LocationSearch& search,
-                                          const AdminRegionMatchVisitor::AdminRegionResult& adminRegionResult,
-                                          const PostalAreaMatchVisitor::PostalAreaResult& postalAreaResult,
-                                          const LocationMatchVisitor::Result& locationResult,
-                                          const AddressMatchVisitor::AddressResult& addressResult,
-                                          LocationSearchResult& result) const;
-
   public:
     explicit LocationService(const DatabaseRef& database);
 
@@ -812,9 +757,6 @@ namespace osmscout {
     bool ResolveAdminRegionHierachie(const AdminRegionRef& adminRegion,
                                      std::map<FileOffset,AdminRegionRef >& refs) const;
 
-    bool InitializeLocationSearchEntries(const std::string& searchPattern,
-                                         LocationSearch& search);
-
     bool SearchForLocationByString(const LocationStringSearchParameter& searchParameter,
                                    LocationSearchResult& result) const;
 
@@ -822,9 +764,6 @@ namespace osmscout {
                                  LocationSearchResult& result) const;
 
     bool SearchForPOIByForm(const POIFormSearchParameter& searchParameter,
-                            LocationSearchResult& result) const;
-
-    bool SearchForLocations(const LocationSearch& search,
                             LocationSearchResult& result) const;
 
     bool ReverseLookupRegion(const GeoCoord &coord,
