@@ -83,6 +83,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/BasemapDatabase.h \
                         osmscout/SRTM.h \
                         osmscout/LocationService.h \
+                        osmscout/LocationDescriptionService.h \
                         osmscout/POIService.h
 
 if OSMSCOUT_HAVE_SSE2

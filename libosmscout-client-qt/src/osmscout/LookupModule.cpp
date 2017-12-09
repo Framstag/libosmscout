@@ -62,7 +62,7 @@ void LookupModule::requestObjectsOnView(const MapViewStruct &view)
 
   loadJob=new DBLoadJob(lookupProjection,maximumAreaLevel,/* lowZoomOptimization */ true);
   this->view=view;
-  
+
   connect(loadJob, SIGNAL(databaseLoaded(QString,QList<osmscout::TileRef>)),
           this, SLOT(onDatabaseLoaded(QString,QList<osmscout::TileRef>)));
   connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)),
@@ -144,7 +144,7 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
         }
 
         std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
-        if (!db->locationService->DescribeLocationByAddress(location, description)) {
+        if (!db->locationDescriptionService->DescribeLocationByAddress(location, description)) {
           osmscout::log.Error() << "Error during generation of location description";
           continue;
         }
@@ -157,7 +157,7 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
                                    BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
         }
 
-        if (!db->locationService->DescribeLocationByPOI(location, description)) {
+        if (!db->locationDescriptionService->DescribeLocationByPOI(location, description)) {
           osmscout::log.Error() << "Error during generation of location description";
           continue;
         }
@@ -248,9 +248,9 @@ void LookupModule::requestRegionLookup(const osmscout::GeoCoord location) {
           continue;
         }
 
-        std::list<osmscout::LocationService::ReverseLookupResult> result;
+        std::list<osmscout::LocationDescriptionService::ReverseLookupResult> result;
 
-        if (db->locationService->ReverseLookupRegion(location,result)){
+        if (db->locationDescriptionService->ReverseLookupRegion(location,result)){
           std::map<osmscout::FileOffset,AdminRegionInfoRef> adminRegionMap=adminRegionCache[db->path];
           AdminRegionInfoRef bottomAdminRegion; // admin region with highest admin level
 

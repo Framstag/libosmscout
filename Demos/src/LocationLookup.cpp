@@ -23,6 +23,7 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
+#include <osmscout/LocationDescriptionService.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/String.h>
