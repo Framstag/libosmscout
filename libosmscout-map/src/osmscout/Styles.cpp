@@ -19,6 +19,7 @@
 
 #include <osmscout/Styles.h>
 
+#include <osmscout/system/Math.h>
 
 namespace osmscout {
 
