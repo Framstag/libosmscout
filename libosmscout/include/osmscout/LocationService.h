@@ -776,8 +776,8 @@ namespace osmscout {
 
     bool DescribeLocation(const GeoCoord& location,
                           LocationDescription& description,
-                          const double lookupDistance=100,
-                          const double sizeFilter=1.0);
+                          double lookupDistance=100,
+                          double sizeFilter=1.0);
 
     /**
      * @see LoadNearAreas
@@ -785,7 +785,7 @@ namespace osmscout {
     bool LoadNearNodes(const GeoCoord& location,
                        const TypeInfoSet &types,
                        std::vector<LocationDescriptionCandicate> &candidates,
-                       const double maxDistance=100);
+                       double maxDistance=100);
 
     /**
      * @see LoadNearAreas
@@ -793,7 +793,7 @@ namespace osmscout {
     bool LoadNearWays(const GeoCoord& location,
                       const TypeInfoSet &types,
                       std::vector<WayRef> &candidates,
-                      const double maxDistance=100);
+                      double maxDistance=100);
 
     /**
      * Load areas of given types near to location.
@@ -806,30 +806,30 @@ namespace osmscout {
      */
     bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
                        std::vector<LocationDescriptionCandicate> &candidates,
-                       const double maxDistance=100);
+                       double maxDistance=100);
 
     bool DescribeLocationByName(const GeoCoord& location,
                                 LocationDescription& description,
-                                const double lookupDistance=100,
-                                const double sizeFilter=1.0);
+                                double lookupDistance=100,
+                                double sizeFilter=1.0);
 
     bool DescribeLocationByAddress(const GeoCoord& location,
                                    LocationDescription& description,
-                                   const double lookupDistance=100,
-                                   const double sizeFilter=1.0);
+                                   double lookupDistance=100,
+                                   double sizeFilter=1.0);
 
     bool DescribeLocationByPOI(const GeoCoord& location,
                                LocationDescription& description,
-                               const double lookupDistance=100,
-                               const double sizeFilter=1.0);
+                               double lookupDistance=100,
+                               double sizeFilter=1.0);
 
     bool DescribeLocationByCrossing(const GeoCoord& location,
                                     LocationDescription& description,
-                                    const double lookupDistance=100);
+                                    double lookupDistance=100);
 
     bool DescribeLocationByWay(const GeoCoord& location,
                                LocationDescription& description,
-                               const double lookupDistance=100);
+                               double lookupDistance=100);
   };
 
   //! \ingroup Service
