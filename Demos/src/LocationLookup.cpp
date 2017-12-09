@@ -39,6 +39,7 @@ struct Arguments
   bool                   poiOnlyMatch=false;
   bool                   locationOnlyMatch=false;
   bool                   addressOnlyMatch=true;
+  bool                   partialMatch=false;
   size_t                 limit=30;
   std::list<std::string> location;
 };
@@ -367,6 +368,12 @@ int main(int argc, char* argv[])
                       "addressOnlyMatch",
                       "Return only exact matches for the address");
 
+  argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
+                        args.partialMatch=value;
+                      }),
+                      "partialMatch",
+                      "Return only matches that match the complete search string");
+
   argParser.AddOption(osmscout::CmdLineSizeTOption([&args](size_t value) {
                         args.limit=value;
                       }),
@@ -442,6 +449,7 @@ int main(int argc, char* argv[])
   searchParameter.SetPOIOnlyMatch(args.poiOnlyMatch);
   searchParameter.SetLocationOnlyMatch(args.locationOnlyMatch);
   searchParameter.SetAddressOnlyMatch(args.addressOnlyMatch);
+  searchParameter.SetPartialMatch(args.partialMatch);
   searchParameter.SetStringMatcherFactory(matcherFactory);
   searchParameter.SetLimit(args.limit);
 
@@ -483,6 +491,7 @@ int main(int argc, char* argv[])
   std::cout << "POI only match:          " << (searchParameter.GetPOIOnlyMatch() ? "true" : "false") << std::endl;
   std::cout << "Location only match:     " << (searchParameter.GetLocationOnlyMatch() ? "true" : "false") << std::endl;
   std::cout << "Address only match:      " << (searchParameter.GetAddressOnlyMatch() ? "true" : "false") << std::endl;
+  std::cout << "Partial match:           " << (searchParameter.GetPartialMatch() ? "true" : "false") << std::endl;
 
   if (searchParameter.GetDefaultAdminRegion()) {
     std::cout << "Default admin region:    " << searchParameter.GetDefaultAdminRegion()->name << " (" << searchParameter.GetDefaultAdminRegion()->object.GetName() << ")" << std::endl;

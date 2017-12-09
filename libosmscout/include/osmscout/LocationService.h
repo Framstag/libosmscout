@@ -143,6 +143,8 @@ namespace osmscout {
     bool                    locationOnlyMatch;    //!< Evaluate on direct location matches
     bool                    addressOnlyMatch;     //!< Evaluate on direct address matches
 
+    bool                    partialMatch;         //!< Add matches to the result, event if they do not match the complete search string
+
     std::string             searchString;         //!< The search string itself, must bot be empty
     StringMatcherFactoryRef stringMatcherFactory; //!< String matcher factory to use
 
@@ -161,6 +163,8 @@ namespace osmscout {
     bool GetLocationOnlyMatch() const;
     bool GetAddressOnlyMatch() const;
 
+    bool GetPartialMatch() const;
+
     std::string GetSearchString() const;
 
     StringMatcherFactoryRef GetStringMatcherFactory() const;
@@ -176,6 +180,8 @@ namespace osmscout {
     void SetPOIOnlyMatch(bool poiOnlyMatch);
     void SetLocationOnlyMatch(bool locationOnlyMatch);
     void SetAddressOnlyMatch(bool addressOnlyMatch);
+
+    void SetPartialMatch(bool partialMatch);
 
     void SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory);
 
