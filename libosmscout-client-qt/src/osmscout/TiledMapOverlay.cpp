@@ -106,7 +106,7 @@ TiledMapOverlay::~TiledMapOverlay()
 
 void TiledMapOverlay::paint(QPainter *painter)
 {
-  if (!enabled){
+  if (!enabled || !view->IsValid()){
     return;
   }
   QMutexLocker locker(&tileCacheMutex);
