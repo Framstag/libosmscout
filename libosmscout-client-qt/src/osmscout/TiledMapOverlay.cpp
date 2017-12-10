@@ -95,9 +95,6 @@ TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
   connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
           loader,SLOT(download(uint32_t, uint32_t, uint32_t)),
           Qt::QueuedConnection);
-  connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(download(uint32_t, uint32_t, uint32_t)),
-          Qt::QueuedConnection);
 }
 
 TiledMapOverlay::~TiledMapOverlay()
@@ -109,7 +106,7 @@ TiledMapOverlay::~TiledMapOverlay()
 
 void TiledMapOverlay::paint(QPainter *painter)
 {
-  if (!enabled){
+  if (!enabled || !view->IsValid()){
     return;
   }
   QMutexLocker locker(&tileCacheMutex);
@@ -192,6 +189,7 @@ void TiledMapOverlay::setProvider(QJsonValue jv)
   }
   providerJson=jv;
   emit providerChanged(provider);
+  redraw();
 }
 
 bool TiledMapOverlay::isEnabled()
@@ -201,9 +199,13 @@ bool TiledMapOverlay::isEnabled()
 
 void TiledMapOverlay::setEnabled(bool b)
 {
+  if (b==enabled){
+    return;
+  }
   enabled=b;
   if (!enabled){
     QMutexLocker locker(&tileCacheMutex);
     onlineTileCache.cleanupCache();
   }
+  redraw();
 }

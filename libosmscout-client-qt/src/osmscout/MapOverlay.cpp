@@ -23,6 +23,9 @@ MapOverlay::MapOverlay(QQuickItem* parent):
     QQuickPaintedItem(parent)
 {
   view=new MapView(this);
+
+  setRenderTarget(RenderTarget::FramebufferObject);
+  setPerformanceHints(PerformanceHint::FastFBOResizing);
 }
 
 MapOverlay::~MapOverlay()

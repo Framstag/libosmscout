@@ -191,6 +191,8 @@ public:
   inline double GetMagLevel(){ return magnification.GetLevel(); }
   inline double GetMapDpi(){ return mapDpi; }
 
+  inline bool IsValid(){ return mapDpi > 0; }
+
   void inline operator=(const MapView &mv)
   {
     center = mv.center;
