@@ -95,9 +95,6 @@ TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
   connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
           loader,SLOT(download(uint32_t, uint32_t, uint32_t)),
           Qt::QueuedConnection);
-  connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(download(uint32_t, uint32_t, uint32_t)),
-          Qt::QueuedConnection);
 }
 
 TiledMapOverlay::~TiledMapOverlay()
