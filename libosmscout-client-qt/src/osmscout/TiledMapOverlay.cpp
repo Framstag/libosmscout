@@ -189,6 +189,7 @@ void TiledMapOverlay::setProvider(QJsonValue jv)
   }
   providerJson=jv;
   emit providerChanged(provider);
+  redraw();
 }
 
 bool TiledMapOverlay::isEnabled()
@@ -198,9 +199,13 @@ bool TiledMapOverlay::isEnabled()
 
 void TiledMapOverlay::setEnabled(bool b)
 {
+  if (b==enabled){
+    return;
+  }
   enabled=b;
   if (!enabled){
     QMutexLocker locker(&tileCacheMutex);
     onlineTileCache.cleanupCache();
   }
+  redraw();
 }
