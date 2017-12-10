@@ -47,22 +47,22 @@ namespace osmscout {
     }
 
 #if defined(__WIN32__) || defined(WIN32)
-	if (_fseeki64(file, 0L, SEEK_END) != 0) {
-		fclose(file);
-		throw IOException(filename, "Seeking end of file");
-	}
+  if (_fseeki64(file, 0L, SEEK_END) != 0) {
+    fclose(file);
+    throw IOException(filename, "Seeking end of file");
+  }
 
-	const __int64 size = _ftelli64(file);
+  const __int64 size = _ftelli64(file);
 
-	if (size == -1) {
-		fclose(file);
+  if (size == -1) {
+    fclose(file);
 
-		throw IOException(filename, "Getting current file position");
-	}
+    throw IOException(filename, "Getting current file position");
+  }
 
-	fclose(file);
+  fclose(file);
 
-	return (FileOffset)size;
+  return (FileOffset)size;
 #elif defined(HAVE_FSEEKO)
     if (fseeko(file,0L,SEEK_END)!=0) {
       fclose(file);
