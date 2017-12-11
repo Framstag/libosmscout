@@ -30,10 +30,12 @@ UI_DIR = $$DESTDIR/
 
 SOURCES = src/OSMScout.cpp \
           src/Theme.cpp \
-          src/AppSettings.cpp
+          src/AppSettings.cpp \
+          src/PositionSimulator.cpp
 
 HEADERS = src/Theme.h \
-          src/AppSettings.h
+          src/AppSettings.h \
+          src/PositionSimulator.h
 
 DISTFILES += \
     qml/custom/MapButton.qml \

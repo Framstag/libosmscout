@@ -25,6 +25,7 @@
 #include <QQuickView>
 #include <QApplication>
 #include <QFileInfo>
+#include <QQmlContext>
 
 // OSM Scout library singleton
 #include <osmscout/OSMScoutQt.h>
@@ -43,8 +44,11 @@
 #include "Theme.h"
 
 #include "AppSettings.h"
+#include "PositionSimulator.h"
 
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/GPXFeatures.h>
 
 static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
@@ -78,6 +82,24 @@ static int LogEnv(QString env)
 
   return WARNING;
 }
+
+struct Arguments {
+  bool help;
+  QString databaseDirectory;
+  QString style;
+  QString iconDirectory;
+
+  QString track;
+  bool simulateNavigation;
+
+  Arguments() :
+      help(false),
+      databaseDirectory("."),
+      style("stylesheets/standard.oss"),
+      iconDirectory("icons"),
+      simulateNavigation(false)
+  {}
+};
 
 int main(int argc, char* argv[])
 {
@@ -116,39 +138,82 @@ int main(int argc, char* argv[])
   // setup paths
   QStringList cmdLineArgs = QApplication::arguments();
 
+  osmscout::CmdLineParser   argParser("OSMScout2",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.iconDirectory=QString::fromStdString(value);
+                      }),
+                      "icons",
+                      "Icon directory",
+                      false);
+
+#ifdef OSMSCOUT_GPX_HAVE_LIB_XML
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.track=QString::fromStdString(value);
+                        args.simulateNavigation=true;
+                      }),
+                      "simulate-track",
+                      "GPX file for navigation simulation",
+                      false);
+#endif
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=QString::fromStdString(value);
+                          }),
+                          "databaseDir",
+                          "Database directory");
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.style=QString::fromStdString(value);
+                          }),
+                          "stylesheet",
+                          "Map stylesheet");
+
+  osmscout::CmdLineParseResult argResult=argParser.Parse();
+  if (argResult.HasError()) {
+    std::cerr << "ERROR: " << argResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+    return 1;
+  }
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
+  }
+
   QStringList mapLookupDirectories;
-  if (cmdLineArgs.size() > 1){
-    mapLookupDirectories << cmdLineArgs.at(1);
 
-    QDir dir(cmdLineArgs.at(1));
+  mapLookupDirectories << args.databaseDirectory;
 
-    if (dir.cdUp()) {
-      if (dir.cd("world")) {
-        builder.WithBasemapLookupDirectory(dir.absolutePath());
-      }
+  QDir dir(args.databaseDirectory);
+
+  if (dir.cdUp()) {
+    if (dir.cd("world")) {
+      builder.WithBasemapLookupDirectory(dir.absolutePath());
     }
   }
-
-  if (cmdLineArgs.size() > 2){
-    QFileInfo stylesheetFile(cmdLineArgs.at(2));
-    builder.WithStyleSheetDirectory(stylesheetFile.dir().path())
-     .WithStyleSheetFile(stylesheetFile.fileName());
-  }
-
-  QString iconDirectory;
-  if (cmdLineArgs.size() > 3){
-    iconDirectory = cmdLineArgs.at(3);
-  }
-  else {
-    if (cmdLineArgs.size() > 1) {
-      iconDirectory = QDir(cmdLineArgs.at(1)).filePath("icons");
+  if (args.simulateNavigation){
+    QFileInfo gpxFile(args.track);
+    if (!gpxFile.exists()){
+      std::cerr << args.track.toStdString() << " dont exists" << std::endl;
+      return 1;
     }
-    else {
-      iconDirectory = "icons";
-    }
+    qmlRegisterType<PositionSimulator>("net.sf.libosmscout.map", 1, 0, "PositionSimulator");
   }
+
+  QFileInfo stylesheetFile(args.style);
+
   builder
-    .WithIconDirectory(iconDirectory)
+    .WithStyleSheetDirectory(stylesheetFile.dir().path())
+    .WithStyleSheetFile(stylesheetFile.fileName())
+    .WithIconDirectory(args.iconDirectory)
     .WithMapLookupDirectories(mapLookupDirectories)
     .WithOnlineTileProviders(":/resources/online-tile-providers.json")
     .WithMapProviders(":/resources/map-providers.json")
@@ -160,8 +225,15 @@ int main(int argc, char* argv[])
   }
 
   {
-    QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
-    result = app.exec();
+    if (args.simulateNavigation){
+      QQmlApplicationEngine window;
+      window.rootContext()->setContextProperty("PositionSimulationTrack", args.track);
+      window.load(QUrl("qrc:/qml/NavigationSimulation.qml"));
+      result = app.exec();
+    }else{
+      QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
+      result = app.exec();
+    }
   }
 
   OSMScoutQt::FreeInstance();
