@@ -257,7 +257,7 @@ add_test(NAME NumberSet COMMAND NumberSet)
 #---- ScanConversion
 add_executable(ScanConversion src/ScanConversion.cpp)
 set_property(TARGET ScanConversion PROPERTY CXX_STANDARD 11)
-target_include_directories(ScanConversion PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_include_directories(ScanConversion PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 if(APPLE)
   target_link_libraries(ScanConversion OSMScout)
 else()
