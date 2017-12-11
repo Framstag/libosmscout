@@ -1,0 +1,29 @@
+version: 2
+jobs:
+  build_cmake:
+    docker:
+      - image: circleci/build-image:ubuntu-14.04-XL-922-9410082
+        environment:
+          TZ: "/usr/share/zoneinfo/Europe/Berlin"
+    branches:
+      only:
+        - master
+        - pull/*
+    steps:
+      - checkout
+      - run:
+          name: Create build directory
+          command: mkdir build
+      - run:
+          name: Configure project
+          command: cmake .. -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+          working_directory: build
+      - run:
+          name: Build project
+          command: make
+          working_directory: build
+      - run:
+          name: Test project
+          command: ctest
+          working_directory: build
+
