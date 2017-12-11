@@ -5,6 +5,7 @@ general:
   branches:
     only:
       - master
+      - pull/*  
 
 compile:
   override:
