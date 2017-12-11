@@ -5,6 +5,7 @@ jobs:
       - image: circleci/build-image:ubuntu-14.04-XL-922-9410082
         environment:
           TZ: "/usr/share/zoneinfo/Europe/Berlin"
+          LANG: "de_DE.utf8"
     branches:
       only:
         - master
@@ -20,10 +21,10 @@ jobs:
           working_directory: build
       - run:
           name: Build project
-          command: make
+          command: make -j 2
           working_directory: build
       - run:
           name: Test project
-          command: ctest
+          command: ctest -j 2 --output-on-failure
           working_directory: build
 
