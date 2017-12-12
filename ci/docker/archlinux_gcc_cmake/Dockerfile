@@ -1,16 +1,16 @@
 FROM pritunl/archlinux:latest
 
-RUN pacman --noconfirm --needed -S \
+RUN pacman --noconfirm --needed -S --asdeps \
           git \
           libxml2 protobuf \
           agg freetype2 \
           cairo \
           qt5-base qt5-declarative qt5-graphicaleffects qt5-location \
           qt5-quickcontrols qt5-script qt5-sensors  qt5-svg qt5-tools \
-          freeglut glu \
+          freeglut glu glew glm glfw libxcursor libxinerama \
           marisa
 
-RUN pacman --noconfirm --needed -S \
+RUN pacman --noconfirm --needed -S --asdeps \
           cmake make pkg-config \
           gcc
           
