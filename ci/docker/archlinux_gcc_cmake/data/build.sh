@@ -14,12 +14,11 @@ fi
 
 git clone -b "$BRANCH" "$REPO" libosmscout
 
-env
-
+export LANG=en_US.utf8
 cd libosmscout
 mkdir build
 cd build
 cmake ..
 make
-make test
+ctest --output-on-failure
 
