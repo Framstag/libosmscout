@@ -26,14 +26,15 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Location.h>
+#include <osmscout/LocationDescriptionService.h>
 #include <osmscout/LocationService.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI
- * 
- * Qt abstraction for various objects on map, 
+ *
+ * Qt abstraction for various objects on map,
  * used for search and routing
  */
 class OSMSCOUT_CLIENT_QT_API LocationEntry : public QObject

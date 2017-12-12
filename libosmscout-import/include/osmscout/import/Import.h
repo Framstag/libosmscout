@@ -277,11 +277,9 @@ namespace osmscout {
     void SetRawCoordBlockSize(size_t blockSize);
 
     void SetRawNodeDataMemoryMaped(bool memoryMaped);
-    void SetRawNodeDataCacheSize(size_t nodeDataCacheSize);
 
     void SetRawWayIndexMemoryMaped(bool memoryMaped);
     void SetRawWayDataMemoryMaped(bool memoryMaped);
-    void SetRawWayDataCacheSize(size_t wayDataCacheSize);
     void SetRawWayIndexCacheSize(size_t wayIndexCacheSize);
     void SetRawWayBlockSize(size_t blockSize);
 
@@ -451,7 +449,7 @@ namespace osmscout {
     bool ExecuteModules(const TypeConfigRef& typeConfig,
                         Progress& progress);
   public:
-    Importer(const ImportParameter& parameter);
+    explicit Importer(const ImportParameter& parameter);
     virtual ~Importer();
 
     bool Import(Progress& progress);

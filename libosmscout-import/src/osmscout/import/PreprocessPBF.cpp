@@ -85,7 +85,7 @@ namespace osmscout {
 
   void PreprocessPBF::AssureBlockSize(google::protobuf::int32 length)
   {
-    if (buffer==NULL) {
+    if (buffer==nullptr) {
       buffer=new char[length];
       bufferSize=length;
     }
@@ -454,7 +454,7 @@ namespace osmscout {
   }
 
   PreprocessPBF::PreprocessPBF(PreprocessorCallback& callback)
-  : buffer(NULL),
+  : buffer(nullptr),
     bufferSize(0),
     callback(callback)
   {
@@ -522,7 +522,7 @@ namespace osmscout {
 
       file=fopen(filename.c_str(),"rb");
 
-      if (file==NULL) {
+      if (file==nullptr) {
         progress.Error("Cannot open file!");
         return false;
       }

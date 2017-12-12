@@ -78,7 +78,7 @@ namespace osmscout {
     }
 
     /**
-     * Marks the tile as inpcomplete again, without actually clearing data and types.
+     * Marks the tile as incomplete again, without actually clearing data and types.
      */
     void Invalidate()
     {
@@ -464,6 +464,11 @@ namespace osmscout {
     inline size_t GetSize() const
     {
       return cacheSize;
+    }
+
+    inline size_t GetCurrentSize() const
+    {
+      return tileCache.size();
     }
 
     void CleanupCache();

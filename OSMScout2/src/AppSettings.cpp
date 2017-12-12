@@ -20,6 +20,7 @@
 #include <QDebug>
 
 #include <osmscout/InputHandler.h>
+#include <osmscout/OSMScoutQt.h>
 
 #include "AppSettings.h"
 
@@ -37,7 +38,8 @@ MapView *AppSettings::GetMapView()
     view = new MapView(this,
               osmscout::GeoCoord(lat, lon),
               angle,
-              osmscout::Magnification(mag)
+              osmscout::Magnification(mag),
+              OSMScoutQt::GetInstance().GetSettings()->GetMapDPI()
               );
   }
   return view;
@@ -55,7 +57,8 @@ void AppSettings::SetMapView(QObject *o)
     view = new MapView(this,
               osmscout::GeoCoord(updated->GetLat(), updated->GetLon()),
               updated->GetAngle(),
-              osmscout::Magnification(updated->GetMag())
+              osmscout::Magnification(updated->GetMag()),
+              updated->GetMapDpi()
               );
     changed = true;
   }else{

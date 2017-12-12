@@ -90,6 +90,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/BasemapDatabase.cpp \
                         osmscout/SRTM.cpp \
                         osmscout/LocationService.cpp \
+                        osmscout/LocationDescriptionService.cpp \
                         osmscout/POIService.cpp
 
 if OSMSCOUT_HAVE_SSE2

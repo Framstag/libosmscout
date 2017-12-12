@@ -106,11 +106,12 @@ namespace osmscout {
     ImportErrorReporter(Progress& progress,
                         const TypeConfigRef& typeConfig,
                         const std::string& destinationDirectory);
-    virtual ~ImportErrorReporter();
 
-    virtual void ReportTag(const ObjectOSMRef &object,
-                           const TagMap& tags,
-                           const std::string& error);
+    ~ImportErrorReporter() override;
+
+    void ReportTag(const ObjectOSMRef &object,
+                   const TagMap& tags,
+                   const std::string& error) override;
 
     void ReportWay(OSMId id,
                    const TagMap& tags,

@@ -79,7 +79,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainter
   {
   public:
-
     /*
      * Dimension of a text
      */
@@ -243,7 +242,7 @@ namespace osmscout {
       double currentOffset;
 
     public:
-      ContourLabelHelper(const MapPainter& painter);
+      explicit ContourLabelHelper(const MapPainter& painter);
 
       bool Init(double pathLength,
                 double textWidth);

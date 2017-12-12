@@ -185,7 +185,7 @@ namespace osmscout {
     if (usedPoints>=bufferSize) {
       bufferSize=bufferSize*2;
 
-      Vertex2D* newBuffer=new Vertex2D[bufferSize];
+      auto* newBuffer=new Vertex2D[bufferSize];
 
       memcpy(newBuffer,buffer,sizeof(Vertex2D)*usedPoints);
 

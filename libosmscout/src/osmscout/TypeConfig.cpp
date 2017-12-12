@@ -1134,6 +1134,8 @@ namespace osmscout {
 
     RegisterFeature(std::make_shared<IsInFeature>());
 
+    RegisterFeature(std::make_shared<ConstructionYearFeature>());
+
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
     typeInfoIgnore=std::make_shared<TypeInfo>("");
@@ -1665,15 +1667,13 @@ namespace osmscout {
    */
   bool TypeConfig::LoadFromOSTFile(const std::string& filename)
   {
-    FileOffset fileSize;
-    FILE*      file;
     bool success=false;
 
     try {
-      fileSize=GetFileSize(filename);
+      FileOffset fileSize=GetFileSize(filename);
+      FILE       *file=fopen(filename.c_str(),"rb");
 
-      file=fopen(filename.c_str(),"rb");
-      if (file==NULL) {
+      if (file==nullptr) {
         log.Error() << "Cannot open file '" << filename << "'";
         return false;
       }

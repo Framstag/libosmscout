@@ -1931,6 +1931,13 @@ namespace osmscout {
                                      projection,
                                      fillStyle);
 
+        FillStyleProcessorRef fillProcessor=parameter.GetFillStyleProcessor(ring.GetType()->GetIndex());
+
+        if (fillProcessor) {
+          fillStyle=fillProcessor->Process(ring.GetFeatureValueBuffer(),
+                                           fillStyle);
+        }
+
         styleConfig.GetAreaBorderStyles(type,
                                         ring.GetFeatureValueBuffer(),
                                         projection,
@@ -2152,7 +2159,7 @@ namespace osmscout {
 
       LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
 
-      if (layerValue!=NULL) {
+      if (layerValue!=nullptr) {
         data.layer=layerValue->GetLayer();
       }
 

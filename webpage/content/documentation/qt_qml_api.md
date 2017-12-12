@@ -81,9 +81,8 @@ You can choose one of two rendering types:
  * **tiled** - map is combined from tiles downloaded from some online web service 
    ([openstreetmap.org](https://openstreetmap.org) for example) and tiles rendered offline
    by library. This allows to render detailed map for whole world and keep benefits 
-   of offline rendering for areas covered by downloaded databases. This kind of rendering
-   don't support map rotating (yet), north will be always up. Rendering may be more 
-   responsive, due to tile caching in memory. 
+   of offline rendering for areas covered by downloaded databases. It supports map rotating,
+   but labels are rotated too. Rendering may be more responsive, due to tile caching in memory.
  
 ### User input
 

@@ -22,6 +22,9 @@
 
 #include <osmscout/OSMTile.h>
 
+// uncomment or define by compiler parameter to render various debug marks
+// #define DRAW_DEBUG
+
 // Timeout for the first rendering after rerendering was triggered (render what ever data is available)
 static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
 
@@ -97,7 +100,6 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                  const MapViewStruct& request)
 {
   //qDebug() << "RenderMap()";
-
   QMutexLocker locker(&finishedMutex);
 
   osmscout::Color backgroundColor;
@@ -152,9 +154,6 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     return false;
   }
 
-  osmscout::GeoBox finalImgBoundingBox;
-  finalImgProjection.GetDimensions(finalImgBoundingBox);
-
   // projection bounding box may be smaller than projection dimensions...
   double scale=computeScale(finalImgProjection,requestProjection);
   
@@ -166,14 +165,19 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   double targetCenterX;
   double targetCenterY;
 
-  requestProjection.GeoToPixel(finalImgBoundingBox.GetCenter(),targetCenterX,targetCenterY);
-  double targetTopLeftX=targetCenterX-requestProjection.GetWidth()*canvasOverrun*scale*0.5;
-  double targetTopLeftY=targetCenterY-requestProjection.GetHeight()*canvasOverrun*scale*0.5;
+  osmscout::GeoCoord srcImageCenterCoord;
+  finalImgProjection.PixelToGeo(finalImgProjection.GetWidth()/2,
+                                finalImgProjection.GetHeight()/2,
+                                srcImageCenterCoord);
+
+  requestProjection.GeoToPixel(srcImageCenterCoord,targetCenterX,targetCenterY);
+  double targetTopLeftX=targetCenterX - finalImgProjection.GetWidth()*scale*0.5;
+  double targetTopLeftY=targetCenterY - finalImgProjection.GetHeight()*scale*0.5;
 
   QRectF targetRectangle(targetTopLeftX,
                          targetTopLeftY,
-                         requestProjection.GetWidth()*canvasOverrun*scale,
-                         requestProjection.GetHeight()*canvasOverrun*scale);
+                         finalImgProjection.GetWidth()*scale,
+                         finalImgProjection.GetHeight()*scale);
 
 
   // check if transformed final img cover current canvas...
@@ -191,6 +195,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                                       backgroundColor.GetA()));
   }
 
+  painter.save();
   if (finalImgProjection.GetAngle()!=requestProjection.GetAngle()){
     // rotate final image
     QPointF rotationCenter(targetRectangle.x()+targetRectangle.width()/2.0,
@@ -203,6 +208,28 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   painter.drawImage(targetRectangle,
                     *finishedImage,
                     sourceRectangle);
+
+#ifdef DRAW_DEBUG
+  painter.resetTransform();
+  double lon,lat;
+  finalImgProjection.PixelToGeo(0,0,lon,lat);
+  osmscout::GeoCoord topLeft(lat,lon);
+  finalImgProjection.PixelToGeo(finalImgProjection.GetWidth(),finalImgProjection.GetHeight(),lon,lat);
+  osmscout::GeoCoord bottomRight(lat,lon);
+  finalImgProjection.PixelToGeo(finalImgProjection.GetWidth(),0,lon,lat);
+  osmscout::GeoCoord topRight(lat,lon);
+  finalImgProjection.PixelToGeo(0,finalImgProjection.GetHeight(),lon,lat);
+  osmscout::GeoCoord bottomLeft(lat,lon);
+
+  painter.setPen(QColor::fromRgbF(0,0,1));
+  double x1,y1,x2,y2;
+  requestProjection.GeoToPixel(topLeft,x1,y1);
+  requestProjection.GeoToPixel(bottomRight,x2,y2);
+  painter.drawLine(x1,y1,x2,y2);
+  requestProjection.GeoToPixel(topRight,x1,y1);
+  requestProjection.GeoToPixel(bottomLeft,x2,y2);
+  painter.drawLine(x1,y1,x2,y2);
+#endif
 
   MapViewStruct extendedRequest=request;
   extendedRequest.width*=canvasOverrun;
@@ -221,6 +248,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     emit TriggerMapRenderingSignal(extendedRequest);
   }
 
+  painter.restore();
   return needsNoRepaint;
 }
 
@@ -344,6 +372,12 @@ void PlaneMapRenderer::DrawMap()
       dbThread->RunJob(&job);
       success=job.IsSuccess();
     }
+
+#ifdef DRAW_DEBUG
+    p.setPen(QColor::fromRgbF(1,0,0));
+    p.drawLine(0,0, currentImage->width(), currentImage->height());
+    p.drawLine(currentImage->width(),0, 0, currentImage->height());
+#endif
 
     p.end();
 

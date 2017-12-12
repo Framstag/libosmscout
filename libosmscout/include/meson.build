@@ -61,6 +61,7 @@ osmscoutHeader = [
             'osmscout/Location.h',
             'osmscout/LocationIndex.h',
             'osmscout/LocationService.h',
+            'osmscout/LocationDescriptionService.h',
             'osmscout/Node.h',
             'osmscout/NodeDataFile.h',
             'osmscout/NumericIndex.h',

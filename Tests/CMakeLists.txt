@@ -9,6 +9,17 @@ else()
 endif()
 add_test(NAME AccessParse COMMAND AccessParse)
 
+#---- TimeParse
+add_executable(TimeParse src/TimeParse.cpp)
+set_property(TARGET TimeParse PROPERTY CXX_STANDARD 11)
+target_include_directories(TimeParse PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+if(APPLE)
+  target_link_libraries(TimeParse OSMScout)
+else()
+  target_link_libraries(TimeParse osmscout)
+endif()
+add_test(NAME TimeParse COMMAND TimeParse)
+
 #---- Bearing
 add_executable(Bearing src/Bearing.cpp)
 set_property(TARGET Bearing PROPERTY CXX_STANDARD 11)
@@ -246,7 +257,7 @@ add_test(NAME NumberSet COMMAND NumberSet)
 #---- ScanConversion
 add_executable(ScanConversion src/ScanConversion.cpp)
 set_property(TARGET ScanConversion PROPERTY CXX_STANDARD 11)
-target_include_directories(ScanConversion PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_include_directories(ScanConversion PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 if(APPLE)
   target_link_libraries(ScanConversion OSMScout)
 else()

@@ -136,7 +136,7 @@ namespace osmscout {
                 if (line.substr(0,1)=="!") {
                   sectionName=line.substr(1);
                   context=ExcludedPolygon;
-                  if (sectionName.size()==0) {
+                  if (sectionName.empty()) {
                     throw IOException(filename, "Empty section name on line "+NumberToStringUnsigned(lineNum), "");
                   }
                 }
@@ -176,7 +176,7 @@ namespace osmscout {
               throw IOException(filename, "Invalid number format on line "+NumberToStringUnsigned(lineNum), "");
             }
 
-            polygonNodes.push_back(GeoCoord(lat, lon));
+            polygonNodes.emplace_back(lat, lon);
             break;
         }
       }

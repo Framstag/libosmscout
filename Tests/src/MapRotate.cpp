@@ -779,10 +779,10 @@ static const double ringCoords[] = {
   0.0
 };
 
-class TestPainter : public osmscout::MapPainterNoOp{
+class TestPainter : public osmscout::MapPainterNoOp
+{
 public:
-  TestPainter(const osmscout::StyleConfigRef& styleConfig);
-  inline ~TestPainter(){};
+  explicit TestPainter(const osmscout::StyleConfigRef& styleConfig);
   bool IsVisibleAreaPublic(const osmscout::Projection& projection,
                            const std::vector<osmscout::Point>& nodes,
                            double pixelOffset) const;
@@ -835,6 +835,7 @@ int main(int /*argc*/, char** /*argv*/)
 
   int problems = 0;
   osmscout::MercatorProjection  projection;
+
   for (double angle=0; angle<2*M_PI; angle+= 2*M_PI/32.0){
     projection.Set(center, angle, mag,
                    dpi, width, height
@@ -842,13 +843,17 @@ int main(int /*argc*/, char** /*argv*/)
     double angleDeg = (360*(angle/(2*M_PI)));
 
     bool visible = painter.IsVisibleAreaPublic(projection, ring, 0.0);
-    if (!visible){
+
+    if (!visible) {
       problems+=1;
-      std::cerr << "angle " << angle << " (" << angleDeg << "°) => " << visible << std::endl;
-    }else{
-      std::cout << "angle " << angle << " (" << angleDeg << "°) => " << visible << std::endl;
+      std::cerr << "angle " << angle << " (" << angleDeg << "°) => " << visible << " ERROR" << std::endl;
+    }
+    else {
+      std::cout << "angle " << angle << " (" << angleDeg << "°) => " << visible << " OK" << std::endl;
     }
   }
+
+  std::cout << problems << " problems found" << std::endl;
 
   return problems;
 }

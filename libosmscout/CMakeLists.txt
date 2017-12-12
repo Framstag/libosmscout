@@ -69,6 +69,7 @@ set(HEADER_FILES
     include/osmscout/Location.h
     include/osmscout/LocationIndex.h
     include/osmscout/LocationService.h
+    include/osmscout/LocationDescriptionService.h
     include/osmscout/Navigation.h
     include/osmscout/Node.h
     include/osmscout/NodeDataFile.h
@@ -153,6 +154,7 @@ set(SOURCE_FILES
     src/osmscout/Location.cpp
     src/osmscout/LocationIndex.cpp
     src/osmscout/LocationService.cpp
+    src/osmscout/LocationDescriptionService.cpp
     src/osmscout/Node.cpp
     src/osmscout/NodeDataFile.cpp
     src/osmscout/NumericIndex.cpp

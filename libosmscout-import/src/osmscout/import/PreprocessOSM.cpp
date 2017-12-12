@@ -83,14 +83,14 @@ namespace osmscout {
       }
 
       if (strcmp((const char*)name,"node")==0) {
-        const xmlChar *idValue=NULL;
-        const xmlChar *latValue=NULL;
-        const xmlChar *lonValue=NULL;
+        const xmlChar *idValue=nullptr;
+        const xmlChar *latValue=nullptr;
+        const xmlChar *lonValue=nullptr;
 
         context=contextNode;
         tags.clear();
 
-        for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+        for (size_t i=0; atts[i]!=nullptr && atts[i+1]!=nullptr; i+=2) {
           if (strcmp((const char*)atts[i],"id")==0) {
             idValue=atts[i+1];
           }
@@ -102,7 +102,7 @@ namespace osmscout {
           }
         }
 
-        if (idValue==NULL || lonValue==NULL || latValue==NULL) {
+        if (idValue==nullptr || lonValue==nullptr || latValue==nullptr) {
           progress.Error("Not all required attributes found");
         }
 
@@ -120,14 +120,14 @@ namespace osmscout {
         }
       }
       else if (strcmp((const char*)name,"way")==0) {
-        const xmlChar *idValue=NULL;
+        const xmlChar *idValue=nullptr;
 
         context=contextWay;
         nodes.clear();
         members.clear();
         tags.clear();
 
-        for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+        for (size_t i=0; atts[i]!=nullptr && atts[i+1]!=nullptr; i+=2) {
           if (strcmp((const char*)atts[i],"id")==0) {
             idValue=atts[i+1];
           }
@@ -139,14 +139,14 @@ namespace osmscout {
         }
       }
       if (strcmp((const char*)name,"relation")==0) {
-        const xmlChar *idValue=NULL;
+        const xmlChar *idValue=nullptr;
 
         context=contextRelation;
         tags.clear();
         nodes.clear();
         members.clear();
 
-        for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+        for (size_t i=0; atts[i]!=nullptr && atts[i+1]!=nullptr; i+=2) {
           if (strcmp((const char*)atts[i],"id")==0) {
             idValue=atts[i+1];
           }
@@ -162,10 +162,10 @@ namespace osmscout {
           return;
         }
 
-        const xmlChar *keyValue=NULL;
-        const xmlChar *valueValue=NULL;
+        const xmlChar *keyValue=nullptr;
+        const xmlChar *valueValue=nullptr;
 
-        for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+        for (size_t i=0; atts[i]!=nullptr && atts[i+1]!=nullptr; i+=2) {
           if (strcmp((const char*)atts[i],"k")==0) {
             keyValue=atts[i+1];
           }
@@ -174,7 +174,7 @@ namespace osmscout {
           }
         }
 
-        if (keyValue==NULL || valueValue==NULL) {
+        if (keyValue==nullptr || valueValue==nullptr) {
           std::cerr << "Cannot parse tag, skipping..." << std::endl;
           return;
         }
@@ -191,9 +191,9 @@ namespace osmscout {
         }
 
         OSMId         node;
-        const xmlChar *idValue=NULL;
+        const xmlChar *idValue=nullptr;
 
-        for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+        for (size_t i=0; atts[i]!=nullptr && atts[i+1]!=nullptr; i+=2) {
           if (strcmp((const char*)atts[i],"ref")==0) {
             idValue=atts[i+1];
           }
@@ -212,11 +212,11 @@ namespace osmscout {
         }
 
         RawRelation::Member member;
-        const xmlChar       *typeValue=NULL;
-        const xmlChar       *refValue=NULL;
-        const xmlChar       *roleValue=NULL;
+        const xmlChar       *typeValue=nullptr;
+        const xmlChar       *refValue=nullptr;
+        const xmlChar       *roleValue=nullptr;
 
-        for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+        for (size_t i=0; atts[i]!=nullptr && atts[i+1]!=nullptr; i+=2) {
           if (strcmp((const char*)atts[i],"type")==0) {
             typeValue=atts[i+1];
           }
@@ -228,17 +228,17 @@ namespace osmscout {
           }
         }
 
-        if (typeValue==NULL) {
+        if (typeValue==nullptr) {
           std::cerr << "Member of relation " << id << " does not have a type" << std::endl;
           return;
         }
 
-        if (refValue==NULL) {
+        if (refValue==nullptr) {
           std::cerr << "Member of relation " << id << " does not have a valid reference" << std::endl;
           return;
         }
 
-        if (roleValue==NULL) {
+        if (roleValue==nullptr) {
           std::cerr << "Member of relation " << id << " does not have a valid role" << std::endl;
           return;
         }
@@ -261,7 +261,7 @@ namespace osmscout {
           std::cerr << "Cannot parse ref '" << refValue << "' for relation " << id << std::endl;
         }
 
-        if (roleValue!=NULL) {
+        if (roleValue!=nullptr) {
           member.role=(const char*)roleValue;
         }
 
@@ -311,7 +311,7 @@ namespace osmscout {
 
         if (blockDataSize>10000) {
           callback.ProcessBlock(std::move(blockData));
-          blockData=NULL;
+          blockData=nullptr;
         }
       }
       catch (IOException& e) {
@@ -408,7 +408,7 @@ namespace osmscout {
 
     file=fopen(filename.c_str(),"rb");
 
-    if (file==NULL) {
+    if (file==nullptr) {
       return false;
     }
 
@@ -420,7 +420,7 @@ namespace osmscout {
       return false;
     }
 
-    ctxt=xmlCreatePushParserCtxt(&saxParser,&parser,chars,res,NULL);
+    ctxt=xmlCreatePushParserCtxt(&saxParser,&parser,chars,res,nullptr);
 
     // Resolve entities, do not do any network communication
     xmlCtxtUseOptions(ctxt,XML_PARSE_NOENT|XML_PARSE_NONET);

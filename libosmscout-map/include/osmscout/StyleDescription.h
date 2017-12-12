@@ -20,19 +20,24 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include <osmscout/private/MapImportExport.h>
 
+#include <osmscout/system/Compiler.h>
+
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Magnification.h>
 
-#include <osmscout/LabelProvider.h>
-
 namespace osmscout {
+
   class Symbol;
   typedef std::shared_ptr<Symbol> SymbolRef;
+
+  class LabelProvider;
+  typedef std::shared_ptr<LabelProvider> LabelProviderRef;
 
   /**
    * \ingroup Stylesheet

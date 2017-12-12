@@ -36,12 +36,21 @@ matrix:
       env:
         - BUILDTOOL=meson
         - TARGET=build
+        - PLATFORM=osx
     - os: osx
       osx_image: xcode7.3
       compiler: clang
       env:
         - BUILDTOOL=cmake
         - TARGET=build
+        - PLATFORM=osx
+    - os: osx
+      osx_image: xcode9.1
+      compiler: clang
+      env:
+        - BUILDTOOL=cmake
+        - TARGET=build
+        - PLATFORM=ios
     - os: linux
       dist: trusty
       sudo: required

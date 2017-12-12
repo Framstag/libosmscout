@@ -230,6 +230,7 @@ namespace osmscout {
 
     void SetCacheSize(size_t cacheSize);
     size_t GetCacheSize() const;
+    size_t GetCurrentCacheSize() const;
 
     void CleanupTileCache();
     void FlushTileCache();

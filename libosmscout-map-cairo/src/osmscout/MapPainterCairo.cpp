@@ -347,7 +347,7 @@ namespace osmscout {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
         pango_font_description_free(entry.second);
 #else
-        cairo_scaled_font_destroy(entry->second);
+        cairo_scaled_font_destroy(entry.second);
 #endif
       }
     }
@@ -1099,17 +1099,12 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    double textWidth=textExtends.width;
+    double textWidth=textExtents.width;
 
     if (!helper.Init(pathLength,
                      textWidth)) {
-      g_object_unref(layout);
       return;
     }
-
-    // Current offset for the next label
-    double offset=helper.GetInitialOffset(pathLength,
-                                          textWidth);
 
     cairo_font_extents_t fontExtents;
     cairo_path_t         *path;
@@ -1127,14 +1122,15 @@ namespace osmscout {
 
     cairo_set_scaled_font(draw,font);
 
-    while (offset<lineLength) {
+    while (helper.ContinueDrawing()) {
       DrawContourLabelCairo(draw,
                             path,
-                            offset-textExtents.x_bearing,
+                            helper.GetCurrentOffset()-textExtents.x_bearing,
                             textExtents.height,
                             text);
 
-      offset=offset+textWidth+contourLabelSpace;
+      helper.AdvanceText();
+      helper.AdvanceSpace();
     }
 
     cairo_path_destroy(path);

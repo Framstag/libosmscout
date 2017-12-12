@@ -38,15 +38,16 @@
  */
 class OsmTileDownloader : public QObject
 {
- Q_OBJECT
+  Q_OBJECT
  
 public:
-  OsmTileDownloader(QString diskCacheDir);
+  OsmTileDownloader(QString diskCacheDir,
+                    const OnlineTileProvider &provider);
   virtual ~OsmTileDownloader();
   
 public slots:
   void download(uint32_t zoomLevel, uint32_t x, uint32_t y);
-  void onlineTileProviderChanged();
+  void onlineTileProviderChanged(const OnlineTileProvider &provider);
   
 signals:
   void downloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);

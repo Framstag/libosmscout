@@ -333,6 +333,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
     databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath(),
                                                      database,
                                                      std::make_shared<osmscout::LocationService>(database),
+                                                     std::make_shared<osmscout::LocationDescriptionService>(database),
                                                      mapService,
                                                      std::make_shared<QBreaker>(),
                                                      styleConfig));

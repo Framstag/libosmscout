@@ -32,7 +32,7 @@
 
 namespace osmscout {
 
-  class PreprocessorCallback
+  class OSMSCOUT_IMPORT_API PreprocessorCallback
   {
   public:
     struct RawNodeData
@@ -72,7 +72,7 @@ namespace osmscout {
     virtual void ProcessBlock(RawBlockDataRef data) = 0;
   };
 
-  class Preprocessor
+  class OSMSCOUT_IMPORT_API Preprocessor
   {
   public:
     virtual ~Preprocessor();

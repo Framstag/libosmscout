@@ -467,7 +467,7 @@ CONST
 
   SYMBOL highway_street_lamp
     CIRCLE GROUND 0,0 10 {
-      AREA {color: #f5fb5b; }
+      AREA {color: #f5fb5b44; }
     }
 
   SYMBOL marker

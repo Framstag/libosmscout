@@ -222,9 +222,6 @@ namespace osmscout {
   void Preprocess::Callback::NodeSubTask(const RawNodeData& data,
                                          ProcessedData& processed)
   {
-    ObjectOSMRef object(data.id,
-                        osmRefNode);
-
     RawCoord rawCoord;
 
     rawCoord.SetOSMId(data.id);
@@ -413,24 +410,22 @@ namespace osmscout {
                                                     TurnRestriction::Type type,
                                                     ProcessedData& processed)
   {
-    Id from=0;
-    Id via=0;
-    Id to=0;
+    OSMId from=0;
+    OSMId via=0;
+    OSMId to=0;
 
-    for (std::vector<RawRelation::Member>::const_iterator member=members.begin();
-         member!=members.end();
-         ++member) {
-      if (member->type==RawRelation::memberWay &&
-          member->role=="from") {
-        from=member->id;
+    for (const auto& member : members) {
+      if (member.type==RawRelation::memberWay &&
+        member.role=="from") {
+        from=member.id;
       }
-      else if (member->type==RawRelation::memberNode &&
-               member->role=="via") {
-        via=member->id;
+      else if (member.type==RawRelation::memberNode &&
+        member.role=="via") {
+        via=member.id;
       }
-      else if (member->type==RawRelation::memberWay &&
-               member->role=="to") {
-        to=member->id;
+      else if (member.type==RawRelation::memberWay &&
+        member.role=="to") {
+        to=member.id;
       }
 
       // finished collection data
@@ -449,7 +444,7 @@ namespace osmscout {
                                   via,
                                   to);
 
-      processed.turnRestriction.push_back(std::move(restriction));
+      processed.turnRestriction.push_back(restriction);
     }
   }
 
@@ -555,7 +550,7 @@ namespace osmscout {
 
   void Preprocess::Callback::WriteTask(std::shared_future<ProcessedDataRef>& p)
   {
-    ProcessedDataRef processed=p.get();
+    const ProcessedDataRef& processed=p.get();
 
     for (const auto& coastline : processed->rawCoastlines) {
       coastline.Write(coastlineWriter);
@@ -971,7 +966,6 @@ namespace osmscout {
                           const ImportParameter& parameter,
                           Progress& progress)
   {
-    bool     result=false;
     Callback callback(typeConfig,
                       parameter,
                       progress);
@@ -980,10 +974,10 @@ namespace osmscout {
       return false;
     }
 
-    result=ProcessFiles(typeConfig,
-                        parameter,
-                        progress,
-                        callback);
+    bool result=ProcessFiles(typeConfig,
+                             parameter,
+                             progress,
+                             callback);
 
     if (!callback.Cleanup(result)) {
       return false;

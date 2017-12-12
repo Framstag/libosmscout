@@ -7,6 +7,13 @@ AccessParse =  executable('AccessParse',
              link_with: [osmscout],
              install: false)
 
+TimeParse =  executable('TimeParse',
+             'src/TimeParse.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep],
+             link_with: [osmscout],
+             install: false)
+
 Bearing = executable('Bearing',
              'src/Bearing.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -186,6 +193,7 @@ ostandossEnv = environment()
 ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
 
 test('Check parsing of access rights', AccessParse)
+test('Check parsing of time string', TimeParse)
 test('Check calculation of bearing', Bearing)
 test('Check encoding of numbers', BitsAndBytesNeeded)
 test('Check parsing of command line args', CmdLineParsing)

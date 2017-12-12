@@ -28,6 +28,7 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
+#include <osmscout/LocationDescriptionService.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterQt.h>
 
@@ -99,24 +100,27 @@ public slots:
   void onThreadFinished();
 
 public: // TODO: make it private, ensure thread safety
-  QString                           path;
-  osmscout::DatabaseRef             database;
+  QString                                 path;
+  osmscout::DatabaseRef                   database;
 
-  osmscout::LocationServiceRef      locationService;
-  osmscout::MapServiceRef           mapService;
-  osmscout::BreakerRef              dataLoadingBreaker;
+  osmscout::LocationServiceRef            locationService;
+  osmscout::LocationDescriptionServiceRef locationDescriptionService;
+  osmscout::MapServiceRef                 mapService;
+  osmscout::BreakerRef                    dataLoadingBreaker;
 
   osmscout::StyleConfigRef          styleConfig;
 
   inline DBInstance(QString path,
                     osmscout::DatabaseRef database,
                     osmscout::LocationServiceRef locationService,
+                    osmscout::LocationDescriptionServiceRef locationDescriptionService,
                     osmscout::MapServiceRef mapService,
                     osmscout::BreakerRef dataLoadingBreaker,
                     osmscout::StyleConfigRef styleConfig):
     path(path),
     database(database),
     locationService(locationService),
+    locationDescriptionService(locationDescriptionService),
     mapService(mapService),
     dataLoadingBreaker(dataLoadingBreaker),
     styleConfig(styleConfig)

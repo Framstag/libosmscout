@@ -29,9 +29,9 @@ MainWindow::MainWindow(DBThreadRef dbThread)
    dbThread(dbThread)
 {
   connect(dbThread.get(),
-          SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
+          SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
           this,
-          SLOT(InitialisationFinished(DatabaseLoadedResponse)));
+          SLOT(InitialisationFinished(const DatabaseLoadedResponse&)));
 }
 
 MainWindow::~MainWindow()

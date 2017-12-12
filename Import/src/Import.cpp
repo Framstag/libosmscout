@@ -17,8 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 #include <iostream>
 #include <memory>
@@ -133,7 +133,7 @@ osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
 
   if (argumentIndex>=argc) {
     std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
-    return NULL;
+    return nullptr;
   }
 
   std::string argument=argv[argumentIndex];
@@ -141,21 +141,21 @@ osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
 
   if (pos==std::string::npos) {
     std::cerr << "Cannot separate vehicles from filename base in router definition '" << argument << "'" << std::endl;
-    return NULL;
+    return nullptr;
   }
 
   filenamebase=argument.substr(pos+1);
 
   if (filenamebase.empty()) {
     std::cerr << "Empty filename base in router definition '" << argument << "'" << std::endl;
-    return NULL;
+    return nullptr;
   }
 
   std::string vehicles=argument.substr(0,pos);
 
   if (vehicles.empty()) {
     std::cerr << "Empty vehicle list in router definition '" << argument << "'" << std::endl;
-    return NULL;
+    return nullptr;
   }
 
   size_t start=0;
@@ -179,7 +179,7 @@ osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
     }
     else {
       std::cerr << "Empty vehicle '" << vehicle << "' in router definition '" << argument << "'" << std::endl;
-      return NULL;
+      return nullptr;
     }
 
     start=devider+1;
@@ -758,7 +758,7 @@ int main(int argc, char* argv[])
         langOrder = ParseLangOrderArgument(argc,
                                            argv,
                                            i);
-        if (langOrder.size() > 0) {
+        if (!langOrder.empty()) {
             parameter.SetLangOrder(langOrder);
         }
         else {
@@ -771,7 +771,7 @@ int main(int argc, char* argv[])
         langOrder = ParseLangOrderArgument(argc,
                                            argv,
                                            i);
-        if (langOrder.size() > 0) {
+        if (!langOrder.empty()) {
             parameter.SetAltLangOrder(langOrder);
         }
         else {
@@ -830,7 +830,7 @@ int main(int argc, char* argv[])
       i++;
     }
     else {
-      mapfiles.push_back(std::string(argv[i]));
+      mapfiles.emplace_back(argv[i]);
 
       i++;
     }
@@ -857,7 +857,7 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    for (auto mapfile: mapfiles){
+    for (const auto& mapfile: mapfiles) {
       if (!osmscout::ExistsInFilesystem(mapfile)) {
         progress.Error("Input '"+mapfile+"' does not exist!");
         return 1;
