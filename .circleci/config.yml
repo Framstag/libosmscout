@@ -5,7 +5,7 @@ jobs:
       - image: circleci/build-image:ubuntu-14.04-XL-922-9410082
         environment:
           TZ: "/usr/share/zoneinfo/Europe/Berlin"
-          LANG: "de_DE.utf8"
+          LANG: "en_US.utf8"
     branches:
       only:
         - master
