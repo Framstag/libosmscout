@@ -1829,6 +1829,7 @@ namespace osmscout {
                                      LocationSearchResult::match,
                                      result);
           if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
             return true;
           }
         }
@@ -1841,6 +1842,7 @@ namespace osmscout {
                                 LocationSearchResult::match,
                                 result);
           if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
             return true;
           }
         }
@@ -1868,6 +1870,7 @@ namespace osmscout {
 
     //std::cout << "Admin Region visit: " << adminRegionVisitTime.ResultString() << std::endl;
     if (searchParameter.IsAborted()){
+      osmscout::log.Debug() << "Search aborted";
       return true;
     }
 
@@ -1893,6 +1896,7 @@ namespace osmscout {
                                      LocationSearchResult::match,
                                      result);
           if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
             return true;
           }
         }
@@ -1905,6 +1909,7 @@ namespace osmscout {
                                 LocationSearchResult::match,
                                 result);
           if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
             return true;
           }
         }
@@ -1943,6 +1948,7 @@ namespace osmscout {
                                        LocationSearchResult::candidate,
                                        result);
             if (searchParameter.IsAborted()){
+              osmscout::log.Debug() << "Search aborted";
               return true;
             }
           }
@@ -1955,6 +1961,7 @@ namespace osmscout {
                                   LocationSearchResult::candidate,
                                   result);
             if (searchParameter.IsAborted()){
+              osmscout::log.Debug() << "Search aborted";
               return true;
             }
           }
