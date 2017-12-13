@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker run libosmscout/archlinux_gcc_autoconf ./build.sh "$@"
+docker run --rm libosmscout/archlinux_gcc_autoconf ./build.sh "$@"
