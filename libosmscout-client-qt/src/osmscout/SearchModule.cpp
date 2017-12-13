@@ -46,6 +46,7 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
                                    const QString searchPattern,
                                    const osmscout::AdminRegionRef defaultRegion,
                                    int limit,
+                                   osmscout::BreakerRef &breaker,
                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
 {
   QList<LocationEntry> locations;
@@ -64,6 +65,7 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
     searchParameter.SetDefaultAdminRegion(defaultRegion);
 
   searchParameter.SetLimit(limit);
+  searchParameter.SetBreaker(breaker);
 
   osmscout::LocationSearchResult result;
 
@@ -185,7 +187,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,
         if (defaultRegionInfo && defaultRegionInfo->database==db->path){
           defaultRegion=defaultRegionInfo->adminRegion;
         }
-        SearchLocations(db,searchPattern,defaultRegion,limit,adminRegionMap);
+        SearchLocations(db,searchPattern,defaultRegion,limit,breaker,adminRegionMap);
 
         if (breaker && breaker->IsAborted()){
           emit searchFinished(searchPattern, /*error*/ false);
