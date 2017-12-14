@@ -205,6 +205,21 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     painter.translate(rotationCenter*-1.0);
   }
 
+  // After our computations with float numbers, target rectangle is not aligned to pixel.
+  // It leads to additional anti-aliasing that blurs output...
+  double absDiff=abs((targetRectangle.x()-targetTopLeftX) - sourceRectangle.x()) +
+                 abs((targetRectangle.y()-targetTopLeftY) - sourceRectangle.y()) +
+                 abs(targetRectangle.width()              - sourceRectangle.width()) +
+                 abs(targetRectangle.height()             - sourceRectangle.height());
+
+  // ...for that reason, when rectangles are (almost) the same,
+  // round target position to get better output
+  if (absDiff < 1e-3){
+    targetRectangle.setX(sourceRectangle.x() + round(targetTopLeftX));
+    targetRectangle.setY(sourceRectangle.y() + round(targetTopLeftY));
+    targetRectangle.setSize(sourceRectangle.size());
+  }
+
   painter.drawImage(targetRectangle,
                     *finishedImage,
                     sourceRectangle);
