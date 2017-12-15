@@ -282,6 +282,16 @@ namespace osmscout {
     this->limit=limit;
   }
 
+  void LocationStringSearchParameter::SetBreaker(BreakerRef &breaker)
+  {
+    this->breaker=breaker;
+  }
+
+  bool LocationStringSearchParameter::IsAborted() const
+  {
+    return breaker && breaker->IsAborted();
+  }
+
   StringMatcherFactoryRef LocationStringSearchParameter::GetStringMatcherFactory() const
   {
     return stringMatcherFactory;
@@ -1818,6 +1828,10 @@ namespace osmscout {
                                      regionMatch,
                                      LocationSearchResult::match,
                                      result);
+          if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
+            return true;
+          }
         }
 
         if (parameter.searchForPOI) {
@@ -1827,6 +1841,10 @@ namespace osmscout {
                                 regionMatch,
                                 LocationSearchResult::match,
                                 result);
+          if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
+            return true;
+          }
         }
       }
     }
@@ -1851,6 +1869,10 @@ namespace osmscout {
     adminRegionVisitTime.Stop();
 
     //std::cout << "Admin Region visit: " << adminRegionVisitTime.ResultString() << std::endl;
+    if (searchParameter.IsAborted()){
+      osmscout::log.Debug() << "Search aborted";
+      return true;
+    }
 
     for (const auto& regionMatch : adminRegionVisitor.matches) {
       //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' (" << regionMatch.adminRegion->object.GetName() << ") for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
@@ -1873,6 +1895,10 @@ namespace osmscout {
                                      regionMatch,
                                      LocationSearchResult::match,
                                      result);
+          if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
+            return true;
+          }
         }
 
         if (parameter.searchForPOI) {
@@ -1882,6 +1908,10 @@ namespace osmscout {
                                 regionMatch,
                                 LocationSearchResult::match,
                                 result);
+          if (searchParameter.IsAborted()){
+            osmscout::log.Debug() << "Search aborted";
+            return true;
+          }
         }
 
         if (result.results.size()==currentResultSize && parameter.partialMatch) {
@@ -1917,6 +1947,10 @@ namespace osmscout {
                                        regionMatch,
                                        LocationSearchResult::candidate,
                                        result);
+            if (searchParameter.IsAborted()){
+              osmscout::log.Debug() << "Search aborted";
+              return true;
+            }
           }
 
           if (parameter.searchForPOI) {
@@ -1926,6 +1960,10 @@ namespace osmscout {
                                   regionMatch,
                                   LocationSearchResult::candidate,
                                   result);
+            if (searchParameter.IsAborted()){
+              osmscout::log.Debug() << "Search aborted";
+              return true;
+            }
           }
 
           if (result.results.size()==currentResultSize && parameter.partialMatch) {

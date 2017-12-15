@@ -41,6 +41,7 @@ struct Arguments
   bool                   addressOnlyMatch=true;
   bool                   partialMatch=false;
   size_t                 limit=30;
+  size_t                 repeat=1;
   std::list<std::string> location;
 };
 
@@ -380,6 +381,12 @@ int main(int argc, char* argv[])
                       "limit",
                       "Maximum number of results");
 
+  argParser.AddOption(osmscout::CmdLineSizeTOption([&args](size_t value) {
+                        args.repeat=value;
+                      }),
+                      "repeat",
+                      "Cout of repeat for performance test");
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -439,7 +446,6 @@ int main(int argc, char* argv[])
 
   osmscout::StringMatcherFactoryRef matcherFactory=std::make_shared<osmscout::StringMatcherCIFactory>();
   osmscout::LocationServiceRef     locationService=std::make_shared<osmscout::LocationService>(database);
-  osmscout::LocationSearchResult   searchResult;
 
   osmscout::LocationStringSearchParameter searchParameter(osmscout::LocaleStringToUTF8String(searchPattern));
 
@@ -503,20 +509,25 @@ int main(int argc, char* argv[])
 
   osmscout::StopClock locationSearchTime;
 
-  if (!locationService->SearchForLocationByString(searchParameter,
-                                                  searchResult)) {
-    std::cerr << "Error while searching for location" << std::endl;
-    return 1;
+  for (size_t i=0; i<args.repeat; i++) {
+    osmscout::LocationSearchResult   searchResult;
+
+    if (!locationService->SearchForLocationByString(searchParameter,
+                                                    searchResult)) {
+      std::cerr << "Error while searching for location" << std::endl;
+      return 1;
+    }
+
+    if (args.repeat==1) {
+      DumpResult(database,
+                 locationService,
+                 searchResult);
+    }
   }
 
   locationSearchTime.Stop();
-
-  std::cout << "Location search time: " << locationSearchTime.ResultString() << std::endl;
   std::cout << std::endl;
-
-  DumpResult(database,
-             locationService,
-             searchResult);
+  std::cout << "Location search time: " << locationSearchTime.ResultString() << std::endl;
 
   database->Close();
 

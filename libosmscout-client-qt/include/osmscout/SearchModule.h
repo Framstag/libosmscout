@@ -85,6 +85,7 @@ private:
                        const QString searchPattern,
                        const osmscout::AdminRegionRef defaultRegion,
                        int limit,
+                       osmscout::BreakerRef &breaker,
                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
 
   bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
