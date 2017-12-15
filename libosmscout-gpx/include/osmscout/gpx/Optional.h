@@ -18,7 +18,7 @@ namespace osmscout {
 namespace gpx {
 
 template<typename T>
-class OSMSCOUT_GPX_API Optional {
+class Optional {
 public:
   const static Optional<T> empty;
 
