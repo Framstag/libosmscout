@@ -67,8 +67,15 @@ namespace osmscout {
    */
   void GeoBox::Include(const GeoBox& other)
   {
-    assert(valid);
-    assert(other.valid);
+    if (!other.valid){
+      return;
+    }
+    if(!valid){
+      minCoord=other.GetMinCoord();
+      maxCoord=other.GetMaxCoord();
+      valid=true;
+      return;
+    }
 
     minCoord.Set(std::min(minCoord.GetLat(),
                           other.GetMinCoord().GetLat()),
