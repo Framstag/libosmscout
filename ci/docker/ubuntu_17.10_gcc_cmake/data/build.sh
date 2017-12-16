@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ $# -ge 1 ] ; then
   REPO="$1"
@@ -14,13 +15,12 @@ fi
 
 git clone -b "$BRANCH" "$REPO" libosmscout
 
-export LANG="C.UTF-8"
 env
 
 cd libosmscout
 mkdir build
 cd build
-cmake ..
-make
-make test
+cmake -DCMAKE_BUILD_TYPE=DEBUG -DOSMSCOUT_BUILD_BINDING_JAVA=OFF ..
+make -j `nproc`
 
+make test

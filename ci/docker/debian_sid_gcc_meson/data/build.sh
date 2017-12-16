@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ $# -ge 1 ] ; then
   REPO="$1"
@@ -14,7 +15,6 @@ fi
 
 git clone -b "$BRANCH" "$REPO" libosmscout
 
-export LANG="C.UTF-8"
 env
 
 cd libosmscout

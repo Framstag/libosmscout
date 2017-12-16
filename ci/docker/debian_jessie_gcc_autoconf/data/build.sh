@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ $# -ge 1 ] ; then
   REPO="$1"
@@ -17,5 +18,5 @@ git clone -b "$BRANCH" "$REPO" libosmscout
 cd libosmscout
 . ./setupAutoconf.sh
 env
-make full
+make -j `nproc` full
 cd Tests && make check

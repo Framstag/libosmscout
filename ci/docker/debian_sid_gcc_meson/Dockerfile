@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
           libmarisa-dev \
           doxygen \
           swig openjdk-8-jdk \
+          locales \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
