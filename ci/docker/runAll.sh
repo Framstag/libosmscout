@@ -17,7 +17,10 @@ RESULT_debian_jessie_gcc_autoconf=$?
 ./debian_jessie_gcc_cmake/run.sh    "$@" 
 RESULT_debian_jessie_gcc_cmake=$?
 
-./ubuntu_14.04_gcc_autoconf/run.sh  "$@" 
+./debian_sid_gcc_meson/run.sh    "$@"
+RESULT_debian_sid_gcc_meson=$?
+
+./ubuntu_14.04_gcc_autoconf/run.sh  "$@"
 RESULT_ubuntu_14_04_gcc_autoconf=$?
 
 ./ubuntu_14.04_gcc_cmake/run.sh     "$@" 
@@ -47,6 +50,12 @@ RESULT_ubuntu_17_04_gcc_autoconf=$?
 ./ubuntu_17.04_gcc_cmake/run.sh     "$@" 
 RESULT_ubuntu_17_04_gcc_cmake=$?
 
+./ubuntu_17.10_gcc_autoconf/run.sh  "$@"
+RESULT_ubuntu_17_10_gcc_autoconf=$?
+
+./ubuntu_17.10_gcc_cmake/run.sh     "$@"
+RESULT_ubuntu_17_10_gcc_cmake=$?
+
 # print results
 set +x
 echo 
@@ -65,6 +74,9 @@ if [ $RESULT_debian_jessie_gcc_autoconf  -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "debian_jessie_gcc_cmake      "
 if [ $RESULT_debian_jessie_gcc_cmake     -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "debian_sid_gcc_meson         "
+if [ $RESULT_debian_sid_gcc_meson        -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "ubuntu_14.04_gcc_autoconf    "
 if [ $RESULT_ubuntu_14_04_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
@@ -95,3 +107,9 @@ if [ $RESULT_ubuntu_17_04_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "ubuntu_17.04_gcc_cmake       "
 if [ $RESULT_ubuntu_17_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_17.10_gcc_autoconf    "
+if [ $RESULT_ubuntu_17_10_gcc_autoconf   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_17.10_gcc_cmake       "
+if [ $RESULT_ubuntu_17_10_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
