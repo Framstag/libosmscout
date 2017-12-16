@@ -165,6 +165,9 @@ namespace osmscout {
   public:
     virtual ~LocationVisitor() = default;
 
+    /**
+     * @return true if location traversal should continue
+     */
     virtual bool Visit(const AdminRegion& adminRegion,
                        const PostalArea& postalArea,
                        const Location &location) = 0;
