@@ -103,6 +103,12 @@ private:
                         QString &typeName,
                         osmscout::GeoCoord& coordinates,
                         osmscout::GeoBox& bbox);
+
+  bool GetObjectDetails(DBInstanceRef db,
+                        const std::vector<osmscout::ObjectFileRef>& objects,
+                        QString &typeName,
+                        osmscout::GeoCoord& coordinates,
+                        osmscout::GeoBox& bbox);
 };
 
 #endif /* OSMSCOUT_CLIENT_QT_SEARCHMODULE_H */
