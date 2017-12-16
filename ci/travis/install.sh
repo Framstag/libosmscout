@@ -23,7 +23,7 @@ if [ "$TARGET" = "build" ]; then
       export PATH=~/bin:$PATH
       sudo apt-get install python3-pip python3-dev build-essential
       pip3 install --upgrade --user pip
-      pip3 install --user meson
+      pip3 install --user meson==0.43.0
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi

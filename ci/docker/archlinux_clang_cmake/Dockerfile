@@ -12,7 +12,7 @@ RUN pacman --noconfirm --needed -S --asdeps \
 
 RUN pacman --noconfirm --needed -S --asdeps \
           cmake make pkg-config \
-          gcc
+          clang openmp
 
 RUN mkdir /work
 

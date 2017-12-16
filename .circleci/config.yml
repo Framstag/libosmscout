@@ -2,10 +2,10 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/build-image:ubuntu-14.04-XL-922-9410082
+      - image: libosmscout/archlinux_gcc_cmake:latest
         environment:
           TZ: "/usr/share/zoneinfo/Europe/Berlin"
-          LANG: "de_DE.utf8"
+          LANG: "en_US.utf8"
     branches:
       only:
         - master

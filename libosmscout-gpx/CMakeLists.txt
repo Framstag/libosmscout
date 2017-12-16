@@ -54,6 +54,17 @@ target_include_directories(${THE_TARGET_NAME} PRIVATE
 if(LIBXML2_FOUND)
     target_include_directories(${THE_TARGET_NAME} PRIVATE ${LIBXML2_INCLUDE_DIR})
     target_link_libraries(${THE_TARGET_NAME} ${LIBXML2_LIBRARIES})
+
+# Looks like libxml2 has additional dependencies under Windows
+	if (ICONV_FOUND)
+		target_include_directories(${THE_TARGET_NAME} PRIVATE ${ICONV_INCLUDE_DIRS})
+		target_link_libraries(${THE_TARGET_NAME} ${ICONV_LIBRARIES})
+	endif()
+
+	if (ZLIB_FOUND)
+		target_include_directories(${THE_TARGET_NAME} PRIVATE ${ZLIB_INCLUDE_DIRS})
+		target_link_libraries(${THE_TARGET_NAME} ${ZLIB_LIBRARIES})
+	endif()
 endif()
 
 if(APPLE)
