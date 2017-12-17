@@ -1,4 +1,4 @@
-If you run this image, it will outomatically download the
+If you run this image, it will automatically download the
 source repository from github (https://github.com/Framstag/libosmscout)
 and start building it using gcc and cmake.
 
