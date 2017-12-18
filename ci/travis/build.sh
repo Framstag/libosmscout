@@ -20,6 +20,11 @@ if [ "$TARGET" = "build" ]; then
   if [ "$BUILDTOOL" = "meson" ]; then
     meson debug
     cd debug
+
+    # workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
+    ln -s . ../OSMScout2/OSMScout2
+    ln -s . ../StyleEditor/StyleEditor
+
     ninja
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
