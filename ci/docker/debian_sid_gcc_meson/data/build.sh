@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ $# -ge 1 ] ; then
   REPO="$1"
@@ -14,14 +15,15 @@ fi
 
 git clone -b "$BRANCH" "$REPO" libosmscout
 
-
-export LANG="C.UTF-8"
 env
 
 cd libosmscout
-mkdir build
-cd build
-cmake ..
-make
-make test
+meson debug
+cd debug
 
+# workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
+ln -s . ../OSMScout2/OSMScout2
+ln -s . ../StyleEditor/StyleEditor
+
+ninja
+ninja test

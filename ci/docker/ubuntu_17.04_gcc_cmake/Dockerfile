@@ -1,4 +1,4 @@
-FROM ubuntu:yakkety
+FROM ubuntu:zesty
 
 RUN apt-get update && apt-get install -y \
           git make libtool pkg-config \
@@ -12,8 +12,11 @@ RUN apt-get update && apt-get install -y \
           libmarisa-dev \
           doxygen \
           swig openjdk-8-jdk \
+          locales \
     && rm -rf /var/lib/apt/lists/*
 
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 
 RUN apt-get update && apt-get install -y \

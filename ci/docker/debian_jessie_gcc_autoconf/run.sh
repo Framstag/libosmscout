@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker run libosmscout/debian_jessie_gcc_autoconf ./build.sh "$@"
+docker run --rm=true -it libosmscout/debian_jessie_gcc_autoconf ./build.sh "$@"

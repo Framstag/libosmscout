@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ $# -ge 1 ] ; then
   REPO="$1"
@@ -18,7 +19,8 @@ cd libosmscout
 . ./setupAutoconf.sh
 export CC=clang
 export CXX=clang++
+export LANG=en_US.utf8
 env
-make full
+make -j `nproc` full
 cd Tests && make check
 

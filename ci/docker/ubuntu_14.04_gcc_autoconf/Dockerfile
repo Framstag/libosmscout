@@ -10,7 +10,11 @@ RUN apt-get update && apt-get install -y \
           qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev \
           freeglut3 freeglut3-dev \
           libmarisa-dev \
+          locales \
     && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.utf8
 
 RUN apt-get update && apt-get install -y \
           autoconf automake \

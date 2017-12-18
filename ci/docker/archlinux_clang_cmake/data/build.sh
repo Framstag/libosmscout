@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ $# -ge 1 ] ; then
   REPO="$1"
@@ -21,7 +22,7 @@ export CXX=clang++
 cd libosmscout
 mkdir build
 cd build
-cmake ..
-make
+cmake -DCMAKE_BUILD_TYPE=DEBUG -DOSMSCOUT_BUILD_BINDING_JAVA=OFF ..
+make -j `nproc`
 ctest --output-on-failure
 
