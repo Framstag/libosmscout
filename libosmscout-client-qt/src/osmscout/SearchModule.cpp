@@ -384,7 +384,7 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
         typeName = QString::fromUtf8(node->GetType()->GetName().c_str());
       }
 
-      bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(coordinates, 2.0));
+      bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(node->GetCoords(), 2.0));
     } else if (object.GetType() == osmscout::RefType::refArea) {
       osmscout::AreaRef area;
 
