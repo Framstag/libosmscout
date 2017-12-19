@@ -214,7 +214,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
 
   // ...for that reason, when rectangles are (almost) the same,
   // round target position to get better output
-  if (absDiff < 1e-3){
+  if (absDiff < 1e-3 && finalImgProjection.GetAngle()==requestProjection.GetAngle()){
     targetRectangle.setX(sourceRectangle.x() + round(targetTopLeftX));
     targetRectangle.setY(sourceRectangle.y() + round(targetTopLeftY));
     targetRectangle.setSize(sourceRectangle.size());
