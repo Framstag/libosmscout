@@ -19,8 +19,9 @@
  */
 
 #include <osmscout/PlaneMapRenderer.h>
-
 #include <osmscout/OSMTile.h>
+
+#include <osmscout/system/Math.h>
 
 // uncomment or define by compiler parameter to render various debug marks
 // #define DRAW_DEBUG
@@ -207,10 +208,10 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
 
   // After our computations with float numbers, target rectangle is not aligned to pixel.
   // It leads to additional anti-aliasing that blurs output...
-  double absDiff=abs((targetRectangle.x()-targetTopLeftX) - sourceRectangle.x()) +
-                 abs((targetRectangle.y()-targetTopLeftY) - sourceRectangle.y()) +
-                 abs(targetRectangle.width()              - sourceRectangle.width()) +
-                 abs(targetRectangle.height()             - sourceRectangle.height());
+  double absDiff=std::abs((targetRectangle.x()-targetTopLeftX) - sourceRectangle.x()) +
+                 std::abs((targetRectangle.y()-targetTopLeftY) - sourceRectangle.y()) +
+                 std::abs(targetRectangle.width()              - sourceRectangle.width()) +
+                 std::abs(targetRectangle.height()             - sourceRectangle.height());
 
   // ...for that reason, when rectangles are (almost) the same,
   // round target position to get better output
