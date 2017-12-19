@@ -886,10 +886,13 @@ namespace osmscout {
     std::list<TokenSearch> patterns;
     std::list<Result>      matches;
     std::list<Result>      partialMatches;
+    BreakerRef             breaker;
 
   public:
     POISearchVisitor(const StringMatcherFactoryRef& matcherFactory,
-                     const std::list<TokenStringRef>& patterns)
+                     const std::list<TokenStringRef>& patterns,
+                     BreakerRef &breaker):
+        breaker(breaker)
     {
       for (const auto& pattern : patterns) {
         this->patterns.emplace_back(pattern,
@@ -915,7 +918,7 @@ namespace osmscout {
         }
       }
 
-      return true;
+      return !(breaker && breaker->IsAborted());
     }
   };
 
@@ -1724,7 +1727,8 @@ namespace osmscout {
     // Search for locations
 
     POISearchVisitor poiVisitor(parameter.stringMatcherFactory,
-                                poiSearchPatterns);
+                                poiSearchPatterns,
+                                breaker);
 
     if (!locationIndex->VisitPOIs(*regionMatch.adminRegion,
                                   poiVisitor)) {
@@ -1790,7 +1794,8 @@ namespace osmscout {
     // Search for locations
 
     POISearchVisitor poiVisitor(parameter.stringMatcherFactory,
-                                poiSearchPatterns);
+                                poiSearchPatterns,
+                                breaker);
 
     if (!locationIndex->VisitPOIs(*regionMatch.adminRegion,
                                   poiVisitor)) {
