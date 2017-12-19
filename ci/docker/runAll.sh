@@ -17,6 +17,9 @@ RESULT_debian_jessie_gcc_autoconf=$?
 ./debian_jessie_gcc_cmake/run.sh    "$@" 
 RESULT_debian_jessie_gcc_cmake=$?
 
+./debian_stretch_gcc_cmake/run.sh    "$@"
+RESULT_debian_stretch_gcc_cmake=$?
+
 ./debian_sid_gcc_meson/run.sh    "$@"
 RESULT_debian_sid_gcc_meson=$?
 
@@ -62,6 +65,9 @@ if [ $RESULT_debian_jessie_gcc_autoconf  -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "debian_jessie_gcc_cmake      "
 if [ $RESULT_debian_jessie_gcc_cmake     -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "debian_stretch_gcc_cmake      "
+if [ $RESULT_debian_stretch_gcc_cmake    -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "debian_sid_gcc_meson         "
 if [ $RESULT_debian_sid_gcc_meson        -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
