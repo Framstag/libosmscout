@@ -402,7 +402,7 @@ bool MoveHandler::rotateTo(double angle)
     targetMagnification = view.magnification;
 
     targetAngle = angle;
-    if (abs(targetAngle-view.angle)>M_PI){
+    if (std::abs(targetAngle-view.angle)>M_PI){
         targetAngle+=2*M_PI;
     }
 

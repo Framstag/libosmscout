@@ -22,6 +22,8 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/OSMTile.h>
 
+#include <osmscout/system/Math.h>
+
 // uncomment or define by compiler parameter to render various debug marks
 // #define DRAW_DEBUG
 
@@ -45,8 +47,8 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
     double cosBeta=cos(M_PI_2 - request.angle);
     double rw=request.width;
     double rh=request.height;
-    height=abs(rw*cosBeta)+abs(rh*cosAlpha);
-    width=abs(rw*cosAlpha)+abs(rh*cosBeta);
+    height=std::abs(rw*cosBeta)+std::abs(rh*cosAlpha);
+    width=std::abs(rw*cosAlpha)+std::abs(rh*cosBeta);
     if (request.angle>0 && request.angle<=M_PI_2) {
       translateVector.setY(cosBeta*rw*-1);
     } else if (request.angle<=M_PI) {
