@@ -1,0 +1,467 @@
+/*
+  Scanner header
+*/
+
+-->begin
+
+#if !defined(-->prefixSCANNER_H)
+#define -->prefixSCANNER_H
+
+#include <string>
+#include <map>
+#include <memory>
+
+#include <osmscout/system/Types.h>
+
+-->namespace_open
+
+#define COCO_WCHAR_MAX 65535
+
+// string handling, wide character
+extern char* coco_string_create(const char* value);
+extern char* coco_string_create(const char* value, int startIndex, int length);
+extern void  coco_string_delete(char* &data);
+
+class Token;
+
+typedef std::shared_ptr<Token> TokenRef;
+
+class Token
+{
+public:
+  int      kind;    // token kind
+  size_t   pos;     // token position in the source text (starting at 0)
+  size_t   charPos; // token position in characters in the source text (starting at 0)
+  int      col;     // token column (starting at 1)
+  int      line;    // token line (starting at 1)
+  char*    val;     // token value
+  TokenRef next;    // ML 2005-03-11 Peek tokens are kept in linked list
+
+  Token();
+  ~Token();
+};
+
+class Buffer
+{
+private:
+  unsigned char *buf; // input buffer
+  size_t bufLen;      // length of buffer
+  size_t bufPos;      // current position in buffer
+
+public:
+  static const int EoF = COCO_WCHAR_MAX + 1;
+
+  Buffer(const unsigned char* buf, size_t len);
+  virtual ~Buffer();
+
+  int Read();
+  int Peek();
+  //wchar_t* GetString(int beg, int end);
+  size_t GetPos();
+  void SetPos(size_t value);
+};
+
+//-----------------------------------------------------------------------------------
+// StartStates  -- maps characters to start states of tokens
+//-----------------------------------------------------------------------------------
+class StartStates
+{
+private:
+  std::map<int,int> map;
+
+public:
+  StartStates()
+  {
+    // no code
+  }
+
+  virtual ~StartStates()
+  {
+    // no code
+  }
+
+  void set(int key, int val)
+  {
+    map[key]=val;
+  }
+
+  int state(int key) {
+    std::map<int,int>::const_iterator iter=map.find(key);
+
+    if (iter!=map.end()) {
+      return iter->second;
+    }
+    else {
+      return 0;
+    }
+  }
+};
+
+//-------------------------------------------------------------------------------------------
+// KeywordMap  -- maps strings to integers (identifiers to keyword kinds)
+//-------------------------------------------------------------------------------------------
+class KeywordMap
+{
+private:
+  std::map<std::string,int> map;
+
+public:
+  KeywordMap()
+  {
+    // no code
+  }
+
+  virtual ~KeywordMap()
+  {
+    // no code
+  }
+
+  void set(const char* key, int val)
+  {
+    map[std::string(key)]=val;
+  }
+
+  int get(const char* key, int defaultVal)
+  {
+    std::map<std::string,int>::const_iterator iter=map.find(std::string(key));
+
+    if (iter!=map.end()) {
+      return iter->second;
+    }
+    else {
+      return defaultVal;
+    }
+  }
+};
+
+class Scanner
+{
+private:
+  unsigned char EOL;
+  int           eofSym;
+  int           noSym;
+  int           maxT;
+  StartStates   start;
+  KeywordMap    keywords;
+
+  TokenRef      t;          // current token
+  char          *tval;      // text of current token
+  size_t        tvalLength; // length of text of current token
+  size_t        tlen;       // length of current token
+
+  TokenRef      tokens;     // list of tokens already peeked (first token is a dummy)
+  TokenRef      pt;         // current peek token
+
+  int           ch;         // current input character
+-->casing0
+  size_t        pos;        // byte position of current character
+  size_t        charPos;    // position by unicode characters starting with 0
+  int           line;       // line number of current character
+  int           col;        // column number of current character
+  int           oldEols;    // EOLs that appeared in a comment;
+
+  TokenRef CreateToken();
+  void AppendVal(TokenRef& t);
+
+  void Init();
+  void NextCh();
+  void AddCh();
+-->commentsheader
+  TokenRef NextToken();
+
+public:
+  Buffer *buffer;   // scanner buffer
+
+  Scanner(const unsigned char* buf, size_t len);
+  ~Scanner();
+  TokenRef Scan();
+  void SetScannerBehindT();
+  TokenRef Peek();
+  void ResetPeek();
+
+}; // end Scanner
+
+-->namespace_close
+
+#endif
+
+-->implementation
+
+/*
+  Scanner source
+*/
+
+-->begin
+/*
+  This source is part of the libosmscout library
+  Copyright (C) 2011  Tim Teulings
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+*/
+
+#include <string.h>
+#include <stdlib.h>
+
+#include <iostream>
+
+#include <osmscout/olt/Scanner.h>
+
+-->namespace_open
+
+// string handling, wide character
+
+char* coco_string_create(const char* value) {
+  char* data;
+  size_t len = 0;
+  if (value) { len = strlen(value); }
+  data = new char[len + 1];
+  strncpy(data, value, len);
+  data[len] = 0;
+  return data;
+}
+
+char* coco_string_create(const char *value , int startIndex, size_t length) {
+  size_t len = 0;
+  char* data;
+
+  if (value) { len = length; }
+  data = new char[len + 1];
+  strncpy(data, &(value[startIndex]), len);
+  data[len] = 0;
+
+  return data;
+}
+
+void coco_string_delete(char* &data) {
+  delete [] data;
+  data = NULL;
+}
+
+Token::Token()
+: kind(0),
+  pos(0),
+  col(0),
+  line(0),
+  val(NULL),
+  next(NULL)
+{
+ // no code
+}
+
+Token::~Token()
+{
+  delete [] val;
+}
+
+Buffer::Buffer(const unsigned char* buf, size_t len)
+{
+  this->buf = new unsigned char[len];
+  memcpy(this->buf, buf, len*sizeof(unsigned char));
+  bufLen = len;
+  bufPos = 0;
+}
+
+Buffer::~Buffer()
+{
+  delete [] buf;
+}
+
+int Buffer::Peek()
+{
+  size_t curPos = GetPos();
+  int ch = Read();
+  SetPos(curPos);
+  return ch;
+}
+
+size_t Buffer::GetPos()
+{
+  return bufPos;
+}
+
+void Buffer::SetPos(size_t value) {
+  if (value > bufLen) {
+    std::cerr << "--- buffer out of bounds access, position: " << value << std::endl;
+    exit(1);
+  }
+
+  bufPos = value;
+}
+
+int Buffer::Read()
+{
+  if (bufPos < bufLen) {
+    return buf[bufPos++];
+  } else {
+    return EoF;
+  }
+}
+
+Scanner::Scanner(const unsigned char* buf, size_t len) {
+  buffer = new Buffer(buf, len);
+  Init();
+}
+
+Scanner::~Scanner() {
+  delete [] tval;
+  delete buffer;
+}
+
+void Scanner::Init() {
+  EOL    = '\n';
+  eofSym = 0;
+-->declarations
+
+  tvalLength = 128;
+  tval = new char[tvalLength]; // text of current token
+
+  pos = -1; line = 1; col = 0;
+  oldEols = 0;
+  NextCh();
+  if (ch == 0xEF) { // check optional byte order mark for UTF-8
+    NextCh(); int ch1 = ch;
+    NextCh(); int ch2 = ch;
+    if (ch1 != 0xBB || ch2 != 0xBF) {
+      std::cerr << "Illegal byte order mark at start of file" << std::endl;
+      exit(1);
+    }
+    NextCh();
+  }
+
+-->initialization
+  pt = tokens = CreateToken(); // first token is a dummy
+}
+
+void Scanner::NextCh() {
+  if (oldEols > 0) {
+    ch = EOL;
+    oldEols--;
+  }
+  else {
+    pos = buffer->GetPos();
+    ch = buffer->Read(); col++;
+    // replace isolated '\r' by '\n' in order to make
+    // eol handling uniform across Windows, Unix and Mac
+    if (ch == L'\r' && buffer->Peek() != L'\n') {
+      ch = EOL;
+    }
+    if (ch == EOL) {
+      line++;
+      col = 0;
+    }
+  }
+-->casing1
+}
+
+void Scanner::AddCh() {
+  if (tlen >= tvalLength) {
+    tvalLength *= 2;
+    char *newBuf = new char[tvalLength];
+    memcpy(newBuf, tval, tlen*sizeof(char));
+    delete [] tval;
+    tval = newBuf;
+  }
+  if (ch != Buffer::EoF) {
+-->casing2
+    NextCh();
+  }
+}
+
+-->comments
+
+TokenRef Scanner::CreateToken() {
+  TokenRef t=std::make_shared<Token>();
+
+  return t;
+}
+
+void Scanner::AppendVal(TokenRef& t) {
+  delete [] t->val;
+  t->val = new char[tlen+1];
+
+  strncpy(t->val, tval, tlen);
+  t->val[tlen] = L'\0';
+}
+
+TokenRef Scanner::NextToken() {
+  while (ch == ' ' ||
+-->scan1
+  ) NextCh();
+-->scan2
+  int recKind = noSym;
+  size_t recEnd = pos;
+
+  t = CreateToken();
+  t->pos = pos; t->col = col; t->line = line; t->charPos = charPos;
+  int state = start.state(ch);
+  tlen = 0; AddCh();
+
+  switch (state) {
+  case -1: { t->kind = eofSym; break; } // NextCh already done
+  case 0: {
+    case_0:
+    if (recKind != noSym) {
+      tlen = recEnd - t->pos;
+      SetScannerBehindT();
+    }
+
+    t->kind = recKind; break;
+  } // NextCh already done
+-->scan3
+  }
+  AppendVal(t);
+
+  return t;
+}
+
+// get the next token (possibly a token already seen during peeking)
+TokenRef Scanner::Scan() {
+  if (!tokens->next) {
+    return pt = tokens = NextToken();
+  }
+  else {
+    pt = tokens = tokens->next;
+    return tokens;
+  }
+}
+
+void Scanner::SetScannerBehindT()
+{
+  buffer->SetPos(t->pos);
+  NextCh();
+  line = t->line; col = t->col; charPos = t->charPos;
+  for (size_t i = 0; i < tlen; i++) NextCh();
+}
+
+
+// peek for the next token, ignore pragmas
+TokenRef Scanner::Peek() {
+  do {
+    if (!pt->next) {
+      pt->next = NextToken();
+    }
+    pt = pt->next;
+  } while (pt->kind > maxT); // skip pragmas
+
+  return pt;
+}
+
+// make sure that peeking starts at the current scan position
+void Scanner::ResetPeek() {
+  pt = tokens;
+}
+
+-->namespace_close
+

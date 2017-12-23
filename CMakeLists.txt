@@ -170,6 +170,12 @@ if(OSMSCOUT_BUILD_IMPORT)
   add_subdirectory(libosmscout-import)
 endif()
 
+option(OSMSCOUT_BUILD_TEST "Enable build of test library" ON)
+if(OSMSCOUT_BUILD_TEST)
+  set(OSMSCOUT_BUILD_TEST OFF CACHE INTERNAL "" FORCE)
+  add_subdirectory(libosmscout-test)
+endif()
+
 option(OSMSCOUT_BUILD_GPX "Enable build of gpx library" ON)
 if(OSMSCOUT_BUILD_GPX)
   set(OSMSCOUT_BUILD_GPX OFF CACHE INTERNAL "" FORCE)

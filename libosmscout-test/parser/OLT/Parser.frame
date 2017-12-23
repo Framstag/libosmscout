@@ -1,0 +1,334 @@
+/*
+  Parser header
+*/
+
+-->begin
+
+#if !defined(-->prefixPARSER_H)
+#define -->prefixPARSER_H
+
+-->headerdef
+#include <osmscout/olt/Scanner.h>
+
+-->namespace_open
+
+class Errors
+{
+public:
+  class Err
+  {
+  public:
+    enum Type {
+      Symbol,
+      Error,
+      Warning,
+      Exception
+    };
+
+  public:
+    Type        type;
+    int         line;
+    int         column;
+    std::string text;
+  };
+
+public:
+  std::list<Err> errors;
+  bool           hasErrors;
+
+public:
+  Errors();
+  void SynErr(int line, int col, int n);
+  void Error(int line, int col, const char *s);
+  void Warning(int line, int col, const char *s);
+  void Warning(const char *s);
+  void Exception(const char *s);
+};
+
+class Parser
+{
+private:
+-->constantsheader
+  TokenRef dummyToken;
+  int errDist;
+  int minErrDist;
+
+  void SynErr(int n);
+  void Get();
+  void Expect(int n);
+  bool StartOf(int s);
+  void ExpectWeak(int n, int follow);
+  bool WeakSeparator(int n, int syFol, int repFol);
+
+  Scanner *scanner;
+
+  TokenRef t;  // last recognized token
+  TokenRef la; // lookahead token
+  osmscout::test::RegionList regionList;
+
+public:
+  Errors  *errors;
+
+-->declarations
+
+  explicit Parser(Scanner *scanner);
+  ~Parser();
+  void SemErr(const char* msg);
+
+-->productionsheader
+  void Parse();
+};
+
+-->namespace_close
+
+#endif // !defined(COCO_PARSER_H__)
+
+-->implementation
+
+/*
+ Parser source
+*/
+
+-->begin
+/*
+  This source is part of the libosmscout library
+  Copyright (C) 2011  Tim Teulings
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+*/
+
+#include <osmscout/olt/Parser.h>
+
+#include <osmscout/olt/Scanner.h>
+
+#include <iostream>
+#include <sstream>
+
+-->namespace_open
+
+void Parser::SynErr(int n)
+{
+  if (errDist >= minErrDist) {
+    errors->SynErr(la->line, la->col, n);
+  }
+  errDist = 0;
+}
+
+void Parser::SemErr(const char* msg)
+{
+  if (errDist >= minErrDist) {
+    errors->Error(t->line, t->col, msg);
+  }
+  errDist = 0;
+}
+
+void Parser::Get()
+{
+  for (;;) {
+    t = la;
+    la = scanner->Scan();
+    if (la->kind <= maxT) {
+      ++errDist;
+      break;
+    }
+-->pragmas
+    if (dummyToken != t) {
+      dummyToken->kind = t->kind;
+      dummyToken->pos = t->pos;
+      dummyToken->col = t->col;
+      dummyToken->line = t->line;
+      dummyToken->next = NULL;
+      coco_string_delete(dummyToken->val);
+      dummyToken->val = coco_string_create(t->val);
+      t = dummyToken;
+    }
+    la = t;
+  }
+}
+
+void Parser::Expect(int n)
+{
+  if (la->kind==n) {
+    Get();
+  }
+  else {
+    SynErr(n);
+  }
+}
+
+void Parser::ExpectWeak(int n, int follow)
+{
+  if (la->kind == n) {
+    Get();
+  }
+  else {
+    SynErr(n);
+    while (!StartOf(follow)) {
+      Get();
+    }
+  }
+}
+
+bool Parser::WeakSeparator(int n, int syFol, int repFol)
+{
+  if (la->kind == n) {
+    Get();
+    return true;
+  }
+  else if (StartOf(repFol)) {
+    return false;
+  }
+  else {
+    SynErr(n);
+    while (!(StartOf(syFol) || StartOf(repFol) || StartOf(0))) {
+      Get();
+    }
+    return StartOf(syFol);
+  }
+}
+
+-->productions
+
+void Parser::Parse()
+{
+  t = NULL;
+  la = dummyToken = std::make_shared<Token>();
+  la->val = coco_string_create("Dummy Token");
+  Get();
+-->parseRoot
+}
+
+Parser::Parser(Scanner *scanner)
+{
+-->constants
+  dummyToken = NULL;
+  t = la = NULL;
+  minErrDist = 2;
+  errDist = minErrDist;
+  this->scanner = scanner;
+  errors = new Errors();
+}
+
+bool Parser::StartOf(int s)
+{
+  const bool T = true;
+  const bool x = false;
+
+-->initialization
+
+  return set[s][la->kind];
+}
+
+Parser::~Parser()
+{
+  delete errors;
+}
+
+Errors::Errors()
+ : hasErrors(false)
+{
+  // no code
+}
+
+void Errors::SynErr(int line, int col, int n)
+{
+  char* s;
+  switch (n) {
+-->errors
+    default:
+    {
+      std::stringstream buffer;
+
+      buffer << "error " << n;
+
+      s = coco_string_create(buffer.str().c_str());
+    }
+    break;
+  }
+
+  Err error;
+
+  error.type=Err::Symbol;
+  error.line=line;
+  error.column=col;
+  error.text=s;
+
+  coco_string_delete(s);
+
+  std::cout << error.line << "," << error.column << " " << "Symbol: " << error.text << std::endl;
+
+  errors.push_back(error);
+  hasErrors=true;
+}
+
+void Errors::Error(int line, int col, const char *s)
+{
+  Err error;
+
+  error.type=Err::Error;
+  error.line=line;
+  error.column=col;
+  error.text=s;
+
+  std::cout << error.line << "," << error.column << " " << "Error: " << error.text << std::endl;
+
+  errors.push_back(error);
+  hasErrors=true;
+}
+
+void Errors::Warning(int line, int col, const char *s)
+{
+  Err error;
+
+  error.type=Err::Warning;
+  error.line=line;
+  error.column=col;
+  error.text=s;
+
+  std::cout << error.line << "," << error.column << " " << "Warning: " << error.text << std::endl;
+
+  errors.push_back(error);
+}
+
+void Errors::Warning(const char *s)
+{
+  Err error;
+
+  error.type=Err::Warning;
+  error.line=0;
+  error.column=0;
+  error.text=s;
+
+  std::cout << error.line << "," << error.column << " " << "Warning: " << error.text << std::endl;
+
+  errors.push_back(error);
+}
+
+void Errors::Exception(const char* s)
+{
+  Err error;
+
+  error.type=Err::Exception;
+  error.line=0;
+  error.column=0;
+  error.text=s;
+
+  std::cout << error.line << "," << error.column << " " << "Exception: " << error.text << std::endl;
+
+  errors.push_back(error);
+  hasErrors=true;
+}
+
+-->namespace_close
