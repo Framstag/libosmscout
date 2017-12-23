@@ -37,7 +37,7 @@ namespace osmscout {
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
                 Progress& progress,
-                const std::string& filename);
+                const std::string& filename) override;
   };
 }
 

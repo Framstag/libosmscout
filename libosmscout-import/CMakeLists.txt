@@ -110,9 +110,9 @@ if (PROTOBUF_FOUND)
 endif()
 
 if(APPLE)
-  set(THE_TARGET_NAME "OSMScoutImport") 
+  set(THE_TARGET_NAME "OSMScoutImport")
 else()
-  set(THE_TARGET_NAME "osmscout_import") 
+  set(THE_TARGET_NAME "osmscout_import")
 endif()
 
 if(IOS)

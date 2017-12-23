@@ -930,6 +930,19 @@ namespace osmscout {
         return false;
 #endif
       }
+        /*
+      else if (filename.length()>=4 &&
+               filename.substr(filename.length()-4)==".olt") {
+
+        PreprocessOLT preprocess(callback);
+
+        if (!preprocess.Import(typeConfig,
+                               parameter,
+                               progress,
+                               filename)) {
+          return false;
+        }
+      }*/
       else if (filename.length()>=5 &&
             filename.substr(filename.length()-5)==".poly") {
 
@@ -943,8 +956,21 @@ namespace osmscout {
         }
       }
       else {
-        progress.Error("Sorry, this file type is not yet supported!");
-        return false;
+        std::unique_ptr<Preprocessor> preprocessor=parameter.GetPreprocessor(filename,
+                                                                            callback);
+
+        if (preprocessor) {
+          if (!preprocessor->Import(typeConfig,
+                                    parameter,
+                                    progress,
+                                    filename)) {
+            return false;
+          }
+        }
+        else {
+          progress.Error("Sorry, this file type is not yet supported!");
+          return false;
+        }
       }
     }
 

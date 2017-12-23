@@ -76,6 +76,12 @@ namespace osmscout {
   {
   public:
     virtual ~Preprocessor();
+
+    virtual bool Import(const TypeConfigRef& typeConfig,
+                        const ImportParameter& parameter,
+                        Progress& progress,
+                        const std::string& filename) = 0;
+
   };
 }
 

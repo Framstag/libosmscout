@@ -39,6 +39,23 @@
 
 namespace osmscout {
 
+  class Preprocessor;
+  class PreprocessorCallback;
+
+  class OSMSCOUT_IMPORT_API PreprocessorFactory
+  {
+  public:
+    virtual ~PreprocessorFactory()
+    {
+
+    }
+
+    virtual std::unique_ptr<Preprocessor> GetProcessor(const std::string& filename,
+                                                       PreprocessorCallback& callback) const = 0;
+  };
+
+  typedef std::shared_ptr<PreprocessorFactory> PreprocessorFactoryRef;
+
   /**
     Collects all parameter that have influence on the import.
 
@@ -171,6 +188,8 @@ namespace osmscout {
 
     OSMId                        firstFreeOSMId;           //<! first id available for synthetic objects (parsed polygon files)
     size_t                       fillWaterArea;            //<! count of tiles around coastlines flooded by water
+
+    PreprocessorFactoryRef       preprocessorFactory;      //<! Optional preprocessor factory to inject custom preprocessors
 
   public:
     ImportParameter();
@@ -326,6 +345,11 @@ namespace osmscout {
 
     void SetFillWaterArea(size_t fillWaterArea);
     size_t GetFillWaterArea() const;
+
+    void SetPreprocessorFactory(const PreprocessorFactoryRef& factory);
+
+    std::unique_ptr<Preprocessor> GetPreprocessor(const std::string& filename,
+                                                  PreprocessorCallback& callback) const;
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription CLASS_FINAL

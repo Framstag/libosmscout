@@ -39,16 +39,16 @@ osmscoutimportSrc = [
             'src/osmscout/import/Preprocess.cpp',
             'src/osmscout/import/PreprocessPoly.cpp'
           ]
-          
+
 if xml2Dep.found()
   osmscoutimportSrc += ['src/osmscout/import/PreprocessOSM.cpp']
-endif          
+endif
 
 if protocCmd.found() and protobufDep.found()
   osmscoutimportSrc += ['src/osmscout/import/PreprocessPBF.cpp']
-endif          
+endif
 
 if marisaDep.found()
   osmscoutimportSrc += ['src/osmscout/import/GenTextIndex.cpp']
-endif          
+endif
 

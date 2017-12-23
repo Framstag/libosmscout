@@ -45,14 +45,14 @@ osmscoutimportHeader = [
 
 if xml2Dep.found()
   osmscoutimportHeader += ['osmscout/import/PreprocessOSM.h']
-endif          
+endif
 
 if protocCmd.found() and protobufDep.found()
   osmscoutimportHeader += ['osmscout/import/PreprocessPBF.h']
-endif          
+endif
 
 if marisaDep.found()
   osmscoutimportHeader += ['osmscout/import/GenTextIndex.h']
-endif          
+endif
 
 install_headers(osmscoutimportHeader)

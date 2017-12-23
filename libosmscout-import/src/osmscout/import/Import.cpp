@@ -659,6 +659,21 @@ namespace osmscout {
     return fillWaterArea;
   }
 
+  void ImportParameter::SetPreprocessorFactory(const PreprocessorFactoryRef& factory)
+  {
+    this->preprocessorFactory=factory;
+  }
+
+  std::unique_ptr<Preprocessor> ImportParameter::GetPreprocessor(const std::string& filename,
+                                                                 PreprocessorCallback& callback) const
+  {
+    if (preprocessorFactory) {
+      return preprocessorFactory->GetProcessor(filename,
+                                              callback);
+    }
+    return nullptr;
+  }
+
   void ImportModuleDescription::SetName(const std::string& name)
   {
     this->name=name;
