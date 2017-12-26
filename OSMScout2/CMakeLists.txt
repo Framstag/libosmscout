@@ -4,6 +4,9 @@ endif()
 if(NOT ${OSMSCOUT_BUILD_CLIENT_QT})
 	message(SEND_ERROR "The Qt client lib is required for OSMScout2 application")
 endif()
+if(NOT ${OSMSCOUT_BUILD_GPX})
+    message(SEND_ERROR "The Gpx lib is required for OSMScout2 application")
+endif()
 if(NOT Qt5Core_FOUND)
 	message(SEND_ERROR "Qt5Core is required for OSMScout2 application")
 endif()
@@ -61,39 +64,42 @@ set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
 target_include_directories(OSMScout2 PRIVATE
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-client-qt/include
+    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
+    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
+    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-client-qt/include
+    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-gpx/include
 )
 
 if(APPLE)
 	target_link_libraries(OSMScout2
-		    OSMScout
-        	OSMScoutMap
-            OSMScoutGPX
-        	Qt5::Core
-        	Qt5::Gui
-        	Qt5::Widgets
-        	Qt5::Qml
-        	Qt5::Quick
-        	Qt5::Positioning
-        	OSMScoutMapQt
-        	OSMScoutClientQt
+        OSMScout
+        OSMScoutMap
+        OSMScoutGPX
+        Qt5::Core
+        Qt5::Gui
+        Qt5::Widgets
+        Qt5::Qml
+        Qt5::Quick
+        Qt5::Positioning
+        OSMScoutMapQt
+        OSMScoutClientQt
+        OSMScoutGPX
 	)
 else()
 	target_link_libraries(OSMScout2
-		    osmscout
-        	osmscout_map
-            osmscout_gpx
-        	Qt5::Core
-        	Qt5::Gui
-        	Qt5::Widgets
-        	Qt5::Qml
-        	Qt5::Quick
-        	Qt5::Positioning
-        	osmscout_map_qt
-        	osmscout_client_qt
+        osmscout
+        osmscout_map
+        osmscout_gpx
+        Qt5::Core
+        Qt5::Gui
+        Qt5::Widgets
+        Qt5::Qml
+        Qt5::Quick
+        Qt5::Positioning
+        osmscout_map_qt
+        osmscout_client_qt
+        osmscout_gpx
 	)
 endif()
 
