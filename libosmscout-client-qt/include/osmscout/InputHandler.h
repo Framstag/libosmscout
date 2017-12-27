@@ -250,7 +250,7 @@ public:
     virtual bool rotateTo(double angle);
     virtual bool rotateBy(double angleChange);
     virtual bool touch(QTouchEvent *event);
-    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
+    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance);
     virtual bool isLockedToPosition();
     virtual bool focusOutEvent(QFocusEvent *event);
 
@@ -404,14 +404,12 @@ private:
  */
 class OSMSCOUT_CLIENT_QT_API LockHandler : public JumpHandler {
     Q_OBJECT
-protected:
-    double moveTolerance;
 public:
-    inline LockHandler(MapView view, double moveTolerance):
-      JumpHandler(view), moveTolerance(moveTolerance)
+    inline LockHandler(MapView view):
+      JumpHandler(view)
     {};
 
-    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
+    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance);
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
     virtual bool isLockedToPosition();
     virtual bool focusOutEvent(QFocusEvent *event);
