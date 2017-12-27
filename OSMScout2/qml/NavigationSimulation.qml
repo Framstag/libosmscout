@@ -24,5 +24,22 @@ Window {
         Component.onCompleted: {
             console.log("PositionSimulationTrack: "+PositionSimulationTrack)
         }
+        onStartChanged: {
+            map.showCoordinates(latitude, longitude);
+        }
+        onPositionChanged: {
+            if (!map.lockToPosition){ // don't set again when it is true already
+                map.lockToPosition = true;
+            }
+            map.locationChanged(true, // valid
+                                latitude, longitude,
+                                horizontalAccuracyValid, horizontalAccuracy);
+            // console.log("position: " + latitude + " " + longitude);
+        }
+    }
+    Map {
+        id: map
+        anchors.fill: parent
+        showCurrentPosition: true
     }
 }

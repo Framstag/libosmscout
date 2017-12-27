@@ -20,27 +20,82 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <osmscout/gpx/GpxFile.h>
+
 #include <QObject>
 #include <QString>
+#include <QTimer>
+#include <QDateTime>
 
 class PositionSimulator: public QObject {
   Q_OBJECT
   Q_PROPERTY(QString track READ getTrack WRITE setTrack)
+  Q_PROPERTY(bool running READ isRunning WRITE setRunning NOTIFY runningChanged)
+  Q_PROPERTY(QDateTime time READ getTime NOTIFY timeChanged)
+
+  Q_PROPERTY(double startLat READ getStartLat NOTIFY startChanged)
+  Q_PROPERTY(double startLon READ getStartLon NOTIFY startChanged)
+  Q_PROPERTY(double endLat READ getEndLat NOTIFY endChanged)
+  Q_PROPERTY(double endLon READ getEndLon NOTIFY endChanged)
 
 private:
+  std::vector<osmscout::gpx::TrackSegment> segments;
   QString trackFile;
+  bool running{false};
+  bool fileLoaded{false};
+  size_t currentSegment{0};
+  size_t currentPoint{0};
+  QTimer timer;
+  osmscout::Timestamp simulationTime;
+  osmscout::gpx::TrackPoint segmentStart{osmscout::GeoCoord(0,0)};
+  osmscout::gpx::TrackPoint segmentEnd{osmscout::GeoCoord(0,0)};
+
+signals:
+  void positionChanged(double latitude,
+                       double longitude,
+                       bool horizontalAccuracyValid,
+                       double horizontalAccuracy);
+  void runningChanged(bool);
+  void startChanged(double latitude, double longitude);
+  void endChanged(double latitude, double longitude);
+  void timeChanged(QDateTime);
+
+private slots:
+  void tick();
 
 public:
-  PositionSimulator(){}
+  PositionSimulator();
   virtual ~PositionSimulator(){}
 
   QString getTrack() const {
     return trackFile;
   }
 
-  void setTrack(const QString &t) {
-    trackFile=t;
+  void setTrack(const QString &t);
+
+  bool isRunning() const {
+    return running;
   }
+
+  void setRunning(bool);
+
+  double getStartLat() const {
+    return segmentStart.coord.GetLat();
+  }
+  double getStartLon() const {
+    return segmentStart.coord.GetLon();
+  }
+  double getEndLat() const {
+    return segmentEnd.coord.GetLat();
+  }
+  double getEndLon() const {
+    return segmentEnd.coord.GetLon();
+  }
+
+  QDateTime getTime() const;
+
+private:
+  bool setSegment(size_t);
 };
 
 #endif //LIBOSMSCOUT_POSITIONSIMULATOR_H

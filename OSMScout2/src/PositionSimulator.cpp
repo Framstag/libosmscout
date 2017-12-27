@@ -18,3 +18,135 @@
 */
 
 #include "PositionSimulator.h"
+
+#include <osmscout/gpx/Import.h>
+#include <osmscout/util/Logger.h>
+
+static const std::chrono::milliseconds TickDuration(100);
+
+PositionSimulator::PositionSimulator() {
+  connect(&timer, SIGNAL(timeout()),
+          this, SLOT(tick()));
+  timer.setInterval(TickDuration.count());
+  timer.setSingleShot(false);
+}
+
+void PositionSimulator::setTrack(const QString &t)
+{
+  trackFile=t;
+  setRunning(false);
+  fileLoaded=false;
+
+  osmscout::gpx::GpxFile gpxFile;
+  osmscout::log.Info() << "Loading " << trackFile.toStdString();
+  if (!osmscout::gpx::ImportGpx(trackFile.toStdString(), gpxFile)){
+    osmscout::log.Error() << "Failed to load gpx file " << trackFile.toStdString();
+    return;
+  }
+
+  segments.clear();
+
+  for (auto const &trk:gpxFile.tracks){
+    for (auto const &seg:trk.segments){
+      if (seg.points.empty()){
+        continue;
+      }
+      segments.push_back(seg);
+    }
+  }
+  if (segments.empty()){
+    osmscout::log.Error() << "No track in gpx file " << trackFile.toStdString();
+    return;
+  }
+
+  fileLoaded=true;
+  if (!setSegment(0)){
+    return;
+  }
+  setRunning(true);
+}
+
+osmscout::Timestamp Now(){
+  using namespace std::chrono;
+  return time_point_cast<milliseconds,system_clock,nanoseconds>(osmscout::Timestamp::clock::now());
+}
+
+QDateTime PositionSimulator::getTime() const
+{
+  return QDateTime::fromMSecsSinceEpoch(simulationTime.time_since_epoch().count());
+}
+
+bool PositionSimulator::setSegment(size_t i)
+{
+  currentSegment=i;
+  currentPoint=0;
+  if (currentSegment>=segments.size()){
+    return false;
+  }
+  auto &points=segments[currentSegment].points;
+  if (points.empty()){
+    return false; // should not happen
+  }
+  segmentStart=points[0];
+  segmentEnd=points[points.size()-1];
+
+  simulationTime=segmentStart.time.getOrElse([]()->osmscout::Timestamp{
+    return Now();
+  });
+  emit startChanged(segmentStart.coord.GetLat(), segmentStart.coord.GetLon());
+  emit endChanged(segmentEnd.coord.GetLat(), segmentEnd.coord.GetLon());
+
+  emit timeChanged(getTime());
+  return true;
+}
+
+void PositionSimulator::setRunning(bool b)
+{
+  if (running==b){
+    return;
+  }
+  if (b && !fileLoaded){
+    return;
+  }
+  running=b;
+  emit runningChanged(running);
+  if (running) {
+    timer.start();
+  }else{
+    timer.stop();
+  }
+}
+
+void PositionSimulator::tick()
+{
+  if (currentSegment>=segments.size()){
+    setRunning(false);
+    return;
+  }
+  auto &points=segments[currentSegment].points;
+  if (points.empty()){
+    return; // should not happen
+  }
+  simulationTime+=TickDuration;
+  // osmscout::log.Debug() << "Simulator time: " << osmscout::TimestampToISO8601TimeString(simulationTime);
+  emit timeChanged(getTime());
+
+  while (true){
+    if (currentPoint<points.size()) {
+      auto &point=points[currentPoint];
+      if (point.time.hasValue() && point.time.get()>simulationTime){
+        return;
+      }
+      osmscout::log.Debug() << "Simulator point: " << osmscout::TimestampToISO8601TimeString(point.time.getOrElse(simulationTime)) << " @ " << point.coord.GetDisplayText();
+      emit positionChanged(point.coord.GetLat(), point.coord.GetLon(), point.hdop.hasValue(), point.hdop.getOrElse(0));
+      currentPoint++;
+      if (!point.time.hasValue()){
+        return;
+      }
+    }else{
+      setSegment(currentSegment+1);
+      tick();
+      return;
+    }
+  }
+}
