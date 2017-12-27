@@ -76,6 +76,12 @@ QDateTime PositionSimulator::getTime() const
   return QDateTime::fromMSecsSinceEpoch(simulationTime.time_since_epoch().count());
 }
 
+void PositionSimulator::skipTime(uint64_t millis)
+{
+  simulationTime+=std::chrono::milliseconds(millis);
+  emit timeChanged(getTime());
+}
+
 bool PositionSimulator::setSegment(size_t i)
 {
   currentSegment=i;
@@ -111,8 +117,10 @@ void PositionSimulator::setRunning(bool b)
   running=b;
   emit runningChanged(running);
   if (running) {
+    osmscout::log.Debug() << "Simulator started";
     timer.start();
   }else{
+    osmscout::log.Debug() << "Simulator stopped";
     timer.stop();
   }
 }

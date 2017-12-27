@@ -94,6 +94,8 @@ public:
 
   QDateTime getTime() const;
 
+  Q_INVOKABLE void skipTime(uint64_t millis);
+
 private:
   bool setSegment(size_t);
 };
