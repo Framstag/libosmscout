@@ -1,12 +1,17 @@
 osmscout2Src = [
   'src/OSMScout.cpp',
   'src/AppSettings.cpp',
-  'src/Theme.cpp'
+  'src/Theme.cpp',
+  'src/PositionSimulator.cpp'
 ]
 
 osmscout2IncDir = include_directories('src')
 
-osmscout2Mocs = qt5.preprocess(moc_headers : ['src/AppSettings.h', 'src/Theme.h'],
+osmscout2Mocs = qt5.preprocess(moc_headers : [
+                                'src/AppSettings.h',
+                                'src/Theme.h',
+                                'src/PositionSimulator.h'
+                               ],
                                qresources: ['res.qrc'])
 
 OSMScout2 = executable('OSMScout2',

@@ -3,6 +3,8 @@ osmscoutclientqtSrc = [
             'src/osmscout/DBInstance.cpp',
             'src/osmscout/RoutingModel.cpp',
             'src/osmscout/Router.cpp',
+            'src/osmscout/RouteDescriptionBuilder.cpp',
+            'src/osmscout/NavigationModule.cpp',
             'src/osmscout/InputHandler.cpp',
             'src/osmscout/OnlineTileProvider.cpp',
             'src/osmscout/OnlineTileProviderModel.cpp',
