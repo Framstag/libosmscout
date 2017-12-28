@@ -327,6 +327,16 @@ Router* OSMScoutQt::MakeRouter()
   return router;
 }
 
+NavigationModule* OSMScoutQt::MakeNavigation()
+{
+  QThread *thread=makeThread("Navigation");
+
+  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread);
+  navigation->moveToThread(thread);
+  thread->start();
+  return navigation;
+}
+
 QString OSMScoutQt::GetUserAgent(){
   return userAgent;
 }
