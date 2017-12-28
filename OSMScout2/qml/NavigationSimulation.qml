@@ -16,8 +16,8 @@ Window {
     objectName: "main"
     title: "OSMScout navigation simulation"
     visible: true
-    width: 800
-    height: 480
+    width: 1024
+    height: 768
 
     PositionSimulator {
         id: simulator
@@ -28,6 +28,12 @@ Window {
         onStartChanged: {
             map.showCoordinates(latitude, longitude);
         }
+        onEndChanged: {
+            var startLoc = routingModel.locationEntryFromPosition(simulator.startLat, simulator.startLon);
+            var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
+            routingModel.setStartAndTarget(startLoc, destinationLoc);
+        }
+
         onPositionChanged: {
             if (!map.lockToPosition){ // don't set again when it is true already
                 map.lockToPosition = true;
@@ -38,13 +44,26 @@ Window {
             // console.log("position: " + latitude + " " + longitude);
         }
     }
+
+    RoutingListModel {
+        id: routingModel
+        onReadyChanged: {
+            var routeWay = routingModel.routeWay;
+            if (routeWay==null){
+                return;
+            }
+
+            map.addOverlayObject(0,routeWay);
+        }
+    }
+
     Map {
         id: map
         anchors.fill: parent
         showCurrentPosition: true
     }
     RowLayout {
-        id: info
+        id: simulatorControl
 
         x: Theme.horizSpace
         y: parent.height-height-Theme.vertSpace
@@ -97,6 +116,66 @@ Window {
             label: "+ hour"
             onClicked: {
                 simulator.skipTime(3600 * 1000);
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        width: 220
+        height: parent.height
+        color: "transparent"
+
+        Rectangle {
+            id: routingStepsBox
+
+            x: 0
+            y: Theme.vertSpace
+            height: parent.height - (2*Theme.vertSpace)
+            width: parent.width - Theme.horizSpace
+
+            border.color: "lightgrey"
+            border.width: 1
+
+            ListView {
+                id: routingView
+
+                model: routingModel
+
+                anchors.fill: parent
+                anchors.margins: 1
+                clip: true
+
+                delegate: Item {
+                    id: item
+
+                    anchors.right: parent.right;
+                    anchors.left: parent.left;
+                    height: text.implicitHeight+5
+
+                    Text {
+                        id: text
+
+                        y:2
+                        x: 2
+                        width: parent.width-4
+                        text: label
+                        font.pixelSize: Theme.textFontSize
+                    }
+
+                    Rectangle {
+                        x: 2
+                        y: parent.height-2
+                        width: parent.width-4
+                        height: 1
+                        color: "lightgrey"
+                    }
+                }
+            }
+
+            ScrollIndicator {
+                flickableArea: routingView
             }
         }
     }
