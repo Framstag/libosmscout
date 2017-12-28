@@ -37,6 +37,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cmath>
+#include <cstring>
 
 #include <osmscout/Database.h>
 #include <osmscout/routing/SimpleRoutingService.h>
