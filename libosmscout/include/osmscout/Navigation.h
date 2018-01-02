@@ -30,7 +30,7 @@
 namespace osmscout {
     static double one_degree_at_equator = 111320.0;
 
-    template<class NodeDescriptionTmpl> class OSMSCOUT_API OutputDescription {
+    template<class NodeDescriptionTmpl> class OutputDescription {
     public:
         virtual void NextDescription(double distance,
                                      std::list<RouteDescription::Node>::const_iterator &node,
@@ -41,7 +41,7 @@ namespace osmscout {
         NodeDescriptionTmpl description;
     };
 
-    template<class NodeDescriptionTmpl> class OSMSCOUT_API Navigation {
+    template<class NodeDescriptionTmpl> class Navigation {
     private:
         /**
          * return true and set foundNode with the start node of the closest route segment from the location and foundAbscissa with the abscissa
