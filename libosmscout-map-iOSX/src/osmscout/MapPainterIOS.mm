@@ -58,7 +58,7 @@ namespace osmscout {
     {
         std::map<size_t,Font *>::const_iterator f;
 
-        fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+        fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize())*contentScale;
 
         f=fonts.find(fontSize);
 
