@@ -19,6 +19,7 @@
 
 #include "PositionSimulator.h"
 
+#include <osmscout/GPXFeatures.h>
 #include <osmscout/gpx/Import.h>
 #include <osmscout/util/Logger.h>
 
@@ -38,11 +39,17 @@ void PositionSimulator::setTrack(const QString &t)
   fileLoaded=false;
 
   osmscout::gpx::GpxFile gpxFile;
+
+#ifndef OSMSCOUT_GPX_HAVE_LIB_XML
+  osmscout::log.Error() << "GPX import is not supported!";
+  return;
+#else
   osmscout::log.Info() << "Loading " << trackFile.toStdString();
   if (!osmscout::gpx::ImportGpx(trackFile.toStdString(), gpxFile)){
     osmscout::log.Error() << "Failed to load gpx file " << trackFile.toStdString();
     return;
   }
+#endif
 
   segments.clear();
 
