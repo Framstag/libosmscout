@@ -21,6 +21,8 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
+#include <libxml/parser.h>
+
 #include <cstring>
 #include <cassert>
 #include <functional>

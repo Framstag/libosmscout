@@ -53,6 +53,8 @@ set(HEADER_FILES
     include/osmscout/MapOverlay.h
     include/osmscout/TiledMapOverlay.h
     include/osmscout/TiledRenderingHelper.h
+    include/osmscout/NavigationModule.h
+    include/osmscout/RouteDescriptionBuilder.h
 )
 
 set(SOURCE_FILES
@@ -91,6 +93,8 @@ set(SOURCE_FILES
     src/osmscout/MapOverlay.cpp
     src/osmscout/TiledMapOverlay.cpp
     src/osmscout/TiledRenderingHelper.cpp
+    src/osmscout/NavigationModule.cpp
+    src/osmscout/RouteDescriptionBuilder.cpp
 )
 
 if(APPLE)

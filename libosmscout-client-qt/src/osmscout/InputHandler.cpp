@@ -210,7 +210,7 @@ bool InputHandler::touch(QTouchEvent */*event*/)
 {
     return false;
 }
-bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/)
+bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/, double /*moveTolerance*/)
 {
     return false;
 }
@@ -683,7 +683,7 @@ bool MultitouchHandler::touch(QTouchEvent *event)
     return true;
 }
 
-bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition)
+bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance)
 {
     if (locationValid){
         osmscout::MercatorProjection projection;

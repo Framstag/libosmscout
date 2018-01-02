@@ -451,9 +451,9 @@ void MapWidget::reloadTmpStyle() {
 
 void MapWidget::setLockToPosition(bool lock){
     if (lock){
-        if (!inputHandler->currentPosition(locationValid, currentPosition)){
-            setupInputHandler(new LockHandler(*view, std::min(width(), height()) / 3));
-            inputHandler->currentPosition(locationValid, currentPosition);
+        if (!inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3)){
+            setupInputHandler(new LockHandler(*view));
+            inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3);
         }
     }else{
         setupInputHandler(new InputHandler(*view));
@@ -549,7 +549,7 @@ void MapWidget::locationChanged(bool locationValid, double lat, double lon, bool
     this->horizontalAccuracyValid = horizontalAccuracyValid;
     this->horizontalAccuracy = horizontalAccuracy;
 
-    inputHandler->currentPosition(locationValid, currentPosition);
+    inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3);
 
     redraw();
 }

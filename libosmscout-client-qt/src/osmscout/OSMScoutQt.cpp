@@ -128,6 +128,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<RouteSelectionRef>("RouteSelectionRef");
   qRegisterMetaType<RouteSelection>("RouteSelection");
   qRegisterMetaType<uint32_t>("uint32_t");
+  qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<AdminRegionInfoRef>("AdminRegionInfoRef");
   qRegisterMetaType<QList<AdminRegionInfoRef>>("QList<AdminRegionInfoRef>");
   qRegisterMetaType<std::unordered_map<std::string,bool>>("std::unordered_map<std::string,bool>");
@@ -324,6 +325,16 @@ Router* OSMScoutQt::MakeRouter()
   router->moveToThread(thread);
   thread->start();
   return router;
+}
+
+NavigationModule* OSMScoutQt::MakeNavigation()
+{
+  QThread *thread=makeThread("Navigation");
+
+  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread);
+  navigation->moveToThread(thread);
+  thread->start();
+  return navigation;
 }
 
 QString OSMScoutQt::GetUserAgent(){
