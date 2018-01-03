@@ -28,30 +28,35 @@
 
 #include <osmscout/RegionList.h>
 
+#include <osmscout/util/Geometry.h>
+
 namespace osmscout {
   namespace test {
     class OSMSCOUT_TEST_API PreprocessOLT CLASS_FINAL : public Preprocessor
     {
     private:
-      PreprocessorCallback& callback;
-      TagId                 tagAdminLevel;
-      TagId                 tagBoundary;
-      TagId                 tagName;
-      TagId                 tagPlace;
-      OSMId                 nodeId;
-      OSMId                 wayId;
+      PreprocessorCallback&    callback;
+      TagId                    tagAdminLevel;
+      TagId                    tagBoundary;
+      TagId                    tagName;
+      TagId                    tagPlace;
+      OSMId                    nodeId;
+      OSMId                    wayId;
+      std::map<GeoCoord,OSMId> coordNodeIdMap;
+      std::map<OSMId,GeoCoord> nodeIdCoordMap;
 
 
     private:
+      OSMId RegisterAndGetRawNodeId(PreprocessorCallback::RawBlockDataRef data,
+                                    const GeoCoord& coord);
+
       void GenerateRegion(const TypeConfigRef& typeConfig,
                           const ImportParameter& parameter,
                           Progress& progress,
                           PreprocessorCallback::RawBlockDataRef data,
-                          const PreprocessorCallback::RawNodeData& topLeft,
-                          const PreprocessorCallback::RawNodeData& topRight,
-                          const PreprocessorCallback::RawNodeData& bottomLeft,
-                          const PreprocessorCallback::RawNodeData& bottomRight,
-                          const Region& region);
+                          const Region& region,
+                          const GeoBox& box,
+                          GeoBoxPartitioner::Direction direction);
 
       void GenerateWaysAndNodes(const TypeConfigRef& typeConfig,
                                 const ImportParameter& parameter,

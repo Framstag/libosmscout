@@ -33,15 +33,34 @@ namespace osmscout {
       // no code
     }
 
+    OSMId PreprocessOLT::RegisterAndGetRawNodeId(PreprocessorCallback::RawBlockDataRef data,
+                                                 const GeoCoord& coord)
+    {
+      auto entry=coordNodeIdMap.find(coord);
+
+      if (entry!=coordNodeIdMap.end()) {
+        return entry->second;
+      }
+
+      OSMId id=nodeId;
+
+      data->nodeData.push_back(PreprocessorCallback::RawNodeData{id,coord,{}});
+
+      coordNodeIdMap[coord]=id;
+      nodeIdCoordMap[id]=coord;
+
+      nodeId++;
+
+      return id;
+    }
+
     void PreprocessOLT::GenerateRegion(const TypeConfigRef& typeConfig,
                                        const ImportParameter& parameter,
                                        Progress& progress,
                                        PreprocessorCallback::RawBlockDataRef data,
-                                       const PreprocessorCallback::RawNodeData& topLeft,
-                                       const PreprocessorCallback::RawNodeData& topRight,
-                                       const PreprocessorCallback::RawNodeData& bottomLeft,
-                                       const PreprocessorCallback::RawNodeData& bottomRight,
-                                       const Region& region)
+                                       const Region& region,
+                                       const GeoBox& box,
+                                       GeoBoxPartitioner::Direction direction)
     {
       PreprocessorCallback::RawWayData wayData;
       wayData.id=wayId++;
@@ -74,11 +93,12 @@ namespace osmscout {
         wayData.tags[tagAdminLevel]=NumberToString(region.GetAdminLevel());
       }
 
-      wayData.nodes.push_back(topLeft.id);
-      wayData.nodes.push_back(topRight.id);
-      wayData.nodes.push_back(bottomRight.id);
-      wayData.nodes.push_back(bottomLeft.id);
-      wayData.nodes.push_back(topLeft.id);
+      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
+      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopRight()));
+      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetBottomRight()));
+      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetBottomLeft()));
+      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
+
 
       data->wayData.push_back(std::move(wayData));
 
@@ -86,46 +106,23 @@ namespace osmscout {
         return;
       }
 
-      double latDec=(topLeft.coord.GetLat()-bottomLeft.coord.GetLat())/region.GetRegionList().size();
-      size_t currentPos=1;
-      PreprocessorCallback::RawNodeData tl=topLeft;
-      PreprocessorCallback::RawNodeData tr=topRight;
+      GeoBoxPartitioner partitioner(box,
+                                    direction,
+                                    region.GetRegionList().size());
 
       for (const auto& childRegion : region.GetRegionList()) {
-        PreprocessorCallback::RawNodeData bl;
-        PreprocessorCallback::RawNodeData br;
-
-        if (currentPos<region.GetRegionList().size()) {
-          bl.id=nodeId++;
-          bl.coord.Set(tl.coord.GetLat()-latDec,
-                       tl.coord.GetLon());
-          data->nodeData.push_back(bl);
-
-          br.id=nodeId++;
-          br.coord.Set(tr.coord.GetLat()-latDec,
-                       tr.coord.GetLon());
-          data->nodeData.push_back(br);
-        }
-        else {
-          bl=bottomLeft;
-          br=bottomRight;
-        };
+        GeoBox subbox=partitioner.GetCurrentGeoBox();
 
         GenerateRegion(typeConfig,
                        parameter,
                        progress,
                        data,
-                       tl,
-                       tr,
-                       bl,
-                       br,
-                       *childRegion);
+                       *childRegion,
+                       subbox,
+                       direction==GeoBoxPartitioner::Direction::VERTICAL ? GeoBoxPartitioner::Direction::HORIZONTAL : GeoBoxPartitioner::Direction::VERTICAL);
 
-        tl=bl;
-        tr=br;
-        currentPos++;
+        partitioner.Advance();
       }
-
     }
 
     void PreprocessOLT::GenerateWaysAndNodes(const TypeConfigRef& typeConfig,
@@ -135,9 +132,7 @@ namespace osmscout {
     {
       progress.SetAction("Generating ways and nodes");
 
-      PreprocessorCallback::RawNodeData topLeft;
-      PreprocessorCallback::RawNodeData topRight;
-
+      GeoBoxPartitioner::Direction direction=GeoBoxPartitioner::Direction::VERTICAL;
       PreprocessorCallback::RawBlockDataRef data=std::make_shared<PreprocessorCallback::RawBlockData>();
 
       if (regions.GetRegionList().empty()) {
@@ -148,43 +143,25 @@ namespace osmscout {
         return;
       }
 
-      topLeft.id=nodeId++;
-      topLeft.coord.Set(51.0,10.0);
-      data->nodeData.push_back(topLeft);
+      GeoBox box(GeoCoord(50.0,10.0),
+                 GeoCoord(51.0,11.0));
 
-      topRight.id=nodeId++;
-      topRight.coord.Set(51.0,11.0);
-      data->nodeData.push_back(topRight);
-
-      // We are creating the areas from 50 lat to 51 lat...
-      double latDec=1.0/regions.GetRegionList().size();
+      GeoBoxPartitioner partitioner(box,
+                                    direction,
+                                    regions.GetRegionList().size());
 
       for (const auto& region : regions.GetRegionList()) {
-        PreprocessorCallback::RawNodeData bottomLeft;
-        PreprocessorCallback::RawNodeData bottomRight;
-
-        bottomLeft.id=nodeId++;
-        bottomLeft.coord.Set(topLeft.coord.GetLat()-latDec,
-                             topLeft.coord.GetLon());
-        data->nodeData.push_back(bottomLeft);
-
-        bottomRight.id=nodeId++;
-        bottomRight.coord.Set(topRight.coord.GetLat()-latDec,
-                              topRight.coord.GetLon());
-        data->nodeData.push_back(bottomRight);
+        GeoBox subbox=partitioner.GetCurrentGeoBox();
 
         GenerateRegion(typeConfig,
                        parameter,
                        progress,
                        data,
-                       topLeft,
-                       topRight,
-                       bottomLeft,
-                       bottomRight,
-                       *region);
+                       *region,
+                       subbox,
+                       direction==GeoBoxPartitioner::Direction::VERTICAL ? GeoBoxPartitioner::Direction::HORIZONTAL : GeoBoxPartitioner::Direction::VERTICAL);
 
-        topLeft=bottomLeft;
-        topRight=bottomRight;
+        partitioner.Advance();
       }
 
       callback.ProcessBlock(data);
