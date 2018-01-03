@@ -10,6 +10,9 @@
 osmscout::DatabaseRef        database;
 osmscout::LocationServiceRef locationService;
 
+/*
+ * A 1:1 match for the city name => match
+ */
 TEST_CASE("Search for city 'Dortmund' (match)") {
   osmscout::LocationStringSearchParameter parameter("Dortmund");
   osmscout::LocationSearchResult          result;
@@ -24,8 +27,45 @@ TEST_CASE("Search for city 'Dortmund' (match)") {
   REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
 }
 
+/*
+ * Substring of actual city name => candidate
+ */
 TEST_CASE("Search for city 'Dortm' (candidate)") {
   osmscout::LocationStringSearchParameter parameter("Dortm");
+  osmscout::LocationSearchResult          result;
+
+  bool success=locationService->SearchForLocationByString(parameter,
+                                                          result);
+
+  REQUIRE(success);
+  REQUIRE_FALSE(result.limitReached);
+  REQUIRE(result.results.size()==1);
+  REQUIRE(result.results.front().adminRegion->name=="Dortmund");
+  REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::candidate);
+}
+
+/*
+ * 1:1 match of a alias of the city => match
+ */
+TEST_CASE("Search for city 'Brechten' (alias of Dortmund)") {
+  osmscout::LocationStringSearchParameter parameter("Brechten");
+  osmscout::LocationSearchResult          result;
+
+  bool success=locationService->SearchForLocationByString(parameter,
+                                                          result);
+
+  REQUIRE(success);
+  REQUIRE_FALSE(result.limitReached);
+  REQUIRE(result.results.size()==1);
+  REQUIRE(result.results.front().adminRegion->name=="Dortmund");
+  REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
+}
+
+/*
+ * Substring of alias of the city => candiate
+ */
+TEST_CASE("Search for city 'Brecht' (alias of Dortmund)") {
+  osmscout::LocationStringSearchParameter parameter("Brecht");
   osmscout::LocationSearchResult          result;
 
   bool success=locationService->SearchForLocationByString(parameter,
