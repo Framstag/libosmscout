@@ -112,7 +112,7 @@ Geometry = executable('Geometry',
 
 LocationLookupTest = executable('LocationLookupTest',
              'src/LocationLookup.cpp',
-             include_directories: [osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
+             include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscouttest, osmscoutimport, osmscout],
              install: false)
