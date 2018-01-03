@@ -62,45 +62,83 @@ namespace osmscout {
                                        const GeoBox& box,
                                        GeoBoxPartitioner::Direction direction)
     {
-      PreprocessorCallback::RawWayData wayData;
-      wayData.id=wayId++;
+      if (region.IsIsNode()) {
+        PreprocessorCallback::RawNodeData nodeData;
 
-      progress.Info("Generating region '"+region.GetName()+"' "+NumberToString(wayData.id)+"...");
+        nodeData.id=nodeId++;
+        nodeData.coord=box.GetCenter();
 
-      switch (region.GetPlaceType()) {
-      case PlaceType::county:
-        wayData.tags[tagPlace]="county";
-        break;
-      case PlaceType::region:
-        wayData.tags[tagPlace]="region";
-        break;
-      case PlaceType::city:
-        wayData.tags[tagPlace]="city";
-        break;
-      case PlaceType::suburb:
-        wayData.tags[tagPlace]="suburb";
-        break;
-      case PlaceType::unknown:
-        break;
+        progress.Info("Generating ode region '"+region.GetName()+"' "+NumberToString(nodeData.id)+"...");
+
+        switch (region.GetPlaceType()) {
+        case PlaceType::county:
+          nodeData.tags[tagPlace]="county";
+          break;
+        case PlaceType::region:
+          nodeData.tags[tagPlace]="region";
+          break;
+        case PlaceType::city:
+          nodeData.tags[tagPlace]="city";
+          break;
+        case PlaceType::suburb:
+          nodeData.tags[tagPlace]="suburb";
+          break;
+        case PlaceType::unknown:
+          break;
+        }
+
+        if (!region.GetName().empty()) {
+          nodeData.tags[tagName]=region.GetName();
+        }
+
+        if (region.IsBoundary()) {
+          progress.Error("region '"+region.GetName()+"' is node and administrative boundary, but only areas can be an boundary");
+        }
+
+        data->nodeData.push_back(std::move(nodeData));
       }
+      else {
+        PreprocessorCallback::RawWayData wayData;
 
-      if (!region.GetName().empty()) {
-        wayData.tags[tagName]=region.GetName();
+        wayData.id=wayId++;
+
+        progress.Info("Generating area region '"+region.GetName()+"' "+NumberToString(wayData.id)+"...");
+
+        switch (region.GetPlaceType()) {
+        case PlaceType::county:
+          wayData.tags[tagPlace]="county";
+          break;
+        case PlaceType::region:
+          wayData.tags[tagPlace]="region";
+          break;
+        case PlaceType::city:
+          wayData.tags[tagPlace]="city";
+          break;
+        case PlaceType::suburb:
+          wayData.tags[tagPlace]="suburb";
+          break;
+        case PlaceType::unknown:
+          break;
+        }
+
+        if (!region.GetName().empty()) {
+          wayData.tags[tagName]=region.GetName();
+        }
+
+        if (region.IsBoundary()) {
+          wayData.tags[tagBoundary]="administrative";
+          wayData.tags[tagAdminLevel]=NumberToString(region.GetAdminLevel());
+        }
+
+        wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
+        wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopRight()));
+        wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetBottomRight()));
+        wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetBottomLeft()));
+        wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
+
+
+        data->wayData.push_back(std::move(wayData));
       }
-
-      if (region.IsBoundary()) {
-        wayData.tags[tagBoundary]="administrative";
-        wayData.tags[tagAdminLevel]=NumberToString(region.GetAdminLevel());
-      }
-
-      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
-      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopRight()));
-      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetBottomRight()));
-      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetBottomLeft()));
-      wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
-
-
-      data->wayData.push_back(std::move(wayData));
 
       if (region.GetRegionList().empty()) {
         return;
