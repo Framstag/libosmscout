@@ -108,6 +108,16 @@ endif()
 # TODO: add sample data and arguments to test
 #add_test(NAME CoordinateEncoding COMMAND CoordinateEncoding)
 
+#---- LocationLookup
+add_executable(LocationLookupTest src/LocationLookup.cpp)
+set_property(TARGET LocationLookupTest PROPERTY CXX_STANDARD 11)
+target_include_directories(LocationLookupTest PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-test/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+if(APPLE)
+  target_link_libraries(LocationLookupTest OSMScoutTest OSMScoutImport OSMScout)
+else()
+  target_link_libraries(LocationLookupTest osmscout_test osmscout_import osmscout)
+endif()
+
 #---- NumberSetPerformance
 add_executable(NumberSetPerformance src/NumberSetPerformance.cpp)
 set_property(TARGET NumberSetPerformance PROPERTY CXX_STANDARD 11)
