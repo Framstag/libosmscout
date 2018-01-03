@@ -44,7 +44,7 @@ namespace osmscout {
 
       OSMId id=nodeId;
 
-      data->nodeData.push_back(PreprocessorCallback::RawNodeData{id,coord,{}});
+      data->nodeData.push_back(PreprocessorCallback::RawNodeData(id,coord));
 
       coordNodeIdMap[coord]=id;
       nodeIdCoordMap[id]=coord;
