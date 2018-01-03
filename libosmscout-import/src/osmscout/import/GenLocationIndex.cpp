@@ -53,6 +53,8 @@
 #include <osmscout/import/SortNodeDat.h>
 #include <osmscout/import/GenAreaAreaIndex.h>
 
+//#define REGION_DEBUG
+
 namespace osmscout {
 
   static const size_t REGION_INDEX_LEVEL=14;
@@ -248,13 +250,23 @@ namespace osmscout {
 
   bool LocationIndexGenerator::Region::Contains(Region& child) const
   {
+#if defined(REGION_DEBUG)
+    std::cout << "CHECK: '" << child.name << "' is child of '" << name << std::endl;
+#endif
+
     // test whether admin levels allow this to contain child
     if (this->level >= 0 /* check if we have admin level defined for this */ &&
-        ( child.level >= 0 && this->level >= child.level ) )
+        ( child.level >= 0 && this->level >= child.level ) ) {
+#if defined(REGION_DEBUG)
+      std::cout << "=> NO admin level mismatch" << std::endl;
+#endif
       return false;
+    }
 
-    if (child.probePoints.empty()) // calculate probe points if they are missing
+    if (child.probePoints.empty()) {
+      // calculate probe points if they are missing
       child.CalculateProbePoints();
+    }
 
     size_t in = 0;
     size_t out = 0;
@@ -264,24 +276,50 @@ namespace osmscout {
     size_t quorum_isin = (size_t)round(child.probePoints.size() * 0.9);
     size_t quorum_isout = child.probePoints.size() - quorum_isin;
 
-    for (const GeoCoord& p: child.probePoints)
-      {
-        bool isin = false;
-        for (size_t i=0; !isin && i < nareas; ++i)
-          {
-            const auto& area = areas[curr_subarea];
-            if ( osmscout::GetRelationOfPointToArea(p,area) >= 0 )
-              isin = true;
-            else
-              curr_subarea = ( curr_subarea + 1 ) % nareas;
-          }
+    for (const auto& p: child.probePoints) {
+      bool        isin=false;
 
-        if (isin) in++;
-        else out++;
+      for (size_t i=0; !isin && i<nareas; ++i) {
+        const auto& area=areas[curr_subarea];
 
-        if (out > quorum_isout) return false;
-        if (in > quorum_isin) return true;
+        if (osmscout::GetRelationOfPointToArea(p,area)>=0) {
+          isin=true;
+        }
+        else {
+          curr_subarea=(curr_subarea+1)%nareas;
+        }
       }
+
+      if (isin) {
+        in++;
+      }
+      else {
+        out++;
+      }
+
+      if (out>quorum_isout) {
+#if defined(REGION_DEBUG)
+        std::cout << "=> NO quorum decision" << std::endl;
+#endif
+        return false;
+      }
+
+      if (in>quorum_isin) {
+#if defined(REGION_DEBUG)
+        std::cout << "=> YES quorum decision" << std::endl;
+#endif
+        return true;
+      }
+    }
+
+#if defined(REGION_DEBUG)
+    if (in > quorum_isin) {
+      std::cout << "=> YES secondary quorum decision" << std::endl;
+    }
+    else {
+      std::cout << "=> NO secondary quorum decision" << std::endl;
+    }
+#endif
 
     return (in > quorum_isin);
   }
@@ -851,19 +889,22 @@ namespace osmscout {
   }
 
   bool LocationIndexGenerator::AddRegion(Region& parent,
-                                         RegionRef& region,
+                                         const RegionRef& region,
                                          bool assume_contains)
   {
     bool added = false;
     for (const auto& childRegion : parent.regions) {
-      if ( childRegion->CouldContain(*region, true) ) {
-        added = AddRegion(*childRegion,region,false);
-        if (added) return true;
+      if (childRegion->CouldContain(*region,true)) {
+        added=AddRegion(*childRegion,region,false);
+
+        if (added) {
+          return true;
+        }
       }
     }
 
-    if ( !added && (assume_contains || parent.Contains(*region)) ) {
-      added = true;
+    if (!added && (assume_contains || parent.Contains(*region))) {
+      added=true;
 
       if (!region->isIn.empty() &&
           parent.name!=region->isIn) {
@@ -873,6 +914,9 @@ namespace osmscout {
       // If we already have the same name and are a "minor" reference, we skip...
       if (!(region->name==parent.name &&
             region->reference.type<parent.reference.type)) {
+#if defined(REGION_DEBUG)
+        std::cout << "Added region '"  << region->name << "' " << region->reference.GetName() << " below '" << parent.name << "' " << parent.reference.GetName() << std::endl;
+#endif
         parent.regions.push_back(region);
       }
     }
@@ -917,14 +961,14 @@ namespace osmscout {
 
         NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
-        if (nameValue==NULL) {
+        if (nameValue==nullptr) {
           errorReporter->ReportLocation(ObjectFileRef(area.GetFileOffset(),refArea),"No name");
           continue;
         }
 
         AdminLevelFeatureValue *adminLevelValue=adminLevelReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
-        if (adminLevelValue==NULL) {
+        if (adminLevelValue==nullptr) {
           errorReporter->ReportLocation(ObjectFileRef(area.GetFileOffset(),refArea),"No tag 'admin_level'");
           continue;
         }
@@ -963,6 +1007,18 @@ namespace osmscout {
           boundaryAreas.resize(level+1);
         }
 
+#if defined(REGION_DEBUG)
+        std::cout << "Loaded administrative boundary " << region->level << " '" << region->name << "' " << region->reference.GetName() << std::endl;
+
+        for (const auto& area : region->areas) {
+          std::cout << "- area " << region->GetBoundingBox().GetDisplayText() << std::endl;
+
+          for (const auto& coord : area) {
+            std::cout << "  * " << coord.GetDisplayText() << std::endl;
+          }
+        }
+#endif
+
         boundaryAreas[level].push_back(region);
       }
 
@@ -994,13 +1050,10 @@ namespace osmscout {
     }
   }
 
-  /**
-    Return the list of nodes ids with the given type.
-    */
-  bool LocationIndexGenerator::IndexRegionAreas(const TypeConfig& typeConfig,
-                                                const ImportParameter& parameter,
-                                                Progress& progress,
-                                                Region& rootRegion)
+  bool LocationIndexGenerator::GetRegionAreas(const TypeConfig& typeConfig,
+                                              const ImportParameter& parameter,
+                                              Progress& progress,
+                                              std::list<LocationIndexGenerator::RegionRef>& regionAreas)
   {
     FileScanner scanner;
 
@@ -1031,7 +1084,7 @@ namespace osmscout {
 
         NameFeatureValue *nameValue=nameReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
-        if (nameValue==NULL) {
+        if (nameValue==nullptr) {
           errorReporter->ReportLocation(ObjectFileRef(area.GetFileOffset(),refArea),"No name");
           continue;
         }
@@ -1043,7 +1096,7 @@ namespace osmscout {
 
         IsInFeatureValue *isInValue=isInReader.GetValue(area.rings.front().GetFeatureValueBuffer());
 
-        if (isInValue!=NULL) {
+        if (isInValue!=nullptr) {
           region->isIn=GetFirstInStringList(isInValue->GetIsIn(),",;");
         }
 
@@ -1061,19 +1114,59 @@ namespace osmscout {
 
         region->CalculateMinMax();
 
-        AddRegion(rootRegion,
-                  region);
+#if defined(REGION_DEBUG)
+        std::cout << "Loaded region area '" << region->name << "' " << region->reference.GetName() << std::endl;
+
+        for (const auto& area : region->areas) {
+          std::cout << "- area " << region->GetBoundingBox().GetDisplayText() << std::endl;
+
+          for (const auto& coord : area) {
+            std::cout << "  * " << coord.GetDisplayText() << std::endl;
+          }
+        }
+#endif
+
+        regionAreas.push_back(region);
 
         areasFound++;
       }
 
-      progress.Info(std::string("Found ")+NumberToString(areasFound)+" cities of type 'area'");
+      progress.Info(std::string("Found ")+NumberToString(areasFound)+" place regions of type 'area'");
 
       scanner.Close();
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
       return false;
+    }
+
+    return true;
+  }
+
+  /**
+    Return the list of nodes ids with the given type.
+    */
+  bool LocationIndexGenerator::SortInRegionAreas(Progress& progress,
+                                                 Region& rootRegion,
+                                                 std::list<RegionRef>& regionAreas)
+  {
+    size_t currentRegion=0;
+    size_t maxRegion=regionAreas.size();
+
+    // We are sorting regions by size, trying to make sure that we insert region in order of the region tree.
+    // TODO: Check if the solution used by the MapPainter for area ordering is better
+    regionAreas.sort([](const RegionRef& a, const RegionRef&b)-> bool {
+      return a->GetBoundingBox().GetSize()>b->GetBoundingBox().GetSize();
+    });
+
+    for (auto&  region : regionAreas) {
+      currentRegion++;
+
+      progress.SetProgress(currentRegion,
+                           maxRegion);
+
+      AddRegion(rootRegion,
+                region);
     }
 
     return true;
@@ -1189,7 +1282,7 @@ namespace osmscout {
         if (node.GetType()->GetIndexAsRegion()) {
           NameFeatureValue *nameValue=nameReader.GetValue(node.GetFeatureValueBuffer());
 
-          if (nameValue==NULL) {
+          if (nameValue==nullptr) {
             errorReporter->ReportLocation(ObjectFileRef(node.GetFileOffset(),refNode),"No name");
             continue;
           }
@@ -1352,7 +1445,7 @@ namespace osmscout {
           if (!ring.GetType()->GetIgnore() && ring.GetType()->GetIndexAsLocation()) {
             NameFeatureValue *nameValue=nameReader.GetValue(ring.GetFeatureValueBuffer());
 
-            if (nameValue==NULL) {
+            if (nameValue==nullptr) {
               continue;
             }
 
@@ -1362,7 +1455,7 @@ namespace osmscout {
                                     area,
                                     ring,
                                     nameValue->GetName(),
-                                    postalCodeValue!=NULL ? postalCodeValue->GetPostalCode() : "",
+                                    postalCodeValue!=nullptr ? postalCodeValue->GetPostalCode() : "",
                                     regionIndex);
 
             areasFound++;
@@ -1468,7 +1561,7 @@ namespace osmscout {
 
         NameFeatureValue *nameValue=nameReader.GetValue(way.GetFeatureValueBuffer());
 
-        if (nameValue==NULL) {
+        if (nameValue==nullptr) {
           continue;
         }
 
@@ -1484,7 +1577,7 @@ namespace osmscout {
         AddLocationWayToRegion(*region,
                                way,
                                nameValue->GetName(),
-                               postalCodeValue!=NULL ? postalCodeValue->GetPostalCode() : "",
+                               postalCodeValue!=nullptr ? postalCodeValue->GetPostalCode() : "",
                                boundingBox);
 
         waysFound++;
@@ -2512,6 +2605,7 @@ namespace osmscout {
     TypeInfoRef                        boundaryType;
     TypeInfoSet                        boundaryTypes(*typeConfig);
     std::vector<std::list<RegionRef>>  boundaryAreas;
+    std::list<RegionRef>               regionAreas;
     std::list<std::string>             regionIgnoreTokens;
     std::list<std::string>             poiIgnoreTokens;
     std::list<std::string>             locationIgnoreTokens;
@@ -2578,14 +2672,24 @@ namespace osmscout {
       // Getting all areas of type place=*.
       //
 
-      progress.SetAction("Indexing regions of type 'area'");
+      progress.SetAction("Scanning for place regions of type 'area'");
 
-      if (!IndexRegionAreas(*typeConfig,
-                            parameter,
-                            progress,
-                            *rootRegion)) {
+      if (!GetRegionAreas(*typeConfig,
+                          parameter,
+                          progress,
+                          regionAreas)) {
         return false;
       }
+
+      progress.SetAction("Sorting in place regions of type 'area'");
+
+      if (!SortInRegionAreas(progress,
+                             *rootRegion,
+                             regionAreas)) {
+        return false;
+      }
+
+      regionAreas.clear();
 
       progress.SetAction("Calculating region tree depth");
 

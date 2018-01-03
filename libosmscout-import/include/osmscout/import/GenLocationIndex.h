@@ -277,7 +277,7 @@ namespace osmscout {
                              const std::list<std::string>& locationIgnoreTokens);
 
     bool AddRegion(Region& parent,
-                   RegionRef& region,
+                   const RegionRef& region,
                    bool assume_contains=true);
 
     bool GetBoundaryAreas(const ImportParameter& parameter,
@@ -290,10 +290,14 @@ namespace osmscout {
                           Region& rootRegion,
                           std::list<RegionRef>& boundaryAreas);
 
-    bool IndexRegionAreas(const TypeConfig& typeConfig,
-                          const ImportParameter& parameter,
-                          Progress& progress,
-                          Region& rootRegion);
+    bool GetRegionAreas(const TypeConfig& typeConfig,
+                        const ImportParameter& parameter,
+                        Progress& progress,
+                        std::list<RegionRef>& regionAreas);
+
+    bool SortInRegionAreas(Progress& progress,
+                           Region& rootRegion,
+                           std::list<RegionRef>& regionAreas);
 
     void SortInRegion(RegionRef& area,
                       std::vector<std::list<RegionRef> >& regionTree,
