@@ -93,7 +93,7 @@ if(APPLE)
 else()
   target_link_libraries(CoordinateCalculations osmscout)
 endif()
-add_test(NAME CoordinateCalculations COMMAND CoordinateCalculations)
+#add_test(NAME CoordinateCalculations COMMAND CoordinateCalculations)
 
 #---- CoordinateEncoding
 add_executable(CoordinateEncoding src/CoordinateEncoding.cpp)

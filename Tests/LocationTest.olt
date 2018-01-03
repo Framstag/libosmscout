@@ -1,0 +1,51 @@
+OLT
+  OBJECT BOUNDARY 4 "Nordrhein-Westfalen"
+    ALIAS "NRW" {
+
+    OBJECT BOUNDARY 5 "Regierungsbezirk Düsseldorf" {
+      CITY "Düsseldorf"
+      CITY "Essen"
+    }
+
+    OBJECT BOUNDARY 5 "Regierungsbezirk Köln" {
+      CITY "Bonn"
+      CITY "Köln"
+    }
+
+    OBJECT BOUNDARY 5 "Regierungsbezirk Arnsberg" {
+      CITY "Dortmund" {
+        SUBURB NODE "Brechten" {
+          POSTAL_AREA "44339"
+            LOCATION "Am Birkenbaum"
+              ADDRESS "1"
+              ADDRESS "2"
+            LOCATION "In den Hüchten"
+              ADDRESS "1"
+              ADDRESS "2"
+          POSTAL_AREA
+            LOCATION "In den Hüchten"
+              ADDRESS "3"
+        }
+
+        SUBURB NODE "Eving" {
+          POSTAL_AREA "44339"
+            LOCATION "Bahnhofstraße"
+              ADDRESS "50a"
+              ADDRESS "50b"
+        }
+      }
+
+      COUNTY BOUNDARY 6 "Kreis Unna" {
+        CITY "Kamen" {
+
+        }
+
+        CITY "Bergkamen" {
+          SUBURB NODE "Heil"
+          SUBURB NODE "Oberaden"
+          SUBURB NODE "Overberge"
+        }
+      }
+    }
+  }
+END
