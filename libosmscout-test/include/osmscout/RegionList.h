@@ -166,6 +166,11 @@ namespace osmscout {
         return isBoundary;
       }
 
+      inline bool IsIsNode() const
+      {
+        return isNode;
+      }
+
       inline size_t GetAdminLevel() const
       {
         return adminLevel;
