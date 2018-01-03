@@ -121,7 +121,7 @@ int main( int argc, const char* argv[] )
 
   std::cout << "Testing..." << std::endl;
 
-  int result = Catch::Session().run( argc, argv );
+  int result = Catch::Session().run( argc, (char**)argv );
 
   std::cout << "Testing done." << std::endl;
 
