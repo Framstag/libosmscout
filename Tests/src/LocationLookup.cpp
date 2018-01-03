@@ -41,8 +41,8 @@ TEST_CASE("Search for city 'Dortm' (candidate)") {
 class PreprocessorFactory : public osmscout::PreprocessorFactory
 {
 public:
-  virtual std::unique_ptr<osmscout::Preprocessor> GetProcessor(const std::string& /*filename*/,
-                                                               osmscout::PreprocessorCallback& callback) const
+  std::unique_ptr<osmscout::Preprocessor> GetProcessor(const std::string& /*filename*/,
+                                                       osmscout::PreprocessorCallback& callback) const override
   {
     return std::unique_ptr<osmscout::Preprocessor>(new osmscout::test::PreprocessOLT(callback));
   }
