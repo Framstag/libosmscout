@@ -56,6 +56,13 @@ ColorParse = executable('ColorParse',
              link_with: [osmscout],
              install: false)
 
+CoordinateCalculations = executable('CoordinateCalculations',
+             'src/CoordinateCalculations.cpp',
+             include_directories: [osmscoutIncDir],
+             dependencies: [mathDep],
+             link_with: [osmscout],
+             install: false)
+
 CoordinateEncoding = executable('CoordinateEncoding',
              'src/CoordinateEncoding.cpp',
              include_directories: [osmscoutIncDir],

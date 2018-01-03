@@ -61,7 +61,6 @@ if(APPLE)
 else()
   target_link_libraries(CalculateResolution osmscout)
 endif()
-add_test(NAME CalculateResolution COMMAND CalculateResolution)
 
 #---- CmdLineParsing
 add_executable(CmdLineParsing src/CmdLineParsing.cpp)
@@ -117,6 +116,8 @@ if(APPLE)
 else()
   target_link_libraries(LocationLookupTest osmscout_test osmscout_import osmscout)
 endif()
+add_test(NAME LocationLookupTest COMMAND LocationLookupTest)
+set_tests_properties(LocationLookupTest PROPERTIES ENVIRONMENT TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR})
 
 #---- NumberSetPerformance
 add_executable(NumberSetPerformance src/NumberSetPerformance.cpp)
