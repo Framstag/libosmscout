@@ -111,7 +111,7 @@ endif()
 #---- LocationLookup
 add_executable(LocationLookupTest src/LocationLookup.cpp)
 set_property(TARGET LocationLookupTest PROPERTY CXX_STANDARD 11)
-target_include_directories(LocationLookupTest PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-test/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_include_directories(LocationLookupTest PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-test/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 if(APPLE)
   target_link_libraries(LocationLookupTest OSMScoutTest OSMScoutImport OSMScout)
 else()
