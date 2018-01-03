@@ -48,7 +48,7 @@ public:
   }
 };
 
-int main( int argc, const char* argv[] )
+int main(int argc, char* argv[])
 {
   std::cout << "Global setup..." << std::endl;
 
@@ -121,7 +121,7 @@ int main( int argc, const char* argv[] )
 
   std::cout << "Testing..." << std::endl;
 
-  int result = Catch::Session().run( argc, (char**)argv );
+  int result = Catch::Session().run(argc,argv);
 
   std::cout << "Testing done." << std::endl;
 
