@@ -38,9 +38,9 @@ NavigationModule::~NavigationModule()
   }
 }
 
-void NavigationModule::setupRoute(LocationEntryRef target,
-                                  RouteSelectionRef route,
-                                  osmscout::Vehicle vehicle)
+void NavigationModule::setupRoute(LocationEntryRef /*target*/,
+                                  RouteSelectionRef /*route*/,
+                                  osmscout::Vehicle /*vehicle*/)
 {
 
 }
