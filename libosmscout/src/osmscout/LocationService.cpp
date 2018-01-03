@@ -752,7 +752,7 @@ namespace osmscout {
 
             if (matchResult==StringMatcher::match) {
               //std::cout << "Match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'" << std::endl;
-              partialMatches.emplace_back(pattern.tokenString,
+              matches.emplace_back(pattern.tokenString,
                                           std::make_shared<AdminRegion>(region),
                                           alias.name);
               break;
