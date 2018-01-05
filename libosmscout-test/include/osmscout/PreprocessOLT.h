@@ -40,6 +40,8 @@ namespace osmscout {
       TagId                    tagBoundary;
       TagId                    tagName;
       TagId                    tagPlace;
+      TagId                    tagHighway;
+      TagId                    tagPostalCode;
       OSMId                    nodeId;
       OSMId                    wayId;
       std::map<GeoCoord,OSMId> coordNodeIdMap;

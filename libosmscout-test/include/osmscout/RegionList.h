@@ -67,6 +67,11 @@ namespace osmscout {
       {
         addresses.push_back(address);
       }
+
+      inline std::string GetName() const
+      {
+        return name;
+      }
     };
 
     typedef std::shared_ptr<Location> LocationRef;
@@ -86,6 +91,16 @@ namespace osmscout {
       inline void AddLocation(const LocationRef& location)
       {
         locations.push_back(location);
+      }
+
+      inline std::string GetName() const
+      {
+        return name;
+      }
+
+      inline const std::list<LocationRef>& GetLocations() const
+      {
+        return locations;
       }
     };
 
@@ -174,6 +189,11 @@ namespace osmscout {
       inline size_t GetAdminLevel() const
       {
         return adminLevel;
+      }
+
+      inline const std::list<PostalAreaRef>& GetPostalAreas() const
+      {
+        return postalAreas;
       }
 
       inline const std::list<RegionRef>& GetRegionList() const

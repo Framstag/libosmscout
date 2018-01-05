@@ -278,8 +278,8 @@ namespace osmscout {
       adminRegionOnlyMatch(false),
       poiOnlyMatch(false),
       locationOnlyMatch(false),
-      addressOnlyMatch(false),
-      partialMatch(true),
+      addressOnlyMatch(true),
+      partialMatch(false),
       searchString(searchString),
       stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
       limit(100)

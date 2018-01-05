@@ -44,7 +44,7 @@ namespace osmscout {
 
       OSMId id=nodeId;
 
-      data->nodeData.push_back(PreprocessorCallback::RawNodeData(id,coord));
+      data->nodeData.emplace_back(id,coord);
 
       coordNodeIdMap[coord]=id;
       nodeIdCoordMap[id]=coord;
@@ -136,8 +136,48 @@ namespace osmscout {
         wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetBottomLeft()));
         wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
 
-
         data->wayData.push_back(std::move(wayData));
+      }
+
+      size_t locationInRegionCount=0;
+
+      for (const auto& postalArea : region.GetPostalAreas()) {
+        locationInRegionCount+=postalArea->GetLocations().size();
+      }
+
+      if (!region.GetRegionList().empty() &&
+          locationInRegionCount>0) {
+        progress.Error("Region "+region.GetName()+": Locations are only allowed for leaves of the region tree");
+      }
+
+      size_t currentLocation=1;
+      for (const auto& postalArea : region.GetPostalAreas()) {
+        for (const auto& location : postalArea->GetLocations()) {
+          PreprocessorCallback::RawWayData wayData;
+
+          wayData.id=wayId++;
+
+          progress.Info("Generating way '"+location->GetName()+"' "+NumberToString(wayData.id)+"...");
+
+          GeoCoord left(box.GetMinLat()+currentLocation*box.GetHeight()/(locationInRegionCount+1),
+                        box.GetMinLon()+box.GetWidth()/10.0);
+          GeoCoord right(left.GetLat(),
+                         box.GetMaxLon()-box.GetWidth()/10.0);
+
+          wayData.nodes.push_back(RegisterAndGetRawNodeId(data,left));
+          wayData.nodes.push_back(RegisterAndGetRawNodeId(data,right));
+
+          wayData.tags[tagHighway]="residential";
+          wayData.tags[tagName]=location->GetName();
+
+          if (!postalArea->GetName().empty()) {
+            wayData.tags[tagPostalCode]=postalArea->GetName();
+          }
+
+          data->wayData.push_back(std::move(wayData));
+
+          currentLocation++;
+        }
       }
 
       if (region.GetRegionList().empty()) {
@@ -216,6 +256,8 @@ namespace osmscout {
       tagBoundary=typeConfig->GetTagId("boundary");
       tagName=typeConfig->GetTagId("name");
       tagPlace=typeConfig->GetTagId("place");
+      tagHighway=typeConfig->GetTagId("highway");
+      tagPostalCode=typeConfig->GetTagId("postal_code");
 
       nodeId=1;
       wayId=1;
