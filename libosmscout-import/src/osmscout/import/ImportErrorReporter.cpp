@@ -239,7 +239,7 @@ namespace osmscout {
   {
     progress.Debug(object.GetName()+" - "+error);
 
-    errors.push_back(ReportError(reportLocation,object,error));
+    errors.emplace_back(reportLocation,object,error);
   }
 
   void ImportErrorReporter::ReportLocation(const ObjectFileRef& object,
@@ -247,7 +247,7 @@ namespace osmscout {
   {
     progress.Warning(object.GetName()+" - "+error);
 
-    errors.push_back(ReportError(reportLocation,object,error));
+    errors.emplace_back(reportLocation,object,error);
   }
 
   void ImportErrorReporter::FinishedImport()

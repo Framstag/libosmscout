@@ -47,6 +47,11 @@ namespace osmscout {
       {
         this->name=name;
       }
+
+      inline std::string GetName() const
+      {
+        return name;
+      }
     };
 
     typedef std::shared_ptr<Address> AddressRef;
@@ -71,6 +76,11 @@ namespace osmscout {
       inline std::string GetName() const
       {
         return name;
+      }
+
+      inline const std::list<AddressRef>& GetAddresses() const
+      {
+        return addresses;
       }
     };
 

@@ -141,6 +141,8 @@ namespace osmscout {
         data->wayData.push_back(std::move(wayData));
       }
 
+      // Count number of locations in regions
+
       size_t locationInRegionCount=0;
 
       for (const auto& postalArea : region.GetPostalAreas()) {
@@ -152,31 +154,66 @@ namespace osmscout {
         progress.Error("Region "+region.GetName()+": Locations are only allowed for leaves of the region tree");
       }
 
+      // Generate a way for each location
       size_t currentLocation=1;
       for (const auto& postalArea : region.GetPostalAreas()) {
         for (const auto& location : postalArea->GetLocations()) {
-          PreprocessorCallback::RawWayData wayData;
+          PreprocessorCallback::RawWayData locationData;
 
-          wayData.id=wayId++;
+          locationData.id=wayId++;
 
-          progress.Info("Generating way '"+location->GetName()+"' "+NumberToString(wayData.id)+"...");
+          progress.Info("Generating way '"+location->GetName()+"' "+NumberToString(locationData.id)+"...");
 
-          GeoCoord left(box.GetMinLat()+currentLocation*box.GetHeight()/(locationInRegionCount+1),
-                        box.GetMinLon()+box.GetWidth()/10.0);
-          GeoCoord right(left.GetLat(),
-                         box.GetMaxLon()-box.GetWidth()/10.0);
+          GeoCoord wayLeftCoord(box.GetMinLat()+currentLocation*box.GetHeight()/(locationInRegionCount+1),
+                                box.GetMinLon()+box.GetWidth()/10.0);
+          GeoCoord wayRightCoord(wayLeftCoord.GetLat(),
+                                 box.GetMaxLon()-box.GetWidth()/10.0);
 
-          wayData.nodes.push_back(RegisterAndGetRawNodeId(data,left));
-          wayData.nodes.push_back(RegisterAndGetRawNodeId(data,right));
+          locationData.nodes.push_back(RegisterAndGetRawNodeId(data,wayLeftCoord));
+          locationData.nodes.push_back(RegisterAndGetRawNodeId(data,wayRightCoord));
 
-          wayData.tags[tagHighway]="residential";
-          wayData.tags[tagName]=location->GetName();
+          locationData.tags[tagHighway]="residential";
+          locationData.tags[tagName]=location->GetName();
 
           if (!postalArea->GetName().empty()) {
-            wayData.tags[tagPostalCode]=postalArea->GetName();
+            locationData.tags[tagPostalCode]=postalArea->GetName();
           }
 
-          data->wayData.push_back(std::move(wayData));
+          data->wayData.push_back(std::move(locationData));
+
+          size_t currentAddress=1;
+          for (const auto& address : location->GetAddresses()) {
+            PreprocessorCallback::RawWayData buildingData;
+
+            buildingData.id=wayId++;
+
+            progress.Info("Generating building '"+address->GetName()+"' "+NumberToString(buildingData.id)+"...");
+
+            buildingData.tags[tagBuilding]="yes";
+            buildingData.tags[tagAddrCity]=region.GetName();
+
+            if (!postalArea->GetName().empty()) {
+              buildingData.tags[tagAddrPostcode]=postalArea->GetName();
+            }
+
+            buildingData.tags[tagAddrStreet]=location->GetName();
+            buildingData.tags[tagAddrHousenumber]=address->GetName();
+
+            GeoBox buildingBox(GeoCoord(wayLeftCoord.GetLat()+0.0001,
+                                        wayLeftCoord.GetLon()+(currentAddress-1)*(wayRightCoord.GetLon()-wayLeftCoord.GetLon())/location->GetAddresses().size()),
+                               GeoCoord(wayLeftCoord.GetLat()+0.0002,
+                                        wayLeftCoord.GetLon()+currentAddress*(wayRightCoord.GetLon()-wayLeftCoord.GetLon())/location->GetAddresses().size()/2.0));
+
+            buildingData.nodes.push_back(RegisterAndGetRawNodeId(data,buildingBox.GetTopLeft()));
+            buildingData.nodes.push_back(RegisterAndGetRawNodeId(data,buildingBox.GetTopRight()));
+            buildingData.nodes.push_back(RegisterAndGetRawNodeId(data,buildingBox.GetBottomRight()));
+            buildingData.nodes.push_back(RegisterAndGetRawNodeId(data,buildingBox.GetBottomLeft()));
+            buildingData.nodes.push_back(RegisterAndGetRawNodeId(data,buildingBox.GetTopLeft()));
+
+            data->wayData.push_back(std::move(buildingData));
+
+            currentAddress++;
+          }
 
           currentLocation++;
         }
@@ -185,6 +222,8 @@ namespace osmscout {
       if (region.GetRegionList().empty()) {
         return;
       }
+
+      // Generate sub region
 
       GeoBoxPartitioner partitioner(box,
                                     direction,
@@ -260,6 +299,11 @@ namespace osmscout {
       tagPlace=typeConfig->GetTagId("place");
       tagHighway=typeConfig->GetTagId("highway");
       tagPostalCode=typeConfig->GetTagId("postal_code");
+      tagBuilding=typeConfig->GetTagId("building");
+      tagAddrCity=typeConfig->GetTagId("addr:city");
+      tagAddrPostcode=typeConfig->GetTagId("addr:postcode");
+      tagAddrStreet=typeConfig->GetTagId("addr:street");
+      tagAddrHousenumber=typeConfig->GetTagId("addr:housenumber");
 
       nodeId=1;
       wayId=1;

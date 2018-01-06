@@ -17,7 +17,7 @@ osmscout::LocationServiceRef locationService;
 /*
  * Search for the city name => match
  */
-TEST_CASE("Search for city 'Dortmund' (match)") {
+TEST_CASE("Search for city: 'Dortmund' (match)") {
   osmscout::LocationStringSearchParameter parameter("Dortmund");
   osmscout::LocationSearchResult          result;
 
@@ -32,9 +32,24 @@ TEST_CASE("Search for city 'Dortmund' (match)") {
 }
 
 /*
+ * Search for the city name => no match
+ */
+TEST_CASE("Search for city: 'Hamburg' (no match)") {
+  osmscout::LocationStringSearchParameter parameter("Hamburg");
+  osmscout::LocationSearchResult          result;
+
+  bool success=locationService->SearchForLocationByString(parameter,
+                                                          result);
+
+  REQUIRE(success);
+  REQUIRE_FALSE(result.limitReached);
+  REQUIRE(result.results.size()==0);
+}
+
+/*
  * Search city name => candidate (substring)
  */
-TEST_CASE("Search for city 'Dortm' (candidate)") {
+TEST_CASE("Search for city: 'Dortm' (candidate)") {
   osmscout::LocationStringSearchParameter parameter("Dortm");
   osmscout::LocationSearchResult          result;
 
@@ -51,7 +66,7 @@ TEST_CASE("Search for city 'Dortm' (candidate)") {
 /*
  * Search for alias of the city => match
  */
-TEST_CASE("Search for city 'Brechten' (alias of Dortmund)") {
+TEST_CASE("Search for city: 'Brechten' (alias of Dortmund)") {
   osmscout::LocationStringSearchParameter parameter("Brechten");
   osmscout::LocationSearchResult          result;
 
@@ -68,7 +83,7 @@ TEST_CASE("Search for city 'Brechten' (alias of Dortmund)") {
 /*
  * Substring of alias of the city => candiate (substring)
  */
-TEST_CASE("Search for city 'Brecht' (alias of Dortmund)") {
+TEST_CASE("Search for city: 'Brecht' (alias of Dortmund)") {
   osmscout::LocationStringSearchParameter parameter("Brecht");
   osmscout::LocationSearchResult          result;
 
@@ -89,7 +104,7 @@ TEST_CASE("Search for city 'Brecht' (alias of Dortmund)") {
 /*
  * Search for location => match & city name => match
  */
-TEST_CASE("Search for location in city 'Am Birkenbaum Dortmund' (match)") {
+TEST_CASE("Search for location in city: 'Am Birkenbaum Dortmund' (match)") {
   osmscout::LocationStringSearchParameter parameter("Am Birkenbaum Dortmund");
   osmscout::LocationSearchResult          result;
 
@@ -106,9 +121,25 @@ TEST_CASE("Search for location in city 'Am Birkenbaum Dortmund' (match)") {
 }
 
 /*
+ * Search for location => no match & city name => match
+ */
+TEST_CASE("Search for location in city: 'Trallafittistraße Dortmund' (no match)")
+{
+  osmscout::LocationStringSearchParameter parameter("Trallafittistraße Dortmund");
+  osmscout::LocationSearchResult          result;
+
+  bool success=locationService->SearchForLocationByString(parameter,
+                                                          result);
+
+  REQUIRE(success);
+  REQUIRE_FALSE(result.limitReached);
+  REQUIRE(result.results.size()==0);
+}
+
+/*
  * Search for location => candidate (substring) & city name => match
  */
-TEST_CASE("Search for location in city 'Am Birken Dortmund' (match)") {
+TEST_CASE("Search for location in city: 'Am Birken Dortmund' (location substring)") {
   osmscout::LocationStringSearchParameter parameter("Am Birken Dortmund");
   osmscout::LocationSearchResult          result;
 
@@ -127,7 +158,7 @@ TEST_CASE("Search for location in city 'Am Birken Dortmund' (match)") {
 /*
  * Search for city name => match & location => candidate (substring)
  */
-TEST_CASE("Search for location in city 'Dortmund Am Birken ' (match)") {
+TEST_CASE("Search for location in city: 'Dortmund Am Birken ' (location substring)") {
   osmscout::LocationStringSearchParameter parameter("Dortmund Am Birken");
   osmscout::LocationSearchResult          result;
 
@@ -141,6 +172,67 @@ TEST_CASE("Search for location in city 'Dortmund Am Birken ' (match)") {
   REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
   REQUIRE(result.results.front().location->name=="Am Birkenbaum");
   REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::candidate);
+}
+
+//
+// City, location & address search
+//
+
+/*
+ * Search for location => match & address => match & city name => match
+ */
+TEST_CASE("Search for address and location in city: 'Am Birkenbaum 1 Dortmund' (match)") {
+  osmscout::LocationStringSearchParameter parameter("Am Birkenbaum 1 Dortmund");
+  osmscout::LocationSearchResult          result;
+
+  bool success=locationService->SearchForLocationByString(parameter,
+                                                          result);
+
+  REQUIRE(success);
+  REQUIRE_FALSE(result.limitReached);
+  REQUIRE(result.results.size()==1);
+  REQUIRE(result.results.front().adminRegion->name=="Dortmund");
+  REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
+  REQUIRE(result.results.front().location->name=="Am Birkenbaum");
+  REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::match);
+  REQUIRE(result.results.front().address->name=="1");
+  REQUIRE(result.results.front().addressMatchQuality==osmscout::LocationSearchResult::match);
+}
+
+/*
+ * Search for location => match & address => match & city name => match
+ */
+TEST_CASE("Search for address and location in city: 'Am Birkenbaum 10 Dortmund' (no match)") {
+  osmscout::LocationStringSearchParameter parameter("Am Birkenbaum 10 Dortmund");
+  osmscout::LocationSearchResult          result;
+
+  bool success=locationService->SearchForLocationByString(parameter,
+                                                          result);
+
+  REQUIRE(success);
+  REQUIRE_FALSE(result.limitReached);
+  REQUIRE(result.results.size()==0);
+}
+
+/*
+ * Search for city name => match & location => match & addess => match
+ */
+TEST_CASE("Search for address and location in city: 'Dortmund Am Birkenbaum 1' (match)") {
+  osmscout::LocationStringSearchParameter parameter("Dortmund Am Birkenbaum 1");
+  osmscout::LocationSearchResult          result;
+
+  bool success=locationService->SearchForLocationByString(parameter,
+                                                          result);
+
+  REQUIRE(success);
+  REQUIRE_FALSE(result.limitReached);
+  REQUIRE(result.results.size()==1);
+  REQUIRE(result.results.front().adminRegion->name=="Dortmund");
+  REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
+  REQUIRE(result.results.front().location->name=="Am Birkenbaum");
+  REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::match);
+  REQUIRE(result.results.front().address->name=="1");
+  REQUIRE(result.results.front().addressMatchQuality==osmscout::LocationSearchResult::match);
 }
 
 class PreprocessorFactory : public osmscout::PreprocessorFactory
@@ -193,6 +285,7 @@ int main(int argc, char* argv[])
 
   importParameter.SetTypefile(osmscout::AppendFileToDir(testsTopDir,"../stylesheets/map.ost"));
   importParameter.SetMapfiles(mapfiles);
+  importParameter.SetDestinationDirectory(".");
   importParameter.SetPreprocessorFactory(std::make_shared<PreprocessorFactory>());
 
   try {

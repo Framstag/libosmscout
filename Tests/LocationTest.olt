@@ -1,6 +1,5 @@
 OLT
-  OBJECT BOUNDARY 4 "Nordrhein-Westfalen"
-    ALIAS "NRW" {
+  OBJECT BOUNDARY 4 "Nordrhein-Westfalen" {
 
     OBJECT BOUNDARY 5 "Regierungsbezirk Düsseldorf" {
       CITY "Düsseldorf"
