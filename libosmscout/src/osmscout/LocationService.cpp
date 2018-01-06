@@ -855,9 +855,10 @@ namespace osmscout {
         }
       }
 
-      if (breaker && breaker->IsAborted()){
+      if (breaker && breaker->IsAborted()) {
         return stop;
       }
+
       return visitChildren;
     }
   };

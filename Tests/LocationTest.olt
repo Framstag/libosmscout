@@ -21,9 +21,6 @@ OLT
             LOCATION "In den Hüchten"
               ADDRESS "1"
               ADDRESS "2"
-          POSTAL_AREA
-            LOCATION "In den Hüchten"
-              ADDRESS "3"
         }
 
         SUBURB NODE "Eving" {

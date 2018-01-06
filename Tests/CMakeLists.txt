@@ -108,7 +108,7 @@ endif()
 #add_test(NAME CoordinateEncoding COMMAND CoordinateEncoding)
 
 #---- LocationLookup
-add_executable(LocationLookupTest src/LocationLookup.cpp)
+add_executable(LocationLookupTest src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/LocationServiceTest.cpp)
 set_property(TARGET LocationLookupTest PROPERTY CXX_STANDARD 11)
 target_include_directories(LocationLookupTest PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-test/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
 if(APPLE)

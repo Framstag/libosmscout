@@ -117,8 +117,12 @@ Geometry = executable('Geometry',
              link_with: [osmscout],
              install: false)
 
-LocationLookupTest = executable('LocationLookupTest',
-             'src/LocationLookup.cpp',
+LocationServiceTest = executable('LocationServiceTest',
+             [
+               'src/LocationServiceTest.cpp',
+               'src/SearchForLocationByStringTest.cpp',
+               'src/SearchForLocationByFormTest.cpp'
+             ],
              include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscouttest, osmscoutimport, osmscout],
@@ -217,7 +221,7 @@ test('Check File access implementation', FileScannerWriter)
 test('Check parsing of geo box intersection', GeoBox)
 test('Check parsing of geo coordinates', GeoCoordParse)
 test('Check impl. of geometric functions', Geometry)
-test('Check location lookup', LocationLookupTest, env: ostandossEnv)
+test('Check LocationService', LocationServiceTest, env: ostandossEnv)
 test('Check rotation of maps', MapRotate)
 test('Check correctness of NumberSet class', NumberSet)
 test('Check standard OST and OSS files', OSTAndOSSCheck, env: ostandossEnv)

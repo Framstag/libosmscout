@@ -2329,6 +2329,11 @@ namespace osmscout {
 
     locations.clear();
 
+    if (region.defaultPostalArea->second.locations.empty()) {
+      region.postalAreas.erase(region.defaultPostalArea);
+      region.defaultPostalArea=region.postalAreas.end();
+    }
+
     // ... Recursion ...
 
     for (const auto& childRegion : region.regions) {
