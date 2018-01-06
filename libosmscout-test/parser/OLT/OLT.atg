@@ -69,12 +69,6 @@ PRODUCTIONS
                   "NODE" (. region.SetIsNode(); .)
                 ]
                 STRING<name> (. region.SetName(name); .)
-                {
-                  (. std::string alias; .)
-                  "ALIAS"
-                  STRING<alias>
-                  (. region.AddAlias(alias); .)
-                }
                 [
                   "{"
                     {

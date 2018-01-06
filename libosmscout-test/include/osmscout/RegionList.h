@@ -117,7 +117,6 @@ namespace osmscout {
       bool                     isBoundary;
       bool                     isNode;
       size_t                   adminLevel;
-      std::list<std::string>   aliases;
       std::list<PostalAreaRef> postalAreas;
       std::list<RegionRef>     regions;
 
@@ -149,11 +148,6 @@ namespace osmscout {
       inline void SetName(const std::string& name)
       {
         this->name=name;
-      }
-
-      inline void AddAlias(const std::string& name)
-      {
-        aliases.push_back(name);
       }
 
       inline void AddPostalArea(const PostalAreaRef& postalArea)

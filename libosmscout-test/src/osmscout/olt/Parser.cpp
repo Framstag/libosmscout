@@ -129,7 +129,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OLT() {
-		while (!(la->kind == _EOF || la->kind == 4 /* "OLT" */)) {SynErr(20); Get();}
+		while (!(la->kind == _EOF || la->kind == 4 /* "OLT" */)) {SynErr(19); Get();}
 		Expect(4 /* "OLT" */);
 		while (StartOf(1)) {
 			osmscout::test::RegionRef region=std::make_shared<osmscout::test::Region>(); 
@@ -142,7 +142,7 @@ void Parser::OLT() {
 void Parser::REGION(osmscout::test::Region& region) {
 		std::string name;
 		
-		while (!(StartOf(2))) {SynErr(21); Get();}
+		while (!(StartOf(2))) {SynErr(20); Get();}
 		if (la->kind == 6 /* "REGION" */) {
 			Get();
 			region.SetPlaceType(osmscout::test::PlaceType::region); 
@@ -157,7 +157,7 @@ void Parser::REGION(osmscout::test::Region& region) {
 			region.SetPlaceType(osmscout::test::PlaceType::suburb); 
 		} else if (la->kind == 10 /* "OBJECT" */) {
 			Get();
-		} else SynErr(22);
+		} else SynErr(21);
 		if (la->kind == 11 /* "BOUNDARY" */) {
 			size_t adminLevel; 
 			Get();
@@ -170,15 +170,9 @@ void Parser::REGION(osmscout::test::Region& region) {
 		}
 		STRING(name);
 		region.SetName(name); 
-		while (la->kind == 13 /* "ALIAS" */) {
-			std::string alias; 
+		if (la->kind == 13 /* "{" */) {
 			Get();
-			STRING(alias);
-			region.AddAlias(alias); 
-		}
-		if (la->kind == 14 /* "{" */) {
-			Get();
-			while (la->kind == 16 /* "POSTAL_AREA" */) {
+			while (la->kind == 15 /* "POSTAL_AREA" */) {
 				osmscout::test::PostalAreaRef postalArea=std::make_shared<osmscout::test::PostalArea>(); 
 				POSTAL_AREA(*postalArea);
 				region.AddPostalArea(postalArea); 
@@ -188,7 +182,7 @@ void Parser::REGION(osmscout::test::Region& region) {
 				REGION(*childRegion);
 				region.AddRegion(childRegion); 
 			}
-			Expect(15 /* "}" */);
+			Expect(14 /* "}" */);
 		}
 }
 
@@ -211,13 +205,13 @@ void Parser::STRING(std::string& value) {
 void Parser::POSTAL_AREA(osmscout::test::PostalArea& postalArea) {
 		std::string name;
 		
-		while (!(la->kind == _EOF || la->kind == 16 /* "POSTAL_AREA" */)) {SynErr(23); Get();}
-		Expect(16 /* "POSTAL_AREA" */);
+		while (!(la->kind == _EOF || la->kind == 15 /* "POSTAL_AREA" */)) {SynErr(22); Get();}
+		Expect(15 /* "POSTAL_AREA" */);
 		if (la->kind == _string) {
 			STRING(name);
 			postalArea.SetName(name); 
 		}
-		while (la->kind == 17 /* "LOCATION" */) {
+		while (la->kind == 16 /* "LOCATION" */) {
 			osmscout::test::LocationRef location=std::make_shared<osmscout::test::Location>(); 
 			LOCATION(*location);
 			postalArea.AddLocation(location); 
@@ -227,11 +221,11 @@ void Parser::POSTAL_AREA(osmscout::test::PostalArea& postalArea) {
 void Parser::LOCATION(osmscout::test::Location& location) {
 		std::string name;
 		
-		while (!(la->kind == _EOF || la->kind == 17 /* "LOCATION" */)) {SynErr(24); Get();}
-		Expect(17 /* "LOCATION" */);
+		while (!(la->kind == _EOF || la->kind == 16 /* "LOCATION" */)) {SynErr(23); Get();}
+		Expect(16 /* "LOCATION" */);
 		STRING(name);
 		location.SetName(name); 
-		while (la->kind == 18 /* "ADDRESS" */) {
+		while (la->kind == 17 /* "ADDRESS" */) {
 			osmscout::test::AddressRef address=std::make_shared<osmscout::test::Address>(); 
 			ADDRESS(*address);
 			location.AddAddress(address); 
@@ -241,8 +235,8 @@ void Parser::LOCATION(osmscout::test::Location& location) {
 void Parser::ADDRESS(osmscout::test::Address& address) {
 		std::string name;
 		
-		while (!(la->kind == _EOF || la->kind == 18 /* "ADDRESS" */)) {SynErr(25); Get();}
-		Expect(18 /* "ADDRESS" */);
+		while (!(la->kind == _EOF || la->kind == 17 /* "ADDRESS" */)) {SynErr(24); Get();}
+		Expect(17 /* "ADDRESS" */);
 		STRING(name);
 		address.SetName(name); 
 }
@@ -261,7 +255,7 @@ void Parser::Parse()
 
 Parser::Parser(Scanner *scanner)
 {
-	maxT = 19;
+	maxT = 18;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -276,10 +270,10 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[3][21] = {
-		{T,x,x,x, T,x,T,T, T,T,T,x, x,x,x,x, T,T,T,x, x},
-		{x,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x},
-		{T,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x}
+	static bool set[3][20] = {
+		{T,x,x,x, T,x,T,T, T,T,T,x, x,x,x,T, T,T,x,x},
+		{x,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x}
 	};
 
 
@@ -315,19 +309,18 @@ void Errors::SynErr(int line, int col, int n)
 			case 10: s = coco_string_create("\"OBJECT\" expected"); break;
 			case 11: s = coco_string_create("\"BOUNDARY\" expected"); break;
 			case 12: s = coco_string_create("\"NODE\" expected"); break;
-			case 13: s = coco_string_create("\"ALIAS\" expected"); break;
-			case 14: s = coco_string_create("\"{\" expected"); break;
-			case 15: s = coco_string_create("\"}\" expected"); break;
-			case 16: s = coco_string_create("\"POSTAL_AREA\" expected"); break;
-			case 17: s = coco_string_create("\"LOCATION\" expected"); break;
-			case 18: s = coco_string_create("\"ADDRESS\" expected"); break;
-			case 19: s = coco_string_create("??? expected"); break;
-			case 20: s = coco_string_create("this symbol not expected in OLT"); break;
-			case 21: s = coco_string_create("this symbol not expected in REGION"); break;
-			case 22: s = coco_string_create("invalid REGION"); break;
-			case 23: s = coco_string_create("this symbol not expected in POSTAL_AREA"); break;
-			case 24: s = coco_string_create("this symbol not expected in LOCATION"); break;
-			case 25: s = coco_string_create("this symbol not expected in ADDRESS"); break;
+			case 13: s = coco_string_create("\"{\" expected"); break;
+			case 14: s = coco_string_create("\"}\" expected"); break;
+			case 15: s = coco_string_create("\"POSTAL_AREA\" expected"); break;
+			case 16: s = coco_string_create("\"LOCATION\" expected"); break;
+			case 17: s = coco_string_create("\"ADDRESS\" expected"); break;
+			case 18: s = coco_string_create("??? expected"); break;
+			case 19: s = coco_string_create("this symbol not expected in OLT"); break;
+			case 20: s = coco_string_create("this symbol not expected in REGION"); break;
+			case 21: s = coco_string_create("invalid REGION"); break;
+			case 22: s = coco_string_create("this symbol not expected in POSTAL_AREA"); break;
+			case 23: s = coco_string_create("this symbol not expected in LOCATION"); break;
+			case 24: s = coco_string_create("this symbol not expected in ADDRESS"); break;
 
     default:
     {

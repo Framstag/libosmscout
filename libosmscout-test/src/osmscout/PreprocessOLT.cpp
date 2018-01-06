@@ -62,13 +62,14 @@ namespace osmscout {
                                        const GeoBox& box,
                                        GeoBoxPartitioner::Direction direction)
     {
+      // Generate region as node
       if (region.IsIsNode()) {
         PreprocessorCallback::RawNodeData nodeData;
 
         nodeData.id=nodeId++;
         nodeData.coord=box.GetCenter();
 
-        progress.Info("Generating ode region '"+region.GetName()+"' "+NumberToString(nodeData.id)+"...");
+        progress.Info("Generating node region '"+region.GetName()+"' "+NumberToString(nodeData.id)+"...");
 
         switch (region.GetPlaceType()) {
         case PlaceType::county:
@@ -97,6 +98,7 @@ namespace osmscout {
 
         data->nodeData.push_back(std::move(nodeData));
       }
+        // Generate region as area
       else {
         PreprocessorCallback::RawWayData wayData;
 

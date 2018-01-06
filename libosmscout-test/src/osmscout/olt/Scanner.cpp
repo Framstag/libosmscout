@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 19;
-	noSym = 19;
+	maxT = 18;
+	noSym = 18;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -168,10 +168,9 @@ void Scanner::Init() {
 	keywords.set("OBJECT", 10);
 	keywords.set("BOUNDARY", 11);
 	keywords.set("NODE", 12);
-	keywords.set("ALIAS", 13);
-	keywords.set("POSTAL_AREA", 16);
-	keywords.set("LOCATION", 17);
-	keywords.set("ADDRESS", 18);
+	keywords.set("POSTAL_AREA", 15);
+	keywords.set("LOCATION", 16);
+	keywords.set("ADDRESS", 17);
 
 
   tvalLength = 128;
@@ -348,9 +347,9 @@ TokenRef Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_5;}
 			else {t->kind = 3; break;}
 		case 7:
-			{t->kind = 14; break;}
+			{t->kind = 13; break;}
 		case 8:
-			{t->kind = 15; break;}
+			{t->kind = 14; break;}
 
   }
   AppendVal(t);
