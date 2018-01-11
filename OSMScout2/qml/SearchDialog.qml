@@ -255,31 +255,7 @@ FocusScope {
                 anchors.margins: 1
                 clip: true
 
-                delegate: Item {
-                    id: item
-
-                    anchors.right: parent.right;
-                    anchors.left: parent.left;
-                    height: text.implicitHeight+5
-
-                    Text {
-                        id: text
-
-                        y:2
-                        x: 2
-                        width: parent.width-4
-                        text: label
-                        font.pixelSize: Theme.textFontSize
-                    }
-
-                    Rectangle {
-                        x: 2
-                        y: parent.height-2
-                        width: parent.width-4
-                        height: 1
-                        color: "lightgrey"
-                    }
-                }
+                delegate: RoutingStep{}
             }
 
             ScrollIndicator {
