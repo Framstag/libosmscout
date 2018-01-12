@@ -165,21 +165,23 @@ double RoutingListModel::getRouteDuration() const
 
 QVariant RoutingListModel::data(const QModelIndex &index, int role) const
 {
-    if(!route || index.row() < 0 || index.row() >= route->routeSteps.size()) {
-        return QVariant();
-    }
-
-    RouteStep step=route->routeSteps.at(index.row());
-
-    switch (role) {
-    case Qt::DisplayRole:
-    case LabelRole:
-        return step.getDescription();
-    default:
-        break;
-    }
-
+  if(!route || index.row() < 0 || index.row() >= route->routeSteps.size()) {
     return QVariant();
+  }
+
+  RouteStep step=route->routeSteps.at(index.row());
+
+  switch (role) {
+  case Qt::DisplayRole:
+  case LabelRole:
+    return step.getDescription();
+  case TypeRole:
+    return step.getType();
+  default:
+    break;
+  }
+
+  return QVariant();
 }
 
 Qt::ItemFlags RoutingListModel::flags(const QModelIndex &index) const
@@ -193,11 +195,12 @@ Qt::ItemFlags RoutingListModel::flags(const QModelIndex &index) const
 
 QHash<int, QByteArray> RoutingListModel::roleNames() const
 {
-    QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
+  QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
 
-    roles[LabelRole]="label";
+  roles[LabelRole]="label";
+  roles[TypeRole]="type";
 
-    return roles;
+  return roles;
 }
 
 RouteStep* RoutingListModel::get(int row) const

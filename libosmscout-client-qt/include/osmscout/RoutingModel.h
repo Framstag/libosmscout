@@ -88,7 +88,8 @@ private:
 
 public:
   enum Roles {
-      LabelRole = Qt::UserRole
+    LabelRole = Qt::UserRole,
+    TypeRole = Qt::UserRole +1
   };
 
 public:

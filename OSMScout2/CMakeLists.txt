@@ -53,6 +53,8 @@ set(SOURCE_FILES
     qml/custom/LocationSearch.qml
     qml/custom/DialogActionButton.qml
     qml/custom/MapButton.qml
+	qml/custom/RoutingStep.qml
+	qml/custom/RouteStepIcon.qml
 	)
 
 qt5_add_resources(RESOURCE_FILES
