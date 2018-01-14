@@ -114,19 +114,19 @@ static QString MoveToTurnCommand(osmscout::RouteDescription::DirectionDescriptio
 {
   switch (move) {
     case osmscout::RouteDescription::DirectionDescription::sharpLeft:
-      return "Turn sharp left";
+      return RouteDescriptionBuilder::tr("Turn sharp left");
     case osmscout::RouteDescription::DirectionDescription::left:
-      return "Turn left";
+      return RouteDescriptionBuilder::tr("Turn left");
     case osmscout::RouteDescription::DirectionDescription::slightlyLeft:
-      return "Turn slightly left";
+      return RouteDescriptionBuilder::tr("Turn slightly left");
     case osmscout::RouteDescription::DirectionDescription::straightOn:
-      return "Straight on";
+      return RouteDescriptionBuilder::tr("Straight on");
     case osmscout::RouteDescription::DirectionDescription::slightlyRight:
-      return "Turn slightly right";
+      return RouteDescriptionBuilder::tr("Turn slightly right");
     case osmscout::RouteDescription::DirectionDescription::right:
-      return "Turn right";
+      return RouteDescriptionBuilder::tr("Turn right");
     case osmscout::RouteDescription::DirectionDescription::sharpRight:
-      return "Turn sharp right";
+      return RouteDescriptionBuilder::tr("Turn sharp right");
   }
 
   assert(false);

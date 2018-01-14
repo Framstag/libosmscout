@@ -14,6 +14,8 @@ osmscout2Mocs = qt5.preprocess(moc_headers : [
                                ],
                                qresources: ['res.qrc'])
 
+subdir('translations')
+
 OSMScout2 = executable('OSMScout2',
                        osmscout2Src,
                        osmscout2Mocs,

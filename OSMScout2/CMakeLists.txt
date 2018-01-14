@@ -23,6 +23,8 @@ if(NOT Qt5Quick_FOUND)
 	message(SEND_ERROR "Qt5Quick is required for OSMScout2 application")
 endif()
 
+find_package(Qt5LinguistTools)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -57,13 +59,23 @@ set(SOURCE_FILES
 	qml/custom/RouteStepIcon.qml
 	)
 
+set(LANG_FILES
+	translations/en.ts
+
+	translations/cs.ts
+	)
+
+qt5_create_translation(LANG_SRC ${LANG_FILES})
+add_custom_target(translations ALL DEPENDS ${LANG_SRC})
+
 qt5_add_resources(RESOURCE_FILES
     res.qrc
 )
 
 set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 
-add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
+add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES} ${LANG_FILES})
+add_dependencies(OSMScout2 translations)
 
 target_include_directories(OSMScout2 PRIVATE
     ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
@@ -119,3 +131,14 @@ set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)
 
 install(TARGETS OSMScout2 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
+# install QM files to correct location - QStandardPaths::AppDataLocation / "translations"
+if(APPLE)
+	install(FILES ${LANG_SRC}
+			DESTINATION "/Library/Application Support/libosmscout/OSMScout2/translations")
+elseif(WIN32)
+	install(FILES ${LANG_SRC}
+			DESTINATION C:/ProgramData/libosmscout/OSMScout2/translations)
+else() # Linux
+	install(FILES ${LANG_SRC}
+			DESTINATION share/libosmscout/OSMScout2/translations)
+endif()

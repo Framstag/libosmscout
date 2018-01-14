@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 
   app.setOrganizationName("libosmscout");
   app.setOrganizationDomain("libosmscout.sf.net");
-  app.setApplicationName("OSMScout");
+  app.setApplicationName("OSMScout2");
 
   // register OSMScout library QML types
   OSMScoutQt::RegisterQmlTypes();
@@ -134,6 +134,21 @@ int main(int argc, char* argv[])
   osmscout::log.Error(logEnv>=ERROR);
 
   OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
+
+  // install translator
+  QTranslator translator;
+  QLocale locale;
+  // translations are installed to <PREFIX>/share/libosmscout/OSMScout2/translations
+  // Qt lookup app data (on Linux) in directories "~/.local/share/<APPNAME>", "/usr/local/share/<APPNAME>", "/usr/share/<APPNAME>"
+  // when APPNAME is combination of <organisation>/<app name>
+  QString translationDir = QStandardPaths::locate(QStandardPaths::AppDataLocation,"translations",QStandardPaths::LocateDirectory);
+  if (translator.load(locale.name(), translationDir)) {
+    qDebug() << "Install translator for locale " << locale << "/" << locale.name();
+    app.installTranslator(&translator);
+  }else{
+    qWarning() << "Can't load translator for locale" << locale << "/" << locale.name() <<
+               "(" << translationDir << ")";
+  }
 
   // setup paths
   QStringList cmdLineArgs = QApplication::arguments();
