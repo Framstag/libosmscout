@@ -44,34 +44,41 @@ class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
   Q_PROPERTY(QString description READ getDescription)
 
 public:
-  QString distance;
-  QString distanceDelta;
-  QString time;
-  QString timeDelta;
+  QString type;
+  double distance;
+  double distanceDelta;
+  double time;
+  double timeDelta;
   QString description;
 
 public:
-  RouteStep();
+  RouteStep() : RouteStep("") {};
+  RouteStep(QString type);
   RouteStep(const RouteStep& other);
 
   RouteStep& operator=(const RouteStep& other);
 
-  QString getDistance() const
+  QString getType() const
+  {
+    return type;
+  };
+
+  double getDistance() const
   {
     return distance;
   }
 
-  QString getDistanceDelta() const
+  double getDistanceDelta() const
   {
     return distanceDelta;
   }
 
-  QString getTime() const
+  double getTime() const
   {
     return time;
   }
 
-  QString getTimeDelta() const
+  double getTimeDelta() const
   {
     return timeDelta;
   }
@@ -80,6 +87,9 @@ public:
   {
     return description;
   }
+
+private:
+  void copyDynamicProperties(const RouteStep &other);
 };
 
 /**
