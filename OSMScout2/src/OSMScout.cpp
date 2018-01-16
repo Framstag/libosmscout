@@ -88,6 +88,7 @@ struct Arguments {
   QString databaseDirectory;
   QString style;
   QString iconDirectory;
+  QString translationDir;
 
   QString track;
   bool simulateNavigation;
@@ -135,21 +136,6 @@ int main(int argc, char* argv[])
 
   OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
 
-  // install translator
-  QTranslator translator;
-  QLocale locale;
-  // translations are installed to <PREFIX>/share/libosmscout/OSMScout2/translations
-  // Qt lookup app data (on Linux) in directories "~/.local/share/<APPNAME>", "/usr/local/share/<APPNAME>", "/usr/share/<APPNAME>"
-  // when APPNAME is combination of <organisation>/<app name>
-  QString translationDir = QStandardPaths::locate(QStandardPaths::AppDataLocation,"translations",QStandardPaths::LocateDirectory);
-  if (translator.load(locale.name(), translationDir)) {
-    qDebug() << "Install translator for locale " << locale << "/" << locale.name();
-    app.installTranslator(&translator);
-  }else{
-    qWarning() << "Can't load translator for locale" << locale << "/" << locale.name() <<
-               "(" << translationDir << ")";
-  }
-
   // setup paths
   QStringList cmdLineArgs = QApplication::arguments();
 
@@ -169,6 +155,13 @@ int main(int argc, char* argv[])
                       }),
                       "icons",
                       "Icon directory",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.translationDir=QString::fromStdString(value);
+                      }),
+                      "translations",
+                      "Directory with translation files (*.qm)",
                       false);
 
 #ifdef OSMSCOUT_GPX_HAVE_LIB_XML
@@ -201,6 +194,27 @@ int main(int argc, char* argv[])
   else if (args.help) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
+  }
+
+  // install translator
+  QTranslator translator;
+  QLocale locale;
+  QString translationDir;
+  if (args.translationDir.isEmpty()) {
+    // translations are installed to <PREFIX>/share/libosmscout/OSMScout2/translations
+    // Qt lookup app data (on Linux) in directories "~/.local/share/<APPNAME>", "/usr/local/share/<APPNAME>", "/usr/share/<APPNAME>"
+    // when APPNAME is combination of <organisation>/<app name>
+    translationDir = QStandardPaths::locate(QStandardPaths::AppDataLocation, "translations",
+                                            QStandardPaths::LocateDirectory);
+  }else{
+    translationDir = args.translationDir;
+  }
+  if (translator.load(locale.name(), translationDir)) {
+    qDebug() << "Install translator for locale " << locale << "/" << locale.name();
+    app.installTranslator(&translator);
+  }else{
+    qWarning() << "Can't load translator for locale" << locale << "/" << locale.name() <<
+               "(" << translationDir << ")";
   }
 
   QStringList mapLookupDirectories;
