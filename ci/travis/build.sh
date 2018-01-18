@@ -26,7 +26,7 @@ if [ "$TARGET" = "build" ]; then
     ln -s . ../StyleEditor/StyleEditor
 
     ninja
-    meson test
+    meson test -v
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
