@@ -26,6 +26,7 @@ if [ "$TARGET" = "build" ]; then
     ln -s . ../StyleEditor/StyleEditor
 
     ninja
+    meson test
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
@@ -38,11 +39,11 @@ if [ "$TARGET" = "build" ]; then
 
     make
 
-    if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
-        echo "Skip test execution for iOS platform"
-    else
+#    if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
+#        echo "Skip test execution for iOS platform"
+#    else
         make test
-    fi
+#    fi
   fi
 elif [ "$TARGET" = "importer" ]; then
     packaging/import/linux/build_import.sh
