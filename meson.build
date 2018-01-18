@@ -26,8 +26,13 @@ else
 endif
 
 if compiler.has_argument('-fopenmp')
-  add_global_arguments('-fopenmp', language: 'cpp')
-  add_global_link_arguments('-fopenmp', language: 'cpp')
+  if (compiler.get_id()=='gcc')
+    add_global_arguments('-fopenmp', language: 'cpp')
+    add_global_link_arguments('-fopenmp', language: 'cpp')
+  elif (compiler.get_id()=='clang')
+    add_global_arguments('-fopenmp', language: 'cpp')
+    add_global_link_arguments('-fopenmp=libomp', language: 'cpp')
+  endif
 endif
 
 if compiler.get_id()=='msvc'
