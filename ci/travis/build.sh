@@ -18,7 +18,12 @@ if [ "$TARGET" = "build" ]; then
   fi
 
   if [ "$BUILDTOOL" = "meson" ]; then
-    meson debug
+    # Travis currently cannot build clang + OpenMP (https://github.com/travis-ci/travis-ci/issues/8613)
+    if [ "$CXX" = "clang" ]; then
+      meson debug -Dopenmp=false
+    else
+      meson debug
+    fi
     cd debug
 
     # workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
