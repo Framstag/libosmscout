@@ -181,7 +181,7 @@ ScanConversion = executable('ScanConversion',
 ThreadedDatabase = executable('ThreadedDatabase',
              'src/ThreadedDatabase.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
-             dependencies: [mathDep],
+             dependencies: [mathDep, threadDep],
              link_with: [osmscoutmap, osmscout],
              install: false)
 
@@ -195,7 +195,7 @@ TransPolygon = executable('TransPolygon',
 WorkQueue = executable('WorkQueue',
              'src/WorkQueue.cpp',
              include_directories: [osmscoutIncDir],
-             dependencies: [mathDep],
+             dependencies: [mathDep, threadDep],
              link_with: [osmscout],
              install: false)
 
