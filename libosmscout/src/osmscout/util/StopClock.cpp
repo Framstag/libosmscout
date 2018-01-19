@@ -80,6 +80,17 @@ namespace osmscout {
     return result;
   }
 
+  /**
+   * Return true, if the measured time is siginificant, which means, that it has an value of at least
+   * one millisecond.
+   *
+   * @return true if significant, else false
+   */
+  bool StopClock::IsSignificant() const
+  {
+    return GetMilliseconds()>=1.0;
+  }
+
   StopClockNano::StopClockNano()
     : start(std::chrono::high_resolution_clock::now()),
       stop(start)
