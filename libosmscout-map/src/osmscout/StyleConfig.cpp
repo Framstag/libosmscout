@@ -1150,11 +1150,11 @@ namespace osmscout {
     textStyles.clear();
     textStyles.reserve(nodeTextStyleSelectors.size());
 
-    for (size_t slot=0; slot<nodeTextStyleSelectors.size(); slot++) {
-      style=NULL;
+    for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
+      style=nullptr;
 
       GetFeatureStyle(styleResolveContext,
-                      nodeTextStyleSelectors[slot][buffer.GetType()->GetIndex()],
+                      nodeTextStyleSelector[buffer.GetType()->GetIndex()],
                       buffer,
                       projection,
                       style);
