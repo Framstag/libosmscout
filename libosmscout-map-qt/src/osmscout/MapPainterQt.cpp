@@ -922,12 +922,10 @@ namespace osmscout {
                               LineStyle::CapStyle endCap,
                               size_t transStart, size_t transEnd)
   {
-    QPen pen;
-
-    pen.setColor(QColor::fromRgbF(color.GetR(),
-                                  color.GetG(),
-                                  color.GetB(),
-                                  color.GetA()));
+    QPen pen(QColor::fromRgbF(color.GetR(),
+                              color.GetG(),
+                              color.GetB(),
+                              color.GetA()));
     pen.setWidthF(width);
     pen.setJoinStyle(Qt::RoundJoin);
 
@@ -956,23 +954,6 @@ namespace osmscout {
       pen.setDashPattern(dashes);
     }
 
-/*
-    painter->setPen(pen);
-    size_t last=0;
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          start=false;
-        }
-        else {
-          painter->drawLine(QPointF(nodeX[last],nodeY[last]),QPointF(nodeX[i],nodeY[i]));
-        }
-
-        last=i;
-      }
-    }*/
-
     QPainterPath p;
 
     p.moveTo(coordBuffer->buffer[transStart].GetX(),
@@ -983,16 +964,6 @@ namespace osmscout {
     }
 
     painter->strokePath(p,pen);
-/*
-    QPolygonF polygon;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        polygon << QPointF(nodeX[i],nodeY[i]);
-      }
-    }
-
-    painter->setPen(pen);
-    painter->drawPolyline(polygon);*/
 
     if (dash.empty() &&
         startCap==LineStyle::capRound &&
@@ -1008,8 +979,8 @@ namespace osmscout {
     }
 
     if (dash.empty() &&
-      endCap==LineStyle::capRound &&
-      startCap!=LineStyle::capRound) {
+        endCap==LineStyle::capRound &&
+        startCap!=LineStyle::capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),
