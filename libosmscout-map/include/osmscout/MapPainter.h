@@ -49,6 +49,26 @@
 
 namespace osmscout {
 
+  enum RenderSteps : size_t
+  {
+    FirstStep             =  0,
+    Initialize            =  0,
+    DumpStatistics        =  1,
+    PreprocessData        =  2,
+    Prerender             =  3,
+    DrawGroundTiles       =  4,
+    DrawOSMTileGrids      =  5,
+    DrawAreas             =  6,
+    DrawWays              =  7,
+    DrawWayDecorations    =  8,
+    DrawWayContourLabels  =  9,
+    DrawAreaBorderLabels  = 10,
+    DrawAreaBorderSymbols = 11,
+    DrawLabels            = 12,
+    Postrender            = 13,
+    LastStep              = 13
+  };
+
   /**
    * \ingroup Renderer
    *
@@ -78,6 +98,11 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API MapPainter
   {
+  private:
+    typedef void (MapPainter::*StepMethod)(const Projection&,
+                                           const MapParameter&,
+                                           const MapData&);
+
   public:
     /*
      * Dimension of a text
@@ -277,6 +302,7 @@ namespace osmscout {
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
 
   private:
+    std::vector<StepMethod>      stepMethods;
     double                       errorTolerancePixel;
 
     std::list<AreaData>          areaData;
@@ -296,22 +322,6 @@ namespace osmscout {
 
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
-
-    /**
-      Statistics counter
-     */
-    //@{
-    size_t                       waysSegments;
-    size_t                       waysDrawn;
-    size_t                       waysLabelDrawn;
-
-    size_t                       areasSegments;
-    size_t                       areasDrawn;
-
-    size_t                       nodesDrawn;
-
-    size_t                       labelsDrawn;
-    //@}
 
     /**
       Fallback styles in case they are missing for the style sheet
@@ -376,40 +386,45 @@ namespace osmscout {
     //@}
 
     /**
-     Ground tile drawing
-     */
-    //@{
-    void DrawGroundTiles(const StyleConfig& styleConfig,
-                         const Projection& projection,
-                         const MapParameter& parameter,
-                         const MapData& data);
-    //@}
-
-    /**
       Private draw algorithm implementation routines.
      */
     //@{
-    void PrepareAreas(const StyleConfig& styleConfig,
+    void PrepareNode(const StyleConfig& styleConfig,
+                     const Projection& projection,
+                     const MapParameter& parameter,
+                     const NodeRef& node);
+
+    void PrepareNodes(const StyleConfig& styleConfig,
                       const Projection& projection,
                       const MapParameter& parameter,
                       const MapData& data);
 
-    void PrepareArea(const StyleConfig& styleConfig,
-                      const Projection& projection,
-                      const MapParameter& parameter,
-                      const AreaRef &area);
-
-    void PrepareWay(const StyleConfig& styleConfig,
-                    const Projection& projection,
-                    const MapParameter& parameter,
-                    const ObjectFileRef& ref,
-                    const FeatureValueBuffer& buffer,
-                    const std::vector<Point>& nodes);
+    void CalculatePaths(const StyleConfig& styleConfig,
+                        const Projection& projection,
+                        const MapParameter& parameter,
+                        const ObjectFileRef& ref,
+                        const FeatureValueBuffer& buffer,
+                        const std::vector<Point>& nodes);
 
     void PrepareWays(const StyleConfig& styleConfig,
                      const Projection& projection,
                      const MapParameter& parameter,
                      const MapData& data);
+
+    void PrepareArea(const StyleConfig& styleConfig,
+                     const Projection& projection,
+                     const MapParameter& parameter,
+                     const AreaRef &area);
+
+    void PrepareAreaLabel(const StyleConfig& styleConfig,
+                          const Projection& projection,
+                          const MapParameter& parameter,
+                          const AreaData& areaData);
+
+    void PrepareAreas(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const MapParameter& parameter,
+                      const MapData& data);
 
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
@@ -433,68 +448,97 @@ namespace osmscout {
                            double objectWidth=0,
                            double objectHeight=0);
 
-    void DrawWayDecorations(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& data);
+    bool DrawWayDecoration(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const MapParameter& parameter,
+                           const WayPathData& data);
 
-    void DrawWayShieldLabel(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter,
-                            const Way& data);
+    bool CalculateWayShieldLabels(const StyleConfig& styleConfig,
+                                  const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const Way& data);
 
-    void DrawWayContourLabel(const StyleConfig& styleConfig,
+    bool DrawWayContourLabel(const StyleConfig& styleConfig,
                              const Projection& projection,
                              const MapParameter& parameter,
                              const WayPathData& data);
 
-    void DrawWayShieldLabels(const StyleConfig& styleConfig,
-                             const Projection& projection,
-                             const MapParameter& parameter,
-                             const MapData& data);
-
-    void DrawWayContourLabels(const StyleConfig& styleConfig,
-                              const Projection& projection,
-                              const MapParameter& parameter);
-
-    void DrawAreaLabel(const StyleConfig& styleConfig,
-                       const Projection& projection,
-                       const MapParameter& parameter,
-                       const AreaData& areaData);
-
-    void DrawAreaBorderLabel(const StyleConfig& styleConfig,
+    bool DrawAreaBorderLabel(const StyleConfig& styleConfig,
                              const Projection& projection,
                              const MapParameter& parameter,
                              const AreaData& areaData);
 
-    void DrawAreaBorderSymbol(const StyleConfig& styleConfig,
+    bool DrawAreaBorderSymbol(const StyleConfig& styleConfig,
                               const Projection& projection,
                               const MapParameter& parameter,
                               const AreaData& areaData);
 
-    void DrawAreaLabels(const StyleConfig& styleConfig,
-                        const Projection& projection,
-                        const MapParameter& parameter);
-
-    void DrawPOINodes(const StyleConfig& styleConfig,
-                      const Projection& projection,
-                      const MapParameter& parameter,
-                      const MapData& data);
-
-    void DrawLabels(const StyleConfig& styleConfig,
-                    const Projection& projection,
-                    const MapParameter& parameter);
-
-    void DrawOSMTiles(const StyleConfig& styleConfig,
-                      const Projection& projection,
-                      const MapParameter& parameter,
-                      const Magnification& magnification,
-                      const LineStyleRef& osmTileLine);
-
-    void DrawOSMTiles(const StyleConfig& styleConfig,
-                      const Projection& projection,
-                      const MapParameter& parameter);
+    void DrawOSMTileGrid(const Projection& projection,
+                         const MapParameter& parameter,
+                         const Magnification& magnification,
+                         const LineStyleRef& osmTileLine);
     //@}
+
+    /**
+     * This are the offocial render step methods. One method for each render step.
+     */
+    //@{
+    void InitializeRender(const Projection& projection,
+                          const MapParameter& parameter,
+                          const MapData& data);
+
+    void DumpStatistics(const Projection& projection,
+                        const MapParameter& parameter,
+                        const MapData& data);
+
+    void PreprocessData(const Projection& projection,
+                        const MapParameter& parameter,
+                        const MapData& data);
+
+    void Prerender(const Projection& projection,
+                   const MapParameter& parameter,
+                   const MapData& data);
+
+    void DrawGroundTiles(const Projection& projection,
+                         const MapParameter& parameter,
+                         const MapData& data);
+
+    void DrawOSMTileGrids(const Projection& projection,
+                          const MapParameter& parameter,
+                          const MapData& data);
+
+    void DrawAreas(const Projection& projection,
+                   const MapParameter& parameter,
+                   const MapData& data);
+
+    void DrawWays(const Projection& projection,
+                  const MapParameter& parameter,
+                  const MapData& data);
+
+    void DrawWayDecorations(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data);
+
+    void DrawWayContourLabels(const Projection& projection,
+                              const MapParameter& parameter,
+                              const MapData& data);
+
+    void DrawAreaBorderLabels(const Projection& projection,
+                              const MapParameter& parameter,
+                              const MapData& data);
+
+    void DrawAreaBorderSymbols(const Projection& projection,
+                               const MapParameter& parameter,
+                               const MapData& data);
+
+    void DrawLabels(const Projection& projection,
+                    const MapParameter& parameter,
+                    const MapData& data);
+
+    void Postrender(const Projection& projection,
+                    const MapParameter& parameter,
+                    const MapData& data);
+    //@]
 
   protected:
     /**
@@ -674,43 +718,27 @@ namespace osmscout {
                                          double objectWidth,
                                          size_t stringLength);
 
-    /**
-      Med level drawing routines that are already implemented by the base class, but which can be overwritten
-      by the driver if necessary.
-     */
-    //@{
-    virtual void DrawNodes(const StyleConfig& styleConfig,
-                           const Projection& projection,
-                           const MapParameter& parameter,
-                           const MapData& data);
-
-    virtual void DrawNode(const StyleConfig& styleConfig,
-                          const Projection& projection,
-                          const MapParameter& parameter,
-                          const NodeRef& node);
-
     virtual void DrawWay(const StyleConfig& styleConfig,
                          const Projection& projection,
                          const MapParameter& parameter,
                          const WayData& data);
 
-    virtual void DrawWays(const StyleConfig& styleConfig,
-                          const Projection& projection,
-                          const MapParameter& parameter);
-
-    virtual void DrawAreas(const StyleConfig& styleConfig,
-                           const Projection& projection,
-                           const MapParameter& parameter);
-
-    bool Draw(const Projection& projection,
-              const MapParameter& parameter,
-              const MapData& data);
     //@}
 
   public:
     MapPainter(const StyleConfigRef& styleConfig,
                CoordBuffer *buffer);
     virtual ~MapPainter();
+
+    bool Draw(const Projection& projection,
+              const MapParameter& parameter,
+              const MapData& data,
+              RenderSteps startStep,
+              RenderSteps endStep);
+
+    bool Draw(const Projection& projection,
+              const MapParameter& parameter,
+              const MapData& data);
   };
 
   /**

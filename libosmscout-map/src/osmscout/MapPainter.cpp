@@ -205,6 +205,23 @@ namespace osmscout {
     textStyle->SetSize(0.7);
 
     debugLabel=textStyle;
+
+    stepMethods.resize(RenderSteps::LastStep-RenderSteps::FirstStep+1);
+
+    stepMethods[RenderSteps::Initialize]=&MapPainter::InitializeRender;
+    stepMethods[RenderSteps::DumpStatistics]=&MapPainter::DumpStatistics;
+    stepMethods[RenderSteps::PreprocessData]=&MapPainter::PreprocessData;
+    stepMethods[RenderSteps::Prerender]=&MapPainter::Prerender;
+    stepMethods[RenderSteps::DrawGroundTiles]=&MapPainter::DrawGroundTiles;
+    stepMethods[RenderSteps::DrawOSMTileGrids]=&MapPainter::DrawOSMTileGrids;
+    stepMethods[RenderSteps::DrawAreas]=&MapPainter::DrawAreas;
+    stepMethods[RenderSteps::DrawWays]=&MapPainter::DrawWays;
+    stepMethods[RenderSteps::DrawWayDecorations]=&MapPainter::DrawWayDecorations;
+    stepMethods[RenderSteps::DrawWayContourLabels]=&MapPainter::DrawWayContourLabels;
+    stepMethods[RenderSteps::DrawAreaBorderLabels]=&MapPainter::DrawAreaBorderLabels;
+    stepMethods[RenderSteps::DrawAreaBorderSymbols]=&MapPainter::DrawAreaBorderSymbols;
+    stepMethods[RenderSteps::DrawLabels]=&MapPainter::DrawLabels;
+    stepMethods[RenderSteps::Postrender]=&MapPainter::Postrender;
   }
 
   MapPainter::~MapPainter()
@@ -602,299 +619,6 @@ namespace osmscout {
 
   }
 
-  void MapPainter::DrawGroundTiles(const StyleConfig& styleConfig,
-                                   const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const MapData& data)
-  {
-    FillStyleRef      landFill;
-
-#if defined(DEBUG_GROUNDTILES)
-      std::set<GeoCoord> drawnLabels;
-#endif
-
-    styleConfig.GetLandFillStyle(projection,
-                                 landFill);
-
-    if (!landFill) {
-      landFill=this->landFill;
-    }
-
-    if (parameter.GetRenderBackground()) {
-      DrawGround(projection,
-                 parameter,
-                 *landFill);
-    }
-
-    if (!parameter.GetRenderSeaLand()) {
-      return;
-    }
-
-    FillStyleRef       seaFill;
-    FillStyleRef       coastFill;
-    FillStyleRef       unknownFill;
-    LineStyleRef       coastlineLine;
-    std::vector<Point> points;
-    size_t             start=0; // Make the compiler happy
-    size_t             end=0;   // Make the compiler happy
-
-    styleConfig.GetSeaFillStyle(projection,
-                                seaFill);
-    styleConfig.GetCoastFillStyle(projection,
-                                  coastFill);
-    styleConfig.GetUnknownFillStyle(projection,
-                                    unknownFill);
-    styleConfig.GetCoastlineLineStyle(projection,
-                                      coastlineLine);
-
-    if (!seaFill) {
-      seaFill=this->seaFill;
-    }
-
-    for (const auto& tile : data.groundTiles) {
-      AreaData areaData;
-
-      if (tile.type==GroundTile::unknown &&
-          !parameter.GetRenderUnknowns()) {
-        continue;
-      }
-
-      switch (tile.type) {
-      case GroundTile::land:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=landFill;
-        break;
-      case GroundTile::water:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=seaFill;
-        break;
-      case GroundTile::coast:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=coastFill;
-        break;
-      case GroundTile::unknown:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=unknownFill;
-        break;
-      }
-      if (!areaData.fillStyle){
-        continue;
-      }
-
-      GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
-                        tile.xAbs*tile.cellWidth-180.0);
-      GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
-                        minCoord.GetLon()+tile.cellWidth);
-
-      areaData.boundingBox.Set(minCoord,maxCoord);
-
-      if (tile.coords.empty()) {
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << " >= fill" << std::endl;
-#endif
-        // Fill the cell completely with the fill for the given cell type
-        points.resize(5);
-
-        points[0].SetCoord(areaData.boundingBox.GetMinCoord());
-        points[1].SetCoord(GeoCoord(areaData.boundingBox.GetMinCoord().GetLat(),
-                                    areaData.boundingBox.GetMaxCoord().GetLon()));
-        points[2].SetCoord(areaData.boundingBox.GetMaxCoord());
-        points[3].SetCoord(GeoCoord(areaData.boundingBox.GetMaxCoord().GetLat(),
-                                    areaData.boundingBox.GetMinCoord().GetLon()));
-        points[4]=points[0];
-
-        transBuffer.transPolygon.TransformArea(projection,
-                                               TransPolygon::none,
-                                               points,
-                                               errorTolerancePixel);
-
-        size_t s=transBuffer.transPolygon.GetStart();
-
-        start=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+0].x),
-                                            ceil(transBuffer.transPolygon.points[s+0].y));
-
-
-        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+1].x),
-                                      ceil(transBuffer.transPolygon.points[s+1].y));
-
-        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+2].x),
-                                      floor(transBuffer.transPolygon.points[s+2].y));
-
-        transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+3].x),
-                                      floor(transBuffer.transPolygon.points[s+3].y));
-
-        end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+4].x),
-                                          ceil(transBuffer.transPolygon.points[s+4].y));
-      }
-      else {
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << " >= sub" << std::endl;
-#endif
-        points.resize(tile.coords.size());
-
-        for (size_t i=0; i<tile.coords.size(); i++) {
-          double lat;
-          double lon;
-
-          lat=areaData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
-          lon=areaData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
-
-          points[i].SetCoord(GeoCoord(lat,lon));
-        }
-
-        transBuffer.transPolygon.TransformArea(projection,
-                                               TransPolygon::none,
-                                               points,
-                                               errorTolerancePixel);
-
-        for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
-          double x,y;
-
-          if (tile.coords[i].x==0) {
-            x=floor(transBuffer.transPolygon.points[i].x);
-          }
-          else if (tile.coords[i].x==GroundTile::Coord::CELL_MAX) {
-            x=ceil(transBuffer.transPolygon.points[i].x);
-          }
-          else {
-            x=transBuffer.transPolygon.points[i].x;
-          }
-
-          if (tile.coords[i].y==0) {
-            y=ceil(transBuffer.transPolygon.points[i].y);
-          }
-          else if (tile.coords[i].y==GroundTile::Coord::CELL_MAX) {
-            y=floor(transBuffer.transPolygon.points[i].y);
-          }
-          else {
-            y=transBuffer.transPolygon.points[i].y;
-          }
-
-          size_t idx=transBuffer.buffer->PushCoord(x,y);
-
-          if (i==transBuffer.transPolygon.GetStart()) {
-            start=idx;
-          }
-          else if (i==transBuffer.transPolygon.GetEnd()) {
-            end=idx;
-          }
-        }
-
-        if (coastlineLine) {
-          size_t lineStart=0;
-          size_t lineEnd;
-
-          while (lineStart<tile.coords.size()) {
-            while (lineStart<tile.coords.size() &&
-                   !tile.coords[lineStart].coast) {
-              lineStart++;
-            }
-
-            if (lineStart>=tile.coords.size()) {
-              continue;
-            }
-
-            lineEnd=lineStart;
-
-            while (lineEnd<tile.coords.size() &&
-                   tile.coords[lineEnd].coast) {
-              lineEnd++;
-            }
-
-            if (lineStart!=lineEnd) {
-              WayData wd;
-
-              wd.buffer=&coastlineSegmentAttributes;
-              wd.layer=0;
-              wd.lineStyle=coastlineLine;
-              wd.wayPriority=std::numeric_limits<int>::max();
-              wd.transStart=start+lineStart;
-              wd.transEnd=start+lineEnd;
-              wd.lineWidth=GetProjectedWidth(projection,
-                                               projection.ConvertWidthToPixel(coastlineLine->GetDisplayWidth()),
-                                               coastlineLine->GetWidth());
-              wd.startIsClosed=false;
-              wd.endIsClosed=false;
-
-              /*
-              DrawWay(styleConfig,
-                      projection,
-                      parameter,
-                      data);*/
-
-              wayData.push_back(wd);
-            }
-
-            lineStart=lineEnd+1;
-          }
-        }
-      }
-
-      areaData.ref=ObjectFileRef();
-      areaData.transStart=start;
-      areaData.transEnd=end;
-
-      DrawArea(projection,parameter,areaData);
-
-#if defined(DEBUG_GROUNDTILES)
-      size_t   labelId=nextLabelId++;
-      GeoCoord cc=areaData.boundingBox.GetCenter();
-
-      std::string label;
-
-      size_t x=(cc.GetLon()+180)/tile.cellWidth;
-      size_t y=(cc.GetLat()+90)/tile.cellHeight;
-
-      label=NumberToString(tile.xRel)+","+NumberToString(tile.yRel);
-
-      double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
-      double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
-
-      double px;
-      double py;
-
-      projection.GeoToPixel(GeoCoord(lat,lon),
-                            px,py);
-
-      if (drawnLabels.find(GeoCoord(x,y))!=drawnLabels.end()) {
-        continue;
-      }
-
-      LabelLayoutData labelData;
-
-      labelData.fontSize=debugLabel->GetSize();
-
-      labelData.dimension=GetTextDimension(projection,
-                                           parameter,
-                                           -1,
-                                           labelData.fontSize,
-                                           label);
-
-      labelData.alpha=debugLabel->GetAlpha();
-      labelData.position=0;
-      labelData.label=label;
-      labelData.textStyle=debugLabel;
-      labelData.icon=false;
-
-      RegisterPointLabel(projection,
-                         parameter,
-                         labelData,
-                         px,py,
-                         labelId);
-
-      drawnLabels.insert(GeoCoord(x,y));
-#endif
-    }
-  }
-
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
                                          const PathShieldStyleRef& shieldStyle,
@@ -1234,10 +958,10 @@ namespace osmscout {
     return proposedWidth;
   }
 
-  void MapPainter::DrawNodes(const StyleConfig& styleConfig,
-                             const Projection& projection,
-                             const MapParameter& parameter,
-                             const MapData& data)
+  void MapPainter::PrepareNodes(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& data)
   {
 #if defined(DEBUG_NODE_DRAW)
     std::vector<double> times;
@@ -1250,10 +974,27 @@ namespace osmscout {
       StopClockNano nodeTimer;
 #endif
 
-      DrawNode(styleConfig,
-               projection,
-               parameter,
-               node);
+      PrepareNode(styleConfig,
+                  projection,
+                  parameter,
+                  node);
+
+#if defined(DEBUG_NODE_DRAW)
+      nodeTimer.Stop();
+
+      times[node->GetType()->GetNodeId()]+=nodeTimer.GetNanoseconds();
+#endif
+    }
+
+    for (const auto& node : data.poiNodes) {
+#if defined(DEBUG_NODE_DRAW)
+      StopClockNano nodeTimer;
+#endif
+
+      PrepareNode(styleConfig,
+                  projection,
+                  parameter,
+                  node);
 
 #if defined(DEBUG_NODE_DRAW)
       nodeTimer.Stop();
@@ -1274,24 +1015,10 @@ namespace osmscout {
 #endif
   }
 
-  void MapPainter::DrawAreas(const StyleConfig& /*styleConfig*/,
-                             const Projection& projection,
-                             const MapParameter& parameter)
-  {
-    for (const auto& area : areaData)
-    {
-      DrawArea(projection,
-               parameter,
-               area);
-
-      areasDrawn++;
-    }
-  }
-
-  void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
-                                 const Projection& projection,
-                                 const MapParameter& parameter,
-                                 const AreaData& areaData)
+  void MapPainter::PrepareAreaLabel(const StyleConfig& styleConfig,
+                                    const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const AreaData& areaData)
   {
     IconStyleRef iconStyle;
 
@@ -1331,7 +1058,7 @@ namespace osmscout {
                       maxY-minY);
   }
 
-  void MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
+  bool MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
                                        const Projection& projection,
                                        const MapParameter& parameter,
                                        const AreaData& areaData)
@@ -1344,7 +1071,7 @@ namespace osmscout {
                                        borderTextStyle);
 
     if (!borderTextStyle) {
-      return;
+      return false;
     }
 
     double      lineOffset=0.0;
@@ -1354,7 +1081,7 @@ namespace osmscout {
                                                             *areaData.buffer);
 
     if (label.empty()) {
-      return;
+      return false;
     }
 
     if (borderTextStyle->GetOffset()!=0.0) {
@@ -1383,9 +1110,11 @@ namespace osmscout {
                      transStart,
                      transEnd,
                      helper);
+
+    return true;
   }
 
-  void MapPainter::DrawAreaBorderSymbol(const StyleConfig& styleConfig,
+  bool MapPainter::DrawAreaBorderSymbol(const StyleConfig& styleConfig,
                                         const Projection& projection,
                                         const MapParameter& parameter,
                                         const AreaData& areaData)
@@ -1398,7 +1127,7 @@ namespace osmscout {
                                          borderSymbolStyle);
 
     if (!borderSymbolStyle) {
-      return;
+      return false;
     }
 
     double lineOffset=0.0;
@@ -1428,41 +1157,14 @@ namespace osmscout {
                       *borderSymbolStyle->GetSymbol(),
                       symbolSpace,
                       transStart,transEnd);
+
+    return true;
   }
 
-  void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
-                                  const Projection& projection,
-                                  const MapParameter& parameter)
-  {
-    for (const auto& area : areaData)
-    {
-      if (area.buffer==nullptr) {
-        continue;
-      }
-
-      DrawAreaLabel(styleConfig,
-                    projection,
-                    parameter,
-                    area);
-
-      DrawAreaBorderLabel(styleConfig,
-                          projection,
-                          parameter,
-                          area);
-
-      DrawAreaBorderSymbol(styleConfig,
-                           projection,
-                           parameter,
-                           area);
-
-      areasDrawn++;
-    }
-  }
-
-  void MapPainter::DrawNode(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter,
-                            const NodeRef& node)
+  void MapPainter::PrepareNode(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                               const NodeRef& node)
   {
     IconStyleRef iconStyle;
 
@@ -1486,8 +1188,6 @@ namespace osmscout {
                       iconStyle,
                       textStyles,
                       x,y);
-
-    nodesDrawn++;
   }
 
   void MapPainter::DrawWay(const StyleConfig& /*styleConfig*/,
@@ -1517,74 +1217,58 @@ namespace osmscout {
              data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.transStart,data.transEnd);
-
-    waysDrawn++;
   }
 
-  void MapPainter::DrawWays(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter)
+  bool MapPainter::DrawWayDecoration(const StyleConfig& styleConfig,
+                                     const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const MapPainter::WayPathData& data)
   {
-    for (const auto& way : wayData) {
-      DrawWay(styleConfig,
-              projection,
-              parameter,
-              way);
+    PathSymbolStyleRef pathSymbolStyle;
+
+    styleConfig.GetWayPathSymbolStyle(*data.buffer,
+                                      projection,
+                                      pathSymbolStyle);
+
+    if (!pathSymbolStyle) {
+      return false;
     }
+
+    double lineOffset=0.0;
+    size_t transStart=data.transStart;
+    size_t transEnd=data.transEnd;
+    double symbolSpace=projection.ConvertWidthToPixel(pathSymbolStyle->GetSymbolSpace());
+
+    if (pathSymbolStyle->GetOffset()!=0.0) {
+      lineOffset+=GetProjectedWidth(projection,
+                                    pathSymbolStyle->GetOffset());
+    }
+
+    if (pathSymbolStyle->GetDisplayOffset()!=0.0) {
+      lineOffset+=projection.ConvertWidthToPixel(pathSymbolStyle->GetDisplayOffset());
+    }
+
+    if (lineOffset!=0.0) {
+      coordBuffer->GenerateParallelWay(transStart,
+                                       transEnd,
+                                       lineOffset,
+                                       transStart,
+                                       transEnd);
+    }
+
+    DrawContourSymbol(projection,
+                      parameter,
+                      *pathSymbolStyle->GetSymbol(),
+                      symbolSpace,
+                      transStart,transEnd);
+
+    return true;
   }
 
-  void MapPainter::DrawWayDecorations(const StyleConfig& styleConfig,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const MapData& /*data*/)
-  {
-    for (const auto way: wayPathData)
-    {
-      PathSymbolStyleRef pathSymbolStyle;
-
-      styleConfig.GetWayPathSymbolStyle(*way.buffer,
-                                        projection,
-                                        pathSymbolStyle);
-
-      if (!pathSymbolStyle) {
-        continue;
-      }
-
-      double lineOffset=0.0;
-      size_t transStart=way.transStart;
-      size_t transEnd=way.transEnd;
-      double symbolSpace=projection.ConvertWidthToPixel(pathSymbolStyle->GetSymbolSpace());
-
-      if (pathSymbolStyle->GetOffset()!=0.0) {
-        lineOffset+=GetProjectedWidth(projection,
-                                      pathSymbolStyle->GetOffset());
-      }
-
-      if (pathSymbolStyle->GetDisplayOffset()!=0.0) {
-        lineOffset+=projection.ConvertWidthToPixel(pathSymbolStyle->GetDisplayOffset());
-      }
-
-      if (lineOffset!=0.0) {
-        coordBuffer->GenerateParallelWay(transStart,
-                                         transEnd,
-                                         lineOffset,
-                                         transStart,
-                                         transEnd);
-      }
-
-      DrawContourSymbol(projection,
-                        parameter,
-                        *pathSymbolStyle->GetSymbol(),
-                        symbolSpace,
-                        transStart,transEnd);
-    }
-  }
-
-
-  void MapPainter::DrawWayShieldLabel(const StyleConfig& styleConfig,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const Way& data)
+  bool MapPainter::CalculateWayShieldLabels(const StyleConfig& styleConfig,
+                                            const Projection& projection,
+                                            const MapParameter& parameter,
+                                            const Way& data)
   {
     PathShieldStyleRef shieldStyle;
 
@@ -1593,38 +1277,38 @@ namespace osmscout {
                                       shieldStyle);
 
     if (!shieldStyle) {
-      return;
+      return false;
     }
 
     std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
                                                               data.GetFeatureValueBuffer());
 
     if (shieldLabel.empty()) {
-      return;
+      return false;
     }
-
 
     RegisterPointWayLabel(projection,
                           parameter,
                           shieldStyle,
                           shieldLabel,
                           data.nodes);
-    waysLabelDrawn++;
+
+    return true;
   }
 
-  void MapPainter::DrawWayContourLabel(const StyleConfig& styleConfig,
+  bool MapPainter::DrawWayContourLabel(const StyleConfig& styleConfig,
                                        const Projection& projection,
                                        const MapParameter& parameter,
                                        const WayPathData& data)
   {
-    PathTextStyleRef   pathTextStyle;
+    PathTextStyleRef pathTextStyle;
 
     styleConfig.GetWayPathTextStyle(*data.buffer,
                                     projection,
                                     pathTextStyle);
 
     if (!pathTextStyle) {
-      return;
+      return false;
     }
 
     double      lineOffset=0.0;
@@ -1632,6 +1316,10 @@ namespace osmscout {
     size_t      transEnd=data.transEnd;
     std::string textLabel=pathTextStyle->GetLabel()->GetLabel(parameter,
                                                               *data.buffer);
+
+    if (textLabel.empty()) {
+      return false;
+    }
 
     if (pathTextStyle->GetOffset()!=0.0) {
       lineOffset+=GetProjectedWidth(projection,
@@ -1650,99 +1338,23 @@ namespace osmscout {
                                        transEnd);
     }
 
-    if (!textLabel.empty()) {
-      ContourLabelHelper helper(*this);
+    ContourLabelHelper helper(*this);
 
-      DrawContourLabel(projection,
-                       parameter,
-                       *pathTextStyle,
-                       textLabel,
-                       transStart,
-                       transEnd,
-                       helper);
-      waysLabelDrawn++;
-    }
+    DrawContourLabel(projection,
+                     parameter,
+                     *pathTextStyle,
+                     textLabel,
+                     transStart,
+                     transEnd,
+                     helper);
+
+    return true;
   }
 
-  void MapPainter::DrawWayShieldLabels(const StyleConfig& styleConfig,
-                                       const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const MapData& data)
-  {
-    for (const auto& way : data.ways) {
-      DrawWayShieldLabel(styleConfig,
-                         projection,
-                         parameter,
-                         *way);
-    }
-
-    for (const auto& way : data.poiWays) {
-      DrawWayShieldLabel(styleConfig,
-                         projection,
-                         parameter,
-                         *way);
-    }
-  }
-
-  void MapPainter::DrawWayContourLabels(const StyleConfig& styleConfig,
-                                        const Projection& projection,
-                                        const MapParameter& parameter)
-  {
-    for (const auto& way : wayPathData) {
-      DrawWayContourLabel(styleConfig,
-                          projection,
-                          parameter,
-                          way);
-    }
-  }
-
-  void MapPainter::DrawPOINodes(const StyleConfig& styleConfig,
-                                const Projection& projection,
-                                const MapParameter& parameter,
-                                const MapData& data)
-  {
-    for (const auto& node : data.poiNodes) {
-      DrawNode(styleConfig,
-               projection,
-               parameter,
-               node);
-    }
-  }
-
-  void MapPainter::DrawLabels(const StyleConfig& /*styleConfig*/,
-                              const Projection& projection,
-                              const MapParameter& parameter)
-  {
-    //
-    // Draw normal
-    //
-
-    for (const auto& label : labels) {
-      //std::cout << "Drawing label: " << label.text << std::endl;
-      DrawLabel(projection,
-                parameter,
-                label);
-      labelsDrawn++;
-    }
-
-    //
-    // Draw overlays
-    //
-
-    for (const auto& label : overlayLabels) {
-      //std::cout << "Drawing overlay: " << label.text << std::endl;
-      DrawLabel(projection,
-                parameter,
-                label);
-      labelsDrawn++;
-    }
-  }
-
-  void MapPainter::DrawOSMTiles(const StyleConfig& /*styleConfig*/,
-                                const Projection& projection,
-                                const MapParameter& parameter,
-                                const Magnification& magnification,
-                                const LineStyleRef& osmTileLine)
+  void MapPainter::DrawOSMTileGrid(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const Magnification& magnification,
+                                   const LineStyleRef& osmTileLine)
   {
     GeoBox boundingBox;
 
@@ -1768,10 +1380,10 @@ namespace osmscout {
 
     // Horizontal lines
 
-    for (size_t y=startTileY; y<=endTileY; y++) {
+    for (uint32_t y=startTileY; y<=endTileY; y++) {
       points.resize(endTileX-startTileX+1);
 
-      for (size_t x=startTileX; x<=endTileX; x++) {
+      for (uint32_t x=startTileX; x<=endTileX; x++) {
         points[x-startTileX].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
       }
 
@@ -1803,10 +1415,10 @@ namespace osmscout {
 
     // Vertical lines
 
-    for (size_t x=startTileX; x<=endTileX; x++) {
+    for (uint32_t x=startTileX; x<=endTileX; x++) {
       points.resize(endTileY-startTileY+1);
 
-      for (size_t y=startTileY; y<=endTileY; y++) {
+      for (uint32_t y=startTileY; y<=endTileY; y++) {
         points[y-startTileY].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
       }
 
@@ -1834,45 +1446,6 @@ namespace osmscout {
       data.startIsClosed=false;
       data.endIsClosed=false;
       wayData.push_back(data);
-    }
-  }
-
-  void MapPainter::DrawOSMTiles(const StyleConfig& styleConfig,
-                                const Projection& projection,
-                                const MapParameter& parameter)
-  {
-    LineStyleRef osmSubTileLine;
-
-    styleConfig.GetOSMSubTileBorderLineStyle(projection,
-                                             osmSubTileLine);
-
-    if (osmSubTileLine) {
-      Magnification magnification=projection.GetMagnification();
-
-      magnification.SetLevel(magnification.GetLevel()+1);
-
-      DrawOSMTiles(styleConfig,
-                   projection,
-                   parameter,
-                   magnification,
-                   osmSubTileLine);
-    }
-
-    LineStyleRef osmTileLine;
-
-    styleConfig.GetOSMTileBorderLineStyle(projection,
-                                          osmTileLine);
-
-    if (osmTileLine) {
-      Magnification magnification=projection.GetMagnification();
-
-      magnification.SetLevel(magnification.GetLevel());
-
-      DrawOSMTiles(styleConfig,
-                   projection,
-                   parameter,
-                   magnification,
-                   osmTileLine);
     }
   }
 
@@ -2031,8 +1604,6 @@ namespace osmscout {
 
           areaData.push_back(a);
         }
-
-        areasSegments++;
       }
 
       ringId++;
@@ -2063,14 +1634,26 @@ namespace osmscout {
                   parameter,
                   area);
     }
+
+    for (const auto& area : areaData)
+    {
+      if (area.buffer==nullptr) {
+        continue;
+      }
+
+      PrepareAreaLabel(styleConfig,
+                       projection,
+                       parameter,
+                       area);
+    }
   }
 
-  void MapPainter::PrepareWay(const StyleConfig& styleConfig,
-                              const Projection& projection,
-                              const MapParameter& parameter,
-                              const ObjectFileRef& ref,
-                              const FeatureValueBuffer& buffer,
-                              const std::vector<Point>& nodes)
+  void MapPainter::CalculatePaths(const StyleConfig& styleConfig,
+                                  const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const ObjectFileRef& ref,
+                                  const FeatureValueBuffer& buffer,
+                                  const std::vector<Point>& nodes)
   {
     styleConfig.GetWayLineStyles(buffer,
                                  projection,
@@ -2174,7 +1757,6 @@ namespace osmscout {
         data.transEnd=transEnd;
       }
 
-      waysSegments++;
       wayData.push_back(data);
     }
   }
@@ -2184,25 +1766,39 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapData& data)
   {
+    StopClock timer;
+
     wayData.clear();
     wayPathData.clear();
 
     for (const auto& way : data.ways) {
-      PrepareWay(styleConfig,
-                 projection,
-                 parameter,
-                 ObjectFileRef(way->GetFileOffset(),refWay),
-                 way->GetFeatureValueBuffer(),
-                 way->nodes);
+      CalculatePaths(styleConfig,
+                     projection,
+                     parameter,
+                     ObjectFileRef(way->GetFileOffset(),
+                                   refWay),
+                     way->GetFeatureValueBuffer(),
+                     way->nodes);
+
+      CalculateWayShieldLabels(styleConfig,
+                               projection,
+                               parameter,
+                               *way);
     }
 
     for (const auto& way : data.poiWays) {
-      PrepareWay(styleConfig,
-                 projection,
-                 parameter,
-                 ObjectFileRef(way->GetFileOffset(),refWay),
-                 way->GetFeatureValueBuffer(),
-                 way->nodes);
+      CalculatePaths(styleConfig,
+                     projection,
+                     parameter,
+                     ObjectFileRef(way->GetFileOffset(),
+                                   refWay),
+                     way->GetFeatureValueBuffer(),
+                     way->nodes);
+
+      CalculateWayShieldLabels(styleConfig,
+                               projection,
+                               parameter,
+                               *way);
     }
 
     wayData.sort();
@@ -2210,7 +1806,49 @@ namespace osmscout {
 
   bool MapPainter::Draw(const Projection& projection,
                         const MapParameter& parameter,
+                        const MapData& data,
+                        RenderSteps startStep,
+                        RenderSteps endStep)
+  {
+    assert(startStep>=RenderSteps::FirstStep);
+    assert(startStep<=RenderSteps::LastStep);
+
+    for (size_t step=startStep; step<=endStep; step++) {
+      StepMethod stepMethod=stepMethods[step];
+
+      assert(stepMethod!=nullptr);
+
+      (this->*stepMethod)(projection,parameter,data);
+
+      if (parameter.IsAborted()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool MapPainter::Draw(const Projection& projection,
+                        const MapParameter& parameter,
                         const MapData& data)
+  {
+    return Draw(projection,
+                parameter,
+                data,
+                RenderSteps::FirstStep,
+                RenderSteps::LastStep);
+  }
+
+  /**
+   * Base method that must get called to initial the renderer for a render action.
+   * The derived method of the concrete renderer mplementation can have
+   *
+   * @return
+   *    false if there was either an error or of the rendering was already interrupted, else true
+   */
+  void MapPainter::InitializeRender(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const MapData& /*data*/)
   {
     errorTolerancePixel=projection.ConvertWidthToPixel(parameter.GetOptimizeErrorToleranceMm());
     areaMinDimension   =projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
@@ -2219,17 +1857,6 @@ namespace osmscout {
 
     shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
     shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
-
-    waysSegments  =0;
-    waysDrawn     =0;
-    waysLabelDrawn=0;
-
-    areasSegments=0;
-    areasDrawn   =0;
-
-    nodesDrawn=0;
-
-    labelsDrawn=0;
 
     nextLabelId=0;
     labels.Initialize(projection,
@@ -2242,21 +1869,15 @@ namespace osmscout {
     standardFontSize=GetFontHeight(projection,
                                    parameter,
                                    1.0);
+  }
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
+  void MapPainter::DumpStatistics(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data)
+  {
     if (parameter.IsDebugPerformance()) {
-      GeoBox boundingBox;
-
-      projection.GetDimensions(boundingBox);
-
       log.Info()
-        << "Draw: " << boundingBox.GetDisplayText() << " "
-        << (int) projection.GetMagnification().GetMagnification() << "x" << "/"
-        << projection.GetMagnification().GetLevel() << " "
-        << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI() << " DPI";
+        << "Data: " << data.nodes.size() << "+" << data.poiNodes.size() << " " << data.ways.size() << " " << data.areas.size();
     }
 
     if (parameter.GetWarningCoordCountLimit()>0 ||
@@ -2266,22 +1887,23 @@ namespace osmscout {
                          parameter,
                          data);
     }
+  }
 
-    //
-    // Setup and Precalculation
-    //
+  void MapPainter::PreprocessData(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data)
+  {
+    StopClock prepareNodesTimer;
 
-    StopClock prepareAreasTimer;
+    PrepareNodes(*styleConfig,
+                projection,
+                parameter,
+                data);
 
-    PrepareAreas(*styleConfig,
-                 projection,
-                 parameter,
-                 data);
-
-    prepareAreasTimer.Stop();
+    prepareNodesTimer.Stop();
 
     if (parameter.IsAborted()) {
-      return false;
+      return;
     }
 
     StopClock prepareWaysTimer;
@@ -2294,8 +1916,17 @@ namespace osmscout {
     prepareWaysTimer.Stop();
 
     if (parameter.IsAborted()) {
-      return false;
+      return;
     }
+
+    StopClock prepareAreasTimer;
+
+    PrepareAreas(*styleConfig,
+                 projection,
+                 parameter,
+                 data);
+
+    prepareAreasTimer.Stop();
 
     // Optional callback after preprocessing data
     AfterPreprocessing(*styleConfig,
@@ -2303,198 +1934,567 @@ namespace osmscout {
                        parameter,
                        data);
 
-    // Optional callback after preprocessing data
+    if (parameter.IsDebugPerformance() &&
+        (prepareNodesTimer.IsSignificant() ||
+         prepareWaysTimer.IsSignificant() ||
+         prepareAreasTimer.IsSignificant())) {
+      log.Info()
+        << "Prep: " << prepareNodesTimer.ResultString() << " (sec) " << prepareWaysTimer.ResultString() << " (sec) " << prepareAreasTimer.ResultString() << " (sec)";
+    }
+  }
+
+  void MapPainter::Prerender(const Projection& projection,
+                             const MapParameter& parameter,
+                             const MapData& data)
+  {
     BeforeDrawing(*styleConfig,
                   projection,
                   parameter,
                   data);
 
-    //
-    // Clear area with background color
-    //
+    if (parameter.IsDebugPerformance()) {
+      GeoBox boundingBox;
 
-    DrawGroundTiles(*styleConfig,
-                    projection,
-                    parameter,
-                    data);
+      projection.GetDimensions(boundingBox);
 
-    if (parameter.IsAborted()) {
-      return false;
+      log.Info()
+        << "Draw: " << boundingBox.GetDisplayText() << " "
+        << (int) projection.GetMagnification().GetMagnification() << "x" << "/"
+        << projection.GetMagnification().GetLevel() << " "
+        << projection.GetWidth() << "x" << projection.GetHeight() << " " << projection.GetDPI() << " DPI";
+    }
+  }
+
+  void MapPainter::DrawGroundTiles(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const MapData& data)
+  {
+    FillStyleRef      landFill;
+
+#if defined(DEBUG_GROUNDTILES)
+    std::set<GeoCoord> drawnLabels;
+#endif
+
+    styleConfig->GetLandFillStyle(projection,
+                                  landFill);
+
+    if (!landFill) {
+      landFill=this->landFill;
     }
 
-    DrawOSMTiles(*styleConfig,
-                 projection,
-                 parameter);
-
-    if (parameter.IsAborted()) {
-      return false;
+    if (parameter.GetRenderBackground()) {
+      DrawGround(projection,
+                 parameter,
+                 *landFill);
     }
 
-    //
-    // Draw areas
-    //
+    if (!parameter.GetRenderSeaLand()) {
+      return;
+    }
 
-    StopClock areasTimer;
+    FillStyleRef       seaFill;
+    FillStyleRef       coastFill;
+    FillStyleRef       unknownFill;
+    LineStyleRef       coastlineLine;
+    std::vector<Point> points;
+    size_t             start=0; // Make the compiler happy
+    size_t             end=0;   // Make the compiler happy
 
-    DrawAreas(*styleConfig,
+    styleConfig->GetSeaFillStyle(projection,
+                                 seaFill);
+    styleConfig->GetCoastFillStyle(projection,
+                                   coastFill);
+    styleConfig->GetUnknownFillStyle(projection,
+                                     unknownFill);
+    styleConfig->GetCoastlineLineStyle(projection,
+                                       coastlineLine);
+
+    if (!seaFill) {
+      seaFill=this->seaFill;
+    }
+
+    for (const auto& tile : data.groundTiles) {
+      AreaData areaData;
+
+      if (tile.type==GroundTile::unknown &&
+          !parameter.GetRenderUnknowns()) {
+        continue;
+      }
+
+      switch (tile.type) {
+      case GroundTile::land:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=landFill;
+        break;
+      case GroundTile::water:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=seaFill;
+        break;
+      case GroundTile::coast:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=coastFill;
+        break;
+      case GroundTile::unknown:
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
+#endif
+        areaData.fillStyle=unknownFill;
+        break;
+      }
+      if (!areaData.fillStyle){
+        continue;
+      }
+
+      GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
+                        tile.xAbs*tile.cellWidth-180.0);
+      GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
+                        minCoord.GetLon()+tile.cellWidth);
+
+      areaData.boundingBox.Set(minCoord,maxCoord);
+
+      if (tile.coords.empty()) {
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= fill" << std::endl;
+#endif
+        // Fill the cell completely with the fill for the given cell type
+        points.resize(5);
+
+        points[0].SetCoord(areaData.boundingBox.GetMinCoord());
+        points[1].SetCoord(GeoCoord(areaData.boundingBox.GetMinCoord().GetLat(),
+                                    areaData.boundingBox.GetMaxCoord().GetLon()));
+        points[2].SetCoord(areaData.boundingBox.GetMaxCoord());
+        points[3].SetCoord(GeoCoord(areaData.boundingBox.GetMaxCoord().GetLat(),
+                                    areaData.boundingBox.GetMinCoord().GetLon()));
+        points[4]=points[0];
+
+        transBuffer.transPolygon.TransformArea(projection,
+                                               TransPolygon::none,
+                                               points,
+                                               errorTolerancePixel);
+
+        size_t s=transBuffer.transPolygon.GetStart();
+
+        start=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+0].x),
+                                            ceil(transBuffer.transPolygon.points[s+0].y));
+
+
+        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+1].x),
+                                      ceil(transBuffer.transPolygon.points[s+1].y));
+
+        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+2].x),
+                                      floor(transBuffer.transPolygon.points[s+2].y));
+
+        transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+3].x),
+                                      floor(transBuffer.transPolygon.points[s+3].y));
+
+        end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+4].x),
+                                          ceil(transBuffer.transPolygon.points[s+4].y));
+      }
+      else {
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << " >= sub" << std::endl;
+#endif
+        points.resize(tile.coords.size());
+
+        for (size_t i=0; i<tile.coords.size(); i++) {
+          double lat;
+          double lon;
+
+          lat=areaData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=areaData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
+
+          points[i].SetCoord(GeoCoord(lat,lon));
+        }
+
+        transBuffer.transPolygon.TransformArea(projection,
+                                               TransPolygon::none,
+                                               points,
+                                               errorTolerancePixel);
+
+        for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
+          double x,y;
+
+          if (tile.coords[i].x==0) {
+            x=floor(transBuffer.transPolygon.points[i].x);
+          }
+          else if (tile.coords[i].x==GroundTile::Coord::CELL_MAX) {
+            x=ceil(transBuffer.transPolygon.points[i].x);
+          }
+          else {
+            x=transBuffer.transPolygon.points[i].x;
+          }
+
+          if (tile.coords[i].y==0) {
+            y=ceil(transBuffer.transPolygon.points[i].y);
+          }
+          else if (tile.coords[i].y==GroundTile::Coord::CELL_MAX) {
+            y=floor(transBuffer.transPolygon.points[i].y);
+          }
+          else {
+            y=transBuffer.transPolygon.points[i].y;
+          }
+
+          size_t idx=transBuffer.buffer->PushCoord(x,y);
+
+          if (i==transBuffer.transPolygon.GetStart()) {
+            start=idx;
+          }
+          else if (i==transBuffer.transPolygon.GetEnd()) {
+            end=idx;
+          }
+        }
+
+        if (coastlineLine) {
+          size_t lineStart=0;
+          size_t lineEnd;
+
+          while (lineStart<tile.coords.size()) {
+            while (lineStart<tile.coords.size() &&
+                   !tile.coords[lineStart].coast) {
+              lineStart++;
+            }
+
+            if (lineStart>=tile.coords.size()) {
+              continue;
+            }
+
+            lineEnd=lineStart;
+
+            while (lineEnd<tile.coords.size() &&
+                   tile.coords[lineEnd].coast) {
+              lineEnd++;
+            }
+
+            if (lineStart!=lineEnd) {
+              WayData wd;
+
+              wd.buffer=&coastlineSegmentAttributes;
+              wd.layer=0;
+              wd.lineStyle=coastlineLine;
+              wd.wayPriority=std::numeric_limits<int>::max();
+              wd.transStart=start+lineStart;
+              wd.transEnd=start+lineEnd;
+              wd.lineWidth=GetProjectedWidth(projection,
+                                             projection.ConvertWidthToPixel(coastlineLine->GetDisplayWidth()),
+                                             coastlineLine->GetWidth());
+              wd.startIsClosed=false;
+              wd.endIsClosed=false;
+
+              /*
+              DrawWay(styleConfig,
+                      projection,
+                      parameter,
+                      data);*/
+
+              wayData.push_back(wd);
+            }
+
+            lineStart=lineEnd+1;
+          }
+        }
+      }
+
+      areaData.ref=ObjectFileRef();
+      areaData.transStart=start;
+      areaData.transEnd=end;
+
+      DrawArea(projection,parameter,areaData);
+
+#if defined(DEBUG_GROUNDTILES)
+      size_t   labelId=nextLabelId++;
+      GeoCoord cc=areaData.boundingBox.GetCenter();
+
+      std::string label;
+
+      size_t x=(cc.GetLon()+180)/tile.cellWidth;
+      size_t y=(cc.GetLat()+90)/tile.cellHeight;
+
+      label=NumberToString(tile.xRel)+","+NumberToString(tile.yRel);
+
+      double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
+      double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
+
+      double px;
+      double py;
+
+      projection.GeoToPixel(GeoCoord(lat,lon),
+                            px,py);
+
+      if (drawnLabels.find(GeoCoord(x,y))!=drawnLabels.end()) {
+        continue;
+      }
+
+      LabelLayoutData labelData;
+
+      labelData.fontSize=debugLabel->GetSize();
+
+      labelData.dimension=GetTextDimension(projection,
+                                           parameter,
+                                           -1,
+                                           labelData.fontSize,
+                                           label);
+
+      labelData.alpha=debugLabel->GetAlpha();
+      labelData.position=0;
+      labelData.label=label;
+      labelData.textStyle=debugLabel;
+      labelData.icon=false;
+
+      RegisterPointLabel(projection,
+                         parameter,
+                         labelData,
+                         px,py,
+                         labelId);
+
+      drawnLabels.insert(GeoCoord(x,y));
+#endif
+    }
+  }
+
+  void MapPainter::DrawOSMTileGrids(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const MapData& /*data*/)
+  {
+    LineStyleRef osmSubTileLine;
+
+    styleConfig->GetOSMSubTileBorderLineStyle(projection,
+                                              osmSubTileLine);
+
+    if (osmSubTileLine) {
+      Magnification magnification=projection.GetMagnification();
+
+      magnification.SetLevel(magnification.GetLevel()+1);
+
+      DrawOSMTileGrid(projection,
+                      parameter,
+                      magnification,
+                      osmSubTileLine);
+    }
+
+    LineStyleRef osmTileLine;
+
+    styleConfig->GetOSMTileBorderLineStyle(projection,
+                                           osmTileLine);
+
+    if (osmTileLine) {
+      Magnification magnification=projection.GetMagnification();
+
+      magnification.SetLevel(magnification.GetLevel());
+
+      DrawOSMTileGrid(projection,
+                      parameter,
+                      magnification,
+                      osmTileLine);
+    }
+  }
+
+  void MapPainter::DrawAreas(const Projection& projection,
+                             const MapParameter& parameter,
+                             const MapData& /*data*/)
+  {
+    StopClock timer;
+
+    for (const auto& area : areaData) {
+      DrawArea(projection,
+               parameter,
+               area);
+    }
+
+    timer.Stop();
+
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw areas: " << areaData.size() << " (pcs) " << timer.ResultString() << " (s)";
+    }
+  }
+
+  void MapPainter::DrawWays(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& /*data*/)
+  {
+    StopClock timer;
+
+    for (const auto& way : wayData) {
+      DrawWay(*styleConfig,
               projection,
-              parameter);
-
-    areasTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return false;
+              parameter,
+              way);
     }
 
-    //
-    // Drawing ways
-    //
+    timer.Stop();
 
-    StopClock pathsTimer;
-
-    DrawWays(*styleConfig,
-             projection,
-             parameter);
-
-    pathsTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return false;
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw ways: " << wayData.size() << " (pcs) " << timer.ResultString() << " (s)";
     }
+  }
 
+  void MapPainter::DrawWayDecorations(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const MapData& /*data*/)
+  {
     //
     // Path decorations (like arrows and similar)
     //
 
-    StopClock pathDecorationsTimer;
+    StopClock timer;
+    size_t    drawnCount=0;
 
-    DrawWayDecorations(*styleConfig,
-                       projection,
-                       parameter,
-                       data);
-
-    pathDecorationsTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return false;
+    for (const auto way: wayPathData) {
+      if (DrawWayDecoration(*styleConfig,
+                            projection,
+                            parameter,
+                            way)) {
+        drawnCount++;
+      }
     }
 
-    //
-    // Path labels
-    //
+    timer.Stop();
 
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw way decorations: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
+    }
+  }
+
+  void MapPainter::DrawWayContourLabels(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const MapData& /*data*/)
+  {
     // TODO: Draw labels only if there is a style for the current zoom level
     // that requires labels
 
-    StopClock pathShieldLabelsTimer;
+    StopClock timer;
+    size_t    drawnCount=0;
 
-    DrawWayShieldLabels(*styleConfig,
-                        projection,
-                        parameter,
-                        data);
-
-    pathShieldLabelsTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return false;
+    for (const auto& way : wayPathData) {
+      if (DrawWayContourLabel(*styleConfig,
+                              projection,
+                              parameter,
+                              way)) {
+        drawnCount++;
+      }
     }
 
-    StopClock pathContourLabelsTimer;
+    timer.Stop();
 
-    DrawWayContourLabels(*styleConfig,
-                         projection,
-                         parameter);
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw way contour labels: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
+    }
+  }
 
-    pathContourLabelsTimer.Stop();
+  void MapPainter::DrawAreaBorderLabels(const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const MapData& /*data*/)
+  {
+    StopClock timer;
+    size_t    drawnCount=0;
 
-    if (parameter.IsAborted()) {
-      return false;
+    for (const auto& area : areaData) {
+      if (area.buffer==nullptr) {
+        continue;
+      }
+
+      if (DrawAreaBorderLabel(*styleConfig,
+                              projection,
+                              parameter,
+                              area)) {
+        drawnCount++;
+      }
+    }
+
+    timer.Stop();
+
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw area border labels: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
+    }
+  }
+
+  void MapPainter::DrawAreaBorderSymbols(const Projection& projection,
+                                         const MapParameter& parameter,
+                                         const MapData& /*data*/)
+  {
+    StopClock timer;
+    size_t    drawnCount=0;
+
+    for (const auto& area : areaData) {
+      if (area.buffer==nullptr) {
+        continue;
+      }
+
+      if (DrawAreaBorderSymbol(*styleConfig,
+                               projection,
+                               parameter,
+                               area)) {
+        drawnCount++;
+      }
+    }
+
+    timer.Stop();
+
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw area border symbols: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
+    }
+  }
+
+  void MapPainter::DrawLabels(const Projection& projection,
+                              const MapParameter& parameter,
+                              const MapData& /*data*/)
+  {
+    size_t    labelsDrawn=0;
+    StopClock timer;
+
+    //
+    // Draw normal
+    //
+
+    for (const auto& label : labels) {
+      //std::cout << "Drawing label: " << label.text << std::endl;
+      DrawLabel(projection,
+                parameter,
+                label);
+
+      labelsDrawn++;
     }
 
     //
-    // Nodes symbols & Node labels
+    // Draw overlays
     //
 
-    StopClock nodesTimer;
+    for (const auto& label : overlayLabels) {
+      //std::cout << "Drawing overlay: " << label.text << std::endl;
+      DrawLabel(projection,
+                parameter,
+                label);
 
-    DrawNodes(*styleConfig,
-              projection,
-              parameter,
-              data);
-
-    nodesTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return false;
+      labelsDrawn++;
     }
 
-    //
-    // Area labels
-    //
+    timer.Stop();
 
-    StopClock areaLabelsTimer;
-
-    DrawAreaLabels(*styleConfig,
-                   projection,
-                   parameter);
-
-    areaLabelsTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return false;
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw labels: " <<  labels.Size() << "/" << labels.GetLabelsAdded() << " " << overlayLabels.Size() << "/" << overlayLabels.GetLabelsAdded() << " " << labelsDrawn << " (pcs) "
+        << timer << " (sec)";
     }
+  }
 
-    //
-    // POI Nodes
-    //
-
-    StopClock poisTimer;
-
-    DrawPOINodes(*styleConfig,
-                 projection,
-                 parameter,
-                 data);
-
-    poisTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    StopClock labelsTimer;
-
-    DrawLabels(*styleConfig,
-               projection,
-               parameter);
-
-    labelsTimer.Stop();
-
+  void MapPainter::Postrender(const Projection& projection,
+                              const MapParameter& parameter,
+                              const MapData& data)
+  {
     AfterDrawing(*styleConfig,
                  projection,
                  parameter,
                  data);
-
-    if (parameter.IsDebugPerformance()) {
-      log.Info()
-          << "Paths: "
-          << data.ways.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysLabelDrawn << " (pcs) "
-          << prepareWaysTimer << "/" << pathsTimer << "/" << pathShieldLabelsTimer << "/" << pathContourLabelsTimer << " (sec)";
-
-      log.Info()
-          << "Areas: "
-          << data.areas.size() << "/" << areasSegments << "/" << areasDrawn << " (pcs) "
-          << prepareAreasTimer << "/" << areasTimer << "/" << areaLabelsTimer << " (sec)";
-
-      log.Info()
-          << "Nodes: "
-          << data.nodes.size() <<"+" << data.poiNodes.size() << "/" << nodesDrawn << " (pcs) "
-          << nodesTimer << "/" << poisTimer << " (sec)";
-
-      log.Info()
-          << "Labels: " << labels.Size() << "/" << labels.GetLabelsAdded() << " " << overlayLabels.Size() << "/" << overlayLabels.GetLabelsAdded() << " " << labelsDrawn << " (pcs) "
-          << labelsTimer << " (sec)";
-    }
-
-    return true;
   }
 }
