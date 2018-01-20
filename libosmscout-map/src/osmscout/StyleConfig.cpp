@@ -46,7 +46,7 @@ namespace osmscout {
   {
     AccessFeatureValue *accessValue=accessReader.GetValue(buffer);
 
-    if (accessValue!=NULL) {
+    if (accessValue!=nullptr) {
       return accessValue->IsOneway();
     }
     else {
@@ -64,8 +64,9 @@ namespace osmscout {
       return entry->second;
     }
 
-    featureReaders.push_back(DynamicFeatureReader(*typeConfig,
-                                                  feature));
+    featureReaders.emplace_back(*typeConfig,
+                                feature);
+
     size_t index=featureReaders.size()-1;
 
     featureReaderMap[feature.GetName()]=index;
@@ -339,7 +340,7 @@ namespace osmscout {
   void StyleConfig::Reset()
   {
     symbols.clear();
-    emptySymbol=NULL;
+    emptySymbol=nullptr;
 
     nodeTextStyleConditionals.clear();
     nodeIconStyleConditionals.clear();
@@ -397,7 +398,7 @@ namespace osmscout {
     auto entry=labelFactories.find(name);
 
     if (entry==labelFactories.end()) {
-      return NULL;
+      return nullptr;
     }
 
     return entry->second->Create(*typeConfig);
@@ -573,7 +574,7 @@ namespace osmscout {
           typename std::list<StyleSelector<S,A> >::iterator prevSelector=selector[level].begin();
           typename std::list<StyleSelector<S,A> >::iterator curSelector=prevSelector;
 
-          curSelector++;
+          ++curSelector;
 
           while (curSelector!=selector[level].end()) {
             if (prevSelector->criteria==curSelector->criteria) {
@@ -587,7 +588,7 @@ namespace osmscout {
             }
             else {
               prevSelector=curSelector;
-              curSelector++;
+              ++curSelector;
             }
           }
         }
@@ -636,7 +637,7 @@ namespace osmscout {
     nodeTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      nodeTypeSets.push_back(TypeInfoSet(*typeConfig));
+      nodeTypeSets.emplace_back(*typeConfig);
     }
 
     CalculateUsedTypes(*typeConfig,
@@ -699,7 +700,7 @@ namespace osmscout {
     wayTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      wayTypeSets.push_back(TypeInfoSet(*typeConfig));
+      wayTypeSets.emplace_back(*typeConfig);
     }
 
     CalculateUsedTypes(*typeConfig,
@@ -804,7 +805,7 @@ namespace osmscout {
     areaTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      areaTypeSets.push_back(TypeInfoSet(*typeConfig));
+      areaTypeSets.emplace_back(*typeConfig);
     }
 
     CalculateUsedTypes(*typeConfig,
@@ -1089,7 +1090,7 @@ namespace osmscout {
       level=styleSelectors.size()-1;
     }
 
-    style=NULL;
+    style=nullptr;
 
     for (const auto& selector : styleSelectors[level]) {
       if (!selector.criteria.Matches(context,
@@ -1118,7 +1119,7 @@ namespace osmscout {
 
     if (composed &&
         !style->IsVisible()) {
-      style=NULL;
+      style=nullptr;
     }
   }
 
@@ -1127,12 +1128,12 @@ namespace osmscout {
   {
     auto level=magnification.GetLevel();
 
-    for (size_t slot=0; slot<nodeTextStyleSelectors.size(); slot++) {
-      if (level>=nodeTextStyleSelectors[slot][type->GetIndex()].size()) {
-        level=nodeTextStyleSelectors[slot][type->GetIndex()].size()-1;
+    for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
+      if (level>=nodeTextStyleSelector[type->GetIndex()].size()) {
+        level=nodeTextStyleSelector[type->GetIndex()].size()-1;
       }
 
-      if (!nodeTextStyleSelectors[slot][type->GetIndex()][level].empty()) {
+      if (!nodeTextStyleSelector[type->GetIndex()][level].empty()) {
         return true;
       }
     }
@@ -1184,11 +1185,11 @@ namespace osmscout {
     lineStyles.clear();
     lineStyles.reserve(wayLineStyleSelectors.size());
 
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-      style=NULL;
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      style=nullptr;
 
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][buffer.GetType()->GetIndex()],
+                      wayLineStyleSelector[buffer.GetType()->GetIndex()],
                       buffer,
                       projection,
                       style);
@@ -1254,11 +1255,11 @@ namespace osmscout {
     borderStyles.clear();
     borderStyles.reserve(areaBorderStyleSelectors.size());
 
-    for (size_t slot=0; slot<areaBorderStyleSelectors.size(); slot++) {
-      style=NULL;
+    for (const auto& areaBorderStyleSelector : areaBorderStyleSelectors) {
+      style=nullptr;
 
       GetFeatureStyle(styleResolveContext,
-                      areaBorderStyleSelectors[slot][type->GetIndex()],
+                      areaBorderStyleSelector[type->GetIndex()],
                       buffer,
                       projection,
                       style);
@@ -1274,12 +1275,12 @@ namespace osmscout {
   {
     auto level=magnification.GetLevel();
 
-    for (size_t slot=0; slot<areaTextStyleSelectors.size(); slot++) {
-      if (level>=areaTextStyleSelectors[slot][type->GetIndex()].size()) {
-        level=areaTextStyleSelectors[slot][type->GetIndex()].size()-1;
+    for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
+      if (level>=areaTextStyleSelector[type->GetIndex()].size()) {
+        level=areaTextStyleSelector[type->GetIndex()].size()-1;
       }
 
-      if (!areaTextStyleSelectors[slot][type->GetIndex()][level].empty()) {
+      if (!areaTextStyleSelector[type->GetIndex()][level].empty()) {
         return true;
       }
     }
@@ -1297,11 +1298,11 @@ namespace osmscout {
     textStyles.clear();
     textStyles.reserve(areaTextStyleSelectors.size());
 
-    for (size_t slot=0; slot<areaTextStyleSelectors.size(); slot++) {
-      style=NULL;
+    for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
+      style=nullptr;
 
       GetFeatureStyle(styleResolveContext,
-                      areaTextStyleSelectors[slot][type->GetIndex()],
+                      areaTextStyleSelector[type->GetIndex()],
                       buffer,
                       projection,
                       style);
@@ -1391,9 +1392,9 @@ namespace osmscout {
   void StyleConfig::GetCoastlineLineStyle(const Projection& projection,
                                           LineStyleRef& lineStyle) const
   {
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][coastlineBuffer.GetType()->GetIndex()],
+                      wayLineStyleSelector[coastlineBuffer.GetType()->GetIndex()],
                       coastlineBuffer,
                       projection,
                       lineStyle);
@@ -1407,9 +1408,9 @@ namespace osmscout {
   void StyleConfig::GetOSMTileBorderLineStyle(const Projection& projection,
                                               LineStyleRef& lineStyle) const
   {
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][osmTileBorderBuffer.GetType()->GetIndex()],
+                      wayLineStyleSelector[osmTileBorderBuffer.GetType()->GetIndex()],
                       osmTileBorderBuffer,
                       projection,
                       lineStyle);
@@ -1423,9 +1424,9 @@ namespace osmscout {
   void StyleConfig::GetOSMSubTileBorderLineStyle(const Projection& projection,
                                                  LineStyleRef& lineStyle) const
   {
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
       GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][osmSubTileBorderBuffer.GetType()->GetIndex()],
+                      wayLineStyleSelector[osmSubTileBorderBuffer.GetType()->GetIndex()],
                       osmSubTileBorderBuffer,
                       projection,
                       lineStyle);
@@ -1502,7 +1503,7 @@ namespace osmscout {
       fileSize=GetFileSize(styleFile);
 
       file=fopen(styleFile.c_str(),"rb");
-      if (file==NULL) {
+      if (file==nullptr) {
         log.Error() << "Cannot open file '" << styleFile << "'";
 
         return false;
