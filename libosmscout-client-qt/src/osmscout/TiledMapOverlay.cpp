@@ -100,7 +100,8 @@ TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
 TiledMapOverlay::~TiledMapOverlay()
 {
   if (loader!=NULL){
-    delete loader;
+    loader->deleteLater();
+    loader=NULL;
   }
 }
 
