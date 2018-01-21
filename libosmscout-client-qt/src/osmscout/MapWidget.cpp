@@ -230,6 +230,11 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
+    osmscout::MercatorProjection projection = getProjection();
+    if (!projection.IsValid()){
+      qWarning() << "Projection is not valid!";
+      return;
+    }
     bool animationInProgress = inputHandler->animationInProgress();
 
     painter->setRenderHint(QPainter::Antialiasing, !animationInProgress);
@@ -255,8 +260,6 @@ void MapWidget::paint(QPainter *painter)
 
     // render current position spot
     if (showCurrentPosition && locationValid){
-        osmscout::MercatorProjection projection = getProjection();
-
         double x;
         double y;
         projection.GeoToPixel(osmscout::GeoCoord(currentPosition.GetLat(), currentPosition.GetLon()), x, y);
@@ -280,8 +283,6 @@ void MapWidget::paint(QPainter *painter)
 
     // render marks
     if (!marks.isEmpty()){
-        osmscout::MercatorProjection projection = getProjection();
-
         double x;
         double y;
         painter->setBrush(QBrush());
