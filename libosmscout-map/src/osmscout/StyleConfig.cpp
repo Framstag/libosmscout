@@ -244,7 +244,7 @@ namespace osmscout {
     return *this;
   }
 
-  StyleFilter& StyleFilter::AddFeature(const size_t featureFilterIndex)
+  StyleFilter& StyleFilter::AddFeature(size_t featureFilterIndex)
   {
     features.insert(featureFilterIndex);
 
@@ -1165,15 +1165,18 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
-                                     const Projection& projection,
-                                     IconStyleRef& iconStyle) const
+  IconStyleRef StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
+                                             const Projection& projection) const
   {
+    IconStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     nodeIconStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
-                    iconStyle);
+                    style);
+
+    return style;
   }
 
   void StyleConfig::GetWayLineStyles(const FeatureValueBuffer& buffer,
@@ -1200,49 +1203,61 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetWayPathTextStyle(const FeatureValueBuffer& buffer,
-                                        const Projection& projection,
-                                        PathTextStyleRef& pathTextStyle) const
+  PathTextStyleRef StyleConfig::GetWayPathTextStyle(const FeatureValueBuffer& buffer,
+                                                    const Projection& projection) const
   {
+    PathTextStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     wayPathTextStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
-                    pathTextStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
-                                          const Projection& projection,
-                                          PathSymbolStyleRef& pathSymbolStyle) const
+  PathSymbolStyleRef StyleConfig::GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
+                                                        const Projection& projection) const
   {
+    PathSymbolStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     wayPathSymbolStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
-                    pathSymbolStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
-                                          const Projection& projection,
-                                          PathShieldStyleRef& pathShieldStyle) const
+  PathShieldStyleRef StyleConfig::GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
+                                                        const Projection& projection) const
   {
+    PathShieldStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     wayPathShieldStyleSelectors[buffer.GetType()->GetIndex()],
                     buffer,
                     projection,
-                    pathShieldStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
-                                     const FeatureValueBuffer& buffer,
-                                     const Projection& projection,
-                                     FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
+                                             const FeatureValueBuffer& buffer,
+                                             const Projection& projection) const
   {
+    FillStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     areaFillStyleSelectors[type->GetIndex()],
                     buffer,
                     projection,
-                    fillStyle);
+                    style);
+
+    return style;
   }
 
   void StyleConfig::GetAreaBorderStyles(const TypeInfoRef& type,
@@ -1325,116 +1340,145 @@ namespace osmscout {
                     iconStyle);
   }
 
-  void StyleConfig::GetAreaBorderTextStyle(const TypeInfoRef& type,
-                                           const FeatureValueBuffer& buffer,
-                                           const Projection& projection,
-                                           PathTextStyleRef& pathTextStyle) const
+  PathTextStyleRef StyleConfig::GetAreaBorderTextStyle(const TypeInfoRef& type,
+                                                       const FeatureValueBuffer& buffer,
+                                                       const Projection& projection) const
   {
+    PathTextStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     areaBorderTextStyleSelectors[type->GetIndex()],
                     buffer,
                     projection,
-                    pathTextStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetAreaBorderSymbolStyle(const TypeInfoRef& type,
-                                             const FeatureValueBuffer& buffer,
-                                             const Projection& projection,
-                                             PathSymbolStyleRef& pathSymbolStyle) const
+  PathSymbolStyleRef StyleConfig::GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+                                                           const FeatureValueBuffer& buffer,
+                                                           const Projection& projection) const
   {
+    PathSymbolStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     areaBorderSymbolStyleSelectors[type->GetIndex()],
                     buffer,
                     projection,
-                    pathSymbolStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetLandFillStyle(const Projection& projection,
-                                     FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetLandFillStyle(const Projection& projection) const
   {
+    FillStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     areaFillStyleSelectors[tileLandBuffer.GetType()->GetIndex()],
                     tileLandBuffer,
                     projection,
-                    fillStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetSeaFillStyle(const Projection& projection,
-                                    FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetSeaFillStyle(const Projection& projection) const
   {
+    FillStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     areaFillStyleSelectors[tileSeaBuffer.GetType()->GetIndex()],
                     tileSeaBuffer,
                     projection,
-                    fillStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetCoastFillStyle(const Projection& projection,
-                                      FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetCoastFillStyle(const Projection& projection) const
   {
+    FillStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     areaFillStyleSelectors[tileCoastBuffer.GetType()->GetIndex()],
                     tileCoastBuffer,
                     projection,
-                    fillStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetUnknownFillStyle(const Projection& projection,
-                                        FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetUnknownFillStyle(const Projection& projection) const
   {
+    FillStyleRef style;
+
     GetFeatureStyle(styleResolveContext,
                     areaFillStyleSelectors[tileUnknownBuffer.GetType()->GetIndex()],
                     tileUnknownBuffer,
                     projection,
-                    fillStyle);
+                    style);
+
+    return style;
   }
 
-  void StyleConfig::GetCoastlineLineStyle(const Projection& projection,
-                                          LineStyleRef& lineStyle) const
+  LineStyleRef StyleConfig::GetCoastlineLineStyle(const Projection& projection) const
   {
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      LineStyleRef style;
+
       GetFeatureStyle(styleResolveContext,
                       wayLineStyleSelector[coastlineBuffer.GetType()->GetIndex()],
                       coastlineBuffer,
                       projection,
-                      lineStyle);
+                      style);
 
-      if (lineStyle) {
-        return;
+      if (style) {
+        return style;
       }
     }
+
+    return nullptr;
   }
 
-  void StyleConfig::GetOSMTileBorderLineStyle(const Projection& projection,
-                                              LineStyleRef& lineStyle) const
+  LineStyleRef StyleConfig::GetOSMTileBorderLineStyle(const Projection& projection) const
   {
+    LineStyleRef style;
+
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      LineStyleRef style;
+
       GetFeatureStyle(styleResolveContext,
                       wayLineStyleSelector[osmTileBorderBuffer.GetType()->GetIndex()],
                       osmTileBorderBuffer,
                       projection,
-                      lineStyle);
+                      style);
 
-      if (lineStyle) {
-        return;
+      if (style) {
+        return style;
       }
     }
+
+    return nullptr;
   }
 
-  void StyleConfig::GetOSMSubTileBorderLineStyle(const Projection& projection,
-                                                 LineStyleRef& lineStyle) const
+  LineStyleRef StyleConfig::GetOSMSubTileBorderLineStyle(const Projection& projection) const
   {
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      LineStyleRef style;
+
       GetFeatureStyle(styleResolveContext,
                       wayLineStyleSelector[osmSubTileBorderBuffer.GetType()->GetIndex()],
                       osmSubTileBorderBuffer,
                       projection,
-                      lineStyle);
+                      style);
 
-      if (lineStyle) {
-        return;
+      if (style) {
+        return style;
       }
     }
+
+    return nullptr;
   }
 
   void StyleConfig::GetNodeTextStyleSelectors(size_t level,

@@ -157,7 +157,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
 
   // projection bounding box may be smaller than projection dimensions...
   double scale=computeScale(finalImgProjection,requestProjection);
-  
+
   QRectF sourceRectangle(0,
                          0,
                          finalImgProjection.GetWidth(),
@@ -521,7 +521,7 @@ void PlaneMapRenderer::onStylesheetFilenameChanged()
       [this](const std::list<DBInstanceRef>& databases) {
         for (auto &db:databases){
           if (db->styleConfig){
-            db->styleConfig->GetUnknownFillStyle(projection, finishedUnknownFillStyle);
+            finishedUnknownFillStyle=db->styleConfig->GetUnknownFillStyle(projection);
             if (finishedUnknownFillStyle){
               break;
             }

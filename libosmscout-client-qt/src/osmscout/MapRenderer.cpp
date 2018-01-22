@@ -221,8 +221,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     for (auto &db:databases){
       // fill background with "unknown" color
       if (!backgroundRendered && db->styleConfig){
-          osmscout::FillStyleRef unknownFillStyle;
-          db->styleConfig->GetUnknownFillStyle(renderProjection, unknownFillStyle);
+          osmscout::FillStyleRef unknownFillStyle=db->styleConfig->GetUnknownFillStyle(renderProjection);
           if (unknownFillStyle){
             osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
             p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
@@ -289,7 +288,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
         continue;
       }
     }
-    
+
     osmscout::MapData data;
 
     db->mapService->AddTileDataToMapData(tileList,data);

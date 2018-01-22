@@ -245,14 +245,12 @@ namespace osmscout {
       entry.coordCount++;
 
       if (parameter.IsDebugData()) {
-        IconStyleRef iconStyle;
+        IconStyleRef iconStyle=styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                                             projection);
 
         styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
                                        projection,
                                        textStyles);
-        styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                      projection,
-                                      iconStyle);
 
         entry.labelCount+=textStyles.size();
 
@@ -269,14 +267,12 @@ namespace osmscout {
       entry.coordCount++;
 
       if (parameter.IsDebugData()) {
-        IconStyleRef iconStyle;
+        IconStyleRef iconStyle=styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                                             projection);
 
         styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
                                        projection,
                                        textStyles);
-        styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                      projection,
-                                      iconStyle);
 
         entry.labelCount+=textStyles.size();
 
@@ -293,15 +289,10 @@ namespace osmscout {
       entry.coordCount+=way->nodes.size();
 
       if (parameter.IsDebugData()) {
-        PathShieldStyleRef shieldStyle;
-        PathTextStyleRef   pathTextStyle;
-
-        styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
-                                           projection,
-                                           shieldStyle);
-        styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
-                                         projection,
-                                         pathTextStyle);
+        PathShieldStyleRef shieldStyle=styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+                                                                          projection);
+        PathTextStyleRef   pathTextStyle=styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
+                                                                          projection);
 
         if (shieldStyle) {
           entry.labelCount++;
@@ -320,15 +311,10 @@ namespace osmscout {
       entry.coordCount+=way->nodes.size();
 
       if (parameter.IsDebugData()) {
-        PathShieldStyleRef shieldStyle;
-        PathTextStyleRef   pathTextStyle;
-
-        styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
-                                           projection,
-                                           shieldStyle);
-        styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
-                                         projection,
-                                         pathTextStyle);
+        PathShieldStyleRef shieldStyle=styleConfig->GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
+                                                                          projection);
+        PathTextStyleRef   pathTextStyle=styleConfig->GetWayPathTextStyle(way->GetFeatureValueBuffer(),
+                                                                          projection);
 
         if (shieldStyle) {
           entry.labelCount++;
@@ -1063,12 +1049,9 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const AreaData& areaData)
   {
-    PathTextStyleRef borderTextStyle;
-
-    styleConfig.GetAreaBorderTextStyle(areaData.type,
-                                       *areaData.buffer,
-                                       projection,
-                                       borderTextStyle);
+    PathTextStyleRef borderTextStyle=styleConfig.GetAreaBorderTextStyle(areaData.type,
+                                                                        *areaData.buffer,
+                                                                        projection);
 
     if (!borderTextStyle) {
       return false;
@@ -1119,12 +1102,9 @@ namespace osmscout {
                                         const MapParameter& parameter,
                                         const AreaData& areaData)
   {
-    PathSymbolStyleRef borderSymbolStyle;
-
-    styleConfig.GetAreaBorderSymbolStyle(areaData.type,
-                                         *areaData.buffer,
-                                         projection,
-                                         borderSymbolStyle);
+    PathSymbolStyleRef borderSymbolStyle=styleConfig.GetAreaBorderSymbolStyle(areaData.type,
+                                                                              *areaData.buffer,
+                                                                              projection);
 
     if (!borderSymbolStyle) {
       return false;
@@ -1166,14 +1146,12 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const NodeRef& node)
   {
-    IconStyleRef iconStyle;
+    IconStyleRef iconStyle=styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                                        projection);
 
     styleConfig.GetNodeTextStyles(node->GetFeatureValueBuffer(),
                                  projection,
                                  textStyles);
-    styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                 projection,
-                                 iconStyle);
 
     double x,y;
 
@@ -1224,11 +1202,8 @@ namespace osmscout {
                                      const MapParameter& parameter,
                                      const MapPainter::WayPathData& data)
   {
-    PathSymbolStyleRef pathSymbolStyle;
-
-    styleConfig.GetWayPathSymbolStyle(*data.buffer,
-                                      projection,
-                                      pathSymbolStyle);
+    PathSymbolStyleRef pathSymbolStyle=styleConfig.GetWayPathSymbolStyle(*data.buffer,
+                                                                         projection);
 
     if (!pathSymbolStyle) {
       return false;
@@ -1270,11 +1245,8 @@ namespace osmscout {
                                             const MapParameter& parameter,
                                             const Way& data)
   {
-    PathShieldStyleRef shieldStyle;
-
-    styleConfig.GetWayPathShieldStyle(data.GetFeatureValueBuffer(),
-                                      projection,
-                                      shieldStyle);
+    PathShieldStyleRef shieldStyle=styleConfig.GetWayPathShieldStyle(data.GetFeatureValueBuffer(),
+                                                                     projection);
 
     if (!shieldStyle) {
       return false;
@@ -1301,11 +1273,8 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const WayPathData& data)
   {
-    PathTextStyleRef pathTextStyle;
-
-    styleConfig.GetWayPathTextStyle(*data.buffer,
-                                    projection,
-                                    pathTextStyle);
+    PathTextStyleRef pathTextStyle=styleConfig.GetWayPathTextStyle(*data.buffer,
+                                                                   projection);
 
     if (!pathTextStyle) {
       return false;
@@ -1499,10 +1468,9 @@ namespace osmscout {
           type=ring.GetType();
         }
 
-        styleConfig.GetAreaFillStyle(type,
-                                     ring.GetFeatureValueBuffer(),
-                                     projection,
-                                     fillStyle);
+        fillStyle=styleConfig.GetAreaFillStyle(type,
+                                               ring.GetFeatureValueBuffer(),
+                                               projection);
 
         FillStyleProcessorRef fillProcessor=parameter.GetFillStyleProcessor(ring.GetType()->GetIndex());
 
@@ -1969,14 +1937,10 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const MapData& data)
   {
-    FillStyleRef      landFill;
-
 #if defined(DEBUG_GROUNDTILES)
     std::set<GeoCoord> drawnLabels;
 #endif
-
-    styleConfig->GetLandFillStyle(projection,
-                                  landFill);
+    FillStyleRef      landFill=styleConfig->GetLandFillStyle(projection);
 
     if (!landFill) {
       landFill=this->landFill;
@@ -1992,22 +1956,13 @@ namespace osmscout {
       return;
     }
 
-    FillStyleRef       seaFill;
-    FillStyleRef       coastFill;
-    FillStyleRef       unknownFill;
-    LineStyleRef       coastlineLine;
+    FillStyleRef       seaFill=styleConfig->GetSeaFillStyle(projection);
+    FillStyleRef       coastFill=styleConfig->GetCoastFillStyle(projection);
+    FillStyleRef       unknownFill=styleConfig->GetUnknownFillStyle(projection);
+    LineStyleRef       coastlineLine=styleConfig->GetCoastlineLineStyle(projection);
     std::vector<Point> points;
     size_t             start=0; // Make the compiler happy
     size_t             end=0;   // Make the compiler happy
-
-    styleConfig->GetSeaFillStyle(projection,
-                                 seaFill);
-    styleConfig->GetCoastFillStyle(projection,
-                                   coastFill);
-    styleConfig->GetUnknownFillStyle(projection,
-                                     unknownFill);
-    styleConfig->GetCoastlineLineStyle(projection,
-                                       coastlineLine);
 
     if (!seaFill) {
       seaFill=this->seaFill;
@@ -2261,10 +2216,7 @@ namespace osmscout {
                                     const MapParameter& parameter,
                                     const MapData& /*data*/)
   {
-    LineStyleRef osmSubTileLine;
-
-    styleConfig->GetOSMSubTileBorderLineStyle(projection,
-                                              osmSubTileLine);
+    LineStyleRef osmSubTileLine=styleConfig->GetOSMSubTileBorderLineStyle(projection);
 
     if (osmSubTileLine) {
       Magnification magnification=projection.GetMagnification();
@@ -2277,10 +2229,7 @@ namespace osmscout {
                       osmSubTileLine);
     }
 
-    LineStyleRef osmTileLine;
-
-    styleConfig->GetOSMTileBorderLineStyle(projection,
-                                           osmTileLine);
+    LineStyleRef osmTileLine=styleConfig->GetOSMTileBorderLineStyle(projection);
 
     if (osmTileLine) {
       Magnification magnification=projection.GetMagnification();

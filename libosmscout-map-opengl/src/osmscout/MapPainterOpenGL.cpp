@@ -107,8 +107,8 @@ namespace osmscout {
   void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                                             const osmscout::Projection &projection,
                                             const osmscout::StyleConfigRef &styleConfig) {
-    styleConfig.get()->GetLandFillStyle(projection, landFill);
-    styleConfig.get()->GetSeaFillStyle(projection, seaFill);
+    landFill=styleConfig.get()->GetLandFillStyle(projection);
+    seaFill=styleConfig.get()->GetSeaFillStyle(projection);
 
     Textloader.SetDefaultFontSize(parameter.GetFontSize());
 
@@ -334,10 +334,9 @@ namespace osmscout {
             type = ring.GetType();
           }
 
-          styleConfig->GetAreaFillStyle(type,
-                                        ring.GetFeatureValueBuffer(),
-                                        projection,
-                                        fillStyle);
+          fillStyle=styleConfig->GetAreaFillStyle(type,
+                                                  ring.GetFeatureValueBuffer(),
+                                                  projection);
 
           styleConfig->GetAreaBorderStyles(type,
                                            ring.GetFeatureValueBuffer(),
@@ -763,26 +762,16 @@ namespace osmscout {
   osmscout::MapPainterOpenGL::ProcessGround(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                                             const osmscout::Projection &projection,
                                             const osmscout::StyleConfigRef &styleConfig) {
-    FillStyleRef landFill;
-
-    styleConfig->GetLandFillStyle(projection,
-                                  landFill);
+    FillStyleRef landFill=styleConfig->GetLandFillStyle(projection);
 
     if (!landFill) {
       landFill = this->landFill;
     }
 
-    FillStyleRef seaFill;
-    FillStyleRef coastFill;
-    FillStyleRef unknownFill;
+    FillStyleRef seaFill=styleConfig->GetSeaFillStyle(projection);
+    FillStyleRef coastFill=styleConfig->GetCoastFillStyle(projection);
+    FillStyleRef unknownFill=styleConfig->GetUnknownFillStyle(projection);
     std::vector<Point> points;
-
-    styleConfig->GetSeaFillStyle(projection,
-                                 seaFill);
-    styleConfig->GetCoastFillStyle(projection,
-                                   coastFill);
-    styleConfig->GetUnknownFillStyle(projection,
-                                     unknownFill);
 
     if (!seaFill) {
       seaFill = this->seaFill;
@@ -927,10 +916,8 @@ namespace osmscout {
     std::vector<int> icons;
     for (const auto &node: data.nodes) {
       FeatureValueBuffer buffer = node->GetFeatureValueBuffer();
-      IconStyleRef iconStyle;
-      styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                    projection,
-                                    iconStyle);
+      IconStyleRef iconStyle=styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                                           projection);
 
       std::vector<TextStyleRef> textStyles;
       styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),

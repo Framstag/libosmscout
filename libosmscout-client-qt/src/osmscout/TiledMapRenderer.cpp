@@ -129,7 +129,7 @@ void TiledMapRenderer::onStylesheetFilenameChanged()
       [this,&unknownFillStyle,&projection](const std::list<DBInstanceRef>& databases) {
         for (auto &db:databases){
           if (db->styleConfig) {
-            db->styleConfig->GetUnknownFillStyle(projection, unknownFillStyle);
+            unknownFillStyle=db->styleConfig->GetUnknownFillStyle(projection);
             if (unknownFillStyle) {
               osmscout::Color fillColor = unknownFillStyle->GetFillColor();
               unknownColor.setRgbF(fillColor.GetR(),
@@ -462,7 +462,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
     projection.Set(tileVisualCenter, /* angle */ 0, magnification, mapDpi,
                    canvas.width(), canvas.height());
     projection.SetLinearInterpolationUsage(loadZ >= 10);
-    
+
     // overlay ways
     std::vector<OverlayObjectRef> overlayObjects;
     osmscout::GeoBox renderBox;

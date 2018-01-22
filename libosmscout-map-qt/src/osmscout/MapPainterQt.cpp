@@ -1146,11 +1146,7 @@ namespace osmscout {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setRenderHint(QPainter::TextAntialiasing);
 
-    FillStyleRef      landFill;
-
-
-    styleConfig->GetLandFillStyle(projection,
-                                  landFill);
+    FillStyleRef landFill=styleConfig->GetLandFillStyle(projection);
 
     if (!landFill) {
       return;
@@ -1162,22 +1158,15 @@ namespace osmscout {
                  *landFill);
     }
 
-    FillStyleRef       seaFill;
-    FillStyleRef       coastFill;
-    FillStyleRef       unknownFill;
-    LineStyleRef       coastlineLine;
+    FillStyleRef       seaFill=styleConfig->GetSeaFillStyle(projection);
+    FillStyleRef       coastFill=styleConfig->GetCoastFillStyle(projection);
+    FillStyleRef       unknownFill=styleConfig->GetUnknownFillStyle(projection);
+    LineStyleRef       coastlineLine=styleConfig->GetCoastlineLineStyle(projection);
     std::vector<Point> points;
     size_t             start=0; // Make the compiler happy
     size_t             end=0;   // Make the compiler happy
 
-    styleConfig->GetSeaFillStyle(projection,
-                                 seaFill);
-    styleConfig->GetCoastFillStyle(projection,
-                                   coastFill);
-    styleConfig->GetUnknownFillStyle(projection,
-                                     unknownFill);
-    styleConfig->GetCoastlineLineStyle(projection,
-                                       coastlineLine);
+    ;
 
     if (!seaFill) {
       return;
