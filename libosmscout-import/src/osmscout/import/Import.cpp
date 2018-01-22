@@ -60,6 +60,8 @@
 #include <osmscout/import/GenAreaNodeIndex.h>
 #include <osmscout/import/GenAreaWayIndex.h>
 
+#include <osmscout/import/GenCoverageIndex.h>
+
 #include <osmscout/import/GenLocationIndex.h>
 #include <osmscout/import/GenOptimizeAreaWayIds.h>
 #include <osmscout/import/GenWaterIndex.h>
@@ -83,9 +85,9 @@ namespace osmscout {
 
   static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-  static const size_t defaultEndStep=24;
+  static const size_t defaultEndStep=25;
 #else
-  static const size_t defaultEndStep=23;
+  static const size_t defaultEndStep=24;
 #endif
 
   ImportParameter::Router::Router(uint8_t vehicleMask,
@@ -840,25 +842,29 @@ namespace osmscout {
     modules.push_back(std::make_shared<AreaAreaIndexGenerator>());
 
     /* 18 */
-    modules.push_back(std::make_shared<WaterIndexGenerator>());
+    modules.push_back(std::make_shared<CoverageIndexGenerator>());
 
     /* 19 */
-    modules.push_back(std::make_shared<OptimizeAreasLowZoomGenerator>());
+    modules.push_back(std::make_shared<WaterIndexGenerator>());
 
     /* 20 */
-    modules.push_back(std::make_shared<OptimizeWaysLowZoomGenerator>());
+    modules.push_back(std::make_shared<OptimizeAreasLowZoomGenerator>());
 
     /* 21 */
-    modules.push_back(std::make_shared<LocationIndexGenerator>());
+    modules.push_back(std::make_shared<OptimizeWaysLowZoomGenerator>());
 
     /* 22 */
-    modules.push_back(std::make_shared<RouteDataGenerator>());
+    modules.push_back(std::make_shared<LocationIndexGenerator>());
 
     /* 23 */
+    modules.push_back(std::make_shared<RouteDataGenerator>());
+
+    /* 24 */
     modules.push_back(std::make_shared<IntersectionIndexGenerator>());
 
+
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 24 */
+    /* 25 */
     modules.push_back(std::make_shared<TextIndexGenerator>());
 #endif
   }

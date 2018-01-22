@@ -34,7 +34,7 @@ namespace osmscout {
     IntersectionIndexGenerator();
 
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
   };
 }
 

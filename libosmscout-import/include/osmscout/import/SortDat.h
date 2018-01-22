@@ -133,7 +133,7 @@ namespace osmscout {
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 
   template <class N>

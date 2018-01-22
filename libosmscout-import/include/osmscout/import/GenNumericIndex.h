@@ -52,11 +52,12 @@ namespace osmscout {
     NumericIndexGenerator(const std::string& description,
                           const std::string& datafile,
                           const std::string& indexfile);
-    virtual ~NumericIndexGenerator();
+
+    ~NumericIndexGenerator() override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 
   template <class N,class T>

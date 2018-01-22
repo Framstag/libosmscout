@@ -63,11 +63,11 @@ namespace osmscout {
                   const std::unordered_set<Id>& usedIdAtLeastTwiceSet);
   public:
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 }
 

@@ -521,10 +521,10 @@ namespace osmscout
     return true;
   }
 
-  bool TextIndexGenerator::BuildKeyStr(const std::string &text,
-                                       const FileOffset offset,
-                                       const RefType reftype,
-                                       std::string &keyString) const
+  bool TextIndexGenerator::BuildKeyStr(const std::string& text,
+                                       FileOffset offset,
+                                       const RefType& reftype,
+                                       std::string& keyString) const
   {
     if(text.empty()) {
       return false;

@@ -37,11 +37,11 @@ namespace osmscout
     TextIndexGenerator();
 
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter &parameter,
-                Progress &progress);
+                Progress &progress) override;
 
   private:
     bool SetFileOffsetSize(const ImportParameter &parameter,
@@ -59,10 +59,10 @@ namespace osmscout
                               Progress &progress,
                               const TypeConfig &typeConfig);
 
-    bool BuildKeyStr(const std::string &text,
-                     const FileOffset offset,
-                     const RefType reftype,
-                     std::string &keyString) const;
+    bool BuildKeyStr(const std::string& text,
+                     FileOffset offset,
+                     const RefType& reftype,
+                     std::string& keyString) const;
 
     // keysets used to store text data and generate tries
     marisa::Keyset  keysetPoi;

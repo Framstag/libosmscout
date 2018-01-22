@@ -80,8 +80,6 @@ namespace osmscout {
     GradeFeatureValueReader            *gradeReader;
 
   private:
-    bool IsAccessRestricted(const FeatureValueBuffer& buffer) const;
-
     AccessFeatureValue GetAccess(const FeatureValueBuffer& buffer) const;
 
     inline AccessFeatureValue GetAccess(const Way& way) const
@@ -274,11 +272,11 @@ namespace osmscout {
     RouteDataGenerator();
 
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 }
 

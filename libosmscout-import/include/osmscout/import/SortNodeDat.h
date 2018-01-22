@@ -35,13 +35,13 @@ namespace osmscout {
 
   private:
     void GetTopLeftCoordinate(const Node& data,
-                              GeoCoord& coord);
+                              GeoCoord& coord) override;
 
   public:
     SortNodeDataGenerator();
 
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
   };
 }
 
