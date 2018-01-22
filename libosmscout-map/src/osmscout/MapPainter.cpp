@@ -1167,7 +1167,8 @@ namespace osmscout {
     Color color=data.lineStyle->GetLineColor();
 
     if (data.lineStyle->HasDashes() &&
-        data.lineStyle->GetGapColor().GetA()>0.0) {
+        data.lineStyle->GetGapColor().IsVisible()) {
+      // Draw the background of a dashed line
       DrawPath(projection,
                parameter,
                data.lineStyle->GetGapColor(),
