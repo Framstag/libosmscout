@@ -336,17 +336,14 @@ namespace osmscout {
 
         if (parameter.IsDebugData()) {
           if (ring.IsMasterRing()) {
-            IconStyleRef iconStyle;
+            IconStyleRef iconStyle=styleConfig->GetAreaIconStyle(area->GetType(),
+                                                                 ring.GetFeatureValueBuffer(),
+                                                                 projection);
 
             styleConfig->GetAreaTextStyles(area->GetType(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
                                            textStyles);
-            styleConfig->GetAreaIconStyle(area->GetType(),
-                                          ring.GetFeatureValueBuffer(),
-                                          projection,
-                                          iconStyle);
-
             if (iconStyle) {
               entry.iconCount++;
             }
@@ -367,17 +364,14 @@ namespace osmscout {
 
         if (parameter.IsDebugData()) {
           if (ring.IsMasterRing()) {
-            IconStyleRef iconStyle;
+            IconStyleRef iconStyle=styleConfig->GetAreaIconStyle(area->GetType(),
+                                                                 ring.GetFeatureValueBuffer(),
+                                                                 projection);
 
             styleConfig->GetAreaTextStyles(area->GetType(),
                                            ring.GetFeatureValueBuffer(),
                                            projection,
                                            textStyles);
-            styleConfig->GetAreaIconStyle(area->GetType(),
-                                          ring.GetFeatureValueBuffer(),
-                                          projection,
-                                          iconStyle);
-
             if (iconStyle) {
               entry.iconCount++;
             }
@@ -1006,17 +1000,14 @@ namespace osmscout {
                                     const MapParameter& parameter,
                                     const AreaData& areaData)
   {
-    IconStyleRef iconStyle;
+    IconStyleRef iconStyle=styleConfig.GetAreaIconStyle(areaData.type,
+                                                        *areaData.buffer,
+                                                        projection);
 
     styleConfig.GetAreaTextStyles(areaData.type,
                                   *areaData.buffer,
                                   projection,
                                   textStyles);
-
-    styleConfig.GetAreaIconStyle(areaData.type,
-                                 *areaData.buffer,
-                                 projection,
-                                 iconStyle);
 
     if (!iconStyle && textStyles.empty()) {
       return;

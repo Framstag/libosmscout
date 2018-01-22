@@ -706,16 +706,15 @@ namespace osmscout {
                            const FeatureValueBuffer& buffer,
                            const Projection& projection,
                            std::vector<TextStyleRef>& textStyles) const;
-    void GetAreaIconStyle(const TypeInfoRef& type,
-                          const FeatureValueBuffer& buffer,
-                          const Projection& projection,
-                          IconStyleRef& iconStyle) const;
-    PathTextStyleRef GetAreaBorderTextStyle(const TypeInfoRef& type,
-                                const FeatureValueBuffer& buffer,
-                                const Projection& projection) const;
-    PathSymbolStyleRef GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+    IconStyleRef GetAreaIconStyle(const TypeInfoRef& type,
                                   const FeatureValueBuffer& buffer,
                                   const Projection& projection) const;
+    PathTextStyleRef GetAreaBorderTextStyle(const TypeInfoRef& type,
+                                            const FeatureValueBuffer& buffer,
+                                            const Projection& projection) const;
+    PathSymbolStyleRef GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+                                                const FeatureValueBuffer& buffer,
+                                                const Projection& projection) const;
 
     FillStyleRef GetLandFillStyle(const Projection& projection) const;
     FillStyleRef GetSeaFillStyle(const Projection& projection) const;
