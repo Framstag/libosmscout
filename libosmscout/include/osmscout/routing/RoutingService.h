@@ -237,7 +237,8 @@ namespace osmscout {
    *
    * Abstract algorithms for routing
    */
-  class OSMSCOUT_API RoutingService{
+  class OSMSCOUT_API RoutingService
+  {
   protected:
     /**
      * \ingroup Routing

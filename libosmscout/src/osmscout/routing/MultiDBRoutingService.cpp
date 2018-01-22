@@ -70,14 +70,10 @@ namespace osmscout {
       return false;
     }
 
-    if (!junctionDataFile.Open(database->GetTypeConfig(),
-                               database->GetPath(),
-                               false,
-                               false)) {
-      return false;
-    }
-
-    return true;
+    return junctionDataFile.Open(database->GetTypeConfig(),
+                                 database->GetPath(),
+                                 false,
+                                 false);
   }
 
   void RouterDBFiles::Close()
@@ -473,7 +469,7 @@ namespace osmscout {
 
   bool MultiDBRoutingService::GetWayByOffset(const DBFileOffset &offset,
                                              WayRef &way)
-  {    
+  {
     return databases[offset.database]->GetWayByOffset(offset.offset,way);
   }
 
@@ -572,6 +568,7 @@ namespace osmscout {
     state.GetOverlappingDatabases(database,id,overlappingDatabases);
 
     std::vector<DBFileOffset> twins;
+
     twins.reserve(overlappingDatabases.size());
     for (const auto &dbId:overlappingDatabases){
       FileOffset offset;
@@ -579,7 +576,7 @@ namespace osmscout {
         log.Error() << "Failed to retrieve file offset";
         continue;
       }
-      twins.push_back(DBFileOffset(dbId,offset));
+      twins.emplace_back(dbId,offset);
     }
     return twins;
   }
@@ -604,7 +601,10 @@ namespace osmscout {
         return result;
       }
       SimpleRoutingServiceRef service=it->second;
-      return service->CalculateRoute(*(profiles.at(it->first)),start,target,parameter);
+      return service->CalculateRoute(*(profiles.at(it->first)),
+                                     start,
+                                     target,
+                                     parameter);
     }
 
     // start and target databases are different, try to find common route nodes
@@ -645,7 +645,7 @@ namespace osmscout {
                               profiles[start.GetDatabaseId()],
                               profiles[target.GetDatabaseId()],
                               commonRouteNodes);
-    
+
     return AbstractRoutingService<MultiDBRoutingState>::CalculateRoute(state,
                                                                        start,
                                                                        target,
@@ -670,42 +670,42 @@ namespace osmscout {
     {
         RoutingResult               result;
         std::vector<RoutePosition>  routePositions;
-        
+
         assert(!via.empty());
-        
+
         for (const auto& etap : via) {
             RoutePosition target = GetClosestRoutableNode(etap, radius);
-            
+
             if (!target.IsValid()) {
                 return result;
             }
-            
+
             routePositions.push_back(target);
         }
-        
+
         RoutingResult partialResult;
         for (size_t index=0; index<routePositions.size() - 1; index++) {
             RoutePosition fromRoutePosition=routePositions[index];
             RoutePosition toRoutePosition=routePositions[index+1];
-            
+
             partialResult=CalculateRoute(fromRoutePosition,
                                          toRoutePosition,
                                          parameter);
             if (!partialResult.Success()) {
                 result.GetRoute().Clear();
-                
+
                 return result;
             }
-            
+
             /* In intermediary via points the end of the previous part is the start of the */
             /* next part, we need to remove the duplicate point in the calculated route */
             if (index<routePositions.size() - 2) {
                 partialResult.GetRoute().PopEntry();
             }
-            
+
             result.GetRoute().Append(partialResult.GetRoute());
         }
-        
+
         return result;
     }
 
@@ -723,22 +723,19 @@ namespace osmscout {
 
     motorwayTypeNames.insert("highway_motorway_trunk");
     motorwayTypeNames.insert("highway_trunk");
-    
+
     motorwayLinkTypeNames.insert("highway_trunk_link");
     motorwayTypeNames.insert("highway_motorway_primary");
 
     RoutePostprocessor routePostprocessor;
-    if (!routePostprocessor.PostprocessRouteDescription(description,
-                                                        profiles,
-                                                        databases,
-                                                        postprocessors,
-                                                        motorwayTypeNames,
-                                                        motorwayLinkTypeNames,
-                                                        junctionTypeNames)) {
-      return false;
-    }
 
-    return true;
+    return routePostprocessor.PostprocessRouteDescription(description,
+                                                          profiles,
+                                                          databases,
+                                                          postprocessors,
+                                                          motorwayTypeNames,
+                                                          motorwayLinkTypeNames,
+                                                          junctionTypeNames);
   }
 
   // FIXME: I don't understand why these methods should be here...
@@ -759,5 +756,4 @@ namespace osmscout {
   {
     return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToWay(data,way);
   }
-
 }

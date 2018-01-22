@@ -56,7 +56,6 @@
 
 namespace osmscout {
 
-
   /**
    * \ingroup Service
    * \ingroup Routing
@@ -76,7 +75,7 @@ namespace osmscout {
     DatabaseRef                          database;              //!< Database object, holding all index and data files
     std::string                          filenamebase;          //!< Common base name for all router files
     AccessFeatureValueReader             accessReader;          //!< Read access information from objects
-    bool                                 isOpen;                //!< true, if opened    
+    bool                                 isOpen;                //!< true, if opened
 
     std::string                          path;                  //!< Path to the directory containing all files
 
@@ -85,77 +84,78 @@ namespace osmscout {
     ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loading object variant data
 
   protected:
-    virtual Vehicle GetVehicle(const RoutingProfile& profile);
+    Vehicle GetVehicle(const RoutingProfile& profile) override;
 
-    virtual bool CanUse(const RoutingProfile& profile,
+    bool CanUse(const RoutingProfile& profile,
                         const DatabaseId database,
                         const RouteNode& routeNode,
-                        size_t pathIndex);
+                        size_t pathIndex) override;
 
-    virtual bool CanUseForward(const RoutingProfile& profile,
-                               const DatabaseId& database,
-                               const WayRef& way);
+    bool CanUseForward(const RoutingProfile& profile,
+                       const DatabaseId& database,
+                       const WayRef& way) override;
 
-    virtual bool CanUseBackward(const RoutingProfile& profile,
-                                const DatabaseId& database,
-                                const WayRef& way);
+    bool CanUseBackward(const RoutingProfile& profile,
+                        const DatabaseId& database,
+                        const WayRef& way) override;
 
-    virtual double GetCosts(const RoutingProfile& profile,
+    double GetCosts(const RoutingProfile& profile,
+                    const DatabaseId database,
+                    const RouteNode& routeNode,
+                    size_t pathIndex) override;
+
+    double GetCosts(const RoutingProfile& profile,
+                    const DatabaseId database,
+                    const WayRef &way,
+                    double wayLength) override;
+
+    double GetEstimateCosts(const RoutingProfile& profile,
                             const DatabaseId database,
-                            const RouteNode& routeNode,
-                            size_t pathIndex);
+                            double targetDistance) override;
 
-    virtual double GetCosts(const RoutingProfile& profile,
-                            const DatabaseId database,
-                            const WayRef &way,
-                            double wayLength);
+    double GetCostLimit(const RoutingProfile& profile,
+                        const DatabaseId database,
+                        double targetDistance) override;
 
-    virtual double GetEstimateCosts(const RoutingProfile& profile,
-                                    const DatabaseId database,
-                                    double targetDistance);
+    bool GetRouteNode(const DatabaseId &database,
+                      const Id &id,
+                      RouteNodeRef &node) override;
 
-    virtual double GetCostLimit(const RoutingProfile& profile,
-                                const DatabaseId database,
-                                double targetDistance);
+    bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
+                               std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap) override;
 
-    virtual bool GetRouteNode(const DatabaseId &database,
-                              const Id &id,
-                              RouteNodeRef &node);
+    bool GetRouteNodeByOffset(const DBFileOffset &offset,
+                              RouteNodeRef &node) override;
 
-    virtual bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
-                                       std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap);
+    bool GetRouteNodeOffset(const DatabaseId &database,
+                            const Id &id,
+                            FileOffset &offset) override;
 
-    virtual bool GetRouteNodeByOffset(const DBFileOffset &offset,
-                                      RouteNodeRef &node);
+    bool GetWayByOffset(const DBFileOffset &offset,
+                        WayRef &way) override;
 
-    virtual bool GetRouteNodeOffset(const DatabaseId &database,
-                                    const Id &id,
-                                    FileOffset &offset);
+    bool GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
+                         std::unordered_map<DBFileOffset,WayRef> &wayMap) override;
+
+    bool GetAreaByOffset(const DBFileOffset &offset,
+                         AreaRef &area) override;
+
+    bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
+                          std::unordered_map<DBFileOffset,AreaRef> &areaMap) override;
+
+    bool ResolveRouteDataJunctions(RouteData& route) override;
+
+    std::vector<DBFileOffset> GetNodeTwins(const RoutingProfile& state,
+                                           const DatabaseId database,
+                                           const Id id) override;
 
     bool HasNodeWithId(const std::vector<Point>& nodes) const;
 
-    virtual bool GetWayByOffset(const DBFileOffset &offset,
-                                WayRef &way);
-
-    virtual bool GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
-                                 std::unordered_map<DBFileOffset,WayRef> &wayMap);
-
-    virtual bool GetAreaByOffset(const DBFileOffset &offset,
-                                 AreaRef &area);
-
-    virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
-                                  std::unordered_map<DBFileOffset,AreaRef> &areaMap);
-
-    virtual bool ResolveRouteDataJunctions(RouteData& route);
-
-    virtual std::vector<DBFileOffset> GetNodeTwins(const RoutingProfile& state,
-                                                   const DatabaseId database,
-                                                   const Id id);
   public:
     SimpleRoutingService(const DatabaseRef& database,
                          const RouterParameter& parameter,
                          const std::string& filenamebase);
-    virtual ~SimpleRoutingService();
+    ~SimpleRoutingService() override;
 
     bool Open();
     bool IsOpen() const;
@@ -163,31 +163,10 @@ namespace osmscout {
 
     TypeConfigRef GetTypeConfig() const;
 
-    /**
-     * Calculate a route
-     *
-     * @param profile
-     *    Profile to use
-     * @param start
-     *    Start of the route
-     * @param target
-     *    Target of teh route
-     * @param progress
-     *    Optional callback for handling routing progress
-     * @param route
-     *    The route object holding the resulting route on success
-     * @return
-     *    True, if the engine was able to find a route, else false
-     */
-    virtual RoutingResult CalculateRoute(RoutingProfile& profile,
-                                         const RoutePosition& start,
-                                         const RoutePosition& target,
-                                         const RoutingParameter& parameter);
-
-    RoutingResult CalculateRoute(RoutingProfile& profile,
-                                 std::vector<GeoCoord> via,
-                                 double radius,
-                                 const RoutingParameter& parameter);
+    RoutingResult CalculateRouteViaCoords(RoutingProfile& profile,
+                                          std::vector<GeoCoord> via,
+                                          double radius,
+                                          const RoutingParameter& parameter);
 
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
                                          const RoutingProfile& profile,

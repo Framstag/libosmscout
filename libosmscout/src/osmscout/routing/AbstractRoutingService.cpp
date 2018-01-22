@@ -57,7 +57,8 @@ namespace osmscout {
                                                                      std::list<VNode>& nodes)
   {
     bool restricted=false;
-    ClosedSet::const_iterator current=closedSet.find(VNode(finalRouteNode));
+    auto current=closedSet.find(VNode(finalRouteNode));
+
     if (current==closedSet.end()){
       current=closedRestrictedSet.find(VNode(finalRouteNode));
       assert(current!=closedSet.end());
@@ -104,7 +105,7 @@ namespace osmscout {
                                                                       RouteNodeRef& routeNode,
                                                                       size_t& routeNodeIndex)
   {
-    routeNode=NULL;
+    routeNode=nullptr;
 
     if (!CanUseForward(state,database,way)) {
       return;
@@ -132,7 +133,7 @@ namespace osmscout {
                                                                        RouteNodeRef& routeNode,
                                                                        size_t& routeNodeIndex)
   {
-    routeNode=NULL;
+    routeNode=nullptr;
 
     if (nodeIndex>=way->nodes.size()) {
       return;
@@ -166,7 +167,7 @@ namespace osmscout {
                                                                        size_t nodeIndex,
                                                                        RouteNodeRef& routeNode)
   {
-    routeNode=NULL;
+    routeNode=nullptr;
 
     if (nodeIndex>=way->nodes.size()) {
       return;
@@ -199,7 +200,7 @@ namespace osmscout {
                                                                         size_t nodeIndex,
                                                                         RouteNodeRef& routeNode)
   {
-    routeNode=NULL;
+    routeNode=nullptr;
 
     if (!CanUseBackward(state,database,way)) {
       return;
@@ -231,7 +232,7 @@ namespace osmscout {
   {
     FileOffset offset;
 
-    node=NULL;
+    node=nullptr;
 
     // TODO: can be routeNode->GetFileOffset() used here?
     if (!GetRouteNodeOffset(position.GetDatabaseId(),
@@ -552,7 +553,7 @@ namespace osmscout {
 #endif
         continue;
       }
-      OpenMap::iterator twinIt=openMap.find(twin);
+      auto twinIt=openMap.find(twin);
       if (twinIt!=openMap.end()){
         RNodeRef rn=(*twinIt->second);
         if (rn->currentCost > current->currentCost){
@@ -704,8 +705,8 @@ namespace osmscout {
 
       double currentCost=current->currentCost+GetCosts(state,dbId,*currentRouteNode,i);
 
-      OpenMap::iterator openEntry=openMap.find(DBFileOffset(current->nodeOffset.database,
-                                                            path.offset));
+      auto openEntry=openMap.find(DBFileOffset(current->nodeOffset.database,
+                                               path.offset));
 
       // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
       // into the open list
@@ -1022,7 +1023,7 @@ namespace osmscout {
                                          current->prev));
       }
 
-      current->node=NULL;
+      current->node=nullptr;
 
       maxOpenList=std::max(maxOpenList,openMap.size());
       maxClosedSet=std::max(maxClosedSet,closedSet.size()+closedRestrictedSet.size());
@@ -1315,8 +1316,8 @@ namespace osmscout {
     std::unordered_map<DBFileOffset,AreaRef>      areaMap;
     std::unordered_map<DBFileOffset,WayRef>       wayMap;
 
-    std::vector<Point>                          *ids=NULL;
-    bool                                        oneway=false;
+    std::vector<Point>                            *ids=nullptr;
+    bool                                          oneway=false;
 
     // Collect all route node file offsets on the path and also
     // all area/way file offsets on the path
@@ -1455,10 +1456,10 @@ namespace osmscout {
     // Walk the routing path from route node to the next route node
     // and build entries.
     //
-    for (std::list<VNode>::const_iterator n=nodes.begin();
+    for (auto n=nodes.begin();
         n!=nodes.end();
         n++) {
-      std::list<VNode>::const_iterator nn=n;
+      auto nn=n;
 
       nn++;
 
@@ -1473,22 +1474,22 @@ namespace osmscout {
                target.GetObjectFileRef().GetType()==refWay);
 
         if (target.GetObjectFileRef().GetType()==refArea) {
-          std::unordered_map<DBFileOffset,AreaRef>::const_iterator entry=areaMap
+          std::unordered_map<DBFileOffset,AreaRef>::const_iterator areaEntry=areaMap
             .find(DBFileOffset(target.GetDatabaseId(),target.GetObjectFileRef().GetFileOffset()));
 
-          assert(entry!=areaMap.end());
+          assert(areaEntry!=areaMap.end());
 
-          ids=&entry->second->rings.front().nodes;
+          ids=&areaEntry->second->rings.front().nodes;
           oneway=false;
         }
         else if (target.GetObjectFileRef().GetType()==refWay) {
-          std::unordered_map<DBFileOffset,WayRef>::const_iterator entry=wayMap
+          std::unordered_map<DBFileOffset,WayRef>::const_iterator wayEntry=wayMap
             .find(DBFileOffset(target.GetDatabaseId(),target.GetObjectFileRef().GetFileOffset()));
 
-          assert(entry!=wayMap.end());
+          assert(wayEntry!=wayMap.end());
 
-          ids=&entry->second->nodes;
-          oneway=!CanUseBackward(state,entry->first.database,entry->second);
+          ids=&wayEntry->second->nodes;
+          oneway=!CanUseBackward(state,wayEntry->first.database,wayEntry->second);
         }
 
         size_t currentNodeIndex=0;
@@ -1531,22 +1532,22 @@ namespace osmscout {
              nn->object.GetType()==refWay);
 
       if (nn->object.GetType()==refArea) {
-        std::unordered_map<DBFileOffset,AreaRef>::const_iterator entry=areaMap
+        std::unordered_map<DBFileOffset,AreaRef>::const_iterator areaEntry=areaMap
           .find(DBFileOffset(nn->currentNode.database,nn->object.GetFileOffset()));
 
-        assert(entry!=areaMap.end());
+        assert(areaEntry!=areaMap.end());
 
-        ids=&entry->second->rings.front().nodes;
+        ids=&areaEntry->second->rings.front().nodes;
         oneway=false;
       }
       else if (nn->object.GetType()==refWay) {
-        std::unordered_map<DBFileOffset,WayRef>::const_iterator entry=wayMap
+        std::unordered_map<DBFileOffset,WayRef>::const_iterator wayEntry=wayMap
           .find(DBFileOffset(nn->currentNode.database,nn->object.GetFileOffset()));
 
-        assert(entry!=wayMap.end());
+        assert(wayEntry!=wayMap.end());
 
-        ids=&entry->second->nodes;
-        oneway=!CanUseBackward(state,entry->first.database,entry->second);
+        ids=&wayEntry->second->nodes;
+        oneway=!CanUseBackward(state,wayEntry->first.database,wayEntry->second);
       }
 
       size_t currentNodeIndex=0;
@@ -1598,14 +1599,12 @@ namespace osmscout {
       return true;
     }
 
-    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
-         iter!=data.Entries().end();
-         ++iter) {
-      description.AddNode(iter->GetDatabaseId(),
-                          iter->GetCurrentNodeIndex(),
-                          iter->GetObjects(),
-                          iter->GetPathObject(),
-                          iter->GetTargetNodeIndex());
+    for (const auto& entry : data.Entries()) {
+      description.AddNode(entry.GetDatabaseId(),
+                          entry.GetCurrentNodeIndex(),
+                          entry.GetObjects(),
+                          entry.GetPathObject(),
+                          entry.GetTargetNodeIndex());
     }
 
     return true;
@@ -1663,7 +1662,7 @@ namespace osmscout {
       return true;
     }
 
-    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
+    for (auto iter=data.Entries().begin();
          iter!=data.Entries().end();
          ++iter) {
       if (iter->GetPathObject().Valid()) {

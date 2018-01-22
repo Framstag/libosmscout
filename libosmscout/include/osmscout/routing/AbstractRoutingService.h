@@ -54,7 +54,7 @@ namespace osmscout {
 
   protected:
     virtual Vehicle GetVehicle(const RoutingState& state) = 0;
-    
+
     virtual bool CanUse(const RoutingState& state,
                         const DatabaseId database,
                         const RouteNode& routeNode,
@@ -184,7 +184,7 @@ namespace osmscout {
                   size_t idCount,
                   bool oneway,
                   size_t targetNodeIndex);
-    
+
     bool GetWayStartNodes(const RoutingState& state,
                           const RoutePosition& position,
                           GeoCoord& startCoord,
@@ -223,14 +223,14 @@ namespace osmscout {
                            double &currentMaxDistance,
                            const double &overallDistance,
                            const double &costLimit);
+  public:
+    explicit AbstractRoutingService(const RouterParameter& parameter);
+    ~AbstractRoutingService() override;
 
     RoutingResult CalculateRoute(RoutingState& state,
                                  const RoutePosition& start,
                                  const RoutePosition& target,
                                  const RoutingParameter& parameter);
-  public:
-    AbstractRoutingService(const RouterParameter& parameter);
-    virtual ~AbstractRoutingService();
 
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);

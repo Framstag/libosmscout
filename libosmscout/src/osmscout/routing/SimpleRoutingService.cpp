@@ -253,30 +253,6 @@ namespace osmscout {
     return database->GetTypeConfig();
   }
 
-  /**
-   * Calculate a route
-   *
-   * @param profile
-   *    Profile to use
-   * @param start
-   *    Start of the route
-   * @param target
-   *    Target of teh route
-   * @param progress
-   *    Optional callback for handling routing progress
-   * @param route
-   *    The route object holding the resulting route on success
-   * @return
-   *    True, if the engine was able to find a route, else false
-   */
-  RoutingResult SimpleRoutingService::CalculateRoute(RoutingProfile& profile, // TODO: make it const!
-                                                     const RoutePosition& start,
-                                                     const RoutePosition& target,
-                                                     const RoutingParameter& parameter)
-  {
-    return AbstractRoutingService<RoutingProfile>::CalculateRoute(profile,start,target,parameter);
-  }
-
   bool SimpleRoutingService::GetWayByOffset(const DBFileOffset &offset,
                                             WayRef &way)
   {
@@ -430,10 +406,10 @@ namespace osmscout {
    *    A RoutingResult object
    */
 
-  RoutingResult SimpleRoutingService::CalculateRoute(RoutingProfile& profile,
-                                                     std::vector<osmscout::GeoCoord> via,
-                                                     double radius,
-                                                     const RoutingParameter& parameter)
+  RoutingResult SimpleRoutingService::CalculateRouteViaCoords(RoutingProfile& profile,
+                                                              std::vector<osmscout::GeoCoord> via,
+                                                              double radius,
+                                                              const RoutingParameter& parameter)
   {
     RoutingResult                        result;
     std::vector<size_t>                  nodeIndexes;
@@ -462,8 +438,12 @@ namespace osmscout {
       RoutingResult              partialResult;
 
       partialResult=CalculateRoute(profile,
-                                   RoutePosition(fromObject,fromNodeIndex,/*database*/0),
-                                   RoutePosition(toObject,toNodeIndex,/*database*/0),
+                                   RoutePosition(fromObject,
+                                                 fromNodeIndex,/*database*/
+                                                 0),
+                                   RoutePosition(toObject,
+                                                 toNodeIndex,/*database*/
+                                                 0),
                                    parameter);
       if (!partialResult.Success()) {
         result.GetRoute().Clear();
@@ -635,7 +615,7 @@ namespace osmscout {
         }
       }
     }
-      
+
     radius = minDistance;
     return position;
   }
