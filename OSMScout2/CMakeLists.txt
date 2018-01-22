@@ -66,7 +66,6 @@ set(LANG_FILES
 	)
 
 qt5_create_translation(LANG_SRC ${LANG_FILES})
-add_custom_target(translations ALL DEPENDS ${LANG_SRC})
 
 qt5_add_resources(RESOURCE_FILES
     res.qrc
@@ -74,8 +73,7 @@ qt5_add_resources(RESOURCE_FILES
 
 set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 
-add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES} ${LANG_FILES})
-add_dependencies(OSMScout2 translations)
+add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES} ${LANG_FILES} ${LANG_SRC})
 
 target_include_directories(OSMScout2 PRIVATE
     ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
