@@ -24,10 +24,12 @@ Item {
         id: text
 
         y: 2
+        x: 2
         anchors.left: icon.right
-        width: parent.width-4
+        width: parent.width - 4 - icon.width
         text: label
         font.pixelSize: Theme.textFontSize
+        wrapMode: Text.Wrap
     }
 
     Rectangle {

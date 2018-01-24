@@ -196,7 +196,7 @@ namespace osmscout {
 
     /**
      * \ingroup Routing
-     * List the names of allways, that are crossing the current node.
+     * List the names of all ways, that are crossing the current node.
      */
     class OSMSCOUT_API CrossingWaysDescription : public Description
     {
