@@ -1246,6 +1246,7 @@ namespace osmscout {
 
   static void AddAddressResult(const SearchParameter& parameter,
                                LocationSearchResult::MatchQuality regionMatchQuality,
+                               LocationSearchResult::MatchQuality postalAreaMatchQuality,
                                LocationSearchResult::MatchQuality locationMatchQuality,
                                const AddressSearchVisitor::Result& addressMatch,
                                LocationSearchResult::MatchQuality addressMatchQuality,
@@ -1261,7 +1262,7 @@ namespace osmscout {
       entry.adminRegionMatchQuality=regionMatchQuality;
       entry.poiMatchQuality=LocationSearchResult::none;
       entry.postalArea=addressMatch.postalArea;
-      entry.postalAreaMatchQuality=LocationSearchResult::none;
+      entry.postalAreaMatchQuality=postalAreaMatchQuality;
       entry.location=addressMatch.location;
       entry.locationMatchQuality=locationMatchQuality;
       entry.address=addressMatch.address;
@@ -1278,6 +1279,7 @@ namespace osmscout {
                                           const std::list<std::string>& addressTokens,
                                           const LocationSearchVisitor::Result& locationMatch,
                                           LocationSearchResult::MatchQuality regionMatchQuality,
+                                          LocationSearchResult::MatchQuality postalAreaMatchQuality,
                                           LocationSearchResult::MatchQuality locationMatchQuality,
                                           LocationSearchResult& result)
   {
@@ -1315,6 +1317,7 @@ namespace osmscout {
       if (restTokens.empty()) {
         AddAddressResult(parameter,
                          regionMatchQuality,
+                         postalAreaMatchQuality,
                          locationMatchQuality,
                          addressMatch,
                          LocationSearchResult::match,
@@ -1331,6 +1334,7 @@ namespace osmscout {
         if (restTokens.empty()) {
           AddAddressResult(parameter,
                            regionMatchQuality,
+                           postalAreaMatchQuality,
                            locationMatchQuality,
                            addressMatch,
                            LocationSearchResult::candidate,
@@ -1405,6 +1409,7 @@ namespace osmscout {
                                     addressTokens,
                                     locationMatch,
                                     regionMatchQuality,
+                                    LocationSearchResult::none,
                                     LocationSearchResult::match,
                                     result);
 
@@ -1443,6 +1448,7 @@ namespace osmscout {
                                       addressTokens,
                                       locationMatch,
                                       regionMatchQuality,
+                                      LocationSearchResult::none,
                                       LocationSearchResult::candidate,
                                       result);
 
@@ -1521,6 +1527,7 @@ namespace osmscout {
                                     addressTokens,
                                     locationMatch,
                                     regionMatchQuality,
+                                    postalAreaMatchQuality,
                                     LocationSearchResult::match,
                                     result);
 
@@ -1560,6 +1567,7 @@ namespace osmscout {
                                       addressTokens,
                                       locationMatch,
                                       regionMatchQuality,
+                                      postalAreaMatchQuality,
                                       LocationSearchResult::candidate,
                                       result);
 

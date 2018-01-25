@@ -201,6 +201,8 @@ TEST_CASE("Form location search for city and location")
     REQUIRE(result.results.size()==1);
     REQUIRE(result.results.front().adminRegion->name=="Dortmund");
     REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
+    REQUIRE(result.results.front().postalArea->name=="44339");
+    REQUIRE(result.results.front().postalAreaMatchQuality==osmscout::LocationSearchResult::match);
     REQUIRE(result.results.front().location->name=="Am Birkenbaum");
     REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::match);
   }
@@ -243,6 +245,8 @@ TEST_CASE("Form location search for city and location")
     REQUIRE(result.results.size()==1);
     REQUIRE(result.results.front().adminRegion->name=="Dortmund");
     REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
+    REQUIRE(result.results.front().postalArea->name=="44339");
+    REQUIRE(result.results.front().postalAreaMatchQuality==osmscout::LocationSearchResult::match);
     REQUIRE(result.results.front().location->name=="Am Birkenbaum");
     REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::candidate);
   }
@@ -273,6 +277,8 @@ TEST_CASE("Form location search for city, location and address")
     REQUIRE(result.results.size()==1);
     REQUIRE(result.results.front().adminRegion->name=="Dortmund");
     REQUIRE(result.results.front().adminRegionMatchQuality==osmscout::LocationSearchResult::match);
+    REQUIRE(result.results.front().postalArea->name=="44339");
+    REQUIRE(result.results.front().postalAreaMatchQuality==osmscout::LocationSearchResult::match);
     REQUIRE(result.results.front().location->name=="Am Birkenbaum");
     REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::match);
     REQUIRE(result.results.front().address->name=="1");
