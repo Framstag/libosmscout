@@ -13,6 +13,7 @@ OLT
 
     OBJECT BOUNDARY 5 "Regierungsbezirk Arnsberg" {
       CITY "Dortmund" {
+        POI "Bücherei Brechten"
         SUBURB NODE "Brechten" {
           POSTAL_AREA "44339"
             LOCATION "Am Birkenbaum"

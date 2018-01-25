@@ -116,6 +116,25 @@ namespace osmscout {
 
     typedef std::shared_ptr<PostalArea> PostalAreaRef;
 
+    class OSMSCOUT_TEST_API POI
+    {
+    private:
+      std::string            name;
+
+    public:
+      inline void SetName(const std::string& name)
+      {
+        this->name=name;
+      }
+
+      inline std::string GetName() const
+      {
+        return name;
+      }
+    };
+
+    typedef std::shared_ptr<POI> POIRef;
+
     class Region;
     typedef std::shared_ptr<Region> RegionRef;
 
@@ -127,6 +146,7 @@ namespace osmscout {
       bool                     isBoundary;
       bool                     isNode;
       size_t                   adminLevel;
+      std::list<POIRef>        pois;
       std::list<PostalAreaRef> postalAreas;
       std::list<RegionRef>     regions;
 
@@ -158,6 +178,11 @@ namespace osmscout {
       inline void SetName(const std::string& name)
       {
         this->name=name;
+      }
+
+      inline void AddPOI(const POIRef& poi)
+      {
+        pois.push_back(poi);
       }
 
       inline void AddPostalArea(const PostalAreaRef& postalArea)

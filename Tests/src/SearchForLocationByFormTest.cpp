@@ -8,7 +8,7 @@ extern void DumpSeachResult(const osmscout::LocationSearchResult& result);
 //
 // City search
 //
-TEST_CASE("Form location search for city")
+TEST_CASE("Form location search for city/postalArea/location/address")
 {
   /*
    * Search for the city name => match

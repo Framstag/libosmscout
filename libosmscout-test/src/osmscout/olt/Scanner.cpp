@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 18;
-	noSym = 18;
+	maxT = 19;
+	noSym = 19;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -168,9 +168,10 @@ void Scanner::Init() {
 	keywords.set("OBJECT", 10);
 	keywords.set("BOUNDARY", 11);
 	keywords.set("NODE", 12);
-	keywords.set("POSTAL_AREA", 15);
-	keywords.set("LOCATION", 16);
-	keywords.set("ADDRESS", 17);
+	keywords.set("POI", 15);
+	keywords.set("POSTAL_AREA", 16);
+	keywords.set("LOCATION", 17);
+	keywords.set("ADDRESS", 18);
 
 
   tvalLength = 128;

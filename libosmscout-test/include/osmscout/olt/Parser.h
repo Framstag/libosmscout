@@ -123,6 +123,7 @@ const osmscout::test::RegionList& GetRegionList() const
 	void REGION(osmscout::test::Region& region);
 	void UINT(size_t& value);
 	void STRING(std::string& value);
+	void POI(osmscout::test::POI& poi);
 	void POSTAL_AREA(osmscout::test::PostalArea& postalArea);
 	void LOCATION(osmscout::test::Location& location);
 	void ADDRESS(osmscout::test::Address& address);
