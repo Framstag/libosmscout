@@ -42,14 +42,16 @@ class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
   Q_PROPERTY(QString time READ getTime)
   Q_PROPERTY(QString timeDelta READ getTimeDelta)
   Q_PROPERTY(QString description READ getDescription)
+  Q_PROPERTY(QString shortDescription READ getShortDescription)
 
 public:
-  QString type;
-  double distance;
-  double distanceDelta;
-  double time;
-  double timeDelta;
-  QString description;
+  QString type;             //!< Type of route step
+  double distance;          //!< Estimate distance [meters] from route start
+  double distanceDelta;     //!< Estimate distance [meters] from previous route step
+  double time;              //!< Estimate time [seconds] from route start
+  double timeDelta;         //!< Estimate time [seconds] from previous route step
+  QString description;      //!< Formatted (html) verbose description (translated already)
+  QString shortDescription; //!< Plain short description (translated already)
 
 public:
   RouteStep() : RouteStep("") {};
@@ -86,6 +88,11 @@ public:
   QString getDescription() const
   {
     return description;
+  }
+
+  QString getShortDescription() const
+  {
+    return shortDescription;
   }
 
 private:

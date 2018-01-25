@@ -71,9 +71,6 @@ matrix:
 before_install:
   - $TRAVIS_BUILD_DIR/ci/travis/install.sh
 
-before_script:
-  - . setupAutoconf.sh
-
 script:
   - $TRAVIS_BUILD_DIR/ci/travis/build.sh
 
