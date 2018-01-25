@@ -594,10 +594,10 @@ int main(int argc, char *argv[]){
         std::cerr << "Cannot find start node for target location!" << std::endl;
     }
 
-    osmscout::RoutingResult result=router->CalculateRouteViaCoords(*routingProfile,
-                                                                   start,
-                                                                   target,
-                                                                   parameter);
+    osmscout::RoutingResult result=router->CalculateRoute(*routingProfile,
+                                                          start,
+                                                          target,
+                                                          parameter);
 
     if (!result.Success()) {
         std::cerr << "There was an error while calculating the route!" << std::endl;
