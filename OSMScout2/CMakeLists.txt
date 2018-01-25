@@ -61,7 +61,6 @@ set(SOURCE_FILES
 
 set(LANG_FILES
 	translations/en.ts
-
 	translations/cs.ts
 	)
 
