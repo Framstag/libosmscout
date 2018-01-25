@@ -14,6 +14,7 @@ osmscoutimportHeader = [
             'osmscout/import/GenAreaNodeIndex.h',
             'osmscout/import/GenAreaWayIndex.h',
             'osmscout/import/GenCoordDat.h',
+            'osmscout/import/GenCoverageIndex.h',
             'osmscout/import/GenIntersectionIndex.h',
             'osmscout/import/GenLocationIndex.h',
             'osmscout/import/GenMergeAreas.h',

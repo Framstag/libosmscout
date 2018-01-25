@@ -74,6 +74,7 @@ set(HEADER_FILES
     include/osmscout/Coord.h
     include/osmscout/CoordDataFile.h
     #include/osmscout/CoreFeatures.h
+    include/osmscout/CoverageIndex.h
     include/osmscout/BoundingBoxDataFile.h
     include/osmscout/TypeDistributionDataFile.h
     include/osmscout/Database.h
@@ -158,6 +159,7 @@ set(SOURCE_FILES
     src/osmscout/AreaWayIndex.cpp
     src/osmscout/Coord.cpp
     src/osmscout/CoordDataFile.cpp
+    src/osmscout/CoverageIndex.cpp
     src/osmscout/BoundingBoxDataFile.cpp
     src/osmscout/TypeDistributionDataFile.cpp
     src/osmscout/Database.cpp

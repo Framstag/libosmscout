@@ -1,3 +1,14 @@
+#---- Coverage
+add_executable(Coverage src/Coverage.cpp)
+set_property(TARGET Coverage PROPERTY CXX_STANDARD 11)
+target_include_directories(Coverage PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+if(APPLE)
+    target_link_libraries(Coverage OSMScout)
+else()
+    target_link_libraries(Coverage osmscout)
+endif()
+install(TARGETS Coverage RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
 #---- DumpOSS
 if(${OSMSCOUT_BUILD_MAP})
 	add_executable(DumpOSS src/DumpOSS.cpp)

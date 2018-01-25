@@ -11,6 +11,7 @@ osmscoutimportSrc = [
             'src/osmscout/import/GenAreaNodeIndex.cpp',
             'src/osmscout/import/GenAreaWayIndex.cpp',
             'src/osmscout/import/GenCoordDat.cpp',
+            'src/osmscout/import/GenCoverageIndex.cpp',
             'src/osmscout/import/GenIntersectionIndex.cpp',
             'src/osmscout/import/GenLocationIndex.cpp',
             'src/osmscout/import/GenMergeAreas.cpp',
