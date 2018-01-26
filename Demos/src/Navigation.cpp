@@ -103,10 +103,8 @@ namespace osmscout {
             }
         }
 
-        for (std::list<osmscout::RouteDescription::NameDescriptionRef>::const_iterator name=crossingWaysDescription.GetDescriptions().begin();
-             name!=crossingWaysDescription.GetDescriptions().end();
-             ++name) {
-            std::string nameString=(*name)->GetDescription();
+        for (const auto& name : crossingWaysDescription.GetDescriptions()) {
+            std::string nameString=name->GetDescription();
 
             if (!nameString.empty() && nameString.compare("unnamed road")) {
                 names.insert(nameString);
@@ -116,7 +114,7 @@ namespace osmscout {
         if (names.size()>1) {
             std::ostringstream stream;
 
-            for (std::set<std::string>::const_iterator name=names.begin();
+            for (auto name=names.begin();
                  name!=names.end();
                  ++name) {
                 if (name!=names.begin()) {
@@ -186,14 +184,14 @@ namespace osmscout {
         return stream.str();
     }
 
-    std::string DumpTargetDescription(const osmscout::RouteDescription::TargetDescriptionRef& targetDescription)
+    std::string DumpTargetDescription(const osmscout::RouteDescription::TargetDescriptionRef& /*targetDescription*/)
     {
         std::ostringstream stream;
         stream << "Target reached";
         return stream.str();
     }
 
-    NodeDescription DumpTurnDescription(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
+    NodeDescription DumpTurnDescription(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
                                         const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
                                         const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                                         const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
@@ -234,8 +232,8 @@ namespace osmscout {
         return description;
     }
 
-    std::string DumpRoundaboutEnterDescription(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
-                                               const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
+    std::string DumpRoundaboutEnterDescription(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
+                                               const osmscout::RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/)
     {
         std::ostringstream stream;
         std::string crossingWaysString;
@@ -247,27 +245,22 @@ namespace osmscout {
         switch(digit){
             case 1:
                 return "first";
-                break;
             case 2:
                 return "second";
-                break;
             case 3:
                 return "third";
-                break;
             case 4:
                 return "fourth";
-                break;
             default: {
                 char str[32];
                 std::snprintf(str, sizeof(str), "number %zu", digit);
                 return str;
-                break;
             }
         }
     }
 
     std::string DumpRoundaboutLeaveDescription(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                               const osmscout::RouteDescription::NameDescriptionRef& nameDescription, int roundaboutCrossingCounter)
+                                               const osmscout::RouteDescription::NameDescriptionRef& nameDescription, int /*roundaboutCrossingCounter*/)
     {
         std::ostringstream stream;
         size_t exitCount = roundaboutLeaveDescription->GetExitCount();
@@ -333,7 +326,7 @@ namespace osmscout {
     }
 
     NodeDescription DumpMotorwayLeaveDescription(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
-                                                 const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                                                 const osmscout::RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
                                                  const osmscout::RouteDescription::NameDescriptionRef& nameDescription,
                                                  const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunction)
     {
@@ -352,9 +345,9 @@ namespace osmscout {
             stream << " to '" << nameDescription->GetDescription() << "'";
         }
         if (motorwayJunction){
-            if(motorwayJunction->GetJunctionDescription()->GetName()!=""){
+            if(!motorwayJunction->GetJunctionDescription()->GetName().empty()){
                 stream << " exit '" << motorwayJunction->GetJunctionDescription()->GetName();
-                if(motorwayJunction->GetJunctionDescription()->GetRef()!=""){
+                if(!motorwayJunction->GetJunctionDescription()->GetRef().empty()){
                     stream << " (" << motorwayJunction->GetJunctionDescription()->GetRef() << ")";
                 }
                 stream << "'";
@@ -524,7 +517,7 @@ int main(int argc, char *argv[]){
     osmscout::DatabaseParameter databaseParameter;
     osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
-    if (!database->Open(mapDirectory.c_str())) {
+    if (!database->Open(mapDirectory)) {
         std::cerr << "Cannot open database" << std::endl;
 
         return 1;
@@ -623,7 +616,7 @@ int main(int argc, char *argv[]){
     std::set<std::string> motorwayTypeNames;
     std::set<std::string> motorwayLinkTypeNames;
     std::set<std::string> junctionTypeNames;
-    osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
+    auto*instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
     if(vehicle == osmscout::vehicleCar){
         motorwayTypeNames = {"highway_motorway", "highway_motorway_trunk", "highway_motorway_primary"};
         motorwayLinkTypeNames = {"highway_motorway_link", "highway_trunk_link"};
