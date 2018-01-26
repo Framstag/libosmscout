@@ -45,6 +45,8 @@ namespace osmscout {
     bool                    adminRegionOnlyMatch;    //!< Evaluate on direct admin region matches
     bool                    poiOnlyMatch;            //!< Evaluate on direct poi matches
 
+    bool                    partialMatch;            //!< Add matches to the result, event if they do not match the complete search string
+
     StringMatcherFactoryRef stringMatcherFactory;    //!< String matcher factory to use
 
     size_t                  limit;                   //!< The maximum number of results over all sub searches requested
@@ -59,6 +61,8 @@ namespace osmscout {
     bool GetAdminRegionOnlyMatch() const;
     bool GetPOIOnlyMatch() const;
 
+    bool GetPartialMatch() const;
+
     StringMatcherFactoryRef GetStringMatcherFactory() const;
 
     size_t GetLimit() const;
@@ -70,6 +74,8 @@ namespace osmscout {
 
     void SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch);
     void SetPOIOnlyMatch(bool poiOnlyMatch);
+
+    void SetPartialMatch(bool partialMatch);
 
     void SetLimit(size_t limit);
 

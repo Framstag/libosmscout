@@ -199,6 +199,10 @@ namespace osmscout {
             buildingData.tags[tagAddrStreet]=location->GetName();
             buildingData.tags[tagAddrHousenumber]=address->GetName();
 
+            for (const auto& tag : address->GetTags()) {
+              buildingData.tags[typeConfig->GetTagId(tag.GetKey())]=tag.GetValue();
+            }
+
             GeoBox buildingBox(GeoCoord(wayLeftCoord.GetLat()+0.0001,
                                         wayLeftCoord.GetLon()+(currentAddress-1)*(wayRightCoord.GetLon()-wayLeftCoord.GetLon())/location->GetAddresses().size()),
                                GeoCoord(wayLeftCoord.GetLat()+0.0002,

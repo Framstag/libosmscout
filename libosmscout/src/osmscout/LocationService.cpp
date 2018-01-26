@@ -191,6 +191,7 @@ namespace osmscout {
   POIFormSearchParameter::POIFormSearchParameter()
     : adminRegionOnlyMatch(false),
       poiOnlyMatch(false),
+      partialMatch(false),
       stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
       limit(100)
   {
@@ -215,6 +216,11 @@ namespace osmscout {
   std::string POIFormSearchParameter::GetPOISearchString() const
   {
     return poiSearchString;
+  }
+
+  bool POIFormSearchParameter::GetPartialMatch() const
+  {
+    return partialMatch;
   }
 
   void POIFormSearchParameter::SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory)
@@ -250,6 +256,11 @@ namespace osmscout {
   bool POIFormSearchParameter::GetPOIOnlyMatch() const
   {
     return poiOnlyMatch;
+  }
+
+  void POIFormSearchParameter::SetPartialMatch(bool partialMatch)
+  {
+    this->partialMatch=partialMatch;
   }
 
   void POIFormSearchParameter::SetLimit(size_t limit)
@@ -905,14 +916,17 @@ namespace osmscout {
                const POI& poi) override
     {
       for (const auto& pattern : patterns) {
+        std::cout << pattern.tokenString->text << " vs. " << poi.name << std::endl;
         StringMatcher::Result matchResult=pattern.matcher->Match(poi.name);
 
         if (matchResult==StringMatcher::match) {
+          std::cout << " => match" << std::endl;
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(adminRegion),
                                std::make_shared<POI>(poi));
         }
         else if (matchResult==StringMatcher::partialMatch) {
+          std::cout << " => partial match" << std::endl;
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(adminRegion),
                                       std::make_shared<POI>(poi));
@@ -1819,7 +1833,7 @@ namespace osmscout {
                    result);
     }
 
-    if (!parameter.locationOnlyMatch) {
+    if (!parameter.poiOnlyMatch) {
       for (const auto& poiMatch : poiVisitor.partialMatches) {
         AddPOIResult(parameter,
                      regionMatchQuality,
@@ -2261,7 +2275,8 @@ namespace osmscout {
                               result,
                               breaker);
 
-        if (result.results.size()==currentResultSize) {
+        if (result.results.size()==currentResultSize &&
+            searchParameter.GetPartialMatch()) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
           // so that partial results are not lost
           AddRegionResult(parameter,
@@ -2292,7 +2307,8 @@ namespace osmscout {
                               result,
                               breaker);
 
-        if (result.results.size()==currentResultSize) {
+        if (result.results.size()==currentResultSize &&
+            searchParameter.GetPartialMatch()) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
           // so that partial results are not lost
           AddRegionResult(parameter,

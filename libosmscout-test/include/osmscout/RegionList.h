@@ -37,10 +37,35 @@ namespace osmscout {
       unknown
     };
 
+    class OSMSCOUT_TEST_API Tag
+    {
+    private:
+      std::string key;
+      std::string value;
+
+    public:
+      Tag(const std::string& key,
+          const std::string& value)
+        : key(key),
+          value(value)
+      {
+
+      }
+      inline std::string GetKey() const
+      {
+        return key;
+      }
+      inline std::string GetValue() const
+      {
+        return value;
+      }
+    };
+
     class OSMSCOUT_TEST_API Address
     {
     private:
-      std::string            name;
+      std::string    name;
+      std::list<Tag> tags;
 
     public:
       inline void SetName(const std::string& name)
@@ -51,6 +76,17 @@ namespace osmscout {
       inline std::string GetName() const
       {
         return name;
+      }
+
+      inline void AddTag(const std::string& key,
+                         const std::string& value)
+      {
+        tags.emplace_back(key,value);
+      }
+
+      inline const std::list<Tag>& GetTags() const
+      {
+        return tags;
       }
     };
 
@@ -116,25 +152,6 @@ namespace osmscout {
 
     typedef std::shared_ptr<PostalArea> PostalAreaRef;
 
-    class OSMSCOUT_TEST_API POI
-    {
-    private:
-      std::string            name;
-
-    public:
-      inline void SetName(const std::string& name)
-      {
-        this->name=name;
-      }
-
-      inline std::string GetName() const
-      {
-        return name;
-      }
-    };
-
-    typedef std::shared_ptr<POI> POIRef;
-
     class Region;
     typedef std::shared_ptr<Region> RegionRef;
 
@@ -146,7 +163,6 @@ namespace osmscout {
       bool                     isBoundary;
       bool                     isNode;
       size_t                   adminLevel;
-      std::list<POIRef>        pois;
       std::list<PostalAreaRef> postalAreas;
       std::list<RegionRef>     regions;
 
@@ -178,11 +194,6 @@ namespace osmscout {
       inline void SetName(const std::string& name)
       {
         this->name=name;
-      }
-
-      inline void AddPOI(const POIRef& poi)
-      {
-        pois.push_back(poi);
       }
 
       inline void AddPostalArea(const PostalAreaRef& postalArea)

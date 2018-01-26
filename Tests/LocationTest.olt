@@ -13,7 +13,6 @@ OLT
 
     OBJECT BOUNDARY 5 "Regierungsbezirk Arnsberg" {
       CITY "Dortmund" {
-        POI "Bücherei Brechten"
         SUBURB NODE "Brechten" {
           POSTAL_AREA "44339"
             LOCATION "Am Birkenbaum"
@@ -22,6 +21,7 @@ OLT
             LOCATION "In den Hüchten"
               ADDRESS "1"
               ADDRESS "2"
+
         }
 
         SUBURB NODE "Eving" {
@@ -29,6 +29,12 @@ OLT
             LOCATION "Bahnhofstraße"
               ADDRESS "50a"
               ADDRESS "50b"
+            LOCATION "August-Warkner-Platz"
+              ADDRESS "2-4"
+              [
+                "amenity" = "library"
+                "name" = "Stadtteilbibliothek Eving"
+              ]
         }
       }
 

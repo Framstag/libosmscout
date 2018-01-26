@@ -1165,7 +1165,19 @@ TYPES
       GROUP amenity, building
 
   TYPE amenity_kindergarten
-    = NODE ("amenity"=="kindergarten")
+    = NODE AREA ("amenity"=="kindergarten")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity
+
+  TYPE amenity_library_building
+    = AREA ("amenity"=="library" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity
+
+  TYPE amenity_library
+    = NODE AREA ("amenity"=="library")
       {Name, NameAlt}
       ADDRESS POI
       GROUP amenity

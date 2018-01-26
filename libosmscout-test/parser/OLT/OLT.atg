@@ -72,11 +72,6 @@ PRODUCTIONS
                 [
                   "{"
                     {
-                      (. osmscout::test::POIRef poi=std::make_shared<osmscout::test::POI>(); .)
-                      POI<*poi>
-                      (. region.AddPOI(poi); .)
-                    }
-                    {
                       (. osmscout::test::PostalAreaRef postalArea=std::make_shared<osmscout::test::PostalArea>(); .)
                       POSTAL_AREA<*postalArea>
                       (. region.AddPostalArea(postalArea); .)
@@ -88,15 +83,6 @@ PRODUCTIONS
                     }
                   "}"
                 ]
-                .
-
-  POI<osmscout::test::POI& poi>
-              = (.
-                  std::string name;
-                 .)
-                SYNC
-                "POI"
-                STRING<name> (. poi.SetName(name); .)
                 .
 
   POSTAL_AREA<osmscout::test::PostalArea& postalArea>
@@ -135,6 +121,15 @@ PRODUCTIONS
                  .)
                 SYNC
                 "ADDRESS" STRING<name> (. address.SetName(name); .)
+                [
+                  "["
+                  {
+                    (. std::string tagKey,tagValue; .)
+                    STRING<tagKey> "=" STRING<tagValue>
+                    (. address.AddTag(tagKey,tagValue); .)
+                  }
+                  "]"
+                ]
                 .
 
   STRING<std::string& value>
