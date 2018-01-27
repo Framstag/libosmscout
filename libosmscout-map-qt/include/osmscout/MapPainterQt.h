@@ -31,6 +31,8 @@
 
 namespace osmscout {
 
+  class MapPainterBatchQt;
+
   /**
     Implementation of MapPainter for Qt
    */
