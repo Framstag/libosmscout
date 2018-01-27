@@ -36,6 +36,8 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
+    friend class MapPainterBatchQt;
+
   private:
     struct FollowPathHandle
     {
@@ -171,6 +173,26 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const MapData& data,
                  QPainter* painter);
+  };
+
+  /**
+   * \ingroup Renderer
+   *
+   * Qt specific MapPainterBatch. When given PainterQt instances
+   * are used from multiple threads, they should be always
+   * added in same order to avoid deadlocks.
+   */
+  class OSMSCOUT_MAP_QT_API MapPainterBatchQt:
+      public MapPainterBatch<MapPainterQt*> {
+  public:
+    MapPainterBatchQt(size_t expectedCount):
+        MapPainterBatch(expectedCount) {}
+
+    virtual ~MapPainterBatchQt(){}
+
+    bool paint(const Projection& projection,
+               const MapParameter& parameter,
+               QPainter* painter);
   };
 }
 
