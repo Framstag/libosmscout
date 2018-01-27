@@ -64,7 +64,9 @@ set(LANG_FILES
 	translations/cs.ts
 	)
 
-qt5_create_translation(LANG_SRC ${LANG_FILES})
+if(NOT MSVC)
+  qt5_create_translation(LANG_SRC ${LANG_FILES})
+endif()
 
 qt5_add_resources(RESOURCE_FILES
     res.qrc
@@ -72,7 +74,11 @@ qt5_add_resources(RESOURCE_FILES
 
 set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 
-add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES} ${LANG_FILES} ${LANG_SRC})
+add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
+
+if(NOT MSVC)
+  target_sources(OSMScout2 ${LANG_FILES} ${LANG_SRC})
+endif()
 
 target_include_directories(OSMScout2 PRIVATE
     ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
@@ -133,8 +139,8 @@ if(APPLE)
 	install(FILES ${LANG_SRC}
 			DESTINATION "/Library/Application Support/libosmscout/OSMScout2/translations")
 elseif(WIN32)
-	install(FILES ${LANG_SRC}
-			DESTINATION C:/ProgramData/libosmscout/OSMScout2/translations)
+#	install(FILES ${LANG_SRC}
+#			DESTINATION C:/ProgramData/libosmscout/OSMScout2/translations)
 else() # Linux
 	install(FILES ${LANG_SRC}
 			DESTINATION share/libosmscout/OSMScout2/translations)
