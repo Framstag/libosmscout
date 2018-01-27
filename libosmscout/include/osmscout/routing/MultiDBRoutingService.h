@@ -43,7 +43,6 @@ namespace osmscout {
 
   public:
     RouterDBFiles();
-    ~RouterDBFiles();
 
     bool Open(DatabaseRef database);
     void Close();
@@ -80,6 +79,22 @@ namespace osmscout {
     bool  isOpen;
 
   private:
+
+    Pixel GetCell(const osmscout::GeoCoord& coord);
+
+    bool ReadCellsForRoutingTree(osmscout::Database& database,
+                                 std::unordered_set<uint64_t>& cells);
+
+    bool ReadRouteNodesForCells(osmscout::Database& database,
+                                std::unordered_set<uint64_t>& cells,
+                                std::unordered_set<osmscout::Id>& routeNodes);
+
+    bool FindCommonRoutingNodes(const BreakerRef &breaker,
+                                DatabaseRef &database1,
+                                DatabaseRef &database2,
+                                std::set<Id> &commonRouteNodes);
+
+  private:
     Vehicle GetVehicle(const MultiDBRoutingState& state) override;
 
     bool CanUseForward(const MultiDBRoutingState& state,
@@ -91,21 +106,21 @@ namespace osmscout {
                         const WayRef& way) override;
 
     double GetCosts(const MultiDBRoutingState& state,
-                    const DatabaseId database,
+                    DatabaseId database,
                     const RouteNode& routeNode,
                     size_t pathIndex) override;
 
     double GetCosts(const MultiDBRoutingState& state,
-                    const DatabaseId database,
+                    DatabaseId database,
                     const WayRef &way,
                     double wayLength) override;
 
     double GetEstimateCosts(const MultiDBRoutingState& state,
-                            const DatabaseId database,
+                            DatabaseId database,
                             double targetDistance) override;
 
     double GetCostLimit(const MultiDBRoutingState& state,
-                        const DatabaseId database,
+                        DatabaseId database,
                         double targetDistance) override;
 
     bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
@@ -133,31 +148,17 @@ namespace osmscout {
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
     std::vector<DBFileOffset> GetNodeTwins(const MultiDBRoutingState& state,
-                                           const DatabaseId database,
-                                           const Id id) override;
+                                           DatabaseId database,
+                                           Id id) override;
 
     bool GetRouteNode(const DatabaseId &database,
                       const Id &id,
                       RouteNodeRef &node) override;
 
     bool CanUse(const MultiDBRoutingState& state,
-                const DatabaseId database,
+                DatabaseId database,
                 const RouteNode& routeNode,
                 size_t pathIndex) override;
-
-    Pixel GetCell(const osmscout::GeoCoord& coord);
-
-    bool ReadCellsForRoutingTree(osmscout::Database& database,
-                                 std::unordered_set<uint64_t>& cells);
-
-    bool ReadRouteNodesForCells(osmscout::Database& database,
-                                std::unordered_set<uint64_t>& cells,
-                                std::unordered_set<osmscout::Id>& routeNodes);
-
-    bool FindCommonRoutingNodes(const BreakerRef &breaker,
-                                DatabaseRef &database1,
-                                DatabaseRef &database2,
-                                std::set<Id> &commonRouteNodes);
 
   public:
     MultiDBRoutingService(const RouterParameter& parameter,

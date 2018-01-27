@@ -83,13 +83,16 @@ namespace osmscout {
     IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
     ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loading object variant data
 
+  private:
+    bool HasNodeWithId(const std::vector<Point>& nodes) const;
+
   protected:
     Vehicle GetVehicle(const RoutingProfile& profile) override;
 
     bool CanUse(const RoutingProfile& profile,
-                        const DatabaseId database,
-                        const RouteNode& routeNode,
-                        size_t pathIndex) override;
+                DatabaseId database,
+                const RouteNode& routeNode,
+                size_t pathIndex) override;
 
     bool CanUseForward(const RoutingProfile& profile,
                        const DatabaseId& database,
@@ -100,21 +103,21 @@ namespace osmscout {
                         const WayRef& way) override;
 
     double GetCosts(const RoutingProfile& profile,
-                    const DatabaseId database,
+                    DatabaseId database,
                     const RouteNode& routeNode,
                     size_t pathIndex) override;
 
     double GetCosts(const RoutingProfile& profile,
-                    const DatabaseId database,
+                    DatabaseId database,
                     const WayRef &way,
                     double wayLength) override;
 
     double GetEstimateCosts(const RoutingProfile& profile,
-                            const DatabaseId database,
+                            DatabaseId database,
                             double targetDistance) override;
 
     double GetCostLimit(const RoutingProfile& profile,
-                        const DatabaseId database,
+                        DatabaseId database,
                         double targetDistance) override;
 
     bool GetRouteNode(const DatabaseId &database,
@@ -146,10 +149,8 @@ namespace osmscout {
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
     std::vector<DBFileOffset> GetNodeTwins(const RoutingProfile& state,
-                                           const DatabaseId database,
-                                           const Id id) override;
-
-    bool HasNodeWithId(const std::vector<Point>& nodes) const;
+                                           DatabaseId database,
+                                           Id id) override;
 
   public:
     SimpleRoutingService(const DatabaseRef& database,

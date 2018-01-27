@@ -545,18 +545,22 @@ namespace osmscout {
     std::vector<DBFileOffset> twins=GetNodeTwins(state,
                                                  current->nodeOffset.database,
                                                  currentRouteNode->GetId());
-    for (auto &twin:twins){
-      if ((current->access && closedSet.find(VNode(twin))!=closedSet.end()) ||
-          (!current->access && closedRestrictedSet.find(VNode(twin))!=closedRestrictedSet.end())){
+    for (const auto& twin : twins) {
+      if ((current->access &&
+           closedSet.find(VNode(twin))!=closedSet.end()) ||
+          (!current->access &&
+            closedRestrictedSet.find(VNode(twin))!=closedRestrictedSet.end())){
 #if defined(DEBUG_ROUTING)
         std::cout << "Twin node " << twin << " is closed already, ignore it" << std::endl;
 #endif
         continue;
       }
+
       auto twinIt=openMap.find(twin);
+
       if (twinIt!=openMap.end()){
         RNodeRef rn=(*twinIt->second);
-        if (rn->currentCost > current->currentCost){
+        if (rn->currentCost > current->currentCost) {
           // this is cheaper path to twin
 
           rn->prev=current->nodeOffset;
@@ -576,7 +580,8 @@ namespace osmscout {
           std::cout << "Better transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
 #endif
         }
-      }else{
+      }
+      else {
         RouteNodeRef node;
         if (!GetRouteNodeByOffset(twin,node)){
           return false;
@@ -665,8 +670,10 @@ namespace osmscout {
         continue;
       }
 
-      if ((current->access && closedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedSet.end()) ||
-          (!current->access && closedRestrictedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedRestrictedSet.end())) {
+      if ((current->access &&
+           closedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedSet.end()) ||
+          (!current->access &&
+           closedRestrictedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedRestrictedSet.end())) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
         std::cout << " to " << dbId << " / " << path.offset;
@@ -763,7 +770,7 @@ namespace osmscout {
         parameter.GetProgress()->Progress(currentMaxDistance,overallDistance);
       }
 
-      // If we already have the node in the open list, but the new path is cheaper,
+      // If we already have the node in the open list, but the new path is cheaper (as tested above),
       // update the existing entry
       if (openEntry!=openMap.end()) {
         RNodeRef node=*openEntry->second;
@@ -808,6 +815,7 @@ namespace osmscout {
 
       i++;
     }
+
     return true;
   }
 
@@ -995,13 +1003,12 @@ namespace osmscout {
       //
 
       if (!WalkToOtherDatabases(state,
-                                  current,
-                                  currentRouteNode,
-                                  openList,
-                                  openMap,
-                                  closedSet,
-                                  closedRestrictedSet)){
-
+                                current,
+                                currentRouteNode,
+                                openList,
+                                openMap,
+                                closedSet,
+                                closedRestrictedSet)) {
         log.Error() << "Failed to walk to other databases from " << dbId << " / " << currentRouteNode->GetFileOffset();
         return result;
       }
@@ -1017,7 +1024,8 @@ namespace osmscout {
         closedSet.insert(VNode(current->nodeOffset,
                                current->object,
                                current->prev));
-      }else{
+      }
+      else {
         closedRestrictedSet.insert(VNode(current->nodeOffset,
                                          current->object,
                                          current->prev));

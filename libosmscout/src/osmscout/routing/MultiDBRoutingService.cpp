@@ -51,10 +51,6 @@ namespace osmscout {
   {
   }
 
-  RouterDBFiles::~RouterDBFiles()
-  {
-  }
-
   bool RouterDBFiles::Open(DatabaseRef database)
   {
     if (!objectVariantDataFile.Load(*(database->GetTypeConfig()),
@@ -62,6 +58,7 @@ namespace osmscout {
                                                     RoutingService::GetData2Filename(osmscout::RoutingService::DEFAULT_FILENAME_BASE)))){
       return false;
     }
+
     if (!routeNodeDataFile.Open(database->GetTypeConfig(),
                                 database->GetPath(),
                                 true,
@@ -88,9 +85,10 @@ namespace osmscout {
     isOpen(false)
   {
     DatabaseId id=0;
-    for (auto &db:databases){
+    for (auto& db : databases) {
       this->databaseMap[db->GetPath()]=id;
       this->databases[id]=db;
+
       id++;
     }
   }
@@ -102,23 +100,25 @@ namespace osmscout {
 
   bool MultiDBRoutingService::Open(RoutingProfileBuilder profileBuilder)
   {
-    if (databases.empty()){
+    if (databases.empty()) {
       return false;
     }
+
     RouterParameter routerParameter;
     routerParameter.SetDebugPerformance(debugPerformance);
 
     isOpen=true;
-    for (auto &entry:databases){
+    for (auto &entry:databases) {
       DatabaseRef database=entry.second;
       SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(
                                               entry.second,
                                               routerParameter,
                                               osmscout::RoutingService::DEFAULT_FILENAME_BASE);
-      if (!router->Open()){
+      if (!router->Open()) {
         Close();
         return false;
       }
+
       services[entry.first]=router;
       profiles[entry.first]=profileBuilder(database);
 
@@ -127,22 +127,27 @@ namespace osmscout {
         Close();
         return false;
       }
+
       routerFiles[entry.first]=dataFile;
 
     }
     return true;
   }
 
-  void MultiDBRoutingService::Close(){
-    if (!isOpen){
+  void MultiDBRoutingService::Close()
+  {
+    if (!isOpen) {
       return;
     }
+
     for (auto &entry:services){
       entry.second->Close();
     }
+
     for (auto entry:routerFiles){
       entry.second->Close();
     }
+
     services.clear();
     profiles.clear();
     isOpen=false;
@@ -153,18 +158,22 @@ namespace osmscout {
   {
     RoutePosition position, closestPosition;
 
-    double minDistance = std::numeric_limits<double>::max();
-    double distance;
-    for (auto &entry:services){
-      distance = radius;
-      position=entry.second->GetClosestRoutableNode(coord,*(profiles.at(entry.first)),distance);
-      if (position.IsValid() && distance < minDistance){
-          closestPosition =  RoutePosition(position.GetObjectFileRef(),
-                               position.GetNodeIndex(),
-                               /*database*/ entry.first);
-          minDistance = distance;
+    double minDistance=std::numeric_limits<double>::max();
+
+    for (auto &entry:services) {
+      double distance = radius;
+      position=entry.second->GetClosestRoutableNode(coord,
+                                                    *(profiles.at(entry.first)),
+                                                    distance);
+      if (position.IsValid() && distance < minDistance) {
+        closestPosition=RoutePosition(position.GetObjectFileRef(),
+                                      position.GetNodeIndex(),
+                                      /*database*/
+                                      entry.first);
+        minDistance=distance;
       }
     }
+
     return closestPosition;
   }
 
@@ -174,14 +183,15 @@ namespace osmscout {
 
   Pixel MultiDBRoutingService::GetCell(const osmscout::GeoCoord& coord)
   {
-    return osmscout::Pixel(uint32_t((coord.GetLon()+180.0)/ LON_CELL_FACTOR),
-                           uint32_t((coord.GetLat()+90.0)/ LAT_CELL_FACTOR));
+    return {uint32_t((coord.GetLon()+180.0)/ LON_CELL_FACTOR),
+            uint32_t((coord.GetLat()+90.0)/ LAT_CELL_FACTOR)};
   }
 
   Vehicle MultiDBRoutingService::GetVehicle(const MultiDBRoutingState& state)
   {
     return state.GetVehicle();
   }
+
   bool MultiDBRoutingService::CanUseForward(const MultiDBRoutingState& state,
                                             const DatabaseId& database,
                                             const WayRef& way)
@@ -201,7 +211,6 @@ namespace osmscout {
                                          const RouteNode& routeNode,
                                          size_t pathIndex)
   {
-    ;
     return state.GetProfile(database)->GetCosts(routeNode,
                                                 routerFiles[database]->objectVariantDataFile.GetData(),
                                                 pathIndex);
@@ -223,8 +232,8 @@ namespace osmscout {
   }
 
   double MultiDBRoutingService::GetCostLimit(const MultiDBRoutingState& state,
-                              const DatabaseId database,
-                              double targetDistance)
+                                             const DatabaseId database,
+                                             double targetDistance)
   {
     RoutingProfileRef profile=state.GetProfile(database);
     return profile->GetCosts(profile->GetCostLimitDistance())+targetDistance*profile->GetCostLimitFactor();
@@ -597,9 +606,11 @@ namespace osmscout {
 
     if (start.GetDatabaseId()==target.GetDatabaseId()){
       auto it=services.find(start.GetDatabaseId());
+
       if (it==services.end()){
         return result;
       }
+
       SimpleRoutingServiceRef service=it->second;
       return service->CalculateRoute(*(profiles.at(it->first)),
                                      start,
@@ -613,6 +624,7 @@ namespace osmscout {
       log.Error() << "Can't find start database " << start.GetDatabaseId();
       return result;
     }
+
     DatabaseRef database1=it->second;
 
     it=databases.find(target.GetDatabaseId());
@@ -620,19 +632,26 @@ namespace osmscout {
       log.Error() << "Can't find target database " << target.GetDatabaseId();
       return result;
     }
+
     DatabaseRef database2=it->second;
 
     std::set<Id> commonRouteNodes;
-    if (!FindCommonRoutingNodes(parameter.GetBreaker(),database1,database2,commonRouteNodes)){
+
+    if (!FindCommonRoutingNodes(parameter.GetBreaker(),
+                                database1,
+                                database2,
+                                commonRouteNodes)) {
       log.Error() << "Can't find common routing nodes for databases " <<
         database1->GetPath() << ", " <<
         database2->GetPath();
       return result;
     }
+
     if (parameter.GetBreaker() &&
         parameter.GetBreaker()->IsAborted()) {
       return result;
     }
+
     if (commonRouteNodes.empty()){
       log.Warn() << "Can't find common routing nodes for databases " <<
         database1->GetPath() << ", " <<
@@ -668,45 +687,46 @@ namespace osmscout {
                                                         double radius,
                                                         const RoutingParameter& parameter)
     {
-        RoutingResult               result;
-        std::vector<RoutePosition>  routePositions;
+      RoutingResult              result;
+      std::vector<RoutePosition> routePositions;
 
-        assert(!via.empty());
+      assert(!via.empty());
 
-        for (const auto& etap : via) {
-            RoutePosition target = GetClosestRoutableNode(etap, radius);
+      for (const auto& etap : via) {
+        RoutePosition target=GetClosestRoutableNode(etap,
+                                                    radius);
 
-            if (!target.IsValid()) {
-                return result;
-            }
-
-            routePositions.push_back(target);
+        if (!target.IsValid()) {
+          return result;
         }
 
-        RoutingResult partialResult;
-        for (size_t index=0; index<routePositions.size() - 1; index++) {
-            RoutePosition fromRoutePosition=routePositions[index];
-            RoutePosition toRoutePosition=routePositions[index+1];
+        routePositions.push_back(target);
+      }
 
-            partialResult=CalculateRoute(fromRoutePosition,
-                                         toRoutePosition,
-                                         parameter);
-            if (!partialResult.Success()) {
-                result.GetRoute().Clear();
+      RoutingResult partialResult;
+      for (size_t   index=0; index<routePositions.size()-1; index++) {
+        RoutePosition fromRoutePosition=routePositions[index];
+        RoutePosition toRoutePosition  =routePositions[index+1];
 
-                return result;
-            }
+        partialResult=CalculateRoute(fromRoutePosition,
+                                     toRoutePosition,
+                                     parameter);
+        if (!partialResult.Success()) {
+          result.GetRoute().Clear();
 
-            /* In intermediary via points the end of the previous part is the start of the */
-            /* next part, we need to remove the duplicate point in the calculated route */
-            if (index<routePositions.size() - 2) {
-                partialResult.GetRoute().PopEntry();
-            }
-
-            result.GetRoute().Append(partialResult.GetRoute());
+          return result;
         }
 
-        return result;
+        /* In intermediary via points the end of the previous part is the start of the */
+        /* next part, we need to remove the duplicate point in the calculated route */
+        if (index<routePositions.size()-2) {
+          partialResult.GetRoute().PopEntry();
+        }
+
+        result.GetRoute().Append(partialResult.GetRoute());
+      }
+
+      return result;
     }
 
   bool MultiDBRoutingService::PostProcessRouteDescription(RouteDescription &description,

@@ -56,7 +56,7 @@ namespace osmscout {
     virtual Vehicle GetVehicle(const RoutingState& state) = 0;
 
     virtual bool CanUse(const RoutingState& state,
-                        const DatabaseId database,
+                        DatabaseId database,
                         const RouteNode& routeNode,
                         size_t pathIndex) = 0;
 
@@ -69,21 +69,21 @@ namespace osmscout {
                                 const WayRef& way) = 0;
 
     virtual double GetCosts(const RoutingState& state,
-                            const DatabaseId database,
+                            DatabaseId database,
                             const RouteNode& routeNode,
                             size_t pathIndex) = 0;
 
     virtual double GetCosts(const RoutingState& state,
-                            const DatabaseId database,
+                            DatabaseId database,
                             const WayRef &way,
                             double wayLength) = 0;
 
     virtual double GetEstimateCosts(const RoutingState& state,
-                                    const DatabaseId database,
+                                    DatabaseId database,
                                     double targetDistance) = 0;
 
     virtual double GetCostLimit(const RoutingState& state,
-                                const DatabaseId database,
+                                DatabaseId database,
                                 double targetDistance) = 0;
 
     virtual bool GetRouteNode(const DatabaseId &database,
@@ -93,9 +93,30 @@ namespace osmscout {
     virtual bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
                                        std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap) = 0;
 
+    /**
+     * Return the route node for the given database offset
+     * @param offset
+     *    Offset in given database
+     * @param node
+     *    Node instance to write the result back
+     * @return
+     *    True, if the node couldbe loaded, else false
+     */
     virtual bool GetRouteNodeByOffset(const DBFileOffset &offset,
                                       RouteNodeRef &node) = 0;
 
+    /**
+     * Return the file offset for the given route node id in teh given database
+     *
+     * @param database
+     *    Database id
+     * @param id
+     *    Id of route node
+     * @param offset
+     *    The resulting file offset where the node can be found
+     * @return
+     *    True, if the id have been resolved, else false
+     */
     virtual bool GetRouteNodeOffset(const DatabaseId &database,
                                     const Id &id,
                                     FileOffset &offset) = 0;
@@ -120,8 +141,8 @@ namespace osmscout {
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
 
     virtual std::vector<DBFileOffset> GetNodeTwins(const RoutingState& state,
-                                                   const DatabaseId database,
-                                                   const Id id) = 0;
+                                                   DatabaseId database,
+                                                   Id id) = 0;
 
     void GetStartForwardRouteNode(const RoutingState& state,
                                   const DatabaseId& database,
