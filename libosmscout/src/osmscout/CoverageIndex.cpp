@@ -82,23 +82,32 @@ namespace osmscout {
     }
   }
 
-  bool CoverageIndex::IsCovered(const GeoCoord& coord) const
+  Pixel CoverageIndex::GetTile(const GeoCoord& coord) const
   {
-    Pixel cell((uint32_t)((coord.GetLon()+180.0)/cellWidth),
-               (uint32_t)((coord.GetLat()+90.0)/cellHeight));
+    return {(uint32_t)((coord.GetLon()+180.0)/cellWidth),
+            (uint32_t)((coord.GetLat()+90.0)/cellHeight)};
+  }
 
-    if (cell.x<minCell.x ||
-        cell.x>maxCell.x ||
-        cell.y<minCell.y ||
-        cell.y>maxCell.y) {
+  bool CoverageIndex::IsCovered(const Pixel& tile) const
+  {
+    if (tile.x<minCell.x ||
+        tile.x>maxCell.x ||
+        tile.y<minCell.y ||
+        tile.y>maxCell.y) {
       return false;
     }
 
-    size_t bitInMap=((cell.y-minCell.y)*width+(cell.x-minCell.x));
+    size_t bitInMap=((tile.y-minCell.y)*width+(tile.x-minCell.x));
     size_t byteInMap=bitInMap/8;
     size_t bitInByte=bitInMap%8;
 
     return bitmap[byteInMap] & ((uint8_t)1 << bitInByte);
   }
+
+  bool CoverageIndex::IsCovered(const GeoCoord& coord) const
+  {
+    return IsCovered(GetTile(coord));
+  }
+
 }
 

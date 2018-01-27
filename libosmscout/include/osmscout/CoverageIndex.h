@@ -68,6 +68,9 @@ namespace osmscout {
       return scanner.IsOpen();
     }
 
+    Pixel GetTile(const GeoCoord& coord) const;
+    bool IsCovered(const Pixel& tile) const;
+
     bool IsCovered(const GeoCoord& coord) const;
   };
 
