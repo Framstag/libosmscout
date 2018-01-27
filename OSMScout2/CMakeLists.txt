@@ -77,7 +77,7 @@ set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
 if(NOT MSVC)
-  target_sources(OSMScout2 ${LANG_FILES} ${LANG_SRC})
+  target_sources(OSMScout2 PRIVATE ${LANG_FILES} ${LANG_SRC})
 endif()
 
 target_include_directories(OSMScout2 PRIVATE
