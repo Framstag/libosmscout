@@ -65,7 +65,7 @@ static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
 #define WARNING 2
 #define ERROR   1
 
-static int LogEnv(QString env)
+static int LogEnv(const QString& env)
 {
   if (env.toUpper()=="DEBUG") {
     return DEBUG;
