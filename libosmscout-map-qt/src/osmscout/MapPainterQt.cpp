@@ -1437,5 +1437,27 @@ namespace osmscout {
                 parameter,
                 data);
   }
+
+  MapPainterBatchQt::MapPainterBatchQt(size_t expectedCount):
+    MapPainterBatch(expectedCount) {}
+
+  MapPainterBatchQt::~MapPainterBatchQt(){}
+
+  bool MapPainterBatchQt::paint(const Projection& projection,
+                                const MapParameter& parameter,
+                                QPainter* qPainter)
+  {
+    qPainter->setRenderHint(QPainter::Antialiasing);
+    qPainter->setRenderHint(QPainter::TextAntialiasing);
+
+    // prepare map painters - lock and setup Qt painter
+    std::vector<std::unique_lock<std::mutex>> locks(data.size());
+    for (MapPainterQt* painter: painters){
+      locks.push_back(std::move(std::unique_lock<std::mutex>(painter->mutex)));
+      painter->painter = qPainter;
+    }
+
+    return batchPaintInternal(projection,parameter);
+  }
 }
 

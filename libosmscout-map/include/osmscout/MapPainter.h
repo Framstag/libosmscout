@@ -89,6 +89,8 @@ namespace osmscout {
     void ClearDBData();
   };
 
+  typedef std::shared_ptr<MapData> MapDataRef;
+
   /**
    * Abstract base class of all renders (though you can always write
    * your own renderer without inheriting from this class) It
@@ -739,6 +741,64 @@ namespace osmscout {
     bool Draw(const Projection& projection,
               const MapParameter& parameter,
               const MapData& data);
+  };
+
+  /**
+   * \ingroup Renderer
+   *
+   * Batch renderer helps to render map based on multiple databases
+   * - map data and corresponding MapPainter
+   */
+  template <class PainterType>
+  class MapPainterBatch {
+  protected:
+    std::vector<MapDataRef> data;
+    std::vector<PainterType> painters;
+
+  protected:
+
+    /**
+     * Render bach of multiple databases, step by step (\see RenderSteps).
+     * All painters should have initialised its (backend specific) state.
+     *
+     * @param projection
+     * @param parameter
+     * @return false on error, true otherwise
+     */
+    bool batchPaintInternal(const Projection& projection,
+                            const MapParameter& parameter)
+    {
+      bool success=true;
+      for (size_t step=osmscout::RenderSteps::FirstStep;
+           step<=osmscout::RenderSteps::LastStep;
+           step++){
+
+        for (size_t i=0;i<data.size(); i++){
+          const MapData &d=*(data[i]);
+          success &= painters[i]->Draw(projection,
+                                       parameter,
+                                       d,
+                                       (RenderSteps)step,
+                                       (RenderSteps)step);
+        }
+      }
+      return success;
+    }
+
+  public:
+    MapPainterBatch(size_t expectedCount)
+    {
+      data.reserve(expectedCount);
+      painters.reserve(expectedCount);
+    }
+
+    virtual ~MapPainterBatch(){}
+
+    void addData(MapDataRef &d, PainterType &painter)
+    {
+      data.push_back(d);
+      painters.push_back(painter);
+    }
   };
 
   /**
