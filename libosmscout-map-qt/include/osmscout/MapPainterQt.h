@@ -187,10 +187,9 @@ namespace osmscout {
   class OSMSCOUT_MAP_QT_API MapPainterBatchQt:
       public MapPainterBatch<MapPainterQt*> {
   public:
-    MapPainterBatchQt(size_t expectedCount):
-        MapPainterBatch(expectedCount) {}
+    MapPainterBatchQt(size_t expectedCount);
 
-    virtual ~MapPainterBatchQt(){}
+    virtual ~MapPainterBatchQt();
 
     bool paint(const Projection& projection,
                const MapParameter& parameter,
