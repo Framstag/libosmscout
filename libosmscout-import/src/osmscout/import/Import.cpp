@@ -327,12 +327,12 @@ namespace osmscout {
     return areaAreaIndexMaxMag;
   }
 
-  size_t ImportParameter::GetWaterIndexMinMag() const
+  uint32_t ImportParameter::GetWaterIndexMinMag() const
   {
     return waterIndexMinMag;
   }
 
-  size_t ImportParameter::GetWaterIndexMaxMag() const
+  uint32_t ImportParameter::GetWaterIndexMaxMag() const
   {
     return waterIndexMaxMag;
   }
@@ -579,12 +579,12 @@ namespace osmscout {
     this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
   }
 
-  void ImportParameter::SetWaterIndexMinMag(size_t waterIndexMinMag)
+  void ImportParameter::SetWaterIndexMinMag(uint32_t waterIndexMinMag)
   {
     this->waterIndexMinMag=waterIndexMinMag;
   }
 
-  void ImportParameter::SetWaterIndexMaxMag(size_t waterIndexMaxMag)
+  void ImportParameter::SetWaterIndexMaxMag(uint32_t waterIndexMaxMag)
   {
     this->waterIndexMaxMag=waterIndexMaxMag;
   }

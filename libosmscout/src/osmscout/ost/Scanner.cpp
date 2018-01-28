@@ -107,7 +107,7 @@ Buffer::~Buffer()
 
 int Buffer::Peek()
 {
-  size_t curPos = GetPos();
+  int curPos = GetPos();
   int ch = Read();
   SetPos(curPos);
   return ch;

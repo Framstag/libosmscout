@@ -236,8 +236,8 @@ namespace osmscout {
   template <class N>
   void NumericIndex<N>::InitializeCache()
   {
-    unsigned long currentCacheSize=cacheSize; // Available free space in cache
-    unsigned long requiredCacheSize=0;        // Space needed for caching everything
+    size_t currentCacheSize=cacheSize; // Available free space in cache
+    size_t requiredCacheSize=0;        // Space needed for caching everything
 
     for (const auto count : pageCounts) {
       requiredCacheSize+=count;
@@ -249,7 +249,7 @@ namespace osmscout {
 
     simpleCacheMaxLevel=0;
     for (size_t level=1; level<pageCounts.size(); level++) {
-      unsigned long resultingCacheSize; // Cache size we actually use for this level
+      size_t resultingCacheSize; // Cache size we actually use for this level
 
       simplePageCache.push_back(PageSimpleCache());
 

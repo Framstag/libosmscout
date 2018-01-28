@@ -206,7 +206,7 @@ bool InputHandler::rotateBy(double /*angleChange*/)
 {
     return false;
 }
-bool InputHandler::touch(QTouchEvent */*event*/)
+bool InputHandler::touch(QTouchEvent* /*event*/)
 {
     return false;
 }
@@ -218,7 +218,7 @@ bool InputHandler::isLockedToPosition()
 {
     return false;
 }
-bool InputHandler::focusOutEvent(QFocusEvent */*event*/)
+bool InputHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return false;
 }
@@ -711,7 +711,7 @@ bool LockHandler::isLockedToPosition()
 {
     return true;
 }
-bool LockHandler::focusOutEvent(QFocusEvent */*event*/)
+bool LockHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return true;
 }

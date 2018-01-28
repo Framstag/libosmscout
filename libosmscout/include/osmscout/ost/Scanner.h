@@ -46,8 +46,8 @@ class Token
 {
 public:
   int      kind;    // token kind
-  size_t   pos;     // token position in the source text (starting at 0)
-  size_t   charPos; // token position in characters in the source text (starting at 0)
+  int      pos;     // token position in the source text (starting at 0)
+  int      charPos; // token position in characters in the source text (starting at 0)
   int      col;     // token column (starting at 1)
   int      line;    // token line (starting at 1)
   char*    val;     // token value
@@ -62,7 +62,7 @@ class Buffer
 private:
   unsigned char *buf; // input buffer
   size_t bufLen;      // length of buffer
-  size_t bufPos;      // current position in buffer
+  int    bufPos;      // current position in buffer
 
 public:
   static const int EoF = COCO_WCHAR_MAX + 1;

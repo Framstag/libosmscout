@@ -166,8 +166,8 @@ namespace osmscout {
     size_t                       areaWayMinMag;            //<! Minimum magnification of index for individual type
     size_t                       areaWayIndexMaxLevel;     //<! Maximum zoom level for area way index bitmap
 
-    size_t                       waterIndexMinMag;         //<! Minimum level of the generated water index
-    size_t                       waterIndexMaxMag;         //<! Maximum level of the generated water index
+    uint32_t                     waterIndexMinMag;         //<! Minimum level of the generated water index
+    uint32_t                     waterIndexMaxMag;         //<! Maximum level of the generated water index
 
     size_t                       optimizationMaxWayCount;  //<! Maximum number of ways for one iteration
     uint32_t                     optimizationMaxMag;       //<! Maximum magnification for optimization
@@ -248,8 +248,8 @@ namespace osmscout {
 
     size_t GetAreaAreaIndexMaxMag() const;
 
-    size_t GetWaterIndexMinMag() const;
-    size_t GetWaterIndexMaxMag() const;
+    uint32_t GetWaterIndexMinMag() const;
+    uint32_t GetWaterIndexMaxMag() const;
 
     size_t GetOptimizationMaxWayCount() const;
     uint32_t GetOptimizationMaxMag() const;
@@ -322,8 +322,8 @@ namespace osmscout {
     void SetAreaWayMinMag(size_t areaWayMinMag);
     void SetAreaWayIndexMaxMag(size_t areaWayIndexMaxLevel);
 
-    void SetWaterIndexMinMag(size_t waterIndexMinMag);
-    void SetWaterIndexMaxMag(size_t waterIndexMaxMag);
+    void SetWaterIndexMinMag(uint32_t waterIndexMinMag);
+    void SetWaterIndexMaxMag(uint32_t waterIndexMaxMag);
 
     void SetOptimizationMaxWayCount(size_t optimizationMaxWayCount);
     void SetOptimizationMaxMag(uint32_t optimizationMaxMag);

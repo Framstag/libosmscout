@@ -1130,7 +1130,7 @@ namespace osmscout {
 
     for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
       if (level>=nodeTextStyleSelector[type->GetIndex()].size()) {
-        level=nodeTextStyleSelector[type->GetIndex()].size()-1;
+        level=static_cast<uint32_t>(nodeTextStyleSelector[type->GetIndex()].size()-1);
       }
 
       if (!nodeTextStyleSelector[type->GetIndex()][level].empty()) {
@@ -1253,7 +1253,7 @@ namespace osmscout {
 
     for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
       if (level>=areaTextStyleSelector[type->GetIndex()].size()) {
-        level=areaTextStyleSelector[type->GetIndex()].size()-1;
+        level=static_cast<uint32_t>(areaTextStyleSelector[type->GetIndex()].size()-1);
       }
 
       if (!areaTextStyleSelector[type->GetIndex()][level].empty()) {

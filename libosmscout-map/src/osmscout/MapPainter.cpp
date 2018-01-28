@@ -825,11 +825,11 @@ namespace osmscout {
 
         // Retricts the height of a label to maxHeight
         double alpha=textStyle->GetAlpha();
-        double maxHeight=projection.GetHeight()/5;
+        double maxHeight=projection.GetHeight()/5.0;
 
         if (height>maxHeight) {
             // If the height exeeds maxHeight the alpha value will be decreased
-            double minAlpha=projection.GetHeight();
+            double minAlpha=(double)projection.GetHeight();
             double normHeight=(height-maxHeight)/(minAlpha-maxHeight);
             alpha*=std::min(std::max(1-normHeight,0.2),1.0);
             height=maxHeight;
