@@ -91,7 +91,7 @@ void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::Si
   QPen          pen;
   QFont         font;
   QFontMetricsF metrics=QFontMetricsF(font,painter->device());
-  double        fontHeight=12;
+  int           fontHeight=12;
 
   font.setPixelSize(fontHeight);
   font.setStyleStrategy(QFont::PreferAntialias);
@@ -122,7 +122,7 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::Si
 {
   QPen          pen;
   QFont         font;
-  double        fontHeight=12;
+  int           fontHeight=12;
   double        pLength=p.GetLength();
 
   font.setPixelSize(fontHeight);
@@ -215,7 +215,7 @@ void DrawWindow::drawLine(QPainter *painter, const osmscout::SimplifiedPath &p)
   */
 }
 
-void DrawWindow::paintEvent(QPaintEvent */* event */)
+void DrawWindow::paintEvent(QPaintEvent* /* event */)
 {
   QPainter painter(this);
   painter.fillRect(0,0, width(), height(), QBrush(QColor::fromRgbF(1,1,1)));

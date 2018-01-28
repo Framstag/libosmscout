@@ -142,8 +142,8 @@ namespace osmscout {
                                                    bool coast)
   {
     //std::cout << "       " << (coast?"*":"+") << " " << point.GetDisplayText() << std::endl;
-    GroundTile::Coord coord(floor((point.GetLon()-cellMinLon)/stateMap.GetCellWidth()*GroundTile::Coord::CELL_MAX+0.5),
-                            floor((point.GetLat()-cellMinLat)/stateMap.GetCellHeight()*GroundTile::Coord::CELL_MAX+0.5),
+    GroundTile::Coord coord(static_cast<uint16_t>(floor((point.GetLon()-cellMinLon)/stateMap.GetCellWidth()*GroundTile::Coord::CELL_MAX+0.5)),
+                            static_cast<uint16_t>(floor((point.GetLat()-cellMinLat)/stateMap.GetCellHeight()*GroundTile::Coord::CELL_MAX+0.5)),
                             coast);
 
     return coord;
@@ -947,7 +947,7 @@ namespace osmscout {
             size_t          intersectionCount=0;
             IntersectionRef firstIntersection=std::make_shared<Intersection>();
             IntersectionRef secondIntersection=std::make_shared<Intersection>();
-            size_t          corner=0;
+            uint8_t         corner=0;
 
             // Check intersection with one of the borders
             while (corner<4) {

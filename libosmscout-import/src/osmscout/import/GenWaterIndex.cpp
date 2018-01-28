@@ -336,7 +336,7 @@ namespace osmscout {
     double cellWidth=360.0;
     double cellHeight=180.0;
 
-    for (size_t zoomLevel=0; zoomLevel<=parameter.GetWaterIndexMaxMag(); zoomLevel++) {
+    for (uint32_t zoomLevel=0; zoomLevel<=parameter.GetWaterIndexMaxMag(); zoomLevel++) {
       if (zoomLevel>=parameter.GetWaterIndexMinMag() &&
           zoomLevel<=parameter.GetWaterIndexMaxMag()) {
         WaterIndexProcessor::Level level;

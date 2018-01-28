@@ -51,7 +51,7 @@ namespace osmscout {
   std::string
   DumpRoundaboutLeaveDescription(const RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
                                  const RouteDescription::NameDescriptionRef& nameDescription,
-                                 int roundaboutCrossingCounter);
+                                 size_t roundaboutCrossingCounter);
 
   NodeDescription
   DumpMotorwayEnterDescription(const RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
@@ -262,8 +262,8 @@ namespace osmscout {
     }
 
   private:
-    int             roundaboutCrossingCounter;
-    int             index;
+    size_t          roundaboutCrossingCounter;
+    size_t          index;
     double          previousDistance;
     NodeDescription description;
   };

@@ -742,7 +742,7 @@ namespace osmscout {
     // note: this assumes 2d cartesian coordinate space is used;
     // for geographic, expect Vec2.x=lon and Vec2.y=lat!
 
-    int ptIdx=0;
+    size_t ptIdx=0;
 
     for (size_t i=1; i<edges.size(); i++) {
       // find the point with the smallest y value,
@@ -757,8 +757,8 @@ namespace osmscout {
       }
     }
 
-    int prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
-    int nextIdx=(ptIdx==(int)edges.size()-1) ? 0 : ptIdx+1;
+    size_t prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
+    size_t nextIdx=(ptIdx==edges.size()-1) ? 0 : ptIdx+1;
 
     double signedArea=(edges[ptIdx].x-edges[prevIdx].x)*
                       (edges[nextIdx].y-edges[ptIdx].y)-

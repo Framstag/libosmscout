@@ -279,7 +279,7 @@ namespace osmscout {
       GeoCoord      point;              //! The intersection point
       double        distanceSquare;     //! The distance^2 between the path point and the intersectionPoint
       Direction     direction;          //! 1 in, 0 touch, -1 out
-      unsigned char borderIndex;        //! The index of the border that gets intersected [0..3]
+      uint8_t       borderIndex;        //! The index of the border that gets intersected [0..3]
     };
 
     typedef std::shared_ptr<Intersection> IntersectionRef;

@@ -882,7 +882,7 @@ int main(int argc, char* argv[])
       }
     }
   }
-  catch (osmscout::IOException& e) {
+  catch (osmscout::IOException& /*e*/) {
     // we ignore this exception, since it is likely a "not implemented" exception
   }
 

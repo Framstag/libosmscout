@@ -260,7 +260,7 @@ namespace osmscout {
     }
 
     std::string DumpRoundaboutLeaveDescription(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                               const osmscout::RouteDescription::NameDescriptionRef& nameDescription, int /*roundaboutCrossingCounter*/)
+                                               const osmscout::RouteDescription::NameDescriptionRef& nameDescription, size_t /*roundaboutCrossingCounter*/)
     {
         std::ostringstream stream;
         size_t exitCount = roundaboutLeaveDescription->GetExitCount();

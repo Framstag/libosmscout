@@ -180,7 +180,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
   osmscout::GeoBox boundingBox(osmscout::GeoCoord(-90.0,-180.0),
                                osmscout::GeoCoord(90.0,180.0));
 
-  for (size_t zoomLevel=0; zoomLevel<=indexMaxMag; zoomLevel++) {
+  for (uint32_t zoomLevel=0; zoomLevel<=indexMaxMag; zoomLevel++) {
     if (zoomLevel>=indexMinMag &&
         zoomLevel<=indexMaxMag) {
       osmscout::WaterIndexProcessor::Level level;
@@ -448,7 +448,7 @@ int main(int argc, char* argv[])
       }
     }
   }
-  catch (osmscout::IOException& e) {
+  catch (osmscout::IOException& /*e*/) {
     // we ignore this exception, since it is likely a "not implemented" exception
   }
 
