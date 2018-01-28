@@ -979,11 +979,11 @@ namespace osmscout {
         }
 
         RegionRef region=std::make_shared<Region>();
-        size_t   level=adminLevelValue->GetAdminLevel();
+        uint8_t   level=adminLevelValue->GetAdminLevel();
 
         region->reference=area.GetObjectFileRef();
         region->name=nameValue->GetName();
-        region->level=level;
+        region->level=(int8_t)level;
 
         if (!adminLevelValue->GetIsIn().empty()) {
           region->isIn=GetFirstInStringList(adminLevelValue->GetIsIn(),",;");

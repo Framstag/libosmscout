@@ -31,8 +31,8 @@ namespace osmscout {
   class RawWayIndexedDataFile CLASS_FINAL : public IndexedDataFile<OSMId,RawWay>
   {
   public:
-    RawWayIndexedDataFile(unsigned long indexCacheSize,
-                          unsigned long dataCacheSize);
+    RawWayIndexedDataFile(size_t indexCacheSize,
+                          size_t dataCacheSize);
   };
 }
 

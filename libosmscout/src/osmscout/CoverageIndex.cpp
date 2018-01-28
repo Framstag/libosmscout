@@ -101,7 +101,7 @@ namespace osmscout {
     size_t byteInMap=bitInMap/8;
     size_t bitInByte=bitInMap%8;
 
-    return bitmap[byteInMap] & ((uint8_t)1 << bitInByte);
+    return (bitmap[byteInMap] & ((uint8_t)1 << bitInByte))!=0;
   }
 
   bool CoverageIndex::IsCovered(const GeoCoord& coord) const

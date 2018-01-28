@@ -83,7 +83,7 @@ namespace osmscout {
 
     mutable FileScanner                  scanner;             //!< FileScanner instance for file access
 
-    unsigned long                        cacheSize;           //!< Maximum umber of index pages cached
+    size_t                               cacheSize;           //!< Maximum umber of index pages cached
     uint32_t                             pageSize;            //!< Size of one page as stated by the actual index file
     uint32_t                             levels;              //!< Number of index levels as stated by the actual index file
     std::vector<uint32_t>                pageCounts;          //!< Number of pages per level as stated by the actual index file
@@ -103,7 +103,7 @@ namespace osmscout {
 
   public:
     NumericIndex(const std::string& filename,
-                 unsigned long cacheSize);
+                 size_t cacheSize);
     virtual ~NumericIndex();
 
     bool Open(const std::string& path,
@@ -125,7 +125,7 @@ namespace osmscout {
 
   template <class N>
   NumericIndex<N>::NumericIndex(const std::string& filename,
-                                unsigned long cacheSize)
+                                size_t cacheSize)
    : filepart(filename),
      cacheSize(cacheSize),
      pageSize(0),

@@ -167,7 +167,7 @@ namespace osmscout {
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       int8_t                   layer;           //!< Layer this way is in
       LineStyleRef             lineStyle;       //!< Line style
-      int                      wayPriority;     //!< Priority of way (from style sheet)
+      size_t                   wayPriority;     //!< Priority of way (from style sheet)
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer
       double                   lineWidth;       //!< Line width

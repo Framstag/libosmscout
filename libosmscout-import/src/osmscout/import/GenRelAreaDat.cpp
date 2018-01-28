@@ -124,7 +124,7 @@ namespace osmscout {
                                          std::list<MultipolygonPart>& groups,
                                          GroupingState& state,
                                          size_t topIndex,
-                                         size_t id)
+                                         uint8_t id)
   {
     std::list<MultipolygonPart>::const_iterator sub;
     size_t                                      subIndex;

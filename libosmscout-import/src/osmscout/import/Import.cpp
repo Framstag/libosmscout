@@ -342,12 +342,12 @@ namespace osmscout {
     return optimizationMaxWayCount;
   }
 
-  size_t ImportParameter::GetOptimizationMaxMag() const
+  uint32_t ImportParameter::GetOptimizationMaxMag() const
   {
     return optimizationMaxMag;
   }
 
-  size_t ImportParameter::GetOptimizationMinMag() const
+  uint32_t ImportParameter::GetOptimizationMinMag() const
   {
     return optimizationMinMag;
   }
@@ -594,12 +594,12 @@ namespace osmscout {
     this->optimizationMaxWayCount=optimizationMaxWayCount;
   }
 
-  void ImportParameter::SetOptimizationMaxMag(size_t optimizationMaxMag)
+  void ImportParameter::SetOptimizationMaxMag(uint32_t optimizationMaxMag)
   {
     this->optimizationMaxMag=optimizationMaxMag;
   }
 
-  void ImportParameter::SetOptimizationMinMag(size_t optimizationMinMag)
+  void ImportParameter::SetOptimizationMinMag(uint32_t optimizationMinMag)
   {
     this->optimizationMinMag=optimizationMinMag;
   }

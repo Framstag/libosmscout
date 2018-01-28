@@ -73,8 +73,8 @@ public:
   int Read();
   int Peek();
   //wchar_t* GetString(int beg, int end);
-  size_t GetPos();
-  void SetPos(size_t value);
+  int GetPos();
+  void SetPos(int value);
 };
 
 //-----------------------------------------------------------------------------------
@@ -170,8 +170,8 @@ private:
 
   int           ch;         // current input character
 
-  size_t        pos;        // byte position of current character
-  size_t        charPos;    // position by unicode characters starting with 0
+  int           pos;        // byte position of current character
+  int           charPos;    // position by unicode characters starting with 0
   int           line;       // line number of current character
   int           col;        // column number of current character
   int           oldEols;    // EOLs that appeared in a comment;

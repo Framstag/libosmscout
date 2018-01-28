@@ -591,7 +591,7 @@ namespace osmscout {
         return false;
       }
 
-      uint32_t nodeCount=nodeUseMap.size();
+      size_t   nodeCount=nodeUseMap.size();
       uint32_t areasWritten=0;
 
       progress.Info("Found "+NumberToString(nodeCount)+" nodes as possible connection points for areas");

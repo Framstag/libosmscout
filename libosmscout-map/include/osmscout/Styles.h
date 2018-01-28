@@ -467,7 +467,6 @@ namespace osmscout {
 
     TextStyle& SetSlot(const std::string& slot);
 
-    TextStyle& SetPriority(uint8_t priority);
     TextStyle& SetSize(double size) override;
     TextStyle& SetLabel(const LabelProviderRef& label);
     TextStyle& SetPosition(size_t position);
@@ -575,7 +574,6 @@ namespace osmscout {
     ShieldStyle(const ShieldStyle& style);
 
     ShieldStyle& SetLabel(const LabelProviderRef& label);
-    ShieldStyle& SetPriority(uint8_t priority);
     ShieldStyle& SetSize(double size) override;
     ShieldStyle& SetTextColor(const Color& color);
     ShieldStyle& SetBgColor(const Color& color);
@@ -652,7 +650,7 @@ namespace osmscout {
     void SetUIntValue(int attribute, size_t value) override;
 
     PathShieldStyle& SetLabel(const LabelProviderRef& label);
-    PathShieldStyle& SetPriority(uint8_t priority);
+    PathShieldStyle& SetPriority(size_t priority);
     PathShieldStyle& SetSize(double size);
     PathShieldStyle& SetTextColor(const Color& color);
     PathShieldStyle& SetBgColor(const Color& color);
@@ -669,7 +667,7 @@ namespace osmscout {
       return shieldStyle->GetAlpha();
     }
 
-    inline uint8_t GetPriority() const
+    inline size_t GetPriority() const
     {
       return shieldStyle->GetPriority();
     }

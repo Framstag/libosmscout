@@ -1363,7 +1363,7 @@ namespace osmscout {
       data.buffer=&coastlineSegmentAttributes;
       data.layer=0;
       data.lineStyle=osmTileLine;
-      data.wayPriority=std::numeric_limits<int>::max();
+      data.wayPriority=std::numeric_limits<size_t>::max();
       data.transStart=transStart;
       data.transEnd=transEnd;
       data.lineWidth=GetProjectedWidth(projection,
@@ -1398,7 +1398,7 @@ namespace osmscout {
       data.buffer=&coastlineSegmentAttributes;
       data.layer=0;
       data.lineStyle=osmTileLine;
-      data.wayPriority=std::numeric_limits<int>::max();
+      data.wayPriority=std::numeric_limits<size_t>::max();
       data.transStart=transStart;
       data.transEnd=transEnd;
       data.lineWidth=GetProjectedWidth(projection,
@@ -2124,7 +2124,7 @@ namespace osmscout {
               wd.buffer=&coastlineSegmentAttributes;
               wd.layer=0;
               wd.lineStyle=coastlineLine;
-              wd.wayPriority=std::numeric_limits<int>::max();
+              wd.wayPriority=std::numeric_limits<size_t>::max();
               wd.transStart=start+lineStart;
               wd.transEnd=start+lineEnd;
               wd.lineWidth=GetProjectedWidth(projection,

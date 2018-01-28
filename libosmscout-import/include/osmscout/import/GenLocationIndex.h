@@ -167,7 +167,7 @@ namespace osmscout {
       std::string                        name;               //!< The name of this area
       std::string                        isIn;               //!< Name of the parent region as stated in OSM (is_in tag)
       std::list<RegionAlias>             aliases;            //!< Location that are represented by this region
-      int                                level{-1};          //!< Admin level or -1 if not set
+      int8_t                             level{-1};          //!< Admin level or -1 if not set
 
       std::vector<std::vector<GeoCoord>> areas;              //!< the geometric area of this region
       std::list<RegionPOI>               pois;               //!< A list of POIs in this region
