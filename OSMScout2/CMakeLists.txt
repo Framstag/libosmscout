@@ -59,14 +59,33 @@ set(SOURCE_FILES
 	qml/custom/RouteStepIcon.qml
 	)
 
-set(LANG_FILES
+# XML files with translated phrases.
+# You can add new language translation just by adding new entry here, and run build.
+# Newly created *.ts file may be edited by linguist tool.
+# Please don't forget to add new *.ts file to Meson-based build.
+set(TRANSLATION_TS_FILES
 	translations/en.ts
 	translations/cs.ts
 	)
 
-if(NOT MSVC)
-  qt5_create_translation(LANG_SRC ${LANG_FILES})
-endif()
+# source files that may contains translatable phrases (see tr, qsTr, QT_TRANSLATE_NOOP functions)
+set(TRANSLATION_SOURCE_FILES
+	${SOURCE_FILES}
+	../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp
+	)
+
+# See http://doc.qt.io/qt-5/cmake-manual.html
+#
+# qt5_create_translation macro process translations in two steps:
+#
+#  - collect available phrases inside TRANSLATION_SOURCE_FILES
+#    with lupdate tool and put them into *.ts files if some is missing there.
+#
+#  - create binary translation files (*.qm) from translated phrases available
+#    in *.ts files with lrelease tool
+qt5_create_translation(TRANSLATION_QM_FILES
+		${TRANSLATION_SOURCE_FILES}
+		${TRANSLATION_TS_FILES})
 
 qt5_add_resources(RESOURCE_FILES
     res.qrc
@@ -76,9 +95,7 @@ set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 
 add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
-if(NOT MSVC)
-  target_sources(OSMScout2 PRIVATE ${LANG_FILES} ${LANG_SRC})
-endif()
+target_sources(OSMScout2 PRIVATE ${TRANSLATION_TS_FILES} ${TRANSLATION_QM_FILES})
 
 target_include_directories(OSMScout2 PRIVATE
     ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
@@ -136,12 +153,12 @@ install(TARGETS OSMScout2 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIV
 
 # install QM files to correct location - QStandardPaths::AppDataLocation / "translations"
 if(APPLE)
-	install(FILES ${LANG_SRC}
+	install(FILES ${TRANSLATION_QM_FILES}
 			DESTINATION "/Library/Application Support/libosmscout/OSMScout2/translations")
 elseif(WIN32)
-#	install(FILES ${LANG_SRC}
+#	install(FILES ${TRANSLATION_QM_FILES}
 #			DESTINATION C:/ProgramData/libosmscout/OSMScout2/translations)
 else() # Linux
-	install(FILES ${LANG_SRC}
+	install(FILES ${TRANSLATION_QM_FILES}
 			DESTINATION share/libosmscout/OSMScout2/translations)
 endif()
