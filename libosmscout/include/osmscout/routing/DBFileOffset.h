@@ -51,8 +51,10 @@ namespace osmscout{
     {
     }
 
-    DBFileOffset(DatabaseId database,FileOffset offset):
-     database(database),offset(offset)
+    DBFileOffset(DatabaseId database,
+                 FileOffset offset)
+    : database(database),
+      offset(offset)
     {
     }
 
