@@ -230,20 +230,7 @@ namespace osmscout {
                                                       const GeoCoord& targetCoord,
                                                       RNodeRef& node)
   {
-    FileOffset offset;
-
-    node=nullptr;
-
-    // TODO: can be routeNode->GetFileOffset() used here?
-    if (!GetRouteNodeOffset(position.GetDatabaseId(),
-                            routeNode->GetId(),
-                            offset)) {
-      log.Error() << "Cannot get offset of route node";
-
-      return false;
-    }
-
-    node=std::make_shared<RNode>(DBFileOffset(position.GetDatabaseId(),offset),
+    node=std::make_shared<RNode>(DBFileOffset(position.GetDatabaseId(),routeNode->GetFileOffset()),
                                  routeNode,
                                  position.GetObjectFileRef());
 
@@ -1082,7 +1069,6 @@ namespace osmscout {
     RNodeRef  targetFinalNode;
 
     if (targetBackwardFinalNode && targetForwardFinalNode) {
-      std::cout << targetBackwardFinalNode->currentCost << " " << targetForwardFinalNode->currentCost << std::endl;
       if (targetForwardFinalNode->currentCost<=targetBackwardFinalNode->currentCost) {
         targetFinalNode=targetForwardFinalNode;
       }

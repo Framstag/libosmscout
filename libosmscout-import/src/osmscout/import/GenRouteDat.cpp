@@ -601,11 +601,12 @@ namespace osmscout {
                                              NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
-    uint32_t    dataCount=0;
 
     progress.Info("Scanning ways");
 
     try {
+      uint32_t dataCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    WayDataFile::WAYS_DAT),
                    FileScanner::Sequential,
@@ -629,7 +630,7 @@ namespace osmscout {
           continue;
         }
 
-        std::set<Id> nodeIds;
+        std::unordered_set<Id> nodeIds;
 
         for (const auto& node : way.nodes) {
           if (!node.IsRelevant()) {
@@ -677,7 +678,7 @@ namespace osmscout {
           continue;
         }
 
-        std::set<Id> nodeIds;
+        std::unordered_set<Id> nodeIds;
 
         for (const auto& node : area.rings.front().nodes) {
           if (!node.IsRelevant()) {
@@ -748,7 +749,7 @@ namespace osmscout {
           continue;
         }
 
-        std::set<Id> nodeIds;
+        std::unordered_set<Id> nodeIds;
 
         for (auto& node : way.nodes) {
           if (!node.IsRelevant()) {
@@ -803,7 +804,7 @@ namespace osmscout {
           continue;
         }
 
-        std::set<Id> nodeIds;
+        std::unordered_set<Id> nodeIds;
 
         for (auto& node : area.rings.front().nodes) {
           if (!node.IsRelevant()) {
@@ -1583,7 +1584,6 @@ namespace osmscout {
     // Writing route nodes
     //
 
-
     try {
       uint32_t handledRouteNodeCount=0;
       uint32_t writtenRouteNodeCount=0;
@@ -1723,7 +1723,7 @@ namespace osmscout {
 
           routeNode.SetPoint(point);
 
-          std::cout << (uint32_t)((routeNode.GetCoord().GetLon()+180.0)/cellWidth) << "," << (uint32_t)((routeNode.GetCoord().GetLat()+90.0)/cellHeight) << std::endl;
+          //std::cout << (uint32_t)((routeNode.GetCoord().GetLon()+180.0)/cellWidth) << "," << (uint32_t)((routeNode.GetCoord().GetLat()+90.0)/cellHeight) << std::endl;
 
           //
           // Calculate all outgoing paths
