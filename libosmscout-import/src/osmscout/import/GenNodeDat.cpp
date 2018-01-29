@@ -40,7 +40,7 @@ namespace osmscout {
   const char* NodeDataGenerator::NODES_TMP="nodes.tmp";
 
   void NodeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
-                                                   ImportModuleDescription& description) const
+                                         ImportModuleDescription& description) const
   {
     description.SetName("NodeDataGenerator");
     description.SetDescription("Convert raw nodes to nodes");

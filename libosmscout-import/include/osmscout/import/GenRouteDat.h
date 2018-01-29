@@ -67,6 +67,14 @@ namespace osmscout {
     {
       FileOffset routeNodeOffset;
       size_t     index;
+
+      inline PendingOffset(FileOffset routeNodeOffset,
+                           size_t index)
+      : routeNodeOffset(routeNodeOffset),
+        index(index)
+      {
+
+      }
     };
 
     typedef std::unordered_map<Id, FileOffset>             NodeIdOffsetMap;

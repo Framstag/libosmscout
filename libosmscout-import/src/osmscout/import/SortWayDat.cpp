@@ -43,14 +43,14 @@ namespace osmscout {
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
-                               const TypeConfig& typeConfig);
+                               const TypeConfig& typeConfig) override;
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Way& way,
-                 bool& save);
+                 bool& save) override;
     bool AfterProcessingEnd(const ImportParameter& parameter,
                             Progress& progress,
-                            const TypeConfig& typeConfig);
+                            const TypeConfig& typeConfig) override;
   };
 
   bool WayLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
@@ -89,7 +89,7 @@ namespace osmscout {
 
       NameFeatureValue       *nameValue=nameReader->GetValue(way.GetFeatureValueBuffer());
 
-      if (nameValue==NULL) {
+      if (nameValue==nullptr) {
         return true;
       }
 
@@ -99,7 +99,7 @@ namespace osmscout {
 
       name=nameValue->GetName();
 
-      if (postalCodeValue!=NULL) {
+      if (postalCodeValue!=nullptr) {
         postalCode=postalCodeValue->GetPostalCode();
       }
 
@@ -127,10 +127,10 @@ namespace osmscout {
                                                       const TypeConfig& /*typeConfig*/)
   {
     delete nameReader;
-    nameReader=NULL;
+    nameReader=nullptr;
 
     delete postalCodeReader;
-    postalCodeReader=NULL;
+    postalCodeReader=nullptr;
 
     writer.SetPos(0);
     writer.Write(overallDataCount);
@@ -174,16 +174,16 @@ namespace osmscout {
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
-                               const TypeConfig& typeConfig);
+                               const TypeConfig& typeConfig) override;
 
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Way& way,
-                 bool& save);
+                 bool& save) override;
 
     bool AfterProcessingEnd(const ImportParameter& parameter,
                             Progress& progress,
-                            const TypeConfig& typeConfig);
+                            const TypeConfig& typeConfig) override;
   };
 
   bool WayNodeReductionProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
@@ -333,14 +333,10 @@ namespace osmscout {
       return false;
     }
 
-    if (!RemoveRedundantNodes(progress,
-                              offset,
-                              way,
-                              save)) {
-      return false;
-    }
-
-    return true;
+    return RemoveRedundantNodes(progress,
+                                offset,
+                                way,
+                                save);
   }
 
   bool WayNodeReductionProcessorFilter::AfterProcessingEnd(const ImportParameter& /*parameter*/,
@@ -363,14 +359,14 @@ namespace osmscout {
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
-                               const TypeConfig& typeConfig);
+                               const TypeConfig& typeConfig) override;
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Way& way,
-                 bool& save);
+                 bool& save) override;
     bool AfterProcessingEnd(const ImportParameter& parameter,
                             Progress& progress,
-                            const TypeConfig& typeConfig);
+                            const TypeConfig& typeConfig) override;
   };
 
   bool WayTypeIgnoreProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
@@ -388,7 +384,7 @@ namespace osmscout {
                                              Way& way,
                                              bool& save)
   {
-    save=way.GetType()!=NULL &&
+    save=way.GetType()!=nullptr &&
          way.GetType()!=typeInfoIgnore;
 
     if (!save) {

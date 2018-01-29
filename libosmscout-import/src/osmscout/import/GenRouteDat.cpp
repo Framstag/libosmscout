@@ -37,7 +37,7 @@
 #include <osmscout/import/GenNumericIndex.h>
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/GenWayWayDat.h>
-
+#include <iostream>
 namespace osmscout {
 
   RouteDataGenerator::RouteDataGenerator()
@@ -1104,12 +1104,7 @@ namespace osmscout {
         path.offset=pathNodeOffset->second;
       }
       else {
-        PendingOffset pendingOffset;
-
-        pendingOffset.routeNodeOffset=routeNodeOffset;
-        pendingOffset.index=routeNode.paths.size();
-
-        pendingOffsetsMap[ring.GetId(nextNode)].push_back(pendingOffset);
+        pendingOffsetsMap[ring.GetId(nextNode)].emplace_back(routeNodeOffset,routeNode.paths.size());
 
         path.offset=0;
       }
@@ -1166,12 +1161,7 @@ namespace osmscout {
         path.offset=pathNodeOffset->second;
       }
       else {
-        PendingOffset pendingOffset;
-
-        pendingOffset.routeNodeOffset=routeNodeOffset;
-        pendingOffset.index=routeNode.paths.size();
-
-        pendingOffsetsMap[ring.GetId(prevNode)].push_back(pendingOffset);
+        pendingOffsetsMap[ring.GetId(prevNode)].emplace_back(routeNodeOffset,routeNode.paths.size());
 
         path.offset=0;
       }
@@ -1243,12 +1233,7 @@ namespace osmscout {
           path.offset=pathNodeOffset->second;
         }
         else {
-          PendingOffset pendingOffset;
-
-          pendingOffset.routeNodeOffset=routeNodeOffset;
-          pendingOffset.index=routeNode.paths.size();
-
-          pendingOffsetsMap[way.GetId(nextNode)].push_back(pendingOffset);
+          pendingOffsetsMap[way.GetId(nextNode)].emplace_back(routeNodeOffset,routeNode.paths.size());
 
           path.offset=0;
         }
@@ -1305,12 +1290,7 @@ namespace osmscout {
           path.offset=pathNodeOffset->second;
         }
         else {
-          PendingOffset pendingOffset;
-
-          pendingOffset.routeNodeOffset=routeNodeOffset;
-          pendingOffset.index=routeNode.paths.size();
-
-          pendingOffsetsMap[way.GetId(prevNode)].push_back(pendingOffset);
+          pendingOffsetsMap[way.GetId(prevNode)].emplace_back(routeNodeOffset,routeNode.paths.size());
 
           path.offset=0;
         }
@@ -1359,12 +1339,7 @@ namespace osmscout {
               path.offset=pathNodeOffset->second;
             }
             else {
-              PendingOffset pendingOffset;
-
-              pendingOffset.routeNodeOffset=routeNodeOffset;
-              pendingOffset.index=routeNode.paths.size();
-
-              pendingOffsetsMap[way.GetId(j)].push_back(pendingOffset);
+              pendingOffsetsMap[way.GetId(j)].emplace_back(routeNodeOffset,routeNode.paths.size());
 
               path.offset=0;
             }
@@ -1408,12 +1383,7 @@ namespace osmscout {
             }
             else {
 
-              PendingOffset pendingOffset;
-
-              pendingOffset.routeNodeOffset=routeNodeOffset;
-              pendingOffset.index=routeNode.paths.size();
-
-              pendingOffsetsMap[way.GetId(j)].push_back(pendingOffset);
+              pendingOffsetsMap[way.GetId(j)].emplace_back(routeNodeOffset,routeNode.paths.size());
 
               path.offset=0;
             }
@@ -1622,6 +1592,12 @@ namespace osmscout {
       size_t   excludeCount=0;
       size_t   simpleNodesCount=0;
 
+
+      double cellMagnification=std::pow(2.0,14);
+
+      double cellWidth=360.0/cellMagnification;
+      double cellHeight=180.0/cellMagnification;
+
       writer.Open(dataFilename);
 
       writer.Write(writtenRouteNodeCount);
@@ -1746,6 +1722,8 @@ namespace osmscout {
           RouteNode routeNode;
 
           routeNode.SetPoint(point);
+
+          std::cout << (uint32_t)((routeNode.GetCoord().GetLon()+180.0)/cellWidth) << "," << (uint32_t)((routeNode.GetCoord().GetLat()+90.0)/cellHeight) << std::endl;
 
           //
           // Calculate all outgoing paths
