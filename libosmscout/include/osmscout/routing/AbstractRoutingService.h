@@ -105,22 +105,6 @@ namespace osmscout {
     virtual bool GetRouteNodeByOffset(const DBFileOffset &offset,
                                       RouteNodeRef &node) = 0;
 
-    /**
-     * Return the file offset for the given route node id in teh given database
-     *
-     * @param database
-     *    Database id
-     * @param id
-     *    Id of route node
-     * @param offset
-     *    The resulting file offset where the node can be found
-     * @return
-     *    True, if the id have been resolved, else false
-     */
-    virtual bool GetRouteNodeOffset(const DatabaseId &database,
-                                    const Id &id,
-                                    FileOffset &offset) = 0;
-
     virtual bool GetWayByOffset(const DBFileOffset &offset,
                                 WayRef &way) = 0;
 

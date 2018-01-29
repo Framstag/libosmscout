@@ -129,10 +129,6 @@ namespace osmscout {
     bool GetRouteNodeByOffset(const DBFileOffset &offset,
                               RouteNodeRef &node) override;
 
-    bool GetRouteNodeOffset(const DatabaseId &database,
-                            const Id &id,
-                            FileOffset &offset) override;
-
     bool GetWayByOffset(const DBFileOffset &offset,
                         WayRef &way) override;
 

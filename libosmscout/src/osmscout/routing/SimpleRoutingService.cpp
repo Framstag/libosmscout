@@ -186,13 +186,6 @@ namespace osmscout {
                                          node);
   }
 
-  bool SimpleRoutingService::GetRouteNodeOffset(const DatabaseId &/*database*/,
-                                                const Id &id,
-                                                FileOffset &offset)
-  {
-    return routeNodeDataFile.GetOffset(id,offset);
-  }
-
   bool SimpleRoutingService::GetWayByOffset(const DBFileOffset &offset,
                                             WayRef &way)
   {

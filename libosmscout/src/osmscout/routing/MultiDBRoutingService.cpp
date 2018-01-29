@@ -469,13 +469,6 @@ namespace osmscout {
     return dataFiles->routeNodeDataFile.GetByOffset(offset.offset, node);
   }
 
-  bool MultiDBRoutingService::GetRouteNodeOffset(const DatabaseId &database,
-                                                 const Id &id,
-                                                 FileOffset &offset)
-  {
-    return routerFiles[database]->routeNodeDataFile.GetOffset(id,offset);
-  }
-
   bool MultiDBRoutingService::GetWayByOffset(const DBFileOffset &offset,
                                              WayRef &way)
   {
