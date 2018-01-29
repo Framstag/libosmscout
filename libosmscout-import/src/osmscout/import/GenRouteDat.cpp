@@ -37,7 +37,7 @@
 #include <osmscout/import/GenNumericIndex.h>
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/GenWayWayDat.h>
-#include <iostream>
+
 namespace osmscout {
 
   RouteDataGenerator::RouteDataGenerator()
@@ -1592,12 +1592,6 @@ namespace osmscout {
       size_t   excludeCount=0;
       size_t   simpleNodesCount=0;
 
-
-      double cellMagnification=std::pow(2.0,14);
-
-      double cellWidth=360.0/cellMagnification;
-      double cellHeight=180.0/cellMagnification;
-
       writer.Open(dataFilename);
 
       writer.Write(writtenRouteNodeCount);
@@ -1722,8 +1716,6 @@ namespace osmscout {
           RouteNode routeNode;
 
           routeNode.SetPoint(point);
-
-          //std::cout << (uint32_t)((routeNode.GetCoord().GetLon()+180.0)/cellWidth) << "," << (uint32_t)((routeNode.GetCoord().GetLat()+90.0)/cellHeight) << std::endl;
 
           //
           // Calculate all outgoing paths
