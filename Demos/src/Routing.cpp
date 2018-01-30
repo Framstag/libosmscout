@@ -72,14 +72,14 @@ public:
     // no code
   }
 
-  void Reset()
+  void Reset() override
   {
     lastDump=std::chrono::system_clock::now();
     maxPercent=0.0;
   }
 
   void Progress(double currentMaxDistance,
-                double overallDistance)
+                double overallDistance) override
   {
     double currentPercent=(currentMaxDistance*100.0)/overallDistance;
 
@@ -185,10 +185,10 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
     }
   }
 
-  if (names.size()>0) {
+  if (!names.empty()) {
     std::ostringstream stream;
 
-    for (std::set<std::string>::const_iterator name=names.begin();
+    for (auto name=names.begin();
         name!=names.end();
         ++name) {
       if (name!=names.begin()) {
@@ -719,8 +719,9 @@ int main(int argc, char* argv[])
       std::cerr << "Error during route conversion" << std::endl;
     }
     std::cout.precision(8);
-    std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << std::endl;
-    std::cout << "<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"bin2gpx\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">" << std::endl;
+    std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
+    std::cout << R"(<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="bin2gpx" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">)"
+              << std::endl;
 
     std::cout << "\t<wpt lat=\""<< startLat << "\" lon=\""<< startLon << "\">" << std::endl;
     std::cout << "\t\t<name>Start</name>" << std::endl;
