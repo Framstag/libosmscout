@@ -129,7 +129,7 @@ void Buffer::SetPos(int value) {
 
 int Buffer::Read()
 {
-  if (bufPos < bufLen) {
+  if (bufPos < (int)bufLen) {
     return buf[bufPos++];
   } else {
     return EoF;

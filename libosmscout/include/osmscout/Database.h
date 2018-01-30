@@ -175,10 +175,10 @@ namespace osmscout {
     std::string GetPath() const;
     TypeConfigRef GetTypeConfig() const;
 
-    inline bool GetRouterDataMMap() const
+    inline const DatabaseParameter& GetParameter() const
     {
-      return parameter.GetRouterDataMMap();
-    };
+      return parameter;
+    }
 
     BoundingBoxDataFileRef GetBoundingBoxDataFile() const;
 

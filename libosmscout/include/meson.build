@@ -35,6 +35,7 @@ osmscoutHeader = [
             'osmscout/routing/RouteData.h',
             'osmscout/routing/RouteNode.h',
             'osmscout/routing/RoutePostprocessor.h',
+            'osmscout/routing/RoutingDB.h',
             'osmscout/routing/RoutingProfile.h',
             'osmscout/routing/RoutingService.h',
             'osmscout/routing/AbstractRoutingService.h',

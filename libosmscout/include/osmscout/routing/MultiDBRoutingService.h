@@ -26,29 +26,9 @@
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/routing/RoutingDB.h>
 
 namespace osmscout {
-
-  /**
-   * \ingroup Routing
-   *
-   * Helper container for MultiDBRoutingService
-   */
-  class RouterDBFiles CLASS_FINAL
-  {
-  public:
-    IndexedDataFile<Id,RouteNode>    routeNodeDataFile;     //!< Cached access to the 'route.dat' file
-    IndexedDataFile<Id,Intersection> junctionDataFile;      //!< Cached access to the 'junctions.dat' file
-    ObjectVariantDataFile            objectVariantDataFile;
-
-  public:
-    RouterDBFiles();
-
-    bool Open(DatabaseRef database);
-    void Close();
-  };
-
-  typedef std::shared_ptr<RouterDBFiles> RouterDBFilesRef;
 
   /**
    * \ingroup Routing
@@ -74,7 +54,7 @@ namespace osmscout {
     std::map<DatabaseId,SimpleRoutingServiceRef>  services;
     std::map<DatabaseId,RoutingProfileRef>        profiles;
 
-    std::map<DatabaseId,RouterDBFilesRef>         routerFiles;
+    std::map<DatabaseId,RoutingDatabaseRef>         routerFiles;
 
     bool  isOpen;
 

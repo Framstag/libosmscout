@@ -45,6 +45,7 @@
 #include <osmscout/Intersection.h>
 #include <osmscout/routing/Route.h>
 #include <osmscout/routing/RouteData.h>
+#include <osmscout/routing/RoutingDB.h>
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/AbstractRoutingService.h>
@@ -79,9 +80,7 @@ namespace osmscout {
 
     std::string                          path;                  //!< Path to the directory containing all files
 
-    IndexedDataFile<Id,RouteNode>        routeNodeDataFile;     //!< Cached access to the 'route.dat' file
-    IndexedDataFile<Id,Intersection>     junctionDataFile;      //!< Cached access to the 'junctions.dat' file
-    ObjectVariantDataFile                objectVariantDataFile; //!< DataFile class for loading object variant data
+    RoutingDatabase                      routingDatabase;       //!< Access to routing data and index files
 
   private:
     bool HasNodeWithId(const std::vector<Point>& nodes) const;

@@ -611,10 +611,9 @@ int main(int argc, char* argv[])
     routerParameter.SetDebugPerformance(true);
   }
 
-  osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(
-                                                    database,
-                                                    routerParameter,
-                                                    routerFilenamebase);
+  osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(database,
+                                                                                            routerParameter,
+                                                                                            routerFilenamebase);
 
   if (!router->Open()) {
     std::cerr << "Cannot open routing database" << std::endl;

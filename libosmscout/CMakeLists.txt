@@ -50,6 +50,7 @@ set(HEADER_FILES_ROUTING
     include/osmscout/routing/RouteData.h
     include/osmscout/routing/RouteNode.h
     include/osmscout/routing/RoutePostprocessor.h
+    include/osmscout/routing/RoutingDB.h
     include/osmscout/routing/RoutingProfile.h
     include/osmscout/routing/RoutingService.h
     include/osmscout/routing/AbstractRoutingService.h
@@ -145,6 +146,7 @@ set(SOURCE_FILES
     src/osmscout/routing/RouteData.cpp
     src/osmscout/routing/RouteNode.cpp
     src/osmscout/routing/RoutePostprocessor.cpp
+    src/osmscout/routing/RoutingDB.cpp
     src/osmscout/routing/RoutingProfile.cpp
     src/osmscout/routing/RoutingService.cpp
     src/osmscout/routing/AbstractRoutingService.cpp

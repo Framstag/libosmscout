@@ -34,6 +34,7 @@ osmscoutSrc = [
             'src/osmscout/routing/RouteData.cpp',
             'src/osmscout/routing/RouteNode.cpp',
             'src/osmscout/routing/RoutePostprocessor.cpp',
+            'src/osmscout/routing/RoutingDB.cpp',
             'src/osmscout/routing/RoutingProfile.cpp',
             'src/osmscout/routing/RoutingService.cpp',
             'src/osmscout/routing/AbstractRoutingService.cpp',

@@ -52,15 +52,7 @@ namespace osmscout {
      database(database),
      filenamebase(filenamebase),
      accessReader(*database->GetTypeConfig()),
-     isOpen(false),
-     routeNodeDataFile(GetDataFilename(filenamebase),
-                       GetIndexFilename(filenamebase),
-                       /*indexCacheSize*/ 12000,
-                       /*dataCacheSize*/ 1000),
-     junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
-                      RoutingService::FILENAME_INTERSECTIONS_IDX,
-                      /*indexCacheSize*/ 10000,
-                      /*dataCacheSize*/ 1000)
+     isOpen(false)
   {
     assert(database);
   }
@@ -93,7 +85,7 @@ namespace osmscout {
                                     const RouteNode& routeNode,
                                     size_t pathIndex)
   {
-    return profile.CanUse(routeNode,objectVariantDataFile.GetData(),pathIndex);
+    return profile.CanUse(routeNode,routingDatabase.GetObjectVariantData(),pathIndex);
   }
 
   bool SimpleRoutingService::CanUseForward(const RoutingProfile& profile,
@@ -115,7 +107,7 @@ namespace osmscout {
                                         const RouteNode& routeNode,
                                         size_t pathIndex)
   {
-    return profile.GetCosts(routeNode,objectVariantDataFile.GetData(),pathIndex);
+    return profile.GetCosts(routeNode,routingDatabase.GetObjectVariantData(),pathIndex);
   }
 
   double SimpleRoutingService::GetCosts(const RoutingProfile& profile,
@@ -144,7 +136,7 @@ namespace osmscout {
                                           const Id &id,
                                           RouteNodeRef &node)
   {
-    return routeNodeDataFile.Get(id, node);
+    return routingDatabase.GetRouteNode(id,node);
   }
 
   bool SimpleRoutingService::GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
@@ -163,10 +155,7 @@ namespace osmscout {
 
     std::unordered_map<FileOffset,RouteNodeRef> nodeMap;
 
-    if (!routeNodeDataFile.GetByOffset(offsets.begin(),
-                                       offsets.end(),
-                                       offsets.size(),
-                                       nodeMap)){
+    if (!routingDatabase.GetRouteNodesByOffset(offsets,nodeMap)) {
       return false;
     }
 
@@ -182,8 +171,8 @@ namespace osmscout {
   bool SimpleRoutingService::GetRouteNodeByOffset(const DBFileOffset &offset,
                                                   RouteNodeRef& node)
   {
-    return routeNodeDataFile.GetByOffset(offset.offset,
-                                         node);
+    return routingDatabase.GetRouteNodeByOffset(offset.offset,
+                                                node);
   }
 
   bool SimpleRoutingService::GetWayByOffset(const DBFileOffset &offset,
@@ -278,7 +267,8 @@ namespace osmscout {
 
   bool SimpleRoutingService::ResolveRouteDataJunctions(RouteData& route)
   {
-    std::set<Id> nodeIds;
+    std::set<Id>             nodeIds;
+    std::vector<JunctionRef> junctions;
 
     for (const auto& routeEntry : route.Entries()) {
       if (routeEntry.GetCurrentNodeId()!=0) {
@@ -286,26 +276,8 @@ namespace osmscout {
       }
     }
 
-    if (!junctionDataFile.IsOpen()) {
-      StopClock timer;
-
-      if (!junctionDataFile.Open(database->GetTypeConfig(),
-                                 path,
-                                 false,
-                                 false)) {
-        return false;
-      }
-
-      timer.Stop();
-
-      log.Debug() << "Opening JunctionDataFile: " << timer.ResultString();
-    }
-
-    std::vector<JunctionRef> junctions;
-
-    if (!junctionDataFile.Get(nodeIds,
-                              junctions)) {
-      log.Error() << "Error while resolving junction ids to junctions";
+    if (!routingDatabase.GetJunctions(nodeIds,junctions)) {
+      return false;
     }
 
     nodeIds.clear();
@@ -328,7 +300,7 @@ namespace osmscout {
       }
     }
 
-    return junctionDataFile.Close();
+    return true;
   }
 
   std::vector<DBFileOffset> SimpleRoutingService::GetNodeTwins(const RoutingProfile& /*state*/,
@@ -352,23 +324,7 @@ namespace osmscout {
 
     assert(!path.empty());
 
-    StopClock timer;
-
-    if (!routeNodeDataFile.Open(database->GetTypeConfig(),
-                                path,
-                                true,
-                                database->GetRouterDataMMap())) {
-      log.Error() << "Cannot open '" <<  path << "'!";
-      return false;
-    }
-
-    timer.Stop();
-
-    log.Debug() << "Opening RouteNodeData: " << timer.ResultString();
-
-    if (!objectVariantDataFile.Load(*database->GetTypeConfig(),
-                                    AppendFileToDir(path,
-                                                    GetData2Filename(filenamebase)))) {
+    if (!routingDatabase.Open(database)) {
       return false;
     }
 
@@ -393,7 +349,7 @@ namespace osmscout {
    */
   void SimpleRoutingService::Close()
   {
-    routeNodeDataFile.Close();
+    routingDatabase.Close();
 
     isOpen=false;
   }
