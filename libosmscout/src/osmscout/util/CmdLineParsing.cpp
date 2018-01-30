@@ -36,7 +36,7 @@ namespace osmscout {
     arguments.reserve((size_t)argc);
 
     for (int i=0; i<argc; i++) {
-      arguments.push_back(std::string(argv[i]));
+      arguments.emplace_back(argv[i]);
     }
 
   }
@@ -397,9 +397,7 @@ namespace osmscout {
 
     CmdLinePositional desc(parser,argumentName);
 
-    std::string callDescription=argumentName;
-
-    CmdLineArgHelp help(callDescription,helpString);
+    CmdLineArgHelp help(argumentName,helpString);
 
     positionals.push_back(desc);
     positionalHelps.push_back(help);
