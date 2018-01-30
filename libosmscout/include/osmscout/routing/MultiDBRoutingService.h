@@ -48,13 +48,11 @@ namespace osmscout {
     static const double LON_CELL_FACTOR;
 
   private:
-    std::map<std::string,DatabaseId>              databaseMap;
+    std::vector<DatabaseRef>             databases;
+    std::vector<SimpleRoutingServiceRef> services;
+    std::vector<RoutingProfileRef>       profiles;
 
-    std::map<DatabaseId,DatabaseRef>              databases;
-    std::map<DatabaseId,SimpleRoutingServiceRef>  services;
-    std::map<DatabaseId,RoutingProfileRef>        profiles;
-
-    std::map<DatabaseId,RoutingDatabaseRef>         routerFiles;
+    std::vector<RoutingDatabaseRef>      routerFiles;
 
     bool  isOpen;
 

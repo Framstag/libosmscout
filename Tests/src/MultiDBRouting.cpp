@@ -27,7 +27,17 @@
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/MultiDBRoutingService.h>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/FileScanner.h>
+
+struct Arguments
+{
+  bool                   help=false;
+  std::string            databaseDirectory1;
+  std::string            databaseDirectory2;
+  osmscout::GeoCoord     start;
+  osmscout::GeoCoord     target;
+};
 
 void GetCarSpeedTable(std::map<std::string,double>& map)
 {
@@ -54,40 +64,54 @@ void GetCarSpeedTable(std::map<std::string,double>& map)
 
 int main(int argc, char* argv[])
 {
-  if (argc!=7) {
-    std::cerr << "MultiDBRouting" << std::endl;
-    std::cerr << "  <database directory1> <database directory2>" << std::endl;
-    std::cerr << "  <start lat> <start lon>" << std::endl;
-    std::cerr << "  <target lat> <target lon>" << std::endl;
+  osmscout::CmdLineParser   argParser("MutiDBRouting",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory1=value;
+                          }),
+                          "DATABASE1",
+                          "Directory of the first database to use");
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory2=value;
+                          }),
+                          "DATABASE2",
+                          "Directory of the second database to use");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.start=value;
+                          }),
+                          "START",
+                          "start coordinate");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.target=value;
+                          }),
+                          "TARGET",
+                          "target coordinate");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
 
-  double  startLat;
-  double  startLon;
-
-  double  targetLat;
-  double  targetLon;
-
-  if (sscanf(argv[3],"%lf",&startLat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
+  if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
-  if (sscanf(argv[4],"%lf",&startLon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-  if (sscanf(argv[5],"%lf",&targetLat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-  if (sscanf(argv[6],"%lf",&targetLon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  osmscout::GeoCoord startCoord(startLat,startLon);
-  osmscout::GeoCoord targetCoord(targetLat,targetLon);
 
   // Database
 
@@ -105,7 +129,7 @@ int main(int argc, char* argv[])
 
   std::cout << "Opening database 1..." << std::endl;
 
-  if (!database1->Open(argv[1])) {
+  if (!database1->Open(args.databaseDirectory1)) {
     std::cerr << "Cannot open database 1" << std::endl;
 
     return 1;
@@ -115,7 +139,7 @@ int main(int argc, char* argv[])
 
   std::cout << "Opening database 2..." << std::endl;
 
-  if (!database2->Open(argv[2])) {
+  if (!database2->Open(args.databaseDirectory2)) {
     std::cerr << "Cannot open database 2" << std::endl;
 
     return 1;
@@ -123,9 +147,7 @@ int main(int argc, char* argv[])
 
   std::cout << "Done." << std::endl;
 
-  std::vector<osmscout::DatabaseRef> databases(2);
-  databases[0]=database1;
-  databases[1]=database2;
+  std::vector<osmscout::DatabaseRef> databases={database1,database2};
 
   osmscout::RouterParameter routerParam;
   routerParam.SetDebugPerformance(true);
@@ -143,20 +165,20 @@ int main(int argc, char* argv[])
       };
 
   if (!router->Open(profileBuilder)) {
-    
+
     std::cerr << "Cannot open router" << std::endl;
     return 1;
   }
   std::cout << "Done." << std::endl;
 
-  osmscout::RoutePosition startNode=router->GetClosestRoutableNode(startCoord);
+  osmscout::RoutePosition startNode=router->GetClosestRoutableNode(args.start);
   if (!startNode.IsValid()){
-    std::cerr << "Can't found route node near start coord " << startCoord.GetDisplayText() << std::endl;
+    std::cerr << "Can't found route node near start coord " << args.start.GetDisplayText() << std::endl;
     return 1;
   }
-  osmscout::RoutePosition targetNode=router->GetClosestRoutableNode(targetCoord);
+  osmscout::RoutePosition targetNode=router->GetClosestRoutableNode(args.target);
   if (!targetNode.IsValid()){
-    std::cerr << "Can't found route node near target coord " << targetCoord.GetDisplayText() << std::endl;
+    std::cerr << "Can't found route node near target coord " << args.target.GetDisplayText() << std::endl;
     return 1;
   }
 
@@ -175,10 +197,10 @@ int main(int argc, char* argv[])
   router->Close();
 
   database1->Close();
-  database1=NULL;
+  database1.reset();
 
   database2->Close();
-  database2=NULL;
+  database2.reset();
 
   std::cout << "Done." << std::endl;
 

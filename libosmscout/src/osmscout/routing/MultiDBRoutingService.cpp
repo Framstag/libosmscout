@@ -44,10 +44,11 @@ namespace osmscout {
     AbstractRoutingService<MultiDBRoutingState>(parameter),
     isOpen(false)
   {
+    this->databases.reserve(databases.size());
+
     DatabaseId id=0;
     for (auto& db : databases) {
-      this->databaseMap[db->GetPath()]=id;
-      this->databases[id]=db;
+      this->databases.push_back(db);
 
       id++;
     }
@@ -67,11 +68,15 @@ namespace osmscout {
     RouterParameter routerParameter;
     routerParameter.SetDebugPerformance(debugPerformance);
 
+    services.resize(databases.size());
+    profiles.resize(databases.size());
+    routerFiles.resize(databases.size());
+
     isOpen=true;
-    for (auto &entry:databases) {
-      DatabaseRef database=entry.second;
+    for (DatabaseId dbIdx=0; dbIdx<databases.size(); dbIdx++) {
+      DatabaseRef database=databases[dbIdx];
       SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(
-                                              entry.second,
+                                              database,
                                               routerParameter,
                                               osmscout::RoutingService::DEFAULT_FILENAME_BASE);
       if (!router->Open()) {
@@ -79,8 +84,8 @@ namespace osmscout {
         return false;
       }
 
-      services[entry.first]=router;
-      profiles[entry.first]=profileBuilder(database);
+      services[dbIdx]=router;
+      profiles[dbIdx]=profileBuilder(database);
 
       RoutingDatabaseRef dataFile=std::make_shared<RoutingDatabase>();
       if (!dataFile->Open(database)) {
@@ -88,7 +93,7 @@ namespace osmscout {
         return false;
       }
 
-      routerFiles[entry.first]=dataFile;
+      routerFiles[dbIdx]=dataFile;
 
     }
     return true;
@@ -100,16 +105,17 @@ namespace osmscout {
       return;
     }
 
-    for (auto &entry:services){
-      entry.second->Close();
+    for (auto& entry: services) {
+      entry->Close();
     }
 
-    for (auto entry:routerFiles){
-      entry.second->Close();
+    for (auto db: routerFiles) {
+      db->Close();
     }
 
     services.clear();
     profiles.clear();
+
     isOpen=false;
   }
 
@@ -120,16 +126,17 @@ namespace osmscout {
 
     double minDistance=std::numeric_limits<double>::max();
 
-    for (auto &entry:services) {
+    for (DatabaseId dbIdx=0; dbIdx<databases.size(); dbIdx++) {
+      SimpleRoutingServiceRef service=services[dbIdx];
       double distance = radius;
-      position=entry.second->GetClosestRoutableNode(coord,
-                                                    *(profiles.at(entry.first)),
-                                                    distance);
+      position=service->GetClosestRoutableNode(coord,
+                                             *profiles[dbIdx],
+                                             distance);
       if (position.IsValid() && distance < minDistance) {
         closestPosition=RoutePosition(position.GetObjectFileRef(),
                                       position.GetNodeIndex(),
                                       /*database*/
-                                      entry.first);
+                                      dbIdx);
         minDistance=distance;
       }
     }
@@ -479,9 +486,10 @@ namespace osmscout {
 
   bool MultiDBRoutingService::ResolveRouteDataJunctions(RouteData& route)
   {
-    for (auto &filesEntry:routerFiles){
-      DatabaseId dbId=filesEntry.first;
-      std::set<Id> nodeIds;
+    for (size_t dbIdx=0; dbIdx<routerFiles.size(); dbIdx++) {
+      DatabaseId         dbId=dbIdx;
+      RoutingDatabaseRef db=routerFiles[dbIdx];
+      std::set<Id>       nodeIds;
 
       for (const auto& routeEntry : route.Entries()) {
         if (routeEntry.GetCurrentNodeId()!=0 && routeEntry.GetDatabaseId()==dbId) {
@@ -491,7 +499,7 @@ namespace osmscout {
 
       std::vector<JunctionRef> junctions;
 
-      if (!filesEntry.second->GetJunctions(nodeIds,
+      if (!db->GetJunctions(nodeIds,
                                            junctions)) {
         log.Error() << "Error while resolving junction ids to junctions";
         return false;
@@ -556,35 +564,35 @@ namespace osmscout {
     RoutingResult result;
 
     if (start.GetDatabaseId()==target.GetDatabaseId()){
-      auto it=services.find(start.GetDatabaseId());
+      DatabaseId              dbId=start.GetDatabaseId();
+      SimpleRoutingServiceRef service=services[dbId];
 
-      if (it==services.end()){
+      if (!service) {
         return result;
       }
 
-      SimpleRoutingServiceRef service=it->second;
-      return service->CalculateRoute(*(profiles.at(it->first)),
+      return service->CalculateRoute(*profiles[dbId],
                                      start,
                                      target,
                                      parameter);
     }
 
     // start and target databases are different, try to find common route nodes
-    auto it=databases.find(start.GetDatabaseId());
-    if (it==databases.end()){
+    if (start.GetDatabaseId()>=databases.size() ||
+        !databases[start.GetDatabaseId()]) {
       log.Error() << "Can't find start database " << start.GetDatabaseId();
       return result;
     }
 
-    DatabaseRef database1=it->second;
+    DatabaseRef database1=databases[start.GetDatabaseId()];
 
-    it=databases.find(target.GetDatabaseId());
-    if (it==databases.end()){
+    if (target.GetDatabaseId()>=databases.size() ||
+        !databases[target.GetDatabaseId()]) {
       log.Error() << "Can't find target database " << target.GetDatabaseId();
       return result;
     }
 
-    DatabaseRef database2=it->second;
+    DatabaseRef database2=databases[target.GetDatabaseId()];
 
     std::set<Id> commonRouteNodes;
 

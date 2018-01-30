@@ -625,8 +625,8 @@ int main(int argc, char *argv[]){
     }
     postprocessors.push_back(osmscout::RoutePostprocessor::PostprocessorRef(instructionProcessor));
 
-    std::map<osmscout::DatabaseId,osmscout::RoutingProfileRef> profiles = {{0,routingProfile}};
-    std::map<osmscout::DatabaseId,osmscout::DatabaseRef> databases = {{0,database}};
+    std::vector<osmscout::RoutingProfileRef> profiles = {routingProfile};
+    std::vector<osmscout::DatabaseRef> databases = {database};
     osmscout::RoutePostprocessor postprocessor;
     if (!postprocessor.PostprocessRouteDescription(description,
                                                    profiles,
