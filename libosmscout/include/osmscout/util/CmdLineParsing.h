@@ -72,14 +72,17 @@ namespace osmscout {
   class OSMSCOUT_API CmdLineArgParser
   {
   private:
-    std::string argumentName;
+    std::string optionName;   //<! The unqualified option name
+    std::string argumentName; //<! The actual command line argument name
 
   protected:
+    std::string GetOptionName() const;
     std::string GetArgumentName() const;
 
   public:
-    virtual ~CmdLineArgParser() =default;
+    virtual ~CmdLineArgParser()=default;
 
+    void SetOptionName(const std::string& optionName);
     void SetArgumentName(const std::string& argumentName);
 
     virtual std::string GetOptionHint() const = 0;
@@ -99,6 +102,24 @@ namespace osmscout {
 
   public:
     explicit CmdLineFlagArgParser(SetterFunction&& setter);
+
+    std::string GetOptionHint() const override;
+    std::string GetPositionalHint(const std::string& positional) const override;
+
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override;
+  };
+
+  class OSMSCOUT_API CmdLineAlternativeFlagArgParser : public CmdLineArgParser
+  {
+  public:
+    typedef std::function<void(const std::string&)> SetterFunction;
+
+  private:
+    SetterFunction setter;
+    std::string    lastArgumentCalled;
+
+  public:
+    explicit CmdLineAlternativeFlagArgParser(SetterFunction&& setter);
 
     std::string GetOptionHint() const override;
     std::string GetPositionalHint(const std::string& positional) const override;
@@ -226,6 +247,12 @@ namespace osmscout {
   }
 
   template<class ...Args>
+  CmdLineArgParserRef CmdLineAlternativeFlag(Args&& ...args)
+  {
+    return std::make_shared<CmdLineAlternativeFlagArgParser>(std::forward<Args>(args)...);
+  }
+
+  template<class ...Args>
   CmdLineArgParserRef CmdLineBoolOption(Args&& ...args)
   {
     return std::make_shared<CmdLineBoolArgParser>(std::forward<Args>(args)...);
@@ -298,13 +325,16 @@ namespace osmscout {
     {
       CmdLineArgParserRef parser;
       std::string         option;
+      std::string         argument;
       bool                stopParsing;
 
       CmdLineOption(const CmdLineArgParserRef& parser,
                     const std::string& option,
+                    const std::string& argument,
                     bool stopParsing)
       : parser(parser),
         option(option),
+        argument(argument),
         stopParsing(stopParsing)
       {
         // no code
