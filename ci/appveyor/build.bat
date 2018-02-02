@@ -18,7 +18,14 @@ IF %COMPILER%==msys2 (
 
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ln -s . ../OSMScout2/OSMScout2 && ln -s . ../StyleEditor/StyleEditor && ninja"
+
+    # workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
+    mkdir ../OSMScout2
+    mkdir ../StyleEditor
+    mklink ../OSMScout2/OSMScout2 .
+    mklink ../StyleEditor/StyleEditor .
+
+    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ninja"
     echo Finished mason build
   )
 
