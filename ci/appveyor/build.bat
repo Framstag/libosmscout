@@ -56,6 +56,11 @@ IF %COMPILER%==msvc2015 (
     mkdir debug
     meson debug --backend vs2015
     cd debug
+
+    # workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
+    mklink ../OSMScout2/OSMScout2 .
+    mklink ../StyleEditor/StyleEditor .
+
     msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
     echo Finished meson build
   )
