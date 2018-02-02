@@ -18,6 +18,13 @@ IF %COMPILER%==msys2 (
 
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
+
+    # workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
+    mkdir ../OSMScout2
+    mkdir ../StyleEditor
+    mklink ../OSMScout2/OSMScout2 .
+    mklink ../StyleEditor/StyleEditor .
+
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson debug && cd debug && ninja"
     echo Finished mason build
   )
@@ -56,6 +63,7 @@ IF %COMPILER%==msvc2015 (
     mkdir debug
     meson debug --backend vs2015
     cd debug
+
     msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
     echo Finished meson build
   )
