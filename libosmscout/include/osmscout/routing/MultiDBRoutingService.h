@@ -38,6 +38,14 @@ namespace osmscout {
   class OSMSCOUT_API MultiDBRoutingService CLASS_FINAL : public AbstractRoutingService<MultiDBRoutingState>
   {
   private:
+    struct DatabaseHandle
+    {
+      DatabaseId              dbId;            //<! Numeric id of the database (also index to the handles array)
+      DatabaseRef             database;        //<! Object database
+      RoutingDatabaseRef      routingDatabase; //<! Routing database
+      SimpleRoutingServiceRef router;          //<! Simple router for the given database
+      RoutingProfileRef       profile;         //<! Profile for the given database
+    };
 
   public:
     typedef std::function<RoutingProfileRef(const DatabaseRef&)> RoutingProfileBuilder;
@@ -48,11 +56,7 @@ namespace osmscout {
     static const double LON_CELL_FACTOR;
 
   private:
-    std::vector<DatabaseRef>             databases;
-    std::vector<SimpleRoutingServiceRef> services;
-    std::vector<RoutingProfileRef>       profiles;
-
-    std::vector<RoutingDatabaseRef>      routerFiles;
+    std::vector<DatabaseHandle> handles;
 
     bool  isOpen;
 
@@ -84,7 +88,7 @@ namespace osmscout {
                         const WayRef& way) override;
 
     double GetCosts(const MultiDBRoutingState& state,
-                    DatabaseId database,
+                    DatabaseId databaseId,
                     const RouteNode& routeNode,
                     size_t pathIndex) override;
 
@@ -125,12 +129,12 @@ namespace osmscout {
                                            DatabaseId database,
                                            Id id) override;
 
-    bool GetRouteNode(const DatabaseId &database,
+    bool GetRouteNode(const DatabaseId &databaseId,
                       const Id &id,
                       RouteNodeRef &node) override;
 
     bool CanUse(const MultiDBRoutingState& state,
-                DatabaseId database,
+                DatabaseId databaseId,
                 const RouteNode& routeNode,
                 size_t pathIndex) override;
 
