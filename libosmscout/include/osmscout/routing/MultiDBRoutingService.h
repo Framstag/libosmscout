@@ -38,7 +38,7 @@ namespace osmscout {
   class OSMSCOUT_API MultiDBRoutingService CLASS_FINAL : public AbstractRoutingService<MultiDBRoutingState>
   {
   private:
-    struct DatabaseHandle
+    struct DatabaseHandle CLASS_FINAL
     {
       DatabaseId              dbId;            //<! Numeric id of the database (also index to the handles array)
       DatabaseRef             database;        //<! Object database
@@ -51,14 +51,13 @@ namespace osmscout {
     typedef std::function<RoutingProfileRef(const DatabaseRef&)> RoutingProfileBuilder;
 
   private:
-    static const double CELL_MAGNIFICATION;
+    static const size_t CELL_MAGNIFICATION;
     static const double LAT_CELL_FACTOR;
     static const double LON_CELL_FACTOR;
 
   private:
     std::vector<DatabaseHandle> handles;
-
-    bool  isOpen;
+    bool                        isOpen;
 
   private:
 

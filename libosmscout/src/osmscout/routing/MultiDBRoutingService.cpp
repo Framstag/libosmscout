@@ -19,6 +19,9 @@
 */
 
 #include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
 
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/RoutingService.h>
@@ -34,10 +37,11 @@
 
 //#define DEBUG_ROUTING
 
-#include <iomanip>
-#include <iostream>
-
 namespace osmscout {
+
+  const size_t MultiDBRoutingService::CELL_MAGNIFICATION=65536; // 2^16
+  const double MultiDBRoutingService::LAT_CELL_FACTOR=180.0/ MultiDBRoutingService::CELL_MAGNIFICATION;
+  const double MultiDBRoutingService::LON_CELL_FACTOR=360.0/ MultiDBRoutingService::CELL_MAGNIFICATION;
 
   MultiDBRoutingService::MultiDBRoutingService(const RouterParameter& parameter,
                                                const std::vector<DatabaseRef> &databases):
@@ -136,10 +140,6 @@ namespace osmscout {
 
     return closestPosition;
   }
-
-  const double MultiDBRoutingService::CELL_MAGNIFICATION=std::pow(2,16);
-  const double MultiDBRoutingService::LAT_CELL_FACTOR=180.0/ MultiDBRoutingService::CELL_MAGNIFICATION;
-  const double MultiDBRoutingService::LON_CELL_FACTOR=360.0/ MultiDBRoutingService::CELL_MAGNIFICATION;
 
   Pixel MultiDBRoutingService::GetCell(const osmscout::GeoCoord& coord)
   {
