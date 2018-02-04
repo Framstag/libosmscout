@@ -338,7 +338,7 @@ void RouteDescriptionBuilder::DumpTurnDescription(RouteSelection &route,
   if (!crossingWaysString.isEmpty() && !targetName.isEmpty()) {
     turn.description=FullTurnCommand(directionDescription).arg(crossingWaysString).arg(targetName);
   } else if (!crossingWaysString.isEmpty()) {
-    turn.description=TurnCommandWithList(directionDescription).arg(crossingWaysString).arg(targetName);
+    turn.description=TurnCommandWithList(directionDescription).arg(crossingWaysString);
   } else {
     turn.description=QString("<strong>%1</strong>").arg(turn.shortDescription);
   }
