@@ -19,5 +19,16 @@
 
 #include <osmscout/Pixel.h>
 
+#include <sstream>
+
 namespace osmscout {
+
+  std::string Pixel::GetDisplayText() const
+  {
+    std::ostringstream stream;
+
+    stream << x << "," << y;
+
+    return stream.str();
+  }
 }
