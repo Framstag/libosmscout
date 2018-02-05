@@ -21,10 +21,6 @@
 
 #include <algorithm>
 
-#include <osmscout/GeoCoord.h>
-
-#include <osmscout/util/GeoBox.h>
-
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
@@ -75,8 +71,8 @@ namespace osmscout {
   {
     double latRad=coord.GetLat() * M_PI/180.0;
 
-    return OSMTileId((uint32_t)(floor((coord.GetLon() + 180.0) / 360.0 *magnification.GetMagnification())),
-                     (uint32_t)(floor((1.0 - log( tan(latRad) + 1.0 / cos(latRad)) / M_PI) / 2.0 * magnification.GetMagnification())));
+    return {(uint32_t)(floor((coord.GetLon() + 180.0) / 360.0 *magnification.GetMagnification())),
+            (uint32_t)(floor((1.0 - log( tan(latRad) + 1.0 / cos(latRad)) / M_PI) / 2.0 * magnification.GetMagnification()))};
   }
 
   OSMTileIdBox::OSMTileIdBox(const OSMTileId& a,
@@ -103,6 +99,18 @@ namespace osmscout {
   {
     return GeoBox(minTile.GetTopLeftCoord(magnification),
                   OSMTileId(maxTile.GetX()+1,maxTile.GetY()+1).GetTopLeftCoord(magnification));
+  }
+
+  TileCalculator::TileCalculator(const Magnification& magnification)
+  : cellWidth(360.0/magnification.GetMagnification()),
+    cellHeight(180.0/magnification.GetMagnification())
+  {
+  }
+
+  osmscout::Pixel TileCalculator::GetTileId(const GeoCoord& coord) const
+  {
+    return {uint32_t((coord.GetLon()+180.0)/cellWidth),
+            uint32_t((coord.GetLat()+90.0)/cellHeight)};
   }
 }
 

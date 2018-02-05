@@ -20,9 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/GeoCoord.h>
+#include <osmscout/Pixel.h>
+
+#include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
 #include <osmscout/util/String.h>
 
@@ -247,7 +250,21 @@ namespace osmscout {
     {
       return std::string("["+minTile.GetDisplayText()+" - "+maxTile.GetDisplayText()+"]");
     }
+  };
 
+  /**
+   * Calculates the libosmscout tile id for the given coordinate and magnification
+   */
+  class OSMSCOUT_API TileCalculator CLASS_FINAL
+  {
+  private:
+    double cellWidth;
+    double cellHeight;
+
+  public:
+    explicit TileCalculator(const Magnification& magnification);
+
+    Pixel GetTileId(const GeoCoord& coord) const;
   };
 }
 
