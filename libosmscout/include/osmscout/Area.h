@@ -128,6 +128,9 @@ namespace osmscout {
         return nodes.back().GetId();
       }
 
+      bool GetNodeIndexByNodeId(Id id,
+                                size_t& index) const;
+
       inline const GeoCoord& GetCoord(size_t index) const
       {
         return nodes[index].GetCoord();

@@ -42,6 +42,20 @@ namespace osmscout {
     return false;
   }
 
+  bool Area::Ring::GetNodeIndexByNodeId(Id id,
+                                        size_t& index) const
+  {
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (nodes[i].GetId()==id) {
+        index=i;
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool Area::Ring::GetCenter(GeoCoord& center) const
   {
     double minLat=0.0;
