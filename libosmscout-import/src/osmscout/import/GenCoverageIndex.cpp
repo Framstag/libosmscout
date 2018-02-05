@@ -29,12 +29,6 @@ namespace osmscout {
 
   static uint32_t cellLevel=14;
 
-  Pixel CoverageIndexGenerator::GetCell(const osmscout::GeoCoord& coord) const
-  {
-    return {uint32_t((coord.GetLon()+180.0)/cellWidth),
-            uint32_t((coord.GetLat()+90.0)/cellHeight)};
-  }
-
   CoverageIndexGenerator::CellSet CoverageIndexGenerator::ScanNodes(const TypeConfigRef& typeConfig,
                                                                     const ImportParameter& parameter,
                                                                     Progress& progress) const
@@ -61,7 +55,7 @@ namespace osmscout {
       node.Read(*typeConfig,
                 nodeScanner);
 
-      cells.insert(GetCell(node.GetCoords()));
+      cells.insert(tileCalculator.GetTileId(node.GetCoords()));
     }
 
     nodeScanner.Close();
@@ -102,8 +96,8 @@ namespace osmscout {
 
       way.GetBoundingBox(boundingBox);
 
-      Pixel bottomLeft=GetCell(boundingBox.GetBottomLeft());
-      Pixel topRight=GetCell(boundingBox.GetTopRight());
+      Pixel bottomLeft=tileCalculator.GetTileId(boundingBox.GetBottomLeft());
+      Pixel topRight=tileCalculator.GetTileId(boundingBox.GetTopRight());
 
       for (uint32_t y=bottomLeft.y; y<=topRight.y; y++) {
         for (uint32_t x=bottomLeft.x; x<=topRight.x; x++) {
@@ -147,8 +141,8 @@ namespace osmscout {
 
       area.GetBoundingBox(boundingBox);
 
-      Pixel bottomLeft=GetCell(boundingBox.GetBottomLeft());
-      Pixel topRight=GetCell(boundingBox.GetTopRight());
+      Pixel bottomLeft=tileCalculator.GetTileId(boundingBox.GetBottomLeft());
+      Pixel topRight=tileCalculator.GetTileId(boundingBox.GetTopRight());
 
       for (uint32_t y=bottomLeft.y; y<=topRight.y; y++) {
         for (uint32_t x=bottomLeft.x; x<=topRight.x; x++) {
@@ -237,6 +231,12 @@ namespace osmscout {
 
   }
 
+  CoverageIndexGenerator::CoverageIndexGenerator()
+  : tileCalculator(std::pow(2,cellLevel))
+  {
+
+  }
+
   void CoverageIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                               ImportModuleDescription& description) const
   {
@@ -254,12 +254,7 @@ namespace osmscout {
                                       const ImportParameter& parameter,
                                       Progress& progress)
   {
-    double cellMagnification=std::pow(2.0,cellLevel);
-
     progress.Info("Generating bitmap for cell level "+std::to_string((size_t)cellLevel));
-
-    cellWidth=360.0/cellMagnification;
-    cellHeight=180.0/cellMagnification;
 
     try {
       CellSet nodeCells;

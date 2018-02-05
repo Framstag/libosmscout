@@ -22,6 +22,8 @@
 
 #include <set>
 
+#include <osmscout/util/Tiling.h>
+
 #include <osmscout/import/Import.h>
 
 #include <osmscout/system/Compiler.h>
@@ -34,12 +36,9 @@ namespace osmscout {
     typedef std::set<Pixel> CellSet;
 
   private:
-    double cellHeight;
-    double cellWidth;
+    TileCalculator tileCalculator;
 
   private:
-    Pixel GetCell(const osmscout::GeoCoord& coord) const;
-
     CellSet ScanNodes(const TypeConfigRef& typeConfig,
                       const ImportParameter& parameter,
                       Progress& progress) const;
@@ -56,6 +55,7 @@ namespace osmscout {
                     Progress& progress,
                     const CellSet& cells);
   public:
+    CoverageIndexGenerator();
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;
 
