@@ -43,4 +43,15 @@ namespace osmscout {
 
     return id;
   }
+
+  GeoCoord Point::GetCoordFromId(Id id)
+  {
+    id=id >> 8;
+
+    uint64_t latValue=((id >> 8) & 0xff) + (((id >> 24) & 0xff) << 8) + (((id >> 40) & 0xff) << 16) + (((id >> 51) & 0x07) << 24);
+    uint64_t lonValue=((id >> 0) & 0xff) + (((id >> 16) & 0xff) << 8) + (((id >> 32) & 0xff) << 16) + (((id >> 48) & 0x07) << 24);
+
+    return GeoCoord(latValue/latConversionFactor-90.0,
+                    lonValue/lonConversionFactor-180.0);
+  }
 }

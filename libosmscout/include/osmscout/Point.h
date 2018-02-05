@@ -165,6 +165,8 @@ namespace osmscout {
       return coord<other.GetCoord() ||
         (coord==other.GetCoord() && serial < other.serial);
     }
+
+    static GeoCoord GetCoordFromId(Id id);
   };
 }
 
