@@ -20,11 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <map>
-
-#include <QObject>
-#include <QAbstractListModel>
-
 #include <osmscout/Location.h>
 #include <osmscout/util/Breaker.h>
 #include <osmscout/routing/Route.h>
@@ -35,6 +30,12 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/Router.h>
 #include <osmscout/OverlayObject.h>
+
+#include <QObject>
+#include <QAbstractListModel>
+
+#include <map>
+
 
 /**
  * \ingroup QtAPI
@@ -88,8 +89,9 @@ private:
 
 public:
   enum Roles {
-    LabelRole = Qt::UserRole,
-    TypeRole = Qt::UserRole +1
+    ShortDescriptionRole = Qt::UserRole + 1,
+    DescriptionRole = Qt::UserRole + 2,
+    TypeRole = Qt::UserRole + 3
   };
 
 public:

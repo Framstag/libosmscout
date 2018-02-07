@@ -173,8 +173,10 @@ QVariant RoutingListModel::data(const QModelIndex &index, int role) const
 
   switch (role) {
   case Qt::DisplayRole:
-  case LabelRole:
-    return step.getDescription();
+  case ShortDescriptionRole:
+    return step.getShortDescription();
+  case DescriptionRole:
+      return step.getDescription();
   case TypeRole:
     return step.getType();
   default:
@@ -197,19 +199,20 @@ QHash<int, QByteArray> RoutingListModel::roleNames() const
 {
   QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
 
-  roles[LabelRole]="label";
-  roles[TypeRole]="type";
+  roles[ShortDescriptionRole] = "shortDescription";
+  roles[DescriptionRole] = "description";
+  roles[TypeRole] = "type";
 
   return roles;
 }
 
 RouteStep* RoutingListModel::get(int row) const
 {
-    if(!route || row < 0 || row >= route->routeSteps.size()) {
-        return NULL;
-    }
+  if(!route || row < 0 || row >= route->routeSteps.size()) {
+    return NULL;
+  }
 
-    RouteStep step=route->routeSteps.at(row);
+  RouteStep step=route->routeSteps.at(row);
 
-    return new RouteStep(step);
+  return new RouteStep(step);
 }
