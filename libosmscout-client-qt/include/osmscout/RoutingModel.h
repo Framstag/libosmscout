@@ -71,7 +71,7 @@ public slots:
 
   void cancel();
 
-  void onRouteComputed(RouteSelectionRef route,
+  void onRouteComputed(QtRouteData route,
                        int requestId);
 
   void onRouteFailed(QString reason,
@@ -82,7 +82,7 @@ public slots:
 
 private:
   Router                *router;
-  RouteSelectionRef     route;
+  QtRouteData           route;
   int                   requestId;
   bool                  computing;
   osmscout::BreakerRef  breaker;
@@ -140,7 +140,7 @@ public:
     if (!route){
       return NULL;
     }
-    return new OverlayWay(route->routeWay.nodes);
+    return new OverlayWay(route.routeWay().nodes);
   }
 };
 

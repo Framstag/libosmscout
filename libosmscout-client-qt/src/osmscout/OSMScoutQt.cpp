@@ -41,6 +41,7 @@
 #include <osmscout/StyleFlagsModel.h>
 #include <osmscout/TiledMapOverlay.h>
 #include <osmscout/Router.h>
+#include <osmscout/NavigationModel.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
@@ -125,8 +126,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
   qRegisterMetaType<QList<QDir>>("QList<QDir>");
   qRegisterMetaType<MapViewStruct>("MapViewStruct");
-  qRegisterMetaType<RouteSelectionRef>("RouteSelectionRef");
-  qRegisterMetaType<RouteSelection>("RouteSelection");
+  qRegisterMetaType<QtRouteData>("QtRouteData");
   qRegisterMetaType<uint32_t>("uint32_t");
   qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<AdminRegionInfoRef>("AdminRegionInfoRef");
@@ -145,6 +145,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<MapObjectInfoModel>(uri, versionMajor, versionMinor, "MapObjectInfoModel");
   qmlRegisterType<MapStyleModel>(uri, versionMajor, versionMinor, "MapStyleModel");
   qmlRegisterType<MapWidget>(uri, versionMajor, versionMinor, "Map");
+  qmlRegisterType<NavigationModel>(uri, versionMajor, versionMinor, "NavigationModel");
   qmlRegisterType<OnlineTileProviderModel>(uri, versionMajor, versionMinor, "OnlineTileProviderModel");
   qmlRegisterType<OverlayWay>(uri, versionMajor, versionMinor, "OverlayWay");
   qmlRegisterType<OverlayArea>(uri, versionMajor, versionMinor, "OverlayArea");

@@ -219,11 +219,11 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
     return;
   }
 
-  RouteSelectionRef route=std::make_shared<RouteSelection>();
+  osmscout::RouteData routeData;
   if (!CalculateRoute(routingService,
                       startNode,
                       targetNode,
-                      route->routeData,
+                      routeData,
                       requestId,
                       breaker)) {
 
@@ -238,23 +238,29 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
 
   osmscout::log.Debug() << "Route calculated";
 
+  osmscout::RouteDescription routeDescription;
   TransformRouteDataToRouteDescription(routingService,
-                                       route->routeData,
-                                       route->routeDescription,
+                                       routeData,
+                                       routeDescription,
                                        start->getLabel().toUtf8().constData(),
                                        target->getLabel().toUtf8().constData());
 
   osmscout::log.Debug() << "Route transformed";
 
   RouteDescriptionBuilder builder;
-  builder.GenerateRouteSteps(*route);
+  QList<RouteStep>        routeSteps;
+  builder.GenerateRouteSteps(routeDescription, routeSteps);
 
-  if (!routingService->TransformRouteDataToWay(route->routeData,route->routeWay)) {
+  osmscout::Way routeWay;
+  if (!routingService->TransformRouteDataToWay(routeData,routeWay)) {
     emit routeFailed("Error while transforming route",requestId);
     return;
   }
 
-  emit routeComputed(route,requestId);
+  emit routeComputed(QtRouteData(std::move(routeDescription),
+                                 std::move(routeSteps),
+                                 std::move(routeWay)),
+                     requestId);
 }
 
 void Router::onRouteRequest(LocationEntryRef start,

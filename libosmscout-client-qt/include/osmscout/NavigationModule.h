@@ -23,10 +23,16 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/Settings.h>
 #include <osmscout/Router.h>
+#include <osmscout/Navigation.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
 #include <QObject>
+
+class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder :
+    public osmscout::OutputDescription<RouteStep>{
+
+};
 
 /**
  * \ingroup QtAPI
@@ -34,10 +40,17 @@
 class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
   Q_OBJECT
 
+signals:
+  void updated();
+
 public slots:
   void setupRoute(LocationEntryRef target,
-                  RouteSelectionRef route,
+                  QtRouteData route,
                   osmscout::Vehicle vehicle);
+
+  void locationChanged(osmscout::GeoCoord coord,
+                       bool /*horizontalAccuracyValid*/,
+                       double /*horizontalAccuracy*/);
 
 public:
   NavigationModule(QThread *thread,
@@ -51,6 +64,10 @@ private:
   SettingsRef settings;
   DBThreadRef dbThread;
 
+  NextStepDescriptionBuilder nextStepDescBuilder;
+  osmscout::RouteDescription routeDescription;
+  osmscout::Navigation<RouteStep> navigation;
+  bool knownPosition;
 };
 
 #endif //LIBOSMSCOUT_NAVIGATIONMODULE_H

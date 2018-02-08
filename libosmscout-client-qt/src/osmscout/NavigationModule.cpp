@@ -22,25 +22,46 @@
 NavigationModule::NavigationModule(QThread *thread,
                                    SettingsRef settings,
                                    DBThreadRef dbThread):
-  thread(thread), settings(settings), dbThread(dbThread)
+  thread(thread), settings(settings), dbThread(dbThread),
+  navigation(&nextStepDescBuilder)
 {
-
+  navigation.SetSnapDistance(40.0);
 }
 
 NavigationModule::~NavigationModule()
 {
   if (thread!=QThread::currentThread()){
-    qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
+    qWarning() << "Destroy" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
-  qDebug() << "~Router";
+  qDebug() << "~NavigationModule";
   if (thread!=NULL){
     thread->quit();
   }
 }
 
 void NavigationModule::setupRoute(LocationEntryRef /*target*/,
-                                  RouteSelectionRef /*route*/,
+                                  QtRouteData route,
                                   osmscout::Vehicle /*vehicle*/)
 {
+  if (thread!=QThread::currentThread()){
+    qWarning() << "setupRoute" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
+  // create own copy of route description
+  routeDescription=route.routeDescription();
+  navigation.SetRoute(&routeDescription);
+}
 
+void NavigationModule::locationChanged(osmscout::GeoCoord coord,
+                                       bool /*horizontalAccuracyValid*/,
+                                       double /*horizontalAccuracy*/) {
+  if (thread!=QThread::currentThread()){
+    qWarning() << "locationChanged" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
+  if (!navigation.HasRoute()) {
+    return;
+  }
+
+  double minDistance = 0;
+  knownPosition = navigation.UpdateCurrentLocation(coord, minDistance);
+  emit updated();
 }

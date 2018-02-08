@@ -41,8 +41,15 @@ Window {
             map.locationChanged(true, // valid
                                 latitude, longitude,
                                 horizontalAccuracyValid, horizontalAccuracy);
+            navigationModel.locationChanged(true, // valid
+                                            latitude, longitude,
+                                            horizontalAccuracyValid, horizontalAccuracy);
             // console.log("position: " + latitude + " " + longitude);
         }
+    }
+
+    NavigationModel {
+        id: navigationModel
     }
 
     RoutingListModel {
@@ -54,6 +61,7 @@ Window {
             }
 
             map.addOverlayObject(0,routeWay);
+            //navigationModel.
         }
     }
 
@@ -121,6 +129,28 @@ Window {
     }
 
     Rectangle {
+        id: topContainer
+        anchors.left: parent.left
+        anchors.top: parent.top
+        width: Math.min(400, parent.width - rightContainer.width)
+        height: 80
+        color: "transparent"
+
+        Rectangle {
+            id: nextStepBox
+
+            x: Theme.horizSpace
+            y: Theme.vertSpace
+            height: parent.height
+            width: parent.width - (2*Theme.horizSpace)
+
+            border.color: "lightgrey"
+            border.width: 1
+        }
+    }
+
+    Rectangle {
+        id: rightContainer
         anchors.right: parent.right
         anchors.top: parent.top
         width: 220

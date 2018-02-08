@@ -118,7 +118,7 @@ public slots:
                       int requestId,
                       osmscout::BreakerRef breaker);
 signals:
-  void routeComputed(RouteSelectionRef route,
+  void routeComputed(QtRouteData route,
                      int requestId);
 
   void routeFailed(QString reason,
