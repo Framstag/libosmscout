@@ -186,6 +186,13 @@ ThreadedDatabase = executable('ThreadedDatabase',
              link_with: [osmscoutmap, osmscout],
              install: false)
 
+TilingTest = executable('TilingTest',
+             'src/TilingTest.cpp',
+             include_directories: [osmscoutIncDir],
+             dependencies: [mathDep, threadDep],
+             link_with: [osmscout],
+             install: false)
+
 TransPolygon = executable('TransPolygon',
              'src/TransPolygon.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -227,6 +234,7 @@ test('Check rotation of maps', MapRotate)
 test('Check correctness of NumberSet class', NumberSet)
 test('Check standard OST and OSS files', OSTAndOSSCheck, env: ostandossEnv)
 test('Check scan conversion code', ScanConversion)
+test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)
 test('Check implementation of work queue', WorkQueue)
 test('Check WString<=>String conversion code', WStringStringConversion)

@@ -9,17 +9,6 @@ else()
 endif()
 add_test(NAME AccessParse COMMAND AccessParse)
 
-#---- TimeParse
-add_executable(TimeParse src/TimeParse.cpp)
-set_property(TARGET TimeParse PROPERTY CXX_STANDARD 11)
-target_include_directories(TimeParse PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
-if(APPLE)
-  target_link_libraries(TimeParse OSMScout)
-else()
-  target_link_libraries(TimeParse osmscout)
-endif()
-add_test(NAME TimeParse COMMAND TimeParse)
-
 #---- Bearing
 add_executable(Bearing src/Bearing.cpp)
 set_property(TARGET Bearing PROPERTY CXX_STANDARD 11)
@@ -275,6 +264,28 @@ else()
   target_link_libraries(ScanConversion osmscout)
 endif()
 add_test(NAME ScanConversion COMMAND ScanConversion)
+
+#---- TilingTest
+add_executable(TilingTest src/TilingTest.cpp)
+set_property(TARGET TilingTest PROPERTY CXX_STANDARD 11)
+target_include_directories(TilingTest PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+if(APPLE)
+  target_link_libraries(TilingTest OSMScout)
+else()
+  target_link_libraries(TilingTest osmscout)
+endif()
+add_test(NAME TilingTest COMMAND TilingTest)
+
+#---- TimeParse
+add_executable(TimeParse src/TimeParse.cpp)
+set_property(TARGET TimeParse PROPERTY CXX_STANDARD 11)
+target_include_directories(TimeParse PRIVATE include ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+if(APPLE)
+  target_link_libraries(TimeParse OSMScout)
+else()
+  target_link_libraries(TimeParse osmscout)
+endif()
+add_test(NAME TimeParse COMMAND TimeParse)
 
 #---- WStringStringConversion
 add_executable(WStringStringConversion src/WStringStringConversion.cpp)

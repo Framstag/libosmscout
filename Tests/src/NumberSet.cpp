@@ -18,21 +18,21 @@ int main()
     errors++;
   }
 
-  set.Insert(1);
+  set.Set(1);
 
   if (!set.IsSet(1)) {
     std::cerr << "1 not found in set!" << std::endl;
     errors++;
   }
 
-  set.Insert(255);
+  set.Set(255);
 
   if (!set.IsSet(255)) {
     std::cerr << "255 not found in set!" << std::endl;
     errors++;
   }
 
-  set.Insert(256);
+  set.Set(256);
 
   if (!set.IsSet(256)) {
     std::cerr << "256 not found in set!" << std::endl;
@@ -40,7 +40,7 @@ int main()
   }
 
   for (size_t i=256; i<256*256; i++) {
-    set.Insert(i);
+    set.Set(i);
 
     if (!set.IsSet(i)) {
       std::cerr << i << " not found in set!" << std::endl;
