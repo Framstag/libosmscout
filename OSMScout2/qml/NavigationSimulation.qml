@@ -19,6 +19,13 @@ Window {
     width: 1024
     height: 768
 
+    function reroute(){
+        var startLoc = routingModel.locationEntryFromPosition(simulator.latitude, simulator.longitude);
+        var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
+        console.log("We leave route, reroute from " + startLoc.label + " -> " + destinationLoc.label);
+        routingModel.setStartAndTarget(startLoc, destinationLoc);
+    }
+
     PositionSimulator {
         id: simulator
         track: PositionSimulationTrack
@@ -45,6 +52,10 @@ Window {
                                             latitude, longitude,
                                             horizontalAccuracyValid, horizontalAccuracy);
             // console.log("position: " + latitude + " " + longitude);
+
+            if ((!navigationModel.positionOnRoute) && routingModel.ready){
+                reroute();
+            }
         }
     }
 
@@ -54,9 +65,7 @@ Window {
 
         onPositionOnRouteChanged: {
             if (!positionOnRoute){
-                var startLoc = routingModel.locationEntryFromPosition(simulator.latitude, simulator.longitude);
-                var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
-                routingModel.setStartAndTarget(startLoc, destinationLoc);
+                reroute();
             }
         }
     }

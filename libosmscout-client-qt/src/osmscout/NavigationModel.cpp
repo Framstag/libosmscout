@@ -63,7 +63,7 @@ QObject *NavigationModel::getRoute() const
 
 void NavigationModel::onUpdated(bool onRoute, RouteStep routeStep)
 {
-  qDebug() << onRoute << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
+  // qDebug() << onRoute << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
   if (this->onRoute != onRoute) {
     this->onRoute = onRoute;
     emit positionOnRouteChanged();
