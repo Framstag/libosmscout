@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en">
 <context>
+    <name>NavigationSimulation</name>
+    <message>
+        <source>meters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>km</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>RouteDescriptionBuilder</name>
     <message>
         <source>Turn sharp left</source>
