@@ -80,12 +80,13 @@ namespace osmscout {
     }
   }
 
-  bool AreaNodeIndex::Open(const std::string& path)
+  bool AreaNodeIndex::Open(const std::string& path,
+                           bool memoryMappedData)
   {
     datafilename=AppendFileToDir(path,AREA_NODE_IDX);
 
     try {
-      scanner.Open(datafilename,FileScanner::FastRandom,true);
+      scanner.Open(datafilename,FileScanner::FastRandom,memoryMappedData);
 
       uint32_t indexEntries;
 
