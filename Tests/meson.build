@@ -188,7 +188,7 @@ ThreadedDatabase = executable('ThreadedDatabase',
 
 TilingTest = executable('TilingTest',
              'src/TilingTest.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, threadDep],
              link_with: [osmscout],
              install: false)
