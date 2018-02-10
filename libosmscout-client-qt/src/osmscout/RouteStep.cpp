@@ -27,6 +27,7 @@ RouteStep::RouteStep(QString type):
     type(type),
     distance(-1),
     distanceDelta(-1),
+    distanceTo(-1),
     time(-1),
     timeDelta(-1)
 {
@@ -38,9 +39,11 @@ RouteStep::RouteStep(const RouteStep& other)
       type(other.type),
       distance(other.distance),
       distanceDelta(other.distanceDelta),
+      distanceTo(other.distanceTo),
       time(other.time),
       timeDelta(other.timeDelta),
-      description(other.description)
+      description(other.description),
+      shortDescription(other.shortDescription)
 {
   copyDynamicProperties(other);
 }
@@ -58,9 +61,11 @@ RouteStep& RouteStep::operator=(const RouteStep& other)
     type=other.type;
     distance=other.distance;
     distanceDelta=other.distanceDelta;
+    distanceTo=other.distanceTo;
     time=other.time;
     timeDelta=other.timeDelta;
     description=other.description;
+    shortDescription=other.shortDescription;
     for (auto const &propertyName:dynamicPropertyNames()){
       setProperty(propertyName, QVariant());
     }

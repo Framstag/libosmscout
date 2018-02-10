@@ -28,7 +28,7 @@
 /**
  * Human representation of route step commands.
  * It contains time, disntace and two variants of translated description:
- *  - simple `shortTranslatin`
+ *  - simple `shortTranslation`
  *  - formatted `description` with simple html formatting (just subset supported by Qt components)
  *
  * \ingroup QtAPI
@@ -36,17 +36,23 @@
 class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(QString distance READ getDistance)
-  Q_PROPERTY(QString distanceDelta READ getDistanceDelta)
-  Q_PROPERTY(QString time READ getTime)
-  Q_PROPERTY(QString timeDelta READ getTimeDelta)
-  Q_PROPERTY(QString description READ getDescription)
-  Q_PROPERTY(QString shortDescription READ getShortDescription)
+  Q_PROPERTY(QString type             READ getType             NOTIFY update)
+  Q_PROPERTY(double  distance         READ getDistance         NOTIFY update)
+  Q_PROPERTY(double  distanceDelta    READ getDistanceDelta    NOTIFY update)
+  Q_PROPERTY(double  distanceTo       READ getDistanceTo       NOTIFY update)
+  Q_PROPERTY(double  time             READ getTime             NOTIFY update)
+  Q_PROPERTY(double  timeDelta        READ getTimeDelta        NOTIFY update)
+  Q_PROPERTY(QString description      READ getDescription      NOTIFY update)
+  Q_PROPERTY(QString shortDescription READ getShortDescription NOTIFY update)
+
+signals:
+  void update();
 
 public:
   QString type;             //!< Type of route step
   double distance;          //!< Estimate distance [meters] from route start
   double distanceDelta;     //!< Estimate distance [meters] from previous route step
+  double distanceTo;        //!< Estimate distance [meters] to this step (used with navigation)
   double time;              //!< Estimate time [seconds] from route start
   double timeDelta;         //!< Estimate time [seconds] from previous route step
   QString description;      //!< Formatted (html) verbose description (translated already)
@@ -72,6 +78,11 @@ public:
   double getDistanceDelta() const
   {
     return distanceDelta;
+  }
+
+  double getDistanceTo() const
+  {
+    return distanceTo;
   }
 
   double getTime() const

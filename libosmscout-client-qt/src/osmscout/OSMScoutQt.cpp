@@ -135,6 +135,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QMap<QString,bool>>("QMap<QString,bool>");
   qRegisterMetaType<LocationEntry>("LocationEntry");
   qRegisterMetaType<OnlineTileProvider>("OnlineTileProvider");
+  qRegisterMetaType<RouteStep>("RouteStep");
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
