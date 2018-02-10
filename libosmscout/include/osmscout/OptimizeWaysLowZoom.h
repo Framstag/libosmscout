@@ -89,7 +89,8 @@ namespace osmscout {
     virtual ~OptimizeWaysLowZoom();
 
     bool Open(const TypeConfigRef& typeConfig,
-              const std::string& path);
+              const std::string& path,
+              bool memoryMappedData);
     bool Close();
 
     bool HasOptimizations(double magnification) const;

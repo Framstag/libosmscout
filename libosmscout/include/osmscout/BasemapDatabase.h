@@ -38,9 +38,12 @@ namespace osmscout {
   class OSMSCOUT_API BasemapDatabaseParameter CLASS_FINAL
   {
   private:
-
+    bool dataMMap{true};
   public:
     BasemapDatabaseParameter();
+
+    void SetDataMMap(bool mmap);
+    bool GetDataMMap() const;
   };
 
   /**

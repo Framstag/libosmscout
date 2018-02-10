@@ -29,6 +29,16 @@ namespace osmscout {
     // no code
   }
 
+  void BasemapDatabaseParameter::SetDataMMap(bool mmap)
+  {
+    dataMMap=mmap;
+  }
+
+  bool BasemapDatabaseParameter::GetDataMMap() const
+  {
+    return dataMMap;
+  }
+
   BasemapDatabase::BasemapDatabase(const BasemapDatabaseParameter& parameter)
    : parameter(parameter),
      isOpen(false)
@@ -90,7 +100,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!waterIndex->Open(path)) {
+      if (!waterIndex->Open(path, parameter.GetDataMMap())) {
         log.Error() << "Cannot load water index!";
         waterIndex=NULL;
 
