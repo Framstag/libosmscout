@@ -50,6 +50,15 @@ Window {
 
     NavigationModel {
         id: navigationModel
+        route: routingModel.route
+
+        onPositionOnRouteChanged: {
+            if (!positionOnRoute){
+                var startLoc = routingModel.locationEntryFromPosition(simulator.latitude, simulator.longitude);
+                var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
+                routingModel.setStartAndTarget(startLoc, destinationLoc);
+            }
+        }
     }
 
     RoutingListModel {
@@ -133,7 +142,7 @@ Window {
         anchors.left: parent.left
         anchors.top: parent.top
         width: Math.min(400, parent.width - rightContainer.width)
-        height: 80
+        height: 120
         color: "transparent"
 
         Rectangle {
@@ -146,6 +155,47 @@ Window {
 
             border.color: "lightgrey"
             border.width: 1
+
+            RouteStepIcon{
+                id: nextStepIcon
+                stepType: navigationModel.nextRouteStep.type
+                height: parent.height
+                width: height
+                anchors{
+                    top: parent.top
+                    left: parent.left
+                }
+            }
+            Text{
+                id: distanceToNextStep
+
+                function humanDistance(distance){
+                    if (distance < 150){
+                        return Math.round(distance/10)*10 + " "+ qsTr("meters");
+                    }
+                    if (distance < 2000){
+                        return Math.round(distance/100)*100 + " "+ qsTr("meters");
+                    }
+                    return Math.round(distance/1000) + " "+ qsTr("km");
+                }
+                text: humanDistance(navigationModel.nextRouteStep.distanceTo)
+                font.pixelSize: Theme.textFontSize*2
+                anchors{
+                    top: parent.top
+                    left: nextStepIcon.right
+                }
+            }
+            Text{
+                id: nextStepDescription
+                text: navigationModel.nextRouteStep.description
+                font.pixelSize: Theme.textFontSize
+                wrapMode: Text.Wrap
+                anchors{
+                    top: distanceToNextStep.bottom
+                    left: nextStepIcon.right
+                    right: parent.right
+                }
+            }
         }
     }
 

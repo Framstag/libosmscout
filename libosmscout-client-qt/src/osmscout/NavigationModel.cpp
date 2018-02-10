@@ -21,8 +21,20 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/OSMScoutQt.h>
 
-NavigationModel::NavigationModel(){
+NavigationModel::NavigationModel():
+    vehicle(osmscout::Vehicle::vehicleCar), onRoute(false)
+{
   navigationModule=OSMScoutQt::GetInstance().MakeNavigation();
+
+  connect(this, SIGNAL(routeChanged(LocationEntryRef, QtRouteData, osmscout::Vehicle)),
+          navigationModule, SLOT(setupRoute(LocationEntryRef, QtRouteData, osmscout::Vehicle)),
+          Qt::QueuedConnection);
+  connect(this, SIGNAL(positionChange(osmscout::GeoCoord, bool, double)),
+          navigationModule, SLOT(locationChanged(osmscout::GeoCoord, bool, double)),
+          Qt::QueuedConnection);
+  connect(navigationModule, SIGNAL(update(bool, RouteStep)),
+          this, SLOT(onUpdated(bool, RouteStep)),
+          Qt::QueuedConnection);
 }
 
 NavigationModel::~NavigationModel(){
@@ -32,14 +44,47 @@ NavigationModel::~NavigationModel(){
   }
 }
 
-bool NavigationModel::isPositionKnown()
+bool NavigationModel::isPositionOnRoute()
 {
-  return false;
+  return onRoute;
 }
 
 void NavigationModel::locationChanged(bool /*locationValid*/,
-                                      double /*lat*/, double /*lon*/,
-                                      bool /*horizontalAccuracyValid*/, double /*horizontalAccuracy*/)
+                                      double lat, double lon,
+                                      bool horizontalAccuracyValid, double horizontalAccuracy)
 {
+  emit positionChange(osmscout::GeoCoord(lat, lon), horizontalAccuracyValid, horizontalAccuracy);
+}
 
+QObject *NavigationModel::getRoute() const
+{
+  return new QtRouteData(route);
+}
+
+void NavigationModel::onUpdated(bool onRoute, RouteStep routeStep)
+{
+  qDebug() << onRoute << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
+  if (this->onRoute != onRoute) {
+    this->onRoute = onRoute;
+    emit positionOnRouteChanged();
+  }
+  nextRouteStep=routeStep;
+
+  emit update();
+}
+
+QObject *NavigationModel::getNextRoutStep()
+{
+  return new RouteStep(nextRouteStep);
+}
+
+void NavigationModel::setRoute(QObject *o)
+{
+  QtRouteData* route=dynamic_cast<QtRouteData*>(o);
+  if (route == nullptr){
+    qWarning() << "Failed to cast " << o << " to QtRouteData*.";
+    return;
+  }
+  this->route=*route;
+  emit routeChanged(target, this->route, vehicle);
 }

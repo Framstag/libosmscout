@@ -29,9 +29,22 @@
 
 #include <QObject>
 
-class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder :
-    public osmscout::OutputDescription<RouteStep>{
+class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder:
+    public osmscout::OutputDescription<RouteStep> {
 
+public:
+  NextStepDescriptionBuilder();
+
+  virtual ~NextStepDescriptionBuilder(){};
+
+  virtual void NextDescription(double distance,
+                               std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
+                               std::list<osmscout::RouteDescription::Node>::const_iterator end);
+
+private:
+  size_t          roundaboutCrossingCounter;
+  size_t          index;
+  double          previousDistance;
 };
 
 /**
@@ -41,7 +54,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
   Q_OBJECT
 
 signals:
-  void updated();
+  void update(bool onRoute, RouteStep routeStep);
 
 public slots:
   void setupRoute(LocationEntryRef target,
@@ -67,7 +80,6 @@ private:
   NextStepDescriptionBuilder nextStepDescBuilder;
   osmscout::RouteDescription routeDescription;
   osmscout::Navigation<RouteStep> navigation;
-  bool knownPosition;
 };
 
 #endif //LIBOSMSCOUT_NAVIGATIONMODULE_H

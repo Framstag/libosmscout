@@ -81,6 +81,10 @@ public:
   RouteDescriptionBuilder();
   virtual ~RouteDescriptionBuilder();
 
+  bool GenerateRouteStep(const osmscout::RouteDescription::Node &node,
+                         QList<RouteStep> &routeSteps,
+                         size_t &roundaboutCrossingCounter);
+
   void GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
                           QList<RouteStep> &routeSteps);
 };

@@ -19,6 +19,41 @@
 
 #include <osmscout/NavigationModule.h>
 
+NextStepDescriptionBuilder::NextStepDescriptionBuilder():
+    roundaboutCrossingCounter(0),
+    index(0),
+    previousDistance(0.0)
+{
+}
+
+void NextStepDescriptionBuilder::NextDescription(double distance,
+                                                 std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
+                                                 std::list<osmscout::RouteDescription::Node>::const_iterator end)
+{
+  if (waypoint==end || (distance>=0 && previousDistance>distance)) {
+    return;
+  }
+  RouteDescriptionBuilder builder;
+  for (; waypoint!=end; waypoint++) {
+    QList<RouteStep> routeSteps;
+    if (!builder.GenerateRouteStep(*waypoint, routeSteps, roundaboutCrossingCounter)){
+      continue;
+    }
+    if (routeSteps.isEmpty()){
+      continue;
+    }
+
+    description=routeSteps.first();
+    description.distance=waypoint->GetDistance()*1000;
+    description.time    =waypoint->GetTime()*3600;
+
+    if (waypoint->GetDistance() > distance){
+      description.distanceTo=(waypoint->GetDistance()-distance)*1000;
+      break;
+    }
+  }
+}
+
 NavigationModule::NavigationModule(QThread *thread,
                                    SettingsRef settings,
                                    DBThreadRef dbThread):
@@ -46,6 +81,11 @@ void NavigationModule::setupRoute(LocationEntryRef /*target*/,
   if (thread!=QThread::currentThread()){
     qWarning() << "setupRoute" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
+  if (!route){
+    routeDescription.Clear();
+    navigation.Clear();
+    return;
+  }
   // create own copy of route description
   routeDescription=route.routeDescription();
   navigation.SetRoute(&routeDescription);
@@ -62,6 +102,7 @@ void NavigationModule::locationChanged(osmscout::GeoCoord coord,
   }
 
   double minDistance = 0;
-  knownPosition = navigation.UpdateCurrentLocation(coord, minDistance);
-  emit updated();
+  bool onRoute = navigation.UpdateCurrentLocation(coord, minDistance);
+  RouteStep routeStep = navigation.nextWaypointDescription();
+  emit update(onRoute, routeStep);
 }

@@ -450,6 +450,146 @@ void RouteDescriptionBuilder::DumpNameChangedDescription(QList<RouteStep> &route
   routeSteps.push_back(changed);
 }
 
+bool RouteDescriptionBuilder::GenerateRouteStep(const osmscout::RouteDescription::Node &node,
+                                                QList<RouteStep> &routeSteps,
+                                                size_t &roundaboutCrossingCounter)
+{
+  osmscout::RouteDescription::DescriptionRef                 desc;
+  osmscout::RouteDescription::NameDescriptionRef             nameDescription;
+  osmscout::RouteDescription::DirectionDescriptionRef        directionDescription;
+  osmscout::RouteDescription::NameChangedDescriptionRef      nameChangedDescription;
+  osmscout::RouteDescription::CrossingWaysDescriptionRef     crossingWaysDescription;
+
+  osmscout::RouteDescription::StartDescriptionRef            startDescription;
+  osmscout::RouteDescription::TargetDescriptionRef           targetDescription;
+  osmscout::RouteDescription::TurnDescriptionRef             turnDescription;
+  osmscout::RouteDescription::RoundaboutEnterDescriptionRef  roundaboutEnterDescription;
+  osmscout::RouteDescription::RoundaboutLeaveDescriptionRef  roundaboutLeaveDescription;
+  osmscout::RouteDescription::MotorwayEnterDescriptionRef    motorwayEnterDescription;
+  osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
+  osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
+
+  desc=node.GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
+  if (desc) {
+    nameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::DIRECTION_DESC);
+  if (desc) {
+    directionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::DirectionDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+  if (desc) {
+    nameChangedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameChangedDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
+  if (desc) {
+    crossingWaysDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::CrossingWaysDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::NODE_START_DESC);
+  if (desc) {
+    startDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::StartDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
+  if (desc) {
+    targetDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TargetDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::TURN_DESC);
+  if (desc) {
+    turnDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TurnDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
+  if (desc) {
+    roundaboutEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutEnterDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
+  if (desc) {
+    roundaboutLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutLeaveDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
+  if (desc) {
+    motorwayEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayEnterDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
+  if (desc) {
+    motorwayChangeDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayChangeDescription>(desc);
+  }
+
+  desc=node.GetDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
+  if (desc) {
+    motorwayLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayLeaveDescription>(desc);
+  }
+
+  if (crossingWaysDescription &&
+      roundaboutCrossingCounter>0 &&
+      crossingWaysDescription->GetExitCount()>1) {
+    roundaboutCrossingCounter+=crossingWaysDescription->GetExitCount()-1;
+  }
+
+  if (startDescription) {
+    DumpStartDescription(routeSteps,
+                         startDescription,
+                         nameDescription);
+  }
+  else if (targetDescription) {
+    DumpTargetDescription(routeSteps,
+                          targetDescription);
+  }
+  else if (turnDescription) {
+    DumpTurnDescription(routeSteps,
+                        turnDescription,
+                        crossingWaysDescription,
+                        directionDescription,
+                        nameDescription);
+  }
+  else if (roundaboutEnterDescription) {
+    DumpRoundaboutEnterDescription(routeSteps,
+                                   roundaboutEnterDescription,
+                                   crossingWaysDescription);
+
+    roundaboutCrossingCounter=1;
+  }
+  else if (roundaboutLeaveDescription) {
+    DumpRoundaboutLeaveDescription(routeSteps,
+                                   roundaboutLeaveDescription,
+                                   nameDescription);
+
+    roundaboutCrossingCounter=0;
+  }
+  else if (motorwayEnterDescription) {
+    DumpMotorwayEnterDescription(routeSteps,
+                                 motorwayEnterDescription,
+                                 crossingWaysDescription);
+  }
+  else if (motorwayChangeDescription) {
+    DumpMotorwayChangeDescription(routeSteps,
+                                  motorwayChangeDescription);
+  }
+  else if (motorwayLeaveDescription) {
+    DumpMotorwayLeaveDescription(routeSteps,
+                                 motorwayLeaveDescription,
+                                 directionDescription,
+                                 nameDescription);
+  }
+  else if (nameChangedDescription) {
+    DumpNameChangedDescription(routeSteps,
+                               nameChangedDescription);
+  }
+  else {
+    return false;
+  }
+  return true;
+}
+
 void RouteDescriptionBuilder::GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
                                                  QList<RouteStep> &routeSteps)
 {
@@ -460,137 +600,8 @@ void RouteDescriptionBuilder::GenerateRouteSteps(const osmscout::RouteDescriptio
   for (std::list<osmscout::RouteDescription::Node>::const_iterator node=routeDescription.Nodes().begin();
        node!=routeDescription.Nodes().end();
        ++node) {
-    osmscout::RouteDescription::DescriptionRef                 desc;
-    osmscout::RouteDescription::NameDescriptionRef             nameDescription;
-    osmscout::RouteDescription::DirectionDescriptionRef        directionDescription;
-    osmscout::RouteDescription::NameChangedDescriptionRef      nameChangedDescription;
-    osmscout::RouteDescription::CrossingWaysDescriptionRef     crossingWaysDescription;
 
-    osmscout::RouteDescription::StartDescriptionRef            startDescription;
-    osmscout::RouteDescription::TargetDescriptionRef           targetDescription;
-    osmscout::RouteDescription::TurnDescriptionRef             turnDescription;
-    osmscout::RouteDescription::RoundaboutEnterDescriptionRef  roundaboutEnterDescription;
-    osmscout::RouteDescription::RoundaboutLeaveDescriptionRef  roundaboutLeaveDescription;
-    osmscout::RouteDescription::MotorwayEnterDescriptionRef    motorwayEnterDescription;
-    osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
-    osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
-
-    desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
-    if (desc) {
-      nameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::DIRECTION_DESC);
-    if (desc) {
-      directionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::DirectionDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
-    if (desc) {
-      nameChangedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameChangedDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
-    if (desc) {
-      crossingWaysDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::CrossingWaysDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
-    if (desc) {
-      startDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::StartDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
-    if (desc) {
-      targetDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TargetDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::TURN_DESC);
-    if (desc) {
-      turnDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TurnDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
-    if (desc) {
-      roundaboutEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutEnterDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
-    if (desc) {
-      roundaboutLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutLeaveDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
-    if (desc) {
-      motorwayEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayEnterDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
-    if (desc) {
-      motorwayChangeDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayChangeDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
-    if (desc) {
-      motorwayLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayLeaveDescription>(desc);
-    }
-
-    if (crossingWaysDescription &&
-        roundaboutCrossingCounter>0 &&
-        crossingWaysDescription->GetExitCount()>1) {
-      roundaboutCrossingCounter+=crossingWaysDescription->GetExitCount()-1;
-    }
-
-    if (startDescription) {
-      DumpStartDescription(routeSteps,
-                           startDescription,
-                           nameDescription);
-    }
-    else if (targetDescription) {
-      DumpTargetDescription(routeSteps,
-                            targetDescription);
-    }
-    else if (turnDescription) {
-      DumpTurnDescription(routeSteps,
-                          turnDescription,
-                          crossingWaysDescription,
-                          directionDescription,
-                          nameDescription);
-    }
-    else if (roundaboutEnterDescription) {
-      DumpRoundaboutEnterDescription(routeSteps,
-                                     roundaboutEnterDescription,
-                                     crossingWaysDescription);
-
-      roundaboutCrossingCounter=1;
-    }
-    else if (roundaboutLeaveDescription) {
-      DumpRoundaboutLeaveDescription(routeSteps,
-                                     roundaboutLeaveDescription,
-                                     nameDescription);
-
-      roundaboutCrossingCounter=0;
-    }
-    else if (motorwayEnterDescription) {
-      DumpMotorwayEnterDescription(routeSteps,
-                                   motorwayEnterDescription,
-                                   crossingWaysDescription);
-    }
-    else if (motorwayChangeDescription) {
-      DumpMotorwayChangeDescription(routeSteps,
-                                    motorwayChangeDescription);
-    }
-    else if (motorwayLeaveDescription) {
-      DumpMotorwayLeaveDescription(routeSteps,
-                                   motorwayLeaveDescription,
-                                   directionDescription,
-                                   nameDescription);
-    }
-    else if (nameChangedDescription) {
-      DumpNameChangedDescription(routeSteps,
-                                 nameChangedDescription);
-    }
-    else {
+    if (!GenerateRouteStep(*node, routeSteps, roundaboutCrossingCounter)){
       continue;
     }
 

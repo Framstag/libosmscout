@@ -46,6 +46,7 @@ class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
   Q_PROPERTY(int count            READ rowCount         NOTIFY computingChanged)
   Q_PROPERTY(bool ready           READ isReady          NOTIFY computingChanged)
   Q_PROPERTY(QObject *routeWay    READ getRouteWay      NOTIFY computingChanged)
+  Q_PROPERTY(QObject *route       READ getRoute         NOTIFY computingChanged)
   Q_PROPERTY(double length        READ getRouteLength   NOTIFY computingChanged)
   Q_PROPERTY(double duration      READ getRouteDuration NOTIFY computingChanged)
 
@@ -133,6 +134,11 @@ public:
   inline Q_INVOKABLE LocationEntry* locationEntryFromPosition(double lat, double lon, QString label="")
   {
     return new LocationEntry(label,osmscout::GeoCoord(lat,lon));
+  }
+
+  inline QObject *getRoute() const
+  {
+    return new QtRouteData(route);
   }
 
   inline OverlayWay* getRouteWay()

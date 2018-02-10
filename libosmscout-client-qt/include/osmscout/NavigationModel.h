@@ -35,24 +35,48 @@
 class OSMSCOUT_CLIENT_QT_API NavigationModel : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(bool knownPosition   READ isPositionKnown  NOTIFY update)
+  Q_PROPERTY(bool positionOnRoute   READ isPositionOnRoute NOTIFY positionOnRouteChanged)
+  Q_PROPERTY(QObject *route         READ getRoute          WRITE setRoute NOTIFY routeChanged)
+  Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
 
 signals:
   void update();
+  void positionOnRouteChanged();
+
+  void routeChanged(LocationEntryRef target,
+                    QtRouteData route,
+                    osmscout::Vehicle vehicle);
+
+  void positionChange(osmscout::GeoCoord coord,
+                      bool horizontalAccuracyValid, double horizontalAccuracy);
 
 public slots:
   void locationChanged(bool locationValid,
                        double lat, double lon,
                        bool horizontalAccuracyValid, double horizontalAccuracy);
+
+  void onUpdated(bool onRoute, RouteStep routeStep);
+
 public:
   NavigationModel();
 
   virtual ~NavigationModel();
 
-  bool isPositionKnown();
+  bool isPositionOnRoute();
+
+  QObject *getRoute() const;
+  void setRoute(QObject *route);
+
+  QObject *getNextRoutStep();
 
 private:
   NavigationModule* navigationModule;
+  LocationEntryRef  target;
+  QtRouteData       route;
+  osmscout::Vehicle vehicle;
+
+  bool              onRoute;
+  RouteStep         nextRouteStep;
 };
 
 #endif //OSMSCOUT_CLIENT_QT_NAVIGATIONMODEL_H
