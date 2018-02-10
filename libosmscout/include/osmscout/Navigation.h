@@ -47,7 +47,7 @@ namespace osmscout {
 
     virtual void Clear()
     {};
-  private:
+  protected:
     NodeDescriptionTmpl description;
   };
 
@@ -122,6 +122,7 @@ namespace osmscout {
 
     void SetRoute(RouteDescription* newRoute)
     {
+      assert(newRoute);
       route                                                         =newRoute;
       distanceFromStart                                             =0.0;
       durationFromStart                                             =0.0;
@@ -134,6 +135,11 @@ namespace osmscout {
       std::list<RouteDescription::Node>::const_iterator lastWaypoint=--(route->Nodes().end());
       duration=lastWaypoint->GetTime();
       distance=lastWaypoint->GetDistance();
+    }
+
+    void Clear()
+    {
+      route=nullptr;
     }
 
     bool HasRoute()
