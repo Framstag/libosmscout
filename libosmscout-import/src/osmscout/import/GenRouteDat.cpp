@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <future>
+#include <iterator>
 
 #include <osmscout/ObjectRef.h>
 
