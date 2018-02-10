@@ -55,7 +55,10 @@ set(HEADER_FILES
     include/osmscout/TiledRenderingHelper.h
     include/osmscout/NavigationModule.h
     include/osmscout/RouteDescriptionBuilder.h
-)
+    include/osmscout/NavigationModel.h
+    include/osmscout/QtRouteData.h
+    include/osmscout/RouteStep.h
+    )
 
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
@@ -95,7 +98,10 @@ set(SOURCE_FILES
     src/osmscout/TiledRenderingHelper.cpp
     src/osmscout/NavigationModule.cpp
     src/osmscout/RouteDescriptionBuilder.cpp
-)
+    src/osmscout/NavigationModel.cpp
+    src/osmscout/RouteStep.cpp
+    src/osmscout/QtRouteData.cpp
+    )
 
 if(APPLE)
   set(THE_TARGET_NAME "OSMScoutClientQt") 

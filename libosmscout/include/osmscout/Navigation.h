@@ -47,7 +47,7 @@ namespace osmscout {
 
     virtual void Clear()
     {};
-  private:
+  protected:
     NodeDescriptionTmpl description;
   };
 
@@ -103,6 +103,10 @@ namespace osmscout {
     }
 
   public:
+    /**
+     * outputDescr pointer is not owned, it should not be destroyed before Navigation,
+     * caller is responsible for deleting it.
+     */
     Navigation(OutputDescription<NodeDescriptionTmpl>* outputDescr)
       : route(0),
         outputDescription(outputDescr),
@@ -118,6 +122,7 @@ namespace osmscout {
 
     void SetRoute(RouteDescription* newRoute)
     {
+      assert(newRoute);
       route                                                         =newRoute;
       distanceFromStart                                             =0.0;
       durationFromStart                                             =0.0;
@@ -130,6 +135,16 @@ namespace osmscout {
       std::list<RouteDescription::Node>::const_iterator lastWaypoint=--(route->Nodes().end());
       duration=lastWaypoint->GetTime();
       distance=lastWaypoint->GetDistance();
+    }
+
+    void Clear()
+    {
+      route=nullptr;
+    }
+
+    bool HasRoute()
+    {
+      return route!=nullptr;
     }
 
     void SetSnapDistance(double distance)

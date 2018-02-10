@@ -23,10 +23,29 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/Settings.h>
 #include <osmscout/Router.h>
+#include <osmscout/Navigation.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
 #include <QObject>
+
+class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder:
+    public osmscout::OutputDescription<RouteStep> {
+
+public:
+  NextStepDescriptionBuilder();
+
+  virtual ~NextStepDescriptionBuilder(){};
+
+  virtual void NextDescription(double distance,
+                               std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
+                               std::list<osmscout::RouteDescription::Node>::const_iterator end);
+
+private:
+  size_t          roundaboutCrossingCounter;
+  size_t          index;
+  double          previousDistance;
+};
 
 /**
  * \ingroup QtAPI
@@ -34,10 +53,17 @@
 class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
   Q_OBJECT
 
+signals:
+  void update(bool onRoute, RouteStep routeStep);
+
 public slots:
   void setupRoute(LocationEntryRef target,
-                  RouteSelectionRef route,
+                  QtRouteData route,
                   osmscout::Vehicle vehicle);
+
+  void locationChanged(osmscout::GeoCoord coord,
+                       bool /*horizontalAccuracyValid*/,
+                       double /*horizontalAccuracy*/);
 
 public:
   NavigationModule(QThread *thread,
@@ -51,6 +77,9 @@ private:
   SettingsRef settings;
   DBThreadRef dbThread;
 
+  NextStepDescriptionBuilder nextStepDescBuilder;
+  osmscout::RouteDescription routeDescription;
+  osmscout::Navigation<RouteStep> navigation;
 };
 
 #endif //LIBOSMSCOUT_NAVIGATIONMODULE_H

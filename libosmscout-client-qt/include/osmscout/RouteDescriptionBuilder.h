@@ -18,12 +18,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef LIBOSMSCOUT_ROUTEDESCRIPTIONBUILDER_H
-#define LIBOSMSCOUT_ROUTEDESCRIPTIONBUILDER_H
+#ifndef OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H
+#define OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H
 
 #include <osmscout/routing/RouteData.h>
 #include <osmscout/routing/Route.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/RouteStep.h>
+#include <osmscout/QtRouteData.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -34,135 +37,56 @@
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
-{
-  Q_OBJECT
-  Q_PROPERTY(QString distance READ getDistance)
-  Q_PROPERTY(QString distanceDelta READ getDistanceDelta)
-  Q_PROPERTY(QString time READ getTime)
-  Q_PROPERTY(QString timeDelta READ getTimeDelta)
-  Q_PROPERTY(QString description READ getDescription)
-  Q_PROPERTY(QString shortDescription READ getShortDescription)
-
-public:
-  QString type;             //!< Type of route step
-  double distance;          //!< Estimate distance [meters] from route start
-  double distanceDelta;     //!< Estimate distance [meters] from previous route step
-  double time;              //!< Estimate time [seconds] from route start
-  double timeDelta;         //!< Estimate time [seconds] from previous route step
-  QString description;      //!< Formatted (html) verbose description (translated already)
-  QString shortDescription; //!< Plain short description (translated already)
-
-public:
-  RouteStep() : RouteStep("") {};
-  RouteStep(QString type);
-  RouteStep(const RouteStep& other);
-
-  RouteStep& operator=(const RouteStep& other);
-
-  QString getType() const
-  {
-    return type;
-  };
-
-  double getDistance() const
-  {
-    return distance;
-  }
-
-  double getDistanceDelta() const
-  {
-    return distanceDelta;
-  }
-
-  double getTime() const
-  {
-    return time;
-  }
-
-  double getTimeDelta() const
-  {
-    return timeDelta;
-  }
-
-  QString getDescription() const
-  {
-    return description;
-  }
-
-  QString getShortDescription() const
-  {
-    return shortDescription;
-  }
-
-private:
-  void copyDynamicProperties(const RouteStep &other);
-};
-
-/**
- * \ingroup QtAPI
- */
-struct RouteSelection
-{
-  osmscout::RouteData        routeData;
-  osmscout::RouteDescription routeDescription;
-  QList<RouteStep>           routeSteps;
-  osmscout::Way              routeWay;
-};
-
-typedef std::shared_ptr<RouteSelection> RouteSelectionRef;
-
-Q_DECLARE_METATYPE(RouteSelection)
-Q_DECLARE_METATYPE(RouteSelectionRef)
-
-/**
- * \ingroup QtAPI
- */
 class OSMSCOUT_CLIENT_QT_API RouteDescriptionBuilder : public QObject {
   Q_OBJECT
 
 private:
-  void DumpStartDescription(RouteSelection &route,
+  void DumpStartDescription(QList<RouteStep> &routeSteps,
                             const osmscout::RouteDescription::StartDescriptionRef& startDescription,
                             const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
 
-  void DumpTargetDescription(RouteSelection &route,
+  void DumpTargetDescription(QList<RouteStep> &routeSteps,
                              const osmscout::RouteDescription::TargetDescriptionRef& targetDescription);
 
-  void DumpTurnDescription(RouteSelection &route,
+  void DumpTurnDescription(QList<RouteStep> &routeSteps,
                            const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
                            const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
                            const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                            const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
 
-  void DumpRoundaboutEnterDescription(RouteSelection &route,
+  void DumpRoundaboutEnterDescription(QList<RouteStep> &routeSteps,
                                       const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
                                       const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
 
-  void DumpRoundaboutLeaveDescription(RouteSelection &route,
+  void DumpRoundaboutLeaveDescription(QList<RouteStep> &routeSteps,
                                       const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
                                       const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
 
-  void DumpMotorwayEnterDescription(RouteSelection &route,
+  void DumpMotorwayEnterDescription(QList<RouteStep> &routeSteps,
                                     const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
                                     const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
 
-  void DumpMotorwayChangeDescription(RouteSelection &route,
+  void DumpMotorwayChangeDescription(QList<RouteStep> &routeSteps,
                                      const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription);
 
-  void DumpMotorwayLeaveDescription(RouteSelection &route,
+  void DumpMotorwayLeaveDescription(QList<RouteStep> &routeSteps,
                                     const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                                     const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                                     const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
 
-  void DumpNameChangedDescription(RouteSelection &route,
+  void DumpNameChangedDescription(QList<RouteStep> &routeSteps,
                                   const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
 
 public:
   RouteDescriptionBuilder();
   virtual ~RouteDescriptionBuilder();
 
-  void GenerateRouteSteps(RouteSelection &route);
+  bool GenerateRouteStep(const osmscout::RouteDescription::Node &node,
+                         QList<RouteStep> &routeSteps,
+                         size_t &roundaboutCrossingCounter);
+
+  void GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
+                          QList<RouteStep> &routeSteps);
 };
 
-#endif //LIBOSMSCOUT_ROUTEDESCRIPTIONBUILDER_H
+#endif //OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H
