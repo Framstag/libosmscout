@@ -42,7 +42,9 @@ namespace osmscout {
     routerDataMMap(true),
     nodesDataMMap(true),
     areasDataMMap(true),
-    waysDataMMap(true)
+    waysDataMMap(true),
+    optimizeLowZoomMMap(true),
+    indexMMap(true)
   {
     // no code
   }
@@ -87,6 +89,11 @@ namespace osmscout {
     waysDataMMap=mmap;
   }
 
+  void DatabaseParameter::SetIndexMMap(bool mmap)
+  {
+    indexMMap=mmap;
+  }
+
   unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
     return areaAreaIndexCacheSize;
@@ -125,6 +132,16 @@ namespace osmscout {
   bool DatabaseParameter::GetWaysDataMMap() const
   {
     return waysDataMMap;
+  }
+
+  bool DatabaseParameter::GetOptimizeLowZoomMMap() const
+  {
+    return optimizeLowZoomMMap;
+  }
+
+  bool DatabaseParameter::GetIndexMMap() const
+  {
+    return indexMMap;
   }
 
   Database::Database(const DatabaseParameter& parameter)
@@ -366,7 +383,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!areaNodeIndex->Open(path)) {
+      if (!areaNodeIndex->Open(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load area node index!";
         areaNodeIndex=NULL;
 
@@ -394,7 +411,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!areaAreaIndex->Open(path)) {
+      if (!areaAreaIndex->Open(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load area area index!";
         areaAreaIndex=NULL;
 
@@ -423,7 +440,8 @@ namespace osmscout {
       StopClock timer;
 
       if (!areaWayIndex->Open(typeConfig,
-                              path)) {
+                              path,
+                              parameter.GetIndexMMap())) {
         log.Error() << "Cannot load area way index!";
         areaWayIndex=NULL;
 
@@ -451,7 +469,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!locationIndex->Load(path)) {
+      if (!locationIndex->Load(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load location index!";
         locationIndex=NULL;
 
@@ -479,7 +497,7 @@ namespace osmscout {
 
       StopClock timer;
 
-      if (!waterIndex->Open(path)) {
+      if (!waterIndex->Open(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load water index!";
         waterIndex=NULL;
 
@@ -508,7 +526,8 @@ namespace osmscout {
       StopClock timer;
 
       if (!optimizeAreasLowZoom->Open(typeConfig,
-                                      path)) {
+                                      path,
+                                      parameter.GetOptimizeLowZoomMMap())) {
         log.Error() << "Cannot load optimize areas low zoom index!";
         optimizeAreasLowZoom=NULL;
 
@@ -534,7 +553,8 @@ namespace osmscout {
       StopClock timer;
 
       if (!optimizeWaysLowZoom->Open(typeConfig,
-                                     path)) {
+                                     path,
+                                     parameter.GetOptimizeLowZoomMMap())) {
         log.Error() << "Cannot load optimize areas low zoom index!";
         optimizeWaysLowZoom=NULL;
 

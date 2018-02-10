@@ -204,7 +204,7 @@ namespace osmscout {
   template <class N>
   bool DataFile<N>::Open(const TypeConfigRef& typeConfig,
                          const std::string& path,
-                         bool memoryMapedData)
+                         bool memoryMappedData)
   {
     this->typeConfig=typeConfig;
 
@@ -213,7 +213,7 @@ namespace osmscout {
     try {
       scanner.Open(datafilename,
                    FileScanner::LowMemRandom,
-                   memoryMapedData);
+                   memoryMappedData);
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
