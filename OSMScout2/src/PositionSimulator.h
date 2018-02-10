@@ -35,8 +35,11 @@ class PositionSimulator: public QObject {
 
   Q_PROPERTY(double startLat READ getStartLat NOTIFY startChanged)
   Q_PROPERTY(double startLon READ getStartLon NOTIFY startChanged)
-  Q_PROPERTY(double endLat READ getEndLat NOTIFY endChanged)
-  Q_PROPERTY(double endLon READ getEndLon NOTIFY endChanged)
+  Q_PROPERTY(double endLat   READ getEndLat   NOTIFY endChanged)
+  Q_PROPERTY(double endLon   READ getEndLon   NOTIFY endChanged)
+
+  Q_PROPERTY(double latitude  READ getLat NOTIFY positionChanged)
+  Q_PROPERTY(double longitude READ getLon NOTIFY positionChanged)
 
 private:
   std::vector<osmscout::gpx::TrackSegment> segments;
@@ -45,6 +48,7 @@ private:
   bool fileLoaded{false};
   size_t currentSegment{0};
   size_t currentPoint{0};
+  osmscout::GeoCoord currentPosition{osmscout::GeoCoord(0,0)};
   QTimer timer;
   osmscout::Timestamp simulationTime;
   osmscout::gpx::TrackPoint segmentStart{osmscout::GeoCoord(0,0)};
@@ -90,6 +94,13 @@ public:
   }
   double getEndLon() const {
     return segmentEnd.coord.GetLon();
+  }
+
+  double getLat() const {
+    return currentPosition.GetLat();
+  }
+  double getLon() const {
+    return currentPosition.GetLon();
   }
 
   QDateTime getTime() const;
