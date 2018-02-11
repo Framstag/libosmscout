@@ -191,6 +191,9 @@ Rectangle {
             textArea.cursorPosition=0
             textArea.forceActiveFocus()
         }
+        Component.onCompleted: {
+            read();
+        }
     }
 
 }
