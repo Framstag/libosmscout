@@ -2,9 +2,9 @@ import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Dialogs 1.1
 import QtQuick.Layouts 1.1
+import QtQuick.Dialogs 1.2
 import FileIO 1.0
 import "custom"
-
 
 Rectangle {
     property alias source: styleFile.source
@@ -182,6 +182,37 @@ Rectangle {
         }
     }
 
+    Dialog {
+        id: saveDialog
+        property bool isAccepted: false
+        property bool isRefused: false
+        visible: false
+        title: qsTr("Style file is not saved!")
+        standardButtons: StandardButton.Save | StandardButton.No | StandardButton.Cancel
+
+        Text{
+            text: qsTr("Save stylesheet changes to %1 ?").arg(styleFile.source)
+            wrapMode: Text.Wrap
+        }
+
+        onAccepted: {
+            isAccepted = true;
+            visible = false;
+            console.log("Save dialog accepted");
+            mainWindow.close();
+        }
+        onNo: {
+            isRefused = true;
+            visible = false;
+            console.log("Save dialog refused");
+            mainWindow.close();
+        }
+        onRejected: {
+            visible = false;
+            console.log("Save dialog canceled");
+        }
+    }
+
     FileIO {
         id: styleFile
         onError: console.log(msg)
@@ -192,8 +223,26 @@ Rectangle {
             textArea.forceActiveFocus()
         }
 
+        function onWindowClosing(event){
+            console.log("Save dialog "+saveDialog.isAccepted+" "+saveDialog.isRefused);
+            event.accepted = false;
+            if (saveDialog.isAccepted){
+                if (styleFile.write()){
+                    event.accepted = true;
+                }
+            } else if (saveDialog.isRefused){
+                event.accepted = true;
+            } else if (isModified()){
+                console.log("Stylesheet is not saved, don't accept close event, show saveDialog...");
+                saveDialog.visible = true;
+            } else {
+                event.accepted = true;
+            }
+        }
+
         Component.onCompleted: {
             read();
+            mainWindow.closing.connect(onWindowClosing)
         }
     }
 

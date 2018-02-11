@@ -16,7 +16,14 @@ ApplicationWindow {
         Menu {
             title: "File"
             MenuItem { text: "Open..." }
-            MenuItem { text: "Close" }
+            MenuItem {
+                text: "Close"
+                action: Action {
+                    onTriggered: {
+                        mainWindow.close();
+                    }
+                }
+            }
         }
 
         Menu {
