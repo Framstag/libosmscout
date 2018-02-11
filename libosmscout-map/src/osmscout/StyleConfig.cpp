@@ -1491,24 +1491,24 @@ namespace osmscout {
       success=!parser->errors->hasErrors;
 
       errors.clear();
-      if (!success) {
-        for (const auto& err : parser->errors->errors) {
-          switch(err.type) {
-          case oss::Errors::Err::Symbol:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
-            break;
-          case oss::Errors::Err::Error:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
-            break;
-          case oss::Errors::Err::Warning:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
-            break;
-          case oss::Errors::Err::Exception:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
-            break;
-          default:
-            break;
-          }
+      warnings.clear();
+
+      for (const auto& err : parser->errors->errors) {
+        switch(err.type) {
+        case oss::Errors::Err::Symbol:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
+          break;
+        case oss::Errors::Err::Error:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
+          break;
+        case oss::Errors::Err::Warning:
+          warnings.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
+          break;
+        case oss::Errors::Err::Exception:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
+          break;
+        default:
+          break;
         }
       }
 
@@ -1531,5 +1531,10 @@ namespace osmscout {
   const std::list<std::string>& StyleConfig::GetErrors()
   {
     return errors;
+  }
+
+  const std::list<std::string>& StyleConfig::GetWarnings()
+  {
+    return warnings;
   }
 }
