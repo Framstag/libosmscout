@@ -42,6 +42,12 @@ public:
     Q_INVOKABLE bool writeTmp();
     Q_INVOKABLE int lineOffset(int l);
 
+    /**
+     * Check if content of file match with content of target
+     * @return true if content in target was changed
+     */
+    Q_INVOKABLE bool isModified();
+
     QQuickItem *target() { return m_target; }
     void setTarget(QQuickItem *target);
 
@@ -62,6 +68,7 @@ signals:
 
 private:
     bool write(const QString &filename);
+    QString getTargetContent();
 
     QString m_source;
     QQuickItem *m_target;

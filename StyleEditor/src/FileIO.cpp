@@ -71,10 +71,31 @@ void FileIO::read()
             m_highlighter = new Highlighter(m_doc);
             m_highlighter->setStyle(12);
         }
+        if (m_doc) {
+            m_doc->setModified(false);
+        }
     } else {
         emit error("Unable to open the file");
         return;
     }
+}
+
+QString FileIO::getTargetContent()
+{
+    QVariant length = m_target->property("length");
+    QVariant returnedValue;
+    QMetaObject::invokeMethod(m_target, "getText",
+                              Q_RETURN_ARG(QVariant, returnedValue),
+                              Q_ARG(QVariant, QVariant(0)),
+                              Q_ARG(QVariant, length));
+    QString text = returnedValue.toString();
+    text.replace(QChar(0x2029),"\n").replace(QChar(0x00a0)," ");
+    return text;
+}
+
+bool FileIO::isModified()
+{
+    return m_doc && m_doc->isModified();
 }
 
 bool FileIO::write(const QString &fileName)
@@ -87,18 +108,15 @@ bool FileIO::write(const QString &fileName)
     if (!file.open(QFile::WriteOnly | QFile::Truncate))
         return false;
 
-    QVariant length = m_target->property("length");
-    QVariant returnedValue;
-    QMetaObject::invokeMethod(m_target, "getText",
-                              Q_RETURN_ARG(QVariant, returnedValue),
-                              Q_ARG(QVariant, QVariant(0)),
-                              Q_ARG(QVariant, length));
-    QString text = returnedValue.toString();
-    text.replace(QChar(0x2029),"\n").replace(QChar(0x00a0)," ");
+    QString text=getTargetContent();
     QTextStream out(&file);
     out << text;
 
     file.close();
+
+    if (m_doc) {
+        m_doc->setModified(false);
+    }
 
     return true;
 }
