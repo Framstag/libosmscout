@@ -1447,6 +1447,45 @@ namespace osmscout {
     }
   }
 
+  bool StyleConfig::LoadContent(const std::string& content)
+  {
+    oss::Scanner *scanner=new oss::Scanner((const unsigned char *)content.c_str(),
+                                           content.length());
+    oss::Parser  *parser=new oss::Parser(scanner,
+                                         *this);
+    parser->Parse();
+
+    bool success=!parser->errors->hasErrors;
+
+    errors.clear();
+    warnings.clear();
+
+    for (const auto& err : parser->errors->errors) {
+      switch(err.type) {
+        case oss::Errors::Err::Symbol:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
+          break;
+        case oss::Errors::Err::Error:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
+          break;
+        case oss::Errors::Err::Warning:
+          warnings.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
+          break;
+        case oss::Errors::Err::Exception:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
+          break;
+        default:
+          break;
+      }
+    }
+
+    delete parser;
+    delete scanner;
+
+    Postprocess();
+    return success;
+  }
+
   bool StyleConfig::Load(const std::string& styleFile)
   {
     StopClock  timer;
@@ -1479,43 +1518,9 @@ namespace osmscout {
 
       fclose(file);
 
-      oss::Scanner *scanner=new oss::Scanner(content,
-                                             fileSize);
-      oss::Parser  *parser=new oss::Parser(scanner,
-                                           *this);
+      success=LoadContent(std::string((const char *)content, fileSize));
 
       delete [] content;
-
-      parser->Parse();
-
-      success=!parser->errors->hasErrors;
-
-      errors.clear();
-      warnings.clear();
-
-      for (const auto& err : parser->errors->errors) {
-        switch(err.type) {
-        case oss::Errors::Err::Symbol:
-          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
-          break;
-        case oss::Errors::Err::Error:
-          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
-          break;
-        case oss::Errors::Err::Warning:
-          warnings.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
-          break;
-        case oss::Errors::Err::Exception:
-          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
-          break;
-        default:
-          break;
-        }
-      }
-
-      delete parser;
-      delete scanner;
-
-      Postprocess();
 
       timer.Stop();
 

@@ -745,6 +745,7 @@ namespace osmscout {
      * Methods for loading a concrete OSS style sheet
      */
     //@{
+    bool LoadContent(const std::string& content);
     bool Load(const std::string& styleFile);
     const std::list<std::string>&  GetErrors();
     const std::list<std::string>&  GetWarnings();
