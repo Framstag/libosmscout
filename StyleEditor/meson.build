@@ -3,12 +3,19 @@ styleeditorSrc = [
   'src/SettingsDialog.cpp',
   'src/FileIO.cpp',
   'src/Highlighter.cpp',
-  'src/StyleEditor.cpp'
+  'src/StyleEditor.cpp',
+  'src/StyleAnalyser.cpp'
 ]
 
 styleeditorIncDir = include_directories('src')
 
-styleeditorMocs = qt5.preprocess(moc_headers : ['src/MainWindow.h','src/SettingsDialog.h', 'src/FileIO.h','src/Highlighter.h'],
+styleeditorMocs = qt5.preprocess(moc_headers : [
+                                    'src/MainWindow.h',
+                                    'src/SettingsDialog.h',
+                                    'src/FileIO.h',
+                                    'src/Highlighter.h',
+                                    'src/StyleAnalyser.h'
+                                    ],
                                  qresources: ['StyleEditor.qrc'])
 
 OSMScout2 = executable('StyleEditor',

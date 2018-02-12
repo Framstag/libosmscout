@@ -50,6 +50,7 @@ int main(int argc, char* argv[])
   // register OSMScout library QML types
   OSMScoutQt::RegisterQmlTypes();
 
+  qRegisterMetaType<QSet<int>>("QSet<int>");
   qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
 
   OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
