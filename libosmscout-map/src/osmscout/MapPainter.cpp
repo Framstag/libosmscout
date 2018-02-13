@@ -218,8 +218,10 @@ namespace osmscout {
     stepMethods[RenderSteps::DrawWays]=&MapPainter::DrawWays;
     stepMethods[RenderSteps::DrawWayDecorations]=&MapPainter::DrawWayDecorations;
     stepMethods[RenderSteps::DrawWayContourLabels]=&MapPainter::DrawWayContourLabels;
+    stepMethods[RenderSteps::PrepareAreaLabels]=&MapPainter::PrepareAreaLabels;
     stepMethods[RenderSteps::DrawAreaBorderLabels]=&MapPainter::DrawAreaBorderLabels;
     stepMethods[RenderSteps::DrawAreaBorderSymbols]=&MapPainter::DrawAreaBorderSymbols;
+    stepMethods[RenderSteps::PrepareNodeLabels]=&MapPainter::PrepareNodeLabels;
     stepMethods[RenderSteps::DrawLabels]=&MapPainter::DrawLabels;
     stepMethods[RenderSteps::Postrender]=&MapPainter::Postrender;
   }
@@ -1594,18 +1596,6 @@ namespace osmscout {
                   parameter,
                   area);
     }
-
-    for (const auto& area : areaData)
-    {
-      if (area.buffer==nullptr) {
-        continue;
-      }
-
-      PrepareAreaLabel(styleConfig,
-                       projection,
-                       parameter,
-                       area);
-    }
   }
 
   void MapPainter::CalculatePaths(const StyleConfig& styleConfig,
@@ -1853,19 +1843,6 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const MapData& data)
   {
-    StopClock prepareNodesTimer;
-
-    PrepareNodes(*styleConfig,
-                projection,
-                parameter,
-                data);
-
-    prepareNodesTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return;
-    }
-
     StopClock prepareWaysTimer;
 
     PrepareWays(*styleConfig,
@@ -1895,11 +1872,10 @@ namespace osmscout {
                        data);
 
     if (parameter.IsDebugPerformance() &&
-        (prepareNodesTimer.IsSignificant() ||
-         prepareWaysTimer.IsSignificant() ||
+        (prepareWaysTimer.IsSignificant() ||
          prepareAreasTimer.IsSignificant())) {
       log.Info()
-        << "Prep: " << prepareNodesTimer.ResultString() << " (sec) " << prepareWaysTimer.ResultString() << " (sec) " << prepareAreasTimer.ResultString() << " (sec)";
+        << "Prep: " << prepareWaysTimer.ResultString() << " (sec) " << prepareAreasTimer.ResultString() << " (sec)";
     }
   }
 
@@ -2331,6 +2307,35 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::PrepareAreaLabels(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const MapData& /*data*/)
+  {
+    StopClock timer;
+    size_t    drawnCount=0;
+
+    for (const auto& area : areaData)
+    {
+      if (area.buffer==nullptr) {
+        continue;
+      }
+
+      PrepareAreaLabel(*styleConfig,
+                       projection,
+                       parameter,
+                       area);
+
+      drawnCount++;
+    }
+
+    timer.Stop();
+
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Draw area labels: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
+    }
+  }
+
   void MapPainter::DrawAreaBorderLabels(const Projection& projection,
                                         const MapParameter& parameter,
                                         const MapData& /*data*/)
@@ -2384,6 +2389,25 @@ namespace osmscout {
     if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
       log.Info()
         << "Draw area border symbols: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
+    }
+  }
+
+  void MapPainter::PrepareNodeLabels(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const MapData& data)
+  {
+    StopClock timer;
+
+    PrepareNodes(*styleConfig,
+                 projection,
+                 parameter,
+                 data);
+
+    timer.Stop();
+
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+        << "Prepare node labels: " << timer.ResultString() << "(s)";
     }
   }
 

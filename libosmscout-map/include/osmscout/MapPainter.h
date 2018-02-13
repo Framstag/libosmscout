@@ -62,11 +62,13 @@ namespace osmscout {
     DrawWays              =  7,
     DrawWayDecorations    =  8,
     DrawWayContourLabels  =  9,
-    DrawAreaBorderLabels  = 10,
-    DrawAreaBorderSymbols = 11,
-    DrawLabels            = 12,
-    Postrender            = 13,
-    LastStep              = 13
+    PrepareAreaLabels     = 10,
+    DrawAreaBorderLabels  = 11,
+    DrawAreaBorderSymbols = 12,
+    PrepareNodeLabels     = 13,
+    DrawLabels            = 14,
+    Postrender            = 15,
+    LastStep              = 15
   };
 
   /**
@@ -525,6 +527,10 @@ namespace osmscout {
                               const MapParameter& parameter,
                               const MapData& data);
 
+    void PrepareAreaLabels(const Projection& projection,
+                           const MapParameter& parameter,
+                           const MapData& data);
+
     void DrawAreaBorderLabels(const Projection& projection,
                               const MapParameter& parameter,
                               const MapData& data);
@@ -532,6 +538,10 @@ namespace osmscout {
     void DrawAreaBorderSymbols(const Projection& projection,
                                const MapParameter& parameter,
                                const MapData& data);
+
+    void PrepareNodeLabels(const Projection& projection,
+                           const MapParameter& parameter,
+                           const MapData& data);
 
     void DrawLabels(const Projection& projection,
                     const MapParameter& parameter,
