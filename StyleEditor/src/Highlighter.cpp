@@ -19,11 +19,11 @@
 
 #include "Highlighter.h"
 #include <QtGui>
+#include <QQuickWindow>
 
 Highlighter::Highlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
-
 }
 
 void Highlighter::updateRules()
@@ -41,7 +41,7 @@ void Highlighter::updateRules()
 
     kwFormat.setFontWeight(QFont::Bold);
     kwFormat.setForeground(QColor("#7070ff"));
-    rule.pattern = QRegExp("GROUP|COLOR|SYMBOL");
+    rule.pattern = QRegExp("GROUP|COLOR|SYMBOL|UINT");
     rule.pattern.setMinimal(true);
     rule.format = kwFormat;
     highlightingRules.append(rule);
@@ -108,6 +108,9 @@ void Highlighter::updateRules()
     rule.format = commentsFormat;
     highlightingRules.append(rule);
 
+    errorFormat.setBackground(QBrush(QColor(255, 0, 0, 80), Qt::SolidPattern));
+    warningFormat.setBackground(QBrush(QColor(255, 255, 0, 50), Qt::SolidPattern));
+
     multiLineCommentFormat.setFontItalic(true);
     multiLineCommentFormat.setForeground(QColor("#309030"));
 }
@@ -116,6 +119,16 @@ void Highlighter::highlightBlock(const QString &text)
 {
     if (m_baseFontPointSize == 0.0)
             return;
+
+    int line = currentBlock().firstLineNumber()+1;
+    if (currentBlock().lineCount() == 1){
+      if (errorLines.contains(line)) {
+        setFormat(0, text.size(), errorFormat);
+      }
+      if (warningLines.contains(line)) {
+        setFormat(0, text.size(), warningFormat);
+      }
+    }
 
     foreach (const HighlightingRule &rule, highlightingRules) {
         QRegExp expression(rule.pattern);
@@ -153,4 +166,29 @@ void Highlighter::setStyle(qreal baseFontPointSize)
     m_baseFontPointSize = baseFontPointSize;
     this->updateRules();
     this->rehighlight();
+}
+
+void Highlighter::onProblematicLines(QSet<int> errorLines, QSet<int> warningLines)
+{
+    if (this->errorLines==errorLines &&
+        this->warningLines==warningLines){
+      return;
+    }
+    QSet<int> changedLines = this->errorLines + errorLines +
+                             this->warningLines + warningLines;
+
+    this->errorLines=errorLines;
+    this->warningLines=warningLines;
+
+    if (document()) {
+      for (int line: changedLines) {
+        QTextBlock block = document()->findBlockByLineNumber(line - 1);
+        rehighlightBlock(block);
+      }
+    }
+
+    // FIXME: this is hack that should not be needed by documentation
+    // but rehighlightBlock don't update view for some reason
+    // setDocument do it immediately
+    setDocument(document());
 }

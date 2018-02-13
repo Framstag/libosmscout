@@ -330,8 +330,21 @@ if(${OSMSCOUT_BUILD_MAP})
   else()
     target_link_libraries(OSTAndOSSCheck osmscout osmscout_map)
   endif()
-  add_test(NAME OSTAndOSSCheck COMMAND OSTAndOSSCheck)
-  set_tests_properties(OSTAndOSSCheck PROPERTIES ENVIRONMENT TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR})
+
+  set(STYLESHEETS
+          standard.oss
+          winter-sports.oss
+          boundaries.oss
+          railways.oss
+          motorways.oss)
+
+  foreach(STYLESHEET ${STYLESHEETS})
+    add_test(NAME CheckStyleSheet-${STYLESHEET}
+            COMMAND OSTAndOSSCheck
+              --warning-as-error
+              ${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/map.ost
+              ${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET})
+  endforeach()
 else()
-    message("Skip MapRotate test libosmscout-map, is missing.")
+    message("Skip OSTAndOSSCheck test libosmscout-map, is missing.")
 endif()

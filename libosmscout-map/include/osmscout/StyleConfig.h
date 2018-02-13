@@ -570,6 +570,7 @@ namespace osmscout {
     std::unordered_map<std::string,bool>       flags;
     std::unordered_map<std::string,StyleConstantRef> constants;
     std::list<std::string>                     errors;
+    std::list<std::string>                     warnings;
 
   private:
     void Reset();
@@ -744,8 +745,10 @@ namespace osmscout {
      * Methods for loading a concrete OSS style sheet
      */
     //@{
+    bool LoadContent(const std::string& content);
     bool Load(const std::string& styleFile);
     const std::list<std::string>&  GetErrors();
+    const std::list<std::string>&  GetWarnings();
     //@}
   };
 
