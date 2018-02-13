@@ -25,73 +25,93 @@
 #include <osmscout/StyleConfig.h>
 
 #include <osmscout/util/File.h>
+#include <osmscout/util/CmdLineParsing.h>
 
 using namespace std;
 
-int main(int /*argc*/, char** /*argv*/)
+struct Arguments {
+  bool help = false;
+  bool warningAsError = false;
+  std::string ostFile;
+  std::string ossFile;
+};
+
+int main(int argc, char** argv)
 {
-  const std::list<std::string> ostFiles={"map.ost"};
-  const std::list<std::string> ossFiles={"standard.oss",
-                                         "winter-sports.oss",
-                                         "boundaries.oss",
-                                         "railways.oss",
-                                         "motorways.oss"};
+  osmscout::CmdLineParser   argParser("MutiDBRouting",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
-  char*        testsTopDirEnv=getenv("TESTS_TOP_DIR");
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
 
-  if (testsTopDirEnv==NULL) {
-    std::cerr << "Expected environment variable 'TESTS_TOP_DIR' not set" << std::endl;
-    // CMake-based tests would fail, if we do not exit here
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.warningAsError=value;
+                      }),
+                      "warning-as-error",
+                      "Mark all warnings as error",
+                      false);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.ostFile=value;
+                          }),
+                          "OST_FILE",
+                          "Typedefinition file (*.ost)");
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.ossFile=value;
+                          }),
+                          "OSS_FILE",
+                          "Stylesheet file (*.oss)");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
 
-  std::string   testsTopDir=testsTopDirEnv;
-
-  if (testsTopDir.empty()) {
-    std::cerr << "Environment variable 'TESTS_TOP_DIR' is empty" << std::endl;
-    return 77;
+  if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
-
-  if (!osmscout::IsDirectory(testsTopDir)) {
-    std::cerr << "Environment variable 'TESTS_TOP_DIR' does not point to directory" << std::endl;
-    return 77;
-  }
-
-  std::string   stylesheetDir=osmscout::AppendFileToDir(testsTopDir,"../stylesheets");
-
-  if (!osmscout::IsDirectory(stylesheetDir)) {
-    std::cerr << "Calculated stylesheet directory does not point to directory" << std::endl;
-    return 77;
-  }
-
-  std::cout << "Stylesheet directory: '" << stylesheetDir << "'"  << std::endl;
 
   size_t errorCount=0;
 
-  for (const auto& ostFile : ostFiles) {
-    osmscout::TypeConfigRef typeConfig=std::make_shared<osmscout::TypeConfig>();
-    std::string             ostFilepath=osmscout::AppendFileToDir(stylesheetDir,ostFile);
+  osmscout::TypeConfigRef typeConfig=std::make_shared<osmscout::TypeConfig>();
+  std::string             ostFilepath=args.ostFile;
 
-    if (typeConfig->LoadFromOSTFile(ostFilepath)) {
-      std::cout << "OST file '" << ostFilepath << "' => OK" << std::endl;
+  if (typeConfig->LoadFromOSTFile(ostFilepath)) {
+    std::cout << "OST file '" << ostFilepath << "' => OK" << std::endl;
 
-      for (const auto& ossFile : ossFiles) {
-        osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-        std::string             ossFilepath=osmscout::AppendFileToDir(stylesheetDir,ossFile);
 
-        if (styleConfig->Load(ossFilepath)) {
-          std::cout << "OSS file '" << ossFilepath << "' => OK" << std::endl;
-        }
-        else {
-          std::cerr << "OSS file '" << ossFilepath << "' => ERROR" << std::endl;
-          errorCount++;
+    osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+    std::string             ossFilepath=args.ossFile;
+
+    if (styleConfig->Load(ossFilepath)) {
+      if (styleConfig->GetWarnings().empty()) {
+        std::cout << "OSS file '" << ossFilepath << "' => OK" << std::endl;
+      }else{
+        std::cout << "OSS file '" << ossFilepath << "' => WARNINGS" << std::endl;
+        if (args.warningAsError){
+          errorCount+=styleConfig->GetWarnings().size();
         }
       }
     }
     else {
-      std::cerr << "OST file '" << ostFilepath << "' => ERROR" << std::endl;
+      std::cerr << "OSS file '" << ossFilepath << "' => ERROR" << std::endl;
       errorCount++;
     }
+  }
+  else {
+    std::cerr << "OST file '" << ostFilepath << "' => ERROR" << std::endl;
+    errorCount++;
   }
 
   if (errorCount>0) {

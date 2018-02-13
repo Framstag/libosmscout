@@ -26,6 +26,7 @@
 #include <QVector>
 
 #include "Highlighter.h"
+#include "StyleAnalyser.h"
 
 #define TMP_SUFFIX ".tmp"
 
@@ -36,20 +37,27 @@ public:
     Q_PROPERTY(QQuickItem *target READ target WRITE setTarget NOTIFY targetChanged)
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
     explicit FileIO(QObject *parent = 0);
+    ~FileIO();
 
     Q_INVOKABLE bool write();
     Q_INVOKABLE void read();
     Q_INVOKABLE bool writeTmp();
     Q_INVOKABLE int lineOffset(int l);
 
-    QQuickItem *target() { return m_target; }
+    /**
+     * Check if content of file match with content of target
+     * @return true if content in target was changed
+     */
+    Q_INVOKABLE bool isModified();
+
+    QQuickItem *target() { return targetComponent; }
     void setTarget(QQuickItem *target);
 
-    QString source() { return m_source; }
+    QString source() { return styleSheetFile; }
     void setSource(const QString& source) {
-        if(m_source != source){
-            m_source = source;
-            emit sourceChanged(m_source);
+        if(styleSheetFile != source){
+            styleSheetFile = source;
+            emit sourceChanged(styleSheetFile);
         }
     }
 
@@ -61,13 +69,16 @@ signals:
     void error(const QString& msg);
 
 private:
+    void stopAnalyser();
     bool write(const QString &filename);
+    QString getTargetContent();
 
-    QString m_source;
-    QQuickItem *m_target;
-    QTextDocument *m_doc;
-    Highlighter *m_highlighter;
-    QVector<int> m_lineOffsets;
+    QString styleSheetFile;
+    QQuickItem *targetComponent;
+    QTextDocument *doc;
+    Highlighter *highlighter;
+    StyleAnalyser *styleAnalyser;
+    QVector<int> lineOffsets;
 };
 
 #endif // FILEIO_H
