@@ -1,15 +1,21 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/main.qml</file>
+
         <file>qml/AboutDialog.qml</file>
-        <file>qml/custom/DialogActionButton.qml</file>
-        <file>qml/custom/LineEdit.qml</file>
-        <file>qml/custom/MapButton.qml</file>
-        <file>qml/custom/MapDialog.qml</file>
-        <file>qml/custom/ScrollIndicator.qml</file>
         <file>qml/MapControl.qml</file>
         <file>qml/TextEditor.qml</file>
-        
+        <file>qml/SearchGeocodeDialog.qml</file>
+        <file>qml/SearchLocationDialog.qml</file>
+        <file>qml/settings.qml</file>
+
+        <file>qml/custom/LocationEdit.qml</file>
+        <file>qml/custom/MapDialog.qml</file>
+        <file>qml/custom/ScrollIndicator.qml</file>
+        <file>qml/custom/LineEdit.qml</file>
+        <file>qml/custom/DialogActionButton.qml</file>
+        <file>qml/custom/MapButton.qml</file>
+
         <file>resources/online-tile-providers.json</file>
     </qresource>
 </RCC>

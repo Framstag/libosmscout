@@ -8,7 +8,7 @@ import "custom"
 MapDialog {
     id: dialog
 
-    signal showLocation(Location location)
+    signal showLocation(LocationEntry location)
 
     Rectangle {
         id: content

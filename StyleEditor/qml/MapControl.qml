@@ -123,7 +123,6 @@ Rectangle {
         */
         // Use PinchArea for multipoint zoom in/out?
     }
-
     Column {
         id: menu
         anchors.top: parent.top

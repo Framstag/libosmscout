@@ -6,7 +6,7 @@ LineEdit {
     id: locationEdit
     z: 100
 
-    property Location location;
+    property LocationEntry location;
 
     function updateSuggestions() {
         suggestionModel.setPattern(locationEdit.text)
@@ -14,7 +14,7 @@ LineEdit {
         console.log("Suggestion count: " + suggestionModel.count)
 
         if (suggestionModel.count>=1 &&
-            locationEdit.text === suggestionModel.get(0).name) {
+            locationEdit.text === suggestionModel.get(0).label) {
             location=suggestionModel.get(0)
 
             return
@@ -45,7 +45,7 @@ LineEdit {
 
         if (suggestionView.count>0) {
             location = suggestionModel.get(0)
-            console.log("Enforced location: " + location.name)
+            console.log("Enforced location: " + location.label)
         }
     }
 
@@ -85,7 +85,7 @@ LineEdit {
 
             locationEdit.location = location
             if (location) {
-              locationEdit.text = location.name
+              locationEdit.text = location.label
             }
             else {
                 locationEdit.text = ""
@@ -129,6 +129,10 @@ LineEdit {
 
     LocationListModel {
         id: suggestionModel
+
+        onCountChanged:{
+            updateSuggestions();
+        }
     }
 
     Item {
@@ -209,7 +213,7 @@ LineEdit {
 
                                 var location = suggestionModel.get(index)
 
-                                locationEdit.text = location.name
+                                locationEdit.text = location.label
                                 locationEdit.location = location
 
                                 popup.visible = false
