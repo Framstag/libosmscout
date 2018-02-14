@@ -154,31 +154,91 @@ Rectangle {
         }
     }
 
-    Column {
+    Rectangle {
         id: textPanel
         anchors.top: toolBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        TextArea {
-            Accessible.name: "document"
-            id: textArea
-            frameVisible: false
-            height: parent.height
-            width: parent.width
-            font.family: "Courier"
-            textFormat: Qt.RichText
-        }
-        TextArea {
-            id: statusText
-            visible: false
-            frameVisible: false
-            width: parent.width
-            height: 20
-            textColor: "#ff0000"
-            font.family: "Courier"
-            font.bold: true
-            textFormat: Qt.RichText
+
+        Item {
+            anchors.fill: parent
+            clip: true
+            Rectangle {
+                id: lineColumn
+                property int rowHeight: textArea.font.pixelSize + 3 // TODO: use dynamic line space
+                color: "#f2f2f2"
+                width: 50
+                height: parent.height
+
+                Rectangle {
+                    height: parent.height
+                    anchors.right: parent.right
+                    width: 1
+                    color: "#ddd"
+                }
+                Column {
+                    y: -textArea.flickableItem.contentY + textArea.textMargin // 4
+                    width: parent.width
+
+                    // hack for posponing lineNumberRepeater initialisation
+                    property bool ready: false
+                    Component.onCompleted: {
+                        console.log("repeater: Max("+ (textArea.lineCount + 2) +", " + lineColumn.height +" / " + lineColumn.rowHeight +")");
+                        ready = true;
+                    }
+                    Repeater {
+                        id: lineNumberRepeater
+                        model: parent.ready ? Math.max(textArea.lineCount + 2, (lineColumn.height/lineColumn.rowHeight) ) : (lineColumn.height/lineColumn.rowHeight)
+
+                        delegate: Text {
+                            id: text
+                            color: "#666"
+                            font: textArea.font
+                            width: lineColumn.width
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            height: lineColumn.rowHeight
+                            renderType: Text.NativeRendering
+                            text: index
+                        }
+                    }
+                }
+            }
+
+            TextArea {
+                Accessible.name: "document"
+                id: textArea
+
+                anchors.left: lineColumn.right
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+
+                frameVisible: false
+                //height: parent.height
+                //width: parent.width
+                font.family: "Courier"
+                textFormat: Qt.RichText
+                tabChangesFocus: true
+
+                Keys.onTabPressed: {
+                    console.log("tab");
+                }
+
+                wrapMode: TextEdit.NoWrap
+            }
+            TextArea {
+                id: statusText
+                visible: false
+                frameVisible: false
+                width: parent.width
+                height: 20
+                textColor: "#ff0000"
+                font.family: "Courier"
+                font.bold: true
+                textFormat: Qt.RichText
+            }
         }
     }
 
