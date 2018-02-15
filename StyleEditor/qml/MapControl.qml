@@ -99,6 +99,19 @@ Rectangle {
           }
         }
 
+        function setupInitialPosition(){
+            if (mapView.databaseLoaded){
+                mapView.recenter();
+            }
+        }
+        Component.onCompleted: {
+            setupInitialPosition();
+        }
+        onDatabaseLoaded: {
+            setupInitialPosition();
+        }
+
+
         /*
         Keys.onPressed: {
             if (event.key === Qt.Key_Plus) {
