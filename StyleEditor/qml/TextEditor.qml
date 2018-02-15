@@ -216,17 +216,131 @@ Rectangle {
                 anchors.bottom: parent.bottom
 
                 frameVisible: false
-                //height: parent.height
-                //width: parent.width
                 font.family: "Courier"
                 textFormat: Qt.RichText
+                wrapMode: TextEdit.NoWrap
+
                 tabChangesFocus: true
 
-                Keys.onTabPressed: {
-                    console.log("tab");
+                Component.onCompleted: {
+                    cursorPosition = 0;
+                    textArea.flickableItem.contentY = 0;
+                    textArea.flickableItem.contentX = 0;
                 }
 
-                wrapMode: TextEdit.NoWrap
+                property string newLine: String.fromCharCode(0x2029) // 8233
+                property string nbsp: String.fromCharCode(0xa0)
+
+                Keys.onBacktabPressed: {
+                    // console.log("backtab " + cursorPosition + ", " +  selectionStart + ", " + selectionEnd);
+                    // remove two spaces before each line in selection
+
+                    var originalText=getText(0, textArea.length);
+                    var yScroll = textArea.flickableItem.contentY;
+
+                    var blockStart=originalText.lastIndexOf(newLine, selectionStart-1)+1;
+                    var blockCursorPosition=cursorPosition-blockStart;
+                    var blockSelectionStart=selectionStart-blockStart;
+                    var originalSelectionEnd=selectionEnd;
+
+                    var textBefore=originalText.substring(0, blockStart);
+                    var textBlock=originalText.substring(blockStart, selectionEnd);
+                    var textAfter=originalText.substring(selectionEnd, originalText.length);
+
+                    console.log(selectionStart + " " + blockStart);
+
+                    var updatedBlock="";
+                    var removeNextSpaces=2;
+                    var sizeChange=0;
+                    for (var pos=0; pos<textBlock.length; pos++){
+                        var ch = textBlock.substring(pos, pos+1);
+                        if (removeNextSpaces>0 && ch===nbsp){
+                            removeNextSpaces--;
+                            if (blockCursorPosition>=pos){
+                                blockCursorPosition--;
+                            }
+                            if (blockSelectionStart>=pos){
+                                blockSelectionStart--;
+                            }
+                            sizeChange--;
+                        }else{
+                            updatedBlock += ch;
+                            removeNextSpaces=0;
+                        }
+                        if (ch===newLine){
+                            removeNextSpaces=2;
+                        }
+                    }
+                    cursorPosition=0;
+                    var updated = (textBefore + updatedBlock + textAfter)
+                                    .replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    textArea.text = updated;
+
+                    cursorPosition = blockCursorPosition + blockStart;
+                    if (blockCursorPosition==blockSelectionStart){
+                        textArea.select(originalSelectionEnd+sizeChange, blockSelectionStart+blockStart);
+                    }else{
+                        textArea.select(blockSelectionStart+blockStart, originalSelectionEnd+sizeChange);
+                    }
+                    textArea.flickableItem.contentY = yScroll;
+                }
+                Keys.onTabPressed: {
+                    //console.log("tab " + cursorPosition + ", " +  selectionStart + ", " + selectionEnd);
+                    if (selectionStart==selectionEnd){
+                        // no selection, add two spaces on cursor position
+                        insert(cursorPosition, "&nbsp;&nbsp;");
+                    }else{
+                        // indent block (each line in selection) by two spaces
+
+                        var originalText=getText(0, textArea.length);
+                        var blockStart=originalText.lastIndexOf(newLine, selectionStart)+1;
+
+                        var blockCursorPosition=cursorPosition-blockStart;
+                        var blockSelectionStart=selectionStart-blockStart;
+                        var originalSelectionEnd=selectionEnd;
+                        var yScroll = textArea.flickableItem.contentY;
+
+                        var textBefore=originalText.substring(0, blockStart);
+                        var textBlock=originalText.substring(blockStart, selectionEnd);
+                        var textAfter=originalText.substring(selectionEnd, originalText.length);
+
+                        var updatedBlock="";
+                        var lineStart=true;
+                        var sizeChange=0;
+                        for (var pos=0; pos<textBlock.length; pos++){
+                            if (lineStart){
+                                updatedBlock += "&nbsp;&nbsp;"
+                                lineStart=false;
+                                if (blockCursorPosition>=pos){
+                                    blockCursorPosition+=2;
+                                }
+                                if (blockSelectionStart>=pos){
+                                    blockSelectionStart+=2;
+                                }
+                                sizeChange+=2;
+                            }
+                            var ch = textBlock.substring(pos, pos+1);
+                            updatedBlock += ch;
+                            if (ch===newLine){
+                                lineStart=true;
+                            }
+                        }
+                        cursorPosition=0;
+                        var updated = (textBefore + updatedBlock + textAfter)
+                                        .replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                        textArea.text = updated;
+
+                        console.log(textArea.length + " = " + updated.length);
+                        cursorPosition = blockCursorPosition + blockStart;
+                        if (blockCursorPosition==blockSelectionStart){
+                            textArea.select(originalSelectionEnd+sizeChange, blockSelectionStart+blockStart);
+                        }else{
+                            textArea.select(blockSelectionStart+blockStart, originalSelectionEnd+sizeChange);
+                        }
+                        textArea.flickableItem.contentY = yScroll;
+                    }
+                }
             }
             TextArea {
                 id: statusText
