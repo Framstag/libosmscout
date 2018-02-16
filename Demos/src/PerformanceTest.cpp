@@ -36,6 +36,9 @@
 #include <QScreen>
 #include <osmscout/MapPainterQt.h>
 #endif
+#if defined(HAVE_LIB_AGG)
+#include <osmscout/MapPainterAgg.h>
+#endif
 
 #if defined(HAVE_LIB_GPERFTOOLS)
 #include <gperftools/tcmalloc.h>
@@ -216,6 +219,12 @@ int main(int argc, char* argv[])
   QApplication    application(argc,argv,true);
 #endif
 
+#if defined(HAVE_LIB_AGG)
+  unsigned char* buffer;
+  agg::rendering_buffer* rbuf;
+  osmscout::MapPainterAgg::AggPixelFormat* pf;
+#endif
+
   if (driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
@@ -256,6 +265,16 @@ int main(int argc, char* argv[])
 #else
     std::cerr << "Driver 'Qt' is not enabled" << std::endl;
   return 1;
+#endif
+  } else if (driver == "agg") {
+    std::cout << "Using driver 'Agg'..." << std::endl;
+#if defined(HAVE_LIB_AGG)
+    buffer = new unsigned char[tileWidth * tileHeight * 3];
+    rbuf = new agg::rendering_buffer(buffer, tileWidth, tileHeight, tileWidth * 3);
+    pf = new osmscout::MapPainterAgg::AggPixelFormat(*rbuf);
+#else
+    std::cerr << "Driver 'Agg' is not enabled" << std::endl;
+    return 1;
 #endif
   }
   else if (driver=="noop") {
@@ -299,6 +318,8 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
   std::list<LevelStats>         statistics;
 
+  // TODO: Use some way to find a valid font on the system (Agg display a ton of messages otherwise)
+  drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSanss.ttf");
   searchParameter.SetUseMultithreading(true);
 
   for (uint32_t level=std::min(startZoom,endZoom);
@@ -323,6 +344,9 @@ int main(int argc, char* argv[])
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
     osmscout::MapPainterQt    qtMapPainter(styleConfig);
+#endif
+#if defined(HAVE_LIB_AGG)
+    osmscout::MapPainterAgg aggMapPainter(styleConfig);
 #endif
     osmscout::MapPainterNoOp  noOpMapPainter(styleConfig);
 
@@ -425,6 +449,15 @@ int main(int argc, char* argv[])
                              drawParameter,
                              data,
                              qtPainter);
+      }
+#endif
+#if defined(HAVE_LIB_AGG)
+      if (driver == "agg") {
+        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
+        aggMapPainter.DrawMap(projection,
+                drawParameter,
+                data,
+                pf);
       }
 #endif
       if (driver=="noop") {
