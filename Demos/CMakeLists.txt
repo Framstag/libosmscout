@@ -299,6 +299,19 @@ else()
 	message("Skip DrawMapDirectX demo, libosmscout-map-directx is missing.")
 endif()
 
+if(${OSMSCOUT_BUILD_MAP_OPENGL})
+	add_executable(DrawMapOpenGL src/DrawMapOpenGL.cpp)
+	set_property(TARGET DrawMapOpenGL PROPERTY CXX_STANDARD 11)
+	target_include_directories(DrawMapOpenGL PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
+		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-opengl/include
+        ${FREETYPE_INCLUDE_DIRS})
+	target_link_libraries(DrawMapOpenGL osmscout osmscout_map osmscout_map_opengl glfw)
+	install(TARGETS DrawMapOpenGL RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+else()
+	message("Skip DrawMapOpenGL demo, libosmscout-map-opengl is missing.")
+endif()
+
 if(${LIBXML2_FOUND})
     #---- GpxPipe
     add_executable(GpxPipe src/GpxPipe.cpp)
