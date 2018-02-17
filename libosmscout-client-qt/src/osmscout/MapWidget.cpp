@@ -698,8 +698,10 @@ QString MapWidget::GetZoomLevelName() const
         return "Suburb";
     } else if(level>=osmscout::Magnification::magDetail && level < osmscout::Magnification::magClose){
         return "Detail";
-    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magVeryClose){
+    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magCloser){
         return "Close";
+    } else if(level>=osmscout::Magnification::magCloser && level < osmscout::Magnification::magVeryClose){
+        return "Closer";
     } else if(level>=osmscout::Magnification::magVeryClose && level < osmscout::Magnification::magBlock){
         return "VeryClose";
     } else if(level>=osmscout::Magnification::magBlock && level < osmscout::Magnification::magStreet){
