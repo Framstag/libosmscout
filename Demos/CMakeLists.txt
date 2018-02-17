@@ -134,6 +134,15 @@ if(${OSMSCOUT_BUILD_MAP})
 		endif()
     set(HAVE_LIB_OSMSCOUTMAPAGG 1)
 	endif()
+    if(${OSMSCOUT_BUILD_MAP_OPENGL})
+		target_include_directories(PerformanceTest PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-opengl/include ${OPENGL_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
+		if(APPLE)
+		  target_link_libraries(PerformanceTest OSMScoutMapOpenGL ${GLFW_LIBRARIES})
+		else()
+		  target_link_libraries(PerformanceTest osmscout_map_opengl ${GLFW_LIBRARIES})
+		endif()
+    set(HAVE_LIB_OSMSCOUTMAPAGG 1)
+	endif()
   if(${GPERFTOOLS_USAGE})
     target_include_directories(PerformanceTest PRIVATE ${GPERFTOOLS_INCLUDE_DIRS})
     target_link_libraries(PerformanceTest ${GPERFTOOLS_LIBRARIES})
@@ -305,8 +314,10 @@ if(${OSMSCOUT_BUILD_MAP_OPENGL})
 	target_include_directories(DrawMapOpenGL PRIVATE ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-opengl/include
+        ${OPENGL_INCLUDE_DIR}
+        ${GLFW_INCLUDE_DIR}
         ${FREETYPE_INCLUDE_DIRS})
-	target_link_libraries(DrawMapOpenGL osmscout osmscout_map osmscout_map_opengl glfw)
+	target_link_libraries(DrawMapOpenGL osmscout osmscout_map osmscout_map_opengl ${GLFW_LIBRARIES})
 	install(TARGETS DrawMapOpenGL RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 else()
 	message("Skip DrawMapOpenGL demo, libosmscout-map-opengl is missing.")

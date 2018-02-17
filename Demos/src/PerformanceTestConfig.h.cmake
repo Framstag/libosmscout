@@ -29,6 +29,9 @@
 /* Agg detected */
 #cmakedefine HAVE_LIB_AGG 1
 
+/* Opengl detected */
+#cmakedefine HAVE_LIB_OPENGL 1
+
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H 1
 

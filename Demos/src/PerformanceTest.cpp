@@ -39,6 +39,10 @@
 #if defined(HAVE_LIB_AGG)
 #include <osmscout/MapPainterAgg.h>
 #endif
+#if defined(HAVE_LIB_OPENGL)
+#include <osmscout/MapPainterOpenGL.h>
+#include <GLFW/glfw3.h>
+#endif
 
 #if defined(HAVE_LIB_GPERFTOOLS)
 #include <gperftools/tcmalloc.h>
@@ -225,6 +229,10 @@ int main(int argc, char* argv[])
   osmscout::MapPainterAgg::AggPixelFormat* pf;
 #endif
 
+#if defined(HAVE_LIB_OPENGL)
+
+#endif
+
   if (driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
@@ -276,6 +284,31 @@ int main(int argc, char* argv[])
     std::cerr << "Driver 'Agg' is not enabled" << std::endl;
     return 1;
 #endif
+  } else if (driver == "opengl") {
+    std::cout << "Using driver 'OpenGL'..." << std::endl;
+#if defined(HAVE_LIB_OPENGL)
+    // Create the offscreen renderer
+    glfwSetErrorCallback([](int, const char *err_str) {
+      std::cerr << "GLFW Error: " << err_str << std::endl;
+    });
+    if (!glfwInit())
+      return 1;
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    GLFWwindow* offscreen_context = glfwCreateWindow(tileWidth, tileHeight, "", NULL, NULL);
+    if (!offscreen_context) {
+      std::cerr << "Failed to create offscreen context." << std::endl;
+      return 1;
+    }
+    glfwMakeContextCurrent(offscreen_context);
+#else
+    std::cerr << "Driver 'OpenGL' is not enabled" << std::endl;
+    return 1;
+#endif
   }
   else if (driver=="noop") {
     std::cout << "Using driver 'noop'..." << std::endl;
@@ -319,7 +352,7 @@ int main(int argc, char* argv[])
   std::list<LevelStats>         statistics;
 
   // TODO: Use some way to find a valid font on the system (Agg display a ton of messages otherwise)
-  drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSanss.ttf");
+  drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
   searchParameter.SetUseMultithreading(true);
 
   for (uint32_t level=std::min(startZoom,endZoom);
@@ -348,7 +381,14 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_AGG)
     osmscout::MapPainterAgg aggMapPainter(styleConfig);
 #endif
-    osmscout::MapPainterNoOp  noOpMapPainter(styleConfig);
+#if defined(HAVE_LIB_OPENGL)
+    osmscout::MapPainterOpenGL* openglMapPainter;
+    if (driver == "opengl") // This driver need a valid existing context
+      openglMapPainter =
+            new osmscout::MapPainterOpenGL(tileWidth, tileHeight, DPI, tileWidth, tileHeight,
+            "/usr/share/fonts/TTF/DejaVuSans.ttf");
+#endif
+    osmscout::MapPainterNoOp noOpMapPainter(styleConfig);
 
     size_t current=1;
     size_t tileCount=tileArea.GetCount();
@@ -460,7 +500,15 @@ int main(int argc, char* argv[])
                 pf);
       }
 #endif
-      if (driver=="noop") {
+#if defined(HAVE_LIB_OPENGL)
+      if (driver == "opengl") {
+        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
+        openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
+        openglMapPainter->SwapData();
+        openglMapPainter->DrawMap();
+      }
+#endif
+      if (driver == "noop") {
         noOpMapPainter.DrawMap(projection,
                                drawParameter,
                                data);
