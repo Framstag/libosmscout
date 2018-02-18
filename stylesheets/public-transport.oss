@@ -355,6 +355,12 @@ STYLE
       }
     }
   }
+  [TYPE shop] {
+    [MAG veryClose-] {
+      AREA { color: #ffe0e0; }
+      AREA.BORDER { color: #d0d0d0; width: 0.1mm;}
+    }
+  }
   [MAG block-] {
     [FEATURE Address] {
       NODE.TEXT#address { label: Address.name; color: #303030; size: 0.7; priority: 10; position: 1; }
