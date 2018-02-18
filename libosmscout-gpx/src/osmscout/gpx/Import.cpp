@@ -17,17 +17,19 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Import.h>
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/String.h>
-
-#include <libxml/parser.h>
-
 #include <cstring>
-#include <cassert>
 #include <functional>
 #include <iomanip>
 #include <iostream>
+
+#include <libxml/parser.h>
+
+#include <osmscout/gpx/Import.h>
+
+#include <osmscout/util/Logger.h>
+#include <osmscout/util/String.h>
+
+#include <osmscout/system/Assert.h>
 
 using namespace osmscout;
 using namespace osmscout::gpx;

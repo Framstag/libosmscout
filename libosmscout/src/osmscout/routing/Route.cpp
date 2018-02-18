@@ -19,9 +19,9 @@
 
 #include <osmscout/routing/Route.h>
 
-#include <cassert>
 #include <sstream>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
