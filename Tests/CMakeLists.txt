@@ -336,7 +336,8 @@ if(${OSMSCOUT_BUILD_MAP})
           winter-sports.oss
           boundaries.oss
           railways.oss
-          motorways.oss)
+          motorways.oss
+          public-transport.oss)
 
   foreach(STYLESHEET ${STYLESHEETS})
     add_test(NAME CheckStyleSheet-${STYLESHEET}
