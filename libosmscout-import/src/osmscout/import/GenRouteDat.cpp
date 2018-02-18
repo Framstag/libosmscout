@@ -34,7 +34,6 @@
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/GenNumericIndex.h>
 #include <osmscout/import/Preprocess.h>
@@ -252,7 +251,7 @@ namespace osmscout {
 
         if (wayEntry==waysMap.end()) {
           progress.Error("Error while loading way at offset "+
-                         NumberToString(ref.GetFileOffset()) +
+                         std::to_string(ref.GetFileOffset()) +
                          " (Internal error?)");
           continue;
         }
@@ -267,7 +266,7 @@ namespace osmscout {
 
         if (areaEntry==areasMap.end()) {
           progress.Error("Error while loading areaEntry at offset "+
-                         NumberToString(ref.GetFileOffset()) +
+                         std::to_string(ref.GetFileOffset()) +
                          " (Internal error?)");
           continue;
         }
@@ -370,7 +369,7 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(wayIdOffsetMap.size())+" turn restriction way(s) found, "+NumberToString(resolveCount)+" way(s) resolved");
+      progress.Info(std::to_string(wayIdOffsetMap.size())+" turn restriction way(s) found, "+std::to_string(resolveCount)+" way(s) resolved");
 
       scanner.Close();
     }
@@ -424,7 +423,7 @@ namespace osmscout {
       return false;
     }
 
-    progress.Info(NumberToString(nodeIds.size())+" via node(s) found, "+NumberToString(resolveCount)+" node(s) resolved");
+    progress.Info(std::to_string(nodeIds.size())+" via node(s) found, "+std::to_string(resolveCount)+" node(s) resolved");
 
     return true;
   }
@@ -465,7 +464,7 @@ namespace osmscout {
 
         if (idOffsetEntry==wayIdOffsetMap.end() || idOffsetEntry->second==0) {
           progress.Error(std::string("Error while retrieving way offset for way id ")+
-                         NumberToString(restriction->GetFrom()));
+                         std::to_string(restriction->GetFrom()));
           continue;
         }
 
@@ -475,7 +474,7 @@ namespace osmscout {
 
         if (nodeIdEntry==nodeIdMap.end() || nodeIdEntry->second==0) {
           progress.Error(std::string("Error while retrieving node id for node OSM id ")+
-                         NumberToString(restriction->GetVia()));
+                         std::to_string(restriction->GetVia()));
           continue;
         }
 
@@ -485,7 +484,7 @@ namespace osmscout {
 
         if (idOffsetEntry==wayIdOffsetMap.end() || idOffsetEntry->second==0) {
           progress.Error(std::string("Error while retrieving way offset for way id ")+
-                         NumberToString(restriction->GetTo()));
+                         std::to_string(restriction->GetTo()));
           continue;
         }
 
@@ -503,7 +502,7 @@ namespace osmscout {
         restrictions[data.viaNodeId].push_back(data);
       }
 
-      progress.Info(std::string("Read ")+NumberToString(restrictionCount)+" turn restrictions");
+      progress.Info(std::string("Read ")+std::to_string(restrictionCount)+" turn restrictions");
 
       scanner.Close();
     }
@@ -701,8 +700,8 @@ namespace osmscout {
 
       scanner.Close();
 
-      progress.Info("Found "+NumberToString(nodeUseMap.GetNodeUsedCount())+" possible routing nodes, "+
-                    NumberToString(nodeUseMap.GetDuplicateCount())+" at least used twice");
+      progress.Info("Found "+std::to_string(nodeUseMap.GetNodeUsedCount())+" possible routing nodes, "+
+                    std::to_string(nodeUseMap.GetDuplicateCount())+" at least used twice");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -824,8 +823,8 @@ namespace osmscout {
 
       scanner.Close();
 
-      progress.Info("Found "+NumberToString(nodeObjectsMap.size())+" routing nodes, with in sum "+
-                    NumberToString(junctionWayCount)+" ways and "+NumberToString(junctionAreaCount)+" areas");
+      progress.Info("Found "+std::to_string(nodeObjectsMap.size())+" routing nodes, with in sum "+
+                    std::to_string(junctionWayCount)+" ways and "+std::to_string(junctionAreaCount)+" areas");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -887,7 +886,7 @@ namespace osmscout {
       }
     }
 
-    progress.Info("Loading " +NumberToString(wayOffsets.size())+" ways");
+    progress.Info("Loading " +std::to_string(wayOffsets.size())+" ways");
 
     FileOffset           oldPos;
     FileOffsetWayMap     waysMap;
@@ -928,7 +927,7 @@ namespace osmscout {
       }
     }
 
-    progress.Info("Loading " +NumberToString(areaOffsets.size())+" areas");
+    progress.Info("Loading " +std::to_string(areaOffsets.size())+" areas");
 
     FileOffsetAreaMap areasMap;
     FileOffset        oldPos;
@@ -963,7 +962,7 @@ namespace osmscout {
 
         if (!way) {
           progress.Error("Error while loading way at offset "+
-                         NumberToString(ref.GetFileOffset()) +
+                         std::to_string(ref.GetFileOffset()) +
                          " (Internal error?)");
           continue;
         }
@@ -984,7 +983,7 @@ namespace osmscout {
 
         if (!area) {
           progress.Error("Error while loading area at offset "+
-                         NumberToString(ref.GetFileOffset()) +
+                         std::to_string(ref.GetFileOffset()) +
                          " (Internal error?)");
           continue;
         }
@@ -1548,7 +1547,7 @@ namespace osmscout {
         entry.Write(writer);
       }
 
-      progress.Info(NumberToString(objectVariantData.size()) + " object variant(s)");
+      progress.Info(std::to_string(objectVariantData.size()) + " object variant(s)");
 
       writer.Close();
     }
@@ -1689,7 +1688,7 @@ namespace osmscout {
 
               if (!way) {
                 progress.Error("Error while loading way at offset "+
-                               NumberToString(ref.GetFileOffset()) +
+                               std::to_string(ref.GetFileOffset()) +
                                " (Internal error?)");
                 continue;
               }
@@ -1727,7 +1726,7 @@ namespace osmscout {
 
               if (!area) {
                 progress.Error("Error while loading area at offset "+
-                               NumberToString(ref.GetFileOffset()) +
+                               std::to_string(ref.GetFileOffset()) +
                                " (Internal error?)");
                 continue;
               }
@@ -1801,11 +1800,11 @@ namespace osmscout {
       writer.SetPos(0);
       writer.Write(writtenRouteNodeCount);
 
-      progress.Info(NumberToString(writtenRouteNodeCount) + " route node(s) written");
-      progress.Info(NumberToString(simpleNodesCount)+ " route node(s) are simple and only have 1 path");
-      progress.Info(NumberToString(objectCount)+ " object(s)");
-      progress.Info(NumberToString(pathCount) + " path(s)");
-      progress.Info(NumberToString(excludeCount) + " exclude(s)");
+      progress.Info(std::to_string(writtenRouteNodeCount) + " route node(s) written");
+      progress.Info(std::to_string(simpleNodesCount)+ " route node(s) are simple and only have 1 path");
+      progress.Info(std::to_string(objectCount)+ " object(s)");
+      progress.Info(std::to_string(pathCount) + " path(s)");
+      progress.Info(std::to_string(excludeCount) + " exclude(s)");
 
       wayScanner.Close();
       areaScanner.Close();
@@ -1855,7 +1854,7 @@ namespace osmscout {
       return false;
     }
 
-    progress.Info(std::string("Restrictions for ") + NumberToString(restrictions.size()) + " objects loaded");
+    progress.Info(std::string("Restrictions for ") + std::to_string(restrictions.size()) + " objects loaded");
 
     //
     // Building a map of nodes and the number of ways that contain this way

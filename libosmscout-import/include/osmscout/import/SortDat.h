@@ -203,7 +203,7 @@ namespace osmscout {
 
         source.scanner.Read(dataCount);
 
-        progress.Info(NumberToString(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
+        progress.Info(std::to_string(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
         overallDataCount+=dataCount;
       }
@@ -220,7 +220,7 @@ namespace osmscout {
       mapWriter.Write(overallDataCount);
 
       while (true) {
-        progress.Info("Reading objects in cell range "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex));
+        progress.Info("Reading objects in cell range "+std::to_string(minIndex)+ "-"+std::to_string(maxIndex));
 
         size_t                                 currentEntries=0;
         std::map<size_t,std::list<CellEntry> > dataByCellMap;
@@ -302,7 +302,7 @@ namespace osmscout {
         }
 
         if (maxIndex<cellCount-1) {
-          progress.Info("Cell range was reduced to "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex));
+          progress.Info("Cell range was reduced to "+std::to_string(minIndex)+ "-"+std::to_string(maxIndex));
         }
 
         progress.Info(std::string("Copy renumbered data to '")+dataWriter.GetFilename()+"'");
@@ -382,7 +382,7 @@ namespace osmscout {
         source.scanner.Close();
       }
 
-      progress.Info(NumberToString(dataCopiedCount)+" of " +NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+      progress.Info(std::to_string(dataCopiedCount)+" of " +std::to_string(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
       dataWriter.SetPos(0);
       dataWriter.Write(dataCopiedCount);
@@ -444,7 +444,7 @@ namespace osmscout {
 
         source.scanner.Read(dataCount);
 
-        progress.Info(NumberToString(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
+        progress.Info(std::to_string(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
         overallDataCount+=dataCount;
 
@@ -503,7 +503,7 @@ namespace osmscout {
       mapWriter.SetPos(0);
       mapWriter.Write(overallDataCount);
 
-      progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+      progress.Info(std::to_string(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
       dataWriter.Close();
       mapWriter.Close();

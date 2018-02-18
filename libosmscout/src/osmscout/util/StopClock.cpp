@@ -22,8 +22,6 @@
 #include <iomanip>
 #include <sstream>
 
-#include <osmscout/util/String.h>
-
 namespace osmscout {
 
   typedef std::chrono::duration<double,std::milli> MilliDouble;
@@ -66,11 +64,11 @@ namespace osmscout {
     std::string result;
     std::string millisString;
 
-    result=NumberToString(seconds);
+    result=std::to_string(seconds);
 
     result+=".";
 
-    millisString=NumberToString(milliseconds);
+    millisString=std::to_string(milliseconds);
     for (size_t i=millisString.length()+1; i<=3; i++) {
       result+="0";
     }
@@ -121,7 +119,7 @@ namespace osmscout {
   {
     double deltaNano=GetNanoseconds();
 
-    return NumberToString((uint64_t)deltaNano);
+    return std::to_string((uint64_t)deltaNano);
   }
 
 }

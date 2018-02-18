@@ -69,7 +69,7 @@ namespace osmscout {
         nodeData.id=nodeId++;
         nodeData.coord=box.GetCenter();
 
-        progress.Info("Generating node region '"+region.GetName()+"' "+NumberToString(nodeData.id)+"...");
+        progress.Info("Generating node region '"+region.GetName()+"' "+std::to_string(nodeData.id)+"...");
 
         switch (region.GetPlaceType()) {
         case PlaceType::county:
@@ -104,7 +104,7 @@ namespace osmscout {
 
         wayData.id=wayId++;
 
-        progress.Info("Generating area region '"+region.GetName()+"' "+NumberToString(wayData.id)+"...");
+        progress.Info("Generating area region '"+region.GetName()+"' "+std::to_string(wayData.id)+"...");
 
         switch (region.GetPlaceType()) {
         case PlaceType::county:
@@ -129,7 +129,7 @@ namespace osmscout {
 
         if (region.IsBoundary()) {
           wayData.tags[tagBoundary]="administrative";
-          wayData.tags[tagAdminLevel]=NumberToString(region.GetAdminLevel());
+          wayData.tags[tagAdminLevel]=std::to_string(region.GetAdminLevel());
         }
 
         wayData.nodes.push_back(RegisterAndGetRawNodeId(data,box.GetTopLeft()));
@@ -162,7 +162,7 @@ namespace osmscout {
 
           locationData.id=wayId++;
 
-          progress.Info("Generating way '"+location->GetName()+"' "+NumberToString(locationData.id)+"...");
+          progress.Info("Generating way '"+location->GetName()+"' "+std::to_string(locationData.id)+"...");
 
           GeoCoord wayLeftCoord(box.GetMinLat()+currentLocation*box.GetHeight()/(locationInRegionCount+1),
                                 box.GetMinLon()+box.GetWidth()/10.0);
@@ -187,7 +187,7 @@ namespace osmscout {
 
             buildingData.id=wayId++;
 
-            progress.Info("Generating building '"+address->GetName()+"' "+NumberToString(buildingData.id)+"...");
+            progress.Info("Generating building '"+address->GetName()+"' "+std::to_string(buildingData.id)+"...");
 
             buildingData.tags[tagBuilding]="yes";
             buildingData.tags[tagAddrCity]=region.GetName();

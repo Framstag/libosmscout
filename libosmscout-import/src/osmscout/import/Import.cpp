@@ -25,6 +25,9 @@
 
 #include <osmscout/Types.h>
 
+#include <osmscout/routing/RoutingService.h>
+#include <osmscout/routing/RouteNode.h>
+#include <osmscout/Intersection.h>
 
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
@@ -32,10 +35,6 @@
 
 #include <osmscout/import/GenRawWayIndex.h>
 #include <osmscout/import/GenRawRelIndex.h>
-
-#include <osmscout/routing/RoutingService.h>
-#include <osmscout/routing/RouteNode.h>
-#include <osmscout/Intersection.h>
 
 #include <osmscout/import/GenTypeDat.h>
 
@@ -872,10 +871,10 @@ namespace osmscout {
   void Importer::DumpTypeConfigData(const TypeConfig& typeConfig,
                                     Progress& progress)
   {
-    progress.Info("Number of types: "+NumberToString(typeConfig.GetTypes().size()));
-    progress.Info("Number of node types: "+NumberToString(typeConfig.GetNodeTypes().size())+" "+NumberToString(typeConfig.GetNodeTypeIdBytes())+" byte(s)");
-    progress.Info("Number of way types: "+NumberToString(typeConfig.GetWayTypes().size())+" "+NumberToString(typeConfig.GetWayTypeIdBytes())+" byte(s)");
-    progress.Info("Number of area types: "+NumberToString(typeConfig.GetAreaTypes().size())+" "+NumberToString(typeConfig.GetAreaTypeIdBytes())+" byte(s)");
+    progress.Info("Number of types: "+std::to_string(typeConfig.GetTypes().size()));
+    progress.Info("Number of node types: "+std::to_string(typeConfig.GetNodeTypes().size())+" "+std::to_string(typeConfig.GetNodeTypeIdBytes())+" byte(s)");
+    progress.Info("Number of way types: "+std::to_string(typeConfig.GetWayTypes().size())+" "+std::to_string(typeConfig.GetWayTypeIdBytes())+" byte(s)");
+    progress.Info("Number of area types: "+std::to_string(typeConfig.GetAreaTypes().size())+" "+std::to_string(typeConfig.GetAreaTypeIdBytes())+" byte(s)");
   }
 
   void Importer::DumpModuleDescription(const ImportModuleDescription& description,
@@ -972,7 +971,7 @@ namespace osmscout {
                                moduleDescription);
 
         progress.SetStep("Step #"+
-                         NumberToString(currentStep)+
+                         std::to_string(currentStep)+
                          " - "+
                          moduleDescription.GetName());
         progress.Info("Module description: "+moduleDescription.GetDescription());

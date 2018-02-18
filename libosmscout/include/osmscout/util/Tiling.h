@@ -27,7 +27,6 @@
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/system/Compiler.h>
 
@@ -97,7 +96,7 @@ namespace osmscout {
 
     inline std::string GetDisplayText() const
     {
-      return NumberToString(x)+","+NumberToString(y);
+      return std::to_string(x)+","+std::to_string(y);
     }
 
     static OSMTileId GetOSMTile(const GeoCoord& coord,

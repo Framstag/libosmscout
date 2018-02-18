@@ -364,7 +364,7 @@ namespace osmscout {
     if (buffer!=NULL) {
       if (pos>=size) {
         hasError=true;
-        throw IOException(filename,"Cannot set position in file to "+NumberToString(pos),"Position beyond file end");
+        throw IOException(filename,"Cannot set position in file to "+std::to_string(pos),"Position beyond file end");
       }
 
       offset=pos;

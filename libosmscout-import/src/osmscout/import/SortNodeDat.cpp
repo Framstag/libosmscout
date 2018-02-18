@@ -246,7 +246,7 @@ namespace osmscout {
                                                          Progress& progress,
                                                          const TypeConfig& /*typeConfig*/)
   {
-    progress.Info("Nodes without a type removed: " + NumberToString(removedNodesCount));
+    progress.Info("Nodes without a type removed: " + std::to_string(removedNodesCount));
 
     return true;
   }

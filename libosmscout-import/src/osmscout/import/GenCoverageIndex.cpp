@@ -164,7 +164,7 @@ namespace osmscout {
 
     progress.SetAction("Generating 'coverage.idx'");
 
-    progress.Info(NumberToString(cells.size())+" bitmap entries");
+    progress.Info(std::to_string(cells.size())+" bitmap entries");
 
     Pixel minCell(std::numeric_limits<uint32_t>::max(),
                   std::numeric_limits<uint32_t>::max());
@@ -183,9 +183,9 @@ namespace osmscout {
     uint32_t height=maxCell.y-minCell.y+1;
 
     progress.Info("Original bitmap boundary: "+
-                  NumberToString(minCell.x)+","+NumberToString(minCell.y)+" - "+
-                  NumberToString(maxCell.x)+","+NumberToString(maxCell.y)+" "+
-                  NumberToString(width)+"x"+NumberToString(height));
+                  std::to_string(minCell.x)+","+std::to_string(minCell.y)+" - "+
+                  std::to_string(maxCell.x)+","+std::to_string(maxCell.y)+" "+
+                  std::to_string(width)+"x"+std::to_string(height));
 
 
     if (width/8!=0) {
@@ -199,9 +199,9 @@ namespace osmscout {
     }
 
     progress.Info("Aligned bitmap boundary: "+
-                  NumberToString(minCell.x)+","+NumberToString(minCell.y)+" - "+
-                  NumberToString(maxCell.x)+","+NumberToString(maxCell.y)+" "+
-                  NumberToString(maxCell.x-minCell.x+1)+"x"+NumberToString(maxCell.y-minCell.y+1));
+                  std::to_string(minCell.x)+","+std::to_string(minCell.y)+" - "+
+                  std::to_string(maxCell.x)+","+std::to_string(maxCell.y)+" "+
+                  std::to_string(maxCell.x-minCell.x+1)+"x"+std::to_string(maxCell.y-minCell.y+1));
 
     std::vector<uint8_t> bitmap((width*height)/8,0);
 
@@ -279,9 +279,9 @@ namespace osmscout {
 
       // Dump result
 
-      progress.Info(NumberToString(nodeCells.size())+" node bitmap entries");
-      progress.Info(NumberToString(wayCells.size())+" way bitmap entries");
-      progress.Info(NumberToString(areaCells.size())+" area bitmap entries");
+      progress.Info(std::to_string(nodeCells.size())+" node bitmap entries");
+      progress.Info(std::to_string(wayCells.size())+" way bitmap entries");
+      progress.Info(std::to_string(areaCells.size())+" area bitmap entries");
 
       // Merge the result
 

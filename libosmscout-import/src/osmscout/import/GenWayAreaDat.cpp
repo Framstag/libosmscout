@@ -25,7 +25,6 @@
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/RawWay.h>
 
@@ -169,7 +168,7 @@ namespace osmscout {
 
     types.Remove(currentTypes);
 
-    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.Size())+" types");
+    progress.SetAction("Collected "+std::to_string(collectedWaysCount)+" ways for "+std::to_string(currentTypes.Size())+" types");
 
     return true;
   }
@@ -197,9 +196,9 @@ namespace osmscout {
 
       if (coord==coordsMap.end()) {
         progress.Error("Cannot resolve node with id "+
-                       NumberToString(rawWay.GetNodeId(n))+
+                       std::to_string(rawWay.GetNodeId(n))+
                        " for area "+
-                       NumberToString(wayId));
+                       std::to_string(wayId));
         success=false;
         break;
       }
@@ -214,13 +213,13 @@ namespace osmscout {
 
     if (!IsValidToWrite(ring.nodes)) {
       progress.Error("Area coordinates are not dense enough to be written for area "+
-                     NumberToString(wayId));
+                     std::to_string(wayId));
       return false;
     }
 
     if (parameter.GetStrictAreas() &&
         !AreaIsSimple(ring.nodes)) {
-      progress.Error("Area "+NumberToString(wayId)+" of type '"+ring.GetType()->GetName()+"' is not simple");
+      progress.Error("Area "+std::to_string(wayId)+" of type '"+ring.GetType()->GetName()+"' is not simple");
       return true;
     }
 
@@ -366,8 +365,8 @@ namespace osmscout {
         }
       }
 
-      progress.Info(NumberToString(rawWayCount) + " raw way(s) read, "+
-                    NumberToString(writtenWayCount) + " areas(s) written");
+      progress.Info(std::to_string(rawWayCount) + " raw way(s) read, "+
+                    std::to_string(writtenWayCount) + " areas(s) written");
 
       /* -------*/
 
@@ -394,8 +393,8 @@ namespace osmscout {
       return false;
     }
 
-    progress.Info(NumberToString(rawWayCount) + " raw way(s) read, "+
-                  NumberToString(writtenWayCount) + " areas(s) written");
+    progress.Info(std::to_string(rawWayCount) + " raw way(s) read, "+
+                  std::to_string(writtenWayCount) + " areas(s) written");
 
     return true;
   }

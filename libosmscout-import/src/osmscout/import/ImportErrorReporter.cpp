@@ -24,7 +24,6 @@
 #include <osmscout/DebugDatabase.h>
 
 #include <osmscout/util/File.h>
-#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -102,28 +101,28 @@ namespace osmscout {
   ImportErrorReporter::~ImportErrorReporter()
   {
     locationReport.WriteListEnd();
-    locationReport.WriteText(NumberToString(locationErrorCount)+" errors");
+    locationReport.WriteText(std::to_string(locationErrorCount)+" errors");
     locationReport.WriteBodyEnd();
     locationReport.WriteDocumentEnd();
 
     locationReport.CloseFailsafe();
 
     relationReport.WriteListEnd();
-    relationReport.WriteText(NumberToString(relationErrorCount)+" errors");
+    relationReport.WriteText(std::to_string(relationErrorCount)+" errors");
     relationReport.WriteBodyEnd();
     relationReport.WriteDocumentEnd();
 
     relationReport.CloseFailsafe();
 
     wayReport.WriteListEnd();
-    wayReport.WriteText(NumberToString(wayErrorCount)+" errors");
+    wayReport.WriteText(std::to_string(wayErrorCount)+" errors");
     wayReport.WriteBodyEnd();
     wayReport.WriteDocumentEnd();
 
     wayReport.CloseFailsafe();
 
     tagReport.WriteListEnd();
-    tagReport.WriteText(NumberToString(tagErrorCount)+" errors");
+    tagReport.WriteText(std::to_string(tagErrorCount)+" errors");
     tagReport.WriteBodyEnd();
     tagReport.WriteDocumentEnd();
 

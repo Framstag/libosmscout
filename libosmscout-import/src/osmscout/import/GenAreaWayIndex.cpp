@@ -34,9 +34,7 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
-#include <osmscout/util/String.h>
 
-#include <iostream>
 namespace osmscout {
 
   AreaWayIndexGenerator::TypeData::TypeData()
@@ -114,7 +112,7 @@ namespace osmscout {
     }
 
     if (toLowCount*1.0/allCount>=0.2) {
-      progress.Warning(typeInfo.GetName()+" has more than 20% cells with <40% of average filling ("+NumberToString(toLowCount)+"/"+NumberToString(allCount)+")");
+      progress.Warning(typeInfo.GetName()+" has more than 20% cells with <40% of average filling ("+std::to_string(toLowCount)+"/"+std::to_string(allCount)+")");
     }
 
     /*
@@ -203,7 +201,7 @@ namespace osmscout {
         TypeInfoSet                currentWayTypes(remainingWayTypes);
         std::vector<CoordCountMap> cellFillCount(typeConfig.GetTypeCount());
 
-        progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingWayTypes.Size())+" types remaining)");
+        progress.Info("Scanning Level "+std::to_string(level)+" ("+std::to_string(remainingWayTypes.Size())+" types remaining)");
 
         wayScanner.GotoBegin();
 
@@ -268,7 +266,7 @@ namespace osmscout {
         for (const auto &type : currentWayTypes) {
           maxLevel=std::max(maxLevel,level);
 
-          progress.Info("Type "+type->GetName()+", "+NumberToString(wayTypeData[type->GetIndex()].indexCells)+" cells, "+NumberToString(wayTypeData[type->GetIndex()].indexEntries)+" objects");
+          progress.Info("Type "+type->GetName()+", "+std::to_string(wayTypeData[type->GetIndex()].indexCells)+" cells, "+std::to_string(wayTypeData[type->GetIndex()].indexEntries)+" objects");
 
           remainingWayTypes.Remove(type);
         }
@@ -408,7 +406,7 @@ namespace osmscout {
     std::vector<TypeData> wayTypeData;
     size_t                maxLevel;
 
-    progress.Info("Minimum magnification: "+NumberToString(parameter.GetAreaWayMinMag()));
+    progress.Info("Minimum magnification: "+std::to_string(parameter.GetAreaWayMinMag()));
 
     //
     // Scanning distribution
@@ -491,7 +489,7 @@ namespace osmscout {
           continue;
         }
 
-        progress.Info("Scanning ways for index level "+NumberToString(l));
+        progress.Info("Scanning ways for index level "+std::to_string(l));
 
         std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypeCount());
 

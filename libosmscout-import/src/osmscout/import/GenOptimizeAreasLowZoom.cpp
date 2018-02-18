@@ -32,7 +32,6 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
-#include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
 #include <osmscout/AreaDataFile.h>
 
@@ -169,7 +168,7 @@ namespace osmscout
       }
     }
 
-    progress.Info("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(loadedTypes.Size())+" types");
+    progress.Info("Collected "+std::to_string(collectedAreasCount)+" areas for "+std::to_string(loadedTypes.Size())+" types");
 
     return !scanner.HasError();
   }
@@ -271,7 +270,7 @@ namespace osmscout
       for (const auto& ring : copiedArea->rings) {
         if (!IsValidToWrite(ring.nodes)) {
           progress.Error("Area coordinates are not dense enough to be written for area "+
-                         NumberToString(area->GetFileOffset()));
+                         std::to_string(area->GetFileOffset()));
           skip=true;
           break;
         }
@@ -442,10 +441,10 @@ namespace osmscout
     data.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
     progress.Info("Writing map for level "+
-                  NumberToString(data.optLevel)+", index level "+
-                  NumberToString(data.indexLevel)+", "+
-                  NumberToString(cellOffsets.size())+" cells, "+
-                  NumberToString(indexEntries)+" entries, "+
+                  std::to_string(data.optLevel)+", index level "+
+                  std::to_string(data.indexLevel)+", "+
+                  std::to_string(cellOffsets.size())+" cells, "+
+                  std::to_string(indexEntries)+" entries, "+
                   ByteSizeToString(1.0*data.cellXCount*data.cellYCount*data.dataOffsetBytes+dataSize));
 
     data.bitmapOffset=writer.GetPos();
@@ -509,7 +508,7 @@ namespace osmscout
     double dpi=320.0;
     double pixel=2.0/* mm */ * dpi / 25.4 /* inch */;
 
-    progress.Info("Minimum visible size in pixel: "+NumberToString((unsigned long)pixel));
+    progress.Info("Minimum visible size in pixel: "+std::to_string((unsigned long)pixel));
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -560,7 +559,7 @@ namespace osmscout
                           parameter.GetOptimizationWayMethod());
 
             if (optimizedAreas.empty()) {
-              progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index generated");
+              progress.Debug("Empty optimization result for level "+std::to_string(level)+", no index generated");
 
               TypeData typeData;
 
@@ -572,7 +571,7 @@ namespace osmscout
               continue;
             }
 
-            progress.Info("Optimized from "+NumberToString(allAreas[type->GetIndex()].size())+" to "+NumberToString(optimizedAreas.size())+" areas");
+            progress.Info("Optimized from "+std::to_string(allAreas[type->GetIndex()].size())+" to "+std::to_string(optimizedAreas.size())+" areas");
 
             /*
             size_t optAreas=optimizedAreas.size();

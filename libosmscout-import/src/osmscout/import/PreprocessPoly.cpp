@@ -19,8 +19,8 @@
 
 #include <osmscout/import/PreprocessPoly.h>
 
-#include <osmscout/util/String.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/String.h>
 
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
@@ -137,7 +137,7 @@ namespace osmscout {
                   sectionName=line.substr(1);
                   context=ExcludedPolygon;
                   if (sectionName.empty()) {
-                    throw IOException(filename, "Empty section name on line "+NumberToStringUnsigned(lineNum), "");
+                    throw IOException(filename, "Empty section name on line "+std::to_string(lineNum), "");
                   }
                 }
                 else {
@@ -152,7 +152,7 @@ namespace osmscout {
           case ExcludedPolygon:
             if (line=="END") {
               if (!ClosePolygon(progress, context, polygonNodes, availableId, typeConfig->tagDataPolygon)) {
-                throw IOException(filename, "Invalid section on line "+NumberToStringUnsigned(lineNum), "");
+                throw IOException(filename, "Invalid section on line "+std::to_string(lineNum), "");
               }
               context=Section;
               polygonNodes.clear();
@@ -162,18 +162,18 @@ namespace osmscout {
             std::list<std::string> tokens=SplitStringAtSpace(line);
 
             if (tokens.size()!=2) {
-              throw IOException(filename, "Invalid format on line "+NumberToStringUnsigned(lineNum), "");
+              throw IOException(filename, "Invalid format on line "+std::to_string(lineNum), "");
             }
 
             double lon;
             double lat;
 
             if (!StringToNumber(tokens.front(), lon)) {
-              throw IOException(filename, "Invalid number format on line "+NumberToStringUnsigned(lineNum), "");
+              throw IOException(filename, "Invalid number format on line "+std::to_string(lineNum), "");
             }
 
             if (!StringToNumber(tokens.back(), lat)) {
-              throw IOException(filename, "Invalid number format on line "+NumberToStringUnsigned(lineNum), "");
+              throw IOException(filename, "Invalid number format on line "+std::to_string(lineNum), "");
             }
 
             polygonNodes.emplace_back(lat, lon);

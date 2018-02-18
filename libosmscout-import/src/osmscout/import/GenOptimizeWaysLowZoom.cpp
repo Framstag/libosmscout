@@ -36,7 +36,6 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
-#include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout
@@ -184,7 +183,7 @@ namespace osmscout
       types.erase(type);
     }
 
-    progress.Info("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.size())+" types");
+    progress.Info("Collected "+std::to_string(collectedWaysCount)+" ways for "+std::to_string(currentTypes.size())+" types");
 
     return !scanner.HasError();
   }
@@ -196,7 +195,7 @@ namespace osmscout
     std::map<Id, std::list<WayRef > > waysByJoin;
     std::set<FileOffset>              usedWays;
 
-    progress.Info("Merging "+NumberToString(ways.size())+" ways");
+    progress.Info("Merging "+std::to_string(ways.size())+" ways");
 
     for (const auto &way : ways) {
       if (way->GetFrontId()!=0) {
@@ -351,7 +350,7 @@ namespace osmscout
       }
     }
 
-    progress.Info("Merged to "+NumberToString(newWays.size())+" ways");
+    progress.Info("Merged to "+std::to_string(newWays.size())+" ways");
   }
 
   void OptimizeWaysLowZoomGenerator::GetWayIndexLevel(const ImportParameter& parameter,
@@ -484,7 +483,7 @@ namespace osmscout
 
       if (!IsValidToWrite(copiedWay->nodes)) {
         progress.Error("Way coordinates are not dense enough to be written for way "+
-                       NumberToString(way->GetFileOffset()));
+                       std::to_string(way->GetFileOffset()));
         continue;
       }
 
@@ -569,10 +568,10 @@ namespace osmscout
     data.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
     progress.Info("Writing map for level "+
-                  NumberToString(data.optLevel)+", index level "+
-                  NumberToString(data.indexLevel)+", "+
-                  NumberToString(cellOffsets.size())+" cells, "+
-                  NumberToString(indexEntries)+" entries, "+
+                  std::to_string(data.optLevel)+", index level "+
+                  std::to_string(data.indexLevel)+", "+
+                  std::to_string(cellOffsets.size())+" cells, "+
+                  std::to_string(indexEntries)+" entries, "+
                   ByteSizeToString(1.0*data.cellXCount*data.cellYCount*data.dataOffsetBytes+dataSize));
 
     data.bitmapOffset=writer.GetPos();
@@ -707,7 +706,7 @@ namespace osmscout
                          parameter.GetOptimizationWayMethod());
 
             if (optimizedWays.empty()) {
-              progress.Debug("Empty optimization result for level "+NumberToString(level)+", no index bitmap generated");
+              progress.Debug("Empty optimization result for level "+std::to_string(level)+", no index bitmap generated");
 
               TypeData typeData;
 
