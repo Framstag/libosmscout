@@ -244,6 +244,7 @@ stylesheets = [
             'boundaries.oss',
             'railways.oss',
             'motorways.oss',
+            'public-transport.oss',
             ]
 
 foreach stylesheet : stylesheets
