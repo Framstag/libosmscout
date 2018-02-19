@@ -22,7 +22,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/MergeAreaData.h>
 
@@ -282,7 +281,7 @@ namespace osmscout {
       }
     }
 
-    progress.SetAction("Collected "+NumberToString(collectedAreasCount)+" areas for "+NumberToString(loadedTypes.Size())+" types");
+    progress.SetAction("Collected "+std::to_string(collectedAreasCount)+" areas for "+std::to_string(loadedTypes.Size())+" types");
 
     return true;
   }
@@ -454,7 +453,7 @@ namespace osmscout {
                         job.areas,
                         idAreaMap);
 
-    progress.Info("Found "+NumberToString(idAreaMap.size())+" nodes as possible connection points for areas");
+    progress.Info("Found "+std::to_string(idAreaMap.size())+" nodes as possible connection points for areas");
 
     while (!job.areas.empty()) {
       AreaRef area;
@@ -591,10 +590,10 @@ namespace osmscout {
         return false;
       }
 
-      uint32_t nodeCount=nodeUseMap.size();
+      size_t   nodeCount=nodeUseMap.size();
       uint32_t areasWritten=0;
 
-      progress.Info("Found "+NumberToString(nodeCount)+" nodes as possible connection points for areas");
+      progress.Info("Found "+std::to_string(nodeCount)+" nodes as possible connection points for areas");
 
       /* ------ */
 
@@ -636,7 +635,7 @@ namespace osmscout {
             MergeAreas(progress,
                        nodeUseMap,
                        mergeJob[type->GetIndex()]);
-            progress.Info("Reduced areas of '"+type->GetName()+"' from "+NumberToString(mergeJob[type->GetIndex()].areaCount)+" to "+NumberToString(mergeJob[type->GetIndex()].areaCount-mergeJob[type->GetIndex()].mergedAway.size()));
+            progress.Info("Reduced areas of '"+type->GetName()+"' from "+std::to_string(mergeJob[type->GetIndex()].areaCount)+" to "+std::to_string(mergeJob[type->GetIndex()].areaCount-mergeJob[type->GetIndex()].mergedAway.size()));
 
             mergeJob[type->GetIndex()].areas.clear();
           }

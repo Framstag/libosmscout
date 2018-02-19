@@ -28,22 +28,33 @@ namespace osmscout{
 
   typedef uint32_t DatabaseId;
 
-  struct DBFileOffset{
+  /**
+   * \ingroup Routing
+   *
+   * Helper structure to implement a reference to a routing node in a given
+   * database (identified by a unique index).
+   */
+  struct DBFileOffset
+  {
     DatabaseId database;
     FileOffset offset;
 
-    DBFileOffset():
-      database(0),offset(0)
+    DBFileOffset()
+    : database(0),
+      offset(0)
     {
     }
 
-    DBFileOffset(const DBFileOffset &o):
-      database(o.database),offset(o.offset)
+    DBFileOffset(const DBFileOffset &o)
+    : database(o.database),
+      offset(o.offset)
     {
     }
 
-    DBFileOffset(DatabaseId database,FileOffset offset):
-     database(database),offset(offset)
+    DBFileOffset(DatabaseId database,
+                 FileOffset offset)
+    : database(database),
+      offset(offset)
     {
     }
 
@@ -64,9 +75,23 @@ namespace osmscout{
 
     inline bool operator<(const DBFileOffset& other) const
     {
-      if (database!=other.database)
+      if (database!=other.database) {
         return database<other.database;
+      }
+
       return offset<other.offset;
+    }
+
+    DBFileOffset& operator=(const DBFileOffset& other)
+    {
+      if(&other==this) {
+        return *this;
+      }
+
+      this->database=other.database;
+      this->offset=other.offset;
+
+      return *this;
     }
   };
 

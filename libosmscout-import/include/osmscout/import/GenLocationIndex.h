@@ -167,7 +167,7 @@ namespace osmscout {
       std::string                        name;               //!< The name of this area
       std::string                        isIn;               //!< Name of the parent region as stated in OSM (is_in tag)
       std::list<RegionAlias>             aliases;            //!< Location that are represented by this region
-      int                                level{-1};          //!< Admin level or -1 if not set
+      int8_t                             level{-1};          //!< Admin level or -1 if not set
 
       std::vector<std::vector<GeoCoord>> areas;              //!< the geometric area of this region
       std::list<RegionPOI>               pois;               //!< A list of POIs in this region
@@ -277,7 +277,7 @@ namespace osmscout {
                              const std::list<std::string>& locationIgnoreTokens);
 
     bool AddRegion(Region& parent,
-                   RegionRef& region,
+                   const RegionRef& region,
                    bool assume_contains=true);
 
     bool GetBoundaryAreas(const ImportParameter& parameter,
@@ -290,10 +290,14 @@ namespace osmscout {
                           Region& rootRegion,
                           std::list<RegionRef>& boundaryAreas);
 
-    bool IndexRegionAreas(const TypeConfig& typeConfig,
-                          const ImportParameter& parameter,
-                          Progress& progress,
-                          Region& rootRegion);
+    bool GetRegionAreas(const TypeConfig& typeConfig,
+                        const ImportParameter& parameter,
+                        Progress& progress,
+                        std::list<RegionRef>& regionAreas);
+
+    bool SortInRegionAreas(Progress& progress,
+                           Region& rootRegion,
+                           std::list<RegionRef>& regionAreas);
 
     void SortInRegion(RegionRef& area,
                       std::vector<std::list<RegionRef> >& regionTree,
@@ -472,11 +476,11 @@ namespace osmscout {
 
   public:
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 }
 

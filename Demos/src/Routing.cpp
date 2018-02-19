@@ -30,6 +30,7 @@
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/routing/DBFileOffset.h>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/Geometry.h>
 
 //#define ROUTE_DEBUG
@@ -58,6 +59,17 @@
      51.5717798 7.4587852  51.5143553 7.4932118
 */
 
+struct Arguments
+{
+  bool                   help=false;
+  std::string            router=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
+  osmscout::Vehicle      vehicle=osmscout::Vehicle::vehicleCar;
+  bool                   gpx=false;
+  std::string            databaseDirectory;
+  osmscout::GeoCoord     start;
+  osmscout::GeoCoord     target;
+};
+
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
 {
 private:
@@ -72,14 +84,14 @@ public:
     // no code
   }
 
-  void Reset()
+  void Reset() override
   {
     lastDump=std::chrono::system_clock::now();
     maxPercent=0.0;
   }
 
   void Progress(double currentMaxDistance,
-                double overallDistance)
+                double overallDistance) override
   {
     double currentPercent=(currentMaxDistance*100.0)/overallDistance;
 
@@ -185,10 +197,10 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
     }
   }
 
-  if (names.size()>0) {
+  if (!names.empty()) {
     std::ostringstream stream;
 
-    for (std::set<std::string>::const_iterator name=names.begin();
+    for (auto name=names.begin();
         name!=names.end();
         ++name) {
       if (name!=names.begin()) {
@@ -509,96 +521,80 @@ static void DumpNameChangedDescription(size_t& lineCount,
 
 int main(int argc, char* argv[])
 {
-  std::string                               routerFilenamebase=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
-  osmscout::Vehicle                         vehicle=osmscout::vehicleCar;
-  std::string                               mapDirectory;
-  bool                                      outputGPX=false;
-  bool                                      argumentError=false;
+  osmscout::CmdLineParser   argParser("Routing",
+                                      argc,argv);
+  std::vector<std::string>  helpArgs{"h","help"};
+  Arguments                 args;
 
-  double                                    startLat;
-  double                                    startLon;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
 
-  double                                    targetLat;
-  double                                    targetLon;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.gpx=value;
+                      }),
+                      "gpx",
+                      "Dump resulting route as GPX to std::cout",
+                      true);
 
-  int currentArg=1;
-  while (currentArg<argc) {
-    if (strcmp(argv[currentArg],"--router")==0) {
-      currentArg++;
+  argParser.AddOption(osmscout::CmdLineAlternativeFlag([&args](const std::string& value) {
+                        if (value=="foot") {
+                          args.vehicle=osmscout::Vehicle::vehicleCar;
+                        }
+                        else if (value=="bicycle") {
+                          args.vehicle=osmscout::Vehicle::vehicleBicycle;
+                        }
+                        else if (value=="car") {
+                          args.vehicle=osmscout::Vehicle::vehicleCar;
+                        }
+                      }),
+                      {"foot","bicycle","car"},
+                      "Vehicle type to use for routing");
 
-      if (currentArg>=argc) {
-        argumentError=true;
-      }
-      else {
-        routerFilenamebase=argv[currentArg];
-        currentArg++;
-      }
-    }
-    else if (strcmp(argv[currentArg],"--foot")==0) {
-      vehicle=osmscout::vehicleFoot;
-      currentArg++;
-    }
-    else if (strcmp(argv[currentArg],"--bicycle")==0) {
-      vehicle=osmscout::vehicleBicycle;
-      currentArg++;
-    }
-    else if (strcmp(argv[currentArg],"--car")==0) {
-      vehicle=osmscout::vehicleCar;
-      currentArg++;
-    }
-    else if (strcmp(argv[currentArg],"--gpx")==0) {
-      outputGPX=true;
-      currentArg++;
-    }
-    else {
-      // No more "special" arguments
-      break;
-    }
-  }
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.router=value;
+                      }),
+                      "router",
+                      "Router filename base");
 
-  if (argumentError ||
-      argc-currentArg!=5) {
-    std::cout << "Routing" << std::endl;
-    std::cout << "  [--router <router filename base>]" << std::endl;
-    std::cout << "  [--foot | --bicycle | --car]" << std::endl;
-    std::cout << "  [--gpx]" << std::endl;
-    std::cout << "  <map directory>" << std::endl;
-    std::cout << "  <start lat> <start lon>" << std::endl;
-    std::cout << "  <target lat> <target lon>" << std::endl;
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the first database to use");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.start=value;
+                          }),
+                          "START",
+                          "start coordinate");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.target=value;
+                          }),
+                          "TARGET",
+                          "target coordinate");
+
+  osmscout::CmdLineParseResult cmdLineParseResult=argParser.Parse();
+
+  if (cmdLineParseResult.HasError()) {
+    std::cerr << "ERROR: " << cmdLineParseResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
 
-  mapDirectory=argv[currentArg];
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lf",&startLat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
+  if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lf",&startLon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lf",&targetLat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lf",&targetLon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-  currentArg++;
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
-  if (!database->Open(mapDirectory.c_str())) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -607,14 +603,13 @@ int main(int argc, char* argv[])
   osmscout::FastestPathRoutingProfileRef routingProfile=std::make_shared<osmscout::FastestPathRoutingProfile>(database->GetTypeConfig());
   osmscout::RouterParameter              routerParameter;
 
-  if (!outputGPX) {
+  if (!args.gpx) {
     routerParameter.SetDebugPerformance(true);
   }
 
-  osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(
-                                                    database,
-                                                    routerParameter,
-                                                    routerFilenamebase);
+  osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(database,
+                                                                                            routerParameter,
+                                                                                            args.router);
 
   if (!router->Open()) {
     std::cerr << "Cannot open routing database" << std::endl;
@@ -629,7 +624,7 @@ int main(int argc, char* argv[])
 
   parameter.SetProgress(std::make_shared<ConsoleRoutingProgress>());
 
-  switch (vehicle) {
+  switch (args.vehicle) {
   case osmscout::vehicleFoot:
     routingProfile->ParametrizeForFoot(*typeConfig,
                                       5.0);
@@ -647,7 +642,7 @@ int main(int argc, char* argv[])
   }
 
   double radius = 1000.0;
-  osmscout::RoutePosition start=router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
+  osmscout::RoutePosition start=router->GetClosestRoutableNode(args.start,
                                                                *routingProfile,
                                                                radius);
 
@@ -661,7 +656,7 @@ int main(int argc, char* argv[])
   }
 
   radius = 1000.0;
-  osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
+  osmscout::RoutePosition target=router->GetClosestRoutableNode(args.target,
                                                                *routingProfile,
                                                                radius);
 
@@ -679,7 +674,7 @@ int main(int argc, char* argv[])
                                                         target,
                                                         parameter);
 
-  if (!result.Success()) {
+  if (!cmdLineParseResult.Success()) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();
     return 1;
@@ -714,21 +709,22 @@ int main(int argc, char* argv[])
 
   std::list<osmscout::Point> points;
 
-  if(outputGPX) {
+  if(args.gpx) {
     if (!router->TransformRouteDataToPoints(result.GetRoute(),
                                             points)) {
       std::cerr << "Error during route conversion" << std::endl;
     }
     std::cout.precision(8);
-    std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << std::endl;
-    std::cout << "<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"bin2gpx\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">" << std::endl;
+    std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
+    std::cout << R"(<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="bin2gpx" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">)"
+              << std::endl;
 
-    std::cout << "\t<wpt lat=\""<< startLat << "\" lon=\""<< startLon << "\">" << std::endl;
+    std::cout << "\t<wpt lat=\""<< args.start.GetLat() << "\" lon=\""<< args.start.GetLon() << "\">" << std::endl;
     std::cout << "\t\t<name>Start</name>" << std::endl;
     std::cout << "\t\t<fix>2d</fix>" << std::endl;
     std::cout << "\t</wpt>" << std::endl;
 
-    std::cout << "\t<wpt lat=\""<< targetLat << "\" lon=\""<< targetLon << "\">" << std::endl;
+    std::cout << "\t<wpt lat=\""<< args.target.GetLat() << "\" lon=\""<< args.target.GetLon() << "\">" << std::endl;
     std::cout << "\t\t<name>Target</name>" << std::endl;
     std::cout << "\t\t<fix>2d</fix>" << std::endl;
     std::cout << "\t</wpt>" << std::endl;
@@ -763,11 +759,8 @@ int main(int argc, char* argv[])
   motorwayLinkTypeNames.insert("highway_trunk_link");
   motorwayTypeNames.insert("highway_motorway_primary");
 
-  std::map<osmscout::DatabaseId,osmscout::RoutingProfileRef> profiles;
-  std::map<osmscout::DatabaseId,osmscout::DatabaseRef> databases;
-
-  profiles[0]=routingProfile;
-  databases[0]=database;
+  std::vector<osmscout::RoutingProfileRef> profiles={routingProfile};
+  std::vector<osmscout::DatabaseRef>       databases={database};
 
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  profiles,

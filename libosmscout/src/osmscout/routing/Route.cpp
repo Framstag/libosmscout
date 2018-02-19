@@ -19,11 +19,10 @@
 
 #include <osmscout/routing/Route.h>
 
+#include <cassert>
 #include <sstream>
 
 #include <osmscout/system/Math.h>
-
-#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -241,7 +240,7 @@ namespace osmscout {
       if (!result.empty()) {
         result+=" ";
       }
-      result+=NumberToString(exitCount)+ " exits";
+      result+=std::to_string(exitCount)+ " exits";
     }
 
     return "Crossing: "+result;
@@ -415,7 +414,7 @@ namespace osmscout {
 
   std::string RouteDescription::MaxSpeedDescription::GetDebugString() const
   {
-    return std::string("Max. speed ")+NumberToString(maxSpeed)+"km/h";
+    return std::string("Max. speed ")+std::to_string(maxSpeed)+"km/h";
   }
 
   RouteDescription::Node::Node(DatabaseId database,

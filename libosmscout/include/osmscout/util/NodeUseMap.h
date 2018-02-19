@@ -51,7 +51,7 @@ namespace osmscout {
   {
   private:
     typedef std::bitset<4096>                 Bitset;
-    typedef std::unordered_map<PageId,Bitset> Map;
+    typedef std::unordered_map<size_t,Bitset> Map;
 
   private:
     Map                                       nodeUseMap;

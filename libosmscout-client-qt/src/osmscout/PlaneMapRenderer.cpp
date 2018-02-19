@@ -19,8 +19,9 @@
  */
 
 #include <osmscout/PlaneMapRenderer.h>
-
 #include <osmscout/OSMTile.h>
+
+#include <osmscout/system/Math.h>
 
 // uncomment or define by compiler parameter to render various debug marks
 // #define DRAW_DEBUG
@@ -156,7 +157,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
 
   // projection bounding box may be smaller than projection dimensions...
   double scale=computeScale(finalImgProjection,requestProjection);
-  
+
   QRectF sourceRectangle(0,
                          0,
                          finalImgProjection.GetWidth(),
@@ -203,6 +204,21 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     painter.translate(rotationCenter);
     painter.rotate(qRadiansToDegrees(requestProjection.GetAngle()-finalImgProjection.GetAngle()));
     painter.translate(rotationCenter*-1.0);
+  }
+
+  // After our computations with float numbers, target rectangle is not aligned to pixel.
+  // It leads to additional anti-aliasing that blurs output...
+  double absDiff=std::abs((targetRectangle.x()-targetTopLeftX) - sourceRectangle.x()) +
+                 std::abs((targetRectangle.y()-targetTopLeftY) - sourceRectangle.y()) +
+                 std::abs(targetRectangle.width()              - sourceRectangle.width()) +
+                 std::abs(targetRectangle.height()             - sourceRectangle.height());
+
+  // ...for that reason, when rectangles are (almost) the same,
+  // round target position to get better output
+  if (absDiff < 1e-3 && finalImgProjection.GetAngle()==requestProjection.GetAngle()){
+    targetRectangle.setX(sourceRectangle.x() + round(targetTopLeftX));
+    targetRectangle.setY(sourceRectangle.y() + round(targetTopLeftY));
+    targetRectangle.setSize(sourceRectangle.size());
   }
 
   painter.drawImage(targetRectangle,
@@ -505,7 +521,7 @@ void PlaneMapRenderer::onStylesheetFilenameChanged()
       [this](const std::list<DBInstanceRef>& databases) {
         for (auto &db:databases){
           if (db->styleConfig){
-            db->styleConfig->GetUnknownFillStyle(projection, finishedUnknownFillStyle);
+            finishedUnknownFillStyle=db->styleConfig->GetUnknownFillStyle(projection);
             if (finishedUnknownFillStyle){
               break;
             }

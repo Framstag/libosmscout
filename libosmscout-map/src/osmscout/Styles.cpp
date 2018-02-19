@@ -922,13 +922,6 @@ namespace osmscout {
     return *this;
   }
 
-  TextStyle& TextStyle::SetPriority(uint8_t priority)
-  {
-    LabelStyle::SetPriority(priority);
-
-    return *this;
-  }
-
   TextStyle& TextStyle::SetSize(double size)
   {
     LabelStyle::SetSize(size);
@@ -1123,13 +1116,6 @@ namespace osmscout {
     return *this;
   }
 
-  ShieldStyle& ShieldStyle::SetPriority(uint8_t priority)
-  {
-    LabelStyle::SetPriority(priority);
-
-    return *this;
-  }
-
   ShieldStyle& ShieldStyle::SetSize(double size)
   {
     LabelStyle::SetSize(size);
@@ -1278,7 +1264,7 @@ namespace osmscout {
     return *this;
   }
 
-  PathShieldStyle& PathShieldStyle::SetPriority(uint8_t priority)
+  PathShieldStyle& PathShieldStyle::SetPriority(size_t priority)
   {
     shieldStyle->SetPriority(priority);
 

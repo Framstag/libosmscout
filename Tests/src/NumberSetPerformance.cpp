@@ -17,9 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <random>
+#include <set>
+#include <unordered_set>
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
@@ -32,7 +34,8 @@
   and check the performance of std::set<unsigned long> against NumberSet.
 */
 
-#define ID_COUNT 10000000
+size_t       ID_COUNT=50000000; // Number of insert/find tests bases on random numbers
+osmscout::Id UPPER_LIMIT=100000;//std::numeric_limits<osmscout::Id>::max(); // upper range for test values
 
 int main(int /*argc*/, char* /*argv*/[])
 {
@@ -40,45 +43,82 @@ int main(int /*argc*/, char* /*argv*/[])
 
   ids.resize(ID_COUNT);
 
-  for (size_t i=0; i<ids.size(); i++) {
-    ids[i]=(int)(std::numeric_limits<unsigned long>::max()*rand()/(RAND_MAX+1.0));
+  std::random_device               rd;  //Will be used to obtain a seed for the random number engine
+  std::mt19937                     gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::uniform_real_distribution<> dis(1, UPPER_LIMIT);
+
+  std::cout << "Generate random ids..." << std::endl;
+
+  for (auto& id : ids) {
+    id=(osmscout::Id)dis(gen);
   }
+
+  std::cout << "Inserting into std::set..." << std::endl;
 
   osmscout::StopClock insertsetTimer;
 
   std::set<osmscout::Id> set;
 
-  for (size_t i=0; i<ids.size(); i++) {
-    set.insert(ids[i]);
+  for (auto id : ids) {
+    set.insert(id);
   }
 
   insertsetTimer.Stop();
+
+  std::cout << "Inserting into std::unordered_set..." << std::endl;
+
+  osmscout::StopClock insertusetTimer;
+
+  std::unordered_set<osmscout::Id> uset;
+
+  for (auto id : ids) {
+    uset.insert(id);
+  }
+
+  insertusetTimer.Stop();
+
+  std::cout << "Inserting into NumberSet..." << std::endl;
 
   osmscout::StopClock insertnsetTimer;
 
   osmscout::NumberSet nset;
 
-  for (size_t i=0; i<ids.size(); i++) {
-    nset.Insert(ids[i]);
+  for (auto id : ids) {
+    nset.Set(id);
   }
 
   insertnsetTimer.Stop();
 
+  std::cout << "Searching in std::set..." << std::endl;
 
   osmscout::StopClock stestsetTimer;
 
-  for (size_t i=0; i<ids.size(); i++) {
-    if (set.find(ids[i])==set.end()) {
+  for (auto id : ids) {
+    if (set.find(id)==set.end()) {
       std::cerr << "set error!" << std::endl;
     }
   }
 
   stestsetTimer.Stop();
 
+  std::cout << "Searching in std::unordered_set..." << std::endl;
+
+  osmscout::StopClock stestusetTimer;
+
+  for (auto id : ids) {
+    if (uset.find(id)==uset.end()) {
+      std::cerr << "unordered_set error!" << std::endl;
+    }
+  }
+
+  stestusetTimer.Stop();
+
+  std::cout << "Searching in NumberSet..." << std::endl;
+
   osmscout::StopClock stestnsetTimer;
 
-  for (size_t i=0; i<ids.size(); i++) {
-    if (!nset.IsSet(ids[i])) {
+  for (auto id : ids) {
+    if (!nset.IsSet(id)) {
       std::cerr << "NumberSet error!" << std::endl;
     }
   }
@@ -86,8 +126,10 @@ int main(int /*argc*/, char* /*argv*/[])
   stestnsetTimer.Stop();
 
   std::cout << "Inserting " << ID_COUNT << " ids into std::set took " << insertsetTimer << std::endl;
+  std::cout << "Inserting " << ID_COUNT << " ids into std::unordered_set took " << insertusetTimer << std::endl;
   std::cout << "Inserting " << ID_COUNT << " ids into NumberSet took " << insertnsetTimer << std::endl;
   std::cout << "Testing " << ID_COUNT << " ids in std::set took " << stestsetTimer << std::endl;
+  std::cout << "Testing " << ID_COUNT << " ids in std::unordered_set took " << stestusetTimer << std::endl;
   std::cout << "Testing " << ID_COUNT << " ids in NumberSet took " << stestnsetTimer << std::endl;
 
   return 0;

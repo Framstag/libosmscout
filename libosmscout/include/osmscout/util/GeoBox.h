@@ -241,8 +241,31 @@ namespace osmscout {
      *
      * @return GetWidth()*GetHeight()
      */
-    inline double GetSize() const {
+    inline double GetSize() const
+    {
       return GetWidth()*GetHeight();
+    }
+
+    inline GeoCoord GetBottomLeft() const
+    {
+      return minCoord;
+    }
+
+    inline GeoCoord GetBottomRight() const
+    {
+      return GeoCoord(minCoord.GetLat(),
+                      maxCoord.GetLon());
+    }
+
+    inline GeoCoord GetTopLeft() const
+    {
+      return GeoCoord(maxCoord.GetLat(),
+                      minCoord.GetLon());
+    }
+
+    inline GeoCoord GetTopRight() const
+    {
+      return maxCoord;
     }
 
     /**

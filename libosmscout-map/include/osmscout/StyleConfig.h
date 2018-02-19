@@ -204,7 +204,7 @@ namespace osmscout {
     StyleFilter& SetMinLevel(size_t level);
     StyleFilter& SetMaxLevel(size_t level);
 
-    StyleFilter& AddFeature(const size_t featureFilterIndex);
+    StyleFilter& AddFeature(size_t featureFilterIndex);
 
     StyleFilter& SetOneway(bool oneway);
 
@@ -570,6 +570,7 @@ namespace osmscout {
     std::unordered_map<std::string,bool>       flags;
     std::unordered_map<std::string,StyleConstantRef> constants;
     std::list<std::string>                     errors;
+    std::list<std::string>                     warnings;
 
   private:
     void Reset();
@@ -680,27 +681,22 @@ namespace osmscout {
                            const Projection& projection,
                            std::vector<TextStyleRef>& textStyles) const;
 
-    void GetNodeIconStyle(const FeatureValueBuffer& buffer,
-                          const Projection& projection,
-                          IconStyleRef& iconStyle) const;
+    IconStyleRef GetNodeIconStyle(const FeatureValueBuffer& buffer,
+                                  const Projection& projection) const;
 
     void GetWayLineStyles(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           std::vector<LineStyleRef>& lineStyles) const;
-    void GetWayPathTextStyle(const FeatureValueBuffer& buffer,
-                             const Projection& projection,
-                             PathTextStyleRef& pathTextStyle) const;
-    void GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
-                               const Projection& projection,
-                               PathSymbolStyleRef& pathSymbolStyle) const;
-    void GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
-                               const Projection& projection,
-                               PathShieldStyleRef& pathShieldStyle) const;
+    PathTextStyleRef GetWayPathTextStyle(const FeatureValueBuffer& buffer,
+                                         const Projection& projection) const;
+    PathSymbolStyleRef GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
+                                             const Projection& projection) const;
+    PathShieldStyleRef GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
+                                             const Projection& projection) const;
 
-    void GetAreaFillStyle(const TypeInfoRef& type,
-                          const FeatureValueBuffer& buffer,
-                          const Projection& projection,
-                          FillStyleRef& fillStyle) const;
+    FillStyleRef GetAreaFillStyle(const TypeInfoRef& type,
+                                  const FeatureValueBuffer& buffer,
+                                  const Projection& projection) const;
     void GetAreaBorderStyles(const TypeInfoRef& type,
                              const FeatureValueBuffer& buffer,
                              const Projection& projection,
@@ -711,33 +707,23 @@ namespace osmscout {
                            const FeatureValueBuffer& buffer,
                            const Projection& projection,
                            std::vector<TextStyleRef>& textStyles) const;
-    void GetAreaIconStyle(const TypeInfoRef& type,
-                          const FeatureValueBuffer& buffer,
-                          const Projection& projection,
-                          IconStyleRef& iconStyle) const;
-    void GetAreaBorderTextStyle(const TypeInfoRef& type,
-                                const FeatureValueBuffer& buffer,
-                                const Projection& projection,
-                                PathTextStyleRef& pathTextStyle) const;
-    void GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+    IconStyleRef GetAreaIconStyle(const TypeInfoRef& type,
                                   const FeatureValueBuffer& buffer,
-                                  const Projection& projection,
-                                  PathSymbolStyleRef& pathSymbolStyle) const;
+                                  const Projection& projection) const;
+    PathTextStyleRef GetAreaBorderTextStyle(const TypeInfoRef& type,
+                                            const FeatureValueBuffer& buffer,
+                                            const Projection& projection) const;
+    PathSymbolStyleRef GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+                                                const FeatureValueBuffer& buffer,
+                                                const Projection& projection) const;
 
-    void GetLandFillStyle(const Projection& projection,
-                          FillStyleRef& fillStyle) const;
-    void GetSeaFillStyle(const Projection& projection,
-                         FillStyleRef& fillStyle) const;
-    void GetCoastFillStyle(const Projection& projection,
-                           FillStyleRef& fillStyle) const;
-    void GetUnknownFillStyle(const Projection& projection,
-                             FillStyleRef& fillStyle) const;
-    void GetCoastlineLineStyle(const Projection& projection,
-                               LineStyleRef& lineStyle) const;
-    void GetOSMTileBorderLineStyle(const Projection& projection,
-                                   LineStyleRef& lineStyle) const;
-    void GetOSMSubTileBorderLineStyle(const Projection& projection,
-                                      LineStyleRef& lineStyle) const;
+    FillStyleRef GetLandFillStyle(const Projection& projection) const;
+    FillStyleRef GetSeaFillStyle(const Projection& projection) const;
+    FillStyleRef GetCoastFillStyle(const Projection& projection) const;
+    FillStyleRef GetUnknownFillStyle(const Projection& projection) const;
+    LineStyleRef GetCoastlineLineStyle(const Projection& projection) const;
+    LineStyleRef GetOSMTileBorderLineStyle(const Projection& projection) const;
+    LineStyleRef GetOSMSubTileBorderLineStyle(const Projection& projection) const;
     //@}
 
     /**
@@ -759,8 +745,10 @@ namespace osmscout {
      * Methods for loading a concrete OSS style sheet
      */
     //@{
+    bool LoadContent(const std::string& content);
     bool Load(const std::string& styleFile);
     const std::list<std::string>&  GetErrors();
+    const std::list<std::string>&  GetWarnings();
     //@}
   };
 

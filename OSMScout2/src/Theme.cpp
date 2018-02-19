@@ -67,7 +67,7 @@ int Theme::GetTextFontSize() const
         textFontSize=font.pixelSize();
 
         if (textFontSize==-1) {
-            textFontSize=pointToPixel(font.pointSize());
+            textFontSize=(int)pointToPixel(font.pointSize());
         }
 
 #endif

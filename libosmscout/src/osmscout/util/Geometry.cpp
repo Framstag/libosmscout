@@ -673,6 +673,30 @@ namespace osmscout {
     return true;
   }
 
+  void GeoBoxPartitioner::CalculateBox()
+  {
+    if (direction==Direction::HORIZONTAL) {
+      double delta=(box.GetMaxLon()-box.GetMinLon())/parts;
+      double start=box.GetMinLon()+currentIndex*delta;
+      double end=box.GetMinLon()+(currentIndex+1)*delta;
+
+      currentBox=GeoBox(GeoCoord(box.GetMinLat(),
+                                 start),
+                        GeoCoord(box.GetMaxLat(),
+                                 end));
+    }
+    else {
+      double delta=(box.GetMaxLat()-box.GetMinLat())/parts;
+      double start=box.GetMinLat()+currentIndex*delta;
+      double end=box.GetMinLat()+(currentIndex+1)*delta;
+
+      currentBox=GeoBox(GeoCoord(start,
+                                 box.GetMinLon()),
+                        GeoCoord(end,
+                                 box.GetMaxLon()));
+    }
+  }
+
   CellDimension cellDimension[] = {
       { 360.0,                      180.0                      }, //  0
       { 180.0,                       90.0                      }, //  1

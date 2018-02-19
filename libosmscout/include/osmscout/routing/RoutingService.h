@@ -237,7 +237,8 @@ namespace osmscout {
    *
    * Abstract algorithms for routing
    */
-  class OSMSCOUT_API RoutingService{
+  class OSMSCOUT_API RoutingService
+  {
   protected:
     /**
      * \ingroup Routing
@@ -264,7 +265,7 @@ namespace osmscout {
         // no code
       }
 
-      RNode(DBFileOffset nodeOffset,
+      RNode(const DBFileOffset& nodeOffset,
             const RouteNodeRef& node,
             const ObjectFileRef& object)
       : nodeOffset(nodeOffset),
@@ -279,10 +280,10 @@ namespace osmscout {
         // no code
       }
 
-      RNode(DBFileOffset nodeOffset,
+      RNode(const DBFileOffset& nodeOffset,
             const RouteNodeRef& node,
             const ObjectFileRef& object,
-            DBFileOffset prev)
+            const DBFileOffset& prev)
       : nodeOffset(nodeOffset),
         node(node),
         prev(prev),
@@ -359,7 +360,7 @@ namespace osmscout {
        * @param currentNode
        *    Offset of the node to search for
        */
-      inline VNode(DBFileOffset currentNode)
+      inline explicit VNode(const DBFileOffset& currentNode)
         : currentNode(currentNode),
           previousNode()
       {
@@ -376,9 +377,9 @@ namespace osmscout {
        * @param previousNode
        *    FileOffset of the previous route node visited
        */
-      VNode(DBFileOffset currentNode,
+      VNode(const DBFileOffset& currentNode,
             const ObjectFileRef& object,
-            DBFileOffset previousNode)
+            const DBFileOffset& previousNode)
       : currentNode(currentNode),
         previousNode(previousNode),
         object(object)

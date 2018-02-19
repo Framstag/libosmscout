@@ -31,8 +31,8 @@ namespace osmscout {
   class RawRelationIndexedDataFile CLASS_FINAL : public IndexedDataFile<OSMId,RawRelation>
   {
   public:
-    RawRelationIndexedDataFile(unsigned long indexCacheSize,
-                               unsigned long dataCacheSize);
+    RawRelationIndexedDataFile(size_t indexCacheSize,
+                               size_t dataCacheSize);
   };
 }
 

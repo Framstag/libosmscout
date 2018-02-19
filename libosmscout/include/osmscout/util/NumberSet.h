@@ -22,45 +22,39 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <bitset>
+#include <unordered_map>
+
+#include <osmscout/Types.h>
+
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   /**
    * \ingroup Util
    *
    */
-  class OSMSCOUT_API NumberSet
+  class OSMSCOUT_API NumberSet CLASS_FINAL
   {
-    typedef unsigned long Number;
-
-    struct Data
-    {
-      virtual ~Data();
-    };
-
-    struct Refs : public Data
-    {
-      Data* refs[256];
-
-      Refs();
-      ~Refs();
-    };
-
-    struct Leaf : public Data
-    {
-      unsigned char values[32];
-
-      Leaf();
-    };
+  private:
+    typedef std::bitset<4096>                 Bitset;
+    typedef std::unordered_map<size_t,Bitset> Map;
 
   private:
-    Refs refs;
+    Map                                       map;
+    size_t                                    count;
 
-  public:
+    public:
     NumberSet();
-    ~NumberSet();
-    void Insert(Number value);
-    bool IsSet(Number value) const;
+
+    void Set(Id id);
+    bool IsSet(Id id) const;
+    size_t GetNodeUsedCount() const;
+
+    void Clear();
   };
+
 }
 
 #endif

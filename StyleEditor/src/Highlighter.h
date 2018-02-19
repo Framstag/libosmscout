@@ -25,6 +25,8 @@
 #include <QHash>
 #include <QTextCharFormat>
 
+#include <QtQuick/QQuickItem>
+
 class QTextDocument;
 
 class Highlighter : public QSyntaxHighlighter
@@ -34,7 +36,12 @@ class Highlighter : public QSyntaxHighlighter
 public:
     Highlighter(QTextDocument *parent = 0);
 
+    virtual ~Highlighter(){};
+
     void setStyle(qreal m_baseFontPointSize);
+
+public slots:
+    void onProblematicLines(QSet<int> errorLines, QSet<int> warningLines);
 
 protected:
     void highlightBlock(const QString &text);
@@ -67,6 +74,12 @@ private:
     QTextCharFormat kwONEWAYFormat;
     QTextCharFormat commentsFormat;
     QTextCharFormat multiLineCommentFormat;
+
+    QTextCharFormat errorFormat;
+    QTextCharFormat warningFormat;
+
+    QSet<int> errorLines;
+    QSet<int> warningLines;
 };
 
 #endif

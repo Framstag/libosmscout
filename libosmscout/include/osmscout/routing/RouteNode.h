@@ -141,8 +141,10 @@ namespace osmscout {
       return point.GetCoord();
     }
 
-    inline void SetPoint(const Point& point)
+    inline void Initialize(FileOffset fileOffset,
+                           const Point& point)
     {
+      this->fileOffset=fileOffset;
       this->point=point;
     }
 

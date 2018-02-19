@@ -29,7 +29,7 @@ namespace osmscout {
 
   const char* const LocationIndex::FILENAME_LOCATION_IDX = "location.idx";
 
-  bool LocationIndex::Load(const std::string& path)
+  bool LocationIndex::Load(const std::string& path, bool memoryMappedData)
   {
     this->path=path;
 
@@ -39,7 +39,7 @@ namespace osmscout {
       scanner.Open(AppendFileToDir(path,
                                    FILENAME_LOCATION_IDX),
                    FileScanner::LowMemRandom,
-                   true);
+                   memoryMappedData);
 
       scanner.Read(bytesForNodeFileOffset);
       scanner.Read(bytesForAreaFileOffset);

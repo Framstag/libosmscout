@@ -26,27 +26,9 @@
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/routing/RoutingDB.h>
 
 namespace osmscout {
-
-  /**
-   * \ingroup Routing
-   *
-   * Helper container for MultiDBRoutingService
-   */
-  class RouterDBFiles{
-  public:
-    IndexedDataFile<Id,RouteNode>       routeNodeDataFile;     //!< Cached access to the 'route.dat' file
-    IndexedDataFile<Id,Intersection>    junctionDataFile;      //!< Cached access to the 'junctions.dat' file
-    ObjectVariantDataFile               objectVariantDataFile;
-  public:
-    RouterDBFiles();
-    virtual ~RouterDBFiles();
-    bool Open(DatabaseRef database);
-    void Close();
-  };
-
-  typedef std::shared_ptr<RouterDBFiles> RouterDBFilesRef;
 
   /**
    * \ingroup Routing
@@ -56,89 +38,31 @@ namespace osmscout {
   class OSMSCOUT_API MultiDBRoutingService CLASS_FINAL : public AbstractRoutingService<MultiDBRoutingState>
   {
   private:
+    struct DatabaseHandle CLASS_FINAL
+    {
+      DatabaseId              dbId;            //<! Numeric id of the database (also index to the handles array)
+      DatabaseRef             database;        //<! Object database
+      RoutingDatabaseRef      routingDatabase; //<! Routing database
+      SimpleRoutingServiceRef router;          //<! Simple router for the given database
+      RoutingProfileRef       profile;         //<! Profile for the given database
+    };
 
   public:
     typedef std::function<RoutingProfileRef(const DatabaseRef&)> RoutingProfileBuilder;
 
   private:
-    static const double CELL_MAGNIFICATION;
+    static const size_t CELL_MAGNIFICATION;
     static const double LAT_CELL_FACTOR;
     static const double LON_CELL_FACTOR;
 
   private:
-    std::map<std::string,DatabaseId>              databaseMap;
-
-    std::map<DatabaseId,DatabaseRef>              databases;
-    std::map<DatabaseId,SimpleRoutingServiceRef>  services;
-    std::map<DatabaseId,RoutingProfileRef>        profiles;
-
-    std::map<DatabaseId,RouterDBFilesRef>         routerFiles;
-
-    bool  isOpen;
+    std::vector<DatabaseHandle> handles;
+    bool                        isOpen;
 
   private:
-    virtual Vehicle GetVehicle(const MultiDBRoutingState& state);
 
-    virtual bool CanUseForward(const MultiDBRoutingState& state,
-                               const DatabaseId& database,
-                               const WayRef& way);
-
-    virtual bool CanUseBackward(const MultiDBRoutingState& state,
-                                const DatabaseId& database,
-                                const WayRef& way);
-
-    virtual double GetCosts(const MultiDBRoutingState& state,
-                            const DatabaseId database,
-                            const RouteNode& routeNode,
-                            size_t pathIndex);
-
-    virtual double GetCosts(const MultiDBRoutingState& state,
-                            const DatabaseId database,
-                            const WayRef &way,
-                            double wayLength);
-
-    virtual double GetEstimateCosts(const MultiDBRoutingState& state,
-                                    const DatabaseId database,
-                                    double targetDistance);
-
-    virtual double GetCostLimit(const MultiDBRoutingState& state,
-                                const DatabaseId database,
-                                double targetDistance);
-
-    virtual bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
-                                       std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap);
-
-    virtual bool GetRouteNodeByOffset(const DBFileOffset &offset,
-                                      RouteNodeRef &node);
-
-    virtual bool GetRouteNodeOffset(const DatabaseId &database,
-                                    const Id &id,
-                                    FileOffset &offset);
-
-    virtual bool GetWayByOffset(const DBFileOffset &offset,
-                                WayRef &way);
-
-    virtual bool GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
-                                 std::unordered_map<DBFileOffset,WayRef> &wayMap);
-
-    virtual bool GetAreaByOffset(const DBFileOffset &offset,
-                                 AreaRef &area);
-
-    virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
-                                  std::unordered_map<DBFileOffset,AreaRef> &areaMap);
-
-    virtual bool ResolveRouteDataJunctions(RouteData& route);
-
-    virtual std::vector<DBFileOffset> GetNodeTwins(const MultiDBRoutingState& state,
-                                                   const DatabaseId database,
-                                                   const Id id);
-
-    virtual bool GetRouteNode(const DatabaseId &database,
-                              const Id &id,
-                              RouteNodeRef &node);
-    
     Pixel GetCell(const osmscout::GeoCoord& coord);
-    
+
     bool ReadCellsForRoutingTree(osmscout::Database& database,
                                  std::unordered_set<uint64_t>& cells);
 
@@ -151,19 +75,75 @@ namespace osmscout {
                                 DatabaseRef &database2,
                                 std::set<Id> &commonRouteNodes);
 
-    virtual bool CanUse(const MultiDBRoutingState& state,
-                        const DatabaseId database,
-                        const RouteNode& routeNode,
-                        size_t pathIndex);
+  private:
+    Vehicle GetVehicle(const MultiDBRoutingState& state) override;
+
+    bool CanUseForward(const MultiDBRoutingState& state,
+                       const DatabaseId& database,
+                       const WayRef& way) override;
+
+    bool CanUseBackward(const MultiDBRoutingState& state,
+                        const DatabaseId& database,
+                        const WayRef& way) override;
+
+    double GetCosts(const MultiDBRoutingState& state,
+                    DatabaseId databaseId,
+                    const RouteNode& routeNode,
+                    size_t pathIndex) override;
+
+    double GetCosts(const MultiDBRoutingState& state,
+                    DatabaseId database,
+                    const WayRef &way,
+                    double wayLength) override;
+
+    double GetEstimateCosts(const MultiDBRoutingState& state,
+                            DatabaseId database,
+                            double targetDistance) override;
+
+    double GetCostLimit(const MultiDBRoutingState& state,
+                        DatabaseId database,
+                        double targetDistance) override;
+
+    bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
+                               std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap) override;
+
+    bool GetRouteNodeByOffset(const DBFileOffset &offset,
+                              RouteNodeRef &node) override;
+
+    bool GetWayByOffset(const DBFileOffset &offset,
+                        WayRef &way) override;
+
+    bool GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
+                         std::unordered_map<DBFileOffset,WayRef> &wayMap) override;
+
+    bool GetAreaByOffset(const DBFileOffset &offset,
+                         AreaRef &area) override;
+
+    bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
+                          std::unordered_map<DBFileOffset,AreaRef> &areaMap) override;
+
+    bool ResolveRouteDataJunctions(RouteData& route) override;
+
+    std::vector<DBFileOffset> GetNodeTwins(const MultiDBRoutingState& state,
+                                           DatabaseId database,
+                                           Id id) override;
+
+    bool GetRouteNode(const DatabaseId &databaseId,
+                      const Id &id,
+                      RouteNodeRef &node) override;
+
+    bool CanUse(const MultiDBRoutingState& state,
+                DatabaseId databaseId,
+                const RouteNode& routeNode,
+                size_t pathIndex) override;
 
   public:
     MultiDBRoutingService(const RouterParameter& parameter,
                           const std::vector<DatabaseRef> &databases);
-
-    virtual ~MultiDBRoutingService();
+    ~MultiDBRoutingService() override;
 
     bool Open(RoutingProfileBuilder routingProfileBuilder);
-    
+
     void Close();
 
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
@@ -172,7 +152,7 @@ namespace osmscout {
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,
                                  const RoutingParameter &parameter);
-      
+
     RoutingResult CalculateRoute(std::vector<osmscout::GeoCoord> via,
                                  double radius,
                                  const RoutingParameter& parameter);

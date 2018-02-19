@@ -18,15 +18,26 @@ if [ "$TARGET" = "build" ]; then
   fi
 
   if [ "$BUILDTOOL" = "meson" ]; then
-    meson debug
+    # Travis currently cannot build clang + OpenMP (https://github.com/travis-ci/travis-ci/issues/8613)
+    if [ "$CXX" = "clang++" ]; then
+      meson debug -Dopenmp=false
+    else
+      meson debug
+    fi
     cd debug
+
+    # workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
+    ln -s . ../OSMScout2/OSMScout2
+    ln -s . ../StyleEditor/StyleEditor
+
     ninja
+    meson test -v
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
 
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config  -DOSMSCOUT_BUILD_TESTS=OFF ..
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config ..
     else
       cmake ..
     fi

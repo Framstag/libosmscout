@@ -45,10 +45,13 @@ namespace osmscout {
     bool                    adminRegionOnlyMatch;    //!< Evaluate on direct admin region matches
     bool                    poiOnlyMatch;            //!< Evaluate on direct poi matches
 
+    bool                    partialMatch;            //!< Add matches to the result, event if they do not match the complete search string
+
     StringMatcherFactoryRef stringMatcherFactory;    //!< String matcher factory to use
 
     size_t                  limit;                   //!< The maximum number of results over all sub searches requested
 
+    BreakerRef              breaker;                 //!< Breaker for search
   public:
     explicit POIFormSearchParameter();
 
@@ -57,6 +60,8 @@ namespace osmscout {
 
     bool GetAdminRegionOnlyMatch() const;
     bool GetPOIOnlyMatch() const;
+
+    bool GetPartialMatch() const;
 
     StringMatcherFactoryRef GetStringMatcherFactory() const;
 
@@ -70,7 +75,13 @@ namespace osmscout {
     void SetAdminRegionOnlyMatch(bool adminRegionOnlyMatch);
     void SetPOIOnlyMatch(bool poiOnlyMatch);
 
+    void SetPartialMatch(bool partialMatch);
+
     void SetLimit(size_t limit);
+
+    void SetBreaker(BreakerRef &breaker);
+    BreakerRef GetBreaker() const;
+    bool IsAborted() const;
   };
 
   /**
@@ -96,6 +107,7 @@ namespace osmscout {
     StringMatcherFactoryRef stringMatcherFactory;    //!< String matcher factory to use
     size_t                  limit;                   //!< The maximum number of results over all sub searches requested
 
+    BreakerRef              breaker;                 //!< Breaker for search
   public:
     explicit LocationFormSearchParameter();
 
@@ -130,6 +142,10 @@ namespace osmscout {
     void SetPartialMatch(bool partialMatch);
 
     void SetLimit(size_t limit);
+
+    void SetBreaker(BreakerRef &breaker);
+    BreakerRef GetBreaker() const;
+    bool IsAborted() const;
   };
 
   /**
@@ -197,6 +213,7 @@ namespace osmscout {
     void SetLimit(size_t limit);
 
     void SetBreaker(BreakerRef &breaker);
+    BreakerRef GetBreaker() const;
     bool IsAborted() const;
   };
 

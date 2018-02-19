@@ -20,7 +20,6 @@
 #include <osmscout/import/ShapeFileScanner.h>
 
 #include <osmscout/util/Exception.h>
-#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -145,7 +144,7 @@ namespace osmscout {
     int32_t fileCode=ReadIntegerBE();
 
     if (fileCode!=9994) {
-      throw IOException(filename,"Format error","Expected file code 9994, got "+NumberToString(fileCode));
+      throw IOException(filename,"Format error","Expected file code 9994, got "+std::to_string(fileCode));
     }
 
     // Skip reserved space
@@ -157,13 +156,13 @@ namespace osmscout {
     int32_t version   =ReadIntegerLE();
 
     if (version!=1000) {
-      throw IOException(filename,"Format error","Expected shape file version 1000, got "+NumberToString(version));
+      throw IOException(filename,"Format error","Expected shape file version 1000, got "+std::to_string(version));
     }
 
     int32_t shapeType=ReadIntegerLE();
 
     if (shapeType!=3) {
-      throw IOException(filename,"Not implemented","Shapes of type "+NumberToString(shapeType)+" are not supported");
+      throw IOException(filename,"Not implemented","Shapes of type "+std::to_string(shapeType)+" are not supported");
     }
 
     double xMin=ReadDoubleLE();
@@ -203,8 +202,8 @@ namespace osmscout {
         if (recordShapeType!=shapeType) {
           throw IOException(filename,
                             "Error while reading shape file record",
-                            "Shape file is type shape type "+NumberToString(shapeType)+
-                            ", but shape type of record is "+NumberToString(recordShapeType));
+                            "Shape file is type shape type "+std::to_string(shapeType)+
+                            ", but shape type of record is "+std::to_string(recordShapeType));
         }
 
         double recordXMin=ReadDoubleLE();
@@ -240,7 +239,7 @@ namespace osmscout {
                            buffer);
       }
       else {
-        throw IOException(filename,"Not implemented","Shapes of type "+NumberToString(shapeType)+" not supported");
+        throw IOException(filename,"Not implemented","Shapes of type "+std::to_string(shapeType)+" not supported");
       }
 
       filePos=ftell(file);

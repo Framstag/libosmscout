@@ -1,19 +1,26 @@
 set(OSMSCOUT_BUILD_CORE ON CACHE INTERNAL "" FORCE)
 
-set(HEADER_FILES
+set(HEADER_FILES_OST
     include/osmscout/ost/Parser.h
-    include/osmscout/ost/Scanner.h
-    #include/osmscout/private/Config.h
-    include/osmscout/private/CoreImportExport.h
+    include/osmscout/ost/Scanner.h)
+
+
+set(HEADER_FILES_PRIVATE
+    include/osmscout/private/CoreImportExport.h)
+
+set(HEADER_FILES_SYSTEM
     include/osmscout/system/Assert.h
     include/osmscout/system/Compiler.h
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
-    include/osmscout/system/Types.h
+    include/osmscout/system/Types.h)
+
+set(HEADER_FILES_UTIL
     include/osmscout/util/Breaker.h
     include/osmscout/util/Cache.h
     include/osmscout/util/Color.h
+    include/osmscout/util/CmdLineParsing.h
     include/osmscout/util/Exception.h
     include/osmscout/util/File.h
     include/osmscout/util/FileScanner.h
@@ -36,11 +43,14 @@ set(HEADER_FILES
     include/osmscout/util/TagErrorReporter.h
     include/osmscout/util/Tiling.h
     include/osmscout/util/Transformation.h
-    include/osmscout/util/WorkQueue.h
+    include/osmscout/util/WorkQueue.h)
+
+set(HEADER_FILES_ROUTING
     include/osmscout/routing/Route.h
     include/osmscout/routing/RouteData.h
     include/osmscout/routing/RouteNode.h
     include/osmscout/routing/RoutePostprocessor.h
+    include/osmscout/routing/RoutingDB.h
     include/osmscout/routing/RoutingProfile.h
     include/osmscout/routing/RoutingService.h
     include/osmscout/routing/AbstractRoutingService.h
@@ -48,7 +58,15 @@ set(HEADER_FILES
     include/osmscout/routing/MultiDBRoutingService.h
     include/osmscout/routing/DBFileOffset.h
     include/osmscout/routing/TurnRestriction.h
-    include/osmscout/routing/MultiDBRoutingState.h
+    include/osmscout/routing/MultiDBRoutingState.h)
+
+set(HEADER_FILES
+    ${HEADER_FILES_OST}
+    ${HEADER_FILES_PRIVATE}
+    ${HEADER_FILES_SYSTEM}
+    ${HEADER_FILES_UTIL}
+    ${HEADER_FILES_ROUTING}
+    #include/osmscout/private/Config.h
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
@@ -57,6 +75,7 @@ set(HEADER_FILES
     include/osmscout/Coord.h
     include/osmscout/CoordDataFile.h
     #include/osmscout/CoreFeatures.h
+    include/osmscout/CoverageIndex.h
     include/osmscout/BoundingBoxDataFile.h
     include/osmscout/TypeDistributionDataFile.h
     include/osmscout/Database.h
@@ -91,8 +110,6 @@ set(HEADER_FILES
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h
-    include/osmscout/system/Compiler.h
-    include/osmscout/util/CmdLineParsing.h
 )
 
 set(SOURCE_FILES
@@ -129,6 +146,7 @@ set(SOURCE_FILES
     src/osmscout/routing/RouteData.cpp
     src/osmscout/routing/RouteNode.cpp
     src/osmscout/routing/RoutePostprocessor.cpp
+    src/osmscout/routing/RoutingDB.cpp
     src/osmscout/routing/RoutingProfile.cpp
     src/osmscout/routing/RoutingService.cpp
     src/osmscout/routing/AbstractRoutingService.cpp
@@ -143,6 +161,7 @@ set(SOURCE_FILES
     src/osmscout/AreaWayIndex.cpp
     src/osmscout/Coord.cpp
     src/osmscout/CoordDataFile.cpp
+    src/osmscout/CoverageIndex.cpp
     src/osmscout/BoundingBoxDataFile.cpp
     src/osmscout/TypeDistributionDataFile.cpp
     src/osmscout/Database.cpp
@@ -218,14 +237,25 @@ if(${IOS})
 endif()
 
 if(APPLE)
-set_target_properties(${THE_TARGET_NAME} PROPERTIES
+  set_target_properties(${THE_TARGET_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-)
+  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer")
+
+  set_property(SOURCE "${HEADER_FILES_OST}"
+          PROPERTY MACOSX_PACKAGE_LOCATION Headers/ost)
+  set_property(SOURCE "${HEADER_FILES_PRIVATE}"
+          PROPERTY MACOSX_PACKAGE_LOCATION Headers/private)
+  set_property(SOURCE "${HEADER_FILES_SYSTEM}"
+          PROPERTY MACOSX_PACKAGE_LOCATION Headers/system)
+  set_property(SOURCE "${HEADER_FILES_UTIL}"
+          PROPERTY MACOSX_PACKAGE_LOCATION Headers/util)
+  set_property(SOURCE "${HEADER_FILES_ROUTING}"
+          PROPERTY MACOSX_PACKAGE_LOCATION Headers/routing)
+
 endif()
 
 target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)

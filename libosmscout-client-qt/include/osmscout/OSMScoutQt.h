@@ -29,6 +29,7 @@
 #include <osmscout/Router.h>
 #include <osmscout/SearchModule.h>
 #include <osmscout/StyleModule.h>
+#include <osmscout/NavigationModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -280,6 +281,7 @@ public:
   LookupModule* MakeLookupModule();
   MapRenderer* MakeMapRenderer(RenderingType type);
   Router* MakeRouter();
+  NavigationModule* MakeNavigation();
   SearchModule *MakeSearchModule();
   StyleModule *MakeStyleModule();
 

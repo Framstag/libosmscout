@@ -4,20 +4,42 @@
         <file>qml/AboutDialog.qml</file>
         <file>qml/SearchDialog.qml</file>
         <file>qml/MapDownloadDialog.qml</file>
+        <file>qml/NavigationSimulation.qml</file>
+
         <file>qml/custom/DialogActionButton.qml</file>
         <file>qml/custom/LineEdit.qml</file>
         <file>qml/custom/LocationSearch.qml</file>
         <file>qml/custom/MapButton.qml</file>
         <file>qml/custom/MapDialog.qml</file>
         <file>qml/custom/ScrollIndicator.qml</file>
-        
+        <file>qml/custom/RouteStepIcon.qml</file>
+        <file>qml/custom/RoutingStep.qml</file>
+
         <file>pics/DeleteText.svg</file>
         <file>pics/Minus.svg</file>
         <file>pics/Search.svg</file>
         <file>pics/Route.svg</file>
         <file>pics/Plus.svg</file>
         <file>pics/Download.svg</file>
-        
+
+        <file>pics/routestep/turn-right.svg</file>
+        <file>pics/routestep/turn-sharp-right.svg</file>
+        <file>pics/routestep/invalid-straight.svg</file>
+        <file>pics/routestep/turn-sharp-left.svg</file>
+        <file>pics/routestep/turn.svg</file>
+        <file>pics/routestep/leave-roundabout.svg</file>
+        <file>pics/routestep/start.svg</file>
+        <file>pics/routestep/turn-left.svg</file>
+        <file>pics/routestep/continue-straight-on.svg</file>
+        <file>pics/routestep/enter-roundabout.svg</file>
+        <file>pics/routestep/drive-along.svg</file>
+        <file>pics/routestep/turn-slightly-left.svg</file>
+        <file>pics/routestep/turn-slightly-right.svg</file>
+        <file>pics/routestep/target.svg</file>
+        <file>pics/routestep/information.svg</file>
+        <file>pics/routestep/change-motorway.svg</file>
+        <file>pics/routestep/leave-motorway.svg</file>
+
         <file>resources/online-tile-providers.json</file>
         <file>resources/map-providers.json</file>
     </qresource>

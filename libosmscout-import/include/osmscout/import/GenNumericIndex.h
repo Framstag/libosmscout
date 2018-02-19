@@ -29,7 +29,6 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Progress.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/Import.h>
 
@@ -52,11 +51,12 @@ namespace osmscout {
     NumericIndexGenerator(const std::string& description,
                           const std::string& datafile,
                           const std::string& indexfile);
-    virtual ~NumericIndexGenerator();
+
+    ~NumericIndexGenerator() override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 
   template <class N,class T>
@@ -136,7 +136,7 @@ namespace osmscout {
 
       writer.FlushCurrentBlockWithZeros(pageSize);
 
-      progress.Info(std::string("Writing level ")+NumberToString(1)+" ("+NumberToString(dataCount)+" entries)");
+      progress.Info(std::string("Writing level ")+std::to_string(1)+" ("+std::to_string(dataCount)+" entries)");
 
       N          lastId=0;
       FileOffset lastPos=0;
@@ -156,7 +156,7 @@ namespace osmscout {
 
         if (d>0) {
           if (data.GetId()<=lastId) {
-            progress.Error("Current id "+NumberToString(data.GetId())+" <= last id "+NumberToString(lastId));
+            progress.Error("Current id "+std::to_string(data.GetId())+" <= last id "+std::to_string(lastId));
           }
           assert(data.GetId()>lastId);
           assert(readPos>lastPos);
@@ -218,7 +218,7 @@ namespace osmscout {
         startingIds.clear();
         pageStarts.clear();
 
-        progress.Info(std::string("Writing level ")+NumberToString(indexPageCounts.size()+1)+" ("+NumberToString(si.size())+" entries)");
+        progress.Info(std::string("Writing level ")+std::to_string(indexPageCounts.size()+1)+" ("+std::to_string(si.size())+" entries)");
 
         size_t currentPageSize=0;
 
@@ -291,11 +291,11 @@ namespace osmscout {
         writer.SetPos(indexPageCountsPos);
       }
 
-      progress.Info(std::string("Index for ")+NumberToString(dataCount)+" data elements will be stored in "+NumberToString(indexPageCounts.size())+ " levels");
+      progress.Info(std::string("Index for ")+std::to_string(dataCount)+" data elements will be stored in "+std::to_string(indexPageCounts.size())+ " levels");
       for (size_t level=0; level<indexPageCounts.size(); level++) {
         size_t levelIndex=indexPageCounts.size()-level-1;
 
-        progress.Info(std::string("Page count for level ")+NumberToString(level)+" is "+NumberToString(indexPageCounts[levelIndex]));
+        progress.Info(std::string("Page count for level ")+std::to_string(level)+" is "+std::to_string(indexPageCounts[levelIndex]));
         writer.WriteNumber(indexPageCounts[levelIndex]);
       }
 

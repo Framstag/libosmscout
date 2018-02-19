@@ -116,7 +116,7 @@ namespace osmscout {
     LocationIndex() = default;
     virtual ~LocationIndex() = default;
 
-    bool Load(const std::string& path);
+    bool Load(const std::string& path, bool memoryMappedData);
 
     const std::vector<std::string>& GetRegionIgnoreTokens() const
     {

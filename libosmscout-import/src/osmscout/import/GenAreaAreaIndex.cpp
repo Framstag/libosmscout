@@ -33,7 +33,6 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/GenOptimizeAreaWayIds.h>
 
@@ -340,7 +339,7 @@ namespace osmscout {
 
       if (reduced) {
         if (nodeBuffer.size()<3) {
-          progress.Debug("Area " + NumberToString(offset) + " empty/invalid ring removed after node reduction");
+          progress.Debug("Area " + std::to_string(offset) + " empty/invalid ring removed after node reduction");
           ring=area.rings.erase(ring);
 
           if (area.rings.size()==0 ||
@@ -449,9 +448,9 @@ namespace osmscout {
                                                             Progress& progress,
                                                             const TypeConfig& /*typeConfig*/)
   {
-    progress.Info("Duplicate nodes removed: " + NumberToString(duplicateCount));
-    progress.Info("Redundant nodes removed: " + NumberToString(redundantCount));
-    progress.Info("Overall nodes: " + NumberToString(overallCount));
+    progress.Info("Duplicate nodes removed: " + std::to_string(duplicateCount));
+    progress.Info("Redundant nodes removed: " + std::to_string(redundantCount));
+    progress.Info("Overall nodes: " + std::to_string(overallCount));
 
     return true;
   }
@@ -504,7 +503,7 @@ namespace osmscout {
                                                          Progress& progress,
                                                          const TypeConfig& /*typeConfig*/)
   {
-    progress.Info("Areas without a type removed: " + NumberToString(removedAreasCount));
+    progress.Info("Areas without a type removed: " + std::to_string(removedAreasCount));
 
     return true;
   }
@@ -922,10 +921,10 @@ namespace osmscout {
 
       EnrichLevels(levels);
 
-      assert(levels[0].size()==1);
+      //assert(levels[0].size()==1);
 
       for (size_t i=0; i<levels.size(); i++) {
-        progress.Info("Level "+NumberToString(i)+" has " + NumberToString(levels[i].size())+" entries");
+        progress.Info("Level "+std::to_string(i)+" has " + std::to_string(levels[i].size())+" entries");
       }
 
       //
@@ -997,7 +996,7 @@ namespace osmscout {
       mapWriter.SetPos(0);
       mapWriter.Write(overallDataCount);
 
-      progress.Info(NumberToString(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+      progress.Info(std::to_string(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
       scanner.Close();
       indexWriter.Close();

@@ -56,6 +56,13 @@ ColorParse = executable('ColorParse',
              link_with: [osmscout],
              install: false)
 
+CoordinateCalculations = executable('CoordinateCalculations',
+             'src/CoordinateCalculations.cpp',
+             include_directories: [osmscoutIncDir],
+             dependencies: [mathDep],
+             link_with: [osmscout],
+             install: false)
+
 CoordinateEncoding = executable('CoordinateEncoding',
              'src/CoordinateEncoding.cpp',
              include_directories: [osmscoutIncDir],
@@ -108,6 +115,18 @@ Geometry = executable('Geometry',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
+             install: false)
+
+LocationServiceTest = executable('LocationServiceTest',
+             [
+               'src/LocationServiceTest.cpp',
+               'src/SearchForLocationByStringTest.cpp',
+               'src/SearchForLocationByFormTest.cpp',
+               'src/SearchForPOIByFormTest.cpp'
+             ],
+             include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
+             dependencies: [mathDep],
+             link_with: [osmscouttest, osmscoutimport, osmscout],
              install: false)
 
 MapRotate = executable('MapRotate',
@@ -163,8 +182,15 @@ ScanConversion = executable('ScanConversion',
 ThreadedDatabase = executable('ThreadedDatabase',
              'src/ThreadedDatabase.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
-             dependencies: [mathDep],
+             dependencies: [mathDep, threadDep],
              link_with: [osmscoutmap, osmscout],
+             install: false)
+
+TilingTest = executable('TilingTest',
+             'src/TilingTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, threadDep],
+             link_with: [osmscout],
              install: false)
 
 TransPolygon = executable('TransPolygon',
@@ -177,7 +203,7 @@ TransPolygon = executable('TransPolygon',
 WorkQueue = executable('WorkQueue',
              'src/WorkQueue.cpp',
              include_directories: [osmscoutIncDir],
-             dependencies: [mathDep],
+             dependencies: [mathDep, threadDep],
              link_with: [osmscout],
              install: false)
 
@@ -203,10 +229,28 @@ test('Check File access implementation', FileScannerWriter)
 test('Check parsing of geo box intersection', GeoBox)
 test('Check parsing of geo coordinates', GeoCoordParse)
 test('Check impl. of geometric functions', Geometry)
+test('Check LocationService', LocationServiceTest, env: ostandossEnv)
 test('Check rotation of maps', MapRotate)
 test('Check correctness of NumberSet class', NumberSet)
-test('Check standard OST and OSS files', OSTAndOSSCheck, env: ostandossEnv)
 test('Check scan conversion code', ScanConversion)
+test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)
 test('Check implementation of work queue', WorkQueue)
 test('Check WString<=>String conversion code', WStringStringConversion)
+
+stylesheets = [
+            'standard.oss',
+            'winter-sports.oss',
+            'boundaries.oss',
+            'railways.oss',
+            'motorways.oss',
+            'public-transport.oss',
+            ]
+
+foreach stylesheet : stylesheets
+    test('Check OST and OSS file '+stylesheet,
+            OSTAndOSSCheck,
+            args : ['--warning-as-error',
+                    meson.current_source_dir() + '/../stylesheets/map.ost',
+                    meson.current_source_dir() + '/../stylesheets/' + stylesheet])
+endforeach

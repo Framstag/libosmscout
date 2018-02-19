@@ -50,6 +50,8 @@ namespace osmscout {
 
     double GetMilliseconds() const;
 
+    bool IsSignificant() const;
+
     std::string ResultString() const;
 
     friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);

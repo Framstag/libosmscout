@@ -49,6 +49,14 @@ namespace osmscout {
   class RouteDataGenerator CLASS_FINAL : public ImportModule
   {
   private:
+
+    struct RawRouteNode
+    {
+      Id                       id;
+      Pixel                    cell;
+      std::list<ObjectFileRef> objects;
+    };
+
     struct TurnRestrictionData
     {
       enum Type
@@ -67,12 +75,24 @@ namespace osmscout {
     {
       FileOffset routeNodeOffset;
       size_t     index;
+
+      inline PendingOffset(FileOffset routeNodeOffset,
+                           size_t index)
+      : routeNodeOffset(routeNodeOffset),
+        index(index)
+      {
+
+      }
     };
 
-    typedef std::unordered_map<Id, FileOffset>             NodeIdOffsetMap;
-    typedef std::map<Id,std::list<ObjectFileRef> >         NodeIdObjectsMap;
-    typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
-    typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
+    typedef std::unordered_map<FileOffset,WayRef>                   FileOffsetWayMap;
+    typedef std::unordered_map<FileOffset,AreaRef>                  FileOffsetAreaMap;
+    typedef std::unordered_set<Id>                                  RouteNodeIdSet;
+    typedef std::vector<RawRouteNode>                               RawRouteNodeList;
+    typedef std::unordered_map<Id,FileOffset>                       NodeIdOffsetMap;
+    typedef std::map<Id,std::list<ObjectFileRef>>                   NodeIdObjectsMap;
+    typedef std::unordered_map<Id,std::list<PendingOffset>>         PendingRouteNodeOffsetsMap;
+    typedef std::unordered_map<Id,std::vector<TurnRestrictionData>> ViaTurnRestrictionMap;
 
     AccessFeatureValueReader           *accessReader;
     AccessRestrictedFeatureValueReader *accessRestrictedReader;
@@ -80,8 +100,6 @@ namespace osmscout {
     GradeFeatureValueReader            *gradeReader;
 
   private:
-    bool IsAccessRestricted(const FeatureValueBuffer& buffer) const;
-
     AccessFeatureValue GetAccess(const FeatureValueBuffer& buffer) const;
 
     inline AccessFeatureValue GetAccess(const Way& way) const
@@ -102,7 +120,7 @@ namespace osmscout {
                                             uint8_t grade);
 
     bool IsAnyRoutable(Progress& progress,
-                       const std::list<ObjectFileRef>& objects,
+                       const RawRouteNode& node,
                        const std::unordered_map<FileOffset,WayRef>& waysMap,
                        const std::unordered_map<FileOffset,AreaRef>&  areasMap,
                        VehicleMask vehicles) const;
@@ -178,26 +196,25 @@ namespace osmscout {
     /**
      * Loads ways based on their file offset.
      */
-    bool LoadWays(const TypeConfig& typeConfig,
-                  Progress& progress,
-                  FileScanner& scanner,
-                  const std::set<FileOffset>& fileOffsets,
-                  std::unordered_map<FileOffset,WayRef>& waysMap);
+    FileOffsetWayMap LoadWays(Progress& progress,
+                              const TypeConfig& typeConfig,
+                              FileScanner& scanner,
+                              RawRouteNodeList::const_iterator startNode,
+                              RawRouteNodeList::const_iterator endNode);
 
     /**
      * Loads areas based on their file offset.
      */
-    bool LoadAreas(const TypeConfig& typeConfig,
-                   Progress& progress,
-                   FileScanner& scanner,
-                   const std::set<FileOffset>& fileOffsets,
-                   std::unordered_map<FileOffset,AreaRef>& areasMap);
+    FileOffsetAreaMap LoadAreas(Progress& progress,
+                                const TypeConfig& typeConfig,
+                                FileScanner& scanner,
+                                RawRouteNodeList::const_iterator startNode,
+                                RawRouteNodeList::const_iterator endNode);
 
     bool GetRouteNodePoint(Progress& progress,
-                           Id id,
-                           const std::list<ObjectFileRef>& objects,
-                           std::unordered_map<FileOffset,WayRef>& waysMap,
-                           std::unordered_map<FileOffset,AreaRef>& areasMap,
+                           const RawRouteNode& node,
+                           FileOffsetWayMap& waysMap,
+                           FileOffsetAreaMap& areasMap,
                            Point& point) const;
 
     /*
@@ -212,8 +229,7 @@ namespace osmscout {
     void CalculateAreaPaths(RouteNode& routeNode,
                             const Area& area,
                             uint16_t objectVariantIndex,
-                            FileOffset routeNodeOffset,
-                            const NodeIdObjectsMap& nodeObjectsMap,
+                            const RouteNodeIdSet& routeNodeIdSet,
                             const NodeIdOffsetMap& nodeIdOffsetMap,
                             PendingRouteNodeOffsetsMap& pendingOffsetsMap);
 
@@ -223,8 +239,7 @@ namespace osmscout {
     void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
                                    uint16_t objectVariantIndex,
-                                   FileOffset routeNodeOffset,
-                                   const NodeIdObjectsMap& nodeObjectsMap,
+                                   const RouteNodeIdSet& routeNodeIdSet,
                                    const NodeIdOffsetMap& nodeIdOffsetMap,
                                    PendingRouteNodeOffsetsMap& pendingOffsetsMap);
 
@@ -234,8 +249,7 @@ namespace osmscout {
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
                            uint16_t objectVariantIndex,
-                           FileOffset routeNodeOffset,
-                           const NodeIdObjectsMap& nodeObjectsMap,
+                           const RouteNodeIdSet& routeNodeIdSet,
                            const NodeIdOffsetMap& nodeIdOffsetMap,
                            PendingRouteNodeOffsetsMap& pendingOffsetsMap);
 
@@ -243,7 +257,7 @@ namespace osmscout {
      * Adds the result of the turn restriction evaluation to the route node.
      */
     void FillRoutePathExcludes(RouteNode& routeNode,
-                               const std::list<ObjectFileRef>& objects,
+                               const RawRouteNode& node,
                                const ViaTurnRestrictionMap& restrictions);
 
     /**
@@ -254,8 +268,8 @@ namespace osmscout {
                               const NodeIdOffsetMap& routeNodeIdOffsetMap,
                               PendingRouteNodeOffsetsMap& pendingOffsetsMap,
                               FileWriter& routeNodeWriter,
-                              const std::vector<NodeIdObjectsMap::const_iterator>& block,
-                              size_t blockCount);
+                              RawRouteNodeList::const_iterator nodesBegin,
+                              RawRouteNodeList::const_iterator nodesEnd);
 
     bool WriteObjectVariantData(Progress& progress,
                                 const std::string& variantFilename,
@@ -264,7 +278,8 @@ namespace osmscout {
     bool WriteRouteGraph(const ImportParameter& parameter,
                          Progress& progress,
                          const TypeConfig& typeConfig,
-                         const NodeIdObjectsMap& nodeObjectsMap,
+                         const RawRouteNodeList& rawRouteNodes,
+                         const RouteNodeIdSet& routeNodeIdSet,
                          const ViaTurnRestrictionMap& restrictions,
                          VehicleMask vehicles,
                          const std::string& dataFilename,
@@ -274,11 +289,11 @@ namespace osmscout {
     RouteDataGenerator();
 
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 }
 

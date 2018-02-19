@@ -22,6 +22,8 @@
 #include <iostream>
 #include <locale>
 
+#include <osmscout/util/String.h>
+
 namespace osmscout {
 
   TextLoader::TextLoader(std::string path, long defaultSize) {

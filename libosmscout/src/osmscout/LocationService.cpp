@@ -173,9 +173,25 @@ namespace osmscout {
     this->limit=limit;
   }
 
+  void LocationFormSearchParameter::SetBreaker(BreakerRef &breaker)
+  {
+    this->breaker=breaker;
+  }
+
+  BreakerRef LocationFormSearchParameter::GetBreaker() const
+  {
+    return breaker;
+  }
+
+  bool LocationFormSearchParameter::IsAborted() const
+  {
+    return breaker && breaker->IsAborted();
+  }
+
   POIFormSearchParameter::POIFormSearchParameter()
     : adminRegionOnlyMatch(false),
       poiOnlyMatch(false),
+      partialMatch(false),
       stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
       limit(100)
   {
@@ -200,6 +216,11 @@ namespace osmscout {
   std::string POIFormSearchParameter::GetPOISearchString() const
   {
     return poiSearchString;
+  }
+
+  bool POIFormSearchParameter::GetPartialMatch() const
+  {
+    return partialMatch;
   }
 
   void POIFormSearchParameter::SetStringMatcherFactory(const StringMatcherFactoryRef& stringMatcherFactory)
@@ -237,9 +258,29 @@ namespace osmscout {
     return poiOnlyMatch;
   }
 
+  void POIFormSearchParameter::SetPartialMatch(bool partialMatch)
+  {
+    this->partialMatch=partialMatch;
+  }
+
   void POIFormSearchParameter::SetLimit(size_t limit)
   {
     this->limit=limit;
+  }
+
+  void POIFormSearchParameter::SetBreaker(BreakerRef &breaker)
+  {
+    this->breaker=breaker;
+  }
+
+  BreakerRef POIFormSearchParameter::GetBreaker() const
+  {
+    return breaker;
+  }
+
+  bool POIFormSearchParameter::IsAborted() const
+  {
+    return breaker && breaker->IsAborted();
   }
 
   LocationStringSearchParameter::LocationStringSearchParameter(const std::string& searchString)
@@ -248,8 +289,8 @@ namespace osmscout {
       adminRegionOnlyMatch(false),
       poiOnlyMatch(false),
       locationOnlyMatch(false),
-      addressOnlyMatch(false),
-      partialMatch(true),
+      addressOnlyMatch(true),
+      partialMatch(false),
       searchString(searchString),
       stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
       limit(100)
@@ -285,6 +326,11 @@ namespace osmscout {
   void LocationStringSearchParameter::SetBreaker(BreakerRef &breaker)
   {
     this->breaker=breaker;
+  }
+
+  BreakerRef LocationStringSearchParameter::GetBreaker() const
+  {
+    return breaker;
   }
 
   bool LocationStringSearchParameter::IsAborted() const
@@ -717,7 +763,7 @@ namespace osmscout {
 
             if (matchResult==StringMatcher::match) {
               //std::cout << "Match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'" << std::endl;
-              partialMatches.emplace_back(pattern.tokenString,
+              matches.emplace_back(pattern.tokenString,
                                           std::make_shared<AdminRegion>(region),
                                           alias.name);
               break;
@@ -763,10 +809,13 @@ namespace osmscout {
     std::list<TokenSearch> patterns;
     std::list<Result>      matches;
     std::list<Result>      partialMatches;
+    BreakerRef             breaker;
 
   public:
     PostalAreaSearchVisitor(const StringMatcherFactoryRef& matcherFactory,
-                            const std::list<TokenStringRef>& patterns)
+                            const std::list<TokenStringRef>& patterns,
+                            BreakerRef &breaker):
+      breaker(breaker)
     {
       for (const auto& pattern : patterns) {
         this->patterns.emplace_back(pattern,
@@ -817,6 +866,10 @@ namespace osmscout {
         }
       }
 
+      if (breaker && breaker->IsAborted()) {
+        return stop;
+      }
+
       return visitChildren;
     }
   };
@@ -845,10 +898,13 @@ namespace osmscout {
     std::list<TokenSearch> patterns;
     std::list<Result>      matches;
     std::list<Result>      partialMatches;
+    BreakerRef             breaker;
 
   public:
     POISearchVisitor(const StringMatcherFactoryRef& matcherFactory,
-                     const std::list<TokenStringRef>& patterns)
+                     const std::list<TokenStringRef>& patterns,
+                     BreakerRef &breaker):
+        breaker(breaker)
     {
       for (const auto& pattern : patterns) {
         this->patterns.emplace_back(pattern,
@@ -860,21 +916,24 @@ namespace osmscout {
                const POI& poi) override
     {
       for (const auto& pattern : patterns) {
+        std::cout << pattern.tokenString->text << " vs. " << poi.name << std::endl;
         StringMatcher::Result matchResult=pattern.matcher->Match(poi.name);
 
         if (matchResult==StringMatcher::match) {
+          std::cout << " => match" << std::endl;
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(adminRegion),
                                std::make_shared<POI>(poi));
         }
         else if (matchResult==StringMatcher::partialMatch) {
+          std::cout << " => partial match" << std::endl;
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(adminRegion),
                                       std::make_shared<POI>(poi));
         }
       }
 
-      return true;
+      return !(breaker && breaker->IsAborted());
     }
   };
 
@@ -905,10 +964,13 @@ namespace osmscout {
     std::list<TokenSearch> patterns;
     std::list<Result>      matches;
     std::list<Result>      partialMatches;
+    BreakerRef             breaker;
 
   public:
     LocationSearchVisitor(const StringMatcherFactoryRef& matcherFactory,
-                          const std::list<TokenStringRef>& patterns)
+                          const std::list<TokenStringRef>& patterns,
+                          BreakerRef &breaker):
+      breaker(breaker)
     {
       for (const auto& pattern : patterns) {
         this->patterns.emplace_back(pattern,
@@ -941,7 +1003,7 @@ namespace osmscout {
         }
       }
 
-      return true;
+      return !(breaker && breaker->IsAborted());
     }
   };
 
@@ -1198,6 +1260,7 @@ namespace osmscout {
 
   static void AddAddressResult(const SearchParameter& parameter,
                                LocationSearchResult::MatchQuality regionMatchQuality,
+                               LocationSearchResult::MatchQuality postalAreaMatchQuality,
                                LocationSearchResult::MatchQuality locationMatchQuality,
                                const AddressSearchVisitor::Result& addressMatch,
                                LocationSearchResult::MatchQuality addressMatchQuality,
@@ -1213,7 +1276,7 @@ namespace osmscout {
       entry.adminRegionMatchQuality=regionMatchQuality;
       entry.poiMatchQuality=LocationSearchResult::none;
       entry.postalArea=addressMatch.postalArea;
-      entry.postalAreaMatchQuality=LocationSearchResult::none;
+      entry.postalAreaMatchQuality=postalAreaMatchQuality;
       entry.location=addressMatch.location;
       entry.locationMatchQuality=locationMatchQuality;
       entry.address=addressMatch.address;
@@ -1230,6 +1293,7 @@ namespace osmscout {
                                           const std::list<std::string>& addressTokens,
                                           const LocationSearchVisitor::Result& locationMatch,
                                           LocationSearchResult::MatchQuality regionMatchQuality,
+                                          LocationSearchResult::MatchQuality postalAreaMatchQuality,
                                           LocationSearchResult::MatchQuality locationMatchQuality,
                                           LocationSearchResult& result)
   {
@@ -1267,6 +1331,7 @@ namespace osmscout {
       if (restTokens.empty()) {
         AddAddressResult(parameter,
                          regionMatchQuality,
+                         postalAreaMatchQuality,
                          locationMatchQuality,
                          addressMatch,
                          LocationSearchResult::match,
@@ -1283,6 +1348,7 @@ namespace osmscout {
         if (restTokens.empty()) {
           AddAddressResult(parameter,
                            regionMatchQuality,
+                           postalAreaMatchQuality,
                            locationMatchQuality,
                            addressMatch,
                            LocationSearchResult::candidate,
@@ -1299,7 +1365,8 @@ namespace osmscout {
                                          const std::list<std::string>& locationTokens,
                                          const AdminRegionSearchVisitor::Result& regionMatch,
                                          LocationSearchResult::MatchQuality regionMatchQuality,
-                                         LocationSearchResult& result)
+                                         LocationSearchResult& result,
+                                         BreakerRef &breaker)
   {
     std::unordered_set<std::string> locationIgnoreTokenSet;
 
@@ -1318,7 +1385,8 @@ namespace osmscout {
     // Search for locations
 
     LocationSearchVisitor locationVisitor(parameter.stringMatcherFactory,
-                                          locationSearchPatterns);
+                                          locationSearchPatterns,
+                                          breaker);
 
     StopClock locationVisitTime;
 
@@ -1332,6 +1400,9 @@ namespace osmscout {
     //std::cout << "Location (" << regionMatch.adminRegion->name << ") visit time: " << locationVisitTime.ResultString() << std::endl;
 
     for (const auto& locationMatch : locationVisitor.matches) {
+      if (breaker && breaker->IsAborted()){
+        return true;
+      }
       //std::cout << "Found location match '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'" << std::endl;
       std::list<std::string> addressTokens=BuildStringListFromSubToken(locationMatch.tokenString,
                                                                        locationTokens);
@@ -1352,6 +1423,7 @@ namespace osmscout {
                                     addressTokens,
                                     locationMatch,
                                     regionMatchQuality,
+                                    LocationSearchResult::none,
                                     LocationSearchResult::match,
                                     result);
 
@@ -1390,6 +1462,7 @@ namespace osmscout {
                                       addressTokens,
                                       locationMatch,
                                       regionMatchQuality,
+                                      LocationSearchResult::none,
                                       LocationSearchResult::candidate,
                                       result);
 
@@ -1417,7 +1490,8 @@ namespace osmscout {
                                              const PostalAreaSearchVisitor::Result& postalAreaMatch,
                                              LocationSearchResult::MatchQuality regionMatchQuality,
                                              LocationSearchResult::MatchQuality postalAreaMatchQuality,
-                                             LocationSearchResult& result)
+                                             LocationSearchResult& result,
+                                             BreakerRef &breaker)
   {
     std::unordered_set<std::string> locationIgnoreTokenSet;
 
@@ -1434,7 +1508,8 @@ namespace osmscout {
     // Search for locations
 
     LocationSearchVisitor locationVisitor(parameter.stringMatcherFactory,
-                                          locationSearchPatterns);
+                                          locationSearchPatterns,
+                                          breaker);
 
     //std::cout << "Search for location for " << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "..." << std::endl;
 
@@ -1466,6 +1541,7 @@ namespace osmscout {
                                     addressTokens,
                                     locationMatch,
                                     regionMatchQuality,
+                                    postalAreaMatchQuality,
                                     LocationSearchResult::match,
                                     result);
 
@@ -1505,6 +1581,7 @@ namespace osmscout {
                                       addressTokens,
                                       locationMatch,
                                       regionMatchQuality,
+                                      postalAreaMatchQuality,
                                       LocationSearchResult::candidate,
                                       result);
 
@@ -1533,7 +1610,8 @@ namespace osmscout {
                                            const std::string& addressPattern,
                                            const AdminRegionSearchVisitor::Result& regionMatch,
                                            LocationSearchResult::MatchQuality regionMatchQuality,
-                                           LocationSearchResult& result)
+                                           LocationSearchResult& result,
+                                           BreakerRef &breaker)
   {
     /*
     std::unordered_set<std::string> postalAreaIgnoreTokenSet;
@@ -1555,7 +1633,8 @@ namespace osmscout {
     // Search for locations
 
     PostalAreaSearchVisitor postalAreaVisitor(parameter.stringMatcherFactory,
-                                               postalAreaSearchPatterns);
+                                              postalAreaSearchPatterns,
+                                              breaker);
 
     if (!locationIndex->VisitAdminRegions(*regionMatch.adminRegion,
                                           postalAreaVisitor)) {
@@ -1586,7 +1665,8 @@ namespace osmscout {
                                        postalAreaMatch,
                                        regionMatchQuality,
                                        LocationSearchResult::match,
-                                       result);
+                                       result,
+                                       breaker);
 
         if (result.results.size()==currentResultSize &&
             parameter.partialMatch) {
@@ -1625,7 +1705,8 @@ namespace osmscout {
                                          postalAreaMatch,
                                          regionMatchQuality,
                                          LocationSearchResult::candidate,
-                                         result);
+                                         result,
+                                         breaker);
 
           if (result.results.size()==currentResultSize &&
               parameter.partialMatch) {
@@ -1649,7 +1730,8 @@ namespace osmscout {
                                     const std::list<std::string>& poiTokens,
                                     const AdminRegionSearchVisitor::Result& regionMatch,
                                     LocationSearchResult::MatchQuality regionMatchQuality,
-                                    LocationSearchResult& result)
+                                    LocationSearchResult& result,
+                                    BreakerRef &breaker)
   {
     std::unordered_set<std::string> poiIgnoreTokenSet;
 
@@ -1668,7 +1750,8 @@ namespace osmscout {
     // Search for locations
 
     POISearchVisitor poiVisitor(parameter.stringMatcherFactory,
-                                poiSearchPatterns);
+                                poiSearchPatterns,
+                                breaker);
 
     if (!locationIndex->VisitPOIs(*regionMatch.adminRegion,
                                   poiVisitor)) {
@@ -1713,7 +1796,8 @@ namespace osmscout {
                                     const std::string& poiPattern,
                                     const AdminRegionSearchVisitor::Result& regionMatch,
                                     LocationSearchResult::MatchQuality regionMatchQuality,
-                                    LocationSearchResult& result)
+                                    LocationSearchResult& result,
+                                    BreakerRef &breaker)
   {
     std::unordered_set<std::string> poiIgnoreTokenSet;
 
@@ -1733,7 +1817,8 @@ namespace osmscout {
     // Search for locations
 
     POISearchVisitor poiVisitor(parameter.stringMatcherFactory,
-                                poiSearchPatterns);
+                                poiSearchPatterns,
+                                breaker);
 
     if (!locationIndex->VisitPOIs(*regionMatch.adminRegion,
                                   poiVisitor)) {
@@ -1748,7 +1833,7 @@ namespace osmscout {
                    result);
     }
 
-    if (!parameter.locationOnlyMatch) {
+    if (!parameter.poiOnlyMatch) {
       for (const auto& poiMatch : poiVisitor.partialMatches) {
         AddPOIResult(parameter,
                      regionMatchQuality,
@@ -1769,6 +1854,8 @@ namespace osmscout {
     AdminRegionRef                  defaultAdminRegion=searchParameter.GetDefaultAdminRegion();
     std::string                     searchPattern=searchParameter.GetSearchString();
     SearchParameter                 parameter;
+
+    BreakerRef breaker=searchParameter.GetBreaker();
 
     parameter.searchForLocation=searchParameter.GetSearchForLocation();
     parameter.searchForPOI=searchParameter.GetSearchForPOI();
@@ -1827,7 +1914,8 @@ namespace osmscout {
                                      locationTokens,
                                      regionMatch,
                                      LocationSearchResult::match,
-                                     result);
+                                     result,
+                                     breaker);
           if (searchParameter.IsAborted()){
             osmscout::log.Debug() << "Search aborted";
             return true;
@@ -1840,7 +1928,8 @@ namespace osmscout {
                                 locationTokens,
                                 regionMatch,
                                 LocationSearchResult::match,
-                                result);
+                                result,
+                                breaker);
           if (searchParameter.IsAborted()){
             osmscout::log.Debug() << "Search aborted";
             return true;
@@ -1894,7 +1983,8 @@ namespace osmscout {
                                      locationTokens,
                                      regionMatch,
                                      LocationSearchResult::match,
-                                     result);
+                                     result,
+                                     breaker);
           if (searchParameter.IsAborted()){
             osmscout::log.Debug() << "Search aborted";
             return true;
@@ -1907,7 +1997,8 @@ namespace osmscout {
                                 locationTokens,
                                 regionMatch,
                                 LocationSearchResult::match,
-                                result);
+                                result,
+                                breaker);
           if (searchParameter.IsAborted()){
             osmscout::log.Debug() << "Search aborted";
             return true;
@@ -1946,7 +2037,8 @@ namespace osmscout {
                                        locationTokens,
                                        regionMatch,
                                        LocationSearchResult::candidate,
-                                       result);
+                                       result,
+                                       breaker);
             if (searchParameter.IsAborted()){
               osmscout::log.Debug() << "Search aborted";
               return true;
@@ -1959,7 +2051,8 @@ namespace osmscout {
                                   locationTokens,
                                   regionMatch,
                                   LocationSearchResult::candidate,
-                                  result);
+                                  result,
+                                  breaker);
             if (searchParameter.IsAborted()){
               osmscout::log.Debug() << "Search aborted";
               return true;
@@ -1987,6 +2080,8 @@ namespace osmscout {
     LocationIndexRef                locationIndex=database->GetLocationIndex();
     std::unordered_set<std::string> regionIgnoreTokenSet;
     SearchParameter                 parameter;
+
+    BreakerRef breaker=searchParameter.GetBreaker();
 
     parameter.searchForLocation=true;
     parameter.searchForPOI=false;
@@ -2026,6 +2121,10 @@ namespace osmscout {
                                                 regionSearchPatterns);
 
     locationIndex->VisitAdminRegions(adminRegionVisitor);
+    if (searchParameter.IsAborted()){
+      osmscout::log.Debug() << "Search aborted";
+      return true;
+    }
 
     for (const auto& regionMatch : adminRegionVisitor.matches) {
       //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
@@ -2048,7 +2147,8 @@ namespace osmscout {
                                      searchParameter.GetAddressSearchString(),
                                      regionMatch,
                                      LocationSearchResult::match,
-                                     result);
+                                     result,
+                                     breaker);
 
         if (result.results.size()==currentResultSize &&
             searchParameter.GetPartialMatch()) {
@@ -2083,7 +2183,8 @@ namespace osmscout {
                                      searchParameter.GetAddressSearchString(),
                                      regionMatch,
                                      LocationSearchResult::candidate,
-                                     result);
+                                     result,
+                                     breaker);
 
         if (result.results.size()==currentResultSize &&
             searchParameter.GetPartialMatch()) {
@@ -2109,6 +2210,8 @@ namespace osmscout {
     LocationIndexRef                locationIndex=database->GetLocationIndex();
     std::unordered_set<std::string> regionIgnoreTokenSet;
     SearchParameter                 parameter;
+
+    BreakerRef breaker=searchParameter.GetBreaker();
 
     parameter.searchForLocation=false;
     parameter.searchForPOI=true;
@@ -2147,6 +2250,10 @@ namespace osmscout {
                                                 regionSearchPatterns);
 
     locationIndex->VisitAdminRegions(adminRegionVisitor);
+    if (searchParameter.IsAborted()){
+      osmscout::log.Debug() << "Search aborted";
+      return true;
+    }
 
     for (const auto& regionMatch : adminRegionVisitor.matches) {
       //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
@@ -2165,9 +2272,11 @@ namespace osmscout {
                               searchParameter.GetPOISearchString(),
                               regionMatch,
                               LocationSearchResult::match,
-                              result);
+                              result,
+                              breaker);
 
-        if (result.results.size()==currentResultSize) {
+        if (result.results.size()==currentResultSize &&
+            searchParameter.GetPartialMatch()) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
           // so that partial results are not lost
           AddRegionResult(parameter,
@@ -2195,9 +2304,11 @@ namespace osmscout {
                               searchParameter.GetPOISearchString(),
                               regionMatch,
                               LocationSearchResult::candidate,
-                              result);
+                              result,
+                              breaker);
 
-        if (result.results.size()==currentResultSize) {
+        if (result.results.size()==currentResultSize &&
+            searchParameter.GetPartialMatch()) {
           // If we have not found any result for the given search entry, we create one for the "upper" object
           // so that partial results are not lost
           AddRegionResult(parameter,

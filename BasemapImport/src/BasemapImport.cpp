@@ -28,7 +28,6 @@
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/ShapeFileScanner.h>
@@ -58,13 +57,13 @@ public:
     currentId=std::numeric_limits<osmscout::Id>::max();
   }
 
-  ~CoastlineShapeFileVisitor()
+  ~CoastlineShapeFileVisitor() override
   {
     if (continuation) {
       progress.Error("Last element is not properly closed");
     }
 
-    progress.Info("Found "+osmscout::NumberToString(coastlineCount)+ " coastline(s)");
+    progress.Info("Found "+std::to_string(coastlineCount)+ " coastline(s)");
   }
 
   void AddCoast(const std::vector<osmscout::GeoCoord>& coords)
@@ -85,7 +84,7 @@ public:
     coastline->coast.reserve(coords.size());
 
     for (auto& coord : coords) {
-      coastline->coast.push_back(osmscout::Point(0,coord));
+      coastline->coast.emplace_back(0,coord);
     }
 
     coasts.push_back(coastline);
@@ -94,14 +93,14 @@ public:
   }
 
   void OnProgress(double current,
-                  double total)
+                  double total) override
   {
     progress.SetProgress(current,total);
   }
 
   void OnPolyline(int32_t /*recordNumber*/,
                   const osmscout::GeoBox& /*boundingBox*/,
-                  const std::vector<osmscout::GeoCoord>& coords)
+                  const std::vector<osmscout::GeoCoord>& coords) override
   {
     if (continuation) {
       if (coords.size()<1000 || coordBuffer.front()==coords.back()) {
@@ -180,7 +179,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
   osmscout::GeoBox boundingBox(osmscout::GeoCoord(-90.0,-180.0),
                                osmscout::GeoCoord(90.0,180.0));
 
-  for (size_t zoomLevel=0; zoomLevel<=indexMaxMag; zoomLevel++) {
+  for (uint32_t zoomLevel=0; zoomLevel<=indexMaxMag; zoomLevel++) {
     if (zoomLevel>=indexMinMag &&
         zoomLevel<=indexMaxMag) {
       osmscout::WaterIndexProcessor::Level level;
@@ -228,8 +227,8 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
                   coastline->coast.back().GetLat()<-56){
           // hack for Antarctica
           coastline->isArea=true;
-          coastline->coast.push_back(osmscout::Point(0,osmscout::GeoCoord(-90,+180)));
-          coastline->coast.push_back(osmscout::Point(0,osmscout::GeoCoord(-90,-180)));
+          coastline->coast.emplace_back(0,osmscout::GeoCoord(-90,+180));
+          coastline->coast.emplace_back(0,osmscout::GeoCoord(-90,-180));
         }else{
           it=visitor.coasts.erase(it);
           removedCoastlines++;
@@ -239,7 +238,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
       it++;
     }
     if (removedCoastlines>0){
-      progress.Warning("Removed "+osmscout::NumberToString(removedCoastlines)+" unclosed coastlines");
+      progress.Warning("Removed "+std::to_string(removedCoastlines)+" unclosed coastlines");
     }
 
     writer.Open(osmscout::AppendFileToDir(destinationDirectory,
@@ -247,7 +246,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
 
     processor.DumpIndexHeader(writer,
                               levels);
-    progress.Info("Generating index for level "+osmscout::NumberToString(indexMinMag)+" to "+osmscout::NumberToString(indexMaxMag));
+    progress.Info("Generating index for level "+std::to_string(indexMinMag)+" to "+std::to_string(indexMaxMag));
 
     for (auto& level : levels) {
       osmscout::Magnification                                    magnification;
@@ -259,7 +258,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
 
       projection.Set(osmscout::GeoCoord(0.0,0.0),magnification,72,640,480);
 
-      progress.SetAction("Building tiles for level "+osmscout::NumberToString(level.level));
+      progress.SetAction("Building tiles for level "+std::to_string(level.level));
 
       if (!visitor.coasts.empty()) {
         osmscout::WaterIndexProcessor::Data data;
@@ -448,7 +447,7 @@ int main(int argc, char* argv[])
       }
     }
   }
-  catch (osmscout::IOException& e) {
+  catch (osmscout::IOException& /*e*/) {
     // we ignore this exception, since it is likely a "not implemented" exception
   }
 

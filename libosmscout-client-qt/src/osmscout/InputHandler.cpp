@@ -206,11 +206,11 @@ bool InputHandler::rotateBy(double /*angleChange*/)
 {
     return false;
 }
-bool InputHandler::touch(QTouchEvent */*event*/)
+bool InputHandler::touch(QTouchEvent* /*event*/)
 {
     return false;
 }
-bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/)
+bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/, double /*moveTolerance*/)
 {
     return false;
 }
@@ -218,7 +218,7 @@ bool InputHandler::isLockedToPosition()
 {
     return false;
 }
-bool InputHandler::focusOutEvent(QFocusEvent */*event*/)
+bool InputHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return false;
 }
@@ -402,7 +402,7 @@ bool MoveHandler::rotateTo(double angle)
     targetMagnification = view.magnification;
 
     targetAngle = angle;
-    if (abs(targetAngle-view.angle)>M_PI){
+    if (std::abs(targetAngle-view.angle)>M_PI){
         targetAngle+=2*M_PI;
     }
 
@@ -683,7 +683,7 @@ bool MultitouchHandler::touch(QTouchEvent *event)
     return true;
 }
 
-bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition)
+bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance)
 {
     if (locationValid){
         osmscout::MercatorProjection projection;
@@ -711,7 +711,7 @@ bool LockHandler::isLockedToPosition()
 {
     return true;
 }
-bool LockHandler::focusOutEvent(QFocusEvent */*event*/)
+bool LockHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return true;
 }

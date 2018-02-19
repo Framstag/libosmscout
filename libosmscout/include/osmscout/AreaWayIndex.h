@@ -92,7 +92,8 @@ namespace osmscout {
 
     void Close();
     bool Open(const TypeConfigRef& typeConfig,
-              const std::string& path);
+              const std::string& path,
+              bool memoryMappedData);
 
     inline bool IsOpen() const
     {

@@ -112,7 +112,8 @@ int main(int argc, char* argv[])
 
   QApplication application(argc,argv,true);
 
-  QPixmap *pixmap=new QPixmap(width,height);
+  QPixmap *pixmap=new QPixmap(static_cast<int>(width),
+                              static_cast<int>(height));
 
   if (pixmap==NULL) {
     std::cerr << "Cannot create QPixmap" << std::endl;

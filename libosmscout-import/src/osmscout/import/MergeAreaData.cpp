@@ -124,8 +124,8 @@ namespace osmscout {
 
       writer.Close();
 
-      progress.Info("Merged "+NumberToString(wayDataCount)+ " ways and "+NumberToString(relDataCount)+" relations to "+
-                    NumberToString(dataWritten)+" areas");
+      progress.Info("Merged "+std::to_string(wayDataCount)+ " ways and "+std::to_string(relDataCount)+" relations to "+
+                    std::to_string(dataWritten)+" areas");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());

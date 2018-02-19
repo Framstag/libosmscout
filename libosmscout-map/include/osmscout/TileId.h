@@ -65,7 +65,7 @@ namespace osmscout {
     /**
      * Return the zoom level of the tile
      */
-    inline size_t GetLevel() const
+    inline uint32_t GetLevel() const
     {
       return level;
     }

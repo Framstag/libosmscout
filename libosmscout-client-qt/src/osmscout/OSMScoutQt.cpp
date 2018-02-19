@@ -41,6 +41,7 @@
 #include <osmscout/StyleFlagsModel.h>
 #include <osmscout/TiledMapOverlay.h>
 #include <osmscout/Router.h>
+#include <osmscout/NavigationModel.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
@@ -125,15 +126,16 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
   qRegisterMetaType<QList<QDir>>("QList<QDir>");
   qRegisterMetaType<MapViewStruct>("MapViewStruct");
-  qRegisterMetaType<RouteSelectionRef>("RouteSelectionRef");
-  qRegisterMetaType<RouteSelection>("RouteSelection");
+  qRegisterMetaType<QtRouteData>("QtRouteData");
   qRegisterMetaType<uint32_t>("uint32_t");
+  qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<AdminRegionInfoRef>("AdminRegionInfoRef");
   qRegisterMetaType<QList<AdminRegionInfoRef>>("QList<AdminRegionInfoRef>");
   qRegisterMetaType<std::unordered_map<std::string,bool>>("std::unordered_map<std::string,bool>");
   qRegisterMetaType<QMap<QString,bool>>("QMap<QString,bool>");
   qRegisterMetaType<LocationEntry>("LocationEntry");
   qRegisterMetaType<OnlineTileProvider>("OnlineTileProvider");
+  qRegisterMetaType<RouteStep>("RouteStep");
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -144,6 +146,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<MapObjectInfoModel>(uri, versionMajor, versionMinor, "MapObjectInfoModel");
   qmlRegisterType<MapStyleModel>(uri, versionMajor, versionMinor, "MapStyleModel");
   qmlRegisterType<MapWidget>(uri, versionMajor, versionMinor, "Map");
+  qmlRegisterType<NavigationModel>(uri, versionMajor, versionMinor, "NavigationModel");
   qmlRegisterType<OnlineTileProviderModel>(uri, versionMajor, versionMinor, "OnlineTileProviderModel");
   qmlRegisterType<OverlayWay>(uri, versionMajor, versionMinor, "OverlayWay");
   qmlRegisterType<OverlayArea>(uri, versionMajor, versionMinor, "OverlayArea");
@@ -324,6 +327,16 @@ Router* OSMScoutQt::MakeRouter()
   router->moveToThread(thread);
   thread->start();
   return router;
+}
+
+NavigationModule* OSMScoutQt::MakeNavigation()
+{
+  QThread *thread=makeThread("Navigation");
+
+  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread);
+  navigation->moveToThread(thread);
+  thread->start();
+  return navigation;
 }
 
 QString OSMScoutQt::GetUserAgent(){

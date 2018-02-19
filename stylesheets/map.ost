@@ -500,7 +500,7 @@ TYPES
   TYPE railway_rail
     = WAY ("railway"=="rail")
       {Bridge, Tunnel, Width}
-      //OPTIMIZE_LOW_ZOOM
+      OPTIMIZE_LOW_ZOOM
 
   TYPE railway_tram
     = WAY ("railway"=="tram")
@@ -509,14 +509,16 @@ TYPES
   TYPE railway_light_rail
     = WAY ("railway"=="light_rail")
       {Bridge, Tunnel, Width}
+      OPTIMIZE_LOW_ZOOM
 
   TYPE railway_subway
     = WAY ("railway"=="subway")
-      {Bridge, Tunnel, Width}
+      {Name, Bridge, Tunnel, Width}
 
   TYPE railway_preserved
     = WAY ("railway"=="preserved")
       {Name, Bridge, Tunnel, Width}
+      OPTIMIZE_LOW_ZOOM
 
   TYPE railway_disused
     = WAY ("railway"=="disused")
@@ -529,6 +531,7 @@ TYPES
   TYPE railway_narrow_gauge
     = WAY ("railway"=="narrow_gauge")
       {Name, Bridge, Tunnel, Width}
+      OPTIMIZE_LOW_ZOOM
 
   TYPE railway_monorail
     = WAY ("railway"=="monorail")
@@ -1165,7 +1168,19 @@ TYPES
       GROUP amenity, building
 
   TYPE amenity_kindergarten
-    = NODE ("amenity"=="kindergarten")
+    = NODE AREA ("amenity"=="kindergarten")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity
+
+  TYPE amenity_library_building
+    = AREA ("amenity"=="library" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity
+
+  TYPE amenity_library
+    = NODE AREA ("amenity"=="library")
       {Name, NameAlt}
       ADDRESS POI
       GROUP amenity

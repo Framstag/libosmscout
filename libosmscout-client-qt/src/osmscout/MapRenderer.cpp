@@ -221,8 +221,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     for (auto &db:databases){
       // fill background with "unknown" color
       if (!backgroundRendered && db->styleConfig){
-          osmscout::FillStyleRef unknownFillStyle;
-          db->styleConfig->GetUnknownFillStyle(renderProjection, unknownFillStyle);
+          osmscout::FillStyleRef unknownFillStyle=db->styleConfig->GetUnknownFillStyle(renderProjection);
           if (unknownFillStyle){
             osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
             p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
@@ -272,7 +271,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
   }
 
-  // draw databases
+  // prepare data for batch
+  osmscout::MapPainterBatchQt batch(databases.size());
   size_t i=0;
   bool last;
 
@@ -289,10 +289,9 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
         continue;
       }
     }
-    
-    osmscout::MapData data;
 
-    db->mapService->AddTileDataToMapData(tileList,data);
+    osmscout::MapDataRef data=std::make_shared<osmscout::MapData>();
+    db->mapService->AddTileDataToMapData(tileList,*data);
     if (last){
       osmscout::TypeConfigRef typeConfig=db->database->GetTypeConfig();
       for (auto const &o:overlayObjects){
@@ -302,7 +301,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           if (ow != NULL) {
             osmscout::WayRef w = std::make_shared<osmscout::Way>();
             if (ow->toWay(w, *typeConfig)) {
-              data.poiWays.push_back(w);
+              data->poiWays.push_back(w);
             }
           }
         } else if (o->getObjectType()==osmscout::RefType::refArea){
@@ -310,7 +309,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           if (oa != NULL) {
             osmscout::AreaRef a = std::make_shared<osmscout::Area>();
             if (oa->toArea(a, *typeConfig)) {
-              data.poiAreas.push_back(a);
+              data->poiAreas.push_back(a);
             }
           }
         } else if (o->getObjectType()==osmscout::RefType::refNode){
@@ -318,7 +317,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           if (oo != NULL) {
             osmscout::NodeRef n = std::make_shared<osmscout::Node>();
             if (oo->toNode(n, *typeConfig)) {
-              data.poiNodes.push_back(n);
+              data->poiNodes.push_back(n);
             }
           }
         }
@@ -327,19 +326,21 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
     if (drawParameter->GetRenderSeaLand()) {
       db->mapService->GetGroundTiles(renderProjection,
-                                     data.groundTiles);
+                                     data->groundTiles);
     }
 
     auto painter=db->GetPainter();
     if (painter) {
-      success &= painter->DrawMap(renderProjection,
-                                  *drawParameter,
-                                  data,
-                                  p);
+      batch.addData(data, painter);
     }else{
       osmscout::log.Warn() << "Painter is not available for database: " << db->path.toStdString();
       success=false;
     }
   }
+
+  // draw databases
+  success &= batch.paint(renderProjection,
+                         *drawParameter,
+                         p);
   Close();
 }

@@ -35,7 +35,6 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Number.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/GenTextIndex.h>
 
@@ -73,7 +72,7 @@ namespace osmscout
                            progress)) {
       return false;
     }
-    progress.Info("Using "+NumberToString(offsetSizeBytes)+"-byte offsets");
+    progress.Info("Using "+std::to_string(offsetSizeBytes)+"-byte offsets");
 
     // add node text data
     if(!this->AddNodeTextToKeysets(parameter,
@@ -100,7 +99,7 @@ namespace osmscout
     // 0x04: EOT
     std::string offsetSizeBytesStr;
     offsetSizeBytesStr.push_back(4);
-    offsetSizeBytesStr+=NumberToString(offsetSizeBytes);
+    offsetSizeBytesStr+=std::to_string(offsetSizeBytes);
 
     // build and save tries
     std::vector<marisa::Keyset*> keysets;
@@ -194,14 +193,14 @@ namespace osmscout
       uint8_t minWayOffsetSizeBytes  = BytesNeededToEncodeNumber(waysFileSize);
       uint8_t minAreaOffsetSizeBytes = BytesNeededToEncodeNumber(areasFileSize);
 
-      progress.Info("Node filesize is " + NumberToString(nodesFileSize) + " bytes, "+
-                    "req. " + NumberToString(minNodeOffsetSizeBytes) +" bytes");
+      progress.Info("Node filesize is " + std::to_string(nodesFileSize) + " bytes, "+
+                    "req. " + std::to_string(minNodeOffsetSizeBytes) +" bytes");
 
-      progress.Info("Way filesize is " + NumberToString(waysFileSize) + " bytes, "+
-                    "req. " + NumberToString(minWayOffsetSizeBytes) +" bytes");
+      progress.Info("Way filesize is " + std::to_string(waysFileSize) + " bytes, "+
+                    "req. " + std::to_string(minWayOffsetSizeBytes) +" bytes");
 
-      progress.Info("Area filesize is " + NumberToString(areasFileSize) + " bytes, "+
-                    "req. " + NumberToString(minAreaOffsetSizeBytes) +" bytes");
+      progress.Info("Area filesize is " + std::to_string(areasFileSize) + " bytes, "+
+                    "req. " + std::to_string(minAreaOffsetSizeBytes) +" bytes");
 
       offsetSizeBytes = 0;
       offsetSizeBytes = std::max(minNodeOffsetSizeBytes,minWayOffsetSizeBytes);
@@ -521,10 +520,10 @@ namespace osmscout
     return true;
   }
 
-  bool TextIndexGenerator::BuildKeyStr(const std::string &text,
-                                       const FileOffset offset,
-                                       const RefType reftype,
-                                       std::string &keyString) const
+  bool TextIndexGenerator::BuildKeyStr(const std::string& text,
+                                       FileOffset offset,
+                                       const RefType& reftype,
+                                       std::string& keyString) const
   {
     if(text.empty()) {
       return false;

@@ -164,7 +164,7 @@ namespace osmscout {
     // Store the name of each way
     //
 
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+    for (auto node=description.Nodes().begin();
          node!=description.Nodes().end();
          ++node) {
       // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
@@ -184,7 +184,7 @@ namespace osmscout {
 
         if (postprocessor.IsBridge(*node) &&
             node!=description.Nodes().begin()) {
-          std::list<RouteDescription::Node>::iterator lastNode=node;
+          auto lastNode=node;
 
           lastNode--;
 
@@ -219,26 +219,24 @@ namespace osmscout {
     // Store the name of each way
     //
 
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-         node!=description.Nodes().end();
-         ++node) {
+    for (auto& node : description.Nodes()) {
       // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
-      if (!node->HasPathObject()) {
+      if (!node.HasPathObject()) {
         break;
       }
 
-      if (node->GetPathObject().GetType()==refArea) {
-        AreaRef                                  area=postprocessor.GetArea(node->GetDBFileOffset());
+      if (node.GetPathObject().GetType()==refArea) {
+        AreaRef                                  area=postprocessor.GetArea(node.GetDBFileOffset());
         RouteDescription::TypeNameDescriptionRef typeNameDesc=std::make_shared<RouteDescription::TypeNameDescription>(area->GetType()->GetName());
 
-        node->AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
+        node.AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
                              typeNameDesc);
       }
-      else if (node->GetPathObject().GetType()==refWay) {
-        WayRef                                   way=postprocessor.GetWay(node->GetDBFileOffset());
+      else if (node.GetPathObject().GetType()==refWay) {
+        WayRef                                   way=postprocessor.GetWay(node.GetDBFileOffset());
         RouteDescription::TypeNameDescriptionRef typeNameDesc=std::make_shared<RouteDescription::TypeNameDescription>(way->GetType()->GetName());
 
-        node->AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
+        node.AddDescription(RouteDescription::WAY_TYPE_NAME_DESC,
                              typeNameDesc);
       }
     }
@@ -293,9 +291,9 @@ namespace osmscout {
     // Analyze crossing
     //
 
-    std::list<RouteDescription::Node>::iterator lastJunction=description.Nodes().end();
-    std::list<RouteDescription::Node>::iterator lastNode=description.Nodes().end();
-    std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+    auto lastJunction=description.Nodes().end();
+    auto lastNode=description.Nodes().end();
+    auto node=description.Nodes().begin();
 
     while (node!=description.Nodes().end()) {
       // We only analyze junctions, that means nodes that cross other objects
@@ -392,10 +390,10 @@ namespace osmscout {
                                                            RouteDescription& description)
   {
     std::list<RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+    for (auto node=description.Nodes().begin();
          node!=description.Nodes().end();
          prevNode=node++) {
-      std::list<RouteDescription::Node>::iterator nextNode=node;
+      auto nextNode=node;
 
       nextNode++;
 
@@ -420,10 +418,10 @@ namespace osmscout {
         double curveAngle=turnAngle;
 
         if (fabs(turnAngle)>=curveMinInitialAngle && fabs(turnAngle)<=curveMaxInitialAngle) {
-          std::list<RouteDescription::Node>::iterator curveB=nextNode;
-          double                                      currentBearing=outBearing;
-          double                                      forwardDistance=nextNode->GetDistance()-node->GetDistance();
-          std::list<RouteDescription::Node>::iterator lookup=nextNode;
+          auto   curveB=nextNode;
+          double currentBearing=outBearing;
+          double forwardDistance=nextNode->GetDistance()-node->GetDistance();
+          auto   lookup=nextNode;
 
           lookup++;
           while (true) {
@@ -541,7 +539,7 @@ namespace osmscout {
          break;
        }
 
-       if (junctionName != "" || junctionRef != "") {
+       if (!junctionName.empty() || !junctionRef.empty()) {
          RouteDescription::NameDescriptionRef nameDescription=std::make_shared<RouteDescription::NameDescription>(junctionName,
                                                                                                                   junctionRef);
          node.AddDescription(RouteDescription::MOTORWAY_JUNCTION_DESC,
@@ -563,11 +561,11 @@ namespace osmscout {
   bool RoutePostprocessor::DestinationPostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                              RouteDescription& description)
   {
-    std::list<RouteDescription::Node>::iterator lastJunction=description.Nodes().end();
-    ObjectFileRef                               prevObject;
-    DatabaseId                                  prevDb=0;
-    ObjectFileRef                               curObject;
-    DatabaseId                                  curDb;
+    auto          lastJunction=description.Nodes().end();
+    ObjectFileRef prevObject;
+    DatabaseId    prevDb=0;
+    ObjectFileRef curObject;
+    DatabaseId    curDb;
 
     for (auto node=description.Nodes().begin(); node!=description.Nodes().end(); ++node) {
       if (!node->GetObjects().empty()) {
@@ -890,10 +888,10 @@ namespace osmscout {
 
       else if (!postprocessor.IsMotorwayLink(*lastNode) &&
                postprocessor.IsMotorwayLink(*node)) {
-        bool                                        originIsMotorway=postprocessor.IsMotorway(*lastNode);
-        bool                                        targetIsMotorway=false;
-        std::list<RouteDescription::Node>::iterator next=node;
-        RouteDescription::NameDescriptionRef        nextName;
+        bool                                 originIsMotorway=postprocessor.IsMotorway(*lastNode);
+        bool                                 targetIsMotorway=false;
+        auto                                 next=node;
+        RouteDescription::NameDescriptionRef nextName;
 
         next++;
         while (next!=description.Nodes().end() &&
@@ -1119,16 +1117,16 @@ namespace osmscout {
 
   double RoutePostprocessor::GetTime(DatabaseId dbId,const Area& area,double deltaDistance) const
   {
-    auto profile=profiles.find(dbId);
-    assert(profile!=profiles.end());
-    return profile->second->GetTime(area,deltaDistance);
+    assert(dbId<profiles.size() && profiles[dbId]);
+    auto profile=profiles[dbId];
+    return profile->GetTime(area,deltaDistance);
   }
 
   double RoutePostprocessor::GetTime(DatabaseId dbId,const Way& way,double deltaDistance) const
   {
-    auto profile=profiles.find(dbId);
-    assert(profile!=profiles.end());
-    return profile->second->GetTime(way,deltaDistance);
+    assert(dbId<profiles.size() && profiles[dbId]);
+    auto profile=profiles[dbId];
+    return profile->GetTime(way,deltaDistance);
   }
 
   RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const RouteDescription::Node& node) const
@@ -1166,7 +1164,7 @@ namespace osmscout {
     NameFeatureValue *nameValue=nameReader->second->GetValue(area.rings.front().GetFeatureValueBuffer());
     std::string      name;
 
-    if (nameValue!=NULL) {
+    if (nameValue!=nullptr) {
       name=nameValue->GetName();
     }
 
@@ -1186,11 +1184,11 @@ namespace osmscout {
     std::string      name;
     std::string      ref;
 
-    if (nameValue!=NULL) {
+    if (nameValue!=nullptr) {
       name=nameValue->GetName();
     }
 
-    if (refValue!=NULL) {
+    if (refValue!=nullptr) {
       ref=refValue->GetRef();
     }
 
@@ -1214,9 +1212,8 @@ namespace osmscout {
     assert(refReaderIt!=refReaders.end());
     RefFeatureValueReader* refReader=refReaderIt->second;
 
-    auto databaseIt=databases.find(dbId);
-    assert(databaseIt!=databases.end());
-    DatabaseRef database=databaseIt->second;
+    assert(dbId<databases.size() && databases[dbId]);
+    DatabaseRef database=databases[dbId];
 
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
 
@@ -1254,18 +1251,18 @@ namespace osmscout {
       return false;
     }
 
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (fabs(nodes[i]->GetCoords().GetLat() - coord.GetLat()) < delta &&
-          fabs(nodes[i]->GetCoords().GetLon() - coord.GetLon()) < delta) {
-        RefFeatureValue *refFeatureValue=refReader->GetValue(nodes[i]->GetFeatureValueBuffer());
+    for (const auto& node : nodes) {
+      if (fabs(node->GetCoords().GetLat() - coord.GetLat()) < delta &&
+          fabs(node->GetCoords().GetLon() - coord.GetLon()) < delta) {
+        RefFeatureValue *refFeatureValue=refReader->GetValue(node->GetFeatureValueBuffer());
 
-        if (refFeatureValue!=NULL) {
+        if (refFeatureValue!=nullptr) {
           junctionRef=refFeatureValue->GetRef();
         }
 
-        NameFeatureValue *nameFeatureValue=nameReader->GetValue(nodes[i]->GetFeatureValueBuffer());
+        NameFeatureValue *nameFeatureValue=nameReader->GetValue(node->GetFeatureValueBuffer());
 
-        if (nameFeatureValue!=NULL) {
+        if (nameFeatureValue!=nullptr) {
           junctionName = nameFeatureValue->GetName();
         }
 
@@ -1349,7 +1346,7 @@ namespace osmscout {
       WayRef way=GetWay(node.GetDBFileOffset());
 
       DestinationFeatureValue *destinationValue=destinationReader->second->GetValue(way->GetFeatureValueBuffer());
-      if (destinationValue!=NULL){
+      if (destinationValue!=nullptr){
         std::string destination=destinationValue->GetDestination();
         dest=std::make_shared<RouteDescription::DestinationDescription>(destination);
       }
@@ -1366,7 +1363,7 @@ namespace osmscout {
       WayRef way=GetWay(node.GetDBFileOffset());
 
       MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader->second->GetValue(way->GetFeatureValueBuffer());
-      if (maxSpeedValue!=NULL) {
+      if (maxSpeedValue!=nullptr) {
         speed=maxSpeedValue->GetMaxSpeed();
       }
       else {
@@ -1438,13 +1435,13 @@ namespace osmscout {
                                           Id fromNodeId,
                                           const ObjectFileRef& object) const
   {
-    auto profile=profiles.find(dbId);
-    assert(profile!=profiles.end());
+    assert(dbId<profiles.size() && profiles[dbId]);
+    auto profile=profiles[dbId];
 
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(DBFileOffset(dbId,object.GetFileOffset()));
 
-      return profile->second->CanUse(*area);
+      return profile->CanUse(*area);
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(DBFileOffset(dbId,object.GetFileOffset()));
@@ -1457,7 +1454,7 @@ namespace osmscout {
       }
 
       return fromNodeIndex>0 &&
-             profile->second->CanUseBackward(*way);
+             profile->CanUseBackward(*way);
     }
     else {
       assert(false);
@@ -1470,13 +1467,13 @@ namespace osmscout {
                                          Id fromNodeId,
                                          const ObjectFileRef& object) const
   {
-    auto profile=profiles.find(dbId);
-    assert(profile!=profiles.end());
+    assert(dbId<profiles.size() && profiles[dbId]);
+    auto profile=profiles[dbId];
 
     if (object.GetType()==refArea) {
       AreaRef area=GetArea(DBFileOffset(dbId,object.GetFileOffset()));
 
-      return profile->second->CanUse(*area);
+      return profile->CanUse(*area);
     }
     else if (object.GetType()==refWay) {
       WayRef way=GetWay(DBFileOffset(dbId,object.GetFileOffset()));
@@ -1489,7 +1486,7 @@ namespace osmscout {
       }
 
       return fromNodeIndex!=way->nodes.size()-1 &&
-             profile->second->CanUseForward(*way);
+             profile->CanUseForward(*way);
     }
     else {
       assert(false);
@@ -1590,8 +1587,8 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::PostprocessRouteDescription(RouteDescription& description,
-                                                       std::map<DatabaseId,RoutingProfileRef> &profiles,
-                                                       std::map<DatabaseId,DatabaseRef>& databases,
+                                                       std::vector<RoutingProfileRef> &profiles,
+                                                       std::vector<DatabaseRef>& databases,
                                                        std::list<PostprocessorRef> processors,
                                                        std::set<std::string> motorwayTypeNames,
                                                        std::set<std::string> motorwayLinkTypeNames,
@@ -1602,10 +1599,10 @@ namespace osmscout {
     this->databases=databases;
     this->profiles=profiles;
 
-    for (const auto &pair:databases){
+    for (DatabaseId dbIdx=0; dbIdx<databases.size(); dbIdx++){
       // init feature readers
-      DatabaseId dbId=pair.first;
-      DatabaseRef database=pair.second;
+      DatabaseId dbId=dbIdx;
+      DatabaseRef database=databases[dbIdx];
       TypeConfigRef typeConfig=database->GetTypeConfig();
 
       nameReaders[dbId]=new NameFeatureValueReader(*typeConfig);
@@ -1627,7 +1624,7 @@ namespace osmscout {
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
         motorwayLinkTypes[dbId].Set(type);
       }
-      
+
       junctionTypes[dbId]; // insert empty TypeInfoSet
       for (const std::string &typeName:junctionTypeNames){
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);

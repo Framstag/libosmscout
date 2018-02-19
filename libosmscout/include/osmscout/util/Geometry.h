@@ -742,7 +742,7 @@ namespace osmscout {
     // note: this assumes 2d cartesian coordinate space is used;
     // for geographic, expect Vec2.x=lon and Vec2.y=lat!
 
-    int ptIdx=0;
+    size_t ptIdx=0;
 
     for (size_t i=1; i<edges.size(); i++) {
       // find the point with the smallest y value,
@@ -757,8 +757,8 @@ namespace osmscout {
       }
     }
 
-    int prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
-    int nextIdx=(ptIdx==(int)edges.size()-1) ? 0 : ptIdx+1;
+    size_t prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
+    size_t nextIdx=(ptIdx==edges.size()-1) ? 0 : ptIdx+1;
 
     double signedArea=(edges[ptIdx].x-edges[prevIdx].x)*
                       (edges[nextIdx].y-edges[ptIdx].y)-
@@ -1340,6 +1340,69 @@ namespace osmscout {
   const size_t CELL_DIMENSION_COUNT = CELL_DIMENSION_MAX+1;
 
   extern OSMSCOUT_API CellDimension cellDimension[CELL_DIMENSION_COUNT];
+
+  /**
+   * Helper class to divide a given GeoBox in multiple equally sized parts. The partitioning
+   * can ether be done horizontally or vertically.
+   *
+   * TODO:
+   * An alternative design is possible where all the magic is placed inside iterators and there is a strategy
+   * (the iterator has two different (global instances) stateless implementations) for either iterating horizontally or
+   * vertically.
+   */
+  class OSMSCOUT_API GeoBoxPartitioner
+  {
+  public:
+    enum class Direction
+    {
+      HORIZONTAL,
+      VERTICAL
+    };
+
+  private:
+    GeoBox    box;
+    Direction direction;
+    double    parts;
+    size_t    currentIndex;
+    GeoBox    currentBox;
+
+  private:
+    void CalculateBox();
+
+  public:
+    GeoBoxPartitioner(const GeoBox& box,
+                     Direction direction,
+                     size_t parts)
+     : box(box),
+       direction(direction),
+       parts((double)parts),
+       currentIndex(0)
+    {
+      assert(currentIndex<parts);
+      CalculateBox();
+    }
+
+    void Advance()
+    {
+      currentIndex++;
+
+      if (currentIndex<parts) {
+        CalculateBox();
+      }
+    }
+
+    GeoBox GetCurrentGeoBox() const
+    {
+      assert(currentIndex<parts);
+      return currentBox;
+    }
+
+    size_t GetCurrentIndex() const
+    {
+      assert(currentIndex<parts);
+      return currentIndex;
+    }
+  };
 }
 
 namespace std {

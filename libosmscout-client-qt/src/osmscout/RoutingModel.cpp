@@ -30,8 +30,8 @@ RoutingListModel::RoutingListModel(QObject* parent)
           router,SLOT(onRouteRequest(LocationEntryRef,LocationEntryRef,osmscout::Vehicle,int,osmscout::BreakerRef)),
           Qt::QueuedConnection);
 
-  connect(router,SIGNAL(routeComputed(RouteSelectionRef,int)),
-          this,SLOT(onRouteComputed(RouteSelectionRef,int)),
+  connect(router,SIGNAL(routeComputed(QtRouteData,int)),
+          this,SLOT(onRouteComputed(QtRouteData,int)),
           Qt::QueuedConnection);
   connect(router,SIGNAL(routeFailed(QString,int)),
           this,SLOT(onRouteFailed(QString,int)),
@@ -43,9 +43,6 @@ RoutingListModel::RoutingListModel(QObject* parent)
 
 RoutingListModel::~RoutingListModel()
 {
-  if (route){
-    route->routeSteps.clear();
-  }
   if (router!=NULL){
     router->deleteLater();
     router=NULL;
@@ -76,7 +73,7 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   emit routeRequest(startRef,targetRef,vehicle,++requestId,breaker);
 }
 
-void RoutingListModel::onRouteComputed(RouteSelectionRef route,
+void RoutingListModel::onRouteComputed(QtRouteData route,
                                        int requestId)
 {
   if (!route || requestId!=this->requestId){
@@ -125,7 +122,7 @@ void RoutingListModel::clear()
   beginResetModel();
 
   ++requestId;
-  route->routeSteps.clear();
+  route.clear();
 
   endResetModel();
 }
@@ -144,42 +141,46 @@ int RoutingListModel::rowCount(const QModelIndex& ) const
   if (!route){
     return 0;
   }
-  return route->routeSteps.size();
+  return route.routeSteps().size();
 }
 
 double RoutingListModel::getRouteLength() const
 {
-  if (!route || route->routeDescription.Nodes().empty()){
+  if (!route || route.routeDescription().Nodes().empty()){
     return 0;
   }
-  return route->routeDescription.Nodes().back().GetDistance() * 1000;
+  return route.routeDescription().Nodes().back().GetDistance() * 1000;
 }
 
 double RoutingListModel::getRouteDuration() const
 {
-  if (!route || route->routeDescription.Nodes().empty()){
+  if (!route || route.routeDescription().Nodes().empty()){
     return 0;
   }
-  return route->routeDescription.Nodes().back().GetTime() * 3600;
+  return route.routeDescription().Nodes().back().GetTime() * 3600;
 }
 
 QVariant RoutingListModel::data(const QModelIndex &index, int role) const
 {
-    if(!route || index.row() < 0 || index.row() >= route->routeSteps.size()) {
-        return QVariant();
-    }
-
-    RouteStep step=route->routeSteps.at(index.row());
-
-    switch (role) {
-    case Qt::DisplayRole:
-    case LabelRole:
-        return step.getDescription();
-    default:
-        break;
-    }
-
+  if(!route || index.row() < 0 || index.row() >= route.routeSteps().size()) {
     return QVariant();
+  }
+
+  RouteStep step=route.routeSteps().at(index.row());
+
+  switch (role) {
+  case Qt::DisplayRole:
+  case ShortDescriptionRole:
+    return step.getShortDescription();
+  case DescriptionRole:
+      return step.getDescription();
+  case TypeRole:
+    return step.getType();
+  default:
+    break;
+  }
+
+  return QVariant();
 }
 
 Qt::ItemFlags RoutingListModel::flags(const QModelIndex &index) const
@@ -193,20 +194,22 @@ Qt::ItemFlags RoutingListModel::flags(const QModelIndex &index) const
 
 QHash<int, QByteArray> RoutingListModel::roleNames() const
 {
-    QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
+  QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
 
-    roles[LabelRole]="label";
+  roles[ShortDescriptionRole] = "shortDescription";
+  roles[DescriptionRole] = "description";
+  roles[TypeRole] = "type";
 
-    return roles;
+  return roles;
 }
 
 RouteStep* RoutingListModel::get(int row) const
 {
-    if(!route || row < 0 || row >= route->routeSteps.size()) {
-        return NULL;
-    }
+  if(!route || row < 0 || row >= route.routeSteps().size()) {
+    return NULL;
+  }
 
-    RouteStep step=route->routeSteps.at(row);
+  RouteStep step=route.routeSteps().at(row);
 
-    return new RouteStep(step);
+  return new RouteStep(step);
 }

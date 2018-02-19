@@ -43,7 +43,7 @@ namespace osmscout {
   public:
     CmdLineScanner(int argc, char* argv[]);
 
-    CmdLineScanner(const std::vector<std::string>& arguments);
+    explicit CmdLineScanner(const std::vector<std::string>& arguments);
 
     bool HasNextArg() const;
     std::string PeakNextArg() const;
@@ -60,7 +60,8 @@ namespace osmscout {
 
   public:
     CmdLineParseResult();
-    CmdLineParseResult(const std::string& errorDescription);
+
+    explicit CmdLineParseResult(const std::string& errorDescription);
 
     bool Success() const;
     bool HasError() const;
@@ -71,14 +72,17 @@ namespace osmscout {
   class OSMSCOUT_API CmdLineArgParser
   {
   private:
-    std::string argumentName;
+    std::string optionName;   //<! The unqualified option name
+    std::string argumentName; //<! The actual command line argument name
 
   protected:
+    std::string GetOptionName() const;
     std::string GetArgumentName() const;
 
   public:
-    virtual ~CmdLineArgParser() =default;
+    virtual ~CmdLineArgParser()=default;
 
+    void SetOptionName(const std::string& optionName);
     void SetArgumentName(const std::string& argumentName);
 
     virtual std::string GetOptionHint() const = 0;
@@ -97,12 +101,30 @@ namespace osmscout {
      SetterFunction setter;
 
   public:
-    CmdLineFlagArgParser(SetterFunction&& setter);
+    explicit CmdLineFlagArgParser(SetterFunction&& setter);
 
-    std::string GetOptionHint() const;
-    std::string GetPositionalHint(const std::string& positional) const;
+    std::string GetOptionHint() const override;
+    std::string GetPositionalHint(const std::string& positional) const override;
 
-    CmdLineParseResult Parse(CmdLineScanner& scanner);
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override;
+  };
+
+  class OSMSCOUT_API CmdLineAlternativeFlagArgParser : public CmdLineArgParser
+  {
+  public:
+    typedef std::function<void(const std::string&)> SetterFunction;
+
+  private:
+    SetterFunction setter;
+    std::string    lastArgumentCalled;
+
+  public:
+    explicit CmdLineAlternativeFlagArgParser(SetterFunction&& setter);
+
+    std::string GetOptionHint() const override;
+    std::string GetPositionalHint(const std::string& positional) const override;
+
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override;
   };
 
   class OSMSCOUT_API CmdLineBoolArgParser : public CmdLineArgParser
@@ -114,12 +136,12 @@ namespace osmscout {
     SetterFunction setter;
 
   public:
-    CmdLineBoolArgParser(SetterFunction&& setter);
+    explicit CmdLineBoolArgParser(SetterFunction&& setter);
 
-    std::string GetOptionHint() const;
-    std::string GetPositionalHint(const std::string& positional) const;
+    std::string GetOptionHint() const override;
+    std::string GetPositionalHint(const std::string& positional) const override;
 
-    CmdLineParseResult Parse(CmdLineScanner& scanner);
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override;
   };
 
   class OSMSCOUT_API CmdLineStringArgParser : public CmdLineArgParser
@@ -131,12 +153,12 @@ namespace osmscout {
     SetterFunction setter;
 
   public:
-    CmdLineStringArgParser(SetterFunction&& setter);
+    explicit CmdLineStringArgParser(SetterFunction&& setter);
 
-    std::string GetOptionHint() const;
-    std::string GetPositionalHint(const std::string& positional) const;
+    std::string GetOptionHint() const override;
+    std::string GetPositionalHint(const std::string& positional) const override;
 
-    CmdLineParseResult Parse(CmdLineScanner& scanner);
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override;
   };
 
   class OSMSCOUT_API CmdLineStringListArgParser : public CmdLineArgParser
@@ -148,12 +170,12 @@ namespace osmscout {
     AppendFunction appender;
 
   public:
-    CmdLineStringListArgParser(AppendFunction&& appender);
+    explicit CmdLineStringListArgParser(AppendFunction&& appender);
 
-    std::string GetOptionHint() const;
-    std::string GetPositionalHint(const std::string& positional) const;
+    std::string GetOptionHint() const override;
+    std::string GetPositionalHint(const std::string& positional) const override;
 
-    CmdLineParseResult Parse(CmdLineScanner& scanner);
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override;
   };
 
   template<typename N>
@@ -166,23 +188,23 @@ namespace osmscout {
     SetterFunction setter;
 
   public:
-    CmdLineNumberArgParser(SetterFunction&& setter)
+    explicit CmdLineNumberArgParser(SetterFunction&& setter)
       : setter(setter)
     {
       // no code
     }
 
-    std::string GetOptionHint() const
+    std::string GetOptionHint() const override
     {
       return "number";
     }
 
-    std::string GetPositionalHint(const std::string& positional) const
+    std::string GetPositionalHint(const std::string& positional) const override
     {
       return positional;
     }
 
-    CmdLineParseResult Parse(CmdLineScanner& scanner)
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override
     {
       if (!scanner.HasNextArg()) {
         return CmdLineParseResult("Missing value for number argument '"+GetArgumentName()+"'");
@@ -210,18 +232,24 @@ namespace osmscout {
     SetterFunction setter;
 
   public:
-    CmdLineGeoCoordArgParser(SetterFunction&& setter);
+    explicit CmdLineGeoCoordArgParser(SetterFunction&& setter);
 
-    std::string GetOptionHint() const;
-    std::string GetPositionalHint(const std::string& positional) const;
+    std::string GetOptionHint() const override;
+    std::string GetPositionalHint(const std::string& positional) const override;
 
-    CmdLineParseResult Parse(CmdLineScanner& scanner);
+    CmdLineParseResult Parse(CmdLineScanner& scanner) override;
   };
 
   template<class ...Args>
   CmdLineArgParserRef CmdLineFlag(Args&& ...args)
   {
     return std::make_shared<CmdLineFlagArgParser>(std::forward<Args>(args)...);
+  }
+
+  template<class ...Args>
+  CmdLineArgParserRef CmdLineAlternativeFlag(Args&& ...args)
+  {
+    return std::make_shared<CmdLineAlternativeFlagArgParser>(std::forward<Args>(args)...);
   }
 
   template<class ...Args>
@@ -297,13 +325,16 @@ namespace osmscout {
     {
       CmdLineArgParserRef parser;
       std::string         option;
+      std::string         argument;
       bool                stopParsing;
 
       CmdLineOption(const CmdLineArgParserRef& parser,
                     const std::string& option,
+                    const std::string& argument,
                     bool stopParsing)
       : parser(parser),
         option(option),
+        argument(argument),
         stopParsing(stopParsing)
       {
         // no code

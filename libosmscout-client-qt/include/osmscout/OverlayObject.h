@@ -81,7 +81,7 @@ public:
   }
 
   bool set(const OverlayObject &other);
-  
+
   inline QString getTypeName() const
   {
     QMutexLocker locker(&lock);
@@ -93,7 +93,7 @@ public:
     typeName=name;
   }
 
-  inline int getSize(){
+  inline size_t getSize(){
     return nodes.size();
   }
 

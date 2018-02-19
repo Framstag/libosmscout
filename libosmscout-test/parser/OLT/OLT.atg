@@ -1,0 +1,153 @@
+#include <osmscout/RegionList.h>
+
+#include <osmscout/util/String.h>
+
+COMPILER OLT
+
+std::string Destring(const char* str)
+{
+  std::string result(str);
+
+  if (result.length()>=2 &&
+      result[0]=='"' &&
+      result[result.length()-1]=='"') {
+    result=result.substr(1,result.length()-2);
+  }
+
+  return result;
+}
+
+const osmscout::test::RegionList& GetRegionList() const
+{
+  return regionList;
+}
+
+CHARACTERS
+  letter     = 'a'..'z' + 'A'..'Z'.
+  digit      = '0'..'9'.
+  eol        = '\n'.
+  stringchar = ANY - '"'.
+  quotchar   = ANY.
+
+TOKENS
+  ident      = letter {letter | digit | '_'}.
+  number     = digit {digit}.
+  string     = '"' {stringchar | '\\' quotchar} '"'.
+
+COMMENTS FROM "/*" TO "*/" NESTED
+COMMENTS FROM "//" TO eol
+
+IGNORE '\t' + '\r' + '\n'
+
+PRODUCTIONS
+  OLT         = SYNC "OLT"
+                {
+                  (. osmscout::test::RegionRef region=std::make_shared<osmscout::test::Region>(); .)
+                  REGION<*region>
+                  (. regionList.AddRegion(region); .)
+                }
+                "END"
+                .
+
+  REGION<osmscout::test::Region& region>
+              = (.
+                  std::string name;
+                 .)
+                SYNC
+                (   "REGION"  (. region.SetPlaceType(osmscout::test::PlaceType::region); .)
+                  | "COUNTY"  (. region.SetPlaceType(osmscout::test::PlaceType::county); .)
+                  | "CITY"    (. region.SetPlaceType(osmscout::test::PlaceType::city); .)
+                  | "SUBURB"  (. region.SetPlaceType(osmscout::test::PlaceType::suburb); .)
+                  | "OBJECT"
+                )
+                [
+                  (. size_t adminLevel; .)
+                  "BOUNDARY"
+                  UINT<adminLevel> (. region.SetAdminLevel(adminLevel); .)
+                ]
+                [
+                  "NODE" (. region.SetIsNode(); .)
+                ]
+                STRING<name> (. region.SetName(name); .)
+                [
+                  "{"
+                    {
+                      (. osmscout::test::PostalAreaRef postalArea=std::make_shared<osmscout::test::PostalArea>(); .)
+                      POSTAL_AREA<*postalArea>
+                      (. region.AddPostalArea(postalArea); .)
+                    }
+                    {
+                      (. osmscout::test::RegionRef childRegion=std::make_shared<osmscout::test::Region>(); .)
+                      REGION<*childRegion>
+                      (. region.AddRegion(childRegion); .)
+                    }
+                  "}"
+                ]
+                .
+
+  POSTAL_AREA<osmscout::test::PostalArea& postalArea>
+              = (.
+                  std::string name;
+                 .)
+                SYNC
+                "POSTAL_AREA"
+                [
+                  STRING<name> (. postalArea.SetName(name); .)
+                ]
+                {
+                  (. osmscout::test::LocationRef location=std::make_shared<osmscout::test::Location>(); .)
+                  LOCATION<*location>
+                  (. postalArea.AddLocation(location); .)
+                }
+                .
+
+  LOCATION<osmscout::test::Location& location>
+              = (.
+                  std::string name;
+                 .)
+                SYNC
+                "LOCATION"
+                STRING<name> (. location.SetName(name); .)
+                {
+                  (. osmscout::test::AddressRef address=std::make_shared<osmscout::test::Address>(); .)
+                  ADDRESS<*address>
+                  (. location.AddAddress(address); .)
+                }
+                .
+
+  ADDRESS<osmscout::test::Address& address>
+              = (.
+                  std::string name;
+                 .)
+                SYNC
+                "ADDRESS" STRING<name> (. address.SetName(name); .)
+                [
+                  "["
+                  {
+                    (. std::string tagKey,tagValue; .)
+                    STRING<tagKey> "=" STRING<tagValue>
+                    (. address.AddTag(tagKey,tagValue); .)
+                  }
+                  "]"
+                ]
+                .
+
+  STRING<std::string& value>
+              = string
+                (.
+                  value=Destring(t->val);
+                .)
+                .
+
+  UINT<size_t& value>
+              = number
+                (.
+                  if (!StringToNumber(t->val,value)) {
+                    std::string e="Cannot parse number '"+std::string(t->val)+"'";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                .
+END OLT.
+

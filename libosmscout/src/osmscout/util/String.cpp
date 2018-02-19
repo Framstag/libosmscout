@@ -876,7 +876,7 @@ namespace osmscout {
     stream << buff.data();
 
     // add milliseconds
-    long millisFromEpoch = timestamp.time_since_epoch().count();
+    auto millisFromEpoch = timestamp.time_since_epoch().count();
     stream << (millisFromEpoch - ((millisFromEpoch / 1000) * 1000));
     stream << "Z";
     return stream.str();

@@ -922,12 +922,10 @@ namespace osmscout {
                               LineStyle::CapStyle endCap,
                               size_t transStart, size_t transEnd)
   {
-    QPen pen;
-
-    pen.setColor(QColor::fromRgbF(color.GetR(),
-                                  color.GetG(),
-                                  color.GetB(),
-                                  color.GetA()));
+    QPen pen(QColor::fromRgbF(color.GetR(),
+                              color.GetG(),
+                              color.GetB(),
+                              color.GetA()));
     pen.setWidthF(width);
     pen.setJoinStyle(Qt::RoundJoin);
 
@@ -956,23 +954,6 @@ namespace osmscout {
       pen.setDashPattern(dashes);
     }
 
-/*
-    painter->setPen(pen);
-    size_t last=0;
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          start=false;
-        }
-        else {
-          painter->drawLine(QPointF(nodeX[last],nodeY[last]),QPointF(nodeX[i],nodeY[i]));
-        }
-
-        last=i;
-      }
-    }*/
-
     QPainterPath p;
 
     p.moveTo(coordBuffer->buffer[transStart].GetX(),
@@ -983,16 +964,6 @@ namespace osmscout {
     }
 
     painter->strokePath(p,pen);
-/*
-    QPolygonF polygon;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        polygon << QPointF(nodeX[i],nodeY[i]);
-      }
-    }
-
-    painter->setPen(pen);
-    painter->drawPolyline(polygon);*/
 
     if (dash.empty() &&
         startCap==LineStyle::capRound &&
@@ -1008,8 +979,8 @@ namespace osmscout {
     }
 
     if (dash.empty() &&
-      endCap==LineStyle::capRound &&
-      startCap!=LineStyle::capRound) {
+        endCap==LineStyle::capRound &&
+        startCap!=LineStyle::capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),
@@ -1175,11 +1146,7 @@ namespace osmscout {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setRenderHint(QPainter::TextAntialiasing);
 
-    FillStyleRef      landFill;
-
-
-    styleConfig->GetLandFillStyle(projection,
-                                  landFill);
+    FillStyleRef landFill=styleConfig->GetLandFillStyle(projection);
 
     if (!landFill) {
       return;
@@ -1191,22 +1158,15 @@ namespace osmscout {
                  *landFill);
     }
 
-    FillStyleRef       seaFill;
-    FillStyleRef       coastFill;
-    FillStyleRef       unknownFill;
-    LineStyleRef       coastlineLine;
+    FillStyleRef       seaFill=styleConfig->GetSeaFillStyle(projection);
+    FillStyleRef       coastFill=styleConfig->GetCoastFillStyle(projection);
+    FillStyleRef       unknownFill=styleConfig->GetUnknownFillStyle(projection);
+    LineStyleRef       coastlineLine=styleConfig->GetCoastlineLineStyle(projection);
     std::vector<Point> points;
     size_t             start=0; // Make the compiler happy
     size_t             end=0;   // Make the compiler happy
 
-    styleConfig->GetSeaFillStyle(projection,
-                                 seaFill);
-    styleConfig->GetCoastFillStyle(projection,
-                                   coastFill);
-    styleConfig->GetUnknownFillStyle(projection,
-                                     unknownFill);
-    styleConfig->GetCoastlineLineStyle(projection,
-                                       coastlineLine);
+    ;
 
     if (!seaFill) {
       return;
@@ -1476,6 +1436,28 @@ namespace osmscout {
     return Draw(projection,
                 parameter,
                 data);
+  }
+
+  MapPainterBatchQt::MapPainterBatchQt(size_t expectedCount):
+    MapPainterBatch(expectedCount) {}
+
+  MapPainterBatchQt::~MapPainterBatchQt(){}
+
+  bool MapPainterBatchQt::paint(const Projection& projection,
+                                const MapParameter& parameter,
+                                QPainter* qPainter)
+  {
+    qPainter->setRenderHint(QPainter::Antialiasing);
+    qPainter->setRenderHint(QPainter::TextAntialiasing);
+
+    // prepare map painters - lock and setup Qt painter
+    std::vector<std::unique_lock<std::mutex>> locks(data.size());
+    for (MapPainterQt* painter: painters){
+      locks.push_back(std::move(std::unique_lock<std::mutex>(painter->mutex)));
+      painter->painter = qPainter;
+    }
+
+    return batchPaintInternal(projection,parameter);
   }
 }
 

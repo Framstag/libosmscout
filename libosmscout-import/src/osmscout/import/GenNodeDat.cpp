@@ -30,7 +30,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/Preprocess.h>
@@ -40,7 +39,7 @@ namespace osmscout {
   const char* NodeDataGenerator::NODES_TMP="nodes.tmp";
 
   void NodeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
-                                                   ImportModuleDescription& description) const
+                                         ImportModuleDescription& description) const
   {
     description.SetName("NodeDataGenerator");
     description.SetDescription("Convert raw nodes to nodes");
@@ -124,7 +123,7 @@ namespace osmscout {
       return false;
     }
 
-    progress.Info(std::string("Read "+NumberToString(nodesReadCount)+" nodes, wrote "+NumberToString(nodesWrittenCount)+" nodes"));
+    progress.Info(std::string("Read "+std::to_string(nodesReadCount)+" nodes, wrote "+std::to_string(nodesWrittenCount)+" nodes"));
 
     return true;
   }

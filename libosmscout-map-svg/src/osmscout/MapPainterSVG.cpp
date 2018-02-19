@@ -24,8 +24,6 @@
 #include <limits>
 #include <list>
 
-#include <osmscout/util/String.h>
-
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -142,7 +140,7 @@ namespace osmscout {
       std::map<FillStyle,std::string>::const_iterator entry=fillStyleNameMap.find(*area.fillStyle);
 
       if (entry==fillStyleNameMap.end()) {
-        std::string name="area_"+NumberToString(nextAreaId);
+        std::string name="area_"+std::to_string(nextAreaId);
 
         fillStyleNameMap.insert(std::make_pair(*area.fillStyle,name));
 
@@ -195,7 +193,7 @@ namespace osmscout {
       std::map<LineStyle,std::string>::const_iterator entry=lineStyleNameMap.find(*way.lineStyle);
 
       if (entry==lineStyleNameMap.end()) {
-        std::string name="way_"+NumberToString(nextWayId);
+        std::string name="way_"+std::to_string(nextWayId);
 
         lineStyleNameMap.insert(std::make_pair(*way.lineStyle,name));
 

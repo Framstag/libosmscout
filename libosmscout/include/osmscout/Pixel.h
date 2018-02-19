@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <string>
+
 #include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/system/Types.h>
@@ -74,6 +76,14 @@ namespace osmscout {
     inline uint64_t GetId() const
     {
       return InterleaveNumbers(x,y);
+    }
+
+    std::string GetDisplayText() const;
+
+    inline std::ostream& operator<<(std::ostream& stream)
+    {
+      stream << GetDisplayText();
+      return stream;
     }
   };
 

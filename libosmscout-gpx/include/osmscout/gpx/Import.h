@@ -28,8 +28,6 @@
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/Breaker.h>
 
-#include <libxml/parser.h>
-
 #include <cstdio>
 #include <string>
 

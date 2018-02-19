@@ -153,7 +153,7 @@ namespace osmscout {
                      std::list<MultipolygonPart>& groups,
                      GroupingState& state,
                      size_t topIndex,
-                     size_t id);
+                     uint8_t id);
 
     bool BuildRings(const TypeConfig& typeConfig,
                     const ImportParameter& parameter,
@@ -223,11 +223,11 @@ namespace osmscout {
 
   public:
     void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const;
+                        ImportModuleDescription& description) const override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,
-                Progress& progress);
+                Progress& progress) override;
   };
 }
 

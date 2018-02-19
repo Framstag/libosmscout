@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(libosmscout C CXX)
 
@@ -168,6 +168,12 @@ option(OSMSCOUT_BUILD_IMPORT "Enable build of import library" ON)
 if(OSMSCOUT_BUILD_IMPORT)
   set(OSMSCOUT_BUILD_IMPORT OFF CACHE INTERNAL "" FORCE)
   add_subdirectory(libosmscout-import)
+endif()
+
+option(OSMSCOUT_BUILD_TEST "Enable build of test library" ON)
+if(OSMSCOUT_BUILD_TEST)
+  set(OSMSCOUT_BUILD_TEST OFF CACHE INTERNAL "" FORCE)
+  add_subdirectory(libosmscout-test)
 endif()
 
 option(OSMSCOUT_BUILD_GPX "Enable build of gpx library" ON)

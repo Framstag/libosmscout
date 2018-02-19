@@ -14,7 +14,7 @@ Rectangle {
 
   signal clicked
   
-  width: Theme.mapButtonWidth
+  width: Math.max(Theme.mapButtonWidth, mapButtonLabel.width + Theme.horizSpace*2)
   height: Theme.mapButtonHeight
   color: defaultColor
   border.color: "grey"

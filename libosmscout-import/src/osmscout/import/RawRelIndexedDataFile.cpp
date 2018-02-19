@@ -21,8 +21,8 @@
 
 namespace osmscout {
 
-  RawRelationIndexedDataFile::RawRelationIndexedDataFile(unsigned long indexCacheSize,
-                                                         unsigned long dataCacheSize)
+  RawRelationIndexedDataFile::RawRelationIndexedDataFile(size_t indexCacheSize,
+                                                         size_t dataCacheSize)
   : IndexedDataFile<OSMId,RawRelation>("rawrels.dat",
                                        "rawrel.idx",
                                        indexCacheSize,

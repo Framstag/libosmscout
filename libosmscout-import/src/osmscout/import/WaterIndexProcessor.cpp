@@ -142,8 +142,8 @@ namespace osmscout {
                                                    bool coast)
   {
     //std::cout << "       " << (coast?"*":"+") << " " << point.GetDisplayText() << std::endl;
-    GroundTile::Coord coord(floor((point.GetLon()-cellMinLon)/stateMap.GetCellWidth()*GroundTile::Coord::CELL_MAX+0.5),
-                            floor((point.GetLat()-cellMinLat)/stateMap.GetCellHeight()*GroundTile::Coord::CELL_MAX+0.5),
+    GroundTile::Coord coord(static_cast<uint16_t>(floor((point.GetLon()-cellMinLon)/stateMap.GetCellWidth()*GroundTile::Coord::CELL_MAX+0.5)),
+                            static_cast<uint16_t>(floor((point.GetLat()-cellMinLat)/stateMap.GetCellHeight()*GroundTile::Coord::CELL_MAX+0.5)),
                             coast);
 
     return coord;
@@ -947,7 +947,7 @@ namespace osmscout {
             size_t          intersectionCount=0;
             IntersectionRef firstIntersection=std::make_shared<Intersection>();
             IntersectionRef secondIntersection=std::make_shared<Intersection>();
-            size_t          corner=0;
+            uint8_t         corner=0;
 
             // Check intersection with one of the borders
             while (corner<4) {
@@ -1269,7 +1269,7 @@ namespace osmscout {
                                 intersections);
 
           if (!intersections.empty()) {
-            progress.Warning("Detected intersection "+NumberToString(coasts[i]->id)+" <> "+NumberToString(coasts[j]->id));
+            progress.Warning("Detected intersection "+std::to_string(coasts[i]->id)+" <> "+std::to_string(coasts[j]->id));
 
             if (a->isArea && !b->isArea) {
               transformedCoastlines[i]=NULL;
@@ -1346,7 +1346,7 @@ namespace osmscout {
     // Fix the vector size to remove unused slots (because of filtering by min area size)
     data.coastlines.resize(curCoast);
 
-    progress.Info("Initial "+NumberToString(coastlines.size())+" coastline(s) transformed to "+NumberToString(data.coastlines.size())+" coastline(s)");
+    progress.Info("Initial "+std::to_string(coastlines.size())+" coastline(s) transformed to "+std::to_string(data.coastlines.size())+" coastline(s)");
   }
 
   void WaterIndexProcessor::WalkBorderCW(GroundTile& groundTile,
@@ -2078,9 +2078,9 @@ namespace osmscout {
     }
 
     clock.Stop();
-    progress.Info(NumberToString(boundingPolygons.size())+" bouding polygon(s), and "+
-                  NumberToString(allCoastlines.size())+" coastline(s) synthesized into "+
-                  NumberToString(synthesized.size())+" coastlines(s), took "+
+    progress.Info(std::to_string(boundingPolygons.size())+" bouding polygon(s), and "+
+                  std::to_string(allCoastlines.size())+" coastline(s) synthesized into "+
+                  std::to_string(synthesized.size())+" coastlines(s), took "+
                   clock.ResultString() +" s"
                  );
 
@@ -2164,18 +2164,18 @@ namespace osmscout {
       }
 
       if ((coastline->isArea && coastline->coast.size()<=2) || coastline->coast.size()<2) {
-        progress.Warning("Dropping to short coastline with id "+NumberToString(coastline->id));
+        progress.Warning("Dropping to short coastline with id "+std::to_string(coastline->id));
         continue;
       }
 
       //if (!coastline->isArea){
-      //  WriteGpx(coastline->coast, "coastway-"+NumberToString(coastline->id)+".gpx");
+      //  WriteGpx(coastline->coast, "coastway-"+std::to_string(coastline->id)+".gpx");
       //}
 
       mergedCoastlines.push_back(coastline);
     }
 
-    progress.Info(NumberToString(wayCoastCount)+" way coastline(s), "+NumberToString(areaCoastCount)+" area coastline(s)");
+    progress.Info(std::to_string(wayCoastCount)+" way coastline(s), "+std::to_string(areaCoastCount)+" area coastline(s)");
 
     coastlines=mergedCoastlines;
   }
@@ -2204,13 +2204,13 @@ namespace osmscout {
      * split candidate and ways separately
      */
     for (const auto& c : candidates) {
-      //WriteGpx(c->coast,"candidate"+NumberToString(ci)+".gpx");
+      //WriteGpx(c->coast,"candidate"+std::to_string(ci)+".gpx");
       std::vector<PathIntersection> candidateIntersections;
 
       size_t wi=0;
       for (const auto& coastline : coastlines) {
 
-        //WriteGpx(coastline->coast,"coastline-"+NumberToString(coastline->id)+".gpx");
+        //WriteGpx(coastline->coast,"coastline-"+std::to_string(coastline->id)+".gpx");
         // try to find intersections between this candidate and way
         std::vector<PathIntersection> intersections;
 
@@ -2233,8 +2233,8 @@ namespace osmscout {
         }
 
         if (valid%2!=0) {
-          progress.Warning("Odd count ("+NumberToString(valid)+") of valid intersections. "+
-                           "Coastline "+NumberToString(coastline->id));
+          progress.Warning("Odd count ("+std::to_string(valid)+") of valid intersections. "+
+                           "Coastline "+std::to_string(coastline->id));
         }
 
         wi++;
@@ -2246,7 +2246,7 @@ namespace osmscout {
       }
       else {
         if (candidateIntersections.size()%2!=0) {
-          progress.Warning("Odd count of intersections: "+NumberToString(candidateIntersections.size()));
+          progress.Warning("Odd count of intersections: "+std::to_string(candidateIntersections.size()));
           continue;
         }
 
@@ -2318,7 +2318,7 @@ namespace osmscout {
       }
 
       if (intersections.size()%2!=0) {
-        progress.Warning("Odd count of intersections: "+NumberToString(intersections.size()));
+        progress.Warning("Odd count of intersections: "+std::to_string(intersections.size()));
         continue;
       }
 
@@ -2401,10 +2401,10 @@ namespace osmscout {
       level.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
       progress.Info("Writing index for level "+
-                    NumberToString(level.level)+", "+
-                    NumberToString(level.stateMap.GetXCount()*level.stateMap.GetYCount())+" cells, "+
-                    NumberToString(cellGroundTileMap.size())+" entries, "+
-                    NumberToString(level.dataOffsetBytes)+" bytes/entry, "+
+                    std::to_string(level.level)+", "+
+                    std::to_string(level.stateMap.GetXCount()*level.stateMap.GetYCount())+" cells, "+
+                    std::to_string(cellGroundTileMap.size())+" entries, "+
+                    std::to_string(level.dataOffsetBytes)+" bytes/entry, "+
                     ByteSizeToString(1.0*level.stateMap.GetXCount()*level.stateMap.GetYCount()*level.dataOffsetBytes+dataSize));
 
       //

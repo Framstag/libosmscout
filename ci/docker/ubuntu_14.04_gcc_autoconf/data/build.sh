@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ $# -ge 1 ] ; then
   REPO="$1"
@@ -17,7 +18,6 @@ git clone -b "$BRANCH" "$REPO" libosmscout
 cd libosmscout
 . ./setupAutoconf.sh
 
-export LANG="C.Utf8"
 env
 
 make full

@@ -52,15 +52,7 @@ namespace osmscout {
      database(database),
      filenamebase(filenamebase),
      accessReader(*database->GetTypeConfig()),
-     isOpen(false),
-     routeNodeDataFile(GetDataFilename(filenamebase),
-                       GetIndexFilename(filenamebase),
-                       /*indexCacheSize*/ 12000,
-                       /*dataCacheSize*/ 1000),
-     junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
-                      RoutingService::FILENAME_INTERSECTIONS_IDX,
-                      /*indexCacheSize*/ 10000,
-                      /*dataCacheSize*/ 1000)
+     isOpen(false)
   {
     assert(database);
   }
@@ -93,7 +85,7 @@ namespace osmscout {
                                     const RouteNode& routeNode,
                                     size_t pathIndex)
   {
-    return profile.CanUse(routeNode,objectVariantDataFile.GetData(),pathIndex);
+    return profile.CanUse(routeNode,routingDatabase.GetObjectVariantData(),pathIndex);
   }
 
   bool SimpleRoutingService::CanUseForward(const RoutingProfile& profile,
@@ -115,7 +107,7 @@ namespace osmscout {
                                         const RouteNode& routeNode,
                                         size_t pathIndex)
   {
-    return profile.GetCosts(routeNode,objectVariantDataFile.GetData(),pathIndex);
+    return profile.GetCosts(routeNode,routingDatabase.GetObjectVariantData(),pathIndex);
   }
 
   double SimpleRoutingService::GetCosts(const RoutingProfile& profile,
@@ -144,7 +136,7 @@ namespace osmscout {
                                           const Id &id,
                                           RouteNodeRef &node)
   {
-    return routeNodeDataFile.Get(id, node);
+    return routingDatabase.GetRouteNode(id,node);
   }
 
   bool SimpleRoutingService::GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
@@ -153,35 +145,171 @@ namespace osmscout {
     if (routeNodeOffsets.empty()){
       return true;
     }
+
     std::vector<FileOffset> offsets(routeNodeOffsets.size());
+
     std::transform(routeNodeOffsets.begin(),routeNodeOffsets.end(),offsets.begin(),
-                   [](const DBFileOffset &dbOff){return dbOff.offset;});
+                   [](const DBFileOffset& dbOff) {
+                     return dbOff.offset;
+                   });
 
     std::unordered_map<FileOffset,RouteNodeRef> nodeMap;
-    if (!routeNodeDataFile.GetByOffset(offsets.begin(),
-                                       offsets.end(),
-                                       offsets.size(),
-                                       nodeMap)){
+
+    if (!routingDatabase.GetRouteNodesByOffset(offsets,nodeMap)) {
       return false;
     }
+
     DatabaseId dbId=routeNodeOffsets.begin()->database;
-    for (auto const &entry:nodeMap){
+
+    for (auto const& entry : nodeMap) {
       routeNodeMap[DBFileOffset(dbId,entry.first)]=entry.second;
     }
+
     return true;
   }
 
   bool SimpleRoutingService::GetRouteNodeByOffset(const DBFileOffset &offset,
-                                                  RouteNodeRef &node)
+                                                  RouteNodeRef& node)
   {
-    return routeNodeDataFile.GetByOffset(offset.offset, node);
+    return routingDatabase.GetRouteNodeByOffset(offset.offset,
+                                                node);
   }
 
-  bool SimpleRoutingService::GetRouteNodeOffset(const DatabaseId &/*database*/,
-                                                const Id &id,
-                                                FileOffset &offset)
+  bool SimpleRoutingService::GetWayByOffset(const DBFileOffset &offset,
+                                            WayRef &way)
   {
-    return routeNodeDataFile.GetOffset(id,offset);
+    WayDataFileRef wayDataFile(database->GetWayDataFile());
+
+    if (!wayDataFile) {
+      return false;
+    }
+
+    return wayDataFile->GetByOffset(offset.offset,way);
+  }
+
+  bool SimpleRoutingService::GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
+                                             std::unordered_map<DBFileOffset,WayRef> &wayMap)
+  {
+    if (wayOffsets.empty()){
+      return true;
+    }
+
+    WayDataFileRef wayDataFile(database->GetWayDataFile());
+
+    if (!wayDataFile) {
+      return false;
+    }
+
+    std::vector<FileOffset> offsets(wayOffsets.size());
+    std::transform(wayOffsets.begin(),wayOffsets.end(),offsets.begin(),
+                   [](const DBFileOffset& dbOff) {
+                     return dbOff.offset;
+                   });
+
+    std::unordered_map<FileOffset,WayRef> map;
+    if (!wayDataFile->GetByOffset(offsets.begin(),
+                                  offsets.end(),
+                                  offsets.size(),
+                                  map)) {
+      return false;
+    }
+
+    DatabaseId dbId=wayOffsets.begin()->database;
+    for (const auto &entry:map) {
+      wayMap[DBFileOffset(dbId,entry.first)]=entry.second;
+    }
+
+    return true;
+  }
+
+  bool SimpleRoutingService::GetAreaByOffset(const DBFileOffset &offset,
+                                             AreaRef &area)
+  {
+    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
+    if (!areaDataFile){
+      return false;
+    }
+    return areaDataFile->GetByOffset(offset.offset,area);
+  }
+
+  bool SimpleRoutingService::GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
+                                              std::unordered_map<DBFileOffset,AreaRef> &areaMap)
+  {
+    if (areaOffsets.empty()){
+      return true;
+    }
+
+    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
+
+    if (!areaDataFile){
+      return false;
+    }
+
+    std::vector<FileOffset> offsets(areaOffsets.size());
+    std::transform(areaOffsets.begin(),areaOffsets.end(),offsets.begin(),
+                   [](const DBFileOffset &dbOff){return dbOff.offset;});
+
+    std::unordered_map<FileOffset,AreaRef> map;
+    if (!areaDataFile->GetByOffset(offsets.begin(),
+                                   offsets.end(),
+                                   offsets.size(),
+                                   map)) {
+      return false;
+    }
+
+    DatabaseId dbId=areaOffsets.begin()->database;
+    for (const auto &entry:map){
+      areaMap[DBFileOffset(dbId,entry.first)]=entry.second;
+    }
+
+    return true;
+  }
+
+  bool SimpleRoutingService::ResolveRouteDataJunctions(RouteData& route)
+  {
+    std::set<Id>             nodeIds;
+    std::vector<JunctionRef> junctions;
+
+    for (const auto& routeEntry : route.Entries()) {
+      if (routeEntry.GetCurrentNodeId()!=0) {
+        nodeIds.insert(routeEntry.GetCurrentNodeId());
+      }
+    }
+
+    if (!routingDatabase.GetJunctions(nodeIds,junctions)) {
+      return false;
+    }
+
+    nodeIds.clear();
+
+    std::unordered_map<Id,JunctionRef> junctionMap;
+
+    for (const auto& junction : junctions) {
+      junctionMap.insert(std::make_pair(junction->GetId(),junction));
+    }
+
+    junctions.clear();
+
+    for (auto& routeEntry : route.Entries()) {
+      if (routeEntry.GetCurrentNodeId()!=0) {
+        auto junctionEntry=junctionMap.find(routeEntry.GetCurrentNodeId());
+
+        if (junctionEntry!=junctionMap.end()) {
+          routeEntry.SetObjects(junctionEntry->second->GetObjects());
+        }
+      }
+    }
+
+    return true;
+  }
+
+  std::vector<DBFileOffset> SimpleRoutingService::GetNodeTwins(const RoutingProfile& /*state*/,
+                                                               const DatabaseId /*database*/,
+                                                               const Id /*id*/)
+  {
+    std::vector<DBFileOffset> result;
+
+    return result;
   }
 
   /**
@@ -196,23 +324,7 @@ namespace osmscout {
 
     assert(!path.empty());
 
-    StopClock timer;
-
-    if (!routeNodeDataFile.Open(database->GetTypeConfig(),
-                                path,
-                                true,
-                                database->GetRouterDataMMap())) {
-      log.Error() << "Cannot open '" <<  path << "'!";
-      return false;
-    }
-
-    timer.Stop();
-
-    log.Debug() << "Opening RouteNodeData: " << timer.ResultString();
-
-    if (!objectVariantDataFile.Load(*database->GetTypeConfig(),
-                                    AppendFileToDir(path,
-                                                    GetData2Filename(filenamebase)))) {
+    if (!routingDatabase.Open(database)) {
       return false;
     }
 
@@ -237,7 +349,7 @@ namespace osmscout {
    */
   void SimpleRoutingService::Close()
   {
-    routeNodeDataFile.Close();
+    routingDatabase.Close();
 
     isOpen=false;
   }
@@ -251,168 +363,6 @@ namespace osmscout {
   TypeConfigRef SimpleRoutingService::GetTypeConfig() const
   {
     return database->GetTypeConfig();
-  }
-
-  /**
-   * Calculate a route
-   *
-   * @param profile
-   *    Profile to use
-   * @param start
-   *    Start of the route
-   * @param target
-   *    Target of teh route
-   * @param progress
-   *    Optional callback for handling routing progress
-   * @param route
-   *    The route object holding the resulting route on success
-   * @return
-   *    True, if the engine was able to find a route, else false
-   */
-  RoutingResult SimpleRoutingService::CalculateRoute(RoutingProfile& profile, // TODO: make it const!
-                                                     const RoutePosition& start,
-                                                     const RoutePosition& target,
-                                                     const RoutingParameter& parameter)
-  {
-    return AbstractRoutingService<RoutingProfile>::CalculateRoute(profile,start,target,parameter);
-  }
-
-  bool SimpleRoutingService::GetWayByOffset(const DBFileOffset &offset,
-                                            WayRef &way)
-  {
-    WayDataFileRef  wayDataFile(database->GetWayDataFile());
-    if (!wayDataFile) {
-      return false;
-    }
-    return wayDataFile->GetByOffset(offset.offset,way);
-  }
-
-  bool SimpleRoutingService::GetWaysByOffset(const std::set<DBFileOffset> &wayOffsets,
-                                             std::unordered_map<DBFileOffset,WayRef> &wayMap)
-  {
-    if (wayOffsets.empty()){
-      return true;
-    }
-    WayDataFileRef wayDataFile(database->GetWayDataFile());
-    if (!wayDataFile) {
-      return false;
-    }
-    std::vector<FileOffset> offsets(wayOffsets.size());
-    std::transform(wayOffsets.begin(),wayOffsets.end(),offsets.begin(),
-                   [](const DBFileOffset &dbOff){return dbOff.offset;});
-
-    std::unordered_map<FileOffset,WayRef> map;
-    if (!wayDataFile->GetByOffset(offsets.begin(),
-                                  offsets.end(),
-                                  offsets.size(),
-                                  map)){
-      return false;
-    }
-    DatabaseId dbId=wayOffsets.begin()->database;
-    for (const auto &entry:map){
-      wayMap[DBFileOffset(dbId,entry.first)]=entry.second;
-    }
-    return true;
-  }
-
-  bool SimpleRoutingService::GetAreaByOffset(const DBFileOffset &offset,
-                                             AreaRef &area)
-  {
-    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
-    if (!areaDataFile){
-      return false;
-    }
-    return areaDataFile->GetByOffset(offset.offset,area);
-  }
-
-  bool SimpleRoutingService::GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
-                                              std::unordered_map<DBFileOffset,AreaRef> &areaMap)
-  {
-    if (areaOffsets.empty()){
-      return true;
-    }
-    AreaDataFileRef areaDataFile(database->GetAreaDataFile());
-    if (!areaDataFile){
-      return false;
-    }
-    std::vector<FileOffset> offsets(areaOffsets.size());
-    std::transform(areaOffsets.begin(),areaOffsets.end(),offsets.begin(),
-                   [](const DBFileOffset &dbOff){return dbOff.offset;});
-
-    std::unordered_map<FileOffset,AreaRef> map;
-    if (!areaDataFile->GetByOffset(offsets.begin(),
-                                   offsets.end(),
-                                   offsets.size(),
-                                   map)) {
-      return false;
-    }
-    DatabaseId dbId=areaOffsets.begin()->database;
-    for (const auto &entry:map){
-      areaMap[DBFileOffset(dbId,entry.first)]=entry.second;
-    }
-    return true;
-  }
-
-  bool SimpleRoutingService::ResolveRouteDataJunctions(RouteData& route)
-  {
-    std::set<Id> nodeIds;
-
-    for (const auto& routeEntry : route.Entries()) {
-      if (routeEntry.GetCurrentNodeId()!=0) {
-        nodeIds.insert(routeEntry.GetCurrentNodeId());
-      }
-    }
-
-    if (!junctionDataFile.IsOpen()) {
-      StopClock timer;
-
-      if (!junctionDataFile.Open(database->GetTypeConfig(),
-                                 path,
-                                 false,
-                                 false)) {
-        return false;
-      }
-
-      timer.Stop();
-
-      log.Debug() << "Opening JunctionDataFile: " << timer.ResultString();
-    }
-
-    std::vector<JunctionRef> junctions;
-
-    if (!junctionDataFile.Get(nodeIds,
-                              junctions)) {
-      log.Error() << "Error while resolving junction ids to junctions";
-    }
-
-    nodeIds.clear();
-
-    std::unordered_map<Id,JunctionRef> junctionMap;
-
-    for (const auto& junction : junctions) {
-      junctionMap.insert(std::make_pair(junction->GetId(),junction));
-    }
-
-    junctions.clear();
-
-    for (auto& routeEntry : route.Entries()) {
-      if (routeEntry.GetCurrentNodeId()!=0) {
-        auto junctionEntry=junctionMap.find(routeEntry.GetCurrentNodeId());
-        if (junctionEntry!=junctionMap.end()) {
-          routeEntry.SetObjects(junctionEntry->second->GetObjects());
-        }
-      }
-    }
-
-    return junctionDataFile.Close();
-  }
-
-  std::vector<DBFileOffset> SimpleRoutingService::GetNodeTwins(const RoutingProfile& /*state*/,
-                                                               const DatabaseId /*database*/,
-                                                               const Id /*id*/)
-  {
-    std::vector<DBFileOffset> result;
-    return result;
   }
 
   /**
@@ -430,10 +380,10 @@ namespace osmscout {
    *    A RoutingResult object
    */
 
-  RoutingResult SimpleRoutingService::CalculateRoute(RoutingProfile& profile,
-                                                     std::vector<osmscout::GeoCoord> via,
-                                                     double radius,
-                                                     const RoutingParameter& parameter)
+  RoutingResult SimpleRoutingService::CalculateRouteViaCoords(RoutingProfile& profile,
+                                                              std::vector<osmscout::GeoCoord> via,
+                                                              double radius,
+                                                              const RoutingParameter& parameter)
   {
     RoutingResult                        result;
     std::vector<size_t>                  nodeIndexes;
@@ -462,8 +412,12 @@ namespace osmscout {
       RoutingResult              partialResult;
 
       partialResult=CalculateRoute(profile,
-                                   RoutePosition(fromObject,fromNodeIndex,/*database*/0),
-                                   RoutePosition(toObject,toNodeIndex,/*database*/0),
+                                   RoutePosition(fromObject,
+                                                 fromNodeIndex,/*database*/
+                                                 0),
+                                   RoutePosition(toObject,
+                                                 toNodeIndex,/*database*/
+                                                 0),
                                    parameter);
       if (!partialResult.Success()) {
         result.GetRoute().Clear();
@@ -635,7 +589,7 @@ namespace osmscout {
         }
       }
     }
-      
+
     radius = minDistance;
     return position;
   }

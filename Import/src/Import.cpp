@@ -28,7 +28,6 @@
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/Import.h>
 
@@ -247,9 +246,9 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
   progress.Info(std::string("typefile: ")+parameter.GetTypefile());
   progress.Info(std::string("Destination directory: ")+parameter.GetDestinationDirectory());
   progress.Info(std::string("Steps: ")+
-                osmscout::NumberToString(parameter.GetStartStep())+
+                std::to_string(parameter.GetStartStep())+
                 " - "+
-                osmscout::NumberToString(parameter.GetEndStep()));
+                std::to_string(parameter.GetEndStep()));
 
 
 
@@ -261,13 +260,13 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
                 (parameter.GetStrictAreas() ? "true" : "false"));
 
   progress.Info(std::string("ProcessingQueueSize: ")+
-                osmscout::NumberToString(parameter.GetProcessingQueueSize()));
+                std::to_string(parameter.GetProcessingQueueSize()));
 
   progress.Info(std::string("NumericIndexPageSize: ")+
-                osmscout::NumberToString(parameter.GetNumericIndexPageSize()));
+                std::to_string(parameter.GetNumericIndexPageSize()));
 
   progress.Info(std::string("RawCoordBlockSize: ")+
-                osmscout::NumberToString(parameter.GetRawCoordBlockSize()));
+                std::to_string(parameter.GetRawCoordBlockSize()));
 
   progress.Info(std::string("RawNodeDataMemoryMaped: ")+
                 (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
@@ -277,39 +276,39 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
   progress.Info(std::string("RawWayDataMemoryMaped: ")+
                 (parameter.GetRawWayDataMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("RawWayIndexCacheSize: ")+
-                osmscout::NumberToString(parameter.GetRawWayIndexCacheSize()));
+                std::to_string(parameter.GetRawWayIndexCacheSize()));
   progress.Info(std::string("RawWayBlockSize: ")+
-                osmscout::NumberToString(parameter.GetRawWayBlockSize()));
+                std::to_string(parameter.GetRawWayBlockSize()));
 
 
   progress.Info(std::string("SortObjects: ")+
                 (parameter.GetSortObjects() ? "true" : "false"));
   progress.Info(std::string("SortBlockSize: ")+
-                osmscout::NumberToString(parameter.GetSortBlockSize()));
+                std::to_string(parameter.GetSortBlockSize()));
 
   progress.Info(std::string("CoordDataMemoryMaped: ")+
                 (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("CoordIndexCacheSize: ")+
-                osmscout::NumberToString(parameter.GetCoordIndexCacheSize()));
+                std::to_string(parameter.GetCoordIndexCacheSize()));
   progress.Info(std::string("CoordBlockSize: ")+
-                osmscout::NumberToString(parameter.GetCoordBlockSize()));
+                std::to_string(parameter.GetCoordBlockSize()));
 
   progress.Info(std::string("AreaDataMemoryMaped: ")+
                 (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("AreaDataCacheSize: ")+
-                osmscout::NumberToString(parameter.GetAreaDataCacheSize()));
+                std::to_string(parameter.GetAreaDataCacheSize()));
 
   progress.Info(std::string("WayDataMemoryMaped: ")+
                 (parameter.GetWayDataMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("WayDataCacheSize: ")+
-                osmscout::NumberToString(parameter.GetWayDataCacheSize()));
+                std::to_string(parameter.GetWayDataCacheSize()));
 
   progress.Info(std::string("RouteNodeBlockSize: ")+
-                osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
+                std::to_string(parameter.GetRouteNodeBlockSize()));
 
 
   progress.Info(std::string("MaxAdminLevel: ")+
-                osmscout::NumberToString(parameter.GetMaxAdminLevel()));
+                std::to_string(parameter.GetMaxAdminLevel()));
 
   progress.Info(std::string("Eco: ")+
                 (parameter.IsEco() ? "true" : "false"));
@@ -882,7 +881,7 @@ int main(int argc, char* argv[])
       }
     }
   }
-  catch (osmscout::IOException& e) {
+  catch (osmscout::IOException& /*e*/) {
     // we ignore this exception, since it is likely a "not implemented" exception
   }
 

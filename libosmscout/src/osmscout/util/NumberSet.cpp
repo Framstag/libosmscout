@@ -19,115 +19,59 @@
 
 #include <osmscout/util/NumberSet.h>
 
-#include <osmscout/system/Types.h>
-
-#include <stdio.h>
+#include <limits>
 
 namespace osmscout {
 
-  NumberSet::Data::~Data()
-  {
-    // no code
-  }
-
-  NumberSet::Refs::Refs()
-  {
-    for (size_t i=0; i<256; i++) {
-      refs[i]=NULL;
-    }
-  }
-
-  NumberSet::Refs::~Refs()
-  {
-    for (size_t i=0; i<256; i++) {
-      delete refs[i];
-    }
-  }
-
-  NumberSet::Leaf::Leaf()
-  {
-    for (size_t i=0; i<32; i++) {
-      values[i]=0;
-    }
-  }
-
   NumberSet::NumberSet()
+    : count(0)
   {
     // no code
   }
 
-  NumberSet::~NumberSet()
+  void NumberSet::Set(Id id)
   {
-    // no code
+    size_t resolvedId=id+std::numeric_limits<Id>::min();
+    size_t offset=resolvedId/(4096/2);
+
+    auto entry=map.find(offset);
+
+    if (entry==map.end()) {
+      entry=map.insert(std::make_pair(offset,Bitset())).first;
+    }
+
+    size_t index=resolvedId%4096;
+
+    if (!entry->second[index]) {
+      count++;
+      entry->second.set(index);
+    }
   }
 
-  void NumberSet::Insert(Number value)
+  bool NumberSet::IsSet(Id id) const
   {
-    unsigned char byte;
-    Refs          *r=&refs;
+    size_t resolvedId=id+std::numeric_limits<Id>::min();
+    size_t offset=resolvedId/(4096/2);
 
-    byte=value >> (sizeof(Number)-1)*8;
+    auto entry=map.find(offset);
 
-    if (r->refs[byte]==NULL) {
-      r->refs[byte]=new Refs();
+    if (entry==map.end()) {
+      return false;
     }
 
-    for (size_t i=2; i<sizeof(Number)-1; i++) {
-      r=static_cast<Refs*>(r->refs[byte]);
+    size_t index=resolvedId%4096;
 
-      byte=(unsigned char)(value >> (sizeof(Number)-i)*8);
-
-      if (r->refs[byte]==NULL) {
-        r->refs[byte]=new Refs();
-      }
-    }
-
-    r=static_cast<Refs*>(r->refs[byte]);
-
-    byte=(unsigned char)(value >> 1*8);
-
-    if (r->refs[byte]==NULL) {
-      r->refs[byte]=new Leaf();
-    }
-
-    Leaf *l=static_cast<Leaf*>(r->refs[byte]);
-
-    byte=value & 0xff;
-
-    size_t by=byte/32;
-    size_t bi=byte%8;
-
-    l->values[by]|=(1 << bi);
+    return entry->second[index];
   }
 
-  bool NumberSet::IsSet(Number value) const
+  size_t NumberSet::GetNodeUsedCount() const
   {
-    unsigned char byte;
-    const Refs    *r=&refs;
+    return count;
+  }
 
-    byte=value >> (sizeof(Number)-1)*8;
-
-    if (r->refs[byte]==NULL) {
-      return false;;
-    }
-
-    for (size_t i=2; i<sizeof(Number); i++) {
-      r=dynamic_cast<const Refs*>(r->refs[byte]);
-
-      byte=(unsigned char)(value >> (sizeof(Number)-i)*8);
-
-      if (r->refs[byte]==NULL) {
-        return false;
-      }
-    }
-
-    const Leaf *l=static_cast<const Leaf*>(r->refs[byte]);
-
-    byte=value & 0xff;
-
-    size_t by=byte/32;
-    size_t bi=byte%8;
-
-    return (l->values[by] & (1 << bi))!=0;
+  void NumberSet::Clear()
+  {
+    map.clear();
+    count=0;
   }
 }

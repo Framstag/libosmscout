@@ -230,6 +230,11 @@ void MapWidget::wheelEvent(QWheelEvent* event)
 
 void MapWidget::paint(QPainter *painter)
 {
+    osmscout::MercatorProjection projection = getProjection();
+    if (!projection.IsValid()){
+      qWarning() << "Projection is not valid!";
+      return;
+    }
     bool animationInProgress = inputHandler->animationInProgress();
 
     painter->setRenderHint(QPainter::Antialiasing, !animationInProgress);
@@ -255,8 +260,6 @@ void MapWidget::paint(QPainter *painter)
 
     // render current position spot
     if (showCurrentPosition && locationValid){
-        osmscout::MercatorProjection projection = getProjection();
-
         double x;
         double y;
         projection.GeoToPixel(osmscout::GeoCoord(currentPosition.GetLat(), currentPosition.GetLon()), x, y);
@@ -280,8 +283,6 @@ void MapWidget::paint(QPainter *painter)
 
     // render marks
     if (!marks.isEmpty()){
-        osmscout::MercatorProjection projection = getProjection();
-
         double x;
         double y;
         painter->setBrush(QBrush());
@@ -451,9 +452,9 @@ void MapWidget::reloadTmpStyle() {
 
 void MapWidget::setLockToPosition(bool lock){
     if (lock){
-        if (!inputHandler->currentPosition(locationValid, currentPosition)){
-            setupInputHandler(new LockHandler(*view, std::min(width(), height()) / 3));
-            inputHandler->currentPosition(locationValid, currentPosition);
+        if (!inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3)){
+            setupInputHandler(new LockHandler(*view));
+            inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3);
         }
     }else{
         setupInputHandler(new InputHandler(*view));
@@ -549,7 +550,7 @@ void MapWidget::locationChanged(bool locationValid, double lat, double lon, bool
     this->horizontalAccuracyValid = horizontalAccuracyValid;
     this->horizontalAccuracy = horizontalAccuracy;
 
-    inputHandler->currentPosition(locationValid, currentPosition);
+    inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3);
 
     redraw();
 }
@@ -697,8 +698,10 @@ QString MapWidget::GetZoomLevelName() const
         return "Suburb";
     } else if(level>=osmscout::Magnification::magDetail && level < osmscout::Magnification::magClose){
         return "Detail";
-    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magVeryClose){
+    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magCloser){
         return "Close";
+    } else if(level>=osmscout::Magnification::magCloser && level < osmscout::Magnification::magVeryClose){
+        return "Closer";
     } else if(level>=osmscout::Magnification::magVeryClose && level < osmscout::Magnification::magBlock){
         return "VeryClose";
     } else if(level>=osmscout::Magnification::magBlock && level < osmscout::Magnification::magStreet){

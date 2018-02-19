@@ -36,7 +36,7 @@ namespace osmscout {
     arguments.reserve((size_t)argc);
 
     for (int i=0; i<argc; i++) {
-      arguments.push_back(std::string(argv[i]));
+      arguments.emplace_back(argv[i]);
     }
 
   }
@@ -104,6 +104,16 @@ namespace osmscout {
     return errorDescription;
   }
 
+  void CmdLineArgParser::SetOptionName(const std::string& optionName)
+  {
+    this->optionName=optionName;
+  }
+
+  std::string CmdLineArgParser::GetOptionName() const
+  {
+    return optionName;
+  }
+
   void CmdLineArgParser::SetArgumentName(const std::string& argumentName)
   {
     this->argumentName=argumentName;
@@ -133,6 +143,35 @@ namespace osmscout {
   CmdLineParseResult CmdLineFlagArgParser::Parse(CmdLineScanner& /*scanner*/)
   {
     setter(true);
+
+    return CmdLineParseResult();
+  }
+
+  CmdLineAlternativeFlagArgParser::CmdLineAlternativeFlagArgParser(SetterFunction&& setter)
+    : setter(setter)
+  {
+    // no code
+  }
+
+  std::string CmdLineAlternativeFlagArgParser::GetOptionHint() const
+  {
+    return "";
+  }
+
+  std::string CmdLineAlternativeFlagArgParser::GetPositionalHint(const std::string& positional) const
+  {
+    return positional;
+  }
+
+  CmdLineParseResult CmdLineAlternativeFlagArgParser::Parse(CmdLineScanner& /*scanner*/)
+  {
+    if (!lastArgumentCalled.empty()) {
+      return CmdLineParseResult("You cannot call flag argument '"+GetArgumentName()+"', since alternative flag argument '"+lastArgumentCalled+"' was already called");
+    }
+
+    setter(GetOptionName());
+
+    lastArgumentCalled=GetArgumentName();
 
     return CmdLineParseResult();
   }
@@ -320,17 +359,16 @@ namespace osmscout {
       argument="--"+optionName;
     }
 
-    parser->SetArgumentName(argument);
-
     CmdLineOption option(parser,
+                         optionName,
                          argument,
                          stopParsing);
 
-    assert(options.find(option.option)==options.end());
+    assert(options.find(option.argument)==options.end());
 
-    options.insert(std::make_pair(option.option,option));
+    options.insert(std::make_pair(option.argument,option));
 
-    std::string callDescription=option.option;
+    std::string callDescription=option.argument;
     std::string argumentType=parser->GetOptionHint();
 
     if (!argumentType.empty()) {
@@ -362,17 +400,16 @@ namespace osmscout {
         argument="--"+optionName;
       }
 
-      parser->SetArgumentName(argument);
-
       CmdLineOption option(parser,
+                           optionName,
                            argument,
                            stopParsing);
 
-      assert(options.find(option.option)==options.end());
+      assert(options.find(option.argument)==options.end());
 
-      options.insert(std::make_pair(option.option,option));
+      options.insert(std::make_pair(option.argument,option));
 
-      std::string callDescription=option.option;
+      std::string callDescription=option.argument;
       std::string argumentType=parser->GetOptionHint();
 
       if (!argumentType.empty()) {
@@ -393,13 +430,12 @@ namespace osmscout {
   {
     assert(argumentName[0]!='-');
 
+    parser->SetOptionName(argumentName);
     parser->SetArgumentName(argumentName);
 
     CmdLinePositional desc(parser,argumentName);
 
-    std::string callDescription=argumentName;
-
-    CmdLineArgHelp help(callDescription,helpString);
+    CmdLineArgHelp help(argumentName,helpString);
 
     positionals.push_back(desc);
     positionalHelps.push_back(help);
@@ -428,6 +464,9 @@ namespace osmscout {
       }
 
       /* ignore */ scanner.Advance();
+
+      option->second.parser->SetOptionName(option->second.option);
+      option->second.parser->SetArgumentName(option->second.argument);
 
       CmdLineParseResult result=option->second.parser->Parse(scanner);
 

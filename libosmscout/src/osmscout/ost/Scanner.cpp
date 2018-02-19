@@ -107,19 +107,19 @@ Buffer::~Buffer()
 
 int Buffer::Peek()
 {
-  size_t curPos = GetPos();
+  int curPos = GetPos();
   int ch = Read();
   SetPos(curPos);
   return ch;
 }
 
-size_t Buffer::GetPos()
+int Buffer::GetPos()
 {
   return bufPos;
 }
 
-void Buffer::SetPos(size_t value) {
-  if (value > bufLen) {
+void Buffer::SetPos(int value) {
+  if (value > (int)bufLen) {
     std::cerr << "--- buffer out of bounds access, position: " << value << std::endl;
     exit(1);
   }
@@ -129,7 +129,7 @@ void Buffer::SetPos(size_t value) {
 
 int Buffer::Read()
 {
-  if (bufPos < bufLen) {
+  if (bufPos < (int)bufLen) {
     return buf[bufPos++];
   } else {
     return EoF;
@@ -332,7 +332,7 @@ TokenRef Scanner::NextToken() {
   ) NextCh();
 	if ((ch == '/' && Comment0()) || (ch == '/' && Comment1())) return NextToken();
   int recKind = noSym;
-  size_t recEnd = pos;
+  int recEnd = pos;
 
   t = CreateToken();
   t->pos = pos; t->col = col; t->line = line; t->charPos = charPos;

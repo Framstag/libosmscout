@@ -58,7 +58,7 @@ namespace osmscout {
     {
         std::map<size_t,Font *>::const_iterator f;
 
-        fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+        fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize())*contentScale;
 
         f=fonts.find(fontSize);
 
@@ -95,16 +95,14 @@ namespace osmscout {
                                         const MapParameter& parameter,
                                         const std::list<GroundTile>& groundTiles,
                                         CGContextRef paintCG){
-        cg = paintCG;
+        FillStyleRef landFill=styleConfig->GetLandFillStyle(projection);
 
-        FillStyleRef      landFill;
-
-        styleConfig->GetLandFillStyle(projection,
-                                      landFill);
 
         if (!landFill) {
-            return;
+          return;
         }
+
+        cg = paintCG;
 
         if (parameter.GetRenderBackground()) {
             DrawGround(projection,
@@ -112,22 +110,13 @@ namespace osmscout {
                        *landFill);
         }
 
-        FillStyleRef       seaFill;
-        FillStyleRef       coastFill;
-        FillStyleRef       unknownFill;
-        LineStyleRef       coastlineLine;
+        FillStyleRef       seaFill=styleConfig->GetSeaFillStyle(projection);
+        FillStyleRef       coastFill=styleConfig->GetCoastFillStyle(projection);
+        FillStyleRef       unknownFill=styleConfig->GetUnknownFillStyle(projection);
+        LineStyleRef       coastlineLine=styleConfig->GetCoastlineLineStyle(projection);
         std::vector<Point> points;
         size_t             start=0;
         size_t             end=0;
-
-        styleConfig->GetSeaFillStyle(projection,
-                                     seaFill);
-        styleConfig->GetCoastFillStyle(projection,
-                                       coastFill);
-        styleConfig->GetUnknownFillStyle(projection,
-                                         unknownFill);
-        styleConfig->GetCoastlineLineStyle(projection,
-                                           coastlineLine);
 
         if (!seaFill) {
             return;

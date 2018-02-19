@@ -20,11 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <map>
-
-#include <QObject>
-#include <QAbstractListModel>
-
 #include <osmscout/Location.h>
 #include <osmscout/util/Breaker.h>
 #include <osmscout/routing/Route.h>
@@ -36,6 +31,12 @@
 #include <osmscout/Router.h>
 #include <osmscout/OverlayObject.h>
 
+#include <QObject>
+#include <QAbstractListModel>
+
+#include <map>
+
+
 /**
  * \ingroup QtAPI
  */
@@ -45,6 +46,7 @@ class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
   Q_PROPERTY(int count            READ rowCount         NOTIFY computingChanged)
   Q_PROPERTY(bool ready           READ isReady          NOTIFY computingChanged)
   Q_PROPERTY(QObject *routeWay    READ getRouteWay      NOTIFY computingChanged)
+  Q_PROPERTY(QObject *route       READ getRoute         NOTIFY computingChanged)
   Q_PROPERTY(double length        READ getRouteLength   NOTIFY computingChanged)
   Q_PROPERTY(double duration      READ getRouteDuration NOTIFY computingChanged)
 
@@ -70,7 +72,7 @@ public slots:
 
   void cancel();
 
-  void onRouteComputed(RouteSelectionRef route,
+  void onRouteComputed(QtRouteData route,
                        int requestId);
 
   void onRouteFailed(QString reason,
@@ -81,14 +83,16 @@ public slots:
 
 private:
   Router                *router;
-  RouteSelectionRef     route;
+  QtRouteData           route;
   int                   requestId;
   bool                  computing;
   osmscout::BreakerRef  breaker;
 
 public:
   enum Roles {
-      LabelRole = Qt::UserRole
+    ShortDescriptionRole = Qt::UserRole + 1,
+    DescriptionRole = Qt::UserRole + 2,
+    TypeRole = Qt::UserRole + 3
   };
 
 public:
@@ -132,12 +136,17 @@ public:
     return new LocationEntry(label,osmscout::GeoCoord(lat,lon));
   }
 
+  inline QObject *getRoute() const
+  {
+    return new QtRouteData(route);
+  }
+
   inline OverlayWay* getRouteWay()
   {
     if (!route){
       return NULL;
     }
-    return new OverlayWay(route->routeWay.nodes);
+    return new OverlayWay(route.routeWay().nodes);
   }
 };
 

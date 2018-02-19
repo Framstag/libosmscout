@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker run libosmscout/ubuntu_14.04_webpage
+docker run --rm=true -it libosmscout/ubuntu_14.04_webpage

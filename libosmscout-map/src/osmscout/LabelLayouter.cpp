@@ -92,8 +92,8 @@ namespace osmscout {
       return false;
     }
 
-    if (dynamic_cast<ShieldStyle*>(first.style.get())!=NULL &&
-        dynamic_cast<ShieldStyle*>(second.style.get())!=NULL) {
+    if (dynamic_cast<ShieldStyle*>(first.style.get())!=nullptr &&
+        dynamic_cast<ShieldStyle*>(second.style.get())!=nullptr) {
       double horizLabelSpace=shieldLabelSpace;
       double vertLabelSpace=shieldLabelSpace;
 
@@ -167,8 +167,8 @@ namespace osmscout {
     labels.clear();
     events.clear();
 
-    width=projection.GetWidth();
-    height=projection.GetHeight();
+    width=static_cast<double>(projection.GetWidth());
+    height=static_cast<double>(projection.GetHeight());
 
     labelSpace=projection.ConvertWidthToPixel(parameter.GetLabelSpace());
     shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
@@ -204,7 +204,7 @@ namespace osmscout {
     searchEvent.y=label.by1-maxSpace;
     searchEvent.x=label.bx1;
 
-    std::set<LabelEvent>::iterator event=events.lower_bound(searchEvent);
+    auto event=events.lower_bound(searchEvent);
 
 #if defined(LABEL_LAYOUTER_DEBUG)
     std::cout << "--- Placing: '";

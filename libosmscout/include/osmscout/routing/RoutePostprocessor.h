@@ -67,10 +67,10 @@ namespace osmscout {
       std::string startDescription;
 
     public:
-      StartPostprocessor(const std::string& startDescription);
+      explicit StartPostprocessor(const std::string& startDescription);
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -83,10 +83,10 @@ namespace osmscout {
       std::string targetDescription;
 
     public:
-      TargetPostprocessor(const std::string& targetDescription);
+      explicit TargetPostprocessor(const std::string& targetDescription);
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -99,7 +99,7 @@ namespace osmscout {
       DistanceAndTimePostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -112,7 +112,7 @@ namespace osmscout {
       WayNamePostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -125,7 +125,7 @@ namespace osmscout {
       WayTypePostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -145,7 +145,7 @@ namespace osmscout {
       CrossingWaysPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -165,7 +165,7 @@ namespace osmscout {
       DirectionPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -178,7 +178,7 @@ namespace osmscout {
       MotorwayJunctionPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -191,7 +191,7 @@ namespace osmscout {
       DestinationPostprocessor();
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     class OSMSCOUT_API MaxSpeedPostprocessor : public RoutePostprocessor::Postprocessor
@@ -200,7 +200,7 @@ namespace osmscout {
       MaxSpeedPostprocessor() : Postprocessor() {};
 
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
     };
 
     /**
@@ -241,15 +241,15 @@ namespace osmscout {
 
     public:
       bool Process(const RoutePostprocessor& postprocessor,
-                   RouteDescription& description);
+                   RouteDescription& description) override;
 
     };
 
     typedef std::shared_ptr<InstructionPostprocessor> InstructionPostprocessorRef;
 
   private:
-    std::map<DatabaseId,RoutingProfileRef>    profiles;
-    std::map<DatabaseId,DatabaseRef>          databases;
+    std::vector<RoutingProfileRef>            profiles;
+    std::vector<DatabaseRef>                  databases;
 
     std::unordered_map<DBFileOffset,AreaRef>  areaMap;
     std::unordered_map<DBFileOffset,WayRef>   wayMap;
@@ -300,7 +300,7 @@ namespace osmscout {
     bool IsBridge(const RouteDescription::Node& node) const;
 
     RouteDescription::DestinationDescriptionRef GetDestination(const RouteDescription::Node& node) const;
-    
+
     uint8_t GetMaxSpeed(const RouteDescription::Node& node) const;
 
     Id GetNodeId(const RouteDescription::Node& node) const;
@@ -331,8 +331,8 @@ namespace osmscout {
                             size_t nodeIndex) const;
 
     bool PostprocessRouteDescription(RouteDescription& description,
-                                     std::map<DatabaseId,RoutingProfileRef> &profiles,
-                                     std::map<DatabaseId,DatabaseRef>& databases,
+                                     std::vector<RoutingProfileRef> &profiles,
+                                     std::vector<DatabaseRef>& databases,
                                      std::list<PostprocessorRef> processors,
                                      std::set<std::string> motorwayTypeNames=std::set<std::string>(),
                                      std::set<std::string> motorwayLinkTypeNames=std::set<std::string>(),

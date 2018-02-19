@@ -29,7 +29,6 @@
 #include <osmscout/CoordDataFile.h>
 
 #include <osmscout/util/File.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawCoord.h>
@@ -151,7 +150,7 @@ namespace osmscout {
 
     size_t blockWorkerCount=std::max((unsigned int)1,std::thread::hardware_concurrency());
 
-    progress.Info("Using "+NumberToString(blockWorkerCount)+" block worker threads"+" with queue size of "+NumberToString(parameter.GetProcessingQueueSize()));
+    progress.Info("Using "+std::to_string(blockWorkerCount)+" block worker threads"+" with queue size of "+std::to_string(parameter.GetProcessingQueueSize()));
 
     for (size_t t=1; t<=blockWorkerCount; t++) {
       blockWorkerThreads.push_back(std::thread(&Preprocess::Callback::BlockWorkerLoop,this));
@@ -479,7 +478,7 @@ namespace osmscout {
   {
     if (data.members.empty()) {
       progress.Warning("Relation "+
-                       NumberToString(data.id)+
+                       std::to_string(data.id)+
                        " does not have any members!");
       parameter.GetErrorReporter()->ReportRelation(data.id,
                                                    data.tags,
@@ -812,15 +811,15 @@ namespace osmscout {
     progress.SetAction("Dump statistics");
 
     if (success) {
-      progress.Info(std::string("Coords:           ")+NumberToString(coordCount));
-      progress.Info(std::string("Nodes:            ")+NumberToString(nodeCount));
-      progress.Info(std::string("Ways/Areas/Sum:   ")+NumberToString(wayCount)+" "+
-                    NumberToString(areaCount)+" "+
-                    NumberToString(wayCount+areaCount));
-      progress.Info(std::string("Relations:        ")+NumberToString(relationCount));
-      progress.Info(std::string("Coastlines:       ")+NumberToString(coastlineCount));
-      progress.Info(std::string("Turnrestrictions: ")+NumberToString(turnRestrictionCount));
-      progress.Info(std::string("Multipolygons:    ")+NumberToString(multipolygonCount));
+      progress.Info(std::string("Coords:           ")+std::to_string(coordCount));
+      progress.Info(std::string("Nodes:            ")+std::to_string(nodeCount));
+      progress.Info(std::string("Ways/Areas/Sum:   ")+std::to_string(wayCount)+" "+
+                    std::to_string(areaCount)+" "+
+                    std::to_string(wayCount+areaCount));
+      progress.Info(std::string("Relations:        ")+std::to_string(relationCount));
+      progress.Info(std::string("Coastlines:       ")+std::to_string(coastlineCount));
+      progress.Info(std::string("Turnrestrictions: ")+std::to_string(turnRestrictionCount));
+      progress.Info(std::string("Multipolygons:    ")+std::to_string(multipolygonCount));
 
       for (const auto &type : typeConfig->GetTypes()) {
         size_t      i=type->GetIndex();
@@ -833,10 +832,10 @@ namespace osmscout {
 
         if (isEmpty &&
             isImportant) {
-          progress.Warning("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+          progress.Warning("Type "+type->GetName()+ ": "+std::to_string(nodeStat[i])+" node(s), "+std::to_string(areaStat[i])+" area(s), "+std::to_string(wayStat[i])+" ways(s)");
         }
         else {
-          progress.Info("Type "+type->GetName()+ ": "+NumberToString(nodeStat[i])+" node(s), "+NumberToString(areaStat[i])+" area(s), "+NumberToString(wayStat[i])+" ways(s)");
+          progress.Info("Type "+type->GetName()+ ": "+std::to_string(nodeStat[i])+" node(s), "+std::to_string(areaStat[i])+" area(s), "+std::to_string(wayStat[i])+" ways(s)");
         }
       }
     }
@@ -930,6 +929,19 @@ namespace osmscout {
         return false;
 #endif
       }
+        /*
+      else if (filename.length()>=4 &&
+               filename.substr(filename.length()-4)==".olt") {
+
+        PreprocessOLT preprocess(callback);
+
+        if (!preprocess.Import(typeConfig,
+                               parameter,
+                               progress,
+                               filename)) {
+          return false;
+        }
+      }*/
       else if (filename.length()>=5 &&
             filename.substr(filename.length()-5)==".poly") {
 
@@ -943,8 +955,21 @@ namespace osmscout {
         }
       }
       else {
-        progress.Error("Sorry, this file type is not yet supported!");
-        return false;
+        std::unique_ptr<Preprocessor> preprocessor=parameter.GetPreprocessor(filename,
+                                                                            callback);
+
+        if (preprocessor) {
+          if (!preprocessor->Import(typeConfig,
+                                    parameter,
+                                    progress,
+                                    filename)) {
+            return false;
+          }
+        }
+        else {
+          progress.Error("Sorry, this file type is not yet supported!");
+          return false;
+        }
       }
     }
 

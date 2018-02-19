@@ -89,7 +89,8 @@ namespace osmscout {
     AreaNodeIndex();
 
     void Close();
-    bool Open(const std::string& path);
+    bool Open(const std::string& path,
+              bool memoryMappedData);
 
     inline bool IsOpen() const
     {

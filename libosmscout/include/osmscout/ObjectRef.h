@@ -45,7 +45,7 @@ namespace osmscout {
   class OSMSCOUT_API ObjectOSMRef CLASS_FINAL
   {
   public:
-    Id         id;
+    OSMId      id;
     OSMRefType type;
 
   public:
@@ -56,7 +56,7 @@ namespace osmscout {
       // no code
     }
 
-    inline ObjectOSMRef(Id id,
+    inline ObjectOSMRef(OSMId id,
                         OSMRefType type)
     : id(id),
       type(type)
@@ -64,7 +64,7 @@ namespace osmscout {
       // no code
     }
 
-    inline void Set(const Id& id,
+    inline void Set(const OSMId& id,
                     const OSMRefType& type)
     {
       this->id=id;
@@ -77,7 +77,7 @@ namespace osmscout {
       this->type=osmRefNone;
     }
 
-    inline const Id& GetId() const
+    inline const OSMId& GetId() const
     {
       return id;
     }

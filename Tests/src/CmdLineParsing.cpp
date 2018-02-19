@@ -16,9 +16,10 @@ private:
   osmscout::GeoCoord location;
   std::string        path;
   std::string        file;
+  size_t             enumeration;
 
 private:
-  friend std::ostream & operator<<(std::ostream &os, const Arguments& args);
+  friend std::ostream & operator<<(std::ostream &out, const Arguments& args);
 
 public:
   Arguments()
@@ -27,7 +28,8 @@ public:
     witchyFlag(false),
     distance(0),
     doubleTrouble(0.0),
-    location(osmscout::GeoCoord(0.0,0.0))
+    location(osmscout::GeoCoord(0.0,0.0)),
+    enumeration(0)
   {
     // no code
   }
@@ -77,6 +79,11 @@ public:
     this->file=file;
   }
 
+  void SetEnumeration(size_t enumeration)
+  {
+    this->enumeration=enumeration;
+  }
+
   bool operator==(const Arguments& other) const
   {
     return this->help==other.help &&
@@ -86,7 +93,8 @@ public:
            this->doubleTrouble==other.doubleTrouble &&
            this->location==other.location &&
            this->path==other.path &&
-           this->file==other.file;
+           this->file==other.file &&
+           this->enumeration==other.enumeration;
   }
 
 };
@@ -101,6 +109,7 @@ std::ostream &operator<<(std::ostream &out, const Arguments& args)
   out << " location " << args.location.GetDisplayText();
   out << " path " << args.path;
   out << " file " << args.file;
+  out << " enumeration " << args.enumeration;
 
   return out;
 }
@@ -156,6 +165,20 @@ void CallParser(const std::vector<std::string>& arguments,
                    }),
                    "path",
                    "set path");
+
+  parser.AddOption(osmscout::CmdLineAlternativeFlag([&actualData](const std::string& value) {
+                     if (value=="O1") {
+                       actualData.SetEnumeration(1);
+                     }
+                     else if (value=="O2") {
+                       actualData.SetEnumeration(2);
+                     }
+                     else if (value=="O3") {
+                       actualData.SetEnumeration(3);
+                     }
+                   }),
+                   {"O1","O2","O3"},
+                   "set enumeration");
 
   parser.AddPositional(osmscout::CmdLineStringOption([&actualData](const std::string& value) {
                          actualData.SetFile(value);
@@ -371,5 +394,40 @@ TEST_CASE("Parsing of unknown option") {
              actualData);
 
   REQUIRE(actualResult.HasError());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of valid alternative flag option") {
+  std::vector<std::string> arguments={"Test", "--O1", "filename"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  expectedData.SetEnumeration(1);
+  expectedData.SetFile("filename");
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.Success());
+  REQUIRE(actualData==expectedData);
+}
+
+TEST_CASE("Parsing of alternative flag option with multiple instances") {
+  std::vector<std::string> arguments={"Test", "--O1", "--O2", "filename"};
+  osmscout::CmdLineParseResult actualResult;
+  Arguments                    actualData;
+  Arguments                    expectedData;
+
+  expectedData.SetEnumeration(1);
+  //expectedData.SetFile("filename");
+
+  CallParser(arguments,
+             actualResult,
+             actualData);
+
+  REQUIRE(actualResult.HasError());
+  REQUIRE(actualResult.GetErrorDescription()=="You cannot call flag argument '--O2', since alternative flag argument '--O1' was already called");
   REQUIRE(actualData==expectedData);
 }

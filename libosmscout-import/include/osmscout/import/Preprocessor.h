@@ -40,6 +40,16 @@ namespace osmscout {
       OSMId    id;
       GeoCoord coord;
       TagMap   tags;
+
+      RawNodeData() = default;
+
+      RawNodeData(OSMId id,
+                  const GeoCoord& coord)
+      : id(id),
+        coord(coord)
+      {
+        // no code
+      }
     };
 
     struct RawWayData
@@ -76,6 +86,12 @@ namespace osmscout {
   {
   public:
     virtual ~Preprocessor();
+
+    virtual bool Import(const TypeConfigRef& typeConfig,
+                        const ImportParameter& parameter,
+                        Progress& progress,
+                        const std::string& filename) = 0;
+
   };
 }
 

@@ -23,7 +23,7 @@ if [ "$TARGET" = "build" ]; then
       export PATH=~/bin:$PATH
       sudo apt-get install python3-pip python3-dev build-essential
       pip3 install --upgrade --user pip
-      pip3 install --user meson==0.43.0
+      pip3 install --user meson==0.44.0
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi
@@ -36,6 +36,7 @@ if [ "$TARGET" = "build" ]; then
       libagg-dev libfreetype6-dev \
       libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev \
       qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev \
+      qttools5-dev-tools qttools5-dev \
       freeglut3 freeglut3-dev \
       libmarisa-dev \
       libglew-dev \

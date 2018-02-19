@@ -18,7 +18,6 @@
 */
 
 #include <osmscout/util/HTMLWriter.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/util/Logger.h>
@@ -331,7 +330,7 @@ namespace osmscout {
         break;
       }
 
-      file << "/" << NumberToString(object.GetId()) << "\">" << Sanitize(name) << "</a>";
+      file << "/" << std::to_string(object.GetId()) << "\">" << Sanitize(name) << "</a>";
     }
     catch (std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write object link",e);

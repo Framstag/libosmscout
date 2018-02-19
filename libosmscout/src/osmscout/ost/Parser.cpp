@@ -185,7 +185,7 @@ void Parser::TYPES() {
 
 void Parser::MAXSPEED() {
 		std::string alias;
-		size_t      speed; 
+		size_t      speed;
 		
 		while (!(la->kind == _EOF || la->kind == 8 /* "SPEED" */)) {SynErr(63); Get();}
 		Expect(8 /* "SPEED" */);
@@ -240,7 +240,7 @@ void Parser::GRADE() {
 			                                      grade);
 			}
 			else {
-			 std::string e="Not a valid grade level: "+NumberToString(grade);
+			 std::string e="Not a valid grade level: "+std::to_string(grade);
 			
 			 SemErr(e.c_str());
 			}
@@ -262,7 +262,7 @@ void Parser::FEATURE() {
 		 std::string e="Unknown feature '"+featureName+"'";
 		
 		 SemErr(e.c_str());
-		 
+		
 		 // Avoid NULL-pointer further on
 		 feature=std::make_shared<osmscout::NameFeature>();
 		}
@@ -404,7 +404,7 @@ void Parser::TYPEFEATURE(TypeInfo& typeInfo) {
 		 std::string e="Feature '"+name+"' is unknown";
 		
 		 SemErr(e.c_str());
-		}                
+		}
 		
 }
 

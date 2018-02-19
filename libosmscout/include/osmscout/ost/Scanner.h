@@ -46,8 +46,8 @@ class Token
 {
 public:
   int      kind;    // token kind
-  size_t   pos;     // token position in the source text (starting at 0)
-  size_t   charPos; // token position in characters in the source text (starting at 0)
+  int      pos;     // token position in the source text (starting at 0)
+  int      charPos; // token position in characters in the source text (starting at 0)
   int      col;     // token column (starting at 1)
   int      line;    // token line (starting at 1)
   char*    val;     // token value
@@ -62,7 +62,7 @@ class Buffer
 private:
   unsigned char *buf; // input buffer
   size_t bufLen;      // length of buffer
-  size_t bufPos;      // current position in buffer
+  int    bufPos;      // current position in buffer
 
 public:
   static const int EoF = COCO_WCHAR_MAX + 1;
@@ -73,8 +73,8 @@ public:
   int Read();
   int Peek();
   //wchar_t* GetString(int beg, int end);
-  size_t GetPos();
-  void SetPos(size_t value);
+  int GetPos();
+  void SetPos(int value);
 };
 
 //-----------------------------------------------------------------------------------
@@ -170,8 +170,8 @@ private:
 
   int           ch;         // current input character
 
-  size_t        pos;        // byte position of current character
-  size_t        charPos;    // position by unicode characters starting with 0
+  int           pos;        // byte position of current character
+  int           charPos;    // position by unicode characters starting with 0
   int           line;       // line number of current character
   int           col;        // column number of current character
   int           oldEols;    // EOLs that appeared in a comment;

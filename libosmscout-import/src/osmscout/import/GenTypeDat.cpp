@@ -19,8 +19,6 @@
 
 #include <osmscout/import/GenTypeDat.h>
 
-#include <osmscout/util/String.h>
-
 namespace osmscout {
 
   void TypeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
@@ -38,7 +36,7 @@ namespace osmscout {
   {
     progress.SetAction("Generate types.dat");
 
-    progress.Info("Number of types: "+NumberToString(typeConfig->GetTypes().size()));
+    progress.Info("Number of types: "+std::to_string(typeConfig->GetTypes().size()));
 
     if (!typeConfig->StoreToDataFile(parameter.GetDestinationDirectory())) {
       progress.Error(std::string("Cannot create file '")+TypeConfig::FILE_TYPES_DAT+"'");

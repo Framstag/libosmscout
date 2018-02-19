@@ -19,8 +19,6 @@
 
 #include <osmscout/TileId.h>
 
-#include <osmscout/util/String.h>
-
 namespace osmscout {
 
   /**
@@ -45,7 +43,7 @@ namespace osmscout {
    */
   std::string TileId::DisplayText() const
   {
-    return NumberToString(level)+ "." + NumberToString(y) + "." + NumberToString(x);
+    return std::to_string(level)+ "." + std::to_string(y) + "." + std::to_string(x);
   }
 
   /**

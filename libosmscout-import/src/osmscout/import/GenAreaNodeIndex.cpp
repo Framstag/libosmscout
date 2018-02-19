@@ -35,7 +35,6 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
-#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -101,7 +100,7 @@ namespace osmscout {
 
         cellFillCount.resize(typeConfig->GetTypeCount());
 
-        progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingNodeTypes.Size())+
+        progress.Info("Scanning Level "+std::to_string(level)+" ("+std::to_string(remainingNodeTypes.Size())+
                       " types still to process)");
 
         nodeScanner.GotoBegin();
@@ -180,7 +179,7 @@ namespace osmscout {
           // If the fill rate of the index is too low, we use this index level anyway
           if (nodeTypeData[i].indexCells/(1.0*nodeTypeData[i].cellXCount*nodeTypeData[i].cellYCount)<=
               parameter.GetAreaNodeIndexMinFillRate()) {
-            progress.Warning(typeConfig->GetTypeInfo(i)->GetName()+" ("+NumberToString(i)+") is not well distributed");
+            progress.Warning(typeConfig->GetTypeInfo(i)->GetName()+" ("+std::to_string(i)+") is not well distributed");
             continue;
           }
 
@@ -200,9 +199,9 @@ namespace osmscout {
         for (const auto& type : currentNodeTypes) {
           maxLevel=std::max(maxLevel,level);
 
-          progress.Info("Type "+type->GetName()+"("+NumberToString(type->GetIndex())+"), "+
-                        NumberToString(nodeTypeData[type->GetIndex()].indexCells)+" cells, "+
-                        NumberToString(nodeTypeData[type->GetIndex()].indexEntries)+" objects");
+          progress.Info("Type "+type->GetName()+"("+std::to_string(type->GetIndex())+"), "+
+                        std::to_string(nodeTypeData[type->GetIndex()].indexCells)+" cells, "+
+                        std::to_string(nodeTypeData[type->GetIndex()].indexEntries)+" objects");
         }
 
         remainingNodeTypes.Remove(currentNodeTypes);
@@ -269,7 +268,7 @@ namespace osmscout {
           continue;
         }
 
-        progress.Info("Scanning nodes for index level "+NumberToString(l));
+        progress.Info("Scanning nodes for index level "+std::to_string(l));
 
         std::vector<std::map<Pixel,std::list<FileOffset> > > typeCellOffsets;
 
@@ -329,8 +328,8 @@ namespace osmscout {
 
           progress.Info("Writing map for "+
                         type->GetName()+", "+
-                        NumberToString(typeCellOffsets[type->GetIndex()].size())+" cells, "+
-                        NumberToString(indexEntries)+" entries, "+
+                        std::to_string(typeCellOffsets[type->GetIndex()].size())+" cells, "+
+                        std::to_string(indexEntries)+" entries, "+
                         ByteSizeToString(1.0*dataOffsetBytes*nodeTypeData[type->GetIndex()].cellXCount*
                                          nodeTypeData[type->GetIndex()].cellYCount));
 

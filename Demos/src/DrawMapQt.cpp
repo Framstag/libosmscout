@@ -188,7 +188,8 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  QPixmap *pixmap=new QPixmap(width,height);
+  QPixmap *pixmap=new QPixmap(static_cast<int>(width),
+                              static_cast<int>(height));
 
   QPainter* painter=new QPainter(pixmap);
 

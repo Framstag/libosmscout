@@ -46,7 +46,7 @@ namespace osmscout {
   {
     AccessFeatureValue *accessValue=accessReader.GetValue(buffer);
 
-    if (accessValue!=NULL) {
+    if (accessValue!=nullptr) {
       return accessValue->IsOneway();
     }
     else {
@@ -64,8 +64,9 @@ namespace osmscout {
       return entry->second;
     }
 
-    featureReaders.push_back(DynamicFeatureReader(*typeConfig,
-                                                  feature));
+    featureReaders.emplace_back(*typeConfig,
+                                feature);
+
     size_t index=featureReaders.size()-1;
 
     featureReaderMap[feature.GetName()]=index;
@@ -243,7 +244,7 @@ namespace osmscout {
     return *this;
   }
 
-  StyleFilter& StyleFilter::AddFeature(const size_t featureFilterIndex)
+  StyleFilter& StyleFilter::AddFeature(size_t featureFilterIndex)
   {
     features.insert(featureFilterIndex);
 
@@ -339,7 +340,7 @@ namespace osmscout {
   void StyleConfig::Reset()
   {
     symbols.clear();
-    emptySymbol=NULL;
+    emptySymbol=nullptr;
 
     nodeTextStyleConditionals.clear();
     nodeIconStyleConditionals.clear();
@@ -397,7 +398,7 @@ namespace osmscout {
     auto entry=labelFactories.find(name);
 
     if (entry==labelFactories.end()) {
-      return NULL;
+      return nullptr;
     }
 
     return entry->second->Create(*typeConfig);
@@ -573,7 +574,7 @@ namespace osmscout {
           typename std::list<StyleSelector<S,A> >::iterator prevSelector=selector[level].begin();
           typename std::list<StyleSelector<S,A> >::iterator curSelector=prevSelector;
 
-          curSelector++;
+          ++curSelector;
 
           while (curSelector!=selector[level].end()) {
             if (prevSelector->criteria==curSelector->criteria) {
@@ -587,7 +588,7 @@ namespace osmscout {
             }
             else {
               prevSelector=curSelector;
-              curSelector++;
+              ++curSelector;
             }
           }
         }
@@ -636,7 +637,7 @@ namespace osmscout {
     nodeTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      nodeTypeSets.push_back(TypeInfoSet(*typeConfig));
+      nodeTypeSets.emplace_back(*typeConfig);
     }
 
     CalculateUsedTypes(*typeConfig,
@@ -699,7 +700,7 @@ namespace osmscout {
     wayTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      wayTypeSets.push_back(TypeInfoSet(*typeConfig));
+      wayTypeSets.emplace_back(*typeConfig);
     }
 
     CalculateUsedTypes(*typeConfig,
@@ -804,7 +805,7 @@ namespace osmscout {
     areaTypeSets.reserve(maxLevel);
 
     for (size_t type=0; type<maxLevel; type++) {
-      areaTypeSets.push_back(TypeInfoSet(*typeConfig));
+      areaTypeSets.emplace_back(*typeConfig);
     }
 
     CalculateUsedTypes(*typeConfig,
@@ -1073,23 +1074,21 @@ namespace osmscout {
    * a given style (S) and its style attributes (A).
    */
   template <class S, class A>
-  void GetFeatureStyle(const StyleResolveContext& context,
-                       const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                       const FeatureValueBuffer& buffer,
-                       const Projection& projection,
-                       std::shared_ptr<S>& style)
+  std::shared_ptr<S> GetFeatureStyle(const StyleResolveContext& context,
+                                     const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
+                                     const FeatureValueBuffer& buffer,
+                                     const Projection& projection)
   {
-    bool   fastpath=false;
-    bool   composed=false;
-    size_t level=projection.GetMagnification().GetLevel();
-    double meterInPixel=projection.GetMeterInPixel();
-    double meterInMM=projection.GetMeterInMM();
+    bool               fastpath=false;
+    bool               composed=false;
+    size_t             level=projection.GetMagnification().GetLevel();
+    double             meterInPixel=projection.GetMeterInPixel();
+    double             meterInMM=projection.GetMeterInMM();
+    std::shared_ptr<S> style;
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
     }
-
-    style=NULL;
 
     for (const auto& selector : styleSelectors[level]) {
       if (!selector.criteria.Matches(context,
@@ -1118,8 +1117,10 @@ namespace osmscout {
 
     if (composed &&
         !style->IsVisible()) {
-      style=NULL;
+      style=nullptr;
     }
+
+    return style;
   }
 
   bool StyleConfig::HasNodeTextStyles(const TypeInfoRef& type,
@@ -1127,12 +1128,12 @@ namespace osmscout {
   {
     auto level=magnification.GetLevel();
 
-    for (size_t slot=0; slot<nodeTextStyleSelectors.size(); slot++) {
-      if (level>=nodeTextStyleSelectors[slot][type->GetIndex()].size()) {
-        level=nodeTextStyleSelectors[slot][type->GetIndex()].size()-1;
+    for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
+      if (level>=nodeTextStyleSelector[type->GetIndex()].size()) {
+        level=static_cast<uint32_t>(nodeTextStyleSelector[type->GetIndex()].size()-1);
       }
 
-      if (!nodeTextStyleSelectors[slot][type->GetIndex()][level].empty()) {
+      if (!nodeTextStyleSelector[type->GetIndex()][level].empty()) {
         return true;
       }
     }
@@ -1144,19 +1145,15 @@ namespace osmscout {
                                       const Projection& projection,
                                       std::vector<TextStyleRef>& textStyles) const
   {
-    TextStyleRef style;
 
     textStyles.clear();
     textStyles.reserve(nodeTextStyleSelectors.size());
 
-    for (size_t slot=0; slot<nodeTextStyleSelectors.size(); slot++) {
-      style=NULL;
-
-      GetFeatureStyle(styleResolveContext,
-                      nodeTextStyleSelectors[slot][buffer.GetType()->GetIndex()],
-                      buffer,
-                      projection,
-                      style);
+    for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
+      TextStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         nodeTextStyleSelector[buffer.GetType()->GetIndex()],
+                                         buffer,
+                                         projection);
 
       if (style) {
         textStyles.push_back(style);
@@ -1164,34 +1161,27 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
-                                     const Projection& projection,
-                                     IconStyleRef& iconStyle) const
+  IconStyleRef StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
+                                             const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    nodeIconStyleSelectors[buffer.GetType()->GetIndex()],
-                    buffer,
-                    projection,
-                    iconStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           nodeIconStyleSelectors[buffer.GetType()->GetIndex()],
+                           buffer,
+                           projection);
   }
 
   void StyleConfig::GetWayLineStyles(const FeatureValueBuffer& buffer,
                                      const Projection& projection,
                                      std::vector<LineStyleRef>& lineStyles) const
   {
-    LineStyleRef style;
-
     lineStyles.clear();
     lineStyles.reserve(wayLineStyleSelectors.size());
 
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-      style=NULL;
-
-      GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][buffer.GetType()->GetIndex()],
-                      buffer,
-                      projection,
-                      style);
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      LineStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         wayLineStyleSelector[buffer.GetType()->GetIndex()],
+                                         buffer,
+                                         projection);
 
       if (style) {
         lineStyles.push_back(style);
@@ -1199,49 +1189,41 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetWayPathTextStyle(const FeatureValueBuffer& buffer,
-                                        const Projection& projection,
-                                        PathTextStyleRef& pathTextStyle) const
+  PathTextStyleRef StyleConfig::GetWayPathTextStyle(const FeatureValueBuffer& buffer,
+                                                    const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    wayPathTextStyleSelectors[buffer.GetType()->GetIndex()],
-                    buffer,
-                    projection,
-                    pathTextStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           wayPathTextStyleSelectors[buffer.GetType()->GetIndex()],
+                           buffer,
+                           projection);
   }
 
-  void StyleConfig::GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
-                                          const Projection& projection,
-                                          PathSymbolStyleRef& pathSymbolStyle) const
+  PathSymbolStyleRef StyleConfig::GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
+                                                        const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    wayPathSymbolStyleSelectors[buffer.GetType()->GetIndex()],
-                    buffer,
-                    projection,
-                    pathSymbolStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           wayPathSymbolStyleSelectors[buffer.GetType()->GetIndex()],
+                           buffer,
+                           projection);
   }
 
-  void StyleConfig::GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
-                                          const Projection& projection,
-                                          PathShieldStyleRef& pathShieldStyle) const
+  PathShieldStyleRef StyleConfig::GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
+                                                        const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    wayPathShieldStyleSelectors[buffer.GetType()->GetIndex()],
-                    buffer,
-                    projection,
-                    pathShieldStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           wayPathShieldStyleSelectors[buffer.GetType()->GetIndex()],
+                           buffer,
+                           projection);
   }
 
-  void StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
-                                     const FeatureValueBuffer& buffer,
-                                     const Projection& projection,
-                                     FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
+                                             const FeatureValueBuffer& buffer,
+                                             const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[type->GetIndex()],
-                    buffer,
-                    projection,
-                    fillStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           areaFillStyleSelectors[type->GetIndex()],
+                           buffer,
+                           projection);
   }
 
   void StyleConfig::GetAreaBorderStyles(const TypeInfoRef& type,
@@ -1249,19 +1231,14 @@ namespace osmscout {
                                         const Projection& projection,
                                         std::vector<BorderStyleRef>& borderStyles) const
   {
-    BorderStyleRef style;
-
     borderStyles.clear();
     borderStyles.reserve(areaBorderStyleSelectors.size());
 
-    for (size_t slot=0; slot<areaBorderStyleSelectors.size(); slot++) {
-      style=NULL;
-
-      GetFeatureStyle(styleResolveContext,
-                      areaBorderStyleSelectors[slot][type->GetIndex()],
-                      buffer,
-                      projection,
-                      style);
+    for (const auto& areaBorderStyleSelector : areaBorderStyleSelectors) {
+      BorderStyleRef style=GetFeatureStyle(styleResolveContext,
+                                           areaBorderStyleSelector[type->GetIndex()],
+                                           buffer,
+                                           projection);
 
       if (style) {
         borderStyles.push_back(style);
@@ -1274,12 +1251,12 @@ namespace osmscout {
   {
     auto level=magnification.GetLevel();
 
-    for (size_t slot=0; slot<areaTextStyleSelectors.size(); slot++) {
-      if (level>=areaTextStyleSelectors[slot][type->GetIndex()].size()) {
-        level=areaTextStyleSelectors[slot][type->GetIndex()].size()-1;
+    for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
+      if (level>=areaTextStyleSelector[type->GetIndex()].size()) {
+        level=static_cast<uint32_t>(areaTextStyleSelector[type->GetIndex()].size()-1);
       }
 
-      if (!areaTextStyleSelectors[slot][type->GetIndex()][level].empty()) {
+      if (!areaTextStyleSelector[type->GetIndex()][level].empty()) {
         return true;
       }
     }
@@ -1292,19 +1269,14 @@ namespace osmscout {
                                       const Projection& projection,
                                       std::vector<TextStyleRef>& textStyles) const
   {
-    TextStyleRef style;
-
     textStyles.clear();
     textStyles.reserve(areaTextStyleSelectors.size());
 
-    for (size_t slot=0; slot<areaTextStyleSelectors.size(); slot++) {
-      style=NULL;
-
-      GetFeatureStyle(styleResolveContext,
-                      areaTextStyleSelectors[slot][type->GetIndex()],
-                      buffer,
-                      projection,
-                      style);
+    for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
+      TextStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         areaTextStyleSelector[type->GetIndex()],
+                                         buffer,
+                                         projection);
 
       if (style) {
         textStyles.push_back(style);
@@ -1312,128 +1284,114 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetAreaIconStyle(const TypeInfoRef& type,
-                                     const FeatureValueBuffer& buffer,
-                                     const Projection& projection,
-                                     IconStyleRef& iconStyle) const
-  {
-    GetFeatureStyle(styleResolveContext,
-                    areaIconStyleSelectors[type->GetIndex()],
-                    buffer,
-                    projection,
-                    iconStyle);
-  }
-
-  void StyleConfig::GetAreaBorderTextStyle(const TypeInfoRef& type,
-                                           const FeatureValueBuffer& buffer,
-                                           const Projection& projection,
-                                           PathTextStyleRef& pathTextStyle) const
-  {
-    GetFeatureStyle(styleResolveContext,
-                    areaBorderTextStyleSelectors[type->GetIndex()],
-                    buffer,
-                    projection,
-                    pathTextStyle);
-  }
-
-  void StyleConfig::GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+  IconStyleRef StyleConfig::GetAreaIconStyle(const TypeInfoRef& type,
                                              const FeatureValueBuffer& buffer,
-                                             const Projection& projection,
-                                             PathSymbolStyleRef& pathSymbolStyle) const
+                                             const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaBorderSymbolStyleSelectors[type->GetIndex()],
-                    buffer,
-                    projection,
-                    pathSymbolStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           areaIconStyleSelectors[type->GetIndex()],
+                           buffer,
+                           projection);
   }
 
-  void StyleConfig::GetLandFillStyle(const Projection& projection,
-                                     FillStyleRef& fillStyle) const
+  PathTextStyleRef StyleConfig::GetAreaBorderTextStyle(const TypeInfoRef& type,
+                                                       const FeatureValueBuffer& buffer,
+                                                       const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileLandBuffer.GetType()->GetIndex()],
-                    tileLandBuffer,
-                    projection,
-                    fillStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           areaBorderTextStyleSelectors[type->GetIndex()],
+                           buffer,
+                           projection);
   }
 
-  void StyleConfig::GetSeaFillStyle(const Projection& projection,
-                                    FillStyleRef& fillStyle) const
+  PathSymbolStyleRef StyleConfig::GetAreaBorderSymbolStyle(const TypeInfoRef& type,
+                                                           const FeatureValueBuffer& buffer,
+                                                           const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileSeaBuffer.GetType()->GetIndex()],
-                    tileSeaBuffer,
-                    projection,
-                    fillStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           areaBorderSymbolStyleSelectors[type->GetIndex()],
+                           buffer,
+                           projection);
   }
 
-  void StyleConfig::GetCoastFillStyle(const Projection& projection,
-                                      FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetLandFillStyle(const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileCoastBuffer.GetType()->GetIndex()],
-                    tileCoastBuffer,
-                    projection,
-                    fillStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           areaFillStyleSelectors[tileLandBuffer.GetType()->GetIndex()],
+                           tileLandBuffer,
+                           projection);
   }
 
-  void StyleConfig::GetUnknownFillStyle(const Projection& projection,
-                                        FillStyleRef& fillStyle) const
+  FillStyleRef StyleConfig::GetSeaFillStyle(const Projection& projection) const
   {
-    GetFeatureStyle(styleResolveContext,
-                    areaFillStyleSelectors[tileUnknownBuffer.GetType()->GetIndex()],
-                    tileUnknownBuffer,
-                    projection,
-                    fillStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           areaFillStyleSelectors[tileSeaBuffer.GetType()->GetIndex()],
+                           tileSeaBuffer,
+                           projection);
   }
 
-  void StyleConfig::GetCoastlineLineStyle(const Projection& projection,
-                                          LineStyleRef& lineStyle) const
+  FillStyleRef StyleConfig::GetCoastFillStyle(const Projection& projection) const
   {
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-      GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][coastlineBuffer.GetType()->GetIndex()],
-                      coastlineBuffer,
-                      projection,
-                      lineStyle);
+    return GetFeatureStyle(styleResolveContext,
+                           areaFillStyleSelectors[tileCoastBuffer.GetType()->GetIndex()],
+                           tileCoastBuffer,
+                           projection);
+  }
 
-      if (lineStyle) {
-        return;
+  FillStyleRef StyleConfig::GetUnknownFillStyle(const Projection& projection) const
+  {
+    return GetFeatureStyle(styleResolveContext,
+                           areaFillStyleSelectors[tileUnknownBuffer.GetType()->GetIndex()],
+                           tileUnknownBuffer,
+                           projection);
+  }
+
+  LineStyleRef StyleConfig::GetCoastlineLineStyle(const Projection& projection) const
+  {
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      LineStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         wayLineStyleSelector[coastlineBuffer.GetType()->GetIndex()],
+                                         coastlineBuffer,
+                                         projection);
+
+      if (style) {
+        return style;
       }
     }
+
+    return nullptr;
   }
 
-  void StyleConfig::GetOSMTileBorderLineStyle(const Projection& projection,
-                                              LineStyleRef& lineStyle) const
+  LineStyleRef StyleConfig::GetOSMTileBorderLineStyle(const Projection& projection) const
   {
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-      GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][osmTileBorderBuffer.GetType()->GetIndex()],
-                      osmTileBorderBuffer,
-                      projection,
-                      lineStyle);
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      LineStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         wayLineStyleSelector[osmTileBorderBuffer.GetType()->GetIndex()],
+                                         osmTileBorderBuffer,
+                                         projection);
 
-      if (lineStyle) {
-        return;
+      if (style) {
+        return style;
       }
     }
+
+    return nullptr;
   }
 
-  void StyleConfig::GetOSMSubTileBorderLineStyle(const Projection& projection,
-                                                 LineStyleRef& lineStyle) const
+  LineStyleRef StyleConfig::GetOSMSubTileBorderLineStyle(const Projection& projection) const
   {
-    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
-      GetFeatureStyle(styleResolveContext,
-                      wayLineStyleSelectors[slot][osmSubTileBorderBuffer.GetType()->GetIndex()],
-                      osmSubTileBorderBuffer,
-                      projection,
-                      lineStyle);
+    for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      LineStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         wayLineStyleSelector[osmSubTileBorderBuffer.GetType()->GetIndex()],
+                                         osmSubTileBorderBuffer,
+                                         projection);
 
-      if (lineStyle) {
-        return;
+      if (style) {
+        return style;
       }
     }
+
+    return nullptr;
   }
 
   void StyleConfig::GetNodeTextStyleSelectors(size_t level,
@@ -1489,20 +1447,60 @@ namespace osmscout {
     }
   }
 
+  bool StyleConfig::LoadContent(const std::string& content)
+  {
+    oss::Scanner *scanner=new oss::Scanner((const unsigned char *)content.c_str(),
+                                           content.length());
+    oss::Parser  *parser=new oss::Parser(scanner,
+                                         *this);
+    parser->Parse();
+
+    bool success=!parser->errors->hasErrors;
+
+    errors.clear();
+    warnings.clear();
+
+    for (const auto& err : parser->errors->errors) {
+      switch(err.type) {
+        case oss::Errors::Err::Symbol:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
+          break;
+        case oss::Errors::Err::Error:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
+          break;
+        case oss::Errors::Err::Warning:
+          warnings.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
+          break;
+        case oss::Errors::Err::Exception:
+          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
+          break;
+        default:
+          break;
+      }
+    }
+
+    delete parser;
+    delete scanner;
+
+    Postprocess();
+    return success;
+  }
+
   bool StyleConfig::Load(const std::string& styleFile)
   {
     StopClock  timer;
-    FileOffset fileSize;
-    FILE*      file;
     bool       success=false;
 
     try {
+      FILE*      file;
+      FileOffset fileSize;
+
       Reset();
 
       fileSize=GetFileSize(styleFile);
 
       file=fopen(styleFile.c_str(),"rb");
-      if (file==NULL) {
+      if (file==nullptr) {
         log.Error() << "Cannot open file '" << styleFile << "'";
 
         return false;
@@ -1520,43 +1518,9 @@ namespace osmscout {
 
       fclose(file);
 
-      oss::Scanner *scanner=new oss::Scanner(content,
-                                             fileSize);
-      oss::Parser  *parser=new oss::Parser(scanner,
-                                           *this);
+      success=LoadContent(std::string((const char *)content, fileSize));
 
       delete [] content;
-
-      parser->Parse();
-
-      success=!parser->errors->hasErrors;
-
-      errors.clear();
-      if (!success) {
-        for (const auto& err : parser->errors->errors) {
-          switch(err.type) {
-          case oss::Errors::Err::Symbol:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
-            break;
-          case oss::Errors::Err::Error:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
-            break;
-          case oss::Errors::Err::Warning:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
-            break;
-          case oss::Errors::Err::Exception:
-            errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
-            break;
-          default:
-            break;
-          }
-        }
-      }
-
-      delete parser;
-      delete scanner;
-
-      Postprocess();
 
       timer.Stop();
 
@@ -1573,5 +1537,9 @@ namespace osmscout {
   {
     return errors;
   }
-}
 
+  const std::list<std::string>& StyleConfig::GetWarnings()
+  {
+    return warnings;
+  }
+}

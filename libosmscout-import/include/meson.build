@@ -14,6 +14,7 @@ osmscoutimportHeader = [
             'osmscout/import/GenAreaNodeIndex.h',
             'osmscout/import/GenAreaWayIndex.h',
             'osmscout/import/GenCoordDat.h',
+            'osmscout/import/GenCoverageIndex.h',
             'osmscout/import/GenIntersectionIndex.h',
             'osmscout/import/GenLocationIndex.h',
             'osmscout/import/GenMergeAreas.h',
@@ -45,14 +46,14 @@ osmscoutimportHeader = [
 
 if xml2Dep.found()
   osmscoutimportHeader += ['osmscout/import/PreprocessOSM.h']
-endif          
+endif
 
 if protocCmd.found() and protobufDep.found()
   osmscoutimportHeader += ['osmscout/import/PreprocessPBF.h']
-endif          
+endif
 
 if marisaDep.found()
   osmscoutimportHeader += ['osmscout/import/GenTextIndex.h']
-endif          
+endif
 
 install_headers(osmscoutimportHeader)

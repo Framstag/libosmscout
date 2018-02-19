@@ -54,9 +54,9 @@ namespace osmscout {
 
   protected:
     virtual Vehicle GetVehicle(const RoutingState& state) = 0;
-    
+
     virtual bool CanUse(const RoutingState& state,
-                        const DatabaseId database,
+                        DatabaseId database,
                         const RouteNode& routeNode,
                         size_t pathIndex) = 0;
 
@@ -69,21 +69,21 @@ namespace osmscout {
                                 const WayRef& way) = 0;
 
     virtual double GetCosts(const RoutingState& state,
-                            const DatabaseId database,
+                            DatabaseId database,
                             const RouteNode& routeNode,
                             size_t pathIndex) = 0;
 
     virtual double GetCosts(const RoutingState& state,
-                            const DatabaseId database,
+                            DatabaseId database,
                             const WayRef &way,
                             double wayLength) = 0;
 
     virtual double GetEstimateCosts(const RoutingState& state,
-                                    const DatabaseId database,
+                                    DatabaseId database,
                                     double targetDistance) = 0;
 
     virtual double GetCostLimit(const RoutingState& state,
-                                const DatabaseId database,
+                                DatabaseId database,
                                 double targetDistance) = 0;
 
     virtual bool GetRouteNode(const DatabaseId &database,
@@ -93,12 +93,17 @@ namespace osmscout {
     virtual bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
                                        std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap) = 0;
 
+    /**
+     * Return the route node for the given database offset
+     * @param offset
+     *    Offset in given database
+     * @param node
+     *    Node instance to write the result back
+     * @return
+     *    True, if the node couldbe loaded, else false
+     */
     virtual bool GetRouteNodeByOffset(const DBFileOffset &offset,
                                       RouteNodeRef &node) = 0;
-
-    virtual bool GetRouteNodeOffset(const DatabaseId &database,
-                                    const Id &id,
-                                    FileOffset &offset) = 0;
 
     virtual bool GetWayByOffset(const DBFileOffset &offset,
                                 WayRef &way) = 0;
@@ -120,8 +125,8 @@ namespace osmscout {
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
 
     virtual std::vector<DBFileOffset> GetNodeTwins(const RoutingState& state,
-                                                   const DatabaseId database,
-                                                   const Id id) = 0;
+                                                   DatabaseId database,
+                                                   Id id) = 0;
 
     void GetStartForwardRouteNode(const RoutingState& state,
                                   const DatabaseId& database,
@@ -184,7 +189,7 @@ namespace osmscout {
                   size_t idCount,
                   bool oneway,
                   size_t targetNodeIndex);
-    
+
     bool GetWayStartNodes(const RoutingState& state,
                           const RoutePosition& position,
                           GeoCoord& startCoord,
@@ -223,14 +228,14 @@ namespace osmscout {
                            double &currentMaxDistance,
                            const double &overallDistance,
                            const double &costLimit);
+  public:
+    explicit AbstractRoutingService(const RouterParameter& parameter);
+    ~AbstractRoutingService() override;
 
     RoutingResult CalculateRoute(RoutingState& state,
                                  const RoutePosition& start,
                                  const RoutePosition& target,
                                  const RoutingParameter& parameter);
-  public:
-    AbstractRoutingService(const RouterParameter& parameter);
-    virtual ~AbstractRoutingService();
 
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);

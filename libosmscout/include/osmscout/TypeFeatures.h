@@ -24,8 +24,6 @@
 
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/util/String.h>
-
 namespace osmscout {
 
   class OSMSCOUT_API NameFeatureValue : public FeatureValue
@@ -1268,7 +1266,7 @@ namespace osmscout {
 
     inline std::string GetLabel() const
     {
-      return NumberToString(ele)+"m";
+      return std::to_string(ele)+"m";
     }
 
     void Read(FileScanner& scanner);
@@ -1640,10 +1638,10 @@ namespace osmscout {
     inline std::string GetLabel() const
     {
       if (startYear==endYear) {
-        return NumberToString(startYear);
+        return std::to_string(startYear);
       }
       else {
-        return NumberToString(startYear)+"-"+NumberToString(endYear);
+        return std::to_string(startYear)+"-"+std::to_string(endYear);
       }
     }
 
