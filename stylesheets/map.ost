@@ -345,7 +345,7 @@ TYPES
   TYPE highway_cycleway
     = WAY ("highway"=="cycleway")
       {Name, NameAlt}
-      PATH[BICYCLE] PIN_WAY
+      PATH[FOOT BICYCLE] PIN_WAY
       DESC
         en: "cycleway"
         de: "Fahradweg"
