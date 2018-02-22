@@ -27,7 +27,6 @@
 #include <osmscout/gpx/Import.h>
 
 #include <osmscout/util/Logger.h>
-#include <osmscout/util/String.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -62,14 +61,16 @@ public:
   DocumentContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser) :
       GpxParserContext(ctxt, parser), output(output) {}
 
-  virtual ~DocumentContext() {}
+  ~DocumentContext() override
+  {}
 
-  virtual const char *ContextName() const {
+  const char *ContextName() const override
+  {
     return "Document";
   }
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &/*atts*/);
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &/*atts*/) override;
 
 };
 
@@ -92,10 +93,10 @@ private:
 public:
   GpxParser(const std::string &filePath,
          GpxFile &output,
-         BreakerRef breaker,
-         ProcessCallbackRef callback):
-  file(NULL),
-  ctxt(NULL),
+         const BreakerRef& breaker,
+         const ProcessCallbackRef& callback):
+  file(nullptr),
+  ctxt(nullptr),
   fileSize(0),
   output(output),
   breaker(breaker),
@@ -128,40 +129,41 @@ public:
   ~GpxParser()
   {
     for (auto context : contextStack) {
-      if (context != NULL) {
-        delete context;
-      }
+      delete context;
     }
     contextStack.clear();
-    if (ctxt!=NULL) {
+    if (ctxt!=nullptr) {
       xmlFreeParserCtxt(ctxt);
     }
-    if (file!=NULL){
+    if (file!=nullptr){
       std::fclose(file);
     }
   }
 
   bool Process()
   {
-    if (file==NULL) {
+    if (file==nullptr) {
       return false;
     }
 
     char chars[1024];
 
-    int res=std::fread(chars,1,4,file);
+    size_t res=std::fread(chars,1,4,file);
     if (res!=4) {
       return false;
     }
 
-    ctxt=xmlCreatePushParserCtxt(&saxParser,this,chars,res,NULL);
+    ctxt=xmlCreatePushParserCtxt(&saxParser,this,chars,
+                                 static_cast<int>(res),
+                                 nullptr);
 
     // Resolve entities, do not do any network communication
     xmlCtxtUseOptions(ctxt,XML_PARSE_NOENT|XML_PARSE_NONET);
 
     FileOffset position=0;
     while ((res=std::fread(chars,1,sizeof(chars),file))>0) {
-      if (xmlParseChunk(ctxt,chars,res,0)!=0) {
+      if (xmlParseChunk(ctxt,chars,
+                        static_cast<int>(res),0)!=0) {
         xmlParserError(ctxt,"xmlParseChunk");
         return false;
       }
@@ -199,14 +201,14 @@ public:
   {
     assert(!contextStack.empty());
     GpxParserContext *top=contextStack.back();
-    contextStack.push_back(top==NULL? NULL : top->StartElement(name, atts));
+    contextStack.push_back(top==nullptr ? nullptr : top->StartElement(name, atts));
   }
 
   void Characters(const std::string &str)
   {
     assert(!contextStack.empty());
     GpxParserContext *top=contextStack.back();
-    if (top!=NULL) {
+    if (top!=nullptr) {
       top->Characters(str);
     }
   }
@@ -214,9 +216,9 @@ public:
   void PopContext(){
     assert(!contextStack.empty());
     GpxParserContext *top=contextStack.back();
-    if (top!=NULL){
-      delete top;
-    }
+
+    delete top;
+
     contextStack.pop_back();
   }
 
@@ -229,7 +231,7 @@ public:
     PopContext();
   }
 
-  void Error(std::string msg)
+  void Error(const std::string& msg)
   {
     errorCnt++;
     if (callback){
@@ -237,7 +239,7 @@ public:
     }
   }
 
-  void Warning(std::string msg)
+  void Warning(const std::string& msg)
   {
     osmscout::log.Warn() << msg;
   }
@@ -256,10 +258,10 @@ public:
 
   static void StartElement(void *data, const xmlChar *name, const xmlChar **atts)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
+    auto* parser=static_cast<GpxParser*>(data);
     std::unordered_map<std::string,std::string> attsMap;
-    if (atts!=NULL) {
-      for (size_t i = 0; atts[i] != NULL && atts[i + 1] != NULL; i += 2) {
+    if (atts!=nullptr) {
+      for (size_t i = 0; atts[i] !=nullptr && atts[i + 1] !=nullptr; i += 2) {
         attsMap[std::string((const char *) atts[i])] = std::string((const char *) atts[i + 1]);
       }
     }
@@ -268,13 +270,14 @@ public:
 
   static void Characters(void *data, const xmlChar *ch, int len)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
-    parser->Characters(std::string((const char *)ch,len));
+    auto* parser=static_cast<GpxParser*>(data);
+    parser->Characters(std::string((const char *)ch,
+                                   static_cast<unsigned long>(len)));
   }
 
   static void EndElement(void *data, const xmlChar *name)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
+    auto* parser=static_cast<GpxParser*>(data);
     parser->EndElement(std::string((const char *)name));
   }
 
@@ -285,32 +288,32 @@ public:
 
   static void StructuredErrorHandler(void* data, xmlErrorPtr error)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
+    auto* parser=static_cast<GpxParser*>(data);
     parser->Error("XML error, line " + std::to_string(error->line) + ": " + error->message);
   }
 
   static void WarningHandler(void* data, const char* msg,...)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
+    auto* parser=static_cast<GpxParser*>(data);
     parser->Warning(msg);
   }
 
   static void ErrorHandler(void* data, const char* msg,...)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
+    auto* parser=static_cast<GpxParser*>(data);
     parser->Error(std::string("XML error:") + msg );
   }
 
   static void StartDocumentHandler(void* data)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
+    auto* parser=static_cast<GpxParser*>(data);
     parser->StartDocument();
   }
 
 
   static void EndDocumentHandler(void* data)
   {
-    GpxParser* parser=static_cast<GpxParser*>(data);
+    auto* parser=static_cast<GpxParser*>(data);
     parser->EndDocument();
   }
 
@@ -321,7 +324,7 @@ GpxParserContext* GpxParserContext::StartElement(const std::string &name,
 {
   xmlParserWarning(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
   parser.Warning("Unexpected element");
-  return NULL;
+  return nullptr;
 }
 
 class SimpleValueContext : public GpxParserContext {
@@ -333,21 +336,24 @@ private:
   std::string buffer;
   Callback callback;
 public:
-  SimpleValueContext(std::string name,
+  SimpleValueContext(const std::string& name,
                      xmlParserCtxtPtr ctxt,
                      GpxParser &parser,
                      Callback callback):
       GpxParserContext(ctxt, parser), name(name), callback(callback) { }
-  virtual ~SimpleValueContext() {
+
+  ~SimpleValueContext() override
+  {
     callback(buffer);
   }
 
-  virtual const char *ContextName() const
+  const char *ContextName() const override
   {
     return name.c_str();
   };
 
-  virtual void Characters(const std::string &str){
+  void Characters(const std::string &str) override
+  {
     buffer+=str;
   };
 
@@ -360,10 +366,12 @@ public:
   PointLikeContext(xmlParserCtxtPtr ctxt, GpxParser &parser, double lat, double lon) :
       GpxParserContext(ctxt, parser), point(GeoCoord(lat,lon)) { }
 
-  virtual ~PointLikeContext() {}
+  ~PointLikeContext() override
+  {}
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &/*atts*/) {
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
+  {
     if (name == "ele") {
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
         double ele;
@@ -426,7 +434,7 @@ public:
       });
     }
 
-    return NULL; // silently ignore unknown elements
+    return nullptr; // silently ignore unknown elements
   }
 };
 
@@ -437,11 +445,12 @@ public:
   TrkptContext(xmlParserCtxtPtr ctxt, TrackSegment &segment, GpxParser &parser, double lat, double lon) :
       PointLikeContext(ctxt, parser, lat, lon), segment(segment) {}
 
-  virtual ~TrkptContext() {
+  ~TrkptContext() override
+  {
     segment.points.push_back(std::move(point));
   }
 
-  virtual const char *ContextName() const
+  const char *ContextName() const override
   {
     return "Trkpt";
   }
@@ -454,11 +463,12 @@ public:
   RteptContext(xmlParserCtxtPtr ctxt, Route &route, GpxParser &parser, double lat, double lon) :
     PointLikeContext(ctxt, parser, lat, lon), route(route) {}
 
-  virtual ~RteptContext() {
+  ~RteptContext() override
+  {
     route.points.push_back(std::move(point));
   }
 
-  virtual const char *ContextName() const
+  const char *ContextName() const override
   {
     return "Rtept";
   }
@@ -472,17 +482,19 @@ public:
   WaypointContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser, double lat, double lon) :
       GpxParserContext(ctxt, parser), output(output), waypoint(GeoCoord(lat,lon)) { }
 
-  virtual ~WaypointContext() {
+  ~WaypointContext() override
+  {
     output.waypoints.push_back(std::move(waypoint));
   }
 
-  virtual const char *ContextName() const
+  const char *ContextName() const override
   {
     return "Waypoint";
   }
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &/*atts*/) {
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
+  {
     if (name=="name") {
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
         waypoint.name = Optional<std::string>::of(name);
@@ -539,7 +551,7 @@ public:
       });
     }
 
-    return NULL; // silently ignore unknown elements
+    return nullptr; // silently ignore unknown elements
   }
 };
 
@@ -551,16 +563,18 @@ public:
   TrkSegContext(xmlParserCtxtPtr ctxt, Track &track, GpxParser &parser) :
       GpxParserContext(ctxt, parser), track(track) {}
 
-  virtual ~TrkSegContext() {
+  ~TrkSegContext() override
+  {
     track.segments.push_back(std::move(segment));
   }
 
-  virtual const char *ContextName() const {
+  const char *ContextName() const override
+  {
     return "TrkSeg";
   }
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &atts)
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &atts) override
   {
     if (name=="trkpt"){
       double lat;
@@ -572,7 +586,7 @@ public:
       }else{
         xmlParserError(ctxt,"Can't parse trkpt lan/lon\n");
         parser.Error("Can't parse trkpt lan/lon");
-        return NULL;
+        return nullptr;
       }
     }
 
@@ -588,16 +602,18 @@ public:
   RouteContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser) :
   GpxParserContext(ctxt, parser), output(output) {}
 
-  virtual ~RouteContext() {
+  ~RouteContext() override
+  {
     output.routes.push_back(std::move(route));
   }
 
-  virtual const char *ContextName() const {
+  const char *ContextName() const override
+  {
     return "Route";
   }
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &atts)
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &atts) override
   {
     if (name=="rtept") {
       double lat;
@@ -609,7 +625,7 @@ public:
       } else {
         xmlParserError(ctxt, "Can't parse trkpt lan/lon\n");
         parser.Error("Can't parse trkpt lan/lon");
-        return NULL;
+        return nullptr;
       }
     } else if (name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
@@ -617,7 +633,7 @@ public:
       });
     }
 
-    return NULL; // silently ignore unknown elements
+    return nullptr; // silently ignore unknown elements
   }
 };
 
@@ -628,17 +644,19 @@ private:
 public:
   TrkContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser):
       GpxParserContext(ctxt, parser), output(output) { }
-  virtual ~TrkContext() {
+
+  ~TrkContext() override
+  {
     output.tracks.push_back(std::move(track));
   }
 
-  virtual const char *ContextName() const
+  const char *ContextName() const override
   {
     return "Trk";
   };
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &/*atts*/)
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
   {
     if (name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
@@ -652,7 +670,7 @@ public:
       return new TrkSegContext(ctxt, track, parser);
     }
 
-    return NULL; // silently ignore unknown elements
+    return nullptr; // silently ignore unknown elements
   }
 };
 
@@ -661,14 +679,17 @@ class GpxDocumentContext : public GpxParserContext {
 public:
   GpxDocumentContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser):
       GpxParserContext(ctxt, parser), output(output) {}
-  virtual ~GpxDocumentContext() {}
 
-  virtual const char *ContextName() const {
+  ~GpxDocumentContext() override
+  {}
+
+  const char *ContextName() const override
+  {
     return "Gpx";
   }
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &atts)
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &atts) override
   {
     if (name=="trk"){
       return new TrkContext(ctxt,output,parser);
@@ -682,12 +703,12 @@ public:
       }else{
         xmlParserError(ctxt,"Can't parse wpt lan/lon\n");
         parser.Error("Can't parse wpt lan/lon");
-        return NULL;
+        return nullptr;
       }
     } else if (name=="rte"){
       return new RouteContext(ctxt,output,parser);
     }
-    return NULL; // silently ignore unknown elements
+    return nullptr; // silently ignore unknown elements
   }
 };
 
