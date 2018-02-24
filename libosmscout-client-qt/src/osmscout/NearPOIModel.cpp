@@ -180,8 +180,6 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
     qDebug() << "Put " << location.getObjectType() << location.getLabel() << " to position: " << position << "(distance" << distanceKm << ")";
     emit endInsertRows();
   }
-  searching=false;
-  emit SearchingChanged(searching);
 }
 
 void NearPOIModel::lookupPOI()
