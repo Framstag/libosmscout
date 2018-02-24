@@ -42,6 +42,7 @@
 #include <osmscout/TiledMapOverlay.h>
 #include <osmscout/Router.h>
 #include <osmscout/NavigationModel.h>
+#include <osmscout/NearPOIModel.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
@@ -156,6 +157,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");
   qmlRegisterType<StyleFlagsModel>(uri, versionMajor, versionMinor, "StyleFlagsModel");
   qmlRegisterType<TiledMapOverlay>(uri, versionMajor, versionMinor, "TiledMapOverlay");
+  qmlRegisterType<NearPOIModel>(uri, versionMajor, versionMinor, "NearPOIModel");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
@@ -293,6 +295,15 @@ StyleModule* OSMScoutQt::MakeStyleModule()
 {
   QThread *thread=makeThread("StyleModule");
   StyleModule *module=new StyleModule(thread,dbThread);
+  module->moveToThread(thread);
+  thread->start();
+  return module;
+}
+
+POILookupModule *OSMScoutQt::MakePOILookupModule()
+{
+  QThread *thread=makeThread("POILookupModule");
+  POILookupModule *module=new POILookupModule(thread,dbThread);
   module->moveToThread(thread);
   thread->start();
   return module;

@@ -220,7 +220,7 @@ bool SearchModule::BuildLocationEntry(const osmscout::ObjectFileRef& object,
     osmscout::log.Debug() << "obj:    " << title.toStdString() << " (" << objectType.toStdString() << ")";
 
     // Reverse lookup is slow for all search entries
-    // TODO: move it to SearchModel and make it asynchrous
+    // TODO: move it to SearchModel and make it asynchronous
     /*
     std::list<osmscout::LocationService::ReverseLookupResult> result;
     if (db->locationService->ReverseLookupObject(object, result)){
