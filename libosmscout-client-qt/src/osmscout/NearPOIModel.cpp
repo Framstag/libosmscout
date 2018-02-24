@@ -186,34 +186,36 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
 
 void NearPOIModel::lookupPOI()
 {
-  if (searchCenter.GetLat()!=INVALID_COORD &&
-    searchCenter.GetLon()!=INVALID_COORD &&
-    !types.isEmpty() &&
-    maxDistance>0 &&
-    resultLimit>0){
+  if (breaker){
+    breaker->Break();
+  }
 
-    if (breaker){
-      breaker->Break();
+  if (!locations.isEmpty()){
+    beginResetModel();
+    for (QList<LocationEntry*>::iterator location=locations.begin();
+         location!=locations.end();
+         ++location) {
+      delete *location;
     }
+
+    locations.clear();
+    endResetModel();
+    emit countChanged(locations.size());
+  }
+
+  if (searchCenter.GetLat()!=INVALID_COORD &&
+      searchCenter.GetLon()!=INVALID_COORD &&
+      !types.isEmpty() &&
+      maxDistance>0 &&
+      resultLimit>0){
+
     breaker=std::make_shared<osmscout::ThreadedBreaker>();
     searching=true;
-
-    if (!locations.isEmpty()){
-      beginResetModel();
-      for (QList<LocationEntry*>::iterator location=locations.begin();
-           location!=locations.end();
-           ++location) {
-        delete *location;
-      }
-
-      locations.clear();
-      endResetModel();
-      emit countChanged(locations.size());
-    }
-
     // TODO: use resultLimit
     emit lookupPOI(++currentRequest, breaker, searchCenter, types, maxDistance);
-    emit SearchingChanged(searching);
+  }else{
+    searching=false;
   }
+  emit SearchingChanged(searching);
 }
 
