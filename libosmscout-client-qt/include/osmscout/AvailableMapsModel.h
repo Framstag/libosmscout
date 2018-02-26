@@ -165,14 +165,16 @@ Q_DECLARE_METATYPE(AvailableMapsModelMap)
  */
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModel : public QAbstractItemModel {
   Q_OBJECT
-  
-  Q_PROPERTY(bool loading READ isLoading NOTIFY loaded)
+
+  Q_PROPERTY(bool loading READ isLoading NOTIFY loadingChanged)
+  Q_PROPERTY(QString fetchError READ getFetchError NOTIFY loadingChanged)
 
 signals:
-  void loaded();
+  void loadingChanged();
 
 public slots:
   void listDownloaded(QNetworkReply*);
+  void reload();
 
 public:
   AvailableMapsModel();
@@ -208,6 +210,10 @@ public:
     return !requests.isEmpty();
   }
 
+  inline QString getFetchError(){
+    return fetchError;
+  }
+
 private:
   void append(AvailableMapsModelItem *item);
   QList<AvailableMapsModelItem *> findChildrenByPath(QStringList dir) const;
@@ -217,6 +223,7 @@ private:
   QList<MapProvider>        mapProviders;
   QHash<QUrl,MapProvider>   requests;
   QList<AvailableMapsModelItem*> items;
+  QString                   fetchError;
 };
 
 #endif	/* AVAILABLEMAPMODEL_H */
