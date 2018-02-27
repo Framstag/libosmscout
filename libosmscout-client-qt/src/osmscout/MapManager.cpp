@@ -42,6 +42,25 @@ MapDownloadJob::~MapDownloadJob()
 
 void MapDownloadJob::start()
 {
+  QJsonObject mapMetadata;
+  mapMetadata["name"] = map.getName();
+  mapMetadata["map"] = map.getPath().join("/");
+  mapMetadata["version"] = map.getVersion();
+  mapMetadata["creation"] = (double)map.getCreation().toTime_t();
+
+  QJsonDocument doc(mapMetadata);
+  QFile metadataFile(target.filePath("metadata.json"));
+  metadataFile.open(QFile::OpenModeFlag::WriteOnly);
+  metadataFile.write(doc.toJson());
+  metadataFile.close();
+  if (metadataFile.error() != QFile::FileError::NoError){
+    started = true;
+    done = true;
+    error = metadataFile.errorString();
+    emit failed(metadataFile.errorString());
+    return;
+  }
+
   QStringList fileNames;
   fileNames << "bounding.dat"
             << "nodes.dat"
