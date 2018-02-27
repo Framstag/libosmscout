@@ -62,7 +62,8 @@ void MapDownloadJob::start()
             << "textloc.dat"
             << "textother.dat"
             << "textpoi.dat"
-            << "textregion.dat";
+            << "textregion.dat"
+            << "coverage.idx";
 
   // types.dat should be last, when download is interrupted,
   // directory is not recognized as valid map
