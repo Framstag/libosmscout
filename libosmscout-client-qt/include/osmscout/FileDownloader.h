@@ -47,7 +47,11 @@ public:
   enum Type { Plain=0, BZ2=1 };
 
 public:
-  explicit FileDownloader(QNetworkAccessManager *manager, QString url, QString path, const Type mode = Plain, QObject *parent = 0);
+  explicit FileDownloader(QNetworkAccessManager *manager,
+                          QString url,
+                          QString path,
+                          const Type mode = Plain,
+                          QObject *parent = 0);
   ~FileDownloader();
 
   operator bool() const { return m_isok; }
@@ -59,7 +63,7 @@ signals:
   void downloadedBytes(uint64_t sz);
   void writtenBytes(uint64_t sz);
   void finished(QString path);
-  void error(QString error_text);
+  void error(QString error_text, bool recoverable);
 
 public slots:
   void startDownload();

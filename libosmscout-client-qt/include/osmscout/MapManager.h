@@ -58,14 +58,18 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
 
   uint64_t                downloadedBytes;
 
+  QString                 error;
+
 signals:
   void finished();
+  void failed(QString error);
   void downloadProgress();
 
 public slots:
-  void onJobFailed(QString error_text);
+  void onJobFailed(QString errorMessage, bool recoverable);
   void onJobFinished();
   void downloadNextFile();
+  void onDownloadProgress(uint64_t);
 
 public:
   MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target);
@@ -97,6 +101,12 @@ public:
   {
     return started && !done;
   }
+
+  inline QString getError()
+  {
+    return error;
+  }
+
   double getProgress();
   QString getDownloadingFile();
 };
@@ -119,7 +129,8 @@ private:
 public slots:
   void lookupDatabases();
   void onJobFinished();
-  
+  void onJobFailed(QString errorMessage);
+
 signals:
   void mapDownloadFails(QString message);
   void databaseListChanged(QList<QDir> databaseDirectories);

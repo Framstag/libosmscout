@@ -72,42 +72,56 @@ void MapDownloadJob::start()
   for (auto fileName:fileNames){
     auto job=new FileDownloader(webCtrl, map.getProvider().getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));
     connect(job, SIGNAL(finished(QString)), this, SLOT(onJobFinished()));
-    connect(job, SIGNAL(error(QString)), this, SLOT(onJobFailed(QString)));
+    connect(job, SIGNAL(error(QString, bool)), this, SLOT(onJobFailed(QString, bool)));
     connect(job, SIGNAL(writtenBytes(uint64_t)), this, SIGNAL(downloadProgress()));
-    jobs << job; 
+    connect(job, SIGNAL(writtenBytes(uint64_t)), this, SLOT(onDownloadProgress(uint64_t)));
+    jobs << job;
   }
   started=true;
   downloadNextFile();
 }
 
-void MapDownloadJob::onJobFailed(QString error_text){
-  osmscout::log.Debug() << "Download failed with the error: " << error_text.toStdString();
+void MapDownloadJob::onDownloadProgress(uint64_t)
+{
+  // reset error message
+  error = "";
+}
 
-  // TODO: add some flag if this failure is temprary and downloading will be
-  //       retried. If it is final, unrecoverable failure, emit mapDownloadFails
-  // TODO: Report file these failures to UI (via MapDownloadsModel?)
+void MapDownloadJob::onJobFailed(QString errorMessage, bool recoverable){
+  osmscout::log.Warn() << "Download failed with the error: "
+                       << errorMessage.toStdString() << " "
+                       << (recoverable? "(recoverable)": "(not recoverable)");
+
+  if (recoverable){
+    error = errorMessage;
+    emit downloadProgress();
+  }else{
+    done = true;
+    error = errorMessage;
+    emit failed(errorMessage);
+  }
 }
 
 void MapDownloadJob::onJobFinished()
 {
-  if (!jobs.isEmpty())
-    {
-      jobs.first()->deleteLater();
-      downloadedBytes += jobs.first()->getBytesDownloaded();
-      jobs.pop_front();      
-    }
+  if (!jobs.isEmpty()) {
+    jobs.first()->deleteLater();
+    downloadedBytes += jobs.first()->getBytesDownloaded();
+    jobs.pop_front();
+  }
   
   downloadNextFile();
 }
 
 void MapDownloadJob::downloadNextFile()
 {
-  if (!jobs.isEmpty())
+  if (!jobs.isEmpty()) {
     jobs.first()->startDownload();
-  else
-    done=true;
-  
-  emit finished();
+    emit downloadProgress();
+  } else {
+    done = true;
+    emit finished();
+  }
 }
 
 double MapDownloadJob::getProgress()
@@ -188,6 +202,7 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir)
   
   auto job=new MapDownloadJob(&webCtrl, map, dir);
   connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
+  connect(job, SIGNAL(failed(QString)), this, SLOT(onJobFailed(QString)));
   downloadJobs<<job;
   emit downloadJobsChanged();
   downloadNext();
@@ -204,6 +219,11 @@ void MapManager::downloadNext()
     job->start();
     break;
   }  
+}
+
+void MapManager::onJobFailed(QString /*errorMessage*/)
+{
+  onJobFinished();
 }
 
 void MapManager::onJobFinished()

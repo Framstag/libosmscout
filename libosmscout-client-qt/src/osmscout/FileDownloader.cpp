@@ -37,29 +37,27 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
                                QObject *parent):
   QObject(parent),
   m_manager(manager),
-  m_url(url), m_path(path)
+  m_url(url),
+  m_path(path)
 {
-  if (!m_url.isValid())
-    {
-      m_isok = false;
-      return;
-    }
+  if (!m_url.isValid()) {
+    m_isok = false;
+    return;
+  }
 
   // check path and open file
   QFileInfo finfo(m_path);
   QDir dir;
-  if ( !dir.mkpath(finfo.dir().absolutePath()) )
-    {
-      m_isok = false;
-      return;
-    }
+  if ( !dir.mkpath(finfo.dir().absolutePath()) ) {
+    m_isok = false;
+    return;
+  }
 
   m_file.setFileName(m_path + ".download");
-  if (!m_file.open(QIODevice::WriteOnly))
-    {
-      m_isok = false;
-      return;
-    }
+  if (!m_file.open(QIODevice::WriteOnly)) {
+    m_isok = false;
+    return;
+  }
 
   connect( &m_file, SIGNAL(bytesWritten(qint64)),
            this, SLOT(onBytesWritten(qint64)) );
@@ -67,47 +65,41 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
   // start data processor if requested
   QString command;
   QStringList arguments;
-  if (mode == BZ2)
-    {
-      command = "bunzip2";
-      arguments << "-c";
-    }
-  else if (mode == Plain)
-    {
-      // nothing to do
-    }
-  else
-    {
-      std::cerr << "FileDownloader: unknown mode: " << mode << std::endl;
-      m_isok = false;
-      return;
-    }
+  if (mode == BZ2) {
+    command = "bunzip2";
+    arguments << "-c";
+  } else if (mode == Plain) {
+    // nothing to do
+  } else {
+    std::cerr << "FileDownloader: unknown mode: " << mode << std::endl;
+    m_isok = false;
+    return;
+  }
 
-  if (!command.isEmpty())
-    {
-      m_pipe_to_process = true;
-      m_process = new QProcess(this);
+  if (!command.isEmpty()) {
+    m_pipe_to_process = true;
+    m_process = new QProcess(this);
 
-      connect( m_process, SIGNAL(started()),
-               this, SLOT(onProcessStarted()) );
+    connect( m_process, SIGNAL(started()),
+             this, SLOT(onProcessStarted()) );
 
-      connect( m_process, SIGNAL(finished(int)),
-               this, SLOT(onProcessStopped(int)) );
+    connect( m_process, SIGNAL(finished(int)),
+             this, SLOT(onProcessStopped(int)) );
 
-      connect( m_process, SIGNAL(stateChanged(QProcess::ProcessState)),
-               this, SLOT(onProcessStateChanged(QProcess::ProcessState)) );
+    connect( m_process, SIGNAL(stateChanged(QProcess::ProcessState)),
+             this, SLOT(onProcessStateChanged(QProcess::ProcessState)) );
 
-      connect( m_process, SIGNAL(readyReadStandardOutput()),
-               this, SLOT(onProcessRead()) );
+    connect( m_process, SIGNAL(readyReadStandardOutput()),
+             this, SLOT(onProcessRead()) );
 
-      connect( m_process, SIGNAL(readyReadStandardError()),
-               this, SLOT(onProcessReadError()) );
+    connect( m_process, SIGNAL(readyReadStandardError()),
+             this, SLOT(onProcessReadError()) );
 
-      connect( m_process, SIGNAL(bytesWritten(qint64)),
-               this, SIGNAL(onBytesWritten(qint64)) );
+    connect( m_process, SIGNAL(bytesWritten(qint64)),
+             this, SIGNAL(onBytesWritten(qint64)) );
 
-      m_process->start(command, arguments);
-    }
+    m_process->start(command, arguments);
+  }
 
   m_download_last_read_time.start();
   m_download_throttle_time_start.start();
@@ -115,8 +107,12 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
 
 FileDownloader::~FileDownloader()
 {
-  if (m_reply) m_reply->deleteLater();
-  if (m_process) m_process->deleteLater();
+  if (m_reply) {
+    m_reply->deleteLater();
+  }
+  if (m_process) {
+    m_process->deleteLater();
+  }
 }
 
 void FileDownloader::startDownload()
@@ -162,17 +158,15 @@ void FileDownloader::onFinished()
 
   m_file.rename(m_path);
 
-  if (m_process)
-    {
-      m_process->deleteLater();
-      m_process = nullptr;
-    }
+  if (m_process) {
+    m_process->deleteLater();
+    m_process = nullptr;
+  }
 
-  if (m_reply)
-    {
-      m_reply->deleteLater();
-      m_reply = nullptr;
-    }
+  if (m_reply) {
+    m_reply->deleteLater();
+    m_reply = nullptr;
+  }
 
   emit finished(m_path);
 }
@@ -195,7 +189,7 @@ void FileDownloader::onError(const QString &err)
     }
 
   m_isok = false;
-  emit error(err);
+  emit error(err, false);
 }
 
 void FileDownloader::onNetworkReadyRead()
@@ -203,8 +197,10 @@ void FileDownloader::onNetworkReadyRead()
   m_download_last_read_time.restart();
 
   if (!m_reply ||
-      (m_pipe_to_process && !m_process_started) ) // too early, haven't started yet
+      (m_pipe_to_process && !m_process_started) ) {
+    // too early, haven't started yet
     return;
+  }
 
   double speed = m_download_throttle_bytes /
       (m_download_throttle_time_start.elapsed() * 1e-3) / 1024.0;
@@ -220,41 +216,39 @@ void FileDownloader::onNetworkReadyRead()
   // check if the network has to be throttled due to excessive
   // non-writen buffers. check is skipped on the last read called
   // with m_clear_all_caches
-  if (!m_clear_all_caches)
-    {
-      /// It seems that sometimes Qt heavily overshoots the requested network buffer size. In
-      /// particular it has been usual for the first download from start of the server. On the second try,
-      /// it's usually OK (seen on SFOS 2.0 series)
-      if ( m_reply->bytesAvailable() > const_buffer_network_max_factor_before_cancel*const_buffer_network )
-        {
-          restartDownload(true);
-          return;
-        }
-
-      if ( (m_pipe_to_process && m_process->bytesToWrite() > const_buffer_size_io) ||
-           (m_file.bytesToWrite() > const_buffer_size_io) )
-        {
-          m_pause_network_io = true;
-          return;
-        }
-
-      // check if requested speed has been exceeded
-      if (m_download_throttle_max_speed > 0)
-        {
-          if (speed > m_download_throttle_max_speed)
-            {
-              //              qDebug() << "Going too fast: " << speed;
-              m_pause_network_io = true;
-              return;
-            }
-        }
+  if (!m_clear_all_caches) {
+    /// It seems that sometimes Qt heavily overshoots the requested network buffer size. In
+    /// particular it has been usual for the first download from start of the server. On the second try,
+    /// it's usually OK (seen on SFOS 2.0 series)
+    if ( m_reply->bytesAvailable() > const_buffer_network_max_factor_before_cancel*const_buffer_network ) {
+      restartDownload(true);
+      return;
     }
+
+    if ( (m_pipe_to_process && m_process->bytesToWrite() > const_buffer_size_io) ||
+         (m_file.bytesToWrite() > const_buffer_size_io) ) {
+      m_pause_network_io = true;
+      return;
+    }
+
+    // check if requested speed has been exceeded
+    if (m_download_throttle_max_speed > 0) {
+      if (speed > m_download_throttle_max_speed) {
+        //              qDebug() << "Going too fast: " << speed;
+        m_pause_network_io = true;
+        return;
+      }
+    }
+  }
 
   m_pause_network_io = false;
 
   QByteArray data_current;
-  if (m_clear_all_caches) data_current = m_reply->readAll();
-  else data_current = m_reply->read( std::min(const_cache_size_before_swap, const_buffer_network) );
+  if (m_clear_all_caches) {
+    data_current = m_reply->readAll();
+  } else {
+    data_current = m_reply->read( std::min(const_cache_size_before_swap, const_buffer_network) );
+  }
 
   m_cache_current.append(data_current);
   m_downloaded_gui += data_current.size();
@@ -264,33 +258,28 @@ void FileDownloader::onNetworkReadyRead()
 
   // check if caches are full or whether they have to be
   // filled before writing to file/process
-  if (!m_clear_all_caches && m_cache_current.size() < const_cache_size_before_swap)
+  if (!m_clear_all_caches && m_cache_current.size() < const_cache_size_before_swap) {
     return;
+  }
 
   QByteArray data(m_cache_safe);
-  if (m_clear_all_caches)
-    {
-      data.append(m_cache_current);
-      m_cache_current.clear();
-      m_cache_safe.clear();
-    }
-  else
-    {
-      m_cache_safe = m_cache_current;
-      m_cache_current.clear();
-    }
+  if (m_clear_all_caches) {
+    data.append(m_cache_current);
+    m_cache_current.clear();
+    m_cache_safe.clear();
+  } else {
+    m_cache_safe = m_cache_current;
+    m_cache_current.clear();
+  }
 
   m_downloaded += data.size();
 
-  if (m_pipe_to_process)
-    {
-      m_process->write(data);
-    }
-  else
-    {
-      m_file.write(data);
-      emit writtenBytes(m_downloaded);
-    }
+  if (m_pipe_to_process) {
+    m_process->write(data);
+  } else {
+    m_file.write(data);
+    emit writtenBytes(m_downloaded);
+  }
 }
 
 uint64_t FileDownloader::getBytesDownloaded() const
@@ -300,94 +289,101 @@ uint64_t FileDownloader::getBytesDownloaded() const
 
 void FileDownloader::onDownloaded()
 {
-  if (!m_reply) return; // happens on error, after error cleanup and initiating retry
+  if (!m_reply) {
+    return; // happens on error, after error cleanup and initiating retry
+  }
 
-  if (m_reply->error() != QNetworkReply::NoError)
+  if (m_reply->error() != QNetworkReply::NoError) {
     return;
+  }
 
-  if (m_pipe_to_process && !m_process_started)
+  if (m_pipe_to_process && !m_process_started) {
     return;
+  }
 
   m_clear_all_caches = true;
   onNetworkReadyRead(); // update all data if needed
 
-  if (m_pipe_to_process && m_process)
+  if (m_pipe_to_process && m_process) {
     m_process->closeWriteChannel();
+  }
 
-  if (m_reply) m_reply->deleteLater();
+  if (m_reply) {
+    m_reply->deleteLater();
+  }
   m_reply = nullptr;
 
-  if (!m_pipe_to_process) onFinished();
+  if (!m_pipe_to_process) {
+    onFinished();
+  }
 }
 
 bool FileDownloader::restartDownload(bool force)
 {
   killTimer(m_timeout_timer_id);
-//  qDebug() << QTime::currentTime() << " / Restart called: "
-//           << m_url << " " << m_download_retries << " " << m_download_last_read_time.elapsed();
+  //  qDebug() << QTime::currentTime() << " / Restart called: "
+  //           << m_url << " " << m_download_retries << " " << m_download_last_read_time.elapsed();
 
   // check if we should retry before cancelling all with an error
   // this check is performed only if we managed to get some data
-  if (m_downloaded_last_error != m_downloaded)
+  if (m_downloaded_last_error != m_downloaded) {
     m_download_retries = 0;
+  }
 
   if (m_reply &&
       m_download_retries < const_max_download_retries &&
-      (m_downloaded > 0 || force) )
-    {
-      m_cache_safe.clear();
-      m_cache_current.clear();
-      m_reply->deleteLater();
-      m_reply = nullptr;
+      (m_downloaded > 0 || force) ) {
+    m_cache_safe.clear();
+    m_cache_current.clear();
+    m_reply->deleteLater();
+    m_reply = nullptr;
 
-      QTimer::singleShot(const_download_retry_sleep_time * 1e3,
-                         this, SLOT(startDownload()));
+    QTimer::singleShot(const_download_retry_sleep_time * 1e3,
+                       this, SLOT(startDownload()));
 
-      m_download_retries++;
-      m_downloaded_gui = m_downloaded;
-      m_downloaded_last_error = m_downloaded;
-      m_download_last_read_time.restart();
+    m_download_retries++;
+    m_downloaded_gui = m_downloaded;
+    m_downloaded_last_error = m_downloaded;
+    m_download_last_read_time.restart();
 
-      return true;
-    }
+    return true;
+  }
 
   return false;
 }
 
 void FileDownloader::onNetworkError(QNetworkReply::NetworkError /*code*/)
 {
-  if (restartDownload()) return;
+  if (restartDownload()) {
+    emit error(m_reply? m_reply->errorString(): "", true);
+    return;
+  }
 
-  if (m_reply)
-    {
-      QString err = tr("Failed to download") + "<br>" + m_path +
-          "<br><br>" +tr("Error code: %1").arg(QString::number(m_reply->error())) + "<br><blockquote><small>" +
-          m_reply->errorString() +
-          "</small></blockquote>";
-      onError(err);
-    }
+  if (m_reply) {
+    onError(m_reply->errorString());
+  }
 }
 
 void FileDownloader::timerEvent(QTimerEvent * /*event*/)
 {
-  if (m_pause_network_io)
+  if (m_pause_network_io) {
     onNetworkReadyRead();
+  }
 
-  if (m_download_last_read_time.elapsed()*1e-3 > const_download_timeout)
-    {
-      if (restartDownload()) return;
-
-      QString err = tr("Failed to download") + "<br>" + m_path +
-          "<br><br>" +tr("Timeout");
-
-      onError(err);
-    }
+  if (m_download_last_read_time.elapsed()*1e-3 > const_download_timeout) {
+    if (restartDownload()){
+      emit error("Timeout", true);
+      return;
+    };
+    onError("Timeout");
+  }
 }
 
 void FileDownloader::onBytesWritten(qint64)
 {
-  if (m_pause_network_io)
+  if (m_pause_network_io) {
     onNetworkReadyRead();
+  }
 }
 
 void FileDownloader::onProcessStarted()
@@ -400,7 +396,9 @@ void FileDownloader::onProcessRead()
 {
   m_download_last_read_time.restart();
 
-  if (!m_process) return;
+  if (!m_process) {
+    return;
+  }
 
   QByteArray data = m_process->readAllStandardOutput();
   m_file.write(data);
@@ -410,15 +408,16 @@ void FileDownloader::onProcessRead()
 
 void FileDownloader::onProcessStopped(int exitCode)
 {
-  if (exitCode != 0)
-    {
-      QString err = tr("Error in processing downloaded data");
-      m_isok = false;
-      emit error(err);
-      return;
-    }
+  if (exitCode != 0){
+    QString err = tr("Error in processing downloaded data");
+    m_isok = false;
+    emit error(err, false);
+    return;
+  }
 
-  if (!m_process) return;
+  if (!m_process){
+    return;
+  }
 
   onProcessRead();
   onFinished();
@@ -426,23 +425,21 @@ void FileDownloader::onProcessStopped(int exitCode)
 
 void FileDownloader::onProcessReadError()
 {
-  if (!m_process) return;
+  if (!m_process){
+    // should not happen
+    return;
+  }
 
   QByteArray data = m_process->readAllStandardError();
-  if (data.size() > 0)
-    {
-      QString
-          err = tr("Error in processing downloaded data") + ": " +
-          QString(data.data());
-      onError(err);
-    }
+  if (data.size() > 0){
+    onError("Error in processing downloaded data");
+  }
 }
 
 void FileDownloader::onProcessStateChanged(QProcess::ProcessState state)
 {
-  if ( !m_process_started && state == QProcess::NotRunning )
-    {
-      QString err = tr("Error in processing downloaded data: could not start the program") + " " + m_process->program();
-      onError(err);
-    }
+  if ( !m_process_started && state == QProcess::NotRunning ) {
+    QString err = tr("Error in processing downloaded data: could not start the program") + " " + m_process->program();
+    onError(err);
+  }
 }

@@ -95,6 +95,7 @@ void MapDownloadsModel::onDownloadProgress()
   QVector<int> roles;
   roles<<ProgressRole;
   roles<<ProgressDescriptionRole;
+  roles<<ErrorStringRole;
   emit dataChanged(createIndex(0,0), createIndex(count-1,0),roles);
 }
 
@@ -121,6 +122,8 @@ QVariant MapDownloadsModel::data(const QModelIndex &index, int role) const
       return job->getProgress();
     case ProgressDescriptionRole:
       return job->getDownloadingFile();
+    case ErrorStringRole:
+      return job->getError();
     default:
       break;
   }
@@ -135,6 +138,7 @@ QHash<int, QByteArray> MapDownloadsModel::roleNames() const
   roles[TargetDirectoryRole]="targetDirectory";
   roles[ProgressRole]="progressRole";
   roles[ProgressDescriptionRole]="progressDescription";
+  roles[ErrorStringRole]="errorString";
 
   return roles;
 }
