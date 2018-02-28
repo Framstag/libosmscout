@@ -60,6 +60,7 @@ public:
     TargetDirectoryRole = Qt::UserRole+1,
     ProgressRole = Qt::UserRole+2,
     ProgressDescriptionRole = Qt::UserRole+3,
+    ErrorStringRole = Qt::UserRole+4,
   };
 
   Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;

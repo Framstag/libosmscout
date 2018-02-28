@@ -162,8 +162,10 @@ MapDialog {
                 width: 30
             }
             TableViewColumn {
-                role: "progressDescription"
                 title: "Downloading"
+                delegate: Text {
+                    text: (model!=null) ? (model.errorString!="" ? model.errorString : model.progressDescription) : ""
+                }
                 width: 100
             }
             TableViewColumn {
