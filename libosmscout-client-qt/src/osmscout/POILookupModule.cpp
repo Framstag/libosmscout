@@ -62,7 +62,7 @@ LocationEntry buildLocationEntry(T obj,
 
 QList<LocationEntry> POILookupModule::lookupPOIRequest(DBInstanceRef db,
                                                        osmscout::GeoBox searchBoundingBox,
-                                                       osmscout::BreakerRef breaker,
+                                                       osmscout::BreakerRef /*breaker*/,
                                                        QStringList types)
 {
   QList<LocationEntry> result;

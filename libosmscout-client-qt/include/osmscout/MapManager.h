@@ -248,13 +248,18 @@ public:
   void downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceExisting = true);
   void downloadNext();
   
-  inline QList<MapDownloadJob*> getDownloadJobs(){
+  inline QList<MapDownloadJob*> getDownloadJobs() const {
     return downloadJobs;
   }
   
-  inline QStringList getLookupDirectories()
+  inline QStringList getLookupDirectories() const
   {
     return databaseLookupDirs;
+  }
+
+  inline QList<MapDirectory> getDatabaseDirectories() const
+  {
+    return databaseDirectories;
   }
 };
 

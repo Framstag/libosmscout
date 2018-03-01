@@ -41,5 +41,6 @@ osmscoutclientqtSrc = [
             'src/osmscout/TiledRenderingHelper.cpp',
             'src/osmscout/NearPOIModel.cpp',
             'src/osmscout/POILookupModule.cpp',
+            'src/osmscout/InstalledMapsModel.cpp',
           ]
 

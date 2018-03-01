@@ -43,6 +43,7 @@
 #include <osmscout/Router.h>
 #include <osmscout/NavigationModel.h>
 #include <osmscout/NearPOIModel.h>
+#include <osmscout/InstalledMapsModel.h>
 
 static OSMScoutQt* osmScoutInstance=NULL;
 
@@ -158,6 +159,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<StyleFlagsModel>(uri, versionMajor, versionMinor, "StyleFlagsModel");
   qmlRegisterType<TiledMapOverlay>(uri, versionMajor, versionMinor, "TiledMapOverlay");
   qmlRegisterType<NearPOIModel>(uri, versionMajor, versionMinor, "NearPOIModel");
+  qmlRegisterType<InstalledMapsModel>(uri, versionMajor, versionMinor, "InstalledMapsModel");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
