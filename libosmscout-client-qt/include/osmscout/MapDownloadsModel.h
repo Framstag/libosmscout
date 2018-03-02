@@ -68,8 +68,8 @@ public:
   virtual QHash<int, QByteArray> roleNames() const;
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-  Q_INVOKABLE QString suggestedDirectory(QVariant mapVar, QString rootDirectory = "");
-  Q_INVOKABLE void downloadMap(QVariant map, QString dir);
+  Q_INVOKABLE QString suggestedDirectory(QObject *map, QString rootDirectory = "");
+  Q_INVOKABLE void downloadMap(QObject *map, QString dir);
   Q_INVOKABLE QStringList getLookupDirectories();
   Q_INVOKABLE double getFreeSpace(QString dir);
 };

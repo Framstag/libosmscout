@@ -295,7 +295,7 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
     case DescriptionRole:
       return item->getDescription();
     case MapRole:
-      return map==NULL ? QVariant(): qVariantFromValue(AvailableMapsModelMap(*map));
+      return QVariant::fromValue(map==nullptr ? nullptr: new AvailableMapsModelMap(*map));
     default:
         break;
   }  
@@ -333,4 +333,44 @@ Qt::ItemFlags AvailableMapsModel::flags(const QModelIndex &index) const
   }
 
   return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+QVariant AvailableMapsModel::timeOfMap(QStringList path)
+{
+  if (path.empty()){
+    return QVariant();
+  }
+  for (const AvailableMapsModelItem* item:items){
+    if (item->isDirectory() || !item->isValid()){
+      continue;
+    }
+    if (item->getPath()==path){
+      const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(item);
+      if (map != nullptr){
+        return map->getCreation();
+      }
+    }
+  }
+
+  return QVariant();
+}
+
+QObject* AvailableMapsModel::mapByPath(QStringList path)
+{
+  if (path.empty()){
+    return nullptr;
+  }
+  for (const AvailableMapsModelItem* item:items){
+    if (item->isDirectory() || !item->isValid()){
+      continue;
+    }
+    if (item->getPath()==path){
+      const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(item);
+      if (map != nullptr){
+        return new AvailableMapsModelMap(*map);
+      }
+    }
+  }
+
+  return nullptr;
 }

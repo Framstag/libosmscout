@@ -35,6 +35,11 @@
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelItem : public QObject {
   Q_OBJECT
 
+  Q_PROPERTY(bool valid READ isValid())
+  Q_PROPERTY(QString name READ getName())
+  Q_PROPERTY(QStringList path READ getPath())
+  Q_PROPERTY(QString description READ getDescription())
+
 private:
   bool valid;
   QString name;
@@ -103,7 +108,13 @@ public:
  */
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelMap : public AvailableMapsModelItem {
   Q_OBJECT
-  
+
+  Q_PROPERTY(qint64 byteSize READ getSize())
+  Q_PROPERTY(QString size READ getSizeHuman())
+  Q_PROPERTY(QString serverDirectory READ getServerDirectory())
+  Q_PROPERTY(QDateTime time READ getCreation())
+  Q_PROPERTY(int version READ getVersion())
+
 private:
   MapProvider provider;
   size_t size;
@@ -129,7 +140,7 @@ public:
   {
     return false;
   };
-  
+
   MapProvider getProvider() const;
   size_t getSize() const;
   QString getSizeHuman() const;
@@ -205,6 +216,16 @@ public:
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
   
   Q_INVOKABLE QVariant map(const QModelIndex &index) const;
+
+  /**
+   * Generation time of map with given path. Null if don't exists in available maps.
+   * It may be used for detection if there is some update available.
+   *
+   * @param path
+   * @return
+   */
+   Q_INVOKABLE QVariant timeOfMap(QStringList path);
+   Q_INVOKABLE QObject* mapByPath(QStringList path);
 
   inline bool isLoading(){
     return !requests.isEmpty();

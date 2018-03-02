@@ -30,7 +30,7 @@ MapDownloadsModel::MapDownloadsModel(QObject *parent):
   onDownloadJobsChanged();
 }
 
-QString MapDownloadsModel::suggestedDirectory(QVariant mapVar, QString rootDirectory)
+QString MapDownloadsModel::suggestedDirectory(QObject *obj, QString rootDirectory)
 {
   auto mapManager=OSMScoutQt::GetInstance().GetMapManager();
   auto directories=mapManager->getLookupDirectories();
@@ -43,23 +43,28 @@ QString MapDownloadsModel::suggestedDirectory(QVariant mapVar, QString rootDirec
     }
   }
 
-  if (mapVar.canConvert<AvailableMapsModelMap>()){
-    AvailableMapsModelMap map=mapVar.value<AvailableMapsModelMap>();
+  const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(obj);
+  if (map!=nullptr){
     path+=QDir::separator();
-    for (auto part:map.getPath()){
+    for (auto part:map->getPath()){
       path+=part+"-";
     }
-    path+=map.getCreation().toString("yyyyMMdd-HHmmss");
+    path+=map->getCreation().toString("yyyyMMdd-HHmmss");
+    return path;
+  }else{
+    qWarning() << obj << "can't be converted to AvailableMapsModelMap";
+    return path;
   }
-  return path;
 }
 
-void MapDownloadsModel::downloadMap(QVariant mapVar, QString dir)
+void MapDownloadsModel::downloadMap(QObject *obj, QString dir)
 {
-  if (mapVar.canConvert<AvailableMapsModelMap>()){
-    AvailableMapsModelMap map=mapVar.value<AvailableMapsModelMap>();
-    
-    mapManager->downloadMap(map, QDir(dir));
+  qDebug() << "request to download map:" << obj << "to" << dir;
+  const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(obj);
+  if (map!=nullptr){
+    mapManager->downloadMap(*map, QDir(dir));
+  }else{
+    qWarning() << obj << "can't be converted to AvailableMapsModelMap";
   }
 }
 
