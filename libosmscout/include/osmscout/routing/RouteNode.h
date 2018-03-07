@@ -97,10 +97,10 @@ namespace osmscout {
     struct OSMSCOUT_API Path
     {
       double     distance;    //!< Distance from the current route node to the target route node
-      FileOffset offset;      //!< File Offset of the  targeting route node
+      Id         id;          //!< File Offset of the targeting route node
       uint32_t   objectIndex; //!< The index of the way to use from this route node to the target route node
       uint8_t    flags;       //!< Certain flags
-      //uint8_t    bearing;     //!< Encoded initial and final bearing of this path
+      //uint8_t    bearing;   //!< Encoded initial and final bearing of this path
 
       inline bool IsRestricted(Vehicle vehicle) const
       {

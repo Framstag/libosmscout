@@ -399,32 +399,34 @@ namespace osmscout {
                                                pathIndex);
   }
 
-  bool MultiDBRoutingService::GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
-                                                    std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap)
+  bool MultiDBRoutingService::GetRouteNodes(const std::set<DBId> &routeNodeIds,
+                                            std::unordered_map<DBId,RouteNodeRef> &routeNodeMap)
   {
-    std::unordered_map<DatabaseId,std::set<FileOffset>> offsetMap;
-    for (const auto &offset:routeNodeOffsets){
-      offsetMap[offset.database].insert(offset.offset);
+    std::unordered_map<DatabaseId,std::set<Id>> idMap;
+    for (const auto &id:routeNodeIds){
+      idMap[id.database].insert(id.id);
     }
-    for (const auto &entry:offsetMap){
+    for (const auto &entry:idMap){
       std::vector<RouteNodeRef>  nodes;
-      const std::set<FileOffset> &offsets=entry.second;
+      const std::set<Id>         &ids=entry.second;
 
-      if (!handles[entry.first].routingDatabase->GetRouteNodesByOffset(offsets,
-                                                                       nodes)) {
+      if (!handles[entry.first].routingDatabase->GetRouteNodes(ids.begin(),
+                                                               ids.end(),
+                                                               ids.size(),
+                                                               nodes)) {
         return false;
       }
-      for (const auto &node:nodes){
-        routeNodeMap[DBFileOffset(entry.first,node->GetFileOffset())]=node;
+      for (const auto &node:nodes) {
+        routeNodeMap[DBId(entry.first,node->GetId())]=node;
       }
     }
     return true;
   }
 
-  bool MultiDBRoutingService::GetRouteNodeByOffset(const DBFileOffset &offset,
-                                                   RouteNodeRef &node)
+  bool MultiDBRoutingService::GetRouteNode(const DBId &id,
+                                           RouteNodeRef &node)
   {
-    return handles[offset.database].routingDatabase->GetRouteNodeByOffset(offset.offset, node);
+    return handles[id.database].routingDatabase->GetRouteNode(id.id, node);
   }
 
   bool MultiDBRoutingService::GetWayByOffset(const DBFileOffset &offset,
@@ -519,32 +521,20 @@ namespace osmscout {
     return true;
   }
 
-  std::vector<DBFileOffset> MultiDBRoutingService::GetNodeTwins(const MultiDBRoutingState& state,
-                                                                const DatabaseId database,
-                                                                const Id id)
+  std::vector<DBId> MultiDBRoutingService::GetNodeTwins(const MultiDBRoutingState& state,
+                                                        const DatabaseId database,
+                                                        const Id id)
   {
     std::set<DatabaseId> overlappingDatabases;
     state.GetOverlappingDatabases(database,id,overlappingDatabases);
 
-    std::vector<DBFileOffset> twins;
+    std::vector<DBId> twins;
 
     twins.reserve(overlappingDatabases.size());
     for (const auto &dbId:overlappingDatabases){
-      FileOffset offset;
-      if (!handles[dbId].routingDatabase->GetRouteNodeOffset(id,offset)){
-        log.Error() << "Failed to retrieve file offset";
-        continue;
-      }
-      twins.emplace_back(dbId,offset);
+      twins.emplace_back(dbId,id);
     }
     return twins;
-  }
-
-  bool MultiDBRoutingService::GetRouteNode(const DatabaseId &databaseId,
-                                           const Id &id,
-                                           RouteNodeRef &node)
-  {
-    return handles[databaseId].routingDatabase->GetRouteNode(id, node);
   }
 
   RoutingResult MultiDBRoutingService::CalculateRoute(const RoutePosition &start,
@@ -737,3 +727,4 @@ namespace osmscout {
     return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToWay(data,way);
   }
 }
+

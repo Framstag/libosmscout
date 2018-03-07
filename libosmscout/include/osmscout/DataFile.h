@@ -106,7 +106,7 @@ namespace osmscout {
 
     bool Open(const TypeConfigRef& typeConfig,
               const std::string& path,
-              bool memoryMapedData);
+              bool memoryMappedData);
     virtual bool IsOpen() const;
     virtual bool Close();
 
@@ -243,7 +243,7 @@ namespace osmscout {
   template <class N>
   bool DataFile<N>::Close()
   {
-    typeConfig=NULL;
+    typeConfig=nullptr;
 
     try  {
       if (scanner.IsOpen()) {

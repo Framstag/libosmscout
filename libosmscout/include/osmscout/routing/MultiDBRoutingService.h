@@ -104,11 +104,11 @@ namespace osmscout {
                         DatabaseId database,
                         double targetDistance) override;
 
-    bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
-                               std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap) override;
+    bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
+                       std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) override;
 
-    bool GetRouteNodeByOffset(const DBFileOffset &offset,
-                              RouteNodeRef &node) override;
+    bool GetRouteNode(const DBId &id,
+                      RouteNodeRef &node) override;
 
     bool GetWayByOffset(const DBFileOffset &offset,
                         WayRef &way) override;
@@ -124,13 +124,9 @@ namespace osmscout {
 
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
-    std::vector<DBFileOffset> GetNodeTwins(const MultiDBRoutingState& state,
-                                           DatabaseId database,
-                                           Id id) override;
-
-    bool GetRouteNode(const DatabaseId &databaseId,
-                      const Id &id,
-                      RouteNodeRef &node) override;
+    std::vector<DBId> GetNodeTwins(const MultiDBRoutingState& state,
+                                   DatabaseId database,
+                                   Id id) override;
 
     bool CanUse(const MultiDBRoutingState& state,
                 DatabaseId databaseId,

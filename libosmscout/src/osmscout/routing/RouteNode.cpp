@@ -151,7 +151,7 @@ namespace osmscout {
       for (size_t i=0; i<pathCount; i++) {
         uint32_t distanceValue;
 
-        scanner.ReadFileOffset(paths[i].offset);
+        scanner.Read(paths[i].id);
         scanner.ReadNumber(paths[i].objectIndex);
         //scanner.Read(paths[i].bearing);
         scanner.Read(paths[i].flags);
@@ -217,7 +217,7 @@ namespace osmscout {
     if (!paths.empty()) {
 
       for (const auto& path : paths) {
-        writer.WriteFileOffset(path.offset);
+        writer.Write(path.id);
         writer.WriteNumber(path.objectIndex);
         //writer.Write(paths[i].bearing);
         writer.Write(path.flags);

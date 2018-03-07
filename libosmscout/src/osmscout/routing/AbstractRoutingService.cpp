@@ -51,7 +51,7 @@ namespace osmscout {
   }
 
   template <class RoutingState>
-  void AbstractRoutingService<RoutingState>::ResolveRNodeChainToList(DBFileOffset finalRouteNode,
+  void AbstractRoutingService<RoutingState>::ResolveRNodeChainToList(DBId finalRouteNode,
                                                                      const ClosedSet& closedSet,
                                                                      const ClosedSet& closedRestrictedSet,
                                                                      std::list<VNode>& nodes)
@@ -114,8 +114,8 @@ namespace osmscout {
     // TODO: What if the way is a roundabout?
 
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
-      GetRouteNode(database,
-                   way->GetId(i),
+      GetRouteNode(DBId(database,
+                        way->GetId(i)),
                    routeNode);
 
       if (routeNode) {
@@ -144,8 +144,8 @@ namespace osmscout {
     }
 
     for (long i=(long)nodeIndex-1; i>=0; i--) {
-      GetRouteNode(database,
-                   way->GetId((size_t)i),
+      GetRouteNode(DBId(database,
+                        way->GetId((size_t)i)),
                    routeNode);
 
       if (routeNode) {
@@ -178,8 +178,8 @@ namespace osmscout {
     }
 
     for (long i=(long)nodeIndex-1; i>=0; i--) {
-      GetRouteNode(database,
-                   way->GetId((size_t)i),
+      GetRouteNode(DBId(database,
+                        way->GetId((size_t)i)),
                    routeNode);
 
       if (routeNode) {
@@ -209,8 +209,8 @@ namespace osmscout {
     // TODO: What if the way is a roundabout?
 
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
-      GetRouteNode(database,
-                   way->GetId(i),
+      GetRouteNode(DBId(database,
+                        way->GetId(i)),
                    routeNode);
 
 
@@ -230,7 +230,7 @@ namespace osmscout {
                                                       const GeoCoord& targetCoord,
                                                       RNodeRef& node)
   {
-    node=std::make_shared<RNode>(DBFileOffset(position.GetDatabaseId(),routeNode->GetFileOffset()),
+    node=std::make_shared<RNode>(DBId(position.GetDatabaseId(),routeNode->GetId()),
                                  routeNode,
                                  position.GetObjectFileRef());
 
@@ -304,8 +304,8 @@ namespace osmscout {
     startCoord=way->nodes[position.GetNodeIndex()].GetCoord();
 
     // Check, if the current node is already the route node
-    GetRouteNode(position.GetDatabaseId(),
-                 way->GetId(position.GetNodeIndex()),
+    GetRouteNode(DBId(position.GetDatabaseId(),
+                      way->GetId(position.GetNodeIndex())),
                  forwardRouteNode);
 
     if (forwardRouteNode) {
@@ -455,8 +455,8 @@ namespace osmscout {
     targetCoord=way->nodes[position.GetNodeIndex()].GetCoord();
 
     // Check, if the current node is already the route node
-    GetRouteNode(position.GetDatabaseId(),
-                 way->GetId(position.GetNodeIndex()),
+    GetRouteNode(DBId(position.GetDatabaseId(),
+                      way->GetId(position.GetNodeIndex())),
                  forwardNode);
 
     if (!forwardNode) {
@@ -529,9 +529,9 @@ namespace osmscout {
                                                                   const ClosedSet &closedRestrictedSet)
   {
     // add twin nodes to nextNode from other databases to open list
-    std::vector<DBFileOffset> twins=GetNodeTwins(state,
-                                                 current->nodeOffset.database,
-                                                 currentRouteNode->GetId());
+    std::vector<DBId> twins=GetNodeTwins(state,
+                                         current->id.database,
+                                         currentRouteNode->GetId());
     for (const auto& twin : twins) {
       if ((current->access &&
            closedSet.find(VNode(twin))!=closedSet.end()) ||
@@ -550,7 +550,7 @@ namespace osmscout {
         if (rn->currentCost > current->currentCost) {
           // this is cheaper path to twin
 
-          rn->prev=current->nodeOffset;
+          rn->prev=current->id;
           //rn->object=node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
 
           rn->currentCost=current->currentCost;
@@ -564,20 +564,20 @@ namespace osmscout {
           twinIt->second=insertResult.first;
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "Better transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+          std::cout << "Better transition from " << rn->prev << " to " << rn->id << std::endl;
 #endif
         }
       }
       else {
         RouteNodeRef node;
-        if (!GetRouteNodeByOffset(twin,node)){
+        if (!GetRouteNode(twin,node)){
           return false;
         }
         RNodeRef rn=std::make_shared<RNode>(twin,
                                             node,
                                             //node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
                                             ObjectFileRef(), // TODO: have to be valid Object here?
-                                            /*prev*/current->nodeOffset);
+                                            /*prev*/current->id);
 
         rn->currentCost=current->currentCost;
         rn->estimateCost=current->estimateCost;
@@ -585,10 +585,10 @@ namespace osmscout {
         rn->access=current->access;
 
         std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
-        openMap[rn->nodeOffset]=insertResult.first;
+        openMap[rn->id]=insertResult.first;
 
 #if defined(DEBUG_ROUTING)
-        std::cout << "Transition from " << rn->prev << " to " << rn->nodeOffset << std::endl;
+        std::cout << "Transition from " << rn->prev << " to " << rn->id << std::endl;
 #endif
       }
     }
@@ -612,13 +612,13 @@ namespace osmscout {
                                                        const double &overallDistance,
                                                        const double &costLimit)
   {
-    DatabaseId dbId=current->nodeOffset.database;
+    DatabaseId dbId=current->id.database;
     size_t i=0;
     for (const auto& path : currentRouteNode->paths) {
-      if (path.offset==current->prev.offset) {
+      if (path.id==current->prev.id) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
-        std::cout << " to " << path.offset;
+        std::cout << " to " << path.id;
         std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
         std::cout << " => back to the last node visited" << std::endl;
 #endif
@@ -632,7 +632,7 @@ namespace osmscout {
           !path.IsRestricted(vehicle)) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
-        std::cout << " to " << path.offset;
+        std::cout << " to " << path.id;
         std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
         std::cout << " => moving from non-accessible way back to accessible way" << std::endl;
 #endif
@@ -647,7 +647,7 @@ namespace osmscout {
                   /*pathIndex*/ i)) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
-        std::cout << " to " << path.offset;
+        std::cout << " to " << path.id;
         std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
         std::cout << " => Cannot be used"<< std::endl;
 #endif
@@ -658,12 +658,12 @@ namespace osmscout {
       }
 
       if ((current->access &&
-           closedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedSet.end()) ||
+           closedSet.find(VNode(DBId(dbId,path.id)))!=closedSet.end()) ||
           (!current->access &&
-           closedRestrictedSet.find(VNode(DBFileOffset(dbId,path.offset)))!=closedRestrictedSet.end())) {
+           closedRestrictedSet.find(VNode(DBId(dbId,path.id)))!=closedRestrictedSet.end())) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
-        std::cout << " to " << dbId << " / " << path.offset;
+        std::cout << " to " << dbId << " / " << path.id;
         std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
         std::cout << " => already calculated" << std::endl;
 #endif
@@ -680,7 +680,7 @@ namespace osmscout {
               currentRouteNode->objects[exclude.targetIndex].object==currentRouteNode->objects[path.objectIndex].object) {
 #if defined(DEBUG_ROUTING)
             std::cout << "  Skipping route";
-            std::cout << " to " << dbId << " / " << path.offset;
+            std::cout << " to " << dbId << " / " << path.id;
             std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetName() << ")";
             std::cout << " => turn not allowed" << std::endl;
 #endif
@@ -699,8 +699,8 @@ namespace osmscout {
 
       double currentCost=current->currentCost+GetCosts(state,dbId,*currentRouteNode,i);
 
-      auto openEntry=openMap.find(DBFileOffset(current->nodeOffset.database,
-                                               path.offset));
+      auto openEntry=openMap.find(DBId(current->id.database,
+                                       path.id));
 
       // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
       // into the open list
@@ -708,7 +708,7 @@ namespace osmscout {
           (*openEntry->second)->currentCost<=currentCost) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
-        std::cout << " to " << dbId << " / " << path.offset;
+        std::cout << " to " << dbId << " / " << path.id;
         std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetName() << ")";
         std::cout << " => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->object.GetName() << " " << (*openEntry->second)->node->GetId() << " " << (*openEntry->second)->currentCost << std::endl;
 #endif
@@ -722,10 +722,10 @@ namespace osmscout {
       if (openEntry!=openMap.end()) {
         nextNode=(*openEntry->second)->node;
       }
-      else if (!GetRouteNodeByOffset(DBFileOffset(current->nodeOffset.database,
-                                                  path.offset),
-                                     nextNode)) {
-        log.Error() << "Cannot load route node with id " << path.offset;
+      else if (!GetRouteNode(DBId(current->id.database,
+                                  path.id),
+                             nextNode)) {
+        log.Error() << "Cannot load route node with id " << path.id;
         return false;
       }
 
@@ -742,7 +742,7 @@ namespace osmscout {
       if (overallCost>costLimit) {
 #if defined(DEBUG_ROUTING)
         std::cout << "  Skipping route";
-            std::cout << " to " << path.offset;
+            std::cout << " to " << path.id;
             std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " " << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
             std::cout << " => cost limit reached (" << overallCost << ">" << costLimit << ")" << std::endl;
 #endif
@@ -762,7 +762,7 @@ namespace osmscout {
       if (openEntry!=openMap.end()) {
         RNodeRef node=*openEntry->second;
 
-        node->prev=current->nodeOffset;
+        node->prev=current->id;
         node->object=currentRouteNode->objects[path.objectIndex].object;
 
         node->currentCost=currentCost;
@@ -771,7 +771,7 @@ namespace osmscout {
         node->access=!currentRouteNode->paths[i].IsRestricted(vehicle);
 
 #if defined(DEBUG_ROUTING)
-        std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
+        std::cout << "  Updating route " << current->id << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
 #endif
 
         openList.erase(openEntry->second);
@@ -780,10 +780,10 @@ namespace osmscout {
         openEntry->second=insertResult.first;
       }
       else {
-        RNodeRef node=std::make_shared<RNode>(DBFileOffset(dbId,path.offset),
+        RNodeRef node=std::make_shared<RNode>(DBId(dbId,path.id),
                                               nextNode,
                                               currentRouteNode->objects[path.objectIndex].object,
-                                              current->nodeOffset);
+                                              current->id);
 
         node->currentCost=currentCost;
         node->estimateCost=estimateCost;
@@ -791,13 +791,13 @@ namespace osmscout {
         node->access=!path.IsRestricted(vehicle);
 
 #if defined(DEBUG_ROUTING)
-        std::cout << "  Inserting route to " << path.offset;
+        std::cout << "  Inserting route to " << path.id;
         std::cout <<  " (" << node->object.GetTypeName() << " " << node->object.GetFileOffset() << ")";
         std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->GetId() << std::endl;
 #endif
 
         std::pair<OpenListRef,bool> insertResult=openList.insert(node);
-        openMap[node->nodeOffset]=insertResult.first;
+        openMap[node->id]=insertResult.first;
       }
 
       i++;
@@ -908,13 +908,13 @@ namespace osmscout {
     if (startForwardNode) {
       std::pair<OpenListRef,bool> insertResult=openList.insert(startForwardNode);
 
-      openMap[startForwardNode->nodeOffset]=insertResult.first;
+      openMap[startForwardNode->id]=insertResult.first;
     }
 
     if (startBackwardNode) {
       std::pair<OpenListRef,bool> insertResult=openList.insert(startBackwardNode);
 
-      openMap[startBackwardNode->nodeOffset]=insertResult.first;
+      openMap[startBackwardNode->id]=insertResult.first;
     }
 
 
@@ -948,18 +948,18 @@ namespace osmscout {
 
       current=*openList.begin();
 
-      openMap.erase(current->nodeOffset);
+      openMap.erase(current->id);
       openList.erase(openList.begin());
 
       currentRouteNode=current->node;
-      dbId=current->nodeOffset.database;
+      dbId=current->id.database;
 
       nodesLoadedCount++;
 
       // Get potential follower in the current way
 
 #if defined(DEBUG_ROUTING)
-      std::cout << "Analysing follower of node " << dbId << " / " << currentRouteNode->GetFileOffset();
+      std::cout << "Analysing follower of node " << dbId << " / " << currentRouteNode->GetId();
       std::cout << " (" << current->object.GetName() << "["  << currentRouteNode->GetId() << "]" << ")";
       std::cout << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
@@ -980,7 +980,7 @@ namespace osmscout {
                      overallDistance,
                      costLimit)){
 
-        log.Error() << "Failed to walk paths from " << dbId << " / " << currentRouteNode->GetFileOffset();
+        log.Error() << "Failed to walk paths from " << dbId << " / " << currentRouteNode->GetId();
         return result;
       }
 
@@ -1005,15 +1005,15 @@ namespace osmscout {
       //
 
 #if defined(DEBUG_ROUTING)
-        std::cout << "Closing " << current->nodeOffset << " (previous " << current->prev << ")" << std::endl;
+        std::cout << "Closing " << current->id << " (previous " << current->prev << ")" << std::endl;
 #endif
       if (current->access) {
-        closedSet.insert(VNode(current->nodeOffset,
+        closedSet.insert(VNode(current->id,
                                current->object,
                                current->prev));
       }
       else {
-        closedRestrictedSet.insert(VNode(current->nodeOffset,
+        closedRestrictedSet.insert(VNode(current->id,
                                          current->object,
                                          current->prev));
       }
@@ -1029,29 +1029,29 @@ namespace osmscout {
       }
 
       if (targetForwardRouteNode &&
-          current->nodeOffset.offset==targetForwardRouteNode->GetFileOffset() &&
-          current->nodeOffset.database==target.GetDatabaseId()) {
-        std::cout << "Reached target: " << current->nodeOffset << " == " << targetForwardRouteNode->GetFileOffset() << " (forward)" << std::endl;
+          current->id.id==targetForwardRouteNode->GetId() &&
+          current->id.database==target.GetDatabaseId()) {
+        std::cout << "Reached target: " << current->id << " == " << targetForwardRouteNode->GetId() << " (forward)" << std::endl;
       }
 
       if (targetBackwardRouteNode &&
-          current->nodeOffset.offset==targetBackwardRouteNode->GetFileOffset() &&
-          current->nodeOffset.database==target.GetDatabaseId()) {
-        std::cout << "Reached target: " << current->nodeOffset << " == " << targetBackwardRouteNode->GetFileOffset() << " (backward)" << std::endl;
+          current->id.id==targetBackwardRouteNode->GetId() &&
+          current->id.database==target.GetDatabaseId()) {
+        std::cout << "Reached target: " << current->id << " == " << targetBackwardRouteNode->GetId() << " (backward)" << std::endl;
       }
 #endif
 
       if (!targetForwardFound) {
-        targetForwardFound=current->nodeOffset.offset==targetForwardRouteNode->GetFileOffset() &&
-                           current->nodeOffset.database==target.GetDatabaseId();
+        targetForwardFound=current->id.id==targetForwardRouteNode->GetId() &&
+                           current->id.database==target.GetDatabaseId();
         if (targetForwardFound) {
           targetForwardFinalNode=current;
         }
       }
 
       if (!targetBackwardFound) {
-        targetBackwardFound=current->nodeOffset.offset==targetBackwardRouteNode->GetFileOffset() &&
-                            current->nodeOffset.database==target.GetDatabaseId();
+        targetBackwardFound=current->id.id==targetBackwardRouteNode->GetId() &&
+                            current->id.database==target.GetDatabaseId();
         if (targetBackwardFound) {
           targetBackwardFinalNode=current;
         }
@@ -1061,8 +1061,8 @@ namespace osmscout {
 
     // If we have keep the last node open because of access violations, add it
     // after routing is done
-    if (closedSet.find(VNode(current->nodeOffset))==closedSet.end()) {
-      closedSet.insert(VNode(current->nodeOffset,
+    if (closedSet.find(VNode(current->id))==closedSet.end()) {
+      closedSet.insert(VNode(current->id,
                              current->object,
                              current->prev));
     }
@@ -1151,7 +1151,7 @@ namespace osmscout {
       return result;
     }
 
-    ResolveRNodeChainToList(targetFinalNode->nodeOffset,
+    ResolveRNodeChainToList(targetFinalNode->id,
                             closedSet,
                             closedRestrictedSet,
                             nodes);
@@ -1159,7 +1159,7 @@ namespace osmscout {
 #if defined(DEBUG_ROUTING)
     std::cout << "VNode List:" << std::endl;
     for (const auto& node : nodes) {
-      std::cout << node.object.GetName() << " " << node.currentNode.database << "/" << node.currentNode.offset << std::endl;
+      std::cout << node.object.GetName() << " " << node.currentNode.database << "/" << node.currentNode.id << std::endl;
     }
 #endif
 
@@ -1302,11 +1302,11 @@ namespace osmscout {
                                                                       const RoutePosition& target,
                                                                       RouteData& route)
   {
-    std::set<DBFileOffset>                        routeNodeOffsets;
+    std::set<DBId>                                routeNodeIds;
     std::set<DBFileOffset>                        wayOffsets;
     std::set<DBFileOffset>                        areaOffsets;
 
-    std::unordered_map<DBFileOffset,RouteNodeRef> routeNodeMap;
+    std::unordered_map<DBId,RouteNodeRef>         routeNodeMap;
     std::unordered_map<DBFileOffset,AreaRef>      areaMap;
     std::unordered_map<DBFileOffset,WayRef>       wayMap;
 
@@ -1316,7 +1316,7 @@ namespace osmscout {
     // Collect all route node file offsets on the path and also
     // all area/way file offsets on the path
     for (const auto& node : nodes) {
-      routeNodeOffsets.insert(node.currentNode);
+      routeNodeIds.insert(node.currentNode);
       DatabaseId dbId=node.currentNode.database;
 
       if (node.object.Valid()) {
@@ -1354,8 +1354,8 @@ namespace osmscout {
     // Load data
     //
 
-    if (!GetRouteNodesByOffset(routeNodeOffsets,
-                               routeNodeMap)) {
+    if (!GetRouteNodes(routeNodeIds,
+                       routeNodeMap)) {
       log.Error() << "Cannot load route nodes";
       return false;
     }
@@ -1418,7 +1418,7 @@ namespace osmscout {
     auto entry=routeNodeMap.find(nodes.front().currentNode);
     if (entry==routeNodeMap.end()){
       log.Error() << "Can't found route node " << nodes.front().currentNode.database <<
-        ", " << nodes.front().currentNode.offset;
+        ", " << nodes.front().currentNode.id;
       return false;
     }
     RouteNodeRef initialNode=entry->second;

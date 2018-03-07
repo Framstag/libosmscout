@@ -52,7 +52,7 @@ namespace osmscout {
                  const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
 
-      void SetObjects(const std::vector<ObjectFileRef> objects);
+      void SetObjects(const std::vector<ObjectFileRef>& objects);
 
       inline Id GetCurrentNodeId() const
       {

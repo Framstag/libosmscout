@@ -45,6 +45,7 @@
 #include <osmscout/Intersection.h>
 #include <osmscout/routing/Route.h>
 #include <osmscout/routing/RouteData.h>
+#include <osmscout/routing/RouteNodeDataFile.h>
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/DBFileOffset.h>
 
@@ -54,11 +55,6 @@
 #include <osmscout/system/Compiler.h>
 
 namespace osmscout {
-
-  /**
-   * \ingroup Routing
-   */
-  typedef DataFile<RouteNode> RouteNodeDataFile;
 
   /**
    * \ingroup Routing
@@ -248,9 +244,9 @@ namespace osmscout {
      */
     struct RNode
     {
-      DBFileOffset  nodeOffset;    //!< The file offset of the current route node
+      DBId          id;            //!< The file offset of the current route node
       RouteNodeRef  node;          //!< The current route node
-      DBFileOffset  prev;          //!< The file offset of the previous route node
+      DBId          prev;          //!< The file offset of the previous route node
       ObjectFileRef object;        //!< The object (way/area) visited from the current route node
 
       double        currentCost;   //!< The cost of the current up to the current node
@@ -260,15 +256,15 @@ namespace osmscout {
       bool          access;        //!< Flags to signal, if we had access ("access restrictions") to this node
 
       RNode()
-      : nodeOffset()
+      : id()
       {
         // no code
       }
 
-      RNode(const DBFileOffset& nodeOffset,
+      RNode(const DBId& id,
             const RouteNodeRef& node,
             const ObjectFileRef& object)
-      : nodeOffset(nodeOffset),
+      : id(id),
         node(node),
         prev(),
         object(object),
@@ -280,11 +276,11 @@ namespace osmscout {
         // no code
       }
 
-      RNode(const DBFileOffset& nodeOffset,
+      RNode(const DBId& id,
             const RouteNodeRef& node,
             const ObjectFileRef& object,
-            const DBFileOffset& prev)
-      : nodeOffset(nodeOffset),
+            const DBId& prev)
+      : id(id),
         node(node),
         prev(prev),
         object(object),
@@ -298,12 +294,12 @@ namespace osmscout {
 
       inline bool operator==(const RNode& other)
       {
-        return nodeOffset==other.nodeOffset;
+        return id==other.id;
       }
 
       inline bool operator<(const RNode& other) const
       {
-        return nodeOffset<other.nodeOffset;
+        return id<other.id;
       }
     };
 
@@ -315,7 +311,7 @@ namespace osmscout {
                              const RNodeRef& b) const
       {
         if (a->overallCost==b->overallCost) {
-         return a->nodeOffset<b->nodeOffset;
+         return a->id<b->id;
         }
         else {
           return a->overallCost<b->overallCost;
@@ -336,8 +332,8 @@ namespace osmscout {
      */
     struct VNode
     {
-      DBFileOffset currentNode;   //!< FileOffset of this route node
-      DBFileOffset previousNode;  //!< FileOffset of the previous route node
+      DBId          currentNode;   //!< FileOffset of this route node
+      DBId          previousNode;  //!< FileOffset of the previous route node
       ObjectFileRef object;        //!< The object (way/area) visited from the current route node
 
       /**
@@ -360,7 +356,7 @@ namespace osmscout {
        * @param currentNode
        *    Offset of the node to search for
        */
-      inline explicit VNode(const DBFileOffset& currentNode)
+      inline explicit VNode(const DBId& currentNode)
         : currentNode(currentNode),
           previousNode()
       {
@@ -377,9 +373,9 @@ namespace osmscout {
        * @param previousNode
        *    FileOffset of the previous route node visited
        */
-      VNode(const DBFileOffset& currentNode,
+      VNode(const DBId& currentNode,
             const ObjectFileRef& object,
-            const DBFileOffset& previousNode)
+            const DBId& previousNode)
       : currentNode(currentNode),
         previousNode(previousNode),
         object(object)
@@ -396,7 +392,7 @@ namespace osmscout {
     {
       inline size_t operator()(const VNode& node) const
       {
-        return std::hash<FileOffset>()(node.currentNode.offset) ^
+        return std::hash<Id>()(node.currentNode.id) ^
                std::hash<DatabaseId>()(node.currentNode.database);
       }
     };
@@ -404,7 +400,7 @@ namespace osmscout {
     typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
     typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
-    typedef std::unordered_map<DBFileOffset,OpenListRef>  OpenMap;
+    typedef std::unordered_map<DBId,OpenListRef>          OpenMap;
     typedef std::unordered_set<VNode,ClosedNodeHasher>    ClosedSet;
 
   public:
