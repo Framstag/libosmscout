@@ -101,6 +101,10 @@ namespace osmscout {
     return Log(ERROR);
   }
 
+  Logger::Destination::Destination()
+  {
+  }
+  
   StreamLogger::StreamDestination::StreamDestination(std::ostream& stream)
   : stream(stream)
   {
