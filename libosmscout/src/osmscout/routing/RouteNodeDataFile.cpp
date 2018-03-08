@@ -177,5 +177,22 @@ namespace osmscout {
 
     return false;
   }
+
+  Pixel RouteNodeDataFile::GetTile(const GeoCoord& coord) const
+  {
+    return tileCalculator.GetTileId(coord);
+  }
+
+  bool RouteNodeDataFile::IsCovered(const Pixel& tile) const
+  {
+    auto entry=index.find(tile);
+
+      return entry!=index.end();
+    }
+
+  bool RouteNodeDataFile::IsCovered(const GeoCoord& coord) const
+  {
+    return IsCovered(GetTile(coord));
+  }
 }
 

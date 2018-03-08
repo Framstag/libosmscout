@@ -80,6 +80,11 @@ namespace osmscout {
     bool IsOpen() const;
     bool Close();
 
+    Pixel GetTile(const GeoCoord& coord) const;
+    bool IsCovered(const Pixel& tile) const;
+
+    bool IsCovered(const GeoCoord& coord) const;
+
     bool Get(Id id,
              RouteNodeRef& node) const;
 
