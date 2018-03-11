@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     std::cerr << "  <lat_top> <lon_left> <lat_bottom> <lon_right> " << std::endl;
     std::cerr << "  <start zoom> <end zoom>" << std::endl;
     std::cerr << "  <tile width> <tile height>" << std::endl;
-    std::cerr << "  <cairo|Qt|noop|none>" << std::endl;
+    std::cerr << "  <cairo|Qt|ag|opengl|noop|none>" << std::endl;
 #if defined(HAVE_LIB_GPERFTOOLS)
     std::cerr << "  [heap profile prefix]" << std::endl;
 #endif
