@@ -195,7 +195,7 @@ if buildMapQt
                          install: true)
 endif
 
-if buildMapOpenGL
+if buildMapOpenGL and glfwDep.found() and ftDep.found()
   DrawMapOpenGL = executable('DrawMapOpenGL',
                          'src/DrawMapOpenGL.cpp',
                          cpp_args: ['-fPIC'],
