@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_VISIBLE, false);
   GLFWwindow* offscreen_context = glfwCreateWindow(width, height, "", NULL, NULL);
   if (!offscreen_context) {
     std::cerr << "Failed to create offscreen context." << std::endl;
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
       file << image[i * width * 3 + j];
     }
   }
-  delete image;
+  delete[] image;
 
   return 0;
 }

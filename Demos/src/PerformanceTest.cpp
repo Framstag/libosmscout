@@ -36,10 +36,10 @@
 #include <QScreen>
 #include <osmscout/MapPainterQt.h>
 #endif
-#if defined(HAVE_LIB_AGG)
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
 #include <osmscout/MapPainterAgg.h>
 #endif
-#if defined(HAVE_LIB_OPENGL)
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
 #include <osmscout/MapPainterOpenGL.h>
 #include <GLFW/glfw3.h>
 #endif
@@ -223,13 +223,13 @@ int main(int argc, char* argv[])
   QApplication    application(argc,argv,true);
 #endif
 
-#if defined(HAVE_LIB_AGG)
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
   unsigned char* buffer;
   agg::rendering_buffer* rbuf;
   osmscout::MapPainterAgg::AggPixelFormat* pf;
 #endif
 
-#if defined(HAVE_LIB_OPENGL)
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
 
 #endif
 
@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
 #endif
   } else if (driver == "agg") {
     std::cout << "Using driver 'Agg'..." << std::endl;
-#if defined(HAVE_LIB_AGG)
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
     buffer = new unsigned char[tileWidth * tileHeight * 3];
     rbuf = new agg::rendering_buffer(buffer, tileWidth, tileHeight, tileWidth * 3);
     pf = new osmscout::MapPainterAgg::AggPixelFormat(*rbuf);
@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
 #endif
   } else if (driver == "opengl") {
     std::cout << "Using driver 'OpenGL'..." << std::endl;
-#if defined(HAVE_LIB_OPENGL)
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
     // Create the offscreen renderer
     glfwSetErrorCallback([](int, const char *err_str) {
       std::cerr << "GLFW Error: " << err_str << std::endl;
@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_VISIBLE, false);
     GLFWwindow* offscreen_context = glfwCreateWindow(tileWidth, tileHeight, "", NULL, NULL);
     if (!offscreen_context) {
       std::cerr << "Failed to create offscreen context." << std::endl;
@@ -378,10 +378,10 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
     osmscout::MapPainterQt    qtMapPainter(styleConfig);
 #endif
-#if defined(HAVE_LIB_AGG)
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
     osmscout::MapPainterAgg aggMapPainter(styleConfig);
 #endif
-#if defined(HAVE_LIB_OPENGL)
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
     osmscout::MapPainterOpenGL* openglMapPainter;
     if (driver == "opengl") // This driver need a valid existing context
       openglMapPainter =
@@ -491,7 +491,7 @@ int main(int argc, char* argv[])
                              qtPainter);
       }
 #endif
-#if defined(HAVE_LIB_AGG)
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
       if (driver == "agg") {
         //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
         aggMapPainter.DrawMap(projection,
@@ -500,7 +500,7 @@ int main(int argc, char* argv[])
                 pf);
       }
 #endif
-#if defined(HAVE_LIB_OPENGL)
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
       if (driver == "opengl") {
         //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
         openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
