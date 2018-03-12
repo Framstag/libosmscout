@@ -30,6 +30,7 @@
 #include <osmscout/SearchModule.h>
 #include <osmscout/StyleModule.h>
 #include <osmscout/NavigationModule.h>
+#include <osmscout/POILookupModule.h>
 
 #include <osmscout/private/ClientQtImportExport.h>
 
@@ -284,6 +285,7 @@ public:
   NavigationModule* MakeNavigation();
   SearchModule *MakeSearchModule();
   StyleModule *MakeStyleModule();
+  POILookupModule *MakePOILookupModule();
 
   QString GetUserAgent();
   QString GetCacheLocation();

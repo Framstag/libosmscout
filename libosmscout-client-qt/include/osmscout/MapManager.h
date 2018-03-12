@@ -46,7 +46,7 @@
 class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
 {
   Q_OBJECT
-  
+
   QList<FileDownloader*>  jobs;
   QNetworkAccessManager   *webCtrl;
   
@@ -58,47 +58,154 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
 
   uint64_t                downloadedBytes;
 
+  QString                 error;
+
+  bool                    replaceExisting;
+
 signals:
   void finished();
+  void failed(QString error);
   void downloadProgress();
 
 public slots:
-  void onJobFailed(QString error_text);
+  void onJobFailed(QString errorMessage, bool recoverable);
   void onJobFinished();
   void downloadNextFile();
+  void onDownloadProgress(uint64_t);
 
 public:
-  MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target);
+  static const char* FILE_METADATA;
+
+  MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target, bool replaceExisting);
   virtual ~MapDownloadJob();
   
   void start();
 
-  inline QString getMapName()
+  inline QString getMapName() const
   {
     return map.getName();
   }
 
-  inline size_t expectedSize()
+  inline QStringList getMapPath() const
+  {
+    return map.getPath();
+  }
+
+  inline size_t expectedSize() const
   {
     return map.getSize();
   }
 
-  inline QDir getDestinationDirectory()
+  inline QDir getDestinationDirectory() const
   {
     return target;
   }
 
-  inline bool isDone()
+  inline bool isDone() const
   {
     return done;
   }
 
-  inline bool isDownloading()
+  inline bool isDownloading() const
   {
     return started && !done;
   }
+
+  inline QString getError() const
+  {
+    return error;
+  }
+
+  inline bool isReplaceExisting() const
+  {
+    return replaceExisting;
+  }
+
   double getProgress();
   QString getDownloadingFile();
+};
+
+/**
+ * Holder for map database metadata
+ *
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API MapDirectory
+{
+public:
+  explicit MapDirectory(QDir dir);
+  ~MapDirectory() = default;
+
+  MapDirectory(const MapDirectory &other) = default;
+  MapDirectory &operator=(const MapDirectory &other) = default;
+
+  MapDirectory(MapDirectory &&other) = default;
+  MapDirectory &operator=(MapDirectory &&other) = default;
+
+  QDir getDir() const
+  {
+    return dir;
+  }
+
+  /**
+   * Delete complete database
+   */
+  bool deleteDatabase();
+
+  /**
+   * Check if directory contains all required files for osmscout database
+   * @return true if all requirements met and directory may be used as database
+   */
+  bool isValid() const
+  {
+    return valid;
+  }
+
+  /**
+   * Check if map directory contains metadata created by downloader
+   * @return true if map directory contains metadata
+   */
+  bool hasMetadata() const
+  {
+    return metadata;
+  }
+
+  /**
+   * Human readable name of the map. It is name of geographical region usually (eg: Germany, Czech Republic...).
+   * Name is localised by server when it is downloading. When locale is changed later, name will remain
+   * in its original locale.
+   * @return map name
+   */
+  QString getName() const
+  {
+    return name;
+  }
+
+  /**
+   * Logical path of the map, eg: europe/gemany; europe/czech-republic
+   * @return
+   */
+  QStringList getPath() const
+  {
+    return path;
+  }
+
+  /**
+   * Time of map import
+   * @return
+   */
+  inline QDateTime getCreation() const
+  {
+    return creation;
+  }
+
+private:
+  QDir dir;
+  bool valid{false};
+  bool metadata{false};
+  QString name;
+  QStringList path;
+  QDateTime creation;
 };
 
 /**
@@ -112,14 +219,15 @@ class OSMSCOUT_CLIENT_QT_API MapManager: public QObject
   
 private:
   QStringList databaseLookupDirs;
-  QList<QDir> databaseDirectories;
+  QList<MapDirectory> databaseDirectories;
   QList<MapDownloadJob*> downloadJobs;
   QNetworkAccessManager webCtrl;
 
 public slots:
   void lookupDatabases();
   void onJobFinished();
-  
+  void onJobFailed(QString errorMessage);
+
 signals:
   void mapDownloadFails(QString message);
   void databaseListChanged(QList<QDir> databaseDirectories);
@@ -130,16 +238,28 @@ public:
   
   virtual ~MapManager();
 
-  void downloadMap(AvailableMapsModelMap map, QDir dir);
+  /**
+   * Start map downloading into local dir.
+   *
+   * @param map
+   * @param dir
+   * @param replaceExisting - when true, manager will delete existing database with same path (MapDirectory::getPath)
+   */
+  void downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceExisting = true);
   void downloadNext();
   
-  inline QList<MapDownloadJob*> getDownloadJobs(){
+  inline QList<MapDownloadJob*> getDownloadJobs() const {
     return downloadJobs;
   }
   
-  inline QStringList getLookupDirectories()
+  inline QStringList getLookupDirectories() const
   {
     return databaseLookupDirs;
+  }
+
+  inline QList<MapDirectory> getDatabaseDirectories() const
+  {
+    return databaseDirectories;
   }
 };
 

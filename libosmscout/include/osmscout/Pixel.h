@@ -62,6 +62,11 @@ namespace osmscout {
       return x==other.x && y==other.y;
     }
 
+    inline bool operator!=(const Pixel& other) const
+    {
+      return y!=other.y || x!=other.x;
+    }
+
     inline bool operator<(const Pixel& other) const
     {
       return y<other.y ||

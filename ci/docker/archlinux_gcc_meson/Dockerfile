@@ -1,6 +1,6 @@
 FROM pritunl/archlinux:latest
 
-RUN pacman --noconfirm --needed -Suy --asdeps \
+RUN pacman --noconfirm --needed -S --asdeps \
           git \
           libxml2 protobuf \
           agg freetype2 \
@@ -11,8 +11,8 @@ RUN pacman --noconfirm --needed -Suy --asdeps \
           marisa
 
 RUN pacman --noconfirm --needed -S --asdeps \
-          cmake make pkg-config \
-          clang openmp
+           meson ninja pkg-config \
+           gcc
 
 RUN mkdir /work
 

@@ -58,6 +58,9 @@ set(HEADER_FILES
     include/osmscout/NavigationModel.h
     include/osmscout/QtRouteData.h
     include/osmscout/RouteStep.h
+    include/osmscout/NearPOIModel.h
+    include/osmscout/POILookupModule.h
+    include/osmscout/InstalledMapsModel.h
     )
 
 set(SOURCE_FILES
@@ -101,6 +104,9 @@ set(SOURCE_FILES
     src/osmscout/NavigationModel.cpp
     src/osmscout/RouteStep.cpp
     src/osmscout/QtRouteData.cpp
+    src/osmscout/NearPOIModel.cpp
+    src/osmscout/POILookupModule.cpp
+    src/osmscout/InstalledMapsModel.cpp
     )
 
 if(APPLE)

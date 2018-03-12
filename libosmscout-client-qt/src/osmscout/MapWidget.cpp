@@ -665,6 +665,7 @@ void MapWidget::onMapDPIChange(double dpi)
 
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
+    emit viewChanged();
 }
 
 QString MapWidget::GetStylesheetFilename() const

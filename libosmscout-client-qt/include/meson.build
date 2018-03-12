@@ -41,7 +41,10 @@ osmscoutclientqtHeader = [
             'osmscout/OverlayObject.h',
             'osmscout/MapOverlay.h',
             'osmscout/TiledMapOverlay.h',
-            'osmscout/TiledRenderingHelper.h'
+            'osmscout/TiledRenderingHelper.h',
+            'osmscout/NearPOIModel.h',
+            'osmscout/POILookupModule.h',
+            'osmscout/InstalledMapsModel.h',
           ]
 
 install_headers(osmscoutclientqtHeader)

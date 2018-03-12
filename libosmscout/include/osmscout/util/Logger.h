@@ -65,6 +65,7 @@ namespace osmscout {
     class OSMSCOUT_API Destination
     {
     public:
+      Destination();
       virtual ~Destination() = default;
 
       /**

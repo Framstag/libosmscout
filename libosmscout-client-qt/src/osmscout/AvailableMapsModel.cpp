@@ -66,18 +66,26 @@ AvailableMapsModel::AvailableMapsModel()
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
 
+  reload();
+}
+
+void AvailableMapsModel::reload()
+{
+  fetchError=""; // reset errors
+
   QLocale locale;
   for (auto &provider: mapProviders){
     QUrl url = provider.getListUri(osmscout::TypeConfig::MIN_FORMAT_VERSION,
-                                   osmscout::TypeConfig::MAX_FORMAT_VERSION, 
+                                   osmscout::TypeConfig::MAX_FORMAT_VERSION,
                                    locale.name());
     QNetworkRequest request(url);
     requests[url]=provider;
-    
+
     request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
     //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
     webCtrl.get(request);
   }
+  emit loadingChanged();
 }
 
 AvailableMapsModel::~AvailableMapsModel()
@@ -124,7 +132,8 @@ void AvailableMapsModel::listDownloaded(QNetworkReply* reply)
     requests.remove(url);
     if (reply->error() != QNetworkReply::NoError){
       qWarning() << "Downloading " << url << "failed with " << reply->errorString();
-    }else{      
+      fetchError=reply->errorString();
+    }else{
       QByteArray downloadedData = reply->readAll();
       QJsonDocument doc = QJsonDocument::fromJson(downloadedData);
       for (const QJsonValueRef &ref: doc.array()){
@@ -170,7 +179,7 @@ void AvailableMapsModel::listDownloaded(QNetworkReply* reply)
   qSort(items.begin(), items.end(), itemLessThan);
   reply->deleteLater();
   
-  emit loaded();
+  emit loadingChanged();
   endResetModel();
 }
 
@@ -286,7 +295,7 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
     case DescriptionRole:
       return item->getDescription();
     case MapRole:
-      return map==NULL ? QVariant(): qVariantFromValue(AvailableMapsModelMap(*map));
+      return QVariant::fromValue(map==nullptr ? nullptr: new AvailableMapsModelMap(*map));
     default:
         break;
   }  
@@ -324,4 +333,44 @@ Qt::ItemFlags AvailableMapsModel::flags(const QModelIndex &index) const
   }
 
   return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+QVariant AvailableMapsModel::timeOfMap(QStringList path)
+{
+  if (path.empty()){
+    return QVariant();
+  }
+  for (const AvailableMapsModelItem* item:items){
+    if (item->isDirectory() || !item->isValid()){
+      continue;
+    }
+    if (item->getPath()==path){
+      const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(item);
+      if (map != nullptr){
+        return map->getCreation();
+      }
+    }
+  }
+
+  return QVariant();
+}
+
+QObject* AvailableMapsModel::mapByPath(QStringList path)
+{
+  if (path.empty()){
+    return nullptr;
+  }
+  for (const AvailableMapsModelItem* item:items){
+    if (item->isDirectory() || !item->isValid()){
+      continue;
+    }
+    if (item->getPath()==path){
+      const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(item);
+      if (map != nullptr){
+        return new AvailableMapsModelMap(*map);
+      }
+    }
+  }
+
+  return nullptr;
 }

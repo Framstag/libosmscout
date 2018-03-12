@@ -20,7 +20,6 @@
 #include <osmscout/import/GenLocationIndex.h>
 
 #include <algorithm>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <limits>
@@ -53,6 +52,10 @@
 #include <osmscout/import/GenAreaAreaIndex.h>
 
 //#define REGION_DEBUG
+
+#if defined(REGION_DEBUG)
+  #include <iostream>
+#endif
 
 namespace osmscout {
 
@@ -2255,7 +2258,7 @@ namespace osmscout {
   void LocationIndexGenerator::CleanupPostalAreas(LocationIndexGenerator::Region& region)
   {
     //
-    // Remove addresses from locations in the default postal area, that are indexed by non-default postal areas
+    // Remove addresses from locations in the default postal area, that are already indexed by non-default postal areas
     //
     std::set<ObjectFileRef> addresses;
 
@@ -2264,25 +2267,25 @@ namespace osmscout {
         // for each location in postal area
         for (const auto& location : postalAreaEntry.second.locations) {
           // add all objects for each address to set
-          std::for_each(location.second.addresses.begin(),location.second.addresses.end(),[&addresses](const RegionAddress& address) {
-            addresses.insert(address.object);
-          });
+          std::for_each(location.second.addresses.begin(),
+                        location.second.addresses.end(),
+                        [&addresses](const RegionAddress& address) {
+                          addresses.insert(address.object);
+                        });
         }
       }
     }
 
     for (auto& locationEntry : region.defaultPostalArea->second.locations) {
       // Location does not have any addresses
-      if (!locationEntry.second.addresses.empty()) {
-        auto addressIter=locationEntry.second.addresses.begin();
-        while (addressIter!=locationEntry.second.addresses.end()) {
-          // we have an address for this location in the default postal area that is not in another postal area
-          if (addresses.find(addressIter->object)!=addresses.end()) {
-            addressIter=locationEntry.second.addresses.erase(addressIter);
-          }
-          else {
-            ++addressIter;
-          }
+      auto addressIter=locationEntry.second.addresses.begin();
+      while (addressIter!=locationEntry.second.addresses.end()) {
+        // we have an address for this location in the default postal area which is already in another postal area
+        if (addresses.find(addressIter->object)!=addresses.end()) {
+          addressIter=locationEntry.second.addresses.erase(addressIter);
+        }
+        else {
+          ++addressIter;
         }
       }
     }
@@ -2290,31 +2293,43 @@ namespace osmscout {
     addresses.clear();
 
     //
-    // Remove locations from default postal area, that are are completely indexed by non-default postal areas
+    // Remove empty locations from default postal area, that are are indexed
+    // by some named postal area
     //
 
     std::set<ObjectFileRef> locations;
 
     for (const auto& postalAreaEntry : region.postalAreas) {
-      if (!postalAreaEntry.second.name.empty()) {
-        // for each location in postal area
-        for (const auto& location : postalAreaEntry.second.locations) {
-          // add all objects for each address to set
-          std::for_each(location.second.objects.begin(),location.second.objects.end(),[&locations](const ObjectFileRef& object) {
-            locations.insert(object);
-          });
-        }
+      // Skip default postal area
+      if (postalAreaEntry.second.name.empty()) {
+        continue;
+      }
+      // for each location in postal area
+      for (const auto& location : postalAreaEntry.second.locations) {
+        // add all objects for each address to set
+        std::for_each(location.second.objects.begin(),
+                      location.second.objects.end(),
+                      [&locations](const ObjectFileRef& object) {
+                        locations.insert(object);
+                      });
       }
     }
 
     auto locationIter=region.defaultPostalArea->second.locations.begin();
     while (locationIter!=region.defaultPostalArea->second.locations.end()) {
+      // Skip locations, that have addresses
+      if (!locationIter->second.addresses.empty()) {
+        ++locationIter;
+        continue;
+      }
+
       // we have an object for this location in the default postal area that is not in another postal area
       bool foundAll=true;
 
       for (const auto& object : locationIter->second.objects) {
         if (locations.find(object)==locations.end()) {
           foundAll=false;
+          break;
         }
       }
 
