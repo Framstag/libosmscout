@@ -52,12 +52,12 @@ namespace osmscout {
   enum RenderSteps : size_t
   {
     FirstStep             =  0,
-    Initialize            =  0,
-    DumpStatistics        =  1,
-    PreprocessData        =  2,
-    Prerender             =  3,
-    DrawGroundTiles       =  4,
-    DrawOSMTileGrids      =  5,
+    Initialize            =  0, //!< Setup internal state of renderer for executing next steps with current projection and parameters
+    DumpStatistics        =  1, //!< Prints details for debugging, if debug flag (performance, data) is set in renderer parameter
+    PreprocessData        =  2, //!< Convert geographical coordinates of object points to screen coordinates,
+    Prerender             =  3, //!< Implementation specific preparison
+    DrawGroundTiles       =  4, //!< Draw unknown/sea/land tiles and tiles with "coastlines"
+    DrawOSMTileGrids      =  5, //!< If special style exists, renders grid corresponding to OSM tiles
     DrawAreas             =  6,
     DrawWays              =  7,
     DrawWayDecorations    =  8,
@@ -67,7 +67,7 @@ namespace osmscout {
     DrawAreaBorderSymbols = 12,
     PrepareNodeLabels     = 13,
     DrawLabels            = 14,
-    Postrender            = 15,
+    Postrender            = 15, //!< Implementation specific final step
     LastStep              = 15
   };
 

@@ -1808,7 +1808,7 @@ namespace osmscout {
 
   /**
    * Base method that must get called to initial the renderer for a render action.
-   * The derived method of the concrete renderer mplementation can have
+   * The derived method of the concrete renderer implementation can have
    *
    * @return
    *    false if there was either an error or of the rendering was already interrupted, else true
