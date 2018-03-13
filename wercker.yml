@@ -2,13 +2,7 @@ build:
   box:
     id: libosmscout/archlinux_gcc_meson
     tag: latest
-    # Steps make up the actions in your pipeline
-    # Read more about steps on our dev center:
-    # http://devcenter.wercker.com/docs/steps/index.html
   steps:
-    - script:
-        name: Create build directory
-        code: mkdir debug
     - script:
         name: Configure project
         code: meson debug
