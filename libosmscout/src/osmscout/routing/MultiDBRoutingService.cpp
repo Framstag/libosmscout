@@ -208,15 +208,19 @@ namespace osmscout {
     osmscout::FileScanner scanner;
 
     try {
-      uint32_t count;
+      FileOffset indexFileOffset;
+      uint32_t   dataCount;
+      uint32_t   tileMag;
 
       std::cout << "Opening routing file '" << fullFilename << "'" << std::endl;
 
       scanner.Open(fullFilename,osmscout::FileScanner::Sequential,false);
 
-      scanner.Read(count);
+      scanner.Read(indexFileOffset);
+      scanner.Read(dataCount);
+      scanner.Read(tileMag);
 
-      for (uint32_t i=1; i<=count; i++) {
+      for (uint32_t i=1; i<=dataCount; i++) {
         osmscout::RouteNode node;
         osmscout::Pixel     cell;
 
@@ -249,15 +253,19 @@ namespace osmscout {
     osmscout::FileScanner scanner;
 
     try {
-      uint32_t count;
+      FileOffset indexFileOffset;
+      uint32_t   dataCount;
+      uint32_t   tileMag;
 
       std::cout << "Opening routing file '" << fullFilename << "'" << std::endl;
 
       scanner.Open(fullFilename,osmscout::FileScanner::Sequential,false);
 
-      scanner.Read(count);
+      scanner.Read(indexFileOffset);
+      scanner.Read(dataCount);
+      scanner.Read(tileMag);
 
-      for (uint32_t i=1; i<=count; i++) {
+      for (uint32_t i=1; i<=dataCount; i++) {
         osmscout::RouteNode node;
         osmscout::Pixel     cell;
 
