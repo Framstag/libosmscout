@@ -21,6 +21,38 @@
 
 namespace osmscout {
 
+  RouteNodeRef RouteNodeDataFile::IndexPage::find(FileScanner& scanner,
+                                                  Id id)
+  {
+    if (!nodeMap.empty()) {
+      auto nodeEntry=nodeMap.find(id);
+
+      if (nodeEntry!=nodeMap.end()) {
+        return nodeEntry->second;
+      }
+    }
+
+    if (remaining>0) {
+      scanner.SetPos(fileOffset);
+
+      while (remaining>0) {
+        remaining--;
+        RouteNodeRef node=std::make_shared<RouteNode>();
+
+        node->Read(scanner);
+        nodeMap.insert(std::make_pair(node->GetId(),node));
+
+        fileOffset=scanner.GetPos();
+
+        if (node->GetId()==id) {
+          return node;
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
   RouteNodeDataFile::RouteNodeDataFile(const std::string& datafile,
                                        size_t cacheSize)
   : datafile(datafile),
@@ -123,14 +155,8 @@ namespace osmscout {
 
     ValueCache::CacheEntry cacheEntry(tile.GetId());
 
-    scanner.SetPos(entry->second.fileOffset);
-
-    for (size_t i=1; i<=entry->second.count; i++) {
-      RouteNodeRef node=std::make_shared<RouteNode>();
-
-      node->Read(scanner);
-      cacheEntry.value.nodeMap.insert(std::make_pair(node->GetId(),node));
-    }
+    cacheEntry.value.fileOffset=entry->second.fileOffset;
+    cacheEntry.value.remaining=entry->second.count;
 
     cacheRef=cache.SetEntry(cacheEntry);
 
@@ -168,14 +194,10 @@ namespace osmscout {
       return false;
     }
 
-    auto nodeEntry=cacheRef->value.nodeMap.find(id);
+    node=cacheRef->value.find(scanner,
+                              id);
 
-    if (nodeEntry!=cacheRef->value.nodeMap.end()) {
-      node=nodeEntry->second;
-      return true;
-    }
-
-    return false;
+    return node!=nullptr;
   }
 
   Pixel RouteNodeDataFile::GetTile(const GeoCoord& coord) const

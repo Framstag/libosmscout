@@ -45,7 +45,12 @@ namespace osmscout {
 
     struct IndexPage
     {
+      FileOffset                          fileOffset;
+      uint32_t                            remaining;
       std::unordered_map<Id,RouteNodeRef> nodeMap;
+
+      RouteNodeRef find(FileScanner& scanner,
+                        Id id);
     };
 
   private:
@@ -108,13 +113,14 @@ namespace osmscout {
           return false;
         }
 
-        auto nodeEntry=cacheRef->value.nodeMap.find(id);
+        auto node=cacheRef->value.find(scanner,
+                                       id);
 
-        if (nodeEntry==cacheRef->value.nodeMap.end()) {
+        if (node==nullptr) {
           return false;
         }
 
-        data.push_back(nodeEntry->second);
+        data.push_back(node);
       }
 
       return true;
@@ -138,13 +144,14 @@ namespace osmscout {
           return false;
         }
 
-        auto nodeEntry=cacheRef->value.nodeMap.find(id);
+        auto node=cacheRef->value.find(scanner,
+                                       id);
 
-        if (nodeEntry==cacheRef->value.nodeMap.end()) {
+        if (node==nullptr) {
           return false;
         }
 
-        dataMap[id]=nodeEntry->second;
+        dataMap[id]=node;
       }
 
       return true;
