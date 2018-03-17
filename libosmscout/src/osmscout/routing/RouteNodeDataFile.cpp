@@ -22,7 +22,7 @@
 namespace osmscout {
 
   RouteNodeDataFile::RouteNodeDataFile(const std::string& datafile,
-                           size_t cacheSize)
+                                       size_t cacheSize)
   : datafile(datafile),
     cache(cacheSize),
     tileCalculator(0)
@@ -30,8 +30,8 @@ namespace osmscout {
   }
 
   bool RouteNodeDataFile::Open(const TypeConfigRef& typeConfig,
-                         const std::string& path,
-                         bool memoryMappedData)
+                               const std::string& path,
+                               bool memoryMappedData)
   {
     this->typeConfig=typeConfig;
 
