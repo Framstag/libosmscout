@@ -19,6 +19,4 @@
 
 #include <osmscout/Types.h>
 
-namespace osmscout {
-
-}
+namespace osmscout {}
