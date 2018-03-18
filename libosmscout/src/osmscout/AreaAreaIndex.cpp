@@ -48,7 +48,7 @@ namespace osmscout {
 
   void AreaAreaIndex::Close()
   {
-    try  {
+    try {
       if (scanner.IsOpen()) {
         scanner.Close();
       }
@@ -308,7 +308,9 @@ namespace osmscout {
                             cellRef.offset,
                             cellIndexData,
                             cellDataOffset)) {
-            log.Error() << "Cannot find offset " << cellRef.offset << " in level " << level << " in file '" << scanner.GetFilename() << "'";
+            log.Error() << "Cannot find offset " << cellRef.offset
+                        << " in level " << level
+                        << " in file '" << scanner.GetFilename() << "'";
             return false;
           }
 
@@ -318,7 +320,9 @@ namespace osmscout {
                             types,
                             cellDataOffset,
                             spans)) {
-            log.Error() << "Cannot read index data for level " << level << " at offset " << cellDataOffset << " in file '" << scanner.GetFilename() << "'";
+            log.Error() << "Cannot read index data for level " << level
+                        << " at offset " << cellDataOffset
+                        << " in file '" << scanner.GetFilename() << "'";
             return false;
           }
 
@@ -348,7 +352,8 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << spans.size() << " spans from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
+      log.Warn() << "Retrieving " << spans.size() << " spans from area index for " << boundingBox.GetDisplayText()
+                 << " took " << time.ResultString();
     }
 
     loadedTypes=types;
