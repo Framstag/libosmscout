@@ -32,7 +32,6 @@ namespace osmscout {
 
   const char* AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
 
-
   FileOffset AreaNodeIndex::TypeData::GetDataOffset() const
   {
     return indexOffset+cellXCount*cellYCount*(FileOffset)dataOffsetBytes;
@@ -59,8 +58,7 @@ namespace osmscout {
     maxLon(0.0),
     minLat(0.0),
     maxLat(0.0)
-  {
-  }
+  {}
 
   AreaNodeIndex::AreaNodeIndex()
   {
@@ -127,6 +125,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
   }
@@ -136,6 +135,7 @@ namespace osmscout {
                                  std::vector<FileOffset>& offsets) const
   {
     if (typeData.indexOffset==0) {
+
       // No data for this type available
       return true;
     }
@@ -144,6 +144,7 @@ namespace osmscout {
         boundingBox.GetMinLon()>=typeData.maxLon ||
         boundingBox.GetMaxLat()<typeData.minLat ||
         boundingBox.GetMinLat()>=typeData.maxLat) {
+
       // No data available in given bounding box
       return true;
     }
@@ -253,6 +254,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
 
@@ -268,4 +270,3 @@ namespace osmscout {
     return true;
   }
 }
-
