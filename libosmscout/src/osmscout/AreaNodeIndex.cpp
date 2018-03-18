@@ -148,11 +148,11 @@ namespace osmscout {
       return true;
     }
 
-    uint32_t             minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
-    uint32_t             maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
+    uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
+    uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
 
-    uint32_t             minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/typeData.cellHeight);
-    uint32_t             maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/typeData.cellHeight);
+    uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/typeData.cellHeight);
+    uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/typeData.cellHeight);
 
     minxc=std::max(minxc,typeData.cellXStart);
     maxxc=std::min(maxxc,typeData.cellXEnd);
@@ -259,7 +259,10 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << offsets.size() << " node offsets from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
+      log.Warn() << "Retrieving " << offsets.size()
+                 << " node offsets from area index for "
+                 << boundingBox.GetDisplayText()
+                 << " took " << time.ResultString();
     }
 
     return true;
