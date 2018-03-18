@@ -22,4 +22,3 @@
 namespace osmscout {
   const uint16_t GroundTile::Coord::CELL_MAX=32767;
 }
-
