@@ -277,7 +277,10 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << offsets.size() << " way offsets from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
+      log.Warn() << "Retrieving " << offsets.size()
+                 << " way offsets from area index for "
+                 << boundingBox.GetDisplayText()
+                 << " took " << time.ResultString();
     }
 
     return true;
