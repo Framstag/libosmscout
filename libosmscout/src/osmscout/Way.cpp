@@ -93,8 +93,9 @@ namespace osmscout {
 
     featureValueBuffer.Read(scanner);
 
-    scanner.Read(nodes,type->CanRoute() ||
-                       type->GetOptimizeLowZoom());
+    scanner.Read(nodes,
+                 type->CanRoute() ||
+                 type->GetOptimizeLowZoom());
     nextFileOffset=scanner.GetPos();
   }
 
@@ -136,8 +137,9 @@ namespace osmscout {
 
     featureValueBuffer.Write(writer);
 
-    writer.Write(nodes,featureValueBuffer.GetType()->CanRoute() ||
-                       featureValueBuffer.GetType()->GetOptimizeLowZoom());
+    writer.Write(nodes,
+                 featureValueBuffer.GetType()->CanRoute() ||
+                 featureValueBuffer.GetType()->GetOptimizeLowZoom());
   }
 
   /**
