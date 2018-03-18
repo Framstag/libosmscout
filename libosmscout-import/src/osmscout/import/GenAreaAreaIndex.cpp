@@ -53,14 +53,14 @@ namespace osmscout {
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
-                               const TypeConfig& typeConfig);
+                               const TypeConfig& typeConfig) override;
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Area& area,
-                 bool& save);
+                 bool& save) override;
     bool AfterProcessingEnd(const ImportParameter& parameter,
                             Progress& progress,
-                            const TypeConfig& typeConfig);
+                            const TypeConfig& typeConfig) override;
   };
 
   bool AreaLocationProcessorFilter::BeforeProcessingStart(const ImportParameter& parameter,
@@ -105,17 +105,17 @@ namespace osmscout {
         std::string          address;
         std::string          postalCode;
 
-        if (nameValue!=NULL) {
+        if (nameValue!=nullptr) {
           name=nameValue->GetName();
         }
 
-        if (locationValue!=NULL &&
-            addressValue!=NULL) {
+        if (locationValue!=nullptr &&
+            addressValue!=nullptr) {
           location=locationValue->GetLocation();
           address=addressValue->GetAddress();
         }
 
-        if (postalCodeValue!=NULL) {
+        if (postalCodeValue!=nullptr) {
           postalCode=postalCodeValue->GetPostalCode();
         }
 
@@ -127,7 +127,7 @@ namespace osmscout {
 
         // We only need location info during import up to this point
         // Thus we delete it now to safe disk space
-        if (locationValue!=NULL) {
+        if (locationValue!=nullptr) {
           size_t locationIndex;
 
           if (locationReader->GetIndex(ring.GetFeatureValueBuffer(),
@@ -138,7 +138,7 @@ namespace osmscout {
         }
 
         // Same for postal code
-        if (postalCodeValue!=NULL) {
+        if (postalCodeValue!=nullptr) {
           size_t postalCodeIndex;
 
           if (postalCodeReader->GetIndex(ring.GetFeatureValueBuffer(),
@@ -198,16 +198,16 @@ namespace osmscout {
                                                        const TypeConfig& /*typeConfig*/)
   {
     delete nameReader;
-    nameReader=NULL;
+    nameReader=nullptr;
 
     delete locationReader;
-    locationReader=NULL;
+    locationReader=nullptr;
 
     delete addressReader;
-    addressReader=NULL;
+    addressReader=nullptr;
 
     delete postalCodeReader;
-    postalCodeReader=NULL;
+    postalCodeReader=nullptr;
 
     try {
       writer.SetPos(0);
@@ -489,7 +489,7 @@ namespace osmscout {
                                               Area& area,
                                               bool& save)
   {
-    save=area.GetType()!=NULL &&
+    save=area.GetType()!=nullptr &&
          area.GetType()!=typeInfoIgnore;
 
     if (!save) {

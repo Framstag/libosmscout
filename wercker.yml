@@ -1,0 +1,18 @@
+build:
+  box:
+    id: libosmscout/archlinux_gcc_meson
+    tag: latest
+  steps:
+    - script:
+        name: Configure project
+        code: meson debug
+    - script:
+        name: Build project
+        code: ninja
+        cwd: debug
+    - script:
+        name: Test project
+        code: meson test
+        cwd: debug
+          
+

@@ -65,7 +65,7 @@ ReverseLocationLookup = executable('ReverseLocationLookup',
                                    link_with: [osmscout],
                                    install: true)
 
-if buildMapCairo or buildMapQt
+if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   includes = [demosIncDir, osmscoutIncDir, osmscoutmapIncDir]
   deps = [mathDep]
   links = [osmscout, osmscoutmap]
@@ -78,8 +78,22 @@ if buildMapCairo or buildMapQt
 
   if buildMapQt
     includes += osmscoutmapqtIncDir
-    deps += qt5WidgetsDep
+    deps += [qt5WidgetsDep, qt5GuiDep]
     links += osmscoutmapqt
+  endif
+
+  if buildMapAgg
+    includes += osmscoutmapaggIncDir
+    deps += aggDep
+    links += osmscoutmapagg
+  endif
+
+  # TODO: This build is not working, maybe a missing dependency?... (cmake counterpart works)
+  if buildMapOpenGL
+    includes += osmscoutmapopenglIncDir
+    deps += openGLDep
+    deps += glfwDep
+    links += osmscoutmapopengl
   endif
 
   PerformanceTest = executable('PerformanceTest',
@@ -178,5 +192,15 @@ if buildMapQt
                          include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
                          dependencies: [mathDep, qt5GuiDep, qt5WidgetsDep],
                          link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                         install: true)
+endif
+
+if buildMapOpenGL and glfwDep.found() and ftDep.found()
+  DrawMapOpenGL = executable('DrawMapOpenGL',
+                         'src/DrawMapOpenGL.cpp',
+                         cpp_args: ['-fPIC'],
+                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapopenglIncDir],
+                         dependencies: [mathDep, openGLDep, ftDep, glfwDep],
+                         link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
                          install: true)
 endif

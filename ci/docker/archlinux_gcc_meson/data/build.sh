@@ -4,7 +4,7 @@ set -e
 if [ $# -ge 1 ] ; then
   REPO="$1"
 else
-  REPO="git://git.code.sf.net/p/libosmscout/code"
+  REPO="https://github.com/Framstag/libosmscout.git"
 fi
 
 if [ $# -ge 2 ] ; then
@@ -15,8 +15,13 @@ fi
 
 git clone -b "$BRANCH" "$REPO" libosmscout
 
+export LANG=en_US.utf8
+export CC=gcc
+export CXX=g++
+
 cd libosmscout
-. ./setupAutoconf.sh
-env
-make -j `nproc` full
-cd Tests && make check
+meson debug
+cd debug
+ninja
+meson test
+

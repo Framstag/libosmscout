@@ -26,6 +26,14 @@
 
 #cmakedefine HAVE_LIB_OSMSCOUTMAPQT 1
 
+/* Agg detected */
+#cmakedefine HAVE_LIB_AGG 1
+#cmakedefine HAVE_LIB_OSMSCOUTMAPAGG 1
+
+/* Opengl detected */
+#cmakedefine HAVE_LIB_OPENGL 1
+#cmakedefine HAVE_LIB_OSMSCOUTMAPOPENGL 1
+
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H 1
 
