@@ -40,8 +40,8 @@ namespace osmscout {
   }
 
   BasemapDatabase::BasemapDatabase(const BasemapDatabaseParameter& parameter)
-   : parameter(parameter),
-     isOpen(false)
+  : parameter(parameter),
+    isOpen(false)
   {
     log.Debug() << "BasemapDatabase::BasemapDatabase()";
   }
