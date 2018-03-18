@@ -240,6 +240,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
   }
@@ -267,6 +268,7 @@ namespace osmscout {
                                      TypeInfoSet& loadedTypes) const
   {
     StopClock            time;
+
     std::vector<CellRef> cellRefs;     // cells to scan in this level
     std::vector<CellRef> nextCellRefs; // cells to scan for the next level
     double               minlon=boundingBox.GetMinLon()+180.0;
@@ -312,6 +314,7 @@ namespace osmscout {
             log.Error() << "Cannot find offset " << cellRef.offset
                         << " in level " << level
                         << " in file '" << scanner.GetFilename() << "'";
+
             return false;
           }
 
@@ -324,6 +327,7 @@ namespace osmscout {
             log.Error() << "Cannot read index data for level " << level
                         << " at offset " << cellDataOffset
                         << " in file '" << scanner.GetFilename() << "'";
+
             return false;
           }
 
@@ -337,7 +341,8 @@ namespace osmscout {
                                   maxlat,
                                   cellIndexData,
                                   cellDimension[level+1],
-                                  cx,cy,
+                                  cx,
+                                  cy,
                                   nextCellRefs);
           }
         }
@@ -347,6 +352,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
 
