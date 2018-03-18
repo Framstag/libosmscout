@@ -28,7 +28,7 @@ namespace osmscout {
   const char* BoundingBoxDataFile::BOUNDINGBOX_DAT="bounding.dat";
 
   BoundingBoxDataFile::BoundingBoxDataFile()
-    : isLoaded(false)
+  : isLoaded(false)
   {
     // no code
   }
@@ -57,7 +57,8 @@ namespace osmscout {
 
     try {
       scanner.Open(filename,
-                   FileScanner::Sequential,true);
+                   FileScanner::Sequential,
+                   true);
 
       scanner.ReadBox(boundingBox);
 
@@ -70,6 +71,7 @@ namespace osmscout {
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
+
       return false;
     }
 
