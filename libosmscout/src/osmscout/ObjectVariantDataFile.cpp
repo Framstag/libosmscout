@@ -25,7 +25,7 @@
 namespace osmscout {
 
   ObjectVariantDataFile::ObjectVariantDataFile()
-    : isLoaded(false)
+  : isLoaded(false)
   {
     // no code
   }
@@ -57,7 +57,8 @@ namespace osmscout {
 
     try {
       scanner.Open(filename,
-                   FileScanner::Sequential,true);
+                   FileScanner::Sequential,
+                   true);
 
       uint32_t dataCount;
 
@@ -77,6 +78,7 @@ namespace osmscout {
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
+
       return false;
     }
 
