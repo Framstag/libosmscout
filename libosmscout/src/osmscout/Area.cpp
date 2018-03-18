@@ -63,7 +63,7 @@ namespace osmscout {
     double maxLat=0.0;
     double maxLon=0.0;
 
-    bool start=true;
+    bool   start=true;
 
     for (size_t j=0; j<nodes.size(); j++) {
       if (start) {
@@ -121,7 +121,7 @@ namespace osmscout {
     double maxLat=0.0;
     double maxLon=0.0;
 
-    bool start=true;
+    bool   start=true;
 
     for (const auto& ring : rings) {
       if (ring.IsOuterRing()) {
@@ -531,4 +531,3 @@ namespace osmscout {
     }
   }
 }
-
