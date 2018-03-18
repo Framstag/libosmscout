@@ -30,12 +30,16 @@ namespace osmscout {
   {
     switch (type) {
     case osmRefNode:
+
       return "Node";
     case osmRefWay:
+
       return "Way";
     case osmRefRelation:
+
       return "Relation";
     default:
+
       return "none";
     }
   }
@@ -49,14 +53,17 @@ namespace osmscout {
   {
     switch (type) {
     case refNode:
+
       return "Node";
     case refArea:
+
       return "Area";
     case refWay:
+
       return "Way";
     default:
+
       return "none";
     }
   }
 }
-
