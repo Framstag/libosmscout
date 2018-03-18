@@ -30,4 +30,3 @@ namespace osmscout {
     // no code
   }
 }
-
