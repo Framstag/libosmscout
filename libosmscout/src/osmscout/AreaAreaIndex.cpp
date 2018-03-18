@@ -70,7 +70,8 @@ namespace osmscout {
 
 #if defined(ANALYZE_CACHE)
       if (indexCache.GetSize()==indexCache.GetMaxSize()) {
-        log.Warn() << "areaarea.index cache of " << indexCache.GetSize() << "/" << indexCache.GetMaxSize()<< " is too small";
+        log.Warn() << "areaarea.index cache of " << indexCache.GetSize() << "/" << indexCache.GetMaxSize()
+                   << " is too small";
         indexCache.DumpStatistics("areaarea.idx",IndexCacheValueSizer());
       }
 #endif
