@@ -29,8 +29,8 @@ namespace osmscout {
   const char* CoordDataFile::COORD_DAT="coord.dat";
 
   CoordDataFile::CoordDataFile()
-    : isOpen(false),
-      pageSize(0)
+  : isOpen(false),
+    pageSize(0)
   {
     // no code
   }
@@ -81,6 +81,7 @@ namespace osmscout {
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
+
       return false;
     }
 
@@ -99,6 +100,7 @@ namespace osmscout {
     catch (IOException& e) {
       log.Error() << e.GetDescription();
       isOpen=false;
+
       return false;
     }
 
@@ -117,7 +119,7 @@ namespace osmscout {
         PageId relatedId=id+std::numeric_limits<OSMId>::min();
         PageId pageId=relatedId/pageSize;
 
-        PageIdFileOffsetMap::const_iterator pageOffset=pageFileOffsetMap.find(pageId);
+        auto   pageOffset=pageFileOffsetMap.find(pageId);
 
         if (pageOffset==pageFileOffsetMap.end()) {
           continue;
@@ -146,6 +148,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
 
