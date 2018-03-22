@@ -60,22 +60,6 @@ namespace osmscout {
     bool                        isOpen;
 
   private:
-
-    Pixel GetCell(const osmscout::GeoCoord& coord);
-
-    bool ReadCellsForRoutingTree(osmscout::Database& database,
-                                 std::unordered_set<uint64_t>& cells);
-
-    bool ReadRouteNodesForCells(osmscout::Database& database,
-                                std::unordered_set<uint64_t>& cells,
-                                std::unordered_set<osmscout::Id>& routeNodes);
-
-    bool FindCommonRoutingNodes(const BreakerRef &breaker,
-                                DatabaseRef &database1,
-                                DatabaseRef &database2,
-                                std::set<Id> &commonRouteNodes);
-
-  private:
     Vehicle GetVehicle(const MultiDBRoutingState& state) override;
 
     bool CanUseForward(const MultiDBRoutingState& state,
@@ -125,8 +109,8 @@ namespace osmscout {
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
     std::vector<DBId> GetNodeTwins(const MultiDBRoutingState& state,
-                                   DatabaseId database,
-                                   Id id) override;
+                                   const DatabaseId database,
+                                   const Id id) override;
 
     bool CanUse(const MultiDBRoutingState& state,
                 DatabaseId databaseId,

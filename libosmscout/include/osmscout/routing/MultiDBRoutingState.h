@@ -38,31 +38,9 @@ namespace osmscout {
    */
   class MultiDBRoutingState
   {
-  private:
-    DatabaseId          dbId1;
-    DatabaseId          dbId2;
-
-    RoutingProfileRef   profile1;
-    RoutingProfileRef   profile2;
-
-    std::set<Id>        overlapNodes;
-
   public:
-    MultiDBRoutingState(DatabaseId dbId1,
-                        DatabaseId dbId2,
-                        const RoutingProfileRef& profile1,
-                        const RoutingProfileRef& profile2,
-                        const std::set<Id>& overlapNodes);
-
+    MultiDBRoutingState() = default;
     virtual ~MultiDBRoutingState() =default;
-
-    Vehicle GetVehicle() const;
-
-    RoutingProfileRef GetProfile(DatabaseId database) const;
-
-    void GetOverlappingDatabases(const DatabaseId &database,
-                                 const Id &nodeId,
-                                 std::set<DatabaseId> &overlappingDatabases) const;
   };
 
 }

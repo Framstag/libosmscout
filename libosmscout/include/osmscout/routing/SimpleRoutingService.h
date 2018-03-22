@@ -140,8 +140,8 @@ namespace osmscout {
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
     std::vector<DBId> GetNodeTwins(const RoutingProfile& state,
-                                   DatabaseId database,
-                                   Id id) override;
+                                   const DatabaseId database,
+                                   const Id id) override;
 
   public:
     SimpleRoutingService(const DatabaseRef& database,

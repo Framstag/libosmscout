@@ -209,8 +209,8 @@ namespace osmscout {
   {
     auto entry=index.find(tile);
 
-      return entry!=index.end();
-    }
+    return entry!=index.end();
+  }
 
   bool RouteNodeDataFile::IsCovered(const GeoCoord& coord) const
   {
