@@ -25,12 +25,7 @@ namespace osmscout {
 
   RoutingDatabase::RoutingDatabase()
     :
-    routeNodeDataFile(RoutingService::GetDataFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
-                      RoutingService::GetIndexFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
-                      /*indexCacheSize*/
-                      12000,
-                      /*dataCacheSize*/
-                      1000),
+    routeNodeDataFile(RoutingService::GetDataFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),1000),
     junctionDataFile(RoutingService::FILENAME_INTERSECTIONS_DAT,
                      RoutingService::FILENAME_INTERSECTIONS_IDX,
                      /*indexCacheSize*/
@@ -46,10 +41,9 @@ namespace osmscout {
     path=database->GetPath();
 
     if (!routeNodeDataFile.Open(database->GetTypeConfig(),
-                                database->GetPath(),
-                                true,
-                                database->GetParameter().GetRouterDataMMap())) {
-      log.Error() << "Cannot open '" << database->GetPath() << "'!";
+                          database->GetPath(),
+                          database->GetParameter().GetRouterDataMMap())) {
+      log.Error() << "Cannot open route node data file'" << database->GetPath() << "'!";
       return false;
     }
 

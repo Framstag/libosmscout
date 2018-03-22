@@ -86,12 +86,8 @@ namespace osmscout {
                                 DatabaseId database,
                                 double targetDistance) = 0;
 
-    virtual bool GetRouteNode(const DatabaseId &database,
-                              const Id &id,
-                              RouteNodeRef &node) = 0;
-
-    virtual bool GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
-                                       std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap) = 0;
+    virtual bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
+                               std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) = 0;
 
     /**
      * Return the route node for the given database offset
@@ -102,8 +98,8 @@ namespace osmscout {
      * @return
      *    True, if the node couldbe loaded, else false
      */
-    virtual bool GetRouteNodeByOffset(const DBFileOffset &offset,
-                                      RouteNodeRef &node) = 0;
+    virtual bool GetRouteNode(const DBId &id,
+                              RouteNodeRef &node) = 0;
 
     virtual bool GetWayByOffset(const DBFileOffset &offset,
                                 WayRef &way) = 0;
@@ -117,16 +113,16 @@ namespace osmscout {
     virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                   std::unordered_map<DBFileOffset,AreaRef> &areaMap) = 0;
 
-    void ResolveRNodeChainToList(DBFileOffset finalRouteNode,
+    void ResolveRNodeChainToList(DBId finalRouteNode,
                                  const ClosedSet& closedSet,
                                  const ClosedSet &closedRestrictedSet,
                                  std::list<VNode>& nodes);
 
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
 
-    virtual std::vector<DBFileOffset> GetNodeTwins(const RoutingState& state,
-                                                   DatabaseId database,
-                                                   Id id) = 0;
+    virtual std::vector<DBId> GetNodeTwins(const RoutingState& state,
+                                           const DatabaseId database,
+                                           const Id id) = 0;
 
     void GetStartForwardRouteNode(const RoutingState& state,
                                   const DatabaseId& database,

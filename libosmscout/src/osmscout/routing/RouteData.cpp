@@ -35,7 +35,7 @@ namespace osmscout {
     // no code
   }
 
-  void RouteData::RouteEntry::SetObjects(const std::vector<ObjectFileRef> objects)
+  void RouteData::RouteEntry::SetObjects(const std::vector<ObjectFileRef>& objects)
   {
     this->objects=objects;
   }
