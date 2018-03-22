@@ -2,6 +2,7 @@
 
 #include <d2d1.h>
 #include <dwrite.h>
+#include "osmscout/MapPainter.h"
 
 /*
  * This structure is needed to hold the renderer context. It is passed around as a void* pointer,
@@ -9,6 +10,7 @@
  */
 struct PathTextDrawingContext
 {
+    osmscout::MapPainter::ContourLabelHelper* helper;
     ID2D1RenderTarget* d2DContext;
     ID2D1Geometry* geometry;
     ID2D1Brush* brush;
@@ -17,17 +19,17 @@ struct PathTextDrawingContext
 class PathTextRenderer : public IDWriteTextRenderer
 {
 public:
-	// Static creation method that takes care of allocating a renderer
-	// AND registering it as a COM component.
-	static void CreatePathTextRenderer(float pixelsPerDip, PathTextRenderer **textRenderer);
+  // Static creation method that takes care of allocating a renderer
+  // AND registering it as a COM component.
+  static void CreatePathTextRenderer(float pixelsPerDip, PathTextRenderer **textRenderer);
 
-	//
-	// Public destruction method for PathTextRenderer. This method
-	// does the exact opposite of CreatePathTextRenderer.
-	//
-	static void DestroyPathTextRenderer(PathTextRenderer *textRenderer);
+  //
+  // Public destruction method for PathTextRenderer. This method
+  // does the exact opposite of CreatePathTextRenderer.
+  //
+  static void DestroyPathTextRenderer(PathTextRenderer *textRenderer);
 
-	// All the STDMETHOD have been lifted from the IDWriteTextRenderer interface
+  // All the STDMETHOD have been lifted from the IDWriteTextRenderer interface
     STDMETHOD(DrawGlyphRun)(
         _In_opt_ void* clientDrawingContext,
         FLOAT baselineOriginX,
