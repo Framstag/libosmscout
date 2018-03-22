@@ -86,6 +86,13 @@ namespace osmscout {
     {
       return objectVariantDataFile.GetData();
     }
+
+    inline bool ContainsNode(const Id id) const
+    {
+      RouteNodeRef node;
+      routeNodeDataFile.Get(id, node);
+      return (bool)node;
+    }
   };
 
   /**
