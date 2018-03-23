@@ -26,6 +26,9 @@
 #include <osmscout/routing/RouteNode.h>
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/routing/RouteNodeDataFile.h>
+#include <osmscout/routing/RoutingService.h>
+
 #include <list>
 #include <map>
 #include <string>
@@ -67,7 +70,6 @@ static bool ParseArguments(int argc,
                            std::set<osmscout::OSMId>& coordIds,
                            std::set<osmscout::OSMId>& routeNodeCoordIds,
                            std::set<osmscout::Id>& routeNodeIds,
-                           std::set<osmscout::FileOffset>& routeNodeOffsets,
                            std::list<Job>& jobs)
 {
   if (argc<2) {
@@ -87,7 +89,6 @@ static bool ParseArguments(int argc,
     std::cerr << std::endl;
     std::cerr << "   -rn <OSMId>        route node by OSM node id" << std::endl;
     std::cerr << "   -ri <RouteNodeId>  osmscout route node id" << std::endl;
-    std::cerr << "   -ro <FileOffset>   osmscout route node file offset" << std::endl;
     return false;
   }
 
@@ -208,24 +209,6 @@ static bool ParseArguments(int argc,
       }
 
       routeNodeIds.insert(id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-ro")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -ro requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Route node file offset is not numeric!" << std::endl;
-        return false;
-      }
-
-      routeNodeOffsets.insert(id);
 
       arg++;
     }
@@ -761,7 +744,6 @@ int main(int argc, char* argv[])
 
   std::set<osmscout::OSMId>      routeNodeCoordIds;
   std::set<osmscout::Id>         routeNodeIds;
-  std::set<osmscout::FileOffset> routeNodeOffsets;
 
   try {
     std::locale::global(std::locale(""));
@@ -776,7 +758,6 @@ int main(int argc, char* argv[])
                       coordIds,
                       routeNodeCoordIds,
                       routeNodeIds,
-                      routeNodeOffsets,
                       jobs)) {
     return 1;
   }
@@ -786,10 +767,9 @@ int main(int argc, char* argv[])
   osmscout::DebugDatabaseParameter debugDatabaseParameter;
   osmscout::DebugDatabase          debugDatabase(debugDatabaseParameter);
 
-  osmscout::IndexedDataFile<osmscout::Id,osmscout::RouteNode> routeNodeDataFile("router.dat",
-                                                                                "router.idx",
-                                                                                6000,
-                                                                                1000);
+  osmscout::RouteNodeDataFile routeNodeDataFile(
+      osmscout::RoutingService::GetDataFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
+      1000);
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
@@ -801,7 +781,6 @@ int main(int argc, char* argv[])
 
   if (!routeNodeDataFile.Open(database.GetTypeConfig(),
                               map,
-                              true,
                               true)) {
     std::cerr << "Cannot open routing database" << std::endl;
   }
@@ -933,9 +912,17 @@ int main(int argc, char* argv[])
 
   if (!routeNodeIds.empty() &&
       routeNodeDataFile.IsOpen()) {
-    if (!routeNodeDataFile.Get(routeNodeIds,
-                               routeNodeMap)) {
-      std::cerr << "Error loading route nodes by id" << std::endl;
+    for (const osmscout::Id id:routeNodeIds){
+      osmscout::RouteNodeRef node;
+      if (!routeNodeDataFile.Get(id,node)) {
+        std::cerr << "Error loading route nodes by id" << std::endl;
+        continue;
+      }
+      if (!node){
+        std::cerr << "Error loading route nodes by id" << std::endl;
+        continue;
+      }
+      routeNodeMap[id]=node;
     }
   }
 
@@ -973,20 +960,6 @@ int main(int argc, char* argv[])
       std::cerr << "Cannot find route node with id " << id << std::endl;
     }
 
-    firstRouteNode=false;
-  }
-
-  for (const auto offset:routeNodeOffsets){
-    osmscout::RouteNodeRef routeNodeRef;
-    if (routeNodeDataFile.GetByOffset(offset,routeNodeRef)){
-      if (!firstRouteNode) {
-        std::cout << std::endl;
-      }
-
-      DumpRouteNode(*routeNodeRef);
-    }else{
-      std::cerr << "Cannot find route node with offset " << offset << std::endl;
-    }
     firstRouteNode=false;
   }
 
