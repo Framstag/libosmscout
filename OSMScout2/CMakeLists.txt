@@ -152,7 +152,7 @@ set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)
 install(TARGETS OSMScout2 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 # install QM files to correct location - QStandardPaths::AppDataLocation / "translations"
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE)
 	install(FILES ${TRANSLATION_QM_FILES}
 			DESTINATION "/Library/Application Support/libosmscout/OSMScout2/translations")
 elseif(WIN32)
