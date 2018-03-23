@@ -65,7 +65,6 @@ namespace osmscout {
     for (const auto& router : parameter.GetRouter()) {
       description.AddProvidedFile(router.GetDataFilename());
       description.AddProvidedFile(router.GetVariantFilename());
-      description.AddProvidedFile(router.GetIndexFilename());
     }
 
     description.AddProvidedFile(RoutingService::FILENAME_INTERSECTIONS_DAT);
@@ -1807,8 +1806,6 @@ namespace osmscout {
                                                router.GetDataFilename());
       std::string variantFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
                                                   router.GetVariantFilename());
-      std::string indexFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                router.GetIndexFilename());
 
       progress.SetAction(std::string("Writing route graph '")+dataFilename+"'");
 
