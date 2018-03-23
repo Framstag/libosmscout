@@ -105,7 +105,7 @@ target_include_directories(OSMScout2 PRIVATE
     ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-gpx/include
 )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 	target_link_libraries(OSMScout2
         OSMScout
         OSMScoutMap
@@ -152,7 +152,7 @@ set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)
 install(TARGETS OSMScout2 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 # install QM files to correct location - QStandardPaths::AppDataLocation / "translations"
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 	install(FILES ${TRANSLATION_QM_FILES}
 			DESTINATION "/Library/Application Support/libosmscout/OSMScout2/translations")
 elseif(WIN32)

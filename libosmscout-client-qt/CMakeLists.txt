@@ -109,7 +109,7 @@ set(SOURCE_FILES
     src/osmscout/InstalledMapsModel.cpp
     )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   set(THE_TARGET_NAME "OSMScoutClientQt") 
 else()
   set(THE_TARGET_NAME "osmscout_client_qt") 
@@ -139,8 +139,8 @@ if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
-if(APPLE)
-set_target_properties(${THE_TARGET_NAME} PROPERTIES
+if(APPLE AND BUILD_FRAMEWORKS)
+  set_target_properties(${THE_TARGET_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -150,8 +150,8 @@ set_target_properties(${THE_TARGET_NAME} PROPERTIES
 )
 endif()
 
-if(APPLE)
-target_link_libraries(${THE_TARGET_NAME}
+if(APPLE AND BUILD_FRAMEWORKS)
+    target_link_libraries(${THE_TARGET_NAME}
     OSMScout
     OSMScoutMap
     OSMScoutMapQt
