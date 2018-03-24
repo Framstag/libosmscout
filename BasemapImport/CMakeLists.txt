@@ -11,7 +11,7 @@ target_include_directories(BasemapImport PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include)
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   target_link_libraries(BasemapImport OSMScoutImport)
 else()
   target_link_libraries(BasemapImport osmscout_import)

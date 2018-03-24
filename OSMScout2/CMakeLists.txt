@@ -105,7 +105,7 @@ target_include_directories(OSMScout2 PRIVATE
     ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-gpx/include
 )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 	target_link_libraries(OSMScout2
         OSMScout
         OSMScoutMap
