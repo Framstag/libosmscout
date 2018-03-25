@@ -248,7 +248,7 @@ namespace osmscout {
     {
       size_t        position;   //!< Relative position of the label
       std::string   label;      //!< The text of the label (only used if TextStyle is set)
-      TextDimension dimension;  //!< Dimension of the label object (coul dbe text, sybol, icon...)
+      TextDimension dimension;  //!< Dimension of the label object (could be text, symbol, icon...)
       double        fontSize;   //!< The font size (only used if TextStyle is set)
       double        alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
       TextStyleRef  textStyle;  //!< The text style for a textual label (optional)
@@ -258,7 +258,7 @@ namespace osmscout {
 
     /**
      * Helper class for drawing contours. Allows the MapPainter base class
-     * to inject itself at certain points in the contour label rendeirng code of
+     * to inject itself at certain points in the contour label rendering code of
      * the actual backend.
      */
     class OSMSCOUT_MAP_API ContourLabelHelper CLASS_FINAL

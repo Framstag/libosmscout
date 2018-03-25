@@ -830,7 +830,7 @@ namespace osmscout {
         double maxHeight=projection.GetHeight()/5.0;
 
         if (height>maxHeight) {
-            // If the height exeeds maxHeight the alpha value will be decreased
+            // If the height exceeds maxHeight the alpha value will be decreased
             double minAlpha=(double)projection.GetHeight();
             double normHeight=(height-maxHeight)/(minAlpha-maxHeight);
             alpha*=std::min(std::max(1-normHeight,0.2),1.0);
