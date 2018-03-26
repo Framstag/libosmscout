@@ -49,6 +49,7 @@ set(HEADER_FILES_ROUTING
     include/osmscout/routing/Route.h
     include/osmscout/routing/RouteData.h
     include/osmscout/routing/RouteNode.h
+    include/osmscout/routing/RouteNodeDataFile.h
     include/osmscout/routing/RoutePostprocessor.h
     include/osmscout/routing/RoutingDB.h
     include/osmscout/routing/RoutingProfile.h
@@ -109,8 +110,7 @@ set(HEADER_FILES
     include/osmscout/Types.h
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
-    include/osmscout/WayDataFile.h
-)
+    include/osmscout/WayDataFile.h)
 
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
@@ -145,6 +145,7 @@ set(SOURCE_FILES
     src/osmscout/routing/Route.cpp
     src/osmscout/routing/RouteData.cpp
     src/osmscout/routing/RouteNode.cpp
+    src/osmscout/routing/RouteNodeDataFile.cpp
     src/osmscout/routing/RoutePostprocessor.cpp
     src/osmscout/routing/RoutingDB.cpp
     src/osmscout/routing/RoutingProfile.cpp
@@ -201,7 +202,7 @@ if(MARISA_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   set(THE_TARGET_NAME "OSMScout")
 else()
   set(THE_TARGET_NAME "osmscout")
@@ -236,7 +237,7 @@ if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   set_target_properties(${THE_TARGET_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C

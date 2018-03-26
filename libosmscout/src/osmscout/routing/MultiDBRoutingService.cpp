@@ -141,251 +141,63 @@ namespace osmscout {
     return closestPosition;
   }
 
-  Pixel MultiDBRoutingService::GetCell(const osmscout::GeoCoord& coord)
+  Vehicle MultiDBRoutingService::GetVehicle(const MultiDBRoutingState& /*state*/)
   {
-    return {uint32_t((coord.GetLon()+180.0)/ LON_CELL_FACTOR),
-            uint32_t((coord.GetLat()+90.0)/ LAT_CELL_FACTOR)};
+    assert(!handles.empty());
+    return handles.begin()->profile->GetVehicle();
   }
 
-  Vehicle MultiDBRoutingService::GetVehicle(const MultiDBRoutingState& state)
-  {
-    return state.GetVehicle();
-  }
-
-  bool MultiDBRoutingService::CanUseForward(const MultiDBRoutingState& state,
+  bool MultiDBRoutingService::CanUseForward(const MultiDBRoutingState& /*state*/,
                                             const DatabaseId& database,
                                             const WayRef& way)
   {
-    return state.GetProfile(database)->CanUseForward(*way);
+    assert(handles.size()>database);
+    return handles[database].profile->CanUseForward(*way);
   }
 
-  bool MultiDBRoutingService::CanUseBackward(const MultiDBRoutingState& state,
+  bool MultiDBRoutingService::CanUseBackward(const MultiDBRoutingState& /*state*/,
                                              const DatabaseId& database,
                                              const WayRef& way)
   {
-    return state.GetProfile(database)->CanUseBackward(*way);
+    assert(handles.size()>database);
+    return handles[database].profile->CanUseBackward(*way);
   }
 
-  double MultiDBRoutingService::GetCosts(const MultiDBRoutingState& state,
+  double MultiDBRoutingService::GetCosts(const MultiDBRoutingState& /*state*/,
                                          const DatabaseId databaseId,
                                          const RouteNode& routeNode,
                                          size_t pathIndex)
   {
-    return state.GetProfile(databaseId)->GetCosts(routeNode,
-                                                handles[databaseId].routingDatabase->GetObjectVariantData(),
-                                                pathIndex);
+    assert(handles.size()>databaseId);
+    return handles[databaseId].profile->GetCosts(routeNode,
+                                                 handles[databaseId].routingDatabase->GetObjectVariantData(),
+                                                 pathIndex);
   }
 
-  double MultiDBRoutingService::GetCosts(const MultiDBRoutingState& state,
+  double MultiDBRoutingService::GetCosts(const MultiDBRoutingState& /*state*/,
                                          const DatabaseId database,
                                          const WayRef &way,
                                          double wayLength)
   {
-    return state.GetProfile(database)->GetCosts(*way,wayLength);
+    assert(handles.size()>database);
+    return handles[database].profile->GetCosts(*way,wayLength);
   }
 
-  double MultiDBRoutingService::GetEstimateCosts(const MultiDBRoutingState& state,
+  double MultiDBRoutingService::GetEstimateCosts(const MultiDBRoutingState& /*state*/,
                                                  const DatabaseId database,
                                                  double targetDistance)
   {
-    return state.GetProfile(database)->GetCosts(targetDistance);
+    assert(handles.size()>database);
+    return handles[database].profile->GetCosts(targetDistance);
   }
 
-  double MultiDBRoutingService::GetCostLimit(const MultiDBRoutingState& state,
+  double MultiDBRoutingService::GetCostLimit(const MultiDBRoutingState& /*state*/,
                                              const DatabaseId database,
                                              double targetDistance)
   {
-    RoutingProfileRef profile=state.GetProfile(database);
+    assert(handles.size()>database);
+    RoutingProfileRef profile=handles[database].profile;
     return profile->GetCosts(profile->GetCostLimitDistance())+targetDistance*profile->GetCostLimitFactor();
-  }
-
-  bool MultiDBRoutingService::ReadCellsForRoutingTree(osmscout::Database& database,
-                                                      std::unordered_set<uint64_t>& cells)
-  {
-    std::string filename=std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".dat";
-    std::string fullFilename=osmscout::AppendFileToDir(database.GetPath(),filename);
-
-    osmscout::FileScanner scanner;
-
-    try {
-      uint32_t count;
-
-      std::cout << "Opening routing file '" << fullFilename << "'" << std::endl;
-
-      scanner.Open(fullFilename,osmscout::FileScanner::Sequential,false);
-
-      scanner.Read(count);
-
-      for (uint32_t i=1; i<=count; i++) {
-        osmscout::RouteNode node;
-        osmscout::Pixel     cell;
-
-        node.Read(*database.GetTypeConfig(),scanner);
-
-        cell=GetCell(node.GetCoord());
-
-        cells.insert(cell.GetId());
-
-        //std::cout << node.GetCoord().GetDisplayText() << " " << cell.GetId() << std::endl;
-      }
-
-      scanner.Close();
-    }
-    catch (osmscout::IOException& e) {
-      log.Error() << "Error while reading '" << fullFilename << "': " << e.GetDescription();
-      return false;
-    }
-
-    return true;
-  }
-
-  bool MultiDBRoutingService::ReadRouteNodesForCells(osmscout::Database& database,
-                                                     std::unordered_set<uint64_t>& cells,
-                                                     std::unordered_set<Id>& routeNodes)
-  {
-    std::string filename=std::string(osmscout::RoutingService::DEFAULT_FILENAME_BASE)+".dat";
-    std::string fullFilename=osmscout::AppendFileToDir(database.GetPath(),filename);
-
-    osmscout::FileScanner scanner;
-
-    try {
-      uint32_t count;
-
-      std::cout << "Opening routing file '" << fullFilename << "'" << std::endl;
-
-      scanner.Open(fullFilename,osmscout::FileScanner::Sequential,false);
-
-      scanner.Read(count);
-
-      for (uint32_t i=1; i<=count; i++) {
-        osmscout::RouteNode node;
-        osmscout::Pixel     cell;
-
-        node.Read(*database.GetTypeConfig(),scanner);
-
-        cell=GetCell(node.GetCoord());
-
-        if (cells.find(cell.GetId())!=cells.end()) {
-          routeNodes.insert(node.GetId());
-        }
-      }
-
-      scanner.Close();
-    }
-    catch (osmscout::IOException& e) {
-      log.Error() << "Error while reading '" << fullFilename << "': " << e.GetDescription();
-      return false;
-    }
-
-    return true;
-  }
-
-  bool MultiDBRoutingService::FindCommonRoutingNodes(const BreakerRef &breaker,
-                                                     DatabaseRef &database1,
-                                                     DatabaseRef &database2,
-                                                     std::set<Id> &commonRouteNodes)
-  {
-
-    std::unordered_set<uint64_t> cells1;
-    std::unordered_set<uint64_t> cells2;
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "Reading route node cells of database 1..." << std::endl;
-#endif
-
-    if (!ReadCellsForRoutingTree(*database1,
-                                 cells1)){
-      return false;
-    }
-    if (breaker &&
-        breaker->IsAborted()) {
-      return true;
-    }
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "Found route nodes in " << cells1.size() << " cells" << std::endl;
-    std::cout << "Reading route node cells of database 2..." << std::endl;
-#endif
-
-    if (!ReadCellsForRoutingTree(*database2,
-                                 cells2)){
-      return false;
-    }
-    if (breaker &&
-        breaker->IsAborted()) {
-      return true;
-    }
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "Found route nodes in " << cells2.size() << " cells" << std::endl;
-    std::cout << "Detecting common cells..." << std::endl;
-#endif
-
-    std::unordered_set<uint64_t> commonCells;
-
-    for (const auto cell : cells1) {
-      if (cells2.find(cell)!=cells2.end()) {
-        commonCells.insert(cell);
-      }
-    }
-
-    cells1.clear();
-    cells2.clear();
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "There are " << commonCells.size() << " common cells" << std::endl;
-#endif
-
-    std::unordered_set<Id> routeNodes1;
-    std::unordered_set<Id> routeNodes2;
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "Reading route nodes in common cells of database 1..." << std::endl;
-#endif
-
-    if (!ReadRouteNodesForCells(*database1,
-                                commonCells,
-                                routeNodes1)){
-      return false;
-    }
-    if (breaker &&
-        breaker->IsAborted()) {
-      return true;
-    }
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "Found " << routeNodes1.size() << " route nodes in common cells" << std::endl;
-    std::cout << "Reading route nodes in common cells of database 2..." << std::endl;
-#endif
-
-    if (!ReadRouteNodesForCells(*database2,
-                                commonCells,
-                                routeNodes2)){
-      return false;
-    }
-    if (breaker &&
-        breaker->IsAborted()) {
-      return true;
-    }
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "Found " << routeNodes2.size() << " route nodes in common cells" << std::endl;
-    std::cout << "Detecting common route nodes..." << std::endl;
-#endif
-
-    for (const auto routeNode : routeNodes1) {
-      if (routeNodes2.find(routeNode)!=routeNodes2.end()) {
-        commonRouteNodes.insert(routeNode);
-      }
-    }
-
-    routeNodes1.clear();
-    routeNodes2.clear();
-
-#if defined(DEBUG_ROUTING)
-    std::cout << "There are " << commonRouteNodes.size() << " common route nodes" << std::endl;
-#endif
-    return true;
   }
 
   bool MultiDBRoutingService::CanUse(const MultiDBRoutingState& /*state*/,
@@ -399,32 +211,34 @@ namespace osmscout {
                                                pathIndex);
   }
 
-  bool MultiDBRoutingService::GetRouteNodesByOffset(const std::set<DBFileOffset> &routeNodeOffsets,
-                                                    std::unordered_map<DBFileOffset,RouteNodeRef> &routeNodeMap)
+  bool MultiDBRoutingService::GetRouteNodes(const std::set<DBId> &routeNodeIds,
+                                            std::unordered_map<DBId,RouteNodeRef> &routeNodeMap)
   {
-    std::unordered_map<DatabaseId,std::set<FileOffset>> offsetMap;
-    for (const auto &offset:routeNodeOffsets){
-      offsetMap[offset.database].insert(offset.offset);
+    std::unordered_map<DatabaseId,std::set<Id>> idMap;
+    for (const auto &id:routeNodeIds){
+      idMap[id.database].insert(id.id);
     }
-    for (const auto &entry:offsetMap){
+    for (const auto &entry:idMap){
       std::vector<RouteNodeRef>  nodes;
-      const std::set<FileOffset> &offsets=entry.second;
+      const std::set<Id>         &ids=entry.second;
 
-      if (!handles[entry.first].routingDatabase->GetRouteNodesByOffset(offsets,
-                                                                       nodes)) {
+      if (!handles[entry.first].routingDatabase->GetRouteNodes(ids.begin(),
+                                                               ids.end(),
+                                                               ids.size(),
+                                                               nodes)) {
         return false;
       }
-      for (const auto &node:nodes){
-        routeNodeMap[DBFileOffset(entry.first,node->GetFileOffset())]=node;
+      for (const auto &node:nodes) {
+        routeNodeMap[DBId(entry.first,node->GetId())]=node;
       }
     }
     return true;
   }
 
-  bool MultiDBRoutingService::GetRouteNodeByOffset(const DBFileOffset &offset,
-                                                   RouteNodeRef &node)
+  bool MultiDBRoutingService::GetRouteNode(const DBId &id,
+                                           RouteNodeRef &node)
   {
-    return handles[offset.database].routingDatabase->GetRouteNodeByOffset(offset.offset, node);
+    return handles[id.database].routingDatabase->GetRouteNode(id.id, node);
   }
 
   bool MultiDBRoutingService::GetWayByOffset(const DBFileOffset &offset,
@@ -519,32 +333,24 @@ namespace osmscout {
     return true;
   }
 
-  std::vector<DBFileOffset> MultiDBRoutingService::GetNodeTwins(const MultiDBRoutingState& state,
-                                                                const DatabaseId database,
-                                                                const Id id)
+  std::vector<DBId> MultiDBRoutingService::GetNodeTwins(const MultiDBRoutingState& /*state*/,
+                                                        const DatabaseId database,
+                                                        const Id id)
   {
-    std::set<DatabaseId> overlappingDatabases;
-    state.GetOverlappingDatabases(database,id,overlappingDatabases);
+    assert(handles.size()>database);
 
-    std::vector<DBFileOffset> twins;
+    std::vector<DBId> twins;
 
-    twins.reserve(overlappingDatabases.size());
-    for (const auto &dbId:overlappingDatabases){
-      FileOffset offset;
-      if (!handles[dbId].routingDatabase->GetRouteNodeOffset(id,offset)){
-        log.Error() << "Failed to retrieve file offset";
+    twins.reserve(handles.size()-1);
+    for (DatabaseId dbId=0; dbId<handles.size(); dbId++){
+      if (dbId==database){
         continue;
       }
-      twins.emplace_back(dbId,offset);
+      if (handles[dbId].routingDatabase->ContainsNode(id)) {
+        twins.emplace_back(dbId, id);
+      }
     }
     return twins;
-  }
-
-  bool MultiDBRoutingService::GetRouteNode(const DatabaseId &databaseId,
-                                           const Id &id,
-                                           RouteNodeRef &node)
-  {
-    return handles[databaseId].routingDatabase->GetRouteNode(id, node);
   }
 
   RoutingResult MultiDBRoutingService::CalculateRoute(const RoutePosition &start,
@@ -574,7 +380,7 @@ namespace osmscout {
       return result;
     }
 
-    DatabaseRef database1=handles[start.GetDatabaseId()].database;
+    // DatabaseRef database1=handles[start.GetDatabaseId()].database;
 
     if (target.GetDatabaseId()>=handles.size() ||
         !handles[target.GetDatabaseId()].database) {
@@ -582,38 +388,7 @@ namespace osmscout {
       return result;
     }
 
-    DatabaseRef database2=handles[target.GetDatabaseId()].database;
-
-    std::set<Id> commonRouteNodes;
-
-    if (!FindCommonRoutingNodes(parameter.GetBreaker(),
-                                database1,
-                                database2,
-                                commonRouteNodes)) {
-      log.Error() << "Can't find common routing nodes for databases " <<
-        database1->GetPath() << ", " <<
-        database2->GetPath();
-      return result;
-    }
-
-    if (parameter.GetBreaker() &&
-        parameter.GetBreaker()->IsAborted()) {
-      return result;
-    }
-
-    if (commonRouteNodes.empty()){
-      log.Warn() << "Can't find common routing nodes for databases " <<
-        database1->GetPath() << ", " <<
-        database2->GetPath();
-      return result;
-    }
-
-    MultiDBRoutingState state(start.GetDatabaseId(),
-                              target.GetDatabaseId(),
-                              handles[start.GetDatabaseId()].profile,
-                              handles[target.GetDatabaseId()].profile,
-                              commonRouteNodes);
-
+    MultiDBRoutingState state;
     return AbstractRoutingService<MultiDBRoutingState>::CalculateRoute(state,
                                                                        start,
                                                                        target,
@@ -737,3 +512,4 @@ namespace osmscout {
     return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToWay(data,way);
   }
 }
+

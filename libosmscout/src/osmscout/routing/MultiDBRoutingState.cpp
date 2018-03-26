@@ -23,49 +23,4 @@
 
 namespace osmscout {
 
-  MultiDBRoutingState::MultiDBRoutingState(DatabaseId dbId1,
-                                           DatabaseId dbId2,
-                                           const RoutingProfileRef& profile1,
-                                           const RoutingProfileRef& profile2,
-                                           const std::set<Id>& overlapNodes):
-    dbId1(dbId1),
-    dbId2(dbId2),
-    profile1(profile1),
-    profile2(profile2),
-    overlapNodes(overlapNodes)
-  {
-  }
-
-  Vehicle MultiDBRoutingState::GetVehicle() const
-  {
-    return profile1->GetVehicle();
-  }
-
-  RoutingProfileRef MultiDBRoutingState::GetProfile(DatabaseId database) const
-  {
-    if (database==dbId1) {
-      return profile1;
-    }
-    else if (database==dbId2) {
-      return profile2;
-    }
-
-    assert(false);
-
-    return nullptr;
-  }
-
-  void MultiDBRoutingState::GetOverlappingDatabases(const DatabaseId &database,
-                                                    const Id &nodeId,
-                                                    std::set<DatabaseId> &overlappingDatabases) const
-  {
-    if (overlapNodes.find(nodeId)!=overlapNodes.end()) {
-      if (database==dbId1) {
-        overlappingDatabases.insert(dbId2);
-      }
-      else if (database==dbId2) {
-        overlappingDatabases.insert(dbId1);
-      }
-    }
-  }
 }

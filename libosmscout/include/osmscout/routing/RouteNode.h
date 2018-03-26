@@ -86,7 +86,7 @@ namespace osmscout {
     struct OSMSCOUT_API Exclude
     {
       ObjectFileRef source;      //!< The source object
-      uint32_t      targetIndex; //!< The index of the target path
+      uint8_t       targetIndex; //!< The index of the target path
     };
 
     /**
@@ -97,10 +97,10 @@ namespace osmscout {
     struct OSMSCOUT_API Path
     {
       double     distance;    //!< Distance from the current route node to the target route node
-      FileOffset offset;      //!< File Offset of the  targeting route node
-      uint32_t   objectIndex; //!< The index of the way to use from this route node to the target route node
+      Id         id;          //!< id of the targeting route node
+      uint8_t    objectIndex; //!< The index of the way to use from this route node to the target route node
       uint8_t    flags;       //!< Certain flags
-      //uint8_t    bearing;     //!< Encoded initial and final bearing of this path
+      //uint8_t    bearing;   //!< Encoded initial and final bearing of this path
 
       inline bool IsRestricted(Vehicle vehicle) const
       {
@@ -148,8 +148,8 @@ namespace osmscout {
       this->point=point;
     }
 
-    uint32_t AddObject(const ObjectFileRef& object,
-                       uint16_t objectVariantIndex);
+    uint8_t AddObject(const ObjectFileRef& object,
+                      uint16_t objectVariantIndex);
 
     void Read(FileScanner& scanner);
     void Read(const TypeConfig& typeConfig,

@@ -51,7 +51,6 @@ void PathTextRenderer::DestroyPathTextRenderer(PathTextRenderer *textRenderer)
   if (textRenderer == nullptr)
     return;
   textRenderer->Release();
-  delete textRenderer;
 }
 
 // The obvious constructor (private)
@@ -97,78 +96,89 @@ HRESULT PathTextRenderer::DrawGlyphRun(
   if (FAILED(hr))
     return hr;
 
-  // Set up a partial glyph run that we can modify.
-  DWRITE_GLYPH_RUN workingGlyphRun = *glyphRun;
-
   float totalRunLength = 0;
   for (int idx = 0; idx < glyphRun->glyphCount; ++idx) {
     totalRunLength += glyphRun->glyphAdvances[idx];
   }
 
+  if (!dc->helper->Init(maxLength, totalRunLength)) {
+    return S_OK;
+  }
+
   // Set the initial length along the path.
-  float workingLength = baselineOriginX + std::max((maxLength - totalRunLength) / 2, 0.f);
+  //float workingLength = baselineOriginX + std::max((maxLength - totalRunLength) / 2, 0.f);
 
-  // Set the index of the first glyph in the current glyph cluster.
-  unsigned clusterStartIdx = 0;
+  while (dc->helper->ContinueDrawing()) {
+    // Set the index of the first glyph in the current glyph cluster.
+    unsigned clusterStartIdx = 0;
 
-  while (clusterStartIdx < glyphRun->glyphCount)
-  {
-    // Compute the number of glyphs in this cluster and the total cluster width.
-    size_t clusterGlyphCount = 0;
-    float clusterWidth = 0;
-    for (size_t i = clusterStartIdx;
-      i < glyphRun->glyphCount // We're sill in the glyph run
-      && glyphRunDescription->clusterMap[i] == glyphRunDescription->clusterMap[clusterStartIdx]; // And we're still in the current cluster
-      ++i)
+    // Set up a partial glyph run that we can modify.
+    DWRITE_GLYPH_RUN workingGlyphRun = *glyphRun;
+
+
+    while (clusterStartIdx < glyphRun->glyphCount)
     {
-      clusterWidth += glyphRun->glyphAdvances[i];
-      clusterGlyphCount++;
+      // Compute the number of glyphs in this cluster and the total cluster width.
+      size_t clusterGlyphCount = 0;
+      float clusterWidth = 0;
+      for (size_t i = clusterStartIdx;
+           i < glyphRun->glyphCount // We're sill in the glyph run
+           && glyphRunDescription->clusterMap[i] == glyphRunDescription->clusterMap[clusterStartIdx]; // And we're still in the current cluster
+           ++i)
+      {
+        clusterWidth += glyphRun->glyphAdvances[i];
+        clusterGlyphCount++;
+      }
+
+      float currentOffset = dc->helper->GetCurrentOffset();
+
+      // Compute the cluster's midpoint along the path.
+      float middle = currentOffset + clusterWidth / 2;
+
+      // If we're out of the path, don't bother with this cluster nor the following ones.
+      if (middle >= maxLength)
+        break;
+
+      // Compute the offset and tangent to the path at the midpoint.
+      D2D1_POINT_2F pathOffset, pathTangent;
+      hr = dc->geometry->ComputePointAtLength(middle, D2D1::IdentityMatrix(), &pathOffset, &pathTangent);
+
+      if (hr != S_OK)
+        return hr;
+
+      // Lifted from the Microsoft sample.
+      // Create a rotation matrix to align the cluster to the path.
+      // Alternatively, we could use the D2D1::Matrix3x2F::Rotation()
+      // helper, but this is more efficient since we already have cos(t)
+      // and sin(t).
+      auto rotation = D2D1::Matrix3x2F(
+        pathTangent.x,
+        pathTangent.y,
+        -pathTangent.y,
+        pathTangent.x,
+        (pathOffset.x * (1.f - pathTangent.x) + pathOffset.y * pathTangent.y),
+        (pathOffset.y * (1.f - pathTangent.x) - pathOffset.x * pathTangent.y)
+      );
+
+      // Create a translation matrix to center the cluster on the tangent point.
+      auto translation = D2D1::Matrix3x2F::Translation(-clusterWidth / 2, glyphRun->fontEmSize / 4);
+
+      // Apply the transformations
+      dc->d2DContext->SetTransform(translation * rotation * prevTransform);
+
+      // Draw the glyph cluster.
+      workingGlyphRun.glyphCount = clusterGlyphCount;
+      dc->d2DContext->DrawGlyphRun(D2D1::Point2F(pathOffset.x, pathOffset.y), &workingGlyphRun, dc->brush);
+
+      // Go to the next cluster
+      workingGlyphRun.glyphAdvances += clusterGlyphCount;
+      workingGlyphRun.glyphIndices += clusterGlyphCount;
+      dc->helper->AdvancePartial(clusterWidth);
+
+      clusterStartIdx += clusterGlyphCount;
     }
 
-    // Compute the cluster's midpoint along the path.
-    float middle = workingLength + clusterWidth / 2;
-
-    // If we're out of the path, don't bother with this cluster nor the following ones.
-    if (middle <= maxLength)
-      break;
-
-    // Compute the offset and tangent to the path at the midpoint.
-    D2D1_POINT_2F pathOffset, pathTangent;
-    hr = dc->geometry->ComputePointAtLength(middle, D2D1::IdentityMatrix(), &pathOffset, &pathTangent);
-
-    if (hr != S_OK)
-      return hr;
-
-    // Lifted from the Microsoft sample.
-    // Create a rotation matrix to align the cluster to the path.
-    // Alternatively, we could use the D2D1::Matrix3x2F::Rotation()
-    // helper, but this is more efficient since we already have cos(t)
-    // and sin(t).
-    auto rotation = D2D1::Matrix3x2F(
-      pathTangent.x,
-      pathTangent.y,
-      -pathTangent.y,
-      pathTangent.x,
-      (pathOffset.x * (1.f - pathTangent.x) + pathOffset.y * pathTangent.y),
-      (pathOffset.y * (1.f - pathTangent.x) - pathOffset.x * pathTangent.y)
-    );
-
-    // Create a translation matrix to center the cluster on the tangent point.
-    auto translation = D2D1::Matrix3x2F::Translation(-clusterWidth / 2, glyphRun->fontEmSize / 4);
-
-    // Apply the transformations
-    dc->d2DContext->SetTransform(translation * rotation * prevTransform);
-
-    // Draw the glyph cluster.
-    workingGlyphRun.glyphCount = clusterGlyphCount;
-    dc->d2DContext->DrawGlyphRun(D2D1::Point2F(pathOffset.x, pathOffset.y), &workingGlyphRun, dc->brush);
-
-    // Go to the next cluster
-    workingGlyphRun.glyphAdvances += clusterGlyphCount;
-    workingGlyphRun.glyphIndices += clusterGlyphCount;
-    workingLength += clusterWidth;
-
-    clusterStartIdx += clusterGlyphCount;
+    dc->helper->AdvanceSpace();
   }
 
   // Cleanup the transformation.

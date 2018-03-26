@@ -17,7 +17,7 @@ set(SOURCE_FILES
     src/osmscout/SimplifiedPath.cpp
 )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   set(THE_TARGET_NAME "OSMScoutMapQt") 
 else()
   set(THE_TARGET_NAME "osmscout_map_qt") 
@@ -43,7 +43,7 @@ if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 set_target_properties(${THE_TARGET_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C
@@ -54,7 +54,7 @@ set_target_properties(${THE_TARGET_NAME} PROPERTIES
 )
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(${THE_TARGET_NAME}
 		OSMScout
 		OSMScoutMap

@@ -13,7 +13,7 @@ set(SOURCE_FILES
     src/osmscout/MapPainterSVG.cpp
 )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   set(THE_TARGET_NAME "OSMScoutMapSVG") 
 else()
   set(THE_TARGET_NAME "osmscout_map_svg") 
@@ -33,7 +33,7 @@ target_include_directories(${THE_TARGET_NAME} PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include)
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(${THE_TARGET_NAME}
 		OSMScout
 		OSMScoutMap)
