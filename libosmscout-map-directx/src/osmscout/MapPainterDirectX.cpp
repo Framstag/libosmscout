@@ -670,6 +670,7 @@ namespace osmscout
     std::shared_ptr<BorderStyle> borderStyle = area.borderStyle;
 
     bool hasBorder = borderStyle && borderStyle->GetWidth() > 0.0 && borderStyle->GetColor().IsVisible();
+    bool hasFilling = fillStyle && fillStyle->GetFillColor().IsVisible();
     float borderWidth = hasBorder ? float(projection.ConvertWidthToPixel(borderStyle->GetWidth())) : 0.0f;
 
     ID2D1PathGeometry* pPathGeometry;
@@ -690,8 +691,10 @@ namespace osmscout
         pSink = NULL;
       }
     }
-    m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
-    if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+    if (hasFilling)
+      m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
+    if (hasBorder)
+      m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
     pPathGeometry->Release();
 
     for (std::list<PolyData>::const_iterator c = area.clippings.begin();
@@ -717,8 +720,10 @@ namespace osmscout
           pSink = NULL;
         }
       }
-      m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
-      if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+      if (hasFilling)
+        m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
+      if (hasBorder)
+	    m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
       pPathGeometry->Release();
     }
   }
