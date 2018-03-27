@@ -97,6 +97,7 @@ namespace osmscout {
     double               maxSpace;
     bool                 dropNotVisiblePointLabels;
     size_t               labelsAdded;
+    double               time;
 
   private:
     void DeleteEventsForLabel(const std::set<LabelEvent>::iterator& eventRef);
@@ -130,6 +131,10 @@ namespace osmscout {
     inline size_t GetLabelsAdded() const
     {
       return labelsAdded;
+    }
+
+    inline double GetTime(){
+      return time;
     }
   };
 }

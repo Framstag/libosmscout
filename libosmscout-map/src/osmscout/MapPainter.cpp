@@ -2466,6 +2466,7 @@ namespace osmscout {
         << "Draw labels: " <<  labels.Size() << "/" << labels.GetLabelsAdded() << " " << overlayLabels.Size() << "/" << overlayLabels.GetLabelsAdded() << " " << labelsDrawn << " (pcs) "
         << timer << " (sec)";
     }
+    log.Info() << "Layouter time: " << (labels.GetTime()/1000000) << " millis, draw time " << timer.GetMilliseconds() << " millis";
   }
 
   void MapPainter::Postrender(const Projection& projection,

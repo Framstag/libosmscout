@@ -21,6 +21,10 @@
 
 //#define LABEL_LAYOUTER_DEBUG
 
+#if defined(LABEL_LAYOUTER_DEBUG)
+#include <iostream>
+#endif
+
 namespace osmscout {
 
   LabelData::LabelData()
@@ -182,12 +186,19 @@ namespace osmscout {
     dropNotVisiblePointLabels=parameter.GetDropNotVisiblePointLabels();
 
     labelsAdded=0;
+    time=0;
   }
 
   bool LabelLayouter::Placelabel(const LabelData& label,
                                  LabelDataRef& labelRef)
   {
     labelsAdded++;
+
+    osmscout::StopClockNano stopClock;
+    std::shared_ptr<int> guard(nullptr, std::move([&](int *){
+      stopClock.Stop();
+      time+=stopClock.GetNanoseconds();
+    }));
 
     LabelEvent searchEvent;
 
