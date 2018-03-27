@@ -89,6 +89,11 @@ namespace osmscout {
   static const size_t defaultEndStep=24;
 #endif
 
+  PreprocessorFactory::~PreprocessorFactory()
+  {
+
+  }
+
   ImportParameter::Router::Router(uint8_t vehicleMask,
                                   const std::string& filenamebase)
   : vehicleMask(vehicleMask),

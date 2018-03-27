@@ -45,10 +45,7 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API PreprocessorFactory
   {
   public:
-    virtual ~PreprocessorFactory()
-    {
-
-    }
+    virtual ~PreprocessorFactory();
 
     virtual std::unique_ptr<Preprocessor> GetProcessor(const std::string& filename,
                                                        PreprocessorCallback& callback) const = 0;
