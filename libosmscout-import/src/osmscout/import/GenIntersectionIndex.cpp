@@ -24,9 +24,9 @@
 namespace osmscout {
 
   IntersectionIndexGenerator::IntersectionIndexGenerator()
-   : NumericIndexGenerator<Id,Intersection>("Generating 'intersection.idx'",
-                                            RoutingService::FILENAME_INTERSECTIONS_DAT,
-                                            RoutingService::FILENAME_INTERSECTIONS_IDX)
+  : NumericIndexGenerator<Id,Intersection>("Generating 'intersection.idx'",
+                                           RoutingService::FILENAME_INTERSECTIONS_DAT,
+                                           RoutingService::FILENAME_INTERSECTIONS_IDX)
   {
     // no code
   }
@@ -41,4 +41,3 @@ namespace osmscout {
     description.AddProvidedFile(RoutingService::FILENAME_INTERSECTIONS_IDX);
   }
 }
-
