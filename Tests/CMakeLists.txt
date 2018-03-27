@@ -95,7 +95,28 @@ if(${OSMSCOUT_BUILD_MAP_QT})
   target_include_directories(DrawTextQt PRIVATE include ${CMAKE_CURRENT_BINARY_DIR})
   target_link_libraries(DrawTextQt OSMScout OSMScoutMap OSMScoutMapQt Qt5::Widgets)
 else()
-	message("Skip DrawTextQt test, libosmscout-map-qt is missing.")
+  message("Skip DrawTextQt test, libosmscout-map-qt is missing.")
+endif()
+
+if(${OSMSCOUT_BUILD_MAP_QT})
+  set(src_files src/LabelLayouterQt.cpp include/DrawWindow.h)
+  qt5_wrap_cpp(src_files include/DrawWindow.h)
+  add_executable(LabelLayouterQt ${src_files})
+  set_property(TARGET LabelLayouterQt PROPERTY CXX_STANDARD 11)
+  target_include_directories(LabelLayouterQt PRIVATE
+          include
+          ${CMAKE_CURRENT_BINARY_DIR}
+          ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
+          ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
+          ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
+          ${Qt5Gui_INCLUDE_DIRS}
+          ${Qt5Widgets_INCLUDE_DIRS})
+
+
+  target_link_libraries(LabelLayouterQt OSMScout OSMScoutMap OSMScoutMapQt ${Qt5Widgets_LIBRARIES})
+  target_compile_definitions(LabelLayouterQt PRIVATE ${Qt5Widgets_DEFINITIONS})
+else()
+  message("Skip LabelLayouterQt test, libosmscout-map-qt is missing.")
 endif()
 
 #---- Geometry
