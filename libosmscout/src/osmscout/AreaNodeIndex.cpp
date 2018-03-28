@@ -238,7 +238,7 @@ namespace osmscout {
     offsets.reserve(std::min((size_t)10000,offsets.capacity()));
 
     try {
-      for (TypeInfoRef type : requestedTypes) {
+      for (const TypeInfoRef& type : requestedTypes) {
         if (type->IsInternal()) {
           continue;
         }

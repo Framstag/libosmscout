@@ -249,16 +249,16 @@ namespace osmscout {
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
-                               const TypeConfig& typeConfig);
+                               const TypeConfig& typeConfig) override;
 
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Area& area,
-                 bool& save);
+                 bool& save) override;
 
     bool AfterProcessingEnd(const ImportParameter& parameter,
                             Progress& progress,
-                            const TypeConfig& typeConfig);
+                            const TypeConfig& typeConfig) override;
   };
 
   bool AreaNodeReductionProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,
@@ -291,7 +291,7 @@ namespace osmscout {
   {
     unsigned char buffers[2][coordByteSize];
 
-    std::vector<Area::Ring>::iterator ring=area.rings.begin();
+    auto ring=area.rings.begin();
 
     while (ring!=area.rings.end()) {
       bool reduced=false;
@@ -342,7 +342,7 @@ namespace osmscout {
           progress.Debug("Area " + std::to_string(offset) + " empty/invalid ring removed after node reduction");
           ring=area.rings.erase(ring);
 
-          if (area.rings.size()==0 ||
+          if (area.rings.empty() ||
               (area.rings.size()==1 &&
                area.rings[0].IsMasterRing())) {
             save=false;
@@ -464,14 +464,14 @@ namespace osmscout {
   public:
     bool BeforeProcessingStart(const ImportParameter& parameter,
                                Progress& progress,
-                               const TypeConfig& typeConfig);
+                               const TypeConfig& typeConfig) override;
     bool Process(Progress& progress,
                  const FileOffset& offset,
                  Area& area,
-                 bool& save);
+                 bool& save) override;
     bool AfterProcessingEnd(const ImportParameter& parameter,
                             Progress& progress,
-                            const TypeConfig& typeConfig);
+                            const TypeConfig& typeConfig) override;
   };
 
   bool AreaTypeIgnoreProcessorFilter::BeforeProcessingStart(const ImportParameter& /*parameter*/,

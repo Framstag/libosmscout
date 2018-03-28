@@ -45,13 +45,11 @@ namespace osmscout {
   SRTM::SRTM(const std::string &path){
     srtmPath = path;
     currentFilename = "";
-    heights = NULL;
+    heights =nullptr;
   }
 
   SRTM::~SRTM(){
-    if(heights){
-      delete heights;
-    }
+    delete heights;
   }
 
   /**
@@ -94,14 +92,14 @@ namespace osmscout {
     int patchLon = int(floor(longitude));
     std::string patchFilename = srtmFilename(patchLat, patchLon);
     size_t length;
-    if(currentFilename == "" || currentFilename != patchFilename){
+    if(currentFilename.empty() || currentFilename != patchFilename){
       currentFilename = patchFilename;
       currentPatchLat = patchLat;
       currentPatchLon = patchLon;
 
       if(heights){
         delete heights;
-        heights = NULL;
+        heights =nullptr;
       }
 
       if(currentFile.is_open()){

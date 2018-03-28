@@ -75,8 +75,8 @@ namespace osmscout
     }
 
     // Determine the number of bytes used for offsets
-    for (size_t i=0; i<tries.size(); i++) {
-      if (tries[i].isAvail) {
+    for (auto& trie : tries) {
+      if (trie.isAvail) {
         // We use an ASCII control character to denote
         // the start of the sz offset key:
         // 0x04: EOT
@@ -88,7 +88,7 @@ namespace osmscout
                         offsetSizeBytesQuery.length());
 
         // there should only be one result
-        if (tries[i].trie->predictive_search(agent)) {
+        if (trie.trie->predictive_search(agent)) {
           std::string result(agent.key().ptr(),agent.key().length());
           result.erase(0,1);  // get rid of the ASCII control char
           if (!StringToNumberUnsigned(result,offsetSizeBytes)) {

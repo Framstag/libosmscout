@@ -287,14 +287,12 @@ namespace osmscout
     loadedWayTypes.Clear();
 
     try {
-      for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=wayTypesData.begin();
-           type!=wayTypesData.end();
-           ++type) {
-        if (wayTypes.IsSet(type->first)) {
-          std::list<TypeData>::const_iterator match=type->second.end();
+      for (const auto& type : wayTypesData) {
+        if (wayTypes.IsSet(type.first)) {
+          auto match=type.second.cend();
 
-          for (std::list<TypeData>::const_iterator typeData=type->second.begin();
-               typeData!=type->second.end();
+          for (auto typeData=type.second.cbegin();
+               typeData!=type.second.cend();
                ++typeData) {
             if (typeData->optLevel==magnification.GetLevel()) {
               match=typeData;
@@ -302,7 +300,7 @@ namespace osmscout
             }
           }
 
-          if (match!=type->second.end()) {
+          if (match!=type.second.end()) {
             if (match->bitmapOffset!=0) {
               GetOffsets(*match,
                          boundingBox,
@@ -310,7 +308,7 @@ namespace osmscout
             }
 
             // Successfully loaded type data
-            loadedWayTypes.Set(type->first);
+            loadedWayTypes.Set(type.first);
           }
         }
       }

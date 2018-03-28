@@ -41,7 +41,7 @@
 namespace osmscout
 {
   OptimizeWaysLowZoomGenerator::TypeData::TypeData()
-  : type(0),
+  : type(nullptr),
     optLevel(0),
     indexLevel(0),
     cellXStart(0),
@@ -164,7 +164,7 @@ namespace osmscout
         TypeInfoRef victimType;
 
         for (auto &type : currentTypes) {
-          if (ways[type->GetIndex()].size()>0 &&
+          if (!ways[type->GetIndex()].empty() &&
               (!victimType ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
             victimType=type;
@@ -208,8 +208,8 @@ namespace osmscout
     }
 
     for (std::map<Id, std::list<WayRef> >::iterator entry=waysByJoin.begin();
-        entry!=waysByJoin.end();
-        entry++) {
+         entry!=waysByJoin.end();
+         ++entry) {
       while (!entry->second.empty()) {
 
         WayRef way=entry->second.front();
@@ -241,11 +241,11 @@ namespace osmscout
             if (otherWay!=match->second.end()) {
               std::list<WayRef>::iterator stillOtherWay=otherWay;
 
-              stillOtherWay++;
+              ++stillOtherWay;
               while (stillOtherWay!=match->second.end() &&
                      (usedWays.find((*stillOtherWay)->GetFileOffset())!=usedWays.end() ||
                       way->GetFeatureValueBuffer()!=(*stillOtherWay)->GetFeatureValueBuffer())) {
-                stillOtherWay++;
+                ++stillOtherWay;
               }
 
               // If we have at least three ways with the same joining node
@@ -265,15 +265,15 @@ namespace osmscout
                   newNodes.push_back((*otherWay)->nodes[i]);
                 }
 
-                for (size_t i=0; i<way->nodes.size(); i++) {
-                  newNodes.push_back(way->nodes[i]);
+                for (const auto& node : way->nodes) {
+                  newNodes.push_back(node);
                 }
 
                 way->nodes=newNodes;
               }
               else {
-                for (size_t i=0; i<(*otherWay)->nodes.size(); i++) {
-                  newNodes.push_back((*otherWay)->nodes[i]);
+                for (const auto& node : (*otherWay)->nodes) {
+                  newNodes.push_back(node);
                 }
 
                 for (size_t i=1; i<way->nodes.size(); i++) {
@@ -306,11 +306,11 @@ namespace osmscout
             if (otherWay!=match->second.end()) {
               std::list<WayRef>::iterator stillOtherWay=otherWay;
 
-              stillOtherWay++;
+              ++stillOtherWay;
               while (stillOtherWay!=match->second.end() &&
                      (usedWays.find((*stillOtherWay)->GetFileOffset())!=usedWays.end() ||
                       way->GetFeatureValueBuffer()!=(*stillOtherWay)->GetFeatureValueBuffer())) {
-                stillOtherWay++;
+                ++stillOtherWay;
               }
 
               // If we have at least three ways with the same joining node

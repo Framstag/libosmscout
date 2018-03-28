@@ -115,14 +115,9 @@ int main(int argc, char* argv[])
   QPixmap *pixmap=new QPixmap(static_cast<int>(width),
                               static_cast<int>(height));
 
-  if (pixmap==NULL) {
-    std::cerr << "Cannot create QPixmap" << std::endl;
-    return 1;
-  }
-
   QPainter* painter=new QPainter(pixmap);
 
-  if (painter==NULL) {
+  if (painter==nullptr) {
     std::cerr << "Cannot create QPainter" << std::endl;
     delete painter;
     return 1;
@@ -139,7 +134,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef   database(new osmscout::Database(databaseParameter));
   osmscout::MapServiceRef mapService(new osmscout::MapService(database));
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(map)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;

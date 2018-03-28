@@ -218,8 +218,8 @@ namespace osmscout {
     assert(valid);
 
     // Transform to center-based coordinate
-    x-=width/2;
-    y=height/2-y;
+    x-=width/2.0;
+    y=height/2.0-y;
 
     if (angle!=0.0) {
       double xn=x*angleCos-y*angleSin;
@@ -260,8 +260,8 @@ namespace osmscout {
     }
 
     // Transform to canvas coordinate
-    y=height/2-y;
-    x+=width/2;
+    y=height/2.0-y;
+    x+=width/2.0;
 
     return IsValidFor(coord);
   }
@@ -448,7 +448,7 @@ namespace osmscout {
       x=coord.GetLon()*scaleGradtorad-lonOffset;
 
       if (useLinearInterpolation) {
-        y=(height/2)-((coord.GetLat()-this->lat)*scaledLatDeriv);
+        y=(height/2.0)-((coord.GetLat()-this->lat)*scaledLatDeriv);
       }
       else {
         y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);

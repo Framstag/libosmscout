@@ -83,16 +83,16 @@ namespace osmscout {
 
         scanner.SetPos(offset);
 
-        for (size_t c=0; c<4; c++) {
+        for (FileOffset& c : cacheRef->value.children) {
           FileOffset childOffset;
 
           scanner.ReadNumber(childOffset);
 
           if (childOffset==0) {
-            cacheRef->value.children[c]=0;
+            c=0;
           }
           else {
-            cacheRef->value.children[c]=offset-childOffset;
+            c=offset-childOffset;
           }
         }
 
@@ -107,8 +107,8 @@ namespace osmscout {
     else {
       indexCell.data=offset;
 
-      for (size_t c=0; c<4; c++) {
-        indexCell.children[c]=0;
+      for (FileOffset& c : indexCell.children) {
+        c=0;
       }
     }
 

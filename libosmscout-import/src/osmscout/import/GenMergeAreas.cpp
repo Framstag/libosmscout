@@ -353,14 +353,14 @@ namespace osmscout {
 
           // We only merge against "simple" areas
           if (candidateArea->rings.size()!=1) {
-            candidate++;
+            ++candidate;
             continue;
           }
 
           // The area itself => skip
           if (area.GetFileOffset()==candidateArea->GetFileOffset()) {
             // TODO: Should not happen?
-            candidate++;
+            ++candidate;
             continue;
           }
 
@@ -373,7 +373,7 @@ namespace osmscout {
           // Area was already merged before => skip
           if (mergedAway.find(candidateArea->GetFileOffset())!=mergedAway.end()) {
             // TODO: Should not happen?
-            candidate++;
+            ++candidate;
             continue;
           }
 
@@ -385,7 +385,7 @@ namespace osmscout {
 
           if (area.rings[firstOuterRing].nodes.size()+candidateArea->rings[secondOuterRing].nodes.size()>FileWriter::MAX_NODES) {
             // We could merge, but we could not store the resulting area anymore
-            candidate++;
+            ++candidate;
             continue;
           }
 
@@ -397,7 +397,7 @@ namespace osmscout {
           // Areas do not have the same feature value buffer values, skip
           if (area.rings[firstOuterRing].GetFeatureValueBuffer()!=candidateArea->rings[secondOuterRing].GetFeatureValueBuffer()) {
             //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " because of different feature values" << std::endl;
-            candidate++;
+            ++candidate;
             continue;
           }
 
@@ -432,7 +432,7 @@ namespace osmscout {
             //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " at " << index << " " << node.GetCoord().GetDisplayText() << std::endl;
           }
 
-          candidate++;
+          ++candidate;
         }
 
         finishedIds.insert(id);

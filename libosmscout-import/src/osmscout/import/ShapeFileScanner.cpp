@@ -48,7 +48,7 @@ namespace osmscout {
 
   ShapeFileScanner::ShapeFileScanner(const std::string& filename)
     : filename(filename),
-      file(NULL)
+      file(nullptr)
   {
     // no code
   }
@@ -60,23 +60,23 @@ namespace osmscout {
 
   void ShapeFileScanner::Open()
   {
-    if (file!=NULL) {
+    if (file!=nullptr) {
       throw IOException(filename,"Cannot open file","File is already open");
     }
 
     file=fopen(filename.c_str(),"rb");
 
-    if (file==NULL) {
+    if (file==nullptr) {
       throw IOException(filename,"Cannot open file for reading");
     }
   }
 
   void ShapeFileScanner::Close()
   {
-    if (file!=NULL)
+    if (file!=nullptr)
     {
       fclose(file);
-      file=NULL;
+      file=nullptr;
     }
   }
 
@@ -133,7 +133,7 @@ namespace osmscout {
     // Shape files has a maximum size of 31 bits, so no need to fiddle around
     // with large file support stuff
 
-    if (file==NULL) {
+    if (file==nullptr) {
       throw IOException(filename,"Cannot visit file content","File not opened");
     }
 
@@ -231,7 +231,7 @@ namespace osmscout {
           double x=ReadDoubleLE();
           double y=ReadDoubleLE();
 
-          buffer.push_back(GeoCoord(y,x));
+          buffer.emplace_back(y,x);
         }
 
         visitor.OnPolyline(recordNumber,

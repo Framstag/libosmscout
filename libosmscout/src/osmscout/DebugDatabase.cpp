@@ -158,14 +158,12 @@ namespace osmscout {
     bool haveToScanAreas=false;
     bool haveToScanWays=false;
 
-    for (std::set<ObjectOSMRef>::const_iterator ref=ids.begin();
-         ref!=ids.end();
-         ++ref) {
+    for (const auto& id : ids) {
       if (haveToScanNodes && haveToScanAreas && haveToScanWays) {
         break;
       }
 
-      switch (ref->GetType()) {
+      switch (id.GetType()) {
       case osmRefNone:
         break;
       case osmRefNode:
@@ -181,14 +179,12 @@ namespace osmscout {
       }
     }
 
-    for (std::set<ObjectFileRef>::const_iterator ref=fileOffsets.begin();
-         ref!=fileOffsets.end();
-         ++ref) {
+    for (const auto& fileOffset : fileOffsets) {
       if (haveToScanNodes && haveToScanAreas && haveToScanWays) {
         break;
       }
 
-      switch (ref->GetType()) {
+      switch (fileOffset.GetType()) {
       case refNone:
         break;
       case refNode:

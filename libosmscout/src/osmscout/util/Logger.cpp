@@ -104,7 +104,7 @@ namespace osmscout {
   Logger::Destination::Destination()
   {
   }
-  
+
   StreamLogger::StreamDestination::StreamDestination(std::ostream& stream)
   : stream(stream)
   {
@@ -214,7 +214,7 @@ namespace osmscout {
 
   void Log::SetLogger(Logger* logger)
   {
-    assert(logger!=NULL);
+    assert(logger!=nullptr);
     Logger* oldLogger=this->logger;
 
     this->logger=logger;

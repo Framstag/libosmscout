@@ -57,7 +57,7 @@ namespace osmscout {
     inline Color(double r,
                  double g,
                  double b,
-                 double a)
+                 double a) noexcept
     : r(r),
       g(g),
       b(b),
@@ -71,7 +71,7 @@ namespace osmscout {
 
     inline Color(double r,
                  double g,
-                 double b)
+                 double b) noexcept
     : r(r),
       g(g),
       b(b),
