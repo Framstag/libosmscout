@@ -116,7 +116,7 @@ public:
 void drawDot(QPainter &painter,
              const osmscout::MercatorProjection &projection,
              const osmscout::GeoCoord &coord){
-  
+
   double x,y;
   projection.GeoToPixel(coord,x,y);
   painter.setPen(Qt::NoPen);
@@ -211,8 +211,8 @@ public:
           !closedNode.previousNode.IsValid()){
         continue;
       }
-      if (!GetRouteNodeByOffset(closedNode.currentNode,n1) ||
-          !GetRouteNodeByOffset(closedNode.previousNode,n2)){
+      if (!GetRouteNode(closedNode.currentNode,n1) ||
+          !GetRouteNode(closedNode.previousNode,n2)){
         return false;
       }
 
@@ -221,7 +221,7 @@ public:
       painter.setPen(pen);
       painter.drawLine(x1,y1,x2,y2);
     }
-    
+
     // closed, restricted
     painter.setBrush(QBrush(grey));
     pen.setColor(grey);
@@ -231,8 +231,8 @@ public:
           !closedNode.previousNode.IsValid()){
         continue;
       }
-      if (!GetRouteNodeByOffset(closedNode.currentNode,n1) ||
-          !GetRouteNodeByOffset(closedNode.previousNode,n2)){
+      if (!GetRouteNode(closedNode.currentNode,n1) ||
+          !GetRouteNode(closedNode.previousNode,n2)){
         return false;
       }
 
@@ -249,7 +249,7 @@ public:
     for (const auto &open:openList){
       drawDot(painter,projection,open->node->GetCoord());
       if (open->prev.IsValid()){
-        if (!GetRouteNodeByOffset(open->prev,n1)){
+        if (!GetRouteNode(open->prev,n1)){
           return false;
         }
         projection.GeoToPixel(n1->GetCoord(),x1,y1);
@@ -264,7 +264,7 @@ public:
     painter.setBrush(green);
     drawDot(painter,projection,current->node->GetCoord());
     if (current->prev.IsValid()){
-      if (!GetRouteNodeByOffset(current->prev,n1)){
+      if (!GetRouteNode(current->prev,n1)){
         return false;
       }
       projection.GeoToPixel(n1->GetCoord(),x1,y1);
@@ -333,7 +333,7 @@ struct Arguments
   int64_t                 endStep;
   size_t                  startFrame;
 
-  Arguments(): 
+  Arguments():
     help(false),
     routerFilenamebase(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
     vehicle(osmscout::vehicleCar),
@@ -353,7 +353,7 @@ struct Arguments
 
 int main(int argc, char* argv[])
 {
-  
+
   osmscout::CmdLineParser   argParser("RoutingAnimation",
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
@@ -450,21 +450,21 @@ int main(int argc, char* argv[])
                       "start-step",
                       "first rendered routing step (default 0)",
                       false);
-    
+
   argParser.AddOption(osmscout::CmdLineIntOption([&args](const int& value) {
                         args.endStep=value;
                       }),
                       "end-step",
                       "last rendered routing step (default -1)",
                       false);
-    
+
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
                         args.startFrame=value;
                       }),
                       "start-frame",
                       "first frame number (default 0)",
                       false);
-    
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -509,7 +509,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  
+
   QApplication application(argc,argv,true);
 
   osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));

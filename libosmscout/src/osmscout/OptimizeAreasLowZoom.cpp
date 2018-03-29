@@ -285,14 +285,12 @@ namespace osmscout
     loadedAreaTypes.Clear();
 
     try {
-      for (std::map<TypeInfoRef,std::list<TypeData> >::const_iterator type=areaTypesData.begin();
-           type!=areaTypesData.end();
-           ++type) {
-        if (areaTypes.IsSet(type->first)) {
-          std::list<TypeData>::const_iterator match=type->second.end();
+      for (const auto& type : areaTypesData) {
+        if (areaTypes.IsSet(type.first)) {
+          auto match=type.second.cend();
 
-          for (std::list<TypeData>::const_iterator typeData=type->second.begin();
-               typeData!=type->second.end();
+          for (auto typeData=type.second.cbegin();
+               typeData!=type.second.cend();
                ++typeData) {
             if (typeData->optLevel==magnification.GetLevel()) {
               match=typeData;
@@ -300,14 +298,14 @@ namespace osmscout
             }
           }
 
-          if (match!=type->second.end()) {
+          if (match!=type.second.end()) {
             if (match->bitmapOffset!=0) {
               GetOffsets(*match,
                          boundingBox,
                          offsets);
             }
 
-            loadedAreaTypes.Set(type->first);
+            loadedAreaTypes.Set(type.first);
           }
         }
       }

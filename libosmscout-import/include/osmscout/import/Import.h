@@ -45,10 +45,7 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API PreprocessorFactory
   {
   public:
-    virtual ~PreprocessorFactory()
-    {
-
-    }
+    virtual ~PreprocessorFactory();
 
     virtual std::unique_ptr<Preprocessor> GetProcessor(const std::string& filename,
                                                        PreprocessorCallback& callback) const = 0;
@@ -177,6 +174,7 @@ namespace osmscout {
     TransPolygon::OptimizeMethod optimizationWayMethod;    //<! what method to use to optimize ways
 
     size_t                       routeNodeBlockSize;       //<! Number of route nodes loaded during import until ways get resolved
+    uint32_t                     routeNodeTileMag;         //<! Size of a routing tile
 
     AssumeLandStrategy           assumeLand;               //<! During sea/land detection,we either trust coastlines only or make some
                                                            //<! assumptions which tiles are sea and which are land.
@@ -259,6 +257,7 @@ namespace osmscout {
     TransPolygon::OptimizeMethod GetOptimizationWayMethod() const;
 
     size_t GetRouteNodeBlockSize() const;
+    uint32_t GetRouteNodeTileMag() const;
 
     AssumeLandStrategy GetAssumeLand() const;
 
@@ -333,6 +332,7 @@ namespace osmscout {
     void SetOptimizationWayMethod(TransPolygon::OptimizeMethod optimizationWayMethod);
 
     void SetRouteNodeBlockSize(size_t blockSize);
+    void SetRouteNodeTileMag(uint32_t routeNodeTileMag);
 
     void SetAssumeLand(AssumeLandStrategy assumeLand);
 

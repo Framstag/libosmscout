@@ -16,6 +16,9 @@ endif()
 option(BUILD_SHARED_LIBS "Shared libraries " ON)  # SHARED lib default
 option(BUILD_WITH_OPENMP "Check for OpenMP support " ON)
 option(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION "Import tool for distribution " OFF)
+if(APPLE)
+  option(BUILD_FRAMEWORKS "Enable build of libraries as frameworks" ON)
+endif()
 
 # compiler configurations
 if(WIN32)
@@ -368,6 +371,9 @@ add_subdirectory(libosmscout-extern)
 # display build configuration
 message(STATUS "libosmscout build configuration:")
 message(STATUS "Shared libraries:                        ${BUILD_SHARED_LIBS}")
+if(APPLE)
+  message(STATUS "Build frameworks:                        ${BUILD_FRAMEWORKS}")
+endif()
 message(STATUS "core library:                            ${OSMSCOUT_BUILD_CORE}")
 if (OSMSCOUT_BUILD_CORE)
   message(STATUS " - marisa support:                       ${MARISA_FOUND}")

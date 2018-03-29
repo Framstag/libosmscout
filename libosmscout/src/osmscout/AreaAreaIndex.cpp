@@ -48,7 +48,7 @@ namespace osmscout {
 
   void AreaAreaIndex::Close()
   {
-    try  {
+    try {
       if (scanner.IsOpen()) {
         scanner.Close();
       }
@@ -70,7 +70,8 @@ namespace osmscout {
 
 #if defined(ANALYZE_CACHE)
       if (indexCache.GetSize()==indexCache.GetMaxSize()) {
-        log.Warn() << "areaarea.index cache of " << indexCache.GetSize() << "/" << indexCache.GetMaxSize()<< " is too small";
+        log.Warn() << "areaarea.index cache of " << indexCache.GetSize() << "/" << indexCache.GetMaxSize()
+                   << " is too small";
         indexCache.DumpStatistics("areaarea.idx",IndexCacheValueSizer());
       }
 #endif
@@ -82,16 +83,16 @@ namespace osmscout {
 
         scanner.SetPos(offset);
 
-        for (size_t c=0; c<4; c++) {
+        for (FileOffset& c : cacheRef->value.children) {
           FileOffset childOffset;
 
           scanner.ReadNumber(childOffset);
 
           if (childOffset==0) {
-            cacheRef->value.children[c]=0;
+            c=0;
           }
           else {
-            cacheRef->value.children[c]=offset-childOffset;
+            c=offset-childOffset;
           }
         }
 
@@ -106,8 +107,8 @@ namespace osmscout {
     else {
       indexCell.data=offset;
 
-      for (size_t c=0; c<4; c++) {
-        indexCell.children[c]=0;
+      for (FileOffset& c : indexCell.children) {
+        c=0;
       }
     }
 
@@ -239,6 +240,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
   }
@@ -266,6 +268,7 @@ namespace osmscout {
                                      TypeInfoSet& loadedTypes) const
   {
     StopClock            time;
+
     std::vector<CellRef> cellRefs;     // cells to scan in this level
     std::vector<CellRef> nextCellRefs; // cells to scan for the next level
     double               minlon=boundingBox.GetMinLon()+180.0;
@@ -308,7 +311,10 @@ namespace osmscout {
                             cellRef.offset,
                             cellIndexData,
                             cellDataOffset)) {
-            log.Error() << "Cannot find offset " << cellRef.offset << " in level " << level << " in file '" << scanner.GetFilename() << "'";
+            log.Error() << "Cannot find offset " << cellRef.offset
+                        << " in level " << level
+                        << " in file '" << scanner.GetFilename() << "'";
+
             return false;
           }
 
@@ -318,7 +324,10 @@ namespace osmscout {
                             types,
                             cellDataOffset,
                             spans)) {
-            log.Error() << "Cannot read index data for level " << level << " at offset " << cellDataOffset << " in file '" << scanner.GetFilename() << "'";
+            log.Error() << "Cannot read index data for level " << level
+                        << " at offset " << cellDataOffset
+                        << " in file '" << scanner.GetFilename() << "'";
+
             return false;
           }
 
@@ -332,7 +341,8 @@ namespace osmscout {
                                   maxlat,
                                   cellIndexData,
                                   cellDimension[level+1],
-                                  cx,cy,
+                                  cx,
+                                  cy,
                                   nextCellRefs);
           }
         }
@@ -342,13 +352,15 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
 
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << spans.size() << " spans from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
+      log.Warn() << "Retrieving " << spans.size() << " spans from area index for " << boundingBox.GetDisplayText()
+                 << " took " << time.ResultString();
     }
 
     loadedTypes=types;

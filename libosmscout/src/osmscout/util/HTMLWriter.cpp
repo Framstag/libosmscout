@@ -166,7 +166,7 @@ namespace osmscout {
       }
 
       if (!stylesheetLocation.empty()) {
-        file << "<link rel=\"stylesheet\" type=\"text/css\" href=\"" << stylesheetLocation << "\">" << std::endl;
+        file << R"(<link rel="stylesheet" type="text/css" href=")" << stylesheetLocation << "\">" << std::endl;
       }
 
       file << "<meta charset=\"utf-8\">" << std::endl;

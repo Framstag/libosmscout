@@ -89,6 +89,11 @@ namespace osmscout {
   static const size_t defaultEndStep=24;
 #endif
 
+  PreprocessorFactory::~PreprocessorFactory()
+  {
+
+  }
+
   ImportParameter::Router::Router(uint8_t vehicleMask,
                                   const std::string& filenamebase)
   : vehicleMask(vehicleMask),
@@ -137,6 +142,7 @@ namespace osmscout {
      optimizationCellSizeMax(255),
      optimizationWayMethod(TransPolygon::quality),
      routeNodeBlockSize(500000),
+     routeNodeTileMag(13),
      assumeLand(AssumeLandStrategy::automatic),
      langOrder({"#"}),
      maxAdminLevel(10),
@@ -369,6 +375,11 @@ namespace osmscout {
   size_t ImportParameter::GetRouteNodeBlockSize() const
   {
     return routeNodeBlockSize;
+  }
+
+  uint32_t ImportParameter::GetRouteNodeTileMag() const
+  {
+    return routeNodeTileMag;
   }
 
   ImportParameter::AssumeLandStrategy ImportParameter::GetAssumeLand() const
@@ -623,6 +634,11 @@ namespace osmscout {
   void ImportParameter::SetRouteNodeBlockSize(size_t blockSize)
   {
     this->routeNodeBlockSize=blockSize;
+  }
+
+  void ImportParameter::SetRouteNodeTileMag(uint32_t routeNodeTileMag)
+  {
+    this->routeNodeTileMag=routeNodeTileMag;
   }
 
   void ImportParameter::SetAssumeLand(AssumeLandStrategy assumeLand)
@@ -1090,7 +1106,7 @@ namespace osmscout {
 
     parameter.GetErrorReporter()->FinishedImport();
 
-    parameter.SetErrorReporter(NULL);
+    parameter.SetErrorReporter(nullptr);
 
     return result;
   }

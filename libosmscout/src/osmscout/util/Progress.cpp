@@ -121,11 +121,11 @@ namespace osmscout {
   void ConsoleProgress::SetProgress(double current, double total)
   {
     if (lastProgressDump==0) {
-      lastProgressDump=time(NULL);
+      lastProgressDump=time(nullptr);
       return;
     }
 
-    time_t now=time(NULL);
+    time_t now=time(nullptr);
 
     if (now-lastProgressDump>=5) {
       lastProgressDump=now;

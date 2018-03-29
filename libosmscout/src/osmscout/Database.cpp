@@ -185,58 +185,58 @@ namespace osmscout {
 
   void Database::Close()
   {
-    boundingBoxDataFile=NULL;
+    boundingBoxDataFile=nullptr;
 
     if (nodeDataFile &&
         nodeDataFile->IsOpen()) {
       nodeDataFile->Close();
-      nodeDataFile=NULL;
+      nodeDataFile=nullptr;
     }
 
     if (areaDataFile &&
         areaDataFile->IsOpen()) {
       areaDataFile->Close();
-      areaDataFile=NULL;
+      areaDataFile=nullptr;
     }
 
     if (wayDataFile &&
         wayDataFile->IsOpen()) {
       wayDataFile->Close();
-      wayDataFile=NULL;
+      wayDataFile=nullptr;
     }
 
     if (areaNodeIndex) {
       areaNodeIndex->Close();
-      areaNodeIndex=NULL;
+      areaNodeIndex=nullptr;
     }
 
     if (areaAreaIndex) {
       areaAreaIndex->Close();
-      areaAreaIndex=NULL;
+      areaAreaIndex=nullptr;
     }
 
     if (areaWayIndex) {
       areaWayIndex->Close();
-      areaWayIndex=NULL;
+      areaWayIndex=nullptr;
     }
 
     if (locationIndex) {
-      locationIndex=NULL;
+      locationIndex=nullptr;
     }
 
     if (waterIndex) {
       waterIndex->Close();
-      waterIndex=NULL;
+      waterIndex=nullptr;
     }
 
     if (optimizeWaysLowZoom) {
       optimizeWaysLowZoom->Close();
-      optimizeWaysLowZoom=NULL;
+      optimizeWaysLowZoom=nullptr;
     }
 
     if (optimizeAreasLowZoom) {
       optimizeAreasLowZoom->Close();
-      optimizeAreasLowZoom=NULL;
+      optimizeAreasLowZoom=nullptr;
     }
 
     isOpen=false;
@@ -257,7 +257,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(boundingBoxDataFileMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!boundingBoxDataFile) {
@@ -269,7 +269,7 @@ namespace osmscout {
 
       if (!boundingBoxDataFile->Load(path)) {
         log.Error() << "Cannot open '" << BoundingBoxDataFile::BOUNDINGBOX_DAT << "'!";
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -285,7 +285,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(nodeDataFileMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!nodeDataFile) {
@@ -299,7 +299,7 @@ namespace osmscout {
                               path,
                               parameter.GetNodesDataMMap())) {
         log.Error() << "Cannot open 'nodes.dat'!";
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -315,7 +315,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(areaDataFileMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!areaDataFile) {
@@ -329,7 +329,7 @@ namespace osmscout {
                               path,
                               parameter.GetAreasDataMMap())) {
         log.Error() << "Cannot open 'areas.dat'!";
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -345,7 +345,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(wayDataFileMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!wayDataFile) {
@@ -359,7 +359,7 @@ namespace osmscout {
                              path,
                              parameter.GetWaysDataMMap())) {
         log.Error() << "Cannot open 'ways.dat'!";
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -375,7 +375,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(areaNodeIndexMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!areaNodeIndex) {
@@ -385,9 +385,9 @@ namespace osmscout {
 
       if (!areaNodeIndex->Open(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load area node index!";
-        areaNodeIndex=NULL;
+        areaNodeIndex=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -403,7 +403,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(areaAreaIndexMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!areaAreaIndex) {
@@ -413,9 +413,9 @@ namespace osmscout {
 
       if (!areaAreaIndex->Open(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load area area index!";
-        areaAreaIndex=NULL;
+        areaAreaIndex=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -431,7 +431,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(areaWayIndexMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!areaWayIndex) {
@@ -443,9 +443,9 @@ namespace osmscout {
                               path,
                               parameter.GetIndexMMap())) {
         log.Error() << "Cannot load area way index!";
-        areaWayIndex=NULL;
+        areaWayIndex=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -461,7 +461,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(locationIndexMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!locationIndex) {
@@ -471,9 +471,9 @@ namespace osmscout {
 
       if (!locationIndex->Load(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load location index!";
-        locationIndex=NULL;
+        locationIndex=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -489,7 +489,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(waterIndexMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!waterIndex) {
@@ -499,9 +499,9 @@ namespace osmscout {
 
       if (!waterIndex->Open(path, parameter.GetIndexMMap())) {
         log.Error() << "Cannot load water index!";
-        waterIndex=NULL;
+        waterIndex=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();
@@ -517,7 +517,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(optimizeAreasMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!optimizeAreasLowZoom) {
@@ -529,9 +529,9 @@ namespace osmscout {
                                       path,
                                       parameter.GetOptimizeLowZoomMMap())) {
         log.Error() << "Cannot load optimize areas low zoom index!";
-        optimizeAreasLowZoom=NULL;
+        optimizeAreasLowZoom=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
 
@@ -556,9 +556,9 @@ namespace osmscout {
                                      path,
                                      parameter.GetOptimizeLowZoomMMap())) {
         log.Error() << "Cannot load optimize areas low zoom index!";
-        optimizeWaysLowZoom=NULL;
+        optimizeWaysLowZoom=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();

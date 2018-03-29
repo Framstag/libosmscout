@@ -34,6 +34,79 @@ namespace osmscout{
    * Helper structure to implement a reference to a routing node in a given
    * database (identified by a unique index).
    */
+  struct DBId
+  {
+    DatabaseId database;
+    Id         id;
+
+    DBId()
+      : database(0),
+        id(0)
+    {
+    }
+
+    DBId(const DBId &o)
+      : database(o.database),
+        id(o.id)
+    {
+    }
+
+    DBId(DatabaseId database,
+         Id id)
+      : database(database),
+        id(id)
+    {
+    }
+
+    inline bool IsValid() const
+    {
+      return id!=0;
+    }
+
+    inline bool operator==(const DBId& other) const
+    {
+      return database==other.database && id==other.id;
+    }
+
+    inline bool operator!=(const DBId& other) const
+    {
+      return database!=other.database || id!=other.id;
+    }
+
+    inline bool operator<(const DBId& other) const
+    {
+      if (database!=other.database) {
+        return database<other.database;
+      }
+
+      return id<other.id;
+    }
+
+    DBId& operator=(const DBId& other)
+    {
+      if(&other==this) {
+        return *this;
+      }
+
+      this->database=other.database;
+      this->id=other.id;
+
+      return *this;
+    }
+  };
+
+  inline std::ostream& operator<<(std::ostream &stream,const DBId &o)
+  {
+    stream << "DBId(" << o.database << "," << o.id << ")";
+    return stream;
+  }
+
+  /**
+   * \ingroup Routing
+   *
+   * Helper structure to implement a reference to a routing node in a given
+   * database (identified by a unique index).
+   */
   struct DBFileOffset
   {
     DatabaseId database;
@@ -104,11 +177,20 @@ namespace osmscout{
 
 namespace std {
   template <>
+  struct hash<osmscout::DBId>
+  {
+    size_t operator()(const osmscout::DBId& id) const
+    {
+      return hash<uint32_t>{}(id.database) ^ hash<osmscout::Id>{}(id.id);
+    }
+  };
+
+  template <>
   struct hash<osmscout::DBFileOffset>
   {
-    size_t operator()(const osmscout::DBFileOffset& offset) const
+    size_t operator()(const osmscout::DBFileOffset& id) const
     {
-      return hash<uint32_t>{}(offset.database) ^ hash<osmscout::FileOffset>{}(offset.offset);
+      return hash<uint32_t>{}(id.database) ^ hash<osmscout::FileOffset>{}(id.offset);
     }
   };
 }

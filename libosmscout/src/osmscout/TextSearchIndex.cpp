@@ -1,8 +1,8 @@
 #include <osmscout/TextSearchIndex.h>
 
 #include <osmscout/util/File.h>
-#include <osmscout/util/String.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout
 {
@@ -18,11 +18,11 @@ namespace osmscout
 
   TextSearchIndex::~TextSearchIndex()
   {
-    for(size_t i=0; i < tries.size(); i++) {
+    for (size_t i=0; i<tries.size(); i++) {
       tries[i].isAvail=false;
-      if(tries[i].trie){
+      if (tries[i].trie) {
         delete tries[i].trie;
-        tries[i].trie = NULL;
+        tries[i].trie=nullptr;
       }
     }
   }
@@ -30,7 +30,7 @@ namespace osmscout
   bool TextSearchIndex::Load(const std::string& path)
   {
     std::string fixedPath=path;
-    if(path[path.length()-1]!='/') {
+    if (path[path.length()-1]!='/') {
       fixedPath.push_back('/');
     }
 
@@ -48,34 +48,35 @@ namespace osmscout
     tries.push_back(trie);
 
     uint8_t triesAvail=0;
-    for(size_t i=0; i < tries.size(); i++) {
+    for (size_t i=0; i<tries.size(); i++) {
       // open/load the data file
       try {
         triesAvail++;
         tries[i].isAvail=true;
-        tries[i].trie = new marisa::Trie;
+        tries[i].trie=new marisa::Trie;
         tries[i].trie->load(tries[i].file.c_str());
       }
-      catch(const marisa::Exception &ex) {
+      catch (const marisa::Exception &ex) {
         // We don't return false on a failed load attempt
         // since its possible that the user does not want
         // to include a specific trie (ie. textother)
         log.Error() << "Warn, could not open " << tries[i].file << ":"  << ex.what();
         delete tries[i].trie;
-        tries[i].trie = NULL;
+        tries[i].trie=nullptr;
         tries[i].isAvail=false;
         triesAvail--;
       }
     }
 
-    if(triesAvail==0) {
+    if (triesAvail==0) {
       log.Error() << "TextSearchIndex: No valid text data files is available";
+
       return false;
     }
 
     // Determine the number of bytes used for offsets
-    for(size_t i=0; i < tries.size(); i++) {
-      if(tries[i].isAvail) {
+    for (auto& trie : tries) {
+      if (trie.isAvail) {
         // We use an ASCII control character to denote
         // the start of the sz offset key:
         // 0x04: EOT
@@ -87,17 +88,19 @@ namespace osmscout
                         offsetSizeBytesQuery.length());
 
         // there should only be one result
-        if(tries[i].trie->predictive_search(agent)) {
+        if (trie.trie->predictive_search(agent)) {
           std::string result(agent.key().ptr(),agent.key().length());
           result.erase(0,1);  // get rid of the ASCII control char
-          if(!StringToNumberUnsigned(result,offsetSizeBytes)) {
+          if (!StringToNumberUnsigned(result,offsetSizeBytes)) {
             log.Error() << "Could not parse file offset size in text data";
+
             return false;
           }
           break;
         }
         else {
           log.Error() << "Could not find file offset size in text data";
+
           return false;
         }
       }
@@ -105,7 +108,6 @@ namespace osmscout
 
     return true;
   }
-
 
   bool TextSearchIndex::Search(const std::string& query,
                                bool searchPOIs,
@@ -116,7 +118,7 @@ namespace osmscout
   {
     results.clear();
 
-    if(query.empty()) {
+    if (query.empty()) {
       return true;
     }
 
@@ -127,27 +129,27 @@ namespace osmscout
     searchGroups.push_back(searchRegions);
     searchGroups.push_back(searchOther);
 
-    for(size_t i=0; i < tries.size(); i++) {
-      if(searchGroups[i] && tries[i].isAvail) {
+    for (size_t i=0; i<tries.size(); i++) {
+      if (searchGroups[i] && tries[i].isAvail) {
         marisa::Agent agent;
 
         try {
           agent.set_query(query.c_str(),
                           query.length());
-          while(tries[i].trie->predictive_search(agent)) {
-            std::string result(agent.key().ptr(),
-                               agent.key().length());
-            std::string text;
+          while (tries[i].trie->predictive_search(agent)) {
+            std::string   result(agent.key().ptr(),
+                                 agent.key().length());
+            std::string   text;
             ObjectFileRef ref;
 
             splitSearchResult(result,text,ref);
 
             ResultsMap::iterator it=results.find(text);
-            if(it==results.end()) {
+            if (it==results.end()) {
               // If the text has not been added to the
               // search results yet, insert a new entry
-              std::pair<std::string,std::vector<ObjectFileRef> > entry;
-              entry.first = text;
+              std::pair<std::string,std::vector<ObjectFileRef>> entry;
+              entry.first=text;
               entry.second.push_back(ref);
               results.insert(entry);
             }
@@ -157,8 +159,9 @@ namespace osmscout
             }
           }
         }
-        catch(const marisa::Exception &ex) {
+        catch (const marisa::Exception &ex) {
           log.Error() << "Error searching for text: " << ex.what();
+
           return false;
         }
       }
@@ -180,10 +183,11 @@ namespace osmscout
 
     FileOffset offset=0;
     FileOffset add=0;
-    size_t idx=result.size()-1;
-    for(size_t i=0; i < offsetSizeBytes; i++) {
-      add = (unsigned char)(result[idx]);
-      offset |= (add << (i*8));
+    size_t     idx=result.size()-1;
+
+    for (size_t i=0; i<offsetSizeBytes; i++) {
+      add=(unsigned char)(result[idx]);
+      offset|=(add << (i*8));
 
       idx--;
     }

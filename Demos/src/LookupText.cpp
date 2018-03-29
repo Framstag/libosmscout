@@ -40,7 +40,7 @@ void printDetails(const osmscout::FeatureValueBuffer& features)
 {
   std::cout << "   - type:     " << features.GetType()->GetName() << std::endl;
 
-  for (auto featureInstance :features.GetType()->GetFeatures()) {
+  for (const auto& featureInstance :features.GetType()->GetFeatures()) {
     if (features.HasFeature(featureInstance.GetIndex())) {
       osmscout::FeatureRef feature=featureInstance.GetFeature();
 

@@ -19,8 +19,8 @@
 
 #include <osmscout/private/Config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #if defined(HAVE_SYS_STAT_H)
 #include <sys/stat.h>
@@ -42,7 +42,7 @@ namespace osmscout {
 
     file=fopen(filename.c_str(),"rb");
 
-    if (file==NULL) {
+    if (file==nullptr) {
       throw IOException(filename,"Opening file");
     }
 
@@ -180,7 +180,7 @@ namespace osmscout {
       throw IOException(filename,"Is file directory");
     }
 
-    return s.st_mode & S_IFDIR;
+    return (s.st_mode & S_IFDIR)!=0;
 #else
     throw IOException(filename,"Is file directory","Not implemented");
 #endif

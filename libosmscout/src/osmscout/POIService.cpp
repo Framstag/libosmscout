@@ -30,7 +30,7 @@
 namespace osmscout {
 
   POIService::POIService(const DatabaseRef& database)
-   : database(database)
+  : database(database)
   {
     // no code
   }
@@ -74,6 +74,7 @@ namespace osmscout {
                                    offsets,
                                    loadedTypes)) {
       log.Error() << "Error getting nodes from area node index!";
+
       return false;
     }
 
@@ -163,8 +164,8 @@ namespace osmscout {
                                  const TypeInfoSet& types,
                                  std::vector<WayRef>& ways) const
   {
-    AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
-    WayDataFileRef   wayDataFile=database->GetWayDataFile();
+    AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
+    WayDataFileRef  wayDataFile=database->GetWayDataFile();
 
     ways.clear();
 
@@ -173,8 +174,8 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<FileOffset>  offsets;
-    TypeInfoSet              loadedWayTypes;
+    std::vector<FileOffset> offsets;
+    TypeInfoSet             loadedWayTypes;
 
 
     if (!areaWayIndex->GetOffsets(boundingBox,
@@ -227,9 +228,9 @@ namespace osmscout {
                                  const TypeInfoSet& areaTypes,
                                  std::vector<AreaRef>& areas) const
   {
-    bool nodesSuccess=true;
-    bool waysSuccess=true;
-    bool areasSuccess=true;
+    bool nodesSuccess;
+    bool waysSuccess;
+    bool areasSuccess;
 
 #pragma omp parallel
 #pragma omp sections

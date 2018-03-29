@@ -1272,12 +1272,12 @@ namespace osmscout {
             progress.Warning("Detected intersection "+std::to_string(coasts[i]->id)+" <> "+std::to_string(coasts[j]->id));
 
             if (a->isArea && !b->isArea) {
-              transformedCoastlines[i]=NULL;
-              coasts[i]=NULL;
+              transformedCoastlines[i]=nullptr;
+              coasts[i]=nullptr;
             }
             else if (b->isArea && !a->isArea) {
-              transformedCoastlines[j]=NULL;
-              coasts[j]=NULL;
+              transformedCoastlines[j]=nullptr;
+              coasts[j]=nullptr;
             }
           }
         }
@@ -1391,12 +1391,12 @@ namespace osmscout {
 
     while (next!=intersectionsCW.end() &&
            (*next)!=current) {
-      next++;
+      ++next;
     }
 
     assert(next!=intersectionsCW.end());
 
-    next++;
+    ++next;
 
     if (next==intersectionsCW.end()) {
       next=intersectionsCW.begin();
@@ -2020,7 +2020,7 @@ namespace osmscout {
     if (level.stateMap.GetXCount()>0 && level.stateMap.GetYCount()>0) {
       level.defaultCellData=level.stateMap.GetState(0,0);
 
-      if (cellGroundTileMap.size()>0) {
+      if (!cellGroundTileMap.empty()) {
         level.hasCellData=true;
       }
       else {
@@ -2269,7 +2269,7 @@ namespace osmscout {
 
           CoastRef part=std::make_shared<Coast>();
 
-          part->coast.push_back(Point(0,int1.point));
+          part->coast.emplace_back(0,int1.point);
 
           CutPath(part->coast,
                   c->coast,
@@ -2278,7 +2278,7 @@ namespace osmscout {
                   int1.aDistanceSquare,
                   int2.aDistanceSquare);
 
-          part->coast.push_back(Point(0,int2.point));
+          part->coast.emplace_back(0,int2.point);
 
           part->left=int1.orientation>0 ? CoastState::water : CoastState::land;
 
@@ -2348,13 +2348,13 @@ namespace osmscout {
 
         CoastRef part=std::make_shared<Coast>();
 
-        part->coast.push_back(Point(0,int1.point));
+        part->coast.emplace_back(0,int1.point);
 
         CutPath(part->coast,coastline->coast,
                 int1.bIndex+1,int2.bIndex+1,
                 int1.bDistanceSquare,int2.bDistanceSquare);
 
-        part->coast.push_back(Point(0,int2.point));
+        part->coast.emplace_back(0,int2.point);
         part->left=coastline->left;
         part->right=coastline->right;
         part->id=coastline->id;
@@ -2441,16 +2441,16 @@ namespace osmscout {
 
           writer.WriteNumber((uint32_t) tile.coords.size());
 
-          for (size_t c=0; c<tile.coords.size(); c++) {
-            if (tile.coords[c].coast) {
-              uint16_t x=tile.coords[c].x | uint16_t(1 << 15);
+          for (auto coord : tile.coords) {
+            if (coord.coast) {
+              uint16_t x=coord.x | uint16_t(1 << 15);
 
               writer.Write(x);
             }
             else {
-              writer.Write(tile.coords[c].x);
+              writer.Write(coord.x);
             }
-            writer.Write(tile.coords[c].y);
+            writer.Write(coord.y);
           }
         }
 

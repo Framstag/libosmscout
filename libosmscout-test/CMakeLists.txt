@@ -13,7 +13,7 @@ set(SOURCE_FILES
         src/osmscout/RegionList.cpp
         src/osmscout/PreprocessOLT.cpp)
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 set(THE_TARGET_NAME "OSMScoutTest")
 else()
 set(THE_TARGET_NAME "osmscout_test")
@@ -35,7 +35,7 @@ target_include_directories(${THE_TARGET_NAME} PRIVATE
         ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-import/include
         )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   target_link_libraries(${THE_TARGET_NAME} OSMScout OSMScoutImport)
 else()
   target_link_libraries(${THE_TARGET_NAME} osmscout osmscout_import)
@@ -45,7 +45,7 @@ if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 set_target_properties(${THE_TARGET_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C

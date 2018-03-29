@@ -614,17 +614,17 @@ namespace osmscout {
           return false;
         }
 
-        for (size_t r=0; r<area->rings.size(); r++) {
-          if (area->rings[r].IsOuterRing()) {
+        for (auto& ring : area->rings) {
+          if (ring.IsOuterRing()) {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
             searchEntry.object=object;
-            area->rings[r].GetBoundingBox(searchEntry.bbox);
+            ring.GetBoundingBox(searchEntry.bbox);
 
-            searchEntry.coords.resize(area->rings[r].nodes.size());
+            searchEntry.coords.resize(ring.nodes.size());
 
-            for (size_t i=0; i<area->rings[r].nodes.size(); i++) {
-              searchEntry.coords[i]=area->rings[r].nodes[i].GetCoord();
+            for (size_t i=0; i<ring.nodes.size(); i++) {
+              searchEntry.coords[i]=ring.nodes[i].GetCoord();
             }
 
             adminRegionVisitor.AddSearchEntry(searchEntry);

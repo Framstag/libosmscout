@@ -112,17 +112,23 @@ namespace osmscout {
 
     if (valueType==string) {
       switch (binaryOperator) {
-      case  operatorLess:
+      case operatorLess:
+
         return t->second<tagStringValue;
-      case  operatorLessEqual:
+      case operatorLessEqual:
+
         return t->second<=tagStringValue;
-      case  operatorEqual:
+      case operatorEqual:
+
         return t->second==tagStringValue;
       case operatorNotEqual:
+
         return t->second!=tagStringValue;
       case operatorGreaterEqual:
+
         return t->second>=tagStringValue;
-      case  operatorGreater:
+      case operatorGreater:
+
         return t->second>tagStringValue;
       default:
         assert(false);
@@ -139,17 +145,23 @@ namespace osmscout {
       }
 
       switch (binaryOperator) {
-      case  operatorLess:
+      case operatorLess:
+
         return value<tagSizeValue;
-      case  operatorLessEqual:
+      case operatorLessEqual:
+
         return value<=tagSizeValue;
-      case  operatorEqual:
+      case operatorEqual:
+
         return value==tagSizeValue;
       case operatorNotEqual:
+
         return value!=tagSizeValue;
       case operatorGreaterEqual:
+
         return value>=tagSizeValue;
-      case  operatorGreater:
+      case operatorGreater:
+
         return value>tagSizeValue;
       default:
         assert(false);
@@ -188,8 +200,8 @@ namespace osmscout {
 
   TagInfo::TagInfo(TagId id,
                    const std::string& name)
-   : id(id),
-     name(name)
+  : id(id),
+    name(name)
   {
     // no code
   }

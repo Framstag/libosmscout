@@ -58,8 +58,7 @@ namespace osmscout {
     maxLon(0.0),
     minLat(0.0),
     maxLat(0.0)
-  {
-  }
+  {}
 
   AreaWayIndex::AreaWayIndex()
   {
@@ -73,7 +72,7 @@ namespace osmscout {
 
   void AreaWayIndex::Close()
   {
-    try  {
+    try {
       if (scanner.IsOpen()) {
         scanner.Close();
       }
@@ -140,6 +139,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
   }
@@ -149,6 +149,7 @@ namespace osmscout {
                                 std::unordered_set<FileOffset>& offsets) const
   {
     if (typeData.bitmapOffset==0) {
+
       // No data for this type available
       return true;
     }
@@ -157,6 +158,7 @@ namespace osmscout {
         boundingBox.GetMinLon()>=typeData.maxLon ||
         boundingBox.GetMaxLat()<typeData.minLat ||
         boundingBox.GetMinLat()>=typeData.maxLat) {
+
       // No data available in given bounding box
       return true;
     }
@@ -267,6 +269,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
 
@@ -277,7 +280,10 @@ namespace osmscout {
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << offsets.size() << " way offsets from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
+      log.Warn() << "Retrieving " << offsets.size()
+                 << " way offsets from area index for "
+                 << boundingBox.GetDisplayText()
+                 << " took " << time.ResultString();
     }
 
     return true;

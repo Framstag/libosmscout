@@ -68,7 +68,7 @@ target_include_directories(StyleEditor PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-client-qt/include
 )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 	target_link_libraries(StyleEditor
 		OSMScout
         	OSMScoutMap

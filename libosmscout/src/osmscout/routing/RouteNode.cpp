@@ -68,18 +68,20 @@ namespace osmscout {
     writer.Write(grade);
   }
 
-  uint32_t RouteNode::AddObject(const ObjectFileRef& object,
+  uint8_t RouteNode::AddObject(const ObjectFileRef& object,
                                 uint16_t objectVariantIndex)
   {
-    uint32_t index=0;
+    size_t index=0;
 
     while (index<objects.size() &&
            objects[index].object!=object) {
       index++;
     }
 
+    assert(index<=std::numeric_limits<uint8_t>::max());
+
     if (index<objects.size()) {
-      return index;
+      return (uint8_t)index;
     }
 
     ObjectData data;
@@ -89,7 +91,7 @@ namespace osmscout {
 
     objects.push_back(data);
 
-    return index;
+    return (uint8_t)index;
   }
 
 
@@ -102,9 +104,9 @@ namespace osmscout {
   {
     uint8_t  serial;
     GeoCoord coord;
-    uint32_t objectCount;
-    uint32_t pathCount;
-    uint32_t excludesCount;
+    uint8_t  objectCount;
+    uint8_t  pathCount;
+    uint8_t  excludesCount;
 
     fileOffset=scanner.GetPos();
 
@@ -113,15 +115,15 @@ namespace osmscout {
 
     point.Set(serial,coord);
 
-    scanner.ReadNumber(objectCount);
-    scanner.ReadNumber(pathCount);
-    scanner.ReadNumber(excludesCount);
+    scanner.Read(objectCount);
+    scanner.Read(pathCount);
+    scanner.Read(excludesCount);
 
     objects.resize(objectCount);
 
     Id previousFileOffset=0;
 
-    for (size_t i=0; i<objectCount; i++) {
+    for (auto& object : objects) {
       RefType    type;
       FileOffset fileOffset;
 
@@ -138,33 +140,31 @@ namespace osmscout {
 
       fileOffset+=previousFileOffset;
 
-      objects[i].object.Set(fileOffset,type);
+      object.object.Set(fileOffset,type);
 
-      scanner.Read(objects[i].objectVariantIndex);
+      scanner.Read(object.objectVariantIndex);
 
       previousFileOffset=fileOffset;
     }
 
-    if (pathCount>0) {
-      paths.resize(pathCount);
+    paths.resize(pathCount);
 
-      for (size_t i=0; i<pathCount; i++) {
-        uint32_t distanceValue;
+    for (auto& path : paths) {
+      uint32_t distanceValue;
 
-        scanner.ReadFileOffset(paths[i].offset);
-        scanner.ReadNumber(paths[i].objectIndex);
-        //scanner.Read(paths[i].bearing);
-        scanner.Read(paths[i].flags);
-        scanner.ReadNumber(distanceValue);
+      scanner.Read(path.id);
+      scanner.Read(path.objectIndex);
+      //scanner.Read(paths[i].bearing);
+      scanner.Read(path.flags);
+      scanner.ReadNumber(distanceValue);
 
-        paths[i].distance=distanceValue/(1000.0*100.0);
-      }
+      path.distance=distanceValue/(1000.0*100.0);
     }
 
     excludes.resize(excludesCount);
-    for (size_t i=0; i<excludesCount; i++) {
-      scanner.Read(excludes[i].source);
-      scanner.ReadNumber(excludes[i].targetIndex);
+    for (auto& exclude: excludes) {
+      scanner.Read(exclude.source);
+      scanner.Read(exclude.targetIndex);
     }
   }
 
@@ -189,9 +189,12 @@ namespace osmscout {
     writer.Write(point.GetSerial());
     writer.WriteCoord(point.GetCoord());
 
-    writer.WriteNumber((uint32_t)objects.size());
-    writer.WriteNumber((uint32_t)paths.size());
-    writer.WriteNumber((uint32_t)excludes.size());
+    assert(paths.size()<=std::numeric_limits<uint8_t>::max());
+    assert(excludes.size()<=std::numeric_limits<uint8_t>::max());
+
+    writer.Write((uint8_t)objects.size());
+    writer.Write((uint8_t)paths.size());
+    writer.Write((uint8_t)excludes.size());
 
     Id lastFileOffset=0;
 
@@ -214,20 +217,17 @@ namespace osmscout {
       lastFileOffset=object.object.GetFileOffset();
     }
 
-    if (!paths.empty()) {
-
-      for (const auto& path : paths) {
-        writer.WriteFileOffset(path.offset);
-        writer.WriteNumber(path.objectIndex);
-        //writer.Write(paths[i].bearing);
-        writer.Write(path.flags);
-        writer.WriteNumber((uint32_t)floor(path.distance*(1000.0*100.0)+0.5));
-      }
+    for (const auto& path : paths) {
+      writer.Write(path.id);
+      writer.Write(path.objectIndex);
+      //writer.Write(paths[i].bearing);
+      writer.Write(path.flags);
+      writer.WriteNumber((uint32_t)floor(path.distance*(1000.0*100.0)+0.5));
     }
 
     for (const auto& exclude : excludes) {
       writer.Write(exclude.source);
-      writer.WriteNumber(exclude.targetIndex);
+      writer.Write(exclude.targetIndex);
     }
   }
 }

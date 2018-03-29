@@ -33,9 +33,9 @@ namespace osmscout {
     for (size_t i=0; i<featureValueBuffer.GetFeatureCount(); i++) {
       if (featureValueBuffer.HasFeature(i) &&
           featureValueBuffer.GetFeature(i).GetFeature()->HasValue()) {
-        AccessFeatureValue* value=dynamic_cast<AccessFeatureValue*>(featureValueBuffer.GetValue(i));
+        auto* value=dynamic_cast<AccessFeatureValue*>(featureValueBuffer.GetValue(i));
 
-        if (value!=NULL) {
+        if (value!=nullptr) {
           return value->IsOneway();
         }
       }
@@ -160,13 +160,14 @@ namespace osmscout {
     if (!nodes.empty()) {
       OSMId minId=std::numeric_limits<OSMId>::max();
 
-      for (size_t i=0; i<nodes.size(); i++) {
-        minId=std::min(minId,nodes[i]);
+      for (OSMId node : nodes) {
+        minId=std::min(minId,
+                       node);
       }
 
       writer.WriteNumber(minId);
-      for (size_t i=0; i<nodes.size(); i++) {
-        writer.WriteNumber(nodes[i]-minId);
+      for (OSMId node : nodes) {
+        writer.WriteNumber(node-minId);
       }
     }
   }

@@ -75,4 +75,3 @@ namespace osmscout {
     writer.WriteCoord(coords);
   }
 }
-

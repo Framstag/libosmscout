@@ -40,8 +40,8 @@ namespace osmscout {
   }
 
   BasemapDatabase::BasemapDatabase(const BasemapDatabaseParameter& parameter)
-   : parameter(parameter),
-     isOpen(false)
+  : parameter(parameter),
+    isOpen(false)
   {
     log.Debug() << "BasemapDatabase::BasemapDatabase()";
   }
@@ -76,7 +76,7 @@ namespace osmscout {
 
     if (waterIndex) {
       waterIndex->Close();
-      waterIndex=NULL;
+      waterIndex=nullptr;
     }
 
     isOpen=false;
@@ -92,7 +92,7 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(waterIndexMutex);
 
     if (!IsOpen()) {
-      return NULL;
+      return nullptr;
     }
 
     if (!waterIndex) {
@@ -102,9 +102,9 @@ namespace osmscout {
 
       if (!waterIndex->Open(path, parameter.GetDataMMap())) {
         log.Error() << "Cannot load water index!";
-        waterIndex=NULL;
+        waterIndex=nullptr;
 
-        return NULL;
+        return nullptr;
       }
 
       timer.Stop();

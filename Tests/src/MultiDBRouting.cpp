@@ -32,11 +32,10 @@
 
 struct Arguments
 {
-  bool                   help=false;
-  std::string            databaseDirectory1;
-  std::string            databaseDirectory2;
-  osmscout::GeoCoord     start;
-  osmscout::GeoCoord     target;
+  bool                     help=false;
+  std::vector<std::string> databaseDirectories;
+  osmscout::GeoCoord       start;
+  osmscout::GeoCoord       target;
 };
 
 void GetCarSpeedTable(std::map<std::string,double>& map)
@@ -76,18 +75,6 @@ int main(int argc, char* argv[])
                       "Return argument help",
                       true);
 
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.databaseDirectory1=value;
-                          }),
-                          "DATABASE1",
-                          "Directory of the first database to use");
-
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.databaseDirectory2=value;
-                          }),
-                          "DATABASE2",
-                          "Directory of the second database to use");
-
   argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
                             args.start=value;
                           }),
@@ -99,6 +86,12 @@ int main(int argc, char* argv[])
                           }),
                           "TARGET",
                           "target coordinate");
+
+  argParser.AddPositional(osmscout::CmdLineStringListOption([&args](const std::string& value) {
+                            args.databaseDirectories.push_back(value);
+                          }),
+                          "DATABASE 1 [... DATABASE X]",
+                          "Directories with databases to use");
 
   osmscout::CmdLineParseResult result=argParser.Parse();
 
@@ -116,8 +109,7 @@ int main(int argc, char* argv[])
   // Database
 
   osmscout::DatabaseParameter dbParameter;
-  osmscout::DatabaseRef       database1=std::make_shared<osmscout::Database>(dbParameter);
-  osmscout::DatabaseRef       database2=std::make_shared<osmscout::Database>(dbParameter);
+  std::vector<osmscout::DatabaseRef> databases;
   osmscout::RouterParameter   routerParameter;
 
   osmscout::log.Debug(true);
@@ -127,27 +119,18 @@ int main(int argc, char* argv[])
 
   routerParameter.SetDebugPerformance(true);
 
-  std::cout << "Opening database 1..." << std::endl;
+  for (auto const &databaseDirectory:args.databaseDirectories) {
+    std::cout << "Opening database " << databaseDirectory << std::endl;
+    osmscout::DatabaseRef database=std::make_shared<osmscout::Database>(dbParameter);;
+    if (!database->Open(databaseDirectory)) {
+      std::cerr << "Cannot open database " << databaseDirectory << std::endl;
 
-  if (!database1->Open(args.databaseDirectory1)) {
-    std::cerr << "Cannot open database 1" << std::endl;
-
-    return 1;
+      return 1;
+    }
+    databases.push_back(database);
   }
 
   std::cout << "Done." << std::endl;
-
-  std::cout << "Opening database 2..." << std::endl;
-
-  if (!database2->Open(args.databaseDirectory2)) {
-    std::cerr << "Cannot open database 2" << std::endl;
-
-    return 1;
-  }
-
-  std::cout << "Done." << std::endl;
-
-  std::vector<osmscout::DatabaseRef> databases={database1,database2};
 
   osmscout::RouterParameter routerParam;
   routerParam.SetDebugPerformance(true);
@@ -171,16 +154,21 @@ int main(int argc, char* argv[])
   }
   std::cout << "Done." << std::endl;
 
+  std::cout << "Retrieve routing node next to start..." << std::endl;
   osmscout::RoutePosition startNode=router->GetClosestRoutableNode(args.start);
   if (!startNode.IsValid()){
     std::cerr << "Can't found route node near start coord " << args.start.GetDisplayText() << std::endl;
     return 1;
   }
+
+  std::cout << "Retrieve routing node next to target..." << std::endl;
   osmscout::RoutePosition targetNode=router->GetClosestRoutableNode(args.target);
   if (!targetNode.IsValid()){
     std::cerr << "Can't found route node near target coord " << args.target.GetDisplayText() << std::endl;
     return 1;
   }
+
+  std::cout << "Calculate route..." << std::endl;
 
   osmscout::RoutingParameter parameter;
   osmscout::RoutingResult route=router->CalculateRoute(startNode,targetNode,parameter);
@@ -196,11 +184,10 @@ int main(int argc, char* argv[])
 
   router->Close();
 
-  database1->Close();
-  database1.reset();
-
-  database2->Close();
-  database2.reset();
+  for (auto &db: databases) {
+    db->Close();
+    db.reset();
+  }
 
   std::cout << "Done." << std::endl;
 

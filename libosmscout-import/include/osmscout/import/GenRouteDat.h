@@ -85,10 +85,28 @@ namespace osmscout {
       }
     };
 
+    struct IndexEntry
+    {
+      FileOffset offset;
+      uint32_t   count;
+
+      IndexEntry()
+      : offset(0),
+        count(0)
+      {
+      }
+
+      IndexEntry(FileOffset offset)
+      : offset(offset),
+        count(0)
+      {
+      }
+    };
+
     typedef std::unordered_map<FileOffset,WayRef>                   FileOffsetWayMap;
     typedef std::unordered_map<FileOffset,AreaRef>                  FileOffsetAreaMap;
     typedef std::unordered_set<Id>                                  RouteNodeIdSet;
-    typedef std::vector<RawRouteNode>                               RawRouteNodeList;
+    typedef std::list<RawRouteNode>                                 RawRouteNodeList;
     typedef std::unordered_map<Id,FileOffset>                       NodeIdOffsetMap;
     typedef std::map<Id,std::list<ObjectFileRef>>                   NodeIdObjectsMap;
     typedef std::unordered_map<Id,std::list<PendingOffset>>         PendingRouteNodeOffsetsMap;
@@ -229,9 +247,7 @@ namespace osmscout {
     void CalculateAreaPaths(RouteNode& routeNode,
                             const Area& area,
                             uint16_t objectVariantIndex,
-                            const RouteNodeIdSet& routeNodeIdSet,
-                            const NodeIdOffsetMap& nodeIdOffsetMap,
-                            PendingRouteNodeOffsetsMap& pendingOffsetsMap);
+                            const RouteNodeIdSet& routeNodeIdSet);
 
     /**
      * Calculate all possible route from the given route node for the given circular way
@@ -239,9 +255,7 @@ namespace osmscout {
     void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
                                    uint16_t objectVariantIndex,
-                                   const RouteNodeIdSet& routeNodeIdSet,
-                                   const NodeIdOffsetMap& nodeIdOffsetMap,
-                                   PendingRouteNodeOffsetsMap& pendingOffsetsMap);
+                                   const RouteNodeIdSet& routeNodeIdSet);
 
     /**
      * Calculate all possible route from the given route node for the given non-circular way
@@ -249,9 +263,7 @@ namespace osmscout {
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
                            uint16_t objectVariantIndex,
-                           const RouteNodeIdSet& routeNodeIdSet,
-                           const NodeIdOffsetMap& nodeIdOffsetMap,
-                           PendingRouteNodeOffsetsMap& pendingOffsetsMap);
+                           const RouteNodeIdSet& routeNodeIdSet);
 
     /**
      * Adds the result of the turn restriction evaluation to the route node.
@@ -259,17 +271,6 @@ namespace osmscout {
     void FillRoutePathExcludes(RouteNode& routeNode,
                                const RawRouteNode& node,
                                const ViaTurnRestrictionMap& restrictions);
-
-    /**
-     * Adds missing file offsets to route nodes that were not written at the time the referencing route node
-     * was stored.
-     */
-    bool HandlePendingOffsets(Progress& progress,
-                              const NodeIdOffsetMap& routeNodeIdOffsetMap,
-                              PendingRouteNodeOffsetsMap& pendingOffsetsMap,
-                              FileWriter& routeNodeWriter,
-                              RawRouteNodeList::const_iterator nodesBegin,
-                              RawRouteNodeList::const_iterator nodesEnd);
 
     bool WriteObjectVariantData(Progress& progress,
                                 const std::string& variantFilename,

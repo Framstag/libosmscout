@@ -78,7 +78,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
 
   if buildMapQt
     includes += osmscoutmapqtIncDir
-    deps += qt5WidgetsDep
+    deps += [qt5WidgetsDep, qt5GuiDep]
     links += osmscoutmapqt
   endif
 

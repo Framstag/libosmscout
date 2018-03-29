@@ -21,7 +21,7 @@ set(SOURCE_FILES
     src/osmscout/MapPainterCairo.cpp
 )
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   set(THE_TARGET_NAME "OSMScoutMapCairo") 
 else()
   set(THE_TARGET_NAME "osmscout_map_cairo") 
@@ -43,7 +43,7 @@ target_include_directories(${THE_TARGET_NAME} PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${CAIRO_INCLUDE_DIRS}
 		${PNG_INCLUDE_DIRS})
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(${THE_TARGET_NAME}
 		OSMScout
 		OSMScoutMap
@@ -65,7 +65,7 @@ if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 set_target_properties(${THE_TARGET_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C

@@ -32,7 +32,6 @@ namespace osmscout {
 
   const char* AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
 
-
   FileOffset AreaNodeIndex::TypeData::GetDataOffset() const
   {
     return indexOffset+cellXCount*cellYCount*(FileOffset)dataOffsetBytes;
@@ -59,8 +58,7 @@ namespace osmscout {
     maxLon(0.0),
     minLat(0.0),
     maxLat(0.0)
-  {
-  }
+  {}
 
   AreaNodeIndex::AreaNodeIndex()
   {
@@ -127,6 +125,7 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
   }
@@ -136,6 +135,7 @@ namespace osmscout {
                                  std::vector<FileOffset>& offsets) const
   {
     if (typeData.indexOffset==0) {
+
       // No data for this type available
       return true;
     }
@@ -144,15 +144,16 @@ namespace osmscout {
         boundingBox.GetMinLon()>=typeData.maxLon ||
         boundingBox.GetMaxLat()<typeData.minLat ||
         boundingBox.GetMinLat()>=typeData.maxLat) {
+
       // No data available in given bounding box
       return true;
     }
 
-    uint32_t             minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
-    uint32_t             maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
+    uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
+    uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
 
-    uint32_t             minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/typeData.cellHeight);
-    uint32_t             maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/typeData.cellHeight);
+    uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/typeData.cellHeight);
+    uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/typeData.cellHeight);
 
     minxc=std::max(minxc,typeData.cellXStart);
     maxxc=std::min(maxxc,typeData.cellXEnd);
@@ -237,7 +238,7 @@ namespace osmscout {
     offsets.reserve(std::min((size_t)10000,offsets.capacity()));
 
     try {
-      for (TypeInfoRef type : requestedTypes) {
+      for (const TypeInfoRef& type : requestedTypes) {
         if (type->IsInternal()) {
           continue;
         }
@@ -253,16 +254,19 @@ namespace osmscout {
     }
     catch (IOException& e) {
       log.Error() << e.GetDescription();
+
       return false;
     }
 
     time.Stop();
 
     if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << offsets.size() << " node offsets from area index for " << boundingBox.GetDisplayText() << " took " << time.ResultString();
+      log.Warn() << "Retrieving " << offsets.size()
+                 << " node offsets from area index for "
+                 << boundingBox.GetDisplayText()
+                 << " took " << time.ResultString();
     }
 
     return true;
   }
 }
-

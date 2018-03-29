@@ -35,7 +35,7 @@ set(SOURCE_FILES
 		src/poly2tri/sweep/sweep_context.cc
 		src/poly2tri/sweep/advancing_front.cc)
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
   set(THE_TARGET_NAME "OSMScoutMapOpenGL") 
 else()
   set(THE_TARGET_NAME "osmscout_map_opengl") 
@@ -65,7 +65,7 @@ if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
-if(APPLE)
+if(APPLE AND BUILD_FRAMEWORKS)
 set_target_properties(${THE_TARGET_NAME} PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C
@@ -85,7 +85,7 @@ if(MSVS OR MSYS OR MINGW)
 			${FREETYPE_LIBRARIES}
 			glew32 # TODO: ${GLEW_LIBRARIES} is not setup correctly on Windows?
 			)
-elseif(APPLE)
+elseif(APPLE AND BUILD_FRAMEWORKS)
 	target_link_libraries(${THE_TARGET_NAME}
 			OSMScout
 			OSMScoutMap

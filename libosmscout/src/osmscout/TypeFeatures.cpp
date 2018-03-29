@@ -42,7 +42,7 @@ namespace osmscout {
   FeatureValue& NameFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const NameFeatureValue& otherValue=static_cast<const NameFeatureValue&>(other);
+      const auto& otherValue=static_cast<const NameFeatureValue&>(other);
 
       name=otherValue.name;
     }
@@ -52,7 +52,7 @@ namespace osmscout {
 
   bool NameFeatureValue::operator==(const FeatureValue& other) const
   {
-    const NameFeatureValue& otherValue=static_cast<const NameFeatureValue&>(other);
+    const auto& otherValue=static_cast<const NameFeatureValue&>(other);
 
     return name==otherValue.name;
   }
@@ -110,7 +110,7 @@ namespace osmscout {
     }
 
     if (!name.empty()) {
-      NameFeatureValue* value=static_cast<NameFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<NameFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetName(name);
     }
@@ -129,7 +129,7 @@ namespace osmscout {
   FeatureValue& NameAltFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const NameAltFeatureValue& otherValue=static_cast<const NameAltFeatureValue&>(other);
+      const auto& otherValue=static_cast<const NameAltFeatureValue&>(other);
 
       nameAlt=otherValue.nameAlt;
     }
@@ -139,7 +139,7 @@ namespace osmscout {
 
   bool NameAltFeatureValue::operator==(const FeatureValue& other) const
   {
-    const NameAltFeatureValue& otherValue=static_cast<const NameAltFeatureValue&>(other);
+    const auto& otherValue=static_cast<const NameAltFeatureValue&>(other);
 
     return nameAlt==otherValue.nameAlt;
   }
@@ -196,7 +196,7 @@ namespace osmscout {
     }
 
     if (!nameAlt.empty()) {
-      NameAltFeatureValue* value=static_cast<NameAltFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<NameAltFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetNameAlt(nameAlt);
     }
@@ -215,7 +215,7 @@ namespace osmscout {
   FeatureValue& RefFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const RefFeatureValue& otherValue=static_cast<const RefFeatureValue&>(other);
+      const auto& otherValue=static_cast<const RefFeatureValue&>(other);
 
       ref=otherValue.ref;
     }
@@ -225,7 +225,7 @@ namespace osmscout {
 
   bool RefFeatureValue::operator==(const FeatureValue& other) const
   {
-    const RefFeatureValue& otherValue=static_cast<const RefFeatureValue&>(other);
+    const auto& otherValue=static_cast<const RefFeatureValue&>(other);
 
     return ref==otherValue.ref;
   }
@@ -272,7 +272,7 @@ namespace osmscout {
 
     if (ref!=tags.end() &&
         !ref->second.empty()) {
-      RefFeatureValue* value=static_cast<RefFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<RefFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetRef(ref->second);
     }
@@ -291,7 +291,7 @@ namespace osmscout {
   FeatureValue& LocationFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const LocationFeatureValue& otherValue=static_cast<const LocationFeatureValue&>(other);
+      const auto& otherValue=static_cast<const LocationFeatureValue&>(other);
 
       location=otherValue.location;
     }
@@ -301,7 +301,7 @@ namespace osmscout {
 
   bool LocationFeatureValue::operator==(const FeatureValue& other) const
   {
-    const LocationFeatureValue& otherValue=static_cast<const LocationFeatureValue&>(other);
+    const auto& otherValue=static_cast<const LocationFeatureValue&>(other);
 
     return location==otherValue.location;
   }
@@ -356,7 +356,7 @@ namespace osmscout {
 
     if (!street->second.empty() &&
         !houseNr->second.empty()) {
-      LocationFeatureValue* value=static_cast<LocationFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<LocationFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetLocation(street->second);
     }
@@ -375,7 +375,7 @@ namespace osmscout {
   FeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const AddressFeatureValue& otherValue=static_cast<const AddressFeatureValue&>(other);
+      const auto& otherValue=static_cast<const AddressFeatureValue&>(other);
 
       address=otherValue.address;
     }
@@ -385,7 +385,7 @@ namespace osmscout {
 
   bool AddressFeatureValue::operator==(const FeatureValue& other) const
   {
-    const AddressFeatureValue& otherValue=static_cast<const AddressFeatureValue&>(other);
+    const auto& otherValue=static_cast<const AddressFeatureValue&>(other);
 
     return address==otherValue.address;
   }
@@ -452,7 +452,7 @@ namespace osmscout {
 
     if (!street->second.empty() &&
         !houseNr->second.empty()) {
-      AddressFeatureValue* value=static_cast<AddressFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<AddressFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetAddress(houseNr->second);
     }
@@ -471,7 +471,7 @@ namespace osmscout {
   FeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const AccessFeatureValue& otherValue=static_cast<const AccessFeatureValue&>(other);
+      const auto& otherValue=static_cast<const AccessFeatureValue&>(other);
 
       access=otherValue.access;
     }
@@ -481,7 +481,7 @@ namespace osmscout {
 
   bool AccessFeatureValue::operator==(const FeatureValue& other) const
   {
-    const AccessFeatureValue& otherValue=static_cast<const AccessFeatureValue&>(other);
+    const auto& otherValue=static_cast<const AccessFeatureValue&>(other);
 
     return access==otherValue.access;
   }
@@ -732,7 +732,7 @@ namespace osmscout {
     }
 
     if (access!=defaultAccess) {
-      AccessFeatureValue* value=static_cast<AccessFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<AccessFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetAccess(access);
     }
@@ -751,7 +751,7 @@ namespace osmscout {
   FeatureValue& AccessRestrictedFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const AccessRestrictedFeatureValue& otherValue=static_cast<const AccessRestrictedFeatureValue&>(other);
+      const auto& otherValue=static_cast<const AccessRestrictedFeatureValue&>(other);
 
       access=otherValue.access;
     }
@@ -761,7 +761,7 @@ namespace osmscout {
 
   bool AccessRestrictedFeatureValue::operator==(const FeatureValue& other) const
   {
-    const AccessRestrictedFeatureValue& otherValue=static_cast<const AccessRestrictedFeatureValue&>(other);
+    const auto& otherValue=static_cast<const AccessRestrictedFeatureValue&>(other);
 
     return access==otherValue.access;
   }
@@ -852,7 +852,7 @@ namespace osmscout {
     }
 
     if (access!=defaultAccess) {
-      AccessRestrictedFeatureValue* value=static_cast<AccessRestrictedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<AccessRestrictedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetAccess(access);
     }
@@ -871,7 +871,7 @@ namespace osmscout {
   FeatureValue& LayerFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const LayerFeatureValue& otherValue=static_cast<const LayerFeatureValue&>(other);
+      const auto& otherValue=static_cast<const LayerFeatureValue&>(other);
 
       layer=otherValue.layer;
     }
@@ -881,7 +881,7 @@ namespace osmscout {
 
   bool LayerFeatureValue::operator==(const FeatureValue& other) const
   {
-    const LayerFeatureValue& otherValue=static_cast<const LayerFeatureValue&>(other);
+    const auto& otherValue=static_cast<const LayerFeatureValue&>(other);
 
     return layer==otherValue.layer;
   }
@@ -922,7 +922,7 @@ namespace osmscout {
 
       if (StringToNumber(layer->second,layerValue)) {
         if (layerValue!=0) {
-          LayerFeatureValue* value=static_cast<LayerFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+          auto* value=static_cast<LayerFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
           value->SetLayer(layerValue);
         }
@@ -946,7 +946,7 @@ namespace osmscout {
   FeatureValue& WidthFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const WidthFeatureValue& otherValue=static_cast<const WidthFeatureValue&>(other);
+      const auto& otherValue=static_cast<const WidthFeatureValue&>(other);
 
       width=otherValue.width;
     }
@@ -956,7 +956,7 @@ namespace osmscout {
 
   bool WidthFeatureValue::operator==(const FeatureValue& other) const
   {
-    const WidthFeatureValue& otherValue=static_cast<const WidthFeatureValue&>(other);
+    const auto& otherValue=static_cast<const WidthFeatureValue&>(other);
 
     return width==otherValue.width;
   }
@@ -1033,11 +1033,11 @@ namespace osmscout {
     if (!StringToNumber(widthString,w)) {
       errorReporter.ReportTag(object,tags,std::string("Width tag value '")+width->second+"' is no double!");
     }
-    else if (w<0 && w>255.5) {
+    else if (w<0 || w>255.5) {
       errorReporter.ReportTag(object,tags,std::string("Width tag value '")+width->second+"' value is too small or too big!");
     }
     else {
-      WidthFeatureValue* value=static_cast<WidthFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<WidthFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetWidth((uint8_t)floor(w+0.5));
     }
@@ -1056,7 +1056,7 @@ namespace osmscout {
   FeatureValue& MaxSpeedFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const MaxSpeedFeatureValue& otherValue=static_cast<const MaxSpeedFeatureValue&>(other);
+      const auto& otherValue=static_cast<const MaxSpeedFeatureValue&>(other);
 
       maxSpeed=otherValue.maxSpeed;
     }
@@ -1066,7 +1066,7 @@ namespace osmscout {
 
   bool MaxSpeedFeatureValue::operator==(const FeatureValue& other) const
   {
-    const MaxSpeedFeatureValue& otherValue=static_cast<const MaxSpeedFeatureValue&>(other);
+    const auto& otherValue=static_cast<const MaxSpeedFeatureValue&>(other);
 
     return maxSpeed==otherValue.maxSpeed;
   }
@@ -1119,7 +1119,7 @@ namespace osmscout {
     // "walk" should not be used, but we provide an estimation anyway,
     // since it is likely still better than the default
     if (valueString=="walk") {
-      MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetMaxSpeed(10);
 
@@ -1161,7 +1161,7 @@ namespace osmscout {
       }
     }
 
-    MaxSpeedFeatureValue* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+    auto* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
     if (isMph) {
       if (valueNumeric>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
@@ -1195,7 +1195,7 @@ namespace osmscout {
   FeatureValue& GradeFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const GradeFeatureValue& otherValue=static_cast<const GradeFeatureValue&>(other);
+      const auto& otherValue=static_cast<const GradeFeatureValue&>(other);
 
       grade=otherValue.grade;
     }
@@ -1205,7 +1205,7 @@ namespace osmscout {
 
   bool GradeFeatureValue::operator==(const FeatureValue& other) const
   {
-    const GradeFeatureValue& otherValue=static_cast<const GradeFeatureValue&>(other);
+    const auto& otherValue=static_cast<const GradeFeatureValue&>(other);
 
     return grade==otherValue.grade;
   }
@@ -1244,35 +1244,35 @@ namespace osmscout {
 
     if (tracktype!=tags.end()) {
       if (tracktype->second=="grade1") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(1);
 
         return;
       }
       else if (tracktype->second=="grade2") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(2);
 
         return;
       }
       else if (tracktype->second=="grade3") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(3);
 
         return;
       }
       else if (tracktype->second=="grade4") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(4);
 
         return;
       }
       else if (tracktype->second=="grade5") {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(5);
 
@@ -1290,7 +1290,7 @@ namespace osmscout {
 
       if (typeConfig.GetGradeForSurface(surface->second,
                                         grade)) {
-        GradeFeatureValue* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade((uint8_t)grade);
       }
@@ -1315,7 +1315,7 @@ namespace osmscout {
   FeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
+      const auto& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
 
       adminLevel=otherValue.adminLevel;
       isIn=otherValue.isIn;
@@ -1326,7 +1326,7 @@ namespace osmscout {
 
   bool AdminLevelFeatureValue::operator==(const FeatureValue& other) const
   {
-    const AdminLevelFeatureValue& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
+    const auto& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
 
     return adminLevel==otherValue.adminLevel && isIn==otherValue.isIn;
   }
@@ -1368,7 +1368,7 @@ namespace osmscout {
 
       if (StringToNumber(adminLevel->second,
                          adminLevelValue)) {
-        AdminLevelFeatureValue* value=static_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<AdminLevelFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetAdminLevel(adminLevelValue);
 
@@ -1397,7 +1397,7 @@ namespace osmscout {
   FeatureValue& PostalCodeFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const PostalCodeFeatureValue& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
+      const auto& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
 
       postalCode=otherValue.postalCode;
     }
@@ -1407,7 +1407,7 @@ namespace osmscout {
 
   bool PostalCodeFeatureValue::operator==(const FeatureValue& other) const
   {
-    const PostalCodeFeatureValue& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
+    const auto& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
 
     return postalCode==otherValue.postalCode;
   }
@@ -1464,7 +1464,7 @@ namespace osmscout {
       if (!postalCodeValue.empty()) {
         size_t idx = feature.GetIndex();
         FeatureValue* fv = buffer.AllocateValue(idx);
-        PostalCodeFeatureValue* value=static_cast<PostalCodeFeatureValue*>(fv);
+        auto* value=static_cast<PostalCodeFeatureValue*>(fv);
 
         value->SetPostalCode(postalCodeValue);
       }
@@ -1487,7 +1487,7 @@ namespace osmscout {
   FeatureValue& WebsiteFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const WebsiteFeatureValue& otherValue=static_cast<const WebsiteFeatureValue&>(other);
+      const auto& otherValue=static_cast<const WebsiteFeatureValue&>(other);
 
       website=otherValue.website;
     }
@@ -1497,7 +1497,7 @@ namespace osmscout {
 
   bool WebsiteFeatureValue::operator==(const FeatureValue& other) const
   {
-    const WebsiteFeatureValue& otherValue=static_cast<const WebsiteFeatureValue&>(other);
+    const auto& otherValue=static_cast<const WebsiteFeatureValue&>(other);
 
     return website==otherValue.website;
   }
@@ -1552,7 +1552,7 @@ namespace osmscout {
       if (!strValue.empty()) {
         size_t idx = feature.GetIndex();
         FeatureValue* fv = buffer.AllocateValue(idx);
-        WebsiteFeatureValue* value=static_cast<WebsiteFeatureValue*>(fv);
+        auto* value=static_cast<WebsiteFeatureValue*>(fv);
 
         value->SetWebsite(strValue);
       }
@@ -1575,7 +1575,7 @@ namespace osmscout {
   FeatureValue& PhoneFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const PhoneFeatureValue& otherValue=static_cast<const PhoneFeatureValue&>(other);
+      const auto& otherValue=static_cast<const PhoneFeatureValue&>(other);
 
       phone=otherValue.phone;
     }
@@ -1585,7 +1585,7 @@ namespace osmscout {
 
   bool PhoneFeatureValue::operator==(const FeatureValue& other) const
   {
-    const PhoneFeatureValue& otherValue=static_cast<const PhoneFeatureValue&>(other);
+    const auto& otherValue=static_cast<const PhoneFeatureValue&>(other);
 
     return phone==otherValue.phone;
   }
@@ -1646,7 +1646,7 @@ namespace osmscout {
 
         size_t idx = feature.GetIndex();
         FeatureValue* fv = buffer.AllocateValue(idx);
-        PhoneFeatureValue* value=static_cast<PhoneFeatureValue*>(fv);
+        auto* value=static_cast<PhoneFeatureValue*>(fv);
 
         value->SetPhone(strValue);
       }
@@ -1783,7 +1783,7 @@ namespace osmscout {
   FeatureValue& EleFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const EleFeatureValue& otherValue=static_cast<const EleFeatureValue&>(other);
+      const auto& otherValue=static_cast<const EleFeatureValue&>(other);
 
       ele=otherValue.ele;
     }
@@ -1793,7 +1793,7 @@ namespace osmscout {
 
   bool EleFeatureValue::operator==(const FeatureValue& other) const
   {
-    const EleFeatureValue& otherValue=static_cast<const EleFeatureValue&>(other);
+    const auto& otherValue=static_cast<const EleFeatureValue&>(other);
 
     return ele==otherValue.ele;
   }
@@ -1883,7 +1883,7 @@ namespace osmscout {
       errorReporter.ReportTag(object,tags,std::string("Ele tag value '")+ele->second+"' value is too small or too big!");
     }
     else {
-      EleFeatureValue* value=static_cast<EleFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<EleFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetEle((uint32_t)floor(e+0.5));
     }
@@ -1902,7 +1902,7 @@ namespace osmscout {
   FeatureValue& DestinationFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const DestinationFeatureValue& otherValue=static_cast<const DestinationFeatureValue&>(other);
+      const auto& otherValue=static_cast<const DestinationFeatureValue&>(other);
 
       destination=otherValue.destination;
     }
@@ -1912,7 +1912,7 @@ namespace osmscout {
 
   bool DestinationFeatureValue::operator==(const FeatureValue& other) const
   {
-    const DestinationFeatureValue& otherValue=static_cast<const DestinationFeatureValue&>(other);
+    const auto& otherValue=static_cast<const DestinationFeatureValue&>(other);
 
     return destination==otherValue.destination;
   }
@@ -1974,7 +1974,7 @@ namespace osmscout {
     }
 
     if (!destination->second.empty()) {
-      DestinationFeatureValue* value=static_cast<DestinationFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<DestinationFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetDestination(destination->second);
     }
@@ -2022,7 +2022,7 @@ namespace osmscout {
   FeatureValue& IsInFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const IsInFeatureValue& otherValue=static_cast<const IsInFeatureValue&>(other);
+      const auto& otherValue=static_cast<const IsInFeatureValue&>(other);
 
       isIn=otherValue.isIn;
     }
@@ -2032,7 +2032,7 @@ namespace osmscout {
 
   bool IsInFeatureValue::operator==(const FeatureValue& other) const
   {
-    const IsInFeatureValue& otherValue=static_cast<const IsInFeatureValue&>(other);
+    const auto& otherValue=static_cast<const IsInFeatureValue&>(other);
 
     return isIn==otherValue.isIn;
   }
@@ -2069,7 +2069,7 @@ namespace osmscout {
     auto isIn=tags.find(tagIsIn);
 
     if (isIn!=tags.end() && !isIn->second.empty()) {
-      IsInFeatureValue* value=static_cast<IsInFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=static_cast<IsInFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
       value->SetIsIn(isIn->second);
     }
   }
@@ -2089,7 +2089,7 @@ namespace osmscout {
   FeatureValue& ConstructionYearFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
-      const ConstructionYearFeatureValue& otherValue=static_cast<const ConstructionYearFeatureValue&>(other);
+      const auto& otherValue=static_cast<const ConstructionYearFeatureValue&>(other);
 
       startYear=otherValue.startYear;
       endYear=otherValue.endYear;
@@ -2100,7 +2100,7 @@ namespace osmscout {
 
   bool ConstructionYearFeatureValue::operator==(const FeatureValue& other) const
   {
-    const ConstructionYearFeatureValue& otherValue=static_cast<const ConstructionYearFeatureValue&>(other);
+    const auto& otherValue=static_cast<const ConstructionYearFeatureValue&>(other);
 
     return startYear==otherValue.startYear &&
       endYear==otherValue.endYear;
@@ -2168,7 +2168,7 @@ namespace osmscout {
 
 
     if (osmscout::StringToNumber(strValue,startYear)) {
-      ConstructionYearFeatureValue* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      auto* value=dynamic_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetStartYear(startYear);
       value->SetEndYear(startYear);
@@ -2187,7 +2187,7 @@ namespace osmscout {
           osmscout::StringToNumber(startValue,startYear) &&
           osmscout::StringToNumber(endValue,endYear)) {
 
-          ConstructionYearFeatureValue* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
           value->SetStartYear(startYear);
           value->SetEndYear(endYear);
@@ -2207,7 +2207,7 @@ namespace osmscout {
             osmscout::StringToNumber(startValue,startYear) &&
             osmscout::StringToNumber(endValue,endYear)) {
 
-          ConstructionYearFeatureValue* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
           value->SetStartYear(startYear);
           value->SetEndYear(endYear);
@@ -2227,7 +2227,7 @@ namespace osmscout {
             osmscout::StringToNumber(startValue,startYear) &&
             osmscout::StringToNumber(endValue,endYear)) {
 
-          ConstructionYearFeatureValue* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
           value->SetStartYear(startYear);
           value->SetEndYear(endYear);
@@ -2240,7 +2240,7 @@ namespace osmscout {
         std::string startValue=strValue.substr(1);
 
         if (osmscout::StringToNumber(startValue,startYear)) {
-          ConstructionYearFeatureValue* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
           value->SetStartYear(startYear*100);
           value->SetEndYear((startYear+1)*100-1);

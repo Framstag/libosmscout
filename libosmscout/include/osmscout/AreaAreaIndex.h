@@ -65,7 +65,7 @@ namespace osmscout {
 
     struct IndexCacheValueSizer : public IndexCache::ValueSizer
     {
-      size_t GetSize(const IndexCell& value) const
+      size_t GetSize(const IndexCell& value) const override
       {
         size_t memory=0;
 
@@ -125,7 +125,7 @@ namespace osmscout {
                                std::vector<CellRef>& nextCellRefs) const;
 
   public:
-    AreaAreaIndex(size_t cacheSize);
+    explicit AreaAreaIndex(size_t cacheSize);
     virtual ~AreaAreaIndex();
 
     void Close();

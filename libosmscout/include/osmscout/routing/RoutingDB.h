@@ -28,6 +28,7 @@
 #include <osmscout/ObjectVariantDataFile.h>
 
 #include <osmscout/routing/RouteNode.h>
+#include <osmscout/routing/RouteNodeDataFile.h>
 
 namespace osmscout {
 
@@ -41,7 +42,7 @@ namespace osmscout {
   private:
     TypeConfigRef                    typeConfig;
     std::string                      path;
-    IndexedDataFile<Id,RouteNode>    routeNodeDataFile;     //!< Cached access to the 'route.dat' file
+    RouteNodeDataFile                routeNodeDataFile;
     IndexedDataFile<Id,Intersection> junctionDataFile;      //!< Cached access to the 'junctions.dat' file
     ObjectVariantDataFile            objectVariantDataFile;
 
@@ -58,45 +59,24 @@ namespace osmscout {
                                    node);
     }
 
-    inline bool GetRouteNodesByOffset(const std::vector<FileOffset>& routeNodeOffsets,
-                                      std::unordered_map<FileOffset,RouteNodeRef>& routeNodeMap)
+    template<typename IteratorIn>
+    inline bool GetRouteNodes(IteratorIn begin, IteratorIn end, size_t size,
+                              std::unordered_map<Id,RouteNodeRef>& routeNodeMap)
     {
-      return routeNodeDataFile.GetByOffset(routeNodeOffsets.begin(),
-                                           routeNodeOffsets.end(),
-                                           routeNodeOffsets.size(),
-                                           routeNodeMap);
+      return routeNodeDataFile.Get(begin,
+                                   end,
+                                   size,
+                                   routeNodeMap);
     }
 
-    inline bool GetRouteNodesByOffset(const std::set<FileOffset>& routeNodeOffsets,
-                                      std::vector<RouteNodeRef>& routeNodes)
+    template<typename IteratorIn>
+    inline bool GetRouteNodes(IteratorIn begin, IteratorIn end, size_t size,
+                              std::vector<RouteNodeRef>& routeNodes)
     {
-      return routeNodeDataFile.GetByOffset(routeNodeOffsets.begin(),
-                                           routeNodeOffsets.end(),
-                                           routeNodeOffsets.size(),
-                                           routeNodes);
-    }
-
-    /**
-     * Return the route node for the given database offset
-     * @param offset
-     *    Offset in given database
-     * @param node
-     *    Node instance to write the result back
-     * @return
-     *    True, if the node couldbe loaded, else false
-     */
-    inline bool GetRouteNodeByOffset(const FileOffset& offset,
-                                     RouteNodeRef& node)
-    {
-      return routeNodeDataFile.GetByOffset(offset,
-                                           node);
-    }
-
-    inline bool GetRouteNodeOffset(Id id,
-                                   FileOffset& offset)
-    {
-      return routeNodeDataFile.GetOffset(id,
-                                         offset);
+      return routeNodeDataFile.Get(begin,
+                                   end,
+                                   size,
+                                   routeNodes);
     }
 
     bool GetJunctions(const std::set<Id>& ids,
@@ -105,6 +85,13 @@ namespace osmscout {
     inline const std::vector<ObjectVariantData>& GetObjectVariantData() const
     {
       return objectVariantDataFile.GetData();
+    }
+
+    inline bool ContainsNode(const Id id) const
+    {
+      RouteNodeRef node;
+      routeNodeDataFile.Get(id, node);
+      return (bool)node;
     }
   };
 
