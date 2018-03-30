@@ -68,6 +68,12 @@ target_include_directories(StyleEditor PRIVATE
 		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-client-qt/include
 )
 
+# TODO: Should transitive dependencies not already be handled by libosmscout?
+if(MARISA_FOUND)
+	target_include_directories(StyleEditor PRIVATE ${MARISA_INCLUDE_DIRS})
+	target_link_libraries(StyleEditor ${MARISA_LIBRARIES})
+endif()
+
 if(APPLE AND BUILD_FRAMEWORKS)
 	target_link_libraries(StyleEditor
 		OSMScout
