@@ -1,8 +1,25 @@
-*.opt
-*.txt
-*.osm
-*.osm.pbf
-*.zip
-*.poly
-*.shp
-/**/
+# OSM data files and similar
+
+/*.opt
+/*.txt
+/*.osm
+/*.osm.pbf
+/*.zip
+/*.poly
+/*.shp
+
+# Databases
+/*/*.txt
+/*/*.dat
+/*/*.idx
+/*/*.idmap
+/*/*.tmp
+/*/*.html
+
+# Shapefiles
+/*/*.cpg
+/*/*.dbf
+/*/*.prj
+/*/*.shp
+/*/*.shx
+/*/*.json
