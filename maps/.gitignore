@@ -3,4 +3,6 @@
 *.osm
 *.osm.pbf
 *.zip
+*.poly
+*.shp
 /**/

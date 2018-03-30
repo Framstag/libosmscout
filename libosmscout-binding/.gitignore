@@ -1,6 +1,0 @@
-Makefile
-src/Makefile
-src/java/Makefile
-
-src/java/libosmscout.cpp
-/target/
