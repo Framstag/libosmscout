@@ -8,7 +8,7 @@
 /*.poly
 /*.shp
 
-# Databases
+# Libosmscout Databases
 /*/*.txt
 /*/*.dat
 /*/*.idx
@@ -23,3 +23,4 @@
 /*/*.shp
 /*/*.shx
 /*/*.json
+/*/README

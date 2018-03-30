@@ -1,23 +1,19 @@
-#Autoconf & Automake
-
-**/Config.h.in
-**/config.h.in
-
 # CMake
 **/cmake_install.cmake
+/build/
 
 # IDEs
 **/.cproject
-**/.idea
 **/.project
 **/.settings
 **/.classpath
 **/nbproject
+**/.idea
+/cmake-build-debug
 
 # Backup
 **/*~
 
-# Usual build dir
-/build/
+# meson
 /debug/
 /release/
