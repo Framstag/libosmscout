@@ -104,7 +104,6 @@ set(HEADER_FILES
     include/osmscout/ObjectVariantDataFile.h
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
-    #include/osmscout/TextSearchIndex.h
     include/osmscout/TypeConfig.h
     include/osmscout/TypeFeatures.h
     include/osmscout/Types.h
@@ -188,7 +187,6 @@ set(SOURCE_FILES
     src/osmscout/ObjectVariantDataFile.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
-    #src/osmscout/TextSearchIndex.cpp
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeatures.cpp
     src/osmscout/Types.cpp

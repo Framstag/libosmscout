@@ -1,12 +1,10 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 
 project(libosmscout C CXX)
 
-set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # build should fail when compiler don't support standard defined by CMAKE_CXX_STANDARD
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QTDIR}" "${QTDIR}" "$ENV{QTDIR}/lib/cmake" "${QTDIR}/lib/cmake")
-set(CMAKE_ENABLE_COMPILE_COMMANDS ON)
 #
 # default build type
 if(CMAKE_BUILD_TYPE STREQUAL "")
@@ -20,26 +18,13 @@ if(APPLE)
   option(BUILD_FRAMEWORKS "Enable build of libraries as frameworks" ON)
 endif()
 
-# compiler configurations
-if(WIN32)
-  set(CMAKE_USE_RELATIVE_PATHS true)
-  set(CMAKE_SUPPRESS_REGENERATION true)
-endif()
-
 if(APPLE AND NOT ANDROID)
   set(CMAKE_SIZEOF_VOID_P 4)
-  set(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "com.apple.compilers.llvm.clang.1_0")
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
   set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 endif ()
 
-# CXX_STANDARD property is supported from cmake 3.1, we have to define -std with old cmake
-if(NOT MSVC)
-  if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.1)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  endif ()
-endif()
-
+# TODO: This will not work for cross-compiling :-/
 include(CheckTypeSize)
 CHECK_TYPE_SIZE("void*" OSMSCOUT_PTR_SIZE BUILTIN_TYPES_ONLY)
 if(OSMSCOUT_PTR_SIZE EQUAL 8)
@@ -68,36 +53,43 @@ if(MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /we4028")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /wd4251")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Oi")
+
   if(CMAKE_CL_64)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /bigobj")
   endif()
+
   if(MSVC_VERSION GREATER 1500 OR MSVC_VERSION EQUAL 1500)
     option(OSMSCOUT_BUILD_MSVC_MP "Enable build with multiple processes in Visual Studio" TRUE)
   else()
     set(OSMSCOUT_BUILD_MSVC_MP FALSE CACHE BOOL "Compiler option /MP requires at least Visual Studio 2008 (VS9) or newer" FORCE)
   endif()
+
   if(OSMSCOUT_BUILD_MSVC_MP)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
   endif()
+
   add_definitions(-D_WIN32_WINNT=0x0600)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DDLL_EXPORT)
 endif()
 
 if(MINGW)
   add_definitions(-D_WIN32_WINNT=0x0600)
+
   if(NOT OSMSCOUT_PLATFORM_X64)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=i686")
     # provide more addressable memory on win 32bit builds
     # see https://msdn.microsoft.com/en-us/library/aa366778
     set(CMAKE_EXE_LINKER_FLAGS "-Wl,--large-address-aware")
   endif ()
+
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fno-tree-slp-vectorize -Wno-error=cast-qual -Wno-unused-local-typedefs")
 endif()
 
 if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC) AND NOT MINGW)
   add_definitions( -Wall -pedantic )
   check_cxx_compiler_flag(-fvisibility=hidden OSMSCOUT_GCC_VISIBILITY)
+
   if(OSMSCOUT_GCC_VISIBILITY)
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE OSMSCOUT_GCC_VERSION)
     message(STATUS "Detected g++ ${OSMSCOUT_GCC_VERSION}")
@@ -105,6 +97,7 @@ if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_G
     set(OSMSCOUT_GCC_VISIBILITY_FLAGS "-fvisibility=hidden")
     set(XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN "YES")
     string(TOLOWER "${CMAKE_BUILD_TYPE}" OSMSCOUT_BUILD_TYPE)
+
     if(OSMSCOUT_BUILD_TYPE STREQUAL "debug" AND OSMSCOUT_GCC_VERSION VERSION_LESS "4.2")
       message(STATUS "Skipping -fvisibility-inlines-hidden due to possible bug in g++ < 4.2")
     else()
@@ -275,7 +268,7 @@ endif()
 if(APPLE)
   option(OSMSCOUT_BUILD_MAP_IOSX "Enable build of iOS/OSX map drawing backend" ${OSMSCOUT_BUILD_MAP})
   if(OSMSCOUT_BUILD_MAP_IOSX)
-  add_subdirectory(libosmscout-map-iosx)
+    add_subdirectory(libosmscout-map-iosx)
   endif()
 else()
   set(OSMSCOUT_BUILD_MAP_IOSX OFF CACHE INTERNAL "" FORCE)
