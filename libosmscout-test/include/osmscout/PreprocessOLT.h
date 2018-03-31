@@ -24,7 +24,7 @@
 
 #include <osmscout/system/Compiler.h>
 
-#include <osmscout/private/TestImportExport.h>
+#include <osmscout/TestImportExport.h>
 
 #include <osmscout/RegionList.h>
 
