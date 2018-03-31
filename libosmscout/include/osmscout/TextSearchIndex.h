@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_IMPORT_TEXTSEARCHINDEX_H
-#define OSMSCOUT_IMPORT_TEXTSEARCHINDEX_H
+#ifndef OSMSCOUT_TEXTSEARCHINDEX_H
+#define OSMSCOUT_TEXTSEARCHINDEX_H
 
 /*
  This source is part of the libosmscout library
@@ -86,4 +86,4 @@ namespace osmscout
 }
 
 
-#endif // OSMSCOUT_IMPORT_TEXTSEARCHINDEX_H
+#endif // OSMSCOUT_TEXTSEARCHINDEX_H

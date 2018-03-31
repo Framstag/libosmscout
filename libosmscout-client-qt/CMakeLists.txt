@@ -123,6 +123,8 @@ endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 
+target_include_directories(${THE_TARGET_NAME} PUBLIC include)
+
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/ClientQtFeatures.h)
 target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -130,14 +132,6 @@ target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BIN
 # Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
 target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-target_include_directories(${THE_TARGET_NAME} PRIVATE
-    include
-    ${Qt5Gui_INCLUDE_DIRS})
-
-if(MARISA_FOUND)
-    target_include_directories(${THE_TARGET_NAME} PRIVATE ${MARISA_INCLUDE_DIRS})
-endif()
 
 if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
@@ -172,7 +166,8 @@ target_link_libraries(${THE_TARGET_NAME}
     Qt5::Quick)
 endif()
 
-target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS ${Qt5Gui_DEFINITIONS})
+target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
+
 install(TARGETS ${THE_TARGET_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

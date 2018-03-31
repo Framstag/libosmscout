@@ -25,6 +25,8 @@ endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 
+target_include_directories(${THE_TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapSVGFeatures.h)
 target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -32,8 +34,6 @@ target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BIN
 # Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
 target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-target_include_directories(${THE_TARGET_NAME} PRIVATE include)
 
 if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(${THE_TARGET_NAME}
@@ -46,7 +46,7 @@ target_link_libraries(${THE_TARGET_NAME}
 endif()
 
 if(PANGOFT2_FOUND)
-  target_include_directories(${THE_TARGET_NAME} PRIVATE ${PANGOFT2_INCLUDE_DIRS})
+  target_include_directories(${THE_TARGET_NAME} PUBLIC ${PANGOFT2_INCLUDE_DIRS})
   target_link_libraries(${THE_TARGET_NAME} ${PANGOFT2_LIBRARIES})
 endif()
 

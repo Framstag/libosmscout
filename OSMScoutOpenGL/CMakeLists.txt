@@ -14,14 +14,10 @@ set(SOURCE_FILES
 add_executable(OSMScoutOpenGL ${SOURCE_FILES})
 
 target_include_directories(OSMScoutOpenGL PRIVATE
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-opengl/include
 		${OPENGL_INCLUDE_DIR}
 		${GLEW_INCLUDE_DIRS}
 		${GLFW_INCLUDE_DIR}
-		${FREETYPE_INCLUDE_DIRS}
-		)
+		${FREETYPE_INCLUDE_DIRS})
 
 if(MSVS OR MSYS OR MINGW)
 	target_link_libraries(OSMScoutOpenGL

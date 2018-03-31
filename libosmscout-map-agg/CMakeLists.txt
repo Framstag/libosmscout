@@ -35,6 +35,11 @@ endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 
+target_include_directories(${THE_TARGET_NAME} PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/include
+		${LIBAGG_INCLUDE_DIRS}
+		${FREETYPE_INCLUDE_DIRS})
+
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapAggFeatures.h)
 target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -43,10 +48,6 @@ target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BIN
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
 target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
-target_include_directories(${THE_TARGET_NAME} PRIVATE
-		include
-		${LIBAGG_INCLUDE_DIRS}
-		${FREETYPE_INCLUDE_DIRS})
 if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(${THE_TARGET_NAME}
 		OSMScout
@@ -79,6 +80,7 @@ set_target_properties(${THE_TARGET_NAME} PROPERTIES
 endif()
 
 target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
+
 install(TARGETS ${THE_TARGET_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

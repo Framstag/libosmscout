@@ -44,6 +44,8 @@ endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 
+target_include_directories(${THE_TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 # Public features Header
 configure_file(include/osmscout/gpx/GPXFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/gpx/GPXFeatures.h)
 target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -51,8 +53,6 @@ target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BIN
 # Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-gpx")
 target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-target_include_directories(${THE_TARGET_NAME} PRIVATE include)
 
 if(LIBXML2_FOUND)
     target_include_directories(${THE_TARGET_NAME} PRIVATE ${LIBXML2_INCLUDE_DIR})

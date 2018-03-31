@@ -208,6 +208,8 @@ endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
 
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_SOURCE_DIR}/include)
+
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/CoreFeatures.h)
 target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -217,7 +219,7 @@ create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/priva
 target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 if(MARISA_FOUND)
-    target_include_directories(${THE_TARGET_NAME} PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_include_directories(${THE_TARGET_NAME} PUBLIC ${MARISA_INCLUDE_DIRS})
     target_link_libraries(${THE_TARGET_NAME} ${MARISA_LIBRARIES})
 endif()
 
