@@ -12,8 +12,7 @@ if(NOT ${OSMSCOUT_BUILD_MAP})
 endif()
 
 set(HEADER_FILES
-    #include/osmscout/private/Config.h
-    include/osmscout/private/MapAggImportExport.h
+    include/osmscout/MapAggImportExport.h
     include/osmscout/MapAggFeatures.h
     include/osmscout/MapPainterAgg.h
 )
@@ -23,9 +22,9 @@ set(SOURCE_FILES
 )
 
 if(APPLE AND BUILD_FRAMEWORKS)
-  set(THE_TARGET_NAME "OSMScoutMapAGG") 
+  set(THE_TARGET_NAME "OSMScoutMapAGG")
 else()
-  set(THE_TARGET_NAME "osmscout_map_agg") 
+  set(THE_TARGET_NAME "osmscout_map_agg")
 endif()
 
 if(IOS)
@@ -35,13 +34,17 @@ else()
 endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapAggFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+
+# Public features Header
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapAggFeatures.h)
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+
 target_include_directories(${THE_TARGET_NAME} PRIVATE
 		include
-		${CMAKE_CURRENT_BINARY_DIR}/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${LIBAGG_INCLUDE_DIRS}
 		${FREETYPE_INCLUDE_DIRS})
 if(APPLE AND BUILD_FRAMEWORKS)

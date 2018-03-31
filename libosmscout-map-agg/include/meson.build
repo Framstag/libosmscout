@@ -1,7 +1,7 @@
 osmscoutmapaggIncDir = include_directories('.')
 
 osmscoutmapaggHeader = [
-            'osmscout/private/MapAggImportExport.h',
+            'osmscout/MapAggImportExport.h',
             'osmscout/MapPainterAgg.h'
           ]
 
