@@ -29,7 +29,7 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/MapRenderer.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <atomic>
 

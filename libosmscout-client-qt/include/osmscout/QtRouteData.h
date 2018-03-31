@@ -27,7 +27,7 @@
 #include <osmscout/RouteStep.h>
 #include <osmscout/routing/Route.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
 

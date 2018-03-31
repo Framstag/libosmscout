@@ -24,7 +24,7 @@
 #include <osmscout/util/Breaker.h>
 #include <osmscout/routing/Route.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <osmscout/SearchLocationModel.h>
 #include <osmscout/DBThread.h>

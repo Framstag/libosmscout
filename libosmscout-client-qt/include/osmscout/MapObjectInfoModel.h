@@ -31,7 +31,7 @@
 #include <osmscout/LookupModule.h>
 
 #include <osmscout/LocationInfoModel.h>
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
 #include <QAbstractListModel>

@@ -29,7 +29,7 @@
 #include <osmscout/OnlineTileProvider.h>
 #include <osmscout/MapProvider.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 // this variable should be defined by build system
 #ifndef LIBOSMSCOUT_VERSION_STRING

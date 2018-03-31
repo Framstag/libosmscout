@@ -6,8 +6,7 @@ if(NOT ${OSMSCOUT_BUILD_MAP})
 endif()
 
 set(HEADER_FILES
-    #include/osmscout/private/Config.h
-    include/osmscout/private/MapQtImportExport.h
+	include/osmscout/MapQtImportExport.h
     include/osmscout/SimplifiedPath.h
     include/osmscout/MapPainterQt.h
 )
@@ -18,9 +17,9 @@ set(SOURCE_FILES
 )
 
 if(APPLE AND BUILD_FRAMEWORKS)
-  set(THE_TARGET_NAME "OSMScoutMapQt") 
+  set(THE_TARGET_NAME "OSMScoutMapQt")
 else()
-  set(THE_TARGET_NAME "osmscout_map_qt") 
+  set(THE_TARGET_NAME "osmscout_map_qt")
 endif()
 
 if(IOS)
@@ -30,13 +29,17 @@ else()
 endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapQtFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapQtFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
-target_include_directories(${THE_TARGET_NAME} PRIVATE 
+
+# Public features Header
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapQtFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapQtFeatures.h)
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+
+target_include_directories(${THE_TARGET_NAME} PRIVATE
 		include
-		${CMAKE_CURRENT_BINARY_DIR}/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${Qt5Gui_INCLUDE_DIRS})
 
 if(${IOS})

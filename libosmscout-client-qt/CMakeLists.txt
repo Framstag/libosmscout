@@ -15,6 +15,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
+    include/osmscout/ClientQtImportExport.h
     include/osmscout/DBThread.h
     include/osmscout/DBInstance.h
     include/osmscout/FileDownloader.h
@@ -27,7 +28,6 @@ set(HEADER_FILES
     include/osmscout/OsmTileDownloader.h
     include/osmscout/OSMTile.h
     include/osmscout/private
-    include/osmscout/private/ClientQtImportExport.h
     include/osmscout/RoutingModel.h
     include/osmscout/Router.h
     include/osmscout/SearchLocationModel.h
@@ -110,9 +110,9 @@ set(SOURCE_FILES
     )
 
 if(APPLE AND BUILD_FRAMEWORKS)
-  set(THE_TARGET_NAME "OSMScoutClientQt") 
+  set(THE_TARGET_NAME "OSMScoutClientQt")
 else()
-  set(THE_TARGET_NAME "osmscout_client_qt") 
+  set(THE_TARGET_NAME "osmscout_client_qt")
 endif()
 
 if(IOS)
@@ -122,15 +122,19 @@ else()
 endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ClientQtFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
-target_include_directories(${THE_TARGET_NAME} PRIVATE 
+
+# Public features Header
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/ClientQtFeatures.h)
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+
+target_include_directories(${THE_TARGET_NAME} PRIVATE
     include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
-    ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-qt/include
     ${Qt5Gui_INCLUDE_DIRS})
+
 if(MARISA_FOUND)
     target_include_directories(${THE_TARGET_NAME} PRIVATE ${MARISA_INCLUDE_DIRS})
 endif()

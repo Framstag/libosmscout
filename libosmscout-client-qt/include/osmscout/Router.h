@@ -30,7 +30,7 @@
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/DBFileOffset.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <memory>
 

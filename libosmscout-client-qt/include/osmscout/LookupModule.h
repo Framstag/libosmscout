@@ -24,7 +24,7 @@
 #include <QThread>
 #include <osmscout/DBThread.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 class OSMSCOUT_CLIENT_QT_API AdminRegionInfo {
 public:

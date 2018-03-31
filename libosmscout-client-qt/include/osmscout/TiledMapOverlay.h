@@ -23,7 +23,7 @@
 #include <osmscout/TileCache.h>
 #include <osmscout/OsmTileDownloader.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <QImage>
 

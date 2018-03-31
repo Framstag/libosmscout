@@ -29,7 +29,7 @@
 #include <osmscout/Area.h>
 #include <osmscout/Node.h>
 #include <osmscout/util/GeoBox.h>
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI

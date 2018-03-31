@@ -27,7 +27,7 @@
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 #include <osmscout/OverlayObject.h>
 
 /**

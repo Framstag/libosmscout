@@ -24,7 +24,7 @@
 #include <QPointF>
 #include <QVector>
 
-#include <osmscout/private/MapQtImportExport.h>
+#include <osmscout/MapQtImportExport.h>
 
 namespace osmscout {
   struct Segment

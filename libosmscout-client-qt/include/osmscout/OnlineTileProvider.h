@@ -27,7 +27,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI
