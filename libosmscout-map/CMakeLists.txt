@@ -1,11 +1,9 @@
 set(OSMSCOUT_BUILD_MAP ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
+	include/osmscout/MapImportExport.h
 	include/osmscout/oss/Parser.h
 	include/osmscout/oss/Scanner.h
-	#include/osmscout/private/Config.h
-	#include/osmscout/private/MapImportExport.h
-	include/osmscout/MapFeatures.h
 	include/osmscout/LabelLayouter.h
 	include/osmscout/MapPainter.h
 	include/osmscout/MapParameter.h
@@ -40,9 +38,9 @@ set(SOURCE_FILES
 )
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set(THE_TARGET_NAME "OSMScoutMap")
+  set(THE_TARGET_NAME "OSMScoutMap")
 else()
-set(THE_TARGET_NAME "osmscout_map")
+  set(THE_TARGET_NAME "osmscout_map")
 endif()
 
 if(IOS)
@@ -52,12 +50,17 @@ else()
 endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
+
+# Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map")
-target_include_directories(${THE_TARGET_NAME} PRIVATE
-		include
-		${CMAKE_CURRENT_BINARY_DIR}/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "osmscout-map")
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+
+target_include_directories(${THE_TARGET_NAME} PRIVATE include)
+
 if(APPLE AND BUILD_FRAMEWORKS)
   target_link_libraries(${THE_TARGET_NAME} OSMScout)
 else()

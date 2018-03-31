@@ -23,7 +23,7 @@
 #include <memory>
 #include <set>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/MapImportExport.h>
 
 #include <osmscout/StyleConfig.h>
 

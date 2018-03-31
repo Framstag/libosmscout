@@ -1,7 +1,7 @@
 osmscoutmapIncDir = include_directories('.')
 
 osmscoutmapHeader = [
-            'osmscout/private/MapImportExport.h',
+            'osmscout/MapImportExport.h',
             'osmscout/oss/Scanner.h',
             'osmscout/oss/Parser.h',
             'osmscout/LabelLayouter.h',

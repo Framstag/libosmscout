@@ -24,7 +24,7 @@
 #include <set>
 #include <vector>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/MapImportExport.h>
 
 #include <osmscout/Pixel.h>
 #include <osmscout/util/Color.h>

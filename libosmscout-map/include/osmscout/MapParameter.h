@@ -23,7 +23,7 @@
 #include <list>
 #include <string>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/MapImportExport.h>
 
 #include <osmscout/StyleProcessor.h>
 
