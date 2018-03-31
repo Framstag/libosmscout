@@ -32,7 +32,7 @@
   #include <pango/pangoft2.h>
 #endif
 
-#include <osmscout/private/MapSVGImportExport.h>
+#include <osmscout/MapSVGImportExport.h>
 
 #include <osmscout/MapPainter.h>
 
