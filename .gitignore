@@ -1,5 +1,6 @@
 # CMake
 **/cmake_install.cmake
+**/CMakeFiles
 /build/
 
 # IDEs
