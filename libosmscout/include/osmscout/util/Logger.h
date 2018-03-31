@@ -22,7 +22,7 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 #include <ostream>
 #include <sstream>

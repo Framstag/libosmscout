@@ -24,7 +24,7 @@
 #include <mutex>
 #include <thread>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 #include <osmscout/system/Compiler.h>
 

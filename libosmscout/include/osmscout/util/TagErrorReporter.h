@@ -25,7 +25,7 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Tag.h>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 namespace osmscout {
 
