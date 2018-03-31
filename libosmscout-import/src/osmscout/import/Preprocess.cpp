@@ -36,7 +36,7 @@
 #include <osmscout/import/RawWay.h>
 
 #include <osmscout/private/Config.h>
-#include <osmscout/ImportFeatures.h>
+#include <osmscout/import/ImportFeatures.h>
 
 #if defined(HAVE_LIB_XML) || defined(OSMSCOUT_IMPORT_HAVE_XML_SUPPORT)
   #include <osmscout/import/PreprocessOSM.h>

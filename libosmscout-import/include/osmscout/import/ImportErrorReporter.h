@@ -23,7 +23,7 @@
 #include <mutex>
 #include <string>
 
-#include <osmscout/private/ImportImportExport.h>
+#include <osmscout/import/ImportImportExport.h>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/TypeConfig.h>

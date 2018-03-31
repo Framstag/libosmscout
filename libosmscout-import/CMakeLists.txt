@@ -44,7 +44,7 @@ set(HEADER_FILES
     include/osmscout/import/SortNodeDat.h
     include/osmscout/import/SortWayDat.h
     #include/osmscout/private/Config.h
-    include/osmscout/private/ImportImportExport.h
+        include/osmscout/import/ImportImportExport.h
     #include/osmscout/ImportFeatures.h
 )
 
@@ -124,14 +124,18 @@ else()
 endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ImportFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/ImportFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+
+# Public features Header
+configure_file(include/osmscout/import/ImportFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/ImportFeatures.h)
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 target_include_directories(${THE_TARGET_NAME} PRIVATE
 		include
 		include/osmscout/import/pbf
-		${CMAKE_CURRENT_BINARY_DIR}/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
 		)
 
 if(APPLE AND BUILD_FRAMEWORKS)

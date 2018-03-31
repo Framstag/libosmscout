@@ -38,7 +38,7 @@
 
 #include <osmscout/system/Compiler.h>
 
-#include <osmscout/private/ImportImportExport.h>
+#include <osmscout/import/ImportImportExport.h>
 
 namespace osmscout {
 
