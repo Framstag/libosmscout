@@ -9,8 +9,7 @@ if(NOT FREETYPE_FOUND)
 endif()
 
 set(HEADER_FILES
-		#include/osmscout/private/Config.h
-		include/osmscout/private/MapOpenGLImportExport.h
+        include/osmscout/MapOpenGLImportExport.h
 		include/osmscout/OpenGLMapData.h
 		include/osmscout/MapPainterOpenGL.h
 		include/osmscout/Triangulate.h
@@ -36,9 +35,9 @@ set(SOURCE_FILES
 		src/poly2tri/sweep/advancing_front.cc)
 
 if(APPLE AND BUILD_FRAMEWORKS)
-  set(THE_TARGET_NAME "OSMScoutMapOpenGL") 
+  set(THE_TARGET_NAME "OSMScoutMapOpenGL")
 else()
-  set(THE_TARGET_NAME "osmscout_map_opengl") 
+  set(THE_TARGET_NAME "osmscout_map_opengl")
 endif()
 
 if(IOS)
@@ -48,13 +47,17 @@ else()
 endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapOpenGLFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+
+# Public features Header
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapOpenGLFeatures.h)
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+
 target_include_directories(${THE_TARGET_NAME} PRIVATE
 		include
-		${CMAKE_CURRENT_BINARY_DIR}/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include
 		${OPENGL_INCLUDE_DIR}
 		${GLEW_INCLUDE_DIRS}
 		${PNG_INCLUDE_DIRS}
