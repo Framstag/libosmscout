@@ -28,7 +28,7 @@
   #include <cairo/cairo.h>
 #endif
 
-#include <osmscout/private/MapCairoImportExport.h>
+#include <osmscout/MapCairoImportExport.h>
 
 namespace osmscout {
 
