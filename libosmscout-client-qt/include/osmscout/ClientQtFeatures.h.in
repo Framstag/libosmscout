@@ -1,8 +1,0 @@
-#ifndef OSMSCOUT_CLIENT_QT_FEATURES
-#define OSMSCOUT_CLIENT_QT_FEATURES
-
-/* Illumination uses special gcc compiler features to explicitely export symbols */
-#undef OSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS
-
-#endif
-
