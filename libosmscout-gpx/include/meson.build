@@ -1,7 +1,7 @@
 osmscoutgpxIncDir = include_directories('.')
 
 osmscoutgpxHeader = [
-            'osmscout/private/GPXImportExport.h',
+            'osmscout/gpx/GPXImportExport.h',
             'osmscout/gpx/Optional.h',
             'osmscout/gpx/GpxFile.h',
             'osmscout/gpx/Utils.h',

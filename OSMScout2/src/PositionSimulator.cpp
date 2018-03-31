@@ -19,9 +19,10 @@
 
 #include "PositionSimulator.h"
 
-#include <osmscout/GPXFeatures.h>
-#include <osmscout/gpx/Import.h>
 #include <osmscout/util/Logger.h>
+
+#include <osmscout/gpx/GPXFeatures.h>
+#include <osmscout/gpx/Import.h>
 
 static const std::chrono::milliseconds TickDuration(100);
 

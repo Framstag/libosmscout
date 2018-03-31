@@ -8,7 +8,7 @@
 
 // TODO: consider to use std::optional after transition to c++14
 
-#include <osmscout/private/GPXImportExport.h>
+#include <osmscout/gpx/GPXImportExport.h>
 
 #include <stdexcept>
 #include <functional>

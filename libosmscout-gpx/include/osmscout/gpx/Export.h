@@ -22,7 +22,7 @@
 
 #include <osmscout/gpx/GpxFile.h>
 #include <osmscout/gpx/Import.h>
-#include <osmscout/private/GPXImportExport.h>
+#include <osmscout/gpx/GPXImportExport.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/Exception.h>
