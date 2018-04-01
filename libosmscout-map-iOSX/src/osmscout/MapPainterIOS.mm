@@ -1172,5 +1172,4 @@ namespace osmscout {
             CGContextSetRGBStrokeColor(cg,0,0,0,0);
         }
     }
-
 }
