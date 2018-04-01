@@ -3,7 +3,7 @@ if(NOT ${OSMSCOUT_BUILD_MAP})
 endif()
 
 set(HEADER_FILES
-    include/osmscout/private/MapDirectXPaint.h
+	include/osmscout/MapDirectXImportExport.h
     include/osmscout/MapPainterDirectX.h
     include/osmscout/PathTextRenderer.h
 )
@@ -23,11 +23,11 @@ target_include_directories(osmscout_map_directx PUBLIC
 
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapDirectXFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapDirectXFeatures.h)
-target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(osmscout_map_directx PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
-target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "osmscout_map_directx")
+target_include_directories(osmscout_map_directx PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 target_link_libraries(osmscout_map_directx
 		osmscout
