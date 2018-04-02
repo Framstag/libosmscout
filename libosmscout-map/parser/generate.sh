@@ -2,17 +2,17 @@
 
 if [ -x "$(command -v Coco)" ]; then
   COCO=Coco
-elif  [ -x "$(command -v cococpp)" ]; then   
+elif  [ -x "$(command -v cococpp)" ]; then
   COCO=cococpp
 else
   echo "No coco implementation found!"
-  exit 1  
+  exit 1
 fi
 
 echo "Using Coco command '${COCO}'..."
 
 # OSS (aka OSMScout style)
-$COCO OSS/OSS.atg -trace AFGIJPSX -namespace osmscout:oss -frames OSS -o OSS
+$COCO OSS/OSS.atg -namespace osmscout:oss -frames OSS -o OSS
 
 sed -i s/\(L\"/\(\"/g OSS/Scanner.cpp
 sed -i s/L\'/\'/g OSS/Scanner.cpp

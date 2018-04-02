@@ -25,7 +25,7 @@
 #include <thread>
 #include <vector>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/MapImportExport.h>
 
 #include <osmscout/Database.h>
 #include <osmscout/TypeConfig.h>

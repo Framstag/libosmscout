@@ -27,7 +27,7 @@
 #include <QAbstractListModel>
 
 #include <osmscout/StyleModule.h>
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI

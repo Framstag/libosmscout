@@ -1,7 +1,7 @@
 osmscoutimportIncDir = include_directories('.')
 
 osmscoutimportHeader = [
-            'osmscout/private/ImportImportExport.h',
+            'osmscout/import/ImportImportExport.h',
             'osmscout/import/RawCoastline.h',
             'osmscout/import/RawCoord.h',
             'osmscout/import/RawNode.h',

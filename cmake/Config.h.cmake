@@ -221,11 +221,6 @@
 #cmakedefine OSMSCOUT_HAVE_INT8_T 1
 #endif
 
-/* libmarisa detected */
-#ifndef OSMSCOUT_HAVE_LIB_MARISA
-#cmakedefine OSMSCOUT_HAVE_LIB_MARISA 1
-#endif
-
 /* long long is available */
 #ifndef OSMSCOUT_HAVE_LONG_LONG
 #cmakedefine OSMSCOUT_HAVE_LONG_LONG 1

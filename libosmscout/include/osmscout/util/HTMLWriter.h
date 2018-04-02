@@ -22,7 +22,7 @@
 
 #include <fstream>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 #include <osmscout/ObjectRef.h>
 

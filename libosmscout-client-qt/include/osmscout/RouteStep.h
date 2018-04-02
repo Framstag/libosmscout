@@ -21,7 +21,7 @@
 #ifndef OSMSCOUT_CLIENT_QT_ROUTESTEP_H
 #define OSMSCOUT_CLIENT_QT_ROUTESTEP_H
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
 

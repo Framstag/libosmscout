@@ -1,6 +1,26 @@
-*.opt
-*.txt
-*.osm
-*.osm.pbf
-*.zip
-/**/
+# OSM data files and similar
+
+/*.opt
+/*.txt
+/*.osm
+/*.osm.pbf
+/*.zip
+/*.poly
+/*.shp
+
+# Libosmscout Databases
+/*/*.txt
+/*/*.dat
+/*/*.idx
+/*/*.idmap
+/*/*.tmp
+/*/*.html
+
+# Shapefiles
+/*/*.cpg
+/*/*.dbf
+/*/*.prj
+/*/*.shp
+/*/*.shx
+/*/*.json
+/*/README

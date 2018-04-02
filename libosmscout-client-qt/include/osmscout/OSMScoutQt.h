@@ -32,7 +32,7 @@
 #include <osmscout/NavigationModule.h>
 #include <osmscout/POILookupModule.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <atomic>
 

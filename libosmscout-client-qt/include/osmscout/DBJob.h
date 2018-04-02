@@ -30,7 +30,7 @@
 #include <osmscout/DBInstance.h>
 #include <osmscout/DataTileCache.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI

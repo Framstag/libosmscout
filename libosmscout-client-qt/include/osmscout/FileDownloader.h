@@ -31,7 +31,7 @@
 #include <QTime>
 #include <QFileInfo>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /// \brief Downloads a file specified by URL
 ///

@@ -27,7 +27,7 @@
 #include <limits>
 #include <thread>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 namespace osmscout {
 

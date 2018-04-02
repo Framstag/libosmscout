@@ -30,7 +30,7 @@
 #include <osmscout/LocationService.h>
 #include <osmscout/SearchModule.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * Model for searching objects in osmscout databases by pattern written by human.

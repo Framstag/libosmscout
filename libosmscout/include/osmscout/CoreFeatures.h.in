@@ -1,8 +1,0 @@
-/* libosmscout uses special gcc compiler features to export symbols */
-#undef OSMSCOUT_EXPORT_SYMBOLS
-
-/* SSE2 processor extension available */
-#undef OSMSCOUT_HAVE_SSE2
-
-/* libmarisa is available */
-#undef OSMSCOUT_HAVE_LIB_MARISA

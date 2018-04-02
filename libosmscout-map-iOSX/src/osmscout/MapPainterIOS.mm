@@ -430,7 +430,7 @@ namespace osmscout {
                                       double fontSize){
         Font *font = GetFont(projection,parameter,fontSize);
 #if TARGET_OS_IPHONE
-        CGSize size = [@"Aj" sizeWithFont:font];
+        CGSize size = [@"Aj" sizeWithAttributes:@{NSFontAttributeName:font}];
 #else
         NSRect stringBounds = [@"Aj" boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
         CGSize size = stringBounds.size;
@@ -456,7 +456,7 @@ namespace osmscout {
         textStyle.alignment = NSTextAlignmentCenter;
 
         if(objectWidth > 0){
-            CGSize averageFontSize = [@"a" sizeWithFont:font];
+            CGSize averageFontSize = [@"a" sizeWithAttributes:@{NSFontAttributeName:font}];
             CGFloat proposedWidth = GetProposedLabelWidth(parameter,
                                                        averageFontSize.width,
                                                        objectWidth,
@@ -587,11 +587,9 @@ namespace osmscout {
             Font *font = GetFont(projection, parameter, label.fontSize);
             NSString *str = [NSString stringWithUTF8String:label.text.c_str()];
 #if TARGET_OS_IPHONE
-            CGContextSetRGBFillColor(cg,style->GetTextColor().GetR(),
-                                     style->GetTextColor().GetG(),
-                                     style->GetTextColor().GetB(),
-                                     style->GetTextColor().GetA());
-            [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
+            UIColor *color = [UIColor colorWithRed: style->GetTextColor().GetR() green: style->GetTextColor().GetG() blue: style->GetTextColor().GetB() alpha: style->GetTextColor().GetA()];
+            NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
+            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
 #else
             NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
             NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
@@ -757,6 +755,8 @@ namespace osmscout {
         CGContextSetRGBFillColor(cg, style.GetTextColor().GetR(), style.GetTextColor().GetG(), style.GetTextColor().GetB(), style.GetTextColor().GetA());
         CGContextSetRGBStrokeColor(cg, 1, 1, 1, 1);
         CGContextSetFont(cg, (__bridge CGFontRef)font);
+        UIColor *color = [UIColor colorWithRed: style.GetTextColor().GetR() green: style.GetTextColor().GetG() blue: style.GetTextColor().GetB() alpha: style.GetTextColor().GetA()];
+        NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
 #else
         NSColor *color = [NSColor colorWithSRGBRed:style.GetTextColor().GetR() green:style.GetTextColor().GetG() blue:style.GetTextColor().GetB() alpha:style.GetTextColor().GetA()];
         NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
@@ -804,7 +804,7 @@ namespace osmscout {
                 ct = CGAffineTransformMakeRotation(slopes[i]);
                 CGContextConcatCTM(cg, ct);
 #if TARGET_OS_IPHONE
-                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withFont:font];
+                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withAttributes:attrsDictionary];
 #else
                 [str drawAtPoint:CGPointMake(0,-dimension.height/2) withAttributes:attrsDictionary];
 #endif
@@ -835,8 +835,8 @@ namespace osmscout {
         assert(idx<images.size());
         assert(images[idx]);
 
-        CGFloat w = CGImageGetWidth(images[idx]);
-        CGFloat h = CGImageGetHeight(images[idx]);
+        CGFloat w = CGImageGetWidth(images[idx])/contentScale;
+        CGFloat h = CGImageGetHeight(images[idx])/contentScale;
         CGRect rect = CGRectMake(x-w/2, -h/2-y, w, h);
         CGContextSaveGState(cg);
         CGContextScaleCTM(cg, 1.0, -1.0);
@@ -1172,5 +1172,4 @@ namespace osmscout {
             CGContextSetRGBStrokeColor(cg,0,0,0,0);
         }
     }
-
 }

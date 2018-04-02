@@ -1,6 +1,7 @@
 osmscoutIncDir = include_directories('.')
 
 osmscoutHeader = [
+            'osmscout/CoreImportExport.h',
             'osmscout/ost/Parser.h',
             'osmscout/ost/Scanner.h',
             'osmscout/system/SSEMath.h',

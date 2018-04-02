@@ -1,5 +1,0 @@
-Makefile
-include/Makefile
-src/Makefile
-
-include/osmscout/MapCairoFeatures.h

@@ -4,10 +4,6 @@ set(HEADER_FILES_OST
     include/osmscout/ost/Parser.h
     include/osmscout/ost/Scanner.h)
 
-
-set(HEADER_FILES_PRIVATE
-    include/osmscout/private/CoreImportExport.h)
-
 set(HEADER_FILES_SYSTEM
     include/osmscout/system/Assert.h
     include/osmscout/system/Compiler.h
@@ -63,11 +59,10 @@ set(HEADER_FILES_ROUTING
 
 set(HEADER_FILES
     ${HEADER_FILES_OST}
-    ${HEADER_FILES_PRIVATE}
     ${HEADER_FILES_SYSTEM}
     ${HEADER_FILES_UTIL}
     ${HEADER_FILES_ROUTING}
-    #include/osmscout/private/Config.h
+    include/osmscout/CoreImportExport.h
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
@@ -75,7 +70,6 @@ set(HEADER_FILES
     include/osmscout/AreaWayIndex.h
     include/osmscout/Coord.h
     include/osmscout/CoordDataFile.h
-    #include/osmscout/CoreFeatures.h
     include/osmscout/CoverageIndex.h
     include/osmscout/BoundingBoxDataFile.h
     include/osmscout/TypeDistributionDataFile.h
@@ -104,7 +98,6 @@ set(HEADER_FILES
     include/osmscout/ObjectVariantDataFile.h
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
-    #include/osmscout/TextSearchIndex.h
     include/osmscout/TypeConfig.h
     include/osmscout/TypeFeatures.h
     include/osmscout/Types.h
@@ -188,7 +181,6 @@ set(SOURCE_FILES
     src/osmscout/ObjectVariantDataFile.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
-    #src/osmscout/TextSearchIndex.cpp
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeatures.cpp
     src/osmscout/Types.cpp
@@ -215,12 +207,19 @@ else()
 endif()
 
 set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/CoreFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout")
-target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_SOURCE_DIR}/include)
+
+# Public features Header
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/CoreFeatures.h)
+target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "osmscout")
+target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 if(MARISA_FOUND)
-    target_include_directories(${THE_TARGET_NAME} PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_include_directories(${THE_TARGET_NAME} PUBLIC ${MARISA_INCLUDE_DIRS})
     target_link_libraries(${THE_TARGET_NAME} ${MARISA_LIBRARIES})
 endif()
 
@@ -248,8 +247,6 @@ if(APPLE AND BUILD_FRAMEWORKS)
 
   set_property(SOURCE "${HEADER_FILES_OST}"
           PROPERTY MACOSX_PACKAGE_LOCATION Headers/ost)
-  set_property(SOURCE "${HEADER_FILES_PRIVATE}"
-          PROPERTY MACOSX_PACKAGE_LOCATION Headers/private)
   set_property(SOURCE "${HEADER_FILES_SYSTEM}"
           PROPERTY MACOSX_PACKAGE_LOCATION Headers/system)
   set_property(SOURCE "${HEADER_FILES_UTIL}"

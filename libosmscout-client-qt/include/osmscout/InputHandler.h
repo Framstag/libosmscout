@@ -30,7 +30,7 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI

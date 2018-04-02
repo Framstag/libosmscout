@@ -35,7 +35,7 @@
   #include <pango/pangocairo.h>
 #endif
 
-#include <osmscout/private/MapCairoImportExport.h>
+#include <osmscout/MapCairoImportExport.h>
 
 #include <osmscout/MapPainter.h>
 

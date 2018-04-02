@@ -1,44 +1,4 @@
-#Autoconf & Automake
-
-**/config.log
-**/config.guess
-**/config.status
-**/config.sub
-**/COPYING
-**/INSTALL
-**/Makefile.in
-**/aclocal.m4
-**/autom4te.cache
-**/configure
-**/compile
-**/depcomp
-**/install-sh
-**/missing
-**/stamp-h1
-**/stamp-h2
-**/config.h.in
-**/config.h
-**/Config.h.in
-**/Config.h
-**/test-driver
-**/.deps
-**/.libs
-**/.dirstamp
-**/*-uninstalled.sh
-
-# Libtool
-**/libtool
-**/ltmain.sh
-**/*.la
-**/*.lo
-
-# pkg-config
-**/*.pc
-**/*.pc.in
-
 # CMake
-**/CMakeFiles
-**/CMakeCache.txt
 **/cmake_install.cmake
 **/.autotools
 **/debug
@@ -47,14 +7,16 @@ build/
 
 # IDEs
 **/.cproject
-**/.idea
 **/.project
 **/.settings
 **/.classpath
 **/nbproject
+**/.idea
+/cmake-build-debug
 
 # Backup
 **/*~
 
-# Usual build dir
-/build/
+# meson
+/debug/
+/release/

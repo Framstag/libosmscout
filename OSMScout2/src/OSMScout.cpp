@@ -48,7 +48,8 @@
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/GPXFeatures.h>
+
+#include <osmscout/gpx/GPXFeatures.h>
 
 static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {

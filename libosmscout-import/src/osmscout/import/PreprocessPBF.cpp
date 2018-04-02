@@ -20,7 +20,7 @@
 #include <osmscout/import/PreprocessPBF.h>
 
 #include <osmscout/private/Config.h>
-#include <osmscout/ImportFeatures.h>
+#include <osmscout/import/ImportFeatures.h>
 
 #include <cstdio>
 

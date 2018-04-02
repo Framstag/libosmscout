@@ -22,7 +22,7 @@
 
 #include <osmscout/gpx/TrackSegment.h>
 
-#include <osmscout/private/GPXImportExport.h>
+#include <osmscout/gpx/GPXImportExport.h>
 
 #include <string>
 #include <vector>

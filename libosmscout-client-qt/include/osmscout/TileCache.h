@@ -34,7 +34,7 @@
 #include <QPixmap>
 
 #include <osmscout/util/GeoBox.h>
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI

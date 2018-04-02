@@ -30,7 +30,7 @@
 #include <osmscout/TextSearchIndex.h>
 #endif
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI

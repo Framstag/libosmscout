@@ -26,7 +26,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 #include <osmscout/util/Parsing.h>
 

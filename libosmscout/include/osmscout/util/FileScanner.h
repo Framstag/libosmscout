@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 #include <osmscout/CoreFeatures.h>
 

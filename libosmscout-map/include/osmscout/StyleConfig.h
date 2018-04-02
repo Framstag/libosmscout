@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/MapImportExport.h>
 
 #include <osmscout/Pixel.h>
 

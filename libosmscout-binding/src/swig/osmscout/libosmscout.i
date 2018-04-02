@@ -14,6 +14,9 @@
 
 %include <osmscout/Types.i>
 
+%include <osmscout/util/StringMatcher.i>
+%include <osmscout/util/Breaker.i>
+
 %include <osmscout/ObjectRef.i>
 
 %include <osmscout/util/Magnification.i>

@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/MapImportExport.h>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>

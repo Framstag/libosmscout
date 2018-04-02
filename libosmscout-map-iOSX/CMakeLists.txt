@@ -23,6 +23,12 @@ endif()
 
 set_property(TARGET OSMScoutMapIOSX PROPERTY CXX_STANDARD 11)
 
+target_include_directories(OSMScoutMapIOSX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# Private config header
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapIOSX")
+target_include_directories(OSMScoutMapIOSX PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+
 set_target_properties(OSMScoutMapIOSX PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C
@@ -32,17 +38,9 @@ set_target_properties(OSMScoutMapIOSX PROPERTIES
   CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 )
 
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-map-iosx")
-
 find_library(FOUNDATION Foundation)
 find_library(COREGRAPHICS CoreGraphics)
 find_library(CORETEXT CoreText)
-
-target_include_directories(OSMScoutMapIOSX PRIVATE 
-		include
-		${CMAKE_CURRENT_BINARY_DIR}/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include
-		${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map/include)
 
 if(${IOS})
 find_library(UIKIT UIKit)
@@ -73,8 +71,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc -fembed-bitcode")
 else()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc")
 endif()
-			
+
 target_compile_definitions(OSMScoutMapIOSX PRIVATE -DOSMSCOUTMAPIOSX_EXPORT_SYMBOLS)
+
 install(TARGETS OSMScoutMapIOSX
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

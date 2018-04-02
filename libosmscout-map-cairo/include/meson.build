@@ -1,7 +1,7 @@
 osmscoutmapcairoIncDir = include_directories('.')
 
 osmscoutmapcairoHeader = [
-            'osmscout/private/MapCairoImportExport.h',
+            'osmscout/MapCairoImportExport.h',
             'osmscout/MapPainterCairo.h'
           ]
 

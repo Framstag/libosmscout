@@ -21,7 +21,7 @@
 */
 
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <QAbstractListModel>
 

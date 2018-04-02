@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include <osmscout/private/ImportImportExport.h>
+#include <osmscout/import/ImportImportExport.h>
 
 #include <osmscout/util/GeoBox.h>
 

@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include <osmscout/private/MapOpenGLImportExport.h>
+#include <osmscout/MapOpenGLImportExport.h>
 #include <osmscout/OpenGLMapData.h>
 
 namespace osmscout {

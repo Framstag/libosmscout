@@ -26,7 +26,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <osmscout/DBThread.h>
 #include <osmscout/MapRenderer.h>

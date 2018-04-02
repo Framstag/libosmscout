@@ -24,11 +24,11 @@
 
 #include <osmscout/MapDirectXFeatures.h>
 
-#include <osmscout/private/MapDirectXImportExport.h>
+#include <osmscout/MapDirectXImportExport.h>
+
+#include <osmscout/MapPainter.h>
 
 #include <osmscout/PathTextRenderer.h>
-#include <osmscout/private/MapDirectXPaint.h>
-#include <osmscout/MapPainter.h>
 
 #include <d2d1.h>
 #include <dwrite.h>

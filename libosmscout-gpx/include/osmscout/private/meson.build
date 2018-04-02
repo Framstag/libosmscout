@@ -1,6 +1,6 @@
-mapqtCfg = configuration_data()
-mapqtCfg.set('HAVE_VISIBILITY',haveVisibility, description: 'compiler supports simple visibility declarations')
+mapgpxCfg = configuration_data()
+mapgpxCfg.set('HAVE_VISIBILITY',haveVisibility, description: 'compiler supports simple visibility declarations')
 
 configure_file(output: 'Config.h',
-               configuration: mapqtCfg)
+               configuration: mapgpxCfg)
 

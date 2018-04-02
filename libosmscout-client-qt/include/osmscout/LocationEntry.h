@@ -29,7 +29,7 @@
 #include <osmscout/LocationDescriptionService.h>
 #include <osmscout/LocationService.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 /**
  * \ingroup QtAPI

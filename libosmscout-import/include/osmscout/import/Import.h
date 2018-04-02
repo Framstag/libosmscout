@@ -24,9 +24,9 @@
 #include <mutex>
 #include <string>
 
-#include <osmscout/ImportFeatures.h>
+#include <osmscout/import/ImportFeatures.h>
 
-#include <osmscout/private/ImportImportExport.h>
+#include <osmscout/import/ImportImportExport.h>
 
 #include <osmscout/TypeConfig.h>
 

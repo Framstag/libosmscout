@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/CoreImportExport.h>
 
 #include <osmscout/Types.h>
 

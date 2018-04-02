@@ -24,7 +24,7 @@
 #include <osmscout/gpx/Route.h>
 #include <osmscout/gpx/Waypoint.h>
 
-#include <osmscout/private/GPXImportExport.h>
+#include <osmscout/gpx/GPXImportExport.h>
 
 #include <vector>
 

@@ -23,7 +23,7 @@
 #include <osmscout/LocationEntry.h>
 #include <osmscout/POILookupModule.h>
 
-#include <osmscout/private/ClientQtImportExport.h>
+#include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
 #include <QAbstractListModel>

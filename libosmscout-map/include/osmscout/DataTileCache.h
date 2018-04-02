@@ -26,7 +26,7 @@
 #include <mutex>
 #include <vector>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/MapImportExport.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Way.h>
