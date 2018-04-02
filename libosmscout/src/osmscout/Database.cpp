@@ -89,6 +89,11 @@ namespace osmscout {
     waysDataMMap=mmap;
   }
 
+  void DatabaseParameter::SetOptimizeLowZoomMMap(bool mmap)
+  {
+    optimizeLowZoomMMap=mmap;
+  }
+
   void DatabaseParameter::SetIndexMMap(bool mmap)
   {
     indexMMap=mmap;
