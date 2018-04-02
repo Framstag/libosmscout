@@ -95,12 +95,6 @@ add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
 target_sources(OSMScout2 PRIVATE ${TRANSLATION_TS_FILES} ${TRANSLATION_QM_FILES})
 
-# TODO: Should transitive dependencies not already be handled by libosmscout?
-if(MARISA_FOUND)
-	target_include_directories(OSMScout2 PRIVATE ${MARISA_INCLUDE_DIRS})
-	target_link_libraries(OSMScout2 ${MARISA_LIBRARIES})
-endif()
-
 if(APPLE AND BUILD_FRAMEWORKS)
 	target_link_libraries(OSMScout2
         OSMScout
