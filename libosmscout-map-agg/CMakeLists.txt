@@ -87,4 +87,4 @@ install(TARGETS ${THE_TARGET_NAME}
         ARCHIVE DESTINATION lib
         FRAMEWORK DESTINATION lib)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
-install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapAggFeatures.h DESTINATION include/osmscout)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapAggFeatures.h DESTINATION include/osmscout)
