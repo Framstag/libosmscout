@@ -14,8 +14,8 @@ RESULT_archlinux_gcc_meson=$?
 ./debian_stretch_gcc_cmake/run.sh "$@"
 RESULT_debian_stretch_gcc_cmake=$?
 
-./debian_sid_gcc_meson/run.sh "$@"
-RESULT_debian_sid_gcc_meson=$?
+./debian_buster_gcc_meson/run.sh "$@"
+RESULT_debian_buster_gcc_meson=$?
 
 ./ubuntu_14.04_gcc_cmake/run.sh "$@"
 RESULT_ubuntu_14_04_gcc_cmake=$?
@@ -42,8 +42,8 @@ if [ $RESULT_archlinux_gcc_meson         -eq 0 ] ; then echo "OK"; else echo "FA
 echo -ne "debian_stretch_gcc_cmake     "
 if [ $RESULT_debian_stretch_gcc_cmake    -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "debian_sid_gcc_meson         "
-if [ $RESULT_debian_sid_gcc_meson        -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+echo -ne "debian_buster_gcc_meson      "
+if [ $RESULT_debian_buster_gcc_meson     -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "ubuntu_14.04_gcc_cmake       "
 if [ $RESULT_ubuntu_14_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
