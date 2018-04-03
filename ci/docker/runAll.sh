@@ -11,9 +11,6 @@ RESULT_archlinux_gcc_cmake=$?
 ./archlinux_gcc_meson/run.sh "$@"
 RESULT_archlinux_gcc_meson=$?
 
-./debian_jessie_gcc_cmake/run.sh "$@"
-RESULT_debian_jessie_gcc_cmake=$?
-
 ./debian_stretch_gcc_cmake/run.sh "$@"
 RESULT_debian_stretch_gcc_cmake=$?
 
@@ -41,9 +38,6 @@ if [ $RESULT_archlinux_gcc_cmake         -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "archlinux_gcc_meson          "
 if [ $RESULT_archlinux_gcc_meson         -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
-
-echo -ne "debian_jessie_gcc_cmake      "
-if [ $RESULT_debian_jessie_gcc_cmake     -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "debian_stretch_gcc_cmake     "
 if [ $RESULT_debian_stretch_gcc_cmake    -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
