@@ -21,9 +21,5 @@ cd libosmscout
 meson debug
 cd debug
 
-# workaround for meson 0.44 issue https://github.com/mesonbuild/meson/issues/2763
-ln -s . ../OSMScout2/OSMScout2
-ln -s . ../StyleEditor/StyleEditor
-
 ninja
 ninja test
