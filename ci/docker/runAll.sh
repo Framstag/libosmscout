@@ -2,9 +2,6 @@
 cd `dirname $0`
 set -x
 
-./archlinux_gcc_autoconf/run.sh     "$@"
-RESULT_archlinux_gcc_autoconf=$?
- 
 ./archlinux_gcc_cmake/run.sh        "$@" 
 RESULT_archlinux_gcc_cmake=$?
 
