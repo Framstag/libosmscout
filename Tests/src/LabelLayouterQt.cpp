@@ -93,6 +93,10 @@ public:
   using ContourLabel = std::vector<Glyph<NativeGlyph>>;
 
 public:
+  LabelLayouter(TextLayouter *textLayouter):
+      textLayouter(textLayouter)
+  {};
+
   void registerContourLabel(std::vector<QPointF> way,
                             std::string string)
   {
@@ -108,16 +112,33 @@ public:
   {
     return std::move(std::vector<ContourLabel>());
   }
+
+private:
+  TextLayouter *textLayouter;
 };
+
+
+using QtGlyph = Glyph<QGlyphRun>;
+using QtLabel = Label<QGlyphRun>;
 
 class QTextLayouter
 {
+public:
+  QPainter *painter;
+  LabelLayouter<QGlyphRun, QTextLayouter> labelLayouter;
+
+public:
+  QTextLayouter(QPainter *painter):
+    painter(painter),
+    labelLayouter(this)
+  {
+  }
 
 };
 
-Label<QGlyphRun>::toGlyphs() const
+template<> std::vector<QtGlyph> QtLabel::toGlyphs() const
 {
-
+  return std::vector<QtGlyph>();
 }
 
 class DrawWindow : public QWidget
@@ -133,7 +154,7 @@ protected:
 
   void drawLine(QPainter *painter, const std::vector<QPointF> &p);
   void drawGlyph(QPainter *painter,
-                 const Glyph<QGlyphRun> &glyph) const;
+                 const QtGlyph &glyph) const;
 
   QString                   variant;
   std::vector<double>       sin;           //! Lookup table for sin calculation
@@ -241,7 +262,8 @@ void DrawWindow::paintEvent(QPaintEvent* /* event */)
   QPainter painter(this);
   painter.fillRect(0,0, width(), height(), QBrush(QColor::fromRgbF(1,1,1)));
 
-  LabelLayouter<QGlyphRun,QTextLayouter> layouter;
+  QTextLayouter textLayouter(&painter);
+  LabelLayouter<QGlyphRun,QTextLayouter> *layouter=&textLayouter.labelLayouter;
 
   QString string="Hebrew Sarah (שרה) is spelled: sin (ש), resh (ר) and heh (ה)";
 
@@ -253,10 +275,10 @@ void DrawWindow::paintEvent(QPaintEvent* /* event */)
       int y=std::sin(((double)(x+sinStart+moveOffset)/(double)width()) *2*M_PI) * (height()/2-44) + height()/2;
       way.push_back(QPointF(x,y));
     }
-    layouter.registerContourLabel(way, string.toStdString());
+    layouter->registerContourLabel(way, string.toStdString());
   }
 
-  for (const LabelInstance<QGlyphRun> &label:layouter.labels()){
+  for (const LabelInstance<QGlyphRun> &label:layouter->labels()){
     for (const Glyph<QGlyphRun> &glyph:label.label.toGlyphs()){
       drawGlyph(&painter, glyph);
     }
