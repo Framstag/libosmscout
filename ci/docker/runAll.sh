@@ -2,9 +2,6 @@
 cd `dirname $0`
 set -x
 
-./archlinux_gcc_autoconf/run.sh     "$@"
-RESULT_archlinux_gcc_autoconf=$?
- 
 ./archlinux_gcc_cmake/run.sh        "$@" 
 RESULT_archlinux_gcc_cmake=$?
 
@@ -23,9 +20,6 @@ RESULT_ubuntu_14_04_gcc_cmake=$?
 ./ubuntu_16.04_gcc_cmake/run.sh     "$@" 
 RESULT_ubuntu_16_04_gcc_cmake=$?
 
-./ubuntu_17.04_gcc_cmake/run.sh     "$@" 
-RESULT_ubuntu_17_04_gcc_cmake=$?
-
 ./ubuntu_17.10_gcc_cmake/run.sh     "$@"
 RESULT_ubuntu_17_10_gcc_cmake=$?
 
@@ -39,7 +33,7 @@ if [ $RESULT_archlinux_gcc_cmake         -eq 0 ] ; then echo "OK"; else echo "FA
 echo -ne "debian_jessie_gcc_cmake      "
 if [ $RESULT_debian_jessie_gcc_cmake     -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "debian_stretch_gcc_cmake      "
+echo -ne "debian_stretch_gcc_cmake     "
 if [ $RESULT_debian_stretch_gcc_cmake    -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "debian_sid_gcc_meson         "
@@ -50,9 +44,6 @@ if [ $RESULT_ubuntu_14_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "ubuntu_16.04_gcc_cmake       "
 if [ $RESULT_ubuntu_16_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
-
-echo -ne "ubuntu_17.04_gcc_cmake       "
-if [ $RESULT_ubuntu_17_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "ubuntu_17.10_gcc_cmake       "
 if [ $RESULT_ubuntu_17_10_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
