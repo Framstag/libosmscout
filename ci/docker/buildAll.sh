@@ -2,7 +2,9 @@
 cd `dirname $0`
 set -xe
 
+./archlinux_clang_cmake/build.sh
 ./archlinux_gcc_cmake/build.sh
+./archlinux_gcc_meson/build.sh
 ./debian_jessie_gcc_cmake/build.sh
 ./debian_stretch_gcc_cmake/build.sh
 ./debian_sid_gcc_meson/build.sh
