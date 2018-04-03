@@ -8,5 +8,4 @@ set -xe
 ./debian_sid_gcc_meson/build.sh
 ./ubuntu_14.04_gcc_cmake/build.sh
 ./ubuntu_16.04_gcc_cmake/build.sh
-./ubuntu_17.04_gcc_cmake/build.sh
 ./ubuntu_17.10_gcc_cmake/build.sh
