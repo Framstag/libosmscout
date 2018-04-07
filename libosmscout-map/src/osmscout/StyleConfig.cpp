@@ -474,27 +474,6 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)
-  {
-    for (const auto& type : typeConfig->GetNodeTypes()) {
-      types.push_back(type->GetNodeId());
-    }
-  }
-
-  void StyleConfig::GetAllWayTypes(std::list<TypeId>& types)
-  {
-    for (const auto& type : typeConfig->GetWayTypes()) {
-      types.push_back(type->GetWayId());
-    }
-  }
-
-  void StyleConfig::GetAllAreaTypes(std::list<TypeId>& types)
-  {
-    for (const auto& type : typeConfig->GetAreaTypes()) {
-      types.push_back(type->GetAreaId());
-    }
-  }
-
   template <class S, class A>
   void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A> >& conditionals,
                                  size_t& maxLevel)

@@ -575,10 +575,6 @@ namespace osmscout {
   private:
     void Reset();
 
-    void GetAllNodeTypes(std::list<TypeId>& types);
-    void GetAllWayTypes(std::list<TypeId>& types);
-    void GetAllAreaTypes(std::list<TypeId>& types);
-
     void PostprocessNodes();
     void PostprocessWays();
     void PostprocessAreas();
