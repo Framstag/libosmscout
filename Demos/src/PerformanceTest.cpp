@@ -94,7 +94,7 @@ struct LevelStats
 
   size_t tileCount;
 
-  LevelStats(size_t level)
+  explicit LevelStats(size_t level)
   : level(level),
     dbMinTime(std::numeric_limits<double>::max()),
     dbMaxTime(0.0),
@@ -213,20 +213,20 @@ int main(int argc, char* argv[])
   driver=argv[11];
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-  cairo_surface_t * cairoSurface=NULL;
-  cairo_t         *cairo=NULL;
+  cairo_surface_t * cairoSurface=nullptr;
+  cairo_t         *cairo=nullptr;
 #endif
 
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
-  QPixmap         *qtPixmap=NULL;
-  QPainter        *qtPainter=NULL;
+  QPixmap         *qtPixmap=nullptr;
+  QPainter        *qtPainter=nullptr;
   QApplication    application(argc,argv,true);
 #endif
 
 #if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-  unsigned char* buffer;
-  agg::rendering_buffer* rbuf;
-  osmscout::MapPainterAgg::AggPixelFormat* pf;
+  unsigned char*                           buffer;
+  agg::rendering_buffer*                   rbuf=nullptr;
+  osmscout::MapPainterAgg::AggPixelFormat* pf=nullptr;
 #endif
 
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
@@ -238,14 +238,14 @@ int main(int argc, char* argv[])
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
     cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
 
-    if (cairoSurface==NULL) {
+    if (cairoSurface==nullptr) {
       std::cerr << "Cannot create cairo image cairoSurface" << std::endl;
       return 1;
     }
 
     cairo=cairo_create(cairoSurface);
 
-    if (cairo==NULL) {
+    if (cairo==nullptr) {
       std::cerr << "Cannot create cairo_t for image cairoSurface" << std::endl;
       return 1;
     }
@@ -258,18 +258,7 @@ int main(int argc, char* argv[])
     std::cout << "Using driver 'Qt'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
     qtPixmap=new QPixmap(tileWidth,tileHeight);
-
-    if (qtPixmap==NULL) {
-      std::cerr << "Cannot create QPixmap" << std::endl;
-      return 1;
-    }
-
     qtPainter=new QPainter(qtPixmap);
-
-    if (qtPainter==NULL) {
-      std::cerr << "Cannot create QPainter image cairoSurface" << std::endl;
-      return 1;
-    }
 #else
     std::cerr << "Driver 'Qt' is not enabled" << std::endl;
   return 1;
@@ -299,7 +288,12 @@ int main(int argc, char* argv[])
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, false);
-    GLFWwindow* offscreen_context = glfwCreateWindow(tileWidth, tileHeight, "", NULL, NULL);
+    GLFWwindow* offscreen_context;
+    offscreen_context=glfwCreateWindow(tileWidth,
+                                       tileHeight,
+                                       "",
+                                       nullptr,
+                                       nullptr);
     if (!offscreen_context) {
       std::cerr << "Failed to create offscreen context." << std::endl;
       return 1;
@@ -328,7 +322,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
   osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(map)) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
@@ -382,11 +376,16 @@ int main(int argc, char* argv[])
     osmscout::MapPainterAgg aggMapPainter(styleConfig);
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
-    osmscout::MapPainterOpenGL* openglMapPainter;
-    if (driver == "opengl") // This driver need a valid existing context
-      openglMapPainter =
-            new osmscout::MapPainterOpenGL(tileWidth, tileHeight, DPI, tileWidth, tileHeight,
-            "/usr/share/fonts/TTF/DejaVuSans.ttf");
+    osmscout::MapPainterOpenGL* openglMapPainter=nullptr;
+    if (driver == "opengl") {
+      // This driver need a valid existing context
+      openglMapPainter=new osmscout::MapPainterOpenGL(tileWidth,
+                                                      tileHeight,
+                                                      DPI,
+                                                      tileWidth,
+                                                      tileHeight,
+                                                      "/usr/share/fonts/TTF/DejaVuSans.ttf");
+    }
 #endif
     osmscout::MapPainterNoOp noOpMapPainter(styleConfig);
 
@@ -495,9 +494,9 @@ int main(int argc, char* argv[])
       if (driver == "agg") {
         //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
         aggMapPainter.DrawMap(projection,
-                drawParameter,
-                data,
-                pf);
+                              drawParameter,
+                              data,
+                              pf);
       }
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
