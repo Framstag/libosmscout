@@ -743,8 +743,10 @@ namespace osmscout {
      * Methods for loading a concrete OSS style sheet
      */
     //@{
-    bool LoadContent(const std::string& content);
-    bool Load(const std::string& styleFile);
+    bool LoadContent(const std::string& content,
+                    ColorPostprocessor colorPostprocessor=nullptr);
+    bool Load(const std::string& styleFile,
+              ColorPostprocessor colorPostprocessor=nullptr);
     const std::list<std::string>&  GetErrors();
     const std::list<std::string>&  GetWarnings();
     //@}
