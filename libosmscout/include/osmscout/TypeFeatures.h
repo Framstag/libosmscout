@@ -37,7 +37,7 @@ namespace osmscout {
       // no code
     }
 
-    inline NameFeatureValue(const std::string& name)
+    inline explicit NameFeatureValue(const std::string& name)
     : name(name)
     {
       // no code
@@ -53,16 +53,16 @@ namespace osmscout {
       return name;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return name;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API NameFeature : public Feature
@@ -79,19 +79,19 @@ namespace osmscout {
 
   public:
     NameFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API NameAltFeatureValue : public FeatureValue
@@ -105,7 +105,7 @@ namespace osmscout {
       // no code
     }
 
-    inline NameAltFeatureValue(const std::string& nameAlt)
+    inline explicit NameAltFeatureValue(const std::string& nameAlt)
     : nameAlt(nameAlt)
     {
       // no code
@@ -121,16 +121,16 @@ namespace osmscout {
       return nameAlt;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return nameAlt;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API NameAltFeature : public Feature
@@ -147,19 +147,19 @@ namespace osmscout {
 
   public:
     NameAltFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API RefFeatureValue : public FeatureValue
@@ -173,7 +173,7 @@ namespace osmscout {
       // no code
     }
 
-    inline RefFeatureValue(const std::string& ref)
+    inline explicit RefFeatureValue(const std::string& ref)
     : ref(ref)
     {
       // no code
@@ -189,16 +189,16 @@ namespace osmscout {
       return ref;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return ref;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API RefFeature : public Feature
@@ -216,19 +216,19 @@ namespace osmscout {
 
   public:
     RefFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API LocationFeatureValue : public FeatureValue
@@ -242,7 +242,7 @@ namespace osmscout {
       // no code
     }
 
-    inline LocationFeatureValue(const std::string& location)
+    inline explicit LocationFeatureValue(const std::string& location)
     : location(location)
     {
       // no code
@@ -258,16 +258,16 @@ namespace osmscout {
       return location;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return location;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   /**
@@ -288,19 +288,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   /**
@@ -320,7 +320,7 @@ namespace osmscout {
       // no code
     }
 
-    inline AddressFeatureValue(const std::string& address)
+    inline explicit AddressFeatureValue(const std::string& address)
     : address(address)
     {
       // no code
@@ -336,16 +336,16 @@ namespace osmscout {
       return address;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return address;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API AddressFeature : public Feature
@@ -367,19 +367,19 @@ namespace osmscout {
 
   public:
     AddressFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API AccessFeatureValue : public FeatureValue
@@ -406,7 +406,7 @@ namespace osmscout {
 
     }
 
-    inline AccessFeatureValue(uint8_t access)
+    inline explicit AccessFeatureValue(uint8_t access)
     : access(access)
     {
       // no code
@@ -565,11 +565,11 @@ namespace osmscout {
       return (access & onewayBackward)!=0;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API AccessFeature : public Feature
@@ -615,19 +615,19 @@ namespace osmscout {
     }
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API AccessRestrictedFeatureValue : public FeatureValue
@@ -649,7 +649,7 @@ namespace osmscout {
       // no code
     }
 
-    inline AccessRestrictedFeatureValue(uint8_t access)
+    inline explicit AccessRestrictedFeatureValue(uint8_t access)
     : access(access)
     {
       // no code
@@ -720,11 +720,11 @@ namespace osmscout {
       return (access & car)!=0;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   /**
@@ -750,19 +750,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API LayerFeatureValue : public FeatureValue
@@ -777,7 +777,7 @@ namespace osmscout {
 
     }
 
-    inline LayerFeatureValue(int8_t layer)
+    inline explicit LayerFeatureValue(int8_t layer)
     : layer(layer)
     {
       // no code
@@ -793,11 +793,11 @@ namespace osmscout {
       return layer;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API LayerFeature : public Feature
@@ -810,19 +810,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API WidthFeatureValue : public FeatureValue
@@ -837,7 +837,7 @@ namespace osmscout {
 
     }
 
-    inline WidthFeatureValue(uint8_t width)
+    inline explicit WidthFeatureValue(uint8_t width)
     : width(width)
     {
       // no code
@@ -853,11 +853,11 @@ namespace osmscout {
       return width;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API WidthFeature : public Feature
@@ -870,19 +870,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API MaxSpeedFeatureValue : public FeatureValue
@@ -897,7 +897,7 @@ namespace osmscout {
 
     }
 
-    inline MaxSpeedFeatureValue(uint8_t maxSpeed)
+    inline explicit MaxSpeedFeatureValue(uint8_t maxSpeed)
     : maxSpeed(maxSpeed)
     {
       // no code
@@ -913,11 +913,11 @@ namespace osmscout {
       return maxSpeed;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API MaxSpeedFeature : public Feature
@@ -930,19 +930,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API GradeFeatureValue : public FeatureValue
@@ -957,7 +957,7 @@ namespace osmscout {
 
     }
 
-    inline GradeFeatureValue(uint8_t grade)
+    inline explicit GradeFeatureValue(uint8_t grade)
     : grade(grade)
     {
       // no code
@@ -973,11 +973,11 @@ namespace osmscout {
       return grade;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API GradeFeature : public Feature
@@ -991,19 +991,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API AdminLevelFeatureValue : public FeatureValue
@@ -1020,7 +1020,7 @@ namespace osmscout {
     }
 
     inline AdminLevelFeatureValue(uint8_t adminLevel,
-                                 const std::string& isIn)
+                                  const std::string& isIn)
     : adminLevel(adminLevel),
       isIn(isIn)
     {
@@ -1047,11 +1047,11 @@ namespace osmscout {
       return isIn;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API AdminLevelFeature : public Feature
@@ -1065,19 +1065,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API PostalCodeFeatureValue : public FeatureValue
@@ -1092,13 +1092,13 @@ namespace osmscout {
 
     }
 
-    inline PostalCodeFeatureValue(std::string postalCode)
+    inline explicit PostalCodeFeatureValue(const std::string& postalCode)
     : postalCode(postalCode)
     {
       // no code
     }
 
-    inline void SetPostalCode(std::string postalCode)
+    inline void SetPostalCode(const std::string& postalCode)
     {
       this->postalCode=postalCode;
     }
@@ -1108,16 +1108,16 @@ namespace osmscout {
       return postalCode;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return postalCode;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API PostalCodeFeature : public Feature
@@ -1133,19 +1133,19 @@ namespace osmscout {
   public:
     PostalCodeFeature();
 
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API BridgeFeature : public Feature
@@ -1158,16 +1158,16 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API TunnelFeature : public Feature
@@ -1180,16 +1180,16 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API EmbankmentFeature : public Feature
@@ -1202,16 +1202,16 @@ namespace osmscout {
         static const char* const NAME;
 
     public:
-        void Initialize(TypeConfig& typeConfig);
+        void Initialize(TypeConfig& typeConfig) override;
 
-        std::string GetName() const;
+        std::string GetName() const override;
 
         void Parse(TagErrorReporter& reporter,
                    const TypeConfig& typeConfig,
                    const FeatureInstance& feature,
                    const ObjectOSMRef& object,
                    const TagMap& tags,
-                   FeatureValueBuffer& buffer) const;
+                   FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API RoundaboutFeature : public Feature
@@ -1224,16 +1224,16 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API EleFeatureValue : public FeatureValue
@@ -1248,7 +1248,7 @@ namespace osmscout {
 
     }
 
-    inline EleFeatureValue(uint32_t ele)
+    inline explicit EleFeatureValue(uint32_t ele)
     : ele(ele)
     {
       // no code
@@ -1264,16 +1264,16 @@ namespace osmscout {
       return ele;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return std::to_string(ele)+"m";
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API EleFeature : public Feature
@@ -1293,19 +1293,19 @@ namespace osmscout {
 
   public:
     EleFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API DestinationFeatureValue : public FeatureValue
@@ -1319,7 +1319,7 @@ namespace osmscout {
       // no code
     }
 
-    inline DestinationFeatureValue(const std::string& destination)
+    inline explicit DestinationFeatureValue(const std::string& destination)
     : destination(destination)
     {
       // no code
@@ -1335,16 +1335,16 @@ namespace osmscout {
       return destination;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return destination;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API DestinationFeature : public Feature
@@ -1366,19 +1366,19 @@ namespace osmscout {
 
   public:
     DestinationFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API BuildingFeature : public Feature
@@ -1391,16 +1391,16 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API WebsiteFeatureValue : public FeatureValue
@@ -1414,7 +1414,7 @@ namespace osmscout {
       // no code
     }
 
-    inline WebsiteFeatureValue(const std::string& website)
+    inline explicit WebsiteFeatureValue(const std::string& website)
     : website(website)
     {
       // no code
@@ -1430,16 +1430,16 @@ namespace osmscout {
       return website;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return website;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API WebsiteFeature : public Feature
@@ -1456,19 +1456,19 @@ namespace osmscout {
 
   public:
     WebsiteFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
 
@@ -1483,7 +1483,7 @@ namespace osmscout {
       // no code
     }
 
-    inline PhoneFeatureValue(const std::string& phone)
+    inline explicit PhoneFeatureValue(const std::string& phone)
     : phone(phone)
     {
       // no code
@@ -1499,16 +1499,16 @@ namespace osmscout {
       return phone;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       return phone;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API PhoneFeature : public Feature
@@ -1522,19 +1522,19 @@ namespace osmscout {
 
   public:
     PhoneFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API IsInFeatureValue : public FeatureValue
@@ -1548,7 +1548,7 @@ namespace osmscout {
       // no code
     }
 
-    inline IsInFeatureValue(const std::string& isIn)
+    inline explicit IsInFeatureValue(const std::string& isIn)
       : isIn(isIn)
     {
       // no code
@@ -1564,11 +1564,11 @@ namespace osmscout {
       return isIn;
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API IsInFeature : public Feature
@@ -1581,19 +1581,19 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   class OSMSCOUT_API ConstructionYearFeatureValue : public FeatureValue
@@ -1635,7 +1635,7 @@ namespace osmscout {
       return endYear;
     }
 
-    inline std::string GetLabel() const
+    inline std::string GetLabel() const override
     {
       if (startYear==endYear) {
         return std::to_string(startYear);
@@ -1645,11 +1645,11 @@ namespace osmscout {
       }
     }
 
-    void Read(FileScanner& scanner);
-    void Write(FileWriter& writer);
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
 
-    FeatureValue& operator=(const FeatureValue& other);
-    bool operator==(const FeatureValue& other) const;
+    FeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
   };
 
   class OSMSCOUT_API ConstructionYearFeature : public Feature
@@ -1664,19 +1664,19 @@ namespace osmscout {
 
   public:
     ConstructionYearFeature();
-    void Initialize(TypeConfig& typeConfig);
+    void Initialize(TypeConfig& typeConfig) override;
 
-    std::string GetName() const;
+    std::string GetName() const override;
 
-    size_t GetValueSize() const;
-    FeatureValue* AllocateValue(void* buffer);
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
                const TypeConfig& typeConfig,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
-               FeatureValueBuffer& buffer) const;
+               FeatureValueBuffer& buffer) const override;
   };
 
   /**
@@ -1693,7 +1693,7 @@ namespace osmscout {
     std::vector<size_t> lookupTable;
 
   public:
-    FeatureReader(const TypeConfig& typeConfig);
+    explicit FeatureReader(const TypeConfig& typeConfig);
 
     /**
      * Returns the index of the Feature/FeatureValue within the given FeatureValueBuffer.
@@ -1730,7 +1730,7 @@ namespace osmscout {
       size_t index;
 
       if (type->GetFeature(F::NAME,
-                          index)) {
+                           index)) {
         lookupTable[type->GetIndex()]=index;
       }
     }
@@ -1801,7 +1801,7 @@ namespace osmscout {
     std::vector<size_t> lookupTable;
 
   public:
-    FeatureValueReader(const TypeConfig& typeConfig);
+    explicit FeatureValueReader(const TypeConfig& typeConfig);
 
     /**
      * Returns the index of the Feature/FeatureValue within the given FeatureValueBuffer.
@@ -1894,7 +1894,7 @@ namespace osmscout {
     std::vector<size_t> lookupTable;
 
   public:
-    FeatureLabelReader(const TypeConfig& typeConfig);
+    explicit FeatureLabelReader(const TypeConfig& typeConfig);
 
     /**
      * Returns the label of the given object
