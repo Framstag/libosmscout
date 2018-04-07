@@ -1053,6 +1053,8 @@ int main(int argc, char* argv[])
   std::cout.setf(oldFlags,std::ios::floatfield);
   std::cout.precision(oldPrecision);
 
+  routeNodeDataFile.Close();
+
   database.Close();
 
   debugDatabase.Close();
