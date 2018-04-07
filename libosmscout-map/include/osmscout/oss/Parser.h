@@ -45,8 +45,6 @@ namespace osmscout {
 namespace oss {
 
 
-typedef osmscout::Color(*ColorPostprocessor)(const osmscout::Color& color);
-
 class Errors
 {
 public:
@@ -102,7 +100,7 @@ private:
   TokenRef t;  // last recognized token
   TokenRef la; // lookahead token
 
-  ColorPostprocessor colorPostprocessor;
+  osmscout::ColorPostprocessor colorPostprocessor;
 
   void SynErr(int n);
 
@@ -203,7 +201,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 
   Parser(Scanner *scanner,
          StyleConfig& config,
-         ColorPostprocessor colorPostprocessor=nullptr);
+         osmscout::ColorPostprocessor colorPostprocessor=nullptr);
   ~Parser();
 
   void SemErr(const char* msg);

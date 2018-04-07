@@ -46,6 +46,8 @@
 
 namespace osmscout {
 
+  typedef osmscout::Color(*ColorPostprocessor)(const osmscout::Color& color);
+
   /**
    * \ingroup Stylesheet
    *

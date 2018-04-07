@@ -2209,7 +2209,7 @@ void Parser::Parse()
 
 Parser::Parser(Scanner *scanner,
                StyleConfig& config,
-               ColorPostprocessor colorPostprocessor)
+               osmscout::ColorPostprocessor colorPostprocessor)
  : config(config)
 {
 	maxT = 62;
