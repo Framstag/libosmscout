@@ -37,7 +37,12 @@ target_include_directories(OSMScoutTest PUBLIC include ${CMAKE_CURRENT_BINARY_DI
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutTest")
 target_include_directories(OSMScoutTest PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
-target_link_libraries(OSMScoutTest OSMScout OSMScoutImport)
+if(APPLE AND BUILD_FRAMEWORKS)
+  target_link_libraries(OSMScoutTest OSMScout OSMScoutImport)
+else()
+  target_link_libraries(OSMScoutTest osmscout OSMScoutImport)
+endif()
+
 
 if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
