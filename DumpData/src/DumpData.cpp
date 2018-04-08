@@ -452,6 +452,72 @@ static void DumpAccessRestrictedFeatureValue(const osmscout::AccessRestrictedFea
   std::cout << "}" << std::endl;
 }
 
+static void DumpSidewayFeatureValue(const osmscout::SidewayFeatureValue& sidewayValue,
+                                    size_t indent)
+{
+  DumpIndent(indent);
+  std::cout << "Sideway {" << std::endl;
+
+  if (sidewayValue.HasSidewalkLaneLeft() &&
+      sidewayValue.HasSidewalkLaneRight()) {
+    DumpIndent(indent+2);
+    std::cout << "sidewalk: lane both" << std::endl;
+  }
+  else if (sidewayValue.HasSidewalkLaneLeft()) {
+    DumpIndent(indent+2);
+    std::cout << "sidewalk: lane left" << std::endl;
+  }
+  else if (sidewayValue.HasSidewalkLaneRight()) {
+    DumpIndent(indent+2);
+    std::cout << "sidewalk: lane right" << std::endl;
+  }
+
+  if (sidewayValue.HasSidewalkTrackLeft() &&
+      sidewayValue.HasSidewalkTrackRight()) {
+    DumpIndent(indent+2);
+    std::cout << "sidewalk: track both" << std::endl;
+  }
+  else if (sidewayValue.HasSidewalkTrackLeft()) {
+    DumpIndent(indent+2);
+    std::cout << "sidewalk: track left" << std::endl;
+  }
+  else if (sidewayValue.HasSidewalkTrackRight()) {
+    DumpIndent(indent+2);
+    std::cout << "sidewalk: track right" << std::endl;
+  }
+
+  if (sidewayValue.HasCyclewayLaneLeft() &&
+      sidewayValue.HasCyclewayLaneRight()) {
+    DumpIndent(indent+2);
+    std::cout << "cycleway: lane both" << std::endl;
+  }
+  else if (sidewayValue.HasCyclewayLaneLeft()) {
+    DumpIndent(indent+2);
+    std::cout << "cycleway: lane left" << std::endl;
+  }
+  else if (sidewayValue.HasCyclewayLaneRight()) {
+    DumpIndent(indent+2);
+    std::cout << "cycleway: lane right" << std::endl;
+  }
+
+  if (sidewayValue.HasCyclewayTrackLeft() &&
+      sidewayValue.HasCyclewayTrackRight()) {
+    DumpIndent(indent+2);
+    std::cout << "cycleway: track both" << std::endl;
+  }
+  else if (sidewayValue.HasCyclewayTrackLeft()) {
+    DumpIndent(indent+2);
+    std::cout << "cycleway: track left" << std::endl;
+  }
+  else if (sidewayValue.HasCyclewayTrackRight()) {
+    DumpIndent(indent+2);
+    std::cout << "cycleway: track right" << std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "}" << std::endl;
+}
+
 static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
                                    size_t indent)
 {
@@ -545,6 +611,11 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
 
           DumpIndent(indent);
           std::cout << "IsIn: " << isInValue->GetIsIn() << std::endl;
+        }
+        else if (dynamic_cast<osmscout::SidewayFeatureValue*>(value)!=nullptr) {
+          auto*sidewayValue=dynamic_cast<osmscout::SidewayFeatureValue*>(value);
+
+          DumpSidewayFeatureValue(*sidewayValue,indent);
         }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);

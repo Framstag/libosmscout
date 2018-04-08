@@ -1675,6 +1675,110 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const override;
   };
 
+  class OSMSCOUT_API SidewayFeatureValue : public FeatureValue
+  {
+  public:
+    enum Feature : uint8_t {
+      sidewalkLaneLeft   = 1u << 0u,
+      sidewalkLaneRight  = 1u << 1u,
+      sidewalkTrackLeft  = 1u << 2u,
+      sidewalkTrackRight = 1u << 3u,
+      cyclewayLaneLeft   = 1u << 4u,
+      cyclewayLaneRight  = 1u << 5u,
+      cyclewayTrackLeft  = 1u << 6u,
+      cyclewayTrackRight = 1u << 7u,
+    };
+
+  private:
+    uint8_t featureSet;
+
+  public:
+    inline SidewayFeatureValue()
+    {
+      // no code
+    }
+
+    inline void SetFeatureSet(uint8_t featureSet)
+    {
+      this->featureSet=featureSet;
+    }
+
+    inline bool HasSidewalkLaneLeft() const
+    {
+      return featureSet & sidewalkLaneLeft;
+    }
+
+    inline bool HasSidewalkLaneRight() const
+    {
+      return featureSet & sidewalkLaneRight;
+    }
+
+    inline bool HasSidewalkTrackLeft() const
+    {
+      return featureSet & sidewalkTrackLeft;
+    }
+
+    inline bool HasSidewalkTrackRight() const
+    {
+      return featureSet & sidewalkTrackRight;
+    }
+
+    inline bool HasCyclewayLaneLeft() const
+    {
+      return featureSet & cyclewayLaneLeft;
+    }
+
+    inline bool HasCyclewayLaneRight() const
+    {
+      return featureSet & cyclewayLaneRight;
+    }
+
+    inline bool HasCyclewayTrackLeft() const
+    {
+      return featureSet & cyclewayTrackLeft;
+    }
+
+    inline bool HasCyclewayTrackRight() const
+    {
+      return featureSet & cyclewayTrackRight;
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    SidewayFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API SidewayFeature : public Feature
+  {
+  private:
+    TagId tagSidewalkLeft;
+    TagId tagSidewalkRight;
+    TagId tagCyclewayLeft;
+    TagId tagCyclewayRight;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    SidewayFeature();
+    void Initialize(TypeConfig& typeConfig) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TypeConfig& typeConfig,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
+
   /**
    * Helper template class for easy access to flag-like Features.
    *
