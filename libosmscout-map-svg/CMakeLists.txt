@@ -46,15 +46,9 @@ if(APPLE AND BUILD_FRAMEWORKS)
             )
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(OSMScoutMapSVG
 		OSMScout
 		OSMScoutMap)
-else()
-target_link_libraries(OSMScoutMapSVG
-		osmscout
-        OSMScoutMap)
-endif()
 
 if(PANGOFT2_FOUND)
   target_include_directories(OSMScoutMapSVG PUBLIC ${PANGOFT2_INCLUDE_DIRS})

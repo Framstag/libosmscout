@@ -61,31 +61,17 @@ set(RESOURCE_FILES
 
 add_executable(StyleEditor ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
-if(APPLE AND BUILD_FRAMEWORKS)
-	target_link_libraries(StyleEditor
-		OSMScout
-        	OSMScoutMap
-        	Qt5::Core
-        	Qt5::Gui
-        	Qt5::Widgets
-        	Qt5::Qml
-        	Qt5::Quick
-        	OSMScoutMapQt
-        	OSMScoutClientQt
-	)
-else()
-	target_link_libraries(StyleEditor
-		osmscout
-			OSMScoutMap
-        	Qt5::Core
-        	Qt5::Gui
-        	Qt5::Widgets
-        	Qt5::Qml
-        	Qt5::Quick
-			OSMScoutMapQt
-			OSMScoutClientQt
-	)
-endif()
+target_link_libraries(StyleEditor
+	OSMScout
+		OSMScoutMap
+		Qt5::Core
+		Qt5::Gui
+		Qt5::Widgets
+		Qt5::Qml
+		Qt5::Quick
+		OSMScoutMapQt
+		OSMScoutClientQt
+)
 
 if (Qt5Svg_FOUND)
 	target_link_libraries(StyleEditor Qt5::Svg)

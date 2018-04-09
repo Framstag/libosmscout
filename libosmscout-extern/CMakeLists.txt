@@ -10,11 +10,11 @@ if(OSMSCOUT_BUILD_EXTERN_MATLAB)
     set_target_properties(osmscoutmx PROPERTIES LINK_FLAGS -DEF:"${CMAKE_BINARY_DIR}/osmscoutmx.def")
     set_target_properties(osmscoutmx PROPERTIES LINK_FLAGS_DEBUG -DEF:"${CMAKE_BINARY_DIR}/osmscoutmxd.def")
   endif()
-  target_include_directories(osmscoutmx PRIVATE 
+  target_include_directories(osmscoutmx PRIVATE
     include
     ${CMAKE_CURRENT_BINARY_DIR}/include
     ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout/include)
-  target_link_libraries(osmscoutmx osmscout)
+  target_link_libraries(osmscoutmx OSMScout)
   target_compile_definitions(osmscoutmx PRIVATE -DOSMSCOUT_MATLAB_EXPORT_SYMBOLS -DMATLAB_MEX_FILE)
   if(${OSMSCOUT_BUILD_MAP_CAIRO})
     target_include_directories(osmscoutmx PRIVATE
@@ -22,8 +22,8 @@ if(OSMSCOUT_BUILD_EXTERN_MATLAB)
       ${OSMSCOUT_BASE_DIR_SOURCE}/libosmscout-map-cairo/include
       ${CAIRO_INCLUDE_DIRS})
     target_link_libraries(osmscoutmx
-      osmscout_map
-      osmscout_map_cairo
+      OSMScoutMap
+      OSMScoutMapCairo
       ${CAIRO_LIBRARIES})
     target_compile_definitions(osmscoutmx PRIVATE -DOSMSCOUT_MAP_CAIRO)
   endif()

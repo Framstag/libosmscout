@@ -4,13 +4,9 @@ set(SOURCE_FILES
 
 add_executable(DumpData ${SOURCE_FILES})
 
-set_property(TARGET DumpData PROPERTY CXX_STANDARD 11)
+set_target_properties(DumpData PROPERTIES CXX_STANDARD 11)
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  target_link_libraries(DumpData OSMScout)
-else()
-  target_link_libraries(DumpData osmscout)
-endif()
+target_link_libraries(DumpData OSMScout)
 
 install(TARGETS DumpData
         RUNTIME DESTINATION bin

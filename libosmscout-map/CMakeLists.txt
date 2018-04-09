@@ -61,11 +61,7 @@ target_include_directories(OSMScoutMap PUBLIC include ${CMAKE_CURRENT_BINARY_DIR
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMap")
 target_include_directories(OSMScoutMap PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  target_link_libraries(OSMScoutMap OSMScout)
-else()
-  target_link_libraries(OSMScoutMap osmscout)
-endif()
+target_link_libraries(OSMScoutMap OSMScout)
 
 if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")

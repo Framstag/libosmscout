@@ -55,17 +55,10 @@ set_target_properties(OSMScoutMapQt PROPERTIES
 )
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(OSMScoutMapQt
 		OSMScout
 		OSMScoutMap
 		Qt5::Gui)
-else()
-target_link_libraries(OSMScoutMapQt
-		osmscout
-		OSMScoutMap
-		Qt5::Gui)
-endif()
 
 target_compile_definitions(OSMScoutMapQt PRIVATE -DOSMSCOUT_MAP_QT_EXPORT_SYMBOLS)
 

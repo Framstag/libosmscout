@@ -46,19 +46,11 @@ target_include_directories(OSMScoutMapCairo PUBLIC include ${CMAKE_CURRENT_BINAR
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapCairo")
 target_include_directories(OSMScoutMapCairo PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
-if(APPLE AND BUILD_FRAMEWORKS)
 target_link_libraries(OSMScoutMapCairo
 		OSMScout
 		OSMScoutMap
 		${CAIRO_LIBRARIES}
 		${PNG_LIBRARIES})
-else()
-target_link_libraries(OSMScoutMapCairo
-		osmscout
-		OSMScoutMap
-		${CAIRO_LIBRARIES}
-		${PNG_LIBRARIES})
-endif()
 
 if(PANGOCAIRO_FOUND)
   target_include_directories(OSMScoutMapCairo PUBLIC ${PANGO_INCLUDE_DIRS})

@@ -80,25 +80,16 @@ endif()
 
 if(MSVS OR MSYS OR MINGW)
 	target_link_libraries(OSMScoutMapOpenGL
-			osmscout
+			OSMScout
 			OSMScoutMap
 			${OPENGL_LIBRARIES}
 			${PNG_LIBRARIES}
 			${FREETYPE_LIBRARIES}
 			glew32 # TODO: ${GLEW_LIBRARIES} is not setup correctly on Windows?
 			)
-elseif(APPLE AND BUILD_FRAMEWORKS)
-	target_link_libraries(OSMScoutMapOpenGL
-			OSMScout
-			OSMScoutMap
-			${OPENGL_LIBRARIES}
-			${GLEW_LIBRARIES}
-			${PNG_LIBRARIES}
-			${FREETYPE_LIBRARIES}
-			)
 else()
 	target_link_libraries(OSMScoutMapOpenGL
-			osmscout
+			OSMScout
 			OSMScoutMap
 			${OPENGL_LIBRARIES}
 			${GLEW_LIBRARIES}

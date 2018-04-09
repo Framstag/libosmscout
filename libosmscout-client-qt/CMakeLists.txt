@@ -148,23 +148,13 @@ if(APPLE AND BUILD_FRAMEWORKS)
 )
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-    target_link_libraries(OSMScoutClientQt
-    OSMScout
-    OSMScoutMap
-    OSMScoutMapQt
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Quick)
-else()
 target_link_libraries(OSMScoutClientQt
-    osmscout
-    osmscout_map
-    OSMScoutMapQt
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Quick)
-endif()
+  OSMScout
+  OSMScoutMap
+  OSMScoutMapQt
+  Qt5::Core
+  Qt5::Gui
+  Qt5::Quick)
 
 target_compile_definitions(OSMScoutClientQt PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
 

@@ -95,37 +95,20 @@ add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
 target_sources(OSMScout2 PRIVATE ${TRANSLATION_TS_FILES} ${TRANSLATION_QM_FILES})
 
-if(APPLE AND BUILD_FRAMEWORKS)
-	target_link_libraries(OSMScout2
-        OSMScout
-        OSMScoutMap
-        OSMScoutGPX
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Widgets
-        Qt5::Qml
-        Qt5::Quick
-        Qt5::Positioning
-        OSMScoutMapQt
-        OSMScoutClientQt
-        OSMScoutGPX
-	)
-else()
-	target_link_libraries(OSMScout2
-        osmscout
-		OSMScoutMap
-        OSMScoutGPX
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Widgets
-        Qt5::Qml
-        Qt5::Quick
-        Qt5::Positioning
-		OSMScoutMapQt
-		OSMScoutClientQt
-		OSMScoutGPX
-	)
-endif()
+target_link_libraries(OSMScout2
+	OSMScout
+	OSMScoutMap
+	OSMScoutGPX
+	Qt5::Core
+	Qt5::Gui
+	Qt5::Widgets
+	Qt5::Qml
+	Qt5::Quick
+	Qt5::Positioning
+	OSMScoutMapQt
+	OSMScoutClientQt
+	OSMScoutGPX
+)
 
 if (Qt5Svg_FOUND)
 	target_link_libraries(OSMScout2 Qt5::Svg)

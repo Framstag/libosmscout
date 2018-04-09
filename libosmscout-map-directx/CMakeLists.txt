@@ -32,7 +32,7 @@ create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/priva
 target_include_directories(OSMScoutMapDirectX PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 target_link_libraries(OSMScoutMapDirectX
-		osmscout
+		OSMScout
 		OSMScoutMap
 		${Direct2D_LIBRARIES}
 		Windowscodecs)

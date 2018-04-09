@@ -137,11 +137,7 @@ target_include_directories(OSMScoutImport PUBLIC include ${CMAKE_CURRENT_BINARY_
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutImport")
 target_include_directories(OSMScoutImport PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  target_link_libraries(OSMScoutImport OSMScout)
-else()
-  target_link_libraries(OSMScoutImport osmscout)
-endif()
+target_link_libraries(OSMScoutImport OSMScout)
 
 if(ZLIB_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
     target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})

@@ -70,11 +70,7 @@ if(LIBXML2_FOUND)
 	endif()
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  target_link_libraries(OSMScoutGPX OSMScout)
-else()
-  target_link_libraries(OSMScoutGPX osmscout)
-endif()
+target_link_libraries(OSMScoutGPX OSMScout)
 
 if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
