@@ -13,31 +13,33 @@ set(SOURCE_FILES
     src/osmscout/PathTextRenderer.cpp
 )
 
-add_library(osmscout_map_directx SHARED ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScoutMapDirectX SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
-set_property(TARGET osmscout_map_directx PROPERTY CXX_STANDARD 11)
+set_target_properties(OSMScoutMapDirectX PROPERTIES LIBRARY_OUTPUT_NAME "osmscout_map_directx")
 
-target_include_directories(osmscout_map_directx PUBLIC
+set_target_properties(OSMScoutMapDirectX PROPERTY CXX_STANDARD 11)
+
+target_include_directories(OSMScoutMapDirectX PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/include
 		${Direct2D_INCLUDE_DIRS})
 
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapDirectXFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapDirectXFeatures.h)
-target_include_directories(osmscout_map_directx PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(OSMScoutMapDirectX PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "osmscout_map_directx")
-target_include_directories(osmscout_map_directx PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapDirectX")
+target_include_directories(OSMScoutMapDirectX PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
-target_link_libraries(osmscout_map_directx
+target_link_libraries(OSMScoutMapDirectX
 		osmscout
 		osmscout_map
 		${Direct2D_LIBRARIES}
 		Windowscodecs)
 
-target_compile_definitions(osmscout_map_directx PRIVATE -DOSMSCOUT_MAP_DIRECTX_EXPORT_SYMBOLS -DUNICODE -D_UNICODE)
+target_compile_definitions(OSMScoutMapDirectX PRIVATE -DOSMSCOUT_MAP_DIRECTX_EXPORT_SYMBOLS -DUNICODE -D_UNICODE)
 
-install(TARGETS osmscout_map_directx
+install(TARGETS OSMScoutMapDirectX
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
