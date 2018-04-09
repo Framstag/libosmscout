@@ -160,7 +160,7 @@ else()
 target_link_libraries(OSMScoutClientQt
     osmscout
     osmscout_map
-    osmscout_map_qt
+    OSMScoutMapQt
     Qt5::Core
     Qt5::Gui
     Qt5::Quick)

@@ -114,14 +114,14 @@ else()
 	target_link_libraries(OSMScout2
         osmscout
         osmscout_map
-        OSMScoutGpx
+        OSMScoutGPX
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
         Qt5::Qml
         Qt5::Quick
         Qt5::Positioning
-        osmscout_map_qt
+		OSMScoutMapQt
 		OSMScoutClientQt
 		OSMScoutGPX
 	)

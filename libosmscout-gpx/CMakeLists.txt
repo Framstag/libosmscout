@@ -30,12 +30,6 @@ if(LIBXML2_FOUND)
 			)
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-set(THE_TARGET_NAME "OSMScoutGPX")
-else()
-set(THE_TARGET_NAME "osmscout_gpx")
-endif()
-
 if(IOS)
   add_library(OSMScoutGPX STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
@@ -99,7 +93,7 @@ endif()
 
 target_compile_definitions(OSMScoutGPX PRIVATE -DOSMSCOUT_GPX_EXPORT_SYMBOLS)
 
-install(TARGETS ${THE_TARGET_NAME}
+install(TARGETS OSMScoutGPX
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib

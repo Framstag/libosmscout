@@ -82,7 +82,7 @@ else()
         	Qt5::Widgets
         	Qt5::Qml
         	Qt5::Quick
-        	osmscout_map_qt
+			OSMScoutMapQt
 			OSMScoutClientQt
 	)
 endif()
