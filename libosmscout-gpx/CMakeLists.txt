@@ -57,7 +57,7 @@ configure_file(include/osmscout/gpx/GPXFeatures.h.cmake ${CMAKE_CURRENT_BINARY_D
 target_include_directories(OSMScoutGPX PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "osmscout-gpx")
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/private/Config.h" "OSMScoutGPX")
 target_include_directories(OSMScoutGPX PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 if(LIBXML2_FOUND)
