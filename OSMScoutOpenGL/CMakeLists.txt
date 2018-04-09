@@ -22,7 +22,7 @@ target_include_directories(OSMScoutOpenGL PRIVATE
 if(MSVS OR MSYS OR MINGW)
 	target_link_libraries(OSMScoutOpenGL
 			osmscout
-			osmscout_map
+			OSMScoutMap
 			OSMScoutMapOpenGL
 			${OPENGL_LIBRARIES}
 			glfw3 # TODO: check if ${GLFW_LIBRARIES} is setup correctly on Windows
@@ -40,7 +40,7 @@ elseif(APPLE AND BUILD_FRAMEWORKS)
 else()
 	target_link_libraries(OSMScoutOpenGL
 			osmscout
-			osmscout_map
+			OSMScoutMap
 			OSMScoutMapOpenGL
 			${OPENGL_LIBRARIES}
 			${GLFW_LIBRARIES}

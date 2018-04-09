@@ -63,7 +63,7 @@ target_link_libraries(OSMScoutMapQt
 else()
 target_link_libraries(OSMScoutMapQt
 		osmscout
-		osmscout_map
+		OSMScoutMap
 		Qt5::Gui)
 endif()
 

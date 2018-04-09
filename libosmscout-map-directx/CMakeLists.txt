@@ -33,7 +33,7 @@ target_include_directories(OSMScoutMapDirectX PRIVATE include ${CMAKE_CURRENT_BI
 
 target_link_libraries(OSMScoutMapDirectX
 		osmscout
-		osmscout_map
+		OSMScoutMap
 		${Direct2D_LIBRARIES}
 		Windowscodecs)
 

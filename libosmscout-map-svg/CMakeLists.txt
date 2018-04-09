@@ -53,7 +53,7 @@ target_link_libraries(OSMScoutMapSVG
 else()
 target_link_libraries(OSMScoutMapSVG
 		osmscout
-		osmscout_map)
+        OSMScoutMap)
 endif()
 
 if(PANGOFT2_FOUND)

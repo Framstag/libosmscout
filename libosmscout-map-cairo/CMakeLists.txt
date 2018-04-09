@@ -55,7 +55,7 @@ target_link_libraries(OSMScoutMapCairo
 else()
 target_link_libraries(OSMScoutMapCairo
 		osmscout
-		osmscout_map
+		OSMScoutMap
 		${CAIRO_LIBRARIES}
 		${PNG_LIBRARIES})
 endif()

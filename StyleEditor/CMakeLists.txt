@@ -76,7 +76,7 @@ if(APPLE AND BUILD_FRAMEWORKS)
 else()
 	target_link_libraries(StyleEditor
 		osmscout
-        	osmscout_map
+			OSMScoutMap
         	Qt5::Core
         	Qt5::Gui
         	Qt5::Widgets

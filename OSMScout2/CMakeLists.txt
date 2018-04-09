@@ -113,7 +113,7 @@ if(APPLE AND BUILD_FRAMEWORKS)
 else()
 	target_link_libraries(OSMScout2
         osmscout
-        osmscout_map
+		OSMScoutMap
         OSMScoutGPX
         Qt5::Core
         Qt5::Gui

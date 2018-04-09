@@ -81,7 +81,7 @@ endif()
 if(MSVS OR MSYS OR MINGW)
 	target_link_libraries(OSMScoutMapOpenGL
 			osmscout
-			osmscout_map
+			OSMScoutMap
 			${OPENGL_LIBRARIES}
 			${PNG_LIBRARIES}
 			${FREETYPE_LIBRARIES}
@@ -99,7 +99,7 @@ elseif(APPLE AND BUILD_FRAMEWORKS)
 else()
 	target_link_libraries(OSMScoutMapOpenGL
 			osmscout
-			osmscout_map
+			OSMScoutMap
 			${OPENGL_LIBRARIES}
 			${GLEW_LIBRARIES}
 			${PNG_LIBRARIES}

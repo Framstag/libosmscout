@@ -58,7 +58,7 @@ target_link_libraries(OSMScoutMapAGG
 else()
 target_link_libraries(OSMScoutMapAGG
 		osmscout
-		osmscout_map
+		OSMScoutMap
 		${LIBAGG_LIBRARIES}
 		${LIBAGGFT2_LIBRARIES}
 		${FREETYPE_LIBRARIES})
