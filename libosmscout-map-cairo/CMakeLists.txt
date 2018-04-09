@@ -25,13 +25,9 @@ else()
   add_library(OSMScoutMapCairo ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-	set_target_properties(OSMScoutMapCairo PROPERTIES LIBRARY_OUTPUT_NAME "OSMScoutMapCairo")
-else()
-	set_target_properties(OSMScoutMapCairo PROPERTIES LIBRARY_OUTPUT_NAME "osmscout_map_cairo")
-endif()
-
-set_target_properties(OSMScoutMapCairo PROPERTIES CXX_STANDARD 11)
+set_target_properties(OSMScoutMapCairo PROPERTIES
+		CXX_STANDARD 11
+		LIBRARY_OUTPUT_NAME "osmscout_map_cairo")
 
 target_include_directories(OSMScoutMapCairo PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -63,12 +59,13 @@ endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
 set_target_properties(OSMScoutMapCairo PROPERTIES
-  FRAMEWORK TRUE
-  FRAMEWORK_VERSION C
-  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
-  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-  PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+  		FRAMEWORK TRUE
+  		FRAMEWORK_VERSION C
+  		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+  		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+  		PUBLIC_HEADER     "${HEADER_FILES}"
+  		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+		LIBRARY_OUTPUT_NAME "OSMScoutMapCairo"
 )
 endif()
 

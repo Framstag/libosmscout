@@ -25,6 +25,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
     ${OSMSCOUT_TARGET}
     ${JNI_LIBRARIES})
   set_property(TARGET osmscout_binding_java PROPERTY CXX_STANDARD 11)
+
   install(TARGETS osmscout_binding_java
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION bin
@@ -32,6 +33,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
   install(DIRECTORY ${OSMSCOUT_BASE_DIR_SOURCE}/Java DESTINATION binding)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Java DESTINATION binding FILES_MATCHING PATTERN "*.java" PATTERN "private" EXCLUDE)
 endif()
+
 if(OSMSCOUT_BUILD_BINDING_CSHARP)
   if(NOT SWIG_FOUND)
     message(SEND_ERROR "swig is required for c# binding")
@@ -53,6 +55,7 @@ if(OSMSCOUT_BUILD_BINDING_CSHARP)
   target_link_libraries(osmscout_binding_csharp
           ${OSMSCOUT_TARGET})
   set_property(TARGET osmscout_binding_csharp PROPERTY CXX_STANDARD 11)
+
   install(TARGETS osmscout_binding_csharp
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION bin

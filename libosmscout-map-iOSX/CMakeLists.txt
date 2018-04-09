@@ -21,7 +21,7 @@ else()
   add_library(OSMScoutMapIOSX ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-set_property(TARGET OSMScoutMapIOSX PROPERTY CXX_STANDARD 11)
+set_target_properties(OSMScoutMapIOSX PROPERTIES CXX_STANDARD 11)
 
 target_include_directories(OSMScoutMapIOSX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
