@@ -114,7 +114,7 @@ else()
 	target_link_libraries(OSMScout2
         osmscout
         osmscout_map
-        osmscout_gpx
+        OSMScoutGpx
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
@@ -122,8 +122,8 @@ else()
         Qt5::Quick
         Qt5::Positioning
         osmscout_map_qt
-        osmscout_client_qt
-        osmscout_gpx
+		OSMScoutClientQt
+		OSMScoutGPX
 	)
 endif()
 
@@ -136,7 +136,7 @@ if (Qt5Positioning_FOUND)
 endif()
 
 # enable QML debuger
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG")
 set_property(TARGET OSMScout2 PROPERTY CXX_STANDARD 11)
 
 install(TARGETS OSMScout2 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)

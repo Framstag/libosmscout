@@ -27,6 +27,12 @@ else()
   add_library(OSMScoutMapAGG ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
+if(APPLE AND BUILD_FRAMEWORKS)
+	set_target_properties(OSMScoutMapAGG PROPERTIES LIBRARY_OUTPUT_NAME "OSMScoutMapAGG")
+else()
+	set_target_properties(OSMScoutMapAGG PROPERTIES LIBRARY_OUTPUT_NAME "osmscout_map_agg")
+endif()
+
 set_target_properties(OSMScoutMapAGG PROPERTIES CXX_STANDARD 11)
 
 target_include_directories(OSMScoutMapAGG PUBLIC
