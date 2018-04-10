@@ -15,7 +15,7 @@ set(SOURCE_FILES
 
 add_library(OSMScoutMapDirectX SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
-set_target_properties(OSMScoutMapDirectX PROPERTY
+set_target_properties(OSMScoutMapDirectX PROPERTIES
 		CXX_STANDARD 11
 		LIBRARY_OUTPUT_NAME "osmscout_map_directx")
 
