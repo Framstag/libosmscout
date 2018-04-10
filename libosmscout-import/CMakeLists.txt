@@ -117,13 +117,9 @@ else()
   add_library(OSMScoutImport ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-    set_target_properties(OSMScoutImport PROPERTIES LIBRARY_OUTPUT_NAME "OSMScoutImport")
-else()
-    set_target_properties(OSMScoutImport PROPERTIES LIBRARY_OUTPUT_NAME "osmscout_import")
-endif()
-
-set_target_properties(OSMScoutImport PROPERTIES CXX_STANDARD 11)
+set_target_properties(OSMScoutImport PROPERTIES
+        CXX_STANDARD 11
+        LIBRARY_OUTPUT_NAME "osmscout_import")
 
 target_include_directories(OSMScoutImport PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -137,11 +133,7 @@ target_include_directories(OSMScoutImport PUBLIC include ${CMAKE_CURRENT_BINARY_
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutImport")
 target_include_directories(OSMScoutImport PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  target_link_libraries(OSMScoutImport OSMScout)
-else()
-  target_link_libraries(OSMScoutImport osmscout)
-endif()
+target_link_libraries(OSMScoutImport OSMScout)
 
 if(ZLIB_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
     target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})
@@ -184,12 +176,13 @@ endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
 set_target_properties(OSMScoutImport PROPERTIES
-  FRAMEWORK TRUE
-  FRAMEWORK_VERSION C
-  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
-  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-  PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION C
+        MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+        #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+        PUBLIC_HEADER     "${HEADER_FILES}"
+        CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+        LIBRARY_OUTPUT_NAME "OSMScoutImport"
 )
 endif()
 

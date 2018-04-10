@@ -6,12 +6,6 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
     message(SEND_ERROR "A JDK is required for java binding")
   endif()
 
-  if(APPLE AND BUILD_FRAMEWORKS)
-    set(OSMSCOUT_TARGET "OSMScout")
-  else()
-    set(OSMSCOUT_TARGET "osmscout")
-  endif()
-
   include(${SWIG_USE_FILE})
   set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/Java/src/main/java/net/sf/libosmscout/osmscout)
   file(MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR})
@@ -21,7 +15,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
   endif()
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i PROPERTIES CPLUSPLUS ON)
   swig_add_module(osmscout_binding_java Java ${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i)
-  swig_link_libraries(osmscout_binding_java ${OSMSCOUT_TARGET} ${JNI_LIBRARIES})
+  swig_link_libraries(osmscout_binding_java OSMScout ${JNI_LIBRARIES})
   target_include_directories(osmscout_binding_java PRIVATE
     include
     ${CMAKE_CURRENT_BINARY_DIR}/include
@@ -31,6 +25,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
     ${OSMSCOUT_TARGET}
     ${JNI_LIBRARIES})
   set_property(TARGET osmscout_binding_java PROPERTY CXX_STANDARD 11)
+
   install(TARGETS osmscout_binding_java
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION bin
@@ -38,6 +33,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
   install(DIRECTORY ${OSMSCOUT_BASE_DIR_SOURCE}/Java DESTINATION binding)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Java DESTINATION binding FILES_MATCHING PATTERN "*.java" PATTERN "private" EXCLUDE)
 endif()
+
 if(OSMSCOUT_BUILD_BINDING_CSHARP)
   if(NOT SWIG_FOUND)
     message(SEND_ERROR "swig is required for c# binding")
@@ -52,13 +48,14 @@ if(OSMSCOUT_BUILD_BINDING_CSHARP)
   endif()
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i PROPERTIES CPLUSPLUS ON)
   swig_add_module(osmscout_binding_csharp csharp ${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i)
-  swig_link_libraries(osmscout_binding_csharp ${OSMSCOUT_TARGET})
+  swig_link_libraries(osmscout_binding_csharp OSMScout)
   target_include_directories(osmscout_binding_csharp PRIVATE
     include
     ${CMAKE_CURRENT_BINARY_DIR}/include)
   target_link_libraries(osmscout_binding_csharp
           ${OSMSCOUT_TARGET})
   set_property(TARGET osmscout_binding_csharp PROPERTY CXX_STANDARD 11)
+
   install(TARGETS osmscout_binding_csharp
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION bin

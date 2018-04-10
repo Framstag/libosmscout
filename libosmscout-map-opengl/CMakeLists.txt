@@ -40,13 +40,9 @@ else()
   add_library(OSMScoutMapOpenGL ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-	set_target_properties(OSMScoutMapOpenGL PROPERTIES LIBRARY_OUTPUT_NAME "OSMScoutMapOpenGL")
-else()
-	set_target_properties(OSMScoutMapOpenGL PROPERTIES LIBRARY_OUTPUT_NAME "osmscout_map_opengl")
-endif()
-
-set_target_properties(OSMScoutMapOpenGL PROPERTIES CXX_STANDARD 11)
+set_target_properties(OSMScoutMapOpenGL PROPERTIES
+		CXX_STANDARD 11
+		LIBRARY_OUTPUT_NAME "OSMScoutMapOpenGL")
 
 target_include_directories(OSMScoutMapOpenGL PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -69,37 +65,29 @@ endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
 set_target_properties(OSMScoutMapOpenGL PROPERTIES
-  FRAMEWORK TRUE
-  FRAMEWORK_VERSION C
-  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
-  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-  PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+  		FRAMEWORK TRUE
+  		FRAMEWORK_VERSION C
+  		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+  		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+  		PUBLIC_HEADER     "${HEADER_FILES}"
+  		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+		LIBRARY_OUTPUT_NAME "OSMScoutMapOpenGL"
 )
 endif()
 
 if(MSVS OR MSYS OR MINGW)
 	target_link_libraries(OSMScoutMapOpenGL
-			osmscout
-			osmscout_map
+			OSMScout
+			OSMScoutMap
 			${OPENGL_LIBRARIES}
 			${PNG_LIBRARIES}
 			${FREETYPE_LIBRARIES}
 			glew32 # TODO: ${GLEW_LIBRARIES} is not setup correctly on Windows?
 			)
-elseif(APPLE AND BUILD_FRAMEWORKS)
+else()
 	target_link_libraries(OSMScoutMapOpenGL
 			OSMScout
 			OSMScoutMap
-			${OPENGL_LIBRARIES}
-			${GLEW_LIBRARIES}
-			${PNG_LIBRARIES}
-			${FREETYPE_LIBRARIES}
-			)
-else()
-	target_link_libraries(OSMScoutMapOpenGL
-			osmscout
-			osmscout_map
 			${OPENGL_LIBRARIES}
 			${GLEW_LIBRARIES}
 			${PNG_LIBRARIES}

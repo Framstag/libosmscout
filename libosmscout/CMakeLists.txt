@@ -194,42 +194,42 @@ if(MARISA_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  set(THE_TARGET_NAME "OSMScout")
-else()
-  set(THE_TARGET_NAME "osmscout")
-endif()
-
 if(IOS)
-  add_library(${THE_TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+  add_library(OSMScout STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
-  add_library(${THE_TARGET_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+  add_library(OSMScout ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
+if(APPLE AND BUILD_FRAMEWORKS)
+    set_target_properties(OSMScout PROPERTIES LIBRARY_OUTPUT_NAME "√")
+else()
+    set_target_properties(OSMScout PROPERTIES LIBRARY_OUTPUT_NAME "osmscout")
+endif()
 
-target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_SOURCE_DIR}/include)
+set_target_properties(OSMScout PROPERTIES CXX_STANDARD 11)
+
+target_include_directories(OSMScout PUBLIC include ${CMAKE_SOURCE_DIR}/include)
 
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/CoreFeatures.h)
-target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(OSMScout PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "osmscout")
-target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScout")
+target_include_directories(OSMScout PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 if(MARISA_FOUND)
-    target_include_directories(${THE_TARGET_NAME} PUBLIC ${MARISA_INCLUDE_DIRS})
-    target_link_libraries(${THE_TARGET_NAME} ${MARISA_LIBRARIES})
+    target_include_directories(OSMScout PUBLIC ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(OSMScout ${MARISA_LIBRARIES})
 endif()
 
 if (ICONV_FOUND)
-    target_include_directories(${THE_TARGET_NAME} PRIVATE ${ICONV_INCLUDE_DIRS})
-    target_link_libraries(${THE_TARGET_NAME} ${ICONV_LIBRARIES})
+    target_include_directories(OSMScout PRIVATE ${ICONV_INCLUDE_DIRS})
+    target_link_libraries(OSMScout ${ICONV_LIBRARIES})
 endif()
 
 if(CMAKE_THREAD_LIBS_INIT)
-  target_link_libraries(${THE_TARGET_NAME} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(OSMScout ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if(${IOS})
@@ -237,7 +237,7 @@ if(${IOS})
 endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
-  set_target_properties(${THE_TARGET_NAME} PROPERTIES
+  set_target_properties(OSMScout PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -256,7 +256,7 @@ if(APPLE AND BUILD_FRAMEWORKS)
 
 endif()
 
-target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
+target_compile_definitions(OSMScout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
 install(TARGETS ${THE_TARGET_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

@@ -16,60 +16,50 @@ set(SOURCE_FILES
     src/osmscout/SimplifiedPath.cpp
 )
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  set(THE_TARGET_NAME "OSMScoutMapQt")
-else()
-  set(THE_TARGET_NAME "osmscout_map_qt")
-endif()
-
 if(IOS)
-  add_library(${THE_TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+  add_library(OSMScoutMapQt STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
-  add_library(${THE_TARGET_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+  add_library(OSMScoutMapQt ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
+set_target_properties(OSMScoutMapQt PROPERTIES
+		CXX_STANDARD 11
+		LIBRARY_OUTPUT_NAME "osmscout_map_qt")
 
-target_include_directories(${THE_TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(OSMScoutMapQt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapQtFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapQtFeatures.h)
-target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(OSMScoutMapQt PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
-target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapQt")
+target_include_directories(OSMScoutMapQt PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set_target_properties(${THE_TARGET_NAME} PROPERTIES
-  FRAMEWORK TRUE
-  FRAMEWORK_VERSION C
-  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
-  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-  PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+set_target_properties(OSMScoutMapQt PROPERTIES
+  		FRAMEWORK TRUE
+  		FRAMEWORK_VERSION C
+  		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+  		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+  		PUBLIC_HEADER     "${HEADER_FILES}"
+  		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+		LIBRARY_OUTPUT_NAME "OSMScoutMapQt"
 )
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-target_link_libraries(${THE_TARGET_NAME}
+target_link_libraries(OSMScoutMapQt
 		OSMScout
 		OSMScoutMap
 		Qt5::Gui)
-else()
-target_link_libraries(${THE_TARGET_NAME}
-		osmscout
-		osmscout_map
-		Qt5::Gui)
-endif()
 
-target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_MAP_QT_EXPORT_SYMBOLS)
+target_compile_definitions(OSMScoutMapQt PRIVATE -DOSMSCOUT_MAP_QT_EXPORT_SYMBOLS)
 
-install(TARGETS ${THE_TARGET_NAME}
+install(TARGETS OSMScoutMapQt
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib

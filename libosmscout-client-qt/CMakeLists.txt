@@ -109,66 +109,53 @@ set(SOURCE_FILES
     src/osmscout/InstalledMapsModel.cpp
     )
 
-if(APPLE AND BUILD_FRAMEWORKS)
-  set(THE_TARGET_NAME "OSMScoutClientQt")
-else()
-  set(THE_TARGET_NAME "osmscout_client_qt")
-endif()
-
 if(IOS)
-  add_library(${THE_TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+  add_library(OSMScoutClientQt STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
-  add_library(${THE_TARGET_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+  add_library(OSMScoutClientQt ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-set_property(TARGET ${THE_TARGET_NAME} PROPERTY CXX_STANDARD 11)
+set_target_properties(OSMScoutClientQt PROPERTIES
+        CXX_STANDARD 11
+        LIBRARY_OUTPUT_NAME "osmscout_client_qt")
 
-target_include_directories(${THE_TARGET_NAME} PUBLIC include)
+target_include_directories(OSMScoutClientQt PUBLIC include)
 
 # Public features Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/ClientQtFeatures.h)
-target_include_directories(${THE_TARGET_NAME} PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(OSMScoutClientQt PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "${THE_TARGET_NAME}")
-target_include_directories(${THE_TARGET_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutClientQt")
+target_include_directories(OSMScoutClientQt PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
 
 if(${IOS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
 endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
-  set_target_properties(${THE_TARGET_NAME} PROPERTIES
+  set_target_properties(OSMScoutClientQt PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION C
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER     "${HEADER_FILES}"
   CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+  LIBRARY_OUTPUT_NAME "OSMScoutClientQt"
 )
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-    target_link_libraries(${THE_TARGET_NAME}
-    OSMScout
-    OSMScoutMap
-    OSMScoutMapQt
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Quick)
-else()
-target_link_libraries(${THE_TARGET_NAME}
-    osmscout
-    osmscout_map
-    osmscout_map_qt
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Quick)
-endif()
+target_link_libraries(OSMScoutClientQt
+  OSMScout
+  OSMScoutMap
+  OSMScoutMapQt
+  Qt5::Core
+  Qt5::Gui
+  Qt5::Quick)
 
-target_compile_definitions(${THE_TARGET_NAME} PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
+target_compile_definitions(OSMScoutClientQt PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
 
-install(TARGETS ${THE_TARGET_NAME}
+install(TARGETS OSMScoutClientQt
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
