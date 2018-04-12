@@ -17,7 +17,7 @@ add_library(OSMScoutMapDirectX SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
 set_target_properties(OSMScoutMapDirectX PROPERTIES
 		CXX_STANDARD 11
-		LIBRARY_OUTPUT_NAME "osmscout_map_directx")
+		OUTPUT_NAME "osmscout_map_directx")
 
 target_include_directories(OSMScoutMapDirectX PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/include

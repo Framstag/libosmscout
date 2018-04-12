@@ -19,7 +19,7 @@ endif()
 
 set_target_properties(OSMScoutMapSVG PROPERTIES
         CXX_STANDARD 11
-        LIBRARY_OUTPUT_NAME "osmscout_map_svg")
+        OUTPUT_NAME "osmscout_map_svg")
 
 target_include_directories(OSMScoutMapSVG PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -39,7 +39,7 @@ if(APPLE AND BUILD_FRAMEWORKS)
             #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
             PUBLIC_HEADER     "${HEADER_FILES}"
             CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-            LIBRARY_OUTPUT_NAME "OSMScoutMapSVG")
+            OUTPUT_NAME "OSMScoutMapSVG")
 endif()
 
 target_link_libraries(OSMScoutMapSVG

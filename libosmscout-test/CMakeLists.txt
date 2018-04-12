@@ -21,7 +21,7 @@ endif()
 
 set_target_properties(OSMScoutTest PROPERTIES
         CXX_STANDARD 11
-        LIBRARY_OUTPUT_NAME "osmscout_test")
+        OUTPUT_NAME "osmscout_test")
 
 target_include_directories(OSMScoutTest PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -47,7 +47,7 @@ set_target_properties(OSMScoutTest PROPERTIES
         #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
         PUBLIC_HEADER     "${HEADER_FILES}"
         CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-        LIBRARY_OUTPUT_NAME "OSMScoutTest")
+        OUTPUT_NAME "OSMScoutTest")
 endif()
 
 target_compile_definitions(OSMScoutTest PRIVATE -DOSMSCOUT_TEST_EXPORT_SYMBOLS)

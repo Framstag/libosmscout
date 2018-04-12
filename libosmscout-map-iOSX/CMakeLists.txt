@@ -21,7 +21,9 @@ else()
   add_library(OSMScoutMapIOSX ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-set_target_properties(OSMScoutMapIOSX PROPERTIES CXX_STANDARD 11)
+set_target_properties(OSMScoutMapIOSX PROPERTIES
+		CXX_STANDARD 11
+		OUTPUT_NAME "osmscout-map-iosx")
 
 target_include_directories(OSMScoutMapIOSX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -36,7 +38,7 @@ set_target_properties(OSMScoutMapIOSX PROPERTIES
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER     include/osmscout/MapPainterIOS.h
   CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-)
+  OUTPUT_NAME "OSMScoutMapIOSX")
 
 find_library(FOUNDATION Foundation)
 find_library(COREGRAPHICS CoreGraphics)

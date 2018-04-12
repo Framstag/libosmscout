@@ -117,7 +117,7 @@ endif()
 
 set_target_properties(OSMScoutClientQt PROPERTIES
         CXX_STANDARD 11
-        LIBRARY_OUTPUT_NAME "osmscout_client_qt")
+        OUTPUT_NAME "osmscout_client_qt")
 
 target_include_directories(OSMScoutClientQt PUBLIC include)
 
@@ -141,8 +141,7 @@ if(APPLE AND BUILD_FRAMEWORKS)
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER     "${HEADER_FILES}"
   CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-  LIBRARY_OUTPUT_NAME "OSMScoutClientQt"
-)
+  OUTPUT_NAME "OSMScoutClientQt")
 endif()
 
 target_link_libraries(OSMScoutClientQt

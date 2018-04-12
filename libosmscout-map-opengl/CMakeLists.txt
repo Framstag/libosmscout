@@ -42,7 +42,7 @@ endif()
 
 set_target_properties(OSMScoutMapOpenGL PROPERTIES
 		CXX_STANDARD 11
-		LIBRARY_OUTPUT_NAME "OSMScoutMapOpenGL")
+		OUTPUT_NAME "OSMScoutMapOpenGL")
 
 target_include_directories(OSMScoutMapOpenGL PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -71,8 +71,7 @@ set_target_properties(OSMScoutMapOpenGL PROPERTIES
   		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   		PUBLIC_HEADER     "${HEADER_FILES}"
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-		LIBRARY_OUTPUT_NAME "OSMScoutMapOpenGL"
-)
+		OUTPUT_NAME "OSMScoutMapOpenGL")
 endif()
 
 if(MSVS OR MSYS OR MINGW)

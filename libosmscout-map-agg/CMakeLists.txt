@@ -29,7 +29,7 @@ endif()
 
 set_target_properties(OSMScoutMapAGG PROPERTIES
 		CXX_STANDARD 11
-		LIBRARY_OUTPUT_NAME "osmscout_map_agg")
+		OUTPUT_NAME "osmscout_map_agg")
 
 target_include_directories(OSMScoutMapAGG PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -63,8 +63,7 @@ set_target_properties(OSMScoutMapAGG PROPERTIES
   		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   		PUBLIC_HEADER     "${HEADER_FILES}"
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-		LIBRARY_OUTPUT_NAME "OSMScoutMapAGG"
-)
+		OUTPUT_NAME "OSMScoutMapAGG")
 endif()
 
 target_compile_definitions(OSMScoutMapAGG PRIVATE -DOSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)

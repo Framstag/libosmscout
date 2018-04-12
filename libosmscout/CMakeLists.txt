@@ -200,13 +200,9 @@ else()
   add_library(OSMScout ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
-    set_target_properties(OSMScout PROPERTIES LIBRARY_OUTPUT_NAME "√")
-else()
-    set_target_properties(OSMScout PROPERTIES LIBRARY_OUTPUT_NAME "osmscout")
-endif()
-
-set_target_properties(OSMScout PROPERTIES CXX_STANDARD 11)
+set_target_properties(OSMScout PROPERTIES
+    CXX_STANDARD 11
+	OUTPUT_NAME "osmscout")
 
 target_include_directories(OSMScout PUBLIC include ${CMAKE_SOURCE_DIR}/include)
 
@@ -243,7 +239,8 @@ if(APPLE AND BUILD_FRAMEWORKS)
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer")
+  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+  OUTPUT_NAME "OSMScout")
 
   set_property(SOURCE "${HEADER_FILES_OST}"
           PROPERTY MACOSX_PACKAGE_LOCATION Headers/ost)

@@ -119,7 +119,7 @@ endif()
 
 set_target_properties(OSMScoutImport PROPERTIES
         CXX_STANDARD 11
-        LIBRARY_OUTPUT_NAME "osmscout_import")
+        OUTPUT_NAME "osmscout_import")
 
 target_include_directories(OSMScoutImport PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -182,8 +182,7 @@ set_target_properties(OSMScoutImport PROPERTIES
         #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
         PUBLIC_HEADER     "${HEADER_FILES}"
         CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-        LIBRARY_OUTPUT_NAME "OSMScoutImport"
-)
+        OUTPUT_NAME "OSMScoutImport")
 endif()
 
 target_compile_definitions(OSMScoutImport PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})

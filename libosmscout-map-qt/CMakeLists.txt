@@ -24,7 +24,7 @@ endif()
 
 set_target_properties(OSMScoutMapQt PROPERTIES
 		CXX_STANDARD 11
-		LIBRARY_OUTPUT_NAME "osmscout_map_qt")
+		OUTPUT_NAME "osmscout_map_qt")
 
 target_include_directories(OSMScoutMapQt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -48,8 +48,7 @@ set_target_properties(OSMScoutMapQt PROPERTIES
   		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   		PUBLIC_HEADER     "${HEADER_FILES}"
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-		LIBRARY_OUTPUT_NAME "OSMScoutMapQt"
-)
+		OUTPUT_NAME "OSMScoutMapQt")
 endif()
 
 target_link_libraries(OSMScoutMapQt

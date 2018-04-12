@@ -38,7 +38,7 @@ endif()
 
 set_target_properties(OSMScoutGPX PROPERTIES
 		CXX_STANDARD 11
-		LIBRARY_OUTPUT_NAME "osmscout_gpx")
+		OUTPUT_NAME "osmscout_gpx")
 
 target_include_directories(OSMScoutGPX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -80,8 +80,7 @@ set_target_properties(OSMScoutGPX PROPERTIES
   		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   		PUBLIC_HEADER     "${HEADER_FILES}"
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-		LIBRARY_OUTPUT_NAME "OSMScoutGPX"
-)
+		OUTPUT_NAME "OSMScoutGPX")
 endif()
 
 target_compile_definitions(OSMScoutGPX PRIVATE -DOSMSCOUT_GPX_EXPORT_SYMBOLS)
