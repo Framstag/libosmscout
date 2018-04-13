@@ -1705,42 +1705,42 @@ namespace osmscout {
 
     inline bool HasSidewalkLaneLeft() const
     {
-      return featureSet & sidewalkLaneLeft;
+      return (featureSet & sidewalkLaneLeft)!=0;
     }
 
     inline bool HasSidewalkLaneRight() const
     {
-      return featureSet & sidewalkLaneRight;
+      return (featureSet & sidewalkLaneRight)!=0;
     }
 
     inline bool HasSidewalkTrackLeft() const
     {
-      return featureSet & sidewalkTrackLeft;
+      return (featureSet & sidewalkTrackLeft)!=0;
     }
 
     inline bool HasSidewalkTrackRight() const
     {
-      return featureSet & sidewalkTrackRight;
+      return (featureSet & sidewalkTrackRight)!=0;
     }
 
     inline bool HasCyclewayLaneLeft() const
     {
-      return featureSet & cyclewayLaneLeft;
+      return (featureSet & cyclewayLaneLeft)!=0;
     }
 
     inline bool HasCyclewayLaneRight() const
     {
-      return featureSet & cyclewayLaneRight;
+      return (featureSet & cyclewayLaneRight)!=0;
     }
 
     inline bool HasCyclewayTrackLeft() const
     {
-      return featureSet & cyclewayTrackLeft;
+      return (featureSet & cyclewayTrackLeft)!=0;
     }
 
     inline bool HasCyclewayTrackRight() const
     {
-      return featureSet & cyclewayTrackRight;
+      return (featureSet & cyclewayTrackRight)!=0;
     }
 
     void Read(FileScanner& scanner) override;
