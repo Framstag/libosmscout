@@ -61,7 +61,7 @@ if [ "$TARGET" = "build" ]; then
     fi
 
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
-      brew install gettext protobuf cairo pango qt5 glfw3 glew glm
+      brew install gettext python@2 protobuf cairo pango qt5 glfw3 glew glm
       brew link --force gettext
       brew link --force qt5
     fi
