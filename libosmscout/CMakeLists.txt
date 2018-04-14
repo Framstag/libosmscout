@@ -10,7 +10,7 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
-    include/osmscout/system/Types.h)
+        include/osmscout/system/OSMScoutTypes.h)
 
 set(HEADER_FILES_UTIL
     include/osmscout/util/Breaker.h
@@ -100,7 +100,7 @@ set(HEADER_FILES
     include/osmscout/Tag.h
     include/osmscout/TypeConfig.h
     include/osmscout/TypeFeatures.h
-    include/osmscout/Types.h
+        include/osmscout/OSMScoutTypes.h
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h)
@@ -183,7 +183,7 @@ set(SOURCE_FILES
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeatures.cpp
-    src/osmscout/Types.cpp
+        src/osmscout/OSMScoutTypes.cpp
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp

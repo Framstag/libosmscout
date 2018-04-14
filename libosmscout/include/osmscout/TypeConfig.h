@@ -34,7 +34,7 @@
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Tag.h>
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>

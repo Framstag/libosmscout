@@ -25,7 +25,7 @@
 #include <map>
 #include <memory>
 
-#include <osmscout/system/Types.h>
+#include <osmscout/system/OSMScoutTypes.h>
 
 namespace osmscout {
 namespace ost {

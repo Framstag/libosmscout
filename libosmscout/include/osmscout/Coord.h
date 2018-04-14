@@ -22,7 +22,7 @@
 
 #include <osmscout/CoreImportExport.h>
 
-#include <osmscout/system/Types.h>
+#include <osmscout/system/OSMScoutTypes.h>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/TypeConfig.h>

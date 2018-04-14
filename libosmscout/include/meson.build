@@ -81,7 +81,7 @@ osmscoutHeader = [
             'osmscout/Tag.h',
             'osmscout/TypeConfig.h',
             'osmscout/TypeFeatures.h',
-            'osmscout/Types.h',
+            'osmscout/OSMScoutTypes.h',
             'osmscout/WaterIndex.h',
             'osmscout/Way.h',
             'osmscout/WayDataFile.h'

@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/import/RawRelation.h>
 

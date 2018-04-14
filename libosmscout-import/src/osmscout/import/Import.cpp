@@ -23,7 +23,7 @@
 #include <iostream>
 #include <iterator>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/RouteNode.h>

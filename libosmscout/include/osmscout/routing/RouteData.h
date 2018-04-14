@@ -24,7 +24,7 @@
 #include <vector>
 
 #include <osmscout/Path.h>
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 #include <osmscout/routing/DBFileOffset.h>
 
 namespace osmscout {

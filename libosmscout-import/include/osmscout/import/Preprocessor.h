@@ -24,7 +24,7 @@
 
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 #include <osmscout/util/Progress.h>
 
 #include <osmscout/import/Import.h>

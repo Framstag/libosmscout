@@ -30,7 +30,7 @@
 
 #include <osmscout/util/Parsing.h>
 
-#include <osmscout/system/Types.h>
+#include <osmscout/system/OSMScoutTypes.h>
 
 namespace osmscout {
 

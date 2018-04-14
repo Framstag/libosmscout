@@ -31,7 +31,7 @@
 #include <string>
 #include <fstream>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #define SRTM1_GRID 3601
 #define SRTM3_GRID 1201

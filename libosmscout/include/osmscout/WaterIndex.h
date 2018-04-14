@@ -27,7 +27,7 @@
 #include <vector>
 
 #include <osmscout/GroundTile.h>
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Magnification.h>

@@ -21,7 +21,7 @@
 */
 
 // Type and style sheet configuration
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
 
 // Water index
