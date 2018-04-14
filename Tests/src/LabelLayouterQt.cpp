@@ -84,9 +84,6 @@ public:
   Label<NativeGlyph, NativeLabel>
                           label;
 
-public:
-  LabelInstance();
-  virtual ~LabelInstance();
 };
 
 template <class NativeGlyph, class NativeLabel, class TextLayouter>
@@ -159,6 +156,7 @@ private:
 
 using QtGlyph = Glyph<QGlyphRun>;
 using QtLabel = Label<QGlyphRun, std::shared_ptr<QTextLayout>>;
+using QtLabelInstance = LabelInstance<QGlyphRun, std::shared_ptr<QTextLayout>>;
 
 class QTextLayouter
 {
@@ -395,6 +393,11 @@ void DrawWindow::paintEvent(QPaintEvent* /* event */)
     for (const Glyph<QGlyphRun> &glyph:label){
       drawGlyph(&painter, glyph);
     }
+  }
+
+  for (const QtLabelInstance inst : layouter->labels()){
+    QTextLayout *tl = inst.label.label.get();
+    tl->draw(&painter, QPointF(inst.x, inst.y));
   }
 
   cnt++;
