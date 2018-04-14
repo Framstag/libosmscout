@@ -34,6 +34,8 @@
 // Custom QML objects
 #include "FileIO.h"
 
+using namespace osmscout;
+
 int main(int argc, char* argv[])
 {
 #ifdef Q_WS_X11

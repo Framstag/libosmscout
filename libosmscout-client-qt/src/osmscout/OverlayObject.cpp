@@ -21,6 +21,8 @@
 #include <osmscout/OverlayObject.h>
 #include <osmscout/util/Geometry.h>
 
+namespace osmscout {
+
 OverlayObject::OverlayObject(QObject *parent):
   QObject(parent),
   typeName("_route")
@@ -159,4 +161,5 @@ bool OverlayNode::toNode(osmscout::NodeRef &node,
   //node->SetLayerToMax();
   node->SetCoords(nodes.begin()->GetCoord());
   return true;
+}
 }

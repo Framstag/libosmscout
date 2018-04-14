@@ -27,6 +27,7 @@
 #include <osmscout/OSMScoutQt.h>
 #include <osmscout/Router.h>
 
+namespace osmscout {
 
 Router::Router(QThread *thread,
                SettingsRef settings,
@@ -285,4 +286,5 @@ void Router::onRouteRequest(LocationEntryRef start,
       routingService->Close();
     }
   );
+}
 }

@@ -24,6 +24,8 @@
 #include <QGuiApplication>
 #include "SettingsDialog.h"
 
+using namespace osmscout;
+
 MainWindow::MainWindow(DBThreadRef dbThread)
  : QQmlApplicationEngine(QUrl("qrc:/qml/main.qml")),
    dbThread(dbThread)

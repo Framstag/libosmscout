@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H
+#define OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2010 Tim Teulings
@@ -18,9 +21,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H
-#define OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H
-
 #include <osmscout/routing/RouteData.h>
 #include <osmscout/routing/Route.h>
 #include <osmscout/Way.h>
@@ -33,6 +33,8 @@
 #include <QObject>
 #include <QString>
 #include <memory>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -88,5 +90,7 @@ public:
   void GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
                           QList<RouteStep> &routeSteps);
 };
+
+}
 
 #endif //OSMSCOUT_CLIENT_QT_ROUTEDESCRIPTIONBUILDER_H

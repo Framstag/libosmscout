@@ -36,6 +36,7 @@
 
 #include <map>
 
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -149,5 +150,7 @@ public:
     return new OverlayWay(route.routeWay().nodes);
   }
 };
+
+}
 
 #endif

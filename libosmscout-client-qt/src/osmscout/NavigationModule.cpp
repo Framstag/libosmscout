@@ -19,6 +19,8 @@
 
 #include <osmscout/NavigationModule.h>
 
+namespace osmscout {
+
 NextStepDescriptionBuilder::NextStepDescriptionBuilder():
     roundaboutCrossingCounter(0),
     index(0),
@@ -105,4 +107,5 @@ void NavigationModule::locationChanged(osmscout::GeoCoord coord,
   bool onRoute = navigation.UpdateCurrentLocation(coord, minDistance);
   RouteStep routeStep = navigation.nextWaypointDescription();
   emit update(onRoute, routeStep);
+}
 }

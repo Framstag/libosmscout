@@ -23,6 +23,8 @@
 
 #include <osmscout/system/Math.h>
 
+namespace osmscout {
+
 // uncomment or define by compiler parameter to render various debug marks
 // #define DRAW_DEBUG
 
@@ -533,4 +535,5 @@ void PlaneMapRenderer::onStylesheetFilenameChanged()
 
   MapRenderer::onStylesheetFilenameChanged();
   emit Redraw();
+}
 }

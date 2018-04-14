@@ -20,7 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-
 #include <QObject>
 #include <QThread>
 #include <osmscout/DBThread.h>
@@ -31,6 +30,8 @@
 #endif
 
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -111,5 +112,6 @@ private:
                         osmscout::GeoBox& bbox);
 };
 
-#endif /* OSMSCOUT_CLIENT_QT_SEARCHMODULE_H */
+}
 
+#endif /* OSMSCOUT_CLIENT_QT_SEARCHMODULE_H */

@@ -27,6 +27,8 @@
 
 #include <osmscout/MapManager.h>
 
+namespace osmscout {
+
 /**
  * Model providing access to currently installed maps on device
  * \ingroup QtAPI
@@ -74,5 +76,6 @@ private:
   MapManagerRef mapManager;
 };
 
+}
 
 #endif //OSMSCOUT_CLIENT_QT_INSTALLEDMAPSMODEL_H

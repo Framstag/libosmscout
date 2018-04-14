@@ -23,6 +23,8 @@
 #include <QMetaType>
 #include <QVariant>
 
+namespace osmscout {
+
 RouteStep::RouteStep(QString type):
     type(type),
     distance(-1),
@@ -75,3 +77,4 @@ RouteStep& RouteStep::operator=(const RouteStep& other)
   return *this;
 }
 
+}

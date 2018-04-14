@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_ROUTER_H
+#define OSMSCOUT_CLIENT_QT_ROUTER_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2010 Tim Teulings
@@ -18,9 +21,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef ROUTER_H
-#define ROUTER_H
-
 #include <osmscout/RouteDescriptionBuilder.h>
 
 #include <osmscout/DataTileCache.h>
@@ -37,7 +37,7 @@
 #include <QObject>
 #include <QSettings>
 
-Q_DECLARE_METATYPE(osmscout::Vehicle)
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -164,4 +164,8 @@ public:
 
 };
 
-#endif /* ROUTER_H */
+}
+
+Q_DECLARE_METATYPE(osmscout::Vehicle)
+
+#endif /* OSMSCOUT_CLIENT_QT_ROUTER_H */

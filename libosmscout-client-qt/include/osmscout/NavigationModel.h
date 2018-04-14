@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_NAVIGATIONMODEL_H
+#define OSMSCOUT_CLIENT_QT_NAVIGATIONMODEL_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2018 Lukas Karas
@@ -17,14 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef OSMSCOUT_CLIENT_QT_NAVIGATIONMODEL_H
-#define OSMSCOUT_CLIENT_QT_NAVIGATIONMODEL_H
-
 #include <osmscout/NavigationModule.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
+
+namespace osmscout {
 
 /**
  * Model providing navigation functionality to QML.
@@ -78,5 +80,7 @@ private:
   bool              onRoute;
   RouteStep         nextRouteStep;
 };
+
+}
 
 #endif //OSMSCOUT_CLIENT_QT_NAVIGATIONMODEL_H

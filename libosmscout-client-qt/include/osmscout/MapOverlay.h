@@ -1,5 +1,5 @@
-#ifndef LIBOSMSCOUT_MAPOVERLAY_H
-#define LIBOSMSCOUT_MAPOVERLAY_H
+#ifndef OSMSCOUT_CLIENT_QT_MAPOVERLAY_H
+#define OSMSCOUT_CLIENT_QT_MAPOVERLAY_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -25,6 +25,8 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QQuickPaintedItem>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -65,4 +67,6 @@ public:
   }
 };
 
-#endif //LIBOSMSCOUT_MAPOVERLAY_H
+}
+
+#endif // OSMSCOUT_CLIENT_QT_MAPOVERLAY_H

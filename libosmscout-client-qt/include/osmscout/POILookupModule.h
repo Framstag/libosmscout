@@ -25,6 +25,8 @@
 
 #include <QObject>
 
+namespace osmscout {
+
 /**
  * \ingroup QtAPI
  */
@@ -60,5 +62,7 @@ private:
                                         QStringList types);
 
 };
+
+}
 
 #endif //OSMSCOUT_CLIENT_QT_POILOOKUPSERVICE_H

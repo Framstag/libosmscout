@@ -1,5 +1,5 @@
-#ifndef LIBOSMSCOUT_TILEMAPOVERLAY_H
-#define LIBOSMSCOUT_TILEMAPOVERLAY_H
+#ifndef OSMSCOUT_CLIENT_QT_TILEMAPOVERLAY_H
+#define OSMSCOUT_CLIENT_QT_TILEMAPOVERLAY_H
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2017 Lukáš Karas
@@ -26,6 +26,8 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QImage>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -91,4 +93,6 @@ public:
   void setEnabled(bool b);
 };
 
-#endif //LIBOSMSCOUT_TILEMAPOVERLAY_H
+}
+
+#endif // OSMSCOUT_CLIENT_QT_TILEMAPOVERLAY_H

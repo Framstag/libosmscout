@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_FILEDOWNLOADER_H
+#define OSMSCOUT_CLIENT_QT_FILEDOWNLOADER_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2017 Rinigus
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef FILEDOWNLOADER_H
-#define FILEDOWNLOADER_H
-
 #include <QObject>
 #include <QString>
 #include <QNetworkAccessManager>
@@ -32,6 +32,8 @@
 #include <QFileInfo>
 
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /// \brief Downloads a file specified by URL
 ///
@@ -135,4 +137,6 @@ protected:
   const int const_download_timeout{60};                ///< Download timeout in seconds
 };
 
-#endif // FILEDOWNLOADER_H
+}
+
+#endif // OSMSCOUT_CLIENT_QT_FILEDOWNLOADER_H

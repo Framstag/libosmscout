@@ -30,6 +30,8 @@
 
 #include <osmscout/util/Logger.h>
 
+namespace osmscout {
+
 DBThread::DBThread(QThread *backgroundThread,
                    QString basemapLookupDirectory,
                    QString iconDirectory,
@@ -456,4 +458,5 @@ void DBThread::RunSynchronousJob(SynchronousDBJob job)
     return;
   }
   job(databases);
+}
 }

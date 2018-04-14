@@ -24,6 +24,8 @@
 
 #include "AppSettings.h"
 
+using namespace osmscout;
+
 AppSettings::AppSettings(): view(NULL)
 {
 }

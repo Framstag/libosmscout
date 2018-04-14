@@ -1,5 +1,5 @@
-#ifndef DBOPERATION_H
-#define DBOPERATION_H
+#ifndef OSMSCOUT_CLIENT_QT_DBOPERATION_H
+#define OSMSCOUT_CLIENT_QT_DBOPERATION_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -31,6 +31,8 @@
 #include <osmscout/DataTileCache.h>
 
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -108,4 +110,6 @@ public:
                             osmscout::MapData &data);
 };
 
-#endif /* DBOPERATION_H */
+}
+
+#endif /* OSMSCOUT_CLIENT_QT_DBOPERATION_H */
