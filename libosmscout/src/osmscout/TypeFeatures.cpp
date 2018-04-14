@@ -2311,10 +2311,10 @@ namespace osmscout {
     return new (buffer) SidewayFeatureValue();
   }
 
-  void SidewayFeature::Parse(TagErrorReporter& errorReporter,
+  void SidewayFeature::Parse(TagErrorReporter& /*errorReporter*/,
                              const TypeConfig& /*typeConfig*/,
                              const FeatureInstance& feature,
-                             const ObjectOSMRef& object,
+                             const ObjectOSMRef& /*object*/,
                              const TagMap& tags,
                              FeatureValueBuffer& buffer) const
   {
