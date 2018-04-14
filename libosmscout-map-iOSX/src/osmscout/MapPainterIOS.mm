@@ -441,7 +441,7 @@ namespace osmscout {
      */
     MapPainter::TextDimension MapPainterIOS::GetTextDimension(const Projection& projection,
                                                               const MapParameter& parameter,
-                                                              double /*objectWidth*/,
+                                                              double objectWidth,
                                                               double fontSize,
                                                               const std::string& text){
         Font *font = GetFont(projection,parameter,fontSize);
@@ -469,6 +469,7 @@ namespace osmscout {
             rect.size.height = size.height;
         }
 #else
+
         NSRect stringBounds = [str boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
         CGSize size = stringBounds.size;
         rect.size.width = size.width;
