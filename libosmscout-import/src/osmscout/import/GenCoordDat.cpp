@@ -20,6 +20,7 @@
 #include <osmscout/import/GenCoordDat.h>
 
 #include <limits>
+#include <map>
 
 #include <osmscout/Coord.h>
 #include <osmscout/CoordDataFile.h>

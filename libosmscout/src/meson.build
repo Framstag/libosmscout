@@ -77,6 +77,7 @@ osmscoutSrc = [
             'src/osmscout/SRTM.cpp',
             'src/osmscout/Tag.cpp',
             'src/osmscout/TypeConfig.cpp',
+            'src/osmscout/TypeFeature.cpp',
             'src/osmscout/TypeFeatures.cpp',
             'src/osmscout/OSMScoutTypes.cpp',
             'src/osmscout/WaterIndex.cpp',

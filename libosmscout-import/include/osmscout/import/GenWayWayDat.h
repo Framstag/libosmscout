@@ -22,6 +22,7 @@
 
 #include <osmscout/import/ImportFeatures.h>
 
+#include <map>
 #include <unordered_map>
 
 #include <osmscout/Way.h>

@@ -99,8 +99,9 @@ set(HEADER_FILES
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
     include/osmscout/TypeConfig.h
+    include/osmscout/TypeFeature.h
     include/osmscout/TypeFeatures.h
-        include/osmscout/OSMScoutTypes.h
+    include/osmscout/OSMScoutTypes.h
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h)
@@ -182,8 +183,9 @@ set(SOURCE_FILES
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
+    src/osmscout/TypeFeature.cpp
     src/osmscout/TypeFeatures.cpp
-        src/osmscout/OSMScoutTypes.cpp
+    src/osmscout/OSMScoutTypes.cpp
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp

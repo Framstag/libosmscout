@@ -80,6 +80,7 @@ osmscoutHeader = [
             'osmscout/SRTM.h',
             'osmscout/Tag.h',
             'osmscout/TypeConfig.h',
+            'osmscout/TypeFeature.h',
             'osmscout/TypeFeatures.h',
             'osmscout/OSMScoutTypes.h',
             'osmscout/WaterIndex.h',

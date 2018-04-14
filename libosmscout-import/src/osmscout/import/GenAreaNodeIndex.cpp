@@ -19,6 +19,7 @@
 
 #include <osmscout/import/GenAreaNodeIndex.h>
 
+#include <map>
 #include <vector>
 
 #include <osmscout/Node.h>

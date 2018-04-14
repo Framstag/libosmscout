@@ -19,13 +19,16 @@
  */
 
 #include <osmscout/RouteDescriptionBuilder.h>
+
+#include <set>
+#include <sstream>
+#include <iomanip>
+
 #include <osmscout/routing/Route.h>
 
 #include <QMetaType>
 #include <QVariant>
 
-#include <sstream>
-#include <iomanip>
 
 namespace osmscout {
 
