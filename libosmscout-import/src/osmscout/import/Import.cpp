@@ -1066,16 +1066,16 @@ namespace osmscout {
                        progress);
 
     progress.Info("Parsed language(s) :");
-    int langIndex = 0;
+    uint32_t langIndex = 0;
     for(const auto& lang : parameter.GetLangOrder()){
       if(lang=="#"){
         progress.Info("  default");
-        typeConfig->RegisterNameTag("name", langIndex);
-        typeConfig->RegisterNameTag("place_name", langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameTag("name", langIndex);
+        typeConfig->GetTagRegistry().RegisterNameTag("place_name", langIndex+1);
       } else {
           progress.Info("  " + lang);
-          typeConfig->RegisterNameTag("name:"+lang, langIndex);
-          typeConfig->RegisterNameTag("place_name:"+lang, langIndex+1);
+          typeConfig->GetTagRegistry().RegisterNameTag("name:"+lang, langIndex);
+          typeConfig->GetTagRegistry().RegisterNameTag("place_name:"+lang, langIndex+1);
       }
       langIndex+=2;
     }
@@ -1085,12 +1085,12 @@ namespace osmscout {
     for(const auto& lang : parameter.GetAltLangOrder()){
       if(lang=="#"){
         progress.Info("  default");
-        typeConfig->RegisterNameAltTag("name", langIndex);
-        typeConfig->RegisterNameAltTag("place_name", langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("name", langIndex);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("place_name", langIndex+1);
       } else {
         progress.Info("  " + lang);
-        typeConfig->RegisterNameAltTag("name:"+lang, langIndex);
-        typeConfig->RegisterNameAltTag("place_name:"+lang, langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("name:"+lang, langIndex);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("place_name:"+lang, langIndex+1);
       }
       langIndex+=2;
     }

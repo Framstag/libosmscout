@@ -286,14 +286,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,sizeValue);
                   .)
@@ -309,14 +309,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,sizeValue);
                   .)
@@ -332,14 +332,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,sizeValue);
                   .)
@@ -355,14 +355,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,sizeValue);
                   .)
@@ -378,14 +378,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,sizeValue);
                   .)
@@ -401,14 +401,14 @@ PRODUCTIONS
                 (
                   STRING<stringValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,stringValue);
                   .)
                 |
                   UINT<sizeValue>
                   (.
-                    TagId tagId=config.RegisterTag(tagName);
+                    TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,sizeValue);
                   .)
@@ -428,7 +428,7 @@ PRODUCTIONS
                 }
                 "]"
                 (.
-                  TagId tagId=config.RegisterTag(tagName);
+                  TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 
                   if (values.size()==1) {
                     condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,values.front());
@@ -449,7 +449,7 @@ PRODUCTIONS
               = "EXISTS"
                  string
                  (.
-                   condition=std::make_shared<TagExistsCondition>(config.RegisterTag(Destring(t->val)));
+                   condition=std::make_shared<TagExistsCondition>(config.GetTagRegistry().RegisterTag(Destring(t->val)));
                  .)
                  .
 

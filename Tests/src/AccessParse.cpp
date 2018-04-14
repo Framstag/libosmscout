@@ -114,7 +114,7 @@ void CheckParseSuccess(bool canFoot,
   std::unordered_map<osmscout::TagId,std::string> tags;
 
   for (const auto &entry : stringTags) {
-    osmscout::TagId tagId=typeConfig.RegisterTag(entry.first);
+    osmscout::TagId tagId=typeConfig.GetTagRegistry().RegisterTag(entry.first);
 
     tags[tagId]=entry.second;
   }

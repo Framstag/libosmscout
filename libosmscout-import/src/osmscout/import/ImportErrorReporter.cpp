@@ -44,7 +44,7 @@ namespace osmscout {
       relationErrorCount(0),
       locationErrorCount(0)
   {
-    nameTagId=typeConfig->GetTagId("name");
+    nameTagId=typeConfig->GetTagRegistry().GetTagId("name");
 
     tagReport.Open(AppendFileToDir(destinationDirectory,FILENAME_TAG_HTML));
     tagReport.WriteDocumentStart();

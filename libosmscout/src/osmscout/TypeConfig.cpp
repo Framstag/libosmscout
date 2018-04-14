@@ -1047,12 +1047,12 @@ namespace osmscout {
     typeInfoOSMSubTileBorder->SetInternal().CanBeWay(true);
     RegisterType(typeInfoOSMSubTileBorder);
 
-    tagArea=GetTagId("area");
-    tagNatural=GetTagId("natural");
-    tagDataPolygon=GetTagId("datapolygon");
-    tagType=GetTagId("type");
-    tagRestriction=GetTagId("restriction");
-    tagJunction=GetTagId("junction");
+    tagArea=tagRegistry.GetTagId("area");
+    tagNatural=tagRegistry.GetTagId("natural");
+    tagDataPolygon=tagRegistry.GetTagId("datapolygon");
+    tagType=tagRegistry.GetTagId("type");
+    tagRestriction=tagRegistry.GetTagId("restriction");
+    tagJunction=tagRegistry.GetTagId("junction");
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);

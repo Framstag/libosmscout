@@ -1013,23 +1013,6 @@ namespace osmscout {
      * Methods for dealing with tags
      */
     //@{
-    inline TagId RegisterTag(const std::string& tagName)
-    {
-      return tagRegistry.RegisterTag(tagName);
-    }
-
-    inline TagId RegisterNameTag(const std::string& tagName,
-                                 uint32_t priority)
-    {
-      return tagRegistry.RegisterNameTag(tagName,priority);
-    }
-
-    inline TagId RegisterNameAltTag(const std::string& tagName,
-                                    uint32_t priority)
-    {
-      return tagRegistry.RegisterNameAltTag(tagName,priority);
-    }
-
     inline TagId GetTagId(const char* name) const
     {
       return tagRegistry.GetTagId(name);
@@ -1041,6 +1024,11 @@ namespace osmscout {
     }
 
     inline const TagRegistry& GetTagRegistry() const
+    {
+      return tagRegistry;
+    }
+
+    inline TagRegistry& GetTagRegistry()
     {
       return tagRegistry;
     }
