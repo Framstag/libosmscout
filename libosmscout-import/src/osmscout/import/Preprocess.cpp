@@ -238,7 +238,7 @@ namespace osmscout {
       node.SetCoord(data.coord);
 
       node.Parse(*parameter.GetErrorReporter(),
-                 *typeConfig,
+                 typeConfig->GetTagRegistry(),
                  data.tags);
 
       processed.rawNodes.push_back(std::move(node));
@@ -380,7 +380,7 @@ namespace osmscout {
     }
 
     way.Parse(*parameter.GetErrorReporter(),
-              *typeConfig,
+              typeConfig->GetTagRegistry(),
               data.tags);
 
     if (isCoastline) {
@@ -467,7 +467,7 @@ namespace osmscout {
     relation.members=members;
 
     relation.Parse(*parameter.GetErrorReporter(),
-                   *typeConfig,
+                   typeConfig->GetTagRegistry(),
                    tags);
 
     processed.rawRelations.push_back(std::move(relation));

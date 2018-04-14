@@ -35,14 +35,14 @@ namespace osmscout {
   }
 
   void RawRelation::Parse(TagErrorReporter& errorReporter,
-                          const TypeConfig& typeConfig,
+                          const TagRegistry& tagRegistry,
                           const TagMap& tags)
   {
     ObjectOSMRef object(id,
                         osmRefRelation);
 
     featureValueBuffer.Parse(errorReporter,
-                             typeConfig,
+                             tagRegistry,
                              object,
                              tags);
   }

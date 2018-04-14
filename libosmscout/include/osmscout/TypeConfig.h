@@ -773,7 +773,7 @@ namespace osmscout {
     {
       size_t featureBit=type->GetFeature(idx).GetFeatureBit();
 
-      return (featureBits[featureBit/8] & (1 << featureBit%8))!=0;
+      return (featureBits[featureBit/8] & (1u << featureBit%8))!=0;
     }
 
     /**
@@ -786,16 +786,15 @@ namespace osmscout {
      */
     inline FeatureValue* GetValue(size_t idx) const
     {
-      if (featureValueBuffer == NULL)
-        return NULL;
-      return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
+      return featureValueBuffer==nullptr ? nullptr
+                                         : static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
     }
 
     FeatureValue* AllocateValue(size_t idx);
     void FreeValue(size_t idx);
 
     void Parse(TagErrorReporter& errorReporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const ObjectOSMRef& object,
                const TagMap& tags);
 
@@ -818,23 +817,27 @@ namespace osmscout {
 
     template<class T> const T* findValue() const
     {
-      for (auto &featureInstance :GetType()->GetFeatures()){
-        if (HasFeature(featureInstance.GetIndex())){
+      for (auto& featureInstance :GetType()->GetFeatures()) {
+        if (HasFeature(featureInstance.GetIndex())) {
           osmscout::FeatureRef feature=featureInstance.GetFeature();
-          if (feature->HasValue()){
-            osmscout::FeatureValue *value=GetValue(featureInstance.GetIndex());
-            const T *v = dynamic_cast<const T*>(value);
-            if (v!=NULL){
+          if (feature->HasValue()) {
+            osmscout::FeatureValue* value=GetValue(featureInstance.GetIndex());
+            const T *v=dynamic_cast<const T*>(value);
+            if (v!=nullptr) {
               return v;
             }
           }
         }
       }
+
       return nullptr;
     }
   };
 
   typedef std::shared_ptr<FeatureValueBuffer> FeatureValueBufferRef;
+
+  // Forward declaration
+  class TypeConfig;
 
   /**
    * Custom data structure to efficiently handle a set of TypeInfoRef.
@@ -943,19 +946,8 @@ namespace osmscout {
     static const uint32_t MAX_FORMAT_VERSION = FILE_FORMAT_VERSION;
 
   private:
-
     // Tags
-
-    std::vector<TagInfo>                        tags;
-
-    TagId                                       nextTagId;
-
-    std::unordered_map<std::string,TagId>       stringToTagMap;
-    std::unordered_map<TagId,uint32_t>          nameTagIdToPrioMap;
-    std::unordered_map<TagId,uint32_t>          nameAltTagIdToPrioMap;
-    std::unordered_map<std::string,uint8_t>     nameToMaxSpeedMap;
-
-    std::unordered_map<std::string,size_t>      surfaceToGradeMap;
+    TagRegistry                                 tagRegistry;
 
     // Types
 
@@ -1021,20 +1013,61 @@ namespace osmscout {
      * Methods for dealing with tags
      */
     //@{
-    TagId RegisterTag(const std::string& tagName);
+    inline TagId RegisterTag(const std::string& tagName)
+    {
+      return tagRegistry.RegisterTag(tagName);
+    }
 
-    TagId RegisterNameTag(const std::string& tagName,
-                          uint32_t priority);
-    TagId RegisterNameAltTag(const std::string& tagName,
-                             uint32_t priority);
+    inline TagId RegisterNameTag(const std::string& tagName,
+                                 uint32_t priority)
+    {
+      return tagRegistry.RegisterNameTag(tagName,priority);
+    }
 
-    TagId GetTagId(const char* name) const;
-    TagId GetTagId(const std::string& name) const;
+    inline TagId RegisterNameAltTag(const std::string& tagName,
+                                    uint32_t priority)
+    {
+      return tagRegistry.RegisterNameAltTag(tagName,priority);
+    }
 
-    bool IsNameTag(TagId tag,
-                   uint32_t& priority) const;
-    bool IsNameAltTag(TagId tag,
-                      uint32_t& priority) const;
+    inline TagId GetTagId(const char* name) const
+    {
+      return tagRegistry.GetTagId(name);
+    }
+
+    inline TagId GetTagId(const std::string& name) const
+    {
+      return tagRegistry.GetTagId(name);
+    }
+
+    inline const TagRegistry& GetTagRegistry() const
+    {
+      return tagRegistry;
+    }
+    //@}
+
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
+    inline void RegisterSurfaceToGradeMapping(const std::string& surface,
+                                              size_t grade)
+    {
+      tagRegistry.RegisterSurfaceToGradeMapping(surface,
+                                                grade);
+    }
+    //@}
+
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
+    inline void RegisterMaxSpeedAlias(const std::string& alias,
+                                      uint8_t maxSpeed)
+    {
+      tagRegistry.RegisterMaxSpeedAlias(alias,
+                                        maxSpeed);
+    }
     //@}
 
     /**
@@ -1218,27 +1251,6 @@ namespace osmscout {
       return features;
     }
     //@}
-
-    /**
-     * Methods for dealing with mappings for surfaces and surface grades.
-     */
-    //@{
-    void RegisterSurfaceToGradeMapping(const std::string& surface,
-                                       size_t grade);
-    bool GetGradeForSurface(const std::string& surface,
-                            size_t& grade) const;
-    //@}
-
-    /**
-     * Methods for dealing with mappings for surfaces and surface grades.
-     */
-    //@{
-    void RegisterMaxSpeedAlias(const std::string& alias,
-                               uint8_t maxSpeed);
-    bool GetMaxSpeedFromAlias(const std::string& alias,
-                              uint8_t& maxSpeed) const;
-    //@}
-
 
     /**
      * Methods for loading/storing of type information from/to files.

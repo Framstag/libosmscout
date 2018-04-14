@@ -34,13 +34,6 @@
 
 namespace osmscout {
 
-  // Forward declaration of classes TypeConfig and TypeInfo because
-  // of circular dependency between them and Feature
-  class FeatureValueBuffer;
-  class FeatureInstance;
-  class TypeConfig;
-  class TypeInfo;
-
   class OSMSCOUT_API FeatureValue
   {
   public:
@@ -67,6 +60,11 @@ namespace osmscout {
     }
   };
 
+  // Forward declaration of classes because
+  // of circular dependency between them and Feature
+  class FeatureValueBuffer;
+  class FeatureInstance;
+
   /**
    * A feature combines one or multiple tags  to build information attribute for a type.
    *
@@ -92,10 +90,10 @@ namespace osmscout {
     virtual ~Feature()=default;
 
     /**
-     * Does further initialization based on the current TypeConfig. For example
+     * Does further initialization based on the current TagRegistry. For example
      * it registers Tags (and stores their TagId) for further processing.
      */
-    virtual void Initialize(TypeConfig& typeConfig) = 0;
+    virtual void Initialize(TagRegistry& tagRegistry) = 0;
 
     void AddDescription(const std::string& languageCode,
                         const std::string& description);
@@ -161,7 +159,7 @@ namespace osmscout {
     virtual FeatureValue* AllocateValue(void* buffer);
 
     virtual void Parse(TagErrorReporter& reporter,
-                       const TypeConfig& typeConfig,
+                       const TagRegistry& tagRegistry,
                        const FeatureInstance& feature,
                        const ObjectOSMRef& object,
                        const TagMap& tags,
@@ -169,6 +167,9 @@ namespace osmscout {
   };
 
   typedef std::shared_ptr<Feature> FeatureRef;
+
+  // Forward declaration of TypeInfo
+  class TypeInfo;
 
   /**
    * An instantiation of a feature for a certain type.

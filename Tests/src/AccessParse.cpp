@@ -139,7 +139,7 @@ void CheckParseSuccess(bool canFoot,
   buffer.SetType(testType);
 
   accessFeature->Parse(reporter,
-                       typeConfig,
+                       typeConfig.GetTagRegistry(),
                        featureInstance,
                        osmscout::ObjectOSMRef(1,osmscout::osmRefWay),
                        tags,

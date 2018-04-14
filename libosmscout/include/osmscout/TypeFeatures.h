@@ -81,7 +81,7 @@ namespace osmscout {
 
   public:
     NameFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -89,7 +89,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -149,7 +149,7 @@ namespace osmscout {
 
   public:
     NameAltFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -157,7 +157,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -218,7 +218,7 @@ namespace osmscout {
 
   public:
     RefFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -226,7 +226,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -290,7 +290,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -298,7 +298,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -369,7 +369,7 @@ namespace osmscout {
 
   public:
     AddressFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -377,7 +377,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -617,7 +617,7 @@ namespace osmscout {
     }
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -625,7 +625,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -748,7 +748,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -756,7 +756,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -808,7 +808,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -816,7 +816,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -868,7 +868,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -876,7 +876,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -928,7 +928,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -936,7 +936,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -989,7 +989,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -997,7 +997,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1063,7 +1063,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1071,7 +1071,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1131,7 +1131,7 @@ namespace osmscout {
   public:
     PostalCodeFeature();
 
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1139,7 +1139,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1156,12 +1156,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1178,12 +1178,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1200,12 +1200,12 @@ namespace osmscout {
         static const char* const NAME;
 
     public:
-        void Initialize(TypeConfig& typeConfig) override;
+        void Initialize(TagRegistry& tagRegistry) override;
 
         std::string GetName() const override;
 
         void Parse(TagErrorReporter& reporter,
-                   const TypeConfig& typeConfig,
+                   const TagRegistry& tagRegistry,
                    const FeatureInstance& feature,
                    const ObjectOSMRef& object,
                    const TagMap& tags,
@@ -1222,12 +1222,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1291,7 +1291,7 @@ namespace osmscout {
 
   public:
     EleFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1299,7 +1299,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1364,7 +1364,7 @@ namespace osmscout {
 
   public:
     DestinationFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1372,7 +1372,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1389,12 +1389,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1454,7 +1454,7 @@ namespace osmscout {
 
   public:
     WebsiteFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1462,7 +1462,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1520,7 +1520,7 @@ namespace osmscout {
 
   public:
     PhoneFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1528,7 +1528,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1579,7 +1579,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1587,7 +1587,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1662,7 +1662,7 @@ namespace osmscout {
 
   public:
     ConstructionYearFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1670,7 +1670,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1766,7 +1766,7 @@ namespace osmscout {
 
   public:
     SidewayFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1774,7 +1774,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,

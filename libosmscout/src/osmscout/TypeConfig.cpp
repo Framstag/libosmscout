@@ -412,13 +412,13 @@ namespace osmscout {
   }
 
   void FeatureValueBuffer::Parse(TagErrorReporter& errorReporter,
-                                 const TypeConfig& typeConfig,
+                                 const TagRegistry& tagRegistry,
                                  const ObjectOSMRef& object,
                                  const TagMap& tags)
   {
     for (const auto &feature : type->GetFeatures()) {
       feature.GetFeature()->Parse(errorReporter,
-                                  typeConfig,
+                                  tagRegistry,
                                   feature,
                                   object,
                                   tags,
@@ -924,24 +924,12 @@ namespace osmscout {
   }
 
   TypeConfig::TypeConfig()
-   : nextTagId(0),
-     nodeTypeIdBytes(1),
+   : nodeTypeIdBytes(1),
      wayTypeIdBytes(1),
      areaTypeIdBits(1),
      areaTypeIdBytes(1)
   {
     log.Debug() << "TypeConfig::TypeConfig()";
-
-    // Make sure, that this is always registered first.
-    // It assures that id 0 is always reserved for tagIgnore
-    RegisterTag("");
-
-    RegisterTag("area");
-    RegisterTag("natural");
-    RegisterTag("datapolygon");
-    RegisterTag("type");
-    RegisterTag("restriction");
-    RegisterTag("junction");
 
     featureName=std::make_shared<NameFeature>();
     RegisterFeature(featureName);
@@ -1015,7 +1003,6 @@ namespace osmscout {
 
     RegisterType(typeInfoIgnore);
 
-
     //
     // Internal type for showing routes
     //
@@ -1080,42 +1067,6 @@ namespace osmscout {
     log.Debug() << "TypeConfig::~TypeConfig()";
   }
 
-  TagId TypeConfig::RegisterTag(const std::string& tagName)
-  {
-    auto mapping=stringToTagMap.find(tagName);
-
-    if (mapping!=stringToTagMap.end()) {
-      return mapping->second;
-    }
-
-    TagInfo tagInfo(nextTagId,tagName);
-
-    nextTagId++;
-
-    tags.push_back(tagInfo);
-    stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
-
-    return tagInfo.GetId();
-  }
-
-  TagId TypeConfig::RegisterNameTag(const std::string& tagName, uint32_t priority)
-  {
-    TagId tagId=RegisterTag(tagName);
-
-    nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
-
-    return tagId;
-  }
-
-  TagId TypeConfig::RegisterNameAltTag(const std::string& tagName, uint32_t priority)
-  {
-    TagId tagId=RegisterTag(tagName);
-
-    nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
-
-    return tagId;
-  }
-
   void TypeConfig::RegisterFeature(const FeatureRef& feature)
   {
     assert(feature);
@@ -1128,7 +1079,7 @@ namespace osmscout {
     features.push_back(feature);
     nameToFeatureMap[feature->GetName()]=feature;
 
-    feature->Initialize(*this);
+    feature->Initialize(tagRegistry);
   }
 
   FeatureRef TypeConfig::GetFeature(const std::string& name) const
@@ -1290,30 +1241,6 @@ namespace osmscout {
     }
   }
 
-  TagId TypeConfig::GetTagId(const char* name) const
-  {
-    auto iter=stringToTagMap.find(name);
-
-    if (iter!=stringToTagMap.end()) {
-      return iter->second;
-    }
-    else {
-      return tagIgnore;
-    }
-  }
-
-  TagId TypeConfig::GetTagId(const std::string& name) const
-  {
-    auto iter=stringToTagMap.find(name);
-
-    if (iter!=stringToTagMap.end()) {
-      return iter->second;
-    }
-    else {
-      return tagIgnore;
-    }
-  }
-
   const TypeInfoRef TypeConfig::GetTypeInfo(const std::string& name) const
   {
     auto typeEntry=nameToTypeMap.find(name);
@@ -1323,40 +1250,6 @@ namespace osmscout {
     }
 
     return TypeInfoRef();
-  }
-
-  bool TypeConfig::IsNameTag(TagId tag, uint32_t& priority) const
-  {
-    if (nameTagIdToPrioMap.empty()) {
-      return false;
-    }
-
-    auto entry=nameTagIdToPrioMap.find(tag);
-
-    if (entry==nameTagIdToPrioMap.end()) {
-      return false;
-    }
-
-    priority=entry->second;
-
-    return true;
-  }
-
-  bool TypeConfig::IsNameAltTag(TagId tag, uint32_t& priority) const
-  {
-    if (nameAltTagIdToPrioMap.empty()) {
-      return false;
-    }
-
-    auto entry=nameAltTagIdToPrioMap.find(tag);
-
-    if (entry==nameAltTagIdToPrioMap.end()) {
-      return false;
-    }
-
-    priority=entry->second;
-
-    return true;
   }
 
   TypeInfoRef TypeConfig::GetNodeType(const TagMap& tagMap) const
@@ -1480,51 +1373,6 @@ namespace osmscout {
     return typeInfoIgnore;
   }
 
-  void TypeConfig::RegisterSurfaceToGradeMapping(const std::string& surface,
-                                                 size_t grade)
-  {
-    surfaceToGradeMap.insert(std::make_pair(surface,
-                                            grade));
-  }
-
-  bool TypeConfig::GetGradeForSurface(const std::string& surface,
-                                      size_t& grade) const
-  {
-    auto entry=surfaceToGradeMap.find(surface);
-
-    if (entry!=surfaceToGradeMap.end()) {
-      grade=entry->second;
-
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
-  void TypeConfig::RegisterMaxSpeedAlias(const std::string& alias,
-                                         uint8_t maxSpeed)
-  {
-    nameToMaxSpeedMap.insert(std::make_pair(alias,
-                                            maxSpeed));
-  }
-
-  bool TypeConfig::GetMaxSpeedFromAlias(const std::string& alias,
-                                        uint8_t& maxSpeed) const
-  {
-    auto entry=nameToMaxSpeedMap.find(alias);
-
-    if (entry!=nameToMaxSpeedMap.end()) {
-      maxSpeed=entry->second;
-
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
-
   /**
    * Loads the type configuration from the given *.ost file.
    *
@@ -1640,7 +1488,7 @@ namespace osmscout {
 
           if (feature) {
             feature->AddDescription(languageCode,
-                                   description);
+                                    description);
           }
         }
       }
