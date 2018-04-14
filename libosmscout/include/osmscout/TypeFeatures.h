@@ -53,7 +53,7 @@ namespace osmscout {
       return name;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return name;
     }
@@ -121,7 +121,7 @@ namespace osmscout {
       return nameAlt;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return nameAlt;
     }
@@ -189,7 +189,7 @@ namespace osmscout {
       return ref;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return ref;
     }
@@ -258,7 +258,7 @@ namespace osmscout {
       return location;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return location;
     }
@@ -336,7 +336,7 @@ namespace osmscout {
       return address;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return address;
     }
@@ -1104,7 +1104,7 @@ namespace osmscout {
       return postalCode;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return postalCode;
     }
@@ -1260,7 +1260,7 @@ namespace osmscout {
       return ele;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return std::to_string(ele)+"m";
     }
@@ -1331,7 +1331,7 @@ namespace osmscout {
       return destination;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return destination;
     }
@@ -1426,7 +1426,7 @@ namespace osmscout {
       return website;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return website;
     }
@@ -1495,7 +1495,7 @@ namespace osmscout {
       return phone;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       return phone;
     }
@@ -1631,7 +1631,7 @@ namespace osmscout {
       return endYear;
     }
 
-    inline std::string GetLabel() const override
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
       if (startYear==endYear) {
         return std::to_string(startYear);
@@ -2036,7 +2036,7 @@ namespace osmscout {
       V* value=dynamic_cast<V*>(buffer.GetValue(index));
 
       if (value!=NULL) {
-        return value->GetLabel();
+        return value->GetLabel(0);
       }
     }
 

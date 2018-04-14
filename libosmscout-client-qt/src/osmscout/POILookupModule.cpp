@@ -50,7 +50,7 @@ LocationEntry buildLocationEntry(T obj,
   const osmscout::FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
   const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
   if (name!=NULL){
-    title=QString::fromStdString(name->GetLabel());
+    title=QString::fromStdString(name->GetLabel(0));
     //std::cout << " \"" << name->GetLabel() << "\"";
   }
 

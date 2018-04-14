@@ -95,8 +95,8 @@ private:
 
     const osmscout::FeatureValueBuffer &features=o->GetFeatureValueBuffer();
     const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
-    if (name!=NULL){
-      info.name=QString::fromStdString(name->GetLabel());
+    if (name!=nullptr){
+      info.name=QString::fromStdString(name->GetLabel(0));
       //std::cout << " \"" << name->GetLabel() << "\"";
     }
     info.points=points;
