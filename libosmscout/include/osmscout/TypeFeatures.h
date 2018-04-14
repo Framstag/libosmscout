@@ -20,9 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <limits>
 #include <unordered_map>
 
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeature.h>
 
 namespace osmscout {
 

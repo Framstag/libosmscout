@@ -17,14 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <algorithm>
-
 #include <osmscout/TypeFeatures.h>
 
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/String.h>
+#include <algorithm>
 
-#include <osmscout/system/Assert.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
