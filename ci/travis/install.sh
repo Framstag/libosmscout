@@ -52,16 +52,17 @@ if [ "$TARGET" = "build" ]; then
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
     brew update
 
-    if [ "$BUILDTOOL" = "cmake" ]; then
-      brew install -f cmake || true
-    elif [ "$BUILDTOOL" = "meson" ]; then
-      brew install -f meson || true
+      # Current images have preinstalled
+      # - cmake
+      # - libxml2
+
+    if [ "$BUILDTOOL" = "meson" ]; then
+      brew install meson || true
     fi
 
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
-      brew install -f gettext libxml2 protobuf cairo pango qt5 glfw3 glew glm
+      brew install gettext protobuf cairo pango qt5 glfw3 glew glm
       brew link --force gettext
-      brew link --force libxml2
       brew link --force qt5
     fi
   fi
