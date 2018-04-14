@@ -43,7 +43,7 @@ namespace osmscout {
    *
    * Magic constant for an unresolved and to be ignored tag
    */
-  static const TagId tagIgnore        = 0;
+  static const TagId tagIgnore = 0;
 
   /**
    * \ingroup type
@@ -76,9 +76,9 @@ namespace osmscout {
     TagConditionRef condition;
 
   public:
-    TagNotCondition(const TagConditionRef& condition);
+    explicit TagNotCondition(const TagConditionRef& condition);
 
-    inline bool Evaluate(const TagMap& tagMap) const
+    inline bool Evaluate(const TagMap& tagMap) const override
     {
       return !condition->Evaluate(tagMap);
     }
@@ -103,11 +103,11 @@ namespace osmscout {
     Type                       type;
 
   public:
-    TagBoolCondition(Type type);
+    explicit TagBoolCondition(Type type);
 
     void AddCondition(const TagConditionRef& condition);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const override;
   };
 
   /**
@@ -128,9 +128,9 @@ namespace osmscout {
     TagId tag;
 
   public:
-    TagExistsCondition(TagId tag);
+    explicit TagExistsCondition(TagId tag);
 
-    inline bool Evaluate(const TagMap& tagMap) const
+    inline bool Evaluate(const TagMap& tagMap) const override
     {
       return tagMap.find(tag)!=tagMap.end();
     }
@@ -165,7 +165,7 @@ namespace osmscout {
                        BinaryOperator binaryOperator,
                        const size_t& tagValue);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const override;
   };
 
   /**
@@ -181,11 +181,11 @@ namespace osmscout {
     std::unordered_set<std::string> tagValues;
 
   public:
-    TagIsInCondition(TagId tag);
+    explicit TagIsInCondition(TagId tag);
 
     void AddTagValue(const std::string& tagValue);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const override;
   };
 
   /**
