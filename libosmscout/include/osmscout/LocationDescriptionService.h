@@ -26,6 +26,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/Location.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/util/StringMatcher.h>
 
 namespace osmscout {

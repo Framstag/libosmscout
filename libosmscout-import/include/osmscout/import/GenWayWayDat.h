@@ -29,7 +29,11 @@
 
 #include <osmscout/Coord.h>
 #include <osmscout/CoordDataFile.h>
+
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/NumericIndex.h>
+
 #include <osmscout/routing/TurnRestriction.h>
 
 #include <osmscout/import/Import.h>

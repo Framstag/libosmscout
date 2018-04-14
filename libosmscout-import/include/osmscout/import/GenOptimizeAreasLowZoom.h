@@ -27,6 +27,8 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/Area.h>
 
 #include <osmscout/util/FileScanner.h>

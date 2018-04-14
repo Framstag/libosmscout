@@ -26,6 +26,8 @@
 #include <set>
 #include <string>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
 

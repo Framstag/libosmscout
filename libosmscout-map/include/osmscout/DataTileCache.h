@@ -32,7 +32,7 @@
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>

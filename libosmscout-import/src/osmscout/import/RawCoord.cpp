@@ -42,7 +42,7 @@ namespace osmscout {
    *
    * @throws IOException
    */
-  void RawCoord::Read(const TypeConfig& /*typeConfig*/,
+  void RawCoord:: Read(const TypeConfig& /*typeConfig*/,
                      FileScanner& scanner)
   {
     scanner.ReadNumber(id);

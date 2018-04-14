@@ -26,6 +26,8 @@
 
 #include <osmscout/DataFile.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/FileScanner.h>

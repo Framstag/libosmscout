@@ -33,6 +33,7 @@
 #include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/TypeInfoSet.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/Node.h>

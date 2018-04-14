@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/util/FileScanner.h>
 

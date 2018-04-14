@@ -31,6 +31,8 @@
 
 #include <osmscout/ObjectRef.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/import/Import.h>
 
 #include <osmscout/system/Compiler.h>

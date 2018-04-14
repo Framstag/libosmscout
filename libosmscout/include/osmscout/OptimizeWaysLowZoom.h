@@ -26,6 +26,8 @@
 #include <set>
 #include <string>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>

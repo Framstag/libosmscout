@@ -101,6 +101,7 @@ set(HEADER_FILES
     include/osmscout/TypeConfig.h
     include/osmscout/TypeFeature.h
     include/osmscout/TypeFeatures.h
+    include/osmscout/TypeInfoSet.h
     include/osmscout/FeatureReader.h
     include/osmscout/OSMScoutTypes.h
     include/osmscout/WaterIndex.h
@@ -186,6 +187,7 @@ set(SOURCE_FILES
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeature.cpp
     src/osmscout/TypeFeatures.cpp
+    src/osmscout/TypeInfoSet.cpp
     src/osmscout/FeatureReader.cpp
     src/osmscout/OSMScoutTypes.cpp
     src/osmscout/WaterIndex.cpp

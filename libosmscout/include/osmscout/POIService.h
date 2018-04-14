@@ -25,6 +25,8 @@
 
 #include <osmscout/Database.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/util/GeoBox.h>
 
 namespace osmscout {

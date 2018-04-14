@@ -12,6 +12,5 @@
 
 %template(FeatureVector) std::vector<osmscout::FeatureRef>;
 %template(FeatureInstanceVector) std::vector<osmscout::FeatureInstance>;
-%template(TypeInfoVector) std::vector<osmscout::TypeInfoRef>;
 %template(FeatureRef) std::shared_ptr<osmscout::Feature>;
 

@@ -28,6 +28,9 @@
 
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/NumericIndex.h>
+
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/routing/TurnRestriction.h>
 
 #include <osmscout/import/Import.h>
