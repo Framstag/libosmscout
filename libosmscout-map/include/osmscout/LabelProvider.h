@@ -88,12 +88,12 @@ namespace osmscout {
       std::vector<size_t> nameAltLookupTable;
 
     public:
-      INameLabelProvider(const TypeConfig& typeConfig);
+      explicit INameLabelProvider(const TypeConfig& typeConfig);
 
       std::string GetLabel(const MapParameter& parameter,
-                           const FeatureValueBuffer& buffer) const;
+                           const FeatureValueBuffer& buffer) const override;
 
-      inline std::string GetName() const
+      inline std::string GetName() const override
       {
         return "IName";
       }
@@ -103,7 +103,7 @@ namespace osmscout {
       mutable LabelProviderRef instance;
 
     public:
-      LabelProviderRef Create(const TypeConfig& typeConfig) const;
+      LabelProviderRef Create(const TypeConfig& typeConfig) const override;
   };
 
   /**
@@ -138,9 +138,9 @@ namespace osmscout {
                               const std::string& labelName);
 
     std::string GetLabel(const MapParameter& parameter,
-                         const FeatureValueBuffer& buffer) const;
+                         const FeatureValueBuffer& buffer) const override;
 
-    inline std::string GetName() const
+    inline std::string GetName() const override
     {
       return featureName + "." + labelName;
     }
