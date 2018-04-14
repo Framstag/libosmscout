@@ -7,8 +7,7 @@ if(NOT ${OSMSCOUT_BUILD_MAP})
 endif()
 
 set(HEADER_FILES
-    include/osmscout/private/Math.h
-    include/osmscout/MapPainterIOS.h
+        include/osmscout/MapPainterIOS.h
 )
 
 set(SOURCE_FILES
