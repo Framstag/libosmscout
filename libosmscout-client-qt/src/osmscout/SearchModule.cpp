@@ -24,6 +24,8 @@
 #include <osmscout/util/Logger.h>
 #include <iostream>
 
+namespace osmscout {
+
 SearchModule::SearchModule(QThread *thread,DBThreadRef dbThread,LookupModule *lookupModule):
   thread(thread),dbThread(dbThread),lookupModule(lookupModule)
 {
@@ -410,4 +412,5 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
   }
   coordinates=bbox.GetCenter();
   return true;
+}
 }

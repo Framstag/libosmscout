@@ -32,6 +32,8 @@
 #include <osmscout/Settings.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 Settings::Settings(QSettings *providedStorage):
   storage(providedStorage)
 {
@@ -401,4 +403,5 @@ double QmlSettings::GetFontSize() const
 void QmlSettings::SetFontSize(double fontSize)
 {
     settings->SetFontSize(fontSize);
+}
 }

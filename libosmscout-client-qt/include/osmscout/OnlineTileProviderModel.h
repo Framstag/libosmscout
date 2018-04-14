@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_ONLINETILEPROVIDERMODEL_H
+#define	OSMSCOUT_CLIENT_QT_ONLINETILEPROVIDERMODEL_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2016 Lukas Karas
@@ -17,14 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef ONLINETILEPROVIDERMODEL_H
-#define	ONLINETILEPROVIDERMODEL_H
-
 #include <QAbstractListModel>
 
 #include <osmscout/OnlineTileProvider.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/OSMScoutQt.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -110,5 +112,7 @@ private:
     QList<OnlineTileProvider> onlineProviders;
 };
 
-#endif	/* ONLINETILEPROVIDERMODEL_H */
+}
+
+#endif	/* OSMSCOUT_CLIENT_QT_ONLINETILEPROVIDERMODEL_H */
 

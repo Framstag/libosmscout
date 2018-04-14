@@ -30,6 +30,8 @@
 
 #include <osmscout/system/Math.h>
 
+namespace osmscout {
+
 void TapRecognizer::onTimeout()
 {
     switch(state){
@@ -714,4 +716,5 @@ bool LockHandler::isLockedToPosition()
 bool LockHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return true;
+}
 }

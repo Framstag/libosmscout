@@ -19,6 +19,8 @@
 
 #include <osmscout/MapProvider.h>
 
+namespace osmscout {
+
 MapProvider MapProvider::fromJson(QJsonValue val)
 {
   if (!val.isObject())
@@ -33,4 +35,5 @@ MapProvider MapProvider::fromJson(QJsonValue val)
     return MapProvider();
   }
   return MapProvider(name.toString(), uri.toString(), listUri.toString());
+}
 }

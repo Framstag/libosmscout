@@ -20,6 +20,8 @@
 
 #include <osmscout/MapRenderer.h>
 
+namespace osmscout {
+
 MapRenderer::MapRenderer(QThread *thread,
                          SettingsRef settings,
                          DBThreadRef dbThread,
@@ -343,4 +345,5 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                          *drawParameter,
                          p);
   Close();
+}
 }

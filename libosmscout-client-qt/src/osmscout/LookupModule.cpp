@@ -21,6 +21,8 @@
 #include <osmscout/OSMScoutQt.h>
 #include <iostream>
 
+namespace osmscout {
+
 LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
   QObject(),
   thread(thread),
@@ -348,4 +350,5 @@ QStringList LookupModule::BuildAdminRegionList(const osmscout::LocationServiceRe
     parentOffset = region->parentRegionOffset;
   }
   return list;
+}
 }

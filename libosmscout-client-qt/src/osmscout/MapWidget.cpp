@@ -25,6 +25,8 @@
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 #define TMP_SUFFIX ".tmp"
 
 //! We rotate in 16 steps
@@ -788,4 +790,5 @@ void MapWidget::SetRenderingType(QString strType)
             this,SLOT(redraw()));
     emit renderingTypeChanged(GetRenderingType());
   }
+}
 }

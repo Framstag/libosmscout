@@ -26,6 +26,8 @@
 
 #include <iostream>
 
+namespace osmscout {
+
 #define INVALID_COORD -1000.0
 
 LocationListModel::LocationListModel(QObject* parent)
@@ -352,4 +354,5 @@ void LocationListModel::lookupRegion()
   if (searchCenter.GetLat()!=INVALID_COORD && searchCenter.GetLon()!=INVALID_COORD){
     emit regionLookupRequested(searchCenter);
   }
+}
 }

@@ -26,6 +26,8 @@
 #include <osmscout/TileCache.h>
 #include <osmscout/OSMTile.h>
 
+namespace osmscout {
+
 using namespace std;
 
 uint qHash(const TileCacheKey &key){
@@ -253,4 +255,4 @@ bool TileCache::invalidate(osmscout::GeoBox box){
     }
     return removed;
 }
-
+}

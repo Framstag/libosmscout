@@ -22,7 +22,7 @@
 #include <osmscout/OSMScoutQt.h>
 #include <osmscout/TiledRenderingHelper.h>
 
-
+namespace osmscout {
 TileLoaderThread::TileLoaderThread(QThread *thread): thread(thread), tileDownloader(NULL) {}
 
 TileLoaderThread::~TileLoaderThread()
@@ -209,4 +209,5 @@ void TiledMapOverlay::setEnabled(bool b)
     onlineTileCache.cleanupCache();
   }
   redraw();
+}
 }

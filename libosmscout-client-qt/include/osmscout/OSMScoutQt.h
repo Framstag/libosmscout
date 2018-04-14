@@ -36,9 +36,9 @@
 
 #include <atomic>
 
+namespace osmscout {
+
 class OSMScoutQt;
-Q_DECLARE_METATYPE(osmscout::TileRef)
-Q_DECLARE_METATYPE(osmscout::BreakerRef)
 
 /**
  * \ingroup QtAPI
@@ -300,5 +300,9 @@ public:
   static void FreeInstance();
 };
 
-#endif /* OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H */
+}
 
+Q_DECLARE_METATYPE(osmscout::TileRef)
+Q_DECLARE_METATYPE(osmscout::BreakerRef)
+
+#endif /* OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H */

@@ -19,6 +19,8 @@
 
 #include <osmscout/OnlineTileProviderModel.h>
 
+namespace osmscout {
+
 QVariant OnlineTileProviderModel::data(const QModelIndex &index, int role) const
 {
   OnlineTileProvider provider = onlineProviders.at(index.row());
@@ -68,4 +70,4 @@ QString OnlineTileProviderModel::getName(int row) const
     return onlineProviders.at(row).getName();    
 }
 
-  
+}

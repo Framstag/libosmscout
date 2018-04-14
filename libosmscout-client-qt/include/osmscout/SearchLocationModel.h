@@ -32,6 +32,8 @@
 
 #include <osmscout/ClientQtImportExport.h>
 
+namespace osmscout {
+
 /**
  * Model for searching objects in osmscout databases by pattern written by human.
  *
@@ -238,5 +240,7 @@ private:
   void lookupRegion();
 
 };
+
+}
 
 #endif

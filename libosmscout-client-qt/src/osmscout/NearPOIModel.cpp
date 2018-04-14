@@ -20,6 +20,8 @@
 #include <osmscout/NearPOIModel.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 NearPOIModel::NearPOIModel()
 {
   poiModule=OSMScoutQt::GetInstance().MakePOILookupModule();
@@ -217,3 +219,4 @@ void NearPOIModel::lookupPOI()
   emit SearchingChanged(searching);
 }
 
+}

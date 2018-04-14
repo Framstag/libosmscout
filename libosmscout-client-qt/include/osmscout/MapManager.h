@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_MAPMANAGER_H
+#define OSMSCOUT_CLIENT_QT_MAPMANAGER_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2016 Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef MAPMANAGER_H
-#define	MAPMANAGER_H
-
 #include <QObject>
 #include <QStringList>
 #include <QList>
@@ -37,6 +37,8 @@
 #define HAS_QSTORAGE
 #include <QStorageInfo>
 #endif
+
+namespace osmscout {
 
 /**
  * Utility class for downloading map database described by AvailableMapsModelMap
@@ -268,5 +270,6 @@ public:
  */
 typedef std::shared_ptr<MapManager> MapManagerRef;
 
-#endif	/* MAPMANAGER_H */
+}
 
+#endif	/* OSMSCOUT_CLIENT_QT_MAPMANAGER_H */

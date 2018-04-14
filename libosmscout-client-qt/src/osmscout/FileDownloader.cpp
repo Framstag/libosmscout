@@ -31,6 +31,8 @@
 #include <algorithm>
 #include <iostream> // for a rarely expected error message
 
+namespace osmscout {
+
 FileDownloader::FileDownloader(QNetworkAccessManager *manager,
                                QString url, QString path,
                                const Type mode,
@@ -442,4 +444,5 @@ void FileDownloader::onProcessStateChanged(QProcess::ProcessState state)
     QString err = tr("Error in processing downloaded data: could not start the program") + " " + m_process->program();
     onError(err);
   }
+}
 }

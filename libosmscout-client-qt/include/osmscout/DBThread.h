@@ -43,6 +43,8 @@
 #include <osmscout/DBInstance.h>
 #include <osmscout/DBJob.h>
 
+namespace osmscout {
+
 /**
  * \ingroup QtAPI
  */
@@ -54,8 +56,6 @@ struct MapViewStruct
   size_t                  width;
   size_t                  height;
 };
-
-Q_DECLARE_METATYPE(MapViewStruct)
 
 inline bool operator!=(const MapViewStruct &r1, const MapViewStruct &r2)
 {
@@ -73,8 +73,6 @@ struct DatabaseLoadedResponse
 {
     osmscout::GeoBox boundingBox;
 };
-
-Q_DECLARE_METATYPE(DatabaseLoadedResponse)
 
 /**
  * \ingroup QtAPI
@@ -235,5 +233,10 @@ public:
 };
 
 typedef std::shared_ptr<DBThread> DBThreadRef;
+
+}
+
+Q_DECLARE_METATYPE(osmscout::MapViewStruct)
+Q_DECLARE_METATYPE(osmscout::DatabaseLoadedResponse)
 
 #endif

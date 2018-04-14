@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_AVAILABLEMAPSMODEL_H
+#define OSMSCOUT_CLIENT_QT_AVAILABLEMAPSMODEL_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2016 Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef AVAILABLEMAPSMODEL_H
-#define	AVAILABLEMAPSMODEL_H
-
 #include <QAbstractListModel>
 #include <QNetworkAccessManager>
 #include <QNetworkDiskCache>
@@ -27,6 +27,8 @@
 
 #include <osmscout/MapProvider.h>
 #include <osmscout/Settings.h>
+
+namespace osmscout {
 
 /**
  * Abstract model item used in AvailableMapsModel
@@ -149,8 +151,6 @@ public:
   int getVersion() const;
 };
 
-Q_DECLARE_METATYPE(AvailableMapsModelMap)
-
 /**
  * Tree model with maps available by configured providers (see Settings::GetMapProviders).
  * Every map provider have to expose list of maps by json. Json format exammple:
@@ -247,4 +247,8 @@ private:
   QString                   fetchError;
 };
 
-#endif	/* AVAILABLEMAPMODEL_H */
+}
+
+Q_DECLARE_METATYPE(osmscout::AvailableMapsModelMap)
+
+#endif	/* OSMSCOUT_CLIENT_QT_AVAILABLEMAPMODEL_H */

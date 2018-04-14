@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_OSMTILEDOWNLOADER_H
+#define OSMSCOUT_CLIENT_QT_OSMTILEDOWNLOADER_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2016  Lukas Karas
@@ -16,10 +19,6 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
-
-#ifndef OSMTILEDOWNLOADER_H
-#define	OSMTILEDOWNLOADER_H
-
  
 #include <QObject>
 #include <QByteArray>
@@ -32,6 +31,8 @@
 #include <osmscout/TileCache.h>
 #include <osmscout/OnlineTileProvider.h>
 #include <osmscout/Settings.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -65,5 +66,6 @@ private:
 
 };
 
-#endif	/* OSMTILEDOWNLOADER_H */
+}
 
+#endif	/* OSMSCOUT_CLIENT_QT_OSMTILEDOWNLOADER_H */

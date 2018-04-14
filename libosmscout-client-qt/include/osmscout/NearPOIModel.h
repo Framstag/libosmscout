@@ -28,6 +28,8 @@
 #include <QObject>
 #include <QAbstractListModel>
 
+namespace osmscout {
+
 #define INVALID_COORD -1000.0
 
 /**
@@ -200,5 +202,7 @@ public:
 private:
   void lookupPOI();
 };
+
+}
 
 #endif //OSMSCOUT_CLIENT_QT_NEARPOIMODEL_H

@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_MAPRENDERER_H
+#define OSMSCOUT_CLIENT_QT_MAPRENDERER_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2010  Tim Teulings
@@ -18,9 +21,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef OSMSCOUT_CLIENT_QT_MAPRENDERER_H
-#define OSMSCOUT_CLIENT_QT_MAPRENDERER_H
-
 #include <QObject>
 #include <QSettings>
 
@@ -29,6 +29,8 @@
 
 #include <osmscout/ClientQtImportExport.h>
 #include <osmscout/OverlayObject.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -134,5 +136,6 @@ public:
 
 typedef std::shared_ptr<MapRenderer> MapRendererRef;
 
-#endif /* OSMSCOUT_CLIENT_QT_MAPRENDERER_H */
+}
 
+#endif /* OSMSCOUT_CLIENT_QT_MAPRENDERER_H */

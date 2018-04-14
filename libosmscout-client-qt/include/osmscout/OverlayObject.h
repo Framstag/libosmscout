@@ -31,6 +31,8 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/ClientQtImportExport.h>
 
+namespace osmscout {
+
 /**
  * \ingroup QtAPI
  *
@@ -166,5 +168,7 @@ public:
 
 
 typedef std::shared_ptr<OverlayObject> OverlayObjectRef;
+
+}
 
 #endif /* OSMSCOUT_CLIENT_QT_OVERLAYOBJECT_H */

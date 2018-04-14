@@ -21,6 +21,7 @@
 #include <osmscout/OSMScoutQt.h>
 #include <iostream>
 
+namespace osmscout {
 StyleModule::StyleModule(QThread *thread,DBThreadRef dbThread):
     QObject(),
     thread(thread),
@@ -66,4 +67,5 @@ void StyleModule::onSetFlagRequest(QString key, bool value)
 {
   dbThread->SetStyleFlag(key, value);
   emit flagSet(key, value);
+}
 }

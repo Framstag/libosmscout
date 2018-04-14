@@ -20,6 +20,8 @@
 
 #include <osmscout/QtRouteData.h>
 
+namespace osmscout {
+
 QtRouteData::QtRouteData(const QtRouteData &other,
                          QObject* parent):
   QObject(parent)
@@ -71,4 +73,5 @@ const QList<RouteStep>& QtRouteData::routeSteps() const
 const osmscout::RouteDescription& QtRouteData::routeDescription() const
 {
   return data->routeDescription;
+}
 }

@@ -24,6 +24,8 @@
 #include <QFile>
 #include <QTextStream>
 
+using namespace osmscout;
+
 FileIO::FileIO(QObject *parent) :
     QObject(parent),styleSheetFile(QString("")),targetComponent(0),
     highlighter(nullptr), styleAnalyser(nullptr)
