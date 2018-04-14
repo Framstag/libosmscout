@@ -29,18 +29,18 @@ class AppSettings: public QObject{
   Q_PROPERTY(QObject  *mapView  READ GetMapView WRITE SetMapView  NOTIFY MapViewChanged)
 
 signals:
-  void MapViewChanged(MapView *view);
+  void MapViewChanged(osmscout::MapView *view);
 
 public:
   AppSettings();
   inline virtual ~AppSettings(){};
 
-  MapView *GetMapView();
+  osmscout::MapView *GetMapView();
   void SetMapView(QObject *view);
 
 private:
-  QSettings settings;
-  MapView   *view;
+  QSettings         settings;
+  osmscout::MapView *view;
 };
 
 #endif /* APPSETTINGS_H */

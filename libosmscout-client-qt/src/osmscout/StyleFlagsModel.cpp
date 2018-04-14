@@ -21,6 +21,8 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 StyleFlagsModel::StyleFlagsModel():
   QAbstractListModel()
 {
@@ -119,4 +121,5 @@ Q_INVOKABLE void StyleFlagsModel::setFlag(const QString &key, bool value)
   }
   SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
   settings->SetStyleSheetFlags(flags);
+}
 }

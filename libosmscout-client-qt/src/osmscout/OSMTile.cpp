@@ -23,6 +23,8 @@
 #include <osmscout/OSMTile.h>
 #include <osmscout/util/GeoBox.h>
 
+namespace osmscout {
+
 osmscout::GeoBox OSMTile::tileBoundingBox(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
 {
     double lon = tilex2lon(xtile, zoomLevel);
@@ -55,4 +57,4 @@ osmscout::GeoCoord OSMTile::tileVisualCenter(uint32_t zoomLevel, uint32_t xtile,
 {
     return OSMTile::tileRelativeCoord(zoomLevel, (double)xtile + 0.5, (double)ytile + 0.5);
 }
-    
+}

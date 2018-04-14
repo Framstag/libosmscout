@@ -30,13 +30,13 @@ class MainWindow : public QQmlApplicationEngine
   Q_OBJECT
 
 public slots:
-  void InitialisationFinished(const DatabaseLoadedResponse& response);
+  void InitialisationFinished(const osmscout::DatabaseLoadedResponse& response);
 
 private:
-  DBThreadRef dbThread;
+  osmscout::DBThreadRef dbThread;
 
 public:
-  MainWindow(DBThreadRef dbThread);
+  MainWindow(osmscout::DBThreadRef dbThread);
   ~MainWindow();
 
 

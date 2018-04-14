@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_INPUTHANDLER_H
+#define OSMSCOUT_CLIENT_QT_INPUTHANDLER_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2016  Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef INPUTHANDLER_H
-#define	INPUTHANDLER_H
-
 #include <QObject>
 #include <QVector2D>
 #include <QTouchEvent>
@@ -31,6 +31,8 @@
 #include <osmscout/util/Magnification.h>
 
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -113,7 +115,6 @@ struct AccumulatorEvent
   QPointF pos;
   QTime time;
 };
-Q_DECLARE_METATYPE(AccumulatorEvent)
 
 /**
  * \ingroup QtAPI
@@ -206,8 +207,6 @@ public:
   osmscout::Magnification      magnification;
   double                       mapDpi{0};
 };
-
-Q_DECLARE_METATYPE(MapView)
 
 inline bool operator==(const MapView& a, const MapView& b)
 {
@@ -415,6 +414,9 @@ public:
     virtual bool focusOutEvent(QFocusEvent *event);
 };
 
-#endif	/* INPUTHANDLER_H */
+}
 
+Q_DECLARE_METATYPE(osmscout::AccumulatorEvent)
+Q_DECLARE_METATYPE(osmscout::MapView)
 
+#endif	/* OSMSCOUT_CLIENT_QT_INPUTHANDLER_H */

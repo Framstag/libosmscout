@@ -21,6 +21,8 @@
 #include <osmscout/POIService.h>
 #include <osmscout/SearchModule.h>
 
+namespace osmscout {
+
 POILookupModule::POILookupModule(QThread *thread,DBThreadRef dbThread):
   thread(thread), dbThread(dbThread)
 {
@@ -164,4 +166,5 @@ void POILookupModule::lookupPOIRequest(int requestId,
   });
 
   emit lookupFinished(requestId);
+}
 }

@@ -1,5 +1,5 @@
-#ifndef LIBOSMSCOUT_TILEDRENDERINGHELPER_H
-#define LIBOSMSCOUT_TILEDRENDERINGHELPER_H
+#ifndef OSMSCOUT_CLIENT_QT_TILEDRENDERINGHELPER_H
+#define OSMSCOUT_CLIENT_QT_TILEDRENDERINGHELPER_H
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2010  Tim Teulings
@@ -26,6 +26,8 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QPainter>
+
+namespace osmscout {
 
 class OSMSCOUT_CLIENT_QT_API TiledRenderingHelper
 {
@@ -56,5 +58,6 @@ public:
                           const QColor &unknownColor,
                           double overlap=-1);
 };
+}
 
-#endif //LIBOSMSCOUT_TILEDRENDERINGHELPER_H
+#endif //OSMSCOUT_CLIENT_QT_TILEDRENDERINGHELPER_H

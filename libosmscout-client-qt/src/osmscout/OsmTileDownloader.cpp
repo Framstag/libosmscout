@@ -25,6 +25,8 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 OsmTileDownloader::OsmTileDownloader(QString diskCacheDir,
                                      const OnlineTileProvider &provider):
   serverNumber(qrand()),
@@ -114,4 +116,5 @@ void OsmTileDownloader::fileDownloaded(QNetworkReply* reply)
     }
   }
   reply->deleteLater();
+}
 }

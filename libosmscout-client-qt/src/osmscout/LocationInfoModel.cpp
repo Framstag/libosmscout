@@ -23,6 +23,8 @@
 #include <osmscout/LocationInfoModel.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 LocationInfoModel::LocationInfoModel(): 
   ready(false), setup(false)
 {
@@ -346,4 +348,5 @@ QString LocationInfoModel::bearing(double lat1, double lon1,
                 osmscout::GetSphericalBearingInitial(
                     osmscout::GeoCoord(lat1, lon1),
                     osmscout::GeoCoord(lat2, lon2))));
+}
 }

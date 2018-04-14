@@ -21,6 +21,8 @@
 
 #include <osmscout/util/Logger.h>
 
+namespace osmscout {
+
 QBreaker::QBreaker()
   : osmscout::Breaker(),
     aborted(false)
@@ -172,4 +174,5 @@ void DBInstance::close()
   if (database->IsOpen()) {
     database->Close();
   }
+}
 }

@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_NAVIGATIONMODULE_H
+#define OSMSCOUT_CLIENT_QT_NAVIGATIONMODULE_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2017 Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef LIBOSMSCOUT_NAVIGATIONMODULE_H
-#define LIBOSMSCOUT_NAVIGATIONMODULE_H
-
 #include <osmscout/DBThread.h>
 #include <osmscout/Settings.h>
 #include <osmscout/Router.h>
@@ -28,6 +28,8 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
+
+namespace osmscout {
 
 class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder:
     public osmscout::OutputDescription<RouteStep> {
@@ -82,4 +84,6 @@ private:
   osmscout::Navigation<RouteStep> navigation;
 };
 
-#endif //LIBOSMSCOUT_NAVIGATIONMODULE_H
+}
+
+#endif // OSMSCOUT_CLIENT_QT_NAVIGATIONMODULE_H

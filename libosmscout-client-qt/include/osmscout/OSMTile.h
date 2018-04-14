@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_OSMTILE_H
+#define OSMSCOUT_CLIENT_QT_OSMTILE_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2016  Lukas Karas
@@ -17,12 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef OSMTILE_H
-#define	OSMTILE_H
-
 #include <cmath>
 
 #include <osmscout/util/GeoBox.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -70,7 +72,7 @@ public:
 
     static inline uint32_t lat2tiley(double lat, uint32_t z)
     { 
-        return (uint32_t)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * (double)worldRes(z))); 
+        return (uint32_t)(floor((1.0 - std::log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * (double)worldRes(z)));
     }
 
     static inline double tilex2lon(uint32_t x, uint32_t z) 
@@ -93,5 +95,6 @@ public:
     }
 };
 
-#endif	/* OSMTILE_H */
+}
 
+#endif	/* OSMSCOUT_CLIENT_QT_OSMTILE_H */
