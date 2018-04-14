@@ -26,11 +26,14 @@
 #include <vector>
 
 #include <osmscout/NumericIndex.h>
+
 #include <osmscout/routing/RouteNode.h>
 #include <osmscout/routing/TurnRestriction.h>
 
 #include <osmscout/OSMScoutTypes.h>
+
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
@@ -96,7 +99,7 @@ namespace osmscout {
       {
       }
 
-      IndexEntry(FileOffset offset)
+      explicit IndexEntry(FileOffset offset)
       : offset(offset),
         count(0)
       {

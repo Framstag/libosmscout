@@ -3,7 +3,10 @@
 #include <unordered_map>
 
 #include <osmscout/TypeConfig.h>
+
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
+
 #include <osmscout/util/TagErrorReporter.h>
 
 #define CATCH_CONFIG_MAIN

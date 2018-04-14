@@ -20,6 +20,7 @@
 #include <osmscout/import/SortNodeDat.h>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/NodeDataFile.h>
 #include <osmscout/import/GenNodeDat.h>

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/AreaAreaIndex.h>
 #include <osmscout/AreaDataFile.h>

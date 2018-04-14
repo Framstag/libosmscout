@@ -25,7 +25,8 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 #include <osmscout/TypeFeatures.h>
-#include <iostream>
+#include <osmscout/FeatureReader.h>
+
 namespace osmscout {
 
   LocationCoordDescription::LocationCoordDescription(const GeoCoord& location)

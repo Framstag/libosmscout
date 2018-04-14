@@ -24,6 +24,7 @@
 #include <osmscout/POIService.h>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/GeoBox.h>

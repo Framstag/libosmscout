@@ -31,6 +31,7 @@
 #include <osmscout/Pixel.h>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/LocationIndex.h>
 

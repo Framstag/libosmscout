@@ -27,6 +27,7 @@
 #include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>

@@ -25,7 +25,9 @@
 #include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 #include <osmscout/WaterIndex.h>
+#include <osmscout/WayDataFile.h>
 
 #include <osmscout/system/Math.h>
 
@@ -36,7 +38,6 @@
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
-#include <osmscout/WayDataFile.h>
 
 #if !defined(DEBUG_COASTLINE)
 //#define DEBUG_COASTLINE

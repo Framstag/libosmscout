@@ -20,6 +20,7 @@
 #include <osmscout/import/SortWayDat.h>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/WayDataFile.h>
 
