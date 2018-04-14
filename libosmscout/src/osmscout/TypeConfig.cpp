@@ -99,7 +99,7 @@ namespace osmscout {
   FeatureValue* Feature::AllocateValue(void* /*buffer*/)
   {
     assert(false);
-    return NULL;
+    return nullptr;
   }
 
   /**
@@ -142,7 +142,7 @@ namespace osmscout {
    * Just to make the compiler happy :-/
    */
   FeatureInstance::FeatureInstance()
-  : type(NULL),
+  : type(nullptr),
     featureBit(0),
     index(0),
     offset(0)
@@ -165,15 +165,15 @@ namespace osmscout {
   }
 
   FeatureValueBuffer::FeatureValueBuffer()
-  : featureBits(NULL),
-    featureValueBuffer(NULL)
+  : featureBits(nullptr),
+    featureValueBuffer(nullptr)
   {
     // no code
   }
 
   FeatureValueBuffer::FeatureValueBuffer(const FeatureValueBuffer& other)
-  : featureBits(NULL),
-    featureValueBuffer(NULL)
+  : featureBits(nullptr),
+    featureValueBuffer(nullptr)
   {
     Set(other);
   }
@@ -205,7 +205,7 @@ namespace osmscout {
             size_t featureBit=GetFeature(idx).GetFeatureBit();
             size_t byteIdx=featureBit/8;
 
-            featureBits[byteIdx]=featureBits[byteIdx] | (1 << featureBit%8);
+            featureBits[byteIdx]=featureBits[byteIdx] | (1u << featureBit%8);
           }
         }
       }
@@ -221,12 +221,12 @@ namespace osmscout {
     this->type=type;
 
     AllocateBits();
-    featureValueBuffer=NULL; // buffer is allocated on first usage
+    featureValueBuffer=nullptr; // buffer is allocated on first usage
   }
 
   void FeatureValueBuffer::DeleteData()
   {
-    if (featureValueBuffer!=NULL) {
+    if (featureValueBuffer!=nullptr) {
       for (size_t i=0; i<type->GetFeatureCount(); i++) {
         if (HasFeature(i)) {
           FreeValue(i);
@@ -234,15 +234,15 @@ namespace osmscout {
       }
 
       ::operator delete((void*)featureValueBuffer);
-      featureValueBuffer=NULL;
+      featureValueBuffer=nullptr;
     }
 
-    if (featureBits!=NULL) {
+    if (featureBits!=nullptr) {
       delete [] featureBits;
-      featureBits=NULL;
+      featureBits=nullptr;
     }
 
-    type=NULL;
+    type=nullptr;
   }
 
   void FeatureValueBuffer::AllocateBits()
@@ -252,13 +252,13 @@ namespace osmscout {
     }
     else
     {
-      featureBits=NULL;
+      featureBits=nullptr;
     }
   }
 
   void FeatureValueBuffer::AllocateValueBufferLazy()
   {
-    if (featureValueBuffer==NULL &&
+    if (featureValueBuffer==nullptr &&
         type &&
         type->HasFeatures()) {
       featureValueBuffer=static_cast<char*>(::operator new(type->GetFeatureValueBufferSize()));
@@ -270,7 +270,7 @@ namespace osmscout {
     size_t featureBit=GetFeature(idx).GetFeatureBit();
     size_t byteIdx=featureBit/8;
 
-    featureBits[byteIdx]=featureBits[byteIdx] | (1 << featureBit%8);
+    featureBits[byteIdx]=featureBits[byteIdx] | (1u << featureBit%8);
 
     if (type->GetFeature(idx).GetFeature()->HasValue()) {
       FeatureValue* value=GetValueAndAllocateBuffer(idx);
@@ -278,7 +278,7 @@ namespace osmscout {
       return type->GetFeature(idx).GetFeature()->AllocateValue(value);
     }
     else {
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -293,7 +293,7 @@ namespace osmscout {
       // clear feature bit
       size_t featureBit = GetFeature(idx).GetFeatureBit();
       size_t byteIdx = featureBit / 8;
-      featureBits[byteIdx] = featureBits[byteIdx] & ~(1 << featureBit % 8);
+      featureBits[byteIdx] = featureBits[byteIdx] & ~(1u << featureBit % 8);
     }
   }
 
@@ -608,7 +608,7 @@ namespace osmscout {
         size_t featureBit=GetFeature(featureIndex).GetFeatureBit();
         size_t byteIdx=featureBit/8;
 
-        featureBits[byteIdx]=featureBits[byteIdx] | (1 << featureBit%8);
+        featureBits[byteIdx]=featureBits[byteIdx] | (1u << featureBit%8);
       }
     }
   }
@@ -756,11 +756,11 @@ namespace osmscout {
     }
 
 
-    features.push_back(FeatureInstance(feature,
-                                       this,
-                                       featureBit,
-                                       index,
-                                       offset));
+    features.emplace_back(feature,
+                          this,
+                          featureBit,
+                          index,
+                          offset);
     nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
 
     size_t featureBitCount=0;
@@ -883,7 +883,7 @@ namespace osmscout {
     // no code
   }
 
-  TypeInfoSet::TypeInfoSet(TypeInfoSet&& other)
+  TypeInfoSet::TypeInfoSet(TypeInfoSet&& other) noexcept
   : types(other.types),
     count(other.count)
   {
@@ -944,7 +944,7 @@ namespace osmscout {
 
     if (type->GetIndex()<types.size() &&
         types[type->GetIndex()]) {
-      types[type->GetIndex()]=NULL;
+      types[type->GetIndex()]=nullptr;
       count--;
     }
   }
@@ -956,7 +956,7 @@ namespace osmscout {
       if (type &&
           type->GetIndex()<types.size() &&
           types[type->GetIndex()]) {
-        types[type->GetIndex()]=NULL;
+        types[type->GetIndex()]=nullptr;
         count--;
       }
     }
@@ -968,7 +968,7 @@ namespace osmscout {
       if (types[i] &&
           (i>=otherTypes.types.size() ||
           !otherTypes.types[i])) {
-        types[i]=NULL;
+        types[i]=nullptr;
         count--;
       }
     }
@@ -1269,7 +1269,7 @@ namespace osmscout {
       return feature->second;
     }
     else {
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -1571,37 +1571,37 @@ namespace osmscout {
 
     if (relationType!=tagMap.end() &&
         relationType->second=="multipolygon") {
-      for (size_t i=0; i<types.size(); i++) {
-        if (!types[i]->HasConditions() ||
-            !types[i]->CanBeArea()) {
+      for (const auto& type : types) {
+        if (!type->HasConditions() ||
+            !type->CanBeArea()) {
           continue;
         }
 
-        for (const auto &cond : types[i]->GetConditions()) {
+        for (const auto &cond : type->GetConditions()) {
           if (!(cond.types & TypeInfo::typeArea)) {
             continue;
           }
 
           if (cond.condition->Evaluate(tagMap)) {
-            return types[i];
+            return type;
           }
         }
       }
     }
     else {
-      for (size_t i=0; i<types.size(); i++) {
-        if (!types[i]->HasConditions() ||
-            !types[i]->CanBeRelation()) {
+      for (const auto& type : types) {
+        if (!type->HasConditions() ||
+            !type->CanBeRelation()) {
           continue;
         }
 
-        for (const auto &cond : types[i]->GetConditions()) {
+        for (const auto &cond : type->GetConditions()) {
           if (!(cond.types & TypeInfo::typeRelation)) {
             continue;
           }
 
           if (cond.condition->Evaluate(tagMap)) {
-            return types[i];
+            return type;
           }
         }
       }
@@ -1935,13 +1935,13 @@ namespace osmscout {
       uint32_t typeCount=0;
       uint32_t featureCount=0;
 
-      for (auto type : GetTypes()) {
+      for (const auto& type: GetTypes()) {
         if (!type->IsInternal()) {
           typeCount++;
         }
       }
 
-      for (auto feature : GetFeatures()) {
+      for (const auto& feature : GetFeatures()) {
         if (!feature->GetDescriptions().empty()) {
           featureCount++;
         }
@@ -1949,7 +1949,7 @@ namespace osmscout {
 
       writer.WriteNumber(featureCount);
 
-      for (auto feature : GetFeatures()) {
+      for (const auto& feature : GetFeatures()) {
         if (feature->GetDescriptions().empty()) {
           continue;
         }
@@ -1964,7 +1964,7 @@ namespace osmscout {
 
       writer.WriteNumber(typeCount);
 
-      for (auto type : GetTypes()) {
+      for (const auto& type : GetTypes()) {
         if (type->IsInternal()) {
           continue;
         }
