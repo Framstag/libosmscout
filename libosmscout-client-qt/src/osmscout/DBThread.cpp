@@ -191,7 +191,6 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
 void DBThread::Initialize()
 {
   QReadLocker locker(&lock);
-  qDebug() << "Initialize databases";
   mapManager->lookupDatabases();
 }
 
