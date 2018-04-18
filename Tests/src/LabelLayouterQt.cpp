@@ -364,13 +364,13 @@ public:
       cLabel.priority = 1;
       for (Glyph<NativeGlyph> glyphCopy:glyphs){
         double glyphOffset=offset+glyphCopy.position.GetX();
-        QPointF point=p.PointAtLength(glyphOffset);
+        osmscout::Vertex2D point=p.PointAtLength(glyphOffset);
         qreal   angle=p.AngleAtLength(glyphOffset)*-1;
         double  sinA=std::sin(angle);
         double  cosA=std::cos(angle);
 
-        glyphCopy.position=osmscout::Vertex2D(point.x() - textOffset * sinA,
-                                              point.y() + textOffset * cosA);
+        glyphCopy.position=osmscout::Vertex2D(point.GetX() - textOffset * sinA,
+                                              point.GetY() + textOffset * cosA);
 
         glyphCopy.angle=angle;
 

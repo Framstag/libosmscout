@@ -20,44 +20,44 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <QObject>
-#include <QPointF>
-#include <QVector>
+#include <osmscout/MapImportExport.h>
+#include <osmscout/Pixel.h>
 
-#include <osmscout/MapQtImportExport.h>
+#include <vector>
 
 namespace osmscout {
   struct Segment
   {
-    QPointF start;
-    qreal offset;
-    qreal length;
-    qreal angle;
+    Vertex2D start;
+    double offset;
+    double length;
+    double angle;
   };
 
-  class OSMSCOUT_MAP_QT_API SimplifiedPath{
+  class OSMSCOUT_MAP_API SimplifiedPath
+  {
   private:
-    qreal length;
-    QVector<Segment> segments;
-    QVector<int> offsetIndex; // segment offset by length 100
-    qreal minSegmentLength;
-    QPointF end;
-    qreal endDistance;
+    double length;
+    std::vector<Segment> segments;
+    std::vector<int> offsetIndex; // segment offset by length 100
+    double minSegmentLength;
+    Vertex2D end;
+    double endDistance;
 
   public:
-    SimplifiedPath(qreal minSegmentLength=5);
+    SimplifiedPath(double minSegmentLength=5);
     virtual ~SimplifiedPath();
-    void AddPoint(qreal x,qreal y);
-    inline qreal GetLength() const {
+    void AddPoint(double x,double y);
+    inline double GetLength() const {
       return length+endDistance;
     }
-    QPointF PointAtLength(qreal offset) const;
-    qreal AngleAtLength(qreal offset) const;
-    qreal AngleAtLengthDeg(qreal offset) const;
+    Vertex2D PointAtLength(double offset) const;
+    double AngleAtLength(double offset) const;
+    double AngleAtLengthDeg(double offset) const;
 
-    bool TestAngleVariance(qreal startOffset, qreal endOffset, qreal maximumAngle);
+    bool TestAngleVariance(double startOffset, double endOffset, double maximumAngle);
   private:
-    const Segment& segmentBefore(qreal offset) const;
+    const Segment& segmentBefore(double offset) const;
   };
 }
 

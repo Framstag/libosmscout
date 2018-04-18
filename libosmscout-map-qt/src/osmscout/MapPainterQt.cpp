@@ -545,12 +545,12 @@ namespace osmscout {
           if (glyphOffset>pathLength)
             continue;
 
-          QPointF point=p.PointAtLength(glyphOffset);
+          Vertex2D point=p.PointAtLength(glyphOffset);
           qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
 
           // check if current glyph can be visible
-          if (!painter->viewport().intersects(QRect(QPoint(point.x()-diagonal, point.y()-diagonal),
-                                                    QPoint(point.x()+diagonal, point.y()+diagonal)))){
+          if (!painter->viewport().intersects(QRect(QPoint(point.GetX()-diagonal, point.GetY()-diagonal),
+                                                    QPoint(point.GetX()+diagonal, point.GetY()+diagonal)))){
             continue;
           }
 
@@ -559,7 +559,8 @@ namespace osmscout {
             angle-=180;
           }
 
-          SetupTransformation(painter,point,angle,fontPixelSize*-0.7);
+          QPointF qpoint(point.GetX(), point.GetY());
+          SetupTransformation(painter,qpoint,angle,fontPixelSize*-0.7);
 
           QGlyphRun orphanGlyph;
 
@@ -573,7 +574,7 @@ namespace osmscout {
           orphanGlyph.setStrikeOut(glypRun.strikeOut());
           orphanGlyph.setUnderline(glypRun.underline());
 
-          painter->drawGlyphRun(point, orphanGlyph);
+          painter->drawGlyphRun(qpoint, orphanGlyph);
         }
       }
 
