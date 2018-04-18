@@ -97,8 +97,8 @@ void SearchModule::FreeTextSearch(DBInstanceRef &db,
   QList<osmscout::ObjectFileRef> objectSet;
   osmscout::TextSearchIndex textSearch;
   if(!textSearch.Load(db->path.toStdString())){
-      qWarning("Failed to load text index files, search was for locations only");
-      return; // silently continue, text indexes are optional in database
+    osmscout::log.Warn() << "Failed to load text index files, search only for locations with database " << db->path.toStdString();
+    return; // silently continue, text indexes are optional in database
   }
   osmscout::TextSearchIndex::ResultsMap resultsTxt;
   textSearch.Search(searchPattern.toStdString(),
