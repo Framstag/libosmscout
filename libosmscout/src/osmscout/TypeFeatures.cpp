@@ -39,7 +39,7 @@ namespace osmscout {
   }
 
 
-  FeatureValue& NameFeatureValue::operator=(const FeatureValue& other)
+  NameFeatureValue& NameFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const NameFeatureValue&>(other);
@@ -126,7 +126,7 @@ namespace osmscout {
     writer.Write(nameAlt);
   }
 
-  FeatureValue& NameAltFeatureValue::operator=(const FeatureValue& other)
+  NameAltFeatureValue& NameAltFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const NameAltFeatureValue&>(other);
@@ -212,7 +212,7 @@ namespace osmscout {
     writer.Write(ref);
   }
 
-  FeatureValue& RefFeatureValue::operator=(const FeatureValue& other)
+  RefFeatureValue& RefFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const RefFeatureValue&>(other);
@@ -288,7 +288,7 @@ namespace osmscout {
     writer.Write(location);
   }
 
-  FeatureValue& LocationFeatureValue::operator=(const FeatureValue& other)
+  LocationFeatureValue& LocationFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const LocationFeatureValue&>(other);
@@ -372,7 +372,7 @@ namespace osmscout {
     writer.Write(address);
   }
 
-  FeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
+  AddressFeatureValue& AddressFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const AddressFeatureValue&>(other);
@@ -468,7 +468,7 @@ namespace osmscout {
     writer.Write(access);
   }
 
-  FeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
+  AccessFeatureValue& AccessFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const AccessFeatureValue&>(other);
@@ -748,7 +748,7 @@ namespace osmscout {
     writer.Write(access);
   }
 
-  FeatureValue& AccessRestrictedFeatureValue::operator=(const FeatureValue& other)
+  AccessRestrictedFeatureValue& AccessRestrictedFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const AccessRestrictedFeatureValue&>(other);
@@ -868,7 +868,7 @@ namespace osmscout {
     writer.Write(layer);
   }
 
-  FeatureValue& LayerFeatureValue::operator=(const FeatureValue& other)
+  LayerFeatureValue& LayerFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const LayerFeatureValue&>(other);
@@ -943,7 +943,7 @@ namespace osmscout {
     writer.Write(width);
   }
 
-  FeatureValue& WidthFeatureValue::operator=(const FeatureValue& other)
+  WidthFeatureValue& WidthFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const WidthFeatureValue&>(other);
@@ -1053,7 +1053,7 @@ namespace osmscout {
     writer.Write(maxSpeed);
   }
 
-  FeatureValue& MaxSpeedFeatureValue::operator=(const FeatureValue& other)
+  MaxSpeedFeatureValue& MaxSpeedFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const MaxSpeedFeatureValue&>(other);
@@ -1192,7 +1192,7 @@ namespace osmscout {
     writer.Write(grade);
   }
 
-  FeatureValue& GradeFeatureValue::operator=(const FeatureValue& other)
+  GradeFeatureValue& GradeFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const GradeFeatureValue&>(other);
@@ -1312,7 +1312,7 @@ namespace osmscout {
     writer.Write(isIn);
   }
 
-  FeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
+  AdminLevelFeatureValue& AdminLevelFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const AdminLevelFeatureValue&>(other);
@@ -1394,7 +1394,7 @@ namespace osmscout {
     writer.Write(postalCode);
   }
 
-  FeatureValue& PostalCodeFeatureValue::operator=(const FeatureValue& other)
+  PostalCodeFeatureValue& PostalCodeFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const PostalCodeFeatureValue&>(other);
@@ -1484,7 +1484,7 @@ namespace osmscout {
     writer.Write(website);
   }
 
-  FeatureValue& WebsiteFeatureValue::operator=(const FeatureValue& other)
+  WebsiteFeatureValue& WebsiteFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const WebsiteFeatureValue&>(other);
@@ -1572,7 +1572,7 @@ namespace osmscout {
     writer.Write(phone);
   }
 
-  FeatureValue& PhoneFeatureValue::operator=(const FeatureValue& other)
+  PhoneFeatureValue& PhoneFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const PhoneFeatureValue&>(other);
@@ -1780,7 +1780,7 @@ namespace osmscout {
     writer.WriteNumber(ele);
   }
 
-  FeatureValue& EleFeatureValue::operator=(const FeatureValue& other)
+  EleFeatureValue& EleFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const EleFeatureValue&>(other);
@@ -1899,7 +1899,7 @@ namespace osmscout {
     writer.Write(destination);
   }
 
-  FeatureValue& DestinationFeatureValue::operator=(const FeatureValue& other)
+  DestinationFeatureValue& DestinationFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const DestinationFeatureValue&>(other);
@@ -2019,7 +2019,7 @@ namespace osmscout {
     writer.Write(isIn);
   }
 
-  FeatureValue& IsInFeatureValue::operator=(const FeatureValue& other)
+  IsInFeatureValue& IsInFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const IsInFeatureValue&>(other);
@@ -2086,7 +2086,7 @@ namespace osmscout {
     writer.Write(endYear);
   }
 
-  FeatureValue& ConstructionYearFeatureValue::operator=(const FeatureValue& other)
+  ConstructionYearFeatureValue& ConstructionYearFeatureValue::operator=(const FeatureValue& other)
   {
     if (this!=&other) {
       const auto& otherValue=static_cast<const ConstructionYearFeatureValue&>(other);
@@ -2253,6 +2253,139 @@ namespace osmscout {
     }
   }
 
+  void SidewayFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(featureSet);
+  }
+
+  void SidewayFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(featureSet);
+  }
+
+  SidewayFeatureValue& SidewayFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const auto& otherValue=static_cast<const SidewayFeatureValue&>(other);
+
+      featureSet=otherValue.featureSet;
+    }
+
+    return *this;
+  }
+
+  bool SidewayFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const auto& otherValue=static_cast<const SidewayFeatureValue&>(other);
+
+    return featureSet==otherValue.featureSet;
+  }
+
+  const char* const SidewayFeature::NAME = "Sideway";
+
+  SidewayFeature::SidewayFeature()
+  {
+    //RegisterLabel(NAME, 0);
+  }
+
+  void SidewayFeature::Initialize(TypeConfig& typeConfig)
+  {
+    tagSidewalkLeft=typeConfig.RegisterTag("sidewalk:left");
+    tagSidewalkRight=typeConfig.RegisterTag("sidewalk:right");
+    tagCyclewayLeft=typeConfig.RegisterTag("cycleway:left");
+    tagCyclewayRight=typeConfig.RegisterTag("cycleway:right");
+  }
+
+  std::string SidewayFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t SidewayFeature::GetValueSize() const
+  {
+    return sizeof(SidewayFeatureValue);
+  }
+
+  FeatureValue* SidewayFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) SidewayFeatureValue();
+  }
+
+  void SidewayFeature::Parse(TagErrorReporter& /*errorReporter*/,
+                             const TypeConfig& /*typeConfig*/,
+                             const FeatureInstance& feature,
+                             const ObjectOSMRef& /*object*/,
+                             const TagMap& tags,
+                             FeatureValueBuffer& buffer) const
+  {
+    uint8_t featureSet=0;
+    auto sidewalkLeftTag=tags.find(tagSidewalkLeft);
+    auto sidewalkRightTag=tags.find(tagSidewalkRight);
+    auto cyclewayLeftTag=tags.find(tagCyclewayLeft);
+    auto cyclewayRightTag=tags.find(tagCyclewayRight);
+
+    bool hasSidewalkLaneLeft=sidewalkLeftTag!=tags.end() &&
+                             (sidewalkLeftTag->second=="lane" ||
+                              sidewalkLeftTag->second=="shared_lane");
+
+    bool hasSidewalkLaneRight=sidewalkRightTag!=tags.end() &&
+                              (sidewalkRightTag->second=="lane" ||
+                               sidewalkRightTag->second=="lane_shared");
+
+    bool hasSidewalkTrackLeft=sidewalkLeftTag!=tags.end() &&
+                              sidewalkLeftTag->second=="track";
+
+    bool hasSidewalkTrackRight=sidewalkRightTag!=tags.end() &&
+                               sidewalkRightTag->second=="track";
+
+    bool hasCyclewayLaneLeft=cyclewayLeftTag!=tags.end() &&
+                             (cyclewayLeftTag->second=="lane" ||
+                              cyclewayLeftTag->second=="shared_lane");
+
+    bool hasCyclewayLaneRight=cyclewayRightTag!=tags.end() &&
+                              (cyclewayRightTag->second=="lane" ||
+                               cyclewayRightTag->second=="shared_lane");
+
+    bool hasCyclewayTrackLeft=cyclewayLeftTag!=tags.end() &&
+                              cyclewayLeftTag->second=="track";
+
+    bool hasCyclewayTrackRight=cyclewayRightTag!=tags.end() &&
+                               cyclewayRightTag->second=="track";
+
+    if (hasSidewalkLaneLeft) {
+      featureSet|=SidewayFeatureValue::sidewalkLaneLeft;
+    }
+    if (hasSidewalkLaneRight) {
+      featureSet|=SidewayFeatureValue::sidewalkLaneRight;
+    }
+
+    if (hasSidewalkTrackLeft) {
+      featureSet|=SidewayFeatureValue::sidewalkTrackLeft;
+    }
+    if (hasSidewalkTrackRight) {
+      featureSet|=SidewayFeatureValue::sidewalkTrackRight;
+    }
+
+    if (hasCyclewayLaneLeft) {
+      featureSet|=SidewayFeatureValue::cyclewayLaneLeft;
+    }
+    if (hasCyclewayLaneRight) {
+      featureSet|=SidewayFeatureValue::cyclewayLaneRight;
+    }
+
+    if (hasCyclewayTrackLeft) {
+      featureSet|=SidewayFeatureValue::cyclewayTrackLeft;
+    }
+    if (hasCyclewayTrackRight) {
+      featureSet|=SidewayFeatureValue::cyclewayTrackRight;
+    }
+
+    if (featureSet!=0) {
+      auto* value=static_cast<SidewayFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      value->SetFeatureSet(featureSet);
+    }
+  }
 
   DynamicFeatureReader::DynamicFeatureReader(const TypeConfig& typeConfig,
                                              const Feature& feature)

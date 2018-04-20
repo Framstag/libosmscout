@@ -137,14 +137,25 @@ namespace osmscout {
     {
       return Color(r+(1-r)*factor,
                    g+(1-g)*factor,
-                   b+(1-b)*factor);
+                   b+(1-b)*factor,
+                   a);
     }
 
     inline Color Darken(double factor) const
     {
       return Color(r-r*factor,
                    g-g*factor,
-                   b-b*factor);
+                   b-b*factor,
+                   a);
+    }
+
+    inline Color Decolor() const
+    {
+      double grey=(r+g+b)/3.0;
+      return Color(grey,
+                   grey,
+                   grey,
+                   a);
     }
 
     std::string ToHexString() const;

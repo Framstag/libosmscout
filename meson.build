@@ -223,7 +223,17 @@ else
 endif
 
 # iOSX
-buildMapIOSX=build_machine.system()=='darwin'
+foundationDep = dependency('appleframeworks', modules : 'Foundation', required : false)
+coreGraphicsDep = dependency('appleframeworks', modules : 'CoreGraphics', required : false)
+coreTextDep = dependency('appleframeworks', modules : 'CoreText', required : false)
+cocoaDep = dependency('appleframeworks', modules : 'Cocoa', required : false)
+appKitDep = dependency('appleframeworks', modules : 'AppKit', required : false)
+
+if build_machine.system()=='darwin' and foundationDep.found() and coreGraphicsDep.found() and coreTextDep.found() and cocoaDep.found() and appKitDep.found()
+  buildMapIOSX=true
+else
+  buildMapIOSX=false
+endif
 
 # Binding
 
@@ -236,6 +246,7 @@ endif
 buildOSMScout2=buildMapQt and buildClientQt and qt5SvgDep.found()
 buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
 
+message('build system:            @0@'.format(build_machine.system()))
 message('option \'openmp\':         @0@'.format(openmpOpt))
 message('libosmscout:             @0@'.format(true))
 message('libosmscout-gpx:         @0@'.format(true))
@@ -245,8 +256,7 @@ message('libosmscout-map:         @0@'.format(true))
 message('libosmscout-map-agg:     @0@'.format(buildMapAgg))
 message('libosmscout-map-cairo:   @0@'.format(buildMapCairo))
 message('libosmscout-map-directx: @0@'.format(buildMapDirectX))
-#message('libosmscout-map-iosx:   @0@'.format(buildMapIOSX))
-message('libosmscout-map-iosx:    @0@'.format(false))
+message('libosmscout-map-iosx:    @0@'.format(buildMapIOSX))
 message('libosmscout-map-opengl:  @0@'.format(buildMapOpenGL))
 message('libosmscout-map-qt:      @0@'.format(buildMapQt))
 message('libosmscout-map-svg:     @0@'.format(true))
@@ -279,7 +289,7 @@ endif
 
 if buildMapIOSX
 # Does not yet work, because we are not able to active std11 support, fixed in meson trunk
-#  subdir('libosmscout-map-iosx')
+  subdir('libosmscout-map-iosx')
 endif
 
 if buildMapOpenGL

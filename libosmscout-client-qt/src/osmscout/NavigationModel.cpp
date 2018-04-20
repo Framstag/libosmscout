@@ -21,6 +21,8 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 NavigationModel::NavigationModel():
     vehicle(osmscout::Vehicle::vehicleCar), onRoute(false)
 {
@@ -87,4 +89,5 @@ void NavigationModel::setRoute(QObject *o)
   }
   this->route=*route;
   emit routeChanged(target, this->route, vehicle);
+}
 }

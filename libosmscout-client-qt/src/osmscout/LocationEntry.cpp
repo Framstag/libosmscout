@@ -23,6 +23,8 @@
 
 #include <iostream>
 
+namespace osmscout {
+
 LocationEntry::LocationEntry(Type type,
                              const QString& label,
                              const QString& objectType,
@@ -175,4 +177,5 @@ double LocationEntry::getLat() const
 double LocationEntry::getLon() const
 {
   return coord.GetLon();
+}
 }

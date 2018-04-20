@@ -15,11 +15,11 @@ fi
 
 git clone -b "$BRANCH" "$REPO" libosmscout
 
-export LANG=en_US.utf8
-cd libosmscout
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=DEBUG -DOSMSCOUT_BUILD_BINDING_JAVA=OFF ..
-make -j `nproc`
-ctest --output-on-failure
+env
 
+cd libosmscout
+meson debug
+cd debug
+
+ninja
+ninja test

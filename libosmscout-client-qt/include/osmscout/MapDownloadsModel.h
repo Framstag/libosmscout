@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_MAPDOWNLOADSMODEL_H
+#define OSMSCOUT_CLIENT_QT_MAPDOWNLOADSMODEL_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2016 Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef MAPDOWNLOADSMODEL_H
-#define	MAPDOWNLOADSMODEL_H
-
 #include <QObject>
 #include <QStringList>
 #include <QList>
@@ -31,6 +31,8 @@
 #include <osmscout/MapProvider.h>
 #include <osmscout/MapManager.h>
 #include <osmscout/DBThread.h>
+
+namespace osmscout {
 
 /**
  * QML list model with currently downloaded maps. It provide methods
@@ -74,5 +76,6 @@ public:
   Q_INVOKABLE double getFreeSpace(QString dir);
 };
 
-#endif	/* MAPDOWNLOADSMODEL_H */
+}
 
+#endif	/* OSMSCOUT_CLIENT_QT_MAPDOWNLOADSMODEL_H */

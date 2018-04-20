@@ -27,6 +27,8 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/DBThread.h>
 
+namespace osmscout {
+
 const char* MapDownloadJob::FILE_METADATA = "metadata.json";
 
 MapDownloadJob::MapDownloadJob(QNetworkAccessManager *webCtrl,
@@ -187,16 +189,22 @@ MapDirectory::MapDirectory(QDir dir):
             << "intersections.idx"
             << "router.dat"
             << "router2.dat"
-            << "textloc.dat"
-            << "textother.dat"
-            << "textpoi.dat"
-            << "textregion.dat"
             << "types.dat";
   // coverage.idx is optional, introduced after database version 16
+  // text*.dat files are optional, these files are missing
+  // when database is build without Marisa support
 
+  osmscout::log.Debug() << "Checking database files in directory " << dir.absolutePath().toStdString();
   valid=true;
   for (const auto &fileName: fileNames) {
-    valid &= dir.exists(fileName);
+    bool exists=dir.exists(fileName);
+    if (!exists){
+      osmscout::log.Debug() << "Missing mandatory file: " << fileName.toStdString();
+    }
+    valid &= exists;
+  }
+  if (!valid){
+    osmscout::log.Warn() << "Can't use database " << dir.absolutePath().toStdString() << ", some mandatory files are missing.";
   }
 
   // metadata
@@ -265,6 +273,8 @@ MapManager::MapManager(QStringList databaseLookupDirs, SettingsRef settings):
 
 void MapManager::lookupDatabases()
 {
+  osmscout::log.Info() << "Lookup databases";
+
   databaseDirectories.clear();
   QSet<QString> uniqPaths;
   QList<QDir> databaseFsDirectories;
@@ -277,7 +287,7 @@ void MapManager::lookupDatabases()
       if (fInfo.isFile() && fInfo.fileName() == osmscout::TypeConfig::FILE_TYPES_DAT){
         MapDirectory mapDir(fInfo.dir());
         if (mapDir.isValid()) {
-          qDebug() << "found database" << mapDir.getName() << ":" << fInfo.dir().absolutePath();
+          osmscout::log.Info() << "found database" << mapDir.getName().toStdString() << ":" << fInfo.dir().absolutePath().toStdString();
           if (!uniqPaths.contains(fInfo.canonicalFilePath())) {
             databaseDirectories << mapDir;
             databaseFsDirectories << mapDir.getDir();
@@ -366,8 +376,8 @@ void MapManager::onJobFinished()
               mapDir.getPath() == job->getMapPath() &&
               mapDir.getDir().canonicalPath() != job->getDestinationDirectory().canonicalPath()) {
 
-            qDebug() << "deleting map database" << mapDir.getName() << "after upgrade:"
-                     << mapDir.getDir().canonicalPath();
+            osmscout::log.Debug() << "deleting map database" << mapDir.getName().toStdString() << "after upgrade:"
+                     << mapDir.getDir().canonicalPath().toStdString();
             mapDir.deleteDatabase();
           }
         }
@@ -383,4 +393,5 @@ void MapManager::onJobFinished()
     delete job;
   }
   downloadNext();
+}
 }

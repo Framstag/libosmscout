@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_MAPPROVIDER_H
+#define OSMSCOUT_CLIENT_QT_MAPPROVIDER_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2016 Lukas Karas
@@ -17,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef MAPPROVIDER_H
-#define	MAPPROVIDER_H
-
 #include <QObject>
 #include <QString>
 #include <QUrl>
@@ -29,6 +29,8 @@
 #include <QJsonObject>
 
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -86,6 +88,8 @@ public:
   static MapProvider fromJson(QJsonValue obj);
 };
 
-Q_DECLARE_METATYPE(MapProvider)
-  
-#endif
+}
+
+Q_DECLARE_METATYPE(osmscout::MapProvider)
+
+#endif // OSMSCOUT_CLIENT_QT_MAPPROVIDER_H

@@ -24,7 +24,7 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <osmscout/system/Types.h>
+#include <osmscout/system/OSMScoutTypes.h>
 
 namespace osmscout {
   /**
@@ -52,11 +52,11 @@ namespace osmscout {
    */
   typedef uint16_t TypeId;
 
-  enum Vehicle
+  enum Vehicle : uint8_t
   {
-    vehicleFoot     = 1 << 1,
-    vehicleBicycle  = 1 << 2,
-    vehicleCar      = 1 << 3
+    vehicleFoot     = 1u << 1u,
+    vehicleBicycle  = 1u << 2u,
+    vehicleCar      = 1u << 3u
   };
 
   typedef uint8_t VehicleMask;

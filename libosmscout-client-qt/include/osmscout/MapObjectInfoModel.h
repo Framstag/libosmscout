@@ -1,3 +1,5 @@
+#ifndef OSMSCOUT_CLIENT_QT_MAPOBJECTINFOMODEL_H
+#define OSMSCOUT_CLIENT_QT_MAPOBJECTINFOMODEL_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -18,10 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-
-#ifndef MAPOBJECTINFOMODEL_H
-#define MAPOBJECTINFOMODEL_H
-
 #include <osmscout/OverlayObject.h>
 
 #include <osmscout/GeoCoord.h>
@@ -36,6 +34,7 @@
 #include <QObject>
 #include <QAbstractListModel>
 
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -95,8 +94,8 @@ private:
 
     const osmscout::FeatureValueBuffer &features=o->GetFeatureValueBuffer();
     const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
-    if (name!=NULL){
-      info.name=QString::fromStdString(name->GetLabel());
+    if (name!=nullptr){
+      info.name=QString::fromStdString(name->GetLabel(0));
       //std::cout << " \"" << name->GetLabel() << "\"";
     }
     info.points=points;
@@ -139,5 +138,6 @@ private:
   LookupModule* lookupModule;
 };
 
-#endif /* MAPOBJECTINFOMODEL_H */
+}
 
+#endif /* OSMSCOUT_CLIENT_QT_MAPOBJECTINFOMODEL_H */

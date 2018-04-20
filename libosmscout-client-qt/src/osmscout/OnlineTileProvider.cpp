@@ -19,6 +19,8 @@
 
 #include <osmscout/OnlineTileProvider.h>
 
+namespace osmscout {
+
 OnlineTileProvider OnlineTileProvider::fromJson(QJsonValue val)
 {
   if (!val.isObject())
@@ -48,4 +50,5 @@ OnlineTileProvider OnlineTileProvider::fromJson(QJsonValue val)
   
   return OnlineTileProvider(id.toString(), name.toString(), serverList, 
           maximumZoomLevel.toDouble(), copyright.toString());
+}
 }

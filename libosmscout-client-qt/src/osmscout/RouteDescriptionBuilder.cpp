@@ -27,6 +27,8 @@
 #include <sstream>
 #include <iomanip>
 
+namespace osmscout {
+
 RouteDescriptionBuilder::RouteDescriptionBuilder()
 {
 }
@@ -227,25 +229,25 @@ void RouteDescriptionBuilder::DumpStartDescription(QList<RouteStep> &routeSteps,
 
   if (!startDesc.isEmpty()){
     RouteStep startAt("start");
-    startAt.description=::RouteDescriptionBuilder::tr("<strong>Start</strong> at %1").arg(startDesc);
-    startAt.shortDescription=::RouteDescriptionBuilder::tr("Start");
+    startAt.description=RouteDescriptionBuilder::tr("<strong>Start</strong> at %1").arg(startDesc);
+    startAt.shortDescription=RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(startAt);
 
     if (!driveAlongDesc.isEmpty()) {
       RouteStep driveAlong("drive-along");
-      driveAlong.description=::RouteDescriptionBuilder::tr("<strong>Continue</strong> along %1").arg(driveAlongDesc);
-      driveAlong.shortDescription=::RouteDescriptionBuilder::tr("Continue");
+      driveAlong.description=RouteDescriptionBuilder::tr("<strong>Continue</strong> along %1").arg(driveAlongDesc);
+      driveAlong.shortDescription=RouteDescriptionBuilder::tr("Continue");
       routeSteps.push_back(driveAlong);
     }
   } else if (!driveAlongDesc.isEmpty()) {
     RouteStep startAt("start");
-    startAt.description=::RouteDescriptionBuilder::tr("<strong>Start</strong> along %1").arg(driveAlongDesc);
-    startAt.shortDescription=::RouteDescriptionBuilder::tr("Start");
+    startAt.description=RouteDescriptionBuilder::tr("<strong>Start</strong> along %1").arg(driveAlongDesc);
+    startAt.shortDescription=RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(startAt);
   } else {
     RouteStep start("start");
-    start.description=::RouteDescriptionBuilder::tr("<strong>Start</strong>");
-    start.shortDescription=::RouteDescriptionBuilder::tr("Start");
+    start.description=RouteDescriptionBuilder::tr("<strong>Start</strong>");
+    start.shortDescription=RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(start);
   }
 }
@@ -261,11 +263,11 @@ void RouteDescriptionBuilder::DumpTargetDescription(QList<RouteStep> &routeSteps
         .arg(QString::fromStdString(targetDescription->GetDescription()));
   }
   if (!targetDesc.isEmpty()){
-    targetReached.description=::RouteDescriptionBuilder::tr("<strong>Target reached</strong> at %1").arg(targetDesc);
+    targetReached.description=RouteDescriptionBuilder::tr("<strong>Target reached</strong> at %1").arg(targetDesc);
   }else{
-    targetReached.description=::RouteDescriptionBuilder::tr("<strong>Target reached</strong>");
+    targetReached.description=RouteDescriptionBuilder::tr("<strong>Target reached</strong>");
   }
-  targetReached.shortDescription=::RouteDescriptionBuilder::tr("Target reached");
+  targetReached.shortDescription=RouteDescriptionBuilder::tr("Target reached");
   routeSteps.push_back(targetReached);
 }
 
@@ -311,12 +313,12 @@ void RouteDescriptionBuilder::DumpRoundaboutEnterDescription(QList<RouteStep> &r
   }
 
   if (!crossingWaysString.isEmpty()) {
-    enter.description=::RouteDescriptionBuilder::tr("At crossing %1<strong>Enter roundabout</strong>")
+    enter.description=RouteDescriptionBuilder::tr("At crossing %1<strong>Enter roundabout</strong>")
         .arg(crossingWaysString);
   }else {
-    enter.description=::RouteDescriptionBuilder::tr("<strong>Enter roundabout</strong>");
+    enter.description=RouteDescriptionBuilder::tr("<strong>Enter roundabout</strong>");
   }
-  enter.shortDescription=::RouteDescriptionBuilder::tr("Enter roundabout");
+  enter.shortDescription=RouteDescriptionBuilder::tr("Enter roundabout");
   routeSteps.push_back(enter);
 }
 
@@ -326,16 +328,16 @@ void RouteDescriptionBuilder::DumpRoundaboutLeaveDescription(QList<RouteStep> &r
 {
   RouteStep leave("leave-roundabout");
 
-  leave.shortDescription=::RouteDescriptionBuilder::tr("Leave roundabout");
+  leave.shortDescription=RouteDescriptionBuilder::tr("Leave roundabout");
 
   if (nameDescription &&
       nameDescription->HasName()) {
 
-    leave.description=::RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit into street %2")
+    leave.description=RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit into street %2")
         .arg(roundaboutLeaveDescription->GetExitCount())
         .arg(FormatName(*nameDescription));
   }else{
-    leave.description=::RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit")
+    leave.description=RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit")
         .arg(roundaboutLeaveDescription->GetExitCount());
   }
 
@@ -348,7 +350,7 @@ void RouteDescriptionBuilder::DumpMotorwayEnterDescription(QList<RouteStep> &rou
 {
   RouteStep   enter("enter-motorway");
 
-  enter.shortDescription=::RouteDescriptionBuilder::tr("Enter motorway");
+  enter.shortDescription=RouteDescriptionBuilder::tr("Enter motorway");
 
   QString crossingWaysString;
 
@@ -360,19 +362,19 @@ void RouteDescriptionBuilder::DumpMotorwayEnterDescription(QList<RouteStep> &rou
       motorwayEnterDescription->GetToDescription()->HasName()) {
 
     if (!crossingWaysString.isEmpty()){
-      enter.description=::RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong> %2")
+      enter.description=RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong> %2")
           .arg(crossingWaysString)
           .arg(FormatName(*(motorwayEnterDescription->GetToDescription())));
     }else {
-      enter.description=::RouteDescriptionBuilder::tr("<strong>Enter motorway</strong> %1")
+      enter.description=RouteDescriptionBuilder::tr("<strong>Enter motorway</strong> %1")
           .arg(FormatName(*(motorwayEnterDescription->GetToDescription())));
     }
   }else{
     if (!crossingWaysString.isEmpty()){
-      enter.description=::RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong>")
+      enter.description=RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong>")
           .arg(crossingWaysString);
     }else {
-      enter.description=::RouteDescriptionBuilder::tr("<strong>Enter motorway</strong>");
+      enter.description=RouteDescriptionBuilder::tr("<strong>Enter motorway</strong>");
     }
   }
 
@@ -384,18 +386,18 @@ void RouteDescriptionBuilder::DumpMotorwayChangeDescription(QList<RouteStep> &ro
 {
   RouteStep change("change-motorway");
 
-  change.shortDescription=::RouteDescriptionBuilder::tr("Change motorway");
+  change.shortDescription=RouteDescriptionBuilder::tr("Change motorway");
 
   if (motorwayChangeDescription->GetFromDescription() &&
       motorwayChangeDescription->GetFromDescription()->HasName() &&
       motorwayChangeDescription->GetToDescription() &&
       motorwayChangeDescription->GetToDescription()->HasName()) {
 
-    change.description=::RouteDescriptionBuilder::tr("<strong>Change motorway</strong> from %1 to %2")
+    change.description=RouteDescriptionBuilder::tr("<strong>Change motorway</strong> from %1 to %2")
         .arg(FormatName(*(motorwayChangeDescription->GetFromDescription())))
         .arg(FormatName(*(motorwayChangeDescription->GetToDescription())));
   }else{
-    change.description=::RouteDescriptionBuilder::tr("<strong>Change motorway</strong>");
+    change.description=RouteDescriptionBuilder::tr("<strong>Change motorway</strong>");
   }
 
   routeSteps.push_back(change);
@@ -408,7 +410,7 @@ void RouteDescriptionBuilder::DumpMotorwayLeaveDescription(QList<RouteStep> &rou
 {
   RouteStep leave("leave-motorway");
 
-  leave.shortDescription=::RouteDescriptionBuilder::tr("Leave motorway");
+  leave.shortDescription=RouteDescriptionBuilder::tr("Leave motorway");
 
   // TODO: should we add leave direction to phrase? directionDescription->GetCurve()
   if (motorwayLeaveDescription->GetFromDescription() &&
@@ -417,15 +419,15 @@ void RouteDescriptionBuilder::DumpMotorwayLeaveDescription(QList<RouteStep> &rou
     if (nameDescription &&
         nameDescription->HasName()) {
 
-      leave.description = ::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1 into %2")
+      leave.description = RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1 into %2")
           .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())))
           .arg(FormatName(*nameDescription));
     }else{
-      leave.description = ::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1")
+      leave.description = RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1")
           .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())));
     }
   }else{
-    leave.description=::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong>");
+    leave.description=RouteDescriptionBuilder::tr("<strong>Leave motorway</strong>");
   }
 
   routeSteps.push_back(leave);
@@ -436,14 +438,14 @@ void RouteDescriptionBuilder::DumpNameChangedDescription(QList<RouteStep> &route
 {
   RouteStep changed("name-change");
 
-  changed.shortDescription=::RouteDescriptionBuilder::tr("Way changes name");
+  changed.shortDescription=RouteDescriptionBuilder::tr("Way changes name");
 
   if (nameChangedDescription->GetOriginDesccription()) {
-    changed.description=::RouteDescriptionBuilder::tr("<strong>Way changes name</strong> from %1 to %2")
+    changed.description=RouteDescriptionBuilder::tr("<strong>Way changes name</strong> from %1 to %2")
         .arg(FormatName(*(nameChangedDescription->GetOriginDesccription())))
         .arg(FormatName(*(nameChangedDescription->GetTargetDesccription())));
   } else {
-    changed.description=::RouteDescriptionBuilder::tr("<strong>Way changes name</strong> to %1")
+    changed.description=RouteDescriptionBuilder::tr("<strong>Way changes name</strong> to %1")
       .arg(FormatName(*(nameChangedDescription->GetTargetDesccription())));
   }
 
@@ -633,4 +635,5 @@ void RouteDescriptionBuilder::GenerateRouteSteps(const osmscout::RouteDescriptio
 
     prevNode=node;
   }
+}
 }

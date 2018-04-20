@@ -45,6 +45,8 @@
 #include <osmscout/NearPOIModel.h>
 #include <osmscout/InstalledMapsModel.h>
 
+namespace osmscout {
+
 static OSMScoutQt* osmScoutInstance=NULL;
 
 OSMScoutQtBuilder::OSMScoutQtBuilder():
@@ -364,4 +366,5 @@ QString OSMScoutQt::GetCacheLocation()
 size_t OSMScoutQt::GetOnlineTileCacheSize()
 {
   return onlineTileCacheSize;
+}
 }

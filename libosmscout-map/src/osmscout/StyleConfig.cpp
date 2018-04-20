@@ -474,27 +474,6 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)
-  {
-    for (const auto& type : typeConfig->GetNodeTypes()) {
-      types.push_back(type->GetNodeId());
-    }
-  }
-
-  void StyleConfig::GetAllWayTypes(std::list<TypeId>& types)
-  {
-    for (const auto& type : typeConfig->GetWayTypes()) {
-      types.push_back(type->GetWayId());
-    }
-  }
-
-  void StyleConfig::GetAllAreaTypes(std::list<TypeId>& types)
-  {
-    for (const auto& type : typeConfig->GetAreaTypes()) {
-      types.push_back(type->GetAreaId());
-    }
-  }
-
   template <class S, class A>
   void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A> >& conditionals,
                                  size_t& maxLevel)
@@ -1447,12 +1426,14 @@ namespace osmscout {
     }
   }
 
-  bool StyleConfig::LoadContent(const std::string& content)
+  bool StyleConfig::LoadContent(const std::string& content,
+                                ColorPostprocessor colorPostprocessor)
   {
     oss::Scanner *scanner=new oss::Scanner((const unsigned char *)content.c_str(),
                                            content.length());
     oss::Parser  *parser=new oss::Parser(scanner,
-                                         *this);
+                                         *this,
+                                         colorPostprocessor);
     parser->Parse();
 
     bool success=!parser->errors->hasErrors;
@@ -1486,7 +1467,8 @@ namespace osmscout {
     return success;
   }
 
-  bool StyleConfig::Load(const std::string& styleFile)
+  bool StyleConfig::Load(const std::string& styleFile,
+                         ColorPostprocessor colorPostprocessor)
   {
     StopClock  timer;
     bool       success=false;
@@ -1518,7 +1500,8 @@ namespace osmscout {
 
       fclose(file);
 
-      success=LoadContent(std::string((const char *)content, fileSize));
+      success=LoadContent(std::string((const char *)content,fileSize),
+                          colorPostprocessor);
 
       delete [] content;
 

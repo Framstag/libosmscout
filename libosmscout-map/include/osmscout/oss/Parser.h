@@ -100,6 +100,8 @@ private:
   TokenRef t;  // last recognized token
   TokenRef la; // lookahead token
 
+  osmscout::ColorPostprocessor colorPostprocessor;
+
   void SynErr(int n);
 
   void Get();
@@ -108,16 +110,10 @@ private:
   void ExpectWeak(int n, int follow);
   bool WeakSeparator(int n, int syFol, int repFol);
 
+  osmscout::Color PostprocessColor(const osmscout::Color& color) const;
+
 public:
   Errors  *errors;
-
-typedef std::list<FillStyleRef>       FillStyleList;
-typedef std::list<BorderStyleRef>     BorderStyleList;
-typedef std::list<IconStyleRef>       IconStyleList;
-typedef std::list<TextStyleRef>       TextStyleList;
-typedef std::list<LineStyleRef>       LineStyleList;
-typedef std::list<PathTextStyleRef>   PathTextStyleList;
-typedef std::list<PathShieldStyleRef> PathShieldStyleList;
 
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
@@ -204,7 +200,8 @@ void AddFeatureToFilter(StyleFilter& filter,
 
 
   Parser(Scanner *scanner,
-         StyleConfig& config);
+         StyleConfig& config,
+         osmscout::ColorPostprocessor colorPostprocessor=nullptr);
   ~Parser();
 
   void SemErr(const char* msg);

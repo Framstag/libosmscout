@@ -33,36 +33,6 @@ namespace osmscout {
     // no code
   }
 
-  DynamicFeatureLabelReader::DynamicFeatureLabelReader(const TypeConfig& typeConfig,
-                                                       const std::string& featureName,
-                                                       const std::string& labelName)
-  {
-    FeatureRef feature=typeConfig.GetFeature(featureName);
-    size_t     labelIndex;
-
-    assert(feature);
-    assert(feature->HasLabel());
-
-    feature->GetLabelIndex(labelName,
-                           labelIndex);
-
-    this->featureName=featureName;
-    this->labelName=labelName;
-    this->labelIndex=labelIndex;
-
-    lookupTable.resize(typeConfig.GetTypeCount(),
-                       std::numeric_limits<size_t>::max());
-
-    for (const auto &type : typeConfig.GetTypes()) {
-      size_t index;
-
-      if (type->GetFeature(featureName,
-                          index)) {
-        lookupTable[type->GetIndex()]=index;
-      }
-    }
-  }
-
   INameLabelProviderFactory::INameLabelProvider::INameLabelProvider(const TypeConfig& typeConfig)
   {
     nameLookupTable.resize(typeConfig.GetTypeCount(),
@@ -95,8 +65,8 @@ namespace osmscout {
           buffer.HasFeature(index)) {
         FeatureValue *value=buffer.GetValue(index);
 
-        if (value!=NULL) {
-          return value->GetLabel();
+        if (value!=nullptr) {
+          return value->GetLabel(0);
         }
       }
 
@@ -106,8 +76,8 @@ namespace osmscout {
           buffer.HasFeature(index)) {
         FeatureValue *value=buffer.GetValue(index);
 
-        if (value!=NULL) {
-          return value->GetLabel();
+        if (value!=nullptr) {
+          return value->GetLabel(0);
         }
       }
 
@@ -120,8 +90,8 @@ namespace osmscout {
           buffer.HasFeature(index)) {
         FeatureValue *value=buffer.GetValue(index);
 
-        if (value!=NULL) {
-          return value->GetLabel();
+        if (value!=nullptr) {
+          return value->GetLabel(0);
         }
       }
 
@@ -139,6 +109,36 @@ namespace osmscout {
     return instance;
   }
 
+  DynamicFeatureLabelReader::DynamicFeatureLabelReader(const TypeConfig& typeConfig,
+                                                       const std::string& featureName,
+                                                       const std::string& labelName)
+  {
+    FeatureRef feature=typeConfig.GetFeature(featureName);
+    size_t     labelIndex;
+
+    assert(feature);
+    assert(feature->HasLabel());
+
+    feature->GetLabelIndex(labelName,
+                           labelIndex);
+
+    this->featureName=featureName;
+    this->labelName=labelName;
+    this->labelIndex=labelIndex;
+
+    lookupTable.resize(typeConfig.GetTypeCount(),
+                       std::numeric_limits<size_t>::max());
+
+    for (const auto &type : typeConfig.GetTypes()) {
+      size_t index;
+
+      if (type->GetFeature(featureName,
+                           index)) {
+        lookupTable[type->GetIndex()]=index;
+      }
+    }
+  }
+
   std::string DynamicFeatureLabelReader::GetLabel(const MapParameter& /*parameter*/,
                                                   const FeatureValueBuffer& buffer) const
   {
@@ -148,8 +148,8 @@ namespace osmscout {
         buffer.HasFeature(index)) {
       FeatureValue *value=buffer.GetValue(index);
 
-      if (value!=NULL) {
-        return value->GetLabel();
+      if (value!=nullptr) {
+        return value->GetLabel(labelIndex);
       }
     }
 

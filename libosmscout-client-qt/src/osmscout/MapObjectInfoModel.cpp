@@ -24,6 +24,8 @@
 #include <osmscout/OSMScoutQt.h>
 #include <iostream>
 
+namespace osmscout {
+
 MapObjectInfoModel::MapObjectInfoModel():
 ready(false), setup(false), view(), lookupModule(NULL)
 {
@@ -292,4 +294,5 @@ void MapObjectInfoModel::update()
 
   this->ready=true;
   emit readyChange(ready);
+}
 }

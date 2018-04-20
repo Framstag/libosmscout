@@ -29,7 +29,7 @@
 #include <osmscout/routing/RouteNode.h>
 #include <osmscout/routing/TurnRestriction.h>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeFeatures.h>
 
 #include <osmscout/Area.h>

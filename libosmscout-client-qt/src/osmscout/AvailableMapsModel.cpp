@@ -26,6 +26,8 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 MapProvider AvailableMapsModelMap::getProvider() const
 {
   return provider;
@@ -373,4 +375,5 @@ QObject* AvailableMapsModel::mapByPath(QStringList path)
   }
 
   return nullptr;
+}
 }

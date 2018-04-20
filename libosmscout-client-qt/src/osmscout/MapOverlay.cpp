@@ -19,6 +19,8 @@
 
 #include <osmscout/MapOverlay.h>
 
+namespace osmscout {
+
 MapOverlay::MapOverlay(QQuickItem* parent):
     QQuickPaintedItem(parent)
 {
@@ -45,4 +47,5 @@ void MapOverlay::changeView(const MapView &updated)
 void MapOverlay::redraw()
 {
   update();
+}
 }

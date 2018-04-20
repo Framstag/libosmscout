@@ -21,6 +21,8 @@
 #include <osmscout/RoutingModel.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 RoutingListModel::RoutingListModel(QObject* parent)
 : QAbstractListModel(parent), requestId(0)
 {
@@ -212,4 +214,5 @@ RouteStep* RoutingListModel::get(int row) const
   RouteStep step=route.routeSteps().at(row);
 
   return new RouteStep(step);
+}
 }

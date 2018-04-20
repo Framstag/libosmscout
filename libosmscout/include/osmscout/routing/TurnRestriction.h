@@ -22,7 +22,7 @@
 
 #include <memory>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>

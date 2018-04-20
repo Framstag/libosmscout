@@ -1,6 +1,5 @@
-
-#ifndef TILECACHE_H
-#define	TILECACHE_H
+#ifndef OSMSCOUT_CLIENT_QT_TILECACHE_H
+#define OSMSCOUT_CLIENT_QT_TILECACHE_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -36,6 +35,8 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/ClientQtImportExport.h>
 
+namespace osmscout {
+
 /**
  * \ingroup QtAPI
  */
@@ -51,8 +52,6 @@ bool operator==(const TileCacheKey a, const TileCacheKey b);
 
 uint qHash(const TileCacheKey &key);
 
-Q_DECLARE_METATYPE(TileCacheKey)
-
 /**
  * \ingroup QtAPI
  */
@@ -62,8 +61,6 @@ struct TileCacheVal
   QPixmap image;
 };
 
-Q_DECLARE_METATYPE(TileCacheVal)
-
 /**
  * \ingroup QtAPI
  */
@@ -71,8 +68,6 @@ struct RequestState
 {
     bool pending; //!< if pending is false, request is currently processing
 };
-
-Q_DECLARE_METATYPE(RequestState)
 
 /**
  * \ingroup QtAPI
@@ -136,5 +131,10 @@ private:
   uint32_t                          maximumLivetimeMs;
 };
 
-#endif	/* TILECACHE_H */
+}
 
+Q_DECLARE_METATYPE(osmscout::TileCacheKey)
+Q_DECLARE_METATYPE(osmscout::TileCacheVal)
+Q_DECLARE_METATYPE(osmscout::RequestState)
+
+#endif	/* OSMSCOUT_CLIENT_QT_TILECACHE_H */

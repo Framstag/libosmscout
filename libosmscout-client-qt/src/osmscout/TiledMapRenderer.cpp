@@ -26,6 +26,7 @@
 #include <osmscout/system/Math.h>
 #include <osmscout/util/Logger.h>
 
+namespace osmscout {
 TiledMapRenderer::TiledMapRenderer(QThread *thread,
                                    SettingsRef settings,
                                    DBThreadRef dbThread,
@@ -520,4 +521,5 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osms
 
     emit Redraw();
     //std::cout << "  put offline: " << loadZ << " xtile: " << xtile << " ytile: " << ytile << std::endl;
+}
 }

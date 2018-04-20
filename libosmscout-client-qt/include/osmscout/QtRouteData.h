@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_CLIENT_QT_QTROUTEDATA_H
+#define OSMSCOUT_CLIENT_QT_QTROUTEDATA_H
+
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2010 Tim Teulings
@@ -18,10 +21,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-
-#ifndef OSMSCOUT_CLIENT_QT_QTROUTEDATA_H
-#define OSMSCOUT_CLIENT_QT_QTROUTEDATA_H
-
 #include <osmscout/Way.h>
 
 #include <osmscout/RouteStep.h>
@@ -30,6 +29,8 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
+
+namespace osmscout {
 
 /**
  * Representation of computed route
@@ -77,5 +78,7 @@ public:
   const QList<RouteStep>& routeSteps() const;
   const osmscout::RouteDescription& routeDescription() const;
 };
+
+}
 
 #endif //OSMSCOUT_CLIENT_QT_QTROUTEDATA_H

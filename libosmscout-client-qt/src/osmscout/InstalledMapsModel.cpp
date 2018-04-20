@@ -20,6 +20,8 @@
 #include <osmscout/InstalledMapsModel.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 InstalledMapsModel::InstalledMapsModel()
 {
   mapManager=OSMScoutQt::GetInstance().GetMapManager();
@@ -112,4 +114,5 @@ QVariant InstalledMapsModel::timeOfMap(QStringList path)
     }
   }
   return QVariant();
+}
 }

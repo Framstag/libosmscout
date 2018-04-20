@@ -109,21 +109,22 @@ namespace osmscout {
 
   OpenGLTextureRef TextLoader::CreateTexture() {
 
-    unsigned char *image = new unsigned char[maxHeight * sumWidth];
-    for (int i = 0; i < maxHeight * sumWidth; i++) {
+    auto*image = new unsigned char[maxHeight * sumWidth];
+
+    for (long i = 0; i < maxHeight * sumWidth; i++) {
       image[i] = 0;
     }
 
     int index = 0;
-    for (int i = 0; i < maxHeight; i++) {
-      for (unsigned int j = 0; j < characters.size(); j++) {
-        OpenGLTextureRef tx = characters[j]->GetTexture();
-        int start = i * tx->width;
-        for (unsigned int k = start; k < start + (tx->width); k++) {
-          size_t start2 = maxHeight - (characters[j]->GetBaselineY() + tx->fromOriginY);
+    for (size_t i = 0; i < (size_t)maxHeight; i++) {
+      for (auto& character : characters) {
+        OpenGLTextureRef tx =character->GetTexture();
+        size_t start = i * tx->width;
+        for (size_t k = start; k < start + (tx->width); k++) {
+          size_t start2 = maxHeight - (character->GetBaselineY() + tx->fromOriginY);
           size_t end = start2 + tx->height;
           if (i >= start2 && i < end) {
-            int ind = k - (start2 * tx->width);
+            size_t ind = k - (start2 * tx->width);
             image[index] = (tx->data[ind]);
             index++;
           } else {

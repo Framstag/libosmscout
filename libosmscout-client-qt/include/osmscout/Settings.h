@@ -36,6 +36,8 @@
 #define LIBOSMSCOUT_VERSION_STRING "v?"
 #endif
 
+namespace osmscout {
+
 /**
  * \ingroup QtAPI
  * 
@@ -215,5 +217,7 @@ public:
   double GetFontSize() const;
   void SetFontSize(double fontSize);
 };
+
+}
 
 #endif

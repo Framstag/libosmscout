@@ -29,7 +29,7 @@
 
 #include <osmscout/system/Assert.h>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/Logger.h>
 

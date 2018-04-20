@@ -11,14 +11,6 @@
 
 COMPILER OSS
 
-typedef std::list<FillStyleRef>       FillStyleList;
-typedef std::list<BorderStyleRef>     BorderStyleList;
-typedef std::list<IconStyleRef>       IconStyleList;
-typedef std::list<TextStyleRef>       TextStyleList;
-typedef std::list<LineStyleRef>       LineStyleList;
-typedef std::list<PathTextStyleRef>   PathTextStyleList;
-typedef std::list<PathShieldStyleRef> PathShieldStyleList;
-
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
@@ -1912,7 +1904,7 @@ PRODUCTIONS
                   }
 
                   if (!errors->hasErrors) {
-                    color=osmscout::Color::FromHexString(c);
+                    color=PostprocessColor(osmscout::Color::FromHexString(c));
                   }
                 .)
                .
@@ -1951,7 +1943,7 @@ PRODUCTIONS
                   "lighten" "(" COLOR<color> "," UDOUBLE<factor> ")"
                   (.
                     if (factor>=0.0 && factor<=1.0) {
-                      color=color.Lighten(factor);
+                      color=PostprocessColor(color.Lighten(factor));
                     }
                     else {
                      std::string e="Factor must be in the range [0..1]";
@@ -1963,7 +1955,7 @@ PRODUCTIONS
                   "darken" "(" COLOR<color> "," UDOUBLE<factor> ")"
                   (.
                     if (factor>=0.0 && factor<=1.0) {
-                      color=color.Darken(factor);
+                      color=PostprocessColor(color.Darken(factor));
                     }
                     else {
                      std::string e="Factor must be in the range [0..1]";
@@ -1972,6 +1964,9 @@ PRODUCTIONS
                     }
                   .)
                 | COLOR_VALUE<color>
+                  (.
+                    color=PostprocessColor(color);
+                  .)
                 | CONSTANT<constant>
                   (.
                     if (!constant) {

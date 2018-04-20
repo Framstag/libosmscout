@@ -25,8 +25,6 @@
 
 #include <osmscout/util/Geometry.h>
 
-#include <osmscout/private/Math.h>
-
 #if ! __has_feature(objc_arc)
 #error This file must be compiled with ARC. Either turn on ARC for the project or use -fobjc-arc flag
 #endif
@@ -73,7 +71,7 @@ namespace osmscout {
     /*
      * DrawMap()
      */
-    bool MapPainterIOS::DrawMap(const StyleConfig& styleConfig,
+    bool MapPainterIOS::DrawMap(const StyleConfig& /*styleConfig*/,
                                const Projection& projection,
                                const MapParameter& parameter,
                                const MapData& data,
@@ -301,7 +299,7 @@ namespace osmscout {
     /*
      * HasIcon()
      */
-    bool MapPainterIOS::HasIcon(const StyleConfig& styleConfig,
+    bool MapPainterIOS::HasIcon(const StyleConfig& /* styleConfig */,
                                 const MapParameter& parameter,
                                 IconStyle& style){
         if (style.GetIconId()==0) {
@@ -471,6 +469,7 @@ namespace osmscout {
             rect.size.height = size.height;
         }
 #else
+
         NSRect stringBounds = [str boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
         CGSize size = stringBounds.size;
         rect.size.width = size.width;
@@ -730,7 +729,7 @@ namespace osmscout {
                                          const PathTextStyle& style,
                                          const std::string& text,
                                          size_t transStart, size_t transEnd,
-                                         ContourLabelHelper& helper){
+                                         ContourLabelHelper& /*helper*/){
         Font *font = GetFont(projection, parameter, style.GetSize());
         Vertex2D charOrigin;
         FollowPathHandle followPathHnd;
@@ -770,7 +769,7 @@ namespace osmscout {
         TextDimension dimension;
         int labelRepeatCount = 0;
         while(labelRepeatCount++ < labelRepeatMaxCount){
-            int i = 0;
+            NSUInteger i = 0;
             while(i<charsCount){
 
                 NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
@@ -797,7 +796,7 @@ namespace osmscout {
                 i++;
             }
             CGAffineTransform ct;
-            for(int i=0;i<charsCount;i++) {
+            for(NSUInteger i=0;i<charsCount;i++) {
                 NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
                 CGContextSaveGState(cg);
                 CGContextTranslateCTM(cg, coords[i].GetX(),coords[i].GetY());
@@ -961,8 +960,8 @@ namespace osmscout {
      *          CapStyle endCap,
      *          size_t transStart, size_t transEnd)
      */
-    void MapPainterIOS::DrawPath(const Projection& projection,
-                  const MapParameter& parameter,
+    void MapPainterIOS::DrawPath(const Projection& /*projection*/,
+                  const MapParameter& /*parameter*/,
                   const Color& color,
                   double width,
                   const std::vector<double>& dash,
@@ -1128,7 +1127,7 @@ namespace osmscout {
      *            const FillStyle& style)
      */
     void MapPainterIOS::DrawGround(const Projection& projection,
-                                   const MapParameter& parameter,
+                                   const MapParameter& /*parameter*/,
                                    const FillStyle& style){
         CGContextSaveGState(cg);
         CGContextBeginPath(cg);

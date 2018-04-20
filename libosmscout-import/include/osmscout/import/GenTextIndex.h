@@ -22,7 +22,7 @@
 
 #include <marisa.h>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 #include <osmscout/ObjectRef.h>
 
 #include <osmscout/import/Import.h>

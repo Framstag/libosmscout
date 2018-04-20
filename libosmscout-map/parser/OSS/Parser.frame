@@ -60,6 +60,8 @@ private:
   TokenRef t;  // last recognized token
   TokenRef la; // lookahead token
 
+  osmscout::ColorPostprocessor colorPostprocessor;
+
   void SynErr(int n);
 
   void Get();
@@ -68,13 +70,16 @@ private:
   void ExpectWeak(int n, int follow);
   bool WeakSeparator(int n, int syFol, int repFol);
 
+  osmscout::Color PostprocessColor(const osmscout::Color& color) const;
+
 public:
   Errors  *errors;
 
 -->declarations
 
   Parser(Scanner *scanner,
-         StyleConfig& config);
+         StyleConfig& config,
+         osmscout::ColorPostprocessor colorPostprocessor=nullptr);
   ~Parser();
 
   void SemErr(const char* msg);
@@ -229,7 +234,8 @@ void Parser::Parse()
 }
 
 Parser::Parser(Scanner *scanner,
-               StyleConfig& config)
+               StyleConfig& config,
+               osmscout::ColorPostprocessor colorPostprocessor)
  : config(config)
 {
 -->constants
@@ -239,6 +245,7 @@ Parser::Parser(Scanner *scanner,
   errDist = minErrDist;
   this->scanner = scanner;
   errors = new Errors();
+  this->colorPostprocessor=colorPostprocessor;
 }
 
 bool Parser::StartOf(int s)
@@ -254,6 +261,16 @@ bool Parser::StartOf(int s)
 Parser::~Parser()
 {
   delete errors;
+}
+
+osmscout::Color Parser::PostprocessColor(const osmscout::Color& color) const
+{
+  if (colorPostprocessor!=nullptr) {
+    return (*colorPostprocessor)(color);
+  }
+  else {
+    return color;
+  }
 }
 
 Errors::Errors()

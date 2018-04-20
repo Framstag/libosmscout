@@ -1,5 +1,5 @@
 #ifndef OSMSCOUT_CLIENT_QT_MAPSTYLEMODEL_H
-#define	OSMSCOUT_CLIENT_QT_MAPSTYLEMODEL_H
+#define OSMSCOUT_CLIENT_QT_MAPSTYLEMODEL_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -26,6 +26,8 @@
 
 #include <osmscout/StyleModule.h>
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -70,6 +72,8 @@ public:
 private:
   QList<QFileInfo> stylesheets;
 };
+
+}
 
 #endif	/* OSMSCOUT_CLIENT_QT_MAPSTYLEHELPER_H */
 

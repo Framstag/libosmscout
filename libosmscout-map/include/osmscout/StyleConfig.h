@@ -29,7 +29,7 @@
 
 #include <osmscout/Pixel.h>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
 
@@ -45,6 +45,8 @@
 #include <osmscout/Styles.h>
 
 namespace osmscout {
+
+  typedef osmscout::Color(*ColorPostprocessor)(const osmscout::Color& color);
 
   /**
    * \ingroup Stylesheet
@@ -575,10 +577,6 @@ namespace osmscout {
   private:
     void Reset();
 
-    void GetAllNodeTypes(std::list<TypeId>& types);
-    void GetAllWayTypes(std::list<TypeId>& types);
-    void GetAllAreaTypes(std::list<TypeId>& types);
-
     void PostprocessNodes();
     void PostprocessWays();
     void PostprocessAreas();
@@ -745,8 +743,10 @@ namespace osmscout {
      * Methods for loading a concrete OSS style sheet
      */
     //@{
-    bool LoadContent(const std::string& content);
-    bool Load(const std::string& styleFile);
+    bool LoadContent(const std::string& content,
+                    ColorPostprocessor colorPostprocessor=nullptr);
+    bool Load(const std::string& styleFile,
+              ColorPostprocessor colorPostprocessor=nullptr);
     const std::list<std::string>&  GetErrors();
     const std::list<std::string>&  GetWarnings();
     //@}

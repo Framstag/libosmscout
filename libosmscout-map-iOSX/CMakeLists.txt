@@ -7,8 +7,7 @@ if(NOT ${OSMSCOUT_BUILD_MAP})
 endif()
 
 set(HEADER_FILES
-    include/osmscout/private/Math.h
-    include/osmscout/MapPainterIOS.h
+        include/osmscout/MapPainterIOS.h
 )
 
 set(SOURCE_FILES
@@ -21,7 +20,9 @@ else()
   add_library(OSMScoutMapIOSX ${SOURCE_FILES} ${HEADER_FILES})
 endif()
 
-set_property(TARGET OSMScoutMapIOSX PROPERTY CXX_STANDARD 11)
+set_target_properties(OSMScoutMapIOSX PROPERTIES
+		CXX_STANDARD 11
+		OUTPUT_NAME "osmscout-map-iosx")
 
 target_include_directories(OSMScoutMapIOSX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -36,7 +37,7 @@ set_target_properties(OSMScoutMapIOSX PROPERTIES
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER     include/osmscout/MapPainterIOS.h
   CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-)
+  OUTPUT_NAME "OSMScoutMapIOSX")
 
 find_library(FOUNDATION Foundation)
 find_library(COREGRAPHICS CoreGraphics)
@@ -80,4 +81,4 @@ install(TARGETS OSMScoutMapIOSX
         ARCHIVE DESTINATION lib
         FRAMEWORK DESTINATION lib)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
-#install(FILES ${OSMSCOUT_BASE_DIR_BUILD}/include/osmscout/MapCairoFeatures.h DESTINATION include/osmscout)
+#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapCairoFeatures.h DESTINATION include/osmscout)

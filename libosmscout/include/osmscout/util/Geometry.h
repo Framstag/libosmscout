@@ -31,11 +31,11 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
-#include <osmscout/system/Types.h>
+#include <osmscout/system/OSMScoutTypes.h>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/GeoBox.h>
 

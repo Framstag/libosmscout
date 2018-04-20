@@ -718,7 +718,7 @@ void Parser::COLOR(Color& color) {
 			UDOUBLE(factor);
 			Expect(60 /* ")" */);
 			if (factor>=0.0 && factor<=1.0) {
-			 color=color.Lighten(factor);
+			 color=PostprocessColor(color.Lighten(factor));
 			}
 			else {
 			std::string e="Factor must be in the range [0..1]";
@@ -735,7 +735,7 @@ void Parser::COLOR(Color& color) {
 			UDOUBLE(factor);
 			Expect(60 /* ")" */);
 			if (factor>=0.0 && factor<=1.0) {
-			 color=color.Darken(factor);
+			 color=PostprocessColor(color.Darken(factor));
 			}
 			else {
 			std::string e="Factor must be in the range [0..1]";
@@ -745,6 +745,8 @@ void Parser::COLOR(Color& color) {
 			
 		} else if (la->kind == _color) {
 			COLOR_VALUE(color);
+			color=PostprocessColor(color);
+			
 		} else if (la->kind == _variable) {
 			CONSTANT(constant);
 			if (!constant) {
@@ -2168,7 +2170,7 @@ void Parser::COLOR_VALUE(Color& color) {
 		}
 		
 		if (!errors->hasErrors) {
-		 color=osmscout::Color::FromHexString(c);
+		 color=PostprocessColor(osmscout::Color::FromHexString(c));
 		}
 		
 }
@@ -2206,7 +2208,8 @@ void Parser::Parse()
 }
 
 Parser::Parser(Scanner *scanner,
-               StyleConfig& config)
+               StyleConfig& config,
+               osmscout::ColorPostprocessor colorPostprocessor)
  : config(config)
 {
 	maxT = 62;
@@ -2217,6 +2220,7 @@ Parser::Parser(Scanner *scanner,
   errDist = minErrDist;
   this->scanner = scanner;
   errors = new Errors();
+  this->colorPostprocessor=colorPostprocessor;
 }
 
 bool Parser::StartOf(int s)
@@ -2240,6 +2244,16 @@ bool Parser::StartOf(int s)
 Parser::~Parser()
 {
   delete errors;
+}
+
+osmscout::Color Parser::PostprocessColor(const osmscout::Color& color) const
+{
+  if (colorPostprocessor!=nullptr) {
+    return (*colorPostprocessor)(color);
+  }
+  else {
+    return color;
+  }
 }
 
 Errors::Errors()

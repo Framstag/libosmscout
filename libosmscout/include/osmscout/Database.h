@@ -28,7 +28,7 @@
 #include <vector>
 
 // Type and style sheet configuration
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
 
 // Datafiles

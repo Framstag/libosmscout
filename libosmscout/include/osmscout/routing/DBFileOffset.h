@@ -22,7 +22,7 @@
 
 #include <string>
 #include <ostream>
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 namespace osmscout{
 

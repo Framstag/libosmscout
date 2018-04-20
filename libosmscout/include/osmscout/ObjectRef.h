@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/system/Compiler.h>
 

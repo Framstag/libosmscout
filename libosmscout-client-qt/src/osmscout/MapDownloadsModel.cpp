@@ -21,6 +21,8 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 MapDownloadsModel::MapDownloadsModel(QObject *parent):
   QAbstractListModel(parent){
 
@@ -155,4 +157,5 @@ Qt::ItemFlags MapDownloadsModel::flags(const QModelIndex &index) const
   }
 
   return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
 }

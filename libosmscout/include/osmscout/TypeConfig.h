@@ -34,7 +34,7 @@
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Tag.h>
-#include <osmscout/Types.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
@@ -69,7 +69,7 @@ namespace osmscout {
     FeatureValue();
     virtual ~FeatureValue() = default;
 
-    inline virtual std::string GetLabel() const
+    inline virtual std::string GetLabel(size_t /*labelIndex*/) const
     {
       return "";
     }
@@ -259,10 +259,10 @@ namespace osmscout {
   class OSMSCOUT_API TypeInfo CLASS_FINAL
   {
   public:
-    static const unsigned char typeNode     = 1 << 0; //!< Condition applies to nodes
-    static const unsigned char typeWay      = 1 << 1; //!< Condition applies to ways
-    static const unsigned char typeArea     = 1 << 2; //!< Condition applies to areas
-    static const unsigned char typeRelation = 1 << 3; //!< Condition applies to releations
+    static const uint8_t typeNode     = 1u << 0u; //!< Condition applies to nodes
+    static const uint8_t typeWay      = 1u << 1u; //!< Condition applies to ways
+    static const uint8_t typeArea     = 1u << 2u; //!< Condition applies to areas
+    static const uint8_t typeRelation = 1u << 3u; //!< Condition applies to releations
 
   public:
     /**
@@ -320,7 +320,7 @@ namespace osmscout {
     TypeInfo(const TypeInfo& other);
 
   public:
-    TypeInfo(const std::string& name);
+    explicit TypeInfo(const std::string& name);
 
     /**
      * Set the id of this type
@@ -492,7 +492,7 @@ namespace osmscout {
      */
     inline bool HasConditions() const
     {
-      return conditions.size()>0;
+      return !conditions.empty();
     }
 
     /**
@@ -854,7 +854,7 @@ namespace osmscout {
       return *this;
     }
 
-    TypeInfoSetConstIterator operator++(int)
+    const TypeInfoSetConstIterator operator++(int)
     {
       TypeInfoSetConstIterator tmp(*this);
 
@@ -895,10 +895,12 @@ namespace osmscout {
 
   public:
     TypeInfoSet();
-    TypeInfoSet(const TypeConfig& typeConfig);
+
+    explicit TypeInfoSet(const TypeConfig& typeConfig);
+    explicit TypeInfoSet(const std::vector<TypeInfoRef>& types);
+
     TypeInfoSet(const TypeInfoSet& other);
-    TypeInfoSet(TypeInfoSet&& other);
-    TypeInfoSet(const std::vector<TypeInfoRef>& types);
+    TypeInfoSet(TypeInfoSet&& other) noexcept;
 
     void Adapt(const TypeConfig& typeConfig);
 
@@ -1058,7 +1060,7 @@ namespace osmscout {
     {
       size_t featureBit=type->GetFeature(idx).GetFeatureBit();
 
-      return (featureBits[featureBit/8] & (1 << featureBit%8))!=0;
+      return (featureBits[featureBit/8] & (1u << featureBit%8))!=0;
     }
 
     /**
@@ -1071,8 +1073,10 @@ namespace osmscout {
      */
     inline FeatureValue* GetValue(size_t idx) const
     {
-      if (featureValueBuffer == NULL)
-        return NULL;
+      if (featureValueBuffer ==nullptr) {
+        return nullptr;
+      }
+
       return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
     }
 
@@ -1108,7 +1112,7 @@ namespace osmscout {
             osmscout::FeatureRef feature=featureInstance.GetFeature();
             if (feature->HasValue()){
               osmscout::FeatureValue *value=GetValue(featureInstance.GetIndex());
-              const T *v = dynamic_cast<const T*>(value);
+              const auto *v=dynamic_cast<const T*>(value);
               if (v!=NULL){
                 return v;
               }

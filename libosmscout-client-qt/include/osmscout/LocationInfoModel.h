@@ -1,3 +1,5 @@
+#ifndef OSMSCOUT_CLIENT_QT_LOCATIONINFOMODEL_H
+#define OSMSCOUT_CLIENT_QT_LOCATIONINFOMODEL_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -18,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#ifndef LOCATIONINFOMODEL_H
-#define	LOCATIONINFOMODEL_H
-
 #include <QObject>
 #include <QAbstractListModel>
 
@@ -29,6 +28,8 @@
 
 #include <osmscout/LookupModule.h>
 
+namespace osmscout {
+
 /**
  * \ingroup QtAPI
  */
@@ -36,8 +37,6 @@ struct ObjectKey{
   QString                  database;
   osmscout::ObjectFileRef  ref;
 };
-
-Q_DECLARE_METATYPE(ObjectKey)
 
 /**
  * \ingroup QtAPI
@@ -123,5 +122,8 @@ private:
     
 };
 
-#endif	/* LOCATIONINFOMODEL_H */
+}
 
+Q_DECLARE_METATYPE(osmscout::ObjectKey)
+
+#endif	/* OSMSCOUT_CLIENT_QT_LOCATIONINFOMODEL_H */

@@ -26,6 +26,7 @@
 
 // uncomment or define by compiler parameter to render various debug marks
 // #define DRAW_DEBUG
+namespace osmscout {
 
 bool TiledRenderingHelper::RenderTiles(QPainter &painter,
                                        const MapViewStruct &request,
@@ -102,7 +103,7 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
 
   uint32_t osmTileFromX = std::max(0.0, (double)osmTileRes * ((boundingBox.GetMinLon() + (double)180.0) / (double)360.0));
   double maxLatRad = boundingBox.GetMaxLat() * GRAD_TO_RAD;
-  uint32_t osmTileFromY = std::max(0.0, (double)osmTileRes * ((double)1.0 - (log(tan(maxLatRad) + (double)1.0 / cos(maxLatRad)) / M_PI)) / (double)2.0);
+  uint32_t osmTileFromY = std::max(0.0, (double)osmTileRes * ((double)1.0 - (std::log(tan(maxLatRad) + (double)1.0 / cos(maxLatRad)) / M_PI)) / (double)2.0);
 
   uint32_t zoomLevel = projection.GetMagnification().GetLevel();
 
@@ -299,4 +300,5 @@ void TiledRenderingHelper::lookupAndDrawBottomTileRecursive(TileCache& tileCache
       }
     }
   }
+}
 }

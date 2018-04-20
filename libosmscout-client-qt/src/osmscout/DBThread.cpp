@@ -30,6 +30,8 @@
 
 #include <osmscout/util/Logger.h>
 
+namespace osmscout {
+
 DBThread::DBThread(QThread *backgroundThread,
                    QString basemapLookupDirectory,
                    QString iconDirectory,
@@ -189,7 +191,6 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
 void DBThread::Initialize()
 {
   QReadLocker locker(&lock);
-  qDebug() << "Initialize databases";
   mapManager->lookupDatabases();
 }
 
@@ -456,4 +457,5 @@ void DBThread::RunSynchronousJob(SynchronousDBJob job)
     return;
   }
   job(databases);
+}
 }

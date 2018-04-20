@@ -22,6 +22,8 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/OSMScoutQt.h>
 
+namespace osmscout {
+
 MapStyleModel::MapStyleModel():
   QAbstractListModel()
 {
@@ -128,3 +130,4 @@ Qt::ItemFlags MapStyleModel::flags(const QModelIndex &index) const
   return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
+}

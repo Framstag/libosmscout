@@ -66,6 +66,7 @@ Current build status:
 
 |Operating Systems|Provider|Status|
 |-----------------|--------|------|
-|Linux, Mac OS|Travis-CI| [![Build Status](https://travis-ci.org/Framstag/libosmscout.svg?branch=master)](https://travis-ci.org/Framstag/libosmscout)|
+|Linux, Mac OS|Travis-CI|[![Build Status](https://travis-ci.org/Framstag/libosmscout.svg?branch=master)](https://travis-ci.org/Framstag/libosmscout)|
 |Windows|Appveyor|[![Build status](https://ci.appveyor.com/api/projects/status/s38jd7v5cwhwra8t?svg=true)](https//ci.appveyor.com/project/Framstag/libosmscout)|
 |Linux|Circle CI|[![Build Status](https://circleci.com/gh/Framstag/libosmscout.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/Framstag/libosmscout)|
+|Linux|Wercker|[![wercker status](https://app.wercker.com/status/39a4ba230c28d1d9e4ecae6158b283e8/s/master "wercker status")](https://app.wercker.com/project/byKey/39a4ba230c28d1d9e4ecae6158b283e8)|

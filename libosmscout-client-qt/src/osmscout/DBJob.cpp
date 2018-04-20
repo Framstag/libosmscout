@@ -20,6 +20,8 @@
 #include <QDebug>
 #include <osmscout/DBJob.h>
 
+namespace osmscout {
+
 DBJob::DBJob():
   QObject(),
   locker(NULL),
@@ -235,4 +237,5 @@ bool DBLoadJob::AddTileDataToMapData(QString dbPath,
     }
   }
   return false;
+}
 }

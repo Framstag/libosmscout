@@ -24,7 +24,7 @@
 
 #include <osmscout/CoreImportExport.h>
 
-#include <osmscout/system/Types.h>
+#include <osmscout/system/OSMScoutTypes.h>
 
 #include <osmscout/util/Number.h>
 

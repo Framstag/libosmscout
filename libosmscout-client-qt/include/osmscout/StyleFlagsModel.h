@@ -1,6 +1,5 @@
-
-#ifndef STYLEFLAGSMODEL_H
-#define STYLEFLAGSMODEL_H
+#ifndef OSMSCOUT_CLIENT_QT_STYLEFLAGSMODEL_H
+#define OSMSCOUT_CLIENT_QT_STYLEFLAGSMODEL_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -28,6 +27,8 @@
 
 #include <osmscout/StyleModule.h>
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -71,5 +72,6 @@ public:
   Q_INVOKABLE void setFlag(const QString &key, bool value);
 };
 
-#endif /* STYLEFLAGSMODEL_H */
+}
 
+#endif /* OSMSCOUT_CLIENT_QT_STYLEFLAGSMODEL_H */

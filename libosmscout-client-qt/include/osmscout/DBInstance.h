@@ -1,5 +1,5 @@
-#ifndef DBINSTANCE_H
-#define DBINSTANCE_H
+#ifndef OSMSCOUT_CLIENT_QT_DBINSTANCE_H
+#define OSMSCOUT_CLIENT_QT_DBINSTANCE_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -35,6 +35,8 @@
 #include <osmscout/util/Breaker.h>
 
 #include <osmscout/ClientQtImportExport.h>
+
+namespace osmscout {
 
 /**
  * \ingroup QtAPI
@@ -150,5 +152,6 @@ public: // TODO: make it private, ensure thread safety
 
 typedef std::shared_ptr<DBInstance> DBInstanceRef;
 
-#endif /* DBINSTANCE_H */
+}
 
+#endif /* OSMSCOUT_CLIENT_QT_DBINSTANCE_H */
