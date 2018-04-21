@@ -18,6 +18,7 @@
  */
 
 #include <QObject>
+#include <QtGlobal>
 #include <QMetaType>
 #include <QQmlEngine>
 
@@ -98,7 +99,11 @@ bool OSMScoutQtBuilder::Init()
   QString userAgent=QString("%1/%2 libosmscout/%3 Qt/%4")
       .arg(appName).arg(appVersion)
       .arg(LIBOSMSCOUT_VERSION_STRING)
-      .arg(QT_VERSION_STR);
+      .arg(qVersion());
+
+  if(strcmp(qVersion(), QT_VERSION_STR) != 0) {
+    qWarning() << "Runtime Qt version" << qVersion() << "is different that compile time version" << QT_VERSION_STR;
+  }
 
   osmScoutInstance=new OSMScoutQt(settings,
                                   mapManager,
