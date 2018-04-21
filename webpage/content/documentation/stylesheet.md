@@ -1,5 +1,5 @@
 ---
-date: "2016-06-30T19:50:42+02:00"
+date: "2018-04-21T16:11:42+02:00"
 title: "Style sheet syntax"
 description: "Description of the style sheet syntax in *.oss files"
 weight: 9
@@ -152,11 +152,13 @@ criteria exist:
 `GROUP <groupname> "," <groupname>...`
 :  matches all types that are in all the given groups (AND semantic)
 
-`FEATURE <featurename> "," <featurename>...`
-:  matches all types that have ALL the given features (AND semantic) and in
-turn all object that have the feature set during runtime (so objects which have
-a type that has this feature but the feature is not actually present for 
-agiven nstance of this type do not match).
+`FEATURE <featurename> [. <featureFlag>]"," <featurename> [. <featureFlag>...`
+:  matches all types that have ALL the given features (implicit "AND" semantic)
+and in turn all objects that have the feature set during runtime (so objects
+which have a type that has this feature but the feature is not actually present
+for  a given instance of this type do not match). Optionally instead of filtering
+for a feature you can also filter for feature flag of the given feature.
+Feature flags are boolean values of the feature value.
 
 `PATH`
 : matches all types wihich are annotated as `PATH` in the OST file.
