@@ -43,7 +43,7 @@ namespace osmscout {
   }
 
   TypeInfoSet::TypeInfoSet(TypeInfoSet&& other) noexcept
-  : types(other.types),
+  : types(std::move(other.types)),
     count(other.count)
   {
     // no code
