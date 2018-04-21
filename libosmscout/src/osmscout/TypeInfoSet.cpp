@@ -19,6 +19,7 @@
 
 #include <osmscout/TypeInfoSet.h>
 
+#include <algorithm>
 
 namespace osmscout {
 
