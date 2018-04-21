@@ -64,12 +64,24 @@ size_t GetHexDigitValue(char c)
 
 void AddFeatureToFilter(StyleFilter& filter,
                         const std::string& featureName,
+                        const std::string& flagName,
                         TypeInfoSet& resultTypes)
 {
   FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 
   if (!feature) {
     std::string e="Unknown feature '"+featureName+"'";
+
+    SemErr(e.c_str());
+    return;
+  }
+
+  size_t flagIndex=std::numeric_limits<size_t>::max();
+
+  if (!flagName.empty() &&
+      !feature->GetFlagIndex(flagName,
+                             flagIndex)) {
+    std::string e="Unknown feature flag '"+featureName+"."+flagName+"'";
 
     SemErr(e.c_str());
     return;
@@ -89,7 +101,8 @@ void AddFeatureToFilter(StyleFilter& filter,
   if (!resultTypes.Empty()) {
     size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
 
-    filter.AddFeature(featureFilterIndex);
+    filter.AddFeature(featureFilterIndex,
+                      flagIndex);
   }
 }
 
@@ -698,26 +711,33 @@ PRODUCTIONS
   STYLEFILTER_FEATURE<StyleFilter& filter>
               = (.
                   TypeInfoSet types;
-                  std::string featureName;
                 .)
                 "FEATURE"
-                IDENT<featureName>
-                (.
-                  AddFeatureToFilter(filter,
-                                     featureName,
-                                     types);
-                .)
+                STYLEFILTER_FEATURE_ENTRY<filter,types>
                 {
                   ","
-                  IDENT<featureName>
-                  (.
-                    AddFeatureToFilter(filter,
-                                       featureName,
-                                       types);
-                  .)
+                  STYLEFILTER_FEATURE_ENTRY<filter,types>
                 }
 
                 (. filter.SetTypes(types); .)
+                .
+
+  STYLEFILTER_FEATURE_ENTRY<StyleFilter& filter, TypeInfoSet& types>
+              = (.
+                  std::string featureName;
+                  std::string flagName;
+                .)
+                IDENT<featureName>
+                [
+                  "."
+                  IDENT<flagName>
+                ]
+                (.
+                  AddFeatureToFilter(filter,
+                                     featureName,
+                                     flagName,
+                                     types);
+                .)
                 .
 
   STYLEFILTER_PATH<StyleFilter& filter>

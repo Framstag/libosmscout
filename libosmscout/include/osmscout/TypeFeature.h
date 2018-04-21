@@ -32,6 +32,8 @@
 
 #include <osmscout/util/TagErrorReporter.h>
 
+#include <osmscout/system/Assert.h>
+
 namespace osmscout {
 
   class OSMSCOUT_API FeatureValue
@@ -44,6 +46,13 @@ namespace osmscout {
     inline virtual std::string GetLabel(size_t /*labelIndex*/) const
     {
       return "";
+    }
+
+    inline virtual bool IsFlagSet(size_t /*flagIndex*/) const
+    {
+      assert(false);
+
+      return false;
     }
 
     virtual void Read(FileScanner& scanner);
@@ -78,11 +87,15 @@ namespace osmscout {
   {
   private:
     std::unordered_map<std::string,size_t>      labels;
+    std::unordered_map<std::string,size_t>      flags;
     std::unordered_map<std::string,std::string> descriptions; //!< Map of descriptions for given language codes
 
   protected:
-    size_t RegisterLabel(const std::string& labelName,
-                         size_t index);
+    void RegisterLabel(size_t index,
+                       const std::string& labelName);
+
+    void RegisterFlag(size_t index,
+                      const std::string& flagName);
 
   public:
     Feature();
@@ -142,12 +155,28 @@ namespace osmscout {
     }
 
     /**
+     * Returns 'true' if the feature provides flags.
+     */
+    inline virtual bool HasFlags() const
+    {
+      return !flags.empty();
+    }
+
+    /**
      * Returns the index of the label with the given name. Method returns 'true'
      * if the feature has labels and a label with the given name exists. Else
      * 'false' is returned.
      */
     bool GetLabelIndex(const std::string& labelName,
                        size_t& index) const;
+
+    /**
+     * Returns the index of the feature flag with the given name. Method returns 'true'
+     * if the feature has the named flag. Else
+     * 'false' is returned.
+     */
+    bool GetFlagIndex(const std::string& flagName,
+                      size_t& index) const;
 
     std::string GetDescription(const std::string& languageCode) const;
 

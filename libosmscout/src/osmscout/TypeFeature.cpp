@@ -60,14 +60,20 @@ namespace osmscout {
     // no code
   }
 
-  size_t Feature::RegisterLabel(const std::string& labelName,
-                                size_t index)
+  void Feature::RegisterLabel(size_t index,
+                              const std::string& labelName)
   {
     assert(labels.find(labelName)==labels.end());
 
     labels[labelName]=index;
+  }
 
-    return index;
+  void Feature::RegisterFlag(size_t index,
+                             const std::string& flagName)
+  {
+    assert(flags.find(flagName)==flags.end());
+
+    flags[flagName]=index;
   }
 
   bool Feature::GetLabelIndex(const std::string& labelName,
@@ -76,6 +82,20 @@ namespace osmscout {
     const auto entry=labels.find(labelName);
 
     if (entry==labels.end()) {
+      return false;
+    }
+
+    index=entry->second;
+
+    return true;
+  }
+
+  bool Feature::GetFlagIndex(const std::string& flagName,
+                             size_t& index) const
+  {
+    const auto entry=flags.find(flagName);
+
+    if (entry==flags.end()) {
       return false;
     }
 

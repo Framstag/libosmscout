@@ -974,21 +974,12 @@ void Parser::STYLEFILTER_GROUP(StyleFilter& filter) {
 
 void Parser::STYLEFILTER_FEATURE(StyleFilter& filter) {
 		TypeInfoSet types;
-		std::string featureName;
 		
 		Expect(37 /* "FEATURE" */);
-		IDENT(featureName);
-		AddFeatureToFilter(filter,
-		                  featureName,
-		                  types);
-		
+		STYLEFILTER_FEATURE_ENTRY(filter,types);
 		while (la->kind == 20 /* "," */) {
 			Get();
-			IDENT(featureName);
-			AddFeatureToFilter(filter,
-			                  featureName,
-			                  types);
-			
+			STYLEFILTER_FEATURE_ENTRY(filter,types);
 		}
 		filter.SetTypes(types); 
 }
@@ -1106,6 +1097,22 @@ void Parser::STYLEFILTER_SIZE(StyleFilter& filter) {
 		Expect(42 /* "SIZE" */);
 		SIZECONDITION(sizeCondition);
 		filter.SetSizeCondition(sizeCondition); 
+}
+
+void Parser::STYLEFILTER_FEATURE_ENTRY(StyleFilter& filter, TypeInfoSet& types) {
+		std::string featureName;
+		std::string flagName;
+		
+		IDENT(featureName);
+		if (la->kind == 24 /* "." */) {
+			Get();
+			IDENT(flagName);
+		}
+		AddFeatureToFilter(filter,
+		                  featureName,
+		                  flagName,
+		                  types);
+		
 }
 
 void Parser::SIZECONDITION(SizeConditionRef& condition) {

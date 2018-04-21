@@ -1698,7 +1698,11 @@ namespace osmscout {
   public:
     inline SidewayFeatureValue()
     {
-      // no code
+    }
+
+    inline bool IsFlagSet(size_t flagIndex) const override
+    {
+      return (featureSet & (1<< flagIndex))!=0;
     }
 
     inline void SetFeatureSet(uint8_t featureSet)
@@ -1755,6 +1759,18 @@ namespace osmscout {
 
   class OSMSCOUT_API SidewayFeature : public Feature
   {
+  private:
+    enum class FeatureFlags: uint8_t {
+      sidewalkLaneLeft   = 0,
+      sidewalkLaneRight  = 1,
+      sidewalkTrackLeft  = 2,
+      sidewalkTrackRight = 3,
+      cyclewayLaneLeft   = 4,
+      cyclewayLaneRight  = 5,
+      cyclewayTrackLeft  = 6,
+      cyclewayTrackRight = 7
+    };
+
   private:
     TagId tagSidewalkLeft;
     TagId tagSidewalkRight;

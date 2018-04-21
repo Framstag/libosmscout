@@ -24,8 +24,6 @@
 #include <mutex>
 #include <vector>
 
-#include <osmscout/TypeConfig.h>
-
 #include <osmscout/Pixel.h>
 
 #include <osmscout/util/FileScanner.h>

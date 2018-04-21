@@ -49,4 +49,17 @@ namespace osmscout {
       return false;
     }
   }
+
+  FeatureValue* DynamicFeatureReader::GetValue(const FeatureValueBuffer& buffer) const
+  {
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
+
+    if (index!=std::numeric_limits<size_t>::max()) {
+      return buffer.GetValue(index);
+    }
+    else {
+      return nullptr;
+    }
+  }
+
 }

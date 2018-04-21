@@ -135,6 +135,8 @@ namespace osmscout {
     }
 
     bool IsSet(const FeatureValueBuffer& buffer) const;
+
+    FeatureValue* GetValue(const FeatureValueBuffer& buffer) const;
   };
 
   /**

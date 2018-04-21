@@ -197,6 +197,13 @@ namespace osmscout {
     // no code
   }
 
+  FeatureFilterData::FeatureFilterData(size_t featureFilterIndex,
+                                       size_t flagIndex)
+  : featureFilterIndex(featureFilterIndex),
+    flagIndex(flagIndex)
+  {
+  }
+
   StyleFilter::StyleFilter(const StyleFilter& other)
   {
     this->filtersByType=other.filtersByType;
@@ -244,9 +251,10 @@ namespace osmscout {
     return *this;
   }
 
-  StyleFilter& StyleFilter::AddFeature(size_t featureFilterIndex)
+  StyleFilter& StyleFilter::AddFeature(size_t featureFilterIndex,
+                                       size_t flagIndex)
   {
-    features.insert(featureFilterIndex);
+    features.emplace_back(featureFilterIndex,flagIndex);
 
     return *this;
   }
@@ -290,10 +298,21 @@ namespace osmscout {
                               double meterInPixel,
                               double meterInMM) const
   {
-    if (!features.empty()) {
-      for (size_t index : features) {
-        if (!context.HasFeature(index,
-                                buffer)) {
+    for (const auto& feature : features) {
+      if (!context.HasFeature(feature.featureFilterIndex,
+                              buffer)) {
+        return false;
+      }
+
+      if (feature.flagIndex!=std::numeric_limits<size_t>::max()) {
+        FeatureValue *value=context.GetFeatureValue(feature.featureFilterIndex,
+                                                    buffer);
+
+        if (value==nullptr) {
+          return false;
+        }
+
+        if (!value->IsFlagSet(feature.flagIndex)) {
           return false;
         }
       }

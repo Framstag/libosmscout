@@ -61,8 +61,8 @@ namespace osmscout {
 
   NameFeature::NameFeature()
   {
-    RegisterLabel(NAME_LABEL,
-                  NAME_LABEL_INDEX);
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
   }
 
   void NameFeature::Initialize(TagRegistry& /*tagRegistry*/)
@@ -152,8 +152,8 @@ namespace osmscout {
 
   NameAltFeature::NameAltFeature()
   {
-    RegisterLabel(NAME_LABEL,
-                  NAME_LABEL_INDEX);
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
   }
 
   std::string NameAltFeature::GetName() const
@@ -234,8 +234,8 @@ namespace osmscout {
   RefFeature::RefFeature()
   : tagRef(0)
   {
-    RegisterLabel(NAME_LABEL,
-                  NAME_LABEL_INDEX);
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
   }
 
   void RefFeature::Initialize(TagRegistry& tagRegistry)
@@ -397,8 +397,8 @@ namespace osmscout {
     tagAddrStreet(0),
     tagAddrPlace(0)
   {
-    RegisterLabel(NAME_LABEL,
-                  NAME_LABEL_INDEX);
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
   }
 
   void AddressFeature::Initialize(TagRegistry& tagRegistry)
@@ -1413,7 +1413,7 @@ namespace osmscout {
 
   PostalCodeFeature::PostalCodeFeature()
   {
-      RegisterLabel(NAME, 0);
+    RegisterLabel(0,NAME);
   }
 
   void PostalCodeFeature::Initialize(TagRegistry& tagRegistry)
@@ -1503,7 +1503,7 @@ namespace osmscout {
 
   WebsiteFeature::WebsiteFeature()
   {
-    RegisterLabel(NAME, 0);
+    RegisterLabel(0,NAME);
   }
 
   void WebsiteFeature::Initialize(TagRegistry& tagRegistry)
@@ -1591,7 +1591,7 @@ namespace osmscout {
 
   PhoneFeature::PhoneFeature()
   {
-    RegisterLabel(NAME, 0);
+    RegisterLabel(0,NAME);
   }
 
   void PhoneFeature::Initialize(TagRegistry& tagRegistry)
@@ -1802,8 +1802,8 @@ namespace osmscout {
   EleFeature::EleFeature()
   : tagEle(0)
   {
-    RegisterLabel(NAME_LABEL,
-                  NAME_LABEL_INDEX);
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
   }
 
   void EleFeature::Initialize(TagRegistry& tagRegistry)
@@ -1923,8 +1923,8 @@ namespace osmscout {
     tagDestinationRef(0),
     tagDestinationForward(0)
   {
-    RegisterLabel(NAME_LABEL,
-                  NAME_LABEL_INDEX);
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
   }
 
   void DestinationFeature::Initialize(TagRegistry& tagRegistry)
@@ -2107,7 +2107,7 @@ namespace osmscout {
 
   ConstructionYearFeature::ConstructionYearFeature()
   {
-    RegisterLabel(NAME, 0);
+    RegisterLabel(0,NAME);
   }
 
   void ConstructionYearFeature::Initialize(TagRegistry& tagRegistry)
@@ -2282,7 +2282,15 @@ namespace osmscout {
 
   SidewayFeature::SidewayFeature()
   {
-    //RegisterLabel(NAME, 0);
+    RegisterFlag((size_t)FeatureFlags::sidewalkLaneLeft,"sidewalkLaneLeft");
+    RegisterFlag((size_t)FeatureFlags::sidewalkLaneRight,"sidewalkLaneRight");
+    RegisterFlag((size_t)FeatureFlags::sidewalkTrackLeft,"sidewalkTrackLeft");
+    RegisterFlag((size_t)FeatureFlags::sidewalkTrackRight,"sidewalkTrackRight");
+
+    RegisterFlag((size_t)FeatureFlags::cyclewayLaneLeft,"cyclewayLaneLeft");
+    RegisterFlag((size_t)FeatureFlags::cyclewayLaneRight,"cyclewayLaneRight");
+    RegisterFlag((size_t)FeatureFlags::cyclewayTrackLeft,"cyclewayTrackLeft");
+    RegisterFlag((size_t)FeatureFlags::cyclewayTrackRight,"cyclewayTrackRight");
   }
 
   void SidewayFeature::Initialize(TagRegistry& tagRegistry)

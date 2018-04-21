@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <osmscout/NumericIndex.h>
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>

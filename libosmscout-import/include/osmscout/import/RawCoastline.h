@@ -23,7 +23,6 @@
 #include <memory>
 
 #include <osmscout/Tag.h>
-#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
@@ -40,7 +39,7 @@ namespace osmscout {
     static const uint8_t isArea  = 1 <<  0; //! We are an area
 
   private:
-    OSMId               id;
+    OSMId               id{};
     mutable uint8_t     flags;
     std::vector<OSMId>  nodes;
 

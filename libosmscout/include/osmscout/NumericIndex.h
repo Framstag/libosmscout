@@ -23,8 +23,6 @@
 #include <mutex>
 #include <vector>
 
-#include <osmscout/TypeConfig.h>
-
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
