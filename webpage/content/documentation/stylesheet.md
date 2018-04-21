@@ -1,5 +1,5 @@
 ---
-date: "2018-04-21T16:11:42+02:00"
+date: "2018-04-21T04:11:42+02:00"
 title: "Style sheet syntax"
 description: "Description of the style sheet syntax in *.oss files"
 weight: 9
