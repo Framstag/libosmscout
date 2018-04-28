@@ -845,8 +845,6 @@ namespace osmscout {
                                                             b,
                                                             intersection);
 
-        currentDistance=GetEllipsoidalDistance(location,intersection);
-
         if (currentDistance<distance) {
           distance=currentDistance;
         }
@@ -936,8 +934,6 @@ namespace osmscout {
                                                                 a,
                                                                 b,
                                                                 intersection);
-
-            currentDistance=GetEllipsoidalDistance(location,intersection);
 
             if (!atPlace &&
                 currentDistance<distance) {
