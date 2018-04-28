@@ -125,7 +125,7 @@ public:
 
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-  Q_INVOKABLE LocationEntry* get(int row) const;
+  Q_INVOKABLE QObject* get(int row) const;
 
   virtual QHash<int, QByteArray> roleNames() const;
 

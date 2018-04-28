@@ -112,7 +112,7 @@ public:
 
   QHash<int, QByteArray> roleNames() const;
 
-  Q_INVOKABLE RouteStep* get(int row) const;
+  Q_INVOKABLE QObject* get(int row) const;
 
   inline bool isReady()
   {
@@ -132,7 +132,7 @@ public:
    * Create LocationEntry from geographic coordinate with optional label.
    * It may be used from QML when selecting route start/end via point on map.
    */
-  inline Q_INVOKABLE LocationEntry* locationEntryFromPosition(double lat, double lon, QString label="")
+  inline Q_INVOKABLE QObject* locationEntryFromPosition(double lat, double lon, QString label="")
   {
     return new LocationEntry(label,osmscout::GeoCoord(lat,lon));
   }

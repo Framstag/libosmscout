@@ -338,7 +338,7 @@ QHash<int, QByteArray> LocationListModel::roleNames() const
   return roles;
 }
 
-LocationEntry* LocationListModel::get(int row) const
+QObject* LocationListModel::get(int row) const
 {
     if(row < 0 || row >= locations.size()) {
         return NULL;
