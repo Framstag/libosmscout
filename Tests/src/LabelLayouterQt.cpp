@@ -55,6 +55,7 @@ public:
 };
 
 //typedef std::list<LabelData>::iterator LabelDataRef;
+
 template<class NativeGlyph>
 class Glyph {
 public:

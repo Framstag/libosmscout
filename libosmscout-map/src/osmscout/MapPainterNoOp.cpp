@@ -67,13 +67,22 @@ namespace osmscout {
   }
 
 
-  void MapPainterNoOp::DrawLabel(const Projection& /*projection*/,
-                                 const MapParameter& /*parameter*/,
-                                 const LabelData& /*label*/)
+  void MapPainterNoOp::RegisterLabel(const Projection& /*projection*/,
+                                     const MapParameter& /*parameter*/,
+                                     const LabelData& /*label*/,
+                                     const Vertex2D& /*position*/)
   {
     // no code
   }
 
+
+  void MapPainterNoOp::RegisterContourLabel(const Projection & /*projection*/,
+                                            const MapParameter & /*parameter*/,
+                                            const LabelData & /*label*/,
+                                            const std::vector<Vertex2D> & /*way*/)
+  {
+    // no code
+  }
 
   void MapPainterNoOp::DrawIcon(const IconStyle* /*style*/,
                                 double /*x*/,

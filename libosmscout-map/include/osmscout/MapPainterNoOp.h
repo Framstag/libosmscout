@@ -53,9 +53,16 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const FillStyle& style) override;
 
-    void DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const LabelData& label) override;
+    void RegisterLabel(const Projection& projection,
+                               const MapParameter& parameter,
+                               const LabelData& label,
+                               const Vertex2D& position) override;
+
+    void RegisterContourLabel(const Projection &projection,
+                              const MapParameter &parameter,
+                              const LabelData &label,
+                              const std::vector<Vertex2D> &way) override;
+
 
     void DrawIcon(const IconStyle* style,
                   double x,

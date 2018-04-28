@@ -747,7 +747,7 @@ namespace osmscout {
                                      double objectWidth,
                                      double objectHeight)
   {
-    labelLayoutData.clear();
+    std::vector<LabelLayoutData> labelLayoutData;
 
     /*
     SymbolRef symbol=styleConfig->GetSymbol("marker");

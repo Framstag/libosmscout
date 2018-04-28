@@ -111,6 +111,7 @@ namespace osmscout {
     /*
      * Dimension of a text
      */
+    /*
     struct OSMSCOUT_MAP_API TextDimension
     {
       double xOff;
@@ -132,6 +133,7 @@ namespace osmscout {
         // no code
       }
     };
+    */
 
     /**
      * Structure used for internal statistic collection
@@ -244,6 +246,7 @@ namespace osmscout {
     /**
      * Represents one entry in a label.
      */
+     /*
     struct OSMSCOUT_MAP_API LabelLayoutData
     {
       size_t        position;   //!< Relative position of the label
@@ -255,6 +258,7 @@ namespace osmscout {
       bool          icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
       IconStyleRef  iconStyle;  //!< The icon style for a icon or symbol
     };
+      */
 
     /**
      * Helper class for drawing contours. Allows the MapPainter base class
@@ -318,10 +322,12 @@ namespace osmscout {
       */
     //@{
     size_t                       nextLabelId;
+    /*
     LabelLayouter                labels;
     LabelLayouter                overlayLabels;
 
     std::vector<LabelLayoutData> labelLayoutData;
+    */
     //@}
 
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
@@ -641,11 +647,13 @@ namespace osmscout {
       however it must assure that later calls to corresponding DrawXXX methods will
       honour the bounding box.
       */
+    /*
     virtual TextDimension GetTextDimension(const Projection& projection,
                                            const MapParameter& parameter,
                                            double objectWidth,
                                            double fontSize,
                                            const std::string& text) = 0;
+    */
 
     /**
       (Optionally) fills the area with the given default color
@@ -660,9 +668,29 @@ namespace osmscout {
       Draw the given text at the given pixel coordinate in a style defined
       by the given LabelStyle.
      */
+    /*
     virtual void DrawLabel(const Projection& projection,
                            const MapParameter& parameter,
                            const LabelData& label) = 0;
+    */
+
+    /**
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
+     */
+    virtual void RegisterRegularLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const std::vector<LabelData> &labels,
+                                      const Vertex2D &position,
+                                      const double iconHeight = -1) = 0;
+
+    /**
+     * Register contour label
+     */
+    virtual void RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const LabelData &label,
+                                      const std::vector<Vertex2D> &way) = 0;
 
     /**
       Draw the Icon as defined by the IconStyle at the given pixel coordinate.
