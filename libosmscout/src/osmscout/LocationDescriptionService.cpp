@@ -27,6 +27,8 @@
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
+#include <osmscout/system/Math.h>
+
 namespace osmscout {
 
   LocationCoordDescription::LocationCoordDescription(const GeoCoord& location)
@@ -840,10 +842,16 @@ namespace osmscout {
           b=way->nodes[i].GetCoord();
         }
 
-        currentDistance=CalculateDistancePointToLineSegment(location,
-                                                            a,
-                                                            b,
-                                                            intersection);
+        double newDistance=CalculateDistancePointToLineSegment(location,
+                                                                a,
+                                                                b,
+                                                                intersection);
+
+        if (!std::isfinite(newDistance)) {
+          continue;
+        }
+
+        currentDistance=GetEllipsoidalDistance(location,intersection);
 
         if (currentDistance<distance) {
           distance=currentDistance;
@@ -930,10 +938,16 @@ namespace osmscout {
               b=ring.nodes[i].GetCoord();
             }
 
-            currentDistance=CalculateDistancePointToLineSegment(location,
-                                                                a,
-                                                                b,
-                                                                intersection);
+            double newDistance=CalculateDistancePointToLineSegment(location,
+                                                                    a,
+                                                                    b,
+                                                                    intersection);
+
+            if (!std::isfinite(newDistance)) {
+              continue;
+            }
+
+            currentDistance=GetEllipsoidalDistance(location,intersection);
 
             if (!atPlace &&
                 currentDistance<distance) {
