@@ -196,7 +196,7 @@ public:
 
   virtual QHash<int, QByteArray> roleNames() const;
 
-  Q_INVOKABLE LocationEntry* get(int row) const;
+  Q_INVOKABLE QObject* get(int row) const;
 
   inline bool isSearching() const {
     return searching;

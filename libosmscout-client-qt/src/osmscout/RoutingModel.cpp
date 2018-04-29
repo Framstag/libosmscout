@@ -205,7 +205,7 @@ QHash<int, QByteArray> RoutingListModel::roleNames() const
   return roles;
 }
 
-RouteStep* RoutingListModel::get(int row) const
+QObject* RoutingListModel::get(int row) const
 {
   if(!route || row < 0 || row >= route.routeSteps().size()) {
     return NULL;
