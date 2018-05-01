@@ -1,0 +1,41 @@
+[requires]
+
+# You need the following remotes:
+# conan-center: https://conan.bintray.com [Verify SSL: True]
+# bincrafters: https://api.bintray.com/conan/bincrafters/public-conan [Verify SSL: True]
+# No support for newer conan Versions
+# osechet: https://api.bintray.com/conan/osechet/Conan [Verify SSL: True]
+#
+# Not yet needed:
+# conan-community: https://api.bintray.com/conan/conan-community/conan [Verify SSL: True]
+
+# Core and Import
+libiconv/1.15@bincrafters/stable
+zlib/1.2.11@conan/stable
+libxml2/2.9.8@bincrafters/stable
+protobuf/3.5.2@bincrafters/stable
+
+# Cairo
+freetype/2.9.0@bincrafters/stable
+libpng/1.6.32@conan/stable
+
+# OpenGL
+glfw/3.2.1.20180327@bincrafters/stable
+glm/0.9.8.5@bincrafters/stable
+glew/2.1.0@bincrafters/stable
+
+# Qt5
+#Qt/5.8.0@osechet/stable
+
+[generators]
+cmake
+
+[options]
+*:shared=True
+#Qt:opengl=desktop
+#Qt:location=True
+#Qt:svg=True
+#Qt:openssl=no
+
+[imports]
+# Copy libraries/dlls from dependencies

@@ -2,9 +2,17 @@ cmake_minimum_required(VERSION 3.1)
 
 project(libosmscout C CXX)
 
+# If we are called from conan, include and activate it cmake additions
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  message("Loading conan definitions...")
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup()
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # build should fail when compiler don't support standard defined by CMAKE_CXX_STANDARD
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QTDIR}" "${QTDIR}" "$ENV{QTDIR}/lib/cmake" "${QTDIR}/lib/cmake")
+
 #
 # default build type
 if(CMAKE_BUILD_TYPE STREQUAL "")
