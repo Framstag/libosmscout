@@ -411,7 +411,7 @@ void FileDownloader::onProcessRead()
 void FileDownloader::onProcessStopped(int exitCode)
 {
   if (exitCode != 0){
-    QString err = tr("Error in processing downloaded data");
+    QString err = osmscout::FileDownloader::tr("Error in processing downloaded data");
     m_isok = false;
     emit error(err, false);
     return;
@@ -441,7 +441,7 @@ void FileDownloader::onProcessReadError()
 void FileDownloader::onProcessStateChanged(QProcess::ProcessState state)
 {
   if ( !m_process_started && state == QProcess::NotRunning ) {
-    QString err = tr("Error in processing downloaded data: could not start the program") + " " + m_process->program();
+    QString err = osmscout::FileDownloader::tr("Error in processing downloaded data: could not start the program") + " " + m_process->program();
     onError(err);
   }
 }
