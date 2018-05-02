@@ -39,6 +39,7 @@ namespace osmscout {
       AddAttribute(std::make_shared<StyleUDoubleArrayAttributeDescriptor>("dash",LineStyle::attrDashes));
       AddAttribute(std::make_shared<StyleIntAttributeDescriptor>("priority",LineStyle::attrPriority));
       AddAttribute(std::make_shared<StyleIntAttributeDescriptor>("zIndex",LineStyle::attrZIndex));
+      AddAttribute(std::make_shared<OffsetRelAttributeDescriptor>("offsetRel",LineStyle::attrOffsetRel));
     }
   };
 
@@ -54,7 +55,8 @@ namespace osmscout {
      joinCap(capRound),
      endCap(capRound),
      priority(0),
-     zIndex(0)
+     zIndex(0),
+     offsetRel(base)
   {
     // no code
   }
@@ -71,7 +73,8 @@ namespace osmscout {
     endCap(style.endCap),
     dash(style.dash),
     priority(style.priority),
-    zIndex(style.zIndex)
+    zIndex(style.zIndex),
+    offsetRel(style.offsetRel)
   {
     // no code
   }
@@ -135,6 +138,9 @@ namespace osmscout {
       break;
     case attrZIndex:
       SetZIndex(value);
+      break;
+    case attrOffsetRel:
+      SetOffsetRel((OffsetRel)value);
       break;
     default:
       assert(false);
@@ -225,6 +231,13 @@ namespace osmscout {
     return *this;
   }
 
+  LineStyle& LineStyle::SetOffsetRel(OffsetRel offsetRel)
+  {
+    this->offsetRel=offsetRel;
+
+    return *this;
+  }
+
   StyleDescriptorRef LineStyle::GetDescriptor()
   {
     return lineStyleDescriptor;
@@ -267,6 +280,9 @@ namespace osmscout {
         break;
       case attrZIndex:
         zIndex=other.zIndex;
+        break;
+      case attrOffsetRel:
+        offsetRel=other.offsetRel;
         break;
       }
     }
@@ -318,7 +334,11 @@ namespace osmscout {
       return false;
     }
 
-    return zIndex==other.zIndex;
+    if (zIndex!=other.zIndex) {
+      return false;
+    }
+
+    return offsetRel==other.offsetRel;
   }
 
   bool LineStyle::operator!=(const LineStyle& other) const
@@ -372,7 +392,11 @@ namespace osmscout {
       return priority<other.priority;
     }
 
-    return zIndex<other.zIndex;
+    if (zIndex!=other.zIndex) {
+      return zIndex<other.zIndex;
+    }
+
+    return offsetRel<other.offsetRel;
   }
 
   class FillStyleDescriptor CLASS_FINAL : public StyleDescriptor

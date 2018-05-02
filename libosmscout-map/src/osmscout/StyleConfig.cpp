@@ -1175,6 +1175,8 @@ namespace osmscout {
     lineStyles.clear();
     lineStyles.reserve(wayLineStyleSelectors.size());
 
+    bool requireSort=false;
+
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
       LineStyleRef style=GetFeatureStyle(styleResolveContext,
                                          wayLineStyleSelector[buffer.GetType()->GetIndex()],
@@ -1182,8 +1184,21 @@ namespace osmscout {
                                          projection);
 
       if (style) {
+        if (style->GetOffsetRel()!=LineStyle::base) {
+          requireSort=true;
+        }
+
         lineStyles.push_back(style);
       }
+    }
+
+    if (requireSort &&
+        lineStyles.size()>1) {
+      std::sort(lineStyles.begin(),
+                lineStyles.end(),
+                [](const LineStyleRef& a, const LineStyleRef& b) -> bool {
+                  return a->GetSlot()<b->GetSlot();
+      });
     }
   }
 

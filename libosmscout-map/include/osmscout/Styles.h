@@ -47,6 +47,12 @@ namespace osmscout {
       capSquare
     };
 
+    enum OffsetRel {
+      base,
+      leftOutline,
+      rightOutline
+    };
+
     enum Attribute {
       attrLineColor,
       attrGapColor,
@@ -58,7 +64,8 @@ namespace osmscout {
       attrEndCap,
       attrDashes,
       attrPriority,
-      attrZIndex
+      attrZIndex,
+      attrOffsetRel
     };
 
   private:
@@ -74,6 +81,7 @@ namespace osmscout {
     std::vector<double> dash;
     int                 priority;
     int                 zIndex;
+    OffsetRel           offsetRel;
 
   public:
     LineStyle();
@@ -97,6 +105,7 @@ namespace osmscout {
     LineStyle& SetDashes(const std::vector<double>& dashes);
     LineStyle& SetPriority(int priority);
     LineStyle& SetZIndex(int zIndex);
+    LineStyle& SetOffsetRel(OffsetRel offsetRel);
 
     inline bool IsVisible() const
     {
@@ -170,6 +179,11 @@ namespace osmscout {
       return zIndex;
     }
 
+    inline OffsetRel GetOffsetRel() const
+    {
+      return offsetRel;
+    }
+
     static StyleDescriptorRef GetDescriptor();
 
     void CopyAttributes(const LineStyle& other,
@@ -194,6 +208,19 @@ namespace osmscout {
     }
   };
 
+  class OSMSCOUT_MAP_API OffsetRelAttributeDescriptor CLASS_FINAL : public StyleEnumAttributeDescriptor
+  {
+  public:
+    OffsetRelAttributeDescriptor(const std::string& name,
+                                 int attribute)
+      : StyleEnumAttributeDescriptor(name,
+                                     attribute)
+    {
+      AddEnumValue("base",LineStyle::base);
+      AddEnumValue("leftOutline",LineStyle::leftOutline);
+      AddEnumValue("rightOutline",LineStyle::rightOutline);
+    }
+  };
 
   typedef std::shared_ptr<LineStyle>                       LineStyleRef;
 
