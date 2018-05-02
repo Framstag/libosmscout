@@ -43,12 +43,6 @@ target_include_directories(ColorParse PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/includ
 target_link_libraries(ColorParse OSMScout)
 add_test(NAME ColorParse COMMAND ColorParse)
 
-#---- CoordinateCalculations
-add_executable(CoordinateCalculations src/CoordinateCalculations.cpp)
-set_property(TARGET CoordinateCalculations PROPERTY CXX_STANDARD 11)
-target_link_libraries(CoordinateCalculations OSMScout)
-#add_test(NAME CoordinateCalculations COMMAND CoordinateCalculations)
-
 #---- CoordinateEncoding
 add_executable(CoordinateEncoding src/CoordinateEncoding.cpp)
 set_property(TARGET CoordinateEncoding PROPERTY CXX_STANDARD 11)
@@ -108,6 +102,7 @@ endif()
 add_executable(Geometry src/Geometry.cpp)
 set_property(TARGET Geometry PROPERTY CXX_STANDARD 11)
 target_link_libraries(Geometry OSMScout)
+target_include_directories(Geometry PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_test(NAME Geometry COMMAND Geometry)
 
 #---- WorkQueue
