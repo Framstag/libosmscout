@@ -183,6 +183,7 @@ add_test(NAME TransPolygon COMMAND TransPolygon)
 add_executable(GeoBox src/GeoBox.cpp)
 set_property(TARGET GeoBox PROPERTY CXX_STANDARD 11)
 target_link_libraries(GeoBox OSMScout)
+target_include_directories(GeoBox PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_test(NAME GeoBox COMMAND GeoBox)
 
 #---- OSTAndOSSCheck

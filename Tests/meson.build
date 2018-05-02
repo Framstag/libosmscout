@@ -91,7 +91,7 @@ FileScannerWriter = executable('FileScannerWriter',
 
 GeoBox = executable('GeoBox',
              'src/GeoBox.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
              install: false)
