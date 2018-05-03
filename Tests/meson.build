@@ -56,13 +56,6 @@ ColorParse = executable('ColorParse',
              link_with: [osmscout],
              install: false)
 
-CoordinateCalculations = executable('CoordinateCalculations',
-             'src/CoordinateCalculations.cpp',
-             include_directories: [osmscoutIncDir],
-             dependencies: [mathDep],
-             link_with: [osmscout],
-             install: false)
-
 CoordinateEncoding = executable('CoordinateEncoding',
              'src/CoordinateEncoding.cpp',
              include_directories: [osmscoutIncDir],
@@ -98,7 +91,7 @@ FileScannerWriter = executable('FileScannerWriter',
 
 GeoBox = executable('GeoBox',
              'src/GeoBox.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
              install: false)
@@ -112,7 +105,7 @@ GeoCoordParse = executable('GeoCoordParse',
 
 Geometry = executable('Geometry',
              'src/Geometry.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep],
              link_with: [osmscout],
              install: false)
