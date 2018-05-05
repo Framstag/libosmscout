@@ -672,48 +672,48 @@ namespace osmscout {
    * define the center of the label. The resulting label will be
    * vertically and horizontally aligned to the given coordinate.
    */
-  bool MapPainter::RegisterPointLabel(const Projection& /*projection*/,
-                                      const MapParameter& /*parameter*/,
-                                      const LabelLayoutData& data,
-                                      double x,
-                                      double y,
-                                      size_t id)
-  {
-    // Something is an overlay, if its alpha is <0.8
-    bool overlay=data.alpha<0.8;
-
-    LabelData labelBox;
-
-    labelBox.id=id;
-    labelBox.bx1=x-data.dimension.width/2;
-    labelBox.bx2=x+data.dimension.width/2;
-    labelBox.by1=y-data.dimension.height/2;
-    labelBox.by2=y+data.dimension.height/2;
-    labelBox.priority=data.textStyle->GetPriority();
-    labelBox.x=x-data.dimension.xOff-data.dimension.width/2;
-    labelBox.y=y-data.dimension.yOff-data.dimension.height/2;
-    labelBox.alpha=data.alpha;
-    labelBox.fontSize=data.fontSize;
-    labelBox.style=data.textStyle;
-    labelBox.text=data.label;
-
-    LabelDataRef label;
-
-    if (overlay) {
-      if (!overlayLabels.Placelabel(labelBox,
-                                    label)) {
-        return false;
-      }
-    }
-    else {
-      if (!labels.Placelabel(labelBox,
-                             label)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
+  // bool MapPainter::RegisterPointLabel(const Projection& /*projection*/,
+  //                                     const MapParameter& /*parameter*/,
+  //                                     const LabelLayoutData& data,
+  //                                     double x,
+  //                                     double y,
+  //                                     size_t id)
+  // {
+  //   // Something is an overlay, if its alpha is <0.8
+  //   bool overlay=data.alpha<0.8;
+  //
+  //   LabelData labelBox;
+  //
+  //   labelBox.id=id;
+  //   labelBox.bx1=x-data.dimension.width/2;
+  //   labelBox.bx2=x+data.dimension.width/2;
+  //   labelBox.by1=y-data.dimension.height/2;
+  //   labelBox.by2=y+data.dimension.height/2;
+  //   labelBox.priority=data.textStyle->GetPriority();
+  //   labelBox.x=x-data.dimension.xOff-data.dimension.width/2;
+  //   labelBox.y=y-data.dimension.yOff-data.dimension.height/2;
+  //   labelBox.alpha=data.alpha;
+  //   labelBox.fontSize=data.fontSize;
+  //   labelBox.style=data.textStyle;
+  //   labelBox.text=data.label;
+  //
+  //   LabelDataRef label;
+  //
+  //   if (overlay) {
+  //     if (!overlayLabels.Placelabel(labelBox,
+  //                                   label)) {
+  //       return false;
+  //     }
+  //   }
+  //   else {
+  //     if (!labels.Placelabel(labelBox,
+  //                            label)) {
+  //       return false;
+  //     }
+  //   }
+  //
+  //   return true;
+  // }
 
   /**
    * Request layout of a point label

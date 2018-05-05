@@ -442,12 +442,14 @@ namespace osmscout {
                                const std::string& text,
                                const std::vector<Point>& nodes);
 
+    /*
     bool RegisterPointLabel(const Projection& projection,
                             const MapParameter& parameter,
                             const LabelLayoutData& data,
                             double x,
                             double y,
                             size_t id);
+    */
 
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
