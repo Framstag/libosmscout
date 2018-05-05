@@ -71,13 +71,6 @@ before_install:
 script:
   - $TRAVIS_BUILD_DIR/ci/travis/build.sh
 
-addons:
-  apt:
-    sources:
-      - deadsnakes # source required so it finds the package definition below
-    packages:
-      - python3.5
-
 notifications:
   email:
     recipients:

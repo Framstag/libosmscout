@@ -21,7 +21,12 @@ if [ "$TARGET" = "build" ]; then
       mkdir -p ~/bin
       mv ninja ~/bin
       export PATH=~/bin:$PATH
-      sudo apt-get install python3-pip build-essential
+      sudo apt-get install build-essential python3-pip
+
+      sudo add-apt-repository ppa:deadsnakes/ppa
+      sudo apt-get update
+      sudo apt-get install python3.5
+
       pip3 install --upgrade --user pip
       pip3 install --user meson==0.46.0
     elif [ "$BUILDTOOL" = "cmake" ]; then
