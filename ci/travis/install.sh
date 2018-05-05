@@ -25,7 +25,7 @@ if [ "$TARGET" = "build" ]; then
 
       sudo add-apt-repository ppa:deadsnakes/ppa
       sudo apt-get update
-      sudo apt-get install --yes --force-yes python3.5
+      echo | sudo apt-get install --yes --force-yes python3.5
 
       pip3 install --upgrade --user pip
       pip3 install --user meson==0.46.0
