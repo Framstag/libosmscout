@@ -252,47 +252,47 @@ TYPES
 
   TYPE highway_primary
     = WAY ("highway"=="primary")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
 
   TYPE highway_primary_link
     = WAY ("highway"=="primary_link")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
 
   TYPE highway_secondary
     = WAY ("highway"=="secondary")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
 
   TYPE highway_secondary_link
     = WAY ("highway"=="secondary_link")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
 
   TYPE highway_tertiary
     = WAY ("highway"=="tertiary")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
 
   TYPE highway_tertiary_link
     = WAY ("highway"=="tertiary_link")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
 
   TYPE highway_unclassified
     = WAY AREA ("highway"=="unclassified")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
 
   TYPE highway_road
     = WAY ("highway"=="road")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
 
   TYPE highway_residential
     = WAY AREA ("highway"=="residential")
-      {Name, NameAlt, Ref/*, Sideway*/}
+      {Name, NameAlt, Ref, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION
 
   TYPE highway_area__residential IGNORE
@@ -302,7 +302,7 @@ TYPES
 
   TYPE highway_living_street
     = WAY AREA ("highway"=="living_street")
-      {Name, NameAlt/*, Sideway*/}
+      {Name, NameAlt, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION PIN_WAY
       DESC
         en: "living street"
@@ -310,7 +310,7 @@ TYPES
 
   TYPE highway_service
     = WAY AREA ("highway"=="service")
-      {Name, NameAlt/*, Sideway*/}
+      {Name, NameAlt, Sideway}
       PATH[FOOT BICYCLE CAR] LOCATION
       DESC
         en: "service"
@@ -320,7 +320,7 @@ TYPES
 
   TYPE highway_track
     = WAY AREA ("highway"=="track")
-      {Name, NameAlt/*, Sideway*/}
+      {Name, NameAlt, Sideway}
       PATH[FOOT BICYCLE] LOCATION PIN_WAY
       DESC
         en: "track"
@@ -328,7 +328,7 @@ TYPES
 
   TYPE highway_pedestrian
     = WAY AREA ("highway"=="pedestrian")
-      {Name, NameAlt/*, Sideway*/}
+      {Name, NameAlt, Sideway}
       PATH[FOOT] LOCATION PIN_WAY MERGE_AREAS
       DESC
         en: "pedestrian"
@@ -336,7 +336,7 @@ TYPES
 
   TYPE highway_path
     = WAY AREA ("highway"=="path")
-      {Name, NameAlt/*, Sideway*/}
+      {Name, NameAlt, Sideway}
       PATH[FOOT BICYCLE] IGNORESEALAND PIN_WAY
       DESC
         en: "path"

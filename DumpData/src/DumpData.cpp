@@ -458,20 +458,6 @@ static void DumpSidewayFeatureValue(const osmscout::SidewayFeatureValue& sideway
   DumpIndent(indent);
   std::cout << "Sideway {" << std::endl;
 
-  if (sidewayValue.HasSidewalkLaneLeft() &&
-      sidewayValue.HasSidewalkLaneRight()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: lane both" << std::endl;
-  }
-  else if (sidewayValue.HasSidewalkLaneLeft()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: lane left" << std::endl;
-  }
-  else if (sidewayValue.HasSidewalkLaneRight()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: lane right" << std::endl;
-  }
-
   if (sidewayValue.HasSidewalkTrackLeft() &&
       sidewayValue.HasSidewalkTrackRight()) {
     DumpIndent(indent+2);

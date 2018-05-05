@@ -1682,14 +1682,12 @@ namespace osmscout {
   {
   public:
     enum Feature : uint8_t {
-      sidewalkLaneLeft   = 1u << 0u,
-      sidewalkLaneRight  = 1u << 1u,
-      sidewalkTrackLeft  = 1u << 2u,
-      sidewalkTrackRight = 1u << 3u,
-      cyclewayLaneLeft   = 1u << 4u,
-      cyclewayLaneRight  = 1u << 5u,
-      cyclewayTrackLeft  = 1u << 6u,
-      cyclewayTrackRight = 1u << 7u,
+      sidewalkTrackLeft  = 1u << 0u,
+      sidewalkTrackRight = 1u << 1u,
+      cyclewayLaneLeft   = 1u << 2u,
+      cyclewayLaneRight  = 1u << 3u,
+      cyclewayTrackLeft  = 1u << 4u,
+      cyclewayTrackRight = 1u << 5u,
     };
 
   private:
@@ -1708,16 +1706,6 @@ namespace osmscout {
     inline void SetFeatureSet(uint8_t featureSet)
     {
       this->featureSet=featureSet;
-    }
-
-    inline bool HasSidewalkLaneLeft() const
-    {
-      return (featureSet & sidewalkLaneLeft)!=0;
-    }
-
-    inline bool HasSidewalkLaneRight() const
-    {
-      return (featureSet & sidewalkLaneRight)!=0;
     }
 
     inline bool HasSidewalkTrackLeft() const
@@ -1761,21 +1749,20 @@ namespace osmscout {
   {
   private:
     enum class FeatureFlags: uint8_t {
-      sidewalkLaneLeft   = 0,
-      sidewalkLaneRight  = 1,
-      sidewalkTrackLeft  = 2,
-      sidewalkTrackRight = 3,
-      cyclewayLaneLeft   = 4,
-      cyclewayLaneRight  = 5,
-      cyclewayTrackLeft  = 6,
-      cyclewayTrackRight = 7
+      sidewalkTrackLeft  = 0,
+      sidewalkTrackRight = 1,
+      cyclewayLaneLeft   = 2,
+      cyclewayLaneRight  = 3,
+      cyclewayTrackLeft  = 4,
+      cyclewayTrackRight = 5
     };
 
   private:
-    TagId tagSidewalkLeft;
-    TagId tagSidewalkRight;
+    TagId tagSidewalk;
     TagId tagCyclewayLeft;
+    TagId tagCyclewayLeftSegregated;
     TagId tagCyclewayRight;
+    TagId tagCyclewayRightSegregated;
 
   public:
     /** Name of this feature */

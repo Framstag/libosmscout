@@ -2282,8 +2282,6 @@ namespace osmscout {
 
   SidewayFeature::SidewayFeature()
   {
-    RegisterFlag((size_t)FeatureFlags::sidewalkLaneLeft,"sidewalkLaneLeft");
-    RegisterFlag((size_t)FeatureFlags::sidewalkLaneRight,"sidewalkLaneRight");
     RegisterFlag((size_t)FeatureFlags::sidewalkTrackLeft,"sidewalkTrackLeft");
     RegisterFlag((size_t)FeatureFlags::sidewalkTrackRight,"sidewalkTrackRight");
 
@@ -2295,10 +2293,11 @@ namespace osmscout {
 
   void SidewayFeature::Initialize(TagRegistry& tagRegistry)
   {
-    tagSidewalkLeft=tagRegistry.RegisterTag("sidewalk:left");
-    tagSidewalkRight=tagRegistry.RegisterTag("sidewalk:right");
+    tagSidewalk=tagRegistry.RegisterTag("sidewalk");
     tagCyclewayLeft=tagRegistry.RegisterTag("cycleway:left");
+    tagCyclewayLeftSegregated=tagRegistry.RegisterTag("cycleway:left:segregated");
     tagCyclewayRight=tagRegistry.RegisterTag("cycleway:right");
+    tagCyclewayRightSegregated=tagRegistry.RegisterTag("cycleway:right:segregated");
   }
 
   std::string SidewayFeature::GetName() const
@@ -2324,24 +2323,19 @@ namespace osmscout {
                              FeatureValueBuffer& buffer) const
   {
     uint8_t featureSet=0;
-    auto sidewalkLeftTag=tags.find(tagSidewalkLeft);
-    auto sidewalkRightTag=tags.find(tagSidewalkRight);
+    auto sidewalkTag=tags.find(tagSidewalk);
     auto cyclewayLeftTag=tags.find(tagCyclewayLeft);
     auto cyclewayRightTag=tags.find(tagCyclewayRight);
+    auto cyclewayLeftSegregatedTag=tags.find(tagCyclewayLeftSegregated);
+    auto cyclewayRightSegregatedTag=tags.find(tagCyclewayRightSegregated);
 
-    bool hasSidewalkLaneLeft=sidewalkLeftTag!=tags.end() &&
-                             (sidewalkLeftTag->second=="lane" ||
-                              sidewalkLeftTag->second=="shared_lane");
+    bool hasSidewalkTrackLeft=sidewalkTag!=tags.end() &&
+                              (sidewalkTag->second=="left" ||
+                               sidewalkTag->second=="both");
 
-    bool hasSidewalkLaneRight=sidewalkRightTag!=tags.end() &&
-                              (sidewalkRightTag->second=="lane" ||
-                               sidewalkRightTag->second=="lane_shared");
-
-    bool hasSidewalkTrackLeft=sidewalkLeftTag!=tags.end() &&
-                              sidewalkLeftTag->second=="track";
-
-    bool hasSidewalkTrackRight=sidewalkRightTag!=tags.end() &&
-                               sidewalkRightTag->second=="track";
+    bool hasSidewalkTrackRight=sidewalkTag!=tags.end() &&
+                               (sidewalkTag->second=="right" ||
+                                sidewalkTag->second=="both");
 
     bool hasCyclewayLaneLeft=cyclewayLeftTag!=tags.end() &&
                              (cyclewayLeftTag->second=="lane" ||
@@ -2357,12 +2351,8 @@ namespace osmscout {
     bool hasCyclewayTrackRight=cyclewayRightTag!=tags.end() &&
                                cyclewayRightTag->second=="track";
 
-    if (hasSidewalkLaneLeft) {
-      featureSet|=SidewayFeatureValue::sidewalkLaneLeft;
-    }
-    if (hasSidewalkLaneRight) {
-      featureSet|=SidewayFeatureValue::sidewalkLaneRight;
-    }
+    bool hasCyclewayLeftSegregated=cyclewayLeftSegregatedTag!=tags.end();
+    bool hasCyclewayRightSegregated=cyclewayRightSegregatedTag!=tags.end();
 
     if (hasSidewalkTrackLeft) {
       featureSet|=SidewayFeatureValue::sidewalkTrackLeft;
@@ -2380,9 +2370,17 @@ namespace osmscout {
 
     if (hasCyclewayTrackLeft) {
       featureSet|=SidewayFeatureValue::cyclewayTrackLeft;
+
+      if (hasCyclewayLeftSegregated) {
+        featureSet|=SidewayFeatureValue::sidewalkTrackLeft;
+      }
     }
     if (hasCyclewayTrackRight) {
       featureSet|=SidewayFeatureValue::cyclewayTrackRight;
+
+      if (hasCyclewayRightSegregated) {
+        featureSet|=SidewayFeatureValue::sidewalkTrackRight;
+      }
     }
 
     if (featureSet!=0) {

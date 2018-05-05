@@ -404,7 +404,7 @@ CONST
     CIRCLE 0,0 0.4 {
       AREA {color: @busSymbolColor; }
     }
-  
+
   SYMBOL ferry_terminal
     RECTANGLE 0,0 1 x 1 {
       AREA { color: #30307080; }
@@ -844,6 +844,7 @@ STYLE
  }
 
  [MAG closer-] {
+
    [TYPE highway_pedestrian] {
      [SIZE 8m 0.1mm:3px<] WAY {color: @pedestrianColor; width: 8m; }
      [SIZE 8m <0.1mm:3px] WAY {color: @pedestrianColor; displayWidth: 0.1mm; }
@@ -999,6 +1000,33 @@ STYLE
      AREA.BORDER {color: #ffffff50; width: 0.1mm;}
    }
 
+   [TYPE leisure_track] {
+     WAY {color: #bde3cb; displayWidth: 0.3mm; }
+
+     [FEATURE Bridge] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.15mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.15mm;}
+     }
+   }
+   [TYPE highway_via_ferrata_easy]{
+       WAY {color: @viaFerrataEasyColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataEasyCross; symbolSpace: 2mm;}
+   }
+   [TYPE highway_via_ferrata_moderate]{
+       WAY {color: @viaFerrataModerateColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataModerateCross; symbolSpace: 2mm;}
+   }
+   [TYPE highway_via_ferrata_difficult]{
+       WAY {color: @viaFerrataDifficultColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataDifficultCross; symbolSpace: 2mm;}
+   }
+   [TYPE highway_via_ferrata_extreme]{
+       WAY {color: @viaFerrataExtremeColor; displayWidth: 0.1mm; dash: 1,100;}
+       WAY.SYMBOL {symbol: viaFerrataExtremeCross; symbolSpace: 2mm;}
+   }
+ }
+
+ [MAG block-] {
    [TYPE highway_cycleway] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
      WAY {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}
@@ -1030,31 +1058,33 @@ STYLE
      AREA {color: #90570c;}
    }
 
-   [TYPE leisure_track] {
-     WAY {color: #bde3cb; displayWidth: 0.3mm; }
+   // Cycleways on way
+   [FEATURE Sideway.cyclewayLaneLeft] {
+     WAY#cyclewayLaneLeft {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: leftOutline; displayOffset: 1mm; priority: 1;}
+   }
+   [FEATURE Sideway.cyclewayLaneRight] {
+     WAY#cyclewayLaneRight {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: rightOutline; displayOffset: -1mm; priority: 1;}
+   }
 
-     [FEATURE Bridge] {
-       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.15mm;}
-       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.15mm;}
-     }
+   // Cycleways besides way
+   [FEATURE Sideway.cyclewayTrackLeft] {
+     WAY#cyclewayTrackLeft {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: leftOutline; displayOffset: -1mm; priority: -1;}
    }
-   [TYPE highway_via_ferrata_easy]{
-       WAY {color: @viaFerrataEasyColor; displayWidth: 0.1mm; dash: 1,100;}
-       WAY.SYMBOL {symbol: viaFerrataEasyCross; symbolSpace: 2mm;}
+   [FEATURE Sideway.cyclewayTrackRight] {
+     WAY#cyclewayTrackRight {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: rightOutline; displayOffset: 1mm; priority: -1;}
    }
-   [TYPE highway_via_ferrata_moderate]{
-       WAY {color: @viaFerrataModerateColor; displayWidth: 0.1mm; dash: 1,100;}
-       WAY.SYMBOL {symbol: viaFerrataModerateCross; symbolSpace: 2mm;}
+
+   // sidewalk besides way
+   [FEATURE Sideway.sidewalkTrackLeft] {
+     WAY#sidewalkTrackLeftOutline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt; offsetRel: leftOutline; displayOffset: -0.5mm; priority: -2;}
+     WAY#sidewalkTrackLeft {color: #f64762; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: leftOutline; displayOffset: -0.5mm; priority: -1;}
    }
-   [TYPE highway_via_ferrata_difficult]{
-       WAY {color: @viaFerrataDifficultColor; displayWidth: 0.1mm; dash: 1,100;}
-       WAY.SYMBOL {symbol: viaFerrataDifficultCross; symbolSpace: 2mm;}
+
+   [FEATURE Sideway.sidewalkTrackRight] {
+     WAY#sidewalkTrackRightOutline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt; offsetRel: rightOutline; displayOffset: 0.5mm; priority: -2;}
+     WAY#sidewalkTrackRight {color: #f64762; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: rightOutline; displayOffset: 0.5mm; priority: -1;}
    }
-   [TYPE highway_via_ferrata_extreme]{
-       WAY {color: @viaFerrataExtremeColor; displayWidth: 0.1mm; dash: 1,100;}
-       WAY.SYMBOL {symbol: viaFerrataExtremeCross; symbolSpace: 2mm;}
-   }
-  }
+ }
 
  [MAG @stepsMag-] {
    [TYPE highway_steps] {
