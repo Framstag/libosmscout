@@ -1,8 +1,5 @@
 language: cpp
 
-cache:
-  - apt
-
 branches:
   only:
     - master
@@ -74,7 +71,7 @@ before_install:
 script:
   - $TRAVIS_BUILD_DIR/ci/travis/build.sh
 
-ddons:
+addons:
   apt:
     sources:
       - deadsnakes # source required so it finds the package definition below
