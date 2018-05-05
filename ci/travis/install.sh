@@ -25,9 +25,13 @@ if [ "$TARGET" = "build" ]; then
 
       sudo add-apt-repository -y ppa:deadsnakes/ppa
       sudo apt-get update
-      yes "" | sudo apt-get install --yes --force-yes python3.5
+      sudo apt-get install -y python3.5
 
+      alias python3=python3.5
+
+      echo "Updating pip..."
       pip3 install --upgrade --user pip
+      echo "Installing meson..."
       pip3 install --user meson==0.46.0
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
