@@ -23,9 +23,9 @@ if [ "$TARGET" = "build" ]; then
       export PATH=~/bin:$PATH
       sudo apt-get install build-essential python3-pip
 
-      sudo add-apt-repository ppa:deadsnakes/ppa
+      sudo add-apt-repository -y ppa:deadsnakes/ppa
       sudo apt-get update
-      echo | sudo apt-get install --yes --force-yes python3.5
+      yes "" | sudo apt-get install --yes --force-yes python3.5
 
       pip3 install --upgrade --user pip
       pip3 install --user meson==0.46.0
@@ -51,7 +51,6 @@ if [ "$TARGET" = "build" ]; then
     echo "deb-src http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list.d/fillwave_ext.list
 
     sudo apt-get -qq update
-
     sudo apt-get --yes --force-yes install libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
