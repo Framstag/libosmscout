@@ -13,7 +13,6 @@ matrix:
       dist: trusty
       sudo: required
       compiler: gcc
-      python: 3.5
       env:
         - BUILDTOOL=meson
         - TARGET=build
@@ -28,7 +27,6 @@ matrix:
       dist: trusty
       sudo: required
       compiler: clang
-      python: 3.5
       env:
         - BUILDTOOL=meson
         - TARGET=build
