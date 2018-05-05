@@ -1618,15 +1618,18 @@ namespace osmscout {
                                                                      Way& way)
   {
     std::list<Point> points;
-    if (!TransformRouteDataToPoints(data,points)){
+
+    if (!TransformRouteDataToPoints(data,points)) {
       return false;
     }
+
     way.nodes.clear();
-    way.SetLayerToMax();
     way.nodes.reserve(data.Entries().size());
-    for (const auto &p:points){
+
+    for (const auto& p: points) {
       way.nodes.push_back(p);
     }
+
     return true;
   }
 

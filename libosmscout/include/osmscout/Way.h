@@ -68,7 +68,7 @@ namespace osmscout {
 
     inline ObjectFileRef GetObjectFileRef() const
     {
-      return ObjectFileRef(fileOffset,refWay);
+      return {fileOffset,refWay};
     }
 
     inline TypeInfoRef GetType() const
@@ -180,8 +180,6 @@ namespace osmscout {
     {
       featureValueBuffer.Set(buffer);
     }
-
-    void SetLayerToMax();
 
     void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);

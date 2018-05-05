@@ -20,7 +20,9 @@
 
 #include <osmscout/OverlayObject.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/TypeFeatures.h>
 
+#include <iostream>
 namespace osmscout {
 
 OverlayObject::OverlayObject(QObject *parent):
@@ -98,8 +100,19 @@ bool OverlayWay::toWay(osmscout::WayRef &way,
   if (!type){
     return false;
   }
-  way->SetType(type);
-  way->SetLayerToMax();
+
+  osmscout::FeatureValueBuffer features;
+  size_t                       layerFeatureIndex;
+
+  features.SetType(type);
+  if (type->GetFeature(osmscout::LayerFeature::NAME,
+                      layerFeatureIndex)) {
+    auto*value=dynamic_cast<osmscout::LayerFeatureValue*>(features.AllocateValue(layerFeatureIndex));
+    value->SetLayer(std::numeric_limits<int8_t>::max());
+  }
+
+  way->SetFeatures(features);
+
   way->nodes=nodes;
   return true;
 }
