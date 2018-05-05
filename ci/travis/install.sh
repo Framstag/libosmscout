@@ -24,7 +24,7 @@ if [ "$TARGET" = "build" ]; then
       export PATH=~/bin:$PATH
       sudo apt-get install build-essential python3-pip
 
-      iecho "Installing python3.5..."
+      echo "Installing python3.5..."
       sudo add-apt-repository -y ppa:deadsnakes/ppa
       sudo apt-get update
       sudo apt-get install -y python3.5
