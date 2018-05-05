@@ -288,7 +288,7 @@ namespace osmscout {
       this->lon=other.lon;
     }
 
-    inline double operator-(const GeoCoord& other)
+    inline double operator-(const GeoCoord& other) const
     {
       return GetDistance(other);
     }
