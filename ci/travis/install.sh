@@ -16,6 +16,7 @@ if [ "$TARGET" = "build" ]; then
     sudo apt-get -qq update
 
     if [ "$BUILDTOOL" = "meson" ]; then
+      echo "INstalling ninja..."
       wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
       unzip ninja-linux.zip
       mkdir -p ~/bin
@@ -23,14 +24,18 @@ if [ "$TARGET" = "build" ]; then
       export PATH=~/bin:$PATH
       sudo apt-get install build-essential python3-pip
 
+      iecho "Installing python3.5..."
       sudo add-apt-repository -y ppa:deadsnakes/ppa
       sudo apt-get update
       sudo apt-get install -y python3.5
 
-      alias python3=python3.5
+      # Activate python3.5
+      sudo rm /usr/bin/python3
+      sudo ln -s /usr/bin/python3.5 /usr/bin/python3
 
       echo "Updating pip..."
       pip3 install --upgrade --user pip
+
       echo "Installing meson..."
       pip3 install --user meson==0.46.0
     elif [ "$BUILDTOOL" = "cmake" ]; then
