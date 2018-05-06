@@ -18,7 +18,7 @@ if marisaDep.found()
   LookupText = executable('LookupText',
                           'src/LookupText.cpp',
                           include_directories: [osmscoutIncDir, osmscoutmapIncDir],
-                          dependencies: [mathDep],
+                          dependencies: [mathDep, openmpDep],
                           link_with: [osmscout, osmscoutmap],
                           install: true)
 endif
