@@ -78,7 +78,7 @@ threadDep = dependency('threads')
 iconvDep = compiler.find_library('iconv', required: false)
 marisaDep = dependency('marisa', required : false)
 
-if build_machine.system()=='darwin'
+if compiler.get_id()=='clang'
   openmpDep = dependency('', required: false)
 else
   openmpDep = dependency('openmp', required: false)
