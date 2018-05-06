@@ -77,7 +77,12 @@ mathDep = compiler.find_library('m', required : false)
 threadDep = dependency('threads')
 iconvDep = compiler.find_library('iconv', required: false)
 marisaDep = dependency('marisa', required : false)
-openmpDep = dependency('openmp', required: false)
+
+if build_machine.system()=='darwin'
+  openmpDep = dependency('', required: false)
+else
+  openmpDep = dependency('openmp', required: false)
+endif
 
 # Import
 protobufDep = dependency('protobuf', required : false)

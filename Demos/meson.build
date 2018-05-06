@@ -26,7 +26,7 @@ endif
 LocationLookup = executable('LocationLookup',
                             'src/LocationLookup.cpp',
                             include_directories: [osmscoutIncDir],
-                            dependencies: [mathDep],
+                            dependencies: [mathDep, openmpDep],
                             link_with: [osmscout],
                             install: true)
 
