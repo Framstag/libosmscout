@@ -101,6 +101,11 @@ namespace osmscout {
       return scanner.IsOpen();
     }
 
+    inline std::string GetFilename() const
+    {
+      return datafilename;
+    }
+
     bool GetOffsets(const GeoBox& boundingBox,
                     const TypeInfoSet& types,
                     std::vector<FileOffset>& offsets,

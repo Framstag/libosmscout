@@ -138,6 +138,11 @@ namespace osmscout {
       return scanner.IsOpen();
     }
 
+    inline std::string GetFilename() const
+    {
+      return datafilename;
+    }
+
     bool GetAreasInArea(const TypeConfig& typeConfig,
                         const GeoBox& boundingBox,
                         size_t maxLevel,

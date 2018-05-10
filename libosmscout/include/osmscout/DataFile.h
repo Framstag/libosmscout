@@ -111,6 +111,11 @@ namespace osmscout {
     virtual bool IsOpen() const;
     virtual bool Close();
 
+    inline std::string GetFilename() const
+    {
+      return datafilename;
+    }
+
     bool GetByOffset(FileOffset offset,
                      ValueType& entry) const;
 
