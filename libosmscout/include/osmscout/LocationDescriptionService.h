@@ -379,6 +379,16 @@ namespace osmscout {
 
     bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
 
+    void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
+                         const GeoCoord& location,
+                         const NodeRegionSearchResult& results);
+    void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
+                         const GeoCoord& location,
+                         const WayRegionSearchResult& results);
+    void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
+                         const GeoCoord& location,
+                         const AreaRegionSearchResult& results);
+
   public:
     explicit LocationDescriptionService(const DatabaseRef& database);
 
@@ -394,35 +404,6 @@ namespace osmscout {
                           LocationDescription& description,
                           double lookupDistance=100,
                           double sizeFilter=1.0);
-
-    /**
-     * @see LoadNearAreas
-     */
-    bool LoadNearNodes(const GeoCoord& location,
-                       const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates,
-                       double maxDistance=100);
-
-    /**
-     * @see LoadNearAreas
-     */
-    bool LoadNearWays(const GeoCoord& location,
-                      const TypeInfoSet &types,
-                      std::vector<WayRef> &candidates,
-                      double maxDistance=100);
-
-    /**
-     * Load areas of given types near to location.
-     *
-     * @param location
-     * @param types
-     * @param candidates - unsorted result buffer
-     * @param maxDistance - lookup distance in meters
-     * @return true if no error (it don't indicate non-empty result)
-     */
-    bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates,
-                       double maxDistance=100);
 
     bool DescribeLocationByName(const GeoCoord& location,
                                 LocationDescription& description,

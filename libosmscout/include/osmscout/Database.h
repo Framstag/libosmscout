@@ -116,6 +116,144 @@ namespace osmscout {
     bool GetIndexMMap() const;
   };
 
+  class Database;
+
+  class OSMSCOUT_API NodeRegionSearchResultEntry
+  {
+  private:
+    NodeRef node;
+    double  distance;
+
+  private:
+    explicit NodeRegionSearchResultEntry(const NodeRef& node,
+                                         double distance);
+
+  public:
+    friend Database;
+
+    inline NodeRef GetNode() const
+    {
+      return node;
+    }
+
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+  };
+
+  class OSMSCOUT_API NodeRegionSearchResult
+  {
+  private:
+    std::list<NodeRegionSearchResultEntry> nodeResults;
+
+  public:
+    friend Database;
+
+    inline std::list<NodeRegionSearchResultEntry> GetNodeResults() const
+    {
+      return nodeResults;
+    }
+  };
+
+
+  class OSMSCOUT_API WayRegionSearchResultEntry
+  {
+  private:
+    WayRef   way;
+    double   distance;
+    GeoCoord closestPoint;
+
+  private:
+    explicit WayRegionSearchResultEntry(const WayRef& way,
+                                        double distance,
+                                        const GeoCoord& closestPoint);
+
+  public:
+    friend Database;
+
+    inline WayRef GetWay() const
+    {
+      return way;
+    }
+
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+
+    inline GeoCoord GetClosestPoint() const
+    {
+      return closestPoint;
+    }
+  };
+
+  class OSMSCOUT_API WayRegionSearchResult
+  {
+  private:
+    std::list<WayRegionSearchResultEntry> wayResults;
+
+  public:
+    friend Database;
+
+    inline std::list<WayRegionSearchResultEntry> GetWayResults() const
+    {
+      return wayResults;
+    }
+  };
+
+  class OSMSCOUT_API AreaRegionSearchResultEntry
+  {
+  private:
+    AreaRef  area;
+    double   distance;
+    GeoCoord closestPoint;
+    bool     inArea;
+
+  private:
+    explicit AreaRegionSearchResultEntry(const AreaRef& area,
+                                         double distance,
+                                         const GeoCoord& closestPoint,
+                                         bool inArea);
+
+  public:
+    friend Database;
+
+    inline AreaRef GetArea() const
+    {
+      return area;
+    }
+
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+
+    inline GeoCoord GetClosestPoint() const
+    {
+      return closestPoint;
+    }
+
+    inline bool IsInArea() const
+    {
+      return inArea;
+    }
+  };
+
+  class OSMSCOUT_API AreaRegionSearchResult
+  {
+  private:
+    std::list<AreaRegionSearchResultEntry> areaResults;
+
+  public:
+    friend Database;
+
+    inline std::list<AreaRegionSearchResultEntry> GetAreaResults() const
+    {
+      return areaResults;
+    }
+  };
+
   /**
    * \ingroup Database
    *
@@ -171,7 +309,7 @@ namespace osmscout {
     mutable std::mutex              optimizeWaysMutex;        //!< Mutex to make lazy initialisation of optimized ways index thread-safe
 
   public:
-    Database(const DatabaseParameter& parameter);
+    explicit Database(const DatabaseParameter& parameter);
     virtual ~Database();
 
     bool Open(const std::string& path);
@@ -245,6 +383,60 @@ namespace osmscout {
                          std::vector<WayRef>& ways) const;
     bool GetWaysByOffset(const std::set<FileOffset>& offsets,
                          std::unordered_map<FileOffset,WayRef>& dataMap) const;
+
+    /**
+     * Load nodes of given types with maximum distance to the given coordinate.
+     *
+     * @param location
+     *    Geo coordinate in the center of the given circle
+     * @param types
+     *    Set of type to load conadidates for
+     * @param candidates - unsorted result buffer
+     *    List of candidates found
+     * @param maxDistance - lookup distance in meters
+     *    Maximum radius from center to search for
+     * @return result object
+     * @throws OSMScoutException in case of errors
+     */
+    NodeRegionSearchResult LoadNodesInRadius(const GeoCoord& location,
+                                             const TypeInfoSet& types,
+                                             double maxDistance=100);
+
+    /**
+     * Load ways of given types with maximum distance to the given coordinate.
+     *
+     * @param location
+     *    Geo coordinate in the center of the given circle
+     * @param types
+     *    Set of type to load conadidates for
+     * @param candidates - unsorted result buffer
+     *    List of candidates found
+     * @param maxDistance - lookup distance in meters
+     *    Maximum radius from center to search for
+     * @return true if no error (it don't indicate non-empty result)
+     * @throws OSMScoutException in case of errors
+     */
+    WayRegionSearchResult LoadWaysInRadius(const GeoCoord& location,
+                                           const TypeInfoSet& types,
+                                           double maxDistance=100);
+
+    /**
+     * Load areas of given types with maximum distance to the given coordinate.
+     *
+     * @param location
+     *    Geo coordinate in the center of the given circle
+     * @param types
+     *    Set of type to load conadidates for
+     * @param candidates - unsorted result buffer
+     *    List of candidates found
+     * @param maxDistance - lookup distance in meters
+     *    Maximum radius from center to search for
+     * @return true if no error (it don't indicate non-empty result)
+     * @throws OSMScoutException in case of errors
+     */
+    AreaRegionSearchResult LoadAreasInRadius(const GeoCoord& location,
+                                             const TypeInfoSet& types,
+                                             double maxDistance=100);
 
     void DumpStatistics();
   };
