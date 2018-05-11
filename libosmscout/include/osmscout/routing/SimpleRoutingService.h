@@ -57,6 +57,46 @@
 
 namespace osmscout {
 
+  class SimpleRoutingService;
+
+  class OSMSCOUT_API ClosestRoutableObjectResult
+  {
+  private:
+    ObjectFileRef object;
+    double        distance;
+    WayRef        way;
+    AreaRef       area;
+    std::string   name;
+
+  public:
+    friend SimpleRoutingService;
+
+    inline ObjectFileRef GetObject() const
+    {
+      return object;
+    }
+
+    inline double GetDistance() const
+    {
+      return distance;
+    }
+
+    inline WayRef GetWay() const
+    {
+      return way;
+    }
+
+    inline AreaRef GetArea() const
+    {
+      return area;
+    }
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+  };
+
   /**
    * \ingroup Service
    * \ingroup Routing
@@ -140,8 +180,8 @@ namespace osmscout {
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
     std::vector<DBId> GetNodeTwins(const RoutingProfile& state,
-                                   const DatabaseId database,
-                                   const Id id) override;
+                                   DatabaseId database,
+                                   Id id) override;
 
   public:
     SimpleRoutingService(const DatabaseRef& database,
@@ -163,6 +203,10 @@ namespace osmscout {
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
                                          const RoutingProfile& profile,
                                          double& radius) const;
+
+    ClosestRoutableObjectResult GetClosestRoutableObject(const GeoCoord& location,
+                                                         Vehicle vehicle,
+                                                         double maxRadius);
 
     void DumpStatistics();
   };

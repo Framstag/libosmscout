@@ -109,8 +109,8 @@ namespace osmscout {
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
     std::vector<DBId> GetNodeTwins(const MultiDBRoutingState& state,
-                                   const DatabaseId database,
-                                   const Id id) override;
+                                   DatabaseId database,
+                                   Id id) override;
 
     bool CanUse(const MultiDBRoutingState& state,
                 DatabaseId databaseId,

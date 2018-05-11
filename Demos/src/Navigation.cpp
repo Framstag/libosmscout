@@ -652,6 +652,10 @@ int main(int argc, char *argv[]){
 
     navigation.UpdateCurrentLocation(location, minDistance);
 
+    osmscout::ClosestRoutableObjectResult routableResult=router->GetClosestRoutableObject(location,
+                                                                                          routingProfile->GetVehicle(),
+                                                                                          100);
+
     std::cout << "Distance to route: " << minDistance << std::endl;
 
     std::cout << "Distance from start: " << navigation.GetDistanceFromStart() << std::endl;
@@ -662,6 +666,8 @@ int main(int argc, char *argv[]){
 
     osmscout::NodeDescription nextWaypointDescription = navigation.nextWaypointDescription();
     std::cout << "Next routing instructions: " <<  nextWaypointDescription.instructions << std::endl;
+
+    std::cout << "Closest routable object: " << routableResult.GetObject().GetName() << " '" << routableResult.GetName() << "' " << routableResult.GetDistance() << "m" << std::endl;
 
     return 0;
 }

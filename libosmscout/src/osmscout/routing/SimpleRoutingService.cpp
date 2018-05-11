@@ -589,4 +589,80 @@ namespace osmscout {
     radius = minDistance;
     return position;
   }
+
+  ClosestRoutableObjectResult SimpleRoutingService::GetClosestRoutableObject(const GeoCoord& location,
+                                                                             Vehicle vehicle,
+                                                                             double maxRadius)
+  {
+    ClosestRoutableObjectResult result;
+    TypeInfoSet                 routeableWayTypes;
+    TypeInfoSet                 routeableAreaTypes;
+
+    for (const auto& type : database->GetTypeConfig()->GetTypes()) {
+      if (!type->GetIgnore() &&
+          type->CanBeWay() &&
+          type->CanRoute(vehicle)) {
+        routeableWayTypes.Set(type);
+      }
+
+      if (!type->GetIgnore() &&
+          type->CanBeArea() &&
+          type->CanRoute(vehicle)) {
+        routeableAreaTypes.Set(type);
+      }
+    }
+
+    double  closestDistance=std::numeric_limits<double>::max();
+    WayRef  closestWay;
+    AreaRef closestArea;
+
+    if (!routeableWayTypes.Empty()) {
+      WayRegionSearchResult waySearchResult=database->LoadWaysInRadius(location,
+                                                                       routeableWayTypes,
+                                                                       maxRadius);
+
+      for (const auto& entry : waySearchResult.GetWayResults()) {
+        if (entry.GetDistance()<closestDistance) {
+          closestDistance=entry.GetDistance();
+          closestWay=entry.GetWay();
+          closestArea.reset();
+        }
+      }
+    }
+
+    if (!routeableAreaTypes.Empty()) {
+      AreaRegionSearchResult areaSearchResult=database->LoadAreasInRadius(location,
+                                                                          routeableAreaTypes,
+                                                                          maxRadius);
+      for (const auto& entry : areaSearchResult.GetAreaResults()) {
+        if (entry.GetDistance()<closestDistance) {
+          closestDistance=entry.GetDistance();
+          closestWay.reset();
+          closestArea=entry.GetArea();
+        }
+      }
+    }
+
+    if (!closestWay && !closestArea) {
+      result.distance=std::numeric_limits<double>::max();
+      return result;
+    }
+    else {
+      NameFeatureLabelReader nameFeatureLabelReader(*database->GetTypeConfig());
+
+      result.distance=closestDistance;
+      if (closestWay) {
+        result.way=closestWay;
+        result.object=result.way->GetObjectFileRef();
+        result.name=nameFeatureLabelReader.GetLabel(result.way->GetFeatureValueBuffer());
+      }
+      else {
+        result.area=closestArea;
+        result.object=result.area->GetObjectFileRef();
+        result.name=nameFeatureLabelReader.GetLabel(result.area->GetFeatureValueBuffer());
+      }
+    }
+
+    return result;
+  }
 }
