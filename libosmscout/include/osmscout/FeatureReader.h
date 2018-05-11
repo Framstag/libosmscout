@@ -272,7 +272,7 @@ namespace osmscout {
       size_t index;
 
       if (type->GetFeature(F::NAME,
-                          index)) {
+                           index)) {
         lookupTable[type->GetIndex()]=index;
       }
     }
@@ -284,10 +284,10 @@ namespace osmscout {
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
-    buffer.HasFeature(index)) {
+        buffer.HasFeature(index)) {
       V* value=dynamic_cast<V*>(buffer.GetValue(index));
 
-      if (value!=NULL) {
+      if (value!=nullptr) {
         return value->GetLabel(0);
       }
     }
