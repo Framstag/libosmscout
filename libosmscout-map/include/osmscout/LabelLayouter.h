@@ -41,18 +41,20 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelData
   {
   public:
-    size_t                   id;       //!< Id of this label, multiple labels with the same id do not intersect with each other
-    size_t                   priority; //!< Priority of the entry
+    // TODO: remove id
+    size_t            id;       //!< Id of this label, multiple labels with the same id do not intersect with each other
+    size_t            priority; //!< Priority of the entry
+    size_t            position; //!< Relative position of the label
 
-    double                   alpha;    //!< Alpha value of the label
-    double                   fontSize; //!< Font size to be used
-    double                   proposedWidth;
-    LabelStyleRef            style;    //!< Style for drawing
-    std::string              text;     //!< The label text
+    double            alpha;    //!< Alpha value of the label
+    double            fontSize; //!< Font size to be used
+    double            proposedWidth;
+    LabelStyleRef     style;    //!< Style for drawing
+    std::string       text;     //!< The label text
 
   public:
-    LabelData();
-    virtual ~LabelData();
+    LabelData(){};
+    ~LabelData(){};
   };
 
 

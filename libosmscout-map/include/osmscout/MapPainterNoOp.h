@@ -43,20 +43,23 @@ namespace osmscout {
                        const MapParameter& parameter,
                        double fontSize) override;
 
+    /*
     TextDimension GetTextDimension(const Projection& projection,
                                    const MapParameter& parameter,
                                    double objectWidth,
                                    double fontSize,
                                    const std::string& text) override;
+    */
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
                     const FillStyle& style) override;
 
-    void RegisterLabel(const Projection& projection,
-                               const MapParameter& parameter,
-                               const LabelData& label,
-                               const Vertex2D& position) override;
+    void RegisterRegularLabel(const Projection& projection,
+                              const MapParameter& parameter,
+                              const std::vector<LabelData> &labels,
+                              const Vertex2D& position,
+                              const double iconHeight = -1) override;
 
     void RegisterContourLabel(const Projection &projection,
                               const MapParameter &parameter,

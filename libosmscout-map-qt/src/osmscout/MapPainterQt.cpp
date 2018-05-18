@@ -196,6 +196,7 @@ namespace osmscout {
     return metrics.height();
   }
 
+  /*
   MapPainter::TextDimension MapPainterQt::GetTextDimension(const Projection& projection,
                                                            const MapParameter& parameter,
                                                            double objectWidth,
@@ -240,6 +241,7 @@ namespace osmscout {
 
     return dimension;
   }
+  */
 
   void LayoutTextLayout(const QFontMetrics& fontMetrics,
                         qreal proposedWidth,
@@ -280,6 +282,7 @@ namespace osmscout {
     }
   }
 
+  /*
   void MapPainterQt::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
                                const LabelData& label)
@@ -417,6 +420,7 @@ namespace osmscout {
                               label.y+boundingBox.y()));
     }
   }
+  */
 
   void MapPainterQt::SetupTransformation(QPainter* painter,
                                          const QPointF center,
@@ -1071,6 +1075,30 @@ namespace osmscout {
                                               style.GetFillColor().GetG(),
                                               style.GetFillColor().GetB(),
                                               1)));
+  }
+
+  void MapPainterQt::RegisterRegularLabel(const Projection &projection,
+                                          const MapParameter &parameter,
+                                          const std::vector<LabelData> &labels,
+                                          const Vertex2D &position,
+                                          const double iconHeight)
+  {
+    // TODO
+  }
+
+  void MapPainterQt::RegisterContourLabel(const Projection &projection,
+                                          const MapParameter &parameter,
+                                          const LabelData &label,
+                                          const std::vector<Vertex2D> &way)
+  {
+    // TODO
+  }
+
+  void MapPainterQt::DrawLabels(const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& data)
+  {
+    // TODO
   }
 
   void MapPainterQt::SetFill(const Projection& projection,

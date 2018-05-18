@@ -551,10 +551,6 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const MapData& data);
 
-    void DrawLabels(const Projection& projection,
-                    const MapParameter& parameter,
-                    const MapData& data);
-
     void Postrender(const Projection& projection,
                     const MapParameter& parameter,
                     const MapData& data);
@@ -693,6 +689,10 @@ namespace osmscout {
                                       const MapParameter &parameter,
                                       const LabelData &label,
                                       const std::vector<Vertex2D> &way) = 0;
+
+    virtual void DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) = 0;
 
     /**
       Draw the Icon as defined by the IconStyle at the given pixel coordinate.

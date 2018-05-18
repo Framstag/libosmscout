@@ -45,19 +45,19 @@ namespace osmscout {
     return FONT_HEIGHT_FACTOR*fontSize;
   }
 
-  MapPainter::TextDimension MapPainterNoOp::GetTextDimension(const Projection& /*projection*/,
-                                                             const MapParameter& /*parameter*/,
-                                                             double /*objectWidth*/,
-                                                             double fontSize,
-                                                             const std::string& text)
-  {
-    double height=FONT_HEIGHT_FACTOR*FONT_WIDTH_HEIGHT_FACTOR*fontSize;
-
-    return TextDimension(0.0,
-                         0.0,
-                         text.length()*height,
-                         height);
-  }
+  // MapPainter::TextDimension MapPainterNoOp::GetTextDimension(const Projection& /*projection*/,
+  //                                                            const MapParameter& /*parameter*/,
+  //                                                            double /*objectWidth*/,
+  //                                                            double fontSize,
+  //                                                            const std::string& text)
+  // {
+  //   double height=FONT_HEIGHT_FACTOR*FONT_WIDTH_HEIGHT_FACTOR*fontSize;
+  //
+  //   return TextDimension(0.0,
+  //                        0.0,
+  //                        text.length()*height,
+  //                        height);
+  // }
 
   void MapPainterNoOp::DrawGround(const Projection& /*projection*/,
                                   const MapParameter& /*parameter*/,
@@ -67,10 +67,11 @@ namespace osmscout {
   }
 
 
-  void MapPainterNoOp::RegisterLabel(const Projection& /*projection*/,
-                                     const MapParameter& /*parameter*/,
-                                     const LabelData& /*label*/,
-                                     const Vertex2D& /*position*/)
+  void MapPainterNoOp::RegisterRegularLabel(const Projection& /*projection*/,
+                                            const MapParameter& /*parameter*/,
+                                            const std::vector<LabelData> &/*labels*/,
+                                            const Vertex2D& /*position*/,
+                                            const double /*iconHeight*/)
   {
     // no code
   }
