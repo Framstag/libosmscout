@@ -16,6 +16,7 @@ styleeditorMocs = qt5.preprocess(moc_headers : [
                                     'src/Highlighter.h',
                                     'src/StyleAnalyser.h'
                                     ],
+                                 include_directories: include_directories('src'),
                                  qresources: ['StyleEditor.qrc'])
 
 OSMScout2 = executable('StyleEditor',
