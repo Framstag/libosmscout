@@ -12,6 +12,7 @@ osmscout2Mocs = qt5.preprocess(moc_headers : [
                                 'src/Theme.h',
                                 'src/PositionSimulator.h'
                                ],
+                               include_directories: include_directories('src'),
                                qresources: ['res.qrc'])
 
 subdir('translations')
