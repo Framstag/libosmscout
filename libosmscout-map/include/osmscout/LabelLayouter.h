@@ -3,7 +3,7 @@
 
 /*
   This source is part of the libosmscout-map library
-  Copyright (C) 2016  Tim Teulings
+  Copyright (C) 2018 Lukas Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -88,7 +88,7 @@ namespace osmscout {
     osmscout::LabelStyleRef style;    //!< Style for drawing
     std::string             text;     //!< The label text
 
-    std::vector<Glyph<NativeGlyph>> toGlyphs() const;
+    std::vector<Glyph<NativeGlyph>> ToGlyphs() const;
   };
 
   template<class NativeGlyph, class NativeLabel>
@@ -183,14 +183,16 @@ namespace osmscout {
     }
   }
 
+  /*
   template <class NativeGlyph>
-  osmscout::Vertex2D glyphTopLeft(const NativeGlyph &glyph);
+  osmscout::Vertex2D GlyphTopLeft(const NativeGlyph &glyph);
 
   template <class NativeGlyph>
-  double glyphWidth(const NativeGlyph &glyph);
+  double GlyphWidth(const NativeGlyph &glyph);
 
   template <class NativeGlyph>
-  double glyphHeight(const NativeGlyph &glyph);
+  double GlyphHeight(const NativeGlyph &glyph);
+  */
 
   template <class NativeGlyph, class NativeLabel, class TextLayouter>
   class OSMSCOUT_MAP_API LabelLayouter
@@ -206,13 +208,13 @@ namespace osmscout {
         textLayouter(textLayouter)
     {};
 
-    void reset()
+    void Reset()
     {
       contourLabelInstances.clear();
       labelInstances.clear();
     }
 
-    inline bool checkLabelCollision(const std::vector<uint64_t> &canvas,
+    inline bool CheckLabelCollision(const std::vector<uint64_t> &canvas,
                                     const Mask &mask,
                                     int64_t viewportHeight
     )
@@ -226,7 +228,7 @@ namespace osmscout {
       return collision;
     }
 
-    inline void markLabelPlace(std::vector<uint64_t> &canvas,
+    inline void MarkLabelPlace(std::vector<uint64_t> &canvas,
                                const Mask &mask,
                                int viewportHeight
     )
@@ -238,7 +240,7 @@ namespace osmscout {
       }
     }
 
-    void layout(int viewportWidth, int viewportHeight)
+    void Layout(int viewportWidth, int viewportHeight)
     {
       std::vector<ContourLabelType> allSortedContourLabels;
       std::vector<LabelInstanceType> allSortedLabels;
@@ -285,9 +287,9 @@ namespace osmscout {
 
           row.prepare(rectangle);
 
-          bool collision=checkLabelCollision(canvas, row, viewportHeight);
+          bool collision= CheckLabelCollision(canvas, row, viewportHeight);
           if (!collision) {
-            markLabelPlace(canvas, row, viewportHeight);
+            MarkLabelPlace(canvas, row, viewportHeight);
             labelInstances.push_back(*currentLabel);
           }
 
@@ -311,11 +313,11 @@ namespace osmscout {
                 (int)glyph.trHeight
             };
             masks[gi].prepare(rect);
-            collision |= checkLabelCollision(canvas, masks[gi], viewportHeight);
+            collision |= CheckLabelCollision(canvas, masks[gi], viewportHeight);
           }
           if (!collision) {
             for (int gi=0; gi<glyphCnt; gi++) {
-              markLabelPlace(canvas, masks[gi], viewportHeight);
+              MarkLabelPlace(canvas, masks[gi], viewportHeight);
             }
             contourLabelInstances.push_back(*currentContourLabel);
           }
@@ -324,14 +326,14 @@ namespace osmscout {
       }
     }
 
-    void registerLabel(Vertex2D point,
+    void RegisterLabel(Vertex2D point,
                        std::string string,
                        double proposedWidth = 5000.0)
     {
       int fontHeight=18;
       LabelInstanceType instance;
 
-      instance.label = textLayouter->layout(string, fontHeight, proposedWidth);
+      instance.label = textLayouter->Layout(string, fontHeight, proposedWidth);
 
       instance.id = 0;
       instance.priority = 0;
@@ -343,7 +345,7 @@ namespace osmscout {
       labelInstances.push_back(instance);
     }
 
-    void registerContourLabel(std::vector<Vertex2D> way,
+    void RegisterContourLabel(std::vector<Vertex2D> way,
                               std::string string)
     {
       // TODO: parameters
@@ -357,8 +359,8 @@ namespace osmscout {
       }
 
       // TODO: cache label for string and font parameters
-      LabelType label = textLayouter->layout(string, fontHeight, /* proposed width */ 5000.0);
-      std::vector<Glyph<NativeGlyph>> glyphs = label.toGlyphs();
+      LabelType label = textLayouter->Layout(string, fontHeight, /* proposed width */ 5000.0);
+      std::vector<Glyph<NativeGlyph>> glyphs = label.ToGlyphs();
 
       double pLength=p.GetLength();
       double offset=0;
@@ -377,9 +379,9 @@ namespace osmscout {
 
           glyphCopy.angle=angle;
 
-          double w=glyphWidth(glyphCopy.glyph);
-          double h=glyphHeight(glyphCopy.glyph);
-          auto tl=glyphTopLeft(glyphCopy.glyph);
+          double w = textLayouter->GlyphWidth(glyphCopy.glyph);
+          double h = textLayouter->GlyphHeight(glyphCopy.glyph);
+          auto tl = textLayouter->GlyphTopLeft(glyphCopy.glyph);
 
           // four coordinates of glyph bounding box; x,y of top-left, top-right, bottom-right, bottom-left
           std::array<double, 4> x{tl.GetX(), tl.GetX()+w, tl.GetX()+w, tl.GetX()};
@@ -420,12 +422,12 @@ namespace osmscout {
       }
     }
 
-    std::vector<LabelInstanceType> labels() const
+    std::vector<LabelInstanceType> Labels() const
     {
       return labelInstances;
     }
 
-    std::vector<ContourLabelType> contourLabels() const
+    std::vector<ContourLabelType> ContourLabels() const
     {
       return contourLabelInstances;
     }

@@ -39,7 +39,8 @@ namespace osmscout {
   MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
                new CoordBuffer()),
-    painter(nullptr)
+    painter(nullptr),
+    labelLayouter(this)
   {
     sin.resize(360*10);
 
@@ -421,6 +422,70 @@ namespace osmscout {
     }
   }
   */
+
+  QtLabel MapPainterQt::Layout(std::string text, int fontSize, double proposedWidth)
+  {
+    QFont         font;
+    qreal width=0;
+    qreal height=0;
+
+    font.setPixelSize(fontSize);
+    font.setStyleStrategy(QFont::PreferAntialias);
+    font.setStyleStrategy(QFont::PreferMatch);
+
+    painter->setFont(font);
+
+    QFontMetrics fontMetrics=QFontMetrics(font, painter->device());
+    qreal leading=fontMetrics.leading();
+
+    QtLabel label;
+
+    label.label = std::make_shared<QTextLayout>(QString::fromUtf8(text.c_str()),font,painter->device());
+
+    /*
+    QList<QTextLayout::FormatRange> formatList;
+    QTextLayout::FormatRange        range;
+
+    range.start=0;
+    range.length=text.length();
+    range.format.setForeground(QBrush(QColor(0,0,0)));
+    formatList.append(range);
+
+    label.label->setAdditionalFormats(formatList);
+     */
+
+    // evaluate layout
+    label.label->beginLayout();
+    while (true) {
+      QTextLine line = label.label->createLine();
+      if (!line.isValid())
+        break;
+
+      line.setLineWidth(proposedWidth);
+
+      height+=leading;
+      line.setPosition(QPointF(0.0,height));
+      width=std::max(width,line.naturalTextWidth());
+      height+=line.height();
+    }
+    label.label->endLayout();
+
+    // Center all lines horizontally, after we know the actual width
+
+    for (int i=0; i<label.label->lineCount(); i++) {
+      QTextLine line = label.label->lineAt(i);
+
+      line.setPosition(QPointF((width-line.naturalTextWidth())/2,line.position().y()));
+    }
+
+    label.width=width;
+    label.height=height;
+    label.fontSize=fontSize;
+    //label.style;
+    label.text=text;
+
+    return label;
+  }
 
   void MapPainterQt::SetupTransformation(QPainter* painter,
                                          const QPointF center,
@@ -1084,6 +1149,9 @@ namespace osmscout {
                                           const double iconHeight)
   {
     // TODO
+    for (auto &label:labels) {
+      labelLayouter.RegisterLabel(position, label.text, label.proposedWidth);
+    }
   }
 
   void MapPainterQt::RegisterContourLabel(const Projection &projection,
@@ -1092,6 +1160,7 @@ namespace osmscout {
                                           const std::vector<Vertex2D> &way)
   {
     // TODO
+    labelLayouter.RegisterContourLabel(way, label.text);
   }
 
   void MapPainterQt::DrawLabels(const Projection& projection,
@@ -1099,6 +1168,87 @@ namespace osmscout {
                                 const MapData& data)
   {
     // TODO
+    labelLayouter.Layout(painter->window().width(), painter->window().height());
+
+    for (const ContourLabel<QGlyphRun> &label:labelLayouter.ContourLabels()){
+      for (const Glyph<QGlyphRun> &glyph:label.glyphs){
+        DrawGlyph(painter, glyph);
+
+        QPen pen(QColor::fromRgbF(0,1,0));
+        pen.setWidthF(0.8);
+        painter->setPen(pen);
+        painter->drawRect(glyph.trPosition.GetX(), glyph.trPosition.GetY(), glyph.trWidth, glyph.trHeight);
+
+        pen.setColor(QColor::fromRgbF(1,0,0));
+        painter->setPen(pen);
+        painter->drawLine(glyph.tl.GetX(), glyph.tl.GetY(), glyph.tr.GetX(), glyph.tr.GetY());
+        painter->drawLine(glyph.tr.GetX(), glyph.tr.GetY(), glyph.br.GetX(), glyph.br.GetY());
+        painter->drawLine(glyph.br.GetX(), glyph.br.GetY(), glyph.bl.GetX(), glyph.bl.GetY());
+        painter->drawLine(glyph.bl.GetX(), glyph.bl.GetY(), glyph.tl.GetX(), glyph.tl.GetY());
+      }
+    }
+
+    for (const QtLabelInstance inst : labelLayouter.Labels()){
+      painter->setPen(QColor::fromRgbF(0,0,0));
+      QTextLayout *tl = inst.label.label.get();
+      tl->draw(painter, QPointF(inst.x, inst.y));
+
+      painter->setPen(QColor::fromRgbF(0,1,0));
+      painter->drawRect(QRectF(QPointF(inst.x, inst.y), QSizeF(inst.label.width, inst.label.height)));
+    }
+
+    labelLayouter.Reset();
+  }
+
+  double MapPainterQt::GlyphWidth(const QGlyphRun &glyph)
+  {
+    return glyph.boundingRect().width();
+  }
+
+  double MapPainterQt::GlyphHeight(const QGlyphRun &glyph)
+  {
+    return glyph.boundingRect().height();
+  }
+
+  osmscout::Vertex2D MapPainterQt::GlyphTopLeft(const QGlyphRun &glyph)
+  {
+    auto tl=glyph.boundingRect().topLeft();
+    return osmscout::Vertex2D(tl.x(),tl.y());
+  }
+
+
+  void MapPainterQt::DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const
+  {
+    QPen          pen;
+    pen.setColor(QColor::fromRgbF(0,0,0));
+    painter->setPen(pen);
+
+    QTransform tran;
+    const QTransform originalTran=painter->transform();
+    QPointF point=QPointF(glyph.position.GetX(), glyph.position.GetY());
+    //qreal   angle=(glyph.angle * 180) / M_PI;
+    //qreal penWidth = painter->pen().widthF();
+
+    // rotation matrix components
+    /*
+    qreal sina=sin[lround((360-angle)*10)%sin.size()];
+    qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
+
+    // Applying rotation and translation.
+    tran.setMatrix(cosa, sina, 0.0,
+                   -sina, cosa, 0.0,
+                   point.x(), point.y(), 1.0);
+
+    */
+    tran.translate(point.x(), point.y());
+    tran.rotateRadians(glyph.angle);
+
+
+    painter->setTransform(tran);
+
+    painter->drawGlyphRun(QPointF(0,0), glyph.glyph);
+
+    painter->setTransform(originalTran);
   }
 
   void MapPainterQt::SetFill(const Projection& projection,
@@ -1465,6 +1615,44 @@ namespace osmscout {
     return Draw(projection,
                 parameter,
                 data);
+  }
+
+  template<> std::vector<QtGlyph> QtLabel::ToGlyphs() const
+  {
+    std::vector<QtGlyph> result;
+    QVector<quint32> indexes(1);
+    QVector<QPointF> positions(1);
+
+    positions[0] = QPointF(0, 0);
+
+    QList<QGlyphRun> glyphs=label->glyphRuns();
+    for (const QGlyphRun &glyphRun: glyphs){
+      for (int g=0; g<glyphRun.glyphIndexes().size(); g++) {
+
+        qint32 index = glyphRun.glyphIndexes().at(g);
+        QPointF pos = glyphRun.positions().at(g);
+        QRectF bbox = glyphRun.rawFont().boundingRect(index);
+
+        indexes[0] = index;
+
+        QGlyphRun orphanGlyph;
+        orphanGlyph.setBoundingRect(bbox);
+        orphanGlyph.setFlags(glyphRun.flags());
+        orphanGlyph.setGlyphIndexes(indexes);
+        orphanGlyph.setOverline(glyphRun.overline());
+        orphanGlyph.setPositions(positions);
+        orphanGlyph.setRawFont(glyphRun.rawFont());
+        orphanGlyph.setRightToLeft(glyphRun.isRightToLeft());
+        orphanGlyph.setStrikeOut(glyphRun.strikeOut());
+        orphanGlyph.setUnderline(glyphRun.underline());
+
+        QtGlyph glyph;
+        glyph.glyph=std::move(orphanGlyph);
+        glyph.position.Set(pos.x(), pos.y());
+        result.push_back(std::move(glyph));
+      }
+    }
+    return result;
   }
 
   MapPainterBatchQt::MapPainterBatchQt(size_t expectedCount):

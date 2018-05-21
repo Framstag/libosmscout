@@ -29,7 +29,13 @@
 
 #include <osmscout/MapPainter.h>
 
+#include <QtGui/QTextLayout>
+
 namespace osmscout {
+
+  using QtGlyph = Glyph<QGlyphRun>;
+  using QtLabel = Label<QGlyphRun, std::shared_ptr<QTextLayout>>;
+  using QtLabelInstance = LabelInstance<QGlyphRun, std::shared_ptr<QTextLayout>>;
 
   class MapPainterBatchQt;
 
@@ -39,6 +45,9 @@ namespace osmscout {
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
     friend class MapPainterBatchQt;
+
+    using QtLabelLayouter = LabelLayouter<QGlyphRun, std::shared_ptr<QTextLayout>, MapPainterQt>;
+    friend class LabelLayouter<QGlyphRun, std::shared_ptr<QTextLayout>, MapPainterQt>;
 
   private:
     struct FollowPathHandle
@@ -72,6 +81,8 @@ namespace osmscout {
   private:
     QPainter                   *painter;
 
+    QtLabelLayouter            labelLayouter;
+
     std::vector<QImage>        images;        //! vector of QImage for icons
     std::vector<QImage>        patternImages; //! vector of QImage for fill patterns
     std::vector<QBrush>        patterns;      //! vector of QBrush for fill patterns
@@ -101,6 +112,16 @@ namespace osmscout {
                              const QPointF center,
                              const qreal angle,
                              const qreal baseline) const;
+
+    double GlyphWidth(const QGlyphRun &glyph);
+
+    double GlyphHeight(const QGlyphRun &glyph);
+
+    osmscout::Vertex2D GlyphTopLeft(const QGlyphRun &glyph);
+
+    void DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const;
+
+    QtLabel Layout(std::string text, int fontSize, double proposedWidth);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,

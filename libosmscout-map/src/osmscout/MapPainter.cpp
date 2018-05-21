@@ -1312,6 +1312,7 @@ namespace osmscout {
 
     ContourLabelHelper helper(*this);
 
+    /*
     DrawContourLabel(projection,
                      parameter,
                      *pathTextStyle,
@@ -1319,6 +1320,26 @@ namespace osmscout {
                      transStart,
                      transEnd,
                      helper);
+    */
+
+    LabelData labelData;
+    labelData.id=0;
+    labelData.priority=0;
+    labelData.position=0;
+    labelData.alpha=0;
+    labelData.fontSize=pathTextStyle->GetSize();
+    labelData.proposedWidth=-1;
+    //labelData.style=; // TODO
+    labelData.text=textLabel;
+
+    std::vector<Vertex2D> wayPoints;
+    wayPoints.reserve(transEnd-transStart);
+    for (size_t j=transStart; j<=transEnd; j++) {
+      wayPoints.push_back(Vertex2D(
+          coordBuffer->buffer[j].GetX(),
+          coordBuffer->buffer[j].GetY()));
+    }
+    RegisterContourLabel(projection, parameter, labelData, wayPoints);
 
     return true;
   }
