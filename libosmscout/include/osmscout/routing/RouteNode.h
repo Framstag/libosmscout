@@ -61,12 +61,12 @@ namespace osmscout {
   class OSMSCOUT_API RouteNode
   {
   public:
-    static const uint8_t usableByFoot         = 1 << 0; //!< This path can be traveled by foot
-    static const uint8_t usableByBicycle      = 1 << 1; //!< This path can be traveled by bicycle
-    static const uint8_t usableByCar          = 1 << 2; //!< This path can be traveled by car
-    static const uint8_t restrictedForFoot    = 1 << 3; //!< Using this path ist restricted for foot
-    static const uint8_t restrictedForBicycle = 1 << 4; //!< Using this path ist restricted for bicycle
-    static const uint8_t restrictedForCar     = 1 << 5; //!< Using this path ist restricted for car
+    static const uint8_t usableByFoot         = 1u << 0u; //!< This path can be traveled by foot
+    static const uint8_t usableByBicycle      = 1u << 1u; //!< This path can be traveled by bicycle
+    static const uint8_t usableByCar          = 1u << 2u; //!< This path can be traveled by car
+    static const uint8_t restrictedForFoot    = 1u << 3u; //!< Using this path ist restricted for foot
+    static const uint8_t restrictedForBicycle = 1u << 4u; //!< Using this path ist restricted for bicycle
+    static const uint8_t restrictedForCar     = 1u << 5u; //!< Using this path ist restricted for car
 
     /**
      * \ingroup Routing
