@@ -38,6 +38,7 @@
 #include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/GeoBox.h>
+#include <osmscout/util/Distance.h>
 
 namespace osmscout {
 
@@ -990,26 +991,26 @@ namespace osmscout {
   /**
    * \ingroup Geometry
    * Calculates the spherical distance between the two given points
-   * on the sphere [km].
+   * on the sphere.
    */
-  extern OSMSCOUT_API double GetSphericalDistance(const GeoCoord& a,
-                                                  const GeoCoord& b);
-
-  /**
-   * \ingroup Geometry
-   * Calculates the ellipsoidal (WGS-84) distance between the two given points
-   * on the ellipsoid [km].
-   */
-  extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
-                                                    double bLon, double bLat);
-
-  /**
-   * \ingroup Geometry
-   * Calculates the ellipsoidal (WGS-84) distance between the two given points
-   * on the ellipsoid [km].
-   */
-  extern OSMSCOUT_API double GetEllipsoidalDistance(const GeoCoord& a,
+  extern OSMSCOUT_API Distance GetSphericalDistance(const GeoCoord& a,
                                                     const GeoCoord& b);
+
+  /**
+   * \ingroup Geometry
+   * Calculates the ellipsoidal (WGS-84) distance between the two given points
+   * on the ellipsoid.
+   */
+  extern OSMSCOUT_API Distance GetEllipsoidalDistance(double aLon, double aLat,
+                                                      double bLon, double bLat);
+
+  /**
+   * \ingroup Geometry
+   * Calculates the ellipsoidal (WGS-84) distance between the two given points
+   * on the ellipsoid.
+   */
+  extern OSMSCOUT_API Distance GetEllipsoidalDistance(const GeoCoord& a,
+                                                      const GeoCoord& b);
 
   /**
    * \ingroup Geometry
@@ -1017,7 +1018,7 @@ namespace osmscout {
    * coordinates of the resulting point in the (WGS-84) ellipsoid.
    */
   extern OSMSCOUT_API void GetEllipsoidalDistance(double lat1, double lon1,
-                                                  double bearing, double distance,
+                                                  double bearing, const Distance &distance,
                                                   double& lat2, double& lon2);
 
   /**

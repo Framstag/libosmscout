@@ -76,15 +76,15 @@ namespace osmscout {
     virtual double GetCosts(const RoutingState& state,
                             DatabaseId database,
                             const WayRef &way,
-                            double wayLength) = 0;
+                            const Distance &wayLength) = 0;
 
     virtual double GetEstimateCosts(const RoutingState& state,
                                     DatabaseId database,
-                                    double targetDistance) = 0;
+                                    const Distance &targetDistance) = 0;
 
     virtual double GetCostLimit(const RoutingState& state,
                                 DatabaseId database,
-                                double targetDistance) = 0;
+                                const Distance &targetDistance) = 0;
 
     virtual bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
                                std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) = 0;
@@ -221,8 +221,8 @@ namespace osmscout {
                            const GeoCoord &targetCoord,
                            const Vehicle &vehicle,
                            size_t &nodesIgnoredCount,
-                           double &currentMaxDistance,
-                           const double &overallDistance,
+                           Distance &currentMaxDistance,
+                           const Distance &overallDistance,
                            const double &costLimit);
   public:
     explicit AbstractRoutingService(const RouterParameter& parameter);

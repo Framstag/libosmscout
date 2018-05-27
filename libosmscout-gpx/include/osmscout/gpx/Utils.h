@@ -53,9 +53,9 @@ typedef std::shared_ptr<ProcessCallback> ProcessCallbackRef;
  * For minDistance == 0 it just remove points with same coordinates.
  *
  * @param points
- * @param minDistance in meters
+ * @param minDistance
  */
-extern OSMSCOUT_GPX_API void FilterNearPoints(std::vector<TrackPoint> &points, double minDistance=0);
+extern OSMSCOUT_GPX_API void FilterNearPoints(std::vector<TrackPoint> &points, Distance minDistance=Distance::Of<Meter>(0));
 
 /**
  * Filter out points with horizontal dilution (or position dilution if horizontal is not presented)

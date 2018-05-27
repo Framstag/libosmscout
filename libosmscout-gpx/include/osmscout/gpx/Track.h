@@ -40,7 +40,7 @@ public:
    * Compute track length in meters
    * @return length
    */
-  double GetLength() const;
+  Distance GetLength() const;
 
   size_t GetPointCount() const;
 

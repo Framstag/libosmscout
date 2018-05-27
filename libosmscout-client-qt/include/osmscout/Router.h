@@ -70,10 +70,10 @@ private:
       maxPercent=0.0;
     }
 
-    void Progress(double currentMaxDistance,
-                  double overallDistance)
+    void Progress(const Distance &currentMaxDistance,
+                  const Distance &overallDistance)
     {
-      double currentPercent=(currentMaxDistance*100.0)/overallDistance;
+      double currentPercent=(currentMaxDistance.AsMeter()*100.0)/overallDistance.AsMeter();
 
       std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
 

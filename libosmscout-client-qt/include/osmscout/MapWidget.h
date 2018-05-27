@@ -194,7 +194,7 @@ private:
    * @param dimension in kilometers
    * @return approximated magnification by object dimension
    */
-  osmscout::Magnification magnificationByDimension(double dimension);
+  osmscout::Magnification magnificationByDimension(const Distance &dimension);
   
 public:
   MapWidget(QQuickItem* parent = 0);

@@ -118,14 +118,14 @@ namespace osmscout {
   }
 
   RoutePosition MultiDBRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
-                                                              double radius) const
+                                                              Distance radius) const
   {
     RoutePosition position, closestPosition;
 
-    double minDistance=std::numeric_limits<double>::max();
+    Distance minDistance=Distance::Max();
 
     for (auto& handle : handles) {
-      double distance = radius;
+      Distance distance = radius;
       position=handle.router->GetClosestRoutableNode(coord,
                                                      *handle.profile,
                                                      distance);
@@ -177,7 +177,7 @@ namespace osmscout {
   double MultiDBRoutingService::GetCosts(const MultiDBRoutingState& /*state*/,
                                          const DatabaseId database,
                                          const WayRef &way,
-                                         double wayLength)
+                                         const Distance &wayLength)
   {
     assert(handles.size()>database);
     return handles[database].profile->GetCosts(*way,wayLength);
@@ -185,7 +185,7 @@ namespace osmscout {
 
   double MultiDBRoutingService::GetEstimateCosts(const MultiDBRoutingState& /*state*/,
                                                  const DatabaseId database,
-                                                 double targetDistance)
+                                                 const Distance &targetDistance)
   {
     assert(handles.size()>database);
     return handles[database].profile->GetCosts(targetDistance);
@@ -193,11 +193,11 @@ namespace osmscout {
 
   double MultiDBRoutingService::GetCostLimit(const MultiDBRoutingState& /*state*/,
                                              const DatabaseId database,
-                                             double targetDistance)
+                                             const Distance &targetDistance)
   {
     assert(handles.size()>database);
     RoutingProfileRef profile=handles[database].profile;
-    return profile->GetCosts(profile->GetCostLimitDistance())+targetDistance*profile->GetCostLimitFactor();
+    return profile->GetCosts(profile->GetCostLimitDistance()) + profile->GetCosts(targetDistance) * profile->GetCostLimitFactor();
   }
 
   bool MultiDBRoutingService::CanUse(const MultiDBRoutingState& /*state*/,
@@ -408,7 +408,7 @@ namespace osmscout {
      *    A RoutingResult object
      */
     RoutingResult MultiDBRoutingService::CalculateRoute(std::vector<osmscout::GeoCoord> via,
-                                                        double radius,
+                                                        const Distance &radius,
                                                         const RoutingParameter& parameter)
     {
       RoutingResult              result;

@@ -39,7 +39,7 @@ void ProcessCallback::Error(std::string error)
 
 
 void gpx::FilterNearPoints(std::vector<TrackPoint> &points,
-                           double minDistance)
+                           Distance minDistance)
 {
   if (points.empty()){
     return;
@@ -49,7 +49,7 @@ void gpx::FilterNearPoints(std::vector<TrackPoint> &points,
   it++;
   while (it!=points.end()){
     GeoCoord current=(*it).coord;
-    double distance=GetEllipsoidalDistance(latest, current)*1000;
+    Distance distance=GetEllipsoidalDistance(latest, current);
     if (distance <= minDistance){
       it = points.erase(it);
     }else {

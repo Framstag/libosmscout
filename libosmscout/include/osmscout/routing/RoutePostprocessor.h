@@ -157,8 +157,8 @@ namespace osmscout {
     private:
       static const double curveMinInitialAngle;
       static const double curveMaxInitialAngle;
-      static const double curveMaxNodeDistance;
-      static const double curveMaxDistance;
+      static const Distance curveMaxNodeDistance;
+      static const Distance curveMaxDistance;
       static const double curveMinAngle;
 
     public:
@@ -277,8 +277,8 @@ namespace osmscout {
     AreaRef GetArea(const DBFileOffset &offset) const;
     WayRef GetWay(const DBFileOffset &offset) const;
 
-    double GetTime(DatabaseId dbId,const Area& area,double deltaDistance) const;
-    double GetTime(DatabaseId dbId,const Way& way,double deltaDistance) const;
+    double GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const;
+    double GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const;
 
     RouteDescription::NameDescriptionRef GetNameDescription(const RouteDescription::Node& node) const;
     RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,

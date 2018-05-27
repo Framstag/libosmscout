@@ -113,23 +113,23 @@ namespace osmscout {
   double SimpleRoutingService::GetCosts(const RoutingProfile& profile,
                                         const DatabaseId /*database*/,
                                         const WayRef &way,
-                                        double wayLength)
+                                        const Distance &wayLength)
   {
     return profile.GetCosts(*way,wayLength);
   }
 
   double SimpleRoutingService::GetEstimateCosts(const RoutingProfile& profile,
                                                 const DatabaseId /*database*/,
-                                                double targetDistance)
+                                                const Distance &targetDistance)
   {
     return profile.GetCosts(targetDistance);
   }
 
   double SimpleRoutingService::GetCostLimit(const RoutingProfile& profile,
                                             const DatabaseId /*database*/,
-                                            double targetDistance)
+                                            const Distance &targetDistance)
   {
-    return profile.GetCosts(profile.GetCostLimitDistance())+targetDistance*profile.GetCostLimitFactor();
+    return profile.GetCosts(profile.GetCostLimitDistance()) + profile.GetCosts(targetDistance)*profile.GetCostLimitFactor();
   }
 
   bool SimpleRoutingService::GetRouteNodes(const std::set<DBId> &routeNodeIds,
@@ -369,7 +369,7 @@ namespace osmscout {
    * @param via
    *    A vector of via points
    * @param radius
-   *    The maximum radius to search in from the search center in meter
+   *    The maximum radius to search in from the search center
    * @param parameter
    *    A RoutingParamater object
    * @return
@@ -378,7 +378,7 @@ namespace osmscout {
 
   RoutingResult SimpleRoutingService::CalculateRouteViaCoords(RoutingProfile& profile,
                                                               std::vector<osmscout::GeoCoord> via,
-                                                              double radius,
+                                                              const Distance &radius,
                                                               const RoutingParameter& parameter)
   {
     RoutingResult                        result;
@@ -388,9 +388,10 @@ namespace osmscout {
     assert(!via.empty());
 
     for (const auto& etap : via) {
+      Distance r=radius;
       RoutePosition target=GetClosestRoutableNode(etap,
                                                   profile,
-                                                  radius);
+                                                  r);
 
       if (!target.IsValid()) {
         return result;
@@ -455,13 +456,12 @@ namespace osmscout {
    * @param profile
    *    Routing profile to use. It defines Vehicle to use
    * @param radius
-   *    The maximum radius to search in from the search center in meter, at
-   *    return is set to the minimum distance found
+   *    The maximum radius to search in from the search center
    * @return
    */
   RoutePosition SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                              const RoutingProfile& profile,
-                                                             double& radius) const
+                                                             const Distance &radius) const
   {
     TypeConfigRef    typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
@@ -586,13 +586,12 @@ namespace osmscout {
       }
     }
 
-    radius = minDistance;
     return position;
   }
 
   ClosestRoutableObjectResult SimpleRoutingService::GetClosestRoutableObject(const GeoCoord& location,
                                                                              Vehicle vehicle,
-                                                                             double maxRadius)
+                                                                             const Distance &maxRadius)
   {
     ClosestRoutableObjectResult result;
     TypeInfoSet                 routeableWayTypes;
@@ -612,9 +611,9 @@ namespace osmscout {
       }
     }
 
-    double  closestDistance=std::numeric_limits<double>::max();
-    WayRef  closestWay;
-    AreaRef closestArea;
+    Distance closestDistance=Distance::Max();
+    WayRef   closestWay;
+    AreaRef  closestArea;
 
     if (!routeableWayTypes.Empty()) {
       WayRegionSearchResult waySearchResult=database->LoadWaysInRadius(location,
@@ -644,7 +643,7 @@ namespace osmscout {
     }
 
     if (!closestWay && !closestArea) {
-      result.distance=std::numeric_limits<double>::max();
+      result.distance=Distance::Max();
       return result;
     }
     else {

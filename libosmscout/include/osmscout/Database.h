@@ -121,12 +121,12 @@ namespace osmscout {
   class OSMSCOUT_API NodeRegionSearchResultEntry
   {
   private:
-    NodeRef node;
-    double  distance;
+    NodeRef  node;
+    Distance distance;
 
   private:
     explicit NodeRegionSearchResultEntry(const NodeRef& node,
-                                         double distance);
+                                         const Distance &distance);
 
   public:
     friend Database;
@@ -136,7 +136,7 @@ namespace osmscout {
       return node;
     }
 
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
@@ -161,13 +161,13 @@ namespace osmscout {
   {
   private:
     WayRef   way;
-    double   distance;
+    Distance distance;
     GeoCoord closestPoint;
 
   private:
-    explicit WayRegionSearchResultEntry(const WayRef& way,
-                                        double distance,
-                                        const GeoCoord& closestPoint);
+    explicit WayRegionSearchResultEntry(const WayRef &way,
+                                        const Distance &distance,
+                                        const GeoCoord &closestPoint);
 
   public:
     friend Database;
@@ -177,7 +177,7 @@ namespace osmscout {
       return way;
     }
 
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
@@ -206,14 +206,14 @@ namespace osmscout {
   {
   private:
     AreaRef  area;
-    double   distance;
+    Distance distance;
     GeoCoord closestPoint;
     bool     inArea;
 
   private:
-    explicit AreaRegionSearchResultEntry(const AreaRef& area,
-                                         double distance,
-                                         const GeoCoord& closestPoint,
+    explicit AreaRegionSearchResultEntry(const AreaRef &area,
+                                         const Distance &distance,
+                                         const GeoCoord &closestPoint,
                                          bool inArea);
 
   public:
@@ -224,7 +224,7 @@ namespace osmscout {
       return area;
     }
 
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
@@ -400,7 +400,7 @@ namespace osmscout {
      */
     NodeRegionSearchResult LoadNodesInRadius(const GeoCoord& location,
                                              const TypeInfoSet& types,
-                                             double maxDistance=100);
+                                             Distance maxDistance=Distance::Of<Meter>(100));
 
     /**
      * Load ways of given types with maximum distance to the given coordinate.
@@ -418,7 +418,7 @@ namespace osmscout {
      */
     WayRegionSearchResult LoadWaysInRadius(const GeoCoord& location,
                                            const TypeInfoSet& types,
-                                           double maxDistance=100);
+                                           Distance maxDistance=Distance::Of<Meter>(100));
 
     /**
      * Load areas of given types with maximum distance to the given coordinate.
@@ -436,7 +436,7 @@ namespace osmscout {
      */
     AreaRegionSearchResult LoadAreasInRadius(const GeoCoord& location,
                                              const TypeInfoSet& types,
-                                             double maxDistance=100);
+                                             Distance maxDistance=Distance::Of<Meter>(100));
 
     void DumpStatistics();
   };
