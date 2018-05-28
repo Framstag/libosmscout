@@ -1150,7 +1150,11 @@ namespace osmscout {
   {
     // TODO
     for (auto &label:labels) {
-      labelLayouter.RegisterLabel(position, label.text, label.proposedWidth);
+      double proposedWidth = label.proposedWidth;
+      if (proposedWidth <= 0 || proposedWidth > painter->window().width()){
+        proposedWidth = painter->window().width();
+      }
+      labelLayouter.RegisterLabel(position, label.text, proposedWidth);
     }
   }
 

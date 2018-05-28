@@ -48,7 +48,7 @@ namespace osmscout {
 
     double            alpha;    //!< Alpha value of the label
     double            fontSize; //!< Font size to be used
-    double            proposedWidth;
+    double            proposedWidth{-1};
     LabelStyleRef     style;    //!< Style for drawing
     std::string       text;     //!< The label text
 
@@ -328,7 +328,7 @@ namespace osmscout {
 
     void RegisterLabel(Vertex2D point,
                        std::string string,
-                       double proposedWidth = 5000.0)
+                       double proposedWidth = 10000.0)
     {
       int fontHeight=18;
       LabelInstanceType instance;

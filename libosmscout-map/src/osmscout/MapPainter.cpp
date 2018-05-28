@@ -781,6 +781,7 @@ namespace osmscout {
 
         hasSymbol=true;
 
+        data.proposedWidth=objectWidth;
         labelLayoutData.push_back(data);
       }
       else if (iconStyle->GetSymbol()) {
@@ -795,6 +796,7 @@ namespace osmscout {
         iconHeight = projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
 
         hasSymbol=true;
+        data.proposedWidth=objectWidth;
 
         labelLayoutData.push_back(data);
       }
@@ -865,6 +867,7 @@ namespace osmscout {
 
       data.position=textStyle->GetPosition();
       data.text=label;
+      data.proposedWidth=objectWidth;
       //data.textStyle=textStyle;
       //data.icon=false;
       //
