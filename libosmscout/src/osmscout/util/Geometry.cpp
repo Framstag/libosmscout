@@ -101,12 +101,12 @@ namespace osmscout {
 
   /**
    * Calculating basic cost for the A* algorithm based on the
-   * spherical distance of two points on earth [km].
+   * spherical distance of two points on earth.
    */
-  double GetSphericalDistance(const GeoCoord& a,
+  Distance GetSphericalDistance(const GeoCoord& a,
                               const GeoCoord& b)
   {
-    double r=6371.01; // Average radius of earth
+    Distance r=Distance::Of<Kilometer>(6371.01); // Average radius of earth
     double aLatRad=DegToRad(a.GetLat());
     double bLatRad=DegToRad(b.GetLat());
     double dLat=DegToRad(b.GetLat()-a.GetLat());
@@ -125,10 +125,10 @@ namespace osmscout {
 
   /**
    * Calculating Vincenty's inverse for getting the ellipsoidal distance
-   * of two points on earth [km].
+   * of two points on earth.
    */
-  double GetEllipsoidalDistance(double aLon, double aLat,
-                                double bLon, double bLat)
+  Distance GetEllipsoidalDistance(double aLon, double aLat,
+                                  double bLon, double bLat)
   {
     double a=6378137;
     double b=6356752.3142;
@@ -217,18 +217,18 @@ namespace osmscout {
       }
     }
 
-    return b * A * (sigma - deltasigma)/1000; // We want the distance in Km
+    return Distance::Of<Kilometer>(b * A * (sigma - deltasigma)/1000); // We want the distance in Km
   }
 
 
-  double GetEllipsoidalDistance(const GeoCoord& a,
-                                const GeoCoord& b)
+  Distance GetEllipsoidalDistance(const GeoCoord& a,
+                                  const GeoCoord& b)
   {
     return GetEllipsoidalDistance(a.GetLon(),a.GetLat(),b.GetLon(),b.GetLat());
   }
 
   void GetEllipsoidalDistance(double lat1, double lon1,
-                              double bearing, double distance,
+                              double bearing, const Distance &distance,
                               double& lat2, double& lon2)
   {
     /* local variable definitions */
@@ -259,7 +259,7 @@ namespace osmscout {
     A=1+uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)));
     B=uSq/1024*(256+uSq*(-128+uSq*(74-47*uSq)));
 
-    sigma=distance/(b*A);
+    sigma=distance.As<Meter>() /(b*A);
     sigmaP=2*M_PI;
     while (fabs(sigma-sigmaP) > 1e-12) {
       cos2SigmaM = cos(2*sigma1 + sigma);
@@ -267,7 +267,7 @@ namespace osmscout {
       cosSigma = cos(sigma);
       deltaSigma = B*sinSigma*(cos2SigmaM+B/4*(cosSigma*(-1+2*cos2SigmaM*cos2SigmaM)-B/6*cos2SigmaM*(-3+4*sinSigma*sinSigma)*(-3+4*cos2SigmaM*cos2SigmaM)));
       sigmaP = sigma;
-      sigma = distance / (b*A) + deltaSigma;
+      sigma = distance.As<Meter>() / (b*A) + deltaSigma;
     }
 
     sinU1=tanU1*cosU1;

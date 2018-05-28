@@ -10,13 +10,14 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
-        include/osmscout/system/OSMScoutTypes.h)
+    include/osmscout/system/OSMScoutTypes.h)
 
 set(HEADER_FILES_UTIL
     include/osmscout/util/Breaker.h
     include/osmscout/util/Cache.h
     include/osmscout/util/Color.h
     include/osmscout/util/CmdLineParsing.h
+    include/osmscout/util/Distance.h
     include/osmscout/util/Exception.h
     include/osmscout/util/File.h
     include/osmscout/util/FileScanner.h
@@ -115,6 +116,7 @@ set(SOURCE_FILES
     src/osmscout/util/Breaker.cpp
     src/osmscout/util/Cache.cpp
     src/osmscout/util/Color.cpp
+    src/osmscout/util/Distance.cpp
     src/osmscout/util/Exception.cpp
     src/osmscout/util/File.cpp
     src/osmscout/util/FileScanner.cpp

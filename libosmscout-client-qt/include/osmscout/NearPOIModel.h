@@ -110,7 +110,7 @@ private:
   osmscout::GeoCoord searchCenter{INVALID_COORD,INVALID_COORD};
   int resultLimit{100};
   osmscout::BreakerRef breaker;
-  double maxDistance{1000};
+  Distance maxDistance{Distance::Of<Kilometer>(1)};
   QStringList types;
 
   POILookupModule *poiModule{nullptr};
@@ -162,13 +162,13 @@ public:
 
   inline double GetMaxDistance() const
   {
-    return maxDistance;
+    return maxDistance.AsMeter();
   }
 
   void SetMaxDistance(double d)
   {
-    if (maxDistance!=d){
-      maxDistance=d;
+    if (maxDistance.AsMeter()!=d){
+      maxDistance=Distance::Of<Meter>(d);
       lookupPOI();
     }
   }

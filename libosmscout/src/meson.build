@@ -7,6 +7,7 @@ osmscoutSrc = [
             'src/osmscout/util/Cache.cpp',
             'src/osmscout/util/CmdLineParsing.cpp',
             'src/osmscout/util/Color.cpp',
+            'src/osmscout/util/Distance.cpp',
             'src/osmscout/util/Exception.cpp',
             'src/osmscout/util/File.cpp',
             'src/osmscout/util/FileScanner.cpp',

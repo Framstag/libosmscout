@@ -291,7 +291,7 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
     return QVariant::fromValue(location->getCoord().GetLon());
   case DistanceRole:
     if (searchCenter.GetLat()!=INVALID_COORD && searchCenter.GetLon()!=INVALID_COORD) {
-      return osmscout::GetSphericalDistance(location->getCoord(), searchCenter)*1000;
+      return osmscout::GetSphericalDistance(location->getCoord(), searchCenter).AsMeter();
     }else{
       return 0;
     }

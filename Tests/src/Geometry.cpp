@@ -127,21 +127,26 @@ TEST_CASE("Check node in area")
   }
 }
 
-bool IsSame(double a, double b)
+bool IsSame(double a, double b, double tolerance = 1e-9)
 {
-  return std::abs(a - b) < 1e-9;
+  return std::abs(a - b) < tolerance;
+}
+
+bool IsSame(const osmscout::Distance &d1, const osmscout::Distance &d2, double tolerance = 1e-9)
+{
+  return IsSame(d1.AsMeter(), d2.AsMeter(), tolerance);
 }
 
 TEST_CASE("Distance computation")
 {
   osmscout::GeoCoord location1(51.43170928, 6.80131361);
   osmscout::GeoCoord location2(51.48510151, 7.4160216);
-  double distance_km = location2 - location1;
+  osmscout::Distance distance = location2 - location1;
 
-  REQUIRE(IsSame(distance_km, 43.135331925602415));
-  REQUIRE(IsSame(distance_km, osmscout::GetEllipsoidalDistance(location1.GetLon(), location1.GetLat(),
+  REQUIRE(IsSame(distance, osmscout::Distance::Of<osmscout::Kilometer>(43.135331925602415)));
+  REQUIRE(IsSame(distance, osmscout::GetEllipsoidalDistance(location1.GetLon(), location1.GetLat(),
                                                                location2.GetLon(), location2.GetLat())));
-  REQUIRE(IsSame(distance_km, osmscout::GetEllipsoidalDistance(location1, location2)));
+  REQUIRE(IsSame(distance, osmscout::GetEllipsoidalDistance(location1, location2)));
 }
 
 bool IsSame(const osmscout::GeoCoord &a,
@@ -158,7 +163,7 @@ TEST_CASE("Target computation from bearing and distance")
   // Target:
   //    Latitude: 51°27'48" N (51.463397)
   //    Longitude: 7°0'22" E (7.006078)
-  double distance = 14665.298166863819; // [m]
+  osmscout::Distance distance = osmscout::Distance::Of<osmscout::Meter>(14665.298166863819);
   double angle = 76.010085273091411718093847668127; // [deg]
 
   osmscout::GeoCoord target = location1.Add(angle, distance);
@@ -169,4 +174,5 @@ TEST_CASE("Target computation from bearing and distance")
                                    angle, distance,
                                    lat2, lon2);
   REQUIRE(IsSame(target, osmscout::GeoCoord(lat2, lon2)));
+  REQUIRE(IsSame(distance, location1 - osmscout::GeoCoord(lat2, lon2), 1e-6));
 }

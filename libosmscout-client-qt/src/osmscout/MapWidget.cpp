@@ -310,8 +310,8 @@ void MapWidget::recenter()
   if (!resp.boundingBox.IsValid()){
     return;
   }
-  double dimension = osmscout::GetEllipsoidalDistance(resp.boundingBox.GetMinCoord(),
-                                                      resp.boundingBox.GetMaxCoord());
+  Distance dimension = osmscout::GetEllipsoidalDistance(resp.boundingBox.GetMinCoord(),
+                                                        resp.boundingBox.GetMaxCoord());
 
   showCoordinates(resp.boundingBox.GetCenter(), magnificationByDimension(dimension));
 }
@@ -491,9 +491,10 @@ void MapWidget::showCoordinatesInstantly(double lat, double lon)
     showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);
 }
 
-osmscout::Magnification MapWidget::magnificationByDimension(double dimension)
+osmscout::Magnification MapWidget::magnificationByDimension(const Distance &d)
 {
   osmscout::Magnification::Mag mag = osmscout::Magnification::magBlock;
+  double dimension = d.As<Kilometer>();
   if (dimension > 0.1)
     mag = osmscout::Magnification::magVeryClose;
   if (dimension > 0.2)
@@ -530,7 +531,7 @@ void MapWidget::showLocation(LocationEntry* location)
   qDebug() << "Show location: " << location;
 
   osmscout::GeoCoord center;
-  double dimension = 0.01; // km
+  Distance dimension = Distance::Of<Meter>(10);
   if (location->getBBox().IsValid()){
     center = location->getBBox().GetCenter();
     dimension = osmscout::GetEllipsoidalDistance(location->getBBox().GetMinCoord(),

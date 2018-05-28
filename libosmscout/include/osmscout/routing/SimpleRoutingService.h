@@ -63,7 +63,7 @@ namespace osmscout {
   {
   private:
     ObjectFileRef object;
-    double        distance;
+    Distance      distance;
     WayRef        way;
     AreaRef       area;
     std::string   name;
@@ -76,7 +76,7 @@ namespace osmscout {
       return object;
     }
 
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
@@ -149,15 +149,15 @@ namespace osmscout {
     double GetCosts(const RoutingProfile& profile,
                     DatabaseId database,
                     const WayRef &way,
-                    double wayLength) override;
+                    const Distance &wayLength) override;
 
     double GetEstimateCosts(const RoutingProfile& profile,
                             DatabaseId database,
-                            double targetDistance) override;
+                            const Distance &targetDistance) override;
 
     double GetCostLimit(const RoutingProfile& profile,
                         DatabaseId database,
-                        double targetDistance) override;
+                        const Distance &targetDistance) override;
 
     bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
                        std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) override;
@@ -197,16 +197,16 @@ namespace osmscout {
 
     RoutingResult CalculateRouteViaCoords(RoutingProfile& profile,
                                           std::vector<GeoCoord> via,
-                                          double radius,
+                                          const Distance &radius,
                                           const RoutingParameter& parameter);
 
     RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
                                          const RoutingProfile& profile,
-                                         double& radius) const;
+                                         const Distance &radius) const;
 
     ClosestRoutableObjectResult GetClosestRoutableObject(const GeoCoord& location,
                                                          Vehicle vehicle,
-                                                         double maxRadius);
+                                                         const Distance &maxRadius);
 
     void DumpStatistics();
   };

@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_GPX_TRACKSEGMENT_H
-#define OSMSCOUT_GPX_TRACKSEGMENT_H
-
 /*
-  This source is part of the libosmscout-gpx library
-  Copyright (C) 2017 Lukas Karas
+  This source is part of the libosmscout library
+  Copyright (C) 2018 Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,27 +17,28 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/util/Distance.h>
 
-#include <osmscout/gpx/TrackPoint.h>
+namespace osmscout{
 
-#include <osmscout/gpx/GPXImportExport.h>
+  Distance Distance::Max()
+  {
+    return Distance(std::numeric_limits<double>::max());
+  }
 
-#include <vector>
+  Distance Distance::Min()
+  {
+    return Distance(std::numeric_limits<double>::min());
+  }
 
-namespace osmscout {
-namespace gpx {
+  Distance Distance::Max(const Distance &a, const Distance &b)
+  {
+    return Distance(std::max(a.meters, b.meters));
+  }
 
-class OSMSCOUT_GPX_API TrackSegment {
-public:
-  std::vector<TrackPoint> points;
+  Distance Distance::Min(const Distance &a, const Distance &b)
+  {
+    return Distance(std::min(a.meters, b.meters));
+  }
 
-  /**
-   * Compute track length
-   * @return
-   */
-  Distance GetLength() const;
-};
 }
-}
-
-#endif //OSMSCOUT_GPX_TRACKSEGMENT_H

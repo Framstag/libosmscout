@@ -27,6 +27,7 @@
 #include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/util/Magnification.h>
+#include <osmscout/util/Distance.h>
 
 #include <osmscout/system/Math.h>
 #include <osmscout/system/Compiler.h>
@@ -238,24 +239,24 @@ namespace osmscout {
      * @param target
      *    Target coordinate to measure distance
      * @return
-     *    Point to point distance to target coordinates in kilometers
+     *    Point to point distance to target coordinates
      * @note
      *    The difference in height between the two points is neglected.
      */
-    double GetDistance(GeoCoord target) const;
+    Distance GetDistance(const GeoCoord &target) const;
 
     /**
     * Get coordinate of position + course and distance.
     * @param bearing
     *    Target course in degree
     * @param distance
-    *    Target distance in meters
+    *    Target distance
     * @return
     *    Target coordinates
     * @note
     *    The difference in height between the two points is neglected.
     */
-    GeoCoord Add(double bearing, double distance);
+    GeoCoord Add(double bearing, const Distance &distance);
 
     /**
      * Return true if both coordinates are equals (using == operator)
@@ -288,7 +289,7 @@ namespace osmscout {
       this->lon=other.lon;
     }
 
-    inline double operator-(const GeoCoord& other) const
+    inline Distance operator-(const GeoCoord& other) const
     {
       return GetDistance(other);
     }

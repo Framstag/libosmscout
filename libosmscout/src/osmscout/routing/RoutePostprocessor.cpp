@@ -82,7 +82,7 @@ namespace osmscout {
     AreaRef       area;
     WayRef        way;
 
-    double        distance=0.0;
+    Distance      distance;
     double        time=0.0;
 
     for (auto& node : description.Nodes()) {
@@ -120,8 +120,8 @@ namespace osmscout {
 
         // There is no delta for the first route node
         if (prevObject.Valid()) {
-          double deltaDistance=GetEllipsoidalDistance(prevCoord,
-                                                      curCoord);
+          Distance deltaDistance=GetEllipsoidalDistance(prevCoord,
+                                                        curCoord);
 
           double deltaTime=0.0;
 
@@ -377,8 +377,8 @@ namespace osmscout {
 
   const double RoutePostprocessor::DirectionPostprocessor::curveMinInitialAngle=5.0;
   const double RoutePostprocessor::DirectionPostprocessor::curveMaxInitialAngle=10.0;
-  const double RoutePostprocessor::DirectionPostprocessor::curveMaxNodeDistance=0.020;
-  const double RoutePostprocessor::DirectionPostprocessor::curveMaxDistance=0.300;
+  const Distance RoutePostprocessor::DirectionPostprocessor::curveMaxNodeDistance=Distance::Of<Kilometer>(0.020);
+  const Distance RoutePostprocessor::DirectionPostprocessor::curveMaxDistance=Distance::Of<Kilometer>(0.300);
   const double RoutePostprocessor::DirectionPostprocessor::curveMinAngle=5.0;
 
   RoutePostprocessor::DirectionPostprocessor::DirectionPostprocessor()
@@ -420,7 +420,7 @@ namespace osmscout {
         if (fabs(turnAngle)>=curveMinInitialAngle && fabs(turnAngle)<=curveMaxInitialAngle) {
           auto   curveB=nextNode;
           double currentBearing=outBearing;
-          double forwardDistance=nextNode->GetDistance()-node->GetDistance();
+          Distance forwardDistance=nextNode->GetDistance()-node->GetDistance();
           auto   lookup=nextNode;
 
           lookup++;
@@ -1115,14 +1115,14 @@ namespace osmscout {
     return entry->second;
   }
 
-  double RoutePostprocessor::GetTime(DatabaseId dbId,const Area& area,double deltaDistance) const
+  double RoutePostprocessor::GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const
   {
     assert(dbId<profiles.size() && profiles[dbId]);
     auto profile=profiles[dbId];
     return profile->GetTime(area,deltaDistance);
   }
 
-  double RoutePostprocessor::GetTime(DatabaseId dbId,const Way& way,double deltaDistance) const
+  double RoutePostprocessor::GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const
   {
     assert(dbId<profiles.size() && profiles[dbId]);
     auto profile=profiles[dbId];

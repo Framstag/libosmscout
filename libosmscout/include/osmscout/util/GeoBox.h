@@ -25,6 +25,7 @@
 #include <osmscout/GeoCoord.h>
 
 #include <osmscout/system/Compiler.h>
+#include <osmscout/util/Distance.h>
 
 namespace osmscout {
 
@@ -277,7 +278,7 @@ namespace osmscout {
      * Return an GeoBox based on the center and the radius [meters] of a circle around the center.
      * The resulting box will cross the circle in its corners.
      */
-    static GeoBox BoxByCenterAndRadius(const GeoCoord& center,double radius);
+    static GeoBox BoxByCenterAndRadius(const GeoCoord& center,const Distance& radius);
   };
 }
 

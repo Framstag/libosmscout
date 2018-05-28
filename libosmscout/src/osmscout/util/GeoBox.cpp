@@ -117,7 +117,7 @@ namespace osmscout {
   }
 
   GeoBox GeoBox::BoxByCenterAndRadius(const GeoCoord& center,
-                                      double radius)
+                                      const Distance& radius)
   {
     double topLat;
     double botLat;

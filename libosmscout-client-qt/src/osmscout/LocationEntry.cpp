@@ -114,7 +114,7 @@ void LocationEntry::mergeWith(const LocationEntry &location)
 
 Q_INVOKABLE double LocationEntry::distanceTo(double lat, double lon) const
 {
-  return osmscout::GetSphericalDistance(coord, osmscout::GeoCoord(lat, lon)) * 1000;
+  return osmscout::GetSphericalDistance(coord, osmscout::GeoCoord(lat, lon)).AsMeter();
 }
 
 LocationEntry::Type LocationEntry::getType() const
