@@ -893,7 +893,7 @@ namespace osmscout {
         }
         else {
           description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                        candidate.GetDistance()*1000,
+                                                                                        candidate.GetDistance(),
                                                                                         candidate.GetBearing()));
         }
 
@@ -923,7 +923,7 @@ namespace osmscout {
         }
         else {
           description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                        candidate.GetDistance()*1000,
+                                                                                        candidate.GetDistance(),
                                                                                         candidate.GetBearing()));
         }
 
@@ -1015,7 +1015,7 @@ namespace osmscout {
         }
         else {
           description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                            candidate.GetDistance()*1000, candidate.GetBearing()));
+                            candidate.GetDistance(), candidate.GetBearing()));
         }
         return true;
       }
@@ -1100,7 +1100,7 @@ namespace osmscout {
         }
         else {
           description.SetAtPOIDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                       candidate.GetDistance()*1000,
+                                                                                       candidate.GetDistance(),
                                                                                        candidate.GetBearing()));
         }
         return true;
@@ -1237,7 +1237,7 @@ namespace osmscout {
 
       crossingDescription=std::make_shared<LocationCrossingDescription>(candidate.GetCoord(),
                                                                         places,
-                                                                        distance*1000,
+                                                                        distance,
                                                                         bearing);
     }
 
