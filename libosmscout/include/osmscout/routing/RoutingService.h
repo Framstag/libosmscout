@@ -139,8 +139,8 @@ namespace osmscout {
      * @param overallDistance
      *    distance between start and target
      */
-    virtual void Progress(double currentMaxDistance,
-                          double overallDistance) = 0;
+    virtual void Progress(const Distance &currentMaxDistance,
+                          const Distance &overallDistance) = 0;
   };
 
   /**
@@ -186,28 +186,28 @@ namespace osmscout {
   {
   private:
     RouteData route;
-    double    currentMaxDistance;
-    double    overallDistance;
+    Distance  currentMaxDistance;
+    Distance  overallDistance;
 
   public:
     RoutingResult();
 
-    inline void SetOverallDistance(double overallDistance)
+    inline void SetOverallDistance(const Distance &overallDistance)
     {
       this->overallDistance=overallDistance;
     }
 
-    inline void SetCurrentMaxDistance(double currentMaxDistance)
+    inline void SetCurrentMaxDistance(const Distance &currentMaxDistance)
     {
       this->currentMaxDistance=currentMaxDistance;
     }
 
-    inline double GetOverallDistance() const
+    inline Distance GetOverallDistance() const
     {
       return overallDistance;
     }
 
-    inline double GetCurrentMaxDistance() const
+    inline Distance GetCurrentMaxDistance() const
     {
       return currentMaxDistance;
     }

@@ -23,16 +23,15 @@ namespace osmscout {
 
 NextStepDescriptionBuilder::NextStepDescriptionBuilder():
     roundaboutCrossingCounter(0),
-    index(0),
-    previousDistance(0.0)
+    index(0)
 {
 }
 
-void NextStepDescriptionBuilder::NextDescription(double distance,
+void NextStepDescriptionBuilder::NextDescription(const Distance &distance,
                                                  std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
                                                  std::list<osmscout::RouteDescription::Node>::const_iterator end)
 {
-  if (waypoint==end || (distance>=0 && previousDistance>distance)) {
+  if (waypoint==end || (distance.AsMeter()>=0 && previousDistance>distance)) {
     return;
   }
   RouteDescriptionBuilder builder;
@@ -46,11 +45,11 @@ void NextStepDescriptionBuilder::NextDescription(double distance,
     }
 
     description=routeSteps.first();
-    description.distance=waypoint->GetDistance()*1000;
+    description.distance=waypoint->GetDistance().AsMeter();
     description.time    =waypoint->GetTime()*3600;
 
     if (waypoint->GetDistance() > distance){
-      description.distanceTo=(waypoint->GetDistance()-distance)*1000;
+      description.distanceTo=(waypoint->GetDistance()-distance).AsMeter();
       break;
     }
   }
@@ -62,7 +61,7 @@ NavigationModule::NavigationModule(QThread *thread,
   thread(thread), settings(settings), dbThread(dbThread),
   navigation(&nextStepDescBuilder)
 {
-  navigation.SetSnapDistance(40.0);
+  navigation.SetSnapDistance(Distance::Of<Meter>(40.0));
 }
 
 NavigationModule::~NavigationModule()

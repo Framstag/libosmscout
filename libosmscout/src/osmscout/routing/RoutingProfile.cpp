@@ -38,7 +38,7 @@ namespace osmscout {
      maxSpeedReader(*typeConfig),
      vehicle(vehicleCar),
      vehicleRouteNodeBit(RouteNode::usableByCar),
-     costLimitDistance(10.0),
+     costLimitDistance(Distance::Of<Kilometer>(10.0)),
      costLimitFactor(5.0),
      minSpeed(0),
      maxSpeed(0),
@@ -75,7 +75,7 @@ namespace osmscout {
    * @param costLimitDistance
    *    static distance value added to the maximum cost
    */
-  void AbstractRoutingProfile::SetCostLimitDistance(double costLimitDistance)
+  void AbstractRoutingProfile::SetCostLimitDistance(const Distance &costLimitDistance)
   {
     this->costLimitDistance=costLimitDistance;
   }

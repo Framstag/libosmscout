@@ -45,14 +45,13 @@ namespace osmscout {
   LocationAtPlaceDescription::LocationAtPlaceDescription(const Place& place)
   : place(place),
     atPlace(true),
-    distance(0.0),
     bearing(0.0)
   {
     // no code
   }
 
-  LocationAtPlaceDescription::LocationAtPlaceDescription(const Place& place,
-                                                         double distance,
+  LocationAtPlaceDescription::LocationAtPlaceDescription(const Place &place,
+                                                         const Distance &distance,
                                                          double bearing)
   : place(place),
     atPlace(false),
@@ -62,15 +61,14 @@ namespace osmscout {
     // no code
   }
 
-  LocationWayDescription::LocationWayDescription(const Place& way)
-  : way(way),
-    distance(0.0)
+  LocationWayDescription::LocationWayDescription(const Place &way)
+  : way(way)
   {
     // no code
   }
 
-  LocationWayDescription::LocationWayDescription(const Place& way,
-                                                 double distance)
+  LocationWayDescription::LocationWayDescription(const Place &way,
+                                                 const Distance &distance)
     : way(way),
       distance(distance)
   {
@@ -82,7 +80,6 @@ namespace osmscout {
   : crossing(crossing),
     atPlace(true),
     ways(ways),
-    distance(0.0),
     bearing(0.0)
   {
     // no code
@@ -90,7 +87,7 @@ namespace osmscout {
 
   LocationCrossingDescription::LocationCrossingDescription(const GeoCoord& crossing,
                                                            const std::list<Place>& ways,
-                                                           double distance,
+                                                           const Distance &distance,
                                                            double bearing)
     : crossing(crossing),
       atPlace(false),
@@ -809,7 +806,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocationByName(const GeoCoord& location,
                                                           LocationDescription& description,
-                                                          const double lookupDistance,
+                                                          Distance lookupDistance,
                                                           const double sizeFilter)
   {
 
@@ -896,7 +893,7 @@ namespace osmscout {
         }
         else {
           description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                        candidate.GetDistance()*1000,
+                                                                                        candidate.GetDistance(),
                                                                                         candidate.GetBearing()));
         }
 
@@ -926,7 +923,7 @@ namespace osmscout {
         }
         else {
           description.SetAtNameDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                        candidate.GetDistance()*1000,
+                                                                                        candidate.GetDistance(),
                                                                                         candidate.GetBearing()));
         }
 
@@ -939,7 +936,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocationByAddress(const GeoCoord& location,
                                                              LocationDescription& description,
-                                                             const double lookupDistance,
+                                                             Distance lookupDistance,
                                                              const double sizeFilter)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
@@ -1018,7 +1015,7 @@ namespace osmscout {
         }
         else {
           description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                            candidate.GetDistance()*1000, candidate.GetBearing()));
+                            candidate.GetDistance(), candidate.GetBearing()));
         }
         return true;
       }
@@ -1029,7 +1026,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocationByPOI(const GeoCoord& location,
                                                          LocationDescription& description,
-                                                         const double lookupDistance,
+                                                         Distance lookupDistance,
                                                          const double sizeFilter)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
@@ -1103,7 +1100,7 @@ namespace osmscout {
         }
         else {
           description.SetAtPOIDescription(std::make_shared<LocationAtPlaceDescription>(place,
-                                                                                       candidate.GetDistance()*1000,
+                                                                                       candidate.GetDistance(),
                                                                                        candidate.GetBearing()));
         }
         return true;
@@ -1126,7 +1123,7 @@ namespace osmscout {
    */
   bool LocationDescriptionService::DescribeLocationByCrossing(const GeoCoord& location,
                                                               LocationDescription& description,
-                                                              const double lookupDistance)
+                                                              Distance lookupDistance)
   {
     TypeConfigRef          typeConfig=database->GetTypeConfig();
     NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
@@ -1192,10 +1189,10 @@ namespace osmscout {
     }
 
     Point  candidate=Point(0,GeoCoord(0.0,0.0));
-    double candidateDistance=std::numeric_limits<double>::max();
+    Distance candidateDistance=Distance::Max();
 
     for (const auto& entry : crossings) {
-      double distance=GetEllipsoidalDistance(entry.GetCoord(),location);
+      Distance distance=GetEllipsoidalDistance(entry.GetCoord(),location);
 
       if (distance<candidateDistance) {
         candidate=entry;
@@ -1233,14 +1230,14 @@ namespace osmscout {
                                                                         places);
     }
     else {
-      double distance=GetEllipsoidalDistance(location,
-                                             candidate.GetCoord());
+      Distance distance=GetEllipsoidalDistance(location,
+                                               candidate.GetCoord());
       double bearing=GetSphericalBearingInitial(candidate.GetCoord(),
                                                 location);
 
       crossingDescription=std::make_shared<LocationCrossingDescription>(candidate.GetCoord(),
                                                                         places,
-                                                                        distance*1000,
+                                                                        distance,
                                                                         bearing);
     }
 
@@ -1262,7 +1259,7 @@ namespace osmscout {
    */
   bool LocationDescriptionService::DescribeLocationByWay(const GeoCoord& location,
                                                          LocationDescription& description,
-                                                         const double lookupDistance)
+                                                         Distance lookupDistance)
   {
     TypeConfigRef          typeConfig=database->GetTypeConfig();
     NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
@@ -1304,14 +1301,16 @@ namespace osmscout {
     }
 
     WayRef way;
-    double minDistance = std::numeric_limits<double>::max();
+    double minDistanceDeg = std::numeric_limits<double>::max();
+    Distance minDistance = Distance::Max();
     for (const auto& candidate : candidates) {
       for (size_t i = 0;  i < candidate->nodes.size() - 1; i++) {
         double r, intersectLon, intersectLat;
-        double distance = DistanceToSegment(location.GetLon(),location.GetLat(),candidate->nodes[i].GetLon(),candidate->nodes[i].GetLat(),
-                        candidate->nodes[i+1].GetLon(),candidate->nodes[i+1].GetLat(), r, intersectLon, intersectLat);
-        if (distance < minDistance) {
-          minDistance = distance;
+        double distanceDeg = DistanceToSegment(location.GetLon(),location.GetLat(),candidate->nodes[i].GetLon(),candidate->nodes[i].GetLat(),
+                                               candidate->nodes[i+1].GetLon(),candidate->nodes[i+1].GetLat(), r, intersectLon, intersectLat);
+        if (distanceDeg < minDistanceDeg) {
+          minDistanceDeg = distanceDeg;
+          minDistance = GetSphericalDistance(location, GeoCoord(intersectLat, intersectLon));
           way = candidate;
         }
       }
@@ -1324,7 +1323,7 @@ namespace osmscout {
 
     Place place = GetPlace(result);
     LocationWayDescriptionRef wayDescription;
-    wayDescription=std::make_shared<LocationWayDescription>(place, minDistance*1000);
+    wayDescription=std::make_shared<LocationWayDescription>(place, minDistance);
 
     description.SetWayDescription(wayDescription);
 
@@ -1333,7 +1332,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocation(const GeoCoord& location,
                                                     LocationDescription& description,
-                                                    const double lookupDistance,
+                                                    Distance lookupDistance,
                                                     const double sizeFilter)
   {
     description.SetCoordDescription(std::make_shared<LocationCoordDescription>(location));

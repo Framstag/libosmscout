@@ -22,6 +22,7 @@
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/Distance.h>
 
 #include <iostream>
 
@@ -105,15 +106,15 @@ int main(int argc, char* argv[])
     }
     std::cout << "  count of segments: " << track.segments.size() << std::endl;
     std::cout << "  \"raw\" point count: " << track.GetPointCount() << std::endl;
-    std::cout << "  \"raw\" length: " << (track.GetLength()/1000) << " km" << std::endl;
+    std::cout << "  \"raw\" length: " << track.GetLength().As<osmscout::Kilometer>() << " km" << std::endl;
 
     osmscout::gpx::Track filtered(track);
     filtered.FilterPoints([](std::vector<osmscout::gpx::TrackPoint> &points){
       osmscout::gpx::FilterInaccuratePoints(points, 15);
-      osmscout::gpx::FilterNearPoints(points, 10);
+      osmscout::gpx::FilterNearPoints(points, osmscout::Distance::Of<osmscout::Meter>(10));
     });
     std::cout << "  filtered point count: " << filtered.GetPointCount() << std::endl;
-    std::cout << "  filtered length: " << (filtered.GetLength()/1000) << " km" << std::endl;
+    std::cout << "  filtered length: " << filtered.GetLength().As<osmscout::Kilometer>() << " km" << std::endl;
     filteredFile.tracks.push_back(filtered);
   }
 

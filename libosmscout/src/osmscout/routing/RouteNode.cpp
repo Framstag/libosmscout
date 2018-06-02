@@ -158,7 +158,7 @@ namespace osmscout {
       scanner.Read(path.flags);
       scanner.ReadNumber(distanceValue);
 
-      path.distance=distanceValue/(1000.0*100.0);
+      path.distance=Distance::Of<Kilometer>(distanceValue/(1000.0*100.0));
     }
 
     excludes.resize(excludesCount);
@@ -222,7 +222,7 @@ namespace osmscout {
       writer.Write(path.objectIndex);
       //writer.Write(paths[i].bearing);
       writer.Write(path.flags);
-      writer.WriteNumber((uint32_t)floor(path.distance*(1000.0*100.0)+0.5));
+      writer.WriteNumber((uint32_t)floor(path.distance.As<Kilometer>()*(1000.0*100.0)+0.5));
     }
 
     for (const auto& exclude : excludes) {

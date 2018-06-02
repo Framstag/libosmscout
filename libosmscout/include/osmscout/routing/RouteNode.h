@@ -96,7 +96,7 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Path
     {
-      double     distance;    //!< Distance from the current route node to the target route node
+      Distance   distance;    //!< Distance from the current route node to the target route node
       Id         id;          //!< id of the targeting route node
       uint8_t    objectIndex; //!< The index of the way to use from this route node to the target route node
       uint8_t    flags;       //!< Certain flags

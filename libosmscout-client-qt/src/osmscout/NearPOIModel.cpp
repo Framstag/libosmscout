@@ -87,7 +87,7 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
       return QVariant::fromValue(location->getCoord().GetLon());
     case DistanceRole:
       if (searchCenter.GetLat()!=INVALID_COORD && searchCenter.GetLon()!=INVALID_COORD) {
-        return osmscout::GetSphericalDistance(location->getCoord(), searchCenter)*1000;
+        return osmscout::GetSphericalDistance(location->getCoord(), searchCenter).AsMeter();
       }else{
         return 0;
       }
@@ -166,12 +166,12 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
   }
   for (LocationEntry &location:newLocations){
     int position=0;
-    double distanceKm=osmscout::GetSphericalDistance(location.getCoord(), searchCenter);
-    if ((distanceKm*1000)>maxDistance){
+    Distance distance=osmscout::GetSphericalDistance(location.getCoord(), searchCenter);
+    if (distance > maxDistance){
       continue;
     }
     for (LocationEntry* secondLocation:locations) {
-      if (distanceKm < osmscout::GetSphericalDistance(secondLocation->getCoord(), searchCenter)){
+      if (distance < osmscout::GetSphericalDistance(secondLocation->getCoord(), searchCenter)){
         break;
       }
       position++;
@@ -179,7 +179,7 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
 
     emit beginInsertRows(QModelIndex(), position, position);
     locations.insert(position, new LocationEntry(location));
-    qDebug() << "Put " << location.getObjectType() << location.getLabel() << " to position: " << position << "(distance" << distanceKm << ")";
+    qDebug() << "Put " << location.getObjectType() << location.getLabel() << " to position: " << position << "(distance" << distance.AsMeter() << " m)";
     emit endInsertRows();
   }
 }
@@ -206,13 +206,13 @@ void NearPOIModel::lookupPOI()
   if (searchCenter.GetLat()!=INVALID_COORD &&
       searchCenter.GetLon()!=INVALID_COORD &&
       !types.isEmpty() &&
-      maxDistance>0 &&
+      maxDistance.AsMeter()>0 &&
       resultLimit>0){
 
     breaker=std::make_shared<osmscout::ThreadedBreaker>();
     searching=true;
     // TODO: use resultLimit
-    emit lookupPOI(++currentRequest, breaker, searchCenter, types, maxDistance);
+    emit lookupPOI(++currentRequest, breaker, searchCenter, types, maxDistance.AsMeter());
   }else{
     searching=false;
   }

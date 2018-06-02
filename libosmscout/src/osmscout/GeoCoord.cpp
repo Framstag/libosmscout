@@ -380,14 +380,14 @@ namespace osmscout {
     return false;
   }
 
-  double GeoCoord::GetDistance(GeoCoord target) const
+  Distance GeoCoord::GetDistance(const GeoCoord &target) const
   {
       return GetEllipsoidalDistance(*this, target);
   }
 
-  GeoCoord GeoCoord::Add(double bearing, double distance)
+  GeoCoord GeoCoord::Add(double bearing, const Distance &distance)
   {
-      if (distance == 0.0) {
+      if (distance.AsMeter() == 0.0) {
         return GeoCoord(GetLat(), GetLon());
       }
 

@@ -39,14 +39,14 @@ public:
 
   virtual ~NextStepDescriptionBuilder(){};
 
-  virtual void NextDescription(double distance,
+  virtual void NextDescription(const Distance &distance,
                                std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
                                std::list<osmscout::RouteDescription::Node>::const_iterator end);
 
 private:
   size_t          roundaboutCrossingCounter;
   size_t          index;
-  double          previousDistance;
+  Distance        previousDistance;
 };
 
 /**

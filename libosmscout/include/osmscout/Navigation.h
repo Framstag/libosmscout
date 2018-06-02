@@ -37,7 +37,7 @@ namespace osmscout {
     virtual ~OutputDescription()
     {};
 
-    virtual void NextDescription(double /*distance*/,
+    virtual void NextDescription(const Distance& /*distance*/,
                                  std::list<RouteDescription::Node>::const_iterator& /*node*/,
                                  std::list<RouteDescription::Node>::const_iterator /*end*/)
     {};
@@ -110,26 +110,26 @@ namespace osmscout {
     Navigation(OutputDescription<NodeDescriptionTmpl>* outputDescr)
       : route(0),
         outputDescription(outputDescr),
-        snapDistanceInMeters(25.0)
+        snapDistanceInMeters(Distance::Of<Meter>(25.0))
     {
     }
 
-    static inline double distanceInDegrees(double d,
+    static inline double distanceInDegrees(const Distance &d,
                                            double latitude)
     {
-      return d/(one_degree_at_equator*cos(M_PI*latitude/180));
+      return d.AsMeter()/(one_degree_at_equator*cos(M_PI*latitude/180));
     }
 
     void SetRoute(RouteDescription* newRoute)
     {
       assert(newRoute);
       route                                                         =newRoute;
-      distanceFromStart                                             =0.0;
+      distanceFromStart                                             =Distance::Of<Meter>(0.0);
       durationFromStart                                             =0.0;
       locationOnRoute                                               =route->Nodes().begin();
       nextWaypoint                                                  =route->Nodes().begin();
       outputDescription->Clear();
-      outputDescription->NextDescription(-1.0,
+      outputDescription->NextDescription(Distance::Of<Meter>(-1.0),
                                          nextWaypoint,
                                          route->Nodes().end());
       std::list<RouteDescription::Node>::const_iterator lastWaypoint=--(route->Nodes().end());
@@ -147,12 +147,12 @@ namespace osmscout {
       return route!=nullptr;
     }
 
-    void SetSnapDistance(double distance)
+    void SetSnapDistance(const Distance &distance)
     {
       snapDistanceInMeters=distance;
     }
 
-    double GetDistanceFromStart()
+    Distance GetDistanceFromStart()
     {
       return distanceFromStart;
     }
@@ -162,7 +162,7 @@ namespace osmscout {
       return durationFromStart;
     }
 
-    double GetDistance()
+    Distance GetDistance()
     {
       return distance;
     }
@@ -221,11 +221,11 @@ namespace osmscout {
     std::list<RouteDescription::Node>::const_iterator locationOnRoute;       // last passed node on the route
     std::list<RouteDescription::Node>::const_iterator nextWaypoint;          // next node with routing instructions
     OutputDescription<NodeDescriptionTmpl>            * outputDescription;    // next routing instructions
-    double                                            distanceFromStart;     // current length from the beginning of the route (in meters)
+    Distance                                          distanceFromStart;     // current length from the beginning of the route (in meters)
     double                                            durationFromStart;     // current (estimated) duration from the beginning of the route (in fract hours)
-    double                                            distance;              // whole lenght of the route (in meters)
+    Distance                                          distance;              // whole lenght of the route
     double                                            duration;              // whole estimated duration of the route (in fraction of hours)
-    double                                            snapDistanceInMeters;  // max distance in meters from the route path to consider being on route
+    Distance                                          snapDistanceInMeters;  // max distance from the route path to consider being on route
   };
 }
 

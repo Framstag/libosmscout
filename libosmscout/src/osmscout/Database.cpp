@@ -149,16 +149,16 @@ namespace osmscout {
     return indexMMap;
   }
 
-  NodeRegionSearchResultEntry::NodeRegionSearchResultEntry(const NodeRef& node,
-                                                           double distance)
+  NodeRegionSearchResultEntry::NodeRegionSearchResultEntry(const NodeRef &node,
+                                                           const Distance &distance)
   : node(node),
     distance(distance)
   {
   }
 
-  WayRegionSearchResultEntry::WayRegionSearchResultEntry(const WayRef& way,
-                                                         double distance,
-                                                         const GeoCoord& closestPoint)
+  WayRegionSearchResultEntry::WayRegionSearchResultEntry(const WayRef &way,
+                                                         const Distance &distance,
+                                                         const GeoCoord &closestPoint)
   : way(way),
     distance(distance),
     closestPoint(closestPoint)
@@ -166,7 +166,7 @@ namespace osmscout {
   }
 
   AreaRegionSearchResultEntry::AreaRegionSearchResultEntry(const AreaRef& area,
-                                                           double distance,
+                                                           const Distance &distance,
                                                            const GeoCoord& closestPoint,
                                                            bool inArea)
   : area(area),
@@ -1005,7 +1005,7 @@ namespace osmscout {
 
   NodeRegionSearchResult Database::LoadNodesInRadius(const GeoCoord& location,
                                                      const TypeInfoSet& types,
-                                                     double maxDistance)
+                                                     Distance maxDistance)
   {
     AreaNodeIndexRef areaNodeIndex=GetAreaNodeIndex();
 
@@ -1044,8 +1044,8 @@ namespace osmscout {
     }
 
     for (const auto& node : nodes) {
-      double  distance=GetEllipsoidalDistance(location,
-                                              node.get()->GetCoords())*1000; // In m
+      Distance distance=GetEllipsoidalDistance(location,
+                                               node.get()->GetCoords());
       if (distance<=maxDistance) {
         result.nodeResults.push_back(NodeRegionSearchResultEntry(node,
                                                                  distance));
@@ -1057,7 +1057,7 @@ namespace osmscout {
 
   WayRegionSearchResult Database::LoadWaysInRadius(const GeoCoord& location,
                                                    const TypeInfoSet& types,
-                                                   double maxDistance)
+                                                   Distance maxDistance)
   {
     AreaWayIndexRef areaWayIndex=GetAreaWayIndex();
 
@@ -1096,11 +1096,11 @@ namespace osmscout {
     }
 
     for (const auto& way : ways) {
-      double   distance=std::numeric_limits<double>::max(); // In m
+      Distance distance=Distance::Max();
       GeoCoord closestPoint;
 
       for (size_t i=1; i<way->nodes.size(); i++) {
-        double   currentDistance;
+        Distance currentDistance;
         GeoCoord a;
         GeoCoord b;
         GeoCoord intersection;
@@ -1118,7 +1118,7 @@ namespace osmscout {
         }
 
         currentDistance=GetEllipsoidalDistance(location,
-                                               intersection)*1000;
+                                               intersection);
 
         if (currentDistance<distance) {
           distance=currentDistance;
@@ -1138,7 +1138,7 @@ namespace osmscout {
 
   AreaRegionSearchResult Database::LoadAreasInRadius(const GeoCoord& location,
                                                      const TypeInfoSet& types,
-                                                     double maxDistance)
+                                                     Distance maxDistance)
   {
     AreaAreaIndexRef areaAreaIndex=GetAreaAreaIndex();
 
@@ -1179,7 +1179,7 @@ namespace osmscout {
     }
 
     for (const auto& area : areas) {
-      double  distance=std::numeric_limits<double>::max(); // In m
+      Distance distance=Distance::Max();
       GeoCoord closestPoint;
       bool     stop=false;
       bool     inArea=false;
@@ -1192,14 +1192,14 @@ namespace osmscout {
         if (ring.IsOuterRing()) {
           if (IsCoordInArea(location,
                             ring.nodes)) {
-            distance=0.0;
+            distance=Distance::Of<Meter>(0.0);
             inArea=true;
             stop=true;
             break;
           }
 
           for (size_t i=0; i<ring.nodes.size(); i++) {
-            double   currentDistance;
+            Distance currentDistance;
             GeoCoord a;
             GeoCoord b;
             GeoCoord intersection;
@@ -1223,7 +1223,7 @@ namespace osmscout {
             }
 
             currentDistance=GetEllipsoidalDistance(location,
-                                                   intersection)*1000;
+                                                   intersection);
 
             if (currentDistance<distance) {
               distance=currentDistance;

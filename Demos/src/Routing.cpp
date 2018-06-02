@@ -90,10 +90,10 @@ public:
     maxPercent=0.0;
   }
 
-  void Progress(double currentMaxDistance,
-                double overallDistance) override
+  void Progress(const osmscout::Distance &currentMaxDistance,
+                const osmscout::Distance &overallDistance) override
   {
-    double currentPercent=(currentMaxDistance*100.0)/overallDistance;
+    double currentPercent=(currentMaxDistance.AsMeter()*100.0)/overallDistance.AsMeter();
 
     std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
 
@@ -641,10 +641,9 @@ int main(int argc, char* argv[])
     break;
   }
 
-  double radius = 1000.0;
   osmscout::RoutePosition start=router->GetClosestRoutableNode(args.start,
                                                                *routingProfile,
-                                                               radius);
+                                                               osmscout::Distance::Of<osmscout::Kilometer>(1));
 
   if (!start.IsValid()) {
     std::cerr << "Error while searching for routing node near start location!" << std::endl;
@@ -655,10 +654,9 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
-  radius = 1000.0;
   osmscout::RoutePosition target=router->GetClosestRoutableNode(args.target,
                                                                *routingProfile,
-                                                               radius);
+                                                                osmscout::Distance::Of<osmscout::Kilometer>(1));
 
   if (!target.IsValid()) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;
@@ -891,11 +889,11 @@ int main(int argc, char* argv[])
     }
 
     std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
-    std::cout << node->GetDistance() << "km ";
+    std::cout << node->GetDistance().As<osmscout::Kilometer>() << "km ";
 
-    if (prevNode!=description.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
+    if (prevNode!=description.Nodes().end() && (node->GetDistance()-prevNode->GetDistance()).AsMeter()!=0.0) {
       std::cout << std::setfill(' ') << std::setw(4) << std::fixed << std::setprecision(1);
-      std::cout << node->GetDistance()-prevNode->GetDistance() << "km ";
+      std::cout << (node->GetDistance()-prevNode->GetDistance()).As<osmscout::Kilometer>() << "km ";
     }
     else {
       std::cout << "       ";

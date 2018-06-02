@@ -151,7 +151,7 @@ double RoutingListModel::getRouteLength() const
   if (!route || route.routeDescription().Nodes().empty()){
     return 0;
   }
-  return route.routeDescription().Nodes().back().GetDistance() * 1000;
+  return route.routeDescription().Nodes().back().GetDistance().AsMeter();
 }
 
 double RoutingListModel::getRouteDuration() const

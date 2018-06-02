@@ -9,6 +9,7 @@ osmscoutHeader = [
             'osmscout/util/Cache.h',
             'osmscout/util/CmdLineParsing.h',
             'osmscout/util/Color.h',
+            'osmscout/util/Distance.h',
             'osmscout/util/Exception.h',
             'osmscout/util/File.h',
             'osmscout/util/FileScanner.h',

@@ -526,8 +526,7 @@ int main(int argc, char *argv[]){
     osmscout::FastestPathRoutingProfileRef routingProfile=std::make_shared<osmscout::FastestPathRoutingProfile>(database->GetTypeConfig());
     osmscout::RouterParameter              routerParameter;
 
-    osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(
-                                                                                              database,
+    osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(database,
                                                                                               routerParameter,
                                                                                               routerFilenamebase);
 
@@ -559,10 +558,9 @@ int main(int argc, char *argv[]){
             break;
     }
 
-    double radius = 1000.0;
     osmscout::RoutePosition start=router->GetClosestRoutableNode(osmscout::GeoCoord(startLat,startLon),
                                                                  *routingProfile,
-                                                                 radius);
+                                                                 osmscout::Distance::Of<osmscout::Kilometer>(1));
 
     if (!start.IsValid()) {
         std::cerr << "Error while searching for routing node near start location!" << std::endl;
@@ -573,10 +571,9 @@ int main(int argc, char *argv[]){
         std::cerr << "Cannot find start node for start location!" << std::endl;
     }
 
-    radius = 1000.0;
     osmscout::RoutePosition target=router->GetClosestRoutableNode(osmscout::GeoCoord(targetLat,targetLon),
                                                                   *routingProfile,
-                                                                  radius);
+                                                                  osmscout::Distance::Of<osmscout::Kilometer>(1));
 
     if (!target.IsValid()) {
         std::cerr << "Error while searching for routing node near target location!" << std::endl;
@@ -644,7 +641,7 @@ int main(int argc, char *argv[]){
     //
 
     // Snap to route distance set to 100m
-    navigation.SetSnapDistance(100.0);
+    navigation.SetSnapDistance(osmscout::Distance::Of<osmscout::Meter>(100.0));
     navigation.SetRoute(&description);
 
     osmscout::GeoCoord location(latitude, longitude);
@@ -654,20 +651,21 @@ int main(int argc, char *argv[]){
 
     osmscout::ClosestRoutableObjectResult routableResult=router->GetClosestRoutableObject(location,
                                                                                           routingProfile->GetVehicle(),
-                                                                                          100);
+                                                                                          osmscout::Distance::Of<osmscout::Meter>(100));
 
-    std::cout << "Distance to route: " << minDistance << std::endl;
+    std::cout << "Distance to route: " << minDistance << " °" << std::endl;
 
-    std::cout << "Distance from start: " << navigation.GetDistanceFromStart() << std::endl;
+    std::cout << "Distance from start: " << navigation.GetDistanceFromStart().AsMeter() << std::endl;
     std::cout << "Time from start: " << TimeToString(navigation.GetDurationFromStart()) << std::endl;
 
-    std::cout << "Distance to destination: " << navigation.GetDistance() << std::endl;
+    std::cout << "Distance to destination: " << navigation.GetDistance().AsMeter() << std::endl;
     std::cout << "Time to destination: " << TimeToString(navigation.GetDuration()) << std::endl;
 
     osmscout::NodeDescription nextWaypointDescription = navigation.nextWaypointDescription();
     std::cout << "Next routing instructions: " <<  nextWaypointDescription.instructions << std::endl;
 
-    std::cout << "Closest routable object: " << routableResult.GetObject().GetName() << " '" << routableResult.GetName() << "' " << routableResult.GetDistance() << "m" << std::endl;
+    std::cout << "Closest routable object: " << routableResult.GetObject().GetName() << " '" << routableResult.GetName() << "' " <<
+              routableResult.GetDistance().AsMeter() << "m" << std::endl;
 
     return 0;
 }
