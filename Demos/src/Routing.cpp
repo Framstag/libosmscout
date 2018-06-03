@@ -216,308 +216,342 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
   }
 }
 
-static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
+struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionGenerator::Callback
 {
-#if defined(ROUTE_DEBUG)
-  unused(node);
+  size_t lineCount;
+  double prevDistance;
+  double prevTime;
+  double distance;
+  double time;
+  bool  lineDrawn;
 
-  return true;
-#else
-  if (node.HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
-    return true;
+  RouteDescriptionGeneratorCallback()
+  : lineCount(0),
+    prevDistance(0.0),
+    prevTime(0.0),
+    distance(0.0),
+    time(0.0),
+    lineDrawn(false)
+  {
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC)) {
-    return true;
+  void NextLine(size_t& lineCount)
+  {
+    if (lineCount==0) {
+      lineDrawn=true;
+
+      std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
+      std::cout << distance << "km ";
+
+      if (distance-prevDistance!=0.0) {
+        std::cout << std::setfill(' ') << std::setw(4) << std::fixed << std::setprecision(1);
+        std::cout << distance-prevDistance << "km ";
+      }
+      else {
+        std::cout << "       ";
+      }
+
+      std::cout << TimeToString(time) << "h ";
+
+      if (time-prevTime!=0.0) {
+        std::cout << TimeToString(time-prevTime) << "h ";
+      }
+      else {
+        std::cout << "       ";
+      }
+    }
+    else {
+      std::cout << "                             ";
+    }
+
+    lineCount++;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC)) {
-    return true;
+  void BeforeRoute() override
+  {
+    std::cout << "----------------------------------------------------" << std::endl;
+    std::cout << "     At| After|  Time| After|" << std::endl;
+    std::cout << "----------------------------------------------------" << std::endl;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC)) {
-    return true;
+  void OnStart(const osmscout::RouteDescription::StartDescriptionRef& startDescription,
+               const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+               const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
+  {
+    NextLine(lineCount);
+    std::cout << "Start at '" << startDescription->GetDescription() << "'" << std::endl;
+
+    NextLine(lineCount);
+    std::cout << "Drive along";
+
+    if (typeNameDescription) {
+      std::cout << " " << typeNameDescription->GetDescription();
+    }
+
+    if (nameDescription &&
+        nameDescription->HasName()) {
+      std::cout << " '" << nameDescription->GetDescription() << "'";
+    }
+    else {
+      std::cout << " <unknown name>";
+    }
+
+    std::cout << std::endl;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC)) {
-    return true;
+  void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef& targetDescription) override
+  {
+    NextLine(lineCount);
+
+    std::cout << "Target reached '" << targetDescription->GetDescription() << "'" << std::endl;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::TURN_DESC)) {
-    return true;
+  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
+              const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+              const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+              const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+              const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
+  {
+    std::string crossingWaysString;
+
+    if (crossingWaysDescription) {
+      crossingWaysString=CrossingWaysDescriptionToString(*crossingWaysDescription);
+    }
+
+    if (!crossingWaysString.empty()) {
+      NextLine(lineCount);
+      std::cout << "At crossing " << crossingWaysString << std::endl;
+    }
+
+    NextLine(lineCount);
+    if (directionDescription) {
+      std::cout << MoveToTurnCommand(directionDescription->GetCurve());
+    }
+    else {
+      std::cout << "Turn";
+    }
+
+    std::cout << " into";
+
+    if (typeNameDescription) {
+      std::cout << " " << typeNameDescription->GetDescription();
+    }
+
+    if (nameDescription &&
+        nameDescription->HasName()) {
+
+      std::cout << " '" << nameDescription->GetDescription() << "'";
+    }
+    else {
+      std::cout << " <unknown name>";
+    }
+
+    std::cout << std::endl;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::MOTORWAY_ENTER_DESC)) {
-    return true;
+  void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
+                         const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override
+  {
+    std::string crossingWaysString;
+
+    if (crossingWaysDescription) {
+      crossingWaysString=CrossingWaysDescriptionToString(*crossingWaysDescription);
+    }
+
+    if (!crossingWaysString.empty()) {
+      NextLine(lineCount);
+      std::cout << "At crossing " << crossingWaysString << std::endl;
+    }
+
+    NextLine(lineCount);
+    std::cout << "Enter roundabout" << std::endl;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC)) {
-    return true;
+  void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                         const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
+  {
+    NextLine(lineCount);
+    std::cout << "Leave roundabout (" << roundaboutLeaveDescription->GetExitCount() << ". exit)";
+
+    if (nameDescription &&
+        nameDescription->HasName()) {
+      std::cout << " into street '" << nameDescription->GetDescription() << "'";
+    }
+
+    std::cout << std::endl;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC)) {
-    return true;
+  void OnMotorwayEnter(const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
+                       const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override
+  {
+    std::string crossingWaysString;
+
+    if (crossingWaysDescription) {
+      crossingWaysString=CrossingWaysDescriptionToString(*crossingWaysDescription);
+    }
+
+    if (!crossingWaysString.empty()) {
+      NextLine(lineCount);
+      std::cout << "At crossing " << crossingWaysString << std::endl;
+    }
+
+    NextLine(lineCount);
+    std::cout << "Enter motorway";
+
+    if (motorwayEnterDescription->GetToDescription() &&
+        motorwayEnterDescription->GetToDescription()->HasName()) {
+      std::cout << " '" << motorwayEnterDescription->GetToDescription()->GetDescription() << "'";
+    }
+
+    std::cout << std::endl;
   }
 
-  /*
-  if (node.HasDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC)) {
-    return true;
-  }*/
+  void OnMotorwayChange(const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                        const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                        const osmscout::RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
+  {
+    NextLine(lineCount);
 
-  return false;
+    if (motorwayJunctionDescription &&
+        motorwayJunctionDescription->GetJunctionDescription()) {
+      std::cout << "At";
+
+      if (!motorwayJunctionDescription->GetJunctionDescription()->GetName().empty()) {
+        std::cout << " '" << motorwayJunctionDescription->GetJunctionDescription()->GetName() << "'";
+
+        if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
+          std::cout << " (exit " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << ")";
+        }
+      }
+
+      std::cout << std::endl;
+      NextLine(lineCount);
+    }
+
+    std::cout << "Change motorway";
+
+    if (motorwayChangeDescription->GetFromDescription() &&
+        motorwayChangeDescription->GetFromDescription()->HasName()) {
+      std::cout << " from '" << motorwayChangeDescription->GetFromDescription()->GetDescription() << "'";
+    }
+
+    if (motorwayChangeDescription->GetToDescription() &&
+        motorwayChangeDescription->GetToDescription()->HasName()) {
+      std::cout << " to '" << motorwayChangeDescription->GetToDescription()->GetDescription() << "'";
+    }
+
+    if (crossingDestinationDescription) {
+      std::cout << " destination '" << crossingDestinationDescription->GetDescription() << "'";
+    }
+
+    std::cout << std::endl;
+  }
+
+  void OnMotorwayLeave(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                       const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                       const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                       const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
+  {
+    NextLine(lineCount);
+
+    if (motorwayJunctionDescription &&
+        motorwayJunctionDescription->GetJunctionDescription()) {
+      std::cout << "At";
+
+      if (!motorwayJunctionDescription->GetJunctionDescription()->GetName().empty()) {
+        std::cout << " '" << motorwayJunctionDescription->GetJunctionDescription()->GetName() << "'";
+
+        if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
+          std::cout << " (exit " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << ")";
+        }
+      }
+
+      std::cout << std::endl;
+      NextLine(lineCount);
+    }
+
+    std::cout << "Leave motorway";
+
+    if (motorwayLeaveDescription->GetFromDescription() &&
+        motorwayLeaveDescription->GetFromDescription()->HasName()) {
+      std::cout << " '" << motorwayLeaveDescription->GetFromDescription()->GetDescription() << "'";
+    }
+
+    if (directionDescription &&
+        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
+        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
+        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
+      std::cout << " " << MoveToTurnCommand(directionDescription->GetCurve());
+    }
+
+    if (nameDescription &&
+        nameDescription->HasName()) {
+      std::cout << " into '" << nameDescription->GetDescription() << "'";
+    }
+
+    std::cout << std::endl;
+  }
+
+  void OnPathNameChange(const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override
+  {
+    NextLine(lineCount);
+
+    std::cout << "Way changes name";
+    if (nameChangedDescription->GetOriginDescription()) {
+      std::cout << " from ";
+      std::cout << "'" << nameChangedDescription->GetOriginDescription()->GetDescription() << "'";
+    }
+
+    std::cout << " to '";
+    std::cout << nameChangedDescription->GetTargetDescription()->GetDescription();
+    std::cout << "'" << std::endl;
+  }
+
+  virtual void OnMaxSpeed(const osmscout::RouteDescription::MaxSpeedDescriptionRef& /*maxSpeedDescription*/)
+  {
+    //NextLine(lineCount);
+    //std::cout << "MaxSpeed: " << (unsigned int)maxSpeedDescription->GetMaxSpeed() << std::endl;
+  }
+
+  void BeforeNode(const osmscout::RouteDescription::Node& node) override
+  {
+    lineCount=0;
+    lineDrawn=false;
+    distance=node.GetDistance().As<osmscout::Kilometer>();
+    time=node.GetTime();
+
+#if defined(ROUTE_DEBUG) || defined(NODE_DEBUG)
+    NextLine(lineCount);
+
+    std::cout << "// " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km ";
+
+    if (node->GetPathObject().Valid()) {
+      std::cout << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetCurrentNodeIndex() << "] => " << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetTargetNodeIndex() << "]";
+    }
+
+    std::cout << std::endl;
+
+    for (std::list<osmscout::RouteDescription::DescriptionRef>::const_iterator d=node.GetDescriptions().begin();
+        d!=node.GetDescriptions().end();
+        ++d) {
+      osmscout::RouteDescription::DescriptionRef desc=*d;
+
+      NextLine(lineCount);
+      std::cout << "// " << desc->GetDebugString() << std::endl;
+    }
 #endif
-}
-
-static void NextLine(size_t& lineCount)
-{
-  if (lineCount>0) {
-    std::cout << "                             ";
   }
 
-  lineCount++;
-}
-
-static void DumpStartDescription(size_t& lineCount,
-                                 const osmscout::RouteDescription::StartDescriptionRef& startDescription,
-                                 const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
-                                 const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
-{
-  NextLine(lineCount);
-  std::cout << "Start at '" << startDescription->GetDescription() << "'" << std::endl;
-
-  NextLine(lineCount);
-  std::cout << "Drive along";
-
-  if (typeNameDescription) {
-    std::cout << " " << typeNameDescription->GetDescription();
-  }
-
-  if (nameDescription &&
-      nameDescription->HasName()) {
-    std::cout << " '" << nameDescription->GetDescription() << "'";
-  }
-  else {
-    std::cout << " <unknown name>";
-  }
-
-  std::cout << std::endl;
-}
-
-static void DumpTargetDescription(size_t& lineCount,
-                                  const osmscout::RouteDescription::TargetDescriptionRef& targetDescription)
-{
-  NextLine(lineCount);
-
-  std::cout << "Target reached '" << targetDescription->GetDescription() << "'" << std::endl;
-}
-
-static void DumpTurnDescription(size_t& lineCount,
-                                const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
-                                const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
-                                const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-                                const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
-                                const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
-{
-  std::string crossingWaysString;
-
-  if (crossingWaysDescription) {
-    crossingWaysString=CrossingWaysDescriptionToString(*crossingWaysDescription);
-  }
-
-  if (!crossingWaysString.empty()) {
-    NextLine(lineCount);
-    std::cout << "At crossing " << crossingWaysString << std::endl;
-  }
-
-  NextLine(lineCount);
-  if (directionDescription) {
-    std::cout << MoveToTurnCommand(directionDescription->GetCurve());
-  }
-  else {
-    std::cout << "Turn";
-  }
-
-  std::cout << " into";
-
-  if (typeNameDescription) {
-    std::cout << " " << typeNameDescription->GetDescription();
-  }
-
-  if (nameDescription &&
-      nameDescription->HasName()) {
-
-    std::cout << " '" << nameDescription->GetDescription() << "'";
-  }
-  else {
-    std::cout << " <unknown name>";
-  }
-
-  std::cout << std::endl;
-}
-
-static void DumpRoundaboutEnterDescription(size_t& lineCount,
-                                           const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
-                                           const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
-{
-  std::string crossingWaysString;
-
-  if (crossingWaysDescription) {
-    crossingWaysString=CrossingWaysDescriptionToString(*crossingWaysDescription);
-  }
-
-  if (!crossingWaysString.empty()) {
-    NextLine(lineCount);
-    std::cout << "At crossing " << crossingWaysString << std::endl;
-  }
-
-  NextLine(lineCount);
-  std::cout << "Enter roundabout" << std::endl;
-}
-
-static void DumpRoundaboutLeaveDescription(size_t& lineCount,
-                                           const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                           const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
-{
-  NextLine(lineCount);
-  std::cout << "Leave roundabout (" << roundaboutLeaveDescription->GetExitCount() << ". exit)";
-
-  if (nameDescription &&
-      nameDescription->HasName()) {
-    std::cout << " into street '" << nameDescription->GetDescription() << "'";
-  }
-
-  std::cout << std::endl;
-}
-
-static void DumpMotorwayEnterDescription(size_t& lineCount,
-                                         const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
-                                         const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
-{
-  std::string crossingWaysString;
-
-  if (crossingWaysDescription) {
-    crossingWaysString=CrossingWaysDescriptionToString(*crossingWaysDescription);
-  }
-
-  if (!crossingWaysString.empty()) {
-    NextLine(lineCount);
-    std::cout << "At crossing " << crossingWaysString << std::endl;
-  }
-
-  NextLine(lineCount);
-  std::cout << "Enter motorway";
-
-  if (motorwayEnterDescription->GetToDescription() &&
-      motorwayEnterDescription->GetToDescription()->HasName()) {
-    std::cout << " '" << motorwayEnterDescription->GetToDescription()->GetDescription() << "'";
-  }
-
-  std::cout << std::endl;
-}
-
-static void DumpMotorwayChangeDescription(size_t& lineCount,
-                                          const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
-                                          const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                          const osmscout::RouteDescription::DestinationDescriptionRef& crossingDestinationDescription)
-{
-  NextLine(lineCount);
-
-  if (motorwayJunctionDescription &&
-      motorwayJunctionDescription->GetJunctionDescription()) {
-    std::cout << "At";
-
-    if (!motorwayJunctionDescription->GetJunctionDescription()->GetName().empty()) {
-      std::cout << " '" << motorwayJunctionDescription->GetJunctionDescription()->GetName() << "'";
-
-      if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
-        std::cout << " (exit " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << ")";
-      }
+  void AfterNode(const osmscout::RouteDescription::Node& node) override
+  {
+    if (lineCount==0 && lineDrawn) {
+      std::cout << std::endl;
     }
 
-    std::cout << std::endl;
-    NextLine(lineCount);
+    prevDistance=node.GetDistance().As<osmscout::Kilometer>();
+    prevTime=node.GetTime();
   }
-
-  std::cout << "Change motorway";
-
-  if (motorwayChangeDescription->GetFromDescription() &&
-      motorwayChangeDescription->GetFromDescription()->HasName()) {
-    std::cout << " from '" << motorwayChangeDescription->GetFromDescription()->GetDescription() << "'";
-  }
-
-  if (motorwayChangeDescription->GetToDescription() &&
-      motorwayChangeDescription->GetToDescription()->HasName()) {
-    std::cout << " to '" << motorwayChangeDescription->GetToDescription()->GetDescription() << "'";
-  }
-
-  if (crossingDestinationDescription) {
-    std::cout << " destination '" << crossingDestinationDescription->GetDescription() << "'";
-  }
-
-  std::cout << std::endl;
-}
-
-static void DumpMotorwayLeaveDescription(size_t& lineCount,
-                                         const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
-                                         const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                         const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-                                         const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
-{
-  NextLine(lineCount);
-
-  if (motorwayJunctionDescription &&
-      motorwayJunctionDescription->GetJunctionDescription()) {
-    std::cout << "At";
-
-    if (!motorwayJunctionDescription->GetJunctionDescription()->GetName().empty()) {
-      std::cout << " '" << motorwayJunctionDescription->GetJunctionDescription()->GetName() << "'";
-
-      if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
-        std::cout << " (exit " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << ")";
-      }
-    }
-
-    std::cout << std::endl;
-    NextLine(lineCount);
-  }
-
-  std::cout << "Leave motorway";
-
-  if (motorwayLeaveDescription->GetFromDescription() &&
-      motorwayLeaveDescription->GetFromDescription()->HasName()) {
-    std::cout << " '" << motorwayLeaveDescription->GetFromDescription()->GetDescription() << "'";
-  }
-
-  if (directionDescription &&
-      directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
-      directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
-      directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
-    std::cout << " " << MoveToTurnCommand(directionDescription->GetCurve());
-  }
-
-  if (nameDescription &&
-      nameDescription->HasName()) {
-    std::cout << " into '" << nameDescription->GetDescription() << "'";
-  }
-
-  std::cout << std::endl;
-}
-
-static void DumpNameChangedDescription(size_t& lineCount,
-                                       const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription)
-{
-  NextLine(lineCount);
-
-  std::cout << "Way changes name";
-  if (nameChangedDescription->GetOriginDesccription()) {
-    std::cout << " from ";
-    std::cout << "'" << nameChangedDescription->GetOriginDesccription()->GetDescription() << "'";
-  }
-
-  std::cout << " to '";
-  std::cout << nameChangedDescription->GetTargetDesccription()->GetDescription();
-  std::cout << "'" << std::endl;
-}
+};
 
 int main(int argc, char* argv[])
 {
@@ -703,7 +737,6 @@ int main(int argc, char* argv[])
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>());
 
   osmscout::RoutePostprocessor postprocessor;
-  size_t                       roundaboutCrossingCounter=0;
 
   std::list<osmscout::Point> points;
 
@@ -770,236 +803,11 @@ int main(int argc, char* argv[])
     std::cerr << "Error during route postprocessing" << std::endl;
   }
 
-  std::cout << "----------------------------------------------------" << std::endl;
-  std::cout << "     At| After|  Time| After|" << std::endl;
-  std::cout << "----------------------------------------------------" << std::endl;
-  std::list<osmscout::RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
+  osmscout::RouteDescriptionGenerator generator;
+  RouteDescriptionGeneratorCallback   generatorCallback;
 
-  for (std::list<osmscout::RouteDescription::Node>::const_iterator node=description.Nodes().begin();
-       node!=description.Nodes().end();
-       ++node) {
-    osmscout::RouteDescription::DescriptionRef                 desc;
-    osmscout::RouteDescription::NameDescriptionRef             nameDescription;
-    osmscout::RouteDescription::DirectionDescriptionRef        directionDescription;
-    osmscout::RouteDescription::NameChangedDescriptionRef      nameChangedDescription;
-    osmscout::RouteDescription::CrossingWaysDescriptionRef     crossingWaysDescription;
-
-    osmscout::RouteDescription::StartDescriptionRef            startDescription;
-    osmscout::RouteDescription::TargetDescriptionRef           targetDescription;
-    osmscout::RouteDescription::TurnDescriptionRef             turnDescription;
-    osmscout::RouteDescription::RoundaboutEnterDescriptionRef  roundaboutEnterDescription;
-    osmscout::RouteDescription::RoundaboutLeaveDescriptionRef  roundaboutLeaveDescription;
-    osmscout::RouteDescription::MotorwayEnterDescriptionRef    motorwayEnterDescription;
-    osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
-    osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
-    osmscout::RouteDescription::MotorwayJunctionDescriptionRef motorwayJunctionDescription;
-    osmscout::RouteDescription::DestinationDescriptionRef      crossingDestinationDescription;
-    osmscout::RouteDescription::MaxSpeedDescriptionRef         maxSpeedDescription;
-    osmscout::RouteDescription::TypeNameDescriptionRef         typeNameDescription;
-
-    desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
-    if (desc) {
-      nameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::DIRECTION_DESC);
-    if (desc) {
-      directionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::DirectionDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
-    if (desc) {
-      nameChangedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameChangedDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
-    if (desc) {
-      crossingWaysDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::CrossingWaysDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
-    if (desc) {
-      startDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::StartDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
-    if (desc) {
-      targetDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TargetDescription>(desc);
-    }
-
-
-    desc=node->GetDescription(osmscout::RouteDescription::TURN_DESC);
-    if (desc) {
-      turnDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TurnDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
-    if (desc) {
-      roundaboutEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutEnterDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
-    if (desc) {
-      roundaboutLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutLeaveDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
-    if (desc) {
-      motorwayEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayEnterDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
-    if (desc) {
-      motorwayChangeDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayChangeDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
-    if (desc) {
-      motorwayLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayLeaveDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_JUNCTION_DESC);
-    if (desc) {
-      motorwayJunctionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayJunctionDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::CROSSING_DESTINATION_DESC);
-    if (desc) {
-      crossingDestinationDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::DestinationDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
-    if (desc) {
-      maxSpeedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MaxSpeedDescription>(desc);
-    }
-
-    desc=node->GetDescription(osmscout::RouteDescription::WAY_TYPE_NAME_DESC);
-    if (desc) {
-      typeNameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TypeNameDescription>(desc);
-    }
-
-    if (crossingWaysDescription &&
-        roundaboutCrossingCounter>0 &&
-        crossingWaysDescription->GetExitCount()>1) {
-      roundaboutCrossingCounter+=crossingWaysDescription->GetExitCount()-1;
-    }
-
-    if (!HasRelevantDescriptions(*node)) {
-      continue;
-    }
-
-    std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
-    std::cout << node->GetDistance().As<osmscout::Kilometer>() << "km ";
-
-    if (prevNode!=description.Nodes().end() && (node->GetDistance()-prevNode->GetDistance()).AsMeter()!=0.0) {
-      std::cout << std::setfill(' ') << std::setw(4) << std::fixed << std::setprecision(1);
-      std::cout << (node->GetDistance()-prevNode->GetDistance()).As<osmscout::Kilometer>() << "km ";
-    }
-    else {
-      std::cout << "       ";
-    }
-
-    std::cout << TimeToString(node->GetTime()) << "h ";
-
-    if (prevNode!=description.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
-      std::cout << TimeToString(node->GetTime()-prevNode->GetTime()) << "h ";
-    }
-    else {
-      std::cout << "       ";
-    }
-
-    /*
-    if (maxSpeedDescription) {
-      std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
-      std::cout << (size_t)maxSpeedDescription->GetMaxSpeed() << " km/h ";
-    }
-    else {
-      std::cout << "           ";
-    }*/
-
-    size_t lineCount=0;
-
-#if defined(ROUTE_DEBUG) || defined(NODE_DEBUG)
-    NextLine(lineCount);
-
-    std::cout << "// " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km ";
-
-    if (node->GetPathObject().Valid()) {
-      std::cout << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetCurrentNodeIndex() << "] => " << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetTargetNodeIndex() << "]";
-    }
-
-    std::cout << std::endl;
-
-    for (std::list<osmscout::RouteDescription::DescriptionRef>::const_iterator d=node->GetDescriptions().begin();
-        d!=node->GetDescriptions().end();
-        ++d) {
-      osmscout::RouteDescription::DescriptionRef desc=*d;
-
-      NextLine(lineCount);
-      std::cout << "// " << desc->GetDebugString() << std::endl;
-    }
-#endif
-
-    if (startDescription) {
-      DumpStartDescription(lineCount,
-                           startDescription,
-                           typeNameDescription,
-                           nameDescription);
-    }
-    else if (targetDescription) {
-      DumpTargetDescription(lineCount,targetDescription);
-    }
-    else if (turnDescription) {
-      DumpTurnDescription(lineCount,
-                          turnDescription,
-                          crossingWaysDescription,
-                          directionDescription,
-                          typeNameDescription,
-                          nameDescription);
-    }
-    else if (roundaboutEnterDescription) {
-      DumpRoundaboutEnterDescription(lineCount,
-                                     roundaboutEnterDescription,
-                                     crossingWaysDescription);
-
-      roundaboutCrossingCounter=1;
-    }
-    else if (roundaboutLeaveDescription) {
-      DumpRoundaboutLeaveDescription(lineCount,
-                                     roundaboutLeaveDescription,
-                                     nameDescription);
-
-      roundaboutCrossingCounter=0;
-    }
-    else if (motorwayEnterDescription) {
-      DumpMotorwayEnterDescription(lineCount,
-                                   motorwayEnterDescription,
-                                   crossingWaysDescription);
-    }
-    else if (motorwayChangeDescription) {
-      DumpMotorwayChangeDescription(lineCount,
-                                    motorwayChangeDescription,
-                                    motorwayJunctionDescription,
-                                    crossingDestinationDescription);
-    }
-    else if (motorwayLeaveDescription) {
-      DumpMotorwayLeaveDescription(lineCount,
-                                   motorwayLeaveDescription,
-                                   motorwayJunctionDescription,
-                                   directionDescription,
-                                   nameDescription);
-    }
-    else if (nameChangedDescription) {
-      DumpNameChangedDescription(lineCount,
-                                 nameChangedDescription);
-    }
-
-    if (lineCount==0) {
-      std::cout << std::endl;
-    }
-
-    prevNode=node;
-  }
+  generator.GenerateDescription(description,
+                                generatorCallback);
 
   router->Close();
 

@@ -363,15 +363,15 @@ namespace osmscout {
     {
         NodeDescription desc;
         std::ostringstream stream;
-        if (nameChangedDescription->GetOriginDesccription() && nameChangedDescription->GetTargetDesccription()) {
-            std::string originNameString=nameChangedDescription->GetOriginDesccription()->GetDescription();
-            std::string targetNameString=nameChangedDescription->GetTargetDesccription()->GetDescription();
+        if (nameChangedDescription->GetOriginDescription() && nameChangedDescription->GetTargetDescription()) {
+            std::string originNameString=nameChangedDescription->GetOriginDescription()->GetDescription();
+            std::string targetNameString=nameChangedDescription->GetTargetDescription()->GetDescription();
 
             if (!originNameString.empty() && originNameString.compare("unnamed road") &&
                 !targetNameString.empty() && targetNameString.compare("unnamed road")) {
                 stream << "Way changes name";
-                stream << " from '" << nameChangedDescription->GetOriginDesccription()->GetDescription() << "'";
-                stream << " to '" << nameChangedDescription->GetTargetDesccription()->GetDescription() << "'";
+                stream << " from '" << nameChangedDescription->GetOriginDescription()->GetDescription() << "'";
+                stream << " to '" << nameChangedDescription->GetTargetDescription()->GetDescription() << "'";
 
             }
         }

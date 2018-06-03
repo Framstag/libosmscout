@@ -109,9 +109,9 @@ namespace osmscout {
       std::string description;
 
     public:
-      StartDescription(const std::string& description);
+      explicit StartDescription(const std::string& description);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       std::string GetDescription() const;
     };
@@ -128,9 +128,9 @@ namespace osmscout {
       std::string description;
 
     public:
-      TargetDescription(const std::string& description);
+      explicit TargetDescription(const std::string& description);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       std::string GetDescription() const;
     };
@@ -149,12 +149,12 @@ namespace osmscout {
       std::string ref;
 
     public:
-      NameDescription(const std::string& name);
+      explicit NameDescription(const std::string& name);
 
       NameDescription(const std::string& name,
                       const std::string& ref);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       bool HasName() const;
 
@@ -180,14 +180,14 @@ namespace osmscout {
       NameChangedDescription(const NameDescriptionRef& originDescription,
                              const NameDescriptionRef& targetDescription);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef& GetOriginDesccription() const
+      inline const NameDescriptionRef GetOriginDescription() const
       {
         return originDescription;
       }
 
-      inline const NameDescriptionRef& GetTargetDesccription() const
+      inline const NameDescriptionRef GetTargetDescription() const
       {
         return targetDescription;
       }
@@ -214,7 +214,7 @@ namespace osmscout {
 
       void AddDescription(const NameDescriptionRef& description);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       inline size_t GetExitCount() const
       {
@@ -226,12 +226,12 @@ namespace osmscout {
         return exitCount>1;
       }
 
-      inline const NameDescriptionRef& GetOriginDesccription() const
+      inline const NameDescriptionRef GetOriginDesccription() const
       {
         return originDescription;
       }
 
-      inline const NameDescriptionRef& GetTargetDesccription() const
+      inline const NameDescriptionRef GetTargetDesccription() const
       {
         return targetDescription;
       }
@@ -282,7 +282,7 @@ namespace osmscout {
       DirectionDescription(double turnAngle,
                       double curveAngle);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       inline double GetTurnAngle() const
       {
@@ -316,7 +316,7 @@ namespace osmscout {
     public:
       TurnDescription();
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
     };
 
     typedef std::shared_ptr<TurnDescription> TurnDescriptionRef;
@@ -330,7 +330,7 @@ namespace osmscout {
     public:
       RoundaboutEnterDescription();
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
     };
 
     typedef std::shared_ptr<RoundaboutEnterDescription> RoundaboutEnterDescriptionRef;
@@ -345,9 +345,9 @@ namespace osmscout {
       size_t exitCount;
 
     public:
-      RoundaboutLeaveDescription(size_t exitCount);
+      explicit RoundaboutLeaveDescription(size_t exitCount);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       inline size_t GetExitCount() const
       {
@@ -367,11 +367,11 @@ namespace osmscout {
       NameDescriptionRef toDescription;
 
     public:
-      MotorwayEnterDescription(const NameDescriptionRef& toDescription);
+      explicit MotorwayEnterDescription(const NameDescriptionRef& toDescription);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef& GetToDescription() const
+      inline const NameDescriptionRef GetToDescription() const
       {
         return toDescription;
       }
@@ -393,14 +393,14 @@ namespace osmscout {
       MotorwayChangeDescription(const NameDescriptionRef& fromDescription,
                                 const NameDescriptionRef& toDescription);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef& GetFromDescription() const
+      inline const NameDescriptionRef GetFromDescription() const
       {
         return fromDescription;
       }
 
-      inline const NameDescriptionRef& GetToDescription() const
+      inline const NameDescriptionRef GetToDescription() const
       {
         return toDescription;
       }
@@ -418,11 +418,11 @@ namespace osmscout {
       NameDescriptionRef fromDescription;
 
     public:
-      MotorwayLeaveDescription(const NameDescriptionRef& fromDescription);
+      explicit MotorwayLeaveDescription(const NameDescriptionRef& fromDescription);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef& GetFromDescription() const
+      inline const NameDescriptionRef GetFromDescription() const
       {
         return fromDescription;
       }
@@ -440,11 +440,11 @@ namespace osmscout {
       NameDescriptionRef junctionDescription;
 
     public:
-      MotorwayJunctionDescription(const NameDescriptionRef& junctionDescription);
+      explicit MotorwayJunctionDescription(const NameDescriptionRef& junctionDescription);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef& GetJunctionDescription() const
+      inline const NameDescriptionRef GetJunctionDescription() const
       {
         return junctionDescription;
       }
@@ -462,9 +462,9 @@ namespace osmscout {
       std::string description;
 
     public:
-      DestinationDescription(const std::string& description);
+      explicit DestinationDescription(const std::string& description);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       std::string GetDescription() const;
     };
@@ -481,9 +481,9 @@ namespace osmscout {
       uint8_t maxSpeed;
 
     public:
-      MaxSpeedDescription(uint8_t speed);
+      explicit MaxSpeedDescription(uint8_t speed);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       inline uint8_t GetMaxSpeed() const
       {
@@ -503,9 +503,9 @@ namespace osmscout {
       std::string name;
 
     public:
-      TypeNameDescription(const std::string& name);
+      explicit TypeNameDescription(const std::string& name);
 
-      std::string GetDebugString() const;
+      std::string GetDebugString() const override;
 
       bool HasName() const;
 
@@ -655,6 +655,144 @@ namespace osmscout {
     {
       return nodes;
     }
+  };
+
+  /**
+   * The RouteDescriptionGenerator does all the heavy lifting of creating the
+   * various available Postprocessors, evaluate their feedback and map it onto a set
+   * of real-life situation callback methods.
+   *
+   * Just implement your own derived Callback class and pass it to the generator methods.
+   */
+  class OSMSCOUT_API RouteDescriptionGenerator
+  {
+  public:
+    /**
+     * Callback class that gets call in various routing situations.
+     */
+    struct OSMSCOUT_API Callback
+    {
+      virtual ~Callback();
+
+      /**
+       * Call once before evaluation the the RouteDswcription starts
+       */
+      virtual void BeforeRoute() = 0;
+
+      /**
+       * Called one for the start node
+       *
+       * @param startDescription
+       * @param typeNameDescription
+       * @param nameDescription
+       */
+      virtual void OnStart(const RouteDescription::StartDescriptionRef& startDescription,
+                           const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+                           const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+
+      /**
+       * Called once for the target node reached
+       *
+       * @param targetDescription
+       */
+      virtual void OnTargetReached(const RouteDescription::TargetDescriptionRef& targetDescription) = 0;
+
+      /**
+       * Call everytime a turn is necessary. Call with all information available regarding the turn
+       * and the way turned into and its direction.
+       *
+       * @param turnDescription
+       * @param crossingWaysDescription
+       * @param directionDescription
+       * @param typeNameDescription
+       * @param nameDescription
+       */
+      virtual void OnTurn(const RouteDescription::TurnDescriptionRef& turnDescription,
+                          const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+                          const RouteDescription::DirectionDescriptionRef& directionDescription,
+                          const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+                          const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+
+      /**
+       * Called if we enter a roundabound
+       *
+       * @param roundaboutEnterDescription
+       * @param crossingWaysDescription
+       */
+      virtual void OnRoundaboutEnter(const RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
+                                     const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) = 0;
+
+      /**
+       * Called if we leave a roundabound entered before
+       *
+       * @param roundaboutLeaveDescription
+       * @param nameDescription
+       */
+      virtual void OnRoundaboutLeave(const RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                                     const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+
+      /**
+       * Called if we enter a motorway
+       *
+       * @param motorwayEnterDescription
+       * @param crossingWaysDescription
+       */
+      virtual void OnMotorwayEnter(const RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
+                                   const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) = 0;
+      /**
+       * Called if we already on a motorway and switch to another motorway
+       *
+       * @param motorwayChangeDescription
+       * @param motorwayJunctionDescription
+       * @param crossingDestinationDescription
+       */
+      virtual void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                                    const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                                    const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) = 0;
+      /**
+       * Called if we are on a motorway an leave it to a non-motorway way.
+       *
+       * @param motorwayLeaveDescription
+       * @param motorwayJunctionDescription
+       * @param directionDescription
+       * @param nameDescription
+       */
+      virtual void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                                   const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                                   const RouteDescription::DirectionDescriptionRef& directionDescription,
+                                   const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+
+      /**
+       * Called anytime the way we are on changes its name.
+       *
+       * @param nameChangedDescription
+       */
+      virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) = 0;
+
+      /**
+       * Called everytime we have max speed information for a route segment
+       *
+       * @param maxSpeedDescription
+       */
+      virtual void OnMaxSpeed(const RouteDescription::MaxSpeedDescriptionRef& maxSpeedDescription) = 0;
+
+      /**
+       * Always called before we analyse a node. It may be that other callback methods are called
+       * or not (normally we only call other methods, if something relevant changes).
+       *
+       * @param node
+       */
+      virtual void BeforeNode(const RouteDescription::Node& node) = 0;
+      /**
+       * Called after all possible callback methods for a node are called.
+       * @param node
+       */
+      virtual void AfterNode(const RouteDescription::Node& node) = 0;
+    };
+
+  public:
+    void GenerateDescription(const RouteDescription& description,
+                             Callback& callback);
   };
 }
 

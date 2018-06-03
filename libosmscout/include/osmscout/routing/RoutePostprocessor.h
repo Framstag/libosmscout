@@ -329,9 +329,13 @@ namespace osmscout {
                             size_t nodeIndex) const;
 
   public:
-    // All Postprocessor are allowed to use our internal methods current
-    // we should fix this by moving helper methods to a separate
-    // PostprocessorContext object that gets passed to the postprocessors explicitely
+    /*
+     * TODO:
+     * All Postprocessors are allowed to use our internal methods currently.
+     * We should fix this by moving helper methods to a separate
+     * PostprocessorContext object that gets passed to the postprocessors explicitely.
+     * This would also move state out of the RoutePostprocessor itself.
+     */
     friend Postprocessor;
 
     RoutePostprocessor();

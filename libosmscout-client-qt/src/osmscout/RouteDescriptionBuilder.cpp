@@ -443,13 +443,13 @@ void RouteDescriptionBuilder::DumpNameChangedDescription(QList<RouteStep> &route
 
   changed.shortDescription=osmscout::RouteDescriptionBuilder::tr("Way changes name");
 
-  if (nameChangedDescription->GetOriginDesccription()) {
+  if (nameChangedDescription->GetOriginDescription()) {
     changed.description=osmscout::RouteDescriptionBuilder::tr("<strong>Way changes name</strong> from %1 to %2")
-        .arg(FormatName(*(nameChangedDescription->GetOriginDesccription())))
-        .arg(FormatName(*(nameChangedDescription->GetTargetDesccription())));
+        .arg(FormatName(*(nameChangedDescription->GetOriginDescription())))
+        .arg(FormatName(*(nameChangedDescription->GetTargetDescription())));
   } else {
     changed.description=osmscout::RouteDescriptionBuilder::tr("<strong>Way changes name</strong> to %1")
-      .arg(FormatName(*(nameChangedDescription->GetTargetDesccription())));
+      .arg(FormatName(*(nameChangedDescription->GetTargetDescription())));
   }
 
   routeSteps.push_back(changed);
