@@ -186,8 +186,8 @@ namespace osmscout {
   }
 
   double MapPainterQt::GetFontHeight(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   double fontSize)
+                                     const MapParameter& parameter,
+                                     double fontSize)
   {
     QFont        font(GetFont(projection,
                               parameter,
@@ -283,20 +283,23 @@ namespace osmscout {
     }
   }
 
-  /*
   void MapPainterQt::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const LabelData& label)
+                               const QRectF& rect,
+                               const LabelData& label,
+                               const QTextLayout& textLayout)
   {
-    QFont        font(GetFont(projection,
-                              parameter,
-                              label.fontSize));
-    QString      string=QString::fromUtf8(label.text.c_str());
-    QFontMetrics fontMetrics=QFontMetrics(font);
-    QTextLayout  textLayout(string,font);
-    qreal        proposedWidth=std::ceil(label.bx2-label.bx1); // try to make word wrapping more stable
+    //QFont        font(GetFont(projection,
+    //                          parameter,
+    //                          label.fontSize));
+    //QString      string=QString::fromUtf8(label.text.c_str());
+    //QFontMetrics fontMetrics=QFontMetrics(font);
+    //QTextLayout  textLayout(string,font);
+    //qreal        proposedWidth=std::ceil(label.bx2-label.bx1); // try to make word wrapping more stable
 
-    textLayout.setCacheEnabled(true);
+    //textLayout.setCacheEnabled(true);
+
+
 
     if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
       const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
@@ -305,83 +308,138 @@ namespace osmscout {
       double      b=style->GetTextColor().GetB();
 
       if (style->GetStyle()==TextStyle::normal) {
+
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
-        QRectF                          boundingBox;
+        //QRectF                          boundingBox;
         QList<QTextLayout::FormatRange> formatList;
         QTextLayout::FormatRange        range;
 
-        range.start=0;
-        range.length=string.length();
-        range.format.setForeground(QBrush(textColor));
-        formatList.append(range);
+        //range.start=0;
+        //range.length=textLayout.text().size();
+        //range.format.setForeground(QBrush(textColor));
+        //formatList.append(range);
 
-        textLayout.setAdditionalFormats(formatList);
+        painter->setPen(textColor);
 
-        LayoutTextLayout(fontMetrics,
-                         proposedWidth,
-                         textLayout,
-                         boundingBox);
+        //painter->setBrush(QBrush(textColor));
 
-        textLayout.draw(painter,QPointF(label.x+boundingBox.x(),
-                                        label.y+boundingBox.y()));
+        //textLayout.setAdditionalFormats(formatList);
+
+        //LayoutTextLayout(fontMetrics,
+        //                 proposedWidth,
+        //                 textLayout,
+        //                 boundingBox);
+
+        textLayout.draw(painter,rect.topLeft());
+        //textLayout.draw(painter,QPointF(label.x+boundingBox.x(),
+        //                                label.y+boundingBox.y()));
+
+
+        /*
+        QBrush brush(Qt::transparent);
+        painter->setBrush(brush);
+
+        QPen pen2(QColor::fromRgbF(0,0,0));
+        pen2.setWidthF(1);
+        painter->setPen(pen2);
+
+        textLayout.draw(painter, rect.topLeft());
+        */
+
       }
       else if (style->GetStyle()==TextStyle::emphasize) {
-        QRectF                          boundingBox;
+
+        //QRectF                          boundingBox;
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
         QColor                          outlineColor=QColor::fromRgbF(1.0,1.0,1.0,label.alpha);
         QPen                            outlinePen(outlineColor,2.0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
+        //QColor                          outlineColor=QColor::fromRgbF(1.0,0,0,label.alpha);
+        //QPen                            outlinePen(outlineColor,10.0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
         QList<QTextLayout::FormatRange> formatList;
         QTextLayout::FormatRange        range;
 
-        range.start=0;
-        range.length=string.length();
-        range.format.setForeground(QBrush(outlineColor));
-        range.format.setTextOutline(outlinePen);
-        formatList.append(range);
 
-        textLayout.setAdditionalFormats(formatList);
+        //range.start=0;
+        //range.length=textLayout.text().size();
+        //range.format.setForeground(QBrush(outlineColor));
+        //range.format.setTextOutline(outlinePen);
+        //formatList.append(range);
+        //
+        //textLayout.setAdditionalFormats(formatList);
 
-        LayoutTextLayout(fontMetrics,
-                         proposedWidth,
-                         textLayout,
-                         boundingBox);
+        //LayoutTextLayout(fontMetrics,
+        //                 proposedWidth,
+        //                 textLayout,
+        //                 boundingBox);
 
-        textLayout.draw(painter,
-                        QPointF(label.x+boundingBox.x(),
-                                label.y+boundingBox.y()));
+        painter->setPen(outlineColor);
 
-        range.start=0;
-        range.length=string.length();
-        range.format.setForeground(QBrush(textColor));
-        range.format.setTextOutline(QPen(Qt::transparent));
-        formatList.clear();
-        formatList.append(range);
+        QVector<QTextLayout::FormatRange> overrides;
+        QTextLayout::FormatRange outline;
+        outline.start=0;
+        outline.length=textLayout.text().size();
+        outline.format.setForeground(QBrush(outlineColor));
+        outline.format.setTextOutline(outlinePen);
+        overrides << outline;
+        //textLayout.setFormats(overrides);
 
-        textLayout.setAdditionalFormats(formatList);
+        //textLayout.beginLayout();
+        //while (true) {
+        //  QTextLine line = textLayout.createLine();
+        //  if (!line.isValid())
+        //    break;
+        //}
+        //textLayout.endLayout();
 
-        LayoutTextLayout(fontMetrics,
-                         proposedWidth,
-                         textLayout,
-                         boundingBox);
 
-        textLayout.draw(painter,
-                        QPointF(label.x+boundingBox.x(),
-                                label.y+boundingBox.y()));
+        //painter->text
+
+        textLayout.draw(painter,rect.topLeft(),overrides);
+
+
+        // range.start=0;
+        // range.length=textLayout.text().size();
+        // range.format.setForeground(QBrush(textColor));
+        // range.format.setTextOutline(QPen(Qt::transparent));
+        // formatList.clear();
+        // formatList.append(range);
+        //
+        // textLayout.setAdditionalFormats(formatList);
+
+        //LayoutTextLayout(fontMetrics,
+        //                 proposedWidth,
+        //                 textLayout,
+        //                 boundingBox);
+
+        //textLayout.beginLayout();
+        //while (true) {
+        //  QTextLine line = textLayout.createLine();
+        //  if (!line.isValid())
+        //    break;
+        //}
+        //textLayout.endLayout();
+
+        //painter->setBrush(QBrush(QColor::fromRgbF(1,0,0), Qt::SolidPattern));
+
+        painter->setPen(QPen(textColor,1.0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
+        textLayout.draw(painter, rect.topLeft());
       }
     }
     else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+
+      QPointF marginMove(-5,-5);
+      QSizeF marginResize(10,10);
+
       const auto *style=dynamic_cast<const ShieldStyle*>(label.style.get());
       QColor     textColor=QColor::fromRgbF(style->GetTextColor().GetR(),
                                             style->GetTextColor().GetG(),
                                             style->GetTextColor().GetB(),
                                             style->GetTextColor().GetA());
-      QRectF             boundingBox;
+      //QRectF             boundingBox;
 
       // Shield background
-      painter->fillRect(QRectF(label.bx1,
-                               label.by1,
-                               label.bx2-label.bx1+1,
-                               label.by2-label.by1+1),
+      painter->fillRect(QRectF(rect.topLeft() + marginMove,
+                               rect.size() + QSizeF(1,1) + marginResize),
                         QBrush(QColor::fromRgbF(style->GetBgColor().GetR(),
                                                 style->GetBgColor().GetG(),
                                                 style->GetBgColor().GetB(),
@@ -394,53 +452,58 @@ namespace osmscout {
                                        style->GetBorderColor().GetA()));
       painter->setBrush(Qt::NoBrush);
 
-      painter->drawRect(QRectF(label.bx1+2,
-                               label.by1+2,
-                               label.bx2-label.bx1+1-4,
-                               label.by2-label.by1+1-4));
+      painter->drawRect(QRectF(rect.topLeft() + QPointF(2,2) + marginMove,
+                               rect.size() + QSizeF(1-4,1-4) + marginResize));
 
-      QList<QTextLayout::FormatRange> formatList;
-      QTextLayout::FormatRange range;
+      //QList<QTextLayout::FormatRange> formatList;
+      //QTextLayout::FormatRange range;
 
-      range.start=0;
-      range.length=string.length();
-      range.format.setForeground(QBrush(textColor));
-      range.format.setTextOutline(Qt::NoPen);
-      formatList.clear();
-      formatList.append(range);
+      // range.start=0;
+      // range.length=textLayout.text().size();
+      // range.format.setForeground(QBrush(textColor));
+      // range.format.setTextOutline(Qt::NoPen);
+      // formatList.clear();
+      // formatList.append(range);
 
-      textLayout.setAdditionalFormats(formatList);
+      //textLayout.setAdditionalFormats(formatList);
 
-      LayoutTextLayout(fontMetrics,
-                       proposedWidth,
-                       textLayout,
-                       boundingBox);
+      //LayoutTextLayout(fontMetrics,
+      //                 proposedWidth,
+      //                 textLayout,
+      //                 boundingBox);
 
+      painter->setPen(QPen(textColor,1.0));
       textLayout.draw(painter,
-                      QPointF(label.x+boundingBox.x(),
-                              label.y+boundingBox.y()));
+                      rect.topLeft());
+    } else {
+      log.Warn() << "Label style not recognised: " << label.style.get();
     }
   }
-  */
 
-  QtLabel MapPainterQt::Layout(std::string text, int fontSize, double proposedWidth)
+  std::shared_ptr<QtLabel> MapPainterQt::Layout(const Projection& projection,
+                                                const MapParameter& parameter,
+                                                std::string text,
+                                                int fontSize,
+                                                double proposedWidth)
   {
-    QFont         font;
+    // TODO: cache labels
+    QFont font(GetFont(projection,
+                       parameter,
+                       fontSize));
     qreal width=0;
     qreal height=0;
-
-    font.setPixelSize(fontSize);
-    font.setStyleStrategy(QFont::PreferAntialias);
-    font.setStyleStrategy(QFont::PreferMatch);
 
     painter->setFont(font);
 
     QFontMetrics fontMetrics=QFontMetrics(font, painter->device());
     qreal leading=fontMetrics.leading();
 
-    QtLabel label;
+    std::shared_ptr<QtLabel> label=std::make_shared<QtLabel>();
 
-    label.label = std::make_shared<QTextLayout>(QString::fromUtf8(text.c_str()),font,painter->device());
+    label->label = std::make_shared<QTextLayout>(QString::fromUtf8(text.c_str()),
+                                                font,
+                                                painter->device());
+    label->label->setCacheEnabled(true);
 
     /*
     QList<QTextLayout::FormatRange> formatList;
@@ -451,13 +514,13 @@ namespace osmscout {
     range.format.setForeground(QBrush(QColor(0,0,0)));
     formatList.append(range);
 
-    label.label->setAdditionalFormats(formatList);
+    label->label->setAdditionalFormats(formatList);
      */
 
     // evaluate layout
-    label.label->beginLayout();
+    label->label->beginLayout();
     while (true) {
-      QTextLine line = label.label->createLine();
+      QTextLine line = label->label->createLine();
       if (!line.isValid())
         break;
 
@@ -468,21 +531,21 @@ namespace osmscout {
       width=std::max(width,line.naturalTextWidth());
       height+=line.height();
     }
-    label.label->endLayout();
+    label->label->endLayout();
 
     // Center all lines horizontally, after we know the actual width
 
-    for (int i=0; i<label.label->lineCount(); i++) {
-      QTextLine line = label.label->lineAt(i);
+    for (int i=0; i<label->label->lineCount(); i++) {
+      QTextLine line = label->label->lineAt(i);
 
       line.setPosition(QPointF((width-line.naturalTextWidth())/2,line.position().y()));
     }
 
-    label.width=width;
-    label.height=height;
-    label.fontSize=fontSize;
-    //label.style;
-    label.text=text;
+    label->width=width;
+    label->height=height;
+    label->fontSize=fontSize;
+    //label->style;
+    label->text=text;
 
     return label;
   }
@@ -1146,16 +1209,12 @@ namespace osmscout {
                                           const MapParameter &parameter,
                                           const std::vector<LabelData> &labels,
                                           const Vertex2D &position,
-                                          const double iconHeight)
+                                          double proposedWidth)
   {
-    // TODO
-    for (auto &label:labels) {
-      double proposedWidth = label.proposedWidth;
-      if (proposedWidth <= 0 || proposedWidth > painter->window().width()){
-        proposedWidth = painter->window().width();
-      }
-      labelLayouter.RegisterLabel(position, label.text, proposedWidth);
+    if (proposedWidth <= 0 || proposedWidth > painter->window().width()){
+      proposedWidth = painter->window().width();
     }
+    labelLayouter.RegisterLabel(projection, parameter, position, labels, proposedWidth);
   }
 
   void MapPainterQt::RegisterContourLabel(const Projection &projection,
@@ -1163,15 +1222,15 @@ namespace osmscout {
                                           const LabelData &label,
                                           const std::vector<Vertex2D> &way)
   {
-    // TODO
-    labelLayouter.RegisterContourLabel(way, label.text);
+    // TODO use LabelData::style
+    labelLayouter.RegisterContourLabel(projection, parameter, way, label.text);
   }
 
   void MapPainterQt::DrawLabels(const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
-    // TODO
+    // TODO: draw symbols and icons first, then standard labels and then overlays
     labelLayouter.Layout(painter->window().width(), painter->window().height());
 
     for (const ContourLabel<QGlyphRun> &label:labelLayouter.ContourLabels()){
@@ -1181,6 +1240,7 @@ namespace osmscout {
         QPen pen(QColor::fromRgbF(0,1,0));
         pen.setWidthF(0.8);
         painter->setPen(pen);
+        painter->setBrush(Qt::transparent);
         painter->drawRect(glyph.trPosition.GetX(), glyph.trPosition.GetY(), glyph.trWidth, glyph.trHeight);
 
         pen.setColor(QColor::fromRgbF(1,0,0));
@@ -1193,12 +1253,33 @@ namespace osmscout {
     }
 
     for (const QtLabelInstance inst : labelLayouter.Labels()){
-      painter->setPen(QColor::fromRgbF(0,0,0));
-      QTextLayout *tl = inst.label.label.get();
-      tl->draw(painter, QPointF(inst.x, inst.y));
+      //painter->setPen(QColor::fromRgbF(0,0,0));
+      for (const QtLabelInstance::Element &el : inst.elements) {
+        if (el.labelData.type==LabelData::Symbol){
+          //std::cout << "# Symbol " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
+          DrawSymbol(projection,
+                     parameter,
+                     *(el.labelData.iconStyle->GetSymbol()),
+                     el.x,
+                     el.y); // TODO: x, y coordinates are top-left or center?
 
-      painter->setPen(QColor::fromRgbF(0,1,0));
-      painter->drawRect(QRectF(QPointF(inst.x, inst.y), QSizeF(inst.label.width, inst.label.height)));
+        } else if (el.labelData.type==LabelData::Icon){
+          DrawIcon(el.labelData.iconStyle.get(),
+                   el.x,
+                   el.y); // TODO: x, y coordinates are top-left or center?
+        }else {
+          //QTextLayout *tl = el.label->label.get();
+          DrawLabel(projection, parameter,
+                    QRectF(el.x, el.y, el.label->width, el.label->height),
+                    el.labelData, *(el.label->label) );
+
+          QPen pen(QColor::fromRgbF(0,1,0));
+          pen.setWidthF(0.8);
+          painter->setPen(pen);
+          painter->setBrush(Qt::transparent);
+          painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
+        }
+      }
     }
 
     labelLayouter.Reset();

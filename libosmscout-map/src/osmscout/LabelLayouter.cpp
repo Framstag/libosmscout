@@ -26,5 +26,39 @@
 #endif
 
 namespace osmscout {
+  void Mask::prepare(const IntRectangle &rect)
+  {
+    // clear
+    for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
+      d[c] = 0;
+    }
 
+    // setup
+    cellFrom = rect.x / 64;
+    int cellFromBit = rect.x % 64;
+    cellTo = (rect.x + rect.width) / 64;
+    int cellToBit = (rect.x + rect.width) % 64;
+    rowFrom = rect.y;
+    rowTo = rect.y + rect.height;
+
+    if (cellFromBit<0){
+      cellFrom--;
+      cellFromBit=64+cellFromBit;
+    }
+    if (cellToBit<0){
+      cellTo--;
+      cellToBit=64+cellToBit;
+    }
+
+    uint64_t mask = ~0;
+    for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
+      d[c] = mask;
+    }
+    if (cellFrom >= 0 && cellFrom < size()) {
+      d[cellFrom] = d[cellFrom] >> cellFromBit;
+    }
+    if (cellTo >= 0 && cellTo < size()) {
+      d[cellTo] = d[cellTo] << (64 - cellToBit);
+    }
+  }
 }

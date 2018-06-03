@@ -121,7 +121,11 @@ namespace osmscout {
 
     void DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const;
 
-    QtLabel Layout(std::string text, int fontSize, double proposedWidth);
+    std::shared_ptr<QtLabel> Layout(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    std::string text,
+                                    int fontSize,
+                                    double proposedWidth);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
@@ -145,9 +149,11 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const FillStyle& style) override;
 
-    // void DrawLabel(const Projection& projection,
-    //                const MapParameter& parameter,
-    //                const LabelData& label) override;
+    void DrawLabel(const Projection& projection,
+                   const MapParameter& parameter,
+                   const QRectF& point,
+                   const LabelData& label,
+                   const QTextLayout& textLayout);
 
     /**
       Register regular label with given text at the given pixel coordinate
@@ -157,7 +163,7 @@ namespace osmscout {
                                       const MapParameter &parameter,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
-                                      const double iconHeight = -1) override;
+                                      double proposedWidth) override;
 
     /**
      * Register contour label

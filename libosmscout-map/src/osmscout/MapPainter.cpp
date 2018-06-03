@@ -617,8 +617,8 @@ namespace osmscout {
                   shieldGridSizeVert,
                   gridPoints);
 
-    double frameHoriz=5;
-    double frameVert=5;
+    //double frameHoriz=5;
+    //double frameVert=5;
 
     //TextDimension dimension=GetTextDimension(projection,
     //                                         parameter,
@@ -647,7 +647,7 @@ namespace osmscout {
 
       LabelData labelBox;
 
-      labelBox.id=nextLabelId++;
+      //labelBox.id=nextLabelId++;
       //labelBox.bx1=x-dimension.width/2-frameHoriz;
       //labelBox.bx2=x+dimension.width/2+frameHoriz;
       //labelBox.by1=y-dimension.height/2-frameVert;
@@ -666,7 +666,7 @@ namespace osmscout {
       //                  label);
       std::vector<LabelData> vect;
       vect.push_back(labelBox);
-      RegisterRegularLabel(projection, parameter, vect, Vertex2D(x,y));
+      RegisterRegularLabel(projection, parameter, vect, Vertex2D(x,y), /*proposedWidth*/ -1);
     }
   }
 
@@ -762,10 +762,10 @@ namespace osmscout {
                  x,y);
     }*/
 
-    size_t labelId=nextLabelId++;
+    //size_t labelId=nextLabelId++;
     //double overallTextHeight=0;
-    bool   hasSymbol=false;
-    double iconHeight=-1;
+    //bool   hasSymbol=false;
+    //double iconHeight=-1;
 
     if (iconStyle) {
       if (!iconStyle->GetIconName().empty() &&
@@ -774,29 +774,34 @@ namespace osmscout {
                   *iconStyle)) {
         LabelData data;
 
+        data.type=LabelData::Type::Icon;
         data.position=iconStyle->GetPosition();
         //data.dimension=TextDimension(0.0,0.0,14.0,14.0);
         //data.icon=true;
-        //data.iconStyle=iconStyle;
+        data.iconStyle=iconStyle;
+        data.iconWidth=projection.ConvertWidthToPixel(14.0);
+        data.iconHeight=projection.ConvertWidthToPixel(14.0);
 
-        hasSymbol=true;
+        //hasSymbol=true;
 
-        data.proposedWidth=objectWidth;
+        //data.proposedWidth=objectWidth;
         labelLayoutData.push_back(data);
-      }
-      else if (iconStyle->GetSymbol()) {
+      } else if (iconStyle->GetSymbol()) {
         LabelData data;
 
+        data.type=LabelData::Type::Symbol;
         data.position=iconStyle->GetPosition();
         // data.dimension=TextDimension(0.0,0.0,
         //                              projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth()),
         //                              projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight()));
         // data.icon=false;
-        // data.iconStyle=iconStyle;
-        iconHeight = projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
+        data.iconStyle=iconStyle;
+        //iconHeight = projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
+        data.iconWidth=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth());
+        data.iconHeight=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
 
-        hasSymbol=true;
-        data.proposedWidth=objectWidth;
+        //hasSymbol=true;
+        //data.proposedWidth=objectWidth;
 
         labelLayoutData.push_back(data);
       }
@@ -811,6 +816,7 @@ namespace osmscout {
       }
 
       LabelData data;
+      data.type=LabelData::Type::Text;
 
       if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag() &&
           parameter.GetDrawFadings()) {
@@ -867,8 +873,8 @@ namespace osmscout {
 
       data.position=textStyle->GetPosition();
       data.text=label;
-      data.proposedWidth=objectWidth;
-      //data.textStyle=textStyle;
+      //data.proposedWidth=objectWidth;
+      data.style=textStyle;
       //data.icon=false;
       //
       //overallTextHeight+=data.dimension.height;
@@ -889,7 +895,7 @@ namespace osmscout {
     // thus we need to convert it...
     //double offset = hasSymbol ? y : y-overallTextHeight/2;
 
-    RegisterRegularLabel(projection, parameter, labelLayoutData, Vertex2D(x,y), iconHeight);
+    RegisterRegularLabel(projection, parameter, labelLayoutData, Vertex2D(x,y), objectWidth);
 
     //std::cout << ">>>" << std::endl;
     /*
@@ -1326,15 +1332,16 @@ namespace osmscout {
     */
 
     LabelData labelData;
-    labelData.id=0;
+    //labelData.id=0;
     labelData.priority=0;
     labelData.position=0;
     labelData.alpha=0;
     labelData.fontSize=pathTextStyle->GetSize();
-    labelData.proposedWidth=-1;
+    //labelData.proposedWidth=-1;
     //labelData.style=; // TODO
     labelData.text=textLabel;
 
+    // TODO: move this code to layouter and build simplified path without temporary vector wayPoints
     std::vector<Vertex2D> wayPoints;
     wayPoints.reserve(transEnd-transStart);
     for (size_t j=transStart; j<=transEnd; j++) {
@@ -1858,7 +1865,7 @@ namespace osmscout {
     shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
     shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
 
-    nextLabelId=0;
+    //nextLabelId=0;
     //labels.Initialize(projection,
     //                  parameter);
     //overlayLabels.Initialize(projection,

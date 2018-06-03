@@ -321,7 +321,7 @@ namespace osmscout {
       Temporary data structures for intelligent label positioning
       */
     //@{
-    size_t                       nextLabelId;
+    //size_t                       nextLabelId;
     /*
     LabelLayouter                labels;
     LabelLayouter                overlayLabels;
@@ -633,8 +633,8 @@ namespace osmscout {
      * Returns the height of the font.
      */
     virtual double GetFontHeight(const Projection& projection,
-                               const MapParameter& parameter,
-                               double fontSize) = 0;
+                                 const MapParameter& parameter,
+                                 double fontSize) = 0;
 
     /**
       Return the bounding box of the given text. The method is called
@@ -680,7 +680,7 @@ namespace osmscout {
                                       const MapParameter &parameter,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
-                                      const double iconHeight = -1) = 0;
+                                      double proposedWidth) = 0;
 
     /**
      * Register contour label

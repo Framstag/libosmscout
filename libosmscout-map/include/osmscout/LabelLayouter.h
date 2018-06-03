@@ -41,16 +41,27 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelData
   {
   public:
-    // TODO: remove id
-    size_t            id;       //!< Id of this label, multiple labels with the same id do not intersect with each other
-    size_t            priority; //!< Priority of the entry
-    size_t            position; //!< Relative position of the label
+    enum Type
+    {
+      Icon,
+      Symbol,
+      Text
+    };
+  public:
+    Type              type{Type::Text};
+    size_t            priority{0}; //!< Priority of the entry
+    size_t            position{0}; //!< Relative position of the label
 
-    double            alpha;    //!< Alpha value of the label
-    double            fontSize; //!< Font size to be used
-    double            proposedWidth{-1};
+    double            alpha{0};     //!< Alpha value of the label
+    double            fontSize{10}; //!< Font size to be used
+    //double          proposedWidth{-1};
+
     LabelStyleRef     style;    //!< Style for drawing
     std::string       text;     //!< The label text
+
+    IconStyleRef      iconStyle; //!< Icon or symbol style
+    double            iconWidth{0};
+    double            iconHeight{0};
 
   public:
     LabelData(){};
@@ -75,6 +86,9 @@ namespace osmscout {
     double trHeight{0};                 //!< height after rotation
   };
 
+  /**
+   * Position independent representation of layouted label
+   */
   template<class NativeGlyph, class NativeLabel>
   class Label
   {
@@ -95,16 +109,17 @@ namespace osmscout {
   class LabelInstance
   {
   public:
-    size_t                  id;       //!< Id of this label, multiple labels with the same id do not intersect with each other
-    size_t                  priority; //!< Priority of the entry
-
-    double                  x;        //!< Coordinate of the left, top edge of the text
-    double                  y;        //!< Coordinate of the left, top edge of the text
-    double                  alpha;    //!< Alpha value of the label
-
-    Label<NativeGlyph, NativeLabel>
-        label;
-
+    struct Element
+    {
+      LabelData labelData;
+      double    x;        //!< Coordinate of the left, top edge of the text / icon / symbol
+      double    y;        //!< Coordinate of the left, top edge of the text / icon / symbol
+      std::shared_ptr<Label<NativeGlyph, NativeLabel>>
+                label;
+    };
+  public:
+    size_t                priority; //!< Priority of the entry (minimum of priority label elements)
+    std::vector<Element>  elements;
   };
 
   template<class NativeGlyph>
@@ -115,73 +130,41 @@ namespace osmscout {
     std::vector<Glyph<NativeGlyph>> glyphs;
   };
 
-  namespace {
-    class Mask
+  class OSMSCOUT_MAP_API Mask
+  {
+  public:
+    Mask(size_t rowSize) : d(rowSize)
     {
-    public:
-      Mask(size_t rowSize) : d(rowSize)
-      {
-        //std::cout << "create " << this << std::endl;
-      };
-
-      Mask(const Mask &m) :
-          d(m.d), cellFrom(m.cellFrom), cellTo(m.cellTo), rowFrom(m.rowFrom), rowTo(m.rowTo)
-      {
-        //std::cout << "create(2) " << this << std::endl;
-      };
-
-      ~Mask()
-      {
-        //std::cout << "delete " << this << std::endl;
-      }
-
-      Mask(Mask &&m) = delete;
-      Mask &operator=(const Mask &m) = delete;
-      Mask &operator=(Mask &&m) = delete;
-
-      void prepare(const IntRectangle &rect);
-
-      inline int64_t size() const
-      { return d.size(); };
-
-      std::vector<uint64_t> d;
-
-      int cellFrom{0};
-      int cellTo{0};
-      int rowFrom{0};
-      int rowTo{0};
+      //std::cout << "create " << this << std::endl;
     };
 
-    void Mask::prepare(const IntRectangle &rect)
+    Mask(const Mask &m) :
+        d(m.d), cellFrom(m.cellFrom), cellTo(m.cellTo), rowFrom(m.rowFrom), rowTo(m.rowTo)
     {
-      cellFrom = rect.x / 64;
-      int cellFromBit = rect.x % 64;
-      cellTo = (rect.x + rect.width) / 64;
-      int cellToBit = (rect.x + rect.width) % 64;
-      rowFrom = rect.y;
-      rowTo = rect.y + rect.height;
+      //std::cout << "create(2) " << this << std::endl;
+    };
 
-      if (cellFromBit<0){
-        cellFrom--;
-        cellFromBit=64+cellFromBit;
-      }
-      if (cellToBit<0){
-        cellTo--;
-        cellToBit=64+cellToBit;
-      }
-
-      uint64_t mask = ~0;
-      for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
-        d[c] = mask;
-      }
-      if (cellFrom >= 0 && cellFrom < size()) {
-        d[cellFrom] = d[cellFrom] >> cellFromBit;
-      }
-      if (cellTo >= 0 && cellTo < size()) {
-        d[cellTo] = d[cellTo] << (64 - cellToBit);
-      }
+    ~Mask()
+    {
+      //std::cout << "delete " << this << std::endl;
     }
-  }
+
+    Mask(Mask &&m) = delete;
+    Mask &operator=(const Mask &m) = delete;
+    Mask &operator=(Mask &&m) = delete;
+
+    void prepare(const IntRectangle &rect);
+
+    inline int64_t size() const
+    { return d.size(); };
+
+    std::vector<uint64_t> d;
+
+    int cellFrom{0};
+    int cellTo{0};
+    int rowFrom{0};
+    int rowTo{0};
+  };
 
   /*
   template <class NativeGlyph>
@@ -201,6 +184,7 @@ namespace osmscout {
   public:
     using ContourLabelType = ContourLabel<NativeGlyph>;
     using LabelType = Label<NativeGlyph, NativeLabel>;
+    using LabelPtr = std::shared_ptr<LabelType>;
     using LabelInstanceType = LabelInstance<NativeGlyph, NativeLabel>;
 
   public:
@@ -254,8 +238,11 @@ namespace osmscout {
       int64_t rowSize = (viewportWidth / 64)+1;
       //int64_t binaryWidth = rowSize * 8;
       //size_t binaryHeight = (viewportHeight / 8)+1;
-      std::vector<uint64_t> canvas((size_t)(rowSize*viewportHeight));
+      std::vector<uint64_t> iconCanvas((size_t)(rowSize*viewportHeight));
+      std::vector<uint64_t> labelCanvas((size_t)(rowSize*viewportHeight));
+      std::vector<uint64_t> overlayCanvas((size_t)(rowSize*viewportHeight));
       //canvas.data()
+      Mask row(rowSize);
 
       auto labelIter = allSortedLabels.begin();
       auto contourLabelIter = allSortedContourLabels.begin();
@@ -277,20 +264,34 @@ namespace osmscout {
 
         if (currentLabel != allSortedLabels.end()){
 
-          IntRectangle rectangle{
-              (int)currentLabel->x,
-              (int)currentLabel->y,
-              (int)currentLabel->label.width,
-              (int)currentLabel->label.height,
-          };
-          Mask row(rowSize);
-
-          row.prepare(rectangle);
-
-          bool collision= CheckLabelCollision(canvas, row, viewportHeight);
-          if (!collision) {
-            MarkLabelPlace(canvas, row, viewportHeight);
-            labelInstances.push_back(*currentLabel);
+          std::vector<typename LabelInstance<NativeGlyph, NativeLabel>::Element> visibleElements;
+          for (const typename LabelInstance<NativeGlyph, NativeLabel>::Element& element : currentLabel->elements){
+            IntRectangle rectangle{ (int)element.x, (int)element.y, 0, 0 };
+            std::vector<uint64_t> &canvas = labelCanvas;
+            if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol){
+              rectangle.width = element.labelData.iconWidth;
+              rectangle.height = element.labelData.iconHeight;
+              canvas = iconCanvas;
+            } else {
+              rectangle.width = element.label->width;
+              rectangle.height = element.label->height;
+              // Something is an overlay, if its alpha is <0.8
+              if (element.labelData.alpha < 0.8){
+                canvas = overlayCanvas;
+              }
+            }
+            row.prepare(rectangle);
+            bool collision = CheckLabelCollision(canvas, row, viewportHeight);
+            if (!collision) {
+              MarkLabelPlace(canvas, row, viewportHeight);
+              visibleElements.push_back(element);
+            }
+          }
+          LabelInstanceType instanceCopy;
+          instanceCopy.priority = currentLabel->priority;
+          instanceCopy.elements = visibleElements;
+          if (!instanceCopy.elements.empty()) {
+            labelInstances.push_back(instanceCopy);
           }
 
           labelIter++;
@@ -313,11 +314,11 @@ namespace osmscout {
                 (int)glyph.trHeight
             };
             masks[gi].prepare(rect);
-            collision |= CheckLabelCollision(canvas, masks[gi], viewportHeight);
+            collision |= CheckLabelCollision(labelCanvas, masks[gi], viewportHeight);
           }
           if (!collision) {
             for (int gi=0; gi<glyphCnt; gi++) {
-              MarkLabelPlace(canvas, masks[gi], viewportHeight);
+              MarkLabelPlace(labelCanvas, masks[gi], viewportHeight);
             }
             contourLabelInstances.push_back(*currentContourLabel);
           }
@@ -326,31 +327,57 @@ namespace osmscout {
       }
     }
 
-    void RegisterLabel(Vertex2D point,
-                       std::string string,
+    void RegisterLabel(const Projection& projection,
+                       const MapParameter& parameter,
+                       const Vertex2D& point,
+                       const std::vector<LabelData> &data,
                        double proposedWidth = 10000.0)
     {
-      int fontHeight=18;
       LabelInstanceType instance;
+      instance.priority = std::numeric_limits<size_t>::max();
 
-      instance.label = textLayouter->Layout(string, fontHeight, proposedWidth);
-
-      instance.id = 0;
-      instance.priority = 0;
-
-      instance.x = point.GetX() - instance.label.width/2;
-      instance.y = point.GetY() - instance.label.height/2;
-      instance.alpha = 1.0;
+      double offset=-1;
+      for (const auto &d:data) {
+        typename LabelInstance<NativeGlyph, NativeLabel>::Element element;
+        element.labelData=d;
+        instance.priority = std::min(d.priority, instance.priority);
+        if (d.type==LabelData::Type::Icon || d.type==LabelData::Type::Symbol){
+          element.x = point.GetX() - d.iconWidth / 2;
+          if (offset<0){
+            element.y = point.GetY() - d.iconHeight / 2;
+            offset = point.GetY() + d.iconHeight / 2;
+          } else {
+            element.y = offset;
+            offset += d.iconHeight;
+          }
+        }else {
+          // TODO: should we take style into account?
+          element.label = textLayouter->Layout(projection, parameter,
+                                               d.text, d.fontSize,
+                                               proposedWidth);
+          element.x = point.GetX() - element.label->width / 2;
+          if (offset<0){
+            element.y = point.GetY() - element.label->height / 2;
+            offset = point.GetY() + element.label->height / 2;
+          } else {
+            element.y = offset;
+            offset += element.label->height;
+          }
+        }
+        instance.elements.push_back(element);
+      }
 
       labelInstances.push_back(instance);
     }
 
-    void RegisterContourLabel(std::vector<Vertex2D> way,
+    void RegisterContourLabel(const Projection& projection,
+                              const MapParameter& parameter,
+                              std::vector<Vertex2D> way,
                               std::string string)
     {
       // TODO: parameters
-      int fontHeight=24;
-      int textOffset=fontHeight / 3;
+      int fontHeight=1.75; // points
+      int textOffset=4*fontHeight; // pixels
 
       // TODO: cache simplified path for way id
       SimplifiedPath p;
@@ -359,8 +386,8 @@ namespace osmscout {
       }
 
       // TODO: cache label for string and font parameters
-      LabelType label = textLayouter->Layout(string, fontHeight, /* proposed width */ 5000.0);
-      std::vector<Glyph<NativeGlyph>> glyphs = label.ToGlyphs();
+      LabelPtr label = textLayouter->Layout(projection, parameter, string, fontHeight, /* proposed width */ 10000.0);
+      std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
       double pLength=p.GetLength();
       double offset=0;
@@ -418,7 +445,7 @@ namespace osmscout {
           cLabel.glyphs.push_back(glyphCopy);
         }
         contourLabelInstances.push_back(cLabel);
-        offset+=label.width + 3*fontHeight;
+        offset+=label->width + 3*fontHeight;
       }
     }
 
