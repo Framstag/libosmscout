@@ -248,22 +248,22 @@ namespace osmscout {
     typedef std::shared_ptr<InstructionPostprocessor> InstructionPostprocessorRef;
 
   private:
-    std::vector<RoutingProfileRef>            profiles;
-    std::vector<DatabaseRef>                  databases;
+    std::vector<RoutingProfileRef>                                profiles;
+    std::vector<DatabaseRef>                                      databases;
 
-    std::unordered_map<DBFileOffset,AreaRef>  areaMap;
-    std::unordered_map<DBFileOffset,WayRef>   wayMap;
+    std::unordered_map<DBFileOffset,AreaRef>                      areaMap;
+    std::unordered_map<DBFileOffset,WayRef>                       wayMap;
 
-    std::map<DatabaseId,NameFeatureValueReader*>        nameReaders;
-    std::map<DatabaseId,RefFeatureValueReader*>         refReaders;
-    std::map<DatabaseId,BridgeFeatureReader*>           bridgeReaders;
-    std::map<DatabaseId,RoundaboutFeatureReader*>       roundaboutReaders;
-    std::map<DatabaseId,DestinationFeatureValueReader*> destinationReaders;
-    std::map<DatabaseId,MaxSpeedFeatureValueReader *>   maxSpeedReaders;
+    std::unordered_map<DatabaseId,NameFeatureValueReader*>        nameReaders;
+    std::unordered_map<DatabaseId,RefFeatureValueReader*>         refReaders;
+    std::unordered_map<DatabaseId,BridgeFeatureReader*>           bridgeReaders;
+    std::unordered_map<DatabaseId,RoundaboutFeatureReader*>       roundaboutReaders;
+    std::unordered_map<DatabaseId,DestinationFeatureValueReader*> destinationReaders;
+    std::unordered_map<DatabaseId,MaxSpeedFeatureValueReader*>    maxSpeedReaders;
 
-    std::map<DatabaseId,TypeInfoSet> motorwayTypes;
-    std::map<DatabaseId,TypeInfoSet> motorwayLinkTypes;
-    std::map<DatabaseId,TypeInfoSet> junctionTypes;
+    std::unordered_map<DatabaseId,TypeInfoSet>                    motorwayTypes;
+    std::unordered_map<DatabaseId,TypeInfoSet>                    motorwayLinkTypes;
+    std::unordered_map<DatabaseId,TypeInfoSet>                    junctionTypes;
 
   private:
     bool ResolveAllAreasAndWays(const RouteDescription& description,
@@ -271,9 +271,7 @@ namespace osmscout {
                                 Database& database);
     void Cleanup();
 
-  public:
-    RoutePostprocessor();
-
+  private:
     AreaRef GetArea(const DBFileOffset &offset) const;
     WayRef GetWay(const DBFileOffset &offset) const;
 
@@ -281,11 +279,11 @@ namespace osmscout {
     double GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const;
 
     RouteDescription::NameDescriptionRef GetNameDescription(const RouteDescription::Node& node) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const ObjectFileRef& object) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const Area& area) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const Way& way) const;
 
     bool LoadJunction(DatabaseId database,
@@ -330,13 +328,21 @@ namespace osmscout {
     GeoCoord GetCoordinates(const RouteDescription::Node& node,
                             size_t nodeIndex) const;
 
+  public:
+    // All Postprocessor are allowed to use our internal methods current
+    // we should fix this by moving helper methods to a separate
+    // PostprocessorContext object that gets passed to the postprocessors explicitely
+    friend Postprocessor;
+
+    RoutePostprocessor();
+
     bool PostprocessRouteDescription(RouteDescription& description,
-                                     std::vector<RoutingProfileRef> &profiles,
-                                     std::vector<DatabaseRef>& databases,
-                                     std::list<PostprocessorRef> processors,
-                                     std::set<std::string> motorwayTypeNames=std::set<std::string>(),
-                                     std::set<std::string> motorwayLinkTypeNames=std::set<std::string>(),
-                                     std::set<std::string> junctionTypeNames=std::set<std::string>());
+                                     const std::vector<RoutingProfileRef>& profiles,
+                                     const std::vector<DatabaseRef>& databases,
+                                     const std::list<PostprocessorRef>& processors,
+                                     const std::set<std::string>& motorwayTypeNames=std::set<std::string>(),
+                                     const std::set<std::string>& motorwayLinkTypeNames=std::set<std::string>(),
+                                     const std::set<std::string>& junctionTypeNames=std::set<std::string>());
   };
 }
 

@@ -1134,7 +1134,7 @@ namespace osmscout {
     return GetNameDescription(node.GetDatabaseId(),node.GetPathObject());
   }
 
-  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const DatabaseId dbId,
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(DatabaseId dbId,
                                                                               const ObjectFileRef& object) const
   {
     RouteDescription::NameDescriptionRef description;
@@ -1156,7 +1156,7 @@ namespace osmscout {
     return description;
   }
 
-  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const DatabaseId dbId,
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(DatabaseId dbId,
                                                                               const Area& area) const
   {
     auto nameReader=nameReaders.find(dbId);
@@ -1171,7 +1171,7 @@ namespace osmscout {
     return std::make_shared<RouteDescription::NameDescription>(name);
   }
 
-  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(const DatabaseId dbId,
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(DatabaseId dbId,
                                                                               const Way& way) const
   {
     auto nameReader=nameReaders.find(dbId);
@@ -1587,12 +1587,12 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::PostprocessRouteDescription(RouteDescription& description,
-                                                       std::vector<RoutingProfileRef> &profiles,
-                                                       std::vector<DatabaseRef>& databases,
-                                                       std::list<PostprocessorRef> processors,
-                                                       std::set<std::string> motorwayTypeNames,
-                                                       std::set<std::string> motorwayLinkTypeNames,
-                                                       std::set<std::string> junctionTypeNames)
+                                                       const std::vector<RoutingProfileRef>& profiles,
+                                                       const std::vector<DatabaseRef>& databases,
+                                                       const std::list<PostprocessorRef>& processors,
+                                                       const std::set<std::string>& motorwayTypeNames,
+                                                       const std::set<std::string>& motorwayLinkTypeNames,
+                                                       const std::set<std::string>& junctionTypeNames)
   {
     Cleanup(); // We do not trust ourself ;-)
 
