@@ -1072,12 +1072,12 @@ namespace osmscout {
         progress.Info("  default");
         typeConfig->GetTagRegistry().RegisterNameTag("name", langIndex);
         typeConfig->GetTagRegistry().RegisterNameTag("place_name", langIndex+1);
-        typeConfig->GetTagRegistry().RegisterNameAltTag("brand", langIndex+2);
+        typeConfig->GetTagRegistry().RegisterNameTag("brand", langIndex+2);
       } else {
           progress.Info("  " + lang);
           typeConfig->GetTagRegistry().RegisterNameTag("name:"+lang, langIndex);
           typeConfig->GetTagRegistry().RegisterNameTag("place_name:"+lang, langIndex+1);
-          typeConfig->GetTagRegistry().RegisterNameAltTag("brand", langIndex+2);
+          typeConfig->GetTagRegistry().RegisterNameTag("brand:"+lang, langIndex+2);
       }
       langIndex+=3;
     }
@@ -1094,7 +1094,7 @@ namespace osmscout {
         progress.Info("  " + lang);
         typeConfig->GetTagRegistry().RegisterNameAltTag("name:"+lang, langIndex);
         typeConfig->GetTagRegistry().RegisterNameAltTag("place_name:"+lang, langIndex+1);
-        typeConfig->GetTagRegistry().RegisterNameAltTag("brand", langIndex+2);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("brand:"+lang, langIndex+2);
       }
       langIndex+=3;
     }
