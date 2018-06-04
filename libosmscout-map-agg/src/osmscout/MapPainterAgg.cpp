@@ -515,8 +515,8 @@ namespace osmscout {
 
     symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-    centerX=maxX-minX;
-    centerY=maxY-minY;
+    centerX=(minX+maxX)/2;
+    centerY=(minY+maxY)/2;
 
     for (const auto& primitive : symbol.GetPrimitives()) {
       const DrawPrimitive *primitivePtr=primitive.get();
