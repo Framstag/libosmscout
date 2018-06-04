@@ -905,8 +905,8 @@ namespace osmscout {
         QPainterPath path;
 
         path.addEllipse(center,
-                        2*radius,
-                        2*radius);
+                        radius,
+                        radius);
 
         painter->drawPath(path);
       }

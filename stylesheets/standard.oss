@@ -401,7 +401,7 @@ CONST
     }
 
   SYMBOL highway_bus_stop
-    CIRCLE 0,0 0.4 {
+    CIRCLE 0,0 0.8 {
       AREA {color: @busSymbolColor; }
     }
 
@@ -416,7 +416,7 @@ CONST
     }
 
   SYMBOL amenity_hospital
-    CIRCLE 0,0 0.5 {
+    CIRCLE 0,0 1.0 {
       AREA.BORDER {color: @hospitalSymbolColor; width: 0.2mm; }
     }
     // Horizontal bar
@@ -443,7 +443,7 @@ CONST
     }
 
   SYMBOL amenity_parking
-    CIRCLE 0,0 0.4 {
+    CIRCLE 0,0 0.8 {
       AREA {color: #4bb2da; }
     }
 
@@ -466,17 +466,17 @@ CONST
     }
 
   SYMBOL speed_camera
-    CIRCLE 0,0 0.4 {
+    CIRCLE 0,0 0.8 {
       AREA {color: @red; }
     }
 
   SYMBOL highway_street_lamp
-    CIRCLE GROUND 0,0 10 {
+    CIRCLE GROUND 0,0 20 {
       AREA {color: #f5fb5b44; }
     }
 
   SYMBOL marker
-    CIRCLE 0,0 0.4 {
+    CIRCLE 0,0 0.8 {
       AREA {color: #ff0000; }
     }
 

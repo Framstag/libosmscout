@@ -5,22 +5,22 @@ OSS
     COLOR unknownColor               = @waterColor;
 
   SYMBOL place_city
-    CIRCLE 0,0 1.25 {
+    CIRCLE 0,0 2.5 {
       AREA {color: #ff0000aa; }
     }
 
   SYMBOL place_town
-    CIRCLE 0,0 0.75 {
+    CIRCLE 0,0 1.5 {
       AREA {color: #ff000055; }
     }
    
   SYMBOL railway_station
-    CIRCLE 0,0 1.25 {
+    CIRCLE 0,0 2.5 {
       AREA {color: #00ff0055; }
     }
 
   SYMBOL railway_halt
-    CIRCLE 0,0 0.75 {
+    CIRCLE 0,0 1.5 {
       AREA {color: #00ff0055; }
     }
 
