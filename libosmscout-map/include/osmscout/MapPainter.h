@@ -680,7 +680,7 @@ namespace osmscout {
                                       const MapParameter &parameter,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
-                                      double proposedWidth) = 0;
+                                      double objectWidth) = 0;
 
     /**
      * Register contour label
@@ -695,13 +695,13 @@ namespace osmscout {
                             const MapData& data) = 0;
 
     /**
-      Draw the Icon as defined by the IconStyle at the given pixel coordinate.
+      Draw the Icon as defined by the IconStyle at the given pixel coordinate (icon center).
      */
     virtual void DrawIcon(const IconStyle* style,
                           double x, double y) = 0;
 
     /**
-      Draw the Symbol as defined by the SymbolStyle at the given pixel coordinate.
+      Draw the Symbol as defined by the SymbolStyle at the given pixel coordinate (symbol center).
      */
     virtual void DrawSymbol(const Projection& projection,
                             const MapParameter& parameter,

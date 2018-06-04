@@ -482,9 +482,10 @@ namespace osmscout {
 
   std::shared_ptr<QtLabel> MapPainterQt::Layout(const Projection& projection,
                                                 const MapParameter& parameter,
-                                                std::string text,
-                                                int fontSize,
-                                                double proposedWidth)
+                                                const std::string& text,
+                                                double fontSize,
+                                                double objectWidth,
+                                                bool enableWrapping)
   {
     // TODO: cache labels
     QFont font(GetFont(projection,
@@ -505,6 +506,14 @@ namespace osmscout {
                                                 painter->device());
     label->label->setCacheEnabled(true);
 
+    double proposedWidth = -1;
+    if (enableWrapping) {
+      proposedWidth = GetProposedLabelWidth(parameter,
+                                            fontMetrics.averageCharWidth(),
+                                            objectWidth,
+                                            text.length());
+    }
+
     /*
     QList<QTextLayout::FormatRange> formatList;
     QTextLayout::FormatRange        range;
@@ -524,7 +533,9 @@ namespace osmscout {
       if (!line.isValid())
         break;
 
-      line.setLineWidth(proposedWidth);
+      if (proposedWidth > 0) {
+        line.setLineWidth(proposedWidth);
+      }
 
       height+=leading;
       line.setPosition(QPointF(0.0,height));
@@ -1209,12 +1220,9 @@ namespace osmscout {
                                           const MapParameter &parameter,
                                           const std::vector<LabelData> &labels,
                                           const Vertex2D &position,
-                                          double proposedWidth)
+                                          double objectWidth)
   {
-    if (proposedWidth <= 0 || proposedWidth > painter->window().width()){
-      proposedWidth = painter->window().width();
-    }
-    labelLayouter.RegisterLabel(projection, parameter, position, labels, proposedWidth);
+    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
   }
 
   void MapPainterQt::RegisterContourLabel(const Projection &projection,
@@ -1260,24 +1268,30 @@ namespace osmscout {
           DrawSymbol(projection,
                      parameter,
                      *(el.labelData.iconStyle->GetSymbol()),
-                     el.x,
-                     el.y); // TODO: x, y coordinates are top-left or center?
+                     el.x + el.labelData.iconWidth/2,
+                     el.y + el.labelData.iconHeight/2);
 
         } else if (el.labelData.type==LabelData::Icon){
           DrawIcon(el.labelData.iconStyle.get(),
-                   el.x,
-                   el.y); // TODO: x, y coordinates are top-left or center?
+                   el.x + el.labelData.iconWidth/2,
+                   el.y + el.labelData.iconHeight/2);
+
         }else {
           //QTextLayout *tl = el.label->label.get();
           DrawLabel(projection, parameter,
                     QRectF(el.x, el.y, el.label->width, el.label->height),
                     el.labelData, *(el.label->label) );
 
-          QPen pen(QColor::fromRgbF(0,1,0));
-          pen.setWidthF(0.8);
-          painter->setPen(pen);
-          painter->setBrush(Qt::transparent);
+        }
+
+        QPen pen(QColor::fromRgbF(0, 1, 0));
+        pen.setWidthF(0.8);
+        painter->setPen(pen);
+        painter->setBrush(Qt::transparent);
+        if (el.labelData.type==LabelData::Text) {
           painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
+        }else{
+          painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
         }
       }
     }

@@ -123,9 +123,10 @@ namespace osmscout {
 
     std::shared_ptr<QtLabel> Layout(const Projection& projection,
                                     const MapParameter& parameter,
-                                    std::string text,
-                                    int fontSize,
-                                    double proposedWidth);
+                                    const std::string& text,
+                                    double fontSize,
+                                    double objectWidth,
+                                    bool enableWrapping = false);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
@@ -163,7 +164,7 @@ namespace osmscout {
                                       const MapParameter &parameter,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
-                                      double proposedWidth) override;
+                                      double objectWidth) override;
 
     /**
      * Register contour label
