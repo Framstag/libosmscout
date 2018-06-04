@@ -893,10 +893,10 @@ namespace osmscout {
                      ++pixel) {
                     if (pixel==polygon->GetCoords().begin()) {
                         CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                                             y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                                             y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
                     } else {
                         CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                                                y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                                                y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
                     }
                 }
 
@@ -918,7 +918,7 @@ namespace osmscout {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
                 CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
-                                         y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY),
+                                         y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY),
                                          projection.ConvertWidthToPixel(rectangle->GetWidth()),
                                          projection.ConvertWidthToPixel(rectangle->GetHeight()));
                 CGContextAddRect(cg,rect);
@@ -940,7 +940,7 @@ namespace osmscout {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
                 CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
-                                         y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY),
+                                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY),
                                          projection.ConvertWidthToPixel(circle->GetRadius()),
                                          projection.ConvertWidthToPixel(circle->GetRadius()));
                 CGContextAddEllipseInRect(cg, rect);

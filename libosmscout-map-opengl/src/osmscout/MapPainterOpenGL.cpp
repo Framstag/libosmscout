@@ -1045,7 +1045,7 @@ namespace osmscout {
                 double x =
                     node->GetCoords().GetLon() + (projection.ConvertWidthToPixel(pixel.GetX() - centerX) * scale);
                 double y = node->GetCoords().GetLat() +
-                           (projection.ConvertWidthToPixel(maxY - pixel.GetY() - centerY) * scaleLat);
+                           (projection.ConvertWidthToPixel(pixel.GetY() - centerY) * scaleLat);
 
                 vertices.push_back(osmscout::Vertex2D(x, y));
               }

@@ -1159,12 +1159,12 @@ namespace osmscout {
         if (pixel==polygon->GetCoords().begin()) {
           cairo_move_to(draw,
                         x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                        y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                        y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
         }
         else {
           cairo_line_to(draw,
                         x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                        y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                        y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
         }
       }
 
@@ -1175,7 +1175,7 @@ namespace osmscout {
 
       cairo_rectangle(draw,
                       x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
-                      y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY),
+                      y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY),
                       projection.ConvertWidthToPixel(rectangle->GetWidth()),
                       projection.ConvertWidthToPixel(rectangle->GetHeight()));
     }
@@ -1184,7 +1184,7 @@ namespace osmscout {
 
       cairo_arc(draw,
                 x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
-                y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY),
+                y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY),
                 projection.ConvertWidthToPixel(circle->GetRadius()),
                 0,2*M_PI);
     }
