@@ -21,22 +21,22 @@ CONST
   COLOR unknownColor               = @waterColor;
 
 SYMBOL place_city
-  CIRCLE 0,0 1.25 {
+  CIRCLE 0,0 2.5 {
     AREA {color: #ff000050; }
   }
 
 SYMBOL place_town
-  CIRCLE 0,0 0.66 {
+  CIRCLE 0,0 1.32 {
     AREA {color: #ff000040; }
   }
  
 SYMBOL railway_station
-  CIRCLE 0,0 0.50 {
+  CIRCLE 0,0 1.0 {
     AREA {color: #60005070; }
   }
 
 SYMBOL railway_halt
-  CIRCLE 0,0 0.25 {
+  CIRCLE 0,0 0.5 {
     AREA {color: #00800080; }
   }
 SYMBOL railway_tram_stop

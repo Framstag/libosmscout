@@ -100,6 +100,7 @@ int main(int argc, char* argv[])
 
   if (!styleConfig->Load(style)) {
     std::cerr << "Cannot open style" << std::endl;
+    return 1;
   }
 
   std::ofstream stream(output.c_str(), std::ios_base::binary|std::ios_base::trunc|std::ios_base::out);

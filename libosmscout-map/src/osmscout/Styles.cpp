@@ -1572,10 +1572,10 @@ namespace osmscout {
                                           double& maxY) const
   {
     minX=topLeft.GetX();
-    minY=topLeft.GetY()-height;
+    minY=topLeft.GetY();
 
     maxX=topLeft.GetX()+width;
-    maxY=topLeft.GetY();
+    maxY=topLeft.GetY()+height;
   }
 
   CirclePrimitive::CirclePrimitive(ProjectionMode projectionMode,

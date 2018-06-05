@@ -397,7 +397,7 @@ CONST
     }
 
   SYMBOL highway_bus_stop
-    CIRCLE 0,0 0.75 {
+    CIRCLE 0,0 1.5 {
       AREA {color: @busSymbolColor; }
     }
 
@@ -407,15 +407,15 @@ CONST
     }
 
   SYMBOL amenity_hospital
-    CIRCLE 0,0 1 {
+    CIRCLE 0,0 2 {
       AREA.BORDER {color: @hospitalSymbolColor; width: 0.2mm; }
     }
     // Horizontal bar
-    RECTANGLE -0.75,0.25 1.5 x 0.5 {
+    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
       AREA { color: @hospitalSymbolColor; }
     }
     // Vertical bar
-    RECTANGLE -0.25,0.75 0.5 x 1.5 {
+    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
       AREA { color: @hospitalSymbolColor; }
     }
 
@@ -425,16 +425,16 @@ CONST
       AREA.BORDER {color: @pharmacySymbolColor; width: 0.2mm; }
     }
     // Horizontal bar
-    RECTANGLE -0.75,0.25 1.5 x 0.5 {
+    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
       AREA { color: @pharmacySymbolColor; }
     }
     // Vertical bar
-    RECTANGLE -0.25,0.75 0.5 x 1.5 {
+    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
       AREA {color: @pharmacySymbolColor; }
     }
 
   SYMBOL amenity_parking
-    CIRCLE 0,0 0.75 {
+    CIRCLE 0,0 1.5 {
       AREA {color: #4bb2da; }
     }
 
@@ -449,25 +449,25 @@ CONST
     }
 
   SYMBOL christian_church_cross
-    RECTANGLE 0.5,2 0.5 x 2 {
+    RECTANGLE 0.5,-2 0.5 x 2 {
       AREA { color: #000000; }   // vertical bar
     }
-    RECTANGLE 0,1.5 1.5 x 0.5 {
+    RECTANGLE 0,-1.5 1.5 x 0.5 {
       AREA { color: #000000; } // horizontal bar
     }
 
   SYMBOL speed_camera
-    CIRCLE 0,0 0.75 {
+    CIRCLE 0,0 1.5 {
       AREA {color: @red; }
     }
 
   SYMBOL highway_street_lamp
-    CIRCLE 0,0 1 {
+    CIRCLE 0,0 2 {
       AREA {color: #f5fb5b; }
     }
 
   SYMBOL marker
-    CIRCLE 0,0 0.75 {
+    CIRCLE 0,0 1.5 {
       AREA {color: #ff0000; }
     }
 

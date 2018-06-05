@@ -1042,7 +1042,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    * Definition of a symbol. A symbol consists of a list of DrawPrimitives
-   * with with assigned rendering styes.
+   * with with assigned rendering styles.
    */
   class OSMSCOUT_MAP_API Symbol
   {

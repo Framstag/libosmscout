@@ -124,8 +124,8 @@ like oneway arrows, simple signs or similar.
 
 Currently the following primives are supported:
 
-* `RECTANGLE <x> , <y> <width> x <height> { area style definitions }`
-* `CIRCLE    <x> , <y> <radius> { area style definitions }`
+* `RECTANGLE <left-x> , <top-y> <width> x <height> { area style definitions }`
+* `CIRCLE    <center-x> , <center-y> <radius> { area style definitions }`
 * `POLYGON   <x> , <y> ...more coordinates... { area style definitions }`
 
 "area style definitions" are normal style definitions for areas as
