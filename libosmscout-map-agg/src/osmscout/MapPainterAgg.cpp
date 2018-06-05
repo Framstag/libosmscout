@@ -261,6 +261,8 @@ namespace osmscout {
                                    color.GetA()));
 
       agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+    }else{
+      rasterizer->reset();
     }
 
     if (borderStyle) {
