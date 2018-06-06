@@ -63,6 +63,9 @@ namespace osmscout {
                                   double fontSize);
 #endif
 
+    void SetupFillAndStroke(const FillStyleRef &fillStyle,
+                                           const BorderStyleRef &borderStyle);
+
     void WriteHeader(size_t width,size_t height);
     void DumpStyles(const StyleConfig& styleConfig,
                     const MapParameter& parameter,

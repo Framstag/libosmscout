@@ -435,12 +435,94 @@ namespace osmscout {
     // Not implemented
   }
 
-  void MapPainterSVG::DrawSymbol(const Projection& /*projection*/,
-                                 const MapParameter& /*parameter*/,
-                                 const Symbol& /*style*/,
-                                 double /*x*/, double /*y*/)
+  void MapPainterSVG::SetupFillAndStroke(const FillStyleRef &fillStyle,
+                                         const BorderStyleRef &borderStyle)
   {
-    // Not implemented
+    stream << " fill=\"" << (fillStyle && fillStyle->GetFillColor().IsVisible() ? GetColorValue(fillStyle->GetFillColor()) : "none") << "\"";
+    stream << " stroke=\"" << (borderStyle && borderStyle->GetColor().IsVisible() ? GetColorValue(borderStyle->GetColor()) : "none") << "\"";
+
+    if (borderStyle) {
+      if (!borderStyle->GetColor().IsSolid()) {
+        stream << " stroke-opacity=\"" << borderStyle->GetColor().GetA() << "\"";
+      }
+      stream << " stroke-width=\"" << borderStyle->GetWidth() << "\"";
+    }
+  }
+
+  void MapPainterSVG::DrawSymbol(const Projection& projection,
+                                 const MapParameter& /*parameter*/,
+                                 const Symbol& symbol,
+                                 double x, double y)
+  {
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+    double centerX;
+    double centerY;
+
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
+
+    centerX=(minX+maxX)/2;
+    centerY=(minY+maxY)/2;
+
+    stream << "    <!-- symbol: " << symbol.GetName() << " -->" << std::endl;
+    for (const auto& primitive : symbol.GetPrimitives()) {
+      const DrawPrimitive *primitivePtr = primitive.get();
+
+      const auto *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+      const auto *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+      const auto *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
+
+      if (polygon != nullptr) {
+        FillStyleRef   fillStyle=polygon->GetFillStyle();
+        BorderStyleRef borderStyle=polygon->GetBorderStyle();
+
+        stream << "    <polyline";
+        SetupFillAndStroke(fillStyle, borderStyle);
+        stream << std::endl;
+
+        stream << "              points=\"";
+
+        for (auto pixel=polygon->GetCoords().begin();
+             pixel!=polygon->GetCoords().end();
+             ++pixel) {
+          if (pixel!=polygon->GetCoords().begin()) {
+            stream << " ";
+          }
+
+          stream << (x+projection.ConvertWidthToPixel(pixel->GetX()-centerX))
+                 << "," << (y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
+        }
+
+        stream << "\" />" << std::endl;
+
+      } else if (rectangle != nullptr) {
+        FillStyleRef   fillStyle=rectangle->GetFillStyle();
+        BorderStyleRef borderStyle=rectangle->GetBorderStyle();
+
+        stream << "    <rect";
+        stream << " x=\"" << ((x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX))) << "\"";
+        stream << " y=\"" << ((y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY))) << "\"";
+        stream << " width=\"" << (projection.ConvertWidthToPixel(rectangle->GetWidth())) << "\"";
+        stream << " height=\"" << (projection.ConvertWidthToPixel(rectangle->GetHeight())) << "\"";
+
+        SetupFillAndStroke(fillStyle, borderStyle);
+        stream << " />" << std::endl;
+
+      } else if (circle != nullptr) {
+        FillStyleRef   fillStyle=circle->GetFillStyle();
+        BorderStyleRef borderStyle=circle->GetBorderStyle();
+
+        stream << "    <circle";
+        stream << " cx=\"" << (x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX)) << "\"";
+        stream << " cy=\"" << (y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY)) << "\"";
+        stream << " r=\"" << (projection.ConvertWidthToPixel(circle->GetRadius())) << "\"";
+
+        SetupFillAndStroke(fillStyle, borderStyle);
+        stream << " />" << std::endl;
+      }
+    }
   }
 
   void MapPainterSVG::DrawIcon(const IconStyle* /*style*/,
