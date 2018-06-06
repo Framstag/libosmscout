@@ -79,7 +79,7 @@ namespace osmscout {
 
   void MapPainterNoOp::RegisterContourLabel(const Projection & /*projection*/,
                                             const MapParameter & /*parameter*/,
-                                            const LabelData & /*label*/,
+                                            const PathLabelData & /*label*/,
                                             const std::vector<Vertex2D> & /*way*/)
   {
     // no code

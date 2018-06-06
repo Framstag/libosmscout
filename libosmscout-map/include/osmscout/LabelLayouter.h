@@ -38,6 +38,14 @@ namespace osmscout {
     int height;
   };
 
+  class OSMSCOUT_MAP_API PathLabelData
+  {
+  public:
+    size_t            priority{0}; //!< Priority of the entry
+    std::string       text;        //!< The label text (type==Text|PathText)
+    PathTextStyleRef  style;
+  };
+
   class OSMSCOUT_MAP_API LabelData
   {
   public:
@@ -57,7 +65,7 @@ namespace osmscout {
     //double          proposedWidth{-1};
 
     LabelStyleRef     style;    //!< Style for drawing
-    std::string       text;     //!< The label text
+    std::string       text;     //!< The label text (type==Text|PathText)
 
     IconStyleRef      iconStyle; //!< Icon or symbol style
     double            iconWidth{0};

@@ -1331,14 +1331,9 @@ namespace osmscout {
                      helper);
     */
 
-    LabelData labelData;
-    //labelData.id=0;
+    PathLabelData labelData;
     labelData.priority=0;
-    labelData.position=0;
-    labelData.alpha=0;
-    labelData.fontSize=pathTextStyle->GetSize();
-    //labelData.proposedWidth=-1;
-    //labelData.style=; // TODO
+    labelData.style=pathTextStyle;
     labelData.text=textLabel;
 
     // TODO: move this code to layouter and build simplified path without temporary vector wayPoints
