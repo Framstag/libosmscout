@@ -52,7 +52,7 @@ SYMBOL highway_bus_stop
     AREA { color: #10107080; }
   }
 SYMBOL subway_entrance
-  POLYGON -0.4,0 -0.4,0.8 0,0.4 0.4,0.8 0.4,0 1,0 0,-1 -1,0 {
+  POLYGON -0.4,0 -0.4,-0.8 0,-0.4 0.4,-0.8 0.4,0 1,0 0,1 -1,0 {
     AREA { color: #60005070; }
   }
 
