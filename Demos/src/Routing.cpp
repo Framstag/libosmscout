@@ -775,6 +775,8 @@ int main(int argc, char* argv[])
     return 0;
   }
 
+  osmscout::StopClock postprocessTimer;
+
   std::set<std::string> motorwayTypeNames;
   std::set<std::string> motorwayLinkTypeNames;
   std::set<std::string> junctionTypeNames;
@@ -803,11 +805,20 @@ int main(int argc, char* argv[])
     std::cerr << "Error during route postprocessing" << std::endl;
   }
 
+  postprocessTimer.Stop();
+
+  std::cout << "Postprocessing time: " << postprocessTimer.ResultString() << std::endl;
+
+  osmscout::StopClock                 generateTimer;
   osmscout::RouteDescriptionGenerator generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
   generator.GenerateDescription(description,
                                 generatorCallback);
+
+  generateTimer.Stop();
+
+  std::cout << "Description generation time: " << postprocessTimer.ResultString() << std::endl;
 
   router->Close();
 
