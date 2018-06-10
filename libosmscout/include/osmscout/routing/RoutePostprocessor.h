@@ -42,10 +42,22 @@ namespace osmscout {
 
   /**
    * \ingroup Routing
+   *
+   * RouteProcessor allows to enhance the raw routing information from the routing algorithm with additional
+   * information like way names, turns and similar by traversing the route and its objects.
+   *
+   * The processor is plugable in the sense that it can get enhanced by classes deriving from the Processor
+   * base class allowing to write traversial code for a specific aim. The complete routing description
+   * is the result of the sum of all information collected by the individual processors.
    */
   class OSMSCOUT_API RoutePostprocessor
   {
   public:
+    /**
+     * \ingroup Routing
+     * Base class for routing processors. Routing processors allow iterating of the raw route with the aim
+     * to collect further information to enhance information abut the route like street names, turns etc...
+     */
     class OSMSCOUT_API Postprocessor
     {
     public:
@@ -194,6 +206,10 @@ namespace osmscout {
                    RouteDescription& description) override;
     };
 
+    /**
+     * \ingroup Routing
+     * Collects max speed information
+     */
     class OSMSCOUT_API MaxSpeedPostprocessor : public RoutePostprocessor::Postprocessor
     {
     public:
