@@ -437,10 +437,10 @@ namespace osmscout {
 
     for (int x=x1; x<=x2; x++) {
       if (steep) {
-        cells.push_back(ScanCell(y,x));
+        cells.emplace_back(y,x);
       }
       else {
-        cells.push_back(ScanCell(x,y));
+        cells.emplace_back(x,y);
       }
 
       error-=dy;
