@@ -131,6 +131,11 @@ Currently the following primives are supported:
 "area style definitions" are normal style definitions for areas as
 used within the STYLE section.
 
+Primitives are using coordinate system that is usual for computer graphics:
+X coordinate is increasing to right and Y coordinate is increasing to bottom.
+
+<a href="/images/symbols.png"><img src="/images/symbols.png" width="800" height="435" alt="Symbol examples"/></a>
+
 ## Section `STYLE`
 
 The style section is a CSS-like aproach to define a number of filters
