@@ -1066,6 +1066,18 @@ namespace osmscout {
       return x==other.x && y==other.y;
     }
 
+    inline bool operator<(const ScanCell& other) const
+    {
+      if (y<other.y) {
+        return true;
+      }
+      else if (y==other.y) {
+        return x<other.x;
+      }
+
+      return false;
+    }
+
     inline bool IsEqual(const ScanCell& other) const
     {
       return x==other.x && y==other.y;
