@@ -442,8 +442,11 @@ namespace osmscout {
   }
 
   /**
-   * Returns the closed routeable object (area or way) relative
+   * Returns the closest routeable object (area or way) relative
    * to the given coordinate.
+   *
+   * The result should be use as imput for the router to define
+   * routing start or end point.
    *
    * @note The returned node may in fact not be routable, it is just
    * the closest node to the given position on a routable way or area.
@@ -458,6 +461,8 @@ namespace osmscout {
    * @param radius
    *    The maximum radius to search in from the search center
    * @return
+   *    A reference to a node on a way or area that is routable (if returned
+   *    route position is valid)
    */
   RoutePosition SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                              const RoutingProfile& profile,
@@ -589,6 +594,33 @@ namespace osmscout {
     return position;
   }
 
+  /**
+   * Returns the closest routeable object (area or way) relative
+   * to the given coordinate.
+   *
+   * The result should be use for typical "object you are traveling on"
+   * information as used by routing applications.
+   *
+   * @note The returned node may in fact not be routable, it is just
+   * the closest node to the given position on a routable way or area.
+   *
+   * @note The actual object may not be within the given radius
+   * due to internal search index resolution.
+   *
+   * @note This is a simple solution that does not track any spast state.
+   * A better implementation should hold on recently travels coordinates and
+   * ways or areas and do some tolerance error handling in case of GPS
+   * jitter effects.
+   *
+   * @param coord
+   *    coordinate of the search center
+   * @param vehicle
+   *    The vehicle to use
+   * @param maxRadius
+   *    The maximum radius to search in from the search center
+   * @return
+   *    A convinient description of the clostest routable object (if valid)
+   */
   ClosestRoutableObjectResult SimpleRoutingService::GetClosestRoutableObject(const GeoCoord& location,
                                                                              Vehicle vehicle,
                                                                              const Distance &maxRadius)
