@@ -34,19 +34,19 @@ namespace osmscout {
     double angle;
   };
 
-  class OSMSCOUT_MAP_API SimplifiedPath
+  class OSMSCOUT_MAP_API LabelPath
   {
   private:
     double length;
     std::vector<Segment> segments;
-    std::vector<int> offsetIndex; // segment offset by length 100
+    std::vector<size_t> offsetIndex; // segment offset by length 100
     double minSegmentLength;
     Vertex2D end;
     double endDistance;
 
   public:
-    SimplifiedPath(double minSegmentLength=5);
-    virtual ~SimplifiedPath();
+    LabelPath(double minSegmentLength=5);
+    virtual ~LabelPath();
     void AddPoint(double x,double y);
     inline double GetLength() const {
       return length+endDistance;

@@ -17,24 +17,24 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/SimplifiedPath.h>
+#include <osmscout/LabelPath.h>
 #include <osmscout/system/Math.h>
 #include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 
 
-  SimplifiedPath::SimplifiedPath(double minSegmentLength):
+  LabelPath::LabelPath(double minSegmentLength):
     length(0), minSegmentLength(minSegmentLength), endDistance(0)
   {
     offsetIndex.push_back(0);
   }
 
-  SimplifiedPath::~SimplifiedPath()
+  LabelPath::~LabelPath()
   {
   }
 
-  void SimplifiedPath::AddPoint(double x,double y)
+  void LabelPath::AddPoint(double x,double y)
   {
     if (segments.empty()){
       end.Set(x,y);
@@ -62,7 +62,7 @@ namespace osmscout {
     }
   }
 
-  Vertex2D SimplifiedPath::PointAtLength(double offset) const
+  Vertex2D LabelPath::PointAtLength(double offset) const
   {
     if (segments.empty()){
       return Vertex2D();
@@ -75,12 +75,12 @@ namespace osmscout {
     return Vertex2D(p.GetX() + add.GetX(), p.GetY() + add.GetY());
   }
 
-  const Segment& SimplifiedPath::segmentBefore(double offset) const
+  const Segment& LabelPath::segmentBefore(double offset) const
   {
-    int hundred=offset/100;
+    size_t hundred=offset/100;
     if (hundred>=offsetIndex.size())
       return segments.back();
-    int i=offsetIndex[hundred];
+    size_t i=offsetIndex[hundred];
     for (;i<segments.size();i++){
       const Segment &seg=segments[i];
       if (offset<(seg.offset+seg.length)){
@@ -90,17 +90,17 @@ namespace osmscout {
     return segments.back();
   }
 
-  double SimplifiedPath::AngleAtLength(double offset) const
+  double LabelPath::AngleAtLength(double offset) const
   {
     return segmentBefore(offset).angle;
   }
 
-  double SimplifiedPath::AngleAtLengthDeg(double offset) const
+  double LabelPath::AngleAtLengthDeg(double offset) const
   {
     return (AngleAtLength(offset) * 180) / M_PI;
   }
 
-  bool SimplifiedPath::TestAngleVariance(double startOffset, double endOffset, double maximumAngle)
+  bool LabelPath::TestAngleVariance(double startOffset, double endOffset, double maximumAngle)
   {
     double initialAngle=0;
     bool initialised=false;

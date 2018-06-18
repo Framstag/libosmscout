@@ -30,7 +30,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 
-#include <osmscout/SimplifiedPath.h>
+#include <osmscout/LabelPath.h>
 
 #include <DrawWindow.h>
 
@@ -55,7 +55,7 @@ DrawWindow::~DrawWindow()
 
 }
 
-void DrawWindow::setupTransformation(QPainter *painter, const osmscout::SimplifiedPath &p,
+void DrawWindow::setupTransformation(QPainter *painter, const osmscout::LabelPath &p,
                                      const qreal offset, const qreal baseline) const
 {
   QTransform tran;
@@ -86,7 +86,7 @@ void DrawWindow::setupTransformation(QPainter *painter, const osmscout::Simplifi
   painter->setTransform(tran);
 }
 
-void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::SimplifiedPath &p)
+void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::LabelPath &p)
 {
   QPen          pen;
   QFont         font;
@@ -118,7 +118,7 @@ void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::Si
   painter->resetTransform();
 }
 
-void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::SimplifiedPath &p)
+void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::LabelPath &p)
 {
   QPen          pen;
   QFont         font;
@@ -192,7 +192,7 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::Si
   painter->resetTransform();
 }
 
-void DrawWindow::drawLine(QPainter *painter, const osmscout::SimplifiedPath &p)
+void DrawWindow::drawLine(QPainter *painter, const osmscout::LabelPath &p)
 {
   QPen pen;
   pen.setColor(QColor::fromRgbF(0,0,1));
@@ -224,7 +224,7 @@ void DrawWindow::paintEvent(QPaintEvent* /* event */)
 
   int sinStart=0;
   for (int k=0;k<sinCount;k++){
-    osmscout::SimplifiedPath p;
+    osmscout::LabelPath p;
     // fill path with sinus
     for (int x=startOffset;(x+startOffset)<width();x++){
       //int y=std::cos(((double)(x+sinStart)/(double)width()) *3*M_PI) * (height()/2-44) + height()/2;

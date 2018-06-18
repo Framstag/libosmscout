@@ -28,6 +28,7 @@
 #include <osmscout/util/String.h>
 #include <osmscout/util/Tiling.h>
 #include <iostream>
+#include <cstdint>
 
 //#define DEBUG_GROUNDTILES
 //#define DEBUG_NODE_DRAW
@@ -1319,7 +1320,7 @@ namespace osmscout {
                                        transEnd);
     }
 
-    ContourLabelHelper helper(*this);
+    //ContourLabelHelper helper(*this);
 
     /*
     DrawContourLabel(projection,
@@ -1332,19 +1333,21 @@ namespace osmscout {
     */
 
     PathLabelData labelData;
-    labelData.priority=0;
+    labelData.priority=0; // TODO: bring priority to contour labels
     labelData.style=pathTextStyle;
     labelData.text=textLabel;
+    labelData.contourLabelOffset=contourLabelOffset;
+    labelData.contourLabelSpace=contourLabelSpace;
 
-    // TODO: move this code to layouter and build simplified path without temporary vector wayPoints
-    std::vector<Vertex2D> wayPoints;
-    wayPoints.reserve(transEnd-transStart);
+    // TODO: use coordBuffer for label path
+    LabelPath labelPath;
+
     for (size_t j=transStart; j<=transEnd; j++) {
-      wayPoints.push_back(Vertex2D(
+      labelPath.AddPoint(
           coordBuffer->buffer[j].GetX(),
-          coordBuffer->buffer[j].GetY()));
+          coordBuffer->buffer[j].GetY());
     }
-    RegisterContourLabel(projection, parameter, labelData, wayPoints);
+    RegisterContourLabel(projection, parameter, labelData, labelPath);
 
     return true;
   }

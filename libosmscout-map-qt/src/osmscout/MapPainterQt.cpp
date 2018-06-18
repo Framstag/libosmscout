@@ -18,7 +18,7 @@
 */
 
 #include <osmscout/MapPainterQt.h>
-#include <osmscout/SimplifiedPath.h>
+#include <osmscout/LabelPath.h>
 
 #include <iostream>
 #include <limits>
@@ -535,9 +535,14 @@ namespace osmscout {
 
       if (proposedWidth > 0) {
         line.setLineWidth(proposedWidth);
+      } else {
+        // it is necessary to setup some width to get usable dimension in QTextLine::naturalTextWidth()
+        line.setLineWidth(std::numeric_limits<qreal>::max());
       }
 
-      height+=leading;
+      if (leading > 0) {
+        height += leading;
+      }
       line.setPosition(QPointF(0.0,height));
       width=std::max(width,line.naturalTextWidth());
       height+=line.height();
@@ -628,7 +633,7 @@ namespace osmscout {
     painter->setFont(font);
 
     // build path
-    SimplifiedPath p;
+    LabelPath p;
 
     // Path has direction left => right
     if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
@@ -1228,10 +1233,9 @@ namespace osmscout {
   void MapPainterQt::RegisterContourLabel(const Projection &projection,
                                           const MapParameter &parameter,
                                           const PathLabelData &label,
-                                          const std::vector<Vertex2D> &way)
+                                          const LabelPath &labelPath)
   {
-    // TODO use LabelData::style
-    labelLayouter.RegisterContourLabel(projection, parameter, way, label.text);
+    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
   }
 
   void MapPainterQt::DrawLabels(const Projection& projection,
@@ -1242,7 +1246,14 @@ namespace osmscout {
     labelLayouter.Layout(painter->window().width(), painter->window().height());
 
     for (const ContourLabel<QGlyphRun> &label:labelLayouter.ContourLabels()){
+
+      const Color &color = label.style->GetTextColor();
+      QPen pen;
+      pen.setColor(QColor::fromRgbF(color.GetR(),color.GetG(),color.GetB(),color.GetA()));
+      painter->setPen(pen);
+
       for (const Glyph<QGlyphRun> &glyph:label.glyphs){
+
         DrawGlyph(painter, glyph);
 
         QPen pen(QColor::fromRgbF(0,1,0));

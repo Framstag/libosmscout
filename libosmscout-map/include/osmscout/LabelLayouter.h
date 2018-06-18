@@ -26,7 +26,7 @@
 #include <osmscout/MapImportExport.h>
 
 #include <osmscout/StyleConfig.h>
-#include <osmscout/SimplifiedPath.h>
+#include <osmscout/LabelPath.h>
 
 namespace osmscout {
 
@@ -44,6 +44,8 @@ namespace osmscout {
     size_t            priority{0}; //!< Priority of the entry
     std::string       text;        //!< The label text (type==Text|PathText)
     PathTextStyleRef  style;
+    double            contourLabelOffset;
+    double            contourLabelSpace;
   };
 
   class OSMSCOUT_MAP_API LabelData
@@ -103,10 +105,10 @@ namespace osmscout {
   public:
     NativeLabel             label;
 
-    double                  width;
-    double                  height;
+    double                  width{-1};
+    double                  height{-1};
 
-    double                  fontSize; //!< Font size to be used
+    double                  fontSize{1}; //!< Font size to be used
     osmscout::LabelStyleRef style;    //!< Style for drawing
     std::string             text;     //!< The label text
 
@@ -125,6 +127,7 @@ namespace osmscout {
       std::shared_ptr<Label<NativeGlyph, NativeLabel>>
                 label;
     };
+
   public:
     size_t                priority; //!< Priority of the entry (minimum of priority label elements)
     std::vector<Element>  elements;
@@ -136,6 +139,7 @@ namespace osmscout {
   public:
     size_t priority;
     std::vector<Glyph<NativeGlyph>> glyphs;
+    osmscout::PathTextStyleRef style;    //!< Style for drawing
   };
 
   class OSMSCOUT_MAP_API Mask
@@ -397,32 +401,36 @@ namespace osmscout {
 
     void RegisterContourLabel(const Projection& projection,
                               const MapParameter& parameter,
-                              std::vector<Vertex2D> way,
-                              std::string string)
+                              const PathLabelData &labelData,
+                              const LabelPath &labelPath)
     {
-      // TODO: parameters
-      int fontSize=1.75; // points
-      int textOffset=4*fontSize; // pixels
-
-      // TODO: cache simplified path for way id
-      SimplifiedPath p;
-      for (auto const &point:way){
-        p.AddPoint(point.GetX(), point.GetY());
-      }
-
       // TODO: cache label for string and font parameters
-      LabelPtr label = textLayouter->Layout(projection, parameter, string, fontSize, /* object width */ 10.0, /*enable wrapping*/ false);
+      LabelPtr label = textLayouter->Layout(
+          projection,
+          parameter,
+          labelData.text,
+          labelData.style->GetSize(),
+          /* object width */ 0.0,
+          /*enable wrapping*/ false);
+
+      // text should be rendered with 0x0 coordinate as left baseline
+      // we want to move label little bit bottom, near to line center
+      double textOffset=label->height * 0.25;
+      //double textOffset=100.0;
+
       std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
-      double pLength=p.GetLength();
-      double offset=0;
+      // TODO: do the magick to make sure that we don't render label upside-down
+      double pLength=labelPath.GetLength();
+      double offset=labelData.contourLabelOffset;
       while (offset<pLength){
         ContourLabelType cLabel;
-        cLabel.priority = 1;
+        cLabel.priority = labelData.priority;
+        cLabel.style = labelData.style;
         for (Glyph<NativeGlyph> glyphCopy:glyphs){
           double glyphOffset=offset+glyphCopy.position.GetX();
-          osmscout::Vertex2D point=p.PointAtLength(glyphOffset);
-          double angle=p.AngleAtLength(glyphOffset)*-1;
+          osmscout::Vertex2D point=labelPath.PointAtLength(glyphOffset);
+          double angle=labelPath.AngleAtLength(glyphOffset)*-1;
           double  sinA=std::sin(angle);
           double  cosA=std::cos(angle);
 
@@ -470,7 +478,7 @@ namespace osmscout {
           cLabel.glyphs.push_back(glyphCopy);
         }
         contourLabelInstances.push_back(cLabel);
-        offset+=label->width + 3*fontSize;
+        offset+=label->width + labelData.contourLabelSpace;
       }
     }
 

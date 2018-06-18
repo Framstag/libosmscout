@@ -688,7 +688,7 @@ namespace osmscout {
     virtual void RegisterContourLabel(const Projection &projection,
                                       const MapParameter &parameter,
                                       const PathLabelData &label,
-                                      const std::vector<Vertex2D> &way) = 0;
+                                      const LabelPath &labelPath) = 0;
 
     virtual void DrawLabels(const Projection& projection,
                             const MapParameter& parameter,

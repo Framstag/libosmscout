@@ -31,7 +31,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 
-#include <osmscout/SimplifiedPath.h>
+#include <osmscout/LabelPath.h>
 
 class OSMSCOUT_MAP_API LabelLayoutKey
 {
@@ -349,7 +349,7 @@ public:
     int textOffset=fontHeight / 3;
 
     // TODO: cache simplified path for way id
-    osmscout::SimplifiedPath p;
+    osmscout::LabelPath p;
     for (auto const &point:way){
       p.AddPoint(point.x(), point.y());
     }
