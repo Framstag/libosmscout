@@ -271,7 +271,7 @@ gapColor     |Color        |Color drawn in the "gap", if not set gapColor is tra
 displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
 width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
 displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn line in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn line in relation to the actual path.
 joinCap      |Cap          |Cap in case where lines join.
 endCap       |Cap          |Cap in the case where the lines ends without joining another line.
 priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
@@ -296,7 +296,7 @@ gapColor     |Color        |Color drawn in the "gap", if not set gapColor is tra
 displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
 width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
 displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn line in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn line in relation to the actual path.
 priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
 
 If `displayWidth` and `width` are both set, the resulting pixel values will be added.
@@ -350,7 +350,7 @@ label        |FeatureAttr  |The name of the feature attribute to be rendered.
 color        |Color        |The color of the text
 size         |Int          |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
 displayOffset|ScreenSize   |Offset of drawn text in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn text in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn text in relation to the actual path.
 
 ### IconStyle - Drawing icons for nodes and areas
 
@@ -396,7 +396,7 @@ Name         |Type         |Description
 symbol       |String       |The name of the symbol to draw
 symbolSpace  |ScreenSize   |Space between each symbol on a path.
 displayOffset|ScreenSize   |Offset of drawn symbol in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn symbol in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn symbol in relation to the actual path.
 
 ## Label and icon placement
 
