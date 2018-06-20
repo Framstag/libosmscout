@@ -100,7 +100,7 @@ namespace osmscout {
     return (AngleAtLength(offset) * 180) / M_PI;
   }
 
-  bool LabelPath::TestAngleVariance(double startOffset, double endOffset, double maximumAngle)
+  bool LabelPath::TestAngleVariance(double startOffset, double endOffset, double maximumAngle) const
   {
     double initialAngle=0;
     bool initialised=false;

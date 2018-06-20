@@ -156,6 +156,11 @@ namespace osmscout {
                    const LabelData& label,
                    const QTextLayout& textLayout);
 
+    virtual void BeforeDrawing(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                               const MapData& data);
+
     /**
       Register regular label with given text at the given pixel coordinate
       in a style defined by the given LabelStyle.

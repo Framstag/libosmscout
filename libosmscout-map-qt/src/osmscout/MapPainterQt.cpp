@@ -1221,6 +1221,15 @@ namespace osmscout {
                                               1)));
   }
 
+  void MapPainterQt::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                   const Projection& /*projection*/,
+                                   const MapParameter& /*parameter*/,
+                                   const MapData& /*data*/)
+  {
+    labelLayouter.SetViewport(painter->window().width()/-2, painter->window().height()/-2,
+                              painter->window().width()*2, painter->window().height()*2);
+  }
+
   void MapPainterQt::RegisterRegularLabel(const Projection &projection,
                                           const MapParameter &parameter,
                                           const std::vector<LabelData> &labels,
@@ -1243,7 +1252,7 @@ namespace osmscout {
                                 const MapData& data)
   {
     // TODO: draw symbols and icons first, then standard labels and then overlays
-    labelLayouter.Layout(painter->window().width(), painter->window().height());
+    labelLayouter.Layout();
 
     for (const ContourLabel<QGlyphRun> &label:labelLayouter.ContourLabels()){
 

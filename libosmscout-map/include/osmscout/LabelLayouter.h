@@ -30,12 +30,21 @@
 
 namespace osmscout {
 
-  class IntRectangle {
-  public:
+  struct IntRectangle {
     int x;
     int y;
     int width;
     int height;
+
+    inline bool Intersects(const IntRectangle &other)
+    {
+      return !(
+          (x + width) < other.x ||
+          x > (other.x + other.width) ||
+          (y + height) < other.y ||
+          y > (other.y + other.height)
+      );
+    }
   };
 
   class OSMSCOUT_MAP_API PathLabelData
@@ -201,8 +210,16 @@ namespace osmscout {
 
   public:
     LabelLayouter(TextLayouter *textLayouter):
-        textLayouter(textLayouter)
+        textLayouter(textLayouter), viewport{}
     {};
+
+    void SetViewport(int x, int y, int w, int h)
+    {
+      viewport.x=x;
+      viewport.y=y;
+      viewport.width=w;
+      viewport.height=h;
+    }
 
     void Reset()
     {
@@ -236,7 +253,7 @@ namespace osmscout {
       }
     }
 
-    void Layout(int viewportWidth, int viewportHeight)
+    void Layout()
     {
       std::vector<ContourLabelType> allSortedContourLabels;
       std::vector<LabelInstanceType> allSortedLabels;
@@ -249,12 +266,12 @@ namespace osmscout {
       // TODO: layout labels outside viewport
 
       // compute collisions, hide some labels
-      int64_t rowSize = (viewportWidth / 64)+1;
+      int64_t rowSize = (viewport.width / 64)+1;
       //int64_t binaryWidth = rowSize * 8;
       //size_t binaryHeight = (viewportHeight / 8)+1;
-      std::vector<uint64_t> iconCanvas((size_t)(rowSize*viewportHeight));
-      std::vector<uint64_t> labelCanvas((size_t)(rowSize*viewportHeight));
-      std::vector<uint64_t> overlayCanvas((size_t)(rowSize*viewportHeight));
+      std::vector<uint64_t> iconCanvas((size_t)(rowSize*viewport.height));
+      std::vector<uint64_t> labelCanvas((size_t)(rowSize*viewport.height));
+      std::vector<uint64_t> overlayCanvas((size_t)(rowSize*viewport.height));
       //canvas.data()
       //Mask row(rowSize);
 
@@ -288,7 +305,7 @@ namespace osmscout {
             const typename LabelInstance<NativeGlyph, NativeLabel>::Element& element = currentLabel->elements[eli];
             Mask& row=masks[eli];
 
-            IntRectangle rectangle{ (int)element.x, (int)element.y, 0, 0 };
+            IntRectangle rectangle{ (int)element.x-viewport.x, (int)element.y-viewport.y, 0, 0 };
             std::vector<uint64_t> *canvas = &labelCanvas;
             if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol){
               rectangle.width = element.labelData.iconWidth;
@@ -303,7 +320,7 @@ namespace osmscout {
               }
             }
             row.prepare(rectangle);
-            bool collision = CheckLabelCollision(*canvas, row, viewportHeight);
+            bool collision = CheckLabelCollision(*canvas, row, viewport.height);
             if (!collision) {
               visibleElements.push_back(element);
               canvases[eli]=canvas;
@@ -318,7 +335,7 @@ namespace osmscout {
             // mark all labels at once
             for (size_t eli=0; eli < currentLabel->elements.size(); eli++) {
               if (canvases[eli] != nullptr) {
-                MarkLabelPlace(*(canvases[eli]), masks[eli], viewportHeight);
+                MarkLabelPlace(*(canvases[eli]), masks[eli], viewport.height);
               }
             }
           }
@@ -337,17 +354,17 @@ namespace osmscout {
 
             auto glyph=currentContourLabel->glyphs[gi];
             IntRectangle rect{
-                (int)glyph.trPosition.GetX(),
-                (int)glyph.trPosition.GetY(),
+                (int)glyph.trPosition.GetX()-viewport.x,
+                (int)glyph.trPosition.GetY()-viewport.y,
                 (int)glyph.trWidth,
                 (int)glyph.trHeight
             };
             masks[gi].prepare(rect);
-            collision |= CheckLabelCollision(labelCanvas, masks[gi], viewportHeight);
+            collision |= CheckLabelCollision(labelCanvas, masks[gi], viewport.height);
           }
           if (!collision) {
             for (int gi=0; gi<glyphCnt; gi++) {
-              MarkLabelPlace(labelCanvas, masks[gi], viewportHeight);
+              MarkLabelPlace(labelCanvas, masks[gi], viewport.height);
             }
             contourLabelInstances.push_back(*currentContourLabel);
           }
@@ -420,32 +437,67 @@ namespace osmscout {
 
       std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
-      // TODO: do the magick to make sure that we don't render label upside-down
+      // TODO: do the magic to make sure that we don't render label upside-down
       double pLength=labelPath.GetLength();
       double offset=labelData.contourLabelOffset;
-      while (offset<pLength){
+      while (offset+label->width < pLength){
+
+        // skip string rendering when path is too much squiggly at this offset
+        if (!labelPath.TestAngleVariance(offset,offset+label->width,M_PI/4)){
+          // skip drawing current label and let offset point to the next instance
+          offset+=label->width + labelData.contourLabelSpace;
+          continue;
+        }
+
         ContourLabelType cLabel;
         cLabel.priority = labelData.priority;
         cLabel.style = labelData.style;
-        for (Glyph<NativeGlyph> glyphCopy:glyphs){
-          double glyphOffset=offset+glyphCopy.position.GetX();
+
+        // direction of path at the label drawing starting point
+        double initialAngle=std::abs(labelPath.AngleAtLengthDeg(offset));
+        bool upwards=initialAngle>90 && initialAngle<270;
+
+        for (const Glyph<NativeGlyph> &glyph:glyphs){
+          double glyphOffset = upwards ?
+                               offset - glyph.position.GetX() + label->width:
+                               offset + glyph.position.GetX();
           osmscout::Vertex2D point=labelPath.PointAtLength(glyphOffset);
+          // glyph angle in radians
           double angle=labelPath.AngleAtLength(glyphOffset)*-1;
+
+          double w = textLayouter->GlyphWidth(glyph.glyph);
+          double h = textLayouter->GlyphHeight(glyph.glyph);
+
+          // it is not real diagonal, but maximum distance from glyph
+          // point that can be covered after treansformantions
+          double diagonal=w+h+std::abs(textOffset);
+
+          // fast check if current glyph can be visible
+          if (!viewport.Intersects(IntRectangle{
+            (int)(point.GetX()-diagonal),
+            (int)(point.GetY()-diagonal),
+            (int)(2*diagonal),
+            (int)(2*diagonal)
+          })){
+            continue;
+          }
+
+          if (upwards) {
+            angle-=M_PI;
+          }
           double  sinA=std::sin(angle);
           double  cosA=std::cos(angle);
 
+          Glyph<NativeGlyph> glyphCopy=glyph;
           glyphCopy.position=osmscout::Vertex2D(point.GetX() - textOffset * sinA,
                                                 point.GetY() + textOffset * cosA);
-
           glyphCopy.angle=angle;
 
-          double w = textLayouter->GlyphWidth(glyphCopy.glyph);
-          double h = textLayouter->GlyphHeight(glyphCopy.glyph);
           auto tl = textLayouter->GlyphTopLeft(glyphCopy.glyph);
 
           // four coordinates of glyph bounding box; x,y of top-left, top-right, bottom-right, bottom-left
-          std::array<double, 4> x{tl.GetX(), tl.GetX()+w, tl.GetX()+w, tl.GetX()};
-          std::array<double, 4> y{tl.GetY(), tl.GetY(), tl.GetY()+h, tl.GetY()+h};
+          std::array<double, 4> x{tl.GetX(), tl.GetX() + w, tl.GetX() + w, tl.GetX()};
+          std::array<double, 4> y{tl.GetY(), tl.GetY(), tl.GetY() + h, tl.GetY() + h};
 
           // rotate
           for (int i=0; i<4; i++){
@@ -459,7 +511,7 @@ namespace osmscout {
           glyphCopy.br.Set(x[2]+glyphCopy.position.GetX(), y[2]+glyphCopy.position.GetY());
           glyphCopy.bl.Set(x[3]+glyphCopy.position.GetX(), y[3]+glyphCopy.position.GetY());
 
-          // bounding box
+          // bounding box after rotation
           double minX=x[0];
           double maxX=x[0];
           double minY=y[0];
@@ -477,7 +529,9 @@ namespace osmscout {
 
           cLabel.glyphs.push_back(glyphCopy);
         }
-        contourLabelInstances.push_back(cLabel);
+        if (!cLabel.glyphs.empty()) { // is some glyph visible?
+          contourLabelInstances.push_back(cLabel);
+        }
         offset+=label->width + labelData.contourLabelSpace;
       }
     }
@@ -496,6 +550,7 @@ namespace osmscout {
     TextLayouter *textLayouter;
     std::vector<ContourLabelType> contourLabelInstances;
     std::vector<LabelInstanceType> labelInstances;
+    IntRectangle viewport;
   };
 
 }

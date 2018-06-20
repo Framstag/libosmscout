@@ -55,7 +55,7 @@ namespace osmscout {
     double AngleAtLength(double offset) const;
     double AngleAtLengthDeg(double offset) const;
 
-    bool TestAngleVariance(double startOffset, double endOffset, double maximumAngle);
+    bool TestAngleVariance(double startOffset, double endOffset, double maximumAngle) const;
   private:
     const Segment& segmentBefore(double offset) const;
   };
