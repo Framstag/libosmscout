@@ -283,7 +283,7 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::DrawLabel(const Projection& projection,
+  void MapPainterQt::DrawLabel(const Projection& /*projection*/,
                                const MapParameter& /*parameter*/,
                                const QRectF& rect,
                                const LabelData& label,
@@ -1252,8 +1252,62 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& /*data*/)
   {
-    // TODO: draw symbols and icons first, then standard labels and then overlays
+    // draw symbols and icons first, then standard labels and then overlays
     labelLayouter.Layout();
+
+    std::vector<QtLabelInstance::Element> textElements;
+
+    for (const QtLabelInstance &inst : labelLayouter.Labels()){
+      //painter->setPen(QColor::fromRgbF(0,0,0));
+      for (const QtLabelInstance::Element &el : inst.elements) {
+        if (el.labelData.type==LabelData::Symbol){
+          //std::cout << "# Symbol " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
+          DrawSymbol(projection,
+                     parameter,
+                     *(el.labelData.iconStyle->GetSymbol()),
+                     el.x + el.labelData.iconWidth/2,
+                     el.y + el.labelData.iconHeight/2);
+
+        } else if (el.labelData.type==LabelData::Icon){
+          DrawIcon(el.labelData.iconStyle.get(),
+                   el.x + el.labelData.iconWidth/2,
+                   el.y + el.labelData.iconHeight/2);
+
+        } else {
+          // postpone text elements
+          textElements.push_back(el);
+        }
+
+        // QPen pen(QColor::fromRgbF(0, 1, 0));
+        // pen.setWidthF(0.8);
+        // painter->setPen(pen);
+        // painter->setBrush(Qt::transparent);
+        // if (el.labelData.type==LabelData::Text) {
+        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
+        // }else{
+        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
+        // }
+      }
+    }
+
+    //for (const QtLabelInstance &inst : labelLayouter.Labels()){
+      //painter->setPen(QColor::fromRgbF(0,0,0));
+    for (const QtLabelInstance::Element &el : textElements) {
+      DrawLabel(projection, parameter,
+                QRectF(el.x, el.y, el.label->width, el.label->height),
+                el.labelData, *(el.label->label) );
+
+      // QPen pen(QColor::fromRgbF(0, 1, 0));
+      // pen.setWidthF(0.8);
+      // painter->setPen(pen);
+      // painter->setBrush(Qt::transparent);
+      // if (el.labelData.type==LabelData::Text) {
+      //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
+      // }else{
+      //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
+      // }
+    }
+    //}
 
     for (const ContourLabel<QGlyphRun> &label:labelLayouter.ContourLabels()){
 
@@ -1278,41 +1332,6 @@ namespace osmscout {
         // painter->drawLine(glyph.tr.GetX(), glyph.tr.GetY(), glyph.br.GetX(), glyph.br.GetY());
         // painter->drawLine(glyph.br.GetX(), glyph.br.GetY(), glyph.bl.GetX(), glyph.bl.GetY());
         // painter->drawLine(glyph.bl.GetX(), glyph.bl.GetY(), glyph.tl.GetX(), glyph.tl.GetY());
-      }
-    }
-
-    for (const QtLabelInstance inst : labelLayouter.Labels()){
-      //painter->setPen(QColor::fromRgbF(0,0,0));
-      for (const QtLabelInstance::Element &el : inst.elements) {
-        if (el.labelData.type==LabelData::Symbol){
-          //std::cout << "# Symbol " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
-          DrawSymbol(projection,
-                     parameter,
-                     *(el.labelData.iconStyle->GetSymbol()),
-                     el.x + el.labelData.iconWidth/2,
-                     el.y + el.labelData.iconHeight/2);
-
-        } else if (el.labelData.type==LabelData::Icon){
-          DrawIcon(el.labelData.iconStyle.get(),
-                   el.x + el.labelData.iconWidth/2,
-                   el.y + el.labelData.iconHeight/2);
-
-        }else {
-          DrawLabel(projection, parameter,
-                    QRectF(el.x, el.y, el.label->width, el.label->height),
-                    el.labelData, *(el.label->label) );
-
-        }
-
-        // QPen pen(QColor::fromRgbF(0, 1, 0));
-        // pen.setWidthF(0.8);
-        // painter->setPen(pen);
-        // painter->setBrush(Qt::transparent);
-        // if (el.labelData.type==LabelData::Text) {
-        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
-        // }else{
-        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
-        // }
       }
     }
 
