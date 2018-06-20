@@ -95,10 +95,10 @@ namespace osmscout {
     osmscout::Vertex2D position;
     double angle{0}; //!< clock-wise rotation in radians
 
-    osmscout::Vertex2D tl{0,0};
-    osmscout::Vertex2D tr{0,0};
-    osmscout::Vertex2D br{0,0};
-    osmscout::Vertex2D bl{0,0};
+    // osmscout::Vertex2D tl{0,0};
+    // osmscout::Vertex2D tr{0,0};
+    // osmscout::Vertex2D br{0,0};
+    // osmscout::Vertex2D bl{0,0};
 
     osmscout::Vertex2D trPosition{0,0}; //!< top-left position after rotation
     double trWidth{0};                  //!< width after rotation
@@ -501,15 +501,15 @@ namespace osmscout {
 
           // rotate
           for (int i=0; i<4; i++){
-            double tmp;
-            tmp  = x[i] * cosA - y[i] * sinA;
-            y[i] = x[i] * sinA + y[i] * cosA;
-            x[i] = tmp;
+            double ox = x[i];
+            double oy = y[i];
+            x[i] = ox * cosA - oy * sinA;
+            y[i] = ox * sinA + oy * cosA;
           }
-          glyphCopy.tl.Set(x[0]+glyphCopy.position.GetX(), y[0]+glyphCopy.position.GetY());
-          glyphCopy.tr.Set(x[1]+glyphCopy.position.GetX(), y[1]+glyphCopy.position.GetY());
-          glyphCopy.br.Set(x[2]+glyphCopy.position.GetX(), y[2]+glyphCopy.position.GetY());
-          glyphCopy.bl.Set(x[3]+glyphCopy.position.GetX(), y[3]+glyphCopy.position.GetY());
+          // glyphCopy.tl.Set(x[0]+glyphCopy.position.GetX(), y[0]+glyphCopy.position.GetY());
+          // glyphCopy.tr.Set(x[1]+glyphCopy.position.GetX(), y[1]+glyphCopy.position.GetY());
+          // glyphCopy.br.Set(x[2]+glyphCopy.position.GetX(), y[2]+glyphCopy.position.GetY());
+          // glyphCopy.bl.Set(x[3]+glyphCopy.position.GetX(), y[3]+glyphCopy.position.GetY());
 
           // bounding box after rotation
           double minX=x[0];

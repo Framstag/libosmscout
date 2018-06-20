@@ -200,12 +200,12 @@ namespace osmscout {
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd) override;
 
-    void DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd,
-                          ContourLabelHelper& helper) override;
+    // void DrawContourLabel(const Projection& projection,
+    //                       const MapParameter& parameter,
+    //                       const PathTextStyle& style,
+    //                       const std::string& text,
+    //                       size_t transStart, size_t transEnd,
+    //                       ContourLabelHelper& helper) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

@@ -1098,13 +1098,30 @@ namespace osmscout {
 
     ContourLabelHelper helper(*this);
 
-    DrawContourLabel(projection,
-                     parameter,
-                     *borderTextStyle,
-                     label,
-                     transStart,
-                     transEnd,
-                     helper);
+    // TODO: use coordBuffer for label path
+    LabelPath labelPath;
+
+    for (size_t j=transStart; j<=transEnd; j++) {
+      labelPath.AddPoint(
+          coordBuffer->buffer[j].GetX(),
+          coordBuffer->buffer[j].GetY());
+    }
+
+    PathLabelData labelData;
+    labelData.priority=0; // TODO: bring priority to contour labels
+    labelData.style=borderTextStyle;
+    labelData.text=label;
+    labelData.contourLabelOffset=contourLabelOffset;
+    labelData.contourLabelSpace=contourLabelSpace;
+
+    RegisterContourLabel(projection, parameter, labelData, labelPath);
+    // DrawContourLabel(projection,
+    //                  parameter,
+    //                  *borderTextStyle,
+    //                  label,
+    //                  transStart,
+    //                  transEnd,
+    //                  helper);
 
     return true;
   }

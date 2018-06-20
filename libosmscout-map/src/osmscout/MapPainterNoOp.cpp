@@ -22,7 +22,7 @@
 namespace osmscout {
 
   static double FONT_HEIGHT_FACTOR=10; //!< Height of the font in pixel in relation to the given fontSize
-  static double FONT_WIDTH_HEIGHT_FACTOR=1; //!< Width of an individual character in relation to its height
+  //static double FONT_WIDTH_HEIGHT_FACTOR=1; //!< Width of an individual character in relation to its height
 
   MapPainterNoOp::MapPainterNoOp(const StyleConfigRef& styleConfig)
           : MapPainter(styleConfig,
@@ -116,17 +116,16 @@ namespace osmscout {
     // no code
   }
 
-
-  void MapPainterNoOp::DrawContourLabel(const Projection& /*projection*/,
-                                        const MapParameter& /*parameter*/,
-                                        const PathTextStyle& /*style*/,
-                                        const std::string& /*text*/,
-                                        size_t /*transStart*/,
-                                        size_t /*transEnd*/,
-                                        ContourLabelHelper& /*helper*/)
-  {
-    // no code
-  }
+  // void MapPainterNoOp::DrawContourLabel(const Projection& /*projection*/,
+  //                                       const MapParameter& /*parameter*/,
+  //                                       const PathTextStyle& /*style*/,
+  //                                       const std::string& /*text*/,
+  //                                       size_t /*transStart*/,
+  //                                       size_t /*transEnd*/,
+  //                                       ContourLabelHelper& /*helper*/)
+  // {
+  //   // no code
+  // }
 
 
   void MapPainterNoOp::DrawContourSymbol(const Projection& /*projection*/,

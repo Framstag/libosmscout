@@ -284,7 +284,7 @@ namespace osmscout {
   }
 
   void MapPainterQt::DrawLabel(const Projection& projection,
-                               const MapParameter& parameter,
+                               const MapParameter& /*parameter*/,
                                const QRectF& rect,
                                const LabelData& label,
                                const QTextLayout& textLayout)
@@ -597,6 +597,7 @@ namespace osmscout {
     painter->setTransform(tran);
   }
 
+  /*
   void MapPainterQt::DrawContourLabel(const Projection& projection,
                                       const MapParameter& parameter,
                                       const PathTextStyle& style,
@@ -732,7 +733,7 @@ namespace osmscout {
 
     painter->resetTransform();
   }
-
+  */
 
   void MapPainterQt::FollowPathInit(FollowPathHandle &hnd,
                                     Vertex2D &origin,
@@ -1249,7 +1250,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawLabels(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& data)
+                                const MapData& /*data*/)
   {
     // TODO: draw symbols and icons first, then standard labels and then overlays
     labelLayouter.Layout();
@@ -1265,18 +1266,18 @@ namespace osmscout {
 
         DrawGlyph(painter, glyph);
 
-        QPen pen(QColor::fromRgbF(0,1,0));
-        pen.setWidthF(0.8);
-        painter->setPen(pen);
-        painter->setBrush(Qt::transparent);
-        painter->drawRect(glyph.trPosition.GetX(), glyph.trPosition.GetY(), glyph.trWidth, glyph.trHeight);
-
-        pen.setColor(QColor::fromRgbF(1,0,0));
-        painter->setPen(pen);
-        painter->drawLine(glyph.tl.GetX(), glyph.tl.GetY(), glyph.tr.GetX(), glyph.tr.GetY());
-        painter->drawLine(glyph.tr.GetX(), glyph.tr.GetY(), glyph.br.GetX(), glyph.br.GetY());
-        painter->drawLine(glyph.br.GetX(), glyph.br.GetY(), glyph.bl.GetX(), glyph.bl.GetY());
-        painter->drawLine(glyph.bl.GetX(), glyph.bl.GetY(), glyph.tl.GetX(), glyph.tl.GetY());
+        // QPen pen(QColor::fromRgbF(0,1,0));
+        // pen.setWidthF(0.8);
+        // painter->setPen(pen);
+        // painter->setBrush(Qt::transparent);
+        // painter->drawRect(glyph.trPosition.GetX(), glyph.trPosition.GetY(), glyph.trWidth, glyph.trHeight);
+        //
+        // pen.setColor(QColor::fromRgbF(1,0,0));
+        // painter->setPen(pen);
+        // painter->drawLine(glyph.tl.GetX(), glyph.tl.GetY(), glyph.tr.GetX(), glyph.tr.GetY());
+        // painter->drawLine(glyph.tr.GetX(), glyph.tr.GetY(), glyph.br.GetX(), glyph.br.GetY());
+        // painter->drawLine(glyph.br.GetX(), glyph.br.GetY(), glyph.bl.GetX(), glyph.bl.GetY());
+        // painter->drawLine(glyph.bl.GetX(), glyph.bl.GetY(), glyph.tl.GetX(), glyph.tl.GetY());
       }
     }
 
@@ -1297,22 +1298,21 @@ namespace osmscout {
                    el.y + el.labelData.iconHeight/2);
 
         }else {
-          //QTextLayout *tl = el.label->label.get();
           DrawLabel(projection, parameter,
                     QRectF(el.x, el.y, el.label->width, el.label->height),
                     el.labelData, *(el.label->label) );
 
         }
 
-        QPen pen(QColor::fromRgbF(0, 1, 0));
-        pen.setWidthF(0.8);
-        painter->setPen(pen);
-        painter->setBrush(Qt::transparent);
-        if (el.labelData.type==LabelData::Text) {
-          painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
-        }else{
-          painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
-        }
+        // QPen pen(QColor::fromRgbF(0, 1, 0));
+        // pen.setWidthF(0.8);
+        // painter->setPen(pen);
+        // painter->setBrush(Qt::transparent);
+        // if (el.labelData.type==LabelData::Text) {
+        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
+        // }else{
+        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
+        // }
       }
     }
 
