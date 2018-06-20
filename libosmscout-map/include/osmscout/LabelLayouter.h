@@ -462,11 +462,12 @@ namespace osmscout {
                                offset - glyph.position.GetX() + label->width:
                                offset + glyph.position.GetX();
           osmscout::Vertex2D point=labelPath.PointAtLength(glyphOffset);
-          // glyph angle in radians
-          double angle=labelPath.AngleAtLength(glyphOffset)*-1;
 
           double w = textLayouter->GlyphWidth(glyph.glyph);
           double h = textLayouter->GlyphHeight(glyph.glyph);
+
+          // glyph angle in radians
+          double angle=labelPath.AngleAtLength(upwards ? glyphOffset - w/2 : glyphOffset + w/2)*-1;
 
           // it is not real diagonal, but maximum distance from glyph
           // point that can be covered after treansformantions
