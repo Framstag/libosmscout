@@ -492,7 +492,7 @@ namespace osmscout {
     //@}
 
     /**
-     * This are the offocial render step methods. One method for each render step.
+     * This are the official render step methods. One method for each render step.
      */
     //@{
     void InitializeRender(const Projection& projection,
