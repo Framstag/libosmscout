@@ -537,12 +537,12 @@ namespace osmscout {
       }
     }
 
-    std::vector<LabelInstanceType> Labels() const
+    const std::vector<LabelInstanceType>& Labels() const
     {
       return labelInstances;
     }
 
-    std::vector<ContourLabelType> ContourLabels() const
+    const std::vector<ContourLabelType>& ContourLabels() const
     {
       return contourLabelInstances;
     }
