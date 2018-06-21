@@ -263,17 +263,11 @@ namespace osmscout {
 
       // TODO: sort labels by priority and position (to be deterministic)
 
-      // TODO: layout labels outside viewport
-
       // compute collisions, hide some labels
       int64_t rowSize = (viewport.width / 64)+1;
-      //int64_t binaryWidth = rowSize * 8;
-      //size_t binaryHeight = (viewportHeight / 8)+1;
       std::vector<uint64_t> iconCanvas((size_t)(rowSize*viewport.height));
       std::vector<uint64_t> labelCanvas((size_t)(rowSize*viewport.height));
       std::vector<uint64_t> overlayCanvas((size_t)(rowSize*viewport.height));
-      //canvas.data()
-      //Mask row(rowSize);
 
       auto labelIter = allSortedLabels.begin();
       auto contourLabelIter = allSortedContourLabels.begin();
@@ -398,6 +392,7 @@ namespace osmscout {
           }
         }else {
           // TODO: should we take style into account?
+          // Qt allows to split text layout and style setup
           element.label = textLayouter->Layout(projection, parameter,
                                                d.text, d.fontSize,
                                                objectWidth, /*enable wrapping*/ true);
@@ -437,7 +432,6 @@ namespace osmscout {
 
       std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
-      // TODO: do the magic to make sure that we don't render label upside-down
       double pLength=labelPath.GetLength();
       double offset=labelData.contourLabelOffset;
       while (offset+label->width < pLength){
@@ -452,6 +446,8 @@ namespace osmscout {
         ContourLabelType cLabel;
         cLabel.priority = labelData.priority;
         cLabel.style = labelData.style;
+
+        // do the magic to make sure that we don't render label upside-down
 
         // direction of path at the label drawing starting point
         double initialAngle=std::abs(labelPath.AngleAtLengthDeg(offset));

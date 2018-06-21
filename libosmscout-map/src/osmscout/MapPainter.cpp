@@ -1115,13 +1115,6 @@ namespace osmscout {
     labelData.contourLabelSpace=contourLabelSpace;
 
     RegisterContourLabel(projection, parameter, labelData, labelPath);
-    // DrawContourLabel(projection,
-    //                  parameter,
-    //                  *borderTextStyle,
-    //                  label,
-    //                  transStart,
-    //                  transEnd,
-    //                  helper);
 
     return true;
   }
