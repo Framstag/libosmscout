@@ -1108,7 +1108,7 @@ namespace osmscout {
     }
 
     PathLabelData labelData;
-    labelData.priority=0; // TODO: bring priority to contour labels
+    labelData.priority=borderTextStyle->GetPriority();
     labelData.style=borderTextStyle;
     labelData.text=label;
     labelData.contourLabelOffset=contourLabelOffset;
@@ -1343,7 +1343,7 @@ namespace osmscout {
     */
 
     PathLabelData labelData;
-    labelData.priority=0; // TODO: bring priority to contour labels
+    labelData.priority=pathTextStyle->GetPriority();
     labelData.style=pathTextStyle;
     labelData.text=textLabel;
     labelData.contourLabelOffset=contourLabelOffset;
