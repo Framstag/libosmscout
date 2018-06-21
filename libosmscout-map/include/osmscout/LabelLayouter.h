@@ -187,16 +187,29 @@ namespace osmscout {
     int rowTo{0};
   };
 
-  /*
-  template <class NativeGlyph>
-  osmscout::Vertex2D GlyphTopLeft(const NativeGlyph &glyph);
+  template <class NativeGlyph, class NativeLabel>
+  static bool LabelInstanceSorter(const LabelInstance<NativeGlyph, NativeLabel> &a,
+                                  const LabelInstance<NativeGlyph, NativeLabel> &b)
+  {
+    if (a.priority == b.priority) {
+      assert(!a.elements.empty());
+      assert(!b.elements.empty());
+      return a.elements[0].x < b.elements[0].x;
+    }
+    return a.priority < b.priority;
+  }
 
   template <class NativeGlyph>
-  double GlyphWidth(const NativeGlyph &glyph);
-
-  template <class NativeGlyph>
-  double GlyphHeight(const NativeGlyph &glyph);
-  */
+  static bool ContourLabelSorter(const ContourLabel<NativeGlyph> &a,
+                                 const ContourLabel<NativeGlyph> &b)
+  {
+    if (a.priority == b.priority) {
+      assert(!a.glyphs.empty());
+      assert(!b.glyphs.empty());
+      return a.glyphs[0].trPosition.GetX() < b.glyphs[0].trPosition.GetX();
+    }
+    return b.priority < b.priority;
+  }
 
   template <class NativeGlyph, class NativeLabel, class TextLayouter>
   class OSMSCOUT_MAP_API LabelLayouter
@@ -261,7 +274,13 @@ namespace osmscout {
       std::swap(allSortedLabels, labelInstances);
       std::swap(allSortedContourLabels, contourLabelInstances);
 
-      // TODO: sort labels by priority and position (to be deterministic)
+      // sort labels by priority and position (to be deterministic)
+      std::stable_sort(allSortedLabels.begin(),
+                       allSortedLabels.end(),
+                       LabelInstanceSorter<NativeGlyph, NativeLabel>);
+      std::stable_sort(allSortedContourLabels.begin(),
+                       allSortedContourLabels.end(),
+                       ContourLabelSorter<NativeGlyph>);
 
       // compute collisions, hide some labels
       int64_t rowSize = (viewport.width / 64)+1;
