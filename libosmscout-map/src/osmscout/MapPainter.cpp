@@ -779,6 +779,10 @@ namespace osmscout {
         data.position=iconStyle->GetPosition();
         //data.dimension=TextDimension(0.0,0.0,14.0,14.0);
         //data.icon=true;
+
+        // TODO: add priority to icons
+        //data.priority=iconStyle->GetPriority();
+
         data.iconStyle=iconStyle;
         data.iconWidth=projection.ConvertWidthToPixel(14.0);
         data.iconHeight=projection.ConvertWidthToPixel(14.0);
@@ -797,6 +801,10 @@ namespace osmscout {
         //                              projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight()));
         // data.icon=false;
         data.iconStyle=iconStyle;
+
+        // TODO: add priority to symbols
+        //data.priority=iconStyle->GetPriority();
+
         //iconHeight = projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
         data.iconWidth=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth());
         data.iconHeight=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
@@ -818,6 +826,7 @@ namespace osmscout {
 
       LabelData data;
       data.type=LabelData::Type::Text;
+      data.priority=textStyle->GetPriority();
 
       if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag() &&
           parameter.GetDrawFadings()) {

@@ -27,6 +27,7 @@
 
 #include <osmscout/StyleConfig.h>
 #include <osmscout/LabelPath.h>
+#include <iostream>
 
 namespace osmscout {
 
@@ -139,6 +140,7 @@ namespace osmscout {
 
   public:
     size_t                priority; //!< Priority of the entry (minimum of priority label elements)
+    // TODO: move priority from label to element
     std::vector<Element>  elements;
   };
 
@@ -208,7 +210,7 @@ namespace osmscout {
       assert(!b.glyphs.empty());
       return a.glyphs[0].trPosition.GetX() < b.glyphs[0].trPosition.GetX();
     }
-    return b.priority < b.priority;
+    return a.priority < b.priority;
   }
 
   template <class NativeGlyph, class NativeLabel, class TextLayouter>
@@ -325,6 +327,8 @@ namespace osmscout {
               rectangle.height = element.labelData.iconHeight;
               canvas = &iconCanvas;
             } else {
+              // std::cout << "Test label prio " << currentLabel->priority << ": " << element.labelData.text << std::endl;
+
               rectangle.width = element.label->width;
               rectangle.height = element.label->height;
               // Something is an overlay, if its alpha is <0.8
@@ -358,7 +362,9 @@ namespace osmscout {
 
         if (currentContourLabel != allSortedContourLabels.end()){
           int glyphCnt=currentContourLabel->glyphs.size();
-          //std::vector<uint64_t> rowBuff((size_t)(rowSize * glyphCnt));
+
+          // std::cout << "Test contour label prio " << currentContourLabel->priority << std::endl;
+
           Mask m(rowSize);
           std::vector<Mask> masks(glyphCnt, m);
           bool collision=false;
@@ -489,8 +495,8 @@ namespace osmscout {
       for (const auto &d:data) {
         typename LabelInstance<NativeGlyph, NativeLabel>::Element element;
         element.labelData=d;
-        instance.priority = std::min(d.priority, instance.priority);
         if (d.type==LabelData::Type::Icon || d.type==LabelData::Type::Symbol){
+          // TODO: icons and symbols don't support priority now
           element.x = point.GetX() - d.iconWidth / 2;
           if (offset<0){
             element.y = point.GetY() - d.iconHeight / 2;
@@ -500,6 +506,7 @@ namespace osmscout {
             offset += d.iconHeight;
           }
         }else {
+          instance.priority = std::min(d.priority, instance.priority);
           // TODO: should we take style into account?
           // Qt allows to split text layout and style setup
           element.label = textLayouter->Layout(projection, parameter,
