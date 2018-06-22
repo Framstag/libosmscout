@@ -111,8 +111,8 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::POIServiceRef     poiService(new osmscout::POIService(database));
+  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
+  osmscout::POIServiceRef     poiService=std::make_shared<osmscout::POIService>(database);
   osmscout::GeoBox            boundingBox(args.topLeft,
                                           args.bottomRight);
 
