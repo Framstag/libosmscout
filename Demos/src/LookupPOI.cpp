@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
   for (const auto &typeName : args.typeNames) {
     osmscout::TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
 
-    if (type->GetIgnore()) {
+    if (!type || type->GetIgnore()) {
       std::cerr << "Cannot resolve type name '" << typeName << "'" << std::endl;
       continue;
     }
@@ -165,14 +165,17 @@ int main(int argc, char* argv[])
   std::vector<osmscout::WayRef>  ways;
   std::vector<osmscout::AreaRef> areas;
 
-  if (!poiService->GetPOIsInArea(boundingBox,
-                                 nodeTypes,
-                                 nodes,
-                                 wayTypes,
-                                 ways,
-                                 areaTypes,
-                                 areas)) {
-    std::cerr << "Cannot load data from database" << std::endl;
+  try {
+    poiService->GetPOIsInArea(boundingBox,
+                              nodeTypes,
+                              nodes,
+                              wayTypes,
+                              ways,
+                              areaTypes,
+                              areas);
+  }
+  catch (const std::exception& e) {
+    std::cerr << "Cannot load data from database: " << e.what() << std::endl;
 
     return 1;
   }

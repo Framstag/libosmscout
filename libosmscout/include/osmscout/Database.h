@@ -391,8 +391,6 @@ namespace osmscout {
      *    Geo coordinate in the center of the given circle
      * @param types
      *    Set of type to load conadidates for
-     * @param candidates - unsorted result buffer
-     *    List of candidates found
      * @param maxDistance - lookup distance in meters
      *    Maximum radius from center to search for
      * @return result object
@@ -409,11 +407,9 @@ namespace osmscout {
      *    Geo coordinate in the center of the given circle
      * @param types
      *    Set of type to load conadidates for
-     * @param candidates - unsorted result buffer
-     *    List of candidates found
      * @param maxDistance - lookup distance in meters
      *    Maximum radius from center to search for
-     * @return true if no error (it don't indicate non-empty result)
+     * @return result object
      * @throws OSMScoutException in case of errors
      */
     WayRegionSearchResult LoadWaysInRadius(const GeoCoord& location,
@@ -427,16 +423,56 @@ namespace osmscout {
      *    Geo coordinate in the center of the given circle
      * @param types
      *    Set of type to load conadidates for
-     * @param candidates - unsorted result buffer
-     *    List of candidates found
      * @param maxDistance - lookup distance in meters
      *    Maximum radius from center to search for
-     * @return true if no error (it don't indicate non-empty result)
+     * @return result object
      * @throws OSMScoutException in case of errors
      */
     AreaRegionSearchResult LoadAreasInRadius(const GeoCoord& location,
                                              const TypeInfoSet& types,
                                              Distance maxDistance=Distance::Of<Meter>(100));
+
+    /**
+     * Load nodes of given types in the given geo box
+     * Distance is measured in relation to the center of the bounding box
+     *
+     * @param types
+     *    Set of type to load conadidates for
+     * @param boundingBox
+     *    Geographic area to search in
+     * @return result object
+     * @throws OSMScoutException in case of errors
+     */
+    NodeRegionSearchResult LoadNodesInArea(const TypeInfoSet& types,
+                                           const GeoBox& boundingBox);
+
+    /**
+     * Load ways of given types in the given geo box.
+     * Distance is measured in relation to the center of the bounding box
+     *
+     * @param types
+     *    Set of type to load conadidates for
+     * @param boundingBox
+     *    Geographic area to search in
+     * @return result object
+     * @throws OSMScoutException in case of errors
+     */
+    WayRegionSearchResult LoadWaysInArea(const TypeInfoSet& types,
+                                         const GeoBox& boundingBox);
+
+    /**
+     * Load areas of given types in the given geo box.
+     * Distance is measured in relation to the center of the bounding box
+     *
+     * @param types
+     *    Set of type to load conadidates for
+     * @param boundingBox
+     *    Geographic area to search in
+     * @return result object
+     * @throws OSMScoutException in case of errors
+     */
+    AreaRegionSearchResult LoadAreasInArea(const TypeInfoSet& types,
+                                           const GeoBox& boundingBox);
 
     void DumpStatistics();
   };

@@ -106,14 +106,17 @@ QList<LocationEntry> POILookupModule::lookupPOIRequest(DBInstanceRef db,
 
   // lookup objects
   osmscout::POIService poiService(db->database);
-  if (!poiService.GetPOIsInArea(searchBoundingBox,
-                                nodeTypes,
-                                nodes,
-                                wayTypes,
-                                ways,
-                                areaTypes,
-                                areas)){
-    osmscout::log.Error() << "Failed to load POIs in area";
+  try {
+    poiService.GetPOIsInArea(searchBoundingBox,
+                             nodeTypes,
+                             nodes,
+                             wayTypes,
+                             ways,
+                             areaTypes,
+                             areas);
+  }
+  catch (const std::exception& e) {
+    osmscout::log.Error() << "Failed to load POIs in area: " << e.what();
     return result;
   }
 
