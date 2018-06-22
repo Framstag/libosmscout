@@ -101,6 +101,9 @@ namespace osmscout {
     bool operator!=(const TileId& other) const;
 
     bool operator<(const TileId& other) const;
+
+    static TileId GetTile(const Magnification& magnification,
+                          const GeoCoord& coord);
   };
 
   /**

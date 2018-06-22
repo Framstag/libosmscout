@@ -100,4 +100,23 @@ namespace osmscout {
 
     return x<other.x;
   }
+
+  /**
+   * Return the libosmscout-specific tile id for the given magnification that contains the given
+   * coordinate.
+   *
+   * @param magnification
+   *    Magnification to use
+   * @param coord
+   *    Coordinate that should be covered by the tile
+   * @return
+   *    A tile id
+   */
+  TileId TileId::GetTile(const Magnification& magnification,
+                         const GeoCoord& coord)
+  {
+    return {osmscout::Magnification(),
+            size_t((coord.GetLon()+180.0)/cellDimension[magnification.GetLevel()].width),
+            size_t((coord.GetLat()+90.0)/cellDimension[magnification.GetLevel()].height)};
+  }
 }
