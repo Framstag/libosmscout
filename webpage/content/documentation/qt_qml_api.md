@@ -287,7 +287,7 @@ NearPOIModel {
   lat: 50.0923
   lon: 14.4827
   maxDistance: 1000
-  types: ["amenity_post_box", "amenity_post_office", "amenity_post_office_building"]
+  types: ["amenity_restaurant", "amenity_restaurant_building"]
 }
 SilicaListView {
   id: suggestionView
