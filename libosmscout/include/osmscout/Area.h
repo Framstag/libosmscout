@@ -139,6 +139,7 @@ namespace osmscout {
       bool GetCenter(GeoCoord& center) const;
 
       void GetBoundingBox(GeoBox& boundingBox) const;
+      GeoBox GetBoundingBox() const;
 
       inline void SetType(const TypeInfoRef& type)
       {
@@ -225,6 +226,7 @@ namespace osmscout {
     bool GetCenter(GeoCoord& center) const;
 
     void GetBoundingBox(GeoBox& boundingBox) const;
+    GeoBox GetBoundingBox() const;
 
     /**
      * Returns true if the bounding box of the object intersects the given
