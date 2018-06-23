@@ -1651,7 +1651,7 @@ STYLE
 
      [TYPE power_sub_station] AREA { color: #bca9a9; }
 
-     [TYPE shop] {
+     [TYPE shop_building] {
        AREA { color: @shopColor;}
        AREA.BORDER { color: @shopBorderColor; width: 0.1mm; }
      }
@@ -1772,7 +1772,7 @@ STYLE
            amenity_school] AREA.TEXT { label: Name.name; style: emphasize; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
 
 
-     [TYPE shop] {
+     [TYPE shop, shop_building] {
        NODE.TEXT { label: Name.name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
        AREA.TEXT { label: Name.name; style: emphasize; color: @shopLabelColor; size: 0.8; priority: @labelPrioShop;}
      }
@@ -1801,7 +1801,6 @@ STYLE
            amenity_building,
            amenity_bank_building,
            amenity_bank,
-           amenity_building,
            amenity_cafe_building,
            amenity_cafe,
            amenity_fast_food_building,

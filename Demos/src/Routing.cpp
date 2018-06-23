@@ -507,10 +507,16 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionGene
     std::cout << "'" << std::endl;
   }
 
-  virtual void OnMaxSpeed(const osmscout::RouteDescription::MaxSpeedDescriptionRef& /*maxSpeedDescription*/)
+  void OnMaxSpeed(const osmscout::RouteDescription::MaxSpeedDescriptionRef& /*maxSpeedDescription*/) override
   {
     //NextLine(lineCount);
     //std::cout << "MaxSpeed: " << (unsigned int)maxSpeedDescription->GetMaxSpeed() << std::endl;
+  }
+
+  void OnPOIAtRoute(const osmscout::RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription)
+  {
+    NextLine(lineCount);
+    std::cout << "Pass: " << poiAtRouteDescription->GetName()->GetDescription() << std::endl;
   }
 
   void BeforeNode(const osmscout::RouteDescription::Node& node) override
@@ -722,19 +728,20 @@ int main(int argc, char* argv[])
   router->TransformRouteDataToRouteDescription(result.GetRoute(),
                                                description);
 
-  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
-
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>("Start"));
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>("Target"));
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::WayNamePostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::WayTypePostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
-  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>());
+  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors={
+    std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>("Start"),
+    std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>("Target"),
+    std::make_shared<osmscout::RoutePostprocessor::WayNamePostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::WayTypePostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::POIsPostprocessor>()
+  };
 
   osmscout::RoutePostprocessor postprocessor;
 

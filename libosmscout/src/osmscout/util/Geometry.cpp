@@ -501,6 +501,131 @@ namespace osmscout {
     }
   }
 
+  double DistanceToSegment(const GeoCoord& point,
+                           const GeoCoord& segmentStart,
+                           const GeoCoord& segmentEnd,
+                           double& r,
+                           GeoCoord& intersection)
+  {
+    double qx,qy;
+
+    double distance=DistanceToSegment(point.GetLon(),point.GetLat(),
+                                      segmentStart.GetLon(),segmentStart.GetLat(),
+                                      segmentEnd.GetLon(),segmentEnd.GetLat(),
+                                      r,
+                                      qx,qy);
+    intersection=GeoCoord(qy,qx);
+
+    return distance;
+  }
+
+  double DistanceToSegment(const std::vector<Point>& points,
+                           const GeoCoord& segmentStart,
+                           const GeoCoord& segmentEnd,
+                           GeoCoord& location,
+                           GeoCoord& intersection)
+  {
+    double distance=std::numeric_limits<double>::max();
+
+    for (const auto& point : points) {
+      GeoCoord pointIntersection;
+      double   pointR;
+
+      double pointDistance=DistanceToSegment(point.GetCoord(),
+                                             segmentStart,
+                                             segmentEnd,
+                                             pointR,
+                                             pointIntersection);
+
+      if (pointDistance<distance) {
+        distance=pointDistance;
+        location=point.GetCoord();
+        intersection=pointIntersection;
+      }
+    }
+
+    return distance;
+  }
+
+  double DistanceToSegment(const GeoBox& boundingBox,
+                           const GeoCoord& segmentStart,
+                           const GeoCoord& segmentEnd,
+                           GeoCoord& location,
+                           GeoCoord& intersection)
+  {
+    double distance=std::numeric_limits<double>::max();
+
+    {
+      GeoCoord pointIntersection;
+      double   pointR;
+
+      double pointDistance=DistanceToSegment(boundingBox.GetTopLeft(),
+                                             segmentStart,
+                                             segmentEnd,
+                                             pointR,
+                                             pointIntersection);
+
+      if (pointDistance<distance) {
+        distance=pointDistance;
+        location=boundingBox.GetTopLeft();
+        intersection=pointIntersection;
+      }
+    }
+
+    {
+      GeoCoord pointIntersection;
+      double   pointR;
+
+      double pointDistance=DistanceToSegment(boundingBox.GetTopRight(),
+                                             segmentStart,
+                                             segmentEnd,
+                                             pointR,
+                                             pointIntersection);
+
+      if (pointDistance<distance) {
+        distance=pointDistance;
+        location=boundingBox.GetTopRight();
+        intersection=pointIntersection;
+      }
+    }
+
+    {
+      GeoCoord pointIntersection;
+      double   pointR;
+
+      double pointDistance=DistanceToSegment(boundingBox.GetBottomLeft(),
+                                             segmentStart,
+                                             segmentEnd,
+                                             pointR,
+                                             pointIntersection);
+
+      if (pointDistance<distance) {
+        distance=pointDistance;
+        location=boundingBox.GetBottomLeft();
+        intersection=pointIntersection;
+      }
+    }
+
+    {
+      GeoCoord pointIntersection;
+      double   pointR;
+
+      double pointDistance=DistanceToSegment(boundingBox.GetBottomRight(),
+                                             segmentStart,
+                                             segmentEnd,
+                                             pointR,
+                                             pointIntersection);
+
+      if (pointDistance<distance) {
+        distance=pointDistance;
+        location=boundingBox.GetBottomRight();
+        intersection=pointIntersection;
+      }
+    }
+
+    return distance;
+  }
+
   void PolygonMerger::AddPolygon(const std::vector<Point>& polygonCoords)
   {
     assert(polygonCoords.size()>=3);

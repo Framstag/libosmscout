@@ -24,6 +24,9 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 
+#include <osmscout/LocationDescriptionService.h>
+
+#include <iostream>
 namespace osmscout {
 
   RoutePostprocessor::Postprocessor::~Postprocessor()
@@ -980,6 +983,499 @@ namespace osmscout {
     return true;
   }
 
+  class AdminRegionPathCollectorVisitor : public AdminRegionVisitor
+  {
+  private:
+    const Database&            database;
+    const std::list<WayRef>&   ways;
+    const std::list<AreaRef>&  areas;
+
+  public:
+    std::list<AdminRegionRef> regions;
+
+  public:
+    explicit AdminRegionPathCollectorVisitor(const Database& database,
+                                             const std::list<WayRef>&   ways,
+                                             const std::list<AreaRef>&  areas)
+      : database(database),
+        ways(ways),
+        areas(areas)
+    {
+      // no code
+    }
+
+    Action Visit(const AdminRegion& region) override
+    {
+      AreaRef regionArea;
+
+      if (!database.GetAreaByOffset(region.object.GetFileOffset(),
+                                    regionArea)) {
+        return error;
+      }
+
+      GeoBox regionBox;
+
+      regionArea->GetBoundingBox(regionBox);
+
+      AdminRegionRef regionRef=std::make_shared<AdminRegion>(region);
+      bool           candidates=false;
+
+      for (const auto& way : ways) {
+        GeoBox box;
+
+        way->GetBoundingBox(box);
+
+        if (box.Intersects(regionBox)) {
+          candidates=true;
+        }
+      }
+
+      for (const auto& area : areas) {
+        GeoBox box;
+
+        area->GetBoundingBox(box);
+
+        if (box.Intersects(regionBox)) {
+          candidates=true;
+        }
+      }
+
+
+      if (candidates) {
+        regions.push_back(regionRef);
+
+        return visitChildren;
+      }
+
+      return skipChildren;
+    }
+  };
+
+  class LocationNameByPathCollectorVisitor : public LocationVisitor
+  {
+  public:
+    const std::set<ObjectFileRef>&                 paths;
+    std::map<std::string,std::list<ObjectFileRef>> namePathsMap;
+
+  public:
+    explicit LocationNameByPathCollectorVisitor(const std::set<ObjectFileRef>& paths)
+      : paths(paths)
+    {
+
+    }
+
+    bool Visit(const AdminRegion& /*adminRegion*/,
+               const PostalArea& /*postalArea*/,
+               const Location &location) override
+    {
+      for (const auto& object : location.objects) {
+        if (paths.find(object)!=paths.end()) {
+          namePathsMap[location.name].push_back(object);
+        }
+      }
+
+      return true;
+    }
+
+  };
+
+  class LocationByNameCollectorVisitor : public LocationVisitor
+  {
+  public:
+    const std::map<std::string,std::list<ObjectFileRef>>& namePathsMap;
+    std::list<LocationRef>                                locations;
+    std::map<FileOffset,std::list<ObjectFileRef>>         locationPathsMap;
+
+  public:
+    explicit LocationByNameCollectorVisitor(const std::map<std::string,std::list<ObjectFileRef>>& namePathsMap)
+      : namePathsMap(namePathsMap)
+    {
+    }
+
+    bool Visit(const AdminRegion& /*adminRegion*/,
+               const PostalArea& /*postalArea*/,
+               const Location &location) override
+    {
+      const auto namePathEntry=namePathsMap.find(location.name);
+
+      if (namePathEntry!=namePathsMap.end()) {
+        LocationRef locationRef=std::make_shared<Location>(location);
+
+        locations.push_back(locationRef);
+        locationPathsMap[location.locationOffset]=namePathEntry->second;
+      }
+
+      return true;
+    }
+  };
+
+  class AddressCollectorVisitor : public AddressVisitor
+  {
+  public:
+    const std::map<FileOffset,std::list<ObjectFileRef>>&   locationPathsMap;
+    std::map<ObjectFileRef,std::set<ObjectFileRef>>&       poiCandidates;
+
+  public:
+    AddressCollectorVisitor(const std::map<FileOffset,std::list<ObjectFileRef>>& locationPathsMap,
+                            std::map<ObjectFileRef,std::set<ObjectFileRef>>& poiCandidates)
+      : locationPathsMap(locationPathsMap),
+        poiCandidates(poiCandidates)
+    {
+    }
+
+    bool Visit(const AdminRegion& /*adminRegion*/,
+               const PostalArea& /*postalArea*/,
+               const Location &location,
+               const Address& address) override
+    {
+      const auto locationPaths=locationPathsMap.find(location.locationOffset);
+
+      for (const auto& path: locationPaths->second) {
+        poiCandidates[path].insert(address.object);
+      }
+
+      return true;
+    }
+  };
+
+  std::set<ObjectFileRef> RoutePostprocessor::POIsPostprocessor::CollectPaths(const std::list<RouteDescription::Node>& nodes) const
+  {
+    ObjectFileRef           prevObject;
+    ObjectFileRef           curObject;
+    std::set<ObjectFileRef> pathSet;
+
+    for (auto& pathNode : nodes) {
+      if (pathNode.HasPathObject()) {
+        curObject=pathNode.GetPathObject();
+
+        if (curObject!=prevObject) {
+          pathSet.insert(pathNode.GetPathObject());
+        }
+      }
+
+      prevObject=curObject;
+    }
+
+    return pathSet;
+  }
+
+  std::list<WayRef> RoutePostprocessor::POIsPostprocessor::CollectWays(const RoutePostprocessor& postprocessor,
+                                                                       const std::list<RouteDescription::Node>& nodes) const
+  {
+    ObjectFileRef     prevObject;
+    ObjectFileRef     curObject;
+    std::list<WayRef> ways;
+
+    for (auto& pathNode : nodes) {
+      if (pathNode.HasPathObject()) {
+        curObject=pathNode.GetPathObject();
+
+        if (curObject!=prevObject) {
+          if (pathNode.GetPathObject().GetType()==refWay) {
+            ways.push_back(postprocessor.GetWay(pathNode.GetDBFileOffset()));
+          }
+        }
+      }
+
+      prevObject=curObject;
+    }
+
+    return ways;
+  }
+
+  std::list<AreaRef> RoutePostprocessor::POIsPostprocessor::CollectAreas(const RoutePostprocessor& postprocessor,
+                                                                         const std::list<RouteDescription::Node>& nodes) const
+  {
+    ObjectFileRef      prevObject;
+    ObjectFileRef      curObject;
+    std::list<AreaRef> areas;
+
+    for (auto& pathNode : nodes) {
+      if (pathNode.HasPathObject()) {
+        curObject=pathNode.GetPathObject();
+
+        if (curObject!=prevObject) {
+          if (pathNode.GetPathObject().GetType()==refArea) {
+            areas.push_back(postprocessor.GetArea(pathNode.GetDBFileOffset()));
+          }
+        }
+      }
+
+      prevObject=curObject;
+    }
+
+    return areas;
+  }
+
+  std::map<ObjectFileRef,std::set<ObjectFileRef>> RoutePostprocessor::POIsPostprocessor::CollectPOICandidates(const Database& database,
+                                                                                                              const std::set<ObjectFileRef>& paths,
+                                                                                                              const std::list<WayRef>& ways,
+                                                                                                              const std::list<AreaRef>& areas)
+  {
+    std::map<ObjectFileRef,std::set<ObjectFileRef>> poiCandidates;
+
+    StopClock scanLocationTime;
+
+    AdminRegionPathCollectorVisitor regionCollector(database,
+                                                    ways,
+                                                    areas);
+
+    database.GetLocationIndex()->VisitAdminRegions(regionCollector);
+
+    for (const auto& adminRegion : regionCollector.regions) {
+      LocationNameByPathCollectorVisitor locationCollector(paths);
+
+      database.GetLocationIndex()->VisitLocations(*adminRegion,
+                                                  locationCollector,
+                                                  false);
+
+      if (locationCollector.namePathsMap.empty()) {
+        continue;
+      }
+
+      LocationByNameCollectorVisitor location2Collector(locationCollector.namePathsMap);
+
+      database.GetLocationIndex()->VisitLocations(*adminRegion,
+                                                   location2Collector,
+                                                   false);
+
+      AddressCollectorVisitor addressCollector(location2Collector.locationPathsMap,
+                                               poiCandidates);
+
+      for (const auto& location : location2Collector.locations) {
+        AdminRegion fakeRegion;
+        PostalArea  fakePostalArea;
+
+        database.GetLocationIndex()->VisitAddresses(*adminRegion,
+                                                    fakePostalArea,
+                                                    *location,
+                                                    addressCollector);
+      }
+    }
+
+    scanLocationTime.Stop();
+
+    std::cout << "Scanning locations: " << scanLocationTime.ResultString() << std::endl;
+
+    return poiCandidates;
+  }
+
+  std::map<ObjectFileRef,RoutePostprocessor::POIsPostprocessor::POIAtRoute>
+    RoutePostprocessor::POIsPostprocessor::AnalysePOICandidates(const RoutePostprocessor& postprocessor,
+                                                                const DatabaseId& databaseId,
+                                                                std::list<RouteDescription::Node>& nodes,
+                                                                const TypeInfoSet& nodeTypes,
+                                                                const TypeInfoSet& areaTypes,
+                                                                const std::unordered_map<FileOffset,NodeRef>& nodeMap,
+                                                                const std::unordered_map<FileOffset,AreaRef>& areaMap,
+                                                                const std::map<ObjectFileRef,std::set<ObjectFileRef>>& poiCandidates)
+  {
+    std::map<ObjectFileRef,RoutePostprocessor::POIsPostprocessor::POIAtRoute> poisAtRoute;
+
+    NodeRef                node;
+    AreaRef                area;
+
+    StopClock analysingCandidatesTime;
+
+    for (auto routeNode=nodes.begin();
+         routeNode!=nodes.end();
+         routeNode++) {
+      auto nextNode=routeNode;
+
+      nextNode++;
+
+      if (nextNode==nodes.end() ||
+          !routeNode->HasPathObject()) {
+        continue;
+      }
+
+      GeoCoord curCoord=routeNode->GetLocation();
+      GeoCoord nextCoord=nextNode->GetLocation();
+
+      const auto pathPoiCandidates=poiCandidates.find(routeNode->GetPathObject());
+
+      if (pathPoiCandidates!=poiCandidates.end()) {
+        for (const auto& candidate : pathPoiCandidates->second) {
+          GeoCoord    location;
+          GeoCoord    intersection;
+          double      r;
+          RouteDescription::NameDescriptionRef name;
+
+          switch (candidate.GetType()) {
+          case refNone:
+          case refWay:
+            assert(false);
+            break;
+          case refNode:
+            node=nodeMap.at(candidate.GetFileOffset());
+            if (!nodeTypes.IsSet(node->GetType())) {
+              continue;
+            }
+            name=postprocessor.GetNameDescription(databaseId,*node);
+            location=node->GetCoords();
+            DistanceToSegment(location,
+                              curCoord,
+                              nextCoord,
+                              r,
+                              intersection);
+            break;
+          case refArea:
+            area=areaMap.at(candidate.GetFileOffset());
+            if (!areaTypes.IsSet(area->GetType())) {
+              continue;
+            }
+            name=postprocessor.GetNameDescription(databaseId,*area);
+            DistanceToSegment(area->GetBoundingBox(),
+                              curCoord,
+                              nextCoord,
+                              location,
+                              intersection);
+            break;
+          }
+
+
+          if (!name) {
+            continue;
+          }
+
+          Distance distance=GetEllipsoidalDistance(location,
+                                                   intersection);
+
+          if (distance<Distance::Of<Meter>(30)) {
+            auto existingPoiAtRoute=poisAtRoute.find(candidate);
+
+            if (existingPoiAtRoute!=poisAtRoute.end() &&
+                existingPoiAtRoute->second.distance<distance) {
+              continue;
+            }
+
+            POIAtRoute poiAtRoute;
+
+            poiAtRoute.distance=distance;
+            poiAtRoute.name=name;
+            poiAtRoute.object=candidate;
+            poiAtRoute.node=routeNode;
+
+            poisAtRoute[candidate]=poiAtRoute;
+          }
+        }
+      }
+    }
+
+    analysingCandidatesTime.Stop();
+
+    std::cout << "Analysing candidates: " << analysingCandidatesTime.ResultString() << std::endl;
+
+    return poisAtRoute;
+  }
+
+  void RoutePostprocessor::POIsPostprocessor::SortInCollectedPOIs(const DatabaseId& databaseId,
+                                                                  const std::map<ObjectFileRef,POIAtRoute>& pois)
+  {
+    for (const auto& poiAtRoute : pois) {
+      RouteDescription::POIAtRouteDescriptionRef desc=std::make_shared<RouteDescription::POIAtRouteDescription>(databaseId,
+                                                                                                                poiAtRoute.second.object,
+                                                                                                                poiAtRoute.second.name,
+                                                                                                                poiAtRoute.second.distance);
+      poiAtRoute.second.node->AddDescription(RouteDescription::POI_AT_ROUTE_DESC,
+                                             desc);
+    }
+  }
+
+  bool RoutePostprocessor::POIsPostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                      RouteDescription& description)
+  {
+    TypeInfoSet        nodeTypes;
+    TypeInfoSet        areaTypes;
+    ObjectFileRef      prevObject;
+    ObjectFileRef      curObject;
+    NodeRef            node;
+    WayRef             way;
+    AreaRef            area;
+
+    StopClock loadDataTime;
+
+    std::set<ObjectFileRef> paths=CollectPaths(description.Nodes());
+    std::list<WayRef>       ways=CollectWays(postprocessor,description.Nodes());
+    std::list<AreaRef>      areas=CollectAreas(postprocessor,description.Nodes());
+
+    loadDataTime.Stop();
+    std::cout << "Loading path data: " << loadDataTime.ResultString() << std::endl;
+
+    StopClock loadingCandidatesTime;
+
+    for (DatabaseId databaseId=0; databaseId<postprocessor.databases.size(); databaseId++) {
+      auto database=postprocessor.databases[databaseId];
+
+      for (const auto& type : database->GetTypeConfig()->GetTypes()) {
+        if (type->IsInGroup("routingPOI")) {
+          if (type->CanBeNode()) {
+            nodeTypes.Set(type);
+          }
+
+          if (type->CanBeArea()) {
+            areaTypes.Set(type);
+          }
+        }
+      }
+
+      std::map<ObjectFileRef,std::set<ObjectFileRef>> poiCandidates=CollectPOICandidates(*database,
+                                                                                         paths,
+                                                                                         ways,
+                                                                                         areas);
+
+      ways.clear();
+      areas.clear();
+
+      std::set<FileOffset> nodeOffsets;
+      std::set<FileOffset> areaOffsets;
+
+      for (const auto& pathPoiCandidates: poiCandidates) {
+        for (const auto& candidate : pathPoiCandidates.second) {
+          switch (candidate.GetType()) {
+          case refNone:
+          case refWay:
+            assert(false);
+            break;
+          case refNode:
+            nodeOffsets.insert(candidate.GetFileOffset());
+            break;
+          case refArea:
+            areaOffsets.insert(candidate.GetFileOffset());
+            break;
+          }
+        }
+      }
+
+      std::unordered_map<FileOffset,NodeRef> nodeMap;
+      std::unordered_map<FileOffset,AreaRef> areaMap;
+
+      database->GetNodesByOffset(nodeOffsets,
+                                 nodeMap);
+
+      database->GetAreasByOffset(areaOffsets,
+                                 areaMap);
+
+      loadingCandidatesTime.Stop();
+
+      std::cout << "Loading candidates: " << loadingCandidatesTime.ResultString() << std::endl;
+
+      std::map<ObjectFileRef,POIAtRoute> poisAtRoute=AnalysePOICandidates(postprocessor,
+                                                                          databaseId,
+                                                                          description.Nodes(),
+                                                                          nodeTypes,
+                                                                          areaTypes,
+                                                                          nodeMap,
+                                                                          areaMap,
+                                                                          poiCandidates);
+
+      SortInCollectedPOIs(databaseId,
+                          poisAtRoute);
+    }
+
+    return true;
+  }
+
   RoutePostprocessor::RoutePostprocessor()
   {
   }
@@ -1154,6 +1650,21 @@ namespace osmscout {
     }
 
     return description;
+  }
+
+  RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(DatabaseId dbId,
+                                                                              const Node& node) const
+  {
+    auto nameReader=nameReaders.find(dbId);
+    assert(nameReader!=nameReaders.end());
+    NameFeatureValue *nameValue=nameReader->second->GetValue(node.GetFeatureValueBuffer());
+    std::string      name;
+
+    if (nameValue!=nullptr) {
+      name=nameValue->GetName();
+    }
+
+    return std::make_shared<RouteDescription::NameDescription>(name);
   }
 
   RouteDescription::NameDescriptionRef RoutePostprocessor::GetNameDescription(DatabaseId dbId,

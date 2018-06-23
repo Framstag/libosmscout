@@ -860,7 +860,7 @@ namespace osmscout {
   }
 
   bool Database::GetAreasByBlockSpan(const DataBlockSpan& span,
-                           std::vector<AreaRef>& area) const
+                                     std::vector<AreaRef>& area) const
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
@@ -872,7 +872,7 @@ namespace osmscout {
   }
 
   bool Database::GetAreasByBlockSpans(const std::vector<DataBlockSpan>& spans,
-                            std::vector<AreaRef>& areas) const
+                                      std::vector<AreaRef>& areas) const
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 

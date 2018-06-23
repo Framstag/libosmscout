@@ -263,6 +263,51 @@ namespace osmscout {
 
     typedef std::shared_ptr<InstructionPostprocessor> InstructionPostprocessorRef;
 
+    /**
+     * \ingroup Routing
+     * Collects POIs the vehicle passes by
+     */
+    class OSMSCOUT_API POIsPostprocessor : public RoutePostprocessor::Postprocessor
+    {
+    private:
+      struct POIAtRoute
+      {
+        ObjectFileRef                               object;
+        RouteDescription::NameDescriptionRef        name;
+        Distance                                    distance;
+        std::list<RouteDescription::Node>::iterator node;
+      };
+
+    private:
+      std::set<ObjectFileRef> CollectPaths(const std::list<RouteDescription::Node>& nodes) const;
+      std::list<WayRef> CollectWays(const RoutePostprocessor& postprocessor,
+                                    const std::list<RouteDescription::Node>& nodes) const;
+      std::list<AreaRef> CollectAreas(const RoutePostprocessor& postprocessor,
+                                      const std::list<RouteDescription::Node>& nodes) const;
+      std::map<ObjectFileRef,std::set<ObjectFileRef>> CollectPOICandidates(const Database& database,
+                                                                           const std::set<ObjectFileRef>& paths,
+                                                                           const std::list<WayRef>& ways,
+                                                                           const std::list<AreaRef>& areas);
+      std::map<ObjectFileRef,POIAtRoute> AnalysePOICandidates(const RoutePostprocessor& postprocessor,
+                                                              const DatabaseId& databaseId,
+                                                              std::list<RouteDescription::Node>& nodes,
+                                                              const TypeInfoSet& nodeTypes,
+                                                              const TypeInfoSet& areaTypes,
+                                                              const std::unordered_map<FileOffset,NodeRef>& nodeMap,
+                                                              const std::unordered_map<FileOffset,AreaRef>& areaMap,
+                                                              const std::map<ObjectFileRef,std::set<ObjectFileRef>>& poiCandidates);
+      void SortInCollectedPOIs(const DatabaseId& databaseId,
+                               const std::map<ObjectFileRef,POIAtRoute>& pois);
+
+    public:
+      POIsPostprocessor() : Postprocessor() {};
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   RouteDescription& description) override;
+    };
+
+    typedef std::shared_ptr<POIsPostprocessor> POIsPostprocessorRef;
+
   private:
     std::vector<RoutingProfileRef>                                profiles;
     std::vector<DatabaseRef>                                      databases;
@@ -297,6 +342,8 @@ namespace osmscout {
     RouteDescription::NameDescriptionRef GetNameDescription(const RouteDescription::Node& node) const;
     RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const ObjectFileRef& object) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
+                                                            const Node& node) const;
     RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const Area& area) const;
     RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,

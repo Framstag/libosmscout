@@ -98,6 +98,7 @@ namespace osmscout {
     bool VisitLocations(const AdminRegion& adminRegion,
                         FileScanner& scanner,
                         LocationVisitor& visitor,
+                        bool recursive,
                         bool& stopped) const;
 
     bool VisitPostalAreaLocations(const AdminRegion& adminRegion,
@@ -179,7 +180,8 @@ namespace osmscout {
      * Visit all locations within the given admin region and its children
      */
     bool VisitLocations(const AdminRegion& adminRegion,
-                        LocationVisitor& visitor) const;
+                        LocationVisitor& visitor,
+                        bool recursive=true) const;
 
     /**
      * Visit all locations within the given admin region and postal region

@@ -1104,7 +1104,7 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
-   * Return de distance of the point (px,py) to the segment [(p1x,p1y),(p2x,p2y)],
+   * Return the distance of the point (px,py) to the segment [(p1x,p1y),(p2x,p2y)],
    * r the abscissa on the line of (qx,qy) the orthogonal projected point from (px,py).
    * 0 <= r <= 1 if q is between p1 and p2.
    */
@@ -1113,6 +1113,24 @@ namespace osmscout {
                                                double p2x, double p2y,
                                                double& r,
                                                double& qx, double& qy);
+
+  extern OSMSCOUT_API double DistanceToSegment(const GeoCoord& point,
+                                               const GeoCoord& segmentStart,
+                                               const GeoCoord& segmentEnd,
+                                               double& r,
+                                               GeoCoord& intersection);
+
+  extern OSMSCOUT_API double DistanceToSegment(const std::vector<Point>& points,
+                                               const GeoCoord& segmentStart,
+                                               const GeoCoord& segmentEnd,
+                                               GeoCoord& location,
+                                               GeoCoord& intersection);
+
+  extern OSMSCOUT_API double DistanceToSegment(const GeoBox& boundingBox,
+                                               const GeoCoord& segmentStart,
+                                               const GeoCoord& segmentEnd,
+                                               GeoCoord& location,
+                                               GeoCoord& intersection);
 
   /**
    * \ingroup Geometry
@@ -1266,7 +1284,7 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
-   * Find next intersetion on way (with itself) from node index i.
+   * Find next intersection on way (with itself) from node index i.
    * Return true if some intersection was found (way is not simple),
    * i and j indexes are setup to start possition of intesections lines.
    */

@@ -59,6 +59,8 @@ namespace osmscout {
   const char* const RouteDescription::WAY_MAXSPEED_DESC      = "MaxSpeed";
   /** Constant for a description of type name of the way (TypeNameDescription) */
   const char* const RouteDescription::WAY_TYPE_NAME_DESC     = "TypeName";
+  /** Constant for a description of type name of the way (TypeNameDescription) */
+  const char* const RouteDescription::POI_AT_ROUTE_DESC      = "POIAtRoute";
 
   RouteDescription::Description::~Description()
   {
@@ -464,6 +466,22 @@ namespace osmscout {
     return stream.str();
   }
 
+  RouteDescription::POIAtRouteDescription::POIAtRouteDescription(DatabaseId databaseId,
+                                                                 const ObjectFileRef& object,
+                                                                 const NameDescriptionRef& name,
+                                                                 const Distance& distance)
+  : databaseId(databaseId),
+    object(object),
+    name(name),
+    distance(distance)
+  {
+  }
+
+  std::string RouteDescription::POIAtRouteDescription::GetDebugString() const
+  {
+    return object.GetName() +" "+std::to_string(distance.AsMeter());
+  }
+
   bool RouteDescription::Node::HasDescription(const char* name) const
   {
     std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
@@ -577,6 +595,7 @@ namespace osmscout {
       osmscout::RouteDescription::DestinationDescriptionRef      crossingDestinationDescription;
       osmscout::RouteDescription::MaxSpeedDescriptionRef         maxSpeedDescription;
       osmscout::RouteDescription::TypeNameDescriptionRef         typeNameDescription;
+      osmscout::RouteDescription::POIAtRouteDescriptionRef       poiAtRouteDescription;
 
       desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
       if (desc) {
@@ -659,6 +678,11 @@ namespace osmscout {
         typeNameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TypeNameDescription>(desc);
       }
 
+      desc=node->GetDescription(osmscout::RouteDescription::POI_AT_ROUTE_DESC);
+      if (desc) {
+        poiAtRouteDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::POIAtRouteDescription>(desc);
+      }
+
       callback.BeforeNode(*node);
 
       if (startDescription) {
@@ -708,6 +732,10 @@ namespace osmscout {
 
       if (maxSpeedDescription) {
         callback.OnMaxSpeed(maxSpeedDescription);
+      }
+
+      if (poiAtRouteDescription) {
+        callback.OnPOIAtRoute(poiAtRouteDescription);
       }
 
       callback.AfterNode(*node);

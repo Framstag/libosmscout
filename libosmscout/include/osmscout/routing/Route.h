@@ -83,6 +83,8 @@ namespace osmscout {
     static const char* const WAY_MAXSPEED_DESC;
     /** Constant for a description of type name of the way (TypeNameDescription) */
     static const char* const WAY_TYPE_NAME_DESC;
+    /** Constant for a description of pois at the route (POIAtRouteDescription) */
+    static const char* const POI_AT_ROUTE_DESC;
 
   public:
     /**
@@ -518,6 +520,49 @@ namespace osmscout {
 
     /**
      * \ingroup Routing
+     * A motorway junction
+     */
+    class OSMSCOUT_API POIAtRouteDescription : public RouteDescription::Description
+    {
+    private:
+      DatabaseId         databaseId;
+      ObjectFileRef      object;
+      NameDescriptionRef name;
+      Distance           distance;
+
+    public:
+      explicit POIAtRouteDescription(DatabaseId databaseId,
+                                     const ObjectFileRef& object,
+                                     const NameDescriptionRef& name,
+                                     const Distance& distance);
+
+      std::string GetDebugString() const override;
+
+      DatabaseId GetDatabaseId() const
+      {
+        return databaseId;
+      }
+
+      inline ObjectFileRef GetObject() const
+      {
+        return object;
+      }
+
+      inline NameDescriptionRef GetName() const
+      {
+        return name;
+      }
+
+      inline Distance GetDistance() const
+      {
+        return distance;
+      }
+    };
+
+    typedef std::shared_ptr<POIAtRouteDescription> POIAtRouteDescriptionRef;
+
+    /**
+     * \ingroup Routing
      */
     class OSMSCOUT_API Node
     {
@@ -775,6 +820,14 @@ namespace osmscout {
        * @param maxSpeedDescription
        */
       virtual void OnMaxSpeed(const RouteDescription::MaxSpeedDescriptionRef& maxSpeedDescription) = 0;
+
+      /**
+       * Called everytime we have a POI at the route
+       *
+       * @param poiAtRouteDescription
+       *    The POI information
+       */
+      virtual void OnPOIAtRoute(const RouteDescription::POIAtRouteDescriptionRef&poiAtRouteDescription) = 0;
 
       /**
        * Always called before we analyse a node. It may be that other callback methods are called
