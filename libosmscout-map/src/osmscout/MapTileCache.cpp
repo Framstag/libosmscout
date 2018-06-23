@@ -25,7 +25,8 @@ namespace osmscout {
    * Create a new tile with the given id.
    */
   MapTile::MapTile(const TileId& id)
-  : id(id)
+  : id(id),
+    boundingBox(id.GetBoundingBox())
   {
     // no code
   }

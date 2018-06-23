@@ -29,7 +29,9 @@ namespace osmscout {
    * Create a new tile with the given id.
    */
   Tile::Tile(const TileId& id)
-  : id(id)
+  : id(id),
+    level(id.GetLevel()),
+    boundingBox(id.GetBoundingBox())
   {
     // no code
   }
@@ -275,13 +277,13 @@ namespace osmscout {
    * and copying data that intersects the bounding box of the given tile.
    */
   void DataTileCache::PrefillDataFromCache(Tile& tile,
-                                            const TypeInfoSet& nodeTypes,
-                                            const TypeInfoSet& wayTypes,
-                                            const TypeInfoSet& areaTypes,
-                                            const TypeInfoSet& /*optimizedWayTypes*/,
-                                            const TypeInfoSet& /*optimizedAreaTypes*/)
+                                           const TypeInfoSet& nodeTypes,
+                                           const TypeInfoSet& wayTypes,
+                                           const TypeInfoSet& areaTypes,
+                                           const TypeInfoSet& /*optimizedWayTypes*/,
+                                           const TypeInfoSet& /*optimizedAreaTypes*/)
   {
-    if (tile.GetId().GetLevel()>0) {
+    if (tile.GetLevel()>0) {
       TileId parentTileId=tile.GetId().GetParent();
       TileRef parentTile=GetCachedTile(parentTileId);
 

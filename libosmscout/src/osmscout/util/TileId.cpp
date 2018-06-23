@@ -31,13 +31,17 @@ namespace osmscout {
                  size_t y)
   : level(magnification.GetLevel()),
     x(x),
-    y(y),
-    boundingBox(GeoCoord(y*cellDimension[magnification.GetLevel()].height-90.0,
-                         x*cellDimension[magnification.GetLevel()].width-180.0),
-                GeoCoord((y+1)*cellDimension[magnification.GetLevel()].height-90.0,
-                         (x+1)*cellDimension[magnification.GetLevel()].width-180.0))
+    y(y)
   {
     // no code
+  }
+
+  GeoBox TileId::GetBoundingBox() const
+  {
+    return GeoBox(GeoCoord(y*cellDimension[level].height-90.0,
+                           x*cellDimension[level].width-180.0),
+                  GeoCoord((y+1)*cellDimension[level].height-90.0,
+                           (x+1)*cellDimension[level].width-180.0));
   }
 
   /**

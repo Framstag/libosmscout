@@ -254,6 +254,8 @@ namespace osmscout {
   {
   private:
     TileId       id;                //!< Id of the tile
+    uint32_t     level;             //!< Magnification level of the tile
+    GeoBox       boundingBox;       //!< bounding box of the tile
     TileNodeData nodeData;          //!< Node data
     TileWayData  wayData;           //!< Way data
     TileAreaData areaData;          //!< Area data
@@ -277,11 +279,19 @@ namespace osmscout {
     }
 
     /**
-     * Return the boundingbox of the tile (shortcut for GetId().GetBoundingBox())
+     * Get the magnification level of the tile
+     */
+    inline uint32_t GetLevel() const
+    {
+      return level;
+    }
+
+    /**
+     * Return the bounding box of the tile
      */
     inline GeoBox GetBoundingBox() const
     {
-      return id.GetBoundingBox();
+      return boundingBox;
     }
 
     /**

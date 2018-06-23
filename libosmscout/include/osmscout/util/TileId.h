@@ -44,10 +44,9 @@ namespace osmscout {
   class OSMSCOUT_API TileId
   {
   private:
-    uint32_t      level;         //!< the zoom level (0..n)
-    size_t        x;             //!< The x coordinate of the tile in relation to the zoom level
-    size_t        y;             //!< The y coordinate of the tile in relation to the zoom level
-    GeoBox        boundingBox;   //!< Bounding box of the tile
+    uint32_t level;         //!< the zoom level (0..n)
+    size_t   x;             //!< The x coordinate of the tile in relation to the zoom level
+    size_t   y;             //!< The y coordinate of the tile in relation to the zoom level
 
   public:
     TileId(const Magnification& magnification,
@@ -86,10 +85,7 @@ namespace osmscout {
     /**
      * Return the bounding box of the tile
      */
-    inline const GeoBox& GetBoundingBox() const
-    {
-      return boundingBox;
-    }
+    GeoBox GetBoundingBox() const;
 
     std::string GetDisplayText() const;
 

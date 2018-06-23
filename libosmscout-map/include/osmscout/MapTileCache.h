@@ -155,7 +155,7 @@ namespace osmscout {
       return existingEntry->second->tile;//.lock();
     }
 
-    return NULL;
+    return nullptr;
   }
 
   /**
@@ -218,7 +218,8 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapTile
   {
   private:
-    TileId  id;                //!< Id of the tile
+    TileId id;          //!< Id of the tile
+    GeoBox boundingBox; //!< Bounding box of the tile
 
   public:
     explicit MapTile(const TileId& id);
@@ -238,7 +239,7 @@ namespace osmscout {
      */
     inline GeoBox GetBoundingBox() const
     {
-      return id.GetBoundingBox();
+      return boundingBox;
     }
   };
 
