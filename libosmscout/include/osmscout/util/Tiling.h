@@ -142,7 +142,7 @@ namespace osmscout {
       return *this;
     }
 
-    OSMTileIdBoxConstIterator operator++(int)
+    const OSMTileIdBoxConstIterator operator++(int)
     {
       OSMTileIdBoxConstIterator tmp(*this);
 
@@ -249,21 +249,6 @@ namespace osmscout {
     {
       return std::string("["+minTile.GetDisplayText()+" - "+maxTile.GetDisplayText()+"]");
     }
-  };
-
-  /**
-   * Calculates the libosmscout tile id for the given coordinate and magnification
-   */
-  class OSMSCOUT_API TileCalculator CLASS_FINAL
-  {
-  private:
-    double cellWidth;
-    double cellHeight;
-
-  public:
-    explicit TileCalculator(const Magnification& magnification);
-
-    Pixel GetTileId(const GeoCoord& coord) const;
   };
 }
 

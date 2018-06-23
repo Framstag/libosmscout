@@ -17,7 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/TileId.h>
+#include <osmscout/util/TileId.h>
+
+#include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 
@@ -41,7 +43,7 @@ namespace osmscout {
   /**
    * Return a short human readable description of the tile id
    */
-  std::string TileId::DisplayText() const
+  std::string TileId::GetDisplayText() const
   {
     return std::to_string(level)+ "." + std::to_string(y) + "." + std::to_string(x);
   }
@@ -119,4 +121,31 @@ namespace osmscout {
             size_t((coord.GetLon()+180.0)/cellDimension[magnification.GetLevel()].width),
             size_t((coord.GetLat()+90.0)/cellDimension[magnification.GetLevel()].height)};
   }
+
+  TileIdBox::TileIdBox(const TileId& a,
+                       const TileId& b)
+    : minTile(a.GetLevel(),
+              std::min(a.GetX(),b.GetX()),
+              std::min(a.GetY(),b.GetY())),
+      maxTile(a.GetLevel(),
+              std::max(a.GetX(),b.GetX()),
+              std::max(a.GetY(),b.GetY()))
+  {
+    assert(a.GetLevel()==b.GetLevel());
+  }
+
+  /**
+   * Return the bounding box of the region defined by the box
+   *
+   * @return
+   *    The GeoBox defining the resulting area
+   */
+  GeoBox TileIdBox::GetBoundingBox() const
+  {
+    return GeoBox(minTile.GetBoundingBox().GetTopLeft(),
+                  TileId(minTile.GetLevel(),
+                         maxTile.GetX()+1,
+                         maxTile.GetY()+1).GetBoundingBox().GetTopLeft());
+  }
+
 }

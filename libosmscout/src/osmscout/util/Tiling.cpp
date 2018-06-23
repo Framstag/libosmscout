@@ -100,17 +100,5 @@ namespace osmscout {
     return GeoBox(minTile.GetTopLeftCoord(magnification),
                   OSMTileId(maxTile.GetX()+1,maxTile.GetY()+1).GetTopLeftCoord(magnification));
   }
-
-  TileCalculator::TileCalculator(const Magnification& magnification)
-  : cellWidth(360.0/magnification.GetMagnification()),
-    cellHeight(180.0/magnification.GetMagnification())
-  {
-  }
-
-  osmscout::Pixel TileCalculator::GetTileId(const GeoCoord& coord) const
-  {
-    return {uint32_t((coord.GetLon()+180.0)/cellWidth),
-            uint32_t((coord.GetLat()+90.0)/cellHeight)};
-  }
 }
 

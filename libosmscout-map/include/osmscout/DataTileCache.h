@@ -36,9 +36,9 @@
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
-#include <osmscout/system/Assert.h>
+#include <osmscout/util/TileId.h>
 
-#include <osmscout/TileId.h>
+#include <osmscout/system/Assert.h>
 
 namespace osmscout {
 

@@ -932,7 +932,7 @@ namespace osmscout {
         //std::cout << "Tile loading time: " << tileLoadingTime.ResultString() << std::endl;
 
         if (tileLoadingTime.GetMilliseconds()>150) {
-          log.Warn() << "Retrieving tile data for tile " << tile->GetId().DisplayText() << " took " << tileLoadingTime.ResultString();
+          log.Warn() << "Retrieving tile data for tile " << tile->GetId().GetDisplayText() << " took " << tileLoadingTime.ResultString();
         }
 
       }
@@ -1036,7 +1036,7 @@ namespace osmscout {
         //std::cout << "Tile loading time: " << tileLoadingTime.ResultString() << std::endl;
 
         if (tileLoadingTime.GetMilliseconds()>150) {
-          log.Warn() << "Retrieving tile data for tile " << tile->GetId().DisplayText() << " took " << tileLoadingTime.ResultString();
+          log.Warn() << "Retrieving tile data for tile " << tile->GetId().GetDisplayText() << " took " << tileLoadingTime.ResultString();
         }
 
       }

@@ -25,6 +25,8 @@
 
 #include <osmscout/CoverageIndex.h>
 
+#include <osmscout/util/TileId.h>
+
 namespace osmscout {
 
   static uint32_t cellLevel=14;
@@ -55,7 +57,7 @@ namespace osmscout {
       node.Read(*typeConfig,
                 nodeScanner);
 
-      cells.insert(tileCalculator.GetTileId(node.GetCoords()));
+      cells.insert(TileId::GetTile(magnification,node.GetCoords()).GetPixel());
     }
 
     nodeScanner.Close();
@@ -94,8 +96,8 @@ namespace osmscout {
 
       GeoBox boundingBox=way.GetBoundingBox();
 
-      Pixel bottomLeft=tileCalculator.GetTileId(boundingBox.GetBottomLeft());
-      Pixel topRight=tileCalculator.GetTileId(boundingBox.GetTopRight());
+      Pixel bottomLeft=TileId::GetTile(magnification,boundingBox.GetBottomLeft()).GetPixel();
+      Pixel topRight=TileId::GetTile(magnification,boundingBox.GetTopRight()).GetPixel();
 
       for (uint32_t y=bottomLeft.y; y<=topRight.y; y++) {
         for (uint32_t x=bottomLeft.x; x<=topRight.x; x++) {
@@ -137,8 +139,8 @@ namespace osmscout {
 
       GeoBox boundingBox=area.GetBoundingBox();
 
-      Pixel bottomLeft=tileCalculator.GetTileId(boundingBox.GetBottomLeft());
-      Pixel topRight=tileCalculator.GetTileId(boundingBox.GetTopRight());
+      Pixel bottomLeft=TileId::GetTile(magnification,boundingBox.GetBottomLeft()).GetPixel();
+      Pixel topRight=TileId::GetTile(magnification,boundingBox.GetTopRight()).GetPixel();
 
       for (uint32_t y=bottomLeft.y; y<=topRight.y; y++) {
         for (uint32_t x=bottomLeft.x; x<=topRight.x; x++) {
@@ -226,7 +228,7 @@ namespace osmscout {
   }
 
   CoverageIndexGenerator::CoverageIndexGenerator()
-  : tileCalculator(std::pow(2,cellLevel))
+  : magnification(std::pow(2,cellLevel))
   {}
 
   void CoverageIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,

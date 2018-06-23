@@ -39,6 +39,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/StringMatcher.h
     include/osmscout/util/TagErrorReporter.h
     include/osmscout/util/Tiling.h
+    include/osmscout/util/TileId.h
     include/osmscout/util/Transformation.h
     include/osmscout/util/WorkQueue.h)
 
@@ -137,6 +138,7 @@ set(SOURCE_FILES
     src/osmscout/util/String.cpp
     src/osmscout/util/StringMatcher.cpp
     src/osmscout/util/Tiling.cpp
+    src/osmscout/util/TileId.cpp
     src/osmscout/util/Transformation.cpp
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/TagErrorReporter.cpp

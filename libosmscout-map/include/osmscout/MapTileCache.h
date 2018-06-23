@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <list>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -28,9 +29,9 @@
 #include <osmscout/MapImportExport.h>
 
 #include <osmscout/util/GeoBox.h>
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Magnification.h>
-
-#include <osmscout/TileId.h>
+#include <osmscout/util/TileId.h>
 
 namespace osmscout {
 
@@ -74,7 +75,7 @@ namespace osmscout {
     mutable Cache      tileCache;
 
   public:
-    MapTileCache(size_t cacheSize);
+    explicit MapTileCache(size_t cacheSize);
 
     void SetSize(size_t cacheSize);
 
@@ -220,7 +221,7 @@ namespace osmscout {
     TileId  id;                //!< Id of the tile
 
   public:
-    MapTile(const TileId& id);
+    explicit MapTile(const TileId& id);
 
     ~MapTile();
 

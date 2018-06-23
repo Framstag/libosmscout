@@ -36,7 +36,7 @@ namespace osmscout {
     typedef std::set<Pixel> CellSet;
 
   private:
-    TileCalculator tileCalculator;
+    Magnification magnification;
 
   private:
     CellSet ScanNodes(const TypeConfigRef& typeConfig,

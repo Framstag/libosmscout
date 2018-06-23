@@ -12,7 +12,6 @@ osmscoutmapHeader = [
             'osmscout/StyleDescription.h',
             'osmscout/StyleConfig.h',
             'osmscout/StyleProcessor.h',
-            'osmscout/TileId.h',
             'osmscout/DataTileCache.h',
             'osmscout/MapTileCache.h',
             'osmscout/MapService.h',

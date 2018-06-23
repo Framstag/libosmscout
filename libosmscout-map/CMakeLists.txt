@@ -13,7 +13,6 @@ set(HEADER_FILES
 	include/osmscout/StyleDescription.h
 	include/osmscout/StyleConfig.h
 	include/osmscout/StyleProcessor.h
-	include/osmscout/TileId.h
 	include/osmscout/DataTileCache.h
 	include/osmscout/MapTileCache.h
 	include/osmscout/MapPainterNoOp.h
@@ -31,7 +30,6 @@ set(SOURCE_FILES
 	src/osmscout/StyleDescription.cpp
 	src/osmscout/StyleConfig.cpp
 	src/osmscout/StyleProcessor.cpp
-	src/osmscout/TileId.cpp
 	src/osmscout/DataTileCache.cpp
 	src/osmscout/MapTileCache.cpp
 	src/osmscout/MapPainterNoOp.cpp

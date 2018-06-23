@@ -1,5 +1,5 @@
 #include <osmscout/Point.h>
-#include <osmscout/util/Tiling.h>
+#include <osmscout/util/TileId.h>
 
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
@@ -12,9 +12,7 @@ TEST_CASE("Test reverse calculation of coordinates from node id") {
 
   magnification.SetLevel(24);
 
-  osmscout::TileCalculator calculator(magnification);
-
-  osmscout::Pixel expectedTile=calculator.GetTileId(coord);
+  osmscout::Pixel expectedTile=osmscout::TileId::GetTile(magnification,coord).GetPixel();
 
   INFO("Expected tile: "+expectedTile.GetDisplayText());
 
@@ -24,7 +22,7 @@ TEST_CASE("Test reverse calculation of coordinates from node id") {
 
   INFO("Reverse calculated coord: "+calculatedCoord.GetDisplayText());
 
-  osmscout::Pixel calculatedTile=calculator.GetTileId(calculatedCoord);
+  osmscout::Pixel calculatedTile=osmscout::TileId::GetTile(magnification,calculatedCoord).GetPixel();
 
   INFO("Calculated tile: "+calculatedTile.GetDisplayText());
 
