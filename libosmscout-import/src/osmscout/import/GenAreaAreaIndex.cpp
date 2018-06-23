@@ -861,9 +861,7 @@ namespace osmscout {
 
       area.Read(*typeConfig,scanner);
 
-      GeoBox boundingBox;
-
-      area.GetBoundingBox(boundingBox);
+      GeoBox boundingBox=area.GetBoundingBox();
 
       GeoCoord center=boundingBox.GetCenter();
 

@@ -122,16 +122,14 @@ QList<LocationEntry> POILookupModule::lookupPOIRequest(DBInstanceRef db,
 
   // build location entries
   for (osmscout::AreaRef &area:areas) {
-    osmscout::GeoBox bbox;
-    area->GetBoundingBox(bbox);
+    osmscout::GeoBox   bbox=area->GetBoundingBox();
     osmscout::GeoCoord coordinates=bbox.GetCenter();
 
     result << buildLocationEntry(area, db->path, coordinates, bbox);
   }
 
   for (osmscout::WayRef &way:ways) {
-    osmscout::GeoBox bbox;
-    way->GetBoundingBox(bbox);
+    osmscout::GeoBox   bbox=way->GetBoundingBox();
     osmscout::GeoCoord coordinates=bbox.GetCenter();
 
     result << buildLocationEntry(way, db->path, coordinates, bbox);

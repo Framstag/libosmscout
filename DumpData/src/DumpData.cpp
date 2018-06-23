@@ -667,9 +667,7 @@ static void DumpNode(const osmscout::NodeRef& node,
 static void DumpWay(const osmscout::WayRef& way,
                     osmscout::OSMId id)
 {
-  osmscout::GeoBox boundingBox;
-
-  way->GetBoundingBox(boundingBox);
+  osmscout::GeoBox boundingBox=way->GetBoundingBox();
 
   std::cout << "Way {" << std::endl;
 
@@ -706,9 +704,7 @@ static void DumpWay(const osmscout::WayRef& way,
 static void DumpArea(const osmscout::AreaRef& area,
                      osmscout::OSMId id)
 {
-  osmscout::GeoBox boundingBox;
-
-  area->GetBoundingBox(boundingBox);
+  osmscout::GeoBox boundingBox=area->GetBoundingBox();
 
   std::cout << "Area {" << std::endl;
 

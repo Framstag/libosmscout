@@ -371,7 +371,6 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
                                     osmscout::GeoCoord& coordinates,
                                     osmscout::GeoBox& bbox)
 {
-  osmscout::GeoBox tmpBox;
   for (const osmscout::ObjectFileRef& object:objects) {
     if (!object.Valid()){
       continue;
@@ -396,8 +395,7 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
       if (typeName.isEmpty()) {
         typeName = QString::fromUtf8(area->GetType()->GetName().c_str());
       }
-      area->GetBoundingBox(tmpBox);
-      bbox.Include(tmpBox);
+      bbox.Include(area->GetBoundingBox());
     } else if (object.GetType() == osmscout::RefType::refWay) {
       osmscout::WayRef way;
       if (!db->database->GetWayByOffset(object.GetFileOffset(), way)) {
@@ -406,8 +404,7 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
       if (typeName.isEmpty()) {
         typeName = QString::fromUtf8(way->GetType()->GetName().c_str());
       }
-      way->GetBoundingBox(tmpBox);
-      bbox.Include(tmpBox);
+      bbox.Include(way->GetBoundingBox());
     }
   }
   coordinates=bbox.GetCenter();

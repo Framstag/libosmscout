@@ -92,9 +92,7 @@ namespace osmscout {
       // We currently use the area of the way, since this is simpler than a scan line
       // processing
 
-      GeoBox boundingBox;
-
-      way.GetBoundingBox(boundingBox);
+      GeoBox boundingBox=way.GetBoundingBox();
 
       Pixel bottomLeft=tileCalculator.GetTileId(boundingBox.GetBottomLeft());
       Pixel topRight=tileCalculator.GetTileId(boundingBox.GetTopRight());
@@ -137,9 +135,7 @@ namespace osmscout {
       area.Read(*typeConfig,
                 areaScanner);
 
-      GeoBox boundingBox;
-
-      area.GetBoundingBox(boundingBox);
+      GeoBox boundingBox=area.GetBoundingBox();
 
       Pixel bottomLeft=tileCalculator.GetTileId(boundingBox.GetBottomLeft());
       Pixel topRight=tileCalculator.GetTileId(boundingBox.GetTopRight());

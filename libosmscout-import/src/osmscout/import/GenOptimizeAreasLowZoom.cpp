@@ -295,9 +295,7 @@ namespace osmscout
       std::map<Pixel,size_t> cellFillCount;
 
       for (const auto& area : areas) {
-        GeoBox  boundingBox;
-
-        area->GetBoundingBox(boundingBox);
+        GeoBox  boundingBox=area->GetBoundingBox();
 
         //
         // Calculate minimum and maximum tile ids that are covered
@@ -393,14 +391,13 @@ namespace osmscout
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
     for (const auto& area : areas) {
-      GeoBox boundingBox;
       auto   offset=offsets.find(area->GetFileOffset());
 
       if (offset==offsets.end()) {
         continue;
       }
 
-      area->GetBoundingBox(boundingBox);
+      GeoBox boundingBox=area->GetBoundingBox();
 
       //
       // Calculate minimum and maximum tile ids that are covered

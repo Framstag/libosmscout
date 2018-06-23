@@ -220,9 +220,7 @@ namespace osmscout {
             continue;
           }
 
-          GeoBox boundingBox;
-
-          way.GetBoundingBox(boundingBox);
+          GeoBox boundingBox=way.GetBoundingBox();
 
           //
           // Calculate minimum and maximum tile ids that are covered
@@ -511,9 +509,7 @@ namespace osmscout {
             continue;
           }
 
-          GeoBox boundingBox;
-
-          way.GetBoundingBox(boundingBox);
+          GeoBox boundingBox=way.GetBoundingBox();
 
           //
           // Calculate minimum and maximum tile ids that are covered

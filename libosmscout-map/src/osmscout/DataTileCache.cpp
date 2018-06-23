@@ -108,7 +108,7 @@ namespace osmscout {
    */
   TileRef DataTileCache::GetCachedTile(const TileId& id) const
   {
-    std::map<TileId,CacheRef>::iterator existingEntry=tileIndex.find(id);
+    auto existingEntry=tileIndex.find(id);
 
     if (existingEntry!=tileIndex.end()) {
       tileCache.splice(tileCache.begin(),tileCache,existingEntry->second);
@@ -117,7 +117,7 @@ namespace osmscout {
       return existingEntry->second->tile;//.lock();
     }
 
-    return NULL;
+    return nullptr;
   }
 
   /**
@@ -126,7 +126,7 @@ namespace osmscout {
    */
   TileRef DataTileCache::GetTile(const TileId& id) const
   {
-    std::map<TileId,CacheRef>::iterator existingEntry=tileIndex.find(id);
+    auto existingEntry=tileIndex.find(id);
 
     if (existingEntry==tileIndex.end()) {
       TileRef tile(new Tile(id));
@@ -226,11 +226,7 @@ namespace osmscout {
 
       parentTile.GetWayData().CopyData([&](const WayRef& way) {
         if (subset.IsSet(way->GetType())) {
-          GeoBox wayBoundingBox;
-
-          way->GetBoundingBox(wayBoundingBox);
-
-          if (wayBoundingBox.Intersects(boundingBox)) {
+          if (way->GetBoundingBox().Intersects(boundingBox)) {
             data.push_back(way);
           }
         }
@@ -261,11 +257,7 @@ namespace osmscout {
 
       parentTile.GetAreaData().CopyData([&](const AreaRef& area) {
         if (subset.IsSet(area->GetType())) {
-          GeoBox areaBoundingBox;
-
-          area->GetBoundingBox(areaBoundingBox);
-
-          if (areaBoundingBox.Intersects(boundingBox)) {
+          if (area->GetBoundingBox().Intersects(boundingBox)) {
             data.push_back(area);
           }
         }

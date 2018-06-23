@@ -291,10 +291,8 @@ namespace osmscout {
 
     std::sort(areas.begin(), areas.end(),
               [](const AreaRef &a, const AreaRef &b) -> bool {
-                GeoBox b1;
-                GeoBox b2;
-                a->GetBoundingBox(b1);
-                b->GetBoundingBox(b2);
+                GeoBox b1=a->GetBoundingBox();
+                GeoBox b2=b->GetBoundingBox();
                 return b1.GetHeight() * b1.GetWidth() > b2.GetHeight() * b2.GetWidth();
               });
 

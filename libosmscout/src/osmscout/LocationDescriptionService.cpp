@@ -290,10 +290,10 @@ namespace osmscout {
     NameFeatureLabelReader nameFeatureLabelReader(*database->GetTypeConfig());
 
     for (const auto& entry : results.GetWayResults()) {
-      GeoBox boundingBox;
+      GeoBox boundingBox=entry.GetWay()->GetBoundingBox();
       double bearing=GetSphericalBearingInitial(entry.GetClosestPoint(),
                                                 location);
-      entry.GetWay()->GetBoundingBox(boundingBox);
+      ;
 
       candidates.emplace_back(entry.GetWay()->GetObjectFileRef(),
                               nameFeatureLabelReader.GetLabel(entry.GetWay()->GetFeatureValueBuffer()),
@@ -311,9 +311,8 @@ namespace osmscout {
     NameFeatureLabelReader nameFeatureLabelReader(*database->GetTypeConfig());
 
     for (const auto& entry : results.GetAreaResults()) {
-      GeoBox boundingBox;
+      GeoBox boundingBox=entry.GetArea()->GetBoundingBox();
       double bearing=GetSphericalBearingInitial(entry.GetClosestPoint(),location);
-      entry.GetArea()->GetBoundingBox(boundingBox);
 
       candidates.emplace_back(entry.GetArea()->GetObjectFileRef(),
                               nameFeatureLabelReader.GetLabel(entry.GetArea()->GetFeatureValueBuffer()),
@@ -702,7 +701,7 @@ namespace osmscout {
         AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
         searchEntry.object=object;
-        way->GetBoundingBox(searchEntry.bbox);
+        searchEntry.bbox=way->GetBoundingBox();
 
         searchEntry.coords.resize(way->nodes.size());
 

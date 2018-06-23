@@ -184,26 +184,6 @@ namespace osmscout {
     return true;
   }
 
-  void Area::GetBoundingBox(GeoBox& boundingBox) const
-  {
-    boundingBox.Invalidate();
-
-    for (const auto& ring : rings) {
-      if (ring.IsOuterRing()) {
-        if (!boundingBox.IsValid()) {
-          ring.GetBoundingBox(boundingBox);
-        }
-        else {
-          GeoBox ringBoundingBox;
-
-          ring.GetBoundingBox(ringBoundingBox);
-
-          boundingBox.Include(ringBoundingBox);
-        }
-      }
-    }
-  }
-
   GeoBox Area::GetBoundingBox() const
   {
     GeoBox boundingBox;

@@ -1013,17 +1013,13 @@ namespace osmscout {
         return error;
       }
 
-      GeoBox regionBox;
-
-      regionArea->GetBoundingBox(regionBox);
+      GeoBox regionBox=regionArea->GetBoundingBox();
 
       AdminRegionRef regionRef=std::make_shared<AdminRegion>(region);
       bool           candidates=false;
 
       for (const auto& way : ways) {
-        GeoBox box;
-
-        way->GetBoundingBox(box);
+        GeoBox box=way->GetBoundingBox();
 
         if (box.Intersects(regionBox)) {
           candidates=true;
@@ -1031,9 +1027,7 @@ namespace osmscout {
       }
 
       for (const auto& area : areas) {
-        GeoBox box;
-
-        area->GetBoundingBox(box);
+        GeoBox box=area->GetBoundingBox();
 
         if (box.Intersects(regionBox)) {
           candidates=true;
