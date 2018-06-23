@@ -191,7 +191,7 @@ namespace osmscout {
 
     if (!optimizeAreasLowZoom ||
         !optimizeWaysLowZoom) {
-      return NULL;
+      return nullptr;
     }
 
     TypeDefinitionRef typeDefinition=std::make_shared<TypeDefinition>();
@@ -1146,7 +1146,7 @@ namespace osmscout {
 
     StopClock uniqueTime;
 
-    for (auto tile : tiles) {
+    for (const auto& tile : tiles) {
       tile->GetNodeData().CopyData([&nodeMap](const NodeRef& node) {
         nodeMap[node->GetFileOffset()]=node;
       });
@@ -1225,7 +1225,7 @@ namespace osmscout {
 
     StopClock uniqueTime;
 
-    for (auto tile : tiles) {
+    for (const auto& tile : tiles) {
       tile->GetNodeData().CopyData([&typeDefinition,&nodeMap](const NodeRef& node) {
         if (typeDefinition.nodeTypes.IsSet(node->GetType())) {
           nodeMap[node->GetFileOffset()]=node;
