@@ -950,20 +950,14 @@ namespace osmscout {
     return osmscout::Vertex2D(tl.x(),tl.y());
   }
 
-
   void MapPainterQt::DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const
   {
-    QPen          pen;
-    pen.setColor(QColor::fromRgbF(0,0,0));
-    painter->setPen(pen);
-
     QTransform tran;
     const QTransform originalTran=painter->transform();
     QPointF point=QPointF(glyph.position.GetX(), glyph.position.GetY());
 
     tran.translate(point.x(), point.y());
     tran.rotateRadians(glyph.angle);
-
 
     painter->setTransform(tran);
 
