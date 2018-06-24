@@ -36,6 +36,7 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
+#include <osmscout/util/TileId.h>
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout
@@ -357,9 +358,10 @@ namespace osmscout
                                                       const std::list<WayRef>& ways,
                                                       TypeData& typeData)
   {
-    size_t level=1;//parameter.GetOptimizationMinMag();
+    MagnificationLevel level(1);
 
     while (true) {
+      Magnification          magnification(level);
       std::map<Pixel,size_t> cellFillCount;
 
       for (const auto& way : ways) {
@@ -367,20 +369,11 @@ namespace osmscout
 
         // Count number of entries per current type and coordinate
 
-        //
-        // Calculate minimum and maximum tile ids that are covered
-        // by the way
-        // Renormated coordinate space (everything is >=0)
-        //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
+        TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                      TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-        for (uint32_t y=minyc; y<=maxyc; y++) {
-          for (uint32_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[Pixel(x,y)]++;
-          }
+        for (const auto& tileId : box) {
+          cellFillCount[tileId.GetPixel()]++;
         }
       }
 
@@ -399,7 +392,7 @@ namespace osmscout
 
       if (!(max>parameter.GetOptimizationCellSizeMax() ||
            average>parameter.GetOptimizationCellSizeAverage())) {
-        typeData.indexLevel=(uint32_t)level;
+        typeData.indexLevel=level;
         typeData.indexCells=cellFillCount.size();
         typeData.indexEntries=0;
 
@@ -513,8 +506,7 @@ namespace osmscout
       return true;
     }
 
-    double                                 cellWidth=cellDimension[data.indexLevel].width;
-    double                                 cellHeight=cellDimension[data.indexLevel].height;
+    Magnification                          magnification(data.indexLevel);
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
     for (const auto &way : ways) {
@@ -526,20 +518,11 @@ namespace osmscout
 
       GeoBox boundingBox=way->GetBoundingBox();
 
-      //
-      // Calculate minimum and maximum tile ids that are covered
-      // by the way
-      // Renormated coordinate space (everything is >=0)
-      //
-      uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
-      uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
-      uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
-      uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
+      TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                    TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-      for (uint32_t y=minyc; y<=maxyc; y++) {
-        for (uint32_t x=minxc; x<=maxxc; x++) {
-          cellOffsets[Pixel(x,y)].push_back(offset->second);
-        }
+      for (const auto& tileId : box) {
+        cellOffsets[tileId.GetPixel()].push_back(offset->second);
       }
     }
 
@@ -566,7 +549,7 @@ namespace osmscout
 
     progress.Info("Writing map for level "+
                   data.optLevel+", index level "+
-                  std::to_string(data.indexLevel)+", "+
+                  data.indexLevel+", "+
                   std::to_string(cellOffsets.size())+" cells, "+
                   std::to_string(indexEntries)+" entries, "+
                   ByteSizeToString(1.0*data.cellXCount*data.cellYCount*data.dataOffsetBytes+dataSize));
@@ -627,7 +610,6 @@ namespace osmscout
                                                 std::list<TypeData>& typesData)
   {
     FileScanner   scanner;
-    Magnification magnification(MagnificationLevel(parameter.GetOptimizationMaxMag())); // Magnification, we optimize for
     // Everything smaller than 2mm should get dropped. Width, height and DPI come from the Nexus 4
     double        dpi=320.0;
     double        pixel=0.5 /* mm */ * dpi / 25.4 /* inch */;
@@ -764,7 +746,6 @@ namespace osmscout
   {
     FileOffset            indexOffset=0;
     FileWriter            writer;
-    Magnification         magnification; // Magnification, we optimize for
     std::set<TypeInfoRef> wayTypes;         // Types we optimize
     std::list<TypeData>   wayTypesData;
 

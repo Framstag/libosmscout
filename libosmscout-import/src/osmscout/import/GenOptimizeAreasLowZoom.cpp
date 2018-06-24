@@ -22,6 +22,7 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/AreaDataFile.h>
 #include <osmscout/OptimizeAreasLowZoom.h>
 
 #include <osmscout/system/Assert.h>
@@ -32,8 +33,8 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
+#include <osmscout/util/TileId.h>
 #include <osmscout/util/Transformation.h>
-#include <osmscout/AreaDataFile.h>
 
 namespace osmscout
 {
@@ -289,9 +290,10 @@ namespace osmscout
                                                         const std::list<AreaRef>& areas,
                                                         TypeData& typeData)
   {
-    size_t level=5;//parameter.GetOptimizationMinMag();
+    MagnificationLevel level(5);
 
     while (true) {
+      Magnification          magnification(level);//parameter.GetOptimizationMinMag();
       std::map<Pixel,size_t> cellFillCount;
 
       for (const auto& area : areas) {
@@ -302,15 +304,11 @@ namespace osmscout
         // by the way
         // Renormated coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
+        TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                      TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-        for (uint32_t y=minyc; y<=maxyc; y++) {
-          for (uint32_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[Pixel(x,y)]++;
-          }
+        for (const auto& tileId : box) {
+          cellFillCount[tileId.GetPixel()]++;
         }
       }
 
@@ -330,7 +328,7 @@ namespace osmscout
 
       if (!(max>parameter.GetOptimizationCellSizeMax() ||
            average>parameter.GetOptimizationCellSizeAverage())) {
-        typeData.indexLevel=(uint32_t)level;
+        typeData.indexLevel=level;
         typeData.indexCells=cellFillCount.size();
         typeData.indexEntries=0;
 
@@ -386,8 +384,7 @@ namespace osmscout
       return true;
     }
 
-    double                                 cellWidth=cellDimension[data.indexLevel].width;
-    double                                 cellHeight=cellDimension[data.indexLevel].height;
+    Magnification                          magnification(data.indexLevel);
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
     for (const auto& area : areas) {
@@ -399,20 +396,11 @@ namespace osmscout
 
       GeoBox boundingBox=area->GetBoundingBox();
 
-      //
-      // Calculate minimum and maximum tile ids that are covered
-      // by the way
-      // Renormated coordinate space (everything is >=0)
-      //
-      uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
-      uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
-      uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
-      uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
+      TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                    TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-      for (uint32_t y=minyc; y<=maxyc; y++) {
-        for (uint32_t x=minxc; x<=maxxc; x++) {
-          cellOffsets[Pixel(x,y)].push_back(offset->second);
-        }
+      for (const auto& tileId : box) {
+        cellOffsets[tileId.GetPixel()].push_back(offset->second);
       }
     }
 
@@ -439,7 +427,7 @@ namespace osmscout
 
     progress.Info("Writing map for level "+
                   data.optLevel+", index level "+
-                  std::to_string(data.indexLevel)+", "+
+                  data.indexLevel+", "+
                   std::to_string(cellOffsets.size())+" cells, "+
                   std::to_string(indexEntries)+" entries, "+
                   ByteSizeToString(1.0*data.cellXCount*data.cellYCount*data.dataOffsetBytes+dataSize));

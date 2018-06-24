@@ -48,7 +48,7 @@ namespace osmscout {
     {
       TypeInfoRef        type;            //!< The type
       MagnificationLevel optLevel;        //!< The display level this data was optimized for
-      uint32_t           indexLevel;      //!< Magnification level of index
+      MagnificationLevel indexLevel;      //!< Magnification level of index
 
       uint32_t           cellXStart;
       uint32_t           cellXEnd;
