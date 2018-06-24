@@ -238,10 +238,11 @@ namespace osmscout {
 
   void MapPainterQt::DrawLabel(const Projection& /*projection*/,
                                const MapParameter& /*parameter*/,
-                               const QRectF& rect,
+                               const DoubleRectangle& labelRect,
                                const LabelData& label,
                                const QTextLayout& textLayout)
   {
+    QRectF rect(labelRect.x, labelRect.y, labelRect.width, labelRect.height);
     if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
       const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
       double      r=style->GetTextColor().GetR();

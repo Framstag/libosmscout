@@ -37,13 +37,27 @@
 
 namespace osmscout {
 
-  struct IntRectangle {
-    int x;
-    int y;
-    int width;
-    int height;
+  template <typename T>
+  struct Rectangle {
+    T x;
+    T y;
+    T width;
+    T height;
 
-    inline bool Intersects(const IntRectangle &other)
+    Rectangle(T x, T y, T width, T height):
+        x(x), y(y), width(width), height(height)
+    {
+    }
+
+    /**
+     * Test if this Rectangle intersects with another.
+     * It is using open interval, so if two rectangles are just touching
+     * each other, these don't intersects.
+     *
+     * @param other
+     * @return true if intersects
+     */
+    inline bool Intersects(const Rectangle<T> &other)
     {
       return !(
           (x + width) < other.x ||
@@ -53,6 +67,9 @@ namespace osmscout {
       );
     }
   };
+
+  using IntRectangle = Rectangle<int>;
+  using DoubleRectangle = Rectangle<double>;
 
   class OSMSCOUT_MAP_API PathLabelData
   {
@@ -222,7 +239,7 @@ namespace osmscout {
 
   public:
     LabelLayouter(TextLayouter *textLayouter):
-        textLayouter(textLayouter), viewport{}
+        textLayouter(textLayouter), viewport{0,0,0,0}
     {};
 
     void SetViewport(int x, int y, int w, int h)
@@ -424,7 +441,7 @@ namespace osmscout {
 
       for (const typename LabelInstanceType::Element &el : textElements) {
         p->DrawLabel(projection, parameter,
-                     QRectF(el.x, el.y, el.label->width, el.label->height),
+                     DoubleRectangle(el.x, el.y, el.label->width, el.label->height),
                      el.labelData, *(el.label->label) );
       }
 

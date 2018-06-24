@@ -149,7 +149,7 @@ namespace osmscout {
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const QRectF& point,
+                   const DoubleRectangle& point,
                    const LabelData& label,
                    const QTextLayout& textLayout);
 
