@@ -260,17 +260,17 @@ int main(int argc, char* argv[])
 
   osmscout::MapPainterAgg painter(styleConfig);
 
-  for (size_t level=std::min(startLevel,endLevel);
+  for (uint32_t level=std::min(startLevel,endLevel);
        level<=std::max(startLevel,endLevel);
        level++) {
     osmscout::Magnification magnification;
 
     magnification.SetLevel(level);
 
-    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latBottom,lonLeft),
-                                                                  magnification));
-    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latTop,lonRight),
-                                                                  magnification));
+    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latBottom,lonLeft)));
+    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latTop,lonRight)));
     uint32_t                xTileStart=std::min(tileA.GetX(),tileB.GetX());
     uint32_t                xTileEnd=std::max(tileA.GetX(),tileB.GetX());
     uint32_t                xTileCount=xTileEnd-xTileStart+1;

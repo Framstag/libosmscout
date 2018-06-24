@@ -66,8 +66,8 @@ namespace osmscout {
                   OSMTileId(x+1,y+1).GetTopLeftCoord(magnification));
   }
 
-  OSMTileId OSMTileId::GetOSMTile(const GeoCoord& coord,
-                                  const Magnification& magnification)
+  OSMTileId OSMTileId::GetOSMTile(const Magnification& magnification,
+                                  const GeoCoord& coord)
   {
     double latRad=coord.GetLat() * M_PI/180.0;
 

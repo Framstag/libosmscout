@@ -357,10 +357,10 @@ int main(int argc, char* argv[])
 
     magnification.SetLevel(level);
 
-    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latBottom,lonLeft),
-                                                                  magnification));
-    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latTop,lonRight),
-                                                                  magnification));
+    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latBottom,lonLeft)));
+    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latTop,lonRight)));
     osmscout::OSMTileIdBox  tileArea(tileA,tileB);
 
     std::cout << "----------" << std::endl;

@@ -69,7 +69,7 @@ namespace osmscout {
 
     inline Pixel GetPixel() const
     {
-      return Pixel(x,y);
+      return {x,y};
     }
 
     std::string GetDisplayText() const;
@@ -146,7 +146,7 @@ namespace osmscout {
 
     TileIdBoxConstIterator& operator++()
     {
-      if (currentTile.GetX()>maxTile.GetX()) {
+      if (currentTile.GetX()>=maxTile.GetX()) {
         currentTile=TileId(minTile.GetX(),
                            currentTile.GetY()+1);
       }
@@ -253,8 +253,8 @@ namespace osmscout {
 
     inline TileIdBoxConstIterator end() const
     {
-      return TileIdBoxConstIterator(TileId(maxTile.GetX()+1,
-                                           maxTile.GetY()),
+      return TileIdBoxConstIterator(TileId(minTile.GetX(),
+                                           maxTile.GetY()+1),
                                        minTile,
                                        maxTile);
     }
