@@ -493,7 +493,7 @@ void MapWidget::showCoordinatesInstantly(double lat, double lon)
 
 osmscout::Magnification MapWidget::magnificationByDimension(const Distance &d)
 {
-  osmscout::Magnification::Mag mag = osmscout::Magnification::magBlock;
+  osmscout::MagnificationLevel mag = osmscout::Magnification::magBlock;
   double dimension = d.As<Kilometer>();
   if (dimension > 0.1)
     mag = osmscout::Magnification::magVeryClose;
@@ -679,44 +679,13 @@ QString MapWidget::GetStylesheetFilename() const
 
 QString MapWidget::GetZoomLevelName() const
 {
-    double level = view->magnification.GetMagnification();
-    if(level>=osmscout::Magnification::magWorld && level < osmscout::Magnification::magContinent){
-        return "World";
-    } else if(level>=osmscout::Magnification::magContinent && level < osmscout::Magnification::magState){
-        return "Continent";
-    } else if(level>=osmscout::Magnification::magState && level < osmscout::Magnification::magStateOver){
-        return "State";
-    } else if(level>=osmscout::Magnification::magStateOver && level < osmscout::Magnification::magCounty){
-        return "StateOver";
-    } else if(level>=osmscout::Magnification::magCounty && level < osmscout::Magnification::magRegion){
-        return "County";
-    } else if(level>=osmscout::Magnification::magRegion && level < osmscout::Magnification::magProximity){
-        return "Region";
-    } else if(level>=osmscout::Magnification::magProximity && level < osmscout::Magnification::magCityOver){
-        return "Proximity";
-    } else if(level>=osmscout::Magnification::magCityOver && level < osmscout::Magnification::magCity){
-        return "CityOver";
-    } else if(level>=osmscout::Magnification::magCity && level < osmscout::Magnification::magSuburb){
-        return "City";
-    } else if(level>=osmscout::Magnification::magSuburb && level < osmscout::Magnification::magDetail){
-        return "Suburb";
-    } else if(level>=osmscout::Magnification::magDetail && level < osmscout::Magnification::magClose){
-        return "Detail";
-    } else if(level>=osmscout::Magnification::magClose && level < osmscout::Magnification::magCloser){
-        return "Close";
-    } else if(level>=osmscout::Magnification::magCloser && level < osmscout::Magnification::magVeryClose){
-        return "Closer";
-    } else if(level>=osmscout::Magnification::magVeryClose && level < osmscout::Magnification::magBlock){
-        return "VeryClose";
-    } else if(level>=osmscout::Magnification::magBlock && level < osmscout::Magnification::magStreet){
-        return "Block";
-    } else if(level>=osmscout::Magnification::magStreet && level < osmscout::Magnification::magHouse){
-        return "Street";
-    } else if(level>=osmscout::Magnification::magHouse){
-        return "House";
-    }
+    osmscout::MagnificationConverter converter;
+    std::string                      name;
 
-    assert(false);
+    if (converter.Convert(osmscout::MagnificationLevel(view->magnification.GetLevel()),
+                          name)) {
+      return name.c_str();
+    }
 
     return "";
 }

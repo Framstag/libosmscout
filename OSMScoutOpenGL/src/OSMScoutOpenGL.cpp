@@ -79,7 +79,7 @@ bool LoadData() {
   magnification.SetLevel(osmscout::MagnificationLevel(level));
   osmscout::MagnificationConverter mm;
   std::string s;
-  mm.Convert(magnification.GetLevel(), s);
+  mm.Convert(osmscout::MagnificationLevel(level), s);
   osmscout::log.Info() << "Zoom level: " << s << " " << magnification.GetLevel();
   projection.Set(center,
                  magnification,

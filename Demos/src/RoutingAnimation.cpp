@@ -347,7 +347,7 @@ struct Arguments
     endStep(-1),
     startFrame(0)
   {
-    zoom.SetMagnification(osmscout::Magnification::magVeryClose);
+    zoom.SetLevel(osmscout::Magnification::magVeryClose);
   }
 };
 
