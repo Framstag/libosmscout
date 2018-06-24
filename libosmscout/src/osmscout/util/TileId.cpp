@@ -128,7 +128,7 @@ namespace osmscout {
 
     assert(level>0);
 
-    zoomedOutMagnification.SetLevel(level-1);
+    zoomedOutMagnification.SetLevel(MagnificationLevel(level-1));
 
     return TileKey(zoomedOutMagnification,
                    TileId(id.GetX()/2,id.GetY()/2));

@@ -36,10 +36,10 @@ namespace osmscout {
     this->level=(uint32_t)log2(this->magnification);
   }
 
-  void Magnification::SetLevel(uint32_t level)
+  void Magnification::SetLevel(const MagnificationLevel& level)
   {
-    this->magnification=pow(2.0,level);
-    this->level=level;
+    this->magnification=pow(2.0,level.Get());
+    this->level=level.Get();
   }
 
   MagnificationConverter::MagnificationConverter()

@@ -1498,10 +1498,10 @@ PRODUCTIONS
                      }
                      else if (valueType==ValueType::NUMBER) {
                        Magnification magnification;
-                       size_t        level;
+                       uint32_t      level;
 
                        if (StringToNumber(number,level)) {
-                         magnification.SetLevel((uint32_t)level);
+                         magnification.SetLevel(osmscout::MagnificationLevel(level));
                        }
                        else {
                          std::string e="Cannot parse number '"+std::string(number)+"'";
@@ -2023,7 +2023,7 @@ PRODUCTIONS
                 )
                 |
                 (
-                  (. size_t level; .)
+                  (. uint32_t level; .)
                   number
                   (.
                     if (!StringToNumber(t->val,level)) {
@@ -2032,7 +2032,7 @@ PRODUCTIONS
                       SemErr(e.c_str());
                     }
                     else {
-                      magnification.SetLevel((uint32_t)level);
+                      magnification.SetLevel(osmscout::MagnificationLevel(level));
                     }
                   .)
                 )
@@ -2042,7 +2042,7 @@ PRODUCTIONS
                   CONSTANT<constant>
                   (.
                     if (!constant) {
-                      magnification.SetLevel(0);
+                      magnification.SetLevel(osmscout::MagnificationLevel(0));
                     }
                     else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
                       std::string e="Variable is not of type 'MAG'";

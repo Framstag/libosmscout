@@ -865,11 +865,9 @@ namespace osmscout {
 
       if (!tile->IsComplete()) {
         StopClock     tileLoadingTime;
-        Magnification magnification;
+        Magnification magnification(MagnificationLevel(tile->GetKey().GetLevel()));
 
         //std::cout << "Loading tile: " << tile->GetId().DisplayText() << std::endl;
-
-        magnification.SetLevel(tile->GetKey().GetLevel());
 
         // TODO: Cache the type definitions, perhaps already in the StyleConfig?
 

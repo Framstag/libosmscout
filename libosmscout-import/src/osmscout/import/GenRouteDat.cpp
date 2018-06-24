@@ -1778,7 +1778,7 @@ namespace osmscout {
                    std::back_inserter(rawRouteNodes),
                    [&magnification](NodeIdObjectsMap::value_type& entry) {
       return RawRouteNode{entry.first,
-                          TileId::GetTile(magnification,Point::GetCoordFromId(entry.first)).GetPixel(),
+                          TileId::GetTile(magnification,Point::GetCoordFromId(entry.first)).AsPixel(),
                           std::move(entry.second)};
     });
 

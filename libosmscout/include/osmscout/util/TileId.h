@@ -67,7 +67,7 @@ namespace osmscout {
       return y;
     }
 
-    inline Pixel GetPixel() const
+    inline Pixel AsPixel() const
     {
       return {x,y};
     }

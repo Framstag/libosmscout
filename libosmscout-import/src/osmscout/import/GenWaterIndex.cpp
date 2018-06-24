@@ -394,11 +394,9 @@ namespace osmscout {
       progress.Info("Generating index for level "+std::to_string(parameter.GetWaterIndexMinMag())+" to "+std::to_string(parameter.GetWaterIndexMaxMag()));
 
       for (auto& level : levels) {
-        Magnification                          magnification;
+        Magnification                          magnification(MagnificationLevel(level.level));
         MercatorProjection                     projection;
         std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
-
-        magnification.SetLevel(level.level);
 
         projection.Set(GeoCoord(0.0,0.0),magnification,72,640,480);
 

@@ -2206,7 +2206,7 @@ namespace osmscout {
     if (osmSubTileLine) {
       Magnification magnification=projection.GetMagnification();
 
-      magnification.SetLevel(magnification.GetLevel()+1);
+      ++magnification;
 
       DrawOSMTileGrid(projection,
                       parameter,
@@ -2218,8 +2218,6 @@ namespace osmscout {
 
     if (osmTileLine) {
       Magnification magnification=projection.GetMagnification();
-
-      magnification.SetLevel(magnification.GetLevel());
 
       DrawOSMTileGrid(projection,
                       parameter,

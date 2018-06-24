@@ -349,13 +349,11 @@ int main(int argc, char* argv[])
   drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
   searchParameter.SetUseMultithreading(true);
 
-  for (uint32_t level=std::min(startZoom,endZoom);
-       level<=std::max(startZoom,endZoom);
+  for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(startZoom,endZoom));
+       level<=osmscout::MagnificationLevel(std::max(startZoom,endZoom));
        level++) {
-    LevelStats              stats(level);
-    osmscout::Magnification magnification;
-
-    magnification.SetLevel(level);
+    LevelStats              stats(level.Get());
+    osmscout::Magnification magnification(level);
 
     osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(magnification,
                                                                   osmscout::GeoCoord(latBottom,lonLeft)));
@@ -421,7 +419,7 @@ int main(int argc, char* argv[])
                      tileHeight);
 
       projection.GetDimensions(boundingBox);
-      projection.SetLinearInterpolationUsage(level >= 10);
+      projection.SetLinearInterpolationUsage(level.Get() >= 10);
 
       osmscout::StopClock dbTimer;
 

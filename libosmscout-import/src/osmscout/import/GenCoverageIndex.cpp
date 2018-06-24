@@ -57,7 +57,7 @@ namespace osmscout {
       node.Read(*typeConfig,
                 nodeScanner);
 
-      cells.insert(TileId::GetTile(magnification,node.GetCoords()).GetPixel());
+      cells.insert(TileId::GetTile(magnification,node.GetCoords()).AsPixel());
     }
 
     nodeScanner.Close();
@@ -96,8 +96,8 @@ namespace osmscout {
 
       GeoBox boundingBox=way.GetBoundingBox();
 
-      Pixel bottomLeft=TileId::GetTile(magnification,boundingBox.GetBottomLeft()).GetPixel();
-      Pixel topRight=TileId::GetTile(magnification,boundingBox.GetTopRight()).GetPixel();
+      Pixel bottomLeft=TileId::GetTile(magnification,boundingBox.GetBottomLeft()).AsPixel();
+      Pixel topRight=TileId::GetTile(magnification,boundingBox.GetTopRight()).AsPixel();
 
       for (uint32_t y=bottomLeft.y; y<=topRight.y; y++) {
         for (uint32_t x=bottomLeft.x; x<=topRight.x; x++) {
@@ -139,8 +139,8 @@ namespace osmscout {
 
       GeoBox boundingBox=area.GetBoundingBox();
 
-      Pixel bottomLeft=TileId::GetTile(magnification,boundingBox.GetBottomLeft()).GetPixel();
-      Pixel topRight=TileId::GetTile(magnification,boundingBox.GetTopRight()).GetPixel();
+      Pixel bottomLeft=TileId::GetTile(magnification,boundingBox.GetBottomLeft()).AsPixel();
+      Pixel topRight=TileId::GetTile(magnification,boundingBox.GetTopRight()).AsPixel();
 
       for (uint32_t y=bottomLeft.y; y<=topRight.y; y++) {
         for (uint32_t x=bottomLeft.x; x<=topRight.x; x++) {

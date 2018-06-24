@@ -70,14 +70,12 @@ TEST_CASE("OSMTileIdBox calculation") {
 }
 
 TEST_CASE("Test reverse calculation of coordinates from node id") {
-  osmscout::Magnification magnification;
+  osmscout::Magnification magnification(osmscout::MagnificationLevel(24));
   osmscout::GeoCoord      coord(51.5726193, 7.1448805);
 
   INFO("Coord: "+coord.GetDisplayText());
 
-  magnification.SetLevel(24);
-
-  osmscout::Pixel expectedTile=osmscout::TileId::GetTile(magnification,coord).GetPixel();
+  osmscout::Pixel expectedTile=osmscout::TileId::GetTile(magnification,coord).AsPixel();
 
   INFO("Expected tile: "+expectedTile.GetDisplayText());
 
@@ -87,7 +85,7 @@ TEST_CASE("Test reverse calculation of coordinates from node id") {
 
   INFO("Reverse calculated coord: "+calculatedCoord.GetDisplayText());
 
-  osmscout::Pixel calculatedTile=osmscout::TileId::GetTile(magnification,calculatedCoord).GetPixel();
+  osmscout::Pixel calculatedTile=osmscout::TileId::GetTile(magnification,calculatedCoord).AsPixel();
 
   INFO("Calculated tile: "+calculatedTile.GetDisplayText());
 

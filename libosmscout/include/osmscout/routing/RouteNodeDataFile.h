@@ -104,7 +104,7 @@ namespace osmscout {
         ValueCache::CacheRef cacheRef;
 
         GeoCoord coord=Point::GetCoordFromId(id);
-        osmscout::Pixel tile=TileId::GetTile(magnification,coord).GetPixel();
+        osmscout::Pixel tile=TileId::GetTile(magnification,coord).AsPixel();
 
         //std::cout << "Tile " << tile.GetDisplayText() << " " << tile.GetId() << "..." << std::endl;
 
@@ -135,7 +135,7 @@ namespace osmscout {
         ValueCache::CacheRef cacheRef;
 
         GeoCoord coord=Point::GetCoordFromId(id);
-        osmscout::Pixel tile=TileId::GetTile(magnification,coord).GetPixel();
+        osmscout::Pixel tile=TileId::GetTile(magnification,coord).AsPixel();
 
         //std::cout << "Tile " << tile.GetDisplayText() << " " << tile.GetId() << "..." << std::endl;
 

@@ -26,11 +26,12 @@
 #include <string>
 #include <unordered_map>
 
+#include <osmscout/system/Compiler.h>
 #include <osmscout/system/OSMScoutTypes.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API MagnificationLevel
+  class OSMSCOUT_API MagnificationLevel CLASS_FINAL
   {
   private:
     uint32_t level;
@@ -47,11 +48,6 @@ namespace osmscout {
     }
 
     inline MagnificationLevel(const MagnificationLevel& level)
-      : level(level.level)
-    {
-    }
-
-    inline MagnificationLevel(const MagnificationLevel&& level) noexcept
       : level(level.level)
     {
     }
@@ -77,7 +73,7 @@ namespace osmscout {
       return *this;
     }
 
-    inline MagnificationLevel operator++(int)
+    inline const MagnificationLevel operator++(int)
     {
       ++level;
 
@@ -132,7 +128,7 @@ namespace osmscout {
     return text+std::to_string(level.Get());
   }
 
-  class OSMSCOUT_API Magnification
+  class OSMSCOUT_API Magnification CLASS_FINAL
   {
   public:
     enum Mag {
@@ -174,24 +170,20 @@ namespace osmscout {
       // no code
     }
 
-    inline Magnification(double magnification)
+    inline explicit Magnification(double magnification)
     {
       SetMagnification(magnification);
     }
 
     inline explicit Magnification(const MagnificationLevel& level)
     {
-      SetLevel(level.Get());
+      SetLevel(level);
     }
 
     void SetMagnification(double magnification);
     void SetMagnification(Mag magnification);
-    void SetLevel(uint32_t level);
 
-    inline void SetLevel(const MagnificationLevel& level)
-    {
-      SetLevel(level.Get());
-    }
+    void SetLevel(const MagnificationLevel& level);
 
     inline double GetMagnification() const
     {
@@ -241,6 +233,22 @@ namespace osmscout {
     inline bool operator>(const Magnification& other) const
     {
       return magnification>other.magnification;
+    }
+
+    inline Magnification& operator++()
+    {
+      magnification*=2.0;
+      level+=1;
+
+      return *this;
+    }
+
+    inline const Magnification operator++(int)
+    {
+      magnification*=2.0;
+      level+=1;
+
+      return *this;
     }
   };
 

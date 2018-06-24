@@ -323,8 +323,8 @@ bool MoveHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRe
     }
 
     targetMagnification = view.magnification;
-    osmscout::Magnification maxMag;
-    maxMag.SetLevel(20);
+    osmscout::Magnification maxMag(osmscout::MagnificationLevel(20));
+
     if (zoomFactor > 1){ // zoom in
         if (targetMagnification.GetMagnification()*zoomFactor>maxMag.GetMagnification()) {
             targetMagnification.SetMagnification(maxMag.GetMagnification());
@@ -653,10 +653,8 @@ bool MultitouchHandler::touch(QTouchEvent *event)
 
                 scale = currentVector.length() / startVector.length();
 
-                osmscout::Magnification maxMag;
-                osmscout::Magnification minMag;
-                maxMag.SetLevel(20);
-                minMag.SetLevel(0);
+              osmscout::Magnification minMag(MagnificationLevel(0));
+                osmscout::Magnification maxMag(MagnificationLevel(20));
 
                 if (view.magnification.GetMagnification()*scale>maxMag.GetMagnification()) {
                     view.magnification.SetMagnification(maxMag.GetMagnification());

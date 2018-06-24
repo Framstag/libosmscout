@@ -72,7 +72,7 @@ MapWidget::MapWidget(QQuickItem* parent)
     view = new MapView(this,
                        osmscout::GeoCoord(0.0, 0.0),
                        /*angle*/ 0,
-                       osmscout::Magnification::magContinent,
+                       Magnification(Magnification::magContinent),
                        settings->GetMapDPI());
     setupInputHandler(new InputHandler(*view));
     setKeepTouchGrab(true);
@@ -473,7 +473,7 @@ void MapWidget::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnificatio
 
 void MapWidget::showCoordinates(double lat, double lon)
 {
-    showCoordinates(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);
+    showCoordinates(osmscout::GeoCoord(lat,lon), Magnification(Magnification::magVeryClose));
 }
 
 void MapWidget::showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Magnification magnification)
@@ -488,7 +488,7 @@ void MapWidget::showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Mag
 
 void MapWidget::showCoordinatesInstantly(double lat, double lon)
 {
-    showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), osmscout::Magnification::magVeryClose);
+    showCoordinatesInstantly(osmscout::GeoCoord(lat,lon), Magnification(Magnification::magVeryClose));
 }
 
 osmscout::Magnification MapWidget::magnificationByDimension(const Distance &d)

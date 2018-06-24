@@ -30,7 +30,7 @@ static const size_t DATAFILEACCESS_ITERATION_COUNT=1000000;
 
 static const size_t AREAINDEXACCESS_THREAD_COUNT=10;
 static const size_t AREAINDEXACCESS_ITERATION_COUNT=100;
-static const size_t AREAINDEXACCESS_AREA_LEVEL=10;
+static const osmscout::MagnificationLevel AREAINDEXACCESS_AREA_LEVEL(10);
 
 //
 // Datafile access
@@ -217,7 +217,7 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
 
       if (!areaAreaIndex->GetAreasInArea(*testData.typeConfig,
                                          testData.boundingBox,
-                                         AREAINDEXACCESS_AREA_LEVEL+4,
+                                         AREAINDEXACCESS_AREA_LEVEL.Get()+4,
                                          testData.areaTypes,
                                          areaSpans,
                                          loadedAreaTypes)) {
@@ -319,9 +319,7 @@ bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
   osmscout::TypeInfoSet   wayTypes;
   osmscout::TypeInfoSet   optimizedAreaTypes;
   osmscout::TypeInfoSet   areaTypes;
-  osmscout::Magnification magnification;
-
-  magnification.SetLevel(AREAINDEXACCESS_AREA_LEVEL);
+  osmscout::Magnification magnification(AREAINDEXACCESS_AREA_LEVEL);
 
   osmscout::AreaNodeIndexRef        areaNodeIndex=database->GetAreaNodeIndex();
   osmscout::AreaWayIndexRef         areaWayIndex=database->GetAreaWayIndex();
@@ -418,7 +416,7 @@ bool TestAreaIndexAcceess(osmscout::DatabaseRef& database,
 
     if (!areaAreaIndex->GetAreasInArea(*testData.typeConfig,
                                        testData.boundingBox,
-                                       AREAINDEXACCESS_AREA_LEVEL+4,
+                                       AREAINDEXACCESS_AREA_LEVEL.Get()+4,
                                        testData.areaTypes,
                                        testData.areaOffsets,
                                        testData.loadedAreaTypes)) {
@@ -520,7 +518,7 @@ int main(int argc, char* argv[])
 
   std::cout << "Closing database..." << std::endl;
   database->Close();
-  database=NULL;
+  database=nullptr;
   std::cout << "Done." << std::endl;
 
   return 0;

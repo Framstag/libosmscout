@@ -373,7 +373,7 @@ namespace osmscout
                       TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
         for (const auto& tileId : box) {
-          cellFillCount[tileId.GetPixel()]++;
+          cellFillCount[tileId.AsPixel()]++;
         }
       }
 
@@ -522,7 +522,7 @@ namespace osmscout
                     TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
       for (const auto& tileId : box) {
-        cellOffsets[tileId.GetPixel()].push_back(offset->second);
+        cellOffsets[tileId.AsPixel()].push_back(offset->second);
       }
     }
 

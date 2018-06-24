@@ -779,7 +779,7 @@ void Parser::MAG(Magnification& magnification) {
 			}
 			
 		} else if (la->kind == _number) {
-			size_t level; 
+			uint32_t level; 
 			Get();
 			if (!StringToNumber(t->val,level)) {
 			 std::string e="Cannot parse number '"+std::string(t->val)+"'";
@@ -787,14 +787,14 @@ void Parser::MAG(Magnification& magnification) {
 			 SemErr(e.c_str());
 			}
 			else {
-			 magnification.SetLevel((uint32_t)level);
+			 magnification.SetLevel(osmscout::MagnificationLevel(level));
 			}
 			
 		} else if (la->kind == _variable) {
 			StyleConstantRef constant; 
 			CONSTANT(constant);
 			if (!constant) {
-			 magnification.SetLevel(0);
+			 magnification.SetLevel(osmscout::MagnificationLevel(0));
 			}
 			else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
 			 std::string e="Variable is not of type 'MAG'";
@@ -1753,10 +1753,10 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		 }
 		 else if (valueType==ValueType::NUMBER) {
 		   Magnification magnification;
-		   size_t        level;
+		   uint32_t      level;
 		
 		   if (StringToNumber(number,level)) {
-		     magnification.SetLevel((uint32_t)level);
+		     magnification.SetLevel(osmscout::MagnificationLevel(level));
 		   }
 		   else {
 		     std::string e="Cannot parse number '"+std::string(number)+"'";

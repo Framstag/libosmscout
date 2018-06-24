@@ -308,7 +308,7 @@ namespace osmscout
                       TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
         for (const auto& tileId : box) {
-          cellFillCount[tileId.GetPixel()]++;
+          cellFillCount[tileId.AsPixel()]++;
         }
       }
 
@@ -400,7 +400,7 @@ namespace osmscout
                     TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
       for (const auto& tileId : box) {
-        cellOffsets[tileId.GetPixel()].push_back(offset->second);
+        cellOffsets[tileId.AsPixel()].push_back(offset->second);
       }
     }
 
@@ -529,10 +529,8 @@ namespace osmscout
           for (MagnificationLevel level=parameter.GetOptimizationMinMag();
                level<=parameter.GetOptimizationMaxMag();
                level++) {
-            Magnification      magnification; // Magnification, we optimize for
+            Magnification      magnification(level); // Magnification, we optimize for
             std::list<AreaRef> optimizedAreas;
-
-            magnification.SetLevel(level);
 
             OptimizeAreas(progress,
                           allAreas[type->GetIndex()],

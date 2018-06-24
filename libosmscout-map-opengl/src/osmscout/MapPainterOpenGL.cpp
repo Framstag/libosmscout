@@ -1155,9 +1155,9 @@ namespace osmscout {
 
   void osmscout::MapPainterOpenGL::OnZoom(float zoomDirection) {
     if (zoomDirection < 0)
-      Magnification.SetLevel(Magnification.GetLevel() - 1);
+      Magnification.SetLevel(MagnificationLevel(Magnification.GetLevel() - 1));
     else if (zoomDirection > 0)
-      Magnification.SetLevel(Magnification.GetLevel() + 1);
+      Magnification.SetLevel(MagnificationLevel(Magnification.GetLevel() + 1));
   }
 
   void osmscout::MapPainterOpenGL::OnTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {

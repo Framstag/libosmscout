@@ -82,7 +82,7 @@ namespace osmscout {
       scanner.Read(dataCount);
       scanner.Read(tileMag);
 
-      magnification.SetLevel(tileMag);
+      magnification.SetLevel(MagnificationLevel(tileMag));
 
       scanner.SetPos(indexFileOffset);
       scanner.Read(indexEntryCount);
@@ -188,7 +188,7 @@ namespace osmscout {
 
     //std::cout << "Tile " << tile.GetDisplayText() << " " << tile.GetId() << "..." << std::endl;
 
-    if (!GetIndexPage(tile.GetPixel(),
+    if (!GetIndexPage(tile.AsPixel(),
                       cacheRef)) {
       return false;
     }
@@ -201,7 +201,7 @@ namespace osmscout {
 
   Pixel RouteNodeDataFile::GetTile(const GeoCoord& coord) const
   {
-    return TileId::GetTile(magnification,coord).GetPixel();
+    return TileId::GetTile(magnification,coord).AsPixel();
   }
 
   bool RouteNodeDataFile::IsCovered(const Pixel& tile) const
