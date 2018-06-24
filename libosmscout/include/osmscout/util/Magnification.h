@@ -22,12 +22,115 @@
 
 #include <osmscout/CoreImportExport.h>
 
+#include <ostream>
 #include <string>
 #include <unordered_map>
 
 #include <osmscout/system/OSMScoutTypes.h>
 
 namespace osmscout {
+
+  class OSMSCOUT_API MagnificationLevel
+  {
+  private:
+    uint32_t level;
+
+  public:
+    inline MagnificationLevel()
+      : level(0)
+    {
+    }
+
+    inline explicit MagnificationLevel(uint32_t level)
+    : level(level)
+    {
+    }
+
+    inline MagnificationLevel(const MagnificationLevel& level)
+      : level(level.level)
+    {
+    }
+
+    inline MagnificationLevel(const MagnificationLevel&& level) noexcept
+      : level(level.level)
+    {
+    }
+
+    inline uint32_t Get() const
+    {
+      return level;
+    }
+
+    inline MagnificationLevel& operator=(const MagnificationLevel& other)
+    {
+      if (this!=&other) {
+        this->level=other.level;
+      }
+
+      return *this;
+    }
+
+    inline MagnificationLevel& operator++()
+    {
+      ++level;
+
+      return *this;
+    }
+
+    inline MagnificationLevel operator++(int)
+    {
+      ++level;
+
+      return *this;
+    }
+
+    inline bool operator==(const MagnificationLevel& other) const
+    {
+      return level==other.level;
+    }
+
+    inline bool operator!=(const MagnificationLevel& other) const
+    {
+      return level!=other.level;
+    }
+
+    inline bool operator<(const MagnificationLevel& other) const
+    {
+      return level<other.level;
+    }
+
+    inline bool operator<=(const MagnificationLevel& other) const
+    {
+      return level<=other.level;
+    }
+
+    inline bool operator>=(const MagnificationLevel& other) const
+    {
+      return level>=other.level;
+    }
+
+    inline bool operator>(const MagnificationLevel& other) const
+    {
+      return level>other.level;
+    }
+  };
+
+  inline std::ostream& operator<<(std::ostream& os, const MagnificationLevel& level)
+  {
+    os << level.Get();
+
+    return os;
+  }
+
+  inline std::string operator+(const char* text, const MagnificationLevel& level)
+  {
+    return std::string(text)+std::to_string(level.Get());
+  }
+
+  inline std::string operator+(const std::string& text, const MagnificationLevel& level)
+  {
+    return text+std::to_string(level.Get());
+  }
 
   class OSMSCOUT_API Magnification
   {
@@ -53,8 +156,8 @@ namespace osmscout {
     };
 
   private:
-    double   magnification;
-    uint32_t level;
+    double   magnification{};
+    uint32_t level{};
 
   public:
     inline Magnification()
@@ -76,9 +179,19 @@ namespace osmscout {
       SetMagnification(magnification);
     }
 
+    inline explicit Magnification(const MagnificationLevel& level)
+    {
+      SetLevel(level.Get());
+    }
+
     void SetMagnification(double magnification);
     void SetMagnification(Mag magnification);
     void SetLevel(uint32_t level);
+
+    inline void SetLevel(const MagnificationLevel& level)
+    {
+      SetLevel(level.Get());
+    }
 
     inline double GetMagnification() const
     {
@@ -143,7 +256,7 @@ namespace osmscout {
     bool Convert(const std::string& name,
                  Magnification& magnification);
 
-    bool Convert(const size_t level,
+    bool Convert(size_t level,
                  std::string& name);
   };
 

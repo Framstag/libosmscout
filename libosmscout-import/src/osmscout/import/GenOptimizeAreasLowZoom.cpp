@@ -100,7 +100,7 @@ namespace osmscout
 
   bool OptimizeAreasLowZoomGenerator::WriteHeader(FileWriter& writer,
                                                   const std::list<TypeData>& areaTypesData,
-                                                  uint32_t optimizeMaxMap)
+                                                  const MagnificationLevel& optimizeMaxMap)
   {
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)areaTypesData.size());
@@ -438,7 +438,7 @@ namespace osmscout
     data.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
     progress.Info("Writing map for level "+
-                  std::to_string(data.optLevel)+", index level "+
+                  data.optLevel+", index level "+
                   std::to_string(data.indexLevel)+", "+
                   std::to_string(cellOffsets.size())+" cells, "+
                   std::to_string(indexEntries)+" entries, "+
@@ -538,7 +538,7 @@ namespace osmscout
         for (const auto& type : loadedTypes) {
           progress.SetAction("Optimizing type "+ type->GetName());
 
-          for (uint32_t level=parameter.GetOptimizationMinMag();
+          for (MagnificationLevel level=parameter.GetOptimizationMinMag();
                level<=parameter.GetOptimizationMaxMag();
                level++) {
             Magnification      magnification; // Magnification, we optimize for
@@ -556,7 +556,7 @@ namespace osmscout
                           parameter.GetOptimizationWayMethod());
 
             if (optimizedAreas.empty()) {
-              progress.Debug("Empty optimization result for level "+std::to_string(level)+", no index generated");
+              progress.Debug("Empty optimization result for level "+level+", no index generated");
 
               TypeData typeData;
 
@@ -676,7 +676,7 @@ namespace osmscout
 
       if (!WriteHeader(writer,
                        areaTypesData,
-                       (uint32_t)parameter.GetOptimizationMaxMag())) {
+                       parameter.GetOptimizationMaxMag())) {
         progress.Error("Cannot write file header");
         return false;
       }

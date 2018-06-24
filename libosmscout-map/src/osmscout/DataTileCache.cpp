@@ -155,27 +155,18 @@ namespace osmscout {
    * Return all tile necessary for covering the given boundingbox using the given magnification.
    */
   void DataTileCache::GetTilesForBoundingBox(const Magnification& magnification,
-                                              const GeoBox& boundingBox,
-                                              std::list<TileRef>& tiles) const
+                                             const GeoBox& boundingBox,
+                                             std::list<TileRef>& tiles) const
   {
     tiles.clear();
 
     //log.Debug() << "Creating tile data for level " << level << " and bounding box " << boundingBox.GetDisplayText();
 
-    uint32_t level=magnification.GetLevel();
+    TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                  TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-    uint32_t cx1=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
-    uint32_t cy1=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
-
-    uint32_t cx2=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
-    uint32_t cy2=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
-
-    //std::cout << "Tile bounding box: " << cx1 << "," << cy1 << " - "  << cx2 << "," << cy2 << std::endl;
-
-    for (uint32_t y=cy1; y<=cy2; y++) {
-      for (uint32_t x=cx1; x<=cx2; x++) {
-        tiles.push_back(GetTile(TileKey(magnification,TileId(x,y))));
-      }
+    for (const auto& tileId : box) {
+      tiles.push_back(GetTile(TileKey(magnification,tileId)));
     }
   }
 

@@ -102,7 +102,7 @@ namespace osmscout
 
   bool OptimizeWaysLowZoomGenerator::WriteHeader(FileWriter& writer,
                                                  const std::list<TypeData>& wayTypesData,
-                                                 uint32_t optimizeMaxMap)
+                                                 MagnificationLevel optimizeMaxMap)
   {
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)wayTypesData.size());
@@ -207,7 +207,7 @@ namespace osmscout
       }
     }
 
-    for (std::map<Id, std::list<WayRef> >::iterator entry=waysByJoin.begin();
+    for (auto entry=waysByJoin.begin();
          entry!=waysByJoin.end();
          ++entry) {
       while (!entry->second.empty()) {
@@ -234,12 +234,12 @@ namespace osmscout
             while (otherWay!=match->second.end() &&
                    (usedWays.find((*otherWay)->GetFileOffset())!=usedWays.end() ||
                     way->GetFeatureValueBuffer()!=(*otherWay)->GetFeatureValueBuffer())) {
-              otherWay++;
+              ++otherWay;
             }
 
             // Search for another way with the same criteria (because then we would have a multi-junction)
             if (otherWay!=match->second.end()) {
-              std::list<WayRef>::iterator stillOtherWay=otherWay;
+              auto stillOtherWay=otherWay;
 
               ++stillOtherWay;
               while (stillOtherWay!=match->second.end() &&
@@ -304,7 +304,7 @@ namespace osmscout
 
             // Search for another way with the same criteria (because then we would have a multi-junction)
             if (otherWay!=match->second.end()) {
-              std::list<WayRef>::iterator stillOtherWay=otherWay;
+              auto stillOtherWay=otherWay;
 
               ++stillOtherWay;
               while (stillOtherWay!=match->second.end() &&
@@ -518,7 +518,7 @@ namespace osmscout
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
     for (const auto &way : ways) {
-      FileOffsetFileOffsetMap::const_iterator offset=offsets.find(way->GetFileOffset());
+      auto offset=offsets.find(way->GetFileOffset());
 
       if (offset==offsets.end()) {
         continue;
@@ -565,7 +565,7 @@ namespace osmscout
     data.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
     progress.Info("Writing map for level "+
-                  std::to_string(data.optLevel)+", index level "+
+                  data.optLevel+", index level "+
                   std::to_string(data.indexLevel)+", "+
                   std::to_string(cellOffsets.size())+" cells, "+
                   std::to_string(indexEntries)+" entries, "+
@@ -627,12 +627,10 @@ namespace osmscout
                                                 std::list<TypeData>& typesData)
   {
     FileScanner   scanner;
-    Magnification magnification; // Magnification, we optimize for
+    Magnification magnification(MagnificationLevel(parameter.GetOptimizationMaxMag())); // Magnification, we optimize for
     // Everything smaller than 2mm should get dropped. Width, height and DPI come from the Nexus 4
     double        dpi=320.0;
     double        pixel=0.5 /* mm */ * dpi / 25.4 /* inch */;
-
-    magnification.SetLevel((uint32_t)parameter.GetOptimizationMaxMag());
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -684,13 +682,11 @@ namespace osmscout
           // Transform/Optimize the way and store it
           //
 
-          for (uint32_t level=parameter.GetOptimizationMinMag();
+          for (MagnificationLevel level=parameter.GetOptimizationMinMag();
                level<=parameter.GetOptimizationMaxMag();
                level++) {
-            Magnification     magnification; // Magnification, we optimize for
+            Magnification     magnification(level); // Magnification, we optimize for
             std::list<WayRef> optimizedWays;
-
-            magnification.SetLevel(level);
 
             // TODO: Wee need to make import parameters for the width and the height
             OptimizeWays(progress,
@@ -703,7 +699,7 @@ namespace osmscout
                          parameter.GetOptimizationWayMethod());
 
             if (optimizedWays.empty()) {
-              progress.Debug("Empty optimization result for level "+std::to_string(level)+", no index bitmap generated");
+              progress.Debug("Empty optimization result for level "+level+", no index bitmap generated");
 
               TypeData typeData;
 
@@ -799,7 +795,7 @@ namespace osmscout
 
       if (!WriteHeader(writer,
                        wayTypesData,
-                       (uint32_t)parameter.GetOptimizationMaxMag())) {
+                       parameter.GetOptimizationMaxMag())) {
         progress.Error("Cannot write file header");
         return false;
       }

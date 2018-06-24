@@ -45,31 +45,25 @@ namespace osmscout {
 
     struct TypeData
     {
-      TypeInfoRef type;            //!< The type
-      uint32_t    optLevel;        //!< The display level this data was optimized for
-      uint32_t    indexLevel;      //!< Magnification level of index
+      TypeInfoRef        type;            //!< The type
+      MagnificationLevel optLevel;        //!< The display level this data was optimized for
+      uint32_t           indexLevel;      //!< Magnification level of index
 
-      uint32_t    cellXStart;
-      uint32_t    cellXEnd;
-      uint32_t    cellYStart;
-      uint32_t    cellYEnd;
+      uint32_t           cellXStart;
+      uint32_t           cellXEnd;
+      uint32_t           cellYStart;
+      uint32_t           cellYEnd;
 
-      FileOffset  bitmapOffset;    //!< Position in file where the offset of the bitmap is written
-      uint8_t     dataOffsetBytes; //!< Number of bytes per entry in bitmap
+      FileOffset         bitmapOffset;    //!< Position in file where the offset of the bitmap is written
+      uint8_t            dataOffsetBytes; //!< Number of bytes per entry in bitmap
 
-      uint32_t    cellXCount;
-      uint32_t    cellYCount;
+      uint32_t           cellXCount;
+      uint32_t           cellYCount;
 
-      size_t      indexCells;      //!< Number of filled cells in index
-      size_t      indexEntries;    //!< Number of entries over all cells
+      size_t             indexCells;      //!< Number of filled cells in index
+      size_t             indexEntries;    //!< Number of entries over all cells
 
       TypeData();
-
-      inline bool HasEntries()
-      {
-        return indexCells>0 &&
-               indexEntries>0;
-      }
     };
 
   private:
@@ -81,7 +75,7 @@ namespace osmscout {
 
     bool WriteHeader(FileWriter& writer,
                      const std::list<TypeData>& areaTypesData,
-                     uint32_t optimizeMaxMap);
+                     const MagnificationLevel& optimizeMaxMap);
 
     bool GetAreas(const TypeConfig& typeConfig,
                   const ImportParameter& parameter,

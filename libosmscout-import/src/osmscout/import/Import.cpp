@@ -317,12 +317,12 @@ namespace osmscout {
     return areaNodeIndexCellSizeMax;
   }
 
-  size_t ImportParameter::GetAreaWayMinMag() const
+  MagnificationLevel ImportParameter::GetAreaWayMinMag() const
   {
     return areaWayMinMag;
   }
 
-  size_t ImportParameter::GetAreaWayIndexMaxLevel() const
+  MagnificationLevel ImportParameter::GetAreaWayIndexMaxLevel() const
   {
     return areaWayIndexMaxLevel;
   }
@@ -347,12 +347,12 @@ namespace osmscout {
     return optimizationMaxWayCount;
   }
 
-  uint32_t ImportParameter::GetOptimizationMaxMag() const
+  MagnificationLevel ImportParameter::GetOptimizationMaxMag() const
   {
     return optimizationMaxMag;
   }
 
-  uint32_t ImportParameter::GetOptimizationMinMag() const
+  MagnificationLevel ImportParameter::GetOptimizationMinMag() const
   {
     return optimizationMinMag;
   }
@@ -579,12 +579,12 @@ namespace osmscout {
     this->areaNodeIndexCellSizeMax=areaNodeIndexCellSizeMax;
   }
 
-  void ImportParameter::SetAreaWayMinMag(size_t areaWayMinMag)
+  void ImportParameter::SetAreaWayMinMag(MagnificationLevel areaWayMinMag)
   {
     this->areaWayMinMag=areaWayMinMag;
   }
 
-  void ImportParameter::SetAreaWayIndexMaxMag(size_t areaWayIndexMaxLevel)
+  void ImportParameter::SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel)
   {
     this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
   }
@@ -604,12 +604,12 @@ namespace osmscout {
     this->optimizationMaxWayCount=optimizationMaxWayCount;
   }
 
-  void ImportParameter::SetOptimizationMaxMag(uint32_t optimizationMaxMag)
+  void ImportParameter::SetOptimizationMaxMag(MagnificationLevel optimizationMaxMag)
   {
     this->optimizationMaxMag=optimizationMaxMag;
   }
 
-  void ImportParameter::SetOptimizationMinMag(uint32_t optimizationMinMag)
+  void ImportParameter::SetOptimizationMinMag(MagnificationLevel optimizationMinMag)
   {
     this->optimizationMinMag=optimizationMinMag;
   }
