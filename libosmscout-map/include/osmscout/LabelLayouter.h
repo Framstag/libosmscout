@@ -29,6 +29,12 @@
 #include <osmscout/LabelPath.h>
 #include <iostream>
 
+//#define DEBUG_LABEL_LAYOUTER
+
+#if defined(LABEL_LAYOUTER_DEBUG)
+#include <iostream>
+#endif
+
 namespace osmscout {
 
   struct IntRectangle {
@@ -74,7 +80,6 @@ namespace osmscout {
 
     double            alpha{1.0};   //!< Alpha value of the label; 0.0 = fully transparent, 1.0 = solid
     double            fontSize{0};  //!< Font size to be used
-    //double          proposedWidth{-1};
 
     LabelStyleRef     style;    //!< Style for drawing
     std::string       text;     //!< The label text (type==Text|PathText)
@@ -95,11 +100,6 @@ namespace osmscout {
     NativeGlyph glyph;
     osmscout::Vertex2D position;
     double angle{0}; //!< clock-wise rotation in radians
-
-    // osmscout::Vertex2D tl{0,0};
-    // osmscout::Vertex2D tr{0,0};
-    // osmscout::Vertex2D br{0,0};
-    // osmscout::Vertex2D bl{0,0};
 
     osmscout::Vertex2D trPosition{0,0}; //!< top-left position after rotation
     double trWidth{0};                  //!< width after rotation
@@ -158,18 +158,15 @@ namespace osmscout {
   public:
     Mask(size_t rowSize) : d(rowSize)
     {
-      //std::cout << "create " << this << std::endl;
     };
 
     Mask(const Mask &m) :
         d(m.d), cellFrom(m.cellFrom), cellTo(m.cellTo), rowFrom(m.rowFrom), rowTo(m.rowTo)
     {
-      //std::cout << "create(2) " << this << std::endl;
     };
 
     ~Mask()
     {
-      //std::cout << "delete " << this << std::endl;
     }
 
     Mask(Mask &&m) = delete;
@@ -327,7 +324,9 @@ namespace osmscout {
               rectangle.height = element.labelData.iconHeight;
               canvas = &iconCanvas;
             } else {
-              // std::cout << "Test label prio " << currentLabel->priority << ": " << element.labelData.text << std::endl;
+#ifdef DEBUG_LABEL_LAYOUTER
+              std::cout << "Test label prio " << currentLabel->priority << ": " << element.labelData.text << std::endl;
+#endif
 
               rectangle.width = element.label->width;
               rectangle.height = element.label->height;
@@ -363,13 +362,14 @@ namespace osmscout {
         if (currentContourLabel != allSortedContourLabels.end()){
           int glyphCnt=currentContourLabel->glyphs.size();
 
-          // std::cout << "Test contour label prio " << currentContourLabel->priority << std::endl;
+#ifdef DEBUG_LABEL_LAYOUTER
+          std::cout << "Test contour label prio " << currentContourLabel->priority << std::endl;
+#endif
 
           Mask m(rowSize);
           std::vector<Mask> masks(glyphCnt, m);
           bool collision=false;
           for (int gi=0; !collision && gi<glyphCnt; gi++) {
-            //uint64_t *row=rowBuff.data() + (gi*rowSize);
 
             auto glyph=currentContourLabel->glyphs[gi];
             IntRectangle rect{
@@ -401,10 +401,9 @@ namespace osmscout {
       std::vector<typename LabelInstanceType::Element> textElements;
 
       for (const LabelInstanceType &inst : Labels()){
-        //painter->setPen(QColor::fromRgbF(0,0,0));
+
         for (const typename LabelInstanceType::Element &el : inst.elements) {
           if (el.labelData.type==LabelData::Symbol){
-            //std::cout << "# Symbol " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
             p->DrawSymbol(projection,
                        parameter,
                        *(el.labelData.iconStyle->GetSymbol()),
@@ -420,65 +419,17 @@ namespace osmscout {
             // postpone text elements
             textElements.push_back(el);
           }
-
-          // QPen pen(QColor::fromRgbF(0, 1, 0));
-          // pen.setWidthF(0.8);
-          // painter->setPen(pen);
-          // painter->setBrush(Qt::transparent);
-          // if (el.labelData.type==LabelData::Text) {
-          //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
-          // }else{
-          //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
-          // }
         }
       }
 
-      //for (const QtLabelInstance &inst : labelLayouter.Labels()){
-      //painter->setPen(QColor::fromRgbF(0,0,0));
       for (const typename LabelInstanceType::Element &el : textElements) {
         p->DrawLabel(projection, parameter,
                      QRectF(el.x, el.y, el.label->width, el.label->height),
                      el.labelData, *(el.label->label) );
-
-        // QPen pen(QColor::fromRgbF(0, 1, 0));
-        // pen.setWidthF(0.8);
-        // painter->setPen(pen);
-        // painter->setBrush(Qt::transparent);
-        // if (el.labelData.type==LabelData::Text) {
-        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.label->width, el.label->height)));
-        // }else{
-        //   painter->drawRect(QRectF(QPointF(el.x, el.y), QSizeF(el.labelData.iconWidth, el.labelData.iconHeight)));
-        // }
       }
-      //}
 
       for (const ContourLabelType &label:ContourLabels()){
-
         p->DrawGlyphs(label.style, label.glyphs);
-        /*
-        const Color &color = label.style->GetTextColor();
-        QPen pen;
-        pen.setColor(QColor::fromRgbF(color.GetR(),color.GetG(),color.GetB(),color.GetA()));
-        painter->setPen(pen);
-
-        for (const Glyph<QGlyphRun> &glyph:label.glyphs){
-
-          DrawGlyph(painter, glyph);
-
-          // QPen pen(QColor::fromRgbF(0,1,0));
-          // pen.setWidthF(0.8);
-          // painter->setPen(pen);
-          // painter->setBrush(Qt::transparent);
-          // painter->drawRect(glyph.trPosition.GetX(), glyph.trPosition.GetY(), glyph.trWidth, glyph.trHeight);
-          //
-          // pen.setColor(QColor::fromRgbF(1,0,0));
-          // painter->setPen(pen);
-          // painter->drawLine(glyph.tl.GetX(), glyph.tl.GetY(), glyph.tr.GetX(), glyph.tr.GetY());
-          // painter->drawLine(glyph.tr.GetX(), glyph.tr.GetY(), glyph.br.GetX(), glyph.br.GetY());
-          // painter->drawLine(glyph.br.GetX(), glyph.br.GetY(), glyph.bl.GetX(), glyph.bl.GetY());
-          // painter->drawLine(glyph.bl.GetX(), glyph.bl.GetY(), glyph.tl.GetX(), glyph.tl.GetY());
-        }
-        */
       }
     }
 
@@ -544,7 +495,6 @@ namespace osmscout {
       // text should be rendered with 0x0 coordinate as left baseline
       // we want to move label little bit bottom, near to line center
       double textOffset=label->height * 0.25;
-      //double textOffset=100.0;
 
       std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
@@ -619,10 +569,6 @@ namespace osmscout {
             x[i] = ox * cosA - oy * sinA;
             y[i] = ox * sinA + oy * cosA;
           }
-          // glyphCopy.tl.Set(x[0]+glyphCopy.position.GetX(), y[0]+glyphCopy.position.GetY());
-          // glyphCopy.tr.Set(x[1]+glyphCopy.position.GetX(), y[1]+glyphCopy.position.GetY());
-          // glyphCopy.br.Set(x[2]+glyphCopy.position.GetX(), y[2]+glyphCopy.position.GetY());
-          // glyphCopy.bl.Set(x[3]+glyphCopy.position.GetX(), y[3]+glyphCopy.position.GetY());
 
           // bounding box after rotation
           double minX=x[0];

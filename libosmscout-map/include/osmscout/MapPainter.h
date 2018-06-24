@@ -108,32 +108,6 @@ namespace osmscout {
                                            const MapData&);
 
   public:
-    /*
-     * Dimension of a text
-     */
-    /*
-    struct OSMSCOUT_MAP_API TextDimension
-    {
-      double xOff;
-      double yOff;
-      double width;
-      double height;
-
-      TextDimension() = default;
-
-      TextDimension(double xOff,
-                    double yOff,
-                    double width,
-                    double height)
-      : xOff(xOff),
-        yOff(yOff),
-        width(width),
-        height(height)
-      {
-        // no code
-      }
-    };
-    */
 
     /**
      * Structure used for internal statistic collection
@@ -244,23 +218,6 @@ namespace osmscout {
     };
 
     /**
-     * Represents one entry in a label.
-     */
-     /*
-    struct OSMSCOUT_MAP_API LabelLayoutData
-    {
-      size_t        position;   //!< Relative position of the label
-      std::string   label;      //!< The text of the label (only used if TextStyle is set)
-      TextDimension dimension;  //!< Dimension of the label object (could be text, symbol, icon...)
-      double        fontSize;   //!< The font size (only used if TextStyle is set)
-      double        alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
-      TextStyleRef  textStyle;  //!< The text style for a textual label (optional)
-      bool          icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
-      IconStyleRef  iconStyle;  //!< The icon style for a icon or symbol
-    };
-      */
-
-    /**
      * Helper class for drawing contours. Allows the MapPainter base class
      * to inject itself at certain points in the contour label rendering code of
      * the actual backend.
@@ -316,19 +273,6 @@ namespace osmscout {
     std::list<AreaData>          areaData;
     std::list<WayData>           wayData;
     std::list<WayPathData>       wayPathData;
-
-    /**
-      Temporary data structures for intelligent label positioning
-      */
-    //@{
-    //size_t                       nextLabelId;
-    /*
-    LabelLayouter                labels;
-    LabelLayouter                overlayLabels;
-
-    std::vector<LabelLayoutData> labelLayoutData;
-    */
-    //@}
 
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
@@ -441,15 +385,6 @@ namespace osmscout {
                                const PathShieldStyleRef& style,
                                const std::string& text,
                                const std::vector<Point>& nodes);
-
-    /*
-    bool RegisterPointLabel(const Projection& projection,
-                            const MapParameter& parameter,
-                            const LabelLayoutData& data,
-                            double x,
-                            double y,
-                            size_t id);
-    */
 
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
@@ -637,23 +572,6 @@ namespace osmscout {
                                  double fontSize) = 0;
 
     /**
-      Return the bounding box of the given text. The method is called
-      every time a label for a node or an area has to be drawn (which means
-      "not for contour labels").
-
-      The backend may decide to relayout the given text (by adding virtual line breaks),
-      however it must assure that later calls to corresponding DrawXXX methods will
-      honour the bounding box.
-      */
-    /*
-    virtual TextDimension GetTextDimension(const Projection& projection,
-                                           const MapParameter& parameter,
-                                           double objectWidth,
-                                           double fontSize,
-                                           const std::string& text) = 0;
-    */
-
-    /**
       (Optionally) fills the area with the given default color
       for ground. In 2D backends this just fills the given area,
       3D backends might draw a sphere or an infinite plane.
@@ -661,16 +579,6 @@ namespace osmscout {
     virtual void DrawGround(const Projection& projection,
                             const MapParameter& parameter,
                             const FillStyle& style) = 0;
-
-    /**
-      Draw the given text at the given pixel coordinate in a style defined
-      by the given LabelStyle.
-     */
-    /*
-    virtual void DrawLabel(const Projection& projection,
-                           const MapParameter& parameter,
-                           const LabelData& label) = 0;
-    */
 
     /**
       Register regular label with given text at the given pixel coordinate
@@ -720,17 +628,6 @@ namespace osmscout {
                           LineStyle::CapStyle startCap,
                           LineStyle::CapStyle endCap,
                           size_t transStart, size_t transEnd) = 0;
-
-    // /**
-    //   Draw the given text as a contour of the given path in a style defined
-    //   by the given LabelStyle.
-    //  */
-    // virtual void DrawContourLabel(const Projection& projection,
-    //                               const MapParameter& parameter,
-    //                               const PathTextStyle& style,
-    //                               const std::string& text,
-    //                               size_t transStart, size_t transEnd,
-    //                               ContourLabelHelper& helper) = 0;
 
     /**
       Draw the given text as a contour of the given path in a style defined

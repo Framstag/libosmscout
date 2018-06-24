@@ -143,12 +143,6 @@ namespace osmscout {
                        const MapParameter& parameter,
                        double fontSize) override;
 
-    // TextDimension GetTextDimension(const Projection& projection,
-    //                                const MapParameter& parameter,
-    //                                double objectWidth,
-    //                                double fontSize,
-    //                                const std::string& text) override;
-
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
                     const FillStyle& style) override;
@@ -202,13 +196,6 @@ namespace osmscout {
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd) override;
-
-    // void DrawContourLabel(const Projection& projection,
-    //                       const MapParameter& parameter,
-    //                       const PathTextStyle& style,
-    //                       const std::string& text,
-    //                       size_t transStart, size_t transEnd,
-    //                       ContourLabelHelper& helper) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
