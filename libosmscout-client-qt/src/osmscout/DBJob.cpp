@@ -24,7 +24,7 @@ namespace osmscout {
 
 DBJob::DBJob():
   QObject(),
-  locker(NULL),
+  locker(nullptr),
   thread(QThread::currentThread())
 {
 }
@@ -51,7 +51,7 @@ void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
 void DBJob::Close()
 {
-  if (locker==NULL){
+  if (locker==nullptr){
     return;
   }
   if (thread!=QThread::currentThread()){
@@ -128,10 +128,10 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     osmscout::MapService::CallbackId callbackId=db->mapService->RegisterTileStateCallback(callback);
     //std::cout << "callback registered for job: " << this << " " << db->path.toStdString() << ": " << callbackId  << std::endl ;
     callbacks[db->path]=callbackId;
-    loadedTiles[db->path]=QMap<osmscout::TileId,osmscout::TileRef>();
-    QMap<osmscout::TileId,osmscout::TileRef> tileMap;
+    loadedTiles[db->path]=QMap<osmscout::TileKey,osmscout::TileRef>();
+    QMap<osmscout::TileKey,osmscout::TileRef> tileMap;
     for (auto &tile:tiles){
-      tileMap[tile->GetId()]=tile;
+      tileMap[tile->GetKey()]=tile;
     }
     allTiles[db->path]=tileMap;
     loadingTiles[db->path]=tileMap;
@@ -171,16 +171,16 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
     return; // loaded already
   }
 
-  QMap<osmscout::TileId,osmscout::TileRef> &loadingTileMap=loadingTiles[dbPath];
-  auto tileIt=loadingTileMap.find(tile->GetId());
+  QMap<osmscout::TileKey,osmscout::TileRef> &loadingTileMap=loadingTiles[dbPath];
+  auto tileIt=loadingTileMap.find(tile->GetKey());
   if (tileIt==loadingTileMap.end()){
     return; // not our request, ignore
   }
 
   // mark as complete
-  QMap<osmscout::TileId,osmscout::TileRef> &loadedTileMap=loadedTiles[dbPath];
-  loadedTileMap[tile->GetId()]=tileIt.value();
-  loadingTileMap.remove(tile->GetId());
+  QMap<osmscout::TileKey,osmscout::TileRef> &loadedTileMap=loadedTiles[dbPath];
+  loadedTileMap[tile->GetKey()]=tileIt.value();
+  loadingTileMap.remove(tile->GetKey());
 
   if (loadingTileMap.isEmpty()){ // this database is finished
     loadingTiles.remove(dbPath);
@@ -217,7 +217,7 @@ bool DBLoadJob::IsFinished() const
   return loadingTiles.isEmpty();
 }
 
-QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> DBLoadJob::GetAllTiles() const
+QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> DBLoadJob::GetAllTiles() const
 {
   return allTiles;
 }

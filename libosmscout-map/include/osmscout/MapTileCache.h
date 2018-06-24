@@ -47,12 +47,12 @@ namespace osmscout {
      */
     struct OSMSCOUT_MAP_API CacheEntry
     {
-      TileId id;
-      TRef   tile;
+      TileKey key;
+      TRef    tile;
 
-      CacheEntry(const TileId& id,
+      CacheEntry(const TileKey& key,
                  const TRef& tile)
-              : id(id),
+              : key(key),
                 tile(tile)
       {
         // no code
@@ -66,7 +66,7 @@ namespace osmscout {
     typedef typename Cache::iterator           CacheRef;
 
     //! An index from TileIds to cache entries
-    typedef typename std::map<TileId,CacheRef> CacheIndex;
+    typedef typename std::map<TileKey,CacheRef> CacheIndex;
 
   private:
     size_t             cacheSize;
@@ -81,8 +81,8 @@ namespace osmscout {
 
     void CleanupCache();
 
-    typename MapTileCache<T>::TRef GetCachedTile(const TileId& id) const;
-    typename MapTileCache<T>::TRef GetTile(const TileId& id) const;
+    typename MapTileCache<T>::TRef GetCachedTile(const TileKey& key) const;
+    typename MapTileCache<T>::TRef GetTile(const TileKey& key) const;
 
     void GetTilesForBoundingBox(const Magnification& magnification,
                                 const GeoBox& boundingBox,
@@ -144,9 +144,9 @@ namespace osmscout {
    * an empty reference will be returned.
    */
   template <class T>
-  typename MapTileCache<T>::TRef MapTileCache<T>::GetCachedTile(const TileId& id) const
+  typename MapTileCache<T>::TRef MapTileCache<T>::GetCachedTile(const TileKey& key) const
   {
-    typename std::map<TileId,MapTileCache<T>::CacheRef>::iterator existingEntry=tileIndex.find(id);
+    typename std::map<TileId,MapTileCache<T>::CacheRef>::iterator existingEntry=tileIndex.find(key);
 
     if (existingEntry!=tileIndex.end()) {
       tileCache.splice(tileCache.begin(),tileCache,existingEntry->second);
@@ -163,18 +163,18 @@ namespace osmscout {
    * return an empty and unassigned tile and move it to the front of the cache.
    */
   template <class T>
-  typename MapTileCache<T>::TRef MapTileCache<T>::GetTile(const TileId& id) const
+  typename MapTileCache<T>::TRef MapTileCache<T>::GetTile(const TileKey& key) const
   {
-    typename std::map<TileId,MapTileCache<T>::CacheRef>::iterator existingEntry=tileIndex.find(id);
+    typename std::map<TileId,MapTileCache<T>::CacheRef>::iterator existingEntry=tileIndex.find(key);
 
     if (existingEntry==tileIndex.end()) {
-      T tile(new T(id));
+      T tile(new T(key));
 
       // Updating cache
-      typename MapTileCache<T>::CacheEntry cacheEntry(id,tile);
+      typename MapTileCache<T>::CacheEntry cacheEntry(key,tile);
 
       tileCache.push_front(cacheEntry);
-      tileIndex[id]=tileCache.begin();
+      tileIndex[key]=tileCache.begin();
 
       return tile;
     }
@@ -210,7 +210,7 @@ namespace osmscout {
 
     for (size_t y=cy1; y<=cy2; y++) {
       for (size_t x=cx1; x<=cx2; x++) {
-        tiles.push_back(GetTile(TileId(magnification,x,y)));
+        tiles.push_back(GetTile(TileKey(magnification,TileId(x,y))));
       }
     }
   }
@@ -218,20 +218,20 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapTile
   {
   private:
-    TileId id;          //!< Id of the tile
-    GeoBox boundingBox; //!< Bounding box of the tile
+    TileKey key;          //!< Id of the tile
+    GeoBox  boundingBox; //!< Bounding box of the tile
 
   public:
-    explicit MapTile(const TileId& id);
+    explicit MapTile(const TileKey& key);
 
     ~MapTile();
 
     /**
      * Return the id of the tile
      */
-    inline TileId GetId() const
+    inline TileKey GyetKe() const
     {
-      return id;
+      return key;
     }
 
     /**

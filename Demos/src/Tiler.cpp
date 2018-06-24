@@ -76,7 +76,7 @@ void MergeTilesToMapData(const std::list<osmscout::TileRef>& centerTiles,
 
   osmscout::StopClock uniqueTime;
 
-  for (auto tile : centerTiles) {
+  for (const auto& tile : centerTiles) {
     tile->GetNodeData().CopyData([&nodeMap](const osmscout::NodeRef& node) {
       nodeMap[node->GetFileOffset()]=node;
     });
@@ -102,7 +102,7 @@ void MergeTilesToMapData(const std::list<osmscout::TileRef>& centerTiles,
     });
   }
 
-  for (auto tile : ringTiles) {
+  for (const auto& tile : ringTiles) {
     tile->GetNodeData().CopyData([&ringTypeDefinition,&nodeMap](const osmscout::NodeRef& node) {
       if (ringTypeDefinition.nodeTypes.IsSet(node->GetType())) {
         nodeMap[node->GetFileOffset()]=node;
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
   osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(map)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
 
     osmscout::MapService::TypeDefinition typeDefinition;
 
-    for (auto type : database->GetTypeConfig()->GetTypes()) {
+    for (const auto& type : database->GetTypeConfig()->GetTypes()) {
       bool hasLabel=false;
 
       if (type->CanBeNode()) {
@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
                                         *styleConfig,
                                         centerTiles);
 
-        std::map<osmscout::TileId, osmscout::TileRef> ringTileMap;
+        std::map<osmscout::TileKey,osmscout::TileRef> ringTileMap;
 
         for (uint32_t ringY=y-tileRingSize; ringY<=y+tileRingSize; ringY++) {
           for (uint32_t ringX=x-tileRingSize; ringX<=x+tileRingSize; ringX++) {
@@ -373,7 +373,7 @@ int main(int argc, char* argv[])
                                     tiles);
 
             for (const auto& tile : tiles) {
-              ringTileMap[tile->GetId()]=tile;
+              ringTileMap[tile->GetKey()]=tile;
             }
           }
         }

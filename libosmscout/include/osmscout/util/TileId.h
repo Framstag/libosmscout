@@ -44,27 +44,17 @@ namespace osmscout {
   class OSMSCOUT_API TileId
   {
   private:
-    uint32_t level;         //!< the zoom level (0..n)
-    size_t   x;             //!< The x coordinate of the tile in relation to the zoom level
-    size_t   y;             //!< The y coordinate of the tile in relation to the zoom level
+    uint32_t x;             //!< The x coordinate of the tile in relation to the zoom level
+    uint32_t y;             //!< The y coordinate of the tile in relation to the zoom level
 
   public:
-    TileId(const Magnification& magnification,
-           size_t x,
-           size_t y);
-
-    /**
-     * Return the zoom level of the tile
-     */
-    inline uint32_t GetLevel() const
-    {
-      return level;
-    }
+    TileId(uint32_t x,
+           uint32_t y);
 
     /**
      * Return the X coordinate fo the tile
      */
-    inline size_t GetX() const
+    inline uint32_t GetX() const
     {
       return x;
     }
@@ -72,7 +62,7 @@ namespace osmscout {
     /**
      * Return the y coordinate fo the tile
      */
-    inline size_t GetY() const
+    inline uint32_t GetY() const
     {
       return y;
     }
@@ -82,14 +72,7 @@ namespace osmscout {
       return Pixel(x,y);
     }
 
-    /**
-     * Return the bounding box of the tile
-     */
-    GeoBox GetBoundingBox() const;
-
     std::string GetDisplayText() const;
-
-    TileId GetParent() const;
 
     bool operator==(const TileId& other) const;
 
@@ -99,6 +82,40 @@ namespace osmscout {
 
     static TileId GetTile(const Magnification& magnification,
                           const GeoCoord& coord);
+  };
+
+  class OSMSCOUT_API TileKey
+  {
+  private:
+    uint32_t level;
+    TileId   id;
+
+  public:
+    TileKey(const Magnification& magnification,
+           const TileId& id);
+
+    inline uint32_t GetLevel() const
+    {
+      return level;
+    }
+
+    inline TileId GetId() const
+    {
+      return id;
+    }
+
+    /**
+     * Return the bounding box of the tile
+     */
+    GeoBox GetBoundingBox() const;
+
+    std::string GetDisplayText() const;
+
+    TileKey GetParent() const;
+
+    bool operator==(const TileKey& other) const;
+    bool operator!=(const TileKey& other) const;
+    bool operator<(const TileKey& other) const;
   };
 
   class OSMSCOUT_API TileIdBoxConstIterator CLASS_FINAL : public std::iterator<std::input_iterator_tag, const TileId>
@@ -130,13 +147,11 @@ namespace osmscout {
     TileIdBoxConstIterator& operator++()
     {
       if (currentTile.GetX()>maxTile.GetX()) {
-        currentTile=TileId(minTile.GetLevel(),
-                           minTile.GetX(),
+        currentTile=TileId(minTile.GetX(),
                            currentTile.GetY()+1);
       }
       else {
-        currentTile=TileId(minTile.GetLevel(),
-                           currentTile.GetX()+1,
+        currentTile=TileId(currentTile.GetX()+1,
                            currentTile.GetY());
       }
 
@@ -238,14 +253,13 @@ namespace osmscout {
 
     inline TileIdBoxConstIterator end() const
     {
-      return TileIdBoxConstIterator(TileId(maxTile.GetLevel(),
-                                           maxTile.GetX()+1,
+      return TileIdBoxConstIterator(TileId(maxTile.GetX()+1,
                                            maxTile.GetY()),
                                        minTile,
                                        maxTile);
     }
 
-    GeoBox GetBoundingBox() const;
+    GeoBox GetBoundingBox(const Magnification& magnification) const;
 
     inline std::string GetDisplayText() const
     {

@@ -825,16 +825,16 @@ namespace osmscout {
   /**
    * Return the given tile.
    *
-   * Note, that tiles may be partially prefill or empty, if not already
+   * Note, that tiles may be partially prefilled or empty, if not already
    * cached.
    */
-  TileRef MapService::LookupTile(const TileId& id) const
+  TileRef MapService::LookupTile(const TileKey& key) const
   {
     std::lock_guard<std::mutex> lock(stateMutex);
 
     StopClock cacheRetrievalTime;
 
-    TileRef tile=cache.GetTile(id);
+    TileRef tile=cache.GetTile(key);
 
     cacheRetrievalTime.Stop();
 
@@ -869,7 +869,7 @@ namespace osmscout {
 
         //std::cout << "Loading tile: " << tile->GetId().DisplayText() << std::endl;
 
-        magnification.SetLevel(tile->GetId().GetLevel());
+        magnification.SetLevel(tile->GetKey().GetLevel());
 
         // TODO: Cache the type definitions, perhaps already in the StyleConfig?
 
@@ -932,7 +932,7 @@ namespace osmscout {
         //std::cout << "Tile loading time: " << tileLoadingTime.ResultString() << std::endl;
 
         if (tileLoadingTime.GetMilliseconds()>150) {
-          log.Warn() << "Retrieving tile data for tile " << tile->GetId().GetDisplayText() << " took " << tileLoadingTime.ResultString();
+          log.Warn() << "Retrieving tile data for tile " << tile->GetKey().GetDisplayText() << " took " << tileLoadingTime.ResultString();
         }
 
       }
@@ -1036,7 +1036,7 @@ namespace osmscout {
         //std::cout << "Tile loading time: " << tileLoadingTime.ResultString() << std::endl;
 
         if (tileLoadingTime.GetMilliseconds()>150) {
-          log.Warn() << "Retrieving tile data for tile " << tile->GetId().GetDisplayText() << " took " << tileLoadingTime.ResultString();
+          log.Warn() << "Retrieving tile data for tile " << tile->GetKey().GetDisplayText() << " took " << tileLoadingTime.ResultString();
         }
 
       }

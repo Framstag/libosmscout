@@ -225,7 +225,7 @@ namespace osmscout {
                                            bool async) const;
 
   public:
-    MapService(const DatabaseRef& database);
+    explicit MapService(const DatabaseRef& database);
     virtual ~MapService();
 
     void SetCacheSize(size_t cacheSize);
@@ -243,7 +243,7 @@ namespace osmscout {
     void LookupTiles(const Projection& projection,
                      std::list<TileRef>& tiles) const;
 
-    TileRef LookupTile(const TileId& id) const;
+    TileRef LookupTile(const TileKey& key) const;
 
     bool LoadMissingTileData(const AreaSearchParameter& parameter,
                              const StyleConfig& styleConfig,

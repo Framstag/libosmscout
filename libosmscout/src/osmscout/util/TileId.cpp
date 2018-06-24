@@ -26,22 +26,12 @@ namespace osmscout {
   /**
    * Ceate a new tile by passing magnification and tile coordinates
    */
-  TileId::TileId(const Magnification& magnification,
-                 size_t x,
-                 size_t y)
-  : level(magnification.GetLevel()),
-    x(x),
+  TileId::TileId(uint32_t x,
+                 uint32_t y)
+  : x(x),
     y(y)
   {
     // no code
-  }
-
-  GeoBox TileId::GetBoundingBox() const
-  {
-    return GeoBox(GeoCoord(y*cellDimension[level].height-90.0,
-                           x*cellDimension[level].width-180.0),
-                  GeoCoord((y+1)*cellDimension[level].height-90.0,
-                           (x+1)*cellDimension[level].width-180.0));
   }
 
   /**
@@ -49,25 +39,7 @@ namespace osmscout {
    */
   std::string TileId::GetDisplayText() const
   {
-    return std::to_string(level)+ "." + std::to_string(y) + "." + std::to_string(x);
-  }
-
-  /**
-   * Return the parent tile.
-   *
-   * Note that the parent tile will cover a 4 times bigger region than the current tile.
-   *
-   * Note that for tiles with level 0 no parent tile will exist. The method will assert in this case!
-   */
-  TileId TileId::GetParent() const
-  {
-    Magnification zoomedOutMagnification;
-
-    assert(level>0);
-
-    zoomedOutMagnification.SetLevel(level-1);
-
-    return TileId(zoomedOutMagnification,x/2,y/2);
+    return std::to_string(y) + "." + std::to_string(x);
   }
 
   /**
@@ -75,8 +47,7 @@ namespace osmscout {
    */
   bool TileId::operator==(const TileId& other) const
   {
-    return level==other.level &&
-           y==other.y &&
+    return y==other.y &&
            x==other.x;
   }
 
@@ -85,8 +56,7 @@ namespace osmscout {
    */
   bool TileId::operator!=(const TileId& other) const
   {
-    return level!=other.level ||
-           y!=other.y ||
+    return y!=other.y ||
            x!=other.x;
   }
 
@@ -96,10 +66,6 @@ namespace osmscout {
    */
   bool TileId::operator<(const TileId& other) const
   {
-    if (level!=other.level) {
-      return level<other.level;
-    }
-
     if (y!=other.y) {
       return y<other.y;
     }
@@ -121,21 +87,91 @@ namespace osmscout {
   TileId TileId::GetTile(const Magnification& magnification,
                          const GeoCoord& coord)
   {
-    return {osmscout::Magnification(),
-            size_t((coord.GetLon()+180.0)/cellDimension[magnification.GetLevel()].width),
-            size_t((coord.GetLat()+90.0)/cellDimension[magnification.GetLevel()].height)};
+    return {uint32_t((coord.GetLon()+180.0)/cellDimension[magnification.GetLevel()].width),
+            uint32_t((coord.GetLat()+90.0)/cellDimension[magnification.GetLevel()].height)};
+  }
+
+  TileKey::TileKey(const Magnification& magnification,
+                   const TileId& id)
+  : level(magnification.GetLevel()),
+    id(id)
+  {
+  }
+
+  GeoBox TileKey::GetBoundingBox() const
+  {
+    return GeoBox(GeoCoord(id.GetY()*cellDimension[level].height-90.0,
+                           id.GetX()*cellDimension[level].width-180.0),
+                  GeoCoord((id.GetY()+1)*cellDimension[level].height-90.0,
+                           (id.GetX()+1)*cellDimension[level].width-180.0));
+  }
+
+
+  /**
+   * Return a short human readable description of the tile id
+   */
+  std::string TileKey::GetDisplayText() const
+  {
+    return std::to_string(level)+ "." + std::to_string(id.GetY()) + "." + std::to_string(id.GetX());
+  }
+
+  /**
+   * Return the parent tile.
+   *
+   * Note that the parent tile will cover a 4 times bigger region than the current tile.
+   *
+   * Note that for tiles with level 0 no parent tile will exist. The method will assert in this case!
+   */
+  TileKey TileKey::GetParent() const
+  {
+    Magnification zoomedOutMagnification;
+
+    assert(level>0);
+
+    zoomedOutMagnification.SetLevel(level-1);
+
+    return TileKey(zoomedOutMagnification,
+                   TileId(id.GetX()/2,id.GetY()/2));
+  }
+
+  /**
+   * Compare tile ids for equality
+   */
+  bool TileKey::operator==(const TileKey& other) const
+  {
+    return level==other.level &&
+           id==other.id;
+  }
+
+  /**
+   * Compare tile ids for inequality
+   */
+  bool TileKey::operator!=(const TileKey& other) const
+  {
+    return level!=other.level ||
+           id!=other.id;
+  }
+
+  /**
+   * Compare tile ids by their order. Needed for sorting tile ids and placing them into (some)
+   * containers.
+   */
+  bool TileKey::operator<(const TileKey& other) const
+  {
+    if (level!=other.level) {
+      return level<other.level;
+    }
+
+    return id<other.id;
   }
 
   TileIdBox::TileIdBox(const TileId& a,
                        const TileId& b)
-    : minTile(a.GetLevel(),
-              std::min(a.GetX(),b.GetX()),
+    : minTile(std::min(a.GetX(),b.GetX()),
               std::min(a.GetY(),b.GetY())),
-      maxTile(a.GetLevel(),
-              std::max(a.GetX(),b.GetX()),
+      maxTile(std::max(a.GetX(),b.GetX()),
               std::max(a.GetY(),b.GetY()))
   {
-    assert(a.GetLevel()==b.GetLevel());
   }
 
   /**
@@ -144,12 +180,12 @@ namespace osmscout {
    * @return
    *    The GeoBox defining the resulting area
    */
-  GeoBox TileIdBox::GetBoundingBox() const
+  GeoBox TileIdBox::GetBoundingBox(const Magnification& magnification) const
   {
-    return GeoBox(minTile.GetBoundingBox().GetTopLeft(),
-                  TileId(minTile.GetLevel(),
-                         maxTile.GetX()+1,
-                         maxTile.GetY()+1).GetBoundingBox().GetTopLeft());
-  }
+    TileKey minKey(magnification,minTile);
+    TileKey maxPlusKey(magnification,TileId(maxTile.GetX()+1,maxTile.GetY()+1));
 
+    return GeoBox(minKey.GetBoundingBox().GetTopLeft(),
+                  maxPlusKey.GetBoundingBox().GetTopLeft());
+  }
 }

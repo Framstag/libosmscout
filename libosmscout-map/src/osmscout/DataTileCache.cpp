@@ -28,10 +28,9 @@ namespace osmscout {
   /**
    * Create a new tile with the given id.
    */
-  Tile::Tile(const TileId& id)
-  : id(id),
-    level(id.GetLevel()),
-    boundingBox(id.GetBoundingBox())
+  Tile::Tile(const TileKey& key)
+  : key(key),
+    boundingBox(key.GetBoundingBox())
   {
     // no code
   }
@@ -78,7 +77,7 @@ namespace osmscout {
         //if (currentEntry->tile.expired()) {
         if (currentEntry->tile.use_count()==1) {
           //std::cout << "Dropping tile " << (std::string)currentEntry->id << " from cache " << cache.size() << "/" << cacheSize << std::endl;
-          tileIndex.erase(currentEntry->id);
+          tileIndex.erase(currentEntry->key);
 
           ++currentEntry;
           currentEntry=std::reverse_iterator<Cache::iterator>(tileCache.erase(currentEntry.base()));
@@ -108,12 +107,14 @@ namespace osmscout {
    * Return the cache tiles with the given id. If the tiles is not cache,
    * an empty reference will be returned.
    */
-  TileRef DataTileCache::GetCachedTile(const TileId& id) const
+  TileRef DataTileCache::GetCachedTile(const TileKey& key) const
   {
-    auto existingEntry=tileIndex.find(id);
+    auto existingEntry=tileIndex.find(key);
 
     if (existingEntry!=tileIndex.end()) {
-      tileCache.splice(tileCache.begin(),tileCache,existingEntry->second);
+      tileCache.splice(tileCache.begin(),
+                       tileCache,
+                       existingEntry->second);
       existingEntry->second=tileCache.begin();
 
       return existingEntry->second->tile;//.lock();
@@ -126,18 +127,19 @@ namespace osmscout {
    * Return the tile with the given id. If the tile is not currently cached
    * return an empty and unassigned tile and move it to the front of the cache.
    */
-  TileRef DataTileCache::GetTile(const TileId& id) const
+  TileRef DataTileCache::GetTile(const TileKey& key) const
   {
-    auto existingEntry=tileIndex.find(id);
+    auto existingEntry=tileIndex.find(key);
 
     if (existingEntry==tileIndex.end()) {
-      TileRef tile(new Tile(id));
+      TileRef tile(new Tile(key));
 
       // Updating cache
-      CacheEntry cacheEntry(id,tile);
+      CacheEntry cacheEntry(key,
+                            tile);
 
       tileCache.push_front(cacheEntry);
-      tileIndex[id]=tileCache.begin();
+      tileIndex[key]=tileCache.begin();
 
       return tile;
     }
@@ -170,9 +172,9 @@ namespace osmscout {
 
     //std::cout << "Tile bounding box: " << cx1 << "," << cy1 << " - "  << cx2 << "," << cy2 << std::endl;
 
-    for (size_t y=cy1; y<=cy2; y++) {
-      for (size_t x=cx1; x<=cx2; x++) {
-        tiles.push_back(GetTile(TileId(magnification,x,y)));
+    for (uint32_t y=cy1; y<=cy2; y++) {
+      for (uint32_t x=cx1; x<=cx2; x++) {
+        tiles.push_back(GetTile(TileKey(magnification,TileId(x,y))));
       }
     }
   }
@@ -284,8 +286,8 @@ namespace osmscout {
                                            const TypeInfoSet& /*optimizedAreaTypes*/)
   {
     if (tile.GetLevel()>0) {
-      TileId parentTileId=tile.GetId().GetParent();
-      TileRef parentTile=GetCachedTile(parentTileId);
+      TileKey parentTileKey=tile.GetKey().GetParent();
+      TileRef parentTile=GetCachedTile(parentTileKey);
 
       GeoBox boundingBox=tile.GetBoundingBox();
 

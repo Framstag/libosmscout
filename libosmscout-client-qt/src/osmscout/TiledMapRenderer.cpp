@@ -306,8 +306,8 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
                               /* lowZoomOptimization */ true,
                               /* closeOnFinish */ false);
 
-        connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)),
-                this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)));
+        connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)),
+                this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)));
 
         dbThread->RunJob(loadJob);
 
@@ -388,7 +388,7 @@ void TiledMapRenderer::onOfflineMapChanged(bool b)
     emit Redraw();
 }
 
-void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles)
+void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles)
 {
     // just start loading
     QMutexLocker locker(&lock);
