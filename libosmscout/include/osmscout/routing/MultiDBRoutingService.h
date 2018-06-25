@@ -78,15 +78,15 @@ namespace osmscout {
     double GetCosts(const MultiDBRoutingState& state,
                     DatabaseId database,
                     const WayRef &way,
-                    double wayLength) override;
+                    const Distance &wayLength) override;
 
     double GetEstimateCosts(const MultiDBRoutingState& state,
                             DatabaseId database,
-                            double targetDistance) override;
+                            const Distance &targetDistance) override;
 
     double GetCostLimit(const MultiDBRoutingState& state,
                         DatabaseId database,
-                        double targetDistance) override;
+                        const Distance &targetDistance) override;
 
     bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
                        std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) override;
@@ -109,8 +109,8 @@ namespace osmscout {
     bool ResolveRouteDataJunctions(RouteData& route) override;
 
     std::vector<DBId> GetNodeTwins(const MultiDBRoutingState& state,
-                                   const DatabaseId database,
-                                   const Id id) override;
+                                   DatabaseId database,
+                                   Id id) override;
 
     bool CanUse(const MultiDBRoutingState& state,
                 DatabaseId databaseId,
@@ -126,15 +126,15 @@ namespace osmscout {
 
     void Close();
 
-    RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
-                                         double radius=1000) const;
+    RoutePosition GetClosestRoutableNode(const GeoCoord &coord,
+                                         Distance radius=Distance::Of<Kilometer>(1)) const;
 
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,
                                  const RoutingParameter &parameter);
 
     RoutingResult CalculateRoute(std::vector<osmscout::GeoCoord> via,
-                                 double radius,
+                                 const Distance &radius,
                                  const RoutingParameter& parameter);
 
     bool TransformRouteDataToRouteDescription(const RouteData& data,

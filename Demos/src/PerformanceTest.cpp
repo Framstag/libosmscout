@@ -349,18 +349,16 @@ int main(int argc, char* argv[])
   drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
   searchParameter.SetUseMultithreading(true);
 
-  for (uint32_t level=std::min(startZoom,endZoom);
-       level<=std::max(startZoom,endZoom);
+  for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(startZoom,endZoom));
+       level<=osmscout::MagnificationLevel(std::max(startZoom,endZoom));
        level++) {
-    LevelStats              stats(level);
-    osmscout::Magnification magnification;
+    LevelStats              stats(level.Get());
+    osmscout::Magnification magnification(level);
 
-    magnification.SetLevel(level);
-
-    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latBottom,lonLeft),
-                                                                  magnification));
-    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latTop,lonRight),
-                                                                  magnification));
+    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latBottom,lonLeft)));
+    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latTop,lonRight)));
     osmscout::OSMTileIdBox  tileArea(tileA,tileB);
 
     std::cout << "----------" << std::endl;
@@ -421,7 +419,7 @@ int main(int argc, char* argv[])
                      tileHeight);
 
       projection.GetDimensions(boundingBox);
-      projection.SetLinearInterpolationUsage(level >= 10);
+      projection.SetLinearInterpolationUsage(level.Get() >= 10);
 
       osmscout::StopClock dbTimer;
 

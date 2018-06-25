@@ -10,13 +10,14 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
-        include/osmscout/system/OSMScoutTypes.h)
+    include/osmscout/system/OSMScoutTypes.h)
 
 set(HEADER_FILES_UTIL
     include/osmscout/util/Breaker.h
     include/osmscout/util/Cache.h
     include/osmscout/util/Color.h
     include/osmscout/util/CmdLineParsing.h
+    include/osmscout/util/Distance.h
     include/osmscout/util/Exception.h
     include/osmscout/util/File.h
     include/osmscout/util/FileScanner.h
@@ -38,6 +39,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/StringMatcher.h
     include/osmscout/util/TagErrorReporter.h
     include/osmscout/util/Tiling.h
+    include/osmscout/util/TileId.h
     include/osmscout/util/Transformation.h
     include/osmscout/util/WorkQueue.h)
 
@@ -99,8 +101,11 @@ set(HEADER_FILES
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
     include/osmscout/TypeConfig.h
+    include/osmscout/TypeFeature.h
     include/osmscout/TypeFeatures.h
-        include/osmscout/OSMScoutTypes.h
+    include/osmscout/TypeInfoSet.h
+    include/osmscout/FeatureReader.h
+    include/osmscout/OSMScoutTypes.h
     include/osmscout/WaterIndex.h
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h)
@@ -112,6 +117,7 @@ set(SOURCE_FILES
     src/osmscout/util/Breaker.cpp
     src/osmscout/util/Cache.cpp
     src/osmscout/util/Color.cpp
+    src/osmscout/util/Distance.cpp
     src/osmscout/util/Exception.cpp
     src/osmscout/util/File.cpp
     src/osmscout/util/FileScanner.cpp
@@ -132,6 +138,7 @@ set(SOURCE_FILES
     src/osmscout/util/String.cpp
     src/osmscout/util/StringMatcher.cpp
     src/osmscout/util/Tiling.cpp
+    src/osmscout/util/TileId.cpp
     src/osmscout/util/Transformation.cpp
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/TagErrorReporter.cpp
@@ -182,8 +189,11 @@ set(SOURCE_FILES
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
+    src/osmscout/TypeFeature.cpp
     src/osmscout/TypeFeatures.cpp
-        src/osmscout/OSMScoutTypes.cpp
+    src/osmscout/TypeInfoSet.cpp
+    src/osmscout/FeatureReader.cpp
+    src/osmscout/OSMScoutTypes.cpp
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp
@@ -254,7 +264,7 @@ if(APPLE AND BUILD_FRAMEWORKS)
 endif()
 
 target_compile_definitions(OSMScout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
-install(TARGETS ${THE_TARGET_NAME}
+install(TARGETS OSMScout
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib

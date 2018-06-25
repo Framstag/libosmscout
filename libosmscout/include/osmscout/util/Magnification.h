@@ -22,63 +22,182 @@
 
 #include <osmscout/CoreImportExport.h>
 
+#include <functional>
+#include <ostream>
 #include <string>
 #include <unordered_map>
 
+#include <osmscout/system/Compiler.h>
 #include <osmscout/system/OSMScoutTypes.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API Magnification
+  class OSMSCOUT_API MagnificationLevel CLASS_FINAL
   {
-  public:
-    enum Mag {
-      magWorld     =                        1, //  0
-      magContinent =                       16, //  4
-      magState     =                       32, //  5
-      magStateOver =                       64, //  6
-      magCounty    =                      128, //  7
-      magRegion    =                      256, //  8
-      magProximity =                      512, //  9
-      magCityOver  =                     1024, // 10
-      magCity      =                   2*1024, // 11
-      magSuburb    =                 2*2*1024, // 12
-      magDetail    =               2*2*2*1024, // 13
-      magClose     =             2*2*2*2*1024, // 14
-      magCloser    =           2*2*2*2*2*1024, // 15
-      magVeryClose =         2*2*2*2*2*2*1024, // 16
-      magBlock     =     2*2*2*2*2*2*2*2*1024, // 18
-      magStreet    =   2*2*2*2*2*2*2*2*2*1024, // 19
-      magHouse     = 2*2*2*2*2*2*2*2*2*2*1024  // 20
-    };
-
   private:
-    double   magnification;
     uint32_t level;
 
   public:
-    inline Magnification()
+    inline MagnificationLevel() noexcept
+      : level(0)
+    {
+    }
+
+    inline explicit MagnificationLevel(uint32_t level) noexcept
+      : level(level)
+    {
+    }
+
+    inline MagnificationLevel(const MagnificationLevel& level) noexcept
+      : level(level.level)
+    {
+    }
+
+    inline uint32_t Get() const
+    {
+      return level;
+    }
+
+    inline MagnificationLevel& operator=(const MagnificationLevel& other)
+    {
+      if (this!=&other) {
+        this->level=other.level;
+      }
+
+      return *this;
+    }
+
+    inline MagnificationLevel& operator++()
+    {
+      ++level;
+
+      return *this;
+    }
+
+    inline const MagnificationLevel operator++(int)
+    {
+      ++level;
+
+      return *this;
+    }
+
+    inline bool operator==(const MagnificationLevel& other) const
+    {
+      return level==other.level;
+    }
+
+    inline bool operator!=(const MagnificationLevel& other) const
+    {
+      return level!=other.level;
+    }
+
+    inline bool operator<(const MagnificationLevel& other) const
+    {
+      return level<other.level;
+    }
+
+    inline bool operator<=(const MagnificationLevel& other) const
+    {
+      return level<=other.level;
+    }
+
+    inline bool operator>=(const MagnificationLevel& other) const
+    {
+      return level>=other.level;
+    }
+
+    inline bool operator>(const MagnificationLevel& other) const
+    {
+      return level>other.level;
+    }
+  };
+
+  inline std::ostream& operator<<(std::ostream& os,
+                                  const MagnificationLevel& level)
+  {
+    os << level.Get();
+
+    return os;
+  }
+
+  inline std::string operator+(const char* text,
+                               const MagnificationLevel& level)
+  {
+    return std::string(text)+std::to_string(level.Get());
+  }
+
+  inline std::string operator+(const std::string& text,
+                               const MagnificationLevel& level)
+  {
+    return text+std::to_string(level.Get());
+  }
+}
+
+namespace std {
+  template <>
+  struct hash<osmscout::MagnificationLevel>
+  {
+    size_t operator()(const osmscout::MagnificationLevel& level) const
+    {
+      return hash<uint32_t>{}(level.Get());
+    }
+  };
+}
+
+namespace osmscout {
+  class OSMSCOUT_API Magnification CLASS_FINAL
+  {
+  public:
+    static MagnificationLevel magWorld;     //  0
+    static MagnificationLevel magContinent; //  4
+    static MagnificationLevel magState;     //  5
+    static MagnificationLevel magStateOver; //  6
+    static MagnificationLevel magCounty;    //  7
+    static MagnificationLevel magRegion;    //  8
+    static MagnificationLevel magProximity; //  9
+    static MagnificationLevel magCityOver;  // 10
+    static MagnificationLevel magCity;      // 11
+    static MagnificationLevel magSuburb;    // 12
+    static MagnificationLevel magDetail;    // 13
+    static MagnificationLevel magClose;     // 14
+    static MagnificationLevel magCloser;    // 15
+    static MagnificationLevel magVeryClose; // 16
+    static MagnificationLevel magBlock;     // 18
+    static MagnificationLevel magStreet;    // 19
+    static MagnificationLevel magHouse;     // 20
+
+  private:
+    double   magnification{};
+    uint32_t level{};
+
+  public:
+    inline Magnification() noexcept
     : magnification(1),
       level(0)
     {
       // no code
     }
 
-    inline Magnification(const Magnification& other)
+    inline Magnification(const Magnification& other) noexcept
     : magnification(other.magnification),
       level(other.level)
     {
       // no code
     }
 
-    inline Magnification(double magnification)
+    inline explicit Magnification(double magnification) noexcept
     {
       SetMagnification(magnification);
     }
 
+    inline explicit Magnification(const MagnificationLevel& level) noexcept
+    {
+      SetLevel(level);
+    }
+
     void SetMagnification(double magnification);
-    void SetMagnification(Mag magnification);
-    void SetLevel(uint32_t level);
+
+    void SetLevel(const MagnificationLevel& level);
 
     inline double GetMagnification() const
     {
@@ -129,13 +248,29 @@ namespace osmscout {
     {
       return magnification>other.magnification;
     }
+
+    inline Magnification& operator++()
+    {
+      magnification*=2.0;
+      level+=1;
+
+      return *this;
+    }
+
+    inline const Magnification operator++(int)
+    {
+      magnification*=2.0;
+      level+=1;
+
+      return *this;
+    }
   };
 
   class OSMSCOUT_API MagnificationConverter
   {
   private:
-    std::unordered_map<std::string,Magnification::Mag> stringToMagMap;
-    std::unordered_map<size_t,std::string>             levelToStringMap;
+    std::unordered_map<std::string,MagnificationLevel> stringToMagMap;
+    std::unordered_map<MagnificationLevel,std::string> levelToStringMap;
 
   public:
     MagnificationConverter();
@@ -143,10 +278,9 @@ namespace osmscout {
     bool Convert(const std::string& name,
                  Magnification& magnification);
 
-    bool Convert(const size_t level,
+    bool Convert(const MagnificationLevel& level,
                  std::string& name);
   };
-
 }
 
 #endif

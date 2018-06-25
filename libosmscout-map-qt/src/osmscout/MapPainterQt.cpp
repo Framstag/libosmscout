@@ -782,11 +782,11 @@ namespace osmscout {
                ++pixel) {
             if (pixel==polygon->GetCoords().begin()) {
               path.moveTo(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                          y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                          y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
             }
             else {
               path.lineTo(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                          y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                          y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
             }
           }
         }
@@ -796,11 +796,11 @@ namespace osmscout {
                ++pixel) {
             if (pixel==polygon->GetCoords().begin()) {
               path.moveTo(x+projection.GetMeterInPixel()*(pixel->GetX()-centerX),
-                          y+projection.GetMeterInPixel()*(maxY-pixel->GetY()-centerY));
+                          y+projection.GetMeterInPixel()*(pixel->GetY()-centerY));
             }
             else {
               path.lineTo(x+projection.GetMeterInPixel()*(pixel->GetX()-centerX),
-                          y+projection.GetMeterInPixel()*(maxY-pixel->GetY()-centerY));
+                          y+projection.GetMeterInPixel()*(pixel->GetY()-centerY));
 
             }
           }
@@ -835,13 +835,13 @@ namespace osmscout {
 
         if (rectangle->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
           path.addRect(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
-                       y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY),
+                       y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY),
                        projection.ConvertWidthToPixel(rectangle->GetWidth()),
                        projection.ConvertWidthToPixel(rectangle->GetHeight()));
         }
         else {
           path.addRect(x+projection.GetMeterInPixel()*(rectangle->GetTopLeft().GetX()-centerX),
-                       y+projection.GetMeterInPixel()*(maxY-rectangle->GetTopLeft().GetY()-centerY),
+                       y+projection.GetMeterInPixel()*(rectangle->GetTopLeft().GetY()-centerY),
                        projection.GetMeterInPixel()*rectangle->GetWidth(),
                        projection.GetMeterInPixel()*rectangle->GetHeight());
         }
@@ -857,13 +857,13 @@ namespace osmscout {
 
         if (circle->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
           center=QPointF(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
-                         y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY));
+                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY));
 
           radius=projection.ConvertWidthToPixel(circle->GetRadius());
         }
         else {
           center=QPointF(x+projection.GetMeterInPixel()*(circle->GetCenter().GetX()-centerX),
-                         y+projection.GetMeterInPixel()*(maxY-circle->GetCenter().GetY()-centerY));
+                         y+projection.GetMeterInPixel()*(circle->GetCenter().GetY()-centerY));
 
           radius=projection.GetMeterInPixel()*circle->GetRadius();
         }
@@ -905,8 +905,8 @@ namespace osmscout {
         QPainterPath path;
 
         path.addEllipse(center,
-                        2*radius,
-                        2*radius);
+                        radius,
+                        radius);
 
         painter->drawPath(path);
       }

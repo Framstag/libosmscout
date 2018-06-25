@@ -261,6 +261,8 @@ namespace osmscout {
                                    color.GetA()));
 
       agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+    }else{
+      rasterizer->reset();
     }
 
     if (borderStyle) {
@@ -515,8 +517,8 @@ namespace osmscout {
 
     symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-    centerX=maxX-minX;
-    centerY=maxY-minY;
+    centerX=(minX+maxX)/2;
+    centerY=(minY+maxY)/2;
 
     for (const auto& primitive : symbol.GetPrimitives()) {
       const DrawPrimitive *primitivePtr=primitive.get();
@@ -532,11 +534,11 @@ namespace osmscout {
              ++pixel) {
           if (pixel==polygon->GetCoords().begin()) {
             path.move_to(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                         y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                         y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
           }
           else {
             path.line_to(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                         y+projection.ConvertWidthToPixel(maxY-pixel->GetY()-centerY));
+                         y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
           }
         }
 
@@ -556,7 +558,7 @@ namespace osmscout {
         BorderStyleRef    borderStyle=rectangle->GetBorderStyle();
         agg::path_storage path;
         double            xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX);
-        double            yPos=y+projection.ConvertWidthToPixel(maxY-rectangle->GetTopLeft().GetY()-centerY);
+        double            yPos=y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY);
         double            width=projection.ConvertWidthToPixel(rectangle->GetWidth());
         double            height=projection.ConvertWidthToPixel(rectangle->GetHeight());
 
@@ -583,7 +585,7 @@ namespace osmscout {
         double            radius=projection.ConvertWidthToPixel(circle->GetRadius());
 
         agg::ellipse ellipse(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
-                             y+projection.ConvertWidthToPixel(maxY-circle->GetCenter().GetY()-centerY),
+                             y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY),
                              radius,
                              radius);
 

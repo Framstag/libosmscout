@@ -5,15 +5,15 @@
     <name>NavigationSimulation</name>
     <message>
         <source>meters</source>
-        <translation type="unfinished"></translation>
+        <translation>metrů</translation>
     </message>
     <message>
         <source>km</source>
-        <translation type="unfinished"></translation>
+        <translation>km</translation>
     </message>
 </context>
 <context>
-    <name>RouteDescriptionBuilder</name>
+    <name>osmscout::RouteDescriptionBuilder</name>
     <message>
         <source>Turn sharp left</source>
         <translation>Zahněte ostře vlevo</translation>

@@ -151,7 +151,7 @@ double RoutingListModel::getRouteLength() const
   if (!route || route.routeDescription().Nodes().empty()){
     return 0;
   }
-  return route.routeDescription().Nodes().back().GetDistance() * 1000;
+  return route.routeDescription().Nodes().back().GetDistance().AsMeter();
 }
 
 double RoutingListModel::getRouteDuration() const
@@ -205,7 +205,7 @@ QHash<int, QByteArray> RoutingListModel::roleNames() const
   return roles;
 }
 
-RouteStep* RoutingListModel::get(int row) const
+QObject* RoutingListModel::get(int row) const
 {
   if(!route || row < 0 || row >= route.routeSteps().size()) {
     return NULL;

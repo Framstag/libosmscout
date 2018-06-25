@@ -20,12 +20,9 @@
 #include <osmscout/POIService.h>
 
 #include <algorithm>
+#include <future>
 
 #include <osmscout/util/Logger.h>
-
-#if _OPENMP
-#include <omp.h>
-#endif
 
 namespace osmscout {
 
@@ -38,167 +35,6 @@ namespace osmscout {
   POIService::~POIService()
   {
     // no code
-  }
-
-  /**
-   * Return all nodes in the given bounding box with the given type
-   * @param boundingBox
-   *    Bounding box, objects must be in
-   * @param types
-   *    The resulting nodes must be of one of these types
-   * @param nodes
-   *    Result of the query, in case the query succeeded. In case of errors
-   *    the result is empty.
-   * @return
-   *    True, if success, else false
-   */
-  bool POIService::GetNodesInArea(const GeoBox& boundingBox,
-                                  const TypeInfoSet& types,
-                                  std::vector<NodeRef>& nodes) const
-  {
-    AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
-    NodeDataFileRef  nodeDataFile=database->GetNodeDataFile();
-    TypeInfoSet      loadedTypes;
-
-    nodes.clear();
-
-    if (!areaNodeIndex ||
-        !nodeDataFile) {
-      return false;
-    }
-
-    std::vector<FileOffset> offsets;
-
-    if (!areaNodeIndex->GetOffsets(boundingBox,
-                                   types,
-                                   offsets,
-                                   loadedTypes)) {
-      log.Error() << "Error getting nodes from area node index!";
-
-      return false;
-    }
-
-    std::sort(offsets.begin(),
-              offsets.end());
-
-    if (!nodeDataFile->GetByOffset(offsets.begin(),
-                                   offsets.end(),
-                                   offsets.size(),
-                                   nodes)) {
-      log.Error() << "Error reading nodes in area!";
-
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Return all areas in the given bounding box with the given type
-   * @param boundingBox
-   *    Bounding box, objects must be in
-   * @param types
-   *    The resulting areas must be of one of these types
-   * @param nodes
-   *    Result of the query, in case the query succeeded. In case of errors
-   *    the result is empty.
-   * @return
-   *    True, if success, else false
-   */
-  bool POIService::GetAreasInArea(const GeoBox& boundingBox,
-                                  const TypeInfoSet& types,
-                                  std::vector<AreaRef>& areas) const
-  {
-    AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
-    AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
-    TypeInfoSet      loadedTypes;
-
-    areas.clear();
-
-    if (!areaAreaIndex ||
-        !areaDataFile) {
-      return false;
-    }
-
-    std::vector<DataBlockSpan> spans;
-
-    if (!areaAreaIndex->GetAreasInArea(*database->GetTypeConfig(),
-                                       boundingBox,
-                                       std::numeric_limits<size_t>::max(),
-                                       types,
-                                       spans,
-                                       loadedTypes)) {
-      log.Error() << "Error getting ways and relations from area index!";
-
-      return false;
-    }
-
-    if (!spans.empty()) {
-      std::sort(spans.begin(),spans.end());
-
-      if (!areaDataFile->GetByBlockSpans(spans.begin(),
-                                         spans.end(),
-                                         areas)) {
-        log.Error() << "Error reading areas in area!";
-
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Return all ways in the given bounding box with the given type
-   * @param boundingBox
-   *    Bounding box, objects must be in
-   * @param types
-   *    The resulting ways must be of one of these types
-   * @param nodes
-   *    Result of the query, in case the query succeeded. In case of errors
-   *    the result is empty.
-   * @return
-   *    True, if success, else false
-   */
-  bool POIService::GetWaysInArea(const GeoBox& boundingBox,
-                                 const TypeInfoSet& types,
-                                 std::vector<WayRef>& ways) const
-  {
-    AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
-    WayDataFileRef  wayDataFile=database->GetWayDataFile();
-
-    ways.clear();
-
-    if (!areaWayIndex ||
-        !wayDataFile) {
-      return false;
-    }
-
-    std::vector<FileOffset> offsets;
-    TypeInfoSet             loadedWayTypes;
-
-
-    if (!areaWayIndex->GetOffsets(boundingBox,
-                                  types,
-                                  offsets,
-                                  loadedWayTypes)) {
-      log.Error() << "Error getting ways and relations from area way index!";
-
-      return false;
-    }
-
-    std::sort(offsets.begin(),offsets.end());
-
-    if (!wayDataFile->GetByOffset(offsets.begin(),
-                                  offsets.end(),
-                                  offsets.size(),
-                                  ways)) {
-      log.Error() << "Error reading ways in area!";
-
-      return true;
-    }
-
-    return true;
   }
 
   /**
@@ -217,10 +53,10 @@ namespace osmscout {
    * @param areas
    *    Result of the query, in case the query succeeded. In case of errors
    *    the result is empty.
-   * @return
-   *    True, if success, else false
+   * @exception
+   *    OSMScoutException in case of errors
    */
-  bool POIService::GetPOIsInArea(const GeoBox& boundingBox,
+  void POIService::GetPOIsInArea(const GeoBox& boundingBox,
                                  const TypeInfoSet& nodeTypes,
                                  std::vector<NodeRef>& nodes,
                                  const TypeInfoSet& wayTypes,
@@ -228,40 +64,124 @@ namespace osmscout {
                                  const TypeInfoSet& areaTypes,
                                  std::vector<AreaRef>& areas) const
   {
-    bool nodesSuccess;
-    bool waysSuccess;
-    bool areasSuccess;
+    nodes.clear();
+    areas.clear();
+    ways.clear();
 
-#pragma omp parallel
-#pragma omp sections
-    {
-#pragma omp section
-      nodesSuccess=GetNodesInArea(boundingBox,
-                                  nodeTypes,
-                                  nodes);
+    auto nodeResult=std::async(std::launch::async,
+                               &Database::LoadNodesInArea,database,
+                               std::ref(nodeTypes),
+                               std::ref(boundingBox));
 
-#pragma omp section
+    auto wayResult=std::async(std::launch::async,
+                              &Database::LoadWaysInArea,database,
+                              std::ref(wayTypes),
+                              std::ref(boundingBox));
 
-      areasSuccess=GetAreasInArea(boundingBox,
-                                  areaTypes,
-                                  areas);
+    auto areaResult=std::async(std::launch::async,
+                               &Database::LoadAreasInArea,database,
+                               std::ref(areaTypes),
+                               std::ref(boundingBox));
 
-#pragma omp section
-      waysSuccess=GetWaysInArea(boundingBox,
-                                wayTypes,
-                                ways);
+    auto nodeResultData=nodeResult.get();
+
+    nodes.reserve(nodeResultData.GetNodeResults().size());
+
+    for (const auto& entry : nodeResultData.GetNodeResults()) {
+      nodes.push_back(entry.GetNode());
     }
 
-    if (!nodesSuccess ||
-        !waysSuccess ||
-        !areasSuccess) {
-      nodes.clear();
-      areas.clear();
-      ways.clear();
+    auto wayResultData=wayResult.get();
 
-      return false;
+    ways.reserve(wayResultData.GetWayResults().size());
+
+    for (const auto& entry : wayResultData.GetWayResults()) {
+      ways.push_back(entry.GetWay());
     }
 
-    return true;
+    auto areaResultData=areaResult.get();
+
+    areas.reserve(areaResultData.GetAreaResults().size());
+
+    for (const auto& entry : areaResultData.GetAreaResults()) {
+      areas.push_back(entry.GetArea());
+    }
+  }
+
+  /**
+   * Returns all objects with the given max distance from the given location that have one of the given types.
+   *
+   * @param location
+   *    Center of the radius
+   * @param maxDistance
+   *    Maximum radius form the location to search in
+   * @param types
+   *    The resulting nodes, ways and areas must be of one of these types
+   * @param nodes
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
+   * @param ways
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
+   * @param areas
+   *    Result of the query, in case the query succeeded. In case of errors
+   *    the result is empty.
+   * @exception
+   *    OSMScoutException in case of errors
+   */
+  void POIService::GetPOIsInRadius(const GeoCoord& location,
+                                   const Distance& maxDistance,
+                                   const TypeInfoSet& nodeTypes,
+                                   std::vector<NodeRef>& nodes,
+                                   const TypeInfoSet& wayTypes,
+                                   std::vector<WayRef>& ways,
+                                   const TypeInfoSet& areaTypes,
+                                   std::vector<AreaRef>& areas) const
+  {
+    nodes.clear();
+    areas.clear();
+    ways.clear();
+
+    auto nodeResult=std::async(std::launch::async,
+                               &Database::LoadNodesInRadius,database,
+                               std::ref(location),
+                               std::ref(nodeTypes),
+                               std::ref(maxDistance));
+
+    auto wayResult=std::async(std::launch::async,
+                              &Database::LoadWaysInRadius,database,
+                              std::ref(location),
+                              std::ref(wayTypes),
+                              std::ref(maxDistance));
+
+    auto areaResult=std::async(std::launch::async,
+                               &Database::LoadAreasInRadius,database,
+                               std::ref(location),
+                               std::ref(areaTypes),
+                               std::ref(maxDistance));
+
+    auto nodeResultData=nodeResult.get();
+
+    nodes.reserve(nodeResultData.GetNodeResults().size());
+
+    for (const auto& entry : nodeResultData.GetNodeResults()) {
+      nodes.push_back(entry.GetNode());
+    }
+
+    auto wayResultData=wayResult.get();
+
+    ways.reserve(wayResultData.GetWayResults().size());
+
+    for (const auto& entry : wayResultData.GetWayResults()) {
+      ways.push_back(entry.GetWay());
+    }
+
+    auto areaResultData=areaResult.get();
+
+    areas.reserve(areaResultData.GetAreaResults().size());
+
+    for (const auto& entry : areaResultData.GetAreaResults()) {
+      areas.push_back(entry.GetArea());
+    }
   }
 }

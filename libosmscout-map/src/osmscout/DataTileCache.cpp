@@ -28,8 +28,9 @@ namespace osmscout {
   /**
    * Create a new tile with the given id.
    */
-  Tile::Tile(const TileId& id)
-  : id(id)
+  Tile::Tile(const TileKey& key)
+  : key(key),
+    boundingBox(key.GetBoundingBox())
   {
     // no code
   }
@@ -76,7 +77,7 @@ namespace osmscout {
         //if (currentEntry->tile.expired()) {
         if (currentEntry->tile.use_count()==1) {
           //std::cout << "Dropping tile " << (std::string)currentEntry->id << " from cache " << cache.size() << "/" << cacheSize << std::endl;
-          tileIndex.erase(currentEntry->id);
+          tileIndex.erase(currentEntry->key);
 
           ++currentEntry;
           currentEntry=std::reverse_iterator<Cache::iterator>(tileCache.erase(currentEntry.base()));
@@ -106,36 +107,39 @@ namespace osmscout {
    * Return the cache tiles with the given id. If the tiles is not cache,
    * an empty reference will be returned.
    */
-  TileRef DataTileCache::GetCachedTile(const TileId& id) const
+  TileRef DataTileCache::GetCachedTile(const TileKey& key) const
   {
-    std::map<TileId,CacheRef>::iterator existingEntry=tileIndex.find(id);
+    auto existingEntry=tileIndex.find(key);
 
     if (existingEntry!=tileIndex.end()) {
-      tileCache.splice(tileCache.begin(),tileCache,existingEntry->second);
+      tileCache.splice(tileCache.begin(),
+                       tileCache,
+                       existingEntry->second);
       existingEntry->second=tileCache.begin();
 
       return existingEntry->second->tile;//.lock();
     }
 
-    return NULL;
+    return nullptr;
   }
 
   /**
    * Return the tile with the given id. If the tile is not currently cached
    * return an empty and unassigned tile and move it to the front of the cache.
    */
-  TileRef DataTileCache::GetTile(const TileId& id) const
+  TileRef DataTileCache::GetTile(const TileKey& key) const
   {
-    std::map<TileId,CacheRef>::iterator existingEntry=tileIndex.find(id);
+    auto existingEntry=tileIndex.find(key);
 
     if (existingEntry==tileIndex.end()) {
-      TileRef tile(new Tile(id));
+      TileRef tile(new Tile(key));
 
       // Updating cache
-      CacheEntry cacheEntry(id,tile);
+      CacheEntry cacheEntry(key,
+                            tile);
 
       tileCache.push_front(cacheEntry);
-      tileIndex[id]=tileCache.begin();
+      tileIndex[key]=tileCache.begin();
 
       return tile;
     }
@@ -151,27 +155,18 @@ namespace osmscout {
    * Return all tile necessary for covering the given boundingbox using the given magnification.
    */
   void DataTileCache::GetTilesForBoundingBox(const Magnification& magnification,
-                                              const GeoBox& boundingBox,
-                                              std::list<TileRef>& tiles) const
+                                             const GeoBox& boundingBox,
+                                             std::list<TileRef>& tiles) const
   {
     tiles.clear();
 
     //log.Debug() << "Creating tile data for level " << level << " and bounding box " << boundingBox.GetDisplayText();
 
-    uint32_t level=magnification.GetLevel();
+    TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                  TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-    uint32_t cx1=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
-    uint32_t cy1=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
-
-    uint32_t cx2=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
-    uint32_t cy2=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
-
-    //std::cout << "Tile bounding box: " << cx1 << "," << cy1 << " - "  << cx2 << "," << cy2 << std::endl;
-
-    for (size_t y=cy1; y<=cy2; y++) {
-      for (size_t x=cx1; x<=cx2; x++) {
-        tiles.push_back(GetTile(TileId(magnification,x,y)));
-      }
+    for (const auto& tileId : box) {
+      tiles.push_back(GetTile(TileKey(magnification,tileId)));
     }
   }
 
@@ -226,11 +221,7 @@ namespace osmscout {
 
       parentTile.GetWayData().CopyData([&](const WayRef& way) {
         if (subset.IsSet(way->GetType())) {
-          GeoBox wayBoundingBox;
-
-          way->GetBoundingBox(wayBoundingBox);
-
-          if (wayBoundingBox.Intersects(boundingBox)) {
+          if (way->GetBoundingBox().Intersects(boundingBox)) {
             data.push_back(way);
           }
         }
@@ -261,11 +252,7 @@ namespace osmscout {
 
       parentTile.GetAreaData().CopyData([&](const AreaRef& area) {
         if (subset.IsSet(area->GetType())) {
-          GeoBox areaBoundingBox;
-
-          area->GetBoundingBox(areaBoundingBox);
-
-          if (areaBoundingBox.Intersects(boundingBox)) {
+          if (area->GetBoundingBox().Intersects(boundingBox)) {
             data.push_back(area);
           }
         }
@@ -283,15 +270,15 @@ namespace osmscout {
    * and copying data that intersects the bounding box of the given tile.
    */
   void DataTileCache::PrefillDataFromCache(Tile& tile,
-                                            const TypeInfoSet& nodeTypes,
-                                            const TypeInfoSet& wayTypes,
-                                            const TypeInfoSet& areaTypes,
-                                            const TypeInfoSet& /*optimizedWayTypes*/,
-                                            const TypeInfoSet& /*optimizedAreaTypes*/)
+                                           const TypeInfoSet& nodeTypes,
+                                           const TypeInfoSet& wayTypes,
+                                           const TypeInfoSet& areaTypes,
+                                           const TypeInfoSet& /*optimizedWayTypes*/,
+                                           const TypeInfoSet& /*optimizedAreaTypes*/)
   {
-    if (tile.GetId().GetLevel()>0) {
-      TileId parentTileId=tile.GetId().GetParent();
-      TileRef parentTile=GetCachedTile(parentTileId);
+    if (tile.GetLevel()>0) {
+      TileKey parentTileKey=tile.GetKey().GetParent();
+      TileRef parentTile=GetCachedTile(parentTileKey);
 
       GeoBox boundingBox=tile.GetBoundingBox();
 

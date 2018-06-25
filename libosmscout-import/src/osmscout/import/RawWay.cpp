@@ -62,14 +62,14 @@ namespace osmscout {
   }
 
   void RawWay::Parse(TagErrorReporter& errorReporter,
-                     const TypeConfig& typeConfig,
+                     const TagRegistry& tagRegistry,
                      const TagMap& tags)
   {
     ObjectOSMRef object(id,
                         osmRefWay);
 
     featureValueBuffer.Parse(errorReporter,
-                             typeConfig,
+                             tagRegistry,
                              object,
                              tags);
   }

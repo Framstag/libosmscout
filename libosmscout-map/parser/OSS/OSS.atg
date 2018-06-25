@@ -64,12 +64,24 @@ size_t GetHexDigitValue(char c)
 
 void AddFeatureToFilter(StyleFilter& filter,
                         const std::string& featureName,
+                        const std::string& flagName,
                         TypeInfoSet& resultTypes)
 {
   FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 
   if (!feature) {
     std::string e="Unknown feature '"+featureName+"'";
+
+    SemErr(e.c_str());
+    return;
+  }
+
+  size_t flagIndex=std::numeric_limits<size_t>::max();
+
+  if (!flagName.empty() &&
+      !feature->GetFlagIndex(flagName,
+                             flagIndex)) {
+    std::string e="Unknown feature flag '"+featureName+"."+flagName+"'";
 
     SemErr(e.c_str());
     return;
@@ -89,7 +101,8 @@ void AddFeatureToFilter(StyleFilter& filter,
   if (!resultTypes.Empty()) {
     size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
 
-    filter.AddFeature(featureFilterIndex);
+    filter.AddFeature(featureFilterIndex,
+                      flagIndex);
   }
 }
 
@@ -698,26 +711,33 @@ PRODUCTIONS
   STYLEFILTER_FEATURE<StyleFilter& filter>
               = (.
                   TypeInfoSet types;
-                  std::string featureName;
                 .)
                 "FEATURE"
-                IDENT<featureName>
-                (.
-                  AddFeatureToFilter(filter,
-                                     featureName,
-                                     types);
-                .)
+                STYLEFILTER_FEATURE_ENTRY<filter,types>
                 {
                   ","
-                  IDENT<featureName>
-                  (.
-                    AddFeatureToFilter(filter,
-                                       featureName,
-                                       types);
-                  .)
+                  STYLEFILTER_FEATURE_ENTRY<filter,types>
                 }
 
                 (. filter.SetTypes(types); .)
+                .
+
+  STYLEFILTER_FEATURE_ENTRY<StyleFilter& filter, TypeInfoSet& types>
+              = (.
+                  std::string featureName;
+                  std::string flagName;
+                .)
+                IDENT<featureName>
+                [
+                  "."
+                  IDENT<flagName>
+                ]
+                (.
+                  AddFeatureToFilter(filter,
+                                     featureName,
+                                     flagName,
+                                     types);
+                .)
                 .
 
   STYLEFILTER_PATH<StyleFilter& filter>
@@ -1478,10 +1498,10 @@ PRODUCTIONS
                      }
                      else if (valueType==ValueType::NUMBER) {
                        Magnification magnification;
-                       size_t        level;
+                       uint32_t      level;
 
                        if (StringToNumber(number,level)) {
-                         magnification.SetLevel((uint32_t)level);
+                         magnification.SetLevel(osmscout::MagnificationLevel(level));
                        }
                        else {
                          std::string e="Cannot parse number '"+std::string(number)+"'";
@@ -2003,7 +2023,7 @@ PRODUCTIONS
                 )
                 |
                 (
-                  (. size_t level; .)
+                  (. uint32_t level; .)
                   number
                   (.
                     if (!StringToNumber(t->val,level)) {
@@ -2012,7 +2032,7 @@ PRODUCTIONS
                       SemErr(e.c_str());
                     }
                     else {
-                      magnification.SetLevel((uint32_t)level);
+                      magnification.SetLevel(osmscout::MagnificationLevel(level));
                     }
                   .)
                 )
@@ -2022,7 +2042,7 @@ PRODUCTIONS
                   CONSTANT<constant>
                   (.
                     if (!constant) {
-                      magnification.SetLevel(0);
+                      magnification.SetLevel(osmscout::MagnificationLevel(0));
                     }
                     else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
                       std::string e="Variable is not of type 'MAG'";

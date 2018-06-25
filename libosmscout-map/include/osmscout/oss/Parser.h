@@ -168,12 +168,24 @@ size_t GetHexDigitValue(char c)
 
 void AddFeatureToFilter(StyleFilter& filter,
                         const std::string& featureName,
+                        const std::string& flagName,
                         TypeInfoSet& resultTypes)
 {
   FeatureRef feature=config.GetTypeConfig()->GetFeature(featureName);
 
   if (!feature) {
     std::string e="Unknown feature '"+featureName+"'";
+
+    SemErr(e.c_str());
+    return;
+  }
+
+  size_t flagIndex=std::numeric_limits<size_t>::max();
+
+  if (!flagName.empty() &&
+      !feature->GetFlagIndex(flagName,
+                             flagIndex)) {
+    std::string e="Unknown feature flag '"+featureName+"."+flagName+"'";
 
     SemErr(e.c_str());
     return;
@@ -193,7 +205,8 @@ void AddFeatureToFilter(StyleFilter& filter,
   if (!resultTypes.Empty()) {
     size_t featureFilterIndex=config.GetFeatureFilterIndex(*feature);
 
-    filter.AddFeature(featureFilterIndex);
+    filter.AddFeature(featureFilterIndex,
+                      flagIndex);
   }
 }
 
@@ -252,6 +265,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 	void STYLEFILTER_MAG(StyleFilter& filter);
 	void STYLEFILTER_ONEWAY(StyleFilter& filter);
 	void STYLEFILTER_SIZE(StyleFilter& filter);
+	void STYLEFILTER_FEATURE_ENTRY(StyleFilter& filter, TypeInfoSet& types);
 	void SIZECONDITION(SizeConditionRef& condition);
 	void NODESTYLEDEF(StyleFilter filter, bool state);
 	void WAYSTYLEDEF(StyleFilter filter, bool state);

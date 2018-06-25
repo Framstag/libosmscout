@@ -36,6 +36,7 @@
 %include <osmscout/util/TagErrorReporter.i>
 
 %include <osmscout/TypeConfig.i>
+
 %include <osmscout/BoundingBoxDataFile.i>
 
 %include <osmscout/Node.i>

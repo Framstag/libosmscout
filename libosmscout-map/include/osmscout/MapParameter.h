@@ -69,7 +69,7 @@ namespace osmscout {
   private:
 // Contour labels
     double                              contourLabelOffset;        //!< Offset in mm for beginning and end of an contour label in relation to contour begin and end
-    double                              contourLabelSpace;         //!< Space in mm between repetive labels on the same contour
+    double                              contourLabelSpace;         //!< Space in mm between repetitive labels on the same contour
 
     bool                                renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                                renderSeaLand;             //!< Rendering of sea/land tiles

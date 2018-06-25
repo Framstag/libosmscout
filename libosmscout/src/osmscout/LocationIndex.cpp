@@ -270,6 +270,7 @@ namespace osmscout {
   bool LocationIndex::VisitLocations(const AdminRegion& adminRegion,
                                      FileScanner& scanner,
                                      LocationVisitor& visitor,
+                                     bool recursive,
                                      bool& stopped) const
   {
     //std::cout << "Visiting locations for " << adminRegion.name << std::endl;
@@ -327,6 +328,10 @@ namespace osmscout {
       }
     }
 
+    if (!recursive) {
+      return true;
+    }
+
     for (const auto offset : adminRegion.childrenOffsets) {
       AdminRegion childRegion;
 
@@ -342,6 +347,7 @@ namespace osmscout {
       if (!VisitLocations(childRegion,
                           scanner,
                           visitor,
+                          recursive,
                           stopped)) {
         return false;
       }
@@ -706,7 +712,8 @@ namespace osmscout {
   }
 
   bool LocationIndex::VisitLocations(const AdminRegion& adminRegion,
-                                     LocationVisitor& visitor) const
+                                     LocationVisitor& visitor,
+                                     bool recursive) const
   {
     FileScanner scanner;
 
@@ -721,6 +728,7 @@ namespace osmscout {
       if (!VisitLocations(adminRegion,
                           scanner,
                           visitor,
+                          recursive,
                           stopped)) {
         scanner.Close();
         return false;
@@ -840,17 +848,17 @@ namespace osmscout {
 
           scanner.SetPos(offset);
 
-          AdminRegion adminRegion;
+          AdminRegion currentAdminRegion;
 
           if (!LoadAdminRegion(scanner,
-                               adminRegion)) {
+                               currentAdminRegion)) {
             return false;
           }
 
-          refs[adminRegion.regionOffset]=std::make_shared<AdminRegion>(adminRegion);
+          refs[currentAdminRegion.regionOffset]=std::make_shared<AdminRegion>(currentAdminRegion);
 
-          if (adminRegion.parentRegionOffset!=0) {
-            newOffsets.push_back(adminRegion.parentRegionOffset);
+          if (currentAdminRegion.parentRegionOffset!=0) {
+            newOffsets.push_back(currentAdminRegion.parentRegionOffset);
           }
 
         }

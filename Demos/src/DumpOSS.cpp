@@ -76,7 +76,7 @@ void DumpTextStyleAttributes(const std::set<osmscout::TextStyle::Attribute>& att
 
 void DumpType(const osmscout::TypeConfigRef& /*typeConfig*/,
               const osmscout::StyleConfigRef& styleConfig,
-              size_t level,
+              const osmscout::MagnificationLevel& level,
               const osmscout::TypeInfoRef& type)
 {
   // Node
@@ -87,17 +87,17 @@ void DumpType(const osmscout::TypeConfigRef& /*typeConfig*/,
   std::list<osmscout::TextStyleSelector> areaTextStyleSelectors;
 
   if (type->CanBeNode()) {
-    styleConfig->GetNodeTextStyleSelectors(level,
+    styleConfig->GetNodeTextStyleSelectors(level.Get(),
                                            type,
                                            nodeTextStyleSelectors);
   }
 
   if (type->CanBeArea()) {
-    styleConfig->GetAreaFillStyleSelectors(level,
+    styleConfig->GetAreaFillStyleSelectors(level.Get(),
                                            type,
                                            areaFillStyleSelectors);
 
-    styleConfig->GetAreaTextStyleSelectors(level,
+    styleConfig->GetAreaTextStyleSelectors(level.Get(),
                                            type,
                                            areaTextStyleSelectors);
   }
@@ -188,12 +188,12 @@ void DumpType(const osmscout::TypeConfigRef& /*typeConfig*/,
 
 void DumpLevel(const osmscout::TypeConfigRef& typeConfig,
                const osmscout::StyleConfigRef& styleConfig,
-               size_t level)
+               const osmscout::MagnificationLevel& level)
 {
   osmscout::MagnificationConverter magConverter;
   std::string                      magName;
 
-  if (level>0) {
+  if (level.Get()>0) {
     std::cout << std::endl;
   }
 
@@ -224,10 +224,10 @@ void DumpOSSFile(const osmscout::TypeConfigRef& typeConfig,
 {
   std::cout << "OSS" << std::endl;
 
-  for (size_t level=0; level<=20; level++) {
+  for (uint32_t level=0; level<=20; level++) {
     DumpLevel(typeConfig,
               styleConfig,
-              level);
+              osmscout::MagnificationLevel(level));
 
   }
 
@@ -289,8 +289,8 @@ int main(int argc, char* argv[])
   DumpOSSFile(typeConfig,
               styleConfig);
 
-  styleConfig=NULL;
-  typeConfig=NULL;
+  styleConfig=nullptr;
+  typeConfig=nullptr;
 
   return 0;
 }

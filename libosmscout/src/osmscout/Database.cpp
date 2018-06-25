@@ -149,6 +149,33 @@ namespace osmscout {
     return indexMMap;
   }
 
+  NodeRegionSearchResultEntry::NodeRegionSearchResultEntry(const NodeRef &node,
+                                                           const Distance &distance)
+  : node(node),
+    distance(distance)
+  {
+  }
+
+  WayRegionSearchResultEntry::WayRegionSearchResultEntry(const WayRef &way,
+                                                         const Distance &distance,
+                                                         const GeoCoord &closestPoint)
+  : way(way),
+    distance(distance),
+    closestPoint(closestPoint)
+  {
+  }
+
+  AreaRegionSearchResultEntry::AreaRegionSearchResultEntry(const AreaRef& area,
+                                                           const Distance &distance,
+                                                           const GeoCoord& closestPoint,
+                                                           bool inArea)
+  : area(area),
+    distance(distance),
+    closestPoint(closestPoint),
+    inArea(inArea)
+  {
+  }
+
   Database::Database(const DatabaseParameter& parameter)
    : parameter(parameter),
      isOpen(false)
@@ -833,7 +860,7 @@ namespace osmscout {
   }
 
   bool Database::GetAreasByBlockSpan(const DataBlockSpan& span,
-                           std::vector<AreaRef>& area) const
+                                     std::vector<AreaRef>& area) const
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
@@ -845,7 +872,7 @@ namespace osmscout {
   }
 
   bool Database::GetAreasByBlockSpans(const std::vector<DataBlockSpan>& spans,
-                            std::vector<AreaRef>& areas) const
+                                      std::vector<AreaRef>& areas) const
   {
     AreaDataFileRef areaDataFile=GetAreaDataFile();
 
@@ -974,5 +1001,476 @@ namespace osmscout {
     if (waterIndex) {
       waterIndex->DumpStatistics();
     }
+  }
+
+  NodeRegionSearchResult Database::LoadNodesInRadius(const GeoCoord& location,
+                                                     const TypeInfoSet& types,
+                                                     Distance maxDistance)
+  {
+    AreaNodeIndexRef areaNodeIndex=GetAreaNodeIndex();
+
+    if (!areaNodeIndex) {
+      throw UninitializedException("AreaNodeIndex");
+    }
+
+    NodeRegionSearchResult  result;
+    GeoBox                  box=GeoBox::BoxByCenterAndRadius(location,
+                                                             maxDistance);
+    std::vector<FileOffset> offsets;
+    TypeInfoSet             loadedAddressTypes;
+
+    if (!areaNodeIndex->GetOffsets(box,
+                                   types,
+                                   offsets,
+                                   loadedAddressTypes)) {
+      throw IOException(areaNodeIndex->GetFilename(),
+                        "Error while reading offsets");
+    }
+
+    if (offsets.empty()) {
+      return result;
+    }
+
+    std::vector<NodeRef> nodes;
+
+    if (!GetNodesByOffset(offsets,
+                          nodes)) {
+      throw IOException(nodeDataFile->GetFilename(),
+                        "Error while reading nodes");
+    }
+
+    if (nodes.empty()) {
+      return result;
+    }
+
+    for (const auto& node : nodes) {
+      Distance distance=GetEllipsoidalDistance(location,
+                                               node.get()->GetCoords());
+      if (distance<=maxDistance) {
+        result.nodeResults.push_back(NodeRegionSearchResultEntry(node,
+                                                                 distance));
+      }
+    }
+
+    return result;
+  }
+
+  WayRegionSearchResult Database::LoadWaysInRadius(const GeoCoord& location,
+                                                   const TypeInfoSet& types,
+                                                   Distance maxDistance)
+  {
+    AreaWayIndexRef areaWayIndex=GetAreaWayIndex();
+
+    if (!areaWayIndex) {
+      throw UninitializedException("AreaWayIndex");
+    }
+
+    WayRegionSearchResult   result;
+    GeoBox                  box=GeoBox::BoxByCenterAndRadius(location,
+                                                             maxDistance);
+    std::vector<FileOffset> offsets;
+    TypeInfoSet             loadedAddressTypes;
+
+    if (!areaWayIndex->GetOffsets(box,
+                                  types,
+                                  offsets,
+                                  loadedAddressTypes)) {
+      throw IOException(areaWayIndex->GetFilename(),
+                        "Error while reading offsets");
+    }
+
+    if (offsets.empty()) {
+      return result;
+    }
+
+    std::vector<WayRef> ways;
+
+    if (!GetWaysByOffset(offsets,
+                         ways)) {
+      throw IOException(areaDataFile->GetFilename(),
+                        "Error while reading ways");
+    }
+
+    if (ways.empty()) {
+      return result;
+    }
+
+    for (const auto& way : ways) {
+      Distance distance=Distance::Max();
+      GeoCoord closestPoint;
+
+      for (size_t i=1; i<way->nodes.size(); i++) {
+        Distance currentDistance;
+        GeoCoord a;
+        GeoCoord b;
+        GeoCoord intersection;
+
+        a=way->nodes[i-1].GetCoord();
+        b=way->nodes[i].GetCoord();
+
+        double newDistance=CalculateDistancePointToLineSegment(location,
+                                                               a,
+                                                               b,
+                                                               intersection);
+
+        if (!std::isfinite(newDistance)) {
+          continue;
+        }
+
+        currentDistance=GetEllipsoidalDistance(location,
+                                               intersection);
+
+        if (currentDistance<distance) {
+          distance=currentDistance;
+          closestPoint=intersection;
+        }
+      }
+
+      if (distance<=maxDistance) {
+        result.wayResults.push_back(WayRegionSearchResultEntry(way,
+                                                               distance,
+                                                               closestPoint));
+      }
+    }
+
+    return result;
+  }
+
+  AreaRegionSearchResult Database::LoadAreasInRadius(const GeoCoord& location,
+                                                     const TypeInfoSet& types,
+                                                     Distance maxDistance)
+  {
+    AreaAreaIndexRef areaAreaIndex=GetAreaAreaIndex();
+
+    if (!areaAreaIndex) {
+      throw UninitializedException("AreaAreaIndex");
+    }
+
+    AreaRegionSearchResult     result;
+    GeoBox                     box=GeoBox::BoxByCenterAndRadius(location,
+                                                                maxDistance);
+    std::vector<DataBlockSpan> areaSpans;
+    TypeInfoSet                loadedTypes;
+
+    if (!areaAreaIndex->GetAreasInArea(*typeConfig,
+                                       box,
+                                       std::numeric_limits<size_t>::max(),
+                                       types,
+                                       areaSpans,
+                                       loadedTypes)) {
+      throw IOException(areaAreaIndex->GetFilename(),
+                        "Error while reading offsets");
+    }
+
+    if (areaSpans.empty()) {
+      return result;
+    }
+
+    std::vector<AreaRef> areas;
+
+    if (!GetAreasByBlockSpans(areaSpans,
+                              areas)) {
+      throw IOException(areaDataFile->GetFilename(),
+                        "Error while reading areas");
+    }
+
+    if (areas.empty()) {
+      return result;
+    }
+
+    for (const auto& area : areas) {
+      Distance distance=Distance::Max();
+      GeoCoord closestPoint;
+      bool     stop=false;
+      bool     inArea=false;
+
+      for (const auto& ring : area->rings) {
+        if (stop) {
+          break;
+        }
+
+        if (ring.IsOuterRing()) {
+          if (IsCoordInArea(location,
+                            ring.nodes)) {
+            distance=Distance::Of<Meter>(0.0);
+            inArea=true;
+            stop=true;
+            break;
+          }
+
+          for (size_t i=0; i<ring.nodes.size(); i++) {
+            Distance currentDistance;
+            GeoCoord a;
+            GeoCoord b;
+            GeoCoord intersection;
+
+            if (i>0) {
+              a=ring.nodes[i-1].GetCoord();
+              b=ring.nodes[i].GetCoord();
+            }
+            else {
+              a=ring.nodes[ring.nodes.size()-1].GetCoord();
+              b=ring.nodes[i].GetCoord();
+            }
+
+            double newDistance=CalculateDistancePointToLineSegment(location,
+                                                                   a,
+                                                                   b,
+                                                                   intersection);
+
+            if (!std::isfinite(newDistance)) {
+              continue;
+            }
+
+            currentDistance=GetEllipsoidalDistance(location,
+                                                   intersection);
+
+            if (currentDistance<distance) {
+              distance=currentDistance;
+              closestPoint=intersection;
+            }
+          }
+        }
+      }
+
+      if (distance<=maxDistance){
+        result.areaResults.push_back(AreaRegionSearchResultEntry(area,
+                                                                 distance,
+                                                                 closestPoint,
+                                                                 inArea));
+      }
+    }
+
+    return result;
+  }
+
+  NodeRegionSearchResult Database::LoadNodesInArea(const TypeInfoSet& types,
+                                                   const GeoBox& boundingBox)
+  {
+    AreaNodeIndexRef areaNodeIndex=GetAreaNodeIndex();
+
+    if (!areaNodeIndex) {
+      throw UninitializedException("AreaNodeIndex");
+    }
+
+    NodeRegionSearchResult  result;
+    std::vector<FileOffset> offsets;
+    TypeInfoSet             loadedAddressTypes;
+    GeoCoord                center=boundingBox.GetCenter();
+
+    if (!areaNodeIndex->GetOffsets(boundingBox,
+                                   types,
+                                   offsets,
+                                   loadedAddressTypes)) {
+      throw IOException(areaNodeIndex->GetFilename(),
+                        "Error while reading offsets");
+    }
+
+    if (offsets.empty()) {
+      return result;
+    }
+
+    std::vector<NodeRef> nodes;
+
+    if (!GetNodesByOffset(offsets,
+                          nodes)) {
+      throw IOException(nodeDataFile->GetFilename(),
+                        "Error while reading nodes");
+    }
+
+    if (nodes.empty()) {
+      return result;
+    }
+
+    for (const auto& node : nodes) {
+      Distance distance=GetEllipsoidalDistance(center,
+                                               node.get()->GetCoords());
+
+      result.nodeResults.push_back(NodeRegionSearchResultEntry(node,
+                                                               distance));
+    }
+
+    return result;
+  }
+
+  WayRegionSearchResult Database::LoadWaysInArea(const TypeInfoSet& types,
+                                                 const GeoBox& boundingBox)
+  {
+    AreaWayIndexRef areaWayIndex=GetAreaWayIndex();
+
+    if (!areaWayIndex) {
+      throw UninitializedException("AreaWayIndex");
+    }
+
+    WayRegionSearchResult   result;
+    std::vector<FileOffset> offsets;
+    TypeInfoSet             loadedAddressTypes;
+    GeoCoord                center=boundingBox.GetCenter();
+
+    if (!areaWayIndex->GetOffsets(boundingBox,
+                                  types,
+                                  offsets,
+                                  loadedAddressTypes)) {
+      throw IOException(areaWayIndex->GetFilename(),
+                        "Error while reading offsets");
+    }
+
+    if (offsets.empty()) {
+      return result;
+    }
+
+    std::vector<WayRef> ways;
+
+    if (!GetWaysByOffset(offsets,
+                         ways)) {
+      throw IOException(areaDataFile->GetFilename(),
+                        "Error while reading ways");
+    }
+
+    if (ways.empty()) {
+      return result;
+    }
+
+    for (const auto& way : ways) {
+      Distance distance=Distance::Max();
+      GeoCoord closestPoint;
+
+      for (size_t i=1; i<way->nodes.size(); i++) {
+        Distance currentDistance;
+        GeoCoord a;
+        GeoCoord b;
+        GeoCoord intersection;
+
+        a=way->nodes[i-1].GetCoord();
+        b=way->nodes[i].GetCoord();
+
+        double newDistance=CalculateDistancePointToLineSegment(center,
+                                                               a,
+                                                               b,
+                                                               intersection);
+
+        if (!std::isfinite(newDistance)) {
+          continue;
+        }
+
+        currentDistance=GetEllipsoidalDistance(center,
+                                               intersection);
+
+        if (currentDistance<distance) {
+          distance=currentDistance;
+          closestPoint=intersection;
+        }
+      }
+
+      result.wayResults.push_back(WayRegionSearchResultEntry(way,
+                                                             distance,
+                                                             closestPoint));
+    }
+
+    return result;
+  }
+
+  AreaRegionSearchResult Database::LoadAreasInArea(const TypeInfoSet& types,
+                                                   const GeoBox& boundingBox)
+  {
+    AreaAreaIndexRef areaAreaIndex=GetAreaAreaIndex();
+
+    if (!areaAreaIndex) {
+      throw UninitializedException("AreaAreaIndex");
+    }
+
+    AreaRegionSearchResult     result;
+    std::vector<DataBlockSpan> areaSpans;
+    TypeInfoSet                loadedTypes;
+    GeoCoord                   center=boundingBox.GetCenter();
+
+    if (!areaAreaIndex->GetAreasInArea(*typeConfig,
+                                       boundingBox,
+                                       std::numeric_limits<size_t>::max(),
+                                       types,
+                                       areaSpans,
+                                       loadedTypes)) {
+      throw IOException(areaAreaIndex->GetFilename(),
+                        "Error while reading offsets");
+    }
+
+    if (areaSpans.empty()) {
+      return result;
+    }
+
+    std::vector<AreaRef> areas;
+
+    if (!GetAreasByBlockSpans(areaSpans,
+                              areas)) {
+      throw IOException(areaDataFile->GetFilename(),
+                        "Error while reading areas");
+    }
+
+    if (areas.empty()) {
+      return result;
+    }
+
+    for (const auto& area : areas) {
+      Distance distance=Distance::Max();
+      GeoCoord closestPoint;
+      bool     stop=false;
+      bool     inArea=false;
+
+      for (const auto& ring : area->rings) {
+        if (stop) {
+          break;
+        }
+
+        if (ring.IsOuterRing()) {
+          if (IsCoordInArea(center,
+                            ring.nodes)) {
+            distance=Distance::Of<Meter>(0.0);
+            inArea=true;
+            stop=true;
+            break;
+          }
+
+          for (size_t i=0; i<ring.nodes.size(); i++) {
+            Distance currentDistance;
+            GeoCoord a;
+            GeoCoord b;
+            GeoCoord intersection;
+
+            if (i>0) {
+              a=ring.nodes[i-1].GetCoord();
+              b=ring.nodes[i].GetCoord();
+            }
+            else {
+              a=ring.nodes[ring.nodes.size()-1].GetCoord();
+              b=ring.nodes[i].GetCoord();
+            }
+
+            double newDistance=CalculateDistancePointToLineSegment(center,
+                                                                   a,
+                                                                   b,
+                                                                   intersection);
+
+            if (!std::isfinite(newDistance)) {
+              continue;
+            }
+
+            currentDistance=GetEllipsoidalDistance(center,
+                                                   intersection);
+
+            if (currentDistance<distance) {
+              distance=currentDistance;
+              closestPoint=intersection;
+            }
+          }
+        }
+      }
+
+      result.areaResults.push_back(AreaRegionSearchResultEntry(area,
+                                                               distance,
+                                                               closestPoint,
+                                                               inArea));
+    }
+
+    return result;
   }
 }

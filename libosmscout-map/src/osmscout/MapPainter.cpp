@@ -1323,10 +1323,10 @@ namespace osmscout {
 
     projection.GetDimensions(boundingBox);
 
-    osmscout::OSMTileId     tileA(OSMTileId::GetOSMTile(boundingBox.GetMinCoord(),
-                                                        magnification));
-    osmscout::OSMTileId     tileB(OSMTileId::GetOSMTile(boundingBox.GetMaxCoord(),
-                                                        magnification));
+    osmscout::OSMTileId     tileA(OSMTileId::GetOSMTile(magnification,
+                                                        boundingBox.GetMinCoord()));
+    osmscout::OSMTileId     tileB(OSMTileId::GetOSMTile(magnification,
+                                                        boundingBox.GetMaxCoord()));
     uint32_t                startTileX=std::min(tileA.GetX(),tileB.GetX());
     uint32_t                endTileX=std::max(tileA.GetX(),tileB.GetX());
     uint32_t                startTileY=std::min(tileA.GetY(),tileB.GetY());
@@ -1616,6 +1616,7 @@ namespace osmscout {
     bool   transformed=false;
     size_t transStart=0; // Make the compiler happy
     size_t transEnd=0;   // Make the compiler happy
+    double mainSlotWidth=0.0;
 
     for (const auto& lineStyle : lineStyles) {
       double       lineWidth=0.0;
@@ -1639,8 +1640,24 @@ namespace osmscout {
         lineWidth+=projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
       }
 
+      if (lineStyle->GetSlot().empty()) {
+        mainSlotWidth=lineWidth;
+      }
+
       if (lineWidth==0.0) {
         continue;
+      }
+
+      switch (lineStyle->GetOffsetRel()) {
+      case LineStyle::base:
+        lineOffset=0.0;
+        break;
+      case LineStyle::leftOutline:
+        lineOffset=-mainSlotWidth/2.0;
+        break;
+      case LineStyle::rightOutline:
+        lineOffset=mainSlotWidth/2.0;
+        break;
       }
 
       if (lineStyle->GetOffset()!=0.0) {
@@ -2189,7 +2206,7 @@ namespace osmscout {
     if (osmSubTileLine) {
       Magnification magnification=projection.GetMagnification();
 
-      magnification.SetLevel(magnification.GetLevel()+1);
+      ++magnification;
 
       DrawOSMTileGrid(projection,
                       parameter,
@@ -2201,8 +2218,6 @@ namespace osmscout {
 
     if (osmTileLine) {
       Magnification magnification=projection.GetMagnification();
-
-      magnification.SetLevel(magnification.GetLevel());
 
       DrawOSMTileGrid(projection,
                       parameter,

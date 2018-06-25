@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/AreaAreaIndex.h>
 #include <osmscout/AreaDataFile.h>
@@ -860,9 +861,7 @@ namespace osmscout {
 
       area.Read(*typeConfig,scanner);
 
-      GeoBox boundingBox;
-
-      area.GetBoundingBox(boundingBox);
+      GeoBox boundingBox=area.GetBoundingBox();
 
       GeoCoord center=boundingBox.GetCenter();
 

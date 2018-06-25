@@ -24,22 +24,34 @@
 
 namespace osmscout {
 
+  MagnificationLevel Magnification::magWorld(0);
+  MagnificationLevel Magnification::magContinent(4);
+  MagnificationLevel Magnification::magState(5);
+  MagnificationLevel Magnification::magStateOver(6);
+  MagnificationLevel Magnification::magCounty(7);
+  MagnificationLevel Magnification::magRegion(8);
+  MagnificationLevel Magnification::magProximity(9);
+  MagnificationLevel Magnification::magCityOver(10);
+  MagnificationLevel Magnification::magCity(11);
+  MagnificationLevel Magnification::magSuburb(12);
+  MagnificationLevel Magnification::magDetail(13);
+  MagnificationLevel Magnification::magClose(14);
+  MagnificationLevel Magnification::magCloser(15);
+  MagnificationLevel Magnification::magVeryClose(16);
+  MagnificationLevel Magnification::magBlock(18);
+  MagnificationLevel Magnification::magStreet(19);
+  MagnificationLevel Magnification::magHouse(20);
+
   void Magnification::SetMagnification(double magnification)
   {
     this->magnification=magnification;
     this->level=(uint32_t)log2(this->magnification);
   }
 
-  void Magnification::SetMagnification(Mag magnification)
+  void Magnification::SetLevel(const MagnificationLevel& level)
   {
-    this->magnification=magnification;
-    this->level=(uint32_t)log2(this->magnification);
-  }
-
-  void Magnification::SetLevel(uint32_t level)
-  {
-    this->magnification=pow(2.0,level);
-    this->level=level;
+    this->magnification=pow(2.0,level.Get());
+    this->level=level.Get();
   }
 
   MagnificationConverter::MagnificationConverter()
@@ -62,23 +74,23 @@ namespace osmscout {
     stringToMagMap[std::string("street")]=Magnification::magStreet;
     stringToMagMap[std::string("house")]=Magnification::magHouse;
 
-    levelToStringMap[(uint32_t)log2((double)Magnification::magWorld)]="world";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magContinent)] = "continent";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magState)] = "state";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magStateOver)] = "stateOver";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magCounty)] = "county";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magRegion)] = "region";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magProximity)] = "proximity";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magCityOver)] = "cityOver";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magCity)] = "city";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magSuburb)] = "suburb";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magDetail)] = "detail";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magClose)] = "close";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magCloser)] = "closer";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magVeryClose)] = "veryClose";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magBlock)] = "block";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magStreet)] = "street";
-    levelToStringMap[(uint32_t)log2((double)Magnification::magHouse)] = "house";
+    levelToStringMap[Magnification::magWorld]="world";
+    levelToStringMap[Magnification::magContinent] = "continent";
+    levelToStringMap[Magnification::magState] = "state";
+    levelToStringMap[Magnification::magStateOver] = "stateOver";
+    levelToStringMap[Magnification::magCounty] = "county";
+    levelToStringMap[Magnification::magRegion] = "region";
+    levelToStringMap[Magnification::magProximity] = "proximity";
+    levelToStringMap[Magnification::magCityOver] = "cityOver";
+    levelToStringMap[Magnification::magCity] = "city";
+    levelToStringMap[Magnification::magSuburb] = "suburb";
+    levelToStringMap[Magnification::magDetail] = "detail";
+    levelToStringMap[Magnification::magClose] = "close";
+    levelToStringMap[Magnification::magCloser] = "closer";
+    levelToStringMap[Magnification::magVeryClose] = "veryClose";
+    levelToStringMap[Magnification::magBlock] = "block";
+    levelToStringMap[Magnification::magStreet] = "street";
+    levelToStringMap[Magnification::magHouse] = "house";
   }
 
   bool MagnificationConverter::Convert(const std::string& name,
@@ -90,12 +102,12 @@ namespace osmscout {
       return false;
     }
 
-    magnification.SetMagnification(entry->second);
+    magnification.SetLevel(entry->second);
 
     return true;
   }
 
-  bool MagnificationConverter::Convert(size_t level,
+  bool MagnificationConverter::Convert(const MagnificationLevel& level,
                                        std::string& name)
   {
     auto entry=levelToStringMap.find(level);

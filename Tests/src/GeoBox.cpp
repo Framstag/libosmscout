@@ -22,38 +22,34 @@
 
 #include <osmscout/util/GeoBox.h>
 
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
 using namespace std;
 
-int main(int /*argc*/, char** /*argv*/)
+TEST_CASE("Invalid boxes should not intersects")
+{
+  osmscout::GeoBox a(osmscout::GeoCoord(0, 0), osmscout::GeoCoord(1, 1));
+  osmscout::GeoBox b;
+
+  REQUIRE(a.IsValid());
+  REQUIRE_FALSE(b.IsValid());
+  REQUIRE_FALSE(a.Intersects(b));
+}
+
+TEST_CASE("Intersection of touching boxes is not commutative by default")
+{
+  osmscout::GeoBox a(osmscout::GeoCoord(0, 0), osmscout::GeoCoord(1, 1));
+  osmscout::GeoBox b(osmscout::GeoCoord(0, 1), osmscout::GeoCoord(1, 2));
+
+  REQUIRE_FALSE(a.Intersects(b));
+  REQUIRE(b.Intersects(a));
+}
+
+TEST_CASE("Intersection of touching boxes is commutative with close interval")
 {
   osmscout::GeoBox a(osmscout::GeoCoord(0,0),osmscout::GeoCoord(1,1));
-  osmscout::GeoBox b;  
-  
-  std::cout << "Invalid boxes should not intersects... ";
-  if (!a.IsValid() ||
-      b.IsValid() ||
-      a.Intersects(b)){
-    std::cout << "Failure" << std::endl;
-    return 1;
-  }
-  std::cout << "OK" << std::endl;
-
-  std::cout << "Intersection of touching boxes is not commutative by default... ";
-  b.Set(osmscout::GeoCoord(0,1),osmscout::GeoCoord(1,2));
-  if (a.Intersects(b) ||
-      !b.Intersects(a)){
-    std::cout << "Failure" << std::endl;
-    return 2;
-  }
-  std::cout << "OK" << std::endl;
-
-  std::cout << "Intersection of touching boxes is commutative with close interval... ";
-  if (!a.Intersects(b,/*openInterval*/false) ||
-      !b.Intersects(a,/*openInterval*/false)){
-    std::cout << "Failure" << std::endl;
-    return 3;
-  }
-  std::cout << "OK" << std::endl;
-
-  return 0;
+  osmscout::GeoBox b(osmscout::GeoCoord(0,1),osmscout::GeoCoord(1,2));
+  REQUIRE(a.Intersects(b,/*openInterval*/false));
+  REQUIRE(b.Intersects(a,/*openInterval*/false));
 }

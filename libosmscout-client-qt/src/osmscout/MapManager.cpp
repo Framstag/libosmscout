@@ -287,7 +287,7 @@ void MapManager::lookupDatabases()
       if (fInfo.isFile() && fInfo.fileName() == osmscout::TypeConfig::FILE_TYPES_DAT){
         MapDirectory mapDir(fInfo.dir());
         if (mapDir.isValid()) {
-          osmscout::log.Info() << "found database" << mapDir.getName().toStdString() << ":" << fInfo.dir().absolutePath().toStdString();
+          osmscout::log.Info() << "found database " << mapDir.getName().toStdString() << ": " << fInfo.dir().absolutePath().toStdString();
           if (!uniqPaths.contains(fInfo.canonicalFilePath())) {
             databaseDirectories << mapDir;
             databaseFsDirectories << mapDir.getDir();

@@ -80,7 +80,7 @@ public slots:
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
   void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
   void onDatabaseLoaded(osmscout::GeoBox boundingBox);
-  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
+  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>);
 
   void onlineTileProviderChanged();
   void onlineTilesEnabledChanged(bool);

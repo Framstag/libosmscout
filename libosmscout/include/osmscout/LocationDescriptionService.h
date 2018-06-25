@@ -26,6 +26,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/Location.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/util/StringMatcher.h>
 
 namespace osmscout {
@@ -55,7 +57,7 @@ namespace osmscout {
   private:
     ObjectFileRef ref;      //!< Reference to the actual object
     std::string   name;     //!< Name of the object
-    double        distance; //!< Distance to the object
+    Distance      distance; //!< Distance to the object
     double        bearing;  //!< Direction towards the object
     bool          atPlace;  //!< We are at the place or only near the place
     double        size;     //!< The size o the place (size of the geographic bounding box)
@@ -63,7 +65,7 @@ namespace osmscout {
   public:
     inline LocationDescriptionCandicate(const ObjectFileRef &ref,
                                         const std::string& name,
-                                        const double distance,
+                                        const Distance &distance,
                                         const double bearing,
                                         const bool atPlace,
                                         const double size)
@@ -87,7 +89,7 @@ namespace osmscout {
       return name;
     }
 
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
@@ -116,15 +118,15 @@ namespace osmscout {
   class OSMSCOUT_API LocationAtPlaceDescription CLASS_FINAL
   {
   private:
-    Place  place;     //!< Place
-    bool   atPlace;   //!< 'true' if at the place itself
-    double distance;  //!< distance to the place
-    double bearing;   //!< bearing to take from place to reach location
+    Place    place;     //!< Place
+    bool     atPlace;   //!< 'true' if at the place itself
+    Distance distance;  //!< distance to the place
+    double   bearing;   //!< bearing to take from place to reach location
 
   public:
     explicit LocationAtPlaceDescription(const Place& place);
     LocationAtPlaceDescription(const Place& place,
-                               double distance,
+                               const Distance &distance,
                                double bearing);
 
     /**
@@ -144,15 +146,15 @@ namespace osmscout {
     }
 
     /**
-     * Return the distance to the location in meter
+     * Return the distance to the location
      */
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
 
     /**
-     * Return the bearing you have to go to from the place for 'distance' meter to reach the location
+     * Return the bearing you have to go to from the place for 'distance' to reach the location
      */
     inline double GetBearing() const
     {
@@ -172,14 +174,14 @@ namespace osmscout {
   class OSMSCOUT_API LocationWayDescription CLASS_FINAL
   {
   private:
-    Place  way;      //!< the nearest way
-    double distance; //!< distance to the way
+    Place    way;      //!< the nearest way
+    Distance distance; //!< distance to the way
 
   public:
     explicit LocationWayDescription(const Place& way);
 
     LocationWayDescription(const Place& way,
-                           double distance);
+                           const Distance &distance);
     /**
      * Return the place this information is refering to
      */
@@ -189,9 +191,9 @@ namespace osmscout {
     }
 
     /**
-     * Return the distance to the location in meter
+     * Return the distance to the location
      */
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
@@ -212,16 +214,16 @@ namespace osmscout {
     GeoCoord         crossing;  //!< The coordinates of the crossing
     bool             atPlace;   //!< 'true' if at the place itself
     std::list<Place> ways;      //!< List of streets
-    double           distance;  //!< distance to the place
+    Distance         distance;  //!< distance to the place
     double           bearing;   //!< bearing to take from place to reach location
 
   public:
     LocationCrossingDescription(const GeoCoord& crossing,
-                               const std::list<Place>& ways);
+                                const std::list<Place>& ways);
 
     LocationCrossingDescription(const GeoCoord& crossing,
                                 const std::list<Place>& ways,
-                                double distance,
+                                const Distance &distance,
                                 double bearing);
     /**
      * Return the place this information is refering to
@@ -240,15 +242,15 @@ namespace osmscout {
     }
 
     /**
-     * Return the distance to the location in meter
+     * Return the distance to the location
      */
-    inline double GetDistance() const
+    inline Distance GetDistance() const
     {
       return distance;
     }
 
     /**
-     * Return the bearing you have to go to from the place for 'distance' meter to reach the location
+     * Return the bearing you have to go to from the place for 'distance' to reach the location
      */
     inline double GetBearing() const
     {
@@ -377,6 +379,16 @@ namespace osmscout {
 
     bool VisitAdminRegions(AdminRegionVisitor& visitor) const;
 
+    void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
+                         const GeoCoord& location,
+                         const NodeRegionSearchResult& results);
+    void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
+                         const GeoCoord& location,
+                         const WayRegionSearchResult& results);
+    void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
+                         const GeoCoord& location,
+                         const AreaRegionSearchResult& results);
+
   public:
     explicit LocationDescriptionService(const DatabaseRef& database);
 
@@ -390,60 +402,31 @@ namespace osmscout {
 
     bool DescribeLocation(const GeoCoord& location,
                           LocationDescription& description,
-                          double lookupDistance=100,
+                          Distance lookupDistance=Distance::Of<Meter>(100),
                           double sizeFilter=1.0);
-
-    /**
-     * @see LoadNearAreas
-     */
-    bool LoadNearNodes(const GeoCoord& location,
-                       const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates,
-                       double maxDistance=100);
-
-    /**
-     * @see LoadNearAreas
-     */
-    bool LoadNearWays(const GeoCoord& location,
-                      const TypeInfoSet &types,
-                      std::vector<WayRef> &candidates,
-                      double maxDistance=100);
-
-    /**
-     * Load areas of given types near to location.
-     *
-     * @param location
-     * @param types
-     * @param candidates - unsorted result buffer
-     * @param maxDistance - lookup distance in meters
-     * @return true if no error (it don't indicate non-empty result)
-     */
-    bool LoadNearAreas(const GeoCoord& location, const TypeInfoSet &types,
-                       std::vector<LocationDescriptionCandicate> &candidates,
-                       double maxDistance=100);
 
     bool DescribeLocationByName(const GeoCoord& location,
                                 LocationDescription& description,
-                                double lookupDistance=100,
+                                Distance lookupDistance=Distance::Of<Meter>(100),
                                 double sizeFilter=1.0);
 
     bool DescribeLocationByAddress(const GeoCoord& location,
                                    LocationDescription& description,
-                                   double lookupDistance=100,
+                                   Distance lookupDistance=Distance::Of<Meter>(100),
                                    double sizeFilter=1.0);
 
     bool DescribeLocationByPOI(const GeoCoord& location,
                                LocationDescription& description,
-                               double lookupDistance=100,
+                               Distance lookupDistance=Distance::Of<Meter>(100),
                                double sizeFilter=1.0);
 
     bool DescribeLocationByCrossing(const GeoCoord& location,
                                     LocationDescription& description,
-                                    double lookupDistance=100);
+                                    Distance lookupDistance=Distance::Of<Meter>(100));
 
     bool DescribeLocationByWay(const GeoCoord& location,
                                LocationDescription& description,
-                               double lookupDistance=100);
+                               Distance lookupDistance=Distance::Of<Meter>(100));
   };
 
   //! \ingroup Service

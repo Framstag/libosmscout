@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/util/FileScanner.h>
 
@@ -98,6 +99,11 @@ namespace osmscout {
     inline bool IsOpen() const
     {
       return scanner.IsOpen();
+    }
+
+    inline std::string GetFilename() const
+    {
+      return datafilename;
     }
 
     bool GetOffsets(const GeoBox& boundingBox,

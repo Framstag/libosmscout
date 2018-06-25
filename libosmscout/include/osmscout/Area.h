@@ -139,6 +139,7 @@ namespace osmscout {
       bool GetCenter(GeoCoord& center) const;
 
       void GetBoundingBox(GeoBox& boundingBox) const;
+      GeoBox GetBoundingBox() const;
 
       inline void SetType(const TypeInfoRef& type)
       {
@@ -204,7 +205,7 @@ namespace osmscout {
 
     inline ObjectFileRef GetObjectFileRef() const
     {
-      return ObjectFileRef(fileOffset,refArea);
+      return {fileOffset,refArea};
     }
 
     inline TypeInfoRef GetType() const
@@ -224,7 +225,7 @@ namespace osmscout {
 
     bool GetCenter(GeoCoord& center) const;
 
-    void GetBoundingBox(GeoBox& boundingBox) const;
+    GeoBox GetBoundingBox() const;
 
     /**
      * Returns true if the bounding box of the object intersects the given
@@ -237,11 +238,7 @@ namespace osmscout {
      */
     inline bool Intersects(const GeoBox& boundingBox) const
     {
-      GeoBox objectBoundingBox;
-
-      GetBoundingBox(objectBoundingBox);
-
-      return objectBoundingBox.Intersects(boundingBox);
+      return GetBoundingBox().Intersects(boundingBox);
     }
 
     /**

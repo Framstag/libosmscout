@@ -256,7 +256,7 @@ Detailed description in [LocationInfoModel class](/api-doc/html/classLocationInf
 ## Search place
 
 `LocationListModel` provides search in location (address) index and "fulltext" index of named objects.
-It is usual Qt model that may presented by some `ListView`.
+It is usual Qt model that may be presented by some `ListView`.
 
 ```qml
 LocationListModel {
@@ -276,9 +276,31 @@ SilicaListView {
 
 Detailed description in [LocationListModel class](/api-doc/html/classLocationListModel.html).
 
+## Search POI
+
+`NearPOIModel` provide lookup of database objects (not limited to POI) by given coordinates and types.
+It is usual Qt model that may be presented by some `ListView`.
+
+```qml
+NearPOIModel {
+  id: poiModel
+  lat: 50.0923
+  lon: 14.4827
+  maxDistance: 1000
+  types: ["amenity_restaurant", "amenity_restaurant_building"]
+}
+SilicaListView {
+  id: suggestionView
+  model: poiModel
+  delegate: Label {
+    text: label
+  }
+}
+```
+
+Detailed description in [NearPOIModel class](/api-doc/html/classNearPOIModel.html).
+
 ## Routing
-
-
 
 ```qml
 RoutingListModel{

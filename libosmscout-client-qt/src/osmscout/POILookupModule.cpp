@@ -106,29 +106,30 @@ QList<LocationEntry> POILookupModule::lookupPOIRequest(DBInstanceRef db,
 
   // lookup objects
   osmscout::POIService poiService(db->database);
-  if (!poiService.GetPOIsInArea(searchBoundingBox,
-                                nodeTypes,
-                                nodes,
-                                wayTypes,
-                                ways,
-                                areaTypes,
-                                areas)){
-    osmscout::log.Error() << "Failed to load POIs in area";
+  try {
+    poiService.GetPOIsInArea(searchBoundingBox,
+                             nodeTypes,
+                             nodes,
+                             wayTypes,
+                             ways,
+                             areaTypes,
+                             areas);
+  }
+  catch (const std::exception& e) {
+    osmscout::log.Error() << "Failed to load POIs in area: " << e.what();
     return result;
   }
 
   // build location entries
   for (osmscout::AreaRef &area:areas) {
-    osmscout::GeoBox bbox;
-    area->GetBoundingBox(bbox);
+    osmscout::GeoBox   bbox=area->GetBoundingBox();
     osmscout::GeoCoord coordinates=bbox.GetCenter();
 
     result << buildLocationEntry(area, db->path, coordinates, bbox);
   }
 
   for (osmscout::WayRef &way:ways) {
-    osmscout::GeoBox bbox;
-    way->GetBoundingBox(bbox);
+    osmscout::GeoBox   bbox=way->GetBoundingBox();
     osmscout::GeoCoord coordinates=bbox.GetCenter();
 
     result << buildLocationEntry(way, db->path, coordinates, bbox);
@@ -137,7 +138,7 @@ QList<LocationEntry> POILookupModule::lookupPOIRequest(DBInstanceRef db,
   for (osmscout::NodeRef &node:nodes) {
     osmscout::GeoCoord coordinates=node->GetCoords();
     osmscout::GeoBox bbox;
-    bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(node->GetCoords(), 2.0));
+    bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(node->GetCoords(), Distance::Of<Meter>(2.0)));
 
     result << buildLocationEntry(node, db->path, coordinates, bbox);
   }
@@ -151,7 +152,7 @@ void POILookupModule::lookupPOIRequest(int requestId,
                                        QStringList types,
                                        double maxDistance)
 {
-  osmscout::GeoBox searchBoundingBox=osmscout::GeoBox::BoxByCenterAndRadius(searchCenter, maxDistance);
+  osmscout::GeoBox searchBoundingBox=osmscout::GeoBox::BoxByCenterAndRadius(searchCenter, Distance::Of<Meter>(maxDistance));
 
   dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef>& databases){
 

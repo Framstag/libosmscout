@@ -52,12 +52,6 @@ namespace osmscout {
     return true;
   }
 
-  void Way::SetLayerToMax()
-  {
-    // TODO
-    // attributes.SetLayer(std::numeric_limits<int8_t>::max());
-  }
-
   bool Way::GetNodeIndexByNodeId(Id id,
                                  size_t& index) const
   {

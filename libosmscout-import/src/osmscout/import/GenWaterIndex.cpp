@@ -25,7 +25,9 @@
 #include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/CoordDataFile.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 #include <osmscout/WaterIndex.h>
+#include <osmscout/WayDataFile.h>
 
 #include <osmscout/system/Math.h>
 
@@ -36,7 +38,6 @@
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
-#include <osmscout/WayDataFile.h>
 
 #if !defined(DEBUG_COASTLINE)
 //#define DEBUG_COASTLINE
@@ -393,11 +394,9 @@ namespace osmscout {
       progress.Info("Generating index for level "+std::to_string(parameter.GetWaterIndexMinMag())+" to "+std::to_string(parameter.GetWaterIndexMaxMag()));
 
       for (auto& level : levels) {
-        Magnification                          magnification;
+        Magnification                          magnification(MagnificationLevel(level.level));
         MercatorProjection                     projection;
         std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
-
-        magnification.SetLevel(level.level);
 
         projection.Set(GeoCoord(0.0,0.0),magnification,72,640,480);
 

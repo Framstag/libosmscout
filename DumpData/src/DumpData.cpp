@@ -458,20 +458,6 @@ static void DumpSidewayFeatureValue(const osmscout::SidewayFeatureValue& sideway
   DumpIndent(indent);
   std::cout << "Sideway {" << std::endl;
 
-  if (sidewayValue.HasSidewalkLaneLeft() &&
-      sidewayValue.HasSidewalkLaneRight()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: lane both" << std::endl;
-  }
-  else if (sidewayValue.HasSidewalkLaneLeft()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: lane left" << std::endl;
-  }
-  else if (sidewayValue.HasSidewalkLaneRight()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: lane right" << std::endl;
-  }
-
   if (sidewayValue.HasSidewalkTrackLeft() &&
       sidewayValue.HasSidewalkTrackRight()) {
     DumpIndent(indent+2);
@@ -681,9 +667,7 @@ static void DumpNode(const osmscout::NodeRef& node,
 static void DumpWay(const osmscout::WayRef& way,
                     osmscout::OSMId id)
 {
-  osmscout::GeoBox boundingBox;
-
-  way->GetBoundingBox(boundingBox);
+  osmscout::GeoBox boundingBox=way->GetBoundingBox();
 
   std::cout << "Way {" << std::endl;
 
@@ -720,9 +704,7 @@ static void DumpWay(const osmscout::WayRef& way,
 static void DumpArea(const osmscout::AreaRef& area,
                      osmscout::OSMId id)
 {
-  osmscout::GeoBox boundingBox;
-
-  area->GetBoundingBox(boundingBox);
+  osmscout::GeoBox boundingBox=area->GetBoundingBox();
 
   std::cout << "Area {" << std::endl;
 

@@ -94,7 +94,7 @@ void DumpLocationAtPlaceDescription(const std::string& label,
   }
   else {
     std::cout.precision(1);
-    std::cout << "  * You are "  << std::fixed << description.GetDistance() << "m ";
+    std::cout << "  * You are "  << std::fixed << description.GetDistance().AsMeter() << "m ";
     std::cout << osmscout::BearingDisplayString(description.GetBearing());
     std::cout << " of '" << place.GetDisplayString() << "' (" << place.GetObject().GetTypeName() << ")" <<std::endl;
   }
@@ -135,7 +135,7 @@ void DumpWayDescription(const std::string& label,
   std::cout << label << ":" << std::endl;
 
   std::cout.precision(1);
-  std::cout << "  * Your are "  << std::fixed << description.GetDistance() << "m";
+  std::cout << "  * Your are "  << std::fixed << description.GetDistance().AsMeter() << "m";
   std::cout << " away from way:"  << std::endl;
 
   std::cout << "  - " << description.GetWay().GetDisplayString() << " " << description.GetWay().GetObject().GetName() << std::endl;
@@ -157,7 +157,7 @@ void DumpCrossingDescription(const std::string& label,
   }
   else {
     std::cout.precision(1);
-    std::cout << "  * Your are "  << std::fixed << description.GetDistance() << "m ";
+    std::cout << "  * Your are "  << std::fixed << description.GetDistance().AsMeter() << "m ";
     std::cout << osmscout::BearingDisplayString(description.GetBearing());
     std::cout << " of crossing:"  << std::endl;
   }

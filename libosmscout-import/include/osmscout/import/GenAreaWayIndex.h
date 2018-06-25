@@ -42,18 +42,18 @@ namespace osmscout {
 
     struct TypeData
     {
-      uint32_t   indexLevel;   //! magnification level of index
-      size_t     indexCells;   //! Number of filled cells in index
-      size_t     indexEntries; //! Number of entries over all cells
+      MagnificationLevel indexLevel;   //! magnification level of index
+      size_t             indexCells;   //! Number of filled cells in index
+      size_t             indexEntries; //! Number of entries over all cells
 
-      uint32_t   cellXStart;
-      uint32_t   cellXEnd;
-      uint32_t   cellYStart;
-      uint32_t   cellYEnd;
-      uint32_t   cellXCount;
-      uint32_t   cellYCount;
+      uint32_t           cellXStart;
+      uint32_t           cellXEnd;
+      uint32_t           cellYStart;
+      uint32_t           cellYEnd;
+      uint32_t           cellXCount;
+      uint32_t           cellYCount;
 
-      FileOffset indexOffset; //! Position in file where the offset of the bitmap is written to
+      FileOffset         indexOffset; //! Position in file where the offset of the bitmap is written to
 
       TypeData();
 
@@ -71,7 +71,7 @@ namespace osmscout {
                            const TypeData& typeData,
                            const CoordCountMap& cellFillCount) const;
 
-    void CalculateStatistics(size_t level,
+    void CalculateStatistics(MagnificationLevel level,
                              TypeData& typeData,
                              const CoordCountMap& cellFillCount) const;
 
@@ -79,7 +79,7 @@ namespace osmscout {
                                const ImportParameter& parameter,
                                Progress& progress,
                                std::vector<TypeData>& wayTypeData,
-                               size_t& maxLevel) const;
+                               MagnificationLevel& maxLevel) const;
 
     bool WriteBitmap(Progress& progress,
                      FileWriter& writer,

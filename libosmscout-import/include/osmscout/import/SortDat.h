@@ -21,8 +21,8 @@
 */
 
 #include <list>
+#include <map>
 #include <memory>
-#include <unordered_map>
 
 #include <osmscout/import/Import.h>
 
@@ -38,8 +38,6 @@ namespace osmscout {
   class SortDataGenerator : public ImportModule
   {
   private:
-    typedef std::unordered_map<Id,Id> IdMap;
-
     struct Source
     {
       std::string filename;

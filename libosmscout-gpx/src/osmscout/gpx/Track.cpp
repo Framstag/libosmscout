@@ -31,9 +31,9 @@ size_t Track::GetPointCount() const
   return result;
 }
 
-double Track::GetLength() const
+Distance Track::GetLength() const
 {
-  double result=0;
+  Distance result;
   for (const auto &segment:segments){
     result+=segment.GetLength();
   }

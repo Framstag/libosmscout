@@ -25,6 +25,8 @@
 
 #include <osmscout/Database.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/util/GeoBox.h>
 
 namespace osmscout {
@@ -42,29 +44,28 @@ namespace osmscout {
   private:
     DatabaseRef database;
 
-    bool GetNodesInArea(const GeoBox& boundingBox,
-                        const TypeInfoSet& types,
-                        std::vector<NodeRef>& nodes) const;
 
-    bool GetAreasInArea(const GeoBox& boundingBox,
-                        const TypeInfoSet& types,
-                        std::vector<AreaRef>& areas) const;
-
-    bool GetWaysInArea(const GeoBox& boundingBox,
-                       const TypeInfoSet& types,
-                       std::vector<WayRef>& ways) const;
 
   public:
     POIService(const DatabaseRef& database);
     virtual ~POIService();
 
-    bool GetPOIsInArea(const GeoBox& boundingBox,
+    void GetPOIsInArea(const GeoBox& boundingBox,
                        const TypeInfoSet& nodeTypes,
                        std::vector<NodeRef>& nodes,
                        const TypeInfoSet& wayTypes,
                        std::vector<WayRef>& ways,
                        const TypeInfoSet& areaTypes,
                        std::vector<AreaRef>& areas) const;
+
+    void GetPOIsInRadius(const GeoCoord& location,
+                         const Distance& maxDistance,
+                         const TypeInfoSet& nodeTypes,
+                         std::vector<NodeRef>& nodes,
+                         const TypeInfoSet& wayTypes,
+                         std::vector<WayRef>& ways,
+                         const TypeInfoSet& areaTypes,
+                         std::vector<AreaRef>& areas) const;
   };
 
   //! \ingroup Service

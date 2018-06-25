@@ -191,7 +191,7 @@ namespace osmscout {
 
     if (!optimizeAreasLowZoom ||
         !optimizeWaysLowZoom) {
-      return NULL;
+      return nullptr;
     }
 
     TypeDefinitionRef typeDefinition=std::make_shared<TypeDefinition>();
@@ -825,16 +825,16 @@ namespace osmscout {
   /**
    * Return the given tile.
    *
-   * Note, that tiles may be partially prefill or empty, if not already
+   * Note, that tiles may be partially prefilled or empty, if not already
    * cached.
    */
-  TileRef MapService::LookupTile(const TileId& id) const
+  TileRef MapService::LookupTile(const TileKey& key) const
   {
     std::lock_guard<std::mutex> lock(stateMutex);
 
     StopClock cacheRetrievalTime;
 
-    TileRef tile=cache.GetTile(id);
+    TileRef tile=cache.GetTile(key);
 
     cacheRetrievalTime.Stop();
 
@@ -865,11 +865,9 @@ namespace osmscout {
 
       if (!tile->IsComplete()) {
         StopClock     tileLoadingTime;
-        Magnification magnification;
+        Magnification magnification(MagnificationLevel(tile->GetKey().GetLevel()));
 
         //std::cout << "Loading tile: " << tile->GetId().DisplayText() << std::endl;
-
-        magnification.SetLevel(tile->GetId().GetLevel());
 
         // TODO: Cache the type definitions, perhaps already in the StyleConfig?
 
@@ -932,7 +930,7 @@ namespace osmscout {
         //std::cout << "Tile loading time: " << tileLoadingTime.ResultString() << std::endl;
 
         if (tileLoadingTime.GetMilliseconds()>150) {
-          log.Warn() << "Retrieving tile data for tile " << tile->GetId().DisplayText() << " took " << tileLoadingTime.ResultString();
+          log.Warn() << "Retrieving tile data for tile " << tile->GetKey().GetDisplayText() << " took " << tileLoadingTime.ResultString();
         }
 
       }
@@ -1036,7 +1034,7 @@ namespace osmscout {
         //std::cout << "Tile loading time: " << tileLoadingTime.ResultString() << std::endl;
 
         if (tileLoadingTime.GetMilliseconds()>150) {
-          log.Warn() << "Retrieving tile data for tile " << tile->GetId().DisplayText() << " took " << tileLoadingTime.ResultString();
+          log.Warn() << "Retrieving tile data for tile " << tile->GetKey().GetDisplayText() << " took " << tileLoadingTime.ResultString();
         }
 
       }
@@ -1146,7 +1144,7 @@ namespace osmscout {
 
     StopClock uniqueTime;
 
-    for (auto tile : tiles) {
+    for (const auto& tile : tiles) {
       tile->GetNodeData().CopyData([&nodeMap](const NodeRef& node) {
         nodeMap[node->GetFileOffset()]=node;
       });
@@ -1225,7 +1223,7 @@ namespace osmscout {
 
     StopClock uniqueTime;
 
-    for (auto tile : tiles) {
+    for (const auto& tile : tiles) {
       tile->GetNodeData().CopyData([&typeDefinition,&nodeMap](const NodeRef& node) {
         if (typeDefinition.nodeTypes.IsSet(node->GetType())) {
           nodeMap[node->GetFileOffset()]=node;

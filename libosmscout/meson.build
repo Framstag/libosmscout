@@ -2,7 +2,7 @@ cppArgs = []
 
 if get_option('default_library')=='shared'
   cppArgs += ['-DOSMSCOUT_EXPORT_SYMBOLS']
-  
+
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']
   endif
@@ -22,7 +22,7 @@ osmscout = library('osmscout',
                    osmscoutSrc,
                    include_directories: osmscoutIncDir,
                    cpp_args: cppArgs,
-                   dependencies: [mathDep, threadDep, iconvDep, marisaDep],        
+                   dependencies: [mathDep, threadDep, openmpDep, iconvDep, marisaDep],
                    install: true)
-        
-# TODO: Generate PKG_CONFIG file        
+
+# TODO: Generate PKG_CONFIG file

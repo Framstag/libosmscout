@@ -68,7 +68,7 @@ namespace osmscout {
 
     inline ObjectFileRef GetObjectFileRef() const
     {
-      return ObjectFileRef(fileOffset,refWay);
+      return {fileOffset,refWay};
     }
 
     inline TypeInfoRef GetType() const
@@ -142,10 +142,14 @@ namespace osmscout {
       return nodes[index].GetCoord();
     }
 
-    inline void GetBoundingBox(GeoBox& boundingBox) const
+    inline GeoBox GetBoundingBox() const
     {
+      GeoBox boundingBox;
+
       osmscout::GetBoundingBox(nodes,
                                boundingBox);
+
+      return boundingBox;
     }
 
     /**
@@ -159,11 +163,7 @@ namespace osmscout {
      */
     inline bool Intersects(const GeoBox& boundingBox) const
     {
-      GeoBox objectBoundingBox;
-
-      GetBoundingBox(objectBoundingBox);
-
-      return objectBoundingBox.Intersects(boundingBox);
+      return GetBoundingBox().Intersects(boundingBox);
     }
 
     bool GetCenter(GeoCoord& center) const;
@@ -180,8 +180,6 @@ namespace osmscout {
     {
       featureValueBuffer.Set(buffer);
     }
-
-    void SetLayerToMax();
 
     void Read(const TypeConfig& typeConfig,
               FileScanner& scanner);

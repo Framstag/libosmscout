@@ -27,7 +27,7 @@
 namespace osmscout {
 
 MapObjectInfoModel::MapObjectInfoModel():
-ready(false), setup(false), view(), lookupModule(NULL)
+ready(false), setup(false), view(), lookupModule(nullptr)
 {
 
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
@@ -56,9 +56,9 @@ ready(false), setup(false), view(), lookupModule(NULL)
 
 MapObjectInfoModel::~MapObjectInfoModel()
 {
-  if (lookupModule!=NULL){
+  if (lookupModule!=nullptr){
     lookupModule->deleteLater();
-    lookupModule=NULL;
+    lookupModule=nullptr;
   }
 }
 
@@ -87,13 +87,13 @@ QHash<int, QByteArray> MapObjectInfoModel::roleNames() const
   roles[IdRole]    ="id";
   roles[NameRole]  ="name";
   roles[ObjectRole]="object";
-  
+
   return roles;
 }
 
 QObject* MapObjectInfoModel::createOverlayObject(int row) const
 {
-  OverlayObject *o=NULL;
+  OverlayObject *o=nullptr;
   if(row < 0 || row >= model.size()) {
     qDebug() << "Undefined row" << row;
     return o;
@@ -107,7 +107,7 @@ QObject* MapObjectInfoModel::createOverlayObject(int row) const
     } else if (obj.type=="area"){
       o=new OverlayArea();
     }
-    if (o!=NULL) {
+    if (o!=nullptr) {
       for (auto const p:obj.points) {
         o->addPoint(p.GetLat(), p.GetLon());
       }
@@ -155,7 +155,7 @@ void MapObjectInfoModel::setPosition(QObject *o,
                                      const int screenX, const int screenY)
 {
   MapView *mapView = dynamic_cast<MapView*>(o);
-  if (mapView == NULL){
+  if (mapView ==nullptr){
       qWarning() << "Failed to cast " << o << " to MapView*.";
       return;
   }
@@ -187,7 +187,7 @@ void MapObjectInfoModel::setPosition(QObject *o,
 void MapObjectInfoModel::setLocationEntry(QObject *o)
 {
   LocationEntry *location = dynamic_cast<LocationEntry*>(o);
-  if (location == NULL){
+  if (location ==nullptr){
     qWarning() << "Failed to cast " << o << " to LocationEntry*.";
     return;
   }
@@ -246,7 +246,7 @@ void MapObjectInfoModel::update()
       projection.GeoToPixel(n->GetCoords(),x,y);
       if (rectangle.contains(x,y)){
         std::vector<osmscout::Point> nodes;
-        nodes.push_back(osmscout::Point(0, n->GetCoords()));
+        nodes.emplace_back(0, n->GetCoords());
 
         addObjectInfo("node",
                       n->GetObjectFileRef().GetFileOffset(),
@@ -258,8 +258,7 @@ void MapObjectInfoModel::update()
     //std::cout << "ways:  " << d.ways.size() << std::endl;
     for (auto const &w:d.ways){
       // TODO: better detection
-      osmscout::GeoBox bbox;
-      w->GetBoundingBox(bbox);
+      osmscout::GeoBox bbox=w->GetBoundingBox();
       projection.GeoToPixel(bbox.GetMinCoord(),x,y);
       projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
       if (rectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
@@ -273,8 +272,7 @@ void MapObjectInfoModel::update()
     //std::cout << "areas: " << d.areas.size() << std::endl;
     for (auto const &a:d.areas){
       // TODO: better detection
-      osmscout::GeoBox bbox;
-      a->GetBoundingBox(bbox);
+      osmscout::GeoBox bbox=a->GetBoundingBox();
       projection.GeoToPixel(bbox.GetMinCoord(),x,y);
       projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
       if (rectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){

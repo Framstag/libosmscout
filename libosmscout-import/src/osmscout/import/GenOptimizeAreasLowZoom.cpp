@@ -22,6 +22,7 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/AreaDataFile.h>
 #include <osmscout/OptimizeAreasLowZoom.h>
 
 #include <osmscout/system/Assert.h>
@@ -32,8 +33,8 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
+#include <osmscout/util/TileId.h>
 #include <osmscout/util/Transformation.h>
-#include <osmscout/AreaDataFile.h>
 
 namespace osmscout
 {
@@ -100,7 +101,7 @@ namespace osmscout
 
   bool OptimizeAreasLowZoomGenerator::WriteHeader(FileWriter& writer,
                                                   const std::list<TypeData>& areaTypesData,
-                                                  uint32_t optimizeMaxMap)
+                                                  const MagnificationLevel& optimizeMaxMap)
   {
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)areaTypesData.size());
@@ -289,30 +290,25 @@ namespace osmscout
                                                         const std::list<AreaRef>& areas,
                                                         TypeData& typeData)
   {
-    size_t level=5;//parameter.GetOptimizationMinMag();
+    MagnificationLevel level(5);
 
     while (true) {
+      Magnification          magnification(level);//parameter.GetOptimizationMinMag();
       std::map<Pixel,size_t> cellFillCount;
 
       for (const auto& area : areas) {
-        GeoBox  boundingBox;
-
-        area->GetBoundingBox(boundingBox);
+        GeoBox  boundingBox=area->GetBoundingBox();
 
         //
         // Calculate minimum and maximum tile ids that are covered
         // by the way
         // Renormated coordinate space (everything is >=0)
         //
-        uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
-        uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
-        uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
-        uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
+        TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                      TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-        for (uint32_t y=minyc; y<=maxyc; y++) {
-          for (uint32_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[Pixel(x,y)]++;
-          }
+        for (const auto& tileId : box) {
+          cellFillCount[tileId.AsPixel()]++;
         }
       }
 
@@ -332,7 +328,7 @@ namespace osmscout
 
       if (!(max>parameter.GetOptimizationCellSizeMax() ||
            average>parameter.GetOptimizationCellSizeAverage())) {
-        typeData.indexLevel=(uint32_t)level;
+        typeData.indexLevel=level;
         typeData.indexCells=cellFillCount.size();
         typeData.indexEntries=0;
 
@@ -388,34 +384,23 @@ namespace osmscout
       return true;
     }
 
-    double                                 cellWidth=cellDimension[data.indexLevel].width;
-    double                                 cellHeight=cellDimension[data.indexLevel].height;
+    Magnification                          magnification(data.indexLevel);
     std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
     for (const auto& area : areas) {
-      GeoBox boundingBox;
       auto   offset=offsets.find(area->GetFileOffset());
 
       if (offset==offsets.end()) {
         continue;
       }
 
-      area->GetBoundingBox(boundingBox);
+      GeoBox boundingBox=area->GetBoundingBox();
 
-      //
-      // Calculate minimum and maximum tile ids that are covered
-      // by the way
-      // Renormated coordinate space (everything is >=0)
-      //
-      uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellWidth);
-      uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellWidth);
-      uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellHeight);
-      uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellHeight);
+      TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                    TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-      for (uint32_t y=minyc; y<=maxyc; y++) {
-        for (uint32_t x=minxc; x<=maxxc; x++) {
-          cellOffsets[Pixel(x,y)].push_back(offset->second);
-        }
+      for (const auto& tileId : box) {
+        cellOffsets[tileId.AsPixel()].push_back(offset->second);
       }
     }
 
@@ -441,8 +426,8 @@ namespace osmscout
     data.dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
 
     progress.Info("Writing map for level "+
-                  std::to_string(data.optLevel)+", index level "+
-                  std::to_string(data.indexLevel)+", "+
+                  data.optLevel+", index level "+
+                  data.indexLevel+", "+
                   std::to_string(cellOffsets.size())+" cells, "+
                   std::to_string(indexEntries)+" entries, "+
                   ByteSizeToString(1.0*data.cellXCount*data.cellYCount*data.dataOffsetBytes+dataSize));
@@ -541,13 +526,11 @@ namespace osmscout
         for (const auto& type : loadedTypes) {
           progress.SetAction("Optimizing type "+ type->GetName());
 
-          for (uint32_t level=parameter.GetOptimizationMinMag();
+          for (MagnificationLevel level=parameter.GetOptimizationMinMag();
                level<=parameter.GetOptimizationMaxMag();
                level++) {
-            Magnification      magnification; // Magnification, we optimize for
+            Magnification      magnification(level); // Magnification, we optimize for
             std::list<AreaRef> optimizedAreas;
-
-            magnification.SetLevel(level);
 
             OptimizeAreas(progress,
                           allAreas[type->GetIndex()],
@@ -559,7 +542,7 @@ namespace osmscout
                           parameter.GetOptimizationWayMethod());
 
             if (optimizedAreas.empty()) {
-              progress.Debug("Empty optimization result for level "+std::to_string(level)+", no index generated");
+              progress.Debug("Empty optimization result for level "+level+", no index generated");
 
               TypeData typeData;
 
@@ -679,7 +662,7 @@ namespace osmscout
 
       if (!WriteHeader(writer,
                        areaTypesData,
-                       (uint32_t)parameter.GetOptimizationMaxMag())) {
+                       parameter.GetOptimizationMaxMag())) {
         progress.Error("Cannot write file header");
         return false;
       }

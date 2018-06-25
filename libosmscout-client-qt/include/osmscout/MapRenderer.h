@@ -39,7 +39,7 @@ class OSMSCOUT_CLIENT_QT_API DBRenderJob : public DBJob{
   Q_OBJECT
 private:
   osmscout::MercatorProjection renderProjection;
-  QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles;
+  QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles;
   osmscout::MapParameter *drawParameter;
   QPainter *p;
   bool success;
@@ -49,7 +49,7 @@ private:
 
 public:
   DBRenderJob(osmscout::MercatorProjection renderProjection,
-              QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
+              QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles,
               osmscout::MapParameter *drawParameter,
               QPainter *p,
               std::vector<OverlayObjectRef> overlayObjects,
@@ -110,7 +110,7 @@ protected:
               QString iconDirectory);
 
   osmscout::GeoBox overlayObjectsBox() const;
-  
+
   void getOverlayObjects(std::vector<OverlayObjectRef> &objs,
                          osmscout::GeoBox requestBox) const;
 

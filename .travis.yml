@@ -1,8 +1,5 @@
 language: cpp
 
-cache:
-  - apt
-
 branches:
   only:
     - master

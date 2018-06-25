@@ -1,5 +1,5 @@
 ---
-date: "2016-06-30T19:50:42+02:00"
+date: "2018-04-21T04:11:42+02:00"
 title: "Style sheet syntax"
 description: "Description of the style sheet syntax in *.oss files"
 weight: 9
@@ -124,12 +124,17 @@ like oneway arrows, simple signs or similar.
 
 Currently the following primives are supported:
 
-* `RECTANGLE <x> , <y> <width> x <height> { area style definitions }`
-* `CIRCLE    <x> , <y> <radius> { area style definitions }`
+* `RECTANGLE <left-x> , <top-y> <width> x <height> { area style definitions }`
+* `CIRCLE    <center-x> , <center-y> <radius> { area style definitions }`
 * `POLYGON   <x> , <y> ...more coordinates... { area style definitions }`
 
 "area style definitions" are normal style definitions for areas as
 used within the STYLE section.
+
+Primitives are using coordinate system that is usual for computer graphics:
+X coordinate is increasing to right and Y coordinate is increasing to bottom.
+
+<a href="/images/symbols.png"><img src="/images/symbols.png" width="800" height="435" alt="Symbol examples"/></a>
 
 ## Section `STYLE`
 
@@ -152,11 +157,13 @@ criteria exist:
 `GROUP <groupname> "," <groupname>...`
 :  matches all types that are in all the given groups (AND semantic)
 
-`FEATURE <featurename> "," <featurename>...`
-:  matches all types that have ALL the given features (AND semantic) and in
-turn all object that have the feature set during runtime (so objects which have
-a type that has this feature but the feature is not actually present for 
-agiven nstance of this type do not match).
+`FEATURE <featurename> [. <featureFlag>]"," <featurename> [. <featureFlag>...`
+:  matches all types that have ALL the given features (implicit "AND" semantic)
+and in turn all objects that have the feature set during runtime (so objects
+which have a type that has this feature but the feature is not actually present
+for  a given instance of this type do not match). Optionally instead of filtering
+for a feature you can also filter for feature flag of the given feature.
+Feature flags are boolean values of the feature value.
 
 `PATH`
 : matches all types wihich are annotated as `PATH` in the OST file.
@@ -264,7 +271,7 @@ gapColor     |Color        |Color drawn in the "gap", if not set gapColor is tra
 displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
 width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
 displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn line in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn line in relation to the actual path.
 joinCap      |Cap          |Cap in case where lines join.
 endCap       |Cap          |Cap in the case where the lines ends without joining another line.
 priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
@@ -289,7 +296,7 @@ gapColor     |Color        |Color drawn in the "gap", if not set gapColor is tra
 displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
 width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
 displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn line in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn line in relation to the actual path.
 priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
 
 If `displayWidth` and `width` are both set, the resulting pixel values will be added.
@@ -343,7 +350,7 @@ label        |FeatureAttr  |The name of the feature attribute to be rendered.
 color        |Color        |The color of the text
 size         |Int          |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
 displayOffset|ScreenSize   |Offset of drawn text in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn text in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn text in relation to the actual path.
 
 ### IconStyle - Drawing icons for nodes and areas
 
@@ -389,7 +396,7 @@ Name         |Type         |Description
 symbol       |String       |The name of the symbol to draw
 symbolSpace  |ScreenSize   |Space between each symbol on a path.
 displayOffset|ScreenSize   |Offset of drawn symbol in relation to the actual path.
-offset       |FroundSize   |Offset of the drawn symbol in relation to the actual path.
+offset       |GroundSize   |Offset of the drawn symbol in relation to the actual path.
 
 ## Label and icon placement
 

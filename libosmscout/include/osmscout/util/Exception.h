@@ -50,6 +50,21 @@ namespace osmscout {
 #pragma warning (pop)
 #endif
 
+  class OSMSCOUT_API UninitializedException : public OSMScoutException
+  {
+  private:
+    std::string object;
+    std::string description;
+
+  public:
+    explicit UninitializedException(const std::string& object);
+
+    const char* what() const OSMSCOUT_NOEXCEPT override;
+
+    std::string GetObject() const;
+    std::string GetDescription() const override;
+  };
+
   class OSMSCOUT_API IOException : public OSMScoutException
   {
   private:
@@ -71,12 +86,12 @@ namespace osmscout {
                 const std::string& semanticError,
                 const std::string& errorMsg);
 
-    const char* what() const OSMSCOUT_NOEXCEPT;
+    const char* what() const OSMSCOUT_NOEXCEPT override;
 
     std::string GetFilename() const;
     std::string GetSemanticError() const;
     std::string GetErrorMsg() const;
-    std::string GetDescription() const;
+    std::string GetDescription() const override;
   };
 }
 

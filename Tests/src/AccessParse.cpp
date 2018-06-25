@@ -3,7 +3,10 @@
 #include <unordered_map>
 
 #include <osmscout/TypeConfig.h>
+
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
+
 #include <osmscout/util/TagErrorReporter.h>
 
 #define CATCH_CONFIG_MAIN
@@ -111,7 +114,7 @@ void CheckParseSuccess(bool canFoot,
   std::unordered_map<osmscout::TagId,std::string> tags;
 
   for (const auto &entry : stringTags) {
-    osmscout::TagId tagId=typeConfig.RegisterTag(entry.first);
+    osmscout::TagId tagId=typeConfig.GetTagRegistry().RegisterTag(entry.first);
 
     tags[tagId]=entry.second;
   }
@@ -139,7 +142,7 @@ void CheckParseSuccess(bool canFoot,
   buffer.SetType(testType);
 
   accessFeature->Parse(reporter,
-                       typeConfig,
+                       typeConfig.GetTagRegistry(),
                        featureInstance,
                        osmscout::ObjectOSMRef(1,osmscout::osmRefWay),
                        tags,

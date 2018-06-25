@@ -824,8 +824,7 @@ int main(int /*argc*/, char** /*argv*/)
     ring.push_back(osmscout::Point(0, osmscout::GeoCoord(lat, lon)));
   }
 
-  osmscout::Magnification mag;
-  mag.SetLevel(15);
+  osmscout::Magnification mag(osmscout::MagnificationLevel(15));
 
   double dpi = 132.78;
   size_t width = 1358;

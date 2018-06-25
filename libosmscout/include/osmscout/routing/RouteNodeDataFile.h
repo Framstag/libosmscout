@@ -26,9 +26,9 @@
 #include <osmscout/DataFile.h>
 #include <osmscout/Pixel.h>
 
-#include <osmscout/routing/RouteNode.h>
+#include <osmscout/util/TileId.h>
 
-#include <osmscout/util/Tiling.h>
+#include <osmscout/routing/RouteNode.h>
 
 namespace osmscout {
   /**
@@ -67,7 +67,7 @@ namespace osmscout {
     mutable FileScanner        scanner;         //!< File stream to the data file
     mutable ValueCache         cache;           //!< Cache of loaded route node pages
     mutable std::mutex         accessMutex;     //!< Mutex to secure multi-thread access
-    mutable TileCalculator     tileCalculator;
+    mutable Magnification      magnification;   //!< Magnification of tiled index
 
   private:
     bool LoadIndexPage(const osmscout::Pixel& tile,
@@ -104,7 +104,7 @@ namespace osmscout {
         ValueCache::CacheRef cacheRef;
 
         GeoCoord coord=Point::GetCoordFromId(id);
-        osmscout::Pixel tile=tileCalculator.GetTileId(coord);
+        osmscout::Pixel tile=TileId::GetTile(magnification,coord).AsPixel();
 
         //std::cout << "Tile " << tile.GetDisplayText() << " " << tile.GetId() << "..." << std::endl;
 
@@ -135,7 +135,7 @@ namespace osmscout {
         ValueCache::CacheRef cacheRef;
 
         GeoCoord coord=Point::GetCoordFromId(id);
-        osmscout::Pixel tile=tileCalculator.GetTileId(coord);
+        osmscout::Pixel tile=TileId::GetTile(magnification,coord).AsPixel();
 
         //std::cout << "Tile " << tile.GetDisplayText() << " " << tile.GetId() << "..." << std::endl;
 

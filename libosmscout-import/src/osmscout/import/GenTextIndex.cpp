@@ -24,6 +24,7 @@
 #include <osmscout/Area.h>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/TextSearchIndex.h>
 

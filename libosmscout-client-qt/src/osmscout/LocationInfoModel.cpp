@@ -162,8 +162,8 @@ void LocationInfoModel::addToModel(const QString database,
   osmscout::LocationRef locRef = place.GetLocation();
   osmscout::AddressRef addrRef = place.GetAddress();
 
-  double distance = description->GetDistance();
-  bool inPlace = description->IsAtPlace() || (distance < 1);
+  Distance distance = description->GetDistance();
+  bool inPlace = description->IsAtPlace() || (distance.AsMeter() < 1);
 
   QStringList addressParts;
   if (locRef){
@@ -213,7 +213,7 @@ void LocationInfoModel::addToModel(const QString database,
   obj[RegionRole] = regions;
   obj[AddressRole] = address;
   obj[InPlaceRole] = inPlace;
-  obj[DistanceRole] = distance;
+  obj[DistanceRole] = distance.AsMeter();
   obj[BearingRole] = QString::fromStdString(osmscout::BearingDisplayString(description->GetBearing()));
   obj[PoiRole] = (poiRef) ? QString::fromStdString(poiRef->name): "";
   obj[TypeRole] = QString::fromStdString(place.GetObjectFeatures()->GetType()->GetName());
@@ -255,7 +255,7 @@ void LocationInfoModel::onLocationDescription(const osmscout::GeoCoord location,
                      << QString::fromStdString(place.GetDisplayString()); 
         }else{
             qDebug() << "Place " << QString::fromStdString(location.GetDisplayText()) << " description: " 
-                     << atAddressDescription->GetDistance() << " m " 
+                     << atAddressDescription->GetDistance().AsMeter() << " m "
                      << QString::fromStdString(osmscout::BearingDisplayString(atAddressDescription->GetBearing())) << " from "
                      << QString::fromStdString(place.GetDisplayString());
         }
@@ -337,7 +337,7 @@ double LocationInfoModel::distance(double lat1, double lon1,
 
     return osmscout::GetEllipsoidalDistance(
             osmscout::GeoCoord(lat1, lon1),
-            osmscout::GeoCoord(lat2, lon2)) * 1000;
+            osmscout::GeoCoord(lat2, lon2)).AsMeter();
 }
 
 QString LocationInfoModel::bearing(double lat1, double lon1, 

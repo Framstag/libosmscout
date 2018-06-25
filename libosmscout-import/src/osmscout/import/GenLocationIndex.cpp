@@ -31,6 +31,7 @@
 #include <osmscout/Pixel.h>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/LocationIndex.h>
 
@@ -201,10 +202,10 @@ namespace osmscout {
     const GeoCoord bbox_max_lon(box.GetMinCoord().GetLat(), box.GetMaxCoord().GetLon());
 
     const double distance_lat =
-      bbox_max_lon.GetDistance( box.GetMaxCoord() ) /
+      bbox_max_lon.GetDistance( box.GetMaxCoord() ).As<Kilometer>() /
       (box.GetMaxCoord().GetLat() - box.GetMinCoord().GetLat()); // distance along latitude per degree
     const double distance_lon =
-      bbox_max_lat.GetDistance( box.GetMaxCoord() ) /
+      bbox_max_lat.GetDistance( box.GetMaxCoord() ).As<Kilometer>() /
       (box.GetMaxCoord().GetLon() - box.GetMinCoord().GetLon()); // distance along longitude per degree
 
     // 100 meters is taken as a smallest step
@@ -1568,13 +1569,9 @@ namespace osmscout {
         }
 
         PostalCodeFeatureValue *postalCodeValue=postalCodeReader.GetValue(way.GetFeatureValueBuffer());
-
-        GeoBox boundingBox;
-
-        way.GetBoundingBox(boundingBox);
-
-        RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                      boundingBox.GetCenter());
+        GeoBox                 boundingBox=way.GetBoundingBox();
+        RegionRef              region=regionIndex.GetRegionForNode(rootRegion,
+                                                                   boundingBox.GetCenter());
 
         AddLocationWayToRegion(*region,
                                way,

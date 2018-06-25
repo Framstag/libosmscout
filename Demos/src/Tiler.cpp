@@ -76,7 +76,7 @@ void MergeTilesToMapData(const std::list<osmscout::TileRef>& centerTiles,
 
   osmscout::StopClock uniqueTime;
 
-  for (auto tile : centerTiles) {
+  for (const auto& tile : centerTiles) {
     tile->GetNodeData().CopyData([&nodeMap](const osmscout::NodeRef& node) {
       nodeMap[node->GetFileOffset()]=node;
     });
@@ -102,7 +102,7 @@ void MergeTilesToMapData(const std::list<osmscout::TileRef>& centerTiles,
     });
   }
 
-  for (auto tile : ringTiles) {
+  for (const auto& tile : ringTiles) {
     tile->GetNodeData().CopyData([&ringTypeDefinition,&nodeMap](const osmscout::NodeRef& node) {
       if (ringTypeDefinition.nodeTypes.IsSet(node->GetType())) {
         nodeMap[node->GetFileOffset()]=node;
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
   osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
-  if (!database->Open(map.c_str())) {
+  if (!database->Open(map)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -260,17 +260,15 @@ int main(int argc, char* argv[])
 
   osmscout::MapPainterAgg painter(styleConfig);
 
-  for (size_t level=std::min(startLevel,endLevel);
-       level<=std::max(startLevel,endLevel);
+  for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(startLevel,endLevel));
+       level<=osmscout::MagnificationLevel(std::max(startLevel,endLevel));
        level++) {
-    osmscout::Magnification magnification;
+    osmscout::Magnification magnification(level);
 
-    magnification.SetLevel(level);
-
-    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latBottom,lonLeft),
-                                                                  magnification));
-    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(osmscout::GeoCoord(latTop,lonRight),
-                                                                  magnification));
+    osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latBottom,lonLeft)));
+    osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(magnification,
+                                                                  osmscout::GeoCoord(latTop,lonRight)));
     uint32_t                xTileStart=std::min(tileA.GetX(),tileB.GetX());
     uint32_t                xTileEnd=std::max(tileA.GetX(),tileB.GetX());
     uint32_t                xTileCount=xTileEnd-xTileStart+1;
@@ -297,7 +295,7 @@ int main(int argc, char* argv[])
 
     osmscout::MapService::TypeDefinition typeDefinition;
 
-    for (auto type : database->GetTypeConfig()->GetTypes()) {
+    for (const auto& type : database->GetTypeConfig()->GetTypes()) {
       bool hasLabel=false;
 
       if (type->CanBeNode()) {
@@ -355,7 +353,7 @@ int main(int argc, char* argv[])
                                         *styleConfig,
                                         centerTiles);
 
-        std::map<osmscout::TileId, osmscout::TileRef> ringTileMap;
+        std::map<osmscout::TileKey,osmscout::TileRef> ringTileMap;
 
         for (uint32_t ringY=y-tileRingSize; ringY<=y+tileRingSize; ringY++) {
           for (uint32_t ringX=x-tileRingSize; ringX<=x+tileRingSize; ringX++) {
@@ -373,7 +371,7 @@ int main(int argc, char* argv[])
                                     tiles);
 
             for (const auto& tile : tiles) {
-              ringTileMap[tile->GetId()]=tile;
+              ringTileMap[tile->GetKey()]=tile;
             }
           }
         }
@@ -414,7 +412,7 @@ int main(int argc, char* argv[])
         maxTime=std::max(maxTime,time);
         totalTime+=time;
 
-        std::string output=std::to_string(level)+"_"+std::to_string(x)+"_"+std::to_string(y)+".ppm";
+        std::string output=std::to_string(level.Get())+"_"+std::to_string(x)+"_"+std::to_string(y)+".ppm";
 
         write_ppm(rbuf,output.c_str());
       }
@@ -425,7 +423,7 @@ int main(int argc, char* argv[])
                 tileHeight*yTileCount,
                 tileWidth*xTileCount*3);
 
-    std::string output=std::to_string(level)+"_full_map.ppm";
+    std::string output=std::to_string(level.Get())+"_full_map.ppm";
 
     write_ppm(rbuf,output.c_str());
 

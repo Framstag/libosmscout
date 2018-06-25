@@ -56,8 +56,7 @@ namespace osmscout {
   RouteNodeDataFile::RouteNodeDataFile(const std::string& datafile,
                                        size_t cacheSize)
   : datafile(datafile),
-    cache(cacheSize),
-    tileCalculator(0)
+    cache(cacheSize)
   {
   }
 
@@ -83,7 +82,7 @@ namespace osmscout {
       scanner.Read(dataCount);
       scanner.Read(tileMag);
 
-      tileCalculator=TileCalculator(std::pow(2,tileMag));
+      magnification.SetLevel(MagnificationLevel(tileMag));
 
       scanner.SetPos(indexFileOffset);
       scanner.Read(indexEntryCount);
@@ -185,11 +184,11 @@ namespace osmscout {
     ValueCache::CacheRef cacheRef;
 
     GeoCoord coord=Point::GetCoordFromId(id);
-    osmscout::Pixel tile=tileCalculator.GetTileId(coord);
+    TileId   tile=TileId::GetTile(magnification,coord);
 
     //std::cout << "Tile " << tile.GetDisplayText() << " " << tile.GetId() << "..." << std::endl;
 
-    if (!GetIndexPage(tile,
+    if (!GetIndexPage(tile.AsPixel(),
                       cacheRef)) {
       return false;
     }
@@ -202,7 +201,7 @@ namespace osmscout {
 
   Pixel RouteNodeDataFile::GetTile(const GeoCoord& coord) const
   {
-    return tileCalculator.GetTileId(coord);
+    return TileId::GetTile(magnification,coord).AsPixel();
   }
 
   bool RouteNodeDataFile::IsCovered(const Pixel& tile) const

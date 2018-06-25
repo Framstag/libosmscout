@@ -32,13 +32,13 @@
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
-#include <osmscout/system/Assert.h>
+#include <osmscout/util/TileId.h>
 
-#include <osmscout/TileId.h>
+#include <osmscout/system/Assert.h>
 
 namespace osmscout {
 
@@ -253,15 +253,16 @@ namespace osmscout {
   class OSMSCOUT_MAP_API Tile
   {
   private:
-    TileId       id;                //!< Id of the tile
-    TileNodeData nodeData;          //!< Node data
-    TileWayData  wayData;           //!< Way data
-    TileAreaData areaData;          //!< Area data
-    TileWayData  optimizedWayData;  //!< Optimized way data
-    TileAreaData optimizedAreaData; //!< Optimized area data
+    TileKey       key;                //!< Id of the tile
+    GeoBox        boundingBox;       //!< bounding box of the tile
+    TileNodeData  nodeData;          //!< Node data
+    TileWayData   wayData;           //!< Way data
+    TileAreaData  areaData;          //!< Area data
+    TileWayData   optimizedWayData;  //!< Optimized way data
+    TileAreaData  optimizedAreaData; //!< Optimized area data
 
   private:
-    explicit Tile(const TileId& id);
+    Tile(const TileKey& key);
 
   public:
     friend class DataTileCache;
@@ -271,17 +272,25 @@ namespace osmscout {
     /**
      * Return the id of the tile
      */
-    inline TileId GetId() const
+    inline TileKey GetKey() const
     {
-      return id;
+      return key;
     }
 
     /**
-     * Return the boundingbox of the tile (shortcut for GetId().GetBoundingBox())
+     * Get the magnification level of the tile
+     */
+    inline uint32_t GetLevel() const
+    {
+      return key.GetLevel();
+    }
+
+    /**
+     * Return the bounding box of the tile
      */
     inline GeoBox GetBoundingBox() const
     {
-      return id.GetBoundingBox();
+      return boundingBox;
     }
 
     /**
@@ -415,13 +424,13 @@ namespace osmscout {
      */
     struct OSMSCOUT_MAP_API CacheEntry
     {
-      TileId  id;
+      TileKey key;
       //TileWeakRef tile;
       TileRef tile;
 
-      CacheEntry(const TileId& id,
+      CacheEntry(const TileKey& key,
                  const TileRef /*TileWeakRef*/& tile)
-              : id(id),
+              : key(key),
                 tile(tile)
       {
         // no code
@@ -429,13 +438,13 @@ namespace osmscout {
     };
 
     //! A list of cached tiles
-    typedef std::list<CacheEntry>     Cache;
+    typedef std::list<CacheEntry>      Cache;
 
     //! References to a tile in above list
-    typedef Cache::iterator           CacheRef;
+    typedef Cache::iterator            CacheRef;
 
     //! An index from TileIds to cache entries
-    typedef std::map<TileId,CacheRef> CacheIndex;
+    typedef std::map<TileKey,CacheRef> CacheIndex;
 
   private:
     size_t             cacheSize;
@@ -475,8 +484,8 @@ namespace osmscout {
 
     void InvalidateCache();
 
-    TileRef GetCachedTile(const TileId& id) const;
-    TileRef GetTile(const TileId& id) const;
+    TileRef GetCachedTile(const TileKey& id) const;
+    TileRef GetTile(const TileKey& id) const;
 
     void GetTilesForBoundingBox(const Magnification& magnification,
                                 const GeoBox& boundingBox,

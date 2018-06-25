@@ -34,7 +34,8 @@ FocusScope {
     function route() {
         if (startLocation !== null && destinationLocation !== null) {
             routingModel.setStartAndTarget(startLocation,
-                                           destinationLocation)
+                                           destinationLocation,
+                                           "car")
         }
         else {
             routingModel.clear()

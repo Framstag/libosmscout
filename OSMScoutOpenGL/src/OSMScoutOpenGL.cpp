@@ -76,10 +76,10 @@ int offset;
 bool LoadData() {
   data.ClearDBData();
   tiles.clear();
-  magnification.SetLevel(level);
+  magnification.SetLevel(osmscout::MagnificationLevel(level));
   osmscout::MagnificationConverter mm;
   std::string s;
-  mm.Convert(magnification.GetLevel(), s);
+  mm.Convert(osmscout::MagnificationLevel(level), s);
   osmscout::log.Info() << "Zoom level: " << s << " " << magnification.GetLevel();
   projection.Set(center,
                  magnification,
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
   drawParameter.SetIconPaths(paths);
   center = boundingBox.GetCenter();
   level = 6;
-  magnification.SetLevel(level);
+  magnification.SetLevel(osmscout::MagnificationLevel(level));
 
   projection.Set(center,
                  magnification,

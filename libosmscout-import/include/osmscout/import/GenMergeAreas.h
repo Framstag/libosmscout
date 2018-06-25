@@ -21,15 +21,17 @@
 */
 
 #include <list>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 
-#include <osmscout/import/ImportFeatures.h>
-
-#include <osmscout/import/Import.h>
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/import/ImportFeatures.h>
+#include <osmscout/import/Import.h>
 
 #include <osmscout/util/NodeUseMap.h>
 

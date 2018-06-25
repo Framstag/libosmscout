@@ -317,12 +317,12 @@ namespace osmscout {
     return areaNodeIndexCellSizeMax;
   }
 
-  size_t ImportParameter::GetAreaWayMinMag() const
+  MagnificationLevel ImportParameter::GetAreaWayMinMag() const
   {
     return areaWayMinMag;
   }
 
-  size_t ImportParameter::GetAreaWayIndexMaxLevel() const
+  MagnificationLevel ImportParameter::GetAreaWayIndexMaxLevel() const
   {
     return areaWayIndexMaxLevel;
   }
@@ -347,12 +347,12 @@ namespace osmscout {
     return optimizationMaxWayCount;
   }
 
-  uint32_t ImportParameter::GetOptimizationMaxMag() const
+  MagnificationLevel ImportParameter::GetOptimizationMaxMag() const
   {
     return optimizationMaxMag;
   }
 
-  uint32_t ImportParameter::GetOptimizationMinMag() const
+  MagnificationLevel ImportParameter::GetOptimizationMinMag() const
   {
     return optimizationMinMag;
   }
@@ -579,12 +579,12 @@ namespace osmscout {
     this->areaNodeIndexCellSizeMax=areaNodeIndexCellSizeMax;
   }
 
-  void ImportParameter::SetAreaWayMinMag(size_t areaWayMinMag)
+  void ImportParameter::SetAreaWayMinMag(MagnificationLevel areaWayMinMag)
   {
     this->areaWayMinMag=areaWayMinMag;
   }
 
-  void ImportParameter::SetAreaWayIndexMaxMag(size_t areaWayIndexMaxLevel)
+  void ImportParameter::SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel)
   {
     this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
   }
@@ -604,12 +604,12 @@ namespace osmscout {
     this->optimizationMaxWayCount=optimizationMaxWayCount;
   }
 
-  void ImportParameter::SetOptimizationMaxMag(uint32_t optimizationMaxMag)
+  void ImportParameter::SetOptimizationMaxMag(MagnificationLevel optimizationMaxMag)
   {
     this->optimizationMaxMag=optimizationMaxMag;
   }
 
-  void ImportParameter::SetOptimizationMinMag(uint32_t optimizationMinMag)
+  void ImportParameter::SetOptimizationMinMag(MagnificationLevel optimizationMinMag)
   {
     this->optimizationMinMag=optimizationMinMag;
   }
@@ -1066,18 +1066,20 @@ namespace osmscout {
                        progress);
 
     progress.Info("Parsed language(s) :");
-    int langIndex = 0;
+    uint32_t langIndex = 0;
     for(const auto& lang : parameter.GetLangOrder()){
       if(lang=="#"){
         progress.Info("  default");
-        typeConfig->RegisterNameTag("name", langIndex);
-        typeConfig->RegisterNameTag("place_name", langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameTag("name", langIndex);
+        typeConfig->GetTagRegistry().RegisterNameTag("place_name", langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameTag("brand", langIndex+2);
       } else {
           progress.Info("  " + lang);
-          typeConfig->RegisterNameTag("name:"+lang, langIndex);
-          typeConfig->RegisterNameTag("place_name:"+lang, langIndex+1);
+          typeConfig->GetTagRegistry().RegisterNameTag("name:"+lang, langIndex);
+          typeConfig->GetTagRegistry().RegisterNameTag("place_name:"+lang, langIndex+1);
+          typeConfig->GetTagRegistry().RegisterNameTag("brand:"+lang, langIndex+2);
       }
-      langIndex+=2;
+      langIndex+=3;
     }
 
     progress.Info("Parsed alt language(s) :");
@@ -1085,14 +1087,16 @@ namespace osmscout {
     for(const auto& lang : parameter.GetAltLangOrder()){
       if(lang=="#"){
         progress.Info("  default");
-        typeConfig->RegisterNameAltTag("name", langIndex);
-        typeConfig->RegisterNameAltTag("place_name", langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("name", langIndex);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("place_name", langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("brand", langIndex+2);
       } else {
         progress.Info("  " + lang);
-        typeConfig->RegisterNameAltTag("name:"+lang, langIndex);
-        typeConfig->RegisterNameAltTag("place_name:"+lang, langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("name:"+lang, langIndex);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("place_name:"+lang, langIndex+1);
+        typeConfig->GetTagRegistry().RegisterNameAltTag("brand:"+lang, langIndex+2);
       }
-      langIndex+=2;
+      langIndex+=3;
     }
 
     ImportErrorReporterRef errorReporter=std::make_shared<ImportErrorReporter>(progress,

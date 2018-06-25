@@ -25,11 +25,13 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include <osmscout/CoreImportExport.h>
 
 #include <osmscout/util/Parsing.h>
 
+#include <osmscout/system/Compiler.h>
 #include <osmscout/system/OSMScoutTypes.h>
 
 namespace osmscout {
@@ -43,7 +45,7 @@ namespace osmscout {
    *
    * Magic constant for an unresolved and to be ignored tag
    */
-  static const TagId tagIgnore        = 0;
+  static const TagId tagIgnore = 0;
 
   /**
    * \ingroup type
@@ -76,9 +78,9 @@ namespace osmscout {
     TagConditionRef condition;
 
   public:
-    TagNotCondition(const TagConditionRef& condition);
+    explicit TagNotCondition(const TagConditionRef& condition);
 
-    inline bool Evaluate(const TagMap& tagMap) const
+    inline bool Evaluate(const TagMap& tagMap) const override
     {
       return !condition->Evaluate(tagMap);
     }
@@ -103,11 +105,11 @@ namespace osmscout {
     Type                       type;
 
   public:
-    TagBoolCondition(Type type);
+    explicit TagBoolCondition(Type type);
 
     void AddCondition(const TagConditionRef& condition);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const override;
   };
 
   /**
@@ -128,9 +130,9 @@ namespace osmscout {
     TagId tag;
 
   public:
-    TagExistsCondition(TagId tag);
+    explicit TagExistsCondition(TagId tag);
 
-    inline bool Evaluate(const TagMap& tagMap) const
+    inline bool Evaluate(const TagMap& tagMap) const override
     {
       return tagMap.find(tag)!=tagMap.end();
     }
@@ -165,7 +167,7 @@ namespace osmscout {
                        BinaryOperator binaryOperator,
                        const size_t& tagValue);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const override;
   };
 
   /**
@@ -181,11 +183,11 @@ namespace osmscout {
     std::unordered_set<std::string> tagValues;
 
   public:
-    TagIsInCondition(TagId tag);
+    explicit TagIsInCondition(TagId tag);
 
     void AddTagValue(const std::string& tagValue);
 
-    bool Evaluate(const TagMap& tagMap) const;
+    bool Evaluate(const TagMap& tagMap) const override;
   };
 
   /**
@@ -222,6 +224,62 @@ namespace osmscout {
     {
       return id;
     }
+  };
+
+  class OSMSCOUT_API TagRegistry CLASS_FINAL
+  {
+  private:
+    // Tags
+
+    std::vector<TagInfo>                        tags;
+
+    TagId                                       nextTagId;
+
+    std::unordered_map<std::string,TagId>       stringToTagMap;
+    std::unordered_map<TagId,uint32_t>          nameTagIdToPrioMap;
+    std::unordered_map<TagId,uint32_t>          nameAltTagIdToPrioMap;
+    std::unordered_map<std::string,uint8_t>     nameToMaxSpeedMap;
+
+    std::unordered_map<std::string,size_t>      surfaceToGradeMap;
+
+  public:
+    TagRegistry();
+    ~TagRegistry();
+
+    TagId RegisterTag(const std::string& tagName);
+
+    TagId RegisterNameTag(const std::string& tagName,
+                          uint32_t priority);
+    TagId RegisterNameAltTag(const std::string& tagName,
+                             uint32_t priority);
+
+    TagId GetTagId(const char* name) const;
+    TagId GetTagId(const std::string& name) const;
+
+    bool IsNameTag(TagId tag,
+                   uint32_t& priority) const;
+    bool IsNameAltTag(TagId tag,
+                      uint32_t& priority) const;
+
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
+    void RegisterSurfaceToGradeMapping(const std::string& surface,
+                                       size_t grade);
+    bool GetGradeForSurface(const std::string& surface,
+                            size_t& grade) const;
+    //@}
+
+    /**
+     * Methods for dealing with mappings for surfaces and surface grades.
+     */
+    //@{
+    void RegisterMaxSpeedAlias(const std::string& alias,
+                               uint8_t maxSpeed);
+    bool GetMaxSpeedFromAlias(const std::string& alias,
+                              uint8_t& maxSpeed) const;
+    //@}
   };
 }
 

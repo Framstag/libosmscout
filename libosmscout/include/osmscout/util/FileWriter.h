@@ -65,12 +65,12 @@ namespace osmscout {
     void CloseFailsafe();
     inline bool IsOpen() const
     {
-      return file!=NULL;
+      return file!=nullptr;
     }
 
     inline bool HasError() const
     {
-      return file==NULL || hasError;
+      return file==nullptr || hasError;
     }
 
     std::string GetFilename() const;
@@ -101,6 +101,11 @@ namespace osmscout {
 
     void Write(const ObjectFileRef& ref);
 
+    inline void Write(const MagnificationLevel& level)
+    {
+      Write(level.Get());
+    }
+
     void WriteFileOffset(FileOffset offset);
     void WriteFileOffset(FileOffset offset,
                          size_t bytes);
@@ -112,6 +117,11 @@ namespace osmscout {
     void WriteNumber(uint16_t number);
     void WriteNumber(uint32_t number);
     void WriteNumber(uint64_t number);
+
+    inline void WriteNumber(const MagnificationLevel& level)
+    {
+      WriteNumber(level.Get());
+    }
 
     void WriteCoord(const GeoCoord& coord);
     void WriteInvalidCoord();
@@ -139,7 +149,7 @@ namespace osmscout {
     FileOffset  lastFileOffset;
 
   public:
-    ObjectFileRefStreamWriter(FileWriter& writer);
+    explicit ObjectFileRefStreamWriter(FileWriter& writer);
 
     void Reset();
 

@@ -42,10 +42,22 @@ namespace osmscout {
 
   /**
    * \ingroup Routing
+   *
+   * RouteProcessor allows to enhance the raw routing information from the routing algorithm with additional
+   * information like way names, turns and similar by traversing the route and its objects.
+   *
+   * The processor is plugable in the sense that it can get enhanced by classes deriving from the Processor
+   * base class allowing to write traversial code for a specific aim. The complete routing description
+   * is the result of the sum of all information collected by the individual processors.
    */
   class OSMSCOUT_API RoutePostprocessor
   {
   public:
+    /**
+     * \ingroup Routing
+     * Base class for routing processors. Routing processors allow iterating of the raw route with the aim
+     * to collect further information to enhance information abut the route like street names, turns etc...
+     */
     class OSMSCOUT_API Postprocessor
     {
     public:
@@ -157,8 +169,8 @@ namespace osmscout {
     private:
       static const double curveMinInitialAngle;
       static const double curveMaxInitialAngle;
-      static const double curveMaxNodeDistance;
-      static const double curveMaxDistance;
+      static const Distance curveMaxNodeDistance;
+      static const Distance curveMaxDistance;
       static const double curveMinAngle;
 
     public:
@@ -194,6 +206,10 @@ namespace osmscout {
                    RouteDescription& description) override;
     };
 
+    /**
+     * \ingroup Routing
+     * Collects max speed information
+     */
     class OSMSCOUT_API MaxSpeedPostprocessor : public RoutePostprocessor::Postprocessor
     {
     public:
@@ -247,23 +263,68 @@ namespace osmscout {
 
     typedef std::shared_ptr<InstructionPostprocessor> InstructionPostprocessorRef;
 
+    /**
+     * \ingroup Routing
+     * Collects POIs the vehicle passes by
+     */
+    class OSMSCOUT_API POIsPostprocessor : public RoutePostprocessor::Postprocessor
+    {
+    private:
+      struct POIAtRoute
+      {
+        ObjectFileRef                               object;
+        RouteDescription::NameDescriptionRef        name;
+        Distance                                    distance;
+        std::list<RouteDescription::Node>::iterator node;
+      };
+
+    private:
+      std::set<ObjectFileRef> CollectPaths(const std::list<RouteDescription::Node>& nodes) const;
+      std::list<WayRef> CollectWays(const RoutePostprocessor& postprocessor,
+                                    const std::list<RouteDescription::Node>& nodes) const;
+      std::list<AreaRef> CollectAreas(const RoutePostprocessor& postprocessor,
+                                      const std::list<RouteDescription::Node>& nodes) const;
+      std::map<ObjectFileRef,std::set<ObjectFileRef>> CollectPOICandidates(const Database& database,
+                                                                           const std::set<ObjectFileRef>& paths,
+                                                                           const std::list<WayRef>& ways,
+                                                                           const std::list<AreaRef>& areas);
+      std::map<ObjectFileRef,POIAtRoute> AnalysePOICandidates(const RoutePostprocessor& postprocessor,
+                                                              const DatabaseId& databaseId,
+                                                              std::list<RouteDescription::Node>& nodes,
+                                                              const TypeInfoSet& nodeTypes,
+                                                              const TypeInfoSet& areaTypes,
+                                                              const std::unordered_map<FileOffset,NodeRef>& nodeMap,
+                                                              const std::unordered_map<FileOffset,AreaRef>& areaMap,
+                                                              const std::map<ObjectFileRef,std::set<ObjectFileRef>>& poiCandidates);
+      void SortInCollectedPOIs(const DatabaseId& databaseId,
+                               const std::map<ObjectFileRef,POIAtRoute>& pois);
+
+    public:
+      POIsPostprocessor() : Postprocessor() {};
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   RouteDescription& description) override;
+    };
+
+    typedef std::shared_ptr<POIsPostprocessor> POIsPostprocessorRef;
+
   private:
-    std::vector<RoutingProfileRef>            profiles;
-    std::vector<DatabaseRef>                  databases;
+    std::vector<RoutingProfileRef>                                profiles;
+    std::vector<DatabaseRef>                                      databases;
 
-    std::unordered_map<DBFileOffset,AreaRef>  areaMap;
-    std::unordered_map<DBFileOffset,WayRef>   wayMap;
+    std::unordered_map<DBFileOffset,AreaRef>                      areaMap;
+    std::unordered_map<DBFileOffset,WayRef>                       wayMap;
 
-    std::map<DatabaseId,NameFeatureValueReader*>        nameReaders;
-    std::map<DatabaseId,RefFeatureValueReader*>         refReaders;
-    std::map<DatabaseId,BridgeFeatureReader*>           bridgeReaders;
-    std::map<DatabaseId,RoundaboutFeatureReader*>       roundaboutReaders;
-    std::map<DatabaseId,DestinationFeatureValueReader*> destinationReaders;
-    std::map<DatabaseId,MaxSpeedFeatureValueReader *>   maxSpeedReaders;
+    std::unordered_map<DatabaseId,NameFeatureValueReader*>        nameReaders;
+    std::unordered_map<DatabaseId,RefFeatureValueReader*>         refReaders;
+    std::unordered_map<DatabaseId,BridgeFeatureReader*>           bridgeReaders;
+    std::unordered_map<DatabaseId,RoundaboutFeatureReader*>       roundaboutReaders;
+    std::unordered_map<DatabaseId,DestinationFeatureValueReader*> destinationReaders;
+    std::unordered_map<DatabaseId,MaxSpeedFeatureValueReader*>    maxSpeedReaders;
 
-    std::map<DatabaseId,TypeInfoSet> motorwayTypes;
-    std::map<DatabaseId,TypeInfoSet> motorwayLinkTypes;
-    std::map<DatabaseId,TypeInfoSet> junctionTypes;
+    std::unordered_map<DatabaseId,TypeInfoSet>                    motorwayTypes;
+    std::unordered_map<DatabaseId,TypeInfoSet>                    motorwayLinkTypes;
+    std::unordered_map<DatabaseId,TypeInfoSet>                    junctionTypes;
 
   private:
     bool ResolveAllAreasAndWays(const RouteDescription& description,
@@ -271,21 +332,21 @@ namespace osmscout {
                                 Database& database);
     void Cleanup();
 
-  public:
-    RoutePostprocessor();
-
+  private:
     AreaRef GetArea(const DBFileOffset &offset) const;
     WayRef GetWay(const DBFileOffset &offset) const;
 
-    double GetTime(DatabaseId dbId,const Area& area,double deltaDistance) const;
-    double GetTime(DatabaseId dbId,const Way& way,double deltaDistance) const;
+    double GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const;
+    double GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const;
 
     RouteDescription::NameDescriptionRef GetNameDescription(const RouteDescription::Node& node) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const ObjectFileRef& object) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
+                                                            const Node& node) const;
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const Area& area) const;
-    RouteDescription::NameDescriptionRef GetNameDescription(const DatabaseId dbId,
+    RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const Way& way) const;
 
     bool LoadJunction(DatabaseId database,
@@ -330,13 +391,25 @@ namespace osmscout {
     GeoCoord GetCoordinates(const RouteDescription::Node& node,
                             size_t nodeIndex) const;
 
+  public:
+    /*
+     * TODO:
+     * All Postprocessors are allowed to use our internal methods currently.
+     * We should fix this by moving helper methods to a separate
+     * PostprocessorContext object that gets passed to the postprocessors explicitely.
+     * This would also move state out of the RoutePostprocessor itself.
+     */
+    friend Postprocessor;
+
+    RoutePostprocessor();
+
     bool PostprocessRouteDescription(RouteDescription& description,
-                                     std::vector<RoutingProfileRef> &profiles,
-                                     std::vector<DatabaseRef>& databases,
-                                     std::list<PostprocessorRef> processors,
-                                     std::set<std::string> motorwayTypeNames=std::set<std::string>(),
-                                     std::set<std::string> motorwayLinkTypeNames=std::set<std::string>(),
-                                     std::set<std::string> junctionTypeNames=std::set<std::string>());
+                                     const std::vector<RoutingProfileRef>& profiles,
+                                     const std::vector<DatabaseRef>& databases,
+                                     const std::list<PostprocessorRef>& processors,
+                                     const std::set<std::string>& motorwayTypeNames=std::set<std::string>(),
+                                     const std::set<std::string>& motorwayLinkTypeNames=std::set<std::string>(),
+                                     const std::set<std::string>& junctionTypeNames=std::set<std::string>());
   };
 }
 

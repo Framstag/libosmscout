@@ -116,6 +116,26 @@ namespace osmscout {
                     GeoCoord(maxLat,maxLon));
   }
 
+  GeoBox Area::Ring::GetBoundingBox() const
+  {
+    assert(!nodes.empty());
+
+    double minLon=nodes[0].GetLon();
+    double maxLon=minLon;
+    double minLat=nodes[0].GetLat();
+    double maxLat=minLat;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLon=std::min(minLon,nodes[i].GetLon());
+      maxLon=std::max(maxLon,nodes[i].GetLon());
+      minLat=std::min(minLat,nodes[i].GetLat());
+      maxLat=std::max(maxLat,nodes[i].GetLat());
+    }
+
+    return GeoBox(GeoCoord(minLat,minLon),
+                  GeoCoord(maxLat,maxLon));
+  }
+
   bool Area::GetCenter(GeoCoord& center) const
   {
     assert(!rings.empty());
@@ -164,9 +184,9 @@ namespace osmscout {
     return true;
   }
 
-  void Area::GetBoundingBox(GeoBox& boundingBox) const
+  GeoBox Area::GetBoundingBox() const
   {
-    boundingBox.Invalidate();
+    GeoBox boundingBox;
 
     for (const auto& ring : rings) {
       if (ring.IsOuterRing()) {
@@ -182,6 +202,8 @@ namespace osmscout {
         }
       }
     }
+
+    return boundingBox;
   }
 
   /**

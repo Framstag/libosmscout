@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -29,6 +30,8 @@
 #include <osmscout/Way.h>
 
 #include <osmscout/ObjectRef.h>
+
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/import/Import.h>
 

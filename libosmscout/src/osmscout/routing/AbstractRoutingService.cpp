@@ -608,8 +608,8 @@ namespace osmscout {
                                                        const GeoCoord &targetCoord,
                                                        const Vehicle &vehicle,
                                                        size_t &nodesIgnoredCount,
-                                                       double &currentMaxDistance,
-                                                       const double &overallDistance,
+                                                       Distance &currentMaxDistance,
+                                                       const Distance &overallDistance,
                                                        const double &costLimit)
   {
     DatabaseId dbId=current->id.database;
@@ -729,10 +729,10 @@ namespace osmscout {
         return false;
       }
 
-      double distanceToTarget=GetSphericalDistance(nextNode->GetCoord(),
+      Distance distanceToTarget=GetSphericalDistance(nextNode->GetCoord(),
                                                    targetCoord);
 
-      currentMaxDistance=std::max(currentMaxDistance,overallDistance-distanceToTarget);
+      currentMaxDistance=Distance::Max(currentMaxDistance,overallDistance-distanceToTarget);
       result.SetCurrentMaxDistance(currentMaxDistance);
 
       // Estimate costs for the rest of the distance to the target
@@ -918,9 +918,9 @@ namespace osmscout {
     }
 
 
-    double currentMaxDistance=0.0;
-    double overallDistance=GetSphericalDistance(startCoord,
-                                                targetCoord);
+    Distance currentMaxDistance;
+    Distance overallDistance=GetSphericalDistance(startCoord,
+                                                  targetCoord);
     double overallCost=GetEstimateCosts(state,start.GetDatabaseId(),overallDistance);
     double costLimit=GetCostLimit(state,start.GetDatabaseId(),overallDistance);
 
@@ -1126,7 +1126,7 @@ namespace osmscout {
 
       std::cout << "Time:                " << clock << std::endl;
 
-      std::cout << "Air-line distance:   " << std::fixed << std::setprecision(1) << overallDistance << "km" << std::endl;
+      std::cout << "Air-line distance:   " << std::fixed << std::setprecision(1) << overallDistance.As<Kilometer>() << "km" << std::endl;
       std::cout << "Minimum cost:        " << overallCost << std::endl;
       if (targetFinalNode) {
         std::cout << "Actual cost:         " << targetFinalNode->currentCost << std::endl;
@@ -1618,15 +1618,18 @@ namespace osmscout {
                                                                      Way& way)
   {
     std::list<Point> points;
-    if (!TransformRouteDataToPoints(data,points)){
+
+    if (!TransformRouteDataToPoints(data,points)) {
       return false;
     }
+
     way.nodes.clear();
-    way.SetLayerToMax();
     way.nodes.reserve(data.Entries().size());
-    for (const auto &p:points){
+
+    for (const auto& p: points) {
       way.nodes.push_back(p);
     }
+
     return true;
   }
 

@@ -35,10 +35,10 @@ public:
   std::vector<TrackPoint> points;
 
   /**
-   * Compute track length in meters
+   * Compute track length
    * @return
    */
-  double GetLength() const;
+  Distance GetLength() const;
 };
 }
 }

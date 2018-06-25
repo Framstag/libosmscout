@@ -27,7 +27,7 @@ namespace osmscout {
     int         roundaboutExitNumber;
     int         index;
     std::string instructions;
-    double      distance;
+    Distance    distance;
     double      time;
     GeoCoord    location;
   };
@@ -77,16 +77,15 @@ namespace osmscout {
   public:
     NavigationDescription()
       : roundaboutCrossingCounter(0),
-        index(0),
-        previousDistance(0.0)
+        index(0)
     {};
 
-    void NextDescription(double distance,
+    void NextDescription(Distance distance,
                          std::list<RouteDescription::Node>::const_iterator& waypoint,
                          std::list<RouteDescription::Node>::const_iterator end)
     {
 
-      if (waypoint==end || (distance>=0 && previousDistance>distance)) {
+      if (waypoint==end || (distance.AsMeter()>=0 && previousDistance>distance)) {
         return;
       }
 
@@ -256,7 +255,7 @@ namespace osmscout {
 
     void Clear()
     {
-      previousDistance         =0.0;
+      previousDistance         =Distance::Of<Meter>(0.0);
       roundaboutCrossingCounter=0;
       index                    =0;
     }
@@ -264,7 +263,7 @@ namespace osmscout {
   private:
     size_t          roundaboutCrossingCounter;
     size_t          index;
-    double          previousDistance;
+    Distance        previousDistance;
     NodeDescription description;
   };
 }

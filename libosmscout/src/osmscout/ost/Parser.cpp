@@ -527,7 +527,7 @@ void Parser::TAGBINCOND(TagConditionRef& condition) {
 void Parser::TAGEXISTSCOND(TagConditionRef& condition) {
 		Expect(38 /* "EXISTS" */);
 		Expect(_string);
-		condition=std::make_shared<TagExistsCondition>(config.RegisterTag(Destring(t->val)));
+		condition=std::make_shared<TagExistsCondition>(config.GetTagRegistry().RegisterTag(Destring(t->val)));
 		
 }
 
@@ -538,13 +538,13 @@ void Parser::TAGLESSCOND(const std::string& tagName,TagConditionRef& condition) 
 		Expect(29 /* "<" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLess,sizeValue);
 			
@@ -558,13 +558,13 @@ void Parser::TAGLESSEQUALCOND(const std::string& tagName,TagConditionRef& condit
 		Expect(30 /* "<=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorLessEqual,sizeValue);
 			
@@ -578,13 +578,13 @@ void Parser::TAGEQUALSCOND(const std::string& tagName,TagConditionRef& condition
 		Expect(31 /* "==" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,sizeValue);
 			
@@ -598,13 +598,13 @@ void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagConditionRef& condit
 		Expect(32 /* "!=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorNotEqual,sizeValue);
 			
@@ -618,13 +618,13 @@ void Parser::TAGGREATERCOND(const std::string& tagName,TagConditionRef& conditio
 		Expect(34 /* ">" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreater,sizeValue);
 			
@@ -638,13 +638,13 @@ void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagConditionRef& con
 		Expect(33 /* ">=" */);
 		if (la->kind == _string) {
 			STRING(stringValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,stringValue);
 			
 		} else if (la->kind == _number) {
 			UINT(sizeValue);
-			TagId tagId=config.RegisterTag(tagName);
+			TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 			
 			condition=std::make_shared<TagBinaryCondition>(tagId,operatorGreaterEqual,sizeValue);
 			
@@ -664,7 +664,7 @@ void Parser::TAGISINCOND(const std::string& tagName,TagConditionRef& condition) 
 			values.push_back(Destring(t->val)); 
 		}
 		Expect(37 /* "]" */);
-		TagId tagId=config.RegisterTag(tagName);
+		TagId tagId=config.GetTagRegistry().RegisterTag(tagName);
 		
 		if (values.size()==1) {
 		 condition=std::make_shared<TagBinaryCondition>(tagId,operatorEqual,values.front());

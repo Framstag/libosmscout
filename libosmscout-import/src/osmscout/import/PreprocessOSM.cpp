@@ -177,7 +177,7 @@ namespace osmscout {
           return;
         }
 
-        TagId id=typeConfig.GetTagId((const char*)keyValue);
+        TagId id=typeConfig.GetTagRegistry().GetTagId((const char*)keyValue);
 
         if (id!=tagIgnore) {
           tags[id]=(const char*)valueValue;

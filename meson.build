@@ -7,8 +7,8 @@ project('libosmscout',
 if build_machine.system()=='darwin'
   add_languages(['objcpp'])
   # Workarounds...
-  add_global_arguments(['-fobjc-arc', '-std=c++11'], language: 'objcpp')
-  add_global_link_arguments(['-dynamiclib'], language: 'objcpp')
+  add_project_arguments(['-fobjc-arc', '-std=c++11'], language: 'objcpp')
+  add_project_link_arguments(['-dynamiclib'], language: 'objcpp')
 endif
 
 compiler = meson.get_compiler('cpp')
@@ -25,38 +25,26 @@ else
   haveVisibility=false
 endif
 
-openmpOpt = get_option('openmp')
-
-if openmpOpt and compiler.has_argument('-fopenmp')
-  if (compiler.get_id()=='gcc')
-    add_global_arguments('-fopenmp', language: 'cpp')
-    add_global_link_arguments('-fopenmp', language: 'cpp')
-  elif (compiler.get_id()=='clang')
-    add_global_arguments('-fopenmp', language: 'cpp')
-    add_global_link_arguments('-fopenmp=libomp', language: 'cpp')
-  endif
-endif
-
 if compiler.get_id()=='msvc'
   # Allow the compiler to fork itself for faster compiling
-  # add_global_arguments('/MP', language: 'cpp')
+  # add_project_arguments('/MP', language: 'cpp')
 
   # Allow the compiler to create bigger object files
-  add_global_arguments('/bigobj', language: 'cpp')
+  add_project_arguments('/bigobj', language: 'cpp')
 
   # Do not warn regarding insecure function calls
-  add_global_arguments('-D_CRT_SECURE_NO_DEPRECATE', language: 'cpp')
-  add_global_arguments('-D_CRT_NONSTDC_NO_DEPRECATE', language: 'cpp')
+  add_project_arguments('-D_CRT_SECURE_NO_DEPRECATE', language: 'cpp')
+  add_project_arguments('-D_CRT_NONSTDC_NO_DEPRECATE', language: 'cpp')
 
   # Fast floating point processing
-  add_global_arguments('/fp:fast', language: 'cpp')
+  add_project_arguments('/fp:fast', language: 'cpp')
 
   # Disable some over-eager compiler warnings
-  add_global_arguments(['/wd4251', '/wd4456', '/wd4458'], language: 'cpp')
+  add_project_arguments(['/wd4251', '/wd4456', '/wd4458'], language: 'cpp')
 
   if get_option('default_library')=='shared'
     # TODO: Should only be set for library builds, not executables
-    add_global_arguments('-DDLL_EXPORT', language: 'cpp')
+    add_project_arguments('-DDLL_EXPORT', language: 'cpp')
   endif
 endif
 
@@ -89,6 +77,12 @@ mathDep = compiler.find_library('m', required : false)
 threadDep = dependency('threads')
 iconvDep = compiler.find_library('iconv', required: false)
 marisaDep = dependency('marisa', required : false)
+
+if compiler.get_id()=='clang'
+  openmpDep = dependency('', required: false)
+else
+  openmpDep = dependency('openmp', required: false)
+endif
 
 # Import
 protobufDep = dependency('protobuf', required : false)
@@ -247,7 +241,7 @@ buildOSMScout2=buildMapQt and buildClientQt and qt5SvgDep.found()
 buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
 
 message('build system:            @0@'.format(build_machine.system()))
-message('option \'openmp\':         @0@'.format(openmpOpt))
+message('openmp support:          @0@'.format(openmpDep.found()))
 message('libosmscout:             @0@'.format(true))
 message('libosmscout-gpx:         @0@'.format(true))
 message('libosmscout-import:      @0@'.format(true))

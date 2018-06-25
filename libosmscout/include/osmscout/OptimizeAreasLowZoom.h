@@ -20,10 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
 #include <memory>
 #include <mutex>
 #include <set>
 #include <string>
+
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>

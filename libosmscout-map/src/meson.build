@@ -9,7 +9,6 @@ osmscoutmapSrc = [
             'src/osmscout/StyleDescription.cpp',
             'src/osmscout/StyleConfig.cpp',
             'src/osmscout/StyleProcessor.cpp',
-            'src/osmscout/TileId.cpp',
             'src/osmscout/DataTileCache.cpp',
             'src/osmscout/MapTileCache.cpp',
             'src/osmscout/MapService.cpp',

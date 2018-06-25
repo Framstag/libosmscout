@@ -29,6 +29,27 @@ namespace osmscout {
     return "No error";
   }
 
+  UninitializedException::UninitializedException(const std::string& object)
+  : object(object)
+  {
+    description="Object '"+object+"' is not initialized";
+  }
+
+  const char* UninitializedException::what() const OSMSCOUT_NOEXCEPT
+  {
+    return description.c_str();
+  }
+
+  std::string UninitializedException::GetObject() const
+  {
+    return object;
+  }
+
+  std::string UninitializedException::GetDescription() const
+  {
+    return description;
+  }
+
   IOException::IOException(const std::string& filename,
                            const std::string& semanticError,
                            const std::system_error& error)

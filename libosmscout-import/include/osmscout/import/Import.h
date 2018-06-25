@@ -32,6 +32,7 @@
 
 #include <osmscout/import/ImportErrorReporter.h>
 
+#include <osmscout/util/Magnification.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Transformation.h>
 
@@ -160,15 +161,15 @@ namespace osmscout {
     size_t                       areaNodeIndexCellSizeAverage; //<! Average entries per index cell
     size_t                       areaNodeIndexCellSizeMax; //<! Maximum number of entries  per index cell
 
-    size_t                       areaWayMinMag;            //<! Minimum magnification of index for individual type
-    size_t                       areaWayIndexMaxLevel;     //<! Maximum zoom level for area way index bitmap
+    MagnificationLevel           areaWayMinMag;            //<! Minimum magnification of index for individual type
+    MagnificationLevel           areaWayIndexMaxLevel;     //<! Maximum zoom level for area way index bitmap
 
     uint32_t                     waterIndexMinMag;         //<! Minimum level of the generated water index
     uint32_t                     waterIndexMaxMag;         //<! Maximum level of the generated water index
 
     size_t                       optimizationMaxWayCount;  //<! Maximum number of ways for one iteration
-    uint32_t                     optimizationMaxMag;       //<! Maximum magnification for optimization
-    uint32_t                     optimizationMinMag;       //<! Minimum magnification of index for individual type
+    MagnificationLevel           optimizationMaxMag;       //<! Maximum magnification for optimization
+    MagnificationLevel           optimizationMinMag;       //<! Minimum magnification of index for individual type
     size_t                       optimizationCellSizeAverage; //<! Average entries per index cell
     size_t                       optimizationCellSizeMax;  //<! Maximum number of entries  per index cell
     TransPolygon::OptimizeMethod optimizationWayMethod;    //<! what method to use to optimize ways
@@ -241,8 +242,8 @@ namespace osmscout {
     size_t GetAreaNodeIndexCellSizeAverage() const;
     size_t GetAreaNodeIndexCellSizeMax() const;
 
-    size_t GetAreaWayMinMag() const;
-    size_t GetAreaWayIndexMaxLevel() const;
+    MagnificationLevel GetAreaWayMinMag() const;
+    MagnificationLevel GetAreaWayIndexMaxLevel() const;
 
     size_t GetAreaAreaIndexMaxMag() const;
 
@@ -250,8 +251,8 @@ namespace osmscout {
     uint32_t GetWaterIndexMaxMag() const;
 
     size_t GetOptimizationMaxWayCount() const;
-    uint32_t GetOptimizationMaxMag() const;
-    uint32_t GetOptimizationMinMag() const;
+    MagnificationLevel GetOptimizationMaxMag() const;
+    MagnificationLevel GetOptimizationMinMag() const;
     size_t GetOptimizationCellSizeAverage() const;
     size_t GetOptimizationCellSizeMax() const;
     TransPolygon::OptimizeMethod GetOptimizationWayMethod() const;
@@ -318,15 +319,15 @@ namespace osmscout {
     void SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage);
     void SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax);
 
-    void SetAreaWayMinMag(size_t areaWayMinMag);
-    void SetAreaWayIndexMaxMag(size_t areaWayIndexMaxLevel);
+    void SetAreaWayMinMag(MagnificationLevel areaWayMinMag);
+    void SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel);
 
     void SetWaterIndexMinMag(uint32_t waterIndexMinMag);
     void SetWaterIndexMaxMag(uint32_t waterIndexMaxMag);
 
     void SetOptimizationMaxWayCount(size_t optimizationMaxWayCount);
-    void SetOptimizationMaxMag(uint32_t optimizationMaxMag);
-    void SetOptimizationMinMag(uint32_t optimizationMinMag);
+    void SetOptimizationMaxMag(MagnificationLevel optimizationMaxMag);
+    void SetOptimizationMinMag(MagnificationLevel optimizationMinMag);
     void SetOptimizationCellSizeAverage(size_t optimizationCellSizeAverage);
     void SetOptimizationCellSizeMax(size_t optimizationCellSizeMax);
     void SetOptimizationWayMethod(TransPolygon::OptimizeMethod optimizationWayMethod);

@@ -20,9 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstdint>
+#include <limits>
 #include <unordered_map>
 
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeFeature.h>
 
 namespace osmscout {
 
@@ -79,7 +82,7 @@ namespace osmscout {
 
   public:
     NameFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -87,7 +90,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -147,7 +150,7 @@ namespace osmscout {
 
   public:
     NameAltFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -155,7 +158,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -216,7 +219,7 @@ namespace osmscout {
 
   public:
     RefFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -224,7 +227,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -288,7 +291,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -296,7 +299,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -367,7 +370,7 @@ namespace osmscout {
 
   public:
     AddressFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -375,7 +378,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -615,7 +618,7 @@ namespace osmscout {
     }
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -623,7 +626,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -746,7 +749,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -754,7 +757,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -806,7 +809,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -814,7 +817,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -866,7 +869,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -874,7 +877,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -926,7 +929,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -934,7 +937,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -987,7 +990,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -995,7 +998,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1061,7 +1064,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1069,7 +1072,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1129,7 +1132,7 @@ namespace osmscout {
   public:
     PostalCodeFeature();
 
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1137,7 +1140,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1154,12 +1157,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1176,12 +1179,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1198,12 +1201,12 @@ namespace osmscout {
         static const char* const NAME;
 
     public:
-        void Initialize(TypeConfig& typeConfig) override;
+        void Initialize(TagRegistry& tagRegistry) override;
 
         std::string GetName() const override;
 
         void Parse(TagErrorReporter& reporter,
-                   const TypeConfig& typeConfig,
+                   const TagRegistry& tagRegistry,
                    const FeatureInstance& feature,
                    const ObjectOSMRef& object,
                    const TagMap& tags,
@@ -1220,12 +1223,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1289,7 +1292,7 @@ namespace osmscout {
 
   public:
     EleFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1297,7 +1300,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1362,7 +1365,7 @@ namespace osmscout {
 
   public:
     DestinationFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1370,7 +1373,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1387,12 +1390,12 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1452,7 +1455,7 @@ namespace osmscout {
 
   public:
     WebsiteFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1460,7 +1463,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1518,7 +1521,7 @@ namespace osmscout {
 
   public:
     PhoneFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1526,7 +1529,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1577,7 +1580,7 @@ namespace osmscout {
     static const char* const NAME;
 
   public:
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1585,7 +1588,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1660,7 +1663,7 @@ namespace osmscout {
 
   public:
     ConstructionYearFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1668,7 +1671,7 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
@@ -1679,14 +1682,12 @@ namespace osmscout {
   {
   public:
     enum Feature : uint8_t {
-      sidewalkLaneLeft   = 1u << 0u,
-      sidewalkLaneRight  = 1u << 1u,
-      sidewalkTrackLeft  = 1u << 2u,
-      sidewalkTrackRight = 1u << 3u,
-      cyclewayLaneLeft   = 1u << 4u,
-      cyclewayLaneRight  = 1u << 5u,
-      cyclewayTrackLeft  = 1u << 6u,
-      cyclewayTrackRight = 1u << 7u,
+      sidewalkTrackLeft  = 1u << 0u,
+      sidewalkTrackRight = 1u << 1u,
+      cyclewayLaneLeft   = 1u << 2u,
+      cyclewayLaneRight  = 1u << 3u,
+      cyclewayTrackLeft  = 1u << 4u,
+      cyclewayTrackRight = 1u << 5u,
     };
 
   private:
@@ -1695,22 +1696,16 @@ namespace osmscout {
   public:
     inline SidewayFeatureValue()
     {
-      // no code
+    }
+
+    inline bool IsFlagSet(size_t flagIndex) const override
+    {
+      return (featureSet & (1<< flagIndex))!=0;
     }
 
     inline void SetFeatureSet(uint8_t featureSet)
     {
       this->featureSet=featureSet;
-    }
-
-    inline bool HasSidewalkLaneLeft() const
-    {
-      return (featureSet & sidewalkLaneLeft)!=0;
-    }
-
-    inline bool HasSidewalkLaneRight() const
-    {
-      return (featureSet & sidewalkLaneRight)!=0;
     }
 
     inline bool HasSidewalkTrackLeft() const
@@ -1753,10 +1748,21 @@ namespace osmscout {
   class OSMSCOUT_API SidewayFeature : public Feature
   {
   private:
-    TagId tagSidewalkLeft;
-    TagId tagSidewalkRight;
+    enum class FeatureFlags: uint8_t {
+      sidewalkTrackLeft  = 0,
+      sidewalkTrackRight = 1,
+      cyclewayLaneLeft   = 2,
+      cyclewayLaneRight  = 3,
+      cyclewayTrackLeft  = 4,
+      cyclewayTrackRight = 5
+    };
+
+  private:
+    TagId tagSidewalk;
     TagId tagCyclewayLeft;
+    TagId tagCyclewayLeftSegregated;
     TagId tagCyclewayRight;
+    TagId tagCyclewayRightSegregated;
 
   public:
     /** Name of this feature */
@@ -1764,7 +1770,7 @@ namespace osmscout {
 
   public:
     SidewayFeature();
-    void Initialize(TypeConfig& typeConfig) override;
+    void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;
 
@@ -1772,282 +1778,12 @@ namespace osmscout {
     FeatureValue* AllocateValue(void* buffer) override;
 
     void Parse(TagErrorReporter& reporter,
-               const TypeConfig& typeConfig,
+               const TagRegistry& tagRegistry,
                const FeatureInstance& feature,
                const ObjectOSMRef& object,
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
-
-  /**
-   * Helper template class for easy access to flag-like Features.
-   *
-   * Each type may have stored the feature in request at a different index. The FeatureReader
-   * caches the index for each type once in the constructor and later on allows access to the feature
-   * in O(1) - without iterating of all feature(values) of an object.
-   */
-  template<class F>
-  class FeatureReader
-  {
-  private:
-    std::vector<size_t> lookupTable;
-
-  public:
-    explicit FeatureReader(const TypeConfig& typeConfig);
-
-    /**
-     * Returns the index of the Feature/FeatureValue within the given FeatureValueBuffer.
-     *
-     * @param buffer
-     *    The FeatureValueBuffer instance
-     * @param index
-     *    The index
-     * @return
-     *    true, if there is a valid index 8because the type has such feature), else false
-     */
-    bool GetIndex(const FeatureValueBuffer& buffer,
-                  size_t& index) const;
-
-    /**
-     * Returns true, if the feature is set for the given FeatureValueBuffer
-     * @param buffer
-     *    The FeatureValueBuffer instance
-     * @return
-     *    true if set, else false
-     */
-    bool IsSet(const FeatureValueBuffer& buffer) const;
-  };
-
-  template<class F>
-  FeatureReader<F>::FeatureReader(const TypeConfig& typeConfig)
-  {
-    FeatureRef feature=typeConfig.GetFeature(F::NAME);
-
-    lookupTable.resize(typeConfig.GetTypeCount(),
-                       std::numeric_limits<size_t>::max());
-
-    for (const auto &type : typeConfig.GetTypes()) {
-      size_t index;
-
-      if (type->GetFeature(F::NAME,
-                           index)) {
-        lookupTable[type->GetIndex()]=index;
-      }
-    }
-  }
-
-  template<class F>
-  bool FeatureReader<F>::GetIndex(const FeatureValueBuffer& buffer,
-                                  size_t& index) const
-  {
-    index=lookupTable[buffer.GetType()->GetIndex()];
-
-    return index!=std::numeric_limits<size_t>::max();
-  }
-
-  template<class F>
-  bool FeatureReader<F>::IsSet(const FeatureValueBuffer& buffer) const
-  {
-    size_t index=lookupTable[buffer.GetType()->GetIndex()];
-
-    if (index!=std::numeric_limits<size_t>::max()) {
-      return buffer.HasFeature(index);
-    }
-    else {
-      return false;
-    }
-  }
-
-  typedef FeatureReader<AccessRestrictedFeature> AccessRestrictedFeatureReader;
-  typedef FeatureReader<BridgeFeature>           BridgeFeatureReader;
-  typedef FeatureReader<TunnelFeature>           TunnelFeatureReader;
-  typedef FeatureReader<EmbankmentFeature>       EmbankmentFeatureReader;
-  typedef FeatureReader<RoundaboutFeature>       RoundaboutFeatureReader;
-
-  /**
-   * Variant of FeatureReader that is not type set and thus can easier get used
-   * in cases where runtime dynamics are required and features are referenced
-   * by name and not by type.
-   */
-  class OSMSCOUT_API DynamicFeatureReader CLASS_FINAL
-  {
-  private:
-    std::string         featureName;
-    std::vector<size_t> lookupTable;
-
-  public:
-    DynamicFeatureReader(const TypeConfig& typeConfig,
-                         const Feature& feature);
-
-    inline std::string GetFeatureName() const
-    {
-      return featureName;
-    }
-
-    bool IsSet(const FeatureValueBuffer& buffer) const;
-  };
-
-  /**
-   * Helper template class for easy access to the value of a certain feature for objects of any type.
-   *
-   * Each type may have stored the feature in request at a different index. The FeatureValueReader
-   * caches the index for each type once in the constructor and later on allows access to the feature value
-   * in O(1) - without iterating of all feature(values) of an object.
-   */
-  template<class F, class V>
-  class FeatureValueReader
-  {
-  private:
-    std::vector<size_t> lookupTable;
-
-  public:
-    explicit FeatureValueReader(const TypeConfig& typeConfig);
-
-    /**
-     * Returns the index of the Feature/FeatureValue within the given FeatureValueBuffer.
-     *
-     * @param buffer
-     *    The FeatureValueBuffer instance
-     * @param index
-     *    The index
-     * @return
-     *    true, if there is a valid index 8because the type has such feature), else false
-     */
-    bool GetIndex(const FeatureValueBuffer& buffer,
-                  size_t& index) const;
-
-    /**
-     * Returns the FeatureValue for the given FeatureValueBuffer
-     * @param buffer
-     *    The FeatureValueBuffer instance
-     * @return
-     *    A pointer to an instance if the Type and the instance do have the feature and its value is not NULL,
-     *    else NULL
-     */
-    V* GetValue(const FeatureValueBuffer& buffer) const;
-  };
-
-  template<class F, class V>
-  FeatureValueReader<F,V>::FeatureValueReader(const TypeConfig& typeConfig)
-  {
-    FeatureRef feature=typeConfig.GetFeature(F::NAME);
-
-    assert(feature->HasValue());
-
-    lookupTable.resize(typeConfig.GetTypeCount(),
-                       std::numeric_limits<size_t>::max());
-
-    for (const auto &type : typeConfig.GetTypes()) {
-      size_t index;
-
-      if (type->GetFeature(F::NAME,
-                          index)) {
-        lookupTable[type->GetIndex()]=index;
-      }
-    }
-  }
-
-  template<class F, class V>
-  bool FeatureValueReader<F,V>::GetIndex(const FeatureValueBuffer& buffer,
-                                         size_t& index) const
-  {
-    index=lookupTable[buffer.GetType()->GetIndex()];
-
-    return index!=std::numeric_limits<size_t>::max();
-  }
-
-  template<class F, class V>
-  V* FeatureValueReader<F,V>::GetValue(const FeatureValueBuffer& buffer) const
-  {
-    size_t index=lookupTable[buffer.GetType()->GetIndex()];
-
-    if (index!=std::numeric_limits<size_t>::max() &&
-        buffer.HasFeature(index)) {
-      return dynamic_cast<V*>(buffer.GetValue(index));
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  typedef FeatureValueReader<NameFeature,NameFeatureValue>                         NameFeatureValueReader;
-  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>                   NameAltFeatureValueReader;
-  typedef FeatureValueReader<RefFeature,RefFeatureValue>                           RefFeatureValueReader;
-  typedef FeatureValueReader<LocationFeature,LocationFeatureValue>                 LocationFeatureValueReader;
-  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>                   AddressFeatureValueReader;
-  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>                     AccessFeatureValueReader;
-  typedef FeatureValueReader<AccessRestrictedFeature,AccessRestrictedFeatureValue> AccessRestrictedFeatureValueReader;
-  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>                       LayerFeatureValueReader;
-  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>                       WidthFeatureValueReader;
-  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue>                 MaxSpeedFeatureValueReader;
-  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>                       GradeFeatureValueReader;
-  typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
-  typedef FeatureValueReader<PostalCodeFeature,PostalCodeFeatureValue>             PostalCodeFeatureValueReader;
-  typedef FeatureValueReader<IsInFeature,IsInFeatureValue>                         IsInFeatureValueReader;
-  typedef FeatureValueReader<DestinationFeature,DestinationFeatureValue>           DestinationFeatureValueReader;
-  typedef FeatureValueReader<ConstructionYearFeature,ConstructionYearFeatureValue> ConstructionYearFeatureValueReader;
-
-  template <class F, class V>
-  class FeatureLabelReader
-  {
-  private:
-    std::vector<size_t> lookupTable;
-
-  public:
-    explicit FeatureLabelReader(const TypeConfig& typeConfig);
-
-    /**
-     * Returns the label of the given object
-     * @param buffer
-     *    The FeatureValueBuffer instance
-     * @return
-     *    The label, if the given feature has a value and a label  or a empty string
-     */
-    std::string GetLabel(const FeatureValueBuffer& buffer) const;
-  };
-
-  template<class F, class V>
-  FeatureLabelReader<F,V>::FeatureLabelReader(const TypeConfig& typeConfig)
-  {
-    FeatureRef feature=typeConfig.GetFeature(F::NAME);
-
-    assert(feature->HasLabel());
-
-    lookupTable.resize(typeConfig.GetTypeCount(),
-                       std::numeric_limits<size_t>::max());
-
-    for (const auto &type : typeConfig.GetTypes()) {
-      size_t index;
-
-      if (type->GetFeature(F::NAME,
-                          index)) {
-        lookupTable[type->GetIndex()]=index;
-      }
-    }
-  }
-
-  template<class F, class V>
-  std::string FeatureLabelReader<F,V>::GetLabel(const FeatureValueBuffer& buffer) const
-  {
-    size_t index=lookupTable[buffer.GetType()->GetIndex()];
-
-    if (index!=std::numeric_limits<size_t>::max() &&
-    buffer.HasFeature(index)) {
-      V* value=dynamic_cast<V*>(buffer.GetValue(index));
-
-      if (value!=NULL) {
-        return value->GetLabel(0);
-      }
-    }
-
-    return "";
-  }
-
-  typedef FeatureLabelReader<NameFeature,NameFeatureValue>         NameFeatureLabelReader;
-
-  /**
-   * \defgroup type Object type related data structures and services
-   */
 }
 
 #endif

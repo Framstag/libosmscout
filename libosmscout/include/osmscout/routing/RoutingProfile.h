@@ -20,12 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
 #include <memory>
 #include <vector>
 
 #include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>
@@ -46,7 +48,7 @@ namespace osmscout {
     virtual ~RoutingProfile();
 
     virtual Vehicle GetVehicle() const = 0;
-    virtual double GetCostLimitDistance() const = 0;
+    virtual Distance GetCostLimitDistance() const = 0;
     virtual double GetCostLimitFactor() const = 0;
 
     virtual bool CanUse(const RouteNode& currentNode,
@@ -61,15 +63,15 @@ namespace osmscout {
                             const std::vector<ObjectVariantData>& objectVariantData,
                             size_t pathIndex) const = 0;
     virtual double GetCosts(const Area& area,
-                            double distance) const = 0;
+                            const Distance &distance) const = 0;
     virtual double GetCosts(const Way& way,
-                            double distance) const = 0;
-    virtual double GetCosts(double distance) const = 0;
+                            const Distance &distance) const = 0;
+    virtual double GetCosts(const Distance &distance) const = 0;
 
     virtual double GetTime(const Area& area,
-                           double distance) const = 0;
+                           const Distance &distance) const = 0;
     virtual double GetTime(const Way& way,
-                           double distance) const = 0;
+                           const Distance &distance) const = 0;
   };
 
   typedef std::shared_ptr<RoutingProfile> RoutingProfileRef;
@@ -87,7 +89,7 @@ namespace osmscout {
     MaxSpeedFeatureValueReader maxSpeedReader;
     Vehicle                    vehicle;
     uint8_t                    vehicleRouteNodeBit;
-    double                     costLimitDistance;
+    Distance                   costLimitDistance;
     double                     costLimitFactor;
     std::vector<double>        speeds;
     double                     minSpeed;
@@ -113,9 +115,9 @@ namespace osmscout {
       return vehicle;
     }
 
-    void SetCostLimitDistance(double costLimitDistance);
+    void SetCostLimitDistance(const Distance &costLimitDistance);
 
-    inline double GetCostLimitDistance() const
+    inline Distance GetCostLimitDistance() const
     {
       return costLimitDistance;
     }
@@ -138,17 +140,17 @@ namespace osmscout {
     bool CanUseBackward(const Way& way) const;
 
     inline double GetTime(const Area& area,
-                          double distance) const
+                          const Distance &distance) const
     {
       double speed=speeds[area.GetType()->GetIndex()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return distance/speed;
+      return distance.As<Kilometer>()/speed;
     }
 
     inline double GetTime(const Way& way,
-                          double distance) const
+                          const Distance &distance) const
     {
       double speed;
 
@@ -164,7 +166,7 @@ namespace osmscout {
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return distance/speed;
+      return distance.As<Kilometer>()/speed;
     }
   };
 
@@ -181,24 +183,24 @@ namespace osmscout {
                            const std::vector<ObjectVariantData>& /*objectVariantData*/,
                            size_t pathIndex) const
     {
-      return currentNode.paths[pathIndex].distance;
+      return currentNode.paths[pathIndex].distance.As<Kilometer>();
     }
 
     inline double GetCosts(const Area& /*area*/,
-                           double distance) const
+                           const Distance &distance) const
     {
-      return distance;
+      return distance.As<Kilometer>();
     }
 
     inline double GetCosts(const Way& /*way*/,
-                           double distance) const
+                           const Distance &distance) const
     {
-      return distance;
+      return distance.As<Kilometer>();
     }
 
-    inline double GetCosts(double distance) const
+    inline double GetCosts(const Distance &distance) const
     {
-      return distance;
+      return distance.As<Kilometer>();
     }
   };
 
@@ -232,21 +234,21 @@ namespace osmscout {
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return currentNode.paths[pathIndex].distance/speed;
+      return currentNode.paths[pathIndex].distance.As<Kilometer>()/speed;
     }
 
     inline double GetCosts(const Area& area,
-                           double distance) const
+                           const Distance &distance) const
     {
       double speed=speeds[area.GetType()->GetIndex()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return distance/speed;
+      return distance.As<Kilometer>()/speed;
     }
 
     inline double GetCosts(const Way& way,
-                           double distance) const
+                           const Distance &distance) const
     {
       double speed;
 
@@ -262,16 +264,16 @@ namespace osmscout {
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return distance/speed;
+      return distance.As<Kilometer>()/speed;
     }
 
-    inline double GetCosts(double distance) const
+    inline double GetCosts(const Distance &distance) const
     {
       double speed=maxSpeed;
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return distance/speed;
+      return distance.As<Kilometer>()/speed;
     }
   };
 

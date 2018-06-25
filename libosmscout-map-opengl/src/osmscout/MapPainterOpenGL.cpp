@@ -291,10 +291,8 @@ namespace osmscout {
 
     std::sort(areas.begin(), areas.end(),
               [](const AreaRef &a, const AreaRef &b) -> bool {
-                GeoBox b1;
-                GeoBox b2;
-                a->GetBoundingBox(b1);
-                b->GetBoundingBox(b2);
+                GeoBox b1=a->GetBoundingBox();
+                GeoBox b2=b->GetBoundingBox();
                 return b1.GetHeight() * b1.GetWidth() > b2.GetHeight() * b2.GetWidth();
               });
 
@@ -1045,7 +1043,7 @@ namespace osmscout {
                 double x =
                     node->GetCoords().GetLon() + (projection.ConvertWidthToPixel(pixel.GetX() - centerX) * scale);
                 double y = node->GetCoords().GetLat() +
-                           (projection.ConvertWidthToPixel(maxY - pixel.GetY() - centerY) * scaleLat);
+                           (projection.ConvertWidthToPixel(pixel.GetY() - centerY) * scaleLat);
 
                 vertices.push_back(osmscout::Vertex2D(x, y));
               }
@@ -1157,9 +1155,9 @@ namespace osmscout {
 
   void osmscout::MapPainterOpenGL::OnZoom(float zoomDirection) {
     if (zoomDirection < 0)
-      Magnification.SetLevel(Magnification.GetLevel() - 1);
+      Magnification.SetLevel(MagnificationLevel(Magnification.GetLevel() - 1));
     else if (zoomDirection > 0)
-      Magnification.SetLevel(Magnification.GetLevel() + 1);
+      Magnification.SetLevel(MagnificationLevel(Magnification.GetLevel() + 1));
   }
 
   void osmscout::MapPainterOpenGL::OnTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {

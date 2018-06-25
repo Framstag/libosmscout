@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <osmscout/NumericIndex.h>
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
@@ -109,6 +110,11 @@ namespace osmscout {
               bool memoryMappedData);
     virtual bool IsOpen() const;
     virtual bool Close();
+
+    inline std::string GetFilename() const
+    {
+      return datafilename;
+    }
 
     bool GetByOffset(FileOffset offset,
                      ValueType& entry) const;

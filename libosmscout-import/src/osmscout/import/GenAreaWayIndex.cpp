@@ -34,6 +34,7 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
+#include <osmscout/util/TileId.h>
 
 namespace osmscout {
 
@@ -139,12 +140,12 @@ namespace osmscout {
    * @param typeData
    * @param cellFillCount
    */
-  void AreaWayIndexGenerator::CalculateStatistics(size_t level,
+  void AreaWayIndexGenerator::CalculateStatistics(MagnificationLevel level,
                                                   TypeData& typeData,
                                                   const CoordCountMap& cellFillCount) const
   {
     // Initialize/reset data structure
-    typeData.indexLevel=(uint32_t)level;
+    typeData.indexLevel=level;
     typeData.indexCells=cellFillCount.size();
     typeData.indexEntries=0;
 
@@ -177,13 +178,13 @@ namespace osmscout {
                                                     const ImportParameter& parameter,
                                                     Progress& progress,
                                                     std::vector<TypeData>& wayTypeData,
-                                                    size_t& maxLevel) const
+                                                    MagnificationLevel& maxLevel) const
   {
-    FileScanner wayScanner;
-    TypeInfoSet remainingWayTypes;
-    size_t      level;
+    FileScanner        wayScanner;
+    TypeInfoSet        remainingWayTypes;
+    MagnificationLevel level=parameter.GetAreaWayMinMag();
 
-    maxLevel=0;
+    maxLevel=MagnificationLevel(0);
     wayTypeData.resize(typeConfig.GetTypeCount());
 
     try {
@@ -194,14 +195,14 @@ namespace osmscout {
 
       remainingWayTypes.Set(typeConfig.GetWayTypes());
 
-      level=parameter.GetAreaWayMinMag();
       while (!remainingWayTypes.Empty() &&
              level<=parameter.GetAreaWayIndexMaxLevel()) {
+        Magnification              magnification(level);
         uint32_t                   wayCount=0;
         TypeInfoSet                currentWayTypes(remainingWayTypes);
         std::vector<CoordCountMap> cellFillCount(typeConfig.GetTypeCount());
 
-        progress.Info("Scanning Level "+std::to_string(level)+" ("+std::to_string(remainingWayTypes.Size())+" types remaining)");
+        progress.Info("Scanning Level "+level+" ("+std::to_string(remainingWayTypes.Size())+" types remaining)");
 
         wayScanner.GotoBegin();
 
@@ -220,24 +221,13 @@ namespace osmscout {
             continue;
           }
 
-          GeoBox boundingBox;
+          GeoBox boundingBox=way.GetBoundingBox();
 
-          way.GetBoundingBox(boundingBox);
+          TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                        TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-          //
-          // Calculate minimum and maximum tile ids that are covered
-          // by the way
-          // Renormalized coordinate space (everything is >=0)
-          //
-          uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[level].width);
-          uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[level].width);
-          uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[level].height);
-          uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[level].height);
-
-          for (uint32_t y=minyc; y<=maxyc; y++) {
-            for (uint32_t x=minxc; x<=maxxc; x++) {
-              cellFillCount[way.GetType()->GetIndex()][Pixel(x,y)]++;
-            }
+          for (const auto& tileId : box) {
+            cellFillCount[way.GetType()->GetIndex()][tileId.AsPixel()]++;
           }
         }
 
@@ -401,12 +391,12 @@ namespace osmscout {
                                      const ImportParameter& parameter,
                                      Progress& progress)
   {
-    FileScanner          wayScanner;
+    FileScanner           wayScanner;
     FileWriter            writer;
     std::vector<TypeData> wayTypeData;
-    size_t                maxLevel;
+    MagnificationLevel    maxLevel;
 
-    progress.Info("Minimum magnification: "+std::to_string(parameter.GetAreaWayMinMag()));
+    progress.Info("Minimum magnification: "+parameter.GetAreaWayMinMag());
 
     //
     // Scanning distribution
@@ -472,9 +462,10 @@ namespace osmscout {
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped());
 
-      for (size_t l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
-        TypeInfoSet indexTypes(*typeConfig);
-        uint32_t    wayCount;
+      for (MagnificationLevel l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
+        Magnification magnification(l);
+        TypeInfoSet   indexTypes(*typeConfig);
+        uint32_t      wayCount;
 
         wayScanner.GotoBegin();
 
@@ -489,7 +480,7 @@ namespace osmscout {
           continue;
         }
 
-        progress.Info("Scanning ways for index level "+std::to_string(l));
+        progress.Info("Scanning ways for index level "+l);
 
         std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypeCount());
 
@@ -511,24 +502,13 @@ namespace osmscout {
             continue;
           }
 
-          GeoBox boundingBox;
+          GeoBox boundingBox=way.GetBoundingBox();
 
-          way.GetBoundingBox(boundingBox);
+          TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
+                        TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
-          //
-          // Calculate minimum and maximum tile ids that are covered
-          // by the way
-          // Renormalized coordinate space (everything is >=0)
-          //
-          uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/cellDimension[l].width);
-          uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/cellDimension[l].width);
-          uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/cellDimension[l].height);
-          uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/cellDimension[l].height);
-
-          for (uint32_t y=minyc; y<=maxyc; y++) {
-            for (uint32_t x=minxc; x<=maxxc; x++) {
-              typeCellOffsets[way.GetType()->GetIndex()][Pixel(x,y)].push_back(offset);
-            }
+          for (const auto& tileId : box) {
+            typeCellOffsets[way.GetType()->GetIndex()][tileId.AsPixel()].push_back(offset);
           }
         }
 

@@ -249,12 +249,10 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
     progress.Info("Generating index for level "+std::to_string(indexMinMag)+" to "+std::to_string(indexMaxMag));
 
     for (auto& level : levels) {
-      osmscout::Magnification                                    magnification;
+      osmscout::Magnification                                    magnification(osmscout::MagnificationLevel(level.level));
       osmscout::MercatorProjection                               projection;
       std::list<osmscout::WaterIndexProcessor::CoastRef>         boundingPolygons;
       std::map<osmscout::Pixel,std::list<osmscout::GroundTile> > cellGroundTileMap;
-
-      magnification.SetLevel(level.level);
 
       projection.Set(osmscout::GeoCoord(0.0,0.0),magnification,72,640,480);
 

@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/system/Assert.h>
 

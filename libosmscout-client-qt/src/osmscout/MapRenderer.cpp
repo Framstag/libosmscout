@@ -188,7 +188,7 @@ void MapRenderer::getOverlayObjects(std::vector<OverlayObjectRef> &objs,
 }
 
 DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
-                         QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles,
+                         QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles,
                          osmscout::MapParameter *drawParameter,
                          QPainter *p,
                          std::vector<OverlayObjectRef> overlayObjects,

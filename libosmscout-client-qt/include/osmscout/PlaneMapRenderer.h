@@ -73,7 +73,7 @@ public slots:
   virtual void InvalidateVisualCache();
   void DrawMap();
   void HandleTileStatusChanged(QString dbPath,const osmscout::TileRef tile);
-  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>);
+  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>);
   void TriggerMapRendering(const MapViewStruct& request);
   void HandleInitialRenderingRequest();
   virtual void onStylesheetFilenameChanged();

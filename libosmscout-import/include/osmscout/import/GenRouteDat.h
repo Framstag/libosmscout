@@ -26,11 +26,14 @@
 #include <vector>
 
 #include <osmscout/NumericIndex.h>
+
 #include <osmscout/routing/RouteNode.h>
 #include <osmscout/routing/TurnRestriction.h>
 
 #include <osmscout/OSMScoutTypes.h>
+
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
@@ -71,20 +74,6 @@ namespace osmscout {
       Type       type;          //!< Type of restriction
     };
 
-    struct PendingOffset
-    {
-      FileOffset routeNodeOffset;
-      size_t     index;
-
-      inline PendingOffset(FileOffset routeNodeOffset,
-                           size_t index)
-      : routeNodeOffset(routeNodeOffset),
-        index(index)
-      {
-
-      }
-    };
-
     struct IndexEntry
     {
       FileOffset offset;
@@ -96,7 +85,7 @@ namespace osmscout {
       {
       }
 
-      IndexEntry(FileOffset offset)
+      explicit IndexEntry(FileOffset offset)
       : offset(offset),
         count(0)
       {
@@ -107,9 +96,7 @@ namespace osmscout {
     typedef std::unordered_map<FileOffset,AreaRef>                  FileOffsetAreaMap;
     typedef std::unordered_set<Id>                                  RouteNodeIdSet;
     typedef std::list<RawRouteNode>                                 RawRouteNodeList;
-    typedef std::unordered_map<Id,FileOffset>                       NodeIdOffsetMap;
     typedef std::map<Id,std::list<ObjectFileRef>>                   NodeIdObjectsMap;
-    typedef std::unordered_map<Id,std::list<PendingOffset>>         PendingRouteNodeOffsetsMap;
     typedef std::unordered_map<Id,std::vector<TurnRestrictionData>> ViaTurnRestrictionMap;
 
     AccessFeatureValueReader           *accessReader;

@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <map>
 #include <set>
 
 #include <osmscout/ObjectRef.h>

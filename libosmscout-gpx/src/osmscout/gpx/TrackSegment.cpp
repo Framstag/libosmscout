@@ -20,16 +20,17 @@
 #include <osmscout/gpx/TrackSegment.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Distance.h>
 
 using namespace osmscout;
 using namespace osmscout::gpx;
 
-double TrackSegment::GetLength() const
+Distance TrackSegment::GetLength() const
 {
-  double result=0;
+  Distance result;
   auto it=points.begin();
   if (it==points.end()){
-    return 0;
+    return result;
   }
   GeoCoord previous=it->coord;
   it++;
@@ -37,5 +38,5 @@ double TrackSegment::GetLength() const
     result+=GetEllipsoidalDistance(previous, it->coord);
     previous=it->coord;
   }
-  return result*1000.0;
+  return result;
 }

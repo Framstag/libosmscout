@@ -35,75 +35,171 @@
 
 namespace osmscout {
 
-  FeatureValue::FeatureValue()
+  const char* TypeConfig::FILE_TYPES_DAT="types.dat";
+
+  TypeInfo::TypeInfo(const std::string& name)
+    : nodeId(0),
+      wayId(0),
+      areaId(0),
+      name(name),
+      index(0),
+      internal(false),
+      featureMaskBytes(0),
+      specialFeatureMaskBytes(0),
+      valueBufferSize(0),
+      canBeNode(false),
+      canBeWay(false),
+      canBeArea(false),
+      canBeRelation(false),
+      isPath(false),
+      canRouteFoot(false),
+      canRouteBicycle(false),
+      canRouteCar(false),
+      indexAsAddress(false),
+      indexAsLocation(false),
+      indexAsRegion(false),
+      indexAsPOI(false),
+      optimizeLowZoom(false),
+      multipolygon(false),
+      pinWay(false),
+      mergeAreas(false),
+      ignoreSeaLand(false),
+      ignore(false)
+  {
+
+  }
+
+  /**
+   * We forbid copying of TypeInfo instances
+   *
+   * @param other
+   */
+  TypeInfo::TypeInfo(const TypeInfo& /*other*/)
   {
     // no code
   }
 
-  FeatureValue& FeatureValue::operator=(const FeatureValue& /*other*/)
+  TypeInfo& TypeInfo::SetNodeId(TypeId id)
   {
-    assert(false);
+    this->nodeId=id;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetWayId(TypeId id)
+  {
+    this->wayId=id;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetAreaId(TypeId id)
+  {
+    this->areaId=id;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetIndex(size_t index)
+  {
+    this->index=index;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetInternal()
+  {
+    this->internal=true;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetType(const std::string& name)
+  {
+    this->name=name;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::AddCondition(unsigned char types,
+                                   const TagConditionRef& condition)
+  {
+    TypeCondition typeCondition;
+
+    if (types & typeNode) {
+      canBeNode=true;
+    }
+
+    if (types & typeWay) {
+      canBeWay=true;
+    }
+
+    if (types & typeArea) {
+      canBeArea=true;
+    }
+
+    if (types & typeRelation) {
+      canBeRelation=true;
+    }
+
+    typeCondition.types=types;
+    typeCondition.condition=condition;
+
+    conditions.push_back(typeCondition);
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::AddFeature(const FeatureRef& feature)
+  {
+    assert(feature);
+    assert(nameToFeatureMap.find(feature->GetName())==nameToFeatureMap.end());
+
+    size_t featureBit=0;
+    size_t index=0;
+    size_t offset=0;
+    size_t alignment=std::max(sizeof(size_t),sizeof(void*));
+
+    if (!features.empty()) {
+      featureBit=features.back().GetFeatureBit()+1+feature->GetFeatureBitCount();
+      index=features.back().GetIndex()+1;
+      offset=features.back().GetOffset()+features.back().GetFeature()->GetValueSize();
+      if (offset%alignment!=0) {
+        offset=(offset/alignment+1)*alignment;
+      }
+    }
+
+
+    features.emplace_back(feature,
+                          this,
+                          featureBit,
+                          index,
+                          offset);
+    nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
+
+    size_t featureBitCount=0;
+
+    if (!features.empty()) {
+      featureBitCount=features.back().GetFeatureBit()+feature->GetFeatureBitCount()+1;
+    }
+
+    featureMaskBytes=BitsToBytes(featureBitCount);
+    specialFeatureMaskBytes=BitsToBytes(featureBitCount+1);
+
+    valueBufferSize=offset+feature->GetValueSize();
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::AddGroup(const std::string& groupName)
+  {
+    groups.insert(groupName);
 
     return *this;
   }
 
   /**
-   * Read the value of the Feature from the FileScanner
-   *
-   * @throws IOException
-   */
-  void FeatureValue::Read(FileScanner& /*scanner*/)
-  {
-    assert(false);
-  }
-
-  /**
-   * Write the FeatureValue to disk.
-   *
-   * @throws IOException.
-   */
-  void FeatureValue::Write(FileWriter& /*writer*/)
-  {
-    assert(false);
-  }
-
-  Feature::Feature()
-  {
-    // no code
-  }
-
-  size_t Feature::RegisterLabel(const std::string& labelName,
-                                size_t index)
-  {
-    assert(labels.find(labelName)==labels.end());
-
-    labels[labelName]=index;
-
-    return index;
-  }
-
-  bool Feature::GetLabelIndex(const std::string& labelName,
-                             size_t& index) const
-  {
-    const auto entry=labels.find(labelName);
-
-    if (entry==labels.end()) {
-      return false;
-    }
-
-    index=entry->second;
-
-    return true;
-  }
-
-  FeatureValue* Feature::AllocateValue(void* /*buffer*/)
-  {
-    assert(false);
-    return nullptr;
-  }
-
-  /**
-   * Add a description of the feature for the given language code
+   * Add a description of the type for the given language code
    * @param languageCode
    *    language code like for example 'en'or 'de'
    * @param description
@@ -111,10 +207,54 @@ namespace osmscout {
    * @return
    *    type info instance
    */
-  void Feature::AddDescription(const std::string& languageCode,
-                               const std::string& description)
+  TypeInfo& TypeInfo::AddDescription(const std::string& languageCode,
+                                     const std::string& description)
   {
     descriptions[languageCode]=description;
+
+    return *this;
+  }
+
+  bool TypeInfo::HasFeature(const std::string& featureName) const
+  {
+    return nameToFeatureMap.find(featureName)!=nameToFeatureMap.end();
+  }
+
+  /**
+   * Return the feature with the given name
+   */
+  bool TypeInfo::GetFeature(const std::string& name,
+                            size_t& index) const
+  {
+    auto entry=nameToFeatureMap.find(name);
+
+    if (entry!=nameToFeatureMap.end()) {
+      index=entry->second;
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  uint8_t TypeInfo::GetDefaultAccess() const
+  {
+    uint8_t access=0;
+
+    if (CanRouteFoot()) {
+      access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
+    }
+
+    if (CanRouteBicycle()) {
+      access|=(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
+    }
+
+    if (CanRouteCar()) {
+      access|=(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
+    }
+
+    return access;
   }
 
   /**
@@ -126,7 +266,7 @@ namespace osmscout {
    * @return
    *    Description or empty string
    */
-  std::string Feature::GetDescription(const std::string& languageCode) const
+  std::string TypeInfo::GetDescription(const std::string& languageCode) const
   {
     auto entry=descriptions.find(languageCode);
 
@@ -138,42 +278,16 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Just to make the compiler happy :-/
-   */
-  FeatureInstance::FeatureInstance()
-  : type(nullptr),
-    featureBit(0),
-    index(0),
-    offset(0)
-  {
-
-  }
-
-  FeatureInstance::FeatureInstance(const FeatureRef& feature,
-                                   const TypeInfo* type,
-                                   size_t featureBit,
-                                   size_t index,
-                                   size_t offset)
-  : feature(feature),
-    type(type),
-    featureBit(featureBit),
-    index(index),
-    offset(offset)
-  {
-    assert(feature);
-  }
-
   FeatureValueBuffer::FeatureValueBuffer()
-  : featureBits(nullptr),
-    featureValueBuffer(nullptr)
+    : featureBits(nullptr),
+      featureValueBuffer(nullptr)
   {
     // no code
   }
 
   FeatureValueBuffer::FeatureValueBuffer(const FeatureValueBuffer& other)
-  : featureBits(nullptr),
-    featureValueBuffer(nullptr)
+    : featureBits(nullptr),
+      featureValueBuffer(nullptr)
   {
     Set(other);
   }
@@ -286,8 +400,8 @@ namespace osmscout {
   {
     if (HasFeature(idx)) {
       if (type->GetFeature(idx).GetFeature()->HasValue()) {
-          FeatureValue* value=GetValue(idx);
-          value->~FeatureValue();
+        FeatureValue* value=GetValue(idx);
+        value->~FeatureValue();
       }
 
       // clear feature bit
@@ -298,13 +412,13 @@ namespace osmscout {
   }
 
   void FeatureValueBuffer::Parse(TagErrorReporter& errorReporter,
-                                 const TypeConfig& typeConfig,
+                                 const TagRegistry& tagRegistry,
                                  const ObjectOSMRef& object,
                                  const TagMap& tags)
   {
     for (const auto &feature : type->GetFeatures()) {
       feature.GetFeature()->Parse(errorReporter,
-                                  typeConfig,
+                                  tagRegistry,
                                   feature,
                                   object,
                                   tags,
@@ -620,458 +734,13 @@ namespace osmscout {
     }
   }
 
-
-  const char* TypeConfig::FILE_TYPES_DAT="types.dat";
-
-  TypeInfo::TypeInfo(const std::string& name)
-    : nodeId(0),
-      wayId(0),
-      areaId(0),
-      name(name),
-      index(0),
-      internal(false),
-      featureMaskBytes(0),
-      specialFeatureMaskBytes(0),
-      valueBufferSize(0),
-      canBeNode(false),
-      canBeWay(false),
-      canBeArea(false),
-      canBeRelation(false),
-      isPath(false),
-      canRouteFoot(false),
-      canRouteBicycle(false),
-      canRouteCar(false),
-      indexAsAddress(false),
-      indexAsLocation(false),
-      indexAsRegion(false),
-      indexAsPOI(false),
-      optimizeLowZoom(false),
-      multipolygon(false),
-      pinWay(false),
-      mergeAreas(false),
-      ignoreSeaLand(false),
-      ignore(false)
-  {
-
-  }
-
-  /**
-   * We forbid copying of TypeInfo instances
-   *
-   * @param other
-   */
-  TypeInfo::TypeInfo(const TypeInfo& /*other*/)
-  {
-    // no code
-  }
-
-  TypeInfo& TypeInfo::SetNodeId(TypeId id)
-  {
-    this->nodeId=id;
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::SetWayId(TypeId id)
-  {
-    this->wayId=id;
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::SetAreaId(TypeId id)
-  {
-    this->areaId=id;
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::SetIndex(size_t index)
-  {
-    this->index=index;
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::SetInternal()
-  {
-    this->internal=true;
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::SetType(const std::string& name)
-  {
-    this->name=name;
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::AddCondition(unsigned char types,
-                                   const TagConditionRef& condition)
-  {
-    TypeCondition typeCondition;
-
-    if (types & typeNode) {
-      canBeNode=true;
-    }
-
-    if (types & typeWay) {
-      canBeWay=true;
-    }
-
-    if (types & typeArea) {
-      canBeArea=true;
-    }
-
-    if (types & typeRelation) {
-      canBeRelation=true;
-    }
-
-    typeCondition.types=types;
-    typeCondition.condition=condition;
-
-    conditions.push_back(typeCondition);
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::AddFeature(const FeatureRef& feature)
-  {
-    assert(feature);
-    assert(nameToFeatureMap.find(feature->GetName())==nameToFeatureMap.end());
-
-    size_t featureBit=0;
-    size_t index=0;
-    size_t offset=0;
-    size_t alignment=std::max(sizeof(size_t),sizeof(void*));
-
-    if (!features.empty()) {
-      featureBit=features.back().GetFeatureBit()+1+feature->GetFeatureBitCount();
-      index=features.back().GetIndex()+1;
-      offset=features.back().GetOffset()+features.back().GetFeature()->GetValueSize();
-      if (offset%alignment!=0) {
-        offset=(offset/alignment+1)*alignment;
-      }
-    }
-
-
-    features.emplace_back(feature,
-                          this,
-                          featureBit,
-                          index,
-                          offset);
-    nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
-
-    size_t featureBitCount=0;
-
-    if (!features.empty()) {
-      featureBitCount=features.back().GetFeatureBit()+feature->GetFeatureBitCount()+1;
-    }
-
-    featureMaskBytes=BitsToBytes(featureBitCount);
-    specialFeatureMaskBytes=BitsToBytes(featureBitCount+1);
-
-    valueBufferSize=offset+feature->GetValueSize();
-
-    return *this;
-  }
-
-  TypeInfo& TypeInfo::AddGroup(const std::string& groupName)
-  {
-    groups.insert(groupName);
-
-    return *this;
-  }
-
-  /**
-   * Add a description of the type for the given language code
-   * @param languageCode
-   *    language code like for example 'en'or 'de'
-   * @param description
-   *    description of the type
-   * @return
-   *    type info instance
-   */
-  TypeInfo& TypeInfo::AddDescription(const std::string& languageCode,
-                                     const std::string& description)
-  {
-    descriptions[languageCode]=description;
-
-    return *this;
-  }
-
-  bool TypeInfo::HasFeature(const std::string& featureName) const
-  {
-    return nameToFeatureMap.find(featureName)!=nameToFeatureMap.end();
-  }
-
-  /**
-   * Return the feature with the given name
-   */
-  bool TypeInfo::GetFeature(const std::string& name,
-                            size_t& index) const
-  {
-    auto entry=nameToFeatureMap.find(name);
-
-    if (entry!=nameToFeatureMap.end()) {
-      index=entry->second;
-
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
-  uint8_t TypeInfo::GetDefaultAccess() const
-  {
-    uint8_t access=0;
-
-    if (CanRouteFoot()) {
-      access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
-    }
-
-    if (CanRouteBicycle()) {
-      access|=(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
-    }
-
-    if (CanRouteCar()) {
-      access|=(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
-    }
-
-    return access;
-  }
-
-  /**
-   * Returns the description for the given language code. Returns an empty string, if
-   * no description is available for the given language code.
-   *
-   * @param languageCode
-   *    languageCode like for example 'en' or 'de'
-   * @return
-   *    Description or empty string
-   */
-  std::string TypeInfo::GetDescription(const std::string& languageCode) const
-  {
-    auto entry=descriptions.find(languageCode);
-
-    if (entry!=descriptions.end()) {
-      return entry->second;
-    }
-    else {
-      return "";
-    }
-  }
-
-  TypeInfoSet::TypeInfoSet()
-  : count(0)
-  {
-    // no code
-  }
-
-  TypeInfoSet::TypeInfoSet(const TypeConfig& typeConfig)
-  : count(0)
-  {
-    types.resize(typeConfig.GetTypeCount());
-  }
-
-  TypeInfoSet::TypeInfoSet(const TypeInfoSet& other)
-  : types(other.types),
-    count(other.count)
-  {
-    // no code
-  }
-
-  TypeInfoSet::TypeInfoSet(TypeInfoSet&& other) noexcept
-  : types(other.types),
-    count(other.count)
-  {
-    // no code
-  }
-
-  TypeInfoSet::TypeInfoSet(const std::vector<TypeInfoRef>& types)
-  {
-    for (const auto& type : types) {
-      Set(type);
-    }
-  }
-
-  void TypeInfoSet::Adapt(const TypeConfig& typeConfig)
-  {
-    types.resize(typeConfig.GetTypeCount());
-  }
-
-  void TypeInfoSet::Set(const TypeInfoRef& type)
-  {
-    assert(type);
-
-    if (type->GetIndex()>=types.size()) {
-      types.resize(type->GetIndex()+1);
-    }
-
-    if (!types[type->GetIndex()]) {
-      types[type->GetIndex()]=type;
-      count++;
-    }
-  }
-
-  void TypeInfoSet::Set(const TypeInfoSet& other)
-  {
-    types=other.types;
-    count=other.count;
-  }
-
-  void TypeInfoSet::Set(const std::vector<TypeInfoRef>& types)
-  {
-    Clear();
-
-    for (const auto& type : types) {
-      Set(type);
-    }
-  }
-
-  void TypeInfoSet::Add(const TypeInfoSet& types)
-  {
-    for (const auto& type : types) {
-      Set(type);
-    }
-  }
-
-  void TypeInfoSet::Remove(const TypeInfoRef& type)
-  {
-    assert(type);
-
-    if (type->GetIndex()<types.size() &&
-        types[type->GetIndex()]) {
-      types[type->GetIndex()]=nullptr;
-      count--;
-    }
-  }
-
-  void TypeInfoSet::Remove(const TypeInfoSet& otherTypes)
-  {
-    for (const auto &type : otherTypes.types)
-    {
-      if (type &&
-          type->GetIndex()<types.size() &&
-          types[type->GetIndex()]) {
-        types[type->GetIndex()]=nullptr;
-        count--;
-      }
-    }
-  }
-
-  void TypeInfoSet::Intersection(const TypeInfoSet& otherTypes)
-  {
-    for (size_t i=0; i<types.size(); i++) {
-      if (types[i] &&
-          (i>=otherTypes.types.size() ||
-          !otherTypes.types[i])) {
-        types[i]=nullptr;
-        count--;
-      }
-    }
-  }
-
-  /**
-   * Returns 'true' if at least one type is set in both Sets. Else
-   * 'false' is returned.
-   */
-  bool TypeInfoSet::Intersects(const TypeInfoSet& otherTypes) const
-  {
-    size_t minSize=std::min(types.size(),otherTypes.types.size());
-
-    for (size_t i=0; i<minSize; i++) {
-      if (types[i] && otherTypes.types[i]) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  bool TypeInfoSet::operator==(const TypeInfoSet& other) const
-  {
-    if (this==&other) {
-      return true;
-    }
-
-    if (count!=other.count) {
-      return false;
-    }
-
-    for (size_t i=0; i<std::max(types.size(),other.types.size()); i++) {
-      if (i<types.size() && i<other.types.size()) {
-        if (types[i]!=other.types[i]) {
-          return false;
-        }
-      }
-      else if (i<types.size()) {
-        if (types[i]) {
-          return false;
-        }
-      }
-      else if (i<other.types.size()) {
-        if (other.types[i]) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
-
-  bool TypeInfoSet::operator!=(const TypeInfoSet& other) const
-  {
-    if (this==&other) {
-      return false;
-    }
-
-    if (count!=other.count) {
-      return true;
-    }
-
-    for (size_t i=0; i<std::max(types.size(),other.types.size()); i++) {
-      if (i<types.size() && i<other.types.size()) {
-        if (types[i]!=other.types[i]) {
-          return true;
-        }
-      }
-      else if (i<types.size()) {
-        if (types[i]) {
-          return true;
-        }
-      }
-      else if (i<other.types.size()) {
-        if (other.types[i]) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
   TypeConfig::TypeConfig()
-   : nextTagId(0),
-     nodeTypeIdBytes(1),
+   : nodeTypeIdBytes(1),
      wayTypeIdBytes(1),
      areaTypeIdBits(1),
      areaTypeIdBytes(1)
   {
     log.Debug() << "TypeConfig::TypeConfig()";
-
-    // Make sure, that this is always registered first.
-    // It assures that id 0 is always reserved for tagIgnore
-    RegisterTag("");
-
-    RegisterTag("area");
-    RegisterTag("natural");
-    RegisterTag("datapolygon");
-    RegisterTag("type");
-    RegisterTag("restriction");
-    RegisterTag("junction");
 
     featureName=std::make_shared<NameFeature>();
     RegisterFeature(featureName);
@@ -1145,7 +814,6 @@ namespace osmscout {
 
     RegisterType(typeInfoIgnore);
 
-
     //
     // Internal type for showing routes
     //
@@ -1190,12 +858,12 @@ namespace osmscout {
     typeInfoOSMSubTileBorder->SetInternal().CanBeWay(true);
     RegisterType(typeInfoOSMSubTileBorder);
 
-    tagArea=GetTagId("area");
-    tagNatural=GetTagId("natural");
-    tagDataPolygon=GetTagId("datapolygon");
-    tagType=GetTagId("type");
-    tagRestriction=GetTagId("restriction");
-    tagJunction=GetTagId("junction");
+    tagArea=tagRegistry.GetTagId("area");
+    tagNatural=tagRegistry.GetTagId("natural");
+    tagDataPolygon=tagRegistry.GetTagId("datapolygon");
+    tagType=tagRegistry.GetTagId("type");
+    tagRestriction=tagRegistry.GetTagId("restriction");
+    tagJunction=tagRegistry.GetTagId("junction");
 
     assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);
@@ -1210,42 +878,6 @@ namespace osmscout {
     log.Debug() << "TypeConfig::~TypeConfig()";
   }
 
-  TagId TypeConfig::RegisterTag(const std::string& tagName)
-  {
-    auto mapping=stringToTagMap.find(tagName);
-
-    if (mapping!=stringToTagMap.end()) {
-      return mapping->second;
-    }
-
-    TagInfo tagInfo(nextTagId,tagName);
-
-    nextTagId++;
-
-    tags.push_back(tagInfo);
-    stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
-
-    return tagInfo.GetId();
-  }
-
-  TagId TypeConfig::RegisterNameTag(const std::string& tagName, uint32_t priority)
-  {
-    TagId tagId=RegisterTag(tagName);
-
-    nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
-
-    return tagId;
-  }
-
-  TagId TypeConfig::RegisterNameAltTag(const std::string& tagName, uint32_t priority)
-  {
-    TagId tagId=RegisterTag(tagName);
-
-    nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
-
-    return tagId;
-  }
-
   void TypeConfig::RegisterFeature(const FeatureRef& feature)
   {
     assert(feature);
@@ -1258,7 +890,7 @@ namespace osmscout {
     features.push_back(feature);
     nameToFeatureMap[feature->GetName()]=feature;
 
-    feature->Initialize(*this);
+    feature->Initialize(tagRegistry);
   }
 
   FeatureRef TypeConfig::GetFeature(const std::string& name) const
@@ -1420,30 +1052,6 @@ namespace osmscout {
     }
   }
 
-  TagId TypeConfig::GetTagId(const char* name) const
-  {
-    auto iter=stringToTagMap.find(name);
-
-    if (iter!=stringToTagMap.end()) {
-      return iter->second;
-    }
-    else {
-      return tagIgnore;
-    }
-  }
-
-  TagId TypeConfig::GetTagId(const std::string& name) const
-  {
-    auto iter=stringToTagMap.find(name);
-
-    if (iter!=stringToTagMap.end()) {
-      return iter->second;
-    }
-    else {
-      return tagIgnore;
-    }
-  }
-
   const TypeInfoRef TypeConfig::GetTypeInfo(const std::string& name) const
   {
     auto typeEntry=nameToTypeMap.find(name);
@@ -1453,40 +1061,6 @@ namespace osmscout {
     }
 
     return TypeInfoRef();
-  }
-
-  bool TypeConfig::IsNameTag(TagId tag, uint32_t& priority) const
-  {
-    if (nameTagIdToPrioMap.empty()) {
-      return false;
-    }
-
-    auto entry=nameTagIdToPrioMap.find(tag);
-
-    if (entry==nameTagIdToPrioMap.end()) {
-      return false;
-    }
-
-    priority=entry->second;
-
-    return true;
-  }
-
-  bool TypeConfig::IsNameAltTag(TagId tag, uint32_t& priority) const
-  {
-    if (nameAltTagIdToPrioMap.empty()) {
-      return false;
-    }
-
-    auto entry=nameAltTagIdToPrioMap.find(tag);
-
-    if (entry==nameAltTagIdToPrioMap.end()) {
-      return false;
-    }
-
-    priority=entry->second;
-
-    return true;
   }
 
   TypeInfoRef TypeConfig::GetNodeType(const TagMap& tagMap) const
@@ -1610,51 +1184,6 @@ namespace osmscout {
     return typeInfoIgnore;
   }
 
-  void TypeConfig::RegisterSurfaceToGradeMapping(const std::string& surface,
-                                                 size_t grade)
-  {
-    surfaceToGradeMap.insert(std::make_pair(surface,
-                                            grade));
-  }
-
-  bool TypeConfig::GetGradeForSurface(const std::string& surface,
-                                      size_t& grade) const
-  {
-    auto entry=surfaceToGradeMap.find(surface);
-
-    if (entry!=surfaceToGradeMap.end()) {
-      grade=entry->second;
-
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
-  void TypeConfig::RegisterMaxSpeedAlias(const std::string& alias,
-                                         uint8_t maxSpeed)
-  {
-    nameToMaxSpeedMap.insert(std::make_pair(alias,
-                                            maxSpeed));
-  }
-
-  bool TypeConfig::GetMaxSpeedFromAlias(const std::string& alias,
-                                        uint8_t& maxSpeed) const
-  {
-    auto entry=nameToMaxSpeedMap.find(alias);
-
-    if (entry!=nameToMaxSpeedMap.end()) {
-      maxSpeed=entry->second;
-
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
-
   /**
    * Loads the type configuration from the given *.ost file.
    *
@@ -1770,7 +1299,7 @@ namespace osmscout {
 
           if (feature) {
             feature->AddDescription(languageCode,
-                                   description);
+                                    description);
           }
         }
       }

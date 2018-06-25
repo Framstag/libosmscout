@@ -187,7 +187,7 @@ endif()
 
 target_compile_definitions(OSMScoutImport PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})
 
-install(TARGETS ${THE_TARGET_NAME}
+install(TARGETS OSMScoutImport
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib

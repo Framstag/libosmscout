@@ -73,7 +73,7 @@ int main(int /*argc*/, char** /*argv*/)
 
   osmscout::MercatorProjection projection;
   osmscout::Magnification mag;
-  mag.SetMagnification(osmscout::Magnification::magSuburb);
+  mag.SetLevel(osmscout::Magnification::magSuburb);
   projection.Set(osmscout::GeoCoord(43.914554, 8.0902544),
                  /*angle*/ 0,
                  mag,

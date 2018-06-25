@@ -536,9 +536,9 @@ namespace osmscout
       {
         RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
         D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX),
-                                 y + projection.ConvertWidthToPixel(maxY - rectangle->GetTopLeft().GetY() - centerY),
+                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY() - centerY),
                                  x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX) + projection.ConvertWidthToPixel(rectangle->GetWidth()),
-                                 y + projection.ConvertWidthToPixel(maxY - rectangle->GetTopLeft().GetY() - centerY) + projection.ConvertWidthToPixel(rectangle->GetHeight()));
+                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY() - centerY) + projection.ConvertWidthToPixel(rectangle->GetHeight()));
         m_pRenderTarget->FillRectangle(rect, GetColorBrush(fillStyle->GetFillColor()));
         if (hasBorder) m_pRenderTarget->DrawRectangle(rect, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
       }

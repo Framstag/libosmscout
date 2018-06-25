@@ -26,6 +26,8 @@
 
 #include <osmscout/DataFile.h>
 
+#include <osmscout/TypeInfoSet.h>
+
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/FileScanner.h>
@@ -134,6 +136,11 @@ namespace osmscout {
     inline bool IsOpen() const
     {
       return scanner.IsOpen();
+    }
+
+    inline std::string GetFilename() const
+    {
+      return datafilename;
     }
 
     bool GetAreasInArea(const TypeConfig& typeConfig,

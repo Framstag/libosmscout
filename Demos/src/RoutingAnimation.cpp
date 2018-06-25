@@ -96,10 +96,10 @@ public:
     maxPercent=0.0;
   }
 
-  void Progress(double currentMaxDistance,
-                double overallDistance)
+  void Progress(const osmscout::Distance &currentMaxDistance,
+                const osmscout::Distance &overallDistance)
   {
-    double currentPercent=(currentMaxDistance*100.0)/overallDistance;
+    double currentPercent=(currentMaxDistance.AsMeter()*100.0)/overallDistance.AsMeter();
 
     std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
 
@@ -347,7 +347,7 @@ struct Arguments
     endStep(-1),
     startFrame(0)
   {
-    zoom.SetMagnification(osmscout::Magnification::magVeryClose);
+    zoom.SetLevel(osmscout::Magnification::magVeryClose);
   }
 };
 
@@ -423,7 +423,7 @@ int main(int argc, char* argv[])
                       false);
 
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
-                        args.zoom.SetLevel(value);
+                        args.zoom.SetLevel(osmscout::MagnificationLevel(value));
                       }),
                       "zoom",
                       "zoom level of animation frames (default 16)",
@@ -624,10 +624,9 @@ int main(int argc, char* argv[])
     break;
   }
 
-  double radius = 1000.0;
   osmscout::RoutePosition start=router->GetClosestRoutableNode(args.start,
                                                                routingProfile,
-                                                               radius);
+                                                               osmscout::Distance::Of<osmscout::Kilometer>(1));
 
   if (!start.IsValid()) {
     std::cerr << "Error while searching for routing node near start location!" << std::endl;
@@ -638,10 +637,9 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for start location!" << std::endl;
   }
 
-  radius = 1000.0;
   osmscout::RoutePosition target=router->GetClosestRoutableNode(args.target,
                                                                 routingProfile,
-                                                                radius);
+                                                                osmscout::Distance::Of<osmscout::Kilometer>(1));
 
   if (!target.IsValid()) {
     std::cerr << "Error while searching for routing node near target location!" << std::endl;

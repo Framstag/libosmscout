@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="800"
+   height="400"
+   viewBox="0 0 211.66667 105.83334"
+   version="1.1"
+   id="svg9186"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="symbols.svg"
+   inkscape:export-filename="/home/karry/data/cecko/OSM/libosmscout/webpage/static/images/symbols.svg.png"
+   inkscape:export-xdpi="109.10243"
+   inkscape:export-ydpi="109.10243">
+  <defs
+     id="defs9180" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="424.93189"
+     inkscape:cy="131.41639"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1134"
+     inkscape:window-x="1600"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata9183">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Vrstva 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-191.16665)">
+    <polyline
+       transform="matrix(4.3154932,0,0,4.3154932,-4733.109,-1649.0388)"
+       points="1103.04,431.82 1103.04,427.095 1105.41,429.458 1107.77,427.095 1107.77,431.82 1111.31,431.82 1105.41,437.725 1099.5,431.82"
+       id="polyline4500"
+       style="fill:#600050;stroke:none;stroke-width:0;stroke-opacity:0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.28888893px;line-height:0.99999998%;font-family:Arial;-inkscape-font-specification:Arial;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="77.095451"
+       y="196.1041"
+       id="text9739"><tspan
+         sodipodi:role="line"
+         id="tspan9737"
+         x="77.095451"
+         y="196.1041"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"><tspan
+   style="fill:#000063;fill-opacity:1"
+   id="tspan9952">SYMBOL</tspan> <tspan
+   style="fill:#7c0000;fill-opacity:1"
+   id="tspan9944">subway_entrance</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="200.33743"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9741">  <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan9946">POLYGON</tspan> -0.4, 0 </tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="204.57077"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9759">          -0.4, -0.8   </tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="208.80409"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9761">             0, -0.4</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="213.03743"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9755">           0.4, -0.8 </tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="217.27077"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9763">           0.4, 0 </tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="221.50409"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9765">             1, 0  </tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="225.73743"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9767">             0, 1 </tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="229.97076"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9940">            -1, 0 {</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="234.2041"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9936">    <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan9960">AREA</tspan> { color: #60005070; }</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="238.43744"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9745">  }</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="242.55063"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9747" /><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="242.66353"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9977" /><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="242.89655"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan10003"> </tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="247.12988"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan10001"><tspan
+   style="fill:#000063;fill-opacity:1"
+   id="tspan10005">SYMBOL</tspan> <tspan
+   style="fill:#7c0000;fill-opacity:1"
+   id="tspan10036">amenity_hospital</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="251.3632"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9979">  <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan10007">CIRCLE</tspan> 0,0 1.0 {</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="255.59654"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9981">    <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan10038">AREA.BORDER</tspan> {color: #da0092; width: 0.2mm; }</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="259.82986"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9983">  }</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="264.0632"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9985">  <tspan
+   style="fill:#656565;fill-opacity:1"
+   id="tspan10015">// Horizontal bar</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="268.29654"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9987">  <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan10009">RECTANGLE</tspan> -0.75,-0.25 1.5 x 0.5 {</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="272.52988"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9989">    <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan10040">AREA</tspan> { color: #da0092; }</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="276.76321"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9991">  }</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="280.99655"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9993">  <tspan
+   style="fill:#656565;fill-opacity:1"
+   id="tspan10013">// Vertical bar</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="285.22989"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9995">  <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan10011">RECTANGLE</tspan> -0.25,-0.75 0.5 x 1.5 {</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="289.46323"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9997">    <tspan
+   style="fill:#300063;fill-opacity:1"
+   id="tspan10042">AREA</tspan> { color: #da0092; }</tspan><tspan
+         sodipodi:role="line"
+         x="77.095451"
+         y="293.69653"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333359px;line-height:100%;font-family:'Andale Mono';-inkscape-font-specification:'Andale Mono';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332px"
+         id="tspan9999">  }</tspan></text>
+    <g
+       id="g9975"
+       transform="matrix(15.569954,0,0,15.569954,4.768266,-3857.8632)">
+      <circle
+         style="fill:none;stroke:#da0092;stroke-width:0.05291667"
+         id="circle4546"
+         r="1.5624995"
+         cy="265.061"
+         cx="2.0788691" />
+      <rect
+         style="fill:#da0092;stroke:none;stroke-width:0;stroke-opacity:0"
+         id="rect4548"
+         height="0.78125107"
+         width="2.3437505"
+         y="264.6702"
+         x="0.90676689" />
+      <rect
+         style="fill:#da0092;stroke:none;stroke-width:0;stroke-opacity:0"
+         id="rect4550"
+         height="2.3437505"
+         width="0.78125107"
+         y="263.88916"
+         x="1.6880822" />
+    </g>
+  </g>
+</svg>
