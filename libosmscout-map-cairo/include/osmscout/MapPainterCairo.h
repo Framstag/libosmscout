@@ -39,16 +39,20 @@
 
 #include <osmscout/MapPainter.h>
 
+
 namespace osmscout {
 
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
+
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    typedef PangoFontDescription*          Font;
+    using PangoLayoutPtr = std::shared_ptr<PangoLayout>;
+    using Font = PangoFontDescription*;
 #else
-    typedef cairo_scaled_font_t*           Font;
+    using Font = cairo_scaled_font_t*;
 #endif
-    typedef std::unordered_map<size_t,Font>  FontMap;          //! Map type for mapping  font sizes to font
+
+    using FontMap = std::unordered_map<size_t,Font>;         //! Map type for mapping  font sizes to font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons
@@ -85,19 +89,53 @@ namespace osmscout {
                        const MapParameter& parameter,
                        double fontSize) override;
 
+    /*
     TextDimension GetTextDimension(const Projection& projection,
                                    const MapParameter& parameter,
                                    double objectWidth,
                                    double fontSize,
                                    const std::string& text) override;
+    */
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
                     const FillStyle& style) override;
 
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const LabelData& label) override;
+                   const DoubleRectangle& labelRectangle,
+                   const LabelData& label,
+                   const PangoLayoutPtr &layout);
+#else
+    void DrawLabel(const Projection& projection,
+                   const MapParameter& parameter,
+                   const DoubleRectangle& labelRectangle,
+                   const LabelData& label,
+                   const void*);
+#endif
+
+    /**
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
+     */
+    virtual void RegisterRegularLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const std::vector<LabelData> &labels,
+                                      const Vertex2D &position,
+                                      double objectWidth) override;
+
+    /**
+     * Register contour label
+     */
+    virtual void RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const PathLabelData &label,
+                                      const LabelPath &labelPath) override;
+
+    virtual void DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) override;
 
     void DrawPrimitivePath(const Projection& projection,
                            const MapParameter& parameter,
@@ -125,12 +163,14 @@ namespace osmscout {
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd) override;
 
+    /*
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
                           const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart, size_t transEnd,
-                          ContourLabelHelper& helper) override;
+                          ContourLabelHelper& helper);
+    */
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

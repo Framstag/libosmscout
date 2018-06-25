@@ -34,6 +34,11 @@ namespace osmscout {
     double angle;
   };
 
+  /**
+   * Helper for rendering labels following some path.
+   *
+   * TODO: implement Bezier curves ?
+   */
   class OSMSCOUT_MAP_API LabelPath
   {
   private:
