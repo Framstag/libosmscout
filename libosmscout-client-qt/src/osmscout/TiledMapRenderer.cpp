@@ -275,7 +275,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
         }
         uint32_t width = (loadXTo - loadXFrom + 1);
         uint32_t height = (loadYTo - loadYFrom + 1);
-        loadZ=zoomLevel;
+        loadZ=MagnificationLevel(zoomLevel);
 
 
         //osmscout::GeoBox tileBoundingBox = OSMTile::tileBoundingBox(zoomLevel, xtile, ytile);
@@ -400,7 +400,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     uint32_t width = (loadXTo - loadXFrom + 1);
     uint32_t height = (loadYTo - loadYFrom + 1);
 
-    osmscout::GeoCoord tileVisualCenter = OSMTile::tileRelativeCoord(loadZ,
+    osmscout::GeoCoord tileVisualCenter = OSMTile::tileRelativeCoord(loadZ.Get(),
             (double)loadXFrom + (double)width/2.0,
             (double)loadYFrom + (double)height/2.0);
 
@@ -449,7 +449,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     // To get accurate label drawing at tile borders, we take into account labels
     // of other than the current tile, too.
-    drawParameter.SetDropNotVisiblePointLabels(loadZ>=14);
+    drawParameter.SetDropNotVisiblePointLabels(loadZ.Get() >= 14);
 
     // setup projection for these tiles
     osmscout::MercatorProjection projection;
@@ -457,13 +457,13 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     projection.Set(tileVisualCenter, /* angle */ 0, magnification, mapDpi,
                    canvas.width(), canvas.height());
-    projection.SetLinearInterpolationUsage(loadZ >= 10);
+    projection.SetLinearInterpolationUsage(loadZ.Get() >= 10);
 
     // overlay ways
     std::vector<OverlayObjectRef> overlayObjects;
     osmscout::GeoBox renderBox;
     projection.GetDimensions(renderBox);
-  getOverlayObjects(overlayObjects, renderBox);
+    getOverlayObjects(overlayObjects, renderBox);
 
     //DrawMap(p, tileVisualCenter, loadZ, canvas.width(), canvas.height());
     bool success;
@@ -493,7 +493,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     {
         QMutexLocker locker(&tileCacheMutex);
         if (width == 1 && height == 1){
-            offlineTileCache.put(loadZ, loadXFrom, loadYFrom, canvas);
+            offlineTileCache.put(loadZ.Get(), loadXFrom, loadYFrom, canvas);
         }else{
             for (uint32_t y = loadYFrom; y <= loadYTo; ++y){
                 for (uint32_t x = loadXFrom; x <= loadXTo; ++x){
@@ -504,7 +504,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
                             osmTileDimension, osmTileDimension
                             );
 
-                    offlineTileCache.put(loadZ, x, y, tile);
+                    offlineTileCache.put(loadZ.Get(), x, y, tile);
                 }
             }
         }
