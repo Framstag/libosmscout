@@ -66,7 +66,7 @@ private:
   uint32_t                      loadXTo;
   uint32_t                      loadYFrom;
   uint32_t                      loadYTo;
-  uint32_t                      loadZ;
+  MagnificationLevel            loadZ;
 
   QColor                        unknownColor;
 
