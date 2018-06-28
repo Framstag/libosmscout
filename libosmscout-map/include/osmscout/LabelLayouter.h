@@ -415,7 +415,7 @@ namespace osmscout {
                     Painter *p)
     {
       // draw symbols and icons first, then standard labels and then overlays
-      std::vector<typename LabelInstanceType::Element> textElements;
+      std::vector<const typename LabelInstanceType::Element*> textElements;
 
       for (const LabelInstanceType &inst : Labels()){
 
@@ -434,15 +434,16 @@ namespace osmscout {
 
           } else {
             // postpone text elements
-            textElements.push_back(el);
+            textElements.push_back(&el);
           }
         }
       }
 
-      for (const typename LabelInstanceType::Element &el : textElements) {
+      // draw postponed text elements
+      for (const typename LabelInstanceType::Element *el : textElements) {
         p->DrawLabel(projection, parameter,
-                     DoubleRectangle(el.x, el.y, el.label->width, el.label->height),
-                     el.labelData, *(el.label->label) );
+                     DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
+                     el->labelData, *(el->label->label) );
       }
 
       for (const ContourLabelType &label:ContourLabels()){
