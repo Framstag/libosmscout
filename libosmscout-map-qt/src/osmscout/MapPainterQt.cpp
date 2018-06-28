@@ -263,23 +263,21 @@ namespace osmscout {
 
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
         QColor                          outlineColor=QColor::fromRgbF(1.0,1.0,1.0,label.alpha);
-        QPen                            outlinePen(outlineColor,2.0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
-        QList<QTextLayout::FormatRange> formatList;
-        QTextLayout::FormatRange        range;
 
+        /**
+         * Use text outline for emphasize is better
+         * (QTextLayout::FormatRange::setTextOutline),
+         * but it has terribly performance.
+         * So we draw text multiple times with move,
+         * it will create similar effect.
+         */
         painter->setPen(outlineColor);
+        textLayout.draw(painter, rect.topLeft()-QPointF(1,0));
+        textLayout.draw(painter, rect.topLeft()+QPointF(1,0));
+        textLayout.draw(painter, rect.topLeft()-QPointF(0,1));
+        textLayout.draw(painter, rect.topLeft()+QPointF(0,1));
 
-        QVector<QTextLayout::FormatRange> overrides;
-        QTextLayout::FormatRange outline;
-        outline.start=0;
-        outline.length=textLayout.text().size();
-        outline.format.setForeground(QBrush(outlineColor));
-        outline.format.setTextOutline(outlinePen);
-        overrides << outline;
-
-        textLayout.draw(painter,rect.topLeft(),overrides);
-
-        painter->setPen(QPen(textColor,1.0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
+        painter->setPen(textColor);
         textLayout.draw(painter, rect.topLeft());
       }
     }
