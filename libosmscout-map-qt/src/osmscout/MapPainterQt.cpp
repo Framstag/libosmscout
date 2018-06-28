@@ -243,6 +243,10 @@ namespace osmscout {
                                const QTextLayout& textLayout)
   {
     QRectF rect(labelRect.x, labelRect.y, labelRect.width, labelRect.height);
+    if (!QRectF(painter->viewport()).intersects(rect)){
+      return;
+    }
+
     if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
       const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
       double      r=style->GetTextColor().GetR();
@@ -950,11 +954,15 @@ namespace osmscout {
 
   void MapPainterQt::DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const
   {
+    if (!QRectF(painter->viewport()).intersects(
+      QRectF(glyph.position.GetX(), glyph.position.GetY(), glyph.trWidth, glyph.trHeight))){
+      return;
+    }
+
     QTransform tran;
     const QTransform originalTran=painter->transform();
-    QPointF point=QPointF(glyph.position.GetX(), glyph.position.GetY());
 
-    tran.translate(point.x(), point.y());
+    tran.translate(glyph.position.GetX(), glyph.position.GetY());
     tran.rotateRadians(glyph.angle);
 
     painter->setTransform(tran);
