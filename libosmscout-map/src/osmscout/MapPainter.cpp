@@ -115,7 +115,16 @@ namespace osmscout {
     if (a.boundingBox.GetMinCoord().GetLon()==b.boundingBox.GetMinCoord().GetLon()) {
       if (a.boundingBox.GetMaxCoord().GetLon()==b.boundingBox.GetMaxCoord().GetLon()) {
         if (a.boundingBox.GetMinCoord().GetLat()==b.boundingBox.GetMinCoord().GetLat()) {
-          return a.boundingBox.GetMaxCoord().GetLat()>b.boundingBox.GetMaxCoord().GetLat();
+          if (a.boundingBox.GetMaxCoord().GetLat()==b.boundingBox.GetMaxCoord().GetLat()){
+            /**
+             * Condition for the case when one area exists in two relations
+             *  - in one as outer ring (type of relation is used) and in second relation as inner ring.
+             * In such case, we want to draw area with outer type after that one of inner type
+             */
+            return !a.isOuter && b.isOuter;
+          } else {
+            return a.boundingBox.GetMaxCoord().GetLat() > b.boundingBox.GetMaxCoord().GetLat();
+          }
         }
         else {
           return a.boundingBox.GetMinCoord().GetLat()<b.boundingBox.GetMinCoord().GetLat();
@@ -1498,6 +1507,8 @@ namespace osmscout {
         double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
         a.boundingBox=ring.GetBoundingBox();
+
+        a.isOuter = ring.IsOuterRing();
 
         if (!IsVisibleArea(projection,
                            a.boundingBox,
