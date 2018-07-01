@@ -236,6 +236,7 @@ namespace osmscout {
       FillStyleRef             fillStyle;       //!< Fill style
       BorderStyleRef           borderStyle;     //!< Border style
       GeoBox                   boundingBox;     //!< Bounding box of the area
+      bool                     isOuter;         //!< flag if this area is outer ring of some relation
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
