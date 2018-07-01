@@ -1507,7 +1507,6 @@ namespace osmscout {
         double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
         a.boundingBox=ring.GetBoundingBox();
-
         a.isOuter = ring.IsOuterRing();
 
         if (!IsVisibleArea(projection,
