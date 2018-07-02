@@ -331,14 +331,21 @@ namespace osmscout {
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
         QColor                          outlineColor=QColor::fromRgbF(1.0,1.0,1.0,label.alpha);
 
-        painter->setPen(outlineColor);
-
         LayoutTextLayout(fontMetrics,
                          proposedWidth,
                          textLayout,
                          boundingBox);
 
         QPointF topLeft = rect.topLeft() + boundingBox.topLeft();
+
+        /**
+         * Use text outline for emphasize is better (more accurate)
+         * (QTextLayout::FormatRange::setTextOutline),
+         * but it has terribly performance.
+         * So we draw text multiple times with move,
+         * it will create similar effect.
+         */
+        painter->setPen(outlineColor);
 
         textLayout.draw(painter, topLeft-QPointF(1,0));
         textLayout.draw(painter, topLeft+QPointF(1,0));
