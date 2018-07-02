@@ -338,18 +338,16 @@ namespace osmscout {
                          textLayout,
                          boundingBox);
 
-        textLayout.draw(painter, rect.topLeft()-QPointF(1,0));
-        textLayout.draw(painter, rect.topLeft()+QPointF(1,0));
-        textLayout.draw(painter, rect.topLeft()-QPointF(0,1));
-        textLayout.draw(painter, rect.topLeft()+QPointF(0,1));
+        QPointF topLeft = rect.topLeft() + boundingBox.topLeft();
+
+        textLayout.draw(painter, topLeft-QPointF(1,0));
+        textLayout.draw(painter, topLeft+QPointF(1,0));
+        textLayout.draw(painter, topLeft-QPointF(0,1));
+        textLayout.draw(painter, topLeft+QPointF(0,1));
 
         painter->setPen(textColor);
 
-        textLayout.draw(painter,
-                        QPointF(label.x+boundingBox.x(),
-                                label.y+boundingBox.y()));
-
-
+        textLayout.draw(painter, topLeft);
       }
     }
     else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
