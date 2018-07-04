@@ -284,6 +284,11 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
+    QRectF rect(label.bx1, label.by1, label.bx2-label.bx1, label.by2-label.by1);
+    if (!QRectF(painter->viewport()).intersects(rect)){
+      return;
+    }
+
     QFont        font(GetFont(projection,
                               parameter,
                               label.fontSize));
@@ -325,44 +330,31 @@ namespace osmscout {
         QRectF                          boundingBox;
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
         QColor                          outlineColor=QColor::fromRgbF(1.0,1.0,1.0,label.alpha);
-        QPen                            outlinePen(outlineColor,2.0,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
-        QList<QTextLayout::FormatRange> formatList;
-        QTextLayout::FormatRange        range;
-
-        range.start=0;
-        range.length=string.length();
-        range.format.setForeground(QBrush(outlineColor));
-        range.format.setTextOutline(outlinePen);
-        formatList.append(range);
-
-        textLayout.setAdditionalFormats(formatList);
 
         LayoutTextLayout(fontMetrics,
                          proposedWidth,
                          textLayout,
                          boundingBox);
 
-        textLayout.draw(painter,
-                        QPointF(label.x+boundingBox.x(),
-                                label.y+boundingBox.y()));
+        QPointF topLeft = rect.topLeft() + boundingBox.topLeft();
 
-        range.start=0;
-        range.length=string.length();
-        range.format.setForeground(QBrush(textColor));
-        range.format.setTextOutline(QPen(Qt::transparent));
-        formatList.clear();
-        formatList.append(range);
+        /**
+         * Use text outline for emphasize is better (more accurate)
+         * (QTextLayout::FormatRange::setTextOutline),
+         * but it has terribly performance.
+         * So we draw text multiple times with move,
+         * it will create similar effect.
+         */
+        painter->setPen(outlineColor);
 
-        textLayout.setAdditionalFormats(formatList);
+        textLayout.draw(painter, topLeft-QPointF(1,0));
+        textLayout.draw(painter, topLeft+QPointF(1,0));
+        textLayout.draw(painter, topLeft-QPointF(0,1));
+        textLayout.draw(painter, topLeft+QPointF(0,1));
 
-        LayoutTextLayout(fontMetrics,
-                         proposedWidth,
-                         textLayout,
-                         boundingBox);
+        painter->setPen(textColor);
 
-        textLayout.draw(painter,
-                        QPointF(label.x+boundingBox.x(),
-                                label.y+boundingBox.y()));
+        textLayout.draw(painter, topLeft);
       }
     }
     else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
