@@ -316,7 +316,8 @@ namespace osmscout {
 
   MapPainterCairo::MapPainterCairo(const StyleConfigRef &styleConfig)
       : MapPainter(styleConfig,
-                   new CoordBuffer())
+                   new CoordBuffer()),
+        labelLayouter(this)
   {
     // no code
   }
@@ -352,7 +353,7 @@ namespace osmscout {
     }
   }
 
-  MapPainterCairo::Font MapPainterCairo::GetFont(const Projection &projection,
+  MapPainterCairo::CairoFont MapPainterCairo::GetFont(const Projection &projection,
                                                  const MapParameter &parameter,
                                                  double fontSize)
   {
@@ -600,7 +601,7 @@ namespace osmscout {
                                         double fontSize)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    Font font;
+    CairoFont font;
 
     font = GetFont(projection,
                    parameter,
@@ -796,14 +797,61 @@ namespace osmscout {
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
 
+  template<>
+  std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> MapPainterCairo::CairoLabel::ToGlyphs() const
+  {
+    // TODO
+    return std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>>();
+  }
+
+  std::shared_ptr<MapPainterCairo::CairoLabel> MapPainterCairo::Layout(const Projection& projection,
+                                                                       const MapParameter& parameter,
+                                                                       const std::string& text,
+                                                                       double fontSize,
+                                                                       double objectWidth,
+                                                                       bool enableWrapping)
+  {
+    auto label = std::make_shared<MapPainterCairo::CairoLabel>();
+    label->text=text;
+
+    // TODO
+
+    return label;
+  }
+
+  double MapPainterCairo::GlyphWidth(const CairoNativeGlyph &glyph)
+  {
+    // TODO
+    return 0;
+  }
+
+  double MapPainterCairo::GlyphHeight(const CairoNativeGlyph &glyph)
+  {
+    // TODO
+    return 0;
+  }
+
+  osmscout::Vertex2D MapPainterCairo::GlyphTopLeft(const CairoNativeGlyph &glyph)
+  {
+    // TODO
+    return Vertex2D();
+  }
+
   void MapPainterCairo::DrawLabel(const Projection &projection,
                                   const MapParameter &parameter,
                                   const DoubleRectangle &labelRectangle,
                                   const LabelData &label,
-                                  const PangoLayoutPtr &layout)
+                                  const CairoNativeLabel &layout)
   {
     // TODO
   }
+
+  void MapPainterCairo::DrawGlyphs(const osmscout::PathTextStyleRef style,
+                                   const std::vector<CairoGlyph> &glyphs)
+  {
+    // TODO
+  }
+
 
 #else
 #endif
@@ -1155,7 +1203,7 @@ namespace osmscout {
                                              const Vertex2D &position,
                                              double objectWidth)
   {
-    // TODO
+    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
   }
 
   /**
@@ -1166,14 +1214,20 @@ namespace osmscout {
                                     const PathLabelData &label,
                                     const LabelPath &labelPath)
   {
-    // TODO
+    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
   }
 
   void MapPainterCairo::DrawLabels(const Projection& projection,
-                          const MapParameter& parameter,
-                          const MapData& data)
+                                   const MapParameter& parameter,
+                                   const MapData& data)
   {
-    // TODO
+    labelLayouter.Layout();
+
+    labelLayouter.DrawLabels(projection,
+                             parameter,
+                             this);
+
+    labelLayouter.Reset();
   }
 
   void MapPainterCairo::DrawPrimitivePath(const Projection& projection,

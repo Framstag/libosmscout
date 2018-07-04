@@ -44,15 +44,25 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
-
+  public:
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    using PangoLayoutPtr = std::shared_ptr<PangoLayout>;
-    using Font = PangoFontDescription*;
+    using CairoNativeLabel = std::shared_ptr<PangoLayout>;
+    using CairoNativeGlyph = std::shared_ptr<PangoGlyphInfo>;
+
+    using CairoLabel = Label<CairoNativeGlyph, CairoNativeLabel>;
+    using CairoGlyph = Glyph<CairoNativeGlyph>;
+    using CairoLabelInstance = LabelInstance<CairoNativeGlyph, CairoNativeLabel>;
+    using CairoFont = PangoFontDescription*;
+    using CairoLabelLayouter = LabelLayouter<CairoNativeGlyph, CairoNativeLabel, MapPainterCairo>;
+    friend CairoLabelLayouter;
+
+    CairoLabelLayouter labelLayouter;
 #else
     using Font = cairo_scaled_font_t*;
 #endif
 
-    using FontMap = std::unordered_map<size_t,Font>;         //! Map type for mapping  font sizes to font
+  private:
+    using FontMap = std::unordered_map<size_t,CairoFont>;         //! Map type for mapping  font sizes to font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons
@@ -64,7 +74,7 @@ namespace osmscout {
     std::mutex                             mutex;            //! Mutex for locking concurrent calls
 
   private:
-    Font GetFont(const Projection& projection,
+    CairoFont GetFont(const Projection& projection,
                  const MapParameter& parameter,
                  double fontSize);
 
@@ -102,11 +112,27 @@ namespace osmscout {
                     const FillStyle& style) override;
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    std::shared_ptr<CairoLabel> Layout(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const std::string& text,
+                                       double fontSize,
+                                       double objectWidth,
+                                       bool enableWrapping = false);
+
+    double GlyphWidth(const CairoNativeGlyph &glyph);
+
+    double GlyphHeight(const CairoNativeGlyph &glyph);
+
+    osmscout::Vertex2D GlyphTopLeft(const CairoNativeGlyph &glyph);
+
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const DoubleRectangle& labelRectangle,
                    const LabelData& label,
-                   const PangoLayoutPtr &layout);
+                   const CairoNativeLabel& layout);
+
+    void DrawGlyphs(const osmscout::PathTextStyleRef style,
+                    const std::vector<CairoGlyph> &glyphs);
 #else
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
