@@ -34,8 +34,8 @@
 namespace osmscout {
 
   using QtGlyph = Glyph<QGlyphRun>;
-  using QtLabel = Label<QGlyphRun, std::shared_ptr<QTextLayout>>;
-  using QtLabelInstance = LabelInstance<QGlyphRun, std::shared_ptr<QTextLayout>>;
+  using QtLabel = Label<QGlyphRun, QTextLayout>;
+  using QtLabelInstance = LabelInstance<QGlyphRun, QTextLayout>;
 
   class MapPainterBatchQt;
 
@@ -46,8 +46,8 @@ namespace osmscout {
   {
     friend class MapPainterBatchQt;
 
-    using QtLabelLayouter = LabelLayouter<QGlyphRun, std::shared_ptr<QTextLayout>, MapPainterQt>;
-    friend class LabelLayouter<QGlyphRun, std::shared_ptr<QTextLayout>, MapPainterQt>;
+    using QtLabelLayouter = LabelLayouter<QGlyphRun, QTextLayout, MapPainterQt>;
+    friend QtLabelLayouter;
 
   private:
     struct FollowPathHandle

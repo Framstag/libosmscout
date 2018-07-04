@@ -341,12 +341,10 @@ namespace osmscout {
     QFontMetrics fontMetrics=QFontMetrics(font, painter->device());
     qreal leading=fontMetrics.leading();
 
-    std::shared_ptr<QtLabel> label=std::make_shared<QtLabel>();
+    std::shared_ptr<QtLabel> label=std::make_shared<QtLabel>(
+        QString::fromUtf8(text.c_str()), font, painter->device());
 
-    label->label = std::make_shared<QTextLayout>(QString::fromUtf8(text.c_str()),
-                                                font,
-                                                painter->device());
-    label->label->setCacheEnabled(true);
+    label->label.setCacheEnabled(true);
 
     double proposedWidth = -1;
     if (enableWrapping) {
@@ -357,9 +355,9 @@ namespace osmscout {
     }
 
     // evaluate layout
-    label->label->beginLayout();
+    label->label.beginLayout();
     while (true) {
-      QTextLine line = label->label->createLine();
+      QTextLine line = label->label.createLine();
       if (!line.isValid())
         break;
 
@@ -377,12 +375,12 @@ namespace osmscout {
       width=std::max(width,line.naturalTextWidth());
       height+=line.height();
     }
-    label->label->endLayout();
+    label->label.endLayout();
 
     // Center all lines horizontally, after we know the actual width
 
-    for (int i=0; i<label->label->lineCount(); i++) {
-      QTextLine line = label->label->lineAt(i);
+    for (int i=0; i<label->label.lineCount(); i++) {
+      QTextLine line = label->label.lineAt(i);
 
       line.setPosition(QPointF((width-line.naturalTextWidth())/2,line.position().y()));
     }
@@ -1360,7 +1358,7 @@ namespace osmscout {
 
     positions[0] = QPointF(0, 0);
 
-    QList<QGlyphRun> glyphs=label->glyphRuns();
+    QList<QGlyphRun> glyphs=label.glyphRuns();
     for (const QGlyphRun &glyphRun: glyphs){
       for (int g=0; g<glyphRun.glyphIndexes().size(); g++) {
 

@@ -139,6 +139,13 @@ namespace osmscout {
     osmscout::LabelStyleRef style;    //!< Style for drawing
     std::string             text;     //!< The label text
 
+    Label() {};
+
+    template<typename... Args>
+    Label(Args&&... args):
+      label(std::forward<Args>(args)...)
+    {}
+
     std::vector<Glyph<NativeGlyph>> ToGlyphs() const;
   };
 
@@ -422,15 +429,15 @@ namespace osmscout {
         for (const typename LabelInstanceType::Element &el : inst.elements) {
           if (el.labelData.type==LabelData::Symbol){
             p->DrawSymbol(projection,
-                       parameter,
-                       *(el.labelData.iconStyle->GetSymbol()),
-                       el.x + el.labelData.iconWidth/2,
-                       el.y + el.labelData.iconHeight/2);
+                          parameter,
+                          *(el.labelData.iconStyle->GetSymbol()),
+                          el.x + el.labelData.iconWidth/2,
+                          el.y + el.labelData.iconHeight/2);
 
           } else if (el.labelData.type==LabelData::Icon){
             p->DrawIcon(el.labelData.iconStyle.get(),
-                     el.x + el.labelData.iconWidth/2,
-                     el.y + el.labelData.iconHeight/2);
+                        el.x + el.labelData.iconWidth/2,
+                        el.y + el.labelData.iconHeight/2);
 
           } else {
             // postpone text elements
@@ -443,7 +450,7 @@ namespace osmscout {
       for (const typename LabelInstanceType::Element *el : textElements) {
         p->DrawLabel(projection, parameter,
                      DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
-                     el->labelData, *(el->label->label) );
+                     el->labelData, el->label->label);
       }
 
       for (const ContourLabelType &label:ContourLabels()){
