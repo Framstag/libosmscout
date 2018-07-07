@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
     NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
     [NSGraphicsContext setCurrentContext:nsgc];
     CGContextRef cg = (CGContextRef)[nsgc graphicsPort];
+    CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, height);
+    CGContextConcatCTM(cg, flipVertical);
     
     if (cg) {
         osmscout::MercatorProjection  projection;
