@@ -795,6 +795,21 @@ namespace osmscout {
     cairo_restore(draw);
   }
 
+  void MapPainterCairo::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                      const Projection& /*projection*/,
+                                      const MapParameter& parameter,
+                                      const MapData& /*data*/)
+  {
+    DoubleRectangle viewport;
+    double x2, y2;
+    cairo_clip_extents(draw, &viewport.x, &viewport.y, &x2, &y2);
+    viewport.width = x2 - viewport.x;
+    viewport.height = y2 - viewport.y;
+
+    labelLayouter.SetViewport(viewport);
+    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+  }
+
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
 
   template<>
@@ -811,10 +826,43 @@ namespace osmscout {
                                                                        double objectWidth,
                                                                        bool enableWrapping)
   {
-    auto label = std::make_shared<MapPainterCairo::CairoLabel>();
-    label->text=text;
+    auto label = std::make_shared<MapPainterCairo::CairoLabel>(
+        std::shared_ptr<PangoLayout>(pango_cairo_create_layout(draw), g_object_unref));
 
-    // TODO
+    CairoFont font=GetFont(projection,
+                           parameter,
+                           fontSize);
+
+    pango_layout_set_font_description(label->label.get(),font);
+
+    PangoContext     *context=pango_layout_get_context(label->label.get());
+    int              proposedWidth=(int)std::ceil(objectWidth);
+
+    pango_layout_set_text(label->label.get(),
+                          text.c_str(),
+                          (int)text.length());
+
+    // layout 0,0 coordinate will be top-center
+    pango_layout_set_alignment(label->label.get(), PANGO_ALIGN_CENTER);
+
+    if (enableWrapping) {
+      pango_layout_set_wrap(label->label.get(), PANGO_WRAP_WORD);
+    }
+
+    if (proposedWidth > 0) {
+      pango_layout_set_width(label->label.get(), proposedWidth * PANGO_SCALE);
+    }
+
+    PangoRectangle extends;
+
+    pango_layout_get_pixel_extents(label->label.get(),
+                                   nullptr,
+                                   &extends);
+
+    label->text=text;
+    label->fontSize=fontSize;
+    label->width=extends.width;
+    label->height=extends.height;
 
     return label;
   }
@@ -834,7 +882,7 @@ namespace osmscout {
   osmscout::Vertex2D MapPainterCairo::GlyphTopLeft(const CairoNativeGlyph &glyph)
   {
     // TODO
-    return Vertex2D();
+    return Vertex2D(0,0);
   }
 
   void MapPainterCairo::DrawLabel(const Projection &projection,
@@ -843,7 +891,40 @@ namespace osmscout {
                                   const LabelData &label,
                                   const CairoNativeLabel &layout)
   {
-    // TODO
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
+      const auto *style = dynamic_cast<const TextStyle *>(label.style.get());
+      double r = style->GetTextColor().GetR();
+      double g = style->GetTextColor().GetG();
+      double b = style->GetTextColor().GetB();
+
+      cairo_set_source_rgba(draw, r, g, b, label.alpha);
+
+      PangoRectangle extends;
+
+      pango_layout_get_pixel_extents(layout.get(),
+                                     nullptr,
+                                     &extends);
+
+      cairo_move_to(draw,
+                    labelRectangle.x - extends.x,
+                    labelRectangle.y);
+
+      if (style->GetStyle() == TextStyle::normal) {
+        pango_cairo_show_layout(draw,
+                                layout.get());
+        cairo_stroke(draw);
+      } else /* emphasize */ {
+        pango_cairo_layout_path(draw,
+                                layout.get());
+
+        cairo_set_source_rgba(draw, 1, 1, 1, label.alpha);
+        cairo_set_line_width(draw, 2.0);
+        cairo_stroke_preserve(draw);
+
+        cairo_set_source_rgba(draw, r, g, b, label.alpha);
+        cairo_fill(draw);
+      }
+    }
   }
 
   void MapPainterCairo::DrawGlyphs(const osmscout::PathTextStyleRef style,

@@ -897,11 +897,11 @@ namespace osmscout {
 
   void MapPainterQt::BeforeDrawing(const StyleConfig& /*styleConfig*/,
                                    const Projection& /*projection*/,
-                                   const MapParameter& /*parameter*/,
+                                   const MapParameter& parameter,
                                    const MapData& /*data*/)
   {
-    labelLayouter.SetViewport(painter->window().width()/-2, painter->window().height()/-2,
-                              painter->window().width()*2, painter->window().height()*2);
+    labelLayouter.SetViewport(DoubleRectangle(0, 0, painter->window().width(), painter->window().height()));
+    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
   }
 
   void MapPainterQt::RegisterRegularLabel(const Projection &projection,
@@ -952,11 +952,6 @@ namespace osmscout {
 
   void MapPainterQt::DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const
   {
-    if (!QRectF(painter->viewport()).intersects(
-      QRectF(glyph.position.GetX(), glyph.position.GetY(), glyph.trWidth, glyph.trHeight))){
-      return;
-    }
-
     QTransform tran;
     const QTransform originalTran=painter->transform();
 
