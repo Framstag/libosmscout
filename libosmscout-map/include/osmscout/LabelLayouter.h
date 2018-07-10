@@ -29,7 +29,7 @@
 #include <osmscout/LabelPath.h>
 #include <iostream>
 
-#define DEBUG_LABEL_LAYOUTER
+//#define DEBUG_LABEL_LAYOUTER
 
 #if defined(LABEL_LAYOUTER_DEBUG)
 #include <iostream>
@@ -149,6 +149,12 @@ namespace osmscout {
       label(std::forward<Args>(args)...)
     {}
 
+    /**
+     * Implementation have to be provided by backend.
+     * Glyph positions should be relative to label baseline.
+     *
+     * @return vector of glyphs
+     */
     std::vector<Glyph<NativeGlyph>> ToGlyphs() const;
   };
 
@@ -237,6 +243,26 @@ namespace osmscout {
     return a.priority < b.priority;
   }
 
+  /**
+   *
+   * @tparam NativeGlyph
+   * @tparam NativeLabel
+   * @tparam TextLayouter - class providing low level text layouting
+   *   required methods:
+   *
+   *    // glyph bounding box relative to its base point
+   *    DoubleRectangle GlyphBoundingBox(const NativeGlyph &) const
+   *
+   *    // layout text for label
+   *    std::shared_ptr<Label<NativeGlyph, NativeLabel>> Layout(
+   *                                        const Projection& projection,
+   *                                        const MapParameter& parameter,
+   *                                        const std::string& text,
+   *                                        double fontSize,
+   *                                        double objectWidth,
+   *                                        bool enableWrapping = false);
+   *
+   */
   template <class NativeGlyph, class NativeLabel, class TextLayouter>
   class OSMSCOUT_MAP_API LabelLayouter
   {
@@ -434,6 +460,32 @@ namespace osmscout {
       }
     }
 
+    /**
+     *
+     * @tparam Painter
+     *  required methods:
+     *
+     *      void DrawSymbol(const Projection& projection,
+     *                      const MapParameter& parameter,
+     *                      onst Symbol& symbol,
+     *                      double x, double y) override;
+     *
+     *      void DrawIcon(const IconStyle* style,
+     *                    double x, double y) override;
+     *
+     *      void DrawLabel(const Projection& projection,
+     *                     const MapParameter& parameter,
+     *                     const DoubleRectangle& labelRectangle,
+     *                     const LabelData& label,
+     *                     const std::shared_ptr<NativeLabel>& layout);
+     *
+     *      void DrawGlyphs(const osmscout::PathTextStyleRef style,
+     *                      const std::vector<Glyph<NativeGlyph>> &glyphs);
+     *
+     * @param projection
+     * @param parameter
+     * @param p - painter pointer
+     */
     template<class Painter>
     void DrawLabels(const Projection& projection,
                     const MapParameter& parameter,
@@ -575,8 +627,10 @@ namespace osmscout {
                                offset + glyph.position.GetX();
           osmscout::Vertex2D point=labelPath.PointAtLength(glyphOffset);
 
-          double w = textLayouter->GlyphWidth(glyph.glyph);
-          double h = textLayouter->GlyphHeight(glyph.glyph);
+          DoubleRectangle textBoundingBox = textLayouter->GlyphBoundingBox(glyph.glyph);
+          double w = textBoundingBox.width;
+          double h = textBoundingBox.height;
+          osmscout::Vertex2D tl(textBoundingBox.x, textBoundingBox.y);
 
           // glyph angle in radians
           double angle=labelPath.AngleAtLength(upwards ? glyphOffset - w/2 : glyphOffset + w/2)*-1;
@@ -605,8 +659,6 @@ namespace osmscout {
           glyphCopy.position=osmscout::Vertex2D(point.GetX() - textBaselineOffset * sinA,
                                                 point.GetY() + textBaselineOffset * cosA);
           glyphCopy.angle=angle;
-
-          auto tl = textLayouter->GlyphTopLeft(glyphCopy.glyph);
 
           // four coordinates of glyph bounding box; x,y of top-left, top-right, bottom-right, bottom-left
           std::array<double, 4> x{tl.GetX(), tl.GetX() + w, tl.GetX() + w, tl.GetX()};

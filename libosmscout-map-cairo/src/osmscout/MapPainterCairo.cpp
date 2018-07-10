@@ -930,28 +930,16 @@ namespace osmscout {
     return label;
   }
 
-  double MapPainterCairo::GlyphWidth(const CairoNativeGlyph &glyph)
-  {
-    assert(glyph.glyphString->num_glyphs == 1);
-    return (double)(glyph.glyphString->glyphs[0].geometry.width) / (double)PANGO_SCALE;
-  }
-
-  double MapPainterCairo::GlyphHeight(const CairoNativeGlyph &glyph)
-  {
-    assert(glyph.glyphString->num_glyphs == 1);
-    PangoRectangle extends;
-    pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
-    return (double)(extends.height) / (double)PANGO_SCALE;
-  }
-
-  osmscout::Vertex2D MapPainterCairo::GlyphTopLeft(const CairoNativeGlyph &glyph)
+  DoubleRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
   {
     assert(glyph.glyphString->num_glyphs == 1);
     PangoRectangle extends;
     pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
 
-    return Vertex2D((double)(extends.x) / (double)PANGO_SCALE,
-                    (double)(extends.y) / (double)PANGO_SCALE);
+    return DoubleRectangle((double)(extends.x) / (double)PANGO_SCALE,
+                           (double)(extends.y) / (double)PANGO_SCALE,
+                           (double)(extends.width) / (double)PANGO_SCALE,
+                           (double)(extends.height) / (double)PANGO_SCALE);
   }
 
   void MapPainterCairo::DrawLabel(const Projection &projection,

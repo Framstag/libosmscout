@@ -125,11 +125,7 @@ namespace osmscout {
                                        double objectWidth,
                                        bool enableWrapping = false);
 
-    double GlyphWidth(const CairoNativeGlyph &glyph);
-
-    double GlyphHeight(const CairoNativeGlyph &glyph);
-
-    osmscout::Vertex2D GlyphTopLeft(const CairoNativeGlyph &glyph);
+    osmscout::DoubleRectangle GlyphBoundingBox(const CairoNativeGlyph &glyph) const;
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
