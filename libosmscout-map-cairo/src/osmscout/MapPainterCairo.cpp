@@ -354,8 +354,8 @@ namespace osmscout {
   }
 
   MapPainterCairo::CairoFont MapPainterCairo::GetFont(const Projection &projection,
-                                                 const MapParameter &parameter,
-                                                 double fontSize)
+                                                      const MapParameter &parameter,
+                                                      double fontSize)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     FontMap::const_iterator f;
@@ -815,8 +815,72 @@ namespace osmscout {
   template<>
   std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> MapPainterCairo::CairoLabel::ToGlyphs() const
   {
-    // TODO
-    return std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>>();
+    PangoRectangle extends;
+
+    pango_layout_get_pixel_extents(label.get(),
+                                   nullptr,
+                                   &extends);
+
+    // label is centered - we have to move its left horizontal offset
+    double horizontalOffset = extends.x * -1.0;
+    std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> result;
+
+#ifdef DEBUG_LABEL_LAYOUTER
+    std::cout << " = getting glyphs for label: " << text << std::endl;
+#endif
+
+    for (PangoLayoutIter *iter = pango_layout_get_iter(label.get());
+         iter != nullptr;){
+      PangoLayoutRun *run = pango_layout_iter_get_run_readonly(iter);
+      if (run == nullptr) {
+        pango_layout_iter_free(iter);
+        break; // nullptr signalise end of line, we don't expect more lines in contour label
+      }
+
+      std::shared_ptr<PangoFont> font = std::shared_ptr<PangoFont>(run->item->analysis.font,
+                                                                   g_object_unref);
+      g_object_ref(font.get());
+
+#ifdef DEBUG_LABEL_LAYOUTER
+      std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs (font " << font.get() << "):" << std::endl;
+#endif
+
+      for (int gi=0; gi < run->glyphs->num_glyphs; gi++){
+        result.emplace_back();
+
+        // new run with single glyph
+        std::shared_ptr<PangoGlyphString> singleGlyphStr = std::shared_ptr<PangoGlyphString>(pango_glyph_string_new(), pango_glyph_string_free);
+
+        pango_glyph_string_set_size(singleGlyphStr.get(), 1);
+
+        // make glyph copy
+        singleGlyphStr.get()->glyphs[0] = run->glyphs->glyphs[gi];
+        PangoGlyphInfo &glyphInfo = singleGlyphStr.get()->glyphs[0];
+
+        result.back().glyph.font = font;
+
+
+        result.back().position.SetX(((double)glyphInfo.geometry.x_offset/(double)PANGO_SCALE) + horizontalOffset);
+        result.back().position.SetY((double)glyphInfo.geometry.y_offset/(double)PANGO_SCALE);
+
+#ifdef DEBUG_LABEL_LAYOUTER
+        std::cout << "     " << glyphInfo.glyph << ": " << result.back().position.GetX() << " x " << result.back().position.GetY() << std::endl;
+#endif
+
+        glyphInfo.geometry.x_offset = 0;
+        glyphInfo.geometry.y_offset = 0;
+        horizontalOffset += ((double)glyphInfo.geometry.width/(double)PANGO_SCALE);
+
+        result.back().glyph.glyphString = singleGlyphStr;
+      }
+
+      if (!pango_layout_iter_next_run(iter)){
+        pango_layout_iter_free(iter);
+        iter = nullptr;
+      }
+    }
+
+    return result;
   }
 
   std::shared_ptr<MapPainterCairo::CairoLabel> MapPainterCairo::Layout(const Projection& projection,
@@ -835,8 +899,7 @@ namespace osmscout {
 
     pango_layout_set_font_description(label->label.get(),font);
 
-    PangoContext     *context=pango_layout_get_context(label->label.get());
-    int              proposedWidth=(int)std::ceil(objectWidth);
+    int proposedWidth=(int)std::ceil(objectWidth);
 
     pango_layout_set_text(label->label.get(),
                           text.c_str(),
@@ -869,20 +932,26 @@ namespace osmscout {
 
   double MapPainterCairo::GlyphWidth(const CairoNativeGlyph &glyph)
   {
-    // TODO
-    return 0;
+    assert(glyph.glyphString->num_glyphs == 1);
+    return (double)(glyph.glyphString->glyphs[0].geometry.width) / (double)PANGO_SCALE;
   }
 
   double MapPainterCairo::GlyphHeight(const CairoNativeGlyph &glyph)
   {
-    // TODO
-    return 0;
+    assert(glyph.glyphString->num_glyphs == 1);
+    PangoRectangle extends;
+    pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
+    return (double)(extends.height) / (double)PANGO_SCALE;
   }
 
   osmscout::Vertex2D MapPainterCairo::GlyphTopLeft(const CairoNativeGlyph &glyph)
   {
-    // TODO
-    return Vertex2D(0,0);
+    assert(glyph.glyphString->num_glyphs == 1);
+    PangoRectangle extends;
+    pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
+
+    return Vertex2D((double)(extends.x) / (double)PANGO_SCALE,
+                    (double)(extends.y) / (double)PANGO_SCALE);
   }
 
   void MapPainterCairo::DrawLabel(const Projection &projection,
@@ -930,7 +999,46 @@ namespace osmscout {
   void MapPainterCairo::DrawGlyphs(const osmscout::PathTextStyleRef style,
                                    const std::vector<CairoGlyph> &glyphs)
   {
-    // TODO
+    cairo_matrix_t matrix;
+    cairo_get_matrix(draw, &matrix);
+
+    cairo_set_source_rgba(draw,
+                         style->GetTextColor().GetR(),
+                         style->GetTextColor().GetG(),
+                         style->GetTextColor().GetB(),
+                         style->GetTextColor().GetA());
+
+    for (auto const &glyph:glyphs) {
+
+      cairo_set_matrix(draw, &matrix);
+      cairo_translate(draw, glyph.position.GetX(), glyph.position.GetY());
+      cairo_rotate(draw, glyph.angle);
+
+      cairo_move_to(draw, 0, 0);
+      pango_cairo_show_glyph_string(draw,
+                                    glyph.glyph.font.get(),
+                                    glyph.glyph.glyphString.get());
+    }
+
+    cairo_set_matrix(draw, &matrix);
+#ifdef DEBUG_LABEL_LAYOUTER
+    for (auto const &glyph:glyphs) {
+      cairo_set_source_rgba(draw, 1, 0, 0, 1);
+      cairo_arc(draw,
+                glyph.trPosition.GetX(), glyph.trPosition.GetY(),
+                0.5,
+                0,
+                2*M_PI);
+      cairo_fill(draw);
+
+      cairo_set_source_rgba(draw, 0, 0, 1, 1);
+      cairo_set_line_width(draw,0.2);
+      cairo_rectangle(draw,
+                      glyph.trPosition.GetX(), glyph.trPosition.GetY(),
+                      glyph.trWidth, glyph.trHeight);
+      cairo_stroke(draw);
+    }
+#endif
   }
 
 

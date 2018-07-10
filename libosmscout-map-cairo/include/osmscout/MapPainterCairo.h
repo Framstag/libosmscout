@@ -33,6 +33,7 @@
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
   #include <pango/pangocairo.h>
+  #include <pango/pango-glyph.h>
 #endif
 
 #include <osmscout/MapCairoImportExport.h>
@@ -46,13 +47,18 @@ namespace osmscout {
   {
   public:
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    using CairoFont = PangoFontDescription*;
     using CairoNativeLabel = std::shared_ptr<PangoLayout>;
-    using CairoNativeGlyph = std::shared_ptr<PangoGlyphInfo>;
+    struct PangoStandaloneGlyph {
+      std::shared_ptr<PangoFont>        font;
+      std::shared_ptr<PangoGlyphString> glyphString;
+    };
+
+    using CairoNativeGlyph = PangoStandaloneGlyph;
 
     using CairoLabel = Label<CairoNativeGlyph, CairoNativeLabel>;
     using CairoGlyph = Glyph<CairoNativeGlyph>;
     using CairoLabelInstance = LabelInstance<CairoNativeGlyph, CairoNativeLabel>;
-    using CairoFont = PangoFontDescription*;
     using CairoLabelLayouter = LabelLayouter<CairoNativeGlyph, CairoNativeLabel, MapPainterCairo>;
     friend CairoLabelLayouter;
 

@@ -29,7 +29,7 @@
 #include <osmscout/LabelPath.h>
 #include <iostream>
 
-//#define DEBUG_LABEL_LAYOUTER
+#define DEBUG_LABEL_LAYOUTER
 
 #if defined(LABEL_LAYOUTER_DEBUG)
 #include <iostream>
@@ -118,8 +118,8 @@ namespace osmscout {
   class Glyph {
   public:
     NativeGlyph glyph;
-    osmscout::Vertex2D position;
-    double angle{0}; //!< clock-wise rotation in radians
+    osmscout::Vertex2D position;        //!< glyph baseline position
+    double angle{0};                    //!< clock-wise rotation in radians
 
     osmscout::Vertex2D trPosition{0,0}; //!< top-left position after rotation
     double trWidth{0};                  //!< width after rotation
@@ -544,7 +544,7 @@ namespace osmscout {
 
       // text should be rendered with 0x0 coordinate as left baseline
       // we want to move label little bit bottom, near to line center
-      double textOffset=label->height * 0.25;
+      double textBaselineOffset = label->height * 0.25;
 
       std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
@@ -583,7 +583,7 @@ namespace osmscout {
 
           // it is not real diagonal, but maximum distance from glyph
           // point that can be covered after treansformantions
-          double diagonal=w+h+std::abs(textOffset);
+          double diagonal=w+h+std::abs(textBaselineOffset);
 
           // fast check if current glyph can be visible
           if (!layoutViewport.Intersects(DoubleRectangle{
@@ -602,8 +602,8 @@ namespace osmscout {
           double  cosA=std::cos(angle);
 
           Glyph<NativeGlyph> glyphCopy=glyph;
-          glyphCopy.position=osmscout::Vertex2D(point.GetX() - textOffset * sinA,
-                                                point.GetY() + textOffset * cosA);
+          glyphCopy.position=osmscout::Vertex2D(point.GetX() - textBaselineOffset * sinA,
+                                                point.GetY() + textBaselineOffset * cosA);
           glyphCopy.angle=angle;
 
           auto tl = textLayouter->GlyphTopLeft(glyphCopy.glyph);
