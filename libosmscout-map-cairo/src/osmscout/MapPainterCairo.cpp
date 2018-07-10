@@ -869,7 +869,8 @@ namespace osmscout {
 
         glyphInfo.geometry.x_offset = 0;
         glyphInfo.geometry.y_offset = 0;
-        horizontalOffset += ((double)glyphInfo.geometry.width/(double)PANGO_SCALE);
+        // TODO: it is correct to take x_offset into account? See pango_glyph_string_extents_range implementation...
+        horizontalOffset += ((double)(glyphInfo.geometry.width + glyphInfo.geometry.x_offset)/(double)PANGO_SCALE);
 
         result.back().glyph.glyphString = singleGlyphStr;
       }
