@@ -52,6 +52,15 @@ namespace osmscout {
     {
     }
 
+    Rectangle<T>& Set(T nx, T ny, T nw, T nh)
+    {
+      x = nx;
+      y = ny;
+      width = nw;
+      height = nh;
+      return *this;
+    }
+
     /**
      * Test if this Rectangle intersects with another.
      * It is using open interval, so if two rectangles are just touching
@@ -497,7 +506,14 @@ namespace osmscout {
       for (const LabelInstanceType &inst : Labels()){
 
         for (const typename LabelInstanceType::Element &el : inst.elements) {
-          if (!visibleViewport.Intersects(DoubleRectangle(el.x, el.y, el.labelData.iconWidth, el.labelData.iconHeight))){
+          DoubleRectangle elementRectangle;
+          if (el.labelData.type==LabelData::Text) {
+            elementRectangle.Set(el.x, el.y, el.label->width, el.label->height);
+          }else{
+            elementRectangle.Set(el.x, el.y, el.labelData.iconWidth, el.labelData.iconHeight);
+          }
+
+          if (!visibleViewport.Intersects(elementRectangle)){
             continue;
           }
 
@@ -522,12 +538,10 @@ namespace osmscout {
 
       // draw postponed text elements
       for (const typename LabelInstanceType::Element *el : textElements) {
-        DoubleRectangle labelRectangle(el->x, el->y, el->label->width, el->label->height);
-        if (visibleViewport.Intersects(labelRectangle)){
-          p->DrawLabel(projection, parameter,
-                       labelRectangle,
-                       el->labelData, el->label->label);
-        }
+        
+        p->DrawLabel(projection, parameter,
+                     DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
+                     el->labelData, el->label->label);
       }
 
       for (const ContourLabelType &label:ContourLabels()){
