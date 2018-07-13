@@ -934,20 +934,11 @@ namespace osmscout {
     labelLayouter.Reset();
   }
 
-  double MapPainterQt::GlyphWidth(const QGlyphRun &glyph)
+  DoubleRectangle MapPainterQt::GlyphBoundingBox(const QGlyphRun &glyph) const
   {
-    return glyph.boundingRect().width();
-  }
-
-  double MapPainterQt::GlyphHeight(const QGlyphRun &glyph)
-  {
-    return glyph.boundingRect().height();
-  }
-
-  osmscout::Vertex2D MapPainterQt::GlyphTopLeft(const QGlyphRun &glyph)
-  {
-    auto tl=glyph.boundingRect().topLeft();
-    return osmscout::Vertex2D(tl.x(),tl.y());
+    auto bbox=glyph.boundingRect();
+    auto tl=bbox.topLeft();
+    return DoubleRectangle(tl.x(), tl.y(), bbox.width(), bbox.height());
   }
 
   void MapPainterQt::DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const

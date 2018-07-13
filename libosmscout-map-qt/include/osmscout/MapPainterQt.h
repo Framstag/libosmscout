@@ -113,11 +113,7 @@ namespace osmscout {
                              const qreal angle,
                              const qreal baseline) const;
 
-    double GlyphWidth(const QGlyphRun &glyph);
-
-    double GlyphHeight(const QGlyphRun &glyph);
-
-    osmscout::Vertex2D GlyphTopLeft(const QGlyphRun &glyph);
+    osmscout::DoubleRectangle GlyphBoundingBox(const QGlyphRun &glyph) const;
 
     void DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const;
 
