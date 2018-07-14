@@ -61,13 +61,13 @@ namespace osmscout {
     using CairoLabelInstance = LabelInstance<CairoNativeGlyph, CairoNativeLabel>;
     using CairoLabelLayouter = LabelLayouter<CairoNativeGlyph, CairoNativeLabel, MapPainterCairo>;
     friend CairoLabelLayouter;
-
-    CairoLabelLayouter labelLayouter;
 #else
     using Font = cairo_scaled_font_t*;
 #endif
 
   private:
+    CairoLabelLayouter labelLayouter;
+
     using FontMap = std::unordered_map<size_t,CairoFont>;         //! Map type for mapping  font sizes to font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask

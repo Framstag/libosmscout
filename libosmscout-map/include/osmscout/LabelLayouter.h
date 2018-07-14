@@ -148,7 +148,6 @@ namespace osmscout {
     double                  height{-1};
 
     double                  fontSize{1}; //!< Font size to be used
-    osmscout::LabelStyleRef style;    //!< Style for drawing
     std::string             text;     //!< The label text
 
     Label() {};
@@ -538,7 +537,7 @@ namespace osmscout {
 
       // draw postponed text elements
       for (const typename LabelInstanceType::Element *el : textElements) {
-        
+
         p->DrawLabel(projection, parameter,
                      DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
                      el->labelData, el->label->label);
