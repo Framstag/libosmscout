@@ -123,7 +123,8 @@ namespace osmscout {
                                        const std::string& text,
                                        double fontSize,
                                        double objectWidth,
-                                       bool enableWrapping = false);
+                                       bool enableWrapping = false,
+                                       bool contourLabel = false);
 
     osmscout::DoubleRectangle GlyphBoundingBox(const CairoNativeGlyph &glyph) const;
 

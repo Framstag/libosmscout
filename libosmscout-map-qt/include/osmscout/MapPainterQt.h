@@ -125,7 +125,8 @@ namespace osmscout {
                                     const std::string& text,
                                     double fontSize,
                                     double objectWidth,
-                                    bool enableWrapping = false);
+                                    bool enableWrapping = false,
+                                    bool contourLabel = false);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,

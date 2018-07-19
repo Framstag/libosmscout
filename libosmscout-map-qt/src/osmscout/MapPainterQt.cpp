@@ -327,7 +327,8 @@ namespace osmscout {
                                                 const std::string& text,
                                                 double fontSize,
                                                 double objectWidth,
-                                                bool enableWrapping)
+                                                bool enableWrapping,
+                                                bool /*contourLabel*/)
   {
     // TODO: cache labels
     QFont font(GetFont(projection,

@@ -889,7 +889,8 @@ namespace osmscout {
                                                                        const std::string& text,
                                                                        double fontSize,
                                                                        double objectWidth,
-                                                                       bool enableWrapping)
+                                                                       bool enableWrapping,
+                                                                       bool /*contourLabel*/)
   {
     auto label = std::make_shared<MapPainterCairo::CairoLabel>(
         std::shared_ptr<PangoLayout>(pango_cairo_create_layout(draw), g_object_unref));
@@ -943,8 +944,8 @@ namespace osmscout {
                            (double)(extends.height) / (double)PANGO_SCALE);
   }
 
-  void MapPainterCairo::DrawLabel(const Projection &projection,
-                                  const MapParameter &parameter,
+  void MapPainterCairo::DrawLabel(const Projection &/*projection*/,
+                                  const MapParameter &/*parameter*/,
                                   const DoubleRectangle &labelRectangle,
                                   const LabelData &label,
                                   const CairoNativeLabel &layout)
@@ -1397,7 +1398,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawLabels(const Projection& projection,
                                    const MapParameter& parameter,
-                                   const MapData& data)
+                                   const MapData& /*data*/)
   {
     labelLayouter.Layout();
 

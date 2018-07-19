@@ -268,7 +268,8 @@ namespace osmscout {
    *                                        const std::string& text,
    *                                        double fontSize,
    *                                        double objectWidth,
-   *                                        bool enableWrapping = false);
+   *                                        bool enableWrapping = false,
+   *                                        bool contourLabel = false);
    *
    */
   template <class NativeGlyph, class NativeLabel, class TextLayouter>
@@ -577,7 +578,9 @@ namespace osmscout {
           // Qt allows to split text layout and style setup
           element.label = textLayouter->Layout(projection, parameter,
                                                d.text, d.fontSize,
-                                               objectWidth, /*enable wrapping*/ true);
+                                               objectWidth,
+                                               /*enable wrapping*/ true,
+                                               /*contour label*/ false);
           element.x = point.GetX() - element.label->width / 2;
           if (offset<0){
             element.y = point.GetY() - element.label->height / 2;
@@ -605,7 +608,8 @@ namespace osmscout {
           labelData.text,
           labelData.style->GetSize(),
           /* object width */ 0.0,
-          /*enable wrapping*/ false);
+          /*enable wrapping*/ false,
+          /*contour label*/ true);
 
       // text should be rendered with 0x0 coordinate as left baseline
       // we want to move label little bit bottom, near to line center
