@@ -49,7 +49,7 @@ namespace osmscout {
     struct NativeGlyph {
       double x;
       double y;
-      const agg::glyph_cache* glyph;
+      const agg::glyph_cache* aggGlyph;
     };
     struct NativeLabel {
       std::wstring text;
@@ -91,11 +91,8 @@ namespace osmscout {
   private:
     void SetFont(const Projection& projection,
                  const MapParameter& parameter,
-                 double size);
-
-    void SetOutlineFont(const Projection& projection,
-                        const MapParameter& parameter,
-                        double size);
+                 double size,
+                 agg::glyph_rendering ren_type = agg::glyph_ren_native_gray8);
 
     void GetTextDimension(const std::wstring& text,
                           double& width,
@@ -104,10 +101,11 @@ namespace osmscout {
                   double y,
                   const std::wstring& text);
 
-    void DrawOutlineText(double x,
-                         double y,
-                         const std::wstring& text,
-                         double width);
+    void DrawGlyph(double x, double y,
+                   const agg::glyph_cache* glyph);
+
+    void DrawGlyphVector(double x, double baselineY,
+                         const std::vector<MapPainterAgg::NativeGlyph> &glyphs);
 
     void DrawFill(const Projection& projection,
                   const MapParameter& parameter,
@@ -162,8 +160,6 @@ namespace osmscout {
     //                       size_t transStart, size_t transEnd,
     //                       ContourLabelHelper& helper) override;
 
-    void DrawGlyph(double x, double y, const agg::glyph_cache* glyph);
-
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const DoubleRectangle& labelRectangle,
@@ -176,11 +172,12 @@ namespace osmscout {
     osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
 
     std::shared_ptr<AggLabel> Layout(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const std::string& text,
-                                       double fontSize,
-                                       double objectWidth,
-                                       bool enableWrapping = false);
+                                     const MapParameter& parameter,
+                                     const std::string& text,
+                                     double fontSize,
+                                     double objectWidth,
+                                     bool enableWrapping = false,
+                                     bool contourLabel = false);
 
     /**
       Register regular label with given text at the given pixel coordinate

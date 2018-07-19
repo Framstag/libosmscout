@@ -28,6 +28,7 @@
 #include <agg2/agg_conv_stroke.h>
 #include <agg2/agg_ellipse.h>
 #include <agg2/agg_trans_single_path.h>
+#include <agg2/agg_trans_affine.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -53,30 +54,12 @@ namespace osmscout {
 
   void MapPainterAgg::SetFont(const Projection& projection,
                               const MapParameter& parameter,
-                              double size)
+                              double size,
+                              agg::glyph_rendering renderingType)
   {
     if (!fontEngine->load_font(parameter.GetFontName().c_str(),
                                0,
-                               agg::glyph_ren_native_gray8)) {
-      std::cout << "Cannot load font '" << parameter.GetFontName() << "'" << std::endl;
-      return;
-
-    }
-
-    //fontEngine->resolution(72);
-    fontEngine->width(size*projection.ConvertWidthToPixel(parameter.GetFontSize()));
-    fontEngine->height(size*projection.ConvertWidthToPixel(parameter.GetFontSize()));
-    fontEngine->hinting(true);
-    fontEngine->flip_y(true);
-  }
-
-  void MapPainterAgg::SetOutlineFont(const Projection& projection,
-                                     const MapParameter& parameter,
-                                     double size)
-  {
-    if (!fontEngine->load_font(parameter.GetFontName().c_str(),
-                               0,
-                               agg::glyph_ren_outline)) {
+                               renderingType)) {
       std::cout << "Cannot load font '" << parameter.GetFontName() << "'" << std::endl;
       return;
 
@@ -107,8 +90,8 @@ namespace osmscout {
   }
 
   double MapPainterAgg::GetFontHeight(const Projection& projection,
-                                    const MapParameter& parameter,
-                                    double fontSize)
+                                      const MapParameter& parameter,
+                                      double fontSize)
   {
     SetFont(projection,
             parameter,
@@ -173,58 +156,6 @@ namespace osmscout {
                                 *renderer_aa);
           break;
 
-        case agg::glyph_data_outline:
-          rasterizer->reset();
-
-          if(convTextContours->width() <= 0.01) {
-            rasterizer->add_path(*convTextCurves);
-          }
-          else {
-            rasterizer->add_path(*convTextContours);
-          }
-          agg::render_scanlines(*rasterizer,
-                                *scanlineP8,
-                                *renderer_aa);
-          break;
-        }
-
-        // increment pen position
-        x += glyph->advance_x;
-        y += glyph->advance_y;
-      }
-    }
-  }
-
-  void MapPainterAgg::DrawOutlineText(double x,
-                                      double y,
-                                      const std::wstring& text,
-                                      double width)
-  {
-    convTextContours->width(width);
-
-    for (wchar_t i : text) {
-      const agg::glyph_cache* glyph = fontCacheManager->glyph(i);
-
-      if (glyph!=nullptr) {
-        if (true) {
-          fontCacheManager->add_kerning(&x, &y);
-        }
-
-        fontCacheManager->init_embedded_adaptors(glyph,x,y);
-
-        switch (glyph->data_type) {
-        default:
-          break;
-        case agg::glyph_data_mono:
-          agg::render_scanlines(fontCacheManager->mono_adaptor(),
-                                fontCacheManager->mono_scanline(),
-                                *renderer_bin);
-          break;
-        case agg::glyph_data_gray8:
-          agg::render_scanlines(fontCacheManager->gray8_adaptor(),
-                                fontCacheManager->gray8_scanline(),
-                                *renderer_aa);
-          break;
         case agg::glyph_data_outline:
           rasterizer->reset();
 
@@ -491,6 +422,8 @@ namespace osmscout {
 
   void MapPainterAgg::DrawGlyph(double x, double y, const agg::glyph_cache* glyph)
   {
+    assert(glyph!=nullptr);
+
     fontCacheManager->init_embedded_adaptors(glyph,x,y);
 
     switch (glyph->data_type) {
@@ -524,35 +457,86 @@ namespace osmscout {
     }
   }
 
-  void MapPainterAgg::DrawLabel(const Projection& projection,
-                                const MapParameter& parameter,
+  void MapPainterAgg::DrawGlyphVector(double x, double baselineY,
+                                      const std::vector<MapPainterAgg::NativeGlyph> &glyphs)
+  {
+    for (const auto &glyph : glyphs){
+      DrawGlyph(x + glyph.x,
+                baselineY + glyph.y,
+                glyph.aggGlyph);
+    }
+  }
+
+  void MapPainterAgg::DrawLabel(const Projection& /*projection*/,
+                                const MapParameter& /*parameter*/,
                                 const DoubleRectangle& labelRectangle,
                                 const LabelData& label,
                                 const NativeLabel& layout)
   {
-    // TODO setup color and font
-    for (const auto &glyph : layout.glyphs){
-      DrawGlyph(labelRectangle.x + glyph.x,
-                labelRectangle.y + glyph.y,
-                glyph.glyph);
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
+      const TextStyle *style = dynamic_cast<const TextStyle *>(label.style.get());
+      double r = style->GetTextColor().GetR();
+      double g = style->GetTextColor().GetG();
+      double b = style->GetTextColor().GetB();
+
+      if (style->GetStyle()==TextStyle::normal) {
+
+        renderer_aa->color(agg::rgba(r,g,b,label.alpha));
+
+      } else if (style->GetStyle()==TextStyle::emphasize) {
+
+        renderer_aa->color(agg::rgba(1,1,1,label.alpha));
+
+        DrawGlyphVector(labelRectangle.x -1, labelRectangle.y + labelRectangle.height, layout.glyphs);
+        DrawGlyphVector(labelRectangle.x +1, labelRectangle.y + labelRectangle.height, layout.glyphs);
+        DrawGlyphVector(labelRectangle.x, labelRectangle.y -1 + labelRectangle.height, layout.glyphs);
+        DrawGlyphVector(labelRectangle.x, labelRectangle.y +1 + labelRectangle.height, layout.glyphs);
+
+        renderer_aa->color(agg::rgba(r,g,b,label.alpha));
+      }
+
+      DrawGlyphVector(labelRectangle.x,
+                      labelRectangle.y + labelRectangle.height,
+                      layout.glyphs);
     }
   }
 
   void MapPainterAgg::DrawGlyphs(const osmscout::PathTextStyleRef style,
                                  const std::vector<MapPainterAgg::AggGlyph> &glyphs)
   {
-    // TODO setup color and font
-    for (const auto &glyph : glyphs){
-      // TODO setup transformation
-      DrawGlyph(glyph.position.GetX(),
-                glyph.position.GetY(),
-                glyph.glyph.glyph);
+    double       r=style->GetTextColor().GetR();
+    double       g=style->GetTextColor().GetG();
+    double       b=style->GetTextColor().GetB();
+    double       a=style->GetTextColor().GetA();
+
+    renderer_aa->color(agg::rgba(r,g,b,a));
+
+    agg::trans_affine matrix;
+
+    for (const auto &layoutGlyph : glyphs){
+      // contour labels should always use outline rendering
+      assert(layoutGlyph.glyph.aggGlyph->data_type == agg::glyph_data_outline);
+
+      matrix.reset();
+      matrix.rotate(layoutGlyph.angle);
+      matrix.translate(layoutGlyph.position.GetX(), layoutGlyph.position.GetY());
+
+      agg::conv_transform<AggTextCurveConverter> ftrans(*convTextCurves, matrix);
+
+      rasterizer->reset();
+      fontCacheManager->init_embedded_adaptors(layoutGlyph.glyph.aggGlyph,
+                                               0, 0);
+      rasterizer->add_path(ftrans);
+      agg::render_scanlines(*rasterizer,
+                            *scanlineP8,
+                            *renderer_aa);
     }
   }
 
   osmscout::DoubleRectangle MapPainterAgg::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
-    return DoubleRectangle(0,0,glyph.glyph->advance_x, glyph.glyph->advance_y);
+    return DoubleRectangle(glyph.aggGlyph->bounds.x1, glyph.aggGlyph->bounds.y1,
+                           glyph.aggGlyph->bounds.x2, glyph.aggGlyph->bounds.y2);
   }
 
   template<>
@@ -569,15 +553,21 @@ namespace osmscout {
     return result;
   }
 
-  std::shared_ptr<MapPainterAgg::AggLabel> MapPainterAgg::Layout(const Projection& /*projection*/,
-                                                                 const MapParameter& /*parameter*/,
+  std::shared_ptr<MapPainterAgg::AggLabel> MapPainterAgg::Layout(const Projection& projection,
+                                                                 const MapParameter& parameter,
                                                                  const std::string& text,
                                                                  double fontSize,
                                                                  double /*objectWidth*/,
-                                                                 bool /*enableWrapping*/)
+                                                                 bool /*enableWrapping*/,
+                                                                 bool contourLabel)
   {
     MapPainterAgg::NativeLabel label{};
     label.text = UTF8StringToWString(text);
+
+    SetFont(projection,
+            parameter,
+            fontSize,
+            contourLabel ? agg::glyph_ren_outline : agg::glyph_ren_native_gray8);
 
     fontCacheManager->reset_last_glyph();
     double x = 0;
