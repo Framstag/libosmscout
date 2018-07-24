@@ -58,6 +58,9 @@ namespace osmscout {
                               const PathLabelData &label,
                               const LabelPath &labelPath) override;
 
+    void DrawLabels(const Projection& projection,
+                    const MapParameter& parameter,
+                    const MapData& data) override;
 
     void DrawIcon(const IconStyle* style,
                   double x,

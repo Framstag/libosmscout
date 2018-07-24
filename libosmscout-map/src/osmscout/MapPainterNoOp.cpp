@@ -71,6 +71,13 @@ namespace osmscout {
     // no code
   }
 
+  void MapPainterNoOp::DrawLabels(const osmscout::Projection&,
+                                  const osmscout::MapParameter&,
+                                  const osmscout::MapData&)
+  {
+    // no code
+  }
+
   void MapPainterNoOp::DrawIcon(const IconStyle* /*style*/,
                                 double /*x*/,
                                 double /*y*/)
