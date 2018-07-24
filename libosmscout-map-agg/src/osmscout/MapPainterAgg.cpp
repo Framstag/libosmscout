@@ -301,7 +301,9 @@ namespace osmscout {
     }
   }
 
-  void MapPainterAgg::DrawGlyphs(const osmscout::PathTextStyleRef style,
+  void MapPainterAgg::DrawGlyphs(const Projection &/*projection*/,
+                                 const MapParameter &/*parameter*/,
+                                 const osmscout::PathTextStyleRef style,
                                  const std::vector<MapPainterAgg::AggGlyph> &glyphs)
   {
     double       r=style->GetTextColor().GetR();

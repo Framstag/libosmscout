@@ -134,7 +134,9 @@ namespace osmscout {
                    const LabelData& label,
                    const CairoNativeLabel& layout);
 
-    void DrawGlyphs(const osmscout::PathTextStyleRef style,
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
                     const std::vector<CairoGlyph> &glyphs);
 #else
     void DrawLabel(const Projection& projection,

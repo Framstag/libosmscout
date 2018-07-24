@@ -117,7 +117,9 @@ namespace osmscout {
 
     void DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const;
 
-    void DrawGlyphs(const osmscout::PathTextStyleRef style,
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
                     const std::vector<osmscout::Glyph<QGlyphRun>> &glyphs);
 
     std::shared_ptr<QtLabel> Layout(const Projection& projection,

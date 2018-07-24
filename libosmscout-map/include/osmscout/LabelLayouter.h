@@ -488,7 +488,9 @@ namespace osmscout {
      *                     const LabelData& label,
      *                     const std::shared_ptr<NativeLabel>& layout);
      *
-     *      void DrawGlyphs(const osmscout::PathTextStyleRef style,
+     *      void DrawGlyphs(const Projection &projection,
+     *                      const MapParameter &parameter,
+     *                      const osmscout::PathTextStyleRef style,
      *                      const std::vector<Glyph<NativeGlyph>> &glyphs);
      *
      * @param projection
@@ -545,7 +547,8 @@ namespace osmscout {
       }
 
       for (const ContourLabelType &label:ContourLabels()){
-        p->DrawGlyphs(label.style, label.glyphs);
+        p->DrawGlyphs(projection, parameter,
+                      label.style, label.glyphs);
       }
     }
 

@@ -149,7 +149,9 @@ namespace osmscout {
                    const LabelData& label,
                    const NativeLabel& layout);
 
-    void DrawGlyphs(const osmscout::PathTextStyleRef style,
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
                     const std::vector<AggGlyph> &glyphs);
 
     osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;

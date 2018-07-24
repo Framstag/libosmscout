@@ -957,7 +957,9 @@ namespace osmscout {
     painter->setTransform(originalTran);
   }
 
-  void MapPainterQt::DrawGlyphs(const osmscout::PathTextStyleRef style,
+  void MapPainterQt::DrawGlyphs(const Projection &/*projection*/,
+                                const MapParameter &/*parameter*/,
+                                const osmscout::PathTextStyleRef style,
                                 const std::vector<Glyph<QGlyphRun>> &glyphs)
   {
     const Color &color = style->GetTextColor();

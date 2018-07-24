@@ -40,19 +40,37 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_SVG_API MapPainterSVG : public MapPainter
   {
-  private:
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-    typedef std::unordered_map<size_t,PangoFontDescription*>  FontMap;          //! Map type for mapping  font sizes to font
+  public:
+    using NativeLabel = std::shared_ptr<PangoLayout>;
+    struct StandaloneGlyph {
+      std::shared_ptr<PangoFont>        font;
+      std::shared_ptr<PangoGlyphString> glyphString;
+      std::string character;
+    };
 
+    using NativeGlyph = StandaloneGlyph;
+
+    using SvgLabel = Label<NativeGlyph, NativeLabel>;
+    using SvgGlyph = Glyph<NativeGlyph>;
+    using SvgLabelInstance = LabelInstance<NativeGlyph, NativeLabel>;
+    using SvgLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterSVG>;
+    friend SvgLabelLayouter;
+
+  private:
+    using FontMap = std::unordered_map<size_t,PangoFontDescription*>  ;          //! Map type for mapping  font sizes to font
     PangoFontMap                     *pangoFontMap;
     PangoContext                     *pangoContext;
     FontMap                          fonts;            //! Cached scaled font
+
+    SvgLabelLayouter labelLayouter;
 #endif
-     std::map<FillStyle,std::string> fillStyleNameMap;
-     std::map<LineStyle,std::string> lineStyleNameMap;
-     std::ostream                    stream;
-     TypeConfigRef                   typeConfig;
-    std::mutex                       mutex;         //! Mutex for locking concurrent calls
+  private:
+    std::map<FillStyle,std::string> fillStyleNameMap;
+    std::map<LineStyle,std::string> lineStyleNameMap;
+    std::ostream                    stream;
+    TypeConfigRef                   typeConfig;
+    std::mutex                      mutex;         //! Mutex for locking concurrent calls
 
   private:
     std::string GetColorValue(const Color& color);
@@ -61,6 +79,28 @@ namespace osmscout {
     PangoFontDescription* GetFont(const Projection& projection,
                                   const MapParameter& parameter,
                                   double fontSize);
+
+    std::shared_ptr<SvgLabel> Layout(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const std::string& text,
+                                       double fontSize,
+                                       double objectWidth,
+                                       bool enableWrapping = false,
+                                       bool contourLabel = false);
+
+    osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+
+    void DrawLabel(const Projection& projection,
+                   const MapParameter& parameter,
+                   const DoubleRectangle& labelRectangle,
+                   const LabelData& label,
+                   const NativeLabel& layout);
+
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
+                    const std::vector<SvgGlyph> &glyphs);
+
 #endif
 
     void SetupFillAndStroke(const FillStyleRef &fillStyle,
@@ -74,6 +114,8 @@ namespace osmscout {
 
     void StartMainGroup();
     void FinishMainGroup();
+
+    std::string StrEscape(const std::string &str) const;
 
   protected:
     void AfterPreprocessing(const StyleConfig& styleConfig,
@@ -96,22 +138,48 @@ namespace osmscout {
                  IconStyle& style) override;
 
     double GetFontHeight(const Projection& projection,
-                       const MapParameter& parameter,
-                       double fontSize) override;
+                         const MapParameter& parameter,
+                         double fontSize) override;
 
+    /*
     TextDimension GetTextDimension(const Projection& projection,
                                    const MapParameter& parameter,
                                    double objectWidth,
                                    double fontSize,
                                    const std::string& text) override;
+    */
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
                     const FillStyle& style) override;
 
+    /*
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelData& label) override;
+    */
+
+    /**
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
+     */
+    virtual void RegisterRegularLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const std::vector<LabelData> &labels,
+                                      const Vertex2D &position,
+                                      double objectWidth) override;
+
+    /**
+     * Register contour label
+     */
+    virtual void RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const PathLabelData &label,
+                                      const LabelPath &labelPath) override;
+
+    virtual void DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) override;
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
@@ -148,12 +216,14 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const WayData& data) override;
 
+    /*
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
                           const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart, size_t transEnd,
                           ContourLabelHelper& helper) override;
+    */
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
