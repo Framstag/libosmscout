@@ -154,23 +154,9 @@ namespace osmscout {
                          const MapParameter& parameter,
                          double fontSize) override;
 
-    /*
-    TextDimension GetTextDimension(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   double objectWidth,
-                                   double fontSize,
-                                   const std::string& text) override;
-    */
-
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
                     const FillStyle& style) override;
-
-    /*
-    void DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const LabelData& label) override;
-    */
 
     /**
       Register regular label with given text at the given pixel coordinate
@@ -228,15 +214,6 @@ namespace osmscout {
                  const Projection& projection,
                  const MapParameter& parameter,
                  const WayData& data) override;
-
-    /*
-    void DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd,
-                          ContourLabelHelper& helper) override;
-    */
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
