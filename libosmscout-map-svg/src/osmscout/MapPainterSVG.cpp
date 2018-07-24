@@ -28,7 +28,7 @@
 #include <osmscout/system/Math.h>
 #include <osmscout/util/String.h>
 
-#define DEBUG_LABEL_LAYOUTER
+// #define DEBUG_LABEL_LAYOUTER
 
 namespace osmscout {
 
