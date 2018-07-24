@@ -225,6 +225,53 @@ namespace osmscout {
     return result;
   }
 
+#else
+
+  template<>
+  std::vector<Glyph<MapPainterSVG::NativeGlyph>> MapPainterSVG::SvgLabel::ToGlyphs() const
+  {
+    std::vector<Glyph<MapPainterSVG::NativeGlyph>> result;
+    double horizontalOffset = 0;
+    for (size_t ch = 0; ch < label.length(); ch++){
+      result.emplace_back();
+
+      result.back().glyph.character = WStringToUTF8String(label.substr(ch,1));
+
+      result.back().position.SetX(horizontalOffset);
+      result.back().position.SetY(0);
+
+      horizontalOffset += (double)(height * MapPainterSVG::AverageCharacterWidth);
+    }
+    return result;
+  }
+
+  DoubleRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
+  {
+    return DoubleRectangle(0,
+                           glyph.height * -1,
+                           glyph.width,
+                           glyph.height);
+  }
+
+  std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
+                                                                 const MapParameter& parameter,
+                                                                 const std::string& text,
+                                                                 double fontSize,
+                                                                 double /*objectWidth*/,
+                                                                 bool /*enableWrapping*/,
+                                                                 bool /*contourLabel*/)
+  {
+    auto label = std::make_shared<MapPainterSVG::SvgLabel>(UTF8StringToWString(text));
+
+    label->text=text;
+    label->fontSize=fontSize;
+    label->height=projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());
+    label->width=label->label.length() * label->height * AverageCharacterWidth;
+
+    return label;
+  }
+#endif
+
   void MapPainterSVG::DrawLabel(const Projection &projection,
                                 const MapParameter &parameter,
                                 const DoubleRectangle &labelRectangle,
@@ -309,8 +356,11 @@ namespace osmscout {
     stream << std::endl;
 
     for (auto const &glyph:glyphs) {
-      if (glyph.glyph.character.empty() || (glyph.glyph.character.length()==1 && glyph.glyph.character==" "))
+      if (glyph.glyph.character.empty() ||
+          (glyph.glyph.character.length()==1 &&
+           (glyph.glyph.character==" " || glyph.glyph.character=="\t" || glyph.glyph.character==" "))) {
         continue;
+      }
 
       stream << "        <tspan";
       stream << " x=\"" << glyph.position.GetX() << "\"";
@@ -322,7 +372,6 @@ namespace osmscout {
 
     stream << "    </text>" << std::endl;
   }
-#endif
 
   std::string MapPainterSVG::StrEscape(const std::string &str) const
   {
@@ -544,11 +593,7 @@ namespace osmscout {
 
     return pango_font_description_get_size(font)/PANGO_SCALE;
 #else
-      unused(projection);
-      unused(parameter);
-      unused(fontSize);
-
-      return 0.0;
+    return projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());;
 #endif
   }
 

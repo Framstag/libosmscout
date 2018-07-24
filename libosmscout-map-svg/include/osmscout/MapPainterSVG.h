@@ -51,21 +51,34 @@ namespace osmscout {
 
     using NativeGlyph = StandaloneGlyph;
 
-    using SvgLabel = Label<NativeGlyph, NativeLabel>;
-    using SvgGlyph = Glyph<NativeGlyph>;
-    using SvgLabelInstance = LabelInstance<NativeGlyph, NativeLabel>;
-    using SvgLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterSVG>;
-    friend SvgLabelLayouter;
-
   private:
     using FontMap = std::unordered_map<size_t,PangoFontDescription*>  ;          //! Map type for mapping  font sizes to font
     PangoFontMap                     *pangoFontMap;
     PangoContext                     *pangoContext;
     FontMap                          fonts;            //! Cached scaled font
 
-    SvgLabelLayouter labelLayouter;
+#else
+  public:
+    using NativeLabel = std::wstring;
+    struct NativeGlyph {
+      std::string character;
+      double width;
+      double height;
+    };
+    static constexpr double AverageCharacterWidth = 0.75;
 #endif
+
+  public:
+    using SvgLabel = Label<NativeGlyph, NativeLabel>;
+
   private:
+    using SvgGlyph = Glyph<NativeGlyph>;
+    using SvgLabelInstance = LabelInstance<NativeGlyph, NativeLabel>;
+    using SvgLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterSVG>;
+    friend SvgLabelLayouter;
+
+    SvgLabelLayouter                labelLayouter;
+
     std::map<FillStyle,std::string> fillStyleNameMap;
     std::map<LineStyle,std::string> lineStyleNameMap;
     std::ostream                    stream;
@@ -75,20 +88,15 @@ namespace osmscout {
   private:
     std::string GetColorValue(const Color& color);
 
-#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-    PangoFontDescription* GetFont(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  double fontSize);
+    osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
 
     std::shared_ptr<SvgLabel> Layout(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const std::string& text,
-                                       double fontSize,
-                                       double objectWidth,
-                                       bool enableWrapping = false,
-                                       bool contourLabel = false);
-
-    osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+                                     const MapParameter& parameter,
+                                     const std::string& text,
+                                     double fontSize,
+                                     double objectWidth,
+                                     bool enableWrapping = false,
+                                     bool contourLabel = false);
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
@@ -100,6 +108,11 @@ namespace osmscout {
                     const MapParameter &parameter,
                     const osmscout::PathTextStyleRef style,
                     const std::vector<SvgGlyph> &glyphs);
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+    PangoFontDescription* GetFont(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  double fontSize);
 
 #endif
 
