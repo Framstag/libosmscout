@@ -28,6 +28,8 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
+#include <osmscout/util/String.h>
+#include <cairo.h>
 
 namespace osmscout {
 
@@ -286,32 +288,32 @@ namespace osmscout {
     cairo_fill(draw);
   }
 
-#else
-  static void DrawContourLabelCairo(cairo_t *draw,
-                                    cairo_path_t *path,
-                                    double offset,
-                                    double textHeight,
-                                    const std::string& text)
-  {
-    // Create a new path for the text we should draw along the curve
-    cairo_new_path(draw);
-    cairo_move_to(draw,0,0);
-    cairo_text_path(draw,text.c_str());
-
-    cairo_path_t *textPath=cairo_copy_path(draw);
-
-    // Now transform the text path so that it maps to the contour of the line
-    MapPathOnPath(draw,
-                  textPath,
-                  path,
-                  offset,
-                  0.5*textHeight);
-
-    cairo_path_destroy(textPath);
-
-    // Draw the text path
-    cairo_fill(draw);
-  }
+// #else
+//   static void DrawContourLabelCairo(cairo_t *draw,
+//                                     cairo_path_t *path,
+//                                     double offset,
+//                                     double textHeight,
+//                                     const std::string& text)
+//   {
+//     // Create a new path for the text we should draw along the curve
+//     cairo_new_path(draw);
+//     cairo_move_to(draw,0,0);
+//     cairo_text_path(draw,text.c_str());
+//
+//     cairo_path_t *textPath=cairo_copy_path(draw);
+//
+//     // Now transform the text path so that it maps to the contour of the line
+//     MapPathOnPath(draw,
+//                   textPath,
+//                   path,
+//                   offset,
+//                   0.5*textHeight);
+//
+//     cairo_path_destroy(textPath);
+//
+//     // Draw the text path
+//     cairo_fill(draw);
+//   }
 #endif
 
   MapPainterCairo::MapPainterCairo(const StyleConfigRef &styleConfig)
@@ -609,7 +611,7 @@ namespace osmscout {
 
     return pango_font_description_get_size(font) / PANGO_SCALE;
 #else
-    Font                 font;
+    CairoFont            font;
     cairo_font_extents_t fontExtents;
 
     font=GetFont(projection,
@@ -944,48 +946,6 @@ namespace osmscout {
                            (double)(extends.height) / (double)PANGO_SCALE);
   }
 
-  void MapPainterCairo::DrawLabel(const Projection &/*projection*/,
-                                  const MapParameter &/*parameter*/,
-                                  const DoubleRectangle &labelRectangle,
-                                  const LabelData &label,
-                                  const CairoNativeLabel &layout)
-  {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
-      const auto *style = dynamic_cast<const TextStyle *>(label.style.get());
-      double r = style->GetTextColor().GetR();
-      double g = style->GetTextColor().GetG();
-      double b = style->GetTextColor().GetB();
-
-      cairo_set_source_rgba(draw, r, g, b, label.alpha);
-
-      PangoRectangle extends;
-
-      pango_layout_get_pixel_extents(layout.get(),
-                                     nullptr,
-                                     &extends);
-
-      cairo_move_to(draw,
-                    labelRectangle.x - extends.x,
-                    labelRectangle.y);
-
-      if (style->GetStyle() == TextStyle::normal) {
-        pango_cairo_show_layout(draw,
-                                layout.get());
-        cairo_stroke(draw);
-      } else /* emphasize */ {
-        pango_cairo_layout_path(draw,
-                                layout.get());
-
-        cairo_set_source_rgba(draw, 1, 1, 1, label.alpha);
-        cairo_set_line_width(draw, 2.0);
-        cairo_stroke_preserve(draw);
-
-        cairo_set_source_rgba(draw, r, g, b, label.alpha);
-        cairo_fill(draw);
-      }
-    }
-  }
-
   void MapPainterCairo::DrawGlyphs(const Projection &/*projection*/,
                                    const MapParameter &/*parameter*/,
                                    const osmscout::PathTextStyleRef style,
@@ -1035,7 +995,229 @@ namespace osmscout {
 
 
 #else
+
+  DoubleRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
+  {
+    return DoubleRectangle(0,
+                           glyph.height * -1,
+                           glyph.width,
+                           glyph.height);
+  }
+
+  template<>
+  std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> MapPainterCairo::CairoLabel::ToGlyphs() const
+  {
+    std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> result;
+
+    double horizontalOffset = 0;
+    for (size_t ch = 0; ch < label.wstr.length(); ch++){
+      result.emplace_back();
+
+      result.back().glyph.character = WStringToUTF8String(label.wstr.substr(ch,1));
+
+      cairo_text_extents_t  textExtents;
+      cairo_scaled_font_text_extents(label.font,
+                                     result.back().glyph.character.c_str(),
+                                     &textExtents);
+
+      result.back().glyph.width = textExtents.width;
+      result.back().glyph.height = label.fontExtents.height;
+
+      result.back().position.SetX(horizontalOffset);
+      result.back().position.SetY(0);
+
+      horizontalOffset += result.back().glyph.width;
+    }
+
+    return result;
+  }
+
+  void MapPainterCairo::DrawGlyphs(const Projection &/*projection*/,
+                                   const MapParameter &/*parameter*/,
+                                   const osmscout::PathTextStyleRef style,
+                                   const std::vector<CairoGlyph> &glyphs)
+  {
+    cairo_matrix_t matrix;
+    cairo_get_matrix(draw, &matrix);
+
+    cairo_set_source_rgba(draw,
+                          style->GetTextColor().GetR(),
+                          style->GetTextColor().GetG(),
+                          style->GetTextColor().GetB(),
+                          style->GetTextColor().GetA());
+
+    for (auto const &glyph:glyphs) {
+
+      cairo_set_matrix(draw, &matrix);
+      cairo_translate(draw, glyph.position.GetX(), glyph.position.GetY());
+      cairo_rotate(draw, glyph.angle);
+
+      cairo_move_to(draw, 0, 0);
+      cairo_show_text(draw,glyph.glyph.character.c_str());
+      cairo_stroke(draw);
+    }
+
+    cairo_set_matrix(draw, &matrix);
+  }
+
+  std::shared_ptr<MapPainterCairo::CairoLabel> MapPainterCairo::Layout(const Projection& projection,
+                                                                       const MapParameter& parameter,
+                                                                       const std::string& text,
+                                                                       double fontSize,
+                                                                       double /*objectWidth*/,
+                                                                       bool /*enableWrapping*/,
+                                                                       bool /*contourLabel*/)
+  {
+    auto label = std::make_shared<MapPainterCairo::CairoLabel>();
+
+    label->label.wstr = UTF8StringToWString(text);
+
+    label->label.font = GetFont(projection, parameter, fontSize);
+
+    cairo_scaled_font_extents(label->label.font,
+                              &(label->label.fontExtents));
+
+    cairo_scaled_font_text_extents(label->label.font,
+                                   text.c_str(),
+                                   &(label->label.textExtents));
+    label->text=text;
+    label->fontSize=fontSize;
+    label->width=label->label.textExtents.width;
+    label->height=label->label.fontExtents.height;
+
+    return label;
+  }
+
 #endif
+
+  void MapPainterCairo::DrawLabel(const Projection &/*projection*/,
+                                  const MapParameter &/*parameter*/,
+                                  const DoubleRectangle &labelRectangle,
+                                  const LabelData &label,
+                                  const CairoNativeLabel &layout)
+  {
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
+      const auto *style = dynamic_cast<const TextStyle *>(label.style.get());
+      double r = style->GetTextColor().GetR();
+      double g = style->GetTextColor().GetG();
+      double b = style->GetTextColor().GetB();
+
+      cairo_set_source_rgba(draw, r, g, b, label.alpha);
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+      PangoRectangle extends;
+
+      pango_layout_get_pixel_extents(layout.get(),
+                                     nullptr,
+                                     &extends);
+
+      cairo_move_to(draw,
+                    labelRectangle.x - extends.x,
+                    labelRectangle.y);
+
+      if (style->GetStyle() == TextStyle::normal) {
+        pango_cairo_show_layout(draw,
+                                layout.get());
+        cairo_stroke(draw);
+      } else /* emphasize */ {
+        pango_cairo_layout_path(draw,
+                                layout.get());
+
+        cairo_set_source_rgba(draw, 1, 1, 1, label.alpha);
+        cairo_set_line_width(draw, 2.0);
+        cairo_stroke_preserve(draw);
+
+        cairo_set_source_rgba(draw, r, g, b, label.alpha);
+        cairo_fill(draw);
+      }
+#else
+      cairo_move_to(draw,
+                    labelRectangle.x,
+                    labelRectangle.y+layout.fontExtents.ascent);
+
+      if (style->GetStyle()==TextStyle::normal) {
+
+        cairo_show_text(draw,label.text.c_str());
+        cairo_stroke(draw);
+      }
+      else {
+        cairo_text_path(draw,label.text.c_str());
+
+        cairo_set_source_rgba(draw,1,1,1,label.alpha);
+        cairo_set_line_width(draw,2.0);
+        cairo_stroke_preserve(draw);
+
+        cairo_set_source_rgba(draw,r,g,b,label.alpha);
+        cairo_fill(draw);
+      }
+
+#endif
+
+    }
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+      const auto* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+
+      cairo_set_dash(draw,nullptr,0,0);
+      cairo_set_line_width(draw,1);
+      cairo_set_source_rgba(draw,
+                            style->GetBgColor().GetR(),
+                            style->GetBgColor().GetG(),
+                            style->GetBgColor().GetB(),
+                            style->GetBgColor().GetA());
+
+      cairo_rectangle(draw,
+                      labelRectangle.x-2,
+                      labelRectangle.y,
+                      labelRectangle.width+3,
+                      labelRectangle.height+1);
+      cairo_fill(draw);
+
+      cairo_set_source_rgba(draw,
+                            style->GetBorderColor().GetR(),
+                            style->GetBorderColor().GetG(),
+                            style->GetBorderColor().GetB(),
+                            style->GetBorderColor().GetA());
+
+      cairo_rectangle(draw,
+                      labelRectangle.x +0,
+                      labelRectangle.y +2,
+                      labelRectangle.width +3-4,
+                      labelRectangle.height +1-4);
+      cairo_stroke(draw);
+
+      cairo_set_source_rgba(draw,
+                            style->GetTextColor().GetR(),
+                            style->GetTextColor().GetG(),
+                            style->GetTextColor().GetB(),
+                            label.alpha);
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+      PangoRectangle extends;
+
+      pango_layout_get_pixel_extents(layout.get(),
+                                     nullptr,
+                                     &extends);
+
+      cairo_move_to(draw,
+                    labelRectangle.x - extends.x,
+                    labelRectangle.y);
+
+      pango_cairo_show_layout(draw,
+                              layout.get());
+      cairo_stroke(draw);
+
+#else
+      cairo_move_to(draw,
+                    labelRectangle.x,
+                    labelRectangle.y+layout.fontExtents.ascent);
+
+      cairo_show_text(draw,label.text.c_str());
+      cairo_stroke(draw);
+
+#endif
+    }
+
+  }
 
 //   void MapPainterCairo::DrawLabel(const Projection& projection,
 //                                   const MapParameter& parameter,

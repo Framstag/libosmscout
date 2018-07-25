@@ -55,20 +55,33 @@ namespace osmscout {
     };
 
     using CairoNativeGlyph = PangoStandaloneGlyph;
+#else
+    using CairoFont = cairo_scaled_font_t*;
+    struct CairoNativeLabel {
+      std::wstring          wstr;
+      CairoFont             font;
+      cairo_text_extents_t  textExtents;
+      cairo_font_extents_t  fontExtents;
+    };
+
+    struct CairoNativeGlyph {
+      std::string character;
+      double width;
+      double height;
+    };
+    //static constexpr double AverageCharacterWidth = 0.75;
+#endif
 
     using CairoLabel = Label<CairoNativeGlyph, CairoNativeLabel>;
     using CairoGlyph = Glyph<CairoNativeGlyph>;
     using CairoLabelInstance = LabelInstance<CairoNativeGlyph, CairoNativeLabel>;
     using CairoLabelLayouter = LabelLayouter<CairoNativeGlyph, CairoNativeLabel, MapPainterCairo>;
     friend CairoLabelLayouter;
-#else
-    using Font = cairo_scaled_font_t*;
-#endif
 
   private:
     CairoLabelLayouter labelLayouter;
 
-    using FontMap = std::unordered_map<size_t,CairoFont>;         //! Map type for mapping  font sizes to font
+    using FontMap = std::unordered_map<size_t,CairoFont>;    //! Map type for mapping font sizes to font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons
@@ -117,7 +130,6 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const FillStyle& style) override;
 
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     std::shared_ptr<CairoLabel> Layout(const Projection& projection,
                                        const MapParameter& parameter,
                                        const std::string& text,
@@ -138,13 +150,6 @@ namespace osmscout {
                     const MapParameter &parameter,
                     const osmscout::PathTextStyleRef style,
                     const std::vector<CairoGlyph> &glyphs);
-#else
-    void DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const DoubleRectangle& labelRectangle,
-                   const LabelData& label,
-                   const void*);
-#endif
 
     virtual void BeforeDrawing(const StyleConfig& styleConfig,
                                const Projection& projection,
