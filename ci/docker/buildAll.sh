@@ -9,4 +9,4 @@ set -xe
 ./debian_buster_gcc_meson/build.sh
 ./ubuntu_14.04_gcc_cmake/build.sh
 ./ubuntu_16.04_gcc_cmake/build.sh
-./ubuntu_17.10_gcc_cmake/build.sh
+./ubuntu_18.04_gcc_cmake/build.sh
