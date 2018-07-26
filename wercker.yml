@@ -8,7 +8,7 @@ build:
         code: meson debug
     - script:
         name: Resource workaround
-        code: ln -s ../OSMScout2/qml .
+        code: mkdir -p OSMScout2 && ln -s ../../OSMScout2/qml OSMScout2/qml
         cwd: debug
     - script:
         name: Build project
