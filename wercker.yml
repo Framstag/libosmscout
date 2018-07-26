@@ -7,6 +7,10 @@ build:
         name: Configure project
         code: meson debug
     - script:
+        name: Resource workaround
+        code: ln -s ../OSMScout2/qml .
+        cwd: debug
+    - script:
         name: Build project
         code: ninja
         cwd: debug
