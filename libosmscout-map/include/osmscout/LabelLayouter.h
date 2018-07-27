@@ -29,7 +29,7 @@
 #include <osmscout/LabelPath.h>
 #include <iostream>
 
-#define DEBUG_LABEL_LAYOUTER
+// #define DEBUG_LABEL_LAYOUTER
 
 #if defined(LABEL_LAYOUTER_DEBUG)
 #include <iostream>
