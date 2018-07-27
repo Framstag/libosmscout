@@ -83,7 +83,7 @@ if(${OSMSCOUT_BUILD_MAP})
   # TODO: add sample data and arguments to test
   #add_test(NAME  COMMAND )
 else()
-	message("Skip ThreadedDatabase test libosmscout-map, is missing.")
+	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()
 
 
@@ -118,7 +118,7 @@ if(${OSMSCOUT_BUILD_MAP})
   target_link_libraries(MapRotate OSMScout OSMScoutMap)
   add_test(NAME MapRotate COMMAND MapRotate)
 else()
-	message("Skip MapRotate test libosmscout-map, is missing.")
+	message("Skip MapRotate test, libosmscout-map is missing.")
 endif()
 
 #---- EncodeNumber
@@ -208,5 +208,17 @@ if(${OSMSCOUT_BUILD_MAP})
               ${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET})
   endforeach()
 else()
-    message("Skip OSTAndOSSCheck test libosmscout-map, is missing.")
+    message("Skip OSTAndOSSCheck test, libosmscout-map is missing.")
 endif()
+
+#---- LabelPathTest
+if(${OSMSCOUT_BUILD_MAP})
+  add_executable(LabelPathTest src/LabelPathTest.cpp)
+  set_property(TARGET LabelPathTest PROPERTY CXX_STANDARD 11)
+  target_include_directories(LabelPathTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_link_libraries(LabelPathTest OSMScout OSMScoutMap)
+  add_test(NAME LabelPathTest COMMAND LabelPathTest)
+else()
+  message("Skip LabelPathTest, libosmscout-map is missing.")
+endif()
+
