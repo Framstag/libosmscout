@@ -625,7 +625,7 @@ namespace osmscout {
       while (offset+label->width < pLength){
 
         // skip string rendering when path is too much squiggly at this offset
-        if (!labelPath.TestAngleVariance(offset,offset+label->width,M_PI/4)){
+        if (!labelPath.TestAngleVariance(offset,offset+label->width,M_PI_4)){
           // skip drawing current label and let offset point to the next instance
           offset+=label->width + labelData.contourLabelSpace;
           continue;
