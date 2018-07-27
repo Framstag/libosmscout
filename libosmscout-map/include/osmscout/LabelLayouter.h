@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <set>
+#include <array>
 
 #include <osmscout/MapImportExport.h>
 
