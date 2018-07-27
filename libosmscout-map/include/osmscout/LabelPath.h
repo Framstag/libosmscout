@@ -60,9 +60,21 @@ namespace osmscout {
     double AngleAtLength(double offset) const;
     double AngleAtLengthDeg(double offset) const;
 
+    /**
+     * Test how squiggly is path in given offsets. It return true
+     * if angle between first path segment (on startOffset) and any
+     * following (until endOffset) is lesser than required maximum.
+     *
+     * @param startOffset
+     * @param endOffset
+     * @param maximumAngle in radians
+     * @return true if angle between first and following segments
+     *         (between given offsets) is lesser than maximumAngle
+     */
     bool TestAngleVariance(double startOffset, double endOffset, double maximumAngle) const;
+
   private:
-    const Segment& segmentBefore(double offset) const;
+    const Segment& SegmentBefore(double offset) const;
   };
 }
 

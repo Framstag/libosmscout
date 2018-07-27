@@ -43,7 +43,7 @@ namespace osmscout {
     }else{
       end.Set(x,y);
       Segment last=segments.back();
-      float endDistance= last.start.DistanceTo(Vertex2D(x,y)); //  QVector2D(last.start).distanceToPoint(QVector2D(x,y));
+      float endDistance = last.start.DistanceTo(Vertex2D(x,y)); //  QVector2D(last.start).distanceToPoint(QVector2D(x,y));
       if (endDistance>minSegmentLength){
         length+=endDistance;
         last.length=endDistance;
@@ -57,7 +57,6 @@ namespace osmscout {
 
         Segment s={end,length,0,0};
         segments.push_back(s);
-        //endDistance=0;
       }
     }
   }
@@ -67,7 +66,7 @@ namespace osmscout {
     if (segments.empty()){
       return Vertex2D();
     }
-    Segment relevantSetment=segmentBefore(offset);
+    Segment relevantSetment= SegmentBefore(offset);
     Vertex2D p=relevantSetment.start;
     double mul = (offset-relevantSetment.offset);
     Vertex2D add(std::cos(relevantSetment.angle) * mul, -std::sin(relevantSetment.angle) * mul);
@@ -75,7 +74,7 @@ namespace osmscout {
     return Vertex2D(p.GetX() + add.GetX(), p.GetY() + add.GetY());
   }
 
-  const Segment& LabelPath::segmentBefore(double offset) const
+  const Segment& LabelPath::SegmentBefore(double offset) const
   {
     size_t hundred=offset/100;
     if (hundred>=offsetIndex.size())
@@ -92,7 +91,7 @@ namespace osmscout {
 
   double LabelPath::AngleAtLength(double offset) const
   {
-    return segmentBefore(offset).angle;
+    return SegmentBefore(offset).angle;
   }
 
   double LabelPath::AngleAtLengthDeg(double offset) const
@@ -113,10 +112,7 @@ namespace osmscout {
           initialAngle=seg.angle;
           initialised=true;
         }else{
-          double change=std::abs(initialAngle-seg.angle);
-          if (change>M_PI)
-            change-=M_PI;
-          if (change>maximumAngle){
+          if (AngleDiff(initialAngle,seg.angle) > maximumAngle){
             return false;
           }
         }
