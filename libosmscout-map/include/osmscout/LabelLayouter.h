@@ -29,7 +29,7 @@
 #include <osmscout/LabelPath.h>
 #include <iostream>
 
-//#define DEBUG_LABEL_LAYOUTER
+#define DEBUG_LABEL_LAYOUTER
 
 #if defined(LABEL_LAYOUTER_DEBUG)
 #include <iostream>
@@ -304,8 +304,8 @@ namespace osmscout {
       layoutOverlap = overlap;
       layoutViewport.width = visibleViewport.width * (overlap + 1);
       layoutViewport.height = visibleViewport.height * (overlap + 1);
-      layoutViewport.x = visibleViewport.x - layoutViewport.width * overlap;
-      layoutViewport.y = visibleViewport.y - layoutViewport.height * overlap;
+      layoutViewport.x = visibleViewport.x - (visibleViewport.width * overlap) / 2;
+      layoutViewport.y = visibleViewport.y - (visibleViewport.height * overlap) / 2;
     }
 
     void Reset()
