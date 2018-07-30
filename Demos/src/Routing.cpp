@@ -513,7 +513,7 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionGene
     //std::cout << "MaxSpeed: " << (unsigned int)maxSpeedDescription->GetMaxSpeed() << std::endl;
   }
 
-  void OnPOIAtRoute(const osmscout::RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription)
+  void OnPOIAtRoute(const osmscout::RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription) override
   {
     NextLine(lineCount);
     std::cout << "Pass: " << poiAtRouteDescription->GetName()->GetDescription() << std::endl;
