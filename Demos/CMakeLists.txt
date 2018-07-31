@@ -208,15 +208,6 @@ else()
     message("Skip GpxPipe demo, libxml is missing.")
 endif()
 
-if(${OSMSCOUT_BUILD_MAP_IOSX} AND NOT DEFINED IOS_PLATFORM)
-    add_executable(DrawMapOSX src/DrawMapOSX.mm)
-    set_property(TARGET DrawMapOSX PROPERTY CXX_STANDARD 11)
-    target_link_libraries(DrawMapOSX OSMScout OSMScoutMap OSMScoutMapIOSX)
-    install(TARGETS DrawMapOSX RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-else()
-	message("Skip DrawMapOSX demo, libosmscout-map-iosx is missing.")
-endif()
-
 #---- Navigation
 if(${OSMSCOUT_BUILD_MAP})
     add_executable(Navigation src/Navigation.cpp)
