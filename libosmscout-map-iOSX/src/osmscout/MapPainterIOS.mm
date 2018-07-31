@@ -428,12 +428,15 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       double fontSize){
         Font *font = GetFont(projection,parameter,fontSize);
+        CGSize size = CGSizeZero;
+        if(font){
 #if TARGET_OS_IPHONE
-        CGSize size = [@"Aj" sizeWithAttributes:@{NSFontAttributeName:font}];
+            size = [@"Aj" sizeWithAttributes:@{NSFontAttributeName:font}];
 #else
-        NSRect stringBounds = [@"Aj" boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
-        CGSize size = stringBounds.size;
+            NSRect stringBounds = [@"Aj" boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
+            size = stringBounds.size;
 #endif
+        }
         return size.height;
     }
 
@@ -450,33 +453,35 @@ namespace osmscout {
         NSString *str = [NSString stringWithUTF8String:text.c_str()];
         CGRect rect = CGRectZero;
 
-#if TARGET_OS_IPHONE
-        NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
-        textStyle.lineBreakMode = NSLineBreakByWordWrapping;
-        textStyle.alignment = NSTextAlignmentCenter;
-
-        if(objectWidth > 0){
-            CGSize averageFontSize = [@"a" sizeWithAttributes:@{NSFontAttributeName:font}];
-            CGFloat proposedWidth = GetProposedLabelWidth(parameter,
-                                                       averageFontSize.width,
-                                                       objectWidth,
-                                                       text.length());
-
-            rect = [str boundingRectWithSize: CGSizeMake(proposedWidth, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin
-                                  attributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}
-                                     context:nil];
-        } else {
-            CGSize size = [str sizeWithAttributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}];
+        if(font){
+        #if TARGET_OS_IPHONE
+            NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+            textStyle.lineBreakMode = NSLineBreakByWordWrapping;
+            textStyle.alignment = NSTextAlignmentCenter;
+            
+            if(objectWidth > 0){
+                CGSize averageFontSize = [@"a" sizeWithAttributes:@{NSFontAttributeName:font}];
+                CGFloat proposedWidth = GetProposedLabelWidth(parameter,
+                                                              averageFontSize.width,
+                                                              objectWidth,
+                                                              text.length());
+                
+                rect = [str boundingRectWithSize: CGSizeMake(proposedWidth, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin
+                                      attributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}
+                                         context:nil];
+            } else {
+                CGSize size = [str sizeWithAttributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}];
+                rect.size.width = size.width;
+                rect.size.height = size.height;
+            }
+        #else
+            
+            NSRect stringBounds = [str boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
+            CGSize size = stringBounds.size;
             rect.size.width = size.width;
             rect.size.height = size.height;
+        #endif
         }
-#else
-
-        NSRect stringBounds = [str boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
-        CGSize size = stringBounds.size;
-        rect.size.width = size.width;
-        rect.size.height = size.height;
-#endif
 
         return TextDimension(rect.origin.x,
                              rect.origin.y,

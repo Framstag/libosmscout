@@ -1304,8 +1304,9 @@ namespace osmscout {
     std::vector<PolyData> td(area->rings.size());
 
     for (size_t i=0; i<area->rings.size(); i++) {
-      // The master ring does not have any nodes, skipping...
-      if (area->rings[i].IsMasterRing() || area->rings[i].nodes.size() < 2) {
+      // The master ring does not have any nodes, so we skip it
+      // Rings with less than 3 nodes should be skipped, too (no area)
+      if (area->rings[i].IsMasterRing() || area->rings[i].nodes.size()<3) {
         continue;
       }
 
@@ -1380,8 +1381,7 @@ namespace osmscout {
         AreaData a;
         double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
-        ring.GetBoundingBox(a.boundingBox);
-
+        a.boundingBox=ring.GetBoundingBox();
         a.isOuter = ring.IsOuterRing();
 
         if (!IsVisibleArea(projection,
@@ -1394,7 +1394,7 @@ namespace osmscout {
         // that do not have a type and thus act as a clipping region. If a inner ring has a type,
         // we currently assume that it does not have alpha and paints over its region and clipping is
         // not required.
-        // Since we know that rings a created deep first, we only take into account direct followers
+        // Since we know that rings are created deep first, we only take into account direct followers
         // in the list with ring+1.
         size_t j=i+1;
         while (j<area->rings.size() &&
