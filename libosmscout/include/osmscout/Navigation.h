@@ -97,6 +97,7 @@ namespace osmscout {
           // Stop the search we have a good candidate
           break;
         }
+        nextNode++;
       }
       return found;
     }
@@ -237,6 +238,7 @@ namespace osmscout {
           minDistance = d;
           foundIntersection = intersection;
         }
+        nextNode++;
       }
       locOnRoute = foundIntersection;
         
