@@ -65,17 +65,8 @@ IF %COMPILER%==msvc2015 (
 
   IF %BUILDTOOL%==cmake (
     echo Downloading vcpkg...
-    git clone https://github.com/Microsoft/vcpkg.git
-    cd vcpkg
-    echo ...done
 
-    echo Bootstrapping vcpkg...
-    .\bootstrap-vcpkg.bat
-    echo ...done
-
-    echo System-wide integrating vcpkg...
-    .\vcpkg integrate install
-    echo ...done
+    cd c:\tools\vcpkg
 
     echo Installing zlib...
     .\vcpkg install zlib:x64-windows
@@ -96,8 +87,24 @@ IF %COMPILER%==msvc2015 (
     echo Installing cairo...
     .\vcpkg install cairo:x64-windows
     echo ...done
+
+    echo Installing pango...
+    .\vcpkg install pango:x64-windows
+    echo ...done
+
+    echo Installing qt5-base...
+    .\vcpkg install qt5-base:x64-windows
+    echo ...done
+
+    echo Installing qt5-svg...
+    .\vcpkg install qt5-svg:x64-windows
+    echo ...done
+
+    echo System-wide integrating vcpkg...
+    .\vcpkg integrate install
+    echo ...done
   
-    cd ..
+    cd %APPVEYOR_BUILD_FOLDER%
   )	
   
   IF %BUILDTOOL%==meson (
