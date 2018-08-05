@@ -48,7 +48,7 @@ environment:
 
 init:
   - ps: $env:APPVEYOR_SAVE_CACHE_ON_ERROR="true"
-	
+
 install:
   - set
   - '%APPVEYOR_BUILD_FOLDER%\ci\appveyor\install.bat'
