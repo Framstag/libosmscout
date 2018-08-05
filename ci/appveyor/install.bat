@@ -63,22 +63,43 @@ IF %COMPILER%==msvc2015 (
   @echo on
   echo MSVC2015 build...
 
-  echo Installing wget...
-  cinst wget -x86
-
-  IF %PLATFORM%==x64 (
-    echo Downloading library dependencies...
-    wget http://xmlsoft.org/sources/win32/64bit/zlib-1.2.8-win32-x86_64.7z -O zlib-1.2.8-win32-x86_64.7z
-    wget http://xmlsoft.org/sources/win32/64bit/iconv-1.14-win32-x86_64.7z -O iconv-1.14-win32-x86_64.7z
-    wget http://xmlsoft.org/sources/win32/64bit/libxml2-2.9.3-win32-x86_64.7z -O libxml2-2.9.3-win32-x86_64.7z
-
-    echo Unpacking library dependencies...
-    7z x zlib-1.2.8-win32-x86_64.7z -ozlib -y > nul
-    7z x iconv-1.14-win32-x86_64.7z -oiconv -y > nul
-    7z x libxml2-2.9.3-win32-x86_64.7z -olibxml2 -y > nul
+  IF %BUILDTOOL%==cmake (
+    echo Downloading vcpkg...
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
     echo ...done
-  )
 
+    echo Bootstrapping vcpkg...
+    .\bootstrap-vcpkg.bat
+    echo ...done
+
+    echo System-wide integrating vcpkg...
+    .\vcpkg integrate install
+    echo ...done
+
+    echo Installing zlib...
+    .\vcpkg install zlib:x64-windows
+    echo ...done
+
+    echo Installing libiconv...
+    .\vcpkg install libiconv:x64-windows
+    echo ...done
+
+    echo Installing libxml2...
+    .\vcpkg install libxml2:x64-windows
+    echo ...done
+
+    echo Installing protobuf...
+    .\vcpkg install protobuf:x64-windows
+    echo ...done
+
+    echo Installing cairo...
+    .\vcpkg install cairo:x64-windows
+    echo ...done
+  
+    cd ..
+  )	
+  
   IF %BUILDTOOL%==meson (
     echo Installing meson build tool...
     set "PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%"
