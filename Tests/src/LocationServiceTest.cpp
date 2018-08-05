@@ -3,7 +3,7 @@
 
 #include <osmscout/import/Import.h>
 
-#include <osmscout/PreprocessOLT.h>
+#include <osmscout-test/PreprocessOLT.h>
 
 #include <osmscout/LocationService.h>
 

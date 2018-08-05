@@ -26,9 +26,9 @@
 
 #include <osmscout/system/Compiler.h>
 
-#include <osmscout/TestImportExport.h>
+#include "TestImportExport.h"
 
-#include <osmscout/RegionList.h>
+#include "RegionList.h"
 
 #include <osmscout/util/Geometry.h>
 

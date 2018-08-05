@@ -41,7 +41,7 @@
 
 #include <iostream>
 
-#include <osmscout/olt/Scanner.h>
+#include <osmscout-test/olt/Scanner.h>
 
 namespace osmscout {
 namespace olt {

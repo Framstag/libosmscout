@@ -24,7 +24,7 @@
 #include <memory>
 #include <string>
 
-#include <osmscout/TestImportExport.h>
+#include "TestImportExport.h"
 
 namespace osmscout {
   namespace test {
