@@ -582,7 +582,7 @@ int main(int argc, char* argv[])
 
   argParser.AddOption(osmscout::CmdLineAlternativeFlag([&args](const std::string& value) {
                         if (value=="foot") {
-                          args.vehicle=osmscout::Vehicle::vehicleCar;
+                          args.vehicle=osmscout::Vehicle::vehicleFoot;
                         }
                         else if (value=="bicycle") {
                           args.vehicle=osmscout::Vehicle::vehicleBicycle;
