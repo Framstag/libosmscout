@@ -341,6 +341,12 @@ namespace osmscout {
       }
     }
 
+    // Something is an overlay, if its alpha is <0.8
+    inline bool IsOverlay(const LabelData &labelData)
+    {
+      return labelData.alpha < 0.8;
+    }
+
     void Layout()
     {
       std::vector<ContourLabelType> allSortedContourLabels;
@@ -408,8 +414,8 @@ namespace osmscout {
 
               rectangle.width = std::ceil(element.label->width);
               rectangle.height = std::ceil(element.label->height);
-              // Something is an overlay, if its alpha is <0.8
-              if (element.labelData.alpha < 0.8){
+
+              if (IsOverlay(element.labelData)){
                 canvas = &overlayCanvas;
               }
             }
@@ -505,6 +511,7 @@ namespace osmscout {
     {
       // draw symbols and icons first, then standard labels and then overlays
       std::vector<const typename LabelInstanceType::Element*> textElements;
+      std::vector<const typename LabelInstanceType::Element*> overlayElements;
 
       for (const LabelInstanceType &inst : Labels()){
 
@@ -534,13 +541,24 @@ namespace osmscout {
 
           } else {
             // postpone text elements
-            textElements.push_back(&el);
+            if (IsOverlay(el.labelData)){
+              overlayElements.push_back(&el);
+            }else {
+              textElements.push_back(&el);
+            }
           }
         }
       }
 
       // draw postponed text elements
       for (const typename LabelInstanceType::Element *el : textElements) {
+
+        p->DrawLabel(projection, parameter,
+                     DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
+                     el->labelData, el->label->label);
+      }
+
+      for (const typename LabelInstanceType::Element *el : overlayElements) {
 
         p->DrawLabel(projection, parameter,
                      DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
