@@ -10,18 +10,27 @@ FIND_PATH(Direct2D_INCLUDE_DIRS d2d1.h PATHS
     "$ENV{DXSDK_DIR}/Include"
     "$ENV{PROGRAMFILES}/Microsoft DirectX SDK*/Include"
     "$ENV{PROGRAMFILES}/Microsoft SDKs/Windows/*/Include"
-	"C:/Program Files (x86)/Windows Kits/10/include/10.0.14393.0/um"
-	"C:/Program Files/Windows Kits/10/include/10.0.14393.0/um"
-	"C:/Program Files (x86)/Windows Kits/10/include/10.0.10586.0/um"
-	"C:/Program Files/Windows Kits/10/include/10.0.10586.0/um"
+	"C:/Program Files (x86)/Windows Kits/10/include"
+	"C:/Program Files/Windows Kits/10/include"
 )
 
 GET_FILENAME_COMPONENT(DirectX_ROOT_DIR "${DirectX_INCLUDE_DIRS}/.." ABSOLUTE)
 
 IF (CMAKE_CL_64)
-    SET(Direct2D_LIBRARY_PATHS "${DirectX_ROOT_DIR}/Lib/x64" "$ENV{DXSDK_DIR}/Lib/x64/" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.14393.0/um/x64/" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.10586.0/um/x64/")
+    SET(Direct2D_LIBRARY_PATHS
+		"${DirectX_ROOT_DIR}/Lib/x64"
+		"$ENV{DXSDK_DIR}/Lib/x64/"
+		# include dir is for example:
+		# C:/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/um
+		"${Direct2D_INCLUDE_DIRS}/../../../Lib/*/um/x64"
+		)
 ELSE ()
-    SET(Direct2D_LIBRARY_PATHS "${DirectX_ROOT_DIR}/Lib/x86" "$ENV{DXSDK_DIR}/Lib/x86/" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.14393.0/um/x86/" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.10586.0/um/x86/" "${DirectX_ROOT_DIR}/Lib")
+    SET(Direct2D_LIBRARY_PATHS
+		"${DirectX_ROOT_DIR}/Lib/x86"
+		"$ENV{DXSDK_DIR}/Lib/x86/"
+		"${Direct2D_INCLUDE_DIRS}/../../../Lib/*/um/x86"
+		"${DirectX_ROOT_DIR}/Lib"
+		)
 ENDIF ()
 
 FIND_LIBRARY(Direct2D_D2D1_LIBRARY d2d1 ${Direct2D_LIBRARY_PATHS} NO_DEFAULT_PATH)
