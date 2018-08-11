@@ -26,7 +26,7 @@
 #endif
 
 namespace osmscout {
-  void Mask::prepare(const IntRectangle &rect)
+  OSMSCOUT_MAP_API void Mask::prepare(const IntRectangle &rect)
   {
     // clear
     for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {

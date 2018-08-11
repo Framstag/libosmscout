@@ -28,7 +28,7 @@
 
 #include <osmscout/StyleConfig.h>
 #include <osmscout/LabelPath.h>
-#include <iostream>
+#include <osmscout/system/Math.h>
 
 // #define DEBUG_LABEL_LAYOUTER
 
@@ -84,7 +84,7 @@ namespace osmscout {
   using IntRectangle = Rectangle<int>;
   using DoubleRectangle = Rectangle<double>;
 
-  class OSMSCOUT_MAP_API PathLabelData
+  class PathLabelData
   {
   public:
     size_t            priority{0}; //!< Priority of the entry
@@ -94,7 +94,7 @@ namespace osmscout {
     double            contourLabelSpace;
   };
 
-  class OSMSCOUT_MAP_API LabelData
+  class LabelData
   {
   public:
     enum Type
@@ -195,7 +195,7 @@ namespace osmscout {
     osmscout::PathTextStyleRef style;    //!< Style for drawing
   };
 
-  class OSMSCOUT_MAP_API Mask
+  class Mask
   {
   public:
     Mask(size_t rowSize) : d(rowSize)
@@ -215,7 +215,7 @@ namespace osmscout {
     Mask &operator=(const Mask &m) = delete;
     Mask &operator=(Mask &&m) = delete;
 
-    void prepare(const IntRectangle &rect);
+	OSMSCOUT_MAP_API void prepare(const IntRectangle &rect);
 
     inline int64_t size() const
     { return d.size(); };
@@ -274,7 +274,7 @@ namespace osmscout {
    *
    */
   template <class NativeGlyph, class NativeLabel, class TextLayouter>
-  class OSMSCOUT_MAP_API LabelLayouter
+  class LabelLayouter
   {
 
   public:
