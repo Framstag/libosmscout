@@ -26,6 +26,9 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
+#include <osmscout/util/String.h>
+
+// #define DEBUG_LABEL_LAYOUTER
 
 namespace osmscout {
 
@@ -34,6 +37,7 @@ namespace osmscout {
   MapPainterSVG::MapPainterSVG(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
                new CoordBuffer()),
+    labelLayouter(this),
     stream(nullptr),
     typeConfig(nullptr)
   {
@@ -85,7 +89,304 @@ namespace osmscout {
 
     return fonts.insert(std::make_pair(fontSize,font)).first->second;
   }
+
+  std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
+                                                                 const MapParameter& parameter,
+                                                                 const std::string& text,
+                                                                 double fontSize,
+                                                                 double objectWidth,
+                                                                 bool enableWrapping,
+                                                                 bool /*contourLabel*/)
+  {
+    auto label = std::make_shared<MapPainterSVG::SvgLabel>(
+        std::shared_ptr<PangoLayout>(pango_layout_new(pangoContext), g_object_unref));
+
+    PangoFontDescription* font=GetFont(projection, parameter, fontSize);
+
+    pango_layout_set_font_description(label->label.get(),font);
+
+    int proposedWidth=(int)std::ceil(objectWidth);
+
+    pango_layout_set_text(label->label.get(),
+                          text.c_str(),
+                          (int)text.length());
+
+    // layout 0,0 coordinate will be top-center
+    pango_layout_set_alignment(label->label.get(), PANGO_ALIGN_CENTER);
+
+    if (enableWrapping) {
+      pango_layout_set_wrap(label->label.get(), PANGO_WRAP_WORD);
+    }
+
+    if (proposedWidth > 0) {
+      pango_layout_set_width(label->label.get(), proposedWidth * PANGO_SCALE);
+    }
+
+    PangoRectangle extends;
+
+    pango_layout_get_pixel_extents(label->label.get(),
+                                   nullptr,
+                                   &extends);
+
+    label->text=text;
+    label->fontSize=fontSize;
+    label->width=extends.width;
+    label->height=extends.height;
+
+    return label;
+  }
+
+  DoubleRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
+  {
+    assert(glyph.glyphString->num_glyphs == 1);
+    PangoRectangle extends;
+    pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
+
+    return DoubleRectangle((double)(extends.x) / (double)PANGO_SCALE,
+                           (double)(extends.y) / (double)PANGO_SCALE,
+                           (double)(extends.width) / (double)PANGO_SCALE,
+                           (double)(extends.height) / (double)PANGO_SCALE);
+  }
+
+  template<>
+  std::vector<Glyph<MapPainterSVG::NativeGlyph>> MapPainterSVG::SvgLabel::ToGlyphs() const
+  {
+    PangoRectangle extends;
+
+    pango_layout_get_pixel_extents(label.get(),
+                                   nullptr,
+                                   &extends);
+
+    // label is centered - we have to move its left horizontal offset
+    double horizontalOffset = extends.x * -1.0;
+    std::vector<Glyph<MapPainterSVG::NativeGlyph>> result;
+
+#ifdef DEBUG_LABEL_LAYOUTER
+    std::cout << " = getting glyphs for label: " << text << std::endl;
 #endif
+
+    for (PangoLayoutIter *iter = pango_layout_get_iter(label.get());
+         iter != nullptr;){
+      PangoLayoutRun *run = pango_layout_iter_get_run_readonly(iter);
+      if (run == nullptr) {
+        pango_layout_iter_free(iter);
+        break; // nullptr signalise end of line, we don't expect more lines in contour label
+      }
+      std::wstring wstr = UTF8StringToWString(text.substr(run->item->offset, run->item->length));
+
+      std::shared_ptr<PangoFont> font = std::shared_ptr<PangoFont>(run->item->analysis.font,
+                                                                   g_object_unref);
+      g_object_ref(font.get());
+
+#ifdef DEBUG_LABEL_LAYOUTER
+      std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs, " <<
+                wstr.size() << " length, " <<
+                run->item->num_chars << " chars " <<
+                "(font " << font.get() << "):" << std::endl;
+#endif
+
+      for (int gi=0; gi < run->glyphs->num_glyphs; gi++){
+        result.emplace_back();
+
+        // new run with single glyph
+        std::shared_ptr<PangoGlyphString> singleGlyphStr = std::shared_ptr<PangoGlyphString>(pango_glyph_string_new(), pango_glyph_string_free);
+
+        pango_glyph_string_set_size(singleGlyphStr.get(), 1);
+
+        // make glyph copy
+        singleGlyphStr.get()->glyphs[0] = run->glyphs->glyphs[gi];
+        PangoGlyphInfo &glyphInfo = singleGlyphStr.get()->glyphs[0];
+
+        result.back().glyph.font = font;
+
+        result.back().position.SetX(((double)glyphInfo.geometry.x_offset/(double)PANGO_SCALE) + horizontalOffset);
+        result.back().position.SetY((double)glyphInfo.geometry.y_offset/(double)PANGO_SCALE);
+
+        glyphInfo.geometry.x_offset = 0;
+        glyphInfo.geometry.y_offset = 0;
+        // TODO: it is correct to take x_offset into account? See pango_glyph_string_extents_range implementation...
+        horizontalOffset += ((double)(glyphInfo.geometry.width + glyphInfo.geometry.x_offset)/(double)PANGO_SCALE);
+
+        result.back().glyph.glyphString = singleGlyphStr;
+        result.back().glyph.character = WStringToUTF8String(wstr.substr(gi, 1));
+
+#ifdef DEBUG_LABEL_LAYOUTER
+        std::cout << "     " << glyphInfo.glyph << " \"" << result.back().glyph.character << "\": " <<
+            result.back().position.GetX() << " x " << result.back().position.GetY() << std::endl;
+#endif
+      }
+
+      if (!pango_layout_iter_next_run(iter)){
+        pango_layout_iter_free(iter);
+        iter = nullptr;
+      }
+    }
+
+    return result;
+  }
+
+#else
+
+  template<>
+  std::vector<Glyph<MapPainterSVG::NativeGlyph>> MapPainterSVG::SvgLabel::ToGlyphs() const
+  {
+    std::vector<Glyph<MapPainterSVG::NativeGlyph>> result;
+    double horizontalOffset = 0;
+    for (size_t ch = 0; ch < label.length(); ch++){
+      result.emplace_back();
+
+      result.back().glyph.character = WStringToUTF8String(label.substr(ch,1));
+
+      result.back().position.SetX(horizontalOffset);
+      result.back().position.SetY(0);
+
+      horizontalOffset += (double)(height * MapPainterSVG::AverageCharacterWidth);
+    }
+    return result;
+  }
+
+  DoubleRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
+  {
+    return DoubleRectangle(0,
+                           glyph.height * -1,
+                           glyph.width,
+                           glyph.height);
+  }
+
+  std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
+                                                                 const MapParameter& parameter,
+                                                                 const std::string& text,
+                                                                 double fontSize,
+                                                                 double /*objectWidth*/,
+                                                                 bool /*enableWrapping*/,
+                                                                 bool /*contourLabel*/)
+  {
+    auto label = std::make_shared<MapPainterSVG::SvgLabel>(UTF8StringToWString(text));
+
+    label->text=text;
+    label->fontSize=fontSize;
+    label->height=projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());
+    label->width=label->label.length() * label->height * AverageCharacterWidth;
+
+    return label;
+  }
+#endif
+
+  void MapPainterSVG::DrawLabel(const Projection &projection,
+                                const MapParameter &parameter,
+                                const DoubleRectangle &labelRectangle,
+                                const LabelData &label,
+                                const NativeLabel &/*layout*/)
+  {
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
+      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
+
+      // TODO: text x, y coordinate is text baseline, our placement is not precise
+
+      stream << "    <text";
+      stream << " x=\"" << labelRectangle.x << "\"";
+      stream << " y=\"" << labelRectangle.y + projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-family=\"" << parameter.GetFontName() << "\"";
+      stream << " font-size=\"" << projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
+
+      if (label.alpha!=1.0) {
+        stream << " fill-opacity=\"" << label.alpha << "\"";
+      }
+
+      stream << ">";
+      stream << StrEscape(label.text);
+      stream << "</text>" << std::endl;
+    }
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
+      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+
+      // Shield background
+      stream << "    <rect";
+      stream << " x=\"" << labelRectangle.x -2 << "\"";
+      stream << " y=\"" << labelRectangle.y -0 << "\"";
+      stream << " width=\"" << labelRectangle.width +4 << "\"";
+      stream << " height=\"" << labelRectangle.height +1 << "\"";
+      stream << " fill=\"" << GetColorValue(style->GetBgColor()) << "\"";
+      stream << " stroke=\"none\"";
+      stream <<  "/>" << std::endl;
+
+      // Shield inner border
+      stream << "    <rect";
+      stream << " x=\"" << labelRectangle.x +0 << "\"";
+      stream << " y=\"" << labelRectangle.y +2 << "\"";
+      stream << " width=\"" << labelRectangle.width +4-4 << "\"";
+      stream << " height=\"" << labelRectangle.height +1-4 << "\"";
+      stream << " fill=\"none\"";
+      stream << " stroke=\"" << GetColorValue(style->GetBorderColor()) << "\"";
+      stream << " stroke-width=\"1\"";
+      stream <<  "/>" << std::endl;
+
+      // TODO: text x, y coordinate is text baseline, our placement is not precise
+
+      stream << "    <text";
+      stream << " x=\"" << labelRectangle.x << "\"";
+      stream << " y=\"" << labelRectangle.y + projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-family=\"" << parameter.GetFontName() << "\"";
+      stream << " font-size=\"" << projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
+
+      if (label.alpha!=1.0) {
+        stream << " fill-opacity=\"" << label.alpha << "\"";
+      }
+
+      stream << ">";
+      stream << StrEscape(label.text);
+      stream << "</text>" << std::endl;
+    }
+
+  }
+
+  void MapPainterSVG::DrawGlyphs(const Projection &projection,
+                                 const MapParameter &parameter,
+                                 const osmscout::PathTextStyleRef style,
+                                 const std::vector<SvgGlyph> &glyphs)
+  {
+    assert(!glyphs.empty());
+
+    stream << "    <text";
+    stream << " font-family=\"" << parameter.GetFontName() << "\"";
+    stream << " font-size=\"" << projection.ConvertWidthToPixel(style->GetSize()*parameter.GetFontSize()) << "\"";
+    stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\">";
+    stream << std::endl;
+
+    for (auto const &glyph:glyphs) {
+      if (glyph.glyph.character.empty() ||
+          (glyph.glyph.character.length()==1 &&
+           (glyph.glyph.character==" " || glyph.glyph.character=="\t" || glyph.glyph.character==" "))) {
+        continue;
+      }
+
+      stream << "        <tspan";
+      stream << " x=\"" << glyph.position.GetX() << "\"";
+      stream << " y=\"" << glyph.position.GetY() << "\"";
+      stream << " rotate=\"" << RadToDeg(glyph.angle) << "\"";
+      stream << ">" << StrEscape(glyph.glyph.character) << "</tspan>";
+      stream << std::endl;
+    }
+
+    stream << "    </text>" << std::endl;
+  }
+
+  std::string MapPainterSVG::StrEscape(const std::string &str) const
+  {
+    std::string buffer;
+    buffer.reserve(str.size());
+    for(size_t pos = 0; pos != str.size(); ++pos) {
+      switch(str[pos]) {
+        case '&':  buffer.append("&amp;");      break;
+        case '<':  buffer.append("&lt;");       break;
+        case '>':  buffer.append("&gt;");       break;
+        default:   buffer.append(&str[pos], 1); break;
+      }
+    }
+    return buffer;
+  }
 
   std::string MapPainterSVG::GetColorValue(const Color& color)
   {
@@ -249,11 +550,17 @@ namespace osmscout {
   }
 
   void MapPainterSVG::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                    const Projection& /*projection*/,
-                                    const MapParameter& /*parameter*/,
+                                    const Projection& projection,
+                                    const MapParameter& parameter,
                                     const MapData& /*data*/)
   {
     stream << "  <g id=\"map\">" << std::endl;
+
+    DoubleRectangle viewport(0,0,
+                             projection.GetWidth(), projection.GetHeight());
+
+    labelLayouter.SetViewport(viewport);
+    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
   }
 
   void MapPainterSVG::AfterDrawing(const StyleConfig& /*styleConfig*/,
@@ -274,8 +581,8 @@ namespace osmscout {
   }
 
   double MapPainterSVG::GetFontHeight(const Projection& projection,
-                                    const MapParameter& parameter,
-                                    double fontSize)
+                                      const MapParameter& parameter,
+                                      double fontSize)
   {
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
     PangoFontDescription *font;
@@ -286,144 +593,8 @@ namespace osmscout {
 
     return pango_font_description_get_size(font)/PANGO_SCALE;
 #else
-      unused(projection);
-      unused(parameter);
-      unused(fontSize);
-
-      return 0.0;
+    return projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());;
 #endif
-  }
-
-  MapPainter::TextDimension MapPainterSVG::GetTextDimension(const Projection& projection,
-                                                            const MapParameter& parameter,
-                                                            double /*objectWidth*/,
-                                                            double fontSize,
-                                                            const std::string& text)
-  {
-#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-    PangoFontDescription *font;
-    PangoLayout          *layout=pango_layout_new(pangoContext);
-    PangoRectangle       extends;
-
-    font=GetFont(projection,
-                 parameter,
-                 fontSize);
-
-    pango_layout_set_font_description(layout,font);
-    pango_layout_set_text(layout,text.c_str(),text.length());
-
-    pango_layout_get_pixel_extents(layout,&extends,NULL);
-
-    g_object_unref(layout);
-
-    return TextDimension(extends.x,
-                         extends.y,
-                         extends.width,
-                         pango_font_description_get_size(font)/PANGO_SCALE);
-#else
-    unused(projection);
-    unused(parameter);
-    unused(fontSize);
-    unused(text);
-
-    return TextDimension();
-#endif
-  }
-
-  void MapPainterSVG::DrawLabel(const Projection& projection,
-                                const MapParameter& parameter,
-                                const LabelData& label)
-  {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
-      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
-  #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-      /*
-      PangoFontDescription* font=GetFont(projection,
-                                         parameter,
-                                         label.fontSize);
-      */
-  #endif
-
-      // TODO: This is not the exact placement, we cannot just move vertical by fontSize, but we must move the actual
-      // text height. For this we need the text bounding box in LabelData.
-
-      stream << "    <text";
-      stream << " x=\"" << label.x << "\"";
-      stream << " y=\"" << label.y+projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
-      stream << " font-family=\"" << parameter.GetFontName() << "\"";
-      stream << " font-size=\"" << projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
-      stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
-
-      if (label.alpha!=1.0) {
-        stream << " fill-opacity=\"" << label.alpha << "\"";
-      }
-
-      stream << ">";
-      stream << label.text;
-      stream << "</text>" << std::endl;
-
-      /*
-      stream << "<rect x=\"" << label.bx1 << "\"" << " y=\"" << label.by1 << "\"" <<" width=\"" << label.bx2-label.bx1 << "\"" << " height=\"" << label.by2-label.by1 << "\""
-              << " fill=\"none\" stroke=\"blue\"/>" << std::endl;*/
-    }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
-      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
-#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
-     /*
-     PangoFontDescription* font=GetFont(projection,
-                                        parameter,
-                                        label.fontSize);
-     */
-#endif
-     // Shield background
-     stream << "    <rect";
-     stream << " x=\"" << label.bx1 << "\"";
-     stream << " y=\"" << label.by1 << "\"";
-     stream << " width=\"" << label.bx2-label.bx1+1 << "\"";
-     stream << " height=\"" << label.by2-label.by1+1 << "\"";
-     stream << " fill=\"" << GetColorValue(style->GetBgColor()) << "\"";
-     stream << " stroke=\"none\"";
-     stream <<  "/>" << std::endl;
-
-     // Shield inner border
-     stream << "    <rect";
-     stream << " x=\"" << label.bx1+2 << "\"";
-     stream << " y=\"" << label.by1+2 << "\"";
-     stream << " width=\"" << label.bx2-label.bx1+1-4 << "\"";
-     stream << " height=\"" << label.by2-label.by1+1-4 << "\"";
-     stream << " fill=\"none\"";
-     stream << " stroke=\"" << GetColorValue(style->GetBorderColor()) << "\"";
-     stream << " stroke-width=\"1\"";
-     stream <<  "/>" << std::endl;
-
-      // TODO: This is not the exact placement, we cannot just move vertical by fontSize, but we must move the actual
-      // text height. For this we need the text bounding box in LabelData.
-
-      stream << "    <text";
-      stream << " x=\"" << label.x << "\"";
-      stream << " y=\"" << label.y+projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
-      stream << " font-family=\"" << parameter.GetFontName() << "\"";
-      stream << " font-size=\"" << projection.ConvertWidthToPixel(label.fontSize*parameter.GetFontSize()) << "\"";
-      stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
-
-      if (label.alpha!=1.0) {
-        stream << " fill-opacity=\"" << label.alpha << "\"";
-      }
-
-      stream << ">";
-      stream << label.text;
-      stream << "</text>" << std::endl;
-    }
-  }
-
-  void MapPainterSVG::DrawContourLabel(const Projection& /*projection*/,
-                                       const MapParameter& /*parameter*/,
-                                       const PathTextStyle& /*style*/,
-                                       const std::string& /*text*/,
-                                       size_t /*transStart*/, size_t /*transEnd*/,
-                                       ContourLabelHelper& /*helper*/)
-  {
-    // Not implemented
   }
 
   void MapPainterSVG::DrawContourSymbol(const Projection& /*projection*/,
@@ -447,6 +618,39 @@ namespace osmscout {
       }
       stream << " stroke-width=\"" << borderStyle->GetWidth() << "\"";
     }
+  }
+
+  void MapPainterSVG::RegisterRegularLabel(const Projection &projection,
+                                           const MapParameter &parameter,
+                                           const std::vector<LabelData> &labels,
+                                           const Vertex2D &position,
+                                           double objectWidth)
+  {
+    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+  }
+
+  /**
+   * Register contour label
+   */
+  void MapPainterSVG::RegisterContourLabel(const Projection &projection,
+                                           const MapParameter &parameter,
+                                           const PathLabelData &label,
+                                           const LabelPath &labelPath)
+  {
+    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+  }
+
+  void MapPainterSVG::DrawLabels(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const MapData& /*data*/)
+  {
+    labelLayouter.Layout();
+
+    labelLayouter.DrawLabels(projection,
+                             parameter,
+                             this);
+
+    labelLayouter.Reset();
   }
 
   void MapPainterSVG::DrawSymbol(const Projection& projection,

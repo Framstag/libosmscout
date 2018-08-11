@@ -42,22 +42,50 @@
 
 namespace osmscout {
 
-  inline double DegToRad(double deg)
-  {
-    return deg*M_PI/180.0;
-  }
-
-  inline double RadToDeg(double rad)
-  {
-    return rad*180.0/M_PI;
-  }
-
   /**
    * \defgroup Geometry Geometric helper
    *
    * Collection of classes and methods releated to low level geometric
    * stuff.
    */
+
+
+  /**
+   * \ingroup Geometry
+   * @param deg angl ein degrees
+   * @return angle in radians
+   */
+  inline double DegToRad(double deg)
+  {
+    return deg*M_PI/180.0;
+  }
+
+  /**
+   * \ingroup Geometry
+   * @param rad angle in radians
+   * @return angle in degrees
+   */
+  inline double RadToDeg(double rad)
+  {
+    return rad*180.0/M_PI;
+  }
+
+  /**
+   * \ingroup Geometry
+   * compute difference of two angles
+   *
+   * @param a angle in radians in range - M_PI .. + M_PI
+   * @param b angle in radians in range - M_PI .. + M_PI
+   * @return angle in radians in range 0 .. M_PI
+   */
+  inline double AngleDiff(double a, double b)
+  {
+    double diff = std::abs(a - b);
+
+    if (diff > M_PI)
+      return 2 * M_PI - diff;
+    return diff;
+  }
 
   /**
    * \ingroup Geometry

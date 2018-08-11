@@ -7,12 +7,12 @@ INCLUDEPATH += include ../libosmscout-map/include ../libosmscout/include
 
 SOURCES += \
     src/osmscout/MapPainterQt.cpp \
-    src/osmscout/SimplifiedPath.cpp
+    src/osmscout/LabelPath.cpp
 
 HEADERS += \
     include/osmscout/MapPainterQt.h \
     include/osmscout/MapQtFeatures.h \
-    include/osmscout/SimplifiedPath.h \
+    include/osmscout/LabelPath.h \
     include/osmscout/private/Config.h \
     include/osmscout/private/MapQtImportExport.h
 

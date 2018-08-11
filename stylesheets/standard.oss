@@ -116,6 +116,8 @@ CONST
 
   UINT labelPrioBuilding            = 100;
 
+  UINT labelPrioElevationContour    = 500;
+
   // For debugging :-)
   COLOR red                        = #ff0000;
 
@@ -519,14 +521,14 @@ STYLE
     [MAG suburb-] {
       [TYPE elevation_contour_major] {
         WAY {color: @majorContourColor; displayWidth: 0.150mm; }
-        WAY.TEXT { label: Ele.inMeter; }
+        WAY.TEXT { label: Ele.inMeter; priority: @labelPrioElevationContour; }
       }
     }
 
     [MAG detail-] {
       [TYPE elevation_contour_medium] {
         WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
-        WAY.TEXT { label: Ele.inMeter; }
+        WAY.TEXT { label: Ele.inMeter; priority: @labelPrioElevationContour; }
       }
 
       [TYPE elevation_contour_minor] {

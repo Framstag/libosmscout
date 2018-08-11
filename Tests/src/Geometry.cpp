@@ -176,3 +176,24 @@ TEST_CASE("Target computation from bearing and distance")
   REQUIRE(IsSame(target, osmscout::GeoCoord(lat2, lon2)));
   REQUIRE(IsSame(distance, location1 - osmscout::GeoCoord(lat2, lon2), 1e-6));
 }
+
+TEST_CASE("Angle diff")
+{
+  double step = osmscout::DegToRad(10);
+  for (double a = -M_PI; a < M_PI; a += step) {
+    for (double diff = -M_PI; diff < M_PI - step; diff += step) {
+      double b = a + diff;
+      if (b < -M_PI)
+        b += 2*M_PI;
+      if (b > M_PI)
+        b -= 2*M_PI;
+
+      // std::cout << osmscout::RadToDeg(a) << ", " <<
+      //           osmscout::RadToDeg(b) << "; " <<
+      //           osmscout::RadToDeg(osmscout::AngleDiff(a, b)) << " ?= " <<
+      //           osmscout::RadToDeg(std::abs(diff)) << std::endl;
+
+      REQUIRE(IsSame(osmscout::AngleDiff(a, b), std::abs(diff)));
+    }
+  }
+}

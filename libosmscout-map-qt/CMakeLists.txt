@@ -7,13 +7,11 @@ endif()
 
 set(HEADER_FILES
 	include/osmscout/MapQtImportExport.h
-    include/osmscout/SimplifiedPath.h
     include/osmscout/MapPainterQt.h
 )
 
 set(SOURCE_FILES
     src/osmscout/MapPainterQt.cpp
-    src/osmscout/SimplifiedPath.cpp
 )
 
 if(IOS)

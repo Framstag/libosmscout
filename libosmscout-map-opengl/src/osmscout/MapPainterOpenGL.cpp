@@ -906,8 +906,6 @@ namespace osmscout {
                                            const osmscout::MapParameter &parameter,
                                            const osmscout::Projection &projection,
                                            const osmscout::StyleConfigRef &styleConfig) {
-    LabelLayouter labels;
-    labels.Initialize(projection, parameter);
 
     osmscout::log.Info() << "Nodes: " << data.nodes.size();
 

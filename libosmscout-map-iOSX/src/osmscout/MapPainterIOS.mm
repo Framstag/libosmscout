@@ -24,6 +24,7 @@
 #include <limits>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/String.h>
 
 #if ! __has_feature(objc_arc)
 #error This file must be compiled with ARC. Either turn on ARC for the project or use -fobjc-arc flag
@@ -32,7 +33,7 @@
 namespace osmscout {
 
     MapPainterIOS::MapPainterIOS(const StyleConfigRef& styleConfig)
-    : MapPainter(styleConfig, new CoordBuffer())
+    : MapPainter(styleConfig, new CoordBuffer()), labelLayouter(this)
     {
 #if TARGET_OS_IPHONE
         contentScale = [[UIScreen mainScreen] scale];
@@ -442,6 +443,7 @@ namespace osmscout {
     /*
      * GetTextDimension()
      */
+/*
     MapPainter::TextDimension MapPainterIOS::GetTextDimension(const Projection& projection,
                                                               const MapParameter& parameter,
                                                               double objectWidth,
@@ -486,22 +488,24 @@ namespace osmscout {
                              rect.size.width,
                              rect.size.height);
     }
-
+    
     double MapPainterIOS::textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        TextDimension dimension=GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text);
+        TextDimension dimension=GetTextDimension(projection,parameter,-1,fontSize,text);
 
         return dimension.width;
     }
-
+    
     double MapPainterIOS::textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        TextDimension dimension=GetTextDimension(projection,parameter,/*objectWidth*/-1,fontSize,text);
+        TextDimension dimension=GetTextDimension(projection,parameter,-1,fontSize,text);
 
         return dimension.height;
     }
+*/
 
     /*
      * DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
      */
+/*
     void MapPainterIOS::DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelData& label){
@@ -602,6 +606,99 @@ namespace osmscout {
             CGContextRestoreGState(cg);
 
         }
+    }
+*/
+    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const NativeGlyph &glyph) const {
+        CFRange range = CFRangeMake(0,1);
+        CGRect glyphRect = CTRunGetImageBounds(glyph.glyph, cg, range);
+        return DoubleRectangle(glyphRect.origin.x,glyphRect.origin.y,glyphRect.size.width,glyphRect.size.height);
+    }
+    
+    template<>
+    std::vector<Glyph<MapPainterIOS::NativeGlyph>> MapPainterIOS::IOSLabel::ToGlyphs() const {
+        std::vector<Glyph<MapPainterIOS::NativeGlyph>> result;
+        return result;
+    }
+
+    void MapPainterIOS::DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
+                    const std::vector<Glyph<NativeGlyph>> &glyphs){
+        
+    }
+    
+    std::shared_ptr<MapPainterIOS::IOSLabel> MapPainterIOS::Layout(const Projection& projection,
+                                                            const MapParameter& parameter,
+                                                            const std::string& text,
+                                                            double fontSize,
+                                                            double objectWidth,
+                                                            bool enableWrapping,
+                                                            bool contourLabel) {
+        
+        MapPainterIOS::NativeLabel label{};
+        label.text = UTF8StringToWString(text);
+        
+        CFAttributedStringRef cfString = (CFAttributedStringRef)CFBridgingRetain([[NSAttributedString alloc] initWithString:@(text.c_str())]);
+        CTLineRef line = CTLineCreateWithAttributedString(cfString);
+        
+        CFArrayRef runArray = CTLineGetGlyphRuns(line);
+        if(CFArrayGetCount(runArray)>0){
+            CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
+            int glyphCount = CTRunGetGlyphCount(run);
+            CGPoint *ptBuffer = (CGPoint *)calloc(glyphCount, sizeof(CGPoint));
+            CTRunGetPositions(run, CFRangeMake(0, 0), ptBuffer);
+            int index = 0;
+            for (wchar_t i : label.text) {
+                CFRange range = CFRangeMake(index, 1);
+                CGRect glyphRect = CTRunGetImageBounds(run, cg, range);
+                index++;
+            }
+            free(ptBuffer);
+        }
+        
+        std::shared_ptr<MapPainterIOS::IOSLabel> result = std::make_shared<MapPainterIOS::IOSLabel>();
+        return result;
+    }
+    
+    void MapPainterIOS::DrawLabel(const Projection& projection,
+                   const MapParameter& parameter,
+                   const DoubleRectangle& labelRectangle,
+                   const LabelData& label,
+                   const NativeLabel& layout) {
+        
+    }
+    
+    void MapPainterIOS::BeforeDrawing(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                       const MapData& data){
+        labelLayouter.SetViewport(DoubleRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
+        labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+    }
+    
+    void MapPainterIOS::RegisterRegularLabel(const Projection &projection,
+                                             const MapParameter &parameter,
+                                             const std::vector<LabelData> &labels,
+                                             const Vertex2D &position,
+                                             double objectWidth){
+        labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    }
+    
+    void MapPainterIOS::RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const PathLabelData &label,
+                                      const LabelPath &labelPath){
+        labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+    }
+    
+    void MapPainterIOS::DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) {
+        labelLayouter.Layout();
+        labelLayouter.DrawLabels(projection,
+                                 parameter,
+                                 this);
+        labelLayouter.Reset();
     }
 
     double MapPainterIOS::pathLength(size_t transStart, size_t transEnd){
@@ -729,12 +826,13 @@ namespace osmscout {
      *                  const std::string& text,
      *                  size_t transStart, size_t transEnd)
      */
+/*
     void MapPainterIOS::DrawContourLabel(const Projection& projection,
                                          const MapParameter& parameter,
                                          const PathTextStyle& style,
                                          const std::string& text,
                                          size_t transStart, size_t transEnd,
-                                         ContourLabelHelper& /*helper*/){
+                                         ContourLabelHelper& ){
         Font *font = GetFont(projection, parameter, style.GetSize());
         Vertex2D charOrigin;
         FollowPathHandle followPathHnd;
@@ -779,7 +877,7 @@ namespace osmscout {
 
                 NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
 
-                dimension=GetTextDimension(projection, parameter,/*objectWidth*/-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding]);
+                dimension=GetTextDimension(projection, parameter,-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding]);
                 x1 = charOrigin.GetX();
                 y1 = charOrigin.GetY();
                 if(!followPath(followPathHnd,dimension.width, charOrigin)){
@@ -826,7 +924,8 @@ namespace osmscout {
         delete[] slopes;
         CGContextRestoreGState(cg);
     }
-
+*/
+    
     /*
      *
      * DrawIcon(const IconStyle* style,
@@ -1069,7 +1168,6 @@ namespace osmscout {
             free(dashes); dashes = NULL;
             CGContextSetLineCap(cg, kCGLineCapButt);
         }
-
     }
 
 

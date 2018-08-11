@@ -28,54 +28,56 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
+#include <osmscout/util/String.h>
+#include <cairo.h>
 
 namespace osmscout {
 
   /* Returns Euclidean distance between two points */
   static double CalculatePointDistance(cairo_path_data_t *a, cairo_path_data_t *b)
   {
-    double dx=b->point.x-a->point.x;
-    double dy=b->point.y-a->point.y;
+    double dx = b->point.x - a->point.x;
+    double dy = b->point.y - a->point.y;
 
-    return sqrt(dx*dx+dy*dy);
+    return sqrt(dx * dx + dy * dy);
   }
 
   /**
    * Calculate an array of double for the path, that contains the length of each path segment
    */
-  static double* CalculatePathSegmentLengths(cairo_path_t *path)
+  static double *CalculatePathSegmentLengths(cairo_path_t *path)
   {
-    cairo_path_data_t *startPoint=nullptr;
-    cairo_path_data_t *currentPoint=nullptr;
-    double            *parametrization;
+    cairo_path_data_t *startPoint = nullptr;
+    cairo_path_data_t *currentPoint = nullptr;
+    double *parametrization;
 
-    parametrization=new double[path->num_data];
+    parametrization = new double[path->num_data];
 
-    for (int i=0; i < path->num_data; i += path->data[i].header.length) {
-      cairo_path_data_t *data=&path->data[i];
+    for (int i = 0; i < path->num_data; i += path->data[i].header.length) {
+      cairo_path_data_t *data = &path->data[i];
 
       parametrization[i] = 0.0;
 
       switch (data->header.type) {
-      case CAIRO_PATH_MOVE_TO:
-        startPoint = &data[1];
-        currentPoint = &data[1];
-        break;
-      case CAIRO_PATH_CLOSE_PATH:
-        // From current point back to the start */
-        parametrization[i] = CalculatePointDistance(currentPoint,startPoint);
-        currentPoint = startPoint;
-        break;
-      case CAIRO_PATH_LINE_TO:
-        parametrization[i] = CalculatePointDistance(currentPoint, &data[1]);
-        currentPoint = &data[1];
-        break;
-      case CAIRO_PATH_CURVE_TO:
-        assert(false);
-        break;
-      default:
-        assert(false);
-        break;
+        case CAIRO_PATH_MOVE_TO:
+          startPoint = &data[1];
+          currentPoint = &data[1];
+          break;
+        case CAIRO_PATH_CLOSE_PATH:
+          // From current point back to the start */
+          parametrization[i] = CalculatePointDistance(currentPoint, startPoint);
+          currentPoint = startPoint;
+          break;
+        case CAIRO_PATH_LINE_TO:
+          parametrization[i] = CalculatePointDistance(currentPoint, &data[1]);
+          currentPoint = &data[1];
+          break;
+        case CAIRO_PATH_CURVE_TO:
+          assert(false);
+          break;
+        default:
+          assert(false);
+          break;
       }
     }
 
@@ -101,44 +103,44 @@ namespace osmscout {
    * the question of "where will I be if then I stop, rotate left for 90
    * degrees and walk straight for a distance of Y".
    */
-  static void PathPointTransformer(double& x,
-                                   double& y,
+  static void PathPointTransformer(double &x,
+                                   double &y,
                                    cairo_path_t *path,
                                    const double *pathSegmentLengths)
   {
-    int               i;
-    double            the_y=y;
-    double            the_x=x;
+    int i;
+    double the_y = y;
+    double the_x = x;
     cairo_path_data_t *data;
-    cairo_path_data_t *startPoint=nullptr;
-    cairo_path_data_t *currentPoint=nullptr;
+    cairo_path_data_t *startPoint = nullptr;
+    cairo_path_data_t *currentPoint = nullptr;
 
     // Find the segment on the line that is "x" away from the start
-    for (i=0;
-         i+path->data[i].header.length < path->num_data &&
+    for (i = 0;
+         i + path->data[i].header.length < path->num_data &&
          (the_x > pathSegmentLengths[i] ||
           path->data[i].header.type == CAIRO_PATH_MOVE_TO);
-         i+=path->data[i].header.length) {
+         i += path->data[i].header.length) {
       data = &path->data[i];
 
       the_x -= pathSegmentLengths[i];
 
       switch (data->header.type) {
-      case CAIRO_PATH_MOVE_TO:
-        currentPoint = &data[1];
-        startPoint = &data[1];
-        break;
-      case CAIRO_PATH_LINE_TO:
-        currentPoint = &data[1];
-        break;
-      case CAIRO_PATH_CURVE_TO:
-        assert(false);
-        return;
-      case CAIRO_PATH_CLOSE_PATH:
-        break;
-      default:
-        assert(false);
-        return;
+        case CAIRO_PATH_MOVE_TO:
+          currentPoint = &data[1];
+          startPoint = &data[1];
+          break;
+        case CAIRO_PATH_LINE_TO:
+          currentPoint = &data[1];
+          break;
+        case CAIRO_PATH_CURVE_TO:
+          assert(false);
+          return;
+        case CAIRO_PATH_CLOSE_PATH:
+          break;
+        default:
+          assert(false);
+          return;
       }
     }
 
@@ -146,10 +148,9 @@ namespace osmscout {
 
     switch (data->header.type) {
 
-    case CAIRO_PATH_MOVE_TO:
-      break;
-    case CAIRO_PATH_CLOSE_PATH:
-      {
+      case CAIRO_PATH_MOVE_TO:
+        break;
+      case CAIRO_PATH_CLOSE_PATH: {
         // Relative offset in the current segment ([0..1])
         double ratio = the_x / pathSegmentLengths[i];
         // Line polynomial
@@ -165,9 +166,8 @@ namespace osmscout {
         x += -dy * ratio;
         y += dx * ratio;
       }
-      break;
-    case CAIRO_PATH_LINE_TO:
-      {
+        break;
+      case CAIRO_PATH_LINE_TO: {
         // Relative offset in the current segment ([0..1])
         double ratio = the_x / pathSegmentLengths[i];
         // Line polynomial
@@ -183,13 +183,13 @@ namespace osmscout {
         x += -dy * ratio;
         y += dx * ratio;
       }
-      break;
-    case CAIRO_PATH_CURVE_TO:
-      assert(false);
-      break;
-    default:
-      assert(false);
-      break;
+        break;
+      case CAIRO_PATH_CURVE_TO:
+        assert(false);
+        break;
+      default:
+        assert(false);
+        break;
     }
   }
 
@@ -203,36 +203,36 @@ namespace osmscout {
                                     double xOffset,
                                     double yOffset)
   {
-    for (int i=0; i<srcPath->num_data; i+=srcPath->data[i].header.length) {
-      cairo_path_data_t *data=&srcPath->data[i];
+    for (int i = 0; i < srcPath->num_data; i += srcPath->data[i].header.length) {
+      cairo_path_data_t *data = &srcPath->data[i];
 
       switch (data->header.type) {
-      case CAIRO_PATH_CURVE_TO:
-        data[1].point.x+=xOffset;
-        data[1].point.y+=yOffset;
-        data[2].point.x+=xOffset;
-        data[2].point.y+=yOffset;
-        data[3].point.x+=xOffset;
-        data[3].point.y+=yOffset;
-        PathPointTransformer(data[1].point.x, data[1].point.y,dstPath,pathSegmentLengths);
-        PathPointTransformer(data[2].point.x, data[2].point.y,dstPath,pathSegmentLengths);
-        PathPointTransformer(data[3].point.x, data[3].point.y,dstPath,pathSegmentLengths);
-        break;
-      case CAIRO_PATH_MOVE_TO:
-        data[1].point.x+=xOffset;
-        data[1].point.y+=yOffset;
-        PathPointTransformer(data[1].point.x, data[1].point.y,dstPath,pathSegmentLengths);
-        break;
-      case CAIRO_PATH_LINE_TO:
-        data[1].point.x+=xOffset;
-        data[1].point.y+=yOffset;
-        PathPointTransformer(data[1].point.x, data[1].point.y,dstPath,pathSegmentLengths);
-        break;
-      case CAIRO_PATH_CLOSE_PATH:
-        break;
-      default:
-        assert(false);
-        break;
+        case CAIRO_PATH_CURVE_TO:
+          data[1].point.x += xOffset;
+          data[1].point.y += yOffset;
+          data[2].point.x += xOffset;
+          data[2].point.y += yOffset;
+          data[3].point.x += xOffset;
+          data[3].point.y += yOffset;
+          PathPointTransformer(data[1].point.x, data[1].point.y, dstPath, pathSegmentLengths);
+          PathPointTransformer(data[2].point.x, data[2].point.y, dstPath, pathSegmentLengths);
+          PathPointTransformer(data[3].point.x, data[3].point.y, dstPath, pathSegmentLengths);
+          break;
+        case CAIRO_PATH_MOVE_TO:
+          data[1].point.x += xOffset;
+          data[1].point.y += yOffset;
+          PathPointTransformer(data[1].point.x, data[1].point.y, dstPath, pathSegmentLengths);
+          break;
+        case CAIRO_PATH_LINE_TO:
+          data[1].point.x += xOffset;
+          data[1].point.y += yOffset;
+          PathPointTransformer(data[1].point.x, data[1].point.y, dstPath, pathSegmentLengths);
+          break;
+        case CAIRO_PATH_CLOSE_PATH:
+          break;
+        default:
+          assert(false);
+          break;
       }
     }
   }
@@ -245,7 +245,7 @@ namespace osmscout {
                             double xOffset,
                             double yOffset)
   {
-    double *segmentLengths=CalculatePathSegmentLengths(dstPath);
+    double *segmentLengths = CalculatePathSegmentLengths(dstPath);
 
     // Center text on path
     TransformPathOntoPath(srcPath,
@@ -255,95 +255,41 @@ namespace osmscout {
                           yOffset);
 
     cairo_new_path(draw);
-    cairo_append_path(draw,srcPath);
+    cairo_append_path(draw, srcPath);
 
-    delete [] segmentLengths;
+    delete[] segmentLengths;
   }
 
-
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-  static void DrawContourLabelPangoCairo(cairo_t *draw,
-                                         cairo_path_t *path,
-                                         double offset,
-                                         PangoLayout *layout,
-                                         const PangoRectangle& extends)
-  {
-    // Create a new path for the text we should draw along the curve
-    cairo_new_path(draw);
-    pango_cairo_layout_path(draw,layout);
-
-    cairo_path_t *textPath=cairo_copy_path(draw);
-
-    // Now transform the text path so that it maps to the contour of the line
-    MapPathOnPath(draw,
-                  textPath,
-                  path,
-                  offset,
-                  -0.5*extends.height);
-
-    cairo_path_destroy(textPath);
-
-    // Draw the text path
-    cairo_fill(draw);
-  }
-
-#else
-  static void DrawContourLabelCairo(cairo_t *draw,
-                                    cairo_path_t *path,
-                                    double offset,
-                                    double textHeight,
-                                    const std::string& text)
-  {
-    // Create a new path for the text we should draw along the curve
-    cairo_new_path(draw);
-    cairo_move_to(draw,0,0);
-    cairo_text_path(draw,text.c_str());
-
-    cairo_path_t *textPath=cairo_copy_path(draw);
-
-    // Now transform the text path so that it maps to the contour of the line
-    MapPathOnPath(draw,
-                  textPath,
-                  path,
-                  offset,
-                  0.5*textHeight);
-
-    cairo_path_destroy(textPath);
-
-    // Draw the text path
-    cairo_fill(draw);
-  }
-#endif
-
-  MapPainterCairo::MapPainterCairo(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig,
-               new CoordBuffer())
+  MapPainterCairo::MapPainterCairo(const StyleConfigRef &styleConfig)
+      : MapPainter(styleConfig,
+                   new CoordBuffer()),
+        labelLayouter(this)
   {
     // no code
   }
 
   MapPainterCairo::~MapPainterCairo()
   {
-    for (const auto& image : images) {
-      if (image!=nullptr) {
+    for (const auto &image : images) {
+      if (image != nullptr) {
         cairo_surface_destroy(image);
       }
     }
 
-    for (const auto& pattern : patterns) {
-      if (pattern!=nullptr) {
+    for (const auto &pattern : patterns) {
+      if (pattern != nullptr) {
         cairo_pattern_destroy(pattern);
       }
     }
 
-    for (const auto& image : patternImages) {
-      if (image!=nullptr) {
+    for (const auto &image : patternImages) {
+      if (image != nullptr) {
         cairo_surface_destroy(image);
       }
     }
 
-    for (const auto& entry : fonts) {
-      if (entry.second!=NULL) {
+    for (const auto &entry : fonts) {
+      if (entry.second != NULL) {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
         pango_font_description_free(entry.second);
 #else
@@ -353,27 +299,27 @@ namespace osmscout {
     }
   }
 
-  MapPainterCairo::Font MapPainterCairo::GetFont(const Projection& projection,
-                                                 const MapParameter& parameter,
-                                                 double fontSize)
+  MapPainterCairo::CairoFont MapPainterCairo::GetFont(const Projection &projection,
+                                                      const MapParameter &parameter,
+                                                      double fontSize)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     FontMap::const_iterator f;
 
-    fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+    fontSize = fontSize * projection.ConvertWidthToPixel(parameter.GetFontSize());
 
-    f=fonts.find(fontSize);
+    f = fonts.find(fontSize);
 
-    if (f!=fonts.end()) {
+    if (f != fonts.end()) {
       return f->second;
     }
 
-    PangoFontDescription* font=pango_font_description_new();
+    PangoFontDescription *font = pango_font_description_new();
 
-    pango_font_description_set_family(font,parameter.GetFontName().c_str());
-    pango_font_description_set_absolute_size(font,fontSize*PANGO_SCALE);
+    pango_font_description_set_family(font, parameter.GetFontName().c_str());
+    pango_font_description_set_absolute_size(font, fontSize * PANGO_SCALE);
 
-    return fonts.insert(std::make_pair(fontSize,font)).first->second;
+    return fonts.insert(std::make_pair(fontSize, font)).first->second;
 #else
     FontMap::const_iterator f;
 
@@ -414,13 +360,13 @@ namespace osmscout {
 #endif
   }
 
-  void MapPainterCairo::SetLineAttributes(const Color& color,
+  void MapPainterCairo::SetLineAttributes(const Color &color,
                                           double width,
-                                          const std::vector<double>& dash)
+                                          const std::vector<double> &dash)
   {
     double dashArray[10];
 
-    assert(dash.size()<=10);
+    assert(dash.size() <= 10);
 
     cairo_set_source_rgba(draw,
                           color.GetR(),
@@ -428,108 +374,105 @@ namespace osmscout {
                           color.GetB(),
                           color.GetA());
 
-    cairo_set_line_width(draw,width);
+    cairo_set_line_width(draw, width);
 
     if (dash.empty()) {
-      cairo_set_dash(draw,nullptr,0,0);
-    }
-    else {
-      for (size_t i=0; i<dash.size(); i++) {
-        dashArray[i]=dash[i]*width;
+      cairo_set_dash(draw, nullptr, 0, 0);
+    } else {
+      for (size_t i = 0; i < dash.size(); i++) {
+        dashArray[i] = dash[i] * width;
       }
-      cairo_set_dash(draw,dashArray,dash.size(),0);
+      cairo_set_dash(draw, dashArray, dash.size(), 0);
     }
   }
 
-  void MapPainterCairo::DrawFillStyle(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const FillStyleRef& fill,
-                                      const BorderStyleRef& border)
+  void MapPainterCairo::DrawFillStyle(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const FillStyleRef &fill,
+                                      const BorderStyleRef &border)
   {
-    bool hasFill=false;
-    bool hasBorder=false;
+    bool hasFill = false;
+    bool hasBorder = false;
 
     if (fill) {
       if (fill->HasPattern() &&
-          projection.GetMagnification()>=fill->GetPatternMinMag() &&
-          HasPattern(parameter,*fill)) {
-        size_t idx=fill->GetPatternId()-1;
+          projection.GetMagnification() >= fill->GetPatternMinMag() &&
+          HasPattern(parameter, *fill)) {
+        size_t idx = fill->GetPatternId() - 1;
 
-        assert(idx<patterns.size());
-        assert(patterns[idx]!=nullptr);
+        assert(idx < patterns.size());
+        assert(patterns[idx] != nullptr);
 
-        cairo_set_source(draw,patterns[idx]);
-        hasFill=true;
-      }
-      else if (fill->GetFillColor().IsVisible()) {
-        Color color=fill->GetFillColor();
+        cairo_set_source(draw, patterns[idx]);
+        hasFill = true;
+      } else if (fill->GetFillColor().IsVisible()) {
+        Color color = fill->GetFillColor();
         cairo_set_source_rgba(draw,
                               color.GetR(),
                               color.GetG(),
                               color.GetB(),
                               color.GetA());
-        hasFill=true;
+        hasFill = true;
       }
     }
 
     if (border) {
-      hasBorder=border->GetWidth()>0 &&
-                border->GetColor().IsVisible() &&
-                border->GetWidth()>=minimumLineWidth;
+      hasBorder = border->GetWidth() > 0 &&
+                  border->GetColor().IsVisible() &&
+                  border->GetWidth() >= minimumLineWidth;
     }
 
     if (hasFill && hasBorder) {
       cairo_fill_preserve(draw);
-    }
-    else if (hasFill) {
+    } else if (hasFill) {
       cairo_fill(draw);
     }
 
     if (hasBorder) {
-      double borderWidth=projection.ConvertWidthToPixel(border->GetWidth());
+      double borderWidth = projection.ConvertWidthToPixel(border->GetWidth());
 
-      if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+      if (borderWidth >= parameter.GetLineMinWidthPixel()) {
         SetLineAttributes(border->GetColor(),
                           borderWidth,
                           border->GetDash());
 
-        cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+        cairo_set_line_cap(draw, CAIRO_LINE_CAP_BUTT);
 
         cairo_stroke(draw);
       }
     }
   }
 
-  bool MapPainterCairo::HasIcon(const StyleConfig& /*styleConfig*/,
-                                const MapParameter& parameter,
-                                IconStyle& style)
+  bool MapPainterCairo::HasIcon(const StyleConfig & /*styleConfig*/,
+                                const MapParameter &parameter,
+                                IconStyle &style)
   {
     // Already loaded with error
-    if (style.GetIconId()==0) {
+    if (style.GetIconId() == 0) {
       return false;
     }
 
-    size_t idx=style.GetIconId()-1;
+    size_t idx = style.GetIconId() - 1;
 
     // Already cached?
-    if (idx<images.size() &&
-        images[idx]!=nullptr) {
+    if (idx < images.size() &&
+        images[idx] != nullptr) {
       return true;
     }
 
-    for (std::list<std::string>::const_iterator path=parameter.GetIconPaths().begin();
-         path!=parameter.GetIconPaths().end();
+    for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
+         path != parameter.GetIconPaths().end();
          ++path) {
-      std::string filename=*path+style.GetIconName()+".png";
+      std::string filename = *path + style.GetIconName() + ".png";
 
-      cairo_surface_t *image=osmscout::LoadPNG(filename);
+      cairo_surface_t *image = osmscout::LoadPNG(filename);
 
-      if (image!=nullptr) {
-        if (idx>=images.size()) {
-          images.resize(idx+1,nullptr);
+      if (image != nullptr) {
+        if (idx >= images.size()) {
+          images.resize(idx + 1, nullptr);
         }
 
-        images[idx]=image;
+        images[idx] = image;
 
         std::cout << "Loaded image '" << filename << "'" << std::endl;
 
@@ -543,49 +486,49 @@ namespace osmscout {
     return false;
   }
 
-  bool MapPainterCairo::HasPattern(const MapParameter& parameter,
-                                   const FillStyle& style)
+  bool MapPainterCairo::HasPattern(const MapParameter &parameter,
+                                   const FillStyle &style)
   {
-    assert(style.HasPattern()) ;
+    assert(style.HasPattern());
 
     // Already loaded with error
-    if (style.GetPatternId()==0) {
+    if (style.GetPatternId() == 0) {
       return false;
     }
 
-    size_t idx=style.GetPatternId()-1;
+    size_t idx = style.GetPatternId() - 1;
 
     // Already cached?
-    if (idx<patterns.size() &&
-        patterns[idx]!=nullptr) {
+    if (idx < patterns.size() &&
+        patterns[idx] != nullptr) {
       return true;
     }
 
-    for (std::list<std::string>::const_iterator path=parameter.GetPatternPaths().begin();
-         path!=parameter.GetPatternPaths().end();
+    for (std::list<std::string>::const_iterator path = parameter.GetPatternPaths().begin();
+         path != parameter.GetPatternPaths().end();
          ++path) {
-      std::string filename=*path+style.GetPatternName()+".png";
+      std::string filename = *path + style.GetPatternName() + ".png";
 
-      cairo_surface_t *image=osmscout::LoadPNG(filename);
+      cairo_surface_t *image = osmscout::LoadPNG(filename);
 
-      if (image!=nullptr) {
-        if (idx>=patternImages.size()) {
-          patternImages.resize(idx+1,nullptr);
+      if (image != nullptr) {
+        if (idx >= patternImages.size()) {
+          patternImages.resize(idx + 1, nullptr);
         }
 
-        patternImages[idx]=image;
+        patternImages[idx] = image;
 
-        if (idx>=patterns.size()) {
-          patterns.resize(idx+1,nullptr);
+        if (idx >= patterns.size()) {
+          patterns.resize(idx + 1, nullptr);
         }
 
-        patterns[idx]=cairo_pattern_create_for_surface(patternImages[idx]);
-        cairo_pattern_set_extend(patterns[idx],CAIRO_EXTEND_REPEAT);
+        patterns[idx] = cairo_pattern_create_for_surface(patternImages[idx]);
+        cairo_pattern_set_extend(patterns[idx], CAIRO_EXTEND_REPEAT);
 
         cairo_matrix_t matrix;
 
-        cairo_matrix_init_scale(&matrix,1,1);
-        cairo_pattern_set_matrix(patterns[idx],&matrix);
+        cairo_matrix_init_scale(&matrix, 1, 1);
+        cairo_pattern_set_matrix(patterns[idx], &matrix);
 
         std::cout << "Loaded pattern image '" << filename << "'" << std::endl;
 
@@ -599,20 +542,20 @@ namespace osmscout {
     return false;
   }
 
-  double MapPainterCairo::GetFontHeight(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      double fontSize)
+  double MapPainterCairo::GetFontHeight(const Projection &projection,
+                                        const MapParameter &parameter,
+                                        double fontSize)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    Font           font;
+    CairoFont font;
 
-    font=GetFont(projection,
-                 parameter,
-                 fontSize);
+    font = GetFont(projection,
+                   parameter,
+                   fontSize);
 
-    return pango_font_description_get_size(font)/PANGO_SCALE;
+    return pango_font_description_get_size(font) / PANGO_SCALE;
 #else
-    Font                 font;
+    CairoFont            font;
     cairo_font_extents_t fontExtents;
 
     font=GetFont(projection,
@@ -625,164 +568,78 @@ namespace osmscout {
 #endif
   }
 
-  MapPainter::TextDimension MapPainterCairo::GetTextDimension(const Projection& projection,
-                                                              const MapParameter& parameter,
-                                                              double objectWidth,
-                                                              double fontSize,
-                                                              const std::string& text)
-  {
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    Font             font=GetFont(projection,
-                                  parameter,
-                                  fontSize);
-    PangoLayout      *layout=pango_cairo_create_layout(draw);
-
-    pango_layout_set_font_description(layout,font);
-
-    PangoContext     *context=pango_layout_get_context(layout);
-    PangoFontMetrics *metrics=pango_context_get_metrics(context,
-                                                        font,
-                                                        pango_context_get_language(context));
-
-    PangoRectangle   extends;
-
-    pango_layout_set_text(layout,
-                          text.c_str(),
-                          (int)text.length());
-    // Do not set an alignment here, since this will set toe X coordinate of
-    // the extends to the center of the text. Since we do "center of" calculation already
-    // in the MapPainter, this will result in broken coordinates.
-    pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
-
-    if (objectWidth>0) {
-      double proposedWidth=GetProposedLabelWidth(parameter,
-                                                 pango_font_metrics_get_approximate_char_width(metrics)/PANGO_SCALE,
-                                                 objectWidth,
-                                                 text.length());
-
-      pango_layout_set_width(layout,
-                             (int)(proposedWidth*PANGO_SCALE));
-    }
-
-    pango_layout_get_pixel_extents(layout,
-                                   &extends,
-                                   nullptr);
-
-    TextDimension dimension;
-
-    if (pango_layout_get_line_count(layout)<=1) {
-      dimension=TextDimension(extends.x,
-                              extends.y,
-                              extends.width,
-                              pango_font_description_get_size(font)/PANGO_SCALE);
-
-    }
-    else {
-      dimension=TextDimension(extends.x,
-                              extends.y,
-                              extends.width,
-                              extends.height);
-    }
-
-    pango_font_metrics_unref(metrics);
-    g_object_unref(layout);
-
-    return dimension;
-#else
-    Font                 font;
-    cairo_text_extents_t textExtents;
-    cairo_font_extents_t fontExtents;
-
-    font=GetFont(projection,
-                 parameter,
-                 fontSize);
-
-    cairo_scaled_font_extents(font,&fontExtents);
-
-    cairo_scaled_font_text_extents(font,
-                                   text.c_str(),
-                                   &textExtents);
-
-    return TextDimension(textExtents.x_bearing,
-                         textExtents.y_bearing,
-                         textExtents.width,
-                         fontExtents.height);
-#endif
-  }
-
-  void MapPainterCairo::DrawContourSymbol(const Projection& projection,
-                                          const MapParameter& parameter,
-                                          const Symbol& symbol,
+  void MapPainterCairo::DrawContourSymbol(const Projection &projection,
+                                          const MapParameter &parameter,
+                                          const Symbol &symbol,
                                           double space,
                                           size_t transStart, size_t transEnd)
   {
-    double lineLength=0;
-    double xo=0;
-    double yo=0;
+    double lineLength = 0;
+    double xo = 0;
+    double yo = 0;
 
     cairo_save(draw);
 
     cairo_new_path(draw);
 
-    for (size_t j=transStart; j<=transEnd; j++) {
-      if (j==transStart) {
+    for (size_t j = transStart; j <= transEnd; j++) {
+      if (j == transStart) {
         cairo_move_to(draw,
                       coordBuffer->buffer[j].GetX(),
                       coordBuffer->buffer[j].GetY());
-      }
-      else {
+      } else {
         cairo_line_to(draw,
                       coordBuffer->buffer[j].GetX(),
                       coordBuffer->buffer[j].GetY());
-        lineLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
-                         pow(coordBuffer->buffer[j].GetY()-yo,2));
+        lineLength += sqrt(pow(coordBuffer->buffer[j].GetX() - xo, 2) +
+                           pow(coordBuffer->buffer[j].GetY() - yo, 2));
       }
 
-      xo=coordBuffer->buffer[j].GetX();
-      yo=coordBuffer->buffer[j].GetY();
+      xo = coordBuffer->buffer[j].GetX();
+      yo = coordBuffer->buffer[j].GetY();
     }
 
-    cairo_path_t *path=cairo_copy_path_flat(draw);
+    cairo_path_t *path = cairo_copy_path_flat(draw);
 
     double minX;
     double minY;
     double maxX;
     double maxY;
 
-    symbol.GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(minX, minY, maxX, maxY);
 
-    double width=projection.ConvertWidthToPixel(maxX-minX);
-    double height=projection.ConvertWidthToPixel(maxY-minY);
+    double width = projection.ConvertWidthToPixel(maxX - minX);
+    double height = projection.ConvertWidthToPixel(maxY - minY);
 
-    for (const auto& primitive : symbol.GetPrimitives()) {
-      FillStyleRef   fillStyle=primitive->GetFillStyle();
-      BorderStyleRef borderStyle=primitive->GetBorderStyle();
+    for (const auto &primitive : symbol.GetPrimitives()) {
+      FillStyleRef fillStyle = primitive->GetFillStyle();
+      BorderStyleRef borderStyle = primitive->GetBorderStyle();
 
-      double offset=space/2.0;
+      double offset = space / 2.0;
 
       cairo_new_path(draw);
 
-      while (offset+width<lineLength) {
+      while (offset + width < lineLength) {
         DrawPrimitivePath(projection,
                           parameter,
                           primitive,
-                          offset+width/2,0,
+                          offset + width / 2, 0,
                           minX,
                           minY,
                           maxX,
                           maxY);
 
-        offset+=width+space;
+        offset += width + space;
       }
 
-      cairo_path_t *patternPath=cairo_copy_path_flat(draw);
+      cairo_path_t *patternPath = cairo_copy_path_flat(draw);
 
       // Now transform the text path so that it maps to the contour of the line
       MapPathOnPath(draw,
                     patternPath,
                     path,
                     0,
-                    height/2);
+                    height / 2);
 
       DrawFillStyle(projection,
                     parameter,
@@ -797,82 +654,343 @@ namespace osmscout {
     cairo_restore(draw);
   }
 
-  void MapPainterCairo::DrawLabel(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const LabelData& label)
+  void MapPainterCairo::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                      const Projection& /*projection*/,
+                                      const MapParameter& parameter,
+                                      const MapData& /*data*/)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
-      const auto* style=dynamic_cast<const TextStyle*>(label.style.get());
-      double           r=style->GetTextColor().GetR();
-      double           g=style->GetTextColor().GetG();
-      double           b=style->GetTextColor().GetB();
-      Font             font=GetFont(projection,
-                                    parameter,
-                                    label.fontSize);
+    DoubleRectangle viewport;
+    double x2, y2;
+    cairo_clip_extents(draw, &viewport.x, &viewport.y, &x2, &y2);
+    viewport.width = x2 - viewport.x;
+    viewport.height = y2 - viewport.y;
+
+    labelLayouter.SetViewport(viewport);
+    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+  }
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-      PangoLayout      *layout=pango_cairo_create_layout(draw);
 
-      pango_layout_set_font_description(layout,font);
+  template<>
+  std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> MapPainterCairo::CairoLabel::ToGlyphs() const
+  {
+    PangoRectangle extends;
 
-      PangoContext     *context=pango_layout_get_context(layout);
-      PangoFontMetrics *metrics=pango_context_get_metrics(context,
-                                                          font,
-                                                          pango_context_get_language(context));
-      int              proposedWidth=(int)std::ceil(label.bx2-label.bx1);
+    pango_layout_get_pixel_extents(label.get(),
+                                   nullptr,
+                                   &extends);
 
-      pango_layout_set_text(layout,
-                            label.text.c_str(),
-                            (int)label.text.length());
-      pango_layout_set_alignment(layout,PANGO_ALIGN_CENTER);
-      pango_layout_set_wrap(layout,PANGO_WRAP_WORD);
+    // label is centered - we have to move its left horizontal offset
+    double horizontalOffset = extends.x * -1.0;
+    std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> result;
 
-      pango_layout_set_width(layout,proposedWidth*PANGO_SCALE);
+#ifdef DEBUG_LABEL_LAYOUTER
+    std::cout << " = getting glyphs for label: " << text << std::endl;
+#endif
 
+    for (PangoLayoutIter *iter = pango_layout_get_iter(label.get());
+         iter != nullptr;){
+      PangoLayoutRun *run = pango_layout_iter_get_run_readonly(iter);
+      if (run == nullptr) {
+        pango_layout_iter_free(iter);
+        break; // nullptr signalise end of line, we don't expect more lines in contour label
+      }
+
+      std::shared_ptr<PangoFont> font = std::shared_ptr<PangoFont>(run->item->analysis.font,
+                                                                   g_object_unref);
+      g_object_ref(font.get());
+
+#ifdef DEBUG_LABEL_LAYOUTER
+      std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs (font " << font.get() << "):" << std::endl;
+#endif
+
+      for (int gi=0; gi < run->glyphs->num_glyphs; gi++){
+        result.emplace_back();
+
+        // new run with single glyph
+        std::shared_ptr<PangoGlyphString> singleGlyphStr = std::shared_ptr<PangoGlyphString>(pango_glyph_string_new(), pango_glyph_string_free);
+
+        pango_glyph_string_set_size(singleGlyphStr.get(), 1);
+
+        // make glyph copy
+        singleGlyphStr.get()->glyphs[0] = run->glyphs->glyphs[gi];
+        PangoGlyphInfo &glyphInfo = singleGlyphStr.get()->glyphs[0];
+
+        result.back().glyph.font = font;
+
+
+        result.back().position.SetX(((double)glyphInfo.geometry.x_offset/(double)PANGO_SCALE) + horizontalOffset);
+        result.back().position.SetY((double)glyphInfo.geometry.y_offset/(double)PANGO_SCALE);
+
+#ifdef DEBUG_LABEL_LAYOUTER
+        std::cout << "     " << glyphInfo.glyph << ": " << result.back().position.GetX() << " x " << result.back().position.GetY() << std::endl;
+#endif
+
+        glyphInfo.geometry.x_offset = 0;
+        glyphInfo.geometry.y_offset = 0;
+        // TODO: it is correct to take x_offset into account? See pango_glyph_string_extents_range implementation...
+        horizontalOffset += ((double)(glyphInfo.geometry.width + glyphInfo.geometry.x_offset)/(double)PANGO_SCALE);
+
+        result.back().glyph.glyphString = singleGlyphStr;
+      }
+
+      if (!pango_layout_iter_next_run(iter)){
+        pango_layout_iter_free(iter);
+        iter = nullptr;
+      }
+    }
+
+    return result;
+  }
+
+  std::shared_ptr<MapPainterCairo::CairoLabel> MapPainterCairo::Layout(const Projection& projection,
+                                                                       const MapParameter& parameter,
+                                                                       const std::string& text,
+                                                                       double fontSize,
+                                                                       double objectWidth,
+                                                                       bool enableWrapping,
+                                                                       bool /*contourLabel*/)
+  {
+    auto label = std::make_shared<MapPainterCairo::CairoLabel>(
+        std::shared_ptr<PangoLayout>(pango_cairo_create_layout(draw), g_object_unref));
+
+    CairoFont font=GetFont(projection,
+                           parameter,
+                           fontSize);
+
+    pango_layout_set_font_description(label->label.get(),font);
+
+    int proposedWidth=(int)std::ceil(objectWidth);
+
+    pango_layout_set_text(label->label.get(),
+                          text.c_str(),
+                          (int)text.length());
+
+    // layout 0,0 coordinate will be top-center
+    pango_layout_set_alignment(label->label.get(), PANGO_ALIGN_CENTER);
+
+    if (enableWrapping) {
+      pango_layout_set_wrap(label->label.get(), PANGO_WRAP_WORD);
+    }
+
+    if (proposedWidth > 0) {
+      pango_layout_set_width(label->label.get(), proposedWidth * PANGO_SCALE);
+    }
+
+    PangoRectangle extends;
+
+    pango_layout_get_pixel_extents(label->label.get(),
+                                   nullptr,
+                                   &extends);
+
+    label->text=text;
+    label->fontSize=fontSize;
+    label->width=extends.width;
+    label->height=extends.height;
+
+    return label;
+  }
+
+  DoubleRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
+  {
+    assert(glyph.glyphString->num_glyphs == 1);
+    PangoRectangle extends;
+    pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
+
+    return DoubleRectangle((double)(extends.x) / (double)PANGO_SCALE,
+                           (double)(extends.y) / (double)PANGO_SCALE,
+                           (double)(extends.width) / (double)PANGO_SCALE,
+                           (double)(extends.height) / (double)PANGO_SCALE);
+  }
+
+  void MapPainterCairo::DrawGlyphs(const Projection &/*projection*/,
+                                   const MapParameter &/*parameter*/,
+                                   const osmscout::PathTextStyleRef style,
+                                   const std::vector<CairoGlyph> &glyphs)
+  {
+    cairo_matrix_t matrix;
+    cairo_get_matrix(draw, &matrix);
+
+    cairo_set_source_rgba(draw,
+                         style->GetTextColor().GetR(),
+                         style->GetTextColor().GetG(),
+                         style->GetTextColor().GetB(),
+                         style->GetTextColor().GetA());
+
+    for (auto const &glyph:glyphs) {
+
+      cairo_set_matrix(draw, &matrix);
+      cairo_translate(draw, glyph.position.GetX(), glyph.position.GetY());
+      cairo_rotate(draw, glyph.angle);
+
+      cairo_move_to(draw, 0, 0);
+      pango_cairo_show_glyph_string(draw,
+                                    glyph.glyph.font.get(),
+                                    glyph.glyph.glyphString.get());
+    }
+
+    cairo_set_matrix(draw, &matrix);
+#ifdef DEBUG_LABEL_LAYOUTER
+    for (auto const &glyph:glyphs) {
+      cairo_set_source_rgba(draw, 1, 0, 0, 1);
+      cairo_arc(draw,
+                glyph.trPosition.GetX(), glyph.trPosition.GetY(),
+                0.5,
+                0,
+                2*M_PI);
+      cairo_fill(draw);
+
+      cairo_set_source_rgba(draw, 0, 0, 1, 1);
+      cairo_set_line_width(draw,0.2);
+      cairo_rectangle(draw,
+                      glyph.trPosition.GetX(), glyph.trPosition.GetY(),
+                      glyph.trWidth, glyph.trHeight);
+      cairo_stroke(draw);
+    }
+#endif
+  }
+
+
+#else
+
+  DoubleRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
+  {
+    return DoubleRectangle(0,
+                           glyph.height * -1,
+                           glyph.width,
+                           glyph.height);
+  }
+
+  template<>
+  std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> MapPainterCairo::CairoLabel::ToGlyphs() const
+  {
+    std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> result;
+
+    double horizontalOffset = 0;
+    for (size_t ch = 0; ch < label.wstr.length(); ch++){
+      result.emplace_back();
+
+      result.back().glyph.character = WStringToUTF8String(label.wstr.substr(ch,1));
+
+      cairo_text_extents_t  textExtents;
+      cairo_scaled_font_text_extents(label.font,
+                                     result.back().glyph.character.c_str(),
+                                     &textExtents);
+
+      result.back().glyph.width = textExtents.width;
+      result.back().glyph.height = label.fontExtents.height;
+
+      result.back().position.SetX(horizontalOffset);
+      result.back().position.SetY(0);
+
+      horizontalOffset += result.back().glyph.width;
+    }
+
+    return result;
+  }
+
+  void MapPainterCairo::DrawGlyphs(const Projection &/*projection*/,
+                                   const MapParameter &/*parameter*/,
+                                   const osmscout::PathTextStyleRef style,
+                                   const std::vector<CairoGlyph> &glyphs)
+  {
+    cairo_matrix_t matrix;
+    cairo_get_matrix(draw, &matrix);
+
+    cairo_set_source_rgba(draw,
+                          style->GetTextColor().GetR(),
+                          style->GetTextColor().GetG(),
+                          style->GetTextColor().GetB(),
+                          style->GetTextColor().GetA());
+
+    for (auto const &glyph:glyphs) {
+
+      cairo_set_matrix(draw, &matrix);
+      cairo_translate(draw, glyph.position.GetX(), glyph.position.GetY());
+      cairo_rotate(draw, glyph.angle);
+
+      cairo_move_to(draw, 0, 0);
+      cairo_show_text(draw,glyph.glyph.character.c_str());
+      cairo_stroke(draw);
+    }
+
+    cairo_set_matrix(draw, &matrix);
+  }
+
+  std::shared_ptr<MapPainterCairo::CairoLabel> MapPainterCairo::Layout(const Projection& projection,
+                                                                       const MapParameter& parameter,
+                                                                       const std::string& text,
+                                                                       double fontSize,
+                                                                       double /*objectWidth*/,
+                                                                       bool /*enableWrapping*/,
+                                                                       bool /*contourLabel*/)
+  {
+    auto label = std::make_shared<MapPainterCairo::CairoLabel>();
+
+    label->label.wstr = UTF8StringToWString(text);
+
+    label->label.font = GetFont(projection, parameter, fontSize);
+
+    cairo_scaled_font_extents(label->label.font,
+                              &(label->label.fontExtents));
+
+    cairo_scaled_font_text_extents(label->label.font,
+                                   text.c_str(),
+                                   &(label->label.textExtents));
+    label->text=text;
+    label->fontSize=fontSize;
+    label->width=label->label.textExtents.width;
+    label->height=label->label.fontExtents.height;
+
+    return label;
+  }
+
+#endif
+
+  void MapPainterCairo::DrawLabel(const Projection &/*projection*/,
+                                  const MapParameter &/*parameter*/,
+                                  const DoubleRectangle &labelRectangle,
+                                  const LabelData &label,
+                                  const CairoNativeLabel &layout)
+  {
+    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
+      const auto *style = dynamic_cast<const TextStyle *>(label.style.get());
+      double r = style->GetTextColor().GetR();
+      double g = style->GetTextColor().GetG();
+      double b = style->GetTextColor().GetB();
+
+      cairo_set_source_rgba(draw, r, g, b, label.alpha);
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
       PangoRectangle extends;
 
-      pango_layout_get_pixel_extents(layout,
+      pango_layout_get_pixel_extents(layout.get(),
                                      nullptr,
                                      &extends);
 
-      cairo_set_source_rgba(draw,r,g,b,label.alpha);
-
       cairo_move_to(draw,
-                    label.x,
-                    label.y);
+                    labelRectangle.x - extends.x,
+                    labelRectangle.y);
 
-      if (style->GetStyle()==TextStyle::normal) {
+      if (style->GetStyle() == TextStyle::normal) {
         pango_cairo_show_layout(draw,
-                                layout);
+                                layout.get());
         cairo_stroke(draw);
-      }
-      else /* emphasize */ {
+      } else /* emphasize */ {
         pango_cairo_layout_path(draw,
-                                layout);
+                                layout.get());
 
-        cairo_set_source_rgba(draw,1,1,1,label.alpha);
-        cairo_set_line_width(draw,2.0);
+        cairo_set_source_rgba(draw, 1, 1, 1, label.alpha);
+        cairo_set_line_width(draw, 2.0);
         cairo_stroke_preserve(draw);
 
-        cairo_set_source_rgba(draw,r,g,b,label.alpha);
+        cairo_set_source_rgba(draw, r, g, b, label.alpha);
         cairo_fill(draw);
       }
-
-      pango_font_metrics_unref(metrics);
-      g_object_unref(layout);
-
 #else
-      cairo_font_extents_t fontExtents;
-
-      cairo_set_scaled_font(draw,font);
-
-      cairo_scaled_font_extents(font,&fontExtents);
-
-      cairo_set_source_rgba(draw,r,g,b,label.alpha);
-
       cairo_move_to(draw,
-                    label.x,
-                    label.y+fontExtents.ascent);
+                    labelRectangle.x,
+                    labelRectangle.y+layout.fontExtents.ascent);
 
       if (style->GetStyle()==TextStyle::normal) {
 
@@ -889,7 +1007,9 @@ namespace osmscout {
         cairo_set_source_rgba(draw,r,g,b,label.alpha);
         cairo_fill(draw);
       }
+
 #endif
+
     }
     else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
       const auto* style=dynamic_cast<const ShieldStyle*>(label.style.get());
@@ -903,10 +1023,10 @@ namespace osmscout {
                             style->GetBgColor().GetA());
 
       cairo_rectangle(draw,
-                      label.bx1,
-                      label.by1,
-                      label.bx2-label.bx1+1,
-                      label.by2-label.by1+1);
+                      labelRectangle.x-2,
+                      labelRectangle.y,
+                      labelRectangle.width+3,
+                      labelRectangle.height+1);
       cairo_fill(draw);
 
       cairo_set_source_rgba(draw,
@@ -916,10 +1036,10 @@ namespace osmscout {
                             style->GetBorderColor().GetA());
 
       cairo_rectangle(draw,
-                      label.bx1+2,
-                      label.by1+2,
-                      label.bx2-label.bx1+1-4,
-                      label.by2-label.by1+1-4);
+                      labelRectangle.x +0,
+                      labelRectangle.y +2,
+                      labelRectangle.width +3-4,
+                      labelRectangle.height +1-4);
       cairo_stroke(draw);
 
       cairo_set_source_rgba(draw,
@@ -927,214 +1047,66 @@ namespace osmscout {
                             style->GetTextColor().GetG(),
                             style->GetTextColor().GetB(),
                             label.alpha);
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-      Font        font=GetFont(projection,
-                               parameter,
-                               label.fontSize);
-      PangoLayout *layout=pango_cairo_create_layout(draw);
 
-      pango_layout_set_font_description(layout,font);
-      pango_layout_set_text(layout,label.text.c_str(),
-                            (int)label.text.length());
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+      PangoRectangle extends;
+
+      pango_layout_get_pixel_extents(layout.get(),
+                                     nullptr,
+                                     &extends);
 
       cairo_move_to(draw,
-                    label.x,
-                    label.y);
+                    labelRectangle.x - extends.x,
+                    labelRectangle.y);
 
       pango_cairo_show_layout(draw,
-                              layout);
+                              layout.get());
       cairo_stroke(draw);
 
-      g_object_unref(layout);
-
 #else
-      Font                 font=GetFont(projection,
-                                        parameter,
-                                        label.fontSize);
-      cairo_font_extents_t fontExtents;
-
-      cairo_set_scaled_font(draw,font);
-
-      cairo_scaled_font_extents(font,&fontExtents);
-
       cairo_move_to(draw,
-                    label.x,
-                    label.y+(label.by2-label.by1-fontExtents.height)/2);
+                    labelRectangle.x,
+                    labelRectangle.y+layout.fontExtents.ascent);
 
       cairo_show_text(draw,label.text.c_str());
       cairo_stroke(draw);
+
 #endif
     }
+
   }
 
-  void MapPainterCairo::DrawContourLabel(const Projection& projection,
-                                         const MapParameter& parameter,
-                                         const PathTextStyle& style,
-                                         const std::string& text,
-                                         size_t transStart, size_t transEnd,
-                                         ContourLabelHelper& helper)
+  void MapPainterCairo::RegisterRegularLabel(const Projection &projection,
+                                             const MapParameter &parameter,
+                                             const std::vector<LabelData> &labels,
+                                             const Vertex2D &position,
+                                             double objectWidth)
   {
-    double pathLength=0;
+    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+  }
 
-    // Make the way path known to cairo and at the same time calculate the length
-    // of the path
+  /**
+   * Register contour label
+   */
+  void MapPainterCairo::RegisterContourLabel(const Projection &projection,
+                                    const MapParameter &parameter,
+                                    const PathLabelData &label,
+                                    const LabelPath &labelPath)
+  {
+    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+  }
 
-    cairo_new_path(draw);
+  void MapPainterCairo::DrawLabels(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const MapData& /*data*/)
+  {
+    labelLayouter.Layout();
 
-    if (coordBuffer->buffer[transStart].GetX()<=coordBuffer->buffer[transEnd].GetX()) {
-      // coordinates of previous point
-      double xo=0;
-      double yo=0;
+    labelLayouter.DrawLabels(projection,
+                             parameter,
+                             this);
 
-      for (size_t j=transStart; j<=transEnd; j++) {
-        if (j==transStart) {
-          cairo_move_to(draw,
-                        coordBuffer->buffer[j].GetX(),
-                        coordBuffer->buffer[j].GetY());
-        }
-        else {
-          cairo_line_to(draw,
-                        coordBuffer->buffer[j].GetX(),
-                        coordBuffer->buffer[j].GetY());
-          pathLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
-                           pow(coordBuffer->buffer[j].GetY()-yo,2));
-        }
-
-        xo=coordBuffer->buffer[j].GetX();
-        yo=coordBuffer->buffer[j].GetY();
-      }
-    }
-    else {
-      // coordinates of previous point
-      double xo=0;
-      double yo=0;
-
-      for (size_t j=0; j<=transEnd-transStart; j++) {
-        size_t idx=transEnd-j;
-
-        if (j==0) {
-          cairo_move_to(draw,
-                        coordBuffer->buffer[idx].GetX(),
-                        coordBuffer->buffer[idx].GetY());
-        }
-        else {
-          cairo_line_to(draw,
-                        coordBuffer->buffer[idx].GetX(),
-                        coordBuffer->buffer[idx].GetY());
-          pathLength+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
-                           pow(coordBuffer->buffer[idx].GetY()-yo,2));
-        }
-
-        xo=coordBuffer->buffer[idx].GetX();
-        yo=coordBuffer->buffer[idx].GetY();
-      }
-    }
-
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    Font           font=GetFont(projection,
-                                parameter,
-                                style.GetSize());
-    PangoLayout    *layout=pango_cairo_create_layout(draw);
-    PangoRectangle extends;
-
-    pango_layout_set_font_description(layout,font);
-    pango_layout_set_text(layout,
-                          text.c_str(),
-                          text.length());
-    pango_layout_get_pixel_extents(layout,&extends,nullptr);
-
-    double textWidth=extends.width;
-
-    if (!helper.Init(pathLength,
-                     textWidth)) {
-      g_object_unref(layout);
-      return;
-    }
-
-    // Current offset for the next label
-    cairo_path_t *path;
-
-    /* Decrease tolerance a bit, since it's going to be magnified */
-    //cairo_set_tolerance (cr, 0.01);
-
-    /* Using cairo_copy_path() here shows our deficiency in handling
-      * Bezier curves, specially around sharper curves.
-      *
-      * Using cairo_copy_path_flat() on the other hand, magnifies the
-      * flattening error with large off-path values. We decreased
-      * tolerance for that reason. Increase tolerance to see that
-      * artifact.
-    */
-
-    // Make a copy of the path of the line we should draw along
-    path=cairo_copy_path_flat(draw);
-
-    cairo_set_source_rgba(draw,
-                          style.GetTextColor().GetR(),
-                          style.GetTextColor().GetG(),
-                          style.GetTextColor().GetB(),
-                          style.GetTextColor().GetA());
-
-    while (helper.ContinueDrawing()) {
-      DrawContourLabelPangoCairo(draw,
-                                 path,
-                                 helper.GetCurrentOffset()-extends.x,
-                                 layout,
-                                 extends);
-
-      helper.AdvanceText();
-      helper.AdvanceSpace();
-    }
-
-    cairo_path_destroy(path);
-    g_object_unref(layout);
-
-#else
-    Font                 font=GetFont(projection,
-                                      parameter,
-                                      style.GetSize());
-    cairo_text_extents_t textExtents;
-
-    cairo_scaled_font_text_extents(font,
-                                   text.c_str(),
-                                   &textExtents);
-
-    double textWidth=textExtents.width;
-
-    if (!helper.Init(pathLength,
-                     textWidth)) {
-      return;
-    }
-
-    cairo_font_extents_t fontExtents;
-    cairo_path_t         *path;
-
-    cairo_scaled_font_extents(font,
-                              &fontExtents);
-
-    path=cairo_copy_path_flat(draw);
-
-    cairo_set_source_rgba(draw,
-                          style.GetTextColor().GetR(),
-                          style.GetTextColor().GetG(),
-                          style.GetTextColor().GetB(),
-                          style.GetTextColor().GetA());
-
-    cairo_set_scaled_font(draw,font);
-
-    while (helper.ContinueDrawing()) {
-      DrawContourLabelCairo(draw,
-                            path,
-                            helper.GetCurrentOffset()-textExtents.x_bearing,
-                            textExtents.height,
-                            text);
-
-      helper.AdvanceText();
-      helper.AdvanceSpace();
-    }
-
-    cairo_path_destroy(path);
-#endif
+    labelLayouter.Reset();
   }
 
   void MapPainterCairo::DrawPrimitivePath(const Projection& projection,

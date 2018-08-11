@@ -21,298 +21,44 @@
 
 //#define LABEL_LAYOUTER_DEBUG
 
+#if defined(LABEL_LAYOUTER_DEBUG)
+#include <iostream>
+#endif
+
 namespace osmscout {
-
-  LabelData::LabelData()
+  void Mask::prepare(const IntRectangle &rect)
   {
-    // no code
-  }
-
-  LabelData::~LabelData()
-  {
-    // no code
-  }
-
-  LabelLayouter::LabelLayouter()
-  {
-    // no code
-  }
-
-  LabelLayouter::~LabelLayouter()
-  {
-    // no code
-  }
-
-  void LabelLayouter::DeleteEventsForLabel(const std::set<LabelEvent>::iterator& eventRef)
-  {
-    LabelEvent searchEventTop;
-    LabelEvent searchEventBottom;
-
-    searchEventTop.y=eventRef->label->by1;
-    searchEventTop.x=eventRef->label->bx1;
-    searchEventTop.label=eventRef->label;
-
-    searchEventBottom.y=eventRef->label->by2;
-    searchEventBottom.x=eventRef->label->bx1;
-    searchEventBottom.label=eventRef->label;
-
-    std::set<LabelEvent>::iterator event;
-
-    event=events.find(searchEventTop);
-
-    assert(event!=events.end());
-
-#if defined(LABEL_LAYOUTER_DEBUG)
-    std::cout << "Removing event: ";
-    std::cout << event->label->text << " ";
-    std::cout << event->x << "," << event->y << " | ";
-    std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;
-#endif
-
-    events.erase(event);
-
-    event=events.find(searchEventBottom);
-
-    assert(event!=events.end());
-
-#if defined(LABEL_LAYOUTER_DEBUG)
-    std::cout << "Removing event: ";
-    std::cout << event->label->text << " ";
-    std::cout << event->x << "," << event->y << " | ";
-    std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;
-#endif
-
-    events.erase(event);
-  }
-
-  bool LabelLayouter::Intersects(const LabelData& first, const LabelData& second) const
-  {
-    // Labels with the same id never intersect
-    if (first.id==second.id) {
-      return false;
+    // clear
+    for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
+      d[c] = 0;
     }
 
-    if (dynamic_cast<ShieldStyle*>(first.style.get())!=nullptr &&
-        dynamic_cast<ShieldStyle*>(second.style.get())!=nullptr) {
-      double horizLabelSpace=shieldLabelSpace;
-      double vertLabelSpace=shieldLabelSpace;
+    // setup
+    cellFrom = rect.x / 64;
+    int cellFromBit = rect.x % 64;
+    cellTo = (rect.x + rect.width) / 64;
+    int cellToBit = (rect.x + rect.width) % 64;
+    rowFrom = rect.y;
+    rowTo = rect.y + rect.height;
 
-      double hx1;
-      double hx2;
-      double hy1;
-      double hy2;
-
-      hx1=first.bx1-horizLabelSpace;
-      hx2=first.bx2+horizLabelSpace;
-      hy1=first.by1-vertLabelSpace;
-      hy2=first.by2+vertLabelSpace;
-
-      if (hx1>=second.bx2 ||
-          hx2<=second.bx1 ||
-          hy1>=second.by2 ||
-          hy2<=second.by1) {
-        return false;
-      }
-
-      if (first.text==second.text) {
-        double horizLabelSpace=sameLabelSpace;
-        double vertLabelSpace=sameLabelSpace;
-
-        double hx1;
-        double hx2;
-        double hy1;
-        double hy2;
-
-        hx1=first.bx1-horizLabelSpace;
-        hx2=first.bx2+horizLabelSpace;
-        hy1=first.by1-vertLabelSpace;
-        hy2=first.by2+vertLabelSpace;
-
-        if (hx1>=second.bx2 ||
-            hx2<=second.bx1 ||
-            hy1>=second.by2 ||
-            hy2<=second.by1) {
-          return false;
-        }
-      }
+    if (cellFromBit<0){
+      cellFrom--;
+      cellFromBit=64+cellFromBit;
     }
-    else {
-      double horizLabelSpace=labelSpace;
-      double vertLabelSpace=labelSpace;
-
-      double hx1;
-      double hx2;
-      double hy1;
-      double hy2;
-
-      hx1=first.bx1-horizLabelSpace;
-      hx2=first.bx2+horizLabelSpace;
-      hy1=first.by1-vertLabelSpace;
-      hy2=first.by2+vertLabelSpace;
-
-      if (hx1>=second.bx2 ||
-          hx2<=second.bx1 ||
-          hy1>=second.by2 ||
-          hy2<=second.by1) {
-        return false;
-      }
+    if (cellToBit<0){
+      cellTo--;
+      cellToBit=64+cellToBit;
     }
 
-    return true;
-  }
-
-  void LabelLayouter::Initialize(const Projection& projection,
-                                 const MapParameter& parameter)
-  {
-    labels.clear();
-    events.clear();
-
-    width=static_cast<double>(projection.GetWidth());
-    height=static_cast<double>(projection.GetHeight());
-
-    labelSpace=projection.ConvertWidthToPixel(parameter.GetLabelSpace());
-    shieldLabelSpace=projection.ConvertWidthToPixel(parameter.GetPlateLabelSpace());
-    sameLabelSpace=projection.ConvertWidthToPixel(parameter.GetSameLabelSpace());
-
-    maxSpace=0.0;
-    maxSpace=std::max(maxSpace,labelSpace);
-    maxSpace=std::max(maxSpace,shieldLabelSpace);
-    maxSpace=std::max(maxSpace,sameLabelSpace);
-
-    dropNotVisiblePointLabels=parameter.GetDropNotVisiblePointLabels();
-
-    labelsAdded=0;
-  }
-
-  bool LabelLayouter::Placelabel(const LabelData& label,
-                                 LabelDataRef& labelRef)
-  {
-    labelsAdded++;
-
-    LabelEvent searchEvent;
-
-    if (dropNotVisiblePointLabels) {
-      if (label.bx2<0 || label.bx1>=width) {
-        return false;
-      }
-
-      if (label.by2<0 || label.by1>=height) {
-        return false;
-      }
+    uint64_t mask = ~0;
+    for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
+      d[c] = mask;
     }
-
-    searchEvent.y=label.by1-maxSpace;
-    searchEvent.x=label.bx1;
-
-    auto event=events.lower_bound(searchEvent);
-
-#if defined(LABEL_LAYOUTER_DEBUG)
-    std::cout << "--- Placing: '";
-    std::cout << label.text << "' ";
-    std::cout << label.bx1 << " - " << label.bx2 << ", "  << label.by1 << " - " << label.by2;
-    std::cout << std::endl;
-
-    for (const auto& event : events) {
-      std::cout << "Event: '";
-      std::cout << event.label->text << "' ";
-      std::cout << event.x << "," << event.y << " | ";
-      std::cout << event.label->bx1 << " - " << event.label->bx2 << ", "  << event.label->by1 << " - " << event.label->by2 << std::endl;
+    if (cellFrom >= 0 && cellFrom < size()) {
+      d[cellFrom] = d[cellFrom] >> cellFromBit;
     }
-#endif
-
-    while (event!=events.end() &&
-           label.by2+maxSpace>=event->y) {
-#if defined(LABEL_LAYOUTER_DEBUG)
-      std::cout << "---->: '";
-      std::cout << event->label->text << "' ";
-      std::cout << event->x << "," << event->y << " | ";
-      std::cout << event->label->bx1 << " - " << event->label->bx2 << ", "  << event->label->by1 << " - " << event->label->by2 << std::endl;
-#endif
-
-      if (Intersects(*event->label,label)) {
-        if (label.priority<event->label->priority) {
-          LabelDataRef oldLabel=event->label;
-
-#if defined(LABEL_LAYOUTER_DEBUG)
-          std::cout << "DROPPING lower prio '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
-#endif
-
-          // Removing old label and restart inserting
-          DeleteEventsForLabel(event);
-          labels.erase(oldLabel);
-
-          // Restart the search :-/
-          event=events.lower_bound(searchEvent);
-        }
-        else if (label.priority==event->label->priority) {
-          LabelDataRef oldLabel=event->label;
-
-          if (event->label->text==label.text) {
-            if (label.bx1<=event->label->bx1) {
-#if defined(LABEL_LAYOUTER_DEBUG)
-              std::cout << "DROPPING intersecting label with same prio and text '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
-#endif
-              // Removing old label and restart inserting
-              DeleteEventsForLabel(event);
-              labels.erase(oldLabel);
-
-              // Restart the search :-/
-              event=events.lower_bound(searchEvent);
-            }
-            else {
-#if defined(LABEL_LAYOUTER_DEBUG)
-              std::cout << "CANCEL because intersecting label with same prio and text '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
-#endif
-              return false;
-            }
-          }
-          else {
-#if defined(LABEL_LAYOUTER_DEBUG)
-            std::cout << "DROPPING same prio and exit '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
-#endif
-            // Drop old and new label
-            DeleteEventsForLabel(event);
-            labels.erase(oldLabel);
-
-            return false;
-          }
-        }
-        else {
-#if defined(LABEL_LAYOUTER_DEBUG)
-          std::cout << "CANCEL since higher prio '" << event->label->text << "' " << label.priority << " vs. " << event->label->priority << std::endl;
-#endif
-          // Do not insert new label
-          return false;
-        }
-      }
-      else {
-#if defined(LABEL_LAYOUTER_DEBUG)
-        //std::cout << "IGNORING '" << event->label->text << "'" << std::endl;
-#endif
-        event++;
-      }
+    if (cellTo >= 0 && cellTo < size()) {
+      d[cellTo] = d[cellTo] << (64 - cellToBit);
     }
-
-#if defined(LABEL_LAYOUTER_DEBUG)
-    std::cout << "INSERT" << std::endl;
-#endif
-
-    labels.push_front(label);
-    labelRef=labels.begin();
-
-    LabelEvent insertEvent;
-
-    insertEvent.x=label.bx1;
-    insertEvent.label=labelRef;
-
-    insertEvent.y=label.by1;
-
-    events.insert(insertEvent);
-
-    insertEvent.y=label.by2;
-
-    events.insert(insertEvent);
-
-    return true;
   }
 }

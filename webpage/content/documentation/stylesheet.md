@@ -351,6 +351,7 @@ color        |Color        |The color of the text
 size         |Int          |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
 displayOffset|ScreenSize   |Offset of drawn text in relation to the actual path.
 offset       |GroundSize   |Offset of the drawn text in relation to the actual path.
+priority     |Int          |numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value.
 
 ### IconStyle - Drawing icons for nodes and areas
 

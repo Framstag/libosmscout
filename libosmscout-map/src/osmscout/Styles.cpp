@@ -1375,6 +1375,7 @@ namespace osmscout {
       AddAttribute(std::make_shared<StyleUDoubleAttributeDescriptor>("size",PathTextStyle::attrSize));
       AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",PathTextStyle::attrDisplayOffset));
       AddAttribute(std::make_shared<StyleUMapAttributeDescriptor>("offset",PathTextStyle::attrOffset));
+      AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("priority",PathTextStyle::attrPriority));
     }
   };
 
@@ -1384,7 +1385,8 @@ namespace osmscout {
    : size(1),
      textColor(0,0,0),
      displayOffset(0.0),
-     offset(0.0)
+     offset(0.0),
+     priority(0)
   {
     // no code
   }
@@ -1437,6 +1439,17 @@ namespace osmscout {
     }
   }
 
+  void PathTextStyle::SetUIntValue(int attribute, size_t value)
+  {
+    switch (attribute) {
+    case attrPriority:
+      SetPriority(value);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
   PathTextStyle& PathTextStyle::SetLabel(const LabelProviderRef& label)
   {
     this->label=label;
@@ -1472,6 +1485,13 @@ namespace osmscout {
     return *this;
   }
 
+  PathTextStyle& PathTextStyle::SetPriority(size_t value)
+  {
+    this->priority=value;
+
+    return *this;
+  }
+
   StyleDescriptorRef PathTextStyle::GetDescriptor()
   {
     return pathTextStyleDescriptor;
@@ -1496,6 +1516,9 @@ namespace osmscout {
         break;
       case attrOffset:
         offset=other.offset;
+        break;
+      case attrPriority:
+        priority=other.priority;
         break;
       }
     }

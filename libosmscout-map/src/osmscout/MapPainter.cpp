@@ -28,6 +28,7 @@
 #include <osmscout/util/String.h>
 #include <osmscout/util/Tiling.h>
 #include <iostream>
+#include <cstdint>
 
 //#define DEBUG_GROUNDTILES
 //#define DEBUG_NODE_DRAW
@@ -152,8 +153,8 @@ namespace osmscout {
   /**
    * Sort labels for the same object by position
    */
-  static inline bool LabelLayoutDataSorter(const MapPainter::LabelLayoutData& a,
-                                           const MapPainter::LabelLayoutData& b)
+  static inline bool LabelLayoutDataSorter(const LabelData& a,
+                                           const LabelData& b)
   {
     return a.position<b.position;
   }
@@ -619,109 +620,28 @@ namespace osmscout {
     const LabelStyleRef& style=shieldStyle->GetShieldStyle();
     std::set<GeoCoord>   gridPoints;
 
-    //SymbolRef symbol=styleConfig->GetSymbol("marker");
-
     GetGridPoints(nodes,
                   shieldGridSizeHoriz,
                   shieldGridSizeVert,
                   gridPoints);
-
-    double frameHoriz=5;
-    double frameVert=5;
-
-    TextDimension dimension=GetTextDimension(projection,
-                                             parameter,
-                                             -1,
-                                             style->GetSize(),
-                                             text);
-
 
     for (const auto& gridPoint : gridPoints) {
       double x,y;
 
       projection.GeoToPixel(gridPoint,x,y);
 
-      /*
-      if (x<0 || x>projection.GetWidth()) {
-        continue;
-      }
-      if (y<0 || y>projection.GetHeight()) {
-        continue;
-      }
-
-      DrawSymbol(projection,
-                 parameter,
-                 *symbol,
-                 x,y);*/
-
       LabelData labelBox;
 
-      labelBox.id=nextLabelId++;
-      labelBox.bx1=x-dimension.width/2-frameHoriz;
-      labelBox.bx2=x+dimension.width/2+frameHoriz;
-      labelBox.by1=y-dimension.height/2-frameVert;
-      labelBox.by2=y+dimension.height/2+frameVert;
       labelBox.priority=style->GetPriority();
-      labelBox.x=x-dimension.xOff-dimension.width/2;
-      labelBox.y=y-dimension.yOff-dimension.height/2;
       labelBox.alpha=1.0;
       labelBox.fontSize=style->GetSize();
       labelBox.style=style;
       labelBox.text=text;
 
-      LabelDataRef label;
-
-      labels.Placelabel(labelBox,
-                        label);
+      std::vector<LabelData> vect;
+      vect.push_back(labelBox);
+      RegisterRegularLabel(projection, parameter, vect, Vertex2D(x,y), /*proposedWidth*/ -1);
     }
-  }
-
-  /**
-   * Register a label with the given parameter.The given coordinates
-   * define the center of the label. The resulting label will be
-   * vertically and horizontally aligned to the given coordinate.
-   */
-  bool MapPainter::RegisterPointLabel(const Projection& /*projection*/,
-                                      const MapParameter& /*parameter*/,
-                                      const LabelLayoutData& data,
-                                      double x,
-                                      double y,
-                                      size_t id)
-  {
-    // Something is an overlay, if its alpha is <0.8
-    bool overlay=data.alpha<0.8;
-
-    LabelData labelBox;
-
-    labelBox.id=id;
-    labelBox.bx1=x-data.dimension.width/2;
-    labelBox.bx2=x+data.dimension.width/2;
-    labelBox.by1=y-data.dimension.height/2;
-    labelBox.by2=y+data.dimension.height/2;
-    labelBox.priority=data.textStyle->GetPriority();
-    labelBox.x=x-data.dimension.xOff-data.dimension.width/2;
-    labelBox.y=y-data.dimension.yOff-data.dimension.height/2;
-    labelBox.alpha=data.alpha;
-    labelBox.fontSize=data.fontSize;
-    labelBox.style=data.textStyle;
-    labelBox.text=data.label;
-
-    LabelDataRef label;
-
-    if (overlay) {
-      if (!overlayLabels.Placelabel(labelBox,
-                                    label)) {
-        return false;
-      }
-    }
-    else {
-      if (!labels.Placelabel(labelBox,
-                             label)) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   /**
@@ -756,49 +676,39 @@ namespace osmscout {
                                      double objectWidth,
                                      double objectHeight)
   {
-    labelLayoutData.clear();
-
-    /*
-    SymbolRef symbol=styleConfig->GetSymbol("marker");
-
-    if (symbol) {
-      DrawSymbol(projection,
-                 parameter,
-                 *symbol,
-                 x,y);
-    }*/
-
-    size_t labelId=nextLabelId++;
-    double overallTextHeight=0;
-    bool   hasSymbol=false;
+    std::vector<LabelData> labelLayoutData;
 
     if (iconStyle) {
       if (!iconStyle->GetIconName().empty() &&
           HasIcon(*styleConfig,
                   parameter,
                   *iconStyle)) {
-        LabelLayoutData data;
+        LabelData data;
 
+        data.type=LabelData::Type::Icon;
         data.position=iconStyle->GetPosition();
-        data.dimension=TextDimension(0.0,0.0,14.0,14.0);
-        data.icon=true;
-        data.iconStyle=iconStyle;
 
-        hasSymbol=true;
+        // TODO: add priority to icons
+        //data.priority=iconStyle->GetPriority();
+
+        data.iconStyle=iconStyle;
+        data.iconWidth=projection.ConvertWidthToPixel(14.0);
+        data.iconHeight=projection.ConvertWidthToPixel(14.0);
 
         labelLayoutData.push_back(data);
-      }
-      else if (iconStyle->GetSymbol()) {
-        LabelLayoutData data;
+      } else if (iconStyle->GetSymbol()) {
+        LabelData data;
 
+        data.type=LabelData::Type::Symbol;
         data.position=iconStyle->GetPosition();
-        data.dimension=TextDimension(0.0,0.0,
-                                     projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth()),
-                                     projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight()));
-        data.icon=false;
+
         data.iconStyle=iconStyle;
 
-        hasSymbol=true;
+        // TODO: add priority to symbols
+        //data.priority=iconStyle->GetPriority();
+
+        data.iconWidth=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth());
+        data.iconHeight=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
 
         labelLayoutData.push_back(data);
       }
@@ -812,18 +722,14 @@ namespace osmscout {
         continue;
       }
 
-      LabelLayoutData data;
+      LabelData data;
+      data.type=LabelData::Type::Text;
+      data.priority=textStyle->GetPriority();
 
       if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag() &&
           parameter.GetDrawFadings()) {
         double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
         data.fontSize=textStyle->GetSize()*pow(1.5,factor);
-
-        data.dimension=GetTextDimension(projection,
-                                        parameter,
-                                        objectWidth,
-                                        data.fontSize,
-                                        label);
 
         data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
@@ -839,7 +745,7 @@ namespace osmscout {
         double maxHeight=projection.GetHeight()/5.0;
 
         if (height>maxHeight) {
-            // If the height exeeds maxHeight the alpha value will be decreased
+            // If the height exceeds maxHeight the alpha value will be decreased
             double minAlpha=(double)projection.GetHeight();
             double normHeight=(height-maxHeight)/(minAlpha-maxHeight);
             alpha*=std::min(std::max(1-normHeight,0.2),1.0);
@@ -848,31 +754,16 @@ namespace osmscout {
 
         data.fontSize=height/standardFontSize;
         data.alpha=alpha;
-
-        data.dimension=GetTextDimension(projection,
-                                        parameter,
-                                        objectWidth,
-                                        data.fontSize,
-                                        label);
       }
       else {
         data.fontSize=textStyle->GetSize();
-
-        data.dimension=GetTextDimension(projection,
-                                        parameter,
-                                        objectWidth,
-                                        data.fontSize,
-                                        label);
 
         data.alpha=textStyle->GetAlpha();
       }
 
       data.position=textStyle->GetPosition();
-      data.label=label;
-      data.textStyle=textStyle;
-      data.icon=false;
-
-      overallTextHeight+=data.dimension.height;
+      data.text=label;
+      data.style=textStyle;
 
       labelLayoutData.push_back(data);
     }
@@ -885,40 +776,7 @@ namespace osmscout {
                      labelLayoutData.end(),
                      LabelLayoutDataSorter);
 
-    // This is the top center position of the initial label element.
-    // Note that RegisterPointLabel gets passed the center of the label,
-    // thus we need to convert it...
-    double offset = hasSymbol ? y : y-overallTextHeight/2;
-
-    //std::cout << ">>>" << std::endl;
-    for (const auto& data : labelLayoutData) {
-      if (data.textStyle) {
-        //std::cout << "# Text '" << data.label << "' " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
-        RegisterPointLabel(projection,
-                           parameter,
-                           data,
-                           x,
-                           offset+data.dimension.height/2,
-                           labelId);
-      }
-      else if (data.icon) {
-        //std::cout << "# Icon " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
-        DrawIcon(data.iconStyle.get(),
-                 x,
-                 offset);
-      }
-      else {
-        //std::cout << "# Symbol " << offset << " " << data.height << " " << projection.ConvertWidthToPixel(parameter.GetLabelSpace()) << std::endl;
-        DrawSymbol(projection,
-                   parameter,
-                   *data.iconStyle->GetSymbol(),
-                   x,
-                   offset);
-      }
-
-      offset+=data.dimension.height;
-    }
-    //std::cout << "<<<" << std::endl;
+    RegisterRegularLabel(projection, parameter, labelLayoutData, Vertex2D(x,y), objectWidth);
   }
 
   double MapPainter::GetProposedLabelWidth(const MapParameter& parameter,
@@ -1088,13 +946,23 @@ namespace osmscout {
 
     ContourLabelHelper helper(*this);
 
-    DrawContourLabel(projection,
-                     parameter,
-                     *borderTextStyle,
-                     label,
-                     transStart,
-                     transEnd,
-                     helper);
+    // TODO: use coordBuffer for label path
+    LabelPath labelPath;
+
+    for (size_t j=transStart; j<=transEnd; j++) {
+      labelPath.AddPoint(
+          coordBuffer->buffer[j].GetX(),
+          coordBuffer->buffer[j].GetY());
+    }
+
+    PathLabelData labelData;
+    labelData.priority=borderTextStyle->GetPriority();
+    labelData.style=borderTextStyle;
+    labelData.text=label;
+    labelData.contourLabelOffset=contourLabelOffset;
+    labelData.contourLabelSpace=contourLabelSpace;
+
+    RegisterContourLabel(projection, parameter, labelData, labelPath);
 
     return true;
   }
@@ -1310,15 +1178,22 @@ namespace osmscout {
                                        transEnd);
     }
 
-    ContourLabelHelper helper(*this);
+    PathLabelData labelData;
+    labelData.priority=pathTextStyle->GetPriority();
+    labelData.style=pathTextStyle;
+    labelData.text=textLabel;
+    labelData.contourLabelOffset=contourLabelOffset;
+    labelData.contourLabelSpace=contourLabelSpace;
 
-    DrawContourLabel(projection,
-                     parameter,
-                     *pathTextStyle,
-                     textLabel,
-                     transStart,
-                     transEnd,
-                     helper);
+    // TODO: use coordBuffer for label path
+    LabelPath labelPath;
+
+    for (size_t j=transStart; j<=transEnd; j++) {
+      labelPath.AddPoint(
+          coordBuffer->buffer[j].GetX(),
+          coordBuffer->buffer[j].GetY());
+    }
+    RegisterContourLabel(projection, parameter, labelData, labelPath);
 
     return true;
   }
@@ -1819,7 +1694,7 @@ namespace osmscout {
 
   /**
    * Base method that must get called to initial the renderer for a render action.
-   * The derived method of the concrete renderer mplementation can have
+   * The derived method of the concrete renderer implementation can have
    *
    * @return
    *    false if there was either an error or of the rendering was already interrupted, else true
@@ -1835,12 +1710,6 @@ namespace osmscout {
 
     shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
     shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
-
-    nextLabelId=0;
-    labels.Initialize(projection,
-                      parameter);
-    overlayLabels.Initialize(projection,
-                             parameter);
 
     transBuffer.Reset();
 
@@ -2137,12 +2006,6 @@ namespace osmscout {
               wd.startIsClosed=false;
               wd.endIsClosed=false;
 
-              /*
-              DrawWay(styleConfig,
-                      projection,
-                      parameter,
-                      data);*/
-
               wayData.push_back(wd);
             }
 
@@ -2434,48 +2297,6 @@ namespace osmscout {
     if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
       log.Info()
         << "Prepare node labels: " << timer.ResultString() << "(s)";
-    }
-  }
-
-  void MapPainter::DrawLabels(const Projection& projection,
-                              const MapParameter& parameter,
-                              const MapData& /*data*/)
-  {
-    size_t    labelsDrawn=0;
-    StopClock timer;
-
-    //
-    // Draw normal
-    //
-
-    for (const auto& label : labels) {
-      //std::cout << "Drawing label: " << label.text << std::endl;
-      DrawLabel(projection,
-                parameter,
-                label);
-
-      labelsDrawn++;
-    }
-
-    //
-    // Draw overlays
-    //
-
-    for (const auto& label : overlayLabels) {
-      //std::cout << "Drawing overlay: " << label.text << std::endl;
-      DrawLabel(projection,
-                parameter,
-                label);
-
-      labelsDrawn++;
-    }
-
-    timer.Stop();
-
-    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
-      log.Info()
-        << "Draw labels: " <<  labels.Size() << "/" << labels.GetLabelsAdded() << " " << overlayLabels.Size() << "/" << overlayLabels.GetLabelsAdded() << " " << labelsDrawn << " (pcs) "
-        << timer << " (sec)";
     }
   }
 
