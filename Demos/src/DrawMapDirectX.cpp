@@ -396,7 +396,7 @@ private:
 			::SetWindowLongPtrW(
 				hWnd,
 				GWLP_USERDATA,
-				PtrToUlong(pDemoApp)
+				(LONG_PTR)pDemoApp
 				);
 
 			result = 1;
