@@ -104,6 +104,10 @@ IF %COMPILER%==msvc2015 (
     .\vcpkg install qt5-svg:x64-windows
     echo ...done
 
+    echo Installing qt5-tools...
+    .\vcpkg install qt5-tools:x64-windows
+    echo ...done
+	
     echo Installing OpenGL...
     .\vcpkg install opengl:x64-windows
     echo ...done
