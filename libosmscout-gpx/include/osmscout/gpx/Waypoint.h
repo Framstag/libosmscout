@@ -38,7 +38,9 @@ public:
       coord(coord) {
   }
 
-  Optional <std::string> name;
+  Optional<std::string> name;
+  Optional<std::string> description;
+  Optional<std::string> symbol;
 
   osmscout::GeoCoord coord;
   Optional<double> elevation; // meters above sea

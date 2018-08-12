@@ -499,6 +499,14 @@ public:
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
         waypoint.name = Optional<std::string>::of(name);
       });
+    } else if (name == "desc") {
+      return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
+        waypoint.description = Optional<std::string>::of(description);
+      });
+    } else if (name == "sym") {
+      return new SimpleValueContext("SymContext", ctxt, parser, [&](const std::string &symbol) {
+        waypoint.symbol = Optional<std::string>::of(symbol);
+      });
     } else if (name == "ele") {
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
         double ele;
