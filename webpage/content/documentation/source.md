@@ -43,7 +43,7 @@ Currently the library does compile without any external dependencies, however
 since you need to be able to import OSM data to make any use of the library
 you should at least have libxml2 or protobuf available.
 
-## Supprted Build systems, operating systems and compiler
+## Supported Build systems, operating systems and compiler
 
 Libosmscout supports cmake and finally meson. It did support autotools, but this
 support was recently dropped.
@@ -62,6 +62,7 @@ Support matrix:
 <th style="text-align: left; width: 35%">OS</th>
 <th style="text-align: left">Compiler</th>
 <th style="text-align: left">Build tool</th>
+<th style="text-align: left">Packaging tool</th>
 <th style="text-align: left">Comments</th>
 </tr>
 </thead>
@@ -72,12 +73,14 @@ Support matrix:
 <td style="text-align: left">gcc</td>
 <td style="text-align: left">CMake</td>
 <td style="text-align: left"></td>
+<td style="text-align: left"></td>
 </tr>
 
 <tr>
 <td style="text-align: left">Linux</td>
 <td style="text-align: left">clang</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -86,6 +89,7 @@ Support matrix:
 <td style="text-align: left">gcc</td>
 <td style="text-align: left">Meson</td>
 <td style="text-align: left"></td>
+<td style="text-align: left"></td>
 </tr>
 
 <tr>
@@ -93,12 +97,14 @@ Support matrix:
 <td style="text-align: left">clang</td>
 <td style="text-align: left">Meson</td>
 <td style="text-align: left"></td>
+<td style="text-align: left"></td>
 </tr>
 
 <tr>
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">MSYS2</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">pacman</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -106,6 +112,7 @@ Support matrix:
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">MSYS2</td>
 <td style="text-align: left">Meson</td>
+<td style="text-align: left">pacman</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -113,6 +120,7 @@ Support matrix:
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">Visual Studio 2015</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">vcpkg</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -127,6 +135,7 @@ Support matrix:
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">Visual Studio 2017</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">vcpkg</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -141,6 +150,7 @@ Support matrix:
 <td style="text-align: left">Mac OS/iOS</td>
 <td style="text-align: left">XCode/Clang</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">homebrew</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -148,6 +158,7 @@ Support matrix:
 <td style="text-align: left">Mac OS/iOS</td>
 <td style="text-align: left">XCode</td>
 <td style="text-align: left">Meson</td>
+<td style="text-align: left">homebrew</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -176,8 +187,41 @@ Note that there is also a central Appveyor build, that uses a similar setup
 as described here.
 
 Please use the cmake based build for VisualStudio project setup. You just need
-to import the `CMakeLists.txt` into VisualStudio. There is currently no automatic
-setup or installation guide for installing dependencies.
+to import the `CMakeLists.txt` into VisualStudio. 
+
+You can use [vcpkg](https://github.com/Microsoft/vcpkg)
+to install required dependencies and build against.
+
+Currently the following vcpkg dependencies can be used (depending on the libraries you want
+to build):
+
+* zlib
+* libiconv
+* libxml2
+* protobuf
+* cairo
+* pango
+* qt5-base
+* qt5-declarative
+* qt5-svg
+* qt5-tools
+* opengl
+* freeglut
+* glm
+* glew
+* glfw3
+
+Currently `glfw3` is not correctly detected by cmake.
+
+To build against vcpkg packages using cmake (note that your version of VisualStudio and the location
+of your vcpkg may differ):
+
+```bash
+mkdir vcbuild
+cd vcbuild
+cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=../../vcpkg\scripts\buildsystems\vcpkg.cmake ..
+cmake --build .
+```
 
 ### Setup for Mac OS X
 
