@@ -8,6 +8,7 @@ osmscoutmapHeader = [
             'osmscout/MapPainter.h',
             'osmscout/MapParameter.h',
             'osmscout/LabelProvider.h',
+            'osmscout/LabelPath.h',
             'osmscout/Styles.h',
             'osmscout/StyleDescription.h',
             'osmscout/StyleConfig.h',

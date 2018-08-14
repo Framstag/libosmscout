@@ -46,6 +46,20 @@ namespace osmscout {
   public:
     typedef agg::pixfmt_rgb24                                  AggPixelFormat;
 
+    struct NativeGlyph {
+      double x;
+      double y;
+      const agg::glyph_cache* aggGlyph;
+    };
+    struct NativeLabel {
+      std::wstring text;
+      std::vector<NativeGlyph> glyphs;
+    };
+    using AggLabel = Label<NativeGlyph, NativeLabel>;
+    using AggGlyph = Glyph<NativeGlyph>;
+    using AggLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterAgg>;
+    friend AggLabelLayouter;
+
   private:
     typedef agg::renderer_base<AggPixelFormat>                 AggRenderBase;
     typedef agg::rasterizer_scanline_aa<>                      AggScanlineRasterizer;
@@ -57,6 +71,8 @@ namespace osmscout {
     typedef agg::font_cache_manager<AggFontEngine>             AggFontManager;
     typedef agg::conv_curve<AggFontManager::path_adaptor_type> AggTextCurveConverter;
     typedef agg::conv_contour<AggTextCurveConverter>           AggTextContourConverter;
+
+    AggLabelLayouter labelLayouter;
 
   private:
     AggPixelFormat            *pf;
@@ -75,11 +91,8 @@ namespace osmscout {
   private:
     void SetFont(const Projection& projection,
                  const MapParameter& parameter,
-                 double size);
-
-    void SetOutlineFont(const Projection& projection,
-                        const MapParameter& parameter,
-                        double size);
+                 double size,
+                 agg::glyph_rendering ren_type = agg::glyph_ren_native_gray8);
 
     void GetTextDimension(const std::wstring& text,
                           double& width,
@@ -88,10 +101,11 @@ namespace osmscout {
                   double y,
                   const std::wstring& text);
 
-    void DrawOutlineText(double x,
-                         double y,
-                         const std::wstring& text,
-                         double width);
+    void DrawGlyph(double x, double y,
+                   const agg::glyph_cache* glyph);
+
+    void DrawGlyphVector(double x, double baselineY,
+                         const std::vector<MapPainterAgg::NativeGlyph> &glyphs);
 
     void DrawFill(const Projection& projection,
                   const MapParameter& parameter,
@@ -108,19 +122,9 @@ namespace osmscout {
                        const MapParameter& parameter,
                        double fontSize) override;
 
-    TextDimension GetTextDimension(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   double objectWidth,
-                                   double fontSize,
-                                   const std::string& text) override;
-
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
                     const FillStyle& style) override;
-
-    void DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const LabelData& label) override;
 
     void DrawIcon(const IconStyle* style,
                   double x, double y) override;
@@ -139,12 +143,53 @@ namespace osmscout {
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd) override;
 
-    void DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd,
-                          ContourLabelHelper& helper) override;
+    void DrawLabel(const Projection& projection,
+                   const MapParameter& parameter,
+                   const DoubleRectangle& labelRectangle,
+                   const LabelData& label,
+                   const NativeLabel& layout);
+
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
+                    const std::vector<AggGlyph> &glyphs);
+
+    osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+
+    std::shared_ptr<AggLabel> Layout(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const std::string& text,
+                                     double fontSize,
+                                     double objectWidth,
+                                     bool enableWrapping = false,
+                                     bool contourLabel = false);
+
+    /**
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
+     */
+    virtual void RegisterRegularLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const std::vector<LabelData> &labels,
+                                      const Vertex2D &position,
+                                      double objectWidth) override;
+
+    /**
+     * Register contour label
+     */
+    virtual void RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const PathLabelData &label,
+                                      const LabelPath &labelPath) override;
+
+    virtual void DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) override;
+
+    virtual void BeforeDrawing(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                               const MapData& data);
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

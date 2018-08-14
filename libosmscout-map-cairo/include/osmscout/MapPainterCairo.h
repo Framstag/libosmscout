@@ -33,22 +33,55 @@
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
   #include <pango/pangocairo.h>
+  #include <pango/pango-glyph.h>
 #endif
 
 #include <osmscout/MapCairoImportExport.h>
 
 #include <osmscout/MapPainter.h>
 
+
 namespace osmscout {
 
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
+  public:
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
-    typedef PangoFontDescription*          Font;
+    using CairoFont = PangoFontDescription*;
+    using CairoNativeLabel = std::shared_ptr<PangoLayout>;
+    struct PangoStandaloneGlyph {
+      std::shared_ptr<PangoFont>        font;
+      std::shared_ptr<PangoGlyphString> glyphString;
+    };
+
+    using CairoNativeGlyph = PangoStandaloneGlyph;
 #else
-    typedef cairo_scaled_font_t*           Font;
+    using CairoFont = cairo_scaled_font_t*;
+    struct CairoNativeLabel {
+      std::wstring          wstr;
+      CairoFont             font;
+      cairo_text_extents_t  textExtents;
+      cairo_font_extents_t  fontExtents;
+    };
+
+    struct CairoNativeGlyph {
+      std::string character;
+      double width;
+      double height;
+    };
+    //static constexpr double AverageCharacterWidth = 0.75;
 #endif
-    typedef std::unordered_map<size_t,Font>  FontMap;          //! Map type for mapping  font sizes to font
+
+    using CairoLabel = Label<CairoNativeGlyph, CairoNativeLabel>;
+    using CairoGlyph = Glyph<CairoNativeGlyph>;
+    using CairoLabelInstance = LabelInstance<CairoNativeGlyph, CairoNativeLabel>;
+    using CairoLabelLayouter = LabelLayouter<CairoNativeGlyph, CairoNativeLabel, MapPainterCairo>;
+    friend CairoLabelLayouter;
+
+  private:
+    CairoLabelLayouter labelLayouter;
+
+    using FontMap = std::unordered_map<size_t,CairoFont>;    //! Map type for mapping font sizes to font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons
@@ -60,7 +93,7 @@ namespace osmscout {
     std::mutex                             mutex;            //! Mutex for locking concurrent calls
 
   private:
-    Font GetFont(const Projection& projection,
+    CairoFont GetFont(const Projection& projection,
                  const MapParameter& parameter,
                  double fontSize);
 
@@ -85,19 +118,57 @@ namespace osmscout {
                        const MapParameter& parameter,
                        double fontSize) override;
 
-    TextDimension GetTextDimension(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   double objectWidth,
-                                   double fontSize,
-                                   const std::string& text) override;
-
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
                     const FillStyle& style) override;
 
+    std::shared_ptr<CairoLabel> Layout(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const std::string& text,
+                                       double fontSize,
+                                       double objectWidth,
+                                       bool enableWrapping = false,
+                                       bool contourLabel = false);
+
+    osmscout::DoubleRectangle GlyphBoundingBox(const CairoNativeGlyph &glyph) const;
+
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const LabelData& label) override;
+                   const DoubleRectangle& labelRectangle,
+                   const LabelData& label,
+                   const CairoNativeLabel& layout);
+
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
+                    const std::vector<CairoGlyph> &glyphs);
+
+    virtual void BeforeDrawing(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                               const MapData& data);
+
+    /**
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
+     */
+    virtual void RegisterRegularLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const std::vector<LabelData> &labels,
+                                      const Vertex2D &position,
+                                      double objectWidth) override;
+
+    /**
+     * Register contour label
+     */
+    virtual void RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const PathLabelData &label,
+                                      const LabelPath &labelPath) override;
+
+    virtual void DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) override;
 
     void DrawPrimitivePath(const Projection& projection,
                            const MapParameter& parameter,
@@ -124,13 +195,6 @@ namespace osmscout {
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd) override;
-
-    void DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd,
-                          ContourLabelHelper& helper) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

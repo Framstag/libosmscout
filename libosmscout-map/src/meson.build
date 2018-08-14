@@ -5,6 +5,7 @@ osmscoutmapSrc = [
             'src/osmscout/MapPainter.cpp',
             'src/osmscout/MapParameter.cpp',
             'src/osmscout/LabelProvider.cpp',
+            'src/osmscout/LabelPath.cpp',
             'src/osmscout/Styles.cpp',
             'src/osmscout/StyleDescription.cpp',
             'src/osmscout/StyleConfig.cpp',

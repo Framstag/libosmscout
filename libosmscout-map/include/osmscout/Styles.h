@@ -756,7 +756,8 @@ namespace osmscout {
       attrSize,
       attrTextColor,
       attrDisplayOffset,
-      attrOffset
+      attrOffset,
+      attrPriority
     };
 
   private:
@@ -765,6 +766,7 @@ namespace osmscout {
     Color            textColor;
     double           displayOffset;
     double           offset;
+    size_t           priority;
 
   public:
     PathTextStyle();
@@ -773,12 +775,14 @@ namespace osmscout {
     void SetColorValue(int attribute, const Color& value) override;
     void SetDoubleValue(int attribute, double value) override;
     void SetLabelValue(int attribute, const LabelProviderRef& value) override;
+    void SetUIntValue(int attribute, size_t value) override;
 
     PathTextStyle& SetLabel(const LabelProviderRef& label);
     PathTextStyle& SetSize(double size);
     PathTextStyle& SetTextColor(const Color& color);
     PathTextStyle& SetDisplayOffset(double value);
     PathTextStyle& SetOffset(double value);
+    PathTextStyle& SetPriority(size_t value);
 
     inline bool IsVisible() const
     {
@@ -809,6 +813,11 @@ namespace osmscout {
     inline double GetOffset() const
     {
       return offset;
+    }
+
+    inline size_t GetPriority() const
+    {
+      return priority;
     }
 
     static StyleDescriptorRef GetDescriptor();

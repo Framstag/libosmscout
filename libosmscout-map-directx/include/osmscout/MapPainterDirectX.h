@@ -91,11 +91,12 @@ namespace osmscout {
                          const MapParameter& parameter,
                          IconStyle& style);
 
-    virtual double GetFontHeight(const Projection& projection,
+
+	virtual double GetFontHeight(const Projection& projection,
                                  const MapParameter& parameter,
                                  double fontSize);
 
-    TextDimension GetTextDimension(const Projection& projection,
+	DoubleRectangle GetTextDimension(const Projection& projection,
                                    const MapParameter& parameter,
                                    double objectWidth,
                                    double fontSize,
@@ -105,9 +106,33 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const FillStyle& style);
 
+	/*
     virtual void DrawLabel(const Projection& projection,
                            const MapParameter& parameter,
                            const LabelData& label);
+	*/
+
+	/**
+	Register regular label with given text at the given pixel coordinate
+	in a style defined by the given LabelStyle.
+	*/
+	virtual void RegisterRegularLabel(const Projection &projection,
+		const MapParameter &parameter,
+		const std::vector<LabelData> &labels,
+		const Vertex2D &position,
+		double objectWidth);
+
+	/**
+	* Register contour label
+	*/
+	virtual void RegisterContourLabel(const Projection &projection,
+		const MapParameter &parameter,
+		const PathLabelData &label,
+		const LabelPath &labelPath);
+
+	virtual void DrawLabels(const Projection& projection,
+		const MapParameter& parameter,
+		const MapData& data);
 
     virtual void DrawIcon(const IconStyle* style,
                           double x, double y);
@@ -126,12 +151,14 @@ namespace osmscout {
                           LineStyle::CapStyle endCap,
                           size_t transStart, size_t transEnd);
 
+	/*
     virtual void DrawContourLabel(const Projection& projection,
                                   const MapParameter& parameter,
                                   const PathTextStyle& style,
                                   const std::string& text,
                                   size_t transStart, size_t transEnd,
                                   ContourLabelHelper& helper);
+	*/
 
     virtual void DrawContourSymbol(const Projection& projection,
                                    const MapParameter& parameter,

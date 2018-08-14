@@ -373,7 +373,7 @@ namespace osmscout
       return fontHeightMap[fontSize];
     else
     {
-      TextDimension dimension;
+      DoubleRectangle dimension;
 
       dimension = GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
       fontHeightMap[fontSize] = dimension.height;
@@ -382,14 +382,14 @@ namespace osmscout
     }
   }
 
-  MapPainter::TextDimension MapPainterDirectX::GetTextDimension(
+  DoubleRectangle MapPainterDirectX::GetTextDimension(
     const Projection& projection,
     const MapParameter& parameter,
     double objectWidth,
     double fontSize,
     const std::string& text)
   {
-    TextDimension dimension;
+	DoubleRectangle dimension;
 
 #ifdef MBUC
     std::wstring sample = s2w(text);
@@ -405,8 +405,8 @@ namespace osmscout
                                                    size * 2.0f,
                                                    size,
                                                    &pDWriteTextLayout);
-    dimension.xOff = 0.0;
-    dimension.yOff = 0.0;
+    dimension.x = 0.0;
+    dimension.y = 0.0;
 
     if (FAILED(hr))
     {
@@ -437,6 +437,7 @@ namespace osmscout
     m_pRenderTarget->FillRectangle(RECTF(0.0f, 0.0f, projection.GetWidth(), projection.GetHeight()), GetColorBrush(style.GetFillColor()));
   }
 
+  /*
   void MapPainterDirectX::DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
   {
     if (dynamic_cast<const TextStyle*>(label.style.get()) != NULL) {
@@ -462,6 +463,35 @@ namespace osmscout
     else
       _DrawText(projection, parameter, label.x, label.y, label.fontSize, Color::BLACK, label.text);
   }
+  */
+
+  void MapPainterDirectX::RegisterRegularLabel(const Projection &projection,
+	  const MapParameter &parameter,
+	  const std::vector<LabelData> &labels,
+	  const Vertex2D &position,
+	  double objectWidth)
+  {
+	  // TODO
+  }
+
+  /**
+  * Register contour label
+  */
+  void MapPainterDirectX::RegisterContourLabel(const Projection &projection,
+	  const MapParameter &parameter,
+	  const PathLabelData &label,
+	  const LabelPath &labelPath)
+  {
+	  // TODO
+  }
+
+  void MapPainterDirectX::DrawLabels(const Projection& projection,
+	  const MapParameter& parameter,
+	  const MapData& data)
+  {
+	  // TODO
+  }
+
 
   void MapPainterDirectX::DrawIcon(const IconStyle* style, double x, double y)
   {
@@ -580,6 +610,7 @@ namespace osmscout
     pPathGeometry->Release();
   }
 
+  /*
   void MapPainterDirectX::DrawContourLabel(const Projection& projection,
                                            const MapParameter& parameter,
                                            const PathTextStyle& style,
@@ -653,6 +684,7 @@ namespace osmscout
     }
     pPathGeometry->Release();
   }
+  */
 
   void MapPainterDirectX::DrawContourSymbol(const Projection& projection,
                                             const MapParameter& parameter,
