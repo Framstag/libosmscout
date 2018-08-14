@@ -30,7 +30,7 @@
 #include <osmscout/LabelPath.h>
 #include <osmscout/system/Math.h>
 
-// #define DEBUG_LABEL_LAYOUTER
+//#define LABEL_LAYOUTER_DEBUG
 
 #if defined(LABEL_LAYOUTER_DEBUG)
 #include <iostream>
@@ -514,7 +514,6 @@ namespace osmscout {
       std::vector<const typename LabelInstanceType::Element*> overlayElements;
 
       for (const LabelInstanceType &inst : Labels()){
-
         for (const typename LabelInstanceType::Element &el : inst.elements) {
           DoubleRectangle elementRectangle;
           if (el.labelData.type==LabelData::Text) {
@@ -552,14 +551,12 @@ namespace osmscout {
 
       // draw postponed text elements
       for (const typename LabelInstanceType::Element *el : textElements) {
-
         p->DrawLabel(projection, parameter,
                      DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
                      el->labelData, el->label->label);
       }
 
       for (const typename LabelInstanceType::Element *el : overlayElements) {
-
         p->DrawLabel(projection, parameter,
                      DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
                      el->labelData, el->label->label);
