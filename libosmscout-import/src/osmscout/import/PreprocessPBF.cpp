@@ -537,7 +537,7 @@ namespace osmscout {
       }
 
       if (blockHeader.type()!="OSMHeader") {
-        progress.Error("File '"+filename+"' is not an OSM PBF file!");
+        progress.Error("File '"+filename+"' is not valid (block header type is '"+blockHeader.type()+"' and not 'OSMHeader')!");
         fclose(file);
         return false;
       }
@@ -559,6 +559,9 @@ namespace osmscout {
           progress.Error(std::string("Unsupported feature '")+feature+"'");
           fclose(file);
           return false;
+        }
+        else {
+          progress.Info(std::string("Feature '")+feature+"'");
         }
       }
 
@@ -589,7 +592,7 @@ namespace osmscout {
         }
 
         if (blockHeader.type()!="OSMData") {
-          progress.Error("File '"+filename+"' is not an OSM PBF file!");
+          progress.Error("File '"+filename+"' is not valid (block header type is '"+blockHeader.type()+"' and not 'OSMData')!");
           fclose(file);
           return false;
         }
