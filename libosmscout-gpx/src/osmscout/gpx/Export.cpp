@@ -250,6 +250,16 @@ bool GpxWritter::WriteWaypoint(const Waypoint &waypoint)
       return false;
     }
   }
+  if (waypoint.description.hasValue()){
+    if (!WriteTextElement("desc", waypoint.description.get())){
+      return false;
+    }
+  }
+  if (waypoint.symbol.hasValue()){
+    if (!WriteTextElement("sym", waypoint.symbol.get())){
+      return false;
+    }
+  }
   if (waypoint.time.hasValue()){
     if (!WriteTextElement("time", waypoint.time.get())){
       return false;
