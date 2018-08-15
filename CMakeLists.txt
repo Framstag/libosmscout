@@ -125,6 +125,9 @@ if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_G
   endif()
 endif()
 
+# Prever non-legacy OpenGL libraries
+set(OpenGL_GL_PREFERENCE "GLVND")
+
 # debug build?
 if (LABEL_LAYOUTER_DEBUG)
   add_definitions( -DLABEL_LAYOUTER_DEBUG)
