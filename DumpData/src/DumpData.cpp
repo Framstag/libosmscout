@@ -370,10 +370,17 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
 }
 
 static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessValue,
-                                   size_t indent)
+                                   size_t indent,
+                                   bool defaultValue)
 {
   DumpIndent(indent);
-  std::cout << "Access {" << std::endl;
+
+  if (defaultValue) {
+    std::cout << "(Access) {" << std::endl;
+  }
+  else {
+    std::cout << "Access {" << std::endl;
+  }
 
   if (accessValue.IsOnewayForward()) {
     DumpIndent(indent+2);
@@ -548,7 +555,8 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
           auto*accessValue=dynamic_cast<osmscout::AccessFeatureValue*>(value);
 
           DumpAccessFeatureValue(*accessValue,
-                                 indent);
+                                 indent,
+                                 false);
         }
         else if (dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value)!=nullptr) {
           auto*accessValue=dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value);
@@ -630,12 +638,13 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
         osmscout::AccessFeatureValue accessValue(buffer.GetType()->GetDefaultAccess());
 
         DumpAccessFeatureValue(accessValue,
-                               indent);
+                               indent,
+                               true);
       }
       else if (!meta.GetFeature()->HasValue()) {
         // We are just a flag...
         DumpIndent(indent);
-        std::cout << meta.GetFeature()->GetName() << ": false";
+        std::cout << "(" << meta.GetFeature()->GetName() << ")" << ": false";
         std::cout << std::endl;
       }
     }
