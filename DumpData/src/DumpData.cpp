@@ -511,6 +511,45 @@ static void DumpSidewayFeatureValue(const osmscout::SidewayFeatureValue& sideway
   std::cout << "}" << std::endl;
 }
 
+static void DumpLanesFeatureValue(const osmscout::LanesFeatureValue& lanesValue,
+                                  size_t indent)
+{
+  DumpIndent(indent);
+  std::cout << "Lanes {" << std::endl;
+
+  DumpIndent(indent+2);
+  std::cout << "Lanes: ";
+  if (lanesValue.HasSingleLane()) {
+    std::cout << "1" << std::endl;
+  }
+  else {
+    std::cout << (size_t)lanesValue.GetForwardLanes() << " " << (size_t)lanesValue.GetBackwardLanes() << std::endl;
+  }
+
+  if (!lanesValue.GetTurnForward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "TurnForward: " << lanesValue.GetTurnForward() << std::endl;
+  }
+
+  if (!lanesValue.GetTurnBackward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "TurnBackward: " << lanesValue.GetTurnBackward() << std::endl;
+  }
+
+  if (!lanesValue.GetDestinationForward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "DestinationForward: " << lanesValue.GetDestinationForward() << std::endl;
+  }
+
+  if (!lanesValue.GetDestinationBackward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "DestinationBackward: " << lanesValue.GetDestinationBackward() << std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "}" << std::endl;
+}
+
 static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
                                    size_t indent)
 {
@@ -614,18 +653,8 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
         else if (dynamic_cast<osmscout::LanesFeatureValue*>(value)!=nullptr) {
           auto*lanesValue=dynamic_cast<osmscout::LanesFeatureValue*>(value);
 
-          DumpIndent(indent);
-
-          std::cout << "Lanes: ";
-
-          if (lanesValue->HasSingleLane()) {
-            std::cout << "1";
-          }
-          else {
-            std::cout << (size_t)lanesValue->GetForwardLanes() << " " << (size_t)lanesValue->GetBackwardLanes();
-          }
-
-          std::cout << std::endl;
+          DumpLanesFeatureValue(*lanesValue,
+                                indent);
         }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);

@@ -1788,13 +1788,17 @@ namespace osmscout {
   class OSMSCOUT_API LanesFeatureValue : public FeatureValue
   {
   private:
-    uint8_t lanes;
+
+    uint8_t     lanes;              //< // First two bits reserved, 3 bit for number of lanes in each direction
+    std::string turnForward;
+    std::string turnBackward;
+    std::string destinationForward;
+    std::string destinationBackward;
 
   public:
     inline LanesFeatureValue()
       : lanes(0)
     {
-
     }
 
     inline explicit LanesFeatureValue(uint8_t lanes)
@@ -1805,25 +1809,60 @@ namespace osmscout {
 
     inline void SetLanes(uint8_t forwardLanes, uint8_t backwardLanes)
     {
-      this->lanes=(forwardLanes & (uint8_t)0xF) | ((backwardLanes & (uint8_t)0xF) << 4);
+      this->lanes=((forwardLanes & (uint8_t)0x7) << 2) |
+                  ((backwardLanes & (uint8_t)0x7) << 5);
     }
 
     inline bool HasSingleLane() const
     {
-      return lanes==0;
+      return GetLanes()==0;
     }
 
     inline uint8_t GetForwardLanes() const
     {
-      return lanes & (uint8_t)0x0F;
+      return (lanes >> 2) & (uint8_t)0x07;
     }
 
     inline uint8_t GetBackwardLanes() const
     {
-      return (lanes & (uint8_t)0xF0) >> 4;
+      return (lanes >> 5) & (uint8_t)0x07;
     }
 
     uint8_t GetLanes() const;
+
+    inline void SetTurnLanes(const std::string& turnForward,
+                             const std::string& turnBawckard)
+    {
+      this->turnForward=turnForward;
+      this->turnBackward=turnBawckard;
+    }
+
+    inline std::string GetTurnForward() const
+    {
+      return turnForward;
+    }
+
+    inline std::string GetTurnBackward() const
+    {
+      return turnBackward;
+    }
+
+    inline std::string GetDestinationForward() const
+    {
+      return destinationForward;
+    }
+
+    inline std::string GetDestinationBackward() const
+    {
+      return destinationBackward;
+    }
+
+    inline void SetDestinationLanes(const std::string& destinationForward,
+                                    const std::string& destinationBawckard)
+    {
+      this->destinationForward=destinationForward;
+      this->destinationBackward=destinationBawckard;
+    }
 
     inline std::string GetLabel(size_t /*labelIndex*/) const override
     {
@@ -1848,6 +1887,12 @@ namespace osmscout {
     TagId tagLanes;
     TagId tagLanesForward;
     TagId tagLanesBackward;
+    TagId tagTurnLanes;
+    TagId tagTurnLanesForward;
+    TagId tagTurnLanesBackward;
+    TagId tagDestinationLanes;
+    TagId tagDestinationLanesForward;
+    TagId tagDestinationLanesBackward;
 
   public:
     /** Name of this feature */
@@ -1875,7 +1920,6 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
-
 }
 
 #endif
