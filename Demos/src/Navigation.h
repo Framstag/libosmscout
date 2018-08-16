@@ -80,7 +80,7 @@ namespace osmscout {
         index(0)
     {};
 
-    void NextDescription(Distance distance,
+    void NextDescription(const Distance &distance,
                          std::list<RouteDescription::Node>::const_iterator& waypoint,
                          std::list<RouteDescription::Node>::const_iterator end)
     {
