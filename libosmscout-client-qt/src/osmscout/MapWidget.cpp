@@ -580,14 +580,14 @@ void MapWidget::addOverlayObject(int id, QObject *o)
   }
   // create shared pointer copy
   if (obj->getObjectType()==osmscout::refWay){
-    copy=std::make_shared<OverlayWay>();
+    copy = std::make_shared<OverlayWay>(static_cast<const OverlayWay&>(*obj));
   }else if (obj->getObjectType()==osmscout::refArea){
-    copy=std::make_shared<OverlayArea>();
+    copy = std::make_shared<OverlayArea>(static_cast<const OverlayArea&>(*obj));
   }else if (obj->getObjectType()==osmscout::refNode){
-    copy=std::make_shared<OverlayNode>();
+    copy = std::make_shared<OverlayNode>(static_cast<const OverlayNode&>(*obj));
   }
 
-  if (copy && copy->set(*obj)) {
+  if (copy){
     renderer->addOverlayObject(id, copy);
   }
 }
