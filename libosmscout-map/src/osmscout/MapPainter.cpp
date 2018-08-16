@@ -191,7 +191,9 @@ namespace osmscout {
     refReader(*styleConfig->GetTypeConfig()),
     layerReader(*styleConfig->GetTypeConfig()),
     widthReader(*styleConfig->GetTypeConfig()),
-    addressReader(*styleConfig->GetTypeConfig())
+    addressReader(*styleConfig->GetTypeConfig()),
+    lanesReader(*styleConfig->GetTypeConfig()),
+    accessReader(*styleConfig->GetTypeConfig())
   {
     log.Debug() << "MapPainter::MapPainter()";
 
@@ -1624,10 +1626,12 @@ namespace osmscout {
       return;
     }
 
-    bool   transformed=false;
-    size_t transStart=0; // Make the compiler happy
-    size_t transEnd=0;   // Make the compiler happy
-    double mainSlotWidth=0.0;
+    bool               transformed=false;
+    size_t             transStart=0; // Make the compiler happy
+    size_t             transEnd=0;   // Make the compiler happy
+    double             mainSlotWidth=0.0;
+    AccessFeatureValue *accessValue=nullptr;
+    LanesFeatureValue  *lanesValue=nullptr;
 
     for (const auto& lineStyle : lineStyles) {
       double       lineWidth=0.0;
@@ -1668,6 +1672,15 @@ namespace osmscout {
         break;
       case LineStyle::rightOutline:
         lineOffset=mainSlotWidth/2.0;
+        break;
+      case LineStyle::laneDivider:
+        lanesValue=lanesReader.GetValue(buffer);
+        accessValue=accessReader.GetValue(buffer);
+
+        if (lanesValue==nullptr &&
+            accessValue==nullptr) {
+          return;
+        }
         break;
       }
 
@@ -1735,7 +1748,38 @@ namespace osmscout {
         data.transEnd=transEnd;
       }
 
-      wayData.push_back(data);
+      if (lineStyle->GetOffsetRel()==LineStyle::laneDivider) {
+        uint8_t lanes=0;
+
+        if (lanesValue!=nullptr) {
+          lanes=lanesValue->GetLanes();
+        }
+        else if (accessValue->IsOneway()) {
+          lanes=buffer.GetType()->GetOnewayLanes();
+        }
+        else {
+          lanes=buffer.GetType()->GetLanes();
+        }
+
+        if (lanes<2) {
+          return;
+        }
+
+        double  lanesSpace=mainSlotWidth/lanes;
+        double  laneOffset=-mainSlotWidth/2.0+lanesSpace;
+
+        for (size_t lane=1; lane<lanes; lane++) {
+          coordBuffer->GenerateParallelWay(transStart,transEnd,
+                                           laneOffset,
+                                           data.transStart,
+                                           data.transEnd);
+          wayData.push_back(data);
+          laneOffset+=lanesSpace;
+        }
+      }
+      else {
+        wayData.push_back(data);
+      }
     }
   }
 

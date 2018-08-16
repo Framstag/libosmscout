@@ -2389,4 +2389,157 @@ namespace osmscout {
       value->SetFeatureSet(featureSet);
     }
   }
+
+  void LanesFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(lanes);
+  }
+
+  void LanesFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(lanes);
+  }
+
+  LanesFeatureValue& LanesFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const auto& otherValue=static_cast<const LanesFeatureValue&>(other);
+
+      lanes=otherValue.lanes;
+    }
+
+    return *this;
+  }
+
+  bool LanesFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const auto& otherValue=static_cast<const LanesFeatureValue&>(other);
+
+    return lanes==otherValue.lanes;
+  }
+
+  uint8_t LanesFeatureValue::GetLanes() const
+  {
+    if (lanes==0) {
+      return 1;
+    }
+    else {
+      return (lanes & (uint8_t)0x0F) + ((lanes & (uint8_t)0xF0) >> 4);
+    }
+  }
+
+  const char* const LanesFeature::NAME             = "Lanes";
+  const char* const LanesFeature::NAME_LABEL       = "label";
+  const size_t      LanesFeature::NAME_LABEL_INDEX = 0;
+
+  LanesFeature::LanesFeature()
+    : tagOneway(0),
+       tagLanes(0)
+
+  {
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
+  }
+
+  void LanesFeature::Initialize(TagRegistry& tagRegistry)
+  {
+    tagOneway=tagRegistry.RegisterTag("oneway");
+    tagLanes=tagRegistry.RegisterTag("lanes");
+    tagLanesForward=tagRegistry.RegisterTag("lanes:forward");
+    tagLanesBackward=tagRegistry.RegisterTag("lanes:backward");
+  }
+
+  std::string LanesFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t LanesFeature::GetValueSize() const
+  {
+    return sizeof(LanesFeatureValue);
+  }
+
+  FeatureValue* LanesFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) LanesFeatureValue();
+  }
+
+  void LanesFeature::Parse(TagErrorReporter& errorReporter,
+                           const TagRegistry& /*tagRegistry*/,
+                           const FeatureInstance& feature,
+                           const ObjectOSMRef& object,
+                           const TagMap& tags,
+                           FeatureValueBuffer& buffer) const
+  {
+    bool oneway=false;
+    uint8_t lanes=0;
+    uint8_t lanesForward=0;
+    uint8_t lanesBackward=0;
+    auto onewayTag=tags.find(tagOneway);
+    auto lanesTag=tags.find(tagLanes);
+    auto lanesForwardTag=tags.find(tagLanesForward);
+    auto lanesBackwardTag=tags.find(tagLanesBackward);
+
+    if (onewayTag!=tags.end()) {
+      // TODO: What happens with -1?
+      oneway=onewayTag->second!="no" && onewayTag->second!="false" && onewayTag->second!="0";
+    }
+
+    if (lanesTag!=tags.end()) {
+      if (!StringToNumber(lanesTag->second,lanes)) {
+        errorReporter.ReportTag(object,tags,std::string("lanes tag value '")+lanesTag->second+"' is not numeric!");
+
+        return;
+      }
+    }
+
+    if (lanesForwardTag!=tags.end()) {
+      if (!StringToNumber(lanesForwardTag->second,lanesForward)) {
+        errorReporter.ReportTag(object,tags,std::string("lanes:forward tag value '")+lanesForwardTag->second+"' is not numeric!");
+
+        return;
+      }
+    }
+
+    if (lanesBackwardTag!=tags.end()) {
+      if (!StringToNumber(lanesBackwardTag->second,lanesBackward)) {
+        errorReporter.ReportTag(object,tags,std::string("lanes:backward tag value '")+lanesBackwardTag->second+"' is not numeric!");
+
+        return;
+      }
+    }
+
+    if (lanesForwardTag!=tags.end() &&
+        lanesBackwardTag!=tags.end()) {
+
+      if (lanesTag!=tags.end() &&
+          lanesForward+lanesBackward!=lanes) {
+        errorReporter.ReportTag(object,tags,std::string("lanes tag value '")+lanesTag->second+"' is not equal sum of lanes:forward and lanes:backward");
+      }
+
+      auto* value=static_cast<LanesFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      value->SetLanes(lanesForward,lanesBackward);
+    }
+    else if (lanesTag!=tags.end()) {
+      if (oneway) {
+        if (lanes==feature.GetType()->GetOnewayLanes()) {
+          return;
+        }
+      }
+      else {
+        if (lanes==feature.GetType()->GetLanes()) {
+          return;
+        }
+      }
+
+      auto* value=static_cast<LanesFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      if (oneway) {
+        value->SetLanes(lanes,0);
+      }
+      else {
+        value->SetLanes(lanes/(uint8_t)2,lanes/(uint8_t)2);
+      }
+    }
+  }
 }

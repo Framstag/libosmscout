@@ -50,7 +50,8 @@ namespace osmscout {
     enum OffsetRel {
       base,
       leftOutline,
-      rightOutline
+      rightOutline,
+      laneDivider,
     };
 
     enum Attribute {
@@ -219,6 +220,7 @@ namespace osmscout {
       AddEnumValue("base",LineStyle::base);
       AddEnumValue("leftOutline",LineStyle::leftOutline);
       AddEnumValue("rightOutline",LineStyle::rightOutline);
+      AddEnumValue("laneDivider",LineStyle::laneDivider);
     }
   };
 

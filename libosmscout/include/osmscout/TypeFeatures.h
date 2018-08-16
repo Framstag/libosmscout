@@ -1784,6 +1784,98 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
+
+  class OSMSCOUT_API LanesFeatureValue : public FeatureValue
+  {
+  private:
+    uint8_t lanes;
+
+  public:
+    inline LanesFeatureValue()
+      : lanes(0)
+    {
+
+    }
+
+    inline explicit LanesFeatureValue(uint8_t lanes)
+      : lanes(lanes)
+    {
+      // no code
+    }
+
+    inline void SetLanes(uint8_t forwardLanes, uint8_t backwardLanes)
+    {
+      this->lanes=(forwardLanes & (uint8_t)0xF) | ((backwardLanes & (uint8_t)0xF) << 4);
+    }
+
+    inline bool HasSingleLane() const
+    {
+      return lanes==0;
+    }
+
+    inline uint8_t GetForwardLanes() const
+    {
+      return lanes & (uint8_t)0x0F;
+    }
+
+    inline uint8_t GetBackwardLanes() const
+    {
+      return (lanes & (uint8_t)0xF0) >> 4;
+    }
+
+    uint8_t GetLanes() const;
+
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    {
+      if (HasSingleLane()) {
+        return "1";
+      }
+
+      return std::to_string(GetForwardLanes()) + " " + std::to_string(GetBackwardLanes());
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    LanesFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API LanesFeature : public Feature
+  {
+  private:
+    TagId tagOneway;
+    TagId tagLanes;
+    TagId tagLanesForward;
+    TagId tagLanesBackward;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
+  public:
+    LanesFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
+
 }
 
 #endif

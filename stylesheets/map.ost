@@ -212,7 +212,7 @@ TYPES
   TYPE highway_motorway
     = WAY ("highway"=="motorway")
       {Name, NameAlt, Ref, Destination}
-      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 2]
       DESC
         en: "motorway"
         de: "Autobahn"
@@ -220,7 +220,7 @@ TYPES
   TYPE highway_motorway_trunk
     = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
       {Name, NameAlt, Ref, Destination}
-      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 2]
       DESC
         en: "trunk"
         de: "Schnellstraße"
@@ -228,7 +228,7 @@ TYPES
   TYPE highway_motorway_primary
     = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
       {Name, NameAlt, Ref, Destination}
-      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
+      PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 1]
 
   TYPE highway_motorway_link
     = WAY ("highway"=="motorway_link")
@@ -253,7 +253,7 @@ TYPES
   TYPE highway_primary
     = WAY ("highway"=="primary")
       {Name, NameAlt, Ref, Sideway}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 1]
 
   TYPE highway_primary_link
     = WAY ("highway"=="primary_link")
@@ -263,7 +263,7 @@ TYPES
   TYPE highway_secondary
     = WAY ("highway"=="secondary")
       {Name, NameAlt, Ref, Sideway}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 1]
 
   TYPE highway_secondary_link
     = WAY ("highway"=="secondary_link")
@@ -273,7 +273,7 @@ TYPES
   TYPE highway_tertiary
     = WAY ("highway"=="tertiary")
       {Name, NameAlt, Ref, Sideway}
-      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
+      PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 1]
 
   TYPE highway_tertiary_link
     = WAY ("highway"=="tertiary_link")
@@ -293,7 +293,7 @@ TYPES
   TYPE highway_residential
     = WAY AREA ("highway"=="residential")
       {Name, NameAlt, Ref, Sideway}
-      PATH[FOOT BICYCLE CAR] LOCATION
+      PATH[FOOT BICYCLE CAR] LOCATION LANES[2 1]
 
   TYPE highway_area__residential IGNORE
     = WAY AREA ("area:highway"=="residential")

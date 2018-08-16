@@ -365,6 +365,8 @@ namespace osmscout {
     LayerFeatureValueReader      layerReader;        //!< Value reader for the 'layer' feature
     WidthFeatureValueReader      widthReader;        //!< Value reader for the 'width' feature
     AddressFeatureValueReader    addressReader;      //!< Value reader for the 'address' feature
+    LanesFeatureValueReader      lanesReader;        //!< Value reader for the 'lanes' feature
+    AccessFeatureValueReader     accessReader;       //!< Value reader for the 'lanes' feature
     //@}
 
     /**

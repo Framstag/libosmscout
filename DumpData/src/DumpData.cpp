@@ -611,6 +611,22 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
 
           DumpSidewayFeatureValue(*sidewayValue,indent);
         }
+        else if (dynamic_cast<osmscout::LanesFeatureValue*>(value)!=nullptr) {
+          auto*lanesValue=dynamic_cast<osmscout::LanesFeatureValue*>(value);
+
+          DumpIndent(indent);
+
+          std::cout << "Lanes: ";
+
+          if (lanesValue->HasSingleLane()) {
+            std::cout << "1";
+          }
+          else {
+            std::cout << (size_t)lanesValue->GetForwardLanes() << " " << (size_t)lanesValue->GetBackwardLanes();
+          }
+
+          std::cout << std::endl;
+        }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);
           std::cout << meta.GetFeature()->GetName() << ": ";

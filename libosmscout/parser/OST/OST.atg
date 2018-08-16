@@ -517,6 +517,7 @@ PRODUCTIONS
                | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)          // TODO: Only valid for WAY
                | "MERGE_AREAS"       (. typeInfo.SetMergeAreas(true); .)      // TODO: Only valid for AREA
                | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)
+               | LANES<typeInfo>
                .
 
   PATH<TypeInfo& typeInfo>
@@ -546,6 +547,23 @@ PRODUCTIONS
                      ]
                   "]"
                 ]
+                .
+
+  LANES<TypeInfo& typeInfo>
+              = "LANES"
+                (. typeInfo.SetIsPath(true); .)
+                "["
+                  (.
+                     uint8_t lanes=1;
+                     uint8_t onewayLanes=1;
+                   .)
+                  UINT8<lanes>
+                  UINT8<onewayLanes>
+                  (.
+                    typeInfo.SetLanes(lanes);
+                    typeInfo.SetOnewayLanes(onewayLanes);
+                   .)
+                "]"
                 .
 
   GROUPS<TypeInfo& typeInfo>
@@ -589,6 +607,17 @@ PRODUCTIONS
                 .
 
   UINT<size_t& value>
+              = number
+                (.
+                  if (!StringToNumber(t->val,value)) {
+                    std::string e="Cannot parse number '"+std::string(t->val)+"'";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                .
+
+  UINT8<uint8_t& value>
               = number
                 (.
                   if (!StringToNumber(t->val,value)) {

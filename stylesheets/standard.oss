@@ -1195,6 +1195,33 @@ STYLE
    //[TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
  }
 
+ // Lanes
+  [MAG 17-] {
+    [TYPE highway_motorway,
+          highway_motorway_link] {
+      WAY#lanes { color: lighten(@motorwayColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_trunk,
+          highway_trunk_link,
+          highway_motorway_trunk] {
+      WAY#lanes { color: lighten(@trunkColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_primary,
+          highway_primary_link,
+          highway_motorway_primary] {
+      WAY#lanes { color: lighten(@primaryColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_secondary,
+          highway_secondary_link] {
+      WAY#lanes { color: lighten(@secondaryColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_tertiary,
+          highway_tertiary_link] {
+      WAY#lanes { color: lighten(@tertiaryColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+  }
+
+
  // -------------------------------------------------------
  //
  // railway

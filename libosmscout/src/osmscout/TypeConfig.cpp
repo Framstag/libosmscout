@@ -64,7 +64,9 @@ namespace osmscout {
       pinWay(false),
       mergeAreas(false),
       ignoreSeaLand(false),
-      ignore(false)
+      ignore(false),
+      lanes(1),
+      onewayLanes(1)
   {
 
   }
@@ -807,6 +809,9 @@ namespace osmscout {
 
     RegisterFeature(std::make_shared<SidewayFeature>());
 
+    featureLanes=std::make_shared<LanesFeature>();
+    RegisterFeature(featureLanes);
+
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
     typeInfoIgnore=std::make_shared<TypeInfo>("");
@@ -943,6 +948,9 @@ namespace osmscout {
       }
       if (!typeInfo->HasFeature(RoundaboutFeature::NAME)) {
         typeInfo->AddFeature(featureRoundabout);
+      }
+      if (!typeInfo->HasFeature(LanesFeature::NAME)) {
+        typeInfo->AddFeature(featureLanes);
       }
     }
 
@@ -1330,6 +1338,8 @@ namespace osmscout {
         bool        mergeAreas;
         bool        ignore;
         bool        ignoreSeaLand;
+        uint8_t     lanes;
+        uint8_t     onewayLanes;
 
         scanner.Read(name);
         scanner.Read(canBeNode);
@@ -1350,6 +1360,8 @@ namespace osmscout {
         scanner.Read(mergeAreas);
         scanner.Read(ignoreSeaLand);
         scanner.Read(ignore);
+        scanner.Read(lanes);
+        scanner.Read(onewayLanes);
 
         TypeInfoRef typeInfo=std::make_shared<TypeInfo>(name);
 
@@ -1371,6 +1383,8 @@ namespace osmscout {
         typeInfo->SetMergeAreas(mergeAreas);
         typeInfo->SetIgnoreSeaLand(ignoreSeaLand);
         typeInfo->SetIgnore(ignore);
+        typeInfo->SetLanes(lanes);
+        typeInfo->SetOnewayLanes(onewayLanes);
 
         // Type Features
 
@@ -1517,6 +1531,8 @@ namespace osmscout {
         writer.Write(type->GetMergeAreas());
         writer.Write(type->GetIgnoreSeaLand());
         writer.Write(type->GetIgnore());
+        writer.Write(type->GetLanes());
+        writer.Write(type->GetOnewayLanes());
 
         writer.WriteNumber((uint32_t)type->GetFeatures().size());
         for (const auto& feature : type->GetFeatures()) {
