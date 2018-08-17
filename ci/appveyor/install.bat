@@ -28,7 +28,8 @@ IF %COMPILER%==msys2 (
 
   IF %BUILDTOOL%==meson (
     echo Installing meson build tool...
-    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja mingw-w64-%MSYS2_ARCH%-meson"
+    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja"
+    pip install meson
   )
 
   IF %BUILDTOOL%==cmake (
