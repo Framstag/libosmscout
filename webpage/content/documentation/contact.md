@@ -23,7 +23,7 @@ all.
 You can find a searchable archive of the mailinglist
 [here](https://sourceforge.net/p/libosmscout/mailman/libosmscout-development/).
 
-If everything else fails you can contact [Tim Teulings](tteuling@users.sf.net)
+If everything else fails you can contact [Tim Teulings](mailto:tteuling@users.sf.net)
 for more information.
 
 

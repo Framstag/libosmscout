@@ -11,6 +11,6 @@ menu:
 ---
 
 There are currently no packages for any distributions. See however documentation
-regarding [docker images]({{< relref "documentation/docker.md" >}}) as a potential
+regarding [docker images]({{< relref "/documentation/docker.md" >}}) as a potential
 way to easily get the code building on your system.
 

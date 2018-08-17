@@ -27,7 +27,7 @@ Of course any other tag or combination of tags can in principle get
 converted to a type feature.
 
 For a more detailed  description regarding assigning features to types, see
-[Type Definition]({{< relref "documentation/typedef.md" >}}).
+[Type Definition]({{< relref "/documentation/typedef.md" >}}).
 
 ## Required C++ headers and base classes
 

@@ -217,10 +217,10 @@ To build against vcpkg packages using cmake (note that your version of VisualStu
 of your vcpkg may differ):
 
 ```bash
-mkdir vcbuild
-cd vcbuild
-cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=../../vcpkg\scripts\buildsystems\vcpkg.cmake ..
-cmake --build .
+$ mkdir vcbuild
+$ cd vcbuild
+$ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=../../vcpkg\scripts\buildsystems\vcpkg.cmake ..
+$ cmake --build .
 ```
 
 ### Setup for Mac OS X
@@ -251,9 +251,9 @@ installed packages. You may have to extend search paths and similar.
 At the time the article has been written this are for example:
 
 ```bash
-brew link --force gettext
-brew link --force libxml2
-brew link --force qt5
+$ brew link --force gettext
+$ brew link --force libxml2
+$ brew link --force qt5
 ```
 
 For cmake based build you also have to install:
@@ -272,7 +272,7 @@ build libosmscout binaries. The cmake based does not have this problem.
 For custom installation directories for Qt you have to pass a hint to cmake:
 
 ```bash
-cmake . -DCMAKE_PREFIX_PATH=[QT5_Installation_prefix]
+$ cmake . -DCMAKE_PREFIX_PATH=[QT5_Installation_prefix]
 ```
 
 Note also that native XCode projects doe not have dependency autodetection.
@@ -297,10 +297,10 @@ instructions [in the OpenStreetMap wiki](http://wiki.openstreetmap.org/wiki/Libo
 In the top level directory type:
 
 ```bash
-  $ mkdir build
-  $ cd build
-  $ cmake ..
-  $ make
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
 ```
 
 This should recursively analyse dependencies for all project sub directories and
@@ -308,18 +308,18 @@ afterwards build them.
 
 Real life example for building using VisualStudio:
 ```bash
-mkdir build
-cd build
-cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0 \
+$ mkdir build
+$ cd build
+$ cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0
   -DCMAKE_INSTALL_PREFIX=D:\Mine\OpenSource\osmlib
-cmake --build . --config Release --target install
+$ cmake --build . --config Release --target install
 ```
 
 Real life example for building using Xcode:
 ```bash
-mkdir build
-cd build
-cmake -G "Xcode" ..
+$ mkdir build
+$ cd build
+$ cmake -G "Xcode" ..
 ```
 
 You can then import the Xcode project created in the build directory.
@@ -331,32 +331,30 @@ variables `QTDIR` and `CMAKE_PREFIX_PATH`.
 Example (with also some other libosmscout specific options):
 
 ```bash
-cmake -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.##### .. \
--DCMAKE_INSTALL_PREFIX=.\output -DOSMSCOUT_BUILD_IMPORT=OFF \
--DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_TESTS=OFF \
--DQTDIR=D:/Tools/Qt/5.9.2/msvc2015 \
+$ cmake -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.##### .. 
+-DCMAKE_INSTALL_PREFIX=.\output -DOSMSCOUT_BUILD_IMPORT=OFF 
+-DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_TESTS=OFF
+-DQTDIR=D:/Tools/Qt/5.9.2/msvc2015
 -DCMAKE_PREFIX_PATH=D:/Tools/Qt/5.9.2/msvc2015/lib/cmake
 ```
-
-
 
 ### meson based build
 
 For ninja based builds: In the top level directory type:
 ```bash
-mkdir debug
-meson debug
-cd debug
-ninja
+$ mkdir debug
+$ meson debug
+$ cd debug
+$ ninja
 ```
 
 For VisualStudio based builds:
 
 ```bash
-mkdir debug
-meson debug --backend vs2015
-cd debug
-msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
+$ mkdir debug
+$ meson debug --backend vs2015
+$ cd debug
+$ msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
 ```
 
 ## Running applications
