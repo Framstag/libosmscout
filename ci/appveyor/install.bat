@@ -13,13 +13,12 @@ echo Target: %TARGET%
 echo Start updating build dependencies...
 
 IF %COMPILER%==msys2 (
-  @echo on
   echo Installing MSYS2 build preconditions...
+
+  @echo on
 
   echo Extending path to MSYS...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
-  echo path
-  echo %PATH%
 
   echo Updating pacman...
   bash -lc "pacman -S --needed --noconfirm pacman-mirrors"
