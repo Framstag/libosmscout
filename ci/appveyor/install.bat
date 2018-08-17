@@ -18,6 +18,8 @@ IF %COMPILER%==msys2 (
 
   echo Extending path to MSYS...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+  echo path
+  echo %PATH%
 
   echo Updating pacman...
   bash -lc "pacman -S --needed --noconfirm pacman-mirrors"
@@ -27,23 +29,21 @@ IF %COMPILER%==msys2 (
   bash -lc "pacman -S --needed --noconfirm git"
 
   IF %BUILDTOOL%==meson (
-    echo "Path:"
-    echo %PATH%
     echo Installing ninja and meson build tool...
     bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja"
-    echo "pip.exe location:"
+    echo pip.exe location
     which pip
-    echo "pip3.exe location:"
+    echo pip3.exe location
     which pip3
-    echo "python.exe location:"
+    echo python.exe location
     which python
-    echo "python3.exe location:"
+    echo python3.exe location
     which python3
-    echo "ninja.exe location:"
+    echo ninja.exe location
     which ninja
-    echo "Instaling meson via pip3..."
+    echo Instaling meson via pip3...
     pip3 install meson
-    echo "meson.exe location:"
+    echo meson.exe location
     which meson
   )
 
