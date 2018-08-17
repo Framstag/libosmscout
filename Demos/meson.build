@@ -206,11 +206,11 @@ if buildMapOpenGL and glfwDep.found() and ftDep.found()
 endif
 
 if buildMapDirectX
-  DrawMapOpenDirectX = executable('DrawMapDirectX',
-                         'src/DrawMapDirectX.cpp',
-                         cpp_args: ['-fPIC'],
-                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapdirectxIncDir],
-                         dependencies: [mathDep, openmpDep, d2d1Dep, dwriteDep, winCodecsDep],
-                         link_with: [osmscout, osmscoutmap, osmscoutmapdirectx],
-                         install: true)
+  DrawMapDirectX = executable('DrawMapDirectX',
+                              'src/DrawMapDirectX.cpp',
+                              include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapdirectxIncDir],
+                              dependencies: [mathDep, openmpDep, d2d1Dep, dwriteDep, winCodecsDep],
+                              link_with: [osmscout, osmscoutmap, osmscoutmapdirectx],
+                              gui_app: true,
+                              install: true)
 endif
