@@ -134,4 +134,11 @@ IF %COMPILER%==msvc2015 (
 
     cd %APPVEYOR_BUILD_FOLDER%
   )
+
+  IF %BUILDTOOL%==meson (
+    echo Installing meson build tool...
+    set "PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%"
+    pip.exe install meson
+    echo ...done
+  )
 )
