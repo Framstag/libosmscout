@@ -99,7 +99,7 @@ IF %COMPILER%==msvc2015 (
     echo Installing qt5-declarative...
     .\vcpkg install qt5-declarative:x64-windows
     echo ...done
-	
+
     echo Installing qt5-svg...
     .\vcpkg install qt5-svg:x64-windows
     echo ...done
@@ -107,7 +107,7 @@ IF %COMPILER%==msvc2015 (
     echo Installing qt5-tools...
     .\vcpkg install qt5-tools:x64-windows
     echo ...done
-	
+
     echo Installing OpenGL...
     .\vcpkg install opengl:x64-windows
     echo ...done
@@ -127,18 +127,18 @@ IF %COMPILER%==msvc2015 (
     echo Installing glfw3...
     .\vcpkg install glfw3:x64-windows
     echo ...done
-	
+
     echo System-wide integrating vcpkg...
     .\vcpkg integrate install
     echo ...done
-  
+
     cd %APPVEYOR_BUILD_FOLDER%
-  )	
-  
+  )
+
   IF %BUILDTOOL%==meson (
-    echo Installing meson build tool...
-    set "PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%"
-    pip.exe install meson
-    echo ...done
+#    echo Installing meson build tool...
+#    set "PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%"
+#    pip.exe install meson
+#    echo ...done
   )
 )
