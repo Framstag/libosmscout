@@ -41,7 +41,7 @@ IF %COMPILER%==msys2 (
     echo ninja.exe location
     which ninja
     echo Instaling meson via pip3...
-    pip3 install meson
+    pip3.exe install meson
     echo meson.exe location
     which meson
   )
