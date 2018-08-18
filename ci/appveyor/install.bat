@@ -30,14 +30,6 @@ IF %COMPILER%==msys2 (
   IF %BUILDTOOL%==meson (
     echo Installing ninja and meson build tool...
     bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-ninja mingw-w64-%MSYS2_ARCH%-python2 mingw-w64-%MSYS2_ARCH%-python3 mingw-w64-%MSYS2_ARCH%-meson"
-    echo python location
-    which python
-    echo python3 location
-    which python3
-    echo ninja location
-    which ninja
-    echo meson location
-    which meson
   )
 
   IF %BUILDTOOL%==cmake (
