@@ -54,7 +54,7 @@ namespace osmscout {
     };
 
     using DirectXGlyph = Glyph<DirectXNativeGlyph>;
-    
+
     class DirectXTextLayout
     {
     public:
@@ -62,18 +62,18 @@ namespace osmscout {
       FLOAT               m_fSize;
       IDWriteTextLayout*  m_pDWriteTextLayout;
       DWRITE_TEXT_METRICS m_TextMetrics;
-      
+
     public:
       DirectXTextLayout(IDWriteFactory* m_pWriteFactory, double fontSize, IDWriteTextFormat* font, std::string text);
       ~DirectXTextLayout();
     };
 
     using DirectXLabel = Label<DirectXNativeGlyph, DirectXTextLayout>;
-    
+
   private:
     using DirectXLabelLayouter = LabelLayouter<DirectXNativeGlyph, DirectXTextLayout, MapPainterDirectX>;
     friend DirectXLabelLayouter;
-    
+
   private:
     typedef std::unordered_map<uint32_t, IDWriteTextFormat*> FontMap;
     FontMap m_Fonts;
@@ -99,13 +99,13 @@ namespace osmscout {
     TypeConfigRef typeConfig;
 
     DirectXLabelLayouter            m_LabelLayouter;
-    
+
   private:
     D2D1_COLOR_F GetColorValue(const Color& color);
     ID2D1SolidColorBrush* GetColorBrush(const Color& color);
     ID2D1SolidColorBrush* GetColorBrush(D2D1_COLOR_F& color);
     ID2D1StrokeStyle* GetStrokeStyle(const std::vector<double>& dash);
-    void _DrawText(const Projection& projection, const MapParameter& parameter, double x, double y, const Color& color, const DirectXTextLayout& textLayout);
+    void _DrawText(double x, double y, const Color& color, const DirectXTextLayout& textLayout);
     bool LoadBitmapFromFile(PCWSTR uri, ID2D1Bitmap **ppBitmap);
     IDWriteTextFormat* GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
 
@@ -154,7 +154,7 @@ namespace osmscout {
                     const MapParameter &parameter,
                     const osmscout::PathTextStyleRef style,
                     const std::vector<osmscout::Glyph<DirectXNativeGlyph>> &glyphs);
-                   
+
 	/**
 	Register regular label with given text at the given pixel coordinate
 	in a style defined by the given LabelStyle.
@@ -201,9 +201,9 @@ namespace osmscout {
                                          double objectWidth,
                                          bool enableWrapping = false,
                                          bool contourLabel = false);
-                          
+
     osmscout::DoubleRectangle GlyphBoundingBox(const DirectXNativeGlyph &glyph) const;
-    
+
 	/*
     virtual void DrawContourLabel(const Projection& projection,
                                   const MapParameter& parameter,
