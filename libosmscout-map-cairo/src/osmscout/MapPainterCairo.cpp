@@ -812,13 +812,12 @@ namespace osmscout {
     cairo_get_matrix(draw, &matrix);
 
     cairo_set_source_rgba(draw,
-                         style->GetTextColor().GetR(),
-                         style->GetTextColor().GetG(),
-                         style->GetTextColor().GetB(),
-                         style->GetTextColor().GetA());
+                          style->GetTextColor().GetR(),
+                          style->GetTextColor().GetG(),
+                          style->GetTextColor().GetB(),
+                          style->GetTextColor().GetA());
 
     for (auto const &glyph:glyphs) {
-
       cairo_set_matrix(draw, &matrix);
       cairo_translate(draw, glyph.position.GetX(), glyph.position.GetY());
       cairo_rotate(draw, glyph.angle);
