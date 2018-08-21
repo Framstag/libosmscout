@@ -22,7 +22,7 @@
 namespace osmscout {
 
   static double FONT_HEIGHT_FACTOR=10; //!< Height of the font in pixel in relation to the given fontSize
-  static double FONT_WIDTH_HEIGHT_FACTOR=1; //!< Width of an individual character in relation to its height
+  //static double FONT_WIDTH_HEIGHT_FACTOR=1; //!< Width of an individual character in relation to its height
 
   MapPainterNoOp::MapPainterNoOp(const StyleConfigRef& styleConfig)
           : MapPainter(styleConfig,
@@ -45,20 +45,6 @@ namespace osmscout {
     return FONT_HEIGHT_FACTOR*fontSize;
   }
 
-  MapPainter::TextDimension MapPainterNoOp::GetTextDimension(const Projection& /*projection*/,
-                                                             const MapParameter& /*parameter*/,
-                                                             double /*objectWidth*/,
-                                                             double fontSize,
-                                                             const std::string& text)
-  {
-    double height=FONT_HEIGHT_FACTOR*FONT_WIDTH_HEIGHT_FACTOR*fontSize;
-
-    return TextDimension(0.0,
-                         0.0,
-                         text.length()*height,
-                         height);
-  }
-
   void MapPainterNoOp::DrawGround(const Projection& /*projection*/,
                                   const MapParameter& /*parameter*/,
                                   const FillStyle& /*style*/)
@@ -67,13 +53,30 @@ namespace osmscout {
   }
 
 
-  void MapPainterNoOp::DrawLabel(const Projection& /*projection*/,
-                                 const MapParameter& /*parameter*/,
-                                 const LabelData& /*label*/)
+  void MapPainterNoOp::RegisterRegularLabel(const Projection& /*projection*/,
+                                            const MapParameter& /*parameter*/,
+                                            const std::vector<LabelData> &/*labels*/,
+                                            const Vertex2D& /*position*/,
+                                            const double /*iconHeight*/)
   {
     // no code
   }
 
+
+  void MapPainterNoOp::RegisterContourLabel(const Projection & /*projection*/,
+                                            const MapParameter & /*parameter*/,
+                                            const PathLabelData & /*label*/,
+                                            const LabelPath & /*labelPath*/)
+  {
+    // no code
+  }
+
+  void MapPainterNoOp::DrawLabels(const osmscout::Projection&,
+                                  const osmscout::MapParameter&,
+                                  const osmscout::MapData&)
+  {
+    // no code
+  }
 
   void MapPainterNoOp::DrawIcon(const IconStyle* /*style*/,
                                 double /*x*/,
@@ -105,19 +108,6 @@ namespace osmscout {
   {
     // no code
   }
-
-
-  void MapPainterNoOp::DrawContourLabel(const Projection& /*projection*/,
-                                        const MapParameter& /*parameter*/,
-                                        const PathTextStyle& /*style*/,
-                                        const std::string& /*text*/,
-                                        size_t /*transStart*/,
-                                        size_t /*transEnd*/,
-                                        ContourLabelHelper& /*helper*/)
-  {
-    // no code
-  }
-
 
   void MapPainterNoOp::DrawContourSymbol(const Projection& /*projection*/,
                                          const MapParameter& /*parameter*/,

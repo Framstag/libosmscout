@@ -17,92 +17,91 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/SimplifiedPath.h>
-#include <QVector2D>
+#include <osmscout/LabelPath.h>
 #include <osmscout/system/Math.h>
+#include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 
-  SimplifiedPath::SimplifiedPath(qreal minSegmentLength):
+
+  LabelPath::LabelPath(double minSegmentLength):
     length(0), minSegmentLength(minSegmentLength), endDistance(0)
   {
-    offsetIndex<<0;
+    offsetIndex.push_back(0);
   }
 
-  SimplifiedPath::~SimplifiedPath()
+  LabelPath::~LabelPath()
   {
   }
 
-  void SimplifiedPath::AddPoint(qreal x,qreal y)
+  void LabelPath::AddPoint(double x,double y)
   {
     if (segments.empty()){
-      end.setX(x);
-      end.setY(y);
+      end.Set(x,y);
       Segment s={end,0,0,0};
-      segments<<s;
+      segments.push_back(s);
     }else{
-      end.setX(x);
-      end.setY(y);
-      Segment last=segments.last();
-      float endDistance=QVector2D(last.start).distanceToPoint(QVector2D(x,y));
+      end.Set(x,y);
+      Segment last=segments.back();
+      float endDistance = last.start.DistanceTo(Vertex2D(x,y)); //  QVector2D(last.start).distanceToPoint(QVector2D(x,y));
       if (endDistance>minSegmentLength){
         length+=endDistance;
         last.length=endDistance;
-        last.angle=std::atan2(last.start.y()-y,x-last.start.x());
+        last.angle=std::atan2(last.start.GetY()-y,x-last.start.GetX());
         segments[segments.size()-1]=last;
 
         // fill offsetIndex
         for (int i=offsetIndex.size();i<length/100;i++){
-          offsetIndex<<segments.size()-1;
+          offsetIndex.push_back(segments.size()-1);
         }
 
         Segment s={end,length,0,0};
-        segments<<s;
-        endDistance=0;
+        segments.push_back(s);
       }
     }
   }
 
-  QPointF SimplifiedPath::PointAtLength(qreal offset) const
+  Vertex2D LabelPath::PointAtLength(double offset) const
   {
-    if (segments.isEmpty()){
-      return QPointF();
+    if (segments.empty()){
+      return Vertex2D();
     }
-    Segment relevantSetment=segmentBefore(offset);
-    QPointF p=relevantSetment.start;
-    QPointF add(std::cos(relevantSetment.angle), -std::sin(relevantSetment.angle));
+    Segment relevantSetment= SegmentBefore(offset);
+    Vertex2D p=relevantSetment.start;
+    double mul = (offset-relevantSetment.offset);
+    Vertex2D add(std::cos(relevantSetment.angle) * mul, -std::sin(relevantSetment.angle) * mul);
     
-    return p + add*(offset-relevantSetment.offset);
+    return Vertex2D(p.GetX() + add.GetX(), p.GetY() + add.GetY());
   }
 
-  const Segment& SimplifiedPath::segmentBefore(qreal offset) const
+  const Segment& LabelPath::SegmentBefore(double offset) const
   {
-    int hundred=offset/100;
+    size_t hundred=offset/100;
     if (hundred>=offsetIndex.size())
-      return segments.last();
-    int i=offsetIndex[hundred];
+      return segments.back();
+    size_t i=offsetIndex[hundred];
     for (;i<segments.size();i++){
       const Segment &seg=segments[i];
       if (offset<(seg.offset+seg.length)){
         return seg;
       }
     }
-    return segments.last();
+    return segments.back();
   }
 
-  qreal SimplifiedPath::AngleAtLength(qreal offset) const
+  double LabelPath::AngleAtLength(double offset) const
   {
-    return segmentBefore(offset).angle;
+    return SegmentBefore(offset).angle;
   }
 
-  qreal SimplifiedPath::AngleAtLengthDeg(qreal offset) const
+  double LabelPath::AngleAtLengthDeg(double offset) const
   {
     return (AngleAtLength(offset) * 180) / M_PI;
   }
 
-  bool SimplifiedPath::TestAngleVariance(qreal startOffset, qreal endOffset, qreal maximumAngle)
+  bool LabelPath::TestAngleVariance(double startOffset, double endOffset, double maximumAngle) const
   {
-    qreal initialAngle=0;
+    double initialAngle=0;
     bool initialised=false;
     for (const Segment &seg:segments){
       if (seg.offset>endOffset){
@@ -113,10 +112,7 @@ namespace osmscout {
           initialAngle=seg.angle;
           initialised=true;
         }else{
-          qreal change=std::abs(initialAngle-seg.angle);
-          if (change>M_PI)
-            change-=M_PI;
-          if (change>maximumAngle){
+          if (AngleDiff(initialAngle,seg.angle) > maximumAngle){
             return false;
           }
         }

@@ -32,7 +32,6 @@
 //add_definitions(-DUNICODE -D_UNICODE)
 
 #if defined(UNICODE) || defined(_UNICODE) || defined(_MBCS) || defined(MBCS)
-#define MBUC
 #define __T(x)      L ## x
 #else
 #define __T(x)           x
@@ -84,9 +83,101 @@ namespace osmscout
     return wstrTo;
   }
 
+  MapPainterDirectX::DirectXTextLayout::DirectXTextLayout(IDWriteFactory* pWriteFactory,
+                                                          double fontSize,
+                                                          IDWriteTextFormat* font,
+                                                          std::string text)
+  {
+	  DoubleRectangle dimension;
+
+    m_pWriteFactory=pWriteFactory;
+
+#ifdef MBUC
+    std::wstring sample = s2w(text);
+#else
+    std::string sample = text;
+#endif
+
+    m_fSize = float(fontSize * fontSizeFactor * sample.length());
+
+    m_pDWriteTextLayout = NULL;
+    HRESULT hr = pWriteFactory->CreateTextLayout(sample.c_str(),
+                                                 sample.length(),
+                                                 font,
+                                                 m_fSize * 2.0f,
+                                                 m_fSize,
+                                                 &m_pDWriteTextLayout);
+    if (FAILED(hr))
+    {
+      return;
+    }
+
+    hr = m_pDWriteTextLayout->GetMetrics(&m_TextMetrics);
+
+    if (FAILED(hr)) {
+      return;
+    }
+  }
+
+  MapPainterDirectX::DirectXTextLayout::~DirectXTextLayout()
+  {
+    m_pDWriteTextLayout->Release();
+  }
+
+  template<>
+  std::vector<Glyph<MapPainterDirectX::DirectXNativeGlyph>> MapPainterDirectX::DirectXLabel::ToGlyphs() const
+  {
+    std::vector<Glyph<MapPainterDirectX::DirectXNativeGlyph>> result;
+
+    double horizontalOffset = 0;
+    for (size_t ch = 0; ch < text.length(); ch++){
+      result.emplace_back();
+
+#ifdef MBUC
+      std::wstring sample = s2w(text.substr(ch,1));
+#else
+      std::string sample = text.substr(ch,1);
+#endif
+
+      result.back().glyph.character = sample;
+
+      IDWriteTextLayout* pDWriteTextLayout = NULL;
+      HRESULT hr = label.m_pWriteFactory->CreateTextLayout(sample.c_str(),
+                                                           sample.length(),
+                                                           label.m_pDWriteTextLayout,
+                                                           label.m_fSize * 2.0f,
+                                                           label.m_fSize,
+                                                           &pDWriteTextLayout);
+      DWRITE_TEXT_METRICS textMetrics;
+      hr = pDWriteTextLayout->GetMetrics(&textMetrics);
+
+      pDWriteTextLayout->Release();
+
+      if (FAILED(hr)) {
+        result.back().glyph.width = 0;
+        result.back().glyph.height = 0;
+      }
+      else
+      {
+        result.back().glyph.width = textMetrics.width;
+        result.back().glyph.height = label.m_TextMetrics.height;
+      }
+
+      result.back().position.SetX(horizontalOffset);
+      result.back().position.SetY(0);
+
+      horizontalOffset += result.back().glyph.width;
+    }
+
+    return result;
+  }
+
   D2D1_COLOR_F MapPainterDirectX::GetColorValue(const Color& color)
   {
-    return D2D1::ColorF((FLOAT)color.GetR(), (FLOAT)color.GetG(), (FLOAT)color.GetB(), (FLOAT)color.GetA());
+    return D2D1::ColorF((FLOAT)color.GetR(),
+                        (FLOAT)color.GetG(),
+                        (FLOAT)color.GetB(),
+                        (FLOAT)color.GetA());
   }
 
   ID2D1SolidColorBrush* MapPainterDirectX::GetColorBrush(const Color& color)
@@ -176,31 +267,16 @@ namespace osmscout
     return m_dashLessStrokeStyle;
   }
 
-  void MapPainterDirectX::_DrawText(const Projection& projection, const MapParameter& parameter, double x, double y, double fontSize, const Color& color, std::string text)
+  void MapPainterDirectX::_DrawText(double x, double y,
+                                    const Color& color,
+                                    const DirectXTextLayout& textLayout)
   {
-#ifdef MBUC
-    std::wstring enc = s2w(text);
-#else
-    std::string enc = text;
-#endif
-    FLOAT size = float(fontSize * fontSizeFactor* text.length());
-    IDWriteTextFormat* tf = GetFont(projection, parameter, fontSize);
-    IDWriteTextLayout* pDWriteTextLayout = NULL;
-    HRESULT hr = m_pWriteFactory->CreateTextLayout(
-      enc.c_str(),
-      enc.length(),
-      tf,
-      size * 2.0f,
-      size,
-      &pDWriteTextLayout);
-    if (FAILED(hr))
-      return;
-    DWRITE_TEXT_METRICS textMetrics;
-    hr = pDWriteTextLayout->GetMetrics(&textMetrics);
-    pDWriteTextLayout->Release();
-    if (SUCCEEDED(hr)) {
-      m_pRenderTarget->DrawText(enc.c_str(), enc.length(), tf, RECTF(x, y, x + textMetrics.width * 1.1f, y + textMetrics.height * 1.1f), GetColorBrush(color));
-    }
+    D2D1_POINT_2F origin;
+
+    origin.x=x;
+    origin.y=y;
+
+    m_pRenderTarget->DrawTextLayout(origin,textLayout.m_pDWriteTextLayout,GetColorBrush(color));
   }
 
   bool MapPainterDirectX::LoadBitmapFromFile(PCWSTR uri, ID2D1Bitmap **ppBitmap)
@@ -276,7 +352,9 @@ namespace osmscout
     return (SUCCEEDED(hr));
   }
 
-  IDWriteTextFormat* MapPainterDirectX::GetFont(const Projection& projection, const MapParameter& parameter, double fontSize)
+  IDWriteTextFormat* MapPainterDirectX::GetFont(const Projection& projection,
+                                                const MapParameter& parameter,
+                                                double fontSize)
   {
     FontMap::const_iterator f;
     fontSize = fontSize * float(projection.ConvertWidthToPixel(parameter.GetFontSize()));
@@ -287,11 +365,13 @@ namespace osmscout
     if (f != m_Fonts.end()) {
       return f->second;
     }
+
 #ifdef MBUC
     std::wstring font = s2w(parameter.GetFontName());
 #else
     std::string font = parameter.GetFontName();
 #endif
+
     IDWriteTextFormat* pTextFormat;
     HRESULT hr = m_pWriteFactory->CreateTextFormat(
       font.c_str(),
@@ -304,21 +384,42 @@ namespace osmscout
       &pTextFormat
     );
 
-    if (SUCCEEDED(hr))
+    if (SUCCEEDED(hr)) {
       return m_Fonts.insert(std::make_pair(hash, pTextFormat)).first->second;
-    else
+    }
+    else {
+      std::cerr << "Could not get font " << parameter.GetFontName() << " " << fontSize << std::endl;
       return NULL;
+    }
   }
 
-  void MapPainterDirectX::AfterPreprocessing(const StyleConfig& styleConfig, const Projection& projection, const MapParameter& parameter, const MapData& data)
+  void MapPainterDirectX::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
+                                             const Projection& /*projection*/,
+                                             const MapParameter& /*parameter*/,
+                                             const MapData& /*data*/)
   {
   }
 
-  void MapPainterDirectX::BeforeDrawing(const StyleConfig& styleConfig, const Projection& projection, const MapParameter& parameter, const MapData& data)
+  void MapPainterDirectX::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                        const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const MapData& /*data*/)
   {
+    DoubleRectangle viewport;
+
+    viewport.x=0;
+    viewport.y=0;
+    viewport.width=projection.GetWidth();
+    viewport.height=projection.GetHeight();
+
+    m_LabelLayouter.SetViewport(viewport);
+    m_LabelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
   }
 
-  void MapPainterDirectX::AfterDrawing(const StyleConfig& styleConfig, const Projection& projection, const MapParameter& parameter, const MapData& data)
+  void MapPainterDirectX::AfterDrawing(const StyleConfig& /*styleConfig*/,
+                                       const Projection& /*projection*/,
+                                       const MapParameter& /*parameter*/,
+                                       const MapData& /*data*/)
   {
     for (GeometryMap::const_iterator entry = m_Polygons.begin(); entry != m_Polygons.end(); ++entry) {
       if (entry->second != NULL) {
@@ -329,7 +430,9 @@ namespace osmscout
     m_Polygons.clear();
   }
 
-  bool MapPainterDirectX::HasIcon(const StyleConfig& styleConfig, const MapParameter& parameter, IconStyle& style)
+  bool MapPainterDirectX::HasIcon(const StyleConfig& /*styleConfig*/,
+                                  const MapParameter& parameter,
+                                  IconStyle& style)
   {
     // Already loaded with error
     if (style.GetIconId() == 0)
@@ -373,7 +476,7 @@ namespace osmscout
       return fontHeightMap[fontSize];
     else
     {
-      TextDimension dimension;
+      DoubleRectangle dimension;
 
       dimension = GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
       fontHeightMap[fontSize] = dimension.height;
@@ -382,14 +485,14 @@ namespace osmscout
     }
   }
 
-  MapPainter::TextDimension MapPainterDirectX::GetTextDimension(
+  DoubleRectangle MapPainterDirectX::GetTextDimension(
     const Projection& projection,
     const MapParameter& parameter,
-    double objectWidth,
+    double /*objectWidth*/,
     double fontSize,
     const std::string& text)
   {
-    TextDimension dimension;
+	DoubleRectangle dimension;
 
 #ifdef MBUC
     std::wstring sample = s2w(text);
@@ -405,8 +508,8 @@ namespace osmscout
                                                    size * 2.0f,
                                                    size,
                                                    &pDWriteTextLayout);
-    dimension.xOff = 0.0;
-    dimension.yOff = 0.0;
+    dimension.x = 0.0;
+    dimension.y = 0.0;
 
     if (FAILED(hr))
     {
@@ -432,35 +535,135 @@ namespace osmscout
     return dimension;
   }
 
-  void MapPainterDirectX::DrawGround(const Projection& projection, const MapParameter& parameter, const FillStyle& style)
+  void MapPainterDirectX::DrawGround(const Projection& projection,
+                                     const MapParameter& /*parameter*/,
+                                     const FillStyle& style)
   {
-    m_pRenderTarget->FillRectangle(RECTF(0.0f, 0.0f, projection.GetWidth(), projection.GetHeight()), GetColorBrush(style.GetFillColor()));
+    m_pRenderTarget->FillRectangle(RECTF(0.0f, 0.0f,
+                                         projection.GetWidth(),
+                                         projection.GetHeight()),
+                                   GetColorBrush(style.GetFillColor()));
   }
 
-  void MapPainterDirectX::DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
+  void MapPainterDirectX::DrawLabel(const Projection& /*projection*/,
+                                    const MapParameter& /*parameter*/,
+                                    const DoubleRectangle& labelRectangle,
+                                    const LabelData& label,
+                                    const DirectXTextLayout& textLayout)
+
   {
     if (dynamic_cast<const TextStyle*>(label.style.get()) != NULL) {
       const TextStyle* style = dynamic_cast<const TextStyle*>(label.style.get());
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
       double b = style->GetTextColor().GetB();
-      _DrawText(projection, parameter, label.x, label.y, label.fontSize, Color(r, g, b, label.alpha), label.text);
+
+      // TODO check style->GetStyle() for normal/emphasize
+
+      _DrawText(labelRectangle.x,
+                labelRectangle.y,
+                Color(r,g,b,label.alpha),
+                textLayout);
     }
     else if (dynamic_cast<const ShieldStyle*>(label.style.get()) != NULL) {
       const ShieldStyle *style = dynamic_cast<const ShieldStyle*>(label.style.get());
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
       double b = style->GetTextColor().GetB();
+
       // Shield background
-      D2D1_RECT_F shieldRectangle = RECTF(label.bx1, label.by1, label.bx2 + 1, label.by2 + 1);
+      D2D1_RECT_F shieldRectangle = RECTF(labelRectangle.x-2,
+                                          labelRectangle.y,
+                                          labelRectangle.x-2+labelRectangle.width+1+3,
+                                          labelRectangle.y+labelRectangle.height+1+1);
       m_pRenderTarget->FillRectangle(shieldRectangle, GetColorBrush(style->GetBgColor()));
       // Shield border
-      shieldRectangle = RECTF(label.bx1 + 2, label.by1 + 2, label.bx2 + 1 - 4, label.by2 + 1 - 4);
-      m_pRenderTarget->DrawRectangle(shieldRectangle, GetColorBrush(style->GetBorderColor()));
-      _DrawText(projection, parameter, label.x, label.y, label.fontSize, Color(r, g, b, label.alpha), label.text);
+      shieldRectangle = RECTF(labelRectangle.x,
+                              labelRectangle.y+2,
+                              labelRectangle.x+labelRectangle.width+1+3-4,
+                              labelRectangle.y+2+labelRectangle.height+1+1-4);
+      m_pRenderTarget->DrawRectangle(shieldRectangle,
+                                     GetColorBrush(style->GetBorderColor()));
+      _DrawText(labelRectangle.x,
+                labelRectangle.y,
+                Color(r,g,b,label.alpha),
+                textLayout);
     }
-    else
-      _DrawText(projection, parameter, label.x, label.y, label.fontSize, Color::BLACK, label.text);
+  }
+
+  void MapPainterDirectX::DrawGlyphs(const Projection &projection,
+                                     const MapParameter &parameter,
+                                     const osmscout::PathTextStyleRef style,
+                                     const std::vector<osmscout::Glyph<DirectXNativeGlyph>> &glyphs)
+  {
+    //std::cout << "Draw glyphs..." << std::endl;
+
+    for (const auto& glyph : glyphs) {
+        #ifdef MBUC
+            std::wstring enc = glyph.glyph.character;
+        #else
+            std::string enc = glyph.glyph.character;
+        #endif
+            float length;
+            D2D1_MATRIX_3X2_F currentTransform;
+            m_pRenderTarget->GetTransform(&currentTransform);
+            FLOAT size = style->GetSize() * fontSizeFactor * glyph.glyph.width;
+            IDWriteTextFormat* tf = GetFont(projection, parameter, style->GetSize());
+            IDWriteTextLayout* pDWriteTextLayout = NULL;
+            HRESULT hr = m_pWriteFactory->CreateTextLayout(
+              enc.c_str(),
+              enc.length(),
+              tf,
+              size*2.0f,
+              size,
+              &pDWriteTextLayout);
+            if (SUCCEEDED(hr)) {
+                D2D1_POINT_2F origin;
+
+                origin.x=glyph.position.GetX();
+                origin.y=glyph.position.GetY();
+
+                m_pRenderTarget->DrawTextLayout(origin,
+                                                pDWriteTextLayout,
+                                                GetColorBrush(style->GetTextColor()));
+              pDWriteTextLayout->Release();
+            }
+    }
+
+    //std::cout << "Draw glyphs...done" << std::endl;
+  }
+
+  void MapPainterDirectX::RegisterRegularLabel(const Projection &projection,
+	  const MapParameter &parameter,
+	  const std::vector<LabelData> &labels,
+	  const Vertex2D &position,
+	  double objectWidth)
+  {
+    m_LabelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+  }
+
+  /**
+  * Register contour label
+  */
+  void MapPainterDirectX::RegisterContourLabel(const Projection &projection,
+	  const MapParameter &parameter,
+	  const PathLabelData &label,
+	  const LabelPath &labelPath)
+  {
+    m_LabelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+  }
+
+  void MapPainterDirectX::DrawLabels(const Projection& projection,
+	  const MapParameter& parameter,
+	  const MapData& /*data*/)
+  {
+    m_LabelLayouter.Layout();
+
+    m_LabelLayouter.DrawLabels(projection,
+                               parameter,
+                               this);
+
+    m_LabelLayouter.Reset();
   }
 
   void MapPainterDirectX::DrawIcon(const IconStyle* style, double x, double y)
@@ -474,7 +677,11 @@ namespace osmscout
     m_pRenderTarget->DrawBitmap(m_Bitmaps[idx], RECTF(x - dx, y - dy, x + dx, y + dy));
   }
 
-  void MapPainterDirectX::DrawSymbol(const Projection& projection, const MapParameter& parameter, const Symbol& symbol, double x, double y)
+  void MapPainterDirectX::DrawSymbol(const Projection& projection,
+                                     const MapParameter& /*parameter*/,
+                                     const Symbol& symbol,
+                                     double x,
+                                     double y)
   {
     double minX;
     double minY;
@@ -527,7 +734,12 @@ namespace osmscout
             }
           }
           m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(polygon->GetFillStyle()->GetFillColor()));
-          if (hasBorder) m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(polygon->GetBorderStyle()->GetColor()), borderWidth, GetStrokeStyle(polygon->GetBorderStyle()->GetDash()));
+          if (hasBorder) {
+              m_pRenderTarget->DrawGeometry(pPathGeometry,
+                                            GetColorBrush(polygon->GetBorderStyle()->GetColor()),
+                                            borderWidth,
+                                            GetStrokeStyle(polygon->GetBorderStyle()->GetDash()));
+          }
           pPathGeometry->Release();
           delete coords;
         }
@@ -555,8 +767,16 @@ namespace osmscout
     }
   }
 
-  void MapPainterDirectX::DrawPath(const Projection& projection, const MapParameter& parameter, const Color& color, double width, const std::vector<double>& dash, LineStyle::CapStyle startCap, LineStyle::CapStyle endCap, size_t transStart, size_t transEnd)
+  void MapPainterDirectX::DrawPath(const Projection& /*projection*/,
+                                   const MapParameter& /*parameter*/,
+                                   const Color& color,
+                                   double width,
+                                   const std::vector<double>& dash,
+                                   LineStyle::CapStyle /*startCap*/,
+                                   LineStyle::CapStyle /*endCap*/,
+                                   size_t transStart, size_t transEnd)
   {
+    // TODO: Evaluate capStyle
     ID2D1PathGeometry* pPathGeometry;
     HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
     if (SUCCEEDED(hr))
@@ -565,7 +785,9 @@ namespace osmscout
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
-        pSink->BeginFigure(POINTF(coordBuffer->buffer[transStart].GetX(), coordBuffer->buffer[transStart].GetY()), D2D1_FIGURE_BEGIN_HOLLOW);
+        pSink->BeginFigure(POINTF(coordBuffer->buffer[transStart].GetX(),
+                                  coordBuffer->buffer[transStart].GetY()),
+                                  D2D1_FIGURE_BEGIN_HOLLOW);
 
         for (size_t i = transStart + 1; i <= transEnd; i++) {
           pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
@@ -580,6 +802,36 @@ namespace osmscout
     pPathGeometry->Release();
   }
 
+  std::shared_ptr<MapPainterDirectX::DirectXLabel> MapPainterDirectX::Layout(const Projection& projection,
+                                                                             const MapParameter& parameter,
+                                                                             const std::string& text,
+                                                                             double fontSize,
+                                                                             double /*objectWidth*/,
+                                                                             bool /*enableWrapping*/,
+                                                                             bool /*contourLabel*/)
+  {
+    // TODO: Evaluate objectWidth and enableWrapping to
+    // support multi-line layouted labels
+    auto font = GetFont(projection, parameter, fontSize);
+    auto label = std::make_shared<MapPainterDirectX::DirectXLabel>(m_pWriteFactory, fontSize, font, text);
+
+    label->text=text;
+    label->fontSize=fontSize;
+    label->width=label->label.m_TextMetrics.width;
+    label->height=label->label.m_TextMetrics.height;
+
+    return label;
+  }
+
+  osmscout::DoubleRectangle MapPainterDirectX::GlyphBoundingBox(const DirectXNativeGlyph &glyph) const
+  {
+    return DoubleRectangle(0,
+                           glyph.height * -1,
+                           glyph.width,
+                           glyph.height);
+  }
+
+  /*
   void MapPainterDirectX::DrawContourLabel(const Projection& projection,
                                            const MapParameter& parameter,
                                            const PathTextStyle& style,
@@ -653,18 +905,21 @@ namespace osmscout
     }
     pPathGeometry->Release();
   }
+  */
 
-  void MapPainterDirectX::DrawContourSymbol(const Projection& projection,
-                                            const MapParameter& parameter,
-                                            const Symbol& symbol,
-                                            double space,
-                                            size_t transStart,
-                                            size_t transEnd)
+  void MapPainterDirectX::DrawContourSymbol(const Projection& /*projection*/,
+                                            const MapParameter& /*parameter*/,
+                                            const Symbol& /*symbol*/,
+                                            double /*space*/,
+                                            size_t /*transStart*/,
+                                            size_t /*transEnd*/)
   {
     // Not implemented yet
   }
 
-  void MapPainterDirectX::DrawArea(const Projection& projection, const MapParameter& parameter, const MapPainter::AreaData& area)
+  void MapPainterDirectX::DrawArea(const Projection& projection,
+                                   const MapParameter& /*parameter*/,
+                                   const MapPainter::AreaData& area)
   {
     std::shared_ptr<FillStyle> fillStyle = area.fillStyle;
     std::shared_ptr<BorderStyle> borderStyle = area.borderStyle;
@@ -728,17 +983,21 @@ namespace osmscout
     }
   }
 
-  MapPainterDirectX::MapPainterDirectX(const StyleConfigRef& styleConfig, ID2D1Factory* pDirect2dFactory, IDWriteFactory* pWriteFactory)
+  MapPainterDirectX::MapPainterDirectX(const StyleConfigRef& styleConfig,
+                                       ID2D1Factory* pDirect2dFactory,
+                                       IDWriteFactory* pWriteFactory)
     : MapPainter(styleConfig, new CoordBuffer()),
     m_dashLessStrokeStyle(NULL),
     m_pDirect2dFactory(pDirect2dFactory),
     m_pWriteFactory(pWriteFactory),
-    m_pRenderingParams(NULL),
     m_pRenderTarget(NULL),
     m_pImagingFactory(NULL),
+    m_pRenderingParams(NULL),
+    m_pPathTextRenderer(NULL),
     dpiX(0.0f),
     dpiY(0.0f),
-    typeConfig(NULL)
+    typeConfig(NULL),
+    m_LabelLayouter(this)
   {
     pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
     HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&m_pImagingFactory);
@@ -805,7 +1064,10 @@ namespace osmscout
     m_Polygons.clear();
   }
 
-  bool MapPainterDirectX::DrawMap(const Projection& projection, const MapParameter& parameter, const MapData& data, ID2D1RenderTarget* renderTarget)
+  bool MapPainterDirectX::DrawMap(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data,
+                                  ID2D1RenderTarget* renderTarget)
   {
     bool result = true;
 

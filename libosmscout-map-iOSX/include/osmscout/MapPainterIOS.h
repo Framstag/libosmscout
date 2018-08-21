@@ -4,17 +4,17 @@
 /*
  This source is part of the libosmscout-map library
  Copyright (C) 2010  Tim Teulings, Vladimir Vyskocil
-
+ 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
-
+ 
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
@@ -37,27 +37,46 @@
 #define OSMSCOUT_REVERSED_Y_AXIS 1
 #endif
 
+#import <CoreText/CoreText.h>
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
-    typedef struct {
-        bool closeWay;
-        size_t transStart;
-        size_t transEnd;
-        size_t i;
-        size_t nVertex;
-        ssize_t direction;
-    } FollowPathHandle;
-
+    
     class MapPainterIOS : public MapPainter {
+    public:
+        typedef struct {
+            bool closeWay;
+            size_t transStart;
+            size_t transEnd;
+            size_t i;
+            size_t nVertex;
+            ssize_t direction;
+        } FollowPathHandle;
+        
+        struct NativeGlyph {
+            double x;
+            double y;
+            const CTRunRef glyph;
+        };
+        struct NativeLabel {
+            std::wstring text;
+            std::vector<NativeGlyph> glyphs;
+        };
+        using IOSLabel = Label<NativeGlyph, NativeLabel>;
+        using IOSGlyph = Glyph<NativeGlyph>;
+        using IOSLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterIOS>;
+        friend IOSLabelLayouter;
+        
     private:
         CGContextRef                cg;
         CGFloat                     contentScale;
-
+        
+        IOSLabelLayouter            labelLayouter;
+        
         std::vector<Image>          images;         // Cached CGImage for icons
         std::vector<Image>          patternImages;  // Cached CGImage for patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
-
+        
         static constexpr double plateLabelMargin = 10.0;
         static constexpr double contourLabelMargin = 50.0;
         static constexpr double contourLabelSpace = 200.0;
@@ -65,64 +84,73 @@ namespace osmscout {
         static constexpr double sameLabelMinDistanceSq = 1600.0;
         typedef std::unordered_multimap<std::string,Vertex2D *> WayLabelsMap;
         WayLabelsMap wayLabels;
-
+        
     public:
         OSMSCOUT_API MapPainterIOS(const StyleConfigRef& styleConfig);
         virtual ~MapPainterIOS();
-
+        
         OSMSCOUT_API bool DrawMap(const StyleConfig& styleConfig,
-                     const Projection& projection,
-                     const MapParameter& parameter,
-                     const MapData& data,
-                     CGContextRef paintCG);
-
+                                  const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data,
+                                  CGContextRef paintCG);
+        
         OSMSCOUT_API void DrawGroundTiles(const Projection& projection,
-                             const MapParameter& parameter,
-                             const std::list<GroundTile>& groundTiles,
-                             CGContextRef paintCG);
+                                          const MapParameter& parameter,
+                                          const std::list<GroundTile>& groundTiles,
+                                          CGContextRef paintCG);
     protected:
         bool HasIcon(const StyleConfig& styleConfig,
                      const MapParameter& parameter,
-                     IconStyle& style);
-
+                     IconStyle& style) override;
+        
         bool HasPattern(const MapParameter& parameter,
                         const FillStyle& style);
-
+        
         double GetFontHeight(const Projection& projection,
-                           const MapParameter& parameter,
-                           double fontSize);
-
-        TextDimension GetTextDimension(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       double objectWidth,
-                                       double fontSize,
-                                       const std::string& text);
-
+                             const MapParameter& parameter,
+                             double fontSize) override;
+        
         void DrawContourSymbol(const Projection& projection,
                                const MapParameter& parameter,
                                const Symbol& symbol,
                                double space,
-                               size_t transStart, size_t transEnd);
-
+                               size_t transStart, size_t transEnd) override;
+        
         void DrawLabel(const Projection& projection,
                        const MapParameter& parameter,
-                       const LabelData& label);
-
-        void DrawContourLabel(const Projection& projection,
-                              const MapParameter& parameter,
-                              const PathTextStyle& style,
-                              const std::string& text,
-                              size_t transStart, size_t transEnd,
-                              ContourLabelHelper& helper);
-
+                       const DoubleRectangle& labelRectangle,
+                       const LabelData& label,
+                       const NativeLabel& layout);
+        
+        virtual void BeforeDrawing(const StyleConfig& styleConfig,
+                                   const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const MapData& data) override;
+        
+        virtual void RegisterRegularLabel(const Projection &projection,
+                                          const MapParameter &parameter,
+                                          const std::vector<LabelData> &labels,
+                                          const Vertex2D &position,
+                                          double objectWidth) override;
+        
+        virtual void RegisterContourLabel(const Projection &projection,
+                                          const MapParameter &parameter,
+                                          const PathLabelData &label,
+                                          const LabelPath &labelPath) override;
+        
+        virtual void DrawLabels(const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& data) override;
+        
         void DrawIcon(const IconStyle* style,
-                      double x, double y);
-
+                      double x, double y) override;
+        
         void DrawSymbol(const Projection& projection,
                         const MapParameter& parameter,
                         const Symbol& symbol,
-                        double x, double y);
-
+                        double x, double y) override;
+        
         void DrawPath(const Projection& projection,
                       const MapParameter& parameter,
                       const Color& color,
@@ -130,38 +158,49 @@ namespace osmscout {
                       const std::vector<double>& dash,
                       LineStyle::CapStyle startCap,
                       LineStyle::CapStyle endCap,
-                      size_t transStart, size_t transEnd);
-
+                      size_t transStart, size_t transEnd) override;
+        
         void DrawArea(const Projection& projection,
                       const MapParameter& parameter,
-                      const AreaData& area);
-
+                      const AreaData& area) override;
+        
         void DrawGround(const Projection& projection,
                         const MapParameter& parameter,
-                        const FillStyle& style);
-
+                        const FillStyle& style) override;
+        
         void SetBorder(const Projection& projection,
                        const MapParameter& parameter,
                        const BorderStyle& borderStyle);
-
+        
         void SetFill(const Projection& projection,
                      const MapParameter& parameter,
                      const FillStyle& fillStyle,
                      CGFloat xOffset=0.0,
                      CGFloat yOffset=0.0);
-
+        
         void SetPen(const LineStyle& style,
                     double lineWidth);
-
+        
         double textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text);
         double textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text);
-
+        
     private:
         Font *GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
         double pathLength(size_t transStart, size_t transEnd);
         bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
-        void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
-                            bool isClosed, bool keepOrientation);
+        void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd, bool isClosed, bool keepOrientation);
+        std::shared_ptr<Label<NativeGlyph, NativeLabel>> Layout(const Projection& projection,
+                                                                const MapParameter& parameter,
+                                                                const std::string& text,
+                                                                double fontSize,
+                                                                double objectWidth,
+                                                                bool enableWrapping = false,
+                                                                bool contourLabel = false);
+        DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+        void DrawGlyphs(const Projection &projection,
+                        const MapParameter &parameter,
+                        const osmscout::PathTextStyleRef style,
+                        const std::vector<Glyph<NativeGlyph>> &glyphs);
     };
 }
 
