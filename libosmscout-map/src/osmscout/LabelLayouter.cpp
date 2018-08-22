@@ -31,7 +31,7 @@ namespace osmscout {
     cellFrom = rect.x / 64;
     uint16_t cellFromBit = rect.x < 0 ? 0 : rect.x % 64;
     int to = (rect.x + rect.width);
-    if (to < 0 || cellFrom >= d.size())
+    if (to < 0 || cellFrom >= (int)d.size())
       return; // mask is outside viewport, keep it blank
     cellTo = to / 64;
     uint16_t cellToBit = (rect.x + rect.width) % 64;
