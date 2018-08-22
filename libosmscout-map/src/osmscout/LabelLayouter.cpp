@@ -19,12 +19,6 @@
 
 #include <osmscout/LabelLayouter.h>
 
-//#define LABEL_LAYOUTER_DEBUG
-
-#if defined(LABEL_LAYOUTER_DEBUG)
-#include <iostream>
-#endif
-
 namespace osmscout {
   OSMSCOUT_MAP_API void Mask::prepare(const IntRectangle &rect)
   {
@@ -35,30 +29,28 @@ namespace osmscout {
 
     // setup
     cellFrom = rect.x / 64;
-    int cellFromBit = rect.x % 64;
-    cellTo = (rect.x + rect.width) / 64;
-    int cellToBit = (rect.x + rect.width) % 64;
+    uint16_t cellFromBit = rect.x < 0 ? 0 : rect.x % 64;
+    int to = (rect.x + rect.width);
+    if (to < 0 || cellFrom >= (int)d.size())
+      return; // mask is outside viewport, keep it blank
+    cellTo = to / 64;
+    uint16_t cellToBit = (rect.x + rect.width) % 64;
+    if (cellToBit == 0){
+      cellTo --;
+    }
+
     rowFrom = rect.y;
     rowTo = rect.y + rect.height;
 
-    if (cellFromBit<0){
-      cellFrom--;
-      cellFromBit=64+cellFromBit;
-    }
-    if (cellToBit<0){
-      cellTo--;
-      cellToBit=64+cellToBit;
-    }
-
-    uint64_t mask = ~0;
+    constexpr uint64_t mask = ~0;
     for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
       d[c] = mask;
     }
-    if (cellFrom >= 0 && cellFrom < size()) {
-      d[cellFrom] = d[cellFrom] >> cellFromBit;
+    if (cellFrom >= 0 && cellFrom < size() && cellFromBit > 0) {
+      d[cellFrom] = mask << cellFromBit;
     }
-    if (cellTo >= 0 && cellTo < size()) {
-      d[cellTo] = d[cellTo] << (64 - cellToBit);
+    if (cellTo >= 0 && cellTo < size() && cellToBit > 0) {
+      d[cellTo] = d[cellTo] & (mask >> (64 - cellToBit));
     }
   }
 }
