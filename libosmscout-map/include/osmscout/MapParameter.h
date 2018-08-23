@@ -55,21 +55,23 @@ namespace osmscout {
     bool                                drawFadings;               //!< Draw label fadings (default: true)
     bool                                drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
 
-    // Node and area labels
+    // Node and area labels, icons
     size_t                              labelLineMinCharCount;     //!< Labels will be _never_ word wrapped if they are shorter then the given characters
     size_t                              labelLineMaxCharCount;     //!< Labels will be word wrapped if they are longer then the given characters
     bool                                labelLineFitToArea;        //!< Labels will be word wrapped to fit object area
     double                              labelLineFitToWidth;       //!< Labels will be word wrapped to fit given width in pixels
 
-    double                              labelSpace;                //!< Space between point labels in mm (default 3).
-    double                              plateLabelSpace;           //!< Space between plates in mm (default 5).
-    double                              sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
+    double                              labelPadding;              //!< Space around point labels in mm (default 1).
+    double                              plateLabelPadding;         //!< Space around plates in mm (default 5).
+    double                              overlayLabelPadding;       //!< Space around overlay labels in mm (default 6).
+    double                              iconPadding;               //!< Space around icons and symbols in mm (default 1).
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
   private:
 // Contour labels
     double                              contourLabelOffset;        //!< Offset in mm for beginning and end of an contour label in relation to contour begin and end
     double                              contourLabelSpace;         //!< Space in mm between repetitive labels on the same contour
+    double                              contourLabelPadding;       //!< Space around contour labels in mm (default 1).
 
     bool                                renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                                renderSeaLand;             //!< Rendering of sea/land tiles
@@ -111,9 +113,12 @@ namespace osmscout {
     void SetLabelLineFitToArea(bool labelLineFitToArea);
     void SetLabelLineFitToWidth(double labelLineFitToWidth);
 
-    void SetLabelSpace(double labelSpace);
-    void SetPlateLabelSpace(double plateLabelSpace);
-    void SetSameLabelSpace(double sameLabelSpace);
+    void SetLabelPadding(double labelPadding);
+    void SetPlateLabelPadding(double plateLabelPadding);
+    void SetOverlayLabelPadding(double padding);
+    void SetIconPadding(double padding);
+    void SetContourLabelPadding(double padding);
+
     void SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels);
 
     void SetContourLabelOffset(double contourLabelOffset);
@@ -214,19 +219,29 @@ namespace osmscout {
       return labelLineFitToWidth;
     }
 
-    inline double GetLabelSpace() const
+    inline double GetLabelPadding() const
     {
-      return labelSpace;
+      return labelPadding;
     }
 
-    inline double GetPlateLabelSpace() const
+    inline double GetPlateLabelPadding() const
     {
-      return plateLabelSpace;
+      return plateLabelPadding;
     }
 
-    inline double GetSameLabelSpace() const
+    inline double GetOverlayLabelPadding() const
     {
-      return sameLabelSpace;
+      return overlayLabelPadding;
+    }
+
+    inline double GetIconPadding() const
+    {
+      return iconPadding;
+    }
+
+    inline double GetContourLabelPadding() const
+    {
+      return contourLabelPadding;
     }
 
     inline bool GetDropNotVisiblePointLabels() const

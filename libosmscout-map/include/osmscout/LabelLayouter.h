@@ -347,10 +347,17 @@ namespace osmscout {
       return labelData.alpha < 0.8;
     }
 
-    void Layout()
+    void Layout(const Projection& projection,
+                const MapParameter& parameter)
     {
       std::vector<ContourLabelType> allSortedContourLabels;
       std::vector<LabelInstanceType> allSortedLabels;
+
+      double iconPadding = projection.ConvertWidthToPixel(parameter.GetIconPadding());
+      double labelPadding = projection.ConvertWidthToPixel(parameter.GetLabelPadding());
+      double shieldLabelPadding = projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding());
+      double contourLabelPadding = projection.ConvertWidthToPixel(parameter.GetContourLabelPadding());
+      double overlayLabelPadding = projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding());
 
       std::swap(allSortedLabels, labelInstances);
       std::swap(allSortedContourLabels, contourLabelInstances);
@@ -399,21 +406,32 @@ namespace osmscout {
             const typename LabelInstance<NativeGlyph, NativeLabel>::Element& element = currentLabel->elements[eli];
             Mask& row=masks[eli];
 
-            IntRectangle rectangle{ (int)std::floor(element.x-layoutViewport.x),
-                                    (int)std::floor(element.y-layoutViewport.y),
+            double padding;
+            if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol) {
+              padding = iconPadding;
+            } else if (IsOverlay(element.labelData)) {
+              padding = overlayLabelPadding;
+            } else if (dynamic_cast<const ShieldStyle*>(element.labelData.style.get())!=nullptr){
+              padding = shieldLabelPadding;
+            } else {
+              padding = labelPadding;
+            }
+
+            IntRectangle rectangle{ (int)std::floor(element.x - layoutViewport.x - padding),
+                                    (int)std::floor(element.y - layoutViewport.y - padding),
                                     0, 0 };
             std::vector<uint64_t> *canvas = &labelCanvas;
             if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol){
-              rectangle.width = std::ceil(element.labelData.iconWidth);
-              rectangle.height = std::ceil(element.labelData.iconHeight);
+              rectangle.width = std::ceil(element.labelData.iconWidth + 2*padding);
+              rectangle.height = std::ceil(element.labelData.iconHeight + 2*padding);
               canvas = &iconCanvas;
             } else {
 #ifdef DEBUG_LABEL_LAYOUTER
               std::cout << "Test label prio " << currentLabel->priority << ": " << element.labelData.text << std::endl;
 #endif
 
-              rectangle.width = std::ceil(element.label->width);
-              rectangle.height = std::ceil(element.label->height);
+              rectangle.width = std::ceil(element.label->width + 2*padding);
+              rectangle.height = std::ceil(element.label->height + 2*padding);
 
               if (IsOverlay(element.labelData)){
                 canvas = &overlayCanvas;
@@ -457,10 +475,10 @@ namespace osmscout {
 
             auto glyph=currentContourLabel->glyphs[gi];
             IntRectangle rect{
-                (int)(glyph.trPosition.GetX()-layoutViewport.x),
-                (int)(glyph.trPosition.GetY()-layoutViewport.y),
-                (int)glyph.trWidth,
-                (int)glyph.trHeight
+                (int)(glyph.trPosition.GetX() - layoutViewport.x - contourLabelPadding),
+                (int)(glyph.trPosition.GetY() - layoutViewport.y - contourLabelPadding),
+                (int)(glyph.trWidth + 2*contourLabelPadding),
+                (int)(glyph.trHeight + 2*contourLabelPadding)
             };
             masks[gi].prepare(rect);
             collision |= CheckLabelCollision(labelCanvas, masks[gi], layoutViewport.height);

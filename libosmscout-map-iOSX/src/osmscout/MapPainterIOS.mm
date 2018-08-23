@@ -694,7 +694,7 @@ namespace osmscout {
     void MapPainterIOS::DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
                             const MapData& data) {
-        labelLayouter.Layout();
+        labelLayouter.Layout(projection, parameter);
         labelLayouter.DrawLabels(projection,
                                  parameter,
                                  this);
