@@ -1099,7 +1099,7 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const MapData& /*data*/)
   {
-    labelLayouter.Layout();
+    labelLayouter.Layout(projection, parameter);
 
     labelLayouter.DrawLabels(projection,
                              parameter,

@@ -35,12 +35,14 @@ namespace osmscout {
     labelLineMaxCharCount(1000/*20*/),
     labelLineFitToArea(true),
     labelLineFitToWidth(8000),
-    labelSpace(1.0),
-    plateLabelSpace(5.0),
-    sameLabelSpace(40.0),
+    labelPadding(1.0),
+    plateLabelPadding(5.0),
+    overlayLabelPadding(6.0),
+    iconPadding(1.0),
     dropNotVisiblePointLabels(true),
     contourLabelOffset(5.0),
     contourLabelSpace(30.0),
+    contourLabelPadding(1.0),
     renderBackground(true),
     renderSeaLand(false),
     renderUnknowns(false),
@@ -127,19 +129,29 @@ namespace osmscout {
     this->labelLineFitToWidth=labelLineFitToWidth;
   }
 
-  void MapParameter::SetLabelSpace(double labelSpace)
+  void MapParameter::SetLabelPadding(double labelSpace)
   {
-    this->labelSpace=labelSpace;
+    this->labelPadding=labelSpace;
   }
 
-  void MapParameter::SetPlateLabelSpace(double plateLabelSpace)
+  void MapParameter::SetPlateLabelPadding(double plateLabelSpace)
   {
-    this->plateLabelSpace=plateLabelSpace;
+    this->plateLabelPadding=plateLabelSpace;
   }
 
-  void MapParameter::SetSameLabelSpace(double sameLabelSpace)
+  void MapParameter::SetOverlayLabelPadding(double padding)
   {
-    this->sameLabelSpace=sameLabelSpace;
+    this->overlayLabelPadding=padding;
+  }
+
+  void MapParameter::SetIconPadding(double padding)
+  {
+    this->iconPadding=padding;
+  }
+
+  void MapParameter::SetContourLabelPadding(double padding)
+  {
+    this->contourLabelPadding=padding;
   }
 
   void MapParameter::SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels)
