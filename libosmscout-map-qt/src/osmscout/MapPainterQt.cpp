@@ -792,6 +792,7 @@ namespace osmscout {
     if (dash.empty() &&
         startCap==LineStyle::capRound &&
         endCap!=LineStyle::capRound) {
+      painter->setPen(QColor(Qt::transparent));
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),
@@ -805,6 +806,7 @@ namespace osmscout {
     if (dash.empty() &&
         endCap==LineStyle::capRound &&
         startCap!=LineStyle::capRound) {
+      painter->setPen(QColor(Qt::transparent));
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),
