@@ -330,6 +330,16 @@ td.missing {
   background-color: #ff0000;
 }
 
+td.vertical, th.vertical {
+  white-space: nowrap;
+  writing-mode: sideways-lr;
+  text-orientation: mixed;
+}
+
+td.bottom, th.bottom {
+  vertical-align: bottom;
+}
+
 table.log {
   border-style:none;
   border-width:0px 0px 0px 0px;
