@@ -215,6 +215,11 @@ void LocationInfoModel::addToModel(const QString database,
     }
   }
 
+  if (postalCode.isEmpty() && place.GetPostalArea()){
+    // postal code is not part of the object (address), but we resolved postal region
+    postalCode = QString::fromStdString(place.GetPostalArea()->name);
+  }
+
   obj[LabelRole] = QString::fromStdString(place.GetDisplayString());
   obj[RegionRole] = regions;
   obj[AddressRole] = address;
