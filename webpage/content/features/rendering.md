@@ -13,56 +13,120 @@ menu:
 ## Backends
 
 <table class="sheet">
+
 <thead>
 <tr>
-<th style="text-align: left; width: 45%">Feature</th>
-<th style="text-align: left; width: 5%">Status</th>
-<th style="text-align: left; width: 50%">Comments</th>
+<th style="text-align: left; width: 45%" class="bottom">Backend</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Ways</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Dashed ways</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Areas</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Area with image pattern</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">POI symbols</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">POI icons</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Labels</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Rith-to-left labels</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Contour labels</th>
 </tr>
 </thead>
 <tbody>
 
 <tr>
-<td style="text-align: left">Qt backend</td>
-
-<td style="text-align: center" class="ok">OK</td>
-
-<td style="text-align: left"></td>
+<td style="text-align: left">Qt</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
 </tr>
 
 <tr>
-<td style="text-align: left">cairo backend</td>
-
-<td style="text-align: center" class="ok">OK</td>
-
-<td style="text-align: left"></td>
+<td style="text-align: left">Cairo</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓<sup>1</sup></td>
+<td style="text-align: center" class="ok">✓</td>
 </tr>
 
 <tr>
-<td style="text-align: left">agg backend</td>
-
-<td style="text-align: center" class="ok">OK</td>
-
-<td style="text-align: left">Drawing of images is missing</td>
+<td style="text-align: left">AGG</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
 </tr>
 
 <tr>
-<td style="text-align: left">OpenGL backend</td>
-
-<td style="text-align: center" class="initial">Initial</td>
-
-<td style="text-align: left">Proof of concept, uses old OpenGL primitives</td>
+<td style="text-align: left">OpenGL</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="initial">✓<sup>4</sup></td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="missing">✗</td> 
 </tr>
 
 <tr>
-<td style="text-align: left">SVG backend</td>
+<td style="text-align: left">DirectX</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="initial">✓<sup>3</sup></td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="initial">✓<sup>3</sup></td>
+</tr>
 
-<td style="text-align: center" class="initial">Initial</td>
+<tr>
+<td style="text-align: left">MacOS / iOS</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="initial">✓<sup>2</sup></td>
+<td style="text-align: center" class="initial">✓<sup>2</sup></td>
+<td style="text-align: center" class="initial">✓<sup>2</sup></td>
+</tr>
 
-<td style="text-align: left">Proof of concept</td>
+<tr>
+<td style="text-align: left">SVG</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓<sup>1</sup></td>
+<td style="text-align: center" class="ok">✓</td>
 </tr>
 </tbody>
 </table>
+
+<div><sup>1)</sup> With Pango library</div>
+<div><sup>2)</sup> Transition to new label layouter is not finished yet</div>
+<div><sup>3)</sup> Problems with non-ascii characters</div>
+<div><sup>4)</sup> Buggy on some platforms</div>
 
 ## Map drawing
 
