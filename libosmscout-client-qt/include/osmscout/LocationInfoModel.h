@@ -75,7 +75,9 @@ public:
         TypeRole = Qt::UserRole+7,
         PostalCodeRole = Qt::UserRole+8,
         WebsiteRole = Qt::UserRole+9,
-        PhoneRole = Qt::UserRole+10
+        PhoneRole = Qt::UserRole+10,
+        AddressLocationRole = Qt::UserRole+11,
+        AddressNumberRole = Qt::UserRole+12
     };
 
 public:
