@@ -1196,17 +1196,31 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,
-                                 double x, double y,
-                                 double /*width*/, double /*height*/)
+                                 double centerX, double centerY,
+                                 double width, double height)
   {
     size_t idx=style->GetIconId()-1;
 
     assert(idx<images.size());
     assert(images[idx]!=nullptr);
 
-    cairo_set_source_surface(draw,images[idx],x-7,y-7);
-    // TODO: rescale to requested width and height
+    cairo_surface_t *icon = images[idx];
+    int w = cairo_image_surface_get_width(icon);
+    int h = cairo_image_surface_get_height(icon);
+
+    cairo_matrix_t matrix;
+    cairo_get_matrix(draw, &matrix);
+    double scaleW = width/w;
+    double scaleH = height/h;
+    cairo_scale(draw, scaleW, scaleH);
+
+    cairo_set_source_surface(draw,
+                             icon,
+                             (centerX-width/2) / scaleW,
+                             (centerY-height/2) / scaleH);
+
     cairo_paint(draw);
+    cairo_set_matrix(draw, &matrix);
   }
 
   void MapPainterCairo::DrawPath(const Projection& /*projection*/,
