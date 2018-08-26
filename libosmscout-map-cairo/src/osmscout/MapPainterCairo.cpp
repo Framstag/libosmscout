@@ -1196,7 +1196,8 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,
-                                 double x, double y)
+                                 double x, double y,
+                                 double /*width*/, double /*height*/)
   {
     size_t idx=style->GetIconId()-1;
 
@@ -1204,6 +1205,7 @@ namespace osmscout {
     assert(images[idx]!=nullptr);
 
     cairo_set_source_surface(draw,images[idx],x-7,y-7);
+    // TODO: rescale to requested width and height
     cairo_paint(draw);
   }
 

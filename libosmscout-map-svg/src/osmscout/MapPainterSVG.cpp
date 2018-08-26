@@ -730,7 +730,8 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawIcon(const IconStyle* /*style*/,
-                                 double /*x*/, double /*y*/)
+                               double /*x*/, double /*y*/,
+                               double /*width*/, double /*height*/)
   {
     // Not implemented
   }

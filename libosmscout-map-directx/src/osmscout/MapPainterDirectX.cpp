@@ -666,7 +666,9 @@ namespace osmscout
     m_LabelLayouter.Reset();
   }
 
-  void MapPainterDirectX::DrawIcon(const IconStyle* style, double x, double y)
+  void MapPainterDirectX::DrawIcon(const IconStyle* style,
+                                   double x, double y,
+                                   double /*width*/, double /*height*/)
   {
     size_t idx = style->GetIconId() - 1;
     assert(idx < m_Bitmaps.size());

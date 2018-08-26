@@ -929,10 +929,12 @@ namespace osmscout {
     /*
      *
      * DrawIcon(const IconStyle* style,
-     *          double x, double y)
+     *          double centerX, double centerY,
+     *          double width, double height)
      */
     void MapPainterIOS::DrawIcon(const IconStyle* style,
-                  double x, double y){
+                                 double x, double y,
+                                 double /*width*/, double /*height*/){
         size_t idx=style->GetIconId()-1;
 
         assert(idx<images.size());

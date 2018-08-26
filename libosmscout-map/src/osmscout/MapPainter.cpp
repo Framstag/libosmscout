@@ -694,8 +694,8 @@ namespace osmscout {
         //data.priority=iconStyle->GetPriority();
 
         data.iconStyle=iconStyle;
-        data.iconWidth=projection.ConvertWidthToPixel(14.0);
-        data.iconHeight=projection.ConvertWidthToPixel(14.0);
+        data.iconWidth=projection.ConvertWidthToPixel(parameter.GetIconSize());
+        data.iconHeight=projection.ConvertWidthToPixel(parameter.GetIconSize());
 
         labelLayoutData.push_back(data);
       } else if (iconStyle->GetSymbol()) {

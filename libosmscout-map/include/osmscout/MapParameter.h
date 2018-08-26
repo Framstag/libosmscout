@@ -64,6 +64,7 @@ namespace osmscout {
     double                              labelPadding;              //!< Space around point labels in mm (default 1).
     double                              plateLabelPadding;         //!< Space around plates in mm (default 5).
     double                              overlayLabelPadding;       //!< Space around overlay labels in mm (default 6).
+    double                              iconSize;                  //!< Size of icons in mm (default 3.7)
     double                              iconPadding;               //!< Space around icons and symbols in mm (default 1).
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
@@ -116,6 +117,7 @@ namespace osmscout {
     void SetLabelPadding(double labelPadding);
     void SetPlateLabelPadding(double plateLabelPadding);
     void SetOverlayLabelPadding(double padding);
+    void SetIconSize(double size);
     void SetIconPadding(double padding);
     void SetContourLabelPadding(double padding);
 
@@ -232,6 +234,11 @@ namespace osmscout {
     inline double GetOverlayLabelPadding() const
     {
       return overlayLabelPadding;
+    }
+
+    inline double GetIconSize() const
+    {
+      return iconSize;
     }
 
     inline double GetIconPadding() const

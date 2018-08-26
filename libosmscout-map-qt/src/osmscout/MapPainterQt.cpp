@@ -559,16 +559,17 @@ namespace osmscout {
   }
 
   void MapPainterQt::DrawIcon(const IconStyle* style,
-                              double x, double y)
+                              double x, double y,
+                              double width, double height)
   {
     size_t idx=style->GetIconId()-1;
 
     assert(idx<images.size());
     assert(!images[idx].isNull());
 
-    painter->drawImage(QPointF(x-images[idx].width()/2,
-                               y-images[idx].height()/2),
-                       images[idx]);
+    painter->drawImage(QRectF(x-width/2, y-height/2, width, height),
+                       images[idx],
+                       QRectF(0, 0, images[idx].width(), images[idx].height()));
   }
 
   void MapPainterQt::DrawSymbol(const Projection& projection,

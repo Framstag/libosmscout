@@ -609,7 +609,8 @@ namespace osmscout {
       Draw the Icon as defined by the IconStyle at the given pixel coordinate (icon center).
      */
     virtual void DrawIcon(const IconStyle* style,
-                          double x, double y) = 0;
+                          double centerX, double centerY,
+                          double width, double height) = 0;
 
     /**
       Draw the Symbol as defined by the SymbolStyle at the given pixel coordinate (symbol center).
