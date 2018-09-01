@@ -41,6 +41,8 @@
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
+    using IOSGlyph = Glyph<CTRunRef>;
+    using IOSLabel = Label<CTRunRef, CTRunRef>;
     
     class MapPainterIOS : public MapPainter {
     public:
@@ -53,18 +55,7 @@ namespace osmscout {
             ssize_t direction;
         } FollowPathHandle;
         
-        struct NativeGlyph {
-            double x;
-            double y;
-            const CTRunRef glyph;
-        };
-        struct NativeLabel {
-            std::wstring text;
-            std::vector<NativeGlyph> glyphs;
-        };
-        using IOSLabel = Label<NativeGlyph, NativeLabel>;
-        using IOSGlyph = Glyph<NativeGlyph>;
-        using IOSLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterIOS>;
+        using IOSLabelLayouter = LabelLayouter<CTRunRef, CTRunRef, MapPainterIOS>;
         friend IOSLabelLayouter;
         
     private:
@@ -121,7 +112,7 @@ namespace osmscout {
                        const MapParameter& parameter,
                        const DoubleRectangle& labelRectangle,
                        const LabelData& label,
-                       const NativeLabel& layout);
+                       const IOSLabel& layout);
         
         virtual void BeforeDrawing(const StyleConfig& styleConfig,
                                    const Projection& projection,
@@ -189,18 +180,24 @@ namespace osmscout {
         double pathLength(size_t transStart, size_t transEnd);
         bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
         void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd, bool isClosed, bool keepOrientation);
-        std::shared_ptr<Label<NativeGlyph, NativeLabel>> Layout(const Projection& projection,
-                                                                const MapParameter& parameter,
-                                                                const std::string& text,
-                                                                double fontSize,
-                                                                double objectWidth,
-                                                                bool enableWrapping = false,
-                                                                bool contourLabel = false);
-        DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+        std::shared_ptr<IOSLabel> Layout(const Projection& projection,
+                                         const MapParameter& parameter,
+                                         const std::string& text,
+                                         double fontSize,
+                                         double objectWidth,
+                                         bool enableWrapping = false,
+                                         bool contourLabel = false);
+        DoubleRectangle GlyphBoundingBox(const CTRunRef &glyph) const;
+        void DrawGlyph(const IOSGlyph &glyph) const;
         void DrawGlyphs(const Projection &projection,
                         const MapParameter &parameter,
                         const osmscout::PathTextStyleRef style,
-                        const std::vector<Glyph<NativeGlyph>> &glyphs);
+                        const std::vector<IOSGlyph> &glyphs);
+        void LayoutDrawLabel(const Projection& projection,
+                             const MapParameter& parameter,
+                             const IOSLabel& layout,
+                             const LabelData& labelData,
+                             const CGPoint& coords);
     };
 }
 
