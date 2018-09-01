@@ -195,7 +195,8 @@ namespace osmscout {
                         const std::vector<IOSGlyph> &glyphs);
         void LayoutDrawLabel(const IOSLabel& layout,
                              const CGPoint& coords,
-                             const Color &color);
+                             const Color &color,
+                             bool emphasize);
     };
 }
 

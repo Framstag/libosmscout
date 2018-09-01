@@ -676,7 +676,9 @@ namespace osmscout {
     }
     
     void MapPainterIOS::LayoutDrawLabel(const IOSLabel& layout,
-                                        const CGPoint& coords, const Color &color){
+                                        const CGPoint& coords,
+                                        const Color &color,
+                                        bool emphasize){
         
         CTRunRef run = layout.label;
         CFIndex glyphCount = CTRunGetGlyphCount(run);
@@ -696,6 +698,13 @@ namespace osmscout {
         CGContextSaveGState(cg);
         CGContextSetRGBFillColor(cg, r, g, b, 1.0);
         CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
+        if(emphasize){
+            CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+            CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, 1 });
+            CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
+            CGColorRelease(haloColor);
+            CGColorSpaceRelease(colorSpace);
+        }
         // The text is drawn reversed...
         CGContextTranslateCTM(cg, 0.0, CGBitmapContextGetHeight(cg));
         CGContextScaleCTM(cg, 1.0, -1.0);
@@ -714,10 +723,10 @@ namespace osmscout {
             const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
             
             if (style->GetStyle()==TextStyle::normal) {
-                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor());
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
                 
             } else if (style->GetStyle()==TextStyle::emphasize) {
-                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor());
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), true);
                 
             } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
                 
