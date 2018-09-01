@@ -193,11 +193,9 @@ namespace osmscout {
                         const MapParameter &parameter,
                         const osmscout::PathTextStyleRef style,
                         const std::vector<IOSGlyph> &glyphs);
-        void LayoutDrawLabel(const Projection& projection,
-                             const MapParameter& parameter,
-                             const IOSLabel& layout,
-                             const LabelData& labelData,
-                             const CGPoint& coords);
+        void LayoutDrawLabel(const IOSLabel& layout,
+                             const CGPoint& coords,
+                             const Color &color);
     };
 }
 

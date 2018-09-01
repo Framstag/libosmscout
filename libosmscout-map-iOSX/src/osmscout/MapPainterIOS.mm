@@ -675,11 +675,8 @@ namespace osmscout {
         return result;
     }
     
-    void MapPainterIOS::LayoutDrawLabel(const Projection& projection,
-                                        const MapParameter& parameter,
-                                        const IOSLabel& layout,
-                                        const LabelData& labelData,
-                                        const CGPoint& coords){
+    void MapPainterIOS::LayoutDrawLabel(const IOSLabel& layout,
+                                        const CGPoint& coords, const Color &color){
         
         CTRunRef run = layout.label;
         CFIndex glyphCount = CTRunGetGlyphCount(run);
@@ -692,8 +689,13 @@ namespace osmscout {
             glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y;
         }
         const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+        double r = color.GetR();
+        double g = color.GetG();
+        double b = color.GetB();
         
         CGContextSaveGState(cg);
+        CGContextSetRGBFillColor(cg, r, g, b, 1.0);
+        CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
         // The text is drawn reversed...
         CGContextTranslateCTM(cg, 0.0, CGBitmapContextGetHeight(cg));
         CGContextScaleCTM(cg, 1.0, -1.0);
@@ -710,15 +712,12 @@ namespace osmscout {
         
         if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
             const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
-            double      r=style->GetTextColor().GetR();
-            double      g=style->GetTextColor().GetG();
-            double      b=style->GetTextColor().GetB();
             
             if (style->GetStyle()==TextStyle::normal) {
-                LayoutDrawLabel(projection, parameter, layout, label, CGPointMake(labelRect.x, labelRect.y));
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor());
                 
             } else if (style->GetStyle()==TextStyle::emphasize) {
-                LayoutDrawLabel(projection, parameter, layout, label, CGPointMake(labelRect.x, labelRect.y));
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor());
                 
             } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
                 
