@@ -358,11 +358,6 @@ namespace osmscout {
 
     static void DrawPattern (void * info,CGContextRef cg){
         CGImageRef imgRef = (CGImageRef)info;
-#if TARGET_OS_IPHONE
-        CGAffineTransform transform = {1,0,0,-1,0,0};
-        transform.ty = CGImageGetHeight(imgRef);
-        CGContextConcatCTM(cg,transform);
-#endif
         CGRect rect = CGRectMake(0, 0, CGImageGetWidth(imgRef), CGImageGetHeight(imgRef));
         CGContextDrawImage(cg, rect, imgRef);
     }
