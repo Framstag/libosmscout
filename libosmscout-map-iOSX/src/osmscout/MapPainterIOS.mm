@@ -676,6 +676,8 @@ namespace osmscout {
                                         bool emphasize){
         
         CTRunRef run = layout.label;
+        const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+        CGFloat fontHeight = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)).size.height;
         CFIndex glyphCount = CTRunGetGlyphCount(run);
         CGGlyph glyphs[glyphCount];
         CGPoint glyphPositions[glyphCount];
@@ -683,9 +685,9 @@ namespace osmscout {
         CTRunGetPositions(run, CFRangeMake(0, 0), glyphPositions);
         for(int index = 0; index < glyphCount; index++){
             glyphPositions[index].x += coords.x;
-            glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y;
+            glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - fontHeight;
         }
-        const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+        
         double r = color.GetR();
         double g = color.GetG();
         double b = color.GetB();
@@ -724,6 +726,34 @@ namespace osmscout {
                 LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), true);
                 
             } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+                
+                const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+ 
+                CGContextSaveGState(cg);
+                CGContextSetRGBFillColor(cg,
+                                         style->GetBgColor().GetR(),
+                                         style->GetBgColor().GetG(),
+                                         style->GetBgColor().GetB(),
+                                         1);
+                CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
+                                           style->GetBorderColor().GetG(),
+                                           style->GetBorderColor().GetB(),
+                                           style->GetBorderColor().GetA());
+                CGContextAddRect(cg, CGRectMake(labelRect.x,
+                                                labelRect.y,
+                                                labelRect.width,
+                                                labelRect.height));
+                CGContextDrawPath(cg, kCGPathFillStroke);
+                
+                CGContextAddRect(cg, CGRectMake(labelRect.x+2,
+                                                labelRect.y+2,
+                                                labelRect.width-4,
+                                                labelRect.height-4));
+                CGContextDrawPath(cg, kCGPathStroke);
+                
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
+                
+                CGContextRestoreGState(cg);
                 
             } else {
                 log.Warn() << "Label style not recognised: " << label.style.get();
