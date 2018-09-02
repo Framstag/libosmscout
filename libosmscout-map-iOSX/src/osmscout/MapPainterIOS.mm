@@ -65,7 +65,12 @@ namespace osmscout {
             return f->second;
         }
 
-        Font *font = [Font fontWithName:[NSString stringWithUTF8String: parameter.GetFontName().c_str()] size:fontSize];
+        NSString *fontName = [NSString stringWithUTF8String: parameter.GetFontName().c_str()];
+        Font *font = [Font fontWithName:fontName size:fontSize];
+        if(!font){
+            std::cerr<<"ERROR font '"<< parameter.GetFontName() << "' not found !" << std::endl;
+            return 0;
+        }
         return fonts.insert(std::pair<size_t,Font *>(fontSize,font)).first->second;
     }
 
@@ -319,7 +324,7 @@ namespace osmscout {
              path!=parameter.GetIconPaths().end();
              ++path) {
 
-            std::string filename=*path+style.GetIconName()+".png";
+            std::string filename=*path+"/"+style.GetIconName()+".png";
             //std::cout << "Trying to Load image " << filename << std::endl;
 
 #if TARGET_OS_IPHONE
@@ -353,11 +358,6 @@ namespace osmscout {
 
     static void DrawPattern (void * info,CGContextRef cg){
         CGImageRef imgRef = (CGImageRef)info;
-#if TARGET_OS_IPHONE
-        CGAffineTransform transform = {1,0,0,-1,0,0};
-        transform.ty = CGImageGetHeight(imgRef);
-        CGContextConcatCTM(cg,transform);
-#endif
         CGRect rect = CGRectMake(0, 0, CGImageGetWidth(imgRef), CGImageGetHeight(imgRef));
         CGContextDrawImage(cg, rect, imgRef);
     }
@@ -389,7 +389,7 @@ namespace osmscout {
         for (std::list<std::string>::const_iterator path=parameter.GetPatternPaths().begin();
              path!=parameter.GetPatternPaths().end();
              ++path) {
-            std::string filename=*path+style.GetPatternName()+".png";
+            std::string filename=*path+"/"+style.GetPatternName()+".png";
 
 #if TARGET_OS_IPHONE
             UIImage *image = [[UIImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
@@ -440,232 +440,160 @@ namespace osmscout {
         return size.height;
     }
 
-    /*
-     * GetTextDimension()
-     */
-/*
-    MapPainter::TextDimension MapPainterIOS::GetTextDimension(const Projection& projection,
-                                                              const MapParameter& parameter,
-                                                              double objectWidth,
-                                                              double fontSize,
-                                                              const std::string& text){
-        Font *font = GetFont(projection,parameter,fontSize);
-        NSString *str = [NSString stringWithUTF8String:text.c_str()];
-        CGRect rect = CGRectZero;
-
-        if(font){
-        #if TARGET_OS_IPHONE
-            NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
-            textStyle.lineBreakMode = NSLineBreakByWordWrapping;
-            textStyle.alignment = NSTextAlignmentCenter;
-            
-            if(objectWidth > 0){
-                CGSize averageFontSize = [@"a" sizeWithAttributes:@{NSFontAttributeName:font}];
-                CGFloat proposedWidth = GetProposedLabelWidth(parameter,
-                                                              averageFontSize.width,
-                                                              objectWidth,
-                                                              text.length());
-                
-                rect = [str boundingRectWithSize: CGSizeMake(proposedWidth, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin
-                                      attributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}
-                                         context:nil];
-            } else {
-                CGSize size = [str sizeWithAttributes:@{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle}];
-                rect.size.width = size.width;
-                rect.size.height = size.height;
-            }
-        #else
-            
-            NSRect stringBounds = [str boundingRectWithSize:CGSizeMake(500, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
-            CGSize size = stringBounds.size;
-            rect.size.width = size.width;
-            rect.size.height = size.height;
-        #endif
-        }
-
-        return TextDimension(rect.origin.x,
-                             rect.origin.y,
-                             rect.size.width,
-                             rect.size.height);
-    }
-    
-    double MapPainterIOS::textLength(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        TextDimension dimension=GetTextDimension(projection,parameter,-1,fontSize,text);
-
-        return dimension.width;
-    }
-    
-    double MapPainterIOS::textHeight(const Projection& projection, const MapParameter& parameter, double fontSize, std::string text){
-        TextDimension dimension=GetTextDimension(projection,parameter,-1,fontSize,text);
-
-        return dimension.height;
-    }
-*/
-
-    /*
-     * DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
-     */
-/*
-    void MapPainterIOS::DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const LabelData& label){
-
-        if (dynamic_cast<const TextStyle*>(label.style.get())!=NULL) {
-            const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
-            double           r=style->GetTextColor().GetR();
-            double           g=style->GetTextColor().GetG();
-            double           b=style->GetTextColor().GetB();
-
-            CGContextSaveGState(cg);
-            CGContextSetTextDrawingMode(cg, kCGTextFill);
-            Font *font = GetFont(projection, parameter, label.fontSize);
-            NSString *str = [NSString stringWithCString:label.text.c_str() encoding:NSUTF8StringEncoding];
-            //std::cout << "label : "<< label.text << " font size : " << label.fontSize << std::endl;
-
-#if TARGET_OS_IPHONE
-            NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
-            textStyle.lineBreakMode = NSLineBreakByWordWrapping;
-            textStyle.alignment = NSTextAlignmentCenter;
-            NSDictionary *attrDict = @{NSFontAttributeName:font, NSParagraphStyleAttributeName:textStyle};
-            CGRect rect = CGRectMake(label.bx1, label.by1, label.bx2 - label.bx1, label.by2 - label.by1);
-#endif
-
-            if (style->GetStyle()==TextStyle::normal) {
-                CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
-#if TARGET_OS_IPHONE
-                [str drawInRect:rect withAttributes:attrDict];
-#else
-                NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
-                NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-                [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
-
-#endif
-            } else if (style->GetStyle()==TextStyle::emphasize) {
-                CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
-                CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-                CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, static_cast<CGFloat>(label.alpha) });
-                CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
-#if TARGET_OS_IPHONE
-                [str drawInRect:rect withAttributes:attrDict];
-#else
-                NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
-                NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-                [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
-#endif
-                CGColorRelease(haloColor);
-                CGColorSpaceRelease(colorSpace);
-            }
-            CGContextRestoreGState(cg);
-        }
-
-        else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=NULL) {
-            const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
-
-
-            if(label.bx1 <= MapPainterIOS::plateLabelMargin ||
-               label.by1 <= MapPainterIOS::plateLabelMargin ||
-               label.bx2 >= projection.GetWidth() - MapPainterIOS::plateLabelMargin ||
-               label.by2 >= projection.GetHeight() - MapPainterIOS::plateLabelMargin
-               ){
-                return;
-            }
-            CGContextSaveGState(cg);
-            CGContextSetRGBFillColor(cg,
-                                     style->GetBgColor().GetR(),
-                                     style->GetBgColor().GetG(),
-                                     style->GetBgColor().GetB(),
-                                     1);
-            CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
-                                       style->GetBorderColor().GetG(),
-                                       style->GetBorderColor().GetB(),
-                                       style->GetBorderColor().GetA());
-            CGContextAddRect(cg, CGRectMake(label.bx1,
-                                            label.by1,
-                                            label.bx2-label.bx1+1,
-                                            label.by2-label.by1+1));
-            CGContextDrawPath(cg, kCGPathFillStroke);
-
-            CGContextAddRect(cg, CGRectMake(label.bx1+2,
-                                            label.by1+2,
-                                            label.bx2-label.bx1+1-4,
-                                            label.by2-label.by1+1-4));
-            CGContextDrawPath(cg, kCGPathStroke);
-
-
-            Font *font = GetFont(projection, parameter, label.fontSize);
-            NSString *str = [NSString stringWithUTF8String:label.text.c_str()];
-#if TARGET_OS_IPHONE
-            UIColor *color = [UIColor colorWithRed: style->GetTextColor().GetR() green: style->GetTextColor().GetG() blue: style->GetTextColor().GetB() alpha: style->GetTextColor().GetA()];
-            NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
-#else
-            NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
-            NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
-#endif
-            CGContextRestoreGState(cg);
-
-        }
-    }
-*/
-    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const NativeGlyph &glyph) const {
+    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const CTRunRef &glyph) const {
         CFRange range = CFRangeMake(0,1);
-        CGRect glyphRect = CTRunGetImageBounds(glyph.glyph, cg, range);
+        CGRect glyphRect = CTRunGetImageBounds(glyph, cg, range);
         return DoubleRectangle(glyphRect.origin.x,glyphRect.origin.y,glyphRect.size.width,glyphRect.size.height);
     }
     
-    template<>
-    std::vector<Glyph<MapPainterIOS::NativeGlyph>> MapPainterIOS::IOSLabel::ToGlyphs() const {
-        std::vector<Glyph<MapPainterIOS::NativeGlyph>> result;
+    // TODO: to finish
+    template<> std::vector<IOSGlyph> IOSLabel::ToGlyphs() const {
+        std::vector<IOSGlyph> result;
         return result;
     }
 
+    // TODO: to finish
+    void MapPainterIOS::DrawGlyph(const IOSGlyph &glyph) const {
+    }
+    
+    // TODO: to finish
     void MapPainterIOS::DrawGlyphs(const Projection &projection,
                     const MapParameter &parameter,
                     const osmscout::PathTextStyleRef style,
-                    const std::vector<Glyph<NativeGlyph>> &glyphs){
+                    const std::vector<IOSGlyph> &glyphs){
+        
+        for (const auto &glyph:glyphs) {
+            DrawGlyph(glyph);
+        }
         
     }
     
-    std::shared_ptr<MapPainterIOS::IOSLabel> MapPainterIOS::Layout(const Projection& projection,
-                                                            const MapParameter& parameter,
-                                                            const std::string& text,
-                                                            double fontSize,
-                                                            double objectWidth,
-                                                            bool enableWrapping,
-                                                            bool contourLabel) {
+    std::shared_ptr<IOSLabel> MapPainterIOS::Layout(const Projection& projection,
+                                                    const MapParameter& parameter,
+                                                    const std::string& text,
+                                                    double fontSize,
+                                                    double objectWidth,
+                                                    bool enableWrapping,
+                                                    bool contourLabel) {
+        std::shared_ptr<IOSLabel> result = std::make_shared<IOSLabel>();
+        CGRect rect = CGRectZero;
+        Font *font = GetFont(projection, parameter, fontSize);
+        NSString *str = [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
+        NSDictionary<NSAttributedStringKey, id> *attr = @{};
+        if(font){
+            attr = @{NSFontAttributeName:font};
+        }
+        NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:str attributes:attr];
         
-        MapPainterIOS::NativeLabel label{};
-        label.text = UTF8StringToWString(text);
-        
-        CFAttributedStringRef cfString = (CFAttributedStringRef)CFBridgingRetain([[NSAttributedString alloc] initWithString:@(text.c_str())]);
+        CFAttributedStringRef cfString = (CFAttributedStringRef)CFBridgingRetain(attrStr);
         CTLineRef line = CTLineCreateWithAttributedString(cfString);
-        
         CFArrayRef runArray = CTLineGetGlyphRuns(line);
-        if(CFArrayGetCount(runArray)>0){
+        if(CFArrayGetCount(runArray) > 0){
             CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
-            int glyphCount = CTRunGetGlyphCount(run);
-            CGPoint *ptBuffer = (CGPoint *)calloc(glyphCount, sizeof(CGPoint));
-            CTRunGetPositions(run, CFRangeMake(0, 0), ptBuffer);
-            int index = 0;
-            for (wchar_t i : label.text) {
-                CFRange range = CFRangeMake(index, 1);
-                CGRect glyphRect = CTRunGetImageBounds(run, cg, range);
-                index++;
-            }
-            free(ptBuffer);
+            
+            result->label = run;
+            rect = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0));
+        }
+        // TODO: how to release the line ?
+        //CFRelease(line);
+        
+        result->text = text;
+        result->fontSize = fontSize;
+        result->width = rect.size.width;
+        result->height = rect.size.height;
+        
+        return result;
+    }
+    
+    void MapPainterIOS::LayoutDrawLabel(const IOSLabel& layout,
+                                        const CGPoint& coords,
+                                        const Color &color,
+                                        bool emphasize){
+        
+        CTRunRef run = layout.label;
+        const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+        CGFloat fontHeight = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)).size.height;
+        CFIndex glyphCount = CTRunGetGlyphCount(run);
+        CGGlyph glyphs[glyphCount];
+        CGPoint glyphPositions[glyphCount];
+        CTRunGetGlyphs(run, CFRangeMake(0, 0), glyphs);
+        CTRunGetPositions(run, CFRangeMake(0, 0), glyphPositions);
+        for(int index = 0; index < glyphCount; index++){
+            glyphPositions[index].x += coords.x;
+            glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - fontHeight;
         }
         
-        std::shared_ptr<MapPainterIOS::IOSLabel> result = std::make_shared<MapPainterIOS::IOSLabel>();
-        return result;
+        double r = color.GetR();
+        double g = color.GetG();
+        double b = color.GetB();
+        
+        CGContextSaveGState(cg);
+        CGContextSetRGBFillColor(cg, r, g, b, 1.0);
+        CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
+        if(emphasize){
+            CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+            CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, 1 });
+            CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
+            CGColorRelease(haloColor);
+            CGColorSpaceRelease(colorSpace);
+        }
+        // The text is drawn reversed...
+        CGContextTranslateCTM(cg, 0.0, CGBitmapContextGetHeight(cg));
+        CGContextScaleCTM(cg, 1.0, -1.0);
+        CTFontDrawGlyphs(font, glyphs, glyphPositions, glyphCount, cg);
+        CGContextRestoreGState(cg);
     }
     
     void MapPainterIOS::DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const DoubleRectangle& labelRectangle,
+                   const DoubleRectangle& labelRect,
                    const LabelData& label,
-                   const NativeLabel& layout) {
+                   const IOSLabel& layout) {
+        // TODO: check that labelRectangle intersect the viewport
         
+        if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
+            const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
+            
+            if (style->GetStyle()==TextStyle::normal) {
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
+                
+            } else if (style->GetStyle()==TextStyle::emphasize) {
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), true);
+                
+            } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+                
+                const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+ 
+                CGContextSaveGState(cg);
+                CGContextSetRGBFillColor(cg,
+                                         style->GetBgColor().GetR(),
+                                         style->GetBgColor().GetG(),
+                                         style->GetBgColor().GetB(),
+                                         1);
+                CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
+                                           style->GetBorderColor().GetG(),
+                                           style->GetBorderColor().GetB(),
+                                           style->GetBorderColor().GetA());
+                CGContextAddRect(cg, CGRectMake(labelRect.x,
+                                                labelRect.y,
+                                                labelRect.width,
+                                                labelRect.height));
+                CGContextDrawPath(cg, kCGPathFillStroke);
+                
+                CGContextAddRect(cg, CGRectMake(labelRect.x+2,
+                                                labelRect.y+2,
+                                                labelRect.width-4,
+                                                labelRect.height-4));
+                CGContextDrawPath(cg, kCGPathStroke);
+                
+                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
+                
+                CGContextRestoreGState(cg);
+                
+            } else {
+                log.Warn() << "Label style not recognised: " << label.style.get();
+            }
+        }
     }
     
     void MapPainterIOS::BeforeDrawing(const StyleConfig& styleConfig,
@@ -812,119 +740,6 @@ namespace osmscout {
             }
         }
     }
-
-    static inline double distSq(const Vertex2D &v1, const Vertex2D &v2){
-        double dx = v1.GetX() - v2.GetX();
-        double dy = v1.GetY() - v2.GetY();
-        return dx*dx+dy*dy;
-    }
-
-    /*
-     * DrawContourLabel(const Projection& projection,
-     *                  const MapParameter& parameter,
-     *                  const PathTextStyle& style,
-     *                  const std::string& text,
-     *                  size_t transStart, size_t transEnd)
-     */
-/*
-    void MapPainterIOS::DrawContourLabel(const Projection& projection,
-                                         const MapParameter& parameter,
-                                         const PathTextStyle& style,
-                                         const std::string& text,
-                                         size_t transStart, size_t transEnd,
-                                         ContourLabelHelper& ){
-        Font *font = GetFont(projection, parameter, style.GetSize());
-        Vertex2D charOrigin;
-        FollowPathHandle followPathHnd;
-        followPathInit(followPathHnd, charOrigin, transStart, transEnd, false, false);
-        if(!followPath(followPathHnd, contourLabelMargin, charOrigin)){
-            return;
-        }
-
-        // check if the same label has been drawn near this one
-        Vertex2D textOrigin(charOrigin);
-        auto its = wayLabels.equal_range(text);
-        for (auto it = its.first; it != its.second; ++it) {
-            if(distSq(textOrigin, *it->second) < MapPainterIOS::sameLabelMinDistanceSq){
-                return;
-            }
-        }
-
-        CGContextSaveGState(cg);
-#if TARGET_OS_IPHONE
-        CGContextSetTextDrawingMode(cg, kCGTextFill);
-        CGContextSetLineWidth(cg, 1.0);
-        CGContextSetRGBFillColor(cg, style.GetTextColor().GetR(), style.GetTextColor().GetG(), style.GetTextColor().GetB(), style.GetTextColor().GetA());
-        CGContextSetRGBStrokeColor(cg, 1, 1, 1, 1);
-        CGContextSetFont(cg, (__bridge CGFontRef)font);
-        UIColor *color = [UIColor colorWithRed: style.GetTextColor().GetR() green: style.GetTextColor().GetG() blue: style.GetTextColor().GetB() alpha: style.GetTextColor().GetA()];
-        NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-#else
-        NSColor *color = [NSColor colorWithSRGBRed:style.GetTextColor().GetR() green:style.GetTextColor().GetG() blue:style.GetTextColor().GetB() alpha:style.GetTextColor().GetA()];
-        NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-#endif
-
-        NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-        double x1,y1,x2,y2,slope;
-        NSUInteger charsCount = [nsText length];
-        Vertex2D *coords = new Vertex2D[charsCount];
-        double *slopes = new double[charsCount];
-        TextDimension dimension;
-        int labelRepeatCount = 0;
-        while(labelRepeatCount++ < labelRepeatMaxCount){
-            NSUInteger i = 0;
-            while(i<charsCount){
-
-                NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
-
-                dimension=GetTextDimension(projection, parameter,-1,style.GetSize(), [str cStringUsingEncoding:NSUTF8StringEncoding]);
-                x1 = charOrigin.GetX();
-                y1 = charOrigin.GetY();
-                if(!followPath(followPathHnd,dimension.width, charOrigin)){
-                    goto exit;
-                }
-                x2 = charOrigin.GetX();
-                y2 = charOrigin.GetY();
-                slope = atan2(y2-y1, x2-x1);
-                if(i>0 && fabs(slope - slopes[i-1])>=M_PI_4){
-                    i=0;
-                    continue;
-                }
-                coords[i].Set(x1, y1);
-                slopes[i] = slope;
-
-                if(!followPath(followPathHnd, 2, charOrigin)){
-                    goto exit;
-                }
-                i++;
-            }
-            CGAffineTransform ct;
-            for(NSUInteger i=0;i<charsCount;i++) {
-                NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
-                CGContextSaveGState(cg);
-                CGContextTranslateCTM(cg, coords[i].GetX(),coords[i].GetY());
-                ct = CGAffineTransformMakeRotation(slopes[i]);
-                CGContextConcatCTM(cg, ct);
-#if TARGET_OS_IPHONE
-                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withAttributes:attrsDictionary];
-#else
-                [str drawAtPoint:CGPointMake(0,-dimension.height/2) withAttributes:attrsDictionary];
-#endif
-                CGContextRestoreGState(cg);
-            }
-            if(!followPath(followPathHnd, contourLabelSpace, charOrigin)){
-                goto exit2;
-            }
-        }
-    exit2:
-        // insert this label with its start point in the map
-        wayLabels.insert(WayLabelsMap::value_type(text,new Vertex2D(textOrigin)));
-    exit:
-        delete[] coords;
-        delete[] slopes;
-        CGContextRestoreGState(cg);
-    }
-*/
     
     /*
      *
