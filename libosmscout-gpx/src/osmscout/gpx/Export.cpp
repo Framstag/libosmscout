@@ -61,6 +61,8 @@ private:
    */
   bool WriteTextElement(const char *elementName, const Timestamp &timestamp);
 
+  bool WriteMetadata(const GpxFile file);
+
   bool WriteWaypoint(const Waypoint &waypoint);
   bool WriteWaypoints(const std::vector<Waypoint> &waypoints);
 
@@ -119,6 +121,10 @@ public:
     }
 
     if (!WriteGpxHeader()){
+      return false;
+    }
+
+    if (!WriteMetadata(gpxFile)){
       return false;
     }
 
@@ -417,6 +423,38 @@ bool GpxWritter::WriteRoutes(const std::vector<Route> &routes)
   return true;
 }
 
+bool GpxWritter::WriteMetadata(const GpxFile file)
+{
+  if (!file.name.hasValue() && !file.desc.hasValue() && !file.time.hasValue()){
+    return true;
+  }
+
+  if (!StartElement("metadata")) {
+    return false;
+  }
+
+  if (file.name.hasValue()){
+    if (!WriteTextElement("name", file.name.get())){
+      return false;
+    }
+  }
+  if (file.desc.hasValue()){
+    if (!WriteTextElement("desc", file.desc.get())){
+      return false;
+    }
+  }
+  if (file.time.hasValue()){
+    if (!WriteTextElement("time", file.time.get())){
+      return false;
+    }
+  }
+
+  if (!EndElement()) {
+    return false;
+  }
+
+  return true;
+}
 
 bool GpxWritter::WriteWaypoints(const std::vector<Waypoint> &waypoints)
 {

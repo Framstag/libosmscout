@@ -33,6 +33,10 @@ namespace gpx {
 
 class OSMSCOUT_GPX_API GpxFile {
 public:
+  Optional<std::string> name;
+  Optional<std::string> desc;
+  Optional<Timestamp> time;
+
   std::vector<Track>    tracks;
   std::vector<Route>    routes;
   std::vector<Waypoint> waypoints;
