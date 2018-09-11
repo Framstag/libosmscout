@@ -52,7 +52,8 @@ endif()
 target_link_libraries(OSMScoutMapQt
 		OSMScout
 		OSMScoutMap
-		Qt5::Gui)
+		Qt5::Gui
+		Qt5::Svg)
 
 target_compile_definitions(OSMScoutMapQt PRIVATE -DOSMSCOUT_MAP_QT_EXPORT_SYMBOLS)
 

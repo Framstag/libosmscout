@@ -147,6 +147,7 @@ namespace osmscout {
                       const MapData& data) override;
 
     bool HasIcon(const StyleConfig& styleConfig,
+                 const Projection& projection,
                  const MapParameter& parameter,
                  IconStyle& style) override;
 

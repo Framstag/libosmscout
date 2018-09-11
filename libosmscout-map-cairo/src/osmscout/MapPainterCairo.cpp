@@ -444,6 +444,7 @@ namespace osmscout {
   }
 
   bool MapPainterCairo::HasIcon(const StyleConfig & /*styleConfig*/,
+                                const Projection& projection,
                                 const MapParameter &parameter,
                                 IconStyle &style)
   {
@@ -460,9 +461,21 @@ namespace osmscout {
       return true;
     }
 
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
+        parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+
+      style.SetWidth(std::round(projection.ConvertWidthToPixel(parameter.GetIconSize())));
+      style.SetHeight(style.GetWidth());
+    }else{
+      style.SetWidth(std::round(parameter.GetIconPixelSize()));
+      style.SetHeight(style.GetWidth());
+    }
+
     for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
          path != parameter.GetIconPaths().end();
          ++path) {
+
+      // TODO: add support for reading svg images (using librsvg?)
       std::string filename = *path + style.GetIconName() + ".png";
 
       cairo_surface_t *image = osmscout::LoadPNG(filename);

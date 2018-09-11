@@ -218,6 +218,14 @@ int main(int argc, char* argv[])
   drawParameter.SetFontSize(3.0);
   drawParameter.SetRenderSeaLand(true);
 
+  /*
+  std::list<std::string> paths;
+  paths.push_back("./libosmscout/data/icons/svg/standard/");
+  paths.push_back("./libosmscout/data/icons/14x14/standard/");
+  drawParameter.SetIconMode(osmscout::MapParameter::Scalable);
+  drawParameter.SetIconPaths(paths);
+  */
+
   projection.Set(osmscout::GeoCoord(lat,lon),
                  osmscout::Magnification(zoom),
                  dpi,

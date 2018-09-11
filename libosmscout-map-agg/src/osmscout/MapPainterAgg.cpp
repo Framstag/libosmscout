@@ -212,8 +212,9 @@ namespace osmscout {
   }
 
   bool MapPainterAgg::HasIcon(const StyleConfig& /*styleConfig*/,
-                             const MapParameter& /*parameter*/,
-                             IconStyle& /*style*/)
+                              const Projection& /*projection*/,
+                              const MapParameter& /*parameter*/,
+                              IconStyle& /*style*/)
   {
     //TODO
 

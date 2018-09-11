@@ -101,6 +101,7 @@ namespace osmscout {
                                           CGContextRef paintCG);
     protected:
         bool HasIcon(const StyleConfig& styleConfig,
+                     const Projection& projection,
                      const MapParameter& parameter,
                      IconStyle& style) override;
         

@@ -114,6 +114,13 @@ int main(int argc, char* argv[])
       drawParameter.SetLabelLineFitToArea(true);
       drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight()));
 
+      /*
+      std::list<std::string> paths;
+      paths.push_back("./libosmscout/data/icons/14x14/standard/");
+      drawParameter.SetIconMode(osmscout::MapParameter::FixedSizePixmap);
+      drawParameter.SetIconPaths(paths);
+      */
+
       projection.Set(osmscout::GeoCoord(lat,lon),
                      osmscout::Magnification(zoom),
                      DPI,

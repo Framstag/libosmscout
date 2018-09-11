@@ -126,6 +126,7 @@ namespace osmscout {
                               const MapData& data);
 
     virtual bool HasIcon(const StyleConfig& styleConfig,
+                         const Projection& projection,
                          const MapParameter& parameter,
                          IconStyle& style);
 

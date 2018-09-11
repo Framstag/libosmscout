@@ -26,6 +26,7 @@
 #include <QPainterPath>
 #include <QTextLayout>
 #include <QDebug>
+#include <QtSvg/QSvgRenderer>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -82,6 +83,7 @@ namespace osmscout {
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& /*styleConfig*/,
+                             const Projection& projection,
                              const MapParameter& parameter,
                              IconStyle& style)
   {
@@ -94,6 +96,16 @@ namespace osmscout {
     if (idx<images.size() &&
         !images[idx].isNull()) {
       return true;
+    }
+
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
+        parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+
+      style.SetWidth(std::round(projection.ConvertWidthToPixel(parameter.GetIconSize())));
+      style.SetHeight(style.GetWidth());
+    }else{
+      style.SetWidth(std::round(parameter.GetIconPixelSize()));
+      style.SetHeight(style.GetWidth());
     }
 
     std::list<std::string> erronousPaths;

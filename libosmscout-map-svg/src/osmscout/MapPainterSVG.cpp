@@ -572,6 +572,7 @@ namespace osmscout {
   }
 
   bool MapPainterSVG::HasIcon(const StyleConfig& /*styleConfig*/,
+                              const Projection& /*projection*/,
                               const MapParameter& /*parameter*/,
                               IconStyle& /*style*/)
   {
