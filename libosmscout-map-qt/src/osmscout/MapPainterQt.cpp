@@ -111,19 +111,37 @@ namespace osmscout {
     std::list<std::string> erronousPaths;
 
     for (const auto& path : parameter.GetIconPaths()) {
-      std::string filename=AppendFileToDir(path,style.GetIconName()+".png");
-
       QImage image;
+      std::string filename;
+      bool success=false;
+      if (parameter.GetIconMode()==MapParameter::IconMode::Scalable){
+        filename=AppendFileToDir(path,style.GetIconName()+".svg");
 
-      if (image.load(filename.c_str())) {
-        if (idx>=images.size()) {
-          images.resize(idx+1);
+        // Load SVG
+        QSvgRenderer renderer(QString::fromStdString(filename));
+        if (renderer.isValid()) {
+          image = QImage(style.GetWidth(), style.GetHeight(), QImage::Format_ARGB32);
+          image.fill(Qt::transparent);
+
+          QPainter painter(&image);
+          renderer.render(&painter);
+          painter.end();
+          success = !image.isNull();
+        }
+      }else{
+        filename=AppendFileToDir(path,style.GetIconName()+".png");
+        if (image.load(filename.c_str())) {
+          success = true;
+        }
+      }
+
+      if (success) {
+        if (idx >= images.size()) {
+          images.resize(idx + 1);
         }
 
-        images[idx]=image;
-
+        images[idx] = image;
         //std::cout << "Loaded image '" << filename << "'" << std::endl;
-
         return true;
       }
 
