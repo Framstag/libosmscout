@@ -845,10 +845,12 @@ namespace osmscout {
     };
 
   private:
-    SymbolRef   symbol;
-    std::string iconName; //!< name of the icon as given in style
-    size_t      iconId;   //!< Id for external resource binding
-    size_t      position; //!< Relative vertical position of the label
+    SymbolRef    symbol;
+    std::string  iconName; //!< name of the icon as given in style
+    size_t       iconId;   //!< Id for external resource binding
+    unsigned int width;    //!< width of icon in pixels
+    unsigned int height;   //!< height of icon in pixels
+    size_t       position; //!< Relative vertical position of the label
 
   public:
     IconStyle();
@@ -861,6 +863,8 @@ namespace osmscout {
     IconStyle& SetSymbol(const SymbolRef& symbol);
     IconStyle& SetIconName(const std::string& iconName);
     IconStyle& SetIconId(size_t id);
+    IconStyle& SetWidth(unsigned int w);
+    IconStyle& SetHeight(unsigned int h);
     IconStyle& SetPosition(size_t position);
 
     inline bool IsVisible() const
@@ -882,6 +886,16 @@ namespace osmscout {
     inline size_t GetIconId() const
     {
       return iconId;
+    }
+
+    inline unsigned int GetWidth() const
+    {
+      return width;
+    }
+
+    inline unsigned int GetHeight() const
+    {
+      return height;
     }
 
     inline size_t GetPosition() const

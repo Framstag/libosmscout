@@ -26,6 +26,7 @@
 #include <QPainterPath>
 #include <QTextLayout>
 #include <QDebug>
+#include <QtSvg/QSvgRenderer>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -82,6 +83,7 @@ namespace osmscout {
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& /*styleConfig*/,
+                             const Projection& projection,
                              const MapParameter& parameter,
                              IconStyle& style)
   {
@@ -96,22 +98,50 @@ namespace osmscout {
       return true;
     }
 
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
+        parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+
+      style.SetWidth(std::round(projection.ConvertWidthToPixel(parameter.GetIconSize())));
+      style.SetHeight(style.GetWidth());
+    }else{
+      style.SetWidth(std::round(parameter.GetIconPixelSize()));
+      style.SetHeight(style.GetWidth());
+    }
+
     std::list<std::string> erronousPaths;
 
     for (const auto& path : parameter.GetIconPaths()) {
-      std::string filename=AppendFileToDir(path,style.GetIconName()+".png");
-
       QImage image;
+      std::string filename;
+      bool success=false;
+      if (parameter.GetIconMode()==MapParameter::IconMode::Scalable){
+        filename=AppendFileToDir(path,style.GetIconName()+".svg");
 
-      if (image.load(filename.c_str())) {
-        if (idx>=images.size()) {
-          images.resize(idx+1);
+        // Load SVG
+        QSvgRenderer renderer(QString::fromStdString(filename));
+        if (renderer.isValid()) {
+          image = QImage(style.GetWidth(), style.GetHeight(), QImage::Format_ARGB32);
+          image.fill(Qt::transparent);
+
+          QPainter painter(&image);
+          renderer.render(&painter);
+          painter.end();
+          success = !image.isNull();
+        }
+      }else{
+        filename=AppendFileToDir(path,style.GetIconName()+".png");
+        if (image.load(filename.c_str())) {
+          success = true;
+        }
+      }
+
+      if (success) {
+        if (idx >= images.size()) {
+          images.resize(idx + 1);
         }
 
-        images[idx]=image;
-
+        images[idx] = image;
         //std::cout << "Loaded image '" << filename << "'" << std::endl;
-
         return true;
       }
 
@@ -559,16 +589,17 @@ namespace osmscout {
   }
 
   void MapPainterQt::DrawIcon(const IconStyle* style,
-                              double x, double y)
+                              double x, double y,
+                              double width, double height)
   {
     size_t idx=style->GetIconId()-1;
 
     assert(idx<images.size());
     assert(!images[idx].isNull());
 
-    painter->drawImage(QPointF(x-images[idx].width()/2,
-                               y-images[idx].height()/2),
-                       images[idx]);
+    painter->drawImage(QRectF(x-width/2, y-height/2, width, height),
+                       images[idx],
+                       QRectF(0, 0, images[idx].width(), images[idx].height()));
   }
 
   void MapPainterQt::DrawSymbol(const Projection& projection,

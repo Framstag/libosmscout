@@ -126,6 +126,7 @@ namespace osmscout {
                               const MapData& data);
 
     virtual bool HasIcon(const StyleConfig& styleConfig,
+                         const Projection& projection,
                          const MapParameter& parameter,
                          IconStyle& style);
 
@@ -178,7 +179,8 @@ namespace osmscout {
 		const MapData& data);
 
     virtual void DrawIcon(const IconStyle* style,
-                          double x, double y);
+                          double centerX, double centerY,
+                          double width, double height);
 
     virtual void DrawSymbol(const Projection& projection,
                             const MapParameter& parameter,

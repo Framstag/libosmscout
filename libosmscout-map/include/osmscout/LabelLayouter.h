@@ -505,7 +505,8 @@ namespace osmscout {
      *                      double x, double y) override;
      *
      *      void DrawIcon(const IconStyle* style,
-     *                    double x, double y) override;
+     *                    double centerX, double centerY,
+     *                    double width, double height) override;
      *
      *      void DrawLabel(const Projection& projection,
      *                     const MapParameter& parameter,
@@ -554,7 +555,9 @@ namespace osmscout {
           } else if (el.labelData.type==LabelData::Icon){
             p->DrawIcon(el.labelData.iconStyle.get(),
                         el.x + el.labelData.iconWidth/2,
-                        el.y + el.labelData.iconHeight/2);
+                        el.y + el.labelData.iconHeight/2,
+                        el.labelData.iconWidth,
+                        el.labelData.iconHeight);
 
           } else {
             // postpone text elements

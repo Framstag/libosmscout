@@ -38,6 +38,9 @@ namespace osmscout {
     labelPadding(1.0),
     plateLabelPadding(5.0),
     overlayLabelPadding(6.0),
+    iconMode(IconMode::FixedSizePixmap),
+    iconSize(3.7),
+    iconPixelSize(14),
     iconPadding(1.0),
     dropNotVisiblePointLabels(true),
     contourLabelOffset(5.0),
@@ -142,6 +145,21 @@ namespace osmscout {
   void MapParameter::SetOverlayLabelPadding(double padding)
   {
     this->overlayLabelPadding=padding;
+  }
+
+  void MapParameter::SetIconMode(const IconMode &mode)
+  {
+    this->iconMode = mode;
+  }
+
+  void MapParameter::SetIconSize(double size)
+  {
+    this->iconSize = size;
+  }
+
+  void MapParameter::SetIconPixelSize(double size)
+  {
+    this->iconPixelSize = size;
   }
 
   void MapParameter::SetIconPadding(double padding)

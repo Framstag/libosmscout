@@ -1670,6 +1670,8 @@ namespace osmscout {
 
   IconStyle::IconStyle()
    : iconId(0),
+     width(14),
+     height(14),
      position(0)
   {
     // no code
@@ -1678,6 +1680,8 @@ namespace osmscout {
   IconStyle::IconStyle(const IconStyle& style)
   : iconName(style.iconName),
     iconId(style.iconId),
+    width(style.width),
+    height(style.height),
     position(style.position)
   {
     // no code
@@ -1736,6 +1740,20 @@ namespace osmscout {
   IconStyle& IconStyle::SetIconId(size_t id)
   {
     this->iconId=id;
+
+    return *this;
+  }
+
+  IconStyle& IconStyle::SetWidth(unsigned int w)
+  {
+    this->width=w;
+
+    return *this;
+  }
+
+  IconStyle& IconStyle::SetHeight(unsigned int h)
+  {
+    this->height=h;
 
     return *this;
   }

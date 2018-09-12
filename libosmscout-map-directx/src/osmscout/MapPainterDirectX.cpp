@@ -431,6 +431,7 @@ namespace osmscout
   }
 
   bool MapPainterDirectX::HasIcon(const StyleConfig& /*styleConfig*/,
+                                  const Projection& projection,
                                   const MapParameter& parameter,
                                   IconStyle& style)
   {
@@ -450,8 +451,19 @@ namespace osmscout
 
     if (m_pImagingFactory == NULL) return false;
 
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
+        parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+
+      style.SetWidth(std::round(projection.ConvertWidthToPixel(parameter.GetIconSize())));
+      style.SetHeight(style.GetWidth());
+    }else{
+      style.SetWidth(std::round(parameter.GetIconPixelSize()));
+      style.SetHeight(style.GetWidth());
+    }
+
     for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin(); path != parameter.GetIconPaths().end(); ++path)
     {
+      // TODO: add support for reading svg images
       std::wstring filename = s2w(*path + style.GetIconName() + ".png");
       ID2D1Bitmap* pBitmap = NULL;
       if (LoadBitmapFromFile(filename.c_str(), &pBitmap))
@@ -666,14 +678,16 @@ namespace osmscout
     m_LabelLayouter.Reset();
   }
 
-  void MapPainterDirectX::DrawIcon(const IconStyle* style, double x, double y)
+  void MapPainterDirectX::DrawIcon(const IconStyle* style,
+                                   double x, double y,
+                                   double width, double height)
   {
     size_t idx = style->GetIconId() - 1;
     assert(idx < m_Bitmaps.size());
     assert(m_Bitmaps[idx] != NULL);
-    D2D1_SIZE_U size = m_Bitmaps[idx]->GetPixelSize();
-    FLOAT dx = (FLOAT)size.width / 2.0f;
-    FLOAT dy = (FLOAT)size.height / 2.0f;
+
+    FLOAT dx = (FLOAT)width / 2.0f;
+    FLOAT dy = (FLOAT)height / 2.0f;
     m_pRenderTarget->DrawBitmap(m_Bitmaps[idx], RECTF(x - dx, y - dy, x + dx, y + dy));
   }
 

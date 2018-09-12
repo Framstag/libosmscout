@@ -39,6 +39,14 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API MapParameter CLASS_FINAL
   {
+  public:
+    enum IconMode
+    {
+      FixedSizePixmap,  // !< raster icons should be used, iconPixelSize will be used for rendering
+      ScaledPixmap,     // !< raster icons should be used, icons will be scaled to iconSize
+      Scalable          // !< vector icons should be used, icons will be scaled to iconSize
+    };
+
   private:
     std::string                         fontName;                  //!< Name of the font to use
     double                              fontSize;                  //!< Metric size of base font (aka font size 100%) in millimeter
@@ -64,7 +72,12 @@ namespace osmscout {
     double                              labelPadding;              //!< Space around point labels in mm (default 1).
     double                              plateLabelPadding;         //!< Space around plates in mm (default 5).
     double                              overlayLabelPadding;       //!< Space around overlay labels in mm (default 6).
+
+    IconMode                            iconMode;                  //!< Mode of icon, it controls what type of files would be loaded and computation of icon dimensions
+    double                              iconSize;                  //!< Size of icons in mm (default 3.7)
+    double                              iconPixelSize;             //!< Size of icons in px (default 14)
     double                              iconPadding;               //!< Space around icons and symbols in mm (default 1).
+
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
   private:
@@ -116,7 +129,12 @@ namespace osmscout {
     void SetLabelPadding(double labelPadding);
     void SetPlateLabelPadding(double plateLabelPadding);
     void SetOverlayLabelPadding(double padding);
+
+    void SetIconMode(const IconMode &mode);
+    void SetIconSize(double size);
+    void SetIconPixelSize(double size);
     void SetIconPadding(double padding);
+
     void SetContourLabelPadding(double padding);
 
     void SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels);
@@ -232,6 +250,21 @@ namespace osmscout {
     inline double GetOverlayLabelPadding() const
     {
       return overlayLabelPadding;
+    }
+
+    inline IconMode GetIconMode() const
+    {
+      return iconMode;
+    }
+
+    inline double GetIconSize() const
+    {
+      return iconSize;
+    }
+
+    inline double GetIconPixelSize() const
+    {
+      return iconPixelSize;
     }
 
     inline double GetIconPadding() const

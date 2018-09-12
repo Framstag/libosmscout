@@ -115,6 +115,7 @@ namespace osmscout {
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
+                 const Projection& projection,
                  const MapParameter& parameter,
                  IconStyle& style) override;
 
@@ -127,7 +128,8 @@ namespace osmscout {
                     const FillStyle& style) override;
 
     void DrawIcon(const IconStyle* style,
-                  double x, double y) override;
+                  double centerX, double centerY,
+                  double width, double height) override;
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,

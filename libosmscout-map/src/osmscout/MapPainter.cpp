@@ -683,6 +683,7 @@ namespace osmscout {
     if (iconStyle) {
       if (!iconStyle->GetIconName().empty() &&
           HasIcon(*styleConfig,
+                  projection,
                   parameter,
                   *iconStyle)) {
         LabelData data;
@@ -694,8 +695,8 @@ namespace osmscout {
         //data.priority=iconStyle->GetPriority();
 
         data.iconStyle=iconStyle;
-        data.iconWidth=projection.ConvertWidthToPixel(14.0);
-        data.iconHeight=projection.ConvertWidthToPixel(14.0);
+        data.iconWidth=iconStyle->GetWidth();
+        data.iconHeight=iconStyle->GetHeight();
 
         labelLayoutData.push_back(data);
       } else if (iconStyle->GetSymbol()) {

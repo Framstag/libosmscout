@@ -306,6 +306,7 @@ namespace osmscout {
      * HasIcon()
      */
     bool MapPainterIOS::HasIcon(const StyleConfig& /* styleConfig */,
+                                const Projection& /*projection*/,
                                 const MapParameter& parameter,
                                 IconStyle& style){
         if (style.GetIconId()==0) {
@@ -744,10 +745,12 @@ namespace osmscout {
     /*
      *
      * DrawIcon(const IconStyle* style,
-     *          double x, double y)
+     *          double centerX, double centerY,
+     *          double width, double height)
      */
     void MapPainterIOS::DrawIcon(const IconStyle* style,
-                  double x, double y){
+                                 double x, double y,
+                                 double /*width*/, double /*height*/){
         size_t idx=style->GetIconId()-1;
 
         assert(idx<images.size());

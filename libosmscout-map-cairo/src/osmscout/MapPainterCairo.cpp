@@ -444,6 +444,7 @@ namespace osmscout {
   }
 
   bool MapPainterCairo::HasIcon(const StyleConfig & /*styleConfig*/,
+                                const Projection& projection,
                                 const MapParameter &parameter,
                                 IconStyle &style)
   {
@@ -460,9 +461,21 @@ namespace osmscout {
       return true;
     }
 
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
+        parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+
+      style.SetWidth(std::round(projection.ConvertWidthToPixel(parameter.GetIconSize())));
+      style.SetHeight(style.GetWidth());
+    }else{
+      style.SetWidth(std::round(parameter.GetIconPixelSize()));
+      style.SetHeight(style.GetWidth());
+    }
+
     for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
          path != parameter.GetIconPaths().end();
          ++path) {
+
+      // TODO: add support for reading svg images (using librsvg?)
       std::string filename = *path + style.GetIconName() + ".png";
 
       cairo_surface_t *image = osmscout::LoadPNG(filename);
@@ -1196,15 +1209,31 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,
-                                 double x, double y)
+                                 double centerX, double centerY,
+                                 double width, double height)
   {
     size_t idx=style->GetIconId()-1;
 
     assert(idx<images.size());
     assert(images[idx]!=nullptr);
 
-    cairo_set_source_surface(draw,images[idx],x-7,y-7);
+    cairo_surface_t *icon = images[idx];
+    int w = cairo_image_surface_get_width(icon);
+    int h = cairo_image_surface_get_height(icon);
+
+    cairo_matrix_t matrix;
+    cairo_get_matrix(draw, &matrix);
+    double scaleW = width/w;
+    double scaleH = height/h;
+    cairo_scale(draw, scaleW, scaleH);
+
+    cairo_set_source_surface(draw,
+                             icon,
+                             (centerX-width/2) / scaleW,
+                             (centerY-height/2) / scaleH);
+
     cairo_paint(draw);
+    cairo_set_matrix(draw, &matrix);
   }
 
   void MapPainterCairo::DrawPath(const Projection& /*projection*/,

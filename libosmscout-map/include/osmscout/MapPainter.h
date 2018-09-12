@@ -562,8 +562,11 @@ namespace osmscout {
       Return true, if the icon in the IconStyle is available and can be drawn.
       If this method returns false, possibly a fallback (using a Symbol)
       will be chosen.
+
+      Icon style dimensions and iconId may be setup for later usage.
      */
     virtual bool HasIcon(const StyleConfig& styleConfig,
+                         const Projection& projection,
                          const MapParameter& parameter,
                          IconStyle& style)= 0;
 
@@ -609,7 +612,8 @@ namespace osmscout {
       Draw the Icon as defined by the IconStyle at the given pixel coordinate (icon center).
      */
     virtual void DrawIcon(const IconStyle* style,
-                          double x, double y) = 0;
+                          double centerX, double centerY,
+                          double width, double height) = 0;
 
     /**
       Draw the Symbol as defined by the SymbolStyle at the given pixel coordinate (symbol center).
