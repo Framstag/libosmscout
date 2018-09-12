@@ -211,6 +211,13 @@ public:
     m_DrawParameter.SetFontSize(3.0);
     m_DrawParameter.SetDebugPerformance(true);
 
+	/*
+	std::list<std::string> paths;
+	paths.push_back("C:\\projects\\libosmscout\\libosmscout\\data\\icons\\14x14\\standard\\");
+	m_DrawParameter.SetIconPaths(paths);
+	m_DrawParameter.SetPatternPaths(paths);
+	*/
+
     m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, 800, 600);
     m_mapService->LookupTiles(m_Projection, m_Tiles);
     m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
