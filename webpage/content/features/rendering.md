@@ -87,9 +87,9 @@ menu:
 <td style="text-align: center" class="ok">✓</td>
 <td style="text-align: center" class="ok">✓</td>
 <td style="text-align: center" class="ok">✓</td>
-<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="missing">✗</td>
 <td style="text-align: center" class="ok">✓</td>
-<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td> 
 <td style="text-align: center" class="initial">✓<sup>3</sup></td>
 <td style="text-align: center" class="missing">✗</td> 
 <td style="text-align: center" class="initial">✓<sup>3</sup></td>
