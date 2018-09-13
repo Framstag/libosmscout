@@ -485,6 +485,11 @@ namespace osmscout {
           images.resize(idx + 1, nullptr);
         }
 
+        if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+          style.SetWidth(cairo_image_surface_get_width(image));
+          style.SetHeight(cairo_image_surface_get_height(image));
+        }
+
         images[idx] = image;
 
         std::cout << "Loaded image '" << filename << "'" << std::endl;

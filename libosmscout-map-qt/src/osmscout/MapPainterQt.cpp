@@ -131,6 +131,10 @@ namespace osmscout {
       }else{
         filename=AppendFileToDir(path,style.GetIconName()+".png");
         if (image.load(filename.c_str())) {
+          if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+            style.SetWidth(image.width());
+            style.SetHeight(image.height());
+          }
           success = true;
         }
       }

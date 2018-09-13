@@ -468,6 +468,12 @@ namespace osmscout
       ID2D1Bitmap* pBitmap = NULL;
       if (LoadBitmapFromFile(filename.c_str(), &pBitmap))
       {
+        if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+          D2D1_SIZE_U size = pBitmap->GetPixelSize();
+          style.SetWidth(size.width);
+          style.SetHeight(size.height);
+        }
+
         std::wcout << L"Loaded image '" << filename << L"'" << std::endl;
         m_Bitmaps[idx] = pBitmap;
         return true;

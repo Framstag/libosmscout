@@ -44,6 +44,7 @@ namespace osmscout {
     {
       FixedSizePixmap,  // !< raster icons should be used, iconPixelSize will be used for rendering
       ScaledPixmap,     // !< raster icons should be used, icons will be scaled to iconSize
+      OriginalPixmap,   // !< raster icons should be used, icons will keep dimensions of original image
       Scalable          // !< vector icons should be used, icons will be scaled to iconSize
     };
 
