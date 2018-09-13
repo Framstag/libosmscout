@@ -82,11 +82,23 @@ CONST
   UINT labelPrioMillionCity         = 6;
   UINT labelPrioBigCity             = 7;
   UINT labelPrioCity                = 8;
-  UINT labelPrioTown                = 9;
-  UINT labelPrioVillage             = 10;
-  UINT labelPrioHamlet              = 11;
-  UINT labelPrioSuburb              = 12;
-  UINT labelPrioLocality            = 13;
+
+  UINT labelShieldMotorway          = 9;
+  UINT labelShieldTrunk             = 11;
+  UINT labelShieldPrimary           = 11;
+
+  UINT labelPrioTown                = 12;
+  UINT labelPrioVillage             = 13;
+  UINT labelPrioHamlet              = 14;
+  UINT labelPrioSuburb              = 15;
+  UINT labelPrioLocality            = 16;
+
+  UINT labelPrioPiste               = 17;
+  UINT labelPrioAeroway             = 17;
+  UINT labelPrioFerry               = 17;
+  UINT labelPrioPublicTransportWay  = 17;
+  UINT labelPrioHighway             = 18;
+  UINT labelPrioOtherWays           = 19;
 
   UINT labelPrioNatural             = 20;
   UINT labelPrioLanduse             = 25;
@@ -111,6 +123,8 @@ CONST
   UINT labelPrioHighwayJunction     = 55;
 
   UINT labelPrioBuilding            = 100;
+
+  UINT labelPrioElevationContour    = 500;
 
   // For debugging :-)
   COLOR red                        = #ff0000;
@@ -510,14 +524,14 @@ STYLE
     [MAG suburb-] {
       [TYPE elevation_contour_major] {
         WAY {color: @majorContourColor; displayWidth: 0.150mm; }
-        WAY.TEXT { label: Ele.inMeter; color: @contourLabelColor; size: 0.7; }
+        WAY.TEXT { label: Ele.inMeter; color: @contourLabelColor; size: 0.7; priority: @labelPrioElevationContour; }
       }
     }
 
     [MAG detail-] {
       [TYPE elevation_contour_medium] {
         WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
-        WAY.TEXT { label: Ele.inMeter; color: @contourLabelColor; size: 0.8; }
+        WAY.TEXT { label: Ele.inMeter; color: @contourLabelColor; size: 0.8; priority: @labelPrioElevationContour; }
       }
 
       [TYPE elevation_contour_minor] {
@@ -654,7 +668,7 @@ STYLE
             waterway_weir,
             waterway_river,
             waterway_canal]
-        WAY.TEXT { label: Name.name; color: @waterLabelColor;}
+        WAY.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
       [TYPE waterway_stream,
             waterway_river,
@@ -1084,16 +1098,16 @@ STYLE
          highway_primary_link,
          highway_secondary,
          highway_secondary_link,
-         route_ferry] WAY.TEXT{label: Name.name; color: @wayLabelColor; size: 1.0; }
+         route_ferry] WAY.TEXT{label: Name.name; color: @wayLabelColor; size: 1.0; priority: @labelPrioHighway; }
  }
 
  [MAG close-] {
    [TYPE highway_services] NODE.TEXT {label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
-   [TYPE highway_construction] WAY.TEXT { label: Name.name; color: @wayLabelColor; }
+   [TYPE highway_construction] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighway; }
 
    [TYPE aerialway_gondola,
          aerialway_chair_lift,
-         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; displayOffset: 2.5mm;}
+         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
  }
 
  [MAG veryClose-] {
@@ -1104,7 +1118,7 @@ STYLE
          highway_living_street,
          highway_service,
          highway_track,
-         leisure_track] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.9; }
+         leisure_track] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.9; priority: @labelPrioOtherWays; }
 
    [TYPE highway_service] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
    
@@ -1122,7 +1136,7 @@ STYLE
          highway_via_ferrata_easy,
          highway_via_ferrata_moderate,
          highway_via_ferrata_difficult,
-         highway_via_ferrata_extreme] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8;}
+         highway_via_ferrata_extreme] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8; priority: @labelPrioOtherWays; }
 
    [TYPE highway_steps,
          highway_via_ferrata_easy,
@@ -1238,7 +1252,7 @@ STYLE
            railway_preserved,
            railway_funicular,
            railway_subway,
-           public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; }
+           public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
 
      [TYPE public_transport_platform] AREA.TEXT { label: Name.name; color: #524a4a; size: 0.8; priority: @labelPrioTramHalt; }
    }
@@ -1586,15 +1600,15 @@ STYLE
  }
  [MAG close-]{
      [TYPE piste_downhill_easy]{
-        WAY.TEXT { label: Name.name; size: 1.0; color: #3030ff; displayOffset: 2.5mm;}
+        WAY.TEXT { label: Name.name; size: 1.0; color: #3030ff; displayOffset: 2.5mm; priority: @labelPrioPiste; }
         AREA.TEXT { label: Name.name; size: 1.0; color: #3030ff; }
      }
      [TYPE piste_downhill_intermediate]{
-        WAY.TEXT { label: Name.name; size: 1.0; color: #ff3030; displayOffset: 2.5mm;}
+        WAY.TEXT { label: Name.name; size: 1.0; color: #ff3030; displayOffset: 2.5mm; priority: @labelPrioPiste; }
         AREA.TEXT { label: Name.name; size: 1.0; color: #ff3030; }
      }
      [TYPE piste_downhill_advanced]{
-        WAY.TEXT { label: Name.name; size: 1.0; color: #505050; displayOffset: 2.5mm;}
+        WAY.TEXT { label: Name.name; size: 1.0; color: #505050; displayOffset: 2.5mm; priority: @labelPrioPiste; }
         AREA.TEXT { label: Name.name; size: 1.0; color: #505050; }
      }
  }
@@ -1905,7 +1919,7 @@ STYLE
 
  [MAG close-] {
    [TYPE aeroway_taxiway,
-         aeroway_runway] WAY.TEXT { label: Name.name;}
+         aeroway_runway] WAY.TEXT { label: Name.name; priority: @labelPrioAeroway; }
 
    [TYPE aeroway_aerodrome,
          aeroway_terminal,
