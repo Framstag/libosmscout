@@ -40,12 +40,18 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter CLASS_FINAL
   {
   public:
-    enum IconMode
+    enum class IconMode
     {
       FixedSizePixmap,  // !< raster icons should be used, iconPixelSize will be used for rendering
       ScaledPixmap,     // !< raster icons should be used, icons will be scaled to iconSize
       OriginalPixmap,   // !< raster icons should be used, icons will keep dimensions of original image
       Scalable          // !< vector icons should be used, icons will be scaled to iconSize
+    };
+
+    enum class PatternMode
+    {
+      OriginalPixmap,   // !< raster pattern should be used, it will keep dimensions of original image
+      Scalable          // !< vector pattern should be used, it will be scaled to patternSize
     };
 
   private:
@@ -74,10 +80,13 @@ namespace osmscout {
     double                              plateLabelPadding;         //!< Space around plates in mm (default 5).
     double                              overlayLabelPadding;       //!< Space around overlay labels in mm (default 6).
 
-    IconMode                            iconMode;                  //!< Mode of icon, it controls what type of files would be loaded and computation of icon dimensions
+    IconMode                            iconMode;                  //!< Mode of icons, it controls what type of files would be loaded and how icon dimensions will be calculated
     double                              iconSize;                  //!< Size of icons in mm (default 3.7)
     double                              iconPixelSize;             //!< Size of icons in px (default 14)
     double                              iconPadding;               //!< Space around icons and symbols in mm (default 1).
+
+    PatternMode                         patternMode;               //!< Mode of pattern, it controls what type of files would be loaded and how pattern geometry will be canculated
+    double                              patternSize;               //!< Size of pattern image in mm (default 3.7)
 
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
@@ -135,6 +144,9 @@ namespace osmscout {
     void SetIconSize(double size);
     void SetIconPixelSize(double size);
     void SetIconPadding(double padding);
+
+    void SetPatternMode(const PatternMode &mode);
+    void SetPatternSize(double size);
 
     void SetContourLabelPadding(double padding);
 
@@ -271,6 +283,16 @@ namespace osmscout {
     inline double GetIconPadding() const
     {
       return iconPadding;
+    }
+
+    inline PatternMode GetPatternMode() const
+    {
+      return patternMode;
+    }
+
+    inline double GetPatternSize() const
+    {
+      return patternSize;
     }
 
     inline double GetContourLabelPadding() const
