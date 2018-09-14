@@ -422,6 +422,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
 
+    drawParameter.SetIconMode(osmscout::MapParameter::Scalable);
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugData(false);
