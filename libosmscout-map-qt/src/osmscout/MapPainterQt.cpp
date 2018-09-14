@@ -131,6 +131,10 @@ namespace osmscout {
       }else{
         filename=AppendFileToDir(path,style.GetIconName()+".png");
         if (image.load(filename.c_str())) {
+          if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+            style.SetWidth(image.width());
+            style.SetHeight(image.height());
+          }
           success = true;
         }
       }
@@ -159,7 +163,8 @@ namespace osmscout {
     return false;
   }
 
-  bool MapPainterQt::HasPattern(const MapParameter& parameter,
+  bool MapPainterQt::HasPattern(const Projection& projection,
+                                const MapParameter& parameter,
                                 const FillStyle& style)
   {
     assert(style.HasPattern());
@@ -179,11 +184,35 @@ namespace osmscout {
     std::list<std::string> erronousPaths;
 
     for (const auto& path : parameter.GetPatternPaths()) {
-      std::string filename=AppendFileToDir(path,style.GetPatternName()+".png");
-
+      bool success = false;
+      std::string filename;
       QImage image;
+      if (parameter.GetPatternMode()==MapParameter::PatternMode::Scalable){
+        filename=AppendFileToDir(path,style.GetPatternName()+".svg");
 
-      if (image.load(filename.c_str())) {
+        // Load SVG
+        QSvgRenderer renderer(QString::fromStdString(filename));
+        if (renderer.isValid()) {
+          int dimension = std::round(projection.ConvertWidthToPixel(parameter.GetPatternSize()));
+          image = QImage(dimension, dimension, QImage::Format_ARGB32);
+
+          // Qt svg don't support page background from Inkscape SVGs, use fill color as workaround for it
+          image.fill(QColor::fromRgbF(style.GetFillColor().GetR(),
+                                      style.GetFillColor().GetG(),
+                                      style.GetFillColor().GetB(),
+                                      style.GetFillColor().GetA()));
+
+          QPainter painter(&image);
+          renderer.render(&painter);
+          painter.end();
+          success = !image.isNull();
+        }
+      }else {
+        filename = AppendFileToDir(path, style.GetPatternName() + ".png");
+        success = image.load(filename.c_str());
+      }
+
+      if (success) {
         if (idx>=patternImages.size()) {
           patternImages.resize(idx+1);
         }
@@ -1012,7 +1041,7 @@ namespace osmscout {
   {
     if (fillStyle.HasPattern() &&
         projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
-        HasPattern(parameter,fillStyle)) {
+        HasPattern(projection, parameter, fillStyle)) {
       size_t idx=fillStyle.GetPatternId()-1;
 
       painter->setBrush(patterns[idx]);
