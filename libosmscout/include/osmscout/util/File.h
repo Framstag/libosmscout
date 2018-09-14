@@ -21,6 +21,7 @@
 */
 
 #include <string>
+#include <vector>
 
 #include <osmscout/CoreImportExport.h>
 
@@ -102,6 +103,8 @@ namespace osmscout {
    * @throws IOException if there was an error or if the function is not implemented.
    */
   extern OSMSCOUT_API bool IsDirectory(const std::string& filename);
+
+  extern OSMSCOUT_API bool ReadFile(const std::string& filename, std::vector<char>& content);
 }
 
 #endif
