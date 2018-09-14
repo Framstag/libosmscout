@@ -14,7 +14,7 @@
 
 namespace osmscout {
 
-  constexpr const char *Base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const char *Base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
   static inline std::string Base64Encode(const std::vector<char> &in)
   {
