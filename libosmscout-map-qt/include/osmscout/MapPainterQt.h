@@ -136,7 +136,8 @@ namespace osmscout {
                  const MapParameter& parameter,
                  IconStyle& style) override;
 
-    bool HasPattern(const MapParameter& parameter,
+    bool HasPattern(const Projection& projection,
+                    const MapParameter& parameter,
                     const FillStyle& style);
 
     double GetFontHeight(const Projection& projection,
