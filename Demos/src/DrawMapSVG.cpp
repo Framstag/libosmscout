@@ -119,6 +119,14 @@ int main(int argc, char* argv[])
   drawParameter.SetFontSize(2.0);
   drawParameter.SetDebugPerformance(true);
 
+  /*
+  std::list<std::string> paths;
+  paths.push_back("./libosmscout/data/icons/14x14/standard/");
+  paths.push_back("./libosmscout/data/icons/svg/standard/");
+  drawParameter.SetIconMode(osmscout::MapParameter::Scalable);
+  drawParameter.SetIconPaths(paths);
+  */
+
   projection.Set(osmscout::GeoCoord(lat,lon),
                  osmscout::Magnification(zoom),
                  /*dpi*/ 150, // TODO: configurable

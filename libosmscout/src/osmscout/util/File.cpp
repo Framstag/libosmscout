@@ -33,6 +33,7 @@
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/File.h>
 #include <osmscout/util/Number.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
 
@@ -185,5 +186,42 @@ namespace osmscout {
     throw IOException(filename,"Is file directory","Not implemented");
 #endif
   }
+
+  bool ReadFile(const std::string& filename, std::vector<char> &contentOut)
+  {
+    if (!ExistsInFilesystem(filename)){
+      return false;
+    }
+
+    try {
+      FILE*      file;
+      FileOffset fileSize;
+
+      fileSize=GetFileSize(filename);
+
+      file=fopen(filename.c_str(),"rb");
+      if (file==nullptr) {
+        log.Error() << "Cannot open file '" << filename << "'";
+
+        return false;
+      }
+
+      contentOut.resize(fileSize);
+
+      if (fread(contentOut.data(),1,fileSize,file)!=(size_t)fileSize) {
+        log.Error() << "Cannot load file '" << filename << "'";
+        fclose(file);
+        return false;
+      }
+
+      fclose(file);
+
+    } catch (IOException& e) {
+      log.Error() << e.GetDescription();
+      return false;
+    }
+    return true;
+  }
+
 
 }
