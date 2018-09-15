@@ -52,12 +52,12 @@ namespace osmscout {
   enum RenderSteps : size_t
   {
     FirstStep             =  0,
-    Initialize            =  0,
-    DumpStatistics        =  1,
-    PreprocessData        =  2,
-    Prerender             =  3,
-    DrawGroundTiles       =  4,
-    DrawOSMTileGrids      =  5,
+    Initialize            =  0, //!< Setup internal state of renderer for executing next steps with current projection and parameters
+    DumpStatistics        =  1, //!< Prints details for debugging, if debug flag (performance, data) is set in renderer parameter
+    PreprocessData        =  2, //!< Convert geographical coordinates of object points to screen coordinates,
+    Prerender             =  3, //!< Implementation specific preparison
+    DrawGroundTiles       =  4, //!< Draw unknown/sea/land tiles and tiles with "coastlines"
+    DrawOSMTileGrids      =  5, //!< If special style exists, renders grid corresponding to OSM tiles
     DrawAreas             =  6,
     DrawWays              =  7,
     DrawWayDecorations    =  8,
@@ -67,7 +67,7 @@ namespace osmscout {
     DrawAreaBorderSymbols = 12,
     PrepareNodeLabels     = 13,
     DrawLabels            = 14,
-    Postrender            = 15,
+    Postrender            = 15, //!< Implementation specific final step
     LastStep              = 15
   };
 
@@ -108,30 +108,6 @@ namespace osmscout {
                                            const MapData&);
 
   public:
-    /*
-     * Dimension of a text
-     */
-    struct OSMSCOUT_MAP_API TextDimension
-    {
-      double xOff;
-      double yOff;
-      double width;
-      double height;
-
-      TextDimension() = default;
-
-      TextDimension(double xOff,
-                    double yOff,
-                    double width,
-                    double height)
-      : xOff(xOff),
-        yOff(yOff),
-        width(width),
-        height(height)
-      {
-        // no code
-      }
-    };
 
     /**
      * Structure used for internal statistic collection
@@ -236,29 +212,15 @@ namespace osmscout {
       FillStyleRef             fillStyle;       //!< Fill style
       BorderStyleRef           borderStyle;     //!< Border style
       GeoBox                   boundingBox;     //!< Bounding box of the area
+      bool                     isOuter;         //!< flag if this area is outer ring of some relation
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
     /**
-     * Represents one entry in a label.
-     */
-    struct OSMSCOUT_MAP_API LabelLayoutData
-    {
-      size_t        position;   //!< Relative position of the label
-      std::string   label;      //!< The text of the label (only used if TextStyle is set)
-      TextDimension dimension;  //!< Dimension of the label object (coul dbe text, sybol, icon...)
-      double        fontSize;   //!< The font size (only used if TextStyle is set)
-      double        alpha;      //!< The alpha value for rendering the text label (only used if TextStyle is set)
-      TextStyleRef  textStyle;  //!< The text style for a textual label (optional)
-      bool          icon;       //!< Flag signaling that an icon is available, else a symbol will be rendered
-      IconStyleRef  iconStyle;  //!< The icon style for a icon or symbol
-    };
-
-    /**
      * Helper class for drawing contours. Allows the MapPainter base class
-     * to inject itself at certain points in the contour label rendeirng code of
+     * to inject itself at certain points in the contour label rendering code of
      * the actual backend.
      */
     class OSMSCOUT_MAP_API ContourLabelHelper CLASS_FINAL
@@ -313,17 +275,6 @@ namespace osmscout {
     std::list<WayData>           wayData;
     std::list<WayPathData>       wayPathData;
 
-    /**
-      Temporary data structures for intelligent label positioning
-      */
-    //@{
-    size_t                       nextLabelId;
-    LabelLayouter                labels;
-    LabelLayouter                overlayLabels;
-
-    std::vector<LabelLayoutData> labelLayoutData;
-    //@}
-
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
 
@@ -364,6 +315,8 @@ namespace osmscout {
     LayerFeatureValueReader      layerReader;        //!< Value reader for the 'layer' feature
     WidthFeatureValueReader      widthReader;        //!< Value reader for the 'width' feature
     AddressFeatureValueReader    addressReader;      //!< Value reader for the 'address' feature
+    LanesFeatureValueReader      lanesReader;        //!< Value reader for the 'lanes' feature
+    AccessFeatureValueReader     accessReader;       //!< Value reader for the 'lanes' feature
     //@}
 
     /**
@@ -436,13 +389,6 @@ namespace osmscout {
                                const std::string& text,
                                const std::vector<Point>& nodes);
 
-    bool RegisterPointLabel(const Projection& projection,
-                            const MapParameter& parameter,
-                            const LabelLayoutData& data,
-                            double x,
-                            double y,
-                            size_t id);
-
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const FeatureValueBuffer& buffer,
@@ -484,7 +430,7 @@ namespace osmscout {
     //@}
 
     /**
-     * This are the offocial render step methods. One method for each render step.
+     * This are the official render step methods. One method for each render step.
      */
     //@{
     void InitializeRender(const Projection& projection,
@@ -542,10 +488,6 @@ namespace osmscout {
     void PrepareNodeLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const MapData& data);
-
-    void DrawLabels(const Projection& projection,
-                    const MapParameter& parameter,
-                    const MapData& data);
 
     void Postrender(const Projection& projection,
                     const MapParameter& parameter,
@@ -620,8 +562,11 @@ namespace osmscout {
       Return true, if the icon in the IconStyle is available and can be drawn.
       If this method returns false, possibly a fallback (using a Symbol)
       will be chosen.
+
+      Icon style dimensions and iconId may be setup for later usage.
      */
     virtual bool HasIcon(const StyleConfig& styleConfig,
+                         const Projection& projection,
                          const MapParameter& parameter,
                          IconStyle& style)= 0;
 
@@ -629,23 +574,8 @@ namespace osmscout {
      * Returns the height of the font.
      */
     virtual double GetFontHeight(const Projection& projection,
-                               const MapParameter& parameter,
-                               double fontSize) = 0;
-
-    /**
-      Return the bounding box of the given text. The method is called
-      every time a label for a node or an area has to be drawn (which means
-      "not for contour labels").
-
-      The backend may decide to relayout the given text (by adding virtual line breaks),
-      however it must assure that later calls to corresponding DrawXXX methods will
-      honour the bounding box.
-      */
-    virtual TextDimension GetTextDimension(const Projection& projection,
-                                           const MapParameter& parameter,
-                                           double objectWidth,
-                                           double fontSize,
-                                           const std::string& text) = 0;
+                                 const MapParameter& parameter,
+                                 double fontSize) = 0;
 
     /**
       (Optionally) fills the area with the given default color
@@ -657,21 +587,36 @@ namespace osmscout {
                             const FillStyle& style) = 0;
 
     /**
-      Draw the given text at the given pixel coordinate in a style defined
-      by the given LabelStyle.
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
      */
-    virtual void DrawLabel(const Projection& projection,
-                           const MapParameter& parameter,
-                           const LabelData& label) = 0;
+    virtual void RegisterRegularLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const std::vector<LabelData> &labels,
+                                      const Vertex2D &position,
+                                      double objectWidth) = 0;
 
     /**
-      Draw the Icon as defined by the IconStyle at the given pixel coordinate.
+     * Register contour label
+     */
+    virtual void RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const PathLabelData &label,
+                                      const LabelPath &labelPath) = 0;
+
+    virtual void DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) = 0;
+
+    /**
+      Draw the Icon as defined by the IconStyle at the given pixel coordinate (icon center).
      */
     virtual void DrawIcon(const IconStyle* style,
-                          double x, double y) = 0;
+                          double centerX, double centerY,
+                          double width, double height) = 0;
 
     /**
-      Draw the Symbol as defined by the SymbolStyle at the given pixel coordinate.
+      Draw the Symbol as defined by the SymbolStyle at the given pixel coordinate (symbol center).
      */
     virtual void DrawSymbol(const Projection& projection,
                             const MapParameter& parameter,
@@ -690,17 +635,6 @@ namespace osmscout {
                           LineStyle::CapStyle startCap,
                           LineStyle::CapStyle endCap,
                           size_t transStart, size_t transEnd) = 0;
-
-    /**
-      Draw the given text as a contour of the given path in a style defined
-      by the given LabelStyle.
-     */
-    virtual void DrawContourLabel(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const PathTextStyle& style,
-                                  const std::string& text,
-                                  size_t transStart, size_t transEnd,
-                                  ContourLabelHelper& helper) = 0;
 
     /**
       Draw the given text as a contour of the given path in a style defined

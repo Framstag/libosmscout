@@ -247,6 +247,15 @@ with values ("`<attributeName> : <value> ;`") and a closing
 `FeatureAttr`
 : Name of a feature followed by a point followed by the name of the feature
 attribute that holds the to be evaluated value. Example: `Name.name`
+
+`OffsetRel`
+: Position of a way in relation to the original way. Possible values are
+  * `base` - (default) offset in relation to the original way 
+  * `leftOutline` - offset in relation to the left outline 
+  * `rightOutline` - offset in relation to the right outline
+  * `laneDivider` - offset on each lane divider - if lane information is
+  available for the given way and the numbe rof lanes is greater than 1.
+
   
 ## Slots
 
@@ -275,6 +284,7 @@ offset       |GroundSize   |Offset of the drawn line in relation to the actual p
 joinCap      |Cap          |Cap in case where lines join.
 endCap       |Cap          |Cap in the case where the lines ends without joining another line.
 priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
+offsetRel    |OffsetRel    |Position the way offset is relative to
 
 If `displayWidth` and `width` are both set, the resulting pixel values will be added.
 
@@ -351,6 +361,7 @@ color        |Color        |The color of the text
 size         |Int          |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
 displayOffset|ScreenSize   |Offset of drawn text in relation to the actual path.
 offset       |GroundSize   |Offset of the drawn text in relation to the actual path.
+priority     |Int          |numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value.
 
 ### IconStyle - Drawing icons for nodes and areas
 

@@ -204,3 +204,13 @@ if buildMapOpenGL and glfwDep.found() and ftDep.found()
                          link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
                          install: true)
 endif
+
+if buildMapDirectX
+  DrawMapDirectX = executable('DrawMapDirectX',
+                              'src/DrawMapDirectX.cpp',
+                              include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapdirectxIncDir],
+                              dependencies: [mathDep, openmpDep, d2d1Dep, dwriteDep, winCodecsDep],
+                              link_with: [osmscout, osmscoutmap, osmscoutmapdirectx],
+                              gui_app: true,
+                              install: true)
+endif

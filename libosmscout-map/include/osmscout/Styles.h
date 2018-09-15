@@ -50,7 +50,8 @@ namespace osmscout {
     enum OffsetRel {
       base,
       leftOutline,
-      rightOutline
+      rightOutline,
+      laneDivider,
     };
 
     enum Attribute {
@@ -219,6 +220,7 @@ namespace osmscout {
       AddEnumValue("base",LineStyle::base);
       AddEnumValue("leftOutline",LineStyle::leftOutline);
       AddEnumValue("rightOutline",LineStyle::rightOutline);
+      AddEnumValue("laneDivider",LineStyle::laneDivider);
     }
   };
 
@@ -756,7 +758,8 @@ namespace osmscout {
       attrSize,
       attrTextColor,
       attrDisplayOffset,
-      attrOffset
+      attrOffset,
+      attrPriority
     };
 
   private:
@@ -765,6 +768,7 @@ namespace osmscout {
     Color            textColor;
     double           displayOffset;
     double           offset;
+    size_t           priority;
 
   public:
     PathTextStyle();
@@ -773,12 +777,14 @@ namespace osmscout {
     void SetColorValue(int attribute, const Color& value) override;
     void SetDoubleValue(int attribute, double value) override;
     void SetLabelValue(int attribute, const LabelProviderRef& value) override;
+    void SetUIntValue(int attribute, size_t value) override;
 
     PathTextStyle& SetLabel(const LabelProviderRef& label);
     PathTextStyle& SetSize(double size);
     PathTextStyle& SetTextColor(const Color& color);
     PathTextStyle& SetDisplayOffset(double value);
     PathTextStyle& SetOffset(double value);
+    PathTextStyle& SetPriority(size_t value);
 
     inline bool IsVisible() const
     {
@@ -811,6 +817,11 @@ namespace osmscout {
       return offset;
     }
 
+    inline size_t GetPriority() const
+    {
+      return priority;
+    }
+
     static StyleDescriptorRef GetDescriptor();
 
     void CopyAttributes(const PathTextStyle& other,
@@ -834,10 +845,12 @@ namespace osmscout {
     };
 
   private:
-    SymbolRef   symbol;
-    std::string iconName; //!< name of the icon as given in style
-    size_t      iconId;   //!< Id for external resource binding
-    size_t      position; //!< Relative vertical position of the label
+    SymbolRef    symbol;
+    std::string  iconName; //!< name of the icon as given in style
+    size_t       iconId;   //!< Id for external resource binding
+    unsigned int width;    //!< width of icon in pixels
+    unsigned int height;   //!< height of icon in pixels
+    size_t       position; //!< Relative vertical position of the label
 
   public:
     IconStyle();
@@ -850,6 +863,8 @@ namespace osmscout {
     IconStyle& SetSymbol(const SymbolRef& symbol);
     IconStyle& SetIconName(const std::string& iconName);
     IconStyle& SetIconId(size_t id);
+    IconStyle& SetWidth(unsigned int w);
+    IconStyle& SetHeight(unsigned int h);
     IconStyle& SetPosition(size_t position);
 
     inline bool IsVisible() const
@@ -871,6 +886,16 @@ namespace osmscout {
     inline size_t GetIconId() const
     {
       return iconId;
+    }
+
+    inline unsigned int GetWidth() const
+    {
+      return width;
+    }
+
+    inline unsigned int GetHeight() const
+    {
+      return height;
     }
 
     inline size_t GetPosition() const

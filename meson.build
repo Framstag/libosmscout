@@ -1,6 +1,6 @@
 project('libosmscout',
         'cpp',
-        meson_version: '>=0.40.0',
+        meson_version: '>=0.46.0',
         default_options: ['cpp_std=c++11', 'buildtype=debugoptimized', 'warning_level=3'],
         license: ['LGPL'])
 
@@ -78,7 +78,7 @@ threadDep = dependency('threads')
 iconvDep = compiler.find_library('iconv', required: false)
 marisaDep = dependency('marisa', required : false)
 
-if compiler.get_id()=='clang'
+if compiler.get_id()=='clang' or compiler.get_id()=='msvc'
   openmpDep = dependency('', required: false)
 else
   openmpDep = dependency('openmp', required: false)

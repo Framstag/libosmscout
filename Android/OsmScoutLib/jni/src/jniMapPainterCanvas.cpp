@@ -51,6 +51,7 @@ namespace osmscout {
   }
   
   bool MapPainterCanvas::HasIcon(const StyleConfig& styleConfig,
+                                 const Projection& /*projection*/,
                                  const MapParameter& parameter,
                                  IconStyle& style)
   {

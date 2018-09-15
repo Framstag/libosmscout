@@ -370,10 +370,17 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
 }
 
 static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessValue,
-                                   size_t indent)
+                                   size_t indent,
+                                   bool defaultValue)
 {
   DumpIndent(indent);
-  std::cout << "Access {" << std::endl;
+
+  if (defaultValue) {
+    std::cout << "(Access) {" << std::endl;
+  }
+  else {
+    std::cout << "Access {" << std::endl;
+  }
 
   if (accessValue.IsOnewayForward()) {
     DumpIndent(indent+2);
@@ -504,6 +511,45 @@ static void DumpSidewayFeatureValue(const osmscout::SidewayFeatureValue& sideway
   std::cout << "}" << std::endl;
 }
 
+static void DumpLanesFeatureValue(const osmscout::LanesFeatureValue& lanesValue,
+                                  size_t indent)
+{
+  DumpIndent(indent);
+  std::cout << "Lanes {" << std::endl;
+
+  DumpIndent(indent+2);
+  std::cout << "Lanes: ";
+  if (lanesValue.HasSingleLane()) {
+    std::cout << "1" << std::endl;
+  }
+  else {
+    std::cout << (size_t)lanesValue.GetForwardLanes() << " " << (size_t)lanesValue.GetBackwardLanes() << std::endl;
+  }
+
+  if (!lanesValue.GetTurnForward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "TurnForward: " << lanesValue.GetTurnForward() << std::endl;
+  }
+
+  if (!lanesValue.GetTurnBackward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "TurnBackward: " << lanesValue.GetTurnBackward() << std::endl;
+  }
+
+  if (!lanesValue.GetDestinationForward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "DestinationForward: " << lanesValue.GetDestinationForward() << std::endl;
+  }
+
+  if (!lanesValue.GetDestinationBackward().empty()) {
+    DumpIndent(indent+2);
+    std::cout << "DestinationBackward: " << lanesValue.GetDestinationBackward() << std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "}" << std::endl;
+}
+
 static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
                                    size_t indent)
 {
@@ -548,7 +594,8 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
           auto*accessValue=dynamic_cast<osmscout::AccessFeatureValue*>(value);
 
           DumpAccessFeatureValue(*accessValue,
-                                 indent);
+                                 indent,
+                                 false);
         }
         else if (dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value)!=nullptr) {
           auto*accessValue=dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value);
@@ -603,6 +650,12 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
 
           DumpSidewayFeatureValue(*sidewayValue,indent);
         }
+        else if (dynamic_cast<osmscout::LanesFeatureValue*>(value)!=nullptr) {
+          auto*lanesValue=dynamic_cast<osmscout::LanesFeatureValue*>(value);
+
+          DumpLanesFeatureValue(*lanesValue,
+                                indent);
+        }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);
           std::cout << meta.GetFeature()->GetName() << ": ";
@@ -630,12 +683,13 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
         osmscout::AccessFeatureValue accessValue(buffer.GetType()->GetDefaultAccess());
 
         DumpAccessFeatureValue(accessValue,
-                               indent);
+                               indent,
+                               true);
       }
       else if (!meta.GetFeature()->HasValue()) {
         // We are just a flag...
         DumpIndent(indent);
-        std::cout << meta.GetFeature()->GetName() << ": false";
+        std::cout << "(" << meta.GetFeature()->GetName() << ")" << ": false";
         std::cout << std::endl;
       }
     }

@@ -25,6 +25,6 @@ To clone the repository use
   $ git clone git://git.code.sf.net/p/libosmscout/code libosmscout-code
 ```
 
-See [Building]({{< relref "documentation/source.md" >}}) for details on how to
+See [Building]({{< relref "/documentation/source.md" >}}) for details on how to
 build the library after downloading its sources.
 

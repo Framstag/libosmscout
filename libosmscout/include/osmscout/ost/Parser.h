@@ -150,6 +150,8 @@ std::string Destring(const char* str)
 	void TYPEKIND(unsigned char& types);
 	void TYPEOPTION(TypeInfo& typeInfo);
 	void PATH(TypeInfo& typeInfo);
+	void LANES(TypeInfo& typeInfo);
+	void UINT8(uint8_t& value);
 
   void Parse();
 };

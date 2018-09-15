@@ -26,7 +26,7 @@ a custom libosmsocut database from the raw data passed.
 An import normally is restrictied to a certain area of the world. Normally
 you find imports for countries or counties or bigger cities.
 
-Take a look at the [import tutorial]({{< ref "tutorials/Importing.md" >}}) for
+Take a look at the [import tutorial]({{< ref "/tutorials/Importing.md" >}}) for
 a description of how to do an import.
 
 ## Database
@@ -36,7 +36,7 @@ consists of a number of files. Some files hold data, other files
 act as index into data and still other files have index and actual data combined.
 
 You can find a description of the individual database files
-[here]({{< ref "documentation/database.md" >}}).
+[here]({{< ref "/documentation/database.md" >}}).
 
 Libomssocut assumes (but does not enforce this) that all maps are stored under
 the same directory. Each database has its own sub directory storing the
@@ -88,8 +88,8 @@ The following backends currently exist:
   the GSoC 2017).
   
 You can find more information regarding requirements for a backend 
-[here]({{< ref "documentation/renderbackend.md" >}}). A description of the actual
-render process can be found [here]({{< ref "documentation/renderprocess.md" >}}).
+[here]({{< ref "/documentation/renderbackend.md" >}}). A description of the actual
+render process can be found [here]({{< ref "/documentation/renderprocess.md" >}}).
 
 ## Type configration file (*.ost)
 
@@ -100,7 +100,7 @@ Types are later on used to assign further information to the object and
 are used as a filter criteria for the style sheet.
 
 You can find more information regarding type configuration
-[here]({{< ref "documentation/typedef.md" >}})
+[here]({{< ref "/documentation/typedef.md" >}})
 
 ## Style sheets (*.oss)
 
@@ -108,6 +108,6 @@ To allow configurable rendering and things like night mode libosmscout
 uses style sheets for configuraion of the actual rendering look.
 
 You can find more information regarding style sheets
-[here]({{< ref "documentation/stylesheet.md" >}})
+[here]({{< ref "/documentation/stylesheet.md" >}})
 
 

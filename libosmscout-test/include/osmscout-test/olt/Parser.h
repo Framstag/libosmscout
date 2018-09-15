@@ -21,11 +21,10 @@
 #if !defined(osmscout_olt_PARSER_H)
 #define osmscout_olt_PARSER_H
 
-#include <osmscout/RegionList.h>
-
 #include <osmscout/util/String.h>
 
-#include <osmscout/olt/Scanner.h>
+#include "Scanner.h"
+#include "../RegionList.h"
 
 namespace osmscout {
 namespace olt {

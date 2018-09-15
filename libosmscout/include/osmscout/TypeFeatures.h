@@ -1784,6 +1784,142 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
+
+  class OSMSCOUT_API LanesFeatureValue : public FeatureValue
+  {
+  private:
+
+    uint8_t     lanes;              //< // First two bits reserved, 3 bit for number of lanes in each direction
+    std::string turnForward;
+    std::string turnBackward;
+    std::string destinationForward;
+    std::string destinationBackward;
+
+  public:
+    inline LanesFeatureValue()
+      : lanes(0)
+    {
+    }
+
+    inline explicit LanesFeatureValue(uint8_t lanes)
+      : lanes(lanes)
+    {
+      // no code
+    }
+
+    inline void SetLanes(uint8_t forwardLanes, uint8_t backwardLanes)
+    {
+      this->lanes=((forwardLanes & (uint8_t)0x7) << 2) |
+                  ((backwardLanes & (uint8_t)0x7) << 5);
+    }
+
+    inline bool HasSingleLane() const
+    {
+      return GetLanes()==0;
+    }
+
+    inline uint8_t GetForwardLanes() const
+    {
+      return (lanes >> 2) & (uint8_t)0x07;
+    }
+
+    inline uint8_t GetBackwardLanes() const
+    {
+      return (lanes >> 5) & (uint8_t)0x07;
+    }
+
+    uint8_t GetLanes() const;
+
+    inline void SetTurnLanes(const std::string& turnForward,
+                             const std::string& turnBawckard)
+    {
+      this->turnForward=turnForward;
+      this->turnBackward=turnBawckard;
+    }
+
+    inline std::string GetTurnForward() const
+    {
+      return turnForward;
+    }
+
+    inline std::string GetTurnBackward() const
+    {
+      return turnBackward;
+    }
+
+    inline std::string GetDestinationForward() const
+    {
+      return destinationForward;
+    }
+
+    inline std::string GetDestinationBackward() const
+    {
+      return destinationBackward;
+    }
+
+    inline void SetDestinationLanes(const std::string& destinationForward,
+                                    const std::string& destinationBawckard)
+    {
+      this->destinationForward=destinationForward;
+      this->destinationBackward=destinationBawckard;
+    }
+
+    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    {
+      if (HasSingleLane()) {
+        return "1";
+      }
+
+      return std::to_string(GetForwardLanes()) + " " + std::to_string(GetBackwardLanes());
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    LanesFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API LanesFeature : public Feature
+  {
+  private:
+    TagId tagOneway;
+    TagId tagLanes;
+    TagId tagLanesForward;
+    TagId tagLanesBackward;
+    TagId tagTurnLanes;
+    TagId tagTurnLanesForward;
+    TagId tagTurnLanesBackward;
+    TagId tagDestinationLanes;
+    TagId tagDestinationLanesForward;
+    TagId tagDestinationLanesBackward;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
+  public:
+    LanesFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
 }
 
 #endif

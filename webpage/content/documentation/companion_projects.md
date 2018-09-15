@@ -11,7 +11,7 @@ menu:
 ---
 
 This is a list of projects using in some kind libosmscout. If you want to
-your project to get added to this page, [contact]({{< relref "documentation/contact.md" >}})
+your project to get added to this page, [contact]({{< relref "/documentation/contact.md" >}})
 the team or just make a pull request with your data added to this page.
 
 (All entries in alphabetical order).

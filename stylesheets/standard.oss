@@ -85,12 +85,17 @@ CONST
   UINT labelShieldTrunk             = 11;
   UINT labelShieldPrimary           = 11;
 
-
   UINT labelPrioTown                = 12;
   UINT labelPrioVillage             = 13;
   UINT labelPrioHamlet              = 14;
   UINT labelPrioSuburb              = 15;
   UINT labelPrioLocality            = 16;
+
+  UINT labelPrioAeroway             = 17;
+  UINT labelPrioFerry               = 17;
+  UINT labelPrioPublicTransportWay  = 17;
+  UINT labelPrioHighway             = 18;
+  UINT labelPrioOtherWays           = 19;
 
   UINT labelPrioNatural             = 20;
   UINT labelPrioLanduse             = 25;
@@ -115,6 +120,8 @@ CONST
   UINT labelPrioHighwayJunction     = 55;
 
   UINT labelPrioBuilding            = 100;
+
+  UINT labelPrioElevationContour    = 500;
 
   // For debugging :-)
   COLOR red                        = #ff0000;
@@ -519,14 +526,14 @@ STYLE
     [MAG suburb-] {
       [TYPE elevation_contour_major] {
         WAY {color: @majorContourColor; displayWidth: 0.150mm; }
-        WAY.TEXT { label: Ele.inMeter; }
+        WAY.TEXT { label: Ele.inMeter; priority: @labelPrioElevationContour; }
       }
     }
 
     [MAG detail-] {
       [TYPE elevation_contour_medium] {
         WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
-        WAY.TEXT { label: Ele.inMeter; }
+        WAY.TEXT { label: Ele.inMeter; priority: @labelPrioElevationContour; }
       }
 
       [TYPE elevation_contour_minor] {
@@ -663,7 +670,7 @@ STYLE
             waterway_weir,
             waterway_river,
             waterway_canal]
-        WAY.TEXT { label: Name.name; color: @waterLabelColor;}
+        WAY.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
       [TYPE waterway_stream,
             waterway_river,
@@ -1125,14 +1132,14 @@ STYLE
          highway_primary,
          highway_primary_link,
          highway_secondary,
-         highway_secondary_link] WAY.TEXT{label: Name.name; color: @wayLabelColor; size: 1.0; }
+         highway_secondary_link] WAY.TEXT{label: Name.name; color: @wayLabelColor; size: 1.0; priority: @labelPrioHighway; }
 
-    [TYPE route_ferry] WAY.TEXT{label: Name.name; color: @wayLabelColor; size: 1.0; displayOffset: 1.4mm; }
+    [TYPE route_ferry] WAY.TEXT{label: Name.name; color: @wayLabelColor; size: 1.0; displayOffset: 1.4mm; priority: @labelPrioFerry; }
  }
 
  [MAG close-] {
    [TYPE highway_services] NODE.TEXT {label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
-   [TYPE highway_construction] WAY.TEXT { label: Name.name; color: @wayLabelColor; }
+   [TYPE highway_construction] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighway; }
  }
 
  [MAG veryClose-] {
@@ -1143,7 +1150,7 @@ STYLE
          highway_living_street,
          highway_service,
          highway_track,
-         leisure_track] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.9; }
+         leisure_track] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.9; priority: @labelPrioHighway; }
 
    [TYPE highway_service] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
 
@@ -1161,7 +1168,7 @@ STYLE
          highway_via_ferrata_easy,
          highway_via_ferrata_moderate,
          highway_via_ferrata_difficult,
-         highway_via_ferrata_extreme] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8;}
+         highway_via_ferrata_extreme] WAY.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8; priority: @labelPrioOtherWays; }
 
    [TYPE highway_steps,
          highway_via_ferrata_easy,
@@ -1175,7 +1182,7 @@ STYLE
 
    [TYPE aerialway_gondola,
          aerialway_chair_lift,
-         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; displayOffset: 2.5mm;}
+         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
 
  }
 
@@ -1194,6 +1201,33 @@ STYLE
  [MAG veryClose-] {
    //[TYPE speed_camera] NODE.ICON { symbol: speed_camera; name: speed_camera;}
  }
+
+ // Lanes
+  [MAG 17-] {
+    [TYPE highway_motorway,
+          highway_motorway_link] {
+      WAY#lanes { color: lighten(@motorwayColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_trunk,
+          highway_trunk_link,
+          highway_motorway_trunk] {
+      WAY#lanes { color: lighten(@trunkColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_primary,
+          highway_primary_link,
+          highway_motorway_primary] {
+      WAY#lanes { color: lighten(@primaryColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_secondary,
+          highway_secondary_link] {
+      WAY#lanes { color: lighten(@secondaryColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+    [TYPE highway_tertiary,
+          highway_tertiary_link] {
+      WAY#lanes { color: lighten(@tertiaryColor,0.1); displayWidth: 0.4mm; dash: 20,3; priority: 1; joinCap: butt; offsetRel: laneDivider; }
+    }
+  }
+
 
  // -------------------------------------------------------
  //
@@ -1281,7 +1315,7 @@ STYLE
            railway_preserved,
            railway_funicular,
            railway_subway,
-           public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; }
+           public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
 
      [TYPE public_transport_platform] AREA.TEXT { label: Name.name; color: #524a4a; size: 0.8; priority: @labelPrioTramHalt; }
    }
@@ -1926,7 +1960,7 @@ STYLE
 
  [MAG close-] {
    [TYPE aeroway_taxiway,
-         aeroway_runway] WAY.TEXT { label: Name.name;}
+         aeroway_runway] WAY.TEXT { label: Name.name; priority: @labelPrioAeroway; }
 
    [TYPE aeroway_aerodrome,
          aeroway_terminal,

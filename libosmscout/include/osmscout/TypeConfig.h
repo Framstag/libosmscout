@@ -116,6 +116,8 @@ namespace osmscout {
     bool                                        mergeAreas;              //!< Areas of this type are merged under certain conditions
     bool                                        ignoreSeaLand;           //!< Ignore objects of this type for sea/land calculation
     bool                                        ignore;                  //!< Ignore objects of this type
+    uint8_t                                     lanes;                   //!< Number of expected lanes (default: 1)
+    uint8_t                                     onewayLanes;             //!< Number of expected lanes (default: 1)
 
     std::unordered_set<std::string>             groups;                  //!< Set of idents that server as categorizing groups
     std::unordered_map<std::string,std::string> descriptions;            //!< Map of descriptions for given language codes
@@ -598,6 +600,30 @@ namespace osmscout {
       return ignore;
     }
 
+    inline TypeInfo& SetLanes(uint8_t lanes)
+    {
+      this->lanes=lanes;
+
+      return *this;
+    }
+
+    inline uint8_t GetLanes() const
+    {
+      return lanes;
+    }
+
+    inline TypeInfo& SetOnewayLanes(uint8_t lanes)
+    {
+      this->onewayLanes=lanes;
+
+      return *this;
+    }
+
+    inline uint8_t GetOnewayLanes() const
+    {
+      return onewayLanes;
+    }
+
     /**
      * Return the set of groups the type is in.
      */
@@ -777,7 +803,7 @@ namespace osmscout {
   // Forward declaration
   class TypeConfig;
 
-  static const uint32_t FILE_FORMAT_VERSION=17;
+  static const uint32_t FILE_FORMAT_VERSION=18;
 
   /**
    * \ingroup type
@@ -833,6 +859,7 @@ namespace osmscout {
     FeatureRef                                  featureTunnel;
     FeatureRef                                  featureEmbankment;
     FeatureRef                                  featureRoundabout;
+    FeatureRef                                  featureLanes;
 
   public:
     // Internal use (only available during preprocessing)

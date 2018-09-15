@@ -43,7 +43,7 @@ Currently the library does compile without any external dependencies, however
 since you need to be able to import OSM data to make any use of the library
 you should at least have libxml2 or protobuf available.
 
-## Supprted Build systems, operating systems and compiler
+## Supported Build systems, operating systems and compiler
 
 Libosmscout supports cmake and finally meson. It did support autotools, but this
 support was recently dropped.
@@ -62,6 +62,7 @@ Support matrix:
 <th style="text-align: left; width: 35%">OS</th>
 <th style="text-align: left">Compiler</th>
 <th style="text-align: left">Build tool</th>
+<th style="text-align: left">Packaging tool</th>
 <th style="text-align: left">Comments</th>
 </tr>
 </thead>
@@ -72,12 +73,14 @@ Support matrix:
 <td style="text-align: left">gcc</td>
 <td style="text-align: left">CMake</td>
 <td style="text-align: left"></td>
+<td style="text-align: left"></td>
 </tr>
 
 <tr>
 <td style="text-align: left">Linux</td>
 <td style="text-align: left">clang</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left"></td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -86,6 +89,7 @@ Support matrix:
 <td style="text-align: left">gcc</td>
 <td style="text-align: left">Meson</td>
 <td style="text-align: left"></td>
+<td style="text-align: left"></td>
 </tr>
 
 <tr>
@@ -93,12 +97,14 @@ Support matrix:
 <td style="text-align: left">clang</td>
 <td style="text-align: left">Meson</td>
 <td style="text-align: left"></td>
+<td style="text-align: left"></td>
 </tr>
 
 <tr>
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">MSYS2</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">pacman</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -106,6 +112,7 @@ Support matrix:
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">MSYS2</td>
 <td style="text-align: left">Meson</td>
+<td style="text-align: left">pacman</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -113,6 +120,7 @@ Support matrix:
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">Visual Studio 2015</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">vcpkg</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -127,6 +135,7 @@ Support matrix:
 <td style="text-align: left">Windows</td>
 <td style="text-align: left">Visual Studio 2017</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">vcpkg</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -141,6 +150,7 @@ Support matrix:
 <td style="text-align: left">Mac OS/iOS</td>
 <td style="text-align: left">XCode/Clang</td>
 <td style="text-align: left">CMake</td>
+<td style="text-align: left">homebrew</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -148,6 +158,7 @@ Support matrix:
 <td style="text-align: left">Mac OS/iOS</td>
 <td style="text-align: left">XCode</td>
 <td style="text-align: left">Meson</td>
+<td style="text-align: left">homebrew</td>
 <td style="text-align: left"></td>
 </tr>
 
@@ -176,8 +187,41 @@ Note that there is also a central Appveyor build, that uses a similar setup
 as described here.
 
 Please use the cmake based build for VisualStudio project setup. You just need
-to import the `CMakeLists.txt` into VisualStudio. There is currently no automatic
-setup or installation guide for installing dependencies.
+to import the `CMakeLists.txt` into VisualStudio. 
+
+You can use [vcpkg](https://github.com/Microsoft/vcpkg)
+to install required dependencies and build against.
+
+Currently the following vcpkg dependencies can be used (depending on the libraries you want
+to build):
+
+* zlib
+* libiconv
+* libxml2
+* protobuf
+* cairo
+* pango
+* qt5-base
+* qt5-declarative
+* qt5-svg
+* qt5-tools
+* opengl
+* freeglut
+* glm
+* glew
+* glfw3
+
+Currently `glfw3` is not correctly detected by cmake.
+
+To build against vcpkg packages using cmake (note that your version of VisualStudio and the location
+of your vcpkg may differ):
+
+```bash
+$ mkdir vcbuild
+$ cd vcbuild
+$ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=../../vcpkg\scripts\buildsystems\vcpkg.cmake ..
+$ cmake --build .
+```
 
 ### Setup for Mac OS X
 
@@ -207,9 +251,9 @@ installed packages. You may have to extend search paths and similar.
 At the time the article has been written this are for example:
 
 ```bash
-brew link --force gettext
-brew link --force libxml2
-brew link --force qt5
+$ brew link --force gettext
+$ brew link --force libxml2
+$ brew link --force qt5
 ```
 
 For cmake based build you also have to install:
@@ -228,7 +272,7 @@ build libosmscout binaries. The cmake based does not have this problem.
 For custom installation directories for Qt you have to pass a hint to cmake:
 
 ```bash
-cmake . -DCMAKE_PREFIX_PATH=[QT5_Installation_prefix]
+$ cmake . -DCMAKE_PREFIX_PATH=[QT5_Installation_prefix]
 ```
 
 Note also that native XCode projects doe not have dependency autodetection.
@@ -253,10 +297,10 @@ instructions [in the OpenStreetMap wiki](http://wiki.openstreetmap.org/wiki/Libo
 In the top level directory type:
 
 ```bash
-  $ mkdir build
-  $ cd build
-  $ cmake ..
-  $ make
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
 ```
 
 This should recursively analyse dependencies for all project sub directories and
@@ -264,18 +308,18 @@ afterwards build them.
 
 Real life example for building using VisualStudio:
 ```bash
-mkdir build
-cd build
-cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0 \
+$ mkdir build
+$ cd build
+$ cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0
   -DCMAKE_INSTALL_PREFIX=D:\Mine\OpenSource\osmlib
-cmake --build . --config Release --target install
+$ cmake --build . --config Release --target install
 ```
 
 Real life example for building using Xcode:
 ```bash
-mkdir build
-cd build
-cmake -G "Xcode" ..
+$ mkdir build
+$ cd build
+$ cmake -G "Xcode" ..
 ```
 
 You can then import the Xcode project created in the build directory.
@@ -287,32 +331,30 @@ variables `QTDIR` and `CMAKE_PREFIX_PATH`.
 Example (with also some other libosmscout specific options):
 
 ```bash
-cmake -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.##### .. \
--DCMAKE_INSTALL_PREFIX=.\output -DOSMSCOUT_BUILD_IMPORT=OFF \
--DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_TESTS=OFF \
--DQTDIR=D:/Tools/Qt/5.9.2/msvc2015 \
+$ cmake -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.##### .. 
+-DCMAKE_INSTALL_PREFIX=.\output -DOSMSCOUT_BUILD_IMPORT=OFF 
+-DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_TESTS=OFF
+-DQTDIR=D:/Tools/Qt/5.9.2/msvc2015
 -DCMAKE_PREFIX_PATH=D:/Tools/Qt/5.9.2/msvc2015/lib/cmake
 ```
-
-
 
 ### meson based build
 
 For ninja based builds: In the top level directory type:
 ```bash
-mkdir debug
-meson debug
-cd debug
-ninja
+$ mkdir debug
+$ meson debug
+$ cd debug
+$ ninja
 ```
 
 For VisualStudio based builds:
 
 ```bash
-mkdir debug
-meson debug --backend vs2015
-cd debug
-msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
+$ mkdir debug
+$ meson debug --backend vs2015
+$ cd debug
+$ msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
 ```
 
 ## Running applications

@@ -513,7 +513,7 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionGene
     //std::cout << "MaxSpeed: " << (unsigned int)maxSpeedDescription->GetMaxSpeed() << std::endl;
   }
 
-  void OnPOIAtRoute(const osmscout::RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription)
+  void OnPOIAtRoute(const osmscout::RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription) override
   {
     NextLine(lineCount);
     std::cout << "Pass: " << poiAtRouteDescription->GetName()->GetDescription() << std::endl;
@@ -582,7 +582,7 @@ int main(int argc, char* argv[])
 
   argParser.AddOption(osmscout::CmdLineAlternativeFlag([&args](const std::string& value) {
                         if (value=="foot") {
-                          args.vehicle=osmscout::Vehicle::vehicleCar;
+                          args.vehicle=osmscout::Vehicle::vehicleFoot;
                         }
                         else if (value=="bicycle") {
                           args.vehicle=osmscout::Vehicle::vehicleBicycle;

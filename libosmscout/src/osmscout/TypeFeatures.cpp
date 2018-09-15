@@ -23,6 +23,7 @@
 
 #include <osmscout/util/String.h>
 
+#include <iostream>
 namespace osmscout {
 
   void NameFeatureValue::Read(FileScanner& scanner)
@@ -2387,6 +2388,274 @@ namespace osmscout {
       auto* value=static_cast<SidewayFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
       value->SetFeatureSet(featureSet);
+    }
+  }
+
+  void LanesFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(lanes);
+
+    if (lanes & 0x01) {
+      scanner.Read(turnForward);
+      scanner.Read(turnBackward);
+      scanner.Read(destinationForward);
+      scanner.Read(destinationBackward);
+    }
+  }
+
+  void LanesFeatureValue::Write(FileWriter& writer)
+  {
+    if (turnForward.empty() &&
+        turnBackward.empty() &&
+        destinationForward.empty() &&
+        destinationBackward.empty()) {
+      lanes=lanes & ~0x01;
+    }
+    else {
+      lanes=lanes | 0x01;
+    }
+
+    writer.Write(lanes);
+
+    if (lanes & 0x01) {
+      writer.Write(turnForward);
+      writer.Write(turnBackward);
+      writer.Write(destinationForward);
+      writer.Write(destinationBackward);
+    }
+  }
+
+  LanesFeatureValue& LanesFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const auto& otherValue=static_cast<const LanesFeatureValue&>(other);
+
+      lanes=otherValue.lanes;
+      turnForward=otherValue.turnForward;
+      turnBackward=otherValue.turnBackward;
+      destinationForward=otherValue.destinationForward;
+      destinationBackward=otherValue.destinationBackward;
+    }
+
+    return *this;
+  }
+
+  bool LanesFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const auto& otherValue=static_cast<const LanesFeatureValue&>(other);
+
+    return lanes==otherValue.lanes &&
+           turnForward==otherValue.turnForward &&
+           turnBackward==otherValue.turnBackward &&
+           destinationForward==otherValue.destinationForward &&
+           destinationBackward==otherValue.destinationBackward;
+  }
+
+  uint8_t LanesFeatureValue::GetLanes() const
+  {
+    if (lanes & 0x01) {
+      return 1;
+    }
+    else {
+      return GetForwardLanes() + GetBackwardLanes();
+    }
+  }
+
+  const char* const LanesFeature::NAME             = "Lanes";
+  const char* const LanesFeature::NAME_LABEL       = "label";
+  const size_t      LanesFeature::NAME_LABEL_INDEX = 0;
+
+  LanesFeature::LanesFeature()
+    : tagOneway(0),
+       tagLanes(0)
+
+  {
+    RegisterLabel(NAME_LABEL_INDEX,
+                  NAME_LABEL);
+  }
+
+  void LanesFeature::Initialize(TagRegistry& tagRegistry)
+  {
+    tagOneway=tagRegistry.RegisterTag("oneway");
+    tagLanes=tagRegistry.RegisterTag("lanes");
+    tagLanesForward=tagRegistry.RegisterTag("lanes:forward");
+    tagLanesBackward=tagRegistry.RegisterTag("lanes:backward");
+    tagTurnLanes=tagRegistry.RegisterTag("turn:lanes");
+    tagTurnLanesForward=tagRegistry.RegisterTag("turn:lanes:forward");
+    tagTurnLanesBackward=tagRegistry.RegisterTag("turn:lanes:backward");
+    tagDestinationLanes=tagRegistry.RegisterTag("destination:lanes");
+    tagDestinationLanesForward=tagRegistry.RegisterTag("destination:lanes:forward");
+    tagDestinationLanesBackward=tagRegistry.RegisterTag("destination:lanes:backward");
+  }
+
+  std::string LanesFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t LanesFeature::GetValueSize() const
+  {
+    return sizeof(LanesFeatureValue);
+  }
+
+  FeatureValue* LanesFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) LanesFeatureValue();
+  }
+
+  void LanesFeature::Parse(TagErrorReporter& errorReporter,
+                           const TagRegistry& /*tagRegistry*/,
+                           const FeatureInstance& feature,
+                           const ObjectOSMRef& object,
+                           const TagMap& tags,
+                           FeatureValueBuffer& buffer) const
+  {
+    bool        oneway=false;
+    bool        additionalInfos=false;
+    uint8_t     lanes=0;
+    uint8_t     lanesForward=0;
+    uint8_t     lanesBackward=0;
+    auto        onewayTag=tags.find(tagOneway);
+    auto        lanesTag=tags.find(tagLanes);
+    auto        lanesForwardTag=tags.find(tagLanesForward);
+    auto        lanesBackwardTag=tags.find(tagLanesBackward);
+    auto        turnLanesTag=tags.find(tagTurnLanes);
+    auto        turnLanesForwardTag=tags.find(tagTurnLanesForward);
+    auto        turnLanesBackwardTag=tags.find(tagTurnLanesBackward);
+    auto        destinationLanesTag=tags.find(tagDestinationLanes);
+    auto        destinationLanesForwardTag=tags.find(tagDestinationLanesForward);
+    auto        destinationLanesBackwardTag=tags.find(tagDestinationLanesBackward);
+    std::string turnForward;
+    std::string turnBackward;
+    std::string destinationForward;
+    std::string destinationBackward;
+
+    if (onewayTag!=tags.end()) {
+      // TODO: What happens with -1?
+      oneway=onewayTag->second!="no" && onewayTag->second!="false" && onewayTag->second!="0";
+    }
+
+    if (lanesTag!=tags.end() &&
+      !StringToNumber(lanesTag->second,lanes)) {
+      errorReporter.ReportTag(object,tags,std::string("lanes tag value '")+lanesTag->second+"' is not numeric!");
+
+      return;
+    }
+
+    if (lanesForwardTag!=tags.end() &&
+        !StringToNumber(lanesForwardTag->second,lanesForward)) {
+      errorReporter.ReportTag(object,tags,std::string("lanes:forward tag value '")+lanesForwardTag->second+"' is not numeric!");
+
+      return;
+    }
+
+    if (lanesBackwardTag!=tags.end() &&
+        !StringToNumber(lanesBackwardTag->second,lanesBackward)) {
+      errorReporter.ReportTag(object,tags,std::string("lanes:backward tag value '")+lanesBackwardTag->second+"' is not numeric!");
+
+      return;
+    }
+
+    /* Too many warnings :-/
+    if (!oneway && lanesTag!=tags.end() && lanes%2 != 0) {
+      errorReporter.ReportTag(object,tags,std::string("No oneway, but lanes tag is set with uneven value"));
+    }*/
+
+    if (!oneway &&
+        turnLanesTag!=tags.end()) {
+      errorReporter.ReportTag(object,tags,std::string("No oneway, but turn:lanes tag is set"));
+    }
+
+    if (!oneway &&
+        destinationLanesTag!=tags.end()) {
+      errorReporter.ReportTag(object,tags,std::string("No oneway, but destination:lanes tag is set"));
+    }
+
+    if (turnLanesTag!=tags.end()) {
+      turnForward=turnLanesTag->second;
+      additionalInfos=true;
+    }
+
+    if (turnLanesForwardTag!=tags.end()) {
+      turnForward=turnLanesForwardTag->second;
+      additionalInfos=true;
+    }
+
+    if (turnLanesBackwardTag!=tags.end()) {
+      turnBackward=turnLanesBackwardTag->second;
+      additionalInfos=true;
+    }
+
+    if (destinationLanesTag!=tags.end()) {
+      destinationForward=destinationLanesTag->second;
+      additionalInfos=true;
+    }
+
+    if (destinationLanesForwardTag!=tags.end()) {
+      destinationForward=destinationLanesForwardTag->second;
+      additionalInfos=true;
+    }
+
+    if (destinationLanesBackwardTag!=tags.end()) {
+      destinationBackward=destinationLanesBackwardTag->second;
+      additionalInfos=true;
+    }
+
+    if (lanesForwardTag!=tags.end() &&
+        lanesBackwardTag!=tags.end() &&
+        lanesTag!=tags.end()) {
+      if (lanesForward+lanesBackward!=lanes) {
+        errorReporter.ReportTag(object,tags,std::string("lanes tag value '")+lanesTag->second+"' is not equal sum of lanes:forward and lanes:backward");
+      }
+    }
+    else if (lanesForwardTag!=tags.end() &&
+             lanesTag!=tags.end()) {
+      lanesBackward=lanes-lanesForward;
+    }
+    else if (lanesBackwardTag!=tags.end() &&
+             lanesTag!=tags.end()) {
+      lanesForward=lanes-lanesBackward;
+    }
+    else if (lanesTag!=tags.end()) {
+      if (oneway) {
+        lanesForward=lanes;
+        lanesBackward=0;
+      }
+      else {
+        lanesForward=lanes/(uint8_t)2;
+        lanesBackward=lanes/(uint8_t)2;
+      }
+    }
+    else {
+      return;
+    }
+
+    if (!additionalInfos) {
+      if (oneway) {
+        if (lanes==feature.GetType()->GetOnewayLanes()) {
+          return;
+        }
+      }
+      else {
+        if (lanes==feature.GetType()->GetLanes()) {
+          return;
+        }
+      }
+    }
+
+    auto* value=static_cast<LanesFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+    if (lanes==1) {
+      // One (most of the time implicit) lane for both directions together
+      value->SetLanes(0,0);
+    }
+    else {
+      value->SetLanes(lanesForward,lanesBackward);
+    }
+
+    if (additionalInfos) {
+      value->SetTurnLanes(turnForward,turnBackward);
+      value->SetDestinationLanes(destinationForward,destinationBackward);
     }
   }
 }

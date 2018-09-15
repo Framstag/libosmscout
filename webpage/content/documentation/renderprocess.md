@@ -21,7 +21,7 @@ will be added on demand.
 On the lowest level the databse consists of a number of data and index files,
 in some cases a file contains both an index and the actual data. For a detailed
 description of the individual files see
-[Database files]({{< relref "documentation/database.md" >}}).
+[Database files]({{< relref "/documentation/database.md" >}}).
 
 For each file an corresponding C++ class exists that wraps access to these
 files.

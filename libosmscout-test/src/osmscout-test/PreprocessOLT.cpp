@@ -17,10 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/PreprocessOLT.h>
+#include <osmscout-test/PreprocessOLT.h>
 
-#include <osmscout/olt/Scanner.h>
-#include <osmscout/olt/Parser.h>
+#include <osmscout-test/olt/Scanner.h>
+#include <osmscout-test/olt/Parser.h>
 
 #include <osmscout/util/File.h>
 

@@ -215,6 +215,35 @@ namespace osmscout {
         return false;
       }
     };
+      
+    bool ClosestPointOnRoute(const GeoCoord& location, GeoCoord& locOnRoute)
+    {
+      if(!route){
+        return false;
+      }
+      std::list<RouteDescription::Node>::const_iterator nextNode = route->Nodes().begin();
+      GeoCoord intersection, foundIntersection;
+      double abscissa;
+      double minDistance=std::numeric_limits<double>::max();
+      for (auto node=nextNode++; node!=route->Nodes().end(); node++) {
+        if (nextNode==route->Nodes().end()) {
+          break;
+        }
+        double d = DistanceToSegment(location,
+                                     node->GetLocation(),
+                                     nextNode->GetLocation(),
+                                     abscissa,
+                                     intersection);
+        if (minDistance > d) {
+          minDistance = d;
+          foundIntersection = intersection;
+        }
+        nextNode++;
+      }
+      locOnRoute = foundIntersection;
+        
+      return true;
+    }
 
   private:
     RouteDescription* route;                 // current route description

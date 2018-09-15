@@ -9,6 +9,8 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup()
 endif()
 
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # build should fail when compiler don't support standard defined by CMAKE_CXX_STANDARD
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "$ENV{QTDIR}" "${QTDIR}" "$ENV{QTDIR}/lib/cmake" "${QTDIR}/lib/cmake")
@@ -122,6 +124,9 @@ if((CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_G
     add_definitions(-fPIC)
   endif()
 endif()
+
+# Prever non-legacy OpenGL libraries
+set(OpenGL_GL_PREFERENCE "GLVND")
 
 # debug build?
 if (LABEL_LAYOUTER_DEBUG)

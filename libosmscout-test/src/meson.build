@@ -1,8 +1,8 @@
 osmscouttestSrc = [
-            'src/osmscout/olt/Parser.cpp',
-            'src/osmscout/olt/Scanner.cpp',
-            'src/osmscout/RegionList.cpp',
-            'src/osmscout/PreprocessOLT.cpp',
+            'src/osmscout-test/olt/Parser.cpp',
+            'src/osmscout-test/olt/Scanner.cpp',
+            'src/osmscout-test/RegionList.cpp',
+            'src/osmscout-test/PreprocessOLT.cpp',
           ]
 
 

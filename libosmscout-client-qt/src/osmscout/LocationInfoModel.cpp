@@ -105,6 +105,8 @@ QHash<int, QByteArray> LocationInfoModel::roleNames() const
     roles[PostalCodeRole] = "postalCode";
     roles[WebsiteRole] = "website";
     roles[PhoneRole] = "phone";
+    roles[AddressLocationRole] = "addressLocation";
+    roles[AddressNumberRole] = "addressNumber";
 
     return roles;
 }
@@ -166,11 +168,15 @@ void LocationInfoModel::addToModel(const QString database,
   bool inPlace = description->IsAtPlace() || (distance.AsMeter() < 1);
 
   QStringList addressParts;
+  QString addressLocation;
+  QString addressNumber;
   if (locRef){
-      addressParts << QString::fromStdString(locRef->name);
+    addressLocation = QString::fromStdString(locRef->name);
+    addressParts << addressLocation;
   }
   if (addrRef){
-      addressParts << QString::fromStdString(addrRef->name);
+    addressNumber = QString::fromStdString(addrRef->name);
+    addressParts << addressNumber;
   }
   QString address;
   for (int i = 0; i < addressParts.size(); i++){
@@ -209,6 +215,11 @@ void LocationInfoModel::addToModel(const QString database,
     }
   }
 
+  if (postalCode.isEmpty() && place.GetPostalArea()){
+    // postal code is not part of the object (address), but we resolved postal region
+    postalCode = QString::fromStdString(place.GetPostalArea()->name);
+  }
+
   obj[LabelRole] = QString::fromStdString(place.GetDisplayString());
   obj[RegionRole] = regions;
   obj[AddressRole] = address;
@@ -220,7 +231,8 @@ void LocationInfoModel::addToModel(const QString database,
   obj[PostalCodeRole] = postalCode;
   obj[WebsiteRole] = website;
   obj[PhoneRole] = phone;
-
+  obj[AddressLocationRole] = addressLocation;
+  obj[AddressNumberRole] = addressNumber;
   
   model << obj;
   qSort(model.begin(),model.end(),distanceComparator);
@@ -313,7 +325,8 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   obj[PostalCodeRole] = "";
   obj[WebsiteRole] = "";
   obj[PhoneRole] = "";
-
+  obj[AddressLocationRole] = "";
+  obj[AddressNumberRole] = "";
 
   model << obj;
   qSort(model.begin(),model.end(),distanceComparator);
