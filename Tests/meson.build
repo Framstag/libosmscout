@@ -214,7 +214,7 @@ LabelPathTest = executable('LabelPathTest',
            link_with: [osmscoutmap, osmscout],
            install: false)
 
-Base64Test = executable('LabelPathTest',
+Base64Test = executable('Base64Test',
            'src/Base64.cpp',
            include_directories: [testIncDir, osmscoutIncDir],
            dependencies: [mathDep],
