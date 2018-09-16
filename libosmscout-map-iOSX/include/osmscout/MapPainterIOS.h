@@ -41,8 +41,12 @@
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
-    using IOSGlyph = Glyph<CTRunRef>;
-    using IOSLabel = Label<CTRunRef, CTRunRef>;
+    struct IOSGlyphInRun {
+        CTRunRef run;
+        int index;
+    };
+    using IOSGlyph = Glyph<IOSGlyphInRun>;
+    using IOSLabel = Label<IOSGlyphInRun, CTRunRef>;
     
     class MapPainterIOS : public MapPainter {
     public:
@@ -55,7 +59,7 @@ namespace osmscout {
             ssize_t direction;
         } FollowPathHandle;
         
-        using IOSLabelLayouter = LabelLayouter<CTRunRef, CTRunRef, MapPainterIOS>;
+        using IOSLabelLayouter = LabelLayouter<IOSGlyphInRun, CTRunRef, MapPainterIOS>;
         friend IOSLabelLayouter;
         
     private:
@@ -181,8 +185,7 @@ namespace osmscout {
                                          double objectWidth,
                                          bool enableWrapping = false,
                                          bool contourLabel = false);
-        DoubleRectangle GlyphBoundingBox(const CTRunRef &glyph) const;
-        void DrawGlyph(const IOSGlyph &glyph) const;
+        DoubleRectangle GlyphBoundingBox(const IOSGlyphInRun &glyph) const;
         void DrawGlyphs(const Projection &projection,
                         const MapParameter &parameter,
                         const osmscout::PathTextStyleRef style,

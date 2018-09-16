@@ -441,31 +441,61 @@ namespace osmscout {
         return size.height;
     }
 
-    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const CTRunRef &glyph) const {
-        CFRange range = CFRangeMake(0,1);
-        CGRect glyphRect = CTRunGetImageBounds(glyph, cg, range);
+    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const IOSGlyphInRun &glyph) const {
+        CFRange range = CFRangeMake(glyph.index, 1);
+        CGRect glyphRect = CTRunGetImageBounds(glyph.run, cg, range);
         return DoubleRectangle(glyphRect.origin.x,glyphRect.origin.y,glyphRect.size.width,glyphRect.size.height);
     }
     
-    // TODO: to finish
     template<> std::vector<IOSGlyph> IOSLabel::ToGlyphs() const {
         std::vector<IOSGlyph> result;
+        CFIndex glyphCount = CTRunGetGlyphCount(label);
+        CGGlyph glyphs[glyphCount];
+        CGPoint glyphPositions[glyphCount];
+        CTRunGetGlyphs(label, CFRangeMake(0, 0), glyphs);
+        CTRunGetPositions(label, CFRangeMake(0, 0), glyphPositions);
+        for(int index = 0; index < glyphCount; index++){
+            IOSGlyph glyph;
+            glyph.glyph.run = label;
+            glyph.glyph.index = index;
+            glyph.position.Set(glyphPositions[index].x, glyphPositions[index].y);
+            result.push_back(std::move(glyph));
+        }
         return result;
     }
 
-    // TODO: to finish
-    void MapPainterIOS::DrawGlyph(const IOSGlyph &glyph) const {
-    }
-    
-    // TODO: to finish
     void MapPainterIOS::DrawGlyphs(const Projection &projection,
                     const MapParameter &parameter,
                     const osmscout::PathTextStyleRef style,
                     const std::vector<IOSGlyph> &glyphs){
-        
-        for (const auto &glyph:glyphs) {
-            DrawGlyph(glyph);
+        if(glyphs.size() == 0){
+            return;
         }
+        CTRunRef run = glyphs[0].glyph.run;
+        const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+        CGGlyph glyphToDraw[1];
+        CGPoint glyphPositions[1];
+        
+        double r = style->GetTextColor().GetR();
+        double g = style->GetTextColor().GetG();
+        double b = style->GetTextColor().GetB();
+        
+        CGContextSaveGState(cg);
+        CGContextSetRGBFillColor(cg, r, g, b, 1.0);
+        CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
+        int index = 0;
+        for (const auto &glyph:glyphs) {
+            CTRunGetGlyphs(run, CFRangeMake(index, 1), glyphToDraw);
+            glyphPositions[0] = CGPointMake(0,0);
+            CGContextSaveGState(cg);
+            CGContextTranslateCTM(cg, glyph.position.GetX(), glyph.position.GetY());
+            CGContextRotateCTM(cg, glyph.angle);
+            CGContextScaleCTM(cg, 1.0, -1.0);
+            CTFontDrawGlyphs(font, glyphToDraw, glyphPositions, 1, cg);
+            CGContextRestoreGState(cg);
+            index++;
+        }
+        CGContextRestoreGState(cg);
         
     }
     
