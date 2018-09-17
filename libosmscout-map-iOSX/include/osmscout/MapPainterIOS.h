@@ -39,14 +39,20 @@
 
 #import <CoreText/CoreText.h>
 #include <osmscout/MapPainter.h>
+#include <osmscout/private/cfref_ptr.hpp>
 
 namespace osmscout {
     struct IOSGlyphInRun {
+        cfref_ptr<CTLineRef> line;
         CTRunRef run;
         int index;
     };
+    struct IOSRunInLine {
+        cfref_ptr<CTLineRef> line;
+        CTRunRef run;
+    };
     using IOSGlyph = Glyph<IOSGlyphInRun>;
-    using IOSLabel = Label<IOSGlyphInRun, CTRunRef>;
+    using IOSLabel = Label<IOSGlyphInRun, IOSRunInLine>;
     
     class MapPainterIOS : public MapPainter {
     public:
@@ -59,7 +65,7 @@ namespace osmscout {
             ssize_t direction;
         } FollowPathHandle;
         
-        using IOSLabelLayouter = LabelLayouter<IOSGlyphInRun, CTRunRef, MapPainterIOS>;
+        using IOSLabelLayouter = LabelLayouter<IOSGlyphInRun, IOSRunInLine, MapPainterIOS>;
         friend IOSLabelLayouter;
         
     private:
@@ -68,10 +74,10 @@ namespace osmscout {
         
         IOSLabelLayouter            labelLayouter;
         
-        std::vector<CGImageRef>          images;         // Cached CGImage for icons
-        std::vector<CGImageRef>          patternImages;  // Cached CGImage for patterns
+        std::vector<CGImageRef>     images;         // Cached CGImage for icons
+        std::vector<CGImageRef>     patternImages;  // Cached CGImage for patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
-                
+        
     public:
         OSMSCOUT_API MapPainterIOS(const StyleConfigRef& styleConfig);
         virtual ~MapPainterIOS();

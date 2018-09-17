@@ -441,14 +441,15 @@ namespace osmscout {
     
     template<> std::vector<IOSGlyph> IOSLabel::ToGlyphs() const {
         std::vector<IOSGlyph> result;
-        CFIndex glyphCount = CTRunGetGlyphCount(label);
+        CFIndex glyphCount = CTRunGetGlyphCount(label.run);
         CGGlyph glyphs[glyphCount];
         CGPoint glyphPositions[glyphCount];
-        CTRunGetGlyphs(label, CFRangeMake(0, 0), glyphs);
-        CTRunGetPositions(label, CFRangeMake(0, 0), glyphPositions);
+        CTRunGetGlyphs(label.run, CFRangeMake(0, 0), glyphs);
+        CTRunGetPositions(label.run, CFRangeMake(0, 0), glyphPositions);
         for(int index = 0; index < glyphCount; index++){
             IOSGlyph glyph;
-            glyph.glyph.run = label;
+            glyph.glyph.line = label.line;
+            glyph.glyph.run = label.run;
             glyph.glyph.index = index;
             glyph.position.Set(glyphPositions[index].x, glyphPositions[index].y);
             result.push_back(std::move(glyph));
@@ -509,16 +510,14 @@ namespace osmscout {
         NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:str attributes:attr];
         
         CFAttributedStringRef cfString = (__bridge CFAttributedStringRef)attrStr;
-        CTLineRef line = CTLineCreateWithAttributedString(cfString);
-        CFArrayRef runArray = CTLineGetGlyphRuns(line);
+        result->label.line = CTLineCreateWithAttributedString(cfString);
+        CFArrayRef runArray = CTLineGetGlyphRuns(result->label.line.get());
         if(CFArrayGetCount(runArray) > 0){
             CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
             
-            result->label = run;
+            result->label.run = run;
             rect = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0));
         }
-        // TODO: how to release the line ?
-        //CFRelease(line);
         
         result->text = text;
         result->fontSize = fontSize;
@@ -533,7 +532,7 @@ namespace osmscout {
                                         const Color &color,
                                         bool emphasize){
         
-        CTRunRef run = layout.label;
+        CTRunRef run = layout.label.run;
         const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
         CGFloat fontHeight = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)).size.height;
         CFIndex glyphCount = CTRunGetGlyphCount(run);
