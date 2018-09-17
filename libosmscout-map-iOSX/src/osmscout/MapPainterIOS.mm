@@ -508,7 +508,7 @@ namespace osmscout {
         }
         NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:str attributes:attr];
         
-        CFAttributedStringRef cfString = (CFAttributedStringRef)CFBridgingRetain(attrStr);
+        CFAttributedStringRef cfString = (__bridge CFAttributedStringRef)attrStr;
         CTLineRef line = CTLineCreateWithAttributedString(cfString);
         CFArrayRef runArray = CTLineGetGlyphRuns(line);
         if(CFArrayGetCount(runArray) > 0){
@@ -572,7 +572,6 @@ namespace osmscout {
                                   const DoubleRectangle& labelRect,
                                   const LabelData& label,
                                   const IOSLabel& layout) {
-        // TODO: check that labelRectangle intersect the viewport
         
         if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
             const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
