@@ -38,15 +38,15 @@ namespace osmscout {
 #if TARGET_OS_IPHONE
         contentScale = [[UIScreen mainScreen] scale];
 #else
-        contentScale = 1.0;
+        contentScale = [[NSScreen mainScreen] backingScaleFactor];
 #endif
     }
 
     MapPainterIOS::~MapPainterIOS(){
-        for(std::vector<Image>::const_iterator image=images.begin(); image<images.end();image++){
+        for(std::vector<CGImageRef>::const_iterator image=images.begin(); image<images.end();image++){
             CGImageRelease(*image);
         }
-        for(std::vector<Image>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
+        for(std::vector<CGImageRef>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
             CGImageRelease(*image);
         }
     }
@@ -328,11 +328,7 @@ namespace osmscout {
             std::string filename=*path+"/"+style.GetIconName()+".png";
             //std::cout << "Trying to Load image " << filename << std::endl;
 
-#if TARGET_OS_IPHONE
-            UIImage *image = [[UIImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#else
-            NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#endif
+            Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
 #if TARGET_OS_IPHONE
                 CGImageRef imgRef= [image CGImage];
@@ -392,11 +388,7 @@ namespace osmscout {
              ++path) {
             std::string filename=*path+"/"+style.GetPatternName()+".png";
 
-#if TARGET_OS_IPHONE
-            UIImage *image = [[UIImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#else
-            NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#endif
+            Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
 #if TARGET_OS_IPHONE
                 CGImageRef imgRef= [image CGImage];
@@ -576,10 +568,10 @@ namespace osmscout {
     }
     
     void MapPainterIOS::DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const DoubleRectangle& labelRect,
-                   const LabelData& label,
-                   const IOSLabel& layout) {
+                                  const MapParameter& parameter,
+                                  const DoubleRectangle& labelRect,
+                                  const LabelData& label,
+                                  const IOSLabel& layout) {
         // TODO: check that labelRectangle intersect the viewport
         
         if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
@@ -590,40 +582,40 @@ namespace osmscout {
                 
             } else if (style->GetStyle()==TextStyle::emphasize) {
                 LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), true);
-                
-            } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
-                
-                const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
- 
-                CGContextSaveGState(cg);
-                CGContextSetRGBFillColor(cg,
-                                         style->GetBgColor().GetR(),
-                                         style->GetBgColor().GetG(),
-                                         style->GetBgColor().GetB(),
-                                         1);
-                CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
-                                           style->GetBorderColor().GetG(),
-                                           style->GetBorderColor().GetB(),
-                                           style->GetBorderColor().GetA());
-                CGContextAddRect(cg, CGRectMake(labelRect.x,
-                                                labelRect.y,
-                                                labelRect.width,
-                                                labelRect.height));
-                CGContextDrawPath(cg, kCGPathFillStroke);
-                
-                CGContextAddRect(cg, CGRectMake(labelRect.x+2,
-                                                labelRect.y+2,
-                                                labelRect.width-4,
-                                                labelRect.height-4));
-                CGContextDrawPath(cg, kCGPathStroke);
-                
-                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
-                
-                CGContextRestoreGState(cg);
-                
-            } else {
-                log.Warn() << "Label style not recognised: " << label.style.get();
             }
+            
+        } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+            
+            const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+            
+            CGContextSaveGState(cg);
+            CGContextSetRGBFillColor(cg,
+                                     style->GetBgColor().GetR(),
+                                     style->GetBgColor().GetG(),
+                                     style->GetBgColor().GetB(),
+                                     1);
+            CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
+                                       style->GetBorderColor().GetG(),
+                                       style->GetBorderColor().GetB(),
+                                       style->GetBorderColor().GetA());
+            CGContextAddRect(cg, CGRectMake(labelRect.x - 5,
+                                            labelRect.y - 5,
+                                            labelRect.width + 10,
+                                            labelRect.height + 10));
+            CGContextDrawPath(cg, kCGPathFillStroke);
+            
+            CGContextAddRect(cg, CGRectMake(labelRect.x - 5 + 2,
+                                            labelRect.y - 5 + 2,
+                                            labelRect.width + 10 - 4,
+                                            labelRect.height + 10 -4));
+            CGContextDrawPath(cg, kCGPathStroke);
+            
+            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
+            
+            CGContextRestoreGState(cg);
+            
+        } else {
+            log.Warn() << "Label style not recognised: " << label.style.get();
         }
     }
     
@@ -658,17 +650,6 @@ namespace osmscout {
                                  parameter,
                                  this);
         labelLayouter.Reset();
-    }
-
-    double MapPainterIOS::pathLength(size_t transStart, size_t transEnd){
-        double len = 0.0;
-        double deltaX, deltaY;
-        for(size_t j=transStart; j<transEnd; j++) {
-            deltaX = coordBuffer->buffer[j].GetX() - coordBuffer->buffer[j+1].GetX();
-            deltaY = coordBuffer->buffer[j].GetY() - coordBuffer->buffer[j+1].GetX();
-            len += sqrt(deltaX*deltaX + deltaY*deltaY);
-        }
-        return len;
     }
 
     void MapPainterIOS::followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
@@ -764,7 +745,7 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, 0, -height/2);
+                    DrawSymbol(projection, parameter, symbol, 0, 0);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, space, origin);
                 }
@@ -809,20 +790,17 @@ namespace osmscout {
         double minY;
         double maxX;
         double maxY;
-
         symbol.GetBoundingBox(minX,minY,maxX,maxY);
+        
+        double centerX=(maxX+minX)/2;
+        double centerY=(maxY+minY)/2;
 
         CGContextSaveGState(cg);
-        for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-             p!=symbol.GetPrimitives().end();
-             ++p) {
-
-            DrawPrimitive* primitive=p->get();
-            double         centerX=(maxX+minX)/2;
-            double         centerY=(maxY+minY)/2;
-
-            if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-                PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+        for (const auto& primitive : symbol.GetPrimitives()) {
+            const DrawPrimitive *primitivePtr=primitive.get();
+            
+            if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=nullptr) {
+                const auto *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
                 FillStyleRef fillStyle=polygon->GetFillStyle();
                 BorderStyleRef borderStyle=polygon->GetBorderStyle();
 
@@ -854,8 +832,8 @@ namespace osmscout {
 
                 CGContextDrawPath(cg, kCGPathFillStroke);
             }
-            else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-                RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+            else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=nullptr) {
+                const auto *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
                 FillStyleRef fillStyle=rectangle->GetFillStyle();
                 BorderStyleRef borderStyle=rectangle->GetBorderStyle();
                 if (fillStyle) {
@@ -876,8 +854,8 @@ namespace osmscout {
                 CGContextAddRect(cg,rect);
                 CGContextDrawPath(cg, kCGPathFillStroke);
             }
-            else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-                CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+            else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=nullptr) {
+                const auto *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
                 FillStyleRef fillStyle=circle->GetFillStyle();
                 BorderStyleRef borderStyle=circle->GetBorderStyle();
                 if (fillStyle) {

@@ -29,11 +29,11 @@
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #define Font UIFont
-#define Image CGImageRef
+#define Image UIImage
 #else
 #import <AppKit/AppKit.h>
 #define Font NSFont
-#define Image CGImageRef
+#define Image NSImage
 #define OSMSCOUT_REVERSED_Y_AXIS 1
 #endif
 
@@ -68,8 +68,8 @@ namespace osmscout {
         
         IOSLabelLayouter            labelLayouter;
         
-        std::vector<Image>          images;         // Cached CGImage for icons
-        std::vector<Image>          patternImages;  // Cached CGImage for patterns
+        std::vector<CGImageRef>          images;         // Cached CGImage for icons
+        std::vector<CGImageRef>          patternImages;  // Cached CGImage for patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
                 
     public:
@@ -175,7 +175,6 @@ namespace osmscout {
         
     private:
         Font *GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
-        double pathLength(size_t transStart, size_t transEnd);
         bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
         void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd, bool isClosed, bool keepOrientation);
         std::shared_ptr<IOSLabel> Layout(const Projection& projection,
