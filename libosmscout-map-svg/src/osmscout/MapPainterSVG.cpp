@@ -585,11 +585,8 @@ namespace osmscout {
 
     size_t idx=style.GetIconId()-1;
 
-    if (idx<images.size() &&
-        !images[idx].empty()) {
-      return true;
-    }
-
+    // there is possible that exists multiple IconStyle instances with same iconId (point and area icon with same icon name)
+    // setup dimensions for all of them
     double dimension;
     if (parameter.GetIconMode()==MapParameter::IconMode::Scalable) {
       dimension = projection.ConvertWidthToPixel(parameter.GetIconSize());
@@ -601,6 +598,11 @@ namespace osmscout {
 
     style.SetWidth(dimension);
     style.SetHeight(dimension);
+
+    if (idx<images.size() &&
+        !images[idx].empty()) {
+      return true;
+    }
 
     for (const auto& path : parameter.GetIconPaths()) {
       std::string filename;
