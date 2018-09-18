@@ -885,26 +885,26 @@ namespace osmscout {
       return;
     }
 
-    double minX;
-    double maxX;
-    double minY;
-    double maxY;
+    double x1;
+    double x2;
+    double y1;
+    double y2;
 
     projection.GeoToPixel(areaData.boundingBox.GetMinCoord(),
-                          minX,minY);
+                          x1,y1);
 
     projection.GeoToPixel(areaData.boundingBox.GetMaxCoord(),
-                          maxX,maxY);
+                          x2,y2);
 
     LayoutPointLabels(projection,
                       parameter,
                       *areaData.buffer,
                       iconStyle,
                       textStyles,
-                      (minX+maxX)/2,
-                      (minY+maxY)/2,
-                      maxX-minX,
-                      maxY-minY);
+                      (x1+x2)/2,
+                      (y1+y2)/2,
+                      std::max(x1, x2) - std::min(x1, x2),
+                      std::max(y1, y2) - std::min(y1, y2));
   }
 
   bool MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
