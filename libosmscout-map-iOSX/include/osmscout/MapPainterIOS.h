@@ -29,20 +29,30 @@
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #define Font UIFont
-#define Image CGImageRef
+#define Image UIImage
 #else
 #import <AppKit/AppKit.h>
 #define Font NSFont
-#define Image CGImageRef
+#define Image NSImage
 #define OSMSCOUT_REVERSED_Y_AXIS 1
 #endif
 
 #import <CoreText/CoreText.h>
 #include <osmscout/MapPainter.h>
+#include <osmscout/private/cfref_ptr.hpp>
 
 namespace osmscout {
-    using IOSGlyph = Glyph<CTRunRef>;
-    using IOSLabel = Label<CTRunRef, CTRunRef>;
+    struct IOSGlyphInRun {
+        cfref_ptr<CTLineRef> line;
+        CTRunRef run;
+        int index;
+    };
+    struct IOSRunInLine {
+        cfref_ptr<CTLineRef> line;
+        CTRunRef run;
+    };
+    using IOSGlyph = Glyph<IOSGlyphInRun>;
+    using IOSLabel = Label<IOSGlyphInRun, IOSRunInLine>;
     
     class MapPainterIOS : public MapPainter {
     public:
@@ -55,7 +65,7 @@ namespace osmscout {
             ssize_t direction;
         } FollowPathHandle;
         
-        using IOSLabelLayouter = LabelLayouter<CTRunRef, CTRunRef, MapPainterIOS>;
+        using IOSLabelLayouter = LabelLayouter<IOSGlyphInRun, IOSRunInLine, MapPainterIOS>;
         friend IOSLabelLayouter;
         
     private:
@@ -64,10 +74,10 @@ namespace osmscout {
         
         IOSLabelLayouter            labelLayouter;
         
-        std::vector<Image>          images;         // Cached CGImage for icons
-        std::vector<Image>          patternImages;  // Cached CGImage for patterns
+        std::vector<CGImageRef>     images;         // Cached CGImage for icons
+        std::vector<CGImageRef>     patternImages;  // Cached CGImage for patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
-                
+        
     public:
         OSMSCOUT_API MapPainterIOS(const StyleConfigRef& styleConfig);
         virtual ~MapPainterIOS();
@@ -171,7 +181,6 @@ namespace osmscout {
         
     private:
         Font *GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
-        double pathLength(size_t transStart, size_t transEnd);
         bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
         void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd, bool isClosed, bool keepOrientation);
         std::shared_ptr<IOSLabel> Layout(const Projection& projection,
@@ -181,8 +190,7 @@ namespace osmscout {
                                          double objectWidth,
                                          bool enableWrapping = false,
                                          bool contourLabel = false);
-        DoubleRectangle GlyphBoundingBox(const CTRunRef &glyph) const;
-        void DrawGlyph(const IOSGlyph &glyph) const;
+        DoubleRectangle GlyphBoundingBox(const IOSGlyphInRun &glyph) const;
         void DrawGlyphs(const Projection &projection,
                         const MapParameter &parameter,
                         const osmscout::PathTextStyleRef style,

@@ -38,15 +38,15 @@ namespace osmscout {
 #if TARGET_OS_IPHONE
         contentScale = [[UIScreen mainScreen] scale];
 #else
-        contentScale = 1.0;
+        contentScale = [[NSScreen mainScreen] backingScaleFactor];
 #endif
     }
 
     MapPainterIOS::~MapPainterIOS(){
-        for(std::vector<Image>::const_iterator image=images.begin(); image<images.end();image++){
+        for(std::vector<CGImageRef>::const_iterator image=images.begin(); image<images.end();image++){
             CGImageRelease(*image);
         }
-        for(std::vector<Image>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
+        for(std::vector<CGImageRef>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
             CGImageRelease(*image);
         }
     }
@@ -328,11 +328,7 @@ namespace osmscout {
             std::string filename=*path+"/"+style.GetIconName()+".png";
             //std::cout << "Trying to Load image " << filename << std::endl;
 
-#if TARGET_OS_IPHONE
-            UIImage *image = [[UIImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#else
-            NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#endif
+            Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
 #if TARGET_OS_IPHONE
                 CGImageRef imgRef= [image CGImage];
@@ -392,11 +388,7 @@ namespace osmscout {
              ++path) {
             std::string filename=*path+"/"+style.GetPatternName()+".png";
 
-#if TARGET_OS_IPHONE
-            UIImage *image = [[UIImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#else
-            NSImage *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
-#endif
+            Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
 #if TARGET_OS_IPHONE
                 CGImageRef imgRef= [image CGImage];
@@ -441,31 +433,62 @@ namespace osmscout {
         return size.height;
     }
 
-    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const CTRunRef &glyph) const {
-        CFRange range = CFRangeMake(0,1);
-        CGRect glyphRect = CTRunGetImageBounds(glyph, cg, range);
+    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const IOSGlyphInRun &glyph) const {
+        CFRange range = CFRangeMake(glyph.index, 1);
+        CGRect glyphRect = CTRunGetImageBounds(glyph.run, cg, range);
         return DoubleRectangle(glyphRect.origin.x,glyphRect.origin.y,glyphRect.size.width,glyphRect.size.height);
     }
     
-    // TODO: to finish
     template<> std::vector<IOSGlyph> IOSLabel::ToGlyphs() const {
         std::vector<IOSGlyph> result;
+        CFIndex glyphCount = CTRunGetGlyphCount(label.run);
+        CGGlyph glyphs[glyphCount];
+        CGPoint glyphPositions[glyphCount];
+        CTRunGetGlyphs(label.run, CFRangeMake(0, 0), glyphs);
+        CTRunGetPositions(label.run, CFRangeMake(0, 0), glyphPositions);
+        for(int index = 0; index < glyphCount; index++){
+            IOSGlyph glyph;
+            glyph.glyph.line = label.line;
+            glyph.glyph.run = label.run;
+            glyph.glyph.index = index;
+            glyph.position.Set(glyphPositions[index].x, glyphPositions[index].y);
+            result.push_back(std::move(glyph));
+        }
         return result;
     }
 
-    // TODO: to finish
-    void MapPainterIOS::DrawGlyph(const IOSGlyph &glyph) const {
-    }
-    
-    // TODO: to finish
     void MapPainterIOS::DrawGlyphs(const Projection &projection,
                     const MapParameter &parameter,
                     const osmscout::PathTextStyleRef style,
                     const std::vector<IOSGlyph> &glyphs){
-        
-        for (const auto &glyph:glyphs) {
-            DrawGlyph(glyph);
+        if(glyphs.size() == 0){
+            return;
         }
+        CTRunRef run = glyphs[0].glyph.run;
+        const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+        CGGlyph glyphToDraw[1];
+        CGPoint glyphPositions[1];
+        
+        double r = style->GetTextColor().GetR();
+        double g = style->GetTextColor().GetG();
+        double b = style->GetTextColor().GetB();
+        
+        CGContextSaveGState(cg);
+        CGContextSetRGBFillColor(cg, r, g, b, 1.0);
+        CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
+        int index = 0;
+        for (const auto &glyph:glyphs) {
+            CTRunGetGlyphs(run, CFRangeMake(index, 1), glyphToDraw);
+            glyphPositions[0] = CGPointMake(0,0);
+            CGContextSaveGState(cg);
+            CGContextTranslateCTM(cg, glyph.position.GetX(), glyph.position.GetY());
+            CGContextRotateCTM(cg, glyph.angle);
+            CGContextScaleCTM(cg, 1.0, -1.0);
+            CTFontDrawGlyphs(font, glyphToDraw, glyphPositions, 1, cg);
+            CGContextRestoreGState(cg);
+            index++;
+        }
+        CGContextRestoreGState(cg);
         
     }
     
@@ -486,17 +509,15 @@ namespace osmscout {
         }
         NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:str attributes:attr];
         
-        CFAttributedStringRef cfString = (CFAttributedStringRef)CFBridgingRetain(attrStr);
-        CTLineRef line = CTLineCreateWithAttributedString(cfString);
-        CFArrayRef runArray = CTLineGetGlyphRuns(line);
+        CFAttributedStringRef cfString = (__bridge CFAttributedStringRef)attrStr;
+        result->label.line = CTLineCreateWithAttributedString(cfString);
+        CFArrayRef runArray = CTLineGetGlyphRuns(result->label.line.get());
         if(CFArrayGetCount(runArray) > 0){
             CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
             
-            result->label = run;
+            result->label.run = run;
             rect = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0));
         }
-        // TODO: how to release the line ?
-        //CFRelease(line);
         
         result->text = text;
         result->fontSize = fontSize;
@@ -511,7 +532,7 @@ namespace osmscout {
                                         const Color &color,
                                         bool emphasize){
         
-        CTRunRef run = layout.label;
+        CTRunRef run = layout.label.run;
         const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
         CGFloat fontHeight = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)).size.height;
         CFIndex glyphCount = CTRunGetGlyphCount(run);
@@ -546,11 +567,10 @@ namespace osmscout {
     }
     
     void MapPainterIOS::DrawLabel(const Projection& projection,
-                   const MapParameter& parameter,
-                   const DoubleRectangle& labelRect,
-                   const LabelData& label,
-                   const IOSLabel& layout) {
-        // TODO: check that labelRectangle intersect the viewport
+                                  const MapParameter& parameter,
+                                  const DoubleRectangle& labelRect,
+                                  const LabelData& label,
+                                  const IOSLabel& layout) {
         
         if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
             const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
@@ -560,40 +580,40 @@ namespace osmscout {
                 
             } else if (style->GetStyle()==TextStyle::emphasize) {
                 LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), true);
-                
-            } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
-                
-                const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
- 
-                CGContextSaveGState(cg);
-                CGContextSetRGBFillColor(cg,
-                                         style->GetBgColor().GetR(),
-                                         style->GetBgColor().GetG(),
-                                         style->GetBgColor().GetB(),
-                                         1);
-                CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
-                                           style->GetBorderColor().GetG(),
-                                           style->GetBorderColor().GetB(),
-                                           style->GetBorderColor().GetA());
-                CGContextAddRect(cg, CGRectMake(labelRect.x,
-                                                labelRect.y,
-                                                labelRect.width,
-                                                labelRect.height));
-                CGContextDrawPath(cg, kCGPathFillStroke);
-                
-                CGContextAddRect(cg, CGRectMake(labelRect.x+2,
-                                                labelRect.y+2,
-                                                labelRect.width-4,
-                                                labelRect.height-4));
-                CGContextDrawPath(cg, kCGPathStroke);
-                
-                LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
-                
-                CGContextRestoreGState(cg);
-                
-            } else {
-                log.Warn() << "Label style not recognised: " << label.style.get();
             }
+            
+        } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+            
+            const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+            
+            CGContextSaveGState(cg);
+            CGContextSetRGBFillColor(cg,
+                                     style->GetBgColor().GetR(),
+                                     style->GetBgColor().GetG(),
+                                     style->GetBgColor().GetB(),
+                                     1);
+            CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
+                                       style->GetBorderColor().GetG(),
+                                       style->GetBorderColor().GetB(),
+                                       style->GetBorderColor().GetA());
+            CGContextAddRect(cg, CGRectMake(labelRect.x - 5,
+                                            labelRect.y - 5,
+                                            labelRect.width + 10,
+                                            labelRect.height + 10));
+            CGContextDrawPath(cg, kCGPathFillStroke);
+            
+            CGContextAddRect(cg, CGRectMake(labelRect.x - 5 + 2,
+                                            labelRect.y - 5 + 2,
+                                            labelRect.width + 10 - 4,
+                                            labelRect.height + 10 -4));
+            CGContextDrawPath(cg, kCGPathStroke);
+            
+            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
+            
+            CGContextRestoreGState(cg);
+            
+        } else {
+            log.Warn() << "Label style not recognised: " << label.style.get();
         }
     }
     
@@ -628,17 +648,6 @@ namespace osmscout {
                                  parameter,
                                  this);
         labelLayouter.Reset();
-    }
-
-    double MapPainterIOS::pathLength(size_t transStart, size_t transEnd){
-        double len = 0.0;
-        double deltaX, deltaY;
-        for(size_t j=transStart; j<transEnd; j++) {
-            deltaX = coordBuffer->buffer[j].GetX() - coordBuffer->buffer[j+1].GetX();
-            deltaY = coordBuffer->buffer[j].GetY() - coordBuffer->buffer[j+1].GetX();
-            len += sqrt(deltaX*deltaX + deltaY*deltaY);
-        }
-        return len;
     }
 
     void MapPainterIOS::followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
@@ -734,7 +743,7 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, 0, -height/2);
+                    DrawSymbol(projection, parameter, symbol, 0, 0);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, space, origin);
                 }
@@ -779,20 +788,17 @@ namespace osmscout {
         double minY;
         double maxX;
         double maxY;
-
         symbol.GetBoundingBox(minX,minY,maxX,maxY);
+        
+        double centerX=(maxX+minX)/2;
+        double centerY=(maxY+minY)/2;
 
         CGContextSaveGState(cg);
-        for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
-             p!=symbol.GetPrimitives().end();
-             ++p) {
-
-            DrawPrimitive* primitive=p->get();
-            double         centerX=(maxX+minX)/2;
-            double         centerY=(maxY+minY)/2;
-
-            if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-                PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+        for (const auto& primitive : symbol.GetPrimitives()) {
+            const DrawPrimitive *primitivePtr=primitive.get();
+            
+            if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=nullptr) {
+                const auto *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
                 FillStyleRef fillStyle=polygon->GetFillStyle();
                 BorderStyleRef borderStyle=polygon->GetBorderStyle();
 
@@ -824,8 +830,8 @@ namespace osmscout {
 
                 CGContextDrawPath(cg, kCGPathFillStroke);
             }
-            else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-                RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+            else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=nullptr) {
+                const auto *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
                 FillStyleRef fillStyle=rectangle->GetFillStyle();
                 BorderStyleRef borderStyle=rectangle->GetBorderStyle();
                 if (fillStyle) {
@@ -846,8 +852,8 @@ namespace osmscout {
                 CGContextAddRect(cg,rect);
                 CGContextDrawPath(cg, kCGPathFillStroke);
             }
-            else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-                CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+            else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=nullptr) {
+                const auto *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
                 FillStyleRef fillStyle=circle->GetFillStyle();
                 BorderStyleRef borderStyle=circle->GetBorderStyle();
                 if (fillStyle) {
