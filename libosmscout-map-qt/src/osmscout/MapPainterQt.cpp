@@ -93,11 +93,9 @@ namespace osmscout {
 
     size_t idx=style.GetIconId()-1;
 
-    if (idx<images.size() &&
-        !images[idx].isNull()) {
-      return true;
-    }
-
+    // there is possible that exists multiple IconStyle instances with same iconId (point and area icon with same icon name)
+    // setup dimensions for all of them
+    // std::cout << style.GetIconId() << ": " << style.GetIconName() << " @ " << &style << std::endl;
     if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
         parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
 
@@ -106,6 +104,16 @@ namespace osmscout {
     }else{
       style.SetWidth(std::round(parameter.GetIconPixelSize()));
       style.SetHeight(style.GetWidth());
+    }
+
+    if (idx<images.size() &&
+        !images[idx].isNull()) {
+
+      if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+        style.SetWidth(images[idx].width());
+        style.SetHeight(images[idx].height());
+      }
+      return true;
     }
 
     std::list<std::string> erronousPaths;

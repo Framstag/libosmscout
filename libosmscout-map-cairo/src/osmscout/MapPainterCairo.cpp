@@ -455,12 +455,8 @@ namespace osmscout {
 
     size_t idx = style.GetIconId() - 1;
 
-    // Already cached?
-    if (idx < images.size() &&
-        images[idx] != nullptr) {
-      return true;
-    }
-
+    // there is possible that exists multiple IconStyle instances with same iconId (point and area icon with same icon name)
+    // setup dimensions for all of them
     if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
         parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
 
@@ -469,6 +465,17 @@ namespace osmscout {
     }else{
       style.SetWidth(std::round(parameter.GetIconPixelSize()));
       style.SetHeight(style.GetWidth());
+    }
+
+    // Already cached?
+    if (idx < images.size() &&
+        images[idx] != nullptr) {
+
+      if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+        style.SetWidth(cairo_image_surface_get_width(images[idx]));
+        style.SetHeight(cairo_image_surface_get_height(images[idx]));
+      }
+      return true;
     }
 
     for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
