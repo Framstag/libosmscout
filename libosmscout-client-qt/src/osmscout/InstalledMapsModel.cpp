@@ -26,17 +26,17 @@ InstalledMapsModel::InstalledMapsModel()
 {
   mapManager=OSMScoutQt::GetInstance().GetMapManager();
   connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
-          this, SLOT(onDatabaseListChagned()));
+          this, SLOT(onDatabaseListChanged()));
   connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
-          this, SIGNAL(databaseListChagned()));
-  onDatabaseListChagned();
+          this, SIGNAL(databaseListChanged()));
+  onDatabaseListChanged();
 }
 
 InstalledMapsModel::~InstalledMapsModel()
 {
 }
 
-void InstalledMapsModel::onDatabaseListChagned()
+void InstalledMapsModel::onDatabaseListChanged()
 {
   beginResetModel();
   endResetModel();

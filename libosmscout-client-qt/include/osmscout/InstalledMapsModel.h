@@ -37,10 +37,10 @@ class OSMSCOUT_CLIENT_QT_API InstalledMapsModel : public QAbstractListModel {
 Q_OBJECT
 
 signals:
-  void databaseListChagned();
+  void databaseListChanged();
 
 public slots:
-  void onDatabaseListChagned();
+  void onDatabaseListChanged();
 
 public:
   InstalledMapsModel();
