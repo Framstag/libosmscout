@@ -131,7 +131,7 @@ Qt::ItemFlags InstalledMapsModel::flags(const QModelIndex &index) const
   return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-Q_INVOKABLE bool InstalledMapsModel::removeRows(int fromRow, int count, const QModelIndex &parent)
+Q_INVOKABLE bool InstalledMapsModel::removeRows(int fromRow, int count, const QModelIndex &/*parent*/)
 {
   if (fromRow < 0 || count <= 0 || fromRow + count > dirs.size()){
     return false;
