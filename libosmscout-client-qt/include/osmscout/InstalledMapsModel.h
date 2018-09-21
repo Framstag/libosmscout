@@ -36,6 +36,9 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API InstalledMapsModel : public QAbstractListModel {
 Q_OBJECT
 
+signals:
+  void databaseListChagned();
+
 public slots:
   void onDatabaseListChagned();
 

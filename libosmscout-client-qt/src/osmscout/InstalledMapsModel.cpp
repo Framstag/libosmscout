@@ -27,6 +27,8 @@ InstalledMapsModel::InstalledMapsModel()
   mapManager=OSMScoutQt::GetInstance().GetMapManager();
   connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
           this, SLOT(onDatabaseListChagned()));
+  connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
+          this, SIGNAL(databaseListChagned()));
   onDatabaseListChagned();
 }
 
