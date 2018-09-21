@@ -66,6 +66,7 @@ public:
    * @return true on success
    */
   Q_INVOKABLE bool deleteMap(int row);
+  Q_INVOKABLE virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
   /**
    * Generation time of map with given path. Null if don't exists
@@ -77,6 +78,7 @@ public:
   Q_INVOKABLE QVariant timeOfMap(QStringList path);
 
 private:
+  QList<MapDirectory> dirs;
   MapManagerRef mapManager;
 };
 
