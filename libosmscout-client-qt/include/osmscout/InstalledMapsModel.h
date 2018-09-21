@@ -53,6 +53,7 @@ public:
     DirectoryRole = Qt::UserRole + 2, // directory
     TimeRole = Qt::UserRole + 3, // generating time of map
   };
+  Q_ENUM(Roles)
 
   Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
   Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;

@@ -50,6 +50,7 @@ public:
       FileRole = Qt::UserRole+1,
       PathRole = Qt::UserRole+2,
   };
+  Q_ENUM(Roles)
 
   MapStyleModel();
   virtual ~MapStyleModel();

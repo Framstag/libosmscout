@@ -61,6 +61,7 @@ public:
       NameRole   = Qt::UserRole+3,
       ObjectRole = Qt::UserRole+4,
   };
+  Q_ENUM(Roles)
 
 signals:
   void readyChange(bool ready);

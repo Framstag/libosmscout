@@ -64,6 +64,7 @@ public:
     ProgressDescriptionRole = Qt::UserRole+3,
     ErrorStringRole = Qt::UserRole+4,
   };
+  Q_ENUM(Roles)
 
   Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
   Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
