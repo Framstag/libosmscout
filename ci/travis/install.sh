@@ -15,6 +15,13 @@ if [ "$TARGET" = "build" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get -qq update
 
+    sudo apt-get install -y ubuntu-release-upgrader-core
+
+    # upgrade from Trusty (14.04) to Xenial (16.04)
+    sudo do-release-upgrade --quiet --frontend=DistUpgradeViewNonInteractive
+    # upgrade from Xenial (16.04) to Bionic (18.04)
+    #sudo do-release-upgrade --quiet --frontend=DistUpgradeViewNonInteractive
+
     if [ "$BUILDTOOL" = "meson" ]; then
       echo "INstalling ninja..."
       wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
@@ -50,6 +57,7 @@ if [ "$TARGET" = "build" ]; then
       libagg-dev libfreetype6-dev \
       libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev \
       qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev \
+      qtpositioning5-dev \
       qttools5-dev-tools qttools5-dev \
       freeglut3 freeglut3-dev \
       libmarisa-dev \
