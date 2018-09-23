@@ -95,6 +95,7 @@ public:
     DescriptionRole = Qt::UserRole + 2,
     TypeRole = Qt::UserRole + 3
   };
+  Q_ENUM(Roles)
 
 public:
   RoutingListModel(QObject* parent = 0);
