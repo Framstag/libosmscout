@@ -4,11 +4,13 @@ branches:
   only:
     - master
 
-os: Visual Studio 2015
+# TODO: add "Visual Studio 2017" image
 
 environment:
   matrix:
-  - COMPILER: msvc2015
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
+    COMPILER: msvc2015
     BUILDTOOL: meson
     CONFIGURATION: Debug
     MSYS2_ARCH: x86_64
@@ -16,21 +18,30 @@ environment:
     MSYSTEM: MINGW64
     TARGET: build
     PLATFORM: x64
-  - COMPILER: msys2
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
+    COMPILER: msys2
     BUILDTOOL: meson
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
     TARGET: build
     PLATFORM: x64
-  - COMPILER: msys2
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
+    COMPILER: msys2
     BUILDTOOL: cmake
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
     MSYSTEM: MINGW64
     TARGET: importer
     PLATFORM: x64
-  - COMPILER: msvc2015
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
+    COMPILER: msvc2015
     BUILDTOOL: cmake
     CONFIGURATION: Debug
     MSYS2_ARCH: x86_64
@@ -38,7 +49,10 @@ environment:
     MSYSTEM: MINGW64
     TARGET: build
     PLATFORM: x64
-  - COMPILER: msys2
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
+    COMPILER: msys2
     BUILDTOOL: cmake
     MSYS2_ARCH: x86_64
     MSYS2_DIR: msys64
@@ -46,15 +60,43 @@ environment:
     TARGET: build
     PLATFORM: x64
 
-init:
-  - ps: $env:APPVEYOR_SAVE_CACHE_ON_ERROR="true"
+  - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    BUILDTOOL: cmake
+    CMAKE_ARGS: -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+    COMPILER: gcc
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    BUILDTOOL: cmake
+    CMAKE_ARGS: -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+    COMPILER: clang
+
+    # make sure that library can be built with all debugging code
+  - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    BUILDTOOL: cmake
+    CMAKE_ARGS: -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_BUILD_BINDING_JAVA=OFF -DLABEL_LAYOUTER_DEBUG=ON -DDEBUG_GROUNDTILES=ON -DDEBUG_COASTLINE=ON -DDEBUG_TILING=ON -DDEBUG_ROUTING=ON
+    COMPILER: gcc
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    BUILDTOOL: meson
+    COMPILER: gcc
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    BUILDTOOL: meson
+    COMPILER: clang
 
 install:
-  - set
-  - '%APPVEYOR_BUILD_FOLDER%\ci\appveyor\install.bat'
+- cmd: set
+- cmd: '%APPVEYOR_BUILD_FOLDER%\ci\appveyor\install.bat'
+- sh: env
+- sh: 'sudo --preserve-env ${APPVEYOR_BUILD_FOLDER}/ci/appveyor/install.sh'
 
 build_script:
-  - '%APPVEYOR_BUILD_FOLDER%\ci\appveyor\build.bat'
+# cmd is executed on windows only, sh is executed just on Ubuntu
+- cmd: '%APPVEYOR_BUILD_FOLDER%\ci\appveyor\build.bat'
+- sh: '${APPVEYOR_BUILD_FOLDER}/ci/appveyor/build.sh'
+
+test_script:
+- sh: '${APPVEYOR_BUILD_FOLDER}/ci/appveyor/test.sh'
 
 deploy:
   provider: GitHub
@@ -68,11 +110,16 @@ deploy:
     target: importer
 
 notifications:
-  - provider: Email
-    to:
-      - tim@framstag.com
-    on_build_failure: true
-    on_build_status_changed: true
+- provider: Email
+  to:
+  - tim@framstag.com
+  on_build_failure: true
+  on_build_status_changed: true
 
-cache: 
+for:
+-
+  matrix:
+    only:
+    - image: Visual Studio 2015
+  cache:
   - c:\tools\vcpkg\installed\
