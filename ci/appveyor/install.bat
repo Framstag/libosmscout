@@ -97,6 +97,38 @@ IF %COMPILER%==msvc2015 (
     .\vcpkg install qt5-base:x64-windows
     echo ...done
 
+    echo Installing qt5-declarative...
+    .\vcpkg install qt5-declarative:x64-windows
+    echo ...done
+
+    echo Installing qt5-svg...
+    .\vcpkg install qt5-svg:x64-windows
+    echo ...done
+
+    echo Installing qt5-tools...
+    .\vcpkg install qt5-tools:x64-windows
+    echo ...done
+
+    echo Installing OpenGL...
+    .\vcpkg install opengl:x64-windows
+    echo ...done
+
+    echo Installing freeglut...
+    .\vcpkg install freeglut:x64-windows
+    echo ...done
+
+    echo Installing glm...
+    .\vcpkg install glm:x64-windows
+    echo ...done
+
+    echo Installing glew...
+    .\vcpkg install glew:x64-windows
+    echo ...done
+
+    echo Installing glfw3...
+    .\vcpkg install glfw3:x64-windows
+    echo ...done
+
     echo System-wide integrating vcpkg...
     .\vcpkg integrate install
     echo ...done
