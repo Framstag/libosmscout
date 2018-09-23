@@ -36,8 +36,11 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API InstalledMapsModel : public QAbstractListModel {
 Q_OBJECT
 
+signals:
+  void databaseListChanged();
+
 public slots:
-  void onDatabaseListChagned();
+  void onDatabaseListChanged();
 
 public:
   InstalledMapsModel();
@@ -50,6 +53,7 @@ public:
     DirectoryRole = Qt::UserRole + 2, // directory
     TimeRole = Qt::UserRole + 3, // generating time of map
   };
+  Q_ENUM(Roles)
 
   Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
   Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
@@ -62,6 +66,7 @@ public:
    * @return true on success
    */
   Q_INVOKABLE bool deleteMap(int row);
+  Q_INVOKABLE virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
 
   /**
    * Generation time of map with given path. Null if don't exists
@@ -73,6 +78,7 @@ public:
   Q_INVOKABLE QVariant timeOfMap(QStringList path);
 
 private:
+  QList<MapDirectory> dirs;
   MapManagerRef mapManager;
 };
 
