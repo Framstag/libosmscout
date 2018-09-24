@@ -43,8 +43,8 @@
 //#define DEBUG_COASTLINE
 #endif
 
-#if !defined(DEBUG_TILING)
-//#define DEBUG_TILING
+#if defined(DEBUG_COASTLINE)
+#include <iostream>
 #endif
 
 namespace osmscout {
@@ -261,7 +261,7 @@ namespace osmscout {
           for (const auto& coord : coords) {
             if (stateMap.IsInAbsolute(coord.x,coord.y)) {
               if (stateMap.GetStateAbsolute(coord.x,coord.y)==WaterIndexProcessor::unknown) {
-#if defined(DEBUG_TILING)
+#if defined(DEBUG_COASTLINE)
                 std::cout << "Assume land: " << coord.x-stateMap.GetXStart() << "," << coord.y-stateMap.GetYStart() << " Way " << way.GetFileOffset() << " " << way.GetType()->GetName() << " is defining area as land" << std::endl;
 #endif
                 stateMap.SetStateAbsolute(coord.x,coord.y,WaterIndexProcessor::land);
