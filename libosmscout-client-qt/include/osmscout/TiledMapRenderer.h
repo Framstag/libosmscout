@@ -45,7 +45,11 @@ private:
   //
   // Online cache may contain NULL images (QImage::isNull() is true) for areas
   // covered by offline database and offline cache can contain NULL images
-  // for areas not coverred by database.
+  // for areas not covered by database.
+  //
+  // When offlineTileCache is invalidated, cache keeps unchanged,
+  // just its epoch is increased. When there is retrieved pixmap with
+  // old epoch from cache, it is used, but rendering request is triggered.
   //
   // Offline tiles should be in ARGB format on database area interface.
   mutable QMutex                tileCacheMutex;
@@ -67,6 +71,7 @@ private:
   uint32_t                      loadYFrom;
   uint32_t                      loadYTo;
   MagnificationLevel            loadZ;
+  size_t                        loadEpoch; // guarded by lock
 
   QColor                        unknownColor;
 

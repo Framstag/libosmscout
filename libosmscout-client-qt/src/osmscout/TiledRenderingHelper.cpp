@@ -221,8 +221,9 @@ bool TiledRenderingHelper::lookupAndDrawTile(TileCache& tileCache, QPainter& pai
         painter.drawPixmap(QRectF(x, y, renderTileWidth+overlap, renderTileHeight+overlap), val.image, imageViewport);
       }
       lookupTileFound = true;
-      if (lookupTileZoom == zoomLevel)
+      if (lookupTileZoom == zoomLevel && val.epoch == tileCache.getEpoch()) {
         triggerRequest = false;
+      }
     }else{
       // no tile found on current zoom zoom level, lookup upper zoom level
       if (lookupTileZoom==0)
