@@ -1338,7 +1338,6 @@ namespace osmscout {
       DrawArea(projection,parameter,areaData);
 
 #if defined(DEBUG_GROUNDTILES)
-      size_t   labelId=nextLabelId++;
       GeoCoord cc=areaData.boundingBox.GetCenter();
 
       std::string label;
@@ -1346,7 +1345,7 @@ namespace osmscout {
       size_t x=(cc.GetLon()+180)/tile.cellWidth;
       size_t y=(cc.GetLat()+90)/tile.cellHeight;
 
-      label=NumberToString(tile.xRel)+","+NumberToString(tile.yRel);
+      label=std::to_string(tile.xRel)+","+std::to_string(tile.yRel);
 
       double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
       double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
@@ -1361,31 +1360,21 @@ namespace osmscout {
         continue;
       }
 
-      LabelLayoutData labelData;
+      LabelData labelBox;
 
-      labelData.fontSize=debugLabel->GetSize();
+      labelBox.priority=0;
+      labelBox.alpha=debugLabel->GetAlpha();;
+      labelBox.fontSize=debugLabel->GetSize();
+      labelBox.style=debugLabel;
+      labelBox.text=label;
 
-      GetTextDimension(projection,
-                       parameter,
-                       -1,
-                       labelData.fontSize,
-                       label,
-                       labelData.xOff,
-                       labelData.yOff,
-                       labelData.width,
-                       labelData.height);
-
-      labelData.alpha=debugLabel->GetAlpha();
-      labelData.position=0;
-      labelData.label=label;
-      labelData.textStyle=debugLabel;
-      labelData.icon=false;
-
-      RegisterPointLabel(projection,
-                         parameter,
-                         labelData,
-                         px,py,
-                         labelId);
+      std::vector<LabelData> vect;
+      vect.push_back(labelBox);
+      RegisterRegularLabel(projection,
+                           parameter,
+                           vect,
+                           Vertex2D(px,py),
+                           /*proposedWidth*/ -1);
 
       drawnLabels.insert(GeoCoord(x,y));
 #endif

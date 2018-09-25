@@ -266,6 +266,7 @@ namespace osmscout {
 
   protected:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
+    TextStyleRef                 debugLabel;
 
   private:
     std::vector<StepMethod>      stepMethods;
@@ -284,7 +285,6 @@ namespace osmscout {
     //@{
     FillStyleRef                 landFill;
     FillStyleRef                 seaFill;
-    TextStyleRef                 debugLabel;
     FeatureValueBuffer           coastlineSegmentAttributes;
     //@}
 
