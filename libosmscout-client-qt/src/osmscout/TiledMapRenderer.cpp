@@ -184,7 +184,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   onlineTileCache.clearPendingRequests();
   offlineTileCache.clearPendingRequests();
 
-  if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,mapDpi,unknownColor)){
+  if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,unknownColor)){
     return false;
   }
 

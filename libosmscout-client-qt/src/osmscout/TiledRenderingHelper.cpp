@@ -31,7 +31,6 @@ namespace osmscout {
 bool TiledRenderingHelper::RenderTiles(QPainter &painter,
                                        const MapViewStruct &request,
                                        QList<TileCache*> &layerCaches,
-                                       double mapDpi,
                                        const QColor &unknownColor,
                                        double overlap)
 {
@@ -66,7 +65,7 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
   projection.Set(request.coord,
                  0,
                  request.magnification,
-                 mapDpi,
+                 request.dpi,
                  width,
                  height);
 

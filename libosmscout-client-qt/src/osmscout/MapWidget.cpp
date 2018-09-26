@@ -252,6 +252,7 @@ void MapWidget::paint(QPainter *painter)
     request.magnification = view->magnification;
     request.width = boundingBox.width();
     request.height = boundingBox.height();
+    request.dpi = view->mapDpi;
 
     bool oldFinished = finished;
     //finished = dbThread->RenderMap(*painter,request);
@@ -664,7 +665,9 @@ void MapWidget::onTapLongTap(const QPoint p)
 
 void MapWidget::onMapDPIChange(double dpi)
 {
-    view->mapDpi = dpi;
+    MapView v = *view;
+    v.mapDpi = dpi;
+    changeView(v);
 
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
