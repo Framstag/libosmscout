@@ -55,6 +55,7 @@ struct MapViewStruct
   osmscout::Magnification magnification;
   size_t                  width;
   size_t                  height;
+  double                  dpi;
 };
 
 inline bool operator!=(const MapViewStruct &r1, const MapViewStruct &r2)
