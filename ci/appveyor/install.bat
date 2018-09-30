@@ -97,6 +97,10 @@ IF %COMPILER%==msvc2015 (
     .\vcpkg install qt5-base:x64-windows
     echo ...done
 
+    echo Installing qt5-declarative...
+    .\vcpkg install qt5-declarative:x64-windows
+    echo ...done
+
     echo System-wide integrating vcpkg...
     .\vcpkg integrate install
     echo ...done
