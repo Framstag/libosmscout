@@ -776,12 +776,11 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
   Triangle& ot = t.NeighborAcross(p);
   Point& op = *ot.OppositePoint(t, p);
 
-  if (&t.NeighborAcross(p) == NULL) {
-    // If we want to integrate the fillEdgeEvent do it here
-    // With current implementation we should never get here
-    //throw new RuntimeException( "[BUG:FIXME] FLIP failed due to missing triangle");
-    assert(0);
-  }
+  //if (&t.NeighborAcross(p) == NULL) {
+  //  If we want to integrate the fillEdgeEvent do it here
+  //  With current implementation we should never get here
+  //  throw new RuntimeException( "[BUG:FIXME] FLIP failed due to missing triangle");
+  //}
 
   if (InScanArea(eq, *flip_triangle.PointCCW(eq), *flip_triangle.PointCW(eq), op)) {
     // flip with new edge op->eq
