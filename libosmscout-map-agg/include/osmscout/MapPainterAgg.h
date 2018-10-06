@@ -191,7 +191,7 @@ namespace osmscout {
     virtual void BeforeDrawing(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
-                               const MapData& data);
+                               const MapData& data) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

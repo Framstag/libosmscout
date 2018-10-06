@@ -147,7 +147,7 @@ namespace osmscout {
     virtual void BeforeDrawing(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
-                               const MapData& data);
+                               const MapData& data) override;
 
     /**
       Register regular label with given text at the given pixel coordinate
