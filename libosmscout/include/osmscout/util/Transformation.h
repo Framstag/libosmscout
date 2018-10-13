@@ -180,6 +180,19 @@ namespace osmscout {
 
     void Reset();
     size_t PushCoord(double x, double y);
+
+    /**
+     * Generate parallel way to way stored in this buffer on range orgStart, orgEnd (inclusive)
+     * Result is stored after the last valid point. Generated way offsets are returned
+     * in start and end.
+     *
+     * @param orgStart original way start
+     * @param orgEnd original way end (inclusive)
+     * @param offset offset of parallel way - positive offset is left, negative right
+     * @param start start of result
+     * @param end end of result (inclusive)
+     * @return true on success, false othervise
+     */
     bool GenerateParallelWay(size_t orgStart,
                              size_t orgEnd,
                              double offset,
