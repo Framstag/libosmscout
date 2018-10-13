@@ -43,6 +43,7 @@ TEST_CASE("Check bounding box of generated parallel way")
   minX = maxX = buffer.buffer[trFrom].GetX();
   minY = maxY = buffer.buffer[trFrom].GetY();
   for (size_t i=trFrom; i<=trTo; i++){
+    //std::cout << buffer.buffer[i].GetX() << " , " << buffer.buffer[i].GetY() << std::endl;
     minX = std::min(minX, buffer.buffer[i].GetX());
     maxX = std::max(maxX, buffer.buffer[i].GetX());
     minY = std::min(minY, buffer.buffer[i].GetY());
