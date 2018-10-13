@@ -221,6 +221,13 @@ Base64Test = executable('Base64Test',
            link_with: [osmscout],
            install: false)
 
+CoordBufferTest = executable('CoordBufferTest',
+           'src/CoordBufferTest.cpp',
+           include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+           dependencies: [mathDep],
+           link_with: [osmscoutmap, osmscout],
+           install: false)
+
 ostandossEnv = environment()
 
 ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
