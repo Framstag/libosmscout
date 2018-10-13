@@ -207,7 +207,7 @@ namespace osmscout {
                                         size_t& start,
                                         size_t& end)
   {
-    if (orgStart+1>orgEnd) {
+    if (orgStart+1>orgEnd || orgEnd >= usedPoints) {
       // To avoid "not initialized" warnings
       return false;
     }
