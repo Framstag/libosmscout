@@ -91,7 +91,7 @@ namespace osmscout {
       return false;
     }
 
-    size_t idx=style.GetIconId()-1;
+    const auto &it=images.find(style.GetIconName());
 
     // there is possible that exists multiple IconStyle instances with same iconId (point and area icon with same icon name)
     // setup dimensions for all of them
@@ -106,12 +106,12 @@ namespace osmscout {
       style.SetHeight(style.GetWidth());
     }
 
-    if (idx<images.size() &&
-        !images[idx].isNull()) {
+    if (it!=images.end() &&
+        !it->second.isNull()) {
 
       if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
-        style.SetWidth(images[idx].width());
-        style.SetHeight(images[idx].height());
+        style.SetWidth(it->second.width());
+        style.SetHeight(it->second.height());
       }
       return true;
     }
@@ -148,11 +148,7 @@ namespace osmscout {
       }
 
       if (success) {
-        if (idx >= images.size()) {
-          images.resize(idx + 1);
-        }
-
-        images[idx] = image;
+        images[style.GetIconName()] = image;
         //std::cout << "Loaded image '" << filename << "'" << std::endl;
         return true;
       }
@@ -629,14 +625,14 @@ namespace osmscout {
                               double x, double y,
                               double width, double height)
   {
-    size_t idx=style->GetIconId()-1;
+    const auto &it=images.find(style->GetIconName());
 
-    assert(idx<images.size());
-    assert(!images[idx].isNull());
+    assert(it!=images.end());
+    assert(!it->second.isNull());
 
     painter->drawImage(QRectF(x-width/2, y-height/2, width, height),
-                       images[idx],
-                       QRectF(0, 0, images[idx].width(), images[idx].height()));
+                       it->second,
+                       QRectF(0, 0, it->second.width(), it->second.height()));
   }
 
   void MapPainterQt::DrawSymbol(const Projection& projection,
@@ -975,13 +971,21 @@ namespace osmscout {
     labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
   }
 
+  MapPainterQt::QtLabelLayouter& MapPainterQt::GetLayouter()
+  {
+    if (delegateLabelLayouter){
+      return *delegateLabelLayouter;
+    }
+    return labelLayouter;
+  }
+
   void MapPainterQt::RegisterRegularLabel(const Projection &projection,
                                           const MapParameter &parameter,
                                           const std::vector<LabelData> &labels,
                                           const Vertex2D &position,
                                           double objectWidth)
   {
-    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    GetLayouter().RegisterLabel(projection, parameter, position, labels, objectWidth);
   }
 
   void MapPainterQt::RegisterContourLabel(const Projection &projection,
@@ -989,13 +993,17 @@ namespace osmscout {
                                           const PathLabelData &label,
                                           const LabelPath &labelPath)
   {
-    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+    GetLayouter().RegisterContourLabel(projection, parameter, label, labelPath);
   }
 
   void MapPainterQt::DrawLabels(const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& /*data*/)
   {
+    if (delegateLabelLayouter){
+      return;
+    }
+
     labelLayouter.Layout(projection, parameter);
 
     labelLayouter.DrawLabels(projection,
@@ -1445,17 +1453,64 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 QPainter* qPainter)
   {
+    assert(data.size() == painters.size());
+    if (painters.empty()){
+      return true;
+    }
     qPainter->setRenderHint(QPainter::Antialiasing);
     qPainter->setRenderHint(QPainter::TextAntialiasing);
 
-    // prepare map painters - lock and setup Qt painter
-    std::vector<std::unique_lock<std::mutex>> locks(data.size());
+    // prepare map painters:
+    // - acquire locks
+    // - setup QPainter instance
+    // - delegate all label layout operations to the last painter
+    std::vector<std::unique_lock<std::mutex>> locks;
+    locks.reserve(painters.size());
+    MapPainterQt* lastPainter = painters.back();
     for (MapPainterQt* painter: painters){
-      locks.push_back(std::move(std::unique_lock<std::mutex>(painter->mutex)));
+      locks.emplace_back(painter->mutex);
       painter->painter = qPainter;
+
+      if (painter != lastPainter){
+        painter->delegateLabelLayouter = &(lastPainter->labelLayouter);
+      }
     }
 
-    return batchPaintInternal(projection,parameter);
+    bool success=true;
+    for (size_t step=osmscout::RenderSteps::FirstStep;
+         step<=osmscout::RenderSteps::LastStep;
+         step++){
+
+      for (size_t i=0;i<data.size(); i++){
+        const MapData &d=*(data[i]);
+        MapPainterQt *painter = painters[i];
+
+        // copy missing icons to last painter cache
+        // because last painter do the real label and icon rendering
+        if (step==osmscout::RenderSteps::DrawLabels &&
+            painter->delegateLabelLayouter == &(lastPainter->labelLayouter) &&
+            painter!=lastPainter){
+
+          for (auto im=painter->images.begin(); im != painter->images.end(); im++){
+            if (lastPainter->images.find(im->first) == lastPainter->images.end()) {
+              lastPainter->images[im->first] = im->second;
+            }
+          }
+        }
+        success &= painter->Draw(projection,
+                                 parameter,
+                                 d,
+                                 (RenderSteps)step,
+                                 (RenderSteps)step);
+      }
+    }
+
+    // cleanup
+    for (MapPainterQt* painter: painters){
+      painter->painter = nullptr;
+      painter->delegateLabelLayouter = nullptr;
+    }
+    return success;
   }
 }
 
