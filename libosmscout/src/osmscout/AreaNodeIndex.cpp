@@ -232,6 +232,10 @@ namespace osmscout {
                                  std::vector<FileOffset>& offsets,
                                  TypeInfoSet& loadedTypes) const
   {
+    if (nodeTypeData.empty()) {
+      return true;
+    }
+    
     StopClock time;
 
     loadedTypes.Clear();
