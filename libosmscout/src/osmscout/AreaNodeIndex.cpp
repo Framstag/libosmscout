@@ -232,9 +232,6 @@ namespace osmscout {
                                  std::vector<FileOffset>& offsets,
                                  TypeInfoSet& loadedTypes) const
   {
-    if (nodeTypeData.empty()) {
-      return true;
-    }
     
     StopClock time;
 
@@ -248,9 +245,9 @@ namespace osmscout {
           continue;
         }
 
-        if (!GetOffsets(nodeTypeData[type->GetNodeId()],
-                        boundingBox,
-                        offsets)) {
+        auto typeNodeId = type->GetNodeId();
+        if (typeNodeId < nodeTypeData.size() && 
+                !GetOffsets(nodeTypeData[typeNodeId], boundingBox, offsets)) {
           return false;
         }
 
