@@ -131,10 +131,5 @@ notifications:
   on_build_failure: true
   on_build_status_changed: true
 
-for:
--
-  matrix:
-    only:
-      - image: Visual Studio 2015
-  cache:
-    - c:\tools\vcpkg\installed\
+cache:
+  - c:\tools\vcpkg\installed\
