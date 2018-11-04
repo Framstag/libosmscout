@@ -9,7 +9,17 @@ branches:
 environment:
   matrix:
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    COMPILER: msvc2015
+    BUILDTOOL: cmake
+    CONFIGURATION: Debug
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+    TARGET: build
+    PLATFORM: x64
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
+
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     COMPILER: msvc2015
     BUILDTOOL: meson
     CONFIGURATION: Debug
@@ -18,9 +28,9 @@ environment:
     MSYSTEM: MINGW64
     TARGET: build
     PLATFORM: x64
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    APPVEYOR_SAVE_CACHE_ON_ERROR: true
     COMPILER: msys2
     BUILDTOOL: meson
     MSYS2_ARCH: x86_64
@@ -28,9 +38,9 @@ environment:
     MSYSTEM: MINGW64
     TARGET: build
     PLATFORM: x64
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    APPVEYOR_SAVE_CACHE_ON_ERROR: true
     COMPILER: msys2
     BUILDTOOL: cmake
     MSYS2_ARCH: x86_64
@@ -38,20 +48,9 @@ environment:
     MSYSTEM: MINGW64
     TARGET: importer
     PLATFORM: x64
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    APPVEYOR_SAVE_CACHE_ON_ERROR: true
-    COMPILER: msvc2015
-    BUILDTOOL: cmake
-    CONFIGURATION: Debug
-    MSYS2_ARCH: x86_64
-    MSYS2_DIR: msys64
-    MSYSTEM: MINGW64
-    TARGET: build
-    PLATFORM: x64
-
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    APPVEYOR_SAVE_CACHE_ON_ERROR: true
     COMPILER: msys2
     BUILDTOOL: cmake
     MSYS2_ARCH: x86_64
@@ -59,39 +58,46 @@ environment:
     MSYSTEM: MINGW64
     TARGET: build
     PLATFORM: x64
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   # Java binding is broken currently: OSMSCOUT_BUILD_BINDING_JAVA=OFF
   # make sure that library can be built with all debugging code: *_DEBUG, DEBUG_*
   # run unittests with sanitizers (thread sanitizer is not included, it has many false positives)
   - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    COMPILER: gcc
     BUILDTOOL: cmake
     CMAKE_ARGS: -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_BUILD_BINDING_JAVA=OFF -DLABEL_LAYOUTER_DEBUG=ON -DDEBUG_GROUNDTILES=ON -DDEBUG_COASTLINE=ON -DDEBUG_TILING=ON -DDEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=-fsanitize=address
-    COMPILER: gcc
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    COMPILER: gcc
     BUILDTOOL: cmake
     CMAKE_ARGS: -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_BUILD_BINDING_JAVA=OFF -DLABEL_LAYOUTER_DEBUG=ON -DDEBUG_GROUNDTILES=ON -DDEBUG_COASTLINE=ON -DDEBUG_TILING=ON -DDEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=-fsanitize=undefined
-    COMPILER: gcc
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   # try cmake/clang combination
   - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    COMPILER: clang
     BUILDTOOL: cmake
     CMAKE_ARGS: -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_BUILD_BINDING_JAVA=OFF -DLABEL_LAYOUTER_DEBUG=ON -DDEBUG_GROUNDTILES=ON -DDEBUG_COASTLINE=ON -DDEBUG_TILING=ON -DDEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=-fsanitize=address
-    COMPILER: clang
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    COMPILER: clang
     BUILDTOOL: cmake
     CMAKE_ARGS: -DCMAKE_BUILD_TYPE=Debug -DOSMSCOUT_BUILD_BINDING_JAVA=OFF -DLABEL_LAYOUTER_DEBUG=ON -DDEBUG_GROUNDTILES=ON -DDEBUG_COASTLINE=ON -DDEBUG_TILING=ON -DDEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=-fsanitize=undefined
-    COMPILER: clang
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   # try meson/gcc and meson/clang combination
   - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-    BUILDTOOL: meson
     COMPILER: gcc
+    BUILDTOOL: meson
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-    BUILDTOOL: meson
     COMPILER: clang
+    BUILDTOOL: meson
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
 install:
 - cmd: set
@@ -131,4 +137,4 @@ for:
     only:
     - image: Visual Studio 2015
   cache:
-  - c:\tools\vcpkg\installed\
+    - c:\tools\vcpkg\installed\

@@ -65,8 +65,6 @@ IF %COMPILER%==msvc2015 (
   echo MSVC2015 build...
 
   IF %BUILDTOOL%==cmake (
-    echo Downloading vcpkg...
-
     cd c:\tools\vcpkg
 
     echo Installing zlib...
@@ -144,7 +142,7 @@ IF %COMPILER%==msvc2015 (
     echo ...done
 
     echo Installing qt5-base...
-    .\vcpkg install qt5-base:x64-windows
+    rem .\vcpkg install qt5-base:x64-windows
     echo ...done
 
     rem transitive
