@@ -54,7 +54,6 @@ public:
   static bool RenderTiles(QPainter& painter,
                           const MapViewStruct& request,
                           QList<TileCache*> &layerCaches,
-                          double mapDpi,
                           const QColor &unknownColor,
                           double overlap=-1);
 };

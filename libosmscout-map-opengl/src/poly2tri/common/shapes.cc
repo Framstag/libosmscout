@@ -119,10 +119,6 @@ void Triangle::ClearDelunayEdges()
 Point* Triangle::OppositePoint(Triangle& t, Point& p)
 {
   Point *cw = t.PointCW(p);
-  double x = cw->x;
-  double y = cw->y;
-  x = p.x;
-  y = p.y;
   return PointCW(*cw);
 }
 
@@ -348,10 +344,13 @@ void Triangle::SetDelunayEdgeCW(Point& p, bool e)
 Triangle& Triangle::NeighborAcross(Point& opoint)
 {
   if (&opoint == points_[0]) {
+    assert(neighbors_[0] != nullptr);
     return *neighbors_[0];
   } else if (&opoint == points_[1]) {
+    assert(neighbors_[1] != nullptr);
     return *neighbors_[1];
   }
+  assert(neighbors_[2] != nullptr);
   return *neighbors_[2];
 }
 

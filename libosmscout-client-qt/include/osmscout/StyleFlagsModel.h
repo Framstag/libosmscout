@@ -56,6 +56,7 @@ public:
     ValueRole      = Qt::UserRole+1,
     InProgressRole = Qt::UserRole+2,
   };
+  Q_ENUM(Roles)
 
   StyleFlagsModel();
   virtual ~StyleFlagsModel();

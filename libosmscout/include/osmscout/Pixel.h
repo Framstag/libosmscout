@@ -25,6 +25,7 @@
 #include <osmscout/CoreImportExport.h>
 
 #include <osmscout/system/OSMScoutTypes.h>
+#include <osmscout/system/Math.h>
 
 #include <osmscout/util/Number.h>
 
@@ -161,6 +162,12 @@ namespace osmscout {
     {
       return coords[1]<other.coords[1] ||
              (coords[1]==other.coords[1] && coords[0]<other.coords[0]);
+    }
+
+    inline double DistanceTo(const Vertex2D &other) const {
+      double xDiff = coords[0] - other.coords[0];
+      double yDiff = coords[1] - other.coords[1];
+      return sqrt(xDiff*xDiff + yDiff*yDiff);
     }
   };
 

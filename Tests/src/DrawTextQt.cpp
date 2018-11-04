@@ -30,7 +30,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 
-#include <osmscout/SimplifiedPath.h>
+#include <osmscout/LabelPath.h>
 
 #include <DrawWindow.h>
 
@@ -55,11 +55,11 @@ DrawWindow::~DrawWindow()
 
 }
 
-void DrawWindow::setupTransformation(QPainter *painter, const osmscout::SimplifiedPath &p,
+void DrawWindow::setupTransformation(QPainter *painter, const osmscout::LabelPath &p,
                                      const qreal offset, const qreal baseline) const
 {
   QTransform tran;
-  QPointF point=p.PointAtLength(offset);
+  osmscout::Vertex2D point=p.PointAtLength(offset);
   qreal   angle=p.AngleAtLengthDeg(offset);
   qreal penWidth = painter->pen().widthF();
 
@@ -68,16 +68,16 @@ void DrawWindow::setupTransformation(QPainter *painter, const osmscout::Simplifi
   qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
 
   // Rotation
-  qreal newX=(cosa*point.x())-(sina*(point.y()-baseline));
-  qreal newY=(cosa*(point.y()-baseline))+(sina*point.x());
+  qreal newX=(cosa*point.GetX())-(sina*(point.GetY()-baseline));
+  qreal newY=(cosa*(point.GetY()-baseline))+(sina*point.GetX());
 
   // Aditional offseting
   qreal deltaPenX=cosa*penWidth;
   qreal deltaPenY=sina*penWidth;
 
   // Getting the delta distance for the translation part of the transformation
-  qreal deltaX=newX-point.x();
-  qreal deltaY=newY-point.y();
+  qreal deltaX=newX-point.GetX();
+  qreal deltaY=newY-point.GetY();
 
   // Applying rotation and translation.
   tran.setMatrix(cosa,sina,0.0,
@@ -86,7 +86,7 @@ void DrawWindow::setupTransformation(QPainter *painter, const osmscout::Simplifi
   painter->setTransform(tran);
 }
 
-void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::SimplifiedPath &p)
+void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::LabelPath &p)
 {
   QPen          pen;
   QFont         font;
@@ -104,11 +104,11 @@ void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::Si
   qreal offset=0;
   while (offset<p.GetLength()){
     for (int i=0; i<string.size() && offset<p.GetLength(); i++) {
-      QPointF point=p.PointAtLength(offset);
+      osmscout::Vertex2D point=p.PointAtLength(offset);
 
       setupTransformation(painter, p, offset, fontHeight/4);
 
-      painter->drawText(point,QString(string[i]));
+      painter->drawText(point.GetX(), point.GetY(), QString(string[i]));
 
       offset+=metrics.width(string[i]);
     }
@@ -118,7 +118,7 @@ void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::Si
   painter->resetTransform();
 }
 
-void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::SimplifiedPath &p)
+void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::LabelPath &p)
 {
   QPen          pen;
   QFont         font;
@@ -161,13 +161,13 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::Si
           continue;
 
         //QPointF point=p.pointAtPercent(p.percentAtLength(glyphOffset));
-        QPointF point=p.PointAtLength(glyphOffset);
+        osmscout::Vertex2D point=p.PointAtLength(glyphOffset);
 
         // check if current glyph can be visible
         QRectF boundingRect=glypRun.rawFont().boundingRect(index);
         qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
-        if (!painter->viewport().intersects(QRect(QPoint(point.x()-diagonal, point.y()-diagonal),
-                                                  QPoint(point.x()+diagonal, point.y()+diagonal)))){
+        if (!painter->viewport().intersects(QRect(QPoint(point.GetX()-diagonal, point.GetY()-diagonal),
+                                                  QPoint(point.GetX()+diagonal, point.GetY()+diagonal)))){
           continue;
         }
         setupTransformation(painter, p, glyphOffset, fontHeight*-1);
@@ -183,7 +183,7 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::Si
         orphanGlyph.setStrikeOut(glypRun.strikeOut());
         orphanGlyph.setUnderline(glypRun.underline());
 
-        painter->drawGlyphRun(point, orphanGlyph);
+        painter->drawGlyphRun(QPointF(point.GetX(), point.GetY()), orphanGlyph);
       }
     }
 
@@ -192,14 +192,14 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::Si
   painter->resetTransform();
 }
 
-void DrawWindow::drawLine(QPainter *painter, const osmscout::SimplifiedPath &p)
+void DrawWindow::drawLine(QPainter *painter, const osmscout::LabelPath &p)
 {
   QPen pen;
   pen.setColor(QColor::fromRgbF(0,0,1));
   painter->setPen(pen);
   for (double d=0;d<p.GetLength();d+=0.5){
-    QPointF point=p.PointAtLength(d);
-    painter->drawPoint(point);
+    osmscout::Vertex2D point=p.PointAtLength(d);
+    painter->drawPoint(point.GetX(), point.GetY());
   }
 
   /*
@@ -224,7 +224,7 @@ void DrawWindow::paintEvent(QPaintEvent* /* event */)
 
   int sinStart=0;
   for (int k=0;k<sinCount;k++){
-    osmscout::SimplifiedPath p;
+    osmscout::LabelPath p;
     // fill path with sinus
     for (int x=startOffset;(x+startOffset)<width();x++){
       //int y=std::cos(((double)(x+sinStart)/(double)width()) *3*M_PI) * (height()/2-44) + height()/2;

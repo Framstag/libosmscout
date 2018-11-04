@@ -154,7 +154,7 @@ TileCacheVal TileCache::get(uint32_t zoomLevel, uint32_t x, uint32_t y)
     TileCacheKey key = {zoomLevel, x, y};
     if (!tiles.contains(key)){
         qWarning() << "No tile in cache for key {" << zoomLevel << ", " << x << ", " << y << "}";
-        return {QTime(), QPixmap()}; // throw std::underflow_error ?
+        return {QTime(), QPixmap(), epoch}; // throw std::underflow_error ?
     }
     TileCacheVal val = tiles.value(key);
     val.lastAccess.start();
@@ -162,21 +162,21 @@ TileCacheVal TileCache::get(uint32_t zoomLevel, uint32_t x, uint32_t y)
     return val;
 }
 
-void TileCache::removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y)
+bool TileCache::removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y)
 {
     TileCacheKey key = {zoomLevel, x, y};
-    requests.remove(key);    
+    return requests.remove(key) > 0;
     // qDebug() << "remove " << QString("z: %1, %2x%3").arg(key.zoomLevel).arg(key.xtile).arg(key.ytile);
 }
 
-void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image)
+void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, size_t epoch)
 {
     QPixmap pixmap = QPixmap::fromImage(image);
     removeRequest(zoomLevel, x, y);
     TileCacheKey key = {zoomLevel, x, y};
     QTime now;
     now.start();
-    TileCacheVal val = {now, pixmap};
+    TileCacheVal val = {now, pixmap, epoch};
     tiles.insert(key, val);
 
     cleanupCache();
@@ -191,6 +191,8 @@ void TileCache::cleanupCache()
          * 
          * first, we will iterate over all entries and remove up to 10% tiles 
          * older than `maximumLivetimeMs`, if no such entry found, remove oldest
+         *
+         * Goal is to remove more items at once and minimise frequency of this expensive cleaning
          */
         qDebug() << "Cleaning tile cache (" << cacheSize << ")";
         uint32_t removed = 0;

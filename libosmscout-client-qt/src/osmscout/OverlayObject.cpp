@@ -42,7 +42,8 @@ OverlayObject::OverlayObject(const std::vector<osmscout::Point> &nodes,
 {
 }
 
-OverlayObject::OverlayObject(const OverlayObject &other)
+OverlayObject::OverlayObject(const OverlayObject &other):
+  QObject(nullptr)
 {
   QMutexLocker locker(&lock);
   QMutexLocker locker2(&other.lock);

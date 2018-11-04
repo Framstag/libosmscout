@@ -205,6 +205,7 @@ public:
     SizeRole = Qt::UserRole+9,
     MapRole = Qt::UserRole+10,
   };
+  Q_ENUM(Roles)
 
   Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
   Q_INVOKABLE virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;

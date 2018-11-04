@@ -18,7 +18,7 @@
 */
 
 #include <osmscout/MapPainterQt.h>
-#include <osmscout/SimplifiedPath.h>
+#include <osmscout/LabelPath.h>
 
 #include <iostream>
 #include <limits>
@@ -26,6 +26,7 @@
 #include <QPainterPath>
 #include <QTextLayout>
 #include <QDebug>
+#include <QtSvg/QSvgRenderer>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -39,7 +40,8 @@ namespace osmscout {
   MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
   : MapPainter(styleConfig,
                new CoordBuffer()),
-    painter(nullptr)
+    painter(nullptr),
+    labelLayouter(this)
   {
     sin.resize(360*10);
 
@@ -81,6 +83,7 @@ namespace osmscout {
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& /*styleConfig*/,
+                             const Projection& projection,
                              const MapParameter& parameter,
                              IconStyle& style)
   {
@@ -88,29 +91,65 @@ namespace osmscout {
       return false;
     }
 
-    size_t idx=style.GetIconId()-1;
+    const auto &it=images.find(style.GetIconName());
 
-    if (idx<images.size() &&
-        !images[idx].isNull()) {
+    // there is possible that exists multiple IconStyle instances with same iconId (point and area icon with same icon name)
+    // setup dimensions for all of them
+    // std::cout << style.GetIconId() << ": " << style.GetIconName() << " @ " << &style << std::endl;
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
+        parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+
+      style.SetWidth(std::round(projection.ConvertWidthToPixel(parameter.GetIconSize())));
+      style.SetHeight(style.GetWidth());
+    }else{
+      style.SetWidth(std::round(parameter.GetIconPixelSize()));
+      style.SetHeight(style.GetWidth());
+    }
+
+    if (it!=images.end() &&
+        !it->second.isNull()) {
+
+      if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+        style.SetWidth(it->second.width());
+        style.SetHeight(it->second.height());
+      }
       return true;
     }
 
     std::list<std::string> erronousPaths;
 
     for (const auto& path : parameter.GetIconPaths()) {
-      std::string filename=AppendFileToDir(path,style.GetIconName()+".png");
-
       QImage image;
+      std::string filename;
+      bool success=false;
+      if (parameter.GetIconMode()==MapParameter::IconMode::Scalable){
+        filename=AppendFileToDir(path,style.GetIconName()+".svg");
 
-      if (image.load(filename.c_str())) {
-        if (idx>=images.size()) {
-          images.resize(idx+1);
+        // Load SVG
+        QSvgRenderer renderer(QString::fromStdString(filename));
+        if (renderer.isValid()) {
+          image = QImage(style.GetWidth(), style.GetHeight(), QImage::Format_ARGB32);
+          image.fill(Qt::transparent);
+
+          QPainter painter(&image);
+          renderer.render(&painter);
+          painter.end();
+          success = !image.isNull();
         }
+      }else{
+        filename=AppendFileToDir(path,style.GetIconName()+".png");
+        if (image.load(filename.c_str())) {
+          if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
+            style.SetWidth(image.width());
+            style.SetHeight(image.height());
+          }
+          success = true;
+        }
+      }
 
-        images[idx]=image;
-
+      if (success) {
+        images[style.GetIconName()] = image;
         //std::cout << "Loaded image '" << filename << "'" << std::endl;
-
         return true;
       }
 
@@ -128,7 +167,8 @@ namespace osmscout {
     return false;
   }
 
-  bool MapPainterQt::HasPattern(const MapParameter& parameter,
+  bool MapPainterQt::HasPattern(const Projection& projection,
+                                const MapParameter& parameter,
                                 const FillStyle& style)
   {
     assert(style.HasPattern());
@@ -148,11 +188,35 @@ namespace osmscout {
     std::list<std::string> erronousPaths;
 
     for (const auto& path : parameter.GetPatternPaths()) {
-      std::string filename=AppendFileToDir(path,style.GetPatternName()+".png");
-
+      bool success = false;
+      std::string filename;
       QImage image;
+      if (parameter.GetPatternMode()==MapParameter::PatternMode::Scalable){
+        filename=AppendFileToDir(path,style.GetPatternName()+".svg");
 
-      if (image.load(filename.c_str())) {
+        // Load SVG
+        QSvgRenderer renderer(QString::fromStdString(filename));
+        if (renderer.isValid()) {
+          int dimension = std::round(projection.ConvertWidthToPixel(parameter.GetPatternSize()));
+          image = QImage(dimension, dimension, QImage::Format_ARGB32);
+
+          // Qt svg don't support page background from Inkscape SVGs, use fill color as workaround for it
+          image.fill(QColor::fromRgbF(style.GetFillColor().GetR(),
+                                      style.GetFillColor().GetG(),
+                                      style.GetFillColor().GetB(),
+                                      style.GetFillColor().GetA()));
+
+          QPainter painter(&image);
+          renderer.render(&painter);
+          painter.end();
+          success = !image.isNull();
+        }
+      }else {
+        filename = AppendFileToDir(path, style.GetPatternName() + ".png");
+        success = image.load(filename.c_str());
+      }
+
+      if (success) {
         if (idx>=patternImages.size()) {
           patternImages.resize(idx+1);
         }
@@ -185,8 +249,8 @@ namespace osmscout {
   }
 
   double MapPainterQt::GetFontHeight(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   double fontSize)
+                                     const MapParameter& parameter,
+                                     double fontSize)
   {
     QFont        font(GetFont(projection,
                               parameter,
@@ -194,51 +258,6 @@ namespace osmscout {
     QFontMetrics metrics=QFontMetrics(font);
 
     return metrics.height();
-  }
-
-  MapPainter::TextDimension MapPainterQt::GetTextDimension(const Projection& projection,
-                                                           const MapParameter& parameter,
-                                                           double objectWidth,
-                                                           double fontSize,
-                                                           const std::string& text)
-  {
-    QFont         font(GetFont(projection,
-                               parameter,
-                               fontSize));
-    QFontMetrics  fontMetrics=QFontMetrics(font);
-    QString       string=QString::fromUtf8(text.c_str());
-    QTextLayout   textLayout(string,font);
-    qreal         leading=fontMetrics.leading() ;
-
-    qreal         proposedWidth=GetProposedLabelWidth(parameter,
-                                                      fontMetrics.averageCharWidth(),
-                                                      objectWidth,
-                                                      string.length());
-    TextDimension  dimension;
-
-    dimension.width=0;
-    dimension.height=0;
-
-    textLayout.beginLayout();
-    while (true) {
-      QTextLine line=textLayout.createLine();
-      if (!line.isValid())
-        break;
-
-      line.setLineWidth(proposedWidth);
-      dimension.height+=leading;
-      line.setPosition(QPointF(0.0,dimension.height));
-      dimension.width=std::max(dimension.width,(double)line.naturalTextWidth());
-      dimension.height+=line.height();
-    }
-    textLayout.endLayout();
-
-    QRectF boundingBox=textLayout.boundingRect();
-
-    dimension.xOff=boundingBox.x();
-    dimension.yOff=boundingBox.y();
-
-    return dimension;
   }
 
   void LayoutTextLayout(const QFontMetrics& fontMetrics,
@@ -280,24 +299,16 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::DrawLabel(const Projection& projection,
-                               const MapParameter& parameter,
-                               const LabelData& label)
+  void MapPainterQt::DrawLabel(const Projection& /*projection*/,
+                               const MapParameter& /*parameter*/,
+                               const DoubleRectangle& labelRect,
+                               const LabelData& label,
+                               const QTextLayout& textLayout)
   {
-    QRectF rect(label.bx1, label.by1, label.bx2-label.bx1, label.by2-label.by1);
+    QRectF rect(labelRect.x, labelRect.y, labelRect.width, labelRect.height);
     if (!QRectF(painter->viewport()).intersects(rect)){
       return;
     }
-
-    QFont        font(GetFont(projection,
-                              parameter,
-                              label.fontSize));
-    QString      string=QString::fromUtf8(label.text.c_str());
-    QFontMetrics fontMetrics=QFontMetrics(font);
-    QTextLayout  textLayout(string,font);
-    qreal        proposedWidth=std::ceil(label.bx2-label.bx1); // try to make word wrapping more stable
-
-    textLayout.setCacheEnabled(true);
 
     if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
       const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
@@ -306,70 +317,51 @@ namespace osmscout {
       double      b=style->GetTextColor().GetB();
 
       if (style->GetStyle()==TextStyle::normal) {
+
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
-        QRectF                          boundingBox;
         QList<QTextLayout::FormatRange> formatList;
         QTextLayout::FormatRange        range;
 
-        range.start=0;
-        range.length=string.length();
-        range.format.setForeground(QBrush(textColor));
-        formatList.append(range);
+        painter->setPen(textColor);
 
-        textLayout.setAdditionalFormats(formatList);
-
-        LayoutTextLayout(fontMetrics,
-                         proposedWidth,
-                         textLayout,
-                         boundingBox);
-
-        textLayout.draw(painter,QPointF(label.x+boundingBox.x(),
-                                        label.y+boundingBox.y()));
+        textLayout.draw(painter,rect.topLeft());
       }
       else if (style->GetStyle()==TextStyle::emphasize) {
-        QRectF                          boundingBox;
+
         QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
         QColor                          outlineColor=QColor::fromRgbF(1.0,1.0,1.0,label.alpha);
 
-        LayoutTextLayout(fontMetrics,
-                         proposedWidth,
-                         textLayout,
-                         boundingBox);
-
-        QPointF topLeft = rect.topLeft() + boundingBox.topLeft();
-
         /**
-         * Use text outline for emphasize is better (more accurate)
+         * Use text outline for emphasize is better
          * (QTextLayout::FormatRange::setTextOutline),
          * but it has terribly performance.
          * So we draw text multiple times with move,
          * it will create similar effect.
          */
         painter->setPen(outlineColor);
-
-        textLayout.draw(painter, topLeft-QPointF(1,0));
-        textLayout.draw(painter, topLeft+QPointF(1,0));
-        textLayout.draw(painter, topLeft-QPointF(0,1));
-        textLayout.draw(painter, topLeft+QPointF(0,1));
+        textLayout.draw(painter, rect.topLeft()-QPointF(1,0));
+        textLayout.draw(painter, rect.topLeft()+QPointF(1,0));
+        textLayout.draw(painter, rect.topLeft()-QPointF(0,1));
+        textLayout.draw(painter, rect.topLeft()+QPointF(0,1));
 
         painter->setPen(textColor);
-
-        textLayout.draw(painter, topLeft);
+        textLayout.draw(painter, rect.topLeft());
       }
     }
     else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+
+      QPointF marginMove(-5,-5);
+      QSizeF marginResize(10,10);
+
       const auto *style=dynamic_cast<const ShieldStyle*>(label.style.get());
       QColor     textColor=QColor::fromRgbF(style->GetTextColor().GetR(),
                                             style->GetTextColor().GetG(),
                                             style->GetTextColor().GetB(),
                                             style->GetTextColor().GetA());
-      QRectF             boundingBox;
 
       // Shield background
-      painter->fillRect(QRectF(label.bx1,
-                               label.by1,
-                               label.bx2-label.bx1+1,
-                               label.by2-label.by1+1),
+      painter->fillRect(QRectF(rect.topLeft() + marginMove,
+                               rect.size() + QSizeF(1,1) + marginResize),
                         QBrush(QColor::fromRgbF(style->GetBgColor().GetR(),
                                                 style->GetBgColor().GetG(),
                                                 style->GetBgColor().GetB(),
@@ -382,32 +374,87 @@ namespace osmscout {
                                        style->GetBorderColor().GetA()));
       painter->setBrush(Qt::NoBrush);
 
-      painter->drawRect(QRectF(label.bx1+2,
-                               label.by1+2,
-                               label.bx2-label.bx1+1-4,
-                               label.by2-label.by1+1-4));
+      painter->drawRect(QRectF(rect.topLeft() + QPointF(2,2) + marginMove,
+                               rect.size() + QSizeF(1-4,1-4) + marginResize));
 
-      QList<QTextLayout::FormatRange> formatList;
-      QTextLayout::FormatRange range;
-
-      range.start=0;
-      range.length=string.length();
-      range.format.setForeground(QBrush(textColor));
-      range.format.setTextOutline(Qt::NoPen);
-      formatList.clear();
-      formatList.append(range);
-
-      textLayout.setAdditionalFormats(formatList);
-
-      LayoutTextLayout(fontMetrics,
-                       proposedWidth,
-                       textLayout,
-                       boundingBox);
-
+      painter->setPen(QPen(textColor,1.0));
       textLayout.draw(painter,
-                      QPointF(label.x+boundingBox.x(),
-                              label.y+boundingBox.y()));
+                      rect.topLeft());
+    } else {
+      log.Warn() << "Label style not recognised: " << label.style.get();
     }
+  }
+
+  std::shared_ptr<QtLabel> MapPainterQt::Layout(const Projection& projection,
+                                                const MapParameter& parameter,
+                                                const std::string& text,
+                                                double fontSize,
+                                                double objectWidth,
+                                                bool enableWrapping,
+                                                bool /*contourLabel*/)
+  {
+    // TODO: cache labels
+    QFont font(GetFont(projection,
+                       parameter,
+                       fontSize));
+    qreal width=0;
+    qreal height=0;
+
+    painter->setFont(font);
+
+    QFontMetrics fontMetrics=QFontMetrics(font, painter->device());
+    qreal leading=fontMetrics.leading();
+
+    std::shared_ptr<QtLabel> label=std::make_shared<QtLabel>(
+        QString::fromUtf8(text.c_str()), font, painter->device());
+
+    label->label.setCacheEnabled(true);
+
+    double proposedWidth = -1;
+    if (enableWrapping) {
+      proposedWidth = GetProposedLabelWidth(parameter,
+                                            fontMetrics.averageCharWidth(),
+                                            objectWidth,
+                                            text.length());
+    }
+
+    // evaluate layout
+    label->label.beginLayout();
+    while (true) {
+      QTextLine line = label->label.createLine();
+      if (!line.isValid())
+        break;
+
+      if (proposedWidth > 0) {
+        line.setLineWidth(proposedWidth);
+      } else {
+        // it is necessary to setup some width to get usable dimension in QTextLine::naturalTextWidth()
+        line.setLineWidth(std::numeric_limits<qreal>::max());
+      }
+
+      if (leading > 0) {
+        height += leading;
+      }
+      line.setPosition(QPointF(0.0,height));
+      width=std::max(width,line.naturalTextWidth());
+      height+=line.height();
+    }
+    label->label.endLayout();
+
+    // Center all lines horizontally, after we know the actual width
+
+    for (int i=0; i<label->label.lineCount(); i++) {
+      QTextLine line = label->label.lineAt(i);
+
+      line.setPosition(QPointF((width-line.naturalTextWidth())/2,line.position().y()));
+    }
+
+    label->width=width;
+    label->height=height;
+    label->fontSize=fontSize;
+    label->text=text;
+
+    return label;
   }
 
   void MapPainterQt::SetupTransformation(QPainter* painter,
@@ -426,7 +473,7 @@ namespace osmscout {
     qreal newX=(cosa*center.x())-(sina*(center.y()-baseline));
     qreal newY=(cosa*(center.y()-baseline))+(sina*center.x());
 
-    // Aditional offseting
+    // Additional offseting
     qreal deltaPenX=cosa*penWidth;
     qreal deltaPenY=sina*penWidth;
 
@@ -440,142 +487,6 @@ namespace osmscout {
                    -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
     painter->setTransform(tran);
   }
-
-  void MapPainterQt::DrawContourLabel(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const PathTextStyle& style,
-                                      const std::string& text,
-                                      size_t transStart,
-                                      size_t transEnd,
-                                      ContourLabelHelper& helper)
-  {
-    double  fontSize=style.GetSize();
-    double  r=style.GetTextColor().GetR();
-    double  g=style.GetTextColor().GetG();
-    double  b=style.GetTextColor().GetB();
-    double  a=style.GetTextColor().GetA();
-
-    QPen    pen;
-    QFont   font(GetFont(projection,
-                         parameter,
-                         fontSize));
-    int     fontPixelSize=font.pixelSize();
-    QString string=QString::fromUtf8(text.c_str());
-
-    QTextLayout textLayout(string,font,painter->device());
-    // evaluate layout
-    textLayout.beginLayout();
-    while (textLayout.createLine().isValid()){};
-    textLayout.endLayout();
-
-    double textWidth=textLayout.boundingRect().width();
-
-    QList<QGlyphRun> glyphs=textLayout.glyphRuns();
-
-    pen.setColor(QColor::fromRgbF(r,g,b,a));
-    painter->setPen(pen);
-    painter->setFont(font);
-
-    // build path
-    SimplifiedPath p;
-
-    // Path has direction left => right
-    if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
-      for (size_t j=transStart; j<=transEnd; j++) {
-        p.AddPoint(coordBuffer->buffer[j].GetX(),
-                   coordBuffer->buffer[j].GetY());
-      }
-    }
-    // Path has direction right => left
-    else {
-      for (size_t j=0; j<=transEnd-transStart; j++) {
-        size_t idx=transEnd-j;
-        p.AddPoint(coordBuffer->buffer[idx].GetX(),
-                   coordBuffer->buffer[idx].GetY());
-      }
-    }
-
-    // Length of path in pixel
-    qreal pathLength=p.GetLength();
-
-    if (!helper.Init(pathLength,
-                     textWidth)) {
-      return;
-    }
-
-    QVector<quint32> indexes(1);
-    QVector<QPointF> positions(1);
-
-    // While we have not reached the end of the path...
-    while (helper.ContinueDrawing()) {
-      double offset=helper.GetCurrentOffset();
-      // skip string rendering when path is too much squiggly at this offset
-      if (!p.TestAngleVariance(offset,offset+textWidth,M_PI/4)){
-        // skip drawing current label and let offset point to the next instance
-        helper.AdvanceText();
-        helper.AdvanceSpace();
-        continue;
-      }
-
-      // direction of path at the label drawing starting point
-      qreal initialAngle=std::abs(p.AngleAtLengthDeg(offset));
-      bool upwards=initialAngle>90 && initialAngle<270;
-
-      // draw glyphs
-      for (const QGlyphRun& glypRun: glyphs) {
-        for (int idx=0; idx<glypRun.glyphIndexes().size(); idx++) {
-          auto index=glypRun.glyphIndexes().at(idx);
-          auto pos=glypRun.positions().at(idx);
-
-          indexes[0]=index;
-          positions[0]=QPointF(0,pos.y());
-
-          QRectF boundingRect=glypRun.rawFont().boundingRect(index);
-
-          qreal glyphOffset=upwards? (offset+textWidth-pos.x()) : offset+pos.x();
-
-          if (glyphOffset>pathLength)
-            continue;
-
-          QPointF point=p.PointAtLength(glyphOffset);
-          qreal diagonal=boundingRect.width()+boundingRect.height(); // it is little bit longer than correct sqrt(w^2+h^2)
-
-          // check if current glyph can be visible
-          if (!painter->viewport().intersects(QRect(QPoint(point.x()-diagonal, point.y()-diagonal),
-                                                    QPoint(point.x()+diagonal, point.y()+diagonal)))){
-            continue;
-          }
-
-          qreal angle=p.AngleAtLengthDeg(glyphOffset);
-          if (upwards) {
-            angle-=180;
-          }
-
-          SetupTransformation(painter,point,angle,fontPixelSize*-0.7);
-
-          QGlyphRun orphanGlyph;
-
-          orphanGlyph.setBoundingRect(boundingRect);
-          orphanGlyph.setFlags(glypRun.flags());
-          orphanGlyph.setGlyphIndexes(indexes);
-          orphanGlyph.setOverline(glypRun.overline());
-          orphanGlyph.setPositions(positions);
-          orphanGlyph.setRawFont(glypRun.rawFont());
-          orphanGlyph.setRightToLeft(glypRun.isRightToLeft());
-          orphanGlyph.setStrikeOut(glypRun.strikeOut());
-          orphanGlyph.setUnderline(glypRun.underline());
-
-          painter->drawGlyphRun(point, orphanGlyph);
-        }
-      }
-
-      helper.AdvanceText();
-      helper.AdvanceSpace();
-    }
-
-    painter->resetTransform();
-  }
-
 
   void MapPainterQt::FollowPathInit(FollowPathHandle &hnd,
                                     Vertex2D &origin,
@@ -711,16 +622,17 @@ namespace osmscout {
   }
 
   void MapPainterQt::DrawIcon(const IconStyle* style,
-                              double x, double y)
+                              double x, double y,
+                              double width, double height)
   {
-    size_t idx=style->GetIconId()-1;
+    const auto &it=images.find(style->GetIconName());
 
-    assert(idx<images.size());
-    assert(!images[idx].isNull());
+    assert(it!=images.end());
+    assert(!it->second.isNull());
 
-    painter->drawImage(QPointF(x-images[idx].width()/2,
-                               y-images[idx].height()/2),
-                       images[idx]);
+    painter->drawImage(QRectF(x-width/2, y-height/2, width, height),
+                       it->second,
+                       QRectF(0, 0, it->second.width(), it->second.height()));
   }
 
   void MapPainterQt::DrawSymbol(const Projection& projection,
@@ -860,12 +772,6 @@ namespace osmscout {
           radius=projection.GetMeterInPixel()*circle->GetRadius();
         }
 
-
-        /*
-        std::cout << "Circle: " << x << "," << y << " " << circle->GetCenter().x << "," << circle->GetCenter().y << " " << centerX << "," << centerY << " " << center.x() << "," << center.y() << std::endl;
-
-        radius=circle->GetRadius()*projection.GetMeterInPixel();*/
-
         if (fillStyle) {
           SetFill(projection,
                   parameter,
@@ -883,16 +789,6 @@ namespace osmscout {
         else {
           painter->setPen(Qt::NoPen);
         }
-
-        /*
-        QRadialGradient grad(center, radius);
-        grad.setColorAt(0, QColor::fromRgbF(fillStyle->GetFillColor().GetR(),
-                                            fillStyle->GetFillColor().GetG(),
-                                            fillStyle->GetFillColor().GetB(),
-                                            fillStyle->GetFillColor().GetA()));
-        grad.setColorAt(1, QColor(0, 0, 0, 0));
-        QBrush g_brush(grad); // Gradient QBrush
-        painter->setBrush(g_brush);*/
 
         QPainterPath path;
 
@@ -960,6 +856,7 @@ namespace osmscout {
     if (dash.empty() &&
         startCap==LineStyle::capRound &&
         endCap!=LineStyle::capRound) {
+      painter->setPen(QColor(Qt::transparent));
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),
@@ -973,6 +870,7 @@ namespace osmscout {
     if (dash.empty() &&
         endCap==LineStyle::capRound &&
         startCap!=LineStyle::capRound) {
+      painter->setPen(QColor(Qt::transparent));
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),
@@ -1064,13 +962,102 @@ namespace osmscout {
                                               1)));
   }
 
+  void MapPainterQt::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                   const Projection& /*projection*/,
+                                   const MapParameter& parameter,
+                                   const MapData& /*data*/)
+  {
+    labelLayouter.SetViewport(DoubleRectangle(0, 0, painter->window().width(), painter->window().height()));
+    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+  }
+
+  MapPainterQt::QtLabelLayouter& MapPainterQt::GetLayouter()
+  {
+    if (delegateLabelLayouter){
+      return *delegateLabelLayouter;
+    }
+    return labelLayouter;
+  }
+
+  void MapPainterQt::RegisterRegularLabel(const Projection &projection,
+                                          const MapParameter &parameter,
+                                          const std::vector<LabelData> &labels,
+                                          const Vertex2D &position,
+                                          double objectWidth)
+  {
+    GetLayouter().RegisterLabel(projection, parameter, position, labels, objectWidth);
+  }
+
+  void MapPainterQt::RegisterContourLabel(const Projection &projection,
+                                          const MapParameter &parameter,
+                                          const PathLabelData &label,
+                                          const LabelPath &labelPath)
+  {
+    GetLayouter().RegisterContourLabel(projection, parameter, label, labelPath);
+  }
+
+  void MapPainterQt::DrawLabels(const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& /*data*/)
+  {
+    if (delegateLabelLayouter){
+      return;
+    }
+
+    labelLayouter.Layout(projection, parameter);
+
+    labelLayouter.DrawLabels(projection,
+                             parameter,
+                             this);
+
+    labelLayouter.Reset();
+  }
+
+  DoubleRectangle MapPainterQt::GlyphBoundingBox(const QGlyphRun &glyph) const
+  {
+    auto bbox=glyph.boundingRect();
+    auto tl=bbox.topLeft();
+    return DoubleRectangle(tl.x(), tl.y(), bbox.width(), bbox.height());
+  }
+
+  void MapPainterQt::DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const
+  {
+    QTransform tran;
+    const QTransform originalTran=painter->transform();
+
+    tran.translate(glyph.position.GetX(), glyph.position.GetY());
+    tran.rotateRadians(glyph.angle);
+
+    painter->setTransform(tran);
+
+    painter->drawGlyphRun(QPointF(0,0), glyph.glyph);
+
+    painter->setTransform(originalTran);
+  }
+
+  void MapPainterQt::DrawGlyphs(const Projection &/*projection*/,
+                                const MapParameter &/*parameter*/,
+                                const osmscout::PathTextStyleRef style,
+                                const std::vector<Glyph<QGlyphRun>> &glyphs)
+  {
+    const Color &color = style->GetTextColor();
+    QPen pen;
+    pen.setColor(QColor::fromRgbF(color.GetR(),color.GetG(),color.GetB(),color.GetA()));
+    painter->setPen(pen);
+
+    for (const Glyph<QGlyphRun> &glyph:glyphs) {
+
+      DrawGlyph(painter, glyph);
+    }
+  }
+
   void MapPainterQt::SetFill(const Projection& projection,
                              const MapParameter& parameter,
                              const FillStyle& fillStyle)
   {
     if (fillStyle.HasPattern() &&
         projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
-        HasPattern(parameter,fillStyle)) {
+        HasPattern(projection, parameter, fillStyle)) {
       size_t idx=fillStyle.GetPatternId()-1;
 
       painter->setBrush(patterns[idx]);
@@ -1359,7 +1346,6 @@ namespace osmscout {
       DrawArea(projection,parameter,areaData);
 
 #if defined(DEBUG_GROUNDTILES)
-      size_t   labelId=nextLabelId++;
       GeoCoord cc=areaData.boundingBox.GetCenter();
 
       std::string label;
@@ -1367,7 +1353,7 @@ namespace osmscout {
       size_t x=(cc.GetLon()+180)/tile.cellWidth;
       size_t y=(cc.GetLat()+90)/tile.cellHeight;
 
-      label=NumberToString(tile.xRel)+","+NumberToString(tile.yRel);
+      label=std::to_string(tile.xRel)+","+std::to_string(tile.yRel);
 
       double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
       double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
@@ -1382,31 +1368,21 @@ namespace osmscout {
         continue;
       }
 
-      LabelLayoutData labelData;
+      LabelData labelBox;
 
-      labelData.fontSize=debugLabel->GetSize();
+      labelBox.priority=0;
+      labelBox.alpha=debugLabel->GetAlpha();;
+      labelBox.fontSize=debugLabel->GetSize();
+      labelBox.style=debugLabel;
+      labelBox.text=label;
 
-      GetTextDimension(projection,
-                       parameter,
-                       -1,
-                       labelData.fontSize,
-                       label,
-                       labelData.xOff,
-                       labelData.yOff,
-                       labelData.width,
-                       labelData.height);
-
-      labelData.alpha=debugLabel->GetAlpha();
-      labelData.position=0;
-      labelData.label=label;
-      labelData.textStyle=debugLabel;
-      labelData.icon=false;
-
-      RegisterPointLabel(projection,
-                         parameter,
-                         labelData,
-                         px,py,
-                         labelId);
+      std::vector<LabelData> vect;
+      vect.push_back(labelBox);
+      RegisterRegularLabel(projection,
+                           parameter,
+                           vect,
+                           Vertex2D(px,py),
+                           /*proposedWidth*/ -1);
 
       drawnLabels.insert(GeoCoord(x,y));
 #endif
@@ -1430,6 +1406,44 @@ namespace osmscout {
                 data);
   }
 
+  template<> std::vector<QtGlyph> QtLabel::ToGlyphs() const
+  {
+    std::vector<QtGlyph> result;
+    QVector<quint32> indexes(1);
+    QVector<QPointF> positions(1);
+
+    positions[0] = QPointF(0, 0);
+
+    QList<QGlyphRun> glyphs=label.glyphRuns();
+    for (const QGlyphRun &glyphRun: glyphs){
+      for (int g=0; g<glyphRun.glyphIndexes().size(); g++) {
+
+        qint32 index = glyphRun.glyphIndexes().at(g);
+        QPointF pos = glyphRun.positions().at(g);
+        QRectF bbox = glyphRun.rawFont().boundingRect(index);
+
+        indexes[0] = index;
+
+        QGlyphRun orphanGlyph;
+        orphanGlyph.setBoundingRect(bbox);
+        orphanGlyph.setFlags(glyphRun.flags());
+        orphanGlyph.setGlyphIndexes(indexes);
+        orphanGlyph.setOverline(glyphRun.overline());
+        orphanGlyph.setPositions(positions);
+        orphanGlyph.setRawFont(glyphRun.rawFont());
+        orphanGlyph.setRightToLeft(glyphRun.isRightToLeft());
+        orphanGlyph.setStrikeOut(glyphRun.strikeOut());
+        orphanGlyph.setUnderline(glyphRun.underline());
+
+        QtGlyph glyph;
+        glyph.glyph=std::move(orphanGlyph);
+        glyph.position.Set(pos.x(), pos.y());
+        result.push_back(std::move(glyph));
+      }
+    }
+    return result;
+  }
+
   MapPainterBatchQt::MapPainterBatchQt(size_t expectedCount):
     MapPainterBatch(expectedCount) {}
 
@@ -1439,17 +1453,64 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 QPainter* qPainter)
   {
+    assert(data.size() == painters.size());
+    if (painters.empty()){
+      return true;
+    }
     qPainter->setRenderHint(QPainter::Antialiasing);
     qPainter->setRenderHint(QPainter::TextAntialiasing);
 
-    // prepare map painters - lock and setup Qt painter
-    std::vector<std::unique_lock<std::mutex>> locks(data.size());
+    // prepare map painters:
+    // - acquire locks
+    // - setup QPainter instance
+    // - delegate all label layout operations to the last painter
+    std::vector<std::unique_lock<std::mutex>> locks;
+    locks.reserve(painters.size());
+    MapPainterQt* lastPainter = painters.back();
     for (MapPainterQt* painter: painters){
-      locks.push_back(std::move(std::unique_lock<std::mutex>(painter->mutex)));
+      locks.emplace_back(painter->mutex);
       painter->painter = qPainter;
+
+      if (painter != lastPainter){
+        painter->delegateLabelLayouter = &(lastPainter->labelLayouter);
+      }
     }
 
-    return batchPaintInternal(projection,parameter);
+    bool success=true;
+    for (size_t step=osmscout::RenderSteps::FirstStep;
+         step<=osmscout::RenderSteps::LastStep;
+         step++){
+
+      for (size_t i=0;i<data.size(); i++){
+        const MapData &d=*(data[i]);
+        MapPainterQt *painter = painters[i];
+
+        // copy missing icons to last painter cache
+        // because last painter do the real label and icon rendering
+        if (step==osmscout::RenderSteps::DrawLabels &&
+            painter->delegateLabelLayouter == &(lastPainter->labelLayouter) &&
+            painter!=lastPainter){
+
+          for (auto im=painter->images.begin(); im != painter->images.end(); im++){
+            if (lastPainter->images.find(im->first) == lastPainter->images.end()) {
+              lastPainter->images[im->first] = im->second;
+            }
+          }
+        }
+        success &= painter->Draw(projection,
+                                 parameter,
+                                 d,
+                                 (RenderSteps)step,
+                                 (RenderSteps)step);
+      }
+    }
+
+    // cleanup
+    for (MapPainterQt* painter: painters){
+      painter->painter = nullptr;
+      painter->delegateLabelLayouter = nullptr;
+    }
+    return success;
   }
 }
 

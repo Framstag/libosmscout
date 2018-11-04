@@ -207,6 +207,27 @@ WStringStringConversion = executable('WStringStringConversion',
              link_with: [osmscout],
              install: false)
 
+LabelPathTest = executable('LabelPathTest',
+           'src/LabelPathTest.cpp',
+           include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+           dependencies: [mathDep],
+           link_with: [osmscoutmap, osmscout],
+           install: false)
+
+Base64Test = executable('Base64Test',
+           'src/Base64.cpp',
+           include_directories: [testIncDir, osmscoutIncDir],
+           dependencies: [mathDep],
+           link_with: [osmscout],
+           install: false)
+
+CoordBufferTest = executable('CoordBufferTest',
+           'src/CoordBufferTest.cpp',
+           include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+           dependencies: [mathDep],
+           link_with: [osmscoutmap, osmscout],
+           install: false)
+
 ostandossEnv = environment()
 
 ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
@@ -230,6 +251,8 @@ test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)
 test('Check implementation of work queue', WorkQueue)
 test('Check WString<=>String conversion code', WStringStringConversion)
+test('Check LabelPath code', LabelPathTest)
+test('Check Base64 code', Base64Test)
 
 stylesheets = [
             'standard.oss',

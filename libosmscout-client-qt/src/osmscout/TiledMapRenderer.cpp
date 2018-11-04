@@ -152,9 +152,8 @@ void TiledMapRenderer::InvalidateVisualCache()
 {
   // invalidate tile cache and emit Redraw
   {
-      QMutexLocker locker(&tileCacheMutex);
-      offlineTileCache.invalidate();
-      offlineTileCache.clearPendingRequests();
+    QMutexLocker locker(&tileCacheMutex);
+    offlineTileCache.incEpoch();
   }
   emit Redraw();
 }
@@ -185,7 +184,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   onlineTileCache.clearPendingRequests();
   offlineTileCache.clearPendingRequests();
 
-  if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,mapDpi,unknownColor)){
+  if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,unknownColor)){
     return false;
   }
 
@@ -258,6 +257,8 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
         QMutexLocker locker(&tileCacheMutex);
         if (!offlineTileCache.startRequestProcess(zoomLevel, xtile, ytile)) // request was canceled or started already
             return;
+
+        loadEpoch = offlineTileCache.getEpoch();
     }
 
     DatabaseCoverage state = databaseCoverageOfTile(zoomLevel, xtile, ytile);
@@ -422,6 +423,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
 
+    drawParameter.SetIconMode(osmscout::MapParameter::IconMode::Scalable);
+    drawParameter.SetPatternMode(osmscout::MapParameter::PatternMode::Scalable);
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugData(false);
@@ -492,8 +495,13 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     {
         QMutexLocker locker(&tileCacheMutex);
+
+        if (loadEpoch != offlineTileCache.getEpoch()){
+          qWarning() << "Rendered from outdated data" << loadEpoch << "!=" << offlineTileCache.getEpoch();
+        }
+
         if (width == 1 && height == 1){
-            offlineTileCache.put(loadZ.Get(), loadXFrom, loadYFrom, canvas);
+            offlineTileCache.put(loadZ.Get(), loadXFrom, loadYFrom, canvas, loadEpoch);
         }else{
             for (uint32_t y = loadYFrom; y <= loadYTo; ++y){
                 for (uint32_t x = loadXFrom; x <= loadXTo; ++x){
@@ -504,7 +512,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
                             osmTileDimension, osmTileDimension
                             );
 
-                    offlineTileCache.put(loadZ.Get(), x, y, tile);
+                    offlineTileCache.put(loadZ.Get(), x, y, tile, loadEpoch);
                 }
             }
         }

@@ -563,6 +563,49 @@ public:
   }
 };
 
+class MetadataContext : public GpxParserContext {
+private:
+  GpxFile &output;
+public:
+  MetadataContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser) :
+  GpxParserContext(ctxt, parser), output(output) { }
+
+  ~MetadataContext() override
+  {
+  }
+
+  const char *ContextName() const override
+  {
+    return "Metadata";
+  }
+
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
+  {
+    if (name=="name") {
+      return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
+        output.name = Optional<std::string>::of(name);
+      });
+    } else if (name == "desc") {
+      return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
+        output.desc = Optional<std::string>::of(description);
+      });
+    } else if (name == "time") {
+      return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
+        Timestamp time;
+        if (ParseISO8601TimeString(value, time)){
+          output.time=Optional<Timestamp>::of(time);
+        }else{
+          xmlParserWarning(ctxt,"Can't parse Time value\n");
+          parser.Warning("Can't parse Time value");
+        }
+      });
+    }
+
+    return nullptr; // silently ignore unknown elements
+  }
+};
+
 class TrkSegContext : public GpxParserContext {
 private:
   Track &track;
@@ -715,6 +758,8 @@ public:
       }
     } else if (name=="rte"){
       return new RouteContext(ctxt,output,parser);
+    } else if (name=="metadata"){
+      return new MetadataContext(ctxt,output,parser);
     }
     return nullptr; // silently ignore unknown elements
   }

@@ -21,7 +21,7 @@
 */
 
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(_WIN64)
   #define _USE_MATH_DEFINES
 #endif
 
@@ -29,6 +29,10 @@
 
 #if !defined(M_PI)
   #define M_PI 3.14159265358979323846
+#endif
+
+#if !defined(M_PI_4) // pi / 4
+  #define M_PI_4 0.785398163397448309616
 #endif
 
 #if !defined(M_E)

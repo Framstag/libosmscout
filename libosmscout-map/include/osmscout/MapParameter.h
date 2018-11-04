@@ -39,6 +39,21 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API MapParameter CLASS_FINAL
   {
+  public:
+    enum class IconMode
+    {
+      FixedSizePixmap,  // !< raster icons should be used, iconPixelSize will be used for rendering
+      ScaledPixmap,     // !< raster icons should be used, icons will be scaled to iconSize
+      OriginalPixmap,   // !< raster icons should be used, icons will keep dimensions of original image
+      Scalable          // !< vector icons should be used, icons will be scaled to iconSize
+    };
+
+    enum class PatternMode
+    {
+      OriginalPixmap,   // !< raster pattern should be used, it will keep dimensions of original image
+      Scalable          // !< vector pattern should be used, it will be scaled to patternSize
+    };
+
   private:
     std::string                         fontName;                  //!< Name of the font to use
     double                              fontSize;                  //!< Metric size of base font (aka font size 100%) in millimeter
@@ -55,21 +70,31 @@ namespace osmscout {
     bool                                drawFadings;               //!< Draw label fadings (default: true)
     bool                                drawWaysWithFixedWidth;    //!< Draw ways using the size of the style sheet, if if the way has a width explicitly given
 
-    // Node and area labels
+    // Node and area labels, icons
     size_t                              labelLineMinCharCount;     //!< Labels will be _never_ word wrapped if they are shorter then the given characters
     size_t                              labelLineMaxCharCount;     //!< Labels will be word wrapped if they are longer then the given characters
     bool                                labelLineFitToArea;        //!< Labels will be word wrapped to fit object area
     double                              labelLineFitToWidth;       //!< Labels will be word wrapped to fit given width in pixels
 
-    double                              labelSpace;                //!< Space between point labels in mm (default 3).
-    double                              plateLabelSpace;           //!< Space between plates in mm (default 5).
-    double                              sameLabelSpace;            //!< Space between labels with the same value in mm (default 40)
+    double                              labelPadding;              //!< Space around point labels in mm (default 1).
+    double                              plateLabelPadding;         //!< Space around plates in mm (default 5).
+    double                              overlayLabelPadding;       //!< Space around overlay labels in mm (default 6).
+
+    IconMode                            iconMode;                  //!< Mode of icons, it controls what type of files would be loaded and how icon dimensions will be calculated
+    double                              iconSize;                  //!< Size of icons in mm (default 3.7)
+    double                              iconPixelSize;             //!< Size of icons in px (default 14)
+    double                              iconPadding;               //!< Space around icons and symbols in mm (default 1).
+
+    PatternMode                         patternMode;               //!< Mode of pattern, it controls what type of files would be loaded and how pattern geometry will be canculated
+    double                              patternSize;               //!< Size of pattern image in mm (default 3.7)
+
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
   private:
 // Contour labels
     double                              contourLabelOffset;        //!< Offset in mm for beginning and end of an contour label in relation to contour begin and end
     double                              contourLabelSpace;         //!< Space in mm between repetitive labels on the same contour
+    double                              contourLabelPadding;       //!< Space around contour labels in mm (default 1).
 
     bool                                renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                                renderSeaLand;             //!< Rendering of sea/land tiles
@@ -111,9 +136,20 @@ namespace osmscout {
     void SetLabelLineFitToArea(bool labelLineFitToArea);
     void SetLabelLineFitToWidth(double labelLineFitToWidth);
 
-    void SetLabelSpace(double labelSpace);
-    void SetPlateLabelSpace(double plateLabelSpace);
-    void SetSameLabelSpace(double sameLabelSpace);
+    void SetLabelPadding(double labelPadding);
+    void SetPlateLabelPadding(double plateLabelPadding);
+    void SetOverlayLabelPadding(double padding);
+
+    void SetIconMode(const IconMode &mode);
+    void SetIconSize(double size);
+    void SetIconPixelSize(double size);
+    void SetIconPadding(double padding);
+
+    void SetPatternMode(const PatternMode &mode);
+    void SetPatternSize(double size);
+
+    void SetContourLabelPadding(double padding);
+
     void SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels);
 
     void SetContourLabelOffset(double contourLabelOffset);
@@ -214,19 +250,54 @@ namespace osmscout {
       return labelLineFitToWidth;
     }
 
-    inline double GetLabelSpace() const
+    inline double GetLabelPadding() const
     {
-      return labelSpace;
+      return labelPadding;
     }
 
-    inline double GetPlateLabelSpace() const
+    inline double GetPlateLabelPadding() const
     {
-      return plateLabelSpace;
+      return plateLabelPadding;
     }
 
-    inline double GetSameLabelSpace() const
+    inline double GetOverlayLabelPadding() const
     {
-      return sameLabelSpace;
+      return overlayLabelPadding;
+    }
+
+    inline IconMode GetIconMode() const
+    {
+      return iconMode;
+    }
+
+    inline double GetIconSize() const
+    {
+      return iconSize;
+    }
+
+    inline double GetIconPixelSize() const
+    {
+      return iconPixelSize;
+    }
+
+    inline double GetIconPadding() const
+    {
+      return iconPadding;
+    }
+
+    inline PatternMode GetPatternMode() const
+    {
+      return patternMode;
+    }
+
+    inline double GetPatternSize() const
+    {
+      return patternSize;
+    }
+
+    inline double GetContourLabelPadding() const
+    {
+      return contourLabelPadding;
     }
 
     inline bool GetDropNotVisiblePointLabels() const

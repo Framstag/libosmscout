@@ -7,13 +7,11 @@ endif()
 
 set(HEADER_FILES
 	include/osmscout/MapQtImportExport.h
-    include/osmscout/SimplifiedPath.h
     include/osmscout/MapPainterQt.h
 )
 
 set(SOURCE_FILES
     src/osmscout/MapPainterQt.cpp
-    src/osmscout/SimplifiedPath.cpp
 )
 
 if(IOS)
@@ -54,7 +52,8 @@ endif()
 target_link_libraries(OSMScoutMapQt
 		OSMScout
 		OSMScoutMap
-		Qt5::Gui)
+		Qt5::Gui
+		Qt5::Svg)
 
 target_compile_definitions(OSMScoutMapQt PRIVATE -DOSMSCOUT_MAP_QT_EXPORT_SYMBOLS)
 

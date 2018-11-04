@@ -215,7 +215,6 @@ IF %COMPILER%==msvc2015 (
     echo Installing qt5-serialport...
     rem .\vcpkg install qt5-serialport:x64-windows
     echo ...done
-
     echo Installing qt5-svg...
     rem .\vcpkg install qt5-svg:x64-windows
     echo ...done
@@ -259,7 +258,7 @@ IF %COMPILER%==msvc2015 (
     echo ...done
 
     echo System-wide integrating vcpkg...
-    rem .\vcpkg integrate install
+    .\vcpkg integrate install
     echo ...done
 
     cd %APPVEYOR_BUILD_FOLDER%

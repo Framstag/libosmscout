@@ -29,7 +29,13 @@
 
 #include <osmscout/MapPainter.h>
 
+#include <QtGui/QTextLayout>
+
 namespace osmscout {
+
+  using QtGlyph = Glyph<QGlyphRun>;
+  using QtLabel = Label<QGlyphRun, QTextLayout>;
+  using QtLabelInstance = LabelInstance<QGlyphRun, QTextLayout>;
 
   class MapPainterBatchQt;
 
@@ -39,6 +45,9 @@ namespace osmscout {
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
     friend class MapPainterBatchQt;
+
+    using QtLabelLayouter = LabelLayouter<QGlyphRun, QTextLayout, MapPainterQt>;
+    friend QtLabelLayouter;
 
   private:
     struct FollowPathHandle
@@ -70,15 +79,25 @@ namespace osmscout {
     };
 
   private:
-    QPainter                   *painter;
+    QPainter                   *painter{nullptr}; //! non-owning pointer to Qt painter
 
-    std::vector<QImage>        images;        //! vector of QImage for icons
-    std::vector<QImage>        patternImages; //! vector of QImage for fill patterns
-    std::vector<QBrush>        patterns;      //! vector of QBrush for fill patterns
-    QMap<FontDescriptor,QFont> fonts;         //! Cached fonts
-    std::vector<double>        sin;           //! Lookup table for sin calculation
+    QtLabelLayouter            labelLayouter;
 
-    std::mutex                 mutex;         //! Mutex for locking concurrent calls
+    /**
+     * non-owning pointer to layouter
+     * when it is not null, all labels are registered to it
+     * and DrawLabels method is no-op
+     */
+    QtLabelLayouter            *delegateLabelLayouter{nullptr};
+
+    std::map<std::string,QImage> images;        //! map of QImage for icons, key is name of the icon
+                                                //! - it should be independent on the specific style configuration
+    std::vector<QImage>          patternImages; //! vector of QImage for fill patterns, index is patter id
+    std::vector<QBrush>          patterns;      //! vector of QBrush for fill patterns
+    QMap<FontDescriptor,QFont>   fonts;         //! Cached fonts
+    std::vector<double>          sin;           //! Lookup table for sin calculation
+
+    std::mutex                   mutex;         //! Mutex for locking concurrent calls
 
   private:
     QFont GetFont(const Projection& projection,
@@ -102,23 +121,38 @@ namespace osmscout {
                              const qreal angle,
                              const qreal baseline) const;
 
+    osmscout::DoubleRectangle GlyphBoundingBox(const QGlyphRun &glyph) const;
+
+    void DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const;
+
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef style,
+                    const std::vector<osmscout::Glyph<QGlyphRun>> &glyphs);
+
+    std::shared_ptr<QtLabel> Layout(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const std::string& text,
+                                    double fontSize,
+                                    double objectWidth,
+                                    bool enableWrapping = false,
+                                    bool contourLabel = false);
+
+    QtLabelLayouter& GetLayouter();
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
+                 const Projection& projection,
                  const MapParameter& parameter,
                  IconStyle& style) override;
 
-    bool HasPattern(const MapParameter& parameter,
+    bool HasPattern(const Projection& projection,
+                    const MapParameter& parameter,
                     const FillStyle& style);
 
     double GetFontHeight(const Projection& projection,
                        const MapParameter& parameter,
                        double fontSize) override;
-
-    TextDimension GetTextDimension(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   double objectWidth,
-                                   double fontSize,
-                                   const std::string& text) override;
 
     void DrawGround(const Projection& projection,
                     const MapParameter& parameter,
@@ -126,10 +160,40 @@ namespace osmscout {
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const LabelData& label) override;
+                   const DoubleRectangle& labelRectangle,
+                   const LabelData& label,
+                   const QTextLayout& textLayout);
+
+    virtual void BeforeDrawing(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                               const MapData& data) override;
+
+    /**
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
+     */
+    virtual void RegisterRegularLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const std::vector<LabelData> &labels,
+                                      const Vertex2D &position,
+                                      double objectWidth) override;
+
+    /**
+     * Register contour label
+     */
+    virtual void RegisterContourLabel(const Projection &projection,
+                                      const MapParameter &parameter,
+                                      const PathLabelData &label,
+                                      const LabelPath &labelPath) override;
+
+    virtual void DrawLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data) override;
 
     void DrawIcon(const IconStyle* style,
-                  double x, double y) override;
+                  double centerX, double centerY,
+                  double width, double height) override;
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
@@ -144,13 +208,6 @@ namespace osmscout {
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd) override;
-
-    void DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd,
-                          ContourLabelHelper& helper) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

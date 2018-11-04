@@ -29,7 +29,7 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
 
-  src/DrawMapOSX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 1024 800 7.46525 51.51241 70000 test.png
+  src/DrawMapOSX ../maps/nordrhein-westfalen ../images ../stylesheets/standard.oss 1024 800 7.46525 51.51241 70000 test.png
  */
 
 static const double DPI=96.0;
@@ -37,45 +37,47 @@ static const double DPI=96.0;
 int main(int argc, char* argv[])
 {
   std::string   map;
+  std::string   images;
   std::string   style;
   std::string   output;
   size_t        width,height;
   double        lon,lat,zoom;
 
-  if (argc!=9) {
-    std::cerr << "DrawMap <map directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
+  if (argc!=10) {
+    std::cerr << "DrawMap <map directory> <images directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
     return 1;
   }
 
   map=argv[1];
-  style=argv[2];
+  images=argv[2];
+  style=argv[3];
 
-  if (!osmscout::StringToNumber(argv[3],width)) {
+  if (!osmscout::StringToNumber(argv[4],width)) {
     std::cerr << "width is not numeric!" << std::endl;
     return 1;
   }
 
-  if (!osmscout::StringToNumber(argv[4],height)) {
+  if (!osmscout::StringToNumber(argv[5],height)) {
     std::cerr << "height is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[5],"%lf",&lon)!=1) {
+  if (sscanf(argv[6],"%lf",&lon)!=1) {
     std::cerr << "lon is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[6],"%lf",&lat)!=1) {
+  if (sscanf(argv[7],"%lf",&lat)!=1) {
     std::cerr << "lat is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[7],"%lf",&zoom)!=1) {
+  if (sscanf(argv[8],"%lf",&zoom)!=1) {
     std::cerr << "zoom is not numeric!" << std::endl;
     return 1;
   }
 
-  output=argv[8];
+  output=argv[9];
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
@@ -110,11 +112,16 @@ int main(int argc, char* argv[])
         osmscout::MapData             data;
         osmscout::MapPainterIOS       painter(styleConfig);
         
+        drawParameter.SetFontName("GillSans");
         drawParameter.SetFontSize(3.0);
         drawParameter.SetLabelLineMinCharCount(15);
         drawParameter.SetLabelLineMaxCharCount(30);
         drawParameter.SetLabelLineFitToArea(true);
         drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight()));
+        
+        std::list<std::string> paths = {images, map};
+        drawParameter.SetIconPaths(paths);
+        drawParameter.SetPatternPaths(paths);
         
         projection.Set(osmscout::GeoCoord(lat,lon),
                        osmscout::Magnification(zoom),
