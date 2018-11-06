@@ -147,36 +147,36 @@ IF %COMPILER%==msvc2015 (
 
     rem transitive
     echo Installing qt5-graphicaleffects...
-    rem .\vcpkg install qt5-graphicaleffects:x64-windows
+    .\vcpkg install qt5-graphicaleffects:x64-windows
     echo ...done
 
     echo Installing qt5-declarative...
-    rem .\vcpkg install qt5-declarative:x64-windows
+    .\vcpkg install qt5-declarative:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-quickcontrols...
-    rem .\vcpkg install qt5-quickcontrols:x64-windows
+    .\vcpkg install qt5-quickcontrols:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-speech...
-    rem .\vcpkg install qt5-speech:x64-windows
+    .\vcpkg install qt5-speech:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-charts...
-    rem .\vcpkg install qt5-charts:x64-windows
+    .\vcpkg install qt5-charts:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-datavis3d...
-    rem .\vcpkg install qt5-datavis3d:x64-windows
+    .\vcpkg install qt5-datavis3d:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-multimedia...
-    rem .\vcpkg install qt5-multimedia:x64-windows
+    .\vcpkg install qt5-multimedia:x64-windows
     echo ...done
 
     rem transitive
