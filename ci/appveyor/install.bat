@@ -229,7 +229,7 @@ IF %COMPILER%==msvc2015 (
     echo ...done
 
     echo Installing qt5...
-    rem .\vcpkg install qt5:x64-windows
+    .\vcpkg install qt5:x64-windows
     echo ...done
 
     echo Installing qt5-tools...
