@@ -181,55 +181,55 @@ IF %COMPILER%==msvc2015 (
 
     rem transitive
     echo Installing qt5-3d...
-    rem .\vcpkg install qt5-3d:x64-windows
+    .\vcpkg install qt5-3d:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-gamepad...
-    rem .\vcpkg install qt5-gamepad:x64-windows
+    .\vcpkg install qt5-gamepad:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-imageformats...
-    rem .\vcpkg install qt5-imageformats:x64-windows
+    .\vcpkg install qt5-imageformats:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-networkauth...
-    rem .\vcpkg install qt5-networkauth:x64-windows
+    .\vcpkg install qt5-networkauth:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-quickcontrols2...
-    rem .\vcpkg install qt5-quickcontrols2:x64-windows
+    .\vcpkg install qt5-quickcontrols2:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-scxml...
-    rem .\vcpkg install qt5-scxml:x64-windows
+    .\vcpkg install qt5-scxml:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-serialport...
-    rem .\vcpkg install qt5-serialport:x64-windows
+    .\vcpkg install qt5-serialport:x64-windows
     echo ...done
 
     echo Installing qt5-svg...
-    rem .\vcpkg install qt5-svg:x64-windows
+    .\vcpkg install qt5-svg:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-virtualkeyboard...
-    rem .\vcpkg install qt5-virtualkeyboard:x64-windows
+    .\vcpkg install qt5-virtualkeyboard:x64-windows
     echo ...done
 
     rem transitive
     echo Installing qt5-websockets...
-    rem .\vcpkg install qt5-websockets:x64-windows
+    .\vcpkg install qt5-websockets:x64-windows
     echo ...done
 
     echo Installing qt5...
-    rem .\vcpkg install qt5:x64-windows
+    .\vcpkg install qt5:x64-windows
     echo ...done
 
     echo Installing qt5-tools...
