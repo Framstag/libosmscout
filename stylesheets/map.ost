@@ -24,7 +24,7 @@ OST
       * Access
       * MaxSpeed
     OPTIMIZE_LOW_ZOOM:
-      Optimize this area or way for idplaying in low zoom by
+      Optimize this area or way for displaying in low zoom by
       reducing visible complexity
     PIN_WAY:
       This is a way, even if the path is closed
