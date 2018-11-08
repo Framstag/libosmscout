@@ -233,27 +233,27 @@ IF %COMPILER%==msvc2015 (
     echo ...done
 
     echo Installing qt5-tools...
-    rem .\vcpkg install qt5-tools:x64-windows
+    .\vcpkg install qt5-tools:x64-windows
     echo ...done
 
     echo Installing OpenGL...
-    rem .\vcpkg install opengl:x64-windows
+    .\vcpkg install opengl:x64-windows
     echo ...done
 
     echo Installing freeglut...
-    rem .\vcpkg install freeglut:x64-windows
+    .\vcpkg install freeglut:x64-windows
     echo ...done
 
     echo Installing glm...
-    rem .\vcpkg install glm:x64-windows
+    .\vcpkg install glm:x64-windows
     echo ...done
 
     echo Installing glew...
-    rem .\vcpkg install glew:x64-windows
+    .\vcpkg install glew:x64-windows
     echo ...done
 
     echo Installing glfw3...
-    rem .\vcpkg install glfw3:x64-windows
+    .\vcpkg install glfw3:x64-windows
     echo ...done
 
     echo System-wide integrating vcpkg...
