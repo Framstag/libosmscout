@@ -4,7 +4,8 @@ ORDER WAYS
   GROUP _route
   GROUP railway_rail, railway_tram, railway_light_rail, 
       railway_narrow_gauge, railway_preserved, 
-      railway_funicular
+      railway_funicular,
+      aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
   GROUP aeroway_runway, aeroway_taxiway
   GROUP route_ferry
   GROUP waterway_river, waterway_canal
