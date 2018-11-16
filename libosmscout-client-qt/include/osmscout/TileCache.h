@@ -59,6 +59,7 @@ struct TileCacheVal
 {
   QTime lastAccess;
   QPixmap image;
+  size_t epoch;
 };
 
 /**
@@ -118,17 +119,36 @@ public:
    * @return 
    */
   bool invalidate(osmscout::GeoBox box = osmscout::GeoBox());
-  
-  void removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y);
-  void put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image);
+
+  /**
+   * Remove pending request
+   *
+   * @param zoomLevel
+   * @param x
+   * @param y
+   * @return true if there was such request
+   */
+  bool removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y);
+  void put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, size_t epoch = 0);
   
   void cleanupCache();
+
+  inline size_t getEpoch() const
+  {
+    return epoch;
+  }
+
+  inline void incEpoch()
+  {
+    epoch ++;
+  }
   
 private:
   QHash<TileCacheKey, TileCacheVal> tiles;
   QHash<TileCacheKey, RequestState> requests;
   size_t                            cacheSize; // maximum count of elements in cache
   uint32_t                          maximumLivetimeMs;
+  size_t                            epoch{0};
 };
 
 }

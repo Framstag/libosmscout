@@ -85,6 +85,8 @@ namespace osmscout {
     TypeConfigRef                   typeConfig;
     std::mutex                      mutex;         //! Mutex for locking concurrent calls
 
+    std::vector<std::string>        images;
+
   private:
     std::string GetColorValue(const Color& color);
 
@@ -129,6 +131,9 @@ namespace osmscout {
     void FinishMainGroup();
 
     std::string StrEscape(const std::string &str) const;
+
+    void IconData(const Projection& projection,
+                  const MapParameter& parameter);
 
   protected:
     void AfterPreprocessing(const StyleConfig& styleConfig,

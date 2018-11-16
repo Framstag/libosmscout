@@ -79,6 +79,7 @@ public:
         AddressLocationRole = Qt::UserRole+11,
         AddressNumberRole = Qt::UserRole+12
     };
+    Q_ENUM(Roles)
 
 public:
     LocationInfoModel();

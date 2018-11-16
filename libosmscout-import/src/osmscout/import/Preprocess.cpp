@@ -335,7 +335,7 @@ namespace osmscout {
 
         parameter.GetErrorReporter()->ReportWay(data.id,
                                                 data.tags,
-                                                "Should be way but is area");
+                                                "Should be way but is area (" + wayType->GetName() + ")");
       }
 
       if (areaType==typeConfig->typeInfoIgnore ||
@@ -361,7 +361,7 @@ namespace osmscout {
           areaType!=typeConfig->typeInfoIgnore) {
         parameter.GetErrorReporter()->ReportWay(data.id,
                                                 data.tags,
-                                                "Should be area but is way");
+                                                "Should be area but is way (" + areaType->GetName() + ")");
       }
 
       if (wayType==typeConfig->typeInfoIgnore ||

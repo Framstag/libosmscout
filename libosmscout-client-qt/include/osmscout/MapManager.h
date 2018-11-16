@@ -135,6 +135,7 @@ public:
 class OSMSCOUT_CLIENT_QT_API MapDirectory
 {
 public:
+  MapDirectory() = default;
   explicit MapDirectory(QDir dir);
   ~MapDirectory() = default;
 
@@ -199,6 +200,14 @@ public:
   inline QDateTime getCreation() const
   {
     return creation;
+  }
+
+  inline bool operator<(const MapDirectory &o) const
+  {
+    if (getName() == o.getName()){
+      return getDir().absolutePath() < o.getDir().absolutePath();
+    }
+    return getName() < o.getName();
   }
 
 private:

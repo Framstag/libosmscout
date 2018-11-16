@@ -40,6 +40,7 @@ ORDER WAYS
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
+  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
   GROUP highway_primary
   GROUP highway_secondary
   GROUP highway_tertiary
@@ -49,8 +50,7 @@ ORDER WAYS
         aeroway_runway, aeroway_taxiway
   GROUP highway_living_street, highway_service, highway_bus_guideway,
         railway_tram, railway_light_rail, railway_subway, public_transport_platform,
-        railway_narrow_gauge, railway_preserved,
-        aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
+        railway_narrow_gauge, railway_preserved
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
         highway_footway, highway_bridleway, highway_construction,
         leisure_track
@@ -1870,13 +1870,17 @@ STYLE
  // Places
  //
 
- [MAG world-city] {
-   [TYPE place_continent] NODE.TEXT {label: IName; style: emphasize; priority: @labelPrioContinent; }
+ [MAG world-continent] {
+   [TYPE place_continent] NODE.TEXT {label: IName; style: emphasize; size: 1.6; color: #00000080; priority: @labelPrioContinent; }
  }
+ [MAG 2-] { [TYPE place_continent] NODE.TEXT { size: 4; color: #00000060; }}
+ [MAG continent-] { [TYPE place_continent] NODE.TEXT { size: 6; color: #00000040; }}
 
- [MAG stateOver-city] {
-   [TYPE place_country] NODE.TEXT {label: IName; style: emphasize; priority: @labelPrioCounty; }
+ [MAG continent-stateOver] {
+   [TYPE place_country] NODE.TEXT {label: IName; style: emphasize; size: 2.2; priority: @labelPrioCounty; }
  }
+ [MAG state-] { [TYPE place_country] NODE.TEXT { size: 3; color: #00000080; }}
+ [MAG stateOver-] { [TYPE place_country] NODE.TEXT { size: 4; color: #00000060; }}
 
  [MAG state-county] {
    [TYPE place_state] NODE.TEXT {label: IName; style: emphasize; size: 1.7; scaleMag: state; priority: @labelPrioState; }

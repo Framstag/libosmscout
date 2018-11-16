@@ -222,3 +222,17 @@ else()
   message("Skip LabelPathTest, libosmscout-map is missing.")
 endif()
 
+#---- Base64
+add_executable(Base64 src/Base64.cpp)
+set_property(TARGET Base64 PROPERTY CXX_STANDARD 11)
+target_link_libraries(Base64 OSMScout)
+target_include_directories(Base64 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_test(NAME Base64 COMMAND Base64)
+
+#---- CoordBufferTest
+add_executable(CoordBufferTest src/CoordBufferTest.cpp)
+set_property(TARGET CoordBufferTest PROPERTY CXX_STANDARD 11)
+target_link_libraries(CoordBufferTest OSMScout OSMScoutMap)
+target_include_directories(CoordBufferTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_test(NAME CoordBufferTest COMMAND CoordBufferTest)
+

@@ -129,8 +129,9 @@ void TiledMapOverlay::paint(QPainter *painter)
   request.magnification = view->magnification;
   request.width = boundingBox.width();
   request.height = boundingBox.height();
+  request.dpi = view->mapDpi;
 
-  TiledRenderingHelper::RenderTiles(*painter,request,layerCaches,view->mapDpi,transparentColor, /*overlap*/ 0);
+  TiledRenderingHelper::RenderTiles(*painter,request,layerCaches,transparentColor, /*overlap*/ 0);
 }
 
 void TiledMapOverlay::download(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile) {

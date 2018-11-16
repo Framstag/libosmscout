@@ -27,6 +27,8 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 #include <osmscout/util/String.h>
+#include <osmscout/util/File.h>
+#include <osmscout/util/Base64.h>
 
 // #define DEBUG_LABEL_LAYOUTER
 
@@ -420,6 +422,7 @@ namespace osmscout {
     stream << "<svg" << std::endl;
     stream << "  xmlns:svg=\"http://www.w3.org/2000/svg\"" << std::endl;
     stream << "  xmlns=\"http://www.w3.org/2000/svg\"" << std::endl;
+    stream << "  xmlns:xlink=\"http://www.w3.org/1999/xlink\"" << std::endl;
     stream << "  width=\"" << width << "\"" << std::endl;
     stream << "  height=\"" << height << "\"" << std::endl;
     stream << "  id=\"map\"" << std::endl;
@@ -572,11 +575,59 @@ namespace osmscout {
   }
 
   bool MapPainterSVG::HasIcon(const StyleConfig& /*styleConfig*/,
-                              const Projection& /*projection*/,
-                              const MapParameter& /*parameter*/,
-                              IconStyle& /*style*/)
+                              const Projection& projection,
+                              const MapParameter& parameter,
+                              IconStyle& style)
   {
-    // Not implemented
+    if (style.GetIconId()==0) {
+      return false;
+    }
+
+    size_t idx=style.GetIconId()-1;
+
+    // there is possible that exists multiple IconStyle instances with same iconId (point and area icon with same icon name)
+    // setup dimensions for all of them
+    double dimension;
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable) {
+      dimension = projection.ConvertWidthToPixel(parameter.GetIconSize());
+    } else if( parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+      dimension = std::round(projection.ConvertWidthToPixel(parameter.GetIconSize()));
+    }else{
+      dimension = std::round(parameter.GetIconPixelSize());
+    }
+
+    style.SetWidth(dimension);
+    style.SetHeight(dimension);
+
+    if (idx<images.size() &&
+        !images[idx].empty()) {
+      return true;
+    }
+
+    for (const auto& path : parameter.GetIconPaths()) {
+      std::string filename;
+      std::string mime;
+      if (parameter.GetIconMode()==MapParameter::IconMode::Scalable) {
+        filename = AppendFileToDir(path, style.GetIconName() + ".svg");
+        mime = "image/svg+xml";
+      } else {
+        filename = AppendFileToDir(path, style.GetIconName() + ".png");
+        mime = "image/png";
+      }
+      std::vector<char> content;
+      if (ReadFile(filename, content)){
+        // std::cout << filename << " Base64Encode: " << Base64Encode(content) << std::endl;
+        if (idx >= images.size()) {
+          images.resize(idx + 1);
+        }
+
+        images[idx] = "data:" + mime + ";base64," + Base64Encode(content);
+
+        return true;
+      }
+    }
+
+    style.SetIconId(0);
 
     return false;
   }
@@ -641,10 +692,37 @@ namespace osmscout {
     labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
   }
 
+  void MapPainterSVG::IconData(const Projection& projection,
+                               const MapParameter& parameter)
+  {
+    double dimension;
+
+    if (parameter.GetIconMode()==MapParameter::IconMode::Scalable) {
+      dimension = projection.ConvertWidthToPixel(parameter.GetIconSize());
+    } else if( parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
+      dimension = std::round(projection.ConvertWidthToPixel(parameter.GetIconSize()));
+    }else{
+      dimension = std::round(parameter.GetIconPixelSize());
+    }
+
+    stream << "    <defs>\n";
+    for (size_t i = 0; i < images.size(); i++) {
+      if (images[i].empty()){
+        continue;
+      }
+      stream << "        <image id=\"icon_" << (i+1) << "\" with=\"" << dimension <<
+             "\" height=\"" << dimension << "\" xlink:href=\"" << images[i] << "\" />\n";
+    }
+    stream << "    </defs>\n";
+  }
+
   void MapPainterSVG::DrawLabels(const Projection& projection,
                                  const MapParameter& parameter,
                                  const MapData& /*data*/)
   {
+    // insert data of icons
+    IconData(projection, parameter);
+
     labelLayouter.Layout(projection, parameter);
 
     labelLayouter.DrawLabels(projection,
@@ -730,11 +808,13 @@ namespace osmscout {
     }
   }
 
-  void MapPainterSVG::DrawIcon(const IconStyle* /*style*/,
-                               double /*x*/, double /*y*/,
-                               double /*width*/, double /*height*/)
+  void MapPainterSVG::DrawIcon(const IconStyle* style,
+                               double x, double y,
+                               double width, double height)
   {
-    // Not implemented
+    stream << "    <use x=\"" << (x - width/2) << "\" y=\"" << (y - height/2) << "\" " <<
+      "width=\"" << width << "\" height=\"" << height << "\" " <<
+      "xlink:href=\"#icon_" << style->GetIconId() << "\" />\n";
   }
 
   void MapPainterSVG::DrawPath(const Projection& /*projection*/,

@@ -87,6 +87,7 @@ public:
     BearingRole = Qt::UserRole +6,
     LocationObjectRole = Qt::UserRole +7
   };
+  Q_ENUM(Roles)
 
 signals:
   void countChanged(int);

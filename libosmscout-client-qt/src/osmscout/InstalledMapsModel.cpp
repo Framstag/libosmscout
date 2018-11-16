@@ -26,29 +26,70 @@ InstalledMapsModel::InstalledMapsModel()
 {
   mapManager=OSMScoutQt::GetInstance().GetMapManager();
   connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
-          this, SLOT(onDatabaseListChagned()));
-  onDatabaseListChagned();
+          this, SLOT(onDatabaseListChanged()));
+  connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
+          this, SIGNAL(databaseListChanged()));
+  onDatabaseListChanged();
 }
 
 InstalledMapsModel::~InstalledMapsModel()
 {
 }
 
-void InstalledMapsModel::onDatabaseListChagned()
+void InstalledMapsModel::onDatabaseListChanged()
 {
-  beginResetModel();
-  endResetModel();
+  QList<MapDirectory> currentDirs=mapManager->getDatabaseDirectories();
+
+  qStableSort(currentDirs);
+
+  // following process is little bit complicated, but we don't want to call
+  // model reset - it breaks UI animations for changes
+
+  // process removals
+  QMap<QString, MapDirectory> currentDirMap;
+  for (auto dir: currentDirs){
+    currentDirMap[dir.getDir().absolutePath()] = dir;
+  }
+
+  bool deleteDone=false;
+  while (!deleteDone){
+    deleteDone=true;
+    for (int row=0;row<dirs.size(); row++){
+      if (!currentDirMap.contains(dirs.at(row).getDir().absolutePath())){
+        beginRemoveRows(QModelIndex(), row, row);
+        dirs.removeAt(row);
+        endRemoveRows();
+        deleteDone = false;
+        break;
+      }
+    }
+  }
+
+  // process adds
+  QMap<QString, MapDirectory> oldDirMap;
+  for (auto dir: dirs){
+    oldDirMap[dir.getDir().absolutePath()] = dir;
+  }
+
+  for (int row = 0; row < currentDirs.size(); row++) {
+    auto dir = currentDirs.at(row);
+    if (!oldDirMap.contains(dir.getDir().absolutePath())){
+      beginInsertRows(QModelIndex(), row, row);
+      dirs.insert(row, dir);
+      endInsertRows();
+      oldDirMap[dir.getDir().absolutePath()] = dir;
+    }
+  }
 }
 
 int InstalledMapsModel::rowCount(const QModelIndex &/*parent*/) const
 {
-  return mapManager->getDatabaseDirectories().size();
+  return dirs.size();
 }
 
 QVariant InstalledMapsModel::data(const QModelIndex &index, int role) const
 {
-  QList<MapDirectory> dirs=mapManager->getDatabaseDirectories();
-  if (index.row() >= dirs.size()){
+  if (index.row() < 0 || index.row() >= dirs.size()){
     return QVariant();
   }
   auto dir=dirs.at(index.row());
@@ -90,16 +131,26 @@ Qt::ItemFlags InstalledMapsModel::flags(const QModelIndex &index) const
   return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-bool InstalledMapsModel::deleteMap(int row)
+Q_INVOKABLE bool InstalledMapsModel::removeRows(int fromRow, int count, const QModelIndex &/*parent*/)
 {
-  QList<MapDirectory> dirs=mapManager->getDatabaseDirectories();
-  if (row < 0 || row >= dirs.size()){
+  if (fromRow < 0 || count <= 0 || fromRow + count > dirs.size()){
     return false;
   }
-  auto dir=dirs.at(row);
-  bool result = dir.deleteDatabase();
+
+  for (int row = fromRow; row < (fromRow + count); row++){
+      auto dir=dirs.at(row);
+      if (!dir.deleteDatabase()){
+        qWarning() << "Failed to remove " << dir.getDir().absolutePath();
+        break;
+      }
+  }
   mapManager->lookupDatabases();
-  return result;
+  return true;
+}
+
+bool InstalledMapsModel::deleteMap(int row)
+{
+  return removeRows(row, 1);
 }
 
 QVariant InstalledMapsModel::timeOfMap(QStringList path)
@@ -107,7 +158,6 @@ QVariant InstalledMapsModel::timeOfMap(QStringList path)
   if (path.empty()){
     return QVariant();
   }
-  QList<MapDirectory> dirs=mapManager->getDatabaseDirectories();
   for (const auto &dir:dirs){
     if (dir.hasMetadata() && dir.getPath()==path){
       return dir.getCreation();

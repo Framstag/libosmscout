@@ -79,17 +79,25 @@ namespace osmscout {
     };
 
   private:
-    QPainter                   *painter;
+    QPainter                   *painter{nullptr}; //! non-owning pointer to Qt painter
 
     QtLabelLayouter            labelLayouter;
 
-    std::vector<QImage>        images;        //! vector of QImage for icons
-    std::vector<QImage>        patternImages; //! vector of QImage for fill patterns
-    std::vector<QBrush>        patterns;      //! vector of QBrush for fill patterns
-    QMap<FontDescriptor,QFont> fonts;         //! Cached fonts
-    std::vector<double>        sin;           //! Lookup table for sin calculation
+    /**
+     * non-owning pointer to layouter
+     * when it is not null, all labels are registered to it
+     * and DrawLabels method is no-op
+     */
+    QtLabelLayouter            *delegateLabelLayouter{nullptr};
 
-    std::mutex                 mutex;         //! Mutex for locking concurrent calls
+    std::map<std::string,QImage> images;        //! map of QImage for icons, key is name of the icon
+                                                //! - it should be independent on the specific style configuration
+    std::vector<QImage>          patternImages; //! vector of QImage for fill patterns, index is patter id
+    std::vector<QBrush>          patterns;      //! vector of QBrush for fill patterns
+    QMap<FontDescriptor,QFont>   fonts;         //! Cached fonts
+    std::vector<double>          sin;           //! Lookup table for sin calculation
+
+    std::mutex                   mutex;         //! Mutex for locking concurrent calls
 
   private:
     QFont GetFont(const Projection& projection,
@@ -130,6 +138,8 @@ namespace osmscout {
                                     bool enableWrapping = false,
                                     bool contourLabel = false);
 
+    QtLabelLayouter& GetLayouter();
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const Projection& projection,
@@ -157,7 +167,7 @@ namespace osmscout {
     virtual void BeforeDrawing(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
-                               const MapData& data);
+                               const MapData& data) override;
 
     /**
       Register regular label with given text at the given pixel coordinate

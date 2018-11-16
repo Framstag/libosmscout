@@ -201,7 +201,7 @@ namespace osmscout {
                   std::to_string(maxCell.x)+","+std::to_string(maxCell.y)+" "+
                   std::to_string(maxCell.x-minCell.x+1)+"x"+std::to_string(maxCell.y-minCell.y+1));
 
-    std::vector<uint8_t> bitmap((width*height)/8,0);
+    std::vector<uint8_t> bitmap(std::max((uint32_t)1, (width*height)/8),0);
 
     for (const auto& cell : cells) {
       size_t bitInMap=((cell.y-minCell.y)*width+(cell.x-minCell.x));

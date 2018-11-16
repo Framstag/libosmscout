@@ -27,8 +27,12 @@
 #include <system_error>
 
 #if defined(_MSC_VER)
-#include <yvals.h>
-#define OSMSCOUT_NOEXCEPT _NOEXCEPT
+  #if (_MSC_VER <= 1910)
+    #include <yvals.h>
+    #define OSMSCOUT_NOEXCEPT _NOEXCEPT
+  #else
+    #define OSMSCOUT_NOEXCEPT noexcept
+  #endif
 #else
 #define OSMSCOUT_NOEXCEPT noexcept
 #endif

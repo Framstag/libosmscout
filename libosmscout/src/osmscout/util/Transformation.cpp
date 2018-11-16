@@ -207,7 +207,7 @@ namespace osmscout {
                                         size_t& start,
                                         size_t& end)
   {
-    if (orgStart+1>orgEnd) {
+    if (orgStart+1>orgEnd || orgEnd >= usedPoints) {
       // To avoid "not initialized" warnings
       return false;
     }
@@ -252,8 +252,18 @@ namespace osmscout {
                       buffer[i+1].GetY()-buffer[i].GetY());
 
       if (fabs(det2)>0.0001) {
-        PushCoord(buffer[i].GetX()+oax+det1/det2*(buffer[i].GetX()-buffer[i-1].GetX()),
-                  buffer[i].GetY()+oay+det1/det2*(buffer[i].GetY()-buffer[i-1].GetY()));
+        double addX = det1/det2*(buffer[i].GetX()-buffer[i-1].GetX());
+        double addY = det1/det2*(buffer[i].GetY()-buffer[i-1].GetY());
+        if (std::abs(addX) < 2*std::abs(offset) && std::abs(addY) < 2*std::abs(offset)) {
+          PushCoord(buffer[i].GetX() + oax + addX,
+                    buffer[i].GetY() + oay + addY);
+        }else{
+          // cut the edge of too sharp angles
+          PushCoord(buffer[i].GetX() + oax,
+                    buffer[i].GetY() + oay);
+          PushCoord(buffer[i].GetX() + obx,
+                    buffer[i].GetY() + oby);
+        }
       }
       else {
         PushCoord(buffer[i].GetX()+oax,

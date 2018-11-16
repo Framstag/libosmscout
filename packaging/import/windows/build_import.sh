@@ -18,7 +18,9 @@ make -j2
 
 IMPDIST=libosmscout-importer-$IMPORT_TOOL_OS-$IMPORT_TOOL_ARCH
 
-mkdir -p "$IMPDIST"/bin "$IMPDIST"/stylesheets 
+echo Importer distribution file name: '$IMPDIST.zip'
+
+mkdir -p "$IMPDIST"/bin "$IMPDIST"/stylesheets
 
 for a in Import/Import libosmscout/libosmscout.dll libosmscout-import/libosmscout_import.dll; do
     cp $a "$IMPDIST"/bin

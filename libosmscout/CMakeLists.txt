@@ -13,6 +13,7 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/OSMScoutTypes.h)
 
 set(HEADER_FILES_UTIL
+    include/osmscout/util/Base64.h
     include/osmscout/util/Breaker.h
     include/osmscout/util/Cache.h
     include/osmscout/util/Color.h
