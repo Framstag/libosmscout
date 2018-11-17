@@ -138,9 +138,9 @@ namespace osmscout {
     assert(!nodes.empty());
 
     double minLon=nodes[0].GetLon();
-    double maxLon=nodes[0].GetLon();
+    double maxLon=minLon;
     double minLat=nodes[0].GetLat();
-    double maxLat=nodes[0].GetLat();
+    double maxLat=minLat;
 
     for (size_t i=1; i<nodes.size(); i++) {
       minLon=std::min(minLon,nodes[i].GetLon());
@@ -1191,9 +1191,9 @@ namespace osmscout {
     }
 
     double minLon=path[from%path.size()].GetLon();
-    double maxLon=path[from%path.size()].GetLon();
+    double maxLon=minLon;
     double minLat=path[from%path.size()].GetLat();
-    double maxLat=path[from%path.size()].GetLat();
+    double maxLat=minLat;
 
     for (size_t i=from; i<to; i++) {
       minLon=std::min(minLon,path[i%path.size()].GetLon());

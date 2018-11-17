@@ -73,7 +73,7 @@ namespace osmscout {
                            std::map<ObjectFileRef,ObjectOSMRef>& fileOffsetIdMap);
 
   public:
-    DebugDatabase(const DebugDatabaseParameter& parameter);
+    explicit DebugDatabase(const DebugDatabaseParameter& parameter);
     virtual ~DebugDatabase();
 
     bool Open(const std::string& path);

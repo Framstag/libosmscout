@@ -72,9 +72,9 @@ namespace osmscout {
   public:
     ThreadedBreaker();
 
-    virtual void Break();
-    virtual bool IsAborted() const;
-    virtual void Reset();
+    void Break() override;
+    bool IsAborted() const override;
+    void Reset() override;
   };
 }
 

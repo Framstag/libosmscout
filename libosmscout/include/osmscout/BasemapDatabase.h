@@ -71,7 +71,7 @@ namespace osmscout {
     mutable std::mutex              waterIndexMutex;          //!< Mutex to make lazy initialisation of water index thread-safe
 
   public:
-    BasemapDatabase(const BasemapDatabaseParameter& parameter);
+    explicit BasemapDatabase(const BasemapDatabaseParameter& parameter);
     virtual ~BasemapDatabase();
 
     bool Open(const std::string& path);

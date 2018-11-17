@@ -61,7 +61,7 @@ namespace osmscout {
     double meters;
 
   private:
-    inline Distance(double meters):
+    explicit inline Distance(double meters):
       meters(meters)
     { }
 

@@ -37,7 +37,7 @@ namespace osmscout {
     static const char* NODES_IDMAP;
 
   public:
-    NodeDataFile(size_t cacheSize);
+    explicit NodeDataFile(size_t cacheSize);
   };
 
   typedef std::shared_ptr<NodeDataFile> NodeDataFileRef;

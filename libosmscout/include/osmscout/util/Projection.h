@@ -355,17 +355,17 @@ namespace osmscout {
 
     MercatorProjection();
 
-    inline bool CanBatch() const
+    inline bool CanBatch() const override
     {
       return false;
     }
 
-    inline bool IsValid() const
+    inline bool IsValid() const override
     {
       return valid;
     }
 
-    inline bool IsValidFor(const GeoCoord& coord) const
+    inline bool IsValidFor(const GeoCoord& coord) const override
     {
       return coord.GetLat() >= MinLat && coord.GetLat() <= MaxLat &&
              coord.GetLon() >= MinLon && coord.GetLon() <= MaxLon;
@@ -423,7 +423,7 @@ namespace osmscout {
              size_t width, size_t height);
 
     bool PixelToGeo(double x, double y,
-                    double& lon, double& lat) const;
+                    double& lon, double& lat) const override;
 
     inline bool PixelToGeo(double x, double y,
                            GeoCoord &coord) const
@@ -437,7 +437,7 @@ namespace osmscout {
     }
 
     bool GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
+                    double& x, double& y) const override;
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -477,7 +477,7 @@ namespace osmscout {
     }
 
   protected:
-    void GeoToPixel(const BatchTransformer& transformData) const;
+    void GeoToPixel(const BatchTransformer& transformData) const override;
   };
 
 
@@ -519,17 +519,17 @@ namespace osmscout {
   public:
     TileProjection();
 
-    inline bool CanBatch() const
+    inline bool CanBatch() const override
     {
       return true;
     }
 
-    inline bool IsValid() const
+    inline bool IsValid() const override
     {
       return valid;
     }
 
-    inline bool IsValidFor(const GeoCoord& coord) const
+    inline bool IsValidFor(const GeoCoord& coord) const override
     {
       return coord.GetLat() >= -85.0511 && coord.GetLat() <= +85.0511 &&
              coord.GetLon() >= -180.0   && coord.GetLon() <= +180.0;
@@ -553,10 +553,10 @@ namespace osmscout {
              size_t width, size_t height);
 
     bool PixelToGeo(double x, double y,
-                    double& lon, double& lat) const;
+                    double& lon, double& lat) const override;
 
     bool GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const;
+                    double& x, double& y) const override;
 
     inline bool IsLinearInterpolationEnabled()
     {
@@ -574,7 +574,7 @@ namespace osmscout {
 
   protected:
 
-    void GeoToPixel(const BatchTransformer& transformData) const;
+    void GeoToPixel(const BatchTransformer& transformData) const override;
   };
 
 }

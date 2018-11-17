@@ -229,12 +229,12 @@ namespace osmscout {
     bool                     limitReached;
 
   public:
-    AddressListVisitor(size_t limit);
+    explicit AddressListVisitor(size_t limit);
 
     bool Visit(const AdminRegion& adminRegion,
                const PostalArea& postalArea,
                const Location& location,
-               const Address& address);
+               const Address& address) override;
   };
 
   /**
@@ -263,7 +263,7 @@ namespace osmscout {
 
   public:
     Place(const ObjectFileRef& object,
-          const FeatureValueBufferRef objectFeatureBuff,
+          const FeatureValueBufferRef& objectFeatureBuff,
           const AdminRegionRef& adminRegion,
           const PostalAreaRef& postalArea,
           const POIRef& poi,

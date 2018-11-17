@@ -79,7 +79,7 @@ namespace osmscout {
   }
 
   Place::Place(const ObjectFileRef& object,
-               const FeatureValueBufferRef objectFeatures,
+               const FeatureValueBufferRef& objectFeatures,
                const AdminRegionRef& adminRegion,
                const PostalAreaRef& postalArea,
                const POIRef& poi,

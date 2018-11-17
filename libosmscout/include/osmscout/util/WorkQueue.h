@@ -47,7 +47,8 @@ namespace osmscout {
 
   public:
     WorkQueue();
-    WorkQueue(size_t queueLimit);
+
+    explicit WorkQueue(size_t queueLimit);
     ~WorkQueue();
 
     void PushTask(Task& task);

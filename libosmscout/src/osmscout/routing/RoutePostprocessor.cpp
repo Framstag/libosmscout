@@ -760,7 +760,7 @@ namespace osmscout {
     RouteDescription::NameDescriptionRef              nextName;
     RouteDescription::NameDescriptionRef              lastName;
 
-    lastNode--;
+    --lastNode;
 
     if (lastNode==path.end()) {
       return false;

@@ -174,7 +174,7 @@ namespace osmscout {
     FileOffset   lastFileOffset;
 
   public:
-    ObjectFileRefStreamReader(FileScanner& reader);
+    explicit ObjectFileRefStreamReader(FileScanner& reader);
 
     void Reset();
 

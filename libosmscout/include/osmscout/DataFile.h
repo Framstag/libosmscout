@@ -588,9 +588,9 @@ namespace osmscout {
               const std::string& path,
               bool memoryMapedIndex,
               bool memoryMapedData);
-    bool Close();
+    bool Close() override;
 
-    bool IsOpen() const;
+    bool IsOpen() const override;
 
     bool GetOffset(I id,
                    FileOffset& offset) const;
