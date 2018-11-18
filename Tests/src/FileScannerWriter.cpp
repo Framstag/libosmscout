@@ -43,105 +43,104 @@ int main()
   osmscout::FileWriter  writer;
   osmscout::FileScanner scanner;
 
-  bool                  outBool1=false;
-  bool                  outBool2=true;
-
-  uint16_t              out16u1=std::numeric_limits<uint16_t>::min();
-  uint16_t              out16u2=std::numeric_limits<uint16_t>::max()/2;
-  uint16_t              out16u3=std::numeric_limits<uint16_t>::max();
-
-  uint32_t              out32u1=std::numeric_limits<uint32_t>::min();
-  uint32_t              out32u2=std::numeric_limits<uint32_t>::max()/2;
-  uint32_t              out32u3=std::numeric_limits<uint32_t>::max();
-
-  uint64_t              out64u1=std::numeric_limits<uint64_t>::min();
-  uint64_t              out64u2=std::numeric_limits<uint64_t>::max()/2;
-  uint64_t              out64u3=std::numeric_limits<uint64_t>::max();
-
-  osmscout::FileOffset  outfo1=std::numeric_limits<osmscout::FileOffset>::min();
-  osmscout::FileOffset  outfo2=std::numeric_limits<osmscout::FileOffset>::max()/2;
-  osmscout::FileOffset  outfo3=std::numeric_limits<osmscout::FileOffset>::max();
-
-  osmscout::GeoCoord    outCoord1(51.57231,7.46418);
-
-  std::vector<osmscout::Point> outCoords1;
-  std::vector<osmscout::Point> outCoords2;
-  std::vector<osmscout::Point> outCoords3;
-  std::vector<osmscout::Point> outCoords4;
-  std::vector<osmscout::Point> outCoords5;
-  std::vector<osmscout::Point> outCoords6;
-  std::vector<osmscout::Point> outCoords7;
-
-
   osmscout::FileOffset  finalWriteFileOffset;
-
-  bool                  inBool;
-  uint16_t              in16u;
-  uint32_t              in32u;
-  uint64_t              in64u;
 
   osmscout::FileOffset  info;
 
-  osmscout::GeoCoord    inCoord1;
-
-  std::vector<osmscout::Point> inCoords1;
-  std::vector<osmscout::Point> inCoords2;
-  std::vector<osmscout::Point> inCoords3;
-  std::vector<osmscout::Point> inCoords4;
-  std::vector<osmscout::Point> inCoords5;
-  std::vector<osmscout::Point> inCoords6;
-  std::vector<osmscout::Point> inCoords7;
-
   osmscout::FileOffset  finalReadFileOffset;
 
-  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57231,7.46418)));
-  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57233,7.46430)));
-  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57261,7.46563)));
-  outCoords1.push_back(osmscout::Point(0,osmscout::GeoCoord(51.57269,7.46594)));
-
-  outCoords2=outCoords1;
-  std::reverse(outCoords2.begin(),outCoords2.end());
-
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55493)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55494)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58550,7.55496)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58547,7.55504)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58544,7.55506)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58544,7.55507)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58543,7.55508)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58542,7.55508)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58540,7.55508)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58539,7.55508)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58538,7.55500)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58538,7.55498)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58539,7.55495)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58540,7.55494)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58540,7.55488)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58541,7.55484)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58542,7.55484)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58544,7.55483)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58546,7.55484)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58547,7.55485)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58548,7.55488)));
-  outCoords3.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55492)));
-
-  outCoords4=outCoords3;
-  std::reverse(outCoords4.begin(),outCoords4.end());
-
-  outCoords5.push_back(osmscout::Point(0,osmscout::GeoCoord(5.0,-5.0)));
-  outCoords5.push_back(osmscout::Point(0,osmscout::GeoCoord(5.0,5.0)));
-  outCoords5.push_back(osmscout::Point(0,osmscout::GeoCoord(-5.0,5.0)));
-
-  outCoords6=outCoords5;
-  std::reverse(outCoords6.begin(),outCoords6.end());
-
-  uint64_t maxCoords=1000000;
-
-  for (uint64_t i=1; i<=maxCoords; i++) {
-    outCoords7.push_back(osmscout::Point(0,osmscout::GeoCoord(51.58549,7.55493)));
-  }
-
   try {
+    bool                  inBool;
+    uint16_t              in16u;
+    uint32_t              in32u;
+    uint64_t              in64u;
+
+    osmscout::GeoCoord    inCoord1;
+
+    std::vector<osmscout::Point> inCoords1;
+    std::vector<osmscout::Point> inCoords2;
+    std::vector<osmscout::Point> inCoords3;
+    std::vector<osmscout::Point> inCoords4;
+    std::vector<osmscout::Point> inCoords5;
+    std::vector<osmscout::Point> inCoords6;
+    std::vector<osmscout::Point> inCoords7;
+
+    bool                  outBool1=false;
+    bool                  outBool2=true;
+
+    uint16_t              out16u1=std::numeric_limits<uint16_t>::min();
+    uint16_t              out16u2=std::numeric_limits<uint16_t>::max()/2;
+    uint16_t              out16u3=std::numeric_limits<uint16_t>::max();
+
+    uint32_t              out32u1=std::numeric_limits<uint32_t>::min();
+    uint32_t              out32u2=std::numeric_limits<uint32_t>::max()/2;
+    uint32_t              out32u3=std::numeric_limits<uint32_t>::max();
+
+    uint64_t              out64u1=std::numeric_limits<uint64_t>::min();
+    uint64_t              out64u2=std::numeric_limits<uint64_t>::max()/2;
+    uint64_t              out64u3=std::numeric_limits<uint64_t>::max();
+
+    osmscout::FileOffset  outfo1=std::numeric_limits<osmscout::FileOffset>::min();
+    osmscout::FileOffset  outfo2=std::numeric_limits<osmscout::FileOffset>::max()/2;
+    osmscout::FileOffset  outfo3=std::numeric_limits<osmscout::FileOffset>::max();
+
+    osmscout::GeoCoord    outCoord1(51.57231,7.46418);
+
+    std::vector<osmscout::Point> outCoords1;
+    std::vector<osmscout::Point> outCoords2;
+    std::vector<osmscout::Point> outCoords3;
+    std::vector<osmscout::Point> outCoords4;
+    std::vector<osmscout::Point> outCoords5;
+    std::vector<osmscout::Point> outCoords6;
+    std::vector<osmscout::Point> outCoords7;
+
+    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57231,7.46418));
+    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57233,7.46430));
+    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57261,7.46563));
+    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57269,7.46594));
+
+    outCoords2=outCoords1;
+    std::reverse(outCoords2.begin(),outCoords2.end());
+
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58549,7.55493));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58549,7.55494));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58550,7.55496));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58547,7.55504));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58544,7.55506));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58544,7.55507));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58543,7.55508));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58542,7.55508));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58540,7.55508));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58539,7.55508));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58538,7.55500));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58538,7.55498));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58539,7.55495));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58540,7.55494));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58540,7.55488));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58541,7.55484));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58542,7.55484));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58544,7.55483));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58546,7.55484));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58547,7.55485));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58548,7.55488));
+    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58549,7.55492));
+
+    outCoords4=outCoords3;
+    std::reverse(outCoords4.begin(),outCoords4.end());
+
+    outCoords5.emplace_back(0,osmscout::GeoCoord(5.0,-5.0));
+    outCoords5.emplace_back(0,osmscout::GeoCoord(5.0,5.0));
+    outCoords5.emplace_back(0,osmscout::GeoCoord(-5.0,5.0));
+
+    outCoords6=outCoords5;
+    std::reverse(outCoords6.begin(),outCoords6.end());
+
+    uint64_t maxCoords=1000000;
+
+    for (uint64_t i=1; i<=maxCoords; i++) {
+      outCoords7.emplace_back(0,osmscout::GeoCoord(51.58549,7.55493));
+    }
+
     writer.Open("test.dat");
     writer.Write(outBool1);
     writer.Write(outBool2);

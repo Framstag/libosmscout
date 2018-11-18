@@ -47,11 +47,12 @@ namespace osmscout {
   {
     FileScanner scanner;
     FileWriter  writer;
-    uint32_t    wayDataCount=0;
-    uint32_t    relDataCount=0;
-    uint32_t    dataWritten=0;
 
     try {
+      uint32_t    wayDataCount=0;
+      uint32_t    relDataCount=0;
+      uint32_t    dataWritten=0;
+
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   AREAS_TMP));
 

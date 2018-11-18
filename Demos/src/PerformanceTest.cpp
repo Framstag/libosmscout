@@ -585,6 +585,9 @@ int main(int argc, char* argv[])
     cairo_surface_destroy(cairoSurface);
   }
 #endif
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
+  delete rbuf;
+#endif
 
   return 0;
 }

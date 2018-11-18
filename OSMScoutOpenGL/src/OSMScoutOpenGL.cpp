@@ -37,7 +37,10 @@ struct Arguments {
   size_t height;
   std::string fontPath;
   Arguments()
-      : help(false) {
+  : help(false),
+    width(0),
+    height(0)
+  {
     // no code
   }
 };

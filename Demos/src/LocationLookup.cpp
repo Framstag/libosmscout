@@ -473,13 +473,16 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    for (const auto& adminRegionResult : adminRegionSearchResult.results) {
-      if (adminRegionResult.adminRegion &&
-          adminRegionResult.adminRegionMatchQuality==osmscout::LocationSearchResult::match) {
-        searchParameter.SetAdminRegionOnlyMatch(true);
-        searchParameter.SetDefaultAdminRegion(adminRegionResult.adminRegion);
-        break;
-      }
+    auto adminRegionEntry=std::find_if(adminRegionSearchResult.results.cbegin(),
+      adminRegionSearchResult.results.cend(),
+      [](const osmscout::LocationSearchResult::Entry& entry) {
+        return entry.adminRegion &&
+               entry.adminRegionMatchQuality==osmscout::LocationSearchResult::match;
+    });
+
+    if (adminRegionEntry!=adminRegionSearchResult.results.end()) {
+      searchParameter.SetAdminRegionOnlyMatch(true);
+      searchParameter.SetDefaultAdminRegion(adminRegionEntry->adminRegion);
     }
 
     adminRegionSearchTime.Stop();

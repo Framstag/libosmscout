@@ -932,7 +932,7 @@ namespace osmscout {
 
     for (std::list<PolyData>::const_iterator c=area.clippings.begin();
         c!=area.clippings.end();
-        c++) {
+        ++c) {
       const PolyData    &data=*c;
 
       stream << "M " << coordBuffer->buffer[data.transStart].GetX() << " " << coordBuffer->buffer[data.transStart].GetY();

@@ -364,8 +364,6 @@ namespace osmscout {
                                           double width,
                                           const std::vector<double> &dash)
   {
-    double dashArray[10];
-
     assert(dash.size() <= 10);
 
     cairo_set_source_rgba(draw,
@@ -378,7 +376,10 @@ namespace osmscout {
 
     if (dash.empty()) {
       cairo_set_dash(draw, nullptr, 0, 0);
-    } else {
+    }
+    else {
+      double dashArray[10];
+
       for (size_t i = 0; i < dash.size(); i++) {
         dashArray[i] = dash[i] * width;
       }

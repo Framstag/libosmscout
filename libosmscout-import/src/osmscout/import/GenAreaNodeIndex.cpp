@@ -72,12 +72,13 @@ namespace osmscout {
     FileWriter            writer;
     TypeInfoSet           remainingNodeTypes; //! Set of types we still must process
     std::vector<TypeData> nodeTypeData;
-    size_t                level;
-    size_t                maxLevel=0;
 
     nodeTypeData.resize(typeConfig->GetTypeCount());
 
     try {
+      size_t                level;
+      size_t                maxLevel=0;
+
       nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                        NodeDataFile::NODES_DAT),
                        FileScanner::Sequential,

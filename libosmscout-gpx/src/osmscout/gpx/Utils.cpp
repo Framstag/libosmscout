@@ -32,7 +32,7 @@ void ProcessCallback::Progress(double)
   // no-op
 }
 
-void ProcessCallback::Error(std::string error)
+void ProcessCallback::Error(const std::string& error)
 {
   osmscout::log.Error() << error;
 }
@@ -44,9 +44,9 @@ void gpx::FilterNearPoints(std::vector<TrackPoint> &points,
   if (points.empty()){
     return;
   }
-  std::vector<TrackPoint>::iterator it=points.begin();
+  auto it=points.begin();
   GeoCoord latest=(*it).coord;
-  it++;
+  ++it;
   while (it!=points.end()){
     GeoCoord current=(*it).coord;
     Distance distance=GetEllipsoidalDistance(latest, current);
@@ -54,7 +54,7 @@ void gpx::FilterNearPoints(std::vector<TrackPoint> &points,
       it = points.erase(it);
     }else {
       latest=current;
-      it++;
+      ++it;
     }
   }
 }

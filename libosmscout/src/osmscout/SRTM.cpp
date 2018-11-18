@@ -91,8 +91,9 @@ namespace osmscout {
     int patchLat = int(floor(latitude));
     int patchLon = int(floor(longitude));
     std::string patchFilename = srtmFilename(patchLat, patchLon);
-    size_t length;
     if(currentFilename.empty() || currentFilename != patchFilename){
+      std::istream::pos_type length;
+
       currentFilename = patchFilename;
       currentPatchLat = patchLat;
       currentPatchLon = patchLon;

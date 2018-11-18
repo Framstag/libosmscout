@@ -2111,7 +2111,7 @@ namespace osmscout {
       else {
         coastStartMap.insert(std::make_pair(coast->frontNodeId,coast));
 
-        c++;
+        ++c;
       }
     }
 

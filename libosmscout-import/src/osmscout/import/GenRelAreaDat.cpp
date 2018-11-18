@@ -269,7 +269,7 @@ namespace osmscout {
 
         for (std::list<MultipolygonPart*>::const_iterator p=ringParts.begin();
             p!=ringParts.end();
-            p++) {
+            ++p) {
           MultipolygonPart* part=*p;
 
           if (p==ringParts.begin()) {

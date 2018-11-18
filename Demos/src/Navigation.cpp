@@ -236,7 +236,6 @@ namespace osmscout {
                                                const osmscout::RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/)
     {
         std::ostringstream stream;
-        std::string crossingWaysString;
         stream << "Enter in the roundabout, then ";
         return stream.str();
     }
