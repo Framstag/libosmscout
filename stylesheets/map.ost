@@ -1622,7 +1622,7 @@ TYPES
       GROUP historic, building, routingPOI
 
   TYPE historic
-    = NODE AREA (EXISTS "historic")
+    = NODE AREA (EXISTS "historic" AND !("historic" IN ["citywalls"]))
       {Name, NameAlt}
       ADDRESS POI
       GROUP historic
@@ -2067,7 +2067,7 @@ TYPES
       IGNORESEALAND
 
   TYPE barrier_city_wall
-    = WAY AREA ("barrier"=="city_wall")
+    = WAY AREA ("barrier"=="city_wall" OR "historic"=="citywalls")
       {Name, NameAlt, Width}
 
   TYPE barrier_bollard
