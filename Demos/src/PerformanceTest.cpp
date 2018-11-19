@@ -85,6 +85,8 @@ struct Arguments {
   std::tuple<size_t, size_t> tileDimension{std::make_tuple(256, 256)};
   std::string driver{"none"};
   double dpi{96};
+  size_t drawRepeat{1};
+  size_t loadRepeat{1};
 
 #if defined(HAVE_LIB_GPERFTOOLS)
   bool heapProfile{false};
@@ -352,7 +354,7 @@ public:
   PerformanceTestBackendNoOp(osmscout::StyleConfigRef styleConfig):
     noOpMapPainter(styleConfig)
   {}
-  
+
   virtual void DrawMap(const osmscout::TileProjection &projection,
                        const osmscout::MapParameter &drawParameter,
                        const osmscout::MapData &data) {
@@ -472,11 +474,27 @@ int main(int argc, char* argv[])
                       "driver",
                       "Rendering driver (cairo|Qt|ag|opengl|noop|none), default: " + args.driver,
                       false);
-  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
-                        args.dpi = value;
+  argParser.AddOption(osmscout::CmdLineDoubleOption([&args](const double& value) {
+                        if (value > 0) {
+                          args.dpi = value;
+                        } else {
+                          std::cerr << "DPI can't be negative or zero" << std::endl;
+                        }
                       }),
                       "dpi",
                       "Rendering DPI, default: " + std::to_string(args.dpi),
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.drawRepeat = value;
+                      }),
+                      "draw-repeat",
+                      "Repeat every draw call, default: " + std::to_string(args.drawRepeat),
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.loadRepeat = value;
+                      }),
+                      "load-repeat",
+                      "Repeat every load call, default: " + std::to_string(args.loadRepeat),
                       false);
 
 #if defined(HAVE_LIB_GPERFTOOLS)
@@ -610,66 +628,70 @@ int main(int argc, char* argv[])
       projection.GetDimensions(boundingBox);
       projection.SetLinearInterpolationUsage(level.Get() >= 10);
 
-      osmscout::StopClock dbTimer;
+      for (size_t i=0; i<args.loadRepeat; i++) {
+        data.nodes.clear();
+        data.ways.clear();
+        data.areas.clear();
 
-      osmscout::GeoBox dataBoundingBox(tileBox.GetBoundingBox(magnification));
+        osmscout::StopClock dbTimer;
 
-      std::list<osmscout::TileRef> tiles;
+        osmscout::GeoBox dataBoundingBox(tileBox.GetBoundingBox(magnification));
 
-      // set cache size almost unlimited,
-      // for better estimate of peak memory usage by tile loading
-      mapService->SetCacheSize(10000000);
+        std::list<osmscout::TileRef> tiles;
 
-      mapService->LookupTiles(magnification,dataBoundingBox,tiles);
-      mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-      mapService->AddTileDataToMapData(tiles,data);
+        // set cache size almost unlimited,
+        // for better estimate of peak memory usage by tile loading
+        mapService->SetCacheSize(10000000);
+
+        mapService->LookupTiles(magnification, dataBoundingBox, tiles);
+        mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
+        mapService->AddTileDataToMapData(tiles, data);
+
+#if defined(HAVE_LIB_GPERFTOOLS)
+        if (args.heapProfile) {
+          std::ostringstream buff;
+          buff << "load-" << level << "-" << tile.GetX() << "-" << tile.GetY();
+          HeapProfilerDump(buff.str().c_str());
+        }
+        struct mallinfo alloc_info = tc_mallinfo();
+#else
+#if defined(HAVE_MALLINFO)
+        struct mallinfo alloc_info = mallinfo();
+#endif
+#endif
+#if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
+        std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
+        stats.allocMax = std::max(stats.allocMax, (double) alloc_info.uordblks);
+        stats.allocSum = stats.allocSum + (double) alloc_info.uordblks;
+#endif
+
+        // set cache size back to default
+        mapService->SetCacheSize(25);
+        dbTimer.Stop();
+
+        double dbTime = dbTimer.GetMilliseconds();
+
+        stats.dbMinTime = std::min(stats.dbMinTime, dbTime);
+        stats.dbMaxTime = std::max(stats.dbMaxTime, dbTime);
+        stats.dbTotalTime += dbTime;
+      }
 
       stats.nodeCount+=data.nodes.size();
       stats.wayCount+=data.ways.size();
       stats.areaCount+=data.areas.size();
 
-
-#if defined(HAVE_LIB_GPERFTOOLS)
-      if (args.heapProfile){
-          std::ostringstream buff;
-          buff << "load-" << level << "-" << tile.GetX() << "-" << tile.GetY();
-          HeapProfilerDump(buff.str().c_str());
-      }
-      struct mallinfo alloc_info = tc_mallinfo();
-#else
-#if defined(HAVE_MALLINFO)
-      struct mallinfo alloc_info = mallinfo();
-#endif
-#endif
-#if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
-      std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
-      stats.allocMax = std::max(stats.allocMax, (double)alloc_info.uordblks);
-      stats.allocSum = stats.allocSum + (double)alloc_info.uordblks;
-#endif
-
-      // set cache size back to default
-      mapService->SetCacheSize(25);
-      dbTimer.Stop();
-
-      double dbTime=dbTimer.GetMilliseconds();
-
-      stats.dbMinTime=std::min(stats.dbMinTime,dbTime);
-      stats.dbMaxTime=std::max(stats.dbMaxTime,dbTime);
-      stats.dbTotalTime+=dbTime;
-
-      osmscout::StopClock drawTimer;
-
-      backendPtr->DrawMap(projection, drawParameter, data);
-
-      drawTimer.Stop();
-
       stats.tileCount++;
+      for (size_t i=0; i<args.drawRepeat; i++) {
+        osmscout::StopClock drawTimer;
+        backendPtr->DrawMap(projection, drawParameter, data);
+        drawTimer.Stop();
 
-      double drawTime=drawTimer.GetMilliseconds();
+        double drawTime = drawTimer.GetMilliseconds();
 
-      stats.drawMinTime=std::min(stats.drawMinTime,drawTime);
-      stats.drawMaxTime=std::max(stats.drawMaxTime,drawTime);
-      stats.drawTotalTime+=drawTime;
+        stats.drawMinTime = std::min(stats.drawMinTime, drawTime);
+        stats.drawMaxTime = std::max(stats.drawMaxTime, drawTime);
+        stats.drawTotalTime += drawTime;
+      }
 
       current++;
     }
@@ -687,7 +709,7 @@ int main(int argc, char* argv[])
 
   for (const auto& stats : statistics) {
     std::cout << "Level: " << stats.level << std::endl;
-    std::cout << "Tiles: " << stats.tileCount << std::endl;
+    std::cout << "Tiles: " << stats.tileCount << " (load " << args.loadRepeat << "x, drawn " << args.drawRepeat << "x)" << std::endl;
 
 #if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
     std::cout << " Used memory: ";
@@ -711,7 +733,7 @@ int main(int argc, char* argv[])
     std::cout << "total: " << stats.dbTotalTime << " ";
     std::cout << "min: " << stats.dbMinTime << " ";
     if (stats.tileCount>0) {
-      std::cout << "avg: " << stats.dbTotalTime/stats.tileCount << " ";
+      std::cout << "avg: " << stats.dbTotalTime/(stats.tileCount * args.loadRepeat) << " ";
     }
     std::cout << "max: " << stats.dbMaxTime << " " << std::endl;
 
@@ -719,7 +741,7 @@ int main(int argc, char* argv[])
     std::cout << "total: " << stats.drawTotalTime << " ";
     std::cout << "min: " << stats.drawMinTime << " ";
     if (stats.tileCount>0) {
-      std::cout << "avg: " << stats.drawTotalTime/stats.tileCount << " ";
+      std::cout << "avg: " << stats.drawTotalTime/(stats.tileCount * args.drawRepeat) << " ";
     }
     std::cout << "max: " << stats.drawMaxTime << std::endl;
   }
