@@ -87,6 +87,8 @@ struct Arguments {
   double dpi{96};
   size_t drawRepeat{1};
   size_t loadRepeat{1};
+  bool flushCache{false};
+  bool flushDiskCache{false};
 
 #if defined(HAVE_LIB_GPERFTOOLS)
   bool heapProfile{false};
@@ -496,6 +498,19 @@ int main(int argc, char* argv[])
                       "load-repeat",
                       "Repeat every load call, default: " + std::to_string(args.loadRepeat),
                       false);
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.flushCache=value;
+                      }),
+                      "flush-cache",
+                      "Flush data caches after each data load, default: " + std::to_string(args.flushCache),
+                      false);
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.flushDiskCache=value;
+                      }),
+                      "flush-disk",
+                      "Flush system disk caches after each data load, default: " + std::to_string(args.flushDiskCache) +
+                      " (It work just on Linux with admin rights.)",
+                      false);
 
 #if defined(HAVE_LIB_GPERFTOOLS)
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
@@ -674,6 +689,33 @@ int main(int argc, char* argv[])
         stats.dbMinTime = std::min(stats.dbMinTime, dbTime);
         stats.dbMaxTime = std::max(stats.dbMaxTime, dbTime);
         stats.dbTotalTime += dbTime;
+
+        if (args.flushCache) {
+          tiles.clear(); // following flush method removes only tiles with use_count() == 1
+          mapService->FlushTileCache();
+
+          // simplest way howto flush database caches is close it and open again
+          database->Close();
+          if (!database->Open(args.databaseDirectory)) {
+            std::cerr << "Cannot open database" << std::endl;
+            return 1;
+          }
+        }
+        if (args.flushDiskCache) {
+          // Linux specific
+          if (osmscout::ExistsInFilesystem("/proc/sys/vm/drop_caches")){
+            osmscout::FileWriter f;
+            try {
+              f.Open("/proc/sys/vm/drop_caches");
+              f.Write(std::string("3"));
+              f.Close();
+            }catch(const osmscout::IOException &e){
+              std::cerr << "Can't flush disk cache: " << e.what() << std::endl;
+            }
+          }else{
+            std::cerr << "Can't flush disk cache, \"/proc/sys/vm/drop_caches\" file don't exists" << std::endl;
+          }
+        }
       }
 
       stats.nodeCount+=data.nodes.size();
@@ -714,7 +756,7 @@ int main(int argc, char* argv[])
 #if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
     std::cout << " Used memory: ";
     std::cout << "max: " << formatAlloc(stats.allocMax) << " ";
-    std::cout << "avg: " << formatAlloc(stats.allocSum / stats.tileCount) << std::endl;
+    std::cout << "avg: " << formatAlloc(stats.allocSum / (stats.tileCount * args.loadRepeat)) << std::endl;
 #endif
 
     std::cout << " Tot. data  : ";
