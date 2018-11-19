@@ -178,6 +178,252 @@ std::string formatAlloc(double size)
     return buff.str();
 }
 
+class PerformanceTestBackend {
+public:
+  virtual void DrawMap(const osmscout::TileProjection &/*projection*/,
+                       const osmscout::MapParameter &/*drawParameter*/,
+                       const osmscout::MapData &/*data*/)
+  {
+    // none
+  }
+};
+
+#if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
+class PerformanceTestBackendCairo: public PerformanceTestBackend {
+private:
+  cairo_surface_t *cairoSurface = nullptr;
+  cairo_t *cairo = nullptr;
+  osmscout::MapPainterCairo *cairoMapPainter{nullptr};
+
+public:
+  PerformanceTestBackendCairo(size_t tileWidth, size_t tileHeight, osmscout::StyleConfigRef styleConfig)
+  {
+    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
+    if (cairoSurface==nullptr) {
+      throw std::runtime_error("Cannot create cairo image cairoSurface");
+    }
+
+    cairo=cairo_create(cairoSurface);
+    if (cairo==nullptr) {
+      cairo_surface_destroy(cairoSurface);
+      throw std::runtime_error("Cannot create cairo_t for image cairoSurface");
+    }
+    cairoMapPainter = new osmscout::MapPainterCairo(styleConfig);
+  }
+
+  ~PerformanceTestBackendCairo()
+  {
+    cairo_destroy(cairo);
+    cairo_surface_destroy(cairoSurface);
+  }
+
+  virtual void DrawMap(const osmscout::TileProjection &projection,
+                       const osmscout::MapParameter &drawParameter,
+                       const osmscout::MapData &data)
+  {
+    cairoMapPainter->DrawMap(projection,
+                            drawParameter,
+                            data,
+                            cairo);
+  }
+};
+#endif
+
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+class PerformanceTestBackendQt: public PerformanceTestBackend {
+private:
+  QApplication application;
+  QPixmap qtPixmap;
+  QPainter qtPainter;
+  osmscout::MapPainterQt qtMapPainter;
+public:
+  PerformanceTestBackendQt(int argc, char* argv[], int tileWidth, int tileHeight, osmscout::StyleConfigRef styleConfig):
+    application(argc, argv, true),
+    qtPixmap{tileWidth,tileHeight},
+    qtPainter{&qtPixmap},
+    qtMapPainter{styleConfig}
+  {
+  }
+
+  virtual void DrawMap(const osmscout::TileProjection &projection,
+                       const osmscout::MapParameter &drawParameter,
+                       const osmscout::MapData &data) {
+    qtMapPainter.DrawMap(projection,
+                         drawParameter,
+                         data,
+                         &qtPainter);
+  }
+};
+#endif
+
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
+class PerformanceTestBackendAGG: public PerformanceTestBackend {
+private:
+  unsigned char*                           buffer=nullptr;
+  agg::rendering_buffer*                   rbuf=nullptr;
+  osmscout::MapPainterAgg::AggPixelFormat* pf=nullptr;
+  osmscout::MapPainterAgg aggMapPainter;
+public:
+  PerformanceTestBackendAGG(size_t tileWidth, size_t tileHeight, osmscout::StyleConfigRef styleConfig):
+    buffer{new unsigned char[tileWidth * tileHeight * 3]},
+    rbuf{new agg::rendering_buffer(buffer, tileWidth, tileHeight, tileWidth * 3)},
+    pf{new osmscout::MapPainterAgg::AggPixelFormat(*rbuf)},
+    aggMapPainter{styleConfig}
+  {
+  }
+
+  ~PerformanceTestBackendAGG()
+  {
+    delete pf;
+    delete rbuf;
+  }
+
+  virtual void DrawMap(const osmscout::TileProjection &projection,
+                       const osmscout::MapParameter &drawParameter,
+                       const osmscout::MapData &data) {
+    aggMapPainter.DrawMap(projection,
+                          drawParameter,
+                          data,
+                          pf);
+  }
+};
+#endif
+
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
+class PerformanceTestBackendOGL: public PerformanceTestBackend {
+private:
+  osmscout::MapPainterOpenGL* openglMapPainter{nullptr};
+  osmscout::StyleConfigRef styleConfig;
+public:
+  PerformanceTestBackendOGL(size_t tileWidth, size_t tileHeight, size_t dpi, osmscout::StyleConfigRef styleConfig):
+    styleConfig{styleConfig}
+  {
+    // Create the offscreen renderer
+    glfwSetErrorCallback([](int, const char *err_str) {
+      std::cerr << "GLFW Error: " << err_str << std::endl;
+    });
+    if (!glfwInit())
+      throw std::runtime_error("Can't initilise GLFW library");
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_VISIBLE, false);
+    GLFWwindow* offscreen_context;
+    offscreen_context=glfwCreateWindow(tileWidth,
+                                       tileHeight,
+                                       "",
+                                       nullptr,
+                                       nullptr);
+    if (!offscreen_context) {
+      throw std::runtime_error("Failed to create offscreen context.");
+    }
+    glfwMakeContextCurrent(offscreen_context);
+
+    // This driver need a valid existing context
+    openglMapPainter=new osmscout::MapPainterOpenGL(tileWidth,
+                                                    tileHeight,
+                                                    dpi,
+                                                    tileWidth,
+                                                    tileHeight,
+                                                    "/usr/share/fonts/TTF/DejaVuSans.ttf");
+  }
+
+  ~PerformanceTestBackendOGL()
+  {
+    //leaks openglMapPainter;
+  }
+
+  virtual void DrawMap(const osmscout::TileProjection &projection,
+                       const osmscout::MapParameter &drawParameter,
+                       const osmscout::MapData &data) {
+    openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
+    openglMapPainter->SwapData();
+    openglMapPainter->DrawMap();
+  }
+};
+#endif
+
+class PerformanceTestBackendNoOp: public PerformanceTestBackend {
+private:
+  osmscout::MapPainterNoOp noOpMapPainter;
+public:
+  PerformanceTestBackendNoOp(osmscout::StyleConfigRef styleConfig):
+    noOpMapPainter(styleConfig)
+  {}
+  
+  virtual void DrawMap(const osmscout::TileProjection &projection,
+                       const osmscout::MapParameter &drawParameter,
+                       const osmscout::MapData &data) {
+    noOpMapPainter.DrawMap(projection,
+                           drawParameter,
+                           data);
+  }
+};
+
+using PerformanceTestBackendPtr = std::shared_ptr<PerformanceTestBackend>;
+
+PerformanceTestBackendPtr PrepareBackend(int argc, char* argv[], const Arguments &args, osmscout::StyleConfigRef styleConfig)
+{
+  if (args.driver=="cairo") {
+    std::cout << "Using driver 'cairo'..." << std::endl;
+#if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
+    try{
+      return std::make_shared<PerformanceTestBackendCairo>(args.TileWidth(),args.TileHeight(),styleConfig);
+    } catch (std::runtime_error &e){
+      std::cerr << e.what() << std::endl;
+      return nullptr;
+    }
+#else
+    std::cerr << "Driver 'cairo' is not enabled" << std::endl;
+    return nullptr;
+#endif
+  }
+  else if (args.driver=="Qt") {
+    std::cout << "Using driver 'Qt'..." << std::endl;
+#if defined(HAVE_LIB_OSMSCOUTMAPQT)
+    return std::make_shared<PerformanceTestBackendQt>(argc, argv, args.TileWidth(), args.TileHeight(), styleConfig);
+#else
+    std::cerr << "Driver 'Qt' is not enabled" << std::endl;
+    return nullptr;
+#endif
+  } else if (args.driver == "agg") {
+    std::cout << "Using driver 'Agg'..." << std::endl;
+#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
+    return std::make_shared<PerformanceTestBackendAGG>(args.TileWidth(), args.TileHeight(), styleConfig);
+#else
+    std::cerr << "Driver 'Agg' is not enabled" << std::endl;
+    return nullptr;
+#endif
+  } else if (args.driver == "opengl") {
+    std::cout << "Using driver 'OpenGL'..." << std::endl;
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
+    try{
+      return std::make_shared<PerformanceTestBackendOGL>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig);
+    } catch (std::runtime_error &e){
+      std::cerr << e.what() << std::endl;
+      return nullptr;
+    }
+#else
+    std::cerr << "Driver 'OpenGL' is not enabled" << std::endl;
+    return nullptr;
+#endif
+  }
+  else if (args.driver=="noop") {
+    std::cout << "Using driver 'noop'..." << std::endl;
+    return std::make_shared<PerformanceTestBackendNoOp>(styleConfig);
+  }
+  else if (args.driver=="none") {
+    std::cout << "Using driver 'none'..." << std::endl;
+    return std::make_shared<PerformanceTestBackend>();
+  }
+  else {
+    std::cerr << "Unsupported driver '" << args.driver << "'" << std::endl;
+    return nullptr;
+  }
+}
+
 int main(int argc, char* argv[])
 {
   osmscout::CmdLineParser   argParser("PerformanceTest",
@@ -275,109 +521,6 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-#if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-  cairo_surface_t *cairoSurface=nullptr;
-  cairo_t         *cairo=nullptr;
-#endif
-
-#if defined(HAVE_LIB_OSMSCOUTMAPQT)
-  QPixmap         *qtPixmap=nullptr;
-  QPainter        *qtPainter=nullptr;
-  QApplication    application(argc,argv,true);
-#endif
-
-#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-  unsigned char*                           buffer;
-  agg::rendering_buffer*                   rbuf=nullptr;
-  osmscout::MapPainterAgg::AggPixelFormat* pf=nullptr;
-#endif
-
-#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
-
-#endif
-
-  if (args.driver=="cairo") {
-    std::cout << "Using driver 'cairo'..." << std::endl;
-#if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,args.TileWidth(),args.TileHeight());
-
-    if (cairoSurface==nullptr) {
-      std::cerr << "Cannot create cairo image cairoSurface" << std::endl;
-      return 1;
-    }
-
-    cairo=cairo_create(cairoSurface);
-
-    if (cairo==nullptr) {
-      std::cerr << "Cannot create cairo_t for image cairoSurface" << std::endl;
-      return 1;
-    }
-#else
-    std::cerr << "Driver 'cairo' is not enabled" << std::endl;
-    return 1;
-#endif
-  }
-  else if (args.driver=="Qt") {
-    std::cout << "Using driver 'Qt'..." << std::endl;
-#if defined(HAVE_LIB_OSMSCOUTMAPQT)
-    qtPixmap=new QPixmap(args.TileWidth(),args.TileHeight());
-    qtPainter=new QPainter(qtPixmap);
-#else
-    std::cerr << "Driver 'Qt' is not enabled" << std::endl;
-  return 1;
-#endif
-  } else if (args.driver == "agg") {
-    std::cout << "Using driver 'Agg'..." << std::endl;
-#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-    buffer = new unsigned char[args.TileWidth() * args.TileHeight() * 3];
-    rbuf = new agg::rendering_buffer(buffer, args.TileWidth(), args.TileHeight(), args.TileWidth() * 3);
-    pf = new osmscout::MapPainterAgg::AggPixelFormat(*rbuf);
-#else
-    std::cerr << "Driver 'Agg' is not enabled" << std::endl;
-    return 1;
-#endif
-  } else if (args.driver == "opengl") {
-    std::cout << "Using driver 'OpenGL'..." << std::endl;
-#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
-    // Create the offscreen renderer
-    glfwSetErrorCallback([](int, const char *err_str) {
-      std::cerr << "GLFW Error: " << err_str << std::endl;
-    });
-    if (!glfwInit())
-      return 1;
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_VISIBLE, false);
-    GLFWwindow* offscreen_context;
-    offscreen_context=glfwCreateWindow(args.TileWidth(),
-                                       args.TileHeight(),
-                                       "",
-                                       nullptr,
-                                       nullptr);
-    if (!offscreen_context) {
-      std::cerr << "Failed to create offscreen context." << std::endl;
-      return 1;
-    }
-    glfwMakeContextCurrent(offscreen_context);
-#else
-    std::cerr << "Driver 'OpenGL' is not enabled" << std::endl;
-    return 1;
-#endif
-  }
-  else if (args.driver=="noop") {
-    std::cout << "Using driver 'noop'..." << std::endl;
-  }
-  else if (args.driver=="none") {
-    std::cout << "Using driver 'none'..." << std::endl;
-  }
-  else {
-    std::cerr << "Unsupported driver '" << args.driver << "'" << std::endl;
-    return 1;
-  }
-
   osmscout::DatabaseParameter databaseParameter;
 
   osmscout::log.Debug(args.debug);
@@ -395,6 +538,11 @@ int main(int argc, char* argv[])
 
   if (!styleConfig->Load(args.style)) {
     std::cerr << "Cannot open style" << std::endl;
+    return 1;
+  }
+
+  PerformanceTestBackendPtr backendPtr = PrepareBackend(argc, argv, args, styleConfig);
+  if (!backendPtr){
     return 1;
   }
 
@@ -427,29 +575,6 @@ int main(int argc, char* argv[])
 
     std::cout << "----------" << std::endl;
     std::cout << "Drawing level " << level << ", " << tileArea.GetCount() << " tiles " << tileArea.GetDisplayText() << std::endl;
-
-#if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    osmscout::MapPainterCairo cairoMapPainter(styleConfig);
-#endif
-#if defined(HAVE_LIB_OSMSCOUTMAPQT)
-    osmscout::MapPainterQt    qtMapPainter(styleConfig);
-#endif
-#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-    osmscout::MapPainterAgg aggMapPainter(styleConfig);
-#endif
-#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
-    osmscout::MapPainterOpenGL* openglMapPainter=nullptr;
-    if (args.driver == "opengl") {
-      // This driver need a valid existing context
-      openglMapPainter=new osmscout::MapPainterOpenGL(args.TileWidth(),
-                                                      args.TileHeight(),
-                                                      args.dpi,
-                                                      args.TileWidth(),
-                                                      args.TileHeight(),
-                                                      "/usr/share/fonts/TTF/DejaVuSans.ttf");
-    }
-#endif
-    osmscout::MapPainterNoOp noOpMapPainter(styleConfig);
 
     size_t current=1;
     size_t tileCount=tileArea.GetCount();
@@ -534,49 +659,7 @@ int main(int argc, char* argv[])
 
       osmscout::StopClock drawTimer;
 
-#if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-      if (args.driver=="cairo") {
-        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-        cairoMapPainter.DrawMap(projection,
-                                drawParameter,
-                                data,
-                                cairo);
-      }
-#endif
-#if defined(HAVE_LIB_OSMSCOUTMAPQT)
-      if (args.driver=="Qt") {
-        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-        qtMapPainter.DrawMap(projection,
-                             drawParameter,
-                             data,
-                             qtPainter);
-      }
-#endif
-#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-      if (args.driver == "agg") {
-        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-        aggMapPainter.DrawMap(projection,
-                              drawParameter,
-                              data,
-                              pf);
-      }
-#endif
-#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
-      if (args.driver == "opengl") {
-        //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
-        openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
-        openglMapPainter->SwapData();
-        openglMapPainter->DrawMap();
-      }
-#endif
-      if (args.driver == "noop") {
-        noOpMapPainter.DrawMap(projection,
-                               drawParameter,
-                               data);
-      }
-      if (args.driver=="none") {
-        // Do nothing
-      }
+      backendPtr->DrawMap(projection, drawParameter, data);
 
       drawTimer.Stop();
 
@@ -642,16 +725,6 @@ int main(int argc, char* argv[])
   }
 
   database->Close();
-
-#if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-  if (args.driver=="cairo") {
-    cairo_destroy(cairo);
-    cairo_surface_destroy(cairoSurface);
-  }
-#endif
-#if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-  delete rbuf;
-#endif
 
   return 0;
 }
