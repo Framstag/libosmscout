@@ -20,6 +20,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
+#include <tuple>
 
 #include "config.h"
 
@@ -58,6 +59,7 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Tiling.h>
 
@@ -71,7 +73,54 @@
 // See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames for details about
 // coordinate transformation
 
-static const double DPI=96.0;
+struct Arguments {
+  bool help{false};
+  bool debug{false};
+  std::string databaseDirectory{"."};
+  std::string style{"stylesheets/standard.oss"};
+  osmscout::GeoCoord coordTopLeft;
+  osmscout::GeoCoord coordBottomRight;
+  osmscout::MagnificationLevel startZoom{0};
+  osmscout::MagnificationLevel endZoom{20};
+  std::tuple<size_t, size_t> tileDimension{std::make_tuple(256, 256)};
+  std::string driver{"none"};
+  double dpi{96};
+
+#if defined(HAVE_LIB_GPERFTOOLS)
+  bool heapProfile{false};
+  std::string heapProfilePrefix;
+#endif
+
+  size_t TileWidth() const
+  {
+    return std::get<0>(tileDimension);
+  }
+
+  size_t TileHeight() const
+  {
+    return std::get<1>(tileDimension);
+  }
+
+  double LatBottom() const
+  {
+    return coordBottomRight.GetLat();
+  }
+
+  double LonLeft() const
+  {
+    return coordTopLeft.GetLon();
+  }
+
+  double LatTop() const
+  {
+    return coordTopLeft.GetLat();
+  }
+
+  double LonRight() const
+  {
+    return coordBottomRight.GetLon();
+  }
+};
 
 struct LevelStats
 {
@@ -131,89 +180,103 @@ std::string formatAlloc(double size)
 
 int main(int argc, char* argv[])
 {
-  std::string   map;
-  std::string   style;
-  double        latTop,latBottom,lonLeft,lonRight;
-  unsigned int  startZoom;
-  unsigned int  endZoom;
-  unsigned int  tileWidth;
-  unsigned int  tileHeight;
-  std::string   driver;
+  osmscout::CmdLineParser   argParser("PerformanceTest",
+                                      argc,argv);
+  Arguments                 args;
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      std::vector<std::string>{"h","help"},
+                      "Display help",
+                      true);
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      true);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.startZoom=osmscout::MagnificationLevel(value);
+                      }),
+                      "start-zoom",
+                      "Start zoom, default: " + std::to_string(args.startZoom.Get()),
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.endZoom=osmscout::MagnificationLevel(value);
+                      }),
+                      "end-zoom",
+                      "End zoom, default: " + std::to_string(args.endZoom.Get()),
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.tileDimension=std::make_tuple(value, std::get<1>(args.tileDimension));
+                      }),
+                      "tile-width",
+                      "Tile width, default: " + std::to_string(std::get<0>(args.tileDimension)),
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.tileDimension=std::make_tuple(std::get<0>(args.tileDimension), value);
+                      }),
+                      "tile-height",
+                      "Tile height, default: " + std::to_string(std::get<1>(args.tileDimension)),
+                      false);
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.driver = value;
+                      }),
+                      "driver",
+                      "Rendering driver (cairo|Qt|ag|opengl|noop|none), default: " + args.driver,
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.dpi = value;
+                      }),
+                      "dpi",
+                      "Rendering DPI, default: " + std::to_string(args.dpi),
+                      false);
 
 #if defined(HAVE_LIB_GPERFTOOLS)
-  bool          heapProfile;
-  std::string   heapProfilePrefix;
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.heapProfilePrefix = value;
+                        args.heapProfile = !args.heapProfilePrefix.empty();
+                      }),
+                      "heap-profile",
+                      "GPerf heap profile prefix, profiler is disabled by default",
+                      false);
 #endif
 
-  if (argc<12) {
-    std::cerr << "DrawMap " << std::endl;
-    std::cerr << "  <map directory> <style-file> " << std::endl;
-    std::cerr << "  <lat_top> <lon_left> <lat_bottom> <lon_right> " << std::endl;
-    std::cerr << "  <start zoom> <end zoom>" << std::endl;
-    std::cerr << "  <tile width> <tile height>" << std::endl;
-    std::cerr << "  <cairo|Qt|ag|opengl|noop|none>" << std::endl;
-#if defined(HAVE_LIB_GPERFTOOLS)
-    std::cerr << "  [heap profile prefix]" << std::endl;
-#endif
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "databaseDir",
+                          "Database directory");
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.style=value;
+                          }),
+                          "stylesheet",
+                          "Map stylesheet");
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& coord) {
+                            args.coordTopLeft = coord;
+                          }),
+                          "lat_top lon_left",
+                          "Bounding box top-left coordinate");
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& coord) {
+                            args.coordBottomRight = coord;
+                          }),
+                          "lat_bottom lon_right",
+                          "Bounding box bottom-right coordinate");
+
+  osmscout::CmdLineParseResult argResult=argParser.Parse();
+  if (argResult.HasError()) {
+    std::cerr << "ERROR: " << argResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-
-#if defined(HAVE_LIB_GPERFTOOLS)
-  heapProfile = false;
-
-  if (argc>12) {
-      heapProfile = true;
-      heapProfilePrefix = argv[12];
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
-#endif
-
-  map=argv[1];
-  style=argv[2];
-
-  if (sscanf(argv[3],"%lf",&latTop)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[4],"%lf",&lonLeft)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5],"%lf",&latBottom)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[6],"%lf",&lonRight)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[7],"%u",&startZoom)!=1) {
-    std::cerr << "start zoom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[8],"%u",&endZoom)!=1) {
-    std::cerr << "end zoom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[9],"%u",&tileWidth)!=1) {
-    std::cerr << "tile width is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[10],"%u",&tileHeight)!=1) {
-    std::cerr << "tile height is not numeric!" << std::endl;
-    return 1;
-  }
-
-  driver=argv[11];
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-  cairo_surface_t * cairoSurface=nullptr;
+  cairo_surface_t *cairoSurface=nullptr;
   cairo_t         *cairo=nullptr;
 #endif
 
@@ -233,10 +296,10 @@ int main(int argc, char* argv[])
 
 #endif
 
-  if (driver=="cairo") {
+  if (args.driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
+    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,args.TileWidth(),args.TileHeight());
 
     if (cairoSurface==nullptr) {
       std::cerr << "Cannot create cairo image cairoSurface" << std::endl;
@@ -254,26 +317,26 @@ int main(int argc, char* argv[])
     return 1;
 #endif
   }
-  else if (driver=="Qt") {
+  else if (args.driver=="Qt") {
     std::cout << "Using driver 'Qt'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
-    qtPixmap=new QPixmap(tileWidth,tileHeight);
+    qtPixmap=new QPixmap(args.TileWidth(),args.TileHeight());
     qtPainter=new QPainter(qtPixmap);
 #else
     std::cerr << "Driver 'Qt' is not enabled" << std::endl;
   return 1;
 #endif
-  } else if (driver == "agg") {
+  } else if (args.driver == "agg") {
     std::cout << "Using driver 'Agg'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-    buffer = new unsigned char[tileWidth * tileHeight * 3];
-    rbuf = new agg::rendering_buffer(buffer, tileWidth, tileHeight, tileWidth * 3);
+    buffer = new unsigned char[args.TileWidth() * args.TileHeight() * 3];
+    rbuf = new agg::rendering_buffer(buffer, args.TileWidth(), args.TileHeight(), args.TileWidth() * 3);
     pf = new osmscout::MapPainterAgg::AggPixelFormat(*rbuf);
 #else
     std::cerr << "Driver 'Agg' is not enabled" << std::endl;
     return 1;
 #endif
-  } else if (driver == "opengl") {
+  } else if (args.driver == "opengl") {
     std::cout << "Using driver 'OpenGL'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
     // Create the offscreen renderer
@@ -289,8 +352,8 @@ int main(int argc, char* argv[])
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, false);
     GLFWwindow* offscreen_context;
-    offscreen_context=glfwCreateWindow(tileWidth,
-                                       tileHeight,
+    offscreen_context=glfwCreateWindow(args.TileWidth(),
+                                       args.TileHeight(),
                                        "",
                                        nullptr,
                                        nullptr);
@@ -304,39 +367,40 @@ int main(int argc, char* argv[])
     return 1;
 #endif
   }
-  else if (driver=="noop") {
+  else if (args.driver=="noop") {
     std::cout << "Using driver 'noop'..." << std::endl;
   }
-  else if (driver=="none") {
+  else if (args.driver=="none") {
     std::cout << "Using driver 'none'..." << std::endl;
   }
   else {
-    std::cerr << "Unsupported driver '" << driver << "'" << std::endl;
+    std::cerr << "Unsupported driver '" << args.driver << "'" << std::endl;
     return 1;
   }
 
   osmscout::DatabaseParameter databaseParameter;
 
+  osmscout::log.Debug(args.debug);
   //databaseParameter.SetDebugPerformance(true);
 
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
   osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
-  if (!database->Open(map)) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
     return 1;
   }
 
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
-  if (!styleConfig->Load(style)) {
+  if (!styleConfig->Load(args.style)) {
     std::cerr << "Cannot open style" << std::endl;
     return 1;
   }
 
 #if defined(HAVE_LIB_GPERFTOOLS)
-  if (heapProfile){
-    HeapProfilerStart(heapProfilePrefix.c_str());
+  if (args.heapProfile){
+    HeapProfilerStart(args.heapProfilePrefix.c_str());
   }
 #endif
 
@@ -349,16 +413,16 @@ int main(int argc, char* argv[])
   drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
   searchParameter.SetUseMultithreading(true);
 
-  for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(startZoom,endZoom));
-       level<=osmscout::MagnificationLevel(std::max(startZoom,endZoom));
+  for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(args.startZoom,args.endZoom));
+       level<=osmscout::MagnificationLevel(std::max(args.startZoom,args.endZoom));
        level++) {
     LevelStats              stats(level.Get());
     osmscout::Magnification magnification(level);
 
     osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(magnification,
-                                                                  osmscout::GeoCoord(latBottom,lonLeft)));
+                                                                  osmscout::GeoCoord(args.LatBottom(),args.LonLeft())));
     osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(magnification,
-                                                                  osmscout::GeoCoord(latTop,lonRight)));
+                                                                  osmscout::GeoCoord(args.LatTop(),args.LonRight())));
     osmscout::OSMTileIdBox  tileArea(tileA,tileB);
 
     std::cout << "----------" << std::endl;
@@ -375,13 +439,13 @@ int main(int argc, char* argv[])
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
     osmscout::MapPainterOpenGL* openglMapPainter=nullptr;
-    if (driver == "opengl") {
+    if (args.driver == "opengl") {
       // This driver need a valid existing context
-      openglMapPainter=new osmscout::MapPainterOpenGL(tileWidth,
-                                                      tileHeight,
-                                                      DPI,
-                                                      tileWidth,
-                                                      tileHeight,
+      openglMapPainter=new osmscout::MapPainterOpenGL(args.TileWidth(),
+                                                      args.TileHeight(),
+                                                      args.dpi,
+                                                      args.TileWidth(),
+                                                      args.TileHeight(),
                                                       "/usr/share/fonts/TTF/DejaVuSans.ttf");
     }
 #endif
@@ -414,9 +478,9 @@ int main(int argc, char* argv[])
 
       projection.Set(tile,
                      magnification,
-                     DPI,
-                     tileWidth,
-                     tileHeight);
+                     args.dpi,
+                     args.TileWidth(),
+                     args.TileHeight());
 
       projection.GetDimensions(boundingBox);
       projection.SetLinearInterpolationUsage(level.Get() >= 10);
@@ -441,7 +505,7 @@ int main(int argc, char* argv[])
 
 
 #if defined(HAVE_LIB_GPERFTOOLS)
-      if (heapProfile){
+      if (args.heapProfile){
           std::ostringstream buff;
           buff << "load-" << level << "-" << tile.GetX() << "-" << tile.GetY();
           HeapProfilerDump(buff.str().c_str());
@@ -471,7 +535,7 @@ int main(int argc, char* argv[])
       osmscout::StopClock drawTimer;
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-      if (driver=="cairo") {
+      if (args.driver=="cairo") {
         //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
         cairoMapPainter.DrawMap(projection,
                                 drawParameter,
@@ -480,7 +544,7 @@ int main(int argc, char* argv[])
       }
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
-      if (driver=="Qt") {
+      if (args.driver=="Qt") {
         //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
         qtMapPainter.DrawMap(projection,
                              drawParameter,
@@ -489,7 +553,7 @@ int main(int argc, char* argv[])
       }
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-      if (driver == "agg") {
+      if (args.driver == "agg") {
         //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
         aggMapPainter.DrawMap(projection,
                               drawParameter,
@@ -498,19 +562,19 @@ int main(int argc, char* argv[])
       }
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
-      if (driver == "opengl") {
+      if (args.driver == "opengl") {
         //std::cout << data.nodes.size() << " " << data.ways.size() << " " << data.areas.size() << std::endl;
         openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
         openglMapPainter->SwapData();
         openglMapPainter->DrawMap();
       }
 #endif
-      if (driver == "noop") {
+      if (args.driver == "noop") {
         noOpMapPainter.DrawMap(projection,
                                drawParameter,
                                data);
       }
-      if (driver=="none") {
+      if (args.driver=="none") {
         // Do nothing
       }
 
@@ -531,7 +595,7 @@ int main(int argc, char* argv[])
   }
 
 #if defined(HAVE_LIB_GPERFTOOLS)
-  if (heapProfile){
+  if (args.heapProfile){
     HeapProfilerStop();
   }
 #endif
@@ -580,7 +644,7 @@ int main(int argc, char* argv[])
   database->Close();
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-  if (driver=="cairo") {
+  if (args.driver=="cairo") {
     cairo_destroy(cairo);
     cairo_surface_destroy(cairoSurface);
   }
