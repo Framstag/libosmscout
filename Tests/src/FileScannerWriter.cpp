@@ -340,7 +340,10 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords1,false);
+    osmscout::GeoBox boundingBox;
+    std::vector<osmscout::SegmentGeoBox> segments;
+
+    scanner.Read(inCoords1,segments,boundingBox,false);
     if (!Equals(inCoords1,outCoords1)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 1: Expected ";
 
@@ -354,7 +357,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords2,false);
+    scanner.Read(inCoords2,segments,boundingBox,false);
     if (!Equals(inCoords2,outCoords2)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 2: Expected ";
 
@@ -368,7 +371,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords3,false);
+    scanner.Read(inCoords3,segments,boundingBox,false);
     if (!Equals(inCoords3,outCoords3)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 3: Expected ";
 
@@ -382,7 +385,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords4,false);
+    scanner.Read(inCoords4,segments,boundingBox,false);
     if (!Equals(inCoords4,outCoords4)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 4: Expected ";
 
@@ -396,7 +399,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords5,false);
+    scanner.Read(inCoords5,segments,boundingBox,false);
     if (!Equals(inCoords5,outCoords5)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 5: Expected ";
 
@@ -410,7 +413,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords6,false);
+    scanner.Read(inCoords6,segments,boundingBox,false);
     if (!Equals(inCoords6,outCoords6)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 6: Expected ";
 
@@ -424,7 +427,7 @@ int main()
       errors++;
     }
 
-    scanner.Read(inCoords7,false);
+    scanner.Read(inCoords7,segments,boundingBox,false);
     if (!Equals(inCoords7,outCoords7)) {
       std::cerr << "Read/Write(std::vector<GeoCoord>) 7: Expected ";
 

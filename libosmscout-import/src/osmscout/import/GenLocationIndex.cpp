@@ -1790,7 +1790,10 @@ namespace osmscout {
         scanner.Read(postalCode);
         scanner.Read(location);
         scanner.Read(address);
-        scanner.Read(nodes,false);
+
+        GeoBox boundingBox;
+        std::vector<SegmentGeoBox> segments;
+        scanner.Read(nodes,segments,boundingBox,false);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetAreaTypeInfo(typeId);
@@ -1807,11 +1810,6 @@ namespace osmscout {
         if (!isAddress && !isPOI) {
           continue;
         }
-
-        GeoBox boundingBox;
-
-        GetBoundingBox(nodes,
-                       boundingBox);
 
         RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                       boundingBox.GetCenter());
@@ -2002,7 +2000,10 @@ namespace osmscout {
 
         scanner.Read(name);
         scanner.Read(postalCode);
-        scanner.Read(nodes,false);
+
+        GeoBox boundingBox;
+        std::vector<SegmentGeoBox> segments;
+        scanner.Read(nodes,segments,boundingBox,false);
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetWayTypeInfo(typeId);
@@ -2017,11 +2018,6 @@ namespace osmscout {
         if (!isPOI) {
           continue;
         }
-
-        GeoBox boundingBox;
-
-        GetBoundingBox(nodes,
-                       boundingBox);
 
         RegionRef region=regionIndex.GetRegionForNode(rootRegion,
                                                       boundingBox.GetCenter());

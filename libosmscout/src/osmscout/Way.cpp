@@ -88,6 +88,8 @@ namespace osmscout {
     featureValueBuffer.Read(scanner);
 
     scanner.Read(nodes,
+                 segments,
+                 bbox,
                  type->CanRoute() ||
                  type->GetOptimizeLowZoom());
     nextFileOffset=scanner.GetPos();
@@ -112,7 +114,7 @@ namespace osmscout {
 
     featureValueBuffer.Read(scanner);
 
-    scanner.Read(nodes,false);
+    scanner.Read(nodes,segments,bbox,false);
     nextFileOffset=scanner.GetPos();
   }
 

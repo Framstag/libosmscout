@@ -2187,7 +2187,10 @@ namespace osmscout {
     }
   }
 
-  void FileScanner::Read(std::vector<Point>& nodes,bool readIds)
+  void FileScanner::Read(std::vector<Point>& nodes,
+                         std::vector<SegmentGeoBox> &segments,
+                         GeoBox &bbox,
+                         bool readIds)
   {
     size_t  coordBitSize;
     uint8_t sizeByte;
@@ -2271,6 +2274,21 @@ namespace osmscout {
 
     nodes.resize(nodeCount);
 
+    // initialise segments
+    segments.resize((((uint64_t)nodeCount-1) / 1024)+1);
+    for (size_t i=0; i<segments.size(); i++){
+      auto &s = segments[i];
+      s.from = i*1024;
+      s.to = std::min(nodeCount, s.from + 1024); // exclusive
+    }
+
+    auto setCoord = [&](int i, const GeoCoord &coord){
+      nodes[i].SetCoord(coord);
+      GeoBox b(coord,coord);
+      bbox.Include(b);
+      segments[i/1024].bbox.Include(b);
+    };
+
     size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
 
     AssureByteBufferSize(byteBufferSize);
@@ -2279,7 +2297,7 @@ namespace osmscout {
 
     ReadCoord(firstCoord);
 
-    nodes[0].SetCoord(firstCoord);
+    setCoord(0, firstCoord);
 
     uint32_t latValue=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
     uint32_t lonValue=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
@@ -2296,8 +2314,8 @@ namespace osmscout {
         latValue+=latDelta;
         lonValue+=lonDelta;
 
-        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
-                                                 lonValue/lonConversionFactor-180.0));
+        setCoord(currentCoordPos, GeoCoord(latValue/latConversionFactor-90.0,
+                                           lonValue/lonConversionFactor-180.0));
 
         currentCoordPos++;
       }
@@ -2329,8 +2347,8 @@ namespace osmscout {
 
         lonValue+=lonDelta;
 
-        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
-                                                 lonValue/lonConversionFactor-180.0));
+        setCoord(currentCoordPos, GeoCoord(latValue/latConversionFactor-90.0,
+                                           lonValue/lonConversionFactor-180.0));
         currentCoordPos++;
       }
     }
@@ -2361,8 +2379,8 @@ namespace osmscout {
 
         lonValue+=lonDelta;
 
-        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
-                                                 lonValue/lonConversionFactor-180.0));
+        setCoord(currentCoordPos, GeoCoord(latValue/latConversionFactor-90.0,
+                                           lonValue/lonConversionFactor-180.0));
 
         currentCoordPos++;
       }
@@ -2390,15 +2408,6 @@ namespace osmscout {
           idCurrent++;
         }
       }
-
-      /*
-      uint8_t serial;
-
-      for (size_t i=0; i<nodes.size(); i++) {
-        Read(serial);
-
-        nodes[i].SetSerial(serial);
-      }*/
     }
   }
 
