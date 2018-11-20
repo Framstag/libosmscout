@@ -361,7 +361,7 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const ObjectFileRef& ref,
                         const FeatureValueBuffer& buffer,
-                        const std::vector<Point>& nodes);
+                        const Way& way);
 
     void PrepareWays(const StyleConfig& styleConfig,
                      const Projection& projection,
