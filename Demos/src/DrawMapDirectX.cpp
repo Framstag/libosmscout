@@ -28,6 +28,7 @@ src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 7.465
 
 #include <SDKDDKVer.h>
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX // msvc issue with std::max/min
 #include <windows.h>
 #include <tchar.h>
 #include <cmath>
