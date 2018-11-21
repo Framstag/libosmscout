@@ -184,6 +184,8 @@ std::string formatAlloc(double size)
 
 class PerformanceTestBackend {
 public:
+  virtual ~PerformanceTestBackend() = default;
+
   virtual void DrawMap(const osmscout::TileProjection &/*projection*/,
                        const osmscout::MapParameter &/*drawParameter*/,
                        const osmscout::MapData &/*data*/)
