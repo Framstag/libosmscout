@@ -76,6 +76,11 @@ void OverlayObject::addPoint(double lat, double lon)
 osmscout::GeoBox OverlayObject::boundingBox() const
 {
   QMutexLocker locker(&lock);
+  return boundingBoxInternal();
+}
+
+osmscout::GeoBox OverlayObject::boundingBoxInternal() const
+{
   if (!box.IsValid() && !nodes.empty()){
     osmscout::GetBoundingBox(nodes,box);
   }
@@ -84,7 +89,6 @@ osmscout::GeoBox OverlayObject::boundingBox() const
 
 std::vector<SegmentGeoBox> OverlayObject::segments() const
 {
-  QMutexLocker locker(&lock);
   if (segmentsBoxes.empty() && !nodes.empty()){
     osmscout::ComputeSegmentBoxes(nodes, segmentsBoxes, nodes.size(), 1000);
   }
@@ -144,7 +148,7 @@ bool OverlayWay::toWay(osmscout::WayRef &way,
   way->SetFeatures(features);
 
   way->nodes=nodes;
-  way->bbox=boundingBox();
+  way->bbox=boundingBoxInternal();
   way->segments=segments();
   return true;
 }
@@ -175,7 +179,7 @@ bool OverlayArea::toArea(osmscout::AreaRef &area,
   outerRing.SetType(type);
   outerRing.MarkAsOuterRing();
   outerRing.nodes=nodes;
-  outerRing.bbox=boundingBox();
+  outerRing.bbox=boundingBoxInternal();
   outerRing.segments=segments();
 
   osmscout::FeatureValueBuffer features;

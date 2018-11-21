@@ -132,11 +132,15 @@ public:
 
   osmscout::GeoBox boundingBox() const;
 
-  std::vector<SegmentGeoBox> segments() const;
-
 protected:
   void setupFeatures(const osmscout::TypeInfoRef &type,
                      osmscout::FeatureValueBuffer &features) const;
+
+  // internal, lock have to be acquired
+  osmscout::GeoBox boundingBoxInternal() const;
+
+  // internal, lock have to be acquired
+  std::vector<SegmentGeoBox> segments() const;
 };
 
 
