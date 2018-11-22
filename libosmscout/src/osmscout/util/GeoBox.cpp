@@ -88,6 +88,22 @@ namespace osmscout {
                           other.GetMaxCoord().GetLon()));
   }
 
+  void GeoBox::Include(const GeoCoord& point)
+  {
+    if(!valid){
+      minCoord=point;
+      maxCoord=point;
+      valid=true;
+      return;
+    }
+
+    minCoord.Set(std::min(minCoord.GetLat(),point.GetLat()),
+                 std::min(minCoord.GetLon(),point.GetLon()));
+
+    maxCoord.Set(std::max(maxCoord.GetLat(),point.GetLat()),
+                 std::max(maxCoord.GetLon(),point.GetLon()));
+  }
+
   GeoBox GeoBox::Intersection(const GeoBox& other) const
   {
     if (!valid || !other.valid || !Intersects(other))
