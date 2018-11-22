@@ -2274,20 +2274,17 @@ namespace osmscout {
 
     nodes.resize(nodeCount);
 
-    // initialise segments
-    segments.resize((((uint64_t)nodeCount-1) / 1024)+1);
-    for (size_t i=0; i<segments.size(); i++){
-      auto &s = segments[i];
-      s.from = i*1024;
-      s.to = std::min(nodeCount, s.from + 1024); // exclusive
+    // we will prepare segment bounding boxes just for long point vectors
+    bool prepareSegments = nodeCount > 1024;
+    if (prepareSegments) {
+      // initialise segments
+      segments.resize((((uint64_t) nodeCount - 1) / 1024) + 1);
+      for (size_t i = 0; i < segments.size(); i++) {
+        auto &s = segments[i];
+        s.from = i * 1024;
+        s.to = std::min(nodeCount, s.from + 1024); // exclusive
+      }
     }
-
-    auto setCoord = [&](int i, const GeoCoord &coord){
-      nodes[i].SetCoord(coord);
-      GeoBox b(coord,coord);
-      bbox.Include(b);
-      segments[i/1024].bbox.Include(b);
-    };
 
     size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
 
@@ -2297,10 +2294,51 @@ namespace osmscout {
 
     ReadCoord(firstCoord);
 
-    setCoord(0, firstCoord);
+    uint32_t latValue=(uint32_t)round((firstCoord.GetLat()+90.0)*latConversionFactor);
+    uint32_t lonValue=(uint32_t)round((firstCoord.GetLon()+180.0)*lonConversionFactor);
 
-    uint32_t latValue=(uint32_t)round((nodes[0].GetLat()+90.0)*latConversionFactor);
-    uint32_t lonValue=(uint32_t)round((nodes[0].GetLon()+180.0)*lonConversionFactor);
+    uint32_t bboxMinLon=lonValue;
+    uint32_t bboxMaxLon=lonValue;
+    uint32_t bboxMinLat=latValue;
+    uint32_t bboxMaxLat=latValue;
+
+    uint32_t segMinLon=lonValue;
+    uint32_t segMaxLon=lonValue;
+    uint32_t segMinLat=latValue;
+    uint32_t segMaxLat=latValue;
+
+    // this lambda setup coordinate to given node and update bounding box and segments
+    auto setCoord = [&](size_t i, const uint32_t &latValue, const uint32_t &lonValue){
+      nodes[i].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
+                                 lonValue/lonConversionFactor-180.0));
+
+      bboxMinLon=std::min(bboxMinLon,lonValue);
+      bboxMaxLon=std::max(bboxMaxLon,lonValue);
+      bboxMinLat=std::min(bboxMinLat,latValue);
+      bboxMaxLat=std::max(bboxMaxLat,latValue);
+
+      if (prepareSegments) {
+        if (i % 1024 == 0) { // first node of segment
+          segMinLon = lonValue;
+          segMaxLon = lonValue;
+          segMinLat = latValue;
+          segMaxLat = latValue;
+        } else {
+          segMinLon = std::min(segMinLon, lonValue);
+          segMaxLon = std::max(segMaxLon, lonValue);
+          segMinLat = std::min(segMinLat, latValue);
+          segMaxLat = std::max(segMaxLat, latValue);
+        }
+        if (i % 1024 == 1023 || i == nodeCount - 1) { // last node of segment
+          segments[i / 1024].bbox.Set(GeoCoord(segMinLat / latConversionFactor - 90.0,
+                                               segMinLon / lonConversionFactor - 180.0),
+                                      GeoCoord(segMaxLat / latConversionFactor - 90.0,
+                                               segMaxLon / lonConversionFactor - 180.0));
+        }
+      }
+    };
+
+    nodes[0].SetCoord(firstCoord);
 
     Read((char*)byteBuffer,byteBufferSize);
 
@@ -2314,8 +2352,7 @@ namespace osmscout {
         latValue+=latDelta;
         lonValue+=lonDelta;
 
-        setCoord(currentCoordPos, GeoCoord(latValue/latConversionFactor-90.0,
-                                           lonValue/lonConversionFactor-180.0));
+        setCoord(currentCoordPos, latValue, lonValue);
 
         currentCoordPos++;
       }
@@ -2347,8 +2384,7 @@ namespace osmscout {
 
         lonValue+=lonDelta;
 
-        setCoord(currentCoordPos, GeoCoord(latValue/latConversionFactor-90.0,
-                                           lonValue/lonConversionFactor-180.0));
+        setCoord(currentCoordPos, latValue, lonValue);
         currentCoordPos++;
       }
     }
@@ -2379,12 +2415,14 @@ namespace osmscout {
 
         lonValue+=lonDelta;
 
-        setCoord(currentCoordPos, GeoCoord(latValue/latConversionFactor-90.0,
-                                           lonValue/lonConversionFactor-180.0));
+        setCoord(currentCoordPos, latValue, lonValue);
 
         currentCoordPos++;
       }
     }
+
+    bbox.Set(GeoCoord(bboxMinLat/latConversionFactor-90.0,bboxMinLon/lonConversionFactor-180.0),
+             GeoCoord(bboxMaxLat/latConversionFactor-90.0,bboxMaxLon/lonConversionFactor-180.0));
 
     if (hasNodes) {
       size_t idCurrent=0;
