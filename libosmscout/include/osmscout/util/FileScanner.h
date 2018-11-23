@@ -162,6 +162,8 @@ namespace osmscout {
 
     void ReadTypeId(TypeId& id,
                     uint8_t maxBytes);
+
+    std::vector<ObjectFileRef> ReadObjectFileRefs(size_t count);
   };
 
   /**
