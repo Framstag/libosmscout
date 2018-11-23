@@ -504,7 +504,7 @@ namespace osmscout {
                        double pixelOffset) const;
 
     bool IsVisibleWay(const Projection& projection,
-                      const std::vector<Point>& nodes,
+                      const GeoBox& boundingBox,
                       double pixelOffset) const;
 
     void Transform(const Projection& projection,

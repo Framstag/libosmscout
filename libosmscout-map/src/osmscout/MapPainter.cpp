@@ -443,6 +443,10 @@ namespace osmscout {
                                  const GeoBox& boundingBox,
                                  double pixelOffset) const
   {
+    if (!boundingBox.IsValid()){
+      return false;
+    }
+
     double x;
     double y;
 
@@ -501,17 +505,12 @@ namespace osmscout {
   }
 
   bool MapPainter::IsVisibleWay(const Projection& projection,
-                                const std::vector<Point>& nodes,
+                                const GeoBox& boundingBox,
                                 double pixelOffset) const
   {
-    if (nodes.empty()) {
+    if (!boundingBox.IsValid()){
       return false;
     }
-
-    osmscout::GeoBox boundingBox;
-
-    osmscout::GetBoundingBox(nodes,
-                             boundingBox);
 
     double x;
     double y;
@@ -1594,7 +1593,7 @@ namespace osmscout {
       data.lineWidth=lineWidth;
 
       if (!IsVisibleWay(projection,
-                        way.nodes,
+                        way.GetBoundingBox(),
                         lineWidth/2)) {
         continue;
       }

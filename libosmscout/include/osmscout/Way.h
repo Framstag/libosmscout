@@ -152,7 +152,7 @@ namespace osmscout {
 
     inline GeoBox GetBoundingBox() const
     {
-      if (bbox.IsValid()) {
+      if (bbox.IsValid() || nodes.empty()) {
         return bbox;
       }
       GeoBox boundingBox;
