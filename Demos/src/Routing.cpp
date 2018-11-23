@@ -712,7 +712,7 @@ int main(int argc, char* argv[])
                                                         target,
                                                         parameter);
 
-  if (!cmdLineParseResult.Success()) {
+  if (!result.Success()) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();
     return 1;
@@ -784,23 +784,16 @@ int main(int argc, char* argv[])
 
   osmscout::StopClock postprocessTimer;
 
-  std::set<std::string> motorwayTypeNames;
-  std::set<std::string> motorwayLinkTypeNames;
-  std::set<std::string> junctionTypeNames;
+  std::set<std::string>                    motorwayTypeNames{"highway_motorway",
+                                                             "highway_motorway_trunk",
+                                                             "highway_trunk",
+                                                             "highway_motorway_primary"};
+  std::set<std::string>                    motorwayLinkTypeNames{"highway_motorway_link",
+                                                                 "highway_trunk_link"};
+  std::set<std::string>                    junctionTypeNames{"highway_motorway_junction"};
 
-  junctionTypeNames.insert("highway_motorway_junction");
-
-  motorwayTypeNames.insert("highway_motorway");
-  motorwayLinkTypeNames.insert("highway_motorway_link");
-
-  motorwayTypeNames.insert("highway_motorway_trunk");
-  motorwayTypeNames.insert("highway_trunk");
-
-  motorwayLinkTypeNames.insert("highway_trunk_link");
-  motorwayTypeNames.insert("highway_motorway_primary");
-
-  std::vector<osmscout::RoutingProfileRef> profiles={routingProfile};
-  std::vector<osmscout::DatabaseRef>       databases={database};
+  std::vector<osmscout::RoutingProfileRef> profiles{routingProfile};
+  std::vector<osmscout::DatabaseRef>       databases{database};
 
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  profiles,
