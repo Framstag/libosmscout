@@ -133,6 +133,7 @@ GRADES
     "pebblestone"
     "stone"
     "wood"
+    "marble"
   }
 
   SURFACE GRADE 3 {
@@ -146,6 +147,7 @@ GRADES
     "mud"
     "sand"
     "soil"
+    "woodchips"
   }
 
   SURFACE GRADE 4 {
