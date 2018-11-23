@@ -91,6 +91,20 @@ namespace osmscout {
     void AssureByteBufferSize(size_t size);
     void FreeBuffer();
 
+    /**
+     * Reads bytes to internal temporary buffer
+     * or just return pointer to memory mapped file.
+     *
+     * In case of internal buffer, data are valid until
+     * next read. In case of memory mapped file, data
+     * are valid until closing the reader and method don't
+     * copy the memory - it should be fast.
+     *
+     * @param bytes
+     * @return pointer to byteBuffer or memory mapped file
+     */
+    char* ReadInternal(size_t bytes);
+
   public:
     FileScanner();
     virtual ~FileScanner();

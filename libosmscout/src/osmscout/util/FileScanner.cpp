@@ -89,7 +89,6 @@ namespace osmscout {
 
     byteBuffer=new uint8_t[size];
     byteBufferSize=size;
-
   }
 
   void FileScanner::FreeBuffer()
@@ -433,6 +432,36 @@ namespace osmscout {
 
     return (FileOffset)filepos;
 #endif
+  }
+
+  char* FileScanner::ReadInternal(size_t bytes)
+  {
+    if (HasError()) {
+      throw IOException(filename,"Cannot read byte array","File already in error state");
+    }
+
+#if defined(HAVE_MMAP) || defined(_WIN32)
+    if (this->buffer!=NULL) {
+      if (offset+(FileOffset)bytes-1>=size) {
+        hasError=true;
+        throw IOException(filename,"Cannot read byte array","Cannot read beyond end of file");
+      }
+
+      char *res = &this->buffer[offset];
+
+      offset+=bytes;
+
+      return res;
+    }
+#endif
+
+    AssureByteBufferSize(bytes);
+    hasError=fread(byteBuffer,1,bytes,file)!=bytes;
+
+    if (hasError) {
+      throw IOException(filename,"Cannot read byte array");
+    }
+    return (char*)byteBuffer;
   }
 
   void FileScanner::Read(char* buffer, size_t bytes)
@@ -2288,8 +2317,6 @@ namespace osmscout {
 
     size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
 
-    AssureByteBufferSize(byteBufferSize);
-
     GeoCoord firstCoord;
 
     ReadCoord(firstCoord);
@@ -2340,14 +2367,14 @@ namespace osmscout {
 
     nodes[0].SetCoord(firstCoord);
 
-    Read((char*)byteBuffer,byteBufferSize);
+    uint8_t *tmpBuffer = (uint8_t*)ReadInternal(byteBufferSize);
 
     if (coordBitSize==16) {
       size_t currentCoordPos=1;
 
       for (size_t i=0; i<byteBufferSize; i+=2) {
-        int32_t latDelta=(int8_t)byteBuffer[i];
-        int32_t lonDelta=(int8_t)byteBuffer[i+1];
+        int32_t latDelta=(int8_t)tmpBuffer[i];
+        int32_t lonDelta=(int8_t)tmpBuffer[i+1];
 
         latValue+=latDelta;
         lonValue+=lonDelta;
@@ -2361,8 +2388,8 @@ namespace osmscout {
       size_t currentCoordPos=1;
 
       for (size_t i=0; i<byteBufferSize; i+=4) {
-        uint32_t latUDelta=byteBuffer[i+0] | (byteBuffer[i+1]<<8);
-        uint32_t lonUDelta=byteBuffer[i+2] | (byteBuffer[i+3]<<8);
+        uint32_t latUDelta=tmpBuffer[i+0] | (tmpBuffer[i+1]<<8);
+        uint32_t lonUDelta=tmpBuffer[i+2] | (tmpBuffer[i+3]<<8);
         int32_t  latDelta;
         int32_t  lonDelta;
 
@@ -2392,8 +2419,8 @@ namespace osmscout {
       size_t currentCoordPos=1;
 
       for (size_t i=0; i<byteBufferSize; i+=6) {
-        uint32_t latUDelta=(byteBuffer[i+0]) | (byteBuffer[i+1]<<8) | (byteBuffer[i+2]<<16);
-        uint32_t lonUDelta=(byteBuffer[i+3]) | (byteBuffer[i+4]<<8) | (byteBuffer[i+5]<<16);
+        uint32_t latUDelta=(tmpBuffer[i+0]) | (tmpBuffer[i+1]<<8) | (tmpBuffer[i+2]<<16);
+        uint32_t lonUDelta=(tmpBuffer[i+3]) | (tmpBuffer[i+4]<<8) | (tmpBuffer[i+5]<<16);
         int32_t  latDelta;
         int32_t  lonDelta;
 
