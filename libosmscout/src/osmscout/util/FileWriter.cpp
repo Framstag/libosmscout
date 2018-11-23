@@ -40,7 +40,7 @@ namespace osmscout {
   const uint64_t FileWriter::MAX_NODES=0x03FFFFFF; // 26 bits
 
   FileWriter::FileWriter()
-   : file(NULL),
+   : file(nullptr),
      hasError(true)
   {
     // no code
@@ -48,7 +48,7 @@ namespace osmscout {
 
   FileWriter::~FileWriter()
   {
-    if (file!=NULL) {
+    if (file!=nullptr) {
       log.Warn() << "Automatically closing FileWriter for file '" << filename << "'!";
       CloseFailsafe();
     }
@@ -60,7 +60,7 @@ namespace osmscout {
    */
   void FileWriter::Open(const std::string& filename)
   {
-    if (file!=NULL) {
+    if (file!=nullptr) {
       throw IOException(filename,"Error opening file for writing","File already opened");
     }
 
@@ -69,7 +69,7 @@ namespace osmscout {
 
     file=fopen(filename.c_str(),"w+b");
 
-    if (file==NULL) {
+    if (file==nullptr) {
       throw IOException(filename,"Error opening file for writing");
     }
 
@@ -82,27 +82,27 @@ namespace osmscout {
    */
   void FileWriter::Close()
   {
-    if (file==NULL) {
+    if (file==nullptr) {
       throw IOException(filename,"Cannot close file","File already closed");
     }
 
     if (fclose(file)!=0) {
-      file=NULL;
+      file=nullptr;
       throw IOException(filename,"Cannot close file");
     }
 
-    file=NULL;
+    file=nullptr;
   }
 
   void FileWriter::CloseFailsafe()
   {
-    if (file==NULL) {
+    if (file==nullptr) {
       return;
     }
 
     fclose(file);
 
-    file=NULL;
+    file=nullptr;
   }
 
   std::string FileWriter::GetFilename() const
@@ -231,7 +231,7 @@ namespace osmscout {
       throw IOException(filename,"Cannot write bool","File already in error state");
     }
 
-    char value=boolean ? 1 : 0;
+    char value=boolean ? (char)1 : (char)0;
 
     hasError=fwrite((const char*)&value,sizeof(char),1,file)!=1;
 
