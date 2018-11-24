@@ -115,6 +115,11 @@ namespace osmscout {
       return vehicle;
     }
 
+    inline double GetVehicleMaxSpeed() const
+    {
+      return vehicleMaxSpeed;
+    }
+
     void SetCostLimitDistance(const Distance &costLimitDistance);
 
     inline Distance GetCostLimitDistance() const override
