@@ -1026,7 +1026,7 @@ namespace osmscout {
             DrawPrimitive *primitive = p.get();
             FillStyleRef fillStyle = primitive->GetFillStyle();
 
-            if (dynamic_cast<PolygonPrimitive *>(primitive) != NULL) {
+            if (dynamic_cast<PolygonPrimitive *>(primitive) !=nullptr) {
               PolygonPrimitive *polygon = dynamic_cast<PolygonPrimitive *>(primitive);
               double meterPerPixelLat = (40075.016686 * 1000) * std::cos(node->GetCoords().GetLat()) /
                                         (float) (std::pow(2, (Magnification.GetLevel() + 9)));
