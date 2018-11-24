@@ -39,6 +39,9 @@
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 
+#include <osmscout/navigation/Engine.h>
+#include <osmscout/navigation/Agents.h>
+
 #include <osmscout/util/CmdLineParsing.h>
 
 struct Arguments
@@ -229,6 +232,51 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
   steps.emplace_back(time,maxSpeed,currentNode->GetLocation());
 }
 
+class Simulator
+{
+private:
+  void ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages);
+
+public:
+  void Simulate(const osmscout::DatabaseRef& database,
+                const PathGenerator& generator);
+};
+
+void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
+{
+  for (const auto& message : messages) {
+    if (dynamic_cast<osmscout::PositionChangedMessage*>(message.get())!=nullptr) {
+      //auto positionChangedMessage=dynamic_cast<osmscout::PositionChangedMessage*>(message.get());
+    }
+    else if (dynamic_cast<osmscout::StreetChangedMessage*>(message.get())!=nullptr) {
+      auto streetChangedMessage=dynamic_cast<osmscout::StreetChangedMessage*>(message.get());
+
+      std::cout << osmscout::TimestampToISO8601TimeString(streetChangedMessage->timestamp) << " Street name: " << streetChangedMessage->name << std::endl;
+    }
+  }
+}
+
+void Simulator::Simulate(const osmscout::DatabaseRef& database,
+                         const PathGenerator& generator)
+{
+  auto locationDescriptionService=std::make_shared<osmscout::LocationDescriptionService>(database);
+
+  osmscout::NavigationEngine engine{
+    std::make_shared<osmscout::PositionAgent>(),
+    std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService)
+  };
+
+  for (const auto& point : generator.steps) {
+    auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(point.time,true,point.coord,point.speed);
+
+    ProcessMessages(engine.Process(gpsUpdateMessage));
+
+    auto timeTickMessage=std::make_shared<osmscout::TimeTickMessage>(point.time);
+
+    ProcessMessages(engine.Process(timeTickMessage));
+  }
+}
+
 void DumpGpxFile(const std::string& fileName,
                  const std::list<osmscout::Point>& points,
                  const PathGenerator& generator)
@@ -261,7 +309,7 @@ void DumpGpxFile(const std::string& fileName,
 
   stream << "\t<rte>" << std::endl;
   stream << "\t\t<name>Route</name>" << std::endl;
-  for (const auto &point : points) {
+  for (const auto& point : points) {
     stream << "\t\t\t<rtept lat=\""<< point.GetLat() << "\" lon=\""<< point.GetLon() <<"\">" << std::endl;
     stream << "\t\t\t</rtept>" << std::endl;
   }
@@ -270,7 +318,7 @@ void DumpGpxFile(const std::string& fileName,
   stream << "\t<trk>" << std::endl;
   stream << "\t\t<name>GPS</name>" << std::endl;
   stream << "\t\t<trkseg>" << std::endl;
-  for (const auto &point : generator.steps) {
+  for (const auto& point : generator.steps) {
     stream << "\t\t\t<trkpt lat=\""<< point.coord.GetLat() << "\" lon=\""<< point.coord.GetLon() <<"\">" << std::endl;
     stream << "\t\t\t\t<time>" << osmscout::TimestampToISO8601TimeString(point.time) << "</time>" << std::endl;
     stream << "\t\t\t\t<speed>" << point.speed/3.6 << "</speed>" << std::endl;
@@ -512,7 +560,9 @@ int main(int argc, char* argv[])
                 pathGenerator);
   }
 
+  Simulator simulator;
 
+  simulator.Simulate(database,pathGenerator);
 
   router->Close();
 

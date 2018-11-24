@@ -61,7 +61,9 @@ set(HEADER_FILES_ROUTING
     include/osmscout/routing/MultiDBRoutingState.h)
 
 set(HEADER_FILES_NAVIGATION
-        include/osmscout/navigation/Navigation.h)
+    include/osmscout/navigation/Agents.h
+    include/osmscout/navigation/Engine.h
+    include/osmscout/navigation/Navigation.h)
 
 set(HEADER_FILES
     ${HEADER_FILES_OST}
@@ -159,6 +161,8 @@ set(SOURCE_FILES
     src/osmscout/routing/MultiDBRoutingService.cpp
     src/osmscout/routing/TurnRestriction.cpp
     src/osmscout/routing/MultiDBRoutingState.cpp
+    src/osmscout/navigation/Agents.cpp
+    src/osmscout/navigation/Engine.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp

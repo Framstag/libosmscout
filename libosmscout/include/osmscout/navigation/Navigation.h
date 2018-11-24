@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_NAVIGATION_H
-#define OSMSCOUT_NAVIGATION_H
+#ifndef OSMSCOUT_NAVIGATION_NAVIGATION_H
+#define OSMSCOUT_NAVIGATION_NAVIGATION_H
 
 /*
  This source is part of the libosmscout library
