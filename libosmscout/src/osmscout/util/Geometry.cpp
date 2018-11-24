@@ -284,6 +284,21 @@ namespace osmscout {
     lon2=lon1+L*180.0/M_PI;
   }
 
+  GeoCoord GetEllipsoidalDistance(const GeoCoord& position,
+                                  double bearing,
+                                  const Distance &distance)
+  {
+    double lat,lon;
+
+    GetEllipsoidalDistance(position.GetLat(),
+                           position.GetLon(),
+                           bearing,
+                           distance,
+                           lat,lon);
+
+    return {lat,lon};
+  }
+
   double GetSphericalBearingInitial(const GeoCoord& a,
                                     const GeoCoord& b)
   {

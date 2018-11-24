@@ -339,16 +339,11 @@ namespace osmscout {
                    (a2.GetY()-a1.GetY())*(a1.GetX()-b1.GetX());
 
     if (denr==0.0) {
-      if (ua_numr==0.0 && ub_numr==0.0) {
-        // This gives currently false hits because of number resolution problems, if two lines are very
-        // close together and for example are part of a very details node curve intersections are detected.
+      // This gives currently false hits because of number resolution problems, if two lines are very
+      // close together and for example are part of a very details node curve intersections are detected.
 
-        // FIXME: setup intersection
-        return true;
-      }
-      else {
-        return false;
-      }
+      // FIXME: setup intersection
+      return ua_numr==0.0 && ub_numr==0.0;
     }
 
     double ua=ua_numr/denr;
@@ -1048,6 +1043,15 @@ namespace osmscout {
   extern OSMSCOUT_API void GetEllipsoidalDistance(double lat1, double lon1,
                                                   double bearing, const Distance &distance,
                                                   double& lat2, double& lon2);
+
+  /**
+   * \ingroup Geometry
+   * Given a starting point and a bearing and a distance calculates the
+   * coordinates of the resulting point in the (WGS-84) ellipsoid.
+   */
+  extern OSMSCOUT_API GeoCoord GetEllipsoidalDistance(const GeoCoord& position,
+                                                      double bearing,
+                                                      const Distance &distance);
 
   /**
    * \ingroup Geometry
