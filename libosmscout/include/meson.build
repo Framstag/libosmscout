@@ -49,6 +49,7 @@ osmscoutHeader = [
             'osmscout/routing/DBFileOffset.h',
             'osmscout/routing/TurnRestriction.h',
             'osmscout/routing/MultiDBRoutingState.h',
+            'osmscout/navigation/Navigation.h',
             'osmscout/Area.h',
             'osmscout/AreaDataFile.h',
             'osmscout/AreaAreaIndex.h',

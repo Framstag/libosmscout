@@ -60,11 +60,15 @@ set(HEADER_FILES_ROUTING
     include/osmscout/routing/TurnRestriction.h
     include/osmscout/routing/MultiDBRoutingState.h)
 
+set(HEADER_FILES_NAVIGATION
+        include/osmscout/navigation/Navigation.h)
+
 set(HEADER_FILES
     ${HEADER_FILES_OST}
     ${HEADER_FILES_SYSTEM}
     ${HEADER_FILES_UTIL}
     ${HEADER_FILES_ROUTING}
+    ${HEADER_FILES_NAVIGATION}
     include/osmscout/CoreImportExport.h
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
@@ -87,7 +91,6 @@ set(HEADER_FILES
     include/osmscout/LocationIndex.h
     include/osmscout/LocationService.h
     include/osmscout/LocationDescriptionService.h
-    include/osmscout/Navigation.h
     include/osmscout/Node.h
     include/osmscout/NodeDataFile.h
     include/osmscout/NumericIndex.h

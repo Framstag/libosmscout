@@ -23,7 +23,7 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/Settings.h>
 #include <osmscout/Router.h>
-#include <osmscout/Navigation.h>
+#include <osmscout/navigation/Navigation.h>
 
 #include <osmscout/ClientQtImportExport.h>
 

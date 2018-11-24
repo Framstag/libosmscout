@@ -17,7 +17,7 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <osmscout/Navigation.h>
+#include <osmscout/navigation/Navigation.h>
 #include <osmscout/GeoCoord.h>
 
 namespace osmscout {

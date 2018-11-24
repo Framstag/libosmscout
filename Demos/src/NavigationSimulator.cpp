@@ -122,11 +122,14 @@ public:
   struct Step
   {
     osmscout::Timestamp time;
+    double              speed;
     osmscout::GeoCoord  coord;
 
     Step(const osmscout::Timestamp& time,
+         double speed,
          const osmscout::GeoCoord& coord)
     : time(time),
+      speed(speed),
       coord(coord)
     {
       // no code
@@ -165,9 +168,18 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
   auto time=std::chrono::system_clock::now();
 
   lastPosition=currentNode->GetLocation();
-  steps.emplace_back(time,lastPosition);
 
-  time+=std::chrono::seconds(1);
+  {
+    osmscout::RouteDescription::MaxSpeedDescriptionRef maxSpeedPath=std::dynamic_pointer_cast<osmscout::RouteDescription::MaxSpeedDescription>(currentNode->GetDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC));
+
+    if (maxSpeedPath) {
+      maxSpeed=maxSpeedPath->GetMaxSpeed();
+    }
+
+    steps.emplace_back(time,maxSpeed,lastPosition);
+    time+=std::chrono::seconds(1);
+  }
+
 
   ++nextNode;
 
@@ -200,7 +212,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
       lastPosition=lastPosition.Add(bearing*180/M_PI,
                                     osmscout::Distance::Of<osmscout::Kilometer>(segmentDistance));
 
-      steps.emplace_back(time,lastPosition);
+      steps.emplace_back(time,maxSpeed,lastPosition);
       time+=std::chrono::seconds(1);
 
       restTime=0;
@@ -214,7 +226,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
     ++nextNode;
   }
 
-  steps.emplace_back(time,currentNode->GetLocation());
+  steps.emplace_back(time,maxSpeed,currentNode->GetLocation());
 }
 
 void DumpGpxFile(const std::string& fileName,
@@ -261,6 +273,7 @@ void DumpGpxFile(const std::string& fileName,
   for (const auto &point : generator.steps) {
     stream << "\t\t\t<trkpt lat=\""<< point.coord.GetLat() << "\" lon=\""<< point.coord.GetLon() <<"\">" << std::endl;
     stream << "\t\t\t\t<time>" << osmscout::TimestampToISO8601TimeString(point.time) << "</time>" << std::endl;
+    stream << "\t\t\t\t<speed>" << point.speed/3.6 << "</speed>" << std::endl;
     stream << "\t\t\t\t<fix>2d</fix>" << std::endl;
     stream << "\t\t\t</trkpt>" << std::endl;
   }
@@ -498,6 +511,8 @@ int main(int argc, char* argv[])
                 points,
                 pathGenerator);
   }
+
+
 
   router->Close();
 
