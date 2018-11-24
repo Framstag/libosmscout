@@ -22,6 +22,10 @@
 
   Long: "In den Hüchten" Dortmund => Promenadenweg Bonn
     51.5717798 7.4587852  50.6890143 7.1360549
+
+  TODOs:
+  * The vehicle always has the maximum speed allowed. Acceleration and deaccelaration
+    are not taken into account. This result in a little bit unrealistic GPS positions.
  */
 
 #include <iostream>
@@ -114,14 +118,16 @@ static void GetCarSpeedTable(std::map<std::string,double>& map)
 
 class PathGenerator
 {
-private:
+public:
   struct Step
   {
     osmscout::Timestamp time;
     osmscout::GeoCoord  coord;
 
-    explicit Step(const osmscout::GeoCoord& coord)
-    : coord(coord)
+    Step(const osmscout::Timestamp& time,
+         const osmscout::GeoCoord& coord)
+    : time(time),
+      coord(coord)
     {
       // no code
     }
@@ -147,7 +153,6 @@ public:
 PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
                              double maxSpeed)
 {
-  auto now=std::chrono::system_clock::now();
   size_t             tickCount=0;
   double             totalTime=0.0;
   double             restTime=0.0;
@@ -157,12 +162,12 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
 
   assert(currentNode!=description.Nodes().end());
 
-  auto time=now;
+  auto time=std::chrono::system_clock::now();
 
   lastPosition=currentNode->GetLocation();
-  time+=std::chrono::seconds(1);
+  steps.emplace_back(time,lastPosition);
 
-  steps.emplace_back(lastPosition);
+  time+=std::chrono::seconds(1);
 
   ++nextNode;
 
@@ -195,7 +200,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
       lastPosition=lastPosition.Add(bearing*180/M_PI,
                                     osmscout::Distance::Of<osmscout::Kilometer>(segmentDistance));
 
-      steps.emplace_back(lastPosition);
+      steps.emplace_back(time,lastPosition);
       time+=std::chrono::seconds(1);
 
       restTime=0;
@@ -209,7 +214,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
     ++nextNode;
   }
 
-  steps.emplace_back(currentNode->GetLocation());
+  steps.emplace_back(time,currentNode->GetLocation());
 }
 
 void DumpGpxFile(const std::string& fileName,
@@ -270,7 +275,7 @@ void DumpGpxFile(const std::string& fileName,
 
 int main(int argc, char* argv[])
 {
-  osmscout::CmdLineParser   argParser("Routing",
+  osmscout::CmdLineParser   argParser("NavigationSimulator",
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
   Arguments                 args;
