@@ -77,7 +77,7 @@ namespace osmscout
   std::wstring s2w(const std::string& str)
   {
     if (str.empty()) return std::wstring();
-    int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), nullptr, 0);
     std::wstring wstrTo(size_needed, 0);
     MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
     return wstrTo;
@@ -100,7 +100,7 @@ namespace osmscout
 
     m_fSize = float(fontSize * fontSizeFactor * sample.length());
 
-    m_pDWriteTextLayout = NULL;
+    m_pDWriteTextLayout = nullptr;
     HRESULT hr = pWriteFactory->CreateTextLayout(sample.c_str(),
                                                  sample.length(),
                                                  font,
@@ -141,7 +141,7 @@ namespace osmscout
 
       result.back().glyph.character = sample;
 
-      IDWriteTextLayout* pDWriteTextLayout = NULL;
+      IDWriteTextLayout* pDWriteTextLayout = nullptr;
       HRESULT hr = label.m_pWriteFactory->CreateTextLayout(sample.c_str(),
                                                            sample.length(),
                                                            label.m_pDWriteTextLayout,
@@ -196,7 +196,7 @@ namespace osmscout
     if (SUCCEEDED(hr))
       return m_Brushs.insert(std::make_pair(clr, solidColorBrush)).first->second;
     else
-      return NULL;
+      return nullptr;
   }
 
   ID2D1SolidColorBrush* MapPainterDirectX::GetColorBrush(D2D1_COLOR_F& color)
@@ -215,7 +215,7 @@ namespace osmscout
     if (SUCCEEDED(hr))
       return m_Brushs.insert(std::make_pair(clr, solidColorBrush)).first->second;
     else
-      return NULL;
+      return nullptr;
   }
 
   ID2D1StrokeStyle* MapPainterDirectX::GetStrokeStyle(const std::vector<double>& dash)
@@ -229,7 +229,7 @@ namespace osmscout
         return m_StrokeStyles[id];
       else
       {
-        ID2D1StrokeStyle* pStrokeStyle = NULL;
+        ID2D1StrokeStyle* pStrokeStyle = nullptr;
         HRESULT hr = m_pDirect2dFactory->CreateStrokeStyle(
           D2D1::StrokeStyleProperties(
             D2D1_CAP_STYLE_ROUND,
@@ -249,7 +249,7 @@ namespace osmscout
         }
       }
     }
-    if (m_dashLessStrokeStyle == NULL)
+    if (m_dashLessStrokeStyle == nullptr)
     {
       m_pDirect2dFactory->CreateStrokeStyle(
         D2D1::StrokeStyleProperties(
@@ -260,7 +260,7 @@ namespace osmscout
           10.0f,
           D2D1_DASH_STYLE_SOLID,
           0.0f),
-        NULL,
+        nullptr,
         0,
         &m_dashLessStrokeStyle);
     }
@@ -281,13 +281,13 @@ namespace osmscout
 
   bool MapPainterDirectX::LoadBitmapFromFile(PCWSTR uri, ID2D1Bitmap **ppBitmap)
   {
-    IWICBitmapDecoder *pDecoder = NULL;
-    IWICBitmapFrameDecode *pSource = NULL;
-    IWICStream*pStream = NULL;
-    IWICFormatConverter *pConverter = NULL;
-    IWICBitmapScaler *pScaler = NULL;
+    IWICBitmapDecoder *pDecoder = nullptr;
+    IWICBitmapFrameDecode *pSource = nullptr;
+    IWICStream*pStream = nullptr;
+    IWICFormatConverter *pConverter = nullptr;
+    IWICBitmapScaler *pScaler = nullptr;
 
-    HRESULT hr = m_pImagingFactory->CreateDecoderFromFilename(uri, NULL, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &pDecoder);
+    HRESULT hr = m_pImagingFactory->CreateDecoderFromFilename(uri, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &pDecoder);
 
     if (SUCCEEDED(hr))
     {
@@ -307,7 +307,7 @@ namespace osmscout
         pSource,
         GUID_WICPixelFormat32bppPBGRA,
         WICBitmapDitherTypeNone,
-        NULL,
+        nullptr,
         0.f,
         WICBitmapPaletteTypeMedianCut
       );
@@ -318,7 +318,7 @@ namespace osmscout
       // Create a Direct2D bitmap from the WIC bitmap
       hr = m_pRenderTarget->CreateBitmapFromWicBitmap(
         pConverter,
-        NULL,
+        nullptr,
         ppBitmap
       );
     }
@@ -326,27 +326,27 @@ namespace osmscout
     if (pDecoder)
     {
       pDecoder->Release();
-      pDecoder = NULL;
+      pDecoder = nullptr;
     }
     if (pSource)
     {
       pSource->Release();
-      pSource = NULL;
+      pSource = nullptr;
     }
     if (pStream)
     {
       pStream->Release();
-      pStream = NULL;
+      pStream = nullptr;
     }
     if (pConverter)
     {
       pConverter->Release();
-      pConverter = NULL;
+      pConverter = nullptr;
     }
     if (pScaler)
     {
       pScaler->Release();
-      pScaler = NULL;
+      pScaler = nullptr;
     }
 
     return (SUCCEEDED(hr));
@@ -375,7 +375,7 @@ namespace osmscout
     IDWriteTextFormat* pTextFormat;
     HRESULT hr = m_pWriteFactory->CreateTextFormat(
       font.c_str(),
-      NULL,
+      nullptr,
       DWRITE_FONT_WEIGHT_NORMAL,
       DWRITE_FONT_STYLE_NORMAL,
       DWRITE_FONT_STRETCH_NORMAL,
@@ -389,7 +389,7 @@ namespace osmscout
     }
     else {
       std::cerr << "Could not get font " << parameter.GetFontName() << " " << fontSize << std::endl;
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -422,9 +422,9 @@ namespace osmscout
                                        const MapData& /*data*/)
   {
     for (GeometryMap::const_iterator entry = m_Polygons.begin(); entry != m_Polygons.end(); ++entry) {
-      if (entry->second != NULL) {
+      if (entry->second != nullptr) {
         entry->second->Release();
-        m_Polygons[entry->first] = NULL;
+        m_Polygons[entry->first] = nullptr;
       }
     }
     m_Polygons.clear();
@@ -444,12 +444,12 @@ namespace osmscout
     size_t idx = style.GetIconId() - 1;
 
     // Already cached?
-    if (idx < m_Bitmaps.size() && m_Bitmaps[idx] != NULL)
+    if (idx < m_Bitmaps.size() && m_Bitmaps[idx] != nullptr)
     {
       return true;
     }
 
-    if (m_pImagingFactory == NULL) return false;
+    if (m_pImagingFactory == nullptr) return false;
 
     if (parameter.GetIconMode()==MapParameter::IconMode::Scalable ||
         parameter.GetIconMode()==MapParameter::IconMode::ScaledPixmap){
@@ -465,7 +465,7 @@ namespace osmscout
     {
       // TODO: add support for reading svg images
       std::wstring filename = s2w(*path + style.GetIconName() + ".png");
-      ID2D1Bitmap* pBitmap = NULL;
+      ID2D1Bitmap* pBitmap = nullptr;
       if (LoadBitmapFromFile(filename.c_str(), &pBitmap))
       {
         if (parameter.GetIconMode()==MapParameter::IconMode::OriginalPixmap){
@@ -519,7 +519,7 @@ namespace osmscout
 #endif
     FLOAT size = float(fontSize * fontSizeFactor * text.length());
     IDWriteTextFormat* font = GetFont(projection, parameter, fontSize);
-    IDWriteTextLayout* pDWriteTextLayout = NULL;
+    IDWriteTextLayout* pDWriteTextLayout = nullptr;
     HRESULT hr = m_pWriteFactory->CreateTextLayout(sample.c_str(),
                                                    sample.length(),
                                                    font,
@@ -570,7 +570,7 @@ namespace osmscout
                                     const DirectXTextLayout& textLayout)
 
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get()) != NULL) {
+    if (dynamic_cast<const TextStyle*>(label.style.get()) !=nullptr) {
       const TextStyle* style = dynamic_cast<const TextStyle*>(label.style.get());
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
@@ -583,7 +583,7 @@ namespace osmscout
                 Color(r,g,b,label.alpha),
                 textLayout);
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get()) != NULL) {
+    else if (dynamic_cast<const ShieldStyle*>(label.style.get()) != nullptr) {
       const ShieldStyle *style = dynamic_cast<const ShieldStyle*>(label.style.get());
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
@@ -627,7 +627,7 @@ namespace osmscout
             m_pRenderTarget->GetTransform(&currentTransform);
             FLOAT size = style->GetSize() * fontSizeFactor * glyph.glyph.width;
             IDWriteTextFormat* tf = GetFont(projection, parameter, style->GetSize());
-            IDWriteTextLayout* pDWriteTextLayout = NULL;
+            IDWriteTextLayout* pDWriteTextLayout = nullptr;
             HRESULT hr = m_pWriteFactory->CreateTextLayout(
               enc.c_str(),
               enc.length(),
@@ -690,7 +690,7 @@ namespace osmscout
   {
     size_t idx = style->GetIconId() - 1;
     assert(idx < m_Bitmaps.size());
-    assert(m_Bitmaps[idx] != NULL);
+    assert(m_Bitmaps[idx] != nullptr);
 
     FLOAT dx = (FLOAT)width / 2.0f;
     FLOAT dy = (FLOAT)height / 2.0f;
@@ -719,7 +719,7 @@ namespace osmscout
       BorderStyleRef borderStyle = primitive->GetBorderStyle();
       bool hasBorder = borderStyle && borderStyle->GetWidth() > 0.0 && borderStyle->GetColor().IsVisible();
       float borderWidth = hasBorder ? float(projection.ConvertWidthToPixel(borderStyle->GetWidth())) : 0.0f;
-      if (dynamic_cast<PolygonPrimitive*>(primitive) != NULL)
+      if (dynamic_cast<PolygonPrimitive*>(primitive) != nullptr)
       {
         PolygonPrimitive* polygon = dynamic_cast<PolygonPrimitive*>(primitive);
         const std::list<osmscout::Vertex2D> data = polygon->GetCoords();
@@ -737,7 +737,7 @@ namespace osmscout
           HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
           if (SUCCEEDED(hr))
           {
-            ID2D1GeometrySink *pSink = NULL;
+            ID2D1GeometrySink *pSink = nullptr;
             hr = pPathGeometry->Open(&pSink);
             if (SUCCEEDED(hr))
             {
@@ -750,7 +750,7 @@ namespace osmscout
               pSink->EndFigure(D2D1_FIGURE_END_OPEN);
               hr = pSink->Close();
               pSink->Release();
-              pSink = NULL;
+              pSink = nullptr;
             }
           }
           m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(polygon->GetFillStyle()->GetFillColor()));
@@ -764,7 +764,7 @@ namespace osmscout
           delete coords;
         }
       }
-      else if (dynamic_cast<RectanglePrimitive*>(primitive) != NULL)
+      else if (dynamic_cast<RectanglePrimitive*>(primitive) != nullptr)
       {
         RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
         D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX),
@@ -774,7 +774,7 @@ namespace osmscout
         m_pRenderTarget->FillRectangle(rect, GetColorBrush(fillStyle->GetFillColor()));
         if (hasBorder) m_pRenderTarget->DrawRectangle(rect, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
       }
-      else if (dynamic_cast<CirclePrimitive*>(primitive) != NULL)
+      else if (dynamic_cast<CirclePrimitive*>(primitive) != nullptr)
       {
         CirclePrimitive* circle = dynamic_cast<CirclePrimitive*>(primitive);
         D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(centerX, centerY), float(projection.ConvertWidthToPixel(circle->GetRadius())), float(projection.ConvertWidthToPixel(circle->GetRadius())));
@@ -801,7 +801,7 @@ namespace osmscout
     HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
     if (SUCCEEDED(hr))
     {
-      ID2D1GeometrySink *pSink = NULL;
+      ID2D1GeometrySink *pSink = nullptr;
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
@@ -815,7 +815,7 @@ namespace osmscout
         pSink->EndFigure(D2D1_FIGURE_END_OPEN);
         hr = pSink->Close();
         pSink->Release();
-        pSink = NULL;
+        pSink = nullptr;
       }
     }
     m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(color), float(width), GetStrokeStyle(dash));
@@ -864,7 +864,7 @@ namespace osmscout
     HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
     if (SUCCEEDED(hr))
     {
-      ID2D1GeometrySink *pSink = NULL;
+      ID2D1GeometrySink *pSink = nullptr;
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
@@ -889,7 +889,7 @@ namespace osmscout
         pSink->EndFigure(D2D1_FIGURE_END_OPEN);
         hr = pSink->Close();
         pSink->Release();
-        pSink = NULL;
+        pSink = nullptr;
       }
     }
 #ifdef MBUC
@@ -904,7 +904,7 @@ namespace osmscout
     pPathGeometry->ComputeLength(currentTransform, &length);
     FLOAT size = style.attrSize * fontSizeFactor * text.length();
     IDWriteTextFormat* tf = GetFont(projection, parameter, style.attrSize);
-    IDWriteTextLayout* pDWriteTextLayout = NULL;
+    IDWriteTextLayout* pDWriteTextLayout = nullptr;
     hr = m_pWriteFactory->CreateTextLayout(
       enc.c_str(),
       enc.length(),
@@ -952,7 +952,7 @@ namespace osmscout
     HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
     if (SUCCEEDED(hr))
     {
-      ID2D1GeometrySink *pSink = NULL;
+      ID2D1GeometrySink *pSink = nullptr;
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
@@ -963,7 +963,7 @@ namespace osmscout
         pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
         hr = pSink->Close();
         pSink->Release();
-        pSink = NULL;
+        pSink = nullptr;
       }
     }
     if (hasFilling)
@@ -980,7 +980,7 @@ namespace osmscout
       HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
       if (SUCCEEDED(hr))
       {
-        ID2D1GeometrySink *pSink = NULL;
+        ID2D1GeometrySink *pSink = nullptr;
         hr = pPathGeometry->Open(&pSink);
         if (SUCCEEDED(hr))
         {
@@ -992,7 +992,7 @@ namespace osmscout
           pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
           hr = pSink->Close();
           pSink->Release();
-          pSink = NULL;
+          pSink = nullptr;
         }
       }
       if (hasFilling)
@@ -1007,78 +1007,78 @@ namespace osmscout
                                        ID2D1Factory* pDirect2dFactory,
                                        IDWriteFactory* pWriteFactory)
     : MapPainter(styleConfig, new CoordBuffer()),
-    m_dashLessStrokeStyle(NULL),
+    m_dashLessStrokeStyle(nullptr),
     m_pDirect2dFactory(pDirect2dFactory),
     m_pWriteFactory(pWriteFactory),
-    m_pRenderTarget(NULL),
-    m_pImagingFactory(NULL),
-    m_pRenderingParams(NULL),
-    m_pPathTextRenderer(NULL),
+    m_pRenderTarget(nullptr),
+    m_pImagingFactory(nullptr),
+    m_pRenderingParams(nullptr),
+    m_pPathTextRenderer(nullptr),
     dpiX(0.0f),
     dpiY(0.0f),
-    typeConfig(NULL),
+    typeConfig(nullptr),
     m_LabelLayouter(this)
   {
     pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
-    HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&m_pImagingFactory);
+    HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&m_pImagingFactory);
     if (SUCCEEDED(hr))
     {
     }
     else
-      m_pImagingFactory = NULL;
+      m_pImagingFactory = nullptr;
   }
 
   MapPainterDirectX::~MapPainterDirectX()
   {
     DiscardDeviceResources();
     for (FontMap::const_iterator entry = m_Fonts.begin(); entry != m_Fonts.end(); ++entry) {
-      if (entry->second != NULL) {
+      if (entry->second != nullptr) {
         entry->second->Release();
-        m_Fonts[entry->first] = NULL;
+        m_Fonts[entry->first] = nullptr;
       }
     }
     m_Fonts.clear();
     for (BitmapMap::const_iterator entry = m_Bitmaps.begin(); entry != m_Bitmaps.end(); ++entry) {
-      if (entry->second != NULL) {
+      if (entry->second != nullptr) {
         entry->second->Release();
-        m_Bitmaps[entry->first] = NULL;
+        m_Bitmaps[entry->first] = nullptr;
       }
     }
     m_Bitmaps.clear();
     for (StrokeStyleMap::const_iterator entry = m_StrokeStyles.begin(); entry != m_StrokeStyles.end(); ++entry) {
-      if (entry->second != NULL) {
+      if (entry->second != nullptr) {
         entry->second->Release();
-        m_StrokeStyles[entry->first] = NULL;
+        m_StrokeStyles[entry->first] = nullptr;
       }
     }
     m_StrokeStyles.clear();
     if (m_pImagingFactory)
     {
       m_pImagingFactory->Release();
-      m_pImagingFactory = NULL;
+      m_pImagingFactory = nullptr;
     }
   }
 
   void MapPainterDirectX::DiscardDeviceResources()
   {
     for (BrushMap::const_iterator entry = m_Brushs.begin(); entry != m_Brushs.end(); ++entry) {
-      if (entry->second != NULL) {
+      if (entry->second != nullptr) {
         entry->second->Release();
-        m_Brushs[entry->first] = NULL;
+        m_Brushs[entry->first] = nullptr;
       }
     }
     m_Brushs.clear();
     for (GeometryMap::const_iterator entry = m_Geometries.begin(); entry != m_Geometries.end(); ++entry) {
-      if (entry->second != NULL) {
+      if (entry->second != nullptr) {
         entry->second->Release();
-        m_Geometries[entry->first] = NULL;
+        m_Geometries[entry->first] = nullptr;
       }
     }
     m_Geometries.clear();
     for (GeometryMap::const_iterator entry = m_Polygons.begin(); entry != m_Polygons.end(); ++entry) {
-      if (entry->second != NULL) {
+      if (entry->second != nullptr) {
         entry->second->Release();
-        m_Polygons[entry->first] = NULL;
+        m_Polygons[entry->first] = nullptr;
       }
     }
     m_Polygons.clear();
@@ -1091,7 +1091,7 @@ namespace osmscout
   {
     bool result = true;
 
-    if (m_pDirect2dFactory == NULL) return false;
+    if (m_pDirect2dFactory == nullptr) return false;
     typeConfig = styleConfig->GetTypeConfig();
     m_pRenderTarget = renderTarget;
 
