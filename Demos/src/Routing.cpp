@@ -818,7 +818,7 @@ int main(int argc, char* argv[])
 
   generateTimer.Stop();
 
-  std::cout << "Description generation time: " << postprocessTimer.ResultString() << std::endl;
+  std::cout << "Description generation time: " << generateTimer.ResultString() << std::endl;
 
   router->Close();
 
