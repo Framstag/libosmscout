@@ -173,7 +173,7 @@ TEST_CASE("Target computation from bearing and distance")
                                                   angle,
                                                   distance);
   REQUIRE(IsSame(target, location2));
-  REQUIRE(IsSame(distance, location1 - location2, 1e-6));
+  REQUIRE(IsSame(distance, location1 - location2,1e-6));
 }
 
 TEST_CASE("Ellipsoidal distance up")
@@ -185,7 +185,7 @@ TEST_CASE("Ellipsoidal distance up")
   osmscout::GeoCoord target=location.Add(angle,distance);
 
   REQUIRE(target.GetLat()>location.GetLat());
-  REQUIRE(IsSame(target.GetLon(),location.GetLon()));
+  REQUIRE(IsSame(target.GetLon(),location.GetLon(),1e-4));
 }
 
 TEST_CASE("Ellipsoidal distance right")
@@ -199,7 +199,7 @@ TEST_CASE("Ellipsoidal distance right")
   INFO(target.GetDisplayText())
 
   REQUIRE(target.GetLon()>location.GetLon());
-  REQUIRE(IsSame(target.GetLat(),location.GetLat()));
+  REQUIRE(IsSame(target.GetLat(),location.GetLat(),1e-4));
 }
 
 TEST_CASE("Ellipsoidal distance down")
@@ -211,7 +211,7 @@ TEST_CASE("Ellipsoidal distance down")
   osmscout::GeoCoord target=location.Add(angle,distance);
 
   REQUIRE(target.GetLat()<location.GetLat());
-  REQUIRE(IsSame(target.GetLon(),location.GetLon()));
+  REQUIRE(IsSame(target.GetLon(),location.GetLon(),1e-4));
 }
 
 TEST_CASE("Ellipsoidal distance left")
@@ -225,7 +225,7 @@ TEST_CASE("Ellipsoidal distance left")
   INFO(target.GetDisplayText())
 
   REQUIRE(target.GetLon()<location.GetLon());
-  REQUIRE(IsSame(target.GetLat(),location.GetLat()));
+  REQUIRE(IsSame(target.GetLat(),location.GetLat(),1e-4));
 }
 
 TEST_CASE("Angle diff")
