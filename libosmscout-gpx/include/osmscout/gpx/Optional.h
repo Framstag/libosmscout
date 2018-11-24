@@ -32,18 +32,22 @@ public:
     value = (o.value == nullptr) ? nullptr : new T(*o.value);
   };
 
-  Optional(Optional<T> &&o) {
+  Optional(Optional<T> &&o) noexcept {
     std::swap(value, o.value);
   };
 
   ~Optional() { if (value != nullptr) delete value; }
 
-  void operator=(const Optional<T> &o) {
+  Optional& operator=(const Optional<T> &o) {
     value = (o.value == nullptr) ? nullptr : new T(*o.value);
+
+    return *this;
   };
 
-  void operator=(Optional<T> &&o) {
+  Optional& operator=(Optional<T> &&o) noexcept {
     std::swap(value, o.value);
+
+    return *this;
   };
 
   T get() const;
@@ -53,7 +57,7 @@ public:
   bool hasValue() const;
 
 private:
-  Optional(T *v) : value{v} {}
+  explicit Optional(T *v) : value{v} {}
 
   T *value{nullptr};
 };
