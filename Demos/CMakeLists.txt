@@ -209,12 +209,14 @@ else()
 endif()
 
 #---- Navigation
-if(${OSMSCOUT_BUILD_MAP})
-    add_executable(Navigation src/Navigation.cpp)
-    set_property(TARGET Navigation PROPERTY CXX_STANDARD 11)
-    target_link_libraries(Navigation OSMScout OSMScoutMap)
-    install(TARGETS Navigation RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-else()
-    message("Skip Navigation demo, libosmscout-map is missing.")
-endif()
+add_executable(Navigation src/Navigation.cpp)
+set_property(TARGET Navigation PROPERTY CXX_STANDARD 11)
+target_link_libraries(Navigation OSMScout)
+install(TARGETS Navigation RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
+#---- NavigationSimulator
+add_executable(NavigationSimulator src/NavigationSimulator.cpp)
+set_property(TARGET NavigationSimulator PROPERTY CXX_STANDARD 11)
+target_link_libraries(NavigationSimulator OSMScout)
+install(TARGETS NavigationSimulator RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 

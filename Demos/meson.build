@@ -44,6 +44,13 @@ Navigation = executable('Navigation',
                         link_with: [osmscout],
                         install: true)
 
+NavigationSimulator = executable('NavigationSimulator',
+                        'src/NavigationSimulator.cpp',
+                        include_directories: [osmscoutIncDir],
+                        dependencies: [mathDep, openmpDep],
+                        link_with: [osmscout],
+                        install: true)
+
 POILookupForm = executable('POILookupForm',
                             'src/POILookupForm.cpp',
                             include_directories: [osmscoutIncDir],
