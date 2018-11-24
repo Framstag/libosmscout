@@ -481,7 +481,7 @@ namespace osmscout {
    */
   extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
 
-  typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> Timestamp;
+  typedef std::chrono::system_clock::time_point Timestamp;
 
   /**
    * Parse time string in ISO 8601 format "2017-11-26T13:46:12.124Z" (UTC timezone)
