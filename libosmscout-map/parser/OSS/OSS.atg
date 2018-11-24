@@ -1422,7 +1422,7 @@ PRODUCTIONS
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_COLOR) {
                      if (valueType==ValueType::COLOR) {
                        if (constant) {
-                         if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
+                         if (dynamic_cast<StyleConstantColor*>(constant.get())==nullptr) {
                            std::string e="Constant is not of type 'COLOR'";
 
                            SemErr(e.c_str());
@@ -1465,7 +1465,7 @@ PRODUCTIONS
                        if (!constant) {
                          // no code
                        }
-                       else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
+                       else if (dynamic_cast<StyleConstantColor*>(constant.get())==nullptr) {
                          std::string e="Constant is not of type 'COLOR'";
 
                          SemErr(e.c_str());
@@ -1513,7 +1513,7 @@ PRODUCTIONS
                        if (!constant) {
                          // no code
                        }
-                       else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
+                       else if (dynamic_cast<StyleConstantMag*>(constant.get())==nullptr) {
                          std::string e="Constant is not of type 'MAGNIFICATION'";
 
                          SemErr(e.c_str());
@@ -1841,7 +1841,7 @@ PRODUCTIONS
                        if (!constant) {
                          // no code
                        }
-                       else if (dynamic_cast<StyleConstantInt*>(constant.get())==NULL) {
+                       else if (dynamic_cast<StyleConstantInt*>(constant.get())==nullptr) {
                          std::string e="Constant is not of type 'INT'";
 
                          SemErr(e.c_str());
@@ -1889,7 +1889,7 @@ PRODUCTIONS
                        if (!constant) {
                          // no code
                        }
-                       else if (dynamic_cast<StyleConstantUInt*>(constant.get())==NULL) {
+                       else if (dynamic_cast<StyleConstantUInt*>(constant.get())==nullptr) {
                          std::string e="Constant is not of type 'UINT'";
 
                          SemErr(e.c_str());
@@ -1932,7 +1932,7 @@ PRODUCTIONS
   CONSTANT<StyleConstantRef& constant>
                =
                  (.
-                   constant=NULL;
+                   constant=nullptr;
                  .)
                  variable
                  (.
@@ -1992,7 +1992,7 @@ PRODUCTIONS
                     if (!constant) {
                       color=Color::BLACK;
                     }
-                    else if (dynamic_cast<StyleConstantColor*>(constant.get())==NULL) {
+                    else if (dynamic_cast<StyleConstantColor*>(constant.get())==nullptr) {
                       std::string e="Constant is not of type 'COLOR'";
 
                       SemErr(e.c_str());
@@ -2044,7 +2044,7 @@ PRODUCTIONS
                     if (!constant) {
                       magnification.SetLevel(osmscout::MagnificationLevel(0));
                     }
-                    else if (dynamic_cast<StyleConstantMag*>(constant.get())==NULL) {
+                    else if (dynamic_cast<StyleConstantMag*>(constant.get())==nullptr) {
                       std::string e="Variable is not of type 'MAG'";
 
                       SemErr(e.c_str());
@@ -2155,7 +2155,7 @@ PRODUCTIONS
 
                       SemErr(e.c_str());
                     }
-                    else if (dynamic_cast<StyleConstantUInt*>(constant.get())==NULL) {
+                    else if (dynamic_cast<StyleConstantUInt*>(constant.get())==nullptr) {
                       std::string e="Constant is not of type 'UINT'";
 
                       SemErr(e.c_str());
