@@ -37,7 +37,7 @@ namespace gpx {
 
 extern OSMSCOUT_GPX_API bool ImportGpx(const std::string &filePath,
                                        GpxFile &output,
-                                       BreakerRef breaker = NULL,
+                                       BreakerRef breaker =nullptr,
                                        ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
 
 }
