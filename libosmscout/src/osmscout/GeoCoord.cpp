@@ -388,14 +388,9 @@ namespace osmscout {
   GeoCoord GeoCoord::Add(double bearing, const Distance &distance)
   {
       if (distance.AsMeter() == 0.0) {
-        return GeoCoord(GetLat(), GetLon());
+        return *this;
       }
 
-      double lat = GetLat();
-      double lon = GetLon();
-
-      GetEllipsoidalDistance(GetLat(), GetLon(), bearing, distance, lat, lon);
-
-      return GeoCoord(lat, lon);
+      return GetEllipsoidalDistance(*this,bearing,distance);
   }
 }
