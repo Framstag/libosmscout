@@ -77,15 +77,17 @@ namespace osmscout {
     using SvgLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterSVG>;
     friend SvgLabelLayouter;
 
-    SvgLabelLayouter                labelLayouter;
+    SvgLabelLayouter                  labelLayouter;
 
-    std::map<FillStyle,std::string> fillStyleNameMap;
-    std::map<LineStyle,std::string> lineStyleNameMap;
-    std::ostream                    stream;
-    TypeConfigRef                   typeConfig;
-    std::mutex                      mutex;         //! Mutex for locking concurrent calls
+    std::map<FillStyle,std::string>   fillStyleNameMap;
+    std::map<BorderStyle,std::string> borderStyleNameMap;
+    std::map<LineStyle,std::string>   lineStyleNameMap;
 
-    std::vector<std::string>        images;
+    std::ostream                      stream;
+    TypeConfigRef                     typeConfig;
+    std::mutex                        mutex;         //! Mutex for locking concurrent calls
+
+    std::vector<std::string>          images;
 
   private:
     std::string GetColorValue(const Color& color);
