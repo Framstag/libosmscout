@@ -235,15 +235,23 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
 class Simulator
 {
 private:
-  std::string lastBearingString;
+  osmscout::RouteStateChangedMessage::State routeState;
+  std::string                               lastBearingString;
 
 private:
   void ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages);
 
 public:
+  Simulator();
   void Simulate(const osmscout::DatabaseRef& database,
-                const PathGenerator& generator);
+                const PathGenerator& generator,
+                const osmscout::RoutePointsRef& routePoints);
 };
+
+Simulator::Simulator()
+: routeState(osmscout::RouteStateChangedMessage::State::noRoute)
+{
+}
 
 void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
 {
@@ -268,18 +276,58 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
       std::cout << osmscout::TimestampToISO8601TimeString(streetChangedMessage->timestamp)
       << " Street name: " << streetChangedMessage->name << std::endl;
     }
+    else if (dynamic_cast<osmscout::RouteStateChangedMessage*>(message.get())!=nullptr) {
+      auto routeStateChangedMessage=dynamic_cast<osmscout::RouteStateChangedMessage*>(message.get());
+
+      if (routeStateChangedMessage->state!=routeState) {
+
+        routeState=routeStateChangedMessage->state;
+
+
+        std::cout << osmscout::TimestampToISO8601TimeString(routeStateChangedMessage->timestamp)
+                  << " RouteState: ";
+
+        switch (routeState) {
+        case osmscout::RouteStateChangedMessage::State::noRoute:
+          std::cout << "no route";
+          break;
+        case osmscout::RouteStateChangedMessage::State::onRoute:
+          std::cout << "on route";
+          break;
+        case osmscout::RouteStateChangedMessage::State::offRoute:
+          std::cout << "off route";
+          break;
+        }
+
+        std::cout << std::endl;
+      }
+    }
   }
 }
 
 void Simulator::Simulate(const osmscout::DatabaseRef& database,
-                         const PathGenerator& generator)
+                         const PathGenerator& generator,
+                         const osmscout::RoutePointsRef& routePoints)
 {
   auto locationDescriptionService=std::make_shared<osmscout::LocationDescriptionService>(database);
 
+  routeState=osmscout::RouteStateChangedMessage::State::noRoute;
+
   osmscout::NavigationEngine engine{
     std::make_shared<osmscout::PositionAgent>(),
-    std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService)
+    std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
+    std::make_shared<osmscout::RouteStateAgent>(),
   };
+
+  auto initializeMessage=std::make_shared<osmscout::InitializeMessage>(generator.steps.front().time);
+
+  ProcessMessages(engine.Process(initializeMessage));
+
+  // TODO: Simulator possibly should not send this message on start but later on to simulate driver starting before
+  // getting route
+  auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(generator.steps.front().time,routePoints);
+
+  ProcessMessages(engine.Process(routeUpdateMessage));
 
   for (const auto& point : generator.steps) {
     auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(point.time,point.coord,point.speed);
@@ -503,6 +551,12 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(routingResult.GetRoute());
+
+  if (!routePointsResult.success) {
+    std::cerr << "Error during route conversion" << std::endl;
+    return 1;
+  }
 
   auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(routingResult.GetRoute());
 
@@ -569,21 +623,16 @@ int main(int argc, char* argv[])
   PathGenerator pathGenerator(*routeDescriptionResult.description,routingProfile->GetVehicleMaxSpeed());
 
   if (!args.gpxFile.empty()) {
-    osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(routingResult.GetRoute());
-
-    if (routePointsResult.success) {
-      DumpGpxFile(args.gpxFile,
-                  routePointsResult.points->points,
-                  pathGenerator);
-    }
-    else {
-      std::cerr << "Error during route conversion" << std::endl;
-    }
+    DumpGpxFile(args.gpxFile,
+                routePointsResult.points->points,
+                pathGenerator);
   }
 
   Simulator simulator;
 
-  simulator.Simulate(database,pathGenerator);
+  simulator.Simulate(database,
+                     pathGenerator,
+                     routePointsResult.points);
 
   router->Close();
 

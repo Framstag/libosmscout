@@ -209,4 +209,57 @@ namespace osmscout {
 
     return result;
   }
+
+  RouteUpdateMessage::RouteUpdateMessage(const Timestamp& timestamp,
+                                         const RoutePointsRef& points)
+  : NavigationMessage(timestamp),
+    points(points)
+  {
+  }
+
+  RouteStateChangedMessage::RouteStateChangedMessage(const Timestamp& timestamp,
+                                                     State state)
+    : NavigationMessage(timestamp),
+      state(state)
+  {
+  }
+
+  RouteStateAgent::RouteStateAgent()
+  : state(RouteStateChangedMessage::State::noRoute)
+  {
+  }
+
+  std::list<NavigationMessageRef> RouteStateAgent::Process(const NavigationMessageRef& message)
+  {
+    std::list<NavigationMessageRef> result;
+
+    if (dynamic_cast<InitializeMessage*>(message.get())!=nullptr) {
+      result.push_back(std::make_shared<RouteStateChangedMessage>(message->timestamp,
+                                                                  state));
+    }
+    // We assume that we get regular position change events, either directly from the gps
+    // or fake ones.
+    else if (dynamic_cast<RouteUpdateMessage*>(message.get())!=nullptr) {
+      auto routeUpdateMessage=dynamic_cast<RouteUpdateMessage*>(message.get());
+
+      // TODO: Set state to new situation, this is just quick fake
+      if (routeUpdateMessage->points) {
+        state=RouteStateChangedMessage::State::onRoute;
+      }
+      else {
+        state=RouteStateChangedMessage::State::noRoute;
+      }
+
+      result.push_back(std::make_shared<RouteStateChangedMessage>(message->timestamp,
+                                                                  state));
+    }
+    else if (dynamic_cast<PositionChangedMessage*>(message.get())!=nullptr) {
+      //auto positionChangedMessage=dynamic_cast<PositionChangedMessage*>(message.get());
+
+      // TODO: Check if we are still on track, change state if we are not on track anymore for some
+      // time.
+    }
+
+    return result;
+  }
 }

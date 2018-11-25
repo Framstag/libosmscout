@@ -35,6 +35,11 @@ namespace osmscout {
   {
   }
 
+  InitializeMessage::InitializeMessage(const osmscout::Timestamp& timestamp)
+    : NavigationMessage(timestamp)
+  {
+  }
+
   TimeTickMessage::TimeTickMessage(const osmscout::Timestamp& timestamp)
   : NavigationMessage(timestamp)
   {

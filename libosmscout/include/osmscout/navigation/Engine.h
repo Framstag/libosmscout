@@ -56,12 +56,21 @@ namespace osmscout {
   typedef std::shared_ptr<NavigationMessage> NavigationMessageRef;
 
   /**
+   * Message send once at the beginning to make sure everything initializes correctly
+   * and to make it possible that agents can send messages on initialization.
+   */
+  struct OSMSCOUT_API InitializeMessage CLASS_FINAL : public NavigationMessage
+  {
+    explicit InitializeMessage(const Timestamp& timestamp);
+  };
+
+  /**
    * Message to pass periodically to the Engine to make sure that state changes based on
    * timeouts are triggered.
    *
    * We recommend to send a TimeTickMessage around every second.
    */
-  struct OSMSCOUT_API TimeTickMessage : public NavigationMessage
+  struct OSMSCOUT_API TimeTickMessage CLASS_FINAL : public NavigationMessage
   {
     explicit TimeTickMessage(const Timestamp& timestamp);
   };
