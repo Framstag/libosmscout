@@ -1262,6 +1262,7 @@ namespace osmscout {
   {
     TypeConfigRef          typeConfig=database->GetTypeConfig();
     NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
+    RefFeatureLabelReader  refFeatureLabelReader(*typeConfig);
 
     if (!typeConfig) {
       return false;
@@ -1274,7 +1275,8 @@ namespace osmscout {
     // near addressable ways
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeWay() &&
-          type->HasFeature(NameFeature::NAME)) {
+        (type->HasFeature(NameFeature::NAME) ||
+         type->HasFeature(RefFeature::NAME))) {
         wayTypes.Set(type);
       }
     }
@@ -1291,8 +1293,11 @@ namespace osmscout {
     }
 
     // Remove candidates if they do no have a name
-    candidates.erase(std::remove_if(candidates.begin(),candidates.end(),[&nameFeatureLabelReader](const WayRef& candidate) -> bool {
-      return nameFeatureLabelReader.GetLabel(candidate->GetFeatureValueBuffer()).empty();
+    candidates.erase(std::remove_if(candidates.begin(),
+                                    candidates.end(),
+                                    [&nameFeatureLabelReader,&refFeatureLabelReader](const WayRef& candidate) -> bool {
+      return nameFeatureLabelReader.GetLabel(candidate->GetFeatureValueBuffer()).empty() &&
+             refFeatureLabelReader.GetLabel(candidate->GetFeatureValueBuffer()).empty();
     }),candidates.end());
 
     if (candidates.empty()) {
@@ -1321,8 +1326,7 @@ namespace osmscout {
     }
 
     Place place = GetPlace(result);
-    LocationWayDescriptionRef wayDescription;
-    wayDescription=std::make_shared<LocationWayDescription>(place, minDistance);
+    LocationWayDescriptionRef wayDescription=std::make_shared<LocationWayDescription>(place, minDistance);
 
     description.SetWayDescription(wayDescription);
 
