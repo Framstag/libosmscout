@@ -40,10 +40,8 @@ namespace osmscout {
     }
 
     if (object.GetType()==refNode) {
-      for (std::vector<AdminRegion::RegionAlias>::const_iterator alias=aliases.begin();
-           alias!=aliases.end();
-           ++alias) {
-        if (alias->objectOffset==object.GetFileOffset()) {
+      for (const auto& aliase : aliases) {
+        if (aliase.objectOffset==object.GetFileOffset()) {
           return true;
         }
       }
