@@ -235,6 +235,9 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
 class Simulator
 {
 private:
+  std::string lastBearingString;
+
+private:
   void ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages);
 
 public:
@@ -248,10 +251,22 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
     if (dynamic_cast<osmscout::PositionChangedMessage*>(message.get())!=nullptr) {
       //auto positionChangedMessage=dynamic_cast<osmscout::PositionChangedMessage*>(message.get());
     }
+    if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
+      auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
+
+      auto bearingString=bearingChangedMessage->hasBearing ? osmscout::BearingDisplayString(bearingChangedMessage->bearing) : "";
+      if (lastBearingString!=bearingString) {
+        std::cout << osmscout::TimestampToISO8601TimeString(bearingChangedMessage->timestamp)
+        << " Bearing: " << bearingString << std::endl;
+
+        lastBearingString=bearingString;
+      }
+    }
     else if (dynamic_cast<osmscout::StreetChangedMessage*>(message.get())!=nullptr) {
       auto streetChangedMessage=dynamic_cast<osmscout::StreetChangedMessage*>(message.get());
 
-      std::cout << osmscout::TimestampToISO8601TimeString(streetChangedMessage->timestamp) << " Street name: " << streetChangedMessage->name << std::endl;
+      std::cout << osmscout::TimestampToISO8601TimeString(streetChangedMessage->timestamp)
+      << " Street name: " << streetChangedMessage->name << std::endl;
     }
   }
 }
@@ -267,7 +282,7 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
   };
 
   for (const auto& point : generator.steps) {
-    auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(point.time,true,point.coord,point.speed);
+    auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(point.time,point.coord,point.speed);
 
     ProcessMessages(engine.Process(gpsUpdateMessage));
 
@@ -317,6 +332,7 @@ void DumpGpxFile(const std::string& fileName,
 
   stream << "\t<trk>" << std::endl;
   stream << "\t\t<name>GPS</name>" << std::endl;
+  stream << "\t\t<number>1</number>" << std::endl;
   stream << "\t\t<trkseg>" << std::endl;
   for (const auto& point : generator.steps) {
     stream << "\t\t\t<trkpt lat=\""<< point.coord.GetLat() << "\" lon=\""<< point.coord.GetLon() <<"\">" << std::endl;

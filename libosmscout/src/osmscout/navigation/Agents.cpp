@@ -19,28 +19,88 @@
 
 #include <osmscout/navigation/Agents.h>
 
+#include <osmscout/util/Distance.h>
+
 namespace osmscout {
 
   GPSUpdateMessage::GPSUpdateMessage(const Timestamp& timestamp,
-                                     bool hasPositionLock,
                                      const GeoCoord& currentPosition,
                                      double currentSpeed)
   : NavigationMessage(timestamp),
-    hasPositionLock(hasPositionLock),
     currentPosition(currentPosition),
     currentSpeed(currentSpeed)
   {
   }
 
   PositionChangedMessage::PositionChangedMessage(const Timestamp& timestamp,
-                                                 bool hasPositionLock,
                                                  const GeoCoord& currentPosition,
                                                  double currentSpeed)
     : NavigationMessage(timestamp),
-      hasPositionLock(hasPositionLock),
       currentPosition(currentPosition),
       currentSpeed(currentSpeed)
   {
+  }
+
+  BearingChangedMessage::BearingChangedMessage(const Timestamp& timestamp)
+    : NavigationMessage(timestamp),
+      hasBearing(false),
+      bearing(0.0)
+  {
+  }
+
+  BearingChangedMessage::BearingChangedMessage(const Timestamp& timestamp,
+                                               double bearing)
+    : NavigationMessage(timestamp),
+      hasBearing(true),
+      bearing(bearing)
+  {
+  }
+
+  PositionAgent::PositionAgent()
+  : hasBearing(false),
+    currentState(State::noCoord)
+  {
+  }
+
+  void PositionAgent::UpdateHistory(const GPSUpdateMessage* message)
+  {
+    previousPosition=currentPosition;
+    previousCheckTime=currentCheckTime;
+
+    currentPosition=message->currentPosition;
+    currentCheckTime=message->timestamp;
+    currentSpeed=message->currentSpeed;
+
+    switch (currentState) {
+    case State::noCoord:
+      currentState=State::oneCoord;
+      break;
+    case State::oneCoord:
+      currentState=State::twoCoords;
+      break;
+    case State::twoCoords:
+      break;
+    }
+  }
+
+  std::list<NavigationMessageRef> PositionAgent::UpdateBearing()
+  {
+    std::list<NavigationMessageRef> result;
+
+    if (currentState==State::twoCoords) {
+      hasBearing=true;
+
+      double newBearing=GetSphericalBearingInitial(previousPosition,currentPosition);
+
+      if (currentBearing!=newBearing) {
+        currentBearing=newBearing;
+
+        result.push_back(std::make_shared<BearingChangedMessage>(currentCheckTime,
+                                                                 currentBearing));
+      }
+    }
+
+    return result;
   }
 
   std::list<NavigationMessageRef> PositionAgent::Process(const NavigationMessageRef& message)
@@ -50,19 +110,37 @@ namespace osmscout {
     if (dynamic_cast<GPSUpdateMessage*>(message.get())!=nullptr) {
       auto gpsUpdateMessage=dynamic_cast<GPSUpdateMessage*>(message.get());
 
-      // TODO: Keep track of the last relevant position events to interpolate
-      // bearing and current position from them.
+      UpdateHistory(gpsUpdateMessage);
+
+      auto bearingMessages=UpdateBearing();
+
+      result.insert(result.end(),bearingMessages.begin(),bearingMessages.end());
 
       result.push_back(std::make_shared<PositionChangedMessage>(gpsUpdateMessage->timestamp,
-                                                                gpsUpdateMessage->hasPositionLock,
                                                                 gpsUpdateMessage->currentPosition,
                                                                 gpsUpdateMessage->currentSpeed));
     }
     else if (dynamic_cast<TimeTickMessage*>(message.get())!=nullptr) {
-      //auto timeTickMessage=dynamic_cast<TimeTickMessage*>(message.get());
+      auto now=message->timestamp;
 
-      // TODO: If gps signal is lost for some time start generating fake PositionChangedMessages
-      // from position history
+      if (currentState==State::twoCoords &&
+          hasBearing &&
+          now-currentCheckTime>std::chrono::seconds(5)) {
+        previousPosition=currentPosition;
+        previousCheckTime=currentCheckTime;
+
+        auto timeSpanInHours=std::chrono::duration_cast<std::chrono::hours>(now-currentCheckTime).count();
+        auto distance=osmscout::Distance::Of<osmscout::Kilometer>(currentSpeed*timeSpanInHours);
+
+        currentPosition=previousPosition.Add(currentBearing*180/M_PI,
+                                            distance);
+        currentCheckTime=message->timestamp;
+
+
+        result.push_back(std::make_shared<PositionChangedMessage>(message->timestamp,
+                                                                  currentPosition,
+                                                                  currentSpeed));
+      }
     }
 
     return result;
@@ -83,6 +161,8 @@ namespace osmscout {
   std::string CurrentStreetAgent::GetStreetName() const
   {
     osmscout::LocationDescription description;
+
+    // TODO: We should first check the closest way in the route with some maximum delta distance
 
     if (locationDescriptionService->DescribeLocationByWay(currentPosition,description)) {
       auto wayDescription=description.GetWayDescription();
@@ -109,7 +189,7 @@ namespace osmscout {
     else if (dynamic_cast<TimeTickMessage*>(message.get())!=nullptr) {
       auto now=message->timestamp;
 
-      if (now-lastCheckTime>std::chrono::seconds(5)) {
+      if (now-lastCheckTime>std::chrono::seconds(10)) {
 
         auto currentStreetName=GetStreetName();
 
@@ -123,7 +203,7 @@ namespace osmscout {
         lastCheckTime=now;
       }
 
-      // TODO: Do we have to handle position timeouts? What does that means? No change of position
+      // TODO: Do we have to handle position timeouts? What does that means? No change of position?
       // or general signal loss and thus unknown position?
     }
 

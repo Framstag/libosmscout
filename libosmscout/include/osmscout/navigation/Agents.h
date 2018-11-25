@@ -32,31 +32,62 @@ namespace osmscout {
    */
   struct OSMSCOUT_API GPSUpdateMessage : public NavigationMessage
   {
-    const bool     hasPositionLock;
     const GeoCoord currentPosition;
     const double   currentSpeed;
 
     GPSUpdateMessage(const Timestamp& timestamp,
-                     bool hasPositionLock,
                      const GeoCoord& currentPosition,
                      double currentSpeed);
   };
 
   struct OSMSCOUT_API PositionChangedMessage : public NavigationMessage
   {
-    const bool     hasPositionLock;
     const GeoCoord currentPosition;
     const double   currentSpeed;
 
     PositionChangedMessage(const Timestamp& timestamp,
-                           bool hasPositionLock,
                            const GeoCoord& currentPosition,
                            double currentSpeed);
   };
 
+  struct OSMSCOUT_API BearingChangedMessage : public NavigationMessage
+  {
+    const bool hasBearing;
+    const double bearing;
+
+    explicit BearingChangedMessage(const Timestamp& timestamp);
+    BearingChangedMessage(const Timestamp& timestamp,
+                          double bearing);
+  };
+
   class OSMSCOUT_API PositionAgent : public NavigationAgent
   {
+  private:
+    enum class State {
+      noCoord,
+      oneCoord,
+      twoCoords
+    };
+
+  private:
+    GeoCoord  previousPosition;
+    Timestamp previousCheckTime;
+
+    GeoCoord  currentPosition;
+    Timestamp currentCheckTime;
+    double    currentSpeed;
+
+    bool      hasBearing;
+    double    currentBearing;
+
+    State     currentState;
+
+  private:
+    void UpdateHistory(const GPSUpdateMessage* message);
+    std::list<NavigationMessageRef> UpdateBearing();
+
   public:
+    PositionAgent();
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
   };
 
@@ -81,7 +112,7 @@ namespace osmscout {
     std::string GetStreetName() const;
 
   public:
-    CurrentStreetAgent(const LocationDescriptionServiceRef& locationDescriptionService);
+    explicit CurrentStreetAgent(const LocationDescriptionServiceRef& locationDescriptionService);
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
   };
 }
