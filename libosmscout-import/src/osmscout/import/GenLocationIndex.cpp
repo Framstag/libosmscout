@@ -1540,7 +1540,8 @@ namespace osmscout {
     try {
       uint32_t                     wayCount;
       size_t                       waysFound=0;
-      NameFeatureValueReader       nameReader(typeConfig);
+      NameFeatureLabelReader       nameReader(typeConfig);
+      RefFeatureLabelReader        refReader(typeConfig);
       PostalCodeFeatureValueReader postalCodeReader(typeConfig);
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -1562,9 +1563,13 @@ namespace osmscout {
           continue;
         }
 
-        NameFeatureValue *nameValue=nameReader.GetValue(way.GetFeatureValueBuffer());
+        std::string name=nameReader.GetLabel(way.GetFeatureValueBuffer());
 
-        if (nameValue==nullptr) {
+        if (name.empty()) {
+          name=refReader.GetLabel(way.GetFeatureValueBuffer());
+        }
+
+        if (name.empty()) {
           continue;
         }
 
@@ -1575,7 +1580,7 @@ namespace osmscout {
 
         AddLocationWayToRegion(*region,
                                way,
-                               nameValue->GetName(),
+                               name,
                                postalCodeValue!=nullptr ? postalCodeValue->GetPostalCode() : "",
                                boundingBox);
 
