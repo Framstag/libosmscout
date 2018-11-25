@@ -43,12 +43,17 @@ namespace osmscout {
   {
   }
 
+  RoutePoints::RoutePoints(const std::list<Point>& points)
+  : points(points.begin(),points.end())
+  {
+  }
+
   RoutePointsResult::RoutePointsResult()
   : success(false)
   {
   }
 
-  RoutePointsResult::RoutePointsResult(const std::list<Point>& points)
+  RoutePointsResult::RoutePointsResult(const RoutePointsRef& points)
   : success(true),
     points(points)
   {
@@ -1660,7 +1665,7 @@ namespace osmscout {
 
     WayRef way=std::make_shared<Way>();
 
-    way->nodes.assign(routePointsResult.points.begin(),routePointsResult.points.end());
+    way->nodes.assign(routePointsResult.points->points.begin(),routePointsResult.points->points.end());
 
     return RouteWayResult(way);
   }
@@ -1685,10 +1690,8 @@ namespace osmscout {
     WayRef           w;
     DBFileOffset     wId;
 
-    points.clear();
-
     if (data.Entries().empty()) {
-      return RoutePointsResult(points);
+      return RoutePointsResult(std::make_shared<RoutePoints>(points));
     }
 
     for (auto iter=data.Entries().begin();
@@ -1742,7 +1745,7 @@ namespace osmscout {
       }
     }
 
-    return RoutePointsResult(points);
+    return RoutePointsResult(std::make_shared<RoutePoints>(points));
   }
 
   template class AbstractRoutingService<RoutingProfile>;

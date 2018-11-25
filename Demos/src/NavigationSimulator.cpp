@@ -293,7 +293,7 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
 }
 
 void DumpGpxFile(const std::string& fileName,
-                 const std::list<osmscout::Point>& points,
+                 const std::vector<osmscout::Point>& points,
                  const PathGenerator& generator)
 {
   std::ofstream stream;
@@ -573,7 +573,7 @@ int main(int argc, char* argv[])
 
     if (routePointsResult.success) {
       DumpGpxFile(args.gpxFile,
-                  routePointsResult.points,
+                  routePointsResult.points->points,
                   pathGenerator);
     }
     else {

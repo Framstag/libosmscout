@@ -772,7 +772,7 @@ int main(int argc, char* argv[])
       std::cout << "\t<trk>" << std::endl;
       std::cout << "\t\t<name>Route</name>" << std::endl;
       std::cout << "\t\t<trkseg>" << std::endl;
-      for (const auto& point : routePointsResult.points) {
+      for (const auto& point : routePointsResult.points->points) {
         std::cout << "\t\t\t<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\">" << std::endl;
         std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
         std::cout << "\t\t\t</trkpt>" << std::endl;

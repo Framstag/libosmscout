@@ -94,13 +94,22 @@ namespace osmscout {
     }
   };
 
+  struct OSMSCOUT_API RoutePoints
+  {
+    const std::vector<Point> points;
+
+    explicit RoutePoints(const std::list<Point>& points);
+  };
+
+  typedef std::shared_ptr<RoutePoints> RoutePointsRef;
+
   struct OSMSCOUT_API RoutePointsResult CLASS_FINAL
   {
-    const bool             success;
-    const std::list<Point> points;
+    const bool           success;
+    const RoutePointsRef points;
 
     RoutePointsResult();
-    explicit RoutePointsResult(const std::list<Point>& points);
+    explicit RoutePointsResult(const RoutePointsRef& points);
   };
 
   struct OSMSCOUT_API RouteDescriptionResult CLASS_FINAL
