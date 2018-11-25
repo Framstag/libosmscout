@@ -745,41 +745,41 @@ int main(int argc, char* argv[])
 
   osmscout::RoutePostprocessor postprocessor;
 
-  std::list<osmscout::Point> points;
-
   if(args.gpx) {
-    if (!router->TransformRouteDataToPoints(result.GetRoute(),
-                                            points)) {
+    osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(result.GetRoute());
+
+    if (routePointsResult.success) {
+      std::cout.precision(8);
+      std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
+      std::cout
+        << R"(<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="bin2gpx" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">)"
+        << std::endl;
+
+      std::cout << "\t<wpt lat=\"" << args.start.GetLat() << "\" lon=\"" << args.start.GetLon() << "\">" << std::endl;
+      std::cout << "\t\t<name>Start</name>" << std::endl;
+      std::cout << "\t\t<fix>2d</fix>" << std::endl;
+      std::cout << "\t</wpt>" << std::endl;
+
+      std::cout << "\t<wpt lat=\"" << args.target.GetLat() << "\" lon=\"" << args.target.GetLon() << "\">" << std::endl;
+      std::cout << "\t\t<name>Target</name>" << std::endl;
+      std::cout << "\t\t<fix>2d</fix>" << std::endl;
+      std::cout << "\t</wpt>" << std::endl;
+
+      std::cout << "\t<trk>" << std::endl;
+      std::cout << "\t\t<name>Route</name>" << std::endl;
+      std::cout << "\t\t<trkseg>" << std::endl;
+      for (const auto& point : routePointsResult.points) {
+        std::cout << "\t\t\t<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\">" << std::endl;
+        std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
+        std::cout << "\t\t\t</trkpt>" << std::endl;
+      }
+      std::cout << "\t\t</trkseg>" << std::endl;
+      std::cout << "\t</trk>" << std::endl;
+      std::cout << "</gpx>" << std::endl;
+    }
+    else {
       std::cerr << "Error during route conversion" << std::endl;
     }
-    std::cout.precision(8);
-    std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
-    std::cout << R"(<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="bin2gpx" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">)"
-              << std::endl;
-
-    std::cout << "\t<wpt lat=\""<< args.start.GetLat() << "\" lon=\""<< args.start.GetLon() << "\">" << std::endl;
-    std::cout << "\t\t<name>Start</name>" << std::endl;
-    std::cout << "\t\t<fix>2d</fix>" << std::endl;
-    std::cout << "\t</wpt>" << std::endl;
-
-    std::cout << "\t<wpt lat=\""<< args.target.GetLat() << "\" lon=\""<< args.target.GetLon() << "\">" << std::endl;
-    std::cout << "\t\t<name>Target</name>" << std::endl;
-    std::cout << "\t\t<fix>2d</fix>" << std::endl;
-    std::cout << "\t</wpt>" << std::endl;
-
-    std::cout << "\t<trk>" << std::endl;
-    std::cout << "\t\t<name>Route</name>" << std::endl;
-    std::cout << "\t\t<trkseg>" << std::endl;
-    for (const auto &point : points) {
-      std::cout << "\t\t\t<trkpt lat=\""<< point.GetLat() << "\" lon=\""<< point.GetLon() <<"\">" << std::endl;
-      std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
-      std::cout << "\t\t\t</trkpt>" << std::endl;
-    }
-    std::cout << "\t\t</trkseg>" << std::endl;
-    std::cout << "\t</trk>" << std::endl;
-    std::cout << "</gpx>" << std::endl;
-
-    return 0;
   }
 
   osmscout::StopClock postprocessTimer;

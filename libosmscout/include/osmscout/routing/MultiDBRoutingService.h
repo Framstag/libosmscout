@@ -140,8 +140,7 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
-    bool TransformRouteDataToPoints(const RouteData& data,
-                                    std::list<Point>& points);
+    RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);

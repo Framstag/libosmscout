@@ -564,16 +564,16 @@ int main(int argc, char* argv[])
   PathGenerator pathGenerator(description,routingProfile->GetVehicleMaxSpeed());
 
   if (!args.gpxFile.empty()) {
-    std::list<osmscout::Point> points;
+    osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(result.GetRoute());
 
-    if (!router->TransformRouteDataToPoints(result.GetRoute(),
-                                            points)) {
+    if (routePointsResult.success) {
+      DumpGpxFile(args.gpxFile,
+                  routePointsResult.points,
+                  pathGenerator);
+    }
+    else {
       std::cerr << "Error during route conversion" << std::endl;
     }
-
-    DumpGpxFile(args.gpxFile,
-                points,
-                pathGenerator);
   }
 
   Simulator simulator;

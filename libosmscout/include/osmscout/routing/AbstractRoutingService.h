@@ -41,6 +41,15 @@
 
 namespace osmscout {
 
+  struct OSMSCOUT_API RoutePointsResult
+  {
+    const bool             success;
+    const std::list<Point> points;
+
+    RoutePointsResult();
+    RoutePointsResult(const std::list<Point>& points);
+  };
+
   /**
    * \ingroup Routing
    *
@@ -115,14 +124,14 @@ namespace osmscout {
 
     void ResolveRNodeChainToList(DBId finalRouteNode,
                                  const ClosedSet& closedSet,
-                                 const ClosedSet &closedRestrictedSet,
+                                 const ClosedSet& closedRestrictedSet,
                                  std::list<VNode>& nodes);
 
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
 
     virtual std::vector<DBId> GetNodeTwins(const RoutingState& state,
-                                           const DatabaseId database,
-                                           const Id id) = 0;
+                                           DatabaseId database,
+                                           Id id) = 0;
 
     void GetStartForwardRouteNode(const RoutingState& state,
                                   const DatabaseId& database,
@@ -236,8 +245,7 @@ namespace osmscout {
     bool TransformRouteDataToRouteDescription(const RouteData& data,
                                               RouteDescription& description);
 
-    bool TransformRouteDataToPoints(const RouteData& data,
-                                    std::list<Point>& points);
+    RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
 
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);

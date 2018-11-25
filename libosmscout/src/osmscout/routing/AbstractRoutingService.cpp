@@ -39,6 +39,17 @@
 
 namespace osmscout {
 
+  RoutePointsResult::RoutePointsResult()
+  : success(false)
+  {
+  }
+
+  RoutePointsResult::RoutePointsResult(const std::list<Point>& points)
+  : success(true),
+    points(points)
+  {
+  }
+
   template <class RoutingState>
   AbstractRoutingService<RoutingState>::AbstractRoutingService(const RouterParameter& parameter):
     debugPerformance(parameter.IsDebugPerformance())
@@ -1617,16 +1628,17 @@ namespace osmscout {
   bool AbstractRoutingService<RoutingState>::TransformRouteDataToWay(const RouteData& data,
                                                                      Way& way)
   {
+    RoutePointsResult routePointsResult=TransformRouteDataToPoints(data);
     std::list<Point> points;
 
-    if (!TransformRouteDataToPoints(data,points)) {
+    if (!routePointsResult.success) {
       return false;
     }
 
     way.nodes.clear();
     way.nodes.reserve(data.Entries().size());
 
-    for (const auto& p: points) {
+    for (const auto& p: routePointsResult.points) {
       way.nodes.push_back(p);
     }
 
@@ -1643,20 +1655,20 @@ namespace osmscout {
    *    True, if the way could be build, else false
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::TransformRouteDataToPoints(const RouteData& data,
-                                                                        std::list<Point>& points)
+  RoutePointsResult AbstractRoutingService<RoutingState>::TransformRouteDataToPoints(const RouteData& data)
 
   {
-    AreaRef       a;
-    DBFileOffset  aId;
+    std::list<Point> points;
+    AreaRef          a;
+    DBFileOffset     aId;
 
-    WayRef        w;
-    DBFileOffset  wId;
+    WayRef           w;
+    DBFileOffset     wId;
 
     points.clear();
 
     if (data.Entries().empty()) {
-      return true;
+      return {points};
     }
 
     for (auto iter=data.Entries().begin();
@@ -1668,7 +1680,7 @@ namespace osmscout {
               aId!=iter->GetDBFileOffset()) {
             if (!GetAreaByOffset(iter->GetDBFileOffset(),a)) {
               log.Error() << "Cannot load area with id " << iter->GetPathObject().GetFileOffset();
-              return false;
+              return {};
             }
             aId=iter->GetDBFileOffset();
           }
@@ -1690,7 +1702,7 @@ namespace osmscout {
               wId!=iter->GetDBFileOffset()) {
             if (!GetWayByOffset(iter->GetDBFileOffset(),w)) {
               log.Error() << "Cannot load way with id " << iter->GetPathObject().GetFileOffset();
-              return false;
+              return {};
             }
             wId=iter->GetDBFileOffset();
           }
@@ -1710,7 +1722,7 @@ namespace osmscout {
       }
     }
 
-    return true;
+    return {points};
   }
 
   template class AbstractRoutingService<RoutingProfile>;
