@@ -141,8 +141,7 @@ namespace osmscout {
 
     RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
 
-    bool TransformRouteDataToWay(const RouteData& data,
-                                 Way& way);
+    RouteWayResult TransformRouteDataToWay(const RouteData& data);
 
     bool PostProcessRouteDescription(RouteDescription &description,
                                      const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors);

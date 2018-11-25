@@ -250,15 +250,16 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
   QList<RouteStep>        routeSteps;
   builder.GenerateRouteSteps(*routeDescriptionResult.description, routeSteps);
 
-  osmscout::Way routeWay;
-  if (!routingService->TransformRouteDataToWay(routeData,routeWay)) {
+  auto routeWayResult=routingService->TransformRouteDataToWay(routeData);
+
+  if (!routeWayResult.success) {
     emit routeFailed("Error while transforming route",requestId);
     return;
   }
 
   emit routeComputed(QtRouteData(std::move(*routeDescriptionResult.description),
                                  std::move(routeSteps),
-                                 std::move(routeWay)),
+                                 std::move(*routeWayResult.way)),
                      requestId);
 }
 

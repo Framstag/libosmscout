@@ -68,11 +68,6 @@ namespace osmscout {
     this->progress=progress;
   }
 
-  RoutingResult::RoutingResult()
-  {
-    // no code
-  }
-
   std::string RoutingService::GetDataFilename(const std::string& filenamebase)
   {
     return filenamebase+".dat";

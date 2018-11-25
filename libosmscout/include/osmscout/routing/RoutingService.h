@@ -176,59 +176,6 @@ namespace osmscout {
   };
 
   /**
-   * Result of a routing calculation. This object is always returned.
-   * In case of an routing error it however may not contain a valid route
-   * (route is empty).
-   *
-   * @TODO: Make setter private and class friend to the RoutingService
-   */
-  class OSMSCOUT_API RoutingResult CLASS_FINAL
-  {
-  private:
-    RouteData route;
-    Distance  currentMaxDistance;
-    Distance  overallDistance;
-
-  public:
-    RoutingResult();
-
-    inline void SetOverallDistance(const Distance &overallDistance)
-    {
-      this->overallDistance=overallDistance;
-    }
-
-    inline void SetCurrentMaxDistance(const Distance &currentMaxDistance)
-    {
-      this->currentMaxDistance=currentMaxDistance;
-    }
-
-    inline Distance GetOverallDistance() const
-    {
-      return overallDistance;
-    }
-
-    inline Distance GetCurrentMaxDistance() const
-    {
-      return currentMaxDistance;
-    }
-
-    inline RouteData& GetRoute()
-    {
-      return route;
-    }
-
-    inline const RouteData& GetRoute() const
-    {
-      return route;
-    }
-
-    inline bool Success() const
-    {
-      return !route.IsEmpty();
-    }
-  };
-
-  /**
    * \ingroup Routing
    *
    * Abstract algorithms for routing

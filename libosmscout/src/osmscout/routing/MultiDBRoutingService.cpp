@@ -504,10 +504,9 @@ namespace osmscout {
     return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToPoints(data);
   }
 
-  bool MultiDBRoutingService::TransformRouteDataToWay(const RouteData& data,
-                                                      Way& way)
+  RouteWayResult MultiDBRoutingService::TransformRouteDataToWay(const RouteData& data)
   {
-    return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToWay(data,way);
+    return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToWay(data);
   }
 }
 

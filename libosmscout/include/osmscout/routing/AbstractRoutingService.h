@@ -41,7 +41,60 @@
 
 namespace osmscout {
 
-  struct OSMSCOUT_API RoutePointsResult
+  /**
+   * Result of a routing calculation. This object is always returned.
+   * In case of an routing error it however may not contain a valid route
+   * (route is empty).
+   *
+   * TODO: Adapt it to the same style as RoutePointsResult and Co.
+   */
+  class OSMSCOUT_API RoutingResult CLASS_FINAL
+  {
+  private:
+    RouteData route;
+    Distance  currentMaxDistance;
+    Distance  overallDistance;
+
+  public:
+    RoutingResult();
+
+    inline void SetOverallDistance(const Distance &overallDistance)
+    {
+      this->overallDistance=overallDistance;
+    }
+
+    inline void SetCurrentMaxDistance(const Distance &currentMaxDistance)
+    {
+      this->currentMaxDistance=currentMaxDistance;
+    }
+
+    inline Distance GetOverallDistance() const
+    {
+      return overallDistance;
+    }
+
+    inline Distance GetCurrentMaxDistance() const
+    {
+      return currentMaxDistance;
+    }
+
+    inline RouteData& GetRoute()
+    {
+      return route;
+    }
+
+    inline const RouteData& GetRoute() const
+    {
+      return route;
+    }
+
+    inline bool Success() const
+    {
+      return !route.IsEmpty();
+    }
+  };
+
+  struct OSMSCOUT_API RoutePointsResult CLASS_FINAL
   {
     const bool             success;
     const std::list<Point> points;
@@ -50,13 +103,22 @@ namespace osmscout {
     explicit RoutePointsResult(const std::list<Point>& points);
   };
 
-  struct OSMSCOUT_API RouteDescriptionResult
+  struct OSMSCOUT_API RouteDescriptionResult CLASS_FINAL
   {
     const bool                success;
     const RouteDescriptionRef description;
 
     RouteDescriptionResult();
     explicit RouteDescriptionResult(const RouteDescriptionRef& description);
+  };
+
+  struct OSMSCOUT_API RouteWayResult CLASS_FINAL
+  {
+    const bool   success;
+    const WayRef way;
+
+    RouteWayResult();
+    explicit RouteWayResult(const WayRef& way);
   };
 
   /**
@@ -252,11 +314,8 @@ namespace osmscout {
                                  const RoutingParameter& parameter);
 
     RouteDescriptionResult TransformRouteDataToRouteDescription(const RouteData& data);
-
     RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
-
-    bool TransformRouteDataToWay(const RouteData& data,
-                                 Way& way);
+    RouteWayResult TransformRouteDataToWay(const RouteData& data);
   };
 
 }

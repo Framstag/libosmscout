@@ -39,6 +39,10 @@
 
 namespace osmscout {
 
+  RoutingResult::RoutingResult()
+  {
+  }
+
   RoutePointsResult::RoutePointsResult()
   : success(false)
   {
@@ -58,6 +62,17 @@ namespace osmscout {
   RouteDescriptionResult::RouteDescriptionResult(const RouteDescriptionRef& description)
     : success(true),
       description(description)
+  {
+  }
+
+  RouteWayResult::RouteWayResult()
+    : success(false)
+  {
+  }
+
+  RouteWayResult::RouteWayResult(const WayRef& way)
+    : success(true),
+      way(way)
   {
   }
 
@@ -1635,24 +1650,19 @@ namespace osmscout {
    *    True, if the way could be build, else false
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::TransformRouteDataToWay(const RouteData& data,
-                                                                     Way& way)
+  RouteWayResult AbstractRoutingService<RoutingState>::TransformRouteDataToWay(const RouteData& data)
   {
     RoutePointsResult routePointsResult=TransformRouteDataToPoints(data);
-    std::list<Point> points;
 
     if (!routePointsResult.success) {
-      return false;
+      return {};
     }
 
-    way.nodes.clear();
-    way.nodes.reserve(data.Entries().size());
+    WayRef way=std::make_shared<Way>();
 
-    for (const auto& p: routePointsResult.points) {
-      way.nodes.push_back(p);
-    }
+    way->nodes.assign(routePointsResult.points.begin(),routePointsResult.points.end());
 
-    return true;
+    return RouteWayResult(way);
   }
 
   /**
