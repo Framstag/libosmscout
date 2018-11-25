@@ -439,54 +439,70 @@ namespace osmscout {
     stream << "    <style type=\"text/css\">" << std::endl;
     stream << "       <![CDATA[" << std::endl;
 
-    size_t nextAreaId=0;
+    stream << "        .area_fill_transparent { fill-opacity: 0.0; fillRule:nonzero }" << std::endl;
+
+    stream << std::endl;
+
+    size_t nextFillStyleId=0;
+    size_t nextBorderStyleId=0;
     for (const auto& area: GetAreaData()) {
-      std::map<FillStyle,std::string>::const_iterator entry=fillStyleNameMap.find(*area.fillStyle);
+      if (area.fillStyle) {
+        std::map<FillStyle, std::string>::const_iterator entry = fillStyleNameMap.find(*area.fillStyle);
 
-      if (entry==fillStyleNameMap.end()) {
-        std::string name="area_"+std::to_string(nextAreaId);
+        if (entry == fillStyleNameMap.end()) {
+          std::string name = "area_fill_" + std::to_string(nextFillStyleId);
 
-        fillStyleNameMap.insert(std::make_pair(*area.fillStyle,name));
+          fillStyleNameMap.insert(std::make_pair(*area.fillStyle, name));
 
-        nextAreaId++;
+          nextFillStyleId++;
 
-        stream << "        ." << name << " {";
+          stream << "        ." << name << " {";
 
-        stream << "fill:" << GetColorValue(area.fillStyle->GetFillColor());
+          stream << "fill:" << GetColorValue(area.fillStyle->GetFillColor());
 
-        if (!area.fillStyle->GetFillColor().IsSolid()) {
-          stream << ";fill-opacity:" << area.fillStyle->GetFillColor().GetA();
-        }
-
-        stream << ";fillRule:nonzero";
-
-        double borderWidth=area.borderStyle ? projection.ConvertWidthToPixel(area.borderStyle->GetWidth()) : 0.0;
-
-        if (borderWidth>0.0) {
-          stream << ";stroke:" << GetColorValue(area.borderStyle->GetColor());
-
-          if (!area.borderStyle->GetColor().IsSolid()) {
-            stream << ";stroke-opacity:" << area.borderStyle->GetColor().GetA();
+          if (!area.fillStyle->GetFillColor().IsSolid()) {
+            stream << ";fill-opacity:" << area.fillStyle->GetFillColor().GetA();
           }
 
-          stream << ";stroke-width:" << borderWidth;
+          stream << ";fillRule:nonzero";
+          stream << "}" << std::endl;
+        }
+      }
 
-          if (area.borderStyle->HasDashes()) {
-            stream << ";stroke-dasharray:";
+      if (area.borderStyle) {
+        double borderWidth = projection.ConvertWidthToPixel(area.borderStyle->GetWidth());
 
-            for (size_t i=0; i<area.borderStyle->GetDash().size(); i++) {
-              if (i>0) {
-                stream << ",";
-              }
+        if (borderWidth > 0.0) {
+          std::map<BorderStyle, std::string>::const_iterator borderEntry = borderStyleNameMap.find(*area.borderStyle);
+          if (borderEntry == borderStyleNameMap.end()) {
+            std::string name = "area_border_" + std::to_string(nextBorderStyleId);
+            borderStyleNameMap.insert(std::make_pair(*area.borderStyle, name));
+            assert( borderStyleNameMap.find(*area.borderStyle) != borderStyleNameMap.end());
+            nextBorderStyleId++;
 
-              stream << area.borderStyle->GetDash()[i]*borderWidth;
+            stream << "        ." << name << " {";
+            stream << "stroke:" << GetColorValue(area.borderStyle->GetColor());
+
+            if (!area.borderStyle->GetColor().IsSolid()) {
+              stream << ";stroke-opacity:" << area.borderStyle->GetColor().GetA();
             }
+
+            stream << ";stroke-width:" << borderWidth;
+
+            if (area.borderStyle->HasDashes()) {
+              stream << ";stroke-dasharray:";
+
+              for (size_t i = 0; i < area.borderStyle->GetDash().size(); i++) {
+                if (i > 0) {
+                  stream << ",";
+                }
+
+                stream << area.borderStyle->GetDash()[i] * borderWidth;
+              }
+            }
+            stream << "}" << std::endl;
           }
         }
-
-
-        stream << "}" << std::endl;
-
       }
     }
 
@@ -912,11 +928,28 @@ namespace osmscout {
                                const MapParameter& /*parameter*/,
                                const MapPainter::AreaData& area)
   {
-    std::map<FillStyle,std::string>::const_iterator styleNameEntry=fillStyleNameMap.find(*area.fillStyle);
 
-    assert(styleNameEntry!=fillStyleNameMap.end());
+    std::string styleClasses;
+    if (area.fillStyle) {
+      std::map<FillStyle, std::string>::const_iterator styleNameEntry = fillStyleNameMap.find(*area.fillStyle);
+      assert(styleNameEntry != fillStyleNameMap.end());
+      styleClasses = styleNameEntry->second;
+    }else{
+      styleClasses="area_fill_transparent";
+    }
 
-    stream << "    <path class=\"" << styleNameEntry->second << "\"" << std::endl;
+    if (area.borderStyle) {
+      std::map<BorderStyle, std::string>::const_iterator styleNameEntry = borderStyleNameMap.find(*area.borderStyle);
+      if (styleNameEntry != borderStyleNameMap.end()) { // border style can be undefined when borderWidth==0
+        styleClasses += " " + styleNameEntry->second;
+      }
+    }
+
+    stream << "    <path ";
+    if (!styleClasses.empty()) {
+      stream << "class=\"" << styleClasses << "\"";
+    }
+    stream << std::endl;
 
     if (!area.clippings.empty()) {
       stream << "          fillRule=\"evenodd\"" << std::endl;
@@ -973,6 +1006,7 @@ namespace osmscout {
     WriteFooter();
 
     fillStyleNameMap.clear();
+    borderStyleNameMap.clear();
     lineStyleNameMap.clear();
 
     return result;
