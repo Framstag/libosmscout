@@ -47,7 +47,16 @@ namespace osmscout {
     const std::list<Point> points;
 
     RoutePointsResult();
-    RoutePointsResult(const std::list<Point>& points);
+    explicit RoutePointsResult(const std::list<Point>& points);
+  };
+
+  struct OSMSCOUT_API RouteDescriptionResult
+  {
+    const bool                success;
+    const RouteDescriptionRef description;
+
+    RouteDescriptionResult();
+    explicit RouteDescriptionResult(const RouteDescriptionRef& description);
   };
 
   /**
@@ -242,8 +251,7 @@ namespace osmscout {
                                  const RoutePosition& target,
                                  const RoutingParameter& parameter);
 
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
+    RouteDescriptionResult TransformRouteDataToRouteDescription(const RouteData& data);
 
     RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
 

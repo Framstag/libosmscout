@@ -50,6 +50,17 @@ namespace osmscout {
   {
   }
 
+  RouteDescriptionResult::RouteDescriptionResult()
+    : success(false)
+  {
+  }
+
+  RouteDescriptionResult::RouteDescriptionResult(const RouteDescriptionRef& description)
+    : success(true),
+      description(description)
+  {
+  }
+
   template <class RoutingState>
   AbstractRoutingService<RoutingState>::AbstractRoutingService(const RouterParameter& parameter):
     debugPerformance(parameter.IsDebugPerformance())
@@ -1595,24 +1606,23 @@ namespace osmscout {
    *    True on success, else false
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                                                  RouteDescription& description)
+  RouteDescriptionResult AbstractRoutingService<RoutingState>::TransformRouteDataToRouteDescription(const RouteData& data)
   {
-    description.Clear();
+    RouteDescriptionRef description=std::make_shared<RouteDescription>();
 
     if (data.Entries().empty()) {
-      return true;
+      return RouteDescriptionResult(description);
     }
 
     for (const auto& entry : data.Entries()) {
-      description.AddNode(entry.GetDatabaseId(),
-                          entry.GetCurrentNodeIndex(),
-                          entry.GetObjects(),
-                          entry.GetPathObject(),
-                          entry.GetTargetNodeIndex());
+      description->AddNode(entry.GetDatabaseId(),
+                           entry.GetCurrentNodeIndex(),
+                           entry.GetObjects(),
+                           entry.GetPathObject(),
+                           entry.GetTargetNodeIndex());
     }
 
-    return true;
+    return RouteDescriptionResult(description);
   }
 
   /**
@@ -1668,7 +1678,7 @@ namespace osmscout {
     points.clear();
 
     if (data.Entries().empty()) {
-      return {points};
+      return RoutePointsResult(points);
     }
 
     for (auto iter=data.Entries().begin();
@@ -1722,7 +1732,7 @@ namespace osmscout {
       }
     }
 
-    return {points};
+    return RoutePointsResult(points);
   }
 
   template class AbstractRoutingService<RoutingProfile>;

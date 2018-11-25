@@ -444,7 +444,6 @@ int main(int argc, char* argv[])
   }
 
   osmscout::TypeConfigRef             typeConfig=database->GetTypeConfig();
-  osmscout::RouteDescription          description;
   std::map<std::string,double>        carSpeedTable;
   osmscout::RoutingParameter          parameter;
 
@@ -493,21 +492,26 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
 
-  osmscout::RoutingResult result=router->CalculateRoute(*routingProfile,
-                                                        start,
-                                                        target,
-                                                        parameter);
+  auto routingResult=router->CalculateRoute(*routingProfile,
+                                            start,
+                                            target,
+                                            parameter);
 
-  if (!result.Success()) {
+  if (!routingResult.Success()) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();
     return 1;
   }
 
-  router->TransformRouteDataToRouteDescription(result.GetRoute(),
-                                               description);
 
-  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors={
+  auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(routingResult.GetRoute());
+
+  if (!routeDescriptionResult.success) {
+    std::cerr << "Error during generation of route description" << std::endl;
+    return 1;
+  }
+
+  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors{
     std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>("Start"),
     std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>("Target"),
@@ -536,7 +540,7 @@ int main(int argc, char* argv[])
 
   osmscout::StopClock postprocessTimer;
 
-  if (!postprocessor.PostprocessRouteDescription(description,
+  if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.description,
                                                  profiles,
                                                  databases,
                                                  postprocessors,
@@ -544,6 +548,7 @@ int main(int argc, char* argv[])
                                                  motorwayLinkTypeNames,
                                                  junctionTypeNames)) {
     std::cerr << "Error during route postprocessing" << std::endl;
+    return 1;
   }
 
   postprocessTimer.Stop();
@@ -554,17 +559,17 @@ int main(int argc, char* argv[])
   osmscout::RouteDescriptionGenerator generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
-  generator.GenerateDescription(description,
+  generator.GenerateDescription(*routeDescriptionResult.description,
                                 generatorCallback);
 
   generateTimer.Stop();
 
   std::cout << "Description generation time: " << generateTimer.ResultString() << std::endl;
 
-  PathGenerator pathGenerator(description,routingProfile->GetVehicleMaxSpeed());
+  PathGenerator pathGenerator(*routeDescriptionResult.description,routingProfile->GetVehicleMaxSpeed());
 
   if (!args.gpxFile.empty()) {
-    osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(result.GetRoute());
+    osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(routingResult.GetRoute());
 
     if (routePointsResult.success) {
       DumpGpxFile(args.gpxFile,

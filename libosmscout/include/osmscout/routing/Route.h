@@ -847,6 +847,8 @@ namespace osmscout {
     void GenerateDescription(const RouteDescription& description,
                              Callback& callback);
   };
+
+  typedef std::shared_ptr<RouteDescription> RouteDescriptionRef;
 }
 
 #endif

@@ -725,10 +725,14 @@ int main(int argc, char* argv[])
   }
 #endif
 
-  router->TransformRouteDataToRouteDescription(result.GetRoute(),
-                                               description);
+  auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(result.GetRoute());
 
-  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors={
+  if (!routeDescriptionResult.success) {
+    std::cerr << "Error during generation of route description" << std::endl;
+    return 1;
+  }
+
+  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors{
     std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>("Start"),
     std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>("Target"),
@@ -813,7 +817,7 @@ int main(int argc, char* argv[])
   osmscout::RouteDescriptionGenerator generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
-  generator.GenerateDescription(description,
+  generator.GenerateDescription(*routeDescriptionResult.description,
                                 generatorCallback);
 
   generateTimer.Stop();

@@ -156,6 +156,7 @@ int main(int argc, char* argv[])
 
   std::cout << "Retrieve routing node next to start..." << std::endl;
   osmscout::RoutePosition startNode=router->GetClosestRoutableNode(args.start);
+
   if (!startNode.IsValid()){
     std::cerr << "Can't found route node near start coord " << args.start.GetDisplayText() << std::endl;
     return 1;
@@ -163,6 +164,7 @@ int main(int argc, char* argv[])
 
   std::cout << "Retrieve routing node next to target..." << std::endl;
   osmscout::RoutePosition targetNode=router->GetClosestRoutableNode(args.target);
+
   if (!targetNode.IsValid()){
     std::cerr << "Can't found route node near target coord " << args.target.GetDisplayText() << std::endl;
     return 1;
@@ -171,14 +173,14 @@ int main(int argc, char* argv[])
   std::cout << "Calculate route..." << std::endl;
 
   osmscout::RoutingParameter parameter;
-  osmscout::RoutingResult route=router->CalculateRoute(startNode,targetNode,parameter);
-  if (!route.Success()){
+  auto                       routingResult=router->CalculateRoute(startNode,targetNode,parameter);
+
+  if (!routingResult.Success()){
     std::cerr << "Route failed" << std::endl;
     return 1;
   }
 
-  osmscout::RouteDescription description;
-  router->TransformRouteDataToRouteDescription(route.GetRoute(),description);
+  auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(routingResult.GetRoute());
 
   std::cout << "Closing RoutingServices and databases..." << std::endl;
 

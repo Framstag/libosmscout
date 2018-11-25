@@ -494,10 +494,9 @@ namespace osmscout {
   }
 
   // FIXME: I don't understand why these methods should be here...
-  bool MultiDBRoutingService::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                                   RouteDescription& description)
+  RouteDescriptionResult MultiDBRoutingService::TransformRouteDataToRouteDescription(const RouteData& data)
   {
-    return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToRouteDescription(data,description);
+    return AbstractRoutingService<MultiDBRoutingState>::TransformRouteDataToRouteDescription(data);
   }
 
   RoutePointsResult MultiDBRoutingService::TransformRouteDataToPoints(const RouteData& data)

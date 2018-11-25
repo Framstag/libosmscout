@@ -137,8 +137,7 @@ namespace osmscout {
                                  const Distance &radius,
                                  const RoutingParameter& parameter);
 
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
+    RouteDescriptionResult TransformRouteDataToRouteDescription(const RouteData& data);
 
     RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
 
