@@ -99,6 +99,10 @@ namespace osmscout {
   void Area::Ring::GetBoundingBox(GeoBox& boundingBox) const
   {
     assert(!nodes.empty());
+    if (bbox.IsValid()) {
+      boundingBox = bbox;
+      return;
+    }
 
     double minLon=nodes[0].GetLon();
     double maxLon=minLon;
@@ -119,6 +123,9 @@ namespace osmscout {
   GeoBox Area::Ring::GetBoundingBox() const
   {
     assert(!nodes.empty());
+    if (bbox.IsValid()) {
+      return bbox;
+    }
 
     double minLon=nodes[0].GetLon();
     double maxLon=minLon;
@@ -252,24 +259,29 @@ namespace osmscout {
     }
 
     scanner.Read(rings[0].nodes,
+                 rings[0].segments,
+                 rings[0].bbox,
                  rings[0].GetType()->CanRoute());
 
     for (size_t i=1; i<ringCount; i++) {
+      auto &ring = rings[i];
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
       type=typeConfig.GetAreaTypeInfo(ringType);
 
-      rings[i].SetType(type);
+      ring.SetType(type);
 
-      if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
-        rings[i].featureValueBuffer.Read(scanner);
+      if (ring.GetType()->GetAreaId()!=typeIgnore) {
+        ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(rings[i].ring);
-      scanner.Read(rings[i].nodes,
-                   rings[i].GetType()->GetAreaId()!=typeIgnore &&
-                   rings[i].GetType()->CanRoute());
+      scanner.Read(ring.ring);
+      scanner.Read(ring.nodes,
+                   ring.segments,
+                   ring.bbox,
+                   ring.GetType()->GetAreaId()!=typeIgnore &&
+                   ring.GetType()->CanRoute());
     }
     nextFileOffset=scanner.GetPos();
   }
@@ -319,24 +331,29 @@ namespace osmscout {
     }
 
     scanner.Read(rings[0].nodes,
+                 rings[0].segments,
+                 rings[0].bbox,
                  true);
 
     for (size_t i=1; i<ringCount; i++) {
+      auto &ring = rings[i];
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
       type=typeConfig.GetAreaTypeInfo(ringType);
 
-      rings[i].SetType(type);
+      ring.SetType(type);
 
-      if (rings[i].GetType()->GetAreaId()!=typeIgnore) {
-        rings[i].featureValueBuffer.Read(scanner);
+      if (ring.GetType()->GetAreaId()!=typeIgnore) {
+        ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(rings[i].ring);
-      scanner.Read(rings[i].nodes,
-                   rings[i].GetType()->GetAreaId()!=typeIgnore ||
-                   rings[i].ring==outerRingId);
+      scanner.Read(ring.ring);
+      scanner.Read(ring.nodes,
+                   ring.segments,
+                   ring.bbox,
+                   ring.GetType()->GetAreaId()!=typeIgnore ||
+                   ring.ring==outerRingId);
     }
     nextFileOffset=scanner.GetPos();
   }
@@ -386,22 +403,27 @@ namespace osmscout {
     }
 
     scanner.Read(rings[0].nodes,
+                 rings[0].segments,
+                 rings[0].bbox,
                  false);
 
     for (size_t i=1; i<ringCount; i++) {
+      auto &ring = rings[i];
       scanner.ReadTypeId(ringType,
                          typeConfig.GetAreaTypeIdBytes());
 
       type=typeConfig.GetAreaTypeInfo(ringType);
 
-      rings[i].SetType(type);
+      ring.SetType(type);
 
-      if (rings[i].featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-        rings[i].featureValueBuffer.Read(scanner);
+      if (ring.featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
+        ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(rings[i].ring);
-      scanner.Read(rings[i].nodes,
+      scanner.Read(ring.ring);
+      scanner.Read(ring.nodes,
+                   ring.segments,
+                   ring.bbox,
                    false);
     }
     nextFileOffset=scanner.GetPos();

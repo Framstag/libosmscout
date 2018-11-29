@@ -49,12 +49,13 @@ class OSMSCOUT_CLIENT_QT_API OverlayObject : public QObject
   Q_PROPERTY(QString name READ getName WRITE setName)
 
 protected:
-  QString                       typeName;
-  std::vector<osmscout::Point>  nodes;
-  osmscout::GeoBox              box;
-  int8_t                        layer{std::numeric_limits<int8_t>::max()};
-  QString                       name;
-  mutable QMutex                lock;
+  QString                             typeName;
+  std::vector<osmscout::Point>        nodes;
+  mutable std::vector<SegmentGeoBox>  segmentsBoxes;
+  mutable osmscout::GeoBox            box;
+  int8_t                              layer{std::numeric_limits<int8_t>::max()};
+  QString                             name;
+  mutable QMutex                      lock;
 
 public slots:
   void clear();
@@ -129,11 +130,17 @@ public:
     name = n;
   }
 
-  osmscout::GeoBox boundingBox();
+  osmscout::GeoBox boundingBox() const;
 
 protected:
   void setupFeatures(const osmscout::TypeInfoRef &type,
                      osmscout::FeatureValueBuffer &features) const;
+
+  // internal, lock have to be acquired
+  osmscout::GeoBox boundingBoxInternal() const;
+
+  // internal, lock have to be acquired
+  std::vector<SegmentGeoBox> segments() const;
 };
 
 

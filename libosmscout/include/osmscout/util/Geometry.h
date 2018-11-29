@@ -122,6 +122,39 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
+   * Calculate the bounding box of the (non empty) range of geo coords
+   *
+   * @param [first, last) range of geo coords
+   * @param minLon
+   * @param maxLon
+   * @param minLat
+   * @param maxLat
+   */
+  template< class InputIt >
+  void GetBoundingBox(const InputIt first,
+                      const InputIt last,
+                      GeoBox& boundingBox)
+  {
+    assert(first!=last);
+
+    double minLon=first->GetLon();
+    double maxLon=minLon;
+    double minLat=first->GetLat();
+    double maxLat=minLat;
+
+    for (InputIt i=first; i!=last; i++) {
+      minLon=std::min(minLon,i->GetLon());
+      maxLon=std::max(maxLon,i->GetLon());
+      minLat=std::min(minLat,i->GetLat());
+      maxLat=std::max(maxLat,i->GetLat());
+    }
+
+    boundingBox.Set(GeoCoord(minLat,minLon),
+                    GeoCoord(maxLat,maxLon));
+  }
+
+  /**
+   * \ingroup Geometry
    * Calculate the bounding box of the (non empty) vector of geo coords
    *
    * @param nodes
@@ -1126,6 +1159,13 @@ namespace osmscout {
     }
   };
 
+  struct OSMSCOUT_API SegmentGeoBox
+  {
+    size_t from;
+    size_t to; //!< exclusive
+    GeoBox bbox;
+  };
+
   /**
    * \ingroup Geometry
    * Does a scan conversion for a line between the given coordinates.
@@ -1218,12 +1258,16 @@ namespace osmscout {
    */
   template<typename N>
   void ComputeSegmentBoxes(const std::vector<N>& path,
-                           std::vector<GeoBox> &segmentBoxes,
-                           size_t bound)
+                           std::vector<SegmentGeoBox> &segmentBoxes,
+                           size_t bound,
+                           size_t segmentSize = 1000)
   {
-    for (size_t i=0;i<bound;i+=1000){
-      GeoBox box;
-      GetSegmentBoundingBox(path,i,std::min(i+1000,bound), box);
+    assert(segmentSize>0);
+    for (size_t i=0;i<bound;i+=segmentSize){
+      SegmentGeoBox box;
+      box.from = i;
+      box.to = std::min(i+segmentSize,bound);
+      GetSegmentBoundingBox(path, box.from, box.to, box.bbox);
       segmentBoxes.push_back(box);
     }
   }
@@ -1260,8 +1304,8 @@ namespace osmscout {
     GeoBox bLineBox;
 
     // compute b-boxes for B path, each 1000 point-long segment
-    std::vector<GeoBox> bSegmentBoxes;
-    ComputeSegmentBoxes(bPath,bSegmentBoxes,bBound+1);
+    std::vector<SegmentGeoBox> bSegmentBoxes;
+    ComputeSegmentBoxes(bPath,bSegmentBoxes,bBound+1, 1000);
 
     for (;aIndex<aBound;aIndex++){
       N a1=aPath[aIndex%aPath.size()];
@@ -1277,7 +1321,7 @@ namespace osmscout {
         bLineBox.Set(GeoCoord(b1.GetLat(),b1.GetLon()),
                      GeoCoord(b2.GetLat(),b2.GetLon()));
 
-        if (!bSegmentBoxes[bIndex/1000].Intersects(aLineBox,/*openInterval*/false) &&
+        if (!bSegmentBoxes[bIndex/1000].bbox.Intersects(aLineBox,/*openInterval*/false) &&
             !aLineBox.Intersects(bLineBox,/*openInterval*/false)){
           // round up
           bIndex+=std::max(0, 998-(int)(bIndex%1000));
@@ -1328,8 +1372,8 @@ namespace osmscout {
     GeoBox lineBox;
 
     // compute b-boxes for path, each 1000 point-long segment
-    std::vector<GeoBox> segmentBoxes;
-    ComputeSegmentBoxes(way,segmentBoxes,way.size());
+    std::vector<SegmentGeoBox> segmentBoxes;
+    ComputeSegmentBoxes(way,segmentBoxes,way.size(),1000);
 
     for (; i<way.size()-1; i++) {
       N i1=way[i];
@@ -1338,8 +1382,8 @@ namespace osmscout {
                   GeoCoord(i2.GetLat(),i2.GetLon()));
 
       for (j=i+1; j<way.size()-1; j++) {
-        if (!segmentBoxes[j/1000].Intersects(lineBox,/*openInterval*/false) &&
-            !segmentBoxes[(j+1)/1000].Intersects(lineBox,/*openInterval*/false)){
+        if (!segmentBoxes[j/1000].bbox.Intersects(lineBox,/*openInterval*/false) &&
+            !segmentBoxes[(j+1)/1000].bbox.Intersects(lineBox,/*openInterval*/false)){
           // round up
           j+=std::max(0, 998-(int)(j%1000));
           continue;

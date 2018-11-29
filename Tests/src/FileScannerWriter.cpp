@@ -187,270 +187,276 @@ int main()
 
     writer.Close();
 
-    scanner.Open("test.dat",osmscout::FileScanner::Normal,false);
-
-    // Read/Write
-
-    scanner.Read(inBool);
-    if (inBool!=outBool1) {
-      std::cerr << "Read/Write(bool): Expected " << outBool1 << ", got " << inBool << std::endl;
-      errors++;
-    }
-
-    scanner.Read(inBool);
-    if (inBool!=outBool2) {
-      std::cerr << "Read/Write(bool): Expected " << outBool2 << ", got " << inBool << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in16u);
-    if (in16u!=out16u1) {
-      std::cerr << "Read/Write(uint16_t): Expected " << out16u1 << ", got " << in16u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in16u);
-    if (in16u!=out16u2) {
-      std::cerr << "Read/Write(uint16_t): Expected " << out16u2 << ", got " << in16u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in16u);
-    if (in16u!=out16u3) {
-      std::cerr << "Read/Write(uint16_t): Expected " << out16u3 << ", got " << in16u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in32u);
-    if (in32u!=out32u1) {
-      std::cerr << "Read/Write(uint32_t): Expected " << out32u1 << ", got " << in32u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in32u);
-    if (in32u!=out32u2) {
-      std::cerr << "Read/Write(uint32_t): Expected " << out32u2 << ", got " << in32u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in32u);
-    if (in32u!=out32u3) {
-      std::cerr << "Read/Write(uint32_t): Expected " << out32u3 << ", got " << in32u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in64u);
-    if (in64u!=out64u1) {
-      std::cerr << "Read/Write(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in64u);
-    if (in64u!=out64u2) {
-      std::cerr << "Read/Write(uint64_t): Expected " << out64u2 << ", got " << in64u << std::endl;
-      errors++;
-    }
-
-    scanner.Read(in64u);
-    if (in64u!=out64u3) {
-      std::cerr << "Read/Write(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
-      errors++;
-    }
-
-    // Read/WriteNumber
-
-    scanner.ReadNumber(in16u);
-    if (in16u!=out16u1) {
-      std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u1 << ", got " << in16u << std::endl;
-      errors++;
-    }
-
-    scanner.ReadNumber(in16u);
-    if (in16u!=out16u2) {
-      std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u2 << ", got " << in16u << std::endl;
-      errors++;
-    }
-
-    scanner.ReadNumber(in16u);
-    if (in16u!=out16u3) {
-      std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u3 << ", got " << in16u << std::endl;
-      errors++;
-    }
-
-    scanner.ReadNumber(in32u);
-    if (in32u!=out32u1) {
-      std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u1 << ", got " << in32u << std::endl;
-      errors++;
-    }
-
-    scanner.ReadNumber(in32u);
-    if (in32u!=out32u2) {
-      std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u2 << ", got " << in32u << std::endl;
-      errors++;
-    }
+    for (int mmapMode = 0; mmapMode <= 1; mmapMode++){
+      scanner.Open("test.dat",osmscout::FileScanner::Normal,(bool)mmapMode);
+
+      // Read/Write
+
+      scanner.Read(inBool);
+      if (inBool!=outBool1) {
+        std::cerr << "Read/Write(bool): Expected " << outBool1 << ", got " << inBool << std::endl;
+        errors++;
+      }
+
+      scanner.Read(inBool);
+      if (inBool!=outBool2) {
+        std::cerr << "Read/Write(bool): Expected " << outBool2 << ", got " << inBool << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in16u);
+      if (in16u!=out16u1) {
+        std::cerr << "Read/Write(uint16_t): Expected " << out16u1 << ", got " << in16u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in16u);
+      if (in16u!=out16u2) {
+        std::cerr << "Read/Write(uint16_t): Expected " << out16u2 << ", got " << in16u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in16u);
+      if (in16u!=out16u3) {
+        std::cerr << "Read/Write(uint16_t): Expected " << out16u3 << ", got " << in16u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in32u);
+      if (in32u!=out32u1) {
+        std::cerr << "Read/Write(uint32_t): Expected " << out32u1 << ", got " << in32u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in32u);
+      if (in32u!=out32u2) {
+        std::cerr << "Read/Write(uint32_t): Expected " << out32u2 << ", got " << in32u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in32u);
+      if (in32u!=out32u3) {
+        std::cerr << "Read/Write(uint32_t): Expected " << out32u3 << ", got " << in32u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in64u);
+      if (in64u!=out64u1) {
+        std::cerr << "Read/Write(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in64u);
+      if (in64u!=out64u2) {
+        std::cerr << "Read/Write(uint64_t): Expected " << out64u2 << ", got " << in64u << std::endl;
+        errors++;
+      }
+
+      scanner.Read(in64u);
+      if (in64u!=out64u3) {
+        std::cerr << "Read/Write(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
+        errors++;
+      }
+
+      // Read/WriteNumber
+
+      scanner.ReadNumber(in16u);
+      if (in16u!=out16u1) {
+        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u1 << ", got " << in16u << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in16u);
+      if (in16u!=out16u2) {
+        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u2 << ", got " << in16u << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in16u);
+      if (in16u!=out16u3) {
+        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u3 << ", got " << in16u << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in32u);
+      if (in32u!=out32u1) {
+        std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u1 << ", got " << in32u << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in32u);
+      if (in32u!=out32u2) {
+        std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u2 << ", got " << in32u << std::endl;
+        errors++;
+      }
 
-    scanner.ReadNumber(in32u);
-    if (in32u!=out32u3) {
-      std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u3 << ", got " << in32u << std::endl;
-      errors++;
-    }
+      scanner.ReadNumber(in32u);
+      if (in32u!=out32u3) {
+        std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u3 << ", got " << in32u << std::endl;
+        errors++;
+      }
 
-    scanner.ReadNumber(in64u);
-    if (in64u!=out64u1) {
-      std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
-      errors++;
-    }
+      scanner.ReadNumber(in64u);
+      if (in64u!=out64u1) {
+        std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
+        errors++;
+      }
 
-    scanner.ReadNumber(in64u);
-    if (in64u!=out64u2) {
-      std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u2 << ", got " << in64u << std::endl;
-      errors++;
-    }
+      scanner.ReadNumber(in64u);
+      if (in64u!=out64u2) {
+        std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u2 << ", got " << in64u << std::endl;
+        errors++;
+      }
 
-    scanner.ReadNumber(in64u);
-    if (in64u!=out64u3) {
-      std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
-      errors++;
-    }
+      scanner.ReadNumber(in64u);
+      if (in64u!=out64u3) {
+        std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
+        errors++;
+      }
 
-    // Read/WriteFileOffset
+      // Read/WriteFileOffset
 
-    scanner.ReadFileOffset(info);
-    if (info!=outfo1) {
-      std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo1 << ", got " << info << std::endl;
-      errors++;
-    }
+      scanner.ReadFileOffset(info);
+      if (info!=outfo1) {
+        std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo1 << ", got " << info << std::endl;
+        errors++;
+      }
 
-    scanner.ReadFileOffset(info);
-    if (info!=outfo2) {
-      std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo2 << ", got " << info << std::endl;
-      errors++;
-    }
+      scanner.ReadFileOffset(info);
+      if (info!=outfo2) {
+        std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo2 << ", got " << info << std::endl;
+        errors++;
+      }
 
-    scanner.ReadFileOffset(info);
-    if (info!=outfo3) {
-      std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo3 << ", got " << info << std::endl;
-      errors++;
-    }
+      scanner.ReadFileOffset(info);
+      if (info!=outfo3) {
+        std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo3 << ", got " << info << std::endl;
+        errors++;
+      }
 
-    scanner.ReadCoord(inCoord1);
+      scanner.ReadCoord(inCoord1);
 
-    if (inCoord1.GetDisplayText()!=outCoord1.GetDisplayText()) {
-      std::cerr << "Read/WriteCoord(GeoCoord) 1: Expected " << outCoord1.GetDisplayText() << ", got " << inCoord1.GetDisplayText() << std::endl;
-      errors++;
-    }
+      if (inCoord1.GetDisplayText()!=outCoord1.GetDisplayText()) {
+        std::cerr << "Read/WriteCoord(GeoCoord) 1: Expected " << outCoord1.GetDisplayText() << ", got " << inCoord1.GetDisplayText() << std::endl;
+        errors++;
+      }
 
-    scanner.Read(inCoords1,false);
-    if (!Equals(inCoords1,outCoords1)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>) 1: Expected ";
+      osmscout::GeoBox boundingBox;
+      std::vector<osmscout::SegmentGeoBox> segments;
 
-      DumpGeoCoords(outCoords1);
+      scanner.Read(inCoords1,segments,boundingBox,false);
+      if (!Equals(inCoords1,outCoords1)) {
+        std::cerr << "Read/Write(std::vector<GeoCoord>) 1: Expected ";
 
-      std::cout << ", got ";
+        DumpGeoCoords(outCoords1);
 
-      DumpGeoCoords(inCoords1);
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
-    }
+        DumpGeoCoords(inCoords1);
 
-    scanner.Read(inCoords2,false);
-    if (!Equals(inCoords2,outCoords2)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>) 2: Expected ";
+        std::cout << std::endl;
+        errors++;
+      }
 
-      DumpGeoCoords(outCoords2);
+      scanner.Read(inCoords2,segments,boundingBox,false);
+      if (!Equals(inCoords2,outCoords2)) {
+        std::cerr << "Read/Write(std::vector<GeoCoord>) 2: Expected ";
 
-      std::cout << ", got ";
+        DumpGeoCoords(outCoords2);
 
-      DumpGeoCoords(inCoords2);
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
-    }
+        DumpGeoCoords(inCoords2);
 
-    scanner.Read(inCoords3,false);
-    if (!Equals(inCoords3,outCoords3)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>) 3: Expected ";
+        std::cout << std::endl;
+        errors++;
+      }
 
-      DumpGeoCoords(outCoords3);
+      scanner.Read(inCoords3,segments,boundingBox,false);
+      if (!Equals(inCoords3,outCoords3)) {
+        std::cerr << "Read/Write(std::vector<GeoCoord>) 3: Expected ";
 
-      std::cout << ", got ";
+        DumpGeoCoords(outCoords3);
 
-      DumpGeoCoords(inCoords3);
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
-    }
+        DumpGeoCoords(inCoords3);
 
-    scanner.Read(inCoords4,false);
-    if (!Equals(inCoords4,outCoords4)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>) 4: Expected ";
+        std::cout << std::endl;
+        errors++;
+      }
 
-      DumpGeoCoords(outCoords4);
+      scanner.Read(inCoords4,segments,boundingBox,false);
+      if (!Equals(inCoords4,outCoords4)) {
+        std::cerr << "Read/Write(std::vector<GeoCoord>) 4: Expected ";
 
-      std::cout << ", got ";
+        DumpGeoCoords(outCoords4);
 
-      DumpGeoCoords(inCoords4);
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
-    }
+        DumpGeoCoords(inCoords4);
 
-    scanner.Read(inCoords5,false);
-    if (!Equals(inCoords5,outCoords5)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>) 5: Expected ";
+        std::cout << std::endl;
+        errors++;
+      }
 
-      DumpGeoCoords(outCoords5);
+      scanner.Read(inCoords5,segments,boundingBox,false);
+      if (!Equals(inCoords5,outCoords5)) {
+        std::cerr << "Read/Write(std::vector<GeoCoord>) 5: Expected ";
 
-      std::cout << ", got ";
+        DumpGeoCoords(outCoords5);
 
-      DumpGeoCoords(inCoords5);
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
-    }
+        DumpGeoCoords(inCoords5);
 
-    scanner.Read(inCoords6,false);
-    if (!Equals(inCoords6,outCoords6)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>) 6: Expected ";
+        std::cout << std::endl;
+        errors++;
+      }
 
-      DumpGeoCoords(outCoords6);
+      scanner.Read(inCoords6,segments,boundingBox,false);
+      if (!Equals(inCoords6,outCoords6)) {
+        std::cerr << "Read/Write(std::vector<GeoCoord>) 6: Expected ";
 
-      std::cout << ", got ";
+        DumpGeoCoords(outCoords6);
 
-      DumpGeoCoords(inCoords6);
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
-    }
+        DumpGeoCoords(inCoords6);
 
-    scanner.Read(inCoords7,false);
-    if (!Equals(inCoords7,outCoords7)) {
-      std::cerr << "Read/Write(std::vector<GeoCoord>) 7: Expected ";
+        std::cout << std::endl;
+        errors++;
+      }
 
-      std::cout << outCoords7.size();
+      scanner.Read(inCoords7,segments,boundingBox,false);
+      if (!Equals(inCoords7,outCoords7)) {
+        std::cerr << "Read/Write(std::vector<GeoCoord>) 7: Expected ";
 
-      std::cout << ", got ";
+        std::cout << outCoords7.size();
 
-      std::cout << inCoords7.size();
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
-    }
+        std::cout << inCoords7.size();
 
-    finalReadFileOffset=scanner.GetPos();
+        std::cout << std::endl;
+        errors++;
+      }
 
-    if (finalWriteFileOffset!=finalReadFileOffset) {
-      std::cerr << "Final file offset check: Expected ";
+      finalReadFileOffset=scanner.GetPos();
 
-      std::cout << finalWriteFileOffset;
+      if (finalWriteFileOffset!=finalReadFileOffset) {
+        std::cerr << "Final file offset check: Expected ";
 
-      std::cout << ", got ";
+        std::cout << finalWriteFileOffset;
 
-      std::cout << finalReadFileOffset;
+        std::cout << ", got ";
 
-      std::cout << std::endl;
-      errors++;
+        std::cout << finalReadFileOffset;
+
+        std::cout << std::endl;
+        errors++;
+      }
+      scanner.Close();
     }
   }
   catch (osmscout::IOException& e) {

@@ -24,7 +24,7 @@ OST
       * Access
       * MaxSpeed
     OPTIMIZE_LOW_ZOOM:
-      Optimize this area or way for idplaying in low zoom by
+      Optimize this area or way for displaying in low zoom by
       reducing visible complexity
     PIN_WAY:
       This is a way, even if the path is closed
@@ -1932,25 +1932,25 @@ TYPES
     = WAY AREA ("boundary"=="administrative" AND "admin_level"=="2") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
       {Name, NameAlt, AdminLevel}
-      MULTIPOLYGON IGNORESEALAND
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
 
   TYPE boundary_state
     = WAY AREA ("boundary"=="administrative" AND "admin_level"=="4") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="4")
       {Name, NameAlt, AdminLevel}
-      MULTIPOLYGON IGNORESEALAND
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
 
   TYPE boundary_county
     = WAY AREA ("boundary"=="administrative" AND "admin_level"=="6") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="6")
       {Name, NameAlt, AdminLevel}
-      MULTIPOLYGON IGNORESEALAND
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
 
   TYPE boundary_administrative
     = WAY AREA ("boundary"=="administrative") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative")
       {Name, NameAlt, AdminLevel}
-      MULTIPOLYGON IGNORESEALAND
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
 
   TYPE place_continent
     = NODE AREA ("place"=="continent")

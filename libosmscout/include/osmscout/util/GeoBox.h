@@ -91,6 +91,11 @@ namespace osmscout {
     void Include(const GeoBox& other);
 
     /**
+     * Resize the bounding box to include the original bounding box and the given point
+     */
+    void Include(const GeoCoord& point);
+
+    /**
      *
      * Returns 'true' if coordinate is within the bounding box.
      *

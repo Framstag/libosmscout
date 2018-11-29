@@ -35,6 +35,7 @@
 
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/GeoBox.h>
+#include <osmscout/util/Geometry.h>
 
 #if defined(_WIN32)
   #include <windows.h>
@@ -89,6 +90,20 @@ namespace osmscout {
   private:
     void AssureByteBufferSize(size_t size);
     void FreeBuffer();
+
+    /**
+     * Reads bytes to internal temporary buffer
+     * or just return pointer to memory mapped file.
+     *
+     * In case of internal buffer, data are valid until
+     * next read. In case of memory mapped file, data
+     * are valid until closing the reader and method don't
+     * copy the memory - it should be fast.
+     *
+     * @param bytes
+     * @return pointer to byteBuffer or memory mapped file
+     */
+    char* ReadInternal(size_t bytes);
 
   public:
     FileScanner();
@@ -156,7 +171,18 @@ namespace osmscout {
     void ReadConditionalCoord(GeoCoord& coord,
                               bool& isSet);
 
-    void Read(std::vector<Point>& nodes, bool readIds);
+    /**
+     * Reads vector of Point and pre-compute segments and bounding box for it
+     *
+     * @param nodes
+     * @param segments
+     * @param bbox
+     * @param readIds
+     */
+    void Read(std::vector<Point>& nodes,
+              std::vector<SegmentGeoBox> &segments,
+              GeoBox &bbox,
+              bool readIds);
 
     void ReadBox(GeoBox& box);
 
