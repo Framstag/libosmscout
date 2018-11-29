@@ -2303,18 +2303,6 @@ namespace osmscout {
 
     nodes.resize(nodeCount);
 
-    // we will prepare segment bounding boxes just for long point vectors
-    bool prepareSegments = nodeCount > 1024;
-    if (prepareSegments) {
-      // initialise segments
-      segments.resize((((uint64_t) nodeCount - 1) / 1024) + 1);
-      for (size_t i = 0; i < segments.size(); i++) {
-        auto &s = segments[i];
-        s.from = i * 1024;
-        s.to = std::min(nodeCount, s.from + 1024); // exclusive
-      }
-    }
-
     size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
 
     GeoCoord firstCoord;
@@ -2323,47 +2311,6 @@ namespace osmscout {
 
     uint32_t latValue=(uint32_t)round((firstCoord.GetLat()+90.0)*latConversionFactor);
     uint32_t lonValue=(uint32_t)round((firstCoord.GetLon()+180.0)*lonConversionFactor);
-
-    uint32_t bboxMinLon=lonValue;
-    uint32_t bboxMaxLon=lonValue;
-    uint32_t bboxMinLat=latValue;
-    uint32_t bboxMaxLat=latValue;
-
-    uint32_t segMinLon=lonValue;
-    uint32_t segMaxLon=lonValue;
-    uint32_t segMinLat=latValue;
-    uint32_t segMaxLat=latValue;
-
-    // this lambda setup coordinate to given node and update bounding box and segments
-    auto setCoord = [&](size_t i, const uint32_t &latValue, const uint32_t &lonValue){
-      nodes[i].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
-                                 lonValue/lonConversionFactor-180.0));
-
-      bboxMinLon=std::min(bboxMinLon,lonValue);
-      bboxMaxLon=std::max(bboxMaxLon,lonValue);
-      bboxMinLat=std::min(bboxMinLat,latValue);
-      bboxMaxLat=std::max(bboxMaxLat,latValue);
-
-      if (prepareSegments) {
-        if (i % 1024 == 0) { // first node of segment
-          segMinLon = lonValue;
-          segMaxLon = lonValue;
-          segMinLat = latValue;
-          segMaxLat = latValue;
-        } else {
-          segMinLon = std::min(segMinLon, lonValue);
-          segMaxLon = std::max(segMaxLon, lonValue);
-          segMinLat = std::min(segMinLat, latValue);
-          segMaxLat = std::max(segMaxLat, latValue);
-        }
-        if (i % 1024 == 1023 || i == nodeCount - 1) { // last node of segment
-          segments[i / 1024].bbox.Set(GeoCoord(segMinLat / latConversionFactor - 90.0,
-                                               segMinLon / lonConversionFactor - 180.0),
-                                      GeoCoord(segMaxLat / latConversionFactor - 90.0,
-                                               segMaxLon / lonConversionFactor - 180.0));
-        }
-      }
-    };
 
     nodes[0].SetCoord(firstCoord);
 
@@ -2379,7 +2326,8 @@ namespace osmscout {
         latValue+=latDelta;
         lonValue+=lonDelta;
 
-        setCoord(currentCoordPos, latValue, lonValue);
+        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
+                                                 lonValue/lonConversionFactor-180.0));
 
         currentCoordPos++;
       }
@@ -2411,7 +2359,9 @@ namespace osmscout {
 
         lonValue+=lonDelta;
 
-        setCoord(currentCoordPos, latValue, lonValue);
+        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
+                                                 lonValue/lonConversionFactor-180.0));
+
         currentCoordPos++;
       }
     }
@@ -2442,14 +2392,31 @@ namespace osmscout {
 
         lonValue+=lonDelta;
 
-        setCoord(currentCoordPos, latValue, lonValue);
+        //setCoord(currentCoordPos, latValue, lonValue);
+        nodes[currentCoordPos].SetCoord(GeoCoord(latValue/latConversionFactor-90.0,
+                                                 lonValue/lonConversionFactor-180.0));
+
 
         currentCoordPos++;
       }
     }
 
-    bbox.Set(GeoCoord(bboxMinLat/latConversionFactor-90.0,bboxMinLon/lonConversionFactor-180.0),
-             GeoCoord(bboxMaxLat/latConversionFactor-90.0,bboxMaxLon/lonConversionFactor-180.0));
+    GetBoundingBox(nodes, bbox);
+
+    // we will prepare segment bounding boxes just for long point vectors
+    if (nodeCount > 1024) {
+      // initialise segments
+      size_t segmentCount = (((uint64_t) nodeCount - 1) / 1024) + 1;
+      segments.reserve(segmentCount);
+      Point *pd = nodes.data();
+      for (size_t i = 0; i < segmentCount; i++) {
+        SegmentGeoBox s;
+        s.from = i * 1024;
+        s.to = std::min(nodeCount, s.from + 1024); // exclusive
+        GetBoundingBox(pd+s.from, pd+s.to, s.bbox);
+        segments.emplace_back(std::move(s));
+      }
+    }
 
     if (hasNodes) {
       size_t idCurrent=0;

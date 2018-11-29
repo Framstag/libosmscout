@@ -122,6 +122,39 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
+   * Calculate the bounding box of the (non empty) range of geo coords
+   *
+   * @param [first, last) range of geo coords
+   * @param minLon
+   * @param maxLon
+   * @param minLat
+   * @param maxLat
+   */
+  template< class InputIt >
+  void GetBoundingBox(const InputIt first,
+                      const InputIt last,
+                      GeoBox& boundingBox)
+  {
+    assert(first!=last);
+
+    double minLon=first->GetLon();
+    double maxLon=minLon;
+    double minLat=first->GetLat();
+    double maxLat=minLat;
+
+    for (InputIt i=first; i!=last; i++) {
+      minLon=std::min(minLon,i->GetLon());
+      maxLon=std::max(maxLon,i->GetLon());
+      minLat=std::min(minLat,i->GetLat());
+      maxLat=std::max(maxLat,i->GetLat());
+    }
+
+    boundingBox.Set(GeoCoord(minLat,minLon),
+                    GeoCoord(maxLat,maxLon));
+  }
+
+  /**
+   * \ingroup Geometry
    * Calculate the bounding box of the (non empty) vector of geo coords
    *
    * @param nodes
