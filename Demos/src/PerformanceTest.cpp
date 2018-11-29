@@ -432,9 +432,10 @@ PerformanceTestBackendPtr PrepareBackend(int argc, char* argv[], const Arguments
 
 int main(int argc, char* argv[])
 {
-  osmscout::CmdLineParser   argParser("PerformanceTest",
-                                      argc,argv);
-  Arguments                 args;
+  osmscout::CmdLineParser     argParser("PerformanceTest",
+                                        argc,argv);
+  Arguments                   args;
+  osmscout::DatabaseParameter databaseParameter;
 
   argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
                         args.help=value;
@@ -476,7 +477,7 @@ int main(int argc, char* argv[])
                         args.driver = value;
                       }),
                       "driver",
-                      "Rendering driver (cairo|Qt|ag|opengl|noop|none), default: " + args.driver,
+                      "Rendering driver (cairo|Qt|agg|opengl|noop|none), default: " + args.driver,
                       false);
   argParser.AddOption(osmscout::CmdLineDoubleOption([&args](const double& value) {
                         if (value > 0) {
@@ -512,6 +513,25 @@ int main(int argc, char* argv[])
                       "flush-disk",
                       "Flush system disk caches after each data load, default: " + std::to_string(args.flushDiskCache) +
                       " (It work just on Linux with admin rights.)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&databaseParameter](const unsigned int& value) {
+                        databaseParameter.SetNodeDataCacheSize(value);
+                      }),
+                      "cache-nodes",
+                      "Cache size for nodes, default: " + std::to_string(databaseParameter.GetNodeDataCacheSize()),
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&databaseParameter](const unsigned int& value) {
+                        databaseParameter.SetWayDataCacheSize(value);
+                      }),
+                      "cache-ways",
+                      "Cache size for ways, default: " + std::to_string(databaseParameter.GetWayDataCacheSize()),
+                      false);
+  argParser.AddOption(osmscout::CmdLineUIntOption([&databaseParameter](const unsigned int& value) {
+                        databaseParameter.SetAreaDataCacheSize(value);
+                      }),
+                      "cache-areas",
+                      "Cache size for areas, default: " + std::to_string(databaseParameter.GetAreaDataCacheSize()),
                       false);
 
 #if defined(HAVE_LIB_GPERFTOOLS)
@@ -555,8 +575,6 @@ int main(int argc, char* argv[])
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
-
-  osmscout::DatabaseParameter databaseParameter;
 
   osmscout::log.Debug(args.debug);
   //databaseParameter.SetDebugPerformance(true);
