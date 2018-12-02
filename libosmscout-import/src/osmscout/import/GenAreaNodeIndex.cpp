@@ -178,9 +178,9 @@ namespace osmscout {
             continue;
           }
 
+          double fillRate=nodeTypeData[i].indexCells/(1.0*nodeTypeData[i].cellXCount*nodeTypeData[i].cellYCount);
           // If the fill rate of the index is too low, we use this index level anyway
-          if (nodeTypeData[i].indexCells/(1.0*nodeTypeData[i].cellXCount*nodeTypeData[i].cellYCount)<=
-              parameter.GetAreaNodeIndexMinFillRate()) {
+          if (fillRate<=parameter.GetAreaNodeIndexMinFillRate()) {
             progress.Warning(typeConfig->GetTypeInfo(i)->GetName()+" ("+std::to_string(i)+") is not well distributed");
             continue;
           }
