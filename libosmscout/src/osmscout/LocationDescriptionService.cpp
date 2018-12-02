@@ -1325,6 +1325,10 @@ namespace osmscout {
       return false;
     }
 
+    if(result.empty()) {
+      return false;
+    }
+
     Place place = GetPlace(result);
     LocationWayDescriptionRef wayDescription=std::make_shared<LocationWayDescription>(place, minDistance);
 
