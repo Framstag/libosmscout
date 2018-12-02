@@ -301,7 +301,8 @@ namespace osmscout {
     data.reserve(data.size()+size);
     std::lock_guard<std::mutex> lock(accessMutex);
 
-    if (size > cache.GetMaxSize()){
+    if (cache.GetMaxSize()>0 &&
+        size>cache.GetMaxSize()){
       log.Warn() << "Cache size (" << cache.GetMaxSize() << ") for file " << datafile << " is smaller than current request (" << size << ")";
     }
 
@@ -349,10 +350,13 @@ namespace osmscout {
     data.reserve(data.size()+size);
     std::lock_guard<std::mutex> lock(accessMutex);
 
-    if (size > cache.GetMaxSize()){
+    if (cache.GetMaxSize()>0 &&
+        size>cache.GetMaxSize()){
       log.Warn() << "Cache size (" << cache.GetMaxSize() << ") for file " << datafile << " is smaller than current request (" << size << ")";
     }
 
+    //std::map<std::string,size_t> hitRateTypes;
+    size_t inBoxCount=0;
     for (IteratorIn offsetIter=begin; offsetIter!=end; ++offsetIter) {
       ValueType value=std::make_shared<N>();
 
@@ -372,10 +376,21 @@ namespace osmscout {
       }
 
       if (!value->Intersects(boundingBox)) {
+        //hitRateTypes[value->GetType()->GetName()]++;
         continue;
       }
 
+      inBoxCount++;
+
       data.push_back(value);
+    }
+
+    size_t hitRate=inBoxCount*100/size;
+    if (size>100 && hitRate<50) {
+      log.Warn() << "Bounding box hit rate for file " << datafile << " is only " << hitRate << "% (" << inBoxCount << "/" << size << ")";
+      /*for (const auto& hitRate: hitRateTypes) {
+        log.Warn() << "* " << hitRate.first << " " << hitRate.second;
+      }*/
     }
 
     return true;
