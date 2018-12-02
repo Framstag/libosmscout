@@ -82,6 +82,9 @@ namespace osmscout {
 
     static TileId GetTile(const Magnification& magnification,
                           const GeoCoord& coord);
+
+    static TileId GetTile(MagnificationLevel level,
+                          const GeoCoord& coord);
   };
 
   class OSMSCOUT_API TileKey

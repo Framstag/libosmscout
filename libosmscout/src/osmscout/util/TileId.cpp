@@ -91,6 +91,24 @@ namespace osmscout {
             uint32_t((coord.GetLat()+90.0)/cellDimension[magnification.GetLevel()].height)};
   }
 
+  /**
+   * Return the libosmscout-specific tile id for the given magnification that contains the given
+   * coordinate.
+   *
+   * @param level
+   *    Level to use (magnification.GetLevel())
+   * @param coord
+   *    Coordinate that should be covered by the tile
+   * @return
+   *    A tile id
+   */
+  TileId TileId::GetTile(MagnificationLevel level,
+                         const GeoCoord& coord)
+  {
+    return {uint32_t((coord.GetLon()+180.0)/cellDimension[level.Get()].width),
+            uint32_t((coord.GetLat()+90.0)/cellDimension[level.Get()].height)};
+  }
+
   TileKey::TileKey(const Magnification& magnification,
                    const TileId& id)
   : level(magnification.GetLevel()),
