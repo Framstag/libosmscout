@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_NAVIGATION_H
-#define OSMSCOUT_NAVIGATION_H
+#ifndef OSMSCOUT_NAVIGATION_NAVIGATION_H
+#define OSMSCOUT_NAVIGATION_NAVIGATION_H
 
 /*
  This source is part of the libosmscout library
@@ -66,10 +66,10 @@ namespace osmscout {
                               double& foundAbscissa,
                               double& minDistance)
     {
-      std::list<RouteDescription::Node>::const_iterator nextNode=locationOnRoute;
-      double                                            abscissa=0.0;
-      bool                                              found   =false;
-      double                                            qx,qy;
+      auto   nextNode=locationOnRoute;
+      double abscissa=0.0;
+      bool   found=false;
+      double qx,qy;
       minDistance=std::numeric_limits<double>::max();
       for (auto node=nextNode++; node!=route->Nodes().end(); node++) {
         if (nextNode==route->Nodes().end()) {
@@ -108,7 +108,7 @@ namespace osmscout {
      * caller is responsible for deleting it.
      */
     Navigation(OutputDescription<NodeDescriptionTmpl>* outputDescr)
-      : route(0),
+      : route(nullptr),
         outputDescription(outputDescr),
         snapDistanceInMeters(Distance::Of<Meter>(25.0))
     {
@@ -185,16 +185,18 @@ namespace osmscout {
     bool UpdateCurrentLocation(const GeoCoord& location,
                                double& minDistance)
     {
-      std::list<RouteDescription::Node>::const_iterator foundNode    =locationOnRoute;
-      double                                            foundAbscissa=0.0;
+      auto   foundNode    =locationOnRoute;
+      double foundAbscissa=0.0;
 
       bool found=SearchClosestSegment(location,
                                       foundNode,
                                       foundAbscissa,
                                       minDistance);
       if (found) {
-        locationOnRoute                                           =foundNode;
-        std::list<RouteDescription::Node>::const_iterator nextNode=foundNode;
+        locationOnRoute=foundNode;
+
+        auto nextNode=foundNode;
+
         nextNode++;
         outputDescription->NextDescription(locationOnRoute->GetDistance(),
                                            nextWaypoint,
@@ -215,7 +217,7 @@ namespace osmscout {
         return false;
       }
     };
-      
+
     bool ClosestPointOnRoute(const GeoCoord& location, GeoCoord& locOnRoute)
     {
       if(!route){
@@ -238,10 +240,10 @@ namespace osmscout {
           minDistance = d;
           foundIntersection = intersection;
         }
-        nextNode++;
+        ++nextNode;
       }
       locOnRoute = foundIntersection;
-        
+
       return true;
     }
 

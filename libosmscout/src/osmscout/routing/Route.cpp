@@ -561,6 +561,91 @@ namespace osmscout {
     // no code
   }
 
+  void RouteDescriptionGenerator::Callback::BeforeRoute()
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnStart(const RouteDescription::StartDescriptionRef& /*startDescription*/,
+                                                    const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
+                                                    const RouteDescription::NameDescriptionRef& /*nameDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnTargetReached(const RouteDescription::TargetDescriptionRef& /*targetDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnTurn(const RouteDescription::TurnDescriptionRef& /*turnDescription*/,
+                                                   const RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/,
+                                                   const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
+                                                   const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
+                                                   const RouteDescription::NameDescriptionRef& /*nameDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnRoundaboutEnter(const RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
+                                                              const RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnRoundaboutLeave(const RouteDescription::RoundaboutLeaveDescriptionRef& /*roundaboutLeaveDescription*/,
+                                                              const RouteDescription::NameDescriptionRef& /*nameDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnMotorwayEnter(const RouteDescription::MotorwayEnterDescriptionRef& /*motorwayEnterDescription*/,
+                                                            const RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& /*motorwayChangeDescription*/,
+                                                             const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
+                                                             const RouteDescription::DestinationDescriptionRef& /*crossingDestinationDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& /*motorwayLeaveDescription*/,
+                                                            const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
+                                                            const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
+                                                            const RouteDescription::NameDescriptionRef& /*nameDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& /*nameChangedDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnMaxSpeed(const RouteDescription::MaxSpeedDescriptionRef& /*maxSpeedDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::OnPOIAtRoute(const RouteDescription::POIAtRouteDescriptionRef& /*poiAtRouteDescription*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::BeforeNode(const RouteDescription::Node& /*node*/)
+  {
+    // no code
+  }
+
+  void RouteDescriptionGenerator::Callback::AfterNode(const RouteDescription::Node& /*node*/)
+  {
+    // no code
+  }
+
+
   /**
    * Evaluate the already postprocessed RouteDescription and call the given callback for
    * node segments where something important happens or changes.

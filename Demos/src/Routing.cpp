@@ -712,7 +712,7 @@ int main(int argc, char* argv[])
                                                         target,
                                                         parameter);
 
-  if (!cmdLineParseResult.Success()) {
+  if (!result.Success()) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router->Close();
     return 1;
@@ -725,10 +725,14 @@ int main(int argc, char* argv[])
   }
 #endif
 
-  router->TransformRouteDataToRouteDescription(result.GetRoute(),
-                                               description);
+  auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(result.GetRoute());
 
-  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors={
+  if (!routeDescriptionResult.success) {
+    std::cerr << "Error during generation of route description" << std::endl;
+    return 1;
+  }
+
+  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors{
     std::make_shared<osmscout::RoutePostprocessor::DistanceAndTimePostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::StartPostprocessor>("Start"),
     std::make_shared<osmscout::RoutePostprocessor::TargetPostprocessor>("Target"),
@@ -745,62 +749,55 @@ int main(int argc, char* argv[])
 
   osmscout::RoutePostprocessor postprocessor;
 
-  std::list<osmscout::Point> points;
-
   if(args.gpx) {
-    if (!router->TransformRouteDataToPoints(result.GetRoute(),
-                                            points)) {
+    osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(result.GetRoute());
+
+    if (routePointsResult.success) {
+      std::cout.precision(8);
+      std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
+      std::cout
+        << R"(<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="bin2gpx" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">)"
+        << std::endl;
+
+      std::cout << "\t<wpt lat=\"" << args.start.GetLat() << "\" lon=\"" << args.start.GetLon() << "\">" << std::endl;
+      std::cout << "\t\t<name>Start</name>" << std::endl;
+      std::cout << "\t\t<fix>2d</fix>" << std::endl;
+      std::cout << "\t</wpt>" << std::endl;
+
+      std::cout << "\t<wpt lat=\"" << args.target.GetLat() << "\" lon=\"" << args.target.GetLon() << "\">" << std::endl;
+      std::cout << "\t\t<name>Target</name>" << std::endl;
+      std::cout << "\t\t<fix>2d</fix>" << std::endl;
+      std::cout << "\t</wpt>" << std::endl;
+
+      std::cout << "\t<trk>" << std::endl;
+      std::cout << "\t\t<name>Route</name>" << std::endl;
+      std::cout << "\t\t<trkseg>" << std::endl;
+      for (const auto& point : routePointsResult.points->points) {
+        std::cout << "\t\t\t<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\">" << std::endl;
+        std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
+        std::cout << "\t\t\t</trkpt>" << std::endl;
+      }
+      std::cout << "\t\t</trkseg>" << std::endl;
+      std::cout << "\t</trk>" << std::endl;
+      std::cout << "</gpx>" << std::endl;
+    }
+    else {
       std::cerr << "Error during route conversion" << std::endl;
     }
-    std::cout.precision(8);
-    std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
-    std::cout << R"(<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="bin2gpx" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">)"
-              << std::endl;
-
-    std::cout << "\t<wpt lat=\""<< args.start.GetLat() << "\" lon=\""<< args.start.GetLon() << "\">" << std::endl;
-    std::cout << "\t\t<name>Start</name>" << std::endl;
-    std::cout << "\t\t<fix>2d</fix>" << std::endl;
-    std::cout << "\t</wpt>" << std::endl;
-
-    std::cout << "\t<wpt lat=\""<< args.target.GetLat() << "\" lon=\""<< args.target.GetLon() << "\">" << std::endl;
-    std::cout << "\t\t<name>Target</name>" << std::endl;
-    std::cout << "\t\t<fix>2d</fix>" << std::endl;
-    std::cout << "\t</wpt>" << std::endl;
-
-    std::cout << "\t<trk>" << std::endl;
-    std::cout << "\t\t<name>Route</name>" << std::endl;
-    std::cout << "\t\t<trkseg>" << std::endl;
-    for (const auto &point : points) {
-      std::cout << "\t\t\t<trkpt lat=\""<< point.GetLat() << "\" lon=\""<< point.GetLon() <<"\">" << std::endl;
-      std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
-      std::cout << "\t\t\t</trkpt>" << std::endl;
-    }
-    std::cout << "\t\t</trkseg>" << std::endl;
-    std::cout << "\t</trk>" << std::endl;
-    std::cout << "</gpx>" << std::endl;
-
-    return 0;
   }
 
   osmscout::StopClock postprocessTimer;
 
-  std::set<std::string> motorwayTypeNames;
-  std::set<std::string> motorwayLinkTypeNames;
-  std::set<std::string> junctionTypeNames;
+  std::set<std::string>                    motorwayTypeNames{"highway_motorway",
+                                                             "highway_motorway_trunk",
+                                                             "highway_trunk",
+                                                             "highway_motorway_primary"};
+  std::set<std::string>                    motorwayLinkTypeNames{"highway_motorway_link",
+                                                                 "highway_trunk_link"};
+  std::set<std::string>                    junctionTypeNames{"highway_motorway_junction"};
 
-  junctionTypeNames.insert("highway_motorway_junction");
-
-  motorwayTypeNames.insert("highway_motorway");
-  motorwayLinkTypeNames.insert("highway_motorway_link");
-
-  motorwayTypeNames.insert("highway_motorway_trunk");
-  motorwayTypeNames.insert("highway_trunk");
-
-  motorwayLinkTypeNames.insert("highway_trunk_link");
-  motorwayTypeNames.insert("highway_motorway_primary");
-
-  std::vector<osmscout::RoutingProfileRef> profiles={routingProfile};
-  std::vector<osmscout::DatabaseRef>       databases={database};
+  std::vector<osmscout::RoutingProfileRef> profiles{routingProfile};
+  std::vector<osmscout::DatabaseRef>       databases{database};
 
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  profiles,
@@ -820,12 +817,12 @@ int main(int argc, char* argv[])
   osmscout::RouteDescriptionGenerator generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
-  generator.GenerateDescription(description,
+  generator.GenerateDescription(*routeDescriptionResult.description,
                                 generatorCallback);
 
   generateTimer.Stop();
 
-  std::cout << "Description generation time: " << postprocessTimer.ResultString() << std::endl;
+  std::cout << "Description generation time: " << generateTimer.ResultString() << std::endl;
 
   router->Close();
 

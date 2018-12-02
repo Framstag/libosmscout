@@ -146,11 +146,10 @@ private:
                       int requestId,
                       const osmscout::BreakerRef &breaker);
 
-  bool TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
-                                            const osmscout::RouteData& data,
-                                            osmscout::RouteDescription& description,
-                                            const std::string& start,
-                                            const std::string& target);
+  RouteDescriptionResult TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
+                                                              const osmscout::RouteData& data,
+                                                              const std::string& start,
+                                                              const std::string& target);
 
   osmscout::MultiDBRoutingServiceRef MakeRoutingService(const std::list<DBInstanceRef>& databases,
                                                         const osmscout::Vehicle vehicle);

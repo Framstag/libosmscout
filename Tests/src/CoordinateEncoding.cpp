@@ -177,7 +177,7 @@ public:
   size_t      bytesNeeded;
 
 public:
-  Encoder(const std::string& name)
+  explicit Encoder(const std::string& name)
   : name(name),
     bytesNeeded(0)
   {
@@ -206,7 +206,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords) override
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -237,7 +237,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords) override
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -255,9 +255,9 @@ public:
     // minCoord without any compression
     bytesNeeded+=osmscout::coordByteSize;
 
-    for (size_t i=0; i<coords.size(); i++) {
-      bytesNeeded+=osmscout::EncodeNumber((uint32_t)round((coords[i].GetLat()-minCoord.GetLat())*osmscout::latConversionFactor),buffer);
-      bytesNeeded+=osmscout::EncodeNumber((uint32_t)round((coords[i].GetLon()-minCoord.GetLon())*osmscout::lonConversionFactor),buffer);
+    for (const auto& coord : coords) {
+      bytesNeeded+=osmscout::EncodeNumber((uint32_t)round((coord.GetLat()-minCoord.GetLat())*osmscout::latConversionFactor),buffer);
+      bytesNeeded+=osmscout::EncodeNumber((uint32_t)round((coord.GetLon()-minCoord.GetLon())*osmscout::lonConversionFactor),buffer);
     }
   }
 };
@@ -277,7 +277,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords) override
   {
     bytesNeeded+=osmscout::EncodeNumber(coords.size(),buffer);
 
@@ -326,7 +326,7 @@ public:
     // no code
   }
 
-  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords)
+  void Encode(osmscout::FileOffset /*offset*/, const std::vector<osmscout::Point>& coords) override
   {
     if (coords.empty()) {
       bytesNeeded++;

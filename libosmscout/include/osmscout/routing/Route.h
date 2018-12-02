@@ -722,7 +722,7 @@ namespace osmscout {
       /**
        * Call once before evaluation the the RouteDswcription starts
        */
-      virtual void BeforeRoute() = 0;
+      virtual void BeforeRoute();
 
       /**
        * Called one for the start node
@@ -733,14 +733,14 @@ namespace osmscout {
        */
       virtual void OnStart(const RouteDescription::StartDescriptionRef& startDescription,
                            const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
-                           const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+                           const RouteDescription::NameDescriptionRef& nameDescription);
 
       /**
        * Called once for the target node reached
        *
        * @param targetDescription
        */
-      virtual void OnTargetReached(const RouteDescription::TargetDescriptionRef& targetDescription) = 0;
+      virtual void OnTargetReached(const RouteDescription::TargetDescriptionRef& targetDescription);
 
       /**
        * Call everytime a turn is necessary. Call with all information available regarding the turn
@@ -756,7 +756,7 @@ namespace osmscout {
                           const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
                           const RouteDescription::DirectionDescriptionRef& directionDescription,
                           const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
-                          const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+                          const RouteDescription::NameDescriptionRef& nameDescription);
 
       /**
        * Called if we enter a roundabound
@@ -765,7 +765,7 @@ namespace osmscout {
        * @param crossingWaysDescription
        */
       virtual void OnRoundaboutEnter(const RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
-                                     const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) = 0;
+                                     const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
 
       /**
        * Called if we leave a roundabound entered before
@@ -774,7 +774,7 @@ namespace osmscout {
        * @param nameDescription
        */
       virtual void OnRoundaboutLeave(const RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                     const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+                                     const RouteDescription::NameDescriptionRef& nameDescription);
 
       /**
        * Called if we enter a motorway
@@ -783,7 +783,7 @@ namespace osmscout {
        * @param crossingWaysDescription
        */
       virtual void OnMotorwayEnter(const RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
-                                   const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) = 0;
+                                   const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
       /**
        * Called if we already on a motorway and switch to another motorway
        *
@@ -793,7 +793,7 @@ namespace osmscout {
        */
       virtual void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                                     const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                    const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) = 0;
+                                    const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription);
       /**
        * Called if we are on a motorway an leave it to a non-motorway way.
        *
@@ -805,21 +805,21 @@ namespace osmscout {
       virtual void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                                    const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
                                    const RouteDescription::DirectionDescriptionRef& directionDescription,
-                                   const RouteDescription::NameDescriptionRef& nameDescription) = 0;
+                                   const RouteDescription::NameDescriptionRef& nameDescription);
 
       /**
        * Called anytime the way we are on changes its name.
        *
        * @param nameChangedDescription
        */
-      virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) = 0;
+      virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
 
       /**
        * Called everytime we have max speed information for a route segment
        *
        * @param maxSpeedDescription
        */
-      virtual void OnMaxSpeed(const RouteDescription::MaxSpeedDescriptionRef& maxSpeedDescription) = 0;
+      virtual void OnMaxSpeed(const RouteDescription::MaxSpeedDescriptionRef& maxSpeedDescription);
 
       /**
        * Called everytime we have a POI at the route
@@ -827,7 +827,7 @@ namespace osmscout {
        * @param poiAtRouteDescription
        *    The POI information
        */
-      virtual void OnPOIAtRoute(const RouteDescription::POIAtRouteDescriptionRef&poiAtRouteDescription) = 0;
+      virtual void OnPOIAtRoute(const RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription);
 
       /**
        * Always called before we analyse a node. It may be that other callback methods are called
@@ -835,18 +835,20 @@ namespace osmscout {
        *
        * @param node
        */
-      virtual void BeforeNode(const RouteDescription::Node& node) = 0;
+      virtual void BeforeNode(const RouteDescription::Node& node);
       /**
        * Called after all possible callback methods for a node are called.
        * @param node
        */
-      virtual void AfterNode(const RouteDescription::Node& node) = 0;
+      virtual void AfterNode(const RouteDescription::Node& node);
     };
 
   public:
     void GenerateDescription(const RouteDescription& description,
                              Callback& callback);
   };
+
+  typedef std::shared_ptr<RouteDescription> RouteDescriptionRef;
 }
 
 #endif

@@ -39,6 +39,48 @@
 
 namespace osmscout {
 
+  RoutingResult::RoutingResult()
+  {
+  }
+
+  RoutePoints::RoutePoints(const std::list<Point>& points)
+  : points(points.begin(),points.end())
+  {
+  }
+
+  RoutePointsResult::RoutePointsResult()
+  : success(false)
+  {
+  }
+
+  RoutePointsResult::RoutePointsResult(const RoutePointsRef& points)
+  : success(true),
+    points(points)
+  {
+  }
+
+  RouteDescriptionResult::RouteDescriptionResult()
+    : success(false)
+  {
+  }
+
+  RouteDescriptionResult::RouteDescriptionResult(const RouteDescriptionRef& description)
+    : success(true),
+      description(description)
+  {
+  }
+
+  RouteWayResult::RouteWayResult()
+    : success(false)
+  {
+  }
+
+  RouteWayResult::RouteWayResult(const WayRef& way)
+    : success(true),
+      way(way)
+  {
+  }
+
   template <class RoutingState>
   AbstractRoutingService<RoutingState>::AbstractRoutingService(const RouterParameter& parameter):
     debugPerformance(parameter.IsDebugPerformance())
@@ -1584,24 +1626,23 @@ namespace osmscout {
    *    True on success, else false
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                                                  RouteDescription& description)
+  RouteDescriptionResult AbstractRoutingService<RoutingState>::TransformRouteDataToRouteDescription(const RouteData& data)
   {
-    description.Clear();
+    RouteDescriptionRef description=std::make_shared<RouteDescription>();
 
     if (data.Entries().empty()) {
-      return true;
+      return RouteDescriptionResult(description);
     }
 
     for (const auto& entry : data.Entries()) {
-      description.AddNode(entry.GetDatabaseId(),
-                          entry.GetCurrentNodeIndex(),
-                          entry.GetObjects(),
-                          entry.GetPathObject(),
-                          entry.GetTargetNodeIndex());
+      description->AddNode(entry.GetDatabaseId(),
+                           entry.GetCurrentNodeIndex(),
+                           entry.GetObjects(),
+                           entry.GetPathObject(),
+                           entry.GetTargetNodeIndex());
     }
 
-    return true;
+    return RouteDescriptionResult(description);
   }
 
   /**
@@ -1614,23 +1655,19 @@ namespace osmscout {
    *    True, if the way could be build, else false
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::TransformRouteDataToWay(const RouteData& data,
-                                                                     Way& way)
+  RouteWayResult AbstractRoutingService<RoutingState>::TransformRouteDataToWay(const RouteData& data)
   {
-    std::list<Point> points;
+    RoutePointsResult routePointsResult=TransformRouteDataToPoints(data);
 
-    if (!TransformRouteDataToPoints(data,points)) {
-      return false;
+    if (!routePointsResult.success) {
+      return {};
     }
 
-    way.nodes.clear();
-    way.nodes.reserve(data.Entries().size());
+    WayRef way=std::make_shared<Way>();
 
-    for (const auto& p: points) {
-      way.nodes.push_back(p);
-    }
+    way->nodes.assign(routePointsResult.points->points.begin(),routePointsResult.points->points.end());
 
-    return true;
+    return RouteWayResult(way);
   }
 
   /**
@@ -1643,20 +1680,18 @@ namespace osmscout {
    *    True, if the way could be build, else false
    */
   template <class RoutingState>
-  bool AbstractRoutingService<RoutingState>::TransformRouteDataToPoints(const RouteData& data,
-                                                                        std::list<Point>& points)
+  RoutePointsResult AbstractRoutingService<RoutingState>::TransformRouteDataToPoints(const RouteData& data)
 
   {
-    AreaRef       a;
-    DBFileOffset  aId;
+    std::list<Point> points;
+    AreaRef          a;
+    DBFileOffset     aId;
 
-    WayRef        w;
-    DBFileOffset  wId;
-
-    points.clear();
+    WayRef           w;
+    DBFileOffset     wId;
 
     if (data.Entries().empty()) {
-      return true;
+      return RoutePointsResult(std::make_shared<RoutePoints>(points));
     }
 
     for (auto iter=data.Entries().begin();
@@ -1668,7 +1703,7 @@ namespace osmscout {
               aId!=iter->GetDBFileOffset()) {
             if (!GetAreaByOffset(iter->GetDBFileOffset(),a)) {
               log.Error() << "Cannot load area with id " << iter->GetPathObject().GetFileOffset();
-              return false;
+              return {};
             }
             aId=iter->GetDBFileOffset();
           }
@@ -1690,7 +1725,7 @@ namespace osmscout {
               wId!=iter->GetDBFileOffset()) {
             if (!GetWayByOffset(iter->GetDBFileOffset(),w)) {
               log.Error() << "Cannot load way with id " << iter->GetPathObject().GetFileOffset();
-              return false;
+              return {};
             }
             wId=iter->GetDBFileOffset();
           }
@@ -1710,7 +1745,7 @@ namespace osmscout {
       }
     }
 
-    return true;
+    return RoutePointsResult(std::make_shared<RoutePoints>(points));
   }
 
   template class AbstractRoutingService<RoutingProfile>;

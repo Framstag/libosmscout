@@ -42,6 +42,95 @@
 namespace osmscout {
 
   /**
+   * Result of a routing calculation. This object is always returned.
+   * In case of an routing error it however may not contain a valid route
+   * (route is empty).
+   *
+   * TODO: Adapt it to the same style as RoutePointsResult and Co.
+   */
+  class OSMSCOUT_API RoutingResult CLASS_FINAL
+  {
+  private:
+    RouteData route;
+    Distance  currentMaxDistance;
+    Distance  overallDistance;
+
+  public:
+    RoutingResult();
+
+    inline void SetOverallDistance(const Distance &overallDistance)
+    {
+      this->overallDistance=overallDistance;
+    }
+
+    inline void SetCurrentMaxDistance(const Distance &currentMaxDistance)
+    {
+      this->currentMaxDistance=currentMaxDistance;
+    }
+
+    inline Distance GetOverallDistance() const
+    {
+      return overallDistance;
+    }
+
+    inline Distance GetCurrentMaxDistance() const
+    {
+      return currentMaxDistance;
+    }
+
+    inline RouteData& GetRoute()
+    {
+      return route;
+    }
+
+    inline const RouteData& GetRoute() const
+    {
+      return route;
+    }
+
+    inline bool Success() const
+    {
+      return !route.IsEmpty();
+    }
+  };
+
+  struct OSMSCOUT_API RoutePoints
+  {
+    const std::vector<Point> points;
+
+    explicit RoutePoints(const std::list<Point>& points);
+  };
+
+  typedef std::shared_ptr<RoutePoints> RoutePointsRef;
+
+  struct OSMSCOUT_API RoutePointsResult CLASS_FINAL
+  {
+    const bool           success;
+    const RoutePointsRef points;
+
+    RoutePointsResult();
+    explicit RoutePointsResult(const RoutePointsRef& points);
+  };
+
+  struct OSMSCOUT_API RouteDescriptionResult CLASS_FINAL
+  {
+    const bool                success;
+    const RouteDescriptionRef description;
+
+    RouteDescriptionResult();
+    explicit RouteDescriptionResult(const RouteDescriptionRef& description);
+  };
+
+  struct OSMSCOUT_API RouteWayResult CLASS_FINAL
+  {
+    const bool   success;
+    const WayRef way;
+
+    RouteWayResult();
+    explicit RouteWayResult(const WayRef& way);
+  };
+
+  /**
    * \ingroup Routing
    *
    * Abstract algorithms for routing
@@ -115,14 +204,14 @@ namespace osmscout {
 
     void ResolveRNodeChainToList(DBId finalRouteNode,
                                  const ClosedSet& closedSet,
-                                 const ClosedSet &closedRestrictedSet,
+                                 const ClosedSet& closedRestrictedSet,
                                  std::list<VNode>& nodes);
 
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
 
     virtual std::vector<DBId> GetNodeTwins(const RoutingState& state,
-                                           const DatabaseId database,
-                                           const Id id) = 0;
+                                           DatabaseId database,
+                                           Id id) = 0;
 
     void GetStartForwardRouteNode(const RoutingState& state,
                                   const DatabaseId& database,
@@ -233,14 +322,9 @@ namespace osmscout {
                                  const RoutePosition& target,
                                  const RoutingParameter& parameter);
 
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
-
-    bool TransformRouteDataToPoints(const RouteData& data,
-                                    std::list<Point>& points);
-
-    bool TransformRouteDataToWay(const RouteData& data,
-                                 Way& way);
+    RouteDescriptionResult TransformRouteDataToRouteDescription(const RouteData& data);
+    RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
+    RouteWayResult TransformRouteDataToWay(const RouteData& data);
   };
 
 }

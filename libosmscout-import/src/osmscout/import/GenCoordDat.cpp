@@ -57,9 +57,10 @@ namespace osmscout {
     Id          currentLowerLimit=0;
     Id          currentUpperLimit=maxId/coordSortPageSize;
     FileScanner scanner;
-    uint32_t    loadedCoordCount=0;
 
     try {
+      uint32_t    loadedCoordCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    Preprocess::RAWCOORDS_DAT),
                    FileScanner::Sequential,

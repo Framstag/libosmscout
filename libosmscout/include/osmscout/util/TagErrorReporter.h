@@ -49,9 +49,9 @@ namespace osmscout {
 
     virtual inline ~SilentTagErrorReporter(){};
 
-    virtual void ReportTag(const ObjectOSMRef& object,
-                           const TagMap& tags,
-                           const std::string& error);
+    void ReportTag(const ObjectOSMRef& object,
+                   const TagMap& tags,
+                   const std::string& error) override;
   };
 }
 

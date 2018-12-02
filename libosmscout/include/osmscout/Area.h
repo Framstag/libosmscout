@@ -31,6 +31,7 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Progress.h>
+#include <osmscout/util/Geometry.h>
 
 #include <osmscout/system/Compiler.h>
 
@@ -52,7 +53,15 @@ namespace osmscout {
       uint8_t               ring;               //!< The ring hierarchy number (0...n)
 
     public:
-      std::vector<Point>    nodes;              //!< The array of coordinates
+      /**
+       * Note that ring nodes, bbox and segments fields are public for simple manipulation.
+       * User that modify it is responsible to keep these values in sync!
+       * You should not rely on segments and bbox, it is just a cache used some algorithms.
+       * It may be empty/invalid!
+       */
+      std::vector<Point>          nodes;        //!< The array of coordinates
+      std::vector<SegmentGeoBox>  segments;     //!< Precomputed (cache) segment bounding boxes for optimisation
+      GeoBox                      bbox;         //!< Precomputed (cache) bounding box
 
     public:
       inline Ring()

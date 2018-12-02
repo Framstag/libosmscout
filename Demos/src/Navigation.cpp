@@ -236,7 +236,6 @@ namespace osmscout {
                                                const osmscout::RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/)
     {
         std::ostringstream stream;
-        std::string crossingWaysString;
         stream << "Enter in the roundabout, then ";
         return stream.str();
     }
@@ -595,8 +594,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
-    router->TransformRouteDataToRouteDescription(result.GetRoute(),
-                                                 description);
+    auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(result.GetRoute());
 
     std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
@@ -625,7 +623,7 @@ int main(int argc, char *argv[]){
     std::vector<osmscout::RoutingProfileRef> profiles = {routingProfile};
     std::vector<osmscout::DatabaseRef> databases = {database};
     osmscout::RoutePostprocessor postprocessor;
-    if (!postprocessor.PostprocessRouteDescription(description,
+    if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.description,
                                                    profiles,
                                                    databases,
                                                    postprocessors,

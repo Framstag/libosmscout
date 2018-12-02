@@ -137,14 +137,11 @@ namespace osmscout {
                                  const Distance &radius,
                                  const RoutingParameter& parameter);
 
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
+    RouteDescriptionResult TransformRouteDataToRouteDescription(const RouteData& data);
 
-    bool TransformRouteDataToPoints(const RouteData& data,
-                                    std::list<Point>& points);
+    RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
 
-    bool TransformRouteDataToWay(const RouteData& data,
-                                 Way& way);
+    RouteWayResult TransformRouteDataToWay(const RouteData& data);
 
     bool PostProcessRouteDescription(RouteDescription &description,
                                      const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors);

@@ -284,11 +284,12 @@ namespace osmscout {
                                                   std::map<OSMId,Id>& nodeIdMap)
   {
     FileScanner scanner;
-    uint32_t    restrictionCount=0;
 
     progress.Info("Reading turn restriction way ids");
 
     try {
+      uint32_t    restrictionCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    WayWayDataGenerator::TURNRESTR_DAT),
                    FileScanner::Sequential,

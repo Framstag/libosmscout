@@ -45,6 +45,8 @@ osmscoutSrc = [
             'src/osmscout/routing/MultiDBRoutingService.cpp',
             'src/osmscout/routing/TurnRestriction.cpp',
             'src/osmscout/routing/MultiDBRoutingState.cpp',
+            'src/osmscout/navigation/Agents.cpp',
+            'src/osmscout/navigation/Engine.cpp',
             'src/osmscout/Area.cpp',
             'src/osmscout/AreaDataFile.cpp',
             'src/osmscout/AreaAreaIndex.cpp',

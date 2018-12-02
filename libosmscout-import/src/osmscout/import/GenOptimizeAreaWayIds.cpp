@@ -53,12 +53,13 @@ namespace osmscout {
                                                 std::unordered_set<Id>& usedIdAtLeastTwiceSet)
   {
     FileScanner scanner;
-    uint32_t    dataCount=0;
-    uint32_t    idCount=0;
 
     progress.SetAction("Scanning ids from 'areas2.tmp'");
 
     try {
+      uint32_t    dataCount=0;
+      uint32_t    idCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    MergeAreasGenerator::AREAS2_TMP),
                    FileScanner::Sequential,

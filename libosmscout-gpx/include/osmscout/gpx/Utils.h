@@ -43,7 +43,7 @@ public:
    * Error while importing gpx
    * @param error
    */
-  virtual void Error(std::string error);
+  virtual void Error(const std::string& error);
 };
 
 typedef std::shared_ptr<ProcessCallback> ProcessCallbackRef;

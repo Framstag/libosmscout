@@ -578,11 +578,16 @@ namespace osmscout {
     return *this;
   }
 
-  BorderStyle::BorderStyle(const BorderStyle& style)
+  BorderStyle::BorderStyle(const BorderStyle& style):
+    slot(style.slot),
+    color(style.color),
+    gapColor(style.gapColor),
+    width(style.width),
+    dash(style.dash),
+    displayOffset(style.displayOffset),
+    offset(style.offset),
+    priority(style.priority)
   {
-    this->color=style.color;
-    this->width=style.width;
-    this->dash=style.dash;
   }
 
   void BorderStyle::SetColorValue(int attribute, const Color& value)
@@ -733,22 +738,22 @@ namespace osmscout {
     }
 
     if (width!=other.width) {
-      return width<other.width;
+      return false;
     }
 
     if (dash!=other.dash) {
-      return dash<other.dash;
+      return false;
     }
 
     if (displayOffset!=other.displayOffset) {
-      return displayOffset<other.displayOffset;
+      return false;
     }
 
     if (offset!=other.offset) {
-      return offset<other.offset;
+      return false;
     }
 
-    return priority<other.priority;
+    return priority==other.priority;
   }
 
   bool BorderStyle::operator!=(const BorderStyle& other) const

@@ -91,8 +91,9 @@ namespace osmscout {
     int patchLat = int(floor(latitude));
     int patchLon = int(floor(longitude));
     std::string patchFilename = srtmFilename(patchLat, patchLon);
-    size_t length;
     if(currentFilename.empty() || currentFilename != patchFilename){
+      std::istream::pos_type length;
+
       currentFilename = patchFilename;
       currentPatchLat = patchLat;
       currentPatchLon = patchLon;
@@ -112,12 +113,12 @@ namespace osmscout {
       } else {
         return SRTM::nodata;
       }
-      if(length == SRTM1_FILESIZE){
+      if(length == (std::istream::pos_type)SRTM1_FILESIZE){
         rows = SRTM1_GRID;
         columns = SRTM1_GRID;
         patchSize = SRTM1_FILESIZE;
         log.Info() << "Open SRTM1 hgt file : "<<(srtmPath+"/"+currentFilename).c_str();
-      } else if (length == SRTM3_FILESIZE){
+      } else if (length == (std::istream::pos_type)SRTM3_FILESIZE){
         rows = SRTM3_GRID;
         columns = SRTM3_GRID;
         patchSize = SRTM3_FILESIZE;

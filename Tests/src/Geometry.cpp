@@ -169,12 +169,63 @@ TEST_CASE("Target computation from bearing and distance")
   osmscout::GeoCoord target = location1.Add(angle, distance);
   REQUIRE(IsSame(target, osmscout::GeoCoord(51.463397, 7.006078)));
 
-  double lat2, lon2;
-  osmscout::GetEllipsoidalDistance(location1.GetLat(), location1.GetLon(),
-                                   angle, distance,
-                                   lat2, lon2);
-  REQUIRE(IsSame(target, osmscout::GeoCoord(lat2, lon2)));
-  REQUIRE(IsSame(distance, location1 - osmscout::GeoCoord(lat2, lon2), 1e-6));
+  auto location2=osmscout::GetEllipsoidalDistance(location1,
+                                                  angle,
+                                                  distance);
+  REQUIRE(IsSame(target, location2));
+  REQUIRE(IsSame(distance, location1 - location2,1e-6));
+}
+
+TEST_CASE("Ellipsoidal distance up")
+{
+  osmscout::GeoCoord location(51.57178,7.45879);
+  osmscout::Distance distance=osmscout::Distance::Of<osmscout::Kilometer>(5);
+  double             angle=0; // [deg]
+
+  osmscout::GeoCoord target=location.Add(angle,distance);
+
+  REQUIRE(target.GetLat()>location.GetLat());
+  REQUIRE(IsSame(target.GetLon(),location.GetLon(),1e-4));
+}
+
+TEST_CASE("Ellipsoidal distance right")
+{
+  osmscout::GeoCoord location(51.5718,7.45879);
+  osmscout::Distance distance=osmscout::Distance::Of<osmscout::Kilometer>(5);
+  double             angle=90; // [deg]
+
+  osmscout::GeoCoord target=location.Add(angle,distance);
+
+  INFO(target.GetDisplayText())
+
+  REQUIRE(target.GetLon()>location.GetLon());
+  REQUIRE(IsSame(target.GetLat(),location.GetLat(),1e-4));
+}
+
+TEST_CASE("Ellipsoidal distance down")
+{
+  osmscout::GeoCoord location(51.57178,7.45879);
+  osmscout::Distance distance=osmscout::Distance::Of<osmscout::Kilometer>(5);
+  double             angle=180; // [deg]
+
+  osmscout::GeoCoord target=location.Add(angle,distance);
+
+  REQUIRE(target.GetLat()<location.GetLat());
+  REQUIRE(IsSame(target.GetLon(),location.GetLon(),1e-4));
+}
+
+TEST_CASE("Ellipsoidal distance left")
+{
+  osmscout::GeoCoord location(51.57178,7.45879);
+  osmscout::Distance distance=osmscout::Distance::Of<osmscout::Kilometer>(5);
+  double             angle=270; // [deg]
+
+  osmscout::GeoCoord target=location.Add(angle,distance);
+
+  INFO(target.GetDisplayText())
+
+  REQUIRE(target.GetLon()<location.GetLon());
+  REQUIRE(IsSame(target.GetLat(),location.GetLat(),1e-4));
 }
 
 TEST_CASE("Angle diff")

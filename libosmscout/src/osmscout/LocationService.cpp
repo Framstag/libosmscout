@@ -916,17 +916,17 @@ namespace osmscout {
                const POI& poi) override
     {
       for (const auto& pattern : patterns) {
-        std::cout << pattern.tokenString->text << " vs. " << poi.name << std::endl;
+        //std::cout << pattern.tokenString->text << " vs. " << poi.name << std::endl;
         StringMatcher::Result matchResult=pattern.matcher->Match(poi.name);
 
         if (matchResult==StringMatcher::match) {
-          std::cout << " => match" << std::endl;
+          //std::cout << " => match" << std::endl;
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(adminRegion),
                                std::make_shared<POI>(poi));
         }
         else if (matchResult==StringMatcher::partialMatch) {
-          std::cout << " => partial match" << std::endl;
+          //std::cout << " => partial match" << std::endl;
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(adminRegion),
                                       std::make_shared<POI>(poi));

@@ -43,7 +43,7 @@ bool write_ppm(const unsigned char* buf,
   FILE* fd=fopen(file_name, "wb");
 
   if (fd) {
-    fprintf(fd,"P6 %d %d 255\n", width,height);
+    fprintf(fd,"P6 %ud %ud 255\n", width,height);
     fwrite(buf,1,width*height*3,fd);
     fclose(fd);
     return true;

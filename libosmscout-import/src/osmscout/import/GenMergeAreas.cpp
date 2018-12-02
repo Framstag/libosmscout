@@ -366,7 +366,7 @@ namespace osmscout {
 
           // Already visited during this merge => skip
           if (visitedAreas.find(candidateArea)!=visitedAreas.end()) {
-            candidate++;
+            ++candidate;
             continue;
           }
 

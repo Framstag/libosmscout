@@ -128,7 +128,7 @@ PRODUCTIONS
 
                     SemErr(e.c_str());
 
-                    // Avoid NULL-pointer further on
+                    // Avoid nullptr-pointer further on
                     feature=std::make_shared<osmscout::NameFeature>();
                   }
                 .)
@@ -157,7 +157,7 @@ PRODUCTIONS
 
   TYPE        = (.
                   std::string     name;
-                  TagConditionRef condition=NULL;
+                  TagConditionRef condition;
                   TypeInfoRef     typeInfo;
                   unsigned char   types;
                 .)

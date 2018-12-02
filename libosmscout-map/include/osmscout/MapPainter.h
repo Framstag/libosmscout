@@ -361,7 +361,7 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const ObjectFileRef& ref,
                         const FeatureValueBuffer& buffer,
-                        const std::vector<Point>& nodes);
+                        const Way& way);
 
     void PrepareWays(const StyleConfig& styleConfig,
                      const Projection& projection,
@@ -504,7 +504,7 @@ namespace osmscout {
                        double pixelOffset) const;
 
     bool IsVisibleWay(const Projection& projection,
-                      const std::vector<Point>& nodes,
+                      const GeoBox& boundingBox,
                       double pixelOffset) const;
 
     void Transform(const Projection& projection,

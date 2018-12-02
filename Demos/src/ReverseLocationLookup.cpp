@@ -36,8 +36,6 @@ int main(int argc, char* argv[])
 
   map=argv[1];
 
-  std::string searchPattern;
-
   int argIndex=2;
   while (argIndex<argc) {
     osmscout::RefType    objectType;

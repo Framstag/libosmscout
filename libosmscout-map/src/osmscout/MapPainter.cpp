@@ -443,6 +443,10 @@ namespace osmscout {
                                  const GeoBox& boundingBox,
                                  double pixelOffset) const
   {
+    if (!boundingBox.IsValid()){
+      return false;
+    }
+
     double x;
     double y;
 
@@ -501,17 +505,12 @@ namespace osmscout {
   }
 
   bool MapPainter::IsVisibleWay(const Projection& projection,
-                                const std::vector<Point>& nodes,
+                                const GeoBox& boundingBox,
                                 double pixelOffset) const
   {
-    if (nodes.empty()) {
+    if (!boundingBox.IsValid()){
       return false;
     }
-
-    osmscout::GeoBox boundingBox;
-
-    osmscout::GetBoundingBox(nodes,
-                             boundingBox);
 
     double x;
     double y;
@@ -1307,17 +1306,36 @@ namespace osmscout {
     std::vector<PolyData> td(area->rings.size());
 
     for (size_t i=0; i<area->rings.size(); i++) {
+      const Area::Ring &ring = area->rings[i];
       // The master ring does not have any nodes, so we skip it
       // Rings with less than 3 nodes should be skipped, too (no area)
-      if (area->rings[i].IsMasterRing() || area->rings[i].nodes.size()<3) {
+      if (ring.IsMasterRing() || ring.nodes.size()<3) {
         continue;
       }
 
-      transBuffer.TransformArea(projection,
-                                parameter.GetOptimizeAreaNodes(),
-                                area->rings[i].nodes,
-                                td[i].transStart,td[i].transEnd,
-                                errorTolerancePixel);
+      if (ring.segments.size() <= 1){
+        transBuffer.TransformArea(projection,
+                                  parameter.GetOptimizeAreaNodes(),
+                                  ring.nodes,
+                                  td[i].transStart,td[i].transEnd,
+                                  errorTolerancePixel);
+      }else{
+        std::vector<Point> nodes;
+        for (const auto &segment:ring.segments){
+          if (projection.GetDimensions().Intersects(segment.bbox, false)){
+            // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
+            nodes.insert(nodes.end(), ring.nodes.data() + segment.from, ring.nodes.data() + segment.to);
+          } else {
+            nodes.push_back(ring.nodes[segment.from]);
+            nodes.push_back(ring.nodes[segment.to-1]);
+          }
+        }
+        transBuffer.TransformArea(projection,
+                                  parameter.GetOptimizeAreaNodes(),
+                                  nodes,
+                                  td[i].transStart,td[i].transEnd,
+                                  errorTolerancePixel);
+      }
     }
 
     size_t ringId=Area::outerRingId;
@@ -1492,7 +1510,7 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const ObjectFileRef& ref,
                                   const FeatureValueBuffer& buffer,
-                                  const std::vector<Point>& nodes)
+                                  const Way& way)
   {
     styleConfig.GetWayLineStyles(buffer,
                                  projection,
@@ -1575,18 +1593,37 @@ namespace osmscout {
       data.lineWidth=lineWidth;
 
       if (!IsVisibleWay(projection,
-                        nodes,
+                        way.GetBoundingBox(),
                         lineWidth/2)) {
         continue;
       }
 
       if (!transformed) {
-        transBuffer.TransformWay(projection,
-                                 parameter.GetOptimizeWayNodes(),
-                                 nodes,
-                                 transStart,
-                                 transEnd,
-                                 errorTolerancePixel);
+        if (way.segments.size() <= 1) {
+          transBuffer.TransformWay(projection,
+                                   parameter.GetOptimizeWayNodes(),
+                                   way.nodes,
+                                   transStart,
+                                   transEnd,
+                                   errorTolerancePixel);
+        } else {
+          std::vector<Point> nodes;
+          for (const auto &segment : way.segments){
+            if (projection.GetDimensions().Intersects(segment.bbox, false)){
+              // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
+              nodes.insert(nodes.end(), way.nodes.data() + segment.from, way.nodes.data() + segment.to);
+            } else {
+              nodes.push_back(way.nodes[segment.from]);
+              nodes.push_back(way.nodes[segment.to-1]);
+            }
+          }
+          transBuffer.TransformWay(projection,
+                                   parameter.GetOptimizeWayNodes(),
+                                   nodes,
+                                   transStart,
+                                   transEnd,
+                                   errorTolerancePixel);
+        }
 
         WayPathData pathData;
 
@@ -1604,8 +1641,8 @@ namespace osmscout {
       data.buffer=&buffer;
       data.lineStyle=lineStyle;
       data.wayPriority=styleConfig.GetWayPrio(buffer.GetType());
-      data.startIsClosed=nodes[0].GetSerial()==0;
-      data.endIsClosed=nodes[nodes.size()-1].GetSerial()==0;
+      data.startIsClosed=way.nodes[0].GetSerial()==0;
+      data.endIsClosed=way.nodes[way.nodes.size()-1].GetSerial()==0;
 
       LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
 
@@ -1676,7 +1713,7 @@ namespace osmscout {
                      ObjectFileRef(way->GetFileOffset(),
                                    refWay),
                      way->GetFeatureValueBuffer(),
-                     way->nodes);
+                     *way);
 
       CalculateWayShieldLabels(styleConfig,
                                projection,
@@ -1691,7 +1728,7 @@ namespace osmscout {
                      ObjectFileRef(way->GetFileOffset(),
                                    refWay),
                      way->GetFeatureValueBuffer(),
-                     way->nodes);
+                     *way);
 
       CalculateWayShieldLabels(styleConfig,
                                projection,

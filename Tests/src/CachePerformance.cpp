@@ -39,27 +39,11 @@ struct Data
 {
   size_t              value;
   std::vector<size_t> value2;
-};
 
-struct Data2
-{
-  size_t              value;
-  std::vector<size_t> value2;
-
-public:
-  Data2()
+  Data()
+  : value(0)
   {
   }
-
-private:
-  Data2(Data2& /*other*/)
-  {
-  }
-
-  void operator=(Data2& /*other*/)
-  {
-  }
-
 };
 
 static const size_t cacheSize=2000000;
@@ -83,7 +67,7 @@ bool TestData()
 
     DataCache::CacheEntry entry(i,data);
 
-    DataCache::CacheRef ref(cache.SetEntry(entry));
+    auto ref(cache.SetEntry(entry));
 
     unused(ref);
   }
@@ -104,7 +88,7 @@ bool TestData()
     entry.value.value=i;
     entry.value.value2.resize(10,i);
 
-    DataCache::CacheRef ref(cache.SetEntry(entry));
+    auto ref(cache.SetEntry(entry));
 
     unused(ref);
   }

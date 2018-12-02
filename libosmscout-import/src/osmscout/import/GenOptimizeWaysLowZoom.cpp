@@ -300,7 +300,7 @@ namespace osmscout
             while (otherWay!=match->second.end() &&
                    (usedWays.find((*otherWay)->GetFileOffset())!=usedWays.end() ||
                      way->GetFeatureValueBuffer()!=(*otherWay)->GetFeatureValueBuffer())) {
-              otherWay++;
+              ++otherWay;
             }
 
             // Search for another way with the same criteria (because then we would have a multi-junction)

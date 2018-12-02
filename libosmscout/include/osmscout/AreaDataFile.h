@@ -37,7 +37,7 @@ namespace osmscout {
     static const char* AREAS_IDMAP;
 
   public:
-    AreaDataFile(size_t cacheSize);
+    explicit AreaDataFile(size_t cacheSize);
   };
 
   typedef std::shared_ptr<AreaDataFile> AreaDataFileRef;

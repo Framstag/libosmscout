@@ -46,7 +46,7 @@ Router::~Router()
     qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
   qDebug() << "~Router";
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }
@@ -111,12 +111,12 @@ osmscout::MultiDBRoutingServiceRef Router::MakeRoutingService(const std::list<DB
 
   std::vector<osmscout::DatabaseRef> dbs;
   dbs.reserve(databases.size());
-  for (const auto instance:databases){
+  for (const auto& instance:databases){
     dbs.push_back(instance->database);
   }
   osmscout::MultiDBRoutingServiceRef routingService=std::make_shared<osmscout::MultiDBRoutingService>(routerParameter,dbs);
   if (!routingService->Open(profileBuilder)){
-    routingService=NULL;
+    routingService=nullptr;
   }
   return routingService;
 }
@@ -152,14 +152,15 @@ bool Router::CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
   return true;
 }
 
-bool Router::TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
+RouteDescriptionResult Router::TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServiceRef &routingService,
                                                   const osmscout::RouteData& data,
-                                                  osmscout::RouteDescription& description,
                                                   const std::string& start,
                                                   const std::string& target)
 {
-  if (!routingService->TransformRouteDataToRouteDescription(data,description)) {
-    return false;
+  auto result=routingService->TransformRouteDataToRouteDescription(data);
+
+  if (!result.success) {
+    return result;
   }
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
@@ -176,12 +177,12 @@ bool Router::TransformRouteDataToRouteDescription(osmscout::MultiDBRoutingServic
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>());
 
-  if (!routingService->PostProcessRouteDescription(description,
+  if (!routingService->PostProcessRouteDescription(*result.description,
                                                    postprocessors)){
-    return false;
+    return {};
   }
 
-  return true;
+  return result;
 }
 
 std::string vehicleStr(osmscout::Vehicle vehicle){
@@ -239,28 +240,26 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
 
   osmscout::log.Debug() << "Route calculated";
 
-  osmscout::RouteDescription routeDescription;
-  TransformRouteDataToRouteDescription(routingService,
-                                       routeData,
-                                       routeDescription,
-                                       start->getLabel().toUtf8().constData(),
-                                       target->getLabel().toUtf8().constData());
-
+  auto routeDescriptionResult=TransformRouteDataToRouteDescription(routingService,
+                                                                   routeData,
+                                                                   start->getLabel().toUtf8().constData(),
+                                                                   target->getLabel().toUtf8().constData());
   osmscout::log.Debug() << "Route transformed";
 
   RouteDescriptionBuilder builder;
   QList<RouteStep>        routeSteps;
-  builder.GenerateRouteSteps(routeDescription, routeSteps);
+  builder.GenerateRouteSteps(*routeDescriptionResult.description, routeSteps);
 
-  osmscout::Way routeWay;
-  if (!routingService->TransformRouteDataToWay(routeData,routeWay)) {
+  auto routeWayResult=routingService->TransformRouteDataToWay(routeData);
+
+  if (!routeWayResult.success) {
     emit routeFailed("Error while transforming route",requestId);
     return;
   }
 
-  emit routeComputed(QtRouteData(std::move(routeDescription),
+  emit routeComputed(QtRouteData(std::move(*routeDescriptionResult.description),
                                  std::move(routeSteps),
-                                 std::move(routeWay)),
+                                 std::move(*routeWayResult.way)),
                      requestId);
 }
 
@@ -270,7 +269,7 @@ void Router::onRouteRequest(LocationEntryRef start,
                             int requestId,
                             osmscout::BreakerRef breaker)
 {
-  osmscout::log.Debug() << "Routing from '" << start->getLabel().toLocal8Bit().data() << 
+  osmscout::log.Debug() << "Routing from '" << start->getLabel().toLocal8Bit().data() <<
     "' to '" << target->getLabel().toLocal8Bit().data() << "'" <<
     " by '" << vehicleStr(vehicle) << "'";
 

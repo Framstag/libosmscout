@@ -104,7 +104,7 @@ namespace osmscout {
    * spherical distance of two points on earth.
    */
   Distance GetSphericalDistance(const GeoCoord& a,
-                              const GeoCoord& b)
+                                const GeoCoord& b)
   {
     Distance r=Distance::Of<Kilometer>(6371.01); // Average radius of earth
     double aLatRad=DegToRad(a.GetLat());
@@ -164,8 +164,7 @@ namespace osmscout {
     double deltasigma=0.0;
     double lambda0;
 
-    for (int i=0; i < 10; i++)
-    {
+    for (int i=0; i < 10; i++) {
       lambda0=lambda;
 
       double sinlambda;
@@ -224,64 +223,89 @@ namespace osmscout {
   Distance GetEllipsoidalDistance(const GeoCoord& a,
                                   const GeoCoord& b)
   {
-    return GetEllipsoidalDistance(a.GetLon(),a.GetLat(),b.GetLon(),b.GetLat());
+    return GetEllipsoidalDistance(a.GetLon(),a.GetLat(),
+                                  b.GetLon(),b.GetLat());
   }
 
   void GetEllipsoidalDistance(double lat1, double lon1,
-                              double bearing, const Distance &distance,
+                              double bearing,
+                              const Distance &distance,
                               double& lat2, double& lon2)
   {
+    /* See https://en.wikipedia.org/wiki/Vincenty%27s_formulae */
+
     /* local variable definitions */
 
+    lat1=lat1*M_PI/180;
+    lon1=lon1*M_PI/180;
+
     // WGS-84 ellipsiod
-    double a=6378137.0, b=6356752.3142, f=1/298.257223563;
-    double alpha1,sinAlpha, sinAlpha1, cosAlpha1, cosSqAlpha;
-    double sigma, sigma1, cos2SigmaM=0.0, sinSigma=0.0, cosSigma=0.0, deltaSigma=0.0, sigmaP=0.0;
-    double tanU1, cosU1, sinU1, uSq;
-    double A, B, C, L, lambda;
-    double tmp;
+    double a=6378137.0, b=6356752.314245, f=1/298.257223563;
+    double distanceAsMeter=distance.As<Meter>();
 
-    alpha1=bearing*M_PI/180;
+    double alpha1=bearing*M_PI/180;
 
-    tanU1=(1-f)*tan(lat1*M_PI/180);
+    double tanU1=(1-f)*tan(lat1);
+    double cosU1=1/sqrt((1+tanU1*tanU1));
+    double sinU1=tanU1*cosU1;
 
-    cosAlpha1=cos(alpha1);
-    sigma1=atan2(tanU1,cosAlpha1);
+    double cosAlpha1=cos(alpha1);
+    double sinAlpha1=sin(alpha1);
 
-    cosU1=1/sqrt((1+tanU1*tanU1));
-    sinAlpha1=sin(alpha1);
-    sinAlpha=cosU1*sinAlpha1;
+    double sigma1=atan2(tanU1,cosAlpha1);
+    double sinAlpha=cosU1*sinAlpha1;
 
-    cosSqAlpha=1-sinAlpha*sinAlpha;
+    double cosSqAlpha=1-sinAlpha*sinAlpha;
+    double uSq=cosSqAlpha*(a*a-b*b)/(b*b);
 
-    uSq=cosSqAlpha*(a*a-b*b)/(b*b);
+    double A=1+uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)));
+    double B=uSq/1024*(256+uSq*(-128+uSq*(74-47*uSq)));
 
-    A=1+uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)));
-    B=uSq/1024*(256+uSq*(-128+uSq*(74-47*uSq)));
+    double sigma=distanceAsMeter/(b*A);
+    double sinSigma,cosSigma;
+    double cos2SigmaM;
+    double sigmaP;
 
-    sigma=distance.As<Meter>() /(b*A);
-    sigmaP=2*M_PI;
-    while (fabs(sigma-sigmaP) > 1e-12) {
-      cos2SigmaM = cos(2*sigma1 + sigma);
-      sinSigma = sin(sigma);
-      cosSigma = cos(sigma);
-      deltaSigma = B*sinSigma*(cos2SigmaM+B/4*(cosSigma*(-1+2*cos2SigmaM*cos2SigmaM)-B/6*cos2SigmaM*(-3+4*sinSigma*sinSigma)*(-3+4*cos2SigmaM*cos2SigmaM)));
-      sigmaP = sigma;
-      sigma = distance.As<Meter>() / (b*A) + deltaSigma;
-    }
+    do {
+      cos2SigmaM=cos(2*sigma1 + sigma);
 
-    sinU1=tanU1*cosU1;
+      sinSigma=sin(sigma);
+      cosSigma=cos(sigma);
 
-    tmp = sinU1*sinSigma - cosU1*cosSigma*cosAlpha1;
+      double deltaSigma=B*sinSigma*(cos2SigmaM+B/4*(cosSigma*(-1+2*cos2SigmaM*cos2SigmaM)-
+                        B/6*cos2SigmaM*(-3+4*sinSigma*sinSigma)*(-3+4*cos2SigmaM*cos2SigmaM)));
+      sigmaP=sigma;
+      sigma=distanceAsMeter/(b*A) + deltaSigma;
+    } while (fabs(sigma-sigmaP) > 1e-12);
+
+    double tmp = sinU1*sinSigma - cosU1*cosSigma*cosAlpha1;
+
     lat2 = atan2(sinU1*cosSigma + cosU1*sinSigma*cosAlpha1,
-        (1-f)*sqrt(sinAlpha*sinAlpha + tmp*tmp));
-    lambda = atan2(sinSigma*sinAlpha1,
-                   cosU1*cosSigma - sinU1*sinSigma*cosAlpha1);
-    C = f/16*cosSqAlpha*(4+f*(4-3*cosSqAlpha));
-    L = lambda - (1-C)*f*sinAlpha*(sigma+C*sinSigma*(cos2SigmaM+C*cosSigma*(-1+2*cos2SigmaM*cos2SigmaM)));
+                 (1-f)*sqrt(sinAlpha*sinAlpha + tmp*tmp));
+    double lambda = atan2(sinSigma*sinAlpha1,
+                          cosU1*cosSigma - sinU1*sinSigma*cosAlpha1);
+    double C = f/16*cosSqAlpha*(4+f*(4-3*cosSqAlpha));
+    double L = lambda - (1-C)*f*sinAlpha*(sigma+C*sinSigma*(cos2SigmaM+C*cosSigma*(-1+2*cos2SigmaM*cos2SigmaM)));
+
+    lon2=fmod(lon1+L+3*M_PI,2*M_PI)-M_PI;
 
     lat2=lat2*180.0/M_PI;
-    lon2=lon1+L*180.0/M_PI;
+    lon2=lon2*180.0/M_PI;
+  }
+
+  GeoCoord GetEllipsoidalDistance(const GeoCoord& position,
+                                  double bearing,
+                                  const Distance &distance)
+  {
+    double lat,lon;
+
+    GetEllipsoidalDistance(position.GetLat(),
+                           position.GetLon(),
+                           bearing,
+                           distance,
+                           lat,lon);
+
+    return {lat,lon};
   }
 
   double GetSphericalBearingInitial(const GeoCoord& a,

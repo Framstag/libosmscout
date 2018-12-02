@@ -71,10 +71,10 @@ namespace osmscout {
       inline Coord(uint16_t x,
                    uint16_t y,
                    bool coast)
+      : x(x),
+        y(y),
+        coast(coast)
       {
-        this->x=x;
-        this->y=y;
-        this->coast=coast;
       }
 
       inline void Set(uint16_t x,
@@ -106,7 +106,7 @@ namespace osmscout {
       // no code
     }
 
-    inline GroundTile(Type type)
+    inline explicit GroundTile(Type type)
     : type(type)
     {
       // no code

@@ -283,10 +283,12 @@ namespace osmscout {
     /**
      * Assign the value of other
      */
-    inline void operator=(const GeoCoord& other)
+    inline GeoCoord& operator=(const GeoCoord& other)
     {
       this->lat=other.lat;
       this->lon=other.lon;
+
+      return *this;
     }
 
     inline Distance operator-(const GeoCoord& other) const

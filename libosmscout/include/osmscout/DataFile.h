@@ -301,6 +301,10 @@ namespace osmscout {
     data.reserve(data.size()+size);
     std::lock_guard<std::mutex> lock(accessMutex);
 
+    if (size > cache.GetMaxSize()){
+      log.Warn() << "Cache size (" << cache.GetMaxSize() << ") for file " << datafile << " is smaller than current request (" << size << ")";
+    }
+
     for (IteratorIn offsetIter=begin; offsetIter!=end; ++offsetIter) {
       ValueCacheRef entryRef;
 
@@ -344,6 +348,10 @@ namespace osmscout {
 
     data.reserve(data.size()+size);
     std::lock_guard<std::mutex> lock(accessMutex);
+
+    if (size > cache.GetMaxSize()){
+      log.Warn() << "Cache size (" << cache.GetMaxSize() << ") for file " << datafile << " is smaller than current request (" << size << ")";
+    }
 
     for (IteratorIn offsetIter=begin; offsetIter!=end; ++offsetIter) {
       ValueType value=std::make_shared<N>();
@@ -588,9 +596,9 @@ namespace osmscout {
               const std::string& path,
               bool memoryMapedIndex,
               bool memoryMapedData);
-    bool Close();
+    bool Close() override;
 
-    bool IsOpen() const;
+    bool IsOpen() const override;
 
     bool GetOffset(I id,
                    FileOffset& offset) const;

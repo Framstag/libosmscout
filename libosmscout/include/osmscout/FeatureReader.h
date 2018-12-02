@@ -297,6 +297,7 @@ namespace osmscout {
   }
 
   typedef FeatureLabelReader<NameFeature,NameFeatureValue>         NameFeatureLabelReader;
+  typedef FeatureLabelReader<RefFeature,RefFeatureValue>           RefFeatureLabelReader;
 
   /**
    * \defgroup type Object type related data structures and services
