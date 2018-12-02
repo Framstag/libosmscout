@@ -297,7 +297,7 @@ namespace osmscout {
     return wayDataMemoryMaped;
   }
 
-  size_t ImportParameter::GetAreaNodeMinMag() const
+  MagnificationLevel ImportParameter::GetAreaNodeMinMag() const
   {
     return areaNodeMinMag;
   }
@@ -559,7 +559,7 @@ namespace osmscout {
     this->areaAreaIndexMaxMag=areaAreaIndexMaxMag;
   }
 
-  void ImportParameter::SetAreaNodeMinMag(size_t areaNodeMinMag)
+  void ImportParameter::SetAreaNodeMinMag(MagnificationLevel areaNodeMinMag)
   {
     this->areaNodeMinMag=areaNodeMinMag;
   }

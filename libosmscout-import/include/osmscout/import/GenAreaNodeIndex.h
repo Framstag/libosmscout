@@ -24,6 +24,8 @@
 
 #include <osmscout/system/Compiler.h>
 
+#include <osmscout/util/TileId.h>
+
 namespace osmscout {
 
   class AreaNodeIndexGenerator CLASS_FINAL : public ImportModule
@@ -31,25 +33,18 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      uint32_t   indexLevel;   //! magnification level of index
-      size_t     indexCells;   //! Number of filled cells in index
-      size_t     indexEntries; //! Number of entries over all cells
-
-      uint32_t   cellXStart;
-      uint32_t   cellXEnd;
-      uint32_t   cellYStart;
-      uint32_t   cellYEnd;
-      uint32_t   cellXCount;
-      uint32_t   cellYCount;
-
-      FileOffset indexOffset; //! Position in file where the offset of the bitmap is written
+      MagnificationLevel level;       //! magnification level of index
+      size_t             cellCount;   //! Number of filled cells in index
+      size_t             nodeCount;   //! Number of entries over all cells
+      TileIdBox          tileBox;     //! Tile box
+      FileOffset         indexOffset; //! Position in file where the offset of the bitmap is written
 
       TypeData();
 
       inline bool HasEntries()
       {
-        return indexCells>0 &&
-               indexEntries>0;
+        return cellCount>0 &&
+               nodeCount>0;
       }
     };
 
