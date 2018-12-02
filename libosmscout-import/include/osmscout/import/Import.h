@@ -156,7 +156,7 @@ namespace osmscout {
 
     size_t                       areaAreaIndexMaxMag;      //<! Maximum depth of the index generated
 
-    size_t                       areaNodeMinMag;           //<! Minimum magnification of index for individual type
+    MagnificationLevel           areaNodeMinMag;           //<! Minimum magnification of index for individual type
     double                       areaNodeIndexMinFillRate; //<! Minimum rate of filled cells in index bitmap
     size_t                       areaNodeIndexCellSizeAverage; //<! Average entries per index cell
     size_t                       areaNodeIndexCellSizeMax; //<! Maximum number of entries  per index cell
@@ -237,7 +237,7 @@ namespace osmscout {
     bool GetWayDataMemoryMaped() const;
     size_t GetWayDataCacheSize() const;
 
-    size_t GetAreaNodeMinMag() const;
+    MagnificationLevel GetAreaNodeMinMag() const;
     double GetAreaNodeIndexMinFillRate() const;
     size_t GetAreaNodeIndexCellSizeAverage() const;
     size_t GetAreaNodeIndexCellSizeMax() const;
@@ -314,7 +314,7 @@ namespace osmscout {
 
     void SetAreaAreaIndexMaxMag(size_t areaAreaIndexMaxMag);
 
-    void SetAreaNodeMinMag(size_t areaNodeMinMag);
+    void SetAreaNodeMinMag(MagnificationLevel areaNodeMinMag);
     void SetAreaNodeIndexMinFillRate(double areaNodeIndexMinFillRate);
     void SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage);
     void SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax);
