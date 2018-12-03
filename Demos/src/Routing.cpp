@@ -658,7 +658,6 @@ int main(int argc, char* argv[])
   }
 
   osmscout::TypeConfigRef             typeConfig=database->GetTypeConfig();
-  osmscout::RouteDescription          description;
   std::map<std::string,double>        carSpeedTable;
   osmscout::RoutingParameter          parameter;
 
@@ -799,7 +798,7 @@ int main(int argc, char* argv[])
   std::vector<osmscout::RoutingProfileRef> profiles{routingProfile};
   std::vector<osmscout::DatabaseRef>       databases{database};
 
-  if (!postprocessor.PostprocessRouteDescription(description,
+  if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.description,
                                                  profiles,
                                                  databases,
                                                  postprocessors,
