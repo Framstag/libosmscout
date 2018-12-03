@@ -536,7 +536,6 @@ int main(int argc, char *argv[]){
     }
 
     osmscout::TypeConfigRef             typeConfig=database->GetTypeConfig();
-    osmscout::RouteDescription          description;
     std::map<std::string,double>        carSpeedTable;
     osmscout::RoutingParameter          parameter;
 
@@ -640,7 +639,7 @@ int main(int argc, char *argv[]){
 
     // Snap to route distance set to 100m
     navigation.SetSnapDistance(osmscout::Distance::Of<osmscout::Meter>(100.0));
-    navigation.SetRoute(&description);
+    navigation.SetRoute(routeDescriptionResult.description.get());
 
     osmscout::GeoCoord location(latitude, longitude);
     double minDistance = 0.0;
