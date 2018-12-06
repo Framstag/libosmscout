@@ -431,9 +431,15 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
   for (const auto& flag : stylesheetFlags){
     flags[QString::fromStdString(flag.first)]=flag.second;
   }
+
   // add flags defined by stylesheet
   for (auto &db:databases){
-    for (const auto& flag : db->styleConfig->GetFlags()){
+    if (!db->styleConfig) {
+      continue;
+    }
+
+    auto styleFlags = db->styleConfig->GetFlags(); // iterate temporary container is UB!
+    for (const auto& flag : styleFlags){
       if (!flags.contains(QString::fromStdString(flag.first))){
         flags[QString::fromStdString(flag.first)]=flag.second;
       }
