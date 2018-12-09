@@ -33,6 +33,7 @@ namespace osmscout {
   private:
     struct TypeData
     {
+      TypeInfoRef        type;
       MagnificationLevel level;       //! magnification level of index
       size_t             cellCount;   //! Number of filled cells in index
       size_t             nodeCount;   //! Number of entries over all cells
@@ -41,12 +42,24 @@ namespace osmscout {
 
       TypeData();
 
-      inline bool HasEntries()
+      inline bool HasEntries() const
       {
         return cellCount>0 &&
                nodeCount>0;
       }
     };
+
+  private:
+    bool ScanningNodeData(const TypeConfigRef& typeConfig,
+                          const ImportParameter& parameter,
+                          Progress& progress,
+                          std::vector<TypeData>& nodeTypeData);
+    void DumpNodeData(Progress& progress,
+                      const std::vector<TypeData>& nodeTypeData);
+    bool WriteIndexFile(const TypeConfigRef& typeConfig,
+                        const ImportParameter& parameter,
+                        Progress& progress,
+                        std::vector<TypeData>& nodeTypeData);
 
   public:
     void GetDescription(const ImportParameter& parameter,
