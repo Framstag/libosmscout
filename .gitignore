@@ -1,7 +1,8 @@
 # CMake
 **/cmake_install.cmake
-**/CMakeFiles
-/build/
+**/.autotools
+**/debug
+**/release
 build/
 
 # IDEs
