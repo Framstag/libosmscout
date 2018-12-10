@@ -30,9 +30,9 @@
 #include <osmscout/LabelPath.h>
 #include <osmscout/system/Math.h>
 
-//#define LABEL_LAYOUTER_DEBUG
+//#define DEBUG_LABEL_LAYOUTER
 
-#if defined(LABEL_LAYOUTER_DEBUG)
+#ifdef DEBUG_LABEL_LAYOUTER
 #include <iostream>
 #endif
 

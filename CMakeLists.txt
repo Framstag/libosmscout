@@ -129,8 +129,8 @@ endif()
 set(OpenGL_GL_PREFERENCE "GLVND")
 
 # debug build?
-if (LABEL_LAYOUTER_DEBUG)
-  add_definitions( -DLABEL_LAYOUTER_DEBUG)
+if (DEBUG_LABEL_LAYOUTER)
+  add_definitions( -DDEBUG_LABEL_LAYOUTER)
 endif()
 if (DEBUG_GROUNDTILES)
   add_definitions( -DDEBUG_GROUNDTILES)
