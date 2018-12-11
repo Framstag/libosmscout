@@ -39,7 +39,13 @@ bool operator==(const TileCacheKey a, const TileCacheKey b)
     return a.zoomLevel == b.zoomLevel && a.xtile == b.xtile && a.ytile == b.ytile;
 }
 
-TileCache::TileCache(size_t cacheSize):  
+QDebug& operator<<(QDebug &out, const TileCacheKey &key)
+{
+  out << QString("z: %1, %2x%3").arg(key.zoomLevel).arg(key.xtile).arg(key.ytile);
+  return out;
+}
+
+TileCache::TileCache(size_t cacheSize):
   tiles(), 
   requests(),
   cacheSize(cacheSize), 
@@ -57,7 +63,9 @@ void TileCache::clearPendingRequests()
     while (it.hasNext()){
       it.next();
       if (it.value().pending){
-          // qDebug() << "remove pending " << QString("z: %1, %2x%3").arg(it.key().zoomLevel).arg(it.key().xtile).arg(it.key().ytile);                
+#ifdef DEBUG_TILE_CACHE
+          qDebug() << this << "remove pending" << it.key();
+#endif
           it.remove();
       }
     }
@@ -102,9 +110,11 @@ bool TileCache::startRequestProcess(uint32_t zoomLevel, uint32_t x, uint32_t y)
 {
     TileCacheKey key = {zoomLevel, x, y};
     if (requests.contains(key)){
-        // qDebug() << "start process " << QString("z: %1, %2x%3").arg(key.zoomLevel).arg(key.xtile).arg(key.ytile);
-        RequestState state = requests.value(key); 
+        RequestState state = requests.value(key);
         if (state.pending){
+#ifdef DEBUG_TILE_CACHE
+            qDebug() << this << "start process" << key;
+#endif
             state.pending = false;
             requests.insert(key, state);
             return true;
@@ -122,7 +132,10 @@ bool TileCache::request(uint32_t zoomLevel, uint32_t x, uint32_t y)
     if (requests.contains(key))
         return false;
 
-    // qDebug() << "request " << QString("z: %1, %2x%3").arg(key.zoomLevel).arg(key.xtile).arg(key.ytile);
+#ifdef DEBUG_TILE_CACHE
+    qDebug() << this << "request" << key;
+#endif
+
     RequestState state = {true};
     requests.insert(key, state);
     emit tileRequested(zoomLevel, x, y);
@@ -153,7 +166,7 @@ TileCacheVal TileCache::get(uint32_t zoomLevel, uint32_t x, uint32_t y)
 {
     TileCacheKey key = {zoomLevel, x, y};
     if (!tiles.contains(key)){
-        qWarning() << "No tile in cache for key {" << zoomLevel << ", " << x << ", " << y << "}";
+        qWarning() << this << "No tile in cache for key " << key;
         return {QTime(), QPixmap(), epoch}; // throw std::underflow_error ?
     }
     TileCacheVal val = tiles.value(key);
@@ -165,8 +178,12 @@ TileCacheVal TileCache::get(uint32_t zoomLevel, uint32_t x, uint32_t y)
 bool TileCache::removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y)
 {
     TileCacheKey key = {zoomLevel, x, y};
+
+#ifdef DEBUG_TILE_CACHE
+    qDebug() << this << "remove request" << key;
+#endif
+
     return requests.remove(key) > 0;
-    // qDebug() << "remove " << QString("z: %1, %2x%3").arg(key.zoomLevel).arg(key.xtile).arg(key.ytile);
 }
 
 void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, size_t epoch)
@@ -177,6 +194,11 @@ void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, si
     QTime now;
     now.start();
     TileCacheVal val = {now, pixmap, epoch};
+
+#ifdef DEBUG_TILE_CACHE
+    qDebug() << this << "inserting tile" << key;
+#endif
+
     tiles.insert(key, val);
 
     cleanupCache();
@@ -194,7 +216,11 @@ void TileCache::cleanupCache()
          *
          * Goal is to remove more items at once and minimise frequency of this expensive cleaning
          */
-        qDebug() << "Cleaning tile cache (" << cacheSize << ")";
+
+#ifdef DEBUG_TILE_CACHE
+        qDebug() << this << "Cleaning tile cache (" << cacheSize << ")";
+#endif
+
         uint32_t removed = 0;
         int oldest = 0;
         TileCacheKey key;
@@ -217,7 +243,9 @@ void TileCache::cleanupCache()
             }
 
             if (elapsed > (int)maximumLivetimeMs){
-              qDebug() << "  removing " << key.zoomLevel << " / " << key.xtile << " x " << key.ytile;
+#ifdef DEBUG_TILE_CACHE
+                qDebug() << this << "removing" << key;
+#endif
 
               //tiles.remove(key);
               it.remove();
@@ -228,7 +256,9 @@ void TileCache::cleanupCache()
         }
         if (removed == 0 && oldest > 0){
           key = oldestKey;
-          qDebug() << "  removing " << key.zoomLevel << " / " << key.xtile << " x " << key.ytile;
+#ifdef DEBUG_TILE_CACHE
+          qDebug() << this << "removing" << key;
+#endif
           tiles.remove(key);
         }
     }

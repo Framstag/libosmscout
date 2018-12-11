@@ -251,9 +251,17 @@ bool TiledRenderingHelper::lookupAndDrawTile(TileCache& tileCache, QPainter& pai
 
   if (triggerRequest){
     if (tileCache.request(zoomLevel, xtile, ytile)){
-      //std::cout << "  tile request: " << zoomLevel << " xtile: " << xtile << " ytile: " << ytile << std::endl;
+
+#ifdef DEBUG_TILE_CACHE
+      qDebug() << &tileCache << QString("tile request: z: %1, %2x%3").arg(zoomLevel).arg(xtile).arg(ytile);
+#endif
+
     }else{
-      //std::cout << "  requested already: " << zoomLevel << " xtile: " << xtile << " ytile: " << ytile << std::endl;
+
+#ifdef DEBUG_TILE_CACHE
+      qDebug() << &tileCache << QString("requested already: z: %1, %2x%3").arg(zoomLevel).arg(xtile).arg(ytile);
+#endif
+
     }
   }
   return lookupTileFound;
