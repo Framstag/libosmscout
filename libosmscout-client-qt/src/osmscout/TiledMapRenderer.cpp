@@ -314,10 +314,8 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
 
     }else{
         // put Null image
-        {
-            QMutexLocker locker(&tileCacheMutex);
-            offlineTileCache.put(zoomLevel, xtile, ytile, QImage());
-        }
+        QMutexLocker locker(&tileCacheMutex);
+        offlineTileCache.put(zoomLevel, xtile, ytile, QImage(), loadEpoch);
     }
 }
 
