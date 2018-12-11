@@ -42,16 +42,22 @@ namespace osmscout {
 
 /**
  * \ingroup QtAPI
+ *
+ * The key type of a QMap must provide operator<()
+ *
+ * The key type of a QHash must provide operator==()
+ * and a global hash function called qHash() (see qHash).
  */
 struct TileCacheKey
 {
     uint32_t zoomLevel;
     uint32_t xtile; 
     uint32_t ytile;
-  
 };
 
-bool operator==(const TileCacheKey a, const TileCacheKey b);
+bool operator==(const TileCacheKey &a, const TileCacheKey &b);
+
+bool operator<(const TileCacheKey &a, const TileCacheKey &b);
 
 uint qHash(const TileCacheKey &key);
 

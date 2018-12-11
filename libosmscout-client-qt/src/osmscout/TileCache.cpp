@@ -34,9 +34,18 @@ uint qHash(const TileCacheKey &key){
   return (key.zoomLevel << 24) ^ (key.xtile << 12) ^ key.ytile;
 }
 
-bool operator==(const TileCacheKey a, const TileCacheKey b)
+bool operator==(const TileCacheKey &a, const TileCacheKey &b)
 {
-    return a.zoomLevel == b.zoomLevel && a.xtile == b.xtile && a.ytile == b.ytile;
+  return a.zoomLevel == b.zoomLevel && a.xtile == b.xtile && a.ytile == b.ytile;
+}
+
+bool operator<(const TileCacheKey &a, const TileCacheKey &b)
+{
+  if (a.zoomLevel != b.zoomLevel)
+    return a.zoomLevel < b.zoomLevel;
+  if (a.xtile != b.xtile)
+    return a.xtile < b.xtile;
+  return a.ytile < b.ytile;
 }
 
 QDebug& operator<<(QDebug &out, const TileCacheKey &key)
