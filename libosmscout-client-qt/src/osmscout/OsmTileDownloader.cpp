@@ -76,7 +76,7 @@ void OsmTileDownloader::download(uint32_t zoomLevel, uint32_t x, uint32_t y)
   QString server = servers.at(serverNumber % servers.size());
 
   QUrl tileUrl(server.arg(zoomLevel).arg(x).arg(y));
-  qDebug() << "Download tile " << tileUrl << " (current thread: " << QThread::currentThread() << ")";
+  qDebug() << "Download tile" << tileUrl << "(current thread:" << QThread::currentThread() << ")";
   
   TileCacheKey key = {zoomLevel, x, y};
   requests.insert(tileUrl, key);
@@ -91,15 +91,13 @@ void OsmTileDownloader::fileDownloaded(QNetworkReply* reply)
 { 
   QUrl url = reply->url();
   if (!requests.contains(url)){
-    qWarning() << "Response from non-requested url: " << url;
+    qWarning() << "Response from non-requested url:" << url;
   }else{
     
     TileCacheKey key = requests.value(url);
     requests.remove(url);
     if (reply->error() != QNetworkReply::NoError){
-        // TODO: it seems that this code is affected by https://bugreports.qt.io/browse/QTBUG-46323
-        // on Jolla phone (Qt 5.2.2), exists some workaround? Can we copy-paste fixed QNetworkAccessManager to project?
-      qWarning() << "Downloading " << url << "failed with " << reply->errorString();
+      qWarning() << "Downloading" << url << "failed with" << reply->errorString();
       serverNumber = qrand(); // try another server for future requests
       emit failed(key.zoomLevel, key.xtile, key.ytile, false);
     }else{
