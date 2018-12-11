@@ -282,8 +282,8 @@ CONST
   // Leisure
 
   COLOR natureReserveColor         = #abde9622;
-  COLOR natureReserveLabelColor    = darken(@natureReserveColor, 0.5);
-  COLOR natureReserveBorderColor   = darken(@natureReserveColor, 0.3);
+  COLOR natureReserveLabelColor    = #566f4bb0;
+  COLOR natureReserveBorderColor   = #82a77180;
 
   COLOR playgroundColor            = #ccffff;
   COLOR playgroundBorderColor      = darken(@playgroundColor, 0.3);
@@ -1369,6 +1369,20 @@ STYLE
      [TYPE leisure_marina,
            leisure_fishing,
            leisure_ice_rink] AREA { color: #b5d6f1; }
+   }
+
+   [TYPE boundary_protected_area] {
+     [MAG stateOver-]{
+       AREA.BORDER#dashed { color: @natureReserveBorderColor; width: 0.3mm; dash: 6,6; displayOffset: -0.5mm; }
+       AREA.BORDER#solid { color: lighten(@natureReserveBorderColor, 0.3); width: 1.0mm; }
+     }
+     [MAG stateOver-detail]{
+       AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
+     }
+     // Semiransparent overlay just for low zoom
+     [MAG stateOver-proximity]{
+       AREA { color: @natureReserveColor;}
+     }
    }
 
    [MAG city-] {
