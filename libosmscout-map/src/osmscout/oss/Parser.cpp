@@ -1524,7 +1524,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		std::string            subIdent;
 		std::string            stringValue;
 		std::string            function;
-		double                 factor;
+		double                 factor=-1;
 		std::string            unit;
 		std::string            number;
 		std::list<std::string> numberList;
