@@ -31,26 +31,37 @@
 #include <QTime>
 #include <QImage>
 #include <QPixmap>
+#include <QDebug>
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/ClientQtImportExport.h>
+
+//#define DEBUG_TILE_CACHE
 
 namespace osmscout {
 
 /**
  * \ingroup QtAPI
+ *
+ * The key type of a QMap must provide operator<()
+ *
+ * The key type of a QHash must provide operator==()
+ * and a global hash function called qHash() (see qHash).
  */
 struct TileCacheKey
 {
     uint32_t zoomLevel;
     uint32_t xtile; 
     uint32_t ytile;
-  
 };
 
-bool operator==(const TileCacheKey a, const TileCacheKey b);
+bool operator==(const TileCacheKey &a, const TileCacheKey &b);
+
+bool operator<(const TileCacheKey &a, const TileCacheKey &b);
 
 uint qHash(const TileCacheKey &key);
+
+QDebug& operator<<(QDebug &out, const TileCacheKey &key);
 
 /**
  * \ingroup QtAPI
@@ -88,7 +99,7 @@ public:
   virtual ~TileCache();
   
   /**
-   * revove all pending requests
+   * remove all pending requests
    * TODO: in case of multiple map widgets, add some id to avoid removing requests 
    * of another widget
    */

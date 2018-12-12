@@ -40,19 +40,33 @@ private:
   OsmTileDownloader *tileDownloader;
   OnlineTileProvider provider;
 
+  mutable QMutex      tileCacheMutex;
+  TileCache           onlineTileCache;
+
 public slots:
   void init();
   void download(uint32_t, uint32_t, uint32_t);
   void onProviderChanged(const OnlineTileProvider &newProvider);
 
+  void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
+  void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
+
 signals:
-  void downloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
-  void failed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
+  void downloaded(uint32_t zoomLevel, uint32_t x, uint32_t y);
+  void failed(uint32_t zoomLevel, uint32_t x, uint32_t y);
 
 public:
   TileLoaderThread(QThread *thread);
 
   virtual ~TileLoaderThread();
+
+  /**
+   * Acquire tileCacheMutex and provide reference to onlineTileCache
+   *
+   * @param fn
+   */
+  void accessCache(std::function<void(TileCache&)> fn);
+
 };
 
 /**
@@ -65,17 +79,13 @@ class OSMSCOUT_CLIENT_QT_API TiledMapOverlay : public MapOverlay
   Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled)
 
 private:
-  mutable QMutex      tileCacheMutex;
-  TileCache           onlineTileCache;
   QJsonValue          providerJson;
   TileLoaderThread    *loader;
   bool                enabled;
   QColor              transparentColor;
 
 public slots:
-  void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
-  void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
-  void download(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
+  void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y);
 
 signals:
   void providerChanged(const OnlineTileProvider &provider);
