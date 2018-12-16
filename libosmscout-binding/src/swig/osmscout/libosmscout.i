@@ -14,6 +14,7 @@
 
 %include <osmscout/OSMScoutTypes.i>
 
+%include <osmscout/util/Distance.i>
 %include <osmscout/util/StringMatcher.i>
 %include <osmscout/util/Breaker.i>
 
@@ -26,6 +27,7 @@
 %include <osmscout/util/GeoBox.i>
 %include <osmscout/Point.i>
 
+%include <osmscout/util/Geometry.i>
 %include <osmscout/util/FileScanner.i>
 %include <osmscout/util/FileWriter.i>
 %include <osmscout/util/Parsing.i>
@@ -36,6 +38,7 @@
 %include <osmscout/util/TagErrorReporter.i>
 
 %include <osmscout/TypeConfig.i>
+%include <osmscout/TypeInfoSet.i>
 
 %include <osmscout/BoundingBoxDataFile.i>
 
