@@ -160,6 +160,7 @@ namespace osmscout {
     double                       areaNodeIndexMinFillRate; //<! Minimum rate of filled cells in index bitmap
     size_t                       areaNodeIndexCellSizeAverage; //<! Average entries per index cell
     size_t                       areaNodeIndexCellSizeMax; //<! Maximum number of entries  per index cell
+    size_t                       areaNodeListIndexLimit;   //<! Maximum number of entries to use an list based index
 
     MagnificationLevel           areaWayMinMag;            //<! Minimum magnification of index for individual type
     MagnificationLevel           areaWayIndexMaxLevel;     //<! Maximum zoom level for area way index bitmap
@@ -241,6 +242,7 @@ namespace osmscout {
     double GetAreaNodeIndexMinFillRate() const;
     size_t GetAreaNodeIndexCellSizeAverage() const;
     size_t GetAreaNodeIndexCellSizeMax() const;
+    size_t GetAreaNodeListIndexLimit() const;
 
     MagnificationLevel GetAreaWayMinMag() const;
     MagnificationLevel GetAreaWayIndexMaxLevel() const;
@@ -318,6 +320,7 @@ namespace osmscout {
     void SetAreaNodeIndexMinFillRate(double areaNodeIndexMinFillRate);
     void SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage);
     void SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax);
+    void SetAreaNodeListIndexLimit(size_t areaNodeListIndexLimit);
 
     void SetAreaWayMinMag(MagnificationLevel areaWayMinMag);
     void SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel);
@@ -351,6 +354,8 @@ namespace osmscout {
 
     std::unique_ptr<Preprocessor> GetPreprocessor(const std::string& filename,
                                                   PreprocessorCallback& callback) const;
+
+    void SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel);
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription CLASS_FINAL

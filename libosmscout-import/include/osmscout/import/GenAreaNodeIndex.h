@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
+
 #include <osmscout/import/Import.h>
 
 #include <osmscout/system/Compiler.h>
@@ -28,17 +30,34 @@
 
 namespace osmscout {
 
+  /**
+   * Generates an index for querying nodes in a given area and with given node types
+   */
   class AreaNodeIndexGenerator CLASS_FINAL : public ImportModule
   {
   private:
+    /**
+     * The different supported index types for this index
+     */
+    enum class IndexType : uint8_t
+    {
+      IndexTypeBitmap = uint8_t(0),
+      IndexTypeList   = uint8_t(1)
+    };
+
+    /**
+     * Helper struct to hold information type in the index
+     */
     struct TypeData
     {
-      TypeInfoRef        type;
-      MagnificationLevel level;       //! magnification level of index
-      size_t             cellCount;   //! Number of filled cells in index
-      size_t             nodeCount;   //! Number of entries over all cells
-      TileIdBox          tileBox;     //! Tile box
-      FileOffset         indexOffset; //! Position in file where the offset of the bitmap is written
+      TypeInfoRef        type;        //<! Node type
+      IndexType          indexType;   //<! Type of the index
+      MagnificationLevel level;       //<! magnification level of index
+      TileIdBox          tileBox;     //<! Tile box
+      FileOffset         indexOffset; //<! Position in file where the offset of the bitmap is written
+
+      size_t             nodeCount;   //<! Number of entries over all cells
+      size_t             cellCount;   //<! Number of filled cells in index
 
       TypeData();
 
@@ -56,6 +75,16 @@ namespace osmscout {
                           std::vector<TypeData>& nodeTypeData);
     void DumpNodeData(Progress& progress,
                       const std::vector<TypeData>& nodeTypeData);
+    bool WriteBitmap(Progress& progress,
+                     FileWriter& writer,
+                     const TypeInfo& type,
+                     const TypeData& typeData,
+                     const std::map<TileId,std::list<FileOffset>>& bitmapData);
+    bool WriteList(Progress& progress,
+                   FileWriter& writer,
+                   const TypeInfo& type,
+                   const TypeData& typeData,
+                   const std::list<std::pair<GeoCoord,FileOffset>>& listData);
     bool WriteIndexFile(const TypeConfigRef& typeConfig,
                         const ImportParameter& parameter,
                         Progress& progress,

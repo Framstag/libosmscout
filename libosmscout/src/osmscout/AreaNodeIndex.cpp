@@ -44,15 +44,15 @@ namespace osmscout {
   }
 
   AreaNodeIndex::TypeData::TypeData()
-  : indexLevel(0),
-    indexOffset(0),
-    dataOffsetBytes(0),
-    cellXStart(0),
+  : cellXStart(0),
     cellXEnd(0),
     cellYStart(0),
     cellYEnd(0),
     cellXCount(0),
     cellYCount(0),
+    indexOffset(0),
+    dataOffsetBytes(0),
+    indexLevel(0),
     cellWidth(0.0),
     cellHeight(0.0),
     minLon(0.0),
@@ -92,7 +92,8 @@ namespace osmscout {
       scanner.Read(indexEntries);
 
       for (size_t i=0; i<indexEntries; i++) {
-        TypeId type;
+        TypeId  type;
+        uint8_t indexType;
 
         scanner.ReadNumber(type);
 
@@ -100,15 +101,24 @@ namespace osmscout {
           nodeTypeData.resize(type+1);
         }
 
-        scanner.ReadFileOffset(nodeTypeData[type].indexOffset);
-        scanner.Read(nodeTypeData[type].dataOffsetBytes);
+        scanner.Read(indexType);
+
+        nodeTypeData[type].indexType=(IndexType)indexType;
 
         scanner.ReadNumber(nodeTypeData[type].indexLevel);
-
         scanner.ReadNumber(nodeTypeData[type].cellXStart);
         scanner.ReadNumber(nodeTypeData[type].cellXEnd);
         scanner.ReadNumber(nodeTypeData[type].cellYStart);
         scanner.ReadNumber(nodeTypeData[type].cellYEnd);
+
+        scanner.ReadFileOffset(nodeTypeData[type].indexOffset);
+
+        if (nodeTypeData[type].indexType==IndexType::IndexTypeBitmap) {
+          scanner.Read(nodeTypeData[type].dataOffsetBytes);
+        }
+        else {
+          scanner.Read(nodeTypeData[type].entryCount);
+        }
 
         nodeTypeData[type].cellXCount=nodeTypeData[type].cellXEnd-nodeTypeData[type].cellXStart+1;
         nodeTypeData[type].cellYCount=nodeTypeData[type].cellYEnd-nodeTypeData[type].cellYStart+1;
@@ -131,9 +141,9 @@ namespace osmscout {
     }
   }
 
-  bool AreaNodeIndex::GetOffsets(const TypeData& typeData,
-                                 const GeoBox& boundingBox,
-                                 std::vector<FileOffset>& offsets) const
+  bool AreaNodeIndex::GetOffsetsBitmap(const TypeData& typeData,
+                                       const GeoBox& boundingBox,
+                                       std::vector<FileOffset>& offsets) const
   {
     if (typeData.indexOffset==0) {
 
@@ -227,12 +237,48 @@ namespace osmscout {
     return true;
   }
 
+  bool AreaNodeIndex::GetOffsetsList(const TypeData& typeData,
+                                     const GeoBox& boundingBox,
+                                     std::vector<FileOffset>& offsets) const
+  {
+    if (typeData.indexOffset==0) {
+
+      // No data for this type available
+      return true;
+    }
+
+    if (boundingBox.GetMaxLon()<typeData.minLon ||
+        boundingBox.GetMinLon()>=typeData.maxLon ||
+        boundingBox.GetMaxLat()<typeData.minLat ||
+        boundingBox.GetMinLat()>=typeData.maxLat) {
+
+      // No data available in given bounding box
+      return true;
+    }
+
+    scanner.SetPos(typeData.indexOffset);
+
+    for (auto i=1; i<=typeData.entryCount; i++) {
+      GeoCoord   coord;
+      FileOffset fileOffset;
+
+      scanner.ReadCoord(coord);
+      scanner.ReadFileOffset(fileOffset);
+
+      if (boundingBox.Includes(coord)) {
+        offsets.push_back(fileOffset);
+      }
+    }
+
+    return true;
+  }
+
   bool AreaNodeIndex::GetOffsets(const GeoBox& boundingBox,
                                  const TypeInfoSet& requestedTypes,
                                  std::vector<FileOffset>& offsets,
                                  TypeInfoSet& loadedTypes) const
   {
-    
+
     StopClock time;
 
     loadedTypes.Clear();
@@ -246,9 +292,18 @@ namespace osmscout {
         }
 
         auto typeNodeId = type->GetNodeId();
-        if (typeNodeId < nodeTypeData.size() && 
-                !GetOffsets(nodeTypeData[typeNodeId], boundingBox, offsets)) {
-          return false;
+        if (typeNodeId < nodeTypeData.size()) {
+
+          if (nodeTypeData[typeNodeId].indexType==IndexType::IndexTypeBitmap) {
+            if (!GetOffsetsBitmap(nodeTypeData[typeNodeId],boundingBox,offsets)) {
+              return false;
+            }
+          }
+          else if (nodeTypeData[typeNodeId].indexType==IndexType::IndexTypeList) {
+            if (!GetOffsetsList(nodeTypeData[typeNodeId],boundingBox,offsets)) {
+              return false;
+            }
+          }
         }
 
         loadedTypes.Set(type);

@@ -131,6 +131,7 @@ namespace osmscout {
      areaNodeIndexMinFillRate(0.1),
      areaNodeIndexCellSizeAverage(16),
      areaNodeIndexCellSizeMax(256),
+     areaNodeListIndexLimit(1000),
      areaWayMinMag(11), // Should not be >= than optimizationMaxMag
      areaWayIndexMaxLevel(13),
      waterIndexMinMag(6),
@@ -315,6 +316,11 @@ namespace osmscout {
   size_t ImportParameter::GetAreaNodeIndexCellSizeMax() const
   {
     return areaNodeIndexCellSizeMax;
+  }
+
+  size_t ImportParameter::GetAreaNodeListIndexLimit() const
+  {
+    return areaNodeListIndexLimit;
   }
 
   MagnificationLevel ImportParameter::GetAreaWayMinMag() const
@@ -577,6 +583,11 @@ namespace osmscout {
   void ImportParameter::SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax)
   {
     this->areaNodeIndexCellSizeMax=areaNodeIndexCellSizeMax;
+  }
+
+  void ImportParameter::SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel)
+  {
+    this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
   }
 
   void ImportParameter::SetAreaWayMinMag(MagnificationLevel areaWayMinMag)

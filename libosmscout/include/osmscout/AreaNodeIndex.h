@@ -45,19 +45,33 @@ namespace osmscout {
     static const char* AREA_NODE_IDX;
 
   private:
+    /**
+     * The different supported index types for this index
+     */
+    enum class IndexType : uint8_t
+    {
+      IndexTypeBitmap = uint8_t(0),
+      IndexTypeList   = uint8_t(1)
+    };
+
     struct TypeData
     {
-      uint32_t   indexLevel;
-
-      FileOffset indexOffset;
-      uint8_t    dataOffsetBytes;
-
+      IndexType  indexType;
       uint32_t   cellXStart;
       uint32_t   cellXEnd;
       uint32_t   cellYStart;
       uint32_t   cellYEnd;
       uint32_t   cellXCount;
       uint32_t   cellYCount;
+
+      FileOffset indexOffset;
+
+      // bitmap
+      uint8_t    dataOffsetBytes;
+      uint32_t   indexLevel;
+
+      // list
+      uint16_t   entryCount;
 
       double     cellWidth;
       double     cellHeight;
@@ -82,9 +96,12 @@ namespace osmscout {
     mutable std::mutex    lookupMutex;
 
   private:
-    bool GetOffsets(const TypeData& typeData,
-                    const GeoBox& boundingBox,
-                    std::vector<FileOffset>& offsets) const;
+    bool GetOffsetsBitmap(const TypeData& typeData,
+                          const GeoBox& boundingBox,
+                          std::vector<FileOffset>& offsets) const;
+    bool GetOffsetsList(const TypeData& typeData,
+                        const GeoBox& boundingBox,
+                        std::vector<FileOffset>& offsets) const;
 
   public:
     AreaNodeIndex();

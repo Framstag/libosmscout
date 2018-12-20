@@ -303,6 +303,9 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
   progress.Info(std::string("WayDataCacheSize: ")+
                 std::to_string(parameter.GetWayDataCacheSize()));
 
+  progress.Info("AreaNodeListIndexLimit: "+
+                std::to_string(parameter.GetAreaNodeListIndexLimit()));
+
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 std::to_string(parameter.GetRouteNodeBlockSize()));
 
