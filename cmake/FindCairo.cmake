@@ -38,10 +38,23 @@ if(CAIRO_FOUND)
   # set it back as false
   set(CAIRO_FOUND FALSE)
 
-  find_library(CAIRO_LIBRARY cairo
+  find_library(CAIRO_LIBRARY_RELEASE 
+			   NAMES cairo
                HINTS ${_pc_cairo_LIBRARY_DIRS}
   )
-  set(CAIRO_LIBRARIES "${CAIRO_LIBRARY}")
+  
+  find_library(CAIRO_LIBRARY_DEBUG 
+			   NAMES cairod
+               HINTS ${_pc_cairo_LIBRARY_DIRS}
+  )
+
+  if(NOT CAIRO_LIBRARY_DEBUG AND CAIRO_LIBRARY_RELEASE)
+    set(CAIRO_LIBRARY_DEBUG ${CAIRO_LIBRARY_RELEASE})
+  endif()
+
+  set(CAIRO_LIBRARIES 
+		debug ${CAIRO_LIBRARY_DEBUG}
+		optimized ${CAIRO_LIBRARY_RELEASE})
 
   find_path(CAIRO_INCLUDE_DIR cairo.h
             HINTS ${_pc_cairo_INCLUDE_DIRS}
