@@ -21,6 +21,8 @@
 */
 
 #include <map>
+#include <set>
+#include <vector>
 
 #include <osmscout/import/Import.h>
 
@@ -35,60 +37,80 @@ namespace osmscout {
    */
   class AreaNodeIndexGenerator CLASS_FINAL : public ImportModule
   {
-  private:
+  public:
     /**
      * The different supported index types for this index
      */
     enum class IndexType : uint8_t
     {
-      IndexTypeBitmap = uint8_t(0),
-      IndexTypeList   = uint8_t(1)
+      IndexTypeBitmap  = uint8_t(1),
+      IndexTypeList    = uint8_t(2)
     };
 
-    /**
-     * Helper struct to hold information type in the index
-     */
-    struct TypeData
+    struct DistributionData
     {
-      TypeInfoRef        type;        //<! Node type
-      IndexType          indexType;   //<! Type of the index
-      MagnificationLevel level;       //<! magnification level of index
-      TileIdBox          tileBox;     //<! Tile box
-      FileOffset         indexOffset; //<! Position in file where the offset of the bitmap is written
+      size_t                  nodeId;        //<! node id of the type
+      TypeInfoRef             type;          //<! The node type itself
+      bool                    isComplex;     //<! Index is complex
+      GeoBox                  boundingBox;   //<! Bounding box of the data
+      size_t                  fillCount;     //<! Number of entries of this type over all
+      std::map<TileId,size_t> tileFillCount; //<! Number of entries of this type per tile
+      std::set<TileId>        listTiles;     //<! Tiles with list index
+      std::set<TileId>        bitmapTiles;   //<! Tiles with bitmap index
 
-      size_t             nodeCount;   //<! Number of entries over all cells
-      size_t             cellCount;   //<! Number of filled cells in index
-
-      TypeData();
-
-      inline bool HasEntries() const
+      inline bool HasNoData() const
       {
-        return cellCount>0 &&
-               nodeCount>0;
+        return fillCount==0;
+      }
+
+      inline bool IsComplexIndex() const
+      {
+        return isComplex;
       }
     };
 
   private:
-    bool ScanningNodeData(const TypeConfigRef& typeConfig,
-                          const ImportParameter& parameter,
-                          Progress& progress,
-                          std::vector<TypeData>& nodeTypeData);
-    void DumpNodeData(Progress& progress,
-                      const std::vector<TypeData>& nodeTypeData);
-    bool WriteBitmap(Progress& progress,
-                     FileWriter& writer,
-                     const TypeInfo& type,
-                     const TypeData& typeData,
-                     const std::map<TileId,std::list<FileOffset>>& bitmapData);
-    bool WriteList(Progress& progress,
-                   FileWriter& writer,
-                   const TypeInfo& type,
-                   const TypeData& typeData,
-                   const std::list<std::pair<GeoCoord,FileOffset>>& listData);
-    bool WriteIndexFile(const TypeConfigRef& typeConfig,
-                        const ImportParameter& parameter,
-                        Progress& progress,
-                        std::vector<TypeData>& nodeTypeData);
+    bool AnalyseDistribution(const TypeConfigRef& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress,
+                             std::vector<DistributionData>& data);
+    void DumpDistribution(Progress& progress,
+                          const std::vector<DistributionData>& data);
+
+    std::vector<FileOffset> WriteListIndex(Progress& progress,
+                                           const std::vector<DistributionData>& data,
+                                           FileWriter& writer);
+
+    std::vector<std::map<TileId,FileOffset>> WriteTileListIndex(Progress& progress,
+                                                                const std::vector<DistributionData>& data,
+                                                                FileWriter& writer);
+
+    std::vector<std::map<TileId,FileOffset>> WriteBitmapIndex(Progress& progress,
+                                                              const std::vector<DistributionData>& data,
+                                                              FileWriter& writer);
+
+    void WriteListData(Progress& progress,
+                       const std::vector<DistributionData>& data,
+                       const std::vector<std::list<std::pair<GeoCoord,FileOffset>>>& listData,
+                       const std::vector<FileOffset>& listIndexOffsets,
+                       FileWriter& writer);
+
+    void WriteTileListData(const ImportParameter& parameter,
+                           const DistributionData& distributionData,
+                           const std::list<std::pair<GeoCoord,FileOffset>>& tileData,
+                           const FileOffset& tileIndexOffset,
+                           FileWriter& writer);
+
+    void WriteBitmapData(const ImportParameter& parameter,
+                         const TileId& tileId,
+                         const std::list<std::pair<GeoCoord,FileOffset>>& bitmapData,
+                         const FileOffset& bitmapIndexOffset,
+                         FileWriter& writer);
+
+    bool WriteData(const TypeConfigRef& typeConfig,
+                   const ImportParameter& parameter,
+                   Progress& progress,
+                   const std::vector<DistributionData>& data);
 
   public:
     void GetDescription(const ImportParameter& parameter,

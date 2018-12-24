@@ -19,9 +19,7 @@
 
 #include <osmscout/import/GenAreaNodeIndex.h>
 
-#include <map>
 #include <numeric>
-#include <vector>
 
 #include <osmscout/Node.h>
 #include <osmscout/Pixel.h>
@@ -38,17 +36,99 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 
-#include <iostream>
 namespace osmscout {
 
-  AreaNodeIndexGenerator::TypeData::TypeData()
-  : level(0),
-    tileBox(TileId(0,0),
-            TileId(0,0)),
-    indexOffset(0),
-    nodeCount(0),
-    cellCount(0)
+  /**
+   * Count the number of types for that we have found data for.
+   *
+   * @param data
+   *    DistributionData
+   * @return
+   *    Number of types with data
+   */
+  static uint16_t CountIndexTypes(const std::vector<AreaNodeIndexGenerator::DistributionData>& data)
   {
+    return std::accumulate(data.begin(),
+                           data.end(),
+                           uint16_t(0u),
+                           [](uint16_t value,
+                              const AreaNodeIndexGenerator::DistributionData& entry) {
+                             if (entry.fillCount>0) {
+                               value++;
+                             }
+
+                             return value;
+                           });
+  }
+
+  /**
+   * Count the number of tiles of index type "list" over all types
+   *
+   * @param data
+   *    DistributionData
+   * @return
+   *    Number of tiles
+   */
+  static uint32_t CountListTiles(const std::vector<AreaNodeIndexGenerator::DistributionData>& data)
+  {
+    return std::accumulate(data.begin(),
+                           data.end(),
+                           (uint32_t) 0u,
+                           [](uint32_t value,
+                              const AreaNodeIndexGenerator::DistributionData& entry) {
+                             return value+entry.listTiles.size();
+                           });
+  }
+
+  /**
+   * Count the number of tiles of index type "bitmap" over all types
+   *
+   * @param data
+   *    DistributionData
+   * @return
+   *    Number of tiles
+   */
+  static uint32_t CountBitmapTiles(const std::vector<AreaNodeIndexGenerator::DistributionData>& data)
+  {
+    return std::accumulate(data.begin(),
+                           data.end(),
+                           (uint32_t) 0u,
+                           [](uint32_t value,
+                              const AreaNodeIndexGenerator::DistributionData& entry) {
+                             return value+entry.bitmapTiles.size();
+                           });
+  }
+
+  static MagnificationLevel GetBitmapZoomLevel(const ImportParameter& parameter,
+                                               const std::list<std::pair<GeoCoord,FileOffset>>& data)
+  {
+    MagnificationLevel magnification=parameter.GetAreaNodeGridMag();
+
+    //Bitmap should al least have this size to make sense
+    magnification++;
+
+    // That is our maximum magnification, beyond that we trade disk size in favour of performance
+    while (magnification<parameter.GetAreaNodeBitmapMaxMag()) {
+      std::map<TileId,std::list<FileOffset>> bitmapData;
+
+      for (const auto& entry : data) {
+        TileId dataTileId=TileId::GetTile(magnification,entry.first);
+
+        bitmapData[dataTileId].push_back(entry.second);
+      }
+
+      if (std::all_of(bitmapData.begin(),
+                      bitmapData.end(),
+                      [&parameter](const std::pair<TileId,std::list<FileOffset>>& entry) {
+                        return entry.second.size()<=parameter.GetAreaNodeBitmapLimit();
+      })) {
+        return magnification;
+      }
+
+      magnification++;
+    }
+
+    return magnification;
   }
 
   void AreaNodeIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
@@ -62,19 +142,15 @@ namespace osmscout {
     description.AddProvidedFile(AreaNodeIndex::AREA_NODE_IDX);
   }
 
-  bool AreaNodeIndexGenerator::ScanningNodeData(const TypeConfigRef& typeConfig,
-                                                const ImportParameter& parameter,
-                                                Progress& progress,
-                                                std::vector<TypeData>& nodeTypeData)
+  bool AreaNodeIndexGenerator::AnalyseDistribution(const TypeConfigRef& typeConfig,
+                                                   const ImportParameter& parameter,
+                                                   Progress& progress,
+                                                   std::vector<DistributionData>& data)
   {
-    FileScanner nodeScanner;
-    FileWriter  writer;
-    TypeInfoSet remainingNodeTypes; //! Set of types we still must process
-
-    nodeTypeData.resize(typeConfig->GetTypeCount());
+    data.resize(typeConfig->GetNodeTypes().size()+1);
 
     try {
-      MagnificationLevel level;
+      FileScanner        nodeScanner;
 
       nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                        NodeDataFile::NODES_DAT),
@@ -85,166 +161,57 @@ namespace osmscout {
       // Scanning distribution
       //
 
-      progress.SetAction("Scanning level distribution of node types");
+      progress.SetAction("Scanning distribution of node types");
 
-      // Initially we must process all types that represents nodes and that should
-      // not be ignored
-      remainingNodeTypes.Set(typeConfig->GetNodeTypes());
+      uint32_t dataCount=0;
 
-      level=parameter.GetAreaNodeMinMag();
-      while (!remainingNodeTypes.Empty()) {
-        uint32_t                             dataCount=0;
-        TypeInfoSet                          currentNodeTypes(remainingNodeTypes);
-        std::vector<std::map<TileId,size_t>> cellFillCount; // Number of nodes per type and per tile in current level
-        std::vector<GeoBox>                  boundingBoxes;
+      nodeScanner.Read(dataCount);
 
-        /*
-        GeoBox                               ftBox;
-        MagnificationLevel                   ftLevel(14);
-        std::vector<std::map<TileId,size_t>> ftFillCount; // Number of nodes per type and per tile in current level
-         */
+      for (uint32_t n=1; n<=dataCount; n++) {
+        progress.SetProgress(n,dataCount);
 
-        // Reserve memory
-        boundingBoxes.resize(typeConfig->GetTypeCount());
-        cellFillCount.resize(typeConfig->GetTypeCount());
+        Node node;
 
-        //ftFillCount.resize(typeConfig->GetTypeCount());
+        node.Read(*typeConfig,
+                  nodeScanner);
 
-        progress.Info("Scanning Level "+std::to_string(level.Get())+" ("+std::to_string(remainingNodeTypes.Size())+
-                      " types still to process)");
+        size_t typeId=node.GetType()->GetNodeId();
 
-        nodeScanner.GotoBegin();
-        nodeScanner.Read(dataCount);
-
-        for (uint32_t n=1; n<=dataCount; n++) {
-          progress.SetProgress(n,dataCount);
-
-          Node node;
-
-          node.Read(*typeConfig,
-                    nodeScanner);
-
-          /*
-          if (level==parameter.GetAreaNodeMinMag()) {
-            ftBox.Include(node.GetCoords());
-
-            ftFillCount[node.GetType()->GetIndex()][TileId::GetTile(ftLevel,node.GetCoords())]++;
-          }*/
-
-          // If we still need to handle this type,
-          // count number of entries per type and tile cell
-          if (currentNodeTypes.IsSet(node.GetType())) {
-            size_t typeIndex=node.GetType()->GetIndex();
-
-            boundingBoxes[typeIndex].Include(node.GetCoords());
-            cellFillCount[typeIndex][TileId::GetTile(level,node.GetCoords())]++;
-          }
-        }
-
-        /*
-        if (level==parameter.GetAreaNodeMinMag()) {
-          std::cout << ">>>>>>>" << std::endl;
-          TileIdBox ftTileBox(TileId::GetTile(ftLevel,ftBox.GetMinCoord()),
-                              TileId::GetTile(ftLevel,ftBox.GetMaxCoord()));
-
-          std::cout << ftBox.GetDisplayText() << " " << ftTileBox.GetDisplayText() << std::endl;
-
-          for (const auto& type : typeConfig->GetTypes()) {
-            if (!ftFillCount[type->GetIndex()].empty()) {
-              size_t list=0;
-              size_t bitmap=0;
-              auto count=std::accumulate(ftFillCount[type->GetIndex()].begin(),
-                                         ftFillCount[type->GetIndex()].end(),
-                                         0,
-                                         [&list,&bitmap](size_t sum, std::pair<const osmscout::TileId,size_t> current) {
-                if (current.second<=500) {
-                  list++;
-                }
-                else {
-                  bitmap++;
-                }
-
-                return sum+current.second;
-              });
-
-
-              std::cout << type->GetName() << " " << count << " " << list << " " << bitmap << " " << ftFillCount[type->GetIndex()].size() << "/" << ftTileBox.GetCount() << std::endl;
-            }
-          }
-          std::cout << "<<<<<<<" << std::endl;
-        }*/
-
-        // Check statistics for each type
-        // If statistics are within goal limits, use this level
-        // for this type (else try again with the next higher level)
-        for (const auto& type : currentNodeTypes) {
-          TypeData&                typeData=nodeTypeData[type->GetIndex()];
-          GeoBox&                  boundingBox=boundingBoxes[type->GetIndex()];
-          std::map<TileId,size_t>& tillFillCounts=cellFillCount[type->GetIndex()];
-
-          typeData.type=type;
-          typeData.level=level;
-          typeData.cellCount=tillFillCounts.size();
-          typeData.nodeCount=0;
-
-          // If we do not have any entries, we store it now
-          if (tillFillCounts.empty()) {
-            continue;
-          }
-
-          typeData.tileBox=TileIdBox(TileId::GetTile(level,boundingBox.GetMinCoord()),
-                                     TileId::GetTile(level,boundingBox.GetMaxCoord()));
-
-          // Statistics
-
-          for (const auto& cell : tillFillCounts) {
-            typeData.nodeCount+=cell.second;
-          }
-
-          // Count absolute number of entries
-          size_t maxTileCount=0;
-
-          for (const auto& cell : tillFillCounts) {
-            maxTileCount=std::max(maxTileCount,cell.second);
-          }
-
-          if (typeData.nodeCount<=parameter.GetAreaNodeListIndexLimit()) {
-            typeData.indexType=IndexType::IndexTypeList;
-            continue;
-          }
-          else {
-            // Average number of entries per tile cell
-            double averageTileCount=typeData.nodeCount*1.0/tillFillCounts.size();
-            double fillRate        =typeData.cellCount/(1.0*typeData.tileBox.GetCount());
-
-            // Decide...
-
-            // If the fill rate of the index is too low, we use this index level anyway
-            if (fillRate<=parameter.GetAreaNodeIndexMinFillRate()) {
-              progress.Warning(type->GetName()+" ("+std::to_string(type->GetIndex())+") is not well distributed");
-              typeData.indexType=IndexType::IndexTypeBitmap;
-              continue;
-            }
-
-            // If averageTileCount fill size and maxTileCount fill size for tile cells
-            // is within limits, store it now.
-            if (maxTileCount<=parameter.GetAreaNodeIndexCellSizeMax() &&
-                averageTileCount<=parameter.GetAreaNodeIndexCellSizeAverage()) {
-              typeData.indexType=IndexType::IndexTypeBitmap;
-              continue;
-            }
-          }
-
-          // else, we remove it from the list and try again with an higher
-          // level.
-          currentNodeTypes.Remove(type);
-        }
-
-        remainingNodeTypes.Remove(currentNodeTypes);
-        level++;
+        data[typeId].type=node.GetType();
+        data[typeId].nodeId=typeId;
+        data[typeId].boundingBox.Include(node.GetCoords());
+        data[typeId].tileFillCount[TileId::GetTile(parameter.GetAreaNodeGridMag(),node.GetCoords())]++;
       }
 
       nodeScanner.Close();
+
+      progress.SetAction("Analysing distribution of node types");
+
+      for (auto& entry : data) {
+        entry.fillCount=std::accumulate(entry.tileFillCount.begin(),
+                                        entry.tileFillCount.end(),
+                                        (size_t)0,
+                                        [](size_t sum, std::pair<const osmscout::TileId,size_t> current) {
+                                          return sum+current.second;
+                                        });
+
+        if (entry.fillCount>parameter.GetAreaNodeSimpleListLimit()) {
+          entry.isComplex=true;
+          std::for_each(entry.tileFillCount.begin(),
+                        entry.tileFillCount.end(),
+                        [&entry,&parameter](const std::pair<TileId,size_t>& tileData) {
+                          if (tileData.second<=parameter.GetAreaNodeTileListLimit()) {
+                            entry.listTiles.insert(tileData.first);
+                          }
+                          else {
+                            entry.bitmapTiles.insert(tileData.first);
+                          }
+          });
+        }
+        else {
+          entry.isComplex=false;
+        }
+      }
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -254,64 +221,235 @@ namespace osmscout {
     return true;
   }
 
-  void AreaNodeIndexGenerator::DumpNodeData(Progress& progress,
-                                            const std::vector<TypeData>& nodeTypeData)
+  void AreaNodeIndexGenerator::DumpDistribution(Progress& progress,
+                                                const std::vector<DistributionData>& data)
   {
-
-    progress.SetAction("Dumping index structure");
-
-    // Dump index type list
-    progress.Info("Index type List:");
-    for (const auto& typeData : nodeTypeData) {
-      if (!typeData.HasEntries()) {
+    progress.Info("Distribution data:");
+    for (const auto& entry : data) {
+      if (entry.HasNoData()) {
         continue;
       }
 
-      if (typeData.indexType==IndexType::IndexTypeList) {
-        progress.Info("- "+typeData.type->GetName()+"("+std::to_string(typeData.type->GetIndex())+"), "+
-                      std::to_string(typeData.nodeCount)+" objects");
+      if (!entry.IsComplexIndex()) {
+        progress.Info("- "+entry.type->GetName()+"("+std::to_string(entry.type->GetIndex())+"), "+
+                      std::to_string(entry.fillCount)+" nodes");
       }
-    }
-
-
-    // Dump index type bitmap
-
-    MagnificationLevel minLevel(std::numeric_limits<uint32_t>::max());
-    MagnificationLevel maxLevel(0);
-
-    for (const auto& type : nodeTypeData) {
-      if (type.HasEntries() &&
-          type.indexType==IndexType::IndexTypeBitmap) {
-        minLevel=std::min(minLevel,type.level);
-        maxLevel=std::max(maxLevel,type.level);
+      else if (!entry.listTiles.empty() &&
+               entry.bitmapTiles.empty()) {
+        progress.Info("- "+entry.type->GetName()+"("+std::to_string(entry.type->GetIndex())+"), "+
+                      std::to_string(entry.listTiles.size())+" list tiles, "+
+                      std::to_string(entry.fillCount)+" nodes");
       }
-    }
-
-    for (MagnificationLevel l=minLevel; l<=maxLevel; ++l) {
-      progress.Info("Bitmap index level "+std::to_string(l.Get())+":");
-      for (const auto& typeData : nodeTypeData) {
-        if (typeData.level!=l || !typeData.HasEntries()) {
-          continue;
-        }
-
-        if (typeData.indexType==IndexType::IndexTypeBitmap) {
-          progress.Info("- "+typeData.type->GetName()+"("+std::to_string(typeData.type->GetIndex())+"), "+
-                        std::to_string(typeData.cellCount)+" cells, "+
-                        std::to_string(typeData.nodeCount)+" objects");
-        }
+      else if (entry.listTiles.empty() &&
+               !entry.bitmapTiles.empty()) {
+        progress.Info("- "+entry.type->GetName()+"("+std::to_string(entry.type->GetIndex())+"), "+
+                      std::to_string(entry.bitmapTiles.size())+" bitmap tiles, "+
+                      std::to_string(entry.fillCount)+" nodes");
+      }
+      else {
+        progress.Info("- "+entry.type->GetName()+"("+std::to_string(entry.type->GetIndex())+"), "+
+                      std::to_string(entry.listTiles.size())+" list tiles, "+
+                      std::to_string(entry.bitmapTiles.size())+" bitmap tiles, "+
+                      std::to_string(entry.fillCount)+" nodes");
       }
     }
   }
 
-  bool AreaNodeIndexGenerator::WriteBitmap(Progress& progress,
-                                           FileWriter& writer,
-                                           const TypeInfo& type,
-                                           const TypeData& typeData,
-                                           const std::map<TileId,std::list<FileOffset>>& bitmapData)
+  /**
+   * Write the list of indexed types together with information about the type of index used.
+   *
+   * @param progress
+   *    Progress object
+   * @param data
+   *    Information about the distribution of data
+   * @param writer
+   *    File writer for the index
+   * @return
+   *    List of file offsets pointing into the individual index, where later on data needs to get patched.
+   */
+  std::vector<FileOffset> AreaNodeIndexGenerator::WriteListIndex(Progress& progress,
+                                                                 const std::vector<DistributionData>& data,
+                                                                 FileWriter& writer)
   {
-    size_t indexEntries=0;
-    size_t dataSize=0;
-    char   buffer[10];
+    std::vector<FileOffset> listIndexOffsets(data.size());
+
+    // Count number of types in index
+    uint16_t indexEntryCount=CountIndexTypes(data);
+
+    progress.Info("Writing "+std::to_string(indexEntryCount)+" list index entries");
+
+    writer.Write(indexEntryCount);
+    for (const auto& entry : data) {
+      // Skip types without data
+      if (entry.HasNoData()) {
+        continue;
+      }
+
+      writer.WriteNumber(entry.nodeId);
+      writer.Write(entry.isComplex);
+      writer.WriteCoord(entry.boundingBox.GetMinCoord());
+      writer.WriteCoord(entry.boundingBox.GetMaxCoord());
+
+      listIndexOffsets[entry.type->GetNodeId()]=writer.GetPos();
+
+      if (!entry.IsComplexIndex()) {
+        // data offset
+        writer.WriteFileOffset((FileOffset)0);
+        // number of entries in list
+        writer.Write((uint16_t)0);
+      }
+    }
+
+    return listIndexOffsets;
+  }
+
+  std::vector<std::map<TileId,FileOffset>> AreaNodeIndexGenerator::WriteTileListIndex(Progress& progress,
+                                                                                      const std::vector<DistributionData>& data,
+                                                                                      FileWriter& writer)
+  {
+    std::vector<std::map<TileId,FileOffset>> tileIndexOffsets(data.size());
+
+    auto listTileCount=CountListTiles(data);
+
+    // Number of entries to come
+    progress.Info("Writing "+std::to_string(listTileCount)+" list tile index entries");
+    writer.Write(listTileCount);
+
+    for (const auto& entry : data) {
+      for (const auto& tileId : entry.listTiles) {
+        writer.WriteNumber(entry.nodeId);
+        writer.Write(tileId.GetX());
+        writer.Write(tileId.GetY());
+
+        tileIndexOffsets[entry.nodeId][tileId]=writer.GetPos();
+
+        // data offset
+        writer.WriteFileOffset((FileOffset)0);
+        // number of entries in list
+        writer.Write((uint16_t)0);
+        // We also store GeoCoord for faster indexing
+        writer.Write(false);
+      }
+    }
+
+    return tileIndexOffsets;
+  }
+
+  std::vector<std::map<TileId,FileOffset>> AreaNodeIndexGenerator::WriteBitmapIndex(Progress& progress,
+                                                                                    const std::vector<DistributionData>& data,
+                                                                                    FileWriter& writer)
+  {
+    std::vector<std::map<TileId,FileOffset>> bitmapIndexOffsets(data.size());
+
+    auto bitmapTileCount=CountBitmapTiles(data);
+
+    // Number of entries to come
+    progress.Info("Writing "+std::to_string(bitmapTileCount)+" bitmap tile index entries");
+    writer.Write(bitmapTileCount);
+
+    for (const auto& entry : data) {
+      for (const auto& tileId : entry.bitmapTiles) {
+        writer.WriteNumber(entry.nodeId);
+        writer.Write(tileId.GetX());
+        writer.Write(tileId.GetY());
+
+        bitmapIndexOffsets[entry.nodeId][tileId]=writer.GetPos();
+
+        // bitmap offset
+        writer.WriteFileOffset((FileOffset)0);
+        // dataOffsetBytes
+        writer.Write((uint8_t)0);
+        // bitmap cell level
+        writer.Write((uint8_t)0);
+      }
+    }
+
+    return bitmapIndexOffsets;
+  }
+
+  void AreaNodeIndexGenerator::WriteListData(Progress& progress,
+                                             const std::vector<DistributionData>& data,
+                                             const std::vector<std::list<std::pair<GeoCoord,FileOffset>>>& listData,
+                                             const std::vector<FileOffset>& listIndexOffsets,
+                                             FileWriter& writer)
+  {
+    progress.Info("Writing list data");
+
+    for (const auto& entry : data) {
+      if (entry.HasNoData()) {
+        continue;
+      }
+
+      if (entry.IsComplexIndex()) {
+        continue;
+      }
+
+      auto indexStart=writer.GetPos();
+
+      assert(listIndexOffsets[entry.nodeId]!=0);
+
+      writer.SetPos(listIndexOffsets[entry.nodeId]);
+      writer.WriteFileOffset(indexStart);
+      writer.Write((uint16_t)listData[entry.nodeId].size());
+      writer.SetPos(indexStart);
+
+      FileOffset previousOffset=0;
+
+      for (const auto& listEntry : listData[entry.nodeId]) {
+        writer.WriteCoord(listEntry.first);
+        writer.WriteNumber(listEntry.second-previousOffset);
+
+        previousOffset=listEntry.second;
+      }
+    }
+  }
+
+  void AreaNodeIndexGenerator::WriteTileListData(const ImportParameter& parameter,
+                                                 const DistributionData& distributionData,
+                                                 const std::list<std::pair<GeoCoord,FileOffset>>& tileData,
+                                                 const FileOffset& tileIndexOffset,
+                                                 FileWriter& writer)
+  {
+    auto storeGeoCoord=distributionData.fillCount<parameter.GetAreaNodeTileListCoordLimit();
+    auto indexOffset=writer.GetPos();
+
+    writer.SetPos(tileIndexOffset);
+    writer.WriteFileOffset(indexOffset);
+    writer.Write((uint16_t)tileData.size());
+    writer.Write(storeGeoCoord);
+    writer.SetPos(indexOffset);
+
+    FileOffset previousOffset=0;
+
+    for (const auto& tileEntry : tileData) {
+      //writer.WriteCoord(tileEntry.first);
+      writer.WriteNumber(tileEntry.second-previousOffset);
+
+      previousOffset=tileEntry.second;
+    }
+  }
+
+  void AreaNodeIndexGenerator::WriteBitmapData(const ImportParameter& parameter,
+                                               const TileId& tileId,
+                                               const std::list<std::pair<GeoCoord,FileOffset>>& data,
+                                               const FileOffset& bitmapIndexOffset,
+                                               FileWriter& writer)
+  {
+    std::map<TileId,std::list<FileOffset>> bitmapData;
+    size_t                                 indexEntries=0;
+    size_t                                 dataSize=0;
+    char                                   buffer[10];
+    MagnificationLevel                     magnification=GetBitmapZoomLevel(parameter,data);
+
+    for (const auto& entry : data) {
+      TileId dataTileId=TileId::GetTile(magnification,entry.first);
+
+      bitmapData[dataTileId].push_back(entry.second);
+    }
+
+    GeoBox    box=tileId.GetBoundingBox(Magnification(parameter.GetAreaNodeGridMag()));
+    TileIdBox tileBox(TileId::GetTile(magnification,box.GetMinCoord()),
+                      TileId::GetTile(magnification,box.GetMaxCoord()));
 
     // Calculate the size of the bitmap for each current node type
     for (const auto& cell : bitmapData) {
@@ -321,39 +459,33 @@ namespace osmscout {
 
       FileOffset previousOffset=0;
       for (auto offset : cell.second) {
-        FileOffset data=offset-previousOffset;
+        FileOffset offsetDelta=offset-previousOffset;
 
-        dataSize+=EncodeNumber(data,buffer);
+        dataSize+=EncodeNumber(offsetDelta,buffer);
 
         previousOffset=offset;
       }
     }
 
     // "+1" because we add +1 to every offset, to generate offset > 0
-    uint8_t dataOffsetBytes=BytesNeededToEncodeNumber(dataSize);
-
-    progress.Info("- "+
-                  type.GetName()+", "+
-                  "Bitmap: "+
-                  std::to_string(bitmapData.size())+" cells, "+
-                  std::to_string(indexEntries)+" entries, "+
-                  ByteSizeToString(1.0*dataOffsetBytes*typeData.tileBox.GetCount()));
+    uint8_t dataOffsetBytes=BytesNeededToEncodeNumber(dataSize+1);
 
     // Remember start of the bitmap
-    FileOffset bitmapOffset=writer.GetPos();
+    auto bitmapOffset=writer.GetPos();
 
-    assert(typeData.indexOffset!=0);
+    assert(bitmapIndexOffset!=0);
 
     // Write bitmap offset and data size to the index
-    writer.SetPos(typeData.indexOffset);
+    writer.SetPos(bitmapIndexOffset);
     writer.WriteFileOffset(bitmapOffset);
     writer.Write(dataOffsetBytes);
+    writer.Write((uint8_t)magnification.Get());
     writer.SetPos(bitmapOffset);
 
     // Write the bitmap with offsets for each cell
     // We fill the bitmap on disk with zero and only overwrite cells later that have data
     // So zero means "no data for this cell"
-    for (size_t i=0; i<typeData.tileBox.GetCount(); i++) {
+    for (size_t i=0; i<tileBox.GetCount(); i++) {
       FileOffset cellOffset=0;
 
       writer.WriteFileOffset(cellOffset,
@@ -361,16 +493,16 @@ namespace osmscout {
     }
 
     // Remember the start of the data section behind the bitmap itself for delta offset calculation later
-    FileOffset dataStartOffset=writer.GetPos();
+    auto dataStartOffset=writer.GetPos();
 
     // Now write the list of offsets for nodes for every cell with content
     for (const auto& cell : bitmapData) {
       FileOffset bitmapCellOffset=bitmapOffset+
-                                  ((cell.first.GetY()-typeData.tileBox.GetMinY())*
-                                   typeData.tileBox.GetWidth()+
-                                   cell.first.GetX()-typeData.tileBox.GetMinX())*dataOffsetBytes;
+                                  ((cell.first.GetY()-tileBox.GetMinY())*
+                                   tileBox.GetWidth()+
+                                   cell.first.GetX()-tileBox.GetMinX())*dataOffsetBytes;
       FileOffset previousOffset=0;
-      FileOffset cellOffset=writer.GetPos();
+      auto       cellOffset=writer.GetPos();
 
       // Write the offset the node offset list of the current cell to the bitmap
       writer.SetPos(bitmapCellOffset);
@@ -386,57 +518,20 @@ namespace osmscout {
         previousOffset=offset;
       }
     }
-
-    return true;
   }
 
-  bool AreaNodeIndexGenerator::WriteList(Progress& progress,
-                                         FileWriter& writer,
-                                         const TypeInfo& type,
-                                         const TypeData& typeData,
-                                         const std::list<std::pair<GeoCoord,FileOffset>>& listData)
+  bool AreaNodeIndexGenerator::WriteData(const TypeConfigRef& typeConfig,
+                                         const ImportParameter& parameter,
+                                         Progress& progress,
+                                         const std::vector<DistributionData>& data)
   {
-    // Remember start of the bitmap
-    FileOffset listOffset=writer.GetPos();
-
-    writer.SetPos(typeData.indexOffset);
-    writer.WriteFileOffset(listOffset);
-    writer.Write((uint16_t)listData.size());
-    writer.SetPos(listOffset);
-
-    progress.Info("- "+
-                  type.GetName()+", "+
-                  "List: "+
-                  std::to_string(listData.size())+" entries, ");
-
-    for (const auto& entry : listData) {
-      writer.WriteCoord(entry.first);
-      writer.WriteFileOffset(entry.second);
-    }
-
-    return true;
-  }
-
-  bool AreaNodeIndexGenerator::WriteIndexFile(const TypeConfigRef& typeConfig,
-                                              const ImportParameter& parameter,
-                                              Progress& progress,
-                                              std::vector<TypeData>& nodeTypeData)
-  {
-    FileScanner        nodeScanner;
-    FileWriter         writer;
-    MagnificationLevel minLevel(std::numeric_limits<uint32_t>::max());
-    MagnificationLevel maxLevel(0);
-
     progress.SetAction("Generating 'areanode.idx'");
 
-    for (const auto& type : nodeTypeData) {
-      if (type.HasEntries()) {
-        minLevel=std::min(minLevel,type.level);
-        maxLevel=std::max(maxLevel,type.level);
-      }
-    }
-
     try {
+      FileScanner nodeScanner;
+      FileWriter  writer;
+      auto        level=parameter.GetAreaNodeGridMag();
+
       nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                        NodeDataFile::NODES_DAT),
                        FileScanner::Sequential,
@@ -445,124 +540,130 @@ namespace osmscout {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   AreaNodeIndex::AREA_NODE_IDX));
 
-      // Count number of types in index
-      uint32_t indexEntryCount=std::accumulate(typeConfig->GetNodeTypes().begin(),
-                                               typeConfig->GetNodeTypes().end(),
-                                               uint32_t(0u),
-                                               [&nodeTypeData](uint32_t value, const TypeInfoRef& type) {
-                                                 if (nodeTypeData[type->GetIndex()].HasEntries()) {
-                                                   value++;
-                                                 }
+      writer.Write(parameter.GetAreaNodeGridMag().Get());
 
-                                                 return value;
-      });
+      //
+      // Store list index data for each type
+      //
 
-      writer.Write(indexEntryCount);
+      std::vector<FileOffset> listIndexOffsets=WriteListIndex(progress,data,writer);
 
-      // Store index data for each type
-      for (auto& typeData : nodeTypeData) {
-        if (!typeData.HasEntries()) {
-          continue;
-        }
+      //
+      // Store tile list index data for each type
+      //
 
-        writer.WriteNumber(typeData.type->GetNodeId());
-        writer.Write((uint8_t)typeData.indexType);
-        writer.WriteNumber(typeData.level.Get());
-        writer.WriteNumber(typeData.tileBox.GetMinX());
-        writer.WriteNumber(typeData.tileBox.GetMaxX());
-        writer.WriteNumber(typeData.tileBox.GetMinY());
-        writer.WriteNumber(typeData.tileBox.GetMaxY());
+      std::vector<std::map<TileId,FileOffset>> tileIndexOffsets=WriteTileListIndex(progress,data,writer);
 
-        typeData.indexOffset=writer.GetPos();
+      //
+      // Store bitmap index data for each type
+      //
 
-        if (typeData.indexType==IndexType::IndexTypeBitmap) {
-          // bitmap offset
-          writer.WriteFileOffset((FileOffset)0);
-          // data offset bytes
-          writer.Write((uint8_t)0);
-        }
-        else {
-          // bitmap offset
-          writer.WriteFileOffset((FileOffset)0);
-          // number of entries in list
-          writer.Write((uint16_t)0);
+      std::vector<std::map<TileId,FileOffset>> bitmapIndexOffsets=WriteBitmapIndex(progress,data,writer);
+
+      uint32_t nodeCount;
+
+      //
+      // Read list index data
+      //
+
+      std::vector<std::list<std::pair<GeoCoord,FileOffset>>> listData(data.size());
+
+      nodeScanner.GotoBegin();
+      nodeScanner.Read(nodeCount);
+
+      //
+      // Collect all node offsets for each bitmap cell for all current types
+      //
+      for (uint32_t n=1; n<=nodeCount; n++) {
+        progress.SetProgress(n,nodeCount);
+
+        Node node;
+
+        node.Read(*typeConfig,
+                  nodeScanner);
+
+        auto typeId=node.GetType()->GetNodeId();
+
+        if (!data[typeId].IsComplexIndex()) {
+          listData[typeId].push_back(std::make_pair(node.GetCoords(),node.GetFileOffset()));
         }
       }
 
-      // Now store index bitmap for each type in increasing level order (why?)
-      for (MagnificationLevel l=minLevel; l<=maxLevel; ++l) {
-        std::set<TypeInfoRef> indexTypes;
-        uint32_t              nodeCount;
+      //
+      // Write list data
+      //
 
-        for (const auto& typeData : nodeTypeData) {
-          if (typeData.HasEntries() &&
-            ((typeData.indexType==IndexType::IndexTypeBitmap && typeData.level==l) ||
-             (typeData.indexType==IndexType::IndexTypeList && l==minLevel))) {
-            indexTypes.insert(typeData.type);
-          }
-        }
+      WriteListData(progress,
+                    data,
+                    listData,
+                    listIndexOffsets,
+                    writer);
 
-        if (indexTypes.empty()) {
+      listIndexOffsets.clear();
+      listData.clear();
+
+      //
+      // Read tile list and bitmap index data
+      //
+
+      progress.Info("Writing tile list and bitmap index data");
+
+      std::vector<std::map<TileId,std::list<std::pair<GeoCoord,FileOffset>>>> tileData(data.size());
+
+      nodeScanner.GotoBegin();
+      nodeScanner.Read(nodeCount);
+
+      //
+      // Collect all node offsets for each tile for all current types
+      //
+      for (uint32_t n=1; n<=nodeCount; n++) {
+        progress.SetProgress(n,nodeCount);
+
+        Node node;
+
+        node.Read(*typeConfig,
+                  nodeScanner);
+
+        auto typeId=node.GetType()->GetNodeId();
+
+        if (!data[typeId].IsComplexIndex()) {
           continue;
         }
 
-        progress.Info("Index level "+std::to_string(l.Get())+":");
+        auto tileId=TileId::GetTile(level,node.GetCoords());
 
-        std::vector<std::map<TileId,std::list<FileOffset>>>    typeBitmapData;
-        std::vector<std::list<std::pair<GeoCoord,FileOffset>>> typeListData;
+        IndexType indexType;
 
-        typeBitmapData.resize(typeConfig->GetTypeCount());
-        typeListData.resize(typeConfig->GetTypeCount());
-
-        nodeScanner.GotoBegin();
-
-        nodeScanner.Read(nodeCount);
-
-        //
-        // Collect all node offsets for each bitmap cell for all current types
-        //
-        for (uint32_t n=1; n<=nodeCount; n++) {
-          progress.SetProgress(n,nodeCount);
-
-          Node node;
-
-          node.Read(*typeConfig,
-                    nodeScanner);
-
-          auto      typeIndex=node.GetType()->GetIndex();
-          TypeData& typeData=nodeTypeData[typeIndex];
-
-          if (typeData.indexType==IndexType::IndexTypeBitmap &&
-              typeData.level==l) {
-            TileId tileId=TileId::GetTile(l,node.GetCoords());
-
-            typeBitmapData[typeIndex][tileId].push_back(node.GetFileOffset());
-          }
-          else if (typeData.indexType==IndexType::IndexTypeList &&
-                   l==minLevel) {
-            typeListData[typeIndex].push_back(std::make_pair(node.GetCoords(),
-                                                             node.GetFileOffset()));
-          }
+        if (data[typeId].listTiles.find(tileId)!=data[typeId].listTiles.end()) {
+          indexType=IndexType::IndexTypeList;
+        }
+        else if (data[typeId].bitmapTiles.find(tileId)!=data[typeId].bitmapTiles.end()) {
+          indexType=IndexType::IndexTypeBitmap;
+        }
+        else {
+          continue;
         }
 
-        //
-        // Write bitmap for each current node type
-        //
-        for (const auto& type : indexTypes) {
-          if (nodeTypeData[type->GetIndex()].indexType==IndexType::IndexTypeBitmap) {
-            WriteBitmap(progress,
-                        writer,
-                        *type,
-                        nodeTypeData[type->GetIndex()],
-                        typeBitmapData[type->GetIndex()]);
+        tileData[typeId][tileId].push_back(std::make_pair(node.GetCoords(),
+                                                          node.GetFileOffset()));
+
+        if (tileData[typeId][tileId].size()==data[typeId].tileFillCount.find(tileId)->second) {
+          if (indexType==IndexType::IndexTypeList) {
+            WriteTileListData(parameter,
+                              data[typeId],
+                              tileData[typeId][tileId],
+                              tileIndexOffsets[typeId][tileId],
+                              writer);
           }
           else {
-            WriteList(progress,
-                      writer,
-                      *type,
-                      nodeTypeData[type->GetIndex()],
-                      typeListData[type->GetIndex()]);
+            WriteBitmapData(parameter,
+                            tileId,
+                            tileData[typeId][tileId],
+                            bitmapIndexOffsets[typeId][tileId],
+                            writer);
           }
+
+          tileData[typeId][tileId].clear();
         }
       }
 
@@ -581,21 +682,22 @@ namespace osmscout {
                                       const ImportParameter& parameter,
                                       Progress& progress)
   {
-    std::vector<TypeData> nodeTypeData;
+    std::vector<DistributionData> distributionData;
 
-    if (!ScanningNodeData(typeConfig,
-                          parameter,
-                          progress,
-                          nodeTypeData)) {
+    if (!AnalyseDistribution(typeConfig,
+                             parameter,
+                             progress,
+                             distributionData)) {
       return false;
     }
 
-    DumpNodeData(progress,
-                 nodeTypeData);
+    DumpDistribution(progress,
+                     distributionData);
 
-    return WriteIndexFile(typeConfig,
-                          parameter,
-                          progress,
-                          nodeTypeData);
+
+    return WriteData(typeConfig,
+                     parameter,
+                     progress,
+                     distributionData);
   }
 }
