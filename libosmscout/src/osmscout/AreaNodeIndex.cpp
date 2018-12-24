@@ -73,7 +73,7 @@ namespace osmscout {
       scanner.Read(indexEntryCount);
 
       for (uint16_t i=1; i<=indexEntryCount; i++) {
-        size_t  typeId;
+        TypeId typeId;
 
         scanner.ReadNumber(typeId);
 
@@ -101,7 +101,7 @@ namespace osmscout {
       scanner.Read(tileEntryCount);
 
       for (uint32_t i=1; i<=tileEntryCount; i++) {
-        size_t typeId;
+        TypeId typeId;
 
         scanner.ReadNumber(typeId);
 
@@ -126,7 +126,7 @@ namespace osmscout {
       scanner.Read(bitmapEntryCount);
 
       for (uint32_t i=1; i<=bitmapEntryCount; i++) {
-        size_t typeId;
+        TypeId typeId;
 
         scanner.ReadNumber(typeId);
 
