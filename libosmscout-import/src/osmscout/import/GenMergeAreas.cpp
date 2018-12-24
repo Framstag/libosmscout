@@ -346,7 +346,7 @@ namespace osmscout {
         // We now have an node id other areas with the same node id exist for.
         // Let's take a look at all these candidates
 
-        std::set<AreaRef>::iterator candidate=idAreaMap[id].begin();
+        auto candidate=idAreaMap[id].begin();
 
         while (candidate!=idAreaMap[id].end()) {
           AreaRef candidateArea(*candidate);
