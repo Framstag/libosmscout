@@ -74,6 +74,63 @@ namespace osmscout {
   }
 
   /**
+   * Return the top left coordinate of the tile
+   * @param magnification
+   *    Magnification to complete the definition of the tile id (these are relative
+   *    to a magnification)
+   *
+   * @return
+   *    The resuting coordinate
+   */
+  GeoCoord TileId::GetTopLeftCoord(const Magnification& magnification) const
+  {
+    uint32_t level=magnification.GetLevel();
+
+    return GeoCoord(y*cellDimension[level].height-90.0,
+                    x*cellDimension[level].width-180.0);
+  }
+
+  /**
+   * Return the bounding box of the given tile
+   *
+   * @param magnification
+   *    Magnification to complete the definition of the tile id (these are relative
+   *    to a magnification)
+   *
+   * @return
+   *    The GeoBox defining the resulting area
+   */
+  GeoBox TileId::GetBoundingBox(const MagnificationLevel& level) const
+  {
+    auto& ourCellDimension=cellDimension[level.Get()];
+
+    return GeoBox(GeoCoord(y*ourCellDimension.height-90.0,
+                           x*ourCellDimension.width-180.0),
+                  GeoCoord((y+1)*ourCellDimension.height-90.0,
+                           (x+1)*ourCellDimension.width-180.0));
+  }
+
+  /**
+   * Return the bounding box of the given tile
+   *
+   * @param magnification
+   *    Magnification to complete the definition of the tile id (these are relative
+   *    to a magnification)
+   *
+   * @return
+   *    The GeoBox defining the resulting area
+   */
+  GeoBox TileId::GetBoundingBox(const Magnification& magnification) const
+  {
+    auto& ourCellDimension=cellDimension[magnification.GetLevel()];
+
+    return GeoBox(GeoCoord(y*ourCellDimension.height-90.0,
+                           x*ourCellDimension.width-180.0),
+                  GeoCoord((y+1)*ourCellDimension.height-90.0,
+                           (x+1)*ourCellDimension.width-180.0));
+  }
+
+  /**
    * Return the libosmscout-specific tile id for the given magnification that contains the given
    * coordinate.
    *
@@ -148,8 +205,8 @@ namespace osmscout {
 
     zoomedOutMagnification.SetLevel(MagnificationLevel(level-1));
 
-    return TileKey(zoomedOutMagnification,
-                   TileId(id.GetX()/2,id.GetY()/2));
+    return {zoomedOutMagnification,
+            TileId(id.GetX()/2,id.GetY()/2)};
   }
 
   /**

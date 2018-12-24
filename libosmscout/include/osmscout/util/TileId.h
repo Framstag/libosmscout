@@ -80,6 +80,10 @@ namespace osmscout {
 
     bool operator<(const TileId& other) const;
 
+    GeoCoord GetTopLeftCoord(const Magnification& magnification) const;
+    GeoBox GetBoundingBox(const MagnificationLevel& level) const;
+    GeoBox GetBoundingBox(const Magnification& magnification) const;
+
     static TileId GetTile(const Magnification& magnification,
                           const GeoCoord& coord);
 
