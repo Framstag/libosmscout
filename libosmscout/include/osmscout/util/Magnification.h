@@ -81,6 +81,13 @@ namespace osmscout {
       return *this;
     }
 
+    inline MagnificationLevel& operator+=(uint32_t increment)
+    {
+      level+=increment;
+
+      return *this;
+    }
+
     inline bool operator==(const MagnificationLevel& other) const
     {
       return level==other.level;
