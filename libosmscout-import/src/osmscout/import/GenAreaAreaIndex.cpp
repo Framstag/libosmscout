@@ -877,10 +877,7 @@ namespace osmscout {
       uint32_t x=(uint32_t)((center.GetLon()+180.0)/cellDimension[level].width);
       uint32_t y=(uint32_t)((center.GetLat()+90.0)/cellDimension[level].height);
 
-      Entry entry;
-
-      entry.type=area.GetType()->GetAreaId();
-      entry.offset=offset;
+      Entry entry{offset,area.GetType()->GetAreaId()};
 
       levels[level][Pixel(x,y)].areas.push_back(entry);
     }
