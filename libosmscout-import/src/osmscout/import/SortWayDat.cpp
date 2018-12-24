@@ -215,13 +215,12 @@ namespace osmscout {
                                                              Way& way,
                                                              bool& save)
   {
-    unsigned char buffers[2][coordByteSize];
-
     bool reduced=false;
 
     if (way.nodes.size()>=2) {
-      size_t lastIndex=0;
-      size_t currentIndex=1;
+      unsigned char buffers[2][coordByteSize];
+      size_t        lastIndex=0;
+      size_t        currentIndex=1;
 
       nodeBuffer.clear();
 
