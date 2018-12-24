@@ -50,8 +50,8 @@ namespace osmscout {
                                                                                                        size_t& topIndex)
   {
     size_t i=0;
-    for (std::list<MultipolygonPart>::const_iterator r=rings.begin();
-         r!=rings.end();
+    for (auto r=rings.cbegin();
+         r!=rings.cend();
          ++r) {
       if (!state.IsUsed(i)) {
         bool included=false;
@@ -88,8 +88,8 @@ namespace osmscout {
                                                                                                   size_t& subIndex)
   {
     size_t i=0;
-    for (std::list<MultipolygonPart>::const_iterator r=rings.begin();
-         r!=rings.end();
+    for (auto r=rings.cbegin();
+         r!=rings.cend();
          ++r) {
       if (!state.IsUsed(i) &&
           state.Includes(i,topIndex)) {
@@ -229,7 +229,7 @@ namespace osmscout {
         backId=part->role.GetBackId();
 
         while (true) {
-          std::map<Id, std::list<MultipolygonPart*> >::iterator match=partsByEnd.find(backId);
+          auto match=partsByEnd.find(backId);
 
           if (match!=partsByEnd.end()) {
             std::list<MultipolygonPart*>::iterator otherPart;
@@ -273,8 +273,8 @@ namespace osmscout {
           MultipolygonPart* part=*p;
 
           if (p==ringParts.begin()) {
-            for (size_t i=0; i<part->role.nodes.size(); i++) {
-              ring.role.nodes.push_back(part->role.nodes[i]);
+            for (const auto& node : part->role.nodes) {
+              ring.role.nodes.push_back(node);
             }
           }
           else if (ring.role.GetBackId()==part->role.GetFrontId()) {
@@ -430,7 +430,7 @@ namespace osmscout {
                (member.role=="inner" ||
                 member.role=="outer" ||
                 member.role.empty())) {
-        IdRawWayMap::const_iterator wayEntry=wayMap.find(member.id);
+        auto wayEntry=wayMap.find(member.id);
 
         if (wayEntry==wayMap.end()) {
           progress.Error("Cannot resolve way member "+
@@ -452,8 +452,8 @@ namespace osmscout {
         part.role.nodes.resize(way->GetNodeCount());
 
         for (size_t n=0; n<way->GetNodeCount(); n++) {
-          OSMId                                    osmId=way->GetNodeId(n);
-          CoordDataFile::ResultMap::const_iterator coordEntry=coordMap.find(osmId);
+          OSMId osmId=way->GetNodeId(n);
+          auto  coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
             progress.Error("Cannot resolve node member "+
@@ -494,7 +494,7 @@ namespace osmscout {
       if (member.type==RawRelation::memberRelation) {
         if (member.role=="inner" ||
             member.role=="outer") {
-          std::map<OSMId,RawRelationRef>::const_iterator relationEntry=relationMap.find(member.id);
+          auto relationEntry=relationMap.find(member.id);
 
           if (relationEntry==relationMap.end()) {
             progress.Error("Cannot resolve relation member "+
@@ -535,7 +535,7 @@ namespace osmscout {
                (member.role=="inner" ||
                 member.role=="outer" ||
                 member.role.empty())) {
-        IdRawWayMap::const_iterator wayEntry=wayMap.find(member.id);
+        auto wayEntry=wayMap.find(member.id);
 
         if (wayEntry==wayMap.end()) {
           progress.Error("Cannot resolve way member "+
@@ -557,8 +557,8 @@ namespace osmscout {
         part.role.nodes.resize(way->GetNodeCount());
 
         for (size_t n=0; n<way->GetNodeCount(); n++) {
-          OSMId                                    osmId=way->GetNodeId(n);
-          CoordDataFile::ResultMap::const_iterator coordEntry=coordMap.find(osmId);
+          OSMId osmId=way->GetNodeId(n);
+          auto  coordEntry=coordMap.find(osmId);
 
           if (coordEntry==coordMap.end()) {
             progress.Error("Cannot resolve node member "+
@@ -851,7 +851,7 @@ namespace osmscout {
     TypeInfoRef masterType=typeConfig.typeInfoIgnore;
 
     // Count the occurence of outer types and store the last outer ring found for each type
-    for (std::list<MultipolygonPart>::iterator ring=parts.begin(); ring!=parts.end(); ++ring) {
+    for (auto ring=parts.begin(); ring!=parts.end(); ++ring) {
       if (ring->role.IsOuterRing() &&
           ring->IsArea() &&
           ring->role.GetType()!=typeConfig.typeInfoIgnore) {
@@ -969,7 +969,7 @@ namespace osmscout {
     masterRing.MarkAsMasterRing();
 
     if (masterRing.GetType()==typeConfig.typeInfoIgnore) {
-      std::list<MultipolygonPart>::iterator copyPart=parts.end();
+      auto copyPart=parts.end();
 
       TypeInfoRef masterType=AutodetectRelationType(parameter,
                                                     typeConfig,
@@ -1108,9 +1108,9 @@ namespace osmscout {
       if (rawRelation.HasFeature(i) &&
           rawRelation.GetFeature(i).GetFeature()==featureName &&
           rawRelation.GetFeature(i).GetFeature()->HasValue()) {
-        NameFeatureValue* value=dynamic_cast<NameFeatureValue*>(rawRelation.GetFeatureValue(i));
+        auto* value=dynamic_cast<NameFeatureValue*>(rawRelation.GetFeatureValue(i));
 
-        if (value!=NULL) {
+        if (value!=nullptr) {
           return value->GetName();
         }
       }
@@ -1178,14 +1178,15 @@ namespace osmscout {
 
     FileScanner         scanner;
     FileWriter          writer;
-    uint32_t            rawRelationCount=0;
-    uint32_t            writtenRelationCount=0;
     std::vector<size_t> wayTypeCount(typeConfig->GetTypeCount(),0);
     std::vector<size_t> wayNodeTypeCount(typeConfig->GetTypeCount(),0);
     std::vector<size_t> areaTypeCount(typeConfig->GetTypeCount(),0);
     std::vector<size_t> areaNodeTypeCount(typeConfig->GetTypeCount(),0);
 
     try {
+      uint32_t rawRelationCount=0;
+      uint32_t writtenRelationCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    Preprocess::RAWRELS_DAT),
                    FileScanner::Sequential,
