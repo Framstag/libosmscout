@@ -49,7 +49,7 @@ namespace osmscout {
 
     struct DistributionData
     {
-      size_t                  nodeId;        //<! node id of the type
+      TypeId                  nodeId;        //<! node id of the type
       TypeInfoRef             type;          //<! The node type itself
       bool                    isComplex;     //<! Index is complex
       GeoBox                  boundingBox;   //<! Bounding box of the data
