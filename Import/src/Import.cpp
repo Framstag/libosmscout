@@ -62,8 +62,9 @@ static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
   std::cout << "Import -h -d -s <start step> -e <end step> [*.osm|*.pbf]..." << std::endl;
-  std::cout << " -h|--help                            show this help" << std::endl;
-  std::cout << " -d                                   show debug output" << std::endl;
+  std::cout << " -h|--help                            show this help and exit" << std::endl;
+  std::cout << " --data-version                       print output data version and exit" << std::endl;
+  std::cout << " -d                                   show debug output during import" << std::endl;
   std::cout << " -s <number>                          set starting processing step" << std::endl;
   std::cout << " -e <number>                          set final processing step" << std::endl;
   std::cout << " --typefile <*.ost>                   path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
@@ -423,6 +424,10 @@ int main(int argc, char* argv[])
         strcmp(argv[i],"--help")==0) {
       DumpHelp(parameter);
 
+      return 0;
+    }
+    else if (strcmp(argv[i],"--data-version")==0) {
+      std::cout << std::to_string(osmscout::FILE_FORMAT_VERSION) << std::endl;
       return 0;
     }
     else if (strcmp(argv[i],"-s")==0) {
