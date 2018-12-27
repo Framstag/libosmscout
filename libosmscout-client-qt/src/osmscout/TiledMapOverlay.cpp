@@ -50,9 +50,11 @@ void TileLoaderThread::init()
   tileDownloader = new OsmTileDownloader(tileCacheDirectory,provider);
 
   connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
-          this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)));
+          this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+          Qt::QueuedConnection);
   connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)));
+          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+          Qt::QueuedConnection);
 
   connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
           this,SLOT(download(uint32_t, uint32_t, uint32_t)),
