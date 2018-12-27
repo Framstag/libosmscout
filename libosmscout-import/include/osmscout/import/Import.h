@@ -148,6 +148,9 @@ namespace osmscout {
     size_t                       coordIndexCacheSize;      //<! Size of the coord index cache
     size_t                       coordBlockSize;           //<! Maximum number of node ids we resolve in one go
 
+    size_t                       relMaxWays;               //<! Maximum number of ways allowed to resolve a relation
+    size_t                       relMaxCoords;             //<! Maximum number of coords allowed to resolve a relation
+
     bool                         areaDataMemoryMaped;      //<! Use memory mapping for area data file access
     size_t                       areaDataCacheSize;        //<! Size of the area data cache
 
@@ -233,6 +236,9 @@ namespace osmscout {
 
     size_t GetCoordBlockSize() const;
 
+    size_t GetRelMaxWays() const;
+    size_t GetRelMaxCoords() const;
+
     bool GetAreaDataMemoryMaped() const;
     size_t GetAreaDataCacheSize() const;
 
@@ -308,7 +314,11 @@ namespace osmscout {
 
     void SetCoordDataMemoryMaped(bool memoryMaped);
     void SetCoordIndexCacheSize(size_t coordIndexCacheSize);
+
     void SetCoordBlockSize(size_t coordBlockSize);
+
+    void SetRelMaxWays(size_t relMaxWays);
+    void SetRelMaxCoords(size_t relMaxCoords);
 
     void SetAreaDataMemoryMaped(bool memoryMaped);
     void SetAreaDataCacheSize(size_t areaDataCacheSize);

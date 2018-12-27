@@ -36,8 +36,6 @@ namespace osmscout {
 
   const char*           RelAreaDataGenerator::RELAREA_TMP="relarea.tmp";
   const char*           RelAreaDataGenerator::WAYAREABLACK_DAT="wayareablack.dat";
-  static const uint64_t MAX_WAYS=1500;
-  static const uint64_t MAX_COORDS=150000;
 
   /**
     Find a top level role.
@@ -145,7 +143,7 @@ namespace osmscout {
   bool RelAreaDataGenerator::BuildRings(const TypeConfig& typeConfig,
                                         const ImportParameter& parameter,
                                         Progress& progress,
-                                        Id id,
+                                        OSMId id,
                                         const std::string& name,
                                         const TypeInfoRef& type,
                                         std::list<MultipolygonPart>& parts)
@@ -323,7 +321,7 @@ namespace osmscout {
   bool RelAreaDataGenerator::ResolveMultipolygon(const TypeConfig& typeConfig,
                                                  const ImportParameter& parameter,
                                                  Progress& progress,
-                                                 Id id,
+                                                 OSMId id,
                                                  const std::string& name,
                                                  const TypeInfoRef& type,
                                                  std::list<MultipolygonPart>& parts)
@@ -585,6 +583,7 @@ namespace osmscout {
   }
 
   bool RelAreaDataGenerator::ResolveMultipolygonMembers(Progress& progress,
+                                                        const ImportParameter& parameter,
                                                         const TypeConfig& typeConfig,
                                                         CoordDataFile& coordDataFile,
                                                         RawWayIndexedDataFile& wayDataFile,
@@ -635,7 +634,7 @@ namespace osmscout {
            member.role.empty())) {
         wayIds.insert(member.id);
 
-        if (wayIds.size()>MAX_WAYS) {
+        if (wayIds.size()>parameter.GetRelMaxWays()) {
           hasMaxWayError = true;
           continue;
         }
@@ -699,7 +698,7 @@ namespace osmscout {
                member.role.empty())) {
             wayIds.insert(member.id);
 
-            if (wayIds.size()>MAX_WAYS) {
+            if (wayIds.size()>parameter.GetRelMaxWays()) {
               hasMaxWayError = true;
               continue;
             }
@@ -778,7 +777,7 @@ namespace osmscout {
 
     // Now load all node coordinates
 
-    if (nodeIds.size()>MAX_COORDS) {
+    if (nodeIds.size()>parameter.GetRelMaxCoords()) {
       progress.Error("Relation "+
                      std::to_string(rawRelation.GetId())+" "+name+
                      " references too many nodes (" +
@@ -911,6 +910,7 @@ namespace osmscout {
     std::list<MultipolygonPart> parts;
 
     if (!ResolveMultipolygonMembers(progress,
+                                    parameter,
                                     typeConfig,
                                     coordDataFile,
                                     wayDataFile,

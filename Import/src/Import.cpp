@@ -98,6 +98,9 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
   std::cout << " --coordBlockSize <number>            number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
 
+  std::cout << "--relMaxWays <number>                 maximum of ways for a relation to get resolved (default: " << parameter.GetRelMaxWays() << ")" << std::endl;
+  std::cout << "--relMaxCoords <number>               maximum of coords for a relation to get resolved (default: " << parameter.GetRelMaxCoords() << ")" << std::endl;
+
   std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << osmscout::BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
 
@@ -694,6 +697,32 @@ int main(int argc, char* argv[])
                                        i,
                                        coordBlockSize)) {
         parameter.SetCoordBlockSize(coordBlockSize);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--relMaxWays")==0) {
+      size_t relMaxWays;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       relMaxWays)) {
+        parameter.SetRelMaxWays(relMaxWays);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--relMaxCoords")==0) {
+      size_t relMaxCoords;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       relMaxCoords)) {
+        parameter.SetRelMaxCoords(relMaxCoords);
       }
       else {
         parameterError=true;
