@@ -98,8 +98,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
   std::cout << " --coordBlockSize <number>            number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
 
-  std::cout << "--relMaxWays <number>                 maximum of ways for a relation to get resolved (default: " << parameter.GetRelMaxWays() << ")" << std::endl;
-  std::cout << "--relMaxCoords <number>               maximum of coords for a relation to get resolved (default: " << parameter.GetRelMaxCoords() << ")" << std::endl;
+  std::cout << " --relMaxWays <number>                maximum of ways for a relation to get resolved (default: " << parameter.GetRelMaxWays() << ")" << std::endl;
+  std::cout << " --relMaxCoords <number>              maximum of coords for a relation to get resolved (default: " << parameter.GetRelMaxCoords() << ")" << std::endl;
 
   std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << osmscout::BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
