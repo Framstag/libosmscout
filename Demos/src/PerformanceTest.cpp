@@ -454,7 +454,7 @@ int main(int argc, char* argv[])
                       }),
                       "debug",
                       "Enable debug output",
-                      true);
+                      false);
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
                         args.startZoom=osmscout::MagnificationLevel(value);
                       }),
