@@ -1524,7 +1524,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		std::string            subIdent;
 		std::string            stringValue;
 		std::string            function;
-		double                 factor;
+		double                 factor=-1;
 		std::string            unit;
 		std::string            number;
 		std::list<std::string> numberList;
@@ -1690,8 +1690,8 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   }
 		
 		   if (!function.empty()) {
-		     if (factor<0.0 && factor>1.0) {
-		      std::string e="Factor must be in the range [0..1]";
+		     if (factor<0.0 || factor>1.0) {
+		       std::string e="Factor must be in the range [0..1]";
 		
 		       SemErr(e.c_str());
 		     }

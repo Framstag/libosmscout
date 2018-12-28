@@ -84,13 +84,14 @@ namespace osmscout {
     if (!nodes.empty()) {
       OSMId minId=std::numeric_limits<Id>::max();
 
-      for (size_t i=0; i<nodes.size(); i++) {
-        minId=std::min(minId,nodes[i]);
+      for (OSMId node : nodes) {
+        minId=std::min(minId,
+                       node);
       }
 
       writer.WriteNumber(minId);
-      for (size_t i=0; i<nodes.size(); i++) {
-        writer.WriteNumber(nodes[i]-minId);
+      for (OSMId node : nodes) {
+        writer.WriteNumber(node-minId);
       }
     }
   }

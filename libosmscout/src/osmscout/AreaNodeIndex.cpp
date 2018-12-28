@@ -29,37 +29,10 @@
 
 #include <osmscout/system/Math.h>
 
+#include <iostream>
 namespace osmscout {
 
   const char* AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
-
-  FileOffset AreaNodeIndex::TypeData::GetDataOffset() const
-  {
-    return indexOffset+cellXCount*cellYCount*(FileOffset)dataOffsetBytes;
-  }
-
-  FileOffset AreaNodeIndex::TypeData::GetCellOffset(size_t x, size_t y) const
-  {
-    return indexOffset+((y-cellYStart)*cellXCount+x-cellXStart)*dataOffsetBytes;
-  }
-
-  AreaNodeIndex::TypeData::TypeData()
-  : indexLevel(0),
-    indexOffset(0),
-    dataOffsetBytes(0),
-    cellXStart(0),
-    cellXEnd(0),
-    cellYStart(0),
-    cellYEnd(0),
-    cellXCount(0),
-    cellYCount(0),
-    cellWidth(0.0),
-    cellHeight(0.0),
-    minLon(0.0),
-    maxLon(0.0),
-    minLat(0.0),
-    maxLat(0.0)
-  {}
 
   AreaNodeIndex::AreaNodeIndex()
   {
@@ -85,41 +58,96 @@ namespace osmscout {
     datafilename=AppendFileToDir(path,AREA_NODE_IDX);
 
     try {
-      scanner.Open(datafilename,FileScanner::FastRandom,memoryMappedData);
+      scanner.Open(datafilename,
+                   FileScanner::FastRandom,
+                   memoryMappedData);
 
-      uint32_t indexEntries;
+      uint32_t gridMag;
 
-      scanner.Read(indexEntries);
+      scanner.Read(gridMag);
 
-      for (size_t i=0; i<indexEntries; i++) {
-        TypeId type;
+      this->gridMag=MagnificationLevel(gridMag);
 
-        scanner.ReadNumber(type);
+      uint16_t indexEntryCount;
 
-        if (type>=nodeTypeData.size()) {
-          nodeTypeData.resize(type+1);
+      scanner.Read(indexEntryCount);
+
+      for (uint16_t i=1; i<=indexEntryCount; i++) {
+        TypeId typeId;
+
+        scanner.ReadNumber(typeId);
+
+        if (typeId>=nodeTypeData.size()) {
+          nodeTypeData.resize(typeId+1);
         }
 
-        scanner.ReadFileOffset(nodeTypeData[type].indexOffset);
-        scanner.Read(nodeTypeData[type].dataOffsetBytes);
+        scanner.Read(nodeTypeData[typeId].isComplex);
 
-        scanner.ReadNumber(nodeTypeData[type].indexLevel);
+        GeoCoord minCoord,maxCoord;
 
-        scanner.ReadNumber(nodeTypeData[type].cellXStart);
-        scanner.ReadNumber(nodeTypeData[type].cellXEnd);
-        scanner.ReadNumber(nodeTypeData[type].cellYStart);
-        scanner.ReadNumber(nodeTypeData[type].cellYEnd);
+        scanner.ReadCoord(minCoord);
+        scanner.ReadCoord(maxCoord);
 
-        nodeTypeData[type].cellXCount=nodeTypeData[type].cellXEnd-nodeTypeData[type].cellXStart+1;
-        nodeTypeData[type].cellYCount=nodeTypeData[type].cellYEnd-nodeTypeData[type].cellYStart+1;
+        nodeTypeData[typeId].boundingBox.Set(minCoord,maxCoord);
 
-        nodeTypeData[type].cellWidth=cellDimension[nodeTypeData[type].indexLevel].width;
-        nodeTypeData[type].cellHeight=cellDimension[nodeTypeData[type].indexLevel].height;
+        if (!nodeTypeData[typeId].isComplex) {
+          scanner.ReadFileOffset(nodeTypeData[typeId].indexOffset);
+          scanner.Read(nodeTypeData[typeId].entryCount);
+        }
+      }
 
-        nodeTypeData[type].minLon=nodeTypeData[type].cellXStart*nodeTypeData[type].cellWidth-180.0;
-        nodeTypeData[type].maxLon=(nodeTypeData[type].cellXEnd+1)*nodeTypeData[type].cellWidth-180.0;
-        nodeTypeData[type].minLat=nodeTypeData[type].cellYStart*nodeTypeData[type].cellHeight-90.0;
-        nodeTypeData[type].maxLat=(nodeTypeData[type].cellYEnd+1)*nodeTypeData[type].cellHeight-90.0;
+      uint32_t tileEntryCount;
+
+      scanner.Read(tileEntryCount);
+
+      for (uint32_t i=1; i<=tileEntryCount; i++) {
+        TypeId typeId;
+
+        scanner.ReadNumber(typeId);
+
+        if (typeId>=nodeTypeData.size()) {
+          nodeTypeData.resize(typeId+1);
+        }
+
+        uint32_t x,y;
+
+        scanner.Read(x);
+        scanner.Read(y);
+
+        ListTile& entry=nodeTypeData[typeId].listTiles[TileId(x,y)];
+
+        scanner.ReadFileOffset(entry.fileOffset);
+        scanner.Read(entry.entryCount);
+        scanner.Read(entry.storeGeoCoord);
+      }
+
+      uint32_t bitmapEntryCount;
+
+      scanner.Read(bitmapEntryCount);
+
+      for (uint32_t i=1; i<=bitmapEntryCount; i++) {
+        TypeId typeId;
+
+        scanner.ReadNumber(typeId);
+
+        if (typeId>=nodeTypeData.size()) {
+          nodeTypeData.resize(typeId+1);
+        }
+
+        uint32_t x,y;
+        uint8_t  magnification;
+
+        scanner.Read(x);
+        scanner.Read(y);
+
+        BitmapTile& entry=nodeTypeData[typeId].bitmapTiles[TileId(x,y)];
+
+        scanner.ReadFileOffset(entry.fileOffset);
+        scanner.Read(entry.dataOffsetBytes);
+
+        scanner.Read(magnification);
+
+        entry.magnification=MagnificationLevel(magnification);
       }
 
       return !scanner.HasError();
@@ -131,95 +159,176 @@ namespace osmscout {
     }
   }
 
-  bool AreaNodeIndex::GetOffsets(const TypeData& typeData,
-                                 const GeoBox& boundingBox,
-                                 std::vector<FileOffset>& offsets) const
+  bool AreaNodeIndex::GetOffsetsList(const TypeData& typeData,
+                                     const GeoBox& boundingBox,
+                                     std::vector<FileOffset>& offsets) const
   {
-    if (typeData.indexOffset==0) {
+    scanner.SetPos(typeData.indexOffset);
 
-      // No data for this type available
-      return true;
+    FileOffset previousOffset=0;
+
+    for (auto i=1; i<=typeData.entryCount; i++) {
+      GeoCoord   coord;
+      FileOffset fileOffset;
+
+      scanner.ReadCoord(coord);
+      scanner.ReadNumber(fileOffset);
+
+      fileOffset+=previousOffset;
+
+      previousOffset=fileOffset;
+
+      if (boundingBox.Includes(coord)) {
+        offsets.push_back(fileOffset);
+      }
     }
 
-    if (boundingBox.GetMaxLon()<typeData.minLon ||
-        boundingBox.GetMinLon()>=typeData.maxLon ||
-        boundingBox.GetMaxLat()<typeData.minLat ||
-        boundingBox.GetMinLat()>=typeData.maxLat) {
+    return true;
+  }
 
-      // No data available in given bounding box
-      return true;
+  bool AreaNodeIndex::GetOffsetsTileList(const TypeData& typeData,
+                                         const GeoBox& boundingBox,
+                                         std::vector<FileOffset>& offsets) const
+  {
+    TileIdBox tileBox(TileId::GetTile(gridMag,boundingBox.GetMinCoord()),
+                      TileId::GetTile(gridMag,boundingBox.GetMaxCoord()));
+
+    for (const auto& tileId : tileBox) {
+      auto tile=typeData.listTiles.find(tileId);
+
+      if (tile!=typeData.listTiles.end()) {
+        scanner.SetPos(tile->second.fileOffset);
+
+        FileOffset previousOffset=0;
+
+        if (tile->second.storeGeoCoord) {
+          for (auto i=1; i<=tile->second.entryCount; i++) {
+            GeoCoord   coord;
+            FileOffset fileOffset;
+
+            scanner.ReadCoord(coord);
+            scanner.ReadNumber(fileOffset);
+
+            fileOffset+=previousOffset;
+
+            previousOffset=fileOffset;
+
+            if (boundingBox.Includes(coord)) {
+              offsets.push_back(fileOffset);
+            }
+          }
+        }
+        else {
+          for (auto i=1; i<=tile->second.entryCount; i++) {
+            FileOffset fileOffset;
+
+            scanner.ReadNumber(fileOffset);
+
+            fileOffset+=previousOffset;
+
+            previousOffset=fileOffset;
+
+            offsets.push_back(fileOffset);
+          }
+        }
+      }
     }
 
-    uint32_t minxc=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/typeData.cellWidth);
-    uint32_t maxxc=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/typeData.cellWidth);
+    return true;
+  }
 
-    uint32_t minyc=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/typeData.cellHeight);
-    uint32_t maxyc=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/typeData.cellHeight);
+  bool AreaNodeIndex::GetOffsetsBitmap(const TypeData& typeData,
+                                       const GeoBox& boundingBox,
+                                       std::vector<FileOffset>& offsets) const
+  {
+    TileIdBox searchTileBox(TileId::GetTile(gridMag,
+                                            boundingBox.GetMinCoord()),
+                            TileId::GetTile(gridMag,
+                                            boundingBox.GetMaxCoord()));
 
-    minxc=std::max(minxc,typeData.cellXStart);
-    maxxc=std::min(maxxc,typeData.cellXEnd);
+    for (const auto& tileId : searchTileBox) {
+      auto tileBitmap=typeData.bitmapTiles.find(tileId);
 
-    minyc=std::max(minyc,typeData.cellYStart);
-    maxyc=std::min(maxyc,typeData.cellYEnd);
+      if (tileBitmap!=typeData.bitmapTiles.end()) {
+        MagnificationLevel magnification(tileBitmap->second.magnification);
+        GeoBox             box=tileBitmap->first.GetBoundingBox(gridMag);
+        TileIdBox          bitmapTileBox(TileId::GetTile(magnification,
+                                                         box.GetMinCoord()),
+                                         TileId::GetTile(magnification,
+                                                         box.GetMaxCoord()));
+        TileIdBox          boundingBoxTileBox(TileId::GetTile(magnification,
+                                                              boundingBox.GetMinCoord()),
+                                         TileId::GetTile(magnification,
+                                                              boundingBox.GetMaxCoord()));
 
-    FileOffset dataOffset=typeData.GetDataOffset();
+        // Offset of the data behind the bitmap
+        FileOffset dataOffset=tileBitmap->second.fileOffset+bitmapTileBox.GetCount()*tileBitmap->second.dataOffsetBytes;
 
-    // For each row
-    for (size_t y=minyc; y<=maxyc; y++) {
-      std::lock_guard<std::mutex> guard(lookupMutex);
-      FileOffset                  initialCellDataOffset=0;
-      size_t                      cellDataOffsetCount=0;
-      FileOffset                  cellIndexOffset=typeData.GetCellOffset(minxc,y);
+        auto minxc=std::max(bitmapTileBox.GetMinX(),boundingBoxTileBox.GetMinX());
+        auto maxxc=std::min(bitmapTileBox.GetMaxX(),boundingBoxTileBox.GetMaxX());
 
-      scanner.SetPos(cellIndexOffset);
+        auto minyc=std::max(bitmapTileBox.GetMinY(),boundingBoxTileBox.GetMinY());
+        auto maxyc=std::min(bitmapTileBox.GetMaxY(),boundingBoxTileBox.GetMaxY());
 
-      // For each column in row
-      for (size_t x=minxc; x<=maxxc; x++) {
-        FileOffset cellDataOffset;
+        // For each row
+        for (auto y=minyc; y<=maxyc; y++) {
+          std::lock_guard<std::mutex> guard(lookupMutex);
+          FileOffset                  initialCellDataOffset=0;
+          size_t                      cellDataOffsetCount=0;
+          FileOffset                  cellIndexOffset=tileBitmap->second.fileOffset+
+                                                      ((y-bitmapTileBox.GetMinY())*bitmapTileBox.GetWidth()+
+                                                       minxc-bitmapTileBox.GetMinX())*tileBitmap->second.dataOffsetBytes;
 
-        scanner.ReadFileOffset(cellDataOffset,
-                               typeData.dataOffsetBytes);
+          scanner.SetPos(cellIndexOffset);
 
-        if (cellDataOffset==0) {
-          continue;
-        }
+          // For each column in row
+          for (size_t x=minxc; x<=maxxc; x++) {
+            FileOffset cellDataOffset;
 
-        // We added +1 during import and now substract it again
-        cellDataOffset--;
+            scanner.ReadFileOffset(cellDataOffset,
+                                   tileBitmap->second.dataOffsetBytes);
 
-        if (initialCellDataOffset==0) {
-          initialCellDataOffset=dataOffset+cellDataOffset;
-        }
+            if (cellDataOffset==0) {
+              continue;
+            }
 
-        cellDataOffsetCount++;
-      }
+            // We added +1 during import and now substract it again
+            cellDataOffset--;
 
-      if (cellDataOffsetCount==0) {
-        continue;
-      }
+            if (initialCellDataOffset==0) {
+              initialCellDataOffset=dataOffset+cellDataOffset;
+            }
 
-      assert(initialCellDataOffset>=cellIndexOffset);
+            cellDataOffsetCount++;
+          }
 
-      scanner.SetPos(initialCellDataOffset);
+          if (cellDataOffsetCount==0) {
+            continue;
+          }
 
-      // For each data cell in row found
-      for (size_t i=0; i<cellDataOffsetCount; i++) {
-        uint32_t   dataCount;
-        FileOffset lastOffset=0;
+          assert(initialCellDataOffset>=cellIndexOffset);
 
+          scanner.SetPos(initialCellDataOffset);
 
-        scanner.ReadNumber(dataCount);
+          // For each data cell in row found
+          for (size_t i=0; i<cellDataOffsetCount; i++) {
+            uint32_t   dataCount;
+            FileOffset previousOffset=0;
 
-        for (size_t d=0; d<dataCount; d++) {
-          FileOffset objectOffset;
+            scanner.ReadNumber(dataCount);
 
-          scanner.ReadNumber(objectOffset);
+            for (size_t d=0; d<dataCount; d++) {
+              FileOffset fileOffset;
 
-          objectOffset+=lastOffset;
+              scanner.ReadNumber(fileOffset);
 
-          offsets.push_back(objectOffset);
+              fileOffset+=previousOffset;
 
-          lastOffset=objectOffset;
+              offsets.push_back(fileOffset);
+
+              previousOffset=fileOffset;
+            }
+          }
         }
       }
     }
@@ -232,7 +341,7 @@ namespace osmscout {
                                  std::vector<FileOffset>& offsets,
                                  TypeInfoSet& loadedTypes) const
   {
-    
+
     StopClock time;
 
     loadedTypes.Clear();
@@ -245,10 +354,31 @@ namespace osmscout {
           continue;
         }
 
-        auto typeNodeId = type->GetNodeId();
-        if (typeNodeId < nodeTypeData.size() && 
-                !GetOffsets(nodeTypeData[typeNodeId], boundingBox, offsets)) {
-          return false;
+        auto index=type->GetNodeId();
+        if (index<nodeTypeData.size()) {
+          if (!nodeTypeData[index].boundingBox.Intersects(boundingBox)) {
+            // No data available in given bounding box
+            continue;
+          }
+
+          if (!nodeTypeData[index].isComplex &&
+              nodeTypeData[index].indexOffset!=0 &&
+              nodeTypeData[index].entryCount!=0) {
+            if (!GetOffsetsList(nodeTypeData[index],boundingBox,offsets)) {
+              return false;
+            }
+          }
+          else if (nodeTypeData[index].isComplex) {
+            if (!GetOffsetsTileList(nodeTypeData[index],boundingBox,offsets)) {
+              return false;
+            }
+            if (!GetOffsetsBitmap(nodeTypeData[index],boundingBox,offsets)) {
+              return false;
+            }
+          }
+          else {
+            continue;
+          }
         }
 
         loadedTypes.Set(type);

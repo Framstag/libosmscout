@@ -1018,6 +1018,11 @@ TYPES
       {Name, NameAlt}
       MERGE_AREAS
 
+  TYPE boundary_protected_area
+    = AREA RELATION ("boundary"=="national_park" OR "boundary"=="protected_area")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
   TYPE leisure_park
     = NODE AREA ("leisure"=="park")
       {Name, NameAlt}
@@ -2220,9 +2225,6 @@ TYPES
 
   TYPE boundary_civil IGNORE
     = AREA ("boundary"=="civil")
-
-  TYPE boundary_national_park IGNORE
-    = WAY AREA RELATION ("boundary"=="national_park")
 
   TYPE boundary_maritime IGNORE
     = AREA RELATION ("boundary"=="maritime")

@@ -123,10 +123,10 @@ namespace osmscout {
 
     writer.WriteNumber(minId);
 
-    for (size_t i=0; i<members.size(); i++) {
-      writer.WriteNumber((uint32_t)members[i].type);
-      writer.WriteNumber(members[i].id-minId);
-      writer.Write(members[i].role);
+    for (const auto& member : members) {
+      writer.WriteNumber((uint32_t) member.type);
+      writer.WriteNumber(member.id-minId);
+      writer.Write(member.role);
     }
   }
 }

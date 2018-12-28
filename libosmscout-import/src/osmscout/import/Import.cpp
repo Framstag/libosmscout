@@ -122,15 +122,19 @@ namespace osmscout {
      coordDataMemoryMaped(false),
      coordIndexCacheSize(1000000),
      coordBlockSize(250000),
+     relMaxWays(1500),
+     relMaxCoords(150000),
      areaDataMemoryMaped(false),
      areaDataCacheSize(0),
      wayDataMemoryMaped(false),
      wayDataCacheSize(0),
      areaAreaIndexMaxMag(17),
-     areaNodeMinMag(8),
-     areaNodeIndexMinFillRate(0.1),
-     areaNodeIndexCellSizeAverage(16),
-     areaNodeIndexCellSizeMax(256),
+     areaNodeGridMag(14),
+     areaNodeSimpleListLimit(500),
+     areaNodeTileListLimit(100),
+     areaNodeTileListCoordLimit(1000),
+     areaNodeBitmapMaxMag(20),
+     areaNodeBitmapLimit(20),
      areaWayMinMag(11), // Should not be >= than optimizationMaxMag
      areaWayIndexMaxLevel(13),
      waterIndexMinMag(6),
@@ -277,6 +281,16 @@ namespace osmscout {
     return coordBlockSize;
   }
 
+  size_t ImportParameter::GetRelMaxWays() const
+  {
+    return relMaxWays;
+  }
+
+  size_t ImportParameter::GetRelMaxCoords() const
+  {
+    return relMaxCoords;
+  }
+
   size_t ImportParameter::GetAreaDataCacheSize() const
   {
     return areaDataCacheSize;
@@ -297,24 +311,34 @@ namespace osmscout {
     return wayDataMemoryMaped;
   }
 
-  MagnificationLevel ImportParameter::GetAreaNodeMinMag() const
+  MagnificationLevel ImportParameter::GetAreaNodeGridMag() const
   {
-    return areaNodeMinMag;
+    return areaNodeGridMag;
   }
 
-  double ImportParameter::GetAreaNodeIndexMinFillRate() const
+  uint16_t ImportParameter::GetAreaNodeSimpleListLimit() const
   {
-    return areaNodeIndexMinFillRate;
+    return areaNodeSimpleListLimit;
   }
 
-  size_t ImportParameter::GetAreaNodeIndexCellSizeAverage() const
+  uint16_t ImportParameter::GetAreaNodeTileListLimit() const
   {
-    return areaNodeIndexCellSizeAverage;
+    return areaNodeTileListLimit;
   }
 
-  size_t ImportParameter::GetAreaNodeIndexCellSizeMax() const
+  uint16_t ImportParameter::GetAreaNodeTileListCoordLimit() const
   {
-    return areaNodeIndexCellSizeMax;
+    return areaNodeTileListCoordLimit;
+  }
+
+  MagnificationLevel ImportParameter::GetAreaNodeBitmapMaxMag() const
+  {
+    return areaNodeBitmapMaxMag;
+  }
+
+  uint16_t ImportParameter::GetAreaNodeBitmapLimit() const
+  {
+    return areaNodeBitmapLimit;
   }
 
   MagnificationLevel ImportParameter::GetAreaWayMinMag() const
@@ -534,6 +558,16 @@ namespace osmscout {
     this->coordBlockSize=coordBlockSize;
   }
 
+  void ImportParameter::SetRelMaxWays(size_t relMaxWays)
+  {
+    this->relMaxWays=relMaxWays;
+  }
+
+  void ImportParameter::SetRelMaxCoords(size_t relMaxCoords)
+  {
+    this->relMaxCoords=relMaxCoords;
+  }
+
   void ImportParameter::SetAreaDataMemoryMaped(bool memoryMaped)
   {
     this->areaDataMemoryMaped=memoryMaped;
@@ -559,24 +593,39 @@ namespace osmscout {
     this->areaAreaIndexMaxMag=areaAreaIndexMaxMag;
   }
 
-  void ImportParameter::SetAreaNodeMinMag(MagnificationLevel areaNodeMinMag)
+  void ImportParameter::SetAreaNodeGridMag(MagnificationLevel areaNodeGridMag)
   {
-    this->areaNodeMinMag=areaNodeMinMag;
+    this->areaNodeGridMag=areaNodeGridMag;
   }
 
-  void ImportParameter::SetAreaNodeIndexMinFillRate(double areaNodeIndexMinFillRate)
+  void ImportParameter::SetAreaNodeSimpleListLimit(uint16_t areaNodeSimpleListLimit)
   {
-    this->areaNodeIndexMinFillRate=areaNodeIndexMinFillRate;
+    this->areaNodeSimpleListLimit=areaNodeSimpleListLimit;
   }
 
-  void ImportParameter::SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage)
+  void ImportParameter::SetAreaNodeTileListLimit(uint16_t areaNodeTileListLimit)
   {
-    this->areaNodeIndexCellSizeAverage=areaNodeIndexCellSizeAverage;
+    this->areaNodeTileListLimit=areaNodeTileListLimit;
   }
 
-  void ImportParameter::SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax)
+  void ImportParameter::SetAreaNodeTileListCoordLimit(uint16_t areaNodeTileListCoordLimit)
   {
-    this->areaNodeIndexCellSizeMax=areaNodeIndexCellSizeMax;
+    this->areaNodeTileListCoordLimit=areaNodeTileListCoordLimit;
+  }
+
+  void ImportParameter::SetAreaNodeBitmapMaxMag(const MagnificationLevel& areaNodeBitmapMaxMag)
+  {
+    this->areaNodeBitmapMaxMag=areaNodeBitmapMaxMag;
+  }
+
+  void ImportParameter::SetAreaNodeBitmapLimit(uint16_t areaNodeBitmapLimit)
+  {
+    this->areaNodeBitmapLimit=areaNodeBitmapLimit;
+  }
+
+  void ImportParameter::SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel)
+  {
+    this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
   }
 
   void ImportParameter::SetAreaWayMinMag(MagnificationLevel areaWayMinMag)

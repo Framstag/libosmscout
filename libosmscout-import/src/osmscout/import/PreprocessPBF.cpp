@@ -553,7 +553,7 @@ namespace osmscout {
       }
 
       for (int i=0; i<headerBlock.required_features_size(); i++) {
-        std::string feature=headerBlock.required_features(i);
+        const std::string& feature=headerBlock.required_features(i);
         if (feature!="OsmSchema-V0.6" &&
             feature!="DenseNodes") {
           progress.Error(std::string("Unsupported feature '")+feature+"'");

@@ -20,6 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
+#include <set>
+#include <vector>
+
 #include <osmscout/import/Import.h>
 
 #include <osmscout/system/Compiler.h>
@@ -28,25 +32,85 @@
 
 namespace osmscout {
 
+  /**
+   * Generates an index for querying nodes in a given area and with given node types
+   */
   class AreaNodeIndexGenerator CLASS_FINAL : public ImportModule
   {
-  private:
-    struct TypeData
+  public:
+    /**
+     * The different supported index types for this index
+     */
+    enum class IndexType : uint8_t
     {
-      MagnificationLevel level;       //! magnification level of index
-      size_t             cellCount;   //! Number of filled cells in index
-      size_t             nodeCount;   //! Number of entries over all cells
-      TileIdBox          tileBox;     //! Tile box
-      FileOffset         indexOffset; //! Position in file where the offset of the bitmap is written
+      IndexTypeBitmap  = uint8_t(1),
+      IndexTypeList    = uint8_t(2)
+    };
 
-      TypeData();
+    struct DistributionData
+    {
+      TypeId                  nodeId;        //<! node id of the type
+      TypeInfoRef             type;          //<! The node type itself
+      bool                    isComplex;     //<! Index is complex
+      GeoBox                  boundingBox;   //<! Bounding box of the data
+      size_t                  fillCount;     //<! Number of entries of this type over all
+      std::map<TileId,size_t> tileFillCount; //<! Number of entries of this type per tile
+      std::set<TileId>        listTiles;     //<! Tiles with list index
+      std::set<TileId>        bitmapTiles;   //<! Tiles with bitmap index
 
-      inline bool HasEntries()
+      inline bool HasNoData() const
       {
-        return cellCount>0 &&
-               nodeCount>0;
+        return fillCount==0;
+      }
+
+      inline bool IsComplexIndex() const
+      {
+        return isComplex;
       }
     };
+
+  private:
+    bool AnalyseDistribution(const TypeConfigRef& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress,
+                             std::vector<DistributionData>& data);
+    void DumpDistribution(Progress& progress,
+                          const std::vector<DistributionData>& data);
+
+    std::vector<FileOffset> WriteListIndex(Progress& progress,
+                                           const std::vector<DistributionData>& data,
+                                           FileWriter& writer);
+
+    std::vector<std::map<TileId,FileOffset>> WriteTileListIndex(Progress& progress,
+                                                                const std::vector<DistributionData>& data,
+                                                                FileWriter& writer);
+
+    std::vector<std::map<TileId,FileOffset>> WriteBitmapIndex(Progress& progress,
+                                                              const std::vector<DistributionData>& data,
+                                                              FileWriter& writer);
+
+    void WriteListData(Progress& progress,
+                       const std::vector<DistributionData>& data,
+                       const std::vector<std::list<std::pair<GeoCoord,FileOffset>>>& listData,
+                       const std::vector<FileOffset>& listIndexOffsets,
+                       FileWriter& writer);
+
+    void WriteTileListData(const ImportParameter& parameter,
+                           const DistributionData& distributionData,
+                           const std::list<std::pair<GeoCoord,FileOffset>>& tileData,
+                           const FileOffset& tileIndexOffset,
+                           FileWriter& writer);
+
+    void WriteBitmapData(const ImportParameter& parameter,
+                         const TileId& tileId,
+                         const std::list<std::pair<GeoCoord,FileOffset>>& bitmapData,
+                         const FileOffset& bitmapIndexOffset,
+                         FileWriter& writer);
+
+    bool WriteData(const TypeConfigRef& typeConfig,
+                   const ImportParameter& parameter,
+                   Progress& progress,
+                   const std::vector<DistributionData>& data);
 
   public:
     void GetDescription(const ImportParameter& parameter,

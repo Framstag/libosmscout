@@ -62,8 +62,9 @@ static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
   std::cout << "Import -h -d -s <start step> -e <end step> [*.osm|*.pbf]..." << std::endl;
-  std::cout << " -h|--help                            show this help" << std::endl;
-  std::cout << " -d                                   show debug output" << std::endl;
+  std::cout << " -h|--help                            show this help and exit" << std::endl;
+  std::cout << " --data-version                       print output data version and exit" << std::endl;
+  std::cout << " -d                                   show debug output during import" << std::endl;
   std::cout << " -s <number>                          set starting processing step" << std::endl;
   std::cout << " -e <number>                          set final processing step" << std::endl;
   std::cout << " --typefile <*.ost>                   path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
@@ -97,6 +98,9 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << osmscout::BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
   std::cout << " --coordBlockSize <number>            number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
+
+  std::cout << " --relMaxWays <number>                maximum of ways for a relation to get resolved (default: " << parameter.GetRelMaxWays() << ")" << std::endl;
+  std::cout << " --relMaxCoords <number>              maximum of coords for a relation to get resolved (default: " << parameter.GetRelMaxCoords() << ")" << std::endl;
 
   std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << osmscout::BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
@@ -303,6 +307,19 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
   progress.Info(std::string("WayDataCacheSize: ")+
                 std::to_string(parameter.GetWayDataCacheSize()));
 
+  progress.Info("AreaNodeGridMag: "+
+                std::to_string(parameter.GetAreaNodeGridMag().Get()));
+  progress.Info("AreaNodeSimpleListLimit: "+
+                std::to_string(parameter.GetAreaNodeSimpleListLimit()));
+  progress.Info("AreaNodeTileListLimit: "+
+                std::to_string(parameter.GetAreaNodeTileListLimit()));
+  progress.Info("AreaNodeTileListCoordLimit: "+
+                std::to_string(parameter.GetAreaNodeTileListCoordLimit()));
+  progress.Info("AreaNodeBitmapMaxMag: "+
+                std::to_string(parameter.GetAreaNodeBitmapMaxMag().Get()));
+  progress.Info("AreaNodeBitmapLimit: "+
+                std::to_string(parameter.GetAreaNodeBitmapLimit()));
+
   progress.Info(std::string("RouteNodeBlockSize: ")+
                 std::to_string(parameter.GetRouteNodeBlockSize()));
 
@@ -407,6 +424,10 @@ int main(int argc, char* argv[])
         strcmp(argv[i],"--help")==0) {
       DumpHelp(parameter);
 
+      return 0;
+    }
+    else if (strcmp(argv[i],"--data-version")==0) {
+      std::cout << std::to_string(osmscout::FILE_FORMAT_VERSION) << std::endl;
       return 0;
     }
     else if (strcmp(argv[i],"-s")==0) {
@@ -681,6 +702,32 @@ int main(int argc, char* argv[])
                                        i,
                                        coordBlockSize)) {
         parameter.SetCoordBlockSize(coordBlockSize);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--relMaxWays")==0) {
+      size_t relMaxWays;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       relMaxWays)) {
+        parameter.SetRelMaxWays(relMaxWays);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--relMaxCoords")==0) {
+      size_t relMaxCoords;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       relMaxCoords)) {
+        parameter.SetRelMaxCoords(relMaxCoords);
       }
       else {
         parameterError=true;

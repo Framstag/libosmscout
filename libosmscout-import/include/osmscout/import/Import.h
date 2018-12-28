@@ -148,6 +148,9 @@ namespace osmscout {
     size_t                       coordIndexCacheSize;      //<! Size of the coord index cache
     size_t                       coordBlockSize;           //<! Maximum number of node ids we resolve in one go
 
+    size_t                       relMaxWays;               //<! Maximum number of ways allowed to resolve a relation
+    size_t                       relMaxCoords;             //<! Maximum number of coords allowed to resolve a relation
+
     bool                         areaDataMemoryMaped;      //<! Use memory mapping for area data file access
     size_t                       areaDataCacheSize;        //<! Size of the area data cache
 
@@ -156,10 +159,12 @@ namespace osmscout {
 
     size_t                       areaAreaIndexMaxMag;      //<! Maximum depth of the index generated
 
-    MagnificationLevel           areaNodeMinMag;           //<! Minimum magnification of index for individual type
-    double                       areaNodeIndexMinFillRate; //<! Minimum rate of filled cells in index bitmap
-    size_t                       areaNodeIndexCellSizeAverage; //<! Average entries per index cell
-    size_t                       areaNodeIndexCellSizeMax; //<! Maximum number of entries  per index cell
+    MagnificationLevel           areaNodeGridMag;          //<! Magnification level for the index grid
+    uint16_t                     areaNodeSimpleListLimit;  //<! If a type has less entries, we just store them plain
+    uint16_t                     areaNodeTileListLimit;    //<! If a type has less entries in a tile, we store it as list
+    uint16_t                     areaNodeTileListCoordLimit;//<! If a type has less entries we store the coord in tile lists
+    MagnificationLevel           areaNodeBitmapMaxMag;      //<! Maximum Magnification level for bitmap index
+    uint16_t                     areaNodeBitmapLimit;       //<! All cells must have less entries for a given zoom level
 
     MagnificationLevel           areaWayMinMag;            //<! Minimum magnification of index for individual type
     MagnificationLevel           areaWayIndexMaxLevel;     //<! Maximum zoom level for area way index bitmap
@@ -231,16 +236,21 @@ namespace osmscout {
 
     size_t GetCoordBlockSize() const;
 
+    size_t GetRelMaxWays() const;
+    size_t GetRelMaxCoords() const;
+
     bool GetAreaDataMemoryMaped() const;
     size_t GetAreaDataCacheSize() const;
 
     bool GetWayDataMemoryMaped() const;
     size_t GetWayDataCacheSize() const;
 
-    MagnificationLevel GetAreaNodeMinMag() const;
-    double GetAreaNodeIndexMinFillRate() const;
-    size_t GetAreaNodeIndexCellSizeAverage() const;
-    size_t GetAreaNodeIndexCellSizeMax() const;
+    MagnificationLevel GetAreaNodeGridMag() const;
+    uint16_t GetAreaNodeSimpleListLimit() const;
+    uint16_t GetAreaNodeTileListLimit() const;
+    uint16_t GetAreaNodeTileListCoordLimit() const;
+    MagnificationLevel GetAreaNodeBitmapMaxMag() const;
+    uint16_t GetAreaNodeBitmapLimit() const;
 
     MagnificationLevel GetAreaWayMinMag() const;
     MagnificationLevel GetAreaWayIndexMaxLevel() const;
@@ -304,7 +314,11 @@ namespace osmscout {
 
     void SetCoordDataMemoryMaped(bool memoryMaped);
     void SetCoordIndexCacheSize(size_t coordIndexCacheSize);
+
     void SetCoordBlockSize(size_t coordBlockSize);
+
+    void SetRelMaxWays(size_t relMaxWays);
+    void SetRelMaxCoords(size_t relMaxCoords);
 
     void SetAreaDataMemoryMaped(bool memoryMaped);
     void SetAreaDataCacheSize(size_t areaDataCacheSize);
@@ -314,10 +328,12 @@ namespace osmscout {
 
     void SetAreaAreaIndexMaxMag(size_t areaAreaIndexMaxMag);
 
-    void SetAreaNodeMinMag(MagnificationLevel areaNodeMinMag);
-    void SetAreaNodeIndexMinFillRate(double areaNodeIndexMinFillRate);
-    void SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage);
-    void SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax);
+    void SetAreaNodeGridMag(MagnificationLevel areaNodeGridMag);
+    void SetAreaNodeSimpleListLimit(uint16_t areaNodeSimpleListLimit);
+    void SetAreaNodeTileListLimit(uint16_t areaNodeTileListLimit);
+    void SetAreaNodeTileListCoordLimit(uint16_t areaNodeTileListCoordLimit);
+    void SetAreaNodeBitmapMaxMag(const MagnificationLevel& areaNodeBitmapMaxMag);
+    void SetAreaNodeBitmapLimit(uint16_t areaNodeBitmapLimit);
 
     void SetAreaWayMinMag(MagnificationLevel areaWayMinMag);
     void SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel);
@@ -351,6 +367,8 @@ namespace osmscout {
 
     std::unique_ptr<Preprocessor> GetPreprocessor(const std::string& filename,
                                                   PreprocessorCallback& callback) const;
+
+    void SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel);
   };
 
   class OSMSCOUT_IMPORT_API ImportModuleDescription CLASS_FINAL

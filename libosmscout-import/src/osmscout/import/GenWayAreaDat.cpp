@@ -192,7 +192,7 @@ namespace osmscout {
 
     bool success=true;
     for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
-      CoordDataFile::ResultMap::const_iterator coord=coordsMap.find(rawWay.GetNodeId(n));
+      auto coord=coordsMap.find(rawWay.GetNodeId(n));
 
       if (coord==coordsMap.end()) {
         progress.Error("Cannot resolve node with id "+

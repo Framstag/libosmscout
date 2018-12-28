@@ -267,7 +267,7 @@ namespace osmscout {
     ways.sort(WayByNodeCountSorter);
 
     // Index by first node id (if way is not circular)
-    for (WayListPtr w=ways.begin();
+    for (auto w=ways.begin();
         w!=ways.end();
         ++w) {
       RawWayRef way(*w);
@@ -292,7 +292,7 @@ namespace osmscout {
 
       currentWay++;
 
-      WaysByNodeMap::iterator lastNodeCandidate=waysByNode.find(lastNodeId);
+      auto lastNodeCandidate=waysByNode.find(lastNodeId);
 
       // Way is circular (see above) and/or already closed
       if (lastNodeCandidate==waysByNode.end()) {
@@ -325,7 +325,7 @@ namespace osmscout {
       while (lastNodeCandidate!=waysByNode.end()) {
         bool hasMerged=false;
 
-        for (WayListPtrList::iterator c=lastNodeCandidate->second.begin();
+        for (auto c=lastNodeCandidate->second.begin();
              c!=lastNodeCandidate->second.end();
              ++c) {
           RawWayRef candidate(*(*c));
@@ -433,7 +433,7 @@ namespace osmscout {
     size_t currentWay=1;
     size_t wayCount=ways.size();
 
-    for (auto way: ways) {
+    for (const auto& way: ways) {
       //*wayIt;
       Distance length;
       bool split = way->GetNodeCount() > 300;
@@ -560,7 +560,7 @@ namespace osmscout {
 
     ways.clear();
 
-    for (auto way: newWays) {
+    for (const auto& way: newWays) {
       ways.push_back(way);
     }
 
@@ -838,8 +838,8 @@ namespace osmscout {
 
         progress.SetAction("Writing ways");
 
-        for (size_t type=0; type<waysByType.size(); type++) {
-          for (const auto &rawWay : waysByType[type]) {
+        for (auto& type : waysByType) {
+          for (const auto &rawWay : type) {
             WriteWay(progress,
                      *typeConfig,
                      wayWriter,
@@ -848,7 +848,7 @@ namespace osmscout {
                      *rawWay);
           }
 
-          waysByType[type].clear();
+          type.clear();
         }
       }
 
@@ -857,7 +857,7 @@ namespace osmscout {
       if (!slowFallbackTypes.Empty()) {
         progress.Info("Handling low memory fall back (no merging) for the following types");
 
-        for (auto type : slowFallbackTypes) {
+        for (const auto& type : slowFallbackTypes) {
           progress.Info("* "+type->GetName());
         }
 

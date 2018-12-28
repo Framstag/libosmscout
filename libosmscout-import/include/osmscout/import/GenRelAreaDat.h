@@ -158,7 +158,7 @@ namespace osmscout {
     bool BuildRings(const TypeConfig& typeConfig,
                     const ImportParameter& parameter,
                     Progress& progress,
-                    Id id,
+                    OSMId id,
                     const std::string& name,
                     const TypeInfoRef& type,
                     std::list<MultipolygonPart>& parts);
@@ -166,7 +166,7 @@ namespace osmscout {
     bool ResolveMultipolygon(const TypeConfig& typeConfig,
                              const ImportParameter& parameter,
                              Progress& progress,
-                             Id id,
+                             OSMId id,
                              const std::string& name,
                              const TypeInfoRef& type,
                              std::list<MultipolygonPart>& parts);
@@ -191,6 +191,7 @@ namespace osmscout {
                                 std::list<MultipolygonPart>& parts);
 
   bool ResolveMultipolygonMembers(Progress& progress,
+                                  const ImportParameter& parameter,
                                   const TypeConfig& typeConfig,
                                   CoordDataFile& coordDataFile,
                                   RawWayIndexedDataFile& wayDataFile,

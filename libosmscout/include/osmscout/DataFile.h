@@ -33,6 +33,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Logger.h>
 
+//#include <map>
 namespace osmscout {
 
   /**
@@ -356,6 +357,7 @@ namespace osmscout {
     }
 
     //std::map<std::string,size_t> hitRateTypes;
+    //std::map<std::string,size_t> missRateTypes;
     size_t inBoxCount=0;
     for (IteratorIn offsetIter=begin; offsetIter!=end; ++offsetIter) {
       ValueType value=std::make_shared<N>();
@@ -376,9 +378,12 @@ namespace osmscout {
       }
 
       if (!value->Intersects(boundingBox)) {
-        //hitRateTypes[value->GetType()->GetName()]++;
+        //missRateTypes[value->GetType()->GetName()]++;
         continue;
       }
+      /*else {
+        hitRateTypes[value->GetType()->GetName()]++;
+      }*/
 
       inBoxCount++;
 
@@ -388,8 +393,12 @@ namespace osmscout {
     size_t hitRate=inBoxCount*100/size;
     if (size>100 && hitRate<50) {
       log.Warn() << "Bounding box hit rate for file " << datafile << " is only " << hitRate << "% (" << inBoxCount << "/" << size << ")";
-      /*for (const auto& hitRate: hitRateTypes) {
-        log.Warn() << "* " << hitRate.first << " " << hitRate.second;
+      /*
+      for (const auto& missRateType: missRateTypes) {
+        log.Warn() << "- " << missRateType.first << " " << missRateType.second;
+      }
+      for (const auto& hitRateType: hitRateTypes) {
+        log.Warn() << "+ " << hitRateType.first << " " << hitRateType.second;
       }*/
     }
 
