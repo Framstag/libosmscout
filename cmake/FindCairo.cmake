@@ -38,15 +38,26 @@ if(CAIRO_FOUND)
   # set it back as false
   set(CAIRO_FOUND FALSE)
 
-  find_library(CAIRO_LIBRARY cairo
-               HINTS ${_pc_cairo_LIBRARY_DIRS}
-  )
-  set(CAIRO_LIBRARIES "${CAIRO_LIBRARY}")
+  find_library(CAIRO_LIBRARY_RELEASE
+               NAMES cairo
+               HINTS ${_pc_cairo_LIBRARY_DIRS})
+
+  find_library(CAIRO_LIBRARY_DEBUG
+               NAMES cairod
+               HINTS ${_pc_cairo_LIBRARY_DIRS})
+
+  if(NOT CAIRO_LIBRARY_DEBUG AND CAIRO_LIBRARY_RELEASE)
+    set(CAIRO_LIBRARY_DEBUG ${CAIRO_LIBRARY_RELEASE})
+  endif()
+
+  set(CAIRO_LIBRARIES
+      debug ${CAIRO_LIBRARY_DEBUG}
+      optimized ${CAIRO_LIBRARY_RELEASE})
 
   find_path(CAIRO_INCLUDE_DIR cairo.h
             HINTS ${_pc_cairo_INCLUDE_DIRS}
-            PATH_SUFFIXES cairo
-  )
+            PATH_SUFFIXES cairo)
+
   set(CAIRO_INCLUDE_DIRS "${CAIRO_INCLUDE_DIR}")
 
   include(FindPackageHandleStandardArgs)
@@ -58,5 +69,4 @@ endif(CAIRO_INCLUDE_DIRS AND CAIRO_LIBRARIES)
 mark_as_advanced(
   CAIRO_CFLAGS
   CAIRO_INCLUDE_DIRS
-  CAIRO_LIBRARIES
-)
+  CAIRO_LIBRARIES)
