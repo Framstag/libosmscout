@@ -74,11 +74,36 @@ namespace osmscout {
 
     std::string GetDisplayText() const;
 
-    bool operator==(const TileId& other) const;
+    /**
+     * Compare tile ids for equality
+     */
+    inline bool operator==(const TileId& other) const
+    {
+      return y==other.y &&
+             x==other.x;
+    }
 
-    bool operator!=(const TileId& other) const;
+    /**
+     * Compare tile ids for inequality
+     */
+    inline bool operator!=(const TileId& other) const
+    {
+      return y!=other.y ||
+             x!=other.x;
+    }
 
-    bool operator<(const TileId& other) const;
+    /**
+     * Compare tile ids by their order. Needed for sorting tile ids and placing them into (some)
+     * containers.
+     */
+    inline bool operator<(const TileId& other) const
+    {
+      if (y!=other.y) {
+        return y<other.y;
+      }
+
+      return x<other.x;
+    }
 
     GeoCoord GetTopLeftCoord(const Magnification& magnification) const;
     GeoBox GetBoundingBox(const MagnificationLevel& level) const;
@@ -89,6 +114,19 @@ namespace osmscout {
 
     static TileId GetTile(MagnificationLevel level,
                           const GeoCoord& coord);
+  };
+
+  /**
+   * Hasher that can be used in std::unordered_map with TileId as a key
+   */
+  struct OSMSCOUT_API TileIdHasher
+  {
+    std::size_t operator()(const TileId& id) const noexcept
+    {
+      std::size_t h1 = static_cast<size_t>(id.GetX());
+      std::size_t h2 = static_cast<size_t>(id.GetY());
+      return h1 ^ (h2 << 16);
+    }
   };
 
   class OSMSCOUT_API TileKey

@@ -43,37 +43,6 @@ namespace osmscout {
   }
 
   /**
-   * Compare tile ids for equality
-   */
-  bool TileId::operator==(const TileId& other) const
-  {
-    return y==other.y &&
-           x==other.x;
-  }
-
-  /**
-   * Compare tile ids for inequality
-   */
-  bool TileId::operator!=(const TileId& other) const
-  {
-    return y!=other.y ||
-           x!=other.x;
-  }
-
-  /**
-   * Compare tile ids by their order. Needed for sorting tile ids and placing them into (some)
-   * containers.
-   */
-  bool TileId::operator<(const TileId& other) const
-  {
-    if (y!=other.y) {
-      return y<other.y;
-    }
-
-    return x<other.x;
-  }
-
-  /**
    * Return the top left coordinate of the tile
    * @param magnification
    *    Magnification to complete the definition of the tile id (these are relative
