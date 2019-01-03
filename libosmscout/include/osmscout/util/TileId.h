@@ -74,11 +74,36 @@ namespace osmscout {
 
     std::string GetDisplayText() const;
 
-    bool operator==(const TileId& other) const;
+    /**
+     * Compare tile ids for equality
+     */
+    inline bool operator==(const TileId& other) const
+    {
+      return y==other.y &&
+             x==other.x;
+    }
 
-    bool operator!=(const TileId& other) const;
+    /**
+     * Compare tile ids for inequality
+     */
+    inline bool operator!=(const TileId& other) const
+    {
+      return y!=other.y ||
+             x!=other.x;
+    }
 
-    bool operator<(const TileId& other) const;
+    /**
+     * Compare tile ids by their order. Needed for sorting tile ids and placing them into (some)
+     * containers.
+     */
+    inline bool operator<(const TileId& other) const
+    {
+      if (y!=other.y) {
+        return y<other.y;
+      }
+
+      return x<other.x;
+    }
 
     GeoCoord GetTopLeftCoord(const Magnification& magnification) const;
     GeoBox GetBoundingBox(const MagnificationLevel& level) const;
