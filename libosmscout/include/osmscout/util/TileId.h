@@ -116,6 +116,19 @@ namespace osmscout {
                           const GeoCoord& coord);
   };
 
+  /**
+   * Hasher that can be used in std::unordered_map with TileId as a key
+   */
+  struct OSMSCOUT_API TileIdHasher
+  {
+    std::size_t operator()(const TileId& id) const noexcept
+    {
+      std::size_t h1 = static_cast<size_t>(id.GetX());
+      std::size_t h2 = static_cast<size_t>(id.GetY());
+      return h1 ^ (h2 << 16);
+    }
+  };
+
   class OSMSCOUT_API TileKey
   {
   private:
