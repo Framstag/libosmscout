@@ -31,6 +31,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/util/Distance.h>
+#include <osmscout/util/Time.h>
 
 namespace osmscout {
 
@@ -573,7 +574,7 @@ namespace osmscout {
       ObjectFileRef                                  pathObject;
       size_t                                         targetNodeIndex;
       Distance                                       distance;
-      double                                         time;
+      Timestamp::duration                            time; // time from route start
       GeoCoord                                       location;
       std::unordered_map<std::string,DescriptionRef> descriptionMap;
       std::list<DescriptionRef>                      descriptions;
@@ -652,7 +653,7 @@ namespace osmscout {
       /**
        * Time from the start of the route in h.
        */
-      inline double GetTime() const
+      inline Duration GetTime() const
       {
         return time;
       }
@@ -669,7 +670,7 @@ namespace osmscout {
       DescriptionRef GetDescription(const char* name) const;
 
       void SetDistance(Distance distance);
-      void SetTime(double time);
+      void SetTime(const Timestamp::duration &time);
       void SetLocation(const GeoCoord &coord);
 
       void AddDescription(const char* name,

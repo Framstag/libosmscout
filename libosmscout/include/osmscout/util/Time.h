@@ -1,6 +1,9 @@
+#ifndef OSMSCOUT_UTIL_TIME_H
+#define OSMSCOUT_UTIL_TIME_H
+
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2018 Lukáš Karas
+  Copyright (C) 2018  Lukas Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,33 +20,31 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/util/Distance.h>
+#include <chrono>
 
-namespace osmscout{
+namespace osmscout {
 
-  Distance Distance::Zero()
+  using Timestamp = std::chrono::system_clock::time_point;
+
+  using Duration = Timestamp::duration;
+
+  using HourDuration = std::chrono::duration<double, std::ratio<3600>>;
+
+  inline double DurationAsSeconds(Duration duration)
   {
-    return Distance(0);
+    return std::chrono::duration_cast<std::chrono::duration<double>>(
+        duration).count();
   }
 
-  Distance Distance::Max()
+  inline double DurationAsHours(Duration duration)
   {
-    return Distance(std::numeric_limits<double>::max());
+    return std::chrono::duration_cast<HourDuration>(duration).count();
   }
 
-  Distance Distance::Min()
+  inline Duration DurationOfHours(double hours)
   {
-    return Distance(std::numeric_limits<double>::min());
+    return std::chrono::duration_cast<Duration>(HourDuration(hours));
   }
-
-  Distance Distance::Max(const Distance &a, const Distance &b)
-  {
-    return Distance(std::max(a.meters, b.meters));
-  }
-
-  Distance Distance::Min(const Distance &a, const Distance &b)
-  {
-    return Distance(std::min(a.meters, b.meters));
-  }
-
 }
+
+#endif //OSMSCOUT_UTIL_TIME_H

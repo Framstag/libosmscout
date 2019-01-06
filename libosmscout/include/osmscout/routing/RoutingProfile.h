@@ -32,6 +32,8 @@
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>
 
+#include <osmscout/util/Time.h>
+
 #include <osmscout/routing/RouteNode.h>
 
 namespace osmscout {
@@ -68,10 +70,10 @@ namespace osmscout {
                             const Distance &distance) const = 0;
     virtual double GetCosts(const Distance &distance) const = 0;
 
-    virtual double GetTime(const Area& area,
-                           const Distance &distance) const = 0;
-    virtual double GetTime(const Way& way,
-                           const Distance &distance) const = 0;
+    virtual Duration GetTime(const Area& area,
+                             const Distance &distance) const = 0;
+    virtual Duration GetTime(const Way& way,
+                             const Distance &distance) const = 0;
   };
 
   typedef std::shared_ptr<RoutingProfile> RoutingProfileRef;
@@ -144,18 +146,18 @@ namespace osmscout {
     bool CanUseForward(const Way& way) const override;
     bool CanUseBackward(const Way& way) const override;
 
-    inline double GetTime(const Area& area,
-                          const Distance &distance) const override
+    inline Duration GetTime(const Area& area,
+                            const Distance &distance) const override
     {
       double speed=speeds[area.GetType()->GetIndex()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return distance.As<Kilometer>()/speed;
+      return DurationOfHours(distance.As<Kilometer>()/speed);
     }
 
-    inline double GetTime(const Way& way,
-                          const Distance &distance) const override
+    inline Duration GetTime(const Way& way,
+                            const Distance &distance) const override
     {
       double speed;
 
@@ -171,7 +173,7 @@ namespace osmscout {
 
       speed=std::min(vehicleMaxSpeed,speed);
 
-      return distance.As<Kilometer>()/speed;
+      return DurationOfHours(distance.As<Kilometer>()/speed);
     }
   };
 

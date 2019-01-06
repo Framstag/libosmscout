@@ -28,7 +28,7 @@ namespace osmscout {
     int         index;
     std::string instructions;
     Distance    distance;
-    double      time;
+    Duration    time;
     GeoCoord    location;
   };
 

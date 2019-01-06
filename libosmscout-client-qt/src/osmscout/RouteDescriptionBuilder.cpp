@@ -620,17 +620,17 @@ void RouteDescriptionBuilder::GenerateRouteSteps(const osmscout::RouteDescriptio
     }
 
     if (currentStepIndex>=0) {
-      routeSteps[currentStepIndex].distance=node->GetDistance().AsMeter();
-      routeSteps[currentStepIndex].time=node->GetTime() * 3600;
+      routeSteps[currentStepIndex].distance=node->GetDistance();
+      routeSteps[currentStepIndex].time=node->GetTime();
 
       if (prevNode!=routeDescription.Nodes().end() &&
         (node->GetDistance()-prevNode->GetDistance()).AsMeter()!=0.0) {
-        routeSteps[currentStepIndex].distanceDelta=(node->GetDistance()-prevNode->GetDistance()).AsMeter();
+        routeSteps[currentStepIndex].distanceDelta=(node->GetDistance()-prevNode->GetDistance());
       }
 
       if (prevNode!=routeDescription.Nodes().end() &&
-          node->GetTime()-prevNode->GetTime()!=0.0) {
-        routeSteps[currentStepIndex].timeDelta=node->GetTime()-prevNode->GetTime() * 3600;
+          node->GetTime()-prevNode->GetTime()!=Duration::zero()) {
+        routeSteps[currentStepIndex].timeDelta=node->GetTime()-prevNode->GetTime();
       }
     }
 

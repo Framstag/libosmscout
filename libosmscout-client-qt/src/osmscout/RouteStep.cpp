@@ -27,11 +27,11 @@ namespace osmscout {
 
 RouteStep::RouteStep(QString type):
     type(type),
-    distance(-1),
-    distanceDelta(-1),
-    distanceTo(-1),
-    time(-1),
-    timeDelta(-1)
+    distance(Distance::Zero()),
+    distanceDelta(Distance::Zero()),
+    distanceTo(Distance::Zero()),
+    time(Duration::zero()),
+    timeDelta(Duration::zero())
 {
 
 }

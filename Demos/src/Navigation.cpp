@@ -42,15 +42,17 @@
 #include <osmscout/Database.h>
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/util/Time.h>
 
 #include "Navigation.h"
 
-static std::string TimeToString(double time)
+static std::string TimeToString(osmscout::Duration time)
 {
+    double hours = osmscout::DurationAsHours(time);
     std::ostringstream stream;
-    stream << std::setfill(' ') << std::setw(2) << (int)std::floor(time) << ":";
-    time-=std::floor(time);
-    stream << std::setfill('0') << std::setw(2) << (int)floor(60*time+0.5);
+    stream << std::setfill(' ') << std::setw(2) << (int)std::floor(hours) << ":";
+    hours-=std::floor(hours);
+    stream << std::setfill('0') << std::setw(2) << (int)floor(60*hours+0.5);
     return stream.str();
 }
 

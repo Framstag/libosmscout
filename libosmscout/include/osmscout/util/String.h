@@ -29,6 +29,7 @@
 #include <osmscout/CoreFeatures.h>
 
 #include <osmscout/system/Assert.h>
+#include <osmscout/util/Time.h>
 
 #include <osmscout/CoreImportExport.h>
 #include <osmscout/OSMScoutTypes.h>
@@ -480,8 +481,6 @@ namespace osmscout {
    * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
-
-  typedef std::chrono::system_clock::time_point Timestamp;
 
   /**
    * Parse time string in ISO 8601 format "2017-11-26T13:46:12.124Z" (UTC timezone)
