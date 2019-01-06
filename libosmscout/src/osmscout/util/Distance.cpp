@@ -21,6 +21,11 @@
 
 namespace osmscout{
 
+  Distance Distance::Zero()
+  {
+    return Distance(0);
+  }
+
   Distance Distance::Max()
   {
     return Distance(std::numeric_limits<double>::max());

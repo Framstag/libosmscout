@@ -151,6 +151,8 @@ namespace osmscout {
       return Unit::FromMeter(meters);
     }
 
+    static Distance Zero();
+
     static Distance Max();
 
     static Distance Min();
