@@ -45,11 +45,11 @@ void NextStepDescriptionBuilder::NextDescription(const Distance &distance,
     }
 
     description=routeSteps.first();
-    description.distance=waypoint->GetDistance().AsMeter();
-    description.time    =waypoint->GetTime()*3600;
+    description.distance=waypoint->GetDistance();
+    description.time    =waypoint->GetTime();
 
     if (waypoint->GetDistance() > distance){
-      description.distanceTo=(waypoint->GetDistance()-distance).AsMeter();
+      description.distanceTo=(waypoint->GetDistance()-distance);
       break;
     }
   }

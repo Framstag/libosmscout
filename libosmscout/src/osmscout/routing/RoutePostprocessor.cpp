@@ -86,7 +86,7 @@ namespace osmscout {
     WayRef        way;
 
     Distance      distance;
-    double        time=0.0;
+    Duration      time(0);
 
     for (auto& node : description.Nodes()) {
       // The last node does not have a pathWayId set, since we are not going anywhere!
@@ -126,7 +126,7 @@ namespace osmscout {
           Distance deltaDistance=GetEllipsoidalDistance(prevCoord,
                                                         curCoord);
 
-          double deltaTime=0.0;
+          Duration deltaTime(0);
 
           if (node.GetPathObject().GetType()==refArea) {
             deltaTime=postprocessor.GetTime(node.GetDatabaseId(),
@@ -1605,14 +1605,14 @@ namespace osmscout {
     return entry->second;
   }
 
-  double RoutePostprocessor::GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const
+  Duration RoutePostprocessor::GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const
   {
     assert(dbId<profiles.size() && profiles[dbId]);
     auto profile=profiles[dbId];
     return profile->GetTime(area,deltaDistance);
   }
 
-  double RoutePostprocessor::GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const
+  Duration RoutePostprocessor::GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const
   {
     assert(dbId<profiles.size() && profiles[dbId]);
     auto profile=profiles[dbId];

@@ -30,6 +30,8 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/util/Time.h>
+
 // Database
 #include <osmscout/Database.h>
 
@@ -336,8 +338,8 @@ namespace osmscout {
     AreaRef GetArea(const DBFileOffset &offset) const;
     WayRef GetWay(const DBFileOffset &offset) const;
 
-    double GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const;
-    double GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const;
+    Duration GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const;
+    Duration GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const;
 
     RouteDescription::NameDescriptionRef GetNameDescription(const RouteDescription::Node& node) const;
     RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,

@@ -105,8 +105,16 @@ public:
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
+  /**
+   * Route length in meters
+   * @return
+   */
   double getRouteLength() const;
 
+  /**
+   * Route duration in seconds
+   * @return
+   */
   double getRouteDuration() const;
 
   Qt::ItemFlags flags(const QModelIndex &index) const;

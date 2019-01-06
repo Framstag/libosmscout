@@ -23,6 +23,9 @@
 
 #include <osmscout/ClientQtImportExport.h>
 
+#include <osmscout/util/Time.h>
+#include <osmscout/util/Distance.h>
+
 #include <QObject>
 
 namespace osmscout {
@@ -52,11 +55,11 @@ signals:
 
 public:
   QString type;             //!< Type of route step
-  double distance;          //!< Estimate distance [meters] from route start
-  double distanceDelta;     //!< Estimate distance [meters] from previous route step
-  double distanceTo;        //!< Estimate distance [meters] to this step (used with navigation)
-  double time;              //!< Estimate time [seconds] from route start
-  double timeDelta;         //!< Estimate time [seconds] from previous route step
+  Distance distance;        //!< Estimate distance from route start
+  Distance distanceDelta;   //!< Estimate distance from previous route step
+  Distance distanceTo;      //!< Estimate distance to this step (used with navigation)
+  Duration time;            //!< Estimate time from route start
+  Duration timeDelta;       //!< Estimate time from previous route step
   QString description;      //!< Formatted (html) verbose description (translated already)
   QString shortDescription; //!< Plain short description (translated already)
 
@@ -74,27 +77,27 @@ public:
 
   double getDistance() const
   {
-    return distance;
+    return distance.AsMeter();
   }
 
   double getDistanceDelta() const
   {
-    return distanceDelta;
+    return distanceDelta.AsMeter();
   }
 
   double getDistanceTo() const
   {
-    return distanceTo;
+    return distanceTo.AsMeter();
   }
 
   double getTime() const
   {
-    return time;
+    return DurationAsSeconds(time);
   }
 
   double getTimeDelta() const
   {
-    return timeDelta;
+    return DurationAsSeconds(timeDelta);
   }
 
   QString getDescription() const

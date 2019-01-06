@@ -159,7 +159,7 @@ double RoutingListModel::getRouteDuration() const
   if (!route || route.routeDescription().Nodes().empty()){
     return 0;
   }
-  return route.routeDescription().Nodes().back().GetTime() * 3600;
+  return DurationAsSeconds(route.routeDescription().Nodes().back().GetTime());
 }
 
 QVariant RoutingListModel::data(const QModelIndex &index, int role) const

@@ -26,6 +26,7 @@
 #include <osmscout/routing/Route.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Time.h>
 
 namespace osmscout {
   static double one_degree_at_equator=111320.0;
@@ -125,7 +126,7 @@ namespace osmscout {
       assert(newRoute);
       route                                                         =newRoute;
       distanceFromStart                                             =Distance::Of<Meter>(0.0);
-      durationFromStart                                             =0.0;
+      durationFromStart                                             =Duration(osmscout::Duration::zero());
       locationOnRoute                                               =route->Nodes().begin();
       nextWaypoint                                                  =route->Nodes().begin();
       outputDescription->Clear();
@@ -157,7 +158,7 @@ namespace osmscout {
       return distanceFromStart;
     }
 
-    double GetDurationFromStart()
+    Duration GetDurationFromStart()
     {
       return durationFromStart;
     }
@@ -167,7 +168,7 @@ namespace osmscout {
       return distance;
     }
 
-    double GetDuration()
+    Duration GetDuration()
     {
       return duration;
     }
@@ -210,7 +211,8 @@ namespace osmscout {
         distanceFromStart                                         =
           nextNode->GetDistance()*foundAbscissa+locationOnRoute->GetDistance()*(1.0-foundAbscissa);
         durationFromStart                                         =
-          nextNode->GetTime()*foundAbscissa+locationOnRoute->GetTime()*(1.0-foundAbscissa);
+          std::chrono::duration_cast<Duration>(
+          nextNode->GetTime()*foundAbscissa+locationOnRoute->GetTime()*(1.0-foundAbscissa));
         return true;
       }
       else {
@@ -253,9 +255,9 @@ namespace osmscout {
     std::list<RouteDescription::Node>::const_iterator nextWaypoint;          // next node with routing instructions
     OutputDescription<NodeDescriptionTmpl>            * outputDescription;    // next routing instructions
     Distance                                          distanceFromStart;     // current length from the beginning of the route (in meters)
-    double                                            durationFromStart;     // current (estimated) duration from the beginning of the route (in fract hours)
+    Duration                                          durationFromStart;     // current (estimated) duration from the beginning of the route
     Distance                                          distance;              // whole lenght of the route
-    double                                            duration;              // whole estimated duration of the route (in fraction of hours)
+    Duration                                          duration;              // whole estimated duration of the route
     Distance                                          snapDistanceInMeters;  // max distance from the route path to consider being on route
   };
 }

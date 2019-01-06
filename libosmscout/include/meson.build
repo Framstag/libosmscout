@@ -31,6 +31,7 @@ osmscoutHeader = [
             'osmscout/util/String.h',
             'osmscout/util/StringMatcher.h',
             'osmscout/util/Tiling.h',
+            'osmscout/util/Time.h',
             'osmscout/util/TileId.h',
             'osmscout/util/Transformation.h',
             'osmscout/util/WorkQueue.h',
