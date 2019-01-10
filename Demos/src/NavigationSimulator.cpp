@@ -245,7 +245,7 @@ public:
   Simulator();
   void Simulate(const osmscout::DatabaseRef& database,
                 const PathGenerator& generator,
-                const osmscout::RouteDescriptionRef& routePoints);
+                const osmscout::RouteDescriptionRef& routeDescription);
 };
 
 Simulator::Simulator()
@@ -307,7 +307,7 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
 
 void Simulator::Simulate(const osmscout::DatabaseRef& database,
                          const PathGenerator& generator,
-                         const osmscout::RouteDescriptionRef& routePoints)
+                         const osmscout::RouteDescriptionRef& routeDescription)
 {
   auto locationDescriptionService=std::make_shared<osmscout::LocationDescriptionService>(database);
 
@@ -325,7 +325,10 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
 
   // TODO: Simulator possibly should not send this message on start but later on to simulate driver starting before
   // getting route
-  auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(generator.steps.front().time,routePoints);
+  auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(
+      generator.steps.front().time,
+      routeDescription,
+      osmscout::Vehicle::vehicleCar);
 
   ProcessMessages(engine.Process(routeUpdateMessage));
 

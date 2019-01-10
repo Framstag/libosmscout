@@ -213,9 +213,11 @@ namespace osmscout {
   }
 
   RouteUpdateMessage::RouteUpdateMessage(const Timestamp& timestamp,
-                                         const RouteDescriptionRef &routeDescription)
+                                         const RouteDescriptionRef &routeDescription,
+                                         const osmscout::Vehicle &vehicle)
   : NavigationMessage(timestamp),
-    routeDescription(routeDescription)
+    routeDescription(routeDescription),
+    vehicle(vehicle)
   {
   }
 

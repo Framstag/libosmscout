@@ -133,10 +133,12 @@ namespace osmscout {
   struct OSMSCOUT_API RouteUpdateMessage CLASS_FINAL : public NavigationMessage
   {
     const RouteDescriptionRef routeDescription;
+    osmscout::Vehicle vehicle;
     // TODO: Add further route information
 
     RouteUpdateMessage(const Timestamp& timestamp,
-                       const RouteDescriptionRef &routeDescription);
+                       const RouteDescriptionRef &routeDescription,
+                       const osmscout::Vehicle &vehicle);
   };
 
   /**
