@@ -330,7 +330,11 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
   ProcessMessages(engine.Process(routeUpdateMessage));
 
   for (const auto& point : generator.steps) {
-    auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(point.time,point.coord,point.speed);
+    auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(
+        point.time,
+        point.coord,
+        point.speed,
+        osmscout::Distance::Of<osmscout::Meter>(10));
 
     ProcessMessages(engine.Process(gpsUpdateMessage));
 

@@ -35,10 +35,18 @@ namespace osmscout {
   {
     const GeoCoord currentPosition;
     const double   currentSpeed;
+    const Distance horizontalAccuracy;
 
+    /**
+     * @param timestamp
+     * @param currentPosition
+     * @param currentSpeed if negative, speed is not known
+     * @param horizontalAccuracy if negative, accuracy is not known
+     */
     GPSUpdateMessage(const Timestamp& timestamp,
                      const GeoCoord& currentPosition,
-                     double currentSpeed);
+                     double currentSpeed,
+                     const Distance &horizontalAccuracy);
   };
 
   struct OSMSCOUT_API PositionChangedMessage CLASS_FINAL : public NavigationMessage

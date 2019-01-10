@@ -25,10 +25,12 @@ namespace osmscout {
 
   GPSUpdateMessage::GPSUpdateMessage(const Timestamp& timestamp,
                                      const GeoCoord& currentPosition,
-                                     double currentSpeed)
+                                     double currentSpeed,
+                                     const Distance &horizontalAccuracy)
   : NavigationMessage(timestamp),
     currentPosition(currentPosition),
-    currentSpeed(currentSpeed)
+    currentSpeed(currentSpeed),
+    horizontalAccuracy(horizontalAccuracy)
   {
   }
 
