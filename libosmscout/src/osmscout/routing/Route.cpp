@@ -553,6 +553,11 @@ namespace osmscout {
     nodes.clear();
   }
 
+  bool RouteDescription::Empty() const
+  {
+    return nodes.empty();
+  }
+
   void RouteDescription::AddNode(DatabaseId database,
                                  size_t currentNodeIndex,
                                  const std::vector<ObjectFileRef>& objects,

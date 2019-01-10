@@ -245,7 +245,7 @@ public:
   Simulator();
   void Simulate(const osmscout::DatabaseRef& database,
                 const PathGenerator& generator,
-                const osmscout::RoutePointsRef& routePoints);
+                const osmscout::RouteDescriptionRef& routePoints);
 };
 
 Simulator::Simulator()
@@ -307,7 +307,7 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
 
 void Simulator::Simulate(const osmscout::DatabaseRef& database,
                          const PathGenerator& generator,
-                         const osmscout::RoutePointsRef& routePoints)
+                         const osmscout::RouteDescriptionRef& routePoints)
 {
   auto locationDescriptionService=std::make_shared<osmscout::LocationDescriptionService>(database);
 
@@ -632,7 +632,7 @@ int main(int argc, char* argv[])
 
   simulator.Simulate(database,
                      pathGenerator,
-                     routePointsResult.points);
+                     routeDescriptionResult.description);
 
   router->Close();
 

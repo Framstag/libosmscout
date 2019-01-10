@@ -692,6 +692,8 @@ namespace osmscout {
 
     void Clear();
 
+    bool Empty() const;
+
     void AddNode(DatabaseId database,
                  size_t currentNodeIndex,
                  const std::vector<ObjectFileRef>& objects,

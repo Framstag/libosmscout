@@ -211,9 +211,9 @@ namespace osmscout {
   }
 
   RouteUpdateMessage::RouteUpdateMessage(const Timestamp& timestamp,
-                                         const RoutePointsRef& points)
+                                         const RouteDescriptionRef &routeDescription)
   : NavigationMessage(timestamp),
-    points(points)
+    routeDescription(routeDescription)
   {
   }
 
@@ -243,7 +243,8 @@ namespace osmscout {
       auto routeUpdateMessage=dynamic_cast<RouteUpdateMessage*>(message.get());
 
       // TODO: Set state to new situation, this is just quick fake
-      if (routeUpdateMessage->points) {
+      if (routeUpdateMessage->routeDescription &&
+          !routeUpdateMessage->routeDescription->Empty()) {
         state=RouteStateChangedMessage::State::onRoute;
       }
       else {

@@ -124,11 +124,11 @@ namespace osmscout {
  */
   struct OSMSCOUT_API RouteUpdateMessage CLASS_FINAL : public NavigationMessage
   {
-    const RoutePointsRef points;
+    const RouteDescriptionRef routeDescription;
     // TODO: Add further route information
 
     RouteUpdateMessage(const Timestamp& timestamp,
-                       const RoutePointsRef& points);
+                       const RouteDescriptionRef &routeDescription);
   };
 
   /**
