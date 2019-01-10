@@ -134,7 +134,6 @@ namespace osmscout {
   {
     const RouteDescriptionRef routeDescription;
     osmscout::Vehicle vehicle;
-    // TODO: Add further route information
 
     RouteUpdateMessage(const Timestamp& timestamp,
                        const RouteDescriptionRef &routeDescription,
