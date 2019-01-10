@@ -145,6 +145,8 @@ namespace osmscout {
 
     bool PostProcessRouteDescription(RouteDescription &description,
                                      const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors);
+
+    virtual std::map<DatabaseId, std::string> GetDatabaseMapping() const;
   };
 
   //! \ingroup Service

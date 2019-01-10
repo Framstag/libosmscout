@@ -1629,6 +1629,7 @@ namespace osmscout {
   RouteDescriptionResult AbstractRoutingService<RoutingState>::TransformRouteDataToRouteDescription(const RouteData& data)
   {
     RouteDescriptionRef description=std::make_shared<RouteDescription>();
+    description->SetDatabaseMapping(GetDatabaseMapping());
 
     if (data.Entries().empty()) {
       return RouteDescriptionResult(description);

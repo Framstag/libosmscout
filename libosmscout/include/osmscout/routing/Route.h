@@ -25,6 +25,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <map>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
@@ -679,10 +680,15 @@ namespace osmscout {
 
   private:
     std::list<Node> nodes;
+    std::map<DatabaseId, std::string> databaseMapping;
 
   public:
     RouteDescription();
     virtual ~RouteDescription();
+
+    void SetDatabaseMapping(std::map<DatabaseId, std::string> databaseMapping);
+
+    std::map<DatabaseId, std::string> GetDatabaseMapping() const;
 
     void Clear();
 

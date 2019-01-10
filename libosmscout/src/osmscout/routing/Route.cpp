@@ -538,6 +538,16 @@ namespace osmscout {
     // no code
   }
 
+  void RouteDescription::SetDatabaseMapping(std::map<DatabaseId, std::string> databaseMapping)
+  {
+    this->databaseMapping = databaseMapping;
+  }
+
+  std::map<DatabaseId, std::string> RouteDescription::GetDatabaseMapping() const
+  {
+    return databaseMapping;
+  }
+
   void RouteDescription::Clear()
   {
     nodes.clear();

@@ -493,6 +493,15 @@ namespace osmscout {
                                                           junctionTypeNames);
   }
 
+  std::map<DatabaseId, std::string> MultiDBRoutingService::GetDatabaseMapping() const
+  {
+    std::map<DatabaseId, std::string> mapping;
+    for (auto &handle:handles){
+      mapping[handle.dbId]=handle.database->GetPath();
+    }
+    return mapping;
+  }
+
   // FIXME: I don't understand why these methods should be here...
   RouteDescriptionResult MultiDBRoutingService::TransformRouteDataToRouteDescription(const RouteData& data)
   {
