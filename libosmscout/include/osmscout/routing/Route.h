@@ -574,7 +574,7 @@ namespace osmscout {
       std::vector<ObjectFileRef>                     objects;
       ObjectFileRef                                  pathObject;
       size_t                                         targetNodeIndex;
-      Distance                                       distance;
+      Distance                                       distance; // distance from route start
       Timestamp::duration                            time; // time from route start
       GeoCoord                                       location;
       std::unordered_map<std::string,DescriptionRef> descriptionMap;

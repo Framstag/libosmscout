@@ -63,6 +63,7 @@ set(HEADER_FILES_ROUTING
 
 set(HEADER_FILES_NAVIGATION
     include/osmscout/navigation/Agents.h
+    include/osmscout/navigation/DataAgent.h
     include/osmscout/navigation/Engine.h
     include/osmscout/navigation/Navigation.h)
 
@@ -163,6 +164,7 @@ set(SOURCE_FILES
     src/osmscout/routing/TurnRestriction.cpp
     src/osmscout/routing/MultiDBRoutingState.cpp
     src/osmscout/navigation/Agents.cpp
+    src/osmscout/navigation/DataAgent.cpp
     src/osmscout/navigation/Engine.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
