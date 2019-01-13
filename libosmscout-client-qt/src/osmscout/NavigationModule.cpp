@@ -21,6 +21,7 @@
 
 namespace osmscout {
 
+/*
 NextStepDescriptionBuilder::NextStepDescriptionBuilder():
     roundaboutCrossingCounter(0),
     index(0)
@@ -54,14 +55,14 @@ void NextStepDescriptionBuilder::NextDescription(const Distance &distance,
     }
   }
 }
+*/
 
 NavigationModule::NavigationModule(QThread *thread,
                                    SettingsRef settings,
                                    DBThreadRef dbThread):
-  thread(thread), settings(settings), dbThread(dbThread),
-  navigation(&nextStepDescBuilder)
+  thread(thread), settings(settings), dbThread(dbThread)
 {
-  navigation.SetSnapDistance(Distance::Of<Meter>(40.0));
+
 }
 
 NavigationModule::~NavigationModule()
@@ -75,36 +76,109 @@ NavigationModule::~NavigationModule()
   }
 }
 
+void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
+{
+  for (const auto &message : messages) {
+    if (dynamic_cast<osmscout::PositionChangedMessage *>(message.get()) != nullptr) {
+      //auto positionChangedMessage=dynamic_cast<osmscout::PositionChangedMessage*>(message.get());
+    }
+  }
+}
+
+bool NavigationModule::loadRoutableObjects(const GeoBox &box,
+                                           const Vehicle &vehicle,
+                                           const std::map<std::string,DatabaseId> &databaseMapping,
+                                           std::map<DatabaseId,RoutableObjectsRef> &data)
+{
+  StopClock timer;
+
+  dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef> &databases){
+    Magnification magnification(Magnification::magClose);
+    for (auto &db:databases) {
+      auto dbIdIt=databaseMapping.find(db->database->GetPath());
+      if (dbIdIt==databaseMapping.end()){
+        continue; // this database was not used for routing
+      }
+      DatabaseId databaseId=dbIdIt->second;
+
+      MapService::TypeDefinition routableTypes;
+      for (auto &type:db->database->GetTypeConfig()->GetTypes()){
+        if (type->CanRoute(vehicle)){
+          if (type->CanBeArea()){
+            routableTypes.areaTypes.Set(type);
+          }
+          if (type->CanBeWay()){
+            routableTypes.wayTypes.Set(type);
+          }
+          if (type->CanBeNode()){ // can be node routable? :-)
+            routableTypes.nodeTypes.Set(type);
+          }
+        }
+      }
+
+      std::list<TileRef> tiles;
+      db->mapService->LookupTiles(magnification,box,tiles);
+      db->mapService->LoadMissingTileData(AreaSearchParameter{},
+                                          magnification,
+                                          routableTypes,
+                                          tiles);
+
+      auto objects=std::make_shared<RoutableObjects>();
+      for (auto &tile:tiles){
+        tile->GetWayData().CopyData([&](const WayRef &way){objects->ways[way->GetFileOffset()]=way;});
+        tile->GetAreaData().CopyData([&](const AreaRef &area){objects->areas[area->GetFileOffset()]=area;});
+      }
+      data[databaseId]=objects;
+    }
+  });
+
+  timer.Stop();
+  if (timer.GetMilliseconds() > 50){
+    log.Warn() << "Loading of routable objects took " << timer.ResultString();
+  }
+
+  return true;
+}
+
 void NavigationModule::setupRoute(LocationEntryRef /*target*/,
                                   QtRouteData route,
-                                  osmscout::Vehicle /*vehicle*/)
+                                  osmscout::Vehicle vehicle)
 {
   if (thread!=QThread::currentThread()){
     qWarning() << "setupRoute" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
   if (!route){
-    routeDescription.Clear();
-    navigation.Clear();
+    routeDescription = nullptr;
     return;
   }
   // create own copy of route description
-  routeDescription=route.routeDescription();
-  navigation.SetRoute(&routeDescription);
+  routeDescription=std::make_shared<RouteDescription>(route.routeDescription());
+
+  auto now = std::chrono::system_clock::now();
+  auto initializeMessage=std::make_shared<osmscout::InitializeMessage>(now);
+  ProcessMessages(engine.Process(initializeMessage));
+
+  auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(now,routeDescription,vehicle);
+  ProcessMessages(engine.Process(routeUpdateMessage));
 }
 
 void NavigationModule::locationChanged(osmscout::GeoCoord coord,
-                                       bool /*horizontalAccuracyValid*/,
-                                       double /*horizontalAccuracy*/) {
+                                       bool horizontalAccuracyValid,
+                                       double horizontalAccuracy) {
   if (thread!=QThread::currentThread()){
     qWarning() << "locationChanged" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
-  if (!navigation.HasRoute()) {
-    return;
-  }
 
-  double minDistance = 0;
-  bool onRoute = navigation.UpdateCurrentLocation(coord, minDistance);
-  RouteStep routeStep = navigation.nextWaypointDescription();
-  emit update(onRoute, routeStep);
+  auto now = std::chrono::system_clock::now();
+  auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(
+      now,
+      coord,
+      /*speed is not known*/-1,
+      Distance::Of<Meter>(horizontalAccuracyValid ? horizontalAccuracy: -1));
+
+  ProcessMessages(engine.Process(gpsUpdateMessage));
+
+  auto timeTickMessage=std::make_shared<osmscout::TimeTickMessage>(now);
+  ProcessMessages(engine.Process(timeTickMessage));
 }
 }

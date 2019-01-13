@@ -23,7 +23,11 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/Settings.h>
 #include <osmscout/Router.h>
+
 #include <osmscout/navigation/Navigation.h>
+#include <osmscout/navigation/Engine.h>
+#include <osmscout/navigation/Agents.h>
+#include <osmscout/navigation/DataAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -31,6 +35,7 @@
 
 namespace osmscout {
 
+/*
 class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder:
     public osmscout::OutputDescription<RouteStep> {
 
@@ -48,6 +53,7 @@ private:
   size_t          index;
   Distance        previousDistance;
 };
+*/
 
 /**
  * \ingroup QtAPI
@@ -72,16 +78,37 @@ public:
                    SettingsRef settings,
                    DBThreadRef dbThread);
 
+  bool loadRoutableObjects(const GeoBox &box,
+                           const Vehicle &vehicle,
+                           const std::map<std::string,DatabaseId> &databaseMapping,
+                           std::map<DatabaseId,RoutableObjectsRef> &data);
+
   virtual ~NavigationModule();
+
+private:
+  void ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages);
 
 private:
   QThread     *thread;
   SettingsRef settings;
   DBThreadRef dbThread;
 
-  NextStepDescriptionBuilder nextStepDescBuilder;
-  osmscout::RouteDescription routeDescription;
-  osmscout::Navigation<RouteStep> navigation;
+  //NextStepDescriptionBuilder nextStepDescBuilder;
+  osmscout::RouteDescriptionRef routeDescription;
+  //osmscout::Navigation<RouteStep> navigation;
+
+  using DataAgentInst=DataAgent<NavigationModule>;
+  using DataAgentRef=std::shared_ptr<DataAgentInst>;
+
+  DataAgentRef dataAgent{std::make_shared<osmscout::DataAgent<NavigationModule>>(*this)};
+
+  osmscout::NavigationEngine engine{
+      dataAgent,
+      std::make_shared<osmscout::PositionAgent>(),
+      //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
+      std::make_shared<osmscout::RouteStateAgent>(),
+  };
+
 };
 
 }
