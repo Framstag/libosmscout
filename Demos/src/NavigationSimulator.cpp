@@ -41,6 +41,7 @@
 
 #include <osmscout/navigation/Engine.h>
 #include <osmscout/navigation/Agents.h>
+#include <osmscout/navigation/PositionAgent.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 

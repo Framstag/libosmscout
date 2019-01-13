@@ -51,6 +51,8 @@ osmscoutHeader = [
             'osmscout/routing/TurnRestriction.h',
             'osmscout/routing/MultiDBRoutingState.h',
             'osmscout/navigation/Agents.h',
+            'osmscout/navigation/DataAgent.h',
+            'osmscout/navigation/PositionAgent.h',
             'osmscout/navigation/Engine.h',
             'osmscout/navigation/Navigation.h',
             'osmscout/Area.h',

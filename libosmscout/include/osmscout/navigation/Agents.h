@@ -69,37 +69,6 @@ namespace osmscout {
                           double bearing);
   };
 
-  class OSMSCOUT_API PositionAgent CLASS_FINAL : public NavigationAgent
-  {
-  private:
-    enum class State {
-      noCoord,
-      oneCoord,
-      twoCoords
-    };
-
-  private:
-    GeoCoord  previousPosition;
-    Timestamp previousCheckTime;
-
-    GeoCoord  currentPosition;
-    Timestamp currentCheckTime;
-    double    currentSpeed;
-
-    bool      hasBearing;
-    double    currentBearing;
-
-    State     currentState;
-
-  private:
-    void UpdateHistory(const GPSUpdateMessage* message);
-    std::list<NavigationMessageRef> UpdateBearing();
-
-  public:
-    PositionAgent();
-    std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
-  };
-
   struct OSMSCOUT_API StreetChangedMessage CLASS_FINAL : public NavigationMessage
   {
     const std::string name;
