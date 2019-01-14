@@ -33,6 +33,7 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
+#include <QTimer>
 
 namespace osmscout {
 
@@ -74,6 +75,8 @@ public slots:
                        bool /*horizontalAccuracyValid*/,
                        double /*horizontalAccuracy*/);
 
+  void onTimeout();
+
 public:
   NavigationModule(QThread *thread,
                    SettingsRef settings,
@@ -93,6 +96,7 @@ private:
   QThread     *thread;
   SettingsRef settings;
   DBThreadRef dbThread;
+  QTimer      timer;
 
   //NextStepDescriptionBuilder nextStepDescBuilder;
   osmscout::RouteDescriptionRef routeDescription;

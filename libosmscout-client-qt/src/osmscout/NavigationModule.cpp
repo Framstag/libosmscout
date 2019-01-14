@@ -62,7 +62,8 @@ NavigationModule::NavigationModule(QThread *thread,
                                    DBThreadRef dbThread):
   thread(thread), settings(settings), dbThread(dbThread)
 {
-
+  timer.moveToThread(thread); // constructor is called from different thread!
+  connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
 }
 
 NavigationModule::~NavigationModule()
@@ -90,7 +91,7 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
                                            const std::map<std::string,DatabaseId> &databaseMapping,
                                            std::map<DatabaseId,RoutableObjectsRef> &data)
 {
-  StopClock timer;
+  StopClock stopClock;
 
   dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef> &databases){
     Magnification magnification(Magnification::magClose);
@@ -132,9 +133,9 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
     }
   });
 
-  timer.Stop();
-  if (timer.GetMilliseconds() > 50){
-    log.Warn() << "Loading of routable objects took " << timer.ResultString();
+  stopClock.Stop();
+  if (stopClock.GetMilliseconds() > 50){
+    log.Warn() << "Loading of routable objects took " << stopClock.ResultString();
   }
 
   return true;
@@ -149,6 +150,9 @@ void NavigationModule::setupRoute(LocationEntryRef /*target*/,
   }
   if (!route){
     routeDescription = nullptr;
+    if (timer.isActive()) {
+      timer.stop();
+    }
     return;
   }
   // create own copy of route description
@@ -159,6 +163,15 @@ void NavigationModule::setupRoute(LocationEntryRef /*target*/,
   ProcessMessages(engine.Process(initializeMessage));
 
   auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(now,routeDescription,vehicle);
+  ProcessMessages(engine.Process(routeUpdateMessage));
+
+  timer.start(1000);
+}
+
+void NavigationModule::onTimeout()
+{
+  auto now = std::chrono::system_clock::now();
+  auto routeUpdateMessage=std::make_shared<osmscout::TimeTickMessage>(now);
   ProcessMessages(engine.Process(routeUpdateMessage));
 }
 
