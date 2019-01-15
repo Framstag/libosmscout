@@ -168,6 +168,14 @@ namespace osmscout {
     }
   };
 
+  inline Distance Meters(double m){
+    return Distance::Of<Meter>(m);
+  }
+
+  inline Distance Kilometers(double km){
+    return Distance::Of<Kilometer>(km);
+  }
+
 }
 
 #endif //OSMSCOUT_DISTANCE_H
