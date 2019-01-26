@@ -85,7 +85,7 @@ public:
   bool loadRoutableObjects(const GeoBox &box,
                            const Vehicle &vehicle,
                            const std::map<std::string,DatabaseId> &databaseMapping,
-                           std::map<DatabaseId,RoutableObjectsRef> &data);
+                           RoutableObjectsRef &data);
 
   virtual ~NavigationModule();
 

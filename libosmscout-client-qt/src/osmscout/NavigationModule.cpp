@@ -89,9 +89,12 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
 bool NavigationModule::loadRoutableObjects(const GeoBox &box,
                                            const Vehicle &vehicle,
                                            const std::map<std::string,DatabaseId> &databaseMapping,
-                                           std::map<DatabaseId,RoutableObjectsRef> &data)
+                                           RoutableObjectsRef &data)
 {
   StopClock stopClock;
+
+  assert(data);
+  data->bbox=box;
 
   dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef> &databases){
     Magnification magnification(Magnification::magClose);
@@ -124,12 +127,12 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
                                           routableTypes,
                                           tiles);
 
-      auto objects=std::make_shared<RoutableObjects>();
+      RoutableDBObjects &objects=data->dbMap[databaseId];
+      objects.typeConfig=db->database->GetTypeConfig();
       for (auto &tile:tiles){
-        tile->GetWayData().CopyData([&](const WayRef &way){objects->ways[way->GetFileOffset()]=way;});
-        tile->GetAreaData().CopyData([&](const AreaRef &area){objects->areas[area->GetFileOffset()]=area;});
+        tile->GetWayData().CopyData([&](const WayRef &way){objects.ways[way->GetFileOffset()]=way;});
+        tile->GetAreaData().CopyData([&](const AreaRef &area){objects.areas[area->GetFileOffset()]=area;});
       }
-      data[databaseId]=objects;
     }
   });
 

@@ -18,6 +18,9 @@
  */
 
 #include <osmscout/navigation/PositionAgent.h>
+#include <osmscout/navigation/DataAgent.h>
+
+#include <chrono>
 
 namespace osmscout {
 
@@ -45,93 +48,155 @@ namespace osmscout {
   {
   }
 
-  PositionAgent::PositionAgent()
-      : hasBearing(false),
-        currentState(State::noCoord)
+  PositionAgent::GpsPositionState PositionAgent::GpsPosition::GetState(const Timestamp &now) const
   {
-  }
-
-  void PositionAgent::UpdateHistory(const GPSUpdateMessage* message)
-  {
-    previousPosition=currentPosition;
-    previousCheckTime=currentCheckTime;
-
-    currentPosition=message->currentPosition;
-    currentCheckTime=message->timestamp;
-    currentSpeed=message->currentSpeed;
-
-    switch (currentState) {
-      case State::noCoord:
-        currentState=State::oneCoord;
-        break;
-      case State::oneCoord:
-        currentState=State::twoCoords;
-        break;
-      case State::twoCoords:
-        break;
+    using namespace std::chrono;
+    if (now-lastUpdate > seconds(2)){
+      return Outdated;
     }
+    if (horizontalAccuracy > Meters(100)){
+      return LowAccuracy;
+    }
+    return Good;
   }
 
-  std::list<NavigationMessageRef> PositionAgent::UpdateBearing()
+  GeoBox PositionAgent::GpsPosition::GetGeoBox() const
   {
-    std::list<NavigationMessageRef> result;
+    return GeoBox::BoxByCenterAndRadius(position,Meters(std::max(0.0,horizontalAccuracy.AsMeter())));
+  }
 
-    if (currentState==State::twoCoords) {
-      hasBearing=true;
+  void PositionAgent::GpsPosition::Update(const Timestamp &time,
+                                          const GeoCoord &position,
+                                          const Distance &horizontalAccuracy)
+  {
+    this->lastUpdate=time;
+    this->position=position;
+    this->horizontalAccuracy=horizontalAccuracy;
+  }
 
-      double newBearing=GetSphericalBearingInitial(previousPosition,currentPosition);
+  namespace {
+    bool Includes(const RoutableObjectsRef &routableObjects,
+                  const GeoBox &box){
 
-      if (currentBearing!=newBearing) {
-        currentBearing=newBearing;
+      return routableObjects &&
+          routableObjects->bbox.IsValid() &&
+          routableObjects->bbox.Includes(box.GetMinCoord(), false) &&
+          routableObjects->bbox.Includes(box.GetMaxCoord(), false);
+    }
 
-        result.push_back(std::make_shared<BearingChangedMessage>(currentCheckTime,
-                                                                 currentBearing));
+    PositionAgent::PositionOnRoutableObject findNearest(const GeoCoord &coord,
+        const RoutableObjectsRef &routableObjects)
+    {
+      assert(routableObjects);
+
+      auto lookupArea=GeoBox::BoxByCenterAndRadius(coord,Meters(30));
+      double nearest=std::numeric_limits<double>::max();
+
+      PositionAgent::PositionOnRoutableObject position;
+
+      for (auto &e:routableObjects->dbMap){
+        DatabaseId dbId=e.first;
+        RoutableDBObjects &objs=e.second;
+
+        for (auto &w:objs.ways){
+          assert(w.second);
+          if (w.second->GetBoundingBox().Intersects(lookupArea)){
+            double distance=std::numeric_limits<double>::max();
+            GeoCoord p;
+            GeoCoord nearestPoint;
+            for (size_t i=1; i<w.second->nodes.size(); i++){
+              double d = CalculateDistancePointToLineSegment(coord,
+                                    w.second->nodes[i-1].GetCoord(),
+                                    w.second->nodes[i].GetCoord(),
+                                    p);
+              if (d<distance){
+                distance=d;
+                nearestPoint=p;
+              }
+            }
+            if (distance<nearest){
+              position.coord=nearestPoint;
+              position.way=w.second;
+              position.wayDb=dbId;
+              position.area.reset();
+            }
+          }
+        }
+        for (auto &a:objs.areas){
+          assert(a.second);
+          if (a.second->GetBoundingBox().Includes(coord, false)){
+            // TODO
+          }
+        }
       }
+      return position;
     }
+  }
 
-    return result;
+  PositionAgent::PositionAgent()
+  {
   }
 
   std::list<NavigationMessageRef> PositionAgent::Process(const NavigationMessageRef& message)
   {
     std::list<NavigationMessageRef> result;
+    auto now=message->timestamp;
 
     if (dynamic_cast<GPSUpdateMessage*>(message.get())!=nullptr) {
       auto gpsUpdateMessage=dynamic_cast<GPSUpdateMessage*>(message.get());
+      // ignore gps update when we accuracy is too low and we have good data already
+      if (position.GetState(now)!=Good ||
+          gpsUpdateMessage->horizontalAccuracy < Meters(100)){
+        position.Update(now,
+                        gpsUpdateMessage->currentPosition,
+                        gpsUpdateMessage->horizontalAccuracy);
 
-      UpdateHistory(gpsUpdateMessage);
-
-      auto bearingMessages=UpdateBearing();
-
-      result.insert(result.end(),bearingMessages.begin(),bearingMessages.end());
-
-      result.push_back(std::make_shared<PositionChangedMessage>(gpsUpdateMessage->timestamp,
-                                                                gpsUpdateMessage->currentPosition,
-                                                                gpsUpdateMessage->currentSpeed));
-    }
-    else if (dynamic_cast<TimeTickMessage*>(message.get())!=nullptr) {
-      auto now=message->timestamp;
-
-      if (currentState==State::twoCoords &&
-          hasBearing &&
-          now-currentCheckTime>std::chrono::seconds(5)) {
-        previousPosition=currentPosition;
-        previousCheckTime=currentCheckTime;
-
-        auto timeSpanInHours=std::chrono::duration_cast<std::chrono::hours>(now-currentCheckTime).count();
-        auto distance=osmscout::Distance::Of<osmscout::Kilometer>(currentSpeed*timeSpanInHours);
-
-        currentPosition=previousPosition.Add(currentBearing*180/M_PI,
-                                             distance);
-        currentCheckTime=message->timestamp;
-
-
-        result.push_back(std::make_shared<PositionChangedMessage>(message->timestamp,
-                                                                  currentPosition,
-                                                                  currentSpeed));
+        if (!Includes(routableObjects,position.GetGeoBox())){
+          // we don't have routable data for current position, request data
+          GeoBox requestBox = position.GetGeoBox();
+          requestBox.Include(GeoBox::BoxByCenterAndRadius(position.position, Meters(200)));
+          result.push_back(std::make_shared<RoutableObjectsRequestMessage>(now, requestBox));
+        }
+      }
+    } else if (dynamic_cast<RoutableObjectsMessage*>(message.get())!=nullptr){
+      auto msg=dynamic_cast<RoutableObjectsMessage*>(message.get());
+      if (position.GetState(now)==Good && Includes(msg->data,position.GetGeoBox())){
+        this->routableObjects = msg->data;
       }
     }
 
+    if (!Includes(routableObjects,position.GetGeoBox())){
+      return result;
+    }
+
+    using namespace std::chrono;
+    if (now-lastUpdate < milliseconds(500)){
+      return result;
+    }
+
+    // TODO
+    PositionAgent::PositionOnRoutableObject objectPosition=findNearest(position.position, routableObjects);
+    if (objectPosition.way) {
+      assert(routableObjects->dbMap.find(objectPosition.wayDb)!=routableObjects->dbMap.end());
+      TypeConfigRef typeConfig = routableObjects->dbMap[objectPosition.wayDb].typeConfig;
+      assert(typeConfig);
+      MaxSpeedFeatureValueReader maxSpeedReader(*typeConfig);
+      AccessFeatureValueReader accessReader(*typeConfig);
+      AccessRestrictedFeatureValueReader restrictionsReader(*typeConfig);
+      TunnelFeatureReader tunnelReader(*typeConfig);
+
+      bool tunnel = tunnelReader.IsSet(objectPosition.way->GetFeatureValueBuffer());
+      log.Info() << "Here: " << objectPosition.coord.GetDisplayText();
+      log.Info() << "Tunnel: " << tunnel;
+
+      auto maxSpeed = maxSpeedReader.GetValue(objectPosition.way->GetFeatureValueBuffer());
+      if (maxSpeed){
+        log.Info() << "Max speed: " << maxSpeed->GetMaxSpeed();
+      }
+
+    }
+
+    lastUpdate = now;
     return result;
   }
 

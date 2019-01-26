@@ -21,7 +21,11 @@
 
 namespace osmscout {
 
-  RoutableObjectsUpdateMessage::RoutableObjectsUpdateMessage(const Timestamp& timestamp):
-      NavigationMessage(timestamp)
+  RoutableObjectsRequestMessage::RoutableObjectsRequestMessage(const Timestamp& timestamp, const GeoBox &bbox):
+      NavigationMessage(timestamp), bbox(bbox)
+  {}
+
+  RoutableObjectsMessage::RoutableObjectsMessage(const Timestamp& timestamp, const RoutableObjectsRef &data):
+      NavigationMessage(timestamp), data(data)
   {}
 }

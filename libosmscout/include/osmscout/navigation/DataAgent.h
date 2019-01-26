@@ -27,25 +27,39 @@
 
 namespace osmscout {
 
-  struct OSMSCOUT_API RoutableObjects
+  struct OSMSCOUT_API RoutableDBObjects
   {
+    TypeConfigRef typeConfig;
     std::map<FileOffset,WayRef>  ways;
     std::map<FileOffset,AreaRef> areas;
   };
 
+  struct OSMSCOUT_API RoutableObjects
+  {
+    std::map<DatabaseId, RoutableDBObjects> dbMap;
+    GeoBox bbox;
+  };
+
   using RoutableObjectsRef=std::shared_ptr<RoutableObjects>;
+
+  struct OSMSCOUT_API RoutableObjectsRequestMessage CLASS_FINAL : public NavigationMessage
+  {
+    GeoBox bbox;
+
+    RoutableObjectsRequestMessage(const Timestamp& timestamp, const GeoBox &bbox);
+  };
 
   /**
    * Message to pass to the NavigationEngine with routable objects around current possition
    */
-  struct OSMSCOUT_API RoutableObjectsUpdateMessage CLASS_FINAL : public NavigationMessage
+  struct OSMSCOUT_API RoutableObjectsMessage CLASS_FINAL : public NavigationMessage
   {
-    std::map<DatabaseId,RoutableObjectsRef> data;
+    RoutableObjectsRef data;
 
-    RoutableObjectsUpdateMessage(const Timestamp& timestamp);
+    RoutableObjectsMessage(const Timestamp& timestamp, const RoutableObjectsRef &data);
   };
 
-  using RoutableObjectsUpdateMessageRef=std::shared_ptr<RoutableObjectsUpdateMessage>;
+  using RoutableObjectsMessageRef=std::shared_ptr<RoutableObjectsMessage>;
 
   template <typename DataLoader>
   class OSMSCOUT_API DataAgent CLASS_FINAL : public NavigationAgent
@@ -74,13 +88,15 @@ namespace osmscout {
           databaseMapping[e.second]=e.first;
         }
         vehicle=routeUpdateMessage->vehicle;
-      } else if (dynamic_cast<GPSUpdateMessage*>(message.get())!=nullptr) {
-        auto gpsUpdateMessage=dynamic_cast<GPSUpdateMessage*>(message.get());
-        GeoBox box=GeoBox::BoxByCenterAndRadius(gpsUpdateMessage->currentPosition,Distance::Of<Meter>(200));
+      } else if (dynamic_cast<RoutableObjectsRequestMessage*>(message.get())!=nullptr) {
+        if (databaseMapping.empty()){
+          return result; // no route yet
+        }
+        auto requestMessage=dynamic_cast<RoutableObjectsRequestMessage*>(message.get());
 
-        auto msg=std::make_shared<RoutableObjectsUpdateMessage>(gpsUpdateMessage->timestamp);
+        auto msg=std::make_shared<RoutableObjectsMessage>(requestMessage->timestamp, std::make_shared<RoutableObjects>());
 
-        dataLoader.loadRoutableObjects(box,
+        dataLoader.loadRoutableObjects(requestMessage->bbox,
             vehicle,
             databaseMapping,
             msg->data);
