@@ -21,6 +21,44 @@
 
 namespace osmscout {
 
+  WayRef RoutableObjects::GetWay(const DatabaseId &dbId, const ObjectFileRef &objRef) const
+  {
+    if (!objRef.Valid()){
+      return {};
+    }
+    if (objRef.GetType()!=RefType::refWay){
+      return {};
+    }
+    auto objMap=dbMap.find(dbId);
+    if (objMap==dbMap.end()){
+      return {};
+    }
+    auto objEntry=objMap->second.ways.find(objRef.GetFileOffset());
+    if (objEntry==objMap->second.ways.end()){
+      return {};
+    }
+    return objEntry->second;
+  }
+
+  AreaRef RoutableObjects::GetArea(const DatabaseId &dbId, const ObjectFileRef &objRef) const
+  {
+    if (!objRef.Valid()){
+      return {};
+    }
+    if (objRef.GetType()!=RefType::refWay){
+      return {};
+    }
+    auto objMap=dbMap.find(dbId);
+    if (objMap==dbMap.end()){
+      return {};
+    }
+    auto objEntry=objMap->second.areas.find(objRef.GetFileOffset());
+    if (objEntry==objMap->second.areas.end()){
+      return {};
+    }
+    return objEntry->second;
+  }
+
   RoutableObjectsRequestMessage::RoutableObjectsRequestMessage(const Timestamp& timestamp, const GeoBox &bbox):
       NavigationMessage(timestamp), bbox(bbox)
   {}

@@ -45,6 +45,7 @@ namespace osmscout {
       Distance horizontalAccuracy{Meters(2000)};
 
       GpsPositionState GetState(const Timestamp &now) const;
+      std::string GetStateStr(const Timestamp &now) const;
 
       GeoBox GetGeoBox() const;
 
@@ -53,23 +54,61 @@ namespace osmscout {
                   const Distance &horizontalAccuracy);
     };
 
-    struct PositionOnRoutableObject {
-      GeoCoord coord;
-      WayRef way;
-      DatabaseId wayDb;
-      AreaRef area;
-      DatabaseId areaDb;
+    enum PositionState {
+      NoGpsSignal,
+      OnRoute,
+      OffRoute,
+      EstimateInTunnel
     };
 
+    struct Position {
+      PositionState state{PositionState::NoGpsSignal};
+      GeoCoord coord;
+      std::list<RouteDescription::Node>::const_iterator routeNode; // last passed node on the route
+
+      // resolved object
+      DatabaseId databaseId;
+      TypeConfigRef typeConfig;
+      WayRef way;
+      AreaRef area;
+
+      std::string StateStr() const;
+    };
+
+    /**
+     * Message with estimated possition
+     */
+    struct OSMSCOUT_API PositionMessage CLASS_FINAL : public NavigationMessage
+    {
+      RouteDescriptionRef route;
+      Position position;
+
+      PositionMessage(const Timestamp& timestamp, const RouteDescriptionRef &route, const Position position);
+    };
+
+    using PositionMessageRef=std::shared_ptr<PositionMessage>;
+
   private:
-    GpsPosition position;
+    GpsPosition gps;
     Timestamp lastUpdate; // last update of agent state
     RoutableObjectsRef routableObjects; // routable objects around current position
+    RouteDescriptionRef route; // current route description
+    osmscout::Vehicle vehicle; // current vehicle
+    Position position;
+    Distance snapDistanceInMeters{Meters(20)}; // max distance from the route path to consider being on route
 
   public:
     PositionAgent();
 
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
+
+  private:
+    bool SearchClosestSegment(const GeoCoord& location,
+                              const std::list<RouteDescription::Node>::const_iterator locationOnRoute,
+                              GeoCoord &closestPosition,
+                              std::list<RouteDescription::Node>::const_iterator& foundNode,
+                              double& foundAbscissa,
+                              double& minDistance);
   };
 
 }

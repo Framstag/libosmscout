@@ -38,6 +38,10 @@ namespace osmscout {
   {
     std::map<DatabaseId, RoutableDBObjects> dbMap;
     GeoBox bbox;
+
+    WayRef GetWay(const DatabaseId &dbId, const ObjectFileRef &objRef) const;
+
+    AreaRef GetArea(const DatabaseId &dbId, const ObjectFileRef &areaRef) const;
   };
 
   using RoutableObjectsRef=std::shared_ptr<RoutableObjects>;
@@ -100,6 +104,8 @@ namespace osmscout {
             vehicle,
             databaseMapping,
             msg->data);
+
+        // TODO: load all route objects too
 
         result.push_back(msg);
       }
