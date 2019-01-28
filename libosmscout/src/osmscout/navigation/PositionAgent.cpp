@@ -211,8 +211,8 @@ namespace osmscout {
       if (gps.GetState(now)!=Good ||
           gpsUpdateMessage->horizontalAccuracy < Meters(100)){
         gps.Update(now,
-                        gpsUpdateMessage->currentPosition,
-                        gpsUpdateMessage->horizontalAccuracy);
+                   gpsUpdateMessage->currentPosition,
+                   gpsUpdateMessage->horizontalAccuracy);
 
         if (!Includes(routableObjects,gps.GetGeoBox())){
           // we don't have routable data for current position, request data
