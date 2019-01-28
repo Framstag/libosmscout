@@ -55,6 +55,7 @@ osmscoutHeader = [
             'osmscout/navigation/PositionAgent.h',
             'osmscout/navigation/Engine.h',
             'osmscout/navigation/Navigation.h',
+            'osmscout/navigation/RouteStateAgent.h',
             'osmscout/Area.h',
             'osmscout/AreaDataFile.h',
             'osmscout/AreaAreaIndex.h',

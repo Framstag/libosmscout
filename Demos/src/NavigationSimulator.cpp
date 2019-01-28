@@ -43,6 +43,7 @@
 #include <osmscout/navigation/Engine.h>
 #include <osmscout/navigation/Agents.h>
 #include <osmscout/navigation/PositionAgent.h>
+#include <osmscout/navigation/RouteStateAgent.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 
@@ -352,6 +353,30 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
 
       std::cout << osmscout::TimestampToISO8601TimeString(streetChangedMessage->timestamp)
       << " Street name: " << streetChangedMessage->name << std::endl;
+    }
+    else if (dynamic_cast<osmscout::RerouteRequestMessage*>(message.get())!=nullptr) {
+      auto rerouteRequest=dynamic_cast<osmscout::RerouteRequestMessage*>(message.get());
+
+      std::cout << osmscout::TimestampToISO8601TimeString(rerouteRequest->timestamp)
+                << " Reroute request: " << rerouteRequest->from.GetDisplayText()
+                << (rerouteRequest->initialBearing > 0 ? (" (" + osmscout::BearingDisplayString(rerouteRequest->initialBearing) + ")") : "")
+                << " -> " << rerouteRequest->to.GetDisplayText()
+                << std::endl;
+
+    }
+    else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
+      auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+
+      if (targetReachedMessage->targetDistance < osmscout::Meters(1)){
+        std::cout << osmscout::TimestampToISO8601TimeString(targetReachedMessage->timestamp)
+                  << " TargetReached"
+                  << std::endl;
+      }else {
+        std::cout << osmscout::TimestampToISO8601TimeString(targetReachedMessage->timestamp)
+                  << " TargetReached: in " << targetReachedMessage->targetDistance.AsMeter() << " m,"
+                  << " direction: " << osmscout::BearingDisplayString(targetReachedMessage->targetBearing)
+                  << std::endl;
+      }
     }
     else if (dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get())!=nullptr) {
       auto positionMessage=dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());

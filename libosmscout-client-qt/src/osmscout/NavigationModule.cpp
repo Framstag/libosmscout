@@ -80,8 +80,18 @@ NavigationModule::~NavigationModule()
 void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
 {
   for (const auto &message : messages) {
-    if (dynamic_cast<osmscout::PositionChangedMessage *>(message.get()) != nullptr) {
-      //auto positionChangedMessage=dynamic_cast<osmscout::PositionChangedMessage*>(message.get());
+    if (dynamic_cast<PositionAgent::PositionMessage *>(message.get()) != nullptr) {
+      auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+      auto &position=positionMessage->position;
+      emit positionEstimate(position.state, position.coord);
+    }
+    else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
+      auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+      emit targetReached(targetReachedMessage->targetBearing,targetReachedMessage->targetDistance);
+    }
+    else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
+      auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
+      emit rerouteRequest(req->from, req->initialBearing, req->to);
     }
   }
 }

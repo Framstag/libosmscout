@@ -29,6 +29,7 @@
 #include <osmscout/navigation/Agents.h>
 #include <osmscout/navigation/DataAgent.h>
 #include <osmscout/navigation/PositionAgent.h>
+#include <osmscout/navigation/RouteStateAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -65,6 +66,13 @@ class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
 
 signals:
   void update(bool onRoute, RouteStep routeStep);
+  void rerouteRequest(const GeoCoord from,
+                      double initialBearing,
+                      const GeoCoord to);
+
+  void positionEstimate(PositionAgent::PositionState state, GeoCoord coord);
+
+  void targetReached(double targetBearing, Distance targetDistance);
 
 public slots:
   void setupRoute(LocationEntryRef target,

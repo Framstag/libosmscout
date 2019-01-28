@@ -109,33 +109,6 @@ namespace osmscout {
                        const osmscout::Vehicle &vehicle);
   };
 
-  /**
-   * Message created if the state of the navigation in relation to the route changed.
- */
-  struct OSMSCOUT_API RouteStateChangedMessage CLASS_FINAL : public NavigationMessage
-  {
-    enum class State {
-      noRoute,
-      onRoute,
-      offRoute
-    };
-
-    const State state;
-
-    RouteStateChangedMessage(const Timestamp& timestamp,
-                             State state);
-  };
-
-  class OSMSCOUT_API RouteStateAgent CLASS_FINAL : public NavigationAgent
-  {
-  private:
-    RouteStateChangedMessage::State state;
-
-  public:
-    explicit RouteStateAgent();
-    std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
-  };
-
 }
 
 #endif
