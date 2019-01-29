@@ -49,26 +49,7 @@ namespace osmscout {
                      const Distance &horizontalAccuracy);
   };
 
-  struct OSMSCOUT_API PositionChangedMessage CLASS_FINAL : public NavigationMessage
-  {
-    const GeoCoord currentPosition;
-    const double   currentSpeed;
-
-    PositionChangedMessage(const Timestamp& timestamp,
-                           const GeoCoord& currentPosition,
-                           double currentSpeed);
-  };
-
-  struct OSMSCOUT_API BearingChangedMessage CLASS_FINAL : public NavigationMessage
-  {
-    const bool hasBearing;
-    const double bearing;
-
-    explicit BearingChangedMessage(const Timestamp& timestamp);
-    BearingChangedMessage(const Timestamp& timestamp,
-                          double bearing);
-  };
-
+  /*
   struct OSMSCOUT_API StreetChangedMessage CLASS_FINAL : public NavigationMessage
   {
     const std::string name;
@@ -93,6 +74,7 @@ namespace osmscout {
     explicit CurrentStreetAgent(const LocationDescriptionServiceRef& locationDescriptionService);
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
   };
+  */
 
   /**
    * Message to pass to the NavigationEngine each time the calculated route changes.

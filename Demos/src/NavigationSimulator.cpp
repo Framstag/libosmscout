@@ -44,6 +44,7 @@
 #include <osmscout/navigation/Agents.h>
 #include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/navigation/RouteStateAgent.h>
+#include <osmscout/navigation/BearingAgent.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 
@@ -334,13 +335,10 @@ bool DataLoader::loadRoutableObjects(const osmscout::GeoBox &box,
 void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
 {
   for (const auto& message : messages) {
-    if (dynamic_cast<osmscout::PositionChangedMessage*>(message.get())!=nullptr) {
-      //auto positionChangedMessage=dynamic_cast<osmscout::PositionChangedMessage*>(message.get());
-    }
     if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
 
-      auto bearingString=bearingChangedMessage->hasBearing ? osmscout::BearingDisplayString(bearingChangedMessage->bearing) : "";
+      auto bearingString=osmscout::BearingDisplayString(bearingChangedMessage->bearing);
       if (lastBearingString!=bearingString) {
         std::cout << osmscout::TimestampToISO8601TimeString(bearingChangedMessage->timestamp)
         << " Bearing: " << bearingString << std::endl;
@@ -348,12 +346,14 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
         lastBearingString=bearingString;
       }
     }
+    /*
     else if (dynamic_cast<osmscout::StreetChangedMessage*>(message.get())!=nullptr) {
       auto streetChangedMessage=dynamic_cast<osmscout::StreetChangedMessage*>(message.get());
 
       std::cout << osmscout::TimestampToISO8601TimeString(streetChangedMessage->timestamp)
       << " Street name: " << streetChangedMessage->name << std::endl;
     }
+    */
     else if (dynamic_cast<osmscout::RerouteRequestMessage*>(message.get())!=nullptr) {
       auto rerouteRequest=dynamic_cast<osmscout::RerouteRequestMessage*>(message.get());
 
@@ -406,7 +406,8 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
   osmscout::NavigationEngine engine{
     std::make_shared<osmscout::DataAgent<DataLoader>>(dataLoader),
     std::make_shared<osmscout::PositionAgent>(),
-    std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
+    std::make_shared<osmscout::BearingAgent>(),
+    //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
     std::make_shared<osmscout::RouteStateAgent>(),
   };
 

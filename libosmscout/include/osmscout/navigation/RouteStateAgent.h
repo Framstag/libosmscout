@@ -56,8 +56,6 @@ namespace osmscout {
                          const Distance &targetDistance);
   };
 
-
-
   class OSMSCOUT_API RouteStateAgent CLASS_FINAL : public NavigationAgent
   {
   private:

@@ -46,6 +46,7 @@ osmscoutSrc = [
             'src/osmscout/routing/TurnRestriction.cpp',
             'src/osmscout/routing/MultiDBRoutingState.cpp',
             'src/osmscout/navigation/Agents.cpp',
+            'src/osmscout/navigation/BearingAgent.cpp',
             'src/osmscout/navigation/DataAgent.cpp',
             'src/osmscout/navigation/PositionAgent.cpp',
             'src/osmscout/navigation/RouteStateAgent.cpp',

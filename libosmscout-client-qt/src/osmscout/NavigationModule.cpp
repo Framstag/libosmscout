@@ -200,7 +200,7 @@ void NavigationModule::locationChanged(osmscout::GeoCoord coord,
       now,
       coord,
       /*speed is not known*/-1,
-      Distance::Of<Meter>(horizontalAccuracyValid ? horizontalAccuracy: -1));
+      Meters(horizontalAccuracyValid ? horizontalAccuracy: -1));
 
   ProcessMessages(engine.Process(gpsUpdateMessage));
 

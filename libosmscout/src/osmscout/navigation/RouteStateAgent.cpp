@@ -20,6 +20,7 @@
 
 #include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/navigation/RouteStateAgent.h>
+#include <osmscout/navigation/BearingAgent.h>
 
 #include <chrono>
 
@@ -67,10 +68,10 @@ namespace osmscout {
         target = routeUpdateMessage->routeDescription->Nodes().rbegin()->GetLocation();
         targetSetup = true;
       }
-    } else     if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
+    } else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
 
-      bearing = bearingChangedMessage->hasBearing ? bearingChangedMessage->bearing : -1;
+      bearing = bearingChangedMessage->bearing;
 
     } else if (dynamic_cast<PositionAgent::PositionMessage*>(message.get())!=nullptr) {
       auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());

@@ -30,6 +30,7 @@
 #include <osmscout/navigation/DataAgent.h>
 #include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/navigation/RouteStateAgent.h>
+#include <osmscout/navigation/BearingAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -66,6 +67,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
 
 signals:
   void update(bool onRoute, RouteStep routeStep);
+
   void rerouteRequest(const GeoCoord from,
                       double initialBearing,
                       const GeoCoord to);
@@ -79,9 +81,14 @@ public slots:
                   QtRouteData route,
                   osmscout::Vehicle vehicle);
 
+  /**
+   * @param coord
+   * @param horizontalAccuracyValid
+   * @param horizontalAccuracy [meters]
+   */
   void locationChanged(osmscout::GeoCoord coord,
-                       bool /*horizontalAccuracyValid*/,
-                       double /*horizontalAccuracy*/);
+                       bool horizontalAccuracyValid,
+                       double horizontalAccuracy);
 
   void onTimeout();
 
@@ -118,6 +125,7 @@ private:
   osmscout::NavigationEngine engine{
       dataAgent,
       std::make_shared<osmscout::PositionAgent>(),
+      std::make_shared<osmscout::BearingAgent>(),
       //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
       std::make_shared<osmscout::RouteStateAgent>(),
   };

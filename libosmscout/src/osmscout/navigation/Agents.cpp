@@ -34,6 +34,7 @@ namespace osmscout {
   {
   }
 
+  /*
   StreetChangedMessage::StreetChangedMessage(const Timestamp& timestamp,
                                              const std::string& name)
   : NavigationMessage(timestamp),
@@ -97,6 +98,7 @@ namespace osmscout {
 
     return result;
   }
+  */
 
   RouteUpdateMessage::RouteUpdateMessage(const Timestamp& timestamp,
                                          const RouteDescriptionRef &routeDescription,

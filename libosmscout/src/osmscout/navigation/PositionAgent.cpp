@@ -24,30 +24,6 @@
 
 namespace osmscout {
 
-  PositionChangedMessage::PositionChangedMessage(const Timestamp& timestamp,
-                                                 const GeoCoord& currentPosition,
-                                                 double currentSpeed)
-      : NavigationMessage(timestamp),
-        currentPosition(currentPosition),
-        currentSpeed(currentSpeed)
-  {
-  }
-
-  BearingChangedMessage::BearingChangedMessage(const Timestamp& timestamp)
-      : NavigationMessage(timestamp),
-        hasBearing(false),
-        bearing(0.0)
-  {
-  }
-
-  BearingChangedMessage::BearingChangedMessage(const Timestamp& timestamp,
-                                               double bearing)
-      : NavigationMessage(timestamp),
-        hasBearing(true),
-        bearing(bearing)
-  {
-  }
-
   PositionAgent::GpsPositionState PositionAgent::GpsPosition::GetState(const Timestamp &now) const
   {
     using namespace std::chrono;
