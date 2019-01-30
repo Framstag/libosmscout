@@ -23,6 +23,7 @@
 
 #include <osmscout/routing/RouteData.h>
 #include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescriptionPostprocessor.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/RouteStep.h>
@@ -42,50 +43,54 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API RouteDescriptionBuilder : public QObject {
   Q_OBJECT
 
-private:
-  void DumpStartDescription(QList<RouteStep> &routeSteps,
-                            const osmscout::RouteDescription::StartDescriptionRef& startDescription,
-                            const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+public:
+  class Callback: public RouteDescriptionPostprocessor::Callback
+  {
+  private:
+    QList<RouteStep> &routeSteps; // not owning reference
 
-  void DumpTargetDescription(QList<RouteStep> &routeSteps,
-                             const osmscout::RouteDescription::TargetDescriptionRef& targetDescription);
+  public:
+    Callback(QList<RouteStep> &routeSteps);
 
-  void DumpTurnDescription(QList<RouteStep> &routeSteps,
-                           const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
-                           const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
-                           const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-                           const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+    virtual ~Callback();
 
-  void DumpRoundaboutEnterDescription(QList<RouteStep> &routeSteps,
-                                      const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
-                                      const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
+    virtual void OnStart(const RouteDescription::StartDescriptionRef& startDescription,
+                         const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+                         const RouteDescription::NameDescriptionRef& nameDescription) override;
 
-  void DumpRoundaboutLeaveDescription(QList<RouteStep> &routeSteps,
-                                      const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                      const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+    virtual void OnTargetReached(const RouteDescription::TargetDescriptionRef& targetDescription) override;
 
-  void DumpMotorwayEnterDescription(QList<RouteStep> &routeSteps,
-                                    const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
-                                    const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
+    virtual void OnTurn(const RouteDescription::TurnDescriptionRef& turnDescription,
+                        const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+                        const RouteDescription::DirectionDescriptionRef& directionDescription,
+                        const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+                        const RouteDescription::NameDescriptionRef& nameDescription) override;
 
-  void DumpMotorwayChangeDescription(QList<RouteStep> &routeSteps,
-                                     const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription);
+    virtual void OnRoundaboutEnter(const RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
+                                   const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override;
 
-  void DumpMotorwayLeaveDescription(QList<RouteStep> &routeSteps,
-                                    const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
-                                    const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-                                    const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+    virtual void OnRoundaboutLeave(const RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                                   const RouteDescription::NameDescriptionRef& nameDescription) override;
 
-  void DumpNameChangedDescription(QList<RouteStep> &routeSteps,
-                                  const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
+    virtual void OnMotorwayEnter(const RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
+                                 const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override;
 
+    virtual void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                                  const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                                  const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override;
+
+    virtual void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                                 const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                                 const RouteDescription::DirectionDescriptionRef& directionDescription,
+                                 const RouteDescription::NameDescriptionRef& nameDescription) override;
+
+    virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override;
+
+  };
 public:
   RouteDescriptionBuilder();
-  virtual ~RouteDescriptionBuilder();
 
-  bool GenerateRouteStep(const osmscout::RouteDescription::Node &node,
-                         QList<RouteStep> &routeSteps,
-                         size_t &roundaboutCrossingCounter);
+  virtual ~RouteDescriptionBuilder();
 
   void GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
                           QList<RouteStep> &routeSteps);

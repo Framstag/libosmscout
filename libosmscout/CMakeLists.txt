@@ -59,7 +59,7 @@ set(HEADER_FILES_ROUTING
     include/osmscout/routing/MultiDBRoutingService.h
     include/osmscout/routing/DBFileOffset.h
     include/osmscout/routing/TurnRestriction.h
-    include/osmscout/routing/MultiDBRoutingState.h)
+    include/osmscout/routing/MultiDBRoutingState.h include/osmscout/routing/RouteDescriptionPostprocessor.h)
 
 set(HEADER_FILES_NAVIGATION
     include/osmscout/navigation/Agents.h
@@ -214,7 +214,7 @@ set(SOURCE_FILES
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp
-    src/osmscout/util/CmdLineParsing.cpp)
+    src/osmscout/util/CmdLineParsing.cpp src/osmscout/routing/RouteDescriptionPostprocessor.cpp)
 
 if(MARISA_FOUND)
     list(APPEND HEADER_FILES include/osmscout/TextSearchIndex.h)

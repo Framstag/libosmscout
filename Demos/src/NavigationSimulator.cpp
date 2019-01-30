@@ -39,6 +39,7 @@
 
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/routing/RouteDescriptionPostprocessor.h>
 
 #include <osmscout/navigation/Engine.h>
 #include <osmscout/navigation/Agents.h>
@@ -97,7 +98,7 @@ public:
   }
 };
 
-struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionGenerator::Callback
+struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPostprocessor::Callback
 {
 };
 
@@ -718,7 +719,7 @@ int main(int argc, char* argv[])
   std::cout << "Postprocessing time: " << postprocessTimer.ResultString() << std::endl;
 
   osmscout::StopClock                 generateTimer;
-  osmscout::RouteDescriptionGenerator generator;
+  osmscout::RouteDescriptionPostprocessor generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
   generator.GenerateDescription(*routeDescriptionResult.description,
