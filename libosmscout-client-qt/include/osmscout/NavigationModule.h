@@ -51,11 +51,11 @@ signals:
 
   void updateNext(RouteStep nextRouteInstruction);
 
-  void rerouteRequest(const GeoCoord from,
+  void rerouteRequest(const osmscout::GeoCoord from,
                       double initialBearing,
-                      const GeoCoord to);
+                      const osmscout::GeoCoord to);
 
-  void positionEstimate(PositionAgent::PositionState state, GeoCoord coord);
+  void positionEstimate(osmscout::PositionAgent::PositionState state, osmscout::GeoCoord coord, double bearing);
 
   void targetReached(double targetBearing, Distance targetDistance);
 
@@ -95,10 +95,9 @@ private:
   SettingsRef settings;
   DBThreadRef dbThread;
   QTimer      timer;
+  double      lastBearing{-1};
 
-  //NextStepDescriptionBuilder nextStepDescBuilder;
   osmscout::RouteDescriptionRef routeDescription;
-  //osmscout::Navigation<RouteStep> navigation;
 
   using DataAgentInst=DataAgent<NavigationModule>;
   using DataAgentRef=std::shared_ptr<DataAgentInst>;

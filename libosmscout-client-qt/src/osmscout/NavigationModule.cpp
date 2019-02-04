@@ -48,7 +48,11 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
     if (dynamic_cast<PositionAgent::PositionMessage *>(message.get()) != nullptr) {
       auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
       auto &position=positionMessage->position;
-      emit positionEstimate(position.state, position.coord);
+      emit positionEstimate(position.state, position.coord, lastBearing);
+    }
+    else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
+      auto bearingMessage = dynamic_cast<osmscout::BearingChangedMessage *>(message.get());
+      lastBearing=bearingMessage->bearing;
     }
     else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
       auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
