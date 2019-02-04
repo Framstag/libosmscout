@@ -234,24 +234,24 @@ void RouteDescriptionBuilder::Callback::OnStart(const RouteDescription::StartDes
   }
 
   if (!startDesc.isEmpty()){
-    RouteStep startAt("start");
+    RouteStep startAt = MkStep("start");
     startAt.description=osmscout::RouteDescriptionBuilder::tr("<strong>Start</strong> at %1").arg(startDesc);
     startAt.shortDescription=osmscout::RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(startAt);
 
     if (!driveAlongDesc.isEmpty()) {
-      RouteStep driveAlong("drive-along");
+      RouteStep driveAlong = MkStep("drive-along");
       driveAlong.description=osmscout::RouteDescriptionBuilder::tr("<strong>Continue</strong> along %1").arg(driveAlongDesc);
       driveAlong.shortDescription=osmscout::RouteDescriptionBuilder::tr("Continue");
       routeSteps.push_back(driveAlong);
     }
   } else if (!driveAlongDesc.isEmpty()) {
-    RouteStep startAt("start");
+    RouteStep startAt = MkStep("start");
     startAt.description=osmscout::RouteDescriptionBuilder::tr("<strong>Start</strong> along %1").arg(driveAlongDesc);
     startAt.shortDescription=osmscout::RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(startAt);
   } else {
-    RouteStep start("start");
+    RouteStep start = MkStep("start");
     start.description=osmscout::RouteDescriptionBuilder::tr("<strong>Start</strong>");
     start.shortDescription=osmscout::RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(start);
@@ -260,7 +260,7 @@ void RouteDescriptionBuilder::Callback::OnStart(const RouteDescription::StartDes
 
 void RouteDescriptionBuilder::Callback::OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef& targetDescription)
 {
-  RouteStep targetReached("target");
+  RouteStep targetReached = MkStep("target");
 
   QString targetDesc;
   if (targetDescription && !targetDescription->GetDescription().empty()){
@@ -282,7 +282,7 @@ void RouteDescriptionBuilder::Callback::OnTurn(const osmscout::RouteDescription:
                                                const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
                                                const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
 {
-  RouteStep   turn(TurnCommandType(directionDescription));
+  RouteStep turn = MkStep(TurnCommandType(directionDescription));
   turn.shortDescription=ShortTurnCommand(directionDescription);
 
   QString crossingWaysString;
@@ -309,7 +309,7 @@ void RouteDescriptionBuilder::Callback::OnTurn(const osmscout::RouteDescription:
 void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
                                                           const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
-  RouteStep   enter("enter-roundabout");
+  RouteStep enter = MkStep("enter-roundabout");
   QString crossingWaysString;
 
   if (crossingWaysDescription) {
@@ -329,7 +329,7 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const osmscout::RouteD
 void RouteDescriptionBuilder::Callback::OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
                                                           const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
 {
-  RouteStep leave("leave-roundabout");
+  RouteStep leave = MkStep("leave-roundabout");
 
   leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Leave roundabout");
 
@@ -350,7 +350,7 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutLeave(const osmscout::RouteD
 void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
                                                         const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
-  RouteStep   enter("enter-motorway");
+  RouteStep enter = MkStep("enter-motorway");
 
   enter.shortDescription=osmscout::RouteDescriptionBuilder::tr("Enter motorway");
 
@@ -387,7 +387,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayChange(const osmscout::RouteDe
                                                          const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
                                                          const RouteDescription::DestinationDescriptionRef& /*crossingDestinationDescription*/)
 {
-  RouteStep change("change-motorway");
+  RouteStep change = MkStep("change-motorway");
 
   change.shortDescription=osmscout::RouteDescriptionBuilder::tr("Change motorway");
 
@@ -411,7 +411,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
                                                         const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
                                                         const RouteDescription::NameDescriptionRef& nameDescription)
 {
-  RouteStep leave("leave-motorway");
+  RouteStep leave = MkStep("leave-motorway");
 
   leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Leave motorway");
 
@@ -438,7 +438,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
 
 void RouteDescriptionBuilder::Callback::OnPathNameChange(const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription)
 {
-  RouteStep changed("name-change");
+  RouteStep changed = MkStep("name-change");
 
   changed.shortDescription=osmscout::RouteDescriptionBuilder::tr("Way changes name");
 
@@ -452,6 +452,25 @@ void RouteDescriptionBuilder::Callback::OnPathNameChange(const osmscout::RouteDe
   }
 
   routeSteps.push_back(changed);
+}
+
+void RouteDescriptionBuilder::Callback::BeforeNode(const RouteDescription::Node& node)
+{
+  distance=node.GetDistance();
+  time=node.GetTime();
+}
+
+RouteStep RouteDescriptionBuilder::Callback::MkStep(const QString &name)
+{
+  RouteStep step(name,
+                 distance,
+                 distance-distancePrevious,
+                 time,
+                 time-timePrevious);
+
+  distancePrevious = distance;
+  timePrevious = time;
+  return step;
 }
 
 bool RouteDescriptionBuilder::Callback::Continue() const
@@ -512,7 +531,7 @@ RouteStep RouteDescriptionBuilder::GenerateNextRouteInstruction(const RouteDescr
   RouteDescription::NodeIterator next=previous;
   next++;
   if (next!=last) {
-    result.distanceTo = GetEllipsoidalDistance(coord, next->GetLocation());
+    result.distanceTo = (result.distance - previous->GetDistance()) - GetEllipsoidalDistance(coord, previous->GetLocation());
   }
 
   return result;

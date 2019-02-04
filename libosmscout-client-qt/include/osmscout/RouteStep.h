@@ -64,8 +64,16 @@ public:
   QString shortDescription; //!< Plain short description (translated already)
 
 public:
-  RouteStep() : RouteStep("") {};
-  RouteStep(QString type);
+  inline RouteStep() : RouteStep("", Distance::Zero(), Distance::Zero(),
+                                 Duration::zero(), Duration::zero())
+  {};
+
+  RouteStep(const QString &type,
+            const Distance &distance,
+            const Distance &distanceDelta,
+            const Duration &time,
+            const Duration &timeDelta);
+
   RouteStep(const RouteStep& other);
 
   RouteStep& operator=(const RouteStep& other);

@@ -50,6 +50,11 @@ public:
     QList<RouteStep> &routeSteps; //!< route step output container, not owning reference
     size_t limit;                 //!< limit of route steps, limit==0 -> unlimited
 
+    Distance distance;
+    Distance distancePrevious;
+    Duration time;
+    Duration timePrevious;
+
   public:
     Callback(QList<RouteStep> &routeSteps, size_t limit=0);
 
@@ -87,7 +92,11 @@ public:
 
     virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override;
 
+    virtual void BeforeNode(const RouteDescription::Node& node) override;
+
     virtual bool Continue() const;
+
+    RouteStep MkStep(const QString &name);
   };
 public:
   RouteDescriptionBuilder();

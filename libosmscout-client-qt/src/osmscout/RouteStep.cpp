@@ -25,13 +25,17 @@
 
 namespace osmscout {
 
-RouteStep::RouteStep(QString type):
+RouteStep::RouteStep(const QString &type,
+                     const Distance &distance,
+                     const Distance &distanceDelta,
+                     const Duration &time,
+                     const Duration &timeDelta):
     type(type),
-    distance(Distance::Zero()),
-    distanceDelta(Distance::Zero()),
+    distance(distance),
+    distanceDelta(distanceDelta),
     distanceTo(Distance::Zero()),
-    time(Duration::zero()),
-    timeDelta(Duration::zero())
+    time(time),
+    timeDelta(timeDelta)
 {
 
 }
