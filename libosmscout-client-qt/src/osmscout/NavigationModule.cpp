@@ -18,44 +18,9 @@
  */
 
 #include <osmscout/NavigationModule.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
-
-/*
-NextStepDescriptionBuilder::NextStepDescriptionBuilder():
-    roundaboutCrossingCounter(0),
-    index(0)
-{
-}
-
-void NextStepDescriptionBuilder::NextDescription(const Distance &distance,
-                                                 std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
-                                                 std::list<osmscout::RouteDescription::Node>::const_iterator end)
-{
-  if (waypoint==end || (distance.AsMeter()>=0 && previousDistance>distance)) {
-    return;
-  }
-  RouteDescriptionBuilder builder;
-  for (; waypoint!=end; waypoint++) {
-    QList<RouteStep> routeSteps;
-    if (!builder.GenerateRouteStep(*waypoint, routeSteps, roundaboutCrossingCounter)){
-      continue;
-    }
-    if (routeSteps.isEmpty()){
-      continue;
-    }
-
-    description=routeSteps.first();
-    description.distance=waypoint->GetDistance();
-    description.time    =waypoint->GetTime();
-
-    if (waypoint->GetDistance() > distance){
-      description.distanceTo=(waypoint->GetDistance()-distance);
-      break;
-    }
-  }
-}
-*/
 
 NavigationModule::NavigationModule(QThread *thread,
                                    SettingsRef settings,
@@ -92,6 +57,18 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
     else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
       auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
       emit rerouteRequest(req->from, req->initialBearing, req->to);
+    }
+    else if (dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
+      auto instructions = dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
+      emit update(instructions->instructions);
+    }
+    else if (dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
+      auto nextInstruction = dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
+      if (!nextInstruction->nextRouteInstruction.shortDescription.isEmpty()) {
+        log.Debug() << "In " << nextInstruction->nextRouteInstruction.distanceTo.AsMeter() << " m: "
+                    << nextInstruction->nextRouteInstruction.shortDescription.toStdString();
+      }
+      emit updateNext(nextInstruction->nextRouteInstruction);
     }
   }
 }

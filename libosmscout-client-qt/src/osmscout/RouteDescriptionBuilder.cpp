@@ -19,12 +19,13 @@
  */
 
 #include <osmscout/RouteDescriptionBuilder.h>
+#include <osmscout/routing/Route.h>
+#include <osmscout/util/Logger.h>
 
 #include <set>
 #include <sstream>
 #include <iomanip>
 
-#include <osmscout/routing/Route.h>
 
 #include <QMetaType>
 #include <QVariant>
@@ -32,8 +33,9 @@
 
 namespace osmscout {
 
-RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::Callback(QList<RouteStep> &routeSteps):
-  routeSteps(routeSteps)
+RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::Callback(QList<RouteStep> &routeSteps,
+                                                                     size_t limit):
+  routeSteps(routeSteps), limit(limit)
 {
 }
 
@@ -452,6 +454,11 @@ void RouteDescriptionBuilder::Callback::OnPathNameChange(const osmscout::RouteDe
   routeSteps.push_back(changed);
 }
 
+bool RouteDescriptionBuilder::Callback::Continue() const
+{
+  return limit==0 || (size_t)routeSteps.size() < limit;
+}
+
 RouteDescriptionBuilder::RouteDescriptionBuilder()
 {}
 
@@ -459,11 +466,56 @@ RouteDescriptionBuilder::~RouteDescriptionBuilder()
 {}
 
 void RouteDescriptionBuilder::GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
-                                                 QList<RouteStep> &routeSteps)
+                                                 QList<RouteStep> &routeSteps) const
 {
   RouteDescriptionPostprocessor postprocessor;
   Callback callback(routeSteps);
   postprocessor.GenerateDescription(routeDescription, callback);
+}
+
+std::list<RouteStep> RouteDescriptionBuilder::GenerateRouteInstructions(const RouteDescription::NodeIterator &first,
+                                                                        const RouteDescription::NodeIterator &last) const
+{
+  QList<RouteStep> routeSteps;
+  RouteDescriptionPostprocessor postprocessor;
+  Callback callback(routeSteps);
+  postprocessor.GenerateDescription(first, last, callback);
+
+  std::list<RouteStep> result;
+  for (auto &step:routeSteps){
+    result.push_back(step);
+  }
+  return result;
+}
+
+RouteStep RouteDescriptionBuilder::GenerateNextRouteInstruction(const RouteDescription::NodeIterator &previous,
+                                                                const RouteDescription::NodeIterator &last,
+                                                                const GeoCoord &coord) const
+{
+  RouteStep result;
+  if(previous==last){
+    log.Warn() << "Can't generate route instruction without nodes";
+    return result;
+  }
+
+  QList<RouteStep> routeSteps;
+  RouteDescriptionPostprocessor postprocessor;
+  Callback callback(routeSteps, /*limit*/ 1);
+  postprocessor.GenerateDescription(previous, last, callback);
+
+  if (routeSteps.empty()){
+    log.Warn() << "No route instruction generated";
+    return result;
+  }
+
+  result=routeSteps[0];
+  RouteDescription::NodeIterator next=previous;
+  next++;
+  if (next!=last) {
+    result.distanceTo = GetEllipsoidalDistance(coord, next->GetLocation());
+  }
+
+  return result;
 }
 
 }

@@ -31,6 +31,7 @@
 #include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/navigation/RouteStateAgent.h>
 #include <osmscout/navigation/BearingAgent.h>
+#include <osmscout/navigation/RouteInstructionAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -39,26 +40,6 @@
 
 namespace osmscout {
 
-/*
-class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder:
-    public osmscout::OutputDescription<RouteStep> {
-
-public:
-  NextStepDescriptionBuilder();
-
-  virtual ~NextStepDescriptionBuilder(){};
-
-  virtual void NextDescription(const Distance &distance,
-                               std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
-                               std::list<osmscout::RouteDescription::Node>::const_iterator end);
-
-private:
-  size_t          roundaboutCrossingCounter;
-  size_t          index;
-  Distance        previousDistance;
-};
-*/
-
 /**
  * \ingroup QtAPI
  */
@@ -66,7 +47,9 @@ class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
   Q_OBJECT
 
 signals:
-  void update(bool onRoute, RouteStep routeStep);
+  void update(std::list<RouteStep> instructions);
+
+  void updateNext(RouteStep nextRouteInstruction);
 
   void rerouteRequest(const GeoCoord from,
                       double initialBearing,
@@ -120,13 +103,14 @@ private:
   using DataAgentInst=DataAgent<NavigationModule>;
   using DataAgentRef=std::shared_ptr<DataAgentInst>;
 
-  DataAgentRef dataAgent{std::make_shared<osmscout::DataAgent<NavigationModule>>(*this)};
+  //DataAgentRef dataAgent{std::make_shared<osmscout::DataAgent<NavigationModule>>(*this)};
 
   osmscout::NavigationEngine engine{
-      dataAgent,
+      std::make_shared<osmscout::DataAgent<NavigationModule>>(*this),
       std::make_shared<osmscout::PositionAgent>(),
       std::make_shared<osmscout::BearingAgent>(),
       //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
+      std::make_shared<osmscout::RouteInstructionAgent<RouteStep, RouteDescriptionBuilder>>(),
       std::make_shared<osmscout::RouteStateAgent>(),
   };
 

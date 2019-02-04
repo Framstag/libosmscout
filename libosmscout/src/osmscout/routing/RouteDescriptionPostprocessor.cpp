@@ -116,6 +116,11 @@ namespace osmscout {
     // no code
   }
 
+  bool RouteDescriptionPostprocessor::Callback::Continue() const
+  {
+    return true;
+  }
+
 
   /**
    * Evaluate the already postprocessed RouteDescription and call the given callback for
@@ -125,13 +130,22 @@ namespace osmscout {
    * @param callback
    */
   void RouteDescriptionPostprocessor::GenerateDescription(const RouteDescription& description,
-                                                          RouteDescriptionPostprocessor::Callback& callback)
+                                                          RouteDescriptionPostprocessor::Callback& callback) const
+  {
+    GenerateDescription(description.Nodes().cbegin(),
+                        description.Nodes().cend(),
+                        callback);
+  }
+
+  void RouteDescriptionPostprocessor::GenerateDescription(const RouteDescription::NodeIterator &first,
+                                                          const RouteDescription::NodeIterator &last,
+                                                          RouteDescriptionPostprocessor::Callback& callback) const
   {
     callback.BeforeRoute();
 
-    auto prevNode=description.Nodes().cend();
-    for (auto node=description.Nodes().cbegin();
-         node!=description.Nodes().cend();
+    auto prevNode=last;
+    for (auto node=first;
+         node!=last && callback.Continue();
          ++node) {
       osmscout::RouteDescription::DescriptionRef                 desc;
       osmscout::RouteDescription::NameDescriptionRef             nameDescription;

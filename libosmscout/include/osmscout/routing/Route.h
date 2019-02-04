@@ -678,6 +678,8 @@ namespace osmscout {
                           const DescriptionRef& description);
     };
 
+    using NodeIterator = std::list<RouteDescription::Node>::const_iterator;
+
   private:
     std::list<Node> nodes;
     std::map<DatabaseId, std::string> databaseMapping;

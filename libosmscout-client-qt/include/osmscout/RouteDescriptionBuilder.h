@@ -47,10 +47,11 @@ public:
   class Callback: public RouteDescriptionPostprocessor::Callback
   {
   private:
-    QList<RouteStep> &routeSteps; // not owning reference
+    QList<RouteStep> &routeSteps; //!< route step output container, not owning reference
+    size_t limit;                 //!< limit of route steps, limit==0 -> unlimited
 
   public:
-    Callback(QList<RouteStep> &routeSteps);
+    Callback(QList<RouteStep> &routeSteps, size_t limit=0);
 
     virtual ~Callback();
 
@@ -86,6 +87,7 @@ public:
 
     virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override;
 
+    virtual bool Continue() const;
   };
 public:
   RouteDescriptionBuilder();
@@ -93,7 +95,15 @@ public:
   virtual ~RouteDescriptionBuilder();
 
   void GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
-                          QList<RouteStep> &routeSteps);
+                          QList<RouteStep> &routeSteps) const;
+
+  std::list<RouteStep> GenerateRouteInstructions(const RouteDescription::NodeIterator &first,
+                                                 const RouteDescription::NodeIterator &last) const;
+
+  RouteStep GenerateNextRouteInstruction(const RouteDescription::NodeIterator &previous,
+                                         const RouteDescription::NodeIterator &last,
+                                         const GeoCoord &coord) const;
+
 };
 
 }

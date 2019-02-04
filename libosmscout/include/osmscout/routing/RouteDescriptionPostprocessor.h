@@ -176,11 +176,22 @@ namespace osmscout {
        * @param node
        */
       virtual void AfterNode(const RouteDescription::Node& node);
+
+      /**
+       * If postprocessor should continue
+       *
+       * @return continue
+       */
+      virtual bool Continue() const;
     };
 
   public:
     void GenerateDescription(const RouteDescription& description,
-                             Callback& callback);
+                             Callback& callback) const;
+
+    void GenerateDescription(const RouteDescription::NodeIterator &first,
+                             const RouteDescription::NodeIterator &last,
+                             Callback& callback) const;
   };
 
 }
