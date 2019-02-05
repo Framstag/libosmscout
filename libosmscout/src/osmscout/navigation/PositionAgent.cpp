@@ -342,6 +342,9 @@ namespace osmscout {
     double abscissa=0.0;
     bool   found=false;
     double qLon,qLat;
+    double snapDistanceInDegrees = distanceInDegrees(snapDistanceInMeters,
+                                                     location.GetLat());
+
     minDistance=std::numeric_limits<double>::max();
     for (auto node=nextNode++; node!=route->Nodes().end(); node++) {
       if (nextNode==route->Nodes().end()) {
@@ -358,11 +361,11 @@ namespace osmscout {
                                  qLat);
       if (minDistance>=d) {
         minDistance=d;
-        if (d<=distanceInDegrees(snapDistanceInMeters,
-                                 location.GetLat())) {
+        if (d<=snapDistanceInDegrees) {
           foundNode    =node;
           foundAbscissa=abscissa;
           found        =true;
+          closestPosition.Set(qLat,qLon);
         }
       }
       else if (found && d>minDistance*2) {
@@ -371,7 +374,7 @@ namespace osmscout {
       }
       nextNode++;
     }
-    closestPosition.Set(qLat,qLon);
+
     return found;
   }
 
