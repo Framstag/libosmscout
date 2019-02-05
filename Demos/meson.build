@@ -46,7 +46,7 @@ Navigation = executable('Navigation',
 
 NavigationSimulator = executable('NavigationSimulator',
                         'src/NavigationSimulator.cpp',
-                        include_directories: [osmscoutIncDir],
+                        include_directories: [osmscoutIncDir, osmscoutmapIncDir],
                         dependencies: [mathDep, openmpDep],
                         link_with: [osmscout, osmscoutmap],
                         install: true)
