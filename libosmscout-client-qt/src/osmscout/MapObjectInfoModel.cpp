@@ -165,6 +165,7 @@ void MapObjectInfoModel::setPosition(QObject *o,
   r.width=width;
   r.height=height;
   r.magnification=mapView->magnification;
+  r.dpi=mapDpi;
 
   this->screenX=screenX;
   this->screenY=screenY;

@@ -117,8 +117,8 @@ namespace osmscout {
           assert(w.second);
           if (w.second->GetBoundingBox().Intersects(lookupArea)){
             double distance=std::numeric_limits<double>::max();
-            GeoCoord p;
-            GeoCoord nearestPoint;
+            GeoCoord p{0,0};
+            GeoCoord nearestPoint{0,0};
             for (size_t i=1; i<w.second->nodes.size(); i++){
               double d = CalculateDistancePointToLineSegment(coord,
                                     w.second->nodes[i-1].GetCoord(),
@@ -229,7 +229,7 @@ namespace osmscout {
       auto foundNode = position.routeNode;
       double foundAbscissa = 0.0;
       double minDistance = 0.0;
-      GeoCoord coord;
+      GeoCoord coord{0,0};
       bool found=SearchClosestSegment(gps.position,
                                       position.routeNode,
                                       coord,
