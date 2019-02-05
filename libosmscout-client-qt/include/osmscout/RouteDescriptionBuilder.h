@@ -48,7 +48,8 @@ public:
   {
   private:
     QList<RouteStep> &routeSteps; //!< route step output container, not owning reference
-    size_t limit;                 //!< limit of route steps, limit==0 -> unlimited
+    Distance stopAfter;           //!< stop processing when distance of last step from the start is greater
+                                  //!< stopAfter < 0 : unlimited
 
     Distance distance;
     Distance distancePrevious;
@@ -56,7 +57,8 @@ public:
     Duration timePrevious;
 
   public:
-    Callback(QList<RouteStep> &routeSteps, size_t limit=0);
+    Callback(QList<RouteStep> &routeSteps,
+             const Distance &stopAfter = Distance::Lowest());
 
     virtual ~Callback();
 

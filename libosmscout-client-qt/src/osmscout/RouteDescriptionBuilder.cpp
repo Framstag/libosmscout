@@ -34,8 +34,8 @@
 namespace osmscout {
 
 RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::Callback(QList<RouteStep> &routeSteps,
-                                                                     size_t limit):
-  routeSteps(routeSteps), limit(limit)
+                                                                     const Distance &stopAfter):
+  routeSteps(routeSteps), stopAfter(stopAfter)
 {
 }
 
@@ -475,7 +475,9 @@ RouteStep RouteDescriptionBuilder::Callback::MkStep(const QString &name)
 
 bool RouteDescriptionBuilder::Callback::Continue() const
 {
-  return limit==0 || (size_t)routeSteps.size() < limit;
+  return stopAfter < Distance::Zero() ||
+         routeSteps.empty() ||
+         routeSteps.constLast().distance <= stopAfter;
 }
 
 RouteDescriptionBuilder::RouteDescriptionBuilder()
@@ -519,7 +521,7 @@ RouteStep RouteDescriptionBuilder::GenerateNextRouteInstruction(const RouteDescr
 
   QList<RouteStep> routeSteps;
   RouteDescriptionPostprocessor postprocessor;
-  Callback callback(routeSteps, /*limit*/ 1);
+  Callback callback(routeSteps, /*stop after*/ previous->GetDistance());
   postprocessor.GenerateDescription(previous, last, callback);
 
   if (routeSteps.empty()){
@@ -527,12 +529,9 @@ RouteStep RouteDescriptionBuilder::GenerateNextRouteInstruction(const RouteDescr
     return result;
   }
 
-  result=routeSteps[0];
-  RouteDescription::NodeIterator next=previous;
-  next++;
-  if (next!=last) {
-    result.distanceTo = (result.distance - previous->GetDistance()) - GetEllipsoidalDistance(coord, previous->GetLocation());
-  }
+  result=routeSteps.constLast();
+
+  result.distanceTo = (result.distance - previous->GetDistance()) - GetEllipsoidalDistance(coord, previous->GetLocation());
 
   return result;
 }
