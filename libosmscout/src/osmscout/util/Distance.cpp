@@ -36,6 +36,11 @@ namespace osmscout{
     return Distance(std::numeric_limits<double>::min());
   }
 
+  Distance Distance::Lowest()
+  {
+    return Distance(std::numeric_limits<double>::lowest());
+  }
+
   Distance Distance::Max(const Distance &a, const Distance &b)
   {
     return Distance(std::max(a.meters, b.meters));

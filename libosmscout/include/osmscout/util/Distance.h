@@ -125,6 +125,16 @@ namespace osmscout {
       return Distance(meters / factor);
     }
 
+    inline bool operator==(const Distance &d) const
+    {
+      return meters == d.meters;
+    }
+
+    inline bool operator!=(const Distance &d) const
+    {
+      return meters != d.meters;
+    }
+
     inline bool operator>(const Distance &d) const
     {
       return meters > d.meters;
@@ -155,7 +165,17 @@ namespace osmscout {
 
     static Distance Max();
 
+    /**
+     * returns the smallest finite value of the given type
+     * @return
+     */
     static Distance Min();
+
+    /**
+     * returns the lowest finite value of the given type
+     * @return
+     */
+    static Distance Lowest();
 
     static Distance Max(const Distance &a, const Distance &b);
 
