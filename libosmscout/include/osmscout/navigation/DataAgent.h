@@ -66,7 +66,7 @@ namespace osmscout {
   using RoutableObjectsMessageRef=std::shared_ptr<RoutableObjectsMessage>;
 
   template <typename DataLoader>
-  class OSMSCOUT_API DataAgent CLASS_FINAL : public NavigationAgent
+  class DataAgent CLASS_FINAL : public NavigationAgent
   {
   private:
     std::map<std::string,DatabaseId> databaseMapping;

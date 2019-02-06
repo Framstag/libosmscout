@@ -27,7 +27,7 @@
 namespace osmscout {
 
 template <typename RouteInstruction>
-struct OSMSCOUT_API RouteInstructionsMessage CLASS_FINAL : public NavigationMessage
+struct RouteInstructionsMessage CLASS_FINAL : public NavigationMessage
 {
 public:
   std::list<RouteInstruction> instructions;
@@ -38,7 +38,7 @@ public:
 };
 
 template <typename RouteInstruction>
-struct OSMSCOUT_API NextRouteInstructionsMessage CLASS_FINAL : public NavigationMessage
+struct NextRouteInstructionsMessage CLASS_FINAL : public NavigationMessage
 {
 public:
   RouteInstruction nextRouteInstruction;
@@ -49,7 +49,7 @@ public:
 };
 
 template <typename RouteInstruction, typename RouteInstructionBuilder>
-class OSMSCOUT_API RouteInstructionAgent CLASS_FINAL : public NavigationAgent
+class RouteInstructionAgent CLASS_FINAL : public NavigationAgent
 {
 private:
   RouteDescriptionRef prevRoute;
