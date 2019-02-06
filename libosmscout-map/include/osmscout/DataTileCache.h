@@ -45,7 +45,7 @@ namespace osmscout {
   /**
    * \ingroup tiledcache
    *
-   * Temlate for storing sets of data of the same type in a tile. Normally data will either be NodeRef, WayRef or AreaRef.
+   * Template for storing sets of data of the same type in a tile. Normally data will either be NodeRef, WayRef or AreaRef.
    */
   template<typename O>
   class OSMSCOUT_MAP_API TileData

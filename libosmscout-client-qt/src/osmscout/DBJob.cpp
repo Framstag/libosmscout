@@ -197,7 +197,7 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
 
 void DBLoadJob::Close()
 {
-  // stop asyncronous loading if it is still running
+  // stop asynchronous loading if it is still running
   breaker->Break();
 
   // deregister callbacks
