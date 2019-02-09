@@ -98,9 +98,9 @@ IF %COMPILER%==msvc2015 (
     .\vcpkg install fontconfig:x64-windows
     echo ...done
 
-    echo Installing cairo...
-    .\vcpkg install cairo:x64-windows
-    echo ...done
+    rem echo Installing cairo...
+    rem .\vcpkg install cairo:x64-windows
+    rem echo ...done
 
     rem transitive
     echo Installing harfbuzz...
