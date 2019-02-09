@@ -146,6 +146,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<LocationEntry>("LocationEntry");
   qRegisterMetaType<OnlineTileProvider>("OnlineTileProvider");
   qRegisterMetaType<RouteStep>("RouteStep");
+  qRegisterMetaType<std::list<RouteStep>>("std::list<RouteStep>");
   qRegisterMetaType<OverlayWay*>("OverlayWay*");
   qRegisterMetaType<OverlayArea*>("OverlayArea*");
   qRegisterMetaType<OverlayNode*>("OverlayNode*");

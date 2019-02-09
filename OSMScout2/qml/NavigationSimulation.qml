@@ -231,7 +231,7 @@ Window {
             ListView {
                 id: routingView
 
-                model: routingModel
+                model: navigationModel
 
                 anchors.fill: parent
                 anchors.margins: 1

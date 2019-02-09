@@ -71,15 +71,31 @@ QObject *NavigationModel::getRoute() const
   return new QtRouteData(route);
 }
 
-void NavigationModel::onUpdate(std::list<RouteStep> /*instructions*/)
+void NavigationModel::onUpdate(std::list<RouteStep> instructions)
 {
-  // TODO
+  beginResetModel();
+  routeSteps.clear();
+  routeSteps.reserve(instructions.size());
+  routeSteps.insert(routeSteps.begin(), instructions.begin(), instructions.end());
+  endResetModel();
 }
 
 void NavigationModel::onUpdateNext(RouteStep routeStep)
 {
   // qDebug() << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
-  nextRouteStep=routeStep;
+  if (routeSteps.empty()){
+    beginResetModel();
+    routeSteps.push_back(routeStep);
+    endResetModel();
+  }else{
+    routeSteps[0]=routeStep;
+
+    QVector<int> roles;
+    roles<<ShortDescriptionRole;
+    roles<<DescriptionRole;
+    roles<<TypeRole;
+    emit dataChanged(index(0), index(0));
+  }
 
   emit update();
 }
@@ -101,7 +117,10 @@ void NavigationModel::onRerouteRequest(const GeoCoord from, double initialBearin
 
 QObject *NavigationModel::getNextRoutStep()
 {
-  return new RouteStep(nextRouteStep);
+  if (routeSteps.empty()) {
+    return new RouteStep();
+  }
+  return new RouteStep(routeSteps[0]);
 }
 
 void NavigationModel::setRoute(QObject *o)
@@ -111,7 +130,71 @@ void NavigationModel::setRoute(QObject *o)
     qWarning() << "Failed to cast " << o << " to QtRouteData*.";
     return;
   }
+
   this->route=*route;
+
+  beginResetModel();
+  routeSteps.clear();
+  if (this->route) {
+    auto steps = route->routeSteps();
+    routeSteps.reserve(steps.size());
+    routeSteps.insert(routeSteps.begin(), steps.begin(), steps.end());
+  }
+  endResetModel();
+
   emit routeChanged(target, this->route, vehicle);
 }
+
+QVariant NavigationModel::data(const QModelIndex &index, int role) const
+{
+  if(index.row() < 0 || index.row() >= (int)routeSteps.size()) {
+    return QVariant();
+  }
+
+  RouteStep step=routeSteps[index.row()];
+
+  switch (role) {
+    case Qt::DisplayRole:
+    case ShortDescriptionRole:
+      return step.getShortDescription();
+    case DescriptionRole:
+      return step.getDescription();
+    case TypeRole:
+      return step.getType();
+    default:
+      break;
+  }
+
+  return QVariant();
+}
+
+int NavigationModel::rowCount(const QModelIndex &/*parent*/) const
+{
+  if (!route){
+    return 0;
+  }
+  return routeSteps.size();
+}
+
+Qt::ItemFlags NavigationModel::flags(const QModelIndex &index) const
+{
+  if(!index.isValid()) {
+    return Qt::ItemIsEnabled;
+  }
+
+  return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+QHash<int, QByteArray> NavigationModel::roleNames() const
+{
+  QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
+
+  roles[ShortDescriptionRole] = "shortDescription";
+  roles[DescriptionRole] = "description";
+  roles[TypeRole] = "type";
+
+  return roles;
+}
+
+
 }

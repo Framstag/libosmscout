@@ -34,7 +34,7 @@ namespace osmscout {
  *
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API NavigationModel : public QObject
+class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
 {
   Q_OBJECT
   Q_PROPERTY(QObject *route         READ getRoute          WRITE setRoute NOTIFY routeChanged)
@@ -70,6 +70,14 @@ public slots:
   void onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to);
 
 public:
+  enum Roles {
+    ShortDescriptionRole = Qt::UserRole + 1,
+    DescriptionRole = Qt::UserRole + 2,
+    TypeRole = Qt::UserRole + 3
+  };
+  Q_ENUM(Roles)
+
+public:
   NavigationModel();
 
   virtual ~NavigationModel();
@@ -81,13 +89,21 @@ public:
 
   QObject *getNextRoutStep();
 
+  QVariant data(const QModelIndex &index, int role) const;
+
+  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+
+  Qt::ItemFlags flags(const QModelIndex &index) const;
+
+  QHash<int, QByteArray> roleNames() const;
+
 private:
   NavigationModule* navigationModule;
   LocationEntryRef  target;
   QtRouteData       route;
   osmscout::Vehicle vehicle;
 
-  RouteStep         nextRouteStep;
+  std::vector<RouteStep> routeSteps;
 };
 
 }
