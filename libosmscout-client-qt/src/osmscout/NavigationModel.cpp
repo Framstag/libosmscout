@@ -83,20 +83,7 @@ void NavigationModel::onUpdate(std::list<RouteStep> instructions)
 void NavigationModel::onUpdateNext(RouteStep routeStep)
 {
   // qDebug() << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
-  if (routeSteps.empty()){
-    beginResetModel();
-    routeSteps.push_back(routeStep);
-    endResetModel();
-  }else{
-    routeSteps[0]=routeStep;
-
-    QVector<int> roles;
-    roles<<ShortDescriptionRole;
-    roles<<DescriptionRole;
-    roles<<TypeRole;
-    emit dataChanged(index(0), index(0));
-  }
-
+  nextRouteStep=routeStep;
   emit update();
 }
 
@@ -117,10 +104,7 @@ void NavigationModel::onRerouteRequest(const GeoCoord from, double initialBearin
 
 QObject *NavigationModel::getNextRoutStep()
 {
-  if (routeSteps.empty()) {
-    return new RouteStep();
-  }
-  return new RouteStep(routeSteps[0]);
+  return new RouteStep(nextRouteStep);
 }
 
 void NavigationModel::setRoute(QObject *o)

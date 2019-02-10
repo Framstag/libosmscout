@@ -97,12 +97,24 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(now,instructions));
   }
 
+  // remove instructions behind our back (pop from the front of the list)
+  bool updated=false;
+  while (!instructions.empty() &&
+         positionMessage->position.routeNode != positionMessage->route->Nodes().end() &&
+         instructions.front().GetDistance() <= positionMessage->position.routeNode->GetDistance()){
+
+    instructions.pop_front();
+    updated=true;
+  }
+  if (updated){
+    result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(now,instructions));
+  }
+
+  // next route instruction
   RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
                                                                           positionMessage->route->Nodes().end(),
                                                                           positionMessage->position.coord);
-  // TODO: pop instructions behind our back
   result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
-
 
   prevRoute=positionMessage->route;
   prevNode=positionMessage->position.routeNode;

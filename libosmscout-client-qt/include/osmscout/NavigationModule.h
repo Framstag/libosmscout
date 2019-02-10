@@ -102,13 +102,10 @@ private:
   using DataAgentInst=DataAgent<NavigationModule>;
   using DataAgentRef=std::shared_ptr<DataAgentInst>;
 
-  //DataAgentRef dataAgent{std::make_shared<osmscout::DataAgent<NavigationModule>>(*this)};
-
   osmscout::NavigationEngine engine{
       std::make_shared<osmscout::DataAgent<NavigationModule>>(*this),
       std::make_shared<osmscout::PositionAgent>(),
       std::make_shared<osmscout::BearingAgent>(),
-      //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
       std::make_shared<osmscout::RouteInstructionAgent<RouteStep, RouteDescriptionBuilder>>(),
       std::make_shared<osmscout::RouteStateAgent>(),
   };

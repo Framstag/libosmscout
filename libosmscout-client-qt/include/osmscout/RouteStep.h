@@ -83,6 +83,11 @@ public:
     return type;
   };
 
+  Distance GetDistance() const
+  {
+    return distance;
+  }
+
   double getDistance() const
   {
     return distance.AsMeter();

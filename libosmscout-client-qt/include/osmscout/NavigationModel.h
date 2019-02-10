@@ -104,6 +104,7 @@ private:
   osmscout::Vehicle vehicle;
 
   std::vector<RouteStep> routeSteps;
+  RouteStep nextRouteStep;
 };
 
 }
