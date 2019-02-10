@@ -49,6 +49,7 @@ class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
   Q_PROPERTY(double  timeDelta        READ getTimeDelta        NOTIFY update)
   Q_PROPERTY(QString description      READ getDescription      NOTIFY update)
   Q_PROPERTY(QString shortDescription READ getShortDescription NOTIFY update)
+  Q_PROPERTY(QStringList streetNames  READ getStreetNames()    NOTIFY update)
 
 signals:
   void update();
@@ -62,17 +63,20 @@ public:
   Duration timeDelta;       //!< Estimate time from previous route step
   QString description;      //!< Formatted (html) verbose description (translated already)
   QString shortDescription; //!< Plain short description (translated already)
+  QStringList streetNames;  //!< Street names leading to this step
 
 public:
   inline RouteStep() : RouteStep("", Distance::Zero(), Distance::Zero(),
-                                 Duration::zero(), Duration::zero())
+                                 Duration::zero(), Duration::zero(),
+                                 QStringList())
   {};
 
   RouteStep(const QString &type,
             const Distance &distance,
             const Distance &distanceDelta,
             const Duration &time,
-            const Duration &timeDelta);
+            const Duration &timeDelta,
+            const QStringList &streetNames);
 
   RouteStep(const RouteStep& other);
 
@@ -121,6 +125,11 @@ public:
   QString getShortDescription() const
   {
     return shortDescription;
+  }
+
+  QStringList getStreetNames() const
+  {
+    return streetNames;
   }
 
 private:

@@ -151,8 +151,8 @@ Window {
         id: topContainer
         anchors.left: parent.left
         anchors.top: parent.top
-        width: Math.min(400, parent.width - rightContainer.width)
-        height: 120
+        width: Math.min(420, parent.width - rightContainer.width)
+        height: 130
         color: "transparent"
 
         Rectangle {
@@ -196,12 +196,26 @@ Window {
                 }
             }
             Text{
+                id: nextStepStreets
+                text: "via " + navigationModel.nextRouteStep.streetNames.join(", ")
+                font.pixelSize: Theme.textFontSize
+                opacity: 0.7
+                visible: navigationModel.nextRouteStep.streetNames.length > 0
+                wrapMode: Text.NoWrap
+                clip: true
+                anchors{
+                    top: distanceToNextStep.bottom
+                    left: nextStepIcon.right
+                    right: parent.right
+                }
+            }
+            Text{
                 id: nextStepDescription
                 text: navigationModel.nextRouteStep.description
                 font.pixelSize: Theme.textFontSize
                 wrapMode: Text.Wrap
                 anchors{
-                    top: distanceToNextStep.bottom
+                    top: nextStepStreets.bottom
                     left: nextStepIcon.right
                     right: parent.right
                 }

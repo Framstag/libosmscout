@@ -51,6 +51,11 @@ public:
     Distance stopAfter;           //!< stop processing when distance of last step from the start is greater
                                   //!< stopAfter < 0 : unlimited
 
+    bool skipInformative;         //!< Skip informative instructions like "Street change its name"
+                                  //!< that are useless during navigation
+
+    QStringList streetNames;       //!< Stack of route names to next steps
+
     Distance distance;
     Distance distancePrevious;
     Duration time;
@@ -58,7 +63,8 @@ public:
 
   public:
     Callback(QList<RouteStep> &routeSteps,
-             const Distance &stopAfter = Distance::Lowest());
+             const Distance &stopAfter = Distance::Lowest(),
+             bool skipInformative=false);
 
     virtual ~Callback();
 
@@ -93,6 +99,8 @@ public:
                                  const RouteDescription::NameDescriptionRef& nameDescription) override;
 
     virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override;
+
+    void PushStreetName(const RouteDescription::NameDescriptionRef &nameDescription);
 
     virtual void BeforeNode(const RouteDescription::Node& node) override;
 
