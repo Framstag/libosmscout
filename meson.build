@@ -150,12 +150,16 @@ qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
 
 message('Qt version : @0@ (required >= 5.5)'.format(qt5GuiDep.version()))
 
-if qt5GuiDep.found() and qt5GuiDep.version().version_compare('>=5.5') and qt5QmlDep.found() and qt5QuickDep.found() and qt5WidgetsDep.found() and qt5NetworkDep.found()
-  buildClientQt=true
+if qt5GuiDep.found() and qt5GuiDep.version().version_compare('>=5.5') and qt5QmlDep.found() and qt5QuickDep.found() and qt5WidgetsDep.found() and qt5NetworkDep.found() and get_option('enableMapQt')
   buildMapQt=true
 else
-  buildClientQt=false
   buildMapQt=false
+endif
+
+if buildMapQt and get_option('enableClientQt')
+  buildClientQt=true
+else
+  buildClientQt=false
 endif
 
 # OpenGL
@@ -190,32 +194,52 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found()
+if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
 endif
 
 # Agg
-if aggDep.found() and aggftAvailable
+if aggDep.found() and aggftAvailable and get_option('enableMapAgg')
   buildMapAgg=true
 else
   buildMapAgg=false
 endif
 
 # Cairo
-if cairoDep.found()
+if cairoDep.found() and get_option('enableMapCairo')
   buildMapCairo=true
 else
   buildMapCairo=false
 endif
 
-#DirectX
+# DirectX
 
-if d2d1Dep.found() and dwriteDep.found() and winCodecsDep.found() and d2dlHeaderAvailable
+if d2d1Dep.found() and dwriteDep.found() and winCodecsDep.found() and d2dlHeaderAvailable and get_option('enableMapDirectX')
   buildMapDirectX=true
 else
   buildMapDirectX=false
+endif
+
+# GPX
+if xml2Dep.found() and get_option('enableGpx')
+    buildGpx=true
+else
+    buildGpx=false
+endif
+
+# import
+if get_option('enableImport')
+    buildImport=true
+else
+    buildImport=false
+endif
+
+if get_option('enableTests')
+    buildTests=true
+else
+    buildTests=false
 endif
 
 # iOSX
@@ -225,10 +249,16 @@ coreTextDep = dependency('appleframeworks', modules : 'CoreText', required : fal
 cocoaDep = dependency('appleframeworks', modules : 'Cocoa', required : false)
 appKitDep = dependency('appleframeworks', modules : 'AppKit', required : false)
 
-if build_machine.system()=='darwin' and foundationDep.found() and coreGraphicsDep.found() and coreTextDep.found() and cocoaDep.found() and appKitDep.found()
+if build_machine.system()=='darwin' and foundationDep.found() and coreGraphicsDep.found() and coreTextDep.found() and cocoaDep.found() and appKitDep.found() and get_option('enableMapIOSX')
   buildMapIOSX=true
 else
   buildMapIOSX=false
+endif
+
+if get_option('enableMapSvg')
+    buildMapSVG=true
+else
+    buildMapSVG=false
 endif
 
 # Binding
@@ -239,15 +269,15 @@ else
   buildBinding=false
 endif
 
-buildOSMScout2=buildMapQt and buildClientQt and qt5SvgDep.found()
+buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt5SvgDep.found()
 buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
 
 message('build system:            @0@'.format(build_machine.system()))
 message('openmp support:          @0@'.format(openmpDep.found()))
 message('libosmscout:             @0@'.format(true))
-message('libosmscout-gpx:         @0@'.format(true))
-message('libosmscout-import:      @0@'.format(true))
-message('libosmscout-test:        @0@'.format(true))
+message('libosmscout-gpx:         @0@'.format(buildGpx))
+message('libosmscout-import:      @0@'.format(buildImport))
+message('libosmscout-test:        @0@'.format(buildImport))
 message('libosmscout-map:         @0@'.format(true))
 message('libosmscout-map-agg:     @0@'.format(buildMapAgg))
 message('libosmscout-map-cairo:   @0@'.format(buildMapCairo))
@@ -255,22 +285,23 @@ message('libosmscout-map-directx: @0@'.format(buildMapDirectX))
 message('libosmscout-map-iosx:    @0@'.format(buildMapIOSX))
 message('libosmscout-map-opengl:  @0@'.format(buildMapOpenGL))
 message('libosmscout-map-qt:      @0@'.format(buildMapQt))
-message('libosmscout-map-svg:     @0@'.format(true))
+message('libosmscout-map-svg:     @0@'.format(buildMapSVG))
 message('libosmscout-client-qt:   @0@'.format(buildClientQt))
-message('BasemapImport:           @0@'.format(true))
-message('Import:                  @0@'.format(true))
+message('BasemapImport:           @0@'.format(buildImport))
+message('Import:                  @0@'.format(buildImport))
 message('Demos:                   @0@'.format(true))
 message('DumpData:                @0@'.format(true))
 message('OSMScout2:               @0@'.format(buildOSMScout2))
 message('StyleEditor:             @0@'.format(buildStyleEditor))
 message('libosmscout-binding:     @0@'.format(buildBinding))
-message('Tests:                   @0@'.format(true))
+message('Tests:                   @0@'.format(buildTests))
 
 subdir('libosmscout')
-subdir('libosmscout-import')
-subdir('libosmscout-test')
 subdir('libosmscout-map')
-subdir('libosmscout-gpx')
+
+if buildGpx
+    subdir('libosmscout-gpx')
+endif
 
 if buildMapAgg
   subdir('libosmscout-map-agg')
@@ -297,19 +328,29 @@ if buildMapQt
   subdir('libosmscout-map-qt')
 endif
 
-subdir('libosmscout-map-svg')
+if buildMapSVG
+    subdir('libosmscout-map-svg')
+endif
 
 if buildClientQt
   subdir('libosmscout-client-qt')
 endif
 
-subdir('BasemapImport')
-subdir('Import')
+if buildImport
+    subdir('libosmscout-import')
+    subdir('libosmscout-test')
+    subdir('BasemapImport')
+    subdir('Import')
+endif
+
 subdir('Demos')
 subdir('DumpData')
 
-if buildMapQt and buildClientQt and qt5SvgDep.found()
+if buildOSMScout2
   subdir('OSMScout2')
+endif
+
+if buildStyleEditor
   subdir('StyleEditor')
 endif
 
@@ -317,7 +358,9 @@ if buildMapOpenGL and glfwDep.found() and ftDep.found()
   subdir('OSMScoutOpenGL')
 endif
 
-subdir('Tests')
+if buildTests
+    subdir('Tests')
+endif
 
 if buildBinding
 #  subdir('libosmscout-binding')
