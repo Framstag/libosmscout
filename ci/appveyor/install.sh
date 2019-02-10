@@ -42,7 +42,7 @@ fi
 if [ "${BUILDTOOL}" = "meson" ] ; then
     # Ubuntu:bionic distribute Meson 0.45.1 but libosmscout requires >=0.46.0.
     # lets borrow it from cosmic ;-)
-    echo "deb http://cz.archive.ubuntu.com/ubuntu cosmic main universe" >> /etc/apt/sources.list
+    echo "deb http://de.archive.ubuntu.com/ubuntu cosmic main universe" >> /etc/apt/sources.list
     apt-get update
     apt-get install -y \
           meson
