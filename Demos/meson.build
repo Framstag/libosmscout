@@ -91,8 +91,14 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
 
   if buildMapAgg
     includes += osmscoutmapaggIncDir
-    deps += aggDep
+    deps += [mathDep, threadDep, aggDep, ftDep]
     links += osmscoutmapagg
+
+    if aggftpicDep.found()
+      deps += aggftpicDep
+    else
+      deps += aggftDep
+    endif
   endif
 
   # TODO: This build is not working, maybe a missing dependency?... (cmake counterpart works)
@@ -160,12 +166,14 @@ Srtm = executable('Srtm',
                   link_with: [osmscout],
                   install: true)
 
-DrawMapSVG = executable('DrawMapSVG',
-                        'src/DrawMapSVG.cpp',
-                        include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapsvgIncDir],
-                        dependencies: [mathDep, openmpDep, pangoDep],
-                        link_with: [osmscout, osmscoutmap, osmscoutmapsvg],
-                        install: true)
+if buildMapSVG
+    DrawMapSVG = executable('DrawMapSVG',
+                            'src/DrawMapSVG.cpp',
+                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapsvgIncDir],
+                            dependencies: [mathDep, openmpDep, pangoDep],
+                            link_with: [osmscout, osmscoutmap, osmscoutmapsvg],
+                            install: true)
+endif
 
 if buildMapAgg
   DrawMapAgg = executable('DrawMapAgg',

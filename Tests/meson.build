@@ -110,17 +110,19 @@ Geometry = executable('Geometry',
              link_with: [osmscout],
              install: false)
 
-LocationServiceTest = executable('LocationServiceTest',
-             [
-               'src/LocationServiceTest.cpp',
-               'src/SearchForLocationByStringTest.cpp',
-               'src/SearchForLocationByFormTest.cpp',
-               'src/SearchForPOIByFormTest.cpp'
-             ],
-             include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
-             dependencies: [mathDep, openmpDep],
-             link_with: [osmscouttest, osmscoutimport, osmscout],
-             install: false)
+if buildImport
+    LocationServiceTest = executable('LocationServiceTest',
+                 [
+                   'src/LocationServiceTest.cpp',
+                   'src/SearchForLocationByStringTest.cpp',
+                   'src/SearchForLocationByFormTest.cpp',
+                   'src/SearchForPOIByFormTest.cpp'
+                 ],
+                 include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
+                 dependencies: [mathDep, openmpDep],
+                 link_with: [osmscouttest, osmscoutimport, osmscout],
+                 install: false)
+endif
 
 MapRotate = executable('MapRotate',
              'src/MapRotate.cpp',
@@ -243,7 +245,6 @@ test('Check File access implementation', FileScannerWriter)
 test('Check parsing of geo box intersection', GeoBox)
 test('Check parsing of geo coordinates', GeoCoordParse)
 test('Check impl. of geometric functions', Geometry)
-test('Check LocationService', LocationServiceTest, env: ostandossEnv)
 test('Check rotation of maps', MapRotate)
 test('Check correctness of NumberSet class', NumberSet)
 test('Check scan conversion code', ScanConversion)
@@ -253,6 +254,10 @@ test('Check implementation of work queue', WorkQueue)
 test('Check WString<=>String conversion code', WStringStringConversion)
 test('Check LabelPath code', LabelPathTest)
 test('Check Base64 code', Base64Test)
+
+if buildImport
+    test('Check LocationService', LocationServiceTest, env: ostandossEnv)
+endif
 
 stylesheets = [
             'standard.oss',
