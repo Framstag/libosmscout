@@ -39,7 +39,7 @@ namespace osmscout {
       Outdated
     };
 
-    struct GpsPosition {
+    struct OSMSCOUT_API GpsPosition {
       Timestamp lastUpdate;
       GeoCoord position;
       Distance horizontalAccuracy{Meters(2000)};
@@ -61,7 +61,7 @@ namespace osmscout {
       EstimateInTunnel
     };
 
-    struct Position {
+    struct OSMSCOUT_API Position {
       PositionState state{PositionState::NoGpsSignal};
       GeoCoord coord;
       std::list<RouteDescription::Node>::const_iterator routeNode; // last passed node on the route
