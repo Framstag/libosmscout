@@ -208,7 +208,7 @@ namespace osmscout {
                                                          Vehicle vehicle,
                                                          const Distance &maxRadius);
 
-    virtual std::map<DatabaseId, std::string> GetDatabaseMapping() const;
+    virtual std::map<DatabaseId, std::string> GetDatabaseMapping() const override;
 
     void DumpStatistics();
   };

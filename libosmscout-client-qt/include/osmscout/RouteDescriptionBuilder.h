@@ -96,7 +96,7 @@ public:
 
     virtual void BeforeNode(const RouteDescription::Node& node) override;
 
-    virtual bool Continue() const;
+    virtual bool Continue() const override;
 
     RouteStep MkStep(const QString &name);
   };
