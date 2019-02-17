@@ -24,18 +24,31 @@
 namespace osmscout {
 
 NavigationModel::NavigationModel():
-    vehicle(osmscout::Vehicle::vehicleCar), onRoute(false)
+    vehicle(osmscout::Vehicle::vehicleCar)
 {
   navigationModule=OSMScoutQt::GetInstance().MakeNavigation();
 
-  connect(this, SIGNAL(routeChanged(LocationEntryRef, QtRouteData, osmscout::Vehicle)),
-          navigationModule, SLOT(setupRoute(LocationEntryRef, QtRouteData, osmscout::Vehicle)),
+  connect(this, &NavigationModel::routeChanged,
+          navigationModule, &NavigationModule::setupRoute,
           Qt::QueuedConnection);
-  connect(this, SIGNAL(positionChange(osmscout::GeoCoord, bool, double)),
-          navigationModule, SLOT(locationChanged(osmscout::GeoCoord, bool, double)),
+  connect(this, &NavigationModel::positionChange,
+          navigationModule, &NavigationModule::locationChanged,
           Qt::QueuedConnection);
-  connect(navigationModule, SIGNAL(update(bool, RouteStep)),
-          this, SLOT(onUpdated(bool, RouteStep)),
+
+  connect(navigationModule, &NavigationModule::update,
+          this, &NavigationModel::onUpdate,
+          Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::updateNext,
+          this, &NavigationModel::onUpdateNext,
+          Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::positionEstimate,
+          this, &NavigationModel::onPositionEstimate,
+          Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::targetReached,
+          this, &NavigationModel::onTargetReached,
+          Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::rerouteRequest,
+          this, &NavigationModel::onRerouteRequest,
           Qt::QueuedConnection);
 }
 
@@ -44,11 +57,6 @@ NavigationModel::~NavigationModel(){
     navigationModule->deleteLater();
     navigationModule=nullptr;
   }
-}
-
-bool NavigationModel::isPositionOnRoute()
-{
-  return onRoute;
 }
 
 void NavigationModel::locationChanged(bool /*locationValid*/,
@@ -63,16 +71,32 @@ QObject *NavigationModel::getRoute() const
   return new QtRouteData(route);
 }
 
-void NavigationModel::onUpdated(bool onRoute, RouteStep routeStep)
+void NavigationModel::onUpdate(std::list<RouteStep> /*instructions*/)
 {
-  // qDebug() << onRoute << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
-  if (this->onRoute != onRoute) {
-    this->onRoute = onRoute;
-    emit positionOnRouteChanged();
-  }
+  // TODO
+}
+
+void NavigationModel::onUpdateNext(RouteStep routeStep)
+{
+  // qDebug() << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
   nextRouteStep=routeStep;
 
   emit update();
+}
+
+void NavigationModel::onPositionEstimate(PositionAgent::PositionState state, GeoCoord coord, double bearing)
+{
+  emit positionEstimate(state, coord.GetLat(), coord.GetLon(), bearing);
+}
+
+void NavigationModel::onTargetReached(double targetBearing, Distance targetDistance)
+{
+  emit targetReached(targetBearing, targetDistance.AsMeter());
+}
+
+void NavigationModel::onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to)
+{
+  emit rerouteRequest(from.GetLat(), from.GetLon(), initialBearing, to.GetLat(), to.GetLon());
 }
 
 QObject *NavigationModel::getNextRoutStep()

@@ -434,6 +434,13 @@ namespace osmscout {
     return result;
   }
 
+  std::map<DatabaseId, std::string> SimpleRoutingService::GetDatabaseMapping() const
+  {
+    std::map<DatabaseId, std::string> mapping;
+    mapping[0] = database->GetPath();
+    return mapping;
+  }
+
   void SimpleRoutingService::DumpStatistics()
   {
     if (database) {

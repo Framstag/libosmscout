@@ -23,31 +23,22 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/Settings.h>
 #include <osmscout/Router.h>
+
 #include <osmscout/navigation/Navigation.h>
+#include <osmscout/navigation/Engine.h>
+#include <osmscout/navigation/Agents.h>
+#include <osmscout/navigation/DataAgent.h>
+#include <osmscout/navigation/PositionAgent.h>
+#include <osmscout/navigation/RouteStateAgent.h>
+#include <osmscout/navigation/BearingAgent.h>
+#include <osmscout/navigation/RouteInstructionAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QObject>
+#include <QTimer>
 
 namespace osmscout {
-
-class OSMSCOUT_CLIENT_QT_API NextStepDescriptionBuilder:
-    public osmscout::OutputDescription<RouteStep> {
-
-public:
-  NextStepDescriptionBuilder();
-
-  virtual ~NextStepDescriptionBuilder(){};
-
-  virtual void NextDescription(const Distance &distance,
-                               std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
-                               std::list<osmscout::RouteDescription::Node>::const_iterator end);
-
-private:
-  size_t          roundaboutCrossingCounter;
-  size_t          index;
-  Distance        previousDistance;
-};
 
 /**
  * \ingroup QtAPI
@@ -56,32 +47,72 @@ class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
   Q_OBJECT
 
 signals:
-  void update(bool onRoute, RouteStep routeStep);
+  void update(std::list<RouteStep> instructions);
+
+  void updateNext(RouteStep nextRouteInstruction);
+
+  void rerouteRequest(const osmscout::GeoCoord from,
+                      double initialBearing,
+                      const osmscout::GeoCoord to);
+
+  void positionEstimate(osmscout::PositionAgent::PositionState state, osmscout::GeoCoord coord, double bearing);
+
+  void targetReached(double targetBearing, Distance targetDistance);
 
 public slots:
   void setupRoute(LocationEntryRef target,
                   QtRouteData route,
                   osmscout::Vehicle vehicle);
 
+  /**
+   * @param coord
+   * @param horizontalAccuracyValid
+   * @param horizontalAccuracy [meters]
+   */
   void locationChanged(osmscout::GeoCoord coord,
-                       bool /*horizontalAccuracyValid*/,
-                       double /*horizontalAccuracy*/);
+                       bool horizontalAccuracyValid,
+                       double horizontalAccuracy);
+
+  void onTimeout();
 
 public:
   NavigationModule(QThread *thread,
                    SettingsRef settings,
                    DBThreadRef dbThread);
 
+  bool loadRoutableObjects(const GeoBox &box,
+                           const Vehicle &vehicle,
+                           const std::map<std::string,DatabaseId> &databaseMapping,
+                           RoutableObjectsRef &data);
+
   virtual ~NavigationModule();
+
+private:
+  void ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages);
 
 private:
   QThread     *thread;
   SettingsRef settings;
   DBThreadRef dbThread;
+  QTimer      timer;
+  double      lastBearing{-1};
 
-  NextStepDescriptionBuilder nextStepDescBuilder;
-  osmscout::RouteDescription routeDescription;
-  osmscout::Navigation<RouteStep> navigation;
+  osmscout::RouteDescriptionRef routeDescription;
+
+  using DataAgentInst=DataAgent<NavigationModule>;
+  using DataAgentRef=std::shared_ptr<DataAgentInst>;
+
+  //DataAgentRef dataAgent{std::make_shared<osmscout::DataAgent<NavigationModule>>(*this)};
+
+  osmscout::NavigationEngine engine{
+      std::make_shared<osmscout::DataAgent<NavigationModule>>(*this),
+      std::make_shared<osmscout::PositionAgent>(),
+      std::make_shared<osmscout::BearingAgent>(),
+      //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
+      std::make_shared<osmscout::RouteInstructionAgent<RouteStep, RouteDescriptionBuilder>>(),
+      std::make_shared<osmscout::RouteStateAgent>(),
+  };
+
 };
 
 }

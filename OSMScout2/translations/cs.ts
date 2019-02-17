@@ -4,13 +4,13 @@
 <context>
     <name>NavigationSimulation</name>
     <message>
-        <location filename="../qml/NavigationSimulation.qml" line="183"/>
-        <location filename="../qml/NavigationSimulation.qml" line="186"/>
+        <location filename="../qml/NavigationSimulation.qml" line="184"/>
+        <location filename="../qml/NavigationSimulation.qml" line="187"/>
         <source>meters</source>
         <translation>metrů</translation>
     </message>
     <message>
-        <location filename="../qml/NavigationSimulation.qml" line="188"/>
+        <location filename="../qml/NavigationSimulation.qml" line="189"/>
         <source>km</source>
         <translation>km</translation>
     </message>
@@ -18,206 +18,206 @@
 <context>
     <name>osmscout::RouteDescriptionBuilder</name>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="73"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="76"/>
         <source>Turn</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="77"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="80"/>
         <source>Turn sharp left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="79"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="82"/>
         <source>Turn left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="81"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="84"/>
         <source>Turn slightly left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="83"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="86"/>
         <source>Straight on</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="85"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="88"/>
         <source>Turn slightly right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="87"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="90"/>
         <source>Turn right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="89"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="92"/>
         <source>Turn sharp right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="100"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="103"/>
         <source>At crossing %1&lt;strong&gt;Turn&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="104"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="107"/>
         <source>At crossing %1&lt;strong&gt;Turn sharp left&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="106"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="109"/>
         <source>At crossing %1&lt;strong&gt;Turn left&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="108"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="111"/>
         <source>At crossing %1&lt;strong&gt;Turn slightly left&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="110"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="113"/>
         <source>At crossing %1&lt;strong&gt;Straight on&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="112"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="115"/>
         <source>At crossing %1&lt;strong&gt;Turn slightly right&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="114"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="117"/>
         <source>At crossing %1&lt;strong&gt;Turn right&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="116"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="119"/>
         <source>At crossing %1&lt;strong&gt;Turn sharp right&lt;/strong&gt; into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="127"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="130"/>
         <source>At crossing %1&lt;strong&gt;Turn&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="131"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="134"/>
         <source>At crossing %1&lt;strong&gt;Turn sharp left&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="133"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="136"/>
         <source>At crossing %1&lt;strong&gt;Turn left&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="135"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="138"/>
         <source>At crossing %1&lt;strong&gt;Turn slightly left&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="137"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="140"/>
         <source>At crossing %1&lt;strong&gt;Straight on&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="139"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="142"/>
         <source>At crossing %1&lt;strong&gt;Turn slightly right&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="141"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="144"/>
         <source>At crossing %1&lt;strong&gt;Turn right&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="143"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="146"/>
         <source>At crossing %1&lt;strong&gt;Turn sharp right&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="157"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="160"/>
         <source>unnamed road</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="160"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="163"/>
         <source>(%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="163"/>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="226"/>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="265"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="166"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="229"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="267"/>
         <source>&quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="165"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="168"/>
         <source>&quot;%1&quot; (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="235"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="238"/>
         <source>&lt;strong&gt;Start&lt;/strong&gt; at %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="236"/>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="248"/>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="253"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="239"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="251"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="256"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="241"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="244"/>
         <source>&lt;strong&gt;Continue&lt;/strong&gt; along %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="242"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="245"/>
         <source>Continue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="247"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="250"/>
         <source>&lt;strong&gt;Start&lt;/strong&gt; along %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="252"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="255"/>
         <source>&lt;strong&gt;Start&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="269"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="271"/>
         <source>&lt;strong&gt;Target reached&lt;/strong&gt; at %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="271"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="273"/>
         <source>&lt;strong&gt;Target reached&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="273"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="275"/>
         <source>Target reached</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="319"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="320"/>
         <source>At crossing %1&lt;strong&gt;Enter roundabout&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="322"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="323"/>
         <source>&lt;strong&gt;Enter roundabout&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="324"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="325"/>
         <source>Enter roundabout</source>
         <translation type="unfinished"></translation>
     </message>
@@ -237,27 +237,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="356"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="355"/>
         <source>Enter motorway</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="368"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="367"/>
         <source>At crossing %1&lt;strong&gt;Enter motorway&lt;/strong&gt; %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="372"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="371"/>
         <source>&lt;strong&gt;Enter motorway&lt;/strong&gt; %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="377"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="376"/>
         <source>At crossing %1&lt;strong&gt;Enter motorway&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="380"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="379"/>
         <source>&lt;strong&gt;Enter motorway&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -297,17 +297,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="444"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="443"/>
         <source>Way changes name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="447"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="446"/>
         <source>&lt;strong&gt;Way changes name&lt;/strong&gt; from %1 to %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="451"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="450"/>
         <source>&lt;strong&gt;Way changes name&lt;/strong&gt; to %1</source>
         <translation type="unfinished"></translation>
     </message>

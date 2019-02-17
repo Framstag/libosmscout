@@ -35,18 +35,24 @@
 #include <cstring>
 
 #include <osmscout/Database.h>
+#include <osmscout/MapService.h>
 
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/routing/RouteDescriptionPostprocessor.h>
 
 #include <osmscout/navigation/Engine.h>
 #include <osmscout/navigation/Agents.h>
+#include <osmscout/navigation/PositionAgent.h>
+#include <osmscout/navigation/RouteStateAgent.h>
+#include <osmscout/navigation/BearingAgent.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 
 struct Arguments
 {
   bool                   help=false;
+  bool                   debug=false;
   std::string            router=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
   osmscout::Vehicle      vehicle=osmscout::Vehicle::vehicleCar;
   std::string            databaseDirectory;
@@ -92,7 +98,7 @@ public:
   }
 };
 
-struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionGenerator::Callback
+struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPostprocessor::Callback
 {
 };
 
@@ -235,7 +241,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
 class Simulator
 {
 private:
-  osmscout::RouteStateChangedMessage::State routeState;
+  osmscout::PositionAgent::PositionState    routeState;
   std::string                               lastBearingString;
 
 private:
@@ -245,24 +251,95 @@ public:
   Simulator();
   void Simulate(const osmscout::DatabaseRef& database,
                 const PathGenerator& generator,
-                const osmscout::RoutePointsRef& routePoints);
+                const osmscout::RouteDescriptionRef& routeDescription);
 };
 
 Simulator::Simulator()
-: routeState(osmscout::RouteStateChangedMessage::State::noRoute)
+: routeState(osmscout::PositionAgent::PositionState::NoGpsSignal)
 {
 }
+
+class DataLoader{
+private:
+  osmscout::DatabaseRef   database;
+  osmscout::MapServiceRef mapService;
+public:
+  DataLoader(const osmscout::DatabaseRef &database):
+    database(database),
+    mapService{std::make_shared<osmscout::MapService>(database)}
+  {}
+
+  bool loadRoutableObjects(const osmscout::GeoBox &box,
+                           const osmscout::Vehicle &vehicle,
+                           const std::map<std::string,osmscout::DatabaseId> &databaseMapping,
+                           osmscout::RoutableObjectsRef &data);
+};
+
+
+bool DataLoader::loadRoutableObjects(const osmscout::GeoBox &box,
+                                     const osmscout::Vehicle &vehicle,
+                                     const std::map<std::string,osmscout::DatabaseId> &databaseMapping,
+                                     osmscout::RoutableObjectsRef &data)
+{
+  osmscout::StopClock stopClock;
+
+  assert(data);
+  assert(database);
+  assert(mapService);
+  data->bbox=box;
+
+  osmscout::Magnification magnification(osmscout::Magnification::magClose);
+
+  auto dbIdIt=databaseMapping.find(database->GetPath());
+  assert(dbIdIt!=databaseMapping.end());
+  osmscout::DatabaseId databaseId=dbIdIt->second;
+
+  osmscout::MapService::TypeDefinition routableTypes;
+  for (auto &type:database->GetTypeConfig()->GetTypes()){
+    if (type->CanRoute(vehicle)){
+      if (type->CanBeArea()){
+        routableTypes.areaTypes.Set(type);
+      }
+      if (type->CanBeWay()){
+        routableTypes.wayTypes.Set(type);
+      }
+      if (type->CanBeNode()){ // can be node routable? :-)
+        routableTypes.nodeTypes.Set(type);
+      }
+    }
+  }
+
+  std::list<osmscout::TileRef> tiles;
+  mapService->LookupTiles(magnification,box,tiles);
+  mapService->LoadMissingTileData(osmscout::AreaSearchParameter{},
+                                  magnification,
+                                  routableTypes,
+                                  tiles);
+
+  osmscout::RoutableDBObjects &objects=data->dbMap[databaseId];
+  objects.typeConfig=database->GetTypeConfig();
+  for (auto &tile:tiles){
+    tile->GetWayData().CopyData([&](const osmscout::WayRef &way){objects.ways[way->GetFileOffset()]=way;});
+    tile->GetAreaData().CopyData([&](const osmscout::AreaRef &area){objects.areas[area->GetFileOffset()]=area;});
+  }
+
+  stopClock.Stop();
+  if (stopClock.GetMilliseconds() > 50){
+    osmscout::log.Warn() << "Loading of routable objects took " << stopClock.ResultString();
+  }
+
+  return true;
+}
+
+
 
 void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
 {
   for (const auto& message : messages) {
-    if (dynamic_cast<osmscout::PositionChangedMessage*>(message.get())!=nullptr) {
-      //auto positionChangedMessage=dynamic_cast<osmscout::PositionChangedMessage*>(message.get());
-    }
     if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
 
-      auto bearingString=bearingChangedMessage->hasBearing ? osmscout::BearingDisplayString(bearingChangedMessage->bearing) : "";
+      auto bearingString=osmscout::BearingDisplayString(bearingChangedMessage->bearing);
       if (lastBearingString!=bearingString) {
         std::cout << osmscout::TimestampToISO8601TimeString(bearingChangedMessage->timestamp)
         << " Bearing: " << bearingString << std::endl;
@@ -270,36 +347,48 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
         lastBearingString=bearingString;
       }
     }
+    /*
     else if (dynamic_cast<osmscout::StreetChangedMessage*>(message.get())!=nullptr) {
       auto streetChangedMessage=dynamic_cast<osmscout::StreetChangedMessage*>(message.get());
 
       std::cout << osmscout::TimestampToISO8601TimeString(streetChangedMessage->timestamp)
       << " Street name: " << streetChangedMessage->name << std::endl;
     }
-    else if (dynamic_cast<osmscout::RouteStateChangedMessage*>(message.get())!=nullptr) {
-      auto routeStateChangedMessage=dynamic_cast<osmscout::RouteStateChangedMessage*>(message.get());
+    */
+    else if (dynamic_cast<osmscout::RerouteRequestMessage*>(message.get())!=nullptr) {
+      auto rerouteRequest=dynamic_cast<osmscout::RerouteRequestMessage*>(message.get());
 
-      if (routeStateChangedMessage->state!=routeState) {
+      std::cout << osmscout::TimestampToISO8601TimeString(rerouteRequest->timestamp)
+                << " Reroute request: " << rerouteRequest->from.GetDisplayText()
+                << (rerouteRequest->initialBearing > 0 ? (" (" + osmscout::BearingDisplayString(rerouteRequest->initialBearing) + ")") : "")
+                << " -> " << rerouteRequest->to.GetDisplayText()
+                << std::endl;
 
-        routeState=routeStateChangedMessage->state;
+    }
+    else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
+      auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
 
+      if (targetReachedMessage->targetDistance < osmscout::Meters(1)){
+        std::cout << osmscout::TimestampToISO8601TimeString(targetReachedMessage->timestamp)
+                  << " TargetReached"
+                  << std::endl;
+      }else {
+        std::cout << osmscout::TimestampToISO8601TimeString(targetReachedMessage->timestamp)
+                  << " TargetReached: in " << targetReachedMessage->targetDistance.AsMeter() << " m,"
+                  << " direction: " << osmscout::BearingDisplayString(targetReachedMessage->targetBearing)
+                  << std::endl;
+      }
+    }
+    else if (dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get())!=nullptr) {
+      auto positionMessage=dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());
 
-        std::cout << osmscout::TimestampToISO8601TimeString(routeStateChangedMessage->timestamp)
-                  << " RouteState: ";
+      if (positionMessage->position.state!=routeState) {
 
-        switch (routeState) {
-        case osmscout::RouteStateChangedMessage::State::noRoute:
-          std::cout << "no route";
-          break;
-        case osmscout::RouteStateChangedMessage::State::onRoute:
-          std::cout << "on route";
-          break;
-        case osmscout::RouteStateChangedMessage::State::offRoute:
-          std::cout << "off route";
-          break;
-        }
+        routeState=positionMessage->position.state;
 
-        std::cout << std::endl;
+        std::cout << osmscout::TimestampToISO8601TimeString(positionMessage->timestamp)
+                  << " RouteState: " << positionMessage->position.StateStr()
+                  << std::endl;
       }
     }
   }
@@ -307,15 +396,19 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
 
 void Simulator::Simulate(const osmscout::DatabaseRef& database,
                          const PathGenerator& generator,
-                         const osmscout::RoutePointsRef& routePoints)
+                         const osmscout::RouteDescriptionRef& routeDescription)
 {
   auto locationDescriptionService=std::make_shared<osmscout::LocationDescriptionService>(database);
 
-  routeState=osmscout::RouteStateChangedMessage::State::noRoute;
+  routeState=osmscout::PositionAgent::PositionState::NoGpsSignal;
+
+  DataLoader dataLoader(database);
 
   osmscout::NavigationEngine engine{
+    std::make_shared<osmscout::DataAgent<DataLoader>>(dataLoader),
     std::make_shared<osmscout::PositionAgent>(),
-    std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
+    std::make_shared<osmscout::BearingAgent>(),
+    //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
     std::make_shared<osmscout::RouteStateAgent>(),
   };
 
@@ -325,12 +418,19 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
 
   // TODO: Simulator possibly should not send this message on start but later on to simulate driver starting before
   // getting route
-  auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(generator.steps.front().time,routePoints);
+  auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(
+      generator.steps.front().time,
+      routeDescription,
+      osmscout::Vehicle::vehicleCar);
 
   ProcessMessages(engine.Process(routeUpdateMessage));
 
   for (const auto& point : generator.steps) {
-    auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(point.time,point.coord,point.speed);
+    auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(
+        point.time,
+        point.coord,
+        point.speed,
+        osmscout::Distance::Of<osmscout::Meter>(10));
 
     ProcessMessages(engine.Process(gpsUpdateMessage));
 
@@ -412,6 +512,13 @@ int main(int argc, char* argv[])
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
+
   argParser.AddOption(osmscout::CmdLineAlternativeFlag([&args](const std::string& value) {
                         if (value=="foot") {
                           args.vehicle=osmscout::Vehicle::vehicleFoot;
@@ -468,6 +575,8 @@ int main(int argc, char* argv[])
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
+
+  osmscout::log.Debug(args.debug);
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
@@ -610,7 +719,7 @@ int main(int argc, char* argv[])
   std::cout << "Postprocessing time: " << postprocessTimer.ResultString() << std::endl;
 
   osmscout::StopClock                 generateTimer;
-  osmscout::RouteDescriptionGenerator generator;
+  osmscout::RouteDescriptionPostprocessor generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
   generator.GenerateDescription(*routeDescriptionResult.description,
@@ -632,7 +741,7 @@ int main(int argc, char* argv[])
 
   simulator.Simulate(database,
                      pathGenerator,
-                     routePointsResult.points);
+                     routeDescriptionResult.description);
 
   router->Close();
 

@@ -64,7 +64,8 @@ inline bool operator!=(const MapViewStruct &r1, const MapViewStruct &r2)
       r1.angle!=r2.angle ||
       r1.magnification!=r2.magnification ||
       r1.width!=r2.width ||
-      r1.height!=r2.height;
+      r1.height!=r2.height ||
+      r1.dpi!=r2.dpi;
 }
 
 /**

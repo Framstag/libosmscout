@@ -35,63 +35,21 @@ namespace osmscout {
   {
     const GeoCoord currentPosition;
     const double   currentSpeed;
+    const Distance horizontalAccuracy;
 
+    /**
+     * @param timestamp
+     * @param currentPosition
+     * @param currentSpeed if negative, speed is not known
+     * @param horizontalAccuracy if negative, accuracy is not known
+     */
     GPSUpdateMessage(const Timestamp& timestamp,
                      const GeoCoord& currentPosition,
-                     double currentSpeed);
+                     double currentSpeed,
+                     const Distance &horizontalAccuracy);
   };
 
-  struct OSMSCOUT_API PositionChangedMessage CLASS_FINAL : public NavigationMessage
-  {
-    const GeoCoord currentPosition;
-    const double   currentSpeed;
-
-    PositionChangedMessage(const Timestamp& timestamp,
-                           const GeoCoord& currentPosition,
-                           double currentSpeed);
-  };
-
-  struct OSMSCOUT_API BearingChangedMessage CLASS_FINAL : public NavigationMessage
-  {
-    const bool hasBearing;
-    const double bearing;
-
-    explicit BearingChangedMessage(const Timestamp& timestamp);
-    BearingChangedMessage(const Timestamp& timestamp,
-                          double bearing);
-  };
-
-  class OSMSCOUT_API PositionAgent CLASS_FINAL : public NavigationAgent
-  {
-  private:
-    enum class State {
-      noCoord,
-      oneCoord,
-      twoCoords
-    };
-
-  private:
-    GeoCoord  previousPosition;
-    Timestamp previousCheckTime;
-
-    GeoCoord  currentPosition;
-    Timestamp currentCheckTime;
-    double    currentSpeed;
-
-    bool      hasBearing;
-    double    currentBearing;
-
-    State     currentState;
-
-  private:
-    void UpdateHistory(const GPSUpdateMessage* message);
-    std::list<NavigationMessageRef> UpdateBearing();
-
-  public:
-    PositionAgent();
-    std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
-  };
-
+  /*
   struct OSMSCOUT_API StreetChangedMessage CLASS_FINAL : public NavigationMessage
   {
     const std::string name;
@@ -116,6 +74,7 @@ namespace osmscout {
     explicit CurrentStreetAgent(const LocationDescriptionServiceRef& locationDescriptionService);
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
   };
+  */
 
   /**
    * Message to pass to the NavigationEngine each time the calculated route changes.
@@ -124,38 +83,12 @@ namespace osmscout {
  */
   struct OSMSCOUT_API RouteUpdateMessage CLASS_FINAL : public NavigationMessage
   {
-    const RoutePointsRef points;
-    // TODO: Add further route information
+    const RouteDescriptionRef routeDescription;
+    osmscout::Vehicle vehicle;
 
     RouteUpdateMessage(const Timestamp& timestamp,
-                       const RoutePointsRef& points);
-  };
-
-  /**
-   * Message created if the state of the navigation in relation to the route changed.
- */
-  struct OSMSCOUT_API RouteStateChangedMessage CLASS_FINAL : public NavigationMessage
-  {
-    enum class State {
-      noRoute,
-      onRoute,
-      offRoute
-    };
-
-    const State state;
-
-    RouteStateChangedMessage(const Timestamp& timestamp,
-                             State state);
-  };
-
-  class OSMSCOUT_API RouteStateAgent CLASS_FINAL : public NavigationAgent
-  {
-  private:
-    RouteStateChangedMessage::State state;
-
-  public:
-    explicit RouteStateAgent();
-    std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
+                       const RouteDescriptionRef &routeDescription,
+                       const osmscout::Vehicle &vehicle);
   };
 
 }

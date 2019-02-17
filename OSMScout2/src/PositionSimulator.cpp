@@ -81,7 +81,8 @@ osmscout::Timestamp Now(){
 
 QDateTime PositionSimulator::getTime() const
 {
-  return QDateTime::fromMSecsSinceEpoch(simulationTime.time_since_epoch().count());
+  using namespace std::chrono;
+  return QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(simulationTime.time_since_epoch()).count());
 }
 
 void PositionSimulator::skipTime(uint64_t millis)

@@ -29,6 +29,7 @@
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/routing/DBFileOffset.h>
+#include <osmscout/routing/RouteDescriptionPostprocessor.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/Geometry.h>
@@ -218,7 +219,7 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
   }
 }
 
-struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionGenerator::Callback
+struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPostprocessor::Callback
 {
   size_t lineCount;
   double prevDistance;
@@ -815,7 +816,7 @@ int main(int argc, char* argv[])
   std::cout << "Postprocessing time: " << postprocessTimer.ResultString() << std::endl;
 
   osmscout::StopClock                 generateTimer;
-  osmscout::RouteDescriptionGenerator generator;
+  osmscout::RouteDescriptionPostprocessor generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
   generator.GenerateDescription(*routeDescriptionResult.description,

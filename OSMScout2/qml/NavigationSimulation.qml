@@ -52,10 +52,6 @@ Window {
                                             latitude, longitude,
                                             horizontalAccuracyValid, horizontalAccuracy);
             // console.log("position: " + latitude + " " + longitude);
-
-            if ((!navigationModel.positionOnRoute) && routingModel.ready){
-                reroute();
-            }
         }
     }
 
@@ -63,10 +59,15 @@ Window {
         id: navigationModel
         route: routingModel.route
 
-        onPositionOnRouteChanged: {
-            if (!positionOnRoute){
+        onRerouteRequest: {
+            if (routingModel.ready){
                 reroute();
             }
+        }
+        onPositionEstimate: {
+            // TODO: show some arrow that respect bearing
+            console.log("onPositionEstimate " + lat + " " + lon);
+            map.addPositionMark(0, lat, lon);
         }
     }
 

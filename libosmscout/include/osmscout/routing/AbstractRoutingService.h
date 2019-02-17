@@ -325,6 +325,14 @@ namespace osmscout {
     RouteDescriptionResult TransformRouteDataToRouteDescription(const RouteData& data);
     RoutePointsResult TransformRouteDataToPoints(const RouteData& data);
     RouteWayResult TransformRouteDataToWay(const RouteData& data);
+
+    /**
+     * Get current mapping of DatabaseId to database path than be used
+     * later for lookup objects in description
+     *
+     * @return
+     */
+    virtual std::map<DatabaseId, std::string> GetDatabaseMapping() const = 0;
   };
 
 }

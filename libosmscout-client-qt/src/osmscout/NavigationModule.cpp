@@ -18,50 +18,17 @@
  */
 
 #include <osmscout/NavigationModule.h>
+#include <osmscout/util/Logger.h>
 
 namespace osmscout {
-
-NextStepDescriptionBuilder::NextStepDescriptionBuilder():
-    roundaboutCrossingCounter(0),
-    index(0)
-{
-}
-
-void NextStepDescriptionBuilder::NextDescription(const Distance &distance,
-                                                 std::list<osmscout::RouteDescription::Node>::const_iterator& waypoint,
-                                                 std::list<osmscout::RouteDescription::Node>::const_iterator end)
-{
-  if (waypoint==end || (distance.AsMeter()>=0 && previousDistance>distance)) {
-    return;
-  }
-  RouteDescriptionBuilder builder;
-  for (; waypoint!=end; waypoint++) {
-    QList<RouteStep> routeSteps;
-    if (!builder.GenerateRouteStep(*waypoint, routeSteps, roundaboutCrossingCounter)){
-      continue;
-    }
-    if (routeSteps.isEmpty()){
-      continue;
-    }
-
-    description=routeSteps.first();
-    description.distance=waypoint->GetDistance();
-    description.time    =waypoint->GetTime();
-
-    if (waypoint->GetDistance() > distance){
-      description.distanceTo=(waypoint->GetDistance()-distance);
-      break;
-    }
-  }
-}
 
 NavigationModule::NavigationModule(QThread *thread,
                                    SettingsRef settings,
                                    DBThreadRef dbThread):
-  thread(thread), settings(settings), dbThread(dbThread),
-  navigation(&nextStepDescBuilder)
+  thread(thread), settings(settings), dbThread(dbThread)
 {
-  navigation.SetSnapDistance(Distance::Of<Meter>(40.0));
+  timer.moveToThread(thread); // constructor is called from different thread!
+  connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
 }
 
 NavigationModule::~NavigationModule()
@@ -75,36 +42,150 @@ NavigationModule::~NavigationModule()
   }
 }
 
+void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
+{
+  for (const auto &message : messages) {
+    if (dynamic_cast<PositionAgent::PositionMessage *>(message.get()) != nullptr) {
+      auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+      auto &position=positionMessage->position;
+      emit positionEstimate(position.state, position.coord, lastBearing);
+    }
+    else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
+      auto bearingMessage = dynamic_cast<osmscout::BearingChangedMessage *>(message.get());
+      lastBearing=bearingMessage->bearing;
+    }
+    else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
+      auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+      emit targetReached(targetReachedMessage->targetBearing,targetReachedMessage->targetDistance);
+    }
+    else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
+      auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
+      emit rerouteRequest(req->from, req->initialBearing, req->to);
+    }
+    else if (dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
+      auto instructions = dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
+      emit update(instructions->instructions);
+    }
+    else if (dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
+      auto nextInstruction = dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
+      if (!nextInstruction->nextRouteInstruction.shortDescription.isEmpty()) {
+        log.Debug() << "In " << nextInstruction->nextRouteInstruction.distanceTo.AsMeter() << " m: "
+                    << nextInstruction->nextRouteInstruction.shortDescription.toStdString();
+      }
+      emit updateNext(nextInstruction->nextRouteInstruction);
+    }
+  }
+}
+
+bool NavigationModule::loadRoutableObjects(const GeoBox &box,
+                                           const Vehicle &vehicle,
+                                           const std::map<std::string,DatabaseId> &databaseMapping,
+                                           RoutableObjectsRef &data)
+{
+  StopClock stopClock;
+
+  assert(data);
+  data->bbox=box;
+
+  dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef> &databases){
+    Magnification magnification(Magnification::magClose);
+    for (auto &db:databases) {
+      auto dbIdIt=databaseMapping.find(db->database->GetPath());
+      if (dbIdIt==databaseMapping.end()){
+        continue; // this database was not used for routing
+      }
+      DatabaseId databaseId=dbIdIt->second;
+
+      MapService::TypeDefinition routableTypes;
+      for (auto &type:db->database->GetTypeConfig()->GetTypes()){
+        if (type->CanRoute(vehicle)){
+          if (type->CanBeArea()){
+            routableTypes.areaTypes.Set(type);
+          }
+          if (type->CanBeWay()){
+            routableTypes.wayTypes.Set(type);
+          }
+          if (type->CanBeNode()){ // can be node routable? :-)
+            routableTypes.nodeTypes.Set(type);
+          }
+        }
+      }
+
+      std::list<TileRef> tiles;
+      db->mapService->LookupTiles(magnification,box,tiles);
+      db->mapService->LoadMissingTileData(AreaSearchParameter{},
+                                          magnification,
+                                          routableTypes,
+                                          tiles);
+
+      RoutableDBObjects &objects=data->dbMap[databaseId];
+      objects.typeConfig=db->database->GetTypeConfig();
+      for (auto &tile:tiles){
+        tile->GetWayData().CopyData([&](const WayRef &way){objects.ways[way->GetFileOffset()]=way;});
+        tile->GetAreaData().CopyData([&](const AreaRef &area){objects.areas[area->GetFileOffset()]=area;});
+      }
+    }
+  });
+
+  stopClock.Stop();
+  if (stopClock.GetMilliseconds() > 50){
+    log.Warn() << "Loading of routable objects took " << stopClock.ResultString();
+  }
+
+  return true;
+}
+
 void NavigationModule::setupRoute(LocationEntryRef /*target*/,
                                   QtRouteData route,
-                                  osmscout::Vehicle /*vehicle*/)
+                                  osmscout::Vehicle vehicle)
 {
   if (thread!=QThread::currentThread()){
     qWarning() << "setupRoute" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
   if (!route){
-    routeDescription.Clear();
-    navigation.Clear();
+    routeDescription = nullptr;
+    if (timer.isActive()) {
+      timer.stop();
+    }
     return;
   }
   // create own copy of route description
-  routeDescription=route.routeDescription();
-  navigation.SetRoute(&routeDescription);
+  routeDescription=std::make_shared<RouteDescription>(route.routeDescription());
+
+  auto now = std::chrono::system_clock::now();
+  auto initializeMessage=std::make_shared<osmscout::InitializeMessage>(now);
+  ProcessMessages(engine.Process(initializeMessage));
+
+  auto routeUpdateMessage=std::make_shared<osmscout::RouteUpdateMessage>(now,routeDescription,vehicle);
+  ProcessMessages(engine.Process(routeUpdateMessage));
+
+  timer.start(1000);
+}
+
+void NavigationModule::onTimeout()
+{
+  auto now = std::chrono::system_clock::now();
+  auto routeUpdateMessage=std::make_shared<osmscout::TimeTickMessage>(now);
+  ProcessMessages(engine.Process(routeUpdateMessage));
 }
 
 void NavigationModule::locationChanged(osmscout::GeoCoord coord,
-                                       bool /*horizontalAccuracyValid*/,
-                                       double /*horizontalAccuracy*/) {
+                                       bool horizontalAccuracyValid,
+                                       double horizontalAccuracy) {
   if (thread!=QThread::currentThread()){
     qWarning() << "locationChanged" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
-  if (!navigation.HasRoute()) {
-    return;
-  }
 
-  double minDistance = 0;
-  bool onRoute = navigation.UpdateCurrentLocation(coord, minDistance);
-  RouteStep routeStep = navigation.nextWaypointDescription();
-  emit update(onRoute, routeStep);
+  auto now = std::chrono::system_clock::now();
+  auto gpsUpdateMessage=std::make_shared<osmscout::GPSUpdateMessage>(
+      now,
+      coord,
+      /*speed is not known*/-1,
+      Meters(horizontalAccuracyValid ? horizontalAccuracy: -1));
+
+  ProcessMessages(engine.Process(gpsUpdateMessage));
+
+  auto timeTickMessage=std::make_shared<osmscout::TimeTickMessage>(now);
+  ProcessMessages(engine.Process(timeTickMessage));
 }
 }

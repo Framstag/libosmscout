@@ -25,6 +25,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <map>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
@@ -573,7 +574,7 @@ namespace osmscout {
       std::vector<ObjectFileRef>                     objects;
       ObjectFileRef                                  pathObject;
       size_t                                         targetNodeIndex;
-      Distance                                       distance;
+      Distance                                       distance; // distance from route start
       Timestamp::duration                            time; // time from route start
       GeoCoord                                       location;
       std::unordered_map<std::string,DescriptionRef> descriptionMap;
@@ -677,14 +678,23 @@ namespace osmscout {
                           const DescriptionRef& description);
     };
 
+    using NodeIterator = std::list<RouteDescription::Node>::const_iterator;
+
   private:
     std::list<Node> nodes;
+    std::map<DatabaseId, std::string> databaseMapping;
 
   public:
     RouteDescription();
     virtual ~RouteDescription();
 
+    void SetDatabaseMapping(std::map<DatabaseId, std::string> databaseMapping);
+
+    std::map<DatabaseId, std::string> GetDatabaseMapping() const;
+
     void Clear();
+
+    bool Empty() const;
 
     void AddNode(DatabaseId database,
                  size_t currentNodeIndex,
@@ -701,152 +711,6 @@ namespace osmscout {
     {
       return nodes;
     }
-  };
-
-  /**
-   * The RouteDescriptionGenerator does all the heavy lifting of creating the
-   * various available Postprocessors, evaluate their feedback and map it onto a set
-   * of real-life situation callback methods.
-   *
-   * Just implement your own derived Callback class and pass it to the generator methods.
-   */
-  class OSMSCOUT_API RouteDescriptionGenerator
-  {
-  public:
-    /**
-     * Callback class that gets call in various routing situations.
-     */
-    struct OSMSCOUT_API Callback
-    {
-      virtual ~Callback();
-
-      /**
-       * Call once before evaluation the the RouteDswcription starts
-       */
-      virtual void BeforeRoute();
-
-      /**
-       * Called one for the start node
-       *
-       * @param startDescription
-       * @param typeNameDescription
-       * @param nameDescription
-       */
-      virtual void OnStart(const RouteDescription::StartDescriptionRef& startDescription,
-                           const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
-                           const RouteDescription::NameDescriptionRef& nameDescription);
-
-      /**
-       * Called once for the target node reached
-       *
-       * @param targetDescription
-       */
-      virtual void OnTargetReached(const RouteDescription::TargetDescriptionRef& targetDescription);
-
-      /**
-       * Call everytime a turn is necessary. Call with all information available regarding the turn
-       * and the way turned into and its direction.
-       *
-       * @param turnDescription
-       * @param crossingWaysDescription
-       * @param directionDescription
-       * @param typeNameDescription
-       * @param nameDescription
-       */
-      virtual void OnTurn(const RouteDescription::TurnDescriptionRef& turnDescription,
-                          const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
-                          const RouteDescription::DirectionDescriptionRef& directionDescription,
-                          const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
-                          const RouteDescription::NameDescriptionRef& nameDescription);
-
-      /**
-       * Called if we enter a roundabound
-       *
-       * @param roundaboutEnterDescription
-       * @param crossingWaysDescription
-       */
-      virtual void OnRoundaboutEnter(const RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
-                                     const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
-
-      /**
-       * Called if we leave a roundabound entered before
-       *
-       * @param roundaboutLeaveDescription
-       * @param nameDescription
-       */
-      virtual void OnRoundaboutLeave(const RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                     const RouteDescription::NameDescriptionRef& nameDescription);
-
-      /**
-       * Called if we enter a motorway
-       *
-       * @param motorwayEnterDescription
-       * @param crossingWaysDescription
-       */
-      virtual void OnMotorwayEnter(const RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
-                                   const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
-      /**
-       * Called if we already on a motorway and switch to another motorway
-       *
-       * @param motorwayChangeDescription
-       * @param motorwayJunctionDescription
-       * @param crossingDestinationDescription
-       */
-      virtual void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
-                                    const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                    const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription);
-      /**
-       * Called if we are on a motorway an leave it to a non-motorway way.
-       *
-       * @param motorwayLeaveDescription
-       * @param motorwayJunctionDescription
-       * @param directionDescription
-       * @param nameDescription
-       */
-      virtual void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
-                                   const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                   const RouteDescription::DirectionDescriptionRef& directionDescription,
-                                   const RouteDescription::NameDescriptionRef& nameDescription);
-
-      /**
-       * Called anytime the way we are on changes its name.
-       *
-       * @param nameChangedDescription
-       */
-      virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
-
-      /**
-       * Called everytime we have max speed information for a route segment
-       *
-       * @param maxSpeedDescription
-       */
-      virtual void OnMaxSpeed(const RouteDescription::MaxSpeedDescriptionRef& maxSpeedDescription);
-
-      /**
-       * Called everytime we have a POI at the route
-       *
-       * @param poiAtRouteDescription
-       *    The POI information
-       */
-      virtual void OnPOIAtRoute(const RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription);
-
-      /**
-       * Always called before we analyse a node. It may be that other callback methods are called
-       * or not (normally we only call other methods, if something relevant changes).
-       *
-       * @param node
-       */
-      virtual void BeforeNode(const RouteDescription::Node& node);
-      /**
-       * Called after all possible callback methods for a node are called.
-       * @param node
-       */
-      virtual void AfterNode(const RouteDescription::Node& node);
-    };
-
-  public:
-    void GenerateDescription(const RouteDescription& description,
-                             Callback& callback);
   };
 
   typedef std::shared_ptr<RouteDescription> RouteDescriptionRef;

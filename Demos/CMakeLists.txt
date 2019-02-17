@@ -217,6 +217,6 @@ install(TARGETS Navigation RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHI
 #---- NavigationSimulator
 add_executable(NavigationSimulator src/NavigationSimulator.cpp)
 set_property(TARGET NavigationSimulator PROPERTY CXX_STANDARD 11)
-target_link_libraries(NavigationSimulator OSMScout)
+target_link_libraries(NavigationSimulator OSMScout OSMScoutMap)
 install(TARGETS NavigationSimulator RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 

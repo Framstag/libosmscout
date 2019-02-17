@@ -59,12 +59,18 @@ set(HEADER_FILES_ROUTING
     include/osmscout/routing/MultiDBRoutingService.h
     include/osmscout/routing/DBFileOffset.h
     include/osmscout/routing/TurnRestriction.h
-    include/osmscout/routing/MultiDBRoutingState.h)
+    include/osmscout/routing/MultiDBRoutingState.h
+    include/osmscout/routing/RouteDescriptionPostprocessor.h)
 
 set(HEADER_FILES_NAVIGATION
     include/osmscout/navigation/Agents.h
+    include/osmscout/navigation/DataAgent.h
+    include/osmscout/navigation/PositionAgent.h
+    include/osmscout/navigation/RouteStateAgent.h
     include/osmscout/navigation/Engine.h
-    include/osmscout/navigation/Navigation.h)
+    include/osmscout/navigation/Navigation.h
+    include/osmscout/navigation/BearingAgent.h
+    include/osmscout/navigation/RouteInstructionAgent.h)
 
 set(HEADER_FILES
     ${HEADER_FILES_OST}
@@ -162,7 +168,13 @@ set(SOURCE_FILES
     src/osmscout/routing/MultiDBRoutingService.cpp
     src/osmscout/routing/TurnRestriction.cpp
     src/osmscout/routing/MultiDBRoutingState.cpp
+    src/osmscout/routing/RouteDescriptionPostprocessor.cpp
     src/osmscout/navigation/Agents.cpp
+    src/osmscout/navigation/BearingAgent.cpp
+    src/osmscout/navigation/DataAgent.cpp
+    src/osmscout/navigation/PositionAgent.cpp
+    src/osmscout/navigation/RouteStateAgent.cpp
+    src/osmscout/navigation/RouteInstructionAgent.cpp
     src/osmscout/navigation/Engine.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
