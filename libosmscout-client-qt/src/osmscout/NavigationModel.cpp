@@ -109,18 +109,22 @@ QObject *NavigationModel::getNextRoutStep()
 
 void NavigationModel::setRoute(QObject *o)
 {
-  QtRouteData* route=dynamic_cast<QtRouteData*>(o);
-  if (route == nullptr){
+  QtRouteData *rd = dynamic_cast<QtRouteData *>(o);
+  if (o != nullptr && rd == nullptr) {
     qWarning() << "Failed to cast " << o << " to QtRouteData*.";
     return;
   }
 
-  this->route=*route;
+  if (rd==nullptr){
+    route.clear();
+  } else {
+    route=*rd;
+  }
 
   beginResetModel();
   routeSteps.clear();
-  if (this->route) {
-    auto steps = route->routeSteps();
+  if (route) {
+    auto steps = route.routeSteps();
     routeSteps.reserve(steps.size());
     routeSteps.insert(routeSteps.begin(), steps.begin(), steps.end());
   }
