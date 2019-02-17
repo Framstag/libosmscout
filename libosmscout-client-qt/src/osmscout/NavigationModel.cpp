@@ -130,7 +130,7 @@ void NavigationModel::setRoute(QObject *o)
   }
   endResetModel();
 
-  emit routeChanged(target, this->route, vehicle);
+  emit routeChanged(this->route, vehicle);
 }
 
 QVariant NavigationModel::data(const QModelIndex &index, int role) const

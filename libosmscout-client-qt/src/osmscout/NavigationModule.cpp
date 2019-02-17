@@ -135,8 +135,7 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
   return true;
 }
 
-void NavigationModule::setupRoute(LocationEntryRef /*target*/,
-                                  QtRouteData route,
+void NavigationModule::setupRoute(QtRouteData route,
                                   osmscout::Vehicle vehicle)
 {
   if (thread!=QThread::currentThread()){

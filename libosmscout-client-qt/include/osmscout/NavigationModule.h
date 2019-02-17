@@ -60,8 +60,7 @@ signals:
   void targetReached(double targetBearing, Distance targetDistance);
 
 public slots:
-  void setupRoute(LocationEntryRef target,
-                  QtRouteData route,
+  void setupRoute(QtRouteData route,
                   osmscout::Vehicle vehicle);
 
   /**

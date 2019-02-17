@@ -45,8 +45,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
 signals:
   void update();
 
-  void routeChanged(LocationEntryRef target,
-                    QtRouteData route,
+  void routeChanged(QtRouteData route,
                     osmscout::Vehicle vehicle);
 
   void positionChange(osmscout::GeoCoord coord,
@@ -109,7 +108,6 @@ public:
 
 private:
   NavigationModule* navigationModule;
-  LocationEntryRef  target;
   QtRouteData       route;
   osmscout::Vehicle vehicle;
 
