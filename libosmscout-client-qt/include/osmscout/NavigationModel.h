@@ -21,6 +21,7 @@
  */
 
 #include <osmscout/NavigationModule.h>
+#include <osmscout/OverlayObject.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -38,6 +39,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
 {
   Q_OBJECT
   Q_PROPERTY(QObject *route         READ getRoute          WRITE setRoute NOTIFY routeChanged)
+  Q_PROPERTY(QObject *routeWay      READ getRouteWay       NOTIFY routeChanged)
   Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
 
 signals:
@@ -96,6 +98,14 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const;
 
   QHash<int, QByteArray> roleNames() const;
+
+  inline OverlayWay* getRouteWay()
+  {
+    if (!route){
+      return NULL;
+    }
+    return new OverlayWay(route.routeWay().nodes);
+  }
 
 private:
   NavigationModule* navigationModule;
