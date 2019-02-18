@@ -34,8 +34,9 @@
 namespace osmscout {
 
 RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::Callback(QList<RouteStep> &routeSteps,
-                                                                     const Distance &stopAfter):
-  routeSteps(routeSteps), stopAfter(stopAfter)
+                                                                     const Distance &stopAfter,
+                                                                     bool skipInformative):
+  routeSteps(routeSteps), stopAfter(stopAfter), skipInformative(skipInformative)
 {
 }
 
@@ -309,6 +310,14 @@ void RouteDescriptionBuilder::Callback::OnTurn(const osmscout::RouteDescription:
 void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
                                                           const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
+  if (skipInformative){
+    if (crossingWaysDescription) {
+      PushStreetName(crossingWaysDescription->GetOriginDesccription());
+      PushStreetName(crossingWaysDescription->GetTargetDesccription());
+    }
+    return;
+  }
+
   RouteStep enter = MkStep("enter-roundabout");
   QString crossingWaysString;
 
@@ -436,8 +445,26 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
   routeSteps.push_back(leave);
 }
 
+void RouteDescriptionBuilder::Callback::PushStreetName(const RouteDescription::NameDescriptionRef &nameDescription)
+{
+  if (!nameDescription){
+    return;
+  }
+  auto name=FormatName(*nameDescription);
+  if (streetNames.empty() || streetNames.back() != name){
+    streetNames << name;
+  }
+}
+
 void RouteDescriptionBuilder::Callback::OnPathNameChange(const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription)
 {
+  assert(nameChangedDescription);
+  if (skipInformative){
+    PushStreetName(nameChangedDescription->GetOriginDescription());
+    PushStreetName(nameChangedDescription->GetTargetDescription());
+    return;
+  }
+
   RouteStep changed = MkStep("name-change");
 
   changed.shortDescription=osmscout::RouteDescriptionBuilder::tr("Way changes name");
@@ -466,8 +493,10 @@ RouteStep RouteDescriptionBuilder::Callback::MkStep(const QString &name)
                  distance,
                  distance-distancePrevious,
                  time,
-                 time-timePrevious);
+                 time-timePrevious,
+                 streetNames);
 
+  streetNames.clear();
   distancePrevious = distance;
   timePrevious = time;
   return step;
@@ -521,14 +550,15 @@ RouteStep RouteDescriptionBuilder::GenerateNextRouteInstruction(const RouteDescr
 
   QList<RouteStep> routeSteps;
   RouteDescriptionPostprocessor postprocessor;
-  Callback callback(routeSteps, /*stop after*/ previous->GetDistance());
+  Callback callback(routeSteps,
+                    /*stop after*/ previous->GetDistance(),
+                    /*skip informative*/ true);
   postprocessor.GenerateDescription(previous, last, callback);
 
   if (routeSteps.empty()){
     log.Warn() << "No route instruction generated";
     return result;
   }
-
   result=routeSteps.constLast();
 
   result.distanceTo = (result.distance - previous->GetDistance()) - GetEllipsoidalDistance(coord, previous->GetLocation());

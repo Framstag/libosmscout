@@ -54,6 +54,7 @@ class RouteInstructionAgent CLASS_FINAL : public NavigationAgent
 private:
   RouteDescriptionRef prevRoute;
   std::list<RouteDescription::Node>::const_iterator prevNode;
+  std::list<RouteInstruction> instructions;
 
 public:
   RouteInstructionAgent();
@@ -90,23 +91,30 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
   RouteInstructionBuilder builder;
 
   Timestamp now = positionMessage->timestamp;
-  if (prevRoute != positionMessage->route ||
-      prevNode != positionMessage->position.routeNode){
-
-    result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(
-        now,
-        builder.GenerateRouteInstructions(positionMessage->position.routeNode,
-                                          positionMessage->route->Nodes().end()
-                                          )));
+  if (prevRoute != positionMessage->route){
+    instructions=builder.GenerateRouteInstructions(positionMessage->position.routeNode,
+                                                   positionMessage->route->Nodes().end());
+    result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(now,instructions));
   }
 
-  result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(
-      now,
-      builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
-                                           positionMessage->route->Nodes().end(),
-                                           positionMessage->position.coord
-                                           )));
+  // remove instructions behind our back (pop from the front of the list)
+  bool updated=false;
+  while (!instructions.empty() &&
+         positionMessage->position.routeNode != positionMessage->route->Nodes().end() &&
+         instructions.front().GetDistance() <= positionMessage->position.routeNode->GetDistance()){
 
+    instructions.pop_front();
+    updated=true;
+  }
+  if (updated){
+    result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(now,instructions));
+  }
+
+  // next route instruction
+  RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
+                                                                          positionMessage->route->Nodes().end(),
+                                                                          positionMessage->position.coord);
+  result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
 
   prevRoute=positionMessage->route;
   prevNode=positionMessage->position.routeNode;

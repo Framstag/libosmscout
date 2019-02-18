@@ -55,7 +55,7 @@ namespace osmscout {
       virtual ~Callback();
 
       /**
-       * Call once before evaluation the the RouteDswcription starts
+       * Call once before evaluation the the RouteDescription starts
        */
       virtual void BeforeRoute();
 

@@ -21,6 +21,7 @@
  */
 
 #include <osmscout/NavigationModule.h>
+#include <osmscout/OverlayObject.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -34,17 +35,17 @@ namespace osmscout {
  *
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API NavigationModel : public QObject
+class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
 {
   Q_OBJECT
   Q_PROPERTY(QObject *route         READ getRoute          WRITE setRoute NOTIFY routeChanged)
+  Q_PROPERTY(QObject *routeWay      READ getRouteWay       NOTIFY routeChanged)
   Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
 
 signals:
   void update();
 
-  void routeChanged(LocationEntryRef target,
-                    QtRouteData route,
+  void routeChanged(QtRouteData route,
                     osmscout::Vehicle vehicle);
 
   void positionChange(osmscout::GeoCoord coord,
@@ -70,6 +71,14 @@ public slots:
   void onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to);
 
 public:
+  enum Roles {
+    ShortDescriptionRole = Qt::UserRole + 1,
+    DescriptionRole = Qt::UserRole + 2,
+    TypeRole = Qt::UserRole + 3
+  };
+  Q_ENUM(Roles)
+
+public:
   NavigationModel();
 
   virtual ~NavigationModel();
@@ -81,13 +90,29 @@ public:
 
   QObject *getNextRoutStep();
 
+  QVariant data(const QModelIndex &index, int role) const;
+
+  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+
+  Qt::ItemFlags flags(const QModelIndex &index) const;
+
+  QHash<int, QByteArray> roleNames() const;
+
+  inline OverlayWay* getRouteWay()
+  {
+    if (!route){
+      return NULL;
+    }
+    return new OverlayWay(route.routeWay().nodes);
+  }
+
 private:
   NavigationModule* navigationModule;
-  LocationEntryRef  target;
   QtRouteData       route;
   osmscout::Vehicle vehicle;
 
-  RouteStep         nextRouteStep;
+  std::vector<RouteStep> routeSteps;
+  RouteStep nextRouteStep;
 };
 
 }

@@ -62,16 +62,19 @@ osmscout::Way QtRouteData::routeWayCopy() const
 
 const osmscout::Way& QtRouteData::routeWay() const
 {
+  assert(data);
   return data->routeWay;
 }
 
 const QList<RouteStep>& QtRouteData::routeSteps() const
 {
+  assert(data);
   return data->routeSteps;
 }
 
 const osmscout::RouteDescription& QtRouteData::routeDescription() const
 {
+  assert(data);
   return data->routeDescription;
 }
 }
