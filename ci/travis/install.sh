@@ -22,19 +22,12 @@ if [ "$TARGET" = "build" ]; then
       mkdir -p ~/bin
       mv ninja ~/bin
       export PATH=~/bin:$PATH
-      sudo apt-get install build-essential python3-pip
 
-      echo "Installing python3.5..."
-      sudo add-apt-repository -y ppa:deadsnakes/ppa
+      echo "Installing python..."
       sudo apt-get update
-      sudo apt-get install -y python3.5
-
-      # Activate python3.5
-      sudo rm /usr/bin/python3
-      sudo ln -s /usr/bin/python3.5 /usr/bin/python3
-
-      echo "Updating pip..."
-      pip3 install --upgrade --user pip
+      sudo apt-get install -y \
+        build-essential python3-pip \
+        python3 python3-setuptools
 
       echo "Installing meson..."
       pip3 install --user meson==0.46.0
