@@ -54,13 +54,8 @@ if [ "$TARGET" = "build" ]; then
       freeglut3 freeglut3-dev \
       libmarisa-dev \
       libglew-dev \
-      libglm-dev
-
-    echo "deb http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list.d/fillwave_ext.list
-    echo "deb-src http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list.d/fillwave_ext.list
-
-    sudo apt-get -qq update
-    sudo apt-get --yes --force-yes install libglfw3 libglfw3-dev
+      libglm-dev \
+      libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
     brew update
