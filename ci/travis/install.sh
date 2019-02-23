@@ -22,19 +22,12 @@ if [ "$TARGET" = "build" ]; then
       mkdir -p ~/bin
       mv ninja ~/bin
       export PATH=~/bin:$PATH
-      sudo apt-get install build-essential python3-pip
 
-      echo "Installing python3.5..."
-      sudo add-apt-repository -y ppa:deadsnakes/ppa
+      echo "Installing python..."
       sudo apt-get update
-      sudo apt-get install -y python3.5
-
-      # Activate python3.5
-      sudo rm /usr/bin/python3
-      sudo ln -s /usr/bin/python3.5 /usr/bin/python3
-
-      echo "Updating pip..."
-      pip3 install --upgrade --user pip
+      sudo apt-get install -y \
+        build-essential python3-pip \
+        python3 python3-setuptools
 
       echo "Installing meson..."
       pip3 install --user meson==0.46.0
@@ -54,13 +47,8 @@ if [ "$TARGET" = "build" ]; then
       freeglut3 freeglut3-dev \
       libmarisa-dev \
       libglew-dev \
-      libglm-dev
-
-    echo "deb http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list.d/fillwave_ext.list
-    echo "deb-src http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list.d/fillwave_ext.list
-
-    sudo apt-get -qq update
-    sudo apt-get --yes --force-yes install libglfw3 libglfw3-dev
+      libglm-dev \
+      libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
     brew update
@@ -93,7 +81,8 @@ elif [ "$TARGET" = "importer" ]; then
       pkg-config \
       libxml2-dev \
       libprotobuf-dev protobuf-compiler \
-      libmarisa-dev
+      libmarisa-dev \
+      libicu-dev
   fi
 elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
