@@ -67,7 +67,7 @@ public slots:
   void onUpdate(std::list<RouteStep> instructions);
   void onUpdateNext(RouteStep nextRouteInstruction);
   void onPositionEstimate(PositionAgent::PositionState state, GeoCoord coord, double bearing);
-  void onTargetReached(double targetBearing, Distance targetDistance);
+  void onTargetReached(double targetBearing, osmscout::Distance targetDistance);
   void onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to);
 
 public:

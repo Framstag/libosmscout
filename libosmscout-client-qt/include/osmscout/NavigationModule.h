@@ -57,7 +57,7 @@ signals:
 
   void positionEstimate(osmscout::PositionAgent::PositionState state, osmscout::GeoCoord coord, double bearing);
 
-  void targetReached(double targetBearing, Distance targetDistance);
+  void targetReached(double targetBearing, osmscout::Distance targetDistance);
 
 public slots:
   void setupRoute(QtRouteData route,

@@ -30,6 +30,7 @@
 #include <osmscout/PlaneMapRenderer.h>
 #include <osmscout/TiledMapRenderer.h>
 #include <osmscout/OverlayObject.h>
+#include <osmscout/util/Distance.h>
 
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/LocationInfoModel.h>
@@ -126,6 +127,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<DatabaseLoadedResponse>("DatabaseLoadedResponse");
   qRegisterMetaType<LocationEntryRef>("LocationEntryRef");
   qRegisterMetaType<osmscout::BreakerRef>("osmscout::BreakerRef");
+  qRegisterMetaType<osmscout::Distance>("osmscout::Distance");
   qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
   qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
   qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");
