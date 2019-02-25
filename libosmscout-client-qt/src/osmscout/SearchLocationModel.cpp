@@ -75,13 +75,13 @@ LocationListModel::~LocationListModel()
     breaker->Break();
     breaker.reset();
   }
-  if (searchModule!=NULL){
+  if (searchModule!=nullptr){
     searchModule->deleteLater();
-    searchModule=NULL;
+    searchModule=nullptr;
   }
-  if (lookupModule!=NULL){
+  if (lookupModule!=nullptr){
     lookupModule->deleteLater();
-    lookupModule=NULL;
+    lookupModule=nullptr;
   }
 }
 
@@ -341,7 +341,7 @@ QHash<int, QByteArray> LocationListModel::roleNames() const
 QObject* LocationListModel::get(int row) const
 {
     if(row < 0 || row >= locations.size()) {
-        return NULL;
+        return nullptr;
     }
 
     LocationEntry* location=locations.at(row);

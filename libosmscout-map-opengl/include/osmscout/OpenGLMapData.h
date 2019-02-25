@@ -188,7 +188,7 @@ namespace osmscout {
     void clearData() {
       Vertices.clear();
       Elements.clear();
-      Textures = NULL;
+      Textures = nullptr;
       TexturesBuffer.clear();
       textureSize = 0;
       textureWidth = 0;

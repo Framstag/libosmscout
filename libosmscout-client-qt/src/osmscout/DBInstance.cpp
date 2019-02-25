@@ -133,7 +133,7 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
       errors.append(err);
     }
 
-    styleConfig=NULL;
+    styleConfig=nullptr;
 
     return false;
   }
@@ -145,7 +145,7 @@ osmscout::MapPainterQt* DBInstance::GetPainter()
 {
   QMutexLocker locker(&mutex);
   if (!styleConfig)
-    return NULL;
+    return nullptr;
 
   if (!painterHolder.contains(QThread::currentThread())){
     painterHolder[QThread::currentThread()]=new osmscout::MapPainterQt(styleConfig);

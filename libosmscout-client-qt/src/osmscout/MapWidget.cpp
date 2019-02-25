@@ -34,8 +34,8 @@ static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
-      renderer(NULL),
-      inputHandler(NULL),
+      renderer(nullptr),
+      inputHandler(nullptr),
       showCurrentPosition(false),
       finished(false),
       renderingType(RenderingType::PlaneRendering)
@@ -85,9 +85,9 @@ MapWidget::~MapWidget()
 {
     delete inputHandler;
     delete view;
-    if (renderer!=NULL){
+    if (renderer!=nullptr){
       renderer->deleteLater();
-      renderer=NULL;
+      renderer=nullptr;
     }
 }
 
@@ -135,7 +135,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 void MapWidget::setupInputHandler(InputHandler *newGesture)
 {
     bool locked = false;
-    if (inputHandler != NULL){
+    if (inputHandler != nullptr){
         locked = inputHandler->isLockedToPosition();
         inputHandler->deleteLater();
     }
@@ -575,7 +575,7 @@ void MapWidget::addOverlayObject(int id, QObject *o)
 {
   OverlayObjectRef copy;
   const OverlayObject *obj = dynamic_cast<const OverlayObject*>(o);
-  if (obj == NULL){
+  if (obj == nullptr){
       qWarning() << "Failed to cast " << o << " to OverlayObject.";
       return;
   }

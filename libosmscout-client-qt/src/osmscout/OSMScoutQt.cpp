@@ -49,10 +49,10 @@
 
 namespace osmscout {
 
-static OSMScoutQt* osmScoutInstance=NULL;
+static OSMScoutQt* osmScoutInstance=nullptr;
 
 OSMScoutQtBuilder::OSMScoutQtBuilder():
-  settingsStorage(NULL),
+  settingsStorage(nullptr),
   onlineTileCacheSize(100),
   offlineTileCacheSize(200),
   styleSheetDirectoryConfigured(false),
@@ -73,7 +73,7 @@ OSMScoutQtBuilder::OSMScoutQtBuilder():
 
 bool OSMScoutQtBuilder::Init()
 {
-  if (osmScoutInstance!=NULL){
+  if (osmScoutInstance!=nullptr){
     return false;
   }
 
@@ -193,7 +193,7 @@ void OSMScoutQt::FreeInstance()
     osmscout::log.Warn() << "Some resources still acquired by other components";
   }
   delete osmScoutInstance;
-  osmScoutInstance=NULL;
+  osmScoutInstance=nullptr;
   osmscout::log.Debug() << "OSMScoutQt freed";
 }
 

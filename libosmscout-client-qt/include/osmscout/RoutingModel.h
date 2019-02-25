@@ -154,7 +154,7 @@ public:
   inline OverlayWay* getRouteWay()
   {
     if (!route){
-      return NULL;
+      return nullptr;
     }
     return new OverlayWay(route.routeWay().nodes);
   }

@@ -82,14 +82,14 @@ public:
              const std::string &filePath,
              BreakerRef breaker,
              ProcessCallbackRef callback):
-      writer(NULL),
+      writer(nullptr),
       callback(callback),
       gpxFile(gpxFile),
       breaker(breaker)
   {
     /* Create a new XmlWriter for uri, with no compression. */
     writer = xmlNewTextWriterFilename(filePath.c_str(), 0);
-    if (writer == NULL && callback) {
+    if (writer == nullptr && callback) {
       callback->Error("Error creating the xml writer");
     }
     if (writer) {
@@ -101,19 +101,19 @@ public:
 
   ~GpxWritter()
   {
-    if (writer!=NULL){
+    if (writer!=nullptr){
       xmlFreeTextWriter(writer);
-      writer=NULL;
+      writer=nullptr;
     }
   }
 
   bool Process()
   {
-    if (writer==NULL) {
+    if (writer==nullptr) {
       return false;
     }
 
-    if (xmlTextWriterStartDocument(writer, NULL, Encoding, NULL) < 0) {
+    if (xmlTextWriterStartDocument(writer, nullptr, Encoding, nullptr) < 0) {
       if (callback) {
         callback->Error("Error at xmlTextWriterStartDocument");
       }
@@ -153,7 +153,7 @@ public:
 
 bool GpxWritter::StartElement(const char *name)
 {
-  if (writer==NULL){
+  if (writer==nullptr){
     return false;
   }
   if (xmlTextWriterStartElement(writer, (const xmlChar *)name) < 0) {
@@ -167,7 +167,7 @@ bool GpxWritter::StartElement(const char *name)
 
 bool GpxWritter::EndElement()
 {
-  if (writer==NULL){
+  if (writer==nullptr){
     return false;
   }
   if (xmlTextWriterEndElement(writer) < 0) {
@@ -181,7 +181,7 @@ bool GpxWritter::EndElement()
 
 bool GpxWritter::WriteTextElement(const char *elementName, const std::string &text)
 {
-  if (writer==NULL){
+  if (writer==nullptr){
     return false;
   }
   if (xmlTextWriterWriteElement(writer, (const xmlChar *)elementName, (const xmlChar *)text.c_str()) < 0) {
@@ -211,7 +211,7 @@ bool GpxWritter::WriteTextElement(const char *elementName, const Timestamp &time
 
 bool GpxWritter::WriteAttribute(const char *name, const char *content)
 {
-  if (writer==NULL){
+  if (writer==nullptr){
     return false;
   }
   if (xmlTextWriterWriteAttribute(writer, (const xmlChar *)name, (const xmlChar *)content) < 0) {

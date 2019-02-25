@@ -38,8 +38,8 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   tileCacheDirectory(tileCacheDirectory),
   onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
   offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
-  tileDownloader(NULL), // it will be created in different thread
-  loadJob(NULL),
+  tileDownloader(nullptr), // it will be created in different thread
+  loadJob(nullptr),
   unknownColor(QColor::fromRgbF(1.0,1.0,1.0)) // white
 {
   QScreen *srn=QGuiApplication::primaryScreen();
@@ -80,10 +80,10 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
 TiledMapRenderer::~TiledMapRenderer()
 {
   qDebug() << "~TiledMapRenderer";
-  if (tileDownloader != NULL){
+  if (tileDownloader != nullptr){
     delete tileDownloader;
   }
-  if (loadJob!=NULL){
+  if (loadJob!=nullptr){
     delete loadJob;
   }
 }

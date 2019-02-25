@@ -27,7 +27,7 @@ LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
   QObject(),
   thread(thread),
   dbThread(dbThread),
-  loadJob(NULL)
+  loadJob(nullptr)
 {
 
   connect(dbThread.get(), SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
@@ -39,7 +39,7 @@ LookupModule::~LookupModule()
   if (thread!=QThread::currentThread()){
     qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }
@@ -53,7 +53,7 @@ void LookupModule::requestObjectsOnView(const MapViewStruct &view)
   lookupProjection.Set(view.coord,  0, view.magnification, mapDpi, view.width*1.5, view.height*1.5);
   lookupProjection.SetLinearInterpolationUsage(view.magnification.GetLevel() >= 10);
 
-  if (loadJob!=NULL){
+  if (loadJob!=nullptr){
     delete loadJob;
   }
 
@@ -197,8 +197,8 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(DBInstanceRef &db,
   osmscout::WayRef                way;
   osmscout::AreaRef               area;
 
-  osmscout::NameAltFeatureValue    *altNameValue=NULL;
-  osmscout::AdminLevelFeatureValue *adminLevelValue=NULL;
+  osmscout::NameAltFeatureValue    *altNameValue=nullptr;
+  osmscout::AdminLevelFeatureValue *adminLevelValue=nullptr;
 
   switch (region->object.GetType()){
     case osmscout::refNode:
@@ -228,9 +228,9 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(DBInstanceRef &db,
       break;
   }
 
-  if (altNameValue!=NULL)
+  if (altNameValue!=nullptr)
     info->altName=QString::fromStdString(altNameValue->GetNameAlt());
-  if (adminLevelValue!=NULL)
+  if (adminLevelValue!=nullptr)
     info->adminLevel=(int)adminLevelValue->GetAdminLevel();
 
   return info;
