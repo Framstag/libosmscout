@@ -58,7 +58,7 @@ void DBJob::Close()
     qWarning() << "Closing" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   delete locker;
-  locker=NULL;
+  locker=nullptr;
   databases.clear();
 }
 

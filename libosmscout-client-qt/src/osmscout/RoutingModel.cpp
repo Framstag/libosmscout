@@ -45,9 +45,9 @@ RoutingListModel::RoutingListModel(QObject* parent)
 
 RoutingListModel::~RoutingListModel()
 {
-  if (router!=NULL){
+  if (router!=nullptr){
     router->deleteLater();
-    router=NULL;
+    router=nullptr;
   }
 }
 
@@ -208,7 +208,7 @@ QHash<int, QByteArray> RoutingListModel::roleNames() const
 QObject* RoutingListModel::get(int row) const
 {
   if(!route || row < 0 || row >= route.routeSteps().size()) {
-    return NULL;
+    return nullptr;
   }
 
   RouteStep step=route.routeSteps().at(row);

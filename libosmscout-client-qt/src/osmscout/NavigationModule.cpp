@@ -37,7 +37,7 @@ NavigationModule::~NavigationModule()
     qWarning() << "Destroy" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
   qDebug() << "~NavigationModule";
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }

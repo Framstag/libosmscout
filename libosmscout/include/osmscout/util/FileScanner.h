@@ -117,14 +117,14 @@ namespace osmscout {
 
     inline bool IsOpen() const
     {
-      return file!=NULL;
+      return file!=nullptr;
     }
 
     bool IsEOF() const;
 
     inline  bool HasError() const
     {
-      return file==NULL || hasError;
+      return file==nullptr || hasError;
     }
 
     std::string GetFilename() const;

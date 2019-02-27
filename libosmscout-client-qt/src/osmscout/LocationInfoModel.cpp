@@ -197,17 +197,17 @@ void LocationInfoModel::addToModel(const QString database,
           osmscout::FeatureValue *value=place.GetObjectFeatures()->GetValue(featureInstance.GetIndex());
           
           const osmscout::PostalCodeFeatureValue *postalCodeValue = dynamic_cast<const osmscout::PostalCodeFeatureValue*>(value);
-          if (postalCodeValue!=NULL){
+          if (postalCodeValue!=nullptr){
             postalCode = QString::fromStdString(postalCodeValue->GetPostalCode());
           }
           
           const osmscout::WebsiteFeatureValue *websiteValue = dynamic_cast<const osmscout::WebsiteFeatureValue*>(value);
-          if (websiteValue!=NULL){
+          if (websiteValue!=nullptr){
             website = QString::fromStdString(websiteValue->GetWebsite());
           }
           
           const osmscout::PhoneFeatureValue *phoneValue = dynamic_cast<const osmscout::PhoneFeatureValue*>(value);
-          if (phoneValue!=NULL){
+          if (phoneValue!=nullptr){
             phone = QString::fromStdString(phoneValue->GetPhone());
           }
         }

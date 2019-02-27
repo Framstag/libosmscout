@@ -40,13 +40,13 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
                                    QString iconDirectory):
   MapRenderer(thread,settings,dbThread,iconDirectory),
   canvasOverrun(1.5),
-  loadJob(NULL),
+  loadJob(nullptr),
   pendingRenderingTimer(this),
-  currentImage(NULL),
+  currentImage(nullptr),
   currentCoord(0.0,0.0),
   currentAngle(0.0),
   currentMagnification(0),
-  finishedImage(NULL),
+  finishedImage(nullptr),
   finishedCoord(0.0,0.0),
   finishedMagnification(0)
 {
@@ -76,11 +76,11 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
 PlaneMapRenderer::~PlaneMapRenderer()
 {
   qDebug() << "~PlaneMapRenderer";
-  if (currentImage!=NULL)
+  if (currentImage!=nullptr)
     delete currentImage;
-  if (finishedImage!=NULL)
+  if (finishedImage!=nullptr)
     delete finishedImage;
-  if (loadJob!=NULL)
+  if (loadJob!=nullptr)
     delete loadJob;
 }
 
@@ -90,7 +90,7 @@ void PlaneMapRenderer::InvalidateVisualCache()
   osmscout::log.Debug() << "Invalidate finished image";
   if (finishedImage)
     delete finishedImage;
-  finishedImage=NULL;
+  finishedImage=nullptr;
 }
 
 /**
@@ -112,7 +112,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     backgroundColor=osmscout::Color(0,0,0);
   }
 
-  if (finishedImage==NULL) {
+  if (finishedImage==nullptr) {
     painter.fillRect(0,
                      0,
                      request.width,
@@ -305,7 +305,7 @@ void PlaneMapRenderer::DrawMap()
 {
   {
     QMutexLocker locker(&lock);
-    if (loadJob==NULL){
+    if (loadJob==nullptr){
       return;
     }
     osmscout::log.Debug() << "DrawMap()";
@@ -313,7 +313,7 @@ void PlaneMapRenderer::DrawMap()
       osmscout::log.Warn() << "Incorrect thread!";
     }
 
-    if (currentImage==NULL ||
+    if (currentImage==nullptr ||
         currentImage->width()!=(int)currentWidth ||
         currentImage->height()!=(int)currentHeight) {
       delete currentImage;
@@ -404,7 +404,7 @@ void PlaneMapRenderer::DrawMap()
     if (loadJob->IsFinished()){
       // this slot is may be called from DBLoadJob, we can't delete it now
       loadJob->deleteLater();
-      loadJob=NULL;
+      loadJob=nullptr;
     }
 
     if (!success)  {
@@ -462,10 +462,10 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
   osmscout::log.Debug() << "Start data loading...";
   {
     QMutexLocker locker(&lock);
-    if (loadJob!=NULL){
+    if (loadJob!=nullptr){
       // TODO: check if job contains same tiles...
       loadJob->deleteLater();
-      loadJob=NULL;
+      loadJob=nullptr;
     }
     if (thread!=QThread::currentThread()){
       osmscout::log.Warn() << "Incorrect thread!";

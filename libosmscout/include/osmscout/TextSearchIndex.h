@@ -51,7 +51,7 @@ namespace osmscout
       bool         isAvail;
 
       TrieInfo() :
-        trie(NULL),
+        trie(nullptr),
         isAvail(false)
       {
         // no code

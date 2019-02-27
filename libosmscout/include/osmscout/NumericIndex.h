@@ -128,7 +128,7 @@ namespace osmscout {
      cacheSize(cacheSize),
      pageSize(0),
      levels(0),
-     buffer(NULL)
+     buffer(nullptr)
   {
     // no code
   }
@@ -379,7 +379,7 @@ namespace osmscout {
           auto cacheRef=simplePageCache[level].find(startId);
 
           if (cacheRef==simplePageCache[level].end()) {
-            pageRef=NULL; // Make sure, that we allocate a new page and not reuse an old one
+            pageRef=nullptr; // Make sure, that we allocate a new page and not reuse an old one
 
             ReadPage(offset,pageRef);
 

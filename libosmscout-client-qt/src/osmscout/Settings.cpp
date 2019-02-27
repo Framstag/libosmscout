@@ -37,7 +37,7 @@ namespace osmscout {
 Settings::Settings(QSettings *providedStorage):
   storage(providedStorage)
 {
-    if (storage==NULL){
+    if (storage==nullptr){
       storage=new QSettings(this);
     }
     /* Warning: Sailfish OS before version 2.0.1 reports incorrect DPI (100)

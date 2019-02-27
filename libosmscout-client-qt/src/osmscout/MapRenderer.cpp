@@ -64,7 +64,7 @@ MapRenderer::~MapRenderer()
     qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
   qDebug() << "~MapRenderer";
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }
@@ -300,7 +300,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
         if (o->getObjectType()==osmscout::RefType::refWay){
           OverlayWay *ow=dynamic_cast<OverlayWay*>(o.get());
-          if (ow != NULL) {
+          if (ow != nullptr) {
             osmscout::WayRef w = std::make_shared<osmscout::Way>();
             if (ow->toWay(w, *typeConfig)) {
               data->poiWays.push_back(w);
@@ -308,7 +308,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           }
         } else if (o->getObjectType()==osmscout::RefType::refArea){
           OverlayArea *oa=dynamic_cast<OverlayArea*>(o.get());
-          if (oa != NULL) {
+          if (oa != nullptr) {
             osmscout::AreaRef a = std::make_shared<osmscout::Area>();
             if (oa->toArea(a, *typeConfig)) {
               data->poiAreas.push_back(a);
@@ -316,7 +316,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           }
         } else if (o->getObjectType()==osmscout::RefType::refNode){
           OverlayNode *oo=dynamic_cast<OverlayNode*>(o.get());
-          if (oo != NULL) {
+          if (oo != nullptr) {
             osmscout::NodeRef n = std::make_shared<osmscout::Node>();
             if (oo->toNode(n, *typeConfig)) {
               data->poiNodes.push_back(n);

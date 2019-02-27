@@ -76,7 +76,7 @@ DBThread::~DBThread()
 
   if (basemapDatabase) {
     basemapDatabase->Close();
-    basemapDatabase=NULL;
+    basemapDatabase=nullptr;
   }
 
   for (auto db:databases){
@@ -200,7 +200,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
   if (basemapDatabase) {
     basemapDatabase->Close();
-    basemapDatabase=NULL;
+    basemapDatabase=nullptr;
   }
 
   for (auto db:databases){
@@ -315,12 +315,12 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
         if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
           qWarning() << "Cannot load style sheet '" << stylesheetFilename << "'!";
-          styleConfig=NULL;
+          styleConfig=nullptr;
         }
       }
       else {
         qWarning() << "TypeConfig invalid!";
-        styleConfig=NULL;
+        styleConfig=nullptr;
       }
     }
     else {

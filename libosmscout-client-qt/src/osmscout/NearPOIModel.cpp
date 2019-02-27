@@ -137,7 +137,7 @@ QHash<int, QByteArray> NearPOIModel::roleNames() const
 QObject* NearPOIModel::get(int row) const
 {
   if(row < 0 || row >= locations.size()) {
-    return NULL;
+    return nullptr;
   }
 
   LocationEntry* location=locations.at(row);

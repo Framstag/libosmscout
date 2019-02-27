@@ -48,7 +48,7 @@ namespace osmscout {
 
     std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
     delete cdt;
-    cdt = NULL;
+    cdt = nullptr;
 
     return result;
 
@@ -78,7 +78,7 @@ namespace osmscout {
 
     std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
     delete cdt;
-    cdt = NULL;
+    cdt = nullptr;
 
     return result;
 
@@ -108,7 +108,7 @@ namespace osmscout {
 
     std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
     delete cdt;
-    cdt = NULL;
+    cdt = nullptr;
 
     return result;
 
@@ -155,7 +155,7 @@ namespace osmscout {
     }
 
     delete cdt;
-    cdt = NULL;
+    cdt = nullptr;
 
     return result;
 

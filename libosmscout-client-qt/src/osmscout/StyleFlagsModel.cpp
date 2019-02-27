@@ -46,9 +46,9 @@ StyleFlagsModel::StyleFlagsModel():
 
 StyleFlagsModel::~StyleFlagsModel()
 {
-  if (styleModule!=NULL){
+  if (styleModule!=nullptr){
     styleModule->deleteLater();
-    styleModule=NULL;
+    styleModule=nullptr;
   }
 }
 

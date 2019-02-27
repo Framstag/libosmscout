@@ -522,10 +522,10 @@ int main(int argc, char* argv[])
   osmscout::MercatorProjection  projection;
   QPixmap *pixmap=new QPixmap(args.width,args.height);
 
-  if (pixmap!=NULL) {
+  if (pixmap!=nullptr) {
     QPainter* painter=new QPainter(pixmap);
 
-    if (painter!=NULL) {
+    if (painter!=nullptr) {
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;

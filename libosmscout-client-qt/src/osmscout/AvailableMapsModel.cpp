@@ -283,17 +283,17 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
     case DirRole:
       return item->isDirectory(); // isDir? true: false
     case ServerDirectoryRole:
-      return map==NULL ? QVariant(): map->getServerDirectory();// server path for this map
+      return map==nullptr ? QVariant(): map->getServerDirectory();// server path for this map
     case TimeRole:
-      return map==NULL ? QVariant(): map->getCreation();// QTime of map creation 
+      return map==nullptr ? QVariant(): map->getCreation();// QTime of map creation 
     case VersionRole:
-      return map==NULL ? QVariant(): map->getVersion();
+      return map==nullptr ? QVariant(): map->getVersion();
     case ByteSizeRole:
-      return map==NULL ? QVariant(): QVariant((double)map->getSize());
+      return map==nullptr ? QVariant(): QVariant((double)map->getSize());
     case SizeRole:
-      return map==NULL ? "": QVariant(map->getSizeHuman());
+      return map==nullptr ? "": QVariant(map->getSizeHuman());
     case ProviderUriRole:
-      return map==NULL ? QVariant(): map->getProvider().getName();
+      return map==nullptr ? QVariant(): map->getProvider().getName();
     case DescriptionRole:
       return item->getDescription();
     case MapRole:

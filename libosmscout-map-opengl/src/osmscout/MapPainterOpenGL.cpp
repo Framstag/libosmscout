@@ -580,7 +580,7 @@ namespace osmscout {
         if (lineStyles[l]->GetWidth() > 0.0) {
           WidthFeatureValue *widthValue = widthReader.GetValue(buffer);
 
-          if (widthValue != NULL) {
+          if (widthValue != nullptr) {
             lineWidth += widthValue->GetWidth() / projection.GetPixelSize();
           } else {
             lineWidth += lineStyles[l]->GetWidth() / projection.GetPixelSize();
@@ -946,7 +946,7 @@ namespace osmscout {
 
           image = osmscout::LoadPNGOpenGL(filename);
 
-          if (image != NULL) {
+          if (image != nullptr) {
             ImageRenderer.AddNewTexture(image);
             icons.push_back(id);
             hasIcon = true;

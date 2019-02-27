@@ -26,13 +26,13 @@
 
 using namespace osmscout;
 
-AppSettings::AppSettings(): view(NULL)
+AppSettings::AppSettings(): view(nullptr)
 {
 }
 
 MapView *AppSettings::GetMapView()
 {
-  if (view == NULL){
+  if (view == nullptr){
     double lat   = settings.value("settings/map/lat",   0).toDouble();
     double lon   = settings.value("settings/map/lon",   0).toDouble();
     double angle = settings.value("settings/map/angle", 0).toDouble();

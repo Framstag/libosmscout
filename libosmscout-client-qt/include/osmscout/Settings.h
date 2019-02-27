@@ -85,7 +85,7 @@ private:
   QList<MapProvider> mapProviders;
 
 public:
-  Settings(QSettings *providedStorage=NULL);
+  Settings(QSettings *providedStorage=nullptr);
   virtual ~Settings();
 
   double GetPhysicalDPI() const;

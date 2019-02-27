@@ -289,7 +289,7 @@ namespace osmscout {
     }
 
     for (const auto &entry : fonts) {
-      if (entry.second != NULL) {
+      if (entry.second != nullptr) {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
         pango_font_description_free(entry.second);
 #else

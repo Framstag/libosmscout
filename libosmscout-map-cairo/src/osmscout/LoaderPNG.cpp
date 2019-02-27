@@ -43,8 +43,8 @@ namespace osmscout {
     int             channels,intent;
     double          screen_gamma;
     png_uint_32     rowbytes;
-    png_bytepp      row_pointers=NULL;
-    unsigned char   *image_data=NULL;
+    png_bytepp      row_pointers=nullptr;
+    unsigned char   *image_data=nullptr;
     unsigned char   *data;
     cairo_surface_t *image;
     bool            littleEndian;
@@ -56,41 +56,41 @@ namespace osmscout {
     /* open the file */
     file=std::fopen(filename.c_str(),"rb");
 
-    if (file==NULL) {
-      return NULL;
+    if (file==nullptr) {
+      return nullptr;
     }
 
     /* could pass pointers to user-defined error handlers instead of NULLs: */
 
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,NULL,NULL,NULL);
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,nullptr,nullptr,nullptr);
     if (!png_ptr) {
       std::fclose(file);
-      return NULL;   /* out of memory */
+      return nullptr;   /* out of memory */
     }
 
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
-      png_destroy_read_struct(&png_ptr,NULL,NULL);
+      png_destroy_read_struct(&png_ptr,nullptr,nullptr);
       std::fclose(file);
-      return NULL;   /* out of memory */
+      return nullptr;   /* out of memory */
     }
 
     if (setjmp(png_jmpbuf(png_ptr))) {
-      png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
+      png_destroy_read_struct(&png_ptr,&info_ptr,nullptr);
       std::fclose(file);
-      return NULL;
+      return nullptr;
     }
 
     png_init_io(png_ptr,file);
     png_read_info(png_ptr,info_ptr);
 
     png_get_IHDR(png_ptr,info_ptr,&width,&height,&bit_depth,&color_type,
-                 NULL,NULL,NULL);
+                 nullptr,nullptr,nullptr);
 
     if (setjmp(png_jmpbuf(png_ptr))) {
-      png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
+      png_destroy_read_struct(&png_ptr,&info_ptr,nullptr);
       std::fclose(file);
-      return NULL;
+      return nullptr;
     }
 
     /* We always want RGB or RGBA */
@@ -135,17 +135,17 @@ namespace osmscout {
     rowbytes=png_get_rowbytes(png_ptr,info_ptr);
     channels=(int)png_get_channels(png_ptr,info_ptr);
 
-    if ((image_data=(unsigned char *)malloc(rowbytes*height)) == NULL) {
-      png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+    if ((image_data=(unsigned char *)malloc(rowbytes*height)) == nullptr) {
+      png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
       std::fclose(file);
-      return NULL;
+      return nullptr;
     }
 
-    if ((row_pointers=(png_bytepp)malloc(height*sizeof(png_bytep))) == NULL) {
-      png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+    if ((row_pointers=(png_bytepp)malloc(height*sizeof(png_bytep))) == nullptr) {
+      png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
       free(image_data);
       std::fclose(file);
-      return NULL;
+      return nullptr;
     }
 
     for (size_t i=0;  i<height; ++i) {
@@ -155,9 +155,9 @@ namespace osmscout {
     png_read_image(png_ptr,row_pointers);
 
     free(row_pointers);
-    row_pointers=NULL;
+    row_pointers=nullptr;
 
-    png_read_end(png_ptr,NULL);
+    png_read_end(png_ptr,nullptr);
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
     int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32,width);
@@ -225,7 +225,7 @@ namespace osmscout {
     image=cairo_image_surface_create_for_data(data,
                                               CAIRO_FORMAT_ARGB32,
                                               width,height,stride);
-    if (image!=NULL) {
+    if (image!=nullptr) {
       cairo_surface_set_user_data(image,&imageDataKey,
                                   data,&free);
     }
@@ -233,7 +233,7 @@ namespace osmscout {
       free(data);
     }
 
-    png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
+    png_destroy_read_struct(&png_ptr,&info_ptr,nullptr);
     free(image_data);
     std::fclose(file);
 

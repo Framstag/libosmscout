@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
   glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
   const double dpi = mode->width / (widthMM / 25.4);
 
-  window = glfwCreateWindow(width, height, "OSMScoutOpenGL", NULL, NULL);
+  window = glfwCreateWindow(width, height, "OSMScoutOpenGL", nullptr, nullptr);
   if (!window) {
     glfwTerminate();
     return -1;
