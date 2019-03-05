@@ -124,7 +124,7 @@ void LookupModule::onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tile
   emit viewObjectsLoaded(view, data);
 }
 
-void LookupModule::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> /*tiles*/)
+void LookupModule::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> /*tiles*/)
 {
   emit viewObjectsLoaded(view, osmscout::MapData());
 }

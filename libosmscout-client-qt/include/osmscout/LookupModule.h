@@ -95,7 +95,7 @@ public slots:
   void requestObjectsOnView(const MapViewStruct&);
   void requestObjects(const LocationEntry&);
   void onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles);
-  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> tiles);
+  void onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles);
 
   /**
    * Start retrieving place information based on objects on or near the location.
