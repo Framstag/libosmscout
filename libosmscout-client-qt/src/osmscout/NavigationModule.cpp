@@ -74,6 +74,12 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
       }
       emit updateNext(nextInstruction->nextRouteInstruction);
     }
+    else if (dynamic_cast<osmscout::ArrivalEstimateMessage*>(message.get())!=nullptr) {
+      auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+      using namespace std::chrono;
+      emit arrivalEstimate(QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(arrivalMessage->arrivalEstimate.time_since_epoch()).count()),
+                           arrivalMessage->remainingDistance);
+    }
   }
 }
 

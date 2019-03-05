@@ -50,6 +50,9 @@ NavigationModel::NavigationModel():
   connect(navigationModule, &NavigationModule::rerouteRequest,
           this, &NavigationModel::onRerouteRequest,
           Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::arrivalEstimate,
+          this, &NavigationModel::onArrivalEstimate,
+          Qt::QueuedConnection);
 }
 
 NavigationModel::~NavigationModel(){
@@ -100,6 +103,13 @@ void NavigationModel::onTargetReached(double targetBearing, Distance targetDista
 void NavigationModel::onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to)
 {
   emit rerouteRequest(from.GetLat(), from.GetLon(), initialBearing, to.GetLat(), to.GetLon());
+}
+
+void NavigationModel::onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance)
+{
+  this->arrivalEstimate = arrivalEstimate;
+  this->remainingDistance = remainingDistance;
+  emit arrivalUpdate();
 }
 
 QObject *NavigationModel::getNextRoutStep()

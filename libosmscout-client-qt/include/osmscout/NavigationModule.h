@@ -32,6 +32,7 @@
 #include <osmscout/navigation/RouteStateAgent.h>
 #include <osmscout/navigation/BearingAgent.h>
 #include <osmscout/navigation/RouteInstructionAgent.h>
+#include <osmscout/navigation/ArrivalEstimateAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -56,6 +57,8 @@ signals:
                       const osmscout::GeoCoord to);
 
   void positionEstimate(osmscout::PositionAgent::PositionState state, osmscout::GeoCoord coord, double bearing);
+
+  void arrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
 
   void targetReached(double targetBearing, osmscout::Distance targetDistance);
 
@@ -107,6 +110,7 @@ private:
       std::make_shared<osmscout::BearingAgent>(),
       std::make_shared<osmscout::RouteInstructionAgent<RouteStep, RouteDescriptionBuilder>>(),
       std::make_shared<osmscout::RouteStateAgent>(),
+      std::make_shared<osmscout::ArrivalEstimateAgent>()
   };
 
 };
