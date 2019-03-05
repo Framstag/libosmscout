@@ -18,8 +18,17 @@
 */
 
 #include <osmscout/util/Distance.h>
+#include <osmscout/system/Math.h>
 
 namespace osmscout{
+
+  std::string Distance::AsString() const
+  {
+    if (std::abs(meters) < 1500){
+      return std::to_string(meters) + " m";
+    }
+    return std::to_string(As<Kilometer>()) + " km";
+  }
 
   Distance Distance::Zero()
   {

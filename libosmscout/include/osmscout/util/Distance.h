@@ -26,6 +26,8 @@
 #include <utility>
 #include <limits>
 #include <algorithm>
+#include <string>
+#include <ostream>
 
 namespace osmscout {
 
@@ -161,6 +163,8 @@ namespace osmscout {
       return Unit::FromMeter(meters);
     }
 
+    std::string AsString() const;
+
     static Distance Zero();
 
     static Distance Max();
@@ -187,6 +191,14 @@ namespace osmscout {
       return Distance(Unit::ToMeter(value));
     }
   };
+
+  inline std::ostream& operator<<(std::ostream& os,
+                                  const Distance& distance)
+  {
+    os << distance.AsString();
+
+    return os;
+  }
 
   inline Distance Meters(double m){
     return Distance::Of<Meter>(m);
