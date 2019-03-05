@@ -53,6 +53,7 @@ osmscoutSrc = [
             'src/osmscout/navigation/RouteStateAgent.cpp',
             'src/osmscout/navigation/RouteInstructionAgent.cpp',
             'src/osmscout/navigation/Engine.cpp',
+            'src/osmscout/navigation/ArrivalEstimateAgent.cpp',
             'src/osmscout/Area.cpp',
             'src/osmscout/AreaDataFile.cpp',
             'src/osmscout/AreaAreaIndex.cpp',
