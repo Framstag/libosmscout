@@ -73,11 +73,11 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
 {
   std::list<NavigationMessageRef> result;
 
-  if (dynamic_cast<PositionAgent::PositionMessage*>(message.get())==nullptr) {
+  auto positionMessage = dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+  if (positionMessage==nullptr) {
     return result;
   }
 
-  auto positionMessage = dynamic_cast<PositionAgent::PositionMessage*>(message.get());
   if (!positionMessage->route){
     // we don't have route description yet
     return result;

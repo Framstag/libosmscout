@@ -46,6 +46,7 @@
 #include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/navigation/RouteStateAgent.h>
 #include <osmscout/navigation/BearingAgent.h>
+#include <osmscout/navigation/ArrivalEstimateAgent.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 
@@ -391,6 +392,12 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
                   << std::endl;
       }
     }
+    else if (dynamic_cast<osmscout::ArrivalEstimateMessage*>(message.get())!=nullptr) {
+      auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+      std::cout << "Estimated arrival: " << osmscout::TimestampToISO8601TimeString(arrivalMessage->arrivalEstimate)
+                << " remaining distance: " << arrivalMessage->remainingDistance.AsString()
+                << std::endl;
+    }
   }
 }
 
@@ -410,6 +417,7 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
     std::make_shared<osmscout::BearingAgent>(),
     //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
     std::make_shared<osmscout::RouteStateAgent>(),
+    std::make_shared<osmscout::ArrivalEstimateAgent>()
   };
 
   auto initializeMessage=std::make_shared<osmscout::InitializeMessage>(generator.steps.front().time);

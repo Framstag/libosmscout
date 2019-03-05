@@ -42,8 +42,13 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(QObject *routeWay      READ getRouteWay       NOTIFY routeChanged)
   Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
 
+  Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
+  Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
+
 signals:
   void update();
+
+  void arrivalUpdate();
 
   void routeChanged(QtRouteData route,
                     osmscout::Vehicle vehicle);
@@ -69,6 +74,7 @@ public slots:
   void onPositionEstimate(PositionAgent::PositionState state, GeoCoord coord, double bearing);
   void onTargetReached(double targetBearing, osmscout::Distance targetDistance);
   void onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to);
+  void onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
 
 public:
   enum Roles {
@@ -106,6 +112,16 @@ public:
     return new OverlayWay(route.routeWay().nodes);
   }
 
+  QDateTime getArrivalEstimate() const
+  {
+    return arrivalEstimate;
+  }
+
+  double getRemainingDinstance() const
+  {
+    return remainingDistance.AsMeter();
+  }
+
 private:
   NavigationModule* navigationModule;
   QtRouteData       route;
@@ -113,6 +129,9 @@ private:
 
   std::vector<RouteStep> routeSteps;
   RouteStep nextRouteStep;
+
+  QDateTime arrivalEstimate;
+  osmscout::Distance remainingDistance;
 };
 
 }

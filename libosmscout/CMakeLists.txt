@@ -64,6 +64,7 @@ set(HEADER_FILES_ROUTING
 
 set(HEADER_FILES_NAVIGATION
     include/osmscout/navigation/Agents.h
+    include/osmscout/navigation/ArrivalEstimateAgent.h
     include/osmscout/navigation/DataAgent.h
     include/osmscout/navigation/PositionAgent.h
     include/osmscout/navigation/RouteStateAgent.h
@@ -170,6 +171,7 @@ set(SOURCE_FILES
     src/osmscout/routing/MultiDBRoutingState.cpp
     src/osmscout/routing/RouteDescriptionPostprocessor.cpp
     src/osmscout/navigation/Agents.cpp
+    src/osmscout/navigation/ArrivalEstimateAgent.cpp
     src/osmscout/navigation/BearingAgent.cpp
     src/osmscout/navigation/DataAgent.cpp
     src/osmscout/navigation/PositionAgent.cpp
