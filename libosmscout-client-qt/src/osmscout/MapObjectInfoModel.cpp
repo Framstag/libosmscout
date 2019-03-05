@@ -37,7 +37,7 @@ ready(false), setup(false), view(), lookupModule(nullptr)
           this, SLOT(dbInitialized(const DatabaseLoadedResponse)),
           Qt::QueuedConnection);
 
-  connect(this, SIGNAL(objectsRequested(const MapViewStruct&)),
+  connect(this, SIGNAL(objectsOnViewRequested(const MapViewStruct&)),
           lookupModule, SLOT(requestObjectsOnView(const MapViewStruct&)),
           Qt::QueuedConnection);
 
@@ -65,7 +65,7 @@ MapObjectInfoModel::~MapObjectInfoModel()
 void MapObjectInfoModel::dbInitialized(const DatabaseLoadedResponse&)
 {
   if (setup){
-    emit objectsRequested(view);
+    emit objectsOnViewRequested(view);
   }
 }
 
@@ -178,7 +178,7 @@ void MapObjectInfoModel::setPosition(QObject *o,
     model.clear();
     mapData.clear();
     endResetModel();
-    emit objectsRequested(view);
+    emit objectsOnViewRequested(view);
   }else{
     update();
   }
