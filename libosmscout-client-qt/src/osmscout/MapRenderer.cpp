@@ -39,22 +39,22 @@ MapRenderer::MapRenderer(QThread *thread,
   fontName=settings->GetFontName();
   fontSize=settings->GetFontSize();
 
-  connect(settings.get(), SIGNAL(MapDPIChange(double)),
-          this, SLOT(onMapDPIChange(double)),
+  connect(settings.get(), &Settings::MapDPIChange,
+          this, &MapRenderer::onMapDPIChange,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(RenderSeaChanged(bool)),
-          this, SLOT(onRenderSeaChanged(bool)),
+  connect(settings.get(), &Settings::RenderSeaChanged,
+          this, &MapRenderer::onRenderSeaChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
-          this, SLOT(onFontNameChanged(const QString)),
+  connect(settings.get(), &Settings::FontNameChanged,
+          this, &MapRenderer::onFontNameChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(FontSizeChanged(double)),
-          this, SLOT(onFontSizeChanged(double)),
+  connect(settings.get(), &Settings::FontSizeChanged,
+          this, &MapRenderer::onFontSizeChanged,
           Qt::QueuedConnection);
-  connect(thread, SIGNAL(started()),
-          this, SLOT(Initialize()));
-  connect(dbThread.get(), SIGNAL(stylesheetFilenameChanged()),
-          this, SLOT(onStylesheetFilenameChanged()),
+  connect(thread, &QThread::started,
+          this, &MapRenderer::Initialize);
+  connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
+          this, &MapRenderer::onStylesheetFilenameChanged,
           Qt::QueuedConnection);
 }
 

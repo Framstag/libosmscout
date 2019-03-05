@@ -63,7 +63,9 @@ AvailableMapsModel::AvailableMapsModel()
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
   mapProviders = settings->GetMapProviders();
 
-  connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT(listDownloaded(QNetworkReply*)));
+  connect(&webCtrl, &QNetworkAccessManager::finished,
+          this, &AvailableMapsModel::listDownloaded);
+
   diskCache.setCacheDirectory(settings->GetHttpCacheDir());
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));

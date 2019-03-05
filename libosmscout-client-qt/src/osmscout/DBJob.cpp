@@ -78,8 +78,8 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
   searchParameter.SetUseLowZoomOptimization(lowZoomOptimization);
   searchParameter.SetBreaker(breaker);
 
-  connect(this,SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
-          this,SLOT(onTileStateChanged(QString,const osmscout::TileRef)),
+  connect(this, &DBLoadJob::tileStateChanged,
+          this, &DBLoadJob::onTileStateChanged,
           Qt::QueuedConnection);
 }
 

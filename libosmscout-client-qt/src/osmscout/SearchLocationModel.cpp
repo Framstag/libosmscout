@@ -36,28 +36,28 @@ LocationListModel::LocationListModel(QObject* parent)
   searchModule=OSMScoutQt::GetInstance().MakeSearchModule();
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
 
-  connect(this, SIGNAL(SearchRequested(const QString, int, osmscout::GeoCoord, AdminRegionInfoRef, osmscout::BreakerRef)),
-          searchModule, SLOT(SearchForLocations(const QString, int, osmscout::GeoCoord, AdminRegionInfoRef, osmscout::BreakerRef)),
+  connect(this, &LocationListModel::SearchRequested,
+          searchModule, &SearchModule::SearchForLocations,
           Qt::QueuedConnection);
 
-  connect(searchModule, SIGNAL(searchResult(const QString, const QList<LocationEntry>)),
-          this, SLOT(onSearchResult(const QString, const QList<LocationEntry>)),
+  connect(searchModule, &SearchModule::searchResult,
+          this, &LocationListModel::onSearchResult,
           Qt::QueuedConnection);
 
-  connect(searchModule, SIGNAL(searchFinished(const QString, bool)),
-          this, SLOT(onSearchFinished(const QString, bool)),
+  connect(searchModule, &SearchModule::searchFinished,
+          this, &LocationListModel::onSearchFinished,
           Qt::QueuedConnection);
 
-  connect(this, SIGNAL(regionLookupRequested(osmscout::GeoCoord)),
-          lookupModule, SLOT(requestRegionLookup(osmscout::GeoCoord)),
+  connect(this, &LocationListModel::regionLookupRequested,
+          lookupModule, &LookupModule::requestRegionLookup,
           Qt::QueuedConnection);
 
-  connect(lookupModule, SIGNAL(locationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
-          this, SLOT(onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
+  connect(lookupModule, &LookupModule::locationAdminRegions,
+          this, &LocationListModel::onLocationAdminRegions,
           Qt::QueuedConnection);
 
-  connect(lookupModule, SIGNAL(locationAdminRegionFinished(const osmscout::GeoCoord)),
-          this, SLOT(onLocationAdminRegionFinished(const osmscout::GeoCoord)),
+  connect(lookupModule, &LookupModule::locationAdminRegionFinished,
+          this, &LocationListModel::onLocationAdminRegionFinished,
           Qt::QueuedConnection);
 }
 

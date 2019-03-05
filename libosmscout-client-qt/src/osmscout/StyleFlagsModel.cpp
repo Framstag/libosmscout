@@ -28,17 +28,17 @@ StyleFlagsModel::StyleFlagsModel():
 {
   styleModule=OSMScoutQt::GetInstance().MakeStyleModule();
 
-  connect(styleModule,SIGNAL(styleFlagsChanged(QMap<QString,bool>)),
-          this,SLOT(onStyleFlagsChanged(QMap<QString,bool>)),
+  connect(styleModule, &StyleModule::styleFlagsChanged,
+          this, &StyleFlagsModel::onStyleFlagsChanged,
           Qt::QueuedConnection);
-  connect(this,SIGNAL(styleFlagsRequested()),
-          styleModule,SLOT(onStyleFlagsRequested()),
+  connect(this, &StyleFlagsModel::styleFlagsRequested,
+          styleModule, &StyleModule::onStyleFlagsRequested,
           Qt::QueuedConnection);
-  connect(this,SIGNAL(setFlagRequest(QString,bool)),
-          styleModule,SLOT(onSetFlagRequest(QString,bool)),
+  connect(this, &StyleFlagsModel::setFlagRequest,
+          styleModule, &StyleModule::onSetFlagRequest,
           Qt::QueuedConnection);
-  connect(styleModule,SIGNAL(flagSet(QString,bool)),
-          this,SLOT(onFlagSet(QString,bool)),
+  connect(styleModule, &StyleModule::flagSet,
+          this, &StyleFlagsModel::onFlagSet,
           Qt::QueuedConnection);
 
   emit styleFlagsRequested();

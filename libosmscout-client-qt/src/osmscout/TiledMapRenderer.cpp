@@ -50,30 +50,30 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   onlineTilesEnabled = settings->GetOnlineTilesEnabled();
   offlineTilesEnabled = settings->GetOfflineMap();
 
-  connect(settings.get(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
-          this, SLOT(onlineTileProviderChanged()),
+  connect(settings.get(), &Settings::OnlineTileProviderIdChanged,
+          this, &TiledMapRenderer::onlineTileProviderChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(OnlineTilesEnabledChanged(bool)),
-          this, SLOT(onlineTilesEnabledChanged(bool)),
+  connect(settings.get(), &Settings::OnlineTilesEnabledChanged,
+          this, &TiledMapRenderer::onlineTilesEnabledChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(OfflineMapChanged(bool)),
-          this, SLOT(onOfflineMapChanged(bool)),
+  connect(settings.get(), &Settings::OfflineMapChanged,
+          this, &TiledMapRenderer::onOfflineMapChanged,
           Qt::QueuedConnection);
 
-  connect(dbThread.get(), SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
-          this, SLOT(onDatabaseLoaded(osmscout::GeoBox)),
+  connect(dbThread.get(), &DBThread::databaseLoadFinished,
+          this, &TiledMapRenderer::onDatabaseLoaded,
           Qt::QueuedConnection);
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
   //
 
-  connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(onlineTileRequest(uint32_t, uint32_t, uint32_t)),
+  connect(&onlineTileCache, &TileCache::tileRequested,
+          this, &TiledMapRenderer::onlineTileRequest,
           Qt::QueuedConnection);
 
-  connect(&offlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(offlineTileRequest(uint32_t, uint32_t, uint32_t)),
+  connect(&offlineTileCache, &TileCache::tileRequested,
+          this, &TiledMapRenderer::offlineTileRequest,
           Qt::QueuedConnection);
 }
 
@@ -97,16 +97,16 @@ void TiledMapRenderer::Initialize()
     // create tile downloader in correct thread
     tileDownloader = new OsmTileDownloader(tileCacheDirectory,settings->GetOnlineTileProvider());
 
-    connect(settings.get(), SIGNAL(OnlineTileProviderChanged(const OnlineTileProvider &)),
-            tileDownloader, SLOT(onlineTileProviderChanged(const OnlineTileProvider &)),
+    connect(settings.get(), &Settings::OnlineTileProviderChanged,
+            tileDownloader, &OsmTileDownloader::onlineTileProviderChanged,
             Qt::QueuedConnection);
 
-    connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-            this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+    connect(tileDownloader, &OsmTileDownloader::downloaded,
+            this, &TiledMapRenderer::tileDownloaded,
             Qt::QueuedConnection);
 
-    connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
-            this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+    connect(tileDownloader, &OsmTileDownloader::failed,
+            this, &TiledMapRenderer::tileDownloadFailed,
             Qt::QueuedConnection);
   }
 
@@ -307,8 +307,8 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
                               /* lowZoomOptimization */ true,
                               /* closeOnFinish */ false);
 
-        connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)),
-                this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)));
+        connect(loadJob, &DBLoadJob::finished,
+                this, &TiledMapRenderer::onLoadJobFinished);
 
         dbThread->RunJob(loadJob);
 

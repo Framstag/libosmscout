@@ -33,24 +33,24 @@ ready(false), setup(false), view(), lookupModule(nullptr)
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
   this->mapDpi=OSMScoutQt::GetInstance().GetSettings()->GetMapDPI();
 
-  connect(lookupModule, SIGNAL(initialisationFinished(const DatabaseLoadedResponse)),
-          this, SLOT(dbInitialized(const DatabaseLoadedResponse)),
+  connect(lookupModule, &LookupModule::initialisationFinished,
+          this, &MapObjectInfoModel::dbInitialized,
           Qt::QueuedConnection);
 
-  connect(this, SIGNAL(objectsOnViewRequested(const MapViewStruct&)),
-          lookupModule, SLOT(requestObjectsOnView(const MapViewStruct&)),
+  connect(this, &MapObjectInfoModel::objectsOnViewRequested,
+          lookupModule, &LookupModule::requestObjectsOnView,
           Qt::QueuedConnection);
 
-  connect(lookupModule, SIGNAL(viewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&)),
-          this, SLOT(onViewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&)),
+  connect(lookupModule, &LookupModule::viewObjectsLoaded,
+          this, &MapObjectInfoModel::onViewObjectsLoaded,
           Qt::QueuedConnection);
 
-  connect(this, SIGNAL(objectsRequested(const LocationEntry &)),
-          lookupModule, SLOT(requestObjects(const LocationEntry&)),
+  connect(this, &MapObjectInfoModel::objectsRequested,
+          lookupModule, &LookupModule::requestObjects,
           Qt::QueuedConnection);
 
-  connect(lookupModule, SIGNAL(objectsLoaded(const LocationEntry&, const osmscout::MapData&)),
-          this, SLOT(onObjectsLoaded(const LocationEntry&, const osmscout::MapData&)),
+  connect(lookupModule, &LookupModule::objectsLoaded,
+          this, &MapObjectInfoModel::onObjectsLoaded,
           Qt::QueuedConnection);
 }
 

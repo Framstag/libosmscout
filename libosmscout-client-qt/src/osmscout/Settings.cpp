@@ -311,20 +311,20 @@ QmlSettings::QmlSettings()
 {
     settings=OSMScoutQt::GetInstance().GetSettings();
 
-    connect(settings.get(), SIGNAL(MapDPIChange(double)),
-            this, SIGNAL(MapDPIChange(double)));
-    connect(settings.get(), SIGNAL(OnlineTilesEnabledChanged(bool)),
-            this, SIGNAL(OnlineTilesEnabledChanged(bool)));
-    connect(settings.get(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
-            this, SIGNAL(OnlineTileProviderIdChanged(const QString)));
-    connect(settings.get(), SIGNAL(OfflineMapChanged(bool)),
-            this, SIGNAL(OfflineMapChanged(bool)));
-    connect(settings.get(), SIGNAL(RenderSeaChanged(bool)),
-            this, SIGNAL(RenderSeaChanged(bool)));
-    connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
-            this, SIGNAL(FontNameChanged(const QString)));
-    connect(settings.get(), SIGNAL(FontSizeChanged(double)),
-            this, SIGNAL(FontSizeChanged(double)));
+    connect(settings.get(), &Settings::MapDPIChange,
+            this, &QmlSettings::MapDPIChange);
+    connect(settings.get(), &Settings::OnlineTilesEnabledChanged,
+            this, &QmlSettings::OnlineTilesEnabledChanged);
+    connect(settings.get(), &Settings::OnlineTileProviderIdChanged,
+            this, &QmlSettings::OnlineTileProviderIdChanged);
+    connect(settings.get(), &Settings::OfflineMapChanged,
+            this, &QmlSettings::OfflineMapChanged);
+    connect(settings.get(), &Settings::RenderSeaChanged,
+            this, &QmlSettings::RenderSeaChanged);
+    connect(settings.get(), &Settings::FontNameChanged,
+            this, &QmlSettings::FontNameChanged);
+    connect(settings.get(), &Settings::FontSizeChanged,
+            this, &QmlSettings::FontSizeChanged);
 }
 
 double QmlSettings::GetPhysicalDPI() const

@@ -30,32 +30,32 @@ LocationInfoModel::LocationInfoModel():
 {
     lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
 
-    connect(lookupModule, SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
-            this, SLOT(dbInitialized(const DatabaseLoadedResponse&)),
+    connect(lookupModule, &LookupModule::initialisationFinished,
+            this, &LocationInfoModel::dbInitialized,
             Qt::QueuedConnection);
     
-    connect(this, SIGNAL(locationDescriptionRequested(const osmscout::GeoCoord)), 
-            lookupModule, SLOT(requestLocationDescription(const osmscout::GeoCoord)),
+    connect(this, &LocationInfoModel::locationDescriptionRequested,
+            lookupModule, &LookupModule::requestLocationDescription,
             Qt::QueuedConnection);
     
-    connect(lookupModule, SIGNAL(locationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)),
-            this, SLOT(onLocationDescription(const osmscout::GeoCoord, const QString, const osmscout::LocationDescription, const QStringList)),
+    connect(lookupModule, &LookupModule::locationDescription,
+            this, &LocationInfoModel::onLocationDescription,
             Qt::QueuedConnection);
     
-    connect(lookupModule, SIGNAL(locationDescriptionFinished(const osmscout::GeoCoord)),
-            this, SLOT(onLocationDescriptionFinished(const osmscout::GeoCoord)),
+    connect(lookupModule, &LookupModule::locationDescriptionFinished,
+            this, &LocationInfoModel::onLocationDescriptionFinished,
             Qt::QueuedConnection);
 
-    connect(this, SIGNAL(regionLookupRequested(osmscout::GeoCoord)),
-            lookupModule, SLOT(requestRegionLookup(osmscout::GeoCoord)),
+    connect(this, &LocationInfoModel::regionLookupRequested,
+            lookupModule, &LookupModule::requestRegionLookup,
             Qt::QueuedConnection);
 
-    connect(lookupModule, SIGNAL(locationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
-              this, SLOT(onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>)),
-              Qt::QueuedConnection);
+    connect(lookupModule, &LookupModule::locationAdminRegions,
+            this, &LocationInfoModel::onLocationAdminRegions,
+            Qt::QueuedConnection);
 
-    connect(lookupModule, SIGNAL(locationAdminRegionFinished(const osmscout::GeoCoord)),
-            this, SLOT(onLocationAdminRegionFinished(const osmscout::GeoCoord)),
+    connect(lookupModule, &LookupModule::locationAdminRegionFinished,
+            this, &LocationInfoModel::onLocationAdminRegionFinished,
             Qt::QueuedConnection);
 }
 

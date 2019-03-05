@@ -49,15 +49,15 @@ void TileLoaderThread::init()
   QString tileCacheDirectory=OSMScoutQt::GetInstance().GetCacheLocation();
   tileDownloader = new OsmTileDownloader(tileCacheDirectory,provider);
 
-  connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
-          this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+  connect(tileDownloader, &OsmTileDownloader::failed,
+          this, &TileLoaderThread::tileDownloadFailed,
           Qt::QueuedConnection);
-  connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+  connect(tileDownloader, &OsmTileDownloader::downloaded,
+          this, &TileLoaderThread::tileDownloaded,
           Qt::QueuedConnection);
 
-  connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(download(uint32_t, uint32_t, uint32_t)),
+  connect(&onlineTileCache, &TileCache::tileRequested,
+          this, &TileLoaderThread::download,
           Qt::QueuedConnection);
 }
 
@@ -135,16 +135,16 @@ TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
 
   loader=new TileLoaderThread(thread);
   loader->moveToThread(thread);
-  connect(thread, SIGNAL(started()),
-          loader, SLOT(init()));
+  connect(thread, &QThread::started,
+          loader, &TileLoaderThread::init);
   thread->start();
 
-  connect(this, SIGNAL(providerChanged(const OnlineTileProvider &)),
-          loader, SLOT(onProviderChanged(const OnlineTileProvider &)),
+  connect(this, &TiledMapOverlay::providerChanged,
+          loader, &TileLoaderThread::onProviderChanged,
           Qt::QueuedConnection);
 
-  connect(loader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t)),
-          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t)),
+  connect(loader, &TileLoaderThread::downloaded,
+          this, &TiledMapOverlay::tileDownloaded,
           Qt::QueuedConnection);
 }
 

@@ -98,10 +98,10 @@ void MapDownloadJob::start()
 
   for (auto fileName:fileNames){
     auto job=new FileDownloader(webCtrl, map.getProvider().getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));
-    connect(job, SIGNAL(finished(QString)), this, SLOT(onJobFinished()));
-    connect(job, SIGNAL(error(QString, bool)), this, SLOT(onJobFailed(QString, bool)));
-    connect(job, SIGNAL(writtenBytes(uint64_t)), this, SIGNAL(downloadProgress()));
-    connect(job, SIGNAL(writtenBytes(uint64_t)), this, SLOT(onDownloadProgress(uint64_t)));
+    connect(job, &FileDownloader::finished, this, &MapDownloadJob::onJobFinished);
+    connect(job, &FileDownloader::error, this, &MapDownloadJob::onJobFailed);
+    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::downloadProgress);
+    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::onDownloadProgress);
     jobs << job;
   }
   started=true;
@@ -337,8 +337,8 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceEx
 #endif
   
   auto job=new MapDownloadJob(&webCtrl, map, dir, replaceExisting);
-  connect(job, SIGNAL(finished()), this, SLOT(onJobFinished()));
-  connect(job, SIGNAL(failed(QString)), this, SLOT(onJobFailed(QString)));
+  connect(job, &MapDownloadJob::finished, this, &MapManager::onJobFinished);
+  connect(job, &MapDownloadJob::failed, this, &MapManager::onJobFailed);
   downloadJobs<<job;
   emit downloadJobsChanged();
   downloadNext();
