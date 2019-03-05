@@ -26,7 +26,7 @@ NearPOIModel::NearPOIModel()
 {
   poiModule=OSMScoutQt::GetInstance().MakePOILookupModule();
 
-  connect(this, SIGNAL(lookupPOI(int, osmscout::BreakerRef, osmscout::GeoCoord, QStringList, double)),
+  connect(this, SIGNAL(lookupPOIRequest(int, osmscout::BreakerRef, osmscout::GeoCoord, QStringList, double)),
           poiModule, SLOT(lookupPOIRequest(int, osmscout::BreakerRef, osmscout::GeoCoord, QStringList, double)),
           Qt::QueuedConnection);
 
@@ -212,7 +212,7 @@ void NearPOIModel::lookupPOI()
     breaker=std::make_shared<osmscout::ThreadedBreaker>();
     searching=true;
     // TODO: use resultLimit
-    emit lookupPOI(++currentRequest, breaker, searchCenter, types, maxDistance.AsMeter());
+    emit lookupPOIRequest(++currentRequest, breaker, searchCenter, types, maxDistance.AsMeter());
   }else{
     searching=false;
   }
