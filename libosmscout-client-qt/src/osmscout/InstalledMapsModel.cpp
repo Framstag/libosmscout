@@ -25,10 +25,10 @@ namespace osmscout {
 InstalledMapsModel::InstalledMapsModel()
 {
   mapManager=OSMScoutQt::GetInstance().GetMapManager();
-  connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
-          this, SLOT(onDatabaseListChanged()));
-  connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
-          this, SIGNAL(databaseListChanged()));
+  connect(mapManager.get(), &MapManager::databaseListChanged,
+          this, &InstalledMapsModel::onDatabaseListChanged);
+  connect(mapManager.get(), &MapManager::databaseListChanged,
+          this, &InstalledMapsModel::databaseListChanged);
   onDatabaseListChanged();
 }
 

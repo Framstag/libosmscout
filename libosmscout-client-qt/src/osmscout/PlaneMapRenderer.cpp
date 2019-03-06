@@ -58,18 +58,18 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
   // else we might get into a dead lock
   //
 
-  connect(this,SIGNAL(TriggerMapRenderingSignal(const MapViewStruct&)),
-          this,SLOT(TriggerMapRendering(const MapViewStruct&)),
+  connect(this, &PlaneMapRenderer::TriggerMapRenderingSignal,
+          this, &PlaneMapRenderer::TriggerMapRendering,
           Qt::QueuedConnection);
 
-  connect(this,SIGNAL(TriggerInitialRendering()),
-          this,SLOT(HandleInitialRenderingRequest()));
+  connect(this, &PlaneMapRenderer::TriggerInitialRendering,
+          this, &PlaneMapRenderer::HandleInitialRenderingRequest);
 
-  connect(&pendingRenderingTimer,SIGNAL(timeout()),
-          this,SLOT(DrawMap()));
+  connect(&pendingRenderingTimer, &QTimer::timeout,
+          this, &PlaneMapRenderer::DrawMap);
 
-  connect(this,SIGNAL(TriggerDrawMap()),
-          this,SLOT(DrawMap()),
+  connect(this, &PlaneMapRenderer::TriggerDrawMap,
+          this, &PlaneMapRenderer::DrawMap,
           Qt::QueuedConnection);
 }
 
@@ -494,11 +494,11 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
                           /* lowZoomOptimization */ true,
                           /* closeOnFinish */ false);
 
-    connect(loadJob, SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
-            this, SLOT(HandleTileStatusChanged(QString,const osmscout::TileRef)),
+    connect(loadJob, &DBLoadJob::tileStateChanged,
+            this, &PlaneMapRenderer::HandleTileStatusChanged,
             Qt::QueuedConnection);
-    connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)),
-            this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)));
+    connect(loadJob, &DBLoadJob::finished,
+            this, &PlaneMapRenderer::onLoadJobFinished);
 
     dbThread->RunJob(loadJob);
   }

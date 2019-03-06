@@ -61,8 +61,8 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
     return;
   }
 
-  connect( &m_file, SIGNAL(bytesWritten(qint64)),
-           this, SLOT(onBytesWritten(qint64)) );
+  connect(&m_file, &QFile::bytesWritten,
+          this, &FileDownloader::onBytesWritten);
 
   // start data processor if requested
   QString command;
@@ -82,23 +82,23 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
     m_pipe_to_process = true;
     m_process = new QProcess(this);
 
-    connect( m_process, SIGNAL(started()),
-             this, SLOT(onProcessStarted()) );
+    connect( m_process, &QProcess::started,
+             this, &FileDownloader::onProcessStarted );
 
     connect( m_process, SIGNAL(finished(int)),
              this, SLOT(onProcessStopped(int)) );
 
-    connect( m_process, SIGNAL(stateChanged(QProcess::ProcessState)),
-             this, SLOT(onProcessStateChanged(QProcess::ProcessState)) );
+    connect( m_process, &QProcess::stateChanged,
+             this, &FileDownloader::onProcessStateChanged);
 
-    connect( m_process, SIGNAL(readyReadStandardOutput()),
-             this, SLOT(onProcessRead()) );
+    connect( m_process, &QProcess::readyReadStandardOutput,
+             this, &FileDownloader::onProcessRead);
 
-    connect( m_process, SIGNAL(readyReadStandardError()),
-             this, SLOT(onProcessReadError()) );
+    connect( m_process, &QProcess::readyReadStandardError,
+             this, &FileDownloader::onProcessReadError);
 
-    connect( m_process, SIGNAL(bytesWritten(qint64)),
-             this, SIGNAL(onBytesWritten(qint64)) );
+    connect( m_process, &QProcess::bytesWritten,
+             this, &FileDownloader::onBytesWritten);
 
     m_process->start(command, arguments);
   }
@@ -134,10 +134,10 @@ void FileDownloader::startDownload()
   m_reply = m_manager->get(request);
   m_reply->setReadBufferSize(const_buffer_network);
 
-  connect(m_reply, SIGNAL(readyRead()),
-          this, SLOT(onNetworkReadyRead()));
-  connect(m_reply, SIGNAL(finished()),
-          this, SLOT(onDownloaded()));
+  connect(m_reply, &QNetworkReply::readyRead,
+          this, &FileDownloader::onNetworkReadyRead);
+  connect(m_reply, &QNetworkReply::finished,
+          this, &FileDownloader::onDownloaded);
   connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
           this, SLOT(onNetworkError(QNetworkReply::NetworkError)));
 

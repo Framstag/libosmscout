@@ -62,10 +62,10 @@ LocationEntry buildLocationEntry(T obj,
   return location;
 }
 
-QList<LocationEntry> POILookupModule::lookupPOIRequest(DBInstanceRef db,
-                                                       osmscout::GeoBox searchBoundingBox,
-                                                       osmscout::BreakerRef /*breaker*/,
-                                                       QStringList types)
+QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
+                                                  osmscout::GeoBox searchBoundingBox,
+                                                  osmscout::BreakerRef /*breaker*/,
+                                                  QStringList types)
 {
   QList<LocationEntry> result;
 
@@ -162,7 +162,7 @@ void POILookupModule::lookupPOIRequest(int requestId,
         break;
       }
       emit lookupResult(requestId,
-                        lookupPOIRequest(db, searchBoundingBox, breaker, types));
+                        doPOIlookup(db, searchBoundingBox, breaker, types));
     }
   });
 

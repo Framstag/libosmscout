@@ -28,18 +28,18 @@ RoutingListModel::RoutingListModel(QObject* parent)
 {
   router=OSMScoutQt::GetInstance().MakeRouter();
 
-  connect(this,SIGNAL(routeRequest(LocationEntryRef,LocationEntryRef,osmscout::Vehicle,int,osmscout::BreakerRef)),
-          router,SLOT(onRouteRequest(LocationEntryRef,LocationEntryRef,osmscout::Vehicle,int,osmscout::BreakerRef)),
+  connect(this, &RoutingListModel::routeRequest,
+          router, &Router::onRouteRequest,
           Qt::QueuedConnection);
 
-  connect(router,SIGNAL(routeComputed(QtRouteData,int)),
-          this,SLOT(onRouteComputed(QtRouteData,int)),
+  connect(router, &Router::routeComputed,
+          this, &RoutingListModel::onRouteComputed,
           Qt::QueuedConnection);
-  connect(router,SIGNAL(routeFailed(QString,int)),
-          this,SLOT(onRouteFailed(QString,int)),
+  connect(router, &Router::routeFailed,
+          this, &RoutingListModel::onRouteFailed,
           Qt::QueuedConnection);
-  connect(router,SIGNAL(routingProgress(int,int)),
-          this,SLOT(onRoutingProgress(int,int)),
+  connect(router, &Router::routingProgress,
+          this, &RoutingListModel::onRoutingProgress,
           Qt::QueuedConnection);
 }
 

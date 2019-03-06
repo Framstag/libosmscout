@@ -229,7 +229,9 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                                       mapManager,
                                       customPoiTypeVector);
 
-  dbThread->connect(thread, SIGNAL(started()), SLOT(Initialize()));
+  connect(thread, &QThread::started,
+          dbThread.get(), &DBThread::Initialize);
+
   dbThread->moveToThread(thread);
 
   thread->start();
@@ -275,10 +277,10 @@ QThread *OSMScoutQt::makeThread(QString name)
 {
   QThread *thread=new QThread();
   thread->setObjectName(name);
-  QObject::connect(thread, SIGNAL(finished()),
-                   thread, SLOT(deleteLater()));
-  connect(thread, SIGNAL(finished()),
-          this, SLOT(threadFinished()));
+  QObject::connect(thread, &QThread::finished,
+                   thread, &QThread::deleteLater);
+  connect(thread, &QThread::finished,
+          this, &OSMScoutQt::threadFinished);
 
   liveBackgroundThreads++;
   return thread;

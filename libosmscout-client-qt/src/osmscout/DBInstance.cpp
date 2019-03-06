@@ -149,8 +149,8 @@ osmscout::MapPainterQt* DBInstance::GetPainter()
 
   if (!painterHolder.contains(QThread::currentThread())){
     painterHolder[QThread::currentThread()]=new osmscout::MapPainterQt(styleConfig);
-    connect(QThread::currentThread(),SIGNAL(finished()),
-            this,SLOT(onThreadFinished()));
+    connect(QThread::currentThread(), &QThread::finished,
+            this, &DBInstance::onThreadFinished);
   }
   return painterHolder[QThread::currentThread()];
 }

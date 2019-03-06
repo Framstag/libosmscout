@@ -30,8 +30,8 @@ LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
   loadJob(nullptr)
 {
 
-  connect(dbThread.get(), SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
-          this, SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)));
+  connect(dbThread.get(), &DBThread::initialisationFinished,
+          this, &LookupModule::initialisationFinished);
 }
 
 LookupModule::~LookupModule()
@@ -65,10 +65,10 @@ void LookupModule::requestObjectsOnView(const MapViewStruct &view)
   loadJob=new DBLoadJob(lookupProjection,maximumAreaLevel,/* lowZoomOptimization */ true);
   this->view=view;
 
-  connect(loadJob, SIGNAL(databaseLoaded(QString,QList<osmscout::TileRef>)),
-          this, SLOT(onDatabaseLoaded(QString,QList<osmscout::TileRef>)));
-  connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)),
-          this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>>)));
+  connect(loadJob, &DBLoadJob::databaseLoaded,
+          this, &LookupModule::onDatabaseLoaded);
+  connect(loadJob, &DBLoadJob::finished,
+          this, &LookupModule::onLoadJobFinished);
 
   dbThread->RunJob(loadJob);
 }
@@ -124,7 +124,7 @@ void LookupModule::onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tile
   emit viewObjectsLoaded(view, data);
 }
 
-void LookupModule::onLoadJobFinished(QMap<QString,QMap<osmscout::TileId,osmscout::TileRef>> /*tiles*/)
+void LookupModule::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> /*tiles*/)
 {
   emit viewObjectsLoaded(view, osmscout::MapData());
 }

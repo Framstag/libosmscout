@@ -28,7 +28,7 @@ NavigationModule::NavigationModule(QThread *thread,
   thread(thread), settings(settings), dbThread(dbThread)
 {
   timer.moveToThread(thread); // constructor is called from different thread!
-  connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+  connect(&timer, &QTimer::timeout, this, &NavigationModule::onTimeout);
 }
 
 NavigationModule::~NavigationModule()

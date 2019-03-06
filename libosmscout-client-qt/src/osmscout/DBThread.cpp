@@ -60,12 +60,12 @@ DBThread::DBThread(QThread *backgroundThread,
   stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
-  connect(settings.get(), SIGNAL(MapDPIChange(double)),
-          this, SLOT(onMapDPIChange(double)),
+  connect(settings.get(), &Settings::MapDPIChange,
+          this, &DBThread::onMapDPIChange,
           Qt::QueuedConnection);
 
-  connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
-          this, SLOT(onDatabaseListChanged(QList<QDir>)),
+  connect(mapManager.get(), &MapManager::databaseListChanged,
+          this, &DBThread::onDatabaseListChanged,
           Qt::QueuedConnection);
 }
 

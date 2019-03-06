@@ -36,8 +36,8 @@ Router::Router(QThread *thread,
   settings(settings),
   dbThread(dbThread)
 {
-  connect(thread, SIGNAL(started()),
-          this, SLOT(Initialize()));
+  connect(thread, &QThread::started,
+          this, &Router::Initialize);
 }
 
 Router::~Router()

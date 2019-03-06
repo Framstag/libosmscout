@@ -32,7 +32,8 @@ OsmTileDownloader::OsmTileDownloader(QString diskCacheDir,
   serverNumber(qrand()),
   tileProvider(provider)
 {
-  connect(&webCtrl, SIGNAL (finished(QNetworkReply*)),  this, SLOT (fileDownloaded(QNetworkReply*)));
+  connect(&webCtrl, &QNetworkAccessManager::finished,
+          this, &OsmTileDownloader::fileDownloaded);
  
   /** http://wiki.openstreetmap.org/wiki/Tile_usage_policy
    * 

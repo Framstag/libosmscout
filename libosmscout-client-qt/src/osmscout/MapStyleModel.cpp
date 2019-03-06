@@ -28,11 +28,13 @@ MapStyleModel::MapStyleModel():
   QAbstractListModel()
 {
   styleModule=OSMScoutQt::GetInstance().MakeStyleModule();
-  connect(styleModule,SIGNAL(stylesheetFilenameChanged()),
-          this,SIGNAL(styleChanged()),
+
+  connect(styleModule, &StyleModule::stylesheetFilenameChanged,
+          this, &MapStyleModel::styleChanged,
           Qt::QueuedConnection);
-  connect(this,SIGNAL(loadStyleRequested(QString,std::unordered_map<std::string,bool>)),
-          styleModule,SLOT(loadStyle(QString,std::unordered_map<std::string,bool>)),
+
+  connect(this, &MapStyleModel::loadStyleRequested,
+          styleModule, &StyleModule::loadStyle,
           Qt::QueuedConnection);
 
   SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
