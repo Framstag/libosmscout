@@ -175,6 +175,12 @@ Window {
                     top: parent.top
                     left: parent.left
                 }
+                Text{
+                    id: roundaboutExit
+                    text: navigationModel.nextRouteStep.type == "leave-roundabout" ? navigationModel.nextRouteStep.roundaboutExit : ""
+                    anchors.centerIn: parent
+                    font.pixelSize: Theme.textFontSize*2
+                }
             }
             Text{
                 id: distanceToNextStep
