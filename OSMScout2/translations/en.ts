@@ -222,92 +222,107 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="344"/>
-        <source>Take %1. exit</source>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="346"/>
+        <source>Take the first exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="350"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="349"/>
+        <source>Take the second exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="352"/>
+        <source>Take the third exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="355"/>
+        <source>Take the %1th exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="362"/>
         <source>&lt;strong&gt;Leave roundabout&lt;/strong&gt; on %1. exit into street %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="354"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="366"/>
         <source>&lt;strong&gt;Leave roundabout&lt;/strong&gt; on %1. exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="366"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="378"/>
         <source>Enter motorway</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="378"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="390"/>
         <source>At crossing %1&lt;strong&gt;Enter motorway&lt;/strong&gt; %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="382"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="394"/>
         <source>&lt;strong&gt;Enter motorway&lt;/strong&gt; %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="387"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="399"/>
         <source>At crossing %1&lt;strong&gt;Enter motorway&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="390"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="402"/>
         <source>&lt;strong&gt;Enter motorway&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="403"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="415"/>
         <source>Change motorway</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="410"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="422"/>
         <source>&lt;strong&gt;Change motorway&lt;/strong&gt; from %1 to %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="414"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="426"/>
         <source>&lt;strong&gt;Change motorway&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="427"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="439"/>
         <source>Leave motorway</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="436"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="448"/>
         <source>&lt;strong&gt;Leave motorway&lt;/strong&gt; %1 into %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="440"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="452"/>
         <source>&lt;strong&gt;Leave motorway&lt;/strong&gt; %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="444"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="456"/>
         <source>&lt;strong&gt;Leave motorway&lt;/strong&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="472"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="484"/>
         <source>Way changes name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="475"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="487"/>
         <source>&lt;strong&gt;Way changes name&lt;/strong&gt; from %1 to %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="479"/>
+        <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="491"/>
         <source>&lt;strong&gt;Way changes name&lt;/strong&gt; to %1</source>
         <translation type="unfinished"></translation>
     </message>
