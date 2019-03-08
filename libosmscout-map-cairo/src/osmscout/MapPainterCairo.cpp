@@ -29,7 +29,6 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 #include <osmscout/util/String.h>
-#include <cairo.h>
 
 namespace osmscout {
 
