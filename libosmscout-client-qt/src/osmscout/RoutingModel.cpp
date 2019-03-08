@@ -178,6 +178,8 @@ QVariant RoutingListModel::data(const QModelIndex &index, int role) const
       return step.getDescription();
   case TypeRole:
     return step.getType();
+  case RoundaboutExitRole:
+    return step.getRoundaboutExit();
   default:
     break;
   }
@@ -201,6 +203,7 @@ QHash<int, QByteArray> RoutingListModel::roleNames() const
   roles[ShortDescriptionRole] = "shortDescription";
   roles[DescriptionRole] = "description";
   roles[TypeRole] = "type";
+  roles[RoundaboutExitRole] = "roundaboutExit";
 
   return roles;
 }

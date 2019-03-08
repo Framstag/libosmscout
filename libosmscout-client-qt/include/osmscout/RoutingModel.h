@@ -93,7 +93,8 @@ public:
   enum Roles {
     ShortDescriptionRole = Qt::UserRole + 1,
     DescriptionRole = Qt::UserRole + 2,
-    TypeRole = Qt::UserRole + 3
+    TypeRole = Qt::UserRole + 3,
+    RoundaboutExitRole = Qt::UserRole + 4
   };
   Q_ENUM(Roles)
 
