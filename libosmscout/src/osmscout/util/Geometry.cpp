@@ -371,7 +371,7 @@ namespace osmscout {
     return Bearing::Radians(bearing);
   }
 
-  double NormalizeRelativeAngel(double angle)
+  double NormalizeRelativeAngle(double angle)
   {
     if (angle>180.0) {
       return angle-360.0;

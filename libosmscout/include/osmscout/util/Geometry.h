@@ -1108,7 +1108,7 @@ namespace osmscout {
    * \ingroup Geometry
    * Normalizes the given angle (in degrees) to be in the interval [-180.0 - 180.0]
    */
-  extern OSMSCOUT_API double NormalizeRelativeAngel(double angle);
+  extern OSMSCOUT_API double NormalizeRelativeAngle(double angle);
 
   struct OSMSCOUT_API ScanCell
   {
