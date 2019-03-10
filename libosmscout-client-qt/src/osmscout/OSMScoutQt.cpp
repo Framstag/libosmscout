@@ -128,6 +128,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<LocationEntryRef>("LocationEntryRef");
   qRegisterMetaType<osmscout::BreakerRef>("osmscout::BreakerRef");
   qRegisterMetaType<osmscout::Distance>("osmscout::Distance");
+  qRegisterMetaType<osmscout::Bearing>("osmscout::Bearing");
   qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
   qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
   qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");

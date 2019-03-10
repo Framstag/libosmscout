@@ -58,7 +58,7 @@ namespace osmscout {
     ObjectFileRef ref;      //!< Reference to the actual object
     std::string   name;     //!< Name of the object
     Distance      distance; //!< Distance to the object
-    double        bearing;  //!< Direction towards the object
+    Bearing       bearing;  //!< Direction towards the object
     bool          atPlace;  //!< We are at the place or only near the place
     double        size;     //!< The size o the place (size of the geographic bounding box)
 
@@ -66,7 +66,7 @@ namespace osmscout {
     inline LocationDescriptionCandicate(const ObjectFileRef &ref,
                                         const std::string& name,
                                         const Distance &distance,
-                                        const double bearing,
+                                        const Bearing &bearing,
                                         const bool atPlace,
                                         const double size)
     : ref(ref),
@@ -94,7 +94,7 @@ namespace osmscout {
       return distance;
     }
 
-    inline double GetBearing() const
+    inline Bearing GetBearing() const
     {
       return bearing;
     }
@@ -121,13 +121,13 @@ namespace osmscout {
     Place    place;     //!< Place
     bool     atPlace;   //!< 'true' if at the place itself
     Distance distance;  //!< distance to the place
-    double   bearing;   //!< bearing to take from place to reach location
+    Bearing  bearing;   //!< bearing to take from place to reach location
 
   public:
     explicit LocationAtPlaceDescription(const Place& place);
     LocationAtPlaceDescription(const Place& place,
                                const Distance &distance,
-                               double bearing);
+                               const Bearing &bearing);
 
     /**
      * Return the place this information is refering to
@@ -156,7 +156,7 @@ namespace osmscout {
     /**
      * Return the bearing you have to go to from the place for 'distance' to reach the location
      */
-    inline double GetBearing() const
+    inline Bearing GetBearing() const
     {
       return bearing;
     }
@@ -215,7 +215,7 @@ namespace osmscout {
     bool             atPlace;   //!< 'true' if at the place itself
     std::list<Place> ways;      //!< List of streets
     Distance         distance;  //!< distance to the place
-    double           bearing;   //!< bearing to take from place to reach location
+    Bearing          bearing;   //!< bearing to take from place to reach location
 
   public:
     LocationCrossingDescription(const GeoCoord& crossing,
@@ -224,7 +224,7 @@ namespace osmscout {
     LocationCrossingDescription(const GeoCoord& crossing,
                                 const std::list<Place>& ways,
                                 const Distance &distance,
-                                double bearing);
+                                const Bearing &bearing);
     /**
      * Return the place this information is refering to
      */
@@ -252,7 +252,7 @@ namespace osmscout {
     /**
      * Return the bearing you have to go to from the place for 'distance' to reach the location
      */
-    inline double GetBearing() const
+    inline Bearing GetBearing() const
     {
       return bearing;
     }

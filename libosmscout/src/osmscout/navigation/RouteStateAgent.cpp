@@ -23,12 +23,13 @@
 #include <osmscout/navigation/BearingAgent.h>
 
 #include <chrono>
+#include <memory>
 
 namespace osmscout {
 
   RerouteRequestMessage::RerouteRequestMessage(const Timestamp& timestamp,
                                                const GeoCoord &from,
-                                               double initialBearing,
+                                               const std::shared_ptr<Bearing> &initialBearing,
                                                const GeoCoord &to)
       : NavigationMessage(timestamp),
         from(from),
@@ -40,7 +41,7 @@ namespace osmscout {
   TargetReachedMessage::TargetReachedMessage(const Timestamp& timestamp,
                                              const GeoCoord &coord,
                                              const GeoCoord &target,
-                                             double targetBearing,
+                                             const Bearing &targetBearing,
                                              const Distance &targetDistance)
       : NavigationMessage(timestamp),
         coord(coord),
@@ -71,7 +72,7 @@ namespace osmscout {
     } else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
 
-      bearing = bearingChangedMessage->bearing;
+      bearing = std::make_shared<Bearing>(bearingChangedMessage->bearing);
 
     } else if (dynamic_cast<PositionAgent::PositionMessage*>(message.get())!=nullptr) {
       auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());

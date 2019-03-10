@@ -385,7 +385,7 @@ namespace osmscout {
       return GetEllipsoidalDistance(*this, target);
   }
 
-  GeoCoord GeoCoord::Add(double bearing, const Distance &distance)
+  GeoCoord GeoCoord::Add(const Bearing &bearing, const Distance &distance)
   {
       if (distance.AsMeter() == 0.0) {
         return *this;

@@ -52,7 +52,7 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
     }
     else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingMessage = dynamic_cast<osmscout::BearingChangedMessage *>(message.get());
-      lastBearing=bearingMessage->bearing;
+      lastBearing=std::make_shared<Bearing>(bearingMessage->bearing);
     }
     else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
       auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
@@ -60,7 +60,9 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
     }
     else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
       auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
-      emit rerouteRequest(req->from, req->initialBearing, req->to);
+      emit rerouteRequest(req->from,
+                          req->initialBearing ? std::make_shared<Bearing>(*(req->initialBearing)) : nullptr,
+                          req->to);
     }
     else if (dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
       auto instructions = dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get());

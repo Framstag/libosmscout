@@ -202,8 +202,8 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
 
     osmscout::Distance distance=osmscout::GetEllipsoidalDistance(currentNode->GetLocation(),
                                                                  nextNode->GetLocation());
-    double bearing=osmscout::GetSphericalBearingInitial(currentNode->GetLocation(),
-                                                        nextNode->GetLocation());
+    auto bearing=osmscout::GetSphericalBearingInitial(currentNode->GetLocation(),
+                                                      nextNode->GetLocation());
 
     auto distanceInKilometer=distance.As<osmscout::Kilometer>();
     auto timeInHours=distanceInKilometer/maxSpeed;
@@ -219,7 +219,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
 
       double segmentDistance=maxSpeed*(1.0-restTime)/(60*60);
 
-      lastPosition=lastPosition.Add(bearing*180/M_PI,
+      lastPosition=lastPosition.Add(bearing,
                                     osmscout::Distance::Of<osmscout::Kilometer>(segmentDistance));
 
       steps.emplace_back(time,maxSpeed,lastPosition);
@@ -340,7 +340,7 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
     if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
 
-      auto bearingString=osmscout::BearingDisplayString(bearingChangedMessage->bearing);
+      auto bearingString=bearingChangedMessage->bearing.DisplayString();
       if (lastBearingString!=bearingString) {
         std::cout << osmscout::TimestampToISO8601TimeString(bearingChangedMessage->timestamp)
         << " Bearing: " << bearingString << std::endl;
@@ -361,7 +361,7 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
 
       std::cout << osmscout::TimestampToISO8601TimeString(rerouteRequest->timestamp)
                 << " Reroute request: " << rerouteRequest->from.GetDisplayText()
-                << (rerouteRequest->initialBearing > 0 ? (" (" + osmscout::BearingDisplayString(rerouteRequest->initialBearing) + ")") : "")
+                << (rerouteRequest->initialBearing ? (" (" + rerouteRequest->initialBearing->DisplayString() + ")") : "")
                 << " -> " << rerouteRequest->to.GetDisplayText()
                 << std::endl;
 
@@ -376,7 +376,7 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
       }else {
         std::cout << osmscout::TimestampToISO8601TimeString(targetReachedMessage->timestamp)
                   << " TargetReached: in " << targetReachedMessage->targetDistance.AsMeter() << " m,"
-                  << " direction: " << osmscout::BearingDisplayString(targetReachedMessage->targetBearing)
+                  << " direction: " << targetReachedMessage->targetBearing.DisplayString()
                   << std::endl;
       }
     }

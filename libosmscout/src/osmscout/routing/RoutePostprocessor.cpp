@@ -413,8 +413,8 @@ namespace osmscout {
         GeoCoord nextCoord=postprocessor.GetCoordinates(*nextNode,
                                                         nextNode->GetCurrentNodeIndex());
 
-        double inBearing=GetSphericalBearingFinal(prevCoord,coord)*180/M_PI;
-        double outBearing=GetSphericalBearingInitial(coord,nextCoord)*180/M_PI;
+        double inBearing=GetSphericalBearingFinal(prevCoord,coord).AsDegrees();
+        double outBearing=GetSphericalBearingInitial(coord,nextCoord).AsDegrees();
 
         double turnAngle=NormalizeRelativeAngel(outBearing-inBearing);
 
@@ -452,7 +452,7 @@ namespace osmscout {
             GeoCoord lookupCoord=postprocessor.GetCoordinates(*lookup,
                                                               lookup->GetCurrentNodeIndex());
 
-            double lookupBearing=GetSphericalBearingInitial(curveBCoord,lookupCoord)*180/M_PI;
+            double lookupBearing=GetSphericalBearingInitial(curveBCoord,lookupCoord).AsDegrees();
 
 
             double lookupAngle=NormalizeRelativeAngel(lookupBearing-currentBearing);

@@ -44,15 +44,14 @@ namespace osmscout {
 
   LocationAtPlaceDescription::LocationAtPlaceDescription(const Place& place)
   : place(place),
-    atPlace(true),
-    bearing(0.0)
+    atPlace(true)
   {
     // no code
   }
 
   LocationAtPlaceDescription::LocationAtPlaceDescription(const Place &place,
                                                          const Distance &distance,
-                                                         double bearing)
+                                                         const Bearing &bearing)
   : place(place),
     atPlace(false),
     distance(distance),
@@ -79,8 +78,7 @@ namespace osmscout {
                                                            const std::list<Place>& ways)
   : crossing(crossing),
     atPlace(true),
-    ways(ways),
-    bearing(0.0)
+    ways(ways)
   {
     // no code
   }
@@ -88,7 +86,7 @@ namespace osmscout {
   LocationCrossingDescription::LocationCrossingDescription(const GeoCoord& crossing,
                                                            const std::list<Place>& ways,
                                                            const Distance &distance,
-                                                           double bearing)
+                                                           const Bearing &bearing)
     : crossing(crossing),
       atPlace(false),
       ways(ways),
@@ -272,7 +270,7 @@ namespace osmscout {
 
     for (const auto& entry : results.GetNodeResults()) {
       GeoBox boundingBox;
-      double bearing=GetSphericalBearingInitial(entry.GetNode()->GetCoords(),location);
+      auto bearing=GetSphericalBearingInitial(entry.GetNode()->GetCoords(),location);
 
       candidates.emplace_back(entry.GetNode()->GetObjectFileRef(),
                               nameFeatureLabelReader.GetLabel(entry.GetNode()->GetFeatureValueBuffer()),
@@ -291,9 +289,8 @@ namespace osmscout {
 
     for (const auto& entry : results.GetWayResults()) {
       GeoBox boundingBox=entry.GetWay()->GetBoundingBox();
-      double bearing=GetSphericalBearingInitial(entry.GetClosestPoint(),
-                                                location);
-      ;
+      auto bearing=GetSphericalBearingInitial(entry.GetClosestPoint(),
+                                              location);
 
       candidates.emplace_back(entry.GetWay()->GetObjectFileRef(),
                               nameFeatureLabelReader.GetLabel(entry.GetWay()->GetFeatureValueBuffer()),
@@ -312,7 +309,7 @@ namespace osmscout {
 
     for (const auto& entry : results.GetAreaResults()) {
       GeoBox boundingBox=entry.GetArea()->GetBoundingBox();
-      double bearing=GetSphericalBearingInitial(entry.GetClosestPoint(),location);
+      auto bearing=GetSphericalBearingInitial(entry.GetClosestPoint(),location);
 
       candidates.emplace_back(entry.GetArea()->GetObjectFileRef(),
                               nameFeatureLabelReader.GetLabel(entry.GetArea()->GetFeatureValueBuffer()),
@@ -1231,8 +1228,8 @@ namespace osmscout {
     else {
       Distance distance=GetEllipsoidalDistance(location,
                                                candidate.GetCoord());
-      double bearing=GetSphericalBearingInitial(candidate.GetCoord(),
-                                                location);
+      auto bearing=GetSphericalBearingInitial(candidate.GetCoord(),
+                                              location);
 
       crossingDescription=std::make_shared<LocationCrossingDescription>(candidate.GetCoord(),
                                                                         places,

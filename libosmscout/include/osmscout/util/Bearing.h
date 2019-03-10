@@ -20,14 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/util/Geometry.h>
 #include <osmscout/CoreImportExport.h>
 #include <osmscout/system/Compiler.h>
 #include <osmscout/system/Math.h>
 
 #include <string>
 #include <ostream>
-
 
 namespace osmscout {
 
@@ -68,14 +66,20 @@ namespace osmscout {
       return *this;
     }
 
+    /**
+     * Bearing in radians, normalised to [0..2*M_PI)
+     */
     inline double AsRadians() const
     {
       return radians;
     }
 
+    /**
+     * Bearing in degrees, normalised to [0..360)
+     */
     inline double AsDegrees() const
     {
-      return RadToDeg(radians);
+      return radians*180.0/M_PI;
     }
 
     inline ~Bearing()
@@ -91,6 +95,11 @@ namespace osmscout {
       return Bearing(radians+d.radians);
     }
 
+    /**
+     * Convert the bearing to to a direction description in relation to the compass.
+     */
+    std::string DisplayString() const;
+
     static inline Bearing Radians(double radians)
     {
       return Bearing(radians);
@@ -98,7 +107,7 @@ namespace osmscout {
 
     static inline Bearing Degrees(double degrees)
     {
-      return Bearing(DegToRad(degrees));
+      return Bearing(degrees*M_PI/180.0);
     }
 
   private:

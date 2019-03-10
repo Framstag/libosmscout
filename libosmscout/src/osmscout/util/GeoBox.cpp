@@ -142,14 +142,14 @@ namespace osmscout {
 
     GetEllipsoidalDistance(center.GetLat(),
                            center.GetLon(),
-                           315.0,
+                           Bearing::Degrees(315.0),
                            radius,
                            topLat,
                            leftLon);
 
     GetEllipsoidalDistance(center.GetLat(),
                            center.GetLon(),
-                           135.0,
+                           Bearing::Degrees(135.0),
                            radius,
                            botLat,
                            rightLon);

@@ -95,7 +95,7 @@ void DumpLocationAtPlaceDescription(const std::string& label,
   else {
     std::cout.precision(1);
     std::cout << "  * You are "  << std::fixed << description.GetDistance().AsMeter() << "m ";
-    std::cout << osmscout::BearingDisplayString(description.GetBearing());
+    std::cout << description.GetBearing().DisplayString();
     std::cout << " of '" << place.GetDisplayString() << "' (" << place.GetObject().GetTypeName() << ")" <<std::endl;
   }
 
@@ -158,7 +158,7 @@ void DumpCrossingDescription(const std::string& label,
   else {
     std::cout.precision(1);
     std::cout << "  * Your are "  << std::fixed << description.GetDistance().AsMeter() << "m ";
-    std::cout << osmscout::BearingDisplayString(description.GetBearing());
+    std::cout << description.GetBearing().DisplayString();
     std::cout << " of crossing:"  << std::endl;
   }
 

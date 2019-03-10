@@ -19,6 +19,8 @@
 
 #include <osmscout/util/Bearing.h>
 
+#include <cassert>
+
 namespace osmscout {
 
   double Bearing::Normalise(double radians)
@@ -28,6 +30,36 @@ namespace osmscout {
       radians += 2*M_PI;
     }
     return radians;
+  }
+
+  std::string Bearing::DisplayString() const
+  {
+    int grad=(int)round(radians*180/M_PI);
+
+    grad=grad % 360;
+
+    if (grad<0) {
+      grad+=360;
+    }
+
+    if (grad>=0 && grad<=45) {
+      return "N";
+    }
+    else if (grad>45 && grad<=135) {
+      return "E";
+    }
+    else if (grad>135 && grad<=225) {
+      return "S";
+    }
+    else if (grad>225 && grad<=315) {
+      return "W";
+    }
+    else if (grad>315 && grad<360) {
+      return "N";
+    }
+
+    assert(false);
+    return "?";
   }
 
 }
