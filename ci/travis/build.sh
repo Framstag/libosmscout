@@ -15,6 +15,7 @@ if [ "$TARGET" = "build" ]; then
     export PATH="/usr/local/opt/qt/bin:$PATH"
     export PATH="/usr/local/opt/gettext/bin:$PATH"
     export PATH="/usr/local/opt/libxml2/bin:$PATH"
+    export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
   fi
 
   if [ "$BUILDTOOL" = "meson" ]; then
