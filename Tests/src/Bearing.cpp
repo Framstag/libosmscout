@@ -1,9 +1,23 @@
 #include <iostream>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Bearing.h>
 
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
+
+TEST_CASE("Normalise") {
+  osmscout::Bearing bearing;
+
+  bearing=osmscout::Bearing::Radians(-1*M_PI);
+  REQUIRE(bearing.AsRadians()==M_PI);
+
+  bearing=osmscout::Bearing::Radians(-3*M_PI);
+  REQUIRE(bearing.AsRadians()==M_PI);
+
+  bearing=osmscout::Bearing::Radians(3*M_PI);
+  REQUIRE(bearing.AsRadians()==M_PI);
+}
 
 TEST_CASE("North") {
   osmscout::GeoCoord a(-1.0,0.0);

@@ -4,6 +4,7 @@ osmscoutSrc = [
             'src/osmscout/ost/Scanner.cpp',
             'src/osmscout/system/SSEMath.cpp',
             'src/osmscout/util/Breaker.cpp',
+            'src/osmscout/util/Bearing.cpp',
             'src/osmscout/util/Cache.cpp',
             'src/osmscout/util/CmdLineParsing.cpp',
             'src/osmscout/util/Color.cpp',
