@@ -96,13 +96,13 @@ void NavigationModel::onPositionEstimate(const PositionAgent::PositionState stat
 {
   emit positionEstimate(state,
                         coord.GetLat(), coord.GetLon(),
-                        bearing ? QString::fromStdString(bearing->DisplayString()) : "");
+                        bearing ? QString::fromStdString(bearing->LongDisplayString()) : "");
 }
 
 void NavigationModel::onTargetReached(const osmscout::Bearing targetBearing,
                                       const Distance targetDistance)
 {
-  emit targetReached(QString::fromStdString(targetBearing.DisplayString()),
+  emit targetReached(QString::fromStdString(targetBearing.LongDisplayString()),
                      targetDistance.AsMeter());
 }
 

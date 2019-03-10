@@ -24,7 +24,6 @@ TEST_CASE("Normalise") {
   bearing=osmscout::Bearing::Radians(-1*M_PI_2);
   REQUIRE(bearing.AsRadians()==M_PI+M_PI_2);
   REQUIRE(bearing.AsDegrees()==270);
-
 }
 
 TEST_CASE("North") {

@@ -225,7 +225,7 @@ void LocationInfoModel::addToModel(const QString database,
   obj[AddressRole] = address;
   obj[InPlaceRole] = inPlace;
   obj[DistanceRole] = distance.AsMeter();
-  obj[BearingRole] = QString::fromStdString(description->GetBearing().DisplayString());
+  obj[BearingRole] = QString::fromStdString(description->GetBearing().LongDisplayString());
   obj[PoiRole] = (poiRef) ? QString::fromStdString(poiRef->name): "";
   obj[TypeRole] = QString::fromStdString(place.GetObjectFeatures()->GetType()->GetName());
   obj[PostalCodeRole] = postalCode;
@@ -268,7 +268,7 @@ void LocationInfoModel::onLocationDescription(const osmscout::GeoCoord location,
         }else{
             qDebug() << "Place " << QString::fromStdString(location.GetDisplayText()) << " description: " 
                      << atAddressDescription->GetDistance().AsMeter() << " m "
-                     << QString::fromStdString(atAddressDescription->GetBearing().DisplayString()) << " from "
+                     << QString::fromStdString(atAddressDescription->GetBearing().LongDisplayString()) << " from "
                      << QString::fromStdString(place.GetDisplayString());
         }
     }else{
@@ -359,6 +359,6 @@ QString LocationInfoModel::bearing(double lat1, double lon1,
     return QString::fromStdString(
                 osmscout::GetSphericalBearingInitial(
                     osmscout::GeoCoord(lat1, lon1),
-                    osmscout::GeoCoord(lat2, lon2)).DisplayString());
+                    osmscout::GeoCoord(lat2, lon2)).LongDisplayString());
 }
 }

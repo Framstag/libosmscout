@@ -34,13 +34,7 @@ namespace osmscout {
 
   std::string Bearing::DisplayString() const
   {
-    int grad=(int)round(radians*180/M_PI);
-
-    grad=grad % 360;
-
-    if (grad<0) {
-      grad+=360;
-    }
+    int grad=(int)round(AsDegrees());
 
     if (grad>=0 && grad<=45) {
       return "N";
@@ -54,7 +48,43 @@ namespace osmscout {
     else if (grad>225 && grad<=315) {
       return "W";
     }
-    else if (grad>315 && grad<360) {
+    else if (grad>315 && grad<=360) {
+      return "N";
+    }
+
+    assert(false);
+    return "?";
+  }
+
+  std::string Bearing::LongDisplayString() const
+  {
+    double grad=AsDegrees();
+
+    if (grad>=0 && grad<=12.5) {
+      return "N";
+    }
+    else if (grad>12.5 && grad<=57.5) {
+      return "NE";
+    }
+    else if (grad>57.5 && grad<=102.5) {
+      return "E";
+    }
+    else if (grad>102.5 && grad<=147.5) {
+      return "SE";
+    }
+    else if (grad>147.5 && grad<=192.5) {
+      return "S";
+    }
+    else if (grad>192.5 && grad<=237.5) {
+      return "SW";
+    }
+    else if (grad>237.5 && grad<=282.5) {
+      return "W";
+    }
+    else if (grad>282.5 && grad<327.5) {
+      return "NW";
+    }
+    else if (grad>327.5 && grad<=360) {
       return "N";
     }
 

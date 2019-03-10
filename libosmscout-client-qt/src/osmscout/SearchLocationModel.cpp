@@ -299,7 +299,7 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
     if (searchCenter.GetLat()!=INVALID_COORD && searchCenter.GetLon()!=INVALID_COORD) {
       return QString::fromStdString(
               osmscout::GetSphericalBearingInitial(searchCenter, location->getCoord())
-                .DisplayString());
+                .LongDisplayString());
     }else{
       return "";
     }

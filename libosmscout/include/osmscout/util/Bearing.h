@@ -96,9 +96,16 @@ namespace osmscout {
     }
 
     /**
-     * Convert the bearing to to a direction description in relation to the compass.
+     * Convert the bearing to a direction description in relation to the compass (4 points).
+     * One from the options: N, E, S, W
      */
     std::string DisplayString() const;
+
+    /**
+     * Convert the bearing to a direction description in relation to the compass (8-points).
+     * One from the options: N, NE, E, SE, S, SW, W, NW
+     */
+    std::string LongDisplayString() const;
 
     static inline Bearing Radians(double radians)
     {
