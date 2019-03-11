@@ -75,13 +75,13 @@ public slots:
 
   void onPositionEstimate(const PositionAgent::PositionState state,
                           const GeoCoord coord,
-                          const std::shared_ptr<Bearing> bearing);
+                          const std::shared_ptr<osmscout::Bearing> bearing);
 
   void onTargetReached(const osmscout::Bearing targetBearing,
                        const osmscout::Distance targetDistance);
 
   void onRerouteRequest(const GeoCoord from,
-                        const std::shared_ptr<Bearing> initialBearing,
+                        const std::shared_ptr<osmscout::Bearing> initialBearing,
                         const GeoCoord to);
 
   void onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);

@@ -53,12 +53,12 @@ signals:
   void updateNext(RouteStep nextRouteInstruction);
 
   void rerouteRequest(const osmscout::GeoCoord from,
-                      const std::shared_ptr<Bearing> initialBearing,
+                      const std::shared_ptr<osmscout::Bearing> initialBearing,
                       const osmscout::GeoCoord to);
 
   void positionEstimate(const osmscout::PositionAgent::PositionState state,
                         const osmscout::GeoCoord coord,
-                        const std::shared_ptr<Bearing> bearing);
+                        const std::shared_ptr<osmscout::Bearing> bearing);
 
   void arrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
 
