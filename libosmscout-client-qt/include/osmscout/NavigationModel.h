@@ -57,7 +57,8 @@ signals:
                       bool horizontalAccuracyValid, double horizontalAccuracy);
 
   void rerouteRequest(double fromLat, double fromLon,
-                      double initialBearing,
+                      const QString bearing,
+                      double bearingAngle,
                       double toLat, double toLon);
 
   void targetReached(QString targetBearing, double targetDistance);

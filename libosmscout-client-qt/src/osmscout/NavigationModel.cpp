@@ -111,6 +111,7 @@ void NavigationModel::onRerouteRequest(const GeoCoord from,
                                        const GeoCoord to)
 {
   emit rerouteRequest(from.GetLat(), from.GetLon(),
+                      initialBearing ? QString::fromStdString(initialBearing->LongDisplayString()) : "",
                       initialBearing ? initialBearing->AsRadians() : -1,
                       to.GetLat(), to.GetLon());
 }
