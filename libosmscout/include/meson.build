@@ -6,6 +6,7 @@ osmscoutHeader = [
             'osmscout/ost/Scanner.h',
             'osmscout/system/SSEMath.h',
             'osmscout/util/Base64.h',
+            'osmscout/util/Bearing.h',
             'osmscout/util/Breaker.h',
             'osmscout/util/Cache.h',
             'osmscout/util/CmdLineParsing.h',

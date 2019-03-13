@@ -57,12 +57,13 @@ signals:
                       bool horizontalAccuracyValid, double horizontalAccuracy);
 
   void rerouteRequest(double fromLat, double fromLon,
-                      double initialBearing,
+                      const QString bearing,
+                      double bearingAngle,
                       double toLat, double toLon);
 
-  void targetReached(double targetBearing, double targetDistance);
+  void targetReached(QString targetBearing, double targetDistance);
 
-  void positionEstimate(osmscout::PositionAgent::PositionState state, double lat, double lon, double bearing);
+  void positionEstimate(osmscout::PositionAgent::PositionState state, double lat, double lon, QString bearing);
 
 public slots:
   void locationChanged(bool locationValid,
@@ -70,10 +71,20 @@ public slots:
                        bool horizontalAccuracyValid, double horizontalAccuracy);
 
   void onUpdate(std::list<RouteStep> instructions);
+
   void onUpdateNext(RouteStep nextRouteInstruction);
-  void onPositionEstimate(PositionAgent::PositionState state, GeoCoord coord, double bearing);
-  void onTargetReached(double targetBearing, osmscout::Distance targetDistance);
-  void onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to);
+
+  void onPositionEstimate(const PositionAgent::PositionState state,
+                          const GeoCoord coord,
+                          const std::shared_ptr<osmscout::Bearing> bearing);
+
+  void onTargetReached(const osmscout::Bearing targetBearing,
+                       const osmscout::Distance targetDistance);
+
+  void onRerouteRequest(const GeoCoord from,
+                        const std::shared_ptr<osmscout::Bearing> initialBearing,
+                        const GeoCoord to);
+
   void onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
 
 public:

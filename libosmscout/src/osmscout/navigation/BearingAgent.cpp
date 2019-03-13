@@ -26,7 +26,7 @@
 namespace osmscout {
 
   BearingChangedMessage::BearingChangedMessage(const Timestamp& timestamp,
-                                               double bearing)
+                                               const Bearing &bearing)
       : NavigationMessage(timestamp),
         bearing(bearing)
   {

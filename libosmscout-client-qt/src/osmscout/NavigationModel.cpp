@@ -90,19 +90,30 @@ void NavigationModel::onUpdateNext(RouteStep routeStep)
   emit update();
 }
 
-void NavigationModel::onPositionEstimate(PositionAgent::PositionState state, GeoCoord coord, double bearing)
+void NavigationModel::onPositionEstimate(const PositionAgent::PositionState state,
+                                         const GeoCoord coord,
+                                         const std::shared_ptr<Bearing> bearing)
 {
-  emit positionEstimate(state, coord.GetLat(), coord.GetLon(), bearing);
+  emit positionEstimate(state,
+                        coord.GetLat(), coord.GetLon(),
+                        bearing ? QString::fromStdString(bearing->LongDisplayString()) : "");
 }
 
-void NavigationModel::onTargetReached(double targetBearing, Distance targetDistance)
+void NavigationModel::onTargetReached(const osmscout::Bearing targetBearing,
+                                      const Distance targetDistance)
 {
-  emit targetReached(targetBearing, targetDistance.AsMeter());
+  emit targetReached(QString::fromStdString(targetBearing.LongDisplayString()),
+                     targetDistance.AsMeter());
 }
 
-void NavigationModel::onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to)
+void NavigationModel::onRerouteRequest(const GeoCoord from,
+                                       const std::shared_ptr<Bearing> initialBearing,
+                                       const GeoCoord to)
 {
-  emit rerouteRequest(from.GetLat(), from.GetLon(), initialBearing, to.GetLat(), to.GetLon());
+  emit rerouteRequest(from.GetLat(), from.GetLon(),
+                      initialBearing ? QString::fromStdString(initialBearing->LongDisplayString()) : "",
+                      initialBearing ? initialBearing->AsRadians() : -1,
+                      to.GetLat(), to.GetLon());
 }
 
 void NavigationModel::onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance)

@@ -94,8 +94,7 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
     case BearingRole:
       if (searchCenter.GetLat()!=INVALID_COORD && searchCenter.GetLon()!=INVALID_COORD) {
         return QString::fromStdString(
-          osmscout::BearingDisplayString(
-            osmscout::GetSphericalBearingInitial(searchCenter, location->getCoord())));
+            osmscout::GetSphericalBearingInitial(searchCenter, location->getCoord()).LongDisplayString());
       }else{
         return "";
       }
