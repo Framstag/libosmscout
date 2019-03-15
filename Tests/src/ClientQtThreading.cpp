@@ -82,27 +82,46 @@ void ThreadingTest::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmsco
   loadJob->deleteLater();
   loadJob=nullptr;
   size_t objectCount=0;
-  for (const auto &map:tiles){
-    for (const auto &tile:map){
+  for (const auto &dbPath:tiles.keys()){
+    const auto &map=tiles[dbPath];
+
+    for (const auto &tileKey:map.keys()){
+      const auto &tile=map[tileKey];
+      std::cout << "Stylesheet: " << dbThread->GetStylesheetFilename().toStdString()
+                << ", " << dbPath.toStdString()
+                << ", " << tileKey.GetDisplayText()
+                << " object count: " << tile->GetAreaData().GetDataSize()
+                << " / " <<  tile->GetWayData().GetDataSize()
+                << " / " << tile->GetNodeData().GetDataSize()
+                << std::endl;
+
       objectCount += tile->GetAreaData().GetDataSize() + tile->GetWayData().GetDataSize() + tile->GetNodeData().GetDataSize();
     }
   }
-  std::cout << "Stylesheet: " << dbThread->GetStylesheetFilename().toStdString() << ", object count: " << objectCount << std::endl;
-  if (objectCount < lastObjectCount){
-    std::cerr << "Less objects! " << lastObjectCount << " > " << objectCount << std::endl;
-    //QApplication::quit();
-    //return;
+  std::cout << "Stylesheet: " << dbThread->GetStylesheetFilename().toStdString() << ", sum object count: " << objectCount << std::endl;
+  if (objectCountPerStylesheet.contains(dbThread->GetStylesheetFilename())){
+    size_t lastObjectCount = objectCountPerStylesheet[dbThread->GetStylesheetFilename()];
+    if (objectCount < lastObjectCount){
+      std::cerr << "Less objects! " << lastObjectCount << " > " << objectCount << std::endl;
+      failure = true;
+      QApplication::quit();
+      return;
+    }
   }
 
-    lastObjectCount = objectCount;
+  objectCountPerStylesheet[dbThread->GetStylesheetFilename()] = objectCount;
 
-    stylesheetCtn++;
-    emit loadStyleRequested(stylesheets.at(stylesheetCtn % stylesheets.size()).absoluteFilePath(),
-                            std::unordered_map<std::string,bool>());
+  stylesheetCtn++;
+  emit loadStyleRequested(stylesheets.at(stylesheetCtn % stylesheets.size()).absoluteFilePath(),
+                          std::unordered_map<std::string,bool>());
 
-    timer.setInterval(10000);
-    timer.start();
+  if (stylesheetCtn==100){
+    QApplication::quit();
+    return;
+  }
 
+  timer.setInterval(800);
+  timer.start();
 }
 
 int main(int argc, char** argv)
@@ -158,8 +177,15 @@ int main(int argc, char** argv)
   {
     ThreadingTest test(stylesheets);
     result = app.exec();
+    result += test.isFailed() ? 1:0;
   }
   OSMScoutQt::FreeInstance();
+
+  if (result==0){
+    std::cout << "Success!" << std::endl;
+  }else{
+    std::cerr << "Failure!" << std::endl;
+  }
   return result;
 }
 

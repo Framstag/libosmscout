@@ -43,14 +43,20 @@ public:
 
   ~ThreadingTest();
 
+  inline bool isFailed() const
+  {
+    return failure;
+  }
+
 private:
   QTimer timer;
   QList<QFileInfo> stylesheets;
   osmscout::StyleModule* styleModule;
   osmscout::DBThreadRef dbThread;
   osmscout::DBLoadJob *loadJob{nullptr};
-  size_t lastObjectCount{0};
   size_t stylesheetCtn{0};
+  bool failure{false};
+  QMap<QString, size_t> objectCountPerStylesheet;
 };
 
 
