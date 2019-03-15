@@ -275,3 +275,16 @@ foreach stylesheet : stylesheets
                     meson.current_source_dir() + '/../stylesheets/map.ost',
                     meson.current_source_dir() + '/../stylesheets/' + stylesheet])
 endforeach
+
+if buildClientQt
+  drawtextMocs = qt5.preprocess(moc_headers : ['include/ClientQtThreading.h'])
+
+  ClientQtThreading = executable('ClientQtThreading',
+               'src/ClientQtThreading.cpp',
+               drawtextMocs,
+               include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
+               dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep],
+               link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+               install: false)
+endif
+
