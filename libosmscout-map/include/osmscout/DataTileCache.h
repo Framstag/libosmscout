@@ -142,6 +142,20 @@ namespace osmscout {
     }
 
     /**
+     * Add data to the tile and mark the tile as completed.
+     */
+    void AddData(const TypeInfoSet& types,
+                 const std::vector<O>& data)
+    {
+      std::lock_guard<std::mutex> guard(mutex);
+
+      this->data.insert(this->data.end(), data.begin(), data.end());
+      this->types.Add(types);
+
+      complete=true;
+    }
+
+    /**
      * Assign data to the tile and mark the tile as completed.
      */
     void SetData(const TypeInfoSet& types,
@@ -150,7 +164,7 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       this->data=data;
-      this->types.Add(types);
+      this->types=types;
 
       complete=true;
     }
@@ -164,7 +178,7 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
 
       this->data=std::move(data);
-      this->types.Add(types);
+      this->types=types;
 
       complete=true;
     }
