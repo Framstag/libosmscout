@@ -39,7 +39,9 @@ signals:
   void loadStyleRequested(QString,std::unordered_map<std::string,bool>);
 
 public:
-  ThreadingTest(const QList<QFileInfo> &stylesheets);
+  ThreadingTest(const QList<QFileInfo> &stylesheets,
+                const osmscout::GeoCoord &renderingCenter,
+                const size_t &magLevel);
 
   ~ThreadingTest();
 
@@ -51,6 +53,8 @@ public:
 private:
   QTimer timer;
   QList<QFileInfo> stylesheets;
+  osmscout::GeoCoord renderingCenter;
+  size_t magLevel;
   osmscout::StyleModule* styleModule;
   osmscout::DBThreadRef dbThread;
   osmscout::DBLoadJob *loadJob{nullptr};

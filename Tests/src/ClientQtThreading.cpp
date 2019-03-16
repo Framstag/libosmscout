@@ -20,6 +20,7 @@
 #include <ClientQtThreading.h>
 
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/CmdLineParsing.h>
 
 #include <osmscout/OSMScoutQt.h>
 
@@ -34,10 +35,22 @@
 
 using namespace osmscout;
 
+struct Arguments
+{
+  bool                help{false};
+  QString             databaseDirectory;
+  QString             stylesheetDirectory;
+  osmscout::GeoCoord  renderingCenter;
+  size_t              magLevel{0};
+};
 
-ThreadingTest::ThreadingTest(const QList<QFileInfo> &stylesheets):
+ThreadingTest::ThreadingTest(const QList<QFileInfo> &stylesheets,
+                             const osmscout::GeoCoord &renderingCenter,
+                             const size_t &magLevel):
     QObject(nullptr),
     stylesheets(stylesheets),
+    renderingCenter(renderingCenter),
+    magLevel(magLevel),
     styleModule(OSMScoutQt::GetInstance().MakeStyleModule()),
     dbThread(OSMScoutQt::GetInstance().GetDBThread())
 {
@@ -59,9 +72,9 @@ void ThreadingTest::test()
 {
   osmscout::MercatorProjection projection;
   // TODO: use coordinate from argument
-  projection.Set(GeoCoord(50.07213, 14.407) /* Prague */,
+  projection.Set(renderingCenter,
                  /*currentAngle*/ 0.0,
-                 Magnification(Magnification::magCloser),
+                 Magnification(MagnificationLevel(magLevel)),
                  /* dpi */ 160.0,
                  /* width */ 1024,
                  /* height */ 1024);
@@ -91,7 +104,7 @@ void ThreadingTest::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmsco
                 << ", " << dbPath.toStdString()
                 << ", " << tileKey.GetDisplayText()
                 << " object count: " << tile->GetAreaData().GetDataSize()
-                << " / " <<  tile->GetWayData().GetDataSize()
+                << " / " << tile->GetWayData().GetDataSize()
                 << " / " << tile->GetNodeData().GetDataSize()
                 << std::endl;
 
@@ -128,12 +141,54 @@ int main(int argc, char** argv)
 {
   QApplication app(argc, argv);
 
-  if (app.arguments().size() < 3) {
-    qWarning() << "No enough arguments!";
-    std::cout << "Usage:" << std::endl;
-    std::cout << app.arguments().at(0).toStdString() << " MapDirectory stylesheetDirectory" << std::endl;
+  CmdLineParser argParser("ClientQtThreading", argc, argv);
+  std::vector<std::string> helpArgs{"h","help"};
+  Arguments args;
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=QString::fromStdString(value);
+                          }),
+                          "DATABASE",
+                          "Directory for databases lookup");
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.stylesheetDirectory=QString::fromStdString(value);
+                          }),
+                          "STYLESHEETS",
+                          "Directory with stylesheets");
+
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                            args.renderingCenter=value;
+                          }),
+                          "CENTER",
+                          "Rendering center");
+
+  argParser.AddPositional(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                            args.magLevel=value;
+                          }),
+                          "LEVEL",
+                          "Rendering magnification level");
+
+  osmscout::CmdLineParseResult argResult=argParser.Parse();
+
+  if (argResult.HasError()) {
+    std::cerr << "ERROR: " << argResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
+
+  if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
+  }
+
 
   osmscout::log.Info(true);
   osmscout::log.Warn(true);
@@ -144,10 +199,10 @@ int main(int argc, char** argv)
   OSMScoutQt::RegisterQmlTypes();
 
   QStringList mapLookupDirectories;
-  mapLookupDirectories << app.arguments().at(1);
+  mapLookupDirectories << args.databaseDirectory;
 
   QList<QFileInfo> stylesheets;
-  QString stylesheetDirectory = app.arguments().at(2);
+  QString stylesheetDirectory = args.stylesheetDirectory;
   QDirIterator dirIt(stylesheetDirectory, QDirIterator::FollowSymlinks);
   while (dirIt.hasNext()) {
     dirIt.next();
@@ -175,7 +230,7 @@ int main(int argc, char** argv)
 
   int result;
   {
-    ThreadingTest test(stylesheets);
+    ThreadingTest test(stylesheets, args.renderingCenter, args.magLevel);
     result = app.exec();
     result += test.isFailed() ? 1:0;
   }
