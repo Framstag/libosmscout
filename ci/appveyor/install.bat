@@ -54,7 +54,7 @@ IF %COMPILER%==msys2 (
 
   ) ELSE (
     echo Installing common dependencies
-    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-gcc mingw-w64-%MSYS2_ARCH%-pkg-config mingw-w64-%MSYS2_ARCH%-protobuf mingw-w64-%MSYS2_ARCH%-libxml2 mingw-w64-%MSYS2_ARCH%-cairo mingw-w64-%MSYS2_ARCH%-pango mingw-w64-%MSYS2_ARCH%-qt5 mingw-w64-%MSYS2_ARCH%-glew mingw-w64-%MSYS2_ARCH%-glfw mingw-w64-%MSYS2_ARCH%-glm"
+    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-protobuf mingw-w64-%MSYS2_ARCH%-libxml2 mingw-w64-%MSYS2_ARCH%-cairo mingw-w64-%MSYS2_ARCH%-pango mingw-w64-%MSYS2_ARCH%-qt5 mingw-w64-%MSYS2_ARCH%-glew mingw-w64-%MSYS2_ARCH%-glfw mingw-w64-%MSYS2_ARCH%-glm"
   )
 
   echo Finished installing MSYS2 build preconditions
