@@ -294,7 +294,11 @@ namespace osmscout {
           tile->GetNodeData().AddPrefillData(loadedNodeTypes,std::move(nodes));
         }
         else {
-          tile->GetNodeData().SetData(loadedNodeTypes,std::move(nodes));
+          if (cachedNodeTypes.Empty()){
+            tile->GetNodeData().SetData(loadedNodeTypes,std::move(nodes));
+          }else{
+            tile->GetNodeData().AddData(loadedNodeTypes,nodes);
+          }
         }
       }
     }
@@ -365,7 +369,11 @@ namespace osmscout {
         tile->GetOptimizedAreaData().AddPrefillData(loadedAreaTypes,std::move(areas));
       }
       else {
-        tile->GetOptimizedAreaData().SetData(loadedAreaTypes,std::move(areas));
+        if (cachedAreaTypes.Empty()){
+          tile->GetOptimizedAreaData().SetData(loadedAreaTypes,std::move(areas));
+        }else{
+          tile->GetOptimizedAreaData().AddData(loadedAreaTypes,areas);
+        }
       }
     }
 
@@ -448,7 +456,11 @@ namespace osmscout {
           tile->GetAreaData().AddPrefillData(loadedAreaTypes,std::move(areas));
         }
         else {
-          tile->GetAreaData().SetData(loadedAreaTypes,std::move(areas));
+          if (cachedAreaTypes.Empty()){
+            tile->GetAreaData().SetData(loadedAreaTypes,std::move(areas));
+          }else{
+            tile->GetAreaData().AddData(loadedAreaTypes,areas);
+          }
         }
       }
     }
@@ -519,7 +531,11 @@ namespace osmscout {
         tile->GetOptimizedWayData().AddPrefillData(loadedWayTypes,std::move(ways));
       }
       else {
-        tile->GetOptimizedWayData().SetData(loadedWayTypes,std::move(ways));
+        if (cachedWayTypes.Empty()){
+          tile->GetOptimizedWayData().SetData(loadedWayTypes,std::move(ways));
+        }else{
+          tile->GetOptimizedWayData().AddData(loadedWayTypes,ways);
+        }
       }
     }
 
@@ -598,7 +614,11 @@ namespace osmscout {
           tile->GetWayData().AddPrefillData(loadedWayTypes,std::move(ways));
         }
         else {
-          tile->GetWayData().SetData(loadedWayTypes,std::move(ways));
+          if (cachedWayTypes.Empty()){
+            tile->GetWayData().SetData(loadedWayTypes,std::move(ways));
+          }else{
+            tile->GetWayData().AddData(loadedWayTypes,ways);
+          }
         }
       }
     }

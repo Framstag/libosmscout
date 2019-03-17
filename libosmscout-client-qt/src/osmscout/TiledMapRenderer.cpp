@@ -389,7 +389,6 @@ void TiledMapRenderer::onOfflineMapChanged(bool b)
 
 void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles)
 {
-    // just start loading
     QMutexLocker locker(&lock);
     if (loadJob==nullptr){
         // no running load job
@@ -415,7 +414,6 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     QPainter p;
     p.begin(&canvas);
 
-    //loadJob->AddTileDataToMapData()
     osmscout::MapParameter        drawParameter;
     std::list<std::string>        paths;
 
