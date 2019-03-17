@@ -329,13 +329,12 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceEx
       return;
     }
   }
-#ifdef HAS_QSTORAGE
+
   QStorageInfo storage=QStorageInfo(dir);
   if (storage.bytesAvailable()<(double)map.getSize()){
     qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size ("<<map.getSize()<<")!";
   }
-#endif
-  
+
   auto job=new MapDownloadJob(&webCtrl, map, dir, replaceExisting);
   connect(job, &MapDownloadJob::finished, this, &MapManager::onJobFinished);
   connect(job, &MapDownloadJob::failed, this, &MapManager::onJobFailed);

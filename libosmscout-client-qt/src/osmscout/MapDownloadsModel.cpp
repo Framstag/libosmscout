@@ -77,12 +77,8 @@ QStringList MapDownloadsModel::getLookupDirectories()
 
 double MapDownloadsModel::getFreeSpace(QString dir)
 {
-#ifdef HAS_QSTORAGE
   QStorageInfo storage=QStorageInfo(QDir(dir));
   return storage.bytesAvailable();
-#else
-  return -1;
-#endif
 }
 
 void MapDownloadsModel::onDownloadJobsChanged()
