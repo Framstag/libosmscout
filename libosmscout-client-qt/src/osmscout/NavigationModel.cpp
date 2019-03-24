@@ -149,8 +149,11 @@ void NavigationModel::setRoute(QObject *o)
     routeSteps.reserve(steps.size());
     routeSteps.insert(routeSteps.begin(), steps.begin(), steps.end());
   }
+  arrivalEstimate=QDateTime();
+  remainingDistance=Distance::Zero();
   endResetModel();
 
+  emit arrivalUpdate();
   emit routeChanged(this->route, vehicle);
 }
 
