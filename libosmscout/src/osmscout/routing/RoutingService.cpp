@@ -37,6 +37,19 @@ namespace osmscout {
     // no code
   }
 
+  RoutePositionResult::RoutePositionResult()
+    : distance(Distance::Max())
+  {
+    // no code
+  }
+
+  RoutePositionResult::RoutePositionResult(const RoutePosition &routePosition, const Distance &distance)
+    : routePosition(routePosition),
+      distance(distance)
+  {
+    // no code
+  }
+
   RouterParameter::RouterParameter()
   : debugPerformance(false)
   {

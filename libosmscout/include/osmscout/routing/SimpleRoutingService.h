@@ -200,9 +200,9 @@ namespace osmscout {
                                           const Distance &radius,
                                           const RoutingParameter& parameter);
 
-    RoutePosition GetClosestRoutableNode(const GeoCoord& coord,
-                                         const RoutingProfile& profile,
-                                         const Distance &radius) const;
+    RoutePositionResult GetClosestRoutableNode(const GeoCoord& coord,
+                                               const RoutingProfile& profile,
+                                               const Distance &radius) const;
 
     ClosestRoutableObjectResult GetClosestRoutableObject(const GeoCoord& location,
                                                          Vehicle vehicle,

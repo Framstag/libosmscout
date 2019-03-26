@@ -95,6 +95,34 @@ namespace osmscout {
     }
   };
 
+  class OSMSCOUT_API RoutePositionResult CLASS_FINAL
+  {
+  private:
+    RoutePosition routePosition;
+    Distance distance;
+
+  public:
+    RoutePositionResult();
+
+    RoutePositionResult(const RoutePosition &routePosition, const Distance &distance);
+
+    inline RoutePosition GetRoutePosition() const
+    {
+      return routePosition;
+    }
+
+    inline Distance GetDistance() const
+    {
+      return distance;
+    }
+
+    inline bool IsValid() const
+    {
+      return routePosition.IsValid();
+    }
+  };
+
+
   /**
    * \ingroup Routing
    *
