@@ -117,24 +117,20 @@ namespace osmscout {
     isOpen=false;
   }
 
-  RoutePosition MultiDBRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
-                                                              Distance radius) const
+  RoutePositionResult MultiDBRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
+                                                                    const Distance &radius) const
   {
-    RoutePosition position, closestPosition;
-
-    Distance minDistance=Distance::Max();
+    RoutePositionResult position, closestPosition;
 
     for (auto& handle : handles) {
-      Distance distance = radius;
       position=handle.router->GetClosestRoutableNode(coord,
                                                      *handle.profile,
-                                                     distance);
-      if (position.IsValid() && distance < minDistance) {
-        closestPosition=RoutePosition(position.GetObjectFileRef(),
-                                      position.GetNodeIndex(),
-                                      /*database*/
-                                      handle.dbId);
-        minDistance=distance;
+                                                     radius);
+      if (position.IsValid() && position.GetDistance() < closestPosition.GetDistance()) {
+        closestPosition=RoutePositionResult(RoutePosition(position.GetRoutePosition().GetObjectFileRef(),
+                                                          position.GetRoutePosition().GetNodeIndex(),
+                                                          /*database*/ handle.dbId),
+                                            position.GetDistance());
       }
     }
 
@@ -417,8 +413,8 @@ namespace osmscout {
       assert(!via.empty());
 
       for (const auto& etap : via) {
-        RoutePosition target=GetClosestRoutableNode(etap,
-                                                    radius);
+        auto posRes=GetClosestRoutableNode(etap,radius);
+        RoutePosition target=posRes.GetRoutePosition();
 
         if (!target.IsValid()) {
           return result;

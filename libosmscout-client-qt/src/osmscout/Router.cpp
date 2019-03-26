@@ -201,25 +201,27 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
                                  int requestId,
                                  const osmscout::BreakerRef &breaker)
 {
-  osmscout::RoutePosition startNode=routingService->GetClosestRoutableNode(
+  auto startResult=routingService->GetClosestRoutableNode(
                                 start->getCoord(),
-                                /*radius*/ Distance::Of<Kilometer>(1));
-  if (!startNode.IsValid()){
+                                /*radius*/ Kilometers(1));
+  if (!startResult.IsValid()){
     osmscout::log.Warn() << "Can't found route node near start coord " << start->getCoord().GetDisplayText();
     emit routeFailed(QString("Can't found route node near start coord %1").arg(QString::fromStdString(start->getCoord().GetDisplayText())),
                      requestId);
     return;
   }
+  osmscout::RoutePosition startNode=startResult.GetRoutePosition();
 
-  osmscout::RoutePosition targetNode=routingService->GetClosestRoutableNode(
+  auto targetResult=routingService->GetClosestRoutableNode(
                                 target->getCoord(),
-                                /*radius*/ Distance::Of<Kilometer>(1));
-  if (!targetNode.IsValid()){
+                                /*radius*/ Kilometers(1));
+  if (!targetResult.IsValid()){
     osmscout::log.Warn() << "Can't found route node near target coord " << target->getCoord().GetDisplayText();
     emit routeFailed(QString("Can't found route node near target coord %1").arg(QString::fromStdString(target->getCoord().GetDisplayText())),
                      requestId);
     return;
   }
+  osmscout::RoutePosition targetNode=targetResult.GetRoutePosition();
 
   osmscout::RouteData routeData;
   if (!CalculateRoute(routingService,

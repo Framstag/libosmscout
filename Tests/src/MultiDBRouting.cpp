@@ -155,20 +155,22 @@ int main(int argc, char* argv[])
   std::cout << "Done." << std::endl;
 
   std::cout << "Retrieve routing node next to start..." << std::endl;
-  osmscout::RoutePosition startNode=router->GetClosestRoutableNode(args.start);
+  auto startResult=router->GetClosestRoutableNode(args.start);
 
-  if (!startNode.IsValid()){
+  if (!startResult.IsValid()){
     std::cerr << "Can't found route node near start coord " << args.start.GetDisplayText() << std::endl;
     return 1;
   }
+  osmscout::RoutePosition startNode=startResult.GetRoutePosition();
 
   std::cout << "Retrieve routing node next to target..." << std::endl;
-  osmscout::RoutePosition targetNode=router->GetClosestRoutableNode(args.target);
+  auto targetResult=router->GetClosestRoutableNode(args.target);
 
-  if (!targetNode.IsValid()){
+  if (!targetResult.IsValid()){
     std::cerr << "Can't found route node near target coord " << args.target.GetDisplayText() << std::endl;
     return 1;
   }
+  osmscout::RoutePosition targetNode=targetResult.GetRoutePosition();
 
   std::cout << "Calculate route..." << std::endl;
 
