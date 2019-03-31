@@ -352,6 +352,8 @@ void PlaneMapRenderer::DrawMap()
     drawParameter.SetFontName(fontName.toStdString());
     drawParameter.SetFontSize(fontSize);
 
+    drawParameter.SetShowAltLanguage(showAltLanguage);
+
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);

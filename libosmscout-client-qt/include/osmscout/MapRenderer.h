@@ -84,6 +84,7 @@ protected:
   QString     fontName;
   double      fontSize;
   QString     iconDirectory;
+  bool        showAltLanguage{false};
 
   mutable QMutex                 overlayLock;
   std::map<int,OverlayObjectRef> overlayObjectMap; // <! map guarded by overlayLock, OverlayWay object is multithread
@@ -102,6 +103,7 @@ public slots:
   virtual void onRenderSeaChanged(bool);
   virtual void onFontNameChanged(const QString);
   virtual void onFontSizeChanged(double);
+  virtual void onShowAltLanguageChanged(bool);
 
 protected:
   MapRenderer(QThread *thread,

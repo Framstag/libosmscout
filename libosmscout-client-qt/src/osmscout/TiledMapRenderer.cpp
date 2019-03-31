@@ -439,6 +439,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     drawParameter.SetFontName(fontName.toStdString());
     drawParameter.SetFontSize(fontSize);
 
+    drawParameter.SetShowAltLanguage(showAltLanguage);
+
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);

@@ -64,6 +64,7 @@ class OSMSCOUT_CLIENT_QT_API Settings: public QObject
   Q_PROPERTY(QString  styleSheetFile      READ GetStyleSheetFile      WRITE SetStyleSheetFile      NOTIFY StyleSheetFileChanged)
   Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
   Q_PROPERTY(double   fontSize    READ GetFontSize            WRITE SetFontSize     NOTIFY FontSizeChanged)
+  Q_PROPERTY(bool     showAltLanguage READ GetShowAltLanguage WRITE SetShowAltLanguage NOTIFY ShowAltLanguageChanged)
 
 signals:
   void MapDPIChange(double dpi);
@@ -76,6 +77,7 @@ signals:
   void StyleSheetFileChanged(const QString file);
   void FontNameChanged(const QString fontName);
   void FontSizeChanged(double fontSize);
+  void ShowAltLanguageChanged(bool showAltLanguage);
 
 private:
   QSettings *storage;
@@ -134,6 +136,9 @@ public:
   double GetFontSize() const;
   void SetFontSize(double fontSize);
 
+  bool GetShowAltLanguage() const;
+  void SetShowAltLanguage(bool showAltLanguage);
+
   const QString GetHttpCacheDir() const;
   
   const QByteArray GetCookieData() const;
@@ -174,6 +179,7 @@ class OSMSCOUT_CLIENT_QT_API QmlSettings: public QObject{
   Q_PROPERTY(bool     renderSea  READ GetRenderSea  WRITE SetRenderSea  NOTIFY RenderSeaChanged)
   Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
   Q_PROPERTY(double   fontSize    READ GetFontSize            WRITE SetFontSize     NOTIFY FontSizeChanged)
+  Q_PROPERTY(bool     showAltLanguage READ GetShowAltLanguage WRITE SetShowAltLanguage NOTIFY ShowAltLanguageChanged)
 
 private:
   SettingsRef settings;
@@ -186,6 +192,7 @@ signals:
   void RenderSeaChanged(bool);
   void FontNameChanged(const QString fontName);
   void FontSizeChanged(double fontSize);
+  void ShowAltLanguageChanged(bool showAltLanguage);
 
 public:
   QmlSettings();
@@ -216,6 +223,9 @@ public:
 
   double GetFontSize() const;
   void SetFontSize(double fontSize);
+
+  bool GetShowAltLanguage() const;
+  void SetShowAltLanguage(bool showAltLanguage);
 };
 
 }

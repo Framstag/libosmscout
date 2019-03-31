@@ -235,6 +235,11 @@ namespace osmscout {
     warnCoordCountLimit=limit;
   }
 
+  void MapParameter::SetShowAltLanguage(bool showAltLanguage)
+  {
+    this->showAltLanguage=showAltLanguage;
+  }
+
   void MapParameter::SetBreaker(const BreakerRef& breaker)
   {
     this->breaker=breaker;
