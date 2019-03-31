@@ -1258,6 +1258,30 @@ TYPES
       ADDRESS POI
       GROUP amenity, routingPOI
 
+  TYPE amenity_pub_building
+    = AREA ("amenity"=="pub" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_pub
+    = NODE AREA ("amenity"=="pub")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_bar_building
+    = AREA ("amenity"=="bar" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_bar
+    = NODE AREA ("amenity"=="bar")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
   TYPE amenity_recycling // there are a number of sub types, not yet defined here...
     = NODE AREA ("amenity"=="recycling")
       GROUP amenity
