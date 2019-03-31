@@ -291,6 +291,18 @@ void Settings::SetFontSize(double fontSize)
   }
 }
 
+bool Settings::GetShowAltLanguage() const
+{
+  return storage->value("OSMScoutLib/Rendering/ShowAltLanguage", false).toBool();
+}
+void Settings::SetShowAltLanguage(bool showAltLanguage)
+{
+  if (GetShowAltLanguage()!=showAltLanguage){
+    storage->setValue("OSMScoutLib/Rendering/ShowAltLanguage", showAltLanguage);
+    emit ShowAltLanguageChanged(showAltLanguage);
+  }
+}
+
 const QString Settings::GetHttpCacheDir() const
 {
   QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);  
@@ -325,6 +337,8 @@ QmlSettings::QmlSettings()
             this, &QmlSettings::FontNameChanged);
     connect(settings.get(), &Settings::FontSizeChanged,
             this, &QmlSettings::FontSizeChanged);
+    connect(settings.get(), &Settings::ShowAltLanguageChanged,
+            this, &QmlSettings::ShowAltLanguageChanged);
 }
 
 double QmlSettings::GetPhysicalDPI() const
@@ -403,5 +417,13 @@ double QmlSettings::GetFontSize() const
 void QmlSettings::SetFontSize(double fontSize)
 {
     settings->SetFontSize(fontSize);
+}
+bool QmlSettings::GetShowAltLanguage() const
+{
+    return settings->GetShowAltLanguage();
+}
+void QmlSettings::SetShowAltLanguage(bool showAltLanguage)
+{
+    settings->SetShowAltLanguage(showAltLanguage);
 }
 }

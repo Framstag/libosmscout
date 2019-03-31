@@ -38,6 +38,7 @@ MapRenderer::MapRenderer(QThread *thread,
   renderSea=settings->GetRenderSea();
   fontName=settings->GetFontName();
   fontSize=settings->GetFontSize();
+  showAltLanguage=settings->GetShowAltLanguage();
 
   connect(settings.get(), &Settings::MapDPIChange,
           this, &MapRenderer::onMapDPIChange,
@@ -50,6 +51,9 @@ MapRenderer::MapRenderer(QThread *thread,
           Qt::QueuedConnection);
   connect(settings.get(), &Settings::FontSizeChanged,
           this, &MapRenderer::onFontSizeChanged,
+          Qt::QueuedConnection);
+  connect(settings.get(), &Settings::ShowAltLanguageChanged,
+          this, &MapRenderer::onShowAltLanguageChanged,
           Qt::QueuedConnection);
   connect(thread, &QThread::started,
           this, &MapRenderer::Initialize);
@@ -108,6 +112,16 @@ void MapRenderer::onFontSizeChanged(double fontSize)
   {
     QMutexLocker locker(&lock);
     this->fontSize=fontSize;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void MapRenderer::onShowAltLanguageChanged(bool showAltLanguage)
+{
+  {
+    QMutexLocker locker(&lock);
+    this->showAltLanguage=showAltLanguage;
   }
   InvalidateVisualCache();
   emit Redraw();
