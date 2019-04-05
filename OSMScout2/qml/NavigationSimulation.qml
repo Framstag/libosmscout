@@ -80,7 +80,6 @@ Window {
             }
 
             map.addOverlayObject(0,routeWay);
-            //navigationModel.
         }
     }
 
@@ -180,6 +179,25 @@ Window {
                     text: navigationModel.nextRouteStep.type == "leave-roundabout" ? navigationModel.nextRouteStep.roundaboutExit : ""
                     anchors.centerIn: parent
                     font.pixelSize: Theme.textFontSize*2
+                }
+            }
+            Rectangle {
+                anchors{
+                    top: parent.top
+                    right: parent.right
+                }
+                width: currentSpeedText.width+(2*Theme.horizSpace)
+                height: currentSpeedText.height+(2*Theme.vertSpace)
+                color: (navigationModel.currentSpeed > 0 &&
+                        navigationModel.maxAllowedSpeed > 0 &&
+                        navigationModel.currentSpeed > navigationModel.maxAllowedSpeed) ?
+                           "red":"transparent"
+
+                Text{
+                    id: currentSpeedText
+                    anchors.centerIn: parent
+                    text: navigationModel.currentSpeed < 0 ? "--" : (Math.round(navigationModel.currentSpeed)+" km/h")
+                    font.pixelSize: Theme.textFontSize
                 }
             }
             Text{
