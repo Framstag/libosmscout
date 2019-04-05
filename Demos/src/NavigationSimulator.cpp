@@ -47,6 +47,7 @@
 #include <osmscout/navigation/RouteStateAgent.h>
 #include <osmscout/navigation/BearingAgent.h>
 #include <osmscout/navigation/ArrivalEstimateAgent.h>
+#include <osmscout/navigation/SpeedAgent.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 
@@ -398,6 +399,14 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
                 << " remaining distance: " << arrivalMessage->remainingDistance.AsString()
                 << std::endl;
     }
+    else if (dynamic_cast<osmscout::CurrentSpeedMessage*>(message.get())!=nullptr) {
+      auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+      std::cout << "Current speed: " << currentSpeedMessage->speed << " km/h" << std::endl;
+    }
+    else if (dynamic_cast<osmscout::MaxAllowedSpeedMessage*>(message.get())!=nullptr) {
+      auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+      std::cout << "Max. allowed speed: " << maxSpeedMessage->maxAllowedSpeed << " km/h" << std::endl;
+    }
   }
 }
 
@@ -417,7 +426,8 @@ void Simulator::Simulate(const osmscout::DatabaseRef& database,
     std::make_shared<osmscout::BearingAgent>(),
     //std::make_shared<osmscout::CurrentStreetAgent>(locationDescriptionService),
     std::make_shared<osmscout::RouteStateAgent>(),
-    std::make_shared<osmscout::ArrivalEstimateAgent>()
+    std::make_shared<osmscout::ArrivalEstimateAgent>(),
+    std::make_shared<osmscout::SpeedAgent>()
   };
 
   auto initializeMessage=std::make_shared<osmscout::InitializeMessage>(generator.steps.front().time);
