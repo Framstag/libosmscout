@@ -45,6 +45,11 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
   Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
 
+  // km/h, <0 when unkwnown
+  Q_PROPERTY(double currentSpeed    READ getCurrentSpeed    NOTIFY currentSpeedUpdate)
+  // km/h <0 when unknown
+  Q_PROPERTY(double maxAllowedSpeed READ getMaxAllowedSpeed NOTIFY maxAllowedSpeedUpdate)
+
 signals:
   void update();
 
@@ -64,6 +69,9 @@ signals:
   void targetReached(QString targetBearing, double targetDistance);
 
   void positionEstimate(osmscout::PositionAgent::PositionState state, double lat, double lon, QString bearing);
+
+  void currentSpeedUpdate(double currentSpeed);
+  void maxAllowedSpeedUpdate(double maxAllowedSpeed);
 
 public slots:
   void locationChanged(bool locationValid,
@@ -86,6 +94,9 @@ public slots:
                         const GeoCoord to);
 
   void onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
+
+  void onCurrentSpeed(double currentSpeed);
+  void onMaxAllowedSpeed(double maxAllowedSpeed);
 
 public:
   enum Roles {
@@ -124,14 +135,24 @@ public:
     return new OverlayWay(route.routeWay().nodes);
   }
 
-  QDateTime getArrivalEstimate() const
+  inline QDateTime getArrivalEstimate() const
   {
     return arrivalEstimate;
   }
 
-  double getRemainingDinstance() const
+  inline double getRemainingDinstance() const
   {
     return remainingDistance.AsMeter();
+  }
+
+  inline double getCurrentSpeed() const
+  {
+    return currentSpeed;
+  }
+
+  inline double getMaxAllowedSpeed() const
+  {
+    return maxAllowedSpeed;
   }
 
 private:
@@ -144,6 +165,9 @@ private:
 
   QDateTime arrivalEstimate;
   osmscout::Distance remainingDistance;
+
+  double currentSpeed{-1};
+  double maxAllowedSpeed{-1};
 };
 
 }
