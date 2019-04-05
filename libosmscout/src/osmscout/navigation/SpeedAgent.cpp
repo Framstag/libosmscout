@@ -63,7 +63,7 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
         fifoDuration+=s.duration;
         fifoDistance+=s.distance;
       }
-      auto sec=duration_cast<seconds>(fifoDuration);
+      auto sec=duration_cast<duration<double>>(fifoDuration);
       if (sec.count()>0){
         double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
         result.push_back(std::make_shared<CurrentSpeedMessage>(positionMsg->timestamp,speed));
