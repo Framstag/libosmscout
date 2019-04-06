@@ -785,7 +785,7 @@ public:
   explicit TestPainter(const osmscout::StyleConfigRef& styleConfig);
   bool IsVisibleAreaPublic(const osmscout::Projection& projection,
                            const std::vector<osmscout::Point>& nodes,
-                           double pixelOffset) const;
+                           double pixelOffset);
 };
 
 TestPainter::TestPainter(const osmscout::StyleConfigRef& styleConfig):
@@ -796,12 +796,19 @@ TestPainter::TestPainter(const osmscout::StyleConfigRef& styleConfig):
 
 bool TestPainter::IsVisibleAreaPublic(const osmscout::Projection& projection,
                                       const std::vector<osmscout::Point>& nodes,
-                                      double pixelOffset) const
+                                      double pixelOffset)
 {
   osmscout::GeoBox boundingBox;
 
   osmscout::GetBoundingBox(nodes,
-                          boundingBox);
+                           boundingBox);
+
+  // just initialise painter with current projection
+  Draw(projection,
+       osmscout::MapParameter{},
+       osmscout::MapData{},
+       osmscout::RenderSteps::Initialize,
+       osmscout::RenderSteps::Initialize);
 
   return IsVisibleArea(projection,
                        boundingBox,
