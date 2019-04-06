@@ -246,6 +246,12 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
                                                                    routeData,
                                                                    start->getLabel().toUtf8().constData(),
                                                                    target->getLabel().toUtf8().constData());
+  if (!routeDescriptionResult.success){
+    osmscout::log.Warn() << "Route postprocessing failed!";
+    emit routeFailed("Route postprocessing failed!",requestId);
+    return;
+  }
+  assert(routeDescriptionResult.description); // should be setup when success==true
   osmscout::log.Debug() << "Route transformed";
 
   RouteDescriptionBuilder builder;

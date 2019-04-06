@@ -72,7 +72,8 @@ set(HEADER_FILES_NAVIGATION
     include/osmscout/navigation/Engine.h
     include/osmscout/navigation/Navigation.h
     include/osmscout/navigation/BearingAgent.h
-    include/osmscout/navigation/RouteInstructionAgent.h)
+    include/osmscout/navigation/RouteInstructionAgent.h
+    include/osmscout/navigation/SpeedAgent.h)
 
 set(HEADER_FILES
     ${HEADER_FILES_OST}
@@ -179,6 +180,7 @@ set(SOURCE_FILES
     src/osmscout/navigation/PositionAgent.cpp
     src/osmscout/navigation/RouteStateAgent.cpp
     src/osmscout/navigation/RouteInstructionAgent.cpp
+    src/osmscout/navigation/SpeedAgent.cpp
     src/osmscout/navigation/Engine.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp

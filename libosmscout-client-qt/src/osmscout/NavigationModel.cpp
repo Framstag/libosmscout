@@ -53,6 +53,13 @@ NavigationModel::NavigationModel():
   connect(navigationModule, &NavigationModule::arrivalEstimate,
           this, &NavigationModel::onArrivalEstimate,
           Qt::QueuedConnection);
+
+  connect(navigationModule, &NavigationModule::currentSpeed,
+          this, &NavigationModel::onCurrentSpeed,
+          Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::maxAllowedSpeed,
+          this, &NavigationModel::onMaxAllowedSpeed,
+          Qt::QueuedConnection);
 }
 
 NavigationModel::~NavigationModel(){
@@ -121,6 +128,18 @@ void NavigationModel::onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Dis
   this->arrivalEstimate = arrivalEstimate;
   this->remainingDistance = remainingDistance;
   emit arrivalUpdate();
+}
+
+void NavigationModel::onCurrentSpeed(double currentSpeed)
+{
+  this->currentSpeed=currentSpeed;
+  emit currentSpeedUpdate(currentSpeed);
+}
+
+void NavigationModel::onMaxAllowedSpeed(double maxAllowedSpeed)
+{
+  this->maxAllowedSpeed=maxAllowedSpeed;
+  emit maxAllowedSpeedUpdate(maxAllowedSpeed);
 }
 
 QObject *NavigationModel::getNextRoutStep()

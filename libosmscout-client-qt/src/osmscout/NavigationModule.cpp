@@ -82,6 +82,14 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
       emit arrivalEstimate(QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(arrivalMessage->arrivalEstimate.time_since_epoch()).count()),
                            arrivalMessage->remainingDistance);
     }
+    else if (dynamic_cast<osmscout::CurrentSpeedMessage*>(message.get())!=nullptr) {
+      auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+      emit currentSpeed(currentSpeedMessage->speed);
+    }
+    else if (dynamic_cast<osmscout::MaxAllowedSpeedMessage*>(message.get())!=nullptr) {
+      auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+      emit maxAllowedSpeed(maxSpeedMessage->maxAllowedSpeed);
+    }
   }
 }
 

@@ -241,6 +241,7 @@ namespace osmscout {
         position.routeNode=foundNode;
         position.coord=coord;
         position.databaseId=foundNode->GetDatabaseId();
+        position.typeConfig=routableObjects->GetTypeConfig(foundNode->GetDatabaseId());
         position.way=routableObjects->GetWay(foundNode->GetDatabaseId(), foundNode->GetPathObject());
         position.area=routableObjects->GetArea(foundNode->GetDatabaseId(), foundNode->GetPathObject());
       }else{

@@ -39,6 +39,8 @@ namespace osmscout {
     std::map<DatabaseId, RoutableDBObjects> dbMap;
     GeoBox bbox;
 
+    TypeConfigRef GetTypeConfig(const DatabaseId &dbId) const;
+
     WayRef GetWay(const DatabaseId &dbId, const ObjectFileRef &objRef) const;
 
     AreaRef GetArea(const DatabaseId &dbId, const ObjectFileRef &areaRef) const;
