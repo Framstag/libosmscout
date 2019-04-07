@@ -38,23 +38,27 @@ MapRenderer::MapRenderer(QThread *thread,
   renderSea=settings->GetRenderSea();
   fontName=settings->GetFontName();
   fontSize=settings->GetFontSize();
+  showAltLanguage=settings->GetShowAltLanguage();
 
-  connect(settings.get(), SIGNAL(MapDPIChange(double)),
-          this, SLOT(onMapDPIChange(double)),
+  connect(settings.get(), &Settings::MapDPIChange,
+          this, &MapRenderer::onMapDPIChange,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(RenderSeaChanged(bool)),
-          this, SLOT(onRenderSeaChanged(bool)),
+  connect(settings.get(), &Settings::RenderSeaChanged,
+          this, &MapRenderer::onRenderSeaChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(FontNameChanged(const QString)),
-          this, SLOT(onFontNameChanged(const QString)),
+  connect(settings.get(), &Settings::FontNameChanged,
+          this, &MapRenderer::onFontNameChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(FontSizeChanged(double)),
-          this, SLOT(onFontSizeChanged(double)),
+  connect(settings.get(), &Settings::FontSizeChanged,
+          this, &MapRenderer::onFontSizeChanged,
           Qt::QueuedConnection);
-  connect(thread, SIGNAL(started()),
-          this, SLOT(Initialize()));
-  connect(dbThread.get(), SIGNAL(stylesheetFilenameChanged()),
-          this, SLOT(onStylesheetFilenameChanged()),
+  connect(settings.get(), &Settings::ShowAltLanguageChanged,
+          this, &MapRenderer::onShowAltLanguageChanged,
+          Qt::QueuedConnection);
+  connect(thread, &QThread::started,
+          this, &MapRenderer::Initialize);
+  connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
+          this, &MapRenderer::onStylesheetFilenameChanged,
           Qt::QueuedConnection);
 }
 
@@ -64,7 +68,7 @@ MapRenderer::~MapRenderer()
     qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
   qDebug() << "~MapRenderer";
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }
@@ -108,6 +112,16 @@ void MapRenderer::onFontSizeChanged(double fontSize)
   {
     QMutexLocker locker(&lock);
     this->fontSize=fontSize;
+  }
+  InvalidateVisualCache();
+  emit Redraw();
+}
+
+void MapRenderer::onShowAltLanguageChanged(bool showAltLanguage)
+{
+  {
+    QMutexLocker locker(&lock);
+    this->showAltLanguage=showAltLanguage;
   }
   InvalidateVisualCache();
   emit Redraw();
@@ -300,7 +314,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
         if (o->getObjectType()==osmscout::RefType::refWay){
           OverlayWay *ow=dynamic_cast<OverlayWay*>(o.get());
-          if (ow != NULL) {
+          if (ow != nullptr) {
             osmscout::WayRef w = std::make_shared<osmscout::Way>();
             if (ow->toWay(w, *typeConfig)) {
               data->poiWays.push_back(w);
@@ -308,7 +322,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           }
         } else if (o->getObjectType()==osmscout::RefType::refArea){
           OverlayArea *oa=dynamic_cast<OverlayArea*>(o.get());
-          if (oa != NULL) {
+          if (oa != nullptr) {
             osmscout::AreaRef a = std::make_shared<osmscout::Area>();
             if (oa->toArea(a, *typeConfig)) {
               data->poiAreas.push_back(a);
@@ -316,7 +330,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           }
         } else if (o->getObjectType()==osmscout::RefType::refNode){
           OverlayNode *oo=dynamic_cast<OverlayNode*>(o.get());
-          if (oo != NULL) {
+          if (oo != nullptr) {
             osmscout::NodeRef n = std::make_shared<osmscout::Node>();
             if (oo->toNode(n, *typeConfig)) {
               data->poiNodes.push_back(n);

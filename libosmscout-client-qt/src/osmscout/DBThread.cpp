@@ -60,12 +60,12 @@ DBThread::DBThread(QThread *backgroundThread,
   stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
-  connect(settings.get(), SIGNAL(MapDPIChange(double)),
-          this, SLOT(onMapDPIChange(double)),
+  connect(settings.get(), &Settings::MapDPIChange,
+          this, &DBThread::onMapDPIChange,
           Qt::QueuedConnection);
 
-  connect(mapManager.get(), SIGNAL(databaseListChanged(QList<QDir>)),
-          this, SLOT(onDatabaseListChanged(QList<QDir>)),
+  connect(mapManager.get(), &MapManager::databaseListChanged,
+          this, &DBThread::onDatabaseListChanged,
           Qt::QueuedConnection);
 }
 
@@ -76,7 +76,7 @@ DBThread::~DBThread()
 
   if (basemapDatabase) {
     basemapDatabase->Close();
-    basemapDatabase=NULL;
+    basemapDatabase=nullptr;
   }
 
   for (auto db:databases){
@@ -200,7 +200,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
   if (basemapDatabase) {
     basemapDatabase->Close();
-    basemapDatabase=NULL;
+    basemapDatabase=nullptr;
   }
 
   for (auto db:databases){
@@ -315,12 +315,12 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
         if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
           qWarning() << "Cannot load style sheet '" << stylesheetFilename << "'!";
-          styleConfig=NULL;
+          styleConfig=nullptr;
         }
       }
       else {
         qWarning() << "TypeConfig invalid!";
-        styleConfig=NULL;
+        styleConfig=nullptr;
       }
     }
     else {

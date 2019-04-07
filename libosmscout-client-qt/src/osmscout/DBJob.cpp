@@ -58,7 +58,7 @@ void DBJob::Close()
     qWarning() << "Closing" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   delete locker;
-  locker=NULL;
+  locker=nullptr;
   databases.clear();
 }
 
@@ -78,8 +78,8 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
   searchParameter.SetUseLowZoomOptimization(lowZoomOptimization);
   searchParameter.SetBreaker(breaker);
 
-  connect(this,SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
-          this,SLOT(onTileStateChanged(QString,const osmscout::TileRef)),
+  connect(this, &DBLoadJob::tileStateChanged,
+          this, &DBLoadJob::onTileStateChanged,
           Qt::QueuedConnection);
 }
 

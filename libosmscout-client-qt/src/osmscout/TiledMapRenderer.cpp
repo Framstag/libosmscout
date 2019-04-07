@@ -38,8 +38,8 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   tileCacheDirectory(tileCacheDirectory),
   onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
   offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
-  tileDownloader(NULL), // it will be created in different thread
-  loadJob(NULL),
+  tileDownloader(nullptr), // it will be created in different thread
+  loadJob(nullptr),
   unknownColor(QColor::fromRgbF(1.0,1.0,1.0)) // white
 {
   QScreen *srn=QGuiApplication::primaryScreen();
@@ -50,40 +50,40 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   onlineTilesEnabled = settings->GetOnlineTilesEnabled();
   offlineTilesEnabled = settings->GetOfflineMap();
 
-  connect(settings.get(), SIGNAL(OnlineTileProviderIdChanged(const QString)),
-          this, SLOT(onlineTileProviderChanged()),
+  connect(settings.get(), &Settings::OnlineTileProviderIdChanged,
+          this, &TiledMapRenderer::onlineTileProviderChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(OnlineTilesEnabledChanged(bool)),
-          this, SLOT(onlineTilesEnabledChanged(bool)),
+  connect(settings.get(), &Settings::OnlineTilesEnabledChanged,
+          this, &TiledMapRenderer::onlineTilesEnabledChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), SIGNAL(OfflineMapChanged(bool)),
-          this, SLOT(onOfflineMapChanged(bool)),
+  connect(settings.get(), &Settings::OfflineMapChanged,
+          this, &TiledMapRenderer::onOfflineMapChanged,
           Qt::QueuedConnection);
 
-  connect(dbThread.get(), SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
-          this, SLOT(onDatabaseLoaded(osmscout::GeoBox)),
+  connect(dbThread.get(), &DBThread::databaseLoadFinished,
+          this, &TiledMapRenderer::onDatabaseLoaded,
           Qt::QueuedConnection);
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
   //
 
-  connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(onlineTileRequest(uint32_t, uint32_t, uint32_t)),
+  connect(&onlineTileCache, &TileCache::tileRequested,
+          this, &TiledMapRenderer::onlineTileRequest,
           Qt::QueuedConnection);
 
-  connect(&offlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(offlineTileRequest(uint32_t, uint32_t, uint32_t)),
+  connect(&offlineTileCache, &TileCache::tileRequested,
+          this, &TiledMapRenderer::offlineTileRequest,
           Qt::QueuedConnection);
 }
 
 TiledMapRenderer::~TiledMapRenderer()
 {
   qDebug() << "~TiledMapRenderer";
-  if (tileDownloader != NULL){
+  if (tileDownloader != nullptr){
     delete tileDownloader;
   }
-  if (loadJob!=NULL){
+  if (loadJob!=nullptr){
     delete loadJob;
   }
 }
@@ -97,16 +97,16 @@ void TiledMapRenderer::Initialize()
     // create tile downloader in correct thread
     tileDownloader = new OsmTileDownloader(tileCacheDirectory,settings->GetOnlineTileProvider());
 
-    connect(settings.get(), SIGNAL(OnlineTileProviderChanged(const OnlineTileProvider &)),
-            tileDownloader, SLOT(onlineTileProviderChanged(const OnlineTileProvider &)),
+    connect(settings.get(), &Settings::OnlineTileProviderChanged,
+            tileDownloader, &OsmTileDownloader::onlineTileProviderChanged,
             Qt::QueuedConnection);
 
-    connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-            this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+    connect(tileDownloader, &OsmTileDownloader::downloaded,
+            this, &TiledMapRenderer::tileDownloaded,
             Qt::QueuedConnection);
 
-    connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
-            this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+    connect(tileDownloader, &OsmTileDownloader::failed,
+            this, &TiledMapRenderer::tileDownloadFailed,
             Qt::QueuedConnection);
   }
 
@@ -307,8 +307,8 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
                               /* lowZoomOptimization */ true,
                               /* closeOnFinish */ false);
 
-        connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)),
-                this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)));
+        connect(loadJob, &DBLoadJob::finished,
+                this, &TiledMapRenderer::onLoadJobFinished);
 
         dbThread->RunJob(loadJob);
 
@@ -389,7 +389,6 @@ void TiledMapRenderer::onOfflineMapChanged(bool b)
 
 void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles)
 {
-    // just start loading
     QMutexLocker locker(&lock);
     if (loadJob==nullptr){
         // no running load job
@@ -415,7 +414,6 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     QPainter p;
     p.begin(&canvas);
 
-    //loadJob->AddTileDataToMapData()
     osmscout::MapParameter        drawParameter;
     std::list<std::string>        paths;
 
@@ -440,6 +438,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     drawParameter.SetFontName(fontName.toStdString());
     drawParameter.SetFontSize(fontSize);
+
+    drawParameter.SetShowAltLanguage(showAltLanguage);
 
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);

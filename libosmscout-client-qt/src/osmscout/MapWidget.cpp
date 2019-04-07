@@ -34,8 +34,8 @@ static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
-      renderer(NULL),
-      inputHandler(NULL),
+      renderer(nullptr),
+      inputHandler(nullptr),
       showCurrentPosition(false),
       finished(false),
       renderingType(RenderingType::PlaneRendering)
@@ -49,24 +49,24 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
 
-    connect(settings.get(), SIGNAL(MapDPIChange(double)),
-            this, SLOT(onMapDPIChange(double)));
+    connect(settings.get(), &Settings::MapDPIChange,
+            this, &MapWidget::onMapDPIChange);
 
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
-    connect(renderer,SIGNAL(Redraw()),
-            this,SLOT(redraw()));
-    connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
-            this,SIGNAL(stylesheetFilenameChanged()));
-    connect(dbThread.get(),SIGNAL(styleErrorsChanged()),
-            this,SIGNAL(styleErrorsChanged()));
-    connect(dbThread.get(),SIGNAL(databaseLoadFinished(osmscout::GeoBox)),
-            this,SIGNAL(databaseLoaded(osmscout::GeoBox)));
+    connect(renderer, &MapRenderer::Redraw,
+            this, &MapWidget::redraw);
+    connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
+            this, &MapWidget::stylesheetFilenameChanged);
+    connect(dbThread.get(), &DBThread::styleErrorsChanged,
+            this, &MapWidget::styleErrorsChanged);
+    connect(dbThread.get(), &DBThread::databaseLoadFinished,
+            this, &MapWidget::databaseLoaded);
 
-    connect(&tapRecognizer, SIGNAL(tap(const QPoint)),        this, SLOT(onTap(const QPoint)));
-    connect(&tapRecognizer, SIGNAL(doubleTap(const QPoint)),  this, SLOT(onDoubleTap(const QPoint)));
-    connect(&tapRecognizer, SIGNAL(longTap(const QPoint)),    this, SLOT(onLongTap(const QPoint)));
-    connect(&tapRecognizer, SIGNAL(tapLongTap(const QPoint)), this, SLOT(onTapLongTap(const QPoint)));
+    connect(&tapRecognizer, &TapRecognizer::tap,        this, &MapWidget::onTap);
+    connect(&tapRecognizer, &TapRecognizer::doubleTap,  this, &MapWidget::onDoubleTap);
+    connect(&tapRecognizer, &TapRecognizer::longTap,    this, &MapWidget::onLongTap);
+    connect(&tapRecognizer, &TapRecognizer::tapLongTap, this, &MapWidget::onTapLongTap);
 
     // TODO, open last position, move to current position or get as constructor argument...
     view = new MapView(this,
@@ -85,9 +85,9 @@ MapWidget::~MapWidget()
 {
     delete inputHandler;
     delete view;
-    if (renderer!=NULL){
+    if (renderer!=nullptr){
       renderer->deleteLater();
-      renderer=NULL;
+      renderer=nullptr;
     }
 }
 
@@ -135,14 +135,14 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 void MapWidget::setupInputHandler(InputHandler *newGesture)
 {
     bool locked = false;
-    if (inputHandler != NULL){
+    if (inputHandler != nullptr){
         locked = inputHandler->isLockedToPosition();
         inputHandler->deleteLater();
     }
     inputHandler = newGesture;
 
-    connect(inputHandler, SIGNAL(viewChanged(const MapView&)),
-            this, SLOT(changeView(const MapView&)));
+    connect(inputHandler, &InputHandler::viewChanged,
+            this, &MapWidget::changeView);
 
     if (locked != inputHandler->isLockedToPosition()){
         emit lockToPossitionChanged();
@@ -575,7 +575,7 @@ void MapWidget::addOverlayObject(int id, QObject *o)
 {
   OverlayObjectRef copy;
   const OverlayObject *obj = dynamic_cast<const OverlayObject*>(o);
-  if (obj == NULL){
+  if (obj == nullptr){
       qWarning() << "Failed to cast " << o << " to OverlayObject.";
       return;
   }
@@ -759,8 +759,8 @@ void MapWidget::SetRenderingType(QString strType)
     for (auto &p:overlayWays){
       renderer->addOverlayObject(p.first, p.second);
     }
-    connect(renderer,SIGNAL(Redraw()),
-            this,SLOT(redraw()));
+    connect(renderer, &MapRenderer::Redraw,
+            this, &MapWidget::redraw);
     emit renderingTypeChanged(GetRenderingType());
   }
 }

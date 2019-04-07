@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Bearing.h>
 
 #include <cstdlib>
 
@@ -228,7 +229,7 @@ namespace osmscout {
   }
 
   void GetEllipsoidalDistance(double lat1, double lon1,
-                              double bearing,
+                              const Bearing &bearing,
                               const Distance &distance,
                               double& lat2, double& lon2)
   {
@@ -243,7 +244,7 @@ namespace osmscout {
     double a=6378137.0, b=6356752.314245, f=1/298.257223563;
     double distanceAsMeter=distance.As<Meter>();
 
-    double alpha1=bearing*M_PI/180;
+    double alpha1=bearing.AsRadians();
 
     double tanU1=(1-f)*tan(lat1);
     double cosU1=1/sqrt((1+tanU1*tanU1));
@@ -294,7 +295,7 @@ namespace osmscout {
   }
 
   GeoCoord GetEllipsoidalDistance(const GeoCoord& position,
-                                  double bearing,
+                                  const Bearing &bearing,
                                   const Distance &distance)
   {
     double lat,lon;
@@ -308,8 +309,8 @@ namespace osmscout {
     return {lat,lon};
   }
 
-  double GetSphericalBearingInitial(const GeoCoord& a,
-                                    const GeoCoord& b)
+  Bearing GetSphericalBearingInitial(const GeoCoord& a,
+                                     const GeoCoord& b)
   {
     double aLon=a.GetLon()*M_PI/180;
     double aLat=a.GetLat()*M_PI/180;
@@ -330,14 +331,14 @@ namespace osmscout {
 
     double bearing=atan2(y,x);
 
-    return bearing;
+    return Bearing::Radians(bearing);
   }
 
   /**
-   * Taken the path from A to B over a sphere return the bearing (0..2PI) at the destination point B.
+   * Taken the path from A to B over a sphere return the bearing at the destination point B.
    */
-  double GetSphericalBearingFinal(const GeoCoord& a,
-                                  const GeoCoord& b)
+  Bearing GetSphericalBearingFinal(const GeoCoord& a,
+                                   const GeoCoord& b)
   {
     double aLon=a.GetLon()*M_PI/180;
     double aLat=a.GetLat()*M_PI/180;
@@ -367,39 +368,10 @@ namespace osmscout {
 
     //double bearing=fmod(atan2(y,x)+3*M_PI,2*M_PI);
 
-    return bearing;
+    return Bearing::Radians(bearing);
   }
 
-  std::string BearingDisplayString(double bearing)
-  {
-    int grad=(int)round(bearing*180/M_PI);
-
-    grad=grad % 360;
-
-    if (grad<0) {
-      grad+=360;
-    }
-
-    if (grad>=0 && grad<=45) {
-      return "N";
-    }
-    else if (grad>45 && grad<=135) {
-      return "E";
-    }
-    else if (grad>135 && grad<=225) {
-      return "S";
-    }
-    else if (grad>225 && grad<=315) {
-      return "W";
-    }
-    else if (grad>315 && grad<360) {
-      return "N";
-    }
-
-    return "?";
-  }
-
-  double NormalizeRelativeAngel(double angle)
+  double NormalizeRelativeAngle(double angle)
   {
     if (angle>180.0) {
       return angle-360.0;

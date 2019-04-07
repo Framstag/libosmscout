@@ -21,6 +21,15 @@
 
 namespace osmscout {
 
+  TypeConfigRef RoutableObjects::GetTypeConfig(const DatabaseId &dbId) const
+  {
+    auto objMap=dbMap.find(dbId);
+    if (objMap==dbMap.end()){
+      return {};
+    }
+    return objMap->second.typeConfig;
+  }
+
   WayRef RoutableObjects::GetWay(const DatabaseId &dbId, const ObjectFileRef &objRef) const
   {
     if (!objRef.Valid()){

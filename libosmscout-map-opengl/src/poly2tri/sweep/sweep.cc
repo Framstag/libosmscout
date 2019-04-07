@@ -261,12 +261,12 @@ bool Sweep::LargeHole_DontFill(Node* node) {
   // Check additional points on front.
   Node* next2Node = nextNode->next;
   // "..Plus.." because only want angles on same side as point being added.
-  if ((next2Node != NULL) && !AngleExceedsPlus90DegreesOrIsNegative(node->point, next2Node->point, prevNode->point))
+  if ((next2Node != nullptr) && !AngleExceedsPlus90DegreesOrIsNegative(node->point, next2Node->point, prevNode->point))
           return false;
 
   Node* prev2Node = prevNode->prev;
   // "..Plus.." because only want angles on same side as point being added.
-  if ((prev2Node != NULL) && !AngleExceedsPlus90DegreesOrIsNegative(node->point, nextNode->point, prev2Node->point))
+  if ((prev2Node != nullptr) && !AngleExceedsPlus90DegreesOrIsNegative(node->point, nextNode->point, prev2Node->point))
           return false;
 
   return true;
@@ -702,7 +702,7 @@ void Sweep::FlipEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* t, 
   Triangle& ot = t->NeighborAcross(p);
   Point& op = *ot.OppositePoint(*t, p);
 
-  //if (ot == NULL) {
+  //if (ot == nullptr) {
   // If we want to integrate the fillEdgeEvent do it here
   // With current implementation we should never get here
   // throw new RuntimeException( "[BUG:FIXME] FLIP failed due to missing triangle");
@@ -776,7 +776,7 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
   Triangle& ot = t.NeighborAcross(p);
   Point& op = *ot.OppositePoint(t, p);
 
-  //if (&t.NeighborAcross(p) == NULL) {
+  //if (&t.NeighborAcross(p) == nullptr) {
   //  If we want to integrate the fillEdgeEvent do it here
   //  With current implementation we should never get here
   //  throw new RuntimeException( "[BUG:FIXME] FLIP failed due to missing triangle");

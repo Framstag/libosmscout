@@ -228,7 +228,7 @@ namespace osmscout {
 
     AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
 
-    if (accessValue!=NULL) {
+    if (accessValue!=nullptr) {
       switch (vehicle) {
       case vehicleFoot:
         return accessValue->CanRouteFoot();
@@ -268,7 +268,7 @@ namespace osmscout {
 
     AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
 
-    if (accessValue!=NULL) {
+    if (accessValue!=nullptr) {
       switch (vehicle) {
       case vehicleFoot:
         return accessValue->CanRouteFootForward();
@@ -308,7 +308,7 @@ namespace osmscout {
 
     AccessFeatureValue *accessValue=accessReader.GetValue(way.GetFeatureValueBuffer());
 
-    if (accessValue!=NULL) {
+    if (accessValue!=nullptr) {
       switch (vehicle) {
       case vehicleFoot:
         return accessValue->CanRouteFootBackward();

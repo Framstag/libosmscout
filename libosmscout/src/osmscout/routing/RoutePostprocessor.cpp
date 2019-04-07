@@ -413,10 +413,10 @@ namespace osmscout {
         GeoCoord nextCoord=postprocessor.GetCoordinates(*nextNode,
                                                         nextNode->GetCurrentNodeIndex());
 
-        double inBearing=GetSphericalBearingFinal(prevCoord,coord)*180/M_PI;
-        double outBearing=GetSphericalBearingInitial(coord,nextCoord)*180/M_PI;
+        double inBearing=GetSphericalBearingFinal(prevCoord,coord).AsDegrees();
+        double outBearing=GetSphericalBearingInitial(coord,nextCoord).AsDegrees();
 
-        double turnAngle=NormalizeRelativeAngel(outBearing-inBearing);
+        double turnAngle= NormalizeRelativeAngle(outBearing - inBearing);
 
         double curveAngle=turnAngle;
 
@@ -452,10 +452,10 @@ namespace osmscout {
             GeoCoord lookupCoord=postprocessor.GetCoordinates(*lookup,
                                                               lookup->GetCurrentNodeIndex());
 
-            double lookupBearing=GetSphericalBearingInitial(curveBCoord,lookupCoord)*180/M_PI;
+            double lookupBearing=GetSphericalBearingInitial(curveBCoord,lookupCoord).AsDegrees();
 
 
-            double lookupAngle=NormalizeRelativeAngel(lookupBearing-currentBearing);
+            double lookupAngle= NormalizeRelativeAngle(lookupBearing - currentBearing);
 
             // The next node does not have enough direction change to be still part of a turn?
             if (fabs(lookupAngle)<curveMinAngle) {
@@ -468,7 +468,7 @@ namespace osmscout {
             }
 
             currentBearing=lookupBearing;
-            curveAngle=NormalizeRelativeAngel(currentBearing-inBearing);
+            curveAngle= NormalizeRelativeAngle(currentBearing - inBearing);
 
             curveB++;
             lookup++;

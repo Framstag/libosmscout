@@ -34,7 +34,7 @@ POILookupModule::~POILookupModule()
   if (thread!=QThread::currentThread()){
     qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }
@@ -51,7 +51,7 @@ LocationEntry buildLocationEntry(T obj,
   QString objectType = QString::fromUtf8(obj->GetType()->GetName().c_str());
   const osmscout::FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
   const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
-  if (name!=NULL){
+  if (name!=nullptr){
     title=QString::fromStdString(name->GetLabel(0));
     //std::cout << " \"" << name->GetLabel() << "\"";
   }
@@ -62,10 +62,10 @@ LocationEntry buildLocationEntry(T obj,
   return location;
 }
 
-QList<LocationEntry> POILookupModule::lookupPOIRequest(DBInstanceRef db,
-                                                       osmscout::GeoBox searchBoundingBox,
-                                                       osmscout::BreakerRef /*breaker*/,
-                                                       QStringList types)
+QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
+                                                  osmscout::GeoBox searchBoundingBox,
+                                                  osmscout::BreakerRef /*breaker*/,
+                                                  QStringList types)
 {
   QList<LocationEntry> result;
 
@@ -162,7 +162,7 @@ void POILookupModule::lookupPOIRequest(int requestId,
         break;
       }
       emit lookupResult(requestId,
-                        lookupPOIRequest(db, searchBoundingBox, breaker, types));
+                        doPOIlookup(db, searchBoundingBox, breaker, types));
     }
   });
 

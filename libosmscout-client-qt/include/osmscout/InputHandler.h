@@ -86,7 +86,7 @@ public:
           moveTolerance(15)
   {
     timer.setSingleShot(true);
-    connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+    connect(&timer, &QTimer::timeout, this, &TapRecognizer::onTimeout);
   }
 
   virtual inline ~TapRecognizer()

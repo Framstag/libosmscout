@@ -28,6 +28,7 @@
 #include <sstream>
 
 #include <osmscout/util/StopClock.h>
+#include <osmscout/util/Distance.h>
 
 // Since we have a DEBUG enumeration member
 #ifdef DEBUG
@@ -198,6 +199,13 @@ namespace osmscout {
       inline Line& operator<<(const StopClock& value)
       {
         destination.Print(value.ResultString());
+
+        return *this;
+      }
+
+      inline Line& operator<<(const Distance& value)
+      {
+        destination.Print(value.AsString());
 
         return *this;
       }

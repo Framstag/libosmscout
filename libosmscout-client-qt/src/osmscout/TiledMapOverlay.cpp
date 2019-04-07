@@ -26,7 +26,7 @@ namespace osmscout {
 
 TileLoaderThread::TileLoaderThread(QThread *thread):
   thread(thread),
-  tileDownloader(NULL),
+  tileDownloader(nullptr),
   onlineTileCache(OSMScoutQt::GetInstance().GetOnlineTileCacheSize())
 {
   qDebug() << "Overlay tile cache:" << &onlineTileCache;
@@ -34,10 +34,10 @@ TileLoaderThread::TileLoaderThread(QThread *thread):
 
 TileLoaderThread::~TileLoaderThread()
 {
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
-  if (tileDownloader!=NULL){
+  if (tileDownloader!=nullptr){
     delete tileDownloader;
   }
 }
@@ -49,21 +49,21 @@ void TileLoaderThread::init()
   QString tileCacheDirectory=OSMScoutQt::GetInstance().GetCacheLocation();
   tileDownloader = new OsmTileDownloader(tileCacheDirectory,provider);
 
-  connect(tileDownloader, SIGNAL(failed(uint32_t, uint32_t, uint32_t, bool)),
-          this, SLOT(tileDownloadFailed(uint32_t, uint32_t, uint32_t, bool)),
+  connect(tileDownloader, &OsmTileDownloader::failed,
+          this, &TileLoaderThread::tileDownloadFailed,
           Qt::QueuedConnection);
-  connect(tileDownloader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
-          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t, QImage, QByteArray)),
+  connect(tileDownloader, &OsmTileDownloader::downloaded,
+          this, &TileLoaderThread::tileDownloaded,
           Qt::QueuedConnection);
 
-  connect(&onlineTileCache,SIGNAL(tileRequested(uint32_t, uint32_t, uint32_t)),
-          this,SLOT(download(uint32_t, uint32_t, uint32_t)),
+  connect(&onlineTileCache, &TileCache::tileRequested,
+          this, &TileLoaderThread::download,
           Qt::QueuedConnection);
 }
 
 void TileLoaderThread::download(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
 {
-  if (tileDownloader == NULL){
+  if (tileDownloader == nullptr){
     qWarning() << "tile requested but downloader is not initialized yet";
     emit failed(zoomLevel, xtile, ytile);
   }else{
@@ -81,7 +81,7 @@ void TileLoaderThread::onProviderChanged(const OnlineTileProvider &newProvider)
   onlineTileCache.cleanupCache();
 
   provider=newProvider;
-  if (tileDownloader!=NULL){
+  if (tileDownloader!=nullptr){
     emit tileDownloader->onlineTileProviderChanged(provider);
   }
 }
@@ -135,24 +135,24 @@ TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
 
   loader=new TileLoaderThread(thread);
   loader->moveToThread(thread);
-  connect(thread, SIGNAL(started()),
-          loader, SLOT(init()));
+  connect(thread, &QThread::started,
+          loader, &TileLoaderThread::init);
   thread->start();
 
-  connect(this, SIGNAL(providerChanged(const OnlineTileProvider &)),
-          loader, SLOT(onProviderChanged(const OnlineTileProvider &)),
+  connect(this, &TiledMapOverlay::providerChanged,
+          loader, &TileLoaderThread::onProviderChanged,
           Qt::QueuedConnection);
 
-  connect(loader, SIGNAL(downloaded(uint32_t, uint32_t, uint32_t)),
-          this, SLOT(tileDownloaded(uint32_t, uint32_t, uint32_t)),
+  connect(loader, &TileLoaderThread::downloaded,
+          this, &TiledMapOverlay::tileDownloaded,
           Qt::QueuedConnection);
 }
 
 TiledMapOverlay::~TiledMapOverlay()
 {
-  if (loader!=NULL){
+  if (loader!=nullptr){
     loader->deleteLater();
-    loader=NULL;
+    loader=nullptr;
   }
 }
 

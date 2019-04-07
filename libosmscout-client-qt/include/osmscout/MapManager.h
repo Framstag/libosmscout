@@ -33,10 +33,7 @@
 #include <osmscout/FileDownloader.h>
 
 #include <QtGlobal>
-#if QT_VERSION >= 0x050400
-#define HAS_QSTORAGE
 #include <QStorageInfo>
-#endif
 
 namespace osmscout {
 

@@ -243,11 +243,13 @@ else
 endif
 
 # iOSX
-foundationDep = dependency('appleframeworks', modules : 'Foundation', required : false)
-coreGraphicsDep = dependency('appleframeworks', modules : 'CoreGraphics', required : false)
-coreTextDep = dependency('appleframeworks', modules : 'CoreText', required : false)
-cocoaDep = dependency('appleframeworks', modules : 'Cocoa', required : false)
-appKitDep = dependency('appleframeworks', modules : 'AppKit', required : false)
+if build_machine.system()=='darwin'
+  foundationDep = dependency('appleframeworks', modules : 'Foundation', required : false)
+  coreGraphicsDep = dependency('appleframeworks', modules : 'CoreGraphics', required : false)
+  coreTextDep = dependency('appleframeworks', modules : 'CoreText', required : false)
+  cocoaDep = dependency('appleframeworks', modules : 'Cocoa', required : false)
+  appKitDep = dependency('appleframeworks', modules : 'AppKit', required : false)
+endif
 
 if build_machine.system()=='darwin' and foundationDep.found() and coreGraphicsDep.found() and coreTextDep.found() and cocoaDep.found() and appKitDep.found() and get_option('enableMapIOSX')
   buildMapIOSX=true

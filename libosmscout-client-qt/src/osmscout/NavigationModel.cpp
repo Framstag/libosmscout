@@ -50,6 +50,16 @@ NavigationModel::NavigationModel():
   connect(navigationModule, &NavigationModule::rerouteRequest,
           this, &NavigationModel::onRerouteRequest,
           Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::arrivalEstimate,
+          this, &NavigationModel::onArrivalEstimate,
+          Qt::QueuedConnection);
+
+  connect(navigationModule, &NavigationModule::currentSpeed,
+          this, &NavigationModel::onCurrentSpeed,
+          Qt::QueuedConnection);
+  connect(navigationModule, &NavigationModule::maxAllowedSpeed,
+          this, &NavigationModel::onMaxAllowedSpeed,
+          Qt::QueuedConnection);
 }
 
 NavigationModel::~NavigationModel(){
@@ -87,19 +97,49 @@ void NavigationModel::onUpdateNext(RouteStep routeStep)
   emit update();
 }
 
-void NavigationModel::onPositionEstimate(PositionAgent::PositionState state, GeoCoord coord, double bearing)
+void NavigationModel::onPositionEstimate(const PositionAgent::PositionState state,
+                                         const GeoCoord coord,
+                                         const std::shared_ptr<Bearing> bearing)
 {
-  emit positionEstimate(state, coord.GetLat(), coord.GetLon(), bearing);
+  emit positionEstimate(state,
+                        coord.GetLat(), coord.GetLon(),
+                        bearing ? QString::fromStdString(bearing->LongDisplayString()) : "");
 }
 
-void NavigationModel::onTargetReached(double targetBearing, Distance targetDistance)
+void NavigationModel::onTargetReached(const osmscout::Bearing targetBearing,
+                                      const Distance targetDistance)
 {
-  emit targetReached(targetBearing, targetDistance.AsMeter());
+  emit targetReached(QString::fromStdString(targetBearing.LongDisplayString()),
+                     targetDistance.AsMeter());
 }
 
-void NavigationModel::onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to)
+void NavigationModel::onRerouteRequest(const GeoCoord from,
+                                       const std::shared_ptr<Bearing> initialBearing,
+                                       const GeoCoord to)
 {
-  emit rerouteRequest(from.GetLat(), from.GetLon(), initialBearing, to.GetLat(), to.GetLon());
+  emit rerouteRequest(from.GetLat(), from.GetLon(),
+                      initialBearing ? QString::fromStdString(initialBearing->LongDisplayString()) : "",
+                      initialBearing ? initialBearing->AsRadians() : -1,
+                      to.GetLat(), to.GetLon());
+}
+
+void NavigationModel::onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance)
+{
+  this->arrivalEstimate = arrivalEstimate;
+  this->remainingDistance = remainingDistance;
+  emit arrivalUpdate();
+}
+
+void NavigationModel::onCurrentSpeed(double currentSpeed)
+{
+  this->currentSpeed=currentSpeed;
+  emit currentSpeedUpdate(currentSpeed);
+}
+
+void NavigationModel::onMaxAllowedSpeed(double maxAllowedSpeed)
+{
+  this->maxAllowedSpeed=maxAllowedSpeed;
+  emit maxAllowedSpeedUpdate(maxAllowedSpeed);
 }
 
 QObject *NavigationModel::getNextRoutStep()
@@ -128,8 +168,11 @@ void NavigationModel::setRoute(QObject *o)
     routeSteps.reserve(steps.size());
     routeSteps.insert(routeSteps.begin(), steps.begin(), steps.end());
   }
+  arrivalEstimate=QDateTime();
+  remainingDistance=Distance::Zero();
   endResetModel();
 
+  emit arrivalUpdate();
   emit routeChanged(this->route, vehicle);
 }
 
@@ -149,6 +192,8 @@ QVariant NavigationModel::data(const QModelIndex &index, int role) const
       return step.getDescription();
     case TypeRole:
       return step.getType();
+    case RoundaboutExitRole:
+      return step.getRoundaboutExit();
     default:
       break;
   }
@@ -180,6 +225,7 @@ QHash<int, QByteArray> NavigationModel::roleNames() const
   roles[ShortDescriptionRole] = "shortDescription";
   roles[DescriptionRole] = "description";
   roles[TypeRole] = "type";
+  roles[RoundaboutExitRole] = "roundaboutExit";
 
   return roles;
 }

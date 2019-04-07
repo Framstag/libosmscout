@@ -39,6 +39,7 @@
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Distance.h>
+#include <osmscout/util/Bearing.h>
 
 namespace osmscout {
 
@@ -1074,7 +1075,8 @@ namespace osmscout {
    * coordinates of the resulting point in the (WGS-84) ellipsoid.
    */
   extern OSMSCOUT_API void GetEllipsoidalDistance(double lat1, double lon1,
-                                                  double bearing, const Distance &distance,
+                                                  const Bearing &bearing,
+                                                  const Distance &distance,
                                                   double& lat2, double& lon2);
 
   /**
@@ -1083,7 +1085,7 @@ namespace osmscout {
    * coordinates of the resulting point in the (WGS-84) ellipsoid.
    */
   extern OSMSCOUT_API GeoCoord GetEllipsoidalDistance(const GeoCoord& position,
-                                                      double bearing,
+                                                      const Bearing &bearing,
                                                       const Distance &distance);
 
   /**
@@ -1091,27 +1093,22 @@ namespace osmscout {
    * Calculates the initial bearing for a line from one coordinate to the other coordinate
    * on a sphere.
    */
-  extern OSMSCOUT_API double GetSphericalBearingInitial(const GeoCoord& a,
-                                                        const GeoCoord& b);
+  extern OSMSCOUT_API Bearing GetSphericalBearingInitial(const GeoCoord& a,
+                                                         const GeoCoord& b);
 
   /**
    * \ingroup Geometry
    *Calculates the final bearing for a line from one coordinate two the other coordinate
    *on a sphere.
    */
-  extern OSMSCOUT_API double GetSphericalBearingFinal(const GeoCoord& a,
-                                                      const GeoCoord& b);
-
-  /**
-   * COnvert the bearing to to a direction description in releation tothe compass.
-   */
-  extern OSMSCOUT_API std::string BearingDisplayString(double bearing);
+  extern OSMSCOUT_API Bearing GetSphericalBearingFinal(const GeoCoord& a,
+                                                       const GeoCoord& b);
 
   /**
    * \ingroup Geometry
-   * Normalizes the given bearing to be in the interval [-180.0 - 180.0]
+   * Normalizes the given angle (in degrees) to be in the interval [-180.0 - 180.0]
    */
-  extern OSMSCOUT_API double NormalizeRelativeAngel(double angle);
+  extern OSMSCOUT_API double NormalizeRelativeAngle(double angle);
 
   struct OSMSCOUT_API ScanCell
   {

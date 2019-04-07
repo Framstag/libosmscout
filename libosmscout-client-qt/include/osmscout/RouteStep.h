@@ -49,7 +49,8 @@ class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
   Q_PROPERTY(double  timeDelta        READ getTimeDelta        NOTIFY update)
   Q_PROPERTY(QString description      READ getDescription      NOTIFY update)
   Q_PROPERTY(QString shortDescription READ getShortDescription NOTIFY update)
-  Q_PROPERTY(QStringList streetNames  READ getStreetNames()    NOTIFY update)
+  Q_PROPERTY(QStringList streetNames  READ getStreetNames      NOTIFY update)
+  Q_PROPERTY(int roundaboutExit       READ getRoundaboutExit   NOTIFY update)
 
 signals:
   void update();
@@ -64,6 +65,7 @@ public:
   QString description;      //!< Formatted (html) verbose description (translated already)
   QString shortDescription; //!< Plain short description (translated already)
   QStringList streetNames;  //!< Street names leading to this step
+  int roundaboutExit{-1};   //!< when type is "leave-roundabout" this property indicate number of exit
 
 public:
   inline RouteStep() : RouteStep("", Distance::Zero(), Distance::Zero(),
@@ -130,6 +132,11 @@ public:
   QStringList getStreetNames() const
   {
     return streetNames;
+  }
+
+  int getRoundaboutExit() const
+  {
+    return roundaboutExit;
   }
 
 private:

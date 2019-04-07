@@ -52,7 +52,8 @@ RouteStep::RouteStep(const RouteStep& other)
       timeDelta(other.timeDelta),
       description(other.description),
       shortDescription(other.shortDescription),
-      streetNames(other.streetNames)
+      streetNames(other.streetNames),
+      roundaboutExit(other.roundaboutExit)
 {
   copyDynamicProperties(other);
 }
@@ -76,6 +77,7 @@ RouteStep& RouteStep::operator=(const RouteStep& other)
     description=other.description;
     shortDescription=other.shortDescription;
     streetNames=other.streetNames;
+    roundaboutExit=other.roundaboutExit;
     for (auto const &propertyName:dynamicPropertyNames()){
       setProperty(propertyName, QVariant());
     }

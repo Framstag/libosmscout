@@ -29,10 +29,10 @@ namespace osmscout {
 
   struct OSMSCOUT_API BearingChangedMessage CLASS_FINAL : public NavigationMessage
   {
-    const double bearing;
+    const Bearing bearing;
 
     BearingChangedMessage(const Timestamp& timestamp,
-                          double bearing);
+                          const Bearing &bearing);
   };
 
   class OSMSCOUT_API BearingAgent CLASS_FINAL : public NavigationAgent

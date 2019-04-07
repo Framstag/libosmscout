@@ -28,12 +28,12 @@ StyleModule::StyleModule(QThread *thread,DBThreadRef dbThread):
     dbThread(dbThread)
 {
 
-  connect(dbThread.get(), SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
-          this, SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)));
-  connect(dbThread.get(), SIGNAL(stylesheetFilenameChanged()),
-          this, SIGNAL(stylesheetFilenameChanged()));
-  connect(dbThread.get(),SIGNAL(stylesheetFilenameChanged()),
-          this,SLOT(onStyleChanged()),
+  connect(dbThread.get(), &DBThread::initialisationFinished,
+          this, &StyleModule::initialisationFinished);
+  connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
+          this, &StyleModule::stylesheetFilenameChanged);
+  connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
+          this, &StyleModule::onStyleChanged,
           Qt::QueuedConnection);
 }
 
@@ -42,7 +42,7 @@ StyleModule::~StyleModule()
   if (thread!=QThread::currentThread()){
     qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }

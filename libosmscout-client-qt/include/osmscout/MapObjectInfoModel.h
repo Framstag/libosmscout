@@ -65,7 +65,7 @@ public:
 
 signals:
   void readyChange(bool ready);
-  void objectsRequested(const MapViewStruct &view);
+  void objectsOnViewRequested(const MapViewStruct &view);
   void objectsRequested(const LocationEntry &entry);
 
 public slots:

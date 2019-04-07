@@ -32,6 +32,8 @@
 #include <osmscout/navigation/RouteStateAgent.h>
 #include <osmscout/navigation/BearingAgent.h>
 #include <osmscout/navigation/RouteInstructionAgent.h>
+#include <osmscout/navigation/ArrivalEstimateAgent.h>
+#include <osmscout/navigation/SpeedAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -52,12 +54,20 @@ signals:
   void updateNext(RouteStep nextRouteInstruction);
 
   void rerouteRequest(const osmscout::GeoCoord from,
-                      double initialBearing,
+                      const std::shared_ptr<osmscout::Bearing> initialBearing,
                       const osmscout::GeoCoord to);
 
-  void positionEstimate(osmscout::PositionAgent::PositionState state, osmscout::GeoCoord coord, double bearing);
+  void positionEstimate(const osmscout::PositionAgent::PositionState state,
+                        const osmscout::GeoCoord coord,
+                        const std::shared_ptr<osmscout::Bearing> bearing);
 
-  void targetReached(double targetBearing, osmscout::Distance targetDistance);
+  void arrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
+
+  void targetReached(const osmscout::Bearing targetBearing,
+                     const osmscout::Distance targetDistance);
+
+  void currentSpeed(double currentSpeedKmPH);
+  void maxAllowedSpeed(double maxAllowedSpeedKmPh);
 
 public slots:
   void setupRoute(QtRouteData route,
@@ -94,7 +104,7 @@ private:
   SettingsRef settings;
   DBThreadRef dbThread;
   QTimer      timer;
-  double      lastBearing{-1};
+  std::shared_ptr<Bearing> lastBearing; // replace with optional with C++17
 
   osmscout::RouteDescriptionRef routeDescription;
 
@@ -107,6 +117,8 @@ private:
       std::make_shared<osmscout::BearingAgent>(),
       std::make_shared<osmscout::RouteInstructionAgent<RouteStep, RouteDescriptionBuilder>>(),
       std::make_shared<osmscout::RouteStateAgent>(),
+      std::make_shared<osmscout::ArrivalEstimateAgent>(),
+      std::make_shared<osmscout::SpeedAgent>()
   };
 
 };

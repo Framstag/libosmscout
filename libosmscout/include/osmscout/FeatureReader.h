@@ -173,8 +173,8 @@ namespace osmscout {
      * @param buffer
      *    The FeatureValueBuffer instance
      * @return
-     *    A pointer to an instance if the Type and the instance do have the feature and its value is not NULL,
-     *    else NULL
+     *    A pointer to an instance if the Type and the instance do have the feature and its value is not nullptr,
+     *    else nullptr
      */
     V* GetValue(const FeatureValueBuffer& buffer) const;
   };
@@ -218,7 +218,7 @@ namespace osmscout {
       return dynamic_cast<V*>(buffer.GetValue(index));
     }
     else {
-      return NULL;
+      return nullptr;
     }
   }
 

@@ -29,7 +29,6 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 #include <osmscout/util/String.h>
-#include <cairo.h>
 
 namespace osmscout {
 
@@ -289,7 +288,7 @@ namespace osmscout {
     }
 
     for (const auto &entry : fonts) {
-      if (entry.second != NULL) {
+      if (entry.second != nullptr) {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
         pango_font_description_free(entry.second);
 #else

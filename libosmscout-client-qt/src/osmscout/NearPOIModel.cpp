@@ -26,18 +26,18 @@ NearPOIModel::NearPOIModel()
 {
   poiModule=OSMScoutQt::GetInstance().MakePOILookupModule();
 
-  connect(this, SIGNAL(lookupPOI(int, osmscout::BreakerRef, osmscout::GeoCoord, QStringList, double)),
-          poiModule, SLOT(lookupPOIRequest(int, osmscout::BreakerRef, osmscout::GeoCoord, QStringList, double)),
+  connect(this, &NearPOIModel::lookupPOIRequest,
+          poiModule, &POILookupModule::lookupPOIRequest,
           Qt::QueuedConnection);
 
-  connect(poiModule, SIGNAL(lookupAborted(int)),
-          this, SLOT(onLookupFinished(int)),
+  connect(poiModule, &POILookupModule::lookupAborted,
+          this, &NearPOIModel::onLookupFinished,
           Qt::QueuedConnection);
-  connect(poiModule, SIGNAL(lookupFinished(int)),
-          this, SLOT(onLookupFinished(int)),
+  connect(poiModule, &POILookupModule::lookupFinished,
+          this, &NearPOIModel::onLookupFinished,
           Qt::QueuedConnection);
-  connect(poiModule, SIGNAL(lookupResult(int, QList<LocationEntry>)),
-          this, SLOT(onLookupResult(int, QList<LocationEntry>)),
+  connect(poiModule, &POILookupModule::lookupResult,
+          this, &NearPOIModel::onLookupResult,
           Qt::QueuedConnection);
 }
 
@@ -94,8 +94,7 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
     case BearingRole:
       if (searchCenter.GetLat()!=INVALID_COORD && searchCenter.GetLon()!=INVALID_COORD) {
         return QString::fromStdString(
-          osmscout::BearingDisplayString(
-            osmscout::GetSphericalBearingInitial(searchCenter, location->getCoord())));
+            osmscout::GetSphericalBearingInitial(searchCenter, location->getCoord()).LongDisplayString());
       }else{
         return "";
       }
@@ -137,7 +136,7 @@ QHash<int, QByteArray> NearPOIModel::roleNames() const
 QObject* NearPOIModel::get(int row) const
 {
   if(row < 0 || row >= locations.size()) {
-    return NULL;
+    return nullptr;
   }
 
   LocationEntry* location=locations.at(row);
@@ -212,7 +211,7 @@ void NearPOIModel::lookupPOI()
     breaker=std::make_shared<osmscout::ThreadedBreaker>();
     searching=true;
     // TODO: use resultLimit
-    emit lookupPOI(++currentRequest, breaker, searchCenter, types, maxDistance.AsMeter());
+    emit lookupPOIRequest(++currentRequest, breaker, searchCenter, types, maxDistance.AsMeter());
   }else{
     searching=false;
   }

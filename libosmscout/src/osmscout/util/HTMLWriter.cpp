@@ -21,6 +21,7 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/util/Logger.h>
+#include <locale>
 
 namespace osmscout {
 
@@ -312,25 +313,27 @@ namespace osmscout {
                                       const std::string& name)
   {
     try {
-      // TODO: Call WriteLink
+      std::stringstream url;
+      url.imbue(std::locale("C")); // number in link should be locale independent (without thousand delimiter)
 
-      file << "<a href=\"https://www.openstreetmap.org/";
+      url << "https://www.openstreetmap.org/";
 
       switch (object.GetType()) {
       case osmRefNone:
         assert(false);
       case osmRefNode:
-        file << "node";
+        url << "node";
         break;
       case osmRefWay:
-        file << "way";
+        url << "way";
         break;
       case osmRefRelation:
-        file << "relation";
+        url << "relation";
         break;
       }
 
-      file << "/" << std::to_string(object.GetId()) << "\">" << Sanitize(name) << "</a>";
+      url << "/" << std::to_string(object.GetId());
+      WriteLink(url.str(), name);
     }
     catch (std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write object link",e);

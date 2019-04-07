@@ -94,11 +94,11 @@ signals:
 
   void SearchingChanged(bool);
 
-  void lookupPOI(int requestId,
-                 osmscout::BreakerRef breaker,
-                 osmscout::GeoCoord searchCenter,
-                 QStringList types,
-                 double maxDistance);
+  void lookupPOIRequest(int requestId,
+                        osmscout::BreakerRef breaker,
+                        osmscout::GeoCoord searchCenter,
+                        QStringList types,
+                        double maxDistance);
 
 public slots:
   void onLookupFinished(int requestId);

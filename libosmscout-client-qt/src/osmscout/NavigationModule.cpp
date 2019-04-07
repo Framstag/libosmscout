@@ -28,7 +28,7 @@ NavigationModule::NavigationModule(QThread *thread,
   thread(thread), settings(settings), dbThread(dbThread)
 {
   timer.moveToThread(thread); // constructor is called from different thread!
-  connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+  connect(&timer, &QTimer::timeout, this, &NavigationModule::onTimeout);
 }
 
 NavigationModule::~NavigationModule()
@@ -37,7 +37,7 @@ NavigationModule::~NavigationModule()
     qWarning() << "Destroy" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
   qDebug() << "~NavigationModule";
-  if (thread!=NULL){
+  if (thread!=nullptr){
     thread->quit();
   }
 }
@@ -52,7 +52,7 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
     }
     else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingMessage = dynamic_cast<osmscout::BearingChangedMessage *>(message.get());
-      lastBearing=bearingMessage->bearing;
+      lastBearing=std::make_shared<Bearing>(bearingMessage->bearing);
     }
     else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
       auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
@@ -60,7 +60,9 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
     }
     else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
       auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
-      emit rerouteRequest(req->from, req->initialBearing, req->to);
+      emit rerouteRequest(req->from,
+                          req->initialBearing ? std::make_shared<Bearing>(*(req->initialBearing)) : nullptr,
+                          req->to);
     }
     else if (dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
       auto instructions = dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
@@ -73,6 +75,20 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
                     << nextInstruction->nextRouteInstruction.shortDescription.toStdString();
       }
       emit updateNext(nextInstruction->nextRouteInstruction);
+    }
+    else if (dynamic_cast<osmscout::ArrivalEstimateMessage*>(message.get())!=nullptr) {
+      auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+      using namespace std::chrono;
+      emit arrivalEstimate(QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(arrivalMessage->arrivalEstimate.time_since_epoch()).count()),
+                           arrivalMessage->remainingDistance);
+    }
+    else if (dynamic_cast<osmscout::CurrentSpeedMessage*>(message.get())!=nullptr) {
+      auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+      emit currentSpeed(currentSpeedMessage->speed);
+    }
+    else if (dynamic_cast<osmscout::MaxAllowedSpeedMessage*>(message.get())!=nullptr) {
+      auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+      emit maxAllowedSpeed(maxSpeedMessage->maxAllowedSpeed);
     }
   }
 }

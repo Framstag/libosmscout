@@ -49,10 +49,10 @@
 
 namespace osmscout {
 
-static OSMScoutQt* osmScoutInstance=NULL;
+static OSMScoutQt* osmScoutInstance=nullptr;
 
 OSMScoutQtBuilder::OSMScoutQtBuilder():
-  settingsStorage(NULL),
+  settingsStorage(nullptr),
   onlineTileCacheSize(100),
   offlineTileCacheSize(200),
   styleSheetDirectoryConfigured(false),
@@ -73,7 +73,7 @@ OSMScoutQtBuilder::OSMScoutQtBuilder():
 
 bool OSMScoutQtBuilder::Init()
 {
-  if (osmScoutInstance!=NULL){
+  if (osmScoutInstance!=nullptr){
     return false;
   }
 
@@ -128,6 +128,8 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<LocationEntryRef>("LocationEntryRef");
   qRegisterMetaType<osmscout::BreakerRef>("osmscout::BreakerRef");
   qRegisterMetaType<osmscout::Distance>("osmscout::Distance");
+  qRegisterMetaType<osmscout::Bearing>("osmscout::Bearing");
+  qRegisterMetaType<std::shared_ptr<osmscout::Bearing>>("std::shared_ptr<osmscout::Bearing>");
   qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
   qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
   qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");
@@ -193,7 +195,7 @@ void OSMScoutQt::FreeInstance()
     osmscout::log.Warn() << "Some resources still acquired by other components";
   }
   delete osmScoutInstance;
-  osmScoutInstance=NULL;
+  osmScoutInstance=nullptr;
   osmscout::log.Debug() << "OSMScoutQt freed";
 }
 
@@ -229,7 +231,9 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                                       mapManager,
                                       customPoiTypeVector);
 
-  dbThread->connect(thread, SIGNAL(started()), SLOT(Initialize()));
+  connect(thread, &QThread::started,
+          dbThread.get(), &DBThread::Initialize);
+
   dbThread->moveToThread(thread);
 
   thread->start();
@@ -275,10 +279,10 @@ QThread *OSMScoutQt::makeThread(QString name)
 {
   QThread *thread=new QThread();
   thread->setObjectName(name);
-  QObject::connect(thread, SIGNAL(finished()),
-                   thread, SLOT(deleteLater()));
-  connect(thread, SIGNAL(finished()),
-          this, SLOT(threadFinished()));
+  QObject::connect(thread, &QThread::finished,
+                   thread, &QThread::deleteLater);
+  connect(thread, &QThread::finished,
+          this, &OSMScoutQt::threadFinished);
 
   liveBackgroundThreads++;
   return thread;

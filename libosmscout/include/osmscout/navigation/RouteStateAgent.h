@@ -33,12 +33,12 @@ namespace osmscout {
   struct OSMSCOUT_API RerouteRequestMessage CLASS_FINAL : public NavigationMessage
   {
     const GeoCoord from;
-    double initialBearing;
+    const std::shared_ptr<Bearing> initialBearing; // replace with optional with C++17
     const GeoCoord to;
 
     RerouteRequestMessage(const Timestamp& timestamp,
                           const GeoCoord &from,
-                          double initialBearing,
+                          const std::shared_ptr<Bearing> &initialBearing,
                           const GeoCoord &to);
   };
 
@@ -46,13 +46,13 @@ namespace osmscout {
   {
     const GeoCoord coord;
     const GeoCoord target;
-    double targetBearing;
+    const Bearing  targetBearing;
     const Distance targetDistance;
 
     TargetReachedMessage(const Timestamp& timestamp,
                          const GeoCoord &coord,
                          const GeoCoord &target,
-                         double targetBearing,
+                         const Bearing &targetBearing,
                          const Distance &targetDistance);
   };
 
@@ -61,7 +61,7 @@ namespace osmscout {
   private:
     Timestamp lastUpdate;
     PositionAgent::PositionState state;
-    double bearing{-1};
+    std::shared_ptr<Bearing> bearing; // replace with optional with C++17
     GeoCoord target;
     bool targetSetup{false};
 

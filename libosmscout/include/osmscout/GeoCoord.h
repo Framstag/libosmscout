@@ -28,6 +28,7 @@
 
 #include <osmscout/util/Magnification.h>
 #include <osmscout/util/Distance.h>
+#include <osmscout/util/Bearing.h>
 
 #include <osmscout/system/Math.h>
 #include <osmscout/system/Compiler.h>
@@ -256,7 +257,7 @@ namespace osmscout {
     * @note
     *    The difference in height between the two points is neglected.
     */
-    GeoCoord Add(double bearing, const Distance &distance);
+    GeoCoord Add(const Bearing &bearing, const Distance &distance);
 
     /**
      * Return true if both coordinates are equals (using == operator)

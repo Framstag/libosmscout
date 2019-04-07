@@ -126,8 +126,8 @@ namespace osmscout {
 
     void Close();
 
-    RoutePosition GetClosestRoutableNode(const GeoCoord &coord,
-                                         Distance radius=Distance::Of<Kilometer>(1)) const;
+    RoutePositionResult GetClosestRoutableNode(const GeoCoord &coord,
+                                               const Distance &radius=Kilometers(1)) const;
 
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,

@@ -40,13 +40,13 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
                                    QString iconDirectory):
   MapRenderer(thread,settings,dbThread,iconDirectory),
   canvasOverrun(1.5),
-  loadJob(NULL),
+  loadJob(nullptr),
   pendingRenderingTimer(this),
-  currentImage(NULL),
+  currentImage(nullptr),
   currentCoord(0.0,0.0),
   currentAngle(0.0),
   currentMagnification(0),
-  finishedImage(NULL),
+  finishedImage(nullptr),
   finishedCoord(0.0,0.0),
   finishedMagnification(0)
 {
@@ -58,29 +58,29 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
   // else we might get into a dead lock
   //
 
-  connect(this,SIGNAL(TriggerMapRenderingSignal(const MapViewStruct&)),
-          this,SLOT(TriggerMapRendering(const MapViewStruct&)),
+  connect(this, &PlaneMapRenderer::TriggerMapRenderingSignal,
+          this, &PlaneMapRenderer::TriggerMapRendering,
           Qt::QueuedConnection);
 
-  connect(this,SIGNAL(TriggerInitialRendering()),
-          this,SLOT(HandleInitialRenderingRequest()));
+  connect(this, &PlaneMapRenderer::TriggerInitialRendering,
+          this, &PlaneMapRenderer::HandleInitialRenderingRequest);
 
-  connect(&pendingRenderingTimer,SIGNAL(timeout()),
-          this,SLOT(DrawMap()));
+  connect(&pendingRenderingTimer, &QTimer::timeout,
+          this, &PlaneMapRenderer::DrawMap);
 
-  connect(this,SIGNAL(TriggerDrawMap()),
-          this,SLOT(DrawMap()),
+  connect(this, &PlaneMapRenderer::TriggerDrawMap,
+          this, &PlaneMapRenderer::DrawMap,
           Qt::QueuedConnection);
 }
 
 PlaneMapRenderer::~PlaneMapRenderer()
 {
   qDebug() << "~PlaneMapRenderer";
-  if (currentImage!=NULL)
+  if (currentImage!=nullptr)
     delete currentImage;
-  if (finishedImage!=NULL)
+  if (finishedImage!=nullptr)
     delete finishedImage;
-  if (loadJob!=NULL)
+  if (loadJob!=nullptr)
     delete loadJob;
 }
 
@@ -90,7 +90,7 @@ void PlaneMapRenderer::InvalidateVisualCache()
   osmscout::log.Debug() << "Invalidate finished image";
   if (finishedImage)
     delete finishedImage;
-  finishedImage=NULL;
+  finishedImage=nullptr;
 }
 
 /**
@@ -112,7 +112,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     backgroundColor=osmscout::Color(0,0,0);
   }
 
-  if (finishedImage==NULL) {
+  if (finishedImage==nullptr) {
     painter.fillRect(0,
                      0,
                      request.width,
@@ -305,7 +305,7 @@ void PlaneMapRenderer::DrawMap()
 {
   {
     QMutexLocker locker(&lock);
-    if (loadJob==NULL){
+    if (loadJob==nullptr){
       return;
     }
     osmscout::log.Debug() << "DrawMap()";
@@ -313,7 +313,7 @@ void PlaneMapRenderer::DrawMap()
       osmscout::log.Warn() << "Incorrect thread!";
     }
 
-    if (currentImage==NULL ||
+    if (currentImage==nullptr ||
         currentImage->width()!=(int)currentWidth ||
         currentImage->height()!=(int)currentHeight) {
       delete currentImage;
@@ -351,6 +351,8 @@ void PlaneMapRenderer::DrawMap()
 
     drawParameter.SetFontName(fontName.toStdString());
     drawParameter.SetFontSize(fontSize);
+
+    drawParameter.SetShowAltLanguage(showAltLanguage);
 
     drawParameter.SetLabelLineMinCharCount(15);
     drawParameter.SetLabelLineMaxCharCount(30);
@@ -404,7 +406,7 @@ void PlaneMapRenderer::DrawMap()
     if (loadJob->IsFinished()){
       // this slot is may be called from DBLoadJob, we can't delete it now
       loadJob->deleteLater();
-      loadJob=NULL;
+      loadJob=nullptr;
     }
 
     if (!success)  {
@@ -462,10 +464,10 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
   osmscout::log.Debug() << "Start data loading...";
   {
     QMutexLocker locker(&lock);
-    if (loadJob!=NULL){
+    if (loadJob!=nullptr){
       // TODO: check if job contains same tiles...
       loadJob->deleteLater();
-      loadJob=NULL;
+      loadJob=nullptr;
     }
     if (thread!=QThread::currentThread()){
       osmscout::log.Warn() << "Incorrect thread!";
@@ -494,11 +496,11 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
                           /* lowZoomOptimization */ true,
                           /* closeOnFinish */ false);
 
-    connect(loadJob, SIGNAL(tileStateChanged(QString,const osmscout::TileRef)),
-            this, SLOT(HandleTileStatusChanged(QString,const osmscout::TileRef)),
+    connect(loadJob, &DBLoadJob::tileStateChanged,
+            this, &PlaneMapRenderer::HandleTileStatusChanged,
             Qt::QueuedConnection);
-    connect(loadJob, SIGNAL(finished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)),
-            this, SLOT(onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>)));
+    connect(loadJob, &DBLoadJob::finished,
+            this, &PlaneMapRenderer::onLoadJobFinished);
 
     dbThread->RunJob(loadJob);
   }

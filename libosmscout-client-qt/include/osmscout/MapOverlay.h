@@ -50,7 +50,7 @@ public:
   inline void SetMapView(QObject *o)
   {
     MapView *updated = dynamic_cast<MapView*>(o);
-    if (updated == NULL){
+    if (updated == nullptr){
       qWarning() << "Failed to cast " << o << " to MapView*.";
       return;
     }

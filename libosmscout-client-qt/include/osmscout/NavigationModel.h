@@ -42,8 +42,18 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(QObject *routeWay      READ getRouteWay       NOTIFY routeChanged)
   Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
 
+  Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
+  Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
+
+  // km/h, <0 when unkwnown
+  Q_PROPERTY(double currentSpeed    READ getCurrentSpeed    NOTIFY currentSpeedUpdate)
+  // km/h <0 when unknown
+  Q_PROPERTY(double maxAllowedSpeed READ getMaxAllowedSpeed NOTIFY maxAllowedSpeedUpdate)
+
 signals:
   void update();
+
+  void arrivalUpdate();
 
   void routeChanged(QtRouteData route,
                     osmscout::Vehicle vehicle);
@@ -52,12 +62,16 @@ signals:
                       bool horizontalAccuracyValid, double horizontalAccuracy);
 
   void rerouteRequest(double fromLat, double fromLon,
-                      double initialBearing,
+                      const QString bearing,
+                      double bearingAngle,
                       double toLat, double toLon);
 
-  void targetReached(double targetBearing, double targetDistance);
+  void targetReached(QString targetBearing, double targetDistance);
 
-  void positionEstimate(osmscout::PositionAgent::PositionState state, double lat, double lon, double bearing);
+  void positionEstimate(osmscout::PositionAgent::PositionState state, double lat, double lon, QString bearing);
+
+  void currentSpeedUpdate(double currentSpeed);
+  void maxAllowedSpeedUpdate(double maxAllowedSpeed);
 
 public slots:
   void locationChanged(bool locationValid,
@@ -65,16 +79,31 @@ public slots:
                        bool horizontalAccuracyValid, double horizontalAccuracy);
 
   void onUpdate(std::list<RouteStep> instructions);
+
   void onUpdateNext(RouteStep nextRouteInstruction);
-  void onPositionEstimate(PositionAgent::PositionState state, GeoCoord coord, double bearing);
-  void onTargetReached(double targetBearing, osmscout::Distance targetDistance);
-  void onRerouteRequest(const GeoCoord from, double initialBearing, const GeoCoord to);
+
+  void onPositionEstimate(const PositionAgent::PositionState state,
+                          const GeoCoord coord,
+                          const std::shared_ptr<osmscout::Bearing> bearing);
+
+  void onTargetReached(const osmscout::Bearing targetBearing,
+                       const osmscout::Distance targetDistance);
+
+  void onRerouteRequest(const GeoCoord from,
+                        const std::shared_ptr<osmscout::Bearing> initialBearing,
+                        const GeoCoord to);
+
+  void onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
+
+  void onCurrentSpeed(double currentSpeed);
+  void onMaxAllowedSpeed(double maxAllowedSpeed);
 
 public:
   enum Roles {
     ShortDescriptionRole = Qt::UserRole + 1,
     DescriptionRole = Qt::UserRole + 2,
-    TypeRole = Qt::UserRole + 3
+    TypeRole = Qt::UserRole + 3,
+    RoundaboutExitRole = Qt::UserRole + 4
   };
   Q_ENUM(Roles)
 
@@ -101,9 +130,29 @@ public:
   inline OverlayWay* getRouteWay()
   {
     if (!route){
-      return NULL;
+      return nullptr;
     }
     return new OverlayWay(route.routeWay().nodes);
+  }
+
+  inline QDateTime getArrivalEstimate() const
+  {
+    return arrivalEstimate;
+  }
+
+  inline double getRemainingDinstance() const
+  {
+    return remainingDistance.AsMeter();
+  }
+
+  inline double getCurrentSpeed() const
+  {
+    return currentSpeed;
+  }
+
+  inline double getMaxAllowedSpeed() const
+  {
+    return maxAllowedSpeed;
   }
 
 private:
@@ -113,6 +162,12 @@ private:
 
   std::vector<RouteStep> routeSteps;
   RouteStep nextRouteStep;
+
+  QDateTime arrivalEstimate;
+  osmscout::Distance remainingDistance;
+
+  double currentSpeed{-1};
+  double maxAllowedSpeed{-1};
 };
 
 }

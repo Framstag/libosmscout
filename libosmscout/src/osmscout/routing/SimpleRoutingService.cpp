@@ -389,9 +389,8 @@ namespace osmscout {
 
     for (const auto& etap : via) {
       Distance r=radius;
-      RoutePosition target=GetClosestRoutableNode(etap,
-                                                  profile,
-                                                  r);
+      auto posResult=GetClosestRoutableNode(etap, profile, r);
+      RoutePosition target=posResult.GetRoutePosition();
 
       if (!target.IsValid()) {
         return result;
@@ -471,16 +470,16 @@ namespace osmscout {
    *    A reference to a node on a way or area that is routable (if returned
    *    route position is valid)
    */
-  RoutePosition SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
-                                                             const RoutingProfile& profile,
-                                                             const Distance &radius) const
+  RoutePositionResult SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
+                                                                   const RoutingProfile& profile,
+                                                                   const Distance &radius) const
   {
-    TypeConfigRef    typeConfig=database->GetTypeConfig();
-    AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
-    AreaWayIndexRef  areaWayIndex=database->GetAreaWayIndex();
-    AreaDataFileRef  areaDataFile=database->GetAreaDataFile();
-    WayDataFileRef   wayDataFile=database->GetWayDataFile();
-    RoutePosition    position;
+    TypeConfigRef       typeConfig=database->GetTypeConfig();
+    AreaAreaIndexRef    areaAreaIndex=database->GetAreaAreaIndex();
+    AreaWayIndexRef     areaWayIndex=database->GetAreaWayIndex();
+    AreaDataFileRef     areaDataFile=database->GetAreaDataFile();
+    WayDataFileRef      wayDataFile=database->GetWayDataFile();
+    RoutePositionResult position;
 
     if (!typeConfig ||
         !areaAreaIndex ||
@@ -568,7 +567,8 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
 
-          position=RoutePosition(area->GetObjectFileRef(),i,/*database*/0);
+          position=RoutePositionResult(RoutePosition(area->GetObjectFileRef(),i,/*database*/0),
+                                       GetEllipsoidalDistance(coord, area->rings[0].nodes[i].GetCoord()));
         }
       }
     }
@@ -590,9 +590,11 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
           if(r<0.5){
-            position=RoutePosition(way->GetObjectFileRef(),i,/*database*/0);
+            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i,/*database*/0),
+                                         GetEllipsoidalDistance(coord, GeoCoord(intersectLat, intersectLon)));
           } else {
-            position=RoutePosition(way->GetObjectFileRef(),i+1,/*database*/0);
+            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i+1,/*database*/0),
+                                         GetEllipsoidalDistance(coord, GeoCoord(intersectLat, intersectLon)));
           }
         }
       }

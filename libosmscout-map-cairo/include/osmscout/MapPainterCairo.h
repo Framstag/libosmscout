@@ -25,7 +25,7 @@
 #include <mutex>
 #include <unordered_map>
 
-#if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
+#if defined(__WIN32__) || defined(WIN32)
   #include <cairo.h>
 #else
   #include <cairo/cairo.h>

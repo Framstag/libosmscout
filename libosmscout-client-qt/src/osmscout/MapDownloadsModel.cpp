@@ -27,8 +27,8 @@ MapDownloadsModel::MapDownloadsModel(QObject *parent):
   QAbstractListModel(parent){
 
   mapManager=OSMScoutQt::GetInstance().GetMapManager();
-  connect(mapManager.get(), SIGNAL(downloadJobsChanged()), this, SLOT(onDownloadJobsChanged()));
-  connect(mapManager.get(), SIGNAL(mapDownloadFails(QString)), this, SIGNAL(mapDownloadFails(QString)));
+  connect(mapManager.get(), &MapManager::downloadJobsChanged, this, &MapDownloadsModel::onDownloadJobsChanged);
+  connect(mapManager.get(), &MapManager::mapDownloadFails, this, &MapDownloadsModel::mapDownloadFails);
   onDownloadJobsChanged();
 }
 
@@ -77,19 +77,15 @@ QStringList MapDownloadsModel::getLookupDirectories()
 
 double MapDownloadsModel::getFreeSpace(QString dir)
 {
-#ifdef HAS_QSTORAGE
   QStorageInfo storage=QStorageInfo(QDir(dir));
   return storage.bytesAvailable();
-#else
-  return -1;
-#endif
 }
 
 void MapDownloadsModel::onDownloadJobsChanged()
 {
   beginResetModel();
   for (auto job:mapManager->getDownloadJobs()){
-    connect(job, SIGNAL(downloadProgress()), this, SLOT(onDownloadProgress()));
+    connect(job, &MapDownloadJob::downloadProgress, this, &MapDownloadsModel::onDownloadProgress);
   }
   endResetModel();
 }

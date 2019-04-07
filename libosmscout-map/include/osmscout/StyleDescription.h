@@ -489,7 +489,7 @@ namespace osmscout {
         return result->second;
       }
       else {
-        return NULL;
+        return nullptr;
       }
     }
   };
