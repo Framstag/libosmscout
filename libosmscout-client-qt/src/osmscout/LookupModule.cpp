@@ -73,6 +73,64 @@ void LookupModule::requestObjectsOnView(const MapViewStruct &view,
   dbThread->RunJob(loadJob);
 }
 
+void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output
+                                 const NodeRef &n,
+                                 const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                                 LocationServiceRef &locationService,
+                                 std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
+{
+  std::vector<osmscout::Point> nodes;
+  nodes.emplace_back(0, n->GetCoords());
+  addObjectInfo(objectList,
+                "node",
+                n->GetObjectFileRef(),
+                nodes,
+                n->GetCoords(),
+                n,
+                reverseLookupMap,
+                locationService,
+                regionMap);
+}
+
+void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output
+                                 const WayRef &w,
+                   const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                   LocationServiceRef &locationService,
+                   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
+{
+  addObjectInfo(objectList,
+                "way",
+                w->GetObjectFileRef(),
+                w->nodes,
+                w->GetBoundingBox().GetCenter(),
+                w,
+                reverseLookupMap,
+                locationService,
+                regionMap);
+}
+
+void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output
+                                 const AreaRef &a,
+                   const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                   LocationServiceRef &locationService,
+                   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
+{
+  for (const auto &ring:a->rings) {
+    if (!ring.GetType()->GetIgnore()) {
+      addObjectInfo(objectList,
+                    "area",
+                    a->GetObjectFileRef(),
+                    ring.nodes,
+                    ring.GetBoundingBox().GetCenter(),
+                    &ring,
+                    reverseLookupMap,
+                    locationService,
+                    regionMap);
+    }
+  }
+}
+
+
 void LookupModule::requestObjects(const LocationEntry &entry, bool reverseLookupAddresses)
 {
   QList<ObjectInfo> objectList;
@@ -125,47 +183,17 @@ void LookupModule::requestObjects(const LocationEntry &entry, bool reverseLookup
           }
 
           for (auto const &n:mapData.nodes){
-            std::vector<osmscout::Point> nodes;
-            nodes.emplace_back(0, n->GetCoords());
-            addObjectInfo(objectList,
-                          "node",
-                          n->GetObjectFileRef(),
-                          nodes,
-                          n->GetCoords(),
-                          n,
-                          reverseLookupMap,
-                          db->locationService,
-                          regionMap);
+            addObjectInfo(objectList,n,reverseLookupMap,db->locationService,regionMap);
           }
 
           //std::cout << "ways:  " << d.ways.size() << std::endl;
           for (auto const &w:mapData.ways){
-            addObjectInfo(objectList,
-                          "way",
-                          w->GetObjectFileRef(),
-                          w->nodes,
-                          w->GetBoundingBox().GetCenter(),
-                          w,
-                          reverseLookupMap,
-                          db->locationService,
-                          regionMap);
+            addObjectInfo(objectList,w,reverseLookupMap,db->locationService,regionMap);
           }
 
           //std::cout << "areas: " << d.areas.size() << std::endl;
           for (auto const &a:mapData.areas){
-            for (const auto &ring:a->rings) {
-              if (!ring.GetType()->GetIgnore()) {
-                addObjectInfo(objectList,
-                              "area",
-                              a->GetObjectFileRef(),
-                              ring.nodes,
-                              ring.GetBoundingBox().GetCenter(),
-                              &ring,
-                              reverseLookupMap,
-                              db->locationService,
-                              regionMap);
-              }
-            }
+            addObjectInfo(objectList,a,reverseLookupMap,db->locationService,regionMap);
           }
         }
       }
@@ -198,18 +226,7 @@ void LookupModule::filterObjectInView(const osmscout::MapData &mapData,
   for (auto const &n:mapData.nodes){
     projection.GeoToPixel(n->GetCoords(),x,y);
     if (filterRectangle.contains(x,y)){
-      std::vector<osmscout::Point> nodes;
-      nodes.emplace_back(0, n->GetCoords());
-
-      addObjectInfo(objectList,
-                    "node",
-                    n->GetObjectFileRef(),
-                    nodes,
-                    n->GetCoords(),
-                    n,
-                    reverseLookupMap,
-                    locationService,
-                    regionMap);
+      addObjectInfo(objectList,n,reverseLookupMap,locationService,regionMap);
     }
   }
 
@@ -220,15 +237,7 @@ void LookupModule::filterObjectInView(const osmscout::MapData &mapData,
     projection.GeoToPixel(bbox.GetMinCoord(),x,y);
     projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
     if (filterRectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
-      addObjectInfo(objectList,
-                    "way",
-                    w->GetObjectFileRef(),
-                    w->nodes,
-                    w->GetBoundingBox().GetCenter(),
-                    w,
-                    reverseLookupMap,
-                    locationService,
-                    regionMap);
+      addObjectInfo(objectList,w,reverseLookupMap,locationService,regionMap);
     }
   }
 
@@ -239,19 +248,7 @@ void LookupModule::filterObjectInView(const osmscout::MapData &mapData,
     projection.GeoToPixel(bbox.GetMinCoord(),x,y);
     projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
     if (filterRectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
-      for (const auto &ring:a->rings) {
-        if (!ring.GetType()->GetIgnore()) {
-          addObjectInfo(objectList,
-                        "area",
-                        a->GetObjectFileRef(),
-                        ring.nodes,
-                        ring.GetBoundingBox().GetCenter(),
-                        &ring,
-                        reverseLookupMap,
-                        locationService,
-                        regionMap);
-        }
-      }
+      addObjectInfo(objectList,a,reverseLookupMap,locationService,regionMap);
     }
   }
 }

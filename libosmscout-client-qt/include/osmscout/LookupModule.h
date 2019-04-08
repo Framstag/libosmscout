@@ -194,6 +194,24 @@ private:
     objectList << info;
   }
 
+  void addObjectInfo(QList<ObjectInfo> &objectList, // output
+                     const NodeRef &node,
+                     const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                     LocationServiceRef &locationService,
+                     std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
+
+  void addObjectInfo(QList<ObjectInfo> &objectList, // output
+                     const WayRef &way,
+                     const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                     LocationServiceRef &locationService,
+                     std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
+
+  void addObjectInfo(QList<ObjectInfo> &objectList, // output
+                     const AreaRef &area,
+                     const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                     LocationServiceRef &locationService,
+                     std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
+
   AdminRegionInfoRef buildAdminRegionInfo(DBInstanceRef &db,const osmscout::AdminRegionRef &region);
 
   QList<AdminRegionInfoRef> BuildAdminRegionInfoList(AdminRegionInfoRef &bottom,
