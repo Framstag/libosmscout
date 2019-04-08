@@ -93,6 +93,8 @@ QHash<int, QByteArray> MapObjectInfoModel::roleNames() const
   roles[AddressNumberRole]   = "addressNumber";
   roles[PostalCodeRole]      = "postalCode";
   roles[RegionRole]          = "region";
+  roles[LatRole]             = "lat";
+  roles[LonRole]             = "lon";
 
   return roles;
 }
@@ -175,6 +177,12 @@ QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
   }
   if (role==RegionRole){
     return QVariant::fromValue(obj.adminRegionList);
+  }
+  if (role==LatRole){
+    return QVariant::fromValue(obj.center.GetLat());
+  }
+  if (role==LonRole){
+    return QVariant::fromValue(obj.center.GetLon());
   }
 
   //qDebug() << "Undefined role" << role << "("<<LabelRole<<"..."<<NameRole<<")";

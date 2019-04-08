@@ -59,6 +59,8 @@ public:
       AddressNumberRole   = Qt::UserRole+8,
       PostalCodeRole      = Qt::UserRole+9,
       RegionRole          = Qt::UserRole+10,
+      LatRole             = Qt::UserRole+11,
+      LonRole             = Qt::UserRole+12
   };
   Q_ENUM(Roles)
 

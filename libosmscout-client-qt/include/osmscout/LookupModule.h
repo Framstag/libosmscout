@@ -81,6 +81,7 @@ public:
     LocationDescriptionService::ReverseLookupRef reverseLookupRef;
     QStringList adminRegionList;
     uint64_t id;
+    osmscout::GeoCoord center;
     std::vector<osmscout::Point> points;
   };
 
@@ -151,6 +152,7 @@ private:
                                        QString type,
                                        const ObjectFileRef &ref,
                                        const std::vector<osmscout::Point> &points,
+                                       const osmscout::GeoCoord &center,
                                        const T &o,
                                        const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
                                        LocationServiceRef &locationService,
@@ -186,6 +188,7 @@ private:
       info.adminRegionList=BuildAdminRegionList(locationService, it->second.adminRegion, regionMap);
       info.reverseLookupRef=std::make_shared<LocationDescriptionService::ReverseLookupResult>(it->second);
     }
+    info.center=center;
     info.points=points;
 
     objectList << info;
