@@ -366,6 +366,8 @@ namespace osmscout {
       AddressRef     address;     //!< Address data if set
     };
 
+    using ReverseLookupRef = std::shared_ptr<ReverseLookupResult>;
+
   private:
     DatabaseRef database;
 
