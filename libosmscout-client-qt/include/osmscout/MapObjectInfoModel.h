@@ -33,6 +33,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
+#include <iostream>
 
 namespace osmscout {
 
@@ -44,66 +45,46 @@ class OSMSCOUT_CLIENT_QT_API MapObjectInfoModel: public QAbstractListModel
   Q_OBJECT
   Q_PROPERTY(bool ready READ isReady NOTIFY readyChange)
 
-  class ObjectInfo {
-  public:
-    QString type;
-    QString objectType;
-    QString name;
-    uint64_t id;
-    std::vector<osmscout::Point> points;
-  };
 
 public:
   enum Roles {
-      LabelRole  = Qt::UserRole,
-      TypeRole   = Qt::UserRole+1,
-      IdRole     = Qt::UserRole+2,
-      NameRole   = Qt::UserRole+3,
-      ObjectRole = Qt::UserRole+4,
+      LabelRole           = Qt::UserRole,
+      TypeRole            = Qt::UserRole+1,
+      IdRole              = Qt::UserRole+2,
+      NameRole            = Qt::UserRole+3,
+      ObjectRole          = Qt::UserRole+4,
+      PhoneRole           = Qt::UserRole+5,
+      WebsiteRole         = Qt::UserRole+6,
+      AddressLocationRole = Qt::UserRole+7,
+      AddressNumberRole   = Qt::UserRole+8,
+      PostalCodeRole      = Qt::UserRole+9,
+      RegionRole          = Qt::UserRole+10,
+      LatRole             = Qt::UserRole+11,
+      LonRole             = Qt::UserRole+12
   };
   Q_ENUM(Roles)
 
 signals:
   void readyChange(bool ready);
-  void objectsOnViewRequested(const MapViewStruct &view);
-  void objectsRequested(const LocationEntry &entry);
+  void objectsOnViewRequested(const MapViewStruct &view, const QRectF &filterRectangle);
+  void objectsRequested(const LocationEntry &entry, bool reverseLookupAddresses);
 
 public slots:
   void dbInitialized(const DatabaseLoadedResponse&);
   void setPosition(QObject *mapView,
                    const int width, const int height,
                    const int screenX, const int screenY);
-  void onViewObjectsLoaded(const MapViewStruct&, const osmscout::MapData&);
+
+  void onViewObjectsLoaded(const MapViewStruct&,
+                           const QList<LookupModule::ObjectInfo> &objects);
+
   void setLocationEntry(QObject *o);
 
-  void onObjectsLoaded(const LocationEntry &entry, const osmscout::MapData&);
+  void onObjectsLoaded(const LocationEntry &entry,
+                       const QList<LookupModule::ObjectInfo> &objects);
 
 private:
-  void update();
-
-  template<class T> void addObjectInfo(QString type,
-                                       uint64_t id,
-                                       const std::vector<osmscout::Point> &points,
-                                       const T &o)
-  {
-    ObjectInfo info;
-    //std::cout << " - "<<type.toStdString()<<": " << o->GetType()->GetName() << " " << o->GetObjectFileRef().GetFileOffset();
-
-    info.type=type;
-    info.objectType=QString::fromStdString(o->GetType()->GetName());
-    info.id=id;
-
-    const osmscout::FeatureValueBuffer &features=o->GetFeatureValueBuffer();
-    const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
-    if (name!=nullptr){
-      info.name=QString::fromStdString(name->GetLabel(0));
-      //std::cout << " \"" << name->GetLabel() << "\"";
-    }
-    info.points=points;
-
-    //std::cout << std::endl;
-    model << info;
-  }
+  void addToModel(const QList<LookupModule::ObjectInfo> &objects);
 
 public:
   MapObjectInfoModel();
@@ -129,11 +110,11 @@ private:
   bool ready;
   bool setup;
   QList<ObjectKey> objectSet; // set of objects already inserted to model
-  QList<ObjectInfo> model;
+  QList<LookupModule::ObjectInfo> model;
   MapViewStruct view;
+  QRectF filterRectangle;
   LocationEntry locationEntry;
-  int screenX;
-  int screenY;
+
   QList<osmscout::MapData> mapData;
   double mapDpi;
   LookupModule* lookupModule;

@@ -154,6 +154,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<OverlayWay*>("OverlayWay*");
   qRegisterMetaType<OverlayArea*>("OverlayArea*");
   qRegisterMetaType<OverlayNode*>("OverlayNode*");
+  qRegisterMetaType<QList<LookupModule::ObjectInfo>>("QList<LookupModule::ObjectInfo>");
 
   // regiester osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");

@@ -65,7 +65,7 @@ MapObjectInfoModel::~MapObjectInfoModel()
 void MapObjectInfoModel::dbInitialized(const DatabaseLoadedResponse&)
 {
   if (setup){
-    emit objectsOnViewRequested(view);
+    emit objectsOnViewRequested(view,filterRectangle);
   }
 }
 
@@ -82,11 +82,19 @@ QHash<int, QByteArray> MapObjectInfoModel::roleNames() const
 {
   QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
 
-  roles[LabelRole] ="label";
-  roles[TypeRole]  ="type";
-  roles[IdRole]    ="id";
-  roles[NameRole]  ="name";
-  roles[ObjectRole]="object";
+  roles[LabelRole]           = "label";
+  roles[TypeRole]            = "type";
+  roles[IdRole]              = "id";
+  roles[NameRole]            = "name";
+  roles[ObjectRole]          = "object";
+  roles[PhoneRole]           = "phone";
+  roles[WebsiteRole]         = "website";
+  roles[AddressLocationRole] = "addressLocation";
+  roles[AddressNumberRole]   = "addressNumber";
+  roles[PostalCodeRole]      = "postalCode";
+  roles[RegionRole]          = "region";
+  roles[LatRole]             = "lat";
+  roles[LonRole]             = "lon";
 
   return roles;
 }
@@ -98,7 +106,7 @@ QObject* MapObjectInfoModel::createOverlayObject(int row) const
     qDebug() << "Undefined row" << row;
     return o;
   }
-  const ObjectInfo &obj = model.at(row);
+  const LookupModule::ObjectInfo &obj = model.at(row);
   if (!obj.points.empty()){
     if (obj.type=="node"){
       o=new OverlayNode();
@@ -125,7 +133,7 @@ QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
     qDebug() << "Undefined row" << index.row();
     return QVariant();
   }
-  const ObjectInfo &obj = model.at(index.row());
+  const LookupModule::ObjectInfo &obj = model.at(index.row());
 
   if (role==LabelRole){
     return QVariant::fromValue(obj.type);
@@ -144,6 +152,37 @@ QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
 
   if (role==ObjectRole){
     return QVariant::fromValue(createOverlayObject(index.row()));
+  }
+
+  if (role==PhoneRole){
+    return QVariant::fromValue(obj.phone);
+  }
+  if (role==WebsiteRole){
+    return QVariant::fromValue(obj.website);
+  }
+  if (role==AddressNumberRole){
+    return QVariant::fromValue(obj.addressNumber);
+  }
+  if (role==AddressLocationRole){
+    if (!obj.reverseLookupRef || !obj.reverseLookupRef->location){
+      return QVariant("");
+    }
+    return QVariant::fromValue(QString::fromStdString(obj.reverseLookupRef->location->name));
+  }
+  if (role==PostalCodeRole){
+    if (!obj.reverseLookupRef || !obj.reverseLookupRef->postalArea){
+      return QVariant("");
+    }
+    return QVariant::fromValue(QString::fromStdString(obj.reverseLookupRef->postalArea->name));
+  }
+  if (role==RegionRole){
+    return QVariant::fromValue(obj.adminRegionList);
+  }
+  if (role==LatRole){
+    return QVariant::fromValue(obj.center.GetLat());
+  }
+  if (role==LonRole){
+    return QVariant::fromValue(obj.center.GetLon());
   }
 
   //qDebug() << "Undefined role" << role << "("<<LabelRole<<"..."<<NameRole<<")";
@@ -167,20 +206,24 @@ void MapObjectInfoModel::setPosition(QObject *o,
   r.magnification=mapView->magnification;
   r.dpi=mapDpi;
 
-  this->screenX=screenX;
-  this->screenY=screenY;
+  double tolerance=mapDpi/4;
+  QRectF rectangle(screenX-tolerance, screenY-tolerance, tolerance*2, tolerance*2);
+
   this->ready=false;
   emit readyChange(ready);
 
-  if (this->view!=r){
+  if (this->view!=r || this->filterRectangle!=rectangle){
     this->view=r;
+    this->filterRectangle=rectangle;
     beginResetModel();
     model.clear();
     mapData.clear();
     endResetModel();
-    emit objectsOnViewRequested(view);
+
+    emit objectsOnViewRequested(view,rectangle);
   }else{
-    update();
+    // just emit signal that model is ready
+    addToModel(QList<LookupModule::ObjectInfo>());
   }
   setup=true;
 }
@@ -201,94 +244,35 @@ void MapObjectInfoModel::setLocationEntry(QObject *o)
 
   this->ready=false;
   emit readyChange(ready);
-  emit objectsRequested(*location);
+  emit objectsRequested(*location, true);
 }
 
-void MapObjectInfoModel::onObjectsLoaded(const LocationEntry &entry, const osmscout::MapData& data)
+void MapObjectInfoModel::onObjectsLoaded(const LocationEntry &entry,
+                                         const QList<LookupModule::ObjectInfo> &objects)
 {
   if (locationEntry.getDatabase()!=entry.getDatabase() ||
       locationEntry.getReferences()!=entry.getReferences()){
     return; // ignore
   }
 
-  mapData << data;
-  update();
+  addToModel(objects);
 }
 
-void MapObjectInfoModel::onViewObjectsLoaded(const MapViewStruct &view, const osmscout::MapData &data)
+void MapObjectInfoModel::onViewObjectsLoaded(const MapViewStruct &view,
+                                             const QList<LookupModule::ObjectInfo> &objects)
 {
   if (this->view!=view){
     return;
   }
-  mapData << data;
-  update();
+
+  addToModel(objects);
 }
 
-void MapObjectInfoModel::update()
+void MapObjectInfoModel::addToModel(const QList<LookupModule::ObjectInfo> &objects)
 {
-  osmscout::MercatorProjection projection;
-  projection.Set(view.coord, /* angle */ 0, view.magnification, mapDpi, view.width, view.height);
-  projection.SetLinearInterpolationUsage(view.magnification.GetLevel() >= 10);
-
   beginResetModel();
-  model.clear();
-  //std::cout << "object near " << this->screenX << " " << this->screenY << ":" << std::endl;
-
-  double x;
-  double y;
-  double x2;
-  double y2;
-  double tolerance=mapDpi/4;
-  QRectF rectangle(this->screenX-tolerance, this->screenY-tolerance, tolerance*2, tolerance*2);
-  for (auto const &d:mapData){
-
-    //std::cout << "nodes: " << d.nodes.size() << std::endl;
-    for (auto const &n:d.nodes){
-      projection.GeoToPixel(n->GetCoords(),x,y);
-      if (rectangle.contains(x,y)){
-        std::vector<osmscout::Point> nodes;
-        nodes.emplace_back(0, n->GetCoords());
-
-        addObjectInfo("node",
-                      n->GetObjectFileRef().GetFileOffset(),
-                      nodes,
-                      n);
-      }
-    }
-
-    //std::cout << "ways:  " << d.ways.size() << std::endl;
-    for (auto const &w:d.ways){
-      // TODO: better detection
-      osmscout::GeoBox bbox=w->GetBoundingBox();
-      projection.GeoToPixel(bbox.GetMinCoord(),x,y);
-      projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
-      if (rectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
-        addObjectInfo("way",
-                      w->GetObjectFileRef().GetFileOffset(),
-                      w->nodes,
-                      w);
-      }
-    }
-
-    //std::cout << "areas: " << d.areas.size() << std::endl;
-    for (auto const &a:d.areas){
-      // TODO: better detection
-      osmscout::GeoBox bbox=a->GetBoundingBox();
-      projection.GeoToPixel(bbox.GetMinCoord(),x,y);
-      projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
-      if (rectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
-        for (const auto &ring:a->rings) {
-          if (!ring.GetType()->GetIgnore()) {
-            addObjectInfo("area",
-                          a->GetObjectFileRef().GetFileOffset(),
-                          ring.nodes,
-                          &ring);
-          }
-        }
-      }
-    }
-  }
   //std::cout << "count: "<< model.size() << std::endl;
+  model << objects;
   endResetModel();
 
   this->ready=true;
