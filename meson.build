@@ -130,6 +130,7 @@ pangoDep = dependency('pango', required : false)
 pangocairoDep = dependency('pangocairo', required : false)
 pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false)
+gobjectDep = dependency('gobject-2.0',required: false)
 
 # DirectX
 
