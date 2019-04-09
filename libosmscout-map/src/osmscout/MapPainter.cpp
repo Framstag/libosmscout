@@ -689,10 +689,7 @@ namespace osmscout {
 
         data.type=LabelData::Type::Icon;
         data.position=iconStyle->GetPosition();
-
-        // TODO: add priority to icons
-        //data.priority=iconStyle->GetPriority();
-
+        data.priority=iconStyle->GetPriority();
         data.iconStyle=iconStyle;
         data.iconWidth=iconStyle->GetWidth();
         data.iconHeight=iconStyle->GetHeight();
@@ -703,11 +700,8 @@ namespace osmscout {
 
         data.type=LabelData::Type::Symbol;
         data.position=iconStyle->GetPosition();
-
         data.iconStyle=iconStyle;
-
-        // TODO: add priority to symbols
-        //data.priority=iconStyle->GetPriority();
+        data.priority=iconStyle->GetPriority();
 
         data.iconWidth=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth());
         data.iconHeight=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());

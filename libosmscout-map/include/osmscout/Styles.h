@@ -841,7 +841,8 @@ namespace osmscout {
     enum Attribute {
       attrSymbol,
       attrIconName,
-      attrPosition
+      attrPosition,
+      attrPriority
     };
 
   private:
@@ -851,6 +852,7 @@ namespace osmscout {
     unsigned int width;    //!< width of icon in pixels
     unsigned int height;   //!< height of icon in pixels
     size_t       position; //!< Relative vertical position of the label
+    size_t       priority;
 
   public:
     IconStyle();
@@ -866,6 +868,12 @@ namespace osmscout {
     IconStyle& SetWidth(unsigned int w);
     IconStyle& SetHeight(unsigned int h);
     IconStyle& SetPosition(size_t position);
+    IconStyle& SetPriority(size_t priority);
+
+    inline size_t GetPriority() const
+    {
+      return priority;
+    }
 
     inline bool IsVisible() const
     {
