@@ -1513,7 +1513,10 @@ STYLE
 
  [MAG closer-] {
    [TYPE amenity_hospital,
-         amenity_hospital_building] AREA.ICON { symbol: amenity_hospital;}
+         amenity_hospital_building] {
+     AREA.ICON { symbol: amenity_hospital; }
+     NODE.ICON { symbol: amenity_hospital; }
+   }
 
    [TYPE amenity_parking_building] {
      NODE.ICON { symbol: amenity_parking; name: parking; }
