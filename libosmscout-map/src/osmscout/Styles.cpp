@@ -566,7 +566,8 @@ namespace osmscout {
     : color(1.0,0.0,0.0,0.0),
       width(0.0),
       displayOffset(0.0),
-      offset(0.0)
+      offset(0.0),
+      priority(std::numeric_limits<int>::max())
   {
     // no code
   }
@@ -1668,6 +1669,7 @@ namespace osmscout {
       AddAttribute(std::make_shared<StyleSymbolAttributeDescriptor>("symbol",IconStyle::attrSymbol));
       AddAttribute(std::make_shared<StyleStringAttributeDescriptor>("name",IconStyle::attrIconName));
       AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("position",IconStyle::attrPosition));
+      AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("priority",IconStyle::attrPriority));
     }
   };
 
@@ -1677,7 +1679,8 @@ namespace osmscout {
    : iconId(0),
      width(14),
      height(14),
-     position(0)
+     position(0),
+     priority(std::numeric_limits<size_t>::max())
   {
     // no code
   }
@@ -1687,7 +1690,8 @@ namespace osmscout {
     iconId(style.iconId),
     width(style.width),
     height(style.height),
-    position(style.position)
+    position(style.position),
+    priority(style.priority)
   {
     // no code
   }
@@ -1722,6 +1726,9 @@ namespace osmscout {
     switch (attribute) {
     case attrPosition:
       SetPosition(value);
+      break;
+    case attrPriority:
+      SetPriority(value);
       break;
     default:
       assert(false);
@@ -1770,6 +1777,13 @@ namespace osmscout {
     return *this;
   }
 
+  IconStyle& IconStyle::SetPriority(size_t priority)
+  {
+    this->priority=priority;
+
+    return *this;
+  }
+
   StyleDescriptorRef IconStyle::GetDescriptor()
   {
     return iconStyleDescriptor;
@@ -1789,6 +1803,9 @@ namespace osmscout {
         break;
       case attrPosition:
         position=other.position;
+        break;
+      case attrPriority:
+        priority=other.priority;
         break;
       }
     }

@@ -376,7 +376,8 @@ Name         |Type         |Description
 -------------|-------------|-----------
 symbol       |String       |The name of the symbol to draw
 name         |String       |The name of the icon to draw. An icon name is normally mapped onto an external image. The supported image formats depend on the actual backend.
-
+priority     |Int          |numeric value defining a relative priority between icons. Labels with a lower value will be drawn in favour of icons with a higher priority value.
+ 
 ### ShieldStyle - Drawing plates for ways
 
 Currently allowed instances:
