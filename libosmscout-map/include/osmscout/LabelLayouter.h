@@ -181,7 +181,7 @@ namespace osmscout {
     };
 
   public:
-    size_t                priority; //!< Priority of the entry (minimum of priority label elements)
+    size_t                priority{std::numeric_limits<size_t>::max()}; //!< Priority of the entry (minimum of priority label elements)
     // TODO: move priority from label to element
     std::vector<Element>  elements;
   };
@@ -430,9 +430,11 @@ namespace osmscout {
               canvas = &iconCanvas;
 #ifdef DEBUG_LABEL_LAYOUTER
               if (element.labelData.type==LabelData::Icon) {
-                std::cout << "Test icon " << element.labelData.iconStyle->GetIconName();
+                std::cout << "Test icon " << element.labelData.iconStyle->GetIconName() <<
+                             " prio " << currentLabel->priority;
               }else{
-                std::cout << "Test symbol " << element.labelData.iconStyle->GetSymbol()->GetName();
+                std::cout << "Test symbol " << element.labelData.iconStyle->GetSymbol()->GetName() <<
+                             " prio " << currentLabel->priority;
               }
 #endif
             } else {
@@ -614,14 +616,13 @@ namespace osmscout {
                        double objectWidth = 10.0)
     {
       LabelInstanceType instance;
-      instance.priority = std::numeric_limits<size_t>::max();
 
       double offset=-1;
       for (const auto &d:data) {
         typename LabelInstance<NativeGlyph, NativeLabel>::Element element;
         element.labelData=d;
         if (d.type==LabelData::Type::Icon || d.type==LabelData::Type::Symbol){
-          // TODO: icons and symbols don't support priority now
+          instance.priority = std::min(d.priority, instance.priority);
           element.x = point.GetX() - d.iconWidth / 2;
           if (offset<0){
             element.y = point.GetY() - d.iconHeight / 2;
