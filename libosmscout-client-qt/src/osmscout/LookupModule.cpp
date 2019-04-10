@@ -121,7 +121,8 @@ void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output
                     "area",
                     a->GetObjectFileRef(),
                     ring.nodes,
-                    ring.GetBoundingBox().GetCenter(),
+                    // Master ring don't contains nodes! Use intersection of all outer rings instead
+                    (ring.nodes.empty() ? a->GetBoundingBox() : ring.GetBoundingBox()).GetCenter(),
                     &ring,
                     reverseLookupMap,
                     locationService,
