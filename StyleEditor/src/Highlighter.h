@@ -57,7 +57,7 @@ private:
 
     QVector<HighlightingRule> highlightingRules;
 
-    qreal m_baseFontPointSize;
+    qreal m_baseFontPointSize{0};
 
     QRegExp commentStartExpression;
     QRegExp commentEndExpression;

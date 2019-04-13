@@ -75,7 +75,7 @@ private:
 
     QString styleSheetFile;
     QQuickItem *targetComponent;
-    QTextDocument *doc;
+    QTextDocument *doc{nullptr};
     Highlighter *highlighter;
     StyleAnalyser *styleAnalyser;
     QVector<int> lineOffsets;

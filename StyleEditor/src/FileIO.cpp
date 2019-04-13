@@ -165,7 +165,7 @@ bool FileIO::writeTmp()
 
 void FileIO::setTarget(QQuickItem *target)
 {
-    doc = 0;
+    doc = nullptr;
     stopAnalyser();
     if(targetComponent == target){
         return;

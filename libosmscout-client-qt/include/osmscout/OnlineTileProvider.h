@@ -41,7 +41,7 @@ class OSMSCOUT_CLIENT_QT_API OnlineTileProvider: public QObject
   Q_OBJECT
   
 public: 
-  inline OnlineTileProvider(): valid(false){}; 
+  inline OnlineTileProvider(){};
   
   inline OnlineTileProvider(const OnlineTileProvider &o):
     QObject(o.parent()),
@@ -93,11 +93,11 @@ public:
   static OnlineTileProvider fromJson(QJsonValue obj);
 
 private: 
-  bool valid;
+  bool valid{false};
   QString id;
   QString name;
   QStringList servers;
-  int maximumZoomLevel;
+  int maximumZoomLevel{-1};
   QString copyright;
 };
 

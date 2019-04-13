@@ -43,22 +43,32 @@ class OSMSCOUT_CLIENT_QT_API AvailableMapsModelItem : public QObject {
   Q_PROPERTY(QString description READ getDescription())
 
 private:
-  bool valid;
+  bool valid{false};
   QString name;
   QStringList path;
   QString description;
 
 public:
-  inline AvailableMapsModelItem():valid(false){};
+  inline AvailableMapsModelItem(){};
+
   inline AvailableMapsModelItem(QString name, QStringList path, QString description):
     valid(true), name(name), path(path), description(description){};
 
   inline AvailableMapsModelItem(const AvailableMapsModelItem &o):
     QObject(o.parent()),
-    name(o.name), path(o.path), description(o.description){};  
+    valid(o.valid), name(o.name), path(o.path), description(o.description){};
 
   virtual inline ~AvailableMapsModelItem(){}
-    
+
+  inline AvailableMapsModelItem& operator=(const AvailableMapsModelItem &o)
+  {
+    valid=o.valid;
+    name=o.name;
+    path=o.path;
+    description=o.description;
+    return *this;
+  }
+
   inline QString getName() const
   {
     return name;
@@ -119,10 +129,10 @@ class OSMSCOUT_CLIENT_QT_API AvailableMapsModelMap : public AvailableMapsModelIt
 
 private:
   MapProvider provider;
-  size_t size;
+  size_t size{0};
   QString serverDirectory;
   QDateTime creation;
-  int version;
+  int version{-1};
 
 public: 
   inline AvailableMapsModelMap():AvailableMapsModelItem(){};
@@ -142,6 +152,17 @@ public:
   {
     return false;
   };
+
+  inline AvailableMapsModelMap& operator=(const AvailableMapsModelMap &o)
+  {
+    AvailableMapsModelItem::operator=(o);
+    provider=o.provider;
+    size=o.size;
+    serverDirectory=o.serverDirectory;
+    creation=o.creation;
+    version=o.version;
+    return *this;
+  }
 
   MapProvider getProvider() const;
   size_t getSize() const;
