@@ -7,12 +7,29 @@ if [ $# -lt 2 ]; then
   exit 1
 fi
 
+BUILDDIR="$1"
+PROJECT="$2"
 echo "cppcheck wrapper script"
-echo "  build directory: $1"
-echo "  project: $2"
+echo "  build directory: $BUILDDIR"
+echo "  project: $PROJECT"
 
-cd $1
+# Some libraries (like QT) needs build-in compiler macros, 
+# cppcheck pre-processor fails otherwise, see the issue https://trac.cppcheck.net/ticket/8956
+# to workaround that we will create include with these macros
+MACROS=$(mktemp --suffix=.h)
+if [ -z "$CXX" ]; then
+  # try to determine compiler from project json
+  CXX=$(jq -r '.[0].command' < "$PROJECT" | awk '{print $BUILDDIR}')
+fi
+if [ -n "$CXX" ]; then
+  $CXX -dM -E - < /dev/null > "$MACROS"
+  echo "  buildin compiler ($CXX) macros: $MACROS"
+fi
+
+cd $BUILDDIR
 echo "Calling cppcheck..."
-cppcheck -q --force --enable=all --std=c++11 --xml-version=2 --xml $2 2>cppcheck.xml
+cppcheck -q --force --enable=all --std=c++11 --xml-version=2 --include="$MACROS" --xml --project="$PROJECT" 2>cppcheck.xml
 echo "Calling cppcheck-htmlreport..."
 cppcheck-htmlreport --file cppcheck.xml --report-dir=cppcheck
+
+rm "$MACROS"
