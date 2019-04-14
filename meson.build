@@ -372,4 +372,4 @@ endif
 
 run_target('cppcheck', command : ['scripts/cppcheck.sh',
   meson.build_root(),
-  '--project=' +join_paths(meson.build_root(),'compile_commands.json')])
+  join_paths(meson.build_root(),'compile_commands.json')])
