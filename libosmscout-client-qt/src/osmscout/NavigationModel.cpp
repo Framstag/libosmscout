@@ -95,15 +95,20 @@ void NavigationModel::onUpdateNext(RouteStep routeStep)
   // qDebug() << routeStep.getDistanceTo() << "m :" << routeStep.getShortDescription();
   nextRouteStep=routeStep;
   emit update();
+  emit vehiclePositionChanged();
 }
 
 void NavigationModel::onPositionEstimate(const PositionAgent::PositionState state,
                                          const GeoCoord coord,
                                          const std::shared_ptr<Bearing> bearing)
 {
+  this->vehicleState=state;
+  this->vehicleCoord=coord;
+  this->vehicleBearing=bearing;
   emit positionEstimate(state,
                         coord.GetLat(), coord.GetLon(),
                         bearing ? QString::fromStdString(bearing->LongDisplayString()) : "");
+  emit vehiclePositionChanged();
 }
 
 void NavigationModel::onTargetReached(const osmscout::Bearing targetBearing,

@@ -30,6 +30,49 @@
 namespace osmscout {
 
 /**
+ * \ingroup QtAPI
+ *
+ * Object aggregating estimated data about vehicle during navigation.
+ */
+class OSMSCOUT_CLIENT_QT_API VehiclePosition: public QObject
+{
+  Q_OBJECT
+
+  Q_PROPERTY(double   lat       READ getLat)
+  Q_PROPERTY(double   lon       READ getLon)
+
+public:
+  inline VehiclePosition(QObject *parent = 0) : QObject(parent)
+  {}
+
+  inline VehiclePosition(const Vehicle &vehicle,
+                         const PositionAgent::PositionState &state,
+                         const GeoCoord &coord,
+                         const std::shared_ptr<Bearing> &bearing,
+                         const std::shared_ptr<GeoCoord> &nextStepCoord,
+                         QObject *parent = 0):
+      QObject(parent), vehicle(vehicle), state(state), coord(coord), bearing(bearing), nextStepCoord(nextStepCoord)
+  {}
+
+  inline double getLat() const
+  {
+    return coord.GetLat();
+  }
+
+  inline double getLon() const
+  {
+    return coord.GetLon();
+  }
+
+private:
+  Vehicle vehicle;
+  PositionAgent::PositionState state;
+  GeoCoord coord;
+  std::shared_ptr<Bearing> bearing;
+  std::shared_ptr<GeoCoord> nextStepCoord;
+};
+
+/**
  * Model providing navigation functionality to QML.
  * Main logic sits in osmscout::Navigation class and its Qt wrapper NavigationModule.
  *
@@ -41,6 +84,8 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(QObject *route         READ getRoute          WRITE setRoute NOTIFY routeChanged)
   Q_PROPERTY(QObject *routeWay      READ getRouteWay       NOTIFY routeChanged)
   Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
+
+  Q_PROPERTY(QObject *vehiclePosition  READ getVehiclePosition    NOTIFY vehiclePositionChanged)
 
   Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
   Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
@@ -54,6 +99,8 @@ signals:
   void update();
 
   void arrivalUpdate();
+
+  void vehiclePositionChanged();
 
   void routeChanged(QtRouteData route,
                     osmscout::Vehicle vehicle);
@@ -135,6 +182,15 @@ public:
     return new OverlayWay(route.routeWay().nodes);
   }
 
+  inline VehiclePosition* getVehiclePosition() const
+  {
+    if (!route){
+      return nullptr;
+    }
+    return new VehiclePosition(vehicle, vehicleState, vehicleCoord, vehicleBearing,
+        nextRouteStep.getType().isEmpty() ? nullptr : std::make_shared<GeoCoord>(nextRouteStep.GetCoord()));
+  }
+
   inline QDateTime getArrivalEstimate() const
   {
     return arrivalEstimate;
@@ -158,7 +214,11 @@ public:
 private:
   NavigationModule* navigationModule;
   QtRouteData       route;
-  osmscout::Vehicle vehicle;
+
+  Vehicle vehicle;
+  PositionAgent::PositionState vehicleState;
+  GeoCoord vehicleCoord;
+  std::shared_ptr<osmscout::Bearing> vehicleBearing;
 
   std::vector<RouteStep> routeSteps;
   RouteStep nextRouteStep;
