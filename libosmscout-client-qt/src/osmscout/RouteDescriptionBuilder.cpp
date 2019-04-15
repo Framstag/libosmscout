@@ -498,12 +498,14 @@ void RouteDescriptionBuilder::Callback::OnPathNameChange(const osmscout::RouteDe
 void RouteDescriptionBuilder::Callback::BeforeNode(const RouteDescription::Node& node)
 {
   distance=node.GetDistance();
+  coord=node.GetLocation();
   time=node.GetTime();
 }
 
 RouteStep RouteDescriptionBuilder::Callback::MkStep(const QString &name)
 {
   RouteStep step(name,
+                 coord,
                  distance,
                  distance-distancePrevious,
                  time,

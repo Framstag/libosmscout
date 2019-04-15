@@ -56,6 +56,7 @@ public:
 
     QStringList streetNames;       //!< Stack of route names to next steps
 
+    GeoCoord coord;
     Distance distance;
     Distance distancePrevious;
     Duration time;
