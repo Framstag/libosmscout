@@ -26,8 +26,8 @@
 
 namespace osmscout {
 
-  const double latConversionFactor=134217727.0/180.0; // 27 Bit
-  const double lonConversionFactor=134217727.0/360.0; // 27 Bit
+  const double latConversionFactor=(double)maxRawCoordValue/180.0; // 27 Bit
+  const double lonConversionFactor=(double)maxRawCoordValue/360.0; // 27 Bit
 
   Id GeoCoord::GetId() const
   {

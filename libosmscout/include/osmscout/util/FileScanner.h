@@ -105,6 +105,81 @@ namespace osmscout {
      */
     char* ReadInternal(size_t bytes);
 
+    /**
+     * Set coordinates using raw data from file.
+     *
+     * When NDEBUG macro is not defined,
+     * check if GeoCoord is normalised,
+     * throw IO exception otherwise
+     *
+     * @param latDat raw latitude data
+     * @param lonDat raw longitude data
+     * @param coord output
+     */
+    inline void SetCoord(const uint32_t &latDat,
+                         const uint32_t &lonDat,
+                         GeoCoord &coord)
+    {
+#ifndef NDEBUG
+      if (latDat > maxRawCoordValue ||
+          lonDat > maxRawCoordValue){
+        hasError=true;
+        throw IOException(filename,"Cannot read coordinate","Coordinate is not normalised");
+      }
+#endif
+
+      coord.Set(latDat/latConversionFactor-90.0,
+                lonDat/lonConversionFactor-180.0);
+    }
+
+    /**
+     * Set coordinates using raw data from file.
+     *
+     * When NDEBUG macro is not defined,
+     * check if GeoCoord is normalised,
+     * throw IO exception otherwise
+     *
+     * @param latDat raw latitude data
+     * @param lonDat raw longitude data
+     * @param coord output
+     */
+    inline void SetCoord(const uint32_t &latDat,
+                         const uint32_t &lonDat,
+                         Point &point)
+    {
+#ifndef NDEBUG
+      if (latDat > maxRawCoordValue ||
+          lonDat > maxRawCoordValue){
+        hasError=true;
+        throw IOException(filename,"Cannot read coordinate","Coordinate is not normalised");
+      }
+#endif
+
+      point.SetCoord(GeoCoord(latDat/latConversionFactor-90.0,
+                              lonDat/lonConversionFactor-180.0));
+    }
+
+    /**
+     * Covert raw data to boolean
+     *
+     * When NDEBUG macro is not defined,
+     * check if value is normalised,
+     * throw IO exception otherwise
+     *
+     * @param value
+     * @return boolean value
+     */
+    inline bool ConvertBool(const char &value)
+    {
+#ifndef NDEBUG
+      if (value != 0 && value != 1){
+        hasError=true;
+        throw IOException(filename,"Cannot read bool","Bool value is not normalised");
+      }
+#endif
+      return value!=0;
+    }
+
   public:
     FileScanner();
     virtual ~FileScanner();

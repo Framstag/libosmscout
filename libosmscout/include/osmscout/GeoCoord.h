@@ -52,6 +52,8 @@ namespace osmscout {
    */
   extern OSMSCOUT_API const double latConversionFactor;
 
+  constexpr uint32_t maxRawCoordValue = 0x7FFFFFF; // 134217727
+
   /**
    * \ingroup Util
    * Number of bytes needed to store a lat,lon coordinate pair.
