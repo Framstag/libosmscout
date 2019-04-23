@@ -422,7 +422,9 @@ namespace osmscout {
     FileOffset previousOffset=0;
 
     for (const auto& tileEntry : tileData) {
-      //writer.WriteCoord(tileEntry.first);
+      if (storeGeoCoord) {
+        writer.WriteCoord(tileEntry.first);
+      }
       writer.WriteNumber(tileEntry.second-previousOffset);
 
       previousOffset=tileEntry.second;
