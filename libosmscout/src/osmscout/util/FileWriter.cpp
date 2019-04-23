@@ -724,6 +724,12 @@ namespace osmscout {
     if (HasError()) {
       throw IOException(filename,"Cannot write coordinate","File already in error state");
     }
+    if (coord.GetLat() > 90 ||
+        coord.GetLat() < -90 ||
+        coord.GetLon() > 180 ||
+        coord.GetLon() < -180){
+      throw IOException(filename,"Cannot write coordinate","Coordinate is not normalised");
+    }
 
     uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
     uint32_t lonValue=(uint32_t)round((coord.GetLon()+180.0)*lonConversionFactor);
