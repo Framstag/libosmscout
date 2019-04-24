@@ -431,7 +431,7 @@ code {
 }
 
 pre code * {
-  white-space: nowrap;
+  white-space: pre;
 }
 
 .highlight pre {
