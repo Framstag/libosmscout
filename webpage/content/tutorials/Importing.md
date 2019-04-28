@@ -206,10 +206,19 @@ is dumped:
    Import OK!
 ```
 
-## Optimizing the import process
+## Optimizing the import process and resulting database
 
-TODO
+Default Import configuration should provide reasonable defaults for required memory during import, 
+size of resulting database and required resources for rendering. But for some inputs may be too strict
+or too generous for various special usecases. It is beneficial to know Importer options and its impact. 
 
-## Optimizing the resulting database
+ - #### Some huge area (wood, lake..) is missing on the map
+   
+   When you are sure that such area is present in input data, inspect import log
+   and look for object id (id of OSM relation). When you find this message: `Relation XXX references too many ways (YYY)`
+   consider increase default limit for relation members with argument by option `--relMaxWays`.
+   This limit is here for performance reasons of redering, huge objects needs to be loaded 
+   in the device memory completely and its rendering is slow. But some object are just
+   huge :-) Take a look to [Finish lake "Inarijärvi" with 3118 members](https://www.openstreetmap.org/relation/402543).   
+      
 
-TODO
