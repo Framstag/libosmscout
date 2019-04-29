@@ -402,7 +402,7 @@ TYPES
       {Name, NameAlt}
 
   TYPE highway_bus_stop
-    = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND "public_transport"=="platform"))
+    = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND ("public_transport" IN ["platform", "stop_position"])))
       {Name, NameAlt}
 
   TYPE highway_turning_cycle
@@ -555,7 +555,7 @@ TYPES
       {Name, NameAlt}
 
   TYPE railway_tram_stop
-    = NODE ("railway"=="tram_stop")
+    = NODE ("railway"=="tram_stop" OR (("tram" IN ["yes", "true", "1"]) AND ("public_transport" IN ["platform", "stop_position"])))
       {Name, NameAlt}
 
   TYPE railway_crossing
