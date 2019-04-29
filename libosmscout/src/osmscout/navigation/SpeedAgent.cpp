@@ -66,7 +66,7 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
         result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp,speed));
       }
       // pop fifo
-      while (!segmentFifo.empty() && fifoDuration>seconds(5)){
+      while (!segmentFifo.empty() && fifoDuration>seconds(3)){
         fifoDuration-=segmentFifo.front().duration;
         segmentFifo.pop_front();
       }
