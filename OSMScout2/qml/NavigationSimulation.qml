@@ -87,6 +87,7 @@ Window {
         id: map
         anchors.fill: parent
         showCurrentPosition: true
+        vehiclePosition: navigationModel.vehiclePosition
     }
     RowLayout {
         id: simulatorControl

@@ -33,8 +33,7 @@ namespace osmscout {
 static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
-    : QQuickPaintedItem(parent),
-      renderingType(RenderingType::PlaneRendering)
+    : QQuickPaintedItem(parent)
 {
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);

@@ -40,6 +40,7 @@ class OSMSCOUT_CLIENT_QT_API VehiclePosition: public QObject
 
   Q_PROPERTY(double   lat       READ getLat)
   Q_PROPERTY(double   lon       READ getLon)
+  Q_PROPERTY(double   bearing   READ getBearingRadians)
 
 public:
   inline VehiclePosition(QObject *parent = 0) : QObject(parent)
@@ -54,6 +55,16 @@ public:
       QObject(parent), vehicle(vehicle), state(state), coord(coord), bearing(bearing), nextStepCoord(nextStepCoord)
   {}
 
+  inline VehiclePosition & operator=(const VehiclePosition &o)
+  {
+    vehicle=o.vehicle;
+    state=o.state;
+    coord=o.coord;
+    bearing=o.bearing;
+    nextStepCoord=o.nextStepCoord;
+    return *this;
+  }
+
   inline double getLat() const
   {
     return coord.GetLat();
@@ -62,6 +73,26 @@ public:
   inline double getLon() const
   {
     return coord.GetLon();
+  }
+
+  inline std::shared_ptr<Bearing> getBearing() const
+  {
+    return bearing;
+  }
+
+  inline double getBearingRadians() const
+  {
+    return bearing ? bearing->AsRadians() : 0;
+  }
+
+  inline std::shared_ptr<GeoCoord> getNextStepCoord() const
+  {
+    return nextStepCoord;
+  }
+
+  inline PositionAgent::PositionState getState() const
+  {
+    return state;
   }
 
 private:

@@ -34,6 +34,7 @@
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMScoutQt.h>
 #include <osmscout/OverlayObject.h>
+#include <osmscout/NavigationModel.h>
 
 namespace osmscout {
 
@@ -56,6 +57,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
 {
   Q_OBJECT
   Q_PROPERTY(QObject  *view    READ GetView     WRITE SetMapView  NOTIFY viewChanged)
+  Q_PROPERTY(QObject  *vehiclePosition READ GetVehiclePosition WRITE SetVehiclePosition)
   Q_PROPERTY(double   lat      READ GetLat      NOTIFY viewChanged)
   Q_PROPERTY(double   lon      READ GetLon      NOTIFY viewChanged)
   Q_PROPERTY(int      zoomLevel READ GetMagLevel NOTIFY viewChanged)
@@ -76,7 +78,8 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
 private:
   MapRenderer      *renderer{nullptr};
 
-  MapView          *view;
+  MapView          *view{nullptr};
+  VehiclePosition  *vehiclePosition{nullptr};
 
   InputHandler     *inputHandler{nullptr};
   TapRecognizer    tapRecognizer;     
@@ -93,8 +96,8 @@ private:
   CurrentLocation currentPosition;
   bool showCurrentPosition{false};
 
-  RenderingType renderingType;
-  
+  RenderingType renderingType{RenderingType::PlaneRendering};
+
   QMap<int, osmscout::GeoCoord> marks;
 
 signals:
@@ -227,6 +230,33 @@ public:
       setupInputHandler(new InputHandler(*updated));
       changeView(*updated);
     }
+  }
+
+  inline VehiclePosition* GetVehiclePosition() const
+  {
+    return vehiclePosition;
+  }
+
+  inline void SetVehiclePosition(QObject *o)
+  {
+    VehiclePosition *updated = dynamic_cast<VehiclePosition*>(o);
+    if (o != nullptr && updated == nullptr){
+      qWarning() << "Failed to cast " << o << " to VehiclePosition*.";
+      return;
+    }
+    if (updated == nullptr){
+      if (vehiclePosition != nullptr) {
+        delete vehiclePosition;
+        vehiclePosition = nullptr;
+      }
+    }else{
+      if (vehiclePosition==nullptr){
+        vehiclePosition = new VehiclePosition(this);
+      }
+      *vehiclePosition = *updated;
+    }
+
+    // TODO: handle change
   }
 
   inline double GetLat() const
