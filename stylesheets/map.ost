@@ -118,6 +118,7 @@ GRADES
     "sett"
     "tarred"
     "tartan"
+    "iron"
   }
 
   SURFACE GRADE 2 {
@@ -133,6 +134,7 @@ GRADES
     "stone"
     "wood"
     "marble"
+    "panel"
   }
 
   SURFACE GRADE 3 {
@@ -151,6 +153,9 @@ GRADES
   SURFACE GRADE 4 {
     "artificial_turf"
     "bark_mulch"
+    "stones"
+    "rock"
+    "rocks"
   }
 
 FEATURES
