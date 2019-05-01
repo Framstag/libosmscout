@@ -43,20 +43,17 @@ SpeedAgent::SpeedAgent()
 
 std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &message)
 {
-  std::list<NavigationMessageRef> result;
-  auto positionMsg = dynamic_cast<osmscout::PositionAgent::PositionMessage *>(message.get());
-  if (positionMsg==nullptr) {
-    return result;
-  }
-
   using namespace std::chrono;
+  std::list<NavigationMessageRef> result;
+
   // compute actual speed
-  if (positionMsg->position.state==PositionAgent::PositionState::OnRoute ||
-      positionMsg->position.state==PositionAgent::PositionState::OffRoute){
+  auto gpsUpdateMsg = dynamic_cast<GPSUpdateMessage*>(message.get());
+  if (gpsUpdateMsg &&
+      gpsUpdateMsg->horizontalAccuracy < Meters(100)){
 
     if (lastPosition){
-      segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,positionMsg->position.coord),
-                             positionMsg->timestamp-lastPosition.time});
+      segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,gpsUpdateMsg->currentPosition),
+                             gpsUpdateMsg->timestamp-lastPosition.time});
       Timestamp::duration fifoDuration{Timestamp::duration::zero()};
       Distance fifoDistance;
       for (const auto &s:segmentFifo){
@@ -66,36 +63,39 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
       auto sec=duration_cast<duration<double>>(fifoDuration);
       if (sec.count()>0){
         double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
-        result.push_back(std::make_shared<CurrentSpeedMessage>(positionMsg->timestamp,speed));
+        result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp,speed));
       }
       // pop fifo
-      while (!segmentFifo.empty() && fifoDuration>seconds(5)){
+      while (!segmentFifo.empty() && fifoDuration>seconds(3)){
         fifoDuration-=segmentFifo.front().duration;
         segmentFifo.pop_front();
       }
     }
-    lastPosition={positionMsg->position.coord, positionMsg->timestamp};
+    lastPosition={gpsUpdateMsg->currentPosition, gpsUpdateMsg->timestamp};
   }
 
   // obtain max speed
-  MaxSpeedFeatureValue *maxSpeedValue=nullptr;
-  if (positionMsg->position.typeConfig) {
-    MaxSpeedFeatureValueReader reader(*(positionMsg->position.typeConfig));
-    if (positionMsg->position.way) {
-      maxSpeedValue = reader.GetValue(positionMsg->position.way->GetFeatureValueBuffer());
+  auto positionMsg = dynamic_cast<osmscout::PositionAgent::PositionMessage *>(message.get());
+  if (positionMsg) {
+    MaxSpeedFeatureValue *maxSpeedValue = nullptr;
+    if (positionMsg->position.typeConfig) {
+      MaxSpeedFeatureValueReader reader(*(positionMsg->position.typeConfig));
+      if (positionMsg->position.way) {
+        maxSpeedValue = reader.GetValue(positionMsg->position.way->GetFeatureValueBuffer());
+      }
+      if (maxSpeedValue == nullptr && positionMsg->position.area) {
+        maxSpeedValue = reader.GetValue(positionMsg->position.area->GetFeatureValueBuffer());
+      }
     }
-    if (maxSpeedValue == nullptr && positionMsg->position.area) {
-      maxSpeedValue = reader.GetValue(positionMsg->position.area->GetFeatureValueBuffer());
+    double maxSpeed = -1;
+    if (maxSpeedValue) {
+      maxSpeed = maxSpeedValue->GetMaxSpeed();
     }
-  }
-  double maxSpeed=-1;
-  if (maxSpeedValue){
-    maxSpeed=maxSpeedValue->GetMaxSpeed();
-  }
-  if (lastReportedMaxSpeed!=maxSpeed) {
-    result.push_back(std::make_shared<MaxAllowedSpeedMessage>(positionMsg->timestamp,
-                                                              maxSpeed, maxSpeed > 0));
-    lastReportedMaxSpeed=maxSpeed;
+    if (lastReportedMaxSpeed != maxSpeed) {
+      result.push_back(std::make_shared<MaxAllowedSpeedMessage>(positionMsg->timestamp,
+                                                                maxSpeed, maxSpeed > 0));
+      lastReportedMaxSpeed = maxSpeed;
+    }
   }
 
   return result;
