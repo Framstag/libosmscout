@@ -267,7 +267,11 @@ namespace osmscout {
     //@{
     void RegisterSurfaceToGradeMapping(const std::string& surface,
                                        size_t grade);
-    bool GetGradeForSurface(const std::string& surface,
+    /**
+     * \note surface has multiple values often ("asphalt;ground;gravel")
+     * use first that is matching to some grade
+     */
+    bool GetGradeForSurface(const std::string& surfaceValue,
                             size_t& grade) const;
     //@}
 

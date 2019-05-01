@@ -174,6 +174,13 @@ ScanConversion = executable('ScanConversion',
              link_with: [osmscout],
              install: false)
 
+StringUtils = executable('StringUtils',
+             'src/StringUtils.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: false)
+
 ThreadedDatabase = executable('ThreadedDatabase',
              'src/ThreadedDatabase.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
@@ -248,6 +255,7 @@ test('Check impl. of geometric functions', Geometry)
 test('Check rotation of maps', MapRotate)
 test('Check correctness of NumberSet class', NumberSet)
 test('Check scan conversion code', ScanConversion)
+test('Check string utils', StringUtils)
 test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)
 test('Check implementation of work queue', WorkQueue)

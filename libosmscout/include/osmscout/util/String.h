@@ -302,13 +302,25 @@ namespace osmscout {
 
   /**
    * \ingroup Util
+   * Split string by separator. For arguments "asphalt;ground;gravel" and ";" return list of three...
+   *
+   * \note when stringList is empty, result is empty list
+   * \note separator must not be empty
+   * \note when string ends with separator, last (empty) element is omited
+   */
+  extern OSMSCOUT_API std::list<std::string> SplitString(const std::string& stringList,
+                                                         const std::string& separator);
+
+
+  /**
+   * \ingroup Util
    * Assumes that the string consists of a number of values separated by one of the given divider.
    * If the list consists of one entry, no divider is used.
    *
    * Returns the first entry in the list
    *
    * \note stringList must not be empty
-   * \note at least one devidier must be given
+   * \note at least one devider must be given
    */
   extern OSMSCOUT_API std::string GetFirstInStringList(const std::string& stringList,
                                                        const std::string& divider);

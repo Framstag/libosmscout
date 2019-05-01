@@ -259,6 +259,27 @@ namespace osmscout {
     return tokens;
   }
 
+  extern OSMSCOUT_API std::list<std::string> SplitString(const std::string& stringList,
+                                                         const std::string& separator)
+  {
+    assert(!separator.empty());
+
+    std::string remaining=stringList;
+    std::list<std::string> result;
+    while (!remaining.empty()) {
+      std::string::size_type pos = remaining.find(separator);
+
+      if (pos == std::string::npos) {
+        result.push_back(remaining);
+        remaining.clear();
+      }else{
+        result.push_back(remaining.substr(0, pos));
+        remaining.erase(0, pos + separator.length());
+      }
+    }
+    return result;
+  }
+
   std::string GetFirstInStringList(const std::string& stringList,
                                    const std::string& divider)
   {

@@ -152,6 +152,13 @@ target_include_directories(ScanConversion PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/in
 target_link_libraries(ScanConversion OSMScout)
 add_test(NAME ScanConversion COMMAND ScanConversion)
 
+#---- StringUtils
+add_executable(StringUtils src/StringUtils.cpp)
+set_property(TARGET StringUtils PROPERTY CXX_STANDARD 11)
+target_include_directories(StringUtils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(StringUtils OSMScout)
+add_test(NAME StringUtils COMMAND StringUtils)
+
 #---- TilingTest
 add_executable(TilingTest src/TilingTest.cpp)
 set_property(TARGET TilingTest PROPERTY CXX_STANDARD 11)
