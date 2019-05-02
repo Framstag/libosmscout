@@ -123,6 +123,7 @@ void FileDownloader::startDownload()
   QNetworkRequest request(m_url);
   request.setHeader(QNetworkRequest::UserAgentHeader,
                     OSMScoutQt::GetInstance().GetUserAgent());
+  request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
   if (m_downloaded > 0)
     {

@@ -63,9 +63,6 @@ AvailableMapsModel::AvailableMapsModel()
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
   mapProviders = settings->GetMapProviders();
 
-  connect(&webCtrl, &QNetworkAccessManager::finished,
-          this, &AvailableMapsModel::listDownloaded);
-
   diskCache.setCacheDirectory(settings->GetHttpCacheDir());
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
@@ -83,11 +80,16 @@ void AvailableMapsModel::reload()
                                    osmscout::TypeConfig::MAX_FORMAT_VERSION,
                                    locale.name());
     QNetworkRequest request(url);
-    requests[url]=provider;
 
     request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
-    webCtrl.get(request);
+
+    QNetworkReply *reply = webCtrl.get(request);
+    requests++;
+    connect(reply, &QNetworkReply::finished, [provider, this, reply](){
+      this->listDownloaded(provider, reply);
+    });
   }
   emit loadingChanged();
 }
@@ -124,62 +126,58 @@ bool itemLessThan(const AvailableMapsModelItem *i1, const AvailableMapsModelItem
   return i1->getName().localeAwareCompare(i2->getName()) < 0;
 }
 
-void AvailableMapsModel::listDownloaded(QNetworkReply* reply)
+void AvailableMapsModel::listDownloaded(const MapProvider &provider, QNetworkReply* reply)
 {
   beginResetModel();
-  
+  requests--;
+
   QUrl url = reply->url();
-  if (!requests.contains(url)){
-    qWarning() << "Response from non-requested url: " << url;
+  if (reply->error() != QNetworkReply::NoError){
+    qWarning() << "Downloading " << url << "failed with " << reply->errorString();
+    fetchError=reply->errorString();
   }else{
-    MapProvider provider=requests.value(url);
-    requests.remove(url);
-    if (reply->error() != QNetworkReply::NoError){
-      qWarning() << "Downloading " << url << "failed with " << reply->errorString();
-      fetchError=reply->errorString();
-    }else{
-      QByteArray downloadedData = reply->readAll();
-      QJsonDocument doc = QJsonDocument::fromJson(downloadedData);
-      for (const QJsonValueRef &ref: doc.array()){
-        if (!ref.isObject())
-          continue;
-        QJsonObject obj=ref.toObject();
-        auto dir=obj.value("dir");
-        auto name=obj.value("name");
-        auto description=obj.value("description");
-        if (!name.isString())
-          continue;
-        if (dir.isString()){
-          append(new AvailableMapsModelDir(name.toString(), dir.toString().split('/'), description.toString()));
+    QByteArray downloadedData = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(downloadedData);
+    for (const QJsonValueRef &ref: doc.array()){
+      if (!ref.isObject())
+        continue;
+      QJsonObject obj=ref.toObject();
+      auto dir=obj.value("dir");
+      auto name=obj.value("name");
+      auto description=obj.value("description");
+      if (!name.isString())
+        continue;
+      if (dir.isString()){
+        append(new AvailableMapsModelDir(name.toString(), dir.toString().split('/'), description.toString()));
+      }else{
+        auto map=obj.value("map");
+        auto sizeObj=obj.value("size");
+        auto serverDirectory=obj.value("directory");
+        auto timestamp=obj.value("timestamp");
+        auto version=obj.value("version");
+
+        double size=0;
+        if (sizeObj.isDouble()){
+          size=sizeObj.toDouble();
+        }else if (sizeObj.isString()){
+          size=sizeObj.toString().toDouble();
+        }
+        if (map.isString() && serverDirectory.isString() &&
+            timestamp.isDouble() && version.isDouble()){
+
+          QDateTime creation;
+          creation.setTime_t(timestamp.toDouble());
+
+          append(new AvailableMapsModelMap(name.toString(), map.toString().split('/'), description.toString(),
+                                           provider, size, serverDirectory.toString(),
+                                           creation, version.toDouble()));
         }else{
-          auto map=obj.value("map");
-          auto sizeObj=obj.value("size");
-          auto serverDirectory=obj.value("directory");
-          auto timestamp=obj.value("timestamp");
-          auto version=obj.value("version");
-          
-          double size=0;
-          if (sizeObj.isDouble()){
-            size=sizeObj.toDouble();
-          }else if (sizeObj.isString()){
-            size=sizeObj.toString().toDouble();
-          }
-          if (map.isString() && serverDirectory.isString() &&
-              timestamp.isDouble() && version.isDouble()){
-            
-            QDateTime creation;
-            creation.setTime_t(timestamp.toDouble());
-            
-            append(new AvailableMapsModelMap(name.toString(), map.toString().split('/'), description.toString(), 
-                                             provider, size, serverDirectory.toString(), 
-                                             creation, version.toDouble()));
-          }else{
-            qWarning() << "Invalid item:" << obj;
-          }
+          qWarning() << "Invalid item:" << obj;
         }
       }
     }
   }
+
   qSort(items.begin(), items.end(), itemLessThan);
   reply->deleteLater();
   
