@@ -205,7 +205,7 @@ signals:
   void loadingChanged();
 
 public slots:
-  void listDownloaded(QNetworkReply*);
+  void listDownloaded(const MapProvider &provider, QNetworkReply*);
   void reload();
 
 public:
@@ -250,7 +250,7 @@ public:
    Q_INVOKABLE QObject* mapByPath(QStringList path);
 
   inline bool isLoading(){
-    return !requests.isEmpty();
+    return requests>0;
   }
 
   inline QString getFetchError(){
@@ -264,7 +264,7 @@ private:
   QNetworkAccessManager     webCtrl; 
   QNetworkDiskCache         diskCache;
   QList<MapProvider>        mapProviders;
-  QHash<QUrl,MapProvider>   requests;
+  size_t                    requests{0};
   QList<AvailableMapsModelItem*> items;
   QString                   fetchError;
 };

@@ -32,9 +32,6 @@ OsmTileDownloader::OsmTileDownloader(QString diskCacheDir,
   serverNumber(qrand()),
   tileProvider(provider)
 {
-  connect(&webCtrl, &QNetworkAccessManager::finished,
-          this, &OsmTileDownloader::fileDownloaded);
- 
   /** http://wiki.openstreetmap.org/wiki/Tile_usage_policy
    * 
    * - Valid User-Agent identifying application. Faking another app's User-Agent WILL get you blocked.
@@ -55,7 +52,6 @@ OsmTileDownloader::~OsmTileDownloader() {
 void OsmTileDownloader::onlineTileProviderChanged(const OnlineTileProvider &provider)
 {
   tileProvider=provider;
-  requests.clear();
 }
 
 void OsmTileDownloader::download(uint32_t zoomLevel, uint32_t x, uint32_t y)
@@ -80,40 +76,37 @@ void OsmTileDownloader::download(uint32_t zoomLevel, uint32_t x, uint32_t y)
   qDebug() << "Download tile" << tileUrl << "(current thread:" << QThread::currentThread() << ")";
   
   TileCacheKey key = {zoomLevel, x, y};
-  requests.insert(tileUrl, key);
   
   QNetworkRequest request(tileUrl);
   request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
+  request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
   //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
-  webCtrl.get(request);
+
+  QNetworkReply *reply = webCtrl.get(request);
+  connect(reply, &QNetworkReply::finished, [key, this, reply](){ this->fileDownloaded(key, reply); });
 }
   
-void OsmTileDownloader::fileDownloaded(QNetworkReply* reply)
+void OsmTileDownloader::fileDownloaded(const TileCacheKey &key, QNetworkReply *reply)
 { 
   QUrl url = reply->url();
-  if (!requests.contains(url)){
-    qWarning() << "Response from non-requested url:" << url;
-  }else{
     
-    TileCacheKey key = requests.value(url);
-    requests.remove(url);
-    if (reply->error() != QNetworkReply::NoError){
-      qWarning() << "Downloading" << url << "failed with" << reply->errorString();
-      serverNumber = qrand(); // try another server for future requests
-      emit failed(key.zoomLevel, key.xtile, key.ytile, false);
-    }else{
-      QByteArray downloadedData = reply->readAll();
+  if (reply->error() != QNetworkReply::NoError){
+    qWarning() << "Downloading" << url << "failed with" << reply->errorString();
+    serverNumber = qrand(); // try another server for future requests
+    emit failed(key.zoomLevel, key.xtile, key.ytile, false);
+  }else{
+    QByteArray downloadedData = reply->readAll();
 
-      QImage image;
-      if (image.loadFromData(downloadedData, Q_NULLPTR)){    
-        qDebug() << "Downloaded tile " << url << " (current thread: " << QThread::currentThread() << ")";
-        emit downloaded(key.zoomLevel, key.xtile, key.ytile, image, downloadedData);
-      }else{
-        qWarning() << "Failed to load image data from " << url;
-        emit failed(key.zoomLevel, key.xtile, key.ytile, false);
-      }
+    QImage image;
+    if (image.loadFromData(downloadedData, Q_NULLPTR)){
+      qDebug() << "Downloaded tile " << url << " (current thread: " << QThread::currentThread() << ")";
+      emit downloaded(key.zoomLevel, key.xtile, key.ytile, image, downloadedData);
+    }else{
+      qWarning() << "Failed to load image data from " << url;
+      emit failed(key.zoomLevel, key.xtile, key.ytile, false);
     }
   }
+
   reply->deleteLater();
 }
 }

@@ -55,12 +55,11 @@ signals:
   void failed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
 
 private slots:
-  void fileDownloaded(QNetworkReply* pReply);
+  void fileDownloaded(const TileCacheKey &key, QNetworkReply *reply);
  
 private:
   int                       serverNumber;
   QNetworkAccessManager     webCtrl;
-  QHash<QUrl,TileCacheKey>  requests;
   QNetworkDiskCache         diskCache;
   OnlineTileProvider        tileProvider;
 
