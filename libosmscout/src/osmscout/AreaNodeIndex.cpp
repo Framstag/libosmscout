@@ -88,11 +88,13 @@ namespace osmscout {
         scanner.ReadCoord(minCoord);
         scanner.ReadCoord(maxCoord);
 
-        nodeTypeData[typeId].boundingBox.Set(minCoord,maxCoord);
+        TypeData& entry=nodeTypeData[typeId];
 
-        if (!nodeTypeData[typeId].isComplex) {
-          scanner.ReadFileOffset(nodeTypeData[typeId].indexOffset);
-          scanner.Read(nodeTypeData[typeId].entryCount);
+        entry.boundingBox.Set(minCoord,maxCoord);
+
+        if (!entry.isComplex) {
+          scanner.ReadFileOffset(entry.indexOffset);
+          scanner.Read(entry.entryCount);
         }
       }
 
