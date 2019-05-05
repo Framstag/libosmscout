@@ -107,6 +107,13 @@ namespace osmscout {
       OSMId                                    lastWayId;
       OSMId                                    lastRelationId;
 
+      OSMId                                    minNodeId;
+      OSMId                                    maxNodeId;
+      OSMId                                    minWayId;
+      OSMId                                    maxWayId;
+      OSMId                                    minRelationId;
+      OSMId                                    maxRelationId;
+
       bool                                     nodeSortingError;
       bool                                     waySortingError;
       bool                                     relationSortingError;

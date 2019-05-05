@@ -141,6 +141,12 @@ namespace osmscout {
     lastNodeId(std::numeric_limits<OSMId>::min()),
     lastWayId(std::numeric_limits<OSMId>::min()),
     lastRelationId(std::numeric_limits<OSMId>::min()),
+    minNodeId(std::numeric_limits<OSMId>::max()),
+    maxNodeId(std::numeric_limits<OSMId>::min()),
+    minWayId(std::numeric_limits<OSMId>::max()),
+    maxWayId(std::numeric_limits<OSMId>::min()),
+    minRelationId(std::numeric_limits<OSMId>::max()),
+    maxRelationId(std::numeric_limits<OSMId>::min()),
     nodeSortingError(false),
     waySortingError(false),
     relationSortingError(false)
@@ -223,6 +229,9 @@ namespace osmscout {
   {
     RawCoord rawCoord;
 
+    minNodeId=std::min(minNodeId,data.id);
+    maxNodeId=std::max(maxNodeId,data.id);
+
     rawCoord.SetOSMId(data.id);
     rawCoord.SetCoord(data.coord);
 
@@ -255,6 +264,9 @@ namespace osmscout {
     RawWay      way;
     bool        isCoastline=false;
     bool        isDataPolygon=false;
+
+    minWayId=std::min(minWayId,data.id);
+    maxWayId=std::max(maxWayId,data.id);
 
     if (data.nodes.size()<2) {
       parameter.GetErrorReporter()->ReportWay(data.id,
@@ -476,6 +488,9 @@ namespace osmscout {
   void Preprocess::Callback::RelationSubTask(const RawRelationData& data,
                                              ProcessedData& processed)
   {
+    minRelationId=std::min(minRelationId,data.id);
+    maxRelationId=std::max(maxRelationId,data.id);
+
     if (data.members.empty()) {
       progress.Warning("Relation "+
                        std::to_string(data.id)+
@@ -820,6 +835,37 @@ namespace osmscout {
       progress.Info(std::string("Coastlines:       ")+std::to_string(coastlineCount));
       progress.Info(std::string("Turnrestrictions: ")+std::to_string(turnRestrictionCount));
       progress.Info(std::string("Multipolygons:    ")+std::to_string(multipolygonCount));
+
+      if (minNodeId!=std::numeric_limits<OSMId>::max() &&
+          maxNodeId!=std::numeric_limits<OSMId>::min()) {
+        progress.Info(std::string("Min. node id:     ")+std::to_string(minNodeId));
+        progress.Info(std::string("Max. node id:     ")+std::to_string(maxNodeId));
+
+        if (maxNodeId>std::numeric_limits<uint32_t>::max()) {
+          progress.Warning(std::string("Import contains node ids > uint32_t"));
+        }
+      }
+
+      if (minWayId!=std::numeric_limits<OSMId>::max() &&
+          maxWayId!=std::numeric_limits<OSMId>::min()) {
+        progress.Info(std::string("Min. way id:      ")+std::to_string(minWayId));
+        progress.Info(std::string("Max. way id:      ")+std::to_string(maxWayId));
+
+        if (maxWayId>std::numeric_limits<uint32_t>::max()) {
+          progress.Warning(std::string("Import contains way ids > uint32_t"));
+        }
+      }
+
+      if (minRelationId!=std::numeric_limits<OSMId>::max() &&
+          maxRelationId!=std::numeric_limits<OSMId>::min()) {
+        progress.Info(std::string("Min. relation id: ")+std::to_string(minRelationId));
+        progress.Info(std::string("Max. relation id: ")+std::to_string(maxRelationId));
+
+        if (maxNodeId>std::numeric_limits<uint32_t>::max()) {
+          progress.Warning(std::string("Import contains relation ids > uint32_t"));
+        }
+
+      }
 
       for (const auto &type : typeConfig->GetTypes()) {
         size_t      i=type->GetIndex();
