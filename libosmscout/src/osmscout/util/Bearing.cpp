@@ -34,7 +34,7 @@ namespace osmscout {
 
   std::string Bearing::DisplayString() const
   {
-    int grad=(int)round(AsDegrees());
+    double grad=round(AsDegrees());
 
     if (grad>=0 && grad<=45) {
       return "N";
@@ -50,6 +50,9 @@ namespace osmscout {
     }
     else if (grad>315 && grad<=360) {
       return "N";
+    }
+    else if (std::isnan(grad)){
+      return "?";
     }
 
     assert(false);
@@ -86,6 +89,9 @@ namespace osmscout {
     }
     else if (grad>327.5 && grad<=360) {
       return "N";
+    }
+    else if (std::isnan(grad)){
+      return "?";
     }
 
     assert(false);

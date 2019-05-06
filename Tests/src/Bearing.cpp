@@ -26,6 +26,16 @@ TEST_CASE("Normalise") {
   REQUIRE(bearing.AsDegrees()==270);
 }
 
+TEST_CASE("NaN") {
+  auto nan=osmscout::Bearing::Radians(NAN);
+  REQUIRE(nan.DisplayString() == "?");
+  REQUIRE(nan.LongDisplayString() == "?");
+
+  auto inf=osmscout::Bearing::Radians(INFINITY);
+  REQUIRE(inf.DisplayString() == "?");
+  REQUIRE(inf.LongDisplayString() == "?");
+}
+
 TEST_CASE("North") {
   osmscout::GeoCoord a(-1.0,0.0);
   osmscout::GeoCoord b(1.0,0.0);
