@@ -55,6 +55,10 @@ int main()
     uint32_t              in32u;
     uint64_t              in64u;
 
+    int16_t              in16s;
+    int32_t              in32s;
+    int64_t              in64s;
+
     osmscout::GeoCoord    inCoord1;
 
     std::vector<osmscout::Point> inCoords1;
@@ -79,6 +83,18 @@ int main()
     uint64_t              out64u1=std::numeric_limits<uint64_t>::min();
     uint64_t              out64u2=std::numeric_limits<uint64_t>::max()/2;
     uint64_t              out64u3=std::numeric_limits<uint64_t>::max();
+
+    int16_t               out16s1=std::numeric_limits<int16_t>::min();
+    int16_t               out16s2=std::numeric_limits<int16_t>::max()/2;
+    int16_t               out16s3=std::numeric_limits<int16_t>::max();
+
+    int32_t               out32s1=std::numeric_limits<int32_t>::min();
+    int32_t               out32s2=std::numeric_limits<int32_t>::max()/2;
+    int32_t               out32s3=std::numeric_limits<int32_t>::max();
+
+    int64_t               out64s1=std::numeric_limits<int64_t>::min();
+    int64_t               out64s2=std::numeric_limits<int64_t>::max()/2;
+    int64_t               out64s3=std::numeric_limits<int64_t>::max();
 
     osmscout::FileOffset  outfo1=std::numeric_limits<osmscout::FileOffset>::min();
     osmscout::FileOffset  outfo2=std::numeric_limits<osmscout::FileOffset>::max()/2;
@@ -168,6 +184,18 @@ int main()
     writer.WriteNumber(out64u1);
     writer.WriteNumber(out64u2);
     writer.WriteNumber(out64u3);
+
+    writer.WriteNumber(out16s1);
+    writer.WriteNumber(out16s2);
+    writer.WriteNumber(out16s3);
+
+    writer.WriteNumber(out32s1);
+    writer.WriteNumber(out32s2);
+    writer.WriteNumber(out32s3);
+
+    writer.WriteNumber(out64s1);
+    writer.WriteNumber(out64s2);
+    writer.WriteNumber(out64s3);
 
     writer.WriteFileOffset(outfo1);
     writer.WriteFileOffset(outfo2);
@@ -311,6 +339,60 @@ int main()
       scanner.ReadNumber(in64u);
       if (in64u!=out64u3) {
         std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in16s);
+      if (in16s!=out16s1) {
+        std::cerr << "Read/WriteNumber(int16_t): Expected " << out16s1 << ", got " << in16s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in16s);
+      if (in16s!=out16s2) {
+        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16s2 << ", got " << in16s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in16s);
+      if (in16s!=out16s3) {
+        std::cerr << "Read/WriteNumber(int16_t): Expected " << out16s3 << ", got " << in16s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in32s);
+      if (in32s!=out32s1) {
+        std::cerr << "Read/WriteNumber(int32_t): Expected " << out32s1 << ", got " << in32s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in32s);
+      if (in32s!=out32s2) {
+        std::cerr << "Read/WriteNumber(int32_t): Expected " << out32s2 << ", got " << in32s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in32s);
+      if (in32s!=out32s3) {
+        std::cerr << "Read/WriteNumber(int32_t): Expected " << out32s3 << ", got " << in32s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in64s);
+      if (in64s!=out64s1) {
+        std::cerr << "Read/WriteNumber(int64_t): Expected " << out64s1 << ", got " << in64s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in64s);
+      if (in64s!=out64s2) {
+        std::cerr << "Read/WriteNumber(int64_t): Expected " << out64s2 << ", got " << in64s << std::endl;
+        errors++;
+      }
+
+      scanner.ReadNumber(in64s);
+      if (in64s!=out64s3) {
+        std::cerr << "Read/WriteNumber(int64_t): Expected " << out64s3 << ", got " << in64s << std::endl;
         errors++;
       }
 
