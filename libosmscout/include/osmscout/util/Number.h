@@ -34,7 +34,7 @@ namespace osmscout {
    * \ingroup Util
    * Encode a signed number into the given buffer using some variable length encoding.
    *
-   * The first bit (if set) signals a negative numer. The highest bit in a byte
+   * The first bit (if set) signals a negative number. The highest bit in a byte
    * is set, if there is an additional byte following. So we use one bit
    * for signaling signess and use 7 of 8 bytes per byte for data.
    *
@@ -165,7 +165,7 @@ namespace osmscout {
 
     // negative form
     if ((*buffer & 0x01)!=0) {
-      char val=(*buffer & 0x7e) >> 1;
+      N val=(*buffer & 0x7e) >> 1;
 
       number=-1;
       nextShift=6;
@@ -181,7 +181,7 @@ namespace osmscout {
       number^=static_cast<N>(val) << shift;
     }
     else {
-      char val=(*buffer & 0x7e) >> 1;
+      N val=(*buffer & 0x7e) >> 1;
 
       number=0;
       nextShift=6;

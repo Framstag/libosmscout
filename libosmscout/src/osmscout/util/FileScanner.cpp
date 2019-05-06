@@ -1719,7 +1719,7 @@ namespace osmscout {
 
     // negative form
     if ((buffer & 0x01)!=0) {
-      char val=(buffer & 0x7e) >> 1;
+      int16_t val=(buffer & 0x7e) >> 1;
 
       number=-1;
       nextShift=6;
@@ -1740,7 +1740,7 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      char val=(buffer & 0x7e) >> 1;
+      int16_t val=(buffer & 0x7e) >> 1;
 
       number=0;
       nextShift=6;
@@ -1800,7 +1800,7 @@ namespace osmscout {
 
     // negative form
     if ((buffer & 0x01)!=0) {
-      char val=(buffer & 0x7e) >> 1;
+      int32_t val=(buffer & 0x7e) >> 1;
 
       number=-1;
       nextShift=6;
@@ -1821,7 +1821,7 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      char val=(buffer & 0x7e) >> 1;
+      int32_t val=(buffer & 0x7e) >> 1;
 
       number=0;
       nextShift=6;
@@ -1880,7 +1880,7 @@ namespace osmscout {
 
     // negative form
     if ((buffer & 0x01)!=0) {
-      char val=(buffer & 0x7e) >> 1;
+      int64_t val=(buffer & 0x7e) >> 1;
 
       number=-1;
       nextShift=6;
@@ -1901,7 +1901,7 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      char val=(buffer & 0x7e) >> 1;
+      int64_t val=(buffer & 0x7e) >> 1;
 
       number=0;
       nextShift=6;
