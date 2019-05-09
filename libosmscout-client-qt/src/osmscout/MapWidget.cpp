@@ -34,10 +34,6 @@ static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
     : QQuickPaintedItem(parent),
-      renderer(nullptr),
-      inputHandler(nullptr),
-      showCurrentPosition(false),
-      finished(false),
       renderingType(RenderingType::PlaneRendering)
 {
     setOpaquePainting(true);
@@ -262,14 +258,14 @@ void MapWidget::paint(QPainter *painter)
     }
 
     // render current position spot
-    if (showCurrentPosition && locationValid){
+    if (showCurrentPosition && currentPosition.valid){
         double x;
         double y;
-        projection.GeoToPixel(osmscout::GeoCoord(currentPosition.GetLat(), currentPosition.GetLon()), x, y);
+        projection.GeoToPixel(currentPosition.coord, x, y);
         if (boundingBox.contains(x, y)){
 
-            if (horizontalAccuracyValid){
-                double diameter = horizontalAccuracy * projection.GetMeterInPixel();
+            if (currentPosition.horizontalAccuracyValid){
+                double diameter = currentPosition.horizontalAccuracy * projection.GetMeterInPixel();
                 if (diameter > 25.0 && diameter < std::max(request.width, request.height)){
                     painter->setBrush(QBrush(QColor::fromRgbF(1.0, 1.0, 1.0, 0.4)));
                     painter->setPen(QColor::fromRgbF(1.0, 1.0, 1.0, 0.7));
@@ -277,10 +273,16 @@ void MapWidget::paint(QPainter *painter)
                 }
             }
 
-            // TODO: take DPI into account
-            painter->setBrush(QBrush(QColor::fromRgbF(0,1,0, .6)));
+            if (currentPosition.lastUpdate.secsTo(QDateTime::currentDateTime()) > 60) {
+                // outdated, use greyed green
+                painter->setBrush(QBrush(QColor::fromRgb(0x73, 0x8d, 0x73, 0x99)));
+            }else{
+                // updated, use green
+                painter->setBrush(QBrush(QColor::fromRgb(0, 0xff, 0, 0x99)));
+            }
             painter->setPen(QColor::fromRgbF(0.0, 0.5, 0.0, 0.9));
-            painter->drawEllipse(x - 10, y - 10, 20, 20);
+            double dimension = projection.ConvertWidthToPixel(2.8);
+            painter->drawEllipse(x - dimension/2, y - dimension/2, dimension, dimension);
         }
     }
 
@@ -297,8 +299,8 @@ void MapWidget::paint(QPainter *painter)
         for (auto &entry: marks){
             projection.GeoToPixel(osmscout::GeoCoord(entry.GetLat(), entry.GetLon()), x, y);
             if (boundingBox.contains(x, y)){
-                // TODO: take DPI into account
-                painter->drawEllipse(x - 20, y - 20, 40, 40);
+                double dimension = projection.ConvertWidthToPixel(6);
+                painter->drawEllipse(x - dimension/2, y - dimension/2, dimension, dimension);
             }
         }
     }
@@ -455,9 +457,9 @@ void MapWidget::reloadTmpStyle() {
 
 void MapWidget::setLockToPosition(bool lock){
     if (lock){
-        if (!inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3)){
+        if (!inputHandler->currentPosition(currentPosition.valid, currentPosition.coord, std::min(width(), height()) / 3)){
             setupInputHandler(new LockHandler(*view));
-            inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3);
+            inputHandler->currentPosition(currentPosition.valid, currentPosition.coord, std::min(width(), height()) / 3);
         }
     }else{
         setupInputHandler(new InputHandler(*view));
@@ -532,7 +534,7 @@ void MapWidget::showLocation(LocationEntry* location)
   qDebug() << "Show location: " << location;
 
   osmscout::GeoCoord center;
-  Distance dimension = Distance::Of<Meter>(10);
+  Distance dimension = Meters(10);
   if (location->getBBox().IsValid()){
     center = location->getBBox().GetCenter();
     dimension = osmscout::GetEllipsoidalDistance(location->getBBox().GetMinCoord(),
@@ -541,20 +543,23 @@ void MapWidget::showLocation(LocationEntry* location)
     center = location->getCoord();
   }
 
-
   showCoordinates(center, magnificationByDimension(dimension));
 }
 
-void MapWidget::locationChanged(bool locationValid, double lat, double lon, bool horizontalAccuracyValid, double horizontalAccuracy)
+void MapWidget::locationChanged(bool locationValid,
+                                double lat, double lon,
+                                bool horizontalAccuracyValid,
+                                double horizontalAccuracy,
+                                const QDateTime &lastUpdate)
 {
     // location
-    lastUpdate.restart();
-    this->locationValid = locationValid;
-    this->currentPosition.Set(lat, lon);
-    this->horizontalAccuracyValid = horizontalAccuracyValid;
-    this->horizontalAccuracy = horizontalAccuracy;
+    this->currentPosition.lastUpdate = lastUpdate;
+    this->currentPosition.valid = locationValid;
+    this->currentPosition.coord.Set(lat, lon);
+    this->currentPosition.horizontalAccuracyValid = horizontalAccuracyValid;
+    this->currentPosition.horizontalAccuracy = horizontalAccuracy;
 
-    inputHandler->currentPosition(locationValid, currentPosition, std::min(width(), height()) / 3);
+    inputHandler->currentPosition(locationValid, currentPosition.coord, std::min(width(), height()) / 3);
 
     redraw();
 }

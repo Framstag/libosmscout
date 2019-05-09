@@ -74,20 +74,25 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString stylesheetErrorDescription READ firstStylesheetErrorDescription  NOTIFY styleErrorsChanged)  
 
 private:
-  MapRenderer      *renderer;
+  MapRenderer      *renderer{nullptr};
 
   MapView          *view;
 
-  InputHandler     *inputHandler;
+  InputHandler     *inputHandler{nullptr};
   TapRecognizer    tapRecognizer;     
   
-  bool showCurrentPosition;
-  bool finished;
-  QTime lastUpdate;
-  bool locationValid;
-  osmscout::GeoCoord currentPosition;
-  bool horizontalAccuracyValid;
-  double horizontalAccuracy;
+  bool finished{false};
+
+  struct CurrentLocation {
+    QDateTime lastUpdate{QDateTime::currentDateTime()};
+    bool valid{false};
+    osmscout::GeoCoord coord;
+    bool horizontalAccuracyValid{false};
+    double horizontalAccuracy{0};
+  };
+  CurrentLocation currentPosition;
+  bool showCurrentPosition{false};
+
   RenderingType renderingType;
   
   QMap<int, osmscout::GeoCoord> marks;
@@ -146,7 +151,11 @@ public slots:
   void showCoordinatesInstantly(double lat, double lon);
   void showLocation(LocationEntry* location);
 
-  void locationChanged(bool locationValid, double lat, double lon, bool horizontalAccuracyValid, double horizontalAccuracy);
+  void locationChanged(bool locationValid,
+                       double lat, double lon,
+                       bool horizontalAccuracyValid = false,
+                       double horizontalAccuracy = 0,
+                       const QDateTime &lastUpdate = QDateTime::currentDateTime());
 
   /**
    * Add "mark" (small red circle) on top of map.
