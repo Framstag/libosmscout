@@ -73,8 +73,8 @@ namespace osmscout {
     };
 
   private:
-    std::string           datafilename;   //!< Full path and name of the data file
-    mutable FileScanner   scanner;        //!< Scanner instance for reading this file
+    mutable FileScanner   scanner;        //!< Scanner instance for reading this file,
+                                          //!< guarded by lookupMutex (Open and Close method are not guarded!)
 
     MagnificationLevel    gridMag;
     std::vector<TypeData> nodeTypeData;
@@ -108,7 +108,7 @@ namespace osmscout {
 
     inline std::string GetFilename() const
     {
-      return datafilename;
+      return scanner.GetFilename();
     }
 
     bool GetOffsets(const GeoBox& boundingBox,
