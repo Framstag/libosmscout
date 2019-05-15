@@ -26,7 +26,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutMapCairo PROPERTIES
-		CXX_STANDARD 11
+		CXX_STANDARD 14
 		OUTPUT_NAME "osmscout_map_cairo")
 
 target_include_directories(OSMScoutMapCairo PUBLIC

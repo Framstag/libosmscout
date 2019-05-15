@@ -26,7 +26,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutTest PROPERTIES
-        CXX_STANDARD 11
+        CXX_STANDARD 14
         OUTPUT_NAME "osmscout_test")
 
 set_source_files_properties(${HEADER_FILES_OLT}

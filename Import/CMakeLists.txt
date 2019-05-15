@@ -6,7 +6,7 @@ set(SOURCE_FILES
 
 add_executable(Import ${SOURCE_FILES} ${HEADER_FILES})
 
-set_target_properties(Import PROPERTIES CXX_STANDARD 11)
+set_target_properties(Import PROPERTIES CXX_STANDARD 14)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/Config.h)
 
