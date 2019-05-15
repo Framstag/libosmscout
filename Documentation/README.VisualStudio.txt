@@ -1,4 +1,4 @@
-You need VisualStudio 2015 or 2017 (C++11 support!). Most of the code
+You need VisualStudio 2015 or 2017 (C++14 support!). Most of the code
 might also work using Visual Studio 2013, but you likely need to 
 make some changes to the code to get it really build.
 
