@@ -18,7 +18,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutMapSVG PROPERTIES
-        CXX_STANDARD 11
+        CXX_STANDARD 14
         OUTPUT_NAME "osmscout_map_svg")
 
 target_include_directories(OSMScoutMapSVG PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
