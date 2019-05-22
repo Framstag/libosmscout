@@ -56,6 +56,7 @@ set(HEADER_FILES
     include/osmscout/NavigationModule.h
     include/osmscout/RouteDescriptionBuilder.h
     include/osmscout/NavigationModel.h
+    include/osmscout/VehiclePosition.h
     include/osmscout/QtRouteData.h
     include/osmscout/RouteStep.h
     include/osmscout/NearPOIModel.h
@@ -102,6 +103,7 @@ set(SOURCE_FILES
     src/osmscout/NavigationModule.cpp
     src/osmscout/RouteDescriptionBuilder.cpp
     src/osmscout/NavigationModel.cpp
+    src/osmscout/VehiclePosition.cpp
     src/osmscout/RouteStep.cpp
     src/osmscout/QtRouteData.cpp
     src/osmscout/NearPOIModel.cpp
