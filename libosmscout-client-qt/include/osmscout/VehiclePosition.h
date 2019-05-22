@@ -78,6 +78,11 @@ public:
     return coord.GetLon();
   }
 
+  inline GeoCoord getCoord() const
+  {
+    return coord;
+  }
+
   inline std::shared_ptr<Bearing> getBearing() const
   {
     return bearing;

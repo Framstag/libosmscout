@@ -65,9 +65,7 @@ Window {
             }
         }
         onPositionEstimate: {
-            // TODO: show some arrow that respect bearing
             console.log("onPositionEstimate " + lat + " " + lon);
-            map.addPositionMark(0, lat, lon);
         }
     }
 

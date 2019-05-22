@@ -34,7 +34,7 @@
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMScoutQt.h>
 #include <osmscout/OverlayObject.h>
-#include <osmscout/NavigationModel.h>
+#include <osmscout/VehiclePosition.h>
 
 namespace osmscout {
 
@@ -73,13 +73,16 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(bool stylesheetHasErrors           READ stylesheetHasErrors              NOTIFY styleErrorsChanged)
   Q_PROPERTY(int stylesheetErrorLine            READ firstStylesheetErrorLine         NOTIFY styleErrorsChanged)
   Q_PROPERTY(int stylesheetErrorColumn          READ firstStylesheetErrorColumn       NOTIFY styleErrorsChanged)
-  Q_PROPERTY(QString stylesheetErrorDescription READ firstStylesheetErrorDescription  NOTIFY styleErrorsChanged)  
+  Q_PROPERTY(QString stylesheetErrorDescription READ firstStylesheetErrorDescription  NOTIFY styleErrorsChanged)
+
+  Q_PROPERTY(QString vehicleStandardIconFile    READ getVehicleStandardIconFile     WRITE setVehicleStandardIconFile)
+  Q_PROPERTY(QString vehicleNoGpsSignalIconFile READ getVehicleNoGpsSignalIconFile  WRITE setVehicleNoGpsSignalIconFile)
+  Q_PROPERTY(QString vehicleInTunnelIconFile    READ getVehicleInTunnelIconFile     WRITE setVehicleInTunnelIconFile)
 
 private:
   MapRenderer      *renderer{nullptr};
 
   MapView          *view{nullptr};
-  VehiclePosition  *vehiclePosition{nullptr};
 
   InputHandler     *inputHandler{nullptr};
   TapRecognizer    tapRecognizer;     
@@ -99,6 +102,37 @@ private:
   RenderingType renderingType{RenderingType::PlaneRendering};
 
   QMap<int, osmscout::GeoCoord> marks;
+
+  // vehicle data
+  struct Vehicle {
+    VehiclePosition  *position{nullptr};
+
+    double iconSize{8}; // icon size [mm]
+
+    QString standardIconFile{"vehicle.svg"}; // state == OnRoute | OffRoute
+    QString noGpsSignalIconFile{"vehicle_not_fixed.svg"}; // state == NoGpsSignal
+    QString inTunnelIconFile{"vehicle_tunnel.svg"}; // state == EstimateInTunnel
+
+    QImage standardIcon;
+    QImage noGpsSignalIcon;
+    QImage inTunnelIcon;
+
+    QImage getIcon()
+    {
+      if (position==nullptr){
+        return QImage();
+      }
+      switch(position->getState()){
+        case PositionAgent::PositionState::EstimateInTunnel:
+          return !inTunnelIcon.isNull() ? inTunnelIcon : standardIcon;
+        case PositionAgent::PositionState::NoGpsSignal:
+          return !noGpsSignalIcon.isNull() ? noGpsSignalIcon : standardIcon;
+        default:
+          return standardIcon;
+      }
+    }
+  };
+  Vehicle vehicle;
 
 signals:
   void viewChanged();
@@ -201,7 +235,9 @@ private slots:
   
 private:
   void setupInputHandler(InputHandler *newGesture);
-  
+
+  void loadVehicleIcons();
+
   /**
    * @param dimension in kilometers
    * @return approximated magnification by object dimension
@@ -234,29 +270,45 @@ public:
 
   inline VehiclePosition* GetVehiclePosition() const
   {
-    return vehiclePosition;
+    return vehicle.position;
   }
 
-  inline void SetVehiclePosition(QObject *o)
-  {
-    VehiclePosition *updated = dynamic_cast<VehiclePosition*>(o);
-    if (o != nullptr && updated == nullptr){
-      qWarning() << "Failed to cast " << o << " to VehiclePosition*.";
-      return;
-    }
-    if (updated == nullptr){
-      if (vehiclePosition != nullptr) {
-        delete vehiclePosition;
-        vehiclePosition = nullptr;
-      }
-    }else{
-      if (vehiclePosition==nullptr){
-        vehiclePosition = new VehiclePosition(this);
-      }
-      *vehiclePosition = *updated;
-    }
+  void SetVehiclePosition(QObject *o);
 
-    // TODO: handle change
+  inline QString getVehicleStandardIconFile() const
+  {
+    return vehicle.standardIconFile;
+  }
+
+  inline void setVehicleStandardIconFile(const QString &file)
+  {
+    vehicle.standardIconFile = file;
+    loadVehicleIcons();
+    redraw();
+  }
+
+  inline QString getVehicleNoGpsSignalIconFile() const
+  {
+    return vehicle.noGpsSignalIconFile;
+  }
+
+  inline void setVehicleNoGpsSignalIconFile(const QString &file)
+  {
+    vehicle.noGpsSignalIconFile = file;
+    loadVehicleIcons();
+    redraw();
+  }
+
+  inline QString getVehicleInTunnelIconFile() const
+  {
+    return vehicle.inTunnelIconFile;
+  }
+
+  inline void setVehicleInTunnelIconFile(const QString &file)
+  {
+    vehicle.inTunnelIconFile = file;
+    loadVehicleIcons();
+    redraw();
   }
 
   inline double GetLat() const
@@ -301,6 +353,7 @@ public:
   inline void setShowCurrentPosition(bool b)
   { 
       showCurrentPosition = b;
+      redraw();
   };
   
   inline bool isLockedToPosition()
@@ -351,6 +404,11 @@ public:
 
   QString GetRenderingType() const;
   void SetRenderingType(QString type);
+
+  /**
+   * Helper for loading SVG graphics
+   */
+  static QImage loadSVGIcon(const QString &directory, const QString fileName, double iconPixelSize);
 };
 
 }

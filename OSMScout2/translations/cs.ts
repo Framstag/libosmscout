@@ -4,13 +4,13 @@
 <context>
     <name>NavigationSimulation</name>
     <message>
-        <location filename="../qml/NavigationSimulation.qml" line="190"/>
-        <location filename="../qml/NavigationSimulation.qml" line="193"/>
+        <location filename="../qml/NavigationSimulation.qml" line="207"/>
+        <location filename="../qml/NavigationSimulation.qml" line="210"/>
         <source>meters</source>
         <translation>metrů</translation>
     </message>
     <message>
-        <location filename="../qml/NavigationSimulation.qml" line="195"/>
+        <location filename="../qml/NavigationSimulation.qml" line="212"/>
         <source>km</source>
         <translation>km</translation>
     </message>
