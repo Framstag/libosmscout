@@ -56,7 +56,7 @@ ORDER WAYS
         leisure_track
   GROUP highway_steps, barrier_fence
   GROUP waterway_weir, route_ferry
-  GROUP waterway_river, waterway_canal, waterway_drain, waterway_stream
+  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
 
 CONST
   MAG stepsMag                     = veryClose;
@@ -645,7 +645,8 @@ STYLE
     }
 
     [MAG detail-] {
-      [TYPE waterway_drain] {
+      [TYPE waterway_drain,
+            waterway_ditch] {
         [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
         [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
 
@@ -667,6 +668,7 @@ STYLE
     [MAG veryClose-] {
       [TYPE waterway_stream,
             waterway_drain,
+            waterway_ditch,
             waterway_weir,
             waterway_river,
             waterway_canal]
