@@ -78,6 +78,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString vehicleStandardIconFile    READ getVehicleStandardIconFile     WRITE setVehicleStandardIconFile)
   Q_PROPERTY(QString vehicleNoGpsSignalIconFile READ getVehicleNoGpsSignalIconFile  WRITE setVehicleNoGpsSignalIconFile)
   Q_PROPERTY(QString vehicleInTunnelIconFile    READ getVehicleInTunnelIconFile     WRITE setVehicleInTunnelIconFile)
+  Q_PROPERTY(double vehicleIconSize             READ getVehicleIconSize             WRITE setVehicleIconSize)
 
 private:
   MapRenderer      *renderer{nullptr};
@@ -107,7 +108,7 @@ private:
   struct Vehicle {
     VehiclePosition  *position{nullptr};
 
-    double iconSize{8}; // icon size [mm]
+    double iconSize{16}; // icon size [mm]
 
     QString standardIconFile{"vehicle.svg"}; // state == OnRoute | OffRoute
     QString noGpsSignalIconFile{"vehicle_not_fixed.svg"}; // state == NoGpsSignal
@@ -307,6 +308,17 @@ public:
   inline void setVehicleInTunnelIconFile(const QString &file)
   {
     vehicle.inTunnelIconFile = file;
+    loadVehicleIcons();
+    redraw();
+  }
+
+  inline double getVehicleIconSize() const{
+    return vehicle.iconSize;
+  }
+
+  inline void setVehicleIconSize(double value)
+  {
+    vehicle.iconSize = value;
     loadVehicleIcons();
     redraw();
   }
