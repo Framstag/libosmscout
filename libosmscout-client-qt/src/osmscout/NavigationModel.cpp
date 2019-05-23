@@ -179,6 +179,10 @@ void NavigationModel::setRoute(QObject *o)
 
   emit arrivalUpdate();
   emit routeChanged(this->route, vehicle);
+  emit vehiclePositionChanged();
+  emit update();
+  emit currentSpeedUpdate(0);
+  emit maxAllowedSpeedUpdate(0);
 }
 
 QVariant NavigationModel::data(const QModelIndex &index, int role) const
