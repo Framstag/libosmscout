@@ -37,7 +37,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutGPX PROPERTIES
-		CXX_STANDARD 11
+		CXX_STANDARD 14
 		OUTPUT_NAME "osmscout_gpx")
 
 target_include_directories(OSMScoutGPX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

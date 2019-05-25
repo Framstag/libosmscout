@@ -24,7 +24,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
   target_link_libraries(osmscout_binding_java
     ${OSMSCOUT_TARGET}
     ${JNI_LIBRARIES})
-  set_property(TARGET osmscout_binding_java PROPERTY CXX_STANDARD 11)
+  set_property(TARGET osmscout_binding_java PROPERTY CXX_STANDARD 14)
 
   install(TARGETS osmscout_binding_java
     RUNTIME DESTINATION bin
@@ -54,7 +54,7 @@ if(OSMSCOUT_BUILD_BINDING_CSHARP)
     ${CMAKE_CURRENT_BINARY_DIR}/include)
   target_link_libraries(osmscout_binding_csharp
           ${OSMSCOUT_TARGET})
-  set_property(TARGET osmscout_binding_csharp PROPERTY CXX_STANDARD 11)
+  set_property(TARGET osmscout_binding_csharp PROPERTY CXX_STANDARD 14)
 
   install(TARGETS osmscout_binding_csharp
     RUNTIME DESTINATION bin

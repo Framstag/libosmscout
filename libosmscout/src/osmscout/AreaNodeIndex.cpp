@@ -55,7 +55,7 @@ namespace osmscout {
   bool AreaNodeIndex::Open(const std::string& path,
                            bool memoryMappedData)
   {
-    datafilename=AppendFileToDir(path,AREA_NODE_IDX);
+    std::string datafilename=AppendFileToDir(path,AREA_NODE_IDX);
 
     try {
       scanner.Open(datafilename,
@@ -165,6 +165,8 @@ namespace osmscout {
                                      const GeoBox& boundingBox,
                                      std::vector<FileOffset>& offsets) const
   {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
     scanner.SetPos(typeData.indexOffset);
 
     FileOffset previousOffset=0;
@@ -192,6 +194,8 @@ namespace osmscout {
                                          const GeoBox& boundingBox,
                                          std::vector<FileOffset>& offsets) const
   {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+
     TileIdBox tileBox(TileId::GetTile(gridMag,boundingBox.GetMinCoord()),
                       TileId::GetTile(gridMag,boundingBox.GetMaxCoord()));
 

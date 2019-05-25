@@ -12,7 +12,7 @@ menu:
 
 The following platforms are supported:
 
-* Linux using gcc or clang, using autoconf tools or cmake as build system
+* Linux using gcc or clang, using meson or cmake as build system
 * Mac OS X and iOS using XCode/clang
 * Windows
   * Visual Studio 2013 (likely libosmscout source has to be patched slightly)
@@ -26,5 +26,4 @@ The following platforms are supported:
 * Sailfish OS using Qt backend
 * Ubuntu phone using Qt backend
 
-The compiler must at least support C++11.
-
+The compiler must at least support C++14.

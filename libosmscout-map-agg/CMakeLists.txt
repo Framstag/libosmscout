@@ -28,7 +28,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutMapAGG PROPERTIES
-		CXX_STANDARD 11
+		CXX_STANDARD 14
 		OUTPUT_NAME "osmscout_map_agg")
 
 target_include_directories(OSMScoutMapAGG PUBLIC

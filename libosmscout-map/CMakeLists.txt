@@ -44,7 +44,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutMap PROPERTIES
-		CXX_STANDARD 11
+		CXX_STANDARD 14
 		OUTPUT_NAME "osmscout_map")
 
 target_include_directories(OSMScoutMap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

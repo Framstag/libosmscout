@@ -118,7 +118,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutImport PROPERTIES
-        CXX_STANDARD 11
+        CXX_STANDARD 14
         OUTPUT_NAME "osmscout_import")
 
 target_include_directories(OSMScoutImport PUBLIC
