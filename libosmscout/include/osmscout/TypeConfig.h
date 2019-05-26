@@ -53,6 +53,11 @@ namespace osmscout {
    */
   static const TypeId typeIgnore      = 0;
 
+  class TypeInfo;
+
+  typedef std::shared_ptr<TypeInfo> TypeInfoRef;
+
+
   /**
    * \ingroup type
    *
@@ -643,9 +648,9 @@ namespace osmscout {
     };
 
     std::string GetDescription(const std::string& languageCode) const;
-  };
 
-  typedef std::shared_ptr<TypeInfo> TypeInfoRef;
+    static TypeInfoRef Read(FileScanner& scanner);
+  };
 
   /**
    * A FeatureValueBuffer is instantiated by an object and holds information
