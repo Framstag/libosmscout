@@ -25,6 +25,7 @@
 
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
+#include <osmscout/Settings.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/routing/MultiDBRoutingService.h>
 #include <osmscout/routing/RoutingProfile.h>

@@ -65,9 +65,7 @@ Window {
             }
         }
         onPositionEstimate: {
-            // TODO: show some arrow that respect bearing
             console.log("onPositionEstimate " + lat + " " + lon);
-            map.addPositionMark(0, lat, lon);
         }
     }
 
@@ -87,6 +85,81 @@ Window {
         id: map
         anchors.fill: parent
         showCurrentPosition: true
+        vehiclePosition: navigationModel.vehiclePosition
+
+        focus: true
+
+        Keys.onPressed: {
+            if (event.key === Qt.Key_Plus) {
+                map.zoomIn(2.0)
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_Minus) {
+                map.zoomOut(2.0)
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_Up) {
+                map.up()
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_Down) {
+                map.down()
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_Left) {
+                if (event.modifiers & Qt.ShiftModifier) {
+                    map.rotateLeft();
+                }
+                else {
+                    map.left();
+                }
+                event.accepted = true
+            }
+            else if (event.key === Qt.Key_Right) {
+                if (event.modifiers & Qt.ShiftModifier) {
+                    map.rotateRight();
+                }
+                else {
+                    map.right();
+                }
+                event.accepted = true
+            }
+            else if (event.modifiers===Qt.ControlModifier &&
+                     event.key === Qt.Key_F) {
+                searchDialog.focus = true
+                event.accepted = true
+            }
+            else if (event.modifiers===Qt.ControlModifier &&
+                     event.key === Qt.Key_D) {
+                map.toggleDaylight();
+            }
+            else if (event.modifiers===Qt.ControlModifier &&
+                     event.key === Qt.Key_R) {
+                map.reloadStyle();
+            }
+            else if (event.modifiers===(Qt.ControlModifier | Qt.ShiftModifier) &&
+                     event.key === Qt.Key_D) {
+                var debugState = map.toggleDebug();
+
+                if (debugState) {
+                  console.log("DEBUG is ON");
+                }
+                else {
+                  console.log("DEBUG is OFF");
+                }
+            }
+            else if (event.modifiers===(Qt.ControlModifier | Qt.ShiftModifier) &&
+                     event.key === Qt.Key_I) {
+                var infoState = map.toggleInfo();
+
+                if (infoState) {
+                  console.log("INFO is ON");
+                }
+                else {
+                  console.log("INFO is OFF");
+                }
+            }
+        }
     }
     RowLayout {
         id: simulatorControl

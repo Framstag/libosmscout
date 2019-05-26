@@ -11,6 +11,7 @@ osmscoutclientqtHeader = [
             'osmscout/QtRouteData.h',
             'osmscout/NavigationModule.h',
             'osmscout/NavigationModel.h',
+            'osmscout/VehiclePosition.h',
             'osmscout/InputHandler.h',
             'osmscout/OnlineTileProvider.h',
             'osmscout/OnlineTileProviderModel.h',

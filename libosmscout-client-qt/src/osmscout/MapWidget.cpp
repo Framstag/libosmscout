@@ -24,6 +24,7 @@
 #include <osmscout/MapWidget.h>
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMScoutQt.h>
+#include <QtSvg/QSvgRenderer>
 
 namespace osmscout {
 
@@ -33,8 +34,7 @@ namespace osmscout {
 static double DELTA_ANGLE=2*M_PI/16.0;
 
 MapWidget::MapWidget(QQuickItem* parent)
-    : QQuickPaintedItem(parent),
-      renderingType(RenderingType::PlaneRendering)
+    : QQuickPaintedItem(parent)
 {
     setOpaquePainting(true);
     setAcceptedMouseButtons(Qt::LeftButton);
@@ -75,6 +75,8 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     setRenderTarget(RenderTarget::FramebufferObject);
     setPerformanceHints(PerformanceHint::FastFBOResizing);
+
+    loadVehicleIcons();
 }
 
 MapWidget::~MapWidget()
@@ -251,10 +253,33 @@ void MapWidget::paint(QPainter *painter)
     request.dpi = view->mapDpi;
 
     bool oldFinished = finished;
-    //finished = dbThread->RenderMap(*painter,request);
+    assert(renderer);
     finished = renderer->RenderMap(*painter,request);
     if (oldFinished != finished){
         emit finishedChanged(finished);
+    }
+
+    // render vehicle
+    if (vehicle.position && !vehicle.getIcon().isNull()){
+      QImage vehicleIcon=vehicle.getIcon();
+      double x;
+      double y;
+      projection.GeoToPixel(vehicle.position->getCoord(), x, y);
+
+      Bearing iconAngle;
+      if (vehicle.position->getBearing()) {
+        Bearing vehicleBearing = *(vehicle.position->getBearing());
+        Bearing projectionBearing = Bearing::Radians(projection.GetAngle());
+        iconAngle = vehicleBearing + projectionBearing;
+      }
+
+      painter->save();
+      QTransform t=QTransform::fromTranslate(x, y); // move to rotation center
+      t.rotateRadians(iconAngle.AsRadians());
+      painter->setTransform(t);
+      // draw vehicleIcon center on coordinate 0x0
+      painter->drawImage(QPointF(vehicleIcon.width()/-2, vehicleIcon.height()/-2), vehicleIcon);
+      painter->restore();
     }
 
     // render current position spot
@@ -674,9 +699,63 @@ void MapWidget::onMapDPIChange(double dpi)
     v.mapDpi = dpi;
     changeView(v);
 
+    loadVehicleIcons();
+
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
     emit viewChanged();
+}
+
+void MapWidget::SetVehiclePosition(QObject *o)
+{
+  VehiclePosition *updated = dynamic_cast<VehiclePosition*>(o);
+  if (o != nullptr && updated == nullptr){
+    qWarning() << "Failed to cast " << o << " to VehiclePosition*.";
+    return;
+  }
+  if (updated == nullptr){
+    if (vehicle.position != nullptr) {
+      delete vehicle.position;
+      vehicle.position = nullptr;
+    }
+  }else{
+    if (vehicle.position==nullptr){
+      vehicle.position = new VehiclePosition(this);
+    }
+    *vehicle.position = *updated;
+  }
+
+  inputHandler->vehiclePosition(vehicle.position);
+  redraw();
+}
+
+QImage MapWidget::loadSVGIcon(const QString &directory, const QString fileName, double iconPixelSize)
+{
+  QImage image(iconPixelSize, iconPixelSize, QImage::Format_ARGB32);
+  image.fill(Qt::transparent);
+
+  QString iconPath=directory + QDir::separator() + fileName;
+  QSvgRenderer renderer(iconPath);
+  if (renderer.isValid()) {
+    QPainter painter(&image);
+    renderer.render(&painter);
+    painter.end();
+    qDebug() << "Loaded icon" << iconPath;
+  }else{
+    qWarning() << "Cannot load icon" << iconPath;
+  }
+  return image;
+}
+
+
+void MapWidget::loadVehicleIcons()
+{
+  double iconPixelSize=getProjection().ConvertWidthToPixel(vehicle.iconSize);
+  QString iconDirectory=OSMScoutQt::GetInstance().GetIconDirectory();
+
+  vehicle.standardIcon=loadSVGIcon(iconDirectory, vehicle.standardIconFile, iconPixelSize);
+  vehicle.noGpsSignalIcon=loadSVGIcon(iconDirectory, vehicle.noGpsSignalIconFile, iconPixelSize);
+  vehicle.inTunnelIcon=loadSVGIcon(iconDirectory, vehicle.inTunnelIconFile, iconPixelSize);
 }
 
 QString MapWidget::GetStylesheetFilename() const
