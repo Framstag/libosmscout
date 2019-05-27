@@ -56,9 +56,9 @@ public:
                           QObject *parent = 0);
   ~FileDownloader();
 
-  operator bool() const { return m_isok; }
-  QString getFileName() const { return QFileInfo(m_path).fileName(); }
-  QString getFilePath() const { return m_path; }
+  operator bool() const { return isOk; }
+  QString getFileName() const { return QFileInfo(path).fileName(); }
+  QString getFilePath() const { return path; }
   uint64_t getBytesDownloaded() const;
 
 signals:
@@ -92,49 +92,49 @@ protected:
   virtual void timerEvent(QTimerEvent *event);
 
 protected:
-  QNetworkAccessManager *m_manager;
-  QUrl m_url;
-  QString m_path;
+  QNetworkAccessManager *manager;
+  QUrl url;
+  QString path;
 
-  QNetworkReply *m_reply{nullptr};
+  QNetworkReply *reply{nullptr};
 
-  QProcess *m_process{nullptr};
-  bool m_process_started{false};
+  QProcess *process{nullptr};
+  bool processStarted{false};
 
-  QFile m_file;
+  QFile file;
 
-  bool m_pipe_to_process{false};
-  bool m_isok{true};
+  bool pipeToProcess{false};
+  bool isOk{true};
 
-  QByteArray m_cache_safe;
-  QByteArray m_cache_current;
-  bool m_clear_all_caches{false};
-  bool m_pause_network_io{false};
+  QByteArray cacheSafe;
+  QByteArray cacheCurrent;
+  bool clearAllCaches{false};
+  bool pauseNetworkIo{false};
 
-  uint64_t m_downloaded{0};
-  uint64_t m_written{0};
-  uint64_t m_downloaded_gui{0};
+  uint64_t downloaded{0};
+  uint64_t written{0};
+  uint64_t downloadedGui{0};
 
-  uint64_t m_download_throttle_bytes{0};
-  QTime m_download_throttle_time_start;
-  double m_download_throttle_max_speed{0};
+  uint64_t downloadThrottleBytes{0};
+  QTime downloadThrottleTimeStart;
+  double downloadThrottleMaxSpeed{0};
 
-  uint64_t m_downloaded_last_error{0};
-  size_t m_download_retries{0};
-  QTime m_download_last_read_time;
-  int m_timeout_timer_id{-1};
+  uint64_t downloadedLastError{0};
+  size_t downloadRetries{0};
+  QTime downloadLastReadTime;
+  int timeoutTimerId{-1};
 
-  const size_t const_max_download_retries{5};          ///< Maximal number of download retries before cancelling download
-  const double const_download_retry_sleep_time{30.0};  ///< Time between retries in seconds
+  const size_t maxDownloadRetries{5};          ///< Maximal number of download retries before cancelling download
+  const double downloadRetrySleepTime{30.0};  ///< Time between retries in seconds
 
-  const qint64 const_cache_size_before_swap{1024*1024*1}; ///< Size at which cache is promoted from network to file/process
-  const qint64 const_buffer_size_io{1024*1024*3};         ///< Size of the buffers that should not be significantly exceeded
-  const qint64 const_buffer_network{1024*1024*1};         ///< Size of network ring buffer
+  const qint64 cacheSizeBeforeSwap{1024*1024*1}; ///< Size at which cache is promoted from network to file/process
+  const qint64 bufferSizeIO{1024*1024*3};         ///< Size of the buffers that should not be significantly exceeded
+  const qint64 bufferNetwork{1024*1024*1};         ///< Size of network ring buffer
 
   /// \brief Factor determining whether cancel download when network buffer is too large
-  const qint64 const_buffer_network_max_factor_before_cancel{10};
+  const qint64 bufferNetworkMaxFactorBeforeCancel{10};
 
-  const int const_download_timeout{60};                ///< Download timeout in seconds
+  const int downloadTimeout{60};                ///< Download timeout in seconds
 };
 
 }
