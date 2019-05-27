@@ -30,10 +30,22 @@
 #include <QByteArray>
 #include <QTime>
 #include <QFileInfo>
+#include <QTimer>
 
 #include <osmscout/ClientQtImportExport.h>
 
+#include <chrono>
+
 namespace osmscout {
+
+namespace FileDownloaderConfig {
+
+static constexpr uint64_t BufferNetwork{1024*1024*1}; ///< Size of network ring buffer
+static constexpr std::chrono::seconds DownloadTimeout{60}; ///< Download timeout in seconds
+static constexpr std::chrono::seconds BackOffInitial{1}; ///< Initial back-off time
+static constexpr std::chrono::seconds BackOffMax{300}; ///< Maximum back-off time
+static constexpr int MaxDownloadRetries{-1}; ///< Maximal number of download retries before cancelling download
+}
 
 /// \brief Downloads a file specified by URL
 ///
@@ -44,6 +56,32 @@ class OSMSCOUT_CLIENT_QT_API FileDownloader : public QObject
 {
   Q_OBJECT
 
+private:
+  struct BackOff {
+    int downloadRetries{0};
+
+    std::chrono::seconds backOffTime{FileDownloaderConfig::BackOffInitial};
+    QTimer restartTimer;
+
+    bool scheduleRestart();
+    void recover();
+  };
+
+  BackOff backOff;
+
+  QNetworkAccessManager *manager;
+  QUrl url;
+  QString path;
+
+  QNetworkReply *reply{nullptr};
+
+  QFile file;
+
+  bool isOk{true};
+
+  uint64_t downloaded{0};
+
+  QTimer timeoutTimer;
 
 public:
   explicit FileDownloader(QNetworkAccessManager *manager,
@@ -70,39 +108,13 @@ protected slots:
   void onNetworkReadyRead();
   void onDownloaded();
   void onNetworkError(QNetworkReply::NetworkError code);
+  void onTimeout();
 
 protected:
   void onFinished();
   void onError(const QString &err);
 
-  bool restartDownload(bool force = false); ///< Restart download if download retries are not used up
-
-  virtual void timerEvent(QTimerEvent *event);
-
-protected:
-  QNetworkAccessManager *manager;
-  QUrl url;
-  QString path;
-
-  QNetworkReply *reply{nullptr};
-
-  QFile file;
-
-  bool isOk{true};
-
-  uint64_t downloaded{0};
-
-  uint64_t downloadedLastError{0};
-  size_t downloadRetries{0};
-  QTime downloadLastReadTime;
-  int timeoutTimerId{-1};
-
-  const size_t maxDownloadRetries{5};          ///< Maximal number of download retries before cancelling download
-  const double downloadRetrySleepTime{30.0};  ///< Time between retries in seconds
-
-  const qint64 bufferNetwork{1024*1024*1};         ///< Size of network ring buffer
-
-  const int downloadTimeout{60};                ///< Download timeout in seconds
+  bool restartDownload(); ///< Restart download if download retries are not used up
 };
 
 }

@@ -33,6 +33,11 @@
 
 namespace osmscout {
 
+template<typename T>
+int64_t AsMillis(const std::chrono::duration<T> &duration){
+  return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+}
+
 FileDownloader::FileDownloader(QNetworkAccessManager *manager,
                                QString urlStr, QString path,
                                QObject *parent):
@@ -43,30 +48,42 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
 {
   if (!url.isValid()) {
     isOk = false;
+    qWarning() << "Url is not valid:" << url;
     return;
   }
 
   // check path and open file
   QFileInfo finfo(path);
   QDir dir;
-  if ( !dir.mkpath(finfo.dir().absolutePath()) ) {
+  if (!dir.mkpath(finfo.dir().absolutePath())) {
     isOk = false;
+    qWarning() << "Cannot create directory:" << finfo.dir().absolutePath();
     return;
   }
 
   file.setFileName(path + ".download");
   if (!file.open(QIODevice::WriteOnly)) {
     isOk = false;
+    qWarning() << "Cannot open file:" << file.fileName();
     return;
   }
 
-  downloadLastReadTime.start();
+  timeoutTimer.setSingleShot(true);
+  timeoutTimer.setInterval(AsMillis(FileDownloaderConfig::DownloadTimeout));
+  connect(&timeoutTimer, &QTimer::timeout, this, &FileDownloader::onTimeout);
+
+  backOff.restartTimer.setSingleShot(true);
+  connect(&backOff.restartTimer, &QTimer::timeout, this, &FileDownloader::startDownload);
 }
 
 FileDownloader::~FileDownloader()
 {
   if (reply) {
     reply->deleteLater();
+  }
+  if (file.exists()) {
+    file.close();
+    file.remove();
   }
 }
 
@@ -78,14 +95,16 @@ void FileDownloader::startDownload()
                     OSMScoutQt::GetInstance().GetUserAgent());
   request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
+  qDebug() << "Start downloading" << url << "to" << file.fileName();
   if (downloaded > 0) {
     // TODO: Range header don't have to be supported by server, we should handle such case
     QByteArray range_header = "bytes=" + QByteArray::number((qulonglong)downloaded) + "-";
+    qDebug() << "Request from byte" << downloaded;
     request.setRawHeader("Range",range_header);
   }
 
   reply = manager->get(request);
-  reply->setReadBufferSize(bufferNetwork);
+  reply->setReadBufferSize(FileDownloaderConfig::BufferNetwork);
 
   connect(reply, &QNetworkReply::readyRead,
           this, &FileDownloader::onNetworkReadyRead);
@@ -94,9 +113,7 @@ void FileDownloader::startDownload()
   connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
           this, SLOT(onNetworkError(QNetworkReply::NetworkError)));
 
-  downloadLastReadTime.restart();
-
-  timeoutTimerId=startTimer(1000); // used to check for timeouts
+  timeoutTimer.start();
 }
 
 void FileDownloader::onFinished()
@@ -109,6 +126,7 @@ void FileDownloader::onFinished()
     ftmp.remove();
   }
 
+  qDebug() << "Downloaded" << downloaded << "bytes";
   file.rename(path);
 
   if (reply) {
@@ -135,7 +153,8 @@ void FileDownloader::onError(const QString &err)
 
 void FileDownloader::onNetworkReadyRead()
 {
-  downloadLastReadTime.restart();
+  timeoutTimer.start();
+  backOff.recover();
 
   assert(reply);
 
@@ -173,43 +192,48 @@ void FileDownloader::onDownloaded()
   onFinished();
 }
 
-bool FileDownloader::restartDownload(bool force)
+void FileDownloader::BackOff::recover()
 {
-  killTimer(timeoutTimerId);
-  //  qDebug() << QTime::currentTime() << " / Restart called: "
-  //           << url << " " << m_download_retries << " " << m_download_last_read_time.elapsed();
-
-  // check if we should retry before cancelling all with an error
-  // this check is performed only if we managed to get some data
-  if (downloadedLastError != downloaded) {
+  if (downloadRetries > 0) {
+    restartTimer.stop();
+    backOffTime = FileDownloaderConfig::BackOffInitial;
     downloadRetries = 0;
   }
+}
 
-  if (reply &&
-      downloadRetries < maxDownloadRetries &&
-      (downloaded > 0 || force) ) {
-
-    reply->deleteLater();
-    reply = nullptr;
-
-    QTimer::singleShot(downloadRetrySleepTime * 1e3,
-                       this, SLOT(startDownload()));
-
-    downloadRetries++;
-    downloaded = downloaded;
-    downloadedLastError = downloaded;
-    downloadLastReadTime.restart();
-
-    return true;
+bool FileDownloader::BackOff::scheduleRestart()
+{
+  if (FileDownloaderConfig::MaxDownloadRetries >= 0 && downloadRetries >= FileDownloaderConfig::MaxDownloadRetries) {
+    return false;
   }
 
-  return false;
+  qDebug() << "Back off" << backOffTime.count() << "s";
+  restartTimer.setInterval(AsMillis(backOffTime));
+  restartTimer.start();
+  backOffTime=std::min(backOffTime*2, FileDownloaderConfig::BackOffMax);
+
+  downloadRetries++;
+  return true;
+}
+
+bool FileDownloader::restartDownload()
+{
+  timeoutTimer.stop();
+  qDebug() << QTime::currentTime() << "Restart called:"
+           << url << "retries:" <<  backOff.downloadRetries;
+
+  if (reply){
+    reply->deleteLater();
+    reply = nullptr;
+  }
+  return backOff.scheduleRestart();
 }
 
 void FileDownloader::onNetworkError(QNetworkReply::NetworkError /*code*/)
 {
+  QString errorStr = reply ? reply->errorString(): "";
   if (restartDownload()) {
-    emit error(reply? reply->errorString(): "", true);
+    emit error(errorStr, true);
     return;
   }
 
@@ -218,14 +242,11 @@ void FileDownloader::onNetworkError(QNetworkReply::NetworkError /*code*/)
   }
 }
 
-void FileDownloader::timerEvent(QTimerEvent * /*event*/)
+void FileDownloader::onTimeout()
 {
-
-  if (downloadLastReadTime.elapsed()*1e-3 > downloadTimeout) {
-    if (restartDownload()){
-      emit error("Timeout", true);
-      return;
-    }
+  if (restartDownload()){
+    emit error("Timeout", true);
+  }else {
     onError("Timeout");
   }
 }
