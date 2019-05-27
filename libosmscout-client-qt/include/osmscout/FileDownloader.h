@@ -39,20 +39,16 @@ namespace osmscout {
 ///
 /// Downloads a file as specified by URL and stores in a given path.
 /// If the required directories do not exist, creates all parent directories
-/// as needed. If specified that the format is BZ2, the downloader pipes
-/// the internet stream through a process running bunzip2.
+/// as needed.
 class OSMSCOUT_CLIENT_QT_API FileDownloader : public QObject
 {
   Q_OBJECT
 
-public:
-  enum Type { Plain=0, BZ2=1 };
 
 public:
   explicit FileDownloader(QNetworkAccessManager *manager,
                           QString url,
                           QString path,
-                          const Type mode = Plain,
                           QObject *parent = 0);
   ~FileDownloader();
 
@@ -75,15 +71,7 @@ protected slots:
   void onDownloaded();
   void onNetworkError(QNetworkReply::NetworkError code);
 
-  void onProcessStarted();
-  void onProcessRead();
-  void onProcessStopped(int exitCode); ///< Called on error while starting or when process has stopped
-  void onBytesWritten(qint64);
-
 protected:
-  void onProcessStateChanged(QProcess::ProcessState newState); ///< Called when state of the process has changed
-  void onProcessReadError();
-
   void onFinished();
   void onError(const QString &err);
 
@@ -98,26 +86,11 @@ protected:
 
   QNetworkReply *reply{nullptr};
 
-  QProcess *process{nullptr};
-  bool processStarted{false};
-
   QFile file;
 
-  bool pipeToProcess{false};
   bool isOk{true};
 
-  QByteArray cacheSafe;
-  QByteArray cacheCurrent;
-  bool clearAllCaches{false};
-  bool pauseNetworkIo{false};
-
   uint64_t downloaded{0};
-  uint64_t written{0};
-  uint64_t downloadedGui{0};
-
-  uint64_t downloadThrottleBytes{0};
-  QTime downloadThrottleTimeStart;
-  double downloadThrottleMaxSpeed{0};
 
   uint64_t downloadedLastError{0};
   size_t downloadRetries{0};
@@ -127,12 +100,7 @@ protected:
   const size_t maxDownloadRetries{5};          ///< Maximal number of download retries before cancelling download
   const double downloadRetrySleepTime{30.0};  ///< Time between retries in seconds
 
-  const qint64 cacheSizeBeforeSwap{1024*1024*1}; ///< Size at which cache is promoted from network to file/process
-  const qint64 bufferSizeIO{1024*1024*3};         ///< Size of the buffers that should not be significantly exceeded
   const qint64 bufferNetwork{1024*1024*1};         ///< Size of network ring buffer
-
-  /// \brief Factor determining whether cancel download when network buffer is too large
-  const qint64 bufferNetworkMaxFactorBeforeCancel{10};
 
   const int downloadTimeout{60};                ///< Download timeout in seconds
 };
