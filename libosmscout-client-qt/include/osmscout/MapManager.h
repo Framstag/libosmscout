@@ -53,10 +53,11 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
   AvailableMapsModelMap   map;
   QDir                    target;
   
-  bool                    done;
-  bool                    started;
+  bool                    done{false};
+  bool                    started{false};
+  bool                    successful{false};
 
-  uint64_t                downloadedBytes;
+  uint64_t                downloadedBytes{0};
 
   QString                 error;
 
@@ -80,6 +81,8 @@ public:
   virtual ~MapDownloadJob();
   
   void start();
+
+  void cancel();
 
   inline QString getMapName() const
   {

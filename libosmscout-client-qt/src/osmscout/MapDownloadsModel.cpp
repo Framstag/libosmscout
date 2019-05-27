@@ -110,7 +110,7 @@ int MapDownloadsModel::rowCount(const QModelIndex &/*parent*/) const
 QVariant MapDownloadsModel::data(const QModelIndex &index, int role) const
 {
   auto jobs=mapManager->getDownloadJobs();
-  if (index.row()>=jobs.size()){
+  if (index.row() < 0 || index.row()>=jobs.size()){
     return QVariant();
   }
 
@@ -131,6 +131,18 @@ QVariant MapDownloadsModel::data(const QModelIndex &index, int role) const
       break;
   }
   return QVariant();
+}
+
+void MapDownloadsModel::cancel(int row)
+{
+  auto jobs=mapManager->getDownloadJobs();
+  if (row < 0 || row >= jobs.size()){
+    return;
+  }
+
+  auto job = jobs.at(row);
+  qDebug() << "Cancel downloading:" << job->getMapName();
+  job->cancel();
 }
 
 QHash<int, QByteArray> MapDownloadsModel::roleNames() const
