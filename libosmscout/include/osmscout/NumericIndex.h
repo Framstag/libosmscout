@@ -105,7 +105,7 @@ namespace osmscout {
     virtual ~NumericIndex();
 
     bool Open(const std::string& path,
-              bool memoryMaped);
+              bool memoryMapped);
     bool Close();
 
     bool IsOpen() const;
@@ -270,7 +270,7 @@ namespace osmscout {
 
   template <class N>
   bool NumericIndex<N>::Open(const std::string& path,
-                             bool memoryMaped)
+                             bool memoryMapped)
   {
     uint32_t    entries;
     FileOffset  lastLevelPageStart;
@@ -279,9 +279,9 @@ namespace osmscout {
     filename=AppendFileToDir(path,filepart);
 
     try {
-       scanner.Open(filename,
-                    FileScanner::FastRandom,
-                    memoryMaped);
+      scanner.Open(filename,
+                   FileScanner::FastRandom,
+                   memoryMapped);
 
       scanner.ReadNumber(pageSize);                  // Size of one index page
       scanner.ReadNumber(entries);                   // Number of entries in data file
