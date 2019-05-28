@@ -141,12 +141,14 @@ void MapDownloadJob::onJobFailed(QString errorMessage, bool recoverable){
   }
 }
 
-void MapDownloadJob::onJobFinished()
+void MapDownloadJob::onJobFinished(QString path)
 {
   if (!jobs.isEmpty()) {
-    jobs.first()->deleteLater();
-    downloadedBytes += jobs.first()->getBytesDownloaded();
+    FileDownloader* job = jobs.first();
     jobs.pop_front();
+    assert(job->getFilePath()==path);
+    downloadedBytes += job->getBytesDownloaded();
+    job->deleteLater();
   }
   
   downloadNextFile();

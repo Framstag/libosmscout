@@ -70,7 +70,7 @@ signals:
 
 public slots:
   void onJobFailed(QString errorMessage, bool recoverable);
-  void onJobFinished();
+  void onJobFinished(QString path);
   void downloadNextFile();
   void onDownloadProgress(uint64_t);
 
