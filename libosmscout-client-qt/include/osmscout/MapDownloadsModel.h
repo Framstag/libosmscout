@@ -71,6 +71,8 @@ public:
   virtual QHash<int, QByteArray> roleNames() const;
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
+  Q_INVOKABLE void cancel(int row);
+
   Q_INVOKABLE QString suggestedDirectory(QObject *map, QString rootDirectory = "");
   Q_INVOKABLE void downloadMap(QObject *map, QString dir);
   Q_INVOKABLE QStringList getLookupDirectories();
