@@ -81,7 +81,7 @@ FileDownloader::~FileDownloader()
   if (reply) {
     reply->deleteLater();
   }
-  if (file.exists()) {
+  if (file.exists() && !finishedSuccessfully) {
     file.close();
     file.remove();
   }
@@ -127,7 +127,7 @@ void FileDownloader::onFinished()
   }
 
   qDebug() << "Downloaded" << downloaded << "bytes";
-  file.rename(path);
+  finishedSuccessfully = file.rename(path);
 
   if (reply) {
     reply->deleteLater();

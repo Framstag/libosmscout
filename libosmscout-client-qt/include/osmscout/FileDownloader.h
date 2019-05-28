@@ -78,6 +78,7 @@ private:
   QFile file;
 
   bool isOk{true};
+  bool finishedSuccessfully{false};
 
   uint64_t downloaded{0};
 
