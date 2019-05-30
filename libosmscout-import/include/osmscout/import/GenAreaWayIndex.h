@@ -29,6 +29,7 @@
 
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/TileId.h>
 
 #include <osmscout/system/Compiler.h>
 
@@ -37,8 +38,8 @@ namespace osmscout {
   class AreaWayIndexGenerator CLASS_FINAL : public ImportModule
   {
   private:
-    typedef std::map<Pixel,size_t>                 CoordCountMap;
-    typedef std::map<Pixel,std::list<FileOffset> > CoordOffsetsMap;
+    typedef std::map<TileId,size_t>                 CoordCountMap;
+    typedef std::map<TileId,std::list<FileOffset> > CoordOffsetsMap;
 
     struct TypeData
     {

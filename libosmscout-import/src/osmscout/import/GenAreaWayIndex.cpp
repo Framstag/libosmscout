@@ -34,7 +34,6 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
-#include <osmscout/util/TileId.h>
 
 namespace osmscout {
 
@@ -153,8 +152,8 @@ namespace osmscout {
       return;
     }
 
-    typeData.cellXStart=cellFillCount.begin()->first.x;
-    typeData.cellYStart=cellFillCount.begin()->first.y;
+    typeData.cellXStart=cellFillCount.begin()->first.GetX();
+    typeData.cellYStart=cellFillCount.begin()->first.GetY();
 
     typeData.cellXEnd=typeData.cellXStart;
     typeData.cellYEnd=typeData.cellYStart;
@@ -162,11 +161,11 @@ namespace osmscout {
     for (const auto& cell : cellFillCount) {
       typeData.indexEntries+=cell.second;
 
-      typeData.cellXStart=std::min(typeData.cellXStart,cell.first.x);
-      typeData.cellXEnd=std::max(typeData.cellXEnd,cell.first.x);
+      typeData.cellXStart=std::min(typeData.cellXStart,cell.first.GetX());
+      typeData.cellXEnd=std::max(typeData.cellXEnd,cell.first.GetX());
 
-      typeData.cellYStart=std::min(typeData.cellYStart,cell.first.y);
-      typeData.cellYEnd=std::max(typeData.cellYEnd,cell.first.y);
+      typeData.cellYStart=std::min(typeData.cellYStart,cell.first.GetY());
+      typeData.cellYEnd=std::max(typeData.cellYEnd,cell.first.GetY());
     }
 
     typeData.cellXCount=typeData.cellXEnd-typeData.cellXStart+1;
@@ -226,7 +225,7 @@ namespace osmscout {
                         TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
 
           for (const auto& tileId : box) {
-            cellFillCount[way.GetType()->GetIndex()][tileId.AsPixel()]++;
+            cellFillCount[way.GetType()->GetIndex()][tileId]++;
           }
         }
 
@@ -355,8 +354,8 @@ namespace osmscout {
     // Now write the list of offsets of objects for every cell with content
     for (const auto& cell : typeCellOffsets) {
       FileOffset bitmapCellOffset=bitmapOffset+
-                                  ((cell.first.y-typeData.cellYStart)*typeData.cellXCount+
-                                    cell.first.x-typeData.cellXStart)*(FileOffset)dataOffsetBytes;
+                                  ((cell.first.GetY()-typeData.cellYStart)*typeData.cellXCount+
+                                    cell.first.GetX()-typeData.cellXStart)*(FileOffset)dataOffsetBytes;
       FileOffset previousOffset=0;
       FileOffset cellOffset;
 
@@ -416,13 +415,11 @@ namespace osmscout {
 
     // Calculate number of types which have data
 
-    uint32_t indexEntries=0;
-
-    indexEntries=std::count_if(typeConfig->GetWayTypes().begin(),
-                               typeConfig->GetWayTypes().end(),
-                               [&typeData](const TypeInfoRef& type) {
-      return typeData[type->GetIndex()].HasEntries();
-    });
+    uint32_t indexEntries=std::count_if(typeConfig->GetWayTypes().begin(),
+                                        typeConfig->GetWayTypes().end(),
+                                        [&typeData](const TypeInfoRef& type) {
+                                           return typeData[type->GetIndex()].HasEntries();
+                                        });
 
     //
     // Writing index file
@@ -503,13 +500,10 @@ namespace osmscout {
             continue;
           }
 
-          GeoBox boundingBox=way.GetBoundingBox();
-
-          TileIdBox box(TileId::GetTile(magnification,boundingBox.GetMinCoord()),
-                        TileId::GetTile(magnification,boundingBox.GetMaxCoord()));
+          TileIdBox box(magnification,way.GetBoundingBox());
 
           for (const auto& tileId : box) {
-            typeCellOffsets[way.GetType()->GetIndex()][tileId.AsPixel()].push_back(offset);
+            typeCellOffsets[way.GetType()->GetIndex()][tileId].push_back(offset);
           }
         }
 
