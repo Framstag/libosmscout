@@ -112,7 +112,7 @@ namespace osmscout {
     static TileId GetTile(const Magnification& magnification,
                           const GeoCoord& coord);
 
-    static TileId GetTile(MagnificationLevel level,
+    static TileId GetTile(const MagnificationLevel& level,
                           const GeoCoord& coord);
   };
 
@@ -123,9 +123,9 @@ namespace osmscout {
   {
     std::size_t operator()(const TileId& id) const noexcept
     {
-      std::size_t h1 = static_cast<size_t>(id.GetX());
-      std::size_t h2 = static_cast<size_t>(id.GetY());
-      return h1 ^ (h2 << 16);
+      auto h1 = static_cast<size_t>(id.GetX());
+      auto h2 = static_cast<size_t>(id.GetY());
+      return h1 ^ (h2 << 16u);
     }
   };
 
