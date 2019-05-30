@@ -67,10 +67,9 @@ namespace osmscout {
   bool AreaWayIndexGenerator::FitsIndexCriteria(const ImportParameter& /*parameter*/,
                                                 Progress& progress,
                                                 const TypeInfo& typeInfo,
-                                                const TypeData& typeData,
                                                 const CoordCountMap& cellFillCount) const
   {
-    if (typeData.indexCells==0) {
+    if (cellFillCount.empty()) {
       return true;
     }
 
@@ -233,30 +232,33 @@ namespace osmscout {
 
         // Check if cell fill for current type is in defined limits
         for (auto &type : currentWayTypes) {
-          size_t i=type->GetIndex();
-
-          CalculateStatistics(level,
-                              wayTypeData[i],
-                              cellFillCount[i]);
+          size_t typeIndex=type->GetIndex();
 
           if (!FitsIndexCriteria(parameter,
                                  progress,
-                                 *typeConfig.GetTypeInfo(i),
-                                 wayTypeData[i],
-                                 cellFillCount[i])) {
+                                 *typeConfig.GetTypeInfo(typeIndex),
+                                 cellFillCount[typeIndex])) {
             if (level<parameter.GetAreaWayIndexMaxLevel()) {
               currentWayTypes.Remove(type);
             }
             else {
-              progress.Warning(typeConfig.GetTypeInfo(i)->GetName()+" has too many index cells, that area filled over the limit");
+              progress.Warning(typeConfig.GetTypeInfo(typeIndex)->GetName()+" has too many index cells, that area filled over the limit");
             }
           }
         }
 
         for (const auto &type : currentWayTypes) {
+          size_t typeIndex=type->GetIndex();
+
+          CalculateStatistics(level,
+                              wayTypeData[typeIndex],
+                              cellFillCount[typeIndex]);
+
           maxLevel=std::max(maxLevel,level);
 
-          progress.Info("Type "+type->GetName()+", "+std::to_string(wayTypeData[type->GetIndex()].indexCells)+" cells, "+std::to_string(wayTypeData[type->GetIndex()].indexEntries)+" objects");
+          progress.Info("Type "+type->GetName()+", "+
+                        std::to_string(wayTypeData[type->GetIndex()].indexCells)+" cells, "+
+                        std::to_string(wayTypeData[type->GetIndex()].indexEntries)+" objects");
 
           remainingWayTypes.Remove(type);
         }
@@ -393,7 +395,7 @@ namespace osmscout {
   {
     FileScanner           wayScanner;
     FileWriter            writer;
-    std::vector<TypeData> wayTypeData;
+    std::vector<TypeData> typeData;
     MagnificationLevel    maxLevel;
 
     progress.Info("Minimum magnification: "+parameter.GetAreaWayMinMag());
@@ -407,7 +409,7 @@ namespace osmscout {
     if (!CalculateDistribution(*typeConfig,
                                parameter,
                                progress,
-                               wayTypeData,
+                               typeData,
                                maxLevel)) {
       return false;
     }
@@ -416,12 +418,11 @@ namespace osmscout {
 
     uint32_t indexEntries=0;
 
-    for (const auto& type : typeConfig->GetWayTypes())
-    {
-      if (wayTypeData[type->GetIndex()].HasEntries()) {
-        indexEntries++;
-      }
-    }
+    indexEntries=std::count_if(typeConfig->GetWayTypes().begin(),
+                               typeConfig->GetWayTypes().end(),
+                               [&typeData](const TypeInfoRef& type) {
+      return typeData[type->GetIndex()].HasEntries();
+    });
 
     //
     // Writing index file
@@ -438,22 +439,22 @@ namespace osmscout {
       for (const auto &type : typeConfig->GetWayTypes()) {
         size_t i=type->GetIndex();
 
-        if (wayTypeData[i].HasEntries()) {
+        if (typeData[i].HasEntries()) {
           uint8_t    dataOffsetBytes=0;
           FileOffset bitmapOffset=0;
 
           writer.WriteTypeId(type->GetWayId(),
                              typeConfig->GetWayTypeIdBytes());
 
-          wayTypeData[i].indexOffset=writer.GetPos();
+          typeData[i].indexOffset=writer.GetPos();
 
           writer.WriteFileOffset(bitmapOffset);
           writer.Write(dataOffsetBytes);
-          writer.WriteNumber(wayTypeData[i].indexLevel);
-          writer.WriteNumber(wayTypeData[i].cellXStart);
-          writer.WriteNumber(wayTypeData[i].cellXEnd);
-          writer.WriteNumber(wayTypeData[i].cellYStart);
-          writer.WriteNumber(wayTypeData[i].cellYEnd);
+          writer.WriteNumber(typeData[i].indexLevel);
+          writer.WriteNumber(typeData[i].cellXStart);
+          writer.WriteNumber(typeData[i].cellXEnd);
+          writer.WriteNumber(typeData[i].cellYStart);
+          writer.WriteNumber(typeData[i].cellYEnd);
         }
       }
 
@@ -470,8 +471,8 @@ namespace osmscout {
         wayScanner.GotoBegin();
 
         for (const auto &type : typeConfig->GetWayTypes()) {
-          if (wayTypeData[type->GetIndex()].HasEntries() &&
-              wayTypeData[type->GetIndex()].indexLevel==l) {
+          if (typeData[type->GetIndex()].HasEntries() &&
+              typeData[type->GetIndex()].indexLevel==l) {
             indexTypes.Set(type);
           }
         }
@@ -518,7 +519,7 @@ namespace osmscout {
           if (!WriteBitmap(progress,
                            writer,
                            *typeConfig->GetTypeInfo(index),
-                           wayTypeData[index],
+                           typeData[index],
                            typeCellOffsets[index])) {
             return false;
           }

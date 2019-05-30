@@ -68,7 +68,6 @@ namespace osmscout {
     bool FitsIndexCriteria(const ImportParameter& parameter,
                            Progress& progress,
                            const TypeInfo& typeInfo,
-                           const TypeData& typeData,
                            const CoordCountMap& cellFillCount) const;
 
     void CalculateStatistics(const MagnificationLevel& level,
