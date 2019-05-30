@@ -216,6 +216,10 @@ bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*
 {
     return false;
 }
+bool InputHandler::vehiclePosition(VehiclePosition* /*vehiclePosition*/)
+{
+    return false;
+}
 bool InputHandler::isLockedToPosition()
 {
     return false;

@@ -8,6 +8,7 @@ osmscoutclientqtSrc = [
             'src/osmscout/QtRouteData.cpp',
             'src/osmscout/NavigationModule.cpp',
             'src/osmscout/NavigationModel.cpp',
+            'src/osmscout/VehiclePosition.cpp',
             'src/osmscout/InputHandler.cpp',
             'src/osmscout/OnlineTileProvider.cpp',
             'src/osmscout/OnlineTileProviderModel.cpp',

@@ -371,17 +371,23 @@ NavigationModule* OSMScoutQt::MakeNavigation()
   return navigation;
 }
 
-QString OSMScoutQt::GetUserAgent(){
+QString OSMScoutQt::GetUserAgent() const
+{
   return userAgent;
 }
 
-QString OSMScoutQt::GetCacheLocation()
+QString OSMScoutQt::GetCacheLocation() const
 {
   return cacheLocation;
 }
 
-size_t OSMScoutQt::GetOnlineTileCacheSize()
+size_t OSMScoutQt::GetOnlineTileCacheSize() const
 {
   return onlineTileCacheSize;
+}
+
+QString OSMScoutQt::GetIconDirectory() const
+{
+  return iconDirectory;
 }
 }

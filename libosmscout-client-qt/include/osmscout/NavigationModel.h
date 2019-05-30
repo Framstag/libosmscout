@@ -42,6 +42,8 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(QObject *routeWay      READ getRouteWay       NOTIFY routeChanged)
   Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
 
+  Q_PROPERTY(QObject *vehiclePosition  READ getVehiclePosition    NOTIFY vehiclePositionChanged)
+
   Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
   Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
 
@@ -54,6 +56,8 @@ signals:
   void update();
 
   void arrivalUpdate();
+
+  void vehiclePositionChanged();
 
   void routeChanged(QtRouteData route,
                     osmscout::Vehicle vehicle);
@@ -135,6 +139,15 @@ public:
     return new OverlayWay(route.routeWay().nodes);
   }
 
+  inline VehiclePosition* getVehiclePosition() const
+  {
+    if (!route){
+      return nullptr;
+    }
+    return new VehiclePosition(vehicle, vehicleState, vehicleCoord, vehicleBearing,
+        nextRouteStep.getType().isEmpty() ? nullptr : std::make_shared<GeoCoord>(nextRouteStep.GetCoord()));
+  }
+
   inline QDateTime getArrivalEstimate() const
   {
     return arrivalEstimate;
@@ -158,7 +171,11 @@ public:
 private:
   NavigationModule* navigationModule;
   QtRouteData       route;
-  osmscout::Vehicle vehicle;
+
+  Vehicle vehicle;
+  PositionAgent::PositionState vehicleState;
+  GeoCoord vehicleCoord;
+  std::shared_ptr<osmscout::Bearing> vehicleBearing;
 
   std::vector<RouteStep> routeSteps;
   RouteStep nextRouteStep;

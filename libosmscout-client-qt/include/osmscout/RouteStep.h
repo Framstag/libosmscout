@@ -25,6 +25,7 @@
 
 #include <osmscout/util/Time.h>
 #include <osmscout/util/Distance.h>
+#include <osmscout/GeoCoord.h>
 
 #include <QObject>
 
@@ -32,7 +33,7 @@ namespace osmscout {
 
 /**
  * Human representation of route step commands.
- * It contains time, disntace and two variants of translated description:
+ * It contains time, distance and two variants of translated description:
  *  - simple `shortTranslation`
  *  - formatted `description` with simple html formatting (just subset supported by Qt components)
  *
@@ -42,6 +43,8 @@ class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(QString type             READ getType             NOTIFY update)
+  Q_PROPERTY(double  lat              READ getLat()            NOTIFY update)
+  Q_PROPERTY(double  lon              READ getLon()            NOTIFY update)
   Q_PROPERTY(double  distance         READ getDistance         NOTIFY update)
   Q_PROPERTY(double  distanceDelta    READ getDistanceDelta    NOTIFY update)
   Q_PROPERTY(double  distanceTo       READ getDistanceTo       NOTIFY update)
@@ -57,6 +60,7 @@ signals:
 
 public:
   QString type;             //!< Type of route step
+  GeoCoord coord;           //!< Position
   Distance distance;        //!< Estimate distance from route start
   Distance distanceDelta;   //!< Estimate distance from previous route step
   Distance distanceTo;      //!< Estimate distance to this step (used with navigation)
@@ -68,12 +72,13 @@ public:
   int roundaboutExit{-1};   //!< when type is "leave-roundabout" this property indicate number of exit
 
 public:
-  inline RouteStep() : RouteStep("", Distance::Zero(), Distance::Zero(),
+  inline RouteStep() : RouteStep("", GeoCoord(), Distance::Zero(), Distance::Zero(),
                                  Duration::zero(), Duration::zero(),
                                  QStringList())
   {};
 
   RouteStep(const QString &type,
+            const GeoCoord &coord,
             const Distance &distance,
             const Distance &distanceDelta,
             const Duration &time,
@@ -88,6 +93,21 @@ public:
   {
     return type;
   };
+
+  GeoCoord GetCoord() const
+  {
+    return coord;
+  }
+
+  double getLat() const
+  {
+    return coord.GetLat();
+  }
+
+  double getLon() const
+  {
+    return coord.GetLon();
+  }
 
   Distance GetDistance() const
   {

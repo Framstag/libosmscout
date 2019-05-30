@@ -287,9 +287,10 @@ public:
   StyleModule *MakeStyleModule();
   POILookupModule *MakePOILookupModule();
 
-  QString GetUserAgent();
-  QString GetCacheLocation();
-  size_t  GetOnlineTileCacheSize();
+  QString GetUserAgent() const;
+  QString GetCacheLocation() const;
+  size_t  GetOnlineTileCacheSize() const;
+  QString GetIconDirectory() const;
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

@@ -26,12 +26,14 @@
 namespace osmscout {
 
 RouteStep::RouteStep(const QString &type,
+                     const GeoCoord &coord,
                      const Distance &distance,
                      const Distance &distanceDelta,
                      const Duration &time,
                      const Duration &timeDelta,
                      const QStringList &streetNames):
     type(type),
+    coord(coord),
     distance(distance),
     distanceDelta(distanceDelta),
     distanceTo(Distance::Zero()),
@@ -45,6 +47,7 @@ RouteStep::RouteStep(const QString &type,
 RouteStep::RouteStep(const RouteStep& other)
     : QObject(other.parent()),
       type(other.type),
+      coord(other.coord),
       distance(other.distance),
       distanceDelta(other.distanceDelta),
       distanceTo(other.distanceTo),
@@ -69,6 +72,7 @@ RouteStep& RouteStep::operator=(const RouteStep& other)
   if (this!=&other) {
     setParent(other.parent());
     type=other.type;
+    coord=other.coord;
     distance=other.distance;
     distanceDelta=other.distanceDelta;
     distanceTo=other.distanceTo;
