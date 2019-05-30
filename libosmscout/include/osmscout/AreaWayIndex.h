@@ -29,6 +29,7 @@
 #include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/TileId.h>
 
 namespace osmscout {
 
@@ -53,12 +54,7 @@ namespace osmscout {
       uint8_t       dataOffsetBytes;
       FileOffset    bitmapOffset;
 
-      uint32_t      cellXStart;
-      uint32_t      cellXEnd;
-      uint32_t      cellYStart;
-      uint32_t      cellYEnd;
-      uint32_t      cellXCount;
-      uint32_t      cellYCount;
+      TileIdBox     tileBox;
 
       CellDimension cellDimension;
 
