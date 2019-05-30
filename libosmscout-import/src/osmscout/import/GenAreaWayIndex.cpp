@@ -41,12 +41,8 @@ namespace osmscout {
   : indexLevel(0),
     indexCells(0),
     indexEntries(0),
-    cellXStart(0),
-    cellXEnd(0),
-    cellYStart(0),
-    cellYEnd(0),
-    cellXCount(0),
-    cellYCount(0),
+    tileBox(TileId(0,0),
+            TileId(0,0)),
     indexOffset(0)
   {
     // no code
@@ -152,24 +148,13 @@ namespace osmscout {
       return;
     }
 
-    typeData.cellXStart=cellFillCount.begin()->first.GetX();
-    typeData.cellYStart=cellFillCount.begin()->first.GetY();
-
-    typeData.cellXEnd=typeData.cellXStart;
-    typeData.cellYEnd=typeData.cellYStart;
+    typeData.tileBox=TileIdBox(cellFillCount.begin()->first,cellFillCount.begin()->first);
 
     for (const auto& cell : cellFillCount) {
       typeData.indexEntries+=cell.second;
 
-      typeData.cellXStart=std::min(typeData.cellXStart,cell.first.GetX());
-      typeData.cellXEnd=std::max(typeData.cellXEnd,cell.first.GetX());
-
-      typeData.cellYStart=std::min(typeData.cellYStart,cell.first.GetY());
-      typeData.cellYEnd=std::max(typeData.cellYEnd,cell.first.GetY());
+      typeData.tileBox=typeData.tileBox.Include(cell.first);
     }
-
-    typeData.cellXCount=typeData.cellXEnd-typeData.cellXStart+1;
-    typeData.cellYCount=typeData.cellYEnd-typeData.cellYStart+1;
   }
 
   bool AreaWayIndexGenerator::CalculateDistribution(const TypeConfig& typeConfig,
@@ -324,7 +309,7 @@ namespace osmscout {
 
     progress.Info("Writing map for "+
                   typeInfo.GetName()+" , "+
-                  ByteSizeToString(1.0*dataOffsetBytes*typeData.cellXCount*typeData.cellYCount+dataSize));
+                  ByteSizeToString(1.0*dataOffsetBytes*typeData.tileBox.GetCount()+dataSize));
 
     FileOffset bitmapOffset;
 
@@ -342,7 +327,7 @@ namespace osmscout {
     // Write the bitmap with offsets for each cell
     // We prefill with zero and only overwrite cells that have data
     // So zero means "no data for this cell"
-    for (size_t i=0; i<typeData.cellXCount*typeData.cellYCount; i++) {
+    for (size_t i=0; i<typeData.tileBox.GetCount(); i++) {
       writer.WriteFileOffset(0,
                              dataOffsetBytes);
     }
@@ -354,8 +339,8 @@ namespace osmscout {
     // Now write the list of offsets of objects for every cell with content
     for (const auto& cell : typeCellOffsets) {
       FileOffset bitmapCellOffset=bitmapOffset+
-                                  ((cell.first.GetY()-typeData.cellYStart)*typeData.cellXCount+
-                                    cell.first.GetX()-typeData.cellXStart)*(FileOffset)dataOffsetBytes;
+                                  ((cell.first.GetY()-typeData.tileBox.GetMinY())*typeData.tileBox.GetWidth()+
+                                    cell.first.GetX()-typeData.tileBox.GetMinX())*(FileOffset)dataOffsetBytes;
       FileOffset previousOffset=0;
       FileOffset cellOffset;
 
@@ -448,10 +433,10 @@ namespace osmscout {
           writer.WriteFileOffset(bitmapOffset);
           writer.Write(dataOffsetBytes);
           writer.WriteNumber(typeData[i].indexLevel);
-          writer.WriteNumber(typeData[i].cellXStart);
-          writer.WriteNumber(typeData[i].cellXEnd);
-          writer.WriteNumber(typeData[i].cellYStart);
-          writer.WriteNumber(typeData[i].cellYEnd);
+          writer.WriteNumber(typeData[i].tileBox.GetMinX());
+          writer.WriteNumber(typeData[i].tileBox.GetMaxX());
+          writer.WriteNumber(typeData[i].tileBox.GetMinY());
+          writer.WriteNumber(typeData[i].tileBox.GetMaxY());
         }
       }
 

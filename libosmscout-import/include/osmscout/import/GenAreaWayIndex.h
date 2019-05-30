@@ -47,12 +47,7 @@ namespace osmscout {
       size_t             indexCells;   //! Number of filled cells in index
       size_t             indexEntries; //! Number of entries over all cells
 
-      uint32_t           cellXStart;
-      uint32_t           cellXEnd;
-      uint32_t           cellYStart;
-      uint32_t           cellYEnd;
-      uint32_t           cellXCount;
-      uint32_t           cellYCount;
+      TileIdBox          tileBox;
 
       FileOffset         indexOffset; //! Position in file where the offset of the bitmap is written to
 
