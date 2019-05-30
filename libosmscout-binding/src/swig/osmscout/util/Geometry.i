@@ -4,3 +4,5 @@
 
 %include <osmscout/util/Geometry.h>
 
+%template(SegmentGeoBoxVector) std::vector<osmscout::SegmentGeoBox>;
+

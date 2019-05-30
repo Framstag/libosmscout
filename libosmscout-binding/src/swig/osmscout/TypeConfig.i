@@ -14,3 +14,8 @@
 %template(FeatureInstanceVector) std::vector<osmscout::FeatureInstance>;
 %template(FeatureRef) std::shared_ptr<osmscout::Feature>;
 
+%template(TypeInfoTypeConditionList) std::list<osmscout::TypeInfo::TypeCondition>;
+
+%template(TypeInfoRefVector) std::vector<osmscout::TypeInfoRef>;
+
+

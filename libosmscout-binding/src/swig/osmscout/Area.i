@@ -6,4 +6,6 @@
 
 %include <osmscout/Area.h>
 
+%template(AreaRingVector) std::vector<osmscout::Area::Ring>;
+
 %template(AreaVector) std::vector<osmscout::AreaRef>;

@@ -6,3 +6,6 @@
 
 %include <osmscout/LocationService.h>
 
+%template(FileOffsetAdminRegionRefMap) std::map<osmscout::FileOffset,osmscout::AdminRegionRef>;
+
+

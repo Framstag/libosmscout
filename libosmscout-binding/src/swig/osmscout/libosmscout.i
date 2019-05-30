@@ -1,12 +1,18 @@
 %module libosmscout
 
 %include <typemaps.i>
+
 %include <stdint.i>
 %include <stl.i>
 
 %include <std_string.i>
-%include <std_shared_ptr.i>
 %include <std_wstring.i>
+%include <std_shared_ptr.i>
+
+%include <std_list.i>
+%include <std_set.i>
+%include <std_unordered_map.i>
+//%include <std_unordered_set.i>
 %include <std_vector.i>
 
 #define OSMSCOUT_API
@@ -14,8 +20,10 @@
 
 %include <osmscout/OSMScoutTypes.i>
 
+%include <osmscout/util/Bearing.i>
 %include <osmscout/util/Distance.i>
 %include <osmscout/util/StringMatcher.i>
+%include <osmscout/util/Time.i>
 %include <osmscout/util/Breaker.i>
 
 %include <osmscout/ObjectRef.i>
