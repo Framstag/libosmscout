@@ -182,7 +182,7 @@ namespace osmscout {
             y>maxlat+cellDimension.height/2 ||
             x+cellDimension.width<minlon-cellDimension.width/2 ||
             y+cellDimension.height<minlat-cellDimension.height/2)) {
-        nextCellRefs.push_back(CellRef(cellIndexData.children[0],cx,cy+1));
+        nextCellRefs.emplace_back(cellIndexData.children[0],cx,cy+1);
       }
     }
 
@@ -195,7 +195,7 @@ namespace osmscout {
             y>maxlat+cellDimension.height/2 ||
             x+cellDimension.width<minlon-cellDimension.width/2 ||
             y+cellDimension.height<minlat-cellDimension.height/2)) {
-        nextCellRefs.push_back(CellRef(cellIndexData.children[1],cx+1,cy+1));
+        nextCellRefs.emplace_back(cellIndexData.children[1],cx+1,cy+1);
       }
     }
 
@@ -208,7 +208,7 @@ namespace osmscout {
             y>maxlat+cellDimension.height/2 ||
             x+cellDimension.width<minlon-cellDimension.width/2 ||
             y+cellDimension.height<minlat-cellDimension.height/2)) {
-        nextCellRefs.push_back(CellRef(cellIndexData.children[2],cx,cy));
+        nextCellRefs.emplace_back(cellIndexData.children[2],cx,cy);
       }
     }
 
@@ -221,7 +221,7 @@ namespace osmscout {
             y>maxlat+cellDimension.height/2 ||
             x+cellDimension.width<minlon-cellDimension.width/2 ||
             y+cellDimension.height<minlat-cellDimension.height/2)) {
-        nextCellRefs.push_back(CellRef(cellIndexData.children[3],cx+1,cy));
+        nextCellRefs.emplace_back(cellIndexData.children[3],cx+1,cy);
       }
     }
   }
@@ -287,7 +287,7 @@ namespace osmscout {
     cellRefs.reserve(2000);
     nextCellRefs.reserve(2000);
 
-    cellRefs.push_back(CellRef(topLevelOffset,0,0));
+    cellRefs.emplace_back(topLevelOffset,0,0);
 
     try {
       // For all levels:
