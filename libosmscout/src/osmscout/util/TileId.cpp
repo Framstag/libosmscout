@@ -232,4 +232,40 @@ namespace osmscout {
     return GeoBox(minKey.GetBoundingBox().GetTopLeft(),
                   maxPlusKey.GetBoundingBox().GetTopLeft());
   }
+
+  TileIdBox TileIdBox::Include(const TileId& tileId)
+  {
+    return TileIdBox(TileId(std::min(tileId.GetX(),
+                                     minTile.GetX()),
+                            std::min(tileId.GetY(),
+                                     minTile.GetY())),
+                     TileId(std::max(tileId.GetX(),
+                                     minTile.GetX()),
+                            std::max(tileId.GetY(),
+                                     minTile.GetY())));
+  }
+
+  TileIdBox TileIdBox::Include(const TileIdBox& other)
+  {
+    return TileIdBox(TileId(std::min(other.minTile.GetX(),
+                                     minTile.GetX()),
+                            std::min(other.minTile.GetY(),
+                                     minTile.GetY())),
+                     TileId(std::max(other.maxTile.GetX(),
+                                     minTile.GetX()),
+                            std::max(other.maxTile.GetY(),
+                                     minTile.GetY())));
+  }
+
+  TileIdBox TileIdBox::Intersection(const TileIdBox& other)
+  {
+    return TileIdBox(TileId(std::max(other.minTile.GetX(),
+                                     minTile.GetX()),
+                            std::max(other.minTile.GetY(),
+                                     minTile.GetY())),
+                     TileId(std::min(other.maxTile.GetX(),
+                                     minTile.GetX()),
+                            std::min(other.maxTile.GetY(),
+                                     minTile.GetY())));
+  }
 }

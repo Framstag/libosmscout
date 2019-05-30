@@ -315,6 +315,10 @@ namespace osmscout {
 
     GeoBox GetBoundingBox(const Magnification& magnification) const;
 
+    TileIdBox Include(const TileId& tileId);
+    TileIdBox Include(const TileIdBox& other);
+    TileIdBox Intersection(const TileIdBox& other);
+
     inline std::string GetDisplayText() const
     {
       return std::string("["+minTile.GetDisplayText()+" - "+maxTile.GetDisplayText()+"]");
