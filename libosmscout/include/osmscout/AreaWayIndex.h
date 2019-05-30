@@ -47,26 +47,22 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      TypeInfoRef type;
-      uint32_t    indexLevel;
+      TypeInfoRef   type;
+      uint32_t      indexLevel;
 
-      uint8_t     dataOffsetBytes;
-      FileOffset  bitmapOffset;
+      uint8_t       dataOffsetBytes;
+      FileOffset    bitmapOffset;
 
-      uint32_t    cellXStart;
-      uint32_t    cellXEnd;
-      uint32_t    cellYStart;
-      uint32_t    cellYEnd;
-      uint32_t    cellXCount;
-      uint32_t    cellYCount;
+      uint32_t      cellXStart;
+      uint32_t      cellXEnd;
+      uint32_t      cellYStart;
+      uint32_t      cellYEnd;
+      uint32_t      cellXCount;
+      uint32_t      cellYCount;
 
-      double      cellWidth;
-      double      cellHeight;
+      CellDimension cellDimension;
 
-      double      minLon;
-      double      maxLon;
-      double      minLat;
-      double      maxLat;
+      GeoBox        boundingBox;
 
       TypeData();
 
@@ -83,7 +79,7 @@ namespace osmscout {
     mutable std::mutex    lookupMutex;
 
   private:
-    bool GetOffsets(const TypeData& typeData,
+    void GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
                     std::unordered_set<FileOffset>& offsets) const;
 
