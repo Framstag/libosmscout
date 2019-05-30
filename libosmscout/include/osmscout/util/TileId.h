@@ -244,6 +244,15 @@ namespace osmscout {
     TileIdBox(const TileId& a,
               const TileId& b);
 
+    TileIdBox(const Magnification& magnification,
+              const GeoBox& boundingBox)
+    : TileIdBox(TileId::GetTile(magnification,
+                                boundingBox.GetMinCoord()),
+                TileId::GetTile(magnification,
+                                boundingBox.GetMaxCoord()))
+    {
+    }
+
     inline TileId GetMin() const
     {
       return minTile;
