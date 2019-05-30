@@ -140,7 +140,7 @@ namespace osmscout {
    * @param typeData
    * @param cellFillCount
    */
-  void AreaWayIndexGenerator::CalculateStatistics(MagnificationLevel level,
+  void AreaWayIndexGenerator::CalculateStatistics(const MagnificationLevel& level,
                                                   TypeData& typeData,
                                                   const CoordCountMap& cellFillCount) const
   {

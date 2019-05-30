@@ -71,7 +71,7 @@ namespace osmscout {
                            const TypeData& typeData,
                            const CoordCountMap& cellFillCount) const;
 
-    void CalculateStatistics(MagnificationLevel level,
+    void CalculateStatistics(const MagnificationLevel& level,
                              TypeData& typeData,
                              const CoordCountMap& cellFillCount) const;
 
