@@ -252,23 +252,35 @@ namespace osmscout {
       return GetWidth()*GetHeight();
     }
 
+    /**
+     * south-west corner
+     */
     inline GeoCoord GetBottomLeft() const
     {
       return minCoord;
     }
 
+    /**
+     * south-east corner
+     */
     inline GeoCoord GetBottomRight() const
     {
       return GeoCoord(minCoord.GetLat(),
                       maxCoord.GetLon());
     }
 
+    /**
+     * north-west corner
+     */
     inline GeoCoord GetTopLeft() const
     {
       return GeoCoord(maxCoord.GetLat(),
                       minCoord.GetLon());
     }
 
+    /**
+     * north-east corner
+     */
     inline GeoCoord GetTopRight() const
     {
       return maxCoord;
