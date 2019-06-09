@@ -239,6 +239,7 @@ namespace osmscout {
   typedef FeatureValueReader<DestinationFeature,DestinationFeatureValue>           DestinationFeatureValueReader;
   typedef FeatureValueReader<ConstructionYearFeature,ConstructionYearFeatureValue> ConstructionYearFeatureValueReader;
   typedef FeatureValueReader<LanesFeature,LanesFeatureValue>                       LanesFeatureValueReader;
+  typedef FeatureValueReader<EleFeature,EleFeatureValue>                           EleFeatureValueReader;
 
   template <class F, class V>
   class FeatureLabelReader
