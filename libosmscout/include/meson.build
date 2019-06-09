@@ -74,6 +74,7 @@ osmscoutHeader = [
             'osmscout/TypeDistributionDataFile.h',
             'osmscout/Database.h',
             'osmscout/DebugDatabase.h',
+            'osmscout/ElevationService.h',
             'osmscout/BasemapDatabase.h',
             'osmscout/GeoCoord.h',
             'osmscout/GroundTile.h',

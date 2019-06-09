@@ -198,7 +198,7 @@ else()
 	message("Skip DrawMapOSX demo, libosmscout-map-iosx is missing.")
 endif()
 
-if(${LIBXML2_FOUND})
+if(${LIBXML2_FOUND} AND ${OSMSCOUT_BUILD_GPX})
     #---- GpxPipe
     add_executable(GpxPipe src/GpxPipe.cpp)
     set_property(TARGET GpxPipe PROPERTY CXX_STANDARD 14)
@@ -206,6 +206,16 @@ if(${LIBXML2_FOUND})
     install(TARGETS GpxPipe RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 else()
     message("Skip GpxPipe demo, libxml is missing.")
+endif()
+
+if(${LIBXML2_FOUND} AND ${OSMSCOUT_BUILD_GPX})
+    #---- ElevationProfile
+    add_executable(ElevationProfile src/ElevationProfile.cpp)
+    set_property(TARGET ElevationProfile PROPERTY CXX_STANDARD 14)
+    target_link_libraries(ElevationProfile OSMScout OSMScoutMap OSMScoutGPX)
+    install(TARGETS ElevationProfile RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+else()
+    message("Skip ElevationProfile demo, libxml is missing.")
 endif()
 
 #---- Navigation

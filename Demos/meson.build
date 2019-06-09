@@ -229,3 +229,21 @@ if buildMapDirectX
                               gui_app: true,
                               install: true)
 endif
+
+if buildGpx
+  GpxPipe = executable('GpxPipe',
+                       'src/GpxPipe.cpp',
+                       include_directories: [osmscoutIncDir, osmscoutgpxIncDir],
+                       dependencies: [mathDep, openmpDep],
+                       link_with: [osmscout, osmscoutgpx],
+                       install: true)
+endif
+
+if buildGpx
+  ElevationProfile = executable('ElevationProfile',
+                                'src/ElevationProfile.cpp',
+                                include_directories: [osmscoutIncDir, osmscoutgpxIncDir],
+                                dependencies: [mathDep, openmpDep],
+                                link_with: [osmscout, osmscoutgpx],
+                                install: true)
+endif
