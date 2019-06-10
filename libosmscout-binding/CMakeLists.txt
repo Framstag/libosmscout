@@ -9,12 +9,15 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
   include(${SWIG_USE_FILE})
   set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/Java/src/main/java/net/sf/libosmscout/osmscout)
   file(MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR})
-  set(CMAKE_SWIG_FLAGS -c++ -package net.sf.libosmscout.osmscout -features autodoc=1 -I${CMAKE_CURRENT_SOURCE_DIR}/src/swig -I${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout/include -outdir ${CMAKE_SWIG_OUTDIR})
+  # See https://github.com/swig/swig/issues/568
+  set(CMAKE_SWIG_FLAGS -c++ -package net.sf.libosmscout.osmscout -features autodoc=1 -DSWIGWORDSIZE64 -I${CMAKE_CURRENT_SOURCE_DIR}/src/swig -I${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout/include -outdir ${CMAKE_SWIG_OUTDIR})
   if(MSVC)
     set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} -Fmicrosoft)
   endif()
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i PROPERTIES CPLUSPLUS ON)
-  swig_add_module(osmscout_binding_java Java ${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i)
+  swig_add_library(osmscout_binding_java
+    LANGUAGE Java
+    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/swig/osmscout/libosmscout.i)
   swig_link_libraries(osmscout_binding_java OSMScout ${JNI_LIBRARIES})
   target_include_directories(osmscout_binding_java PRIVATE
     include
@@ -25,6 +28,7 @@ if(OSMSCOUT_BUILD_BINDING_JAVA)
     ${OSMSCOUT_TARGET}
     ${JNI_LIBRARIES})
   set_property(TARGET osmscout_binding_java PROPERTY CXX_STANDARD 14)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
   install(TARGETS osmscout_binding_java
     RUNTIME DESTINATION bin
