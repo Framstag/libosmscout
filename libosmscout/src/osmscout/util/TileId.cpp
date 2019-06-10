@@ -229,8 +229,9 @@ namespace osmscout {
     TileKey minKey(magnification,minTile);
     TileKey maxPlusKey(magnification,TileId(maxTile.GetX()+1,maxTile.GetY()+1));
 
-    return GeoBox(minKey.GetBoundingBox().GetTopLeft(),
-                  maxPlusKey.GetBoundingBox().GetTopLeft());
+    // TileId{0,0} is south-west corner. X coordinate is incrementing to east, Y to the north
+    return GeoBox(minKey.GetBoundingBox().GetBottomLeft(),
+                  maxPlusKey.GetBoundingBox().GetBottomLeft());
   }
 
   TileIdBox TileIdBox::Include(const TileId& tileId)

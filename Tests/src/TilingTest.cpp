@@ -15,6 +15,9 @@ TEST_CASE("TileIdBox calculation") {
 
   osmscout::TileIdBox box(tile1,tile2);
 
+  REQUIRE(box.GetBoundingBox(magnification).Includes(coord1));
+  REQUIRE(box.GetBoundingBox(magnification).Includes(coord2));
+
   osmscout::TileId min=box.GetMin();
   osmscout::TileId max=box.GetMax();
 
