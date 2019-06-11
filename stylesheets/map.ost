@@ -2090,6 +2090,7 @@ TYPES
 
   TYPE barrier_wall
     = WAY AREA ("barrier"=="wall")
+      IGNORESEALAND
 
   TYPE barrier_ditch
     IGNORE
