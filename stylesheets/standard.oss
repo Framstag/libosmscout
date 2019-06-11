@@ -102,6 +102,7 @@ CONST
   UINT labelPrioLeisure             = 26;
 
   UINT labelPrioPeak                = 29;
+  UINT labelPrioSpring              = 30;
 
   UINT labelPrioHighwayServices     = 34;
   UINT labelPrioRailwayStation      = 35;
@@ -387,6 +388,19 @@ CONST
       AREA { color: @waterLabelColor; }
     }
 
+  SYMBOL natural_spring
+    CIRCLE 0,0 1.0 {
+      AREA.BORDER {color: @waterLabelColor; width: 0.2mm; }
+    }
+    CIRCLE 0,0 0.3 {
+      AREA {color: @waterLabelColor; }
+    }
+
+  SYMBOL amenity_drinking_water
+    CIRCLE 0,0 0.4 {
+      AREA {color: @waterLabelColor; }
+    }
+
   SYMBOL natural_peak
     POLYGON -0.75,0 0.75,0 0.0,-1.5 {
       AREA { color: @peakSymbolColor; }
@@ -581,6 +595,13 @@ STYLE
       [TYPE natural_peak] {
         NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
         NODE.TEXT#ele { label: Ele.inMeter; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
+      }
+    }
+
+    [MAG veryClose-] {
+      [TYPE natural_spring] {
+        NODE.ICON { symbol: natural_spring; }
+        NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioSpring; size: 0.9; }
       }
     }
 
@@ -1640,6 +1661,8 @@ STYLE
    [TYPE amenity_post_box] NODE.ICON { symbol: amenity_post_box; }
 
    [TYPE amenity_post_office] NODE.ICON { symbol: amenity_post_office; }
+
+   [TYPE amenity_drinking_water] NODE.ICON { symbol: amenity_drinking_water; }
 
    // Amenities without special color
    [TYPE amenity,
