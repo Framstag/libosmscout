@@ -1120,7 +1120,6 @@ TYPES
       GROUP amenity
 
   TYPE amenity_drinking_water
-    IGNORE // No visualisation yet
     = NODE ("amenity"=="drinking_water")
       GROUP amenity
 
