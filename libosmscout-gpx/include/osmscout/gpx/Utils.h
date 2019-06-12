@@ -55,7 +55,8 @@ typedef std::shared_ptr<ProcessCallback> ProcessCallbackRef;
  * @param points
  * @param minDistance
  */
-extern OSMSCOUT_GPX_API void FilterNearPoints(std::vector<TrackPoint> &points, Distance minDistance=Distance::Of<Meter>(0));
+extern OSMSCOUT_GPX_API void FilterNearPoints(std::vector<TrackPoint> &points,
+                                              const Distance &minDistance=Meters(0));
 
 /**
  * Filter out points with horizontal dilution (or position dilution if horizontal is not presented)
