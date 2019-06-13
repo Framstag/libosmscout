@@ -56,6 +56,13 @@ MapDownloadJob::~MapDownloadJob()
 
 void MapDownloadJob::start()
 {
+  QStorageInfo storage=QStorageInfo(target);
+  if (storage.bytesAvailable() > 0 && (size_t)storage.bytesAvailable() < map.getSize()){
+    qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size (" << map.getSize() << ")!";
+    onJobFailed("Not enough space", false);
+    return;
+  }
+
   QJsonObject mapMetadata;
   mapMetadata["name"] = map.getName();
   mapMetadata["map"] = map.getPath().join("/");
@@ -349,11 +356,6 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceEx
       emit mapDownloadFails("Can't create directory");
       return;
     }
-  }
-
-  QStorageInfo storage=QStorageInfo(dir);
-  if (storage.bytesAvailable()<(double)map.getSize()){
-    qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size ("<<map.getSize()<<")!";
   }
 
   auto job=new MapDownloadJob(&webCtrl, map, dir, replaceExisting);
