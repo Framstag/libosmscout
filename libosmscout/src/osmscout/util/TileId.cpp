@@ -241,9 +241,9 @@ namespace osmscout {
                    std::min(tileId.GetY(),
                             minTile.GetY())),
             TileId(std::max(tileId.GetX(),
-                            minTile.GetX()),
+                            maxTile.GetX()),
                    std::max(tileId.GetY(),
-                            minTile.GetY()))};
+                            maxTile.GetY()))};
   }
 
   TileIdBox TileIdBox::Include(const TileIdBox& other)
@@ -253,9 +253,9 @@ namespace osmscout {
                    std::min(other.minTile.GetY(),
                             minTile.GetY())),
             TileId(std::max(other.maxTile.GetX(),
-                            minTile.GetX()),
+                            maxTile.GetX()),
                    std::max(other.maxTile.GetY(),
-                            minTile.GetY()))};
+                            maxTile.GetY()))};
   }
 
   TileIdBox TileIdBox::Intersection(const TileIdBox& other)
