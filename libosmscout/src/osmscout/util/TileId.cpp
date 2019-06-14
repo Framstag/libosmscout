@@ -265,8 +265,8 @@ namespace osmscout {
                    std::max(other.minTile.GetY(),
                             minTile.GetY())),
             TileId(std::min(other.maxTile.GetX(),
-                            minTile.GetX()),
+                            maxTile.GetX()),
                    std::min(other.maxTile.GetY(),
-                            minTile.GetY()))};
+                            maxTile.GetY()))};
   }
 }
