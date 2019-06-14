@@ -52,6 +52,25 @@ TEST_CASE("TileIdBox intersection") {
   REQUIRE(intersection.GetMax() == osmscout::TileId(9,10));
 }
 
+TEST_CASE("TileIdBox inclusion") {
+  osmscout::TileIdBox a(osmscout::TileId(0,0),
+                        osmscout::TileId(10,10));
+  osmscout::TileIdBox b(osmscout::TileId(5,6),
+                        osmscout::TileId(15,15));
+
+  REQUIRE(a.Include(b) == b.Include(a));
+
+  REQUIRE(a.Include(b) == osmscout::TileIdBox(osmscout::TileId(0,0),
+                                              osmscout::TileId(15,15)));
+
+  REQUIRE(a.Include(osmscout::TileId(11,12)) == osmscout::TileIdBox(osmscout::TileId(0,0),
+                                                                    osmscout::TileId(11,12)));
+
+  REQUIRE(b.Include(osmscout::TileId(1,2)) == osmscout::TileIdBox(osmscout::TileId(1,2),
+                                                                  osmscout::TileId(15,15)));
+
+}
+
 TEST_CASE("OSMTileIdBox calculation") {
   osmscout::Magnification magnification(osmscout::Magnification::magClose);
   osmscout::GeoCoord      coord1(51.5717798,7.458785);
