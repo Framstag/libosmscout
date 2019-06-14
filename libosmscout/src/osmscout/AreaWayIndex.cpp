@@ -152,6 +152,11 @@ namespace osmscout {
     TileIdBox boundingTileBox(Magnification(MagnificationLevel(typeData.indexLevel)),
                               boundingBox);
 
+    if (!boundingTileBox.Intersects(typeData.tileBox)) {
+      // No data available in given bounding box
+      return;
+    }
+
     boundingTileBox=boundingTileBox.Intersection(typeData.tileBox);
 
     FileOffset dataOffset=typeData.GetDataOffset();

@@ -269,4 +269,12 @@ namespace osmscout {
                    std::min(other.maxTile.GetY(),
                             maxTile.GetY()))};
   }
+
+  bool TileIdBox::Intersects(const TileIdBox& other) const
+  {
+    return !(other.GetMaxX() < minTile.GetX() ||
+             other.GetMinX() > maxTile.GetX() ||
+             other.GetMaxY() < minTile.GetY() ||
+             other.GetMinY() > maxTile.GetY());
+  }
 }
