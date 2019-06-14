@@ -109,6 +109,11 @@ public:
     return done;
   }
 
+  inline bool isSuccessful() const
+  {
+    return successful;
+  }
+
   inline bool isDownloading() const
   {
     return started && !done;

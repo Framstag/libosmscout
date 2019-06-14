@@ -389,17 +389,17 @@ void MapManager::onJobFinished()
   QList<MapDownloadJob*> finished;
   for (auto job:downloadJobs){
     if (job->isDone()){
-      finished<<job;
+      finished << job;
 
-      if (job->isReplaceExisting()){
+      if (job->isReplaceExisting() && job->isSuccessful()){
         // if there is upgrade requested, delete old database with same (logical) path
         for (auto &mapDir:databaseDirectories) {
           if (mapDir.hasMetadata() &&
               mapDir.getPath() == job->getMapPath() &&
               mapDir.getDir().canonicalPath() != job->getDestinationDirectory().canonicalPath()) {
 
-            osmscout::log.Debug() << "deleting map database" << mapDir.getName().toStdString() << "after upgrade:"
-                     << mapDir.getDir().canonicalPath().toStdString();
+            osmscout::log.Debug() << "deleting map database " << mapDir.getName().toStdString() << " after upgrade: "
+                                  << mapDir.getDir().canonicalPath().toStdString();
             mapDir.deleteDatabase();
           }
         }
