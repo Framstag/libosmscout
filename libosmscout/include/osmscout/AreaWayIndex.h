@@ -56,8 +56,6 @@ namespace osmscout {
 
       TileIdBox     tileBox;
 
-      CellDimension cellDimension;
-
       GeoBox        boundingBox;
 
       TypeData();
