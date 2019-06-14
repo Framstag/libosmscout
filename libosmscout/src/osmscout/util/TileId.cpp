@@ -234,7 +234,7 @@ namespace osmscout {
                   maxPlusKey.GetBoundingBox().GetBottomLeft());
   }
 
-  TileIdBox TileIdBox::Include(const TileId& tileId)
+  TileIdBox TileIdBox::Include(const TileId& tileId) const
   {
     return {TileId(std::min(tileId.GetX(),
                             minTile.GetX()),
@@ -246,7 +246,7 @@ namespace osmscout {
                             maxTile.GetY()))};
   }
 
-  TileIdBox TileIdBox::Include(const TileIdBox& other)
+  TileIdBox TileIdBox::Include(const TileIdBox& other) const
   {
     return {TileId(std::min(other.minTile.GetX(),
                             minTile.GetX()),
@@ -258,7 +258,7 @@ namespace osmscout {
                             maxTile.GetY()))};
   }
 
-  TileIdBox TileIdBox::Intersection(const TileIdBox& other)
+  TileIdBox TileIdBox::Intersection(const TileIdBox& other) const
   {
     return {TileId(std::max(other.minTile.GetX(),
                             minTile.GetX()),
