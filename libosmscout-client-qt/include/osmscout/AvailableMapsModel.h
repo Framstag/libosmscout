@@ -121,7 +121,7 @@ public:
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelMap : public AvailableMapsModelItem {
   Q_OBJECT
 
-  Q_PROPERTY(qint64 byteSize READ getSize())
+  Q_PROPERTY(quint64 byteSize READ getSize())
   Q_PROPERTY(QString size READ getSizeHuman())
   Q_PROPERTY(QString serverDirectory READ getServerDirectory())
   Q_PROPERTY(QDateTime time READ getCreation())
@@ -165,7 +165,7 @@ public:
   }
 
   MapProvider getProvider() const;
-  size_t getSize() const;
+  uint64_t getSize() const;
   QString getSizeHuman() const;
   QString getServerDirectory() const;
   QDateTime getCreation() const;
