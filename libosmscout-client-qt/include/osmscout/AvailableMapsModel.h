@@ -129,7 +129,7 @@ class OSMSCOUT_CLIENT_QT_API AvailableMapsModelMap : public AvailableMapsModelIt
 
 private:
   MapProvider provider;
-  size_t size{0};
+  uint64_t size{0};
   QString serverDirectory;
   QDateTime creation;
   int version{-1};
@@ -138,7 +138,7 @@ public:
   inline AvailableMapsModelMap():AvailableMapsModelItem(){};
 
   inline AvailableMapsModelMap(QString name, QList<QString> path, QString description, MapProvider provider,
-                               size_t size, QString serverDirectory, QDateTime creation, int version):
+                               uint64_t size, QString serverDirectory, QDateTime creation, int version):
     AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory), 
     creation(creation), version(version) {};
 

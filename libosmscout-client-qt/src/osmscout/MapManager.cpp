@@ -57,7 +57,7 @@ MapDownloadJob::~MapDownloadJob()
 void MapDownloadJob::start()
 {
   QStorageInfo storage=QStorageInfo(target);
-  if (storage.bytesAvailable() > 0 && (size_t)storage.bytesAvailable() < map.getSize()){
+  if (storage.bytesAvailable() > 0 && (uint64_t)storage.bytesAvailable() < map.getSize()){
     qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size (" << map.getSize() << ")!";
     onJobFailed("Not enough space", false);
     return;

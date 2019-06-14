@@ -33,7 +33,7 @@ MapProvider AvailableMapsModelMap::getProvider() const
   return provider;
 }
 
-size_t AvailableMapsModelMap::getSize() const
+uint64_t AvailableMapsModelMap::getSize() const
 {
   return size;
 }
