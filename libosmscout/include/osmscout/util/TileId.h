@@ -313,6 +313,13 @@ namespace osmscout {
                                        maxTile);
     }
 
+    inline bool operator==(const TileIdBox& other) const
+    {
+      return minTile==other.minTile &&
+             maxTile==other.maxTile;
+    }
+
+
     GeoBox GetBoundingBox(const Magnification& magnification) const;
 
     TileIdBox Include(const TileId& tileId);
