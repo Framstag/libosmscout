@@ -26,7 +26,14 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                </configuration>            
+                    <archive>
+                        <manifest>
+                            <mainClass>
+                                net.sf.libosmscout.LocationLookup
+                            </mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
                 <executions>
                     <execution>
                         <id>make-assembly</id> <!-- this is used for inheritance merges -->

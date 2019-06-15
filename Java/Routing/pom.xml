@@ -26,6 +26,13 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>
+                                net.sf.libosmscout.Routing
+                            </mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>            
                 <executions>
                     <execution>
