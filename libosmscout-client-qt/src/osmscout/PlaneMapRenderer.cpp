@@ -354,8 +354,8 @@ void PlaneMapRenderer::DrawMap()
 
     drawParameter.SetShowAltLanguage(showAltLanguage);
 
-    drawParameter.SetLabelLineMinCharCount(15);
-    drawParameter.SetLabelLineMaxCharCount(30);
+    drawParameter.SetLabelLineMinCharCount(5);
+    drawParameter.SetLabelLineMaxCharCount(15);
     drawParameter.SetLabelLineFitToArea(true);
     drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight())/canvasOverrun);
 
