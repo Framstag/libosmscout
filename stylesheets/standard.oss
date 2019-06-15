@@ -432,6 +432,14 @@ CONST
       AREA { color: @railwaySymbolColor; }
     }
 
+  SYMBOL railway_subway_entrance
+    RECTANGLE 0,0 2 x 2 {
+      AREA { color: @railwaySymbolColor; }
+    }
+    RECTANGLE 0.5,0.5 1 x 1 {
+      AREA { color: #ffffff; }
+    }
+
   SYMBOL railway_tram_stop
     RECTANGLE 0,0 1 x 1 {
       AREA { color: @railwaySymbolColor; }
@@ -1362,6 +1370,7 @@ STYLE
            railway_funicular,
            public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
 
+     // Do not show labels of subways, clutters display
      //[TYPE railway_subway] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
 
      [TYPE public_transport_platform] AREA.TEXT { label: Name.name; color: #524a4a; size: 0.8; priority: @labelPrioTramHalt; }
@@ -1703,6 +1712,12 @@ STYLE
    }
 
    [TYPE barrier_fence] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
+ }
+
+ [MAG block-] {
+   [TYPE railway_subway_entrance] {
+     NODE.ICON { symbol: railway_subway_entrance; }
+   }
  }
 
 // Aerialways
