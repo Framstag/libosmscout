@@ -31,7 +31,7 @@
 
 namespace osmscout {
 
-  const char* AreaAreaIndex::AREA_AREA_IDX="areaarea.idx";
+  const char* const AreaAreaIndex::AREA_AREA_IDX="areaarea.idx";
 
   AreaAreaIndex::AreaAreaIndex(size_t cacheSize)
   : maxLevel(0),

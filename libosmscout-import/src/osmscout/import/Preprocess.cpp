@@ -50,13 +50,13 @@
 
 namespace osmscout {
 
-  const char* Preprocess::RAWCOORDS_DAT="rawcoords.dat";
-  const char* Preprocess::RAWNODES_DAT="rawnodes.dat";
-  const char* Preprocess::RAWWAYS_DAT="rawways.dat";
-  const char* Preprocess::RAWRELS_DAT="rawrels.dat";
-  const char* Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
-  const char* Preprocess::RAWDATAPOLYGON_DAT="rawdatapolygon.dat";
-  const char* Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
+  const char* const Preprocess::RAWCOORDS_DAT="rawcoords.dat";
+  const char* const Preprocess::RAWNODES_DAT="rawnodes.dat";
+  const char* const Preprocess::RAWWAYS_DAT="rawways.dat";
+  const char* const Preprocess::RAWRELS_DAT="rawrels.dat";
+  const char* const Preprocess::RAWCOASTLINE_DAT="rawcoastline.dat";
+  const char* const Preprocess::RAWDATAPOLYGON_DAT="rawdatapolygon.dat";
+  const char* const Preprocess::RAWTURNRESTR_DAT="rawturnrestr.dat";
 
   bool Preprocess::Callback::IsTurnRestriction(const TagMap& tags,
                                                TurnRestriction::Type& type) const

@@ -29,7 +29,7 @@
 
 namespace osmscout {
 
-  const char* WaterIndex::WATER_IDX="water.idx";
+  const char* const WaterIndex::WATER_IDX="water.idx";
 
   WaterIndex::WaterIndex()
   {

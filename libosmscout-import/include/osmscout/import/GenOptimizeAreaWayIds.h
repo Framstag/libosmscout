@@ -36,8 +36,8 @@ namespace osmscout {
   class OptimizeAreaWayIdsGenerator CLASS_FINAL : public ImportModule
   {
   public:
-    static const char* AREAS3_TMP;
-    static const char* WAYS_TMP;
+    static const char* const AREAS3_TMP;
+    static const char* const WAYS_TMP;
 
   private:
     bool ScanAreaIds(const ImportParameter& parameter,

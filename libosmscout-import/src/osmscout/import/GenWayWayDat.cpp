@@ -36,8 +36,8 @@
 
 namespace osmscout {
 
-  const char* WayWayDataGenerator::WAYWAY_TMP="wayway.tmp";
-  const char* WayWayDataGenerator::TURNRESTR_DAT="turnrestr.dat";
+  const char* const WayWayDataGenerator::WAYWAY_TMP="wayway.tmp";
+  const char* const WayWayDataGenerator::TURNRESTR_DAT="turnrestr.dat";
 
   static inline bool WayByNodeCountSorter(const RawWayRef& a,
                                           const RawWayRef& b)

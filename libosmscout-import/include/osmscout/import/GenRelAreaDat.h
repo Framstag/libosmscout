@@ -45,8 +45,8 @@ namespace osmscout {
   class RelAreaDataGenerator CLASS_FINAL : public ImportModule
   {
   public:
-    static const char* RELAREA_TMP;
-    static const char* WAYAREABLACK_DAT;
+    static const char* const RELAREA_TMP;
+    static const char* const WAYAREABLACK_DAT;
 
   private:
     typedef std::unordered_set<OSMId>           IdSet;

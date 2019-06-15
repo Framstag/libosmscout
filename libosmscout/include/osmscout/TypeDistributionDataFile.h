@@ -38,7 +38,7 @@ namespace osmscout {
   class OSMSCOUT_API TypeDistributionDataFile
   {
   public:
-    static const char* DISTRIBUTION_DAT;
+    static const char* const DISTRIBUTION_DAT;
 
   public:
     struct Distribution

@@ -26,7 +26,7 @@
 
 namespace osmscout {
 
-  const char* CoordDataFile::COORD_DAT="coord.dat";
+  const char* const CoordDataFile::COORD_DAT="coord.dat";
 
   CoordDataFile::CoordDataFile()
   : isOpen(false),

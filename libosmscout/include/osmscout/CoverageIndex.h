@@ -40,7 +40,7 @@ namespace osmscout {
   class OSMSCOUT_API CoverageIndex
   {
   public:
-    static const char* COVERAGE_IDX;
+    static const char* const COVERAGE_IDX;
 
   private:
     std::string           datafilename;   //!< Full path and name of the data file

@@ -34,7 +34,7 @@
 
 namespace osmscout
 {
-  const char* OptimizeAreasLowZoom::FILE_AREASOPT_DAT = "areasopt.dat";
+  const char* const OptimizeAreasLowZoom::FILE_AREASOPT_DAT = "areasopt.dat";
 
   OptimizeAreasLowZoom::OptimizeAreasLowZoom()
   : magnification(0.0)

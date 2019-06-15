@@ -43,7 +43,7 @@ namespace osmscout {
   class OSMSCOUT_API AreaWayIndex
   {
   public:
-    static const char* AREA_WAY_IDX;
+    static const char* const AREA_WAY_IDX;
 
   private:
     struct TypeData

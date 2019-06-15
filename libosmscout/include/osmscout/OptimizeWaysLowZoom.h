@@ -38,7 +38,7 @@ namespace osmscout {
   class OSMSCOUT_API OptimizeWaysLowZoom
   {
   public:
-    static const char* FILE_WAYSOPT_DAT;
+    static const char* const FILE_WAYSOPT_DAT;
 
   private:
     struct TypeData

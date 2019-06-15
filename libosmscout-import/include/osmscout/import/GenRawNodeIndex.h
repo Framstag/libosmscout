@@ -30,7 +30,7 @@ namespace osmscout {
   class RawNodeIndexGenerator CLASS_FINAL : public NumericIndexGenerator<OSMId,RawNode>
   {
   public:
-    static const char* RAWNODE_IDX;
+    static const char* const RAWNODE_IDX;
 
   public:
     RawNodeIndexGenerator();

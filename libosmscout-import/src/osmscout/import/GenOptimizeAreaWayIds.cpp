@@ -30,8 +30,8 @@
 
 namespace osmscout {
 
-  const char* OptimizeAreaWayIdsGenerator::AREAS3_TMP = "areas3.tmp";
-  const char* OptimizeAreaWayIdsGenerator::WAYS_TMP = "ways.tmp";
+  const char* const OptimizeAreaWayIdsGenerator::AREAS3_TMP = "areas3.tmp";
+  const char* const OptimizeAreaWayIdsGenerator::WAYS_TMP = "ways.tmp";
 
   void OptimizeAreaWayIdsGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                                    ImportModuleDescription& description) const

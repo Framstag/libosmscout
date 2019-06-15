@@ -40,7 +40,7 @@ namespace osmscout {
   class OSMSCOUT_API WaterIndex
   {
   public:
-    static const char* WATER_IDX;
+    static const char* const WATER_IDX;
 
   private:
     struct Level

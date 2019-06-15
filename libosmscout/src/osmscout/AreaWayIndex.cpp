@@ -30,7 +30,7 @@
 
 namespace osmscout {
 
-  const char* AreaWayIndex::AREA_WAY_IDX="areaway.idx";
+  const char* const AreaWayIndex::AREA_WAY_IDX="areaway.idx";
 
   FileOffset AreaWayIndex::TypeData::GetDataOffset() const
   {

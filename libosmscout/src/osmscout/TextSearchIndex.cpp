@@ -6,10 +6,10 @@
 
 namespace osmscout
 {
-  const char* TextSearchIndex::TEXT_POI_DAT="textpoi.dat";
-  const char* TextSearchIndex::TEXT_LOC_DAT="textloc.dat";
-  const char* TextSearchIndex::TEXT_REGION_DAT="textregion.dat";
-  const char* TextSearchIndex::TEXT_OTHER_DAT="textother.dat";
+  const char* const TextSearchIndex::TEXT_POI_DAT="textpoi.dat";
+  const char* const TextSearchIndex::TEXT_LOC_DAT="textloc.dat";
+  const char* const TextSearchIndex::TEXT_REGION_DAT="textregion.dat";
+  const char* const TextSearchIndex::TEXT_OTHER_DAT="textother.dat";
 
   TextSearchIndex::TextSearchIndex()
   {
@@ -18,11 +18,11 @@ namespace osmscout
 
   TextSearchIndex::~TextSearchIndex()
   {
-    for (size_t i=0; i<tries.size(); i++) {
-      tries[i].isAvail=false;
-      if (tries[i].trie) {
-        delete tries[i].trie;
-        tries[i].trie=nullptr;
+    for (auto & trie : tries) {
+      trie.isAvail=false;
+      if (trie.trie) {
+        delete trie.trie;
+        trie.trie=nullptr;
       }
     }
   }
@@ -48,22 +48,22 @@ namespace osmscout
     tries.push_back(trie);
 
     uint8_t triesAvail=0;
-    for (size_t i=0; i<tries.size(); i++) {
+    for (auto & trie : tries) {
       // open/load the data file
       try {
         triesAvail++;
-        tries[i].isAvail=true;
-        tries[i].trie=new marisa::Trie;
-        tries[i].trie->load(tries[i].file.c_str());
+        trie.isAvail=true;
+        trie.trie=new marisa::Trie;
+        trie.trie->load(trie.file.c_str());
       }
       catch (const marisa::Exception &ex) {
         // We don't return false on a failed load attempt
         // since its possible that the user does not want
         // to include a specific trie (ie. textother)
-        log.Error() << "Warn, could not open " << tries[i].file << ":"  << ex.what();
-        delete tries[i].trie;
-        tries[i].trie=nullptr;
-        tries[i].isAvail=false;
+        log.Error() << "Warn, could not open " << trie.file << ":"  << ex.what();
+        delete trie.trie;
+        trie.trie=nullptr;
+        trie.isAvail=false;
         triesAvail--;
       }
     }

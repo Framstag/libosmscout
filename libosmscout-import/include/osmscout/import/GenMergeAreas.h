@@ -46,7 +46,7 @@ namespace osmscout {
   class MergeAreasGenerator CLASS_FINAL : public ImportModule
   {
   public:
-    static const char* AREAS2_TMP;
+    static const char* const AREAS2_TMP;
 
   private:
     /**

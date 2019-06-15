@@ -21,8 +21,8 @@
 
 namespace osmscout {
 
-  const char* AreaDataFile::AREAS_DAT="areas.dat";
-  const char* AreaDataFile::AREAS_IDMAP="areas.idmap";
+  const char* const AreaDataFile::AREAS_DAT="areas.dat";
+  const char* const AreaDataFile::AREAS_IDMAP="areas.idmap";
 
   AreaDataFile::AreaDataFile(size_t cacheSize)
   : DataFile<Area>(AREAS_DAT, cacheSize)

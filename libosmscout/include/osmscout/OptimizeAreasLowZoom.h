@@ -42,7 +42,7 @@ namespace osmscout {
   class OSMSCOUT_API OptimizeAreasLowZoom
   {
   public:
-    static const char* FILE_AREASOPT_DAT;
+    static const char* const FILE_AREASOPT_DAT;
 
   private:
     struct TypeData

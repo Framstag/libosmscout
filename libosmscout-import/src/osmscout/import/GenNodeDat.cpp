@@ -36,7 +36,7 @@
 
 namespace osmscout {
 
-  const char* NodeDataGenerator::NODES_TMP="nodes.tmp";
+  const char* const NodeDataGenerator::NODES_TMP="nodes.tmp";
 
   void NodeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                          ImportModuleDescription& description) const

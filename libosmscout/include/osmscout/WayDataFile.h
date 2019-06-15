@@ -33,8 +33,8 @@ namespace osmscout {
   class OSMSCOUT_API WayDataFile : public DataFile<Way>
   {
   public:
-    static const char* WAYS_DAT;
-    static const char* WAYS_IDMAP;
+    static const char* const WAYS_DAT;
+    static const char* const WAYS_IDMAP;
 
   public:
     explicit WayDataFile(size_t cacheSize);

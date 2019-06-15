@@ -27,7 +27,7 @@
 
 namespace osmscout {
 
-  const char* CoverageIndex::COVERAGE_IDX="coverage.idx";
+  const char* const CoverageIndex::COVERAGE_IDX="coverage.idx";
 
   CoverageIndex::CoverageIndex()
   {

@@ -32,7 +32,7 @@
 #include <iostream>
 namespace osmscout {
 
-  const char* AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
+  const char* const AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
 
   AreaNodeIndex::AreaNodeIndex()
   {

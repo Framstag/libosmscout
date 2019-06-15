@@ -46,8 +46,8 @@ namespace osmscout {
   class WayWayDataGenerator CLASS_FINAL : public ImportModule
   {
   public:
-    static const char* WAYWAY_TMP;
-    static const char* TURNRESTR_DAT;
+    static const char* const WAYWAY_TMP;
+    static const char* const TURNRESTR_DAT;
 
   private:
     struct RestrictionData

@@ -44,7 +44,7 @@ namespace osmscout {
   class OSMSCOUT_API AreaNodeIndex
   {
   public:
-    static const char* AREA_NODE_IDX;
+    static const char* const AREA_NODE_IDX;
 
   private:
     struct ListTile

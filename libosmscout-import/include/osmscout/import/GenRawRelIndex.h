@@ -30,7 +30,7 @@ namespace osmscout {
   class RawRelationIndexGenerator CLASS_FINAL : public NumericIndexGenerator<OSMId,RawRelation>
   {
   public:
-    static const char* RAWREL_IDX;
+    static const char* const RAWREL_IDX;
 
   public:
     RawRelationIndexGenerator();

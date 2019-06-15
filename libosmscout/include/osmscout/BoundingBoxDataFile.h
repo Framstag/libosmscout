@@ -37,7 +37,7 @@ namespace osmscout {
   class OSMSCOUT_API BoundingBoxDataFile
   {
   public:
-    static const char* BOUNDINGBOX_DAT;
+    static const char* const BOUNDINGBOX_DAT;
 
   private:
     bool        isLoaded;    //!< If true, data has been successfully loaded

@@ -33,7 +33,7 @@ namespace osmscout {
   class OSMSCOUT_API CoordDataFile
   {
   public:
-    static const char* COORD_DAT;
+    static const char* const COORD_DAT;
 
   private:
     typedef std::unordered_map<PageId,FileOffset> PageIdFileOffsetMap;

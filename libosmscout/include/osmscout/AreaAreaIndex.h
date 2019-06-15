@@ -51,7 +51,7 @@ namespace osmscout {
   class OSMSCOUT_API AreaAreaIndex
   {
   public:
-    static const char* AREA_AREA_IDX;
+    static const char* const AREA_AREA_IDX;
 
   private:
     /**

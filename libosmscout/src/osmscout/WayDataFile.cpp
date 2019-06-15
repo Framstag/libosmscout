@@ -21,8 +21,8 @@
 
 namespace osmscout {
 
-  const char* WayDataFile::WAYS_DAT="ways.dat";
-  const char* WayDataFile::WAYS_IDMAP="ways.idmap";
+  const char* const WayDataFile::WAYS_DAT="ways.dat";
+  const char* const WayDataFile::WAYS_IDMAP="ways.idmap";
 
   WayDataFile::WayDataFile(size_t cacheSize)
   : DataFile<Way>(WAYS_DAT,cacheSize)

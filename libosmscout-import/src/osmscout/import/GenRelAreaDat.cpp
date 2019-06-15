@@ -34,8 +34,8 @@
 
 namespace osmscout {
 
-  const char*           RelAreaDataGenerator::RELAREA_TMP="relarea.tmp";
-  const char*           RelAreaDataGenerator::WAYAREABLACK_DAT="wayareablack.dat";
+  const char* const RelAreaDataGenerator::RELAREA_TMP="relarea.tmp";
+  const char* const RelAreaDataGenerator::WAYAREABLACK_DAT="wayareablack.dat";
 
   /**
     Find a top level role.

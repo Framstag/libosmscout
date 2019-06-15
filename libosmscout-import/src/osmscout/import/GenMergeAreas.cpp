@@ -27,7 +27,7 @@
 
 namespace osmscout {
 
-  const char* MergeAreasGenerator::AREAS2_TMP="areas2.tmp";
+  const char* const MergeAreasGenerator::AREAS2_TMP="areas2.tmp";
 
   static bool HasNoDuplicateNodes(const std::vector<Point>& points)
   {

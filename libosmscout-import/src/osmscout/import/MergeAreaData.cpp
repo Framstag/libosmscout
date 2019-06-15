@@ -27,7 +27,7 @@
 
 namespace osmscout {
 
-  const char* MergeAreaDataGenerator::AREAS_TMP="areas.tmp";
+  const char* const MergeAreaDataGenerator::AREAS_TMP="areas.tmp";
 
   void MergeAreaDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                             ImportModuleDescription& description) const

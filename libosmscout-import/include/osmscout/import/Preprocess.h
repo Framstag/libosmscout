@@ -45,13 +45,13 @@ namespace osmscout {
   class Preprocess CLASS_FINAL : public ImportModule
   {
   public:
-    static const char* RAWCOORDS_DAT;
-    static const char* RAWNODES_DAT;
-    static const char* RAWWAYS_DAT;
-    static const char* RAWRELS_DAT;
-    static const char* RAWCOASTLINE_DAT;
-    static const char* RAWDATAPOLYGON_DAT;
-    static const char* RAWTURNRESTR_DAT;
+    static const char* const RAWCOORDS_DAT;
+    static const char* const RAWNODES_DAT;
+    static const char* const RAWWAYS_DAT;
+    static const char* const RAWRELS_DAT;
+    static const char* const RAWCOASTLINE_DAT;
+    static const char* const RAWDATAPOLYGON_DAT;
+    static const char* const RAWTURNRESTR_DAT;
 
   private:
     class Callback : public PreprocessorCallback

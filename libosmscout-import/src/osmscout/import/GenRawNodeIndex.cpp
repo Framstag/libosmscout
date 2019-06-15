@@ -23,7 +23,7 @@
 
 namespace osmscout {
 
-  const char* RawNodeIndexGenerator::RAWNODE_IDX="rawnode.idx";
+  const char* const RawNodeIndexGenerator::RAWNODE_IDX="rawnode.idx";
 
   RawNodeIndexGenerator::RawNodeIndexGenerator()
    : NumericIndexGenerator<OSMId,RawNode>("Generating 'rawnode.idx'",

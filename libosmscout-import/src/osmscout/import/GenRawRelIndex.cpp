@@ -23,7 +23,7 @@
 
 namespace osmscout {
 
-  const char* RawRelationIndexGenerator::RAWREL_IDX="rawrel.idx";
+  const char* const RawRelationIndexGenerator::RAWREL_IDX="rawrel.idx";
 
   RawRelationIndexGenerator::RawRelationIndexGenerator()
    : NumericIndexGenerator<OSMId,RawRelation>("Generating 'rawrel.idx'",
