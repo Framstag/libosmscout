@@ -203,6 +203,7 @@ namespace osmscout {
      * to inject itself at certain points in the contour label rendering code of
      * the actual backend.
      */
+     /*
     class OSMSCOUT_MAP_API ContourLabelHelper CLASS_FINAL
     {
     private:
@@ -242,7 +243,7 @@ namespace osmscout {
       {
         currentOffset+=contourLabelSpace;
       }
-    };
+    };  */
 
   protected:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer

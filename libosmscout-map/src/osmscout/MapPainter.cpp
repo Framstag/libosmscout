@@ -145,6 +145,7 @@ namespace osmscout {
     return a.position<b.position;
   }
 
+  /*
   MapPainter::ContourLabelHelper::ContourLabelHelper(const MapPainter& painter)
   : contourLabelOffset(painter.contourLabelOffset),
     contourLabelSpace(painter.contourLabelSpace)
@@ -166,7 +167,7 @@ namespace osmscout {
                   textWidth+contourLabelSpace)/2+contourLabelOffset;
 
     return true;
-  }
+  }  */
 
   MapPainter::MapPainter(const StyleConfigRef& styleConfig,
                          CoordBuffer *buffer)
@@ -925,8 +926,6 @@ namespace osmscout {
                                        transStart,
                                        transEnd);
     }
-
-    ContourLabelHelper helper(*this);
 
     // TODO: use coordBuffer for label path
     LabelPath labelPath;
@@ -1768,8 +1767,8 @@ namespace osmscout {
   {
     errorTolerancePixel=projection.ConvertWidthToPixel(parameter.GetOptimizeErrorToleranceMm());
     areaMinDimension   =projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
-    contourLabelOffset =projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
-    contourLabelSpace  =projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
+    contourLabelOffset =GetProjectedWidth(projection,parameter.GetContourLabelOffset());
+    contourLabelSpace  =GetProjectedWidth(projection,parameter.GetContourLabelSpace());
 
     shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
     shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
