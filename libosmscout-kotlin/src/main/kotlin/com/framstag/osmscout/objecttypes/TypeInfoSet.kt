@@ -2,12 +2,12 @@ package com.framstag.osmscout.objecttypes
 
 import java.util.*
 
-class TypeInfoSet {
+class TypeInfoSet(typeConfig: TypeConfig) {
     @ExperimentalUnsignedTypes
     private val types = Vector<TypeInfo>()
     private var count = 0
 
-    constructor(typeConfig: TypeConfig) {
+    init {
         types.setSize(typeConfig.getTypeCount())
     }
 
