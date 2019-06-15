@@ -36,14 +36,14 @@ namespace osmscout {
     uint64_t latValue=(uint64_t)round((lat+90.0)*latConversionFactor);
     uint64_t lonValue=(uint64_t)round((lon+180.0)*lonConversionFactor);
 
-    id=((latValue & 0x000000ff) <<  8)+  // 0 => 8
-       ((lonValue & 0x000000ff) <<  0)+  // 0 => 0
-       ((latValue & 0x0000ff00) << 16)+  // 8 => 24
-       ((lonValue & 0x0000ff00) <<  8)+  // 8 => 16
-       ((latValue & 0x00ff0000) << 24)+  // 16 => 40
-       ((lonValue & 0x00ff0000) << 16)+  // 16 => 32
-       ((latValue & 0x07000000) << 27)+  // 24 => 51
-       ((lonValue & 0x07000000) << 24);  // 24 => 48
+    id=((latValue & 0x000000ffu) <<  8u)+  // 0 => 8
+       ((lonValue & 0x000000ffu) <<  0u)+  // 0 => 0
+       ((latValue & 0x0000ff00u) << 16u)+  // 8 => 24
+       ((lonValue & 0x0000ff00u) <<  8u)+  // 8 => 16
+       ((latValue & 0x00ff0000u) << 24u)+  // 16 => 40
+       ((lonValue & 0x00ff0000u) << 16u)+  // 16 => 32
+       ((latValue & 0x07000000u) << 27u)+  // 24 => 51
+       ((lonValue & 0x07000000u) << 24u);  // 24 => 48
 
     return id;
   }

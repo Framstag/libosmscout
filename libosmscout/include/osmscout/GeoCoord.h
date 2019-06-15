@@ -145,15 +145,15 @@ namespace osmscout {
       uint32_t latValue=(uint32_t)round((lat+90.0)*latConversionFactor);
       uint32_t lonValue=(uint32_t)round((lon+180.0)*lonConversionFactor);
 
-      buffer[0]=((latValue >>  0) & 0xff);
-      buffer[1]=((latValue >>  8) & 0xff);
-      buffer[2]=((latValue >> 16) & 0xff);
+      buffer[0]=((latValue >>  0u) & 0xffu);
+      buffer[1]=((latValue >>  8u) & 0xffu);
+      buffer[2]=((latValue >> 16u) & 0xffu);
 
-      buffer[3]=((lonValue >>  0) & 0xff);
-      buffer[4]=((lonValue >>  8) & 0xff);
-      buffer[5]=((lonValue >> 16) & 0xff);
+      buffer[3]=((lonValue >>  0u) & 0xffu);
+      buffer[4]=((lonValue >>  8u) & 0xffu);
+      buffer[5]=((lonValue >> 16u) & 0xffu);
 
-      buffer[6]=((latValue >> 24) & 0x07) | ((lonValue >> 20) & 0x70);
+      buffer[6]=((latValue >> 24u) & 0x07u) | ((lonValue >> 20u) & 0x70u);
     }
 
     /**
@@ -168,11 +168,11 @@ namespace osmscout {
       for (size_t i=0; i<27; i++) {
         size_t bit=26-i;
 
-        number=number << 1;
-        number=number+((latValue >> bit) & 0x01);
+        number=number << 1u;
+        number=number+((latValue >> bit) & 0x01u);
 
-        number=number << 1;
-        number=number+((lonValue >> bit) & 0x01);
+        number=number << 1u;
+        number=number+((lonValue >> bit) & 0x01u);
       }
 
       return number;
@@ -183,15 +183,15 @@ namespace osmscout {
      */
     inline void DecodeFromBuffer(const unsigned char buffer[])
     {
-      uint32_t latDat=  (buffer[0] <<  0)
-                      | (buffer[1] <<  8)
-                      | (buffer[2] << 16)
-                      | ((buffer[6] & 0x0f) << 24);
+      uint32_t latDat=  (buffer[0] <<  0u)
+                      | (buffer[1] <<  8u)
+                      | (buffer[2] << 16u)
+                      | ((buffer[6] & 0x0fu) << 24u);
 
-      uint32_t lonDat=  (buffer[3] <<  0)
-                      | (buffer[4] <<  8)
-                      | (buffer[5] << 16)
-                      | ((buffer[6] & 0xf0) << 20);
+      uint32_t lonDat=  (buffer[3] <<  0u)
+                      | (buffer[4] <<  8u)
+                      | (buffer[5] << 16u)
+                      | ((buffer[6] & 0xf0u) << 20u);
 
       lat=latDat/latConversionFactor-90.0;
       lon=lonDat/lonConversionFactor-180.0;
