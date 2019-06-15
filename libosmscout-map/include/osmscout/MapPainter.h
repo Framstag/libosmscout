@@ -198,53 +198,6 @@ namespace osmscout {
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
-    /**
-     * Helper class for drawing contours. Allows the MapPainter base class
-     * to inject itself at certain points in the contour label rendering code of
-     * the actual backend.
-     */
-     /*
-    class OSMSCOUT_MAP_API ContourLabelHelper CLASS_FINAL
-    {
-    private:
-      double contourLabelOffset;
-      double contourLabelSpace;
-      double pathLength;
-      double textWidth;
-      double currentOffset;
-
-    public:
-      explicit ContourLabelHelper(const MapPainter& painter);
-
-      bool Init(double pathLength,
-                double textWidth);
-
-      inline bool ContinueDrawing() const
-      {
-        return currentOffset<pathLength;
-      }
-
-      inline double GetCurrentOffset() const
-      {
-        return currentOffset;
-      }
-
-      inline void AdvancePartial(double width)
-      {
-        currentOffset+=width;
-      }
-
-      inline void AdvanceText()
-      {
-        currentOffset+=textWidth;
-      }
-
-      inline void AdvanceSpace()
-      {
-        currentOffset+=contourLabelSpace;
-      }
-    };  */
-
   protected:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
     TextStyleRef                 debugLabel;

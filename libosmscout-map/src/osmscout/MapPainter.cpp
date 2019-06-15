@@ -145,30 +145,6 @@ namespace osmscout {
     return a.position<b.position;
   }
 
-  /*
-  MapPainter::ContourLabelHelper::ContourLabelHelper(const MapPainter& painter)
-  : contourLabelOffset(painter.contourLabelOffset),
-    contourLabelSpace(painter.contourLabelSpace)
-  {
-    // no code
-  }
-
-  bool MapPainter::ContourLabelHelper::Init(double pathLength,
-                                            double textWidth)
-  {
-    this->pathLength=pathLength;
-    this->textWidth=textWidth;
-
-    if (pathLength-textWidth-2*contourLabelOffset<=0.0) {
-      return false;
-    }
-
-    currentOffset=fmod(pathLength-textWidth-2*contourLabelOffset,
-                  textWidth+contourLabelSpace)/2+contourLabelOffset;
-
-    return true;
-  }  */
-
   MapPainter::MapPainter(const StyleConfigRef& styleConfig,
                          CoordBuffer *buffer)
   : coordBuffer(buffer),
