@@ -28,16 +28,16 @@ namespace osmscout {
     uint64_t latValue=(uint64_t)round((coord.GetLat()+90.0)*latConversionFactor);
     uint64_t lonValue=(uint64_t)round((coord.GetLon()+180.0)*lonConversionFactor);
 
-    id=((latValue & 0x000000ff) <<  8)+  // 0 => 8
-       ((lonValue & 0x000000ff) <<  0)+  // 0 => 0
-       ((latValue & 0x0000ff00) << 16)+  // 8 => 24
-       ((lonValue & 0x0000ff00) <<  8)+  // 8 => 16
-       ((latValue & 0x00ff0000) << 24)+  // 16 => 40
-       ((lonValue & 0x00ff0000) << 16)+  // 16 => 32
-       ((latValue & 0x07000000) << 27)+  // 24 => 51
-       ((lonValue & 0x07000000) << 24);  // 24 => 48
+    id=((latValue & 0x000000ffu) <<  8u)+  // 0 => 8
+       ((lonValue & 0x000000ffu) <<  0u)+  // 0 => 0
+       ((latValue & 0x0000ff00u) << 16u)+  // 8 => 24
+       ((lonValue & 0x0000ff00u) <<  8u)+  // 8 => 16
+       ((latValue & 0x00ff0000u) << 24u)+  // 16 => 40
+       ((lonValue & 0x00ff0000u) << 16u)+  // 16 => 32
+       ((latValue & 0x07000000u) << 27u)+  // 24 => 51
+       ((lonValue & 0x07000000u) << 24u);  // 24 => 48
 
-    id=id << 8;
+    id=id << 8u;
 
     id|=serial;
 
@@ -46,10 +46,10 @@ namespace osmscout {
 
   GeoCoord Point::GetCoordFromId(Id id)
   {
-    id=id >> 8;
+    id=id >> 8u;
 
-    uint64_t latValue=((id >> 8) & 0xff) + (((id >> 24) & 0xff) << 8) + (((id >> 40) & 0xff) << 16) + (((id >> 51) & 0x07) << 24);
-    uint64_t lonValue=((id >> 0) & 0xff) + (((id >> 16) & 0xff) << 8) + (((id >> 32) & 0xff) << 16) + (((id >> 48) & 0x07) << 24);
+    uint64_t latValue=((id >> 8u) & 0xffu) + (((id >> 24u) & 0xffu) << 8u) + (((id >> 40u) & 0xffu) << 16u) + (((id >> 51u) & 0x07u) << 24u);
+    uint64_t lonValue=((id >> 0u) & 0xffu) + (((id >> 16u) & 0xffu) << 8u) + (((id >> 32u) & 0xffu) << 16u) + (((id >> 48u) & 0x07u) << 24u);
 
     return GeoCoord(latValue/latConversionFactor-90.0,
                     lonValue/lonConversionFactor-180.0);
