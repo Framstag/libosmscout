@@ -234,39 +234,47 @@ namespace osmscout {
                   maxPlusKey.GetBoundingBox().GetBottomLeft());
   }
 
-  TileIdBox TileIdBox::Include(const TileId& tileId)
+  TileIdBox TileIdBox::Include(const TileId& tileId) const
   {
     return {TileId(std::min(tileId.GetX(),
                             minTile.GetX()),
                    std::min(tileId.GetY(),
                             minTile.GetY())),
             TileId(std::max(tileId.GetX(),
-                            minTile.GetX()),
+                            maxTile.GetX()),
                    std::max(tileId.GetY(),
-                            minTile.GetY()))};
+                            maxTile.GetY()))};
   }
 
-  TileIdBox TileIdBox::Include(const TileIdBox& other)
+  TileIdBox TileIdBox::Include(const TileIdBox& other) const
   {
     return {TileId(std::min(other.minTile.GetX(),
                             minTile.GetX()),
                    std::min(other.minTile.GetY(),
                             minTile.GetY())),
             TileId(std::max(other.maxTile.GetX(),
-                            minTile.GetX()),
+                            maxTile.GetX()),
                    std::max(other.maxTile.GetY(),
-                            minTile.GetY()))};
+                            maxTile.GetY()))};
   }
 
-  TileIdBox TileIdBox::Intersection(const TileIdBox& other)
+  TileIdBox TileIdBox::Intersection(const TileIdBox& other) const
   {
     return {TileId(std::max(other.minTile.GetX(),
                             minTile.GetX()),
                    std::max(other.minTile.GetY(),
                             minTile.GetY())),
             TileId(std::min(other.maxTile.GetX(),
-                            minTile.GetX()),
+                            maxTile.GetX()),
                    std::min(other.maxTile.GetY(),
-                            minTile.GetY()))};
+                            maxTile.GetY()))};
+  }
+
+  bool TileIdBox::Intersects(const TileIdBox& other) const
+  {
+    return !(other.GetMaxX() < minTile.GetX() ||
+             other.GetMinX() > maxTile.GetX() ||
+             other.GetMaxY() < minTile.GetY() ||
+             other.GetMinY() > maxTile.GetY());
   }
 }

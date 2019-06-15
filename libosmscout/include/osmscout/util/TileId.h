@@ -313,11 +313,19 @@ namespace osmscout {
                                        maxTile);
     }
 
+    inline bool operator==(const TileIdBox& other) const
+    {
+      return minTile==other.minTile &&
+             maxTile==other.maxTile;
+    }
+
     GeoBox GetBoundingBox(const Magnification& magnification) const;
 
-    TileIdBox Include(const TileId& tileId);
-    TileIdBox Include(const TileIdBox& other);
-    TileIdBox Intersection(const TileIdBox& other);
+    TileIdBox Include(const TileId& tileId) const;
+    TileIdBox Include(const TileIdBox& other) const;
+    TileIdBox Intersection(const TileIdBox& other) const;
+
+    bool Intersects(const TileIdBox& other) const;
 
     inline std::string GetDisplayText() const
     {
