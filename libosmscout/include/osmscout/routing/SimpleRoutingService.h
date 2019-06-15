@@ -196,7 +196,7 @@ namespace osmscout {
     TypeConfigRef GetTypeConfig() const;
 
     RoutingResult CalculateRouteViaCoords(RoutingProfile& profile,
-                                          std::vector<GeoCoord> via,
+                                          const std::vector<GeoCoord>& via,
                                           const Distance &radius,
                                           const RoutingParameter& parameter);
 

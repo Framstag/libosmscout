@@ -377,7 +377,7 @@ namespace osmscout {
    */
 
   RoutingResult SimpleRoutingService::CalculateRouteViaCoords(RoutingProfile& profile,
-                                                              std::vector<osmscout::GeoCoord> via,
+                                                              const std::vector<osmscout::GeoCoord>& via,
                                                               const Distance &radius,
                                                               const RoutingParameter& parameter)
   {
@@ -388,8 +388,7 @@ namespace osmscout {
     assert(!via.empty());
 
     for (const auto& etap : via) {
-      Distance r=radius;
-      auto posResult=GetClosestRoutableNode(etap, profile, r);
+      auto posResult=GetClosestRoutableNode(etap, profile, radius);
       RoutePosition target=posResult.GetRoutePosition();
 
       if (!target.IsValid()) {
