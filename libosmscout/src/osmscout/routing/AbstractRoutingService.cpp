@@ -1660,13 +1660,14 @@ namespace osmscout {
   {
     RoutePointsResult routePointsResult=TransformRouteDataToPoints(data);
 
-    if (!routePointsResult.success) {
+    if (!routePointsResult.Success()) {
       return {};
     }
 
     WayRef way=std::make_shared<Way>();
 
-    way->nodes.assign(routePointsResult.points->points.begin(),routePointsResult.points->points.end());
+    way->nodes.assign(routePointsResult.GetPoints()->points.begin(),
+                      routePointsResult.GetPoints()->points.end());
 
     return RouteWayResult(way);
   }

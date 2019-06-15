@@ -159,7 +159,7 @@ RouteDescriptionResult Router::TransformRouteDataToRouteDescription(osmscout::Mu
 {
   auto result=routingService->TransformRouteDataToRouteDescription(data);
 
-  if (!result.success) {
+  if (!result.Success()) {
     return result;
   }
 
@@ -177,7 +177,7 @@ RouteDescriptionResult Router::TransformRouteDataToRouteDescription(osmscout::Mu
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>());
 
-  if (!routingService->PostProcessRouteDescription(*result.description,
+  if (!routingService->PostProcessRouteDescription(*result.GetDescription(),
                                                    postprocessors)){
     return {};
   }
@@ -246,28 +246,28 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
                                                                    routeData,
                                                                    start->getLabel().toUtf8().constData(),
                                                                    target->getLabel().toUtf8().constData());
-  if (!routeDescriptionResult.success){
+  if (!routeDescriptionResult.Success()){
     osmscout::log.Warn() << "Route postprocessing failed!";
     emit routeFailed("Route postprocessing failed!",requestId);
     return;
   }
-  assert(routeDescriptionResult.description); // should be setup when success==true
+  assert(routeDescriptionResult.GetDescription()); // should be setup when success==true
   osmscout::log.Debug() << "Route transformed";
 
   RouteDescriptionBuilder builder;
   QList<RouteStep>        routeSteps;
-  builder.GenerateRouteSteps(*routeDescriptionResult.description, routeSteps);
+  builder.GenerateRouteSteps(*routeDescriptionResult.GetDescription(), routeSteps);
 
   auto routeWayResult=routingService->TransformRouteDataToWay(routeData);
 
-  if (!routeWayResult.success) {
+  if (!routeWayResult.Success()) {
     emit routeFailed("Error while transforming route",requestId);
     return;
   }
 
-  emit routeComputed(QtRouteData(std::move(*routeDescriptionResult.description),
+  emit routeComputed(QtRouteData(std::move(*routeDescriptionResult.GetDescription()),
                                  std::move(routeSteps),
-                                 std::move(*routeWayResult.way)),
+                                 std::move(*routeWayResult.GetWay())),
                      requestId);
 }
 

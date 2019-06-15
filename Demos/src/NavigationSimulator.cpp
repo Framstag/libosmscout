@@ -682,14 +682,14 @@ int main(int argc, char* argv[])
 
   osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(routingResult.GetRoute());
 
-  if (!routePointsResult.success) {
+  if (!routePointsResult.Success()) {
     std::cerr << "Error during route conversion" << std::endl;
     return 1;
   }
 
   auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(routingResult.GetRoute());
 
-  if (!routeDescriptionResult.success) {
+  if (!routeDescriptionResult.Success()) {
     std::cerr << "Error during generation of route description" << std::endl;
     return 1;
   }
@@ -723,7 +723,7 @@ int main(int argc, char* argv[])
 
   osmscout::StopClock postprocessTimer;
 
-  if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.description,
+  if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.GetDescription(),
                                                  profiles,
                                                  databases,
                                                  postprocessors,
@@ -742,18 +742,18 @@ int main(int argc, char* argv[])
   osmscout::RouteDescriptionPostprocessor generator;
   RouteDescriptionGeneratorCallback   generatorCallback;
 
-  generator.GenerateDescription(*routeDescriptionResult.description,
+  generator.GenerateDescription(*routeDescriptionResult.GetDescription(),
                                 generatorCallback);
 
   generateTimer.Stop();
 
   std::cout << "Description generation time: " << generateTimer.ResultString() << std::endl;
 
-  PathGenerator pathGenerator(*routeDescriptionResult.description,routingProfile->GetVehicleMaxSpeed());
+  PathGenerator pathGenerator(*routeDescriptionResult.GetDescription(),routingProfile->GetVehicleMaxSpeed());
 
   if (!args.gpxFile.empty()) {
     DumpGpxFile(args.gpxFile,
-                routePointsResult.points->points,
+                routePointsResult.GetPoints()->points,
                 pathGenerator);
   }
 
@@ -761,7 +761,7 @@ int main(int argc, char* argv[])
 
   simulator.Simulate(database,
                      pathGenerator,
-                     routeDescriptionResult.description);
+                     routeDescriptionResult.GetDescription());
 
   router->Close();
 

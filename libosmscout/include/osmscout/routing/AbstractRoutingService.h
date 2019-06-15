@@ -103,31 +103,67 @@ namespace osmscout {
 
   typedef std::shared_ptr<RoutePoints> RoutePointsRef;
 
-  struct OSMSCOUT_API RoutePointsResult CLASS_FINAL
+  class OSMSCOUT_API RoutePointsResult CLASS_FINAL
   {
-    const bool           success;
-    const RoutePointsRef points;
+  private:
+    bool           success;
+    RoutePointsRef points;
 
+  public:
     RoutePointsResult();
     explicit RoutePointsResult(const RoutePointsRef& points);
+
+    inline bool Success() const
+    {
+      return success;
+    }
+
+    inline RoutePointsRef GetPoints() const
+    {
+      return points;
+    }
   };
 
-  struct OSMSCOUT_API RouteDescriptionResult CLASS_FINAL
+  class OSMSCOUT_API RouteDescriptionResult CLASS_FINAL
   {
-    const bool                success;
-    const RouteDescriptionRef description;
+  private:
+    bool                success;
+    RouteDescriptionRef description;
 
+  public:
     RouteDescriptionResult();
     explicit RouteDescriptionResult(const RouteDescriptionRef& description);
+
+    inline bool Success() const
+    {
+      return success;
+    }
+
+    inline RouteDescriptionRef GetDescription() const
+    {
+      return description;
+    }
   };
 
-  struct OSMSCOUT_API RouteWayResult CLASS_FINAL
+  class OSMSCOUT_API RouteWayResult CLASS_FINAL
   {
-    const bool   success;
-    const WayRef way;
+  private:
+    bool   success;
+    WayRef way;
 
+  public:
     RouteWayResult();
     explicit RouteWayResult(const WayRef& way);
+
+    inline bool Success() const
+    {
+      return success;
+    }
+
+    inline WayRef GetWay() const
+    {
+      return way;
+    }
   };
 
   /**

@@ -731,7 +731,7 @@ int main(int argc, char* argv[])
 
   auto routeDescriptionResult=router->TransformRouteDataToRouteDescription(result.GetRoute());
 
-  if (!routeDescriptionResult.success) {
+  if (!routeDescriptionResult.Success()) {
     std::cerr << "Error during generation of route description" << std::endl;
     return 1;
   }
@@ -756,7 +756,7 @@ int main(int argc, char* argv[])
   if(args.gpx) {
     osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(result.GetRoute());
 
-    if (routePointsResult.success) {
+    if (routePointsResult.Success()) {
       std::cout.precision(8);
       std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
       std::cout
@@ -776,7 +776,7 @@ int main(int argc, char* argv[])
       std::cout << "\t<trk>" << std::endl;
       std::cout << "\t\t<name>Route</name>" << std::endl;
       std::cout << "\t\t<trkseg>" << std::endl;
-      for (const auto& point : routePointsResult.points->points) {
+      for (const auto& point : routePointsResult.GetPoints()->points) {
         std::cout << "\t\t\t<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\">" << std::endl;
         std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
         std::cout << "\t\t\t</trkpt>" << std::endl;
@@ -803,7 +803,7 @@ int main(int argc, char* argv[])
   std::vector<osmscout::RoutingProfileRef> profiles{routingProfile};
   std::vector<osmscout::DatabaseRef>       databases{database};
 
-  if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.description,
+  if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.GetDescription(),
                                                  profiles,
                                                  databases,
                                                  postprocessors,
@@ -817,11 +817,11 @@ int main(int argc, char* argv[])
 
   std::cout << "Postprocessing time: " << postprocessTimer.ResultString() << std::endl;
 
-  osmscout::StopClock                 generateTimer;
+  osmscout::StopClock                     generateTimer;
   osmscout::RouteDescriptionPostprocessor generator;
-  RouteDescriptionGeneratorCallback   generatorCallback;
+  RouteDescriptionGeneratorCallback       generatorCallback;
 
-  generator.GenerateDescription(*routeDescriptionResult.description,
+  generator.GenerateDescription(*routeDescriptionResult.GetDescription(),
                                 generatorCallback);
 
   generateTimer.Stop();

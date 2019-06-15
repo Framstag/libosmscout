@@ -625,7 +625,7 @@ int main(int argc, char *argv[]){
     std::vector<osmscout::RoutingProfileRef> profiles = {routingProfile};
     std::vector<osmscout::DatabaseRef> databases = {database};
     osmscout::RoutePostprocessor postprocessor;
-    if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.description,
+    if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.GetDescription(),
                                                    profiles,
                                                    databases,
                                                    postprocessors,
@@ -642,7 +642,7 @@ int main(int argc, char *argv[]){
 
     // Snap to route distance set to 100m
     navigation.SetSnapDistance(osmscout::Distance::Of<osmscout::Meter>(100.0));
-    navigation.SetRoute(routeDescriptionResult.description.get());
+    navigation.SetRoute(routeDescriptionResult.GetDescription().get());
 
     osmscout::GeoCoord location(latitude, longitude);
     double minDistance = 0.0;
