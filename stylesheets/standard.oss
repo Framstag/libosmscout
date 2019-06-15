@@ -396,6 +396,14 @@ CONST
       AREA {color: @waterLabelColor; }
     }
 
+  SYMBOL amenity_charging_station
+    RECTANGLE -1,-1 2 x 2 {
+      AREA { color: #0000ff; }
+    }
+    CIRCLE 0,0 0.8 {
+      AREA {color: #ffffff; }
+    }
+
   SYMBOL amenity_drinking_water
     CIRCLE 0,0 0.4 {
       AREA {color: @waterLabelColor; }
@@ -876,7 +884,10 @@ STYLE
  [MAG closer-] {
 
    [TYPE highway_pedestrian] {
-     [SIZE 8m 0.1mm:3px<] WAY {color: @pedestrianColor; width: 8m; }
+     [SIZE 8m 0.1mm:3px<] {
+       WAY {color: @pedestrianColor; width: 8m; }
+       //WAY#outline { color: darken(@pedestrianColor, 0.3); width: 8m; displayWidth: 0.3mm; priority: -1; joinCap: butt; }
+     }
      [SIZE 8m <0.1mm:3px] WAY {color: @pedestrianColor; displayWidth: 0.1mm; }
    }
 
@@ -1057,6 +1068,8 @@ STYLE
  }
 
  [MAG block-] {
+    [TYPE amenity_charging_station] NODE.ICON { symbol: amenity_charging_station; }
+
    [TYPE highway_cycleway] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
      WAY {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}

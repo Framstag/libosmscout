@@ -1110,7 +1110,6 @@ TYPES
       GROUP amenity, routingPOI
 
   TYPE amenity_charging_station
-    IGNORE // No visualisation yet
     = NODE ("amenity"=="charging_station")
       GROUP amenity
 
