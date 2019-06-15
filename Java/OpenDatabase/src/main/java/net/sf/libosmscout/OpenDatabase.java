@@ -7,7 +7,7 @@ import net.sf.libosmscout.osmscout.GeoBox;
 public class OpenDatabase
 {
   static {
-    System.loadLibrary("osmscoutjava");
+    System.loadLibrary("osmscout_binding_java");
   }
 
   public static void main(String[] args)
