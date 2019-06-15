@@ -163,8 +163,18 @@ void FileDownloader::onNetworkReadyRead()
 
   emit downloadedBytes(downloaded);
 
-  file.write(chunk);
-  emit writtenBytes(downloaded);
+  // TODO: is there any case when writeRes != chunk.size() and it is not error?
+  qint64 writeRes = file.write(chunk);
+  if (writeRes < 0 || writeRes != chunk.size()){
+    qWarning() << "Writing to file return with:" << writeRes << ", chunk size:" << chunk.size() << ", error:" << file.errorString();
+    QString error = file.errorString();
+    if (error.isEmpty()){
+      error = "Writing to file failed";
+    }
+    onError(error);
+  }else {
+    emit writtenBytes(downloaded);
+  }
 }
 
 uint64_t FileDownloader::getBytesDownloaded() const

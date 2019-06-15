@@ -47,8 +47,7 @@ namespace osmscout {
     dataOffsetBytes(0),
     bitmapOffset(0),
     tileBox(TileId(0,0),
-            TileId(0,0)),
-    cellDimension{0.0,0.0}
+            TileId(0,0))
   {}
 
   AreaWayIndex::AreaWayIndex()
@@ -104,7 +103,9 @@ namespace osmscout {
         if (data.bitmapOffset>0) {
           scanner.Read(data.dataOffsetBytes);
 
-          scanner.ReadNumber(data.indexLevel);
+          uint32_t indexLevel;
+          scanner.ReadNumber(indexLevel);
+          data.indexLevel=MagnificationLevel(indexLevel);
 
           uint32_t minX;
           uint32_t maxX;
@@ -119,7 +120,7 @@ namespace osmscout {
           data.tileBox=TileIdBox(TileId(minX,minY),
                                  TileId(maxX,maxY));
 
-          data.boundingBox=data.tileBox.GetBoundingBox(Magnification(MagnificationLevel(data.indexLevel)));
+          data.boundingBox=data.tileBox.GetBoundingBox(Magnification(data.indexLevel));
         }
 
         wayTypeData.push_back(data);
@@ -150,14 +151,19 @@ namespace osmscout {
       return;
     }
 
-    TileIdBox boundingTileBox(Magnification(MagnificationLevel(typeData.indexLevel)),
+    TileIdBox boundingTileBox(Magnification(typeData.indexLevel),
                               boundingBox);
+
+    if (!boundingTileBox.Intersects(typeData.tileBox)) {
+      // No data available in given bounding box
+      return;
+    }
 
     boundingTileBox=boundingTileBox.Intersection(typeData.tileBox);
 
     FileOffset dataOffset=typeData.GetDataOffset();
 
-      // For each row
+    // For each row
     for (size_t y=boundingTileBox.GetMinY(); y<=boundingTileBox.GetMaxY(); y++) {
       std::lock_guard<std::mutex> guard(lookupMutex);
       FileOffset                  initialCellDataOffset=0;

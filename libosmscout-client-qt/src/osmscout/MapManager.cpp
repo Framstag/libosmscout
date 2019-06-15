@@ -56,6 +56,13 @@ MapDownloadJob::~MapDownloadJob()
 
 void MapDownloadJob::start()
 {
+  QStorageInfo storage=QStorageInfo(target);
+  if (storage.bytesAvailable() > 0 && (uint64_t)storage.bytesAvailable() < map.getSize()){
+    qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size (" << map.getSize() << ")!";
+    onJobFailed("Not enough space", false);
+    return;
+  }
+
   QJsonObject mapMetadata;
   mapMetadata["name"] = map.getName();
   mapMetadata["map"] = map.getPath().join("/");
@@ -351,11 +358,6 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceEx
     }
   }
 
-  QStorageInfo storage=QStorageInfo(dir);
-  if (storage.bytesAvailable()<(double)map.getSize()){
-    qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size ("<<map.getSize()<<")!";
-  }
-
   auto job=new MapDownloadJob(&webCtrl, map, dir, replaceExisting);
   connect(job, &MapDownloadJob::finished, this, &MapManager::onJobFinished);
   connect(job, &MapDownloadJob::failed, this, &MapManager::onJobFailed);
@@ -387,17 +389,17 @@ void MapManager::onJobFinished()
   QList<MapDownloadJob*> finished;
   for (auto job:downloadJobs){
     if (job->isDone()){
-      finished<<job;
+      finished << job;
 
-      if (job->isReplaceExisting()){
+      if (job->isReplaceExisting() && job->isSuccessful()){
         // if there is upgrade requested, delete old database with same (logical) path
         for (auto &mapDir:databaseDirectories) {
           if (mapDir.hasMetadata() &&
               mapDir.getPath() == job->getMapPath() &&
               mapDir.getDir().canonicalPath() != job->getDestinationDirectory().canonicalPath()) {
 
-            osmscout::log.Debug() << "deleting map database" << mapDir.getName().toStdString() << "after upgrade:"
-                     << mapDir.getDir().canonicalPath().toStdString();
+            osmscout::log.Debug() << "deleting map database " << mapDir.getName().toStdString() << " after upgrade: "
+                                  << mapDir.getDir().canonicalPath().toStdString();
             mapDir.deleteDatabase();
           }
         }

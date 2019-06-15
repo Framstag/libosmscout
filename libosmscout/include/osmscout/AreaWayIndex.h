@@ -48,17 +48,15 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      TypeInfoRef   type;
-      uint32_t      indexLevel;
+      TypeInfoRef         type;
+      MagnificationLevel  indexLevel;
 
-      uint8_t       dataOffsetBytes;
-      FileOffset    bitmapOffset;
+      uint8_t             dataOffsetBytes;
+      FileOffset          bitmapOffset;
 
-      TileIdBox     tileBox;
+      TileIdBox           tileBox;
 
-      CellDimension cellDimension;
-
-      GeoBox        boundingBox;
+      GeoBox              boundingBox;
 
       TypeData();
 
