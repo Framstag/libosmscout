@@ -180,11 +180,6 @@ namespace osmscout {
         this->ring=ring;
       }
 
-      inline void SetSerial(size_t index, uint8_t serial)
-      {
-        nodes[index].SetSerial(serial);
-      }
-
       friend class Area;
     };
 
