@@ -28,7 +28,6 @@
 #include <vector>
 
 #include <osmscout/GeoCoord.h>
-#include <osmscout/Coord.h>
 #include <osmscout/Pixel.h>
 
 #include <osmscout/GroundTile.h>

@@ -24,7 +24,6 @@
 #include <memory>
 #include <unordered_map>
 
-#include <osmscout/Coord.h>
 #include <osmscout/Tag.h>
 #include <osmscout/routing/TurnRestriction.h>
 

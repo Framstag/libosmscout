@@ -27,7 +27,6 @@
 
 #include <osmscout/Way.h>
 
-#include <osmscout/Coord.h>
 #include <osmscout/CoordDataFile.h>
 
 #include <osmscout/TypeInfoSet.h>

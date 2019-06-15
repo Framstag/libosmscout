@@ -172,11 +172,11 @@ namespace osmscout {
           }
 
           if (n==0) {
-            coast->frontNodeId=coord->second.GetOSMScoutId();
+            coast->frontNodeId=coord->second.GetId();
           }
 
           if (n==coastline->GetNodeCount()-1) {
-            coast->backNodeId=coord->second.GetOSMScoutId();
+            coast->backNodeId=coord->second.GetId();
           }
 
           coast->coast[n]=Point(coord->second.GetSerial(),

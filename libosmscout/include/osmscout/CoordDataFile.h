@@ -21,7 +21,7 @@
 */
 
 #include <osmscout/DataFile.h>
-#include <osmscout/Coord.h>
+#include <osmscout/Point.h>
 
 #include <osmscout/util/Cache.h>
 
@@ -39,7 +39,7 @@ namespace osmscout {
     typedef std::unordered_map<PageId,FileOffset> PageIdFileOffsetMap;
 
   public:
-    typedef std::unordered_map<OSMId,Coord> ResultMap;
+    typedef std::unordered_map<OSMId,Point> ResultMap;
 
   private:
     bool                isOpen;             //!< If true,the data file is opened
@@ -56,7 +56,10 @@ namespace osmscout {
               bool memoryMapedData);
     bool Close();
 
-    std::string GetFilename() const;
+    inline std::string GetFilename() const
+    {
+      return datafilename;
+    }
 
     bool Get(const std::set<OSMId>& ids, ResultMap& resultMap) const;
   };

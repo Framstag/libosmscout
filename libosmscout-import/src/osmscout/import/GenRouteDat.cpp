@@ -29,6 +29,10 @@
 
 #include <osmscout/routing/RoutingService.h>
 
+#include <osmscout/import/GenRouteDat.h>
+
+#include <algorithm>
+#include <future>
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -412,7 +416,7 @@ namespace osmscout {
       auto nodeIdEntry=nodeIdMap.find(entry.first);
 
       if (nodeIdEntry!=nodeIdMap.end()) {
-        nodeIdEntry->second=entry.second.GetOSMScoutId();
+        nodeIdEntry->second=entry.second.GetId();
         resolveCount++;
       }
     }

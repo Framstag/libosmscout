@@ -33,10 +33,6 @@
 //#define DEBUG_GROUNDTILES
 //#define DEBUG_NODE_DRAW
 
-#if defined(DEBUG_GROUNDTILES)
-#include <osmscout/Coord.h>
-#endif
-
 namespace osmscout {
 
   static void GetGridPoints(const std::vector<Point>& nodes,
