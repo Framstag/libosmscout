@@ -1,3 +1,5 @@
+%shared_ptr(osmscout::RouteDescription)
+
 %{
 #include <osmscout/routing/Route.h>
 %}

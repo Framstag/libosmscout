@@ -55,6 +55,8 @@
 %include <osmscout/Area.i>
 %include <osmscout/GroundTile.i>
 
+%include <osmscout/DataFile.i>
+
 %include <osmscout/NodeDataFile.i>
 %include <osmscout/WayDataFile.i>
 %include <osmscout/AreaDataFile.i>
@@ -81,4 +83,6 @@
 %include <osmscout/routing/RoutingProfile.i>
 %include <osmscout/routing/RoutePostprocessor.i>
 %include <osmscout/routing/RoutingService.i>
+%include <osmscout/routing/AbstractRoutingService.i>
+%include <osmscout/routing/SimpleRoutingService.i>
 

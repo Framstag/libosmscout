@@ -4,6 +4,8 @@
 
 %include <osmscout/OSMScoutTypes.h>
 
+%apply unsigned long int { uint64_t }
+
 // String
 %template(StringVector) std::vector<std::string>;
 //%template(StringUnorderedSet) std::unordered_set<std::string>;
@@ -14,6 +16,6 @@
 //%template(UInt64Vector) std::vector<uint64_t>;
 
 //%template(FileOffsetList) std::list<osmscout::FileOffset>;
-%template(FileOffsetSet) std::set<osmscout::FileOffset>;
+//%template(FileOffsetSet) std::set<osmscout::FileOffset>;
 %template(FileOffsetVector) std::vector<osmscout::FileOffset>;
 

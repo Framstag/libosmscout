@@ -6,6 +6,6 @@
 
 %shared_ptr(osmscout::TagCondition)
 
-%template(TagMap) std::unordered_map<osmscout::TagId,std::string>;
+//%template(TagMap) std::unordered_map<osmscout::TagId,std::string>;
 
 
