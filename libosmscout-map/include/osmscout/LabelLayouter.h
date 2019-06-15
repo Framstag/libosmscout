@@ -89,6 +89,7 @@ namespace osmscout {
   public:
     size_t            priority{0}; //!< Priority of the entry
     std::string       text;        //!< The label text (type==Text|PathText)
+    double            height;
     PathTextStyleRef  style;
     double            contourLabelOffset;
     double            contourLabelSpace;
@@ -218,7 +219,7 @@ namespace osmscout {
     Mask &operator=(const Mask &m) = delete;
     Mask &operator=(Mask &&m) = delete;
 
-	  OSMSCOUT_MAP_API void prepare(const IntRectangle &rect);
+    OSMSCOUT_MAP_API void prepare(const IntRectangle &rect);
 
     inline int64_t size() const
     { return d.size(); };
@@ -665,7 +666,7 @@ namespace osmscout {
           projection,
           parameter,
           labelData.text,
-          labelData.style->GetSize(),
+          labelData.height,
           /* object width */ 0.0,
           /*enable wrapping*/ false,
           /*contour label*/ true);

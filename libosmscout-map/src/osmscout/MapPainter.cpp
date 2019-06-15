@@ -1164,6 +1164,7 @@ namespace osmscout {
     labelData.priority=pathTextStyle->GetPriority();
     labelData.style=pathTextStyle;
     labelData.text=textLabel;
+    labelData.height=pathTextStyle->GetSize();
     labelData.contourLabelOffset=contourLabelOffset;
     labelData.contourLabelSpace=contourLabelSpace;
 
