@@ -396,6 +396,14 @@ CONST
       AREA {color: @waterLabelColor; }
     }
 
+  SYMBOL natural_tree
+    CIRCLE 0,0 1 {
+      AREA {color: #9acd32; }
+    }
+    CIRCLE 0,0 0.3 {
+      AREA {color: #8b4513; }
+    }
+
   SYMBOL amenity_charging_station
     RECTANGLE -1,-1 2 x 2 {
       AREA { color: #0000ff; }
@@ -1069,6 +1077,7 @@ STYLE
 
  [MAG block-] {
     [TYPE amenity_charging_station] NODE.ICON { symbol: amenity_charging_station; }
+    [TYPE natural_tree] NODE.ICON { symbol: natural_tree; }
 
    [TYPE highway_cycleway] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
@@ -1194,8 +1203,9 @@ STYLE
  }
 
  [MAG @labelPathsMag-] {
+   [TYPE highway_pedestrian] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioOtherWays; }
+
    [TYPE highway_bus_guideway,
-         highway_pedestrian,
          highway_path,
          highway_cycleway,
          highway_footway,
@@ -1350,8 +1360,9 @@ STYLE
            railway_narrow_gauge,
            railway_preserved,
            railway_funicular,
-           railway_subway,
            public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
+
+     //[TYPE railway_subway] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
 
      [TYPE public_transport_platform] AREA.TEXT { label: Name.name; color: #524a4a; size: 0.8; priority: @labelPrioTramHalt; }
    }

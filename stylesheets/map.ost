@@ -908,7 +908,7 @@ TYPES
       {Name, NameAlt}
 
   TYPE natural_tree
-    IGNORE // Too many for mobile?
+    //IGNORE // Too many for mobile?
     = NODE ("natural"=="tree")
 
   TYPE natural_volcano
