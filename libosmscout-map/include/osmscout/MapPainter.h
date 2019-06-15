@@ -730,7 +730,7 @@ namespace osmscout {
     }
 
   public:
-    MapPainterBatch(size_t expectedCount)
+    explicit MapPainterBatch(size_t expectedCount)
     {
       data.reserve(expectedCount);
       painters.reserve(expectedCount);
