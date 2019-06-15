@@ -365,6 +365,7 @@ endif()
 option(OSMSCOUT_BUILD_BINDING_CSHARP "Enable generation of c# binding" ${OSMSCOUT_BUILD_BINDING_CSHARP_CACHE})
 
 add_subdirectory(libosmscout-binding)
+add_subdirectory(libosmscout-map-binding)
 
 if(MATLAB_FOUND)
   set(OSMSCOUT_BUILD_EXTERN_MATLAB_CACHE ON)

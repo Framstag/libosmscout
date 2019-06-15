@@ -6,4 +6,5 @@
 
 %include <osmscout/Way.h>
 
-%template(WayVector) std::vector<osmscout::WayRef>;
+%template(WayList) std::list<std::shared_ptr<osmscout::Way>>;
+%template(WayVector) std::vector<std::shared_ptr<osmscout::Way>>;

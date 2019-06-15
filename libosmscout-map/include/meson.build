@@ -15,6 +15,7 @@ osmscoutmapHeader = [
             'osmscout/StyleProcessor.h',
             'osmscout/DataTileCache.h',
             'osmscout/MapTileCache.h',
+            'osmscout/MapData.h',
             'osmscout/MapService.h',
             'osmscout/MapPainterNoOp.h'
           ]

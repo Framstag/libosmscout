@@ -37,6 +37,8 @@
 
 #include <osmscout/GroundTile.h>
 
+#include <osmscout/MapData.h>
+
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Projection.h>
@@ -70,28 +72,6 @@ namespace osmscout {
     Postrender            = 15, //!< Implementation specific final step
     LastStep              = 15
   };
-
-  /**
-   * \ingroup Renderer
-   *
-   * This is the data structure holding all to be rendered data.
-   */
-  class OSMSCOUT_MAP_API MapData CLASS_FINAL
-  {
-  public:
-    std::vector<NodeRef>  nodes;       //!< Nodes as retrieved from database
-    std::vector<AreaRef>  areas;       //!< Areas as retrieved from database
-    std::vector<WayRef>   ways;        //!< Ways as retrieved from database
-    std::list<NodeRef>    poiNodes;    //!< List of manually added nodes (not managed or changed by the database)
-    std::list<AreaRef>    poiAreas;    //!< List of manually added areas (not managed or changed by the database)
-    std::list<WayRef>     poiWays;     //!< List of manually added ways (not managed or changed by the database)
-    std::list<GroundTile> groundTiles; //!< List of ground tiles (optional)
-
-  public:
-    void ClearDBData();
-  };
-
-  typedef std::shared_ptr<MapData> MapDataRef;
 
   /**
    * Abstract base class of all renders (though you can always write

@@ -8,6 +8,6 @@
 
 %include <osmscout/Node.h>
 
-%template(NodeVector) std::vector<osmscout::NodeRef>;
-%template(NodeRef) std::shared_ptr<osmscout::Node>;
+%template(NodeList) std::list<std::shared_ptr<osmscout::Node>>;
+%template(NodeVector) std::vector<std::shared_ptr<osmscout::Node>>;
 

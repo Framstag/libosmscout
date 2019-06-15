@@ -276,7 +276,7 @@ namespace osmscout {
     TileAreaData  optimizedAreaData; //!< Optimized area data
 
   private:
-    Tile(const TileKey& key);
+    explicit Tile(const TileKey& key);
 
   public:
     friend class DataTileCache;

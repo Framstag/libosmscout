@@ -1,0 +1,2 @@
+#define OSMSCOUT_API
+#define CLASS_FINAL

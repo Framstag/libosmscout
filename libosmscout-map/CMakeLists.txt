@@ -7,6 +7,7 @@ set(HEADER_FILES
 	include/osmscout/LabelLayouter.h
 	include/osmscout/MapPainter.h
 	include/osmscout/MapParameter.h
+	include/osmscout/MapData.h
 	include/osmscout/MapService.h
 	include/osmscout/LabelProvider.h
 	include/osmscout/LabelPath.h
@@ -25,6 +26,7 @@ set(SOURCE_FILES
 	src/osmscout/LabelLayouter.cpp
 	src/osmscout/MapPainter.cpp
 	src/osmscout/MapParameter.cpp
+	src/osmscout/MapData.cpp
 	src/osmscout/MapService.cpp
 	src/osmscout/LabelProvider.cpp
 	src/osmscout/LabelPath.cpp

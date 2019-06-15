@@ -8,4 +8,5 @@
 
 %template(AreaRingVector) std::vector<osmscout::Area::Ring>;
 
-%template(AreaVector) std::vector<osmscout::AreaRef>;
+%template(AreaList) std::list<std::shared_ptr<osmscout::Area>>;
+%template(AreaVector) std::vector<std::shared_ptr<osmscout::Area>>;
