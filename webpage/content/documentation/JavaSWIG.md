@@ -35,7 +35,7 @@ You need the following
 * Java JDK (tested using Java 11, lower version should be OK, too)
 * Maven
 
-## Building libomscout-binding to generate and build stubs
+## Building libosmscout-binding to generate and build stubs
 
 To build the various stub code call
 
