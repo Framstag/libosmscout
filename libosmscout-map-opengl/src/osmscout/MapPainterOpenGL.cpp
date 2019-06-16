@@ -380,7 +380,7 @@ namespace osmscout {
 
           std::vector<GLfloat> points;
 
-          if (!fillStyle && borderStyles.empty()) {
+          if (!fillStyle) {
             continue;
           }
 
