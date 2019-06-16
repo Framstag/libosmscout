@@ -534,7 +534,7 @@ namespace osmscout {
                             const TagMap& tags,
                             FeatureValueBuffer& buffer) const
   {
-    uint8_t access=0;
+    uint8_t access=0u;
 
     if (feature.GetType()->CanRouteFoot()) {
       access|=(AccessFeatureValue::footForward|AccessFeatureValue::footBackward);
@@ -557,7 +557,7 @@ namespace osmscout {
     if (accessValue!=tags.end() &&
         accessValue->second=="no") {
       // Everything is forbidden and possible later positive restrictions added again
-      access=0;
+      access=0u;
 
       // In any other case this is a general access restriction for all vehicles that
       // does not change any of our existing flags, so we ignore it.
@@ -1074,6 +1074,8 @@ namespace osmscout {
   void MaxSpeedFeature::Initialize(TagRegistry& tagRegistry)
   {
     tagMaxSpeed=tagRegistry.RegisterTag("maxspeed");
+    tagMaxSpeedForward=tagRegistry.RegisterTag("maxspeed:forward");
+    tagMaxSpeedBackward=tagRegistry.RegisterTag("maxspeed:backward");
   }
 
   std::string MaxSpeedFeature::GetName() const
@@ -1091,37 +1093,27 @@ namespace osmscout {
     return new (buffer) MaxSpeedFeatureValue();
   }
 
-  void MaxSpeedFeature::Parse(TagErrorReporter& errorReporter,
-                              const TagRegistry& tagRegistry,
-                              const FeatureInstance& feature,
-                              const ObjectOSMRef& object,
-                              const TagMap& tags,
-                              FeatureValueBuffer& buffer) const
+  bool MaxSpeedFeature::GetTagValue(TagErrorReporter& errorReporter,
+                                    const TagRegistry& tagRegistry,
+                                    const ObjectOSMRef& object,
+                                    const TagMap& tags,
+                                    const std::string& input, uint8_t& speed) const
   {
-    auto maxSpeed=tags.find(tagMaxSpeed);
-
-    if (maxSpeed==tags.end()) {
-      return;
-    }
-
-    std::string valueString=maxSpeed->second;
+    std::string valueString(input);
     size_t      valueNumeric;
     bool        isMph=false;
 
     if (valueString=="signals" ||
         valueString=="none" ||
         valueString=="no") {
-      return;
+      return false;
     }
 
     // "walk" should not be used, but we provide an estimation anyway,
     // since it is likely still better than the default
     if (valueString=="walk") {
-      auto* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
-      value->SetMaxSpeed(10);
-
-      return;
+      speed=10;
+      return true;
     }
 
     size_t pos;
@@ -1141,7 +1133,8 @@ namespace osmscout {
       }
     }
 
-    while (valueString.length()>0 && valueString[valueString.length()-1]==' ') {
+    while (valueString.length()>0 &&
+           valueString[valueString.length()-1]==' ') {
       valueString.erase(valueString.length()-1);
     }
 
@@ -1150,33 +1143,122 @@ namespace osmscout {
       uint8_t maxSpeedValue;
 
       if (tagRegistry.GetMaxSpeedFromAlias(valueString,
-                                          maxSpeedValue)) {
+                                           maxSpeedValue)) {
         valueNumeric=maxSpeedValue;
       }
       else {
-        errorReporter.ReportTag(object,tags,std::string("Max speed tag value '")+maxSpeed->second+"' is not numeric!");
-        return;
+        errorReporter.ReportTag(object,tags,std::string("Max speed tag value '")+input+"' is not numeric!");
+        return false;
       }
     }
 
-    auto* value=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
     if (isMph) {
-      if (valueNumeric>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
+      if (valueNumeric>std::numeric_limits<uint8_t>::max()/lround(1.609)) {
 
-        value->SetMaxSpeed(std::numeric_limits<uint8_t>::max());
+        speed=std::numeric_limits<uint8_t>::max();
       }
       else {
-        value->SetMaxSpeed((uint8_t)(valueNumeric*1.609+0.5));
+        speed=(uint8_t)lround(valueNumeric*1.609);
       }
     }
     else {
       if (valueNumeric>std::numeric_limits<uint8_t>::max()) {
-        value->SetMaxSpeed(std::numeric_limits<uint8_t>::max());
+        speed=std::numeric_limits<uint8_t>::max();
       }
       else {
-        value->SetMaxSpeed((uint8_t)valueNumeric);
+        speed=(uint8_t)valueNumeric;
       }
+    }
+
+    return true;
+  }
+
+
+  void MaxSpeedFeature::Parse(TagErrorReporter& errorReporter,
+                              const TagRegistry& tagRegistry,
+                              const FeatureInstance& feature,
+                              const ObjectOSMRef& object,
+                              const TagMap& tags,
+                              FeatureValueBuffer& buffer) const
+  {
+    auto maxSpeed=tags.find(tagMaxSpeed);
+    auto maxSpeedForward=tags.find(tagMaxSpeedForward);
+    auto maxSpeedBackward=tags.find(tagMaxSpeedBackward);
+
+    if (maxSpeedForward!=tags.end() &&
+        maxSpeedBackward!=tags.end()) {
+      uint8_t forwardSpeed=0;
+      uint8_t backwardSpeed=0;
+
+      if (!GetTagValue(errorReporter,
+                       tagRegistry,
+                       object,
+                       tags,
+                       maxSpeedForward->second,
+                       forwardSpeed)) {
+        return;
+      }
+
+      if (!GetTagValue(errorReporter,
+                       tagRegistry,
+                       object,
+                       tags,
+                       maxSpeedBackward->second,
+                       backwardSpeed)) {
+        return;
+      }
+
+      auto* featureValue=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      featureValue->SetMaxSpeed(std::min(forwardSpeed,backwardSpeed));
+    }
+    else if (maxSpeedForward!=tags.end()) {
+      uint8_t speed=0;
+
+      if (!GetTagValue(errorReporter,
+                       tagRegistry,
+                       object,
+                       tags,
+                       maxSpeedForward->second,
+                       speed)) {
+        return;
+      }
+
+      auto* featureValue=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      featureValue->SetMaxSpeed(speed);
+    }
+    else if (maxSpeedBackward!=tags.end()) {
+      uint8_t speed=0;
+
+      if (!GetTagValue(errorReporter,
+                       tagRegistry,
+                       object,
+                       tags,
+                       maxSpeedBackward->second,
+                       speed)) {
+        return;
+      }
+
+      auto* featureValue=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      featureValue->SetMaxSpeed(speed);
+    }
+    else if (maxSpeed!=tags.end()) {
+      uint8_t speed=0;
+
+      if (!GetTagValue(errorReporter,
+                       tagRegistry,
+                       object,
+                       tags,
+                       maxSpeed->second,
+                       speed)) {
+        return;
+      }
+
+      auto* featureValue=static_cast<MaxSpeedFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      featureValue->SetMaxSpeed(speed);
     }
   }
 

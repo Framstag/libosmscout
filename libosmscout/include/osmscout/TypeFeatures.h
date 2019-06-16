@@ -923,10 +923,20 @@ namespace osmscout {
   {
   private:
     TagId tagMaxSpeed;
+    TagId tagMaxSpeedForward;
+    TagId tagMaxSpeedBackward;
 
   public:
     /** Name of this feature */
     static const char* const NAME;
+
+  private:
+    bool GetTagValue(TagErrorReporter& errorReporter,
+                     const TagRegistry& tagRegistry,
+                     const ObjectOSMRef& object,
+                     const TagMap& tags,
+                     const std::string& input,
+                     uint8_t& speed) const;
 
   public:
     void Initialize(TagRegistry& tagRegistry) override;
