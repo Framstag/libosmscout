@@ -39,7 +39,7 @@ namespace osmscout {
     plateLabelPadding(5.0),
     overlayLabelPadding(6.0),
     iconMode(IconMode::FixedSizePixmap),
-    iconSize(3.7),
+    iconSize(1.8),
     iconPixelSize(14),
     iconPadding(1.0),
     patternMode(PatternMode::OriginalPixmap),
