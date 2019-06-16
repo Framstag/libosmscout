@@ -10,7 +10,7 @@
  */
 struct PathTextDrawingContext
 {
-    osmscout::MapPainter::ContourLabelHelper* helper;
+    ContourLabelHelper* helper;
     ID2D1RenderTarget* d2DContext;
     ID2D1Geometry* geometry;
     ID2D1Brush* brush;
