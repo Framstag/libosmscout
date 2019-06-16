@@ -1094,7 +1094,7 @@ STYLE
 
  [MAG block-] {
     [TYPE amenity_charging_station] NODE.ICON { symbol: amenity_charging_station; }
-    [TYPE natural_tree] NODE.ICON { symbol: natural_tree; }
+    [TYPE natural_tree] NODE.ICON { symbol: natural_tree; name: tree; }
 
    [TYPE highway_cycleway] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
