@@ -149,7 +149,7 @@ namespace osmscout {
 
       if (success) {
         images[style.GetIconName()] = image;
-        //std::cout << "Loaded image '" << filename << "'" << std::endl;
+        log.Info() << "Loaded icon '" << style.GetIconName() << "' from \"" << filename << "\"";
         return true;
       }
 
