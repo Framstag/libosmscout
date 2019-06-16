@@ -1524,12 +1524,13 @@ namespace osmscout {
         lineOffset=mainSlotWidth/2.0;
         break;
       case LineStyle::laneDivider:
+        lineOffset=0.0;
         lanesValue=lanesReader.GetValue(buffer);
         accessValue=accessReader.GetValue(buffer);
 
         if (lanesValue==nullptr &&
             accessValue==nullptr) {
-          return;
+          continue;
         }
         break;
       }
@@ -1562,7 +1563,8 @@ namespace osmscout {
                                    transStart,
                                    transEnd,
                                    errorTolerancePixel);
-        } else {
+        }
+        else {
           std::vector<Point> nodes;
           for (const auto &segment : way.segments){
             if (projection.GetDimensions().Intersects(segment.bbox, false)){
@@ -1631,7 +1633,7 @@ namespace osmscout {
         }
 
         if (lanes<2) {
-          return;
+          continue;
         }
 
         double  lanesSpace=mainSlotWidth/lanes;
