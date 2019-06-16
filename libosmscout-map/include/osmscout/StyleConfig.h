@@ -113,7 +113,7 @@ namespace osmscout {
   public:
     explicit StyleConstantColor(const Color& color);
 
-    inline const Color& GetColor()
+    inline Color GetColor() const
     {
       return color;
     }
@@ -129,9 +129,9 @@ namespace osmscout {
     Magnification magnification;
 
   public:
-    explicit StyleConstantMag(Magnification& magnification);
+    explicit StyleConstantMag(const Magnification& magnification);
 
-    inline const Magnification& GetMag()
+    inline Magnification GetMag() const
     {
       return magnification;
     }
@@ -147,11 +147,41 @@ namespace osmscout {
     size_t value;
 
   public:
-    explicit StyleConstantUInt(size_t& value);
+    explicit StyleConstantUInt(size_t value);
 
-    inline const size_t& GetUInt()
+    inline size_t GetUInt() const
     {
       return value;
+    }
+  };
+
+  /**
+ * \ingroup Stylesheet
+ *
+ */
+  class OSMSCOUT_MAP_API StyleConstantWidth : public StyleConstant
+  {
+  public:
+    enum class Unit {
+      m,
+      mm
+    };
+
+  private:
+    double value;
+    Unit   unit;
+
+  public:
+    explicit StyleConstantWidth(double value, Unit unit);
+
+    inline double GetWidth() const
+    {
+      return value;
+    }
+
+    inline Unit GetUnit() const
+    {
+      return unit;
     }
   };
 

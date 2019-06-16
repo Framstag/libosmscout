@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 62;
-	noSym = 62;
+	maxT = 63;
+	noSym = 63;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -195,25 +195,26 @@ void Scanner::Init() {
 	keywords.set("COLOR", 31);
 	keywords.set("MAG", 32);
 	keywords.set("UINT", 33);
-	keywords.set("STYLE", 34);
-	keywords.set("FEATURE", 37);
-	keywords.set("PATH", 38);
-	keywords.set("TYPE", 39);
-	keywords.set("ONEWAY", 41);
-	keywords.set("SIZE", 42);
-	keywords.set("m", 43);
-	keywords.set("mm", 44);
-	keywords.set("px", 46);
-	keywords.set("NODE", 48);
-	keywords.set("TEXT", 49);
-	keywords.set("ICON", 51);
-	keywords.set("WAY", 52);
-	keywords.set("SHIELD", 53);
-	keywords.set("BORDERTEXT", 54);
-	keywords.set("BORDERSYMBOL", 55);
-	keywords.set("name", 56);
-	keywords.set("lighten", 57);
-	keywords.set("darken", 58);
+	keywords.set("WIDTH", 34);
+	keywords.set("mm", 35);
+	keywords.set("m", 36);
+	keywords.set("STYLE", 37);
+	keywords.set("FEATURE", 40);
+	keywords.set("PATH", 41);
+	keywords.set("TYPE", 42);
+	keywords.set("ONEWAY", 44);
+	keywords.set("SIZE", 45);
+	keywords.set("px", 47);
+	keywords.set("NODE", 49);
+	keywords.set("TEXT", 50);
+	keywords.set("ICON", 52);
+	keywords.set("WAY", 53);
+	keywords.set("SHIELD", 54);
+	keywords.set("BORDERTEXT", 55);
+	keywords.set("BORDERSYMBOL", 56);
+	keywords.set("name", 57);
+	keywords.set("lighten", 58);
+	keywords.set("darken", 59);
 
 
   tvalLength = 128;
@@ -451,25 +452,25 @@ TokenRef Scanner::NextToken() {
 		case 24:
 			{t->kind = 24; break;}
 		case 25:
-			{t->kind = 35; break;}
+			{t->kind = 38; break;}
 		case 26:
-			{t->kind = 36; break;}
+			{t->kind = 39; break;}
 		case 27:
-			{t->kind = 40; break;}
+			{t->kind = 43; break;}
 		case 28:
-			{t->kind = 45; break;}
+			{t->kind = 46; break;}
 		case 29:
-			{t->kind = 47; break;}
+			{t->kind = 48; break;}
 		case 30:
-			{t->kind = 59; break;}
-		case 31:
 			{t->kind = 60; break;}
-		case 32:
+		case 31:
 			{t->kind = 61; break;}
+		case 32:
+			{t->kind = 62; break;}
 		case 33:
-			recEnd = pos; recKind = 50;
+			recEnd = pos; recKind = 51;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
-			else {t->kind = 50; break;}
+			else {t->kind = 51; break;}
 
   }
   AppendVal(t);

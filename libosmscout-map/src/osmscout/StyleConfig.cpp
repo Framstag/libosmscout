@@ -90,14 +90,21 @@ namespace osmscout {
     // no code
   }
 
-  StyleConstantMag::StyleConstantMag(Magnification& magnification)
+  StyleConstantMag::StyleConstantMag(const Magnification& magnification)
   : magnification(magnification)
   {
     // no code
   }
 
-  StyleConstantUInt::StyleConstantUInt(size_t& value)
+  StyleConstantUInt::StyleConstantUInt(size_t value)
   : value(value)
+  {
+    // no code
+  }
+
+  StyleConstantWidth::StyleConstantWidth(double value, Unit unit)
+    : value(value),
+      unit(unit)
   {
     // no code
   }

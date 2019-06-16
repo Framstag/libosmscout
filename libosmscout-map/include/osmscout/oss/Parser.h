@@ -250,6 +250,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 	void COLORCONSTDEF();
 	void MAGCONSTDEF();
 	void UINTCONSTDEF();
+	void WIDTHCONSTDEF();
 	void COLOR(Color& color);
 	void MAG(Magnification& magnification);
 	void UINT(size_t& value);
@@ -267,6 +268,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 	void STYLEFILTER_SIZE(StyleFilter& filter);
 	void STYLEFILTER_FEATURE_ENTRY(StyleFilter& filter, TypeInfoSet& types);
 	void SIZECONDITION(SizeConditionRef& condition);
+	void UMAP(double& width);
 	void NODESTYLEDEF(StyleFilter filter, bool state);
 	void WAYSTYLEDEF(StyleFilter filter, bool state);
 	void AREASTYLEDEF(StyleFilter filter, bool state);

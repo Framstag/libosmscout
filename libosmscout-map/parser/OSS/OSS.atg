@@ -488,6 +488,7 @@ PRODUCTIONS
               =   COLORCONSTDEF
                 | MAGCONSTDEF
                 | UINTCONSTDEF
+                | WIDTHCONSTDEF
                 .
 
   COLORCONSTDEF
@@ -566,6 +567,51 @@ PRODUCTIONS
 
                     if (!errors->hasErrors) {
                       config.AddConstant(name,std::make_shared<StyleConstantUInt>(value));
+                    }
+                  }
+                .)
+                .
+
+  WIDTHCONSTDEF
+              = (.
+                  std::string              name;
+                  StyleConstantRef         constant;
+                  double                   width;
+                  std::string              unitValue;
+                  StyleConstantWidth::Unit unit;
+                .)
+                "WIDTH"
+                IDENT<name>
+                "="
+                DOUBLE<width>
+                (
+                  IDENT<unitValue>
+                | "mm" (. unitValue="mm"; .)
+                | "m"  (. unitValue="m"; .)
+                )
+                (.
+                  if (state) {
+                    constant=config.GetConstantByName(name);
+
+                    if (constant) {
+                      std::string e="Constant already defined";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (unitValue=="mm") {
+                      unit=StyleConstantWidth::Unit::mm;
+                    }
+                    else if (unitValue=="m") {
+                      unit=StyleConstantWidth::Unit::m;
+                    }
+                    else {
+                      std::string e="Unsupported unit '"+unitValue+"'";
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      config.AddConstant(name,std::make_shared<StyleConstantWidth>(width,unit));
                     }
                   }
                 .)
@@ -867,18 +913,13 @@ PRODUCTIONS
 
   SIZECONDITION<SizeConditionRef& condition>
               = (.
+                  double            widthInMeter;
+                  StyleConstantRef constant;
+
                   condition=std::make_shared<SizeCondition>();
-                  double widthInMeter;
                 .)
 
-                UDOUBLE<widthInMeter> "m"
-                (.
-                  if (widthInMeter<0.0) {
-                   std::string e="Width must be >= 0.0";
-
-                   SemErr(e.c_str());
-                  }
-                .)
+                UMAP<widthInMeter>
 
                 [
                   [
@@ -1626,13 +1667,36 @@ PRODUCTIONS
                          style.SetDoubleValue(descriptor.GetAttribute(),value);
                        }
                      }
+                     else if (valueType==ValueType::CONSTANT) {
+                       if (!constant) {
+                         // no code
+                       }
+                       else if (dynamic_cast<StyleConstantWidth*>(constant.get())==nullptr) {
+                         std::string e="Constant is not of type 'WIDTH'";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!errors->hasErrors) {
+                         StyleConstantWidth* widthConstant=dynamic_cast<StyleConstantWidth*>(constant.get());
+
+                         if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
+                           std::string e="Constant is not of unit 'm'";
+
+                           SemErr(e.c_str());
+                         }
+                         else {
+                           style.SetDoubleValue(descriptor.GetAttribute(),widthConstant->GetWidth());
+                         }
+                       }
+                     }
                    }
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_UMAP_SIZE) {
                      if (valueType==ValueType::NUMBER) {
                        double value;
 
                        if (negate) {
-                         std::string e="Negative numbers not allowed here";
+                         std::string e="Width must be >= 0.0";
 
                          SemErr(e.c_str());
                        }
@@ -1651,6 +1715,34 @@ PRODUCTIONS
 
                        if (!errors->hasErrors) {
                          style.SetDoubleValue(descriptor.GetAttribute(),value);
+                       }
+                     }
+                     else if (valueType==ValueType::CONSTANT) {
+                       if (!constant) {
+                         // no code
+                       }
+                       else if (dynamic_cast<StyleConstantWidth*>(constant.get())==nullptr) {
+                         std::string e="Constant is not of type 'WIDTH'";
+
+                         SemErr(e.c_str());
+                       }
+
+                       if (!errors->hasErrors) {
+                         StyleConstantWidth* widthConstant=dynamic_cast<StyleConstantWidth*>(constant.get());
+
+                         if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
+                           std::string e="Constant is not of unit 'm'";
+
+                           SemErr(e.c_str());
+                         }
+                         else if (widthConstant->GetWidth()<0.0) {
+                           std::string e="Width must be >= 0.0";
+
+                           SemErr(e.c_str());
+                         }
+                         else {
+                           style.SetDoubleValue(descriptor.GetAttribute(),widthConstant->GetWidth());
+                         }
                        }
                      }
                    }
@@ -2168,6 +2260,46 @@ PRODUCTIONS
                     }
                   .)
                 .
+
+  UMAP<double& width>
+              = (.
+                  StyleConstantRef constant;
+                .)
+                (
+                  UDOUBLE<width> "m"
+                | CONSTANT<constant>
+                )
+
+                (.
+                  if (constant) {
+                    if (dynamic_cast<StyleConstantWidth*>(constant.get())==nullptr) {
+                      std::string e="Constant is not of type 'WIDTH'";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      StyleConstantWidth* widthConstant=dynamic_cast<StyleConstantWidth*>(constant.get());
+
+                      if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
+                        std::string e="Constant is not of unit 'm'";
+
+                        SemErr(e.c_str());
+                      }
+                      else {
+                        width=widthConstant->GetWidth();
+                      }
+                    }
+                  }
+
+                  if (width<0.0) {
+                    std::string e="Width must be >= 0.0";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                .
+
   IFCOND<bool& state>
               =  (.
                    std::string flag;
