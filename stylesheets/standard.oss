@@ -1300,11 +1300,11 @@ STYLE
  IF railway {
    [MAG suburb-] {
      [TYPE railway_rail] {
-       [SIZE 5m 0.25mm:3px<] {
-         WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
-         WAY {color: #939393; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 5m;}
+       [SIZE 3m 0.25mm:3px<] {
+         WAY#outline { color: #b3b3b3; width: 3m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
+         WAY {color: #939393; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 3m;}
        }
-       [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
+       [SIZE 3m <0.25mm:3px] WAY {color: #777777; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
      }
    }
 
