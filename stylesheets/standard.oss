@@ -827,11 +827,11 @@ STYLE
    }
 
    [TYPE highway_tertiary_link] {
-     [SIZE 12m 0.25mm:3px<] {
-       WAY#outline { color: darken(@secondaryColor,0.4); width: 12m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
-       WAY { color: @secondaryColor; width: 12m;}
+     [SIZE 10m 0.25mm:3px<] {
+       WAY#outline { color: darken(@secondaryColor,0.4); width: 10m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @secondaryColor; width: 10m;}
      }
-     [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm; }
+     [SIZE 10m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm; }
    }
 
    [TYPE highway_road] {
@@ -988,8 +988,8 @@ STYLE
      }
 
      [FEATURE Bridge] {
-       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
-       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -4m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 4m; displayOffset: 0.25mm;}
      }
    }
 
