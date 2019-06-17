@@ -31,6 +31,25 @@ const DWRITE_MATRIX identityTransform =
     0, 0
 };
 
+ContourLabelHelper::ContourLabelHelper(const MapPainter& painter)
+  : contourLabelOffset(painter.contourLabelOffset),
+    contourLabelSpace(painter.contourLabelSpace)
+{
+  // no code
+}
+bool ContourLabelHelper::Init(double pathLength,
+                              double textWidth)
+{
+  this->pathLength=pathLength;
+  this->textWidth=textWidth;
+  if (pathLength-textWidth-2*contourLabelOffset<=0.0) {
+    return false;
+  }
+  currentOffset=fmod(pathLength-textWidth-2*contourLabelOffset,
+                     textWidth+contourLabelSpace)/2+contourLabelOffset;
+  return true;
+}
+
 //
 // Static creation method that takes care of allocating a renderer
 // AND registering it as a COM component.
