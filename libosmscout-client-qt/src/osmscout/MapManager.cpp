@@ -56,6 +56,29 @@ MapDownloadJob::~MapDownloadJob()
 
 void MapDownloadJob::start()
 {
+  started = true;
+
+  if (target.exists()){
+    MapDirectory mapDir(target);
+    if (mapDir.hasMetadata() &&
+        !mapDir.isValid() &&
+        mapDir.getPath() == map.getPath() &&
+        mapDir.getCreation() == map.getCreation()) {
+      // directory contains partial download
+      // (contains downloader metadata, but not all required files)
+      // TODO: continue partial download
+    }
+    qWarning() << "Directory already exists"<<target.canonicalPath()<<"!";
+    onJobFailed("Directory already exists", false);
+    return;
+  } else {
+    if (!target.mkpath(target.path())) {
+      qWarning() << "Can't create directory" << target.canonicalPath() << "!";
+      onJobFailed("Can't create directory", false);
+      return;
+    }
+  }
+  
   QStorageInfo storage=QStorageInfo(target);
   if (storage.bytesAvailable() > 0 && (uint64_t)storage.bytesAvailable() < map.getSize()){
     qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size (" << map.getSize() << ")!";
@@ -75,7 +98,6 @@ void MapDownloadJob::start()
   metadataFile.write(doc.toJson());
   metadataFile.close();
   if (metadataFile.error() != QFile::FileError::NoError){
-    started = true;
     done = true;
     error = metadataFile.errorString();
     emit failed(metadataFile.errorString());
@@ -342,27 +364,6 @@ MapManager::~MapManager(){
 
 void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceExisting)
 {
-  if (dir.exists()){
-    MapDirectory mapDir(dir);
-    if (mapDir.hasMetadata() &&
-        !mapDir.isValid() &&
-        mapDir.getPath() == map.getPath() &&
-        mapDir.getCreation() == map.getCreation()) {
-      // directory contains partial download
-      // (contains downloader metadata, but not all required files)
-      // TODO: continue partial download
-    }
-    qWarning() << "Directory already exists"<<dir.canonicalPath()<<"!";
-    emit mapDownloadFails("Directory already exists");
-    return;
-  } else {
-    if (!dir.mkpath(dir.path())) {
-      qWarning() << "Can't create directory" << dir.canonicalPath() << "!";
-      emit mapDownloadFails("Can't create directory");
-      return;
-    }
-  }
-
   auto job=new MapDownloadJob(&webCtrl, map, dir, replaceExisting);
   connect(job, &MapDownloadJob::finished, this, &MapManager::onJobFinished);
   connect(job, &MapDownloadJob::canceled, this, &MapManager::onJobFinished);
