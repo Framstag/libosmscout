@@ -123,6 +123,7 @@ void MapDownloadJob::start()
 void MapDownloadJob::cancel()
 {
   if (!done){
+    canceledByUser=true;
     onJobFailed("Canceled by user", false);
   }
 }
@@ -144,7 +145,11 @@ void MapDownloadJob::onJobFailed(QString errorMessage, bool recoverable){
   }else{
     done = true;
     error = errorMessage;
-    emit failed(errorMessage);
+    if (canceledByUser) {
+      emit canceled();
+    }else{
+      emit failed(errorMessage);
+    }
   }
 }
 
@@ -360,6 +365,7 @@ void MapManager::downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceEx
 
   auto job=new MapDownloadJob(&webCtrl, map, dir, replaceExisting);
   connect(job, &MapDownloadJob::finished, this, &MapManager::onJobFinished);
+  connect(job, &MapDownloadJob::canceled, this, &MapManager::onJobFinished);
   connect(job, &MapDownloadJob::failed, this, &MapManager::onJobFailed);
   downloadJobs<<job;
   emit downloadJobsChanged();
@@ -379,9 +385,10 @@ void MapManager::downloadNext()
   }  
 }
 
-void MapManager::onJobFailed(QString /*errorMessage*/)
+void MapManager::onJobFailed(QString errorMessage)
 {
   onJobFinished();
+  emit mapDownloadFails(errorMessage);
 }
 
 void MapManager::onJobFinished()

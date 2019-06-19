@@ -56,6 +56,7 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
   bool                    done{false};
   bool                    started{false};
   bool                    successful{false};
+  bool                    canceledByUser{false};
 
   uint64_t                downloadedBytes{0};
 
@@ -64,8 +65,9 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
   bool                    replaceExisting;
 
 signals:
-  void finished();
+  void finished(); // successfully
   void failed(QString error);
+  void canceled();
   void downloadProgress();
 
 public slots:
