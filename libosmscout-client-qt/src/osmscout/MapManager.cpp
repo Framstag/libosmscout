@@ -56,8 +56,6 @@ MapDownloadJob::~MapDownloadJob()
 
 void MapDownloadJob::start()
 {
-  started = true;
-
   if (target.exists()){
     MapDirectory mapDir(target);
     if (mapDir.hasMetadata() &&
@@ -71,12 +69,13 @@ void MapDownloadJob::start()
     qWarning() << "Directory already exists"<<target.canonicalPath()<<"!";
     onJobFailed("Directory already exists", false);
     return;
-  } else {
-    if (!target.mkpath(target.path())) {
-      qWarning() << "Can't create directory" << target.canonicalPath() << "!";
-      onJobFailed("Can't create directory", false);
-      return;
-    }
+  }
+
+  started = true;
+  if (!target.mkpath(target.path())) {
+    qWarning() << "Can't create directory" << target.canonicalPath() << "!";
+    onJobFailed("Can't create directory", false);
+    return;
   }
   
   QStorageInfo storage=QStorageInfo(target);
