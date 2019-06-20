@@ -31,9 +31,9 @@ const DWRITE_MATRIX identityTransform =
     0, 0
 };
 
-ContourLabelHelper::ContourLabelHelper(const MapPainter& painter)
-  : contourLabelOffset(painter.contourLabelOffset),
-    contourLabelSpace(painter.contourLabelSpace)
+ContourLabelHelper::ContourLabelHelper(double contourLabelOffset, double contourLabelSpace)
+  : contourLabelOffset(contourLabelOffset),
+    contourLabelSpace(contourLabelSpace)
 {
   // no code
 }

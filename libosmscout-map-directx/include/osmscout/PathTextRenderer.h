@@ -2,6 +2,9 @@
 
 #include <d2d1.h>
 #include <dwrite.h>
+
+#include <osmscout/MapPainter.h>
+
 #include "osmscout/MapPainter.h"
 
 /**
@@ -9,7 +12,7 @@
  * to inject itself at certain points in the contour label rendering code of
  * the actual backend.
  */
-class OSMSCOUT_MAP_DIRECTX_API ContourLabelHelper CLASS_FINAL
+class ContourLabelHelper
 {
 private:
   double contourLabelOffset;
@@ -18,7 +21,7 @@ private:
   double textWidth;
   double currentOffset;
 public:
-  explicit ContourLabelHelper(const MapPainter& painter);
+  explicit ContourLabelHelper(double contourLabelOffset, double contourLabelSpace);
 
   bool Init(double pathLength,
             double textWidth);
