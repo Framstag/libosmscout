@@ -292,6 +292,18 @@ namespace osmscout {
     std::string GetDisplayText() const;
 
     /**
+     * Assign the value of other
+     */
+    inline GeoBox& operator=(const GeoBox& other)
+    {
+      this->minCoord=other.minCoord;
+      this->maxCoord=other.maxCoord;
+      this->valid=other.valid;
+
+      return *this;
+    }
+
+    /**
      * Return an GeoBox based on the center and the radius [meters] of a circle around the center.
      * The resulting box will cross the circle in its corners.
      */

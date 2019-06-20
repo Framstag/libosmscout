@@ -80,6 +80,13 @@ namespace osmscout {
       // no code
     }
 
+    inline GeoCoord(const GeoCoord& other)
+    : lat(other.lat),
+      lon(other.lon)
+    {
+      // no code
+    }
+
     /**
      * Initialize the coordinate with the given latitude and longitude values.
      */
