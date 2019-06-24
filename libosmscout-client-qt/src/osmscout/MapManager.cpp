@@ -25,6 +25,7 @@
 #include <osmscout/PersistentCookieJar.h>
 
 #include <osmscout/util/Logger.h>
+#include <osmscout/system/Compiler.h>
 #include <osmscout/DBThread.h>
 
 namespace osmscout {
@@ -180,6 +181,7 @@ void MapDownloadJob::onJobFinished(QString path)
     FileDownloader* job = jobs.first();
     jobs.pop_front();
     assert(job->getFilePath()==path);
+    unused(path);
     downloadedBytes += job->getBytesDownloaded();
     job->deleteLater();
   }
