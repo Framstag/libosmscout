@@ -32,6 +32,8 @@
  *
  * Usage of this macro for such variables makes production
  * build happy, and avoids unused-variable warning
+ *
+ * TODO: use [[maybe_unused]] attribute with C++17
  */
 #define unused(x) ((void)(x))
 
