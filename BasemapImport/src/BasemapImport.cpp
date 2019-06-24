@@ -25,6 +25,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
@@ -143,6 +144,7 @@ void DumpHelp()
   std::cout << " --destinationDirectory <path> destination for generated map files" << std::endl;
   std::cout << " --minIndexLevel <number>      minimum water index zoom level (default 4)" << std::endl;
   std::cout << " --maxIndexLevel <number>      maximum water index zoom level (default 10)" << std::endl;
+  std::cout << " --maxWaterDistance <number>   maximum distance (in tiles) from coastline that is filled by water (default 2048)" << std::endl;
   std::cout << std::endl;
   std::cout << " --coastlines <*.shape>        optional shape file containing world-wide coastlines" << std::endl;
   std::cout << std::endl;
@@ -163,7 +165,8 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
                              const std::string& coastlineShapeFile,
                              osmscout::Progress& progress,
                              size_t indexMinMag,
-                             size_t indexMaxMag)
+                             size_t indexMaxMag,
+                             uint32_t maxWaterDistance)
 {
   progress.SetAction("Reading coastline shape file");
 
@@ -298,7 +301,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
         // Marks all still 'unknown' cells neighbouring 'water' cells as 'water', too
         processor.FillWater(progress,
                             level,
-                            20,
+                            std::min(maxWaterDistance, 2u << level.level), // how far (in tiles) from coastline is filled water
                             boundingPolygons);
 
         processor.FillWaterAroundIsland(progress,
@@ -339,6 +342,7 @@ int main(int argc, char* argv[])
   std::string               coastlineShapeFile;
   size_t                    minIndexLevel=4;
   size_t                    maxIndexLevel=10;
+  size_t                    maxWaterDistance=2048;
   osmscout::ConsoleProgress progress;
   bool                      parameterError=false;
 
@@ -394,6 +398,16 @@ int main(int argc, char* argv[])
                                        argv,
                                        i,
                                        maxIndexLevel)) {
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--maxWaterDistance")==0) {
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       maxWaterDistance)) {
       }
       else {
         parameterError=true;
@@ -456,7 +470,8 @@ int main(int argc, char* argv[])
                        coastlineShapeFile,
                        progress,
                        minIndexLevel,
-                       maxIndexLevel);
+                       maxIndexLevel,
+                       maxWaterDistance);
     }
   }
   catch (osmscout::IOException& e) {
