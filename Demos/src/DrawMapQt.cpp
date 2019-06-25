@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <DrawMap.h>
+
 #include <iostream>
 #include <iomanip>
 
@@ -129,78 +131,25 @@ public:
 
 int main(int argc, char* argv[])
 {
-  std::string   map;
-  std::string   style;
-  std::string   output;
-  size_t        width,height;
-  double        lon,lat,zoom;
-
-  if (argc!=9) {
-    std::cerr << "DrawMapQt <map directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
-    return 1;
-  }
-
-  map=argv[1];
-  style=argv[2];
-
-  if (!osmscout::StringToNumber(argv[3],width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (!osmscout::StringToNumber(argv[4],height)) {
-    std::cerr << "height is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5],"%lf",&lon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[6],"%lf",&lat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[7],"%lf",&zoom)!=1) {
-    std::cerr << "zoom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  output=argv[8];
-
   QApplication application(argc,argv,true);
 
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
+  DrawMapDemo drawDemo("DrawMapQt", argc, argv,
+                       application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch());
 
-  if (!database->Open(map)) {
-    std::cerr << "Cannot open database" << std::endl;
-
-    return 1;
+  if (!drawDemo.OpenDatabase()){
+    return 2;
   }
 
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
+  Arguments args = drawDemo.GetArguments();
 
-  if (!styleConfig->Load(style)) {
-    std::cerr << "Cannot open style" << std::endl;
-    return 1;
-  }
-
-  QPixmap *pixmap=new QPixmap(static_cast<int>(width),
-                              static_cast<int>(height));
+  QPixmap *pixmap=new QPixmap(static_cast<int>(args.width),
+                              static_cast<int>(args.height));
 
   QPainter* painter=new QPainter(pixmap);
 
-  osmscout::MercatorProjection  projection;
-  osmscout::MapParameter        drawParameter;
-  osmscout::AreaSearchParameter searchParameter;
-  osmscout::MapData             data;
-  osmscout::MapPainterQt        mapPainter(styleConfig);
-  double                        dpi=application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
-  osmscout::TypeInfoRef         buildingType=database->GetTypeConfig()->GetTypeInfo("building");
+  osmscout::MapPainterQt        mapPainter(drawDemo.styleConfig);
+
+  osmscout::TypeInfoRef         buildingType=drawDemo.database->GetTypeConfig()->GetTypeInfo("building");
 
 
   if (buildingType!=nullptr) {
@@ -215,35 +164,13 @@ int main(int argc, char* argv[])
                                           addressProcessor);*/
   }
 
-  drawParameter.SetFontSize(3.0);
-  drawParameter.SetRenderSeaLand(true);
+  drawDemo.LoadData();
 
-  /*
-  std::list<std::string> paths;
-  paths.push_back("./libosmscout/data/icons/svg/standard/");
-  paths.push_back("./libosmscout/data/icons/14x14/standard/");
-  drawParameter.SetIconMode(osmscout::MapParameter::Scalable);
-  drawParameter.SetIconPaths(paths);
-  */
-
-  projection.Set(osmscout::GeoCoord(lat,lon),
-                 osmscout::Magnification(zoom),
-                 dpi,
-                 width,
-                 height);
-
-  std::list<osmscout::TileRef> tiles;
-
-  mapService->LookupTiles(projection,tiles);
-  mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-  mapService->AddTileDataToMapData(tiles,data);
-  mapService->GetGroundTiles(projection,data.groundTiles);
-
-  if (mapPainter.DrawMap(projection,
-                         drawParameter,
-                         data,
+  if (mapPainter.DrawMap(drawDemo.projection,
+                         drawDemo.drawParameter,
+                         drawDemo.data,
                          painter)) {
-    if (!pixmap->save(output.c_str(),"PNG",-1)) {
+    if (!pixmap->save(QString::fromStdString(args.output),"PNG",-1)) {
       std::cerr << "Cannot write PNG" << std::endl;
     }
 
