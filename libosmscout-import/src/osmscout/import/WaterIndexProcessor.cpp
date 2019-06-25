@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/WaterIndex.h>
@@ -209,6 +210,16 @@ namespace osmscout {
     if (i1.bIndex==i2.bIndex)
       return i1.bDistanceSquare < i2.bDistanceSquare;
     return i1.bIndex < i2.bIndex;
+  }
+
+  bool WaterIndexProcessor::CoastlineGeoSizeSorter(const CoastlineDataRef &a, const CoastlineDataRef &b)
+  {
+    double aSize = a->boundingBox.GetSize();
+    double bSize = b->boundingBox.GetSize();
+    if (aSize==bSize)
+      return a < b;
+    // descending
+    return aSize > bSize;
   }
 
   /**
@@ -1118,10 +1129,8 @@ namespace osmscout {
 
     int                           index=-1;
     std::vector<CoastlineDataRef> transformedCoastlines;
-    std::vector<CoastRef>         coasts;
 
-    transformedCoastlines.resize(coastlines.size());
-    coasts.resize(coastlines.size());
+    transformedCoastlines.reserve(coastlines.size());
 
     for (const auto& coast : coastlines) {
       index++;
@@ -1129,13 +1138,12 @@ namespace osmscout {
 
       TransPolygon polygon;
 
+      GeoBox boundingBox;
+      GetBoundingBox(coast->coast, boundingBox);
+
       // For areas we first transform the bounding box to make sure, that
       // the area coastline will be big enough to be actually visible
       if (coast->isArea) {
-        GeoBox boundingBox;
-
-        GetBoundingBox(coast->coast,
-                       boundingBox);
 
         polygon.TransformBoundingBox(projection,
                                      optimizationMethod,
@@ -1185,6 +1193,7 @@ namespace osmscout {
       CoastlineDataRef coastline=std::make_shared<CoastlineData>();
 
       coastline->id=coast->id;
+      coastline->boundingBox=boundingBox;
       coastline->isArea=coast->isArea;
       coastline->right=coast->right;
       coastline->left=coast->left;
@@ -1208,8 +1217,7 @@ namespace osmscout {
         }
       }
 
-      transformedCoastlines[index]=coastline;
-      coasts[index]=coast;
+      transformedCoastlines.push_back(coastline);
     }
 
     /* In some countries are islands too close to land or other islands
@@ -1220,64 +1228,63 @@ namespace osmscout {
      *
      * For that reason, we will try to detect such intersections between land
      * (line coastlines) and islands (area coastlines) to remove the most visible
-     * errors. Detecting intersections between all islands is too expensive.
+     * errors. Just biggest coastlines (top 100) will be considered, detecting
+     * intersections between all islands is too expensive.
      */
 
-    bool haveAreas=false;
-    bool haveWays=false;
+    // sort by the size (GeoBox::GetSize, descending)
+    std::sort(transformedCoastlines.begin(),
+              transformedCoastlines.end(),
+              CoastlineGeoSizeSorter);
 
-    for (size_t i=0; i<transformedCoastlines.size(); i++) {
-      if (!transformedCoastlines[i]) {
-        continue;
-      }
+    progress.Info("Filter intersecting islands");
 
-      if (transformedCoastlines[i]->isArea) {
-        haveAreas=true;
-      }
+    for (size_t i=0; i<std::min(transformedCoastlines.size(), 100lu); i++) {
+      progress.SetProgress(i,std::min(transformedCoastlines.size(), 100lu));
 
-      if (!transformedCoastlines[i]->isArea) {
-        haveWays=true;
-      }
+      for (size_t j=i+1; j<transformedCoastlines.size(); j++) {
+        assert(i!=j);
+        CoastlineDataRef a=transformedCoastlines[i];
+        CoastlineDataRef b=transformedCoastlines[j];
 
-      if (haveAreas && haveWays) {
-        break;
-      }
-    }
+        if (!a || !b || (!a->isArea && !b->isArea)) {
+          // ignore possible intersections between two coastline ways (it may be touching)
+          continue;
+        }
+        assert(a!=b);
 
-    if (haveAreas && haveWays) {
-      progress.Info("Filter intersecting islands");
+        if (!a->boundingBox.Intersects(b->boundingBox, false)){
+          continue; // fast escape
+        }
 
-      for (size_t i=0; i<transformedCoastlines.size(); i++) {
-        progress.SetProgress(i,transformedCoastlines.size());
+        std::vector<PathIntersection> intersections;
 
-        for (size_t j=i+1; j<transformedCoastlines.size(); j++) {
-          CoastlineDataRef a=transformedCoastlines[i];
-          CoastlineDataRef b=transformedCoastlines[j];
+        FindPathIntersections(a->points,
+                              b->points,
+                              a->isArea,
+                              b->isArea,
+                              intersections);
 
-          if (!a || !b || (a->isArea == b->isArea)) {
-            // ignore possible intersections between two coastline ways (it may be touching)
-            // or two coastline areas (it is not so problematic and its computation is expensive)
-            continue;
+        // TODO: merge coastlines, not remove them
+        if (!intersections.empty()) {
+          progress.Warning("Detected intersection "+std::to_string(a->id)+" <> "+std::to_string(b->id));
+
+          if (a->isArea && !b->isArea) {
+            transformedCoastlines[i]=nullptr;
           }
+          else if (b->isArea && !a->isArea) {
+            transformedCoastlines[j]=nullptr;
+          }
+          else {
+            assert(a->boundingBox.GetSize() > b->boundingBox.GetSize()); // should be descending
 
-          std::vector<PathIntersection> intersections;
-
-          FindPathIntersections(a->points,
-                                b->points,
-                                a->isArea,
-                                b->isArea,
-                                intersections);
-
-          if (!intersections.empty()) {
-            progress.Warning("Detected intersection "+std::to_string(coasts[i]->id)+" <> "+std::to_string(coasts[j]->id));
-
-            if (a->isArea && !b->isArea) {
-              transformedCoastlines[i]=nullptr;
-              coasts[i]=nullptr;
-            }
-            else if (b->isArea && !a->isArea) {
-              transformedCoastlines[j]=nullptr;
-              coasts[j]=nullptr;
+            // in case of base map import, even continents are closed areas (islands in our terminology)
+            // and there may be intersections between them (Africa and Euro-Asia for example)
+            // in that case give up removing and hope that both continents will be handled properly
+            if (b->boundingBox.GetSize() > 100){
+              progress.Warning("Cannot remove such huge island/continent: "+std::to_string(b->id)+"");
+            }else {
+              transformedCoastlines[j] = nullptr;
             }
           }
         }
@@ -1298,21 +1305,14 @@ namespace osmscout {
         continue;
       }
 
-      CoastRef coast=coasts[index];
-
       data.coastlines[curCoast]=coastline;
-
-      GeoBox boundingBox;
-
-      GetBoundingBox(coast->coast,
-                     boundingBox);
 
       uint32_t cxMin,cxMax,cyMin,cyMax;
 
-      cxMin=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/stateMap.GetCellWidth());
-      cxMax=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/stateMap.GetCellWidth());
-      cyMin=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/stateMap.GetCellHeight());
-      cyMax=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/stateMap.GetCellHeight());
+      cxMin=(uint32_t)floor((coastline->boundingBox.GetMinLon()+180.0)/stateMap.GetCellWidth());
+      cxMax=(uint32_t)floor((coastline->boundingBox.GetMaxLon()+180.0)/stateMap.GetCellWidth());
+      cyMin=(uint32_t)floor((coastline->boundingBox.GetMinLat()+90.0)/stateMap.GetCellHeight());
+      cyMax=(uint32_t)floor((coastline->boundingBox.GetMaxLat()+90.0)/stateMap.GetCellHeight());
 
       if (cxMin==cxMax &&
           cyMin==cyMax) {
