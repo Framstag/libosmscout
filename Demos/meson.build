@@ -1,4 +1,5 @@
 subdir('src')
+demoIncDir = include_directories('include')
 
 Coverage = executable('Coverage',
                       'src/Coverage.cpp',
@@ -169,7 +170,7 @@ Srtm = executable('Srtm',
 if buildMapSVG
     DrawMapSVG = executable('DrawMapSVG',
                             'src/DrawMapSVG.cpp',
-                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapsvgIncDir],
+                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapsvgIncDir, demoIncDir],
                             dependencies: [mathDep, openmpDep, pangoDep],
                             link_with: [osmscout, osmscoutmap, osmscoutmapsvg],
                             install: true)
@@ -178,7 +179,7 @@ endif
 if buildMapAgg
   DrawMapAgg = executable('DrawMapAgg',
                           'src/DrawMapAgg.cpp',
-                          include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapaggIncDir],
+                          include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapaggIncDir, demoIncDir],
                           dependencies: [mathDep, openmpDep, aggDep, ftDep],
                           link_with: [osmscout, osmscoutmap, osmscoutmapagg],
                           install: true)
@@ -194,7 +195,7 @@ endif
 if buildMapCairo
   DrawMapCairo = executable('DrawMapCairo',
                             'src/DrawMapCairo.cpp',
-                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
+                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir, demoIncDir],
                             dependencies: [mathDep, openmpDep, cairoDep, pangoDep, pangocairoDep],
                             link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
                             install: true)
@@ -204,7 +205,7 @@ if buildMapQt
   DrawMapQt = executable('DrawMapQt',
                          'src/DrawMapQt.cpp',
                          cpp_args: ['-fPIC'],
-                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
+                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, demoIncDir],
                          dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
                          link_with: [osmscout, osmscoutmap, osmscoutmapqt],
                          install: true)
@@ -214,7 +215,7 @@ if buildMapOpenGL and glfwDep.found() and ftDep.found()
   DrawMapOpenGL = executable('DrawMapOpenGL',
                          'src/DrawMapOpenGL.cpp',
                          cpp_args: ['-fPIC'],
-                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapopenglIncDir],
+                         include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapopenglIncDir, demoIncDir],
                          dependencies: [mathDep, openmpDep, openGLDep, ftDep, glfwDep],
                          link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
                          install: true)
@@ -223,7 +224,7 @@ endif
 if buildMapDirectX
   DrawMapDirectX = executable('DrawMapDirectX',
                               'src/DrawMapDirectX.cpp',
-                              include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapdirectxIncDir],
+                              include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapdirectxIncDir, demoIncDir],
                               dependencies: [mathDep, openmpDep, d2d1Dep, dwriteDep, winCodecsDep],
                               link_with: [osmscout, osmscoutmap, osmscoutmapdirectx],
                               gui_app: true,

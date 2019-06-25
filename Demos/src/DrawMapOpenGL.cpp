@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <DrawMap.h>
+
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
@@ -37,67 +39,14 @@
 static const double DPI = 96.0;
 
 int main(int argc, char* argv[]) {
-  std::string map;
-  std::string style;
-  std::string output;
-  size_t width, height;
-  double lon, lat, zoom;
+  DrawMapDemo drawDemo("DrawMapOpenGL", argc, argv);
 
-  if (argc != 9) {
-    std::cerr << "DrawMap <map directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
-    return 1;
+  if (!drawDemo.OpenDatabase()){
+    return 2;
   }
 
-  map = argv[1];
-  style = argv[2];
-
-  if (!osmscout::StringToNumber(argv[3], width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (!osmscout::StringToNumber(argv[4], height)) {
-    std::cerr << "height is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5], "%lf", &lon) != 1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[6], "%lf", &lat) != 1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[7], "%lf", &zoom) != 1) {
-    std::cerr << "zoom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  output = argv[8];
-
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef mapService(new osmscout::MapService(database));
-
-  if (!database->Open(map.c_str())) {
-    std::cerr << "Cannot open database" << std::endl;
-    return 1;
-  }
-
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
-
-  if (!styleConfig->Load(style)) {
-    std::cerr << "Cannot open style" << std::endl;
-    return 1;
-  }
-
-  osmscout::MercatorProjection projection;
-  osmscout::MapParameter drawParameter;
-  osmscout::AreaSearchParameter searchParameter;
-  osmscout::MapData data;
+  drawDemo.LoadData();
+  Arguments args = drawDemo.GetArguments();
 
   // Create the offscreen renderer
   glfwSetErrorCallback([](int, const char *err_str) {
@@ -111,43 +60,29 @@ int main(int argc, char* argv[]) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_VISIBLE, false);
-  GLFWwindow* offscreen_context = glfwCreateWindow(width, height, "", NULL, NULL);
+  GLFWwindow* offscreen_context = glfwCreateWindow(args.width, args.height, "", NULL, NULL);
   if (!offscreen_context) {
     std::cerr << "Failed to create offscreen context." << std::endl;
     return 1;
   }
   glfwMakeContextCurrent(offscreen_context);
 
-  osmscout::MapPainterOpenGL* painter = new osmscout::MapPainterOpenGL(width, height, DPI, width, height, "/usr/share/fonts/TTF/LiberationSans-Regular.ttf");
+  osmscout::MapPainterOpenGL* painter = new osmscout::MapPainterOpenGL(args.width, args.height, args.dpi, args.width, args.height, args.fontName);
 
-  drawParameter.SetFontSize(12);
-
-  projection.Set(osmscout::GeoCoord(lat, lon),
-          osmscout::Magnification(zoom),
-          DPI,
-          width,
-          height);
-
-  std::list<osmscout::TileRef> tiles;
-
-  mapService->LookupTiles(projection, tiles);
-  mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
-  mapService->AddTileDataToMapData(tiles, data);
-
-  painter->ProcessData(data, drawParameter, projection, styleConfig);
+  painter->ProcessData(drawDemo.data, drawDemo.drawParameter, drawDemo.projection, drawDemo.styleConfig);
   painter->SwapData();
 
   painter->DrawMap();
 
   // Save to file
-  unsigned char* image = new unsigned char[3 * width * height];
-  glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+  unsigned char* image = new unsigned char[3 * args.width * args.height];
+  glReadPixels(0, 0, args.width, args.height, GL_RGB, GL_UNSIGNED_BYTE, image);
 
-  std::ofstream file(output, std::ofstream::binary);
-  file << "P6 " << width << " " << height << " 255\n";
-  for (int i = height - 1; i >= 0; --i) {
-    for (unsigned int j = 0; j < width * 3; ++j) {
-      file << image[i * width * 3 + j];
+  std::ofstream file(args.output, std::ofstream::binary);
+  file << "P6 " << args.width << " " << args.height << " 255\n";
+  for (int i = args.height - 1; i >= 0; --i) {
+    for (unsigned int j = 0; j < args.width * 3; ++j) {
+      file << image[i * args.width * 3 + j];
     }
   }
   delete[] image;

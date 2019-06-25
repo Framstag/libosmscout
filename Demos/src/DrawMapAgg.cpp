@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <DrawMap.h>
+
 #include <iostream>
 #include <iomanip>
 
@@ -32,8 +34,6 @@
   src/DrawMapAgg ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.ppm
   src/DrawMapAgg ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.45274 51.49256 50000 test.ppm
 */
-
-static const double DPI=96.0;
 
 bool write_ppm(const unsigned char* buf,
                unsigned width,
@@ -54,101 +54,32 @@ bool write_ppm(const unsigned char* buf,
 
 int main(int argc, char* argv[])
 {
-  std::string   map;
-  std::string   style;
-  std::string   output;
-  size_t        width,height;
-  double        lon,lat,zoom;
+  DrawMapDemo drawDemo("DrawMapAgg", argc, argv);
 
-  if (argc!=9) {
-    std::cerr << "DrawMap <map directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
-    return 1;
+  if (!drawDemo.OpenDatabase()){
+    return 2;
   }
 
-  map=argv[1];
-  style=argv[2];
+  drawDemo.LoadData();
+  Arguments args = drawDemo.GetArguments();
 
-  if (!osmscout::StringToNumber(argv[3],width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
-  }
+  unsigned char *buffer=new unsigned char[args.width*args.height*3];
 
-  if (!osmscout::StringToNumber(argv[4],height)) {
-    std::cerr << "height is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5],"%lf",&lon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[6],"%lf",&lat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[7],"%lf",&zoom)!=1) {
-    std::cerr << "zoom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  output=argv[8];
-
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
-
-  if (!database->Open(map.c_str())) {
-    std::cerr << "Cannot open database" << std::endl;
-
-    return 1;
-  }
-
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
-
-  if (!styleConfig->Load(style)) {
-    std::cerr << "Cannot open style" << std::endl;
-    return 1;
-  }
-
-  unsigned char *buffer=new unsigned char[width*height*3];
-
-  memset(buffer,255,width*height*3);
+  memset(buffer,255,args.width*args.height*3);
 
   agg::rendering_buffer rbuf(buffer,
-                             width,
-                             height,
-                             width*3);
+                             args.width,
+                             args.height,
+                             args.width*3);
 
   agg::pixfmt_rgb24 pf(rbuf);
 
-  osmscout::MercatorProjection  projection;
-  osmscout::MapParameter        drawParameter;
-  osmscout::AreaSearchParameter searchParameter;
-  osmscout::MapData             data;
-  osmscout::MapPainterAgg       painter(styleConfig);
-
-  drawParameter.SetFontName("/usr/share/fonts/TTF/LiberationSans-Regular.ttf");
-  drawParameter.SetFontSize(3.0);
-
-  projection.Set(osmscout::GeoCoord(lat,lon),
-                 osmscout::Magnification(zoom),
-                 DPI,
-                 width,
-                 height);
-
-  std::list<osmscout::TileRef> tiles;
-
-  mapService->LookupTiles(projection,tiles);
-  mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-  mapService->AddTileDataToMapData(tiles,data);
-
-  if (painter.DrawMap(projection,
-                      drawParameter,
-                      data,
+  osmscout::MapPainterAgg       painter(drawDemo.styleConfig);
+  if (painter.DrawMap(drawDemo.projection,
+                      drawDemo.drawParameter,
+                      drawDemo.data,
                       &pf)) {
-    write_ppm(buffer,width,height,output.c_str());
+    write_ppm(buffer,args.width,args.height,args.output.c_str());
   }
 
   return 0;
