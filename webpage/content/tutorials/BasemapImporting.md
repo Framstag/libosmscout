@@ -15,7 +15,7 @@ menu:
 For the basemap import you need the folling data:
 
 * Shapefile containing world-wide OSm coastlines. You can download the 
-shapefile from [*openstreemapdata.com*](http://openstreetmapdata.com/data/coastlines).
+shapefile from [*osmdata.openstreetmap.de*](https://osmdata.openstreetmap.de/data/coastlines.html).
 Choose the WGS84 format. Unzip the resulting file and copy the *.shp file
 as coastlines.shp into your maps directory.
 
