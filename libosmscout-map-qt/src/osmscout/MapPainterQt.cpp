@@ -1145,8 +1145,6 @@ namespace osmscout {
     size_t             start=0; // Make the compiler happy
     size_t             end=0;   // Make the compiler happy
 
-    ;
-
     if (!seaFill) {
       return;
     }
