@@ -166,12 +166,6 @@ int main(int argc, char* argv[])
 
   drawDemo.LoadData();
 
-  // draw base map
-  mapPainter.DrawGroundTiles(drawDemo.projection,
-                             drawDemo.drawParameter,
-                             drawDemo.BaseMapTiles(),
-                             painter);
-
   if (mapPainter.DrawMap(drawDemo.projection,
                          drawDemo.drawParameter,
                          drawDemo.data,

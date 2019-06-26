@@ -269,18 +269,19 @@ public:
     mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
     mapService->AddTileDataToMapData(tiles,data);
     mapService->GetGroundTiles(projection,data.groundTiles);
+
+    LoadBaseMapTiles(data.baseMapTiles);
   }
 
-  std::list<osmscout::GroundTile> BaseMapTiles()
+  bool LoadBaseMapTiles(std::list<osmscout::GroundTile> &tiles)
   {
-    std::list<osmscout::GroundTile> tiles;
     if (!basemapDatabase) {
-      return tiles;
+      return true;
     }
 
     osmscout::WaterIndexRef waterIndex = basemapDatabase->GetWaterIndex();
     if (!waterIndex) {
-      return tiles;
+      return true;
     }
 
     osmscout::GeoBox boundingBox;
@@ -289,9 +290,10 @@ public:
                                 projection.GetMagnification(),
                                 tiles)) {
       std::cerr << "Failed to read base map tiles" << std::endl;
+      return false;
     }
 
-    return tiles;
+    return true;
   }
 
   Arguments GetArguments() const
