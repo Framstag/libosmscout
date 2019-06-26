@@ -187,6 +187,7 @@ namespace osmscout {
     stepMethods[RenderSteps::DumpStatistics]=&MapPainter::DumpStatistics;
     stepMethods[RenderSteps::PreprocessData]=&MapPainter::PreprocessData;
     stepMethods[RenderSteps::Prerender]=&MapPainter::Prerender;
+    stepMethods[RenderSteps::DrawBaseMapTiles]=&MapPainter::DrawBaseMapTiles;
     stepMethods[RenderSteps::DrawGroundTiles]=&MapPainter::DrawGroundTiles;
     stepMethods[RenderSteps::DrawOSMTileGrids]=&MapPainter::DrawOSMTileGrids;
     stepMethods[RenderSteps::DrawAreas]=&MapPainter::DrawAreas;
@@ -1838,9 +1839,29 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawBaseMapTiles(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const MapData& data)
+  {
+    if (parameter.GetRenderBackground()) {
+      DrawGround(projection,
+                 parameter,
+                 *landFill);
+    }
+
+    DrawGroundTiles(projection, parameter, data.baseMapTiles);
+  }
+
   void MapPainter::DrawGroundTiles(const Projection& projection,
                                    const MapParameter& parameter,
                                    const MapData& data)
+  {
+    DrawGroundTiles(projection, parameter, data.groundTiles);
+  }
+
+  void MapPainter::DrawGroundTiles(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const std::list<GroundTile> &groundTiles)
   {
 #if defined(DEBUG_GROUNDTILES)
     std::set<GeoCoord> drawnLabels;
@@ -1849,12 +1870,6 @@ namespace osmscout {
 
     if (!landFill) {
       landFill=this->landFill;
-    }
-
-    if (parameter.GetRenderBackground()) {
-      DrawGround(projection,
-                 parameter,
-                 *landFill);
     }
 
     if (!parameter.GetRenderSeaLand()) {
@@ -1873,7 +1888,7 @@ namespace osmscout {
       seaFill=this->seaFill;
     }
 
-    for (const auto& tile : data.groundTiles) {
+    for (const auto& tile : groundTiles) {
       AreaData areaData;
 
       if (tile.type==GroundTile::unknown &&

@@ -58,19 +58,20 @@ namespace osmscout {
     DumpStatistics        =  1, //!< Prints details for debugging, if debug flag (performance, data) is set in renderer parameter
     PreprocessData        =  2, //!< Convert geographical coordinates of object points to screen coordinates,
     Prerender             =  3, //!< Implementation specific preparison
-    DrawGroundTiles       =  4, //!< Draw unknown/sea/land tiles and tiles with "coastlines"
-    DrawOSMTileGrids      =  5, //!< If special style exists, renders grid corresponding to OSM tiles
-    DrawAreas             =  6,
-    DrawWays              =  7,
-    DrawWayDecorations    =  8,
-    DrawWayContourLabels  =  9,
-    PrepareAreaLabels     = 10,
-    DrawAreaBorderLabels  = 11,
-    DrawAreaBorderSymbols = 12,
-    PrepareNodeLabels     = 13,
-    DrawLabels            = 14,
-    Postrender            = 15, //!< Implementation specific final step
-    LastStep              = 15
+    DrawBaseMapTiles      =  4, //!< Draw unknown/sea/land tiles and tiles with "coastlines" from base map
+    DrawGroundTiles       =  5, //!< Same as previous, but from main database
+    DrawOSMTileGrids      =  6, //!< If special style exists, renders grid corresponding to OSM tiles
+    DrawAreas             =  7,
+    DrawWays              =  8,
+    DrawWayDecorations    =  9,
+    DrawWayContourLabels  = 10,
+    PrepareAreaLabels     = 11,
+    DrawAreaBorderLabels  = 12,
+    DrawAreaBorderSymbols = 13,
+    PrepareNodeLabels     = 14,
+    DrawLabels            = 15,
+    Postrender            = 16, //!< Implementation specific final step
+    LastStep              = 16
   };
 
   /**
@@ -361,6 +362,11 @@ namespace osmscout {
                          const MapParameter& parameter,
                          const Magnification& magnification,
                          const LineStyleRef& osmTileLine);
+
+    void DrawGroundTiles(const Projection& projection,
+                         const MapParameter& parameter,
+                         const std::list<GroundTile> &groundTiles);
+
     //@}
 
     /**
@@ -382,6 +388,10 @@ namespace osmscout {
     void Prerender(const Projection& projection,
                    const MapParameter& parameter,
                    const MapData& data);
+
+    void DrawBaseMapTiles(const Projection& projection,
+                          const MapParameter& parameter,
+                          const MapData& data);
 
     void DrawGroundTiles(const Projection& projection,
                          const MapParameter& parameter,
