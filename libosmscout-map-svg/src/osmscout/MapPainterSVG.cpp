@@ -445,29 +445,45 @@ namespace osmscout {
 
     size_t nextFillStyleId=0;
     size_t nextBorderStyleId=0;
-    for (const auto& area: GetAreaData()) {
-      if (area.fillStyle) {
-        std::map<FillStyle, std::string>::const_iterator entry = fillStyleNameMap.find(*area.fillStyle);
+
+    auto addFillStyle = [&](const FillStyleRef &fillStyle){
+      if (fillStyle) {
+        std::map<FillStyle, std::string>::const_iterator entry = fillStyleNameMap.find(*fillStyle);
 
         if (entry == fillStyleNameMap.end()) {
           std::string name = "area_fill_" + std::to_string(nextFillStyleId);
 
-          fillStyleNameMap.insert(std::make_pair(*area.fillStyle, name));
+          fillStyleNameMap.insert(std::make_pair(*fillStyle, name));
 
           nextFillStyleId++;
 
           stream << "        ." << name << " {";
 
-          stream << "fill:" << GetColorValue(area.fillStyle->GetFillColor());
+          stream << "fill:" << GetColorValue(fillStyle->GetFillColor());
 
-          if (!area.fillStyle->GetFillColor().IsSolid()) {
-            stream << ";fill-opacity:" << area.fillStyle->GetFillColor().GetA();
+          if (!fillStyle->GetFillColor().IsSolid()) {
+            stream << ";fill-opacity:" << fillStyle->GetFillColor().GetA();
           }
 
           stream << ";fillRule:nonzero";
           stream << "}" << std::endl;
         }
       }
+    };
+
+    // seaFill
+    addFillStyle(styleConfig->GetSeaFillStyle(projection));
+    //coastFill
+    addFillStyle(styleConfig->GetCoastFillStyle(projection));
+    // unknownFill
+    addFillStyle(styleConfig->GetUnknownFillStyle(projection));
+    // fallbackSeaFill
+    addFillStyle(this->seaFill);
+    // fallbackLandFill
+    addFillStyle(this->landFill);
+
+    for (const auto& area: GetAreaData()) {
+      addFillStyle(area.fillStyle);
 
       if (area.borderStyle) {
         double borderWidth = projection.ConvertWidthToPixel(area.borderStyle->GetWidth());

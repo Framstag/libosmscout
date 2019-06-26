@@ -203,6 +203,15 @@ namespace osmscout {
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
     TextStyleRef                 debugLabel;
 
+    /**
+      Fallback styles in case they are missing for the style sheet
+      */
+    //@{
+    FillStyleRef                 landFill;
+    FillStyleRef                 seaFill;
+    FeatureValueBuffer           coastlineSegmentAttributes;
+    //@}
+
   private:
     std::vector<StepMethod>      stepMethods;
     double                       errorTolerancePixel;
@@ -213,15 +222,6 @@ namespace osmscout {
 
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
-
-    /**
-      Fallback styles in case they are missing for the style sheet
-      */
-    //@{
-    FillStyleRef                 landFill;
-    FillStyleRef                 seaFill;
-    FeatureValueBuffer           coastlineSegmentAttributes;
-    //@}
 
     /**                           L
      Precalculations
