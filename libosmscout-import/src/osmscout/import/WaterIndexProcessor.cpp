@@ -801,9 +801,9 @@ namespace osmscout {
       if (coastline->left==CoastState::unknown) {
         type=GroundTile::unknown;
       }
-      else if (coastline->left==CoastState::water) {
-        type=GroundTile::water; // should not happen on the Earth
-      }
+      // coastline->left==CoastState::water should not happen with OSM data,
+      // but it may happen with basemap import from shapefile, it has reverse coastline direction...
+      // for that case always consider island as land type
 
       GroundTile groundTile(type);
 
