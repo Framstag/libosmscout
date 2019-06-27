@@ -295,7 +295,7 @@ namespace osmscout {
       Id                                         id;                 //! The id of the coastline
       bool                                       isArea;             //! true,if the boundary forms an area
       bool                                       isCompletelyInCell; //! true, if the complete coastline is within one cell
-      GeoBox                                     boundingBox;        //! GeoBox of original Coast
+      GeoBox                                     boundingBox;        //! GeoBox from points (already transformed)
       Pixel                                      cell;               //! The cell that completely contains the coastline
       std::vector<GeoCoord>                      points;             //! The points of the coastline
       std::map<Pixel,std::list<IntersectionRef>> cellIntersections;  //! All intersections for each cell

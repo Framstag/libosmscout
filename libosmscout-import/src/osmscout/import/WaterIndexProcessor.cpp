@@ -243,7 +243,7 @@ namespace osmscout {
         if (stateMap.IsInAbsolute(coord.x,coord.y)) {
           if (stateMap.GetStateAbsolute(coord.x,coord.y)==unknown) {
 #if defined(DEBUG_TILING)
-            std::cout << "Coastline: " << coord.x-stateMap.GetXStart() << "," << coord.y-stateMap.GetYStart() << " " << coastline->id << std::endl;
+            std::cout << "Coastline: " << coord.GetDisplayText() << " " << coastline->id << std::endl;
 #endif
             stateMap.SetStateAbsolute(coord.x,coord.y,coast);
           }
@@ -623,7 +623,7 @@ namespace osmscout {
       if (fillWater) {
         GroundTile groundTile(GroundTile::water);
 #if defined(DEBUG_TILING)
-        std::cout << "Add water base to tile with islands: " << coord.x << "," << coord.y << std::endl;
+        std::cout << "Add water base to tile with islands: " << coord.GetDisplayText() << std::endl;
 #endif
 
         groundTile.coords.push_back(cellBoundaries.borderCoords[0]);
@@ -823,7 +823,7 @@ namespace osmscout {
         groundTile.coords.back().coast=false;
 
 #if defined(DEBUG_TILING)
-        std::cout << "Coastline in cell: " << coord.x << "," << coord.y << std::endl;
+        std::cout << "    Coastline " << coastline->id << " in cell: " << coord.GetDisplayText() << std::endl;
 #endif
 
         cellGroundTileMap[coord].push_back(groundTile);
@@ -1138,13 +1138,12 @@ namespace osmscout {
 
       TransPolygon polygon;
 
-      GeoBox boundingBox;
-      GetBoundingBox(coast->coast, boundingBox);
-
       // For areas we first transform the bounding box to make sure, that
       // the area coastline will be big enough to be actually visible
       if (coast->isArea) {
 
+        GeoBox boundingBox;
+        GetBoundingBox(coast->coast, boundingBox);
         polygon.TransformBoundingBox(projection,
                                      optimizationMethod,
                                      boundingBox,
@@ -1193,7 +1192,6 @@ namespace osmscout {
       CoastlineDataRef coastline=std::make_shared<CoastlineData>();
 
       coastline->id=coast->id;
-      coastline->boundingBox=boundingBox;
       coastline->isArea=coast->isArea;
       coastline->right=coast->right;
       coastline->left=coast->left;
@@ -1216,6 +1214,9 @@ namespace osmscout {
           continue;
         }
       }
+
+      // compute bounding box after transformation
+      GetBoundingBox(coastline->points, coastline->boundingBox);
 
       transformedCoastlines.push_back(coastline);
     }
@@ -1309,10 +1310,10 @@ namespace osmscout {
 
       uint32_t cxMin,cxMax,cyMin,cyMax;
 
-      cxMin=(uint32_t)floor((coastline->boundingBox.GetMinLon()+180.0)/stateMap.GetCellWidth());
-      cxMax=(uint32_t)floor((coastline->boundingBox.GetMaxLon()+180.0)/stateMap.GetCellWidth());
-      cyMin=(uint32_t)floor((coastline->boundingBox.GetMinLat()+90.0)/stateMap.GetCellHeight());
-      cyMax=(uint32_t)floor((coastline->boundingBox.GetMaxLat()+90.0)/stateMap.GetCellHeight());
+      cxMin=(uint32_t)((coastline->boundingBox.GetMinLon()+180.0)/stateMap.GetCellWidth());
+      cxMax=(uint32_t)((coastline->boundingBox.GetMaxLon()+180.0)/stateMap.GetCellWidth());
+      cyMin=(uint32_t)((coastline->boundingBox.GetMinLat()+90.0)/stateMap.GetCellHeight());
+      cyMax=(uint32_t)((coastline->boundingBox.GetMaxLat()+90.0)/stateMap.GetCellHeight());
 
       if (cxMin==cxMax &&
           cyMin==cyMax) {
@@ -1337,6 +1338,9 @@ namespace osmscout {
 
         for (const auto& intersectionEntry : coastline->cellIntersections) {
           data.cellCoastlines[intersectionEntry.first].push_back(curCoast);
+        }
+        if (coastline->cellIntersections.empty()){
+          progress.Warning("Coastline " + std::to_string(coastline->id) + " cover multiple cells, but no intersections detected!");
         }
       }
 
@@ -1852,7 +1856,7 @@ namespace osmscout {
           step++;
           if (step>1000) { // last fuse
             // put breakpoint here if computation stucks in this loop :-/
-            std::cout << "   too many steps, give up... " << step << std::endl;
+            std::cout << "   Too many steps, give up!" << std::endl;
             return false;
           }
         }
@@ -1869,7 +1873,7 @@ namespace osmscout {
       step++;
       if (step>1000) { // last use
         // put breakpoint here if computation stucks in this loop :-/
-        std::cout << "   too many steps, give up... " << step << std::endl;
+        std::cout << "   too many steps, give up!" << std::endl;
         return false;
       }
 
@@ -1974,7 +1978,7 @@ namespace osmscout {
                             cellBoundaries,
                             data,
                             containingPaths)) {
-            progress.Warning("Can't walk around cell boundary!");
+            progress.Warning("Can't walk around cell (" + cell.GetDisplayText() + ") boundary!");
             continue;
         }
 
@@ -1999,7 +2003,7 @@ namespace osmscout {
       currentCell++;
 
 #if defined(DEBUG_COASTLINE)
-      std::cout << " - cell " << cellEntry.first.x << " " << cellEntry.first.y << "): " << std::endl;
+      std::cout << " - cell " << cellEntry.first.GetDisplayText() << "" << std::endl;
 #endif
 
       HandleCoastlineCell(progress,
