@@ -48,9 +48,6 @@
 		F5DD1BC0160B880500084E83 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BBE160B880500084E83 /* InfoPlist.strings */; };
 		F5DD1BC2160B880500084E83 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC1160B880500084E83 /* main.m */; };
 		F5DD1BC6160B880500084E83 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC5160B880500084E83 /* AppDelegate.m */; };
-		F5DD1BC8160B880500084E83 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BC7160B880500084E83 /* Default.png */; };
-		F5DD1BCA160B880500084E83 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BC9160B880500084E83 /* Default@2x.png */; };
-		F5DD1BCC160B880500084E83 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BCB160B880500084E83 /* Default-568h@2x.png */; };
 		F5DD1BCF160B880500084E83 /* OSMScoutIOSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */; };
 		F5DD1BD2160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD0160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib */; };
 		F5DD1BD5160B880500084E83 /* OSMScoutIOSViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */; };
@@ -446,9 +443,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5DD1BC0160B880500084E83 /* InfoPlist.strings in Resources */,
-				F5DD1BC8160B880500084E83 /* Default.png in Resources */,
-				F5DD1BCA160B880500084E83 /* Default@2x.png in Resources */,
-				F5DD1BCC160B880500084E83 /* Default-568h@2x.png in Resources */,
 				F5DD1BD2160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib in Resources */,
 				F5DD1BD5160B880500084E83 /* OSMScoutIOSViewController_iPad.xib in Resources */,
 				F5DD1C16160D22A500084E83 /* bus_stop.png in Resources */,
