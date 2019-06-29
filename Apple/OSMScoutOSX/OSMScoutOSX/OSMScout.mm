@@ -45,7 +45,7 @@ namespace osmscout {
             dpi = initDpi;
             mapPainter = new osmscout::MapPainterIOS(styleConfig);
             drawParameter.SetFontName("GillSans");
-            drawParameter.SetFontSize(1.5);
+            drawParameter.SetFontSize(1.0);
             std::list<std::string> paths;
             NSString *path = NSSearchPathForDirectoriesInDomains (NSDocumentDirectory, NSUserDomainMask, YES)[0];
             paths.push_back([path UTF8String]);

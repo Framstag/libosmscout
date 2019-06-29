@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E50B832215E0136800C685B3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E50B832115E0136800C685B3 /* Cocoa.framework */; };
 		E50B832C15E0136800C685B3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E50B832A15E0136800C685B3 /* InfoPlist.strings */; };
 		E50B832E15E0136800C685B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B832D15E0136800C685B3 /* main.m */; };
 		E50B833215E0136800C685B3 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = E50B833015E0136800C685B3 /* Credits.rtf */; };
@@ -16,7 +15,23 @@
 		E50B856815E0219200C685B3 /* OSMScoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B856715E0219200C685B3 /* OSMScoutViewController.m */; };
 		E50B856B15E021DD00C685B3 /* OSMScoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B856A15E021DD00C685B3 /* OSMScoutView.m */; };
 		E50B856E15E024D400C685B3 /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
-		E55CFDAD1F2FAD95004AAA59 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */; };
+		E51A60F722C56EBA007316F9 /* OSMScout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60F422C56EB9007316F9 /* OSMScout.framework */; };
+		E51A60F822C56EBA007316F9 /* OSMScoutMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60F522C56EB9007316F9 /* OSMScoutMap.framework */; };
+		E51A60F922C56EBA007316F9 /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60F622C56EB9007316F9 /* OSMScoutMapIOSX.framework */; };
+		E51A610422C57414007316F9 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610322C573CA007316F9 /* CoreText.framework */; };
+		E51A610C22C57AB5007316F9 /* OSMScoutMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610922C57AB5007316F9 /* OSMScoutMap.framework */; };
+		E51A610D22C57AB5007316F9 /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610A22C57AB5007316F9 /* OSMScoutMapIOSX.framework */; };
+		E51A610E22C57AB5007316F9 /* OSMScout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610B22C57AB5007316F9 /* OSMScout.framework */; };
+		E51A610F22C57B91007316F9 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610022C5738D007316F9 /* Cocoa.framework */; };
+		E51A611022C57B9F007316F9 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60FE22C5736B007316F9 /* MapKit.framework */; };
+		E51A611122C57BA6007316F9 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60FD22C57337007316F9 /* CoreLocation.framework */; };
+		E51A611222C57BAC007316F9 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E50B832415E0136800C685B3 /* AppKit.framework */; };
+		E51A611322C57BB3007316F9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E50B832615E0136800C685B3 /* Foundation.framework */; };
+		E51A611522C57DBD007316F9 /* OSMScout.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610B22C57AB5007316F9 /* OSMScout.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E51A611822C57DCA007316F9 /* OSMScoutMap.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60F522C56EB9007316F9 /* OSMScoutMap.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E51A611A22C57DD6007316F9 /* OSMScoutMapIOSX.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60F622C56EB9007316F9 /* OSMScoutMapIOSX.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E553EC5A22C5809000113E43 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E553EC5922C5809000113E43 /* Images.xcassets */; };
+		E553EC5C22C5816600113E43 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E553EC5B22C5816600113E43 /* Images.xcassets */; };
 		E5653B591F4EF59D00EF6212 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */; };
 		E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5D1F4EF66E00EF6212 /* UIKit.framework */; };
 		E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5F1F4EF6B700EF6212 /* MapKit.framework */; };
@@ -28,22 +43,11 @@
 		F50CBE8E15E59EAC00F0B370 /* parking.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8715E59EAC00F0B370 /* parking.png */; };
 		F50CBE8F15E59EAC00F0B370 /* pharmacy.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8815E59EAC00F0B370 /* pharmacy.png */; };
 		F50CBE9015E59EAC00F0B370 /* scrub.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8915E59EAC00F0B370 /* scrub.png */; };
-		F539E730188834C300059073 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539E72F188834C300059073 /* CoreLocation.framework */; };
-		F53BD1511638829E006C7AE1 /* libosmscout.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953EA5163880BC0026B30F /* libosmscout.a */; };
-		F53BD152163882A2006C7AE1 /* libosmscoutmap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953E9F163880A40026B30F /* libosmscoutmap.a */; };
-		F53BD153163882A5006C7AE1 /* libosmscoutmapiosx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953E99163880820026B30F /* libosmscoutmapiosx.a */; };
-		F53BD1A2163885E9006C7AE1 /* libosmscout-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19516388431006C7AE1 /* libosmscout-OSX.a */; };
-		F53BD1A3163885ED006C7AE1 /* libosmscoutmap-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19816388431006C7AE1 /* libosmscoutmap-OSX.a */; };
-		F53BD1A4163885F3006C7AE1 /* libosmscoutmapiosx-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19B16388431006C7AE1 /* libosmscoutmapiosx-OSX.a */; };
-		F5D603611887566400D8242B /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5D603601887566400D8242B /* MapKit.framework */; };
 		F5D6036A18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
 		F5D6036B18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
 		F5DD1BC0160B880500084E83 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BBE160B880500084E83 /* InfoPlist.strings */; };
 		F5DD1BC2160B880500084E83 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC1160B880500084E83 /* main.m */; };
 		F5DD1BC6160B880500084E83 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC5160B880500084E83 /* AppDelegate.m */; };
-		F5DD1BC8160B880500084E83 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BC7160B880500084E83 /* Default.png */; };
-		F5DD1BCA160B880500084E83 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BC9160B880500084E83 /* Default@2x.png */; };
-		F5DD1BCC160B880500084E83 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BCB160B880500084E83 /* Default-568h@2x.png */; };
 		F5DD1BCF160B880500084E83 /* OSMScoutIOSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */; };
 		F5DD1BD2160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD0160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib */; };
 		F5DD1BD5160B880500084E83 /* OSMScoutIOSViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */; };
@@ -58,98 +62,25 @@
 		F5DD1C1C160D22A500084E83 /* scrub.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8915E59EAC00F0B370 /* scrub.png */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		F53BD14816388248006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953EA0163880BB0026B30F /* libosmscout.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F51E3E9E161A5F4000D51926;
-			remoteInfo = libosmscout;
+/* Begin PBXCopyFilesBuildPhase section */
+		E51A611622C57DBD007316F9 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E51A611822C57DCA007316F9 /* OSMScoutMap.framework in Embed Frameworks */,
+				E51A611522C57DBD007316F9 /* OSMScout.framework in Embed Frameworks */,
+				E51A611A22C57DD6007316F9 /* OSMScoutMapIOSX.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F53BD14A1638824E006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F51E3F80161A651F00D51926;
-			remoteInfo = libosmscoutmap;
-		};
-		F53BD14C16388252006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F51E3FBC161A66F000D51926;
-			remoteInfo = libosmscoutmapiosx;
-		};
-		F53BD19416388431006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953EA0163880BB0026B30F /* libosmscout.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F53BD15816388375006C7AE1;
-			remoteInfo = "libosmscout-OSX";
-		};
-		F53BD19716388431006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F53BD16D163883E7006C7AE1;
-			remoteInfo = "libosmscoutmap-OSX";
-		};
-		F53BD19A16388431006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F53BD1821638841B006C7AE1;
-			remoteInfo = "libosmscoutmapiosx-OSX";
-		};
-		F53BD19C1638843D006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F53BD16C163883E7006C7AE1;
-			remoteInfo = "libosmscoutmap-OSX";
-		};
-		F53BD19E16388443006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F53BD1811638841B006C7AE1;
-			remoteInfo = "libosmscoutmapiosx-OSX";
-		};
-		F53BD1A016388449006C7AE1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953EA0163880BB0026B30F /* libosmscout.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F53BD15716388375006C7AE1;
-			remoteInfo = "libosmscout-OSX";
-		};
-		F5953E98163880820026B30F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F51E3FBD161A66F000D51926;
-			remoteInfo = libosmscoutmapiosx;
-		};
-		F5953E9E163880A40026B30F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F51E3F81161A651F00D51926;
-			remoteInfo = libosmscoutmap;
-		};
-		F5953EA4163880BC0026B30F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F5953EA0163880BB0026B30F /* libosmscout.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F51E3E9F161A5F4000D51926;
-			remoteInfo = libosmscout;
-		};
-/* End PBXContainerItemProxy section */
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		E50B831D15E0136800C685B3 /* OSMScoutOSX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OSMScoutOSX.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E50B832115E0136800C685B3 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		E50B832415E0136800C685B3 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		E50B832515E0136800C685B3 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		E50B832615E0136800C685B3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E50B832915E0136800C685B3 /* OSMScoutOSX-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OSMScoutOSX-Info.plist"; sourceTree = "<group>"; };
 		E50B832B15E0136800C685B3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -165,12 +96,23 @@
 		E50B856A15E021DD00C685B3 /* OSMScoutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSMScoutView.m; sourceTree = "<group>"; };
 		E50B856D15E024D400C685B3 /* OSMScout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OSMScout.mm; path = OSMScoutOSX/OSMScout.mm; sourceTree = "<group>"; };
 		E50B856F15E029A800C685B3 /* OSMScout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OSMScout.h; path = OSMScoutOSX/OSMScout.h; sourceTree = "<group>"; };
-		E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		E51A60F422C56EB9007316F9 /* OSMScout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScout.framework; path = OSMScoutiOS/Frameworks/OSMScout.framework; sourceTree = "<group>"; };
+		E51A60F522C56EB9007316F9 /* OSMScoutMap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMap.framework; path = OSMScoutiOS/Frameworks/OSMScoutMap.framework; sourceTree = "<group>"; };
+		E51A60F622C56EB9007316F9 /* OSMScoutMapIOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMapIOSX.framework; path = OSMScoutiOS/Frameworks/OSMScoutMapIOSX.framework; sourceTree = "<group>"; };
+		E51A60FD22C57337007316F9 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		E51A60FE22C5736B007316F9 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		E51A610022C5738D007316F9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		E51A610122C573A3007316F9 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
+		E51A610322C573CA007316F9 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/CoreText.framework; sourceTree = DEVELOPER_DIR; };
+		E51A610922C57AB5007316F9 /* OSMScoutMap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMap.framework; path = OSMScoutOSX/Frameworks/OSMScoutMap.framework; sourceTree = "<group>"; };
+		E51A610A22C57AB5007316F9 /* OSMScoutMapIOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMapIOSX.framework; path = OSMScoutOSX/Frameworks/OSMScoutMapIOSX.framework; sourceTree = "<group>"; };
+		E51A610B22C57AB5007316F9 /* OSMScout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScout.framework; path = OSMScoutOSX/Frameworks/OSMScout.framework; sourceTree = "<group>"; };
+		E553EC5922C5809000113E43 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		E553EC5B22C5816600113E43 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		E5653B5D1F4EF66E00EF6212 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		E5653B5F1F4EF6B700EF6212 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/MapKit.framework; sourceTree = DEVELOPER_DIR; };
 		E5653B611F4EF79900EF6212 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
-		E5A61D4615E0612D0078BD02 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		F50CBE8315E59EAC00F0B370 /* bus_stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bus_stop.png; sourceTree = "<group>"; };
 		F50CBE8415E59EAC00F0B370 /* cemetery.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cemetery.png; sourceTree = "<group>"; };
 		F50CBE8515E59EAC00F0B370 /* forest.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = forest.png; sourceTree = "<group>"; };
@@ -178,11 +120,6 @@
 		F50CBE8715E59EAC00F0B370 /* parking.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = parking.png; sourceTree = "<group>"; };
 		F50CBE8815E59EAC00F0B370 /* pharmacy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pharmacy.png; sourceTree = "<group>"; };
 		F50CBE8915E59EAC00F0B370 /* scrub.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scrub.png; sourceTree = "<group>"; };
-		F539E72F188834C300059073 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libosmscoutmapiosx.xcodeproj; path = ../libosmscout/libosmscoutmapiosx/libosmscoutmapiosx.xcodeproj; sourceTree = "<group>"; };
-		F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libosmscoutmap.xcodeproj; path = ../libosmscout/libosmscoutmap/libosmscoutmap.xcodeproj; sourceTree = "<group>"; };
-		F5953EA0163880BB0026B30F /* libosmscout.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libosmscout.xcodeproj; path = ../libosmscout/libosmscout/libosmscout.xcodeproj; sourceTree = "<group>"; };
-		F5D603601887566400D8242B /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		F5D6036818875EE000D8242B /* OSMScoutMKTileOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OSMScoutMKTileOverlay.h; path = OSMScoutOSX/OSMScoutMKTileOverlay.h; sourceTree = "<group>"; };
 		F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OSMScoutMKTileOverlay.m; path = OSMScoutOSX/OSMScoutMKTileOverlay.m; sourceTree = "<group>"; };
 		F5DD1BB3160B880400084E83 /* OSMScoutiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OSMScoutiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -208,13 +145,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E55CFDAD1F2FAD95004AAA59 /* libiconv.tbd in Frameworks */,
-				F53BD1A2163885E9006C7AE1 /* libosmscout-OSX.a in Frameworks */,
-				F53BD1A3163885ED006C7AE1 /* libosmscoutmap-OSX.a in Frameworks */,
-				F53BD1A4163885F3006C7AE1 /* libosmscoutmapiosx-OSX.a in Frameworks */,
-				E50B832215E0136800C685B3 /* Cocoa.framework in Frameworks */,
-				F539E730188834C300059073 /* CoreLocation.framework in Frameworks */,
-				F5D603611887566400D8242B /* MapKit.framework in Frameworks */,
+				E51A611322C57BB3007316F9 /* Foundation.framework in Frameworks */,
+				E51A611222C57BAC007316F9 /* AppKit.framework in Frameworks */,
+				E51A611122C57BA6007316F9 /* CoreLocation.framework in Frameworks */,
+				E51A610F22C57B91007316F9 /* Cocoa.framework in Frameworks */,
+				E51A611022C57B9F007316F9 /* MapKit.framework in Frameworks */,
+				E51A610E22C57AB5007316F9 /* OSMScout.framework in Frameworks */,
+				E51A610C22C57AB5007316F9 /* OSMScoutMap.framework in Frameworks */,
+				E51A610D22C57AB5007316F9 /* OSMScoutMapIOSX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,13 +160,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E51A60F722C56EBA007316F9 /* OSMScout.framework in Frameworks */,
+				E51A60F822C56EBA007316F9 /* OSMScoutMap.framework in Frameworks */,
+				E51A60F922C56EBA007316F9 /* OSMScoutMapIOSX.framework in Frameworks */,
 				E5653B621F4EF79900EF6212 /* CoreLocation.framework in Frameworks */,
+				E51A610422C57414007316F9 /* CoreText.framework in Frameworks */,
 				E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */,
 				E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */,
 				E5653B591F4EF59D00EF6212 /* CoreGraphics.framework in Frameworks */,
-				F53BD153163882A5006C7AE1 /* libosmscoutmapiosx.a in Frameworks */,
-				F53BD152163882A2006C7AE1 /* libosmscoutmap.a in Frameworks */,
-				F53BD1511638829E006C7AE1 /* libosmscout.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,9 +177,6 @@
 		E50B831215E0136800C685B3 = {
 			isa = PBXGroup;
 			children = (
-				F5953EA0163880BB0026B30F /* libosmscout.xcodeproj */,
-				F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */,
-				F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */,
 				F5DD1BD9160B889600084E83 /* Common */,
 				E50B832715E0136800C685B3 /* OSMScoutOSX */,
 				F5DD1BBB160B880500084E83 /* OSMScoutiOS */,
@@ -263,24 +199,25 @@
 			isa = PBXGroup;
 			children = (
 				E5653B5A1F4EF5AA00EF6212 /* iOS frameworks */,
-				E55CFDAC1F2FAD95004AAA59 /* libiconv.tbd */,
-				F539E72F188834C300059073 /* CoreLocation.framework */,
-				F5D603601887566400D8242B /* MapKit.framework */,
-				E5A61D4615E0612D0078BD02 /* ApplicationServices.framework */,
-				E50B832115E0136800C685B3 /* Cocoa.framework */,
-				E50B832315E0136800C685B3 /* Other Frameworks */,
+				E50B832315E0136800C685B3 /* MacOS Frameworks */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		E50B832315E0136800C685B3 /* Other Frameworks */ = {
+		E50B832315E0136800C685B3 /* MacOS Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E51A610122C573A3007316F9 /* libiconv.tbd */,
+				E51A610B22C57AB5007316F9 /* OSMScout.framework */,
+				E51A610922C57AB5007316F9 /* OSMScoutMap.framework */,
+				E51A610A22C57AB5007316F9 /* OSMScoutMapIOSX.framework */,
+				E51A610022C5738D007316F9 /* Cocoa.framework */,
+				E51A60FE22C5736B007316F9 /* MapKit.framework */,
+				E51A60FD22C57337007316F9 /* CoreLocation.framework */,
 				E50B832415E0136800C685B3 /* AppKit.framework */,
-				E50B832515E0136800C685B3 /* CoreData.framework */,
 				E50B832615E0136800C685B3 /* Foundation.framework */,
 			);
-			name = "Other Frameworks";
+			name = "MacOS Frameworks";
 			sourceTree = "<group>";
 		};
 		E50B832715E0136800C685B3 /* OSMScoutOSX */ = {
@@ -293,6 +230,7 @@
 				E50B856615E0219200C685B3 /* OSMScoutViewController.h */,
 				E50B856715E0219200C685B3 /* OSMScoutViewController.m */,
 				E50B833615E0136900C685B3 /* MainMenu.xib */,
+				E553EC5922C5809000113E43 /* Images.xcassets */,
 				E50B832815E0136800C685B3 /* Supporting Files */,
 			);
 			path = OSMScoutOSX;
@@ -313,9 +251,13 @@
 		E5653B5A1F4EF5AA00EF6212 /* iOS frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E51A60F422C56EB9007316F9 /* OSMScout.framework */,
+				E51A60F522C56EB9007316F9 /* OSMScoutMap.framework */,
+				E51A60F622C56EB9007316F9 /* OSMScoutMapIOSX.framework */,
 				E5653B611F4EF79900EF6212 /* CoreLocation.framework */,
 				E5653B5F1F4EF6B700EF6212 /* MapKit.framework */,
 				E5653B5D1F4EF66E00EF6212 /* UIKit.framework */,
+				E51A610322C573CA007316F9 /* CoreText.framework */,
 				E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */,
 			);
 			name = "iOS frameworks";
@@ -360,33 +302,6 @@
 			path = standard;
 			sourceTree = "<group>";
 		};
-		F5953E95163880810026B30F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F5953E99163880820026B30F /* libosmscoutmapiosx.a */,
-				F53BD19B16388431006C7AE1 /* libosmscoutmapiosx-OSX.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		F5953E9B163880A30026B30F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F5953E9F163880A40026B30F /* libosmscoutmap.a */,
-				F53BD19816388431006C7AE1 /* libosmscoutmap-OSX.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		F5953EA1163880BB0026B30F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F5953EA5163880BC0026B30F /* libosmscout.a */,
-				F53BD19516388431006C7AE1 /* libosmscout-OSX.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		F5DD1BBB160B880500084E83 /* OSMScoutiOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -398,6 +313,7 @@
 				F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */,
 				F5DD1BD0160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib */,
 				F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */,
+				E553EC5B22C5816600113E43 /* Images.xcassets */,
 				F5DD1BBC160B880500084E83 /* Supporting Files */,
 			);
 			path = OSMScoutiOS;
@@ -438,13 +354,11 @@
 				E50B831915E0136800C685B3 /* Sources */,
 				E50B831A15E0136800C685B3 /* Frameworks */,
 				E50B831B15E0136800C685B3 /* Resources */,
+				E51A611622C57DBD007316F9 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				F53BD1A116388449006C7AE1 /* PBXTargetDependency */,
-				F53BD19D1638843D006C7AE1 /* PBXTargetDependency */,
-				F53BD19F16388443006C7AE1 /* PBXTargetDependency */,
 			);
 			name = OSMScoutOSX;
 			productName = OSMScoutOSX;
@@ -462,9 +376,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				F53BD14D16388252006C7AE1 /* PBXTargetDependency */,
-				F53BD14B1638824E006C7AE1 /* PBXTargetDependency */,
-				F53BD14916388248006C7AE1 /* PBXTargetDependency */,
 			);
 			name = OSMScoutiOS;
 			productName = OSMScoutiOS;
@@ -479,31 +390,27 @@
 			attributes = {
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = libosmscout;
+				TargetAttributes = {
+					E50B831C15E0136800C685B3 = {
+						DevelopmentTeam = TE75LNDCJS;
+						ProvisioningStyle = Automatic;
+					};
+					F5DD1BB2160B880400084E83 = {
+						DevelopmentTeam = TE75LNDCJS;
+					};
+				};
 			};
 			buildConfigurationList = E50B831715E0136800C685B3 /* Build configuration list for PBXProject "OSMScoutOSX" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = E50B831215E0136800C685B3;
 			productRefGroup = E50B831E15E0136800C685B3 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = F5953EA1163880BB0026B30F /* Products */;
-					ProjectRef = F5953EA0163880BB0026B30F /* libosmscout.xcodeproj */;
-				},
-				{
-					ProductGroup = F5953E9B163880A30026B30F /* Products */;
-					ProjectRef = F5953E9A163880A30026B30F /* libosmscoutmap.xcodeproj */;
-				},
-				{
-					ProductGroup = F5953E95163880810026B30F /* Products */;
-					ProjectRef = F5953E94163880810026B30F /* libosmscoutmapiosx.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				E50B831C15E0136800C685B3 /* OSMScoutOSX */,
@@ -511,51 +418,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		F53BD19516388431006C7AE1 /* libosmscout-OSX.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libosmscout-OSX.a";
-			remoteRef = F53BD19416388431006C7AE1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F53BD19816388431006C7AE1 /* libosmscoutmap-OSX.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libosmscoutmap-OSX.a";
-			remoteRef = F53BD19716388431006C7AE1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F53BD19B16388431006C7AE1 /* libosmscoutmapiosx-OSX.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libosmscoutmapiosx-OSX.a";
-			remoteRef = F53BD19A16388431006C7AE1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F5953E99163880820026B30F /* libosmscoutmapiosx.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libosmscoutmapiosx.a;
-			remoteRef = F5953E98163880820026B30F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F5953E9F163880A40026B30F /* libosmscoutmap.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libosmscoutmap.a;
-			remoteRef = F5953E9E163880A40026B30F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F5953EA5163880BC0026B30F /* libosmscout.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libosmscout.a;
-			remoteRef = F5953EA4163880BC0026B30F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E50B831B15E0136800C685B3 /* Resources */ = {
@@ -566,6 +428,7 @@
 				E50B833215E0136800C685B3 /* Credits.rtf in Resources */,
 				E50B833815E0136900C685B3 /* MainMenu.xib in Resources */,
 				F50CBE8A15E59EAC00F0B370 /* bus_stop.png in Resources */,
+				E553EC5A22C5809000113E43 /* Images.xcassets in Resources */,
 				F50CBE8B15E59EAC00F0B370 /* cemetery.png in Resources */,
 				F50CBE8C15E59EAC00F0B370 /* forest.png in Resources */,
 				F50CBE8D15E59EAC00F0B370 /* hospital.png in Resources */,
@@ -580,14 +443,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5DD1BC0160B880500084E83 /* InfoPlist.strings in Resources */,
-				F5DD1BC8160B880500084E83 /* Default.png in Resources */,
-				F5DD1BCA160B880500084E83 /* Default@2x.png in Resources */,
-				F5DD1BCC160B880500084E83 /* Default-568h@2x.png in Resources */,
 				F5DD1BD2160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib in Resources */,
 				F5DD1BD5160B880500084E83 /* OSMScoutIOSViewController_iPad.xib in Resources */,
 				F5DD1C16160D22A500084E83 /* bus_stop.png in Resources */,
 				F5DD1C17160D22A500084E83 /* cemetery.png in Resources */,
 				F5DD1C18160D22A500084E83 /* forest.png in Resources */,
+				E553EC5C22C5816600113E43 /* Images.xcassets in Resources */,
 				F5DD1C19160D22A500084E83 /* hospital.png in Resources */,
 				F5DD1C1A160D22A500084E83 /* parking.png in Resources */,
 				F5DD1C1B160D22A500084E83 /* pharmacy.png in Resources */,
@@ -625,39 +486,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		F53BD14916388248006C7AE1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = libosmscout;
-			targetProxy = F53BD14816388248006C7AE1 /* PBXContainerItemProxy */;
-		};
-		F53BD14B1638824E006C7AE1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = libosmscoutmap;
-			targetProxy = F53BD14A1638824E006C7AE1 /* PBXContainerItemProxy */;
-		};
-		F53BD14D16388252006C7AE1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = libosmscoutmapiosx;
-			targetProxy = F53BD14C16388252006C7AE1 /* PBXContainerItemProxy */;
-		};
-		F53BD19D1638843D006C7AE1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "libosmscoutmap-OSX";
-			targetProxy = F53BD19C1638843D006C7AE1 /* PBXContainerItemProxy */;
-		};
-		F53BD19F16388443006C7AE1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "libosmscoutmapiosx-OSX";
-			targetProxy = F53BD19E16388443006C7AE1 /* PBXContainerItemProxy */;
-		};
-		F53BD1A116388449006C7AE1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "libosmscout-OSX";
-			targetProxy = F53BD1A016388449006C7AE1 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		E50B832A15E0136800C685B3 /* InfoPlist.strings */ = {
@@ -771,14 +599,25 @@
 		E50B835015E0136900C685B3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = TE75LNDCJS;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/OSMScoutOSX/Frameworks",
+					"$(PROJECT_DIR)/OSMScoutiOS/Frameworks",
+				);
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutOSX/OSMScoutOSX-Prefix.pch";
 				INFOPLIST_FILE = "OSMScoutOSX/OSMScoutOSX-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -786,14 +625,25 @@
 		E50B835115E0136900C685B3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = TE75LNDCJS;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/OSMScoutOSX/Frameworks",
+					"$(PROJECT_DIR)/OSMScoutiOS/Frameworks",
+				);
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutOSX/OSMScoutOSX-Prefix.pch";
 				INFOPLIST_FILE = "OSMScoutOSX/OSMScoutOSX-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -801,21 +651,25 @@
 		F5DD1BD7160B880500084E83 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = TE75LNDCJS;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+					"$(PROJECT_DIR)/OSMScoutiOS/Frameworks",
 				);
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutiOS/OSMScoutiOS-Prefix.pch";
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "OSMScoutiOS/OSMScoutiOS-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -826,21 +680,25 @@
 		F5DD1BD8160B880500084E83 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = TE75LNDCJS;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+					"$(PROJECT_DIR)/OSMScoutiOS/Frameworks",
 				);
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutiOS/OSMScoutiOS-Prefix.pch";
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "OSMScoutiOS/OSMScoutiOS-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
