@@ -278,6 +278,7 @@ namespace osmscout {
     {
       size_t        coastline;          //! Running number of the intersecting coastline
       size_t        prevWayPointIndex;  //! The index of the path point before the intersection
+      GeoCoord      prevPoint;          //! just helper for sorting
       GeoCoord      point;              //! The intersection point
       double        distanceSquare;     //! The distance^2 between the path point and the intersectionPoint
       Direction     direction;          //! 1 in, 0 touch, -1 out
@@ -343,12 +344,27 @@ namespace osmscout {
         if (a->borderIndex==b->borderIndex) {
           switch (a->borderIndex) {
           case 0:
+            if (a->point.GetLon()==b->point.GetLon()){
+              return a->prevPoint.GetLon()<b->prevPoint.GetLon();
+            }
             return a->point.GetLon()<b->point.GetLon();
+
           case 1:
+            if (a->point.GetLat()==b->point.GetLat()){
+              return a->prevPoint.GetLat()>b->prevPoint.GetLat();
+            }
             return a->point.GetLat()>b->point.GetLat();
+
           case 2:
+            if (a->point.GetLon()==b->point.GetLon()){
+              return a->prevPoint.GetLon()>b->prevPoint.GetLon();
+            }
             return a->point.GetLon()>b->point.GetLon();
+
           default: /* 3 */
+            if (a->point.GetLat()==b->point.GetLat()){
+              return a->prevPoint.GetLat()<b->prevPoint.GetLat();
+            }
             return a->point.GetLat()<b->point.GetLat();
           }
         }
