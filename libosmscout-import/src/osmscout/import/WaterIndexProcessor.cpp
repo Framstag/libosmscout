@@ -931,7 +931,7 @@ namespace osmscout {
       uint32_t cx2=(uint32_t)((points[p+1].GetLon()+180.0)/stateMap.GetCellWidth());
       uint32_t cy2=(uint32_t)((points[p+1].GetLat()+90.0)/stateMap.GetCellHeight());
 
-      if (cx1!=cx2 || cy1!=cy2) {
+      if (cx1!=cx2 || cy1!=cy2 || p==0) {
         for (uint32_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
           for (uint32_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
 
@@ -948,6 +948,14 @@ namespace osmscout {
             lonMax=(x+1)*stateMap.GetCellWidth()-180.0;
             latMin=y*stateMap.GetCellHeight()-90.0;
             latMax=(y+1)*stateMap.GetCellHeight()-90.0;
+
+            if ((latMax==points[p].GetLat() && latMax==points[p+1].GetLat()) ||
+                (latMin==points[p].GetLat() && latMin==points[p+1].GetLat()) ||
+                (lonMax==points[p].GetLon() && lonMax==points[p+1].GetLon()) ||
+                (lonMin==points[p].GetLon() && lonMin==points[p+1].GetLon())){
+              // line is parallel with tile border
+              continue;
+            }
 
             borderPoints[0].Set(latMax,lonMin); // top left
             borderPoints[1].Set(latMax,lonMax); // top right
@@ -971,6 +979,7 @@ namespace osmscout {
 
                 firstIntersection->coastline=coastline;
                 firstIntersection->prevWayPointIndex=p;
+                firstIntersection->prevPoint=points[p];
                 firstIntersection->distanceSquare=DistanceSquare(points[p],firstIntersection->point);
                 firstIntersection->borderIndex=corner;
 
@@ -992,6 +1001,7 @@ namespace osmscout {
 
                 secondIntersection->coastline=coastline;
                 secondIntersection->prevWayPointIndex=p;
+                secondIntersection->prevPoint=points[p];
                 secondIntersection->distanceSquare=DistanceSquare(points[p],secondIntersection->point);
                 secondIntersection->borderIndex=corner;
 
@@ -1002,6 +1012,11 @@ namespace osmscout {
               corner++;
             }
 
+            if (p==0 && intersectionCount==0){
+              // start segment don't intersects
+              continue;
+            }
+
             // After above steps we can have 0..2 intersections
 
             if (x==cx1 &&
@@ -1010,8 +1025,13 @@ namespace osmscout {
                      intersectionCount==2);
 
               if (intersectionCount==1) {
-                // The segment always leaves the origin cell
-                firstIntersection->direction=Direction::out;
+                if (firstIntersection->prevWayPointIndex==0 && firstIntersection->distanceSquare==0){
+                  // starts on tile boundary
+                  firstIntersection->direction = Direction::in;
+                }else {
+                  // leaves the origin cell
+                  firstIntersection->direction = Direction::out;
+                }
                 cellIntersections[coord].push_back(firstIntersection);
               }
               else if (intersectionCount==2) {
@@ -1911,6 +1931,7 @@ namespace osmscout {
         std::map<Pixel,std::list<IntersectionRef>>::iterator cellData=coastData->cellIntersections.find(cell);
 
         assert(cellData!=coastData->cellIntersections.end());
+        assert(!cellData->second.empty());
 
         intersectionsCW.insert(intersectionsCW.end(), cellData->second.begin(), cellData->second.end());
       }
@@ -1941,8 +1962,8 @@ namespace osmscout {
       std::cout << "    intersections:" << std::endl;
       for (const auto &intersection: intersectionsCW){
         std::cout << "      " << intersection->point.GetDisplayText() << " (" << intersection->coastline << ", ";
-        std::cout << (intersection->direction==Direction::out ? "out" : "in");
-        std::cout << ", " << intersection->prevWayPointIndex;
+        std::cout << (intersection->direction==Direction::touch? "touch" : (intersection->direction==Direction::out ? "out" : "in"));
+        std::cout << ", " << intersection->prevWayPointIndex << ", " << intersection->distanceSquare;
         std::cout << ")" << std::endl;
       }
 #endif
