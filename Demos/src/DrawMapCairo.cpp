@@ -28,10 +28,9 @@
 #include <osmscout/MapPainterCairo.h>
 
 /*
-  Example for the nordrhein-westfalen.osm (to be executed in the Demos top
-  level directory):
+  Example for the nordrhein-westfalen.osm (to be executed in meson build directory):
 
-  src/DrawMapCairo ../maps/nordrhein-westfalen ../stylesheets/standard.oss 1024 800 7.46525 51.51241 70000 test.png
+  Demos/DrawMapCairo ../maps/nordrhein-westfalen ../stylesheets/standard.oss 800 480 51.51241 7.46525 70000 test.png
  */
 
 static const double DPI=96.0;
