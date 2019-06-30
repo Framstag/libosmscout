@@ -1153,7 +1153,7 @@ namespace osmscout {
     }
 
     if (isMph) {
-      if (valueNumeric>std::numeric_limits<uint8_t>::max()/lround(1.609)) {
+      if (valueNumeric>std::numeric_limits<uint8_t>::max()/static_cast<unsigned long>(lround(1.609))) {
 
         speed=std::numeric_limits<uint8_t>::max();
       }
