@@ -20,8 +20,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <osmscout/Database.h>
-#include <osmscout/MapService.h>
+#include <DrawMap.h>
 
 #include <osmscout/MapPainterIOS.h>
 
@@ -36,125 +35,58 @@ static const double DPI=96.0;
 
 int main(int argc, char* argv[])
 {
-  std::string   map;
-  std::string   images;
-  std::string   style;
-  std::string   output;
-  size_t        width,height;
-  double        lon,lat,zoom;
+  DrawMapDemo drawDemo("DrawMapOSX",
+                       argc,argv,
+                       DPI);
 
-  if (argc!=10) {
-    std::cerr << "DrawMap <map directory> <images directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
-    return 1;
+  if (!drawDemo.OpenDatabase()){
+    return 2;
   }
 
-  map=argv[1];
-  images=argv[2];
-  style=argv[3];
+  Arguments args = drawDemo.GetArguments();
 
-  if (!osmscout::StringToNumber(argv[4],width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
-  }
+  CGSize size = CGSizeMake(args.width, args.height);
+  CGContextRef bitmapContext = CGBitmapContextCreate(nullptr, args.width, args.height, 8, 0, [[NSColorSpace genericRGBColorSpace] CGColorSpace], kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst);
+  NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
+  [NSGraphicsContext setCurrentContext:nsgc];
+  CGContextRef cg = (CGContextRef)[nsgc graphicsPort];
+  CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, args.height);
+  CGContextConcatCTM(cg, flipVertical);
 
-  if (!osmscout::StringToNumber(argv[5],height)) {
-    std::cerr << "height is not numeric!" << std::endl;
-    return 1;
-  }
+  if (cg) {
+    osmscout::MapPainterIOS painter(drawDemo.styleConfig);
 
-  if (sscanf(argv[6],"%lf",&lon)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
+    drawDemo.drawParameter.SetFontName("GillSans");
+    drawDemo.drawParameter.SetFontSize(3.0);
+    drawDemo.drawParameter.SetLabelLineMinCharCount(15);
+    drawDemo.drawParameter.SetLabelLineMaxCharCount(30);
+    drawDemo.drawParameter.SetLabelLineFitToArea(true);
+    drawDemo.drawParameter.SetLabelLineFitToWidth(std::min(drawDemo.projection.GetWidth(), drawDemo.projection.GetHeight()));
 
-  if (sscanf(argv[7],"%lf",&lat)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
+    drawDemo.LoadData();
 
-  if (sscanf(argv[8],"%lf",&zoom)!=1) {
-    std::cerr << "zoom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  output=argv[9];
-
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
-  osmscout::MapServiceRef     mapService(new osmscout::MapService(database));
-
-  if (!database->Open(map.c_str())) {
-    std::cerr << "Cannot open database" << std::endl;
-
-    return 1;
-  }
-
-  osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
-
-  if (!styleConfig->Load(style)) {
-    std::cerr << "Cannot open style" << std::endl;
-    return 1;
-  }
-
-    
-    CGSize size = CGSizeMake(width, height);
-    CGContextRef bitmapContext = CGBitmapContextCreate(NULL, width, height, 8, 0, [[NSColorSpace genericRGBColorSpace] CGColorSpace], kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst);
-    NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
-    [NSGraphicsContext setCurrentContext:nsgc];
-    CGContextRef cg = (CGContextRef)[nsgc graphicsPort];
-    CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, height);
-    CGContextConcatCTM(cg, flipVertical);
-    
-    if (cg) {
-        osmscout::MercatorProjection  projection;
-        osmscout::MapParameter        drawParameter;
-        osmscout::AreaSearchParameter searchParameter;
-        osmscout::MapData             data;
-        osmscout::MapPainterIOS       painter(styleConfig);
-        
-        drawParameter.SetFontName("GillSans");
-        drawParameter.SetFontSize(3.0);
-        drawParameter.SetLabelLineMinCharCount(15);
-        drawParameter.SetLabelLineMaxCharCount(30);
-        drawParameter.SetLabelLineFitToArea(true);
-        drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight()));
-        
-        std::list<std::string> paths = {images, map};
-        drawParameter.SetIconPaths(paths);
-        drawParameter.SetPatternPaths(paths);
-        
-        projection.Set(osmscout::GeoCoord(lat,lon),
-                       osmscout::Magnification(zoom),
-                       DPI,
-                       width,
-                       height);
-        
-        std::list<osmscout::TileRef> tiles;
-        
-        mapService->LookupTiles(projection,tiles);
-        mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-        mapService->AddTileDataToMapData(tiles,data);
-        
-        if (painter.DrawMap(*styleConfig,
-                            projection,
-                            drawParameter,
-                            data,
-                            cg)) {
-            CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);
-            CGContextRelease(bitmapContext);
-            NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
-            NSDictionary *props = [NSDictionary dictionary];
-            NSData *imgData = [bitmapRep representationUsingType:NSPNGFileType properties:props];
-            NSString *path = [[NSString alloc] initWithUTF8String:output.c_str()];
-            if(![imgData writeToFile:path atomically:NO]){
-                std::cerr << "Cannot write PNG" << std::endl;
-            }
-        }
-        
+    if (painter.DrawMap(*drawDemo.styleConfig,
+                        drawDemo.projection,
+                        drawDemo.drawParameter,
+                        drawDemo.data,
+                        cg)) {
+      CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);
+      CGContextRelease(bitmapContext);
+      NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
+      NSDictionary *props = [NSDictionary dictionary];
+      NSData *imgData = [bitmapRep representationUsingType:NSPNGFileType properties:props];
+      NSString *path = [[NSString alloc] initWithUTF8String:args.output.c_str()];
+      if(![imgData writeToFile:path atomically:NO]){
+          std::cerr << "Cannot write PNG" << std::endl;
+      }
     }
     else {
-        std::cerr << "Cannot create graphic context" << std::endl;
+      std::cerr << "Error during drawing" << std::endl;
     }
+  }
+  else {
+      std::cerr << "Cannot create graphic context" << std::endl;
+  }
 
   return 0;
 }
