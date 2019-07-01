@@ -248,7 +248,11 @@ namespace osmscout {
       y=(coord.GetLat()-this->lat)*scaledLatDeriv;
     }
     else {
-      y=(atanh(sin(coord.GetLat()*gradtorad))-latOffset)*scale;
+      // Mercator is defined just for latitude +-85.0511
+      // For values outside this range is better to result projection border
+      // than some invalid coordinate, like INFINITY
+      double lat = std::min(std::max(coord.GetLat(), MinLat), MaxLat);
+      y=(atanh(sin(lat*gradtorad))-latOffset)*scale;
     }
 
     if (angle!=0.0) {
