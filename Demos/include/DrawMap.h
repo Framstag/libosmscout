@@ -25,6 +25,7 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
+#include <osmscout/BasemapDatabase.h>
 
 #include <iostream>
 
@@ -33,11 +34,13 @@ struct Arguments {
   bool debug{false};
   double dpi{96.0};
 
-  std::string   map;
-  std::string   style;
-  std::string   output;
-  size_t        width{1920};
-  size_t        height{1080};
+  std::string map;
+  std::string style;
+  std::string output;
+  size_t      width{1920};
+  size_t      height{1080};
+
+  std::string basemap;
 
   osmscout::GeoCoord       center;
   osmscout::Magnification  zoom{osmscout::Magnification::magClose};
@@ -115,6 +118,12 @@ public:
               "iconMode",
               "FixedSizePixmap | ScaledPixmap | OriginalPixmap | Scalable",
               false);
+    AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
+                args.basemap=value;
+              }),
+              "baseMap",
+              "Directory with world base map",
+              false);
 
     AddPositional(osmscout::CmdLineStringOption([this](const std::string& value) {
                     args.map=value;
@@ -170,6 +179,8 @@ public:
   osmscout::MapServiceRef     mapService{new osmscout::MapService(database)};
   osmscout::StyleConfigRef    styleConfig;
 
+  osmscout::BasemapDatabaseRef basemapDatabase;
+
   osmscout::MercatorProjection  projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
@@ -214,6 +225,8 @@ public:
 
     drawParameter.SetFontSize(args.fontSize);
     drawParameter.SetRenderSeaLand(true);
+    drawParameter.SetRenderUnknowns(false);
+    drawParameter.SetRenderBackground(false);
 
     drawParameter.SetIconMode(args.iconMode);
     drawParameter.SetIconPaths(args.iconPaths);
@@ -232,6 +245,14 @@ public:
                    args.width,
                    args.height);
 
+    if (!args.basemap.empty()) {
+      basemapDatabase=std::make_shared<osmscout::BasemapDatabase>(osmscout::BasemapDatabaseParameter{});
+      if (!basemapDatabase->Open(args.basemap)){
+        std::cerr << "Cannot open base map" << std::endl;
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -248,6 +269,31 @@ public:
     mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
     mapService->AddTileDataToMapData(tiles,data);
     mapService->GetGroundTiles(projection,data.groundTiles);
+
+    LoadBaseMapTiles(data.baseMapTiles);
+  }
+
+  bool LoadBaseMapTiles(std::list<osmscout::GroundTile> &tiles)
+  {
+    if (!basemapDatabase) {
+      return true;
+    }
+
+    osmscout::WaterIndexRef waterIndex = basemapDatabase->GetWaterIndex();
+    if (!waterIndex) {
+      return true;
+    }
+
+    osmscout::GeoBox boundingBox;
+    projection.GetDimensions(boundingBox);
+    if (!waterIndex->GetRegions(boundingBox,
+                                projection.GetMagnification(),
+                                tiles)) {
+      std::cerr << "Failed to read base map tiles" << std::endl;
+      return false;
+    }
+
+    return true;
   }
 
   Arguments GetArguments() const

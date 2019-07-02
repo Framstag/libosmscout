@@ -173,7 +173,6 @@ int main(int argc, char* argv[])
     if (!pixmap->save(QString::fromStdString(args.output),"PNG",-1)) {
       std::cerr << "Cannot write PNG" << std::endl;
     }
-
   }
 
   delete painter;

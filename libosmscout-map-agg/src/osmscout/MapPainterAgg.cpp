@@ -379,6 +379,7 @@ namespace osmscout {
     double h=fontEngine->height();
     for (wchar_t i : label.text) {
       const agg::glyph_cache *glyph = fontCacheManager->glyph(i);
+      assert(glyph);
       fontCacheManager->add_kerning(&x, &y);
       label.glyphs.emplace_back(std::move(MapPainterAgg::NativeGlyph{x, y, glyph}));
 

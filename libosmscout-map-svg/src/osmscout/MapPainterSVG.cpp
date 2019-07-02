@@ -445,114 +445,144 @@ namespace osmscout {
 
     size_t nextFillStyleId=0;
     size_t nextBorderStyleId=0;
-    for (const auto& area: GetAreaData()) {
-      if (area.fillStyle) {
-        std::map<FillStyle, std::string>::const_iterator entry = fillStyleNameMap.find(*area.fillStyle);
+    size_t nextWayId=0;
+
+    auto addFillStyle = [&](const FillStyleRef &fillStyle){
+      if (fillStyle) {
+        std::map<FillStyle, std::string>::const_iterator entry = fillStyleNameMap.find(*fillStyle);
 
         if (entry == fillStyleNameMap.end()) {
           std::string name = "area_fill_" + std::to_string(nextFillStyleId);
 
-          fillStyleNameMap.insert(std::make_pair(*area.fillStyle, name));
+          fillStyleNameMap.insert(std::make_pair(*fillStyle, name));
 
           nextFillStyleId++;
 
           stream << "        ." << name << " {";
 
-          stream << "fill:" << GetColorValue(area.fillStyle->GetFillColor());
+          stream << "fill:" << GetColorValue(fillStyle->GetFillColor());
 
-          if (!area.fillStyle->GetFillColor().IsSolid()) {
-            stream << ";fill-opacity:" << area.fillStyle->GetFillColor().GetA();
+          if (!fillStyle->GetFillColor().IsSolid()) {
+            stream << ";fill-opacity:" << fillStyle->GetFillColor().GetA();
           }
 
           stream << ";fillRule:nonzero";
           stream << "}" << std::endl;
         }
       }
+    };
 
-      if (area.borderStyle) {
-        double borderWidth = projection.ConvertWidthToPixel(area.borderStyle->GetWidth());
+    auto addLineStyle = [&](const LineStyleRef &lineStyle){
+      if (lineStyle){
+        std::map<LineStyle,std::string>::const_iterator entry=lineStyleNameMap.find(*lineStyle);
+
+        if (entry==lineStyleNameMap.end()) {
+          std::string name="way_"+std::to_string(nextWayId);
+
+          lineStyleNameMap.insert(std::make_pair(*lineStyle,name));
+
+          nextWayId++;
+
+          double lineWidth;
+
+          if (lineStyle->GetWidth()==0) {
+            lineWidth=projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
+          }
+          else {
+            lineWidth=GetProjectedWidth(projection,
+                                        projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth()),
+                                        lineStyle->GetWidth());
+          }
+
+          stream << "        ." << name << " {";
+          stream << "fill:none;";
+          stream << "stroke:" << GetColorValue(lineStyle->GetLineColor());
+
+          if (!lineStyle->GetLineColor().IsSolid()) {
+            stream << ";stroke-opacity:" << lineStyle->GetLineColor().GetA();
+          }
+
+          if (lineStyle->HasDashes()) {
+            stream << ";stroke-dasharray:";
+
+            for (size_t i=0; i<lineStyle->GetDash().size(); i++) {
+
+              if (i>0) {
+                stream << " ";
+              }
+
+              stream << lineStyle->GetDash()[i]*lineWidth;
+            }
+          }
+
+          stream << "}" << std::endl;
+        }
+      }
+    };
+
+    auto addBorderStyle = [&](const BorderStyleRef &borderStyle){
+      if (borderStyle) {
+        double borderWidth = projection.ConvertWidthToPixel(borderStyle->GetWidth());
 
         if (borderWidth > 0.0) {
-          std::map<BorderStyle, std::string>::const_iterator borderEntry = borderStyleNameMap.find(*area.borderStyle);
+          std::map<BorderStyle, std::string>::const_iterator borderEntry = borderStyleNameMap.find(*borderStyle);
           if (borderEntry == borderStyleNameMap.end()) {
             std::string name = "area_border_" + std::to_string(nextBorderStyleId);
-            borderStyleNameMap.insert(std::make_pair(*area.borderStyle, name));
-            assert( borderStyleNameMap.find(*area.borderStyle) != borderStyleNameMap.end());
+            borderStyleNameMap.insert(std::make_pair(*borderStyle, name));
+            assert( borderStyleNameMap.find(*borderStyle) != borderStyleNameMap.end());
             nextBorderStyleId++;
 
             stream << "        ." << name << " {";
-            stream << "stroke:" << GetColorValue(area.borderStyle->GetColor());
+            stream << "stroke:" << GetColorValue(borderStyle->GetColor());
 
-            if (!area.borderStyle->GetColor().IsSolid()) {
-              stream << ";stroke-opacity:" << area.borderStyle->GetColor().GetA();
+            if (!borderStyle->GetColor().IsSolid()) {
+              stream << ";stroke-opacity:" << borderStyle->GetColor().GetA();
             }
 
             stream << ";stroke-width:" << borderWidth;
 
-            if (area.borderStyle->HasDashes()) {
+            if (borderStyle->HasDashes()) {
               stream << ";stroke-dasharray:";
 
-              for (size_t i = 0; i < area.borderStyle->GetDash().size(); i++) {
+              for (size_t i = 0; i < borderStyle->GetDash().size(); i++) {
                 if (i > 0) {
                   stream << ",";
                 }
 
-                stream << area.borderStyle->GetDash()[i] * borderWidth;
+                stream << borderStyle->GetDash()[i] * borderWidth;
               }
             }
             stream << "}" << std::endl;
           }
         }
       }
+    };
+
+    // landFill
+    addFillStyle(styleConfig->GetLandFillStyle(projection));
+    // seaFill
+    addFillStyle(styleConfig->GetSeaFillStyle(projection));
+    //coastFill
+    addFillStyle(styleConfig->GetCoastFillStyle(projection));
+    // unknownFill
+    addFillStyle(styleConfig->GetUnknownFillStyle(projection));
+    // fallbackSeaFill
+    addFillStyle(this->seaFill);
+    // fallbackLandFill
+    addFillStyle(this->landFill);
+
+    for (const auto& area: GetAreaData()) {
+      addFillStyle(area.fillStyle);
+      addBorderStyle(area.borderStyle);
     }
 
     stream << std::endl;
 
-    size_t nextWayId=0;
+    // coastlineLine
+    addLineStyle(styleConfig->GetCoastlineLineStyle(projection));
+
     for (const auto& way : GetWayData()) {
-      std::map<LineStyle,std::string>::const_iterator entry=lineStyleNameMap.find(*way.lineStyle);
-
-      if (entry==lineStyleNameMap.end()) {
-        std::string name="way_"+std::to_string(nextWayId);
-
-        lineStyleNameMap.insert(std::make_pair(*way.lineStyle,name));
-
-        nextWayId++;
-
-        double lineWidth;
-
-        if (way.lineStyle->GetWidth()==0) {
-          lineWidth=projection.ConvertWidthToPixel(way.lineStyle->GetDisplayWidth());
-        }
-        else {
-          lineWidth=GetProjectedWidth(projection,
-                                      projection.ConvertWidthToPixel(way.lineStyle->GetDisplayWidth()),
-                                      way.lineStyle->GetWidth());
-        }
-
-        stream << "        ." << name << " {";
-        stream << "fill:none;";
-        stream << "stroke:" << GetColorValue(way.lineStyle->GetLineColor());
-
-        if (!way.lineStyle->GetLineColor().IsSolid()) {
-          stream << ";stroke-opacity:" << way.lineStyle->GetLineColor().GetA();
-        }
-
-        if (way.lineStyle->HasDashes()) {
-          stream << ";stroke-dasharray:";
-
-          for (size_t i=0; i<way.lineStyle->GetDash().size(); i++) {
-
-            if (i>0) {
-              stream << " ";
-            }
-
-            stream << way.lineStyle->GetDash()[i]*lineWidth;
-          }
-        }
-
-        stream << "}" << std::endl;
-      }
+      addLineStyle(way.lineStyle);
     }
 
     stream << std::endl;
