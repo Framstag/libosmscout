@@ -571,10 +571,9 @@ namespace osmscout {
     double           maxX;
     double           maxY;
 
-    symbol.GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
 
-    double           widthPx=projection.ConvertWidthToPixel(maxX-minX);
-    double           height=maxY-minY;
+    double           widthPx=maxX-minX;
     bool             isClosed=false;
     Vertex2D         origin;
     double           x1,y1,x2,y2,x3,y3,slope;
@@ -613,7 +612,7 @@ namespace osmscout {
           t=QTransform::fromTranslate(x2, y2);
           t.rotateRadians(slope);
           painter->setTransform(t);
-          DrawSymbol(projection, parameter, symbol, 0, -height*2);
+          DrawSymbol(projection, parameter, symbol, 0, 0);
           loop=FollowPath(followPathHnd, space, origin);
         }
       }
@@ -647,7 +646,7 @@ namespace osmscout {
     double centerX;
     double centerY;
 
-    symbol.GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
 
     centerX=(minX+maxX)/2;
     centerY=(minY+maxY)/2;
@@ -685,12 +684,12 @@ namespace osmscout {
                pixel!=polygon->GetCoords().end();
                ++pixel) {
             if (pixel==polygon->GetCoords().begin()) {
-              path.moveTo(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                          y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
+              path.moveTo(x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
+                          y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
             }
             else {
-              path.lineTo(x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                          y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
+              path.lineTo(x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
+                          y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
             }
           }
         }
@@ -699,12 +698,12 @@ namespace osmscout {
                pixel!=polygon->GetCoords().end();
                ++pixel) {
             if (pixel==polygon->GetCoords().begin()) {
-              path.moveTo(x+projection.GetMeterInPixel()*(pixel->GetX()-centerX),
-                          y+projection.GetMeterInPixel()*(pixel->GetY()-centerY));
+              path.moveTo(x+projection.GetMeterInPixel()*pixel->GetX()-centerX,
+                          y+projection.GetMeterInPixel()*pixel->GetY()-centerY);
             }
             else {
-              path.lineTo(x+projection.GetMeterInPixel()*(pixel->GetX()-centerX),
-                          y+projection.GetMeterInPixel()*(pixel->GetY()-centerY));
+              path.lineTo(x+projection.GetMeterInPixel()*pixel->GetX()-centerX,
+                          y+projection.GetMeterInPixel()*pixel->GetY()-centerY);
 
             }
           }
@@ -738,14 +737,14 @@ namespace osmscout {
         QPainterPath path;
 
         if (rectangle->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
-          path.addRect(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
-                       y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY),
+          path.addRect(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX,
+                       y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-centerY,
                        projection.ConvertWidthToPixel(rectangle->GetWidth()),
                        projection.ConvertWidthToPixel(rectangle->GetHeight()));
         }
         else {
-          path.addRect(x+projection.GetMeterInPixel()*(rectangle->GetTopLeft().GetX()-centerX),
-                       y+projection.GetMeterInPixel()*(rectangle->GetTopLeft().GetY()-centerY),
+          path.addRect(x+projection.GetMeterInPixel()*rectangle->GetTopLeft().GetX()-centerX,
+                       y+projection.GetMeterInPixel()*rectangle->GetTopLeft().GetY()-centerY,
                        projection.GetMeterInPixel()*rectangle->GetWidth(),
                        projection.GetMeterInPixel()*rectangle->GetHeight());
         }
@@ -978,6 +977,19 @@ namespace osmscout {
     }
     return labelLayouter;
   }
+
+  void MapPainterQt::DrawRectangle(int x, int y,
+                                   int width, int height,
+                                   const Color &color)
+  {
+    QPen pen;
+    pen.setColor(QColor::fromRgbF(color.GetR(),color.GetG(),color.GetB(),color.GetA()));
+    painter->setPen(pen);
+    painter->setBrush(Qt::NoBrush);
+
+    painter->drawRect(x,y,width,height);
+  }
+
 
   void MapPainterQt::RegisterRegularLabel(const Projection &projection,
                                           const MapParameter &parameter,

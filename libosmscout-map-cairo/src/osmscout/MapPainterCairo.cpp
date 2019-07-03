@@ -631,10 +631,10 @@ namespace osmscout {
     double maxX;
     double maxY;
 
-    symbol.GetBoundingBox(minX, minY, maxX, maxY);
+    symbol.GetBoundingBox(projection,minX, minY, maxX, maxY);
 
-    double width = projection.ConvertWidthToPixel(maxX - minX);
-    double height = projection.ConvertWidthToPixel(maxY - minY);
+    double width = maxX - minX;
+    double height = maxY - minY;
 
     for (const auto &primitive : symbol.GetPrimitives()) {
       FillStyleRef fillStyle = primitive->GetFillStyle();
@@ -1154,13 +1154,13 @@ namespace osmscout {
            ++pixel) {
         if (pixel==polygon->GetCoords().begin()) {
           cairo_move_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                        y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
+                        x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
+                        y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
         }
         else {
           cairo_line_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                        y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
+                        x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
+                        y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
         }
       }
 
@@ -1170,8 +1170,8 @@ namespace osmscout {
       const auto* rectangle=dynamic_cast<const RectanglePrimitive*>(primitive);
 
       cairo_rectangle(draw,
-                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
-                      y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY),
+                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX,
+                      y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-centerY,
                       projection.ConvertWidthToPixel(rectangle->GetWidth()),
                       projection.ConvertWidthToPixel(rectangle->GetHeight()));
     }
@@ -1179,8 +1179,8 @@ namespace osmscout {
       const auto* circle=dynamic_cast<const CirclePrimitive*>(primitive);
 
       cairo_arc(draw,
-                x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
-                y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY),
+                x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX,
+                y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-centerY,
                 projection.ConvertWidthToPixel(circle->GetRadius()),
                 0,2*M_PI);
     }
@@ -1196,7 +1196,7 @@ namespace osmscout {
     double maxX;
     double maxY;
 
-    symbol.GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
 
     for (const auto& primitive: symbol.GetPrimitives()) {
       FillStyleRef   fillStyle=primitive->GetFillStyle();

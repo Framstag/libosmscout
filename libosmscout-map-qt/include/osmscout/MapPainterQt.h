@@ -140,6 +140,10 @@ namespace osmscout {
 
     QtLabelLayouter& GetLayouter();
 
+    void DrawRectangle(int x, int y,
+                       int width, int height,
+                       const Color &color);
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const Projection& projection,

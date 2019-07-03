@@ -708,7 +708,7 @@ namespace osmscout
     double maxX;
     double maxY;
 
-    symbol.GetBoundingBox(minX, minY, maxX, maxY);
+    symbol.GetBoundingBox(projection, minX, minY, maxX, maxY);
     double centerX = (minX + maxX) / 2.0;
     double centerY = (minY + maxY) / 2.0;
 
@@ -767,10 +767,10 @@ namespace osmscout
       else if (dynamic_cast<RectanglePrimitive*>(primitive) != nullptr)
       {
         RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
-        D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX),
-                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY() - centerY),
-                                 x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX() - centerX) + projection.ConvertWidthToPixel(rectangle->GetWidth()),
-                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY() - centerY) + projection.ConvertWidthToPixel(rectangle->GetHeight()));
+        D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - centerX,
+                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - centerY,
+                                 x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - centerX + projection.ConvertWidthToPixel(rectangle->GetWidth()),
+                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - centerY + projection.ConvertWidthToPixel(rectangle->GetHeight()));
         m_pRenderTarget->FillRectangle(rect, GetColorBrush(fillStyle->GetFillColor()));
         if (hasBorder) m_pRenderTarget->DrawRectangle(rect, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
       }
