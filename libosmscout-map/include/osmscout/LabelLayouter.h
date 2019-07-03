@@ -460,6 +460,9 @@ namespace osmscout {
             }
 #ifdef DEBUG_LABEL_LAYOUTER
             std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
+            // p->DrawRectangle(rectangle.x, rectangle.y,
+            //                  rectangle.width, rectangle.height,
+            //                  collision ? Color(0.8, 0, 0, 0.8): Color(0, 0.8, 0, 0.8));
 #endif
           }
           LabelInstanceType instanceCopy;

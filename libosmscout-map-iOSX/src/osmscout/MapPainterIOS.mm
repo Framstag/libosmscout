@@ -523,10 +523,10 @@ namespace osmscout {
                                           size_t transStart, size_t transEnd){
 
         double minX,minY,maxX,maxY;
-        symbol.GetBoundingBox(minX,minY,maxX,maxY);
+        symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
 
-        double width=projection.ConvertWidthToPixel(maxX-minX);
-        double height=projection.ConvertWidthToPixel(maxY-minY);
+        double width=maxX-minX;
+        double height=maxY-minY;
         bool isClosed = false;
         CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         Vertex2D origin;
@@ -599,7 +599,7 @@ namespace osmscout {
         double minY;
         double maxX;
         double maxY;
-        symbol.GetBoundingBox(minX,minY,maxX,maxY);
+        symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
         
         double centerX=(maxX+minX)/2;
         double centerY=(maxY+minY)/2;
@@ -631,11 +631,11 @@ namespace osmscout {
                      pixel!=polygon->GetCoords().end();
                      ++pixel) {
                     if (pixel==polygon->GetCoords().begin()) {
-                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                                             y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
+                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
+                                             y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
                     } else {
-                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX()-centerX),
-                                                y+projection.ConvertWidthToPixel(pixel->GetY()-centerY));
+                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
+                                                y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
                     }
                 }
 
@@ -656,8 +656,8 @@ namespace osmscout {
                 } else {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()-centerX),
-                                         y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()-centerY),
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX,
+                                         y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-centerY,
                                          projection.ConvertWidthToPixel(rectangle->GetWidth()),
                                          projection.ConvertWidthToPixel(rectangle->GetHeight()));
                 CGContextAddRect(cg,rect);
@@ -678,8 +678,8 @@ namespace osmscout {
                 } else {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
-                                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY),
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX,
+                                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-centerY,
                                          projection.ConvertWidthToPixel(circle->GetRadius()),
                                          projection.ConvertWidthToPixel(circle->GetRadius()));
                 CGContextAddEllipseInRect(cg, rect);

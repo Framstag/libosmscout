@@ -1017,7 +1017,7 @@ namespace osmscout {
           double minY;
           double maxX;
           double maxY;
-          symbol->GetBoundingBox(minX, minY, maxX, maxY);
+          symbol->GetBoundingBox(projection, minX, minY, maxX, maxY);
 
           double centerX = (minX + maxX) / 2;
           double centerY = (minY + maxY) / 2;
@@ -1039,9 +1039,9 @@ namespace osmscout {
                 double scaleLat = -1 * meterPerPixelLat * meterToDegreeLat;
 
                 double x =
-                    node->GetCoords().GetLon() + (projection.ConvertWidthToPixel(pixel.GetX() - centerX) * scale);
+                    node->GetCoords().GetLon() + ((projection.ConvertWidthToPixel(pixel.GetX()) - centerX) * scale);
                 double y = node->GetCoords().GetLat() +
-                           (projection.ConvertWidthToPixel(pixel.GetY() - centerY) * scaleLat);
+                           ((projection.ConvertWidthToPixel(pixel.GetY()) - centerY) * scaleLat);
 
                 vertices.push_back(osmscout::Vertex2D(x, y));
               }

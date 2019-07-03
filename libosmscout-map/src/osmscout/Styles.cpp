@@ -1634,11 +1634,7 @@ namespace osmscout {
   }
 
   Symbol::Symbol(const std::string& name)
-  : name(name),
-    minX(std::numeric_limits<double>::max()),
-    minY(std::numeric_limits<double>::max()),
-    maxX(-std::numeric_limits<double>::max()),
-    maxY(-std::numeric_limits<double>::max())
+  : name(name)
   {
     // no code
   }
@@ -1652,11 +1648,16 @@ namespace osmscout {
 
     primitive->GetBoundingBox(minX,minY,maxX,maxY);
 
-    this->minX=std::min(this->minX,minX);
-    this->minY=std::min(this->minY,minY);
-
-    this->maxX=std::max(this->maxX,maxX);
-    this->maxY=std::max(this->maxY,maxY);
+    switch (primitive->GetProjectionMode()){
+      case DrawPrimitive::ProjectionMode::MAP:
+        mapBoundingBox.Update(minX,minY,maxX,maxY);
+        break;
+      case DrawPrimitive::ProjectionMode::GROUND:
+        groundBoundingBox.Update(minX,minY,maxX,maxY);
+        break;
+      default:
+        assert(false);
+    }
 
     primitives.push_back(primitive);
   }

@@ -667,8 +667,8 @@ namespace osmscout {
         data.iconStyle=iconStyle;
         data.priority=iconStyle->GetPriority();
 
-        data.iconWidth=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetWidth());
-        data.iconHeight=projection.ConvertWidthToPixel(iconStyle->GetSymbol()->GetHeight());
+        data.iconWidth=iconStyle->GetSymbol()->GetWidth(projection);
+        data.iconHeight=iconStyle->GetSymbol()->GetHeight(projection);
 
         labelLayoutData.push_back(data);
       }

@@ -28,6 +28,7 @@
 
 #include <osmscout/Pixel.h>
 #include <osmscout/util/Color.h>
+#include <osmscout/util/Projection.h>
 
 #include <osmscout/StyleDescription.h>
 
@@ -1082,10 +1083,35 @@ namespace osmscout {
   private:
     std::string                 name;
     std::list<DrawPrimitiveRef> primitives;
-    double                      minX;
-    double                      minY;
-    double                      maxX;
-    double                      maxY;
+
+    struct BoundingBox{
+      double minX{0};
+      double minY{0};
+      double maxX{0};
+      double maxY{0};
+
+      inline double GetWidth() const
+      {
+        return maxX-minX;
+      }
+
+      inline double GetHeight() const
+      {
+        return maxY-minY;
+      }
+
+      inline void Update(double minX, double minY, double maxX, double maxY)
+      {
+        this->minX = std::min(this->minX, minX);
+        this->minY = std::min(this->minY, minY);
+
+        this->maxX = std::max(this->maxX, maxX);
+        this->maxY = std::max(this->maxY, maxY);
+      }
+    };
+
+    BoundingBox mapBoundingBox;     //!< bounding box in map canvas coordinates [mm]
+    BoundingBox groundBoundingBox;  //!< bounding box in ground coordinates [m]
 
   public:
     explicit Symbol(const std::string& name);
@@ -1102,27 +1128,44 @@ namespace osmscout {
       return primitives;
     }
 
-    inline void GetBoundingBox(double& minX,
+    /**
+     * bounding box in pixels for given projection
+     */
+    inline void GetBoundingBox(const Projection &projection,
+                               double& minX,
                                double& minY,
                                double& maxX,
                                double& maxY) const
     {
-      minX=this->minX;
-      minY=this->minY;
+      minX=std::min(projection.ConvertWidthToPixel(mapBoundingBox.minX),
+                    projection.GetMeterInPixel() * groundBoundingBox.minX);
+      minY=std::min(projection.ConvertWidthToPixel(mapBoundingBox.minY),
+                    projection.GetMeterInPixel() * groundBoundingBox.minY);
 
-      maxX=this->maxX;
-      maxY=this->maxY;
+      maxX=std::max(projection.ConvertWidthToPixel(mapBoundingBox.maxX),
+                    projection.GetMeterInPixel() * groundBoundingBox.maxX);
+      maxY=std::max(projection.ConvertWidthToPixel(mapBoundingBox.maxY),
+                    projection.GetMeterInPixel() * groundBoundingBox.maxY);
     }
 
-    inline double GetWidth() const
+    /**
+     * width in pixels for given projection
+     */
+    inline double GetWidth(const Projection &projection) const
     {
-      return maxX-minX;
+      return std::max(projection.ConvertWidthToPixel(mapBoundingBox.GetWidth()),
+                      projection.GetMeterInPixel() * groundBoundingBox.GetWidth());
     }
 
-    inline double GetHeight() const
+    /**
+     * height in pixels for given projection
+     */
+    inline double GetHeight(const Projection &projection) const
     {
-      return maxY-minY;
+      return std::max(projection.ConvertWidthToPixel(mapBoundingBox.GetHeight()),
+                      projection.GetMeterInPixel() * groundBoundingBox.GetHeight());
     }
+
   };
 
   /**
