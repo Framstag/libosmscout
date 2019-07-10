@@ -1260,8 +1260,8 @@ namespace osmscout {
 
     progress.Info("Filter intersecting islands");
 
-    for (size_t i=0; i<std::min(transformedCoastlines.size(), static_cast<size_t>(100)); i++) {
-      progress.SetProgress(i,std::min(transformedCoastlines.size(), static_cast<size_t>(100)));
+    for (size_t i=0; i<transformedCoastlines.size(); i++) {
+      progress.SetProgress(i,transformedCoastlines.size());
 
       for (size_t j=i+1; j<transformedCoastlines.size(); j++) {
         assert(i!=j);
