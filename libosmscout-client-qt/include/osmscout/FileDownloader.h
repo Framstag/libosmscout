@@ -56,7 +56,12 @@ class OSMSCOUT_CLIENT_QT_API FileDownloader : public QObject
 {
   Q_OBJECT
 
+#ifdef OSMSCOUT_CLIENT_QT_FILEDOWNLOADER_TEST
+public: // make possible to modify internal state in test
+#else
 private:
+#endif
+
   struct BackOff {
     int downloadRetries{0};
 
