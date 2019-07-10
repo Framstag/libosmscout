@@ -233,14 +233,26 @@ bool FileDownloader::restartDownload()
            << url << "retries:" <<  backOff.downloadRetries;
 
   if (reply){
+    QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
     reply->deleteLater();
     reply = nullptr;
+
+    if (statusCode.isValid() && statusCode.toInt() >= 400 && statusCode.toInt() < 500){
+      return false; // client error is not recoverable (http 400..499)
+    }
   }
   return backOff.scheduleRestart();
 }
 
 void FileDownloader::onNetworkError(QNetworkReply::NetworkError /*code*/)
 {
+  QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+  if (statusCode.isValid()) {
+    QString reason = reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+    qWarning() << "Server status code" << statusCode.toInt() << ":" << reason;
+  }
+
   QString errorStr = reply ? reply->errorString(): "";
   if (restartDownload()) {
     emit error(errorStr, true);
