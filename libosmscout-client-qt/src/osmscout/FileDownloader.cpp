@@ -245,15 +245,17 @@ bool FileDownloader::restartDownload()
   return backOff.scheduleRestart();
 }
 
-void FileDownloader::onNetworkError(QNetworkReply::NetworkError /*code*/)
+void FileDownloader::onNetworkError(QNetworkReply::NetworkError code)
 {
-  QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+  QString errorStr = reply ? reply->errorString(): "";
+  qDebug() << "Error " << code << "/" << errorStr;
+
+  QVariant statusCode = reply ? reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) : QVariant();
   if (statusCode.isValid()) {
     QString reason = reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
     qWarning() << "Server status code" << statusCode.toInt() << ":" << reason;
   }
 
-  QString errorStr = reply ? reply->errorString(): "";
   if (restartDownload()) {
     emit error(errorStr, true);
     return;
