@@ -69,7 +69,7 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
   }
 
   timeoutTimer.setSingleShot(true);
-  timeoutTimer.setInterval(AsMillis(FileDownloaderConfig::DownloadTimeout));
+  timeoutTimer.setInterval(AsMillis(FileDownloaderConfig::DownloadReadTimeout));
   connect(&timeoutTimer, &QTimer::timeout, this, &FileDownloader::onTimeout);
 
   backOff.restartTimer.setSingleShot(true);
@@ -279,9 +279,9 @@ void FileDownloader::onNetworkError(QNetworkReply::NetworkError code)
 void FileDownloader::onTimeout()
 {
   if (restartDownload()){
-    emit error("Timeout", true);
+    emit error("Read timeout", true);
   }else {
-    onError("Timeout");
+    onError("Read timeout");
   }
 }
 
