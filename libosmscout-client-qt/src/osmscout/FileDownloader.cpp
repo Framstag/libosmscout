@@ -101,6 +101,16 @@ void FileDownloader::startDownload()
     QByteArray range_header = "bytes=" + QByteArray::number((qulonglong)downloaded) + "-";
     qDebug() << "Request from byte" << downloaded;
     request.setRawHeader("Range",range_header);
+
+    /**
+     * Default value for "Accept-Encoding" in Qt is "gzip, deflate"
+     * and Qt code do the decompressing for us (when server reply with "Content-Encoding: gzip").
+     * But with explicit byte range (content not from the beginning) decompressing is not possible
+     * (gzip header is not valid) and Qt fails with NetworkError::ProtocolFailure
+     *
+     * For that reason we have to specify that only accepted encoding is identity.
+     */
+    request.setRawHeader("Accept-Encoding", "identity");
   }
 
   reply = manager->get(request);
