@@ -41,7 +41,7 @@ namespace osmscout {
 namespace FileDownloaderConfig {
 
 static constexpr uint64_t BufferNetwork{1024*1024*1}; ///< Size of network ring buffer
-static constexpr std::chrono::seconds DownloadTimeout{60}; ///< Download timeout in seconds
+static constexpr std::chrono::seconds DownloadReadTimeout{60}; ///< Download read timeout in seconds
 static constexpr std::chrono::seconds BackOffInitial{1}; ///< Initial back-off time
 static constexpr std::chrono::seconds BackOffMax{300}; ///< Maximum back-off time
 static constexpr int MaxDownloadRetries{-1}; ///< Maximal number of download retries before cancelling download
@@ -56,7 +56,12 @@ class OSMSCOUT_CLIENT_QT_API FileDownloader : public QObject
 {
   Q_OBJECT
 
+#ifdef OSMSCOUT_CLIENT_QT_FILEDOWNLOADER_TEST
+public: // make possible to modify internal state in test
+#else
 private:
+#endif
+
   struct BackOff {
     int downloadRetries{0};
 

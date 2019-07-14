@@ -186,6 +186,7 @@ OSMScoutQtBuilder OSMScoutQt::NewInstance()
 
 OSMScoutQt& OSMScoutQt::GetInstance()
 {
+  assert(osmScoutInstance);
   return *osmScoutInstance;
 }
 

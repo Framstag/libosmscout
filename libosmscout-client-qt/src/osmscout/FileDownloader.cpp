@@ -69,7 +69,7 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
   }
 
   timeoutTimer.setSingleShot(true);
-  timeoutTimer.setInterval(AsMillis(FileDownloaderConfig::DownloadTimeout));
+  timeoutTimer.setInterval(AsMillis(FileDownloaderConfig::DownloadReadTimeout));
   connect(&timeoutTimer, &QTimer::timeout, this, &FileDownloader::onTimeout);
 
   backOff.restartTimer.setSingleShot(true);
@@ -101,6 +101,16 @@ void FileDownloader::startDownload()
     QByteArray range_header = "bytes=" + QByteArray::number((qulonglong)downloaded) + "-";
     qDebug() << "Request from byte" << downloaded;
     request.setRawHeader("Range",range_header);
+
+    /**
+     * Default value for "Accept-Encoding" in Qt is "gzip, deflate"
+     * and Qt code do the decompressing for us (when server reply with "Content-Encoding: gzip").
+     * But with explicit byte range (content not from the beginning) decompressing is not possible
+     * (gzip header is not valid) and Qt fails with NetworkError::ProtocolFailure
+     *
+     * For that reason we have to specify that only accepted encoding is identity.
+     */
+    request.setRawHeader("Accept-Encoding", "identity");
   }
 
   reply = manager->get(request);
@@ -233,15 +243,29 @@ bool FileDownloader::restartDownload()
            << url << "retries:" <<  backOff.downloadRetries;
 
   if (reply){
+    QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
     reply->deleteLater();
     reply = nullptr;
+
+    if (statusCode.isValid() && statusCode.toInt() >= 400 && statusCode.toInt() < 500){
+      return false; // client error is not recoverable (http 400..499)
+    }
   }
   return backOff.scheduleRestart();
 }
 
-void FileDownloader::onNetworkError(QNetworkReply::NetworkError /*code*/)
+void FileDownloader::onNetworkError(QNetworkReply::NetworkError code)
 {
   QString errorStr = reply ? reply->errorString(): "";
+  qDebug() << "Error " << code << "/" << errorStr;
+
+  QVariant statusCode = reply ? reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) : QVariant();
+  if (statusCode.isValid()) {
+    QString reason = reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+    qWarning() << "Server status code" << statusCode.toInt() << ":" << reason;
+  }
+
   if (restartDownload()) {
     emit error(errorStr, true);
     return;
@@ -255,9 +279,9 @@ void FileDownloader::onNetworkError(QNetworkReply::NetworkError /*code*/)
 void FileDownloader::onTimeout()
 {
   if (restartDownload()){
-    emit error("Timeout", true);
+    emit error("Read timeout", true);
   }else {
-    onError("Timeout");
+    onError("Read timeout");
   }
 }
 
