@@ -27,6 +27,7 @@
 #include <QTime>
 #include <QQueue>
 
+#include <osmscout/util/Bearing.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
 
@@ -170,10 +171,17 @@ class OSMSCOUT_CLIENT_QT_API MapView: public QObject
 public:
   inline MapView(QObject *parent=0): QObject(parent) {}
 
-  inline MapView(QObject *parent, osmscout::GeoCoord center, double angle, osmscout::Magnification magnification, double mapDpi):
+  inline MapView(QObject *parent,
+                 const osmscout::GeoCoord &center,
+                 const Bearing &angle,
+                 const osmscout::Magnification &magnification,
+                 double mapDpi):
     QObject(parent), center(center), angle(angle), magnification(magnification), mapDpi(mapDpi) {}
 
-  inline MapView(osmscout::GeoCoord center, double angle, osmscout::Magnification magnification, double mapDpi):
+  inline MapView(const osmscout::GeoCoord &center,
+                 const Bearing &angle,
+                 const osmscout::Magnification &magnification,
+                 double mapDpi):
     center(center), angle(angle), magnification(magnification), mapDpi(mapDpi) {}
 
   /**
@@ -188,7 +196,7 @@ public:
 
   inline double GetLat(){ return center.GetLat(); }
   inline double GetLon(){ return center.GetLon(); }
-  inline double GetAngle(){ return angle; }
+  inline double GetAngle(){ return angle.AsRadians(); }
   inline double GetMag(){ return magnification.GetMagnification(); }
   inline double GetMagLevel(){ return magnification.GetLevel(); }
   inline double GetMapDpi(){ return mapDpi; }
@@ -204,7 +212,7 @@ public:
   }
 
   osmscout::GeoCoord           center;
-  double                       angle{0};
+  Bearing                      angle;
   osmscout::Magnification      magnification;
   double                       mapDpi{0};
 };
@@ -238,7 +246,7 @@ inline bool operator!=(const MapView& a, const MapView& b)
 class OSMSCOUT_CLIENT_QT_API InputHandler : public QObject{
     Q_OBJECT
 public:
-    InputHandler(MapView view);
+    InputHandler(const MapView &view);
     virtual ~InputHandler();
 
     virtual void painted();
@@ -253,6 +261,7 @@ public:
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance);
     virtual bool vehiclePosition(VehiclePosition* /*vehiclePosition*/);
     virtual bool isLockedToPosition();
+    virtual bool isFollowVehicle();
     virtual bool focusOutEvent(QFocusEvent *event);
 
 signals:
@@ -289,7 +298,7 @@ private slots:
     void onTimeout();
 
 public:
-    MoveHandler(MapView view);
+    MoveHandler(const MapView &view);
     virtual ~MoveHandler();
 
     virtual bool animationInProgress();
@@ -331,7 +340,7 @@ private slots:
     void onTimeout();
 
 public:
-    JumpHandler(MapView view);
+    JumpHandler(const MapView &view);
     virtual ~JumpHandler();
 
     virtual bool animationInProgress();
@@ -346,7 +355,7 @@ public:
 class OSMSCOUT_CLIENT_QT_API DragHandler : public MoveHandler {
     Q_OBJECT
 public:
-    DragHandler(MapView view);
+    DragHandler(const MapView &view);
     virtual ~DragHandler();
 
     virtual bool animationInProgress();
@@ -376,7 +385,7 @@ private:
 class OSMSCOUT_CLIENT_QT_API MultitouchHandler : public MoveHandler {
     Q_OBJECT
 public:
-    MultitouchHandler(MapView view);
+    MultitouchHandler(const MapView &view);
     virtual ~MultitouchHandler();
 
     virtual bool animationInProgress();
@@ -406,7 +415,7 @@ private:
 class OSMSCOUT_CLIENT_QT_API LockHandler : public JumpHandler {
     Q_OBJECT
 public:
-    inline LockHandler(MapView view):
+    inline LockHandler(const MapView &view):
       JumpHandler(view)
     {};
 
@@ -414,6 +423,26 @@ public:
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
     virtual bool isLockedToPosition();
     virtual bool focusOutEvent(QFocusEvent *event);
+};
+
+/**
+ * \ingroup QtAPI
+ *
+ * Input handler that follow vehicle.
+ */
+class OSMSCOUT_CLIENT_QT_API VehicleFollowHandler : public JumpHandler {
+Q_OBJECT
+public:
+  inline VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize):
+      JumpHandler(view), window(widgetSize)
+  {};
+
+  virtual bool vehiclePosition(VehiclePosition* /*vehiclePosition*/);
+  virtual bool isLockedToPosition();
+  virtual bool isFollowVehicle();
+
+private:
+  QSizeF window;
 };
 
 }

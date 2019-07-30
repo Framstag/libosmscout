@@ -172,7 +172,7 @@ QVector2D MoveAccumulator::collect()
             );
 }
 
-InputHandler::InputHandler(MapView view): view(view)
+InputHandler::InputHandler(const MapView &view): view(view)
 {
 }
 InputHandler::~InputHandler()
@@ -224,12 +224,16 @@ bool InputHandler::isLockedToPosition()
 {
     return false;
 }
+bool InputHandler::isFollowVehicle()
+{
+    return false;
+}
 bool InputHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return false;
 }
 
-MoveHandler::MoveHandler(MapView view): InputHandler(view)
+MoveHandler::MoveHandler(const MapView &view): InputHandler(view)
 {
     connect(&timer, &QTimer::timeout, this, &MoveHandler::onTimeout);
     timer.setSingleShot(false);
@@ -266,7 +270,7 @@ void MoveHandler::onTimeout()
     double startMag = startMapView.magnification.GetMagnification();
     double targetMag = targetMagnification.GetMagnification();
 
-    double startAngle = startMapView.angle;
+    double startAngle = startMapView.angle.AsRadians();
     double finalAngle = startAngle + ((targetAngle-startAngle) * scale);
 
     if (finalAngle > 2*M_PI) {
@@ -290,7 +294,7 @@ void MoveHandler::onTimeout()
 
     view.magnification = projection.GetMagnification();
     view.center=projection.GetCenter();
-    view.angle=projection.GetAngle();
+    view.angle=Bearing::Radians(projection.GetAngle());
     if (view.center.GetLon() < OSMTile::minLon()){
         view.center.Set(view.center.GetLat(),OSMTile::minLon());
     }else if (view.center.GetLon() > OSMTile::maxLon()){
@@ -378,7 +382,7 @@ bool MoveHandler::moveNow(QVector2D move)
 
     //qDebug() << "move: " << QString::fromStdString(view.center.GetDisplayText()) << "   by: " << move;
 
-    if (!projection.Set(view.center, view.angle, view.magnification, view.mapDpi, 1000, 1000)) {
+    if (!projection.Set(view.center, view.angle.AsRadians(), view.magnification, view.mapDpi, 1000, 1000)) {
         return false;
     }
 
@@ -408,7 +412,7 @@ bool MoveHandler::rotateTo(double angle)
     targetMagnification = view.magnification;
 
     targetAngle = angle;
-    if (std::abs(targetAngle-view.angle)>M_PI){
+    if (std::abs(targetAngle-view.angle.AsRadians())>M_PI){
         targetAngle+=2*M_PI;
     }
 
@@ -430,7 +434,7 @@ bool MoveHandler::rotateBy(double angleChange)
     startMapView = view;
     targetMagnification = view.magnification;
 
-    targetAngle = view.angle+angleChange;
+    targetAngle = view.angle.AsRadians()+angleChange;
 
     _move.setX(0);
     _move.setY(0);
@@ -445,7 +449,7 @@ bool MoveHandler::rotateBy(double angleChange)
 }
 
 
-JumpHandler::JumpHandler(MapView view):
+JumpHandler::JumpHandler(const MapView &view):
     InputHandler(view)
 {
     connect(&timer, &QTimer::timeout, this, &JumpHandler::onTimeout);
@@ -500,7 +504,7 @@ bool JumpHandler::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnificat
     return true;
 }
 
-DragHandler::DragHandler(MapView view):
+DragHandler::DragHandler(const MapView &view):
         MoveHandler(view), moving(true), startView(view), fingerId(-1),
         startX(-1), startY(-1), ended(false)
 {
@@ -566,7 +570,7 @@ bool DragHandler::animationInProgress()
 }
 
 
-MultitouchHandler::MultitouchHandler(MapView view):
+MultitouchHandler::MultitouchHandler(const MapView &view):
     MoveHandler(view), moving(true), startView(view), initialized(false), ended(false)
 {
 }
@@ -719,4 +723,21 @@ bool LockHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return true;
 }
+
+bool VehicleFollowHandler::vehiclePosition(VehiclePosition* vehiclePosition)
+{
+  // TODO
+  //vehiclePosition.
+  //JumpHandler::showCoordinates(currentPosition, view.magnification);
+  return true;
+}
+bool VehicleFollowHandler::isLockedToPosition()
+{
+  return true;
+}
+bool VehicleFollowHandler::isFollowVehicle()
+{
+  return true;
+}
+
 }

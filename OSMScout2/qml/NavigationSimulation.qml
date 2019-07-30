@@ -42,9 +42,9 @@ Window {
         }
 
         onPositionChanged: {
-            if (!map.lockToPosition){ // don't set again when it is true already
-                map.lockToPosition = true;
-            }
+            // if (!map.lockToPosition){ // don't set again when it is true already
+            //     map.lockToPosition = true;
+            // }
             map.locationChanged(true, // valid
                                 latitude, longitude,
                                 horizontalAccuracyValid, horizontalAccuracy);
@@ -86,6 +86,7 @@ Window {
         anchors.fill: parent
         showCurrentPosition: true
         vehiclePosition: navigationModel.vehiclePosition
+        followVehicle: true
 
         focus: true
 

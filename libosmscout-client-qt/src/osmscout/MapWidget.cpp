@@ -67,7 +67,7 @@ MapWidget::MapWidget(QQuickItem* parent)
     // TODO, open last position, move to current position or get as constructor argument...
     view = new MapView(this,
                        osmscout::GeoCoord(0.0, 0.0),
-                       /*angle*/ 0,
+                       /*angle*/ Bearing(),
                        Magnification(Magnification::magContinent),
                        settings->GetMapDPI());
     setupInputHandler(new InputHandler(*view));
@@ -185,7 +185,6 @@ void MapWidget::touchEvent(QTouchEvent *event)
 
     event->accept();
 
-    /*
     qDebug() << "touchEvent:";
     QList<QTouchEvent::TouchPoint> relevantTouchPoints;
     for (QTouchEvent::TouchPoint tp: event->touchPoints()){
@@ -194,7 +193,6 @@ void MapWidget::touchEvent(QTouchEvent *event)
               " pos " << tp.pos().x() << "x" << tp.pos().y() <<
               " @ " << tp.pressure();
     }
-    */
  }
 
 void MapWidget::focusOutEvent(QFocusEvent *event)
@@ -489,6 +487,16 @@ void MapWidget::setLockToPosition(bool lock){
     }else{
         setupInputHandler(new InputHandler(*view));
     }
+}
+
+void MapWidget::setFollowVehicle(bool follow){
+  if (follow){
+    if (!isFollowVehicle()){
+      setupInputHandler(new VehicleFollowHandler(*view, size()));
+    }
+  }else{
+    setupInputHandler(new InputHandler(*view));
+  }
 }
 
 void MapWidget::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)

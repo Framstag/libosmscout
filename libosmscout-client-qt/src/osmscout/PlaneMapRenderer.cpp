@@ -136,7 +136,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   osmscout::MercatorProjection requestProjection;
 
   if (!requestProjection.Set(request.coord,
-                             request.angle,
+                             request.angle.AsRadians(),
                              request.magnification,
                              mapDpi,
                              request.width,
@@ -255,7 +255,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   bool needsNoRepaint=finishedImage->width()==(int) extendedRequest.width &&
                       finishedImage->height()==(int) extendedRequest.height &&
                       finishedCoord==request.coord &&
-                      finishedAngle==request.angle &&
+                      finishedAngle==request.angle.AsRadians() &&
                       finishedMagnification==request.magnification;
 
   if (!needsNoRepaint){
@@ -476,7 +476,7 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
     currentWidth=request.width;
     currentHeight=request.height;
     currentCoord=request.coord;
-    currentAngle=request.angle;
+    currentAngle=request.angle.AsRadians();
     currentMagnification=request.magnification;
 
     projection.Set(currentCoord,

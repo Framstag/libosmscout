@@ -51,7 +51,7 @@ namespace osmscout {
 struct MapViewStruct
 {
   osmscout::GeoCoord      coord;
-  double                  angle;
+  osmscout::Bearing       angle;
   osmscout::Magnification magnification;
   size_t                  width;
   size_t                  height;
