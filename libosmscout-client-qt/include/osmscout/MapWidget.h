@@ -234,7 +234,9 @@ private slots:
   virtual void onLongTap(const QPoint p);
   virtual void onTapLongTap(const QPoint p);
   
-  void onMapDPIChange(double dpi);  
+  void onMapDPIChange(double dpi);
+
+  void onResize();
   
 private:
   void setupInputHandler(InputHandler *newGesture);

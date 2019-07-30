@@ -258,11 +258,12 @@ public:
     virtual bool rotateTo(double angle);
     virtual bool rotateBy(double angleChange);
     virtual bool touch(QTouchEvent *event);
-    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance);
+    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
     virtual bool vehiclePosition(VehiclePosition* /*vehiclePosition*/);
     virtual bool isLockedToPosition();
     virtual bool isFollowVehicle();
     virtual bool focusOutEvent(QFocusEvent *event);
+    virtual void widgetResized(const QSizeF &widgetSize);
 
 signals:
     void viewChanged(const MapView &view);
@@ -415,14 +416,17 @@ private:
 class OSMSCOUT_CLIENT_QT_API LockHandler : public JumpHandler {
     Q_OBJECT
 public:
-    inline LockHandler(const MapView &view):
-      JumpHandler(view)
+    inline LockHandler(const MapView &view, const QSizeF &widgetSize):
+      JumpHandler(view), window(widgetSize)
     {};
 
-    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance);
+    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
     virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
     virtual bool isLockedToPosition();
     virtual bool focusOutEvent(QFocusEvent *event);
+    virtual void widgetResized(const QSizeF &widgetSize);
+private:
+    QSizeF window;
 };
 
 /**
@@ -440,6 +444,7 @@ public:
   virtual bool vehiclePosition(VehiclePosition* /*vehiclePosition*/);
   virtual bool isLockedToPosition();
   virtual bool isFollowVehicle();
+  virtual void widgetResized(const QSizeF &widgetSize);
 
 private:
   QSizeF window;

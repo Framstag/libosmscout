@@ -64,6 +64,9 @@ MapWidget::MapWidget(QQuickItem* parent)
     connect(&tapRecognizer, &TapRecognizer::longTap,    this, &MapWidget::onLongTap);
     connect(&tapRecognizer, &TapRecognizer::tapLongTap, this, &MapWidget::onTapLongTap);
 
+    connect(this, &QQuickItem::widthChanged, this, &MapWidget::onResize);
+    connect(this, &QQuickItem::heightChanged, this, &MapWidget::onResize);
+
     // TODO, open last position, move to current position or get as constructor argument...
     view = new MapView(this,
                        osmscout::GeoCoord(0.0, 0.0),
@@ -480,9 +483,9 @@ void MapWidget::reloadTmpStyle() {
 
 void MapWidget::setLockToPosition(bool lock){
     if (lock){
-        if (!inputHandler->currentPosition(currentPosition.valid, currentPosition.coord, std::min(width(), height()) / 3)){
-            setupInputHandler(new LockHandler(*view));
-            inputHandler->currentPosition(currentPosition.valid, currentPosition.coord, std::min(width(), height()) / 3);
+        if (!inputHandler->currentPosition(currentPosition.valid, currentPosition.coord)){
+            setupInputHandler(new LockHandler(*view, size()));
+            inputHandler->currentPosition(currentPosition.valid, currentPosition.coord);
         }
     }else{
         setupInputHandler(new InputHandler(*view));
@@ -592,7 +595,7 @@ void MapWidget::locationChanged(bool locationValid,
     this->currentPosition.horizontalAccuracyValid = horizontalAccuracyValid;
     this->currentPosition.horizontalAccuracy = horizontalAccuracy;
 
-    inputHandler->currentPosition(locationValid, currentPosition.coord, std::min(width(), height()) / 3);
+    inputHandler->currentPosition(locationValid, currentPosition.coord);
 
     redraw();
 }
@@ -712,6 +715,11 @@ void MapWidget::onMapDPIChange(double dpi)
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
     emit viewChanged();
+}
+
+void MapWidget::onResize()
+{
+    inputHandler->widgetResized(size());
 }
 
 void MapWidget::SetVehiclePosition(QObject *o)

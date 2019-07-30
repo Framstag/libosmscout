@@ -212,7 +212,7 @@ bool InputHandler::touch(QTouchEvent* /*event*/)
 {
     return false;
 }
-bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/, double /*moveTolerance*/)
+bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/)
 {
     return false;
 }
@@ -231,6 +231,10 @@ bool InputHandler::isFollowVehicle()
 bool InputHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return false;
+}
+void InputHandler::widgetResized(const QSizeF &/*widgetSize*/)
+{
+  // no code
 }
 
 MoveHandler::MoveHandler(const MapView &view): InputHandler(view)
@@ -691,7 +695,7 @@ bool MultitouchHandler::touch(QTouchEvent *event)
     return true;
 }
 
-bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance)
+bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition)
 {
     if (locationValid){
         osmscout::MercatorProjection projection;
@@ -704,6 +708,7 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
         double y;
         projection.GeoToPixel(currentPosition, x, y);
         double distanceFromCenter = sqrt(pow(std::abs(500.0 - x), 2) + pow(std::abs(500.0 - y), 2));
+        double moveTolerance = std::min(window.width(), window.height()) / 4;
         if (distanceFromCenter > moveTolerance){
             JumpHandler::showCoordinates(currentPosition, view.magnification);
         }
@@ -723,6 +728,10 @@ bool LockHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return true;
 }
+void LockHandler::widgetResized(const QSizeF &widgetSize)
+{
+    window=widgetSize;
+}
 
 bool VehicleFollowHandler::vehiclePosition(VehiclePosition* vehiclePosition)
 {
@@ -739,5 +748,8 @@ bool VehicleFollowHandler::isFollowVehicle()
 {
   return true;
 }
-
+void VehicleFollowHandler::widgetResized(const QSizeF &widgetSize)
+{
+  window=widgetSize;
+}
 }
