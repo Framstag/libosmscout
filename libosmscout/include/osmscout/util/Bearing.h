@@ -107,6 +107,16 @@ namespace osmscout {
      */
     std::string LongDisplayString() const;
 
+    inline bool operator==(const Bearing& o) const
+    {
+      return radians == o.radians;
+    }
+
+    inline bool operator!=(const Bearing& o) const
+    {
+      return radians != o.radians;
+    }
+
     static inline Bearing Radians(double radians)
     {
       return Bearing(radians);
@@ -120,7 +130,7 @@ namespace osmscout {
   private:
     static double Normalise(double radians);
   };
-  
+
 }
 
 #endif //LIBOSMSCOUT_BEARING_H
