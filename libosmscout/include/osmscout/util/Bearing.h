@@ -95,6 +95,16 @@ namespace osmscout {
       return Bearing(radians+d.radians);
     }
 
+    inline Bearing operator*(const double &d) const
+    {
+      return Bearing(radians * d);
+    }
+
+    inline Bearing operator/(const double &d) const
+    {
+      return Bearing(radians / d);
+    }
+
     /**
      * Convert the bearing to a direction description in relation to the compass (4 points).
      * One from the options: N, E, S, W
