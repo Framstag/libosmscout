@@ -45,7 +45,7 @@ namespace osmscout {
   protected:
     double        lon;            //!< Longitude coordinate of the center of the image
     double        lat;            //!< Latitude coordinate of the center of the image
-    double        angle;          //!< Display rotation angle in radians
+    double        angle;          //!< Display rotation angle in radians, canvas clockwise
     Magnification magnification;  //!< Current magnification
     double        dpi;            //!< Screen DPI
     size_t        width;          //!< Width of image

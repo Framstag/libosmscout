@@ -741,8 +741,13 @@ void MapWidget::SetVehiclePosition(QObject *o)
     *vehicle.position = *updated;
   }
 
-  inputHandler->vehiclePosition(vehicle.position);
-  redraw();
+  if (vehicle.position != nullptr) {
+    // TODO use timer
+    setFollowVehicle(true);
+
+    inputHandler->vehiclePosition(*vehicle.position);
+    redraw();
+  }
 }
 
 QImage MapWidget::loadSVGIcon(const QString &directory, const QString fileName, double iconPixelSize)

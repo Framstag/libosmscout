@@ -212,7 +212,7 @@ public:
   }
 
   osmscout::GeoCoord           center;
-  Bearing                      angle;
+  Bearing                      angle; // canvas clockwise
   osmscout::Magnification      magnification;
   double                       mapDpi{0};
 };
@@ -259,7 +259,7 @@ public:
     virtual bool rotateBy(double angleChange);
     virtual bool touch(QTouchEvent *event);
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
-    virtual bool vehiclePosition(VehiclePosition* /*vehiclePosition*/);
+    virtual bool vehiclePosition(const VehiclePosition &vehiclePosition);
     virtual bool isLockedToPosition();
     virtual bool isFollowVehicle();
     virtual bool focusOutEvent(QFocusEvent *event);
@@ -333,6 +333,7 @@ private:
     QTimer timer;
     MapView startMapView;
     MapView targetMapView;
+    double angleDiff; // radians
 
     const int ANIMATION_DURATION = 1000; // ms
     const int ANIMATION_TICK = 16;
@@ -345,7 +346,7 @@ public:
     virtual ~JumpHandler();
 
     virtual bool animationInProgress();
-    virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
+    virtual bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing);
 };
 
 /**
@@ -441,7 +442,7 @@ public:
       JumpHandler(view), window(widgetSize)
   {};
 
-  virtual bool vehiclePosition(VehiclePosition* /*vehiclePosition*/);
+  virtual bool vehiclePosition(const VehiclePosition &vehiclePosition);
   virtual bool isLockedToPosition();
   virtual bool isFollowVehicle();
   virtual void widgetResized(const QSizeF &widgetSize);

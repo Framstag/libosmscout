@@ -32,9 +32,6 @@ Window {
         Component.onCompleted: {
             console.log("PositionSimulationTrack: "+PositionSimulationTrack)
         }
-        onStartChanged: {
-            map.showCoordinates(latitude, longitude);
-        }
         onEndChanged: {
             var startLoc = routingModel.locationEntryFromPosition(simulator.startLat, simulator.startLon);
             var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);

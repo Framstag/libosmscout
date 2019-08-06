@@ -216,7 +216,7 @@ bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*
 {
     return false;
 }
-bool InputHandler::vehiclePosition(VehiclePosition* /*vehiclePosition*/)
+bool InputHandler::vehiclePosition(const VehiclePosition& /*vehiclePosition*/)
 {
     return false;
 }
@@ -472,6 +472,7 @@ void JumpHandler::onTimeout()
         timer.stop();
     }
     double magScale = progress; // std::log10( progress * (10 - 1) + 1);
+    double angleScale = progress;
     double positionScale = std::log( progress * (M_E - 1) + 1);
 
     double startMag = startMapView.magnification.GetMagnification();
@@ -488,6 +489,9 @@ void JumpHandler::onTimeout()
 
     view.center.Set(lat, lon);
 
+    double startAngle = startMapView.angle.AsRadians();
+    view.angle = Bearing::Radians(startAngle + (angleDiff * angleScale));
+
     emit viewChanged(view);
 }
 bool JumpHandler::animationInProgress()
@@ -495,10 +499,14 @@ bool JumpHandler::animationInProgress()
     return timer.isActive();
 }
 
-bool JumpHandler::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)
+bool JumpHandler::showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing)
 {
     startMapView = view;
-    targetMapView = MapView(coord, view.angle, magnification, view.mapDpi);
+    targetMapView = MapView(coord, bearing, magnification, view.mapDpi);
+    angleDiff = (bearing - startMapView.angle).AsRadians();
+    if (angleDiff > M_PI){
+      angleDiff -= 2*M_PI;
+    }
 
     animationStart.restart();
     timer.setInterval(ANIMATION_TICK);
@@ -700,7 +708,7 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
     if (locationValid){
         osmscout::MercatorProjection projection;
 
-        if (!projection.Set(view.center, view.magnification, view.mapDpi, 1000, 1000)) {
+        if (!projection.Set(view.center, view.magnification, view.mapDpi, window.width(), window.height())) {
             return false;
         }
 
@@ -710,7 +718,7 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
         double distanceFromCenter = sqrt(pow(std::abs(500.0 - x), 2) + pow(std::abs(500.0 - y), 2));
         double moveTolerance = std::min(window.width(), window.height()) / 4;
         if (distanceFromCenter > moveTolerance){
-            JumpHandler::showCoordinates(currentPosition, view.magnification);
+            JumpHandler::showCoordinates(currentPosition, view.magnification, view.angle);
         }
     }
     return true;
@@ -733,12 +741,32 @@ void LockHandler::widgetResized(const QSizeF &widgetSize)
     window=widgetSize;
 }
 
-bool VehicleFollowHandler::vehiclePosition(VehiclePosition* vehiclePosition)
+bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePosition)
 {
-  // TODO
-  //vehiclePosition.
-  //JumpHandler::showCoordinates(currentPosition, view.magnification);
-  return true;
+  osmscout::Bearing bearing = vehiclePosition.getBearing() ? *(vehiclePosition.getBearing()) : osmscout::Bearing();
+  osmscout::log.Debug() << "bearing: " << bearing.LongDisplayString();
+  // clockwise to counterclockwise (car bearing to canvas rotation)
+  bearing = Bearing::Radians(2*M_PI - bearing.AsRadians());
+
+  osmscout::Magnification magnification(Magnification::magClose); // TODO: evaluate from vehicle position and nextStepCoord
+
+  osmscout::MercatorProjection projection;
+
+  if (!projection.Set(vehiclePosition.getCoord(),
+                      bearing.AsRadians(),
+                      magnification,
+                      view.mapDpi,
+                      window.width(), window.height()
+                      )) {
+    return false;
+  }
+
+  double lat, lon; // updated center
+  if (!projection.PixelToGeo(window.width()/2, window.height()/4, lon, lat)){
+    return false;
+  }
+
+  return JumpHandler::showCoordinates(osmscout::GeoCoord(lat, lon), magnification, bearing);
 }
 bool VehicleFollowHandler::isLockedToPosition()
 {
