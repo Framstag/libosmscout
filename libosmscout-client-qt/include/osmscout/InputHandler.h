@@ -335,14 +335,20 @@ private:
     MapView targetMapView;
     double angleDiff; // radians
 
-    const int ANIMATION_DURATION = 1000; // ms
-    const int ANIMATION_TICK = 16;
+    double moveAnimationDuration;
+    double zoomAnimationDuration;
+
+    static constexpr int ANIMATION_DURATION = 1000; // ms
+    static constexpr int ANIMATION_TICK = 16; // ms
 
 private slots:
     void onTimeout();
 
 public:
-    JumpHandler(const MapView &view);
+    JumpHandler(const MapView &view,
+                double moveAnimationDuration = (double)ANIMATION_DURATION,
+                double zoomAnimationDuration = (double)ANIMATION_DURATION);
+
     virtual ~JumpHandler();
 
     virtual bool animationInProgress();
@@ -438,9 +444,7 @@ private:
 class OSMSCOUT_CLIENT_QT_API VehicleFollowHandler : public JumpHandler {
 Q_OBJECT
 public:
-  inline VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize):
-      JumpHandler(view), window(widgetSize)
-  {};
+  VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize);
 
   virtual bool vehiclePosition(const VehiclePosition &vehiclePosition);
   virtual bool isLockedToPosition();

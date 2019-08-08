@@ -453,8 +453,12 @@ bool MoveHandler::rotateBy(double angleChange)
 }
 
 
-JumpHandler::JumpHandler(const MapView &view):
-    InputHandler(view)
+JumpHandler::JumpHandler(const MapView &view,
+    double moveAnimationDuration,
+    double zoomAnimationDuration):
+    InputHandler(view),
+    moveAnimationDuration(moveAnimationDuration),
+    zoomAnimationDuration(zoomAnimationDuration)
 {
     connect(&timer, &QTimer::timeout, this, &JumpHandler::onTimeout);
     timer.setSingleShot(false);
@@ -466,12 +470,18 @@ JumpHandler::~JumpHandler()
 }
 void JumpHandler::onTimeout()
 {
-    double progress = (double)(animationStart.elapsed() + ANIMATION_TICK) / (double)ANIMATION_DURATION;
+    double progress = (double)(animationStart.elapsed() + ANIMATION_TICK) / moveAnimationDuration;
+    double zoomProgress = (double)(animationStart.elapsed() + ANIMATION_TICK) / zoomAnimationDuration;
     if (progress >= 1){
-        progress = 1.0;
-        timer.stop();
+      progress = 1;
     }
-    double magScale = progress; // std::log10( progress * (10 - 1) + 1);
+    if (zoomProgress >= 1){
+      zoomProgress = 1;
+    }
+    if (progress >= 1 && zoomProgress >= 1){
+      timer.stop();
+    }
+    double magScale = zoomProgress; // std::log10( progress * (10 - 1) + 1);
     double angleScale = progress;
     double positionScale = std::log( progress * (M_E - 1) + 1);
 
@@ -741,14 +751,50 @@ void LockHandler::widgetResized(const QSizeF &widgetSize)
     window=widgetSize;
 }
 
+VehicleFollowHandler::VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize):
+    JumpHandler(view, 1000, 10000), window(widgetSize)
+{}
+
 bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePosition)
 {
-  osmscout::Bearing bearing = vehiclePosition.getBearing() ? *(vehiclePosition.getBearing()) : osmscout::Bearing();
-  osmscout::log.Debug() << "bearing: " << bearing.LongDisplayString();
+  Bearing bearing = vehiclePosition.getBearing() ? *(vehiclePosition.getBearing()) : osmscout::Bearing();
+  log.Debug() << "bearing: " << bearing.LongDisplayString();
   // clockwise to counterclockwise (car bearing to canvas rotation)
   bearing = Bearing::Radians(2*M_PI - bearing.AsRadians());
 
-  osmscout::Magnification magnification(Magnification::magClose); // TODO: evaluate from vehicle position and nextStepCoord
+  Magnification magnification = view.magnification;
+  if(vehiclePosition.getNextStepCoord()) {
+    Distance nextStepDistance = GetSphericalDistance(vehiclePosition.getCoord(), *vehiclePosition.getNextStepCoord());
+
+    double mag;
+    if (nextStepDistance > Kilometers(2)) {
+      mag = pow(2.0, 13); // Magnification::magDetail;
+    } else if (nextStepDistance > Meters(750)) {
+      mag = pow(2.0, 14); // Magnification::magClose;
+    } else if (nextStepDistance > Meters(600)) {
+      mag = pow(2.0, 14.25);
+    } else if (nextStepDistance > Meters(500)) {
+      mag = pow(2.0, 14.5);
+    } else if (nextStepDistance > Meters(400)) {
+      mag = pow(2.0, 14.75);
+    } else if (nextStepDistance > Meters(300)) {
+      mag = pow(2.0, 15); // Magnification::magCloser;
+    } else if (nextStepDistance > Meters(200)) {
+      mag = pow(2.0, 16); // Magnification::magVeryClose;
+    } else if (nextStepDistance > Meters(100)) {
+      mag = pow(2.0, 17); // Magnification::magVeryClose;
+    } else {
+      mag = pow(2.0,18); // Magnification::magBlock
+    }
+
+    magnification.SetMagnification(mag);
+    double factor = magnification.GetMagnification() / view.magnification.GetMagnification();
+    if (factor > 2){
+      magnification.SetMagnification(view.magnification.GetMagnification() * 2);
+    }else if (factor < 0.5){
+      magnification.SetMagnification(view.magnification.GetMagnification() * 0.5);
+    }
+  }
 
   osmscout::MercatorProjection projection;
 
