@@ -504,9 +504,10 @@ void MapWidget::setFollowVehicle(bool follow){
 
 void MapWidget::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)
 {
-    if (!inputHandler->showCoordinates(coord, magnification)){
+    assert(view);
+    if (!inputHandler->showCoordinates(coord, magnification, view->angle)){
         setupInputHandler(new JumpHandler(*view));
-        inputHandler->showCoordinates(coord, magnification);
+        inputHandler->showCoordinates(coord, magnification, view->angle);
     }
 }
 

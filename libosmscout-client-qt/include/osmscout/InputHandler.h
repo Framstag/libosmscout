@@ -252,7 +252,7 @@ public:
     virtual void painted();
     virtual bool animationInProgress();
 
-    virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
+    virtual bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing);
     virtual bool zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension);
     virtual bool move(QVector2D vector); // move vector in pixels
     virtual bool rotateTo(double angle);
@@ -428,7 +428,7 @@ public:
     {};
 
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
-    virtual bool showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
+    virtual bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing);
     virtual bool isLockedToPosition();
     virtual bool focusOutEvent(QFocusEvent *event);
     virtual void widgetResized(const QSizeF &widgetSize);

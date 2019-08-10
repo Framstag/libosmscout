@@ -187,7 +187,7 @@ bool InputHandler::animationInProgress()
 {
     return false;
 }
-bool InputHandler::showCoordinates(osmscout::GeoCoord /*coord*/, osmscout::Magnification /*magnification*/)
+bool InputHandler::showCoordinates(const osmscout::GeoCoord &/*coord*/, const osmscout::Magnification &/*magnification*/, const osmscout::Bearing &bearing)
 {
     return false;
 }
@@ -734,7 +734,7 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
     return true;
 }
 
-bool LockHandler::showCoordinates(osmscout::GeoCoord /*coord*/, osmscout::Magnification /*magnification*/){
+bool LockHandler::showCoordinates(const osmscout::GeoCoord &/*coord*/, const osmscout::Magnification &/*magnification*/, const osmscout::Bearing &/*bearing*/){
     return false; // lock handler can't handle it, we are locked on "currentPosition"
 }
 
