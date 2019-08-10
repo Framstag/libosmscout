@@ -484,7 +484,7 @@ void MapWidget::reloadTmpStyle() {
 void MapWidget::setLockToPosition(bool lock){
     if (lock){
         if (!inputHandler->currentPosition(currentPosition.valid, currentPosition.coord)){
-            setupInputHandler(new LockHandler(*view, size()));
+            setupInputHandler(new LockHandler(*view, QSizeF(width(), height())));
             inputHandler->currentPosition(currentPosition.valid, currentPosition.coord);
         }
     }else{
@@ -495,7 +495,7 @@ void MapWidget::setLockToPosition(bool lock){
 void MapWidget::setFollowVehicle(bool follow){
   if (follow){
     if (!isFollowVehicle()){
-      setupInputHandler(new VehicleFollowHandler(*view, size()));
+      setupInputHandler(new VehicleFollowHandler(*view, QSizeF(width(), height())));
     }
   }else{
     setupInputHandler(new InputHandler(*view));
@@ -720,7 +720,7 @@ void MapWidget::onMapDPIChange(double dpi)
 
 void MapWidget::onResize()
 {
-    inputHandler->widgetResized(size());
+    inputHandler->widgetResized(QSizeF(width(), height()));
 }
 
 void MapWidget::SetVehiclePosition(QObject *o)
