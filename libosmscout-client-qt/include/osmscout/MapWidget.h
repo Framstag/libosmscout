@@ -111,6 +111,10 @@ private:
 
     double iconSize{16}; // icon size [mm]
 
+    /// input handler control
+    bool follow{false};
+    QTime lastGesture; // when there is some gesture, we will not follow vehicle for some short time
+
     QString standardIconFile{"vehicle.svg"}; // state == OnRoute | OffRoute
     QString noGpsSignalIconFile{"vehicle_not_fixed.svg"}; // state == NoGpsSignal
     QString inTunnelIconFile{"vehicle_tunnel.svg"}; // state == EstimateInTunnel
@@ -381,7 +385,7 @@ public:
 
   inline bool isFollowVehicle() const
   {
-    return inputHandler->isFollowVehicle();
+    return vehicle.follow;
   }
 
   void setFollowVehicle(bool);

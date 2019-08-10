@@ -173,7 +173,7 @@ void MapWidget::changeView(const MapView &updated)
 
 void MapWidget::touchEvent(QTouchEvent *event)
 {
-
+    vehicle.lastGesture.restart();
     if (!inputHandler->touch(event)){
         if (event->touchPoints().size() == 1){
             QTouchEvent::TouchPoint tp = event->touchPoints()[0];
@@ -391,6 +391,7 @@ void MapWidget::zoom(double zoomFactor, const QPoint widgetPosition)
   if (zoomFactor == 1)
     return;
 
+  vehicle.lastGesture.restart();
   if (!inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()))){
     setupInputHandler(new MoveHandler(*view));
     inputHandler->zoom(zoomFactor, widgetPosition, QRect(0, 0, width(), height()));
@@ -409,6 +410,7 @@ void MapWidget::zoomOut(double zoomFactor, const QPoint widgetPosition)
 
 void MapWidget::move(QVector2D vector)
 {
+    vehicle.lastGesture.restart();
     if (!inputHandler->move(vector)){
         setupInputHandler(new MoveHandler(*view));
         inputHandler->move(vector);
@@ -437,6 +439,7 @@ void MapWidget::down()
 
 void MapWidget::rotateTo(double angle)
 {
+    vehicle.lastGesture.restart();
     if (!inputHandler->rotateTo(angle)){
         setupInputHandler(new MoveHandler(*view));
         inputHandler->rotateTo(angle);
@@ -445,6 +448,7 @@ void MapWidget::rotateTo(double angle)
 
 void MapWidget::rotateLeft()
 {
+    vehicle.lastGesture.restart();
     if (!inputHandler->rotateBy(-DELTA_ANGLE)){
         setupInputHandler(new MoveHandler(*view));
         inputHandler->rotateBy(-DELTA_ANGLE);
@@ -453,6 +457,7 @@ void MapWidget::rotateLeft()
 
 void MapWidget::rotateRight()
 {
+    vehicle.lastGesture.restart();
     if (!inputHandler->rotateBy(DELTA_ANGLE)){
         setupInputHandler(new MoveHandler(*view));
         inputHandler->rotateBy(DELTA_ANGLE);
@@ -493,8 +498,10 @@ void MapWidget::setLockToPosition(bool lock){
 }
 
 void MapWidget::setFollowVehicle(bool follow){
+  vehicle.follow = follow;
+  vehicle.lastGesture = QTime(); // set to null
   if (follow){
-    if (!isFollowVehicle()){
+    if (!inputHandler->isFollowVehicle()){
       setupInputHandler(new VehicleFollowHandler(*view, QSizeF(width(), height())));
     }
   }else{
@@ -505,6 +512,7 @@ void MapWidget::setFollowVehicle(bool follow){
 void MapWidget::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)
 {
     assert(view);
+    vehicle.lastGesture.restart();
     if (!inputHandler->showCoordinates(coord, magnification, view->angle)){
         setupInputHandler(new JumpHandler(*view));
         inputHandler->showCoordinates(coord, magnification, view->angle);
@@ -522,6 +530,7 @@ void MapWidget::showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Mag
     MapView newView = *view;
     newView.magnification = magnification;
     newView.center = coord;
+    vehicle.lastGesture.restart();
     setupInputHandler(new InputHandler(newView));
     changeView(newView);
 }
@@ -742,13 +751,18 @@ void MapWidget::SetVehiclePosition(QObject *o)
     *vehicle.position = *updated;
   }
 
-  if (vehicle.position != nullptr) {
-    // TODO use timer
-    setFollowVehicle(true);
+  if (vehicle.position != nullptr &&
+      vehicle.follow &&
+      (vehicle.lastGesture.isNull() || vehicle.lastGesture.elapsed() > 4000) // there was no gesture event for 4s
+      ) {
+
+    if (!inputHandler->isFollowVehicle()){
+      setupInputHandler(new VehicleFollowHandler(*view, QSizeF(width(), height())));
+    }
 
     inputHandler->vehiclePosition(*vehicle.position);
-    redraw();
   }
+  redraw();
 }
 
 QImage MapWidget::loadSVGIcon(const QString &directory, const QString fileName, double iconPixelSize)
