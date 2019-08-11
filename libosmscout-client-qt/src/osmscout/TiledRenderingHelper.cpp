@@ -39,22 +39,22 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
   // compute canvas transformation from angle
   double width, height;
   QPointF translateVector;
-  if (request.angle==0) {
+  if (request.angle==Bearing()) {
     width = request.width;
     height = request.height;
   } else {
-    double cosAlpha=cos(request.angle);
-    double cosBeta=cos(M_PI_2 - request.angle);
+    double cosAlpha=cos(request.angle.AsRadians());
+    double cosBeta=cos(M_PI_2 - request.angle.AsRadians());
     double rw=request.width;
     double rh=request.height;
     height=std::abs(rw*cosBeta)+std::abs(rh*cosAlpha);
     width=std::abs(rw*cosAlpha)+std::abs(rh*cosBeta);
-    if (request.angle>0 && request.angle<=M_PI_2) {
+    if (request.angle.AsRadians()>0 && request.angle.AsRadians()<=M_PI_2) {
       translateVector.setY(cosBeta*rw*-1);
-    } else if (request.angle<=M_PI) {
+    } else if (request.angle.AsRadians()<=M_PI) {
       translateVector.setY(height*-1);
       translateVector.setX(cosAlpha * rw);
-    } else if (request.angle<=M_PI+M_PI_2) {
+    } else if (request.angle.AsRadians()<=M_PI+M_PI_2) {
       translateVector.setX(width*-1);
       translateVector.setY(height*-1 - cosBeta*rw);
     } else {
@@ -117,8 +117,8 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
   double y;
 
   painter.save();
-  if (request.angle!=0) {
-    painter.rotate(qRadiansToDegrees(request.angle));
+  if (request.angle!=Bearing()) {
+    painter.rotate(request.angle.AsDegrees());
     painter.translate(translateVector);
   }
 

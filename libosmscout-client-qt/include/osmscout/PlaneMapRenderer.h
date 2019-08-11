@@ -51,7 +51,7 @@ private:
   size_t                        currentWidth;
   size_t                        currentHeight;
   osmscout::GeoCoord            currentCoord;
-  double                        currentAngle;
+  double                        currentAngle;   // radians
   osmscout::Magnification       currentMagnification;
 
   mutable QMutex                finishedMutex;  // mutex protecting access to finished* variables

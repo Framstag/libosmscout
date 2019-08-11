@@ -172,7 +172,7 @@ QVector2D MoveAccumulator::collect()
             );
 }
 
-InputHandler::InputHandler(MapView view): view(view)
+InputHandler::InputHandler(const MapView &view): view(view)
 {
 }
 InputHandler::~InputHandler()
@@ -187,7 +187,7 @@ bool InputHandler::animationInProgress()
 {
     return false;
 }
-bool InputHandler::showCoordinates(osmscout::GeoCoord /*coord*/, osmscout::Magnification /*magnification*/)
+bool InputHandler::showCoordinates(const osmscout::GeoCoord &/*coord*/, const osmscout::Magnification &/*magnification*/, const osmscout::Bearing &bearing)
 {
     return false;
 }
@@ -212,11 +212,11 @@ bool InputHandler::touch(QTouchEvent* /*event*/)
 {
     return false;
 }
-bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/, double /*moveTolerance*/)
+bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*currentPosition*/)
 {
     return false;
 }
-bool InputHandler::vehiclePosition(VehiclePosition* /*vehiclePosition*/)
+bool InputHandler::vehiclePosition(const VehiclePosition& /*vehiclePosition*/)
 {
     return false;
 }
@@ -224,12 +224,20 @@ bool InputHandler::isLockedToPosition()
 {
     return false;
 }
+bool InputHandler::isFollowVehicle()
+{
+    return false;
+}
 bool InputHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return false;
 }
+void InputHandler::widgetResized(const QSizeF &/*widgetSize*/)
+{
+  // no code
+}
 
-MoveHandler::MoveHandler(MapView view): InputHandler(view)
+MoveHandler::MoveHandler(const MapView &view): InputHandler(view)
 {
     connect(&timer, &QTimer::timeout, this, &MoveHandler::onTimeout);
     timer.setSingleShot(false);
@@ -266,7 +274,7 @@ void MoveHandler::onTimeout()
     double startMag = startMapView.magnification.GetMagnification();
     double targetMag = targetMagnification.GetMagnification();
 
-    double startAngle = startMapView.angle;
+    double startAngle = startMapView.angle.AsRadians();
     double finalAngle = startAngle + ((targetAngle-startAngle) * scale);
 
     if (finalAngle > 2*M_PI) {
@@ -290,7 +298,7 @@ void MoveHandler::onTimeout()
 
     view.magnification = projection.GetMagnification();
     view.center=projection.GetCenter();
-    view.angle=projection.GetAngle();
+    view.angle=Bearing::Radians(projection.GetAngle());
     if (view.center.GetLon() < OSMTile::minLon()){
         view.center.Set(view.center.GetLat(),OSMTile::minLon());
     }else if (view.center.GetLon() > OSMTile::maxLon()){
@@ -378,7 +386,7 @@ bool MoveHandler::moveNow(QVector2D move)
 
     //qDebug() << "move: " << QString::fromStdString(view.center.GetDisplayText()) << "   by: " << move;
 
-    if (!projection.Set(view.center, view.angle, view.magnification, view.mapDpi, 1000, 1000)) {
+    if (!projection.Set(view.center, view.angle.AsRadians(), view.magnification, view.mapDpi, 1000, 1000)) {
         return false;
     }
 
@@ -408,7 +416,7 @@ bool MoveHandler::rotateTo(double angle)
     targetMagnification = view.magnification;
 
     targetAngle = angle;
-    if (std::abs(targetAngle-view.angle)>M_PI){
+    if (std::abs(targetAngle-view.angle.AsRadians())>M_PI){
         targetAngle+=2*M_PI;
     }
 
@@ -430,7 +438,7 @@ bool MoveHandler::rotateBy(double angleChange)
     startMapView = view;
     targetMagnification = view.magnification;
 
-    targetAngle = view.angle+angleChange;
+    targetAngle = view.angle.AsRadians()+angleChange;
 
     _move.setX(0);
     _move.setY(0);
@@ -445,8 +453,12 @@ bool MoveHandler::rotateBy(double angleChange)
 }
 
 
-JumpHandler::JumpHandler(MapView view):
-    InputHandler(view)
+JumpHandler::JumpHandler(const MapView &view,
+    double moveAnimationDuration,
+    double zoomAnimationDuration):
+    InputHandler(view),
+    moveAnimationDuration(moveAnimationDuration),
+    zoomAnimationDuration(zoomAnimationDuration)
 {
     connect(&timer, &QTimer::timeout, this, &JumpHandler::onTimeout);
     timer.setSingleShot(false);
@@ -458,12 +470,19 @@ JumpHandler::~JumpHandler()
 }
 void JumpHandler::onTimeout()
 {
-    double progress = (double)(animationStart.elapsed() + ANIMATION_TICK) / (double)ANIMATION_DURATION;
+    double progress = (double)(animationStart.elapsed() + ANIMATION_TICK) / moveAnimationDuration;
+    double zoomProgress = (double)(animationStart.elapsed() + ANIMATION_TICK) / zoomAnimationDuration;
     if (progress >= 1){
-        progress = 1.0;
-        timer.stop();
+      progress = 1;
     }
-    double magScale = progress; // std::log10( progress * (10 - 1) + 1);
+    if (zoomProgress >= 1){
+      zoomProgress = 1;
+    }
+    if (progress >= 1 && zoomProgress >= 1){
+      timer.stop();
+    }
+    double magScale = zoomProgress; // std::log10( progress * (10 - 1) + 1);
+    double angleScale = progress;
     double positionScale = std::log( progress * (M_E - 1) + 1);
 
     double startMag = startMapView.magnification.GetMagnification();
@@ -480,6 +499,9 @@ void JumpHandler::onTimeout()
 
     view.center.Set(lat, lon);
 
+    double startAngle = startMapView.angle.AsRadians();
+    view.angle = Bearing::Radians(startAngle + (angleDiff * angleScale));
+
     emit viewChanged(view);
 }
 bool JumpHandler::animationInProgress()
@@ -487,10 +509,14 @@ bool JumpHandler::animationInProgress()
     return timer.isActive();
 }
 
-bool JumpHandler::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)
+bool JumpHandler::showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing)
 {
     startMapView = view;
-    targetMapView = MapView(coord, view.angle, magnification, view.mapDpi);
+    targetMapView = MapView(coord, bearing, magnification, view.mapDpi);
+    angleDiff = (bearing - startMapView.angle).AsRadians();
+    if (angleDiff > M_PI){
+      angleDiff -= 2*M_PI;
+    }
 
     animationStart.restart();
     timer.setInterval(ANIMATION_TICK);
@@ -500,7 +526,7 @@ bool JumpHandler::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnificat
     return true;
 }
 
-DragHandler::DragHandler(MapView view):
+DragHandler::DragHandler(const MapView &view):
         MoveHandler(view), moving(true), startView(view), fingerId(-1),
         startX(-1), startY(-1), ended(false)
 {
@@ -566,7 +592,7 @@ bool DragHandler::animationInProgress()
 }
 
 
-MultitouchHandler::MultitouchHandler(MapView view):
+MultitouchHandler::MultitouchHandler(const MapView &view):
     MoveHandler(view), moving(true), startView(view), initialized(false), ended(false)
 {
 }
@@ -687,12 +713,12 @@ bool MultitouchHandler::touch(QTouchEvent *event)
     return true;
 }
 
-bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition, double moveTolerance)
+bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord currentPosition)
 {
     if (locationValid){
         osmscout::MercatorProjection projection;
 
-        if (!projection.Set(view.center, view.magnification, view.mapDpi, 1000, 1000)) {
+        if (!projection.Set(view.center, view.magnification, view.mapDpi, window.width(), window.height())) {
             return false;
         }
 
@@ -700,14 +726,15 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
         double y;
         projection.GeoToPixel(currentPosition, x, y);
         double distanceFromCenter = sqrt(pow(std::abs(500.0 - x), 2) + pow(std::abs(500.0 - y), 2));
+        double moveTolerance = std::min(window.width(), window.height()) / 4;
         if (distanceFromCenter > moveTolerance){
-            JumpHandler::showCoordinates(currentPosition, view.magnification);
+            JumpHandler::showCoordinates(currentPosition, view.magnification, view.angle);
         }
     }
     return true;
 }
 
-bool LockHandler::showCoordinates(osmscout::GeoCoord /*coord*/, osmscout::Magnification /*magnification*/){
+bool LockHandler::showCoordinates(const osmscout::GeoCoord &/*coord*/, const osmscout::Magnification &/*magnification*/, const osmscout::Bearing &/*bearing*/){
     return false; // lock handler can't handle it, we are locked on "currentPosition"
 }
 
@@ -718,5 +745,85 @@ bool LockHandler::isLockedToPosition()
 bool LockHandler::focusOutEvent(QFocusEvent* /*event*/)
 {
     return true;
+}
+void LockHandler::widgetResized(const QSizeF &widgetSize)
+{
+    window=widgetSize;
+}
+
+VehicleFollowHandler::VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize):
+    JumpHandler(view, 1000, 10000), window(widgetSize)
+{}
+
+bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePosition)
+{
+  Bearing bearing = vehiclePosition.getBearing() ? *(vehiclePosition.getBearing()) : osmscout::Bearing();
+  log.Debug() << "bearing: " << bearing.LongDisplayString();
+  // clockwise to counterclockwise (car bearing to canvas rotation)
+  bearing = Bearing::Radians(2*M_PI - bearing.AsRadians());
+
+  Magnification magnification = view.magnification;
+  if(vehiclePosition.getNextStepCoord()) {
+    Distance nextStepDistance = GetSphericalDistance(vehiclePosition.getCoord(), *vehiclePosition.getNextStepCoord());
+
+    double mag;
+    if (nextStepDistance > Kilometers(2)) {
+      mag = pow(2.0, 13); // Magnification::magDetail;
+    } else if (nextStepDistance > Meters(750)) {
+      mag = pow(2.0, 14); // Magnification::magClose;
+    } else if (nextStepDistance > Meters(600)) {
+      mag = pow(2.0, 14.25);
+    } else if (nextStepDistance > Meters(500)) {
+      mag = pow(2.0, 14.5);
+    } else if (nextStepDistance > Meters(400)) {
+      mag = pow(2.0, 14.75);
+    } else if (nextStepDistance > Meters(300)) {
+      mag = pow(2.0, 15); // Magnification::magCloser;
+    } else if (nextStepDistance > Meters(200)) {
+      mag = pow(2.0, 16); // Magnification::magVeryClose;
+    } else if (nextStepDistance > Meters(100)) {
+      mag = pow(2.0, 17); // Magnification::magVeryClose;
+    } else {
+      mag = pow(2.0,18); // Magnification::magBlock
+    }
+
+    magnification.SetMagnification(mag);
+    double factor = magnification.GetMagnification() / view.magnification.GetMagnification();
+    if (factor > 2){
+      magnification.SetMagnification(view.magnification.GetMagnification() * 2);
+    }else if (factor < 0.5){
+      magnification.SetMagnification(view.magnification.GetMagnification() * 0.5);
+    }
+  }
+
+  osmscout::MercatorProjection projection;
+
+  if (!projection.Set(vehiclePosition.getCoord(),
+                      bearing.AsRadians(),
+                      magnification,
+                      view.mapDpi,
+                      window.width(), window.height()
+                      )) {
+    return false;
+  }
+
+  double lat, lon; // updated center
+  if (!projection.PixelToGeo(window.width()/2, window.height()/4, lon, lat)){
+    return false;
+  }
+
+  return JumpHandler::showCoordinates(osmscout::GeoCoord(lat, lon), magnification, bearing);
+}
+bool VehicleFollowHandler::isLockedToPosition()
+{
+  return true;
+}
+bool VehicleFollowHandler::isFollowVehicle()
+{
+  return true;
+}
+void VehicleFollowHandler::widgetResized(const QSizeF &widgetSize)
+{
+  window=widgetSize;
 }
 }

@@ -32,9 +32,6 @@ Window {
         Component.onCompleted: {
             console.log("PositionSimulationTrack: "+PositionSimulationTrack)
         }
-        onStartChanged: {
-            map.showCoordinates(latitude, longitude);
-        }
         onEndChanged: {
             var startLoc = routingModel.locationEntryFromPosition(simulator.startLat, simulator.startLon);
             var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
@@ -42,9 +39,9 @@ Window {
         }
 
         onPositionChanged: {
-            if (!map.lockToPosition){ // don't set again when it is true already
-                map.lockToPosition = true;
-            }
+            // if (!map.lockToPosition){ // don't set again when it is true already
+            //     map.lockToPosition = true;
+            // }
             map.locationChanged(true, // valid
                                 latitude, longitude,
                                 horizontalAccuracyValid, horizontalAccuracy);
@@ -86,6 +83,7 @@ Window {
         anchors.fill: parent
         showCurrentPosition: true
         vehiclePosition: navigationModel.vehiclePosition
+        followVehicle: true
 
         focus: true
 

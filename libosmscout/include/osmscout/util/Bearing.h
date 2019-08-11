@@ -95,6 +95,16 @@ namespace osmscout {
       return Bearing(radians+d.radians);
     }
 
+    inline Bearing operator*(const double &d) const
+    {
+      return Bearing(radians * d);
+    }
+
+    inline Bearing operator/(const double &d) const
+    {
+      return Bearing(radians / d);
+    }
+
     /**
      * Convert the bearing to a direction description in relation to the compass (4 points).
      * One from the options: N, E, S, W
@@ -106,6 +116,16 @@ namespace osmscout {
      * One from the options: N, NE, E, SE, S, SW, W, NW
      */
     std::string LongDisplayString() const;
+
+    inline bool operator==(const Bearing& o) const
+    {
+      return radians == o.radians;
+    }
+
+    inline bool operator!=(const Bearing& o) const
+    {
+      return radians != o.radians;
+    }
 
     static inline Bearing Radians(double radians)
     {
@@ -120,7 +140,7 @@ namespace osmscout {
   private:
     static double Normalise(double radians);
   };
-  
+
 }
 
 #endif //LIBOSMSCOUT_BEARING_H

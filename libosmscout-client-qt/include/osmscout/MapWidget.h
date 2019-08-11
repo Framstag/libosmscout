@@ -67,6 +67,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(bool     finished READ IsFinished  NOTIFY finishedChanged)
   Q_PROPERTY(bool     showCurrentPosition READ getShowCurrentPosition WRITE setShowCurrentPosition)
   Q_PROPERTY(bool     lockToPosition READ isLockedToPosition WRITE setLockToPosition NOTIFY lockToPossitionChanged)
+  Q_PROPERTY(bool     followVehicle READ isFollowVehicle WRITE setFollowVehicle NOTIFY followVehicleChanged)
   Q_PROPERTY(QString  stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
   Q_PROPERTY(QString  renderingType READ GetRenderingType WRITE SetRenderingType NOTIFY renderingTypeChanged)
   
@@ -110,6 +111,10 @@ private:
 
     double iconSize{16}; // icon size [mm]
 
+    /// input handler control
+    bool follow{false};
+    QTime lastGesture; // when there is some gesture, we will not follow vehicle for some short time
+
     QString standardIconFile{"vehicle.svg"}; // state == OnRoute | OffRoute
     QString noGpsSignalIconFile{"vehicle_not_fixed.svg"}; // state == NoGpsSignal
     QString inTunnelIconFile{"vehicle_tunnel.svg"}; // state == EstimateInTunnel
@@ -138,6 +143,7 @@ private:
 signals:
   void viewChanged();
   void lockToPossitionChanged();
+  void followVehicleChanged();
   void finishedChanged(bool finished);
 
   void mouseMove(const int screenX, const int screenY, const double lat, const double lon, const Qt::KeyboardModifiers modifiers);
@@ -232,7 +238,9 @@ private slots:
   virtual void onLongTap(const QPoint p);
   virtual void onTapLongTap(const QPoint p);
   
-  void onMapDPIChange(double dpi);  
+  void onMapDPIChange(double dpi);
+
+  void onResize();
   
 private:
   void setupInputHandler(InputHandler *newGesture);
@@ -368,13 +376,20 @@ public:
       redraw();
   };
   
-  inline bool isLockedToPosition()
+  inline bool isLockedToPosition() const
   {
       return inputHandler->isLockedToPosition();
   };
-  
+
   void setLockToPosition(bool);
-  
+
+  inline bool isFollowVehicle() const
+  {
+    return vehicle.follow;
+  }
+
+  void setFollowVehicle(bool);
+
   inline osmscout::MercatorProjection getProjection() const
   {
     osmscout::MercatorProjection projection;
@@ -382,12 +397,12 @@ public:
     size_t w=width();
     size_t h=height();
     projection.Set(GetCenter(),
-               view->angle,
-               view->magnification,
-               view->mapDpi,
-               // to avoid invalid projection when scene is not finished yet
-               w==0? 100:w,
-               h==0? 100:h);
+                   view->angle.AsRadians(),
+                   view->magnification,
+                   view->mapDpi,
+                   // to avoid invalid projection when scene is not finished yet
+                   w==0? 100:w,
+                   h==0? 100:h);
     return projection;
   }
 
