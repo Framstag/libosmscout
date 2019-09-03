@@ -54,15 +54,15 @@ void TapRecognizer::onTimeout()
     }
 }
 
-void TapRecognizer::touch(QTouchEvent *event)
+void TapRecognizer::touch(const QTouchEvent &event)
 {
     // discard on multi touch
-    if (event->touchPoints().size() != 1){
+    if (event.touchPoints().size() != 1){
         state = INACTIVE;
         return;
     }
 
-    QTouchEvent::TouchPoint finger = event->touchPoints()[0];
+    QTouchEvent::TouchPoint finger = event.touchPoints()[0];
     Qt::TouchPointStates fingerState(finger.state());
     bool released = fingerState.testFlag(Qt::TouchPointReleased);
     bool pressed = fingerState.testFlag(Qt::TouchPointPressed);
@@ -187,16 +187,16 @@ bool InputHandler::animationInProgress()
 {
     return false;
 }
-bool InputHandler::showCoordinates(const osmscout::GeoCoord &/*coord*/, const osmscout::Magnification &/*magnification*/, const osmscout::Bearing &bearing)
+bool InputHandler::showCoordinates(const osmscout::GeoCoord &/*coord*/, const osmscout::Magnification &/*magnification*/, const osmscout::Bearing &/*bearing*/)
 {
     return false;
 }
-bool InputHandler::zoom(double /*zoomFactor*/, const QPoint /*widgetPosition*/, const QRect /*widgetDimension*/)
+bool InputHandler::zoom(double /*zoomFactor*/, const QPoint &/*widgetPosition*/, const QRect &/*widgetDimension*/)
 {
     return false;
 }
 
-bool InputHandler::move(QVector2D /*move*/)
+bool InputHandler::move(const QVector2D &/*move*/)
 {
     return false;
 }
@@ -208,7 +208,7 @@ bool InputHandler::rotateBy(double /*angleChange*/)
 {
     return false;
 }
-bool InputHandler::touch(QTouchEvent* /*event*/)
+bool InputHandler::touch(const QTouchEvent &/*event*/)
 {
     return false;
 }
@@ -247,11 +247,11 @@ MoveHandler::~MoveHandler()
 {
     // noop
 }
-bool MoveHandler::touch(QTouchEvent *event)
+bool MoveHandler::touch(const QTouchEvent &event)
 {
     // move handler consumes finger release
-    if (event->touchPoints().size() == 1){
-        QTouchEvent::TouchPoint finger = event->touchPoints()[0];
+    if (event.touchPoints().size() == 1){
+        QTouchEvent::TouchPoint finger = event.touchPoints()[0];
         Qt::TouchPointStates state(finger.state());
         return state.testFlag(Qt::TouchPointReleased);
     }
@@ -318,7 +318,7 @@ bool MoveHandler::animationInProgress()
     return timer.isActive();
 }
 
-bool MoveHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRect widgetDimension)
+bool MoveHandler::zoom(double zoomFactor, const QPoint &widgetPosition, const QRect &widgetDimension)
 {
     startMapView = view;
     targetAngle = view.GetAngle();
@@ -362,7 +362,7 @@ bool MoveHandler::zoom(double zoomFactor, const QPoint widgetPosition, const QRe
     return true;
 }
 
-bool MoveHandler::move(QVector2D move)
+bool MoveHandler::move(const QVector2D &move)
 {
     startMapView = view;
     targetMagnification = view.magnification;
@@ -380,7 +380,7 @@ bool MoveHandler::move(QVector2D move)
     return true;
 }
 
-bool MoveHandler::moveNow(QVector2D move)
+bool MoveHandler::moveNow(const QVector2D &move)
 {
     osmscout::MercatorProjection projection;
 
@@ -534,15 +534,15 @@ DragHandler::DragHandler(const MapView &view):
 DragHandler::~DragHandler()
 {
 }
-bool DragHandler::touch(QTouchEvent *event)
+bool DragHandler::touch(const QTouchEvent &event)
 {
     if (ended)
         return false;
 
-    if (event->touchPoints().size() != 1)
+    if (event.touchPoints().size() != 1)
         return false;
 
-    QTouchEvent::TouchPoint finger = event->touchPoints()[0];
+    QTouchEvent::TouchPoint finger = event.touchPoints()[0];
     Qt::TouchPointStates state(finger.state());
 
     moving = !state.testFlag(Qt::TouchPointReleased);
@@ -571,14 +571,14 @@ bool DragHandler::touch(QTouchEvent *event)
     return true;
 }
 
-bool DragHandler::zoom(double /*zoomFactor*/, const QPoint /*widgetPosition*/, const QRect /*widgetDimension*/)
+bool DragHandler::zoom(double /*zoomFactor*/, const QPoint &/*widgetPosition*/, const QRect &/*widgetDimension*/)
 {
     return false;
         // TODO: finger on screen and zoom
         // => compute geo point under finger, change magnification and then update startView
 }
 
-bool DragHandler::move(QVector2D /*move*/)
+bool DragHandler::move(const QVector2D &/*move*/)
 {
     return false; // finger on screen discard move
 }
@@ -605,11 +605,11 @@ bool MultitouchHandler::animationInProgress()
 {
     return moving || MoveHandler::animationInProgress();
 }
-bool MultitouchHandler::zoom(double /*zoomFactor*/, const QPoint /*widgetPosition*/, const QRect /*widgetDimension*/)
+bool MultitouchHandler::zoom(double /*zoomFactor*/, const QPoint &/*widgetPosition*/, const QRect &/*widgetDimension*/)
 {
     return false;
 }
-bool MultitouchHandler::move(QVector2D /*vector*/)
+bool MultitouchHandler::move(const QVector2D &/*vector*/)
 {
     return false;
 }
@@ -617,14 +617,14 @@ bool MultitouchHandler::rotateBy(double /*angleChange*/)
 {
     return false;
 }
-bool MultitouchHandler::touch(QTouchEvent *event)
+bool MultitouchHandler::touch(const QTouchEvent &event)
 {
     if (ended)
         return false;
 
     if (!initialized){
         QList<QTouchEvent::TouchPoint> valid;
-        QListIterator<QTouchEvent::TouchPoint> it(event->touchPoints());
+        QListIterator<QTouchEvent::TouchPoint> it(event.touchPoints());
         while (it.hasNext() && (valid.size() < 2)){
             QTouchEvent::TouchPoint tp = it.next();
             Qt::TouchPointStates state(tp.state());
@@ -643,7 +643,7 @@ bool MultitouchHandler::touch(QTouchEvent *event)
         QTouchEvent::TouchPoint currentB;
         int assigned = 0;
 
-        QListIterator<QTouchEvent::TouchPoint> it(event->touchPoints());
+        QListIterator<QTouchEvent::TouchPoint> it(event.touchPoints());
         while (it.hasNext() && (assigned < 2)){
             QTouchEvent::TouchPoint tp = it.next();
             if (tp.id() == startPointA.id()){

@@ -94,6 +94,7 @@ MapWidget::~MapWidget()
 
 void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states)
 {
+    assert(event);
     QMouseEvent *mEvent = static_cast<QMouseEvent *>(event);
 
     QTouchEvent::TouchPoint touchPoint;
@@ -103,13 +104,13 @@ void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states
 
     QList<QTouchEvent::TouchPoint> points;
     points << touchPoint;
-    QTouchEvent *touchEvnt = new QTouchEvent(QEvent::TouchBegin,0, Qt::NoModifier, 0, points);
+    QTouchEvent touchEvnt(QEvent::TouchBegin,0, Qt::NoModifier, 0, points);
     //qDebug() << "translate mouse event to touch event: "<< touchEvnt;
-    touchEvent(touchEvnt);
-    delete touchEvnt;
+    touchEvent(&touchEvnt);
 }
 void MapWidget::mousePressEvent(QMouseEvent* event)
 {
+    assert(event);
     if (event->button()==1) {
         translateToTouch(event, Qt::TouchPointPressed);
     }
@@ -173,18 +174,19 @@ void MapWidget::changeView(const MapView &updated)
 
 void MapWidget::touchEvent(QTouchEvent *event)
 {
+    assert(event);
     vehicle.lastGesture.restart();
-    if (!inputHandler->touch(event)){
+    if (!inputHandler->touch(*event)){
         if (event->touchPoints().size() == 1){
             QTouchEvent::TouchPoint tp = event->touchPoints()[0];
             setupInputHandler(new DragHandler(*view));
         }else{
             setupInputHandler(new MultitouchHandler(*view));
         }
-        inputHandler->touch(event);
+        inputHandler->touch(*event);
     }
 
-    tapRecognizer.touch(event);
+    tapRecognizer.touch(*event);
 
     event->accept();
 
