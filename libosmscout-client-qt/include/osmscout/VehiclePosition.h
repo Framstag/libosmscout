@@ -40,9 +40,9 @@ class OSMSCOUT_CLIENT_QT_API VehiclePosition: public QObject
 {
   Q_OBJECT
 
-  Q_PROPERTY(double   lat       READ getLat)
-  Q_PROPERTY(double   lon       READ getLon)
-  Q_PROPERTY(double   bearing   READ getBearingRadians)
+  Q_PROPERTY(double   lat       READ getLat             CONSTANT)
+  Q_PROPERTY(double   lon       READ getLon             CONSTANT)
+  Q_PROPERTY(double   bearing   READ getBearingRadians  CONSTANT)
 
 public:
   inline explicit VehiclePosition(QObject *parent = 0) :

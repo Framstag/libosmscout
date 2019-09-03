@@ -37,10 +37,10 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelItem : public QObject {
   Q_OBJECT
 
-  Q_PROPERTY(bool valid READ isValid())
-  Q_PROPERTY(QString name READ getName())
-  Q_PROPERTY(QStringList path READ getPath())
-  Q_PROPERTY(QString description READ getDescription())
+  Q_PROPERTY(bool valid READ isValid() CONSTANT)
+  Q_PROPERTY(QString name READ getName() CONSTANT)
+  Q_PROPERTY(QStringList path READ getPath() CONSTANT)
+  Q_PROPERTY(QString description READ getDescription() CONSTANT)
 
 private:
   bool valid{false};
@@ -121,11 +121,11 @@ public:
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelMap : public AvailableMapsModelItem {
   Q_OBJECT
 
-  Q_PROPERTY(quint64 byteSize READ getSize())
-  Q_PROPERTY(QString size READ getSizeHuman())
-  Q_PROPERTY(QString serverDirectory READ getServerDirectory())
-  Q_PROPERTY(QDateTime time READ getCreation())
-  Q_PROPERTY(int version READ getVersion())
+  Q_PROPERTY(quint64 byteSize READ getSize() CONSTANT)
+  Q_PROPERTY(QString size READ getSizeHuman() CONSTANT)
+  Q_PROPERTY(QString serverDirectory READ getServerDirectory() CONSTANT)
+  Q_PROPERTY(QDateTime time READ getCreation() CONSTANT)
+  Q_PROPERTY(int version READ getVersion() CONSTANT)
 
 private:
   MapProvider provider;
