@@ -161,12 +161,12 @@ class OSMSCOUT_CLIENT_QT_API MapView: public QObject
 {
   Q_OBJECT
 
-  Q_PROPERTY(double   lat       READ GetLat)
-  Q_PROPERTY(double   lon       READ GetLon)
-  Q_PROPERTY(double   angle     READ GetAngle)
-  Q_PROPERTY(double   mag       READ GetMag)
-  Q_PROPERTY(uint32_t magLevel  READ GetMagLevel)
-  Q_PROPERTY(double   mapDpi    READ GetMapDpi)
+  Q_PROPERTY(double   lat       READ GetLat       CONSTANT)
+  Q_PROPERTY(double   lon       READ GetLon       CONSTANT)
+  Q_PROPERTY(double   angle     READ GetAngle     CONSTANT)
+  Q_PROPERTY(double   mag       READ GetMag       CONSTANT)
+  Q_PROPERTY(uint32_t magLevel  READ GetMagLevel  CONSTANT)
+  Q_PROPERTY(double   mapDpi    READ GetMapDpi    CONSTANT)
 
 public:
   inline MapView(QObject *parent=0): QObject(parent) {}
