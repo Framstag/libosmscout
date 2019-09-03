@@ -752,7 +752,7 @@ void LockHandler::widgetResized(const QSizeF &widgetSize)
 }
 
 VehicleFollowHandler::VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize):
-    JumpHandler(view, 1000, 10000), window(widgetSize)
+    JumpHandler(view), window(widgetSize)
 {}
 
 bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePosition)
@@ -769,16 +769,18 @@ bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePositio
     double mag;
     if (nextStepDistance > Kilometers(2)) {
       mag = pow(2.0, 13); // Magnification::magDetail;
-    } else if (nextStepDistance > Meters(750)) {
+    } else if (nextStepDistance > Meters(1500)) {
       mag = pow(2.0, 14); // Magnification::magClose;
-    } else if (nextStepDistance > Meters(600)) {
+    } else if (nextStepDistance > Meters(1000)) {
       mag = pow(2.0, 14.25);
-    } else if (nextStepDistance > Meters(500)) {
+    } else if (nextStepDistance > Meters(750)) {
       mag = pow(2.0, 14.5);
-    } else if (nextStepDistance > Meters(400)) {
+    } else if (nextStepDistance > Meters(500)) {
       mag = pow(2.0, 14.75);
-    } else if (nextStepDistance > Meters(300)) {
+    } else if (nextStepDistance > Meters(400)) {
       mag = pow(2.0, 15); // Magnification::magCloser;
+    } else if (nextStepDistance > Meters(300)) {
+      mag = pow(2.0, 15.5);
     } else if (nextStepDistance > Meters(200)) {
       mag = pow(2.0, 16); // Magnification::magVeryClose;
     } else if (nextStepDistance > Meters(100)) {
@@ -789,10 +791,10 @@ bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePositio
 
     magnification.SetMagnification(mag);
     double factor = magnification.GetMagnification() / view.magnification.GetMagnification();
-    if (factor > 2){
-      magnification.SetMagnification(view.magnification.GetMagnification() * 2);
-    }else if (factor < 0.5){
-      magnification.SetMagnification(view.magnification.GetMagnification() * 0.5);
+    if (factor > 1.05) {
+      magnification.SetMagnification(view.magnification.GetMagnification() * 1.05);
+    } else if (factor < 0.95) {
+      magnification.SetMagnification(view.magnification.GetMagnification() * 0.95);
     }
   }
 
@@ -803,7 +805,7 @@ bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePositio
                       magnification,
                       view.mapDpi,
                       window.width(), window.height()
-                      )) {
+  )) {
     return false;
   }
 
