@@ -262,17 +262,11 @@ namespace osmscout {
     for (const auto& tileEntry : cellGroundTileMap) {
       Pixel coord=tileEntry.first;
       State  state[4];      // type of the neighbouring cells: top, right, bottom, left
-      size_t coordCount[4]; // number of coords on the given line (top, right, bottom, left)
 
       state[0]=unknown;
       state[1]=unknown;
       state[2]=unknown;
       state[3]=unknown;
-
-      coordCount[0]=0;
-      coordCount[1]=0;
-      coordCount[2]=0;
-      coordCount[3]=0;
 
       // Preset top
       if (coord.y<stateMap.GetYCount()-1) {
@@ -312,27 +306,6 @@ namespace osmscout {
             break;
         }
         for (size_t c=0; c<tile.coords.size()-1;c++) {
-
-          //
-          // Count number of coords *on* the border
-          //
-
-          // top
-          if (tile.coords[c].y==GroundTile::Coord::CELL_MAX) {
-            coordCount[0]++;
-          }
-          // right
-          else if (tile.coords[c].x==GroundTile::Coord::CELL_MAX) {
-            coordCount[1]++;
-          }
-          // bottom
-          else if (tile.coords[c].y==0) {
-            coordCount[2]++;
-          }
-          // left
-          else if (tile.coords[c].x==0) {
-            coordCount[3]++;
-          }
 
           //
           // Detect fills over a complete border
