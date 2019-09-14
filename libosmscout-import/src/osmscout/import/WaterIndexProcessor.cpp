@@ -1220,10 +1220,8 @@ namespace osmscout {
      * It may cause problems in following computation, that strongly rely
      * on the fact that coastlines don't intersect.
      *
-     * For that reason, we will try to detect such intersections between land
-     * (line coastlines) and islands (area coastlines) to remove the most visible
-     * errors. Just biggest coastlines (top 100) will be considered, detecting
-     * intersections between all islands is too expensive.
+     * For that reason, we will try to detect such intersections
+     * and remove smaller objects (islands) that intersects.
      */
 
     // sort by the size (GeoBox::GetSize, descending)
@@ -1231,7 +1229,7 @@ namespace osmscout {
               transformedCoastlines.end(),
               CoastlineGeoSizeSorter);
 
-    progress.Info("Filter intersecting islands");
+    progress.Info("Filter intersecting coastlines");
 
     for (size_t i=0; i<transformedCoastlines.size(); i++) {
       progress.SetProgress(i,transformedCoastlines.size());
@@ -1284,6 +1282,9 @@ namespace osmscout {
         }
       }
     }
+
+    progress.Info("Filter encapsulated coastlines");
+    // TODO
 
     progress.Info("Calculate covered tiles");
     size_t curCoast=0;
