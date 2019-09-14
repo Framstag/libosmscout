@@ -237,11 +237,13 @@ namespace osmscout
             }
           }
         }
+        newRings.back().bbox.Invalidate();
+        newRings.back().segments.clear();
 
         r++;
       }
 
-      // MAster ring can have nodes, but does not need to have
+      // Master ring can have nodes, but does not need to have
       if (area->rings.front().IsMasterRing()) {
         if (area->rings.front().nodes.empty()) {
           if (newRings.size()==1) {
