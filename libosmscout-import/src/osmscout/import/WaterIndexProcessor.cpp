@@ -1275,7 +1275,59 @@ namespace osmscout {
                                                          std::vector<CoastlineDataRef> &transformedCoastlines){
 
     progress.Info("Filter encapsulated coastlines");
-    // TODO
+
+    /*
+     * coastlines intersection with bounding polygon are
+     * synthetized to following ways. Lets try to reconstruct land areas
+     */
+    std::map<GeoCoord, size_t> wayStartPoints;
+
+    for (size_t index=0; index<transformedCoastlines.size(); index++) {
+      CoastlineDataRef coastline = transformedCoastlines[index];
+
+      if (coastline && !coastline->isArea && coastline->left == CoastState::land) {
+        assert(!coastline->points.empty());
+        wayStartPoints[coastline->points[0]] = index;
+      }
+    }
+
+    std::vector<std::vector<GeoCoord>> lands;
+    while (!wayStartPoints.empty()){
+      std::vector<GeoCoord> land;
+      const auto &entry = wayStartPoints.begin();
+      CoastlineDataRef way = transformedCoastlines[entry->second];
+      wayStartPoints.erase(entry);
+
+      land.insert(land.end(), way->points.begin(), way->points.end());
+
+      while (!wayStartPoints.empty()){
+        const auto &next = wayStartPoints.find(way->points[way->points.size()-1]);
+        assert(next!=wayStartPoints.end());
+        way = transformedCoastlines[next->second];
+        wayStartPoints.erase(next);
+        land.insert(land.end(), way->points.begin(), way->points.end());
+        if (land[0] == land[land.size()-1]){
+          lands.push_back(land);
+          break;
+        }
+      }
+    }
+
+    progress.Debug("Found " + std::to_string(lands.size()) + " land areas");
+
+    for (const auto &land : lands){
+      for (size_t index=0; index<transformedCoastlines.size(); index++) {
+        CoastlineDataRef coastline = transformedCoastlines[index];
+
+        if (coastline && coastline->isArea) {
+          if (IsAreaCompletelyInArea(coastline->points, land)){
+            progress.Warning("Island " + std::to_string(coastline->id) + " is encapsulated in land");
+            transformedCoastlines[index] = nullptr;
+          }
+        }
+      }
+    }
+    // TODO filter island encapsulated by some bigger islands
   }
 
   void WaterIndexProcessor::ComputeCoveredTiles(Progress& progress,
