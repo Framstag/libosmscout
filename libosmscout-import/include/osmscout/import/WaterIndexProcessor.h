@@ -592,7 +592,7 @@ namespace osmscout {
 
     /**
      * Take the given coastlines and bounding polygons and create a list of synthesized
-     * coastlines that fuly encircle the imported region. Coastlines are either
+     * coastlines that fully encircle the imported region. Coastlines are either
      * real-life coastlines or emulated coastlines based on the bounding
      * polygons.
      *
@@ -684,8 +684,8 @@ public:
      * @param boundingPolygons
      */
     void SynthesizeCoastlines(Progress& progress,
-                            std::list<CoastRef>& coastlines,
-                            std::list<CoastRef>& boundingPolygons);
+                              std::list<CoastRef>& coastlines,
+                              std::list<CoastRef>& boundingPolygons);
 
     /**
      * Collects, calculates and generates a number of data about a coastline.
