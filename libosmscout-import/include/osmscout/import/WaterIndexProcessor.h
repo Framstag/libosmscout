@@ -616,9 +616,28 @@ namespace osmscout {
                              std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                              Data& data);
 
-    /**
-     * Comparator of coastline size (GeoBox::GetSize) for descending sort
-     */
+    void TransformCoastlines(Progress& progress,
+                             TransPolygon::OptimizeMethod optimizationMethod,
+                             double tolerance,
+                             double minObjectDimension,
+                             const Projection& projection,
+                             const std::list<CoastRef>& coastlines,
+                             std::vector<CoastlineDataRef> &transformedCoastlines);
+
+    void FilterIntersectCoastlines(Progress& progress,
+                                   std::vector<CoastlineDataRef> &transformedCoastlines);
+
+    void FilterEncapsulatedCoastlines(Progress& progress,
+                                      std::vector<CoastlineDataRef> &transformedCoastlines);
+
+    void ComputeCoveredTiles(Progress& progress,
+                           const StateMap& stateMap,
+                           Data& data,
+                           std::vector<CoastlineDataRef> &transformedCoastlines);
+
+      /**
+       * Comparator of coastline size (GeoBox::GetSize) for descending sort
+       */
     static bool CoastlineGeoSizeSorter(const CoastlineDataRef &a, const CoastlineDataRef &b);
 
 public:
