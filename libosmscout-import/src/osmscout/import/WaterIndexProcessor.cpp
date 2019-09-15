@@ -262,17 +262,11 @@ namespace osmscout {
     for (const auto& tileEntry : cellGroundTileMap) {
       Pixel coord=tileEntry.first;
       State  state[4];      // type of the neighbouring cells: top, right, bottom, left
-      size_t coordCount[4]; // number of coords on the given line (top, right, bottom, left)
 
       state[0]=unknown;
       state[1]=unknown;
       state[2]=unknown;
       state[3]=unknown;
-
-      coordCount[0]=0;
-      coordCount[1]=0;
-      coordCount[2]=0;
-      coordCount[3]=0;
 
       // Preset top
       if (coord.y<stateMap.GetYCount()-1) {
@@ -312,27 +306,6 @@ namespace osmscout {
             break;
         }
         for (size_t c=0; c<tile.coords.size()-1;c++) {
-
-          //
-          // Count number of coords *on* the border
-          //
-
-          // top
-          if (tile.coords[c].y==GroundTile::Coord::CELL_MAX) {
-            coordCount[0]++;
-          }
-          // right
-          else if (tile.coords[c].x==GroundTile::Coord::CELL_MAX) {
-            coordCount[1]++;
-          }
-          // bottom
-          else if (tile.coords[c].y==0) {
-            coordCount[2]++;
-          }
-          // left
-          else if (tile.coords[c].x==0) {
-            coordCount[3]++;
-          }
 
           //
           // Detect fills over a complete border
@@ -1133,22 +1106,15 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Collects, calculates and generates a number of data about a coastline.
-   */
-  void WaterIndexProcessor::CalculateCoastlineData(Progress& progress,
-                                                   TransPolygon::OptimizeMethod optimizationMethod,
-                                                   double tolerance,
-                                                   double minObjectDimension,
-                                                   const Projection& projection,
-                                                   const StateMap& stateMap,
-                                                   const std::list<CoastRef>& coastlines,
-                                                   Data& data)
+  void WaterIndexProcessor::TransformCoastlines(Progress& progress,
+                                                TransPolygon::OptimizeMethod optimizationMethod,
+                                                double tolerance,
+                                                double minObjectDimension,
+                                                const Projection& projection,
+                                                const std::list<CoastRef>& coastlines,
+                                                std::vector<CoastlineDataRef> &transformedCoastlines)
   {
-    progress.Info("Calculate coastline data");
-
-    int                           index=-1;
-    std::vector<CoastlineDataRef> transformedCoastlines;
+    int index=-1;
 
     transformedCoastlines.reserve(coastlines.size());
 
@@ -1240,25 +1206,17 @@ namespace osmscout {
 
       transformedCoastlines.push_back(coastline);
     }
+  }
 
-    /* In some countries are islands too close to land or other islands
-     * that its coastlines intersect after polygon optimisation.
-     *
-     * It may cause problems in following computation, that strongly rely
-     * on the fact that coastlines don't intersect.
-     *
-     * For that reason, we will try to detect such intersections between land
-     * (line coastlines) and islands (area coastlines) to remove the most visible
-     * errors. Just biggest coastlines (top 100) will be considered, detecting
-     * intersections between all islands is too expensive.
-     */
+  void WaterIndexProcessor::FilterIntersectCoastlines(Progress& progress,
+                                                      std::vector<CoastlineDataRef> &transformedCoastlines){
+
+    progress.Info("Filter intersecting coastlines");
 
     // sort by the size (GeoBox::GetSize, descending)
     std::sort(transformedCoastlines.begin(),
               transformedCoastlines.end(),
               CoastlineGeoSizeSorter);
-
-    progress.Info("Filter intersecting islands");
 
     for (size_t i=0; i<transformedCoastlines.size(); i++) {
       progress.SetProgress(i,transformedCoastlines.size());
@@ -1311,6 +1269,108 @@ namespace osmscout {
         }
       }
     }
+
+    // erase removed coastlines
+    transformedCoastlines.erase(
+        std::remove_if(transformedCoastlines.begin(),transformedCoastlines.end(),
+                       [](const CoastlineDataRef &c){ return c == nullptr;}),
+        transformedCoastlines.end());
+  }
+
+  void WaterIndexProcessor::FilterEncapsulatedCoastlines(Progress& progress,
+                                                         std::vector<CoastlineDataRef> &transformedCoastlines){
+
+    progress.Info("Filter encapsulated coastlines");
+
+    /*
+     * coastlines intersection with bounding polygon are
+     * synthetized to following ways. Lets try to reconstruct land areas
+     */
+    std::map<GeoCoord, size_t> landStartPoints;
+
+    for (size_t index=0; index<transformedCoastlines.size(); index++) {
+      CoastlineDataRef coastline = transformedCoastlines[index];
+
+      if (coastline && !coastline->isArea && coastline->left == CoastState::land) {
+        assert(!coastline->points.empty());
+        landStartPoints[coastline->points[0]] = index;
+      }
+    }
+
+    std::vector<std::vector<GeoCoord>> lands;
+    while (!landStartPoints.empty()){
+      std::vector<GeoCoord> land;
+      const auto &entry = landStartPoints.begin();
+      CoastlineDataRef way = transformedCoastlines[entry->second];
+      landStartPoints.erase(entry);
+
+      land.insert(land.end(), way->points.begin(), way->points.end());
+
+      while (!landStartPoints.empty()){
+        const GeoCoord endPoint = way->points[way->points.size()-1];
+        const auto &next = landStartPoints.find(endPoint);
+        if(next == landStartPoints.end()){
+          progress.Warning("Cannot found following coastline at " + endPoint.GetDisplayText());
+          break;
+        }
+        way = transformedCoastlines[next->second];
+        landStartPoints.erase(next);
+        land.insert(land.end(), way->points.begin(), way->points.end());
+        if (land[0] == land[land.size()-1]){
+          lands.push_back(land);
+          break;
+        }
+      }
+    }
+
+    progress.Debug("Found " + std::to_string(lands.size()) + " land areas");
+
+    for (const auto &land : lands){
+      GeoBox landBox;
+      GetBoundingBox(land, landBox);
+      for (size_t index=0; index<transformedCoastlines.size(); index++) {
+        CoastlineDataRef coastline = transformedCoastlines[index];
+
+        if (coastline && coastline->isArea) {
+          if (landBox.Intersects(coastline->boundingBox, false) &&
+              IsAreaCompletelyInArea(coastline->points, land)){
+            progress.Warning("Island " + std::to_string(coastline->id) + " is encapsulated in land");
+            transformedCoastlines[index] = nullptr;
+          }
+        }
+      }
+    }
+
+    // filter island encapsulated by some bigger islands
+    // note: coastlines should be sorted already by its size, descending
+    for (size_t ai=0; ai<transformedCoastlines.size(); ai++) {
+      progress.SetProgress(ai, transformedCoastlines.size());
+      CoastlineDataRef a = transformedCoastlines[ai];
+      for (size_t bi=ai+1; bi<transformedCoastlines.size(); bi++) {
+        CoastlineDataRef b = transformedCoastlines[bi];
+        assert(ai!=bi);
+
+        if (a && b && a->isArea && b->isArea) {
+          if (a->boundingBox.Intersects(b->boundingBox, false) &&
+              IsAreaCompletelyInArea(b->points, a->points)){
+            progress.Warning("Island " + std::to_string(b->id) + " is encapsulated in island " + std::to_string(a->id));
+            transformedCoastlines[bi] = nullptr;
+          }
+        }
+      }
+    }
+
+    // erase removed coastlines
+    transformedCoastlines.erase(
+        std::remove_if(transformedCoastlines.begin(),transformedCoastlines.end(),
+                       [](const CoastlineDataRef &c){ return c == nullptr;}),
+        transformedCoastlines.end());
+  }
+
+  void WaterIndexProcessor::ComputeCoveredTiles(Progress& progress,
+                                                const StateMap& stateMap,
+                                                Data& data,
+                                                std::vector<CoastlineDataRef> &transformedCoastlines){
 
     progress.Info("Calculate covered tiles");
     size_t curCoast=0;
@@ -1369,6 +1429,52 @@ namespace osmscout {
 
     // Fix the vector size to remove unused slots (because of filtering by min area size)
     data.coastlines.resize(curCoast);
+  }
+
+  /**
+   * Collects, calculates and generates a number of data about a coastline.
+   */
+  void WaterIndexProcessor::CalculateCoastlineData(Progress& progress,
+                                                   TransPolygon::OptimizeMethod optimizationMethod,
+                                                   double tolerance,
+                                                   double minObjectDimension,
+                                                   const Projection& projection,
+                                                   const StateMap& stateMap,
+                                                   const std::list<CoastRef>& coastlines,
+                                                   Data& data)
+  {
+    progress.Info("Calculate coastline data");
+
+    std::vector<CoastlineDataRef> transformedCoastlines;
+
+    /*
+     * Transform raw coastlines for current magnification
+     * (remove details that cannot be visible on low zoom).
+     * Skip coastlines (islands) too small for current magnification.
+     */
+    TransformCoastlines(progress,
+                        optimizationMethod,
+                        tolerance,
+                        minObjectDimension,
+                        projection,
+                        coastlines,
+                        transformedCoastlines);
+
+    /* In some countries are islands too close to land or other islands
+     * that its coastlines intersect after polygon optimisation.
+     *
+     * It may cause problems in following computation, that strongly rely
+     * on the fact that coastlines don't intersect.
+     *
+     * For that reason, we will try to detect such intersections
+     * and remove smaller objects (islands) that intersects.
+     */
+
+    FilterIntersectCoastlines(progress, transformedCoastlines);
+
+    FilterEncapsulatedCoastlines(progress, transformedCoastlines);
+
+    ComputeCoveredTiles(progress, stateMap, data, transformedCoastlines);
 
     progress.Info("Initial "+std::to_string(coastlines.size())+" coastline(s) transformed to "+std::to_string(data.coastlines.size())+" coastline(s)");
   }

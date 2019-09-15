@@ -592,7 +592,7 @@ namespace osmscout {
 
     /**
      * Take the given coastlines and bounding polygons and create a list of synthesized
-     * coastlines that fuly encircle the imported region. Coastlines are either
+     * coastlines that fully encircle the imported region. Coastlines are either
      * real-life coastlines or emulated coastlines based on the bounding
      * polygons.
      *
@@ -616,9 +616,28 @@ namespace osmscout {
                              std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                              Data& data);
 
-    /**
-     * Comparator of coastline size (GeoBox::GetSize) for descending sort
-     */
+    void TransformCoastlines(Progress& progress,
+                             TransPolygon::OptimizeMethod optimizationMethod,
+                             double tolerance,
+                             double minObjectDimension,
+                             const Projection& projection,
+                             const std::list<CoastRef>& coastlines,
+                             std::vector<CoastlineDataRef> &transformedCoastlines);
+
+    void FilterIntersectCoastlines(Progress& progress,
+                                   std::vector<CoastlineDataRef> &transformedCoastlines);
+
+    void FilterEncapsulatedCoastlines(Progress& progress,
+                                      std::vector<CoastlineDataRef> &transformedCoastlines);
+
+    void ComputeCoveredTiles(Progress& progress,
+                           const StateMap& stateMap,
+                           Data& data,
+                           std::vector<CoastlineDataRef> &transformedCoastlines);
+
+      /**
+       * Comparator of coastline size (GeoBox::GetSize) for descending sort
+       */
     static bool CoastlineGeoSizeSorter(const CoastlineDataRef &a, const CoastlineDataRef &b);
 
 public:
@@ -665,8 +684,8 @@ public:
      * @param boundingPolygons
      */
     void SynthesizeCoastlines(Progress& progress,
-                            std::list<CoastRef>& coastlines,
-                            std::list<CoastRef>& boundingPolygons);
+                              std::list<CoastRef>& coastlines,
+                              std::list<CoastRef>& boundingPolygons);
 
     /**
      * Collects, calculates and generates a number of data about a coastline.
