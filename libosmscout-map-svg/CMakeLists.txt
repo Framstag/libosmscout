@@ -49,6 +49,11 @@ target_link_libraries(OSMScoutMapSVG
 if(PANGOFT2_FOUND)
   target_include_directories(OSMScoutMapSVG PUBLIC ${PANGOFT2_INCLUDE_DIRS})
   target_link_libraries(OSMScoutMapSVG ${PANGOFT2_LIBRARIES})
+
+  if(HARFBUZZ_FOUND)
+      target_include_directories(OSMScoutMapSVG PUBLIC ${HARFBUZZ_INCLUDE_DIRS})
+      target_link_libraries(OSMScoutMapSVG ${HARFBUZZ_LIBRARIES})
+  endif()
 endif()
 
 target_compile_definitions(OSMScoutMapSVG PRIVATE -DOSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)

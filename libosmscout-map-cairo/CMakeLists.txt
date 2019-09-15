@@ -51,6 +51,11 @@ target_link_libraries(OSMScoutMapCairo
 if(PANGOCAIRO_FOUND)
   target_include_directories(OSMScoutMapCairo PUBLIC ${PANGO_INCLUDE_DIRS})
   target_link_libraries(OSMScoutMapCairo ${PANGO_LIBRARIES})
+
+  if(HARFBUZZ_FOUND)
+	  target_include_directories(OSMScoutMapCairo PUBLIC ${HARFBUZZ_INCLUDE_DIRS})
+	  target_link_libraries(OSMScoutMapCairo ${HARFBUZZ_LIBRARIES})
+  endif()
 endif()
 
 if(${IOS})
