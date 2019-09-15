@@ -48,7 +48,7 @@ namespace osmscout {
 
   public:
     /**
-     * Note that ring nodes, bbox and segments fields are public for simple manipulation.
+     * Note that way nodes, bbox and segments fields are public for simple manipulation.
      * User that modify it is responsible to keep these values in sync!
      * You should not rely on segments and bbox, it is just a cache used some algorithms.
      * It may be empty/invalid!
