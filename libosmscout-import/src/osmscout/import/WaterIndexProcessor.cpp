@@ -1269,6 +1269,12 @@ namespace osmscout {
         }
       }
     }
+
+    // erase removed coastlines
+    transformedCoastlines.erase(
+        std::remove_if(transformedCoastlines.begin(),transformedCoastlines.end(),
+                       [](const CoastlineDataRef &c){ return c == nullptr;}),
+        transformedCoastlines.end());
   }
 
   void WaterIndexProcessor::FilterEncapsulatedCoastlines(Progress& progress,
@@ -1316,18 +1322,45 @@ namespace osmscout {
     progress.Debug("Found " + std::to_string(lands.size()) + " land areas");
 
     for (const auto &land : lands){
+      GeoBox landBox;
+      GetBoundingBox(land, landBox);
       for (size_t index=0; index<transformedCoastlines.size(); index++) {
         CoastlineDataRef coastline = transformedCoastlines[index];
 
         if (coastline && coastline->isArea) {
-          if (IsAreaCompletelyInArea(coastline->points, land)){
+          if (landBox.Intersects(coastline->boundingBox, false) &&
+              IsAreaCompletelyInArea(coastline->points, land)){
             progress.Warning("Island " + std::to_string(coastline->id) + " is encapsulated in land");
             transformedCoastlines[index] = nullptr;
           }
         }
       }
     }
-    // TODO filter island encapsulated by some bigger islands
+
+    // filter island encapsulated by some bigger islands
+    // note: coastlines should be sorted already by its size, descending
+    for (size_t ai=0; ai<transformedCoastlines.size(); ai++) {
+      progress.SetProgress(ai, transformedCoastlines.size());
+      CoastlineDataRef a = transformedCoastlines[ai];
+      for (size_t bi=ai+1; bi<transformedCoastlines.size(); bi++) {
+        CoastlineDataRef b = transformedCoastlines[bi];
+        assert(ai!=bi);
+
+        if (a && b && a->isArea && b->isArea) {
+          if (a->boundingBox.Intersects(b->boundingBox, false) &&
+              IsAreaCompletelyInArea(b->points, a->points)){
+            progress.Warning("Island " + std::to_string(b->id) + " is encapsulated in island " + std::to_string(a->id));
+            transformedCoastlines[bi] = nullptr;
+          }
+        }
+      }
+    }
+
+    // erase removed coastlines
+    transformedCoastlines.erase(
+        std::remove_if(transformedCoastlines.begin(),transformedCoastlines.end(),
+                       [](const CoastlineDataRef &c){ return c == nullptr;}),
+        transformedCoastlines.end());
   }
 
   void WaterIndexProcessor::ComputeCoveredTiles(Progress& progress,
