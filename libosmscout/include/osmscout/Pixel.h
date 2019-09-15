@@ -158,6 +158,15 @@ namespace osmscout {
              coords[1]==other.coords[1];
     }
 
+    inline Vertex2D& operator=(const Vertex2D& other)
+    {
+      if (this!=&other) {
+        coords[0]=other.coords[0];
+        coords[1]=other.coords[1];
+      }
+      return *this;
+    }
+
     inline bool operator<(const Vertex2D& other) const
     {
       return coords[1]<other.coords[1] ||
