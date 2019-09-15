@@ -1286,31 +1286,35 @@ namespace osmscout {
      * coastlines intersection with bounding polygon are
      * synthetized to following ways. Lets try to reconstruct land areas
      */
-    std::map<GeoCoord, size_t> wayStartPoints;
+    std::map<GeoCoord, size_t> landStartPoints;
 
     for (size_t index=0; index<transformedCoastlines.size(); index++) {
       CoastlineDataRef coastline = transformedCoastlines[index];
 
       if (coastline && !coastline->isArea && coastline->left == CoastState::land) {
         assert(!coastline->points.empty());
-        wayStartPoints[coastline->points[0]] = index;
+        landStartPoints[coastline->points[0]] = index;
       }
     }
 
     std::vector<std::vector<GeoCoord>> lands;
-    while (!wayStartPoints.empty()){
+    while (!landStartPoints.empty()){
       std::vector<GeoCoord> land;
-      const auto &entry = wayStartPoints.begin();
+      const auto &entry = landStartPoints.begin();
       CoastlineDataRef way = transformedCoastlines[entry->second];
-      wayStartPoints.erase(entry);
+      landStartPoints.erase(entry);
 
       land.insert(land.end(), way->points.begin(), way->points.end());
 
-      while (!wayStartPoints.empty()){
-        const auto &next = wayStartPoints.find(way->points[way->points.size()-1]);
-        assert(next!=wayStartPoints.end());
+      while (!landStartPoints.empty()){
+        const GeoCoord endPoint = way->points[way->points.size()-1];
+        const auto &next = landStartPoints.find(endPoint);
+        if(next == landStartPoints.end()){
+          progress.Warning("Cannot found following coastline at " + endPoint.GetDisplayText());
+          break;
+        }
         way = transformedCoastlines[next->second];
-        wayStartPoints.erase(next);
+        landStartPoints.erase(next);
         land.insert(land.end(), way->points.begin(), way->points.end());
         if (land[0] == land[land.size()-1]){
           lands.push_back(land);
