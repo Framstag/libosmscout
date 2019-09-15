@@ -271,6 +271,8 @@ namespace osmscout
                 }
 
                 way->nodes=newNodes;
+                way->segments.clear();
+                way->bbox.Invalidate();
               }
               else {
                 for (const auto& node : (*otherWay)->nodes) {
@@ -282,6 +284,8 @@ namespace osmscout
                 }
 
                 way->nodes=newNodes;
+                way->segments.clear();
+                way->bbox.Invalidate();
               }
 
               usedWays.insert((*otherWay)->GetFileOffset());
@@ -471,6 +475,8 @@ namespace osmscout
       WayRef copiedWay=std::make_shared<Way>(*way);
 
       copiedWay->nodes=newNodes;
+      copiedWay->bbox.Invalidate();
+      copiedWay->segments.clear();
 
       if (!IsValidToWrite(copiedWay->nodes)) {
         progress.Error("Way coordinates are not dense enough to be written for way "+
