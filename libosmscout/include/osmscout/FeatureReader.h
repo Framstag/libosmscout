@@ -152,6 +152,9 @@ namespace osmscout {
   private:
     std::vector<size_t> lookupTable;
 
+    static_assert(std::is_base_of<Feature, F>::value, "F have to be subtype of Feature");
+    static_assert(std::is_base_of<FeatureValue, V>::value, "V have to be subtype of FeatureValue");
+
   public:
     explicit FeatureValueReader(const TypeConfig& typeConfig);
 
@@ -163,7 +166,7 @@ namespace osmscout {
      * @param index
      *    The index
      * @return
-     *    true, if there is a valid index 8because the type has such feature), else false
+     *    true, if there is a valid index (because the type has such feature), else false
      */
     bool GetIndex(const FeatureValueBuffer& buffer,
                   size_t& index) const;
@@ -193,7 +196,7 @@ namespace osmscout {
       size_t index;
 
       if (type->GetFeature(F::NAME,
-                          index)) {
+                           index)) {
         lookupTable[type->GetIndex()]=index;
       }
     }
@@ -203,6 +206,7 @@ namespace osmscout {
   bool FeatureValueReader<F,V>::GetIndex(const FeatureValueBuffer& buffer,
                                          size_t& index) const
   {
+    assert(buffer.GetType()->GetIndex() < lookupTable.size());
     index=lookupTable[buffer.GetType()->GetIndex()];
 
     return index!=std::numeric_limits<size_t>::max();
@@ -211,11 +215,16 @@ namespace osmscout {
   template<class F, class V>
   V* FeatureValueReader<F,V>::GetValue(const FeatureValueBuffer& buffer) const
   {
+    assert(buffer.GetType()->GetIndex() < lookupTable.size());
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
     if (index!=std::numeric_limits<size_t>::max() &&
         buffer.HasFeature(index)) {
-      return dynamic_cast<V*>(buffer.GetValue(index));
+      FeatureValue *val = buffer.GetValue(index);
+      // Object returned from Feature::AllocateValue and V have to be the same type!
+      // But it cannot be tested in compile-time, lets do it in runtime assert at least.
+      assert(val == nullptr || dynamic_cast<V*>(val) != nullptr);
+      return static_cast<V*>(val);
     }
     else {
       return nullptr;
