@@ -116,13 +116,25 @@ void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output
                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
 {
   for (const auto &ring:a->rings) {
-    if (!ring.GetType()->GetIgnore()) {
+    if (ring.GetRing() == Area::outerRingId || ring.GetRing() == Area::masterRingId) {
+      // for outer ring use type and features from  master ring (area type)
       addObjectInfo(objectList,
                     "area",
                     a->GetObjectFileRef(),
                     ring.nodes,
                     // Master ring don't contains nodes! Use intersection of all outer rings instead
                     (ring.nodes.empty() ? a->GetBoundingBox() : ring.GetBoundingBox()).GetCenter(),
+                    a,
+                    reverseLookupMap,
+                    locationService,
+                    regionMap);
+    } else if (!ring.GetType()->GetIgnore() && !ring.nodes.empty()){
+      // inner rings with defined types and some nodes
+      addObjectInfo(objectList,
+                    "area",
+                    a->GetObjectFileRef(),
+                    ring.nodes,
+                    ring.GetBoundingBox().GetCenter(),
                     &ring,
                     reverseLookupMap,
                     locationService,
