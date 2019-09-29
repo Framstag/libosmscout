@@ -55,7 +55,7 @@ ORDER WAYS
         highway_footway, highway_bridleway, highway_construction,
         leisure_track
   GROUP highway_steps, barrier_fence
-  GROUP waterway_weir, route_ferry
+  GROUP waterway_weir, waterway_waterfall, route_ferry
   GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
 
 CONST
@@ -426,6 +426,34 @@ CONST
       AREA {color: @waterLabelColor; }
     }
 
+  SYMBOL waterway_waterfall
+    RECTANGLE 0,0 1.75 x 0.5 {
+      AREA { color: darken(@waterColor, 0.4); }
+    }
+    POLYGON 1.75,0.5 2.0,1 {
+      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    }
+    POLYGON 1.25,0.5 1.5,1 {
+      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    }
+    POLYGON 0.75,0.5 1,1 {
+      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    }
+
+  SYMBOL waterway_weir
+    RECTANGLE 0,0 2 x 0.5 {
+      AREA { color: darken(@waterColor, 0.4); }
+    }
+    CIRCLE 0.25,0.8 0.25 {
+      AREA {color: darken(@waterColor, 0.2); }
+    }
+    CIRCLE 1,0.8 0.25 {
+      AREA {color: darken(@waterColor, 0.2); }
+    }
+    CIRCLE 1.75,0.8 0.25 {
+      AREA {color: darken(@waterColor, 0.2); }
+    }
+
   SYMBOL natural_peak
     POLYGON -0.75,0 0.75,0 0.0,-1.5 {
       AREA { color: @peakSymbolColor; }
@@ -706,11 +734,21 @@ STYLE
 
         AREA { color: @waterColor;}
       }
-      [TYPE waterway_weir] {
+      [TYPE waterway_weir,
+            waterway_waterfall] {
         WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
 
         AREA { color: lighten(@waterColor, 0.3);}
       }
+    }
+
+    [MAG closer-] {
+          [TYPE waterway_weir] {
+            NODE.ICON { symbol: waterway_weir;}
+          }
+          [TYPE waterway_waterfall] {
+            NODE.ICON { symbol: waterway_waterfall;}
+          }
     }
 
     // Labels
@@ -724,9 +762,14 @@ STYLE
             waterway_drain,
             waterway_ditch,
             waterway_weir,
+            waterway_waterfall,
             waterway_river,
             waterway_canal]
         WAY.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
+
+      [TYPE waterway_weir,
+            waterway_waterfall]
+        NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
       [TYPE waterway_stream,
             waterway_river,
