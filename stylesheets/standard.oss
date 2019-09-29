@@ -734,20 +734,21 @@ STYLE
 
         AREA { color: @waterColor;}
       }
-      [TYPE waterway_weir] {
+      [TYPE waterway_weir,
+            waterway_waterfall] {
         WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
 
         AREA { color: lighten(@waterColor, 0.3);}
-
-        NODE.ICON { symbol: waterway_weir;}
       }
-      [TYPE waterway_waterfall] {
-        WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
+    }
 
-        AREA { color: lighten(@waterColor, 0.3);}
-
-        NODE.ICON { symbol: waterway_waterfall;}
-      }
+    [MAG closer-] {
+          [TYPE waterway_weir] {
+            NODE.ICON { symbol: waterway_weir;}
+          }
+          [TYPE waterway_waterfall] {
+            NODE.ICON { symbol: waterway_waterfall;}
+          }
     }
 
     // Labels
