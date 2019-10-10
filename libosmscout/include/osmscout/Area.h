@@ -157,6 +157,12 @@ namespace osmscout {
         return ring==outerRingId;
       }
 
+      // ring level is odd, it is some outer ring
+      inline bool IsSomeOuterRing() const
+      {
+        return (ring & outerRingId) == outerRingId;
+      }
+
       inline uint8_t GetRing() const
       {
         return ring;

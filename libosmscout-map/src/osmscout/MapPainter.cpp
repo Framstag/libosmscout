@@ -1296,6 +1296,9 @@ namespace osmscout {
     }
 
     size_t ringId=Area::outerRingId;
+
+    // found the ring on this (ringId) depth in hierarchy (and is big enough to render),
+    // we are going deeper in the hierarchy
     bool foundRing=true;
 
     while (foundRing) {
@@ -1308,8 +1311,11 @@ namespace osmscout {
           continue;
         }
 
-        if (!ring.IsOuterRing() &&
+        if (!ring.IsSomeOuterRing() &&
             ring.GetType()->GetIgnore()) {
+          // clipping inner ring, we will not render it, but still go deeper,
+          // there may be inner outer rings
+          foundRing = true;
           continue;
         }
 
@@ -1318,7 +1324,7 @@ namespace osmscout {
         std::vector<BorderStyleRef> borderStyles;
         BorderStyleRef              borderStyle;
 
-        if (ring.IsOuterRing()) {
+        if (ring.IsSomeOuterRing() && ring.GetType()->GetIgnore()) {
           type=area->GetType();
         }
         else {
@@ -1354,19 +1360,19 @@ namespace osmscout {
           borderStyleIndex++;
         }
 
-        foundRing=true;
-
         AreaData a;
         double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
         a.boundingBox=ring.GetBoundingBox();
-        a.isOuter = ring.IsOuterRing();
+        a.isOuter = ring.IsSomeOuterRing();
 
         if (!IsVisibleArea(projection,
                            a.boundingBox,
                            borderWidth/2.0)) {
           continue;
         }
+
+        foundRing=true;
 
         // Collect possible clippings. We only take into account inner rings of the next level
         // that do not have a type and thus act as a clipping region. If a inner ring has a type,
