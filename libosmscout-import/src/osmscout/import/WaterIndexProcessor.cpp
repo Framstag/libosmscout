@@ -1346,11 +1346,15 @@ namespace osmscout {
     for (size_t ai=0; ai<transformedCoastlines.size(); ai++) {
       progress.SetProgress(ai, transformedCoastlines.size());
       CoastlineDataRef a = transformedCoastlines[ai];
+      if (!a || a->left != CoastState::land){
+        continue;
+      }
+
       for (size_t bi=ai+1; bi<transformedCoastlines.size(); bi++) {
         CoastlineDataRef b = transformedCoastlines[bi];
         assert(ai!=bi);
 
-        if (a && b && a->isArea && b->isArea) {
+        if (a && b && a->isArea && b->isArea && b->left == CoastState::land) {
           if (a->boundingBox.Intersects(b->boundingBox, false) &&
               IsAreaCompletelyInArea(b->points, a->points)){
             progress.Warning("Island " + std::to_string(b->id) + " is encapsulated in island " + std::to_string(a->id));
