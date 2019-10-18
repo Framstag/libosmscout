@@ -373,7 +373,7 @@ namespace osmscout {
     sse2LatOffset      = _mm_set1_pd(latOffset);
     sse2Scale          = _mm_set1_pd(scale);
     sse2ScaleGradtorad = _mm_set1_pd(scaleGradtorad);
-    sse2Height         = _mm_set1_pd((double(height));
+    sse2Height         = _mm_set1_pd(double(height));
 #endif
 
     return true;
