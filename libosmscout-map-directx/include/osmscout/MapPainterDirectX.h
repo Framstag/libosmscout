@@ -30,6 +30,8 @@
 
 #include <osmscout/PathTextRenderer.h>
 
+#define NOMINMAX
+
 #include <d2d1.h>
 #include <dwrite.h>
 #include <Wincodec.h>
