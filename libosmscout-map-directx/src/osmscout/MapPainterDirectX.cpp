@@ -18,12 +18,13 @@
 */
 
 #include <osmscout/MapPainterDirectX.h>
-#include <osmscout/PathTextRenderer.h>
 
 #include <iostream>
 #include <iomanip>
 #include <limits>
 #include <list>
+
+#include <osmscout/PathTextRenderer.h>
 
 #include <osmscout/util/String.h>
 #include <osmscout/system/Assert.h>
