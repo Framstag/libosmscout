@@ -118,7 +118,7 @@ int Theme::GetAverageCharWidth() const
 
         averageCharWidth=metrics.averageCharWidth();
 
-        qDebug() << "Average char width:" << averageCharWidth << "px";
+        qDebug() << "Average char horizontalAdvance:" << averageCharWidth << "px";
     }
 
     return averageCharWidth;
@@ -133,19 +133,19 @@ int Theme::GetNumberCharWidth() const
 
         QFontMetrics metrics(font);
 
-        numberCharWidth=std::max(numberCharWidth,metrics.width('-'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width(','));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('.'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('0'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('1'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('2'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('3'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('4'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('5'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('6'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('7'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('8'));
-        numberCharWidth=std::max(numberCharWidth,metrics.width('9'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('-'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance(','));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('.'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('0'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('1'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('2'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('3'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('4'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('5'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('6'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('7'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('8'));
+        numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('9'));
 
         qDebug() << "Number char width: " << numberCharWidth << "px";
     }
