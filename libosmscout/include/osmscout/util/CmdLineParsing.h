@@ -424,6 +424,10 @@ namespace osmscout {
                                               char* argv[],
                                               int& currentIndex,
                                               size_t& value);
+  extern OSMSCOUT_API bool ParseUInt32Argument(int argc,
+                                               char* argv[],
+                                               int& currentIndex,
+                                               uint32_t& value);
 }
 
 #endif

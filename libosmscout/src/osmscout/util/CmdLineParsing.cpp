@@ -651,4 +651,28 @@ namespace osmscout {
 
     return true;
   }
+
+  bool ParseUInt32Argument(int argc,
+                           char* argv[],
+                           int& currentIndex,
+                           uint32_t& value)
+  {
+    int parameterIndex=currentIndex;
+    int argumentIndex=currentIndex+1;
+
+    currentIndex+=2;
+
+    if (argumentIndex>=argc) {
+      std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+      return false;
+    }
+
+    if (!StringToNumber(argv[argumentIndex],
+                        value)) {
+      std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
+      return false;
+    }
+
+    return true;
+  }
 }
