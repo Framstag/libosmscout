@@ -1093,7 +1093,7 @@ STYLE
  }
 
  [MAG block-] {
-    [TYPE amenity_charging_station] NODE.ICON { symbol: amenity_charging_station; }
+    [TYPE amenity_charging_station] NODE.ICON { symbol: amenity_charging_station; name: charging_station; }
     [TYPE natural_tree] NODE.ICON { symbol: natural_tree; name: tree; }
 
    [TYPE highway_cycleway] {
@@ -1651,18 +1651,18 @@ STYLE
  [MAG closer-] {
    [TYPE amenity_hospital,
          amenity_hospital_building] {
-     AREA.ICON { symbol: amenity_hospital; }
-     NODE.ICON { symbol: amenity_hospital; }
+     AREA.ICON { symbol: amenity_hospital; name: hospital; }
+     NODE.ICON { symbol: amenity_hospital; name: hospital; }
    }
 
    [TYPE amenity_parking_building] {
      NODE.ICON { symbol: amenity_parking; name: parking; }
-     AREA.ICON { name: parking;}
+     AREA.ICON { symbol: amenity_parking; name: parking;}
    }
 
    [TYPE amenity_parking] {
      NODE.ICON { symbol: amenity_parking; name: parking; }
-     AREA.ICON { name: parking;}
+     AREA.ICON { symbol: amenity_parking; name: parking;}
    }
 
    [TYPE amenity_parking] {
@@ -1698,7 +1698,7 @@ STYLE
  }
 
  [MAG veryClose-] {
-   [TYPE amenity_pharmacy] NODE.ICON { symbol: amenity_pharmacy;}
+   [TYPE amenity_pharmacy] NODE.ICON { symbol: amenity_pharmacy; name: pharmacy; }
 
    [TYPE amenity_post_box] NODE.ICON { symbol: amenity_post_box; }
 

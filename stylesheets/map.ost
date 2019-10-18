@@ -427,7 +427,7 @@ TYPES
       PATH[CAR]
 
   TYPE highway_street_lamp
-    IGNORE // Too many for mobile offline map?
+     // Too many for mobile offline map?
     = NODE ("highway"=="street_lamp")
 
   // Since rendering of speed cameras is not allowed everwhere, it is disabled by default
