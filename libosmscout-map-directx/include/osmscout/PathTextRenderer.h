@@ -5,8 +5,6 @@
 
 #include <osmscout/MapPainter.h>
 
-#include "osmscout/MapPainter.h"
-
 /**
  * Helper class for drawing contours. Allows the MapPainter base class
  * to inject itself at certain points in the contour label rendering code of

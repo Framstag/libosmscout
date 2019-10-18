@@ -18,12 +18,13 @@
 */
 
 #include <osmscout/MapPainterDirectX.h>
-#include <osmscout/PathTextRenderer.h>
 
 #include <iostream>
 #include <iomanip>
 #include <limits>
 #include <list>
+
+#include <osmscout/PathTextRenderer.h>
 
 #include <osmscout/util/String.h>
 #include <osmscout/system/Assert.h>
@@ -622,7 +623,6 @@ namespace osmscout
         #else
             std::string enc = glyph.glyph.character;
         #endif
-            float length;
             D2D1_MATRIX_3X2_F currentTransform;
             m_pRenderTarget->GetTransform(&currentTransform);
             FLOAT size = style->GetSize() * fontSizeFactor * glyph.glyph.width;

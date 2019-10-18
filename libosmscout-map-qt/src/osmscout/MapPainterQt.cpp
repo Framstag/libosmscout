@@ -759,14 +759,14 @@ namespace osmscout {
         double         radius;
 
         if (circle->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
-          center=QPointF(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX()-centerX),
-                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY()-centerY));
+          center=QPointF(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX,
+                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-centerY);
 
           radius=projection.ConvertWidthToPixel(circle->GetRadius());
         }
         else {
-          center=QPointF(x+projection.GetMeterInPixel()*(circle->GetCenter().GetX()-centerX),
-                         y+projection.GetMeterInPixel()*(circle->GetCenter().GetY()-centerY));
+          center=QPointF(x+projection.GetMeterInPixel()*circle->GetCenter().GetX()-centerX,
+                         y+projection.GetMeterInPixel()*circle->GetCenter().GetY()-centerY);
 
           radius=projection.GetMeterInPixel()*circle->GetRadius();
         }

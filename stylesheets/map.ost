@@ -494,6 +494,11 @@ TYPES
       {Name, NameAlt, Width}
       IGNORESEALAND
 
+  TYPE waterway_waterfall
+    = NODE WAY AREA ("waterway"=="waterfall")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
   TYPE waterway_dam
     = WAY AREA ("waterway"=="dam")
       {Name, NameAlt, Width}

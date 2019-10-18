@@ -19,7 +19,8 @@
 
 #define NOMINMAX
 
-#include "osmscout/PathTextRenderer.h"
+#include <osmscout/PathTextRenderer.h>
+
 #include <cmath>
 #include <algorithm>
 
