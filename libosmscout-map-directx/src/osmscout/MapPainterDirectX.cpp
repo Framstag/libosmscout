@@ -622,7 +622,6 @@ namespace osmscout
         #else
             std::string enc = glyph.glyph.character;
         #endif
-            float length;
             D2D1_MATRIX_3X2_F currentTransform;
             m_pRenderTarget->GetTransform(&currentTransform);
             FLOAT size = style->GetSize() * fontSizeFactor * glyph.glyph.width;
