@@ -342,7 +342,7 @@ int main(int argc, char* argv[])
   std::string               coastlineShapeFile;
   size_t                    minIndexLevel=4;
   size_t                    maxIndexLevel=10;
-  size_t                    maxWaterDistance=2048;
+  uint32_t                  maxWaterDistance=2048;
   osmscout::ConsoleProgress progress;
   bool                      parameterError=false;
 
@@ -404,10 +404,10 @@ int main(int argc, char* argv[])
       }
     }
     else if (strcmp(argv[i],"--maxWaterDistance")==0) {
-      if (osmscout::ParseSizeTArgument(argc,
-                                       argv,
-                                       i,
-                                       maxWaterDistance)) {
+      if (osmscout::ParseUInt32Argument(argc,
+                                        argv,
+                                        i,
+                                        maxWaterDistance)) {
       }
       else {
         parameterError=true;
@@ -471,7 +471,7 @@ int main(int argc, char* argv[])
                        progress,
                        minIndexLevel,
                        maxIndexLevel,
-                       maxWaterDistance);
+                       (uint32_t)maxWaterDistance);
     }
   }
   catch (osmscout::IOException& e) {

@@ -43,7 +43,7 @@ namespace osmscout {
     }else{
       end.Set(x,y);
       Segment last=segments.back();
-      float endDistance = last.start.DistanceTo(Vertex2D(x,y)); //  QVector2D(last.start).distanceToPoint(QVector2D(x,y));
+      double endDistance = last.start.DistanceTo(Vertex2D(x,y)); //  QVector2D(last.start).distanceToPoint(QVector2D(x,y));
       if (endDistance>minSegmentLength){
         length+=endDistance;
         last.length=endDistance;
@@ -70,7 +70,7 @@ namespace osmscout {
     Vertex2D p=relevantSetment.start;
     double mul = (offset-relevantSetment.offset);
     Vertex2D add(std::cos(relevantSetment.angle) * mul, -std::sin(relevantSetment.angle) * mul);
-    
+
     return Vertex2D(p.GetX() + add.GetX(), p.GetY() + add.GetY());
   }
 

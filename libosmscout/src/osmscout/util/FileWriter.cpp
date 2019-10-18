@@ -269,8 +269,8 @@ namespace osmscout {
 
     char buffer[2];
 
-    buffer[0]=((number >> 0) & 0xff);
-    buffer[1]=((number >> 8) & 0xff);
+    buffer[0]=((number >> 0u) & 0xff);
+    buffer[1]=((number >> 8u) & 0xff);
 
     hasError=fwrite(buffer,1,2,file)!=2;
 
@@ -291,10 +291,10 @@ namespace osmscout {
 
     char buffer[4];
 
-    buffer[0]=((number >>  0) & 0xff);
-    buffer[1]=((number >>  8) & 0xff);
-    buffer[2]=((number >> 16) & 0xff);
-    buffer[3]=((number >> 24) & 0xff);
+    buffer[0]=((number >>  0u) & 0xff);
+    buffer[1]=((number >>  8u) & 0xff);
+    buffer[2]=((number >> 16u) & 0xff);
+    buffer[3]=((number >> 24u) & 0xff);
 
     hasError=fwrite(buffer,1,4,file)!=4;
 
@@ -315,14 +315,14 @@ namespace osmscout {
 
     char buffer[8];
 
-    buffer[0]=((number >>  0) & 0xff);
-    buffer[1]=((number >>  8) & 0xff);
-    buffer[2]=((number >> 16) & 0xff);
-    buffer[3]=((number >> 24) & 0xff);
-    buffer[4]=((number >> 32) & 0xff);
-    buffer[5]=((number >> 40) & 0xff);
-    buffer[6]=((number >> 48) & 0xff);
-    buffer[7]=((number >> 56) & 0xff);
+    buffer[0]=((number >>  0u) & 0xff);
+    buffer[1]=((number >>  8u) & 0xff);
+    buffer[2]=((number >> 16u) & 0xff);
+    buffer[3]=((number >> 24u) & 0xff);
+    buffer[4]=((number >> 32u) & 0xff);
+    buffer[5]=((number >> 40u) & 0xff);
+    buffer[6]=((number >> 48u) & 0xff);
+    buffer[7]=((number >> 56u) & 0xff);
 
     hasError=fwrite(buffer,1,8,file)!=8;
 
@@ -360,8 +360,8 @@ namespace osmscout {
 
     char buffer[2];
 
-    buffer[0]=((number >> 0) & 0xff);
-    buffer[1]=((number >> 8) & 0xff);
+    buffer[0]=((number >> 0u) & 0xff);
+    buffer[1]=((number >> 8u) & 0xff);
 
     hasError=fwrite(buffer,1,2,file)!=2;
 
@@ -382,10 +382,10 @@ namespace osmscout {
 
     char buffer[4];
 
-    buffer[0]=((number >>  0) & 0xff);
-    buffer[1]=((number >>  8) & 0xff);
-    buffer[2]=((number >> 16) & 0xff);
-    buffer[3]=((number >> 24) & 0xff);
+    buffer[0]=uint8_t((number >>  0u) & 0xff);
+    buffer[1]=uint8_t((number >>  8u) & 0xff);
+    buffer[2]=uint8_t((number >> 16u) & 0xff);
+    buffer[3]=uint8_t((number >> 24u) & 0xff);
 
     hasError=fwrite(buffer,1,4,file)!=4;
 
@@ -406,14 +406,14 @@ namespace osmscout {
 
     char buffer[8];
 
-    buffer[0]=((number >>  0) & 0xff);
-    buffer[1]=((number >>  8) & 0xff);
-    buffer[2]=((number >> 16) & 0xff);
-    buffer[3]=((number >> 24) & 0xff);
-    buffer[4]=((number >> 32) & 0xff);
-    buffer[5]=((number >> 40) & 0xff);
-    buffer[6]=((number >> 48) & 0xff);
-    buffer[7]=((number >> 56) & 0xff);
+    buffer[0]=uint8_t((number >>  0u) & 0xff);
+    buffer[1]=uint8_t((number >>  8u) & 0xff);
+    buffer[2]=uint8_t((number >> 16u) & 0xff);
+    buffer[3]=uint8_t((number >> 24u) & 0xff);
+    buffer[4]=uint8_t((number >> 32u) & 0xff);
+    buffer[5]=uint8_t((number >> 40u) & 0xff);
+    buffer[6]=uint8_t((number >> 48u) & 0xff);
+    buffer[7]=uint8_t((number >> 56u) & 0xff);
 
     hasError=fwrite(buffer,1,8,file)!=8;
 
@@ -434,8 +434,8 @@ namespace osmscout {
 
     char buffer[2];
 
-    buffer[0]=((number >> 0) & 0xff);
-    buffer[1]=((number >> 8) & 0xff);
+    buffer[0]=uint8_t((number >> 0u) & 0xff);
+    buffer[1]=uint8_t((number >> 8u) & 0xff);
 
     hasError=fwrite(buffer,1,bytes,file)!=bytes;
 
@@ -456,10 +456,10 @@ namespace osmscout {
 
     char buffer[4];
 
-    buffer[0]=((number >>  0) & 0xff);
-    buffer[1]=((number >>  8) & 0xff);
-    buffer[2]=((number >> 16) & 0xff);
-    buffer[3]=((number >> 24) & 0xff);
+    buffer[0]=uint8_t((number >>  0u) & 0xff);
+    buffer[1]=uint8_t((number >>  8u) & 0xff);
+    buffer[2]=uint8_t((number >> 16u) & 0xff);
+    buffer[3]=uint8_t((number >> 24u) & 0xff);
 
     hasError=fwrite(buffer,1,bytes,file)!=bytes;
 
@@ -480,14 +480,14 @@ namespace osmscout {
 
     char buffer[8];
 
-    buffer[0]=((number >>  0) & 0xff);
-    buffer[1]=((number >>  8) & 0xff);
-    buffer[2]=((number >> 16) & 0xff);
-    buffer[3]=((number >> 24) & 0xff);
-    buffer[4]=((number >> 32) & 0xff);
-    buffer[5]=((number >> 40) & 0xff);
-    buffer[6]=((number >> 48) & 0xff);
-    buffer[7]=((number >> 56) & 0xff);
+    buffer[0]=uint8_t((number >>  0u) & 0xff);
+    buffer[1]=uint8_t((number >>  8u) & 0xff);
+    buffer[2]=uint8_t((number >> 16u) & 0xff);
+    buffer[3]=uint8_t((number >> 24u) & 0xff);
+    buffer[4]=uint8_t((number >> 32u) & 0xff);
+    buffer[5]=uint8_t((number >> 40u) & 0xff);
+    buffer[6]=uint8_t((number >> 48u) & 0xff);
+    buffer[7]=uint8_t((number >> 56u) & 0xff);
 
     hasError=fwrite(buffer,1,bytes,file)!=bytes;
 
@@ -518,14 +518,14 @@ namespace osmscout {
 
     char buffer[8];
 
-    buffer[0]=((fileOffset >>  0) & 0xff);
-    buffer[1]=((fileOffset >>  8) & 0xff);
-    buffer[2]=((fileOffset >> 16) & 0xff);
-    buffer[3]=((fileOffset >> 24) & 0xff);
-    buffer[4]=((fileOffset >> 32) & 0xff);
-    buffer[5]=((fileOffset >> 40) & 0xff);
-    buffer[6]=((fileOffset >> 48) & 0xff);
-    buffer[7]=((fileOffset >> 56) & 0xff);
+    buffer[0]=uint8_t((fileOffset >>  0u) & 0xff);
+    buffer[1]=uint8_t((fileOffset >>  8u) & 0xff);
+    buffer[2]=uint8_t((fileOffset >> 16u) & 0xff);
+    buffer[3]=uint8_t((fileOffset >> 24u) & 0xff);
+    buffer[4]=uint8_t((fileOffset >> 32u) & 0xff);
+    buffer[5]=uint8_t((fileOffset >> 40u) & 0xff);
+    buffer[6]=uint8_t((fileOffset >> 48u) & 0xff);
+    buffer[7]=uint8_t((fileOffset >> 56u) & 0xff);
 
     hasError=fwrite(buffer,1,8,file)!=8;
 
@@ -549,14 +549,14 @@ namespace osmscout {
 
     char buffer[8];
 
-    buffer[0]=((fileOffset >>  0) & 0xff);
-    buffer[1]=((fileOffset >>  8) & 0xff);
-    buffer[2]=((fileOffset >> 16) & 0xff);
-    buffer[3]=((fileOffset >> 24) & 0xff);
-    buffer[4]=((fileOffset >> 32) & 0xff);
-    buffer[5]=((fileOffset >> 40) & 0xff);
-    buffer[6]=((fileOffset >> 48) & 0xff);
-    buffer[7]=((fileOffset >> 56) & 0xff);
+    buffer[0]=uint8_t((fileOffset >>  0u) & 0xff);
+    buffer[1]=uint8_t((fileOffset >>  8u) & 0xff);
+    buffer[2]=uint8_t((fileOffset >> 16u) & 0xff);
+    buffer[3]=uint8_t((fileOffset >> 24u) & 0xff);
+    buffer[4]=uint8_t((fileOffset >> 32u) & 0xff);
+    buffer[5]=uint8_t((fileOffset >> 40u) & 0xff);
+    buffer[6]=uint8_t((fileOffset >> 48u) & 0xff);
+    buffer[7]=uint8_t((fileOffset >> 56u) & 0xff);
 
     hasError=fwrite(buffer,1,bytes,file)!=bytes;
 
@@ -736,15 +736,15 @@ namespace osmscout {
 
     char buffer[coordByteSize];
 
-    buffer[0]=((latValue >>  0) & 0xff);
-    buffer[1]=((latValue >>  8) & 0xff);
-    buffer[2]=((latValue >> 16) & 0xff);
+    buffer[0]=uint8_t((latValue >>  0u) & 0xff);
+    buffer[1]=uint8_t((latValue >>  8u) & 0xff);
+    buffer[2]=uint8_t((latValue >> 16u) & 0xff);
 
-    buffer[3]=((lonValue >>  0) & 0xff);
-    buffer[4]=((lonValue >>  8) & 0xff);
-    buffer[5]=((lonValue >> 16) & 0xff);
+    buffer[3]=uint8_t((lonValue >>  0u) & 0xff);
+    buffer[4]=uint8_t((lonValue >>  8u) & 0xff);
+    buffer[5]=uint8_t((lonValue >> 16u) & 0xff);
 
-    buffer[6]=((latValue >> 24) & 0x07) | ((lonValue >> 20) & 0x70);
+    buffer[6]=uint8_t(((latValue >> 24u) & 0x07) | ((lonValue >> 20u) & 0x70));
 
     hasError=fwrite(buffer,1,coordByteSize,file)!=coordByteSize;
 
@@ -886,7 +886,7 @@ namespace osmscout {
     else if (nodesSize<=0xfff) { // 2^(5+7)=2^12 (16-2-1-1)
       uint8_t size[2];
       uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
-      uint8_t nodeSize2=nodesSize >> 5; // The final bits
+      uint8_t nodeSize2=uint8_t(nodesSize >> 5); // The final bits
 
       size[0]=coordSizeFlags | nodeSize1;
       size[1]=nodeSize2;
@@ -897,7 +897,7 @@ namespace osmscout {
       uint8_t size[3];
       uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
       uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
-      uint8_t nodeSize3=nodesSize >> 12; // The final bits
+      uint8_t nodeSize3=uint8_t(nodesSize >> 12); // The final bits
 
       size[0]=coordSizeFlags | nodeSize1;
       size[1]=nodeSize2;
@@ -910,7 +910,7 @@ namespace osmscout {
       uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
       uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
       uint8_t nodeSize3=((nodesSize >> 12) & 0x7f) | 0x80; // further 7 bits + continuation bit
-      uint8_t nodeSize4=nodesSize >> 19; // The final bits
+      uint8_t nodeSize4=uint8_t(nodesSize >> 19); // The final bits
 
       size[0]=coordSizeFlags | nodeSize1;
       size[1]=nodeSize2;
@@ -931,19 +931,19 @@ namespace osmscout {
     if (coordBitSize==16) {
       size_t byteBufferPos=0;
 
-      for (size_t i=0; i<deltaBuffer.size(); i++) {
-        byteBuffer[byteBufferPos]=deltaBuffer[i];
+      for (int i : deltaBuffer) {
+        byteBuffer[byteBufferPos]=i;
         byteBufferPos++;
       }
     }
     else if (coordBitSize==32) {
       size_t byteBufferPos=0;
 
-      for (size_t i=0; i<deltaBuffer.size(); i++) {
-        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+      for (int i : deltaBuffer) {
+        byteBuffer[byteBufferPos]=i & 0xff;
         ++byteBufferPos;
 
-        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8);
+        byteBuffer[byteBufferPos]=(i >> 8);
         ++byteBufferPos;
       }
     }
@@ -1095,7 +1095,7 @@ namespace osmscout {
       else if (nodesSize<=0x7ff) { // 2^(4+7)=2^11 (16-3-1-1)
         uint8_t size[2];
         uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
-        uint8_t nodeSize2=nodesSize >> 4;                   // The final bits
+        uint8_t nodeSize2=uint8_t(nodesSize >> 4);                   // The final bits
 
         size[0]=coordSizeFlags  | hasNodesFlags | nodeSize1;
         size[1]=nodeSize2;
@@ -1106,7 +1106,7 @@ namespace osmscout {
         uint8_t size[3];
         uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80; // The initial 4 bits + continuation bit
         uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80; // Further 7 bits + continuation bit
-        uint8_t nodeSize3=nodesSize >> 11;                  // The final bits
+        uint8_t nodeSize3=uint8_t(nodesSize >> 11);                  // The final bits
 
         size[0]=coordSizeFlags  | hasNodesFlags | nodeSize1;
         size[1]=nodeSize2;
@@ -1119,7 +1119,7 @@ namespace osmscout {
           uint8_t nodeSize1=((nodesSize & 0x0f) << 3) | 0x80;  // The initial 4 bits + continuation bit
           uint8_t nodeSize2=((nodesSize >> 4) & 0x7f) | 0x80;  // Further 7 bits + continuation bit
           uint8_t nodeSize3=((nodesSize >> 11) & 0x7f) | 0x80; // further 7 bits + continuation bit
-          uint8_t nodeSize4=nodesSize >> 18;                    // The final bits
+          uint8_t nodeSize4=uint8_t(nodesSize >> 18);                    // The final bits
 
           size[0]=coordSizeFlags  | hasNodesFlags | nodeSize1;
           size[1]=nodeSize2;
@@ -1139,7 +1139,7 @@ namespace osmscout {
       else if (nodesSize<=0xfff) { // 2^(5+7)=2^12 (16-2-1-1)
         uint8_t size[2];
         uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
-        uint8_t nodeSize2=nodesSize >> 5; // The final bits
+        uint8_t nodeSize2=uint8_t(nodesSize >> 5); // The final bits
 
         size[0]=coordSizeFlags | nodeSize1;
         size[1]=nodeSize2;
@@ -1150,7 +1150,7 @@ namespace osmscout {
         uint8_t size[3];
         uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
         uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
-        uint8_t nodeSize3=nodesSize >> 12; // The final bits
+        uint8_t nodeSize3=uint8_t(nodesSize >> 12); // The final bits
 
         size[0]=coordSizeFlags | nodeSize1;
         size[1]=nodeSize2;
@@ -1162,7 +1162,7 @@ namespace osmscout {
           uint8_t nodeSize1=((nodesSize & 0x1f) << 2) | 0x80; // The initial 5 bits + continuation bit
           uint8_t nodeSize2=((nodesSize >> 5) & 0x7f) | 0x80; // Further 7 bits + continuation bit
           uint8_t nodeSize3=((nodesSize >> 12) & 0x7f) | 0x80; // further 7 bits + continuation bit
-          uint8_t nodeSize4=nodesSize >> 19; // The final bits
+          uint8_t nodeSize4=uint8_t(nodesSize >> 19); // The final bits
 
           size[0]=coordSizeFlags | nodeSize1;
           size[1]=nodeSize2;
@@ -1184,19 +1184,19 @@ namespace osmscout {
     if (coordBitSize==16) {
       size_t byteBufferPos=0;
 
-      for (size_t i=0; i<deltaBuffer.size(); i++) {
-        byteBuffer[byteBufferPos]=deltaBuffer[i];
+      for (int i : deltaBuffer) {
+        byteBuffer[byteBufferPos]=i;
         byteBufferPos++;
       }
     }
     else if (coordBitSize==32) {
       size_t byteBufferPos=0;
 
-      for (size_t i=0; i<deltaBuffer.size(); i++) {
-        byteBuffer[byteBufferPos]=deltaBuffer[i] & 0xff;
+      for (int i : deltaBuffer) {
+        byteBuffer[byteBufferPos]=i & 0xff;
         ++byteBufferPos;
 
-        byteBuffer[byteBufferPos]=(deltaBuffer[i] >> 8);
+        byteBuffer[byteBufferPos]=(i >> 8);
         ++byteBufferPos;
       }
     }

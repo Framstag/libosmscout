@@ -400,7 +400,7 @@ namespace osmscout {
 
     // Calculate number of types which have data
 
-    uint32_t indexEntries=std::count_if(typeConfig->GetWayTypes().begin(),
+    auto indexEntries=std::count_if(typeConfig->GetWayTypes().begin(),
                                         typeConfig->GetWayTypes().end(),
                                         [&typeData](const TypeInfoRef& type) {
                                            return typeData[type->GetIndex()].HasEntries();
@@ -416,7 +416,7 @@ namespace osmscout {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   AreaWayIndex::AREA_WAY_IDX));
 
-      writer.Write(indexEntries);
+      writer.Write((uint32_t)indexEntries);
 
       for (const auto &type : typeConfig->GetWayTypes()) {
         size_t i=type->GetIndex();

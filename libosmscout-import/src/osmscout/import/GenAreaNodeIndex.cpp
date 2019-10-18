@@ -175,7 +175,7 @@ namespace osmscout {
         node.Read(*typeConfig,
                   nodeScanner);
 
-        size_t typeId=node.GetType()->GetNodeId();
+        TypeId typeId=node.GetType()->GetNodeId();
 
         data[typeId].type=node.GetType();
         data[typeId].nodeId=typeId;
