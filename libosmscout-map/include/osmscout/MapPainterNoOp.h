@@ -52,7 +52,7 @@ namespace osmscout {
                               const MapParameter& parameter,
                               const std::vector<LabelData> &labels,
                               const Vertex2D& position,
-                              const double iconHeight = -1) override;
+                              double objectWidth) override;
 
     void RegisterContourLabel(const Projection &projection,
                               const MapParameter &parameter,
