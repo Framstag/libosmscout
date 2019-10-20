@@ -36,8 +36,6 @@
   DrawMapOpenGL ../maps/nordrhein-westfalen ../stylesheets/standard.oss 1024 800 7.46525 51.51241 70000 test.ppm
  */
 
-static const double DPI = 96.0;
-
 int main(int argc, char* argv[]) {
   DrawMapDemo drawDemo("DrawMapOpenGL", argc, argv);
 
