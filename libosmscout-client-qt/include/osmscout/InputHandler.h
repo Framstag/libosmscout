@@ -302,7 +302,7 @@ public:
     MoveHandler(const MapView &view);
     virtual ~MoveHandler();
 
-    virtual bool animationInProgress();
+    virtual bool animationInProgress() override;
 
     /**
      * Called from DragHandler or MultitouchHandler when gesture moves with map
@@ -350,7 +350,7 @@ public:
 
     virtual ~JumpHandler();
 
-    virtual bool animationInProgress();
+    virtual bool animationInProgress() override;
     virtual bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing) override;
 };
 
