@@ -87,12 +87,12 @@ PathTextRenderer::PathTextRenderer(float pixelsPerDip) :
 */
 HRESULT PathTextRenderer::DrawGlyphRun(
   _In_opt_ void* clientDrawingContext,
-  float baselineOriginX,
-  float baselineOriginY,
-  DWRITE_MEASURING_MODE measuringMode,
+  float /*baselineOriginX*/,
+  float /*baselineOriginY*/,
+  DWRITE_MEASURING_MODE /*measuringMode*/,
   _In_ DWRITE_GLYPH_RUN const* glyphRun,
   _In_ DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
-  _In_opt_ IUnknown* clientDrawingEffect
+  _In_opt_ IUnknown* /*clientDrawingEffect*/
 )
 {
   if (clientDrawingContext == nullptr)
@@ -206,10 +206,10 @@ HRESULT PathTextRenderer::DrawGlyphRun(
 }
 
 HRESULT PathTextRenderer::DrawUnderline(
-  _In_opt_ void* clientDrawingContext,
-  float baselineOriginX,
-  float baselineOriginY,
-  _In_ DWRITE_UNDERLINE const* underline,
+  _In_opt_ void* /*clientDrawingContext*/,
+  float /*baselineOriginX*/,
+  float /*baselineOriginY*/,
+  _In_ DWRITE_UNDERLINE const* /*underline*/,
   _In_opt_ IUnknown* clientDrawingEffect
 )
 {
@@ -218,11 +218,11 @@ HRESULT PathTextRenderer::DrawUnderline(
 }
 
 HRESULT PathTextRenderer::DrawStrikethrough(
-  _In_opt_ void* clientDrawingContext,
-  float baselineOriginX,
-  float baselineOriginY,
-  _In_ DWRITE_STRIKETHROUGH const* strikethrough,
-  _In_opt_ IUnknown* clientDrawingEffect
+  _In_opt_ void* /*clientDrawingContext*/,
+  float /*baselineOriginX*/,
+  float /*baselineOriginY*/,
+  _In_ DWRITE_STRIKETHROUGH const* /*strikethrough*/,
+  _In_opt_ IUnknown* /*clientDrawingEffect*/
 )
 {
   // NOPE
@@ -230,13 +230,13 @@ HRESULT PathTextRenderer::DrawStrikethrough(
 }
 
 HRESULT PathTextRenderer::DrawInlineObject(
-  _In_opt_ void* clientDrawingContext,
-  float originX,
-  float originY,
-  IDWriteInlineObject* inlineObject,
-  BOOL isSideways,
-  BOOL isRightToLeft,
-  _In_opt_ IUnknown* clientDrawingEffect
+  _In_opt_ void* /*clientDrawingContext*/,
+  float /*originX*/,
+  float /*originY*/,
+  IDWriteInlineObject* /*inlineObject*/,
+  BOOL /*isSideways*/,
+  BOOL /*isRightToLeft*/,
+  _In_opt_ IUnknown* /*clientDrawingEffect*/
 )
 {
   // Hell no.
@@ -247,7 +247,7 @@ HRESULT PathTextRenderer::DrawInlineObject(
 // IDWritePixelSnapping methods
 //
 HRESULT PathTextRenderer::IsPixelSnappingDisabled(
-  _In_opt_ void* clientDrawingContext,
+  _In_opt_ void* /*clientDrawingContext*/,
   _Out_ BOOL* isDisabled
 )
 {
@@ -257,7 +257,7 @@ HRESULT PathTextRenderer::IsPixelSnappingDisabled(
 }
 
 HRESULT PathTextRenderer::GetCurrentTransform(
-  _In_opt_ void* clientDrawingContext,
+  _In_opt_ void* /*clientDrawingContext*/,
   _Out_ DWRITE_MATRIX* transform
 )
 {
@@ -267,7 +267,7 @@ HRESULT PathTextRenderer::GetCurrentTransform(
 }
 
 HRESULT PathTextRenderer::GetPixelsPerDip(
-  _In_opt_ void* clientDrawingContext,
+  _In_opt_ void* /*clientDrawingContext*/,
   _Out_ float* pixelsPerDip
 )
 {
@@ -283,7 +283,7 @@ HRESULT PathTextRenderer::GetPixelsPerDip(
 //
 // Lifted from the MS samples.
 HRESULT PathTextRenderer::QueryInterface(
-  REFIID riid,
+  REFIID /*riid*/,
   _Outptr_ void** object
 )
 {

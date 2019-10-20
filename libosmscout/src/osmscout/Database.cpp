@@ -1180,7 +1180,7 @@ namespace osmscout {
 
     for (const auto& area : areas) {
       Distance distance=Distance::Max();
-      GeoCoord closestPoint;
+      GeoCoord closestPoint(0.0,0.0);
       bool     stop=false;
       bool     inArea=false;
 

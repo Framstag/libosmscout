@@ -409,6 +409,12 @@ namespace osmscout {
 
     }
 
+    inline AccessFeatureValue(const AccessFeatureValue& other)
+    : access(other.access)
+    {
+
+    }
+
     inline explicit AccessFeatureValue(uint8_t access)
     : access(access)
     {

@@ -86,12 +86,12 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
   emit searchResult(searchPattern, locations);
 }
 
-void SearchModule::FreeTextSearch(DBInstanceRef &db,
-                                  const QString searchPattern,
-                                  int limit,
-                                  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
-{
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
+  void SearchModule::FreeTextSearch(DBInstanceRef &db,
+                                    const QString searchPattern,
+                                    int limit,
+                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
+  {
   // Search by free text
   QList<LocationEntry> locations;
   QList<osmscout::ObjectFileRef> objectSet;
@@ -133,8 +133,16 @@ void SearchModule::FreeTextSearch(DBInstanceRef &db,
   // TODO: merge locations with same label database type
   // bus stations can have more points for example...
   emit searchResult(searchPattern, locations);
+  }
+#else
+  void SearchModule::FreeTextSearch(DBInstanceRef &/*db*/,
+                                    const QString /*1:1searchPattern*/,
+                                    int /*limit*/,
+                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &/*adminRegionMap*/)
+  {
+    // no code
+  }
 #endif
-}
 
 void SearchModule::SearchForLocations(const QString searchPattern,
                                       int limit,
