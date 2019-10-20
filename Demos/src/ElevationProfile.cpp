@@ -65,9 +65,13 @@ public:
     osmscout::StopClock stopClock;
     std::vector<osmscout::FileOffset> offsets;
     osmscout::TypeInfoSet loadedTypes;
-    assert(database->GetAreaWayIndex()->GetOffsets(box,contourTypes,offsets,loadedTypes));
+    if (!database->GetAreaWayIndex()->GetOffsets(box,contourTypes,offsets,loadedTypes)) {
+      assert(false);
+    }
     std::vector<osmscout::WayRef> contours;
-    assert(database->GetWaysByOffset(offsets, contours));
+    if (!database->GetWaysByOffset(offsets, contours)) {
+      assert(false);
+    }
     stopClock.Stop();
     count++;
     millis+=stopClock.GetMilliseconds();
