@@ -249,10 +249,10 @@ namespace osmscout {
 
   DoubleRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
-    return DoubleRectangle(0,
-                           glyph.height * -1,
-                           glyph.width,
-                           glyph.height);
+    return DoubleRectangle(0.0,
+                           (double)(glyph.height * -1),
+                           (double)glyph.width,
+                           (double)glyph.height);
   }
 
   std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
@@ -605,8 +605,8 @@ namespace osmscout {
   {
     stream << "  <g id=\"map\">" << std::endl;
 
-    DoubleRectangle viewport(0,0,
-                             projection.GetWidth(), projection.GetHeight());
+    DoubleRectangle viewport(0.0,0.0,
+                             (double)projection.GetWidth(), (double)projection.GetHeight());
 
     labelLayouter.SetViewport(viewport);
     labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);

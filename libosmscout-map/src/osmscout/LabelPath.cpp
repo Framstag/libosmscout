@@ -51,7 +51,7 @@ namespace osmscout {
         segments[segments.size()-1]=last;
 
         // fill offsetIndex
-        for (int i=offsetIndex.size();i<length/100;i++){
+        for (size_t i=offsetIndex.size();i<length/100;i++){
           offsetIndex.push_back(segments.size()-1);
         }
 

@@ -60,7 +60,7 @@ char* coco_string_create(const char* value) {
 }
 
 char* coco_string_create(const char *value , int startIndex, size_t length) {
-  int len = 0;
+  size_t len = 0;
   char* data;
 
   if (value) { len = length; }
