@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
           freeglut3 freeglut3-dev \
           libmarisa-dev \
           doxygen \
-          swig openjdk-8-jdk \
+          swig openjdk-11-jdk \
           locales \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,7 +19,7 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 RUN locale-gen
 ENV LANG en_US.utf8
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 
 RUN apt-get update && apt-get install -y \
           g++ \
