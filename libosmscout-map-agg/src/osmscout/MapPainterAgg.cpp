@@ -381,7 +381,7 @@ namespace osmscout {
       const agg::glyph_cache *glyph = fontCacheManager->glyph(i);
       assert(glyph);
       fontCacheManager->add_kerning(&x, &y);
-      label.glyphs.emplace_back(std::move(MapPainterAgg::NativeGlyph{x, y, glyph}));
+      label.glyphs.emplace_back(MapPainterAgg::NativeGlyph{x, y, glyph});
 
       w += glyph->advance_x;
 

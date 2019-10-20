@@ -133,6 +133,8 @@ int Theme::GetNumberCharWidth() const
 
         QFontMetrics metrics(font);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
+        // we want to support Qt from 5.6, QFontMetrics::horizontalAdvance was introduced in 5.11
         numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('-'));
         numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance(','));
         numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('.'));
@@ -146,6 +148,22 @@ int Theme::GetNumberCharWidth() const
         numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('7'));
         numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('8'));
         numberCharWidth=std::max(numberCharWidth,metrics.horizontalAdvance('9'));
+#else
+        // QFontMetrics::width is obsolete now, but we have no better choice with older Qt
+        numberCharWidth=std::max(numberCharWidth,metrics.width('-'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width(','));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('.'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('0'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('1'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('2'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('3'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('4'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('5'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('6'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('7'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('8'));
+        numberCharWidth=std::max(numberCharWidth,metrics.width('9'));
+#endif
 
         qDebug() << "Number char width: " << numberCharWidth << "px";
     }
