@@ -22,6 +22,7 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <string>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
@@ -33,8 +34,7 @@
 namespace osmscout {
 
     MapPainterIOS::MapPainterIOS(const StyleConfigRef& styleConfig)
-    : MapPainter(styleConfig, new CoordBuffer()), labelLayouter(this)
-    {
+    : MapPainter(styleConfig, new CoordBuffer()), labelLayouter(this){
 #if TARGET_OS_IPHONE
         contentScale = [[UIScreen mainScreen] scale];
 #else
@@ -53,11 +53,10 @@ namespace osmscout {
 
     Font *MapPainterIOS::GetFont(const Projection& projection,
                                  const MapParameter& parameter,
-                                 double fontSize)
-    {
+                                 double fontSize){
         std::map<size_t,Font *>::const_iterator f;
 
-        fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize())*contentScale;
+        fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
 
         f=fonts.find(fontSize);
 
@@ -136,9 +135,13 @@ namespace osmscout {
              path!=parameter.GetIconPaths().end();
              ++path) {
 
-            std::string filename=*path+"/"+style.GetIconName()+".png";
-            //std::cout << "Trying to Load image " << filename << std::endl;
-
+            std::string filename;
+            if(contentScale == 1){
+                filename = *path+"/"+style.GetIconName()+".png";
+            } else {
+                filename = *path+"/"+style.GetIconName()+"@"+std::to_string((int)contentScale)+"x.png";
+            }
+            
             Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
 #if TARGET_OS_IPHONE
@@ -152,7 +155,6 @@ namespace osmscout {
                 }
 
                 images[idx]=imgRef;
-                //std::cout << "Loaded image '" << filename << "'" << std::endl;
 
                 return true;
             }
@@ -197,7 +199,12 @@ namespace osmscout {
         for (std::list<std::string>::const_iterator path=parameter.GetPatternPaths().begin();
              path!=parameter.GetPatternPaths().end();
              ++path) {
-            std::string filename=*path+"/"+style.GetPatternName()+".png";
+            std::string filename;
+            if(contentScale == 1){
+                filename = *path+"/"+style.GetPatternName()+".png";
+            } else {
+                filename = *path+"/"+style.GetPatternName()+"@"+std::to_string((int)contentScale)+"x.png";
+            }
 
             Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
