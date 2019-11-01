@@ -129,21 +129,33 @@ endif()
 set(OpenGL_GL_PREFERENCE "GLVND")
 
 # debug build?
+option(DEBUG_LABEL_LAYOUTER "Print extra debug messages during label layouting" OFF)
 if (DEBUG_LABEL_LAYOUTER)
   add_definitions( -DDEBUG_LABEL_LAYOUTER)
 endif()
+
+option(DEBUG_GROUNDTILES "Print extra debug messages while rendering ground tiles" OFF)
 if (DEBUG_GROUNDTILES)
   add_definitions( -DDEBUG_GROUNDTILES)
 endif()
+
+option(DEBUG_COASTLINE "Print extra debug messages while importing coastline" OFF)
 if (DEBUG_COASTLINE)
   add_definitions( -DDEBUG_COASTLINE)
 endif()
+
+option(DEBUG_TILING "Print extra debug messages related with map tiles" OFF)
 if (DEBUG_TILING)
   add_definitions( -DDEBUG_TILING)
 endif()
+
+option(DEBUG_ROUTING "Print extra debug messages while routing" OFF)
 if (DEBUG_ROUTING)
   add_definitions( -DDEBUG_ROUTING)
 endif()
+
+# see https://doc.qt.io/qtcreator/creator-debugging-qml.html for more details
+option(QT_QML_DEBUG "Build with QML debugger support" OFF)
 if (QT_QML_DEBUG)
   add_definitions( -DQT_QML_DEBUG)
 endif()
