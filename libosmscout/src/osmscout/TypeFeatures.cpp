@@ -94,14 +94,14 @@ namespace osmscout {
                           FeatureValueBuffer& buffer) const
   {
     std::string name;
-    uint32_t    namePriority=0;
+    uint32_t    namePriority=std::numeric_limits<uint32_t>::max();
 
     for (const auto &tag : tags) {
       uint32_t ntPrio;
       bool     isNameTag=tagRegistry.IsNameTag(tag.first,ntPrio);
 
       if (isNameTag &&
-          (name.empty() || ntPrio>namePriority)) {
+          (name.empty() || ntPrio<namePriority)) {
         name=tag.second;
         namePriority=ntPrio;
       }
@@ -180,14 +180,14 @@ namespace osmscout {
                              FeatureValueBuffer& buffer) const
   {
     std::string nameAlt;
-    uint32_t    nameAltPriority=0;
+    uint32_t    nameAltPriority=std::numeric_limits<uint32_t>::max();
 
     for (const auto &tag : tags) {
       uint32_t natPrio;
       bool     isNameAltTag=tagRegistry.IsNameAltTag(tag.first,natPrio);
 
       if (isNameAltTag &&
-          (nameAlt.empty() || natPrio>nameAltPriority)) {
+          (nameAlt.empty() || natPrio<nameAltPriority)) {
         nameAlt=tag.second;
         nameAltPriority=natPrio;
       }

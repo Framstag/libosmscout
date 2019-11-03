@@ -47,9 +47,9 @@ int main(int argc, char* argv[])
 
   CGSize size = CGSizeMake(args.width, args.height);
   CGContextRef bitmapContext = CGBitmapContextCreate(nullptr, args.width, args.height, 8, 0, [[NSColorSpace genericRGBColorSpace] CGColorSpace], kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst);
-  NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
+  NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithCGContext:bitmapContext flipped:YES];
   [NSGraphicsContext setCurrentContext:nsgc];
-  CGContextRef cg = (CGContextRef)[nsgc graphicsPort];
+  CGContextRef cg = (CGContextRef)[nsgc CGContext];
   CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, args.height);
   CGContextConcatCTM(cg, flipVertical);
 
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
       CGContextRelease(bitmapContext);
       NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
       NSDictionary *props = [NSDictionary dictionary];
-      NSData *imgData = [bitmapRep representationUsingType:NSPNGFileType properties:props];
+      NSData *imgData = [bitmapRep representationUsingType:NSBitmapImageFileTypePNG properties:props];
       NSString *path = [[NSString alloc] initWithUTF8String:args.output.c_str()];
       if(![imgData writeToFile:path atomically:NO]){
           std::cerr << "Cannot write PNG" << std::endl;
