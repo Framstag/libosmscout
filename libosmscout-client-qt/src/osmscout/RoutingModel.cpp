@@ -61,7 +61,8 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   } else if (vehicleStr=="foot"){
     vehicle=osmscout::Vehicle::vehicleFoot;
   }
-  clear();
+  cancel(); // cancel current computation
+  clear(); // clear model
   computing=true;
   breaker=std::make_shared<osmscout::ThreadedBreaker>();
   emit computingChanged();
