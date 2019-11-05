@@ -39,6 +39,7 @@ namespace osmscout {
   {
   private:
     GeoCoord previousPoint;
+    Bearing previousBearing;
     bool previousPointValid{false};
     Timestamp lastUpdate;
 
