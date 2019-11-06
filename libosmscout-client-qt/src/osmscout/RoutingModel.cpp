@@ -61,12 +61,13 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   } else if (vehicleStr=="foot"){
     vehicle=osmscout::Vehicle::vehicleFoot;
   }
-  clear();
+  cancel(); // cancel current computation
+  clear(); // clear model
   computing=true;
   breaker=std::make_shared<osmscout::ThreadedBreaker>();
   emit computingChanged();
 
-  // make copy to shared ptr, remove owhership
+  // make copy to shared ptr, remove ownership
   LocationEntryRef startRef=std::make_shared<LocationEntry>(*start);
   startRef->setParent(Q_NULLPTR);
   LocationEntryRef targetRef=std::make_shared<LocationEntry>(*target);
