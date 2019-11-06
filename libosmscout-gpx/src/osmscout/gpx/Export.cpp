@@ -265,7 +265,7 @@ bool GpxWritter::WriteWaypoint(const Waypoint &waypoint)
     }
   }
   if (waypoint.course.hasValue()){
-    if (!WriteTextElement("course", waypoint.course.get(), 2)){
+    if (!WriteTextElement("magvar", waypoint.course.get(), 2)){
       return false;
     }
   }
@@ -323,7 +323,7 @@ bool GpxWritter::WriteTrackPoint(const char *elemName, const TrackPoint &point)
     }
   }
   if (point.course.hasValue()){
-    if (!WriteTextElement("course", point.course.get(), 2)){
+    if (!WriteTextElement("magvar", point.course.get(), 2)){
       return false;
     }
   }
