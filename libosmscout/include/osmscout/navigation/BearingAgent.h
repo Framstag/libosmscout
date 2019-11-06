@@ -38,7 +38,8 @@ namespace osmscout {
   class OSMSCOUT_API BearingAgent CLASS_FINAL : public NavigationAgent
   {
   private:
-    GeoCoord previousPoing;
+    GeoCoord previousPoint;
+    Bearing previousBearing;
     bool previousPointValid{false};
     Timestamp lastUpdate;
 
