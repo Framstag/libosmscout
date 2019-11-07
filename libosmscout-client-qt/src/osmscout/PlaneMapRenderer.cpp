@@ -359,6 +359,8 @@ void PlaneMapRenderer::DrawMap()
     drawParameter.SetLabelLineFitToArea(true);
     drawParameter.SetLabelLineFitToWidth(std::min(projection.GetWidth(), projection.GetHeight())/canvasOverrun);
 
+    drawParameter.SetUnits(units=="imperial" ? osmscout::MapParameter::Units::Imperial : osmscout::MapParameter::Units::Metrics);
+
     // create copy of projection
     osmscout::MercatorProjection renderProjection;
 

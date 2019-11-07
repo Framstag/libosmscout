@@ -54,6 +54,12 @@ namespace osmscout {
       Scalable          // !< vector pattern should be used, it will be scaled to patternSize
     };
 
+    enum class Units
+    {
+      Metrics,
+      Imperial
+    };
+
   private:
     std::string                         fontName;                  //!< Name of the font to use
     double                              fontSize;                  //!< Metric size of base font (aka font size 100%) in millimeter
@@ -89,6 +95,8 @@ namespace osmscout {
     double                              patternSize;               //!< Size of pattern image in mm (default 3.7)
 
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
+
+    Units                               units;                     //!< Units used by the renderer, for example peak elevation
 
   private:
 // Contour labels
@@ -166,6 +174,8 @@ namespace osmscout {
     void SetWarningCoordCountLimit(size_t limit);
 
     void SetShowAltLanguage(bool showAltLanguage);
+
+    void SetUnits(Units units);
 
     void RegisterFillStyleProcessor(size_t typeIndex,
                                     const FillStyleProcessorRef& processor);
@@ -353,6 +363,11 @@ namespace osmscout {
     inline bool GetShowAltLanguage() const
     {
       return showAltLanguage;
+    }
+
+    inline Units GetUnits() const
+    {
+      return units;
     }
 
     bool IsAborted() const

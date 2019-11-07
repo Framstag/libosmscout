@@ -319,6 +319,19 @@ void Settings::SetCookieData(const QByteArray data)
   storage->setValue("OSMScoutLib/General/Cookies", data);
 }
 
+QString Settings::GetUnits() const
+{
+  return storage->value("OSMScoutLib/General/Units", "metrics").toString();
+}
+
+void Settings::SetUnits(const QString units)
+{
+  if (GetUnits()!=units){
+    storage->setValue("OSMScoutLib/General/Units", units);
+    emit UnitsChanged(units);
+  }
+}
+
 QmlSettings::QmlSettings()
 {
     settings=OSMScoutQt::GetInstance().GetSettings();
@@ -339,6 +352,8 @@ QmlSettings::QmlSettings()
             this, &QmlSettings::FontSizeChanged);
     connect(settings.get(), &Settings::ShowAltLanguageChanged,
             this, &QmlSettings::ShowAltLanguageChanged);
+    connect(settings.get(), &Settings::UnitsChanged,
+            this, &QmlSettings::UnitsChanged);
 }
 
 double QmlSettings::GetPhysicalDPI() const
@@ -425,5 +440,13 @@ bool QmlSettings::GetShowAltLanguage() const
 void QmlSettings::SetShowAltLanguage(bool showAltLanguage)
 {
     settings->SetShowAltLanguage(showAltLanguage);
+}
+QString QmlSettings::GetUnits() const
+{
+    return settings->GetUnits();
+}
+void QmlSettings::SetUnits(const QString units)
+{
+    settings->SetUnits(units);
 }
 }
