@@ -17,6 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/Settings.h>
+#include <osmscout/OSMScoutQt.h>
+
 #include <QScreen>
 #include <QGuiApplication>
 #include <QStandardPaths>
@@ -24,13 +27,8 @@
 #include <QObject>
 #include <QDebug>
 #include <QFileInfo>
-
 #include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-
-#include <osmscout/Settings.h>
-#include <osmscout/OSMScoutQt.h>
+#include <QLocale>
 
 namespace osmscout {
 
@@ -321,7 +319,18 @@ void Settings::SetCookieData(const QByteArray data)
 
 QString Settings::GetUnits() const
 {
-  return storage->value("OSMScoutLib/General/Units", "metrics").toString();
+  QLocale locale;
+  QString defaultUnits;
+  switch (locale.measurementSystem()){
+    case QLocale::ImperialUSSystem:
+    case QLocale::ImperialUKSystem:
+      defaultUnits="imperial";
+      break;
+    case QLocale::MetricSystem:
+    default:
+      defaultUnits="metrics";
+  }
+  return storage->value("OSMScoutLib/General/Units", defaultUnits).toString();
 }
 
 void Settings::SetUnits(const QString units)
