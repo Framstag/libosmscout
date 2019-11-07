@@ -66,7 +66,7 @@ namespace osmscout {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=nullptr) {
-          return value->GetLabel(0);
+          return value->GetLabel(parameter.GetUnits(), 0);
         }
       }
 
@@ -77,7 +77,7 @@ namespace osmscout {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=nullptr) {
-          return value->GetLabel(0);
+          return value->GetLabel(parameter.GetUnits(), 0);
         }
       }
 
@@ -91,7 +91,7 @@ namespace osmscout {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=nullptr) {
-          return value->GetLabel(0);
+          return value->GetLabel(parameter.GetUnits(), 0);
         }
       }
 
@@ -139,7 +139,7 @@ namespace osmscout {
     }
   }
 
-  std::string DynamicFeatureLabelReader::GetLabel(const MapParameter& /*parameter*/,
+  std::string DynamicFeatureLabelReader::GetLabel(const MapParameter& parameter,
                                                   const FeatureValueBuffer& buffer) const
   {
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
@@ -149,7 +149,7 @@ namespace osmscout {
       FeatureValue *value=buffer.GetValue(index);
 
       if (value!=nullptr) {
-        return value->GetLabel(labelIndex);
+        return value->GetLabel(parameter.GetUnits(), labelIndex);
       }
     }
 

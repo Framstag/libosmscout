@@ -54,12 +54,6 @@ namespace osmscout {
       Scalable          // !< vector pattern should be used, it will be scaled to patternSize
     };
 
-    enum class Units
-    {
-      Metrics,
-      Imperial
-    };
-
   private:
     std::string                         fontName;                  //!< Name of the font to use
     double                              fontSize;                  //!< Metric size of base font (aka font size 100%) in millimeter
@@ -96,8 +90,6 @@ namespace osmscout {
 
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
 
-    Units                               units;                     //!< Units used by the renderer, for example peak elevation
-
   private:
 // Contour labels
     double                              contourLabelOffset;        //!< Offset in mm for beginning and end of an contour label in relation to contour begin and end
@@ -115,6 +107,8 @@ namespace osmscout {
     size_t                              warnCoordCountLimit;       //!< Limit for coords/type. If limit is reached a warning is created
 
     bool                                showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
+
+    Units                               units;                     //!< Units used by the renderer, for example peak elevation
 
     std::vector<FillStyleProcessorRef > fillProcessors;            //!< List of processors for FillStyles for types
 

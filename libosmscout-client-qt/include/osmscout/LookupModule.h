@@ -169,7 +169,7 @@ private:
 
     const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
     if (name!=nullptr){
-      info.name=QString::fromStdString(name->GetLabel(0));
+      info.name=QString::fromStdString(name->GetLabel(Units::Metrics, 0));
     }
     const osmscout::PhoneFeatureValue *phone=features.findValue<osmscout::PhoneFeatureValue>();
     if (phone!=nullptr){

@@ -67,8 +67,9 @@ void DumpFeatures(const osmscout::FeatureValueBuffer &features, const std::strin
         if (feature->HasValue()) {
           osmscout::FeatureValue *value=features.GetValue(featureInstance.GetIndex());
           if (feature->HasLabel()) {
-            if (!value->GetLabel(0).empty()) {
-              std::cout << ": " << osmscout::UTF8StringToLocaleString(value->GetLabel(0));
+            std::string label=value->GetLabel(osmscout::Units::Metrics, 0);
+            if (!label.empty()) {
+              std::cout << ": " << osmscout::UTF8StringToLocaleString(label);
             }
           }
           else {

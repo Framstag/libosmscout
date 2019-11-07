@@ -43,7 +43,7 @@ namespace osmscout {
 
     virtual ~FeatureValue()=default;
 
-    inline virtual std::string GetLabel(size_t /*labelIndex*/) const
+    inline virtual std::string GetLabel(Units /*units*/, size_t /*labelIndex*/) const
     {
       return "";
     }

@@ -31,6 +31,12 @@
 
 namespace osmscout {
 
+  enum class Units
+  {
+    Metrics,
+    Imperial
+  };
+
   struct OSMSCOUT_API Meter
   {
     static inline double ToMeter(double m)
@@ -54,6 +60,19 @@ namespace osmscout {
     static inline double FromMeter(double m)
     {
       return m/1000.0;
+    }
+  };
+
+  struct OSMSCOUT_API Feet
+  {
+    static inline double ToMeter(double feet)
+    {
+      return feet * 0.3048;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m/0.3048;
     }
   };
 
