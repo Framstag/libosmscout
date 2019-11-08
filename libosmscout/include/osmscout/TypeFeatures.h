@@ -1283,9 +1283,13 @@ namespace osmscout {
     {
       if (units==Units::Imperial){
         int eleFeet=std::round(Meters(ele).As<Feet>());
-        return std::to_string(eleFeet)+"\u202Fft"; // use tiny, unbreakable space between value and unit
+        // use tiny, unbreakable space between value and unit.
+        // U+202F unicode is encoded as 0xE280AF in utf-8
+        // because unicode support in C++ is poor and platform dependent,
+        // we will use utf-8 bytes directly
+        return std::to_string(eleFeet)+"\xE2\x80\xAF"+"ft";
       }
-      return std::to_string(ele)+"\u202Fm";
+      return std::to_string(ele)+"\xE2\x80\xAF"+"m";
     }
 
     void Read(FileScanner& scanner) override;
