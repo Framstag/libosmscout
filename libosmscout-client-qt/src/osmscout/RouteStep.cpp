@@ -57,7 +57,8 @@ RouteStep::RouteStep(const RouteStep& other)
       description(other.description),
       shortDescription(other.shortDescription),
       streetNames(other.streetNames),
-      roundaboutExit(other.roundaboutExit)
+      roundaboutExit(other.roundaboutExit),
+      roundaboutClockwise(other.roundaboutClockwise)
 {
   copyDynamicProperties(other);
 }
@@ -74,6 +75,8 @@ QVariant RouteStep::data(int role) const
       return getType();
     case RoundaboutExitRole:
       return getRoundaboutExit();
+    case RoundaboutClockwiseRole:
+      return getRoundaboutClockwise();
     default:
       break;
   }
@@ -87,6 +90,7 @@ QHash<int, QByteArray> RouteStep::roleNames(QHash<int, QByteArray> roles)
   roles[DescriptionRole] = "description";
   roles[TypeRole] = "type";
   roles[RoundaboutExitRole] = "roundaboutExit";
+  roles[RoundaboutClockwiseRole] = "roundaboutClockwise";
 
   return roles;
 }
@@ -112,6 +116,7 @@ RouteStep& RouteStep::operator=(const RouteStep& other)
     shortDescription=other.shortDescription;
     streetNames=other.streetNames;
     roundaboutExit=other.roundaboutExit;
+    roundaboutClockwise=other.roundaboutClockwise;
     for (auto const &propertyName:dynamicPropertyNames()){
       setProperty(propertyName, QVariant());
     }

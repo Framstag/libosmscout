@@ -42,18 +42,19 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(QString type             READ getType             NOTIFY update)
-  Q_PROPERTY(double  lat              READ getLat()            NOTIFY update)
-  Q_PROPERTY(double  lon              READ getLon()            NOTIFY update)
-  Q_PROPERTY(double  distance         READ getDistance         NOTIFY update)
-  Q_PROPERTY(double  distanceDelta    READ getDistanceDelta    NOTIFY update)
-  Q_PROPERTY(double  distanceTo       READ getDistanceTo       NOTIFY update)
-  Q_PROPERTY(double  time             READ getTime             NOTIFY update)
-  Q_PROPERTY(double  timeDelta        READ getTimeDelta        NOTIFY update)
-  Q_PROPERTY(QString description      READ getDescription      NOTIFY update)
-  Q_PROPERTY(QString shortDescription READ getShortDescription NOTIFY update)
-  Q_PROPERTY(QStringList streetNames  READ getStreetNames      NOTIFY update)
-  Q_PROPERTY(int roundaboutExit       READ getRoundaboutExit   NOTIFY update)
+  Q_PROPERTY(QString type             READ getType                NOTIFY update)
+  Q_PROPERTY(double  lat              READ getLat()               NOTIFY update)
+  Q_PROPERTY(double  lon              READ getLon()               NOTIFY update)
+  Q_PROPERTY(double  distance         READ getDistance            NOTIFY update)
+  Q_PROPERTY(double  distanceDelta    READ getDistanceDelta       NOTIFY update)
+  Q_PROPERTY(double  distanceTo       READ getDistanceTo          NOTIFY update)
+  Q_PROPERTY(double  time             READ getTime                NOTIFY update)
+  Q_PROPERTY(double  timeDelta        READ getTimeDelta           NOTIFY update)
+  Q_PROPERTY(QString description      READ getDescription         NOTIFY update)
+  Q_PROPERTY(QString shortDescription READ getShortDescription    NOTIFY update)
+  Q_PROPERTY(QStringList streetNames  READ getStreetNames         NOTIFY update)
+  Q_PROPERTY(int roundaboutExit       READ getRoundaboutExit      NOTIFY update)
+  Q_PROPERTY(bool roundaboutClockwise READ getRoundaboutClockwise NOTIFY update)
 
 signals:
   void update();
@@ -63,7 +64,8 @@ public:
     ShortDescriptionRole = Qt::UserRole + 1,
     DescriptionRole = Qt::UserRole + 2,
     TypeRole = Qt::UserRole + 3,
-    RoundaboutExitRole = Qt::UserRole + 4
+    RoundaboutExitRole = Qt::UserRole + 4,
+    RoundaboutClockwiseRole = Qt::UserRole + 5
   };
   Q_ENUM(Roles)
 
@@ -79,6 +81,14 @@ public:
   QString shortDescription; //!< Plain short description (translated already)
   QStringList streetNames;  //!< Street names leading to this step
   int roundaboutExit{-1};   //!< when type is "leave-roundabout" this property indicate number of exit
+
+  /**
+   * when type is "leave-roundabout" or "enter-roundabout",
+   * this property indicate direction of roundabout
+   *  - false for counter clockwise, used in continental Europe
+   *  - true for clockwise, used in England and Irish
+   */
+  bool roundaboutClockwise{false};
 
 public:
   inline RouteStep() : RouteStep("", GeoCoord(), Distance::Zero(), Distance::Zero(),
@@ -166,6 +176,11 @@ public:
   int getRoundaboutExit() const
   {
     return roundaboutExit;
+  }
+
+  bool getRoundaboutClockwise() const
+  {
+    return roundaboutClockwise;
   }
 
   QVariant data(int role) const;

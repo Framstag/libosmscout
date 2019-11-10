@@ -239,12 +239,13 @@ namespace osmscout {
 
       bool                     inRoundabout;
       size_t                   roundaboutCrossingCounter;
+      bool                     roundaboutClockwise{false};
 
     private:
       State GetInitialState(const RoutePostprocessor& postprocessor,
                             RouteDescription::Node& node);
 
-      void HandleRoundaboutEnter(RouteDescription::Node& node);
+      void HandleRoundaboutEnter(const RoutePostprocessor& postprocessor, RouteDescription::Node& node);
       void HandleRoundaboutNode(RouteDescription::Node& node);
       void HandleRoundaboutLeave(RouteDescription::Node& node);
       void HandleDirectMotorwayEnter(RouteDescription::Node& node,

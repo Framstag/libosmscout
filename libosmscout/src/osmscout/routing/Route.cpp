@@ -318,7 +318,8 @@ namespace osmscout {
     return "Turn";
   }
 
-  RouteDescription::RoundaboutEnterDescription::RoundaboutEnterDescription()
+  RouteDescription::RoundaboutEnterDescription::RoundaboutEnterDescription(bool clockwise)
+  : clockwise(clockwise)
   {
     // no code
   }
@@ -328,8 +329,8 @@ namespace osmscout {
     return "Enter roundabout";
   }
 
-  RouteDescription::RoundaboutLeaveDescription::RoundaboutLeaveDescription(size_t exitCount)
-  : exitCount(exitCount)
+  RouteDescription::RoundaboutLeaveDescription::RoundaboutLeaveDescription(size_t exitCount, bool clockwise)
+  : exitCount(exitCount), clockwise(clockwise)
   {
     // no code
   }
