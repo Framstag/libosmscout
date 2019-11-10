@@ -86,11 +86,12 @@ PlaneMapRenderer::~PlaneMapRenderer()
 
 void PlaneMapRenderer::InvalidateVisualCache()
 {
-  QMutexLocker finishedLocker(&finishedMutex);
-  osmscout::log.Debug() << "Invalidate finished image";
-  if (finishedImage)
-    delete finishedImage;
-  finishedImage=nullptr;
+  {
+    QMutexLocker finishedLocker(&finishedMutex);
+    osmscout::log.Debug() << "Invalidate finished image";
+    epoch++;;
+  }
+  emit Redraw();
 }
 
 /**
@@ -129,7 +130,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
       QMutexLocker reqLocker(&lastRequestMutex);
       lastRequest=request;
     }
-    emit TriggerMapRenderingSignal(request);
+    emit TriggerMapRenderingSignal(request, epoch);
     return false;
   }
 
@@ -256,14 +257,15 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                       finishedImage->height()==(int) extendedRequest.height &&
                       finishedCoord==request.coord &&
                       finishedAngle==request.angle.AsRadians() &&
-                      finishedMagnification==request.magnification;
+                      finishedMagnification==request.magnification &&
+                      finishedEpoch==epoch;
 
   if (!needsNoRepaint){
     {
       QMutexLocker reqLocker(&lastRequestMutex);
       lastRequest=extendedRequest;
     }
-    emit TriggerMapRenderingSignal(extendedRequest);
+    emit TriggerMapRenderingSignal(extendedRequest, epoch);
   }
 
   painter.restore();
@@ -420,6 +422,7 @@ void PlaneMapRenderer::DrawMap()
       finishedCoord=currentCoord;
       finishedAngle=currentAngle;
       finishedMagnification=currentMagnification;
+      finishedEpoch=currentEpoch;
 
       lastRendering=QTime::currentTime();
     }
@@ -452,7 +455,7 @@ void PlaneMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
   emit TriggerDrawMap();
 }
 
-void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
+void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request, size_t requestEpoch)
 {
   {
     QMutexLocker reqLocker(&lastRequestMutex);
@@ -478,6 +481,7 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request)
     currentCoord=request.coord;
     currentAngle=request.angle.AsRadians();
     currentMagnification=request.magnification;
+    currentEpoch=requestEpoch;
 
     projection.Set(currentCoord,
                    currentAngle,
