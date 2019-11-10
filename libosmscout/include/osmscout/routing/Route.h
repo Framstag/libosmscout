@@ -339,7 +339,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      bool GetClockwise() const
+      bool IsClockwise() const
       {
         return clockwise;
       }
@@ -367,7 +367,7 @@ namespace osmscout {
         return exitCount;
       }
 
-      bool GetClockwise() const
+      bool IsClockwise() const
       {
         return clockwise;
       }

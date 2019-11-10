@@ -319,7 +319,7 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const osmscout::RouteD
   }
 
   RouteStep enter = MkStep("enter-roundabout");
-  enter.roundaboutClockwise = roundaboutEnterDescription->GetClockwise();
+  enter.roundaboutClockwise = roundaboutEnterDescription->IsClockwise();
 
   QString crossingWaysString;
 
@@ -342,7 +342,7 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutLeave(const osmscout::RouteD
 {
   RouteStep leave = MkStep("leave-roundabout");
   leave.roundaboutExit = roundaboutLeaveDescription->GetExitCount();
-  leave.roundaboutClockwise = roundaboutLeaveDescription->GetClockwise();
+  leave.roundaboutClockwise = roundaboutLeaveDescription->IsClockwise();
 
   switch (roundaboutLeaveDescription->GetExitCount()){
     case 1:
