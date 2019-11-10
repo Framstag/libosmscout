@@ -59,6 +59,15 @@ signals:
   void update();
 
 public:
+  enum Roles {
+    ShortDescriptionRole = Qt::UserRole + 1,
+    DescriptionRole = Qt::UserRole + 2,
+    TypeRole = Qt::UserRole + 3,
+    RoundaboutExitRole = Qt::UserRole + 4
+  };
+  Q_ENUM(Roles)
+
+public:
   QString type;             //!< Type of route step
   GeoCoord coord;           //!< Position
   Distance distance;        //!< Estimate distance from route start
@@ -158,6 +167,10 @@ public:
   {
     return roundaboutExit;
   }
+
+  QVariant data(int role) const;
+
+  static QHash<int, QByteArray> roleNames(QHash<int, QByteArray> roles);
 
 private:
   void copyDynamicProperties(const RouteStep &other);

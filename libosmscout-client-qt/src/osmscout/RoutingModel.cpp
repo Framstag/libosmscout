@@ -170,22 +170,7 @@ QVariant RoutingListModel::data(const QModelIndex &index, int role) const
   }
 
   RouteStep step=route.routeSteps().at(index.row());
-
-  switch (role) {
-  case Qt::DisplayRole:
-  case ShortDescriptionRole:
-    return step.getShortDescription();
-  case DescriptionRole:
-      return step.getDescription();
-  case TypeRole:
-    return step.getType();
-  case RoundaboutExitRole:
-    return step.getRoundaboutExit();
-  default:
-    break;
-  }
-
-  return QVariant();
+  return step.data(role);
 }
 
 Qt::ItemFlags RoutingListModel::flags(const QModelIndex &index) const
@@ -199,14 +184,7 @@ Qt::ItemFlags RoutingListModel::flags(const QModelIndex &index) const
 
 QHash<int, QByteArray> RoutingListModel::roleNames() const
 {
-  QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
-
-  roles[ShortDescriptionRole] = "shortDescription";
-  roles[DescriptionRole] = "description";
-  roles[TypeRole] = "type";
-  roles[RoundaboutExitRole] = "roundaboutExit";
-
-  return roles;
+  return RouteStep::roleNames(QAbstractListModel::roleNames());
 }
 
 QObject* RoutingListModel::get(int row) const

@@ -22,6 +22,7 @@
 
 #include <QMetaType>
 #include <QVariant>
+#include <QAbstractListModel>
 
 namespace osmscout {
 
@@ -59,6 +60,35 @@ RouteStep::RouteStep(const RouteStep& other)
       roundaboutExit(other.roundaboutExit)
 {
   copyDynamicProperties(other);
+}
+
+QVariant RouteStep::data(int role) const
+{
+  switch (role) {
+    case Qt::DisplayRole:
+    case ShortDescriptionRole:
+      return getShortDescription();
+    case DescriptionRole:
+      return getDescription();
+    case TypeRole:
+      return getType();
+    case RoundaboutExitRole:
+      return getRoundaboutExit();
+    default:
+      break;
+  }
+
+  return QVariant();
+}
+
+QHash<int, QByteArray> RouteStep::roleNames(QHash<int, QByteArray> roles)
+{
+  roles[ShortDescriptionRole] = "shortDescription";
+  roles[DescriptionRole] = "description";
+  roles[TypeRole] = "type";
+  roles[RoundaboutExitRole] = "roundaboutExit";
+
+  return roles;
 }
 
 void RouteStep::copyDynamicProperties(const RouteStep &other) {
