@@ -331,10 +331,18 @@ namespace osmscout {
      */
     class OSMSCOUT_API RoundaboutEnterDescription : public Description
     {
+    private:
+      bool clockwise;
+
     public:
-      RoundaboutEnterDescription();
+      explicit RoundaboutEnterDescription(bool clockwise);
 
       std::string GetDebugString() const override;
+
+      bool IsClockwise() const
+      {
+        return clockwise;
+      }
     };
 
     typedef std::shared_ptr<RoundaboutEnterDescription> RoundaboutEnterDescriptionRef;
@@ -347,15 +355,21 @@ namespace osmscout {
     {
     private:
       size_t exitCount;
+      bool clockwise;
 
     public:
-      explicit RoundaboutLeaveDescription(size_t exitCount);
+      RoundaboutLeaveDescription(size_t exitCount, bool clockwise);
 
       std::string GetDebugString() const override;
 
       inline size_t GetExitCount() const
       {
         return exitCount;
+      }
+
+      bool IsClockwise() const
+      {
+        return clockwise;
       }
     };
 

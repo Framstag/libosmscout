@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="WORKING_ICONS"
+   data-name="WORKING ICONS"
+   width="20"
+   height="20"
+   viewBox="0 0 20 20"
+   version="1.1"
+   sodipodi:docname="leave-roundabout-2.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#000"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1134"
+     id="namedview4"
+     showgrid="false"
+     inkscape:zoom="33.37544"
+     inkscape:cx="19.738839"
+     inkscape:cy="7.1668768"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="WORKING_ICONS" />
+  <g>
+    <path
+       fill="#000"
+       id="path4"
+       d="m 9.9345767,4.6815187 c 4.8170603,-10e-8 7.2285803,5.8236093 3.8228163,9.2293713 -3.405763,3.405763 -9.2293704,0.994243 -9.2293704,-3.822817 0.00336,-2.9845664 2.421988,-5.4031984 5.4065541,-5.4065543 m 0,9.9594423 c 4.0564713,0 6.0872253,-4.904091 3.2192133,-7.7721022 -2.86801,-2.8680111 -7.7721007,-0.8372579 -7.7721009,3.2192142 0.00284,2.513315 2.0395738,4.55005 4.5528876,4.552888 m 0,-10.2439978 c -5.0705896,7e-7 -7.6090305,6.1301148 -4.0240166,9.7151278 3.5850139,3.585014 9.7151269,1.046572 9.7151269,-4.024018 -0.0036,-3.1416249 -2.549486,-5.6875192 -5.6911103,-5.6911098 z m 0,9.9594428 c -3.8029423,0 -5.7067734,-4.5975864 -3.018013,-7.2863467 2.6887605,-2.6887603 7.2863453,-0.7849288 7.2863453,3.0180137 -0.0026,2.356269 -1.912064,4.265761 -4.2683323,4.268333 z" />
+  </g>
+
+  <path
+     fill="#000"
+     d="m 15.625688,10.088073 c -2.008894,10.392205 -1.004447,5.196103 0,0 z m -5.6911113,4.268333 c 1.7851803,7.54665 0.8925903,3.773325 0,0 z M 14.20291,9.376685 c 0.112375,2.851987 -1.515031,5.062454 -4.9797213,4.979721 v 4.082444 h 1.4227783 v -2.70343 c 2.57891,-0.326179 4.609778,-2.357047 4.935956,-4.935958 C 14.891341,9.9002652 14.860367,9.3136809 14.20291,9.376685 Z"
+     id="path4-3" />
+  <path
+     fill="#000"
+     d="m 11.451254,4.5564301 c 9.518159,4.6301431 4.75908,2.3150716 0,0 z m 2.649925,6.6019169 c 7.751543,0.228865 3.875772,0.114432 0,0 z M 8.9429342,2.7969482 C 8.709526,2.9517204 8.8297919,3.3156004 9.1094599,3.3007964 L 10.66658,3.2452211 c 0.216001,-0.068877 0.407409,0.1578538 0.303271,0.359239 l -0.573987,2.1421472 c 2.783893,0.6296027 4.497836,2.773667 3.521194,6.0988877 0.466302,-0.259237 0.90343,-0.715576 1.625363,-0.987421 0.352406,-2.5754568 -1.00873,-5.0927142 -3.415345,-6.0752492 l 0.217072,-0.8101229 c 0.0105,-0.2264734 0.289635,-0.3271244 0.442259,-0.159475 l 1.074348,0.674534 c 0.2348,0.1526522 0.520891,-0.1023418 0.396139,-0.3530826 l -1.86986,-3.39211212 z"
+     id="path4-3-6" />
+  <g
+     id="g4631">
+    <rect
+       transform="rotate(15)"
+       y="7.4402642"
+       x="17.334421"
+       height="0.23305087"
+       width="3.7182202"
+       id="rect4612"
+       style="color:#000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#000;fill-opacity:0.99413488;fill-rule:evenodd;stroke:none;stroke-width:0.10978035;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.99413488;marker:none;marker-start:none;marker-mid:none;marker-end:none;enable-background:accumulate" />
+    <rect
+       transform="rotate(15)"
+       y="8.5907841"
+       x="17.297243"
+       height="0.23305087"
+       width="3.7182202"
+       id="rect4612-7"
+       style="color:#000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#000;fill-opacity:0.99413488;fill-rule:evenodd;stroke:none;stroke-width:0.10978035;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.99413488;marker:none;marker-start:none;marker-mid:none;marker-end:none;enable-background:accumulate" />
+  </g>
+</svg>
