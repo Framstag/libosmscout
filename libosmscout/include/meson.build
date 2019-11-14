@@ -17,6 +17,7 @@ osmscoutHeader = [
             'osmscout/util/FileScanner.h',
             'osmscout/util/FileWriter.h',
             'osmscout/util/HTMLWriter.h',
+            'osmscout/util/Locale.h',
             'osmscout/util/GeoBox.h',
             'osmscout/util/Geometry.h',
             'osmscout/util/Logger.h',
