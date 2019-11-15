@@ -52,7 +52,7 @@ LocationEntry buildLocationEntry(T obj,
   const osmscout::FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
   const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
   if (name!=nullptr){
-    title=QString::fromStdString(name->GetLabel(osmscout::Units::Metrics, 0));
+    title=QString::fromStdString(name->GetLabel(osmscout::Locale(), 0));
     //std::cout << " \"" << name->GetLabel() << "\"";
   }
 

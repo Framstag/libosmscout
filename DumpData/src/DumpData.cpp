@@ -660,7 +660,7 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);
           std::cout << meta.GetFeature()->GetName() << ": ";
-          std::cout << value->GetLabel(osmscout::Units::Metrics, 0);
+          std::cout << value->GetLabel(osmscout::Locale(), 0);
           std::cout << std::endl;
         }
         else {

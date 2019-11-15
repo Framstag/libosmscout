@@ -108,7 +108,7 @@ namespace osmscout {
 
     bool                                showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
 
-    Units                               units;                     //!< Units used by the renderer, for example peak elevation
+    Locale                              locale;                     //!< Locale used by the renderer, for example peak elevation
 
     std::vector<FillStyleProcessorRef > fillProcessors;            //!< List of processors for FillStyles for types
 
@@ -169,7 +169,7 @@ namespace osmscout {
 
     void SetShowAltLanguage(bool showAltLanguage);
 
-    void SetUnits(Units units);
+    void SetLocale(const Locale &locale);
 
     void RegisterFillStyleProcessor(size_t typeIndex,
                                     const FillStyleProcessorRef& processor);
@@ -359,9 +359,14 @@ namespace osmscout {
       return showAltLanguage;
     }
 
-    inline Units GetUnits() const
+    inline Locale GetLocale() const
     {
-      return units;
+      return locale;
+    }
+
+    inline Locale& GetLocaleRef()
+    {
+      return locale;
     }
 
     bool IsAborted() const

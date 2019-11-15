@@ -29,6 +29,7 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Locale.h>
 
 #include <osmscout/util/TagErrorReporter.h>
 
@@ -43,7 +44,7 @@ namespace osmscout {
 
     virtual ~FeatureValue()=default;
 
-    inline virtual std::string GetLabel(Units /*units*/, size_t /*labelIndex*/) const
+    inline virtual std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const
     {
       return "";
     }

@@ -35,6 +35,11 @@ namespace osmscout {
     Units distanceUnits{Units::Metrics};
     std::string decimalSeparator{"."}; //!<  UTF-8 encoded string with decimal separator
     std::string thousandsSeparator; //!< UTF-8 encoded string with thousands separator
+
+    // use tiny, unbreakable space between value and unit.
+    // U+202F unicode is encoded as 0xE280AF in utf-8
+    // because unicode support in C++ is poor and platform dependent,
+    // we will use utf-8 bytes directly
     std::string unitsSeparator{"\xE2\x80\xAF"}; //!< UTF-8 encoded string with unit separator (character between number and unit). Unbreakable space by default
 
   public:

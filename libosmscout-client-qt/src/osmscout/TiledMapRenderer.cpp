@@ -452,7 +452,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     // of other than the current tile, too.
     drawParameter.SetDropNotVisiblePointLabels(loadZ.Get() >= 14);
 
-    drawParameter.SetUnits(units=="imperial" ? osmscout::Units::Imperial : osmscout::Units::Metrics);
+    drawParameter.GetLocaleRef().SetDistanceUnits(units == "imperial" ? osmscout::Units::Imperial : osmscout::Units::Metrics);
 
     // setup projection for these tiles
     osmscout::MercatorProjection projection;

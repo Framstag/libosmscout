@@ -56,7 +56,7 @@ namespace osmscout {
     warnObjectCountLimit(0),
     warnCoordCountLimit(0),
     showAltLanguage(false),
-    units{Units::Metrics}
+    locale{Locale::ByEnvironment()}
   {
     // no code
   }
@@ -241,9 +241,9 @@ namespace osmscout {
     this->showAltLanguage=showAltLanguage;
   }
 
-  void MapParameter::SetUnits(Units units)
+  void MapParameter::SetLocale(const Locale &locale)
   {
-    this->units=units;
+    this->locale=locale;
   }
 
   void MapParameter::SetBreaker(const BreakerRef& breaker)

@@ -66,7 +66,7 @@ namespace osmscout {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=nullptr) {
-          return value->GetLabel(parameter.GetUnits(), 0);
+          return value->GetLabel(parameter.GetLocale(), 0);
         }
       }
 
@@ -77,7 +77,7 @@ namespace osmscout {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=nullptr) {
-          return value->GetLabel(parameter.GetUnits(), 0);
+          return value->GetLabel(parameter.GetLocale(), 0);
         }
       }
 
@@ -91,7 +91,7 @@ namespace osmscout {
         FeatureValue *value=buffer.GetValue(index);
 
         if (value!=nullptr) {
-          return value->GetLabel(parameter.GetUnits(), 0);
+          return value->GetLabel(parameter.GetLocale(), 0);
         }
       }
 
@@ -149,7 +149,7 @@ namespace osmscout {
       FeatureValue *value=buffer.GetValue(index);
 
       if (value!=nullptr) {
-        return value->GetLabel(parameter.GetUnits(), labelIndex);
+        return value->GetLabel(parameter.GetLocale(), labelIndex);
       }
     }
 

@@ -299,7 +299,7 @@ namespace osmscout {
       V* value=dynamic_cast<V*>(buffer.GetValue(index));
 
       if (value!=nullptr) {
-        return value->GetLabel(Units::Metrics, 0);
+        return value->GetLabel(Locale(), 0);
       }
     }
 

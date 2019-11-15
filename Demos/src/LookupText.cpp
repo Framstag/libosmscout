@@ -47,12 +47,12 @@ void printDetails(const osmscout::FeatureValueBuffer& features)
 
       if (feature->HasValue() && feature->HasLabel()) {
         osmscout::FeatureValue *value=features.GetValue(featureInstance.GetIndex());
-        if (value->GetLabel(osmscout::Units::Metrics, 0).empty()) {
+        if (value->GetLabel(osmscout::Locale(), 0).empty()) {
           std::cout << "   + feature " << feature->GetName() << std::endl;
         }
         else {
           std::cout << "   + feature " << feature->GetName() << ": "
-                    << osmscout::UTF8StringToLocaleString(value->GetLabel(osmscout::Units::Metrics, 0))
+                    << osmscout::UTF8StringToLocaleString(value->GetLabel(osmscout::Locale(), 0))
                     << std::endl;
         }
       }
