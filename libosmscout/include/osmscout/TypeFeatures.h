@@ -1290,7 +1290,14 @@ namespace osmscout {
         value=ele;
         unitsStr="m";
       }
-      return std::to_string(value) + locale.GetUnitsSeparator() + unitsStr;
+      std::string valueStr;
+      if (value < 1000 || locale.GetThousandsSeparator().empty()){
+        valueStr=std::to_string(value);
+      }else{
+        // not expecting that value will be bigger than million
+        valueStr=std::to_string(value/1000) + locale.GetThousandsSeparator() + std::to_string(value%1000);
+      }
+      return valueStr + locale.GetUnitsSeparator() + unitsStr;
     }
 
     void Read(FileScanner& scanner) override;
