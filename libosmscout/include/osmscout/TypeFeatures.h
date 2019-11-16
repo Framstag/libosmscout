@@ -1279,26 +1279,7 @@ namespace osmscout {
       return ele;
     }
 
-    inline std::string GetLabel(const Locale &locale, size_t /*labelIndex*/) const override
-    {
-      int value;
-      std::string unitsStr;
-      if (locale.GetDistanceUnits()==Units::Imperial){
-        value=std::round(Meters(ele).As<Feet>());
-        unitsStr="ft";
-      }else{
-        value=ele;
-        unitsStr="m";
-      }
-      std::string valueStr;
-      if (value < 1000 || locale.GetThousandsSeparator().empty()){
-        valueStr=std::to_string(value);
-      }else{
-        // not expecting that value will be bigger than million
-        valueStr=std::to_string(value/1000) + locale.GetThousandsSeparator() + std::to_string(value%1000);
-      }
-      return valueStr + locale.GetUnitsSeparator() + unitsStr;
-    }
+    std::string GetLabel(const Locale &locale, size_t labelIndex) const override;
 
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
@@ -1316,11 +1297,23 @@ namespace osmscout {
     /** Name of this feature */
     static const char* const NAME;
 
-    /** Name of the "name" label */
-    static const char* const NAME_LABEL;
+    /** Name of the "inMeter" label */
+    static const char* const IN_METER_LABEL;
 
-    /** Index of the 'name' label */
-    static const size_t      NAME_LABEL_INDEX;
+    /** Index of the 'inMeter' label */
+    static const size_t      IN_METER_LABEL_INDEX;
+
+    /** Name of the "inFeet" label */
+    static const char* const IN_FEET_LABEL;
+
+    /** Index of the 'inFeet' label */
+    static const size_t      IN_FEET_LABEL_INDEX;
+
+    /** Name of the "inLocaleUnit" label */
+    static const char* const IN_LOCALE_UNIT_LABEL;
+
+    /** Index of the 'inLocaleUnit' label */
+    static const size_t      IN_LOCALE_UNIT_LABEL_INDEX;
 
   public:
     EleFeature();
