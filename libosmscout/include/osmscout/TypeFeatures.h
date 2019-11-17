@@ -1145,6 +1145,12 @@ namespace osmscout {
     /** Name of this feature */
     static const char* const NAME;
 
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
+
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
+
   public:
     PostalCodeFeature();
 
@@ -1475,8 +1481,11 @@ namespace osmscout {
     /** Name of this feature */
     static const char* const NAME;
 
-    /** Name of the "name" label */
-    static const char* const NAME_LABEL;
+    /** Name of the "url" label */
+    static const char* const URL_LABEL;
+
+    /** Index of the 'url' label */
+    static const size_t      URL_LABEL_INDEX;
 
   public:
     WebsiteFeature();
@@ -1543,6 +1552,12 @@ namespace osmscout {
   public:
     /** Name of this feature */
     static const char* const NAME;
+
+    /** Name of the "number" label */
+    static const char* const NUMBER_LABEL;
+
+    /** Index of the 'number' label */
+    static const size_t      NUMBER_LABEL_INDEX;
 
   public:
     PhoneFeature();
@@ -1685,6 +1700,12 @@ namespace osmscout {
   public:
     /** Name of this feature */
     static const char* const NAME;
+
+    /** Name of the "year" label */
+    static const char* const YEAR_LABEL;
+
+    /** Index of the 'year' label */
+    static const size_t      YEAR_LABEL_INDEX;
 
   public:
     ConstructionYearFeature();

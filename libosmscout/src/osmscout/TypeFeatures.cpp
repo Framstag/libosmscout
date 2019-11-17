@@ -1493,10 +1493,12 @@ namespace osmscout {
   }
 
   const char* const PostalCodeFeature::NAME = "PostalCode";
+  const char* const PostalCodeFeature::NAME_LABEL = "name";
+  const size_t      PostalCodeFeature::NAME_LABEL_INDEX = 0;
 
   PostalCodeFeature::PostalCodeFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(NAME_LABEL_INDEX,NAME_LABEL);
   }
 
   void PostalCodeFeature::Initialize(TagRegistry& tagRegistry)
@@ -1583,10 +1585,12 @@ namespace osmscout {
   }
 
   const char* const WebsiteFeature::NAME = "Website";
+  const char* const WebsiteFeature::URL_LABEL = "url";
+  const size_t      WebsiteFeature::URL_LABEL_INDEX = 0;
 
   WebsiteFeature::WebsiteFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(URL_LABEL_INDEX,URL_LABEL);
   }
 
   void WebsiteFeature::Initialize(TagRegistry& tagRegistry)
@@ -1671,10 +1675,12 @@ namespace osmscout {
   }
 
   const char* const PhoneFeature::NAME = "Phone";
+  const char* const PhoneFeature::NUMBER_LABEL = "number";
+  const size_t      PhoneFeature::NUMBER_LABEL_INDEX = 0;
 
   PhoneFeature::PhoneFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(NUMBER_LABEL_INDEX,NUMBER_LABEL);
   }
 
   void PhoneFeature::Initialize(TagRegistry& tagRegistry)
@@ -2231,10 +2237,12 @@ namespace osmscout {
   }
 
   const char* const ConstructionYearFeature::NAME = "ConstructionYear";
+  const char* const ConstructionYearFeature::YEAR_LABEL = "year";
+  const size_t      ConstructionYearFeature::YEAR_LABEL_INDEX = 0;
 
   ConstructionYearFeature::ConstructionYearFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(YEAR_LABEL_INDEX,YEAR_LABEL);
   }
 
   void ConstructionYearFeature::Initialize(TagRegistry& tagRegistry)
