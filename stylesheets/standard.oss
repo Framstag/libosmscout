@@ -601,14 +601,14 @@ STYLE
     [MAG suburb-] {
       [TYPE elevation_contour_major] {
         WAY {color: @majorContourColor; displayWidth: 0.150mm; }
-        WAY.TEXT { label: Ele.inMeter; priority: @labelPrioElevationContour; }
+        WAY.TEXT { label: Ele.inLocaleUnit; priority: @labelPrioElevationContour; }
       }
     }
 
     [MAG detail-] {
       [TYPE elevation_contour_medium] {
         WAY {color: @mediumContourColor; displayWidth: 0.100mm; }
-        WAY.TEXT { label: Ele.inMeter; priority: @labelPrioElevationContour; }
+        WAY.TEXT { label: Ele.inLocaleUnit; priority: @labelPrioElevationContour; }
       }
 
       [TYPE elevation_contour_minor] {
@@ -655,7 +655,7 @@ STYLE
 
       [TYPE natural_peak] {
         NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
-        NODE.TEXT#ele { label: Ele.inMeter; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
+        NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
       }
     }
 
