@@ -1493,10 +1493,12 @@ namespace osmscout {
   }
 
   const char* const PostalCodeFeature::NAME = "PostalCode";
+  const char* const PostalCodeFeature::NAME_LABEL = "name";
+  const size_t      PostalCodeFeature::NAME_LABEL_INDEX = 0;
 
   PostalCodeFeature::PostalCodeFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(NAME_LABEL_INDEX,NAME_LABEL);
   }
 
   void PostalCodeFeature::Initialize(TagRegistry& tagRegistry)
@@ -1583,10 +1585,12 @@ namespace osmscout {
   }
 
   const char* const WebsiteFeature::NAME = "Website";
+  const char* const WebsiteFeature::URL_LABEL = "url";
+  const size_t      WebsiteFeature::URL_LABEL_INDEX = 0;
 
   WebsiteFeature::WebsiteFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(URL_LABEL_INDEX,URL_LABEL);
   }
 
   void WebsiteFeature::Initialize(TagRegistry& tagRegistry)
@@ -1671,10 +1675,12 @@ namespace osmscout {
   }
 
   const char* const PhoneFeature::NAME = "Phone";
+  const char* const PhoneFeature::NUMBER_LABEL = "number";
+  const size_t      PhoneFeature::NUMBER_LABEL_INDEX = 0;
 
   PhoneFeature::PhoneFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(NUMBER_LABEL_INDEX,NUMBER_LABEL);
   }
 
   void PhoneFeature::Initialize(TagRegistry& tagRegistry)
@@ -1871,6 +1877,39 @@ namespace osmscout {
     return *this;
   }
 
+  std::string EleFeatureValue::GetLabel(const Locale &locale, size_t labelIndex) const
+  {
+    Units units;
+    if (labelIndex==EleFeature::IN_LOCALE_UNIT_LABEL_INDEX){
+      units=locale.GetDistanceUnits();
+    } else if (labelIndex==EleFeature::IN_METER_LABEL_INDEX){
+      units=Units::Metrics;
+    } else {
+      assert(labelIndex==EleFeature::IN_FEET_LABEL_INDEX);
+      units=Units::Imperial;
+    }
+
+    int value;
+    std::string unitsStr;
+    if (units==Units::Imperial){
+      value=std::round(Meters(ele).As<Feet>());
+      unitsStr="ft";
+    }else{
+      value=ele;
+      unitsStr="m";
+    }
+
+    std::string valueStr;
+    if (value < 1000 || locale.GetThousandsSeparator().empty()){
+      valueStr=std::to_string(value);
+    }else{
+      // not expecting that value will be bigger than million
+      valueStr=std::to_string(value/1000) + locale.GetThousandsSeparator() + std::to_string(value%1000);
+    }
+
+    return valueStr + locale.GetUnitsSeparator() + unitsStr;
+  }
+
   bool EleFeatureValue::operator==(const FeatureValue& other) const
   {
     const auto& otherValue=static_cast<const EleFeatureValue&>(other);
@@ -1878,15 +1917,26 @@ namespace osmscout {
     return ele==otherValue.ele;
   }
 
-  const char* const EleFeature::NAME             = "Ele";
-  const char* const EleFeature::NAME_LABEL       = "inMeter";
-  const size_t      EleFeature::NAME_LABEL_INDEX = 0;
+  const char* const EleFeature::NAME = "Ele";
+
+  const char* const EleFeature::IN_METER_LABEL       = "inMeter";
+  const size_t      EleFeature::IN_METER_LABEL_INDEX = 0;
+
+  const char* const EleFeature::IN_FEET_LABEL       = "inFeet";
+  const size_t      EleFeature::IN_FEET_LABEL_INDEX = 1;
+
+  const char* const EleFeature::IN_LOCALE_UNIT_LABEL       = "inLocaleUnit";
+  const size_t      EleFeature::IN_LOCALE_UNIT_LABEL_INDEX = 2;
 
   EleFeature::EleFeature()
   : tagEle(0)
   {
-    RegisterLabel(NAME_LABEL_INDEX,
-                  NAME_LABEL);
+    RegisterLabel(IN_METER_LABEL_INDEX,
+                  IN_METER_LABEL);
+    RegisterLabel(IN_FEET_LABEL_INDEX,
+                  IN_FEET_LABEL);
+    RegisterLabel(IN_LOCALE_UNIT_LABEL_INDEX,
+                  IN_LOCALE_UNIT_LABEL);
   }
 
   void EleFeature::Initialize(TagRegistry& tagRegistry)
@@ -2187,10 +2237,12 @@ namespace osmscout {
   }
 
   const char* const ConstructionYearFeature::NAME = "ConstructionYear";
+  const char* const ConstructionYearFeature::YEAR_LABEL = "year";
+  const size_t      ConstructionYearFeature::YEAR_LABEL_INDEX = 0;
 
   ConstructionYearFeature::ConstructionYearFeature()
   {
-    RegisterLabel(0,NAME);
+    RegisterLabel(YEAR_LABEL_INDEX,YEAR_LABEL);
   }
 
   void ConstructionYearFeature::Initialize(TagRegistry& tagRegistry)
