@@ -56,7 +56,7 @@ namespace osmscout {
       return name;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return name;
     }
@@ -124,7 +124,7 @@ namespace osmscout {
       return nameAlt;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return nameAlt;
     }
@@ -192,7 +192,7 @@ namespace osmscout {
       return ref;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return ref;
     }
@@ -261,7 +261,7 @@ namespace osmscout {
       return location;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return location;
     }
@@ -339,7 +339,7 @@ namespace osmscout {
       return address;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return address;
     }
@@ -1123,7 +1123,7 @@ namespace osmscout {
       return postalCode;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return postalCode;
     }
@@ -1279,9 +1279,25 @@ namespace osmscout {
       return ele;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &locale, size_t /*labelIndex*/) const override
     {
-      return std::to_string(ele)+"m";
+      int value;
+      std::string unitsStr;
+      if (locale.GetDistanceUnits()==Units::Imperial){
+        value=std::round(Meters(ele).As<Feet>());
+        unitsStr="ft";
+      }else{
+        value=ele;
+        unitsStr="m";
+      }
+      std::string valueStr;
+      if (value < 1000 || locale.GetThousandsSeparator().empty()){
+        valueStr=std::to_string(value);
+      }else{
+        // not expecting that value will be bigger than million
+        valueStr=std::to_string(value/1000) + locale.GetThousandsSeparator() + std::to_string(value%1000);
+      }
+      return valueStr + locale.GetUnitsSeparator() + unitsStr;
     }
 
     void Read(FileScanner& scanner) override;
@@ -1350,7 +1366,7 @@ namespace osmscout {
       return destination;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return destination;
     }
@@ -1445,7 +1461,7 @@ namespace osmscout {
       return website;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return website;
     }
@@ -1514,7 +1530,7 @@ namespace osmscout {
       return phone;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return phone;
     }
@@ -1650,7 +1666,7 @@ namespace osmscout {
       return endYear;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       if (startYear==endYear) {
         return std::to_string(startYear);
@@ -1880,7 +1896,7 @@ namespace osmscout {
       this->destinationBackward=destinationBawckard;
     }
 
-    inline std::string GetLabel(size_t /*labelIndex*/) const override
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       if (HasSingleLane()) {
         return "1";

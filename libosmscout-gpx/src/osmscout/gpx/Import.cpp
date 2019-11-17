@@ -382,14 +382,14 @@ public:
           parser.Warning("Can't parse Ele value");
         }
       });
-    } else if (name == "course") {
-      return new SimpleValueContext("CourseContext", ctxt, parser, [&](const std::string &value){
+    } else if (name == "magvar") {
+      return new SimpleValueContext("MagvarContext", ctxt, parser, [&](const std::string &value){
         double course;
         if (StringToNumber(value, course)){
           point.course=Optional<double>::of(course);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Course value\n");
-          parser.Warning("Can't parse Course value");
+          xmlParserWarning(ctxt,"Can't parse Magvar value\n");
+          parser.Warning("Can't parse Magvar value");
         }
       });
     } else if (name == "hdop") {

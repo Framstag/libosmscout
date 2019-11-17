@@ -45,7 +45,7 @@ public:
   osmscout::GeoCoord coord;
   Optional<double> elevation; // meters above sea
   Optional<Timestamp> time;
-  Optional<double> course; // degrees, 0.0 <= value < 360.0
+  Optional<double> course; // alias magvar - degrees, 0.0 <= value < 360.0
   Optional<double> hdop; // meters
   Optional<double> vdop; // meters
   Optional<double> pdop; // meters

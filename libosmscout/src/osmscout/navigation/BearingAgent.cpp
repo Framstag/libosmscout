@@ -47,12 +47,28 @@ namespace osmscout {
 
       if (!previousPointValid){
         previousPointValid=true;
-        previousPoing=coord;
+        previousPoint=coord;
         lastUpdate=now;
-      }else if (GetSphericalDistance(previousPoing,coord) > Meters(2)){
-        result.push_back(std::make_shared<BearingChangedMessage>(now, GetSphericalBearingInitial(previousPoing, coord)));
+      }else if (GetSphericalDistance(previousPoint, coord) > Meters(2)){
+        Bearing currentBearing = GetSphericalBearingInitial(previousPoint, coord);
+
+        // angle diff [0..M_PI)
+        Bearing bearingDiffAbs = previousBearing - currentBearing;
+        if (bearingDiffAbs.AsRadians() > M_PI) {
+          bearingDiffAbs = Bearing::Radians((2 * M_PI) - bearingDiffAbs.AsRadians());
+        }
+
+        if (bearingDiffAbs.AsRadians() > (M_PI*0.75) &&
+            GetSphericalDistance(previousPoint, coord) < Meters(15)){
+          // to make big bearing change, we have to be sure
+          // we want to avoid turnaround when GPS is just jumping around
+          return result;
+        }
+
+        result.push_back(std::make_shared<BearingChangedMessage>(now, currentBearing));
+        previousBearing=currentBearing;
         previousPointValid=true;
-        previousPoing=coord;
+        previousPoint=coord;
         lastUpdate=now;
       }
     } else if (previousPointValid &&

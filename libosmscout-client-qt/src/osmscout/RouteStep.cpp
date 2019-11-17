@@ -22,6 +22,7 @@
 
 #include <QMetaType>
 #include <QVariant>
+#include <QAbstractListModel>
 
 namespace osmscout {
 
@@ -56,9 +57,42 @@ RouteStep::RouteStep(const RouteStep& other)
       description(other.description),
       shortDescription(other.shortDescription),
       streetNames(other.streetNames),
-      roundaboutExit(other.roundaboutExit)
+      roundaboutExit(other.roundaboutExit),
+      roundaboutClockwise(other.roundaboutClockwise)
 {
   copyDynamicProperties(other);
+}
+
+QVariant RouteStep::data(int role) const
+{
+  switch (role) {
+    case Qt::DisplayRole:
+    case ShortDescriptionRole:
+      return getShortDescription();
+    case DescriptionRole:
+      return getDescription();
+    case TypeRole:
+      return getType();
+    case RoundaboutExitRole:
+      return getRoundaboutExit();
+    case RoundaboutClockwiseRole:
+      return getRoundaboutClockwise();
+    default:
+      break;
+  }
+
+  return QVariant();
+}
+
+QHash<int, QByteArray> RouteStep::roleNames(QHash<int, QByteArray> roles)
+{
+  roles[ShortDescriptionRole] = "shortDescription";
+  roles[DescriptionRole] = "description";
+  roles[TypeRole] = "type";
+  roles[RoundaboutExitRole] = "roundaboutExit";
+  roles[RoundaboutClockwiseRole] = "roundaboutClockwise";
+
+  return roles;
 }
 
 void RouteStep::copyDynamicProperties(const RouteStep &other) {
@@ -82,6 +116,7 @@ RouteStep& RouteStep::operator=(const RouteStep& other)
     shortDescription=other.shortDescription;
     streetNames=other.streetNames;
     roundaboutExit=other.roundaboutExit;
+    roundaboutClockwise=other.roundaboutClockwise;
     for (auto const &propertyName:dynamicPropertyNames()){
       setProperty(propertyName, QVariant());
     }

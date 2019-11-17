@@ -251,6 +251,24 @@ bool GpxWritter::WriteWaypoint(const Waypoint &waypoint)
       WriteAttribute("lon", waypoint.coord.GetLon()))){
     return false;
   }
+  // <xsd:sequence> is used in gpx xsd, elements must appear in exact order:
+  //  ele, time, magvar, geoidheight, name, cmt, desc, src, link, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, extensions
+  // see http://www.topografix.com/GPX/1/1/gpx.xsd
+  if (waypoint.elevation.hasValue()){
+    if (!WriteTextElement("ele", waypoint.elevation.get(), 2)){
+      return false;
+    }
+  }
+  if (waypoint.time.hasValue()){
+    if (!WriteTextElement("time", waypoint.time.get())){
+      return false;
+    }
+  }
+  if (waypoint.course.hasValue()){
+    if (!WriteTextElement("magvar", waypoint.course.get(), 2)){
+      return false;
+    }
+  }
   if (waypoint.name.hasValue()){
     if (!WriteTextElement("name", waypoint.name.get())){
       return false;
@@ -263,21 +281,6 @@ bool GpxWritter::WriteWaypoint(const Waypoint &waypoint)
   }
   if (waypoint.symbol.hasValue()){
     if (!WriteTextElement("sym", waypoint.symbol.get())){
-      return false;
-    }
-  }
-  if (waypoint.time.hasValue()){
-    if (!WriteTextElement("time", waypoint.time.get())){
-      return false;
-    }
-  }
-  if (waypoint.elevation.hasValue()){
-    if (!WriteTextElement("ele", waypoint.elevation.get(), 2)){
-      return false;
-    }
-  }
-  if (waypoint.course.hasValue()){
-    if (!WriteTextElement("course", waypoint.course.get(), 2)){
       return false;
     }
   }
@@ -306,18 +309,21 @@ bool GpxWritter::WriteTrackPoint(const char *elemName, const TrackPoint &point)
         WriteAttribute("lon", point.coord.GetLon()))){
     return false;
   }
-  if (point.time.hasValue()){
-    if (!WriteTextElement("time", point.time.get())){
-      return false;
-    }
-  }
+  // <xsd:sequence> is used in gpx xsd, elements must appear in exact order:
+  //  ele, time, magvar, geoidheight, name, cmt, desc, src, link, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, extensions
+  // see http://www.topografix.com/GPX/1/1/gpx.xsd
   if (point.elevation.hasValue()){
     if (!WriteTextElement("ele", point.elevation.get(), 2)){
       return false;
     }
   }
+  if (point.time.hasValue()){
+    if (!WriteTextElement("time", point.time.get())){
+      return false;
+    }
+  }
   if (point.course.hasValue()){
-    if (!WriteTextElement("course", point.course.get(), 2)){
+    if (!WriteTextElement("magvar", point.course.get(), 2)){
       return false;
     }
   }

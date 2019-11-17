@@ -307,7 +307,7 @@ void RouteDescriptionBuilder::Callback::OnTurn(const osmscout::RouteDescription:
   routeSteps.push_back(turn);
 }
 
-void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& /*roundaboutEnterDescription*/,
+void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
                                                           const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
 {
   if (skipInformative){
@@ -319,6 +319,8 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const osmscout::RouteD
   }
 
   RouteStep enter = MkStep("enter-roundabout");
+  enter.roundaboutClockwise = roundaboutEnterDescription->IsClockwise();
+
   QString crossingWaysString;
 
   if (crossingWaysDescription) {
@@ -340,6 +342,7 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutLeave(const osmscout::RouteD
 {
   RouteStep leave = MkStep("leave-roundabout");
   leave.roundaboutExit = roundaboutLeaveDescription->GetExitCount();
+  leave.roundaboutClockwise = roundaboutLeaveDescription->IsClockwise();
 
   switch (roundaboutLeaveDescription->GetExitCount()){
     case 1:

@@ -11,7 +11,9 @@ Item {
 
     RouteStepIcon{
         id: icon
-        stepType: type
+        stepType: model.type
+        roundaboutExit: model.roundaboutExit
+        roundaboutClockwise: model.roundaboutClockwise
         width: 12 * Theme.dpi/25.4
         height: width
 

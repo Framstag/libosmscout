@@ -40,7 +40,7 @@ private:
   osmscout::MercatorProjection  projection;
 
   mutable QMutex                lastRequestMutex;
-  MapViewStruct              lastRequest;
+  MapViewStruct                 lastRequest;
 
   DBLoadJob                     *loadJob;
 
@@ -53,19 +53,28 @@ private:
   osmscout::GeoCoord            currentCoord;
   double                        currentAngle;   // radians
   osmscout::Magnification       currentMagnification;
+  size_t                        currentEpoch{0}; /// guarded by global mutex
 
   mutable QMutex                finishedMutex;  // mutex protecting access to finished* variables
                                                 // to avoid deadlock, we should not acquire global mutex when holding finishedMutex
                                                 // reverse order is possible
   QImage                        *finishedImage;
+  size_t                        finishedEpoch{0};
   osmscout::GeoCoord            finishedCoord;
   double                        finishedAngle;
   osmscout::Magnification       finishedMagnification;
   osmscout::FillStyleRef        finishedUnknownFillStyle;
 
+  /**
+   * epoch is incremented when data or rendering parameters are changed
+   * @see InvalidateVisualCache
+   * guarded by finishedMutex
+   */
+  size_t                        epoch{0};
+
 signals:
   //void TileStatusChanged(const osmscout::TileRef& tile);
-  void TriggerMapRenderingSignal(const MapViewStruct& request);
+  void TriggerMapRenderingSignal(const MapViewStruct& request, size_t requestEpoch);
   void TriggerInitialRendering();
 
 public slots:
@@ -74,7 +83,7 @@ public slots:
   void DrawMap();
   void HandleTileStatusChanged(QString dbPath,const osmscout::TileRef tile);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>);
-  void TriggerMapRendering(const MapViewStruct& request);
+  void TriggerMapRendering(const MapViewStruct& request, size_t requestEpoch);
   void HandleInitialRenderingRequest();
   virtual void onStylesheetFilenameChanged();
 

@@ -657,9 +657,21 @@ namespace osmscout {
     return street;
   }
 
-  void RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutEnter(RouteDescription::Node& node)
+  void RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutEnter(const RoutePostprocessor& postprocessor,
+                                                                           RouteDescription::Node& node)
   {
-    RouteDescription::RoundaboutEnterDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutEnterDescription>();
+    WayRef way;
+    auto pathObject=node.GetPathObject();
+    if(pathObject.GetType()==refWay){
+      way=postprocessor.GetWay(DBFileOffset{node.GetDatabaseId(), pathObject.GetFileOffset()});
+    }
+    roundaboutClockwise=false;
+    if (way && way->nodes.size()>=3){
+      // roundabout is closed ring, so we can use method for area
+      roundaboutClockwise=AreaIsClockwise(way->nodes);
+    }
+
+    RouteDescription::RoundaboutEnterDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutEnterDescription>(roundaboutClockwise);
 
     node.AddDescription(RouteDescription::ROUNDABOUT_ENTER_DESC,
                         desc);
@@ -678,7 +690,7 @@ namespace osmscout {
 
   void RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutLeave(RouteDescription::Node& node)
   {
-    RouteDescription::RoundaboutLeaveDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutLeaveDescription>(roundaboutCrossingCounter);
+    RouteDescription::RoundaboutLeaveDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutLeaveDescription>(roundaboutCrossingCounter, roundaboutClockwise);
 
     node.AddDescription(RouteDescription::ROUNDABOUT_LEAVE_DESC,
                         desc);
@@ -845,7 +857,7 @@ namespace osmscout {
         inRoundabout=true;
         roundaboutCrossingCounter=0;
 
-        HandleRoundaboutEnter(*node);
+        HandleRoundaboutEnter(postprocessor, *node);
 
         lastNode=node++;
 

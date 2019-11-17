@@ -55,7 +55,8 @@ namespace osmscout {
     debugPerformance(false),
     warnObjectCountLimit(0),
     warnCoordCountLimit(0),
-    showAltLanguage(false)
+    showAltLanguage(false),
+    locale{Locale::ByEnvironment()}
   {
     // no code
   }
@@ -238,6 +239,11 @@ namespace osmscout {
   void MapParameter::SetShowAltLanguage(bool showAltLanguage)
   {
     this->showAltLanguage=showAltLanguage;
+  }
+
+  void MapParameter::SetLocale(const Locale &locale)
+  {
+    this->locale=locale;
   }
 
   void MapParameter::SetBreaker(const BreakerRef& breaker)
