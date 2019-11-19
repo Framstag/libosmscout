@@ -82,6 +82,13 @@ EncodeNumber = executable('EncodeNumber',
              link_with: [osmscout],
              install: false)
 
+FeatureLabelTest = executable('FeatureLabelTest',
+             'src/FeatureLabelTest.cpp',
+             include_directories: [osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: false)
+
 FileScannerWriter = executable('FileScannerWriter',
              'src/FileScannerWriter.cpp',
              include_directories: [osmscoutIncDir],
@@ -248,6 +255,7 @@ test('Check encoding of numbers', BitsAndBytesNeeded)
 test('Check parsing of command line args', CmdLineParsing)
 test('Check parsing of colors', ColorParse)
 test('Check encoding of numbers', EncodeNumber)
+test('Check label formatting', FeatureLabelTest)
 test('Check File access implementation', FileScannerWriter)
 test('Check parsing of geo box intersection', GeoBox)
 test('Check parsing of geo coordinates', GeoCoordParse)

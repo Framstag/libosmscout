@@ -127,6 +127,12 @@ set_property(TARGET EncodeNumber PROPERTY CXX_STANDARD 14)
 target_link_libraries(EncodeNumber OSMScout)
 add_test(NAME EncodeNumber COMMAND EncodeNumber)
 
+#---- FeatureLabelTest
+add_executable(FeatureLabelTest src/FeatureLabelTest.cpp)
+set_property(TARGET FeatureLabelTest PROPERTY CXX_STANDARD 14)
+target_link_libraries(FeatureLabelTest OSMScout)
+add_test(NAME FeatureLabelTest COMMAND FeatureLabelTest)
+
 #---- FileScannerWriter
 add_executable(FileScannerWriter src/FileScannerWriter.cpp)
 set_property(TARGET FileScannerWriter PROPERTY CXX_STANDARD 14)
