@@ -84,7 +84,7 @@ EncodeNumber = executable('EncodeNumber',
 
 FeatureLabelTest = executable('FeatureLabelTest',
              'src/FeatureLabelTest.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: false)

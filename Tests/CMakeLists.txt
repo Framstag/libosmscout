@@ -130,6 +130,7 @@ add_test(NAME EncodeNumber COMMAND EncodeNumber)
 #---- FeatureLabelTest
 add_executable(FeatureLabelTest src/FeatureLabelTest.cpp)
 set_property(TARGET FeatureLabelTest PROPERTY CXX_STANDARD 14)
+target_include_directories(FeatureLabelTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(FeatureLabelTest OSMScout)
 add_test(NAME FeatureLabelTest COMMAND FeatureLabelTest)
 
