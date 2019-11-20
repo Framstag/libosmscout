@@ -1548,6 +1548,8 @@ namespace osmscout {
   {
   private:
     TagId tagPhone;
+    TagId tagContactPhone;
+    TagId tagContactMobile;
 
   public:
     /** Name of this feature */
