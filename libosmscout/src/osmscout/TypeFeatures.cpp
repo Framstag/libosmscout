@@ -1600,6 +1600,7 @@ namespace osmscout {
   void WebsiteFeature::Initialize(TagRegistry& tagRegistry)
   {
     tagWebsite=tagRegistry.RegisterTag("website");
+    tagContactWebsite=tagRegistry.RegisterTag("contact:website");
   }
 
   std::string WebsiteFeature::GetName() const
@@ -1628,12 +1629,15 @@ namespace osmscout {
     if (object.GetType() == OSMRefType::osmRefWay)
       return;
 
-    auto website=tags.find(tagWebsite);
-
     std::string strValue;
 
-    if (website!=tags.end()) {
-      strValue = website->second;
+    std::vector<TagId> websiteTags{tagWebsite, tagContactWebsite};
+    for (auto tagId:websiteTags) {
+      auto website = tags.find(tagId);
+      if (website != tags.end()) {
+        strValue = website->second;
+        break; // use the first one
+      }
     }
 
     try {

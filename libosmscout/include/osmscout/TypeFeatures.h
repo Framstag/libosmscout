@@ -1476,6 +1476,7 @@ namespace osmscout {
   {
   private:
     TagId tagWebsite;
+    TagId tagContactWebsite;
 
   public:
     /** Name of this feature */
