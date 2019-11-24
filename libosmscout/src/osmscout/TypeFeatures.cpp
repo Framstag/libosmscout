@@ -24,6 +24,9 @@
 #include <osmscout/util/String.h>
 
 #include <iostream>
+#include <sstream>
+#include <iomanip>
+
 namespace osmscout {
 
   void NameFeatureValue::Read(FileScanner& scanner)
@@ -1899,15 +1902,19 @@ namespace osmscout {
       unitsStr="m";
     }
 
-    std::string valueStr;
+    std::stringstream ss;
     if (value < 1000 || locale.GetThousandsSeparator().empty()){
-      valueStr=std::to_string(value);
+      ss << value;
     }else{
       // not expecting that value will be bigger than million
-      valueStr=std::to_string(value/1000) + locale.GetThousandsSeparator() + std::to_string(value%1000);
+      ss << (value/1000);
+      ss << locale.GetThousandsSeparator();
+      ss << std::setw(3) << std::setfill('0') << (value%1000);
     }
 
-    return valueStr + locale.GetUnitsSeparator() + unitsStr;
+    ss << locale.GetUnitsSeparator();
+    ss << unitsStr;
+    return ss.str();
   }
 
   bool EleFeatureValue::operator==(const FeatureValue& other) const
