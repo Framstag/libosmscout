@@ -26,6 +26,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <set>
 
 namespace osmscout {
 
@@ -1599,6 +1600,7 @@ namespace osmscout {
   void WebsiteFeature::Initialize(TagRegistry& tagRegistry)
   {
     tagWebsite=tagRegistry.RegisterTag("website");
+    tagContactWebsite=tagRegistry.RegisterTag("contact:website");
   }
 
   std::string WebsiteFeature::GetName() const
@@ -1627,12 +1629,15 @@ namespace osmscout {
     if (object.GetType() == OSMRefType::osmRefWay)
       return;
 
-    auto website=tags.find(tagWebsite);
-
     std::string strValue;
 
-    if (website!=tags.end()) {
-      strValue = website->second;
+    std::vector<TagId> websiteTags{tagWebsite, tagContactWebsite};
+    for (auto tagId:websiteTags) {
+      auto website = tags.find(tagId);
+      if (website != tags.end()) {
+        strValue = website->second;
+        break; // use the first one
+      }
     }
 
     try {
@@ -1689,6 +1694,8 @@ namespace osmscout {
   void PhoneFeature::Initialize(TagRegistry& tagRegistry)
   {
     tagPhone=tagRegistry.RegisterTag("phone");
+    tagContactPhone=tagRegistry.RegisterTag("contact:phone");
+    tagContactMobile=tagRegistry.RegisterTag("contact:mobile");
   }
 
   std::string PhoneFeature::GetName() const
@@ -1717,25 +1724,41 @@ namespace osmscout {
     if (object.GetType() == OSMRefType::osmRefWay)
       return;
 
-    auto phone=tags.find(tagPhone);
-
     std::string strValue;
 
-    if (phone!=tags.end()) {
-      strValue = phone->second;
+    // object may hold multiple phone tags - phone, contact:phone, contact:mobile
+    // we will append all unique values to one string separated by semicolon
+    // note: when some tag contains multiple phones separated by semicolon, deduplication is not working
+    std::set<std::string> knownPhones;
+    std::vector<TagId> phoneTags{tagPhone, tagContactPhone, tagContactMobile};
+    for (auto tagId:phoneTags) {
+      auto phone = tags.find(tagId);
+      if (phone == tags.end()) {
+        continue;
+      }
+
+      std::string phoneStr=phone->second;
+      // remove invalid characters from phone number [0123456789+;,] http://wiki.openstreetmap.org/wiki/Key:phone
+      // - there can be multiple phone numbers separated by semicolon (some mappers use comma)
+      phoneStr.erase(
+          std::remove_if(phoneStr.begin(), phoneStr.end(), [](char x){return (x<'0'||x>'9') && x!='+' && x!=';' && x!=',';}),
+          phoneStr.end());
+
+      if (phoneStr.empty() || knownPhones.find(phoneStr) != knownPhones.end()) {
+        continue;
+      }
+      if (!strValue.empty()) {
+        strValue += ";";
+      }
+      strValue += phoneStr;
+      knownPhones.insert(phoneStr);
     }
 
     try {
       if (!strValue.empty()) {
-        // remove invalid characters from phone number [0123456789+;,] http://wiki.openstreetmap.org/wiki/Key:phone
-        // - there can be multiple phone numbers separated by semicolon (some mappers use comma)
-        strValue.erase(
-          std::remove_if(strValue.begin(), strValue.end(), [](char x){return (x<'0'||x>'9') && x!='+' && x!=';' && x!=',';}),
-          strValue.end());
-
         size_t idx = feature.GetIndex();
         FeatureValue* fv = buffer.AllocateValue(idx);
-        auto* value=static_cast<PhoneFeatureValue*>(fv);
+        auto* value = static_cast<PhoneFeatureValue*>(fv);
 
         value->SetPhone(strValue);
       }
