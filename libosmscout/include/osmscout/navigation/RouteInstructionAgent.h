@@ -32,7 +32,7 @@ struct RouteInstructionsMessage CLASS_FINAL : public NavigationMessage
 public:
   std::list<RouteInstruction> instructions;
 
-  inline RouteInstructionsMessage(const Timestamp& timestamp, std::list<RouteInstruction> instructions):
+  inline RouteInstructionsMessage(const Timestamp& timestamp, const std::list<RouteInstruction> &instructions):
     NavigationMessage(timestamp), instructions(instructions)
   {}
 };

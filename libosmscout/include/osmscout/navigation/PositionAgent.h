@@ -83,7 +83,7 @@ namespace osmscout {
       RouteDescriptionRef route;
       Position position;
 
-      PositionMessage(const Timestamp& timestamp, const RouteDescriptionRef &route, const Position position);
+      PositionMessage(const Timestamp& timestamp, const RouteDescriptionRef &route, const Position &position);
     };
 
     using PositionMessageRef=std::shared_ptr<PositionMessage>;
