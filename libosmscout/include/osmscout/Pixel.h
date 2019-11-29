@@ -109,7 +109,7 @@ namespace osmscout {
       // no code
     }
 
-    inline Vertex2D(const Vertex2D& other)
+    inline Vertex2D(const Vertex2D& other) noexcept
     {
       coords[0]=other.coords[0];
       coords[1]=other.coords[1];
