@@ -55,7 +55,7 @@ namespace osmscout {
       return *this;
     }
 
-    inline Bearing(Bearing &&d)
+    inline Bearing(Bearing &&d) noexcept
     {
       std::swap(radians, d.radians);
     }
