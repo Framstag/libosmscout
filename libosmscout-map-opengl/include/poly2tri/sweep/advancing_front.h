@@ -48,7 +48,7 @@ struct Node {
 
   double value;
 
-  Node(Point& p) : point(&p), triangle(nullptr), next(nullptr), prev(nullptr), value(p.x)
+  explicit Node(Point& p) : point(&p), triangle(nullptr), next(nullptr), prev(nullptr), value(p.x)
   {
   }
 

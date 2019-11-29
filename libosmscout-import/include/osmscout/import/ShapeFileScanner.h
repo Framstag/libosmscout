@@ -66,7 +66,7 @@ namespace osmscout {
     double ReadDoubleLE();
 
   public:
-    ShapeFileScanner(const std::string& filename);
+    explicit ShapeFileScanner(const std::string& filename);
     ~ShapeFileScanner();
 
     void Open();

@@ -52,7 +52,7 @@ class SweepContext {
 public:
 
 /// Constructor
-SweepContext(std::vector<Point*> polyline);
+explicit SweepContext(std::vector<Point*> polyline);
 /// Destructor
 ~SweepContext();
 

@@ -266,7 +266,7 @@ private:
   osmscout::DatabaseRef   database;
   osmscout::MapServiceRef mapService;
 public:
-  DataLoader(const osmscout::DatabaseRef &database):
+  explicit DataLoader(const osmscout::DatabaseRef &database):
     database(database),
     mapService{std::make_shared<osmscout::MapService>(database)}
   {}

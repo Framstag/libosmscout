@@ -46,7 +46,7 @@ private:
   double millis{0};
 
 public:
-  DataLoader(osmscout::DatabaseRef &database):
+  explicit DataLoader(osmscout::DatabaseRef &database):
     database(database),
     reader(*(database->GetTypeConfig()))
   {

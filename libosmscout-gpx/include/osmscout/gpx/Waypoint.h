@@ -34,7 +34,7 @@ namespace gpx {
 
 class OSMSCOUT_GPX_API Waypoint {
 public:
-  Waypoint(GeoCoord coord) :
+  explicit Waypoint(GeoCoord coord) :
       coord(coord) {
   }
 

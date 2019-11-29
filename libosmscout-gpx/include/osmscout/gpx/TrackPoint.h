@@ -35,7 +35,7 @@ namespace gpx {
 class OSMSCOUT_GPX_API TrackPoint {
 public:
 
-  inline TrackPoint(const GeoCoord coord) :
+  inline explicit TrackPoint(const GeoCoord coord) :
       coord(coord) {
   }
 

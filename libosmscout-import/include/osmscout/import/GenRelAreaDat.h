@@ -63,7 +63,7 @@ namespace osmscout {
       bool   *hasIncludes;
 
     public:
-      GroupingState(size_t rings)
+      explicit GroupingState(size_t rings)
       {
         this->rings=rings;
 

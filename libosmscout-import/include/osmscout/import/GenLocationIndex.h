@@ -136,7 +136,7 @@ namespace osmscout {
       FileOffset                           dataOffsetOffset; //!< Offset into the index file
       std::map<std::string,RegionLocation> locations;        //!< list of indexed objects in this region
 
-      PostalArea(const std::string& name)
+      explicit PostalArea(const std::string& name)
       : name(name)
       {
         // no code

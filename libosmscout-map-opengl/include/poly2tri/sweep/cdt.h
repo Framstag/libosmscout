@@ -53,7 +53,7 @@ public:
    * 
    * @param polyline
    */
-  CDT(std::vector<Point*> polyline);
+  explicit CDT(std::vector<Point*> polyline);
   
    /**
    * Destructor - clean up memory
