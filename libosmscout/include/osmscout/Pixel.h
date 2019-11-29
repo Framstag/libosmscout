@@ -47,10 +47,7 @@ namespace osmscout {
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
      */
-    inline Pixel()
-    {
-      // no code
-    }
+    inline Pixel() = default;
 
     inline Pixel(uint32_t x, uint32_t y)
      :x(x),y(y)
