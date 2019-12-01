@@ -101,7 +101,7 @@ namespace osmscout {
       return *this;
     }
 
-    inline Distance(Distance &&d)
+    inline Distance(Distance &&d) noexcept
     {
       std::swap(meters, d.meters);
     }

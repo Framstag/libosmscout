@@ -82,7 +82,7 @@ namespace osmscout {
 
   PositionAgent::PositionMessage::PositionMessage(const Timestamp& timestamp,
                                                   const RouteDescriptionRef &route,
-                                                  const Position position):
+                                                  const Position &position):
                                                   NavigationMessage(timestamp),
                                                   route(route),
                                                   position(position)

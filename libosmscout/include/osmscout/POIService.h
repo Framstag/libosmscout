@@ -44,10 +44,8 @@ namespace osmscout {
   private:
     DatabaseRef database;
 
-
-
   public:
-    POIService(const DatabaseRef& database);
+    explicit POIService(const DatabaseRef& database);
     virtual ~POIService();
 
     void GetPOIsInArea(const GeoBox& boundingBox,

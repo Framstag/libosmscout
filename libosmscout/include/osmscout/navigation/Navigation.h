@@ -108,7 +108,7 @@ namespace osmscout {
      * outputDescr pointer is not owned, it should not be destroyed before Navigation,
      * caller is responsible for deleting it.
      */
-    Navigation(OutputDescription<NodeDescriptionTmpl>* outputDescr)
+    explicit Navigation(OutputDescription<NodeDescriptionTmpl>* outputDescr)
       : route(nullptr),
         outputDescription(outputDescr),
         snapDistanceInMeters(Distance::Of<Meter>(25.0))

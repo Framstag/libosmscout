@@ -91,7 +91,7 @@ namespace osmscout {
     std::vector<NavigationAgentRef> agents;
 
   public:
-    NavigationEngine(std::initializer_list<NavigationAgentRef> agents);
+    explicit NavigationEngine(std::initializer_list<NavigationAgentRef> agents);
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message);
   };
 }

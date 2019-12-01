@@ -61,7 +61,7 @@ namespace osmscout {
         unsigned char   *heights;
 
     public:
-        SRTM(const std::string &path);
+        explicit SRTM(const std::string &path);
         virtual ~SRTM();
         const std::string& srtmFilename(int patchLat, int patchLon);
         int heightAtLocation(double latitude, double longitude);

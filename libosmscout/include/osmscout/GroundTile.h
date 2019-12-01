@@ -63,10 +63,7 @@ namespace osmscout {
       uint16_t y;
       bool     coast;
 
-      inline Coord()
-      {
-        // no code
-      }
+      inline Coord() = default;
 
       inline Coord(uint16_t x,
                    uint16_t y,
@@ -101,10 +98,7 @@ namespace osmscout {
     double             cellHeight;    //!< Height of cell
     std::vector<Coord> coords;        //!< Optional coordinates for coastline
 
-    inline GroundTile()
-    {
-      // no code
-    }
+    inline GroundTile() = default;
 
     inline explicit GroundTile(Type type)
     : type(type)
