@@ -639,6 +639,10 @@ STYLE
       [TYPE waterway_stream] {
         [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
         [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
+
+        [FEATURE Tunnel] {
+          WAY { dash: 0.4,4;}
+        }
       }
     }
 

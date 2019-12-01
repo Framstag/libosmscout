@@ -445,7 +445,7 @@ TYPES
 
   TYPE waterway_stream
     = WAY ("waterway"=="stream")
-      {Name, NameAlt, Width}
+      {Name, NameAlt, Width, Tunnel}
       OPTIMIZE_LOW_ZOOM IGNORESEALAND PIN_WAY
 
   TYPE waterway_river
