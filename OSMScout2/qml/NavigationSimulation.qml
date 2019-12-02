@@ -239,6 +239,7 @@ Window {
             RouteStepIcon{
                 id: nextStepIcon
                 stepType: navigationModel.nextRouteStep.type
+                roundaboutClockwise: navigationModel.nextRouteStep.roundaboutClockwise
                 height: parent.height
                 width: height
                 anchors{
