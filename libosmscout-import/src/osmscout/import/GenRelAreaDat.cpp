@@ -735,7 +735,7 @@ namespace osmscout {
                                  std::to_string(member.id)+
                                  " is referenced multiple times within relation "+
                                  std::to_string(rawRelation.GetId())+" "+name);
-                continue;;
+                continue;
               }
 
               if (resolvedRelations.find(member.id)!=resolvedRelations.end()) {
