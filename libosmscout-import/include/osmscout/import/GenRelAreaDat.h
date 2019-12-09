@@ -158,6 +158,18 @@ namespace osmscout {
         }
       }
 
+      inline std::string GetRelationRoleStr() const
+      {
+        switch (relationRole){
+          case outer:
+            return "outer";
+          case inner:
+            return "inner";
+          default:
+            return "none";
+        }
+      }
+
       inline void SetId(OSMId id)
       {
         this->id = id;

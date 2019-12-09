@@ -362,21 +362,32 @@ namespace osmscout {
 
     GroupingState state(parts.size());
 
-    size_t ix=0;
+    size_t i1=0;
     for (const auto& r1 : parts) {
-      size_t jx=0;
+      size_t i2=0;
       for (const auto& r2 : parts) {
-        if (ix!=jx) {
-          if (IsAreaSubOfArea(r2.role.nodes,
-                              r1.role.nodes)) {
-            state.SetIncluded(ix,jx);
+        if (i1 != i2) {
+          if (IsAreaSubOfArea(r2.role.nodes, r1.role.nodes)) {
+            if (!IsAreaCompletelyInArea(r2.role.nodes, r1.role.nodes)) {
+              // ring r2 is not included in r1 completely, but at least
+              // one its node is included => rings are intersecting!
+              progress.Warning("Rings " + std::to_string(r1.id) + " (" + r1.GetRelationRoleStr() + "), " +
+                               std::to_string(r2.id) + " (" + r2.GetRelationRoleStr() + "), " +
+                               "in relation " + std::to_string(id) + " are intersecting!");
+              // in such case, setup inclusion only when r1 is outer and r2 inner
+              if (r1.relationRole!=MultipolygonPart::outer || r2.relationRole!=MultipolygonPart::inner){
+                continue;
+              }
+            }
+
+            state.SetIncluded(i1, i2);
           }
         }
 
-        jx++;
+        i2++;
       }
 
-      ix++;
+      i1++;
     }
 
     //
