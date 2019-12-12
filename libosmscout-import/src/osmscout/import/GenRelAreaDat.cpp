@@ -696,7 +696,8 @@ namespace osmscout {
           pendingRelationIds.insert(member.id);
         }
         else {
-          progress.Warning("Unsupported relation reference in relation "+
+          progress.Warning("Unsupported relation ("+std::to_string(member.id)+") "+
+                           "reference in relation "+
                            std::to_string(rawRelation.GetId())+" "+
                            rawRelation.GetType()->GetName()+" "+
                            name);
