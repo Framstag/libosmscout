@@ -47,31 +47,36 @@ namespace osmscout {
    *    -- nested outer rings (odd ring number >= 3)
    *  - inner ring(s) (even ring number)
    *
-   *  This hierarchy may be presented as a tree, where ring number represent depth.
-   *  Master ring is first and the rest of rings are ordered deep-first fashion in Area::rings vector
-   *  (top-level outer rings are on the top of the tree).
+   * This hierarchy may be presented as a tree, where ring number represent depth.
+   * Master ring is first and the rest of rings are ordered deep-first fashion in Area::rings vector
+   * (top-level outer rings are on the top of the tree).
    *
-   *  When object consists just from single outline (simple building for example),
-   *  Area contains just one (top level) outer ring
+   * When object consists just from single outline (simple building for example),
+   * Area contains just one (top level) outer ring
    *
-   *  When area is multipolygon relation (in OSM words), type and features of such relation
-   *  are stored in master ring. Every outer ring may have its own type and features.
+   * When area is multipolygon relation (in OSM words), type and features of such relation
+   * are stored in master ring. Every outer ring may have its own type and features.
    *
-   *  When outer ring has not type (GetType()->GetIgnore()), type of master ring
-   *  or nearest (upper) master ring should be used.
+   * When outer ring has not type (GetType()->GetIgnore()), type of master ring should be used.
    *
-   *  When inner ring has no type (GetType()->GetIgnore())
-   *  it is used as simple clipping of containing (upper) outer ring.
+   * When inner ring has no type (GetType()->GetIgnore())
+   * it is used as simple clipping of containing (upper) outer ring.
    *
-   *  For example this ruin: https://www.openstreetmap.org/relation/7281899
-   *  Will have seven rings:
-   *   [0] master (number 0) with type "building", without nodes
-   *   [1] outer (number 1) without type, OSM id 295845013
-   *   [2] inner (number 2) without type, OSM id 495919001
-   *   [3] outer (number 3) without type, OSM id 495919003
-   *   [4] outer (number 3) without type, OSM id 495919002
-   *   [5] inner (number 2) without type, OSM id 495919008
-   *   [6] inner (number 2) without type, OSM id 495919006
+   * For example this ruin: https://www.openstreetmap.org/relation/7281899
+   * Will have seven rings:
+   *  [0] master (number 0) with type "building", without nodes
+   *  [1] outer (number 1) without type, OSM id 295845013
+   *  [2] inner (number 2) without type, OSM id 495919001
+   *  [3] outer (number 3) without type, OSM id 495919003
+   *  [4] outer (number 3) without type, OSM id 495919002
+   *  [5] inner (number 2) without type, OSM id 495919008
+   *  [6] inner (number 2) without type, OSM id 495919006
+   *
+   * Nested relations (member type=relation, role=inner|outer) are not supported for areas now.
+   * See RelAreaDataGenerator::ResolveMultipolygonMembers code for the details.
+   * For example relation https://www.openstreetmap.org/relation/7751062 will be created
+   * just with master and one outer ring. Its nested relation (inner role)
+   * https://www.openstreetmap.org/relation/7074095 will be imported as a separate Area.
    */
   class OSMSCOUT_API Area CLASS_FINAL
   {
