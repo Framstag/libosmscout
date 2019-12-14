@@ -1380,13 +1380,15 @@ namespace osmscout {
         // not required.
         // Since we know that rings are created deep first, we only take into account direct followers
         // in the list with ring+1.
-        size_t j=i+1;
-        while (j<area->rings.size() &&
-               area->rings[j].GetRing()==ringId+1 &&
-               area->rings[j].GetType()->GetIgnore()) {
-          a.clippings.push_back(td[j]);
-
-          j++;
+        // Note that inner rings may have nested islands with ( > ringId+1), we skip them but continue
+        // iterating.
+        for (size_t j=i+1;
+             j<area->rings.size() && area->rings[j].GetRing()>=ringId+1;
+             j++) {
+          if (area->rings[j].GetRing()==ringId+1 &&
+              area->rings[j].GetType()->GetIgnore()) {
+            a.clippings.push_back(td[j]);
+          }
         }
 
         a.ref=area->GetObjectFileRef();
