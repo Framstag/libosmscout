@@ -60,7 +60,7 @@ namespace osmscout {
                                                       Id id) const
   {
     for (size_t r = 0; r<area.rings.size(); r++) {
-      if (area.rings[r].IsOuterRing()) {
+      if (area.rings[r].IsTopOuter()) {
         for (const auto& node : area.rings[r].nodes) {
           if (node.GetId()==id) {
             return r;
@@ -79,7 +79,7 @@ namespace osmscout {
                                              std::unordered_map<Id,std::set<AreaRef> >& idAreaMap)
   {
     for (const auto& ring: area->rings) {
-      if (ring.IsOuterRing()) {
+      if (ring.IsTopOuter()) {
         for (const auto node : ring.nodes) {
           Id id=node.GetId();
 
@@ -134,7 +134,7 @@ namespace osmscout {
       std::unordered_set<Id> nodeIds;
 
       for (const auto& ring: data.rings) {
-        if (!ring.IsOuterRing()) {
+        if (!ring.IsTopOuter()) {
           continue;
         }
 
@@ -227,7 +227,7 @@ namespace osmscout {
       bool isMergeCandidate=false;
 
       for (const auto& ring: area->rings) {
-        if (!ring.IsOuterRing()) {
+        if (!ring.IsTopOuter()) {
           continue;
         }
 
@@ -294,7 +294,7 @@ namespace osmscout {
       std::unordered_set<Id> nodeIds;
 
       for (const auto& ring: area->rings) {
-        if (ring.IsOuterRing()) {
+        if (ring.IsTopOuter()) {
           for (const auto node : ring.nodes) {
             Id id=node.GetId();
 
@@ -316,7 +316,7 @@ namespace osmscout {
                                      std::unordered_set<FileOffset>& mergedAway)
   {
     for (const auto& ring: area.rings) {
-      if (!ring.IsOuterRing()) {
+      if (!ring.IsTopOuter()) {
         continue;
       }
 

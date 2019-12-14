@@ -146,19 +146,19 @@ namespace osmscout {
         return featureValueBuffer;
       }
 
-      inline bool IsMasterRing() const
+      inline bool IsMaster() const
       {
         return ring==masterRingId;
       }
 
       // top level outer ring
-      inline bool IsOuterRing() const
+      inline bool IsTopOuter() const
       {
         return ring==outerRingId;
       }
 
       // ring level is odd, it is some outer ring
-      inline bool IsSomeOuterRing() const
+      inline bool IsOuter() const
       {
         return (ring & outerRingId) == outerRingId;
       }

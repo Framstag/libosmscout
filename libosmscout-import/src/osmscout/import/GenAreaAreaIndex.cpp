@@ -153,10 +153,10 @@ namespace osmscout {
           continue;
         }
 
-        if (ring.IsMasterRing() &&
+        if (ring.IsMaster() &&
             ring.nodes.empty()) {
           for (const auto& r : area.rings) {
-            if (r.IsOuterRing()) {
+            if (r.IsTopOuter()) {
               writer.WriteFileOffset(offset);
               writer.WriteNumber(ring.GetType()->GetAreaId());
 
@@ -345,7 +345,7 @@ namespace osmscout {
 
           if (area.rings.empty() ||
               (area.rings.size()==1 &&
-               area.rings[0].IsMasterRing())) {
+                  area.rings[0].IsMaster())) {
             save=false;
             return true;
           }

@@ -155,7 +155,7 @@ namespace osmscout {
     bool   start=true;
 
     for (const auto& ring : rings) {
-      if (ring.IsOuterRing()) {
+      if (ring.IsTopOuter()) {
         for (const auto& node : ring.nodes) {
           if (start) {
             minLat=node.GetLat();
@@ -196,7 +196,7 @@ namespace osmscout {
     GeoBox boundingBox;
 
     for (const auto& ring : rings) {
-      if (ring.IsOuterRing()) {
+      if (ring.IsTopOuter()) {
         if (!boundingBox.IsValid()) {
           ring.GetBoundingBox(boundingBox);
         }
@@ -440,7 +440,7 @@ namespace osmscout {
   {
     auto ring=rings.cbegin();
     bool multipleRings=rings.size()>1;
-    bool hasMaster=rings[0].IsMasterRing();
+    bool hasMaster= rings[0].IsMaster();
 
     // TODO: We would like to have a bit flag here, if we have a simple area,
     // an area with one master (and multiple rings) or an area with
@@ -496,7 +496,7 @@ namespace osmscout {
   {
     auto ring=rings.cbegin();
     bool multipleRings=rings.size()>1;
-    bool hasMaster=ring->IsMasterRing();
+    bool hasMaster= ring->IsMaster();
 
     // Master/Outer ring
 
@@ -545,7 +545,7 @@ namespace osmscout {
   {
     auto ring=rings.cbegin();
     bool multipleRings=rings.size()>1;
-    bool hasMaster=rings[0].IsMasterRing();
+    bool hasMaster= rings[0].IsMaster();
 
     // Outer ring
 

@@ -783,7 +783,7 @@ static void DumpArea(const osmscout::AreaRef& area,
     std::cout << std::endl;
 
     size_t ident;
-    if (area->rings[r].IsMasterRing()) {
+    if (area->rings[r].IsMaster()) {
       ident=IDENT;
     }
     else {
@@ -791,11 +791,11 @@ static void DumpArea(const osmscout::AreaRef& area,
       ident=IDENT+2;
     }
 
-    if (area->rings[r].IsMasterRing()) {
+    if (area->rings[r].IsMaster()) {
       DumpIndent(ident);
       std::cout << "master" << std::endl;
     }
-    else if (area->rings[r].IsOuterRing()) {
+    else if (area->rings[r].IsTopOuter()) {
       DumpIndent(ident);
       std::cout << "outer" << std::endl;
       DumpIndent(ident);
@@ -833,7 +833,7 @@ static void DumpArea(const osmscout::AreaRef& area,
       }
     }
 
-    if (!area->rings[r].IsMasterRing()) {
+    if (!area->rings[r].IsMaster()) {
       ident-=2;
       DumpIndent(ident);
       std::cout << "}" << std::endl;

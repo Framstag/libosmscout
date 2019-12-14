@@ -313,7 +313,7 @@ namespace osmscout {
         entry.coordCount+=ring.nodes.size();
 
         if (parameter.IsDebugData()) {
-          if (ring.IsMasterRing()) {
+          if (ring.IsMaster()) {
             IconStyleRef iconStyle=styleConfig->GetAreaIconStyle(area->GetType(),
                                                                  ring.GetFeatureValueBuffer(),
                                                                  projection);
@@ -341,7 +341,7 @@ namespace osmscout {
         entry.coordCount+=ring.nodes.size();
 
         if (parameter.IsDebugData()) {
-          if (ring.IsMasterRing()) {
+          if (ring.IsMaster()) {
             IconStyleRef iconStyle=styleConfig->GetAreaIconStyle(area->GetType(),
                                                                  ring.GetFeatureValueBuffer(),
                                                                  projection);
@@ -1266,7 +1266,7 @@ namespace osmscout {
       const Area::Ring &ring = area->rings[i];
       // The master ring does not have any nodes, so we skip it
       // Rings with less than 3 nodes should be skipped, too (no area)
-      if (ring.IsMasterRing() || ring.nodes.size()<3) {
+      if (ring.IsMaster() || ring.nodes.size() < 3) {
         continue;
       }
 
@@ -1311,7 +1311,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!ring.IsSomeOuterRing() &&
+        if (!ring.IsOuter() &&
             ring.GetType()->GetIgnore()) {
           // clipping inner ring, we will not render it, but still go deeper,
           // there may be inner outer rings
@@ -1324,7 +1324,7 @@ namespace osmscout {
         std::vector<BorderStyleRef> borderStyles;
         BorderStyleRef              borderStyle;
 
-        if (ring.IsSomeOuterRing() && ring.GetType()->GetIgnore()) {
+        if (ring.IsOuter() && ring.GetType()->GetIgnore()) {
           type=area->GetType();
         }
         else {
@@ -1364,7 +1364,7 @@ namespace osmscout {
         double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
         a.boundingBox=ring.GetBoundingBox();
-        a.isOuter = ring.IsSomeOuterRing();
+        a.isOuter = ring.IsOuter();
 
         if (!IsVisibleArea(projection,
                            a.boundingBox,

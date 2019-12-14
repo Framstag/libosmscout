@@ -993,7 +993,7 @@ namespace osmscout {
         }
 
         for (const auto& ring : area.rings) {
-          if (ring.IsOuterRing()) {
+          if (ring.IsTopOuter()) {
             std::vector<GeoCoord> coords;
 
             for (const auto& node : ring.nodes) {
@@ -1104,7 +1104,7 @@ namespace osmscout {
         }
 
         for (const auto& ring : area.rings) {
-          if (ring.IsOuterRing()) {
+          if (ring.IsTopOuter()) {
             std::vector<GeoCoord> coords;
 
             for (const auto& node : ring.nodes) {
@@ -1378,10 +1378,10 @@ namespace osmscout {
                                                        const std::string& postalCode,
                                                        const RegionIndex& regionIndex)
   {
-    if (ring.IsMasterRing() &&
+    if (ring.IsMaster() &&
         ring.nodes.empty()) {
       for (const auto& r : area.rings) {
-        if (r.IsOuterRing()) {
+        if (r.IsTopOuter()) {
           GeoBox boundingBox;
 
           r.GetBoundingBox(boundingBox);
