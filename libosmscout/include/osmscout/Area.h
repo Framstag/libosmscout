@@ -57,7 +57,12 @@ namespace osmscout {
    * When area is multipolygon relation (in OSM words), type and features of such relation
    * are stored in master ring. Every outer ring may have its own type and features.
    *
-   * When outer ring has not type (GetType()->GetIgnore()), type of master ring should be used.
+   * When outer ring has not type (GetType()->GetIgnore()), type of relation (master ring) should be used.
+   * But OSM documentation is not clear what type should be used when outer ring has different type than relation.
+   * For example this relation: https://www.openstreetmap.org/relation/7826515
+   *  - master ring has type "leisure_park" and outer ring "place_islet".
+   * OSM Scout library don't support multiple types for object, so in such cases,
+   * we are using relation type for top-level outer ring and ring type for nested outer rings.
    *
    * When inner ring has no type (GetType()->GetIgnore())
    * it is used as simple clipping of containing (upper) outer ring.
