@@ -111,23 +111,28 @@ void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output
 
 void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output
                                  const AreaRef &a,
-                   const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
-                   LocationServiceRef &locationService,
-                   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
+                                 const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                                 LocationServiceRef &locationService,
+                                 std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
 {
   for (const auto &ring:a->rings) {
-    if (!ring.GetType()->GetIgnore()) {
-      addObjectInfo(objectList,
-                    "area",
-                    a->GetObjectFileRef(),
-                    ring.nodes,
-                    // Master ring don't contains nodes! Use intersection of all outer rings instead
-                    (ring.nodes.empty() ? a->GetBoundingBox() : ring.GetBoundingBox()).GetCenter(),
-                    &ring,
-                    reverseLookupMap,
-                    locationService,
-                    regionMap);
+    TypeInfoRef type=a->GetRingType(ring);
+    if (type->GetIgnore()) {
+      continue;
     }
+    // Master ring don't contains nodes! Use intersection of all outer rings instead
+    osmscout::GeoBox bbox=(ring.nodes.empty() ? a->GetBoundingBox() : ring.GetBoundingBox());
+
+    addObjectInfo(objectList,
+                  "area",
+                  a->GetObjectFileRef(),
+                  ring.nodes,
+                  bbox.GetCenter(),
+                  type,
+                  ring.GetFeatureValueBuffer(),
+                  reverseLookupMap,
+                  locationService,
+                  regionMap);
   }
 }
 
