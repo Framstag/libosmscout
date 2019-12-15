@@ -270,6 +270,16 @@ namespace osmscout {
       return rings.front().GetType();
     }
 
+    inline TypeInfoRef GetRingType(const Ring &ring) const
+    {
+      if (ring.IsTopOuter() ||
+          (ring.IsOuter() && ring.GetType()->GetIgnore())) {
+        return GetType();
+      } else {
+        return ring.GetType();
+      }
+    }
+
     inline const FeatureValueBuffer& GetFeatureValueBuffer() const
     {
       return rings.front().GetFeatureValueBuffer();

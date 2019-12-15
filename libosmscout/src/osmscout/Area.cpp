@@ -585,8 +585,6 @@ namespace osmscout {
 
   void Area::VisitRings(RingVisitor visitor) const
   {
-    TypeInfoRef areaType=GetType();
-
     size_t ringId=Area::outerRingId;
 
     // found the ring on this (ringId) depth in hierarchy (and visitor wants to continue),
@@ -603,13 +601,7 @@ namespace osmscout {
           continue;
         }
 
-        TypeInfoRef type;
-        if (ring.IsTopOuter() ||
-            (ring.IsOuter() && ring.GetType()->GetIgnore())) {
-          type=areaType;
-        } else {
-          type=ring.GetType();
-        }
+        TypeInfoRef type=GetRingType(ring);
         foundRing |= visitor(i, ring, type);
       }
       ringId++;
@@ -621,8 +613,6 @@ namespace osmscout {
     assert(i<rings.size());
     uint8_t ringId=rings[i].GetRing();
 
-    TypeInfoRef areaType=GetType();
-
     // Since we know that rings are created deep first, we only take into account direct followers
     // in the list with ring+1.
     // Note that inner rings may have nested islands with ( > ringId+1), we skip them but continue
@@ -631,13 +621,7 @@ namespace osmscout {
          j<rings.size() && rings[j].GetRing()>=ringId+1;
          j++) {
       const Ring &ring=rings[j];
-      TypeInfoRef type;
-      if (ring.IsTopOuter() ||
-          (ring.IsOuter() && ring.GetType()->GetIgnore())) {
-        type=areaType;
-      } else {
-        type=ring.GetType();
-      }
+      TypeInfoRef type=GetRingType(ring);
       if (ring.GetRing()==ringId+1) {
         visitor(j,ring,type);
       }
