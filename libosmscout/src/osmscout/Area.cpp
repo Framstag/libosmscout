@@ -582,4 +582,65 @@ namespace osmscout {
       ++ring;
     }
   }
+
+  void Area::VisitRings(RingVisitor visitor) const
+  {
+    TypeInfoRef areaType=GetType();
+
+    size_t ringId=Area::outerRingId;
+
+    // found the ring on this (ringId) depth in hierarchy (and visitor wants to continue),
+    // we are going deeper in the hierarchy
+    bool foundRing=true;
+
+    while (foundRing) {
+      foundRing = false;
+
+      for (size_t i = 0; i < rings.size(); i++) {
+        const Ring &ring = rings[i];
+
+        if (ring.GetRing() != ringId) {
+          continue;
+        }
+
+        TypeInfoRef type;
+        if (ring.IsTopOuter() ||
+            (ring.IsOuter() && ring.GetType()->GetIgnore())) {
+          type=areaType;
+        } else {
+          type=ring.GetType();
+        }
+        foundRing |= visitor(i, ring, type);
+      }
+      ringId++;
+    }
+  }
+
+  void Area::VisitClippingRings(size_t i, RingVisitor visitor) const
+  {
+    assert(i<rings.size());
+    uint8_t ringId=rings[i].GetRing();
+
+    TypeInfoRef areaType=GetType();
+
+    // Since we know that rings are created deep first, we only take into account direct followers
+    // in the list with ring+1.
+    // Note that inner rings may have nested islands with ( > ringId+1), we skip them but continue
+    // iterating.
+    for (size_t j=i+1;
+         j<rings.size() && rings[j].GetRing()>=ringId+1;
+         j++) {
+      const Ring &ring=rings[j];
+      TypeInfoRef type;
+      if (ring.IsTopOuter() ||
+          (ring.IsOuter() && ring.GetType()->GetIgnore())) {
+        type=areaType;
+      } else {
+        type=ring.GetType();
+      }
+      if (ring.GetRing()==ringId+1) {
+        visitor(j,ring,type);
+      }
+    }
+  }
 }

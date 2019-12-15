@@ -234,6 +234,8 @@ namespace osmscout {
       friend class Area;
     };
 
+    using RingVisitor = std::function<bool(size_t i, const Ring&, const TypeInfoRef&)>;
+
   private:
     FileOffset        fileOffset;
     FileOffset        nextFileOffset;
@@ -335,6 +337,19 @@ namespace osmscout {
      */
     void WriteOptimized(const TypeConfig& typeConfig,
                         FileWriter& writer) const;
+
+    /**
+     * Visit rings in breadth-first manner.
+     * When visitor return true for some ring,
+     * algorithm will continue deeper in hierarchy.
+     */
+    void VisitRings(RingVisitor visitor) const;
+
+    /**
+     * Visit possible clippings of ring specified by index.
+     * We only take into account rings of the next level.
+     */
+    void VisitClippingRings(size_t index, RingVisitor visitor) const;
   };
 
   typedef std::shared_ptr<Area> AreaRef;
