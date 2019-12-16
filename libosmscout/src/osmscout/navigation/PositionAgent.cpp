@@ -280,8 +280,16 @@ namespace osmscout {
               break;
             }
             moveEstimate = Kilometers(speed * lastUpdateInHours);
-            auto distanceToNextNode = GetEllipsoidalDistance(position.coord, nextNode->GetLocation());
-            if (distanceToNextNode < moveEstimate){
+            Distance distanceToNextNode = GetEllipsoidalDistance(position.coord, nextNode->GetLocation());
+
+            Distance distanceFromNode=GetSphericalDistance(position.routeNode->GetLocation(), position.coord);
+            Distance distanceBetweenNodes=GetSphericalDistance(position.routeNode->GetLocation(), nextNode->GetLocation());
+            if (distanceFromNode>distanceBetweenNodes){
+              log.Warn() << "Distance from previous node (" << distanceFromNode << ") is greater than distance between nodes (" << distanceBetweenNodes << ")";
+              distanceToNextNode=Meters(0);
+            }
+
+            if (distanceToNextNode > moveEstimate){
               auto bearing=GetSphericalBearingInitial(position.coord, nextNode->GetLocation());
               position.coord=GetEllipsoidalDistance(position.coord,bearing,moveEstimate);
               log.Debug() << "Estimate position in tunnel. "
@@ -297,7 +305,8 @@ namespace osmscout {
               position.way=routableObjects->GetWay(nextNode->GetDatabaseId(), nextNode->GetPathObject());
               position.area=routableObjects->GetArea(nextNode->GetDatabaseId(), nextNode->GetPathObject());
               if (distanceToNextNode.As<Kilometer>() > 0) {
-                // move time
+                // Updated route node may have different max. speed, we have to compute moveEstimate again.
+                // To do it correctly, we update lastUpdate time to estimated arrival to current route node.
                 auto timeToNextNode = duration<double, std::ratio<3600>>(distanceToNextNode.As<Kilometer>() / speed);
                 lastUpdate=lastUpdate+duration_cast<Timestamp::duration>(timeToNextNode);
                 if (lastUpdate > now){
@@ -307,7 +316,17 @@ namespace osmscout {
                 }
               }
             }
+          } else {
+            // We are not in the tunnel.
+            if (moveEstimate.AsMeter() > 0) {
+              // we left tunnel right now, escape loop... Gps signal should appear soon.
+              moveEstimate = Meters(0);
+              position.state = NoGpsSignal;
+              log.Debug() << "Leaving tunnel, waiting for GPS at " << position.coord.GetDisplayText();;
+            }
           }
+        } else {
+          moveEstimate = Meters(0);
         }
       } while (moveEstimate.AsMeter() > 0);
 
