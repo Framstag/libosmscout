@@ -447,7 +447,7 @@ namespace osmscout {
     // multiple outer but no master
     //
     // Also for each ring we would like to have a bit flag, if
-    // we stor eids or not
+    // we store ids or not
 
     // Outer ring
 
