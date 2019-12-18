@@ -399,7 +399,6 @@ namespace osmscout {
         }
 
         if (currentLabel != allSortedLabels.end()){
-
           Mask m(rowSize);
           std::vector<Mask> masks(currentLabel->elements.size(), m);
           std::vector<std::vector<uint64_t> *> canvases(currentLabel->elements.size(), nullptr);
@@ -426,8 +425,14 @@ namespace osmscout {
                                     0, 0 };
             std::vector<uint64_t> *canvas = &labelCanvas;
             if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol){
-              rectangle.width = std::ceil(element.labelData.iconWidth + 2*padding);
-              rectangle.height = std::ceil(element.labelData.iconHeight + 2*padding);
+              if (element.labelData.iconStyle->IsOverlay()) {
+                rectangle.width = 0;
+                rectangle.height = 0;
+              }
+              else {
+                rectangle.width = std::ceil(element.labelData.iconWidth + 2*padding);
+                rectangle.height = std::ceil(element.labelData.iconHeight + 2*padding);
+              }
               canvas = &iconCanvas;
 #ifdef DEBUG_LABEL_LAYOUTER
               if (element.labelData.type==LabelData::Icon) {

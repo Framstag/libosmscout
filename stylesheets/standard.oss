@@ -1305,7 +1305,7 @@ STYLE
  // Special objects
 
  [MAG detail-] {
-   //[TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp;}
+   //[TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp; overlay: true;}
  }
 
  [MAG veryClose-] {

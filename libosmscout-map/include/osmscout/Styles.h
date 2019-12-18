@@ -843,7 +843,8 @@ namespace osmscout {
       attrSymbol,
       attrIconName,
       attrPosition,
-      attrPriority
+      attrPriority,
+      attrOverlay
     };
 
   private:
@@ -853,12 +854,14 @@ namespace osmscout {
     unsigned int width;    //!< width of icon in pixels
     unsigned int height;   //!< height of icon in pixels
     size_t       position; //!< Relative vertical position of the label
-    size_t       priority;
+    size_t       priority; //!< Rendering priority
+    bool         overlay;  //!< Render in any case, do not clip if it overlaps with something else. Default: false
 
   public:
     IconStyle();
     IconStyle(const IconStyle& style);
 
+    void SetBoolValue(int attribute, bool value) override;
     void SetStringValue(int attribute, const std::string& value) override;
     void SetSymbolValue(int attribute, const SymbolRef& value) override;
     void SetUIntValue(int attribute, size_t value) override;
@@ -870,6 +873,7 @@ namespace osmscout {
     IconStyle& SetHeight(unsigned int h);
     IconStyle& SetPosition(size_t position);
     IconStyle& SetPriority(size_t priority);
+    IconStyle& SetOverlay(bool overlay);
 
     inline size_t GetPriority() const
     {
@@ -910,6 +914,11 @@ namespace osmscout {
     inline size_t GetPosition() const
     {
       return position;
+    }
+
+    inline bool IsOverlay() const
+    {
+      return overlay;
     }
 
     static StyleDescriptorRef GetDescriptor();

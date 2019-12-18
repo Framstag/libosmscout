@@ -280,19 +280,19 @@ Currently allowed instances:
 
 The line style has the following attributes:
 
-Name         |Type         |Description
--------------|-------------|-----------
-color        |Color        |Color of the line. if not set, color is transparent (a lines is not drawn)
-dash         |Dash         |Size of the dashes. If not set lines is solid
-gapColor     |Color        |Color drawn in the "gap", if not set gapColor is transparent
-displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
-width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
-displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
-offset       |GroundSize   |Offset of the drawn line in relation to the actual path.
-joinCap      |Cap          |Cap in case where lines join.
-endCap       |Cap          |Cap in the case where the lines ends without joining another line.
-priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
-offsetRel    |OffsetRel    |Position the way offset is relative to
+Name         |Type         |Default |Description
+-------------|-------------|--------|-----------
+color        |Color        |red     |Color of the line. if not set, color is transparent (a lines is not drawn)
+dash         |Dash         |        |Size of the dashes. If not set lines is solid
+gapColor     |Color        |red     |Color drawn in the "gap", if not set gapColor is transparent
+displayWidth |ScreenSize   |0       |width of the line in millimeter ("size on map")
+width        |GroundSize   |0       |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
+displayOffset|ScreenSize   |0       |Offset of drawn line in relation to the actual path.
+offset       |GroundSize   |0       |Offset of the drawn line in relation to the actual path.
+joinCap      |Cap          |round   |Cap in case where lines join.
+endCap       |Cap          |round   |Cap in the case where the lines ends without joining another line.
+priority     |Int          |0       |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
+offsetRel    |OffsetRel    |0       |Position the way offset is relative to
 
 If `displayWidth` and `width` are both set, the resulting pixel values will be added.
 
@@ -306,16 +306,16 @@ Currently allowed instances:
 
 The border style has the following attributes:
 
-Name         |Type         |Description
--------------|-------------|-----------
-color        |Color        |Color of the line. if not set, color is transparent (a lines is not drawn)
-dash         |Dash         |Size of the dashes. If not set lines is solid
-gapColor     |Color        |Color drawn in the "gap", if not set gapColor is transparent
-displayWidth |ScreenSize   |width of the line in millimeter ("size on map")
-width        |GroundSize   |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
-displayOffset|ScreenSize   |Offset of drawn line in relation to the actual path.
-offset       |GroundSize   |Offset of the drawn line in relation to the actual path.
-priority     |Int          |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
+Name         |Type         |Default |Description
+-------------|-------------|--------|-----------
+color        |Color        |red     |Color of the line. if not set, color is transparent (a lines is not drawn)
+dash         |Dash         |        |Size of the dashes. If not set lines is solid
+gapColor     |Color        |red     |Color drawn in the "gap", if not set gapColor is transparent
+displayWidth |ScreenSize   |0       |width of the line in millimeter ("size on map")
+width        |GroundSize   |0       |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
+displayOffset|ScreenSize   |0       |Offset of drawn line in relation to the actual path.
+offset       |GroundSize   |0       |Offset of the drawn line in relation to the actual path.
+priority     |Int          |0       |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
 
 If `displayWidth` and `width` are both set, the resulting pixel values will be added.
 
@@ -328,11 +328,11 @@ Currently allowed instances:
 
 The area fill style has the following attributes:
 
-Name         |Type         |Description
--------------|-------------|-----------
-color        |Color        |The fill color. By default transparent so area will not be filled.
-pattern      |String       |(File)name of an image that is repeately drawn on top of the area. By default no pattern will be drawn.
-patternMinMag|Magnification|Minimum magnification for the pattern to be drawn (deprecated, should be better defined by a filter). By default this is magWorld, so the pattern will always be drawn
+Name         |Type         |Default |Description
+-------------|-------------|--------|-----------
+color        |Color        |red     |The fill color. By default transparent so area will not be filled.
+pattern      |String       |        |(File)name of an image that is repeately drawn on top of the area. By default no pattern will be drawn.
+patternMinMag|Magnification|world   |Minimum magnification for the pattern to be drawn (deprecated, should be better defined by a filter). By default this is magWorld, so the pattern will always be drawn
 
 ### TextStyle - Drawing labels for nodes or areas
 
@@ -343,15 +343,15 @@ Currently allowed instances:
 
 The text style for point labels has the following attributes:
 
-Name         |Type                         |Description
--------------|-----------------------------|-----------
-label        |FeatureAttr or LabelProvider |The name of the feature attribute to be rendered or name of label provider.
-style        |TextStyle                    |Depending on the value (normal or emphasize) the label is either drawn normal or (depending on the backend the visualisation may be different) somehow emphasized.
-color        |Color                        |The color of the text
-size         |Int                          |The size of the text relative to the standard text size. 2.0 for example generates a text twice as height as normal.
-scaleMag     |Magnification                |Starting with the given magnification in the label is drawn bigger but on the same time with increasing transparency with increasing magnification, genrating an overlay-like effect.
-priority     |Int                          |numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value. Note that labels with a certain alpha value will be ignored (so giant scaleMag labels will not "kill" all other labels beneeth).
-autoSize     |Bool                         |The size of the label is automatically scaled to fit the height of the area itself. Thus bigger areas will get bigger labels, label with not be higher than the actual area.
+Name         |Type                         |Default |Description
+-------------|-----------------------------|--------|-----------
+label        |FeatureAttr or LabelProvider |        |The name of the feature attribute to be rendered or name of label provider.
+style        |TextStyle                    |normal  |Depending on the value (normal or emphasize) the label is either drawn normal or (depending on the backend the visualisation may be different) somehow emphasized.
+color        |Color                        |black   |The color of the text
+size         |Int                          |1       |The size of the text relative to the standard text size. 2.0 for example generates a text twice as height as normal.
+scaleMag     |Magnification                |1000000 |Starting with the given magnification in the label is drawn bigger but on the same time with increasing transparency with increasing magnification, genrating an overlay-like effect.
+priority     |Int                          |max(Int)|numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value. Note that labels with a certain alpha value will be ignored (so giant scaleMag labels will not "kill" all other labels beneeth).
+autoSize     |Bool                         |false   |The size of the label is automatically scaled to fit the height of the area itself. Thus bigger areas will get bigger labels, label with not be higher than the actual area.
 
 ### PathTextStyle - Draw labels onto ways and area borders
 
@@ -362,14 +362,14 @@ Currently allowed instances:
 
 The text style for contour labels has the following attributes:
 
-Name         |Type                         |Description
--------------|-----------------------------|-----------
-label        |FeatureAttr or LabelProvider |The name of the feature attribute to be rendered or name of label provider.
-color        |Color                        |The color of the text
-size         |Int                          |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
-displayOffset|ScreenSize                   |Offset of drawn text in relation to the actual path.
-offset       |GroundSize                   |Offset of the drawn text in relation to the actual path.
-priority     |Int                          |numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value.
+Name         |Type                         |Default |Description
+-------------|-----------------------------|--------|-----------
+label        |FeatureAttr or LabelProvider |        |The name of the feature attribute to be rendered or name of label provider.
+color        |Color                        |black   |The color of the text
+size         |Int                          |1       |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
+displayOffset|ScreenSize                   |0       |Offset of drawn text in relation to the actual path.
+offset       |GroundSize                   |0       |Offset of the drawn text in relation to the actual path.
+priority     |Int                          |max(Int)|numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value.
 
 ### IconStyle - Drawing icons for nodes and areas
 
@@ -380,11 +380,12 @@ Currently allowed instances:
 * `NODE.ICON`
 * `AREA.ICON`
 
-Name         |Type         |Description
--------------|-------------|-----------
-symbol       |String       |The name of the symbol to draw
-name         |String       |The name of the icon to draw. An icon name is normally mapped onto an external image. The supported image formats depend on the actual backend.
-priority     |Int          |numeric value defining a relative priority between icons. Labels with a lower value will be drawn in favour of icons with a higher priority value.
+Name         |Type         |Default |Description
+-------------|-------------|--------|-----------
+symbol       |String       |        |The name of the symbol to draw
+name         |String       |        |The name of the icon to draw. An icon name is normally mapped onto an external image. The supported image formats depend on the actual backend.
+priority     |Int          |max(Int)|numeric value defining a relative priority between icons. Labels with a lower value will be drawn in favour of icons with a higher priority value.
+overlay      |Bool         |false   |If true, render icon/symbol in any case, do not clip if it overlaps with something else. Default: false
  
 ### ShieldStyle - Drawing plates for ways
 
@@ -394,15 +395,15 @@ Currently allowed instances:
 
 The shield style has the following attributes:
 
-Name           |Type                          |Description
----------------|------------------------------|-----------
-label          |FeatureAttr or LabelProvider  |The name of the feature attribute to be rendered or name of label provider.
-color          |Color                         |The color of the text
-backgroundColor|Color                         |The color of the shield itself
-borderColor    |Color                         |The color of the border.
-size           |Int                           |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
-priority       |Int                           |numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value. Note that labels with a certain alpha value will be ignored (so giant scaleMag labels will not "kill" all other labels beneeth).
-shieldSpace    |ScreenSize                    |Space between each shield on a path.
+Name           |Type                          |Default |Description
+---------------|------------------------------|--------|-----------
+label          |FeatureAttr or LabelProvider  |        |The name of the feature attribute to be rendered or name of label provider.
+color          |Color                         |white   |The color of the text
+backgroundColor|Color                         |black   |The color of the shield itself
+borderColor    |Color                         |white   |The color of the border.
+size           |Int                           |1       |The size of the text relative to the standard text size. 2.0 for example genrates a text twice as height as normal.
+priority       |Int                           |max(Int)|numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value. Note that labels with a certain alpha value will be ignored (so giant scaleMag labels will not "kill" all other labels beneeth).
+shieldSpace    |ScreenSize                    |3.0     |Space between each shield on a path.
 
 ### PathSymbolStyle - Drawing symbols onto paths
 
@@ -411,12 +412,12 @@ Currently allowed instances:
 * `WAY.SYMBOL`
 * `AREA.BORDERSYMBOL`
 
-Name         |Type         |Description
--------------|-------------|-----------
-symbol       |String       |The name of the symbol to draw
-symbolSpace  |ScreenSize   |Space between each symbol on a path.
-displayOffset|ScreenSize   |Offset of drawn symbol in relation to the actual path.
-offset       |GroundSize   |Offset of the drawn symbol in relation to the actual path.
+Name         |Type         |Default |Description
+-------------|-------------|--------|-----------
+symbol       |String       |        |The name of the symbol to draw
+symbolSpace  |ScreenSize   |15      |Space between each symbol on a path.
+displayOffset|ScreenSize   |0       |Offset of drawn symbol in relation to the actual path.
+offset       |GroundSize   |0       |Offset of the drawn symbol in relation to the actual path.
 
 ## Label and icon placement
 

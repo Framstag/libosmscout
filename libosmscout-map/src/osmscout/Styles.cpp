@@ -1671,6 +1671,7 @@ namespace osmscout {
       AddAttribute(std::make_shared<StyleStringAttributeDescriptor>("name",IconStyle::attrIconName));
       AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("position",IconStyle::attrPosition));
       AddAttribute(std::make_shared<StyleUIntAttributeDescriptor>("priority",IconStyle::attrPriority));
+      AddAttribute(std::make_shared<StyleBoolAttributeDescriptor>("overlay",IconStyle::attrOverlay));
     }
   };
 
@@ -1681,7 +1682,8 @@ namespace osmscout {
      width(14),
      height(14),
      position(0),
-     priority(std::numeric_limits<size_t>::max())
+     priority(std::numeric_limits<size_t>::max()),
+     overlay(false)
   {
     // no code
   }
@@ -1692,9 +1694,21 @@ namespace osmscout {
     width(style.width),
     height(style.height),
     position(style.position),
-    priority(style.priority)
+    priority(style.priority),
+    overlay(style.overlay)
   {
     // no code
+  }
+
+  void IconStyle::SetBoolValue(int attribute, bool value)
+  {
+    switch (attribute) {
+    case attrOverlay:
+      SetOverlay(value);
+      break;
+    default:
+      assert(false);
+    }
   }
 
   void IconStyle::SetStringValue(int attribute,
@@ -1785,6 +1799,13 @@ namespace osmscout {
     return *this;
   }
 
+  IconStyle& IconStyle::SetOverlay(bool overlay)
+  {
+    this->overlay=overlay;
+
+    return *this;
+  }
+
   StyleDescriptorRef IconStyle::GetDescriptor()
   {
     return iconStyleDescriptor;
@@ -1807,6 +1828,9 @@ namespace osmscout {
         break;
       case attrPriority:
         priority=other.priority;
+        break;
+      case attrOverlay:
+        overlay=other.overlay;
         break;
       }
     }
