@@ -202,7 +202,7 @@ namespace osmscout {
   class Mask
   {
   public:
-    Mask(size_t rowSize) : d(rowSize)
+    explicit Mask(size_t rowSize) : d(rowSize)
     {
     };
 

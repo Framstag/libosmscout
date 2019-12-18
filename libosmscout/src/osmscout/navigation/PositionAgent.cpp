@@ -82,7 +82,7 @@ namespace osmscout {
 
   PositionAgent::PositionMessage::PositionMessage(const Timestamp& timestamp,
                                                   const RouteDescriptionRef &route,
-                                                  const Position position):
+                                                  const Position &position):
                                                   NavigationMessage(timestamp),
                                                   route(route),
                                                   position(position)
@@ -253,62 +253,85 @@ namespace osmscout {
       // gps signal with LowAccuracy or Outdated
       Distance moveEstimate;
       do {
-        if (position.way && // TODO: handle area
-            position.routeNode != route->Nodes().end() &&
-            (position.state == OnRoute || position.state == EstimateInTunnel)) {
+        if (!position.way){  // TODO: handle area
+          break;
+        }
+        if (position.routeNode == route->Nodes().end()){
+          break;
+        }
+        if (position.state != OnRoute && position.state != EstimateInTunnel) {
+          break;
+        }
 
-          auto nextNode = position.routeNode;
-          nextNode++;
-          if (nextNode==route->Nodes().end()){
-            break;
+        auto nextNode = position.routeNode;
+        nextNode++;
+        if (nextNode==route->Nodes().end()){
+          break;
+        }
+
+        assert(routableObjects->dbMap.find(position.databaseId) != routableObjects->dbMap.end());
+        TypeConfigRef typeConfig = routableObjects->dbMap[position.databaseId].typeConfig;
+        assert(typeConfig);
+        TunnelFeatureReader tunnelReader(*typeConfig);
+        bool tunnel = tunnelReader.IsSet(position.way->GetFeatureValueBuffer());
+        if (!tunnel) {
+          // We are not in the tunnel.
+          if (moveEstimate.AsMeter() > 0) {
+            // we left tunnel right now, escape loop... Gps signal should appear soon.
+            position.state = NoGpsSignal;
+            log.Debug() << "Leaving tunnel, waiting for GPS at " << position.coord.GetDisplayText();;
           }
+          break;
+        }
 
-          assert(routableObjects->dbMap.find(position.databaseId) != routableObjects->dbMap.end());
-          TypeConfigRef typeConfig = routableObjects->dbMap[position.databaseId].typeConfig;
-          assert(typeConfig);
-          TunnelFeatureReader tunnelReader(*typeConfig);
-          bool tunnel = tunnelReader.IsSet(position.way->GetFeatureValueBuffer());
-          if (tunnel) {
-            position.state = EstimateInTunnel;
-            MaxSpeedFeatureValueReader maxSpeedReader(*typeConfig);
-            auto maxSpeed = maxSpeedReader.GetValue(position.way->GetFeatureValueBuffer());
-            double vehicleSpeed = GetVehicleSpeed(vehicle, *typeConfig, *position.way->GetType());
-            double speed = maxSpeed ? std::min(static_cast<double>(maxSpeed->GetMaxSpeed()), vehicleSpeed)
-                                    : vehicleSpeed;
-            double lastUpdateInHours = duration_cast<duration<double, std::ratio<3600>>>(now - lastUpdate).count();
-            if (lastUpdateInHours<=0 || speed <= 0){
-              break;
-            }
-            moveEstimate = Kilometers(speed * lastUpdateInHours);
-            auto distanceToNextNode = GetEllipsoidalDistance(position.coord, nextNode->GetLocation());
-            if (distanceToNextNode < moveEstimate){
-              auto bearing=GetSphericalBearingInitial(position.coord, nextNode->GetLocation());
-              position.coord=GetEllipsoidalDistance(position.coord,bearing,moveEstimate);
-              log.Debug() << "Estimate position in tunnel. "
-                          << "Move " << moveEstimate.AsMeter() << " m "
-                          << "to " << position.coord.GetDisplayText();
-              moveEstimate=Meters(0);
-            }else{
-              moveEstimate=moveEstimate - distanceToNextNode;
-              position.coord=nextNode->GetLocation();
-              position.routeNode=nextNode;
-              position.databaseId=nextNode->GetDatabaseId();
-              position.typeConfig=typeConfig;
-              position.way=routableObjects->GetWay(nextNode->GetDatabaseId(), nextNode->GetPathObject());
-              position.area=routableObjects->GetArea(nextNode->GetDatabaseId(), nextNode->GetPathObject());
-              if (distanceToNextNode.As<Kilometer>() > 0) {
-                // move time
-                auto timeToNextNode = duration<double, std::ratio<3600>>(distanceToNextNode.As<Kilometer>() / speed);
-                lastUpdate=lastUpdate+duration_cast<Timestamp::duration>(timeToNextNode);
-                if (lastUpdate > now){
-                  // should not happen
-                  log.Warn() << "Correction of time " << TimestampToISO8601TimeString(lastUpdate) << " > " << TimestampToISO8601TimeString(now);
-                  lastUpdate=now;
-                }
-              }
+        position.state = EstimateInTunnel;
+        MaxSpeedFeatureValueReader maxSpeedReader(*typeConfig);
+        auto maxSpeed = maxSpeedReader.GetValue(position.way->GetFeatureValueBuffer());
+        double vehicleSpeed = GetVehicleSpeed(vehicle, *typeConfig, *position.way->GetType());
+        double speed = maxSpeed ? std::min(static_cast<double>(maxSpeed->GetMaxSpeed()), vehicleSpeed)
+                                : vehicleSpeed;
+        double lastUpdateInHours = duration_cast<duration<double, std::ratio<3600>>>(now - lastUpdate).count();
+        if (lastUpdateInHours<=0 || speed <= 0){
+          break;
+        }
+        moveEstimate = Kilometers(speed * lastUpdateInHours);
+        Distance distanceToNextNode = GetEllipsoidalDistance(position.coord, nextNode->GetLocation());
+
+        Distance distanceFromNode=GetSphericalDistance(position.routeNode->GetLocation(), position.coord);
+        Distance distanceBetweenNodes=GetSphericalDistance(position.routeNode->GetLocation(), nextNode->GetLocation());
+        if (distanceFromNode>distanceBetweenNodes){
+          log.Warn() << "Distance from previous node (" << distanceFromNode << ") is greater than distance between nodes (" << distanceBetweenNodes << ")";
+          distanceToNextNode=Meters(0);
+        }
+
+        if (distanceToNextNode > moveEstimate){
+          auto bearing=GetSphericalBearingInitial(position.coord, nextNode->GetLocation());
+          position.coord=GetEllipsoidalDistance(position.coord,bearing,moveEstimate);
+          log.Debug() << "Estimate position in tunnel. "
+                      << "Move " << moveEstimate.AsMeter() << " m "
+                      << "to " << position.coord.GetDisplayText();
+          moveEstimate=Meters(0);
+        }else{
+          moveEstimate=moveEstimate - distanceToNextNode;
+          position.coord=nextNode->GetLocation();
+          position.routeNode=nextNode;
+          position.databaseId=nextNode->GetDatabaseId();
+          position.typeConfig=typeConfig;
+          position.way=routableObjects->GetWay(nextNode->GetDatabaseId(), nextNode->GetPathObject());
+          position.area=routableObjects->GetArea(nextNode->GetDatabaseId(), nextNode->GetPathObject());
+          if (distanceToNextNode.As<Kilometer>() > 0) {
+            // Updated route node may have different max. speed, we have to compute moveEstimate again.
+            // To do it correctly, we update lastUpdate time to estimated arrival to current route node.
+            auto timeToNextNode = duration<double, std::ratio<3600>>(distanceToNextNode.As<Kilometer>() / speed);
+            lastUpdate=lastUpdate+duration_cast<Timestamp::duration>(timeToNextNode);
+            if (lastUpdate > now){
+              // should not happen
+              log.Warn() << "Correction of time " << TimestampToISO8601TimeString(lastUpdate) << " > " << TimestampToISO8601TimeString(now);
+              lastUpdate=now;
             }
           }
         }
+
       } while (moveEstimate.AsMeter() > 0);
 
       if (position.state!=EstimateInTunnel){

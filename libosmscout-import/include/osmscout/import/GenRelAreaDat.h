@@ -63,7 +63,7 @@ namespace osmscout {
       bool   *hasIncludes;
 
     public:
-      GroupingState(size_t rings)
+      explicit GroupingState(size_t rings)
       {
         this->rings=rings;
 
@@ -127,6 +127,15 @@ namespace osmscout {
       Area::Ring           role;
       std::list<RawWayRef> ways;
 
+      // diagnostics data
+      enum RelationRole {
+        none,
+        inner,
+        outer
+      } relationRole{none};
+
+      OSMId id{0};
+
       inline bool IsArea() const
       {
         if (ways.size()==1) {
@@ -136,6 +145,34 @@ namespace osmscout {
         else {
           return false;
         }
+      }
+
+      inline void SetRelationRole(const std::string &role)
+      {
+        if (role=="outer") {
+          relationRole=outer;
+        } else if (role=="inner") {
+          relationRole=inner;
+        } else {
+          relationRole=none;
+        }
+      }
+
+      inline std::string GetRelationRoleStr() const
+      {
+        switch (relationRole){
+          case outer:
+            return "outer";
+          case inner:
+            return "inner";
+          default:
+            return "none";
+        }
+      }
+
+      inline void SetId(OSMId id)
+      {
+        this->id = id;
       }
     };
 
@@ -149,7 +186,8 @@ namespace osmscout {
                                                         const GroupingState& state,
                                                         size_t& subIndex);
 
-    void ConsumeSubs(const std::list<MultipolygonPart>& rings,
+    void ConsumeSubs(Progress& progress,
+                     const std::list<MultipolygonPart>& rings,
                      std::list<MultipolygonPart>& groups,
                      GroupingState& state,
                      size_t topIndex,

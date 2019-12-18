@@ -53,8 +53,8 @@ private:
   MagnificationLevel loadTileMag;
 
 public:
-  ElevationService(DataLoader &dataLoader,
-                   MagnificationLevel loadTileMag = Magnification::magSuburb):
+  explicit ElevationService(DataLoader &dataLoader,
+                            MagnificationLevel loadTileMag = Magnification::magSuburb):
       dataLoader(dataLoader), loadTileMag(loadTileMag)
   {}
 

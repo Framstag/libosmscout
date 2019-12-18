@@ -53,7 +53,7 @@ namespace osmscout {
     * and check the result...
     */
   template<typename InputIterator>
-  void WriteGpx(InputIterator begin, InputIterator end, const std::string name)
+  void WriteGpx(InputIterator begin, InputIterator end, const std::string &name)
   {
     std::ofstream gpxFile;
 

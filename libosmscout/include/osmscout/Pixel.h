@@ -47,10 +47,7 @@ namespace osmscout {
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
      */
-    inline Pixel()
-    {
-      // no code
-    }
+    inline Pixel() = default;
 
     inline Pixel(uint32_t x, uint32_t y)
      :x(x),y(y)
@@ -112,7 +109,7 @@ namespace osmscout {
       // no code
     }
 
-    inline Vertex2D(const Vertex2D& other)
+    inline Vertex2D(const Vertex2D& other) noexcept
     {
       coords[0]=other.coords[0];
       coords[1]=other.coords[1];

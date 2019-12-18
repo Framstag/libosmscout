@@ -119,7 +119,8 @@ namespace osmscout {
     Recursively consume all direct children and all direct children of that children)
     of the given role.
    */
-  void RelAreaDataGenerator::ConsumeSubs(const std::list<MultipolygonPart>& rings,
+  void RelAreaDataGenerator::ConsumeSubs(Progress& progress,
+                                         const std::list<MultipolygonPart>& rings,
                                          std::list<MultipolygonPart>& groups,
                                          GroupingState& state,
                                          size_t topIndex,
@@ -128,15 +129,25 @@ namespace osmscout {
     std::list<MultipolygonPart>::const_iterator sub;
     size_t                                      subIndex;
 
-    sub=FindSub(rings,topIndex,state,subIndex);
-    while (sub!=rings.end()) {
+
+    for (sub=FindSub(rings,topIndex,state,subIndex);
+         sub!=rings.end();
+         sub=FindSub(rings,topIndex,state,subIndex)) {
+
       state.SetUsed(subIndex);
+
+      if (sub->relationRole!=MultipolygonPart::none){
+        MultipolygonPart::RelationRole expectedRole = id % 2 == 0 ? MultipolygonPart::inner : MultipolygonPart::outer;
+        if (sub->relationRole != expectedRole) {
+          progress.Error("Ring " + std::to_string(sub->id) + " has invalid role, continue");
+          continue;
+        }
+      }
+
       groups.push_back(*sub);
       groups.back().role.SetRing(id);
 
-      ConsumeSubs(rings,groups,state,subIndex,id+1);
-
-      sub=FindSub(rings,topIndex,state,subIndex);
+      ConsumeSubs(progress,rings,groups,state,subIndex,id+1);
     }
   }
 
@@ -221,6 +232,9 @@ namespace osmscout {
 
         ring.role.SetType(typeConfig.typeInfoIgnore);
         ring.ways=part->ways;
+        assert(!part->ways.empty());
+        ring.SetId(part->ways.front()->GetId());
+        ring.relationRole=part->relationRole;
 
         ringParts.push_back(part);
         nodeCount=part->role.nodes.size();
@@ -348,21 +362,32 @@ namespace osmscout {
 
     GroupingState state(parts.size());
 
-    size_t ix=0;
+    size_t i1=0;
     for (const auto& r1 : parts) {
-      size_t jx=0;
+      size_t i2=0;
       for (const auto& r2 : parts) {
-        if (ix!=jx) {
-          if (IsAreaSubOfArea(r2.role.nodes,
-                              r1.role.nodes)) {
-            state.SetIncluded(ix,jx);
+        if (i1 != i2) {
+          if (IsAreaSubOfArea(r2.role.nodes, r1.role.nodes)) {
+            if (!IsAreaCompletelyInArea(r2.role.nodes, r1.role.nodes)) {
+              // ring r2 is not included in r1 completely, but at least
+              // one its node is included => rings are intersecting!
+              progress.Warning("Rings " + std::to_string(r1.id) + " (" + r1.GetRelationRoleStr() + "), " +
+                               std::to_string(r2.id) + " (" + r2.GetRelationRoleStr() + "), " +
+                               "in relation " + std::to_string(id) + " are intersecting!");
+              // in such case, setup inclusion only when r1 is outer and r2 inner
+              if (r1.relationRole!=MultipolygonPart::outer || r2.relationRole!=MultipolygonPart::inner){
+                continue;
+              }
+            }
+
+            state.SetIncluded(i1, i2);
           }
         }
 
-        jx++;
+        i2++;
       }
 
-      ix++;
+      i1++;
     }
 
     //
@@ -384,13 +409,17 @@ namespace osmscout {
       }
 
       state.SetUsed(topIndex);
+      if (top->relationRole!=MultipolygonPart::none && top->relationRole!=MultipolygonPart::outer) {
+        progress.Error("Ring " + std::to_string(top->id) + " is not outer, continue");
+        continue;
+      }
 
       groups.push_back(*top);
 
       groups.back().role.MarkAsOuterRing();
 
       if (state.HasIncludes(topIndex)) {
-        ConsumeSubs(parts,groups,state,topIndex,Area::outerRingId+1/*groups.back().role.GetRing()+1*/);
+        ConsumeSubs(progress,parts,groups,state,topIndex,Area::outerRingId+1/*groups.back().role.GetRing()+1*/);
       }
     }
 
@@ -448,6 +477,8 @@ namespace osmscout {
         part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.MarkAsMasterRing();
         part.role.nodes.resize(way->GetNodeCount());
+        part.SetRelationRole(member.role);
+        part.SetId(member.id);
 
         for (size_t n=0; n<way->GetNodeCount(); n++) {
           OSMId osmId=way->GetNodeId(n);
@@ -553,6 +584,8 @@ namespace osmscout {
         part.role.SetType(typeConfig.typeInfoIgnore);
         part.role.MarkAsMasterRing();
         part.role.nodes.resize(way->GetNodeCount());
+        part.SetId(way->GetId());
+        part.SetRelationRole(member.role);
 
         for (size_t n=0; n<way->GetNodeCount(); n++) {
           OSMId osmId=way->GetNodeId(n);
@@ -663,7 +696,8 @@ namespace osmscout {
           pendingRelationIds.insert(member.id);
         }
         else {
-          progress.Warning("Unsupported relation reference in relation "+
+          progress.Warning("Unsupported relation ("+std::to_string(member.id)+") "+
+                           "reference in relation "+
                            std::to_string(rawRelation.GetId())+" "+
                            rawRelation.GetType()->GetName()+" "+
                            name);
@@ -713,7 +747,7 @@ namespace osmscout {
                                  std::to_string(member.id)+
                                  " is referenced multiple times within relation "+
                                  std::to_string(rawRelation.GetId())+" "+name);
-                continue;;
+                continue;
               }
 
               if (resolvedRelations.find(member.id)!=resolvedRelations.end()) {
