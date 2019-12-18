@@ -120,6 +120,8 @@ QObject* MapObjectInfoModel::createOverlayObject(int row) const
         o->addPoint(p.GetLat(), p.GetLon());
       }
     }
+  } else {
+    qWarning() << "Object " << obj.name << " (" << obj.type << " / " << obj.objectType << ") has no points!";
   }
 
   return o;

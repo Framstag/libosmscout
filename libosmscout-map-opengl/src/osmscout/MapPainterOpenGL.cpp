@@ -306,7 +306,7 @@ namespace osmscout {
         for (size_t i = 0; i < area->rings.size(); i++) {
           const Area::Ring &ring = area->rings[i];
 
-          if (ring.IsMasterRing()) {
+          if (ring.IsMaster()) {
             continue;
           }
 
@@ -314,19 +314,19 @@ namespace osmscout {
             continue;
           }
 
-          if (!ring.IsOuterRing() &&
+          if (!ring.IsTopOuter() &&
               ring.GetType()->GetIgnore()) {
             continue;
           }
 
-          if (!ring.IsOuterRing() && ring.GetType()->GetIgnore())
+          if (!ring.IsTopOuter() && ring.GetType()->GetIgnore())
             continue;
 
           TypeInfoRef type;
           FillStyleRef fillStyle;
           std::vector<BorderStyleRef> borderStyles;
 
-          if (ring.IsOuterRing()) {
+          if (ring.IsTopOuter()) {
             type = area->GetType();
           } else {
             type = ring.GetType();

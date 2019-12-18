@@ -386,7 +386,7 @@ namespace osmscout {
     // Test for inclusion
     bool candidate=false;
     for (const auto& ring : area->rings) {
-      if (!ring.IsOuterRing()) {
+      if (!ring.IsTopOuter()) {
         continue;
       }
 
@@ -671,7 +671,7 @@ namespace osmscout {
         }
 
         for (auto& ring : area->rings) {
-          if (ring.IsOuterRing()) {
+          if (ring.IsTopOuter()) {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
             searchEntry.object=object;

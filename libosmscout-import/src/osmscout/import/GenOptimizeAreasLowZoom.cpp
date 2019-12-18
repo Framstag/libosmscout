@@ -198,7 +198,7 @@ namespace osmscout
 
       size_t r=0;
       while (r<area->rings.size()) {
-        if (!(area->rings[r].IsMasterRing() &&
+        if (!(area->rings[r].IsMaster() &&
               area->rings[r].nodes.empty())) {
           polygon.TransformArea(projection,
                                 optimizeAreaMethod,
@@ -225,7 +225,7 @@ namespace osmscout
 
         newRings.push_back(area->rings[r]);
 
-        if (!(area->rings[r].IsMasterRing() &&
+        if (!(area->rings[r].IsMaster() &&
               area->rings[r].nodes.empty())) {
           newRings.back().nodes.clear();
 
@@ -244,7 +244,7 @@ namespace osmscout
       }
 
       // Master ring can have nodes, but does not need to have
-      if (area->rings.front().IsMasterRing()) {
+      if (area->rings.front().IsMaster()) {
         if (area->rings.front().nodes.empty()) {
           if (newRings.size()==1) {
             // Master ring is empty and the only one left => skip

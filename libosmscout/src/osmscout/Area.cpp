@@ -155,7 +155,7 @@ namespace osmscout {
     bool   start=true;
 
     for (const auto& ring : rings) {
-      if (ring.IsOuterRing()) {
+      if (ring.IsTopOuter()) {
         for (const auto& node : ring.nodes) {
           if (start) {
             minLat=node.GetLat();
@@ -196,7 +196,7 @@ namespace osmscout {
     GeoBox boundingBox;
 
     for (const auto& ring : rings) {
-      if (ring.IsOuterRing()) {
+      if (ring.IsTopOuter()) {
         if (!boundingBox.IsValid()) {
           ring.GetBoundingBox(boundingBox);
         }
@@ -440,7 +440,7 @@ namespace osmscout {
   {
     auto ring=rings.cbegin();
     bool multipleRings=rings.size()>1;
-    bool hasMaster=rings[0].IsMasterRing();
+    bool hasMaster= rings[0].IsMaster();
 
     // TODO: We would like to have a bit flag here, if we have a simple area,
     // an area with one master (and multiple rings) or an area with
@@ -496,7 +496,7 @@ namespace osmscout {
   {
     auto ring=rings.cbegin();
     bool multipleRings=rings.size()>1;
-    bool hasMaster=ring->IsMasterRing();
+    bool hasMaster= ring->IsMaster();
 
     // Master/Outer ring
 
@@ -545,7 +545,7 @@ namespace osmscout {
   {
     auto ring=rings.cbegin();
     bool multipleRings=rings.size()>1;
-    bool hasMaster=rings[0].IsMasterRing();
+    bool hasMaster= rings[0].IsMaster();
 
     // Outer ring
 
@@ -580,6 +580,51 @@ namespace osmscout {
                    false);
 
       ++ring;
+    }
+  }
+
+  void Area::VisitRings(RingVisitor visitor) const
+  {
+    size_t ringId=Area::outerRingId;
+
+    // found the ring on this (ringId) depth in hierarchy (and visitor wants to continue),
+    // we are going deeper in the hierarchy
+    bool foundRing=true;
+
+    while (foundRing) {
+      foundRing = false;
+
+      for (size_t i = 0; i < rings.size(); i++) {
+        const Ring &ring = rings[i];
+
+        if (ring.GetRing() != ringId) {
+          continue;
+        }
+
+        TypeInfoRef type=GetRingType(ring);
+        foundRing |= visitor(i, ring, type);
+      }
+      ringId++;
+    }
+  }
+
+  void Area::VisitClippingRings(size_t i, RingVisitor visitor) const
+  {
+    assert(i<rings.size());
+    uint8_t ringId=rings[i].GetRing();
+
+    // Since we know that rings are created deep first, we only take into account direct followers
+    // in the list with ring+1.
+    // Note that inner rings may have nested islands with ( > ringId+1), we skip them but continue
+    // iterating.
+    for (size_t j=i+1;
+         j<rings.size() && rings[j].GetRing()>=ringId+1;
+         j++) {
+      const Ring &ring=rings[j];
+      TypeInfoRef type=GetRingType(ring);
+      if (ring.GetRing()==ringId+1) {
+        visitor(j,ring,type);
+      }
     }
   }
 }

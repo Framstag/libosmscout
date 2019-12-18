@@ -148,24 +148,23 @@ public:
 
 private:
 
-  template<class T> void addObjectInfo(QList<ObjectInfo> &objectList, // output
-                                       QString type,
-                                       const ObjectFileRef &ref,
-                                       const std::vector<osmscout::Point> &points,
-                                       const osmscout::GeoCoord &center,
-                                       const T &o,
-                                       const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
-                                       LocationServiceRef &locationService,
-                                       std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
+  void addObjectInfo(QList<ObjectInfo> &objectList, // output
+                     QString type,
+                     const ObjectFileRef &ref,
+                     const std::vector<osmscout::Point> &points,
+                     const osmscout::GeoCoord &center,
+                     const osmscout::TypeInfoRef &objectType,
+                     const osmscout::FeatureValueBuffer &features,
+                     const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                     LocationServiceRef &locationService,
+                     std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
   {
     ObjectInfo info;
     //std::cout << " - "<<type.toStdString()<<": " << o->GetType()->GetName() << " " << ref.GetName();
 
     info.type=type;
-    info.objectType=QString::fromStdString(o->GetType()->GetName());
+    info.objectType=QString::fromStdString(objectType->GetName());
     info.id=ref.GetFileOffset();
-
-    const osmscout::FeatureValueBuffer &features=o->GetFeatureValueBuffer();
 
     const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
     if (name!=nullptr){
@@ -192,6 +191,19 @@ private:
     info.points=points;
 
     objectList << info;
+  }
+
+  template<class T> void addObjectInfo(QList<ObjectInfo> &objectList, // output
+                                       QString type,
+                                       const ObjectFileRef &ref,
+                                       const std::vector<osmscout::Point> &points,
+                                       const osmscout::GeoCoord &center,
+                                       const T &o,
+                                       const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
+                                       LocationServiceRef &locationService,
+                                       std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
+  {
+    addObjectInfo(objectList,type,ref,points,center,o->GetType(),o->GetFeatureValueBuffer(),reverseLookupMap,locationService,regionMap);
   }
 
   void addObjectInfo(QList<ObjectInfo> &objectList, // output
