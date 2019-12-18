@@ -313,7 +313,7 @@ namespace osmscout {
         entry.coordCount+=ring.nodes.size();
 
         if (parameter.IsDebugData()) {
-          if (ring.IsMasterRing()) {
+          if (ring.IsMaster()) {
             IconStyleRef iconStyle=styleConfig->GetAreaIconStyle(area->GetType(),
                                                                  ring.GetFeatureValueBuffer(),
                                                                  projection);
@@ -341,7 +341,7 @@ namespace osmscout {
         entry.coordCount+=ring.nodes.size();
 
         if (parameter.IsDebugData()) {
-          if (ring.IsMasterRing()) {
+          if (ring.IsMaster()) {
             IconStyleRef iconStyle=styleConfig->GetAreaIconStyle(area->GetType(),
                                                                  ring.GetFeatureValueBuffer(),
                                                                  projection);
@@ -1266,7 +1266,7 @@ namespace osmscout {
       const Area::Ring &ring = area->rings[i];
       // The master ring does not have any nodes, so we skip it
       // Rings with less than 3 nodes should be skipped, too (no area)
-      if (ring.IsMasterRing() || ring.nodes.size()<3) {
+      if (ring.IsMaster() || ring.nodes.size() < 3) {
         continue;
       }
 
@@ -1295,145 +1295,119 @@ namespace osmscout {
       }
     }
 
-    size_t ringId=Area::outerRingId;
-    bool foundRing=true;
+    area->VisitRings([&](size_t i, const Area::Ring &ring, const TypeInfoRef &type) -> bool {
 
-    while (foundRing) {
-      foundRing=false;
+      if (type->GetIgnore()) {
+        // clipping inner ring, we will not render it, but still go deeper,
+        // there may be nested outer rings
+        return true;
+      }
 
-      for (size_t i=0; i<area->rings.size(); i++) {
-        const Area::Ring& ring=area->rings[i];
+      FillStyleRef                fillStyle;
+      std::vector<BorderStyleRef> borderStyles;
+      BorderStyleRef              borderStyle;
 
-        if (ring.GetRing()!=ringId) {
-          continue;
-        }
+      fillStyle=styleConfig.GetAreaFillStyle(type,
+                                             ring.GetFeatureValueBuffer(),
+                                             projection);
 
-        if (!ring.IsOuterRing() &&
-            ring.GetType()->GetIgnore()) {
-          continue;
-        }
+      FillStyleProcessorRef fillProcessor=parameter.GetFillStyleProcessor(ring.GetType()->GetIndex());
 
-        TypeInfoRef                 type;
-        FillStyleRef                fillStyle;
-        std::vector<BorderStyleRef> borderStyles;
-        BorderStyleRef              borderStyle;
+      if (fillProcessor) {
+        fillStyle=fillProcessor->Process(ring.GetFeatureValueBuffer(),
+                                         fillStyle);
+      }
 
-        if (ring.IsOuterRing()) {
-          type=area->GetType();
-        }
-        else {
-          type=ring.GetType();
-        }
+      styleConfig.GetAreaBorderStyles(type,
+                                      ring.GetFeatureValueBuffer(),
+                                      projection,
+                                      borderStyles);
 
-        fillStyle=styleConfig.GetAreaFillStyle(type,
-                                               ring.GetFeatureValueBuffer(),
-                                               projection);
+      if (!fillStyle && borderStyles.empty()) {
+        return false;
+      }
 
-        FillStyleProcessorRef fillProcessor=parameter.GetFillStyleProcessor(ring.GetType()->GetIndex());
+      size_t borderStyleIndex=0;
 
-        if (fillProcessor) {
-          fillStyle=fillProcessor->Process(ring.GetFeatureValueBuffer(),
-                                           fillStyle);
-        }
+      if (!borderStyles.empty() &&
+          borderStyles.front()->GetDisplayOffset()==0.0 &&
+          borderStyles.front()->GetOffset()==0.0) {
+        borderStyle=borderStyles[borderStyleIndex];
+        borderStyleIndex++;
+      }
 
-        styleConfig.GetAreaBorderStyles(type,
-                                        ring.GetFeatureValueBuffer(),
-                                        projection,
-                                        borderStyles);
+      AreaData a;
+      double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
-        if (!fillStyle && borderStyles.empty()) {
-          continue;
-        }
+      a.boundingBox=ring.GetBoundingBox();
+      a.isOuter = ring.IsOuter();
 
-        size_t borderStyleIndex=0;
+      if (!IsVisibleArea(projection,
+                         a.boundingBox,
+                         borderWidth/2.0)) {
+        return false;
+      }
 
-        if (!borderStyles.empty() &&
-            borderStyles.front()->GetDisplayOffset()==0.0 &&
-            borderStyles.front()->GetOffset()==0.0) {
-          borderStyle=borderStyles[borderStyleIndex];
-          borderStyleIndex++;
-        }
-
-        foundRing=true;
-
-        AreaData a;
-        double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
-
-        a.boundingBox=ring.GetBoundingBox();
-        a.isOuter = ring.IsOuterRing();
-
-        if (!IsVisibleArea(projection,
-                           a.boundingBox,
-                           borderWidth/2.0)) {
-          continue;
-        }
-
-        // Collect possible clippings. We only take into account inner rings of the next level
-        // that do not have a type and thus act as a clipping region. If a inner ring has a type,
-        // we currently assume that it does not have alpha and paints over its region and clipping is
-        // not required.
-        // Since we know that rings are created deep first, we only take into account direct followers
-        // in the list with ring+1.
-        size_t j=i+1;
-        while (j<area->rings.size() &&
-               area->rings[j].GetRing()==ringId+1 &&
-               area->rings[j].GetType()->GetIgnore()) {
+      // Collect possible clippings. We only take into account inner rings of the next level
+      // that do not have a type and thus act as a clipping region. If a inner ring has a type,
+      // we currently assume that it does not have alpha and paints over its region and clipping is
+      // not required.
+      area->VisitClippingRings(i, [&a, &td](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
+        if (type->GetIgnore()) {
           a.clippings.push_back(td[j]);
+        }
+        return true;
+      });
 
-          j++;
+      a.ref=area->GetObjectFileRef();
+      a.type=type;
+      a.buffer=&ring.GetFeatureValueBuffer();
+      a.fillStyle=fillStyle;
+      a.borderStyle=borderStyle;
+      a.transStart=td[i].transStart;
+      a.transEnd=td[i].transEnd;
+
+      areaData.push_back(a);
+
+      for (size_t idx=borderStyleIndex;
+           idx<borderStyles.size();
+           idx++) {
+        borderStyle=borderStyles[idx];
+
+        double offset=0.0;
+
+        size_t transStart=td[i].transStart;
+        size_t transEnd=td[i].transEnd;
+
+        if (borderStyle->GetOffset()!=0.0) {
+          offset+=GetProjectedWidth(projection,
+                                    borderStyle->GetOffset());
+        }
+
+        if (borderStyle->GetDisplayOffset()!=0.0) {
+          offset+=projection.ConvertWidthToPixel(borderStyle->GetDisplayOffset());
+        }
+
+        if (offset!=0.0) {
+          coordBuffer->GenerateParallelWay(transStart,
+                                           transEnd,
+                                           offset,
+                                           transStart,
+                                           transEnd);
         }
 
         a.ref=area->GetObjectFileRef();
         a.type=type;
-        a.buffer=&ring.GetFeatureValueBuffer();
-        a.fillStyle=fillStyle;
+        a.buffer=nullptr;
+        a.fillStyle=nullptr;
         a.borderStyle=borderStyle;
-        a.transStart=td[i].transStart;
-        a.transEnd=td[i].transEnd;
+        a.transStart=transStart;
+        a.transEnd=transEnd;
 
         areaData.push_back(a);
-
-        for (size_t idx=borderStyleIndex;
-             idx<borderStyles.size();
-             idx++) {
-          borderStyle=borderStyles[idx];
-
-          double offset=0.0;
-
-          size_t transStart=td[i].transStart;
-          size_t transEnd=td[i].transEnd;
-
-          if (borderStyle->GetOffset()!=0.0) {
-            offset+=GetProjectedWidth(projection,
-                                      borderStyle->GetOffset());
-          }
-
-          if (borderStyle->GetDisplayOffset()!=0.0) {
-            offset+=projection.ConvertWidthToPixel(borderStyle->GetDisplayOffset());
-          }
-
-          if (offset!=0.0) {
-            coordBuffer->GenerateParallelWay(transStart,
-                                             transEnd,
-                                             offset,
-                                             transStart,
-                                             transEnd);
-          }
-
-          a.ref=area->GetObjectFileRef();
-          a.type=type;
-          a.buffer=nullptr;
-          a.fillStyle=nullptr;
-          a.borderStyle=borderStyle;
-          a.transStart=transStart;
-          a.transEnd=transEnd;
-
-          areaData.push_back(a);
-        }
       }
-
-      ringId++;
-    }
+      return true;
+    });
   }
 
   void MapPainter::PrepareAreas(const StyleConfig& styleConfig,

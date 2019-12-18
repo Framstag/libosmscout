@@ -146,15 +146,21 @@ namespace osmscout {
         return featureValueBuffer;
       }
 
-      inline bool IsMasterRing() const
+      inline bool IsMaster() const
       {
         return ring==masterRingId;
       }
 
       // top level outer ring
-      inline bool IsOuterRing() const
+      inline bool IsTopOuter() const
       {
         return ring==outerRingId;
+      }
+
+      // ring level is odd, it is some outer ring
+      inline bool IsOuter() const
+      {
+        return (ring & outerRingId) == outerRingId;
       }
 
       inline uint8_t GetRing() const
@@ -228,6 +234,8 @@ namespace osmscout {
       friend class Area;
     };
 
+    using RingVisitor = std::function<bool(size_t i, const Ring&, const TypeInfoRef&)>;
+
   private:
     FileOffset        fileOffset;
     FileOffset        nextFileOffset;
@@ -260,6 +268,16 @@ namespace osmscout {
     inline TypeInfoRef GetType() const
     {
       return rings.front().GetType();
+    }
+
+    inline TypeInfoRef GetRingType(const Ring &ring) const
+    {
+      if (ring.IsTopOuter() ||
+          (ring.IsOuter() && ring.GetType()->GetIgnore())) {
+        return GetType();
+      } else {
+        return ring.GetType();
+      }
     }
 
     inline const FeatureValueBuffer& GetFeatureValueBuffer() const
@@ -329,6 +347,19 @@ namespace osmscout {
      */
     void WriteOptimized(const TypeConfig& typeConfig,
                         FileWriter& writer) const;
+
+    /**
+     * Visit rings in breadth-first manner.
+     * When visitor return true for some ring,
+     * algorithm will continue deeper in hierarchy.
+     */
+    void VisitRings(RingVisitor visitor) const;
+
+    /**
+     * Visit possible clippings of ring specified by index.
+     * We only take into account rings of the next level.
+     */
+    void VisitClippingRings(size_t index, RingVisitor visitor) const;
   };
 
   typedef std::shared_ptr<Area> AreaRef;
