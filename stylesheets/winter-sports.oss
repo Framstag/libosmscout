@@ -1584,7 +1584,10 @@ STYLE
          NODE.ICON { symbol: amenity; }
    }
 
-   [TYPE barrier_fence] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
+   [TYPE barrier_fence] {
+      WAY {color: #aaaaaa; displayWidth: 0.1mm;}
+      AREA.BORDER {color: #aaaaaa; width: 0.1mm;}
+   }
  }
  
 // Aerialways
