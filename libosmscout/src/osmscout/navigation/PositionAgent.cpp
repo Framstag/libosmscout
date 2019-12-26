@@ -192,14 +192,13 @@ namespace osmscout {
 
         if (!Includes(routableObjects,gps.GetGeoBox())){
           // we don't have routable data for current position, request data
-          GeoBox requestBox = gps.GetGeoBox();
-          requestBox.Include(GeoBox::BoxByCenterAndRadius(gps.position, Meters(200)));
+          GeoBox requestBox = GeoBox::BoxByCenterAndRadius(gps.position, std::max(Meters(200), gps.horizontalAccuracy));
           result.push_back(std::make_shared<RoutableObjectsRequestMessage>(now, requestBox));
         }
       }
     } else if (dynamic_cast<RoutableObjectsMessage*>(message.get())!=nullptr){
       auto msg=dynamic_cast<RoutableObjectsMessage*>(message.get());
-      if (gps.GetState(now)==Good && Includes(msg->data,gps.GetGeoBox())){
+      if (Includes(msg->data,gps.GetGeoBox())){
         this->routableObjects = msg->data;
       }
     } else if (dynamic_cast<RouteUpdateMessage*>(message.get())!=nullptr) {
