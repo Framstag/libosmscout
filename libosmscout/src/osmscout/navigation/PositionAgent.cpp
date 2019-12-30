@@ -99,6 +99,14 @@ namespace osmscout {
           routableObjects->bbox.Includes(box.GetMaxCoord(), false);
     }
 
+    bool Includes(const RoutableObjectsRef &routableObjects,
+                  const GeoCoord &coord){
+
+      return routableObjects &&
+             routableObjects->bbox.IsValid() &&
+             routableObjects->bbox.Includes(coord, false);
+    }
+
     PositionAgent::Position findNearest(const GeoCoord &coord,
                                         const RoutableObjectsRef &routableObjects)
     {
@@ -189,17 +197,10 @@ namespace osmscout {
         gps.Update(now,
                    gpsUpdateMessage->currentPosition,
                    gpsUpdateMessage->horizontalAccuracy);
-
-        if (!Includes(routableObjects,gps.GetGeoBox())){
-          // we don't have routable data for current position, request data
-          GeoBox requestBox = gps.GetGeoBox();
-          requestBox.Include(GeoBox::BoxByCenterAndRadius(gps.position, Meters(200)));
-          result.push_back(std::make_shared<RoutableObjectsRequestMessage>(now, requestBox));
-        }
       }
     } else if (dynamic_cast<RoutableObjectsMessage*>(message.get())!=nullptr){
       auto msg=dynamic_cast<RoutableObjectsMessage*>(message.get());
-      if (gps.GetState(now)==Good && Includes(msg->data,gps.GetGeoBox())){
+      if (Includes(msg->data,gps.GetGeoBox())){
         this->routableObjects = msg->data;
       }
     } else if (dynamic_cast<RouteUpdateMessage*>(message.get())!=nullptr) {
@@ -207,17 +208,32 @@ namespace osmscout {
       route=routeUpdateMessage->routeDescription;
       vehicle=routeUpdateMessage->vehicle;
       position.routeNode=route->Nodes().begin();
+    } else if (dynamic_cast<TimeTickMessage*>(message.get())==nullptr) {
+      return result; // ignore other message types
     }
 
     if (!route){
       // we don't have route yet
       return result;
     }
-
-    if (!Includes(routableObjects,gps.GetGeoBox())){
-      // we don't have data for gpx position yet
+    if (gps.lastUpdate.time_since_epoch() == Timestamp::duration::zero()){
+      // we don't get GPS update yet
       return result;
     }
+
+    if (!Includes(routableObjects,gps.GetGeoBox()) ||
+        (position.state!=PositionState::NoGpsSignal && !Includes(routableObjects,position.coord))){
+      // we don't have routable data for current position (real or estimated), request data
+      GeoBox requestBox = GeoBox::BoxByCenterAndRadius(gps.position, std::max(Meters(500), gps.horizontalAccuracy));
+      if (position.state!=PositionState::NoGpsSignal) {
+        // include objects around estimated position
+        requestBox.Include(GeoBox::BoxByCenterAndRadius(position.coord, Meters(500)));
+      }
+      result.push_back(std::make_shared<RoutableObjectsRequestMessage>(now, requestBox));
+      return result;
+    }
+
+    assert(routableObjects);
 
     using namespace std::chrono;
     if (now-lastUpdate < milliseconds(100)){

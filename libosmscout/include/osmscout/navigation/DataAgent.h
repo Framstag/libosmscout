@@ -99,6 +99,10 @@ namespace osmscout {
           return result; // no route yet
         }
         auto requestMessage=dynamic_cast<RoutableObjectsRequestMessage*>(message.get());
+        if (GetSphericalDistance(requestMessage->bbox.GetMinCoord(),
+                                 requestMessage->bbox.GetMaxCoord()) > Kilometers(2)){
+          log.Warn() << "Requested routable data from huge region: " << requestMessage->bbox.GetDisplayText();
+        }
 
         auto msg=std::make_shared<RoutableObjectsMessage>(requestMessage->timestamp, std::make_shared<RoutableObjects>());
 

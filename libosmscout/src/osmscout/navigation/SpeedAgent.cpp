@@ -18,6 +18,7 @@
  */
 
 #include <osmscout/navigation/SpeedAgent.h>
+#include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/FeatureReader.h>
 
 namespace osmscout {
@@ -74,9 +75,10 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
     lastPosition={gpsUpdateMsg->currentPosition, gpsUpdateMsg->timestamp};
   }
 
-  // obtain max speed
   auto positionMsg = dynamic_cast<osmscout::PositionAgent::PositionMessage *>(message.get());
   if (positionMsg) {
+
+    // obtain max speed for current route object
     MaxSpeedFeatureValue *maxSpeedValue = nullptr;
     if (positionMsg->position.typeConfig) {
       MaxSpeedFeatureValueReader reader(*(positionMsg->position.typeConfig));
@@ -95,6 +97,13 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
       result.push_back(std::make_shared<MaxAllowedSpeedMessage>(positionMsg->timestamp,
                                                                 maxSpeed, maxSpeed > 0));
       lastReportedMaxSpeed = maxSpeed;
+    }
+
+    // report unknown speed in tunnel
+    using namespace std::chrono;
+    if (positionMsg->position.state == PositionAgent::PositionState::EstimateInTunnel &&
+        lastPosition.time < (positionMsg->timestamp - seconds(5))){
+      result.push_back(std::make_shared<CurrentSpeedMessage>(positionMsg->timestamp,-1));
     }
   }
 
