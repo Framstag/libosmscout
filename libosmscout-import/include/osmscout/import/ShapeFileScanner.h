@@ -51,6 +51,10 @@ namespace osmscout {
 
   /**
    * Class for reading shape files
+   *
+   * Shape file basic types:
+   * Integer: Signed 32-bit integer (4 bytes)
+   * Double: Signed 64-bit IEEE double-precision floating point number (8 bytes)
    */
   class OSMSCOUT_IMPORT_API ShapeFileScanner CLASS_FINAL
   {
