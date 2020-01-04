@@ -21,6 +21,11 @@
 
 #include <osmscout/util/Exception.h>
 
+#include <cstring>
+#include <array>
+#include <cstdint>
+#include <limits>
+
 namespace osmscout {
 
   ShapeFileVisitor::~ShapeFileVisitor()
@@ -114,7 +119,8 @@ namespace osmscout {
   double ShapeFileScanner::ReadDoubleLE()
   {
     double         value;
-    unsigned char* valueBytes=(unsigned char*)&value;
+
+    std::array<uint8_t, 8> valueBytes;
 
     valueBytes[0]=ReadByte();
     valueBytes[1]=ReadByte();
@@ -124,6 +130,16 @@ namespace osmscout {
     valueBytes[5]=ReadByte();
     valueBytes[6]=ReadByte();
     valueBytes[7]=ReadByte();
+
+    static_assert(sizeof(double)==8, "Only 64 bit IEEE doubles are supported");
+    static_assert(std::numeric_limits<double>::is_iec559, "Only 64 bit IEEE doubles are supported");
+
+    // we need to do this:
+    //   value=*(reinterpret_cast<double*>(valueBytes.data()));
+    // but type punning is undefined behavior in C++17 (and older)
+    // memcpy is the only way howto do it safely, luckily compilers
+    // are smart enough to generate the same assembly
+    std::memcpy(&value, valueBytes.data(), 8);
 
     return value;
   }
