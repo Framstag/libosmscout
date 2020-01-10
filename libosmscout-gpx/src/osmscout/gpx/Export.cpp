@@ -390,6 +390,11 @@ bool GpxWritter::WriteTrack(const Track &track)
       return false;
     }
   }
+  if (track.desc.hasValue()){
+    if (!WriteTextElement("desc", track.desc.get())){
+      return false;
+    }
+  }
 
   return WriteTrackSegments(track.segments) &&
       EndElement();
