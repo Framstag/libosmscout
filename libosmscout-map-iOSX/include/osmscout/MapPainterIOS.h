@@ -48,8 +48,10 @@ namespace osmscout {
         int index;
     };
     struct IOSRunInLine {
-        cfref_ptr<CTLineRef> line;
-        CTRunRef run;
+        std::vector<cfref_ptr<CTLineRef>> line;
+        std::vector<CTRunRef> run;
+        CGFloat lineWidth;
+        CGFloat lineHeight;
     };
     using IOSGlyph = Glyph<IOSGlyphInRun>;
     using IOSLabel = Label<IOSGlyphInRun, IOSRunInLine>;
@@ -74,9 +76,10 @@ namespace osmscout {
         
         IOSLabelLayouter            labelLayouter;
         
-        std::vector<CGImageRef>     images;         // Cached CGImage for icons
-        std::vector<CGImageRef>     patternImages;  // Cached CGImage for patterns
-        std::map<size_t,Font *>     fonts;          // Cached fonts
+        std::vector<CGImageRef>     images;             // Cached CGImage for icons
+        std::vector<CGImageRef>     patternImages;      // Cached CGImage for patterns
+        std::map<size_t,Font *>     fonts;              // Cached fonts
+        std::map<size_t,double>     averageCharWidth;   // Average char width for a font size
         
     public:
         OSMSCOUT_API MapPainterIOS(const StyleConfigRef& styleConfig);
@@ -181,6 +184,9 @@ namespace osmscout {
         
     private:
         Font *GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
+        double GetAverageCharWidth(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   double fontSize);
         bool followPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
         void followPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd, bool isClosed, bool keepOrientation);
         std::shared_ptr<IOSLabel> Layout(const Projection& projection,

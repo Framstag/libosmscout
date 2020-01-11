@@ -20,7 +20,6 @@
 #import <osmscout/MapPainterIOS.h>
 
 #include <cassert>
-#include <iostream>
 #include <limits>
 #include <string>
 
@@ -67,7 +66,7 @@ namespace osmscout {
         NSString *fontName = [NSString stringWithUTF8String: parameter.GetFontName().c_str()];
         Font *font = [Font fontWithName:fontName size:fontSize];
         if(!font){
-            std::cerr<<"ERROR font '"<< parameter.GetFontName() << "' not found !" << std::endl;
+            log.Debug()<<"ERROR font '"<< parameter.GetFontName() << "' not found !";
             return 0;
         }
         return fonts.insert(std::pair<size_t,Font *>(fontSize,font)).first->second;
@@ -160,7 +159,7 @@ namespace osmscout {
             }
         }
 
-        std::cerr << "ERROR while loading image '" << style.GetIconName() << "'" << std::endl;
+        log.Warn() << "ERROR while loading image '" << style.GetIconName() << "'";
         style.SetIconId(0);
 
         return false;
@@ -217,16 +216,16 @@ namespace osmscout {
                 NSInteger imgHeight = [imageRep pixelsHigh];
                 rect = CGRectMake(0, 0, imgWidth, imgHeight);
                 CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
+                log.Debug() << "Loaded image " << filename << " (" <<  imgWidth << "x" << imgHeight <<  ") => id " << style.GetPatternId();
 #endif
                 CGImageRetain(imgRef);
                 patternImages.resize(patternImages.size()+1,imgRef);
                 style.SetPatternId(patternImages.size());
-                //std::cout << "Loaded image " << filename << " (" <<  imgWidth << "x" << imgHeight <<  ") => id " << style.GetPatternId() << std::endl;
                 return true;
             }
         }
 
-        std::cerr << "ERROR while loading icon file '" << style.GetPatternName() << "'" << std::endl;
+        log.Warn() << "ERROR while loading icon file '" << style.GetPatternName() << "'";
         style.SetPatternId(std::numeric_limits<size_t>::max());
 
         return false;
@@ -251,6 +250,35 @@ namespace osmscout {
         return size.height;
     }
 
+    /**
+     * Returns the average char width of the font.
+     */
+    double MapPainterIOS::GetAverageCharWidth(const Projection& projection,
+                                const MapParameter& parameter,
+                                double fontSize){
+        Font *font = GetFont(projection,parameter,fontSize);
+        
+        double convFontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+        std::map<size_t,double>::const_iterator it = averageCharWidth.find(convFontSize);
+        if (it != averageCharWidth.end()) {
+            return it->second;
+        }
+        
+        CGSize size = CGSizeZero;
+        NSString *allChars = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        if(font){
+#if TARGET_OS_IPHONE
+            size = [allChars sizeWithAttributes:@{NSFontAttributeName:font}];
+#else
+            NSRect stringBounds = [allChars boundingRectWithSize:CGSizeMake(1000, 50) options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]];
+            size = stringBounds.size;
+#endif
+        }
+        double averageWidth = size.width/allChars.length;
+        log.Debug() << "AverageCharWidth for font size=" << convFontSize << ": " <<  averageWidth;
+        return averageCharWidth.insert(std::pair<size_t,double>(convFontSize,averageWidth)).first->second;
+    }
+
     DoubleRectangle MapPainterIOS::GlyphBoundingBox(const IOSGlyphInRun &glyph) const {
         CFRange range = CFRangeMake(glyph.index, 1);
         CGRect glyphRect = CTRunGetImageBounds(glyph.run, cg, range);
@@ -259,18 +287,22 @@ namespace osmscout {
     
     template<> std::vector<IOSGlyph> IOSLabel::ToGlyphs() const {
         std::vector<IOSGlyph> result;
-        CFIndex glyphCount = CTRunGetGlyphCount(label.run);
-        CGGlyph glyphs[glyphCount];
-        CGPoint glyphPositions[glyphCount];
-        CTRunGetGlyphs(label.run, CFRangeMake(0, 0), glyphs);
-        CTRunGetPositions(label.run, CFRangeMake(0, 0), glyphPositions);
-        for(int index = 0; index < glyphCount; index++){
-            IOSGlyph glyph;
-            glyph.glyph.line = label.line;
-            glyph.glyph.run = label.run;
-            glyph.glyph.index = index;
-            glyph.position.Set(glyphPositions[index].x, glyphPositions[index].y);
-            result.push_back(std::move(glyph));
+        int i = 0;
+        for(const auto &run:label.run){
+            CFIndex glyphCount = CTRunGetGlyphCount(run);
+            CGGlyph glyphs[glyphCount];
+            CGPoint glyphPositions[glyphCount];
+            CTRunGetGlyphs(run, CFRangeMake(0, 0), glyphs);
+            CTRunGetPositions(run, CFRangeMake(0, 0), glyphPositions);
+            for(int index = 0; index < glyphCount; index++){
+                IOSGlyph glyph;
+                glyph.glyph.line = label.line[i];
+                glyph.glyph.run = run;
+                glyph.glyph.index = index;
+                glyph.position.Set(glyphPositions[index].x, glyphPositions[index].y);
+                result.push_back(std::move(glyph));
+            }
+            i++;
         }
         return result;
     }
@@ -319,24 +351,53 @@ namespace osmscout {
                                                     bool contourLabel) {
         std::shared_ptr<IOSLabel> result = std::make_shared<IOSLabel>();
         CGRect rect = CGRectZero;
+        
+        double proposedWidth = -1;
+        if (enableWrapping && objectWidth > 50.0) {
+            proposedWidth = GetProposedLabelWidth(parameter,
+                                                  GetAverageCharWidth(projection, parameter, fontSize),
+                                                  objectWidth,
+                                                  text.length());
+            
+            log.Debug() << "proposedWidth=" << proposedWidth;
+        }
+        
         Font *font = GetFont(projection, parameter, fontSize);
         NSString *str = [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-        NSDictionary<NSAttributedStringKey, id> *attr = @{};
+        str = [str stringByReplacingOccurrencesOfString:@"-" withString:@"\u2011"];
+        NSMutableDictionary<NSAttributedStringKey, id> *attr = [NSMutableDictionary dictionaryWithDictionary: @{}];
         if(font){
-            attr = @{NSFontAttributeName:font};
+            attr[NSFontAttributeName] = font;
         }
         NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:str attributes:attr];
         
         CFAttributedStringRef cfString = (__bridge CFAttributedStringRef)attrStr;
-        result->label.line = CTLineCreateWithAttributedString(cfString);
-        CFArrayRef runArray = CTLineGetGlyphRuns(result->label.line.get());
-        if(CFArrayGetCount(runArray) > 0){
-            CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
-            
-            result->label.run = run;
-            rect = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0));
+
+        CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(cfString);
+        CGPathRef path;
+        if (proposedWidth > 0){
+            path = CGPathCreateWithRect(CGRectMake(0, 0, proposedWidth, std::numeric_limits<double>::max()), NULL);
+        } else {
+            path = CGPathCreateWithRect(CGRectMake(0, 0, std::numeric_limits<double>::max(), std::numeric_limits<double>::max()), NULL);
         }
-        
+        CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
+        CGPathRelease(path);
+        CFArrayRef lines =  CTFrameGetLines(frame);
+        for (int lineNumber = 0; lineNumber< CFArrayGetCount(lines); lineNumber++){
+            CTLineRef line = (CTLineRef)CFArrayGetValueAtIndex(lines, lineNumber);
+            result->label.line.push_back(line);
+            CFArrayRef runArray = CTLineGetGlyphRuns(line);
+            if(CFArrayGetCount(runArray) > 0){
+                CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
+                result->label.run.push_back(run);
+                rect = CGRectUnion(rect, CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)));
+            }
+        }
+        result->label.lineWidth = rect.size.width;
+        result->label.lineHeight = GetFontHeight(projection, parameter, fontSize);
+
+        log.Debug() << "Layout '"<<text<<"' width=" << rect.size.width <<" height=" << rect.size.height;
+
         result->text = text;
         result->fontSize = fontSize;
         result->width = rect.size.width;
@@ -349,39 +410,55 @@ namespace osmscout {
                                         const CGPoint& coords,
                                         const Color &color,
                                         bool emphasize){
-        
-        CTRunRef run = layout.label.run;
-        const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
-        CGFloat fontHeight = CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)).size.height;
-        CFIndex glyphCount = CTRunGetGlyphCount(run);
-        CGGlyph glyphs[glyphCount];
-        CGPoint glyphPositions[glyphCount];
-        CTRunGetGlyphs(run, CFRangeMake(0, 0), glyphs);
-        CTRunGetPositions(run, CFRangeMake(0, 0), glyphPositions);
-        for(int index = 0; index < glyphCount; index++){
-            glyphPositions[index].x += coords.x;
-            glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - fontHeight;
-        }
-        
         double r = color.GetR();
         double g = color.GetG();
         double b = color.GetB();
-        
-        CGContextSaveGState(cg);
-        CGContextSetRGBFillColor(cg, r, g, b, 1.0);
-        CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
-        if(emphasize){
-            CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-            CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, 1 });
-            CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
-            CGColorRelease(haloColor);
-            CGColorSpaceRelease(colorSpace);
+        CGFloat lineHeight = layout.label.lineHeight;
+        CGFloat width = layout.label.lineWidth;
+
+        log.Debug() << "LayoutDrawLabel lineWidth=" << width << " lineHeight=" << lineHeight;
+
+        int lineNumber = 0;
+        for (CTRunRef run : layout.label.run) {
+            const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+            CFIndex glyphCount = CTRunGetGlyphCount(run);
+            CGGlyph glyphs[glyphCount];
+            CGPoint glyphPositions[glyphCount];
+            CTRunGetGlyphs(run, CFRangeMake(0, 0), glyphs);
+            CTRunGetPositions(run, CFRangeMake(0, 0), glyphPositions);
+            CGFloat lineWidth = 0;
+            for(int index = 0; index < glyphCount; index++){
+                glyphPositions[index].x += coords.x;
+                if(index>0){
+                    lineWidth += glyphPositions[index].x - glyphPositions[index-1].x;
+                }
+                glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - (lineNumber) * lineHeight;
+            }
+            CGFloat centerDelta = (width - lineWidth)/2;
+            log.Debug() << "LayoutDrawLabel centerDelta=" << centerDelta;
+            if (centerDelta>0){
+                for(int index = 0; index < glyphCount; index++){
+                    glyphPositions[index].x += centerDelta;
+                }
+            }
+            lineNumber++;
+            
+            CGContextSaveGState(cg);
+            CGContextSetRGBFillColor(cg, r, g, b, 1.0);
+            CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
+            if(emphasize){
+                CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, 1 });
+                CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
+                CGColorRelease(haloColor);
+                CGColorSpaceRelease(colorSpace);
+            }
+            // The text is drawn reversed...
+            CGContextTranslateCTM(cg, 0.0, CGBitmapContextGetHeight(cg));
+            CGContextScaleCTM(cg, 1.0, -1.0);
+            CTFontDrawGlyphs(font, glyphs, glyphPositions, glyphCount, cg);
+            CGContextRestoreGState(cg);
         }
-        // The text is drawn reversed...
-        CGContextTranslateCTM(cg, 0.0, CGBitmapContextGetHeight(cg));
-        CGContextScaleCTM(cg, 1.0, -1.0);
-        CTFontDrawGlyphs(font, glyphs, glyphPositions, glyphCount, cg);
-        CGContextRestoreGState(cg);
     }
     
     void MapPainterIOS::DrawLabel(const Projection& projection,
