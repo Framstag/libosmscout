@@ -57,7 +57,7 @@ namespace osmscout {
    */
   const std::string& SRTM::srtmFilename(int patchLat, int patchLon){
     std::ostringstream fileName;
-    if(patchLat>0){
+    if(patchLat>=0){
       fileName << "N";
     } else {
       fileName << "S";
@@ -67,7 +67,7 @@ namespace osmscout {
       fileName<<"0";
     }
     fileName << patchLat;
-    if(patchLon>0){
+    if(patchLon>=0){
       fileName << "E";
     } else {
       fileName << "W";
@@ -133,20 +133,28 @@ namespace osmscout {
     }
     if(currentFile.std::ios::good()){
       double pixelSize = 1.0/(SRTM::rows-1);
-      double fracLat = (1-pixelSize/2) - (latitude+pixelSize/2) + floor(latitude+pixelSize/2);
-      double fracLon = longitude - floor(longitude+pixelSize/2);
+      double fracLat = latitude>=0.0 ? 1 - latitude + floor(latitude) : ceil(latitude) - latitude;
+      double fracLon = longitude>=0.0 ?  longitude - floor(longitude) : 1 - ceil(longitude) + longitude;
       int col = int(floor(fracLon*SRTM::columns));
       int col2 = col << 1;
       int row = int(floor(fracLat*SRTM::rows));
+
       int h1 = (heights[2*row*SRTM::columns+col2]<<8)+(heights[2*row*SRTM::columns+col2+1]);
+
+#ifndef SRTM_BILINEAR_INTERPOLATION
+      return (int)floor(h1);
+#else
       int h2 = (heights[2*row*SRTM::columns+col2+2]<<8)+(heights[2*row*SRTM::columns+col2+3]);
       int h3 = (heights[2*(row+1)*SRTM::columns+col2]<<8)+(heights[2*(row+1)*SRTM::columns+col2+1]);
       int h4 = (heights[2*(row+1)*SRTM::columns+col2+2]<<8)+(heights[2*(row+1)*SRTM::columns+col2+3]);
       // bilinear interpolation
-      double fLat = (fracLat-row*pixelSize)/pixelSize;
-      double fLon = (fracLon-col*pixelSize)/pixelSize;
+      double fLat = fracLat - fracLat*row/SRTM::rows;
+      double fLon = fracLon - fracLon*pixelSize/SRTM::columns;
+      log.Info() << "fLat=" << fLat << " fLon=" << fLon;
+
       double h = h1*(1-fLat)*(1-fLon) + h2*fLat*(1-fLon) + h3*(1-fLat)*fLon + h4*fLat*fLon;
       return (int)floor(h+0.5);
+#endif
     } else {
       return SRTM::nodata;
     }
