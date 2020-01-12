@@ -32,7 +32,7 @@ target_include_directories(OSMScoutMapIOSX PRIVATE include ${CMAKE_CURRENT_BINAR
 
 set_target_properties(OSMScoutMapIOSX PROPERTIES
   FRAMEWORK TRUE
-  FRAMEWORK_VERSION C
+  FRAMEWORK_VERSION A
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER     include/osmscout/MapPainterIOS.h

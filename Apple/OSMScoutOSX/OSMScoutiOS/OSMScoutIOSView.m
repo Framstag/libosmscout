@@ -13,7 +13,7 @@
 
 // This should reference OSM data generated with the OSMScout Import tool
 // used when targeting the iPhone simulator 
-#define OSMSCOUTDATA @"/Users/vlad/Desktop/France.osmscout"
+#define OSMSCOUTDATA @""
 // The center of the displayed map
 #define LATITUDE 43.694417
 #define LONGITUDE 7.279332
