@@ -424,15 +424,15 @@ namespace osmscout {
             CFIndex glyphCount = CTRunGetGlyphCount(run);
             CGGlyph glyphs[glyphCount];
             CGPoint glyphPositions[glyphCount];
+            CGSize glyphAdvances[glyphCount];
             CTRunGetGlyphs(run, CFRangeMake(0, 0), glyphs);
             CTRunGetPositions(run, CFRangeMake(0, 0), glyphPositions);
+            CTRunGetAdvances(run, CFRangeMake(0, 0), glyphAdvances);
             CGFloat lineWidth = 0;
             for(int index = 0; index < glyphCount; index++){
                 glyphPositions[index].x += coords.x;
-                if(index>0){
-                    lineWidth += glyphPositions[index].x - glyphPositions[index-1].x;
-                }
-                glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - (lineNumber) * lineHeight;
+                lineWidth += glyphAdvances[index].width;
+                glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - (lineNumber+1) * lineHeight;
             }
             CGFloat centerDelta = (width - lineWidth)/2;
             log.Debug() << "LayoutDrawLabel centerDelta=" << centerDelta;
@@ -500,10 +500,10 @@ namespace osmscout {
             CGContextAddRect(cg, CGRectMake(labelRect.x - 5 + 2,
                                             labelRect.y - 5 + 2,
                                             labelRect.width + 10 - 4,
-                                            labelRect.height + 10 -4));
+                                            labelRect.height + 10 - 4));
             CGContextDrawPath(cg, kCGPathStroke);
             
-            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
+            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y - layout.label.lineHeight/3), style->GetTextColor(), false);
             
             CGContextRestoreGState(cg);
             
