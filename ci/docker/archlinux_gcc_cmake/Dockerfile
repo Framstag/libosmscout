@@ -1,6 +1,6 @@
-FROM pritunl/archlinux:latest
+FROM archlinux/base:latest
 
-RUN pacman --noconfirm --needed -Suy --asdeps \
+RUN pacman --noconfirm --needed -Sy \
           git \
           libxml2 protobuf \
           agg freetype2 \
@@ -10,7 +10,7 @@ RUN pacman --noconfirm --needed -Suy --asdeps \
           freeglut glu glew glm glfw libxcursor libxinerama \
           marisa
 
-RUN pacman --noconfirm --needed -S --asdeps \
+RUN pacman --noconfirm --needed -S \
           cmake make pkg-config \
           gcc
 
