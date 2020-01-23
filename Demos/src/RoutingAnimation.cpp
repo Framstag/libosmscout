@@ -18,19 +18,16 @@
 */
 
 
-#include <QApplication>
+#include <QGuiApplication>
 #include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
 #include <QDebug>
 
 #include <chrono>
-#include <cmath>
 #include <cstring>
 #include <iostream>
-#include <iomanip>
 #include <list>
-#include <sstream>
 
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
@@ -509,9 +506,6 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-
-  QApplication application(argc,argv,true);
-
   osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
 
   if (!styleConfig->Load(args.style)) {
@@ -530,7 +524,7 @@ int main(int argc, char* argv[])
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
       osmscout::MapPainterQt        mapPainter(styleConfig);
-      double                        dpi=application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch();
+      double                        dpi=QGuiApplication::primaryScreen()->physicalDotsPerInch();
 
       drawParameter.SetFontSize(3.0);
 

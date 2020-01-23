@@ -167,7 +167,8 @@ void TiledMapRenderer::InvalidateVisualCache()
 bool TiledMapRenderer::RenderMap(QPainter& painter,
                                  const MapViewStruct& request)
 {
-  QTime start;
+  QElapsedTimer start;
+  start.start();
   QMutexLocker locker(&tileCacheMutex);
   int elapsed = start.elapsed();
   if (elapsed > 1){

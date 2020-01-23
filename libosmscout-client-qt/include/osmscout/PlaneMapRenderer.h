@@ -23,6 +23,7 @@
 
 #include <QObject>
 #include <QSettings>
+#include <QElapsedTimer>
 
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
@@ -44,7 +45,7 @@ private:
 
   DBLoadJob                     *loadJob;
 
-  QTime                         lastRendering;
+  QElapsedTimer                 lastRendering;
   QTimer                        pendingRenderingTimer;
 
   QImage                        *currentImage;

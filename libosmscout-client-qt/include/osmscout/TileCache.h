@@ -29,6 +29,7 @@
 #include <QMap>
 #include <QSet>
 #include <QTime>
+#include <QElapsedTimer>
 #include <QImage>
 #include <QPixmap>
 #include <QDebug>
@@ -68,7 +69,7 @@ QDebug& operator<<(QDebug &out, const TileCacheKey &key);
  */
 struct TileCacheVal
 {
-  QTime lastAccess;
+  QElapsedTimer lastAccess;
   QPixmap image;
   size_t epoch;
 };

@@ -501,7 +501,7 @@ void MapWidget::setLockToPosition(bool lock){
 
 void MapWidget::setFollowVehicle(bool follow){
   vehicle.follow = follow;
-  vehicle.lastGesture = QTime(); // set to null
+  vehicle.lastGesture.invalidate(); // set to invalid state
   if (follow){
     if (!inputHandler->isFollowVehicle()){
       setupInputHandler(new VehicleFollowHandler(*view, QSizeF(width(), height())));
@@ -755,7 +755,7 @@ void MapWidget::SetVehiclePosition(QObject *o)
 
   if (vehicle.position != nullptr &&
       vehicle.follow &&
-      (vehicle.lastGesture.isNull() || vehicle.lastGesture.elapsed() > 4000) // there was no gesture event for 4s
+      ((!vehicle.lastGesture.isValid()) || vehicle.lastGesture.elapsed() > 4000) // there was no gesture event for 4s
       ) {
 
     if (!inputHandler->isFollowVehicle()){

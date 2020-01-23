@@ -24,6 +24,7 @@
 #include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
+#include <QElapsedTimer>
 
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
@@ -55,8 +56,8 @@ protected:
   std::vector<double>       sin;           //! Lookup table for sin calculation
   int                       sinCount;
   int                       cnt;
-  QTime                     timer;
-  QTime                     animTimer;
+  QElapsedTimer             timer;
+  QElapsedTimer             animTimer;
   int                       startOffset;
   double                    moveOffset;
 };

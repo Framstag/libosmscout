@@ -26,6 +26,7 @@
 #include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
+#include <QGuiApplication>
 
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
@@ -133,8 +134,9 @@ int main(int argc, char* argv[])
 {
   QApplication application(argc,argv,true);
 
+  assert(QGuiApplication::primaryScreen());
   DrawMapDemo drawDemo("DrawMapQt", argc, argv,
-                       application.screens().at(application.desktop()->primaryScreen())->physicalDotsPerInch());
+                       QGuiApplication::primaryScreen()->physicalDotsPerInch());
 
   if (!drawDemo.OpenDatabase()){
     return 2;

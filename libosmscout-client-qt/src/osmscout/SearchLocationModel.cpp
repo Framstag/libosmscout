@@ -23,6 +23,7 @@
 #include <osmscout/OSMScoutQt.h>
 
 #include <QtQml>
+#include <QElapsedTimer>
 
 #include <iostream>
 
@@ -95,7 +96,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
     return; // result is not for us
   }
 
-  QTime timer;
+  QElapsedTimer timer;
   timer.start();
 
   QQmlEngine *engine = qmlEngine(this);

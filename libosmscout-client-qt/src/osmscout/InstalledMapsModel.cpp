@@ -40,6 +40,7 @@ void InstalledMapsModel::onDatabaseListChanged()
 {
   QList<MapDirectory> currentDirs=mapManager->getDatabaseDirectories();
 
+  // TODO: use std::stable_sort after transition to c++17
   qStableSort(currentDirs);
 
   // following process is little bit complicated, but we don't want to call

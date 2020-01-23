@@ -113,7 +113,7 @@ private:
 
     /// input handler control
     bool follow{false};
-    QTime lastGesture; // when there is some gesture, we will not follow vehicle for some short time
+    QElapsedTimer lastGesture; // when there is some gesture, we will not follow vehicle for some short time
 
     QString standardIconFile{"vehicle.svg"}; // state == OnRoute | OffRoute
     QString noGpsSignalIconFile{"vehicle_not_fixed.svg"}; // state == NoGpsSignal
