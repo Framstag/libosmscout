@@ -1788,6 +1788,11 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		         style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
 		       }
 		     }
+		     else if (function=="alpha") {
+		       if (!errors->hasErrors) {
+		         style.SetColorValue(descriptor.GetAttribute(),color.Alpha(factor));
+		       }
+		     }
 		     else {
 		       std::string e="Unknown color function '"+function+"'";
 		
