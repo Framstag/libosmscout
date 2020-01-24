@@ -1,8 +1,6 @@
 set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
-    #include/osmscout/import/pbf/fileformat.pb.h
-    #include/osmscout/import/pbf/osmformat.pb.h
     include/osmscout/import/GenAreaAreaIndex.h
     include/osmscout/import/GenAreaNodeIndex.h
     include/osmscout/import/GenAreaWayIndex.h
@@ -43,14 +41,10 @@ set(HEADER_FILES
     include/osmscout/import/SortDat.h
     include/osmscout/import/SortNodeDat.h
     include/osmscout/import/SortWayDat.h
-    #include/osmscout/private/Config.h
-        include/osmscout/import/ImportImportExport.h
-    #include/osmscout/ImportFeatures.h
+    include/osmscout/import/ImportImportExport.h
 )
 
 set(SOURCE_FILES
-    #src/osmscout/import/pbf/fileformat.pb.cc
-    #src/osmscout/import/pbf/osmformat.pb.cc
     src/osmscout/import/GenAreaAreaIndex.cpp
     src/osmscout/import/GenAreaNodeIndex.cpp
     src/osmscout/import/GenAreaWayIndex.cpp
@@ -104,7 +98,12 @@ if(LIBXML2_FOUND)
 endif()
 
 if (PROTOBUF_FOUND)
-  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
+    set(PROTOBUF_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/pbf)
+    file(MAKE_DIRECTORY "${PROTOBUF_OUT_DIR}")
+    protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
+            "${PROTOBUF_OUT_DIR}"
+            src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
+
     list(APPEND HEADER_FILES include/osmscout/import/PreprocessPBF.h)
     list(APPEND SOURCE_FILES src/osmscout/import/PreprocessPBF.cpp)
     list(APPEND HEADER_FILES ${PROTO_HDRS})
