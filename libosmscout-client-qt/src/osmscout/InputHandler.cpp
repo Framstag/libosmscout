@@ -22,6 +22,8 @@
 #include <QDebug>
 #include <QPoint>
 #include <QVector>
+#include <QTime>
+#include <QElapsedTimer>
 
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMTile.h>
@@ -129,7 +131,7 @@ void TapRecognizer::touch(const QTouchEvent &event)
 
 MoveAccumulator& MoveAccumulator::operator+=(const QPointF p)
 {
-    AccumulatorEvent ev = {p, QTime()};
+    AccumulatorEvent ev = {p, QElapsedTimer()};
     ev.time.start();
     events.push_back(ev);
     // flush old events

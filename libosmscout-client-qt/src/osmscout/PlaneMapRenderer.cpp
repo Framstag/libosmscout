@@ -28,10 +28,10 @@ namespace osmscout {
 // uncomment or define by compiler parameter to render various debug marks
 // #define DRAW_DEBUG
 
-// Timeout for the first rendering after rerendering was triggered (render what ever data is available)
+// Timeout [ms] for the first rendering after rerendering was triggered (render what ever data is available)
 static int INITIAL_DATA_RENDERING_TIMEOUT = 10;
 
-// Timeout for the updated rendering after rerendering was triggered (more rendering data is available)
+// Timeout [ms] for the updated rendering after rerendering was triggered (more rendering data is available)
 static int UPDATED_DATA_RENDERING_TIMEOUT = 200;
 
 PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
@@ -426,7 +426,7 @@ void PlaneMapRenderer::DrawMap()
       finishedMagnification=currentMagnification;
       finishedEpoch=currentEpoch;
 
-      lastRendering=QTime::currentTime();
+      lastRendering.restart();
     }
   }
   emit Redraw();
@@ -435,7 +435,7 @@ void PlaneMapRenderer::DrawMap()
 void PlaneMapRenderer::HandleTileStatusChanged(QString /*dbPath*/,const osmscout::TileRef /*changedTile*/)
 {
   QMutexLocker locker(&lock);
-  int elapsedTime=lastRendering.elapsed();
+  int elapsedTime=lastRendering.isValid() ? lastRendering.elapsed() : UPDATED_DATA_RENDERING_TIMEOUT;
 
   //qDebug() << "Relevant tile changed, elapsed:" << elapsedTime;
 

@@ -153,7 +153,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,
   QMutexLocker locker(&mutex);
 
   osmscout::log.Debug() << "Searching for " << searchPattern.toStdString();
-  QTime timer;
+  QElapsedTimer timer;
   timer.start();
 
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(

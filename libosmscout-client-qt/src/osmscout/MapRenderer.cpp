@@ -312,7 +312,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
     std::list<osmscout::TileRef> tileList;
     if (tiles.contains(db->path)){
-      tileList=tiles[db->path].values().toStdList();
+      auto list = tiles[db->path].values();
+      tileList=std::list<osmscout::TileRef>(list.begin(), list.end());
     }else{
       if (!last){
         osmscout::log.Debug() << "Skip database " << db->path.toStdString();

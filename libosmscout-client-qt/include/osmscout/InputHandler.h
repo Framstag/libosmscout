@@ -24,7 +24,7 @@
 #include <QVector2D>
 #include <QTouchEvent>
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QQueue>
 
 #include <osmscout/util/Bearing.h>
@@ -115,7 +115,7 @@ signals:
 struct AccumulatorEvent
 {
   QPointF pos;
-  QTime time;
+  QElapsedTimer time;
 };
 
 /**
@@ -282,7 +282,7 @@ class OSMSCOUT_CLIENT_QT_API MoveHandler : public InputHandler {
     Q_OBJECT
 
 private:
-    QTime animationStart;
+    QElapsedTimer animationStart;
     QTimer timer;
     MapView startMapView;
     QVector2D _move;
@@ -328,7 +328,7 @@ class OSMSCOUT_CLIENT_QT_API JumpHandler : public InputHandler {
     Q_OBJECT
 
 private:
-    QTime animationStart;
+    QElapsedTimer animationStart;
     QTimer timer;
     MapView startMapView;
     MapView targetMapView;

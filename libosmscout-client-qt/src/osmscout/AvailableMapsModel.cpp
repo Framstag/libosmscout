@@ -178,6 +178,7 @@ void AvailableMapsModel::listDownloaded(const MapProvider &provider, QNetworkRep
     }
   }
 
+  // TODO: use std::sort after transition to c++17
   qSort(items.begin(), items.end(), itemLessThan);
   reply->deleteLater();
   
