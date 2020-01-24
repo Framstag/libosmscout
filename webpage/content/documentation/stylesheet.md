@@ -450,6 +450,7 @@ Name           |Type         |Description
 ---------------|-------------|-----------
 lighten        |Color, Double|Returns a lighter version of the given color
 darken         |Color, Double|Returns a darker version of the given color
+alpha          |Color, Double|Returns a color with updated alpha channel
 
 ## Example
 

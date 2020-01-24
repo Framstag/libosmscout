@@ -149,6 +149,14 @@ namespace osmscout {
                    a);
     }
 
+    inline Color Alpha(double newAlpha) const
+    {
+      return Color(r,
+                   g,
+                   b,
+                   newAlpha);
+    }
+
     inline Color Decolor() const
     {
       double grey=(r+g+b)/3.0;
