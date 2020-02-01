@@ -1029,7 +1029,8 @@ TYPES
   TYPE boundary_protected_area
     = AREA RELATION ("boundary"=="national_park" OR "boundary"=="protected_area")
       {Name, NameAlt}
-      OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      // national park may be relation of boundary type, but we always want to handle it as a multipolygon
+      MULTIPOLYGON OPTIMIZE_LOW_ZOOM MERGE_AREAS
 
   TYPE leisure_park
     = NODE AREA ("leisure"=="park")
