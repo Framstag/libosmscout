@@ -34,6 +34,7 @@
 #include <osmscout/navigation/RouteInstructionAgent.h>
 #include <osmscout/navigation/ArrivalEstimateAgent.h>
 #include <osmscout/navigation/SpeedAgent.h>
+#include <osmscout/navigation/VoiceInstructionAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -102,6 +103,7 @@ private:
 private:
   QThread     *thread;
   SettingsRef settings;
+  Units       units{Locale::ByEnvironment().GetDistanceUnits()}; // TODO: make possible to override
   DBThreadRef dbThread;
   QTimer      timer;
   std::shared_ptr<Bearing> lastBearing; // replace with optional with C++17
@@ -112,13 +114,14 @@ private:
   using DataAgentRef=std::shared_ptr<DataAgentInst>;
 
   osmscout::NavigationEngine engine{
-      std::make_shared<osmscout::DataAgent<NavigationModule>>(*this),
-      std::make_shared<osmscout::PositionAgent>(),
-      std::make_shared<osmscout::BearingAgent>(),
-      std::make_shared<osmscout::RouteInstructionAgent<RouteStep, RouteDescriptionBuilder>>(),
-      std::make_shared<osmscout::RouteStateAgent>(),
-      std::make_shared<osmscout::ArrivalEstimateAgent>(),
-      std::make_shared<osmscout::SpeedAgent>()
+      std::make_shared<DataAgent<NavigationModule>>(*this),
+      std::make_shared<PositionAgent>(),
+      std::make_shared<BearingAgent>(),
+      std::make_shared<RouteInstructionAgent<RouteStep, RouteDescriptionBuilder>>(),
+      std::make_shared<VoiceInstructionAgent>(units),
+      std::make_shared<RouteStateAgent>(),
+      std::make_shared<ArrivalEstimateAgent>(),
+      std::make_shared<SpeedAgent>()
   };
 
 };
