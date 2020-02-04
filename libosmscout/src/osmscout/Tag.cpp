@@ -261,6 +261,15 @@ namespace osmscout {
     return tagId;
   }
 
+  TagId TagRegistry::RegisterNameShortTag(const std::string& tagName, uint32_t priority)
+  {
+    TagId tagId=RegisterTag(tagName);
+
+    nameShortTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+
+    return tagId;
+  }
+
   TagId TagRegistry::GetTagId(const char* name) const
   {
     auto iter=stringToTagMap.find(name);
@@ -311,6 +320,23 @@ namespace osmscout {
     auto entry=nameAltTagIdToPrioMap.find(tag);
 
     if (entry==nameAltTagIdToPrioMap.end()) {
+      return false;
+    }
+
+    priority=entry->second;
+
+    return true;
+  }
+
+  bool TagRegistry::IsNameShortTag(TagId tag, uint32_t& priority) const
+  {
+    if (nameShortTagIdToPrioMap.empty()) {
+      return false;
+    }
+
+    auto entry=nameShortTagIdToPrioMap.find(tag);
+
+    if (entry==nameShortTagIdToPrioMap.end()) {
       return false;
     }
 

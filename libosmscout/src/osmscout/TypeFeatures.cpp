@@ -203,6 +203,92 @@ namespace osmscout {
       value->SetNameAlt(nameAlt);
     }
   }
+  
+  void NameShortFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(nameShort);
+  }
+
+  void NameShortFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(nameShort);
+  }
+
+  NameShortFeatureValue& NameShortFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const auto& otherValue=static_cast<const NameShortFeatureValue&>(other);
+
+      nameShort=otherValue.nameShort;
+    }
+
+    return *this;
+  }
+
+  bool NameShortFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const auto& otherValue=static_cast<const NameShortFeatureValue&>(other);
+
+    return nameShort==otherValue.nameShort;
+  }
+
+  const char* const NameShortFeature::NAME             = "NameShort";
+  const char* const NameShortFeature::NAME_LABEL       = "name";
+  const size_t      NameShortFeature::NAME_LABEL_INDEX = 0;
+
+  void NameShortFeature::Initialize(TagRegistry& /*tagRegistry*/)
+  {
+    // no code
+  }
+
+  NameShortFeature::NameShortFeature()
+  {
+    RegisterLabel(NAME_LABEL_INDEX,
+                  "short_name");
+  }
+
+  std::string NameShortFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t NameShortFeature::GetValueSize() const
+  {
+    return sizeof(NameShortFeatureValue);
+  }
+
+  FeatureValue* NameShortFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) NameShortFeatureValue();
+  }
+
+  void NameShortFeature::Parse(TagErrorReporter& /*errorReporter*/,
+                             const TagRegistry& tagRegistry,
+                             const FeatureInstance& feature,
+                             const ObjectOSMRef& /*object*/,
+                             const TagMap& tags,
+                             FeatureValueBuffer& buffer) const
+  {
+    std::string nameShort;
+    uint32_t    nameShortPriority=std::numeric_limits<uint32_t>::max();
+
+    for (const auto &tag : tags) {
+      uint32_t natPrio;
+      bool     isNameShortTag=tagRegistry.IsNameShortTag(tag.first,natPrio);
+
+      if (isNameShortTag &&
+          (nameShort.empty() || natPrio<nameShortPriority)) {
+        nameShort=tag.second;
+        nameShortPriority=natPrio;
+      }
+    }
+
+    if (!nameShort.empty()) {
+      auto* value=static_cast<NameShortFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      value->SetNameShort(nameShort);
+    }
+  }
 
   void RefFeatureValue::Read(FileScanner& scanner)
   {
