@@ -76,6 +76,32 @@ namespace osmscout {
     }
   };
 
+  struct OSMSCOUT_API Yard
+  {
+    static inline double ToMeter(double yard)
+    {
+      return yard / 0.9144;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m * 0.9144;
+    }
+  };
+
+  struct OSMSCOUT_API Mile
+  {
+    static inline double ToMeter(double mile)
+    {
+      return mile * 1609.344;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m / 1609.344;
+    }
+  };
+
   class OSMSCOUT_API Distance CLASS_FINAL
   {
   private:
