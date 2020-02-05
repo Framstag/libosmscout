@@ -159,73 +159,76 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const override;
   };
 
-class OSMSCOUT_API NameShortFeatureValue : public FeatureValue
-{
-private:
-  std::string nameShort;
-
-public:
-  inline NameShortFeatureValue()
+  class OSMSCOUT_API NameShortFeatureValue : public FeatureValue
   {
-    // no code
-  }
+  private:
+    std::string nameShort;
 
-  inline explicit NameShortFeatureValue(const std::string& nameShort)
-  : nameShort(nameShort)
+  public:
+    inline NameShortFeatureValue()
+    {
+      // no code
+    }
+
+    inline explicit NameShortFeatureValue(const std::string& nameShort)
+    : nameShort(nameShort)
+    {
+      // no code
+    }
+
+    inline void SetNameShort(const std::string& nameShort)
+    {
+      this->nameShort=nameShort;
+    }
+
+    inline std::string GetNameShort() const
+    {
+      return nameShort;
+    }
+
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    {
+      return nameShort;
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    NameShortFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API NameShortFeature : public Feature
   {
-    // no code
-  }
+  private:
+      TagId tagShortName;
+      
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
 
-  inline void SetNameShort(const std::string& nameShort)
-  {
-    this->nameShort=nameShort;
-  }
+    /** Name of the "name" label */
+    static const char* const NAME_LABEL;
 
-  inline std::string GetNameShort() const
-  {
-    return nameShort;
-  }
+    /** Index of the 'name' label */
+    static const size_t      NAME_LABEL_INDEX;
 
-  inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
-  {
-    return nameShort;
-  }
+  public:
+    NameShortFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
 
-  void Read(FileScanner& scanner) override;
-  void Write(FileWriter& writer) override;
+    std::string GetName() const override;
 
-  NameShortFeatureValue& operator=(const FeatureValue& other) override;
-  bool operator==(const FeatureValue& other) const override;
-};
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
 
-class OSMSCOUT_API NameShortFeature : public Feature
-{
-public:
-  /** Name of this feature */
-  static const char* const NAME;
-
-  /** Name of the "name" label */
-  static const char* const NAME_LABEL;
-
-  /** Index of the 'name' label */
-  static const size_t      NAME_LABEL_INDEX;
-
-public:
-  NameShortFeature();
-  void Initialize(TagRegistry& tagRegistry) override;
-
-  std::string GetName() const override;
-
-  size_t GetValueSize() const override;
-  FeatureValue* AllocateValue(void* buffer) override;
-
-  void Parse(TagErrorReporter& reporter,
-             const TagRegistry& tagRegistry,
-             const FeatureInstance& feature,
-             const ObjectOSMRef& object,
-             const TagMap& tags,
-             FeatureValueBuffer& buffer) const override;
-};
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
 
   class OSMSCOUT_API RefFeatureValue : public FeatureValue
   {

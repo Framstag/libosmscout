@@ -822,8 +822,9 @@ namespace osmscout {
     RegisterFeature(featureName);
 
     RegisterFeature(std::make_shared<NameAltFeature>());
-      
-    RegisterFeature(std::make_shared<NameShortFeature>());
+    
+    featureNameShort=std::make_shared<NameShortFeature>();
+    RegisterFeature(featureNameShort);
 
     featureRef=std::make_shared<RefFeature>();
     RegisterFeature(featureRef);

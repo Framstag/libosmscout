@@ -232,19 +232,20 @@ namespace osmscout {
     return nameShort==otherValue.nameShort;
   }
 
-  const char* const NameShortFeature::NAME             = "NameShort";
+  const char* const NameShortFeature::NAME             = "ShortName";
   const char* const NameShortFeature::NAME_LABEL       = "name";
   const size_t      NameShortFeature::NAME_LABEL_INDEX = 0;
 
-  void NameShortFeature::Initialize(TagRegistry& /*tagRegistry*/)
-  {
-    // no code
-  }
-
   NameShortFeature::NameShortFeature()
+  : tagShortName(0)
   {
     RegisterLabel(NAME_LABEL_INDEX,
-                  "short_name");
+                  NAME_LABEL);
+  }
+
+  void NameShortFeature::Initialize(TagRegistry& tagRegistry)
+  {
+    tagShortName=tagRegistry.RegisterTag("short_name");
   }
 
   std::string NameShortFeature::GetName() const
@@ -269,24 +270,13 @@ namespace osmscout {
                              const TagMap& tags,
                              FeatureValueBuffer& buffer) const
   {
-    std::string nameShort;
-    uint32_t    nameShortPriority=std::numeric_limits<uint32_t>::max();
+    auto shortName=tags.find(tagShortName);
 
-    for (const auto &tag : tags) {
-      uint32_t natPrio;
-      bool     isNameShortTag=tagRegistry.IsNameShortTag(tag.first,natPrio);
-
-      if (isNameShortTag &&
-          (nameShort.empty() || natPrio<nameShortPriority)) {
-        nameShort=tag.second;
-        nameShortPriority=natPrio;
-      }
-    }
-
-    if (!nameShort.empty()) {
+    if (shortName!=tags.end() &&
+      !shortName->second.empty()) {
       auto* value=static_cast<NameShortFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-      value->SetNameShort(nameShort);
+      value->SetNameShort(ref->second);
     }
   }
 

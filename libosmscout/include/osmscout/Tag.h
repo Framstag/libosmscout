@@ -238,7 +238,6 @@ namespace osmscout {
     std::unordered_map<std::string,TagId>       stringToTagMap;
     std::unordered_map<TagId,uint32_t>          nameTagIdToPrioMap;
     std::unordered_map<TagId,uint32_t>          nameAltTagIdToPrioMap;
-    std::unordered_map<TagId,uint32_t>          nameShortTagIdToPrioMap;
     std::unordered_map<std::string,uint8_t>     nameToMaxSpeedMap;
 
     std::unordered_map<std::string,size_t>      surfaceToGradeMap;
@@ -253,8 +252,6 @@ namespace osmscout {
                           uint32_t priority);
     TagId RegisterNameAltTag(const std::string& tagName,
                              uint32_t priority);
-    TagId RegisterNameShortTag(const std::string& tagName,
-                               uint32_t priority);
       
     TagId GetTagId(const char* name) const;
     TagId GetTagId(const std::string& name) const;
@@ -262,8 +259,6 @@ namespace osmscout {
     bool IsNameTag(TagId tag,
                    uint32_t& priority) const;
     bool IsNameAltTag(TagId tag,
-                      uint32_t& priority) const;
-    bool IsNameShortTag(TagId tag,
                       uint32_t& priority) const;
 
     /**
