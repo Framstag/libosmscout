@@ -276,7 +276,7 @@ namespace osmscout {
       !shortName->second.empty()) {
       auto* value=static_cast<NameShortFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-      value->SetNameShort(ref->second);
+      value->SetNameShort(shortName->second);
     }
   }
 
