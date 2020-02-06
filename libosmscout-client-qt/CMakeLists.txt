@@ -7,6 +7,9 @@ endif()
 if(NOT Qt5Quick_FOUND)
   message(SEND_ERROR "Qt5Quick is required for OSMScout Qt client library")
 endif()
+if(NOT Qt5Multimedia_FOUND)
+  message(SEND_ERROR "Qt5Quick is required for OSMScout Qt client library")
+endif()
 if(NOT ${OSMSCOUT_BUILD_MAP_QT})
   message(SEND_ERROR "The main map drawing interface is required for Qt map drawing backend")
 endif()
@@ -152,7 +155,8 @@ target_link_libraries(OSMScoutClientQt
   OSMScoutMapQt
   Qt5::Core
   Qt5::Gui
-  Qt5::Quick)
+  Qt5::Quick
+  Qt5::Multimedia)
 
 target_compile_definitions(OSMScoutClientQt PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
 

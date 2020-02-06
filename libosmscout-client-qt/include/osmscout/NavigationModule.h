@@ -40,6 +40,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QAudioOutput>
 
 namespace osmscout {
 
@@ -107,6 +108,7 @@ private:
   DBThreadRef dbThread;
   QTimer      timer;
   std::shared_ptr<Bearing> lastBearing; // replace with optional with C++17
+  QAudioOutput audioOutput;
 
   osmscout::RouteDescriptionRef routeDescription;
 
