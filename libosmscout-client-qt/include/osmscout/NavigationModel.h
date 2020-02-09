@@ -90,6 +90,8 @@ signals:
 
   void laneUpdate();
 
+  void breakRequest();
+
 public slots:
   void locationChanged(bool locationValid,
                        double lat, double lon,
@@ -116,6 +118,8 @@ public slots:
   void onMaxAllowedSpeed(double maxAllowedSpeed);
 
   void onLaneUpdate(osmscout::LaneAgent::Lane lane);
+
+  void onBreakRequest();
 
 public:
   using Roles = RouteStep::Roles;

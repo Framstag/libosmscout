@@ -77,6 +77,8 @@ signals:
 
   void laneUpdate(osmscout::LaneAgent::Lane lane);
 
+  void breakRequest();
+
 public slots:
   void setupRoute(QtRouteData route,
                   osmscout::Vehicle vehicle);

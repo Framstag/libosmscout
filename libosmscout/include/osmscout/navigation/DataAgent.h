@@ -67,6 +67,16 @@ namespace osmscout {
 
   using RoutableObjectsMessageRef=std::shared_ptr<RoutableObjectsMessage>;
 
+  /**
+   * Message created when we should break.
+   */
+  struct OSMSCOUT_API NoRoutableObjectsMessage CLASS_FINAL : public NavigationMessage
+  {
+    NoRoutableObjectsMessage(const Timestamp& timestamp);
+  };
+
+  using NoRoutableObjectsMessageRef=std::shared_ptr<NoRoutableObjectsMessage>;
+
   template <typename DataLoader>
   class DataAgent CLASS_FINAL : public NavigationAgent
   {
@@ -105,6 +115,8 @@ namespace osmscout {
         if (GetSphericalDistance(requestMessage->bbox.GetMinCoord(),
                                  requestMessage->bbox.GetMaxCoord()) > Kilometers(2)){
           log.Warn() << "Requested routable data from huge region: " << requestMessage->bbox.GetDisplayText();
+          result.push_back(std::make_shared<NoRoutableObjectsMessage>(requestMessage->timestamp));
+          return result;
         }
 
         auto msg=std::make_shared<RoutableObjectsMessage>(requestMessage->timestamp, std::make_shared<RoutableObjects>());

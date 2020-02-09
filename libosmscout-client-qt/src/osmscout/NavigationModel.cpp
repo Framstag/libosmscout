@@ -69,6 +69,10 @@ NavigationModel::NavigationModel():
           this, &NavigationModel::routeAheadChanged);
   connect(this, &NavigationModel::arrivalUpdate,
           this, &NavigationModel::routeAheadChanged);
+
+  connect(navigationModule, &NavigationModule::breakRequest,
+          this, &NavigationModel::onBreakRequest,
+          Qt::QueuedConnection);
 }
 
 NavigationModel::~NavigationModel(){
@@ -210,6 +214,11 @@ void NavigationModel::onLaneUpdate(osmscout::LaneAgent::Lane lane)
 {
   this->lane = lane;
   emit laneUpdate();
+}
+
+void NavigationModel::onBreakRequest()
+{
+  emit breakRequest();
 }
 
 QObject *NavigationModel::getNextRoutStep()

@@ -135,6 +135,10 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
 
       emit laneUpdate(laneMessage->lane);
     }
+    else if (auto breakRequestMessage = dynamic_cast<BreakRequestMessage*>(message.get());
+               breakRequestMessage != nullptr) {
+      emit breakRequest();
+    }
   }
 }
 

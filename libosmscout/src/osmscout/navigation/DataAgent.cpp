@@ -75,4 +75,8 @@ namespace osmscout {
   RoutableObjectsMessage::RoutableObjectsMessage(const Timestamp& timestamp, const RoutableObjectsRef &data):
       NavigationMessage(timestamp), data(data)
   {}
+
+  NoRoutableObjectsMessage::NoRoutableObjectsMessage(const Timestamp& timestamp):
+      NavigationMessage(timestamp)
+  {}
 }

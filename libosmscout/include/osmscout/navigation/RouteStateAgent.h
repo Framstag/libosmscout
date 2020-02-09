@@ -58,6 +58,14 @@ namespace osmscout {
                          const Distance &targetDistance);
   };
 
+  /**
+   * Message created when we should break.
+   */
+  struct OSMSCOUT_API BreakRequestMessage CLASS_FINAL : public NavigationMessage
+  {
+    BreakRequestMessage(const Timestamp& timestamp);
+  };
+
   class OSMSCOUT_API RouteStateAgent CLASS_FINAL : public NavigationAgent
   {
   private:

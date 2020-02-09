@@ -51,6 +51,11 @@ namespace osmscout {
   {
   }
 
+  BreakRequestMessage::BreakRequestMessage(const Timestamp& timestamp)
+      : NavigationMessage(timestamp)
+  {
+  }
+
   RouteStateAgent::RouteStateAgent()
       : state(PositionAgent::PositionState::NoGpsSignal)
   {
@@ -79,6 +84,10 @@ namespace osmscout {
 
       auto &position = positionMessage->position;
 
+      if (state==PositionAgent::PositionState::NoRoute) {
+        // trigger break
+        result.push_back(std::make_shared<BreakRequestMessage>(now));
+      }
       if (position.state==state){
         if (state==PositionAgent::PositionState::OffRoute &&
             (now-lastUpdate) > std::chrono::seconds(5) &&
