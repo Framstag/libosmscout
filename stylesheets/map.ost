@@ -1125,7 +1125,7 @@ TYPES
       GROUP amenity
 
   TYPE amenity_drinking_water
-    = NODE ("amenity"=="drinking_water")
+    = NODE ("amenity"=="drinking_water" OR ("amenity"=="fountain" AND "drinking_water"=="yes"))
       GROUP amenity
 
   TYPE amenity_ev_charging
