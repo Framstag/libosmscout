@@ -51,14 +51,7 @@ namespace osmscout {
 
 static OSMScoutQt* osmScoutInstance=nullptr;
 
-OSMScoutQtBuilder::OSMScoutQtBuilder():
-  settingsStorage(nullptr),
-  onlineTileCacheSize(100),
-  offlineTileCacheSize(200),
-  styleSheetDirectoryConfigured(false),
-  styleSheetFileConfigured(false),
-  appName("UnspecifiedApp"),
-  appVersion("v?")
+OSMScoutQtBuilder::OSMScoutQtBuilder()
 {
   QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
   mapLookupDirectories << QDir::currentPath();
