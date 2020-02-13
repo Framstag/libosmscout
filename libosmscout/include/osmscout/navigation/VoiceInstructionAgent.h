@@ -146,6 +146,16 @@ public:
     {
       return type != MessageType::NoMessage;
     }
+
+    bool operator==(const MessageStruct &other) const
+    {
+      return type==other.type && distance==other.distance;
+    }
+
+    bool operator!=(const MessageStruct &other) const
+    {
+      return !(*this==other);
+    }
   };
 
 private:
