@@ -40,7 +40,8 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QAudioOutput>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
 
 namespace osmscout {
 
@@ -86,6 +87,10 @@ public slots:
 
   void onTimeout();
 
+  void onVoiceChanged(const QString);
+
+  void playerStateChanged(QMediaPlayer::State state);
+
 public:
   NavigationModule(QThread *thread,
                    SettingsRef settings,
@@ -99,7 +104,9 @@ public:
   virtual ~NavigationModule();
 
 private:
+  void InitPlayer();
   void ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages);
+  QString sampleFile(osmscout::VoiceInstructionMessage::VoiceSample sample) const;
 
 private:
   QThread     *thread;
@@ -108,7 +115,14 @@ private:
   DBThreadRef dbThread;
   QTimer      timer;
   std::shared_ptr<Bearing> lastBearing; // replace with optional with C++17
-  QAudioOutput audioOutput;
+
+  // voice route instructions
+  QString voiceDir;
+  // player and playlist should be created in module thread, not in UI thread (constructor)
+  // we setup QObject parents, objects are cleaned after Module destruction
+  QMediaPlaylist *currentPlaylist{nullptr};
+  QMediaPlayer *mediaPlayer{nullptr};
+  std::vector<osmscout::VoiceInstructionMessage::VoiceSample> nextMessage;
 
   osmscout::RouteDescriptionRef routeDescription;
 
