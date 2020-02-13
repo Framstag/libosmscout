@@ -212,6 +212,7 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
   using VoiceSample = VoiceInstructionMessage::VoiceSample;
   std::vector<VoiceInstructionMessage::VoiceSample> samples;
 
+  assert(message);
   // distance from our position to next message
   Distance nextMessageDistance = (message.distance - distanceFromStart);
   double distanceInUnits = (units == Units::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
@@ -248,8 +249,11 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
 
   toSamples(samples, message.type);
   if (then){
-    samples.push_back(VoiceSample::Then);
-    toSamples(samples, then.type);
+    auto thenDistance = then.distance - message.distance;
+    if (thenDistance <= Meters(200)) { // ignore then messsage otherwise
+      samples.push_back(VoiceSample::Then);
+      toSamples(samples, then.type);
+    }
   }
   return samples;
 }
