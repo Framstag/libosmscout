@@ -58,6 +58,8 @@ private:
   size_t onlineTileCacheSize;
   size_t offlineTileCacheSize;
 
+  QString voiceLookupDirectory;
+
   QString styleSheetDirectory;
   bool styleSheetDirectoryConfigured;
 
@@ -99,6 +101,12 @@ public:
   inline OSMScoutQtBuilder& WithBasemapLookupDirectory(QString basemapLookupDirectory)
   {
     this->basemapLookupDirectory=basemapLookupDirectory;
+    return *this;
+  }
+
+  inline OSMScoutQtBuilder& WithVoiceLookupDirectory(QString voiceLookupDirectory)
+  {
+    this->voiceLookupDirectory=voiceLookupDirectory;
     return *this;
   }
 

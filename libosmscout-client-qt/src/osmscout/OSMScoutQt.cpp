@@ -65,9 +65,11 @@ OSMScoutQtBuilder::OSMScoutQtBuilder():
   mapLookupDirectories << QDir(documentsLocation).filePath("Maps");
 
   cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+
+  voiceLookupDirectory = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + QDir::separator() + "voices";
 }
 
-  OSMScoutQtBuilder::~OSMScoutQtBuilder()
+OSMScoutQtBuilder::~OSMScoutQtBuilder()
 {
 }
 
@@ -94,6 +96,9 @@ bool OSMScoutQtBuilder::Init()
   if (styleSheetDirectoryConfigured){
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
+
+  // setup voice
+  settings->SetVoiceLookupDirectory(voiceLookupDirectory);
 
   MapManagerRef mapManager=std::make_shared<MapManager>(mapLookupDirectories, settings);
 

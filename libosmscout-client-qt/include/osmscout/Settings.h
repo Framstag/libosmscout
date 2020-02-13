@@ -67,6 +67,8 @@ class OSMSCOUT_CLIENT_QT_API Settings: public QObject
   Q_PROPERTY(bool     showAltLanguage READ GetShowAltLanguage WRITE SetShowAltLanguage NOTIFY ShowAltLanguageChanged)
   /// metrics or imperial
   Q_PROPERTY(QString  units       READ GetUnits               WRITE SetUnits        NOTIFY UnitsChanged)
+  Q_PROPERTY(QString  voiceLookupDirectory READ GetVoiceLookupDirectory WRITE SetVoiceLookupDirectory NOTIFY VoiceLookupDirectoryChanged)
+  Q_PROPERTY(QString  voice       READ GetVoice               WRITE SetVoice        NOTIFY VoiceChanged)
 
 signals:
   void MapDPIChange(double dpi);
@@ -77,6 +79,8 @@ signals:
   void RenderSeaChanged(bool);
   void StyleSheetDirectoryChanged(const QString dir);
   void StyleSheetFileChanged(const QString file);
+  void VoiceLookupDirectoryChanged(const QString dir);
+  void VoiceChanged(const QString voice);
   void FontNameChanged(const QString fontName);
   void FontSizeChanged(double fontSize);
   void ShowAltLanguageChanged(bool showAltLanguage);
@@ -123,6 +127,12 @@ public:
 
   const QString GetStyleSheetDirectory() const;
   void SetStyleSheetDirectory(const QString dir);
+
+  const QString GetVoiceLookupDirectory() const;
+  void SetVoiceLookupDirectory(const QString &voiceLookupDirectory);
+
+  const QString GetVoice() const;
+  void SetVoice(const QString &voice);
 
   const QString GetStyleSheetFile() const;
   const QString GetStyleSheetAbsoluteFile() const;
