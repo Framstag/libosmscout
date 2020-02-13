@@ -142,6 +142,18 @@ public:
     MessageType type{MessageType::NoMessage};
     Distance distance;
 
+    MessageStruct() = default;
+    MessageStruct(const MessageStruct&) = default;
+    MessageStruct(MessageStruct &&) = default;
+
+    MessageStruct(MessageType type, const Distance &distance):
+      type{type}, distance{distance} {}
+
+    ~MessageStruct() = default;
+
+    MessageStruct &operator=(const MessageStruct&) = default;
+    MessageStruct &operator=(MessageStruct&&) = default;
+
     operator bool() const
     {
       return type != MessageType::NoMessage;
