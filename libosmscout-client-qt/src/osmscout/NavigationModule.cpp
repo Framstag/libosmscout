@@ -68,30 +68,30 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
 {
   for (const auto &message : messages) {
     if (dynamic_cast<PositionAgent::PositionMessage *>(message.get()) != nullptr) {
-      auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+      auto positionMessage=static_cast<PositionAgent::PositionMessage*>(message.get());
       auto &position=positionMessage->position;
       emit positionEstimate(position.state, position.coord, lastBearing);
     }
     else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
-      auto bearingMessage = dynamic_cast<osmscout::BearingChangedMessage *>(message.get());
+      auto bearingMessage = static_cast<osmscout::BearingChangedMessage *>(message.get());
       lastBearing=std::make_shared<Bearing>(bearingMessage->bearing);
     }
     else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
-      auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+      auto targetReachedMessage = static_cast<osmscout::TargetReachedMessage *>(message.get());
       emit targetReached(targetReachedMessage->targetBearing,targetReachedMessage->targetDistance);
     }
     else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
-      auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
+      auto req = static_cast<RerouteRequestMessage *>(message.get());
       emit rerouteRequest(req->from,
                           req->initialBearing ? std::make_shared<Bearing>(*(req->initialBearing)) : nullptr,
                           req->to);
     }
     else if (dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
-      auto instructions = dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
+      auto instructions = static_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
       emit update(instructions->instructions);
     }
     else if (dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
-      auto nextInstruction = dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
+      auto nextInstruction = static_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
       if (!nextInstruction->nextRouteInstruction.shortDescription.isEmpty()) {
         log.Debug() << "In " << nextInstruction->nextRouteInstruction.distanceTo.AsMeter() << " m: "
                     << nextInstruction->nextRouteInstruction.shortDescription.toStdString();
@@ -99,20 +99,20 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
       emit updateNext(nextInstruction->nextRouteInstruction);
     }
     else if (dynamic_cast<osmscout::ArrivalEstimateMessage*>(message.get())!=nullptr) {
-      auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+      auto arrivalMessage = static_cast<osmscout::ArrivalEstimateMessage *>(message.get());
       using namespace std::chrono;
       emit arrivalEstimate(QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(arrivalMessage->arrivalEstimate.time_since_epoch()).count()),
                            arrivalMessage->remainingDistance);
     }
     else if (dynamic_cast<osmscout::CurrentSpeedMessage*>(message.get())!=nullptr) {
-      auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+      auto currentSpeedMessage = static_cast<osmscout::CurrentSpeedMessage *>(message.get());
       emit currentSpeed(currentSpeedMessage->speed);
     }
     else if (dynamic_cast<osmscout::MaxAllowedSpeedMessage*>(message.get())!=nullptr) {
-      auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+      auto maxSpeedMessage = static_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
       emit maxAllowedSpeed(maxSpeedMessage->maxAllowedSpeed);
     } else if (dynamic_cast<osmscout::VoiceInstructionMessage*>(message.get())!=nullptr) {
-      auto voiceInstructionMessage = dynamic_cast<osmscout::VoiceInstructionMessage*>(message.get());
+      auto voiceInstructionMessage = static_cast<osmscout::VoiceInstructionMessage*>(message.get());
       if (!voiceDir.isEmpty()) {
         nextMessage = voiceInstructionMessage->message;
         InitPlayer();
