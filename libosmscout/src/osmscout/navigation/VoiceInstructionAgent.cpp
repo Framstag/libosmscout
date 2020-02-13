@@ -22,6 +22,7 @@
 #include <osmscout/routing/Route.h>
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 
@@ -55,6 +56,7 @@ public:
   {
     assert(roundaboutLeaveDescription);
     assert(nameDescription);
+    unused(nameDescription);
 
     using MessageType = VoiceInstructionAgent::MessageType;
     MessageType type = MessageType::NoMessage;
