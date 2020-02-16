@@ -148,16 +148,17 @@ qt5WidgetsDep = dependency('qt5', modules: 'Widgets', required: false)
 qt5SvgDep = dependency('qt5', modules: 'Svg', required: false)
 qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
 qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
+qt5MultimediaDep = dependency('qt5', modules: 'Multimedia', required: false)
 
 message('Qt version : @0@ (required >= 5.6)'.format(qt5GuiDep.version()))
 
-if qt5GuiDep.found() and qt5GuiDep.version().version_compare('>=5.6') and qt5QmlDep.found() and qt5QuickDep.found() and qt5WidgetsDep.found() and qt5NetworkDep.found() and get_option('enableMapQt')
+if qt5GuiDep.found() and qt5GuiDep.version().version_compare('>=5.6') and qt5WidgetsDep.found() and get_option('enableMapQt')
   buildMapQt=true
 else
   buildMapQt=false
 endif
 
-if buildMapQt and get_option('enableClientQt')
+if buildMapQt and qt5MultimediaDep.found() and qt5QmlDep.found() and qt5QuickDep.found() and qt5NetworkDep.found() and get_option('enableClientQt')
   buildClientQt=true
 else
   buildClientQt=false

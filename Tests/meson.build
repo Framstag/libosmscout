@@ -299,7 +299,7 @@ if buildClientQt
                'src/ClientQtThreading.cpp',
                threadingMocs,
                include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-               dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep],
+               dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
                link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
                install: false)
 endif
@@ -311,7 +311,7 @@ if buildClientQt
                'src/QtFileDownloader.cpp',
                testMocs,
                include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-               dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep],
+               dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
                link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
                install: false)
 endif

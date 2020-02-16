@@ -45,7 +45,7 @@ class OSMScoutQt;
  */
 class OSMSCOUT_CLIENT_QT_API OSMScoutQtBuilder{
 private:
-  QSettings *settingsStorage;
+  QSettings *settingsStorage{nullptr};
 
   QString onlineTileProviders;
   QString mapProviders;
@@ -55,17 +55,19 @@ private:
   QString iconDirectory;
   QStringList customPoiTypes;
 
-  size_t onlineTileCacheSize;
-  size_t offlineTileCacheSize;
+  size_t onlineTileCacheSize{100};
+  size_t offlineTileCacheSize{200};
+
+  QString voiceLookupDirectory;
 
   QString styleSheetDirectory;
-  bool styleSheetDirectoryConfigured;
+  bool styleSheetDirectoryConfigured{false};
 
   QString styleSheetFile;
-  bool styleSheetFileConfigured;
+  bool styleSheetFileConfigured{false};
 
-  QString appName;
-  QString appVersion;
+  QString appName{"UnspecifiedApp"};
+  QString appVersion{"v?"};
 
 public:
   OSMScoutQtBuilder();
@@ -99,6 +101,12 @@ public:
   inline OSMScoutQtBuilder& WithBasemapLookupDirectory(QString basemapLookupDirectory)
   {
     this->basemapLookupDirectory=basemapLookupDirectory;
+    return *this;
+  }
+
+  inline OSMScoutQtBuilder& WithVoiceLookupDirectory(QString voiceLookupDirectory)
+  {
+    this->voiceLookupDirectory=voiceLookupDirectory;
     return *this;
   }
 

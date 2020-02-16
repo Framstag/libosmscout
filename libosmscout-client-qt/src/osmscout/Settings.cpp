@@ -222,6 +222,30 @@ void Settings::SetStyleSheetDirectory(const QString dir)
   }
 }
 
+const QString Settings::GetVoiceLookupDirectory() const
+{
+  return storage->value("OSMScoutLib/Voice/LooukupDirectory", ".voices").toString();
+}
+void Settings::SetVoiceLookupDirectory(const QString &dir)
+{
+  if (GetVoiceLookupDirectory() != dir){
+    storage->setValue("OSMScoutLib/Voice/LooukupDirectory", dir);
+    emit VoiceLookupDirectoryChanged(dir);
+  }
+}
+
+const QString Settings::GetVoice() const
+{
+  return storage->value("OSMScoutLib/Voice/Voice", "default").toString();
+}
+void Settings::SetVoice(const QString &voice)
+{
+  if (GetVoice() != voice){
+    storage->setValue("OSMScoutLib/Voice/Voice", voice);
+    emit VoiceChanged(voice);
+  }
+}
+
 const QString Settings::GetStyleSheetFile() const
 {
   return storage->value("OSMScoutLib/Rendering/StylesheetFile", "standard.oss").toString();

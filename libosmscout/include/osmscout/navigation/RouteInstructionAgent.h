@@ -53,7 +53,6 @@ class RouteInstructionAgent CLASS_FINAL : public NavigationAgent
 {
 private:
   RouteDescriptionRef prevRoute;
-  std::list<RouteDescription::Node>::const_iterator prevNode;
   std::list<RouteInstruction> instructions;
 
 public:
@@ -117,7 +116,6 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
   result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
 
   prevRoute=positionMessage->route;
-  prevNode=positionMessage->position.routeNode;
 
   return result;
 }

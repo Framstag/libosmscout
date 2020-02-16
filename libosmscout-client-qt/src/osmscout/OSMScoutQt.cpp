@@ -51,23 +51,18 @@ namespace osmscout {
 
 static OSMScoutQt* osmScoutInstance=nullptr;
 
-OSMScoutQtBuilder::OSMScoutQtBuilder():
-  settingsStorage(nullptr),
-  onlineTileCacheSize(100),
-  offlineTileCacheSize(200),
-  styleSheetDirectoryConfigured(false),
-  styleSheetFileConfigured(false),
-  appName("UnspecifiedApp"),
-  appVersion("v?")
+OSMScoutQtBuilder::OSMScoutQtBuilder()
 {
   QString documentsLocation = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
   mapLookupDirectories << QDir::currentPath();
   mapLookupDirectories << QDir(documentsLocation).filePath("Maps");
 
   cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+
+  voiceLookupDirectory = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + QDir::separator() + "voices";
 }
 
-  OSMScoutQtBuilder::~OSMScoutQtBuilder()
+OSMScoutQtBuilder::~OSMScoutQtBuilder()
 {
 }
 
@@ -94,6 +89,9 @@ bool OSMScoutQtBuilder::Init()
   if (styleSheetDirectoryConfigured){
     settings->SetStyleSheetDirectory(styleSheetDirectory);
   }
+
+  // setup voice
+  settings->SetVoiceLookupDirectory(voiceLookupDirectory);
 
   MapManagerRef mapManager=std::make_shared<MapManager>(mapLookupDirectories, settings);
 

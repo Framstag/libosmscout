@@ -27,8 +27,15 @@ NavigationModule::NavigationModule(QThread *thread,
                                    DBThreadRef dbThread):
   thread(thread), settings(settings), dbThread(dbThread)
 {
+  assert(settings);
+  assert(dbThread);
+
   timer.moveToThread(thread); // constructor is called from different thread!
   connect(&timer, &QTimer::timeout, this, &NavigationModule::onTimeout);
+
+  connect(settings.get(), &Settings::VoiceLookupDirectoryChanged, this, &NavigationModule::onVoiceChanged);
+  connect(settings.get(), &Settings::VoiceChanged, this, &NavigationModule::onVoiceChanged);
+  onVoiceChanged("");
 }
 
 NavigationModule::~NavigationModule()
@@ -42,34 +49,49 @@ NavigationModule::~NavigationModule()
   }
 }
 
+void NavigationModule::InitPlayer()
+{
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Player initialised from incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
+
+  if (mediaPlayer==nullptr){
+    assert(currentPlaylist==nullptr);
+    mediaPlayer = new QMediaPlayer(this);
+    currentPlaylist = new QMediaPlaylist(mediaPlayer);
+    connect(mediaPlayer, &QMediaPlayer::stateChanged, this, &NavigationModule::playerStateChanged);
+    mediaPlayer->setPlaylist(currentPlaylist);
+  }
+}
+
 void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
 {
   for (const auto &message : messages) {
     if (dynamic_cast<PositionAgent::PositionMessage *>(message.get()) != nullptr) {
-      auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+      auto positionMessage=static_cast<PositionAgent::PositionMessage*>(message.get());
       auto &position=positionMessage->position;
       emit positionEstimate(position.state, position.coord, lastBearing);
     }
     else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
-      auto bearingMessage = dynamic_cast<osmscout::BearingChangedMessage *>(message.get());
+      auto bearingMessage = static_cast<osmscout::BearingChangedMessage *>(message.get());
       lastBearing=std::make_shared<Bearing>(bearingMessage->bearing);
     }
     else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
-      auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+      auto targetReachedMessage = static_cast<osmscout::TargetReachedMessage *>(message.get());
       emit targetReached(targetReachedMessage->targetBearing,targetReachedMessage->targetDistance);
     }
     else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
-      auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
+      auto req = static_cast<RerouteRequestMessage *>(message.get());
       emit rerouteRequest(req->from,
                           req->initialBearing ? std::make_shared<Bearing>(*(req->initialBearing)) : nullptr,
                           req->to);
     }
     else if (dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
-      auto instructions = dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
+      auto instructions = static_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
       emit update(instructions->instructions);
     }
     else if (dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
-      auto nextInstruction = dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
+      auto nextInstruction = static_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
       if (!nextInstruction->nextRouteInstruction.shortDescription.isEmpty()) {
         log.Debug() << "In " << nextInstruction->nextRouteInstruction.distanceTo.AsMeter() << " m: "
                     << nextInstruction->nextRouteInstruction.shortDescription.toStdString();
@@ -77,18 +99,26 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
       emit updateNext(nextInstruction->nextRouteInstruction);
     }
     else if (dynamic_cast<osmscout::ArrivalEstimateMessage*>(message.get())!=nullptr) {
-      auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+      auto arrivalMessage = static_cast<osmscout::ArrivalEstimateMessage *>(message.get());
       using namespace std::chrono;
       emit arrivalEstimate(QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(arrivalMessage->arrivalEstimate.time_since_epoch()).count()),
                            arrivalMessage->remainingDistance);
     }
     else if (dynamic_cast<osmscout::CurrentSpeedMessage*>(message.get())!=nullptr) {
-      auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+      auto currentSpeedMessage = static_cast<osmscout::CurrentSpeedMessage *>(message.get());
       emit currentSpeed(currentSpeedMessage->speed);
     }
     else if (dynamic_cast<osmscout::MaxAllowedSpeedMessage*>(message.get())!=nullptr) {
-      auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+      auto maxSpeedMessage = static_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
       emit maxAllowedSpeed(maxSpeedMessage->maxAllowedSpeed);
+    } else if (dynamic_cast<osmscout::VoiceInstructionMessage*>(message.get())!=nullptr) {
+      auto voiceInstructionMessage = static_cast<osmscout::VoiceInstructionMessage*>(message.get());
+      if (!voiceDir.isEmpty()) {
+        nextMessage = voiceInstructionMessage->message;
+        InitPlayer();
+        assert(mediaPlayer);
+        playerStateChanged(mediaPlayer->state());
+      }
     }
   }
 }
@@ -184,9 +214,117 @@ void NavigationModule::onTimeout()
   ProcessMessages(engine.Process(routeUpdateMessage));
 }
 
+void NavigationModule::onVoiceChanged(const QString)
+{
+  voiceDir = settings->GetVoiceLookupDirectory() + QDir::separator() + settings->GetVoice();
+  if (!QDir(voiceDir).exists()){
+    voiceDir.clear(); // disable voice
+  }
+}
+
+QString NavigationModule::sampleFile(osmscout::VoiceInstructionMessage::VoiceSample sample) const
+{
+  using VoiceSample = osmscout::VoiceInstructionMessage::VoiceSample;
+  switch(sample){
+    case VoiceSample::After: return "After.ogg";
+    case VoiceSample::AhExitLeft: return "AhExitLeft.ogg";
+    case VoiceSample::AhExit: return "AhExit.ogg";
+    case VoiceSample::AhExitRight: return "AhExitRight.ogg";
+    case VoiceSample::AhFerry: return "AhFerry.ogg";
+    case VoiceSample::AhKeepLeft: return "AhKeepLeft.ogg";
+    case VoiceSample::AhKeepRight: return "AhKeepRight.ogg";
+    case VoiceSample::AhLeftTurn: return "AhLeftTurn.ogg";
+    case VoiceSample::AhRightTurn: return "AhRightTurn.ogg";
+    case VoiceSample::AhUTurn: return "AhUTurn.ogg";
+    case VoiceSample::Arrive: return "Arrive.ogg";
+    case VoiceSample::BearLeft: return "BearLeft.ogg";
+    case VoiceSample::BearRight: return "BearRight.ogg";
+    case VoiceSample::Depart: return "Depart.ogg";
+    case VoiceSample::GpsFound: return "GpsFound.ogg";
+    case VoiceSample::GpsLost: return "GpsLost.ogg";
+    case VoiceSample::Charge: return "Charge.ogg";
+    case VoiceSample::KeepLeft: return "KeepLeft.ogg";
+    case VoiceSample::KeepRight: return "KeepRight.ogg";
+    case VoiceSample::LnLeft: return "LnLeft.ogg";
+    case VoiceSample::LnRight: return "LnRight.ogg";
+    case VoiceSample::Marble: return "Marble.ogg";
+    case VoiceSample::Meters: return "Meters.ogg";
+    case VoiceSample::MwEnter: return "MwEnter.ogg";
+    case VoiceSample::MwExitLeft: return "MwExitLeft.ogg";
+    case VoiceSample::MwExit: return "MwExit.ogg";
+    case VoiceSample::MwExitRight: return "MwExitRight.ogg";
+    case VoiceSample::RbBack: return "RbBack.ogg";
+    case VoiceSample::RbCross: return "RbCross.ogg";
+    case VoiceSample::RbExit1: return "RbExit1.ogg";
+    case VoiceSample::RbExit2: return "RbExit2.ogg";
+    case VoiceSample::RbExit3: return "RbExit3.ogg";
+    case VoiceSample::RbExit4: return "RbExit4.ogg";
+    case VoiceSample::RbExit5: return "RbExit5.ogg";
+    case VoiceSample::RbExit6: return "RbExit6.ogg";
+    case VoiceSample::RbLeft: return "RbLeft.ogg";
+    case VoiceSample::RbRight: return "RbRight.ogg";
+    case VoiceSample::RoadEnd: return "RoadEnd.ogg";
+    case VoiceSample::RouteCalculated: return "RouteCalculated.ogg";
+    case VoiceSample::RouteDeviated: return "RouteDeviated.ogg";
+    case VoiceSample::SharpLeft: return "SharpLeft.ogg";
+    case VoiceSample::SharpRight: return "SharpRight.ogg";
+    case VoiceSample::Straight: return "Straight.ogg";
+    case VoiceSample::TakeFerry: return "TakeFerry.ogg";
+    case VoiceSample::Then: return "Then.ogg";
+    case VoiceSample::TryUTurn: return "TryUTurn.ogg";
+    case VoiceSample::TurnLeft: return "TurnLeft.ogg";
+    case VoiceSample::TurnRight: return "TurnRight.ogg";
+    case VoiceSample::UTurn: return "UTurn.ogg";
+    case VoiceSample::Yards: return "Yards.ogg";
+    case VoiceSample::Take2ndLeft: return "Take2ndLeft.ogg";
+    case VoiceSample::Take2ndRight: return "Take2ndRight.ogg";
+    case VoiceSample::Take3rdLeft: return "Take3rdLeft.ogg";
+    case VoiceSample::Take3rdRight: return "Take3rdRight.ogg";
+    case VoiceSample::Distance50: return "50.ogg";
+    case VoiceSample::Distance80: return "80.ogg";
+    case VoiceSample::Distance100: return "100.ogg";
+    case VoiceSample::Distance200: return "200.ogg";
+    case VoiceSample::Distance300: return "300.ogg";
+    case VoiceSample::Distance400: return "400.ogg";
+    case VoiceSample::Distance500: return "500.ogg";
+    case VoiceSample::Distance600: return "600.ogg";
+    case VoiceSample::Distance700: return "700.ogg";
+    case VoiceSample::Distance800: return "800.ogg";
+
+    default:
+      assert(false);
+      return "";
+  }
+}
+
+void NavigationModule::playerStateChanged(QMediaPlayer::State state)
+{
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Player state changed from incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
+
+  qDebug() << "Voice player state:" << mediaPlayer->state() << "(" << currentPlaylist->currentIndex() << "/" << currentPlaylist->mediaCount() << ")";
+  if (!voiceDir.isEmpty() &&
+      !nextMessage.empty() &&
+      state == QMediaPlayer::StoppedState) {
+
+    currentPlaylist->clear();
+
+    for (auto sample : nextMessage){
+      auto sampleUrl = QUrl::fromLocalFile(voiceDir + QDir::separator() + sampleFile(sample));
+      qDebug() << "Adding to playlist:" << sampleUrl;
+      currentPlaylist->addMedia(sampleUrl);
+    }
+    nextMessage.clear();
+    currentPlaylist->setCurrentIndex(0);
+    mediaPlayer->play();
+  }
+}
+
 void NavigationModule::locationChanged(osmscout::GeoCoord coord,
                                        bool horizontalAccuracyValid,
-                                       double horizontalAccuracy) {
+                                       double horizontalAccuracy)
+{
   if (thread!=QThread::currentThread()){
     qWarning() << "locationChanged" << this << "from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
