@@ -771,17 +771,15 @@ bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePositio
     Distance nextStepDistance = GetSphericalDistance(vehiclePosition.getCoord(), *vehiclePosition.getNextStepCoord());
 
     double mag;
-    if (nextStepDistance > Kilometers(2)) {
-      mag = pow(2.0, 13); // Magnification::magDetail;
-    } else if (nextStepDistance > Meters(1500)) {
+    if (nextStepDistance > Kilometers(4)) {
       mag = pow(2.0, 14); // Magnification::magClose;
-    } else if (nextStepDistance > Meters(1000)) {
+    } else if (nextStepDistance > Meters(2000)) {
       mag = pow(2.0, 14.25);
-    } else if (nextStepDistance > Meters(750)) {
+    } else if (nextStepDistance > Meters(1000)) {
       mag = pow(2.0, 14.5);
-    } else if (nextStepDistance > Meters(500)) {
+    } else if (nextStepDistance > Meters(750)) {
       mag = pow(2.0, 14.75);
-    } else if (nextStepDistance > Meters(400)) {
+    } else if (nextStepDistance > Meters(500)) {
       mag = pow(2.0, 15); // Magnification::magCloser;
     } else if (nextStepDistance > Meters(300)) {
       mag = pow(2.0, 15.5);
