@@ -176,6 +176,11 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
       position++;
     }
 
+    // do not care of result outside the limit
+    if (position > resultLimit) {
+      continue;
+    }
+
     emit beginInsertRows(QModelIndex(), position, position);
     locations.insert(position, new LocationEntry(location));
     qDebug() << "Put " << location.getObjectType() << location.getLabel() << " to position: " << position << "(distance" << distance.AsMeter() << " m)";
