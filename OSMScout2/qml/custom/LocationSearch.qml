@@ -234,33 +234,44 @@ LineEdit {
         function locationRank(loc){
 
             if (loc.type=="coordinate"){
+                // when location is GPS position, show it first
                 return 1;
             } else if (loc.type=="object"){
-                var rank=1;
 
+                // set rank by object type
+                var typeRank=0.5;
                 if (loc.objectType=="boundary_country"){
-                    rank*=1;
+                    typeRank=1;
                 }else if (loc.objectType=="boundary_state"){
-                    rank*=0.93;
+                    typeRank=0.93;
                 } else if (loc.objectType=="boundary_administrative" ||
                            loc.objectType=="place_town"){
-                    rank*=0.9;
+                    typeRank=0.9;
                 } else if (loc.objectType=="highway_residential" ||
                            loc.objectType=="address"){
-                    rank*=0.8;
+                    typeRank=0.8;
                 } else if (loc.objectType=="railway_station" ||
                            loc.objectType=="railway_tram_stop" ||
                            loc.objectType=="railway_subway_entrance" ||
                            loc.objectType=="highway_bus_stop"
                           ){
-                    rank*=0.7;
-                }else{
-                    rank*=0.5;
+                    typeRank=0.7;
                 }
-                var distance=loc.distanceTo(searchCenterLat, searchCenterLon);
-                rank*= 1 / Math.log( (distance/1000) + Math.E);
 
-                //console.log("rank " + loc.label + ": " + rank + "");
+                // near objects with higher rank
+                var distance=loc.distanceTo(searchCenterLat, searchCenterLon);
+                var distanceRank = 1 / Math.log( (distance/1000) + Math.E);
+
+                // better match with higher rank
+                var matchRank=0.5;
+                if (loc.label==suggestionModel.pattern){
+                    matchRank=1;
+                } else if (loc.label.startsWith(suggestionModel.pattern)){
+                    matchRank=0.75;
+                }
+
+                var rank = typeRank * distanceRank * matchRank;
+                // console.log("rank of " + loc.label + ": " + typeRank + " * " + distanceRank + " * " + matchRank + " = " + rank + "");
                 return rank;
             }
 
