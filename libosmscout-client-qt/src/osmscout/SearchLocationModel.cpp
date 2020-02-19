@@ -115,6 +115,10 @@ void LocationListModel::onSearchResult(const QString searchPattern,
           args << engine->newQObject(new LocationEntry(location));
           args << engine->newQObject(new LocationEntry(*secondLocation));
           QJSValue result = equalsFn.call(args);
+          if (result.isError()){
+            qWarning() << "Equals failed: " << result.toString();
+            break;
+          }
           if (result.isBool() && result.toBool()){
 
             // qDebug() << "Merge " << location.getLabel() << " to location " << secondLocation->getLabel();
@@ -147,6 +151,10 @@ void LocationListModel::onSearchResult(const QString searchPattern,
         args << engine->newQObject(new LocationEntry(location));
         args << engine->newQObject(new LocationEntry(*secondLocation));
         QJSValue result = compareFn.call(args);
+        if (result.isError()){
+          qWarning() << "Compare failed: " << result.toString();
+          break;
+        }
         if (result.isNumber() && result.toNumber() <= 0){
           break;
         }
