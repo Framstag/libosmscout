@@ -718,6 +718,59 @@ public:
   }
 };
 
+inline bool elem_equal(std::string const & name, std::string const & unqualified_name)
+{
+  size_t e = unqualified_name.size();
+  size_t v = name.size();
+  if (e == v) {
+    return (name == unqualified_name);
+  } else if (e < v) {
+    size_t pos = name.find(':');
+    if (pos != std::string::npos && ++pos < v) {
+      return (name.compare(pos, std::string::npos, unqualified_name) == 0);
+    }
+  }
+  return false;
+}
+
+class TrkExtensionContext : public GpxParserContext {
+private:
+  Track &track;
+public:
+  TrkExtensionContext(xmlParserCtxtPtr ctxt, Track &track, GpxParser &parser) :
+      GpxParserContext(ctxt, parser), track(track) {}
+
+  ~TrkExtensionContext() override
+  {
+  }
+
+  const char *ContextName() const override
+  {
+    return "TrkExtensions";
+  }
+
+  GpxParserContext* StartElement(const std::string &name,
+                                 const std::unordered_map<std::string, std::string> &atts) override
+  {
+    if (elem_equal(name, "TrackExtension")){
+      return new TrkExtensionContext(ctxt, track, parser);
+    } else if (elem_equal(name, "DisplayColor")){
+      return new SimpleValueContext("DisplayColorContext", ctxt, parser, [&](const std::string &value){
+        std::string colorString=UTF8StringToLower(value);
+        Color color;
+        if (!Color::FromHexString(colorString, color) &&
+            !Color::FromW3CKeywordString(colorString, color)) {
+          osmscout::log.Warn() << "Not a valid color value: " << colorString;
+          return;
+        }
+        track.displayColor=std::make_optional<osmscout::Color>(color);
+      });
+    }
+
+    return nullptr; // silently ignore unknown elements
+  }
+};
+
 class TrkContext : public GpxParserContext {
 private:
   Track track;
@@ -753,6 +806,8 @@ public:
 
     if (name=="trkseg"){
       return new TrkSegContext(ctxt, track, parser);
+    } else if (name=="extensions"){
+      return new TrkExtensionContext(ctxt, track, parser);
     }
 
     return nullptr; // silently ignore unknown elements

@@ -43,7 +43,17 @@ namespace osmscout {
   const Color Color::TEAL(0/255,128/255,128/255);
   const Color Color::AQUA(0/255,255/255,255/255);
 
+  const Color Color::LIGHT_GRAY(211/255,211/255,211/255);
+  const Color Color::DARK_GRAY(169/255,169/255,169/255);
+  const Color Color::DARK_RED(139/255,0/255,0/255);
+  const Color Color::DARK_GREEN(0/255,100/255,0/255);
+  const Color Color::DARK_YELLOW(255/255,215/255,0/255);
+  const Color Color::DARK_BLUE(0/255,0/255,139/255);
+  const Color Color::DARK_FUCHSIA(139/255,0/255,139/255);
+  const Color Color::DARK_AQUA(0/255,139/255,139/255);
+
   const Color Color::LUCENT_WHITE(1.0,1.0,1.0,1.0);
+
 
   static char GetHexChar(size_t value)
   {
@@ -178,7 +188,15 @@ namespace osmscout {
         {"navy", Color::NAVY}, // #000080
         {"blue", Color::BLUE}, // #0000FF
         {"teal", Color::TEAL}, // #008080
-        {"aqua", Color::AQUA}, {"cyan", Color::AQUA} // #00FFFF
+        {"aqua", Color::AQUA}, {"cyan", Color::AQUA}, // #00FFFF
+        {"lightgray", Color::LIGHT_GRAY}, {"lightgrey", Color::LIGHT_GRAY}, // #D3D3D3
+        {"darkgray", Color::DARK_GRAY}, {"darkgrey", Color::DARK_GRAY}, // #A9A9A9
+        {"darkred", Color::DARK_RED}, // #8B0000
+        {"darkgreen", Color::DARK_GREEN}, // #006400
+        {"darkyellow", Color::DARK_YELLOW}, // #FFD700
+        {"darkblue", Color::DARK_BLUE}, // #00008B
+        {"darkfuchsia", Color::DARK_FUCHSIA}, {"darkmagenta", Color::DARK_FUCHSIA},// #8B008B
+        {"darkaqua", Color::DARK_AQUA}, {"darkcyan", Color::DARK_AQUA} // #008B8B
     };
 
     auto it=w3cColorKeywords.find(colorKeyword);
