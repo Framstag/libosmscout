@@ -36,18 +36,13 @@ MapDownloadJob::MapDownloadJob(QNetworkAccessManager *webCtrl,
                                AvailableMapsModelMap map,
                                QDir target,
                                bool replaceExisting):
-  webCtrl(webCtrl), map(map), target(target),
-  replaceExisting(replaceExisting)
+    DownloadJob(webCtrl, target, replaceExisting),
+    map(map)
 {
 }
 
 MapDownloadJob::~MapDownloadJob()
 {
-  for (auto job:jobs){
-    delete job;
-  }
-  jobs.clear();
-
   if (started && !successful){
     // delete partial database
     MapDirectory dir(target);
@@ -72,13 +67,12 @@ void MapDownloadJob::start()
     return;
   }
 
-  started = true;
   if (!target.mkpath(target.path())) {
     qWarning() << "Can't create directory" << target.canonicalPath() << "!";
     onJobFailed("Can't create directory", false);
     return;
   }
-  
+
   QStorageInfo storage=QStorageInfo(target);
   if (storage.bytesAvailable() > 0 && (uint64_t)storage.bytesAvailable() < map.getSize()){
     qWarning() << "Free space" << storage.bytesAvailable() << "bytes is less than map size (" << map.getSize() << ")!";
@@ -130,94 +124,7 @@ void MapDownloadJob::start()
   // directory is not recognized as valid map
   fileNames << "types.dat";
 
-  for (auto fileName:fileNames){
-    auto job=new FileDownloader(webCtrl, map.getProvider().getUri()+"/"+map.getServerDirectory()+"/"+fileName, target.filePath(fileName));
-    connect(job, &FileDownloader::finished, this, &MapDownloadJob::onJobFinished);
-    connect(job, &FileDownloader::error, this, &MapDownloadJob::onJobFailed);
-    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::downloadProgress);
-    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::onDownloadProgress);
-    jobs << job;
-  }
-  started=true;
-  downloadNextFile();
-}
-
-void MapDownloadJob::cancel()
-{
-  if (!done){
-    canceledByUser=true;
-    onJobFailed("Canceled by user", false);
-  }
-}
-
-void MapDownloadJob::onDownloadProgress(uint64_t)
-{
-  // reset error message
-  error = "";
-}
-
-void MapDownloadJob::onJobFailed(QString errorMessage, bool recoverable){
-  osmscout::log.Warn() << "Download failed with the error: "
-                       << errorMessage.toStdString() << " "
-                       << (recoverable? "(recoverable)": "(not recoverable)");
-
-  if (recoverable){
-    error = errorMessage;
-    emit downloadProgress();
-  }else{
-    done = true;
-    error = errorMessage;
-    if (canceledByUser) {
-      emit canceled();
-    }else{
-      emit failed(errorMessage);
-    }
-  }
-}
-
-void MapDownloadJob::onJobFinished(QString path)
-{
-  if (!jobs.isEmpty()) {
-    FileDownloader* job = jobs.first();
-    jobs.pop_front();
-    assert(job->getFilePath()==path);
-    unused(path);
-    downloadedBytes += job->getBytesDownloaded();
-    job->deleteLater();
-  }
-  
-  downloadNextFile();
-}
-
-void MapDownloadJob::downloadNextFile()
-{
-  if (!jobs.isEmpty()) {
-    jobs.first()->startDownload();
-    emit downloadProgress();
-  } else {
-    done = true;
-    successful = true;
-    emit finished();
-  }
-}
-
-double MapDownloadJob::getProgress()
-{
-  double expected=expectedSize();
-  uint64_t downloaded=downloadedBytes;
-  for (auto job:jobs){
-    downloaded+=job->getBytesDownloaded();
-  }
-  if (expected==0.0)
-    return 0;
-  return (double)downloaded/expected;
-}
-
-QString MapDownloadJob::getDownloadingFile()
-{
-  if (!jobs.isEmpty())
-    return jobs.first()->getFileName();
-  return "";
+  DownloadJob::start(map.getProvider().getUri()+"/"+map.getServerDirectory(), fileNames);
 }
 
 MapDirectory::MapDirectory(QDir dir):
