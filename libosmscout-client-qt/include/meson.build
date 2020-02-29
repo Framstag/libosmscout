@@ -46,6 +46,7 @@ osmscoutclientqtHeader = [
             'osmscout/NearPOIModel.h',
             'osmscout/POILookupModule.h',
             'osmscout/InstalledMapsModel.h',
+            'osmscout/VoiceProvider.h'
           ]
 
 install_headers(osmscoutclientqtHeader)

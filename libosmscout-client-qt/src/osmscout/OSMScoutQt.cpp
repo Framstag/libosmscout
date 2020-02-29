@@ -81,6 +81,9 @@ bool OSMScoutQtBuilder::Init()
   if (!mapProviders.isEmpty()){
     settings->loadMapProviders(mapProviders);
   }
+  if (!voiceProviders.isEmpty()){
+    settings->loadVoiceProviders(voiceProviders);
+  }
 
   // setup style sheet
   if (styleSheetFileConfigured){
@@ -154,7 +157,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<OverlayNode*>("OverlayNode*");
   qRegisterMetaType<QList<LookupModule::ObjectInfo>>("QList<LookupModule::ObjectInfo>");
 
-  // regiester osmscout types for usage in QML
+  // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
   qmlRegisterType<LocationEntry>(uri, versionMajor, versionMinor, "LocationEntry");
   qmlRegisterType<LocationInfoModel>(uri, versionMajor, versionMinor, "LocationInfoModel");
@@ -273,6 +276,14 @@ SettingsRef OSMScoutQt::GetSettings() const
 MapManagerRef OSMScoutQt::GetMapManager() const
 {
   return mapManager;
+}
+
+VoiceManagerRef OSMScoutQt::GetVoiceManager()
+{
+  if (!voiceManager){
+    voiceManager = std::make_shared<VoiceManager>();
+  }
+  return voiceManager;
 }
 
 QThread *OSMScoutQt::makeThread(QString name)

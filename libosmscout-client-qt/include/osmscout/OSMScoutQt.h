@@ -49,6 +49,7 @@ private:
 
   QString onlineTileProviders;
   QString mapProviders;
+  QString voiceProviders;
   QStringList mapLookupDirectories;
   QString basemapLookupDirectory;
   QString cacheLocation;
@@ -89,6 +90,12 @@ public:
   inline OSMScoutQtBuilder& WithMapProviders(QString mapProviders)
   {
     this->mapProviders=mapProviders;
+    return *this;
+  }
+
+  inline OSMScoutQtBuilder& WithVoiceProviders(QString voiceProviders)
+  {
+    this->voiceProviders=voiceProviders;
     return *this;
   }
 

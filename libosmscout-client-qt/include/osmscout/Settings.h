@@ -28,6 +28,7 @@
 #include <osmscout/InputHandler.h>
 #include <osmscout/OnlineTileProvider.h>
 #include <osmscout/MapProvider.h>
+#include <osmscout/VoiceProvider.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -92,6 +93,7 @@ private:
   QMap<QString, OnlineTileProvider> onlineProviderMap;
   QList<OnlineTileProvider> onlineProviders;
   QList<MapProvider> mapProviders;
+  QList<VoiceProvider> voiceProviders;
 
 public:
   Settings(QSettings *providedStorage=nullptr);
@@ -112,12 +114,14 @@ public:
   const OnlineTileProvider GetOnlineTileProvider() const; 
 
   const QList<MapProvider> GetMapProviders() const;
+  const QList<VoiceProvider> GetVoiceProviders() const;
 
   const QString GetOnlineTileProviderId() const; 
   void SetOnlineTileProviderId(QString id);
   
   bool loadOnlineTileProviders(QString path);
   bool loadMapProviders(QString path);
+  bool loadVoiceProviders(QString path);
   
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);

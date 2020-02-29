@@ -97,12 +97,17 @@ void Settings::SetOnlineTilesEnabled(bool b)
 
 const QList<OnlineTileProvider> Settings::GetOnlineProviders() const
 {
-    return onlineProviders;
+  return onlineProviders;
 }
 
 const QList<MapProvider> Settings::GetMapProviders() const
 {
-    return mapProviders;
+  return mapProviders;
+}
+
+const QList<VoiceProvider> Settings::GetVoiceProviders() const
+{
+  return voiceProviders;
 }
 
 const OnlineTileProvider Settings::GetOnlineTileProvider() const
@@ -165,30 +170,44 @@ bool Settings::loadOnlineTileProviders(QString path)
     return true;
 }
 
+namespace { // anonymous namespace
+
+template <typename Provider>
+bool loadResourceProviders(const QString &path, QList<Provider> &providers)
+{
+  QFile loadFile(path);
+  if (!loadFile.open(QIODevice::ReadOnly)) {
+    qWarning() << "Couldn't open" << loadFile.fileName() << "file.";
+    return false;
+  }
+  qDebug() << "Loading providers from " << loadFile.fileName();
+
+  QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
+  for (auto obj: doc.array()){
+    Provider provider = Provider::fromJson(obj);
+    if (!provider.isValid()){
+      qWarning() << "Can't parse online provider from json value" << obj;
+    }else{
+      providers.append(provider);
+    }
+  }
+  return true;
+}
+}
+
 bool Settings::loadMapProviders(QString path)
 {
-    QFile loadFile(path);
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning() << "Couldn't open" << loadFile.fileName() << "file.";
-        return false;
-    }
-    qDebug() << "Loading map providers from " << loadFile.fileName();
-    
-    QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
-    for (auto obj: doc.array()){
-        MapProvider provider = MapProvider::fromJson(obj);
-        if (!provider.isValid()){
-            qWarning() << "Can't parse online provider from json value" << obj;
-        }else{    
-            mapProviders.append(provider);
-        }
-    }
-    return true;
+  return loadResourceProviders<MapProvider>(path, mapProviders);
+}
+
+bool Settings::loadVoiceProviders(QString path)
+{
+  return loadResourceProviders<VoiceProvider>(path, voiceProviders);
 }
 
 bool Settings::GetOfflineMap() const
 {
-    return storage->value("OSMScoutLib/Rendering/OfflineMap", true).toBool();
+  return storage->value("OSMScoutLib/Rendering/OfflineMap", true).toBool();
 }
 void Settings::SetOfflineMap(bool b)
 {

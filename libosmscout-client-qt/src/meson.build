@@ -43,5 +43,6 @@ osmscoutclientqtSrc = [
             'src/osmscout/NearPOIModel.cpp',
             'src/osmscout/POILookupModule.cpp',
             'src/osmscout/InstalledMapsModel.cpp',
+            'src/osmscout/VoiceProvider.cpp',
           ]
 

@@ -65,6 +65,7 @@ set(HEADER_FILES
     include/osmscout/NearPOIModel.h
     include/osmscout/POILookupModule.h
     include/osmscout/InstalledMapsModel.h
+    include/osmscout/VoiceProvider.h
     )
 
 set(SOURCE_FILES
@@ -112,6 +113,7 @@ set(SOURCE_FILES
     src/osmscout/NearPOIModel.cpp
     src/osmscout/POILookupModule.cpp
     src/osmscout/InstalledMapsModel.cpp
+    src/osmscout/VoiceProvider.cpp
     )
 
 if(IOS)
