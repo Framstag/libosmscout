@@ -46,6 +46,9 @@ osmscoutclientqtHeader = [
             'osmscout/NearPOIModel.h',
             'osmscout/POILookupModule.h',
             'osmscout/InstalledMapsModel.h',
+            'osmscout/Voice.h',
+            'osmscout/VoiceManager.h',
+            'osmscout/AvailableVoicesModel.h',
             'osmscout/VoiceProvider.h'
           ]
 

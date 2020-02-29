@@ -31,6 +31,7 @@
 #include <osmscout/StyleModule.h>
 #include <osmscout/NavigationModule.h>
 #include <osmscout/POILookupModule.h>
+#include <osmscout/VoiceManager.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -238,6 +239,7 @@ private:
   size_t          offlineTileCacheSize;
   QString         userAgent;
   std::atomic_int liveBackgroundThreads;
+  VoiceManagerRef voiceManager; // created lazy
 
 private:
   OSMScoutQt(SettingsRef settings,
@@ -293,6 +295,7 @@ public:
   DBThreadRef GetDBThread() const;
   SettingsRef GetSettings() const;
   MapManagerRef GetMapManager() const;
+  VoiceManagerRef GetVoiceManager();
 
   LookupModule* MakeLookupModule();
   MapRenderer* MakeMapRenderer(RenderingType type);

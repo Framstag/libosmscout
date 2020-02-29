@@ -175,7 +175,7 @@ public:
 
   void cancel();
 
-  virtual inline size_t expectedSize() const = 0;
+  virtual size_t expectedSize() const = 0;
 
   inline bool isDone() const
   {

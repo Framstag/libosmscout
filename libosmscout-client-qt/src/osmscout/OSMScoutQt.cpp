@@ -46,6 +46,7 @@
 #include <osmscout/NavigationModel.h>
 #include <osmscout/NearPOIModel.h>
 #include <osmscout/InstalledMapsModel.h>
+#include <osmscout/AvailableVoicesModel.h>
 
 namespace osmscout {
 
@@ -178,6 +179,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<TiledMapOverlay>(uri, versionMajor, versionMinor, "TiledMapOverlay");
   qmlRegisterType<NearPOIModel>(uri, versionMajor, versionMinor, "NearPOIModel");
   qmlRegisterType<InstalledMapsModel>(uri, versionMajor, versionMinor, "InstalledMapsModel");
+  qmlRegisterType<AvailableVoicesModel>(uri, versionMajor, versionMinor, "AvailableVoicesModel");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
