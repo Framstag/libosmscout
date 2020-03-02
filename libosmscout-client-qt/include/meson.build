@@ -49,7 +49,8 @@ osmscoutclientqtHeader = [
             'osmscout/Voice.h',
             'osmscout/VoiceManager.h',
             'osmscout/AvailableVoicesModel.h',
-            'osmscout/VoiceProvider.h'
+            'osmscout/VoiceProvider.h',
+            'osmscout/InstalledVoicesModel.h',
           ]
 
 install_headers(osmscoutclientqtHeader)

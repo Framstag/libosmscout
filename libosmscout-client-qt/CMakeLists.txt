@@ -69,6 +69,7 @@ set(HEADER_FILES
     include/osmscout/VoiceManager.h
     include/osmscout/AvailableVoicesModel.h
     include/osmscout/VoiceProvider.h
+    include/osmscout/InstalledVoicesModel.h
     )
 
 set(SOURCE_FILES
@@ -120,6 +121,7 @@ set(SOURCE_FILES
     src/osmscout/VoiceManager.cpp
     src/osmscout/AvailableVoicesModel.cpp
     src/osmscout/VoiceProvider.cpp
+    src/osmscout/InstalledVoicesModel.cpp
     )
 
 if(IOS)
