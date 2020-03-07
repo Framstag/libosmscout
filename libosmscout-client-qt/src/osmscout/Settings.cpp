@@ -396,6 +396,8 @@ QmlSettings::QmlSettings()
             this, &QmlSettings::OnlineTileProviderIdChanged);
     connect(settings.get(), &Settings::OfflineMapChanged,
             this, &QmlSettings::OfflineMapChanged);
+    connect(settings.get(), &Settings::StyleSheetFileChanged,
+            this, &QmlSettings::StyleSheetFileChanged);
     connect(settings.get(), &Settings::RenderSeaChanged,
             this, &QmlSettings::RenderSeaChanged);
     connect(settings.get(), &Settings::FontNameChanged,
@@ -459,6 +461,15 @@ bool QmlSettings::GetOfflineMap() const
 void QmlSettings::SetOfflineMap(bool b)
 {
     settings->SetOfflineMap(b);
+}
+
+QString QmlSettings::GetStyleSheetFile() const
+{
+    return settings->GetStyleSheetFile();
+}
+void QmlSettings::SetStyleSheetFile(const QString file)
+{
+    settings->SetStyleSheetFile(file);
 }
 
 bool QmlSettings::GetRenderSea() const
