@@ -253,15 +253,15 @@ void Settings::SetVoiceLookupDirectory(const QString &dir)
   }
 }
 
-const QString Settings::GetVoice() const
+const QString Settings::GetVoiceDir() const
 {
-  return storage->value("OSMScoutLib/Voice/Voice", "default").toString();
+  return storage->value("OSMScoutLib/Voice/VoiceDir", "disabled").toString();
 }
-void Settings::SetVoice(const QString &voice)
+void Settings::SetVoiceDir(const QString &voice)
 {
-  if (GetVoice() != voice){
-    storage->setValue("OSMScoutLib/Voice/Voice", voice);
-    emit VoiceChanged(voice);
+  if (GetVoiceDir() != voice){
+    storage->setValue("OSMScoutLib/Voice/VoiceDir", voice);
+    emit VoiceDirChanged(voice);
   }
 }
 

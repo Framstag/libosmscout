@@ -31,9 +31,12 @@ InstalledVoicesModel::InstalledVoicesModel()
 
   connect(voiceManager.get(), &VoiceManager::reloaded,
       this, &InstalledVoicesModel::update);
-  connect(settings.get(), &Settings::VoiceChanged,
-      this, &InstalledVoicesModel::onVoiceChanged);
+  connect(settings.get(), &Settings::VoiceDirChanged,
+          this, &InstalledVoicesModel::onVoiceChanged);
+  connect(settings.get(), &Settings::VoiceDirChanged,
+          this, &InstalledVoicesModel::voiceChanged);
 
+  voiceDir = settings->GetVoiceDir();
   update();
 }
 
@@ -62,8 +65,13 @@ void InstalledVoicesModel::update()
   endResetModel();
 }
 
-void InstalledVoicesModel::onVoiceChanged()
+void InstalledVoicesModel::onVoiceChanged(const QString dir)
 {
+  voiceDir = dir;
+  if (!QDir(voiceDir).exists()){
+    voiceDir.clear(); // disable voice
+  }
+
   QVector<int> roles;
   roles<<SelectedRole;
   emit dataChanged(createIndex(0,0), createIndex(voices.size()-1,0),roles);
@@ -97,11 +105,21 @@ QVariant InstalledVoicesModel::data(const QModelIndex &index, int role) const
     case DescriptionRole:
       return voice.getDescription();
     case SelectedRole:
-      return false; // TODO
+      return (voiceDir.isEmpty() && !voice.isValid()) ||
+             (voiceDir == voice.getDir().absolutePath());
     default:
       break;
   }
   return QVariant();
+}
+
+void InstalledVoicesModel::select(const QModelIndex &index)
+{
+  if (index.row() < 0 || index.row() >= voices.size()){
+    return;
+  }
+  auto voice=voices.at(index.row());
+  settings->SetVoiceDir(voice.getDir().absolutePath());
 }
 
 QHash<int, QByteArray> InstalledVoicesModel::roleNames() const

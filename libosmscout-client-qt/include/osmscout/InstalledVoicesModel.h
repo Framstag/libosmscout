@@ -40,11 +40,11 @@ class OSMSCOUT_CLIENT_QT_API InstalledVoicesModel : public QAbstractListModel {
   Q_OBJECT
 
 signals:
-
+  void voiceChanged(const QString);
 
 public slots:
   void update();
-  void onVoiceChanged();
+  void onVoiceChanged(const QString);
 
 public:
   InstalledVoicesModel();
@@ -68,7 +68,9 @@ public:
   virtual QHash<int, QByteArray> roleNames() const;
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
+  Q_INVOKABLE void select(const QModelIndex &index);
 private:
+  QString voiceDir;
   QList<Voice> voices;
   VoiceManagerRef voiceManager;
   SettingsRef settings;
