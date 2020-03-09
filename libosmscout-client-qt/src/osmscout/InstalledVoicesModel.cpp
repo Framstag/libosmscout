@@ -40,12 +40,25 @@ InstalledVoicesModel::InstalledVoicesModel()
 InstalledVoicesModel::~InstalledVoicesModel()
 {}
 
+namespace {
+bool itemLessThan(const Voice &i1, const Voice &i2)
+{
+  if (i1.getLang() != i2.getLang()) {
+    return i1.getLang().localeAwareCompare(i2.getLang()) < 0;
+  }
+  return i1.getName().localeAwareCompare(i2.getName()) < 0;
+}
+}
+
 void InstalledVoicesModel::update()
 {
   beginResetModel();
   voices.clear();
   voices<<Voice(); // no-voice placeholder
-  voices+=voiceManager->getInstalledVoices();
+  QList<Voice> installedVoices=voiceManager->getInstalledVoices();
+  // TODO: use std::sort after transition to c++17
+  qSort(installedVoices.begin(), installedVoices.end(), itemLessThan);
+  voices+=installedVoices;
   endResetModel();
 }
 

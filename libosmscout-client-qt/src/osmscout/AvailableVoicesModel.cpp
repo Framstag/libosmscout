@@ -83,9 +83,16 @@ void AvailableVoicesModel::reload()
   emit loadingChanged();
 }
 
+namespace {
 bool itemLessThan(const AvailableVoice *i1, const AvailableVoice *i2)
 {
+  assert(i1);
+  assert(i2);
+  if (i1->getLang() != i2->getLang()) {
+    return i1->getLang().localeAwareCompare(i2->getLang()) < 0;
+  }
   return i1->getName().localeAwareCompare(i2->getName()) < 0;
+}
 }
 
 void AvailableVoicesModel::listDownloaded(const VoiceProvider &provider, QNetworkReply* reply)
