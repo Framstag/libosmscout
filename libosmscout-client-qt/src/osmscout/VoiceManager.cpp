@@ -103,6 +103,22 @@ void VoiceManager::reload()
     }
   }
   emit reloaded();
+
+  // check if configured voice still exists
+  QString voiceDir = settings->GetVoiceDir();
+  if (!voiceDir.isEmpty()){
+    bool found=false;
+    for (const auto &v:installedVoices){
+      if (voiceDir==v.getDir().absolutePath()){
+        found = true;
+        break;
+      }
+    }
+    if (!found){
+      log.Warn() << "Voice " << voiceDir.toStdString() << " don't exists anymore, reset";
+      settings->SetVoiceDir("");
+    }
+  }
 }
 
 VoiceManager::~VoiceManager()
