@@ -122,6 +122,35 @@ void InstalledVoicesModel::select(const QModelIndex &index)
   settings->SetVoiceDir(voice.getDir().absolutePath());
 }
 
+void InstalledVoicesModel::playSample(const QModelIndex &index, const QStringList &sample)
+{
+  if (index.row() < 0 || index.row() >= voices.size()){
+    return;
+  }
+  auto voice=voices.at(index.row());
+  if (!voice.isValid() || !voice.getDir().exists()){
+    return;
+  }
+
+  if (mediaPlayer==nullptr){
+    assert(currentPlaylist==nullptr);
+    mediaPlayer = new QMediaPlayer(this);
+    currentPlaylist = new QMediaPlaylist(mediaPlayer);
+    mediaPlayer->setPlaylist(currentPlaylist);
+  }
+
+  currentPlaylist->clear();
+
+  for (auto file : sample){
+    auto sampleUrl = QUrl::fromLocalFile(voice.getDir().path() + QDir::separator() + file);
+    qDebug() << "Adding to playlist:" << sampleUrl;
+    currentPlaylist->addMedia(sampleUrl);
+  }
+
+  currentPlaylist->setCurrentIndex(0);
+  mediaPlayer->play();
+}
+
 QHash<int, QByteArray> InstalledVoicesModel::roleNames() const
 {
   QHash<int, QByteArray> roles=QAbstractListModel::roleNames();

@@ -25,6 +25,8 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QAbstractListModel>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
 
 namespace osmscout {
 
@@ -69,11 +71,16 @@ public:
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
   Q_INVOKABLE void select(const QModelIndex &index);
+  Q_INVOKABLE void playSample(const QModelIndex &index, const QStringList &sample);
 private:
   QString voiceDir;
   QList<Voice> voices;
   VoiceManagerRef voiceManager;
   SettingsRef settings;
+
+  // we setup QObject parents, objects are cleaned after Module destruction
+  QMediaPlaylist *currentPlaylist{nullptr};
+  QMediaPlayer *mediaPlayer{nullptr};
 };
 }
 #endif //OSMSCOUT_CLIENT_QT_INSTALLEDVOICESMODEL_H
