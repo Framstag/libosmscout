@@ -23,6 +23,7 @@
 #include <osmscout/VoiceProvider.h>
 
 #include <QObject>
+#include <QDir>
 
 namespace osmscout {
 
