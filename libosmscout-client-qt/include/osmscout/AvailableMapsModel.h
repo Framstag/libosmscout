@@ -58,7 +58,7 @@ public:
     QObject(o.parent()),
     valid(o.valid), name(o.name), path(o.path), description(o.description){};
 
-  virtual inline ~AvailableMapsModelItem(){}
+  virtual inline ~AvailableMapsModelItem() = default;
 
   inline AvailableMapsModelItem& operator=(const AvailableMapsModelItem &o)
   {

@@ -34,7 +34,7 @@ NavigationModule::NavigationModule(QThread *thread,
   connect(&timer, &QTimer::timeout, this, &NavigationModule::onTimeout);
 
   connect(settings.get(), &Settings::VoiceLookupDirectoryChanged, this, &NavigationModule::onVoiceChanged);
-  connect(settings.get(), &Settings::VoiceChanged, this, &NavigationModule::onVoiceChanged);
+  connect(settings.get(), &Settings::VoiceDirChanged, this, &NavigationModule::onVoiceChanged);
   onVoiceChanged("");
 }
 
@@ -214,9 +214,9 @@ void NavigationModule::onTimeout()
   ProcessMessages(engine.Process(routeUpdateMessage));
 }
 
-void NavigationModule::onVoiceChanged(const QString)
+void NavigationModule::onVoiceChanged(const QString dir)
 {
-  voiceDir = settings->GetVoiceLookupDirectory() + QDir::separator() + settings->GetVoice();
+  voiceDir = dir;
   if (!QDir(voiceDir).exists()){
     voiceDir.clear(); // disable voice
   }

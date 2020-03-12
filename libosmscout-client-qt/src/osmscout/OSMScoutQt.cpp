@@ -46,6 +46,8 @@
 #include <osmscout/NavigationModel.h>
 #include <osmscout/NearPOIModel.h>
 #include <osmscout/InstalledMapsModel.h>
+#include <osmscout/AvailableVoicesModel.h>
+#include <osmscout/InstalledVoicesModel.h>
 
 namespace osmscout {
 
@@ -80,6 +82,9 @@ bool OSMScoutQtBuilder::Init()
   }
   if (!mapProviders.isEmpty()){
     settings->loadMapProviders(mapProviders);
+  }
+  if (!voiceProviders.isEmpty()){
+    settings->loadVoiceProviders(voiceProviders);
   }
 
   // setup style sheet
@@ -154,7 +159,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<OverlayNode*>("OverlayNode*");
   qRegisterMetaType<QList<LookupModule::ObjectInfo>>("QList<LookupModule::ObjectInfo>");
 
-  // regiester osmscout types for usage in QML
+  // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
   qmlRegisterType<LocationEntry>(uri, versionMajor, versionMinor, "LocationEntry");
   qmlRegisterType<LocationInfoModel>(uri, versionMajor, versionMinor, "LocationInfoModel");
@@ -175,6 +180,8 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<TiledMapOverlay>(uri, versionMajor, versionMinor, "TiledMapOverlay");
   qmlRegisterType<NearPOIModel>(uri, versionMajor, versionMinor, "NearPOIModel");
   qmlRegisterType<InstalledMapsModel>(uri, versionMajor, versionMinor, "InstalledMapsModel");
+  qmlRegisterType<AvailableVoicesModel>(uri, versionMajor, versionMinor, "AvailableVoicesModel");
+  qmlRegisterType<InstalledVoicesModel>(uri, versionMajor, versionMinor, "InstalledVoicesModel");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
@@ -273,6 +280,14 @@ SettingsRef OSMScoutQt::GetSettings() const
 MapManagerRef OSMScoutQt::GetMapManager() const
 {
   return mapManager;
+}
+
+VoiceManagerRef OSMScoutQt::GetVoiceManager()
+{
+  if (!voiceManager){
+    voiceManager = std::make_shared<VoiceManager>();
+  }
+  return voiceManager;
 }
 
 QThread *OSMScoutQt::makeThread(QString name)

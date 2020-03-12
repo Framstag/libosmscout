@@ -31,6 +31,7 @@
 #include <QTime>
 #include <QFileInfo>
 #include <QTimer>
+#include <QDir>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -121,6 +122,94 @@ protected:
   void onError(const QString &err);
 
   bool restartDownload(); ///< Restart download if download retries are not used up
+};
+
+
+/**
+ * Class that provide abstraction for download job of multiple files in sequence.
+ */
+class OSMSCOUT_CLIENT_QT_API DownloadJob: public QObject
+{
+  Q_OBJECT
+
+protected:
+  QList<FileDownloader*>  jobs;
+  QNetworkAccessManager   *webCtrl;
+
+  QDir                    target;
+
+  bool                    done{false};
+  bool                    started{false};
+  bool                    successful{false};
+  bool                    canceledByUser{false};
+
+  uint64_t                downloadedBytes{0};
+
+  QString                 error;
+
+  bool                    replaceExisting;
+
+signals:
+  void finished(); // successfully
+  void failed(QString error);
+  void canceled();
+  void downloadProgress();
+
+public slots:
+  void onJobFailed(QString errorMessage, bool recoverable);
+  void onJobFinished(QString path);
+  void onDownloadProgress(uint64_t);
+  void downloadNextFile();
+
+public:
+  DownloadJob(QNetworkAccessManager *webCtrl, QDir target, bool replaceExisting);
+  virtual ~DownloadJob();
+
+  DownloadJob(const DownloadJob&) = delete;
+  DownloadJob(DownloadJob&&) = delete;
+
+  DownloadJob& operator=(const DownloadJob&) = delete;
+  DownloadJob& operator==(const DownloadJob&&) = delete;
+
+  void start(const QString &serverBasePath, const QStringList &files);
+
+  void cancel();
+
+  virtual size_t expectedSize() const = 0;
+
+  inline bool isDone() const
+  {
+    return done;
+  }
+
+  inline bool isSuccessful() const
+  {
+    return successful;
+  }
+
+  inline bool isDownloading() const
+  {
+    return started && !done;
+  }
+
+  inline QString getError() const
+  {
+    return error;
+  }
+
+  inline bool isReplaceExisting() const
+  {
+    return replaceExisting;
+  }
+
+  inline QDir getDestinationDirectory() const
+  {
+    return target;
+  }
+
+  double getProgress();
+  QString getDownloadingFile();
+
 };
 
 }

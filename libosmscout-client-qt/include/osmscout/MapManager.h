@@ -43,38 +43,11 @@ namespace osmscout {
  * over http. 
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public QObject
+class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public DownloadJob
 {
   Q_OBJECT
 
-  QList<FileDownloader*>  jobs;
-  QNetworkAccessManager   *webCtrl;
-  
   AvailableMapsModelMap   map;
-  QDir                    target;
-  
-  bool                    done{false};
-  bool                    started{false};
-  bool                    successful{false};
-  bool                    canceledByUser{false};
-
-  uint64_t                downloadedBytes{0};
-
-  QString                 error;
-
-  bool                    replaceExisting;
-
-signals:
-  void finished(); // successfully
-  void failed(QString error);
-  void canceled();
-  void downloadProgress();
-
-public slots:
-  void onJobFailed(QString errorMessage, bool recoverable);
-  void onJobFinished(QString path);
-  void downloadNextFile();
-  void onDownloadProgress(uint64_t);
 
 public:
   static const char* FILE_METADATA;
@@ -83,8 +56,6 @@ public:
   virtual ~MapDownloadJob();
   
   void start();
-
-  void cancel();
 
   inline QString getMapName() const
   {
@@ -96,43 +67,10 @@ public:
     return map.getPath();
   }
 
-  inline size_t expectedSize() const
+  virtual inline size_t expectedSize() const
   {
     return map.getSize();
   }
-
-  inline QDir getDestinationDirectory() const
-  {
-    return target;
-  }
-
-  inline bool isDone() const
-  {
-    return done;
-  }
-
-  inline bool isSuccessful() const
-  {
-    return successful;
-  }
-
-  inline bool isDownloading() const
-  {
-    return started && !done;
-  }
-
-  inline QString getError() const
-  {
-    return error;
-  }
-
-  inline bool isReplaceExisting() const
-  {
-    return replaceExisting;
-  }
-
-  double getProgress();
-  QString getDownloadingFile();
 };
 
 /**

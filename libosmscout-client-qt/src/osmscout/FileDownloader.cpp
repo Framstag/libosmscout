@@ -285,4 +285,110 @@ void FileDownloader::onTimeout()
   }
 }
 
+DownloadJob::DownloadJob(QNetworkAccessManager *webCtrl, QDir target, bool replaceExisting):
+  webCtrl{webCtrl}, target{target}, replaceExisting{replaceExisting}
+{
+}
+
+DownloadJob::~DownloadJob()
+{
+  for (auto job:jobs){
+    delete job;
+  }
+  jobs.clear();
+}
+
+void DownloadJob::start(const QString &serverBasePath, const QStringList &fileNames)
+{
+  for (auto fileName:fileNames){
+    auto job=new FileDownloader(webCtrl, serverBasePath+"/"+fileName, target.filePath(fileName));
+    connect(job, &FileDownloader::finished, this, &MapDownloadJob::onJobFinished);
+    connect(job, &FileDownloader::error, this, &MapDownloadJob::onJobFailed);
+    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::downloadProgress);
+    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::onDownloadProgress);
+    jobs << job;
+  }
+  started=true;
+  downloadNextFile();
+}
+
+void DownloadJob::cancel()
+{
+  if (!done){
+    canceledByUser=true;
+    onJobFailed("Canceled by user", false);
+  }
+}
+
+void DownloadJob::onDownloadProgress(uint64_t)
+{
+  // reset error message
+  error = "";
+}
+
+void DownloadJob::onJobFailed(QString errorMessage, bool recoverable){
+  osmscout::log.Warn() << "Download failed with the error: "
+                       << errorMessage.toStdString() << " "
+                       << (recoverable? "(recoverable)": "(not recoverable)");
+
+  if (recoverable){
+    error = errorMessage;
+    emit downloadProgress();
+  }else{
+    done = true;
+    error = errorMessage;
+    if (canceledByUser) {
+      emit canceled();
+    }else{
+      emit failed(errorMessage);
+    }
+  }
+}
+
+void DownloadJob::onJobFinished(QString path)
+{
+  if (!jobs.isEmpty()) {
+    FileDownloader* job = jobs.first();
+    jobs.pop_front();
+    assert(job->getFilePath()==path);
+    unused(path);
+    downloadedBytes += job->getBytesDownloaded();
+    job->deleteLater();
+  }
+
+  downloadNextFile();
+}
+
+void DownloadJob::downloadNextFile()
+{
+  if (!jobs.isEmpty()) {
+    jobs.first()->startDownload();
+    emit downloadProgress();
+  } else {
+    done = true;
+    successful = true;
+    emit finished();
+  }
+}
+
+double DownloadJob::getProgress()
+{
+  double expected=expectedSize();
+  uint64_t downloaded=downloadedBytes;
+  for (auto job:jobs){
+    downloaded+=job->getBytesDownloaded();
+  }
+  if (expected==0.0)
+    return 0;
+  return (double)downloaded/expected;
+}
+
+QString DownloadJob::getDownloadingFile()
+{
+  if (!jobs.isEmpty())
+    return jobs.first()->getFileName();
+  return "";
+}
+
+
 }
