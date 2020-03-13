@@ -35,7 +35,7 @@ NavigationModule::NavigationModule(QThread *thread,
 
   connect(settings.get(), &Settings::VoiceLookupDirectoryChanged, this, &NavigationModule::onVoiceChanged);
   connect(settings.get(), &Settings::VoiceDirChanged, this, &NavigationModule::onVoiceChanged);
-  onVoiceChanged("");
+  onVoiceChanged(settings->GetVoiceDir());
 }
 
 NavigationModule::~NavigationModule()
