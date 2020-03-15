@@ -172,7 +172,10 @@ public:
 
 private:
   Units units{Units::Metrics};
-  PositionAgent::PositionState prevState{PositionAgent::PositionState::OnRoute};
+
+  // state used for triggering GpsFound / GpsLost messages
+  bool prevGpsSignal{true};
+  Timestamp lastSeenGpsSignal{Timestamp::min()};
 
   MessageStruct lastMessage;
   Distance lastMessagePosition; // where we trigger last message (it is before lastMessage.disntace usually)
