@@ -309,7 +309,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   RouteDescriptionPostprocessor postprocessor;
   auto prevRoteNode = positionMessage->position.routeNode;
   auto coord = positionMessage->position.coord;
-  // our currect distance from route start
+  // our current distance from route start
   Distance distanceFromStart = prevRoteNode->GetDistance() + GetEllipsoidalDistance(coord, prevRoteNode->GetLocation());
   PostprocessorCallback callback(distanceFromStart, distanceFromStart + Kilometers(2));
 
