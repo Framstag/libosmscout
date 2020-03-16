@@ -278,27 +278,37 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   }
 
   using VoiceSample = VoiceInstructionMessage::VoiceSample;
+  using namespace std::chrono;
+  Timestamp now = positionMessage->timestamp;
 
-  if (prevState == PositionAgent::PositionState::NoGpsSignal &&
-      positionMessage->position.state != PositionAgent::PositionState::NoGpsSignal){
+  // triggering GpsFound / GpsLost messages
+  bool gpsSignal = positionMessage->position.state != PositionAgent::PositionState::NoGpsSignal;
+
+  // PositionAgent reports NoGpsSignal when there is no udpate for longer than 2 seconds
+  // or accuracy is lower than 100 meters. It is fine for UI but too strict for voice
+  // notification. For that reason we are using lastSeenGpsSignal time
+  // and triggers GpsLost message after longer time.
+  if (!prevGpsSignal && gpsSignal){
     // GpsFound
     result.push_back(std::make_shared<VoiceInstructionMessage>(
         positionMessage->timestamp,
         std::vector<VoiceSample>{VoiceSample::GpsFound}));
-  } else if ((prevState == PositionAgent::PositionState::OnRoute || prevState == PositionAgent::PositionState::OffRoute) &&
-             positionMessage->position.state == PositionAgent::PositionState::NoGpsSignal){
+    prevGpsSignal = gpsSignal;
+  } else if (prevGpsSignal && !gpsSignal && (now - lastSeenGpsSignal) > seconds(10)){
     // GpsLost
     result.push_back(std::make_shared<VoiceInstructionMessage>(
         positionMessage->timestamp,
         std::vector<VoiceSample>{VoiceSample::GpsLost}));
+    prevGpsSignal = gpsSignal;
+  }
+  if (gpsSignal){
+    lastSeenGpsSignal = now;
   }
 
   if (!positionMessage->route){
     // we don't have route description yet
     return result;
   }
-
-  prevState = positionMessage->position.state;
 
   if (positionMessage->position.state != PositionAgent::PositionState::OnRoute &&
       positionMessage->position.state != PositionAgent::PositionState::EstimateInTunnel) {
@@ -309,7 +319,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   RouteDescriptionPostprocessor postprocessor;
   auto prevRoteNode = positionMessage->position.routeNode;
   auto coord = positionMessage->position.coord;
-  // our currect distance from route start
+  // our current distance from route start
   Distance distanceFromStart = prevRoteNode->GetDistance() + GetEllipsoidalDistance(coord, prevRoteNode->GetLocation());
   PostprocessorCallback callback(distanceFromStart, distanceFromStart + Kilometers(2));
 
