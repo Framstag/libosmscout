@@ -53,6 +53,8 @@ namespace osmscout {
   std::string PositionAgent::Position::StateStr() const
   {
     switch (state) {
+      case Uninitialised:
+        return "Uninitialised";
       case NoGpsSignal:
         return "NoGpsSignal";
       case OnRoute:
@@ -140,6 +142,7 @@ namespace osmscout {
             if (distance<nearest){
               nearest=distance;
               position.coord=nearestPoint;
+              position.state=PositionAgent::OffRoute;
               position.databaseId=dbId;
               position.typeConfig=objs.typeConfig;
               position.way=w.second;
@@ -223,10 +226,10 @@ namespace osmscout {
     }
 
     if (!Includes(routableObjects,gps.GetGeoBox()) ||
-        (position.state!=PositionState::NoGpsSignal && !Includes(routableObjects,position.coord))){
+        (position.state!=PositionState::Uninitialised && !Includes(routableObjects,position.coord))){
       // we don't have routable data for current position (real or estimated), request data
       GeoBox requestBox = GeoBox::BoxByCenterAndRadius(gps.position, std::max(Meters(500), gps.horizontalAccuracy));
-      if (position.state!=PositionState::NoGpsSignal) {
+      if (position.state!=PositionState::Uninitialised) {
         // include objects around estimated position
         requestBox.Include(GeoBox::BoxByCenterAndRadius(position.coord, Meters(500)));
       }
@@ -263,7 +266,6 @@ namespace osmscout {
         position.area=routableObjects->GetArea(foundNode->GetDatabaseId(), foundNode->GetPathObject());
       }else{
         position=findNearest(gps.position, routableObjects);
-        position.state=OffRoute;
         position.routeNode=route->Nodes().begin(); // reset route position
       }
     } else {
@@ -351,7 +353,7 @@ namespace osmscout {
 
       } while (moveEstimate.AsMeter() > 0);
 
-      if (position.state!=EstimateInTunnel){
+      if (position.state!=EstimateInTunnel && position.state!=Uninitialised){
         position.state=NoGpsSignal;
       }
     }
@@ -359,8 +361,9 @@ namespace osmscout {
     log.Debug() << "GPS signal state: " << gps.GetStateStr(now) << ", "
                 << "position state: " << position.StateStr() << ", "
                 << "position " << position.coord.GetDisplayText();
-
-    result.push_back(std::make_shared<PositionMessage>(now, route, position));
+    if (position.state!=Uninitialised) { // don't publish unitialised position
+      result.push_back(std::make_shared<PositionMessage>(now, route, position));
+    }
 
     lastUpdate = now;
     return result;

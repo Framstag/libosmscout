@@ -168,6 +168,8 @@ void NavigationModel::setRoute(QObject *o)
 
   beginResetModel();
   routeSteps.clear();
+  nextRouteStep=RouteStep();
+  vehicleState=PositionAgent::Uninitialised;
   if (route) {
     auto steps = route.routeSteps();
     routeSteps.reserve(steps.size());

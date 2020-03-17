@@ -55,14 +55,15 @@ namespace osmscout {
     };
 
     enum PositionState {
-      NoGpsSignal,
-      OnRoute,
-      OffRoute,
-      EstimateInTunnel
+      Uninitialised, // position is uninitialised yet
+      NoGpsSignal, // last know position is used, may be inaccurate
+      OnRoute, // vehicle is on the planned route
+      OffRoute, // vehicle is out off planned route, route should be re-computed
+      EstimateInTunnel // vehicle positin is estimated in tunnel
     };
 
     struct OSMSCOUT_API Position {
-      PositionState state{PositionState::NoGpsSignal};
+      PositionState state{PositionState::Uninitialised};
       GeoCoord coord;
       std::list<RouteDescription::Node>::const_iterator routeNode; // last passed node on the route
 

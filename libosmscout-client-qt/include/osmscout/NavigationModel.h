@@ -135,7 +135,7 @@ public:
 
   inline VehiclePosition* getVehiclePosition() const
   {
-    if (!route){
+    if (!route || vehicleState==PositionAgent::Uninitialised){
       return nullptr;
     }
     return new VehiclePosition(vehicle, vehicleState, vehicleCoord, vehicleBearing,
@@ -167,7 +167,7 @@ private:
   QtRouteData       route;
 
   Vehicle vehicle;
-  PositionAgent::PositionState vehicleState;
+  PositionAgent::PositionState vehicleState{PositionAgent::Uninitialised};
   GeoCoord vehicleCoord;
   std::shared_ptr<osmscout::Bearing> vehicleBearing;
 
