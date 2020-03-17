@@ -59,7 +59,7 @@ namespace osmscout {
       NoGpsSignal, // last know position is used, may be inaccurate
       OnRoute, // vehicle is on the planned route
       OffRoute, // vehicle is out off planned route, route should be re-computed
-      EstimateInTunnel // vehicle positin is estimated in tunnel
+      EstimateInTunnel // vehicle position is estimated in tunnel
     };
 
     struct OSMSCOUT_API Position {
