@@ -70,6 +70,7 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
     if (dynamic_cast<PositionAgent::PositionMessage *>(message.get()) != nullptr) {
       auto positionMessage=static_cast<PositionAgent::PositionMessage*>(message.get());
       auto &position=positionMessage->position;
+      assert(position.state!=PositionAgent::Uninitialised); // unitialised position newer should be used in UI
       emit positionEstimate(position.state, position.coord, lastBearing);
     }
     else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
