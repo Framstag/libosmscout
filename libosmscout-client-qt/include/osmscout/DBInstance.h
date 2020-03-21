@@ -108,7 +108,6 @@ public: // TODO: make it private, ensure thread safety
   osmscout::LocationServiceRef            locationService;
   osmscout::LocationDescriptionServiceRef locationDescriptionService;
   osmscout::MapServiceRef                 mapService;
-  osmscout::BreakerRef                    dataLoadingBreaker;
 
   osmscout::StyleConfigRef          styleConfig;
 
@@ -117,14 +116,12 @@ public: // TODO: make it private, ensure thread safety
                     osmscout::LocationServiceRef locationService,
                     osmscout::LocationDescriptionServiceRef locationDescriptionService,
                     osmscout::MapServiceRef mapService,
-                    osmscout::BreakerRef dataLoadingBreaker,
                     osmscout::StyleConfigRef styleConfig):
     path(path),
     database(database),
     locationService(locationService),
     locationDescriptionService(locationDescriptionService),
     mapService(mapService),
-    dataLoadingBreaker(dataLoadingBreaker),
     styleConfig(styleConfig)
   {
   };

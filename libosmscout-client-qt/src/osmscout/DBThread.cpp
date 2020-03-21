@@ -341,19 +341,11 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
                                                      std::make_shared<osmscout::LocationService>(database),
                                                      std::make_shared<osmscout::LocationDescriptionService>(database),
                                                      mapService,
-                                                     std::make_shared<QBreaker>(),
                                                      styleConfig));
   }
 
   emit databaseLoadFinished(boundingBox);
   emit stylesheetFilenameChanged();
-}
-
-void DBThread::CancelCurrentDataLoading()
-{
-  for (auto db:databases){
-    db->dataLoadingBreaker->Break();
-  }
 }
 
 void DBThread::ToggleDaylight()
