@@ -62,6 +62,7 @@ namespace osmscout {
 
   void AreaWayIndex::Close()
   {
+    wayTypeData.clear();
     try {
       if (scanner.IsOpen()) {
         scanner.Close();

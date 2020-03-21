@@ -48,6 +48,7 @@ namespace osmscout {
 
   void AreaAreaIndex::Close()
   {
+    indexCache.Flush();
     try {
       if (scanner.IsOpen()) {
         scanner.Close();

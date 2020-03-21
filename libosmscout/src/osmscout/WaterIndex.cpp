@@ -106,6 +106,7 @@ namespace osmscout {
 
   void WaterIndex::Close()
   {
+    levels.clear();
     try  {
       if (scanner.IsOpen()) {
         scanner.Close();

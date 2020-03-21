@@ -243,6 +243,7 @@ namespace osmscout {
   bool DataFile<N>::Close()
   {
     typeConfig=nullptr;
+    cache.Flush();
 
     try  {
       if (scanner.IsOpen()) {
