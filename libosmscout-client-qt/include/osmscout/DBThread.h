@@ -112,7 +112,6 @@ public:
 
 signals:
   void initialisationFinished(const DatabaseLoadedResponse& response);
-  void TriggerInitialRendering();
   void stylesheetFilenameChanged();
   void databaseLoadFinished(osmscout::GeoBox boundingBox);
   void styleErrorsChanged();
