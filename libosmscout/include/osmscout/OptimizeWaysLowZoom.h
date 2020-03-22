@@ -67,7 +67,7 @@ namespace osmscout {
     };
 
   private:
-    TypeConfigRef                              typeConfig;    //!< Metadata information for loading the actual obejcts
+    TypeConfigRef                              typeConfig;    //!< Metadata information for loading the actual objects
     std::string                                datafilename;  //!< complete filename for data file
     mutable FileScanner                        scanner;       //!< File stream to the data file
 
