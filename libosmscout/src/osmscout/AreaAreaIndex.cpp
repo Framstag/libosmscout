@@ -371,6 +371,13 @@ namespace osmscout {
 
   void AreaAreaIndex::DumpStatistics()
   {
+    std::lock_guard<std::mutex> guard(lookupMutex);
     indexCache.DumpStatistics(AREA_AREA_IDX,IndexCacheValueSizer());
+  }
+
+  void AreaAreaIndex::FlushCache()
+  {
+    std::lock_guard<std::mutex> guard(lookupMutex);
+    indexCache.Flush();
   }
 }

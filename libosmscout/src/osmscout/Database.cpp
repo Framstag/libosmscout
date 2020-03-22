@@ -1003,6 +1003,38 @@ namespace osmscout {
     }
   }
 
+  void Database::FlushCache()
+  {
+    {
+      std::lock_guard<std::mutex> guard(nodeDataFileMutex);
+      if (nodeDataFile){
+        nodeDataFile->FlushCache();
+      }
+    }
+
+    {
+      std::lock_guard<std::mutex> guard(areaDataFileMutex);
+      if (areaDataFile){
+        areaDataFile->FlushCache();
+      }
+    }
+
+    {
+      std::lock_guard<std::mutex> guard(wayDataFileMutex);
+      if (wayDataFile){
+        wayDataFile->FlushCache();
+      }
+    }
+
+    {
+      std::lock_guard<std::mutex> guard(areaAreaIndexMutex);
+      if (areaAreaIndex){
+        areaAreaIndex->FlushCache();
+      }
+    }
+
+  }
+
   NodeRegionSearchResult Database::LoadNodesInRadius(const GeoCoord& location,
                                                      const TypeInfoSet& types,
                                                      Distance maxDistance)
