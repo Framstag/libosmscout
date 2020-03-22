@@ -111,8 +111,8 @@ osmscout::MultiDBRoutingServiceRef Router::MakeRoutingService(const std::list<DB
 
   std::vector<osmscout::DatabaseRef> dbs;
   dbs.reserve(databases.size());
-  for (const auto& instance:databases){
-    dbs.push_back(instance->database);
+  for (auto& instance:databases){
+    dbs.push_back(instance->GetDatabase());
   }
   osmscout::MultiDBRoutingServiceRef routingService=std::make_shared<osmscout::MultiDBRoutingService>(routerParameter,dbs);
   if (!routingService->Open(profileBuilder)){

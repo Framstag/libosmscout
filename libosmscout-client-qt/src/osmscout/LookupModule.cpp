@@ -172,9 +172,11 @@ void LookupModule::requestObjects(const LocationEntry &entry, bool reverseLookup
 
           MapData mapData;
 
-          db->database->GetAreasByOffset(areaOffsets, mapData.areas);
-          db->database->GetWaysByOffset(wayOffsets, mapData.ways);
-          db->database->GetNodesByOffset(nodeOffsets, mapData.nodes);
+          auto database=db->GetDatabase();
+          auto locationService=db->GetLocationService();
+          database->GetAreasByOffset(areaOffsets, mapData.areas);
+          database->GetWaysByOffset(wayOffsets, mapData.ways);
+          database->GetNodesByOffset(nodeOffsets, mapData.nodes);
 
           std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> reverseLookupMap;
           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
@@ -182,24 +184,24 @@ void LookupModule::requestObjects(const LocationEntry &entry, bool reverseLookup
             std::list<ObjectFileRef> objects;
             objects.insert(objects.begin(), entry.getReferences().cbegin(), entry.getReferences().cend());
             std::list<LocationDescriptionService::ReverseLookupResult> reverseLookupResult;
-            db->locationDescriptionService->ReverseLookupObjects(objects, reverseLookupResult);
+            db->GetLocationDescriptionService()->ReverseLookupObjects(objects, reverseLookupResult);
             for (const auto &res:reverseLookupResult){
               reverseLookupMap[res.object]=res;
             }
           }
 
           for (auto const &n:mapData.nodes){
-            addObjectInfo(objectList,n,reverseLookupMap,db->locationService,regionMap);
+            addObjectInfo(objectList,n,reverseLookupMap,locationService,regionMap);
           }
 
           //std::cout << "ways:  " << d.ways.size() << std::endl;
           for (auto const &w:mapData.ways){
-            addObjectInfo(objectList,w,reverseLookupMap,db->locationService,regionMap);
+            addObjectInfo(objectList,w,reverseLookupMap,locationService,regionMap);
           }
 
           //std::cout << "areas: " << d.areas.size() << std::endl;
           for (auto const &a:mapData.areas){
-            addObjectInfo(objectList,a,reverseLookupMap,db->locationService,regionMap);
+            addObjectInfo(objectList,a,reverseLookupMap,locationService,regionMap);
           }
         }
       }
@@ -281,16 +283,13 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
       int count = 0;
       for (auto db:databases){
         osmscout::LocationDescription description;
-        osmscout::GeoBox dbBox;
-        if (!db->database->GetBoundingBox(dbBox)){
-          continue;
-        }
+        osmscout::GeoBox dbBox=db->GetDBGeoBox();
         if (!dbBox.Includes(location)){
           continue;
         }
 
         std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
-        if (!db->locationDescriptionService->DescribeLocationByAddress(location, description)) {
+        if (!db->GetLocationDescriptionService()->DescribeLocationByAddress(location, description)) {
           osmscout::log.Error() << "Error during generation of location description";
           continue;
         }
@@ -300,10 +299,10 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
 
           auto place = description.GetAtAddressDescription()->GetPlace();
           emit locationDescription(location, db->path, description,
-                                   BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
+                                   BuildAdminRegionList(db->GetLocationService(), place.GetAdminRegion(), regionMap));
         }
 
-        if (!db->locationDescriptionService->DescribeLocationByPOI(location, description)) {
+        if (!db->GetLocationDescriptionService()->DescribeLocationByPOI(location, description)) {
           osmscout::log.Error() << "Error during generation of location description";
           continue;
         }
@@ -313,7 +312,7 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
 
           auto place = description.GetAtPOIDescription()->GetPlace();
           emit locationDescription(location, db->path, description,
-                                   BuildAdminRegionList(db->locationService, place.GetAdminRegion(), regionMap));
+                                   BuildAdminRegionList(db->GetLocationService(), place.GetAdminRegion(), regionMap));
         }
       }
 
@@ -332,7 +331,8 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(DBInstanceRef &db,
   info->adminLevel=-1;
 
   // read admin region features
-  osmscout::TypeConfigRef typeConfig=db->database->GetTypeConfig();
+  auto database=db->GetDatabase();
+  osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
   osmscout::FeatureValueReader<osmscout::NameAltFeature,osmscout::NameAltFeatureValue> altNameReader(*typeConfig);
   osmscout::FeatureValueReader<osmscout::AdminLevelFeature,osmscout::AdminLevelFeatureValue> adminLevelReader(*typeConfig);
 
@@ -346,21 +346,21 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(DBInstanceRef &db,
 
   switch (region->object.GetType()){
     case osmscout::refNode:
-      if (db->database->GetNodeByOffset(region->object.GetFileOffset(), node)) {
+      if (database->GetNodeByOffset(region->object.GetFileOffset(), node)) {
         altNameValue=altNameReader.GetValue(node->GetFeatureValueBuffer());
         adminLevelValue=adminLevelReader.GetValue(node->GetFeatureValueBuffer());
         info->type=QString::fromStdString(node->GetType()->GetName());
       }
       break;
     case osmscout::refWay:
-      if (db->database->GetWayByOffset(region->object.GetFileOffset(), way)) {
+      if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
         altNameValue=altNameReader.GetValue(way->GetFeatureValueBuffer());
         adminLevelValue=adminLevelReader.GetValue(way->GetFeatureValueBuffer());
         info->type=QString::fromStdString(way->GetType()->GetName());
       }
       break;
     case osmscout::refArea:
-      if (db->database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
+      if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
         altNameValue=altNameReader.GetValue(area->GetFeatureValueBuffer());
         adminLevelValue=adminLevelReader.GetValue(area->GetFeatureValueBuffer());
         info->type=QString::fromStdString(area->GetType()->GetName());
@@ -386,17 +386,14 @@ void LookupModule::requestRegionLookup(const osmscout::GeoCoord location) {
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
     [this,location](const std::list<DBInstanceRef> &databases) {
       for (auto db:databases) {
-        osmscout::GeoBox dbBox;
-        if (!db->database->GetBoundingBox(dbBox)){
-          continue;
-        }
+        osmscout::GeoBox dbBox=db->GetDBGeoBox();
         if (!dbBox.Includes(location)){
           continue;
         }
 
         std::list<osmscout::LocationDescriptionService::ReverseLookupResult> result;
 
-        if (db->locationDescriptionService->ReverseLookupRegion(location,result)){
+        if (db->GetLocationDescriptionService()->ReverseLookupRegion(location,result)){
           std::map<osmscout::FileOffset,AdminRegionInfoRef> adminRegionMap=adminRegionCache[db->path];
           AdminRegionInfoRef bottomAdminRegion; // admin region with highest admin level
 

@@ -30,8 +30,9 @@ osmscout::TypeConfigRef getTypeConfig()
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
       [&typeConfig](const std::list<DBInstanceRef>& databases) {
         for (auto &db:databases) {
-          if (db->database && db->database->IsOpen() && db->database->GetTypeConfig()){
-            typeConfig = db->database->GetTypeConfig();
+          auto database=db->GetDatabase();
+          if (database && database->IsOpen() && database->GetTypeConfig()){
+            typeConfig = database->GetTypeConfig();
             return;
           }
         }

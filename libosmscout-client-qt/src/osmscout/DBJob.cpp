@@ -101,12 +101,11 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   lookupProjection.GetDimensions(lookupBox);
   std::list<DBInstanceRef> relevantDatabases;
   for (auto &db:databases){
-    if (!db->database->IsOpen() || (!db->styleConfig)) {
+    if (!db->IsOpen() || (!db->GetStyleConfig())) {
       qDebug() << "Database is not ready" << db->path;
       continue;
     }
-    osmscout::GeoBox dbBox;
-    db->database->GetBoundingBox(dbBox);
+    osmscout::GeoBox dbBox=db->GetDBGeoBox();
     if (!dbBox.Intersects(lookupBox)){
       qDebug() << "Skip database" << db->path;
       continue;
@@ -117,7 +116,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   DBJob::Run(basemapDatabase,relevantDatabases,locker);
   for (auto &db:relevantDatabases){
     std::list<osmscout::TileRef> tiles;
-    db->mapService->LookupTiles(lookupProjection,tiles);
+    db->GetMapService()->LookupTiles(lookupProjection,tiles);
 
     QString path=db->path;
     osmscout::MapService::TileStateCallback callback=[this,path](const osmscout::TileRef& tile) {
@@ -125,7 +124,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
       emit tileStateChanged(path,tile);
     };
 
-    osmscout::MapService::CallbackId callbackId=db->mapService->RegisterTileStateCallback(callback);
+    osmscout::MapService::CallbackId callbackId=db->GetMapService()->RegisterTileStateCallback(callback);
     //std::cout << "callback registered for job: " << this << " " << db->path.toStdString() << ": " << callbackId  << std::endl ;
     callbacks[db->path]=callbackId;
     loadedTiles[db->path]=QMap<osmscout::TileKey,osmscout::TileRef>();
@@ -137,8 +136,8 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     loadingTiles[db->path]=tileMap;
 
     // load tiles asynchronous
-    db->mapService->LoadMissingTileDataAsync(searchParameter,
-                                             *db->styleConfig,
+    db->GetMapService()->LoadMissingTileDataAsync(searchParameter,
+                                             *db->GetStyleConfig(),
                                              tiles);
 
     // process already completed tiles (state callback is not called in such case)
@@ -204,7 +203,7 @@ void DBLoadJob::Close()
   for (auto &db:databases){
     if (callbacks.contains(db->path)){
       //qDebug() << "Remove callback for job:" << this << ":" << callbacks[db->path] << "in" << QThread::currentThread();
-      db->mapService->DeregisterTileStateCallback(callbacks[db->path]);
+      db->GetMapService()->DeregisterTileStateCallback(callbacks[db->path]);
       callbacks.remove(db->path);
     }
   }
@@ -232,7 +231,7 @@ bool DBLoadJob::AddTileDataToMapData(QString dbPath,
       for (auto &tile:tiles){
         tileList.push_back(tile);
       }
-      db->mapService->AddTileDataToMapData(tileList,data);
+      db->GetMapService()->AddTileDataToMapData(tileList,data);
       return true;
     }
   }
