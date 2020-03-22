@@ -128,6 +128,11 @@ public slots:
   void Initialize();
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
 
+  /**
+   * Flush all caches for database that was not used in recent idleMs
+   */
+  void FlushCaches(qint64 idleMs);
+
 protected:
   QThread                            *backgroundThread;
   MapManagerRef                      mapManager;
