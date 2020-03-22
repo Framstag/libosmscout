@@ -94,7 +94,7 @@ DBThread::~DBThread()
 bool DBThread::isInitializedInternal()
 {
   for (auto db:databases){
-    if (!db->database->IsOpen()){
+    if (!db->IsOpen()){
       return false;
     }
   }
@@ -120,13 +120,7 @@ const DatabaseLoadedResponse DBThread::loadedResponse() const {
   QReadLocker locker(&lock);
   DatabaseLoadedResponse response;
   for (auto db:databases){
-    if (response.boundingBox.IsValid()){
-      osmscout::GeoBox boundingBox;
-      db->database->GetBoundingBox(boundingBox);
-      response.boundingBox.Include(boundingBox);
-    }else{
-      db->database->GetBoundingBox(response.boundingBox);
-    }
+    response.boundingBox.Include(db->GetDBGeoBox());
   }
   return response;
 }
@@ -138,14 +132,7 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
 
   osmscout::GeoBox boundingBox;
   for (const auto &db:databases){
-    if (boundingBox.IsValid()){
-      osmscout::GeoBox dbBox;
-      if (db->database->GetBoundingBox(dbBox)){
-        boundingBox.Include(dbBox);
-      }
-    }else{
-      db->database->GetBoundingBox(boundingBox);
-    }
+    boundingBox.Include(db->GetDBGeoBox());
   }
   if (boundingBox.IsValid()) {
     /*
@@ -162,7 +149,7 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
       bool fullCoverage=false;
       for (const auto &db:databases){
         std::list<osmscout::GroundTile> groundTiles;
-        if (!db->mapService->GetGroundTiles(bbox,magnification,groundTiles)){
+        if (!db->GetMapService()->GetGroundTiles(bbox,magnification,groundTiles)){
           break;
         }
         bool mayContainsUnknown=false;
@@ -334,26 +321,16 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       continue;
     }
 
-    osmscout::MapServiceRef mapService = std::make_shared<osmscout::MapService>(database);
-
     databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath(),
                                                      database,
                                                      std::make_shared<osmscout::LocationService>(database),
                                                      std::make_shared<osmscout::LocationDescriptionService>(database),
-                                                     mapService,
-                                                     std::make_shared<QBreaker>(),
+                                                     std::make_shared<osmscout::MapService>(database),
                                                      styleConfig));
   }
 
   emit databaseLoadFinished(boundingBox);
   emit stylesheetFilenameChanged();
-}
-
-void DBThread::CancelCurrentDataLoading()
-{
-  for (auto db:databases){
-    db->dataLoadingBreaker->Break();
-  }
 }
 
 void DBThread::ToggleDaylight()
@@ -434,11 +411,11 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
 
   // add flags defined by stylesheet
   for (auto &db:databases){
-    if (!db->styleConfig) {
+    if (!db->GetStyleConfig()) {
       continue;
     }
 
-    auto styleFlags = db->styleConfig->GetFlags(); // iterate temporary container is UB!
+    auto styleFlags = db->GetStyleConfig()->GetFlags(); // iterate temporary container is UB!
     for (const auto& flag : styleFlags){
       if (!flags.contains(QString::fromStdString(flag.first))){
         flags[QString::fromStdString(flag.first)]=flag.second;

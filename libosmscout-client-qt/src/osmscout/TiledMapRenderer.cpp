@@ -129,8 +129,9 @@ void TiledMapRenderer::onStylesheetFilenameChanged()
     dbThread->RunSynchronousJob(
       [this,&unknownFillStyle,&projection](const std::list<DBInstanceRef>& databases) {
         for (auto &db:databases){
-          if (db->styleConfig) {
-            unknownFillStyle=db->styleConfig->GetUnknownFillStyle(projection);
+          auto styledConfig=db->GetStyleConfig();
+          if (styledConfig) {
+            unknownFillStyle=styledConfig->GetUnknownFillStyle(projection);
             if (unknownFillStyle) {
               osmscout::Color fillColor = unknownFillStyle->GetFillColor();
               unknownColor.setRgbF(fillColor.GetR(),

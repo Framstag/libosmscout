@@ -71,7 +71,7 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
 
   osmscout::LocationSearchResult result;
 
-  if (!db->locationService->SearchForLocationByString(searchParameter, result)){
+  if (!db->GetLocationService()->SearchForLocationByString(searchParameter, result)){
     emit searchFinished(searchPattern, /*error*/ true);
     return;
   }
@@ -164,10 +164,8 @@ void SearchModule::SearchForLocations(const QString searchPattern,
       std::list<DBInstanceRef> sortedDbs=databases;
       sortedDbs.sort(
           [&searchCenter](const DBInstanceRef &a,const DBInstanceRef &b){
-            osmscout::GeoBox abox;
-            osmscout::GeoBox bbox;
-            a->database->GetBoundingBox(abox);
-            b->database->GetBoundingBox(bbox);
+            osmscout::GeoBox abox=a->GetDBGeoBox();
+            osmscout::GeoBox bbox=b->GetDBGeoBox();
             bool ain=abox.Includes(searchCenter);
             bool bin=bbox.Includes(searchCenter);
             //std::cout << "  " << a->path.toStdString() << " ? " << b->path.toStdString() << std::endl;
@@ -260,7 +258,7 @@ bool SearchModule::BuildLocationEntry(const osmscout::LocationSearchResult::Entr
                                       )
 {
     if (entry.adminRegion){
-      db->locationService->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
+      db->GetLocationService()->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
     }
 
     QStringList adminRegionList=LookupModule::BuildAdminRegionList(entry.adminRegion, adminRegionMap);
@@ -379,6 +377,7 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
                                     osmscout::GeoCoord& coordinates,
                                     osmscout::GeoBox& bbox)
 {
+  auto database=db->GetDatabase();
   for (const osmscout::ObjectFileRef& object:objects) {
     if (!object.Valid()){
       continue;
@@ -386,7 +385,7 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
     if (object.GetType() == osmscout::RefType::refNode) {
       osmscout::NodeRef node;
 
-      if (!db->database->GetNodeByOffset(object.GetFileOffset(), node)) {
+      if (!database->GetNodeByOffset(object.GetFileOffset(), node)) {
         return false;
       }
       if (typeName.isEmpty()) {
@@ -397,7 +396,7 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
     } else if (object.GetType() == osmscout::RefType::refArea) {
       osmscout::AreaRef area;
 
-      if (!db->database->GetAreaByOffset(object.GetFileOffset(), area)) {
+      if (!database->GetAreaByOffset(object.GetFileOffset(), area)) {
         return false;
       }
       if (typeName.isEmpty()) {
@@ -406,7 +405,7 @@ bool SearchModule::GetObjectDetails(DBInstanceRef db,
       bbox.Include(area->GetBoundingBox());
     } else if (object.GetType() == osmscout::RefType::refWay) {
       osmscout::WayRef way;
-      if (!db->database->GetWayByOffset(object.GetFileOffset(), way)) {
+      if (!database->GetWayByOffset(object.GetFileOffset(), way)) {
         return false;
       }
       if (typeName.isEmpty()) {

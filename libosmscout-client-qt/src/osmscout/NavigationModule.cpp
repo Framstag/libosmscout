@@ -137,14 +137,15 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
   dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef> &databases){
     Magnification magnification(Magnification::magClose);
     for (auto &db:databases) {
-      auto dbIdIt=databaseMapping.find(db->database->GetPath());
+      auto database=db->GetDatabase();
+      auto dbIdIt=databaseMapping.find(database->GetPath());
       if (dbIdIt==databaseMapping.end()){
         continue; // this database was not used for routing
       }
       DatabaseId databaseId=dbIdIt->second;
 
       MapService::TypeDefinition routableTypes;
-      for (auto &type:db->database->GetTypeConfig()->GetTypes()){
+      for (auto &type:database->GetTypeConfig()->GetTypes()){
         if (type->CanRoute(vehicle)){
           if (type->CanBeArea()){
             routableTypes.areaTypes.Set(type);
@@ -159,14 +160,15 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
       }
 
       std::list<TileRef> tiles;
-      db->mapService->LookupTiles(magnification,box,tiles);
-      db->mapService->LoadMissingTileData(AreaSearchParameter{},
+      auto mapService=db->GetMapService();
+      mapService->LookupTiles(magnification,box,tiles);
+      mapService->LoadMissingTileData(AreaSearchParameter{},
                                           magnification,
                                           routableTypes,
                                           tiles);
 
       RoutableDBObjects &objects=data->dbMap[databaseId];
-      objects.typeConfig=db->database->GetTypeConfig();
+      objects.typeConfig=database->GetTypeConfig();
       for (auto &tile:tiles){
         tile->GetWayData().CopyData([&](const WayRef &way){objects.ways[way->GetFileOffset()]=way;});
         tile->GetAreaData().CopyData([&](const AreaRef &area){objects.areas[area->GetFileOffset()]=area;});

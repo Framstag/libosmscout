@@ -157,8 +157,6 @@ protected:
 
 protected:
 
-  void CancelCurrentDataLoading();
-
   bool isInitializedInternal();
 
 public:

@@ -76,11 +76,12 @@ QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
   osmscout::TypeInfoSet areaTypes;
   std::vector<osmscout::AreaRef> areas;
 
-  if (!db->database){
+  auto database=db->GetDatabase();
+  if (!database){
     osmscout::log.Error() << "No database available";
     return result;
   }
-  osmscout::TypeConfigRef typeConfig=db->database->GetTypeConfig();
+  osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
   if (!typeConfig){
     osmscout::log.Error() << "No typeConfig available";
     return result;
@@ -105,7 +106,7 @@ QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
   }
 
   // lookup objects
-  osmscout::POIService poiService(db->database);
+  osmscout::POIService poiService(database);
   try {
     poiService.GetPOIsInArea(searchBoundingBox,
                              nodeTypes,

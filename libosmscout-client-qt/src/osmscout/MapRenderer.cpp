@@ -250,8 +250,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   if (drawCanvasBackground){
     for (auto &db:databases){
       // fill background with "unknown" color
-      if (!backgroundRendered && db->styleConfig){
-          osmscout::FillStyleRef unknownFillStyle=db->styleConfig->GetUnknownFillStyle(renderProjection);
+      if (!backgroundRendered && db->GetStyleConfig()){
+          osmscout::FillStyleRef unknownFillStyle=db->GetStyleConfig()->GetUnknownFillStyle(renderProjection);
           if (unknownFillStyle){
             osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
             p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
@@ -322,9 +322,9 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
 
     osmscout::MapDataRef data=std::make_shared<osmscout::MapData>();
-    db->mapService->AddTileDataToMapData(tileList,*data);
+    db->GetMapService()->AddTileDataToMapData(tileList,*data);
     if (last){
-      osmscout::TypeConfigRef typeConfig=db->database->GetTypeConfig();
+      osmscout::TypeConfigRef typeConfig=db->GetDatabase()->GetTypeConfig();
       for (auto const &o:overlayObjects){
 
         if (o->getObjectType()==osmscout::RefType::refWay){
@@ -356,7 +356,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
 
     if (drawParameter->GetRenderSeaLand()) {
-      db->mapService->GetGroundTiles(renderProjection,
+      db->GetMapService()->GetGroundTiles(renderProjection,
                                      data->groundTiles);
     }
 
