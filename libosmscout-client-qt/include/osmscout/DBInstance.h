@@ -192,7 +192,7 @@ public:
   /**
    * Returns the number of milliseconds since last database usage
    */
-  inline qint64 lastUsageMs() const
+  inline qint64 LastUsageMs() const
   {
     QMutexLocker locker(&mutex);
     return lastUsage.elapsed();

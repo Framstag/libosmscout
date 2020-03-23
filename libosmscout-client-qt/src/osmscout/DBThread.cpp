@@ -426,6 +426,21 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
   return flags;
 }
 
+void DBThread::FlushCaches(qint64 idleMs)
+{
+  RunSynchronousJob([idleMs](const std::list<DBInstanceRef> &dbs){
+    for (const auto &db:dbs){
+      if (db->LastUsageMs() > idleMs){
+        auto database=db->GetDatabase();
+        osmscout::log.Debug() << "Flushing caches for " << database->GetPath();
+        database->DumpStatistics();
+        database->FlushCache();
+        db->GetMapService()->FlushTileCache();
+      }
+    }
+  });
+}
+
 void DBThread::RunJob(DBJob *job)
 {
   QReadLocker *locker=new QReadLocker(&lock);

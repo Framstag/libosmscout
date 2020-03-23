@@ -112,7 +112,6 @@ public:
 
 signals:
   void initialisationFinished(const DatabaseLoadedResponse& response);
-  void TriggerInitialRendering();
   void stylesheetFilenameChanged();
   void databaseLoadFinished(osmscout::GeoBox boundingBox);
   void styleErrorsChanged();
@@ -127,6 +126,11 @@ public slots:
                  const QString &suffix="");
   void Initialize();
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
+
+  /**
+   * Flush all caches for database that was not used in recent idleMs
+   */
+  void FlushCaches(qint64 idleMs);
 
 protected:
   QThread                            *backgroundThread;
