@@ -2617,12 +2617,7 @@ namespace osmscout {
 
   uint8_t LanesFeatureValue::GetLanes() const
   {
-    if (lanes & 0x01) {
-      return 1;
-    }
-    else {
-      return GetForwardLanes() + GetBackwardLanes();
-    }
+    return GetForwardLanes() + GetBackwardLanes();
   }
 
   const char* const LanesFeature::NAME             = "Lanes";
