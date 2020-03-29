@@ -36,20 +36,15 @@ namespace osmscout{
    */
   struct DBId
   {
-    DatabaseId database;
-    Id         id;
+    DatabaseId database{0};
+    Id         id{0};
 
-    DBId()
-      : database(0),
-        id(0)
-    {
-    }
+    DBId() = default;
+    DBId(const DBId &) = default;
+    DBId(DBId &&) = default;
 
-    DBId(const DBId &o)
-      : database(o.database),
-        id(o.id)
-    {
-    }
+    DBId &operator=(const DBId &) = default;
+    DBId &operator=(DBId &&) = default;
 
     DBId(DatabaseId database,
          Id id)
@@ -57,6 +52,8 @@ namespace osmscout{
         id(id)
     {
     }
+
+    ~DBId() = default;
 
     inline bool IsValid() const
     {
@@ -80,18 +77,6 @@ namespace osmscout{
       }
 
       return id<other.id;
-    }
-
-    DBId& operator=(const DBId& other)
-    {
-      if(&other==this) {
-        return *this;
-      }
-
-      this->database=other.database;
-      this->id=other.id;
-
-      return *this;
     }
   };
 
