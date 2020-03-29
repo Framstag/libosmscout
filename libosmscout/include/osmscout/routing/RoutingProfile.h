@@ -121,13 +121,13 @@ namespace osmscout {
     void SetVehicle(Vehicle vehicle);
     void SetVehicleMaxSpeed(double maxSpeed);
 
-    void ParametrizeForFoot(const TypeConfig& typeConfig,
-                            double maxSpeed);
-    void ParametrizeForBicycle(const TypeConfig& typeConfig,
-                               double maxSpeed);
-    bool ParametrizeForCar(const TypeConfig& typeConfig,
-                           const std::map<std::string,double>& speedMap,
-                           double maxSpeed);
+    virtual void ParametrizeForFoot(const TypeConfig& typeConfig,
+                                    double maxSpeed);
+    virtual void ParametrizeForBicycle(const TypeConfig& typeConfig,
+                                    double maxSpeed);
+    virtual bool ParametrizeForCar(const TypeConfig& typeConfig,
+                                   const std::map<std::string,double>& speedMap,
+                                   double maxSpeed);
 
     inline Vehicle GetVehicle() const override
     {
@@ -238,8 +238,33 @@ namespace osmscout {
    */
   class OSMSCOUT_API FastestPathRoutingProfile : public AbstractRoutingProfile
   {
+  protected:
+    bool applyJunctionPenalty=true;
+
   public:
     explicit FastestPathRoutingProfile(const TypeConfigRef& typeConfig);
+
+    void ParametrizeForFoot(const TypeConfig& typeConfig,
+                            double maxSpeed) override
+    {
+      applyJunctionPenalty=false;
+      AbstractRoutingProfile::ParametrizeForFoot(typeConfig, maxSpeed);
+    }
+
+    void ParametrizeForBicycle(const TypeConfig& typeConfig,
+                               double maxSpeed)
+    {
+      applyJunctionPenalty=true;
+      AbstractRoutingProfile::ParametrizeForBicycle(typeConfig, maxSpeed);
+    }
+
+    bool ParametrizeForCar(const TypeConfig& typeConfig,
+                           const std::map<std::string,double>& speedMap,
+                           double maxSpeed)
+    {
+      applyJunctionPenalty=true;
+      return AbstractRoutingProfile::ParametrizeForCar(typeConfig, speedMap, maxSpeed);
+    }
 
     inline double GetCosts(const RouteNode& currentNode,
                            const std::vector<ObjectVariantData>& objectVariantData,
@@ -248,24 +273,36 @@ namespace osmscout {
     {
       assert(currentNode.paths.size() > inPathIndex);
       assert(currentNode.paths.size() > outPathIndex);
-      size_t inVariantIndex=currentNode.objects[currentNode.paths[inPathIndex].objectIndex].objectVariantIndex;
-      size_t outVariantIndex=currentNode.objects[currentNode.paths[outPathIndex].objectIndex].objectVariantIndex;
+      auto inObjIndex=currentNode.paths[inPathIndex].objectIndex;
+      auto outObjIndex=currentNode.paths[outPathIndex].objectIndex;
+      auto inVariantIndex=currentNode.objects[inObjIndex].objectVariantIndex;
+      auto outVariantIndex=currentNode.objects[outObjIndex].objectVariantIndex;
       assert(objectVariantData.size() > inVariantIndex);
       assert(objectVariantData.size() > outVariantIndex);
       const ObjectVariantData &inPathVariant=objectVariantData[inVariantIndex];
       const ObjectVariantData &outPathVariant=objectVariantData[outVariantIndex];
 
-      double speed;
-      if (outPathVariant.maxSpeed > 0) {
-        speed=outPathVariant.maxSpeed;
-      } else {
-        TypeInfoRef type=outPathVariant.type;
-        speed=speeds[type->GetIndex()];
-      }
-      speed=std::min(vehicleMaxSpeed,speed);
+      auto GetMaxSpeed = [&](const ObjectVariantData &variant) -> double {
+        if (variant.maxSpeed > 0) {
+          return variant.maxSpeed;
+        }
+        TypeInfoRef type=variant.type;
+        return speeds[type->GetIndex()];
+      };
+
+      // price of ride to target node using outPath
+      double speed=std::min(vehicleMaxSpeed,GetMaxSpeed(outPathVariant));
       double outPrice = currentNode.paths[outPathIndex].distance.As<Kilometer>() / speed;
 
-      return outPrice;
+      // add penalty for junction
+      // it is estimate without considering real junction geometry
+      double junctionPenalty{0};
+      if (applyJunctionPenalty && inObjIndex!=outObjIndex){
+        double minSpeed=std::min(GetMaxSpeed(inPathVariant),GetMaxSpeed(outPathVariant));
+        junctionPenalty = 0.160 / minSpeed;
+      }
+
+      return outPrice + junctionPenalty;
     }
 
     inline double GetCosts(const Area& area,
