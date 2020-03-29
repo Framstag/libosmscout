@@ -11,6 +11,8 @@ fi
 
 echo "Using Coco command '${COCO}'..."
 
+cd $(dirname $0)
+
 # OSS (aka OSMScout style)
 $COCO OSS/OSS.atg -namespace osmscout:oss -frames OSS -o OSS
 
