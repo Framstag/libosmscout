@@ -52,7 +52,9 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
   if (gpsUpdateMsg &&
       gpsUpdateMsg->horizontalAccuracy < Meters(100)){
 
-    if (lastPosition){
+    if (lastPosition &&
+        (gpsUpdateMsg->timestamp-lastPosition.time) >= seconds(1)){
+
       segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,gpsUpdateMsg->currentPosition),
                              gpsUpdateMsg->timestamp-lastPosition.time});
       Timestamp::duration fifoDuration{Timestamp::duration::zero()};
