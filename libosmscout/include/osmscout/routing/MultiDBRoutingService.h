@@ -68,7 +68,8 @@ namespace osmscout {
     double GetCosts(const MultiDBRoutingState& state,
                     DatabaseId databaseId,
                     const RouteNode& routeNode,
-                    size_t pathIndex) override;
+                    size_t inPathIndex,
+                    size_t outPathIndex) override;
 
     double GetCosts(const MultiDBRoutingState& state,
                     DatabaseId database,

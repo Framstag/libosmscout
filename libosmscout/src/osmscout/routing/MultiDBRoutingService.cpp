@@ -157,12 +157,14 @@ namespace osmscout {
   double MultiDBRoutingService::GetCosts(const MultiDBRoutingState& /*state*/,
                                          const DatabaseId databaseId,
                                          const RouteNode& routeNode,
-                                         size_t pathIndex)
+                                         size_t inPathIndex,
+                                         size_t outPathIndex)
   {
     assert(handles.size()>databaseId);
     return handles[databaseId].profile->GetCosts(routeNode,
                                                  handles[databaseId].routingDatabase->GetObjectVariantData(),
-                                                 pathIndex);
+                                                 inPathIndex,
+                                                 outPathIndex);
   }
 
   double MultiDBRoutingService::GetCosts(const MultiDBRoutingState& /*state*/,

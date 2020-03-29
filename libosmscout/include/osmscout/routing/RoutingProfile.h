@@ -61,13 +61,30 @@ namespace osmscout {
     virtual bool CanUseForward(const Way& way) const = 0;
     virtual bool CanUseBackward(const Way& way) const = 0;
 
+    /**
+     * Estimated cost for outgoing path (outPathIndex) from currentNode
+     * when currentNode is entered from inPathIndex
+     */
     virtual double GetCosts(const RouteNode& currentNode,
                             const std::vector<ObjectVariantData>& objectVariantData,
-                            size_t pathIndex) const = 0;
+                            size_t inPathIndex,
+                            size_t outPathIndex) const = 0;
+
+    /**
+     * Estimated cost for specific area with given distance
+     */
     virtual double GetCosts(const Area& area,
                             const Distance &distance) const = 0;
+
+    /**
+     * Estimated cost for specific way with given distance
+     */
     virtual double GetCosts(const Way& way,
                             const Distance &distance) const = 0;
+
+    /**
+     * Estimated cost for distance when are no limitations (max. speed on the way)
+     */
     virtual double GetCosts(const Distance &distance) const = 0;
 
     virtual Duration GetTime(const Area& area,
@@ -188,9 +205,10 @@ namespace osmscout {
 
     inline double GetCosts(const RouteNode& currentNode,
                            const std::vector<ObjectVariantData>& /*objectVariantData*/,
-                           size_t pathIndex) const override
+                           size_t /*inPathIndex*/,
+                           size_t outPathIndex) const override
     {
-      return currentNode.paths[pathIndex].distance.As<Kilometer>();
+      return currentNode.paths[outPathIndex].distance.As<Kilometer>();
     }
 
     inline double GetCosts(const Area& /*area*/,
@@ -225,23 +243,29 @@ namespace osmscout {
 
     inline double GetCosts(const RouteNode& currentNode,
                            const std::vector<ObjectVariantData>& objectVariantData,
-                           size_t pathIndex) const override
+                           size_t inPathIndex,
+                           size_t outPathIndex) const override
     {
+      assert(currentNode.paths.size() > inPathIndex);
+      assert(currentNode.paths.size() > outPathIndex);
+      size_t inVariantIndex=currentNode.objects[currentNode.paths[inPathIndex].objectIndex].objectVariantIndex;
+      size_t outVariantIndex=currentNode.objects[currentNode.paths[outPathIndex].objectIndex].objectVariantIndex;
+      assert(objectVariantData.size() > inVariantIndex);
+      assert(objectVariantData.size() > outVariantIndex);
+      const ObjectVariantData &inPathVariant=objectVariantData[inVariantIndex];
+      const ObjectVariantData &outPathVariant=objectVariantData[outVariantIndex];
+
       double speed;
-      size_t index=currentNode.paths[pathIndex].objectIndex;
-
-      if (objectVariantData[currentNode.objects[index].objectVariantIndex].maxSpeed>0) {
-        speed=objectVariantData[currentNode.objects[index].objectVariantIndex].maxSpeed;
-      }
-      else {
-        TypeInfoRef type=objectVariantData[currentNode.objects[index].objectVariantIndex].type;
-
+      if (outPathVariant.maxSpeed > 0) {
+        speed=outPathVariant.maxSpeed;
+      } else {
+        TypeInfoRef type=outPathVariant.type;
         speed=speeds[type->GetIndex()];
       }
-
       speed=std::min(vehicleMaxSpeed,speed);
+      double outPrice = currentNode.paths[outPathIndex].distance.As<Kilometer>() / speed;
 
-      return currentNode.paths[pathIndex].distance.As<Kilometer>()/speed;
+      return outPrice;
     }
 
     inline double GetCosts(const Area& area,
