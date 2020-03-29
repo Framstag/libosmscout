@@ -957,7 +957,7 @@ namespace osmscout {
     if (targetForwardRouteNode) {
       std::cout << "TargetForwardNode:  " << target.GetObjectFileRef().GetName() << " " << targetForwardRouteNode->GetId() << std::endl;
     }
-    if (startBackwardNode) {
+    if (targetBackwardRouteNode) {
       std::cout << "TargetBackwardNode: " << target.GetObjectFileRef().GetName() << " " << targetBackwardRouteNode->GetId() << std::endl;
     }
 #endif
