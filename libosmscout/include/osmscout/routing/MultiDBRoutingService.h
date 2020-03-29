@@ -51,11 +51,6 @@ namespace osmscout {
     typedef std::function<RoutingProfileRef(const DatabaseRef&)> RoutingProfileBuilder;
 
   private:
-    static const size_t CELL_MAGNIFICATION;
-    static const double LAT_CELL_FACTOR;
-    static const double LON_CELL_FACTOR;
-
-  private:
     std::vector<DatabaseHandle> handles;
     bool                        isOpen;
 

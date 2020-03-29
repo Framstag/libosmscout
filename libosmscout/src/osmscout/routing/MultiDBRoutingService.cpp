@@ -27,7 +27,6 @@
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/MultiDBRoutingService.h>
-#include <osmscout/Pixel.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -38,10 +37,6 @@
 //#define DEBUG_ROUTING
 
 namespace osmscout {
-
-  const size_t MultiDBRoutingService::CELL_MAGNIFICATION=65536; // 2^16
-  const double MultiDBRoutingService::LAT_CELL_FACTOR=180.0/ MultiDBRoutingService::CELL_MAGNIFICATION;
-  const double MultiDBRoutingService::LON_CELL_FACTOR=360.0/ MultiDBRoutingService::CELL_MAGNIFICATION;
 
   MultiDBRoutingService::MultiDBRoutingService(const RouterParameter& parameter,
                                                const std::vector<DatabaseRef> &databases):
