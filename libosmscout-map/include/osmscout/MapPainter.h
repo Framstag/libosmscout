@@ -615,6 +615,8 @@ namespace osmscout {
 
     //@}
 
+    std::vector<LineStyle::OffsetRel> ParseLaneTurns(const LanesFeatureValue&);
+
   public:
     MapPainter(const StyleConfigRef& styleConfig,
                CoordBuffer *buffer);

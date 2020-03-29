@@ -1436,6 +1436,68 @@ namespace osmscout {
     }
   }
 
+  std::vector<LineStyle::OffsetRel> MapPainter::ParseLaneTurns(const LanesFeatureValue &lanesValue)
+  {
+    std::vector<LineStyle::OffsetRel> laneTurns;
+    laneTurns.reserve(lanesValue.GetLanes());
+
+    // backward
+    auto turns=SplitString(lanesValue.GetTurnBackward(), "|");
+    int lanes=lanesValue.GetBackwardLanes();
+    int lane=0;
+    for (const std::string &turn: turns) {
+      if (lane>=lanes){
+        break;
+      }
+      if (turn == "left" || turn == "merge_to_left") {
+        laneTurns.push_back(LineStyle::laneBackwardLeft);
+      } else if (turn == "through;left" || turn == "through;slight_left" || turn == "through;sharp_left") {
+        laneTurns.push_back(LineStyle::laneBackwardThroughLeft);
+      } else if (turn == "through") {
+        laneTurns.push_back(LineStyle::laneBackwardThrough);
+      } else if (turn == "through;right" || turn == "through;slight_right" || turn == "through;sharp_right") {
+        laneTurns.push_back(LineStyle::laneBackwardThroughRight);
+      } else if (turn == "right" || turn == "merge_to_right") {
+        laneTurns.push_back(LineStyle::laneBackwardRight);
+      } else {
+        laneTurns.push_back(LineStyle::base);
+      }
+      lane++;
+    }
+    for (;lane<lanes;lane++){
+      laneTurns.push_back(LineStyle::base);
+    }
+
+    // forward
+    turns=SplitString(lanesValue.GetTurnForward(), "|");
+    lanes=lanesValue.GetForwardLanes();
+    lane=0;
+    for (const std::string &turn: turns) {
+      if (lane>=lanes){
+        break;
+      }
+      if (turn == "left" || turn == "merge_to_left") {
+        laneTurns.push_back(LineStyle::laneForwardLeft);
+      } else if (turn == "through;left" || turn == "through;slight_left" || turn == "through;sharp_left") {
+        laneTurns.push_back(LineStyle::laneForwardThroughLeft);
+      } else if (turn == "through") {
+        laneTurns.push_back(LineStyle::laneForwardThrough);
+      } else if (turn == "through;right" || turn == "through;slight_right" || turn == "through;sharp_right") {
+        laneTurns.push_back(LineStyle::laneForwardThroughRight);
+      } else if (turn == "right" || turn == "merge_to_right") {
+        laneTurns.push_back(LineStyle::laneForwardRight);
+      } else {
+        laneTurns.push_back(LineStyle::base);
+      }
+      lane++;
+    }
+    for (;lane<lanes;lane++){
+      laneTurns.push_back(LineStyle::base);
+    }
+
+    return laneTurns;
+  }
+
   void MapPainter::CalculatePaths(const StyleConfig& styleConfig,
                                   const Projection& projection,
                                   const MapParameter& parameter,
@@ -1457,6 +1519,7 @@ namespace osmscout {
     double             mainSlotWidth=0.0;
     AccessFeatureValue *accessValue=nullptr;
     LanesFeatureValue  *lanesValue=nullptr;
+    std::vector<LineStyle::OffsetRel> laneTurns; // cached turns
 
     for (const auto& lineStyle : lineStyles) {
       double       lineWidth=0.0;
@@ -1507,6 +1570,19 @@ namespace osmscout {
             accessValue==nullptr) {
           continue;
         }
+        break;
+      case LineStyle::laneForwardLeft:
+      case LineStyle::laneForwardThroughLeft:
+      case LineStyle::laneForwardThrough:
+      case LineStyle::laneForwardThroughRight:
+      case LineStyle::laneForwardRight:
+      case LineStyle::laneBackwardLeft:
+      case LineStyle::laneBackwardThroughLeft:
+      case LineStyle::laneBackwardThrough:
+      case LineStyle::laneBackwardThroughRight:
+      case LineStyle::laneBackwardRight:
+        lineOffset=0.0;
+        lanesValue=lanesReader.GetValue(buffer);
         break;
       }
 
@@ -1620,6 +1696,40 @@ namespace osmscout {
                                            data.transStart,
                                            data.transEnd);
           wayData.push_back(data);
+          laneOffset+=lanesSpace;
+        }
+      }
+      else if (lineStyle->GetOffsetRel() == LineStyle::laneForwardLeft ||
+               lineStyle->GetOffsetRel() == LineStyle::laneForwardThroughLeft ||
+               lineStyle->GetOffsetRel() == LineStyle::laneForwardThrough ||
+               lineStyle->GetOffsetRel() == LineStyle::laneForwardThroughRight ||
+               lineStyle->GetOffsetRel() == LineStyle::laneForwardRight ||
+               lineStyle->GetOffsetRel() == LineStyle::laneBackwardLeft ||
+               lineStyle->GetOffsetRel() == LineStyle::laneBackwardThroughLeft ||
+               lineStyle->GetOffsetRel() == LineStyle::laneBackwardThrough ||
+               lineStyle->GetOffsetRel() == LineStyle::laneBackwardThroughRight ||
+               lineStyle->GetOffsetRel() == LineStyle::laneBackwardRight ) {
+
+        if (lanesValue==nullptr || lanesValue->GetLanes()<1){
+          continue;
+        }
+
+        if (laneTurns.empty()) {
+          laneTurns=ParseLaneTurns(*lanesValue);
+        }
+
+        int lanes=lanesValue->GetLanes();
+        double lanesSpace=mainSlotWidth/lanes;
+        double laneOffset=-mainSlotWidth/2.0+lanesSpace/2.0;
+
+        for (const LineStyle::OffsetRel &laneTurn: laneTurns) {
+          if (lineStyle->GetOffsetRel() == laneTurn) {
+            coordBuffer->GenerateParallelWay(transStart, transEnd,
+                                             laneOffset,
+                                             data.transStart,
+                                             data.transEnd);
+            wayData.push_back(data);
+          }
           laneOffset+=lanesSpace;
         }
       }

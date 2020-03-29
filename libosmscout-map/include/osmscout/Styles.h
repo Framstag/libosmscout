@@ -53,6 +53,17 @@ namespace osmscout {
       leftOutline,
       rightOutline,
       laneDivider,
+
+      laneForwardLeft,
+      laneForwardThroughLeft,
+      laneForwardThrough,
+      laneForwardThroughRight,
+      laneForwardRight,
+      laneBackwardLeft,
+      laneBackwardThroughLeft,
+      laneBackwardThrough,
+      laneBackwardThroughRight,
+      laneBackwardRight,
     };
 
     enum Attribute {
@@ -222,6 +233,17 @@ namespace osmscout {
       AddEnumValue("leftOutline",LineStyle::leftOutline);
       AddEnumValue("rightOutline",LineStyle::rightOutline);
       AddEnumValue("laneDivider",LineStyle::laneDivider);
+
+      AddEnumValue("laneForwardLeft",LineStyle::laneForwardLeft);
+      AddEnumValue("laneForwardThroughLeft",LineStyle::laneForwardThroughLeft);
+      AddEnumValue("laneForwardThrough",LineStyle::laneForwardThrough);
+      AddEnumValue("laneForwardThroughRight",LineStyle::laneForwardThroughRight);
+      AddEnumValue("laneForwardRight",LineStyle::laneForwardRight);
+      AddEnumValue("laneBackwardLeft",LineStyle::laneBackwardLeft);
+      AddEnumValue("laneBackwardThroughLeft",LineStyle::laneBackwardThroughLeft);
+      AddEnumValue("laneBackwardThrough",LineStyle::laneBackwardThrough);
+      AddEnumValue("laneBackwardThroughRight",LineStyle::laneBackwardThroughRight);
+      AddEnumValue("laneBackwardRight",LineStyle::laneBackwardRight);
     }
   };
 
