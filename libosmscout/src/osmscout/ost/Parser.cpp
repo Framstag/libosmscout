@@ -263,7 +263,7 @@ void Parser::FEATURE() {
 		
 		 SemErr(e.c_str());
 		
-		 // Avoid NULL-pointer further on
+		 // Avoid nullptr-pointer further on
 		 feature=std::make_shared<osmscout::NameFeature>();
 		}
 		
@@ -297,7 +297,7 @@ void Parser::FEATUREDESCS(Feature& feature) {
 
 void Parser::TYPE() {
 		std::string     name;
-		TagConditionRef condition=NULL;
+		TagConditionRef condition=nullptr;
 		TypeInfoRef     typeInfo;
 		unsigned char   types;
 		
