@@ -231,7 +231,7 @@ namespace osmscout {
   public:
     typedef std::unordered_map<std::string,int> EnumNameValueMap;
 
-  private:
+  protected:
     EnumNameValueMap enumMap;
 
   protected:

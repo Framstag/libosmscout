@@ -1070,7 +1070,12 @@ PRODUCTIONS
               = SYNC "SYMBOL"
                 (.
                   PathSymbolPartialStyle style;
+                  std::string      slot;
                 .)
+                [
+                "#"
+                  IDENT<slot> (. style.style->SetSlot(slot); .)
+                ]
                 SYNC "{"
                 {
                   PATHSYMBOLSTYLEATTR<style> WEAK ";"
@@ -1490,6 +1495,11 @@ PRODUCTIONS
                          else if (function=="darken") {
                            if (!errors->hasErrors) {
                              style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
+                           }
+                         }
+                         else if (function=="alpha") {
+                           if (!errors->hasErrors) {
+                             style.SetColorValue(descriptor.GetAttribute(),color.Alpha(factor));
                            }
                          }
                          else {

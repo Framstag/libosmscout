@@ -174,6 +174,7 @@ namespace osmscout {
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer
+      double                   mainSlotWidth;   //!< Width of main slot, used for relative positioning
     };
 
     struct OSMSCOUT_MAP_API PolyData
@@ -615,7 +616,7 @@ namespace osmscout {
 
     //@}
 
-    std::vector<LineStyle::OffsetRel> ParseLaneTurns(const LanesFeatureValue&);
+    std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue&);
 
   public:
     MapPainter(const StyleConfigRef& styleConfig,

@@ -601,7 +601,7 @@ namespace osmscout {
 
     std::vector<LineStyleLookupTable>          wayLineStyleSelectors;
     PathTextStyleLookupTable                   wayPathTextStyleSelectors;
-    PathSymbolStyleLookupTable                 wayPathSymbolStyleSelectors;
+    std::vector<PathSymbolStyleLookupTable>    wayPathSymbolStyleSelectors;
     PathShieldStyleLookupTable                 wayPathShieldStyleSelectors;
 
     std::vector<TypeInfoSet>                   wayTypeSets;
@@ -740,10 +740,11 @@ namespace osmscout {
     void GetWayLineStyles(const FeatureValueBuffer& buffer,
                           const Projection& projection,
                           std::vector<LineStyleRef>& lineStyles) const;
+    void GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
+                               const Projection& projection,
+                               std::vector<PathSymbolStyleRef> &symbolStyles) const;
     PathTextStyleRef GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                                          const Projection& projection) const;
-    PathSymbolStyleRef GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
-                                             const Projection& projection) const;
     PathShieldStyleRef GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                              const Projection& projection) const;
 
