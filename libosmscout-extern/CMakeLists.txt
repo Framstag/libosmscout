@@ -31,7 +31,7 @@ if(OSMSCOUT_BUILD_EXTERN_MATLAB)
     target_compile_definitions(osmscoutmx PRIVATE -DOSMSCOUT_MAP_CAIRO)
   endif()
 
-  set_property(TARGET osmscoutmx PROPERTY CXX_STANDARD 14)
+  set_property(TARGET osmscoutmx PROPERTY CXX_STANDARD 17)
 
   install(TARGETS osmscoutmx
     RUNTIME DESTINATION bin/matlab

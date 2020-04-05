@@ -6,7 +6,7 @@ set(SOURCE_FILES
 
 add_executable(BasemapImport ${SOURCE_FILES} ${HEADER_FILES})
 
-set_target_properties(BasemapImport PROPERTIES CXX_STANDARD 14)
+set_target_properties(BasemapImport PROPERTIES CXX_STANDARD 17)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/Config.h)
 

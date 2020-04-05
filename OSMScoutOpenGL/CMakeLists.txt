@@ -39,4 +39,4 @@ else()
 			)
 endif()
 
-set_property(TARGET OSMScoutOpenGL PROPERTY CXX_STANDARD 14)
+set_property(TARGET OSMScoutOpenGL PROPERTY CXX_STANDARD 17)
