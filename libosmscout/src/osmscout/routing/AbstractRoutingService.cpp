@@ -34,6 +34,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <limits>
 
 //#define DEBUG_ROUTING
 
@@ -654,7 +655,22 @@ namespace osmscout {
                                                        const Distance &overallDistance,
                                                        const double &costLimit)
   {
+    assert(currentRouteNode=current->node);
     DatabaseId dbId=current->id.database;
+
+    bool inPathValid=false;
+    size_t inPathIndex=0; // use std::optional with c++17
+    if (current->prev.IsValid() && dbId==current->prev.database) {
+      for (const auto &path : currentRouteNode->paths) {
+        if (path.id==current->prev.id) {
+          break;
+        }
+        inPathIndex++;
+      }
+      // in case of roundabout, node don't contains path back
+      inPathValid=inPathIndex < currentRouteNode->paths.size();
+    }
+
     size_t i=0;
     for (const auto& path : currentRouteNode->paths) {
       if (path.id==current->prev.id) {
@@ -739,7 +755,11 @@ namespace osmscout {
         }
       }
 
-      double currentCost=current->currentCost+GetCosts(state,dbId,*currentRouteNode,i);
+      double currentCost=current->currentCost+GetCosts(state,
+                                                       dbId,
+                                                       *currentRouteNode,
+                                                       inPathValid ? inPathIndex : i,
+                                                       i);
 
       auto openEntry=openMap.find(DBId(current->id.database,
                                        path.id));
@@ -937,7 +957,7 @@ namespace osmscout {
     if (targetForwardRouteNode) {
       std::cout << "TargetForwardNode:  " << target.GetObjectFileRef().GetName() << " " << targetForwardRouteNode->GetId() << std::endl;
     }
-    if (startBackwardNode) {
+    if (targetBackwardRouteNode) {
       std::cout << "TargetBackwardNode: " << target.GetObjectFileRef().GetName() << " " << targetBackwardRouteNode->GetId() << std::endl;
     }
 #endif

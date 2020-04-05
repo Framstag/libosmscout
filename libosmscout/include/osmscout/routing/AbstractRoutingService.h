@@ -196,7 +196,8 @@ namespace osmscout {
     virtual double GetCosts(const RoutingState& state,
                             DatabaseId database,
                             const RouteNode& routeNode,
-                            size_t pathIndex) = 0;
+                            size_t inPathIndex,
+                            size_t outPathIndex) = 0;
 
     virtual double GetCosts(const RoutingState& state,
                             DatabaseId database,

@@ -105,9 +105,10 @@ namespace osmscout {
   double SimpleRoutingService::GetCosts(const RoutingProfile& profile,
                                         const DatabaseId /*database*/,
                                         const RouteNode& routeNode,
-                                        size_t pathIndex)
+                                        size_t inPathIndex,
+                                        size_t outPathIndex)
   {
-    return profile.GetCosts(routeNode,routingDatabase.GetObjectVariantData(),pathIndex);
+    return profile.GetCosts(routeNode,routingDatabase.GetObjectVariantData(),inPathIndex,outPathIndex);
   }
 
   double SimpleRoutingService::GetCosts(const RoutingProfile& profile,

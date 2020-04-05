@@ -144,7 +144,8 @@ namespace osmscout {
     double GetCosts(const RoutingProfile& profile,
                     DatabaseId database,
                     const RouteNode& routeNode,
-                    size_t pathIndex) override;
+                    size_t inPathIndex,
+                    size_t outPathIndex) override;
 
     double GetCosts(const RoutingProfile& profile,
                     DatabaseId database,
