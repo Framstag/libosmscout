@@ -1070,6 +1070,7 @@ namespace osmscout {
 
         if (laneTurns.empty()) {
           laneTurns=ParseLaneTurns(*lanesValue);
+          assert(laneTurns.size() <= lanesValue->GetLanes());
         }
 
         int lanes=lanesValue->GetLanes();
@@ -1078,7 +1079,7 @@ namespace osmscout {
 
         for (const OffsetRel &laneTurn: laneTurns) {
           if (pathSymbolStyle->GetOffsetRel() == laneTurn) {
-            coordBuffer->GenerateParallelWay(transStart,transEnd,
+            coordBuffer->GenerateParallelWay(data.transStart,data.transEnd,
                                              laneOffset,
                                              transStart,transEnd);
 
@@ -1102,11 +1103,9 @@ namespace osmscout {
         }
 
         if (lineOffset != 0.0) {
-          coordBuffer->GenerateParallelWay(transStart,
-                                           transEnd,
+          coordBuffer->GenerateParallelWay(data.transStart,data.transEnd,
                                            lineOffset,
-                                           transStart,
-                                           transEnd);
+                                           transStart,transEnd);
         }
 
         DrawContourSymbol(projection,
@@ -1767,6 +1766,7 @@ namespace osmscout {
 
         if (laneTurns.empty()) {
           laneTurns=ParseLaneTurns(*lanesValue);
+          assert(laneTurns.size() <= lanesValue->GetLanes());
         }
 
         int lanes=lanesValue->GetLanes();
