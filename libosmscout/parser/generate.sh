@@ -11,6 +11,8 @@ fi
 
 echo "Using Coco command '${COCO}'..."
 
+cd $(dirname $0)
+
 # OST (aka OSMScout types)
 $COCO OST/OST.atg -namespace osmscout:ost -frames OST -o OST 
 

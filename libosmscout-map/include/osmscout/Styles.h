@@ -34,6 +34,24 @@
 
 namespace osmscout {
 
+  enum class OffsetRel: int {
+    base,
+    leftOutline,
+    rightOutline,
+    laneDivider,
+
+    laneForwardLeft,
+    laneForwardThroughLeft,
+    laneForwardThrough,
+    laneForwardThroughRight,
+    laneForwardRight,
+    laneBackwardLeft,
+    laneBackwardThroughLeft,
+    laneBackwardThrough,
+    laneBackwardThroughRight,
+    laneBackwardRight,
+  };
+
   /**
    * \ingroup Stylesheet
    *
@@ -46,13 +64,6 @@ namespace osmscout {
       capButt,
       capRound,
       capSquare
-    };
-
-    enum OffsetRel {
-      base,
-      leftOutline,
-      rightOutline,
-      laneDivider,
     };
 
     enum Attribute {
@@ -218,10 +229,27 @@ namespace osmscout {
       : StyleEnumAttributeDescriptor(name,
                                      attribute)
     {
-      AddEnumValue("base",LineStyle::base);
-      AddEnumValue("leftOutline",LineStyle::leftOutline);
-      AddEnumValue("rightOutline",LineStyle::rightOutline);
-      AddEnumValue("laneDivider",LineStyle::laneDivider);
+      AddEnumValue2("base",OffsetRel::base);
+      AddEnumValue2("leftOutline",OffsetRel::leftOutline);
+      AddEnumValue2("rightOutline",OffsetRel::rightOutline);
+      AddEnumValue2("laneDivider",OffsetRel::laneDivider);
+
+      AddEnumValue2("laneForwardLeft",OffsetRel::laneForwardLeft);
+      AddEnumValue2("laneForwardThroughLeft",OffsetRel::laneForwardThroughLeft);
+      AddEnumValue2("laneForwardThrough",OffsetRel::laneForwardThrough);
+      AddEnumValue2("laneForwardThroughRight",OffsetRel::laneForwardThroughRight);
+      AddEnumValue2("laneForwardRight",OffsetRel::laneForwardRight);
+      AddEnumValue2("laneBackwardLeft",OffsetRel::laneBackwardLeft);
+      AddEnumValue2("laneBackwardThroughLeft",OffsetRel::laneBackwardThroughLeft);
+      AddEnumValue2("laneBackwardThrough",OffsetRel::laneBackwardThrough);
+      AddEnumValue2("laneBackwardThroughRight",OffsetRel::laneBackwardThroughRight);
+      AddEnumValue2("laneBackwardRight",OffsetRel::laneBackwardRight);
+    }
+
+    void AddEnumValue2(const std::string& name,
+                       OffsetRel value)
+    {
+      AddEnumValue(name, static_cast<int>(value));
     }
   };
 
@@ -1190,14 +1218,17 @@ namespace osmscout {
       attrSymbol,
       attrSymbolSpace,
       attrDisplayOffset,
-      attrOffset
+      attrOffset,
+      attrOffsetRel
     };
 
   private:
-    SymbolRef symbol;
-    double    symbolSpace;
-    double    displayOffset;
-    double    offset;
+    std::string slot;
+    SymbolRef   symbol;
+    double      symbolSpace;
+    double      displayOffset;
+    double      offset;
+    OffsetRel   offsetRel{OffsetRel::base};
 
   public:
     PathSymbolStyle();
@@ -1205,15 +1236,24 @@ namespace osmscout {
 
     void SetDoubleValue(int attribute, double value) override;
     void SetSymbolValue(int attribute, const SymbolRef& value) override;
+    void SetIntValue(int attribute, int value) override;
+
+    PathSymbolStyle& SetSlot(const std::string& slot);
 
     PathSymbolStyle& SetSymbol(const SymbolRef& symbol);
     PathSymbolStyle& SetSymbolSpace(double space);
     PathSymbolStyle& SetDisplayOffset(double value);
     PathSymbolStyle& SetOffset(double value);
+    PathSymbolStyle& SetOffsetRel(OffsetRel offsetRel);
 
     inline bool IsVisible() const
     {
       return (bool)symbol;
+    }
+
+    inline const std::string& GetSlot() const
+    {
+      return slot;
     }
 
     inline const SymbolRef& GetSymbol() const
@@ -1234,6 +1274,11 @@ namespace osmscout {
     inline double GetOffset() const
     {
       return offset;
+    }
+
+    inline OffsetRel GetOffsetRel() const
+    {
+      return offsetRel;
     }
 
     static StyleDescriptorRef GetDescriptor();

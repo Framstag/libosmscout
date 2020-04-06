@@ -157,7 +157,7 @@ PRODUCTIONS
 
   TYPE        = (.
                   std::string     name;
-                  TagConditionRef condition;
+                  TagConditionRef condition=nullptr;
                   TypeInfoRef     typeInfo;
                   unsigned char   types;
                 .)

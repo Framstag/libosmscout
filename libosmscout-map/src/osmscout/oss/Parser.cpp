@@ -1401,7 +1401,13 @@ void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state) {
 		while (!(la->kind == _EOF || la->kind == 21 /* "SYMBO" */)) {SynErr(108); Get();}
 		Expect(21 /* "SYMBO" */);
 		PathSymbolPartialStyle style;
+		std::string      slot;
 		
+		if (la->kind == 51 /* "#" */) {
+			Get();
+			IDENT(slot);
+			style.style->SetSlot(slot); 
+		}
 		while (!(la->kind == _EOF || la->kind == 11 /* "{" */)) {SynErr(109); Get();}
 		Expect(11 /* "{" */);
 		while (la->kind == _ident || la->kind == 57 /* "name" */) {

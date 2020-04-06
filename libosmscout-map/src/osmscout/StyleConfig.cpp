@@ -607,6 +607,31 @@ namespace osmscout {
     }
   }
 
+  template <class S, class A>
+  void SortInConditionalsBySlot(const TypeConfig& typeConfig,
+                                const std::list<ConditionalStyle<S,A> >& conditionals,
+                                size_t maxLevel,
+                                std::vector<std::vector<std::vector<std::list<StyleSelector<S,A> > > > >& selectors)
+  {
+    std::unordered_map<std::string,std::list<ConditionalStyle<S,A>> > styleBySlot;
+
+    for (auto& conditional : conditionals) {
+      styleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
+    }
+
+    selectors.resize(styleBySlot.size());
+
+    size_t idx=0;
+    for (const auto& entry : styleBySlot) {
+      SortInConditionals(typeConfig,
+                         entry.second,
+                         maxLevel,
+                         selectors[idx]);
+
+      idx++;
+    }
+  }
+
   void StyleConfig::PostprocessNodes()
   {
     size_t maxLevel=0;
@@ -616,23 +641,10 @@ namespace osmscout {
     GetMaxLevelInConditionals(nodeIconStyleConditionals,
                               maxLevel);
 
-    std::unordered_map<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
-
-    for (auto& conditional : nodeTextStyleConditionals) {
-      textStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
-    }
-
-    nodeTextStyleSelectors.resize(textStyleBySlot.size());
-
-    size_t idx=0;
-    for (const auto& entry : textStyleBySlot) {
-      SortInConditionals(*typeConfig,
-                         entry.second,
-                         maxLevel,
-                         nodeTextStyleSelectors[idx]);
-
-      idx++;
-    }
+    SortInConditionalsBySlot(*typeConfig,
+                             nodeTextStyleConditionals,
+                             maxLevel,
+                             nodeTextStyleSelectors);
 
     SortInConditionals(*typeConfig,
                        nodeIconStyleConditionals,
@@ -671,32 +683,21 @@ namespace osmscout {
     GetMaxLevelInConditionals(wayPathShieldStyleConditionals,
                               maxLevel);
 
-    std::unordered_map<std::string,std::list<LineConditionalStyle> > lineStyleBySlot;
+    SortInConditionalsBySlot(*typeConfig,
+                             wayLineStyleConditionals,
+                             maxLevel,
+                             wayLineStyleSelectors);
 
-    for (auto& conditional : wayLineStyleConditionals) {
-      lineStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
-    }
-
-    wayLineStyleSelectors.resize(lineStyleBySlot.size());
-
-    size_t idx=0;
-    for (const auto& entry : lineStyleBySlot) {
-      SortInConditionals(*typeConfig,
-                         entry.second,
-                         maxLevel,
-                         wayLineStyleSelectors[idx]);
-
-      idx++;
-    }
+    SortInConditionalsBySlot(*typeConfig,
+                             wayPathSymbolStyleConditionals,
+                             maxLevel,
+                             wayPathSymbolStyleSelectors);
 
     SortInConditionals(*typeConfig,
                        wayPathTextStyleConditionals,
                        maxLevel,
                        wayPathTextStyleSelectors);
-    SortInConditionals(*typeConfig,
-                       wayPathSymbolStyleConditionals,
-                       maxLevel,
-                       wayPathSymbolStyleSelectors);
+
     SortInConditionals(*typeConfig,
                        wayPathShieldStyleConditionals,
                        maxLevel,
@@ -756,41 +757,15 @@ namespace osmscout {
                        maxLevel,
                        areaFillStyleSelectors);
 
-    std::unordered_map<std::string,std::list<BorderConditionalStyle> > borderStyleBySlot;
+    SortInConditionalsBySlot(*typeConfig,
+                             areaBorderStyleConditionals,
+                             maxLevel,
+                             areaBorderStyleSelectors);
 
-    for (auto& conditional : areaBorderStyleConditionals) {
-      borderStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
-    }
-
-    areaBorderStyleSelectors.resize(borderStyleBySlot.size());
-
-    size_t idx=0;
-    for (const auto& entry : borderStyleBySlot) {
-      SortInConditionals(*typeConfig,
-                         entry.second,
-                         maxLevel,
-                         areaBorderStyleSelectors[idx]);
-
-      idx++;
-    }
-
-    std::unordered_map<std::string,std::list<TextConditionalStyle> > textStyleBySlot;
-
-    for (auto& conditional : areaTextStyleConditionals) {
-      textStyleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
-    }
-
-    areaTextStyleSelectors.resize(textStyleBySlot.size());
-
-    idx=0;
-    for (const auto& entry : textStyleBySlot) {
-      SortInConditionals(*typeConfig,
-                         entry.second,
-                         maxLevel,
-                         areaTextStyleSelectors[idx]);
-
-      idx++;
-    }
+    SortInConditionalsBySlot(*typeConfig,
+                             areaTextStyleConditionals,
+                             maxLevel,
+                             areaTextStyleSelectors);
 
     SortInConditionals(*typeConfig,
                        areaIconStyleConditionals,
@@ -1191,7 +1166,7 @@ namespace osmscout {
                                          projection);
 
       if (style) {
-        if (style->GetOffsetRel()!=LineStyle::base) {
+        if (style->GetOffsetRel()!=OffsetRel::base) {
           requireSort=true;
         }
 
@@ -1209,20 +1184,29 @@ namespace osmscout {
     }
   }
 
+  void StyleConfig::GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
+                                          const Projection& projection,
+                                          std::vector<PathSymbolStyleRef> &symbolStyles) const
+  {
+    symbolStyles.clear();
+    symbolStyles.reserve(wayLineStyleSelectors.size());
+    for (const auto& wayPathSymbolStyleSelector : wayPathSymbolStyleSelectors) {
+      PathSymbolStyleRef style=GetFeatureStyle(styleResolveContext,
+                                               wayPathSymbolStyleSelector[buffer.GetType()->GetIndex()],
+                                               buffer,
+                                               projection);
+      if (style) {
+        symbolStyles.push_back(style);
+      }
+    }
+  }
+
+
   PathTextStyleRef StyleConfig::GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                                                     const Projection& projection) const
   {
     return GetFeatureStyle(styleResolveContext,
                            wayPathTextStyleSelectors[buffer.GetType()->GetIndex()],
-                           buffer,
-                           projection);
-  }
-
-  PathSymbolStyleRef StyleConfig::GetWayPathSymbolStyle(const FeatureValueBuffer& buffer,
-                                                        const Projection& projection) const
-  {
-    return GetFeatureStyle(styleResolveContext,
-                           wayPathSymbolStyleSelectors[buffer.GetType()->GetIndex()],
                            buffer,
                            projection);
   }

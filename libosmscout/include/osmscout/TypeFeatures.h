@@ -1838,7 +1838,7 @@ namespace osmscout {
   {
   private:
 
-    uint8_t     lanes;              //< // First two bits reserved, 3 bit for number of lanes in each direction
+    uint8_t     lanes;              //!< First two bits reserved, 3 bit for number of lanes in each direction
     std::string turnForward;
     std::string turnBackward;
     std::string destinationForward;

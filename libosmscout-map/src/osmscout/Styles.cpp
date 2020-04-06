@@ -56,7 +56,7 @@ namespace osmscout {
      endCap(capRound),
      priority(0),
      zIndex(0),
-     offsetRel(base)
+     offsetRel(OffsetRel::base)
   {
     // no code
   }
@@ -1845,7 +1845,7 @@ namespace osmscout {
       AddAttribute(std::make_shared<StyleUDisplayAttributeDescriptor>("symbolSpace",PathSymbolStyle::attrSymbolSpace));
       AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",PathSymbolStyle::attrDisplayOffset));
       AddAttribute(std::make_shared<StyleUMapAttributeDescriptor>("offset",PathSymbolStyle::attrOffset));
-    }
+      AddAttribute(std::make_shared<OffsetRelAttributeDescriptor>("offsetRel",PathSymbolStyle::attrOffsetRel));    }
   };
 
   static StyleDescriptorRef pathSymbolStyleDescriptor=std::make_shared<PathSymbolStyleDescriptor>();
@@ -1862,9 +1862,17 @@ namespace osmscout {
   : symbol(style.symbol),
     symbolSpace(style.symbolSpace),
     displayOffset(style.displayOffset),
-    offset(style.offset)
+    offset(style.offset),
+    offsetRel(style.offsetRel)
   {
     // no code
+  }
+
+  PathSymbolStyle& PathSymbolStyle::SetSlot(const std::string& slot)
+  {
+    this->slot=slot;
+
+    return *this;
   }
 
   PathSymbolStyle& PathSymbolStyle::SetSymbol(const SymbolRef& symbol)
@@ -1895,6 +1903,13 @@ namespace osmscout {
     return *this;
   }
 
+  PathSymbolStyle& PathSymbolStyle::SetOffsetRel(OffsetRel offsetRel)
+  {
+    this->offsetRel=offsetRel;
+
+    return *this;
+  }
+
   StyleDescriptorRef PathSymbolStyle::GetDescriptor()
   {
     return pathSymbolStyleDescriptor;
@@ -1915,6 +1930,9 @@ namespace osmscout {
         displayOffset=other.displayOffset;
         break;
       case attrOffset:
+        offset=other.offset;
+        break;
+      case attrOffsetRel:
         offset=other.offset;
         break;
       }
@@ -1950,5 +1968,17 @@ namespace osmscout {
       assert(false);
     }
   }
+
+  void PathSymbolStyle::SetIntValue(int attribute, int value)
+  {
+    switch (attribute) {
+      case attrOffsetRel:
+        SetOffsetRel((OffsetRel)value);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
 }
 
