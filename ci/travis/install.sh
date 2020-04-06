@@ -84,7 +84,8 @@ elif [ "$TARGET" = "importer" ]; then
       libxml2-dev \
       libprotobuf-dev protobuf-compiler \
       libmarisa-dev \
-      libicu-dev
+      libicu-dev \
+      liblzma-dev
   fi
 elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
