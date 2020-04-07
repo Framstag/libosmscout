@@ -36,7 +36,7 @@ cmake \
 make $*
 
 echo "Check which libraries are dynamically linked"
-ldd Import/Import
+ldd Import/Import || true
 
 IMPDIST=libosmscout-importer.$IMPORT_TOOL_OS.$IMPORT_TOOL_ARCH
 
