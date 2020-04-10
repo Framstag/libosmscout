@@ -241,7 +241,7 @@ else()
 endif()
 
 set_target_properties(OSMScout PROPERTIES
-    CXX_STANDARD 14
+    CXX_STANDARD 17
 	OUTPUT_NAME "osmscout")
 
 target_include_directories(OSMScout PUBLIC include ${CMAKE_SOURCE_DIR}/include)

@@ -41,7 +41,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutMapOpenGL PROPERTIES
-		CXX_STANDARD 14
+		CXX_STANDARD 17
 		OUTPUT_NAME "OSMScoutMapOpenGL")
 
 target_include_directories(OSMScoutMapOpenGL PUBLIC

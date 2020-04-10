@@ -93,7 +93,21 @@ check_function_exists(mallinfo HAVE_MALLINFO)
 if(NOT IOS)
 find_package(Marisa)
 endif()
+
 find_package(LibXml2)
+if (LIBXML2_FOUND AND NOT BUILD_SHARED_LIBS)
+  # seems that FindLibXml2.cmake don't handle static libraries properly
+  # as a workaround we append PC_LIBXML_STATIC_LIBRARIES to LIBXML2_LIBRARIES
+  set(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${PC_LIBXML_STATIC_LIBRARIES})
+
+  if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC)
+    # Libxml contains tiny http client that is using libc gethostbyname and getaddrinfo.
+    # These functions are using dlopen in glibc, so it requires libdl dependency
+    # and glibc libraries at runtime! Resulted binary is not fully static.
+    list(APPEND LIBXML2_LIBRARIES "dl")
+  endif()
+endif()
+
 find_package(MyProtobuf) # Modified FindProtobuf
 if (${PROTOBUF_FOUND} AND NOT EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
   message(STATUS "Protobuf library found, but protoc compiler is missing")

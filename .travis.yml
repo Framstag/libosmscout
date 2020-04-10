@@ -56,7 +56,7 @@ matrix:
         - secure: "Oeondq8ZTLy7Msjr8ZaoWhwk0Ra1aQbz8H2NBgnhoovJk/128XS4cy4/8LAavQAEDE2Urblnq946qTrLGHcmKBhBU/727dcDCHd6OD44rY5gBrM/oRmZBePAp8tujj/47iBeGvRR/WWk6qkh3+v6efqK5sOW8Y9wkvEkKawz3iD34k2RqCeeQR0a4uC1PshOUokSd4AWf4ppMKjou4Xu+Dq0sgT4e2dxvcvfb9D43E2sULXBolF4G7jw7ud0DfyMSltYhATrUfI7pj80vYVs3s5uKkuaAq8g2toA30WrmmjrkKYB3QTsxrLNX4vRxggp1lsCheotcG0tLSY8f8R9bt7vuZC69CaAhAXcc4xVBY/RGgcoOn7oBsS04l2QD/TgStnvUmuwevdk1LtSZbu6g8jk+xihn7E/7FzWGkF9G+X6lRW6Bz0Dq4UWHoQiYr/2gx7xQv+PDfc5xf5I6vh2ORFRb/BRBwiDPE1tZY94TRcZRNqPxhsXvypMugRWXqlKqmdT786hQdwvkfndhI7wH5HQDVHMF6Vc4iy7GgnShlaarGWipR7x/fLOnJmj6vbMp/oSr7CTyzqm5Aaoqx2NasvBVMRem/gyYESt82oC2WKclw7f/Rk4e3h0g5mum82n9hleeMlyRdd4lsLSR+v3gb7fsXixYwJAnM69KOzppEQ="
         - secure: "AKvNzfERBE4ozODfRJrSs/b9+XjhJKNMA9Of+GH++nwYV/OmpMeiWCfToVt5I+coLWaZQZ1V7jjHXNl27fzHKly5BslSBx0PbMu+Od6jyPGUVRBf4/HnltyexjIqJ6/BlQLBf57NlUV3f+OYTdlfa9AyMHt7TAr35HQO6L7MBlBCD6uS+hP0piRJSYqXsWePHxcmL9nKDCNY8Ip5DFJ6nPnq8YIxXnG/JZSxUqtPnc15IXYH2+zhNwL8bEyaodIogZdVXUk6I3YykWMn7TTeIw3kPvp2+iCw03964R4wlKcy90IxcdYrZPHQfVx3/fl8Ntik8rqPwjsPSM4KjDjYnoh+wqT3t01cna9mqQ6qaSbNl67//IE7Mb21JaTo/UbnxCzo/Ii1U9HFO8mLov64X6Kp2sYKV+Iajm52lw8eSm7QI04wmmmpM87SFr71n/TN4nZP0NPs1BP6oK4m/uc/N2JbvTt/ikQiwkvd05M/hBi91ToYBpSLtpdAi3iC1Ok1bJD25ElFJkQ9rwyHwUvWFLq0D2qtv4jVpraDYFYE4JWy+Q/BECV5v8IWunqP4DOmVKifpqDTGSJL9j+exEnE8Ed7qtbXtb3cSCucT3WPUFUD2MBW0cpjobZF7k5UgE2U8d1QuYy/mBSfyQR5gif0Hv/hMmlOWahtmGP5jzb/fIE="
     - os: linux
-      dist: trusty # there is problem with static linking of Import tool in Ubuntu Xenial and Bionic
+      dist: bionic
       sudo: required
       compiler: gcc
       env:

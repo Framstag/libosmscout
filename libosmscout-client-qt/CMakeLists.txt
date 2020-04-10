@@ -131,7 +131,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutClientQt PROPERTIES
-        CXX_STANDARD 14
+        CXX_STANDARD 17
         OUTPUT_NAME "osmscout_client_qt")
 
 target_include_directories(OSMScoutClientQt PUBLIC include)

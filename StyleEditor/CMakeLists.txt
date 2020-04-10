@@ -79,4 +79,4 @@ endif()
 
 # enable QML debuger
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
-set_property(TARGET StyleEditor PROPERTY CXX_STANDARD 14)
+set_property(TARGET StyleEditor PROPERTY CXX_STANDARD 17)

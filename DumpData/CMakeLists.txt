@@ -4,7 +4,7 @@ set(SOURCE_FILES
 
 add_executable(DumpData ${SOURCE_FILES})
 
-set_target_properties(DumpData PROPERTIES CXX_STANDARD 14)
+set_target_properties(DumpData PROPERTIES CXX_STANDARD 17)
 
 target_link_libraries(DumpData OSMScout)
 

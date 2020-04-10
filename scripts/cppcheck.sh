@@ -28,7 +28,7 @@ fi
 
 cd $BUILDDIR
 echo "Calling cppcheck..."
-cppcheck -q --force --enable=all --std=c++14 --xml-version=2 --include="$MACROS" --xml --project="$PROJECT" 2>cppcheck.xml
+cppcheck -q --force --enable=all --std=c++17 --xml-version=2 --include="$MACROS" --xml --project="$PROJECT" 2>cppcheck.xml
 echo "Calling cppcheck-htmlreport..."
 cppcheck-htmlreport --file cppcheck.xml --report-dir=cppcheck
 

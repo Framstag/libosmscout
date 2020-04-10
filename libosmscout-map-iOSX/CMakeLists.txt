@@ -21,7 +21,7 @@ else()
 endif()
 
 set_target_properties(OSMScoutMapIOSX PROPERTIES
-		CXX_STANDARD 14
+		CXX_STANDARD 17
 		OUTPUT_NAME "osmscout-map-iosx")
 
 target_include_directories(OSMScoutMapIOSX PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
