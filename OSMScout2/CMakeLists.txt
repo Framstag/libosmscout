@@ -57,6 +57,7 @@ set(SOURCE_FILES
     qml/custom/MapButton.qml
 	qml/custom/RoutingStep.qml
 	qml/custom/RouteStepIcon.qml
+	qml/custom/Utils.js
 	)
 
 # XML files with translated phrases.
