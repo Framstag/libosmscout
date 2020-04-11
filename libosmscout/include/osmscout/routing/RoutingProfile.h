@@ -297,14 +297,18 @@ namespace osmscout {
 
       // price of ride to target node using outPath
       double speed=std::min(vehicleMaxSpeed,GetMaxSpeed(outPathVariant));
-      double outPrice = currentNode.paths[outPathIndex].distance.As<Kilometer>() / speed;
+      double outPrice = speed <= 0 ?
+          std::numeric_limits<double>::infinity() :
+          currentNode.paths[outPathIndex].distance.As<Kilometer>() / speed;
 
       // add penalty for junction
       // it is estimate without considering real junction geometry
       double junctionPenalty{0};
       if (applyJunctionPenalty && inObjIndex!=outObjIndex){
         double minSpeed=std::min(GetMaxSpeed(inPathVariant),GetMaxSpeed(outPathVariant));
-        junctionPenalty = 0.160 / minSpeed;
+        junctionPenalty = minSpeed <= 0 ?
+            std::numeric_limits<double>::infinity() :
+            0.160 / minSpeed;
       }
 
       return outPrice + junctionPenalty;
