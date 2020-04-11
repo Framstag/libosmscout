@@ -33,6 +33,7 @@
 #include <osmscout/Area.h>
 
 #include <osmscout/util/Time.h>
+#include <osmscout/util/Logger.h>
 
 #include <osmscout/routing/RouteNode.h>
 
@@ -287,7 +288,11 @@ namespace osmscout {
           return variant.maxSpeed;
         }
         TypeInfoRef type=variant.type;
-        return speeds[type->GetIndex()];
+        double speed=speeds[type->GetIndex()];
+        if (speed<=0){
+          log.Warn() << "Infinite cost for type " << type->GetName();
+        }
+        return speed;
       };
 
       // price of ride to target node using outPath
