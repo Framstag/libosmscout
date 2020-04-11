@@ -333,7 +333,7 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
 {
   std::cout << "RouteNode {" << std::endl;
   std::cout << "  fileOffset: " << routeNode.GetFileOffset() << std::endl;
-  std::cout << "  OSMScoutId: " << routeNode.GetId() << std::endl;
+  std::cout << "  RouteNodeId: " << routeNode.GetId() << std::endl;
 
   std::streamsize         oldPrecision=std::cout.precision(5);
   std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
