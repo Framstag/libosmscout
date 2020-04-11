@@ -350,6 +350,10 @@ struct Arguments
 
 int main(int argc, char* argv[])
 {
+  int tmpArgc = 1;
+  assert(argc >= tmpArgc);
+  // QGuiApplication modifies arguments and "eats" --style for example. We have to lie to avoid it.
+  QGuiApplication application(tmpArgc,argv);
 
   osmscout::CmdLineParser   argParser("RoutingAnimation",
                                       argc,argv);
