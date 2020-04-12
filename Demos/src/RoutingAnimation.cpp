@@ -324,6 +324,7 @@ struct Arguments
   size_t                  height;
   osmscout::GeoCoord      center;
   osmscout::Magnification zoom;
+  double                  dpi;
 
   size_t                  frameStep;
   size_t                  startStep;
@@ -339,6 +340,7 @@ struct Arguments
     width(1920),
     height(1080),
     center(-1000,-1000),
+    dpi(96),
     frameStep(1),
     startStep(0),
     endStep(-1),
@@ -350,11 +352,18 @@ struct Arguments
 
 int main(int argc, char* argv[])
 {
+  int tmpArgc = 1;
+  assert(argc >= tmpArgc);
+  // QGuiApplication modifies arguments and "eats" --style for example. We have to lie to avoid it.
+  QGuiApplication application(tmpArgc,argv);
 
   osmscout::CmdLineParser   argParser("RoutingAnimation",
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
   Arguments                 args;
+
+  assert(QGuiApplication::primaryScreen());
+  args.dpi=QGuiApplication::primaryScreen()->physicalDotsPerInch();
 
   argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
                         args.help=value;
@@ -417,6 +426,13 @@ int main(int argc, char* argv[])
                       }),
                       "height",
                       "height of animation frames (default 1080)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineDoubleOption([&args](const double& value) {
+                        args.dpi=value;
+                      }),
+                      "dpi",
+                      "dpi of animation frames (default " + std::to_string(args.dpi) + ")",
                       false);
 
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
@@ -524,13 +540,12 @@ int main(int argc, char* argv[])
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
       osmscout::MapPainterQt        mapPainter(styleConfig);
-      double                        dpi=QGuiApplication::primaryScreen()->physicalDotsPerInch();
 
       drawParameter.SetFontSize(3.0);
 
       projection.Set(args.center,
                      args.zoom,
-                     dpi,
+                     args.dpi,
                      args.width,
                      args.height);
 

@@ -655,14 +655,17 @@ namespace osmscout {
                                                        const Distance &overallDistance,
                                                        const double &costLimit)
   {
+    assert(current);
     assert(currentRouteNode=current->node);
     DatabaseId dbId=current->id.database;
 
+    // find incoming path (its index) to current node
     bool inPathValid=false;
     size_t inPathIndex=0; // use std::optional with c++17
     if (current->prev.IsValid() && dbId==current->prev.database) {
       for (const auto &path : currentRouteNode->paths) {
-        if (path.id==current->prev.id) {
+        if (path.id==current->prev.id && // this is path from previous node
+            currentRouteNode->objects[path.objectIndex].object == current->object) { // with used object
           break;
         }
         inPathIndex++;

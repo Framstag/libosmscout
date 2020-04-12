@@ -10,6 +10,7 @@ import QtPositioning 5.2
 import net.sf.libosmscout.map 1.0
 
 import "custom"
+import "custom/Utils.js" as Utils
 
 Window {
     id: mainWindow
@@ -22,7 +23,7 @@ Window {
     function reroute(){
         var startLoc = routingModel.locationEntryFromPosition(simulator.latitude, simulator.longitude);
         var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
-        console.log("We leave route, reroute from " + startLoc.label + " -> " + destinationLoc.label);
+        console.log("We leave route, reroute from " + Utils.locationStr(startLoc) + " -> " + Utils.locationStr(destinationLoc));
         routingModel.setStartAndTarget(startLoc, destinationLoc);
     }
 

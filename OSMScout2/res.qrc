@@ -14,6 +14,7 @@
         <file>qml/custom/ScrollIndicator.qml</file>
         <file>qml/custom/RouteStepIcon.qml</file>
         <file>qml/custom/RoutingStep.qml</file>
+        <file>qml/custom/Utils.js</file>
 
         <file>pics/DeleteText.svg</file>
         <file>pics/Minus.svg</file>
