@@ -36,18 +36,18 @@ IF %COMPILER%==msys2 (
   )
 )
 
-IF %COMPILER%==msvc2015 (
+IF %COMPILER%==msvc2019 (
   @echo on
-  echo Compiling libosmscout using Visual Studio 2015...
+  echo Compiling libosmscout using Visual Studio 2019...
 
-  echo Initializing VisualStudio command line build environment
-  call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  echo Initializing Visual Studio command line build environment
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
 
   IF %BUILDTOOL%==cmake (
     echo Using build tool 'cmake'...
     mkdir build
     cd build
-    cmake -G "Visual Studio 14 2015 Win64" .. -DCMAKE_SYSTEM_VERSION=10.0.10586.0  -DCMAKE_TOOLCHAIN_FILE=c:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake
+    cmake -G "Visual Studio 16 2019" -A x64 .. -DCMAKE_SYSTEM_VERSION=10.0.18362.0  -DCMAKE_TOOLCHAIN_FILE=c:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake
     cmake --build .
     echo Finished cmake build
   )
@@ -55,7 +55,7 @@ IF %COMPILER%==msvc2015 (
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
     mkdir debug
-    meson debug --backend vs2015
+    meson debug --backend vs2019
     cd debug
     msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
     echo Finished meson build

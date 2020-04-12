@@ -60,9 +60,9 @@ IF %COMPILER%==msys2 (
   echo Finished installing MSYS2 build preconditions
 )
 
-IF %COMPILER%==msvc2015 (
+IF %COMPILER%==msvc2019 (
   @echo on
-  echo MSVC2015 build...
+  echo MSVC2019 build...
 
   IF %BUILDTOOL%==cmake (
     cd c:\tools\vcpkg

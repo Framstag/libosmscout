@@ -8,8 +8,8 @@ branches:
 
 environment:
   matrix:
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    COMPILER: msvc2015
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    COMPILER: msvc2019
     BUILDTOOL: cmake
     CONFIGURATION: Debug
     MSYS2_ARCH: x86_64
@@ -19,8 +19,8 @@ environment:
     PLATFORM: x64
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    COMPILER: msvc2015
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    COMPILER: msvc2019
     BUILDTOOL: meson
     CONFIGURATION: Debug
     MSYS2_ARCH: x86_64
@@ -30,7 +30,7 @@ environment:
     PLATFORM: x64
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     COMPILER: msys2
     BUILDTOOL: meson
     MSYS2_ARCH: x86_64
@@ -40,7 +40,7 @@ environment:
     PLATFORM: x64
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     COMPILER: msys2
     BUILDTOOL: cmake
     MSYS2_ARCH: x86_64
@@ -50,7 +50,7 @@ environment:
     PLATFORM: x64
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     COMPILER: msys2
     BUILDTOOL: cmake
     MSYS2_ARCH: x86_64
