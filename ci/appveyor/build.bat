@@ -40,14 +40,14 @@ IF %COMPILER%==msvc2019 (
   @echo on
   echo Compiling libosmscout using Visual Studio 2019...
 
-  echo Initializing VisualStudio command line build environment
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\vcvarsall.bat" amd64
+  echo Initializing Visual Studio command line build environment
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
 
   IF %BUILDTOOL%==cmake (
     echo Using build tool 'cmake'...
     mkdir build
     cd build
-    cmake -G "Visual Studio 16 201r95 Win64" .. -DCMAKE_SYSTEM_VERSION=10.0.10586.0  -DCMAKE_TOOLCHAIN_FILE=c:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake
+    cmake -G "Visual Studio 16 2019" -A x64 .. -DCMAKE_SYSTEM_VERSION=10.0.18362.0  -DCMAKE_TOOLCHAIN_FILE=c:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake
     cmake --build .
     echo Finished cmake build
   )
