@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 
 @setlocal
 
@@ -31,7 +31,6 @@ set /a totalsecs = %hours%*3600 + %mins%*60 + %secs%
 
 IF %totalsecs% LEQ %timemaxdelta% (
     call %1 %2 %3 %4 %5 %6 %7 %8 %9
-)
-else (
+) ELSE (
     echo "Not called, not enough time left"
 )
