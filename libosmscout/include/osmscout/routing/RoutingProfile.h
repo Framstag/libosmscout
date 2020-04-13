@@ -253,7 +253,7 @@ namespace osmscout {
     }
 
     void ParametrizeForBicycle(const TypeConfig& typeConfig,
-                               double maxSpeed)
+                               double maxSpeed) override
     {
       applyJunctionPenalty=true;
       AbstractRoutingProfile::ParametrizeForBicycle(typeConfig, maxSpeed);
@@ -261,7 +261,7 @@ namespace osmscout {
 
     bool ParametrizeForCar(const TypeConfig& typeConfig,
                            const std::map<std::string,double>& speedMap,
-                           double maxSpeed)
+                           double maxSpeed) override
     {
       applyJunctionPenalty=true;
       return AbstractRoutingProfile::ParametrizeForCar(typeConfig, speedMap, maxSpeed);
