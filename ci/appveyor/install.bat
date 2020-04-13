@@ -1,4 +1,4 @@
-@echo on
+@echo off
 
 cd %APPVEYOR_BUILD_FOLDER%
 
@@ -12,7 +12,6 @@ echo Build tool: %BUILDTOOL%
 echo Target: %TARGET%
 
 set timestart=%time%
-set timediff=0
 
 echo Start updating build dependencies...
 
@@ -71,230 +70,130 @@ IF %COMPILER%==msvc2019 (
   IF %BUILDTOOL%==cmake (
     cd c:\tools\vcpkg
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing zlib, iconv, libxml2...
-      .\vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
-    )
+    echo Installing zlib, iconv, libxml2...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing protobuf...
-      .\vcpkg install protobuf:x64-windows
+    echo Installing protobuf...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install protobuf:x64-windows
+
+    rem transitive
+    echo Installing pixman, expat, fontconfig, cairo, harfbuzz, pango...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
+
+    rem transitive
+    echo Installing double-conversion...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install double-conversion:x64-windows
     )
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing pixman, expat, fontconfig, cairo, harfbuzz, pango...
-      .\vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
+    echo Installing qt5-modularscripts...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-modularscripts:x64-windows
     )
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing double-conversion...
-      .\vcpkg install double-conversion:x64-windows
-    )
+    echo Installing openssl-windows, openssl...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install openssl-windows:x64-windows openssl:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-modularscripts...
-      .\vcpkg install qt5-modularscripts:x64-windows
-    )
+    echo Installing libpq...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install libpq:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing openssl-windows, openssl...
-      .\vcpkg install openssl-windows:x64-windows openssl:x64-windows
-    )
+    echo Installing sqlite3...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install sqlite3:x64-windows
+
+    echo Installing qt5-base...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-base:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing libpq...
-      .\vcpkg install libpq:x64-windows
-    )
+    echo Installing qt5-graphicaleffects...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-graphicaleffects:x64-windows
+
+    echo Installing qt5-declarative...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-declarative:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing sqlite3...
-      .\vcpkg install sqlite3:x64-windows
-    )
-
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-base...
-      .\vcpkg install qt5-base:x64-windows
-    )
+    echo Installing qt5-quickcontrols...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-quickcontrols:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-graphicaleffects...
-      .\vcpkg install qt5-graphicaleffects:x64-windows
-    )
-
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-declarative...
-      .\vcpkg install qt5-declarative:x64-windows
-    )
+    echo Installing qt5-speech...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-speech:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-quickcontrols...
-      .\vcpkg install qt5-quickcontrols:x64-windows
-    )
+    echo Installing qt5-charts...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-charts:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-speech...
-      .\vcpkg install qt5-speech:x64-windows
-    )
+    echo Installing qt5-datavis3d...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-datavis3d:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-charts...
-      .\vcpkg install qt5-charts:x64-windows
-    )
+    echo Installing qt5-multimedia...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-multimedia:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-datavis3d...
-      .\vcpkg install qt5-datavis3d:x64-windows
-    )
+    echo Installing qt5-3d...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-3d:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-multimedia...
-      .\vcpkg install qt5-multimedia:x64-windows
-    )
+    echo Installing qt5-gamepad...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-gamepad:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-3d...
-      .\vcpkg install qt5-3d:x64-windows
-    )
+    echo Installing qt5-imageformats...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-imageformats:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-gamepad...
-      .\vcpkg install qt5-gamepad:x64-windows
-    )
+    echo Installing qt5-networkauth...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-networkauth:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-imageformats...
-      .\vcpkg install qt5-imageformats:x64-windows
-    )
+    echo Installing qt5-quickcontrols2...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-quickcontrols2:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-networkauth...
-      .\vcpkg install qt5-networkauth:x64-windows
-    )
+    echo Installing qt5-scxml...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-scxml:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-quickcontrols2...
-      .\vcpkg install qt5-quickcontrols2:x64-windows
-    )
+    echo Installing qt5-serialport...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-serialport:x64-windows
+   
+    echo Installing qt5-svg...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-svg:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-scxml...
-      .\vcpkg install qt5-scxml:x64-windows
-    )
+    echo Installing qt5-virtualkeyboard...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-virtualkeyboard:x64-windows
 
     rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-serialport...
-      .\vcpkg install qt5-serialport:x64-windows
-    )
+    echo Installing qt5-websockets...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-websockets:x64-windows
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-svg...
-      .\vcpkg install qt5-svg:x64-windows
-    )
+    echo Installing qt5...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5:x64-windows
 
-    rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-virtualkeyboard...
-      .\vcpkg install qt5-virtualkeyboard:x64-windows
-    )
+    echo Installing qt5-tools...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-tools:x64-windows
 
-    rem transitive
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-websockets...
-      .\vcpkg install qt5-websockets:x64-windows
-    )
+    echo Installing OpenGL...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install opengl:x64-windows
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5...
-      .\vcpkg install qt5:x64-windows
-    )
+    echo Installing freeglut...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install freeglut:x64-windows
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing qt5-tools...
-      .\vcpkg install qt5-tools:x64-windows
-    )
+    echo Installing glm...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install glm:x64-windows
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing OpenGL...
-      .\vcpkg install opengl:x64-windows
-    )
+    echo Installing glew...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install glew:x64-windows
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing freeglut...
-      .\vcpkg install freeglut:x64-windows
-    )
+    echo Installing glfw3...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install glfw3:x64-windows
 
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing glm...
-      .\vcpkg install glm:x64-windows
-    )
-
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing glew...
-      .\vcpkg install glew:x64-windows
-    )
-
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo Installing glfw3...
-      .\vcpkg install glfw3:x64-windows
-    )
-
-    %APPVEYOR_BUILD_FOLDER%\ci\timediff.bat %timestart%
-    IF %timediff% LEQ 1800 (
-      echo System-wide integrating vcpkg...
-      .\vcpkg integrate install
-    )
+    echo  vcpkg integrate install...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg integrate install
 
     cd %APPVEYOR_BUILD_FOLDER%
   )
