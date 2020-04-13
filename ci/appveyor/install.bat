@@ -102,6 +102,10 @@ IF %COMPILER%==msvc2019 (
     echo Installing sqlite3...
     %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install sqlite3:x64-windows
 
+    rem transitive
+    echo Installing icu...
+    %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install icu:x64-windows
+
     echo Installing qt5-base...
     %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-base:x64-windows
 
