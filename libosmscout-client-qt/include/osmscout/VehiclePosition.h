@@ -28,6 +28,7 @@
 #include <QObject>
 
 #include <memory>
+#include <optional>
 
 namespace osmscout {
 
@@ -52,8 +53,8 @@ public:
   inline VehiclePosition(const Vehicle &vehicle,
                          const PositionAgent::PositionState &state,
                          const GeoCoord &coord,
-                         const std::shared_ptr<Bearing> &bearing,
-                         const std::shared_ptr<GeoCoord> &nextStepCoord,
+                         const std::optional<Bearing> &bearing,
+                         const std::optional<GeoCoord> &nextStepCoord,
                          QObject *parent = 0):
       QObject(parent), vehicle(vehicle), state(state), coord(coord), bearing(bearing), nextStepCoord(nextStepCoord)
   {}
@@ -83,7 +84,7 @@ public:
     return coord;
   }
 
-  inline std::shared_ptr<Bearing> getBearing() const
+  inline std::optional<Bearing> getBearing() const
   {
     return bearing;
   }
@@ -93,7 +94,7 @@ public:
     return bearing ? bearing->AsRadians() : 0;
   }
 
-  inline std::shared_ptr<GeoCoord> getNextStepCoord() const
+  inline std::optional<GeoCoord> getNextStepCoord() const
   {
     return nextStepCoord;
   }
@@ -107,8 +108,8 @@ private:
   Vehicle vehicle;
   PositionAgent::PositionState state;
   GeoCoord coord;
-  std::shared_ptr<Bearing> bearing;
-  std::shared_ptr<GeoCoord> nextStepCoord;
+  std::optional<Bearing> bearing;
+  std::optional<GeoCoord> nextStepCoord;
 };
 
 }

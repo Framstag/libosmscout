@@ -29,7 +29,7 @@ namespace osmscout {
 
   RerouteRequestMessage::RerouteRequestMessage(const Timestamp& timestamp,
                                                const GeoCoord &from,
-                                               const std::shared_ptr<Bearing> &initialBearing,
+                                               const std::optional<Bearing> &initialBearing,
                                                const GeoCoord &to)
       : NavigationMessage(timestamp),
         from(from),
@@ -72,7 +72,7 @@ namespace osmscout {
     } else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
       auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
 
-      bearing = std::make_shared<Bearing>(bearingChangedMessage->bearing);
+      bearing = bearingChangedMessage->bearing;
 
     } else if (dynamic_cast<PositionAgent::PositionMessage*>(message.get())!=nullptr) {
       auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
