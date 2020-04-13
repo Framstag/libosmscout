@@ -11,6 +11,9 @@ echo Configuration: %CONFIGURATION%
 echo Build tool: %BUILDTOOL%
 echo Target: %TARGET%
 
+set timestart=%time%
+set timediff=0
+
 echo Start updating build dependencies...
 
 IF %COMPILER%==msys2 (
@@ -64,8 +67,6 @@ IF %COMPILER%==msys2 (
 IF %COMPILER%==msvc2019 (
   @echo on
   echo MSVC2019 build...
-
-  set timestart=%time%
 
   IF %BUILDTOOL%==cmake (
     cd c:\tools\vcpkg
