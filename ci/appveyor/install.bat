@@ -83,12 +83,10 @@ IF %COMPILER%==msvc2019 (
     rem transitive
     echo Installing double-conversion...
     %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install double-conversion:x64-windows
-    )
 
     rem transitive
     echo Installing qt5-modularscripts...
     %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-modularscripts:x64-windows
-    )
 
     rem transitive
     echo Installing openssl-windows, openssl...
