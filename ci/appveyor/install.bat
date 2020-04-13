@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 
 cd %APPVEYOR_BUILD_FOLDER%
 
@@ -61,7 +61,7 @@ IF %COMPILER%==msys2 (
 )
 
 IF %COMPILER%==msvc2019 (
-  rem @echo on
+  @echo on
   echo MSVC2019 build...
 
   set timestart=%time%
