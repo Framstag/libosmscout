@@ -74,25 +74,14 @@ set_target_properties(OSMScoutMapOpenGL PROPERTIES
 		OUTPUT_NAME "OSMScoutMapOpenGL")
 endif()
 
-if(MSVS OR MSYS OR MINGW)
-	target_link_libraries(OSMScoutMapOpenGL
-			OSMScout
-			OSMScoutMap
-			${OPENGL_LIBRARIES}
-			${PNG_LIBRARIES}
-			${FREETYPE_LIBRARIES}
-			glew32 # TODO: ${GLEW_LIBRARIES} is not setup correctly on Windows?
-			)
-else()
-	target_link_libraries(OSMScoutMapOpenGL
-			OSMScout
-			OSMScoutMap
-			${OPENGL_LIBRARIES}
-			${GLEW_LIBRARIES}
-			${PNG_LIBRARIES}
-			${FREETYPE_LIBRARIES}
-			)
-endif()
+target_link_libraries(OSMScoutMapOpenGL
+		OSMScout
+		OSMScoutMap
+		${OPENGL_LIBRARIES}
+		GLEW::GLEW
+		${PNG_LIBRARIES}
+		${FREETYPE_LIBRARIES}
+		)
 
 target_compile_definitions(OSMScoutMapOpenGL PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
 
