@@ -20,7 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Optional.h>
 #include <osmscout/gpx/TrackPoint.h>
 
 #include <osmscout/GeoCoord.h>
@@ -28,6 +27,7 @@
 #include "GPXImportExport.h"
 
 #include <string>
+#include <optional>
 
 namespace osmscout {
 namespace gpx {
@@ -38,17 +38,17 @@ public:
       coord(coord) {
   }
 
-  Optional<std::string> name;
-  Optional<std::string> description;
-  Optional<std::string> symbol;
+  std::optional<std::string> name;
+  std::optional<std::string> description;
+  std::optional<std::string> symbol;
 
   osmscout::GeoCoord coord;
-  Optional<double> elevation; // meters above sea
-  Optional<Timestamp> time;
-  Optional<double> course; // alias magvar - degrees, 0.0 <= value < 360.0
-  Optional<double> hdop; // meters
-  Optional<double> vdop; // meters
-  Optional<double> pdop; // meters
+  std::optional<double> elevation; // meters above sea
+  std::optional<Timestamp> time;
+  std::optional<double> course; // alias magvar - degrees, 0.0 <= value < 360.0
+  std::optional<double> hdop; // meters
+  std::optional<double> vdop; // meters
+  std::optional<double> pdop; // meters
 };
 }
 }

@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
     output.tracks.push_back(gpxFile.tracks[0]);
     for (const auto &point: profile) {
       osmscout::gpx::Waypoint w(point.coord);
-      w.name = osmscout::gpx::Optional<std::string>::of(point.distance.AsString() + " " + std::to_string(point.elevation.AsMeter()) + " m");
+      w.name = std::make_optional<std::string>(point.distance.AsString() + " " + std::to_string(point.elevation.AsMeter()) + " m");
       output.waypoints.push_back(w);
     }
     osmscout::gpx::ExportGpx(output, args.gpxOutput);

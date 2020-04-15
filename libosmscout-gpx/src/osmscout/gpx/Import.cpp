@@ -376,7 +376,7 @@ public:
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
         double ele;
         if (StringToNumber(value, ele)){
-          point.elevation=Optional<double>::of(ele);
+          point.elevation=std::make_optional<double>(ele);
         }else{
           xmlParserWarning(ctxt,"Can't parse Ele value\n");
           parser.Warning("Can't parse Ele value");
@@ -386,7 +386,7 @@ public:
       return new SimpleValueContext("MagvarContext", ctxt, parser, [&](const std::string &value){
         double course;
         if (StringToNumber(value, course)){
-          point.course=Optional<double>::of(course);
+          point.course=std::make_optional<double>(course);
         }else{
           xmlParserWarning(ctxt,"Can't parse Magvar value\n");
           parser.Warning("Can't parse Magvar value");
@@ -396,7 +396,7 @@ public:
       return new SimpleValueContext("HDopContext", ctxt, parser, [&](const std::string &value){
         double hdop;
         if (StringToNumber(value, hdop)){
-          point.hdop=Optional<double>::of(hdop);
+          point.hdop=std::make_optional<double>(hdop);
         }else{
           xmlParserWarning(ctxt,"Can't parse HDop value\n");
           parser.Warning("Can't parse HDop value");
@@ -406,7 +406,7 @@ public:
       return new SimpleValueContext("VDopContext", ctxt, parser, [&](const std::string &value){
         double vdop;
         if (StringToNumber(value, vdop)){
-          point.vdop=Optional<double>::of(vdop);
+          point.vdop=std::make_optional<double>(vdop);
         }else{
           xmlParserWarning(ctxt,"Can't parse Ele value\n");
           parser.Warning("Can't parse Ele value");
@@ -416,7 +416,7 @@ public:
       return new SimpleValueContext("PDopContext", ctxt, parser, [&](const std::string &value){
         double pdop;
         if (StringToNumber(value, pdop)){
-          point.pdop=Optional<double>::of(pdop);
+          point.pdop=std::make_optional<double>(pdop);
         }else{
           xmlParserWarning(ctxt,"Can't parse PDop value\n");
           parser.Warning("Can't parse PDop value");
@@ -426,7 +426,7 @@ public:
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
-          point.time=Optional<Timestamp>::of(time);
+          point.time=std::make_optional<Timestamp>(time);
         }else{
           xmlParserWarning(ctxt,"Can't parse PDop value\n");
           parser.Warning("Can't parse PDop value");
@@ -497,21 +497,21 @@ public:
   {
     if (name=="name") {
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
-        waypoint.name = Optional<std::string>::of(name);
+        waypoint.name = std::make_optional<std::string>(name);
       });
     } else if (name == "desc") {
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
-        waypoint.description = Optional<std::string>::of(description);
+        waypoint.description = std::make_optional<std::string>(description);
       });
     } else if (name == "sym") {
       return new SimpleValueContext("SymContext", ctxt, parser, [&](const std::string &symbol) {
-        waypoint.symbol = Optional<std::string>::of(symbol);
+        waypoint.symbol = std::make_optional<std::string>(symbol);
       });
     } else if (name == "ele") {
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
         double ele;
         if (StringToNumber(value, ele)){
-          waypoint.elevation=Optional<double>::of(ele);
+          waypoint.elevation=std::make_optional<double>(ele);
         }else{
           xmlParserWarning(ctxt,"Can't parse Ele value\n");
           parser.Warning("Can't parse Ele value");
@@ -521,7 +521,7 @@ public:
       return new SimpleValueContext("HDopContext", ctxt, parser, [&](const std::string &value){
         double hdop;
         if (StringToNumber(value, hdop)){
-          waypoint.hdop=Optional<double>::of(hdop);
+          waypoint.hdop=std::make_optional<double>(hdop);
         }else{
           xmlParserWarning(ctxt,"Can't parse HDop value\n");
           parser.Warning("Can't parse HDop value");
@@ -531,7 +531,7 @@ public:
       return new SimpleValueContext("VDopContext", ctxt, parser, [&](const std::string &value){
         double vdop;
         if (StringToNumber(value, vdop)){
-          waypoint.vdop=Optional<double>::of(vdop);
+          waypoint.vdop=std::make_optional<double>(vdop);
         }else{
           xmlParserWarning(ctxt,"Can't parse Ele value\n");
           parser.Warning("Can't parse Ele value");
@@ -541,7 +541,7 @@ public:
       return new SimpleValueContext("PDopContext", ctxt, parser, [&](const std::string &value){
         double pdop;
         if (StringToNumber(value, pdop)){
-          waypoint.pdop=Optional<double>::of(pdop);
+          waypoint.pdop=std::make_optional<double>(pdop);
         }else{
           xmlParserWarning(ctxt,"Can't parse PDop value\n");
           parser.Warning("Can't parse PDop value");
@@ -551,7 +551,7 @@ public:
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
-          waypoint.time=Optional<Timestamp>::of(time);
+          waypoint.time=std::make_optional<Timestamp>(time);
         }else{
           xmlParserWarning(ctxt,"Can't parse Time value\n");
           parser.Warning("Can't parse Time value");
@@ -584,17 +584,17 @@ public:
   {
     if (name=="name") {
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
-        output.name = Optional<std::string>::of(name);
+        output.name = std::make_optional<std::string>(name);
       });
     } else if (name == "desc") {
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
-        output.desc = Optional<std::string>::of(description);
+        output.desc = std::make_optional<std::string>(description);
       });
     } else if (name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
-          output.time=Optional<Timestamp>::of(time);
+          output.time=std::make_optional<Timestamp>(time);
         }else{
           xmlParserWarning(ctxt,"Can't parse Time value\n");
           parser.Warning("Can't parse Time value");
@@ -680,7 +680,7 @@ public:
       }
     } else if (name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
-        route.name=Optional<std::string>::of(name);
+        route.name=std::make_optional<std::string>(name);
       });
     }
 
@@ -711,11 +711,11 @@ public:
   {
     if (name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
-        track.name=Optional<std::string>::of(name);
+        track.name=std::make_optional<std::string>(name);
       });
     } else if (name=="desc"){
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &desc){
-        track.desc=Optional<std::string>::of(desc);
+        track.desc=std::make_optional<std::string>(desc);
       });
     }else if (name=="trkseg"){
       return new TrkSegContext(ctxt, track, parser);

@@ -100,7 +100,7 @@ void NavigationModel::onUpdateNext(RouteStep routeStep)
 
 void NavigationModel::onPositionEstimate(const PositionAgent::PositionState state,
                                          const GeoCoord coord,
-                                         const std::shared_ptr<Bearing> bearing)
+                                         const std::optional<Bearing> bearing)
 {
   this->vehicleState=state;
   this->vehicleCoord=coord;
@@ -119,7 +119,7 @@ void NavigationModel::onTargetReached(const osmscout::Bearing targetBearing,
 }
 
 void NavigationModel::onRerouteRequest(const GeoCoord from,
-                                       const std::shared_ptr<Bearing> initialBearing,
+                                       const std::optional<Bearing> initialBearing,
                                        const GeoCoord to)
 {
   emit rerouteRequest(from.GetLat(), from.GetLon(),

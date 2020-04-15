@@ -105,9 +105,11 @@ bool PositionSimulator::setSegment(size_t i)
   segmentStart=points[0];
   segmentEnd=points[points.size()-1];
 
-  simulationTime=segmentStart.time.getOrElse([]()->osmscout::Timestamp{
-    return Now();
-  });
+  if (segmentStart.time){
+    simulationTime=*segmentStart.time;
+  }else{
+    simulationTime=Now();
+  }
   emit startChanged(segmentStart.coord.GetLat(), segmentStart.coord.GetLon());
   emit endChanged(segmentEnd.coord.GetLat(), segmentEnd.coord.GetLon());
 
@@ -151,14 +153,14 @@ void PositionSimulator::tick()
   while (true){
     if (currentPoint<points.size()) {
       auto &point=points[currentPoint];
-      if (point.time.hasValue() && point.time.get()>simulationTime){
+      if (point.time && *point.time > simulationTime){
         return;
       }
-      osmscout::log.Debug() << "Simulator point: " << osmscout::TimestampToISO8601TimeString(point.time.getOrElse(simulationTime)) << " @ " << point.coord.GetDisplayText();
+      osmscout::log.Debug() << "Simulator point: " << osmscout::TimestampToISO8601TimeString(point.time.value_or(simulationTime)) << " @ " << point.coord.GetDisplayText();
       currentPosition=point.coord;
-      emit positionChanged(currentPosition.GetLat(), currentPosition.GetLon(), point.hdop.hasValue(), point.hdop.getOrElse(0));
+      emit positionChanged(currentPosition.GetLat(), currentPosition.GetLon(), point.hdop.has_value(), point.hdop.value_or(0));
       currentPoint++;
-      if (!point.time.hasValue()){
+      if (!point.time){
         return;
       }
     }else{

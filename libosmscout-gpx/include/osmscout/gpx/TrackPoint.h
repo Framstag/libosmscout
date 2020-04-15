@@ -20,14 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Optional.h>
-
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/String.h>
 
 #include "GPXImportExport.h"
 
 #include <chrono>
+#include <optional>
 
 namespace osmscout {
 namespace gpx {
@@ -40,9 +39,9 @@ public:
   }
 
   osmscout::GeoCoord coord;
-  Optional<double> elevation; // meters above sea
-  Optional<Timestamp> time;
-  Optional<double> course; // alias magvar - degrees, 0.0 <= value < 360.0
+  std::optional<double> elevation; // meters above sea
+  std::optional<Timestamp> time;
+  std::optional<double> course; // alias magvar - degrees, 0.0 <= value < 360.0
 
   /**
    * Dilution of precision (horizontal, vertical, position)
@@ -66,9 +65,9 @@ public:
    * ...I think that it is ok to assume that hdop/vdop represents
    * accuracy in meters.
    */
-  Optional<double> hdop;
-  Optional<double> vdop;
-  Optional<double> pdop;
+  std::optional<double> hdop;
+  std::optional<double> vdop;
+  std::optional<double> pdop;
 };
 }
 }

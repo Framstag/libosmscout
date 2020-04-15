@@ -1,7 +1,6 @@
 set(OSMSCOUT_BUILD_GPX ON CACHE INTERNAL "" FORCE)
 
 set(HEADER_FILES
-	include/osmscout/gpx/Optional.h
 	include/osmscout/gpx/GpxFile.h
 	include/osmscout/gpx/Route.h
 	include/osmscout/gpx/Track.h

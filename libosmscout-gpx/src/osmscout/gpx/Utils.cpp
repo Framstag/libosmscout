@@ -66,11 +66,11 @@ void gpx::FilterInaccuratePoints(std::vector<TrackPoint> &points,
                                  double maxDilution)
 {
   auto filter=[&maxDilution](const TrackPoint &p) {
-    if (p.hdop.hasValue()){
-      return p.hdop.get() > maxDilution;
+    if (p.hdop){
+      return *p.hdop > maxDilution;
     }
-    if (p.pdop.hasValue()){
-      return p.pdop.get() > maxDilution;
+    if (p.pdop){
+      return *p.pdop > maxDilution;
     }
     return false;
   };

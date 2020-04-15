@@ -49,6 +49,8 @@
 #include <osmscout/AvailableVoicesModel.h>
 #include <osmscout/InstalledVoicesModel.h>
 
+#include <optional>
+
 namespace osmscout {
 
 static OSMScoutQt* osmScoutInstance=nullptr;
@@ -133,6 +135,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<osmscout::Distance>("osmscout::Distance");
   qRegisterMetaType<osmscout::Bearing>("osmscout::Bearing");
   qRegisterMetaType<std::shared_ptr<osmscout::Bearing>>("std::shared_ptr<osmscout::Bearing>");
+  qRegisterMetaType<std::optional<osmscout::Bearing>>("std::optional<osmscout::Bearing>");
   qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
   qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
   qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");

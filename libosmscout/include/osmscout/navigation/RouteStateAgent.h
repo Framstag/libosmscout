@@ -25,6 +25,8 @@
 #include <osmscout/navigation/Agents.h>
 #include <osmscout/navigation/PositionAgent.h>
 
+#include <optional>
+
 namespace osmscout {
 
   /**
@@ -33,12 +35,12 @@ namespace osmscout {
   struct OSMSCOUT_API RerouteRequestMessage CLASS_FINAL : public NavigationMessage
   {
     const GeoCoord from;
-    const std::shared_ptr<Bearing> initialBearing; // replace with optional with C++17
+    const std::optional<Bearing> initialBearing;
     const GeoCoord to;
 
     RerouteRequestMessage(const Timestamp& timestamp,
                           const GeoCoord &from,
-                          const std::shared_ptr<Bearing> &initialBearing,
+                          const std::optional<Bearing> &initialBearing,
                           const GeoCoord &to);
   };
 
@@ -61,7 +63,7 @@ namespace osmscout {
   private:
     Timestamp lastUpdate;
     PositionAgent::PositionState state;
-    std::shared_ptr<Bearing> bearing; // replace with optional with C++17
+    std::optional<Bearing> bearing;
     GeoCoord target;
     bool targetSetup{false};
 
