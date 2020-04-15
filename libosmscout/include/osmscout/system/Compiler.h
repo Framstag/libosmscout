@@ -26,15 +26,4 @@
   #define CLASS_FINAL final
 #endif
 
-/**
- * Some temporary variables used in asserts may be unused
- * on production build, when asserts are wiped out.
- *
- * Usage of this macro for such variables makes production
- * build happy, and avoids unused-variable warning
- *
- * TODO: use [[maybe_unused]] attribute with C++17
- */
-#define unused(x) ((void)(x))
-
 #endif

@@ -114,7 +114,7 @@ namespace osmscout {
   }
 
   void FileScanner::Open(const std::string& filename,
-                         Mode mode,
+                         [[maybe_unused]] Mode mode,
                          bool useMmap)
   {
     if (file!=nullptr) {
@@ -238,7 +238,6 @@ namespace osmscout {
       }
     }
 #elif  defined(_WIN32)
-    unused(mode);
     if (useMmap && this->size>0) {
       FreeBuffer();
 

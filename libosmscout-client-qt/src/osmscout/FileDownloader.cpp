@@ -345,13 +345,12 @@ void DownloadJob::onJobFailed(QString errorMessage, bool recoverable){
   }
 }
 
-void DownloadJob::onJobFinished(QString path)
+void DownloadJob::onJobFinished([[maybe_unused]] QString path)
 {
   if (!jobs.isEmpty()) {
     FileDownloader* job = jobs.first();
     jobs.pop_front();
     assert(job->getFilePath()==path);
-    unused(path);
     downloadedBytes += job->getBytesDownloaded();
     job->deleteLater();
   }

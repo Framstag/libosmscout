@@ -189,15 +189,10 @@ namespace osmscout {
     visitor.OnFileBoundingBox(GeoBox(GeoCoord(yMin,xMin),
                                      GeoCoord(yMax,xMax)));
 
-    double zMin=ReadDoubleLE();
-    double zMax=ReadDoubleLE();
-    double mMin=ReadDoubleLE();
-    double mMax=ReadDoubleLE();
-
-    unused(zMin);
-    unused(zMax);
-    unused(mMin);
-    unused(mMax);
+    [[maybe_unused]] double zMin=ReadDoubleLE();
+    [[maybe_unused]] double zMax=ReadDoubleLE();
+    [[maybe_unused]] double mMin=ReadDoubleLE();
+    [[maybe_unused]] double mMax=ReadDoubleLE();
 
     long filePos=ftell(file);
 
@@ -208,11 +203,9 @@ namespace osmscout {
     while (filePos+1<fileLength) {
       visitor.OnProgress(filePos,fileLength);
 
-      int32_t recordNumber   =ReadIntegerBE();
-      int32_t length         =ReadIntegerBE();
-      int32_t recordShapeType=ReadIntegerLE();
-
-      unused(length);
+      int32_t recordNumber           =ReadIntegerBE();
+      [[maybe_unused]] int32_t length=ReadIntegerBE();
+      int32_t recordShapeType        =ReadIntegerLE();
 
       if (recordShapeType==3) {
         if (recordShapeType!=shapeType) {
@@ -234,10 +227,8 @@ namespace osmscout {
         int32_t numPoints=ReadIntegerLE();
 
         for (int32_t i=1; i<=numParts; i++) {
-          int32_t startIndex=ReadIntegerLE();
-
+          [[maybe_unused]] int32_t startIndex=ReadIntegerLE();
           // We current do not evaluate start index
-          unused(startIndex);
         }
 
         buffer.clear();
