@@ -216,6 +216,7 @@ namespace osmscout {
 
         order.push_front(entry);
 
+        previousEntry=order.begin();
         return order.begin();
       }
 
@@ -240,6 +241,7 @@ namespace osmscout {
         StripCache();
       }
 
+      previousEntry=order.begin();
       return order.begin();
     }
 
@@ -272,6 +274,7 @@ namespace osmscout {
       order.clear();
       map.clear();
       size=0;
+      previousEntry=order.end();
     }
 
     /**
