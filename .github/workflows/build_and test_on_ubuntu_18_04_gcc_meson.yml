@@ -11,7 +11,7 @@ jobs:
       - name: Update package list
         run: sudo apt-get update
       - name: Install dependencies
-        run: apt-get install -y \
+        run: sudo apt-get install -y \
           git libtool \
           libxml2-dev libprotobuf-dev protobuf-compiler \
           libagg-dev \
@@ -24,7 +24,7 @@ jobs:
           libmarisa-dev \
           locales
       - name: Install compiler and build tool
-        run: apt-get install -y \
+        run: sudo apt-get install -y \
           meson ninja pkg-config \
           gcc
       - name: Configure build project
