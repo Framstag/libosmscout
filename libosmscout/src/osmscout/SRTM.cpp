@@ -132,7 +132,7 @@ namespace osmscout {
       currentFile.read((char *)heights,SRTM::patchSize);
     }
     if(currentFile.std::ios::good()){
-      double pixelSize = 1.0/(SRTM::rows-1);
+      [[maybe_unused]] double pixelSize = 1.0/(SRTM::rows-1);
       double fracLat = latitude>=0.0 ? 1 - latitude + floor(latitude) : ceil(latitude) - latitude;
       double fracLon = longitude>=0.0 ?  longitude - floor(longitude) : 1 - ceil(longitude) + longitude;
       int col = int(floor(fracLon*SRTM::columns));

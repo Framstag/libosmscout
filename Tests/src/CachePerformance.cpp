@@ -67,9 +67,7 @@ bool TestData()
 
     DataCache::CacheEntry entry(i,data);
 
-    auto ref(cache.SetEntry(entry));
-
-    unused(ref);
+    [[maybe_unused]] auto ref(cache.SetEntry(entry));
   }
 
   insertTimer.Stop();
@@ -88,9 +86,7 @@ bool TestData()
     entry.value.value=i;
     entry.value.value2.resize(10,i);
 
-    auto ref(cache.SetEntry(entry));
-
-    unused(ref);
+    [[maybe_unused]] auto ref(cache.SetEntry(entry));
   }
 
   updateTimer.Stop();

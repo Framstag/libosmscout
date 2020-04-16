@@ -52,11 +52,10 @@ public:
   }
 
   virtual void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                 const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
+                                 [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
   {
     assert(roundaboutLeaveDescription);
     assert(nameDescription);
-    unused(nameDescription);
 
     using MessageType = VoiceInstructionAgent::MessageType;
     MessageType type = MessageType::NoMessage;
