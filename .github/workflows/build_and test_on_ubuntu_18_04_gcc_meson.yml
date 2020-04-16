@@ -13,16 +13,10 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y \
           git libtool \
-          libxml2-dev libprotobuf-dev protobuf-compiler \
-          libagg-dev \
-          libfreetype6-dev \
-          libcairo2-dev \
-          libpangocairo-1.0-0 libpango1.0-dev \
-          qt5-default qtdeclarative5-dev libqt5svg5-dev \
-          qtlocation5-dev qtpositioning5-dev qttools5-dev-tools qttools5-dev qtmultimedia5-dev \
-          freeglut3 freeglut3-dev \
-          libmarisa-dev \
-          locales
+          libprotobuf-dev protobuf-compiler \
+          qtdeclarative5-dev libqt5svg5-dev \
+          qtpositioning5-dev qttools5-dev-tools qttools5-dev qtmultimedia5-dev \
+          freeglut3-dev
       - name: Install compiler and build tool
         run: sudo apt-get install -y \
           meson ninja pkg-config \
