@@ -28,21 +28,21 @@ matrix:
         - BUILDTOOL=meson
         - TARGET=build
     - os: osx
-      osx_image: xcode9.3
+      osx_image: xcode11.3
       compiler: clang
       env:
         - BUILDTOOL=meson
         - TARGET=build
         - PLATFORM=osx
     - os: osx
-      osx_image: xcode9.3
+      osx_image: xcode11.3
       compiler: clang
       env:
         - BUILDTOOL=cmake
         - TARGET=build
         - PLATFORM=osx
     - os: osx
-      osx_image: xcode9.3
+      osx_image: xcode11.3
       compiler: clang
       env:
         - BUILDTOOL=cmake

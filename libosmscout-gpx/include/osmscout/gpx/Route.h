@@ -26,13 +26,14 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 
 namespace osmscout {
 namespace gpx {
 
 class OSMSCOUT_GPX_API Route {
 public:
-  Optional <std::string> name;
+  std::optional<std::string> name;
   std::vector<TrackPoint> points;
 };
 }

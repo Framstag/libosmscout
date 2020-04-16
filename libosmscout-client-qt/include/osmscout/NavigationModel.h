@@ -27,6 +27,8 @@
 
 #include <QObject>
 
+#include <optional>
+
 namespace osmscout {
 
 /**
@@ -88,13 +90,13 @@ public slots:
 
   void onPositionEstimate(const PositionAgent::PositionState state,
                           const GeoCoord coord,
-                          const std::shared_ptr<osmscout::Bearing> bearing);
+                          const std::optional<osmscout::Bearing> bearing);
 
   void onTargetReached(const osmscout::Bearing targetBearing,
                        const osmscout::Distance targetDistance);
 
   void onRerouteRequest(const GeoCoord from,
-                        const std::shared_ptr<osmscout::Bearing> initialBearing,
+                        const std::optional<osmscout::Bearing> initialBearing,
                         const GeoCoord to);
 
   void onArrivalEstimate(QDateTime arrivalEstimate, osmscout::Distance remainingDistance);
@@ -139,7 +141,7 @@ public:
       return nullptr;
     }
     return new VehiclePosition(vehicle, vehicleState, vehicleCoord, vehicleBearing,
-        nextRouteStep.getType().isEmpty() ? nullptr : std::make_shared<GeoCoord>(nextRouteStep.GetCoord()));
+        nextRouteStep.getType().isEmpty() ? std::nullopt : std::optional(nextRouteStep.GetCoord()));
   }
 
   inline QDateTime getArrivalEstimate() const
@@ -169,7 +171,7 @@ private:
   Vehicle vehicle;
   PositionAgent::PositionState vehicleState{PositionAgent::Uninitialised};
   GeoCoord vehicleCoord;
-  std::shared_ptr<osmscout::Bearing> vehicleBearing;
+  std::optional<osmscout::Bearing> vehicleBearing;
 
   std::vector<RouteStep> routeSteps;
   RouteStep nextRouteStep;

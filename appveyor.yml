@@ -4,8 +4,6 @@ branches:
   only:
     - master
 
-# TODO: add "Visual Studio 2017" image
-
 environment:
   matrix:
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019

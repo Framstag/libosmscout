@@ -99,8 +99,8 @@ int main(int argc, char* argv[])
   filteredFile.tracks.clear();
 
   for (const auto &track:gpxFile.tracks){
-    if (track.name.hasValue()) {
-      std::cout << "Track \"" << track.name.get() << "\":" << std::endl;
+    if (track.name) {
+      std::cout << "Track \"" << *track.name << "\":" << std::endl;
     }else{
       std::cout << "Unnamed track:" << std::endl;
     }

@@ -27,15 +27,16 @@
 #include <osmscout/gpx/GPXImportExport.h>
 
 #include <vector>
+#include <optional>
 
 namespace osmscout {
 namespace gpx {
 
 class OSMSCOUT_GPX_API GpxFile {
 public:
-  Optional<std::string> name;
-  Optional<std::string> desc;
-  Optional<Timestamp> time;
+  std::optional<std::string> name;
+  std::optional<std::string> desc;
+  std::optional<Timestamp> time;
 
   std::vector<Track>    tracks;
   std::vector<Route>    routes;
