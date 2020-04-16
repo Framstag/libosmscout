@@ -29,8 +29,8 @@ jobs:
       - name: Configure build project
         run: meson setup debug
         env:
-          CXX: g++
-          CC: gcc
+          CXX: ccache g++
+          CC: ccache gcc
       - name: Build project
         run: ninja -C debug
       - name: Run tests
