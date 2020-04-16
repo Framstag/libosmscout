@@ -353,13 +353,13 @@ namespace osmscout {
      * When visitor return true for some ring,
      * algorithm will continue deeper in hierarchy.
      */
-    void VisitRings(RingVisitor visitor) const;
+    void VisitRings(const RingVisitor& visitor) const;
 
     /**
      * Visit possible clippings of ring specified by index.
      * We only take into account rings of the next level.
      */
-    void VisitClippingRings(size_t index, RingVisitor visitor) const;
+    void VisitClippingRings(size_t index, const RingVisitor& visitor) const;
   };
 
   typedef std::shared_ptr<Area> AreaRef;

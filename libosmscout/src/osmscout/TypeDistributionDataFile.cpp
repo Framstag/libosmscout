@@ -42,11 +42,6 @@ namespace osmscout {
     // no code
   }
 
-  TypeDistributionDataFile::~TypeDistributionDataFile()
-  {
-    // no code
-  }
-
   /**
    *
    * Load the bounding box data and return, if this operation was successful.

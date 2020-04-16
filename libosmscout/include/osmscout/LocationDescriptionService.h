@@ -404,31 +404,31 @@ namespace osmscout {
 
     bool DescribeLocation(const GeoCoord& location,
                           LocationDescription& description,
-                          Distance lookupDistance=Distance::Of<Meter>(100),
+                          const Distance& lookupDistance=Distance::Of<Meter>(100),
                           double sizeFilter=1.0);
 
     bool DescribeLocationByName(const GeoCoord& location,
                                 LocationDescription& description,
-                                Distance lookupDistance=Distance::Of<Meter>(100),
+                                const Distance& lookupDistance=Distance::Of<Meter>(100),
                                 double sizeFilter=1.0);
 
     bool DescribeLocationByAddress(const GeoCoord& location,
                                    LocationDescription& description,
-                                   Distance lookupDistance=Distance::Of<Meter>(100),
+                                   const Distance& lookupDistance=Distance::Of<Meter>(100),
                                    double sizeFilter=1.0);
 
     bool DescribeLocationByPOI(const GeoCoord& location,
                                LocationDescription& description,
-                               Distance lookupDistance=Distance::Of<Meter>(100),
+                               const Distance& lookupDistance=Distance::Of<Meter>(100),
                                double sizeFilter=1.0);
 
     bool DescribeLocationByCrossing(const GeoCoord& location,
                                     LocationDescription& description,
-                                    Distance lookupDistance=Distance::Of<Meter>(100));
+                                    const Distance& lookupDistance=Distance::Of<Meter>(100));
 
     bool DescribeLocationByWay(const GeoCoord& location,
                                LocationDescription& description,
-                               Distance lookupDistance=Distance::Of<Meter>(100));
+                               const Distance& lookupDistance=Distance::Of<Meter>(100));
   };
 
   //! \ingroup Service

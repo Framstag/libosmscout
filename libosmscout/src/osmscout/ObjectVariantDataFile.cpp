@@ -30,11 +30,6 @@ namespace osmscout {
     // no code
   }
 
-  ObjectVariantDataFile::~ObjectVariantDataFile()
-  {
-    // no code
-  }
-
   /**
    * Load the object variant data from the given file.
    *

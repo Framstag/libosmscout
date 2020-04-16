@@ -31,13 +31,13 @@ namespace osmscout {
    * \ingroup Database
    *
    * DataFile class for loading the object variant data, which is part of the
-   * routing graph. The object variat data contains a lookup table for path
+   * routing graph. The object variant data contains a lookup table for path
    * attributes. Since the number of attribute value combinations is much
-   * smaller then the actual bumber of elements in the route graph it makes
+   * smaller then the actual number of elements in the route graph it makes
    * sense to store all possible combinations in a lookup table and just
    * index them from the routing graph paths.
    */
-  class OSMSCOUT_API ObjectVariantDataFile
+  class OSMSCOUT_API ObjectVariantDataFile final
   {
   private:
     std::vector<ObjectVariantData> data; //!< Data loaded
@@ -48,7 +48,6 @@ namespace osmscout {
 
   public:
     ObjectVariantDataFile();
-    virtual ~ObjectVariantDataFile();
 
     bool Load(const TypeConfig& typeConfig,
               const std::string& filename);

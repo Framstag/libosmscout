@@ -50,11 +50,6 @@ namespace osmscout {
             TileId(0,0))
   {}
 
-  AreaWayIndex::AreaWayIndex()
-  {
-    // no code
-  }
-
   AreaWayIndex::~AreaWayIndex()
   {
     Close();

@@ -37,7 +37,7 @@ namespace osmscout {
   /**
    * \ingroup Database
    */
-  class OSMSCOUT_API WaterIndex
+  class OSMSCOUT_API WaterIndex final
   {
   public:
     static const char* const WATER_IDX;
@@ -90,7 +90,7 @@ namespace osmscout {
                                std::list<GroundTile>& tiles) const;
 
   public:
-    WaterIndex();
+    WaterIndex() = default;
     virtual ~WaterIndex();
 
     bool Open(const std::string& path, bool memoryMappedData);

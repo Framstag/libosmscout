@@ -55,7 +55,7 @@ namespace osmscout {
   class OSMSCOUT_API TagCondition
   {
   public:
-    virtual ~TagCondition();
+    virtual ~TagCondition() = default;
 
     virtual bool Evaluate(const TagMap& tagMap) const = 0;
   };

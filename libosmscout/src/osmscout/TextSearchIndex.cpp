@@ -11,11 +11,6 @@ namespace osmscout
   const char* const TextSearchIndex::TEXT_REGION_DAT="textregion.dat";
   const char* const TextSearchIndex::TEXT_OTHER_DAT="textother.dat";
 
-  TextSearchIndex::TextSearchIndex()
-  {
-    // no code
-  }
-
   TextSearchIndex::~TextSearchIndex()
   {
     for (auto & trie : tries) {
@@ -144,7 +139,7 @@ namespace osmscout
 
             splitSearchResult(result,text,ref);
 
-            ResultsMap::iterator it=results.find(text);
+            auto it=results.find(text);
             if (it==results.end()) {
               // If the text has not been added to the
               // search results yet, insert a new entry
@@ -182,7 +177,7 @@ namespace osmscout
     // the offset is in MSB left to right
 
     FileOffset offset=0;
-    FileOffset add=0;
+    FileOffset add;
     size_t     idx=result.size()-1;
 
     for (size_t i=0; i<offsetSizeBytes; i++) {
@@ -194,7 +189,7 @@ namespace osmscout
 
     // Immediately preceding the FileOffset is
     // a single byte that denotes offset type
-    RefType reftype=static_cast<RefType>((unsigned char)(result[idx]));
+    auto reftype=static_cast<RefType>((unsigned char)(result[idx]));
 
     ref.Set(offset,reftype);
     text=result.substr(0,idx);

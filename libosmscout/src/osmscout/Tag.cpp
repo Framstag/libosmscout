@@ -26,11 +26,6 @@
 
 namespace osmscout {
 
-  TagCondition::~TagCondition()
-  {
-    // no code
-  }
-
   TagNotCondition::TagNotCondition(const TagConditionRef& condition)
   : condition(condition)
   {

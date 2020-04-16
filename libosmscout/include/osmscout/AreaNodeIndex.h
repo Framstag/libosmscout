@@ -95,7 +95,7 @@ namespace osmscout {
                           std::vector<FileOffset>& offsets) const;
 
   public:
-    AreaNodeIndex();
+    AreaNodeIndex() = default;
 
     void Close();
     bool Open(const std::string& path,

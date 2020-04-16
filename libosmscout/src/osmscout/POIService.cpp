@@ -32,11 +32,6 @@ namespace osmscout {
     // no code
   }
 
-  POIService::~POIService()
-  {
-    // no code
-  }
-
   /**
    * Returns all objects in the given boundary that have one of the given types.
    *

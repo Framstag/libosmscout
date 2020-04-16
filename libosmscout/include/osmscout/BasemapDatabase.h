@@ -40,7 +40,7 @@ namespace osmscout {
   private:
     bool dataMMap{true};
   public:
-    BasemapDatabaseParameter();
+    BasemapDatabaseParameter() = default;
 
     void SetDataMMap(bool mmap);
     bool GetDataMMap() const;

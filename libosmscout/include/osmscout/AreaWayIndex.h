@@ -78,7 +78,7 @@ namespace osmscout {
                     std::unordered_set<FileOffset>& offsets) const;
 
   public:
-    AreaWayIndex();
+    AreaWayIndex() = default;
     virtual ~AreaWayIndex();
 
     void Close();
