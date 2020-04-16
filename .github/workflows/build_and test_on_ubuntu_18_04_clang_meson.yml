@@ -29,8 +29,8 @@ jobs:
       - name: Configure build project
         run: meson setup debug
         env:
-          CXX: ccache clang
-          CC: ccache clang
+          CXX: ccache clang++-9
+          CC: ccache clang-9
       - name: Build project
         run: ninja -C debug
       - name: Run tests
