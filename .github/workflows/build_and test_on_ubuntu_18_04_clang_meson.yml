@@ -21,7 +21,7 @@ jobs:
               freeglut3 freeglut3-dev
               libmarisa-dev"
       - name: Install clang compiler and ninja
-        run: sudo apt-get -y install clang-9.0 libc++abi-dev ccache libtool pkg-config ninja-build
+        run: sudo apt-get -y install clang-9 libc++abi-dev ccache libtool pkg-config ninja-build
       - name: Add eoan repository to apt for current meson
         run: sudo add-apt-repository -y -u "deb http://de.archive.ubuntu.com/ubuntu eoan main universe"
       - name: Install meson von eoan repository
