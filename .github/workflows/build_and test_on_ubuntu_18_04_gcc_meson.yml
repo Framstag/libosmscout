@@ -8,8 +8,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Install software-properties-common
+        run: sudo apt-get install software-properties-common
       - name: Add eoan repository to apt for current meson
-        run: sudo echo "deb http://de.archive.ubuntu.com/ubuntu eoan main universe" >> /etc/apt/sources.list
+        run: sudo add-apt-repository -y -u "deb http://de.archive.ubuntu.com/ubuntu eoan main universe"
       - name: Update apt reporsitories
         run: sudo apt-get update
       - name: Install dependencies
