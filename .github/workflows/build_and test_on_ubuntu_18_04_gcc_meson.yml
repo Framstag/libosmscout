@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Update package list
-        run: apt-get update
+        run: sudo apt-get update
       - name: Install dependencies
         run: apt-get install -y \
           git libtool \
