@@ -102,15 +102,15 @@ namespace osmscout {
   {
   private:
     std::vector<TypeInfoRef> types;
-    size_t                   count;
+    size_t                   count = 0;
 
   public:
-    TypeInfoSet();
+    TypeInfoSet() = default;
 
     explicit TypeInfoSet(const TypeConfig& typeConfig);
     explicit TypeInfoSet(const std::vector<TypeInfoRef>& types);
 
-    TypeInfoSet(const TypeInfoSet& other);
+    TypeInfoSet(const TypeInfoSet& other) = default;
     TypeInfoSet(TypeInfoSet&& other) noexcept;
 
     void Adapt(const TypeConfig& typeConfig);

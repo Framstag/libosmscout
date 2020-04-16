@@ -41,13 +41,10 @@ namespace osmscout {
     The following groups attributes are currently available:
     * cache sizes.
     */
-  class OSMSCOUT_API DebugDatabaseParameter
+  class OSMSCOUT_API DebugDatabaseParameter final
   {
-  private:
-
   public:
-    DebugDatabaseParameter();
-
+    DebugDatabaseParameter() = default;
   };
 
   /**

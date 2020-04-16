@@ -34,11 +34,6 @@ namespace osmscout {
 
   const char* const AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
 
-  AreaNodeIndex::AreaNodeIndex()
-  {
-    // no code
-  }
-
   void AreaNodeIndex::Close()
   {
     try {

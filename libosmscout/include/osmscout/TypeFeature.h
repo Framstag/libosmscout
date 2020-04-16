@@ -40,9 +40,9 @@ namespace osmscout {
   class OSMSCOUT_API FeatureValue
   {
   public:
-    FeatureValue();
+    FeatureValue() = default;
 
-    virtual ~FeatureValue()=default;
+    virtual ~FeatureValue() = default;
 
     inline virtual std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const
     {
@@ -99,9 +99,9 @@ namespace osmscout {
                       const std::string& flagName);
 
   public:
-    Feature();
+    Feature() = default;
 
-    virtual ~Feature()=default;
+    virtual ~Feature() = default;
 
     /**
      * Does further initialization based on the current TagRegistry. For example

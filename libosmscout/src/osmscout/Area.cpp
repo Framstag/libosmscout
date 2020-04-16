@@ -583,7 +583,7 @@ namespace osmscout {
     }
   }
 
-  void Area::VisitRings(RingVisitor visitor) const
+  void Area::VisitRings(const RingVisitor& visitor) const
   {
     size_t ringId=Area::outerRingId;
 
@@ -608,7 +608,7 @@ namespace osmscout {
     }
   }
 
-  void Area::VisitClippingRings(size_t i, RingVisitor visitor) const
+  void Area::VisitClippingRings(size_t i, const RingVisitor& visitor) const
   {
     assert(i<rings.size());
     uint8_t ringId=rings[i].GetRing();

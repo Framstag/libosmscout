@@ -802,7 +802,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocationByName(const GeoCoord& location,
                                                           LocationDescription& description,
-                                                          Distance lookupDistance,
+                                                          const Distance& lookupDistance,
                                                           const double sizeFilter)
   {
 
@@ -932,7 +932,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocationByAddress(const GeoCoord& location,
                                                              LocationDescription& description,
-                                                             Distance lookupDistance,
+                                                             const Distance& lookupDistance,
                                                              const double sizeFilter)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
@@ -1022,7 +1022,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocationByPOI(const GeoCoord& location,
                                                          LocationDescription& description,
-                                                         Distance lookupDistance,
+                                                         const Distance& lookupDistance,
                                                          const double sizeFilter)
   {
     // search all addressable areas and nodes, sort it by distance, get first with address
@@ -1119,7 +1119,7 @@ namespace osmscout {
    */
   bool LocationDescriptionService::DescribeLocationByCrossing(const GeoCoord& location,
                                                               LocationDescription& description,
-                                                              Distance lookupDistance)
+                                                              const Distance& lookupDistance)
   {
     TypeConfigRef          typeConfig=database->GetTypeConfig();
     NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
@@ -1255,7 +1255,7 @@ namespace osmscout {
    */
   bool LocationDescriptionService::DescribeLocationByWay(const GeoCoord& location,
                                                          LocationDescription& description,
-                                                         Distance lookupDistance)
+                                                         const Distance& lookupDistance)
   {
     TypeConfigRef          typeConfig=database->GetTypeConfig();
     NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
@@ -1336,7 +1336,7 @@ namespace osmscout {
 
   bool LocationDescriptionService::DescribeLocation(const GeoCoord& location,
                                                     LocationDescription& description,
-                                                    Distance lookupDistance,
+                                                    const Distance& lookupDistance,
                                                     const double sizeFilter)
   {
     description.SetCoordDescription(std::make_shared<LocationCoordDescription>(location));

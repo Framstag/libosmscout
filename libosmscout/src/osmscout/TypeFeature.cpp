@@ -23,11 +23,6 @@
 
 namespace osmscout {
 
-  FeatureValue::FeatureValue()
-  {
-    // no code
-  }
-
   FeatureValue& FeatureValue::operator=(const FeatureValue& /*other*/)
   {
     assert(false);
@@ -53,11 +48,6 @@ namespace osmscout {
   void FeatureValue::Write(FileWriter& /*writer*/)
   {
     assert(false);
-  }
-
-  Feature::Feature()
-  {
-    // no code
   }
 
   void Feature::RegisterLabel(size_t index,

@@ -34,7 +34,7 @@ namespace osmscout {
    * DataFile class for loading the bounding box of the database.
    * The bounding box is represented by a simple GeoBox.
    */
-  class OSMSCOUT_API BoundingBoxDataFile
+  class OSMSCOUT_API BoundingBoxDataFile final
   {
   public:
     static const char* const BOUNDINGBOX_DAT;
@@ -45,8 +45,7 @@ namespace osmscout {
     GeoBox      boundingBox; //!< Bounding box
 
   public:
-  BoundingBoxDataFile();
-    virtual ~BoundingBoxDataFile();
+    BoundingBoxDataFile();
 
     bool Load(const std::string& path);
 

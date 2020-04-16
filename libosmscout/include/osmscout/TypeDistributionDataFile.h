@@ -35,7 +35,7 @@ namespace osmscout {
    * DataFile class for loading the bounding box of the database.
    * The bounding box is represented by a simple GeoBox.
    */
-  class OSMSCOUT_API TypeDistributionDataFile
+  class OSMSCOUT_API TypeDistributionDataFile final
   {
   public:
     static const char* const DISTRIBUTION_DAT;
@@ -58,7 +58,6 @@ namespace osmscout {
 
   public:
     TypeDistributionDataFile();
-    virtual ~TypeDistributionDataFile();
 
     bool Load(const TypeConfig& typeConfig,
               const std::string& path);

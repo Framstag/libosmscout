@@ -33,11 +33,6 @@ namespace osmscout {
     // no code
   }
 
-  BoundingBoxDataFile::~BoundingBoxDataFile()
-  {
-    // no code
-  }
-
   /**
    *
    * Load the bounding box data and return, if this operation was successful.

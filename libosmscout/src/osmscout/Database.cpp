@@ -1077,7 +1077,7 @@ namespace osmscout {
 
     for (const auto& node : nodes) {
       Distance distance=GetEllipsoidalDistance(location,
-                                               node.get()->GetCoords());
+                                               node->GetCoords());
       if (distance<=maxDistance) {
         result.nodeResults.push_back(NodeRegionSearchResultEntry(node,
                                                                  distance));

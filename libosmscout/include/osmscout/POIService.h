@@ -39,14 +39,13 @@ namespace osmscout {
    * Currently this includes the following functionality:
    * - Locating POIs of given types in a given area
    */
-  class OSMSCOUT_API POIService
+  class OSMSCOUT_API POIService final
   {
   private:
     DatabaseRef database;
 
   public:
     explicit POIService(const DatabaseRef& database);
-    virtual ~POIService();
 
     void GetPOIsInArea(const GeoBox& boundingBox,
                        const TypeInfoSet& nodeTypes,

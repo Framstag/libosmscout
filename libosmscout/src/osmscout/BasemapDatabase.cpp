@@ -24,11 +24,6 @@
 
 namespace osmscout {
 
-  BasemapDatabaseParameter::BasemapDatabaseParameter()
-  {
-    // no code
-  }
-
   void BasemapDatabaseParameter::SetDataMMap(bool mmap)
   {
     dataMMap=mmap;

@@ -23,23 +23,10 @@
 
 namespace osmscout {
 
-  TypeInfoSet::TypeInfoSet()
-  : count(0)
-  {
-    // no code
-  }
-
   TypeInfoSet::TypeInfoSet(const TypeConfig& typeConfig)
   : count(0)
   {
     types.resize(typeConfig.GetTypeCount());
-  }
-
-  TypeInfoSet::TypeInfoSet(const TypeInfoSet& other)
-  : types(other.types),
-    count(other.count)
-  {
-    // no code
   }
 
   TypeInfoSet::TypeInfoSet(TypeInfoSet&& other) noexcept
@@ -51,6 +38,7 @@ namespace osmscout {
 
   TypeInfoSet::TypeInfoSet(const std::vector<TypeInfoRef>& types)
   {
+    count=0;
     for (const auto& type : types) {
       Set(type);
     }

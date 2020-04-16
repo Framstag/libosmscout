@@ -35,7 +35,7 @@ namespace osmscout
    A class that allows prefix-based searching
    of text data indexed during import
    */
-  class OSMSCOUT_API TextSearchIndex
+  class OSMSCOUT_API TextSearchIndex final
   {
   public:
     static const char* const TEXT_POI_DAT;
@@ -61,7 +61,7 @@ namespace osmscout
   public:
     typedef std::unordered_map<std::string,std::vector<ObjectFileRef> > ResultsMap;
 
-    TextSearchIndex();
+    TextSearchIndex() = default;
 
     ~TextSearchIndex();
 

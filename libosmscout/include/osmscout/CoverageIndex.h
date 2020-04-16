@@ -56,7 +56,7 @@ namespace osmscout {
     std::vector<uint8_t>  bitmap;
 
   public:
-    CoverageIndex();
+    CoverageIndex() = default;
 
     void Close();
     bool Open(const std::string& path);
