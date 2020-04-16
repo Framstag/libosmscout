@@ -20,8 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <string>
-
 #include <osmscout/CoreImportExport.h>
 
 #include <osmscout/system/OSMScoutTypes.h>
@@ -30,6 +28,10 @@
 #include <osmscout/util/Number.h>
 
 #include <osmscout/system/Compiler.h>
+
+#include <string>
+#include <array>
+#include <type_traits>
 
 namespace osmscout {
 
@@ -98,22 +100,13 @@ namespace osmscout {
   class OSMSCOUT_API Vertex2D CLASS_FINAL
   {
   private:
-    double coords[2];
+    std::array<double,2> coords;
 
   public:
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
      */
-    inline Vertex2D()
-    {
-      // no code
-    }
-
-    inline Vertex2D(const Vertex2D& other) noexcept
-    {
-      coords[0]=other.coords[0];
-      coords[1]=other.coords[1];
-    }
+    Vertex2D() = default;
 
     inline Vertex2D(double x,
                     double y)
@@ -121,6 +114,12 @@ namespace osmscout {
       coords[0]=x;
       coords[1]=y;
     }
+
+    Vertex2D(const Vertex2D& other) = default;
+    Vertex2D(Vertex2D&& other) = default;
+
+    Vertex2D& operator=(const Vertex2D& other) = default;
+    Vertex2D& operator=(Vertex2D&& other) = default;
 
     inline void SetX(double x)
     {
@@ -155,15 +154,6 @@ namespace osmscout {
              coords[1]==other.coords[1];
     }
 
-    inline Vertex2D& operator=(const Vertex2D& other)
-    {
-      if (this!=&other) {
-        coords[0]=other.coords[0];
-        coords[1]=other.coords[1];
-      }
-      return *this;
-    }
-
     inline bool operator<(const Vertex2D& other) const
     {
       return coords[1]<other.coords[1] ||
@@ -176,6 +166,10 @@ namespace osmscout {
       return sqrt(xDiff*xDiff + yDiff*yDiff);
     }
   };
+
+  // make sure that we may use std::memcpy on Vertex2D
+  static_assert(std::is_trivially_copyable<Vertex2D>::value);
+  static_assert(std::is_trivially_assignable<Vertex2D,Vertex2D>::value);
 
   /**
    * \ingroup Geometry
