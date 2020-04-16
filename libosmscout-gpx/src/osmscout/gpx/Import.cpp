@@ -43,7 +43,7 @@ protected:
 public:
   GpxParserContext(xmlParserCtxtPtr ctxt, GpxParser &parser):
       ctxt(ctxt), parser(parser) { }
-  virtual ~GpxParserContext() { }
+  virtual ~GpxParserContext() = default;
 
   virtual const char *ContextName() const = 0;
 
@@ -61,8 +61,7 @@ public:
   DocumentContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser) :
       GpxParserContext(ctxt, parser), output(output) {}
 
-  ~DocumentContext() override
-  {}
+  ~DocumentContext() override = default;
 
   const char *ContextName() const override
   {
@@ -128,10 +127,13 @@ public:
 
   ~GpxParser()
   {
-    for (auto context : contextStack) {
-      delete context;
+    // in case of parsing failure, there may still exists some context
+    // we may have to delete from the the back (lifo)
+    // to avoid use after free, context may use its parent in destructor
+    while (!contextStack.empty()) {
+      PopContext();
     }
-    contextStack.clear();
+
     if (ctxt!=nullptr) {
       xmlFreeParserCtxt(ctxt);
     }
@@ -366,8 +368,7 @@ public:
   PointLikeContext(xmlParserCtxtPtr ctxt, GpxParser &parser, double lat, double lon) :
       GpxParserContext(ctxt, parser), point(GeoCoord(lat,lon)) { }
 
-  ~PointLikeContext() override
-  {}
+  ~PointLikeContext() override = default;
 
   GpxParserContext* StartElement(const std::string &name,
                                  const std::unordered_map<std::string, std::string> &/*atts*/) override
@@ -731,8 +732,7 @@ public:
   GpxDocumentContext(xmlParserCtxtPtr ctxt, GpxFile &output, GpxParser &parser):
       GpxParserContext(ctxt, parser), output(output) {}
 
-  ~GpxDocumentContext() override
-  {}
+  ~GpxDocumentContext() override = default;
 
   const char *ContextName() const override
   {
