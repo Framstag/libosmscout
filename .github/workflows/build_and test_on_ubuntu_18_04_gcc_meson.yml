@@ -8,19 +8,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Update package list
-        run: sudo apt-get update
-      - name: Install dependencies
-        run: sudo apt-get install -y \
-          git libtool \
-          libprotobuf-dev protobuf-compiler \
-          qtdeclarative5-dev libqt5svg5-dev \
-          qtpositioning5-dev qttools5-dev-tools qttools5-dev qtmultimedia5-dev \
-          freeglut3-dev
-      - name: Install compiler and build tool
-        run: sudo apt-get install -y \
-          meson ninja pkg-config \
-          gcc
       - name: Configure build project
         run: meson setup debug
       - name: Build project
