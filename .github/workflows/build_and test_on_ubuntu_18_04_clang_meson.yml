@@ -1,4 +1,4 @@
-name: Build and test on ubuntu 18.04 using gcc and meson
+name: Ubuntu 18.04 using clang and meson
 on: [push]
 
 jobs:
@@ -20,8 +20,8 @@ jobs:
               qttools5-dev qtmultimedia5-dev
               freeglut3 freeglut3-dev
               libmarisa-dev"
-      - name: Install gcc compiler and ninja
-        run: sudo apt-get -y install clang ccache libtool pkg-config ninja-build
+      - name: Install clang compiler and ninja
+        run: sudo apt-get -y install clang-9.0 libc++abi-dev ccache libtool pkg-config ninja-build
       - name: Add eoan repository to apt for current meson
         run: sudo add-apt-repository -y -u "deb http://de.archive.ubuntu.com/ubuntu eoan main universe"
       - name: Install meson von eoan repository
