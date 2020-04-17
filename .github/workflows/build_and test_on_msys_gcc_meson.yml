@@ -21,6 +21,8 @@ jobs:
               mingw-w64-x86_64-cairo mingw-w64-x86_64-pango 
               mingw-w64-x86_64-qt5 
               mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
+      - name: Flush pacman caches
+        run; msys2do pacman -Scc
       - name: Configure build project
         run: msys2do meson setup debug
         env:
