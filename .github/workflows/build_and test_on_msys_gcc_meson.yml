@@ -8,20 +8,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Install/User MSYS/MINGW64 
+        uses: numworks/setup-msys2@v1
       - name: Install meson build tool
-        run: bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-meson mingw-w64-x86_64-ninja"
+        run: msysdo pacman -S --needed --noconfirm mingw-w64-x86_64-meson mingw-w64-x86_64-ninja
       - name: Install libosmscout dependencies
-        run: "bash -lc \"pacman -S --needed --noconfirm mingw-w64-x86_64-protobuf 
+        run: "msysdo pacman -S --needed --noconfirm mingw-w64-x86_64-protobuf 
               mingw-w64-x86_64-libxml2
               mingw-w64-x86_64-cairo mingw-w64-x86_64-pango 
               mingw-w64-x86_64-qt5 
-              mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm\""
+              mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Configure build project
-        run: meson setup debug
+        run: msysdo meson setup debug
         env:
           CXX: ccache g++
           CC: ccache gcc
       - name: Build project
-        run: ninja -C debug
+        run: msysdo ninja -C debug
       - name: Run tests
-        run: meson test -C debug
+        run: msysdo meson test -C debug
