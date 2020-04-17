@@ -30,7 +30,7 @@ jobs:
           CC: ccache gcc
       - name: Build project
         run: msys2do ninja -C debug
-      - name: Run tests
-        run: msys2do meson test -C debug
-        env:
-          LANG: en_US.utf8
+#      - name: Run tests
+#        run: msys2do meson test -C debug
+#        env:
+#          LANG: en_US.utf8
