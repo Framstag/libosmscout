@@ -20,6 +20,7 @@
 #include <osmscout/util/Transformation.h>
 
 #include <limits>
+#include <cstring>
 
 namespace osmscout {
 
@@ -187,7 +188,7 @@ namespace osmscout {
 
       auto* newBuffer=new Vertex2D[bufferSize];
 
-      memcpy(newBuffer,buffer,sizeof(Vertex2D)*usedPoints);
+      std::memcpy(newBuffer,buffer,sizeof(Vertex2D)*usedPoints);
 
       log.Warn() << "*** Buffer reallocation: " << bufferSize;
 
