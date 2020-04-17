@@ -12,6 +12,8 @@ jobs:
         uses: numworks/setup-msys2@v1
       - name: Install pacman-mirrors
         run: msys2do pacman -S --needed --noconfirm pacman-mirrors
+      - name: Try to find best pacman mirror
+        run: msys2do pacman-mirrors -g
       - name: Install gcc toolchain
         run: msys2do pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-libiconv
       - name: Install meson build tool
