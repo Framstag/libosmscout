@@ -24,7 +24,7 @@ jobs:
       - name: Flush pacman caches
         run: msys2do pacman -Scc --noconfirm
       - name: Dump DOS path
-        run: echo %PATH%"
+        run: echo %PATH%
       - name: Dump MSYS path
         run: msys2do echo $PATH
       - name: Configure build project
