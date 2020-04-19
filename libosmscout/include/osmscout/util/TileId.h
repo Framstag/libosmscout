@@ -163,8 +163,15 @@ namespace osmscout {
     bool operator<(const TileKey& other) const;
   };
 
-  class OSMSCOUT_API TileIdBoxConstIterator CLASS_FINAL : public std::iterator<std::input_iterator_tag, const TileId>
+  class OSMSCOUT_API TileIdBoxConstIterator CLASS_FINAL
   {
+  public:
+    using self_type         = TileIdBoxConstIterator;
+    using value_type        = TileId;
+    using reference         = const TileId&;
+    using pointer           = TileId;
+    using iterator_category = std::input_iterator_tag;
+
   private:
     TileId currentTile;
     TileId minTile;
@@ -203,7 +210,7 @@ namespace osmscout {
       return *this;
     }
 
-    const TileIdBoxConstIterator operator++(int)
+    TileIdBoxConstIterator operator++(int)
     {
       TileIdBoxConstIterator tmp(*this);
 
@@ -223,6 +230,11 @@ namespace osmscout {
     }
 
     const TileId& operator*()
+    {
+      return currentTile;
+    }
+
+    TileId operator->()
     {
       return currentTile;
     }

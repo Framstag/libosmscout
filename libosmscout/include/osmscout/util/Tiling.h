@@ -22,6 +22,8 @@
 
 #include <osmscout/CoreImportExport.h>
 
+#include <iterator>
+
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Pixel.h>
 
@@ -104,8 +106,15 @@ namespace osmscout {
 
   };
 
-  class OSMSCOUT_API OSMTileIdBoxConstIterator CLASS_FINAL : public std::iterator<std::input_iterator_tag, const OSMTileId>
+  class OSMSCOUT_API OSMTileIdBoxConstIterator
   {
+  public:
+    using self_type         = OSMTileIdBoxConstIterator;
+    using value_type        = OSMTileId;
+    using reference         = OSMTileId&;
+    using pointer           = OSMTileId*;
+    using iterator_category = std::input_iterator_tag;
+
   private:
     OSMTileId currentTile;
     OSMTileId minTile;
@@ -122,13 +131,7 @@ namespace osmscout {
       // no code
     }
 
-    OSMTileIdBoxConstIterator(const OSMTileIdBoxConstIterator& other)
-      : currentTile(other.currentTile),
-        minTile(other.minTile),
-        maxTile(other.maxTile)
-    {
-      // no code
-    }
+    OSMTileIdBoxConstIterator(const OSMTileIdBoxConstIterator& other) = default;
 
     OSMTileIdBoxConstIterator& operator++()
     {
@@ -142,7 +145,7 @@ namespace osmscout {
       return *this;
     }
 
-    const OSMTileIdBoxConstIterator operator++(int)
+    OSMTileIdBoxConstIterator operator++(int)
     {
       OSMTileIdBoxConstIterator tmp(*this);
 
@@ -162,6 +165,11 @@ namespace osmscout {
     }
 
     const OSMTileId& operator*()
+    {
+      return currentTile;
+    }
+
+    OSMTileId operator->()
     {
       return currentTile;
     }
