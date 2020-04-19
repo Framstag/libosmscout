@@ -1,4 +1,4 @@
-name: MSYS using gcc and meson
+name: MSYS using gcc and cmake
 on: [push]
 
 jobs:
@@ -24,12 +24,12 @@ jobs:
       - name: Flush pacman caches
         run: msys2do pacman -Scc --noconfirm
       - name: Configure build project
-        run: msys2do cmake -B build -S .
+        run: msys2do cmake -B build -S . -G "MSYS Makefiles"
         env:
           CXX: ccache g++
           CC: ccache gcc
       - name: Build project
-        run: cmake --build build
+        run: msys2do cmake --build build
 #      - name: Run tests
 #        run: msys2do meson test -C debug
 #        env:
