@@ -32,11 +32,11 @@ namespace osmscout {
   class OSMSCOUT_API TypeInfoSetConstIterator CLASS_FINAL
   {
   public:
-    typedef TypeInfoSetConstIterator self_type;
-    typedef TypeInfoRef              value_type;
-    typedef const TypeInfoRef&       reference;
-    typedef TypeInfoRef              pointer;
-    typedef std::input_iterator_tag  iterator_category;
+    using self_type         = TypeInfoSetConstIterator;
+    using value_type        = TypeInfoRef;
+    using reference         = const TypeInfoRef&;
+    using pointer           = TypeInfoRef;
+    using iterator_category = std::input_iterator_tag;
 
   private:
     std::vector<TypeInfoRef>::const_iterator iterCurrent;

@@ -166,11 +166,11 @@ namespace osmscout {
   class OSMSCOUT_API TileIdBoxConstIterator CLASS_FINAL
   {
   public:
-    typedef TileIdBoxConstIterator  self_type;
-    typedef TileId                  value_type;
-    typedef const TileId&           reference;
-    typedef TileId                  pointer;
-    typedef std::input_iterator_tag iterator_category;
+    using self_type         = TileIdBoxConstIterator;
+    using value_type        = TileId;
+    using reference         = const TileId&;
+    using pointer           = TileId;
+    using iterator_category = std::input_iterator_tag;
 
   private:
     TileId currentTile;
