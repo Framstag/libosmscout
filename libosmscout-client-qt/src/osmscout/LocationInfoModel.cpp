@@ -18,10 +18,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QtCore/qabstractitemmodel.h>
-
 #include <osmscout/LocationInfoModel.h>
 #include <osmscout/OSMScoutQt.h>
+
+#include <QtCore/qabstractitemmodel.h>
+
+#include <algorithm>
 
 namespace osmscout {
 
@@ -235,8 +237,8 @@ void LocationInfoModel::addToModel(const QString database,
   obj[AddressNumberRole] = addressNumber;
   
   model << obj;
-  // TODO: use std::sort after transition to c++17
-  qSort(model.begin(),model.end(),distanceComparator);
+
+  std::sort(model.begin(),model.end(),distanceComparator);
   endResetModel();
 }
 
@@ -302,8 +304,7 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
 
   QMap<int, QVariant> obj;
 
-  // TODO: use std::sort after transition to c++17
-  qSort(regions.begin(),regions.end(),adminRegionComparator);
+  std::sort(regions.begin(),regions.end(),adminRegionComparator);
 
   const AdminRegionInfoRef bottom=regions.first();
   QStringList regionNames;
@@ -331,8 +332,8 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   obj[AddressNumberRole] = "";
 
   model << obj;
-  // TODO: use std::sort after transition to c++17
-  qSort(model.begin(),model.end(),distanceComparator);
+
+  std::sort(model.begin(),model.end(),distanceComparator);
   endResetModel();
 }
 

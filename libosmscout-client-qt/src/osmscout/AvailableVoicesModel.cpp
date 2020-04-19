@@ -21,6 +21,8 @@
 #include <osmscout/PersistentCookieJar.h>
 #include <osmscout/OSMScoutQt.h>
 
+#include <algorithm>
+
 namespace osmscout {
 
 AvailableVoicesModel::AvailableVoicesModel()
@@ -144,8 +146,7 @@ void AvailableVoicesModel::listDownloaded(const VoiceProvider &provider, QNetwor
     }
   }
 
-  // TODO: use std::sort after transition to c++17
-  qSort(items.begin(), items.end(), itemLessThan);
+  std::sort(items.begin(), items.end(), itemLessThan);
   reply->deleteLater();
 
   // TODO: add locally installed voices to be able uninstall them

@@ -17,14 +17,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <QString>
-#include <QtAlgorithms>
-
 #include <osmscout/util/String.h>
 #include <osmscout/AvailableMapsModel.h>
 #include <osmscout/PersistentCookieJar.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/OSMScoutQt.h>
+
+#include <QString>
+#include <QtAlgorithms>
+
+#include <algorithm>
 
 namespace osmscout {
 
@@ -178,8 +180,7 @@ void AvailableMapsModel::listDownloaded(const MapProvider &provider, QNetworkRep
     }
   }
 
-  // TODO: use std::sort after transition to c++17
-  qSort(items.begin(), items.end(), itemLessThan);
+  std::sort(items.begin(), items.end(), itemLessThan);
   reply->deleteLater();
   
   emit loadingChanged();
