@@ -23,6 +23,7 @@ add_test(NAME BitsAndBytesNeeded COMMAND BitsAndBytesNeeded)
 add_executable(CachePerformance src/CachePerformance.cpp)
 set_property(TARGET CachePerformance PROPERTY CXX_STANDARD 17)
 target_link_libraries(CachePerformance OSMScout)
+add_test(NAME CachePerformance COMMAND CachePerformance --size 1000)
 
 #---- CalculateResolution
 add_executable(CalculateResolution src/CalculateResolution.cpp)
