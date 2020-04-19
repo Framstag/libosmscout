@@ -23,17 +23,13 @@ jobs:
               mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Flush pacman caches
         run: msys2do pacman -Scc --noconfirm
-      - name: Dump DOS path
-        run: echo %PATH%
-      - name: Dump MSYS path
-        run: msys2do echo $PATH
       - name: Configure build project
-        run: msys2do cmake -B build -S . -G "MSYS Makefiles"
+        run: msys2do /mingw64/bin/cmake -B build -S . -G "MSYS Makefiles"
         env:
           CXX: ccache g++
           CC: ccache gcc
       - name: Build project
-        run: msys2do cmake --build build
+        run: msys2do /mingw64/bin/cmake --build build
 #      - name: Run tests
 #        run: msys2do meson test -C debug
 #        env:
