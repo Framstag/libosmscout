@@ -13,7 +13,7 @@ jobs:
       - name: Install gcc toolchain
         run: msys2do pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-libiconv
       - name: Install cmake build tool
-        run: msys2do pacman -S --needed --noconfirm mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+        run: msys2do pacman -S --needed --noconfirm mingw-w64-x86_64-cmake mingw-w64-x86_64-cmake-modules
       - name: Install libosmscout dependencies
         run: "msys2do pacman -S --needed --noconfirm --disable-download-timeout
               mingw-w64-x86_64-protobuf
@@ -23,6 +23,10 @@ jobs:
               mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Flush pacman caches
         run: msys2do pacman -Scc --noconfirm
+      - name: Dump DOS path
+        run: echo %PATH%"
+      - name: Dump MSYS path
+        run: msys2do echo $PATH
       - name: Configure build project
         run: msys2do cmake -B build -S . -G "MSYS Makefiles"
         env:
