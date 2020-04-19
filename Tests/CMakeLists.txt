@@ -48,8 +48,7 @@ add_test(NAME ColorParse COMMAND ColorParse)
 add_executable(CoordinateEncoding src/CoordinateEncoding.cpp)
 set_property(TARGET CoordinateEncoding PROPERTY CXX_STANDARD 17)
 target_link_libraries(CoordinateEncoding OSMScout)
-# TODO: add sample data and arguments to test
-#add_test(NAME CoordinateEncoding COMMAND CoordinateEncoding)
+add_test(NAME CoordinateEncoding COMMAND CoordinateEncoding "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- LocationLookup
 add_executable(LocationLookupTest src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp)
