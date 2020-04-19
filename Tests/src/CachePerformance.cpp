@@ -24,6 +24,7 @@
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/StopClock.h>
+#include <osmscout/util/CmdLineParsing.h>
 
 /**
   Check performance of
@@ -46,11 +47,9 @@ struct Data
   }
 };
 
-static const size_t cacheSize=2000000;
-
 typedef osmscout::Cache<osmscout::Id,Data>     DataCache;
 
-bool TestData()
+bool TestData(size_t cacheSize)
 {
   std::cout << "*** Caching of struct ***" << std::endl;
 
@@ -160,7 +159,36 @@ bool TestData()
   return true;
 }
 
-int main(int /*argc*/, char* /*argv*/[])
+int main(int argc, char* argv[])
 {
-  return TestData() ? 0:1;
+  using namespace std::string_literals;
+  size_t cacheSize=2000000;
+  bool help=false;
+  osmscout::CmdLineParser argParser("CachePerformance", argc, argv);
+
+  argParser.AddOption(osmscout::CmdLineFlag([&](const bool& value) {
+              help=value;
+            }),
+            std::vector<std::string>{"h","help"},
+            "Display help",
+            true);
+
+  argParser.AddOption(osmscout::CmdLineSizeTOption([&](const size_t& value) {
+                  cacheSize=value;
+                }),
+                "size",
+                "Cache size used for the test, default: "s + std::to_string(cacheSize));
+
+  osmscout::CmdLineParseResult argResult=argParser.Parse();
+  if (argResult.HasError()) {
+    std::cerr << "ERROR: " << argResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+    return 1;
+  }
+  if (help){
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
+  }
+
+  return TestData(cacheSize) ? 0:1;
 }
