@@ -13,7 +13,7 @@ jobs:
       - name: Install gcc toolchain
         run: msys2do pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-libiconv
       - name: Install cmake build tool
-        run: msys2do pacman -S --needed --noconfirm mingw-w64-x86_64-cmake mingw-w64-x86_64-cmake-modules
+        run: msys2do pacman -S --needed --noconfirm mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules
       - name: Install libosmscout dependencies
         run: "msys2do pacman -S --needed --noconfirm --disable-download-timeout
               mingw-w64-x86_64-protobuf
