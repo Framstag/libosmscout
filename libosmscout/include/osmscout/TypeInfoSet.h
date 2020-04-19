@@ -33,10 +33,11 @@ namespace osmscout {
   {
   public:
     typedef TypeInfoSetConstIterator self_type;
-    typedef TypeInfoRef value_type;
-    typedef const TypeInfoRef& reference;
-    typedef TypeInfoRef pointer;
-    typedef std::input_iterator_tag iterator_category;
+    typedef TypeInfoRef              value_type;
+    typedef const TypeInfoRef&       reference;
+    typedef TypeInfoRef              pointer;
+    typedef std::input_iterator_tag  iterator_category;
+
   private:
     std::vector<TypeInfoRef>::const_iterator iterCurrent;
     std::vector<TypeInfoRef>::const_iterator iterEnd;
@@ -67,7 +68,7 @@ namespace osmscout {
       return *this;
     }
 
-    const TypeInfoSetConstIterator operator++(int)
+    TypeInfoSetConstIterator operator++(int)
     {
       TypeInfoSetConstIterator tmp(*this);
 
