@@ -79,8 +79,11 @@ if(${OSMSCOUT_BUILD_MAP})
 	add_executable(ThreadedDatabase src/ThreadedDatabase.cpp)
 	set_property(TARGET ThreadedDatabase PROPERTY CXX_STANDARD 17)
     target_link_libraries(ThreadedDatabase OSMScout OSMScoutMap)
-  # TODO: add sample data and arguments to test
-  #add_test(NAME  COMMAND )
+    add_test(NAME ThreadedDatabase COMMAND ThreadedDatabase
+            --threads 100
+            --iterations 1000
+            "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
 else()
 	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()
