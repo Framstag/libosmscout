@@ -20,6 +20,8 @@
 #include <osmscout/InstalledVoicesModel.h>
 #include <osmscout/OSMScoutQt.h>
 
+#include <algorithm>
+
 namespace osmscout {
 
 InstalledVoicesModel::InstalledVoicesModel()
@@ -59,8 +61,7 @@ void InstalledVoicesModel::update()
   voices.clear();
   voices<<Voice(); // no-voice placeholder
   QList<Voice> installedVoices=voiceManager->getInstalledVoices();
-  // TODO: use std::sort after transition to c++17
-  qSort(installedVoices.begin(), installedVoices.end(), itemLessThan);
+  std::sort(installedVoices.begin(), installedVoices.end(), itemLessThan);
   voices+=installedVoices;
   endResetModel();
 }

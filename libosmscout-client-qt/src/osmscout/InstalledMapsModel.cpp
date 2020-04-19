@@ -20,6 +20,8 @@
 #include <osmscout/InstalledMapsModel.h>
 #include <osmscout/OSMScoutQt.h>
 
+#include <algorithm>
+
 namespace osmscout {
 
 InstalledMapsModel::InstalledMapsModel()
@@ -40,8 +42,7 @@ void InstalledMapsModel::onDatabaseListChanged()
 {
   QList<MapDirectory> currentDirs=mapManager->getDatabaseDirectories();
 
-  // TODO: use std::stable_sort after transition to c++17
-  qStableSort(currentDirs);
+  std::stable_sort(currentDirs.begin(), currentDirs.end());
 
   // following process is little bit complicated, but we don't want to call
   // model reset - it breaks UI animations for changes
