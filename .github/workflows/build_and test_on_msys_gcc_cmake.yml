@@ -24,10 +24,10 @@ jobs:
       - name: Flush pacman caches
         run: msys2do pacman -Scc --noconfirm
       - name: Configure build project
-        run: msys2do /mingw64/bin/cmake -B build -S . -G "MSYS Makefiles"
+        run: msys2do /mingw64/bin/cmake -B build -S . -G 'MSYS Makefiles'
         env:
-          CXX: ccache g++
-          CC: ccache gcc
+          CXX: g++
+          CC: gcc
       - name: Build project
         run: msys2do /mingw64/bin/cmake --build build
 #      - name: Run tests
