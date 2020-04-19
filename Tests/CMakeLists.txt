@@ -72,8 +72,7 @@ target_link_libraries(ReaderScannerPerformance OSMScout)
 add_executable(MultiDBRouting src/MultiDBRouting.cpp)
 set_property(TARGET MultiDBRouting PROPERTY CXX_STANDARD 17)
 target_link_libraries(MultiDBRouting OSMScout)
-# TODO: add sample data and arguments to test
-#add_test(NAME  COMMAND )
+add_test(NAME MultiDBRouting COMMAND MultiDBRouting 50.412 14.534  50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- ThreadedDatabase
 if(${OSMSCOUT_BUILD_MAP})

@@ -256,6 +256,7 @@ test('Check cache functionality with CachePerformance', CachePerformance, args :
 test('Check parsing of command line args', CmdLineParsing)
 test('Check parsing of colors', ColorParse)
 test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
+test('Check routing', MultiDBRouting, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
 test('Check encoding of numbers', EncodeNumber)
 test('Check label formatting', FeatureLabelTest)
 test('Check File access implementation', FileScannerWriter)
