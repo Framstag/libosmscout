@@ -23,6 +23,7 @@ add_test(NAME BitsAndBytesNeeded COMMAND BitsAndBytesNeeded)
 add_executable(CachePerformance src/CachePerformance.cpp)
 set_property(TARGET CachePerformance PROPERTY CXX_STANDARD 17)
 target_link_libraries(CachePerformance OSMScout)
+add_test(NAME CachePerformance COMMAND CachePerformance --size 1000)
 
 #---- CalculateResolution
 add_executable(CalculateResolution src/CalculateResolution.cpp)
@@ -47,8 +48,7 @@ add_test(NAME ColorParse COMMAND ColorParse)
 add_executable(CoordinateEncoding src/CoordinateEncoding.cpp)
 set_property(TARGET CoordinateEncoding PROPERTY CXX_STANDARD 17)
 target_link_libraries(CoordinateEncoding OSMScout)
-# TODO: add sample data and arguments to test
-#add_test(NAME CoordinateEncoding COMMAND CoordinateEncoding)
+add_test(NAME CoordinateEncoding COMMAND CoordinateEncoding "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- LocationLookup
 add_executable(LocationLookupTest src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp)
@@ -72,16 +72,18 @@ target_link_libraries(ReaderScannerPerformance OSMScout)
 add_executable(MultiDBRouting src/MultiDBRouting.cpp)
 set_property(TARGET MultiDBRouting PROPERTY CXX_STANDARD 17)
 target_link_libraries(MultiDBRouting OSMScout)
-# TODO: add sample data and arguments to test
-#add_test(NAME  COMMAND )
+add_test(NAME MultiDBRouting COMMAND MultiDBRouting 50.412 14.534  50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- ThreadedDatabase
 if(${OSMSCOUT_BUILD_MAP})
 	add_executable(ThreadedDatabase src/ThreadedDatabase.cpp)
 	set_property(TARGET ThreadedDatabase PROPERTY CXX_STANDARD 17)
     target_link_libraries(ThreadedDatabase OSMScout OSMScoutMap)
-  # TODO: add sample data and arguments to test
-  #add_test(NAME  COMMAND )
+    add_test(NAME ThreadedDatabase COMMAND ThreadedDatabase
+            --threads 100
+            --iterations 1000
+            "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
 else()
 	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()

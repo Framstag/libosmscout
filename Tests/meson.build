@@ -252,8 +252,17 @@ test('Check parsing of access rights', AccessParse)
 test('Check parsing of time string', TimeParse)
 test('Check calculation of bearing', Bearing)
 test('Check encoding of numbers', BitsAndBytesNeeded)
+test('Check cache functionality with CachePerformance', CachePerformance, args : ['--size', '1000'])
 test('Check parsing of command line args', CmdLineParsing)
 test('Check parsing of colors', ColorParse)
+test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
+test('Check routing', MultiDBRouting, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
+test('Check threaded database', ThreadedDatabase, args : [
+        '--threads', '100',
+        '--iterations', '1000',
+        meson.current_source_dir() + '/data/testregion',
+        meson.current_source_dir() + '/../stylesheets/standard.oss'])
+
 test('Check encoding of numbers', EncodeNumber)
 test('Check label formatting', FeatureLabelTest)
 test('Check File access implementation', FileScannerWriter)
