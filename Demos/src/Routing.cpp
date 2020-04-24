@@ -532,10 +532,12 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
 #if defined(ROUTE_DEBUG) || defined(NODE_DEBUG)
     NextLine(lineCount);
 
-    std::cout << "// " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km ";
+    using namespace std::chrono;
+    using hoursDouble = duration<double, std::ratio<3600>>;
+    std::cout << "// " << duration_cast<hoursDouble>(node.GetTime()).count() << "h " << std::setw(0) << std::setprecision(3) << node.GetDistance() << " ";
 
-    if (node->GetPathObject().Valid()) {
-      std::cout << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetCurrentNodeIndex() << "] => " << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetTargetNodeIndex() << "]";
+    if (node.GetPathObject().Valid()) {
+      std::cout << node.GetPathObject().GetTypeName() << " " << node.GetPathObject().GetFileOffset() << "[" << node.GetCurrentNodeIndex() << "] => " << node.GetPathObject().GetTypeName() << " " << node.GetPathObject().GetFileOffset() << "[" << node.GetTargetNodeIndex() << "]";
     }
 
     std::cout << std::endl;
@@ -744,6 +746,7 @@ int main(int argc, char* argv[])
     std::make_shared<osmscout::RoutePostprocessor::WayTypePostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::LanesPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>(),

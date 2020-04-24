@@ -87,6 +87,8 @@ namespace osmscout {
     static const char* const WAY_TYPE_NAME_DESC;
     /** Constant for a description of pois at the route (POIAtRouteDescription) */
     static const char* const POI_AT_ROUTE_DESC;
+    /** Constant for a description of route lanes (LaneDescription) */
+    static const char* const LANES_DESC;
 
   public:
     /**
@@ -576,6 +578,27 @@ namespace osmscout {
     };
 
     using POIAtRouteDescriptionRef = std::shared_ptr<POIAtRouteDescription>;
+
+    /**
+     * \ingroup Routing
+     * A route lane
+     */
+    class OSMSCOUT_API LaneDescription : public RouteDescription::Description
+    {
+    private:
+      bool oneway{false};
+      uint8_t laneCount{1}; // in our direction
+      std::list<std::string> laneTurns;
+
+    public:
+      LaneDescription(bool oneway,
+                      uint8_t laneCount,
+                      const std::list<std::string> &laneTurns);
+
+      std::string GetDebugString() const override;
+    };
+
+    typedef std::shared_ptr<LaneDescription> LaneDescriptionRef;
 
     /**
      * \ingroup Routing

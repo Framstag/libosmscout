@@ -1447,6 +1447,39 @@ namespace osmscout {
     return true;
   }
 
+  bool RoutePostprocessor::LanesPostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                       RouteDescription& description)
+  {
+    ObjectFileRef              prevObject;
+    DatabaseId                 prevDb=0;
+    ObjectFileRef              curObject;
+    DatabaseId                 curDb;
+
+    // TODO:
+    //  - evaluate allowed lanes
+
+    for (auto& node : description.Nodes()) {
+      // The last node does not have a pathWayId set, since we are not going anywhere!
+      if (node.HasPathObject()) {
+        // Only load the next way, if it is different from the old one
+        curObject=node.GetPathObject();
+        curDb=node.GetDatabaseId();
+
+        if (curObject!=prevObject || curDb!=prevDb) {
+          auto lanes=postprocessor.GetLanes(node);
+          if (lanes) {
+            node.AddDescription(RouteDescription::LANES_DESC, lanes);
+          }
+        }
+
+        prevObject=curObject;
+        prevDb=curDb;
+      }
+    }
+
+    return true;
+  }
+
   RoutePostprocessor::RoutePostprocessor()
   {
   }
@@ -1562,6 +1595,11 @@ namespace osmscout {
       delete p.second;
     }
     maxSpeedReaders.clear();
+
+    for (const auto p:lanesReaders){
+      delete p.second;
+    }
+    lanesReaders.clear();
   }
 
   AreaRef RoutePostprocessor::GetArea(const DBFileOffset &offset) const
@@ -1855,6 +1893,42 @@ namespace osmscout {
     return speed;
   }
 
+  RouteDescription::LaneDescriptionRef RoutePostprocessor::GetLanes(const RouteDescription::Node& node) const
+  {
+    RouteDescription::LaneDescriptionRef lanes;
+    if (node.GetPathObject().GetType()==refWay) {
+      auto lanesReader=lanesReaders.find(node.GetDatabaseId());
+      auto accessReader=accessReaders.find(node.GetDatabaseId());
+      assert(lanesReader != lanesReaders.end());
+      assert(accessReader != accessReaders.end());
+
+      WayRef way=GetWay(node.GetDBFileOffset());
+
+      bool forward = node.GetCurrentNodeIndex() < node.GetTargetNodeIndex();
+
+      AccessFeatureValue *accessValue=accessReader->second->GetValue(way->GetFeatureValueBuffer());
+      bool oneway = accessValue ? accessValue->IsOneway() : false;
+
+      uint8_t laneCount;
+      std::list<std::string> laneTurns;
+      LanesFeatureValue *lanesValue=lanesReader->second->GetValue(way->GetFeatureValueBuffer());
+      if (lanesValue!=nullptr) {
+        laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
+        std::string turns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();;
+        laneTurns=SplitString(turns, "|");
+      } else {
+        // default lane count by object type
+        if (oneway) {
+          laneCount=way->GetType()->GetOnewayLanes();
+        } else {
+          laneCount=std::max(1,way->GetType()->GetLanes()/2);
+        }
+      }
+      lanes=std::make_shared<RouteDescription::LaneDescription>(oneway, laneCount, laneTurns);
+    }
+    return lanes;
+  }
+
   Id RoutePostprocessor::GetNodeId(const RouteDescription::Node& node) const
   {
     const ObjectFileRef& object=node.GetPathObject();
@@ -2093,6 +2167,8 @@ namespace osmscout {
       roundaboutReaders[dbId]=new RoundaboutFeatureReader(*typeConfig);
       destinationReaders[dbId]=new DestinationFeatureValueReader(*typeConfig);
       maxSpeedReaders[dbId]=new MaxSpeedFeatureValueReader(*typeConfig);
+      lanesReaders[dbId]=new LanesFeatureValueReader(*typeConfig);
+      accessReaders[dbId]=new AccessFeatureValueReader(*typeConfig);
 
       // init types
       motorwayTypes[dbId]; // insert empty TypeInfoSet
