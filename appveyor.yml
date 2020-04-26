@@ -38,16 +38,6 @@ environment:
     PLATFORM: x64
     APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    COMPILER: msys2
-    BUILDTOOL: cmake
-    MSYS2_ARCH: x86_64
-    MSYS2_DIR: msys64
-    MSYSTEM: MINGW64
-    TARGET: build
-    PLATFORM: x64
-    APPVEYOR_SAVE_CACHE_ON_ERROR: true
-
   # Java binding is broken currently: OSMSCOUT_BUILD_BINDING_JAVA=OFF
   # make sure that library can be built with all debugging code: *_DEBUG, DEBUG_*
   # run unittests with sanitizers (thread sanitizer is not included, it has many false positives)
