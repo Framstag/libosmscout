@@ -11,7 +11,7 @@ jobs:
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
       - name: Install libosmscout dependencies
-        run: "sudo apt-get install -y
+        run: "sudo apt-get update && sudo apt-get install -y
               libxml2-dev
               libprotobuf-dev protobuf-compiler
               libagg-dev
