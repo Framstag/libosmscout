@@ -1455,6 +1455,7 @@ namespace osmscout {
     ObjectFileRef              curObject;
     DatabaseId                 curDb;
 
+    RouteDescription::LaneDescriptionRef lanes;
     // TODO:
     //  - evaluate allowed lanes
 
@@ -1466,10 +1467,10 @@ namespace osmscout {
         curDb=node.GetDatabaseId();
 
         if (curObject!=prevObject || curDb!=prevDb) {
-          auto lanes=postprocessor.GetLanes(node);
-          if (lanes) {
-            node.AddDescription(RouteDescription::LANES_DESC, lanes);
-          }
+          lanes=postprocessor.GetLanes(node);
+        }
+        if (lanes) {
+          node.AddDescription(RouteDescription::LANES_DESC, lanes);
         }
 
         prevObject=curObject;
