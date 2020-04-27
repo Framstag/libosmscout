@@ -502,7 +502,11 @@ namespace osmscout {
     }
     for_each(laneTurns.begin(), laneTurns.end(), [&ss] (const std::string& s) {
       ss << " ";
-      ss << s;
+      if (s.empty()){
+        ss << "<unspecified>";
+      } else {
+        ss << s;
+      }
     });
 
     return ss.str();
