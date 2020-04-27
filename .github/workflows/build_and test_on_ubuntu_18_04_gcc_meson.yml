@@ -1,5 +1,5 @@
 name: Ubuntu 18.04 using gcc and meson
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:

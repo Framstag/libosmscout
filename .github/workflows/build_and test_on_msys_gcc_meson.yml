@@ -1,5 +1,5 @@
 name: MSYS using gcc and meson
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
