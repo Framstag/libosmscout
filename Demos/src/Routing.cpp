@@ -535,6 +535,10 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
 
       using namespace std::chrono;
       using hoursDouble = duration<double, std::ratio<3600>>;
+
+      std::cout << "// at " << node.GetLocation().GetDisplayText() << std::endl;
+
+      NextLine(lineCount);
       std::cout << "// " << duration_cast<hoursDouble>(node.GetTime()).count() << "h " << std::setw(0)
                 << std::setprecision(3) << node.GetDistance() << " ";
 
