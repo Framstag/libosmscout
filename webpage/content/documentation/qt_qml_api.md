@@ -218,6 +218,58 @@ Map {
 
   <a href="/images/qt-hill-shades.png"><img src="/images/qt-hill-shades.png" width="460" alt="OSM Scout map with OpenMapSurfer hill shades overlay"/></a>
 
+### QML overlay
+
+There is also possible to use QML Canvas type for overlay.
+It is easy for proof of concept and may be suitable for some usecases.
+
+```qml
+Map {
+  id: map
+
+  Canvas {
+    id: mapCanvas
+    anchors.fill: parent
+
+    Connections {
+      target: map
+      onViewChanged: {
+          mapCanvas.requestPaint();
+      }
+    }
+
+    onPaint: {
+      try{
+        var ctx = getContext("2d");
+
+        ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "blue";
+        ctx.fillStyle = Qt.rgba(0, 0, 0.8, 0.2);
+
+        var p1 = map.screenPosition(50.4253, 14.5602);
+        var p2 = map.screenPosition(50.4099, 14.5816);
+        var p3 = map.screenPosition(50.4304, 14.6022);
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.lineTo(p3.x, p3.y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.stroke();
+      }catch(e){
+        console.log("error: "+e);
+      }
+    }
+  }
+}
+```
+
+<a href="/images/qt-canvas-overlay.png"><img src="/images/qt-canvas-overlay.png" width="460" alt="OSM Scout map with QML Canvas overlay"/></a>
+
 ## Location info
 
 `LocationInfoModel` provides description for place on map based on nearest POI object 
