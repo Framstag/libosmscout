@@ -1911,12 +1911,14 @@ namespace osmscout {
       bool oneway = accessValue ? accessValue->IsOneway() : false;
 
       uint8_t laneCount;
-      std::list<std::string> laneTurns;
+      std::vector<std::string> laneTurns;
       LanesFeatureValue *lanesValue=lanesReader->second->GetValue(way->GetFeatureValueBuffer());
       if (lanesValue!=nullptr) {
         laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
         std::string turns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();;
-        laneTurns=SplitString(turns, "|");
+        std::list<std::string> turnList=SplitString(turns, "|", laneCount);
+        laneTurns.reserve(turnList.size());
+        laneTurns.insert(laneTurns.begin(), turnList.begin(), turnList.end());
       } else {
         // default lane count by object type
         if (oneway) {

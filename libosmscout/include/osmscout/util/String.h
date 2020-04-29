@@ -307,9 +307,11 @@ namespace osmscout {
    * \note when stringList is empty, result is empty list
    * \note separator must not be empty
    * \note when string ends with separator, last (empty) element is omited
+   * \note when maxSize is negative, list will contains all elements
    */
   extern OSMSCOUT_API std::list<std::string> SplitString(const std::string& stringList,
-                                                         const std::string& separator);
+                                                         const std::string& separator,
+                                                         int maxSize=-1);
 
 
   /**

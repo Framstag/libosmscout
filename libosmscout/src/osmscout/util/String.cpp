@@ -260,13 +260,14 @@ namespace osmscout {
   }
 
   extern OSMSCOUT_API std::list<std::string> SplitString(const std::string& stringList,
-                                                         const std::string& separator)
+                                                         const std::string& separator,
+                                                         int maxSize)
   {
     assert(!separator.empty());
 
     std::string remaining=stringList;
     std::list<std::string> result;
-    while (!remaining.empty()) {
+    while (!remaining.empty() && (maxSize < 0 || result.size() < (size_t)maxSize)) {
       std::string::size_type pos = remaining.find(separator);
 
       if (pos == std::string::npos) {

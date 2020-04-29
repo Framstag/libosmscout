@@ -587,13 +587,14 @@ namespace osmscout {
     {
     private:
       bool oneway{false};
-      uint8_t laneCount{1}; // in our direction
-      std::list<std::string> laneTurns;
+      uint8_t laneCount{1}; // in our direction, not sum on way
+      std::vector<std::string> laneTurns; // turns in lanes from left one (drivers view)
+                                          // vector size may be less than laneCount, even empty
 
     public:
       LaneDescription(bool oneway,
                       uint8_t laneCount,
-                      const std::list<std::string> &laneTurns);
+                      const std::vector<std::string> &laneTurns);
 
       std::string GetDebugString() const override;
     };
