@@ -204,7 +204,7 @@ namespace osmscout {
   {
   private:
       TagId tagShortName;
-      
+
   public:
     /** Name of this feature */
     static const char* const NAME;
@@ -2008,7 +2008,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    OperatorFeatureValue& operator=(const FeatureValue& other);
+    OperatorFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -2077,7 +2077,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    NetworkFeatureValue& operator=(const FeatureValue& other);
+    NetworkFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
