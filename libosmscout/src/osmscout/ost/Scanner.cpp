@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 58;
-	noSym = 58;
+	maxT = 60;
+	noSym = 60;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 106; ++i) start.set(i, 1);
@@ -193,21 +193,23 @@ void Scanner::Init() {
 	keywords.set("WAY", 40);
 	keywords.set("AREA", 41);
 	keywords.set("RELATION", 42);
-	keywords.set("LOCATION", 43);
-	keywords.set("ADMIN_REGION", 44);
-	keywords.set("ADDRESS", 45);
-	keywords.set("POI", 46);
-	keywords.set("OPTIMIZE_LOW_ZOOM", 47);
-	keywords.set("MULTIPOLYGON", 48);
-	keywords.set("PIN_WAY", 49);
-	keywords.set("MERGE_AREAS", 50);
-	keywords.set("IGNORESEALAND", 51);
-	keywords.set("PATH", 52);
-	keywords.set("FOOT", 53);
-	keywords.set("BICYCLE", 54);
-	keywords.set("CAR", 55);
-	keywords.set("LANES", 56);
-	keywords.set("GROUP", 57);
+	keywords.set("MULTIPOLYGON", 43);
+	keywords.set("ROUTE_MASTER", 44);
+	keywords.set("ROUTE", 45);
+	keywords.set("LOCATION", 46);
+	keywords.set("ADMIN_REGION", 47);
+	keywords.set("ADDRESS", 48);
+	keywords.set("POI", 49);
+	keywords.set("OPTIMIZE_LOW_ZOOM", 50);
+	keywords.set("PIN_WAY", 51);
+	keywords.set("MERGE_AREAS", 52);
+	keywords.set("IGNORESEALAND", 53);
+	keywords.set("PATH", 54);
+	keywords.set("FOOT", 55);
+	keywords.set("BICYCLE", 56);
+	keywords.set("CAR", 57);
+	keywords.set("LANES", 58);
+	keywords.set("GROUP", 59);
 
 
   tvalLength = 128;

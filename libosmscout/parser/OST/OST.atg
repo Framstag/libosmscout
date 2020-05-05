@@ -190,6 +190,10 @@ PRODUCTIONS
                 ]
 
                 [
+                  SPECIALTYPE<*typeInfo>
+                ]
+
+                [
                   TYPEOPTIONS<*typeInfo>
                 ]
 
@@ -499,6 +503,13 @@ PRODUCTIONS
                 .)
                 .
 
+  SPECIALTYPE<TypeInfo& typeInfo>
+              =
+                 "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(); .)
+               | "ROUTE_MASTER"      (. typeInfo.SetRouteMaster(); .)
+               | "ROUTE"             (. typeInfo.SetRoute(); .)
+               .
+
   TYPEOPTIONS<TypeInfo& typeInfo>
               = TYPEOPTION<typeInfo>
                 {
@@ -507,13 +518,13 @@ PRODUCTIONS
                 .
 
   TYPEOPTION<TypeInfo& typeInfo>
-              =  PATH<typeInfo>                                               // TODO: Only valid for WAY and AREA
+              =
+                 PATH<typeInfo>                                               // TODO: Only valid for WAY and AREA
                | "LOCATION"          (. typeInfo.SetIndexAsLocation(true); .) // TODO: Only valid for WAY
                | "ADMIN_REGION"      (. typeInfo.SetIndexAsRegion(true); .)   // TODO: Only valid for AREA
                | "ADDRESS"           (. typeInfo.SetIndexAsAddress(true); .)  // TODO: Only valid for NODE and AREA
                | "POI"               (. typeInfo.SetIndexAsPOI(true); .)      // TODO: Only valid for NODE and AREA
                | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .) // TODO: Only valid for WAY AND AREA
-               | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)    // TODO: Only valid for AREA
                | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)          // TODO: Only valid for WAY
                | "MERGE_AREAS"       (. typeInfo.SetMergeAreas(true); .)      // TODO: Only valid for AREA
                | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)

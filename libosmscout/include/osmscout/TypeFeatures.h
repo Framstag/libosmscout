@@ -1969,6 +1969,148 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
+
+  class OSMSCOUT_API OperatorFeatureValue : public FeatureValue
+  {
+  private:
+    std::string op;
+
+  public:
+    inline OperatorFeatureValue()
+    {
+      // no code
+    }
+
+    inline explicit OperatorFeatureValue(const std::string& op)
+      : op(op)
+    {
+      // no code
+    }
+
+    inline void SetOperator(const std::string& op)
+    {
+      this->op=op;
+    }
+
+    inline std::string GetOperator() const
+    {
+      return op;
+    }
+
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    {
+      return op;
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    OperatorFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API OperatorFeature : public Feature
+  {
+  private:
+    TagId tagOperator;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "number" label */
+    static const char* const NUMBER_LABEL;
+
+    /** Index of the 'number' label */
+    static const size_t      NUMBER_LABEL_INDEX;
+
+  public:
+    OperatorFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
+
+  class OSMSCOUT_API NetworkFeatureValue : public FeatureValue
+  {
+  private:
+    std::string network;
+
+  public:
+    inline NetworkFeatureValue()
+    {
+      // no code
+    }
+
+    inline explicit NetworkFeatureValue(const std::string& network)
+      : network(network)
+    {
+      // no code
+    }
+
+    inline void SetNetwork(const std::string& network)
+    {
+      this->network=network;
+    }
+
+    inline std::string GetNetwork() const
+    {
+      return network;
+    }
+
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    {
+      return network;
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    NetworkFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API NetworkFeature : public Feature
+  {
+  private:
+    TagId tagNetwork;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "number" label */
+    static const char* const NUMBER_LABEL;
+
+    /** Index of the 'number' label */
+    static const size_t      NUMBER_LABEL_INDEX;
+
+  public:
+    NetworkFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
 }
 
 #endif

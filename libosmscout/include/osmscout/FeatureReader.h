@@ -249,6 +249,8 @@ namespace osmscout {
   typedef FeatureValueReader<ConstructionYearFeature,ConstructionYearFeatureValue> ConstructionYearFeatureValueReader;
   typedef FeatureValueReader<LanesFeature,LanesFeatureValue>                       LanesFeatureValueReader;
   typedef FeatureValueReader<EleFeature,EleFeatureValue>                           EleFeatureValueReader;
+  typedef FeatureValueReader<OperatorFeature,OperatorFeatureValue>                 OperatorFeatureValueReader;
+  typedef FeatureValueReader<NetworkFeature,NetworkFeatureValue>                   NetworkFeatureValueReader;
 
   template <class F, class V>
   class FeatureLabelReader
