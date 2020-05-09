@@ -180,6 +180,15 @@ namespace osmscout {
      *    else nullptr
      */
     V* GetValue(const FeatureValueBuffer& buffer) const;
+
+    /**
+     * Returns the FeatureValue for the given FeatureValueBuffer or a defaultValue, if the feature is not set
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    Either the value from the FeatureValueBuffer or the defaultValue
+     */
+    V GetValue(const FeatureValueBuffer& buffer, const V& defaultValue) const;
   };
 
   template<class F, class V>
@@ -215,6 +224,25 @@ namespace osmscout {
   template<class F, class V>
   V* FeatureValueReader<F,V>::GetValue(const FeatureValueBuffer& buffer) const
   {
+    assert(buffer.GetType()->GetIndex()<lookupTable.size());
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
+
+    if (index!=std::numeric_limits<size_t>::max() &&
+        buffer.HasFeature(index)) {
+      FeatureValue* val=buffer.GetValue(index);
+      // Object returned from Feature::AllocateValue and V have to be the same type!
+      // But it cannot be tested in compile-time, lets do it in runtime assert at least.
+      assert(val==nullptr || dynamic_cast<V*>(val)!=nullptr);
+      return static_cast<V*>(val);
+    }
+    else {
+      return nullptr;
+    }
+  }
+
+  template<class F, class V>
+  V FeatureValueReader<F,V>::GetValue(const FeatureValueBuffer& buffer, const V& defaultValue) const
+  {
     assert(buffer.GetType()->GetIndex() < lookupTable.size());
     size_t index=lookupTable[buffer.GetType()->GetIndex()];
 
@@ -224,10 +252,10 @@ namespace osmscout {
       // Object returned from Feature::AllocateValue and V have to be the same type!
       // But it cannot be tested in compile-time, lets do it in runtime assert at least.
       assert(val == nullptr || dynamic_cast<V*>(val) != nullptr);
-      return static_cast<V*>(val);
+      return *static_cast<V*>(val);
     }
     else {
-      return nullptr;
+      return defaultValue;
     }
   }
 
