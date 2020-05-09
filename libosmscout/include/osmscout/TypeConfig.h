@@ -833,7 +833,7 @@ namespace osmscout {
 
     template<class T> const T* findValue() const
     {
-      for (auto& featureInstance :GetType()->GetFeatures()) {
+      for (const auto& featureInstance :GetType()->GetFeatures()) {
         if (HasFeature(featureInstance.GetIndex())) {
           osmscout::FeatureRef feature=featureInstance.GetFeature();
           if (feature->HasValue()) {
@@ -855,7 +855,7 @@ namespace osmscout {
   // Forward declaration
   class TypeConfig;
 
-  static const uint32_t FILE_FORMAT_VERSION=19;
+  static const uint32_t FILE_FORMAT_VERSION=20;
 
   /**
    * \ingroup type
