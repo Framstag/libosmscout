@@ -72,6 +72,9 @@
 #include <osmscout/import/GenRouteDat.h>
 #include <osmscout/import/GenIntersectionIndex.h>
 
+// Public Transport
+#include <osmscout/import/GenPTRouteDat.h>
+
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
 #include <osmscout/import/GenTextIndex.h>
 #endif
@@ -84,9 +87,9 @@ namespace osmscout {
 
   static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-  static const size_t defaultEndStep=25;
+  static const size_t defaultEndStep=26;
 #else
-  static const size_t defaultEndStep=24;
+  static const size_t defaultEndStep=25;
 #endif
 
   PreprocessorFactory::~PreprocessorFactory()
@@ -926,9 +929,11 @@ namespace osmscout {
     /* 24 */
     modules.push_back(std::make_shared<IntersectionIndexGenerator>());
 
+    /* 25 */
+    modules.push_back(std::make_shared<PTRouteDataGenerator>());
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-    /* 25 */
+    /* 26 */
     modules.push_back(std::make_shared<TextIndexGenerator>());
 #endif
   }

@@ -48,7 +48,6 @@
 
 #include <osmscout/import/PreprocessPoly.h>
 
-#include <osmscout/FeatureReader.h>
 namespace osmscout {
 
   const char* const Preprocess::RAWCOORDS_DAT="rawcoords.dat";
@@ -550,18 +549,6 @@ namespace osmscout {
                    typeConfig->GetTagRegistry(),
                    tags);
 
-    std::string name;
-
-    NameFeatureValueReader nameReader(*typeConfig);
-
-    auto value = nameReader.GetValue(relation.GetFeatureValueBuffer());
-
-    if (value)  {
-      name=value->GetName();
-    }
-
-    progress.Info("ROUTE MASTER: " + std::to_string(relation.GetId()) + " " + type->GetName() + " " + name);
-
     processed.routeMasters.push_back(std::move(relation));
   }
 
@@ -587,17 +574,6 @@ namespace osmscout {
     relation.Parse(*parameter.GetErrorReporter(),
                    typeConfig->GetTagRegistry(),
                    tags);
-
-    std::string name;
-
-    auto tagName=typeConfig->GetTagId("name");
-    auto tagNameValue=tags.find(tagName);
-
-    if (tagNameValue!=tags.end()) {
-      name=tagNameValue->second;
-    }
-
-    progress.Info("ROUTE: " + std::to_string(relation.GetId()) + " " + type->GetName() + " " + name);
 
     processed.routes.push_back(std::move(relation));
   }
