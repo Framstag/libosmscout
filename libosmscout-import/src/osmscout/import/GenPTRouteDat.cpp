@@ -88,14 +88,14 @@ namespace osmscout {
                                     const ImportParameter& parameter,
                                     Progress& progress)
   {
-    FileScanner                routeMasterScanner;
-    FileScanner                routeScanner;
-    FileScanner                nodeIdScanner;
-    FileScanner                wayIdScanner;
-    FileWriter                 routeWriter;
-    std::list<PTRouteRef>      routes;
+    FileScanner           routeMasterScanner;
+    FileScanner           routeScanner;
+    FileScanner           nodeIdScanner;
+    FileScanner           wayIdScanner;
+    FileWriter            routeWriter;
+    std::list<PTRouteRef> routes;
 
-    std::map<Id,PTRouteRef>    idRouteMasterMap;
+    std::map<Id,PTRouteRef>              idRouteMasterMap;
     std::map<ObjectOSMRef,ObjectFileRef> idMap;
 
     try {

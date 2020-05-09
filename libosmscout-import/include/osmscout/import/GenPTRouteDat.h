@@ -24,6 +24,8 @@
 
 #include <osmscout/PublicTransport.h>
 
+#include <osmscout/util/FileWriter.h>
+
 #include <osmscout/import/Import.h>
 
 namespace osmscout {
@@ -37,8 +39,6 @@ namespace osmscout {
                      const std::list<PTRouteRef>& routes);
 
   public:
-    PTRouteDataGenerator() = default;
-
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;
 

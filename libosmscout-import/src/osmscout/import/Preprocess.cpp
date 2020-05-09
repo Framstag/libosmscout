@@ -48,7 +48,6 @@
 
 #include <osmscout/import/PreprocessPoly.h>
 
-#include <osmscout/FeatureReader.h>
 namespace osmscout {
 
   const char* const Preprocess::RAWCOORDS_DAT="rawcoords.dat";
