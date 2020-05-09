@@ -23,6 +23,7 @@ osmscoutimportSrc = [
             'src/osmscout/import/GenOptimizeAreaWayIds.cpp',
             'src/osmscout/import/GenOptimizeAreasLowZoom.cpp',
             'src/osmscout/import/GenOptimizeWaysLowZoom.cpp',
+            'src/osmscout/import/GenPTRouteDat.cpp',
             'src/osmscout/import/GenRelAreaDat.cpp',
             'src/osmscout/import/GenRouteDat.cpp',
             'src/osmscout/import/GenTypeDat.cpp',

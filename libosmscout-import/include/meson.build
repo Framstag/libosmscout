@@ -26,6 +26,7 @@ osmscoutimportHeader = [
             'osmscout/import/GenOptimizeAreaWayIds.h',
             'osmscout/import/GenOptimizeAreasLowZoom.h',
             'osmscout/import/GenOptimizeWaysLowZoom.h',
+            'osmscout/import/GenPTRouteDat.h',
             'osmscout/import/GenRelAreaDat.h',
             'osmscout/import/GenRouteDat.h',
             'osmscout/import/GenTypeDat.h',
