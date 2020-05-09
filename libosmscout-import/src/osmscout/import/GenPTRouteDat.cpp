@@ -1,0 +1,144 @@
+/*
+  This source is part of the libosmscout library
+  Copyright (C) 2020  Tim Teulings
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+*/
+
+#include <osmscout/import/GenPTRouteDat.h>
+
+#include <osmscout/import/Preprocess.h>
+
+#include <osmscout/FeatureReader.h>
+
+#include <osmscout/util/File.h>
+
+namespace osmscout {
+
+  void PTRouteDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
+                                            ImportModuleDescription& description) const
+  {
+    description.SetName("PTRouteDataGenerator");
+    description.SetDescription("Generate public transport route data");
+
+    description.AddRequiredFile(Preprocess::RAWROUTEMASTER_DAT);
+    description.AddRequiredFile(Preprocess::RAWROUTE_DAT);
+
+    //description.AddProvidedFile(RoutingService::FILENAME_INTERSECTIONS_DAT);
+  }
+
+  bool PTRouteDataGenerator::Import(const TypeConfigRef& typeConfig,
+                                    const ImportParameter& parameter,
+                                    Progress& progress)
+  {
+    FileScanner routeMasterScanner;
+    FileScanner routeScanner;
+
+    try {
+      progress.SetAction("Scanning route masters");
+
+      uint32_t routeMasterCount=0;
+      uint32_t routeCount=0;
+      auto     defaultName=NameFeatureValue("");
+      auto     defaultRef=RefFeatureValue("");
+      auto     defaultOperatorName=OperatorFeatureValue("");
+      auto     defaultNetworkName=NetworkFeatureValue("");
+
+      routeMasterScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                              Preprocess::RAWROUTEMASTER_DAT),
+                              FileScanner::Sequential,
+                              true);
+
+      routeMasterScanner.Read(routeMasterCount);
+
+      for (uint32_t m=1; m<=routeMasterCount; m++) {
+        progress.SetProgress(m,routeMasterCount);
+
+        RawRelation rawRel;
+
+        rawRel.Read(*typeConfig,
+                    routeMasterScanner);
+
+        NameFeatureValueReader     nameReader(*typeConfig);
+        RefFeatureValueReader      refReader(*typeConfig);
+        OperatorFeatureValueReader operatorReader(*typeConfig);
+        NetworkFeatureValueReader  networkReader(*typeConfig);
+
+        std::string name=nameReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultName).GetName();
+        std::string ref=refReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultRef).GetRef();
+        std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
+        std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
+
+        progress.Info("ROUTE MASTER: "+std::to_string(rawRel.GetId())+" "+
+                      rawRel.GetType()->GetName()+" "+
+                      "\""+ref+"\" "+
+                      "\""+name+"\" "+
+                      "\""+networkName+"\" "+
+                      "\""+operatorName+"\"");
+
+      }
+
+      routeMasterScanner.Close();
+
+      progress.SetAction("Scanning routes");
+
+      routeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        Preprocess::RAWROUTE_DAT),
+                        FileScanner::Sequential,
+                        true);
+
+      routeScanner.Read(routeCount);
+
+      for (uint32_t r=1; r<=routeCount; r++) {
+        progress.SetProgress(r,routeCount);
+
+        RawRelation rawRel;
+
+        rawRel.Read(*typeConfig,
+                    routeScanner);
+
+        NameFeatureValueReader     nameReader(*typeConfig);
+        RefFeatureValueReader      refReader(*typeConfig);
+        OperatorFeatureValueReader operatorReader(*typeConfig);
+        NetworkFeatureValueReader  networkReader(*typeConfig);
+
+        std::string name=nameReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultName).GetName();
+        std::string ref=refReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultRef).GetRef();
+        std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
+        std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
+
+        progress.Info("ROUTE: "+std::to_string(rawRel.GetId())+" "+
+                      rawRel.GetType()->GetName()+" "+
+                      "\""+ref+"\" "+
+                      "\""+name+"\" "+
+                      "\""+networkName+"\" "+
+                      "\""+operatorName+"\"");
+
+      }
+
+      routeScanner.Close();
+    }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
+
+      routeScanner.CloseFailsafe();
+      routeMasterScanner.CloseFailsafe();
+
+      return false;
+    }
+
+    return true;
+  }
+}
