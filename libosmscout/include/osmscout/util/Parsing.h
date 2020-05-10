@@ -22,7 +22,7 @@
 
 #include <osmscout/CoreImportExport.h>
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace osmscout {
 

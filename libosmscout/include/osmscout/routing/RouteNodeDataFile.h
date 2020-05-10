@@ -54,7 +54,7 @@ namespace osmscout {
     };
 
   private:
-    typedef Cache<Id,IndexPage> ValueCache;
+    using ValueCache = Cache<Id, IndexPage>;
 
   private:
     std::string                datafile;        //!< Basename part of the data file name

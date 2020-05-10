@@ -120,7 +120,7 @@ namespace osmscout {
      */
     std::string GetDisplayText() const;
 
-    inline std::ostream& operator<<(std::ostream& stream)
+    inline std::ostream& operator<<(std::ostream& stream) const
     {
       stream << GetDisplayText();
       return stream;

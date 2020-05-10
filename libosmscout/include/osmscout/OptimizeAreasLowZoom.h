@@ -112,7 +112,7 @@ namespace osmscout {
                   TypeInfoSet& loadedAreaTypes) const;
   };
 
-  typedef std::shared_ptr<OptimizeAreasLowZoom> OptimizeAreasLowZoomRef;
+  using OptimizeAreasLowZoomRef = std::shared_ptr<OptimizeAreasLowZoom>;
 }
 
 #endif

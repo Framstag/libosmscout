@@ -27,6 +27,8 @@
 
 #include <osmscout/CoreImportExport.h>
 
+#include <osmscout/system/Compiler.h>
+
 namespace osmscout {
 
   class OSMSCOUT_API Progress
@@ -38,7 +40,7 @@ namespace osmscout {
     Progress();
 
   public:
-    virtual ~Progress();
+    virtual ~Progress() = default;
 
     void SetOutputDebug(bool outputDebug);
     bool OutputDebug() const;
@@ -55,10 +57,11 @@ namespace osmscout {
     virtual void Error(const std::string& text);
   };
 
-  class OSMSCOUT_API SilentProgress : public Progress
+  class OSMSCOUT_API SilentProgress CLASS_FINAL : public Progress
   {
-  public:
-    virtual ~SilentProgress() override;
+    public:
+    SilentProgress() = default;
+    ~SilentProgress() override;
   };
 
   class OSMSCOUT_API ConsoleProgress : public Progress
@@ -67,6 +70,8 @@ namespace osmscout {
     std::time_t lastProgressDump;
 
   public:
+    ConsoleProgress() = default;
+
     void SetStep(const std::string& step) override;
     void SetAction(const std::string& action) override;
     void SetProgress(double current, double total) override;

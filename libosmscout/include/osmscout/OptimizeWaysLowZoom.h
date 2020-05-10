@@ -108,7 +108,7 @@ namespace osmscout {
                  TypeInfoSet& loadedWayTypes) const;
   };
 
-  typedef std::shared_ptr<OptimizeWaysLowZoom> OptimizeWaysLowZoomRef;
+  using OptimizeWaysLowZoomRef = std::shared_ptr<OptimizeWaysLowZoom>;
 }
 
 #endif

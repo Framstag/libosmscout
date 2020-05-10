@@ -26,7 +26,7 @@
 
 namespace osmscout{
 
-  typedef uint32_t DatabaseId;
+  using DatabaseId = uint32_t;
 
   /**
    * \ingroup Routing
@@ -36,8 +36,8 @@ namespace osmscout{
    */
   struct DBId
   {
-    DatabaseId database{0};
-    Id         id{0};
+    DatabaseId database=0; // NOLINT
+    Id         id=0; // NOLINT
 
     DBId() = default;
     DBId(const DBId &) = default;
@@ -94,20 +94,11 @@ namespace osmscout{
    */
   struct DBFileOffset
   {
-    DatabaseId database;
-    FileOffset offset;
+    DatabaseId database=0; // NOLINT
+    FileOffset offset=0; // NOLINT
 
-    DBFileOffset()
-    : database(0),
-      offset(0)
-    {
-    }
-
-    DBFileOffset(const DBFileOffset &o)
-    : database(o.database),
-      offset(o.offset)
-    {
-    }
+    DBFileOffset() = default;
+    DBFileOffset(const DBFileOffset &o) = default;
 
     DBFileOffset(DatabaseId database,
                  FileOffset offset)
@@ -140,17 +131,7 @@ namespace osmscout{
       return offset<other.offset;
     }
 
-    DBFileOffset& operator=(const DBFileOffset& other)
-    {
-      if(&other==this) {
-        return *this;
-      }
-
-      this->database=other.database;
-      this->offset=other.offset;
-
-      return *this;
-    }
+    DBFileOffset& operator=(const DBFileOffset& other) = default;
   };
 
   inline std::ostream& operator<<(std::ostream &stream,const DBFileOffset &o)

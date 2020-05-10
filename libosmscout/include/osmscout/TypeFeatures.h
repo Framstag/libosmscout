@@ -35,10 +35,7 @@ namespace osmscout {
     std::string name;
 
   public:
-    inline NameFeatureValue()
-    {
-      // no code
-    }
+    NameFeatureValue() = default;
 
     inline explicit NameFeatureValue(const std::string& name)
     : name(name)
@@ -103,10 +100,7 @@ namespace osmscout {
     std::string nameAlt;
 
   public:
-    inline NameAltFeatureValue()
-    {
-      // no code
-    }
+    NameAltFeatureValue() = default;
 
     inline explicit NameAltFeatureValue(const std::string& nameAlt)
     : nameAlt(nameAlt)
@@ -171,10 +165,7 @@ namespace osmscout {
     std::string ref;
 
   public:
-    inline RefFeatureValue()
-    {
-      // no code
-    }
+    RefFeatureValue() = default;
 
     inline explicit RefFeatureValue(const std::string& ref)
     : ref(ref)
@@ -240,10 +231,7 @@ namespace osmscout {
     std::string location;
 
   public:
-    inline LocationFeatureValue()
-    {
-      // no code
-    }
+    LocationFeatureValue() = default;
 
     inline explicit LocationFeatureValue(const std::string& location)
     : location(location)
@@ -318,10 +306,7 @@ namespace osmscout {
     std::string address;
 
   public:
-    inline AddressFeatureValue()
-    {
-      // no code
-    }
+    AddressFeatureValue() = default;
 
     inline explicit AddressFeatureValue(const std::string& address)
     : address(address)
@@ -400,14 +385,10 @@ namespace osmscout {
     };
 
   private:
-    uint8_t access;
+    uint8_t access=0;
 
   public:
-    inline AccessFeatureValue()
-    : access(0)
-    {
-
-    }
+    AccessFeatureValue() = default;
 
     inline AccessFeatureValue(const AccessFeatureValue& other)
     : access(other.access)
@@ -426,7 +407,7 @@ namespace osmscout {
       this->access=access;
     }
 
-    inline uint8_t GetAccess()
+    inline uint8_t GetAccess() const
     {
       return access;
     }
@@ -649,14 +630,10 @@ namespace osmscout {
     };
 
   private:
-    uint8_t access;
+    uint8_t access=0;
 
   public:
-    inline AccessRestrictedFeatureValue()
-    : access(0)
-    {
-      // no code
-    }
+    AccessRestrictedFeatureValue() = default;
 
     inline explicit AccessRestrictedFeatureValue(uint8_t access)
     : access(access)
@@ -669,7 +646,7 @@ namespace osmscout {
       this->access=access;
     }
 
-    inline uint8_t GetAccess()
+    inline uint8_t GetAccess() const
     {
       return access;
     }
@@ -773,14 +750,10 @@ namespace osmscout {
   class OSMSCOUT_API LayerFeatureValue : public FeatureValue
   {
   private:
-    int8_t layer;
+    int8_t layer=0;
 
   public:
-    inline LayerFeatureValue()
-    : layer(0)
-    {
-
-    }
+    LayerFeatureValue() = default;
 
     inline explicit LayerFeatureValue(int8_t layer)
     : layer(layer)
@@ -833,14 +806,10 @@ namespace osmscout {
   class OSMSCOUT_API WidthFeatureValue : public FeatureValue
   {
   private:
-    uint8_t width;
+    uint8_t width=0;
 
   public:
-    inline WidthFeatureValue()
-    : width(0)
-    {
-
-    }
+    WidthFeatureValue() = default;
 
     inline explicit WidthFeatureValue(uint8_t width)
     : width(width)
@@ -893,14 +862,10 @@ namespace osmscout {
   class OSMSCOUT_API MaxSpeedFeatureValue : public FeatureValue
   {
   private:
-    uint8_t maxSpeed;
+    uint8_t maxSpeed=0;
 
   public:
-    inline MaxSpeedFeatureValue()
-    : maxSpeed(0)
-    {
-
-    }
+    MaxSpeedFeatureValue() = default;
 
     inline explicit MaxSpeedFeatureValue(uint8_t maxSpeed)
     : maxSpeed(maxSpeed)
@@ -963,14 +928,10 @@ namespace osmscout {
   class OSMSCOUT_API GradeFeatureValue : public FeatureValue
   {
   private:
-    uint8_t grade;
+    uint8_t grade=0;
 
   public:
-    inline GradeFeatureValue()
-    : grade(0)
-    {
-
-    }
+    GradeFeatureValue() = default;
 
     inline explicit GradeFeatureValue(uint8_t grade)
     : grade(grade)
@@ -1024,15 +985,11 @@ namespace osmscout {
   class OSMSCOUT_API AdminLevelFeatureValue : public FeatureValue
   {
   private:
-    uint8_t     adminLevel;
+    uint8_t     adminLevel=0;
     std::string isIn;
 
   public:
-    inline AdminLevelFeatureValue()
-    : adminLevel(0)
-    {
-      // no code
-    }
+    AdminLevelFeatureValue() = default;
 
     inline AdminLevelFeatureValue(uint8_t adminLevel,
                                   const std::string& isIn)
@@ -1101,11 +1058,7 @@ namespace osmscout {
     std::string postalCode;
 
   public:
-    inline PostalCodeFeatureValue()
-    : postalCode("")
-    {
-
-    }
+    PostalCodeFeatureValue() = default;
 
     inline explicit PostalCodeFeatureValue(const std::string& postalCode)
     : postalCode(postalCode)
@@ -1260,14 +1213,10 @@ namespace osmscout {
   class OSMSCOUT_API EleFeatureValue : public FeatureValue
   {
   private:
-    uint32_t ele;
+    uint32_t ele=0;
 
   public:
-    inline EleFeatureValue()
-    : ele(0)
-    {
-
-    }
+    EleFeatureValue() = default;
 
     inline explicit EleFeatureValue(uint32_t ele)
     : ele(ele)
@@ -1344,10 +1293,7 @@ namespace osmscout {
     std::string destination;
 
   public:
-    inline DestinationFeatureValue()
-    {
-      // no code
-    }
+    DestinationFeatureValue() = default;
 
     inline explicit DestinationFeatureValue(const std::string& destination)
     : destination(destination)
@@ -1439,10 +1385,7 @@ namespace osmscout {
     std::string website;
 
   public:
-    inline WebsiteFeatureValue()
-    {
-      // no code
-    }
+    WebsiteFeatureValue() = default;
 
     inline explicit WebsiteFeatureValue(const std::string& website)
     : website(website)
@@ -1512,10 +1455,7 @@ namespace osmscout {
     std::string phone;
 
   public:
-    inline PhoneFeatureValue()
-    {
-      // no code
-    }
+    PhoneFeatureValue() = default;
 
     inline explicit PhoneFeatureValue(const std::string& phone)
     : phone(phone)
@@ -1585,10 +1525,7 @@ namespace osmscout {
     std::string isIn;
 
   public:
-    inline IsInFeatureValue()
-    {
-      // no code
-    }
+    IsInFeatureValue() = default;
 
     inline explicit IsInFeatureValue(const std::string& isIn)
       : isIn(isIn)
@@ -1641,14 +1578,11 @@ namespace osmscout {
   class OSMSCOUT_API ConstructionYearFeatureValue : public FeatureValue
   {
   private:
-    int startYear;
-    int endYear;
+    int startYear=0;
+    int endYear=0;
 
   public:
-    inline ConstructionYearFeatureValue()
-    {
-      // no code
-    }
+    ConstructionYearFeatureValue() = default;
 
     inline ConstructionYearFeatureValue(int startYear, int endYear)
       : startYear(startYear),
@@ -1740,12 +1674,10 @@ namespace osmscout {
     };
 
   private:
-    uint8_t featureSet;
+    uint8_t featureSet=0;
 
   public:
-    inline SidewayFeatureValue()
-    {
-    }
+    SidewayFeatureValue() = default;
 
     inline bool IsFlagSet(size_t flagIndex) const override
     {
@@ -1838,17 +1770,14 @@ namespace osmscout {
   {
   private:
 
-    uint8_t     lanes;              //!< First two bits reserved, 3 bit for number of lanes in each direction
+    uint8_t     lanes=0;              //!< First two bits reserved, 3 bit for number of lanes in each direction
     std::string turnForward;
     std::string turnBackward;
     std::string destinationForward;
     std::string destinationBackward;
 
   public:
-    inline LanesFeatureValue()
-      : lanes(0)
-    {
-    }
+    LanesFeatureValue() = default;
 
     inline explicit LanesFeatureValue(uint8_t lanes)
       : lanes(lanes)

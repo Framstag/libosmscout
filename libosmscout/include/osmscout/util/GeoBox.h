@@ -53,14 +53,7 @@ namespace osmscout {
     /**
      * Copy-Constructor
      */
-    inline GeoBox(const GeoBox& other)
-    : minCoord(other.minCoord),
-      maxCoord(other.maxCoord),
-      valid(other.valid)
-    {
-      // no code
-    }
-
+    GeoBox(const GeoBox& other) = default;
 
     /**
      * Initialize the GeoBox based on the given coordinates. The two Coordinates
@@ -294,14 +287,7 @@ namespace osmscout {
     /**
      * Assign the value of other
      */
-    inline GeoBox& operator=(const GeoBox& other)
-    {
-      this->minCoord=other.minCoord;
-      this->maxCoord=other.maxCoord;
-      this->valid=other.valid;
-
-      return *this;
-    }
+    GeoBox& operator=(const GeoBox& other) = default;
 
     /**
      * Return an GeoBox based on the center and the radius [meters] of a circle around the center.

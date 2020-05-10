@@ -36,9 +36,9 @@
 
 namespace osmscout {
 
-  typedef uint16_t TagId;
+  using TagId = uint16_t;
 
-  typedef std::unordered_map<TagId,std::string> TagMap;
+  using TagMap = std::unordered_map<TagId, std::string>;
 
   /**
    * \ingroup type
@@ -65,7 +65,7 @@ namespace osmscout {
    *
    * Reference counted reference to a tag condition
    */
-  typedef std::shared_ptr<TagCondition> TagConditionRef;
+  using TagConditionRef = std::shared_ptr<TagCondition>;
 
   /**
    * \ingroup type
@@ -117,7 +117,7 @@ namespace osmscout {
    *
    * Reference counted reference to a tag condition
    */
-  typedef std::shared_ptr<TagBoolCondition> TagBoolConditionRef;
+  using TagBoolConditionRef = std::shared_ptr<TagBoolCondition>;
 
   /**
    * \ingroup type
@@ -195,7 +195,7 @@ namespace osmscout {
    *
    * Reference counted reference to a tag condition
    */
-  typedef std::shared_ptr<TagIsInCondition> TagIsInConditionRef;
+  using TagIsInConditionRef = std::shared_ptr<TagIsInCondition>;
 
   /**
    * \ingroup type

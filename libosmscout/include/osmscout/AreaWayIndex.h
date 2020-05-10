@@ -102,7 +102,7 @@ namespace osmscout {
                     TypeInfoSet& loadedTypes) const;
   };
 
-  typedef std::shared_ptr<AreaWayIndex> AreaWayIndexRef;
+  using AreaWayIndexRef = std::shared_ptr<AreaWayIndex>;
 }
 
 #endif

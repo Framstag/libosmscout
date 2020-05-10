@@ -68,11 +68,6 @@ namespace osmscout {
     return true;
   }
 
-  RoutePostprocessor::DistanceAndTimePostprocessor::DistanceAndTimePostprocessor()
-  {
-    // no code
-  }
-
   bool RoutePostprocessor::DistanceAndTimePostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                                  RouteDescription& description)
   {
@@ -155,11 +150,6 @@ namespace osmscout {
     return true;
   }
 
-  RoutePostprocessor::WayNamePostprocessor::WayNamePostprocessor()
-  {
-    // no code
-  }
-
   bool RoutePostprocessor::WayNamePostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                          RouteDescription& description)
   {
@@ -210,11 +200,6 @@ namespace osmscout {
     return true;
   }
 
-  RoutePostprocessor::WayTypePostprocessor::WayTypePostprocessor()
-  {
-    // no code
-  }
-
   bool RoutePostprocessor::WayTypePostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                          RouteDescription& description)
   {
@@ -245,11 +230,6 @@ namespace osmscout {
     }
 
     return true;
-  }
-
-  RoutePostprocessor::CrossingWaysPostprocessor::CrossingWaysPostprocessor()
-  {
-    // no code
   }
 
   void RoutePostprocessor::CrossingWaysPostprocessor::AddCrossingWaysDescriptions(const RoutePostprocessor& postprocessor,
@@ -384,11 +364,6 @@ namespace osmscout {
   const Distance RoutePostprocessor::DirectionPostprocessor::curveMaxDistance=Distance::Of<Kilometer>(0.300);
   const double RoutePostprocessor::DirectionPostprocessor::curveMinAngle=5.0;
 
-  RoutePostprocessor::DirectionPostprocessor::DirectionPostprocessor()
-  {
-    // no code
-  }
-
   bool RoutePostprocessor::DirectionPostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                            RouteDescription& description)
   {
@@ -483,11 +458,6 @@ namespace osmscout {
     return true;
   }
 
-  RoutePostprocessor::MotorwayJunctionPostprocessor::MotorwayJunctionPostprocessor()
-  {
-    // no code
-  }
-
   bool RoutePostprocessor::MotorwayJunctionPostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                                   RouteDescription& description)
   {
@@ -554,11 +524,6 @@ namespace osmscout {
      }
 
      return true;
-  }
-
-  RoutePostprocessor::DestinationPostprocessor::DestinationPostprocessor()
-  {
-    // no code
   }
 
   bool RoutePostprocessor::DestinationPostprocessor::Process(const RoutePostprocessor& postprocessor,

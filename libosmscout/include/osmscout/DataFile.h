@@ -593,10 +593,10 @@ namespace osmscout {
   class IndexedDataFile : public DataFile<N>
   {
   public:
-    typedef std::shared_ptr<N> ValueType;
+    using ValueType = std::shared_ptr<N>;
 
   private:
-    typedef NumericIndex<I> DataIndex;
+    using DataIndex = NumericIndex<I>;
 
   private:
     DataIndex index;

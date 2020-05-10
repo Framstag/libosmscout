@@ -36,10 +36,10 @@ namespace osmscout {
     static const char* const COORD_DAT;
 
   private:
-    typedef std::unordered_map<PageId,FileOffset> PageIdFileOffsetMap;
+    using PageIdFileOffsetMap = std::unordered_map<PageId, FileOffset>;
 
   public:
-    typedef std::unordered_map<OSMId,Point> ResultMap;
+    using ResultMap = std::unordered_map<OSMId, Point>;
 
   private:
     bool                isOpen;             //!< If true,the data file is opened

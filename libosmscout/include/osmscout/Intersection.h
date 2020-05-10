@@ -62,7 +62,7 @@ namespace osmscout {
               FileScanner& scanner);
   };
 
-  typedef std::shared_ptr<Intersection> JunctionRef;
+  using JunctionRef = std::shared_ptr<Intersection>;
 }
 
 #endif

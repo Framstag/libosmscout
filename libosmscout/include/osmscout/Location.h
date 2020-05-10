@@ -42,7 +42,7 @@ namespace osmscout {
     FileOffset  objectOffset; //!< Offset of the postal area data
   };
 
-  typedef std::shared_ptr<PostalArea> PostalAreaRef;
+  using PostalAreaRef = std::shared_ptr<PostalArea>;
 
   /**
    \ingroup Location
@@ -80,7 +80,7 @@ namespace osmscout {
     bool Match(const ObjectFileRef& object) const;
   };
 
-  typedef std::shared_ptr<AdminRegion> AdminRegionRef;
+  using AdminRegionRef = std::shared_ptr<AdminRegion>;
 
   /**
    * \ingroup Location
@@ -120,7 +120,7 @@ namespace osmscout {
     ObjectFileRef object;       //!< Reference to the object
   };
 
-  typedef std::shared_ptr<POI> POIRef;
+  using POIRef = std::shared_ptr<POI>;
 
   /**
    * \ingroup Location
@@ -153,7 +153,7 @@ namespace osmscout {
     std::vector<ObjectFileRef> objects;         //!< List of objects that build up this location
   };
 
-  typedef std::shared_ptr<Location> LocationRef;
+  using LocationRef = std::shared_ptr<Location>;
 
   /**
    * \ingroup Location
@@ -188,7 +188,7 @@ namespace osmscout {
     ObjectFileRef object;         //!< Object that represents the address
   };
 
-  typedef std::shared_ptr<Address> AddressRef;
+  using AddressRef = std::shared_ptr<Address>;
 
   /**
    * \ingroup Location

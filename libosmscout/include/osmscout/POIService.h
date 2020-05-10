@@ -67,7 +67,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to a POI service instance
-  typedef std::shared_ptr<POIService> POIServiceRef;
+  using POIServiceRef = std::shared_ptr<POIService>;
 }
 
 #endif

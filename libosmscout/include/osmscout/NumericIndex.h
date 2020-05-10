@@ -60,9 +60,9 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<Page>         PageRef;
-    typedef Cache<N,PageRef>              PageCache;
-    typedef std::unordered_map<N,PageRef> PageSimpleCache;
+    using PageRef         = std::shared_ptr<Page>;
+    using PageCache       = Cache<N, PageRef>;
+    using PageSimpleCache = std::unordered_map<N, PageRef>;
 
     /**
       Returns the size of a individual cache entry

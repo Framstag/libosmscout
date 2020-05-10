@@ -32,7 +32,7 @@ namespace osmscout {
   class OSMSCOUT_API Bearing CLASS_FINAL
   {
   private:
-    double radians; //!< bearing in radians, normalised to [0..2*M_PI)
+    double radians=0.0; //!< bearing in radians, normalised to [0..2*M_PI)
 
   private:
     explicit inline Bearing(double radians):
@@ -40,27 +40,18 @@ namespace osmscout {
     { }
 
   public:
+    Bearing() = default;
 
-    inline Bearing():
-        radians(0.0)
-    { }
+    Bearing(const Bearing &d) = default;
 
-    inline Bearing(const Bearing &d):
-        radians(d.radians)
-    { }
-
-    inline Bearing& operator=(const Bearing &d)
-    {
-      radians=d.radians;
-      return *this;
-    }
+    inline Bearing& operator=(const Bearing &d) = default;
 
     inline Bearing(Bearing &&d) noexcept
     {
       std::swap(radians, d.radians);
     }
 
-    inline Bearing &operator=(Bearing &&d)
+    inline Bearing &operator=(Bearing &&d) noexcept
     {
       std::swap(radians, d.radians);
       return *this;
@@ -81,9 +72,6 @@ namespace osmscout {
     {
       return radians*180.0/M_PI;
     }
-
-    inline ~Bearing()
-    { }
 
     inline Bearing operator-(const Bearing &d) const
     {

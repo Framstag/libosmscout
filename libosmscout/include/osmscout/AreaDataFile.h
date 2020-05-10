@@ -40,7 +40,7 @@ namespace osmscout {
     explicit AreaDataFile(size_t cacheSize);
   };
 
-  typedef std::shared_ptr<AreaDataFile> AreaDataFileRef;
+  using AreaDataFileRef = std::shared_ptr<AreaDataFile>;
 }
 
 #endif

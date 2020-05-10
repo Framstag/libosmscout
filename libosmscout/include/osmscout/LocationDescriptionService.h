@@ -50,7 +50,7 @@ namespace osmscout {
 
   //! \ingroup Location
   //! Reference counted reference to a LocationCoordDescription instance
-  typedef std::shared_ptr<LocationCoordDescription> LocationCoordDescriptionRef;
+  using LocationCoordDescriptionRef = std::shared_ptr<LocationCoordDescription>;
 
   class OSMSCOUT_API LocationDescriptionCandicate CLASS_FINAL
   {
@@ -164,7 +164,7 @@ namespace osmscout {
 
   //! \ingroup Location
   //! Reference counted reference to a LocationAtPlaceDescription instance
-  typedef std::shared_ptr<LocationAtPlaceDescription> LocationAtPlaceDescriptionRef;
+  using LocationAtPlaceDescriptionRef = std::shared_ptr<LocationAtPlaceDescription>;
 
   /**
    * \ingroup Location
@@ -201,7 +201,7 @@ namespace osmscout {
 
   //! \ingroup Location
   //! Reference counted reference to a LocationWayDescription instance
-  typedef std::shared_ptr<LocationWayDescription> LocationWayDescriptionRef;
+  using LocationWayDescriptionRef = std::shared_ptr<LocationWayDescription>;
 
   /**
    * \ingroup Location
@@ -265,7 +265,7 @@ namespace osmscout {
 
   //! \ingroup Location
   //! Reference counted reference to a LocationCrossingDescription instance
-  typedef std::shared_ptr<LocationCrossingDescription> LocationCrossingDescriptionRef;
+  using LocationCrossingDescriptionRef = std::shared_ptr<LocationCrossingDescription>;
 
   /**
    * \ingroup Location
@@ -433,7 +433,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to a location service instance
-  typedef std::shared_ptr<LocationDescriptionService> LocationDescriptionServiceRef;
+  using LocationDescriptionServiceRef = std::shared_ptr<LocationDescriptionService>;
 }
 
 

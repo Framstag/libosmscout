@@ -157,7 +157,7 @@ namespace osmscout {
     void Write(FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<RouteNode> RouteNodeRef;
+  using RouteNodeRef = std::shared_ptr<RouteNode>;
 }
 
 #endif

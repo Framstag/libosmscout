@@ -42,8 +42,8 @@ namespace osmscout {
   private:
     FeatureValueBuffer featureValueBuffer; //!< List of features
 
-    FileOffset         fileOffset;         //!< Offset into the data file of this way
-    FileOffset         nextFileOffset;     //!< Offset after this way
+    FileOffset         fileOffset=0;         //!< Offset into the data file of this way
+    FileOffset         nextFileOffset=0;     //!< Offset after this way
 
 
   public:
@@ -58,11 +58,7 @@ namespace osmscout {
     GeoBox                      bbox;         //!< Precomputed (cache) bounding box
 
   public:
-    inline Way()
-    : fileOffset(0),nextFileOffset(0)
-    {
-      // no code
-    }
+    Way() = default;
 
     inline FileOffset GetFileOffset() const
     {
@@ -203,7 +199,7 @@ namespace osmscout {
                         FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<Way> WayRef;
+  using WayRef = std::shared_ptr<Way>;
 }
 
 #endif

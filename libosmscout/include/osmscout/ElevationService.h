@@ -95,7 +95,7 @@ public:
           }
 
           EleFeatureValue *eleValue=contoursData.reader.GetValue(contour->GetFeatureValueBuffer());
-          if (!eleValue) {
+          if (eleValue==nullptr) {
             continue;
           }
 
@@ -123,10 +123,12 @@ public:
       distance+=GetEllipsoidalDistance(a1,a2);
     }
     std::sort(result.begin(), result.end(), [](const ElevationPoint &a, const ElevationPoint &b) {
-      if (a.distance != b.distance)
+      if (a.distance != b.distance) {
         return a.distance < b.distance;
-      if (a.elevation != b.elevation)
+      }
+      if (a.elevation != b.elevation) {
         return a.elevation < b.elevation;
+      }
       return a.coord < b.coord;
     });
     return result;

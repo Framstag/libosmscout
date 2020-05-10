@@ -105,7 +105,7 @@ namespace osmscout {
   class OSMSCOUT_API Distance CLASS_FINAL
   {
   private:
-    double meters;
+    double meters=0.0;
 
   private:
     explicit inline Distance(double meters):
@@ -113,19 +113,11 @@ namespace osmscout {
     { }
 
   public:
-    inline Distance():
-      meters(0.0)
-    { }
+    Distance() = default;
 
-    inline Distance(const Distance &d):
-      meters(d.meters)
-    { }
+    inline Distance(const Distance &d) = default;
 
-    inline Distance& operator=(const Distance &d)
-    {
-      meters=d.meters;
-      return *this;
-    }
+    Distance& operator=(const Distance &d) = default;
 
     inline Distance(Distance &&d) noexcept
     {
@@ -142,9 +134,6 @@ namespace osmscout {
     {
       return meters;
     }
-
-    inline ~Distance()
-    { }
 
     inline Distance& operator+=(const Distance &d)
     {

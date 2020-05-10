@@ -88,7 +88,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<TypeDistributionDataFile> TypeDistributionDataFileRef;
+  using TypeDistributionDataFileRef = std::shared_ptr<TypeDistributionDataFile>;
 }
 
 #endif
