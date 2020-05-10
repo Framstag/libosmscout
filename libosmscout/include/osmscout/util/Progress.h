@@ -59,6 +59,7 @@ namespace osmscout {
 
   class OSMSCOUT_API SilentProgress CLASS_FINAL : public Progress
   {
+    public:
     SilentProgress() = default;
   };
 
