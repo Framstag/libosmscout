@@ -23,8 +23,7 @@
 #include <osmscout/CoreImportExport.h>
 
 #include <limits>
-
-#include <stddef.h>
+#include <cstddef>
 
 #include <osmscout/system/OSMScoutTypes.h>
 
