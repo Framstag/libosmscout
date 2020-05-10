@@ -28,8 +28,7 @@
 #include <chrono>
 #include <optional>
 
-namespace osmscout {
-namespace gpx {
+namespace osmscout::gpx {
 
 class OSMSCOUT_GPX_API TrackPoint {
 public:
@@ -69,7 +68,6 @@ public:
   std::optional<double> vdop;
   std::optional<double> pdop;
 };
-}
 }
 
 #endif //OSMSCOUT_GPX_TRACKPOINT_H

@@ -196,7 +196,7 @@ namespace osmscout {
                        FeatureValueBuffer& buffer) const = 0;
   };
 
-  typedef std::shared_ptr<Feature> FeatureRef;
+  using FeatureRef = std::shared_ptr<Feature>;
 
   // Forward declaration of TypeInfo
   class TypeInfo;

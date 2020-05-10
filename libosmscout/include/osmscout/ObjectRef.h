@@ -45,16 +45,11 @@ namespace osmscout {
   class OSMSCOUT_API ObjectOSMRef CLASS_FINAL
   {
   public:
-    OSMId      id;
-    OSMRefType type;
+    OSMId      id=0; //NOLINT
+    OSMRefType type=osmRefNone; // NOLINT
 
   public:
-    inline ObjectOSMRef()
-    : id(0),
-      type(osmRefNone)
-    {
-      // no code
-    }
+    ObjectOSMRef() = default;
 
     inline ObjectOSMRef(OSMId id,
                         OSMRefType type)
@@ -132,16 +127,11 @@ namespace osmscout {
   class OSMSCOUT_API ObjectFileRef CLASS_FINAL
   {
   public:
-    FileOffset offset;
-    RefType    type;
+    FileOffset offset=0; // NOLINT
+    RefType    type=refNone; // NOLINT
 
   public:
-    inline ObjectFileRef()
-    : offset(0),
-      type(refNone)
-    {
-      // no code
-    }
+    ObjectFileRef() = default;
 
     inline ObjectFileRef(FileOffset offset,
                          RefType type)

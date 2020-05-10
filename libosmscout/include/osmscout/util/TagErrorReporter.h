@@ -35,7 +35,7 @@ namespace osmscout {
     TagErrorReporter();
 
   public:
-    virtual inline ~TagErrorReporter(){};
+    virtual ~TagErrorReporter() = default;
 
     virtual void ReportTag(const ObjectOSMRef& object,
                            const TagMap& tags,
@@ -47,7 +47,7 @@ namespace osmscout {
   public:
     SilentTagErrorReporter();
 
-    virtual inline ~SilentTagErrorReporter(){};
+    ~SilentTagErrorReporter() override = default;
 
     void ReportTag(const ObjectOSMRef& object,
                    const TagMap& tags,

@@ -205,7 +205,7 @@ namespace osmscout {
     void DumpStatistics();
   };
 
-  typedef std::shared_ptr<LocationIndex> LocationIndexRef;
+  using LocationIndexRef = std::shared_ptr<LocationIndex>;
 }
 
 #endif

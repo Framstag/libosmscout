@@ -34,15 +34,11 @@ namespace osmscout {
   class OSMSCOUT_API Point CLASS_FINAL
   {
   private:
-    uint8_t  serial;
+    uint8_t  serial=0;
     GeoCoord coord;
 
   public:
-    inline Point()
-    : serial(0)
-    {
-      // no code
-    }
+    Point() = default;
 
     inline Point(uint8_t serial,
                  const GeoCoord& coords)

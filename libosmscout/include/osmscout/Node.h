@@ -40,17 +40,13 @@ namespace osmscout {
   private:
     FeatureValueBuffer featureValueBuffer; //!< List of features
 
-    FileOffset         fileOffset;         //!< File offset in the data file, use as unique id
-    FileOffset         nextFileOffset;     //!< Offset after this node
+    FileOffset         fileOffset=0;         //!< File offset in the data file, use as unique id
+    FileOffset         nextFileOffset=0;     //!< Offset after this node
 
     GeoCoord           coords;             //!< Coordinates of node
 
   public:
-    inline Node()
-    : fileOffset(0), nextFileOffset(0)
-    {
-      // no code
-    }
+    Node() = default;
 
     inline FileOffset GetFileOffset() const
     {
@@ -125,7 +121,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<Node> NodeRef;
+  using NodeRef = std::shared_ptr<Node>;
 }
 
 #endif

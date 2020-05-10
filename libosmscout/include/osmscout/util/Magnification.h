@@ -35,37 +35,24 @@ namespace osmscout {
   class OSMSCOUT_API MagnificationLevel CLASS_FINAL
   {
   private:
-    uint32_t level;
+    uint32_t level = 0;
 
   public:
-    inline MagnificationLevel() noexcept
-      : level(0)
-    {
-    }
+    MagnificationLevel() = default;
 
     inline explicit MagnificationLevel(uint32_t level) noexcept
       : level(level)
     {
     }
 
-    inline MagnificationLevel(const MagnificationLevel& level) noexcept
-      : level(level.level)
-    {
-    }
+    inline MagnificationLevel(const MagnificationLevel& level) = default;
 
     inline uint32_t Get() const
     {
       return level;
     }
 
-    inline MagnificationLevel& operator=(const MagnificationLevel& other)
-    {
-      if (this!=&other) {
-        this->level=other.level;
-      }
-
-      return *this;
-    }
+    inline MagnificationLevel& operator=(const MagnificationLevel& other) = default;
 
     inline MagnificationLevel& operator++()
     {
@@ -174,23 +161,13 @@ namespace osmscout {
     static MagnificationLevel magHouse;     // 20
 
   private:
-    double   magnification{};
-    uint32_t level{};
+    double   magnification=1;
+    uint32_t level=0;
 
   public:
-    inline Magnification() noexcept
-    : magnification(1),
-      level(0)
-    {
-      // no code
-    }
+    Magnification() = default;
 
-    inline Magnification(const Magnification& other) noexcept
-    : magnification(other.magnification),
-      level(other.level)
-    {
-      // no code
-    }
+    Magnification(const Magnification& other) = default;
 
     inline explicit Magnification(double magnification) noexcept
     {

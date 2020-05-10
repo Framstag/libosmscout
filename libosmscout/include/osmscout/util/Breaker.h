@@ -62,7 +62,7 @@ namespace osmscout {
     virtual void Reset() = 0;
   };
 
-  typedef std::shared_ptr<Breaker> BreakerRef;
+  using BreakerRef = std::shared_ptr<Breaker>;
 
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {

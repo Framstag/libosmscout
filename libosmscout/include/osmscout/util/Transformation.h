@@ -21,8 +21,7 @@
 */
 
 // For memcpy
-#include <string.h>
-
+#include <cstring>
 #include <vector>
 
 #include <osmscout/CoreImportExport.h>

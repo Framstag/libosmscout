@@ -101,7 +101,7 @@ namespace osmscout {
       virtual std::string GetDebugString() const = 0;
     };
 
-    typedef std::shared_ptr<Description> DescriptionRef;
+    using DescriptionRef = std::shared_ptr<Description>;
 
     /**
      * \ingroup Routing
@@ -120,7 +120,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef std::shared_ptr<StartDescription> StartDescriptionRef;
+    using StartDescriptionRef = std::shared_ptr<StartDescription>;
 
     /**
      * \ingroup Routing
@@ -139,7 +139,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef std::shared_ptr<TargetDescription> TargetDescriptionRef;
+    using TargetDescriptionRef = std::shared_ptr<TargetDescription>;
 
     /**
      * \ingroup Routing
@@ -168,7 +168,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef std::shared_ptr<NameDescription> NameDescriptionRef;
+    using NameDescriptionRef = std::shared_ptr<NameDescription>;
 
     /**
      * \ingroup Routing
@@ -197,7 +197,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<NameChangedDescription> NameChangedDescriptionRef;
+    using NameChangedDescriptionRef = std::shared_ptr<NameChangedDescription>;
 
     /**
      * \ingroup Routing
@@ -246,7 +246,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<CrossingWaysDescription> CrossingWaysDescriptionRef;
+    using CrossingWaysDescriptionRef = std::shared_ptr<CrossingWaysDescription>;
 
     /**
      * \ingroup Routing
@@ -309,7 +309,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<DirectionDescription> DirectionDescriptionRef;
+    using DirectionDescriptionRef = std::shared_ptr<DirectionDescription>;
 
     /**
      * \ingroup Routing
@@ -323,7 +323,7 @@ namespace osmscout {
       std::string GetDebugString() const override;
     };
 
-    typedef std::shared_ptr<TurnDescription> TurnDescriptionRef;
+    using TurnDescriptionRef = std::shared_ptr<TurnDescription>;
 
     /**
      * \ingroup Routing
@@ -345,7 +345,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<RoundaboutEnterDescription> RoundaboutEnterDescriptionRef;
+    using RoundaboutEnterDescriptionRef = std::shared_ptr<RoundaboutEnterDescription>;
 
     /**
      * \ingroup Routing
@@ -373,7 +373,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<RoundaboutLeaveDescription> RoundaboutLeaveDescriptionRef;
+    using RoundaboutLeaveDescriptionRef = std::shared_ptr<RoundaboutLeaveDescription>;
 
     /**
      * \ingroup Routing
@@ -395,7 +395,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<MotorwayEnterDescription> MotorwayEnterDescriptionRef;
+    using MotorwayEnterDescriptionRef = std::shared_ptr<MotorwayEnterDescription>;
 
     /**
      * \ingroup Routing
@@ -424,7 +424,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<MotorwayChangeDescription> MotorwayChangeDescriptionRef;
+    using MotorwayChangeDescriptionRef = std::shared_ptr<MotorwayChangeDescription>;
 
     /**
      * \ingroup Routing
@@ -446,7 +446,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<MotorwayLeaveDescription> MotorwayLeaveDescriptionRef;
+    using MotorwayLeaveDescriptionRef = std::shared_ptr<MotorwayLeaveDescription>;
 
     /**
      * \ingroup Routing
@@ -468,7 +468,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<MotorwayJunctionDescription> MotorwayJunctionDescriptionRef;
+    using MotorwayJunctionDescriptionRef = std::shared_ptr<MotorwayJunctionDescription>;
 
     /**
      * \ingroup Routing
@@ -487,7 +487,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef std::shared_ptr<DestinationDescription> DestinationDescriptionRef;
+    using DestinationDescriptionRef = std::shared_ptr<DestinationDescription>;
 
     /**
      * \ingroup Routing
@@ -509,7 +509,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<MaxSpeedDescription> MaxSpeedDescriptionRef;
+    using MaxSpeedDescriptionRef = std::shared_ptr<MaxSpeedDescription>;
 
     /**
      * \ingroup Routing
@@ -532,7 +532,7 @@ namespace osmscout {
       std::string GetDescription() const;
     };
 
-    typedef std::shared_ptr<TypeNameDescription> TypeNameDescriptionRef;
+    using TypeNameDescriptionRef = std::shared_ptr<TypeNameDescription>;
 
     /**
      * \ingroup Routing
@@ -575,7 +575,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<POIAtRouteDescription> POIAtRouteDescriptionRef;
+    using POIAtRouteDescriptionRef = std::shared_ptr<POIAtRouteDescription>;
 
     /**
      * \ingroup Routing
@@ -727,7 +727,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<RouteDescription> RouteDescriptionRef;
+  using RouteDescriptionRef = std::shared_ptr<RouteDescription>;
 }
 
 #endif

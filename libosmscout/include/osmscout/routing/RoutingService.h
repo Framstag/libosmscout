@@ -174,7 +174,7 @@ namespace osmscout {
   /**
    * \ingroup Routing
    */
-  typedef std::shared_ptr<RoutingProgress> RoutingProgressRef;
+  using RoutingProgressRef = std::shared_ptr<RoutingProgress>;
 
   /**
    * \ingroup Routing
@@ -267,7 +267,7 @@ namespace osmscout {
         // no code
       }
 
-      inline bool operator==(const RNode& other)
+      inline bool operator==(const RNode& other) const
       {
         return id==other.id;
       }
@@ -278,7 +278,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<RNode> RNodeRef;
+    using RNodeRef = std::shared_ptr<RNode>;
 
     struct RNodeCostCompare
     {
@@ -372,11 +372,11 @@ namespace osmscout {
       }
     };
 
-    typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
-    typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
+    using OpenList    = std::set<RNodeRef, RNodeCostCompare>;
+    using OpenListRef = std::set<RNodeRef, RNodeCostCompare>::iterator;
 
-    typedef std::unordered_map<DBId,OpenListRef>          OpenMap;
-    typedef std::unordered_set<VNode,ClosedNodeHasher>    ClosedSet;
+    using OpenMap     = std::unordered_map<DBId, OpenListRef>;
+    using ClosedSet   = std::unordered_set<VNode, ClosedNodeHasher>;
 
   public:
     //! Relative filename of the intersection data file

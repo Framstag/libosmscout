@@ -31,26 +31,26 @@ namespace osmscout {
    * \ingroup Util
    * Type to be used for OSM ids (signed numbers with 64 bit size).
    */
-  typedef int64_t  OSMId;
+  using OSMId = int64_t;
 
   /**
    * \ingroup Util
    * Type to be used for libosmscout internal ids (unsigned numbers with 64 bit
    * size).
    */
-  typedef uint64_t Id;
-  typedef uint64_t PageId;
+  using Id = uint64_t;
+  using PageId = uint64_t;
   /**
    * \ingroup Util
    * Type for describing the position of data within a file.
    */
-  typedef uint64_t FileOffset;
+  using FileOffset = uint64_t;
 
   /**
    * \ingroup Util
    * Type for describing a type of an way, area or node.
    */
-  typedef uint16_t TypeId;
+  using TypeId = uint16_t;
 
   enum Vehicle : uint8_t
   {
@@ -59,7 +59,7 @@ namespace osmscout {
     vehicleCar      = 1u << 3u
   };
 
-  typedef uint8_t VehicleMask;
+  using VehicleMask = uint8_t;
 }
 
 #endif

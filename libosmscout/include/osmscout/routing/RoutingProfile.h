@@ -94,7 +94,7 @@ namespace osmscout {
                              const Distance &distance) const = 0;
   };
 
-  typedef std::shared_ptr<RoutingProfile> RoutingProfileRef;
+  using RoutingProfileRef = std::shared_ptr<RoutingProfile>;
 
   /**
    * \ingroup Routing
@@ -230,7 +230,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<ShortestPathRoutingProfile> ShortestPathRoutingProfileRef;
+  using ShortestPathRoutingProfileRef = std::shared_ptr<ShortestPathRoutingProfile>;
 
   /**
    * \ingroup Routing
@@ -354,7 +354,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<FastestPathRoutingProfile> FastestPathRoutingProfileRef;
+  using FastestPathRoutingProfileRef = std::shared_ptr<FastestPathRoutingProfile>;
 }
 
 #endif

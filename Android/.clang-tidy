@@ -1,0 +1,7 @@
+---
+Checks:          '-*,cppcoreguidelines-avoid-goto'
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*/libosmscout.*/.*'
+AnalyzeTemporaryDtors: false
+FormatStyle:     none
+...

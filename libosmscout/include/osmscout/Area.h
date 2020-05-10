@@ -362,7 +362,7 @@ namespace osmscout {
     void VisitClippingRings(size_t index, const RingVisitor& visitor) const;
   };
 
-  typedef std::shared_ptr<Area> AreaRef;
+  using AreaRef = std::shared_ptr<Area>;
 }
 
 #endif

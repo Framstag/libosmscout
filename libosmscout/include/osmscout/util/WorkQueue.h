@@ -35,7 +35,7 @@ namespace osmscout {
   class WorkQueue
   {
   private:
-    typedef std::packaged_task<R()> Task;
+    using Task = std::packaged_task<R ()>;
 
   private:
     std::mutex              mutex;
@@ -74,10 +74,7 @@ namespace osmscout {
   }
 
   template<class R>
-  WorkQueue<R>::~WorkQueue()
-  {
-    // no code
-  }
+  WorkQueue<R>::~WorkQueue() = default;
 
   template<class R>
   void WorkQueue<R>::PushTask(Task& task)

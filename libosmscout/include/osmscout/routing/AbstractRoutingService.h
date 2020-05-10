@@ -101,7 +101,7 @@ namespace osmscout {
     explicit RoutePoints(const std::list<Point>& points);
   };
 
-  typedef std::shared_ptr<RoutePoints> RoutePointsRef;
+  using RoutePointsRef = std::shared_ptr<RoutePoints>;
 
   class OSMSCOUT_API RoutePointsResult CLASS_FINAL
   {

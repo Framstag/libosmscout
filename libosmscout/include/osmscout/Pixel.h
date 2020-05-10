@@ -43,8 +43,8 @@ namespace osmscout {
    */
   struct OSMSCOUT_API Pixel CLASS_FINAL
   {
-    uint32_t x;
-    uint32_t y;
+    uint32_t x; // NOLINT
+    uint32_t y; // NOLINT
 
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
@@ -85,7 +85,7 @@ namespace osmscout {
 
     std::string GetDisplayText() const;
 
-    inline std::ostream& operator<<(std::ostream& stream)
+    inline std::ostream& operator<<(std::ostream& stream) const
     {
       stream << GetDisplayText();
       return stream;
@@ -187,18 +187,9 @@ namespace osmscout {
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
      */
-    inline Vertex3D()
-    {
-      // no code
-    }
+    Vertex3D() = default;
 
-    inline Vertex3D(const Vertex3D& other)
-     :x(other.x),
-      y(other.y),
-      z(other.z)
-    {
-      // no code
-    }
+    inline Vertex3D(const Vertex3D& other) = default;
 
     inline Vertex3D(double x,
                     double y)
