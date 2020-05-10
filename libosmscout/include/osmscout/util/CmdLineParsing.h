@@ -90,12 +90,12 @@ namespace osmscout {
     virtual CmdLineParseResult Parse(CmdLineScanner& scanner) = 0;
   };
 
-  typedef std::shared_ptr<CmdLineArgParser> CmdLineArgParserRef;
+  using CmdLineArgParserRef = std::shared_ptr<CmdLineArgParser>;
 
   class OSMSCOUT_API CmdLineFlagArgParser : public CmdLineArgParser
   {
   public:
-    typedef std::function<void(const bool&)> SetterFunction;
+    using SetterFunction = std::function<void (const bool &)>;
 
   private:
      SetterFunction setter;
@@ -112,7 +112,7 @@ namespace osmscout {
   class OSMSCOUT_API CmdLineAlternativeFlagArgParser : public CmdLineArgParser
   {
   public:
-    typedef std::function<void(const std::string&)> SetterFunction;
+    using SetterFunction = std::function<void (const std::string &)>;
 
   private:
     SetterFunction setter;
@@ -130,7 +130,7 @@ namespace osmscout {
   class OSMSCOUT_API CmdLineBoolArgParser : public CmdLineArgParser
   {
   public:
-    typedef std::function<void(const bool&)> SetterFunction;
+    using SetterFunction = std::function<void (const bool &)>;
 
   private:
     SetterFunction setter;
@@ -147,7 +147,7 @@ namespace osmscout {
   class OSMSCOUT_API CmdLineStringArgParser : public CmdLineArgParser
   {
   public:
-    typedef std::function<void(const std::string&)> SetterFunction;
+    using SetterFunction = std::function<void (const std::string &)>;
 
   private:
     SetterFunction setter;
@@ -164,7 +164,7 @@ namespace osmscout {
   class OSMSCOUT_API CmdLineStringListArgParser : public CmdLineArgParser
   {
   public:
-    typedef std::function<void(const std::string&)> AppendFunction;
+    using AppendFunction = std::function<void (const std::string &)>;
 
   private:
     AppendFunction appender;
@@ -182,7 +182,7 @@ namespace osmscout {
   class CmdLineNumberArgParser : public CmdLineArgParser
   {
   public:
-    typedef std::function<void(const N&)> SetterFunction;
+    using SetterFunction = std::function<void (const N &)>;
 
   private:
     SetterFunction setter;
@@ -226,7 +226,7 @@ namespace osmscout {
   class OSMSCOUT_API CmdLineGeoCoordArgParser : public CmdLineArgParser
   {
   public:
-    typedef std::function<void(const GeoCoord&)> SetterFunction;
+    using SetterFunction = std::function<void (const GeoCoord &)>;
 
   private:
     SetterFunction setter;

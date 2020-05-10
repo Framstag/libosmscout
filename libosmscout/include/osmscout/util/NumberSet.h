@@ -38,8 +38,8 @@ namespace osmscout {
   class OSMSCOUT_API NumberSet CLASS_FINAL
   {
   private:
-    typedef std::bitset<4096>                 Bitset;
-    typedef std::unordered_map<size_t,Bitset> Map;
+    using Bitset = std::bitset<4096>;
+    using Map    = std::unordered_map<size_t, Bitset>;
 
   private:
     Map                                       map;

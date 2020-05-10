@@ -72,7 +72,7 @@ namespace osmscout {
     bool IsCovered(const GeoCoord& coord) const;
   };
 
-  typedef std::shared_ptr<CoverageIndex> CoverageIndexRef;
+  using CoverageIndexRef = std::shared_ptr<CoverageIndex>;
 }
 
 #endif

@@ -47,10 +47,7 @@ namespace osmscout {
     OSMId to;   // Way id
 
   public:
-    inline TurnRestriction()
-    {
-      // no code
-    }
+    TurnRestriction() = default;
 
     inline TurnRestriction(Type type,
                            OSMId from,
@@ -98,7 +95,7 @@ namespace osmscout {
     void Write(FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<TurnRestriction> TurnRestrictionRef;
+  using TurnRestrictionRef = std::shared_ptr<TurnRestriction>;
 }
 
 #endif

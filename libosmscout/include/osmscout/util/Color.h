@@ -39,20 +39,13 @@ namespace osmscout {
     static const Color BLUE;
 
   private:
-    double r;
-    double g;
-    double b;
-    double a;
+    double r=1.0;
+    double g=0.0;
+    double b=0.0;
+    double a=0.0;
 
   public:
-    inline Color()
-    : r(1.0),
-      g(0.0),
-      b(0.0),
-      a(1.0)
-    {
-      // no code
-    }
+    Color() = default;
 
     inline Color(double r,
                  double g,

@@ -59,7 +59,7 @@ namespace osmscout
     };
 
   public:
-    typedef std::unordered_map<std::string,std::vector<ObjectFileRef> > ResultsMap;
+    using ResultsMap = std::unordered_map<std::string, std::vector<ObjectFileRef> >;
 
     TextSearchIndex() = default;
 

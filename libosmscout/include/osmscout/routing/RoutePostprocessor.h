@@ -69,7 +69,7 @@ namespace osmscout {
                            RouteDescription& description) = 0;
     };
 
-    typedef std::shared_ptr<Postprocessor> PostprocessorRef;
+    using PostprocessorRef = std::shared_ptr<Postprocessor>;
 
     /**
      * \ingroup Routing
@@ -110,7 +110,7 @@ namespace osmscout {
     class OSMSCOUT_API DistanceAndTimePostprocessor : public Postprocessor
     {
     public:
-      DistanceAndTimePostprocessor();
+      DistanceAndTimePostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -123,7 +123,7 @@ namespace osmscout {
     class OSMSCOUT_API WayNamePostprocessor : public Postprocessor
     {
     public:
-      WayNamePostprocessor();
+      WayNamePostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -136,7 +136,7 @@ namespace osmscout {
     class OSMSCOUT_API WayTypePostprocessor : public Postprocessor
     {
     public:
-      WayTypePostprocessor();
+      WayTypePostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -156,7 +156,7 @@ namespace osmscout {
                                        const ObjectFileRef& targetObject);
 
     public:
-      CrossingWaysPostprocessor();
+      CrossingWaysPostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -176,7 +176,7 @@ namespace osmscout {
       static const double curveMinAngle;
 
     public:
-      DirectionPostprocessor();
+      DirectionPostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -189,7 +189,7 @@ namespace osmscout {
     class OSMSCOUT_API MotorwayJunctionPostprocessor : public Postprocessor
     {
     public:
-      MotorwayJunctionPostprocessor();
+      MotorwayJunctionPostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -202,7 +202,7 @@ namespace osmscout {
     class OSMSCOUT_API DestinationPostprocessor : public Postprocessor
     {
     public:
-      DestinationPostprocessor();
+      DestinationPostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -215,7 +215,7 @@ namespace osmscout {
     class OSMSCOUT_API MaxSpeedPostprocessor : public RoutePostprocessor::Postprocessor
     {
     public:
-      MaxSpeedPostprocessor() : Postprocessor() {};
+      MaxSpeedPostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
@@ -264,7 +264,7 @@ namespace osmscout {
 
     };
 
-    typedef std::shared_ptr<InstructionPostprocessor> InstructionPostprocessorRef;
+    using InstructionPostprocessorRef = std::shared_ptr<InstructionPostprocessor>;
 
     /**
      * \ingroup Routing
@@ -303,13 +303,13 @@ namespace osmscout {
                                const std::map<ObjectFileRef,POIAtRoute>& pois);
 
     public:
-      POIsPostprocessor() : Postprocessor() {};
+      POIsPostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
     };
 
-    typedef std::shared_ptr<POIsPostprocessor> POIsPostprocessorRef;
+    using POIsPostprocessorRef = std::shared_ptr<POIsPostprocessor>;
 
   private:
     std::vector<RoutingProfileRef>                                profiles;

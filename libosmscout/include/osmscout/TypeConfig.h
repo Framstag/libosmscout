@@ -55,7 +55,7 @@ namespace osmscout {
 
   class TypeInfo;
 
-  typedef std::shared_ptr<TypeInfo> TypeInfoRef;
+  using TypeInfoRef = std::shared_ptr<TypeInfo>;
 
 
   /**
@@ -786,7 +786,7 @@ namespace osmscout {
 
     template<class T> const T* findValue() const
     {
-      for (auto& featureInstance :GetType()->GetFeatures()) {
+      for (const auto& featureInstance :GetType()->GetFeatures()) {
         if (HasFeature(featureInstance.GetIndex())) {
           osmscout::FeatureRef feature=featureInstance.GetFeature();
           if (feature->HasValue()) {
@@ -803,7 +803,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<FeatureValueBuffer> FeatureValueBufferRef;
+  using FeatureValueBufferRef = std::shared_ptr<FeatureValueBuffer>;
 
   // Forward declaration
   class TypeConfig;
@@ -1132,7 +1132,7 @@ namespace osmscout {
 
   //! \ingroup type
   //! Reference counted reference to a TypeConfig instance
-  typedef std::shared_ptr<TypeConfig> TypeConfigRef;
+  using TypeConfigRef = std::shared_ptr<TypeConfig>;
 
   /**
    * \defgroup type Object type related data structures and services

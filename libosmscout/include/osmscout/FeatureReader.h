@@ -108,11 +108,11 @@ namespace osmscout {
     }
   }
 
-  typedef FeatureReader<AccessRestrictedFeature> AccessRestrictedFeatureReader;
-  typedef FeatureReader<BridgeFeature>           BridgeFeatureReader;
-  typedef FeatureReader<TunnelFeature>           TunnelFeatureReader;
-  typedef FeatureReader<EmbankmentFeature>       EmbankmentFeatureReader;
-  typedef FeatureReader<RoundaboutFeature>       RoundaboutFeatureReader;
+  using AccessRestrictedFeatureReader = FeatureReader<AccessRestrictedFeature>;
+  using BridgeFeatureReader           = FeatureReader<BridgeFeature>;
+  using TunnelFeatureReader           = FeatureReader<TunnelFeature>;
+  using EmbankmentFeatureReader       = FeatureReader<EmbankmentFeature>;
+  using RoundaboutFeatureReader       = FeatureReader<RoundaboutFeature>;
 
   /**
    * Variant of FeatureReader that is not type set and thus can easier get used
@@ -231,24 +231,24 @@ namespace osmscout {
     }
   }
 
-  typedef FeatureValueReader<NameFeature,NameFeatureValue>                         NameFeatureValueReader;
-  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>                   NameAltFeatureValueReader;
-  typedef FeatureValueReader<RefFeature,RefFeatureValue>                           RefFeatureValueReader;
-  typedef FeatureValueReader<LocationFeature,LocationFeatureValue>                 LocationFeatureValueReader;
-  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>                   AddressFeatureValueReader;
-  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>                     AccessFeatureValueReader;
-  typedef FeatureValueReader<AccessRestrictedFeature,AccessRestrictedFeatureValue> AccessRestrictedFeatureValueReader;
-  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>                       LayerFeatureValueReader;
-  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>                       WidthFeatureValueReader;
-  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue>                 MaxSpeedFeatureValueReader;
-  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>                       GradeFeatureValueReader;
-  typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
-  typedef FeatureValueReader<PostalCodeFeature,PostalCodeFeatureValue>             PostalCodeFeatureValueReader;
-  typedef FeatureValueReader<IsInFeature,IsInFeatureValue>                         IsInFeatureValueReader;
-  typedef FeatureValueReader<DestinationFeature,DestinationFeatureValue>           DestinationFeatureValueReader;
-  typedef FeatureValueReader<ConstructionYearFeature,ConstructionYearFeatureValue> ConstructionYearFeatureValueReader;
-  typedef FeatureValueReader<LanesFeature,LanesFeatureValue>                       LanesFeatureValueReader;
-  typedef FeatureValueReader<EleFeature,EleFeatureValue>                           EleFeatureValueReader;
+  using NameFeatureValueReader             = FeatureValueReader<NameFeature, NameFeatureValue>;
+  using NameAltFeatureValueReader          = FeatureValueReader<NameAltFeature, NameAltFeatureValue>;
+  using RefFeatureValueReader              = FeatureValueReader<RefFeature, RefFeatureValue>;
+  using LocationFeatureValueReader         = FeatureValueReader<LocationFeature, LocationFeatureValue>;
+  using AddressFeatureValueReader          = FeatureValueReader<AddressFeature, AddressFeatureValue>;
+  using AccessFeatureValueReader           = FeatureValueReader<AccessFeature, AccessFeatureValue>;
+  using AccessRestrictedFeatureValueReader = FeatureValueReader<AccessRestrictedFeature, AccessRestrictedFeatureValue>;
+  using LayerFeatureValueReader            = FeatureValueReader<LayerFeature, LayerFeatureValue>;
+  using WidthFeatureValueReader            = FeatureValueReader<WidthFeature, WidthFeatureValue>;
+  using MaxSpeedFeatureValueReader         = FeatureValueReader<MaxSpeedFeature, MaxSpeedFeatureValue>;
+  using GradeFeatureValueReader            = FeatureValueReader<GradeFeature, GradeFeatureValue>;
+  using AdminLevelFeatureValueReader       = FeatureValueReader<AdminLevelFeature, AdminLevelFeatureValue>;
+  using PostalCodeFeatureValueReader       = FeatureValueReader<PostalCodeFeature, PostalCodeFeatureValue>;
+  using IsInFeatureValueReader             = FeatureValueReader<IsInFeature, IsInFeatureValue>;
+  using DestinationFeatureValueReader      = FeatureValueReader<DestinationFeature, DestinationFeatureValue>;
+  using ConstructionYearFeatureValueReader = FeatureValueReader<ConstructionYearFeature, ConstructionYearFeatureValue>;
+  using LanesFeatureValueReader            = FeatureValueReader<LanesFeature, LanesFeatureValue>;
+  using EleFeatureValueReader              = FeatureValueReader<EleFeature, EleFeatureValue>;
 
   template <class F, class V>
   class FeatureLabelReader
@@ -306,8 +306,8 @@ namespace osmscout {
     return "";
   }
 
-  typedef FeatureLabelReader<NameFeature,NameFeatureValue>         NameFeatureLabelReader;
-  typedef FeatureLabelReader<RefFeature,RefFeatureValue>           RefFeatureLabelReader;
+  using NameFeatureLabelReader = FeatureLabelReader<NameFeature, NameFeatureValue>;
+  using RefFeatureLabelReader  = FeatureLabelReader<RefFeature, RefFeatureValue>;
 
   /**
    * \defgroup type Object type related data structures and services

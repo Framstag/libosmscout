@@ -216,7 +216,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to an RoutingService instance
-  typedef std::shared_ptr<SimpleRoutingService> SimpleRoutingServiceRef;
+  using SimpleRoutingServiceRef = std::shared_ptr<SimpleRoutingService>;
 
   /**
    * \defgroup Routing Routing based data structures and services

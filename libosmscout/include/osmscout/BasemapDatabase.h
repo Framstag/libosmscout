@@ -84,7 +84,7 @@ namespace osmscout {
   };
 
   //! Reference counted reference to an Database instance
-  typedef std::shared_ptr<BasemapDatabase> BasemapDatabaseRef;
+  using BasemapDatabaseRef = std::shared_ptr<BasemapDatabase>;
 }
 
 #endif

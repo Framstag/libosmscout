@@ -30,11 +30,6 @@ namespace osmscout {
     // no code
   }
 
-  Progress::~Progress()
-  {
-    // no code
-  }
-
   void Progress::SetOutputDebug(bool outputDebug)
   {
     this->outputDebug=outputDebug;
@@ -95,11 +90,6 @@ namespace osmscout {
   }
 
   void Progress::Error(const std::string& /*text*/)
-  {
-    // no code
-  }
-
-  SilentProgress::~SilentProgress()
   {
     // no code
   }

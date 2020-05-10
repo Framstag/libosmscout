@@ -314,7 +314,7 @@ namespace osmscout {
   //! \ingroup Service
   //! \ingroup Location
   //! Reference counted reference to a location service instance
-  typedef std::shared_ptr<LocationService> LocationServiceRef;
+  using LocationServiceRef = std::shared_ptr<LocationService>;
 }
 
 

@@ -40,7 +40,7 @@ namespace osmscout {
     explicit WayDataFile(size_t cacheSize);
   };
 
-  typedef std::shared_ptr<WayDataFile> WayDataFileRef;
+  using WayDataFileRef = std::shared_ptr<WayDataFile>;
 }
 
 #endif

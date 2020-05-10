@@ -63,7 +63,7 @@ namespace osmscout {
       FileOffset data;        //!< The file index at which the data payload starts
     };
 
-    typedef Cache<FileOffset,IndexCell> IndexCache;
+    using IndexCache = Cache<FileOffset, IndexCell>;
 
     struct IndexCacheValueSizer : public IndexCache::ValueSizer
     {
@@ -155,7 +155,7 @@ namespace osmscout {
     void FlushCache();
   };
 
-  typedef std::shared_ptr<AreaAreaIndex> AreaAreaIndexRef;
+  using AreaAreaIndexRef = std::shared_ptr<AreaAreaIndex>;
 }
 
 #endif

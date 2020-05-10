@@ -40,7 +40,7 @@ namespace osmscout {
     explicit NodeDataFile(size_t cacheSize);
   };
 
-  typedef std::shared_ptr<NodeDataFile> NodeDataFileRef;
+  using NodeDataFileRef = std::shared_ptr<NodeDataFile>;
 }
 
 #endif

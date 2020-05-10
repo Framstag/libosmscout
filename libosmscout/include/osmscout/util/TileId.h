@@ -188,13 +188,7 @@ namespace osmscout {
       // no code
     }
 
-    TileIdBoxConstIterator(const TileIdBoxConstIterator& other)
-      : currentTile(other.currentTile),
-        minTile(other.minTile),
-        maxTile(other.maxTile)
-    {
-      // no code
-    }
+    TileIdBoxConstIterator(const TileIdBoxConstIterator& other) = default;
 
     TileIdBoxConstIterator& operator++()
     {
