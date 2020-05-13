@@ -2008,7 +2008,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    OperatorFeatureValue& operator=(const FeatureValue& other) override;
+    OperatorFeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -2077,7 +2077,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    NetworkFeatureValue& operator=(const FeatureValue& other) override;
+    NetworkFeatureValue& operator=(const FeatureValue& other);
     bool operator==(const FeatureValue& other) const override;
   };
 

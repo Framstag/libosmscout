@@ -259,6 +259,7 @@ namespace osmscout {
     }
   }
 
+
   using NameFeatureValueReader             = FeatureValueReader<NameFeature, NameFeatureValue>;
   using NameAltFeatureValueReader          = FeatureValueReader<NameAltFeature, NameAltFeatureValue>;
   using NameShortFeatureValueReader        = FeatureValueReader<NameShortFeature, NameShortFeatureValue>;
