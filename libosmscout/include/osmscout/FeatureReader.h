@@ -180,6 +180,15 @@ namespace osmscout {
      *    else nullptr
      */
     V* GetValue(const FeatureValueBuffer& buffer) const;
+
+    /**
+     * Returns the FeatureValue for the given FeatureValueBuffer or a defaultValue, if the feature is not set
+     * @param buffer
+     *    The FeatureValueBuffer instance
+     * @return
+     *    Either the value from the FeatureValueBuffer or the defaultValue
+     */
+    V GetValue(const FeatureValueBuffer& buffer, const V& defaultValue) const;
   };
 
   template<class F, class V>
@@ -231,24 +240,45 @@ namespace osmscout {
     }
   }
 
-  typedef FeatureValueReader<NameFeature,NameFeatureValue>                         NameFeatureValueReader;
-  typedef FeatureValueReader<NameAltFeature,NameAltFeatureValue>                   NameAltFeatureValueReader;
-  typedef FeatureValueReader<RefFeature,RefFeatureValue>                           RefFeatureValueReader;
-  typedef FeatureValueReader<LocationFeature,LocationFeatureValue>                 LocationFeatureValueReader;
-  typedef FeatureValueReader<AddressFeature,AddressFeatureValue>                   AddressFeatureValueReader;
-  typedef FeatureValueReader<AccessFeature,AccessFeatureValue>                     AccessFeatureValueReader;
-  typedef FeatureValueReader<AccessRestrictedFeature,AccessRestrictedFeatureValue> AccessRestrictedFeatureValueReader;
-  typedef FeatureValueReader<LayerFeature,LayerFeatureValue>                       LayerFeatureValueReader;
-  typedef FeatureValueReader<WidthFeature,WidthFeatureValue>                       WidthFeatureValueReader;
-  typedef FeatureValueReader<MaxSpeedFeature,MaxSpeedFeatureValue>                 MaxSpeedFeatureValueReader;
-  typedef FeatureValueReader<GradeFeature,GradeFeatureValue>                       GradeFeatureValueReader;
-  typedef FeatureValueReader<AdminLevelFeature,AdminLevelFeatureValue>             AdminLevelFeatureValueReader;
-  typedef FeatureValueReader<PostalCodeFeature,PostalCodeFeatureValue>             PostalCodeFeatureValueReader;
-  typedef FeatureValueReader<IsInFeature,IsInFeatureValue>                         IsInFeatureValueReader;
-  typedef FeatureValueReader<DestinationFeature,DestinationFeatureValue>           DestinationFeatureValueReader;
-  typedef FeatureValueReader<ConstructionYearFeature,ConstructionYearFeatureValue> ConstructionYearFeatureValueReader;
-  typedef FeatureValueReader<LanesFeature,LanesFeatureValue>                       LanesFeatureValueReader;
-  typedef FeatureValueReader<EleFeature,EleFeatureValue>                           EleFeatureValueReader;
+  template<class F, class V>
+  V FeatureValueReader<F,V>::GetValue(const FeatureValueBuffer& buffer, const V& defaultValue) const
+  {
+    assert(buffer.GetType()->GetIndex() < lookupTable.size());
+    size_t index=lookupTable[buffer.GetType()->GetIndex()];
+
+    if (index!=std::numeric_limits<size_t>::max() &&
+        buffer.HasFeature(index)) {
+      FeatureValue *val = buffer.GetValue(index);
+      // Object returned from Feature::AllocateValue and V have to be the same type!
+      // But it cannot be tested in compile-time, lets do it in runtime assert at least.
+      assert(val == nullptr || dynamic_cast<V*>(val) != nullptr);
+      return *static_cast<V*>(val);
+    }
+    else {
+      return defaultValue;
+    }
+  }
+
+  using NameFeatureValueReader             = FeatureValueReader<NameFeature, NameFeatureValue>;
+  using NameAltFeatureValueReader          = FeatureValueReader<NameAltFeature, NameAltFeatureValue>;
+  using RefFeatureValueReader              = FeatureValueReader<RefFeature, RefFeatureValue>;
+  using LocationFeatureValueReader         = FeatureValueReader<LocationFeature, LocationFeatureValue>;
+  using AddressFeatureValueReader          = FeatureValueReader<AddressFeature, AddressFeatureValue>;
+  using AccessFeatureValueReader           = FeatureValueReader<AccessFeature, AccessFeatureValue>;
+  using AccessRestrictedFeatureValueReader = FeatureValueReader<AccessRestrictedFeature, AccessRestrictedFeatureValue>;
+  using LayerFeatureValueReader            = FeatureValueReader<LayerFeature, LayerFeatureValue>;
+  using WidthFeatureValueReader            = FeatureValueReader<WidthFeature, WidthFeatureValue>;
+  using MaxSpeedFeatureValueReader         = FeatureValueReader<MaxSpeedFeature, MaxSpeedFeatureValue>;
+  using GradeFeatureValueReader            = FeatureValueReader<GradeFeature, GradeFeatureValue>;
+  using AdminLevelFeatureValueReader       = FeatureValueReader<AdminLevelFeature, AdminLevelFeatureValue>;
+  using PostalCodeFeatureValueReader       = FeatureValueReader<PostalCodeFeature, PostalCodeFeatureValue>;
+  using IsInFeatureValueReader             = FeatureValueReader<IsInFeature, IsInFeatureValue>;
+  using DestinationFeatureValueReader      = FeatureValueReader<DestinationFeature, DestinationFeatureValue>;
+  using ConstructionYearFeatureValueReader = FeatureValueReader<ConstructionYearFeature, ConstructionYearFeatureValue>;
+  using LanesFeatureValueReader            = FeatureValueReader<LanesFeature, LanesFeatureValue>;
+  using EleFeatureValueReader              = FeatureValueReader<EleFeature, EleFeatureValue>;
+  using NetworkFeatureValueReader          = FeatureValueReader<NetworkFeature, NetworkFeatureValue>;
+  using OperatorFeatureValueReader         = FeatureValueReader<OperatorFeature, OperatorFeatureValue>;
 
   template <class F, class V>
   class FeatureLabelReader
@@ -306,8 +336,8 @@ namespace osmscout {
     return "";
   }
 
-  typedef FeatureLabelReader<NameFeature,NameFeatureValue>         NameFeatureLabelReader;
-  typedef FeatureLabelReader<RefFeature,RefFeatureValue>           RefFeatureLabelReader;
+  using NameFeatureLabelReader = FeatureLabelReader<NameFeature, NameFeatureValue>;
+  using RefFeatureLabelReader  = FeatureLabelReader<RefFeature, RefFeatureValue>;
 
   /**
    * \defgroup type Object type related data structures and services
