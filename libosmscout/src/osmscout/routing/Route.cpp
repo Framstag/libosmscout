@@ -62,6 +62,8 @@ namespace osmscout {
   const char* const RouteDescription::POI_AT_ROUTE_DESC      = "POIAtRoute";
   /** Constant for a description of route lanes (LaneDescription) */
   const char* const RouteDescription::LANES_DESC             = "Lanes";
+  /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
+  const char* const RouteDescription::SUGGESTED_LANES_DESC   = "SuggestedLanes";
 
   RouteDescription::Description::~Description()
   {
@@ -492,11 +494,11 @@ namespace osmscout {
 
   std::string RouteDescription::LaneDescription::GetDebugString() const
   {
-    using namespace std::string_literals;
+    using namespace std::string_view_literals;
     std::stringstream ss;
     ss << "Lanes: ";
     ss << (int)laneCount;
-    ss << (oneway ? " [oneway]"s : ""s);
+    ss << (oneway ? " [oneway]"sv : ""sv);
     if (!laneTurns.empty()){
       ss << " :";
     }
@@ -509,6 +511,31 @@ namespace osmscout {
       }
     });
 
+    return ss.str();
+  }
+
+  bool RouteDescription::LaneDescription::operator==(const RouteDescription::LaneDescription &o) const
+  {
+    return oneway==o.oneway && laneCount==o.laneCount && laneTurns==o.laneTurns;
+  }
+
+  bool RouteDescription::LaneDescription::operator!=(const RouteDescription::LaneDescription &o) const
+  {
+    return !((*this)==o);
+  }
+
+  RouteDescription::SuggestedLaneDescription::SuggestedLaneDescription(uint8_t from, uint8_t to):
+      from(from), to(to)
+  {}
+
+  std::string RouteDescription::SuggestedLaneDescription::GetDebugString() const
+  {
+    std::stringstream ss;
+    ss << "Suggested lanes: <";
+    ss << (int)from;
+    ss << ", ";
+    ss << (int)to;
+    ss << ">";
     return ss.str();
   }
 

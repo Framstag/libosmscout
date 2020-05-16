@@ -782,6 +782,7 @@ int main(int argc, char* argv[])
     std::make_shared<osmscout::RoutePostprocessor::CrossingWaysPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::DirectionPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::LanesPostprocessor>(),
+    std::make_shared<osmscout::RoutePostprocessor::SuggestedLanesPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>(),
     std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>(),

@@ -1456,8 +1456,6 @@ namespace osmscout {
     DatabaseId                 curDb;
 
     RouteDescription::LaneDescriptionRef lanes;
-    // TODO:
-    //  - evaluate allowed lanes
 
     for (auto& node : description.Nodes()) {
       // The last node does not have a pathWayId set, since we are not going anywhere!
@@ -1478,6 +1476,138 @@ namespace osmscout {
       }
     }
 
+    return true;
+  }
+
+  bool RoutePostprocessor::SuggestedLanesPostprocessor::Process(const RoutePostprocessor& /*postprocessor*/,
+                                                                RouteDescription& description)
+  {
+    using namespace std::string_view_literals;
+
+    auto GetLaneDescription = [](const RouteDescription::Node &node) -> RouteDescription::LaneDescriptionRef {
+        return std::dynamic_pointer_cast<RouteDescription::LaneDescription>(node.GetDescription(RouteDescription::LANES_DESC));
+    };
+
+    // buffer of traveled nodes, recent node at back
+    std::list<RouteDescription::Node*> backBuffer;
+    for (auto& node : description.Nodes()) {
+
+      while (!backBuffer.empty() &&
+             (node.GetDistance() - backBuffer.front()->GetDistance() > Meters(500))){
+        backBuffer.pop_front();
+      }
+      auto lanes = GetLaneDescription(node);
+      if (!lanes){
+        // it should not happened, just on last node
+        backBuffer.clear();
+        continue;
+      }
+
+      if (!backBuffer.empty() && !node.GetObjects().empty()) { // we know history and there is some crossing on current node
+        auto prevLanes = GetLaneDescription(*backBuffer.back());
+        assert(prevLanes);
+        if (prevLanes->GetLaneCount() > lanes->GetLaneCount()) { // lane count was decreased
+          RouteDescription::DirectionDescriptionRef direction = std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(node.GetDescription(RouteDescription::DIRECTION_DESC));
+
+          //RouteDescription::MotorwayChangeDescriptionRef motorwayChange = std::dynamic_pointer_cast<RouteDescription::MotorwayChangeDescription>(node.GetDescription(RouteDescription::MOTORWAY_CHANGE_DESC));
+          //RouteDescription::MotorwayLeaveDescriptionRef motorwayLeave = std::dynamic_pointer_cast<RouteDescription::MotorwayLeaveDescription>(node.GetDescription(RouteDescription::MOTORWAY_LEAVE_DESC));
+          using Move = RouteDescription::DirectionDescription::Move;
+          Move directionMove = direction ? direction->GetTurn() : Move::straightOn;
+
+          int allowedLaneFrom = -1;
+          int allowedLaneTo = -1; // inclusive
+
+          auto LookupLanesTurns = [&](const std::set<std::string_view> &possibilities){
+            for (size_t i = 0; i < prevLanes->GetLaneTurns().size(); i++){
+              std::string_view turn = prevLanes->GetLaneTurns()[i];
+              if (possibilities.find(turn) != possibilities.end()){
+                // it is possible to use this turn
+                if (allowedLaneFrom < 0) {
+                  allowedLaneFrom=i;
+                  allowedLaneTo=i;
+                } else {
+                  allowedLaneTo=i;
+                }
+              } else {
+                if (allowedLaneFrom>0){
+                  break;
+                }
+              }
+            }
+          };
+
+          // after some direction change, we will evaluate allowed lanes in backBuffer
+          if (!prevLanes->GetLaneTurns().empty()){
+            // we know explicit lane turns
+            switch (directionMove){
+              case Move::sharpLeft:
+              case Move::left:
+              case Move::slightlyLeft:
+                static const std::set<std::string_view> leftPossibilities{
+                  "left"sv, "slight_left"sv, "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv};
+                LookupLanesTurns(leftPossibilities);
+                break;
+              case Move::straightOn:
+                static const std::set<std::string_view> straightPossibilities{
+                  "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv,
+                  "through"sv,
+                  "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
+                LookupLanesTurns(straightPossibilities);
+                break;
+              case Move::slightlyRight:
+              case Move::right:
+              case Move::sharpRight:
+                static const std::set<std::string_view> rightPossibilities{
+                    "right"sv, /*"slight_right"sv,*/ "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
+                LookupLanesTurns(rightPossibilities);
+                break;
+            }
+          }
+          if (allowedLaneFrom < 0){
+            // explicit turns are not available, or evaluation was not successful
+            // it may happen when we detected move is for example slightlyLeft but lane turn is "through"
+
+            // so, just estimate lanes on the count
+            assert(lanes->GetLaneCount()>0);
+            switch (directionMove){
+              case Move::sharpLeft:
+              case Move::left:
+              case Move::slightlyLeft:
+                allowedLaneFrom = 0;
+                allowedLaneTo = lanes->GetLaneCount() - 1;
+                break;
+              case Move::straightOn:
+                // ignore right now, we cannot estimate which lanes
+                // are through without deeper analysis
+                break;
+              case Move::slightlyRight:
+              case Move::right:
+              case Move::sharpRight:
+                allowedLaneFrom = prevLanes->GetLaneCount() - lanes->GetLaneCount();
+                allowedLaneTo = prevLanes->GetLaneCount() -1;
+                break;
+            }
+          }
+
+          if (allowedLaneFrom >= 0) {
+            assert(allowedLaneTo >= allowedLaneFrom);
+            auto suggested = std::make_shared<RouteDescription::SuggestedLaneDescription>(allowedLaneFrom, allowedLaneTo);
+            for (auto it = backBuffer.rbegin(); it != backBuffer.rend(); it++) {
+              auto nodePtr = *it;
+              auto nodeLanes = GetLaneDescription(*nodePtr);
+              if (*prevLanes != *nodeLanes){
+                break;
+              }
+              nodePtr->AddDescription(RouteDescription::SUGGESTED_LANES_DESC, suggested);
+            }
+          }
+
+          backBuffer.clear();
+        }
+      }
+
+      backBuffer.push_back(&node);
+    }
     return true;
   }
 

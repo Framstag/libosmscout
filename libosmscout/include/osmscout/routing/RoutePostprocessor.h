@@ -326,6 +326,25 @@ namespace osmscout {
 
     typedef std::shared_ptr<LanesPostprocessor> LanesPostprocessorRef;
 
+    /**
+     * \ingroup Routing
+     * Evaluate suggested route lanes that may be used.
+     * Route lanes have to be evaluated already (using LanesPostprocessor)
+     */
+    class OSMSCOUT_API SuggestedLanesPostprocessor : public RoutePostprocessor::Postprocessor
+    {
+    public:
+      SuggestedLanesPostprocessor(const Distance &distanceBefore=Meters(500)) :
+        Postprocessor(), distanceBefore(distanceBefore) {};
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   RouteDescription& description) override;
+    private:
+      Distance distanceBefore;
+    };
+
+    typedef std::shared_ptr<SuggestedLanesPostprocessor> SuggestedLanesPostprocessorRef;
+
   private:
     std::vector<RoutingProfileRef>                                profiles;
     std::vector<DatabaseRef>                                      databases;

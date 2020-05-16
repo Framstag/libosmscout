@@ -89,6 +89,8 @@ namespace osmscout {
     static const char* const POI_AT_ROUTE_DESC;
     /** Constant for a description of route lanes (LaneDescription) */
     static const char* const LANES_DESC;
+    /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
+    static const char* const SUGGESTED_LANES_DESC;
 
   public:
     /**
@@ -146,7 +148,7 @@ namespace osmscout {
     /**
      * \ingroup Routing
      * Something has a name. A name consists of a name and a optional alphanumeric
-     * reference (LIke B1 or A40).
+     * reference (Like B1 or A40).
      */
     class OSMSCOUT_API NameDescription : public Description
     {
@@ -587,9 +589,20 @@ namespace osmscout {
     {
     private:
       bool oneway{false};
-      uint8_t laneCount{1}; // in our direction, not sum on way
-      std::vector<std::string> laneTurns; // turns in lanes from left one (drivers view)
-                                          // vector size may be less than laneCount, even empty
+      uint8_t laneCount{1}; //!< in our direction, not sum on way
+
+      /**
+       * turns in lanes from left one (drivers view)
+       * vector size may be less than laneCount, even empty
+       *
+       * usual variants:
+       *    left, slight_left, merge_to_left,
+       *    through;left, through;slight_left, through;sharp_left,
+       *    through,
+       *    through;right, through;slight_right, through;sharp_right,
+       *    right, slight_right, merge_to_right
+       */
+      std::vector<std::string> laneTurns;
 
     public:
       LaneDescription(bool oneway,
@@ -597,9 +610,45 @@ namespace osmscout {
                       const std::vector<std::string> &laneTurns);
 
       std::string GetDebugString() const override;
+
+      bool IsOneway() const
+      {
+        return oneway;
+      }
+
+      uint8_t GetLaneCount() const
+      {
+        return laneCount;
+      }
+
+      const std::vector<std::string>& GetLaneTurns() const
+      {
+        return laneTurns;
+      }
+
+      bool operator==(const LaneDescription &o) const;
+      bool operator!=(const LaneDescription &o) const;
     };
 
     typedef std::shared_ptr<LaneDescription> LaneDescriptionRef;
+
+    /**
+     * \ingroup Routing
+     * A suggested route lane
+     */
+    class OSMSCOUT_API SuggestedLaneDescription : public RouteDescription::Description
+    {
+    private:
+      uint8_t from = -1;
+      uint8_t to = -1; // inclusive
+
+    public:
+      SuggestedLaneDescription(uint8_t from, uint8_t to);
+
+      std::string GetDebugString() const override;
+    };
+
+    typedef std::shared_ptr<SuggestedLaneDescription> SuggestedLaneDescriptionRef;
 
     /**
      * \ingroup Routing
