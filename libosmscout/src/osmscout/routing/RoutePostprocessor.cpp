@@ -1509,8 +1509,6 @@ namespace osmscout {
         if (prevLanes->GetLaneCount() > lanes->GetLaneCount()) { // lane count was decreased
           RouteDescription::DirectionDescriptionRef direction = std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(node.GetDescription(RouteDescription::DIRECTION_DESC));
 
-          //RouteDescription::MotorwayChangeDescriptionRef motorwayChange = std::dynamic_pointer_cast<RouteDescription::MotorwayChangeDescription>(node.GetDescription(RouteDescription::MOTORWAY_CHANGE_DESC));
-          //RouteDescription::MotorwayLeaveDescriptionRef motorwayLeave = std::dynamic_pointer_cast<RouteDescription::MotorwayLeaveDescription>(node.GetDescription(RouteDescription::MOTORWAY_LEAVE_DESC));
           using Move = RouteDescription::DirectionDescription::Move;
           Move directionMove = direction ? direction->GetTurn() : Move::straightOn;
 
