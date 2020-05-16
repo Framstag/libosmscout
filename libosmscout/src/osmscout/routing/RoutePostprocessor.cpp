@@ -1534,6 +1534,17 @@ namespace osmscout {
             }
           };
 
+          static const std::set<std::string_view> leftPossibilities{
+            "left"sv, "slight_left"sv, "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv};
+
+          static const std::set<std::string_view> straightPossibilities{
+            "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv,
+            "through"sv,
+            "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
+
+          static const std::set<std::string_view> rightPossibilities{
+              "right"sv, /*"slight_right"sv,*/ "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
+
           // after some direction change, we will evaluate allowed lanes in backBuffer
           if (!prevLanes->GetLaneTurns().empty()){
             // we know explicit lane turns
@@ -1541,22 +1552,14 @@ namespace osmscout {
               case Move::sharpLeft:
               case Move::left:
               case Move::slightlyLeft:
-                static const std::set<std::string_view> leftPossibilities{
-                  "left"sv, "slight_left"sv, "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv};
                 LookupLanesTurns(leftPossibilities);
                 break;
               case Move::straightOn:
-                static const std::set<std::string_view> straightPossibilities{
-                  "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv,
-                  "through"sv,
-                  "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
                 LookupLanesTurns(straightPossibilities);
                 break;
               case Move::slightlyRight:
               case Move::right:
               case Move::sharpRight:
-                static const std::set<std::string_view> rightPossibilities{
-                    "right"sv, /*"slight_right"sv,*/ "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
                 LookupLanesTurns(rightPossibilities);
                 break;
             }
