@@ -1540,6 +1540,7 @@ namespace osmscout {
           static const std::set<std::string_view> straightPossibilities{
             "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv,
             "through"sv,
+            ""sv, // no-sign implicitly as through
             "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
 
           static const std::set<std::string_view> rightPossibilities{
