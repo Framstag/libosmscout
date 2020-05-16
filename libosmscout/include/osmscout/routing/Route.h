@@ -656,14 +656,14 @@ namespace osmscout {
     class OSMSCOUT_API Node
     {
     private:
-      DatabaseId                                     database;
-      size_t                                         currentNodeIndex;
-      std::vector<ObjectFileRef>                     objects;
-      ObjectFileRef                                  pathObject;
-      size_t                                         targetNodeIndex;
-      Distance                                       distance; // distance from route start
-      Timestamp::duration                            time; // time from route start
-      GeoCoord                                       location;
+      DatabaseId                                     database; //!< database id of objects and pathObject
+      size_t                                         currentNodeIndex; //!< current node index of pathObject
+      std::vector<ObjectFileRef>                     objects; //!< list of objects intersecting this node. Is empty when node belongs to pathObject only
+      ObjectFileRef                                  pathObject; //!< object used for traveling from this node. Is invalid for last node
+      size_t                                         targetNodeIndex; //!< target node index of pathObject
+      Distance                                       distance; //!< distance from route start
+      Duration                                       time; //!< time from route start
+      GeoCoord                                       location; //!< geographic coordinate of node
       std::unordered_map<std::string,DescriptionRef> descriptionMap;
       std::list<DescriptionRef>                      descriptions;
 
