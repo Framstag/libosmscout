@@ -634,18 +634,31 @@ namespace osmscout {
 
     /**
      * \ingroup Routing
-     * A suggested route lane
+     *
+     * A suggested route lanes. It specifies range of lanes <from, to> that drive
+     * should use. Lanes are counted from left (just route direction, not opposite direction),
+     * left-most lane has index 0, both indexes are inclusive.
      */
     class OSMSCOUT_API SuggestedLaneDescription : public RouteDescription::Description
     {
     private:
-      uint8_t from = -1;
-      uint8_t to = -1; // inclusive
+      uint8_t from = -1; //!< left-most suggested lane, inclusive
+      uint8_t to = -1; //!< right-most suggested lane, inclusive
 
     public:
       SuggestedLaneDescription(uint8_t from, uint8_t to);
 
       std::string GetDebugString() const override;
+
+      uint8_t getFrom() const
+      {
+        return from;
+      }
+
+      uint8_t getTo() const
+      {
+        return to;
+      }
     };
 
     typedef std::shared_ptr<SuggestedLaneDescription> SuggestedLaneDescriptionRef;
