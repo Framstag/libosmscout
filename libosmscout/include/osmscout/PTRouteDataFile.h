@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_IMPORT_GENPTROUTEDAT_H
-#define OSMSCOUT_IMPORT_GENPTROUTEDAT_H
+#ifndef OSMSCOUT_PTROUTEDATAFILE_H
+#define OSMSCOUT_PTROUTEDATAFILE_H
 
 /*
   This source is part of the libosmscout library
@@ -20,32 +20,26 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/OSMScoutTypes.h>
+#include <memory>
 
 #include <osmscout/PublicTransport.h>
-
-#include <osmscout/import/Import.h>
+#include <osmscout/DataFile.h>
 
 namespace osmscout {
-
-  class PTRouteDataGenerator CLASS_FINAL : public ImportModule
+  /**
+    \ingroup Database
+    Abstraction for getting cached access to the 'ptroute.dat' file.
+    */
+  class OSMSCOUT_API PTRouteDataFile : public DataFile<PTRoute>
   {
-  private:
-    bool WriteRoutes(const TypeConfig& typeConfig,
-                     const ImportParameter& parameter,
-                     Progress& progress,
-                     const std::list<PTRouteRef>& routes);
+  public:
+    static const char* const PTROUTES_DAT;
 
   public:
-    PTRouteDataGenerator() = default;
-
-    void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const override;
-
-    bool Import(const TypeConfigRef& typeConfig,
-                const ImportParameter& parameter,
-                Progress& progress) override;
+    explicit PTRouteDataFile(size_t cacheSize);
   };
+
+  using PTRouteDataFileRef = std::shared_ptr<PTRouteDataFile>;
 }
 
 #endif
