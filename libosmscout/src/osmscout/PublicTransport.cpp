@@ -21,7 +21,6 @@
 
 namespace osmscout {
 
-
   void PTRoute::Stop::SetType(PTRoute::StopType stopType)
   {
     Stop::type=stopType;
