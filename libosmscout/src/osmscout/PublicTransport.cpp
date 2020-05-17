@@ -1,6 +1,3 @@
-#ifndef OSMSCOUT_IMPORT_GENPTROUTEDAT_H
-#define OSMSCOUT_IMPORT_GENPTROUTEDAT_H
-
 /*
   This source is part of the libosmscout library
   Copyright (C) 2020  Tim Teulings
@@ -20,32 +17,47 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/OSMScoutTypes.h>
-
 #include <osmscout/PublicTransport.h>
-
-#include <osmscout/import/Import.h>
 
 namespace osmscout {
 
-  class PTRouteDataGenerator CLASS_FINAL : public ImportModule
+  void PTRoute::SetName(const std::string& name)
   {
-  private:
-    bool WriteRoutes(const TypeConfig& typeConfig,
-                     const ImportParameter& parameter,
-                     Progress& progress,
-                     const std::list<PTRouteRef>& routes);
+    PTRoute::name=name;
+  }
 
-  public:
-    PTRouteDataGenerator() = default;
+  void PTRoute::SetRef(const std::string& ref)
+  {
+    PTRoute::ref=ref;
+  }
 
-    void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const override;
+  void PTRoute::SetOperator(const std::string& operatorName)
+  {
+    PTRoute::operatorName=operatorName;
+  }
 
-    bool Import(const TypeConfigRef& typeConfig,
-                const ImportParameter& parameter,
-                Progress& progress) override;
-  };
+  void PTRoute::SetNetwork(const std::string& network)
+  {
+    PTRoute::network=network;
+  }
+
+  void PTRoute::Read(const TypeConfig& /*typeConfig*/,
+                     FileScanner& scanner)
+  {
+    fileOffset = scanner.GetPos();
+
+    scanner.Read(name);
+    scanner.Read(ref);
+    scanner.Read(operatorName);
+    scanner.Read(network);
+  }
+
+  void PTRoute::Write(const TypeConfig& /*typeConfig*/,
+                      FileWriter& writer) const
+  {
+    writer.Write(name);
+    writer.Write(ref);
+    writer.Write(operatorName);
+    writer.Write(network);
+  }
 }
-
-#endif
