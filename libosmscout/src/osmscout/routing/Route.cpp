@@ -19,10 +19,10 @@
 
 #include <osmscout/routing/Route.h>
 
-#include <sstream>
-
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
+
+#include <sstream>
 
 namespace osmscout {
 
@@ -60,6 +60,10 @@ namespace osmscout {
   const char* const RouteDescription::WAY_TYPE_NAME_DESC     = "TypeName";
   /** Constant for a description of type name of the way (TypeNameDescription) */
   const char* const RouteDescription::POI_AT_ROUTE_DESC      = "POIAtRoute";
+  /** Constant for a description of route lanes (LaneDescription) */
+  const char* const RouteDescription::LANES_DESC             = "Lanes";
+  /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
+  const char* const RouteDescription::SUGGESTED_LANES_DESC   = "SuggestedLanes";
 
   RouteDescription::Description::~Description()
   {
@@ -444,7 +448,7 @@ namespace osmscout {
 
   std::string RouteDescription::TypeNameDescription::GetDebugString() const
   {
-    return "Name: '"+GetDescription()+"'";
+    return "Type name: '"+GetDescription()+"'";
   }
 
   bool RouteDescription::TypeNameDescription::HasName() const
@@ -480,6 +484,59 @@ namespace osmscout {
   std::string RouteDescription::POIAtRouteDescription::GetDebugString() const
   {
     return object.GetName() +" "+std::to_string(distance.AsMeter());
+  }
+
+  RouteDescription::LaneDescription::LaneDescription(bool oneway,
+                                                     uint8_t laneCount,
+                                                     const std::vector<std::string> &laneTurns)
+                                                     : oneway(oneway), laneCount(laneCount), laneTurns(laneTurns)
+  {}
+
+  std::string RouteDescription::LaneDescription::GetDebugString() const
+  {
+    using namespace std::string_view_literals;
+    std::stringstream ss;
+    ss << "Lanes: ";
+    ss << (int)laneCount;
+    ss << (oneway ? " [oneway]"sv : ""sv);
+    if (!laneTurns.empty()){
+      ss << " :";
+    }
+    for_each(laneTurns.begin(), laneTurns.end(), [&ss] (const std::string& s) {
+      ss << " ";
+      if (s.empty()){
+        ss << "<unspecified>";
+      } else {
+        ss << s;
+      }
+    });
+
+    return ss.str();
+  }
+
+  bool RouteDescription::LaneDescription::operator==(const RouteDescription::LaneDescription &o) const
+  {
+    return oneway==o.oneway && laneCount==o.laneCount && laneTurns==o.laneTurns;
+  }
+
+  bool RouteDescription::LaneDescription::operator!=(const RouteDescription::LaneDescription &o) const
+  {
+    return !((*this)==o);
+  }
+
+  RouteDescription::SuggestedLaneDescription::SuggestedLaneDescription(uint8_t from, uint8_t to):
+      from(from), to(to)
+  {}
+
+  std::string RouteDescription::SuggestedLaneDescription::GetDebugString() const
+  {
+    std::stringstream ss;
+    ss << "Suggested lanes: <";
+    ss << (int)from;
+    ss << ", ";
+    ss << (int)to;
+    ss << ">";
+    return ss.str();
   }
 
   bool RouteDescription::Node::HasDescription(const char* name) const

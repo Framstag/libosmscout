@@ -87,6 +87,10 @@ namespace osmscout {
     static const char* const WAY_TYPE_NAME_DESC;
     /** Constant for a description of pois at the route (POIAtRouteDescription) */
     static const char* const POI_AT_ROUTE_DESC;
+    /** Constant for a description of route lanes (LaneDescription) */
+    static const char* const LANES_DESC;
+    /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
+    static const char* const SUGGESTED_LANES_DESC;
 
   public:
     /**
@@ -144,7 +148,7 @@ namespace osmscout {
     /**
      * \ingroup Routing
      * Something has a name. A name consists of a name and a optional alphanumeric
-     * reference (LIke B1 or A40).
+     * reference (Like B1 or A40).
      */
     class OSMSCOUT_API NameDescription : public Description
     {
@@ -579,18 +583,100 @@ namespace osmscout {
 
     /**
      * \ingroup Routing
+     * A route lane
+     */
+    class OSMSCOUT_API LaneDescription : public RouteDescription::Description
+    {
+    private:
+      bool oneway{false};
+      uint8_t laneCount{1}; //!< in our direction, not sum on way
+
+      /**
+       * turns in lanes from left one (drivers view)
+       * vector size may be less than laneCount, even empty
+       *
+       * usual variants:
+       *    left, slight_left, merge_to_left,
+       *    through;left, through;slight_left, through;sharp_left,
+       *    through,
+       *    through;right, through;slight_right, through;sharp_right,
+       *    right, slight_right, merge_to_right
+       */
+      std::vector<std::string> laneTurns;
+
+    public:
+      LaneDescription(bool oneway,
+                      uint8_t laneCount,
+                      const std::vector<std::string> &laneTurns);
+
+      std::string GetDebugString() const override;
+
+      bool IsOneway() const
+      {
+        return oneway;
+      }
+
+      uint8_t GetLaneCount() const
+      {
+        return laneCount;
+      }
+
+      const std::vector<std::string>& GetLaneTurns() const
+      {
+        return laneTurns;
+      }
+
+      bool operator==(const LaneDescription &o) const;
+      bool operator!=(const LaneDescription &o) const;
+    };
+
+    typedef std::shared_ptr<LaneDescription> LaneDescriptionRef;
+
+    /**
+     * \ingroup Routing
+     *
+     * A suggested route lanes. It specifies range of lanes <from, to> that drive
+     * should use. Lanes are counted from left (just route direction, not opposite direction),
+     * left-most lane has index 0, both indexes are inclusive.
+     */
+    class OSMSCOUT_API SuggestedLaneDescription : public RouteDescription::Description
+    {
+    private:
+      uint8_t from = -1; //!< left-most suggested lane, inclusive
+      uint8_t to = -1; //!< right-most suggested lane, inclusive
+
+    public:
+      SuggestedLaneDescription(uint8_t from, uint8_t to);
+
+      std::string GetDebugString() const override;
+
+      uint8_t getFrom() const
+      {
+        return from;
+      }
+
+      uint8_t getTo() const
+      {
+        return to;
+      }
+    };
+
+    typedef std::shared_ptr<SuggestedLaneDescription> SuggestedLaneDescriptionRef;
+
+    /**
+     * \ingroup Routing
      */
     class OSMSCOUT_API Node
     {
     private:
-      DatabaseId                                     database;
-      size_t                                         currentNodeIndex;
-      std::vector<ObjectFileRef>                     objects;
-      ObjectFileRef                                  pathObject;
-      size_t                                         targetNodeIndex;
-      Distance                                       distance; // distance from route start
-      Timestamp::duration                            time; // time from route start
-      GeoCoord                                       location;
+      DatabaseId                                     database; //!< database id of objects and pathObject
+      size_t                                         currentNodeIndex; //!< current node index of pathObject
+      std::vector<ObjectFileRef>                     objects; //!< list of objects intersecting this node. Is empty when node belongs to pathObject only
+      ObjectFileRef                                  pathObject; //!< object used for traveling from this node. Is invalid for last node
+      size_t                                         targetNodeIndex; //!< target node index of pathObject
+      Distance                                       distance; //!< distance from route start
+      Duration                                       time; //!< time from route start
+      GeoCoord                                       location; //!< geographic coordinate of node
       std::unordered_map<std::string,DescriptionRef> descriptionMap;
       std::list<DescriptionRef>                      descriptions;
 

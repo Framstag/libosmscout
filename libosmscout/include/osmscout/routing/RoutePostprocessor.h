@@ -311,6 +311,40 @@ namespace osmscout {
 
     using POIsPostprocessorRef = std::shared_ptr<POIsPostprocessor>;
 
+    /**
+     * \ingroup Routing
+     * Evaluate route lanes
+     */
+    class OSMSCOUT_API LanesPostprocessor : public RoutePostprocessor::Postprocessor
+    {
+    public:
+      LanesPostprocessor() : Postprocessor() {};
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   RouteDescription& description) override;
+    };
+
+    typedef std::shared_ptr<LanesPostprocessor> LanesPostprocessorRef;
+
+    /**
+     * \ingroup Routing
+     * Evaluate suggested route lanes that may be used.
+     * Route lanes have to be evaluated already (using LanesPostprocessor)
+     */
+    class OSMSCOUT_API SuggestedLanesPostprocessor : public RoutePostprocessor::Postprocessor
+    {
+    public:
+      SuggestedLanesPostprocessor(const Distance &distanceBefore=Meters(500)) :
+        Postprocessor(), distanceBefore(distanceBefore) {};
+
+      bool Process(const RoutePostprocessor& postprocessor,
+                   RouteDescription& description) override;
+    private:
+      Distance distanceBefore;
+    };
+
+    typedef std::shared_ptr<SuggestedLanesPostprocessor> SuggestedLanesPostprocessorRef;
+
   private:
     std::vector<RoutingProfileRef>                                profiles;
     std::vector<DatabaseRef>                                      databases;
@@ -324,6 +358,8 @@ namespace osmscout {
     std::unordered_map<DatabaseId,RoundaboutFeatureReader*>       roundaboutReaders;
     std::unordered_map<DatabaseId,DestinationFeatureValueReader*> destinationReaders;
     std::unordered_map<DatabaseId,MaxSpeedFeatureValueReader*>    maxSpeedReaders;
+    std::unordered_map<DatabaseId,LanesFeatureValueReader*>       lanesReaders;
+    std::unordered_map<DatabaseId,AccessFeatureValueReader*>      accessReaders;
 
     std::unordered_map<DatabaseId,TypeInfoSet>                    motorwayTypes;
     std::unordered_map<DatabaseId,TypeInfoSet>                    motorwayLinkTypes;
@@ -366,6 +402,8 @@ namespace osmscout {
     RouteDescription::DestinationDescriptionRef GetDestination(const RouteDescription::Node& node) const;
 
     uint8_t GetMaxSpeed(const RouteDescription::Node& node) const;
+
+    RouteDescription::LaneDescriptionRef GetLanes(const RouteDescription::Node& node) const;
 
     Id GetNodeId(const RouteDescription::Node& node) const;
 
