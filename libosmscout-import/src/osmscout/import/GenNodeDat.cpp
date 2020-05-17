@@ -19,13 +19,7 @@
 
 #include <osmscout/import/GenNodeDat.h>
 
-#include <iostream>
-#include <map>
-
-#include <osmscout/GeoCoord.h>
 #include <osmscout/Node.h>
-
-#include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
@@ -63,7 +57,7 @@ namespace osmscout {
     // Count the bounding box by the way...
     //
 
-    progress.SetAction("Generating nodes.tmp");
+    progress.SetAction("Generating "+std::string(NODES_TMP));
 
     FileScanner scanner;
     FileWriter  writer;
