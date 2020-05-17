@@ -19,13 +19,51 @@
 
 #include <osmscout/import/GenPTRouteDat.h>
 
-#include <osmscout/import/Preprocess.h>
-
+#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
+
+#include <osmscout/PTRouteDataFile.h>
+
+#include <osmscout/import/Preprocess.h>
 
 #include <osmscout/util/File.h>
 
 namespace osmscout {
+
+  bool PTRouteDataGenerator::WriteRoutes(const TypeConfig& typeConfig,
+                                         const ImportParameter& parameter,
+                                         Progress& progress,
+                                         const std::list<PTRouteRef>& routes)
+  {
+    FileWriter writer;
+    uint32_t   routesWrittenCount=routes.size();
+
+    progress.SetAction("Writing "+std::string(PTRouteDataFile::PTROUTES_DAT));
+
+    try {
+      writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                  PTRouteDataFile::PTROUTES_DAT));
+
+      writer.Write(routesWrittenCount);
+
+      for (auto route : routes) {
+        route->Write(typeConfig,writer);
+      }
+
+      writer.Close();
+    }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
+
+      writer.CloseFailsafe();
+
+      return false;
+    }
+
+    progress.Info(std::string("Wrote "+std::to_string(routesWrittenCount)+" routes"));
+
+    return true;
+  }
 
   void PTRouteDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                             ImportModuleDescription& description) const
@@ -36,25 +74,32 @@ namespace osmscout {
     description.AddRequiredFile(Preprocess::RAWROUTEMASTER_DAT);
     description.AddRequiredFile(Preprocess::RAWROUTE_DAT);
 
-    //description.AddProvidedFile(RoutingService::FILENAME_INTERSECTIONS_DAT);
+    description.AddProvidedFile(PTRouteDataFile::PTROUTES_DAT);
   }
 
   bool PTRouteDataGenerator::Import(const TypeConfigRef& typeConfig,
                                     const ImportParameter& parameter,
                                     Progress& progress)
   {
-    FileScanner routeMasterScanner;
-    FileScanner routeScanner;
+    FileScanner           routeMasterScanner;
+    FileScanner           routeScanner;
+    FileWriter            routeWriter;
+    std::list<PTRouteRef> routes;
 
     try {
+
       progress.SetAction("Scanning route masters");
 
-      uint32_t routeMasterCount=0;
-      uint32_t routeCount=0;
-      auto     defaultName=NameFeatureValue("");
-      auto     defaultRef=RefFeatureValue("");
-      auto     defaultOperatorName=OperatorFeatureValue("");
-      auto     defaultNetworkName=NetworkFeatureValue("");
+      uint32_t                   routeMasterCount   =0;
+      uint32_t                   routeCount         =0;
+      NameFeatureValueReader     nameReader(*typeConfig);
+      RefFeatureValueReader      refReader(*typeConfig);
+      OperatorFeatureValueReader operatorReader(*typeConfig);
+      NetworkFeatureValueReader  networkReader(*typeConfig);
+      auto                       defaultName        =NameFeatureValue("");
+      auto                       defaultRef         =RefFeatureValue("");
+      auto                       defaultOperatorName=OperatorFeatureValue("");
+      auto                       defaultNetworkName =NetworkFeatureValue("");
 
       routeMasterScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                               Preprocess::RAWROUTEMASTER_DAT),
@@ -71,23 +116,27 @@ namespace osmscout {
         rawRel.Read(*typeConfig,
                     routeMasterScanner);
 
-        NameFeatureValueReader     nameReader(*typeConfig);
-        RefFeatureValueReader      refReader(*typeConfig);
-        OperatorFeatureValueReader operatorReader(*typeConfig);
-        NetworkFeatureValueReader  networkReader(*typeConfig);
-
         std::string name=nameReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultName).GetName();
         std::string ref=refReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultRef).GetRef();
         std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
         std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
 
+        PTRouteRef route=std::make_shared<PTRoute>();
+
+        // ID?
+        route->SetName(name);
+        route->SetRef(ref);
+        route->SetOperator(operatorName);
+        route->SetNetwork(networkName);
+
         progress.Info("ROUTE MASTER: "+std::to_string(rawRel.GetId())+" "+
                       rawRel.GetType()->GetName()+" "+
-                      "\""+ref+"\" "+
-                      "\""+name+"\" "+
-                      "\""+networkName+"\" "+
-                      "\""+operatorName+"\"");
+                      "\""+route->GetRef()+"\" "+
+                      "\""+route->GetName()+"\" "+
+                      "\""+route->GetNetwork()+"\" "+
+                      "\""+route->GetOperator()+"\"");
 
+        routes.push_back(route);
       }
 
       routeMasterScanner.Close();
@@ -136,6 +185,10 @@ namespace osmscout {
       routeScanner.CloseFailsafe();
       routeMasterScanner.CloseFailsafe();
 
+      return false;
+    }
+
+    if (!WriteRoutes(*typeConfig,parameter,progress,routes)) {
       return false;
     }
 

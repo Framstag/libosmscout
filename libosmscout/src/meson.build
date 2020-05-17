@@ -88,6 +88,8 @@ osmscoutSrc = [
             'src/osmscout/Pixel.cpp',
             'src/osmscout/Point.cpp',
             'src/osmscout/POIService.cpp',
+            'src/osmscout/PTRouteDataFile.cpp',
+            'src/osmscout/PublicTransport.cpp',
             'src/osmscout/ObjectVariantDataFile.cpp',
             'src/osmscout/SRTM.cpp',
             'src/osmscout/Tag.cpp',
