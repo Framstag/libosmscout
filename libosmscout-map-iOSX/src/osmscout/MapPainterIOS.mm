@@ -322,10 +322,11 @@ namespace osmscout {
         double r = style->GetTextColor().GetR();
         double g = style->GetTextColor().GetG();
         double b = style->GetTextColor().GetB();
+        double a = style->GetTextColor().GetA();
         
         CGContextSaveGState(cg);
-        CGContextSetRGBFillColor(cg, r, g, b, 1.0);
-        CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
+        CGContextSetRGBFillColor(cg, r, g, b, a);
+        CGContextSetRGBStrokeColor(cg, r, g, b, a);
         int index = 0;
         for (const auto &glyph:glyphs) {
             CTRunGetGlyphs(run, CFRangeMake(index, 1), glyphToDraw);
@@ -413,6 +414,7 @@ namespace osmscout {
         double r = color.GetR();
         double g = color.GetG();
         double b = color.GetB();
+        double a = color.GetA();
         CGFloat lineHeight = layout.label.lineHeight;
         CGFloat width = layout.label.lineWidth;
 
@@ -444,8 +446,8 @@ namespace osmscout {
             lineNumber++;
             
             CGContextSaveGState(cg);
-            CGContextSetRGBFillColor(cg, r, g, b, 1.0);
-            CGContextSetRGBStrokeColor(cg, r, g, b, 1.0);
+            CGContextSetRGBFillColor(cg, r, g, b, a);
+            CGContextSetRGBStrokeColor(cg, r, g, b, a);
             if(emphasize){
                 CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
                 CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, 1 });
@@ -486,7 +488,7 @@ namespace osmscout {
                                      style->GetBgColor().GetR(),
                                      style->GetBgColor().GetG(),
                                      style->GetBgColor().GetB(),
-                                     1);
+                                     style->GetBorderColor().GetA());
             CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
                                        style->GetBorderColor().GetG(),
                                        style->GetBorderColor().GetB(),
