@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/util/MemoryMonitor.h>
+#include <osmscout/util/Logger.h>
 
 // For MemoryMonitor
 #ifdef __linux__
@@ -67,12 +68,17 @@ namespace osmscout {
     double currentResidentSet=0.0;
 
 #ifdef __linux__
-    double vsize;
-    double rss;
+    double vsize=0;
+    double rss=0;
     {
       std::ifstream ifs("/proc/self/statm", std::ios_base::in);
+      ifs.imbue(std::locale("C"));
 
       ifs >> vsize >> rss;
+
+      if (ifs.fail()){
+        log.Warn() << "Failed to measure memory usage";
+      }
     }
 
     long pageSizeInByte=sysconf(_SC_PAGE_SIZE);
