@@ -143,6 +143,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<osmscout::TileRef>("osmscout::TileRef");
   qRegisterMetaType<osmscout::Vehicle>("osmscout::Vehicle");
   qRegisterMetaType<osmscout::PositionAgent::PositionState>("osmscout::PositionAgent::PositionState");
+  qRegisterMetaType<osmscout::LaneAgent::Lane>("osmscout::LaneAgent::Lane");
   qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
   qRegisterMetaType<QList<QDir>>("QList<QDir>");
   qRegisterMetaType<MapViewStruct>("MapViewStruct");

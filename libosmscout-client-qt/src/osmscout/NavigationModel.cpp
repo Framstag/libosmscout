@@ -60,6 +60,10 @@ NavigationModel::NavigationModel():
   connect(navigationModule, &NavigationModule::maxAllowedSpeed,
           this, &NavigationModel::onMaxAllowedSpeed,
           Qt::QueuedConnection);
+
+  connect(navigationModule, &NavigationModule::laneUpdate,
+          this, &NavigationModel::onLaneUpdate,
+          Qt::QueuedConnection);
 }
 
 NavigationModel::~NavigationModel(){
@@ -145,6 +149,12 @@ void NavigationModel::onMaxAllowedSpeed(double maxAllowedSpeed)
 {
   this->maxAllowedSpeed=maxAllowedSpeed;
   emit maxAllowedSpeedUpdate(maxAllowedSpeed);
+}
+
+void NavigationModel::onLaneUpdate(osmscout::LaneAgent::Lane lane)
+{
+  this->lane = lane;
+  emit laneUpdate();
 }
 
 QObject *NavigationModel::getNextRoutStep()

@@ -120,6 +120,9 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
         assert(mediaPlayer);
         playerStateChanged(mediaPlayer->state());
       }
+    } else if (dynamic_cast<osmscout::LaneAgent::LaneMessage*>(message.get())!=nullptr) {
+      auto laneMessage = static_cast<osmscout::LaneAgent::LaneMessage*>(message.get());
+      emit laneUpdate(laneMessage->lane);
     }
   }
 }

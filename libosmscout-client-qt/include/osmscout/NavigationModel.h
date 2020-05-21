@@ -54,6 +54,12 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   // km/h <0 when unknown
   Q_PROPERTY(double maxAllowedSpeed READ getMaxAllowedSpeed NOTIFY maxAllowedSpeedUpdate)
 
+  Q_PROPERTY(int laneCount READ getLaneCount NOTIFY laneUpdate)
+  Q_PROPERTY(bool laneSuggested READ isLaneSuggested NOTIFY laneUpdate)
+  Q_PROPERTY(int suggestedLaneFrom READ getSuggestedLaneFrom NOTIFY laneUpdate)
+  Q_PROPERTY(int suggestedLaneTo READ getSuggestedLaneTo NOTIFY laneUpdate)
+  Q_PROPERTY(QStringList laneTurns READ getLaneTurns NOTIFY laneUpdate)
+
 signals:
   void update();
 
@@ -79,6 +85,8 @@ signals:
   void currentSpeedUpdate(double currentSpeed);
   void maxAllowedSpeedUpdate(double maxAllowedSpeed);
 
+  void laneUpdate();
+
 public slots:
   void locationChanged(bool locationValid,
                        double lat, double lon,
@@ -103,6 +111,8 @@ public slots:
 
   void onCurrentSpeed(double currentSpeed);
   void onMaxAllowedSpeed(double maxAllowedSpeed);
+
+  void onLaneUpdate(osmscout::LaneAgent::Lane lane);
 
 public:
   using Roles = RouteStep::Roles;
@@ -164,6 +174,35 @@ public:
     return maxAllowedSpeed;
   }
 
+  int getLaneCount() const
+  {
+    return lane.count;
+  }
+
+  bool isLaneSuggested() const
+  {
+    return lane.suggested;
+  }
+
+  int getSuggestedLaneFrom() const
+  {
+    return lane.suggestedFrom;
+  }
+
+  int getSuggestedLaneTo() const
+  {
+    return lane.suggestedTo;
+  }
+
+  QStringList getLaneTurns() const
+  {
+    QStringList result;
+    for (const auto &turn : lane.turns){
+      result << QString::fromStdString(turn);
+    }
+    return result;
+  }
+
 private:
   NavigationModule* navigationModule;
   QtRouteData       route;
@@ -181,6 +220,8 @@ private:
 
   double currentSpeed{-1};
   double maxAllowedSpeed{-1};
+
+  LaneAgent::Lane lane;
 };
 
 }

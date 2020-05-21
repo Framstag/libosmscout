@@ -85,6 +85,19 @@ namespace osmscout {
       Position position;
 
       PositionMessage(const Timestamp& timestamp, const RouteDescriptionRef &route, const Position &position);
+
+      template<typename Description>
+      std::shared_ptr<Description> GetRouteDescription(const char* name) const
+      {
+        if (route &&
+            position.routeNode != route->Nodes().cend() &&
+            position.state != PositionAgent::Uninitialised &&
+            position.state != PositionAgent::OffRoute) {
+
+          return std::dynamic_pointer_cast<Description>(position.routeNode->GetDescription(name));
+        }
+        return nullptr;
+      }
     };
 
     using PositionMessageRef=std::shared_ptr<PositionMessage>;
