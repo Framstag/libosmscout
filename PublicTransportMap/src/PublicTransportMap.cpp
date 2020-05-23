@@ -83,7 +83,6 @@ struct Route
   std::list<Station> stations;
 };
 
-
 bool LoadPTRoutes(const Arguments& arguments,
                   const osmscout::TypeConfig& typeConfig,
                   const osmscout::TypeInfoRef& routeType,

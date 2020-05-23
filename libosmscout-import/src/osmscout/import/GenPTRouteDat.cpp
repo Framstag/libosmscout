@@ -99,7 +99,6 @@ namespace osmscout {
     std::map<ObjectOSMRef,ObjectFileRef> idMap;
 
     try {
-
       progress.SetAction("Scanning route masters");
 
       uint32_t                   routeMasterCount   =0;
@@ -149,15 +148,6 @@ namespace osmscout {
             idRouteMasterMap[member.id]=route;
           }
         }
-
-        progress.Info("ROUTE MASTER: "+std::to_string(rawRel.GetId())+" "+
-                      rawRel.GetType()->GetName()+" "+
-                      "\""+route->GetRef()+"\" "+
-                      "\""+route->GetName()+"\" "+
-                      "\""+route->GetNetwork()+"\" "+
-                      "\""+route->GetOperator()+"\"");
-
-        routes.push_back(route);
       }
 
       routeMasterScanner.Close();
