@@ -49,7 +49,7 @@ namespace osmscout {
 
       writer.Write(routesWrittenCount);
 
-      for (auto route : routes) {
+      for (const auto& route : routes) {
         route->Write(typeConfig,writer);
       }
 
@@ -243,10 +243,9 @@ namespace osmscout {
       return false;
     }
 
-    if (!WriteRoutes(*typeConfig,parameter,progress,routes)) {
-      return false;
-    }
-
-    return true;
+    return WriteRoutes(*typeConfig,
+                       parameter,
+                       progress,
+                       routes);
   }
 }
