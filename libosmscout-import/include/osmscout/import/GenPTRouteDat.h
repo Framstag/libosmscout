@@ -31,7 +31,7 @@ namespace osmscout {
   class PTRouteDataGenerator CLASS_FINAL : public ImportModule
   {
   private:
-    bool WriteRoutes(const TypeConfig& typeConfig,
+    static bool WriteRoutes(const TypeConfig& typeConfig,
                      const ImportParameter& parameter,
                      Progress& progress,
                      const std::list<PTRouteRef>& routes);
