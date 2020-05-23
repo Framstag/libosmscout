@@ -23,6 +23,23 @@
 
 namespace osmscout {
 
+  ObjectOSMRef RawRelation::Member::GetObjectOSMRef() const
+  {
+    if (type==MemberType::memberNode) {
+      return ObjectOSMRef(id,osmRefNode);
+    }
+
+    if (type==MemberType::memberWay) {
+      return ObjectOSMRef(id,osmRefWay);
+    }
+
+    if (type==MemberType::memberRelation) {
+      return ObjectOSMRef(id,osmRefRelation);
+    }
+
+    return ObjectOSMRef();
+  }
+
   void RawRelation::SetId(OSMId id)
   {
     this->id=id;

@@ -25,6 +25,8 @@
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
+#include <osmscout/NodeDataFile.h>
+#include <osmscout/WayDataFile.h>
 #include <osmscout/PTRouteDataFile.h>
 
 #include <osmscout/import/Preprocess.h>
@@ -76,6 +78,8 @@ namespace osmscout {
 
     description.AddRequiredFile(Preprocess::RAWROUTEMASTER_DAT);
     description.AddRequiredFile(Preprocess::RAWROUTE_DAT);
+    description.AddRequiredFile(NodeDataFile::NODES_IDMAP);
+    description.AddRequiredFile(WayDataFile::WAYS_IDMAP);
 
     description.AddProvidedFile(PTRouteDataFile::PTROUTES_DAT);
   }
@@ -84,12 +88,15 @@ namespace osmscout {
                                     const ImportParameter& parameter,
                                     Progress& progress)
   {
-    FileScanner           routeMasterScanner;
-    FileScanner           routeScanner;
-    FileWriter            routeWriter;
-    std::list<PTRouteRef> routes;
+    FileScanner                routeMasterScanner;
+    FileScanner                routeScanner;
+    FileScanner                nodeIdScanner;
+    FileScanner                wayIdScanner;
+    FileWriter                 routeWriter;
+    std::list<PTRouteRef>      routes;
 
-    std::map<Id,PTRouteRef> idRouteMasterMap;
+    std::map<Id,PTRouteRef>    idRouteMasterMap;
+    std::map<ObjectOSMRef,ObjectFileRef> idMap;
 
     try {
       progress.SetAction("Scanning route masters");
@@ -145,12 +152,95 @@ namespace osmscout {
 
       routeMasterScanner.Close();
 
-      progress.SetAction("Scanning routes");
+      progress.SetAction("Scanning routes for object references");
 
       routeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                         Preprocess::RAWROUTE_DAT),
                         FileScanner::Sequential,
                         true);
+
+      routeScanner.Read(routeCount);
+
+      for (uint32_t r=1; r<=routeCount; r++) {
+        progress.SetProgress(r,routeCount);
+
+        RawRelation rawRel;
+
+        rawRel.Read(*typeConfig,
+                    routeScanner);
+
+        for (const auto& member : rawRel.members) {
+          idMap.insert(std::make_pair(member.GetObjectOSMRef(),ObjectFileRef()));
+        }
+      }
+
+      progress.SetAction("Resolving node ids");
+
+      uint32_t nodeIdCount;
+
+      nodeIdScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                         NodeDataFile::NODES_IDMAP),
+                         FileScanner::Sequential,
+                         true);
+
+      nodeIdScanner.Read(nodeIdCount);
+
+      for (uint32_t n=1; n<nodeIdCount; n++) {
+        progress.SetProgress(n,nodeIdCount);
+
+        Id         id;
+        uint8_t    typeByte;
+        FileOffset fileOffset;
+
+        nodeIdScanner.Read(id);
+        nodeIdScanner.Read(typeByte);
+        nodeIdScanner.ReadFileOffset(fileOffset);
+
+        ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
+        ObjectFileRef fileRef(fileOffset,refNode);
+
+        if (idMap.find(osmRef)!=idMap.end()) {
+          idMap[osmRef]=fileRef;
+        }
+      }
+
+      nodeIdScanner.Close();
+
+      progress.SetAction("Resolving way ids");
+
+      uint32_t wayIdCount;
+
+      wayIdScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                         WayDataFile::WAYS_IDMAP),
+                         FileScanner::Sequential,
+                         true);
+
+      wayIdScanner.Read(wayIdCount);
+
+      for (uint32_t w=1; w<wayIdCount; w++) {
+        progress.SetProgress(w,wayIdCount);
+
+        Id         id;
+        uint8_t    typeByte;
+        FileOffset fileOffset;
+
+        wayIdScanner.Read(id);
+        wayIdScanner.Read(typeByte);
+        wayIdScanner.ReadFileOffset(fileOffset);
+
+        ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
+        ObjectFileRef fileRef(fileOffset,refWay);
+
+        if (idMap.find(osmRef)!=idMap.end()) {
+          idMap[osmRef]=fileRef;
+        }
+      }
+
+      wayIdScanner.Close();
+
+      progress.SetAction("Scanning routes");
+
+      routeScanner.GotoBegin();
 
       routeScanner.Read(routeCount);
 
@@ -188,12 +278,25 @@ namespace osmscout {
           if (member.role=="stop") {
             PTRoute::Stop stop;
 
+            auto objectFileRefIter=idMap.find(member.GetObjectOSMRef());
+
+            if (objectFileRefIter!=idMap.end() &&
+                objectFileRefIter->second.Valid()) {
+              stop.SetStop(objectFileRefIter->second);
+            }
+
             stop.SetType(PTRoute::StopType::normal);
 
             variant.stops.push_back(stop);
           }
           else if (member.role=="stop_entry_only") {
             PTRoute::Stop stop;
+
+            auto objectFileRefIter=idMap.find(member.GetObjectOSMRef());
+
+            if (objectFileRefIter!=idMap.end()) {
+              stop.SetStop(objectFileRefIter->second);
+            }
 
             stop.SetType(PTRoute::StopType::entryOnly);
 
@@ -202,12 +305,24 @@ namespace osmscout {
           else if (member.role=="stop_exit_only") {
             PTRoute::Stop stop;
 
+            auto objectFileRefIter=idMap.find(member.GetObjectOSMRef());
+
+            if (objectFileRefIter!=idMap.end()) {
+              stop.SetStop(objectFileRefIter->second);
+            }
+
             stop.SetType(PTRoute::StopType::exitOnly);
 
             variant.stops.push_back(stop);
           }
           else if (member.role=="platform") {
             PTRoute::Platform platform;
+
+            auto objectFileRefIter=idMap.find(member.GetObjectOSMRef());
+
+            if (objectFileRefIter!=idMap.end()) {
+              platform.SetPlatform(objectFileRefIter->second);
+            }
 
             platform.SetType(PTRoute::PlatformType::normal);
 
@@ -216,12 +331,24 @@ namespace osmscout {
           else if (member.role=="platform_entry_only") {
             PTRoute::Platform platform;
 
+            auto objectFileRefIter=idMap.find(member.GetObjectOSMRef());
+
+            if (objectFileRefIter!=idMap.end()) {
+              platform.SetPlatform(objectFileRefIter->second);
+            }
+
             platform.SetType(PTRoute::PlatformType::entryOnly);
 
             variant.platforms.push_back(platform);
           }
           else if (member.role=="platform_exit_only") {
             PTRoute::Platform platform;
+
+            auto objectFileRefIter=idMap.find(member.GetObjectOSMRef());
+
+            if (objectFileRefIter!=idMap.end()) {
+              platform.SetPlatform(objectFileRefIter->second);
+            }
 
             platform.SetType(PTRoute::PlatformType::exitOnly);
 
@@ -237,6 +364,7 @@ namespace osmscout {
     catch (IOException& e) {
       progress.Error(e.GetDescription());
 
+      nodeIdScanner.CloseFailsafe();
       routeScanner.CloseFailsafe();
       routeMasterScanner.CloseFailsafe();
 
