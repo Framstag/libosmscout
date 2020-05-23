@@ -21,6 +21,11 @@
 
 namespace osmscout {
 
+  void PTRoute::SetType(const TypeInfoRef& type)
+  {
+    PTRoute::type=type;
+  }
+
   void PTRoute::SetName(const std::string& name)
   {
     PTRoute::name=name;
@@ -41,10 +46,16 @@ namespace osmscout {
     PTRoute::network=network;
   }
 
-  void PTRoute::Read(const TypeConfig& /*typeConfig*/,
+  void PTRoute::Read(const TypeConfig& typeConfig,
                      FileScanner& scanner)
   {
-    fileOffset = scanner.GetPos();
+    fileOffset=scanner.GetPos();
+
+    uint16_t typeIndex;
+
+    scanner.Read(typeIndex);
+
+    type=typeConfig.GetTypeInfo(typeIndex);
 
     scanner.Read(name);
     scanner.Read(ref);
@@ -55,6 +66,8 @@ namespace osmscout {
   void PTRoute::Write(const TypeConfig& /*typeConfig*/,
                       FileWriter& writer) const
   {
+    // TODO: Find a better way to get and store a stable id for the type
+    writer.Write(static_cast<uint16_t>(type->GetIndex()));
     writer.Write(name);
     writer.Write(ref);
     writer.Write(operatorName);

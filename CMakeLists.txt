@@ -316,9 +316,14 @@ if(OSMSCOUT_BUILD_DEMOS)
   add_subdirectory(Demos)
 endif()
 
-option(OSMSCOUT_BUILD_TOOL_DUMPDATA "Enable build of dump tool" TRUE)
+option(OSMSCOUT_BUILD_TOOL_DUMPDATA "Enable build of DumpData tool" TRUE)
 if(OSMSCOUT_BUILD_TOOL_DUMPDATA)
   add_subdirectory(DumpData)
+endif()
+
+option(OSMSCOUT_BUILD_TOOL_PUBLICTRANSPORTMAP "Enable build of PublicTransportMap tool" TRUE)
+if(OSMSCOUT_BUILD_TOOL_PUBLICTRANSPORTMAP)
+  add_subdirectory(PublicTransportMap)
 endif()
 
 option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 "Enable build of OSMSCout2 demo" ${OSMSCOUT_BUILD_TOOL_OSMSCOUT2_CACHE})
