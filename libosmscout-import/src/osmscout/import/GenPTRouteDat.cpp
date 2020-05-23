@@ -167,11 +167,24 @@ namespace osmscout {
         std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
         std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
 
-        auto routeMasterIter=idRouteMasterMap.find(rawRel.GetId());
+        auto       routeMasterIter=idRouteMasterMap.find(rawRel.GetId());
+        PTRouteRef route;
 
         if (routeMasterIter==idRouteMasterMap.end()) {
           progress.Error("Cannot find route master for route "+std::to_string(rawRel.GetId())+" "+name);
+          continue;
         }
+
+        route=routeMasterIter->second;
+
+        PTRoute::Variant variant;
+
+        variant.SetName(name);
+        variant.SetRef(ref);
+        variant.SetOperator(operatorName);
+        variant.SetNetwork(networkName);
+
+        route->variants.push_back(variant);
       }
 
       routeScanner.Close();
