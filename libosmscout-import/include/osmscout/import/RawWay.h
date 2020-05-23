@@ -36,20 +36,13 @@ namespace osmscout {
   class RawWay CLASS_FINAL
   {
   private:
-    OSMId              id;
-    bool               isArea;
+    OSMId              id=0;
+    bool               isArea=false;
     std::vector<OSMId> nodes;
     FeatureValueBuffer featureValueBuffer;
 
   public:
-
-  public:
-    inline RawWay()
-    : id(0),
-      isArea(false)
-    {
-      // no code
-    }
+    RawWay() = default;
 
     inline OSMId GetId() const
     {
@@ -143,7 +136,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<RawWay> RawWayRef;
+  using RawWayRef = std::shared_ptr<RawWay>;
 }
 
 #endif
