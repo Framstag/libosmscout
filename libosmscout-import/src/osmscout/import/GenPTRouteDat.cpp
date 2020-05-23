@@ -184,6 +184,51 @@ namespace osmscout {
         variant.SetOperator(operatorName);
         variant.SetNetwork(networkName);
 
+        for (const auto& member : rawRel.members) {
+          if (member.role=="stop") {
+            PTRoute::Stop stop;
+
+            stop.SetType(PTRoute::StopType::normal);
+
+            variant.stops.push_back(stop);
+          }
+          else if (member.role=="stop_entry_only") {
+            PTRoute::Stop stop;
+
+            stop.SetType(PTRoute::StopType::entryOnly);
+
+            variant.stops.push_back(stop);
+          }
+          else if (member.role=="stop_exit_only") {
+            PTRoute::Stop stop;
+
+            stop.SetType(PTRoute::StopType::exitOnly);
+
+            variant.stops.push_back(stop);
+          }
+          else if (member.role=="platform") {
+            PTRoute::Platform platform;
+
+            platform.SetType(PTRoute::PlatformType::normal);
+
+            variant.platforms.push_back(platform);
+          }
+          else if (member.role=="platform_entry_only") {
+            PTRoute::Platform platform;
+
+            platform.SetType(PTRoute::PlatformType::entryOnly);
+
+            variant.platforms.push_back(platform);
+          }
+          else if (member.role=="platform_exit_only") {
+            PTRoute::Platform platform;
+
+            platform.SetType(PTRoute::PlatformType::exitOnly);
+
+            variant.platforms.push_back(platform);
+          }
+        }
+
         route->variants.push_back(variant);
       }
 
