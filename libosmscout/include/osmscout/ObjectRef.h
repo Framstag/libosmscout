@@ -50,6 +50,7 @@ namespace osmscout {
 
   public:
     ObjectOSMRef() = default;
+    ObjectOSMRef(const ObjectOSMRef& ref) = default;
 
     inline ObjectOSMRef(OSMId id,
                         OSMRefType type)
@@ -94,6 +95,20 @@ namespace osmscout {
       return type==osmRefNone;
     }
 
+    inline bool IsNode() const
+    {
+      return type==osmRefNode;
+    }
+
+    inline bool IsWay() const
+    {
+      return type==osmRefWay;
+    }
+
+    inline bool IsRelation() const
+    {
+      return type==osmRefRelation;
+    }
     inline bool operator<(const ObjectOSMRef& reference) const
     {
       return type<reference.type || (type==reference.type &&  id<reference.id);
@@ -132,6 +147,7 @@ namespace osmscout {
 
   public:
     ObjectFileRef() = default;
+    ObjectFileRef(const ObjectFileRef& ref) = default;
 
     inline ObjectFileRef(FileOffset offset,
                          RefType type)
@@ -174,6 +190,21 @@ namespace osmscout {
     inline bool Invalid() const
     {
       return type==refNone;
+    }
+
+    inline bool IsNode() const
+    {
+      return type==refNode;
+    }
+
+    inline bool IsWay() const
+    {
+      return type==refWay;
+    }
+
+    inline bool IsArea() const
+    {
+      return type==refArea;
     }
 
     inline bool operator<(const ObjectFileRef& reference) const
