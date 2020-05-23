@@ -42,6 +42,7 @@ namespace osmscout {
   class OSMSCOUT_API PTRoute CLASS_FINAL
   {
   private:
+    TypeInfoRef type;
     FileOffset  fileOffset;
     std::string name;
     std::string ref;
@@ -50,6 +51,10 @@ namespace osmscout {
 
   public:
     inline PTRoute() = default;
+
+    inline TypeInfoRef GetType() const {
+      return type;
+    }
 
     inline FileOffset GetFileOffset() const
     {
@@ -76,6 +81,7 @@ namespace osmscout {
       return network;
     }
 
+    void SetType(const TypeInfoRef& type);
     void SetName(const std::string& name);
     void SetRef(const std::string& ref);
     void SetOperator(const std::string& operatorName);
