@@ -91,6 +91,10 @@ void DumpRoutes(const std::list<osmscout::PTRouteRef>& routes)
 {
   for (const auto& route : routes) {
     std::cout << route->GetRef() << " - " << route->GetName() << std::endl;
+
+    for (const auto& variant : route->variants) {
+      std::cout << "* " << variant.GetName() << std::endl;
+    }
   }
 }
 

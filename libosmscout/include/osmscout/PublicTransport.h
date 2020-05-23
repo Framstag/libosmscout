@@ -41,6 +41,44 @@ namespace osmscout {
    */
   class OSMSCOUT_API PTRoute CLASS_FINAL
   {
+  public:
+    class Variant
+    {
+    private:
+      std::string name;
+      std::string ref;
+      std::string operatorName;
+      std::string network;
+
+    public:
+      inline std::string GetName() const
+      {
+        return name;
+      }
+
+      inline std::string GetRef() const
+      {
+        return ref;
+      }
+
+      inline std::string GetOperator() const
+      {
+        return operatorName;
+      }
+
+      inline std::string GetNetwork() const
+      {
+        return network;
+      }
+
+      void SetName(const std::string& name);
+      void SetRef(const std::string& ref);
+      void SetOperator(const std::string& operatorName);
+      void SetNetwork(const std::string& network);
+
+      friend PTRoute;
+    };
+
   private:
     TypeInfoRef type;
     FileOffset  fileOffset;
@@ -48,6 +86,9 @@ namespace osmscout {
     std::string ref;
     std::string operatorName;
     std::string network;
+
+  public:
+    std::vector<Variant> variants;
 
   public:
     inline PTRoute() = default;
