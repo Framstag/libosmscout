@@ -19,6 +19,9 @@
 
 #include <iostream>
 
+#include <osmscout/FeatureReader.h>
+
+#include <osmscout/Database.h>
 #include <osmscout/PTRouteDataFile.h>
 
 #include <osmscout/util/CmdLineParsing.h>
@@ -87,8 +90,10 @@ bool LoadPTRoutes(const Arguments& arguments,
   return true;
 }
 
-void DumpRoutes(const std::list<osmscout::PTRouteRef>& routes)
+void DumpRoutes(osmscout::Database& database,const std::list<osmscout::PTRouteRef>& routes)
 {
+  osmscout::NameFeatureLabelReader labelReader(*database.GetTypeConfig());
+
   for (const auto& route : routes) {
     std::cout << route->GetRef() << " - " << route->GetName() << std::endl;
 
@@ -96,7 +101,17 @@ void DumpRoutes(const std::list<osmscout::PTRouteRef>& routes)
       std::cout << "* " << variant.GetName() << std::endl;
 
       for (const auto& stop : variant.stops) {
-        std::cout << "  - " << stop.GetStop().GetName() << std::endl;
+        if (stop.GetStop().IsNode()) {
+          osmscout::NodeRef node;
+
+          if (database.GetNodeByOffset(stop.GetStop().GetFileOffset(),node)) {
+            std::string label=labelReader.GetLabel(node->GetFeatureValueBuffer());
+            std::cout << "  - " << node->GetType()->GetName() << " " << label << std::endl;
+          }
+          else {
+            std::cout << "  - " << stop.GetStop().GetName() << std::endl;
+          }
+        }
       }
     }
   }
@@ -150,16 +165,14 @@ int main(int argc,
     return 0;
   }
 
-  auto typeConfig=std::make_shared<osmscout::TypeConfig>();
+  osmscout::DatabaseParameter      databaseParameter;
+  osmscout::Database               database(databaseParameter);
 
-  std::cout << "Loading type config..." << std::endl;
-  if (!typeConfig->LoadFromDataFile(args.databaseDirectory)) {
-    std::cerr << "Cannot load '"  << osmscout::TypeConfig::FILE_TYPES_DAT << "'!" << std::endl;
-    return 1;
+  if (!database.Open(args.databaseDirectory)) {
+    std::cerr << "Cannot open database" << std::endl;
   }
-  std::cout << "Loading type config...done" << std::endl;
 
-  auto routeType=typeConfig->GetTypeInfo(args.typeName);
+  auto routeType=database.GetTypeConfig()->GetTypeInfo(args.typeName);
 
   if (!routeType) {
     std::cerr << "Cannot find type '"  << args.typeName << "'!" << std::endl;
@@ -169,7 +182,7 @@ int main(int argc,
   std::list<osmscout::PTRouteRef> routes;
 
   std::cout << "Loading routes..." << std::endl;
-  if (!LoadPTRoutes(args,*typeConfig,routeType,routes)) {
+  if (!LoadPTRoutes(args,*database.GetTypeConfig(),routeType,routes)) {
     return 1;
   }
   std::cout << "Loading routes...done" << std::endl;
@@ -181,7 +194,9 @@ int main(int argc,
     return a->GetRef()<b->GetRef();
   });
 
-  DumpRoutes(routes);
+  DumpRoutes(database,routes);
+
+  database.Close();
 
   return 0;
 }

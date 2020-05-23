@@ -48,6 +48,8 @@ namespace osmscout {
       MemberType  type;
       OSMId       id;
       std::string role;
+
+      ObjectOSMRef GetObjectOSMRef() const;
     };
 
   private:

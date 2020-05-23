@@ -166,13 +166,13 @@ namespace osmscout {
       writer.WriteNumber(variant.platforms.size());
 
       for (const auto& stop : variant.stops) {
-        writer.Write((uint8_t)stop.GetType());
-        writer.Write(stop.GetStop());
+        writer.Write((uint8_t)stop.type);
+        writer.Write(stop.stop);
       }
 
       for (const auto& platform : variant.platforms) {
-        writer.Write((uint8_t)platform.GetType());
-        writer.Write(platform.GetPlatform());
+        writer.Write((uint8_t)platform.type);
+        writer.Write(platform.platform);
       }
     }
   }
