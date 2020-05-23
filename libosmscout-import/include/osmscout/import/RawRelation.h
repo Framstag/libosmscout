@@ -51,18 +51,14 @@ namespace osmscout {
     };
 
   private:
-    OSMId               id;
+    OSMId               id=0;
     FeatureValueBuffer  featureValueBuffer;
 
   public:
     std::vector<Member> members;
 
   public:
-    inline RawRelation()
-    : id(0)
-    {
-      // no code
-    }
+    RawRelation() = default;
 
     inline OSMId GetId() const
     {
