@@ -107,7 +107,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<RawRelation> RawRelationRef;
+  using RawRelationRef = std::shared_ptr<RawRelation>;
 }
 
 #endif
