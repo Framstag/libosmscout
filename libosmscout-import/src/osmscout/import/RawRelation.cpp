@@ -20,7 +20,6 @@
 #include <osmscout/import/RawRelation.h>
 
 #include <algorithm>
-#include <limits>
 
 namespace osmscout {
 
@@ -73,24 +72,25 @@ namespace osmscout {
 
     scanner.ReadNumber(memberCount);
 
-    members.resize(memberCount);
 
     if (memberCount>0) {
       OSMId minId;
 
       scanner.ReadNumber(minId);
 
-      for (size_t i=0; i<memberCount; i++) {
+      members.resize(memberCount);
+
+      for (auto& member : members) {
         uint32_t memberType;
         OSMId    id;
 
         scanner.ReadNumber(memberType);
-        members[i].type=(MemberType)memberType;
+        member.type=(MemberType)memberType;
 
         scanner.ReadNumber(id);
-        members[i].id=minId+id;
+        member.id=minId+id;
 
-        scanner.Read(members[i].role);
+        scanner.Read(member.role);
       }
     }
   }
