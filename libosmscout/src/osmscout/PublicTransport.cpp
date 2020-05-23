@@ -21,6 +21,27 @@
 
 namespace osmscout {
 
+
+  void PTRoute::Stop::SetType(PTRoute::StopType stopType)
+  {
+    Stop::type=stopType;
+  }
+
+  void PTRoute::Stop::SetStop(const ObjectFileRef& stop)
+  {
+    Stop::stop=stop;
+  }
+
+  void PTRoute::Platform::SetType(PTRoute::PlatformType platformType)
+  {
+    Platform::type=platformType;
+  }
+
+  void PTRoute::Platform::SetPlatform(const ObjectFileRef& platform)
+  {
+    Platform::platform=platform;
+  }
+
   void PTRoute::Variant::SetName(const std::string& name)
   {
     PTRoute::Variant::name=name;
@@ -93,6 +114,33 @@ namespace osmscout {
       scanner.Read(variant.ref);
       scanner.Read(variant.operatorName);
       scanner.Read(variant.network);
+
+      uint32_t stopCount;
+      uint32_t platformCount;
+
+      scanner.ReadNumber(stopCount);
+      scanner.ReadNumber(platformCount);
+
+      variant.stops.resize(stopCount);
+      variant.platforms.resize(platformCount);
+
+      for (auto& stop : variant.stops) {
+        uint8_t type;
+
+        scanner.Read(type);
+
+        stop.type=(StopType)type;
+        scanner.Read(stop.stop);
+      }
+
+      for (auto& platform : variant.platforms) {
+        uint8_t type;
+
+        scanner.Read(type);
+
+        platform.type=(PlatformType)type;
+        scanner.Read(platform.platform);
+      }
     }
   }
 
@@ -113,6 +161,19 @@ namespace osmscout {
       writer.Write(variant.ref);
       writer.Write(variant.operatorName);
       writer.Write(variant.network);
+
+      writer.WriteNumber(variant.stops.size());
+      writer.WriteNumber(variant.platforms.size());
+
+      for (const auto& stop : variant.stops) {
+        writer.Write((uint8_t)stop.GetType());
+        writer.Write(stop.GetStop());
+      }
+
+      for (const auto& platform : variant.platforms) {
+        writer.Write((uint8_t)platform.GetType());
+        writer.Write(platform.GetPlatform());
+      }
     }
   }
 }

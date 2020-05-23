@@ -42,6 +42,85 @@ namespace osmscout {
   class OSMSCOUT_API PTRoute CLASS_FINAL
   {
   public:
+    /**
+     * A halt can be of one of different types.
+     */
+    enum class StopType : uint8_t
+    {
+      normal    = 0,
+      entryOnly = 1,
+      exitOnly  = 2
+    };
+
+    /**
+     * The platform of a halt can be of one of different types.
+     */
+    enum class PlatformType : uint8_t
+    {
+      normal    = 0,
+      entryOnly = 1,
+      exitOnly  = 2
+    };
+
+    /**
+     * A route variant consists of a number of halts.
+     */
+    class Stop
+    {
+    private:
+      StopType      type;
+      ObjectFileRef stop;
+
+    public:
+      inline StopType GetType() const
+      {
+        return type;
+      }
+
+      inline const ObjectFileRef& GetStop() const
+      {
+        return stop;
+      }
+
+      void SetType(StopType stopType);
+      void SetStop(const ObjectFileRef& stop);
+
+      friend PTRoute;
+    };
+
+    /**
+     * A route variant consists of a number of platforms.
+     */
+    class Platform
+    {
+    private:
+      PlatformType  type;
+      ObjectFileRef platform;
+
+    public:
+      inline PlatformType GetType() const
+      {
+        return type;
+      }
+
+      inline const ObjectFileRef& GetPlatform() const
+      {
+        return platform;
+      }
+
+      void SetType(PlatformType platformType);
+      void SetPlatform(const ObjectFileRef& platform);
+
+      friend PTRoute;
+    };
+
+
+    /**
+     * A route can have multiple variants
+     *
+     * Normally you have one variant in one direction and a second variant in the
+     * opposite direction.
+     */
     class Variant
     {
     private:
@@ -49,6 +128,10 @@ namespace osmscout {
       std::string ref;
       std::string operatorName;
       std::string network;
+
+    public:
+      std::vector<Stop>     stops;
+      std::vector<Platform> platforms;
 
     public:
       inline std::string GetName() const
