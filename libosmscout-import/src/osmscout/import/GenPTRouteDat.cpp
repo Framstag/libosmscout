@@ -19,6 +19,9 @@
 
 #include <osmscout/import/GenPTRouteDat.h>
 
+#include <list>
+#include <map>
+
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
@@ -86,8 +89,9 @@ namespace osmscout {
     FileWriter            routeWriter;
     std::list<PTRouteRef> routes;
 
-    try {
+    std::map<Id,PTRouteRef> idRouteMasterMap;
 
+    try {
       progress.SetAction("Scanning route masters");
 
       uint32_t                   routeMasterCount   =0;
@@ -124,19 +128,19 @@ namespace osmscout {
         PTRouteRef route=std::make_shared<PTRoute>();
 
         // ID?
+        route->SetType(rawRel.GetType());
         route->SetName(name);
         route->SetRef(ref);
         route->SetOperator(operatorName);
         route->SetNetwork(networkName);
 
-        progress.Info("ROUTE MASTER: "+std::to_string(rawRel.GetId())+" "+
-                      rawRel.GetType()->GetName()+" "+
-                      "\""+route->GetRef()+"\" "+
-                      "\""+route->GetName()+"\" "+
-                      "\""+route->GetNetwork()+"\" "+
-                      "\""+route->GetOperator()+"\"");
-
         routes.push_back(route);
+
+        for (const auto& member : rawRel.members) {
+          if (member.type==RawRelation::memberRelation) {
+            idRouteMasterMap[member.id]=route;
+          }
+        }
       }
 
       routeMasterScanner.Close();
@@ -158,23 +162,16 @@ namespace osmscout {
         rawRel.Read(*typeConfig,
                     routeScanner);
 
-        NameFeatureValueReader     nameReader(*typeConfig);
-        RefFeatureValueReader      refReader(*typeConfig);
-        OperatorFeatureValueReader operatorReader(*typeConfig);
-        NetworkFeatureValueReader  networkReader(*typeConfig);
-
         std::string name=nameReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultName).GetName();
         std::string ref=refReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultRef).GetRef();
         std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
         std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
 
-        progress.Info("ROUTE: "+std::to_string(rawRel.GetId())+" "+
-                      rawRel.GetType()->GetName()+" "+
-                      "\""+ref+"\" "+
-                      "\""+name+"\" "+
-                      "\""+networkName+"\" "+
-                      "\""+operatorName+"\"");
+        auto routeMasterIter=idRouteMasterMap.find(rawRel.GetId());
 
+        if (routeMasterIter==idRouteMasterMap.end()) {
+          progress.Error("Cannot find route master for route "+std::to_string(rawRel.GetId())+" "+name);
+        }
       }
 
       routeScanner.Close();
