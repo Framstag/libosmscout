@@ -84,7 +84,7 @@ public:
 
     coastline->coast.reserve(coords.size());
 
-    for (auto& coord : coords) {
+    for (const auto & coord : coords) {
       coastline->coast.emplace_back(0,coord);
     }
 
