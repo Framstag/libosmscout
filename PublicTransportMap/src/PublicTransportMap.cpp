@@ -290,7 +290,6 @@ void WriteRouteList(std::ofstream& stream, const std::list<Route>& routes)
 
     y+=400;
   }
-
 }
 
 void WriteSVGFooter(std::ofstream& stream)
