@@ -349,6 +349,7 @@ endif
 
 subdir('Demos')
 subdir('DumpData')
+subdir('PublicTransportMap')
 
 if buildOSMScout2
   subdir('OSMScout2')
