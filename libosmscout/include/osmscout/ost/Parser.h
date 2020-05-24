@@ -133,6 +133,7 @@ std::string Destring(const char* str)
 	void TYPEKINDS(unsigned char& types);
 	void TAGCONDITION(TagConditionRef& condition);
 	void TYPEFEATURE(TypeInfo& typeInfo);
+	void SPECIALTYPE(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
 	void GROUPS(TypeInfo& typeInfo);
 	void TYPEDESCS(TypeInfo& typeInfo);

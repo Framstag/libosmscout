@@ -51,6 +51,8 @@ namespace osmscout {
     static const char* const RAWCOASTLINE_DAT;
     static const char* const RAWDATAPOLYGON_DAT;
     static const char* const RAWTURNRESTR_DAT;
+    static const char* const RAWROUTEMASTER_DAT;
+    static const char* const RAWROUTE_DAT;
 
   private:
     class Callback : public PreprocessorCallback
@@ -63,8 +65,10 @@ namespace osmscout {
         std::vector<RawWay>          rawWays;
         std::vector<RawCoastline>    rawCoastlines;
         std::vector<RawCoastline>    rawDatapolygon;
-        std::vector<RawRelation>     rawRelations;
+        std::vector<RawRelation>     multipolygons;
         std::vector<TurnRestriction> turnRestriction;
+        std::vector<RawRelation>     routeMasters;
+        std::vector<RawRelation>     routes;
       };
 
       // Should be unique_ptr but I get compiler errors if passing it to the WriteWorkerQueue
@@ -87,6 +91,8 @@ namespace osmscout {
       FileWriter                               datapolygonWriter;
       FileWriter                               turnRestrictionWriter;
       FileWriter                               multipolygonWriter;
+      FileWriter                               routeMasterWriter;
+      FileWriter                               routeWriter;
 
       bool                                     readNodes;
       bool                                     readWays;
@@ -101,6 +107,8 @@ namespace osmscout {
       uint32_t                                 datapolygonCount;
       uint32_t                                 turnRestrictionCount;
       uint32_t                                 multipolygonCount;
+      uint32_t                                 routeMasterCount;
+      uint32_t                                 routeCount;
 
       OSMId                                    lastNodeId;
       OSMId                                    lastWayId;
@@ -122,7 +130,8 @@ namespace osmscout {
 
       std::vector<uint32_t>                    nodeStat;
       std::vector<uint32_t>                    areaStat;
-      std::vector<uint32_t>                    wayStat;
+      std::vector<uint32_t> wayStat;
+      std::vector<uint32_t> relStat;
 
     private:
       bool IsTurnRestriction(const TagMap& tags,
@@ -131,6 +140,12 @@ namespace osmscout {
 
       bool IsMultipolygon(const TagMap& tags,
                           TypeInfoRef& type);
+
+      bool IsRouteMaster(const TagMap& tags,
+                         TypeInfoRef& type);
+
+      bool IsRoute(const TagMap& tags,
+                   TypeInfoRef& type);
 
       bool DumpDistribution();
       bool DumpBoundingBox();
@@ -147,6 +162,16 @@ namespace osmscout {
                                OSMId id,
                                const TypeInfoRef& type,
                                ProcessedData& processed);
+      void RouteMasterSubTask(const TagMap& tags,
+                              const std::vector<RawRelation::Member>& members,
+                              OSMId id,
+                              const TypeInfoRef& type,
+                              ProcessedData& processed);
+      void RouteSubTask(const TagMap& tags,
+                        const std::vector<RawRelation::Member>& members,
+                        OSMId id,
+                        const TypeInfoRef& type,
+                        ProcessedData& processed);
       void RelationSubTask(const RawRelationData& data,
                            ProcessedData& processed);
 
