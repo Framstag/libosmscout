@@ -21,10 +21,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <iomanip>
-
-#include <osmscout/Database.h>
-#include <osmscout/MapService.h>
 
 #include <osmscout/MapPainterSVG.h>
 
@@ -52,6 +48,7 @@ int main(int argc, char* argv[])
 
   if (!stream) {
     std::cerr << "Cannot open '" << args.output << "' for writing!" << std::endl;
+    return 1;
   }
 
   osmscout::MapPainterSVG painter(drawDemo.styleConfig);
