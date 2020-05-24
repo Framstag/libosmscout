@@ -83,7 +83,6 @@ struct Route
   std::list<Station> stations;
 };
 
-
 bool LoadPTRoutes(const Arguments& arguments,
                   const osmscout::TypeConfig& typeConfig,
                   const osmscout::TypeInfoRef& routeType,
@@ -163,12 +162,10 @@ std::list<Route> TransformRoutes(osmscout::Database& database,
 
       for (const auto& stop : variant.stops) {
         Station station;
-
         if (stop.GetStop().IsNode()) {
           osmscout::NodeRef node;
 
           if (database.GetNodeByOffset(stop.GetStop().GetFileOffset(),node)) {
-
             std::string label=labelReader.GetLabel(node->GetFeatureValueBuffer());
 
             station.name=label;
@@ -402,6 +399,7 @@ int main(int argc,
   WriteSVGFooter(stream);
 
   stream.close();
+
   database.Close();
 
   return 0;
