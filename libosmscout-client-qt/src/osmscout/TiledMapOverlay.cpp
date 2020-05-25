@@ -171,7 +171,6 @@ void TiledMapOverlay::paint(QPainter *painter)
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setRenderHint(QPainter::TextAntialiasing, true);
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
-    painter->setRenderHint(QPainter::HighQualityAntialiasing, true);
 
     MapViewStruct request;
     QRectF        boundingBox = contentsBoundingRect();
