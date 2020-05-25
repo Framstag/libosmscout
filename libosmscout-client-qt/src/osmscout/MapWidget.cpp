@@ -243,7 +243,6 @@ void MapWidget::paint(QPainter *painter)
     painter->setRenderHint(QPainter::Antialiasing, !animationInProgress);
     painter->setRenderHint(QPainter::TextAntialiasing, !animationInProgress);
     painter->setRenderHint(QPainter::SmoothPixmapTransform, !animationInProgress);
-    painter->setRenderHint(QPainter::HighQualityAntialiasing, !animationInProgress);
 
     MapViewStruct request;
     QRectF        boundingBox = contentsBoundingRect();
