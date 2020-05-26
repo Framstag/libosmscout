@@ -66,7 +66,11 @@ if [ "$TARGET" = "build" ]; then
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
       brew unlink python
       # skip cairo, already installed
-      brew install gettext protobuf pango qt5 glfw3 glew glm
+      brew install gettext
+      brew upgrade protobuf
+      brew install pango
+      brew upgrade qt5
+      brew install  glfw3 glew glm
       brew link --force gettext
       brew link --force qt5
       brew link --force --overwrite python
