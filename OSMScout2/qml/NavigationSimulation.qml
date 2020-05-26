@@ -318,6 +318,28 @@ Window {
                 }
             }
         }
+
+        LaneTurns {
+            id: laneTurnsComponent
+
+            laneTurns: navigationModel.laneTurns
+            visible: navigationModel.laneSuggested
+            suggestedLaneFrom: navigationModel.suggestedLaneFrom
+            suggestedLaneTo: navigationModel.suggestedLaneTo
+
+            color: "white"
+            border.color: "lightgrey"
+            border.width: 1
+            height: Math.max(60, nextStepBox.height * 0.5)
+
+            anchors{
+                top: nextStepBox.top
+                left: nextStepBox.right
+                margins: Theme.horizSpace
+            }
+            //maxWidth: parent.width - (speedIndicator.width + menuBtn.width + 4*Theme.paddingMedium)
+        }
+
     }
 
     Rectangle {

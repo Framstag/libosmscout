@@ -14,6 +14,8 @@
         <file>qml/custom/ScrollIndicator.qml</file>
         <file>qml/custom/RouteStepIcon.qml</file>
         <file>qml/custom/RoutingStep.qml</file>
+        <file>qml/custom/LaneTurnIcon.qml</file>
+        <file>qml/custom/LaneTurns.qml</file>
         <file>qml/custom/Utils.js</file>
 
         <file>pics/DeleteText.svg</file>
@@ -48,6 +50,19 @@
         <file>pics/routestep/leave-roundabout-4.svg</file>
         <file>pics/routestep/leave-roundabout-4-lhd.svg</file>
         <file>pics/routestep/enter-roundabout-lhd.svg</file>
+
+        <file>pics/laneturn/empty_outline.svg</file>
+        <file>pics/laneturn/empty.svg</file>
+        <file>pics/laneturn/left_outline.svg</file>
+        <file>pics/laneturn/left.svg</file>
+        <file>pics/laneturn/right_outline.svg</file>
+        <file>pics/laneturn/right.svg</file>
+        <file>pics/laneturn/through_left_outline.svg</file>
+        <file>pics/laneturn/through_left.svg</file>
+        <file>pics/laneturn/through_outline.svg</file>
+        <file>pics/laneturn/through_right_outline.svg</file>
+        <file>pics/laneturn/through_right.svg</file>
+        <file>pics/laneturn/through.svg</file>
 
         <file>resources/online-tile-providers.json</file>
         <file>resources/map-providers.json</file>
