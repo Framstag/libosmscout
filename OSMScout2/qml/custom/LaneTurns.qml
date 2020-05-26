@@ -38,6 +38,12 @@ Rectangle{
     onLaneTurnsChanged: {
         updateLane();
     }
+    onSuggestedLaneFromChanged: {
+        updateLane();
+    }
+    onSuggestedLaneToChanged: {
+        updateLane();
+    }
 
     function updateLane() {
         if (iconComponent.status == Component.Error) {
