@@ -241,6 +241,8 @@ namespace osmscout {
   {
   protected:
     bool applyJunctionPenalty=true;
+    Distance penaltySameType=Meters(160);
+    Distance penaltyDifferentType=Meters(250);
 
   public:
     explicit FastestPathRoutingProfile(const TypeConfigRef& typeConfig);
@@ -305,10 +307,14 @@ namespace osmscout {
       // it is estimate without considering real junction geometry
       double junctionPenalty{0};
       if (applyJunctionPenalty && inObjIndex!=outObjIndex){
+        auto penaltyDistance = inPathVariant.type != outPathVariant.type ?
+                               penaltyDifferentType :
+                               penaltySameType;
+
         double minSpeed=std::min(GetMaxSpeed(inPathVariant),GetMaxSpeed(outPathVariant));
         junctionPenalty = minSpeed <= 0 ?
-            std::numeric_limits<double>::infinity() :
-            0.160 / minSpeed;
+                          std::numeric_limits<double>::infinity() :
+                          penaltyDistance.As<Kilometer>() / minSpeed;
       }
 
       return outPrice + junctionPenalty;
