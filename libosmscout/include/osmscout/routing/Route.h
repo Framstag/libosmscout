@@ -650,12 +650,12 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      uint8_t getFrom() const
+      uint8_t GetFrom() const
       {
         return from;
       }
 
-      uint8_t getTo() const
+      uint8_t GetTo() const
       {
         return to;
       }

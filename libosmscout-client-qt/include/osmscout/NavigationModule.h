@@ -35,6 +35,7 @@
 #include <osmscout/navigation/ArrivalEstimateAgent.h>
 #include <osmscout/navigation/SpeedAgent.h>
 #include <osmscout/navigation/VoiceInstructionAgent.h>
+#include <osmscout/navigation/LaneAgent.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -73,6 +74,8 @@ signals:
 
   void currentSpeed(double currentSpeedKmPH);
   void maxAllowedSpeed(double maxAllowedSpeedKmPh);
+
+  void laneUpdate(osmscout::LaneAgent::Lane lane);
 
 public slots:
   void setupRoute(QtRouteData route,
@@ -139,7 +142,8 @@ private:
       std::make_shared<VoiceInstructionAgent>(units),
       std::make_shared<RouteStateAgent>(),
       std::make_shared<ArrivalEstimateAgent>(),
-      std::make_shared<SpeedAgent>()
+      std::make_shared<SpeedAgent>(),
+      std::make_shared<LaneAgent>()
   };
 
 };

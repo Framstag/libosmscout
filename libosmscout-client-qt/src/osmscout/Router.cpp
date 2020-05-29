@@ -175,6 +175,8 @@ RouteDescriptionResult Router::TransformRouteDataToRouteDescription(osmscout::Mu
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MaxSpeedPostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::LanesPostprocessor>());
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::SuggestedLanesPostprocessor>());
   postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::InstructionPostprocessor>());
 
   if (!routingService->PostProcessRouteDescription(*result.GetDescription(),

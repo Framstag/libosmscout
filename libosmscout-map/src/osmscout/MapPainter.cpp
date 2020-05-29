@@ -1498,7 +1498,7 @@ namespace osmscout {
       if (lane>=lanes){
         break;
       }
-      if (turn == "left" || turn == "merge_to_left") {
+      if (turn == "left" || turn == "merge_to_left" || turn == "slight_left" || turn == "sharp_left") {
         laneTurns.push_back(OffsetRel::laneBackwardLeft);
       } else if (turn == "through;left" || turn == "through;slight_left" || turn == "through;sharp_left") {
         laneTurns.push_back(OffsetRel::laneBackwardThroughLeft);
@@ -1506,7 +1506,7 @@ namespace osmscout {
         laneTurns.push_back(OffsetRel::laneBackwardThrough);
       } else if (turn == "through;right" || turn == "through;slight_right" || turn == "through;sharp_right") {
         laneTurns.push_back(OffsetRel::laneBackwardThroughRight);
-      } else if (turn == "right" || turn == "merge_to_right") {
+      } else if (turn == "right" || turn == "merge_to_right" || turn == "slight_right" || turn == "sharp_right") {
         laneTurns.push_back(OffsetRel::laneBackwardRight);
       } else {
         laneTurns.push_back(OffsetRel::base);
@@ -1525,7 +1525,7 @@ namespace osmscout {
       if (lane>=lanes){
         break;
       }
-      if (turn == "left" || turn == "merge_to_left") {
+      if (turn == "left" || turn == "merge_to_left" || turn == "slight_left" || turn == "sharp_left") {
         laneTurns.push_back(OffsetRel::laneForwardLeft);
       } else if (turn == "through;left" || turn == "through;slight_left" || turn == "through;sharp_left") {
         laneTurns.push_back(OffsetRel::laneForwardThroughLeft);
@@ -1533,7 +1533,7 @@ namespace osmscout {
         laneTurns.push_back(OffsetRel::laneForwardThrough);
       } else if (turn == "through;right" || turn == "through;slight_right" || turn == "through;sharp_right") {
         laneTurns.push_back(OffsetRel::laneForwardThroughRight);
-      } else if (turn == "right" || turn == "merge_to_right") {
+      } else if (turn == "right" || turn == "merge_to_right" || turn == "slight_right" || turn == "sharp_right") {
         laneTurns.push_back(OffsetRel::laneForwardRight);
       } else {
         laneTurns.push_back(OffsetRel::base);

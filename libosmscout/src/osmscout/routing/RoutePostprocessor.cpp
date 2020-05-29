@@ -1544,7 +1544,7 @@ namespace osmscout {
             "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
 
           static const std::set<std::string_view> rightPossibilities{
-              "right"sv, /*"slight_right"sv,*/ "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
+              "right"sv, "slight_right"sv, "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
 
           // after some direction change, we will evaluate allowed lanes in backBuffer
           if (!prevLanes->GetLaneTurns().empty()){
