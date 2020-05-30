@@ -252,7 +252,7 @@ namespace osmscout {
                           uint32_t priority);
     TagId RegisterNameAltTag(const std::string& tagName,
                              uint32_t priority);
-
+      
     TagId GetTagId(const char* name) const;
     TagId GetTagId(const std::string& name) const;
 

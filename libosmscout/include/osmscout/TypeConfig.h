@@ -848,6 +848,7 @@ namespace osmscout {
     std::unordered_map<std::string,FeatureRef>  nameToFeatureMap;
 
     FeatureRef                                  featureName;
+    FeatureRef                                  featureNameShort;
     FeatureRef                                  featureRef;
     FeatureRef                                  featureLocation;
     FeatureRef                                  featureAddress;
