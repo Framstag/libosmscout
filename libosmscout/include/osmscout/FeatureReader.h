@@ -280,6 +280,7 @@ namespace osmscout {
   using EleFeatureValueReader              = FeatureValueReader<EleFeature, EleFeatureValue>;
   using OperatorFeatureValueReader         = FeatureValueReader<OperatorFeature, OperatorFeatureValue>;
   using NetworkFeatureValueReader          = FeatureValueReader<NetworkFeature, NetworkFeatureValue>;
+  using FromToFeatureValueReader           = FeatureValueReader<FromToFeature, FromToFeatureValue>;
 
   template <class F, class V>
   class FeatureLabelReader
