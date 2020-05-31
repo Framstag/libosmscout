@@ -153,6 +153,8 @@ namespace osmscout {
         scanner.Read(platform.platform);
       }
     }
+
+    nextFileOffset=scanner.GetPos();
   }
 
   void PTRoute::Write(const TypeConfig& /*typeConfig*/,
