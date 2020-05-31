@@ -179,6 +179,7 @@ namespace osmscout {
   private:
     TypeInfoRef type;
     FileOffset  fileOffset;
+    FileOffset  nextFileOffset;
     std::string name;
     std::string ref;
     std::string operatorName;
@@ -197,6 +198,11 @@ namespace osmscout {
     inline FileOffset GetFileOffset() const
     {
       return fileOffset;
+    }
+
+    inline FileOffset GetNextFileOffset() const
+    {
+      return nextFileOffset;
     }
 
     inline std::string GetName() const
