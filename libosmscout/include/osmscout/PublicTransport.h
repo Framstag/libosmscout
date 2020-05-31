@@ -128,6 +128,8 @@ namespace osmscout {
       std::string ref;
       std::string operatorName;
       std::string network;
+      std::string from;
+      std::string to;
 
     public:
       std::vector<Stop>     stops;
@@ -154,10 +156,22 @@ namespace osmscout {
         return network;
       }
 
+      inline const std::string& GetFrom() const
+      {
+        return from;
+      }
+
+      inline const std::string& GetTo() const
+      {
+        return to;
+      }
+
       void SetName(const std::string& name);
       void SetRef(const std::string& ref);
       void SetOperator(const std::string& operatorName);
       void SetNetwork(const std::string& network);
+      void SetFrom(const std::string& from);
+      void SetTo(const std::string& to);
 
       friend PTRoute;
     };
@@ -204,6 +218,8 @@ namespace osmscout {
     {
       return network;
     }
+
+
 
     void SetType(const TypeInfoRef& type);
     void SetName(const std::string& name);

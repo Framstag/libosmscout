@@ -30,16 +30,51 @@
 
 /*
  * Example:
- *   PublicTransportMap ../maps/arnsberg-regbez routemaster_tram DSW21 map.svg
+ *   PublicTransportMap --operator DSW21 ../maps/arnsberg-regbez routemaster_tram map.svg
  */
 
 struct Arguments
 {
   bool        help=false;
   std::string databaseDirectory;
-  std::string typeName;
-  std::string operatorName;
+  std::string typeFilter;
+  std::string operatorFilter;
+  std::string refFilter;
   std::string mapPath;
+};
+
+class Direction
+{
+private:
+  std::string from;
+  std::string to;
+
+public:
+  Direction()= default;
+  Direction(const Direction& direction) = default;
+
+  Direction(const std::string& from,
+            const std::string& to)
+    : from(from),
+      to(to)
+  {
+
+  }
+
+  inline const std::string& GetFrom() const
+  {
+    return from;
+  }
+
+  inline const std::string& GetTo() const
+  {
+    return to;
+  }
+
+  inline bool IsReverseOf(const Direction& other) const
+  {
+    return from==other.to && to==other.from;
+  }
 };
 
 struct Station
@@ -79,8 +114,9 @@ struct Station
 
 struct Route
 {
-  std::string        name;
-  std::list<Station> stations;
+  std::string            name;
+  std::list<Station>     stations;
+  std::vector<Direction> directions;
 };
 
 bool LoadPTRoutes(const Arguments& arguments,
@@ -111,8 +147,14 @@ bool LoadPTRoutes(const Arguments& arguments,
       }
 
       // Filter by operator
-      if (!arguments.operatorName.empty()) {
-        if (route->GetOperator()!=arguments.operatorName) {
+      if (!arguments.operatorFilter.empty()) {
+        if (route->GetOperator()!=arguments.operatorFilter) {
+          continue;
+        }
+      }
+
+      if (!arguments.refFilter.empty()) {
+        if (route->GetRef()!=arguments.refFilter) {
           continue;
         }
       }
@@ -133,19 +175,20 @@ bool LoadPTRoutes(const Arguments& arguments,
   return true;
 }
 
-bool AlreadyExists(const std::list<Route>& routes, const Route& route)
+std::list<Route>::iterator AlreadyExists(std::list<Route>& routes, const Route& route)
 {
   std::list<Station> reverseStations=route.stations;
 
   reverseStations.reverse();
-  for (const auto& r : routes) {
-    if (r.name==route.name &&
-      (r.stations==route.stations || r.stations==reverseStations)) {
-      return true;
+
+  for (auto routeIter=routes.begin(); routeIter!=routes.end(); ++routeIter) {
+    if (routeIter->name==route.name &&
+      (routeIter->stations==route.stations || routeIter->stations==reverseStations)) {
+      return routeIter;
     }
   }
 
-  return false;
+  return routes.end();
 }
 
 std::list<Route> TransformRoutes(osmscout::Database& database,
@@ -157,6 +200,7 @@ std::list<Route> TransformRoutes(osmscout::Database& database,
   for (const auto& route : orgRoutes) {
     for (const auto& variant : route->variants) {
       Route newRoute;
+      Direction direction=Direction(variant.GetFrom(),variant.GetTo());
 
       newRoute.name=route->GetRef();
 
@@ -183,7 +227,13 @@ std::list<Route> TransformRoutes(osmscout::Database& database,
         newRoute.stations.push_back(station);
       }
 
-      if (!AlreadyExists(routes,newRoute)) {
+      auto existingRouteIter=AlreadyExists(routes,newRoute);
+
+      if (existingRouteIter!=routes.end()) {
+        existingRouteIter->directions.push_back(direction);
+      }
+      else {
+        newRoute.directions.push_back(direction);
         routes.push_back(newRoute);
       }
     }
@@ -196,6 +246,9 @@ void DumpRoutes(const std::list<Route>& routes)
 {
   for (const auto& route : routes) {
     std::cout << "* " << route.name << std::endl;
+    for (const auto& direction : route.directions) {
+     std::cout << "    " << "(" << direction.GetFrom() << " => " << direction.GetTo() << ")" << std::endl;
+    }
 
     for (const auto& station : route.stations) {
       std::cout << "  - " << station.name << std::endl;
@@ -241,6 +294,10 @@ void WriteSVGHeader(std::ofstream& stream, size_t width, size_t height)
   stream << "           fill: #000000;" << std::endl;
   stream << "           font-size: 15px;" << std::endl;
   stream << "         }" << std::endl;
+  stream << "         #directionLabel {" << std::endl;
+  stream << "           fill: #000000;" << std::endl;
+  stream << "           font-size: 15px;" << std::endl;
+  stream << "         }" << std::endl;
   stream << "         #refLine {" << std::endl;
   stream << "           stroke: #0000aa;" << std::endl;
   stream << "           stroke-width: 20px;" << std::endl;
@@ -274,15 +331,44 @@ void WriteRouteList(std::ofstream& stream, const std::list<Route>& routes)
   size_t y=450;
 
   for (const auto& route : routes) {
-    stream << "  <text id=\"refLabel\" " << "x=\"" << x << "\" y=\"" << y << "\">" << route.name << "</text>" << std::endl;
+    stream << "  <text id=\"refLabel\" " << "x=\"" << x << "\" y=\"" << y-100 << "\">" << route.name << "</text>" << std::endl;
+
+    if (route.directions.size()==1) {
+      stream << "  <text id=\"directionLabel\" " << "x=\"" << x << "\" y=\"" << y-80 << "\">"
+             << route.directions[0].GetFrom() << "</text>"
+             << std::endl;
+
+      stream << "  <text id=\"directionLabel\" " << "x=\"" << x << "\" y=\"" << y-60 << "\">"
+             << "&#x21d2;" << "</text>"
+             << std::endl;
+
+      stream << "  <text id=\"directionLabel\" " << "x=\"" << x << "\" y=\"" << y-40 << "\">"
+             << route.directions[0].GetTo() << "</text>"
+             << std::endl;
+    }
+
+    if (route.directions.size()==2 &&
+        route.directions[0].IsReverseOf(route.directions[1])) {
+      stream << "  <text id=\"directionLabel\" " << "x=\"" << x << "\" y=\"" << y-80 << "\">"
+             << route.directions[0].GetFrom() << "</text>"
+             << std::endl;
+
+      stream << "  <text id=\"directionLabel\" " << "x=\"" << x << "\" y=\"" << y-60 << "\">"
+             << "&#x21d4;" << "</text>"
+             << std::endl;
+
+      stream << "  <text id=\"directionLabel\" " << "x=\"" << x << "\" y=\"" << y-40 << "\">"
+             << route.directions[0].GetTo() << "</text>"
+             << std::endl;
+    }
 
     if (!route.stations.empty()) {
-      stream << "  <line id=\"refLine\" x1=\"" << x+100 << "\" y1=\"" << y-10 << "\" x2=\""
-             << x+100+(route.stations.size()-1)*35 << "\" y2=\"" << y-10 << "\"/>" << std::endl;
+      stream << "  <line id=\"refLine\" x1=\"" << x+300 << "\" y1=\"" << y-10 << "\" x2=\""
+             << x+300+(route.stations.size()-1)*35 << "\" y2=\"" << y-10 << "\"/>" << std::endl;
 
       WriteStationList(stream,
                        route,
-                       x+100,
+                       x+300,
                        y-10);
     }
 
@@ -313,6 +399,18 @@ int main(int argc,
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.operatorFilter=value;
+                      }),
+                      "operator",
+                      "Name of the operator");
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.refFilter=value;
+                      }),
+                      "ref",
+                      "Name of the reference");
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -320,17 +418,10 @@ int main(int argc,
                           "Database directory");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.typeName=value;
+                            args.typeFilter=value;
                           }),
                           "TYPE",
                           "Type of the route");
-
-
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                            args.operatorName=value;
-                          }),
-                          "OPERATOR",
-                          "Name of the operator");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.mapPath=value;
@@ -358,10 +449,10 @@ int main(int argc,
     std::cerr << "Cannot open database" << std::endl;
   }
 
-  auto routeType=database.GetTypeConfig()->GetTypeInfo(args.typeName);
+  auto routeType=database.GetTypeConfig()->GetTypeInfo(args.typeFilter);
 
   if (!routeType) {
-    std::cerr << "Cannot find type '"  << args.typeName << "'!" << std::endl;
+    std::cerr << "Cannot find type '" << args.typeFilter << "'!" << std::endl;
     return 1;
   }
 
@@ -393,7 +484,7 @@ int main(int argc,
 
   size_t maxStationCount=GetMaxStationCount(routes);
 
-  WriteSVGHeader(stream,200+maxStationCount*35,routes.size()*400+2*50);
+  WriteSVGHeader(stream,400+maxStationCount*35,routes.size()*400+2*50);
 
   WriteRouteList(stream,routes);
 

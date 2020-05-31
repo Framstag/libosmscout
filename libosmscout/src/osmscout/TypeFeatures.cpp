@@ -203,7 +203,7 @@ namespace osmscout {
       value->SetNameAlt(nameAlt);
     }
   }
-  
+
   void NameShortFeatureValue::Read(FileScanner& scanner)
   {
     scanner.Read(nameShort);
@@ -3040,4 +3040,89 @@ namespace osmscout {
     }
   }
 
+  void FromToFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(from);
+    scanner.Read(to);
+  }
+
+  void FromToFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(from);
+    writer.Write(to);
+  }
+
+  FromToFeatureValue& FromToFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const auto& otherValue=static_cast<const FromToFeatureValue&>(other);
+
+      from=otherValue.from;
+      to=otherValue.to;
+    }
+
+    return *this;
+  }
+
+  bool FromToFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const auto& otherValue=static_cast<const FromToFeatureValue&>(other);
+
+    return from==otherValue.from &&
+           to==otherValue.to;
+  }
+
+  const char* const FromToFeature::NAME = "FromTo";
+  const char* const FromToFeature::NUMBER_LABEL = "number";
+  const size_t      FromToFeature::NUMBER_LABEL_INDEX = 0;
+
+  FromToFeature::FromToFeature()
+  {
+    RegisterLabel(NUMBER_LABEL_INDEX,NUMBER_LABEL);
+  }
+
+  void FromToFeature::Initialize(TagRegistry& tagRegistry)
+  {
+    tagFrom=tagRegistry.RegisterTag("from");
+    tagTo=tagRegistry.RegisterTag("to");
+  }
+
+  std::string FromToFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t FromToFeature::GetValueSize() const
+  {
+    return sizeof(FromToFeatureValue);
+  }
+
+  FeatureValue* FromToFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) FromToFeatureValue();
+  }
+
+  void FromToFeature::Parse(TagErrorReporter& /*errorReporter*/,
+                             const TagRegistry& /*tagRegistry*/,
+                             const FeatureInstance& feature,
+                             const ObjectOSMRef& /*object*/,
+                             const TagMap& tags,
+                             FeatureValueBuffer& buffer) const
+  {
+    auto from=tags.find(tagFrom);
+    auto to=tags.find(tagTo);
+
+    if ((from!=tags.end() && !from->second.empty()) ||
+        (to!=tags.end() && !to->second.empty())) {
+      auto* value = static_cast<FromToFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+      if (from!=tags.end()) {
+        value->SetFrom(from->second);
+      }
+
+      if (to!=tags.end()) {
+        value->SetTo(to->second);
+      }
+    }
+  }
 }

@@ -2244,7 +2244,7 @@ TYPES
 
   TYPE route_aerialway
     = RELATION ("type"=="route" AND "route"=="aerialway")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Bus
@@ -2256,7 +2256,7 @@ TYPES
 
   TYPE route_bus
     = RELATION ("type"=="route" AND "route"=="bus")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Ferry
@@ -2268,7 +2268,7 @@ TYPES
 
   TYPE route_ferry
     = RELATION ("type"=="route" AND "route"=="ferry")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Monorail
@@ -2280,7 +2280,7 @@ TYPES
 
   TYPE route_monorail
     = RELATION ("type"=="route" AND "route"=="monorail")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Subway
@@ -2292,7 +2292,7 @@ TYPES
 
   TYPE route_subway
     = RELATION ("type"=="route" AND "route"=="subway")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Train
@@ -2304,7 +2304,7 @@ TYPES
 
   TYPE route_train
     = RELATION ("type"=="route" AND "route"=="train")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Tram
@@ -2316,7 +2316,7 @@ TYPES
 
   TYPE route_tram
     = RELATION ("type"=="route" AND "route"=="tram")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Trolleybus
@@ -2328,7 +2328,7 @@ TYPES
 
   TYPE route_trolleybus
     = RELATION ("type"=="route" AND "route"=="trolleybus")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, FromTo}
       ROUTE
 
   // Catch-all fallback for other types

@@ -2112,6 +2112,100 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
+
+  class OSMSCOUT_API FromToFeatureValue : public FeatureValue
+  {
+  private:
+    std::string from;
+    std::string to;
+
+  public:
+    FromToFeatureValue() = default;
+    FromToFeatureValue(const FromToFeatureValue& featureValue) = default;
+
+    inline explicit FromToFeatureValue(const std::string& from,
+                                       const std::string& to)
+      : from(from),
+        to(to)
+    {
+      // no code
+    }
+
+    const std::string& GetFrom() const
+    {
+      return from;
+    }
+
+    void SetFrom(const std::string& from)
+    {
+      FromToFeatureValue::from=from;
+    }
+
+    const std::string& GetTo() const
+    {
+      return to;
+    }
+
+    void SetTo(const std::string& to)
+    {
+      FromToFeatureValue::to=to;
+    }
+
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    {
+      if (!from.empty() && ! to.empty()) {
+        return from + " => " + to;
+      }
+      else if (!from.empty())  {
+        return from + "=>";
+      }
+      else if (!to.empty())  {
+        return "=> " + to;
+      }
+
+      return "";
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    FromToFeatureValue& operator=(const FeatureValue& other);
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API FromToFeature : public Feature
+  {
+  private:
+    TagId tagFrom;
+    TagId tagTo;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "number" label */
+    static const char* const NUMBER_LABEL;
+
+    /** Index of the 'number' label */
+    static const size_t      NUMBER_LABEL_INDEX;
+
+  public:
+    FromToFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
+
 }
 
 #endif

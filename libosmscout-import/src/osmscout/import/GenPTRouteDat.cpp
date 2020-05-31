@@ -107,10 +107,12 @@ namespace osmscout {
       RefFeatureValueReader      refReader(*typeConfig);
       OperatorFeatureValueReader operatorReader(*typeConfig);
       NetworkFeatureValueReader  networkReader(*typeConfig);
+      FromToFeatureValueReader   fromToReader(*typeConfig);
       auto                       defaultName        =NameFeatureValue("");
       auto                       defaultRef         =RefFeatureValue("");
       auto                       defaultOperatorName=OperatorFeatureValue("");
       auto                       defaultNetworkName =NetworkFeatureValue("");
+      auto                       defaultFromToName =FromToFeatureValue("","");
 
       routeMasterScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                               Preprocess::RAWROUTEMASTER_DAT),
@@ -256,6 +258,7 @@ namespace osmscout {
         std::string ref=refReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultRef).GetRef();
         std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
         std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
+        auto        fromToValue=fromToReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultFromToName);
 
         auto       routeMasterIter=idRouteMasterMap.find(rawRel.GetId());
         PTRouteRef route;
@@ -273,6 +276,8 @@ namespace osmscout {
         variant.SetRef(ref);
         variant.SetOperator(operatorName);
         variant.SetNetwork(networkName);
+        variant.SetFrom(fromToValue.GetFrom());
+        variant.SetTo(fromToValue.GetTo());
 
         for (const auto& member : rawRel.members) {
           if (member.role=="stop") {

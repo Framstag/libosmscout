@@ -61,6 +61,16 @@ namespace osmscout {
     PTRoute::Variant::network=network;
   }
 
+  void PTRoute::Variant::SetFrom(const std::string& from)
+  {
+    Variant::from=from;
+  }
+
+  void PTRoute::Variant::SetTo(const std::string& to)
+  {
+    Variant::to=to;
+  }
+
   void PTRoute::SetType(const TypeInfoRef& type)
   {
     PTRoute::type=type;
@@ -113,6 +123,8 @@ namespace osmscout {
       scanner.Read(variant.ref);
       scanner.Read(variant.operatorName);
       scanner.Read(variant.network);
+      scanner.Read(variant.from);
+      scanner.Read(variant.to);
 
       uint32_t stopCount;
       uint32_t platformCount;
@@ -160,6 +172,8 @@ namespace osmscout {
       writer.Write(variant.ref);
       writer.Write(variant.operatorName);
       writer.Write(variant.network);
+      writer.Write(variant.from);
+      writer.Write(variant.to);
 
       writer.WriteNumber(variant.stops.size());
       writer.WriteNumber(variant.platforms.size());

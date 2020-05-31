@@ -822,7 +822,7 @@ namespace osmscout {
     RegisterFeature(featureName);
 
     RegisterFeature(std::make_shared<NameAltFeature>());
-    
+
     featureNameShort=std::make_shared<NameShortFeature>();
     RegisterFeature(featureNameShort);
 
@@ -891,6 +891,7 @@ namespace osmscout {
 
     RegisterFeature(std::make_shared<OperatorFeature>());
     RegisterFeature(std::make_shared<NetworkFeature>());
+    RegisterFeature(std::make_shared<FromToFeature>());
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
