@@ -219,8 +219,6 @@ namespace osmscout {
       return network;
     }
 
-
-
     void SetType(const TypeInfoRef& type);
     void SetName(const std::string& name);
     void SetRef(const std::string& ref);

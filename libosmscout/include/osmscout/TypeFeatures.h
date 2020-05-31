@@ -2205,7 +2205,6 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
-
 }
 
 #endif
