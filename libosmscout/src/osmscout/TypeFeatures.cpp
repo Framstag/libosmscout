@@ -264,7 +264,7 @@ namespace osmscout {
   }
 
   void NameShortFeature::Parse(TagErrorReporter& /*errorReporter*/,
-                             const TagRegistry& tagRegistry,
+                             const TagRegistry& /*tagRegistry*/,
                              const FeatureInstance& feature,
                              const ObjectOSMRef& /*object*/,
                              const TagMap& tags,
