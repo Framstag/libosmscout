@@ -36,6 +36,7 @@
 struct Arguments
 {
   bool        help=false;
+  bool        debug=false;
   std::string databaseDirectory;
   std::string typeFilter;
   std::string operatorFilter;
@@ -399,6 +400,13 @@ int main(int argc,
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
+
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
                         args.operatorFilter=value;
                       }),
@@ -441,6 +449,8 @@ int main(int argc,
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
+
+  osmscout::log.Debug(args.debug);
 
   osmscout::DatabaseParameter      databaseParameter;
   osmscout::Database               database(databaseParameter);
