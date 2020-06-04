@@ -24,7 +24,7 @@
 #ifndef TEST_WAY_H
 #define TEST_WAY_H
 
-#include <assert.h>
+#include <cassert>
 #include <vector>
 
 #include <osmscout/Point.h>

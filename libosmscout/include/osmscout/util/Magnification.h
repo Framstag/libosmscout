@@ -61,7 +61,7 @@ namespace osmscout {
       return *this;
     }
 
-    inline const MagnificationLevel operator++(int)
+    inline MagnificationLevel operator++(int)
     {
       ++level;
 
@@ -241,7 +241,7 @@ namespace osmscout {
       return *this;
     }
 
-    inline const Magnification operator++(int)
+    inline Magnification operator++(int)
     {
       magnification*=2.0;
       level+=1;

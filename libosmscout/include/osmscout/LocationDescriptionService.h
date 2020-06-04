@@ -185,7 +185,7 @@ namespace osmscout {
     /**
      * Return the place this information is refering to
      */
-    inline const Place GetWay() const
+    inline Place GetWay() const
     {
       return way;
     }
@@ -228,7 +228,7 @@ namespace osmscout {
     /**
      * Return the place this information is refering to
      */
-    inline const std::list<Place> GetWays() const
+    inline std::list<Place> GetWays() const
     {
       return ways;
     }

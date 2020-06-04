@@ -1060,7 +1060,7 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline const TypeInfoRef GetTypeInfo(size_t index) const
+    inline TypeInfoRef GetTypeInfo(size_t index) const
     {
       assert(index<types.size());
 
@@ -1070,46 +1070,43 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline const TypeInfoRef GetNodeTypeInfo(TypeId id) const
+    inline TypeInfoRef GetNodeTypeInfo(TypeId id) const
     {
       assert(id<=nodeTypes.size());
 
       if (id==typeIgnore) {
         return typeInfoIgnore;
       }
-      else {
-        return nodeTypes[id-1];
-      }
+
+      return nodeTypes[id-1];
     }
 
     /**
      * Returns the type definition for the given type id
      */
-    inline const TypeInfoRef GetWayTypeInfo(TypeId id) const
+    inline TypeInfoRef GetWayTypeInfo(TypeId id) const
     {
       assert(id<=wayTypes.size());
 
       if (id==typeIgnore) {
         return typeInfoIgnore;
       }
-      else {
-        return wayTypes[id-1];
-      }
+
+      return wayTypes[id-1];
     }
 
     /**
      * Returns the type definition for the given type id
      */
-    inline const TypeInfoRef GetAreaTypeInfo(TypeId id) const
+    inline TypeInfoRef GetAreaTypeInfo(TypeId id) const
     {
       assert(id<=areaTypes.size());
 
       if (id==typeIgnore) {
         return typeInfoIgnore;
       }
-      else {
-        return areaTypes[id-1];
-      }
+
+      return areaTypes[id-1];
     }
 
     /**

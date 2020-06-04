@@ -230,11 +230,7 @@ namespace osmscout {
 
       bool          access;        //!< Flags to signal, if we had access ("access restrictions") to this node
 
-      RNode()
-      : id()
-      {
-        // no code
-      }
+      RNode() = default;
 
       RNode(const DBId& id,
             const RouteNodeRef& node,
@@ -288,9 +284,8 @@ namespace osmscout {
         if (a->overallCost==b->overallCost) {
          return a->id<b->id;
         }
-        else {
-          return a->overallCost<b->overallCost;
-        }
+
+        return a->overallCost<b->overallCost;
       }
     };
 

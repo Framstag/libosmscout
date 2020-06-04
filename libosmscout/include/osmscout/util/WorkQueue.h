@@ -43,7 +43,7 @@ namespace osmscout {
     std::condition_variable popCondition;
     std::deque<Task>        tasks;
     size_t                  queueLimit;
-    bool                    running;
+    bool                    running=true;
 
   public:
     WorkQueue();
@@ -59,16 +59,14 @@ namespace osmscout {
 
   template<class R>
   WorkQueue<R>::WorkQueue()
-  : queueLimit(std::numeric_limits<size_t>::max()),
-    running(true)
+  : queueLimit(std::numeric_limits<size_t>::max())
   {
     // no code
   }
 
   template<class R>
   WorkQueue<R>::WorkQueue(size_t queueLimit)
-    : queueLimit(queueLimit),
-      running(true)
+    : queueLimit(queueLimit)
   {
     // no code
   }

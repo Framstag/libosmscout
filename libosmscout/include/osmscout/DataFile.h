@@ -73,11 +73,11 @@ namespace osmscout {
   class DataFile
   {
   public:
-    typedef std::shared_ptr<N> ValueType;
-    typedef Cache<FileOffset,std::shared_ptr<N>> ValueCache;
+    using ValueType = std::shared_ptr<N>;
+    using ValueCache = Cache<FileOffset, std::shared_ptr<N> >;
 
-    typedef typename Cache<FileOffset,ValueType>::CacheEntry ValueCacheEntry;
-    typedef typename Cache<FileOffset,ValueType>::CacheRef ValueCacheRef;
+    using ValueCacheEntry = typename Cache<FileOffset, ValueType>::CacheEntry;
+    using ValueCacheRef = typename Cache<FileOffset, ValueType>::CacheRef;
 
   private:
     std::string         datafile;        //!< Basename part of the data file name

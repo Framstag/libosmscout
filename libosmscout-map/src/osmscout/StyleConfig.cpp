@@ -19,7 +19,7 @@
 
 #include <osmscout/StyleConfig.h>
 
-#include <string.h>
+#include <cstring>
 
 #include <set>
 
@@ -74,16 +74,6 @@ namespace osmscout {
     return index;
   }
 
-  StyleConstant::StyleConstant()
-  {
-    // no code
-  }
-
-  StyleConstant::~StyleConstant()
-  {
-    // no code
-  }
-
   StyleConstantColor::StyleConstantColor(const Color& color)
   : color(color)
   {
@@ -118,11 +108,6 @@ namespace osmscout {
     maxMMSet(false),
     maxPx(0.0),
     maxPxSet(false)
-  {
-    // no code
-  }
-
-  SizeCondition::~SizeCondition()
   {
     // no code
   }

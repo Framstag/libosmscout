@@ -58,7 +58,7 @@ namespace osmscout {
     virtual std::string GetName() const = 0;
   };
 
-  typedef std::shared_ptr<LabelProvider> LabelProviderRef;
+  using LabelProviderRef = std::shared_ptr<LabelProvider>;
 
   /**
    * \ingroup Stylesheet
@@ -72,7 +72,7 @@ namespace osmscout {
     virtual LabelProviderRef Create(const TypeConfig& typeConfig) const = 0;
   };
 
-  typedef std::shared_ptr<LabelProviderFactory> LabelProviderFactoryRef;
+  using LabelProviderFactoryRef = std::shared_ptr<LabelProviderFactory>;
 
   /**
    * \ingroup Stylesheet

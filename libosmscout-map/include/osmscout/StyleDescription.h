@@ -34,10 +34,10 @@
 namespace osmscout {
 
   class Symbol;
-  typedef std::shared_ptr<Symbol> SymbolRef;
+  using SymbolRef = std::shared_ptr<Symbol>;
 
   class LabelProvider;
-  typedef std::shared_ptr<LabelProvider> LabelProviderRef;
+  using LabelProviderRef = std::shared_ptr<LabelProvider>;
 
   /**
    * \ingroup Stylesheet
@@ -229,7 +229,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API StyleEnumAttributeDescriptor : public StyleAttributeDescriptor
   {
   public:
-    typedef std::unordered_map<std::string,int> EnumNameValueMap;
+    using EnumNameValueMap = std::unordered_map<std::string, int>;
 
   protected:
     EnumNameValueMap enumMap;
@@ -258,9 +258,8 @@ namespace osmscout {
       if (entry!=enumMap.end()) {
         return entry->second;
       }
-      else {
-        return -1;
-      }
+
+      return -1;
     }
   };
 
@@ -463,7 +462,7 @@ namespace osmscout {
   };
 
 
-  typedef std::shared_ptr<StyleAttributeDescriptor> StyleAttributeDescriptorRef;
+  using StyleAttributeDescriptorRef = std::shared_ptr<StyleAttributeDescriptor>;
 
   /**
    * \ingroup Stylesheet
@@ -488,13 +487,12 @@ namespace osmscout {
       if (result!=attributeMap.end())  {
         return result->second;
       }
-      else {
-        return nullptr;
-      }
+
+      return nullptr;
     }
   };
 
-  typedef std::shared_ptr<StyleDescriptor> StyleDescriptorRef;
+  using StyleDescriptorRef = std::shared_ptr<StyleDescriptor>;
 }
 
 #endif

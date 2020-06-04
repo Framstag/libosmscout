@@ -94,7 +94,7 @@ namespace osmscout {
     {
     private:
       FeatureValueBuffer    featureValueBuffer; //!< List of features
-      uint8_t               ring;               //!< The ring hierarchy number (0...n)
+      uint8_t               ring=0;             //!< The ring hierarchy number (0...n)
 
     public:
       /**
@@ -108,11 +108,7 @@ namespace osmscout {
       GeoBox                      bbox;         //!< Precomputed (cache) bounding box
 
     public:
-      inline Ring()
-      : ring(0)
-      {
-        // no code
-      }
+      inline Ring() = default;
 
       inline TypeInfoRef GetType() const
       {
@@ -237,18 +233,14 @@ namespace osmscout {
     using RingVisitor = std::function<bool(size_t i, const Ring&, const TypeInfoRef&)>;
 
   private:
-    FileOffset        fileOffset;
-    FileOffset        nextFileOffset;
+    FileOffset        fileOffset=0;
+    FileOffset        nextFileOffset=0;
 
   public:
     std::vector<Ring> rings;
 
   public:
-    inline Area()
-    : fileOffset(0),nextFileOffset(0)
-    {
-      // no code
-    }
+    inline Area() = default;
 
     inline FileOffset GetFileOffset() const
     {
@@ -275,9 +267,10 @@ namespace osmscout {
       if (ring.IsTopOuter() ||
           (ring.IsOuter() && ring.GetType()->GetIgnore())) {
         return GetType();
-      } else {
-        return ring.GetType();
       }
+
+      return ring.GetType();
+
     }
 
     inline const FeatureValueBuffer& GetFeatureValueBuffer() const

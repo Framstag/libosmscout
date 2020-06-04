@@ -462,7 +462,7 @@ namespace osmscout {
       return Move(pixel,0);
     }
 
-    inline bool IsLinearInterpolationEnabled()
+    inline bool IsLinearInterpolationEnabled() const
     {
       return useLinearInterpolation;
     }
@@ -558,7 +558,7 @@ namespace osmscout {
     bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const override;
 
-    inline bool IsLinearInterpolationEnabled()
+    inline bool IsLinearInterpolationEnabled() const
     {
       return useLinearInterpolation;
     }

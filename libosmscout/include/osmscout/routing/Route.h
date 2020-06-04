@@ -190,12 +190,12 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef GetOriginDescription() const
+      inline NameDescriptionRef GetOriginDescription() const
       {
         return originDescription;
       }
 
-      inline const NameDescriptionRef GetTargetDescription() const
+      inline NameDescriptionRef GetTargetDescription() const
       {
         return targetDescription;
       }
@@ -234,12 +234,12 @@ namespace osmscout {
         return exitCount>1;
       }
 
-      inline const NameDescriptionRef GetOriginDesccription() const
+      inline NameDescriptionRef GetOriginDesccription() const
       {
         return originDescription;
       }
 
-      inline const NameDescriptionRef GetTargetDesccription() const
+      inline NameDescriptionRef GetTargetDesccription() const
       {
         return targetDescription;
       }
@@ -393,7 +393,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef GetToDescription() const
+      inline NameDescriptionRef GetToDescription() const
       {
         return toDescription;
       }
@@ -417,12 +417,12 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef GetFromDescription() const
+      inline NameDescriptionRef GetFromDescription() const
       {
         return fromDescription;
       }
 
-      inline const NameDescriptionRef GetToDescription() const
+      inline NameDescriptionRef GetToDescription() const
       {
         return toDescription;
       }
@@ -444,7 +444,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef GetFromDescription() const
+      inline NameDescriptionRef GetFromDescription() const
       {
         return fromDescription;
       }
@@ -466,7 +466,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline const NameDescriptionRef GetJunctionDescription() const
+      inline NameDescriptionRef GetJunctionDescription() const
       {
         return junctionDescription;
       }
@@ -630,7 +630,7 @@ namespace osmscout {
       bool operator!=(const LaneDescription &o) const;
     };
 
-    typedef std::shared_ptr<LaneDescription> LaneDescriptionRef;
+    using LaneDescriptionRef = std::shared_ptr<LaneDescription>;
 
     /**
      * \ingroup Routing
@@ -661,7 +661,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<SuggestedLaneDescription> SuggestedLaneDescriptionRef;
+    using SuggestedLaneDescriptionRef = std::shared_ptr<SuggestedLaneDescription>;
 
     /**
      * \ingroup Routing

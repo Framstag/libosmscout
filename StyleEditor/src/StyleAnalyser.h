@@ -46,7 +46,7 @@ public:
   StyleAnalyser(QThread *thread,
                    QTextDocument *doc,
                    Highlighter *highlighter);
-  virtual ~StyleAnalyser();
+  ~StyleAnalyser() override;
 
 private:
   QThread *thread;
