@@ -34,24 +34,18 @@ void ImportProgress::FinishedImport()
 
 void ImportProgress::DumpModuleDescription(const ImportModuleDescription& description)
 {
-  for (const auto& filename : description.GetRequiredFiles()) {
-    Info("Module requires file '"+filename+"'");
-  }
-  for (const auto& filename : description.GetProvidedFiles()) {
-    Info("Module provides file '"+filename+"'");
-  }
-  for (const auto& filename : description.GetProvidedOptionalFiles()) {
-    Info("Module provides optional file '"+filename+"'");
-  }
-  for (const auto& filename : description.GetProvidedDebuggingFiles()) {
-    Info("Module provides debugging file '"+filename+"'");
-  }
-  for (const auto& filename : description.GetProvidedTemporaryFiles()) {
-    Info("Module provides temporary file '"+filename+"'");
-  }
-  for (const auto& filename : description.GetProvidedAnalysisFiles()) {
-    Info("Module provides analysis file '"+filename+"'");
-  }
+  auto listFiles = [this](const std::string &msg, const std::list<std::string> &files){
+    for (const auto& filename : files) {
+      Info(msg + " '" + filename + "'");
+    }
+  };
+
+  listFiles("Module requires file", description.GetRequiredFiles());
+  listFiles("Module provides file", description.GetProvidedFiles());
+  listFiles("Module provides optional file", description.GetProvidedOptionalFiles());
+  listFiles("Module provides debugging file", description.GetProvidedDebuggingFiles());
+  listFiles("Module provides temporary file", description.GetProvidedTemporaryFiles());
+  listFiles("Module provides analysis file", description.GetProvidedAnalysisFiles());
 }
 
 void ImportProgress::StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription)
