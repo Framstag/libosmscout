@@ -51,6 +51,7 @@ namespace osmscout {
     void Stop();
 
     double GetMilliseconds() const;
+    std::chrono::steady_clock::duration GetDuration() const;
 
     bool IsSignificant() const;
 

@@ -70,6 +70,7 @@ void StatImportProgress::StartImport()
   monitor.Reset();
   maxVMUsage=0.0;
   maxResidentSet=0.0;
+  moduleStats.clear();
 }
 
 void StatImportProgress::FinishedImport()
@@ -88,6 +89,7 @@ void StatImportProgress::StartModule(size_t currentStep, const ImportModuleDescr
 {
   ImportProgress::StartModule(currentStep, moduleDescription);
   timer=StopClock();
+  currentModule=moduleDescription;
 }
 
 void StatImportProgress::FinishedModule()
@@ -109,6 +111,12 @@ void StatImportProgress::FinishedModule()
   else {
     Info(std::string("=> ")+timer.ResultString()+"s");
   }
+
+  moduleStats.emplace_back(ModuleStat{
+    currentModule,
+    timer.GetDuration(),
+    vmUsage,
+    residentSet});
 }
 
 }

@@ -45,6 +45,14 @@ public:
 
 class OSMSCOUT_IMPORT_API StatImportProgress: public ImportProgress
 {
+private:
+  struct ModuleStat {
+    ImportModuleDescription description;
+    std::chrono::steady_clock::duration duration;
+    double vmUsage;
+    double residentSet;
+  };
+
 public:
   StatImportProgress() = default;
   virtual ~StatImportProgress() = default;
@@ -53,7 +61,7 @@ public:
   void FinishedImport() override;
 
   void StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription) override;
-  virtual void FinishedModule();
+  void FinishedModule() override;
 
 private:
   StopClock timer;
@@ -61,6 +69,8 @@ private:
   MemoryMonitor monitor;
   double maxVMUsage=0.0;
   double maxResidentSet=0.0;
+  ImportModuleDescription currentModule;
+  std::list<ModuleStat> moduleStats;
 };
 
 }
