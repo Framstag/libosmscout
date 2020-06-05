@@ -1011,7 +1011,7 @@ namespace osmscout {
       progress.Info("Removing temporary file '"+ filename + "'...");
 
       if (!RemoveFile(filename)) {
-        progress.Error("Error while rmeoving file '"+ filename + "'!");
+        progress.Error("Error while removing file '"+ filename + "'!");
         return false;
       }
     }
