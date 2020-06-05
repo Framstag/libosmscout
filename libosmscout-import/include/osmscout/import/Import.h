@@ -31,6 +31,7 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/import/ImportErrorReporter.h>
+#include <osmscout/import/ImportProgress.h>
 
 #include <osmscout/util/Magnification.h>
 #include <osmscout/util/Progress.h>
@@ -495,7 +496,7 @@ namespace osmscout {
     explicit Importer(const ImportParameter& parameter);
     virtual ~Importer();
 
-    bool Import(Progress& progress);
+    bool Import(ImportProgress& progress);
 
     std::list<std::string> GetProvidedFiles() const;
     std::list<std::string> GetProvidedOptionalFiles() const;
