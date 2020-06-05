@@ -948,6 +948,11 @@ int main(int argc, char* argv[])
 
     if (result) {
 
+      if (!progress.DumpDotStats(osmscout::AppendFileToDir(
+          parameter.GetDestinationDirectory(), "stats.dot"))){
+        progress.Error("Error while writing stats");
+      }
+
       if (!DumpDataSize(parameter,
                         importer,
                         progress)) {

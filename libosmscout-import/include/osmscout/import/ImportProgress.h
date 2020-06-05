@@ -66,6 +66,8 @@ public:
   void StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription) override;
   void FinishedModule() override;
 
+  bool DumpDotStats(const std::string &filename);
+
 private:
   StopClock timer;
   StopClock overAllTimer;
