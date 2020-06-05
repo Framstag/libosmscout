@@ -37,6 +37,8 @@ osmscoutimportSrc = [
             'src/osmscout/import/SortWayDat.cpp',
             'src/osmscout/import/Import.cpp',
             'src/osmscout/import/ImportErrorReporter.cpp',
+            'src/osmscout/import/ImportModule.h',
+            'src/osmscout/import/ImportParameter.h',
             'src/osmscout/import/ImportProgress.cpp',
             'src/osmscout/import/Preprocessor.cpp',
             'src/osmscout/import/Preprocess.cpp',

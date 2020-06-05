@@ -40,6 +40,8 @@ osmscoutimportHeader = [
             'osmscout/import/SortWayDat.h',
             'osmscout/import/Import.h',
             'osmscout/import/ImportErrorReporter.h',
+            'osmscout/import/ImportModule.h',
+            'osmscout/import/ImportParameter.h',
             'osmscout/import/ImportProgress.h',
             'osmscout/import/Preprocessor.h',
             'osmscout/import/Preprocess.h',

@@ -2,6 +2,7 @@
 #include "catch.hpp"
 
 #include <osmscout/import/Import.h>
+#include <osmscout/import/ImportProgress.h>
 
 #include <osmscout-test/PreprocessOLT.h>
 
@@ -59,7 +60,7 @@ int main(int argc, char* argv[])
   std::cout << "Global setup..." << std::endl;
 
   osmscout::ImportParameter importParameter;
-  osmscout::ConsoleProgress progress;
+  osmscout::ImportProgress  progress;
   std::list<std::string>    mapfiles;
 
   try {
