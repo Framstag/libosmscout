@@ -19,10 +19,11 @@
 
 #include <osmscout/import/ImportProgress.h>
 #include <osmscout/util/String.h>
+#include <osmscout/util/File.h>
 
 namespace osmscout {
 
-void ImportProgress::StartImport()
+void ImportProgress::StartImport(const ImportParameter &)
 {
 
 }
@@ -64,8 +65,9 @@ void ImportProgress::FinishedModule()
 
 }
 
-void StatImportProgress::StartImport()
+void StatImportProgress::StartImport(const ImportParameter &param)
 {
+  destinationDirectory=param.GetDestinationDirectory();
   overAllTimer=StopClock();
   monitor.Reset();
   maxVMUsage=0.0;
@@ -117,6 +119,20 @@ void StatImportProgress::FinishedModule()
     timer.GetDuration(),
     vmUsage,
     residentSet});
+
+  auto addFileStat = [this](const std::list<std::string> &files){
+    for (const auto& filename : files) {
+      std::string filePath = osmscout::AppendFileToDir(destinationDirectory, filename);
+      osmscout::FileOffset fileSize = osmscout::GetFileSize(filePath);
+      fileSizes[filename] = fileSize;
+    }
+  };
+
+  addFileStat(currentModule.GetProvidedFiles());
+  addFileStat(currentModule.GetProvidedAnalysisFiles());
+  addFileStat(currentModule.GetProvidedDebuggingFiles());
+  addFileStat(currentModule.GetProvidedOptionalFiles());
+  addFileStat(currentModule.GetProvidedTemporaryFiles());
 }
 
 }

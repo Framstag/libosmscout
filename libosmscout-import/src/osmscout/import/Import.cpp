@@ -331,7 +331,7 @@ namespace osmscout {
   bool Importer::Import(ImportProgress& progress)
   {
     TypeConfigRef typeConfig(std::make_shared<TypeConfig>());
-    progress.StartImport();
+    progress.StartImport(parameter);
 
     if (!ValidateDescription(progress)) {
       return false;

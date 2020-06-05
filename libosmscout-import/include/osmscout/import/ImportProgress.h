@@ -22,9 +22,12 @@
 
 #include <osmscout/import/ImportImportExport.h>
 #include <osmscout/import/ImportModule.h>
+#include <osmscout/import/ImportParameter.h>
 
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/MemoryMonitor.h>
+
+#include <map>
 
 namespace osmscout {
 
@@ -34,7 +37,7 @@ public:
   ImportProgress() = default;
   virtual ~ImportProgress() = default;
 
-  virtual void StartImport();
+  virtual void StartImport(const ImportParameter &param);
   virtual void FinishedImport();
 
   void DumpModuleDescription(const ImportModuleDescription& description);
@@ -57,7 +60,7 @@ public:
   StatImportProgress() = default;
   virtual ~StatImportProgress() = default;
 
-  void StartImport() override;
+  void StartImport(const ImportParameter &param) override;
   void FinishedImport() override;
 
   void StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription) override;
@@ -71,6 +74,8 @@ private:
   double maxResidentSet=0.0;
   ImportModuleDescription currentModule;
   std::list<ModuleStat> moduleStats;
+  std::string destinationDirectory;
+  std::map<std::string, osmscout::FileOffset> fileSizes;
 };
 
 }
