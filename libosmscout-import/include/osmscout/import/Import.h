@@ -60,13 +60,11 @@ namespace osmscout {
     void GetModuleList(std::vector<ImportModuleRef>& modules);
     void DumpTypeConfigData(const TypeConfig& typeConfig,
                             Progress& progress);
-    void DumpModuleDescription(const ImportModuleDescription& description,
-                               Progress& progress);
     bool CleanupTemporaries(size_t currentStep,
                             Progress& progress);
 
     bool ExecuteModules(const TypeConfigRef& typeConfig,
-                        Progress& progress);
+                        ImportProgress& progress);
   public:
     explicit Importer(const ImportParameter& parameter);
     virtual ~Importer();

@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/import/ImportProgress.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -31,14 +32,89 @@ void ImportProgress::FinishedImport()
 
 }
 
-void StatImportProgress::StartImport()
+void ImportProgress::DumpModuleDescription(const ImportModuleDescription& description)
+{
+  for (const auto& filename : description.GetRequiredFiles()) {
+    Info("Module requires file '"+filename+"'");
+  }
+  for (const auto& filename : description.GetProvidedFiles()) {
+    Info("Module provides file '"+filename+"'");
+  }
+  for (const auto& filename : description.GetProvidedOptionalFiles()) {
+    Info("Module provides optional file '"+filename+"'");
+  }
+  for (const auto& filename : description.GetProvidedDebuggingFiles()) {
+    Info("Module provides debugging file '"+filename+"'");
+  }
+  for (const auto& filename : description.GetProvidedTemporaryFiles()) {
+    Info("Module provides temporary file '"+filename+"'");
+  }
+  for (const auto& filename : description.GetProvidedAnalysisFiles()) {
+    Info("Module provides analysis file '"+filename+"'");
+  }
+}
+
+void ImportProgress::StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription)
+{
+  SetStep("Step #" +
+          std::to_string(currentStep) +
+          " - " +
+          moduleDescription.GetName());
+  Info("Module description: "+moduleDescription.GetDescription());
+
+  DumpModuleDescription(moduleDescription);
+}
+
+void ImportProgress::FinishedModule()
 {
 
 }
 
+void StatImportProgress::StartImport()
+{
+  overAllTimer=StopClock();
+  monitor.Reset();
+  maxVMUsage=0.0;
+  maxResidentSet=0.0;
+}
+
 void StatImportProgress::FinishedImport()
 {
+  overAllTimer.Stop();
 
+  if (maxVMUsage!=0.0 || maxResidentSet!=0.0) {
+    Info(std::string("Overall ")+overAllTimer.ResultString()+"s, RSS "+ByteSizeToString(maxResidentSet)+", VM "+ByteSizeToString(maxVMUsage));
+  }
+  else {
+    Info(std::string("Overall ")+overAllTimer.ResultString()+"s");
+  }
+}
+
+void StatImportProgress::StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription)
+{
+  ImportProgress::StartModule(currentStep, moduleDescription);
+  timer=StopClock();
+}
+
+void StatImportProgress::FinishedModule()
+{
+  double vmUsage;
+  double residentSet;
+
+  timer.Stop();
+
+  monitor.GetMaxValue(vmUsage,residentSet);
+  monitor.Reset();
+
+  maxVMUsage=std::max(maxVMUsage,vmUsage);
+  maxResidentSet=std::max(maxResidentSet,residentSet);
+
+  if (vmUsage!=0.0 || residentSet!=0.0) {
+    Info(std::string("=> ")+timer.ResultString()+"s, RSS "+ByteSizeToString(residentSet)+", VM "+ByteSizeToString(vmUsage));
+  }
+  else {
+    Info(std::string("=> ")+timer.ResultString()+"s");
+  }
 }
 
 }

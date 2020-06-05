@@ -20,9 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/util/Progress.h>
-
 #include <osmscout/import/ImportImportExport.h>
+#include <osmscout/import/ImportModule.h>
+
+#include <osmscout/util/Progress.h>
+#include <osmscout/util/MemoryMonitor.h>
 
 namespace osmscout {
 
@@ -30,21 +32,35 @@ class OSMSCOUT_IMPORT_API ImportProgress: public ConsoleProgress
 {
 public:
   ImportProgress() = default;
+  virtual ~ImportProgress() = default;
 
   virtual void StartImport();
   virtual void FinishedImport();
+
+  void DumpModuleDescription(const ImportModuleDescription& description);
+
+  virtual void StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription);
+  virtual void FinishedModule();
 };
 
 class OSMSCOUT_IMPORT_API StatImportProgress: public ImportProgress
 {
 public:
   StatImportProgress() = default;
+  virtual ~StatImportProgress() = default;
 
   void StartImport() override;
   void FinishedImport() override;
 
-private:
+  void StartModule(size_t currentStep, const ImportModuleDescription& moduleDescription) override;
+  virtual void FinishedModule();
 
+private:
+  StopClock timer;
+  StopClock overAllTimer;
+  MemoryMonitor monitor;
+  double maxVMUsage=0.0;
+  double maxResidentSet=0.0;
 };
 
 }

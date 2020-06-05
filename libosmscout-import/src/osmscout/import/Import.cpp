@@ -238,29 +238,6 @@ namespace osmscout {
     progress.Info("Number of area types: "+std::to_string(typeConfig.GetAreaTypes().size())+" "+std::to_string(typeConfig.GetAreaTypeIdBytes())+" byte(s)");
   }
 
-  void Importer::DumpModuleDescription(const ImportModuleDescription& description,
-                                       Progress& progress)
-  {
-    for (const auto& filename : description.GetRequiredFiles()) {
-      progress.Info("Module requires file '"+filename+"'");
-    }
-    for (const auto& filename : description.GetProvidedFiles()) {
-      progress.Info("Module provides file '"+filename+"'");
-    }
-    for (const auto& filename : description.GetProvidedOptionalFiles()) {
-      progress.Info("Module provides optional file '"+filename+"'");
-    }
-    for (const auto& filename : description.GetProvidedDebuggingFiles()) {
-      progress.Info("Module provides debugging file '"+filename+"'");
-    }
-    for (const auto& filename : description.GetProvidedTemporaryFiles()) {
-      progress.Info("Module provides temporary file '"+filename+"'");
-    }
-    for (const auto& filename : description.GetProvidedAnalysisFiles()) {
-      progress.Info("Module provides analysis file '"+filename+"'");
-    }
-  }
-
   bool Importer::CleanupTemporaries(size_t currentStep,
                                     Progress& progress)
   {
@@ -311,54 +288,26 @@ namespace osmscout {
   }
 
   bool Importer::ExecuteModules(const TypeConfigRef& typeConfig,
-                                Progress& progress)
+                                ImportProgress& progress)
   {
-    StopClock     overAllTimer;
     size_t        currentStep=1;
-    MemoryMonitor monitor;
-    double        maxVMUsage=0.0;
-    double        maxResidentSet=0.0;
 
     for (const auto& module : modules) {
       if (currentStep>=parameter.GetStartStep() &&
           currentStep<=parameter.GetEndStep()) {
         ImportModuleDescription moduleDescription;
-        StopClock               timer;
         bool                    success;
-        double                  vmUsage;
-        double                  residentSet;
 
         module->GetDescription(parameter,
                                moduleDescription);
 
-        progress.SetStep("Step #"+
-                         std::to_string(currentStep)+
-                         " - "+
-                         moduleDescription.GetName());
-        progress.Info("Module description: "+moduleDescription.GetDescription());
-
-        monitor.Reset();
-
-        DumpModuleDescription(moduleDescription,
-                              progress);
+        progress.StartModule(currentStep, moduleDescription);
 
         success=module->Import(typeConfig,
                                parameter,
                                progress);
 
-        timer.Stop();
-
-        monitor.GetMaxValue(vmUsage,residentSet);
-
-        maxVMUsage=std::max(maxVMUsage,vmUsage);
-        maxResidentSet=std::max(maxResidentSet,residentSet);
-
-        if (vmUsage!=0.0 || residentSet!=0.0) {
-          progress.Info(std::string("=> ")+timer.ResultString()+"s, RSS "+ByteSizeToString(residentSet)+", VM "+ByteSizeToString(vmUsage));
-        }
-        else {
-          progress.Info(std::string("=> ")+timer.ResultString()+"s");
-        }
+        progress.FinishedModule();
 
         if (!success) {
           progress.Error("Error while executing step '"+moduleDescription.GetName()+"'!");
@@ -374,15 +323,6 @@ namespace osmscout {
       }
 
       currentStep++;
-    }
-
-    overAllTimer.Stop();
-
-    if (maxVMUsage!=0.0 || maxResidentSet!=0.0) {
-      progress.Info(std::string("Overall ")+overAllTimer.ResultString()+"s, RSS "+ByteSizeToString(maxResidentSet)+", VM "+ByteSizeToString(maxVMUsage));
-    }
-    else {
-      progress.Info(std::string("Overall ")+overAllTimer.ResultString()+"s");
     }
 
     return true;
