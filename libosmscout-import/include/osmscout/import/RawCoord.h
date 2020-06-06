@@ -93,7 +93,7 @@ namespace osmscout {
     void Write(FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<RawCoord> RawCoordRef;
+  using RawCoordRef = std::shared_ptr<RawCoord>;
 }
 
 #endif

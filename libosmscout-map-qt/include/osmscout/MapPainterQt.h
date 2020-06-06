@@ -68,12 +68,18 @@ namespace osmscout {
 
       bool operator<(const FontDescriptor& other) const
       {
-        if (fontName!=other.fontName)
-         return fontName<other.fontName;
-        if (fontSize!=other.fontSize)
-         return fontSize<other.fontSize;
-        if (weight!=other.weight)
-         return weight<other.weight;
+        if (fontName!=other.fontName) {
+          return fontName<other.fontName;
+        }
+
+        if (fontSize!=other.fontSize) {
+          return fontSize<other.fontSize;
+        }
+
+        if (weight!=other.weight) {
+          return weight<other.weight;
+        }
+
         return italic<other.italic;
       }
     };
@@ -168,32 +174,32 @@ namespace osmscout {
                    const LabelData& label,
                    const QTextLayout& textLayout);
 
-    virtual void BeforeDrawing(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data) override;
+    void BeforeDrawing(const StyleConfig& styleConfig,
+                       const Projection& projection,
+                       const MapParameter& parameter,
+                       const MapData& data) override;
 
     /**
       Register regular label with given text at the given pixel coordinate
       in a style defined by the given LabelStyle.
      */
-    virtual void RegisterRegularLabel(const Projection &projection,
-                                      const MapParameter &parameter,
-                                      const std::vector<LabelData> &labels,
-                                      const Vertex2D &position,
-                                      double objectWidth) override;
+    void RegisterRegularLabel(const Projection& projection,
+                              const MapParameter& parameter,
+                              const std::vector<LabelData>& labels,
+                              const Vertex2D& position,
+                              double objectWidth) override;
 
     /**
      * Register contour label
      */
-    virtual void RegisterContourLabel(const Projection &projection,
-                                      const MapParameter &parameter,
-                                      const PathLabelData &label,
-                                      const LabelPath &labelPath) override;
+    void RegisterContourLabel(const Projection& projection,
+                              const MapParameter& parameter,
+                              const PathLabelData& label,
+                              const LabelPath& labelPath) override;
 
-    virtual void DrawLabels(const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& data) override;
+    void DrawLabels(const Projection& projection,
+                    const MapParameter& parameter,
+                    const MapData& data) override;
 
     void DrawIcon(const IconStyle* style,
                   double centerX, double centerY,
@@ -250,7 +256,7 @@ namespace osmscout {
   public:
     MapPainterBatchQt(size_t expectedCount);
 
-    virtual ~MapPainterBatchQt();
+    ~MapPainterBatchQt() override;
 
     bool paint(const Projection& projection,
                const MapParameter& parameter,

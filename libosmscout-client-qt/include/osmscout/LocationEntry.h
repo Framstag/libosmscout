@@ -73,13 +73,13 @@ public:
                 const QString database,
                 const osmscout::GeoCoord coord,
                 const osmscout::GeoBox bbox,
-                QObject* parent = 0);
+                QObject* parent = nullptr);
 
   LocationEntry(const QString& label,
                 const osmscout::GeoCoord& coord,
-                QObject* parent = 0);
+                QObject* parent = nullptr);
 
-  LocationEntry(QObject* parent = 0);
+  LocationEntry(QObject* parent = nullptr);
   LocationEntry(const LocationEntry& other);
   virtual ~LocationEntry();
 
@@ -104,7 +104,7 @@ public:
   double getLon() const;
 };
 
-typedef std::shared_ptr<LocationEntry> LocationEntryRef;
+using LocationEntryRef = std::shared_ptr<LocationEntry>;
 
 }
 

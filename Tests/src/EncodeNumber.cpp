@@ -17,18 +17,17 @@ bool CheckEncode(uint64_t value,
     std::cerr << "Encoding of '" << value << "' returned wrong length - Expected " << expectedLength << " actual " << bytes << std::endl;
     return false;
   }
-  else {
-    for (size_t i=0; i<bytes; i++) {
-      if (expected[i]!=buffer[i]) {
-        std::cerr << "Encoding of '" << value << "' returned wrong data at offset " << i << " - expected " << std::hex << (unsigned short int)expected[i] << " actual " << std::hex << (unsigned short int)buffer[i] << std::endl;
 
-        for (size_t i=0; i<bytes; i++) {
-          std::cerr << std::hex << (unsigned int)buffer[i] << " ";
-        }
-        std::cerr << std::endl;
+  for (size_t i=0; i<bytes; i++) {
+    if (expected[i]!=buffer[i]) {
+      std::cerr << "Encoding of '" << value << "' returned wrong data at offset " << i << " - expected " << std::hex << (unsigned short int)expected[i] << " actual " << std::hex << (unsigned short int)buffer[i] << std::endl;
 
-        return false;
+      for (size_t i=0; i<bytes; i++) {
+        std::cerr << std::hex << (unsigned int)buffer[i] << " ";
       }
+      std::cerr << std::endl;
+
+      return false;
     }
   }
 
@@ -140,7 +139,6 @@ int main()
   if (errors!=0) {
     return 1;
   }
-  else {
-    return 0;
-  }
+
+  return 0;
 }

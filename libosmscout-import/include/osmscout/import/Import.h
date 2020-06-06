@@ -52,7 +52,7 @@ namespace osmscout {
                                                        PreprocessorCallback& callback) const = 0;
   };
 
-  typedef std::shared_ptr<PreprocessorFactory> PreprocessorFactoryRef;
+  using PreprocessorFactoryRef = std::shared_ptr<PreprocessorFactory>;
 
   /**
     Collects all parameter that have influence on the import.
@@ -103,7 +103,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<Router> RouterRef;
+    using RouterRef = std::shared_ptr<Router>;
 
     enum class AssumeLandStrategy
     {
@@ -465,7 +465,7 @@ namespace osmscout {
                         Progress& progress) = 0;
   };
 
-  typedef std::shared_ptr<ImportModule> ImportModuleRef;
+  using ImportModuleRef = std::shared_ptr<ImportModule>;
 
   /**
     Does the import based on the given parameters. Feedback about the import progress

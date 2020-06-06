@@ -67,52 +67,52 @@ public:
              const Distance &stopAfter = Distance::Lowest(),
              bool skipInformative=false);
 
-    virtual ~Callback();
+    ~Callback() override;
 
-    virtual void OnStart(const RouteDescription::StartDescriptionRef& startDescription,
-                         const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+    void OnStart(const RouteDescription::StartDescriptionRef& startDescription,
+                 const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+                 const RouteDescription::NameDescriptionRef& nameDescription) override;
+
+    void OnTargetReached(const RouteDescription::TargetDescriptionRef& targetDescription) override;
+
+    void OnTurn(const RouteDescription::TurnDescriptionRef& turnDescription,
+                const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+                const RouteDescription::DirectionDescriptionRef& directionDescription,
+                const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+                const RouteDescription::NameDescriptionRef& nameDescription) override;
+
+    void OnRoundaboutEnter(const RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
+                           const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override;
+
+    void OnRoundaboutLeave(const RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                           const RouteDescription::NameDescriptionRef& nameDescription) override;
+
+    void OnMotorwayEnter(const RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
+                         const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override;
+
+    void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                          const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                          const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override;
+
+    void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                         const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                         const RouteDescription::DirectionDescriptionRef& directionDescription,
                          const RouteDescription::NameDescriptionRef& nameDescription) override;
 
-    virtual void OnTargetReached(const RouteDescription::TargetDescriptionRef& targetDescription) override;
+    void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override;
 
-    virtual void OnTurn(const RouteDescription::TurnDescriptionRef& turnDescription,
-                        const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
-                        const RouteDescription::DirectionDescriptionRef& directionDescription,
-                        const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
-                        const RouteDescription::NameDescriptionRef& nameDescription) override;
+    void PushStreetName(const RouteDescription::NameDescriptionRef& nameDescription);
 
-    virtual void OnRoundaboutEnter(const RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
-                                   const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override;
+    void BeforeNode(const RouteDescription::Node& node) override;
 
-    virtual void OnRoundaboutLeave(const RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                   const RouteDescription::NameDescriptionRef& nameDescription) override;
-
-    virtual void OnMotorwayEnter(const RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
-                                 const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription) override;
-
-    virtual void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
-                                  const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                  const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override;
-
-    virtual void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
-                                 const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                 const RouteDescription::DirectionDescriptionRef& directionDescription,
-                                 const RouteDescription::NameDescriptionRef& nameDescription) override;
-
-    virtual void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override;
-
-    void PushStreetName(const RouteDescription::NameDescriptionRef &nameDescription);
-
-    virtual void BeforeNode(const RouteDescription::Node& node) override;
-
-    virtual bool Continue() const override;
+    bool Continue() const override;
 
     RouteStep MkStep(const QString &name);
   };
 public:
   RouteDescriptionBuilder();
 
-  virtual ~RouteDescriptionBuilder();
+  ~RouteDescriptionBuilder() override;
 
   void GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
                           QList<RouteStep> &routeSteps) const;

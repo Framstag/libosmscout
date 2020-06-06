@@ -33,29 +33,29 @@ namespace osmscout {
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Online tile provider object. See OnlineTileProviderModel and Settings.
  */
 class OSMSCOUT_CLIENT_QT_API OnlineTileProvider: public QObject
 {
   Q_OBJECT
-  
-public: 
-  inline OnlineTileProvider(){};
-  
+
+public:
+  OnlineTileProvider() = default;
+
   inline OnlineTileProvider(const OnlineTileProvider &o):
     QObject(o.parent()),
-    valid(o.valid), id(o.id), name(o.name), servers(o.servers), 
+    valid(o.valid), id(o.id), name(o.name), servers(o.servers),
           maximumZoomLevel(o.maximumZoomLevel), copyright(o.copyright){};
-  
-  inline OnlineTileProvider(QString id, QString name, QStringList servers, int maximumZoomLevel, 
-          QString copyright):
-    valid(true), id(id), name(name), servers(servers), maximumZoomLevel(maximumZoomLevel), 
-    copyright(copyright){};
-    
-  virtual inline ~OnlineTileProvider(){};
 
-  inline void operator=(const OnlineTileProvider &o)
+  inline OnlineTileProvider(QString id, QString name, QStringList servers, int maximumZoomLevel,
+          QString copyright):
+    valid(true), id(id), name(name), servers(servers), maximumZoomLevel(maximumZoomLevel),
+    copyright(copyright){};
+
+  ~OnlineTileProvider() override = default;
+
+  inline OnlineTileProvider& operator=(const OnlineTileProvider &o)
   {
     valid = o.valid;
     id = o.id;
@@ -63,6 +63,8 @@ public:
     servers = o.servers;
     maximumZoomLevel = o.maximumZoomLevel;
     copyright = o.copyright;
+
+    return *this;
   }
 
   inline QString getId() const {
@@ -92,7 +94,7 @@ public:
 
   static OnlineTileProvider fromJson(QJsonValue obj);
 
-private: 
+private:
   bool valid{false};
   QString id;
   QString name;

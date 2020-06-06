@@ -529,10 +529,8 @@ namespace osmscout {
       return true;
     }
 
-    for (std::list<std::string>::const_iterator path = parameter.GetPatternPaths().begin();
-         path != parameter.GetPatternPaths().end();
-         ++path) {
-      std::string filename = *path + style.GetPatternName() + ".png";
+    for (const auto & path : parameter.GetPatternPaths()) {
+      std::string filename = path + style.GetPatternName() + ".png";
 
       cairo_surface_t *image = osmscout::LoadPNG(filename);
 
@@ -738,8 +736,8 @@ namespace osmscout {
         pango_glyph_string_set_size(singleGlyphStr.get(), 1);
 
         // make glyph copy
-        singleGlyphStr.get()->glyphs[0] = run->glyphs->glyphs[gi];
-        PangoGlyphInfo &glyphInfo = singleGlyphStr.get()->glyphs[0];
+        singleGlyphStr->glyphs[0] = run->glyphs->glyphs[gi];
+        PangoGlyphInfo &glyphInfo = singleGlyphStr->glyphs[0];
 
         result.back().glyph.font = font;
 
@@ -759,7 +757,7 @@ namespace osmscout {
         result.back().glyph.glyphString = singleGlyphStr;
       }
 
-      if (!pango_layout_iter_next_run(iter)){
+      if (pango_layout_iter_next_run(iter) == 0){
         pango_layout_iter_free(iter);
         iter = nullptr;
       }

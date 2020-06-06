@@ -74,7 +74,7 @@ namespace osmscout {
     };
 
     // Should be unique_ptr but I get compiler errors if passing it to the WriteWorkerQueue
-    typedef std::shared_ptr<RawBlockData> RawBlockDataRef;
+    using RawBlockDataRef = std::shared_ptr<RawBlockData>;
 
   public:
     virtual ~PreprocessorCallback();

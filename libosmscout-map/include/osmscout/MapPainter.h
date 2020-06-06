@@ -84,9 +84,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainter
   {
   private:
-    typedef void (MapPainter::*StepMethod)(const Projection&,
-                                           const MapParameter&,
-                                           const MapData&);
+    using StepMethod = void (MapPainter::*)(const Projection &, const MapParameter &, const MapData &);
 
   public:
 

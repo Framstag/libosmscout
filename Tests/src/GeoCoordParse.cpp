@@ -13,10 +13,9 @@ bool CheckParseFail(const std::string& text)
     std::cout << "OK" << std::endl;
     return true;
   }
-  else {
-    std::cerr << "FAIL: Was parsed to " << coord.GetDisplayText() << std::endl;
-    return false;
-  }
+
+  std::cerr << "FAIL: Was parsed to " << coord.GetDisplayText() << std::endl;
+  return false;
 }
 
 bool CheckParseSuccess(const std::string& text,
@@ -35,15 +34,13 @@ bool CheckParseSuccess(const std::string& text,
       std::cout << "OK" << std::endl;
       return true;
     }
-    else {
-      std::cerr << "FAIL: Was parsed to " <<  coord.GetDisplayText() << std::endl;
-      return false;
-    }
-  }
-  else {
-    std::cerr << "FAIL: parsing failed" << std::endl;
+
+    std::cerr << "FAIL: Was parsed to " <<  coord.GetDisplayText() << std::endl;
     return false;
   }
+
+  std::cerr << "FAIL: parsing failed" << std::endl;
+  return false;
 }
 
 int main()
@@ -181,7 +178,6 @@ int main()
   if (errors!=0) {
     return 1;
   }
-  else {
-    return 0;
-  }
+
+  return 0;
 }

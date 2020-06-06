@@ -40,7 +40,7 @@ namespace osmscout {
 
 /**
  * Utility class for downloading map database described by AvailableMapsModelMap
- * over http. 
+ * over http.
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public DownloadJob
@@ -53,8 +53,8 @@ public:
   static const char* FILE_METADATA;
 
   MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target, bool replaceExisting);
-  virtual ~MapDownloadJob();
-  
+  ~MapDownloadJob() override;
+
   void start();
 
   inline QString getMapName() const
@@ -67,7 +67,7 @@ public:
     return map.getPath();
   }
 
-  virtual inline size_t expectedSize() const
+  inline size_t expectedSize() const override
   {
     return map.getSize();
   }
@@ -166,14 +166,14 @@ private:
 };
 
 /**
- * Manager of map databases. It provide database lookup 
+ * Manager of map databases. It provide database lookup
  * (in databaseDirectories) and simple scheduler for downloading maps.
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API MapManager: public QObject
 {
   Q_OBJECT
-  
+
 private:
   QStringList databaseLookupDirs;
   QList<MapDirectory> databaseDirectories;
@@ -192,8 +192,8 @@ signals:
 
 public:
   MapManager(QStringList databaseLookupDirs, SettingsRef settings);
-  
-  virtual ~MapManager();
+
+  ~MapManager() override;
 
   /**
    * Start map downloading into local dir.
@@ -204,11 +204,11 @@ public:
    */
   void downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceExisting = true);
   void downloadNext();
-  
+
   inline QList<MapDownloadJob*> getDownloadJobs() const {
     return downloadJobs;
   }
-  
+
   inline QStringList getLookupDirectories() const
   {
     return databaseLookupDirs;
@@ -223,7 +223,7 @@ public:
 /**
  * \ingroup QtAPI
  */
-typedef std::shared_ptr<MapManager> MapManagerRef;
+using MapManagerRef = std::shared_ptr<MapManager>;
 
 }
 

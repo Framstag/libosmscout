@@ -217,9 +217,8 @@ namespace osmscout {
         setter(value);
         return CmdLineParseResult();
       }
-      else {
-        return CmdLineParseResult("Value for number argument '"+GetArgumentName()+"' is not a valid number '"+valueString+"'");
-      }
+
+      return CmdLineParseResult("Value for number argument '"+GetArgumentName()+"' is not a valid number '"+valueString+"'");
     }
   };
 

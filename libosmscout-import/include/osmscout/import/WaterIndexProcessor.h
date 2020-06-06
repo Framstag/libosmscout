@@ -141,7 +141,7 @@ namespace osmscout {
       CoastState         right;
     };
 
-    typedef std::shared_ptr<Coast> CoastRef;
+    using CoastRef = std::shared_ptr<Coast>;
 
     /**
      * State of a cell
@@ -285,7 +285,7 @@ namespace osmscout {
       uint8_t       borderIndex;        //! The index of the border that gets intersected [0..3]
     };
 
-    typedef std::shared_ptr<Intersection> IntersectionRef;
+    using IntersectionRef = std::shared_ptr<Intersection>;
 
     /**
      * Holds all generated, calculated and extracted information about an
@@ -304,7 +304,7 @@ namespace osmscout {
       CoastState                                 right;
     };
 
-    typedef std::shared_ptr<CoastlineData> CoastlineDataRef;
+    using CoastlineDataRef = std::shared_ptr<CoastlineData>;
 
     /**
      * Computed data for one index level
@@ -328,9 +328,8 @@ namespace osmscout {
         if (a->prevWayPointIndex==b->prevWayPointIndex) {
           return a->distanceSquare<b->distanceSquare;
         }
-        else {
-          return a->prevWayPointIndex<b->prevWayPointIndex;
-        }
+
+        return a->prevWayPointIndex<b->prevWayPointIndex;
       }
     };
 

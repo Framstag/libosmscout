@@ -67,7 +67,7 @@ public:
 
   AvailableVoice(const AvailableVoice& o);
 
-  virtual ~AvailableVoice() = default;
+  ~AvailableVoice() override = default;
 
   inline VoiceProvider getProvider() const
   {

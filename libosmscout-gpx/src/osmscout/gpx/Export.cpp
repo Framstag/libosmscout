@@ -92,7 +92,7 @@ public:
     if (writer == nullptr && callback) {
       callback->Error("Error creating the xml writer");
     }
-    if (writer) {
+    if (writer != nullptr) {
       if (xmlTextWriterSetIndent(writer, 1) < 0){
         callback->Error("Error at xmlTextWriterSetIndent");
       }
@@ -201,12 +201,12 @@ bool GpxWritter::WriteTextElement(const char *elementName, double value, std::st
   stream.precision(precision);
   stream << value;
 
-  return WriteTextElement(elementName, stream.str().c_str());
+  return WriteTextElement(elementName, stream.str());
 }
 
 bool GpxWritter::WriteTextElement(const char *elementName, const Timestamp &timestamp)
 {
-  return WriteTextElement(elementName, TimestampToISO8601TimeString(timestamp).c_str());
+  return WriteTextElement(elementName, TimestampToISO8601TimeString(timestamp));
 }
 
 bool GpxWritter::WriteAttribute(const char *name, const char *content)
@@ -460,11 +460,7 @@ bool GpxWritter::WriteMetadata(const GpxFile file)
     }
   }
 
-  if (!EndElement()) {
-    return false;
-  }
-
-  return true;
+  return EndElement();
 }
 
 bool GpxWritter::WriteWaypoints(const std::vector<Waypoint> &waypoints)

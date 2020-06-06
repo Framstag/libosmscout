@@ -63,8 +63,7 @@ public:
 };
 
 template <typename RouteInstruction, typename RouteInstructionBuilder>
-RouteInstructionAgent<RouteInstruction, RouteInstructionBuilder>::RouteInstructionAgent()
-{}
+RouteInstructionAgent<RouteInstruction, RouteInstructionBuilder>::RouteInstructionAgent() = default;
 
 template <typename RouteInstruction, typename RouteInstructionBuilder>
 std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteInstructionBuilder>
@@ -72,7 +71,7 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
 {
   std::list<NavigationMessageRef> result;
 
-  auto positionMessage = dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+  auto* positionMessage = dynamic_cast<PositionAgent::PositionMessage*>(message.get());
   if (positionMessage==nullptr) {
     return result;
   }

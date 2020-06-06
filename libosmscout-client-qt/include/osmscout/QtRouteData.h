@@ -47,7 +47,7 @@ private:
     QList<RouteStep>           routeSteps;
     osmscout::Way              routeWay;
   };
-  typedef std::shared_ptr<PrivateData> PrivateDataRef;
+  using PrivateDataRef = std::shared_ptr<PrivateData>;
 
   PrivateDataRef data;
 
@@ -61,7 +61,7 @@ public:
               osmscout::Way &&routeWay,
               QObject* parent=nullptr);
 
-  ~QtRouteData() {};
+  ~QtRouteData() override = default;
 
   QtRouteData& operator=(const QtRouteData&);
 

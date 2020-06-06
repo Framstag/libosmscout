@@ -108,7 +108,7 @@ class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
   Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
 
 public:
-  typedef std::function<void(const std::list<DBInstanceRef>&)> SynchronousDBJob;
+  using SynchronousDBJob = std::function<void (const std::list<DBInstanceRef> &)>;
 
 signals:
   void initialisationFinished(const DatabaseLoadedResponse& response);
@@ -171,7 +171,7 @@ public:
            MapManagerRef mapManager,
            const std::vector<std::string> &customPoiTypes);
 
-  virtual ~DBThread();
+  ~DBThread() override;
 
   bool isInitialized();
 
@@ -236,7 +236,7 @@ public:
 
 };
 
-typedef std::shared_ptr<DBThread> DBThreadRef;
+using DBThreadRef = std::shared_ptr<DBThread>;
 
 }
 

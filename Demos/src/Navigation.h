@@ -75,10 +75,7 @@ namespace osmscout {
   class NavigationDescription : public OutputDescription<NodeDescription>
   {
   public:
-    NavigationDescription()
-      : roundaboutCrossingCounter(0),
-        index(0)
-    {};
+    NavigationDescription() = default;
 
     void NextDescription(const Distance &distance,
                          std::list<RouteDescription::Node>::const_iterator& waypoint,
@@ -261,8 +258,8 @@ namespace osmscout {
     }
 
   private:
-    size_t          roundaboutCrossingCounter;
-    size_t          index;
+    size_t          roundaboutCrossingCounter=0;
+    size_t          index=0;
     Distance        previousDistance;
     NodeDescription description;
   };

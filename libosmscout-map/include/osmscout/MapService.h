@@ -102,11 +102,11 @@ namespace osmscout {
       TypeInfoSet optimizedWayTypes;
     };
 
-    typedef std::shared_ptr<TypeDefinition> TypeDefinitionRef;
+    using TypeDefinitionRef = std::shared_ptr<TypeDefinition>;
 
   public:
-    typedef size_t                              CallbackId;
-    typedef std::function<void(const TileRef&)> TileStateCallback;
+    using CallbackId = size_t;
+    using TileStateCallback = std::function<void (const TileRef &)>;
 
   private:
     mutable std::mutex           stateMutex;           //!< Mutex to protect internal state
@@ -283,7 +283,7 @@ namespace osmscout {
 
   //! \ingroup Service
   //! Reference counted reference to an Database instance
-  typedef std::shared_ptr<MapService> MapServiceRef;
+  using MapServiceRef = std::shared_ptr<MapService>;
 }
 
 #endif

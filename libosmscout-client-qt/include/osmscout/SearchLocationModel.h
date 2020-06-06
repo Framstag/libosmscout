@@ -169,8 +169,8 @@ public:
   };
 
 public:
-  LocationListModel(QObject* parent = 0);
-  virtual ~LocationListModel();
+  LocationListModel(QObject* parent = nullptr);
+  ~LocationListModel() override;
 
   QJSValue getCompare() const {
     return compareFn;
@@ -188,13 +188,13 @@ public:
     equalsFn=fn;
   }
 
-  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
+  Q_INVOKABLE QVariant data(const QModelIndex &index, int role) const override;
 
-  Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-  virtual QHash<int, QByteArray> roleNames() const;
+  QHash<int, QByteArray> roleNames() const override;
 
   Q_INVOKABLE QObject* get(int row) const;
 

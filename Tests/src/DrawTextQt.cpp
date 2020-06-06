@@ -50,10 +50,7 @@ DrawWindow::DrawWindow(QString variant, int sinCount, QWidget *parent)
   }
 }
 
-DrawWindow::~DrawWindow()
-{
-
-}
+DrawWindow::~DrawWindow() = default;
 
 void DrawWindow::setupTransformation(QPainter *painter, const osmscout::LabelPath &p,
                                      const qreal offset, const qreal baseline) const
@@ -157,8 +154,9 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::La
         positions[0]=QPointF(0,pos.y());
 
         qreal glyphOffset=offset+pos.x();
-        if (glyphOffset>pLength)
+        if (glyphOffset>pLength) {
           continue;
+        }
 
         //QPointF point=p.pointAtPercent(p.percentAtLength(glyphOffset));
         osmscout::Vertex2D point=p.PointAtLength(glyphOffset);
@@ -233,12 +231,15 @@ void DrawWindow::paintEvent(QPaintEvent* /* event */)
     }
     sinStart+=30;
 
-    if (variant=="simple")
+    if (variant=="simple") {
       drawText1(&painter,string,p);
-    if (variant=="bidirectional")
+    }
+    if (variant=="bidirectional") {
       drawText2(&painter,string,p);
-    if (variant=="line")
+    }
+    if (variant=="line") {
       drawLine(&painter,p);
+    }
   }
 
   cnt++;
@@ -261,10 +262,10 @@ int main(int argc, char** argv)
 {
   QApplication app(argc, argv);
 
-  if (app.arguments().size()<3){
+  if (QApplication::arguments().size()<3){
     qWarning() << "No enough arguments!";
     std::cout << "Usage:" << std::endl;
-    std::cout << app.arguments().at(0).toStdString() << " countOfCurves variant" << std::endl;
+    std::cout << QApplication::arguments().at(0).toStdString() << " countOfCurves variant" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Variant can be:" << std::endl;
     std::cout << "  noop" << std::endl;
@@ -274,14 +275,14 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  int sinCount=app.arguments().at(1).toInt();
-  QString variant=app.arguments().at(2);
+  int sinCount=QApplication::arguments().at(1).toInt();
+  QString variant=QApplication::arguments().at(2);
 
   qDebug() << "use" << variant << "variant, render" << sinCount << "paths";
 
   DrawWindow window(variant,sinCount);
   window.show();
 
-  return app.exec();
+  return QApplication::exec();
 }
 

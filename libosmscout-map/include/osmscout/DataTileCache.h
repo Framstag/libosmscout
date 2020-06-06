@@ -58,17 +58,13 @@ namespace osmscout {
     std::vector<O>     prefillData;
     std::vector<O>     data;
 
-    bool               complete;
+    bool               complete=false;
 
   public:
     /**
      * Create an empty and unassigned TileData
      */
-    TileData()
-    : complete(false)
-    {
-      // no code
-    }
+    TileData() = default;
 
     bool IsEmpty() const
     {
@@ -210,7 +206,7 @@ namespace osmscout {
      * Note that it is stll possibly that there is no acutal data for this type in the
      * TileData stored.
      */
-    const TypeInfoSet GetTypes() const
+    TypeInfoSet GetTypes() const
     {
       std::lock_guard<std::mutex> guard(mutex);
 
@@ -238,21 +234,21 @@ namespace osmscout {
    *
    * TileData for nodes
    */
-  typedef TileData<NodeRef> TileNodeData;
+  using TileNodeData = TileData<NodeRef>;
 
   /**
    * \ingroup tiledcache
    *
    * TileData for ways
    */
-  typedef TileData<WayRef>  TileWayData;
+  using TileWayData = TileData<WayRef>;
 
   /**
    * \ingroup tiledcache
    *
    * TileData for areas
    */
-  typedef TileData<AreaRef> TileAreaData;
+  using TileAreaData = TileData<AreaRef>;
 
   // Forward declaration of DataTileCache for friend declaration in Tile
   class DataTileCache;
@@ -417,7 +413,7 @@ namespace osmscout {
    *
    * Reference counted reference to a tile
    */
-  typedef std::shared_ptr<Tile> TileRef;
+  using TileRef = std::shared_ptr<Tile>;
 
   /**
    * \ingroup tiledcache
@@ -452,13 +448,13 @@ namespace osmscout {
     };
 
     //! A list of cached tiles
-    typedef std::list<CacheEntry>      Cache;
+    using Cache = std::list<CacheEntry>;
 
     //! References to a tile in above list
-    typedef Cache::iterator            CacheRef;
+    using CacheRef = Cache::iterator;
 
     //! An index from TileIds to cache entries
-    typedef std::map<TileKey,CacheRef> CacheIndex;
+    using CacheIndex = std::map<TileKey, CacheRef>;
 
   private:
     size_t             cacheSize;
@@ -518,7 +514,7 @@ namespace osmscout {
    *
    * Reference counted reference to a DataTileCache instance
    */
-  typedef std::shared_ptr<DataTileCache> TiledDataCacheRef;
+  using TiledDataCacheRef = std::shared_ptr<DataTileCache>;
 
   /**
    * \defgroup tiledcache Classes for caching map data per tile

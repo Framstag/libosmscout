@@ -1689,9 +1689,8 @@ namespace osmscout {
       if (startYear==endYear) {
         return std::to_string(startYear);
       }
-      else {
-        return std::to_string(startYear)+"-"+std::to_string(endYear);
-      }
+
+      return std::to_string(startYear)+"-"+std::to_string(endYear);
     }
 
     void Read(FileScanner& scanner) override;

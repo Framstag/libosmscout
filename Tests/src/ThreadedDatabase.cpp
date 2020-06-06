@@ -165,7 +165,7 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
       std::cout << "Thread " << std::this_thread::get_id() << ": iteration " << i << std::endl;
     }
 
-    for (auto& testData : testDataSet) {
+    for (const auto & testData : testDataSet) {
       std::vector<osmscout::FileOffset>    nodeOffsets;
       osmscout::TypeInfoSet                loadedNodeTypes;
       std::vector<osmscout::NodeRef>       nodeData;
@@ -277,14 +277,17 @@ void AccessAreaIndex(osmscout::DatabaseRef& database,
       std::vector<osmscout::FileOffset> loadedWayOffsets;
       std::vector<osmscout::FileOffset> loadedAreaOffsets;
 
+      loadedNodeOffsets.reserve(nodeData.size());
       for (const auto& node : nodeData) {
         loadedNodeOffsets.push_back(node->GetFileOffset());
       }
 
+      loadedWayOffsets.reserve(wayData.size());
       for (const auto& way : wayData) {
         loadedWayOffsets.push_back(way->GetFileOffset());
       }
 
+      loadedAreaOffsets.reserve(areaData.size());
       for (const auto& area : areaData) {
         loadedAreaOffsets.push_back(area->GetFileOffset());
       }

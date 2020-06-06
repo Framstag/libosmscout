@@ -118,7 +118,7 @@ namespace osmscout {
 
   private:
     bool SearchClosestSegment(const GeoCoord& location,
-                              const std::list<RouteDescription::Node>::const_iterator locationOnRoute,
+                              const std::list<RouteDescription::Node>::const_iterator& locationOnRoute,
                               GeoCoord &closestPosition,
                               std::list<RouteDescription::Node>::const_iterator& foundNode,
                               double& foundAbscissa,
@@ -126,4 +126,4 @@ namespace osmscout {
   };
 
 }
-#endif 
+#endif

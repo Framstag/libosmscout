@@ -40,51 +40,53 @@ class OSMSCOUT_CLIENT_QT_API MapProvider: public QObject
   Q_OBJECT
 
 private:
-  bool valid;
+  bool valid=false;
   QString uri;
   QString listUri;
   QString name;
-  
+
 public:
-  inline MapProvider():valid(false) {}
-  
+  MapProvider() = default;
+
   inline MapProvider(const MapProvider &o):
     QObject(o.parent()),
-    valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};  
-  
-  inline MapProvider(QString name, QString uri, QString listUri): 
+    valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};
+
+  inline MapProvider(QString name, QString uri, QString listUri):
     valid(true), uri(uri), listUri(listUri), name(name) {}
-  
-  virtual inline ~MapProvider() {}
-  
-  inline void operator=(const MapProvider &o)
+
+  ~MapProvider() override = default;
+
+  inline MapProvider& operator=(const MapProvider &o)
   {
     valid = o.valid;
     uri = o.uri;
     listUri = o.listUri;
     name = o.name;
-  }  
-  
+
+    return *this;
+  }
+
   inline QString getName() const
   {
     return name;
   }
-  
+
   inline QString getUri() const
   {
     return uri;
   }
-  
+
   inline QUrl getListUri(int fromVersion, int toVersion, QString locale="en") const
   {
     return listUri.arg(fromVersion).arg(toVersion).arg(locale);
   }
-  
+
   inline bool isValid() const
   {
     return valid;
   }
-  
+
   static MapProvider fromJson(QJsonValue obj);
 };
 

@@ -182,7 +182,7 @@ public:
 /**
  * \ingroup QtAPI
  */
-typedef std::shared_ptr<OSMScoutQtBuilder> OSMScoutQtBuilderRef;
+using OSMScoutQtBuilderRef = std::shared_ptr<OSMScoutQtBuilder>;
 
 /**
  * \ingroup QtAPI
@@ -256,7 +256,7 @@ public slots:
   void threadFinished();
 
 public:
-  virtual ~OSMScoutQt();
+  ~OSMScoutQt() override;
 
   /**
    * Create new background thread with given name.

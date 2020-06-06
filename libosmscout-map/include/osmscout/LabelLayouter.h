@@ -45,7 +45,7 @@ namespace osmscout {
     T width;
     T height;
 
-    // 123not initialised viewport
+    // not initialised viewport
     Rectangle() = default;
 
     Rectangle(T x, T y, T width, T height):
@@ -120,7 +120,7 @@ namespace osmscout {
     double            iconHeight{0};
 
   public:
-    LabelData() = default;;
+    LabelData() = default;
     ~LabelData() = default;
   };
 

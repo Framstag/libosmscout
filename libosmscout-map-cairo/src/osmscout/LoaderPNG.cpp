@@ -28,7 +28,7 @@ namespace osmscout {
 
   cairo_user_data_key_t imageDataKey;
 
-  static bool IsLowerByteSet(unsigned char *bytes)
+  static bool IsLowerByteSet(const unsigned char *bytes)
   {
     return bytes[0]!=0;
   }
@@ -63,13 +63,13 @@ namespace osmscout {
     /* could pass pointers to user-defined error handlers instead of NULLs: */
 
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,nullptr,nullptr,nullptr);
-    if (!png_ptr) {
+    if (png_ptr == nullptr) {
       std::fclose(file);
       return nullptr;   /* out of memory */
     }
 
     info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr) {
+    if (info_ptr == nullptr) {
       png_destroy_read_struct(&png_ptr,nullptr,nullptr);
       std::fclose(file);
       return nullptr;   /* out of memory */
@@ -102,7 +102,7 @@ namespace osmscout {
       png_set_expand(png_ptr);
     }
 
-    if (png_get_valid(png_ptr,info_ptr,PNG_INFO_tRNS)) {
+    if (png_get_valid(png_ptr,info_ptr,PNG_INFO_tRNS) != 0u) {
       png_set_expand(png_ptr);
     }
 
@@ -117,12 +117,12 @@ namespace osmscout {
 
     screen_gamma=2.2; /* TODO: Make it configurable */
 
-    if (png_get_sRGB(png_ptr,info_ptr,&intent)) {
+    if (png_get_sRGB(png_ptr,info_ptr,&intent) != 0u) {
       png_set_gamma(png_ptr,screen_gamma,0.45455);
     }
     else {
       double image_gamma;
-      if (png_get_gAMA(png_ptr,info_ptr,&image_gamma)) {
+      if (png_get_gAMA(png_ptr,info_ptr,&image_gamma) != 0u) {
         png_set_gamma(png_ptr,screen_gamma,image_gamma);
       }
       else {

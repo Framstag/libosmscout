@@ -91,9 +91,7 @@ public:
     connect(&timer, &QTimer::timeout, this, &TapRecognizer::onTimeout);
   }
 
-  virtual inline ~TapRecognizer()
-  {
-  }
+  ~TapRecognizer() override = default;
 
   void touch(const QTouchEvent &event);
 
@@ -146,7 +144,7 @@ public:
     memory(memory), factor(factor), vectorLengthTreshold(vectorLengthTreshold)
   {
   }
-  virtual inline ~MoveAccumulator(){}
+  ~MoveAccumulator() override = default;
 
   MoveAccumulator& operator+=(const QPointF p);
   QVector2D collect();
@@ -169,7 +167,7 @@ class OSMSCOUT_CLIENT_QT_API MapView: public QObject
   Q_PROPERTY(double   mapDpi    READ GetMapDpi    CONSTANT)
 
 public:
-  inline MapView(QObject *parent=0): QObject(parent) {}
+  inline MapView(QObject *parent=nullptr): QObject(parent) {}
 
   inline MapView(QObject *parent,
                  const osmscout::GeoCoord &center,
@@ -192,23 +190,25 @@ public:
   inline MapView(const MapView &mv):
     QObject(), center(mv.center), angle(mv.angle), magnification(mv.magnification), mapDpi(mv.mapDpi) {}
 
-  virtual inline ~MapView(){}
+  ~MapView() override = default;
 
-  inline double GetLat(){ return center.GetLat(); }
-  inline double GetLon(){ return center.GetLon(); }
-  inline double GetAngle(){ return angle.AsRadians(); }
-  inline double GetMag(){ return magnification.GetMagnification(); }
-  inline double GetMagLevel(){ return magnification.GetLevel(); }
-  inline double GetMapDpi(){ return mapDpi; }
+  inline double GetLat() const{ return center.GetLat(); }
+  inline double GetLon() const{ return center.GetLon(); }
+  inline double GetAngle() const{ return angle.AsRadians(); }
+  inline double GetMag() const{ return magnification.GetMagnification(); }
+  inline double GetMagLevel() const{ return magnification.GetLevel(); }
+  inline double GetMapDpi() const{ return mapDpi; }
 
-  inline bool IsValid(){ return mapDpi > 0; }
+  inline bool IsValid() const{ return mapDpi > 0; }
 
-  void inline operator=(const MapView &mv)
+  inline MapView& operator=(const MapView &mv)
   {
     center = mv.center;
     angle = mv.angle;
     magnification = mv.magnification;
     mapDpi = mv.mapDpi;
+
+    return *this;
   }
 
   osmscout::GeoCoord           center;
@@ -247,7 +247,7 @@ class OSMSCOUT_CLIENT_QT_API InputHandler : public QObject{
     Q_OBJECT
 public:
     InputHandler(const MapView &view);
-    virtual ~InputHandler();
+    ~InputHandler() override;
 
     virtual void painted();
     virtual bool animationInProgress();
@@ -300,9 +300,9 @@ private slots:
 
 public:
     MoveHandler(const MapView &view);
-    virtual ~MoveHandler();
+    ~MoveHandler() override;
 
-    virtual bool animationInProgress() override;
+    bool animationInProgress() override;
 
     /**
      * Called from DragHandler or MultitouchHandler when gesture moves with map
@@ -312,11 +312,11 @@ public:
      */
     bool moveNow(const QVector2D &vector); // move vector in pixels, without animation
 
-    virtual bool zoom(double zoomFactor, const QPoint &widgetPosition, const QRect &widgetDimension) override;
-    virtual bool move(const QVector2D &vector) override; // move vector in pixels
-    virtual bool rotateTo(double angle) override;
-    virtual bool rotateBy(double angleChange) override;
-    virtual bool touch(const QTouchEvent &event) override;
+    bool zoom(double zoomFactor, const QPoint &widgetPosition, const QRect &widgetDimension) override;
+    bool move(const QVector2D &vector) override; // move vector in pixels
+    bool rotateTo(double angle) override;
+    bool rotateBy(double angleChange) override;
+    bool touch(const QTouchEvent &event) override;
 };
 
 /**
@@ -348,10 +348,10 @@ public:
                 double moveAnimationDuration = (double)ANIMATION_DURATION,
                 double zoomAnimationDuration = (double)ANIMATION_DURATION);
 
-    virtual ~JumpHandler();
+    ~JumpHandler() override;
 
-    virtual bool animationInProgress() override;
-    virtual bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing) override;
+    bool animationInProgress() override;
+    bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing) override;
 };
 
 /**
@@ -363,15 +363,15 @@ class OSMSCOUT_CLIENT_QT_API DragHandler : public MoveHandler {
     Q_OBJECT
 public:
     DragHandler(const MapView &view);
-    virtual ~DragHandler();
+    ~DragHandler() override;
 
-    virtual bool animationInProgress() override;
+    bool animationInProgress() override;
 
-    virtual bool zoom(double zoomFactor, const QPoint &widgetPosition, const QRect &widgetDimension) override;
-    virtual bool move(const QVector2D &vector) override; // move vector in pixels
-    virtual bool rotateBy(double angleChange) override;
+    bool zoom(double zoomFactor, const QPoint &widgetPosition, const QRect &widgetDimension) override;
+    bool move(const QVector2D &vector) override; // move vector in pixels
+    bool rotateBy(double angleChange) override;
 
-    virtual bool touch(const QTouchEvent &event) override;
+    bool touch(const QTouchEvent &event) override;
 
 private:
     bool moving;
@@ -393,15 +393,15 @@ class OSMSCOUT_CLIENT_QT_API MultitouchHandler : public MoveHandler {
     Q_OBJECT
 public:
     MultitouchHandler(const MapView &view);
-    virtual ~MultitouchHandler();
+    ~MultitouchHandler() override;
 
-    virtual bool animationInProgress() override;
+    bool animationInProgress() override;
 
-    virtual bool zoom(double zoomFactor, const QPoint &widgetPosition, const QRect &widgetDimension) override;
-    virtual bool move(const QVector2D &vector) override; // move vector in pixels
-    virtual bool rotateBy(double angleChange) override;
+    bool zoom(double zoomFactor, const QPoint &widgetPosition, const QRect &widgetDimension) override;
+    bool move(const QVector2D &vector) override; // move vector in pixels
+    bool rotateBy(double angleChange) override;
 
-    virtual bool touch(const QTouchEvent &event) override;
+    bool touch(const QTouchEvent &event) override;
 
 private:
     bool moving;
@@ -427,11 +427,11 @@ public:
       JumpHandler(view), window(widgetSize)
     {};
 
-    virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition) override;
-    virtual bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing) override;
-    virtual bool isLockedToPosition() override;
-    virtual bool focusOutEvent(QFocusEvent *event) override;
-    virtual void widgetResized(const QSizeF &widgetSize) override;
+    bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition) override;
+    bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing) override;
+    bool isLockedToPosition() override;
+    bool focusOutEvent(QFocusEvent *event) override;
+    void widgetResized(const QSizeF &widgetSize) override;
 private:
     QSizeF window;
 };
@@ -446,10 +446,10 @@ Q_OBJECT
 public:
   VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize);
 
-  virtual bool vehiclePosition(const VehiclePosition &vehiclePosition) override;
-  virtual bool isLockedToPosition() override;
-  virtual bool isFollowVehicle() override;
-  virtual void widgetResized(const QSizeF &widgetSize) override;
+  bool vehiclePosition(const VehiclePosition &vehiclePosition) override;
+  bool isLockedToPosition() override;
+  bool isFollowVehicle() override;
+  void widgetResized(const QSizeF &widgetSize) override;
 
 private:
   QSizeF window;

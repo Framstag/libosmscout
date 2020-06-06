@@ -41,16 +41,16 @@ namespace osmscout {
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Settings provides central point mutable configuration of OSMScout library.
  * It uses Qt's QSettings for persistency. It may be accessed from DBThread instance.
- * 
+ *
  * List of online tile providers should be initialized at applicaiton start.
  * ```
  *   Settings::GetInstance()->loadOnlineTileProviders(
  *     ":/resources/online-tile-providers.json");
  * ```
- * 
+ *
  * Before program exit, resources should be released by calling Settings::FreeInstance.
  */
 class OSMSCOUT_CLIENT_QT_API Settings: public QObject
@@ -97,35 +97,35 @@ private:
 
 public:
   Settings(QSettings *providedStorage=nullptr);
-  virtual ~Settings();
+  ~Settings() override;
 
   double GetPhysicalDPI() const;
-  
+
   void SetMapDPI(double dpi);
   double GetMapDPI() const;
 
   osmscout::Vehicle GetRoutingVehicle() const;
   void SetRoutingVehicle(const osmscout::Vehicle& vehicle);
-  
+
   bool GetOnlineTilesEnabled() const;
   void SetOnlineTilesEnabled(bool b);
-  
+
   const QList<OnlineTileProvider> GetOnlineProviders() const;
-  const OnlineTileProvider GetOnlineTileProvider() const; 
+  const OnlineTileProvider GetOnlineTileProvider() const;
 
   const QList<MapProvider> GetMapProviders() const;
   const QList<VoiceProvider> GetVoiceProviders() const;
 
-  const QString GetOnlineTileProviderId() const; 
+  const QString GetOnlineTileProviderId() const;
   void SetOnlineTileProviderId(QString id);
-  
+
   bool loadOnlineTileProviders(QString path);
   bool loadMapProviders(QString path);
   bool loadVoiceProviders(QString path);
-  
+
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);
-  
+
   bool GetRenderSea() const;
   void SetRenderSea(bool);
 
@@ -157,7 +157,7 @@ public:
   void SetShowAltLanguage(bool showAltLanguage);
 
   const QString GetHttpCacheDir() const;
-  
+
   const QByteArray GetCookieData() const;
   void SetCookieData(QByteArray data);
 
@@ -168,22 +168,22 @@ public:
 /**
  * \ingroup QtAPI
  */
-typedef std::shared_ptr<Settings> SettingsRef;
+using SettingsRef = std::shared_ptr<Settings>;
 
 /**
  * \ingroup QtAPI
- * 
- * Provides interface to Settings object from QML. It should be registered 
+ *
+ * Provides interface to Settings object from QML. It should be registered
  * by qmlRegisterType before first use.
- * 
+ *
  * ```
  * qmlRegisterType<QmlSettings>("net.sf.libosmscout.map", 1, 0, "Settings");
  * ```
- * 
+ *
  * It may be imported and used in QML then:
  * ```
  * import net.sf.libosmscout.map 1.0
- * 
+ *
  * Settings {
  *   id: settings
  * }
@@ -219,25 +219,25 @@ signals:
 
 public:
   QmlSettings();
-  
-  virtual inline ~QmlSettings(){};
+
+  ~QmlSettings() override = default;
 
   double GetPhysicalDPI() const;
 
   void SetMapDPI(double dpi);
-  double GetMapDPI() const;  
-    
+  double GetMapDPI() const;
+
   bool GetOnlineTilesEnabled() const;
   void SetOnlineTilesEnabled(bool b);
-  
-  const QString GetOnlineTileProviderId() const; 
+
+  const QString GetOnlineTileProviderId() const;
   void SetOnlineTileProviderId(QString id);
-  
+
   Q_INVOKABLE QString onlineProviderCopyright();
-  
+
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);
-  
+
   bool GetRenderSea() const;
   void SetRenderSea(bool);
 

@@ -46,7 +46,7 @@ class OSMSCOUT_CLIENT_QT_API VehiclePosition: public QObject
   Q_PROPERTY(double   bearing   READ getBearingRadians  CONSTANT)
 
 public:
-  inline explicit VehiclePosition(QObject *parent = 0) :
+  inline explicit VehiclePosition(QObject *parent = nullptr) :
     QObject(parent)
   {}
 
@@ -55,7 +55,7 @@ public:
                          const GeoCoord &coord,
                          const std::optional<Bearing> &bearing,
                          const std::optional<GeoCoord> &nextStepCoord,
-                         QObject *parent = 0):
+                         QObject *parent = nullptr):
       QObject(parent), vehicle(vehicle), state(state), coord(coord), bearing(bearing), nextStepCoord(nextStepCoord)
   {}
 
