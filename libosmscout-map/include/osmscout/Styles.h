@@ -253,7 +253,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<LineStyle>                       LineStyleRef;
+  using LineStyleRef = std::shared_ptr<LineStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -329,7 +329,7 @@ namespace osmscout {
     bool operator<(const FillStyle& other) const;
   };
 
-  typedef std::shared_ptr<FillStyle>                       FillStyleRef;
+  using FillStyleRef = std::shared_ptr<FillStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -438,7 +438,7 @@ namespace osmscout {
     bool operator<(const BorderStyle& other) const;
   };
 
-  typedef std::shared_ptr<BorderStyle>                         BorderStyleRef;
+  using BorderStyleRef = std::shared_ptr<BorderStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -476,7 +476,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<LabelStyle> LabelStyleRef;
+  using LabelStyleRef = std::shared_ptr<LabelStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -602,7 +602,7 @@ namespace osmscout {
     }
   };
 
-  typedef std::shared_ptr<TextStyle>                       TextStyleRef;
+  using TextStyleRef = std::shared_ptr<TextStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -672,7 +672,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef std::shared_ptr<ShieldStyle>                         ShieldStyleRef;
+  using ShieldStyleRef = std::shared_ptr<ShieldStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -771,7 +771,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef std::shared_ptr<PathShieldStyle>                             PathShieldStyleRef;
+  using PathShieldStyleRef = std::shared_ptr<PathShieldStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -857,7 +857,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef std::shared_ptr<PathTextStyle>                           PathTextStyleRef;
+  using PathTextStyleRef = std::shared_ptr<PathTextStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -955,7 +955,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef std::shared_ptr<IconStyle>                       IconStyleRef;
+  using IconStyleRef = std::shared_ptr<IconStyle>;
 
   /**
    * \ingroup Stylesheet
@@ -1001,7 +1001,7 @@ namespace osmscout {
                                 double& maxY) const = 0;
   };
 
-  typedef std::shared_ptr<DrawPrimitive> DrawPrimitiveRef;
+  using DrawPrimitiveRef = std::shared_ptr<DrawPrimitive>;
 
   /**
    * \ingroup Stylesheet
@@ -1030,7 +1030,7 @@ namespace osmscout {
                         double& maxY) const override;
   };
 
-  typedef std::shared_ptr<PolygonPrimitive> PolygonPrimitiveRef;
+  using PolygonPrimitiveRef = std::shared_ptr<PolygonPrimitive>;
 
   /**
    * \ingroup Stylesheet
@@ -1072,7 +1072,7 @@ namespace osmscout {
                         double& maxY) const override;
   };
 
-  typedef std::shared_ptr<RectanglePrimitive> RectanglePrimitiveRef;
+  using RectanglePrimitiveRef = std::shared_ptr<RectanglePrimitive>;
 
   /**
    * \ingroup Stylesheet
@@ -1107,7 +1107,7 @@ namespace osmscout {
                         double& maxY) const override;
   };
 
-  typedef std::shared_ptr<CirclePrimitive> CirclePrimitiveRef;
+  using CirclePrimitiveRef = std::shared_ptr<CirclePrimitive>;
 
   /**
    * \ingroup Stylesheet
@@ -1287,7 +1287,7 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef std::shared_ptr<PathSymbolStyle>                             PathSymbolStyleRef;
+  using PathSymbolStyleRef = std::shared_ptr<PathSymbolStyle>;
 }
 
 #endif

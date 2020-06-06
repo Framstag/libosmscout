@@ -36,7 +36,7 @@ namespace osmscout {
                                  const FillStyleRef& fillStyle) const = 0;
   };
 
-  typedef std::shared_ptr<FillStyleProcessor> FillStyleProcessorRef;
+  using FillStyleProcessorRef = std::shared_ptr<FillStyleProcessor>;
 }
 
 #endif

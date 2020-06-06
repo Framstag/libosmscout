@@ -34,9 +34,9 @@ class Highlighter : public QSyntaxHighlighter
     Q_OBJECT
 
 public:
-    Highlighter(QTextDocument *parent = 0);
+    Highlighter(QTextDocument *parent = nullptr);
 
-    virtual ~Highlighter(){};
+    ~Highlighter() override = default;
 
     void setStyle(qreal m_baseFontPointSize);
 
@@ -44,7 +44,7 @@ public slots:
     void onProblematicLines(QSet<int> errorLines, QSet<int> warningLines);
 
 protected:
-    void highlightBlock(const QString &text);
+    void highlightBlock(const QString &text) override;
 
 private:
     struct HighlightingRule

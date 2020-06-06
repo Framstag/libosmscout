@@ -62,7 +62,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    NameFeatureValue& operator=(const FeatureValue& other);
+    NameFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -128,7 +128,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    NameAltFeatureValue& operator=(const FeatureValue& other);
+    NameAltFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -167,10 +167,7 @@ namespace osmscout {
     std::string nameShort;
 
   public:
-    inline NameShortFeatureValue()
-    {
-      // no code
-    }
+    inline NameShortFeatureValue() = default;
 
     inline explicit NameShortFeatureValue(const std::string& nameShort)
     : nameShort(nameShort)
@@ -204,7 +201,7 @@ namespace osmscout {
   {
   private:
       TagId tagShortName;
-      
+
   public:
     /** Name of this feature */
     static const char* const NAME;
@@ -265,7 +262,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    RefFeatureValue& operator=(const FeatureValue& other);
+    RefFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -332,7 +329,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    LocationFeatureValue& operator=(const FeatureValue& other);
+    LocationFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -408,7 +405,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    AddressFeatureValue& operator=(const FeatureValue& other);
+    AddressFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -634,7 +631,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    AccessFeatureValue& operator=(const FeatureValue& other);
+    AccessFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -781,7 +778,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    AccessRestrictedFeatureValue& operator=(const FeatureValue& other);
+    AccessRestrictedFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -850,7 +847,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    LayerFeatureValue& operator=(const FeatureValue& other);
+    LayerFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -906,7 +903,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    WidthFeatureValue& operator=(const FeatureValue& other);
+    WidthFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -962,7 +959,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    MaxSpeedFeatureValue& operator=(const FeatureValue& other);
+    MaxSpeedFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1028,7 +1025,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    GradeFeatureValue& operator=(const FeatureValue& other);
+    GradeFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1098,7 +1095,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    AdminLevelFeatureValue& operator=(const FeatureValue& other);
+    AdminLevelFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1160,7 +1157,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    PostalCodeFeatureValue& operator=(const FeatureValue& other);
+    PostalCodeFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1315,7 +1312,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    EleFeatureValue& operator=(const FeatureValue& other);
+    EleFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1395,7 +1392,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    DestinationFeatureValue& operator=(const FeatureValue& other);
+    DestinationFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1487,7 +1484,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    WebsiteFeatureValue& operator=(const FeatureValue& other);
+    WebsiteFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1557,7 +1554,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    PhoneFeatureValue& operator=(const FeatureValue& other);
+    PhoneFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1622,7 +1619,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    IsInFeatureValue& operator=(const FeatureValue& other);
+    IsInFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1700,7 +1697,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    ConstructionYearFeatureValue& operator=(const FeatureValue& other);
+    ConstructionYearFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1798,7 +1795,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    SidewayFeatureValue& operator=(const FeatureValue& other);
+    SidewayFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -1930,7 +1927,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    LanesFeatureValue& operator=(const FeatureValue& other);
+    LanesFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -2008,7 +2005,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    OperatorFeatureValue& operator=(const FeatureValue& other);
+    OperatorFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -2077,7 +2074,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    NetworkFeatureValue& operator=(const FeatureValue& other);
+    NetworkFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -2156,10 +2153,12 @@ namespace osmscout {
       if (!from.empty() && ! to.empty()) {
         return from + " => " + to;
       }
-      else if (!from.empty())  {
+
+      if (!from.empty())  {
         return from + "=>";
       }
-      else if (!to.empty())  {
+
+      if (!to.empty())  {
         return "=> " + to;
       }
 
@@ -2169,7 +2168,7 @@ namespace osmscout {
     void Read(FileScanner& scanner) override;
     void Write(FileWriter& writer) override;
 
-    FromToFeatureValue& operator=(const FeatureValue& other);
+    FromToFeatureValue& operator=(const FeatureValue& other) override;
     bool operator==(const FeatureValue& other) const override;
   };
 
@@ -2205,7 +2204,6 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
-
 }
 
 #endif

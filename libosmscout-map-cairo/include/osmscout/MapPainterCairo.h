@@ -141,35 +141,35 @@ namespace osmscout {
 
     void DrawGlyphs(const Projection &projection,
                     const MapParameter &parameter,
-                    const osmscout::PathTextStyleRef style,
+                    const osmscout::PathTextStyleRef& style,
                     const std::vector<CairoGlyph> &glyphs);
 
-    virtual void BeforeDrawing(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data) override;
+    void BeforeDrawing(const StyleConfig& styleConfig,
+                       const Projection& projection,
+                       const MapParameter& parameter,
+                       const MapData& data) override;
 
     /**
       Register regular label with given text at the given pixel coordinate
       in a style defined by the given LabelStyle.
      */
-    virtual void RegisterRegularLabel(const Projection &projection,
-                                      const MapParameter &parameter,
-                                      const std::vector<LabelData> &labels,
-                                      const Vertex2D &position,
-                                      double objectWidth) override;
+    void RegisterRegularLabel(const Projection& projection,
+                              const MapParameter& parameter,
+                              const std::vector<LabelData>& labels,
+                              const Vertex2D& position,
+                              double objectWidth) override;
 
     /**
      * Register contour label
      */
-    virtual void RegisterContourLabel(const Projection &projection,
-                                      const MapParameter &parameter,
-                                      const PathLabelData &label,
-                                      const LabelPath &labelPath) override;
+    void RegisterContourLabel(const Projection& projection,
+                              const MapParameter& parameter,
+                              const PathLabelData& label,
+                              const LabelPath& labelPath) override;
 
-    virtual void DrawLabels(const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& data) override;
+    void DrawLabels(const Projection& projection,
+                    const MapParameter& parameter,
+                    const MapData& data) override;
 
     void DrawPrimitivePath(const Projection& projection,
                            const MapParameter& parameter,

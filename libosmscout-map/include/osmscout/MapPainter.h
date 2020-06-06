@@ -96,25 +96,15 @@ namespace osmscout {
     struct OSMSCOUT_MAP_API DataStatistic
     {
       TypeInfoRef type;        //!< Type
-      size_t      objectCount; //!< Sum of nodeCount, wayCount, areaCont
-      size_t      nodeCount;   //!< Number of Node objects
-      size_t      wayCount;    //!< Number of Way objects
-      size_t      areaCount;   //!< Number of Area objects
-      size_t      coordCount;  //!< Number of coordinates
-      size_t      labelCount;  //!< Number of labels
-      size_t      iconCount;   //!< Number of icons
+      size_t      objectCount=0; //!< Sum of nodeCount, wayCount, areaCont
+      size_t      nodeCount=0;   //!< Number of Node objects
+      size_t      wayCount=0;    //!< Number of Way objects
+      size_t      areaCount=0;   //!< Number of Area objects
+      size_t      coordCount=0;  //!< Number of coordinates
+      size_t      labelCount=0;  //!< Number of labels
+      size_t      iconCount=0;   //!< Number of icons
 
-      DataStatistic()
-      : objectCount(0),
-        nodeCount(0),
-        wayCount(0),
-        areaCount(0),
-        coordCount(0),
-        labelCount(0),
-        iconCount(0)
-      {
-        // no code
-      }
+      DataStatistic() = default;
     };
 
     /**
@@ -152,15 +142,16 @@ namespace osmscout {
         {
           return layer<other.layer;
         }
-        else if (lineStyle->GetZIndex()!=other.lineStyle->GetZIndex()) {
+
+        if (lineStyle->GetZIndex()!=other.lineStyle->GetZIndex()) {
           return lineStyle->GetZIndex()<other.lineStyle->GetZIndex();
         }
-        else if (lineStyle->GetPriority()!=other.lineStyle->GetPriority()) {
+
+        if (lineStyle->GetPriority()!=other.lineStyle->GetPriority()) {
           return lineStyle->GetPriority()<other.lineStyle->GetPriority();
         }
-        else {
-          return wayPriority>other.wayPriority;
-        }
+
+        return wayPriority>other.wayPriority;
       }
     };
 
@@ -683,7 +674,7 @@ namespace osmscout {
       painters.reserve(expectedCount);
     }
 
-    virtual ~MapPainterBatch(){}
+    virtual ~MapPainterBatch() = default;
 
     void addData(MapDataRef &d, PainterType &painter)
     {

@@ -154,15 +154,16 @@ namespace osmscout {
     if (size>0) {
       size_t left=0;
       size_t right=size-1;
-      size_t mid;
 
       while (left<=right) {
-        mid=(left+right)/2;
+        size_t mid=(left+right)/2;
+
         if (page.entries[mid].startId<=id &&
             (mid+1>=size || page.entries[mid+1].startId>id)) {
           return mid;
         }
-        else if (page.entries[mid].startId<id) {
+
+        if (page.entries[mid].startId<id) {
           left=mid+1;
         }
         else {

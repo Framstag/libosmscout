@@ -112,12 +112,11 @@ namespace osmscout {
                minCoord.GetLon()<=coord.GetLon() &&
                maxCoord.GetLon()>coord.GetLon();
       }
-      else {
-        return minCoord.GetLat()<=coord.GetLat() &&
-               maxCoord.GetLat()>=coord.GetLat() &&
-               minCoord.GetLon()<=coord.GetLon() &&
-               maxCoord.GetLon()>=coord.GetLon();
-      }
+
+      return minCoord.GetLat()<=coord.GetLat() &&
+             maxCoord.GetLat()>=coord.GetLat() &&
+             minCoord.GetLon()<=coord.GetLon() &&
+             maxCoord.GetLon()>=coord.GetLon();
     }
 
     /**
@@ -144,12 +143,11 @@ namespace osmscout {
                  other.GetMaxLat()<minCoord.GetLat() ||
                  other.GetMinLat()>=maxCoord.GetLat());
       }
-      else {
-        return !(other.GetMaxLon()<minCoord.GetLon() ||
-                 other.GetMinLon()>maxCoord.GetLon() ||
-                 other.GetMaxLat()<minCoord.GetLat() ||
-                 other.GetMinLat()>maxCoord.GetLat());
-      }
+
+      return !(other.GetMaxLon()<minCoord.GetLon() ||
+               other.GetMinLon()>maxCoord.GetLon() ||
+               other.GetMaxLat()<minCoord.GetLat() ||
+               other.GetMinLat()>maxCoord.GetLat());
     }
 
     /**

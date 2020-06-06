@@ -55,7 +55,7 @@ namespace osmscout {
     void ClearDBData();
   };
 
-  typedef std::shared_ptr<MapData> MapDataRef;
+  using MapDataRef = std::shared_ptr<MapData>;
 
   /**
    * \defgroup Renderer Map rendering

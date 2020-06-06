@@ -103,9 +103,8 @@ namespace osmscout {
     if (index!=std::numeric_limits<size_t>::max()) {
       return buffer.HasFeature(index);
     }
-    else {
-      return false;
-    }
+
+    return false;
   }
 
   using AccessRestrictedFeatureReader = FeatureReader<AccessRestrictedFeature>;
@@ -235,9 +234,8 @@ namespace osmscout {
       assert(val==nullptr || dynamic_cast<V*>(val)!=nullptr);
       return static_cast<V*>(val);
     }
-    else {
-      return nullptr;
-    }
+
+    return nullptr;
   }
 
   template<class F, class V>
@@ -254,9 +252,8 @@ namespace osmscout {
       assert(val == nullptr || dynamic_cast<V*>(val) != nullptr);
       return *static_cast<V*>(val);
     }
-    else {
-      return defaultValue;
-    }
+
+    return defaultValue;
   }
 
   using NameFeatureValueReader             = FeatureValueReader<NameFeature, NameFeatureValue>;

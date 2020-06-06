@@ -45,8 +45,8 @@ namespace osmscout {
     T width;
     T height;
 
-    // not initialised viewport
-    Rectangle() {}
+    // 123not initialised viewport
+    Rectangle() = default;
 
     Rectangle(T x, T y, T width, T height):
         x(x), y(y), width(width), height(height)
@@ -120,8 +120,8 @@ namespace osmscout {
     double            iconHeight{0};
 
   public:
-    LabelData(){};
-    ~LabelData(){};
+    LabelData() = default;;
+    ~LabelData() = default;
   };
 
 
@@ -152,7 +152,7 @@ namespace osmscout {
     double                  fontSize{1}; //!< Font size to be used
     std::string             text;     //!< The label text
 
-    Label() {};
+    Label() = default;
 
     template<typename... Args>
     Label(Args&&... args):
@@ -206,14 +206,8 @@ namespace osmscout {
     {
     };
 
-    Mask(const Mask &m) :
-        d(m.d), cellFrom(m.cellFrom), cellTo(m.cellTo), rowFrom(m.rowFrom), rowTo(m.rowTo)
-    {
-    };
-
-    ~Mask()
-    {
-    }
+    Mask(const Mask &m) = default;
+    ~Mask() = default;
 
     Mask(Mask &&m) = delete;
     Mask &operator=(const Mask &m) = delete;

@@ -260,7 +260,8 @@ namespace osmscout {
       if (x!=other.x) {
         return x<other.x;
       }
-      else if (y!=other.y) {
+
+      if (y!=other.y) {
         return y<other.y;
       }
 
