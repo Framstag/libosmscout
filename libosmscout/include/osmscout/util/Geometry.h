@@ -1446,7 +1446,7 @@ namespace osmscout {
   const size_t CELL_DIMENSION_MAX   = 25;
   const size_t CELL_DIMENSION_COUNT = CELL_DIMENSION_MAX+1;
 
-  extern OSMSCOUT_API CellDimension cellDimension[CELL_DIMENSION_COUNT];
+  extern OSMSCOUT_API std::array<CellDimension,CELL_DIMENSION_COUNT> cellDimension;
 
   /**
    * Helper class to divide a given GeoBox in multiple equally sized parts. The partitioning

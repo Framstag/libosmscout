@@ -41,7 +41,7 @@ namespace osmscout {
     size_t                   nextArg;
 
   public:
-    CmdLineScanner(int argc, char* argv[]);
+    CmdLineScanner(int argc, char* argv[]); // NOLINT
 
     explicit CmdLineScanner(const std::vector<std::string>& arguments);
 
@@ -386,7 +386,7 @@ namespace osmscout {
 
   public:
     CmdLineParser(const std::string& appName,
-                  int argc, char* argv[]);
+                  int argc, char* argv[]); // NOLINT
     CmdLineParser(const std::string& appName,
                   const std::vector<std::string>& arguments);
 
@@ -410,21 +410,21 @@ namespace osmscout {
   };
 
   extern OSMSCOUT_API bool ParseBoolArgument(int argc,
-                                             char* argv[],
+                                             char* argv[], // NOLINT
                                              int& currentIndex,
                                              bool& value);
 
   extern OSMSCOUT_API bool ParseStringArgument(int argc,
-                                               char* argv[],
+                                               char* argv[], // NOLINT
                                                int& currentIndex,
                                                std::string& value);
 
   extern OSMSCOUT_API bool ParseSizeTArgument(int argc,
-                                              char* argv[],
+                                              char* argv[], // NOLINT
                                               int& currentIndex,
                                               size_t& value);
   extern OSMSCOUT_API bool ParseUInt32Argument(int argc,
-                                               char* argv[],
+                                               char* argv[], // NOLINT
                                                int& currentIndex,
                                                uint32_t& value);
 }

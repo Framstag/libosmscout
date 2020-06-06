@@ -36,10 +36,7 @@ private:
   osmscout::DBThreadRef dbThread;
 
 public:
-  MainWindow(osmscout::DBThreadRef dbThread);
-  ~MainWindow();
-
-
+  explicit MainWindow(const osmscout::DBThreadRef& dbThread);
 };
 
 #endif
