@@ -35,6 +35,7 @@ if compiler.get_id()=='msvc'
   # Do not warn regarding insecure function calls
   add_project_arguments('-D_CRT_SECURE_NO_DEPRECATE', language: 'cpp')
   add_project_arguments('-D_CRT_NONSTDC_NO_DEPRECATE', language: 'cpp')
+  add_project_arguments('-D_USE_MATH_DEFINES', language: 'cpp')
 
   # Fast floating point processing
   add_project_arguments('/fp:fast', language: 'cpp')

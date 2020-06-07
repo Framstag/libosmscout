@@ -20,11 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-
-#if defined(_WIN32) || defined(_WIN64)
-  #define _USE_MATH_DEFINES
-#endif
-
 #include <cmath>
 
 #endif
