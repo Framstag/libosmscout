@@ -49,6 +49,10 @@ if compiler.get_id()=='msvc'
   endif
 endif
 
+if build_machine.system()=='windows' and compiler.get_id()=='gcc'
+  add_project_arguments('-D_USE_MATH_DEFINES', language: 'cpp')
+endif
+
 # Check for headers
 fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
