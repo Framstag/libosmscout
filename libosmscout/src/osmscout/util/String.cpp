@@ -893,7 +893,7 @@ namespace osmscout {
     std::tm tm = *std::gmtime(&tt);
 
     std::array<char, 64> buff;
-    std::strftime(buff.data(), buff.size(), " %Y-%m-%dT%H:%M:%S", &tm);
+    std::strftime(buff.data(), buff.size(), "%Y-%m-%dT%H:%M:%S", &tm);
 
     stream << buff.data();
 
