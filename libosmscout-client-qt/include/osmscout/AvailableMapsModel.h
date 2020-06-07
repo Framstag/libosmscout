@@ -49,7 +49,7 @@ private:
   QString description;
 
 public:
-  inline AvailableMapsModelItem(){};
+  AvailableMapsModelItem() = default;
 
   inline AvailableMapsModelItem(QString name, QStringList path, QString description):
     valid(true), name(name), path(path), description(description){};
@@ -58,7 +58,7 @@ public:
     QObject(o.parent()),
     valid(o.valid), name(o.name), path(o.path), description(o.description){};
 
-  virtual inline ~AvailableMapsModelItem() = default;
+  ~AvailableMapsModelItem() override = default;
 
   inline AvailableMapsModelItem& operator=(const AvailableMapsModelItem &o)
   {
@@ -73,22 +73,22 @@ public:
   {
     return name;
   }
-    
+
   inline QStringList getPath() const
   {
     return path;
   }
-  
+
   inline QString getDescription() const
   {
     return description;
   }
-  
-  inline bool isValid() const 
+
+  inline bool isValid() const
   {
     return valid;
   }
-  
+
   virtual bool isDirectory() const = 0;
 };
 
@@ -99,16 +99,16 @@ public:
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModelDir : public AvailableMapsModelItem {
   Q_OBJECT
 
-public: 
+public:
   inline AvailableMapsModelDir(QString name, QList<QString> path, QString description):
     AvailableMapsModelItem(name, path, description){};
 
   inline AvailableMapsModelDir(const AvailableMapsModelDir &o):
-    AvailableMapsModelItem(o){};  
-    
-  virtual inline ~AvailableMapsModelDir(){};
+    AvailableMapsModelItem(o){};
 
-  virtual inline bool isDirectory() const
+  ~AvailableMapsModelDir() override = default;
+
+  inline bool isDirectory() const override
   {
     return true;
   };
@@ -134,21 +134,21 @@ private:
   QDateTime creation;
   int version{-1};
 
-public: 
-  inline AvailableMapsModelMap():AvailableMapsModelItem(){};
+public:
+  AvailableMapsModelMap() = default;
 
   inline AvailableMapsModelMap(QString name, QList<QString> path, QString description, MapProvider provider,
                                uint64_t size, QString serverDirectory, QDateTime creation, int version):
-    AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory), 
+    AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory),
     creation(creation), version(version) {};
 
   inline AvailableMapsModelMap(const AvailableMapsModelMap &o):
-    AvailableMapsModelItem(o), provider(o.provider), size(o.size), serverDirectory(o.serverDirectory), 
-    creation(o.creation), version(o.version) {};  
-    
-  virtual inline ~AvailableMapsModelMap(){};
+    AvailableMapsModelItem(o), provider(o.provider), size(o.size), serverDirectory(o.serverDirectory),
+    creation(o.creation), version(o.version) {};
 
-  virtual inline bool isDirectory() const
+  ~AvailableMapsModelMap() override = default;
+
+  inline bool isDirectory() const override
   {
     return false;
   };
@@ -175,7 +175,7 @@ public:
 /**
  * Tree model with maps available by configured providers (see Settings::GetMapProviders).
  * Every map provider have to expose list of maps by json. Json format exammple:
- * 
+ *
  * <pre>
  * [
  *  {
@@ -192,7 +192,7 @@ public:
  *  }
  * ]
  * </pre>
- * 
+ *
  * \ingroup QtAPI
  */
 class OSMSCOUT_CLIENT_QT_API AvailableMapsModel : public QAbstractItemModel {
@@ -211,14 +211,14 @@ public slots:
 public:
   AvailableMapsModel();
 
-  virtual ~AvailableMapsModel();
+  ~AvailableMapsModel() override;
 
   enum Roles {
     NameRole = Qt::UserRole, // localized name
     PathRole = Qt::UserRole+1, // path in tree
     DirRole = Qt::UserRole+2, // isDir? true: false
     ServerDirectoryRole = Qt::UserRole+3, // server path for this map
-    TimeRole = Qt::UserRole+4, // QTime of map creation 
+    TimeRole = Qt::UserRole+4, // QTime of map creation
     VersionRole = Qt::UserRole+5,
     ByteSizeRole = Qt::UserRole+6,
     ProviderUriRole = Qt::UserRole+7,
@@ -236,7 +236,7 @@ public:
   Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
   virtual QHash<int, QByteArray> roleNames() const;
   Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
-  
+
   Q_INVOKABLE QVariant map(const QModelIndex &index) const;
 
   /**
@@ -249,7 +249,7 @@ public:
    Q_INVOKABLE QVariant timeOfMap(QStringList path);
    Q_INVOKABLE QObject* mapByPath(QStringList path);
 
-  inline bool isLoading(){
+  inline bool isLoading() const{
     return requests>0;
   }
 
@@ -261,7 +261,7 @@ private:
   void append(AvailableMapsModelItem *item);
   QList<AvailableMapsModelItem *> findChildrenByPath(QStringList dir) const;
 
-  QNetworkAccessManager     webCtrl; 
+  QNetworkAccessManager     webCtrl;
   QNetworkDiskCache         diskCache;
   QList<MapProvider>        mapProviders;
   size_t                    requests{0};

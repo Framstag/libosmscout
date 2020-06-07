@@ -376,7 +376,8 @@ namespace osmscout {
     if (angle>180.0) {
       return angle-360.0;
     }
-    else if (angle<-180.0) {
+
+    if (angle<-180.0) {
       return angle+360.0;
     }
 
@@ -478,23 +479,21 @@ namespace osmscout {
 
       return fabs(s)*sqrt(rd);
     }
-    else {
-      double dist1=(px-p1x)*(px-p1x) + (py-p1y)*(py-p1y);
-      double dist2=(px-p2x)*(px-p2x) + (py-p2y)*(py-p2y);
 
-      if (dist1<dist2) {
-        qx=p1x;
-        qy=p1y;
+    double dist1=(px-p1x)*(px-p1x) + (py-p1y)*(py-p1y);
+    double dist2=(px-p2x)*(px-p2x) + (py-p2y)*(py-p2y);
 
-        return sqrt(dist1);
-      }
-      else {
-        qx=p2x;
-        qy=p2y;
+    if (dist1<dist2) {
+      qx=p1x;
+      qy=p1y;
 
-        return sqrt(dist2);
-      }
+      return sqrt(dist1);
     }
+
+    qx=p2x;
+    qy=p2y;
+
+    return sqrt(dist2);
   }
 
   double DistanceToSegment(const GeoCoord& point,
@@ -735,7 +734,7 @@ namespace osmscout {
 
       // Start a new polygon
       //std::cout << "---" << std::endl;
-      polygons.push_back(std::list<Edge>());
+      polygons.emplace_back();
 
       //std::cout << "* " << current->fromIndex << "=>" << current->toIndex << std::endl;
       polygons.back().push_back(*current);
@@ -784,7 +783,7 @@ namespace osmscout {
     }
 
     for (const auto& polygon : polygons) {
-      result.push_back(Polygon());
+      result.emplace_back();
 
       for (const auto& edge : polygon) {
         result.back().coords.push_back(nodes[edge.fromIndex]);
@@ -818,32 +817,32 @@ namespace osmscout {
     }
   }
 
-  CellDimension cellDimension[] = {
-      { 360.0,                      180.0                      }, //  0
-      { 180.0,                       90.0                      }, //  1
-      {  90.0,                       45.0                      }, //  2
-      {  45.0,                       22.5                      }, //  3
-      {  22.5,                       11.25                     }, //  4
-      {  11.25,                       5.625                    }, //  5
-      {   5.625,                      2.8125                   }, //  6
-      {   2.8125,                     1.40625                  }, //  7
-      {   1.40625,                    0.703125                 }, //  8
-      {   0.703125,                   0.3515625                }, //  9
-      {   0.3515625,                  0.17578125               }, // 10
-      {   0.17578125,                 0.087890625              }, // 11
-      {   0.087890625,                0.0439453125             }, // 12
-      {   0.0439453125,               0.02197265625            }, // 13
-      {   0.02197265625,              0.010986328125           }, // 14
-      {   0.010986328125,             0.0054931640625          }, // 15
-      {   0.0054931640625,            0.00274658203125         }, // 16
-      {   0.00274658203125,           0.001373291015625        }, // 17
-      {   0.001373291015625,          0.0006866455078125       }, // 18
-      {   0.0006866455078125,         0.00034332275390625      }, // 19
-      {   0.00034332275390625,        0.000171661376953125     }, // 20
-      {   0.000171661376953125,       0.0000858306884765625    }, // 21
-      {   0.0000858306884765625,      0.00004291534423828125   }, // 22
-      {   0.00004291534423828125,     0.000021457672119140625  }, // 23
-      {   0.000021457672119140625,    0.0000107288360595703125 }, // 24
-      {   0.0000107288360595703125,   0.0000107288360595703125 }  // 25
+  std::array<CellDimension,CELL_DIMENSION_COUNT> cellDimension = {
+      CellDimension{360.0,                      180.0                       }, //  0
+      CellDimension{ 180.0,                       90.0                      }, //  1
+      CellDimension{  90.0,                       45.0                      }, //  2
+      CellDimension{  45.0,                       22.5                      }, //  3
+      CellDimension{  22.5,                       11.25                     }, //  4
+      CellDimension{  11.25,                       5.625                    }, //  5
+      CellDimension{   5.625,                      2.8125                   }, //  6
+      CellDimension{   2.8125,                     1.40625                  }, //  7
+      CellDimension{   1.40625,                    0.703125                 }, //  8
+      CellDimension{   0.703125,                   0.3515625                }, //  9
+      CellDimension{   0.3515625,                  0.17578125               }, // 10
+      CellDimension{   0.17578125,                 0.087890625              }, // 11
+      CellDimension{   0.087890625,                0.0439453125             }, // 12
+      CellDimension{   0.0439453125,               0.02197265625            }, // 13
+      CellDimension{   0.02197265625,              0.010986328125           }, // 14
+      CellDimension{   0.010986328125,             0.0054931640625          }, // 15
+      CellDimension{   0.0054931640625,            0.00274658203125         }, // 16
+      CellDimension{   0.00274658203125,           0.001373291015625        }, // 17
+      CellDimension{   0.001373291015625,          0.0006866455078125       }, // 18
+      CellDimension{   0.0006866455078125,         0.00034332275390625      }, // 19
+      CellDimension{   0.00034332275390625,        0.000171661376953125     }, // 20
+      CellDimension{   0.000171661376953125,       0.0000858306884765625    }, // 21
+      CellDimension{   0.0000858306884765625,      0.00004291534423828125   }, // 22
+      CellDimension{   0.00004291534423828125,     0.000021457672119140625  }, // 23
+      CellDimension{   0.000021457672119140625,    0.0000107288360595703125 }, // 24
+      CellDimension{   0.0000107288360595703125,   0.0000107288360595703125 }  // 25
   };
 }

@@ -319,12 +319,12 @@ namespace osmscout {
       return contourLabelSpace;
     }
 
-    inline double GetRenderBackground() const
+    inline bool GetRenderBackground() const
     {
       return renderBackground;
     }
 
-    inline double GetRenderSeaLand() const
+    inline bool GetRenderSeaLand() const
     {
       return renderSeaLand;
     }
@@ -374,9 +374,8 @@ namespace osmscout {
       if (breaker) {
         return breaker->IsAborted();
       }
-      else {
-        return false;
-      }
+
+      return false;
     }
   };
 }

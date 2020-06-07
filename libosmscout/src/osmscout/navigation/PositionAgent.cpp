@@ -376,7 +376,7 @@ namespace osmscout {
      * The search start a the locationOnRoute node toward the end.
      */
   bool PositionAgent::SearchClosestSegment(const GeoCoord& location,
-                                           const std::list<RouteDescription::Node>::const_iterator locationOnRoute,
+                                           const std::list<RouteDescription::Node>::const_iterator& locationOnRoute,
                                            GeoCoord &closestPosition,
                                            std::list<RouteDescription::Node>::const_iterator& foundNode,
                                            double& foundAbscissa,

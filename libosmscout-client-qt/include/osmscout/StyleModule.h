@@ -54,13 +54,13 @@ public slots:
 
 public:
   StyleModule(QThread *thread,DBThreadRef dbThread);
-  virtual ~StyleModule();
+  ~StyleModule() override;
 };
 
 /**
  * \ingroup QtAPI
  */
-typedef std::shared_ptr<StyleModule> StyleModuleRef;
+using StyleModuleRef = std::shared_ptr<StyleModule>;
 
 }
 

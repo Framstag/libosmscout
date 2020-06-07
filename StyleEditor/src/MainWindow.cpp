@@ -26,7 +26,7 @@
 
 using namespace osmscout;
 
-MainWindow::MainWindow(DBThreadRef dbThread)
+MainWindow::MainWindow(const DBThreadRef& dbThread)
  : QQmlApplicationEngine(QUrl("qrc:/qml/main.qml")),
    dbThread(dbThread)
 {
@@ -36,12 +36,7 @@ MainWindow::MainWindow(DBThreadRef dbThread)
           SLOT(InitialisationFinished(const DatabaseLoadedResponse&)));
 }
 
-MainWindow::~MainWindow()
-{
-  // no code
-}
-
-void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& /*response*/)
+void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& /*response*/)    // NOLINT
 {
   osmscout::log.Info() << "InitialisationFinished()";
 }

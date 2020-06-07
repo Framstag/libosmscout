@@ -48,7 +48,7 @@ namespace osmscout {
     };
 
   public:
-    typedef std::function<RoutingProfileRef(const DatabaseRef&)> RoutingProfileBuilder;
+    using RoutingProfileBuilder = std::function<RoutingProfileRef (const DatabaseRef &)>;
 
   private:
     std::vector<DatabaseHandle> handles;
@@ -142,12 +142,12 @@ namespace osmscout {
     bool PostProcessRouteDescription(RouteDescription &description,
                                      const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors);
 
-    virtual std::map<DatabaseId, std::string> GetDatabaseMapping() const override;
+    std::map<DatabaseId, std::string> GetDatabaseMapping() const override;
   };
 
   //! \ingroup Service
   //! Reference counted reference to an RoutingService instance
-  typedef std::shared_ptr<MultiDBRoutingService> MultiDBRoutingServiceRef;
+  using MultiDBRoutingServiceRef = std::shared_ptr<MultiDBRoutingService>;
 
 }
 

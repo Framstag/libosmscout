@@ -40,18 +40,18 @@ namespace osmscout {
 
 /**
  * \defgroup QtAPI Qt API
- * 
+ *
  * Classes for integration osmscout library with Qt framework.
  */
 
 /**
  * \ingroup QtAPI
- * 
- * Qt Quick widget for displaying map. 
- * 
- * Type should to be registered by \ref qmlRegisterType method 
+ *
+ * Qt Quick widget for displaying map.
+ *
+ * Type should to be registered by \ref qmlRegisterType method
  * and \ref DBThread instance should be initialized before first usage.
- * 
+ *
  */
 class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
 {
@@ -70,7 +70,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(bool     followVehicle READ isFollowVehicle WRITE setFollowVehicle NOTIFY followVehicleChanged)
   Q_PROPERTY(QString  stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
   Q_PROPERTY(QString  renderingType READ GetRenderingType WRITE SetRenderingType NOTIFY renderingTypeChanged)
-  
+
   Q_PROPERTY(bool stylesheetHasErrors           READ stylesheetHasErrors              NOTIFY styleErrorsChanged)
   Q_PROPERTY(int stylesheetErrorLine            READ firstStylesheetErrorLine         NOTIFY styleErrorsChanged)
   Q_PROPERTY(int stylesheetErrorColumn          READ firstStylesheetErrorColumn       NOTIFY styleErrorsChanged)
@@ -87,8 +87,8 @@ private:
   MapView          *view{nullptr};
 
   InputHandler     *inputHandler{nullptr};
-  TapRecognizer    tapRecognizer;     
-  
+  TapRecognizer    tapRecognizer;
+
   bool finished{false};
 
   struct CurrentLocation {
@@ -156,21 +156,21 @@ signals:
   void styleErrorsChanged();
   void databaseLoaded(osmscout::GeoBox);
   void renderingTypeChanged(QString type);
-  
+
 public slots:
   void changeView(const MapView &view);
   void redraw();
-  
+
   void recenter();
-  
+
   void zoom(double zoomFactor);
   void zoomIn(double zoomFactor);
   void zoomOut(double zoomFactor);
-  
+
   void zoom(double zoomFactor, const QPoint widgetPosition);
   void zoomIn(double zoomFactor, const QPoint widgetPosition);
   void zoomOut(double zoomFactor, const QPoint widgetPosition);
-  
+
   void move(QVector2D vector);
   void left();
   void right();
@@ -188,7 +188,7 @@ public slots:
   void toggleDaylight();
   void reloadStyle();
   void reloadTmpStyle();
-  
+
   void showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification);
   void showCoordinates(double lat, double lon);
   void showCoordinatesInstantly(osmscout::GeoCoord coord, osmscout::Magnification magnification);
@@ -237,11 +237,11 @@ private slots:
   virtual void onDoubleTap(const QPoint p);
   virtual void onLongTap(const QPoint p);
   virtual void onTapLongTap(const QPoint p);
-  
+
   void onMapDPIChange(double dpi);
 
   void onResize();
-  
+
 private:
   void setupInputHandler(InputHandler *newGesture);
 
@@ -252,16 +252,16 @@ private:
    * @return approximated magnification by object dimension
    */
   osmscout::Magnification magnificationByDimension(const Distance &dimension);
-  
+
 public:
-  MapWidget(QQuickItem* parent = 0);
-  virtual ~MapWidget();
+  MapWidget(QQuickItem* parent = nullptr);
+  ~MapWidget() override;
 
   inline MapView* GetView() const
   {
       return view; // We should be owner, parent is set http://doc.qt.io/qt-5/qqmlengine.html#objectOwnership
   }
-  
+
   inline void SetMapView(QObject *o)
   {
     MapView *updated = dynamic_cast<MapView*>(o);
@@ -269,7 +269,7 @@ public:
         qWarning() << "Failed to cast " << o << " to MapView*.";
         return;
     }
-    
+
     bool changed = *view != *updated;
     if (changed){
       setupInputHandler(new InputHandler(*updated));
@@ -340,7 +340,7 @@ public:
   {
       return view->center.GetLon();
   }
-  
+
   inline osmscout::GeoCoord GetCenter() const
   {
       return view->center;
@@ -359,23 +359,23 @@ public:
   {
       return getProjection().GetPixelSize();
   }
-  
+
   inline bool IsFinished() const
   {
       return finished;
   }
-  
+
   inline bool getShowCurrentPosition() const
-  { 
+  {
       return showCurrentPosition;
   };
-  
+
   inline void setShowCurrentPosition(bool b)
-  { 
+  {
       showCurrentPosition = b;
       redraw();
   };
-  
+
   inline bool isLockedToPosition() const
   {
       return inputHandler->isLockedToPosition();
@@ -406,25 +406,25 @@ public:
     return projection;
   }
 
-  void wheelEvent(QWheelEvent* event);
-  virtual void touchEvent(QTouchEvent *event);
-  
-  virtual void focusOutEvent(QFocusEvent *event);
+  void wheelEvent(QWheelEvent* event) override;
+  void touchEvent(QTouchEvent *event) override;
+
+  void focusOutEvent(QFocusEvent *event) override;
 
   void translateToTouch(QMouseEvent* event, Qt::TouchPointStates states);
-  
-  void mousePressEvent(QMouseEvent* event);
-  void mouseMoveEvent(QMouseEvent* event);
-  void mouseReleaseEvent(QMouseEvent* event);
-  void hoverMoveEvent(QHoverEvent* event);
-  
-  void paint(QPainter *painter);
-  
+
+  void mousePressEvent(QMouseEvent* event) override;
+  void mouseMoveEvent(QMouseEvent* event) override;
+  void mouseReleaseEvent(QMouseEvent* event) override;
+  void hoverMoveEvent(QHoverEvent* event) override;
+
+  void paint(QPainter *painter) override;
+
   bool stylesheetHasErrors() const;
   int firstStylesheetErrorLine() const;
   int firstStylesheetErrorColumn() const;
   QString firstStylesheetErrorDescription() const;
-  
+
   bool isDatabaseLoaded();
   Q_INVOKABLE bool isInDatabaseBoundingBox(double lat, double lon);
   Q_INVOKABLE QPointF screenPosition(double lat, double lon);

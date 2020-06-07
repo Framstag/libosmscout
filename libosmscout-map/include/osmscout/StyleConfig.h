@@ -49,7 +49,7 @@
 
 namespace osmscout {
 
-  typedef osmscout::Color(*ColorPostprocessor)(const osmscout::Color& color);
+  using ColorPostprocessor = osmscout::Color (*)(const osmscout::Color &);
 
   /**
    * \ingroup Stylesheet

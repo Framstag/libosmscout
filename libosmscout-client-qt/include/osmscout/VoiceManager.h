@@ -47,7 +47,7 @@ public:
 
   void start();
 
-  virtual inline size_t expectedSize() const
+  inline size_t expectedSize() const override
   {
     return 0;
   }
@@ -98,7 +98,7 @@ public:
   VoiceManager& operator=(const VoiceManager&) = delete;
   VoiceManager& operator=(VoiceManager&&) = delete;
 
-  virtual ~VoiceManager();
+  ~VoiceManager() override;
 
   QList<Voice> getInstalledVoices() const
   {
@@ -120,7 +120,7 @@ private:
 /**
  * \ingroup QtAPI
  */
-typedef std::shared_ptr<VoiceManager> VoiceManagerRef;
+using VoiceManagerRef = std::shared_ptr<VoiceManager>;
 
 }
 #endif //OSMSCOUT_CLIENT_QT_VOICEMANAGER_H

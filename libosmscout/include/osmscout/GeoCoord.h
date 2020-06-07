@@ -139,7 +139,7 @@ namespace osmscout {
     /**
      * Encode the coordinate value into a buffer (with at least a size of coordByteSize).
      */
-    inline void EncodeToBuffer(unsigned char buffer[]) const
+    inline void EncodeToBuffer(unsigned char buffer[]) const // NOLINT
     {
       uint32_t latValue=(uint32_t)round((lat+90.0)*latConversionFactor);
       uint32_t lonValue=(uint32_t)round((lon+180.0)*lonConversionFactor);
@@ -180,7 +180,7 @@ namespace osmscout {
     /**
      * Decode the coordinate value from a buffer (with at least a size of coordByteSize).
      */
-    inline void DecodeFromBuffer(const unsigned char buffer[])
+    inline void DecodeFromBuffer(const unsigned char buffer[]) // NOLINT
     {
       uint32_t latDat=  (buffer[0] <<  0u)
                       | (buffer[1] <<  8u)

@@ -71,7 +71,7 @@ public:
   OverlayObject(const OverlayObject &o);
 
 
-  virtual ~OverlayObject();
+  ~OverlayObject() override;
 
   virtual osmscout::RefType getObjectType() const{
     return osmscout::RefType::refNone;
@@ -155,9 +155,9 @@ public:
               QString typeName="_route",
               QObject *parent=Q_NULLPTR);
 
-  virtual ~OverlayArea();
+  ~OverlayArea() override;
 
-  virtual osmscout::RefType getObjectType() const{
+  osmscout::RefType getObjectType() const override{
     return osmscout::RefType::refArea;
   }
 
@@ -176,9 +176,9 @@ public:
              QString typeName="_route",
              QObject *parent=Q_NULLPTR);
 
-  virtual ~OverlayWay();
+  ~OverlayWay() override;
 
-  virtual osmscout::RefType getObjectType() const{
+  osmscout::RefType getObjectType() const override{
     return osmscout::RefType::refWay;
   }
 
@@ -197,9 +197,9 @@ public:
               QString typeName="_route",
               QObject *parent=Q_NULLPTR);
 
-  virtual ~OverlayNode();
+  ~OverlayNode() override;
 
-  virtual osmscout::RefType getObjectType() const{
+  osmscout::RefType getObjectType() const override{
     return osmscout::RefType::refNode;
   }
 
@@ -208,7 +208,7 @@ public:
 };
 
 
-typedef std::shared_ptr<OverlayObject> OverlayObjectRef;
+using OverlayObjectRef = std::shared_ptr<OverlayObject>;
 
 }
 

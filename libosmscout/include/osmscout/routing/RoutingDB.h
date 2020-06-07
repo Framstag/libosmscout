@@ -98,7 +98,7 @@ namespace osmscout {
   /**
    * \ingroup Routing
    */
-  typedef std::shared_ptr<RoutingDatabase> RoutingDatabaseRef;
+  using RoutingDatabaseRef = std::shared_ptr<RoutingDatabase>;
 }
 
 #endif

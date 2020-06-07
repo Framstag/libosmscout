@@ -246,9 +246,9 @@ public:
     osmscout::log.Warn() << msg;
   }
 
-  bool ParseDoubleAttr(const std::unordered_map<std::string, std::string> &atts,
-                       const std::string &attName,
-                       double &target) const
+  static bool ParseDoubleAttr(const std::unordered_map<std::string,std::string>& atts,
+                              const std::string& attName,
+                              double& target)
   {
     auto it=atts.find(attName);
     if (it==atts.end()){
@@ -318,7 +318,6 @@ public:
     auto* parser=static_cast<GpxParser*>(data);
     parser->EndDocument();
   }
-
 };
 
 GpxParserContext* GpxParserContext::StartElement(const std::string &name,
@@ -331,7 +330,7 @@ GpxParserContext* GpxParserContext::StartElement(const std::string &name,
 
 class SimpleValueContext : public GpxParserContext {
 
-  typedef std::function<void(const std::string &)> Callback;
+  using Callback = std::function<void (const std::string &)>;
 
 private:
   std::string name;
@@ -383,7 +382,9 @@ public:
           parser.Warning("Can't parse Ele value");
         }
       });
-    } else if (name == "magvar") {
+    }
+
+    if (name == "magvar") {
       return new SimpleValueContext("MagvarContext", ctxt, parser, [&](const std::string &value){
         double course;
         if (StringToNumber(value, course)){
@@ -393,7 +394,9 @@ public:
           parser.Warning("Can't parse Magvar value");
         }
       });
-    } else if (name == "hdop") {
+    }
+
+    if (name == "hdop") {
       return new SimpleValueContext("HDopContext", ctxt, parser, [&](const std::string &value){
         double hdop;
         if (StringToNumber(value, hdop)){
@@ -403,7 +406,9 @@ public:
           parser.Warning("Can't parse HDop value");
         }
       });
-    } else if (name == "vdop") {
+    }
+
+    if (name == "vdop") {
       return new SimpleValueContext("VDopContext", ctxt, parser, [&](const std::string &value){
         double vdop;
         if (StringToNumber(value, vdop)){
@@ -413,7 +418,9 @@ public:
           parser.Warning("Can't parse Ele value");
         }
       });
-    } else if (name == "pdop") {
+    }
+
+    if (name == "pdop") {
       return new SimpleValueContext("PDopContext", ctxt, parser, [&](const std::string &value){
         double pdop;
         if (StringToNumber(value, pdop)){
@@ -423,7 +430,9 @@ public:
           parser.Warning("Can't parse PDop value");
         }
       });
-    } else if (name == "time") {
+    }
+
+    if (name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
@@ -500,15 +509,21 @@ public:
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
         waypoint.name = std::make_optional<std::string>(name);
       });
-    } else if (name == "desc") {
+    }
+
+    if (name == "desc") {
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
         waypoint.description = std::make_optional<std::string>(description);
       });
-    } else if (name == "sym") {
+    }
+
+    if (name == "sym") {
       return new SimpleValueContext("SymContext", ctxt, parser, [&](const std::string &symbol) {
         waypoint.symbol = std::make_optional<std::string>(symbol);
       });
-    } else if (name == "ele") {
+    }
+
+    if (name == "ele") {
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
         double ele;
         if (StringToNumber(value, ele)){
@@ -518,7 +533,9 @@ public:
           parser.Warning("Can't parse Ele value");
         }
       });
-    } else if (name == "hdop") {
+    }
+
+    if (name == "hdop") {
       return new SimpleValueContext("HDopContext", ctxt, parser, [&](const std::string &value){
         double hdop;
         if (StringToNumber(value, hdop)){
@@ -528,7 +545,9 @@ public:
           parser.Warning("Can't parse HDop value");
         }
       });
-    } else if (name == "vdop") {
+    }
+
+    if (name == "vdop") {
       return new SimpleValueContext("VDopContext", ctxt, parser, [&](const std::string &value){
         double vdop;
         if (StringToNumber(value, vdop)){
@@ -538,7 +557,9 @@ public:
           parser.Warning("Can't parse Ele value");
         }
       });
-    } else if (name == "pdop") {
+    }
+
+    if (name == "pdop") {
       return new SimpleValueContext("PDopContext", ctxt, parser, [&](const std::string &value){
         double pdop;
         if (StringToNumber(value, pdop)){
@@ -548,7 +569,9 @@ public:
           parser.Warning("Can't parse PDop value");
         }
       });
-    } else if (name == "time") {
+    }
+
+    if (name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
@@ -587,11 +610,15 @@ public:
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
         output.name = std::make_optional<std::string>(name);
       });
-    } else if (name == "desc") {
+    }
+
+    if (name == "desc") {
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
         output.desc = std::make_optional<std::string>(description);
       });
-    } else if (name == "time") {
+    }
+
+    if (name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
@@ -631,15 +658,15 @@ public:
     if (name=="trkpt"){
       double lat;
       double lon;
-      if (parser.ParseDoubleAttr(atts, "lat", lat) &&
-          parser.ParseDoubleAttr(atts, "lon", lon)
+      if (GpxParser::ParseDoubleAttr(atts, "lat", lat) &&
+          GpxParser::ParseDoubleAttr(atts, "lon", lon)
           ) {
         return new TrkptContext(ctxt, segment, parser, lat, lon);
-      }else{
-        xmlParserError(ctxt,"Can't parse trkpt lan/lon\n");
-        parser.Error("Can't parse trkpt lan/lon");
-        return nullptr;
       }
+
+      xmlParserError(ctxt,"Can't parse trkpt lan/lon\n");
+      parser.Error("Can't parse trkpt lan/lon");
+      return nullptr;
     }
 
     return GpxParserContext::StartElement(name, atts);
@@ -670,16 +697,18 @@ public:
     if (name=="rtept") {
       double lat;
       double lon;
-      if (parser.ParseDoubleAttr(atts, "lat", lat) &&
-          parser.ParseDoubleAttr(atts, "lon", lon)
+      if (GpxParser::ParseDoubleAttr(atts, "lat", lat) &&
+          GpxParser::ParseDoubleAttr(atts, "lon", lon)
           ) {
         return new RteptContext(ctxt, route, parser, lat, lon);
-      } else {
-        xmlParserError(ctxt, "Can't parse trkpt lan/lon\n");
-        parser.Error("Can't parse trkpt lan/lon");
-        return nullptr;
       }
-    } else if (name=="name"){
+
+      xmlParserError(ctxt, "Can't parse trkpt lan/lon\n");
+      parser.Error("Can't parse trkpt lan/lon");
+      return nullptr;
+    }
+
+    if (name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
         route.name=std::make_optional<std::string>(name);
       });
@@ -714,11 +743,15 @@ public:
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
         track.name=std::make_optional<std::string>(name);
       });
-    } else if (name=="desc"){
+    }
+
+    if (name=="desc"){
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &desc){
         track.desc=std::make_optional<std::string>(desc);
       });
-    }else if (name=="trkseg"){
+    }
+
+    if (name=="trkseg"){
       return new TrkSegContext(ctxt, track, parser);
     }
 
@@ -744,21 +777,27 @@ public:
   {
     if (name=="trk"){
       return new TrkContext(ctxt,output,parser);
-    } else if (name=="wpt"){
+    }
+
+    if (name=="wpt"){
       double lat;
       double lon;
-      if (parser.ParseDoubleAttr(atts, "lat", lat) &&
-          parser.ParseDoubleAttr(atts, "lon", lon)
+      if (GpxParser::ParseDoubleAttr(atts, "lat", lat) &&
+          GpxParser::ParseDoubleAttr(atts, "lon", lon)
           ) {
         return new WaypointContext(ctxt, output, parser, lat, lon);
-      }else{
-        xmlParserError(ctxt,"Can't parse wpt lan/lon\n");
-        parser.Error("Can't parse wpt lan/lon");
-        return nullptr;
       }
-    } else if (name=="rte"){
+
+      xmlParserError(ctxt,"Can't parse wpt lan/lon\n");
+      parser.Error("Can't parse wpt lan/lon");
+      return nullptr;
+    }
+
+    if (name=="rte"){
       return new RouteContext(ctxt,output,parser);
-    } else if (name=="metadata"){
+    }
+
+    if (name=="metadata"){
       return new MetadataContext(ctxt,output,parser);
     }
     return nullptr; // silently ignore unknown elements

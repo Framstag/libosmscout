@@ -52,9 +52,9 @@ private:
 public:
   QBreaker();
 
-  void Break();
-  bool IsAborted() const;
-  void Reset();
+  void Break() override;
+  bool IsAborted() const override;
+  void Reset() override;
 };
 
 /**
@@ -73,8 +73,8 @@ public:
 
     StyleErrorType GetType(){ return type; }
     QString GetTypeName() const;
-    int GetLine(){ return line; }
-    int GetColumn(){ return column; }
+    int GetLine() const{ return line; }
+    int GetColumn() const{ return column; }
     const QString &GetText(){ return text; }
     QString GetDescription(){return GetTypeName()+": "+GetText();}
 
@@ -137,7 +137,7 @@ public:
     lastUsage.start();
   };
 
-  inline ~DBInstance()
+  inline ~DBInstance() override
   {
     close();
   };
@@ -214,7 +214,7 @@ public:
   void close();
 };
 
-typedef std::shared_ptr<DBInstance> DBInstanceRef;
+using DBInstanceRef = std::shared_ptr<DBInstance>;
 
 }
 

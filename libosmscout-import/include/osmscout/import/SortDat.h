@@ -98,7 +98,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<ProcessingFilter> ProcessingFilterRef;
+    using ProcessingFilterRef = std::shared_ptr<ProcessingFilter>;
 
   private:
     std::list<Source>              sources;
@@ -248,7 +248,7 @@ namespace osmscout {
             data.Read(typeConfig,
                       source->scanner);
 
-            GeoCoord coord;;
+            GeoCoord coord;
 
             GetTopLeftCoordinate(data,
                                  coord);
@@ -283,10 +283,9 @@ namespace osmscout {
                   cutOff=iter;
                   break;
                 }
-                else {
-                  maxIndex=iter->first;
-                  count+=iter->second.size();
-                }
+
+                maxIndex=iter->first;
+                count+=iter->second.size();
               }
 
               assert(cutOff!=dataByCellMap.end());

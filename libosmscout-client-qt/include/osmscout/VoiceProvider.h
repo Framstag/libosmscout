@@ -40,51 +40,51 @@ class OSMSCOUT_CLIENT_QT_API VoiceProvider: public QObject
   Q_OBJECT
 
 private:
-  bool valid;
+  bool valid=false;
   QString uri;
   QString listUri;
   QString name;
-  
+
 public:
-  inline VoiceProvider():valid(false) {}
-  
+  VoiceProvider() = default;
+
   inline VoiceProvider(const VoiceProvider &o):
     QObject(o.parent()),
-    valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};  
-  
-  inline VoiceProvider(QString name, QString uri, QString listUri): 
+    valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};
+
+  inline VoiceProvider(QString name, QString uri, QString listUri):
     valid(true), uri(uri), listUri(listUri), name(name) {}
-  
-  virtual inline ~VoiceProvider() {}
-  
+
+  ~VoiceProvider() override = default;
+
   inline void operator=(const VoiceProvider &o)
   {
     valid = o.valid;
     uri = o.uri;
     listUri = o.listUri;
     name = o.name;
-  }  
-  
+  }
+
   inline QString getName() const
   {
     return name;
   }
-  
+
   inline QString getUri() const
   {
     return uri;
   }
-  
+
   inline QUrl getListUri(QString locale="en") const
   {
     return listUri.arg(locale);
   }
-  
+
   inline bool isValid() const
   {
     return valid;
   }
-  
+
   static VoiceProvider fromJson(QJsonValue obj);
 };
 

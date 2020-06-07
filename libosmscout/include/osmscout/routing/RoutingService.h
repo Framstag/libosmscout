@@ -237,7 +237,6 @@ namespace osmscout {
             const ObjectFileRef& object)
       : id(id),
         node(node),
-        prev(),
         object(object),
         currentCost(0),
         estimateCost(0),
@@ -327,8 +326,7 @@ namespace osmscout {
        *    Offset of the node to search for
        */
       inline explicit VNode(const DBId& currentNode)
-        : currentNode(currentNode),
-          previousNode()
+        : currentNode(currentNode)
       {
         // no code
       }

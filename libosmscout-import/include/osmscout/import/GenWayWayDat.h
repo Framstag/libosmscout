@@ -54,10 +54,10 @@ namespace osmscout {
       std::multimap<OSMId,TurnRestrictionRef> restrictions;
     };
 
-    typedef std::list<RawWayRef>                     WayList;
-    typedef WayList::iterator                        WayListPtr;
-    typedef std::list<WayListPtr>                    WayListPtrList;
-    typedef std::unordered_map<OSMId,WayListPtrList> WaysByNodeMap;
+    using WayList = std::list<RawWayRef>;
+    using WayListPtr = WayList::iterator;
+    using WayListPtrList = std::list<WayListPtr>;
+    using WaysByNodeMap = std::unordered_map<OSMId, WayListPtrList>;
 
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,

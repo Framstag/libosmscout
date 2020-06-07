@@ -90,10 +90,12 @@ TEST_CASE("Check node in area")
 
   for (int i=0;;i+=2){
     double lat = areaCoords[i];
-    if (lat == 0.0)
+    if (lat == 0.0) {
       break;
+    }
+
     double lon = areaCoords[i+1];
-    area.push_back(osmscout::Point(0, osmscout::GeoCoord(lat, lon)));
+    area.emplace_back(0, osmscout::GeoCoord(lat, lon));
   }
 
   SECTION("Nodes outside bounding box"){
@@ -234,10 +236,12 @@ TEST_CASE("Angle diff")
   for (double a = -M_PI; a < M_PI; a += step) {
     for (double diff = -M_PI; diff < M_PI - step; diff += step) {
       double b = a + diff;
-      if (b < -M_PI)
-        b += 2*M_PI;
-      if (b > M_PI)
-        b -= 2*M_PI;
+      if (b<-M_PI) {
+        b+=2*M_PI;
+      }
+      if (b>M_PI) {
+        b-=2*M_PI;
+      }
 
       // std::cout << osmscout::RadToDeg(a) << ", " <<
       //           osmscout::RadToDeg(b) << "; " <<

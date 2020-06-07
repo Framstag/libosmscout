@@ -48,7 +48,7 @@ protected:
 
 public:
   DBJob();
-  virtual ~DBJob();
+  ~DBJob() override;
 
   virtual void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
                    const std::list<DBInstanceRef> &databases, QReadLocker *locker);
@@ -86,12 +86,12 @@ public:
             unsigned long maximumAreaLevel,
             bool lowZoomOptimization,
             bool closeOnFinish=true);
-  virtual ~DBLoadJob();
+  ~DBLoadJob() override;
 
-  virtual void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
+  void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
                    const std::list<DBInstanceRef> &databases,
-                   QReadLocker *locker);
-  virtual void Close();
+                   QReadLocker *locker) override;
+  void Close() override;
 
   bool IsFinished() const;
   QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> GetAllTiles() const;

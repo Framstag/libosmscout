@@ -106,7 +106,7 @@ public:
                            const std::map<std::string,DatabaseId> &databaseMapping,
                            RoutableObjectsRef &data);
 
-  virtual ~NavigationModule();
+  ~NavigationModule() override;
 
 private:
   void InitPlayer();

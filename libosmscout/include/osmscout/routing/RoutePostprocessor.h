@@ -318,13 +318,13 @@ namespace osmscout {
     class OSMSCOUT_API LanesPostprocessor : public RoutePostprocessor::Postprocessor
     {
     public:
-      LanesPostprocessor() : Postprocessor() {};
+      LanesPostprocessor() = default;
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
     };
 
-    typedef std::shared_ptr<LanesPostprocessor> LanesPostprocessorRef;
+    using LanesPostprocessorRef = std::shared_ptr<LanesPostprocessor>;
 
     /**
      * \ingroup Routing
@@ -343,7 +343,7 @@ namespace osmscout {
       Distance distanceBefore;
     };
 
-    typedef std::shared_ptr<SuggestedLanesPostprocessor> SuggestedLanesPostprocessorRef;
+    using SuggestedLanesPostprocessorRef = std::shared_ptr<SuggestedLanesPostprocessor>;
 
   private:
     std::vector<RoutingProfileRef>                                profiles;

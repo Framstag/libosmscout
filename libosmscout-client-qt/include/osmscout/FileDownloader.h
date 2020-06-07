@@ -94,8 +94,8 @@ public:
   explicit FileDownloader(QNetworkAccessManager *manager,
                           QString url,
                           QString path,
-                          QObject *parent = 0);
-  ~FileDownloader();
+                          QObject *parent = nullptr);
+  ~FileDownloader() override;
 
   operator bool() const { return isOk; }
   QString getFileName() const { return QFileInfo(path).fileName(); }
@@ -163,7 +163,7 @@ public slots:
 
 public:
   DownloadJob(QNetworkAccessManager *webCtrl, QDir target, bool replaceExisting);
-  virtual ~DownloadJob();
+  ~DownloadJob() override;
 
   DownloadJob(const DownloadJob&) = delete;
   DownloadJob(DownloadJob&&) = delete;

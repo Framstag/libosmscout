@@ -45,7 +45,7 @@ namespace osmscout {
 
     virtual ~FeatureValue() = default;
 
-    virtual FeatureValue& operator=(const FeatureValue& other) = 0;
+    virtual FeatureValue& operator=(const FeatureValue& other); // NOLINT
 
     inline virtual std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const
     {

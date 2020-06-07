@@ -40,17 +40,13 @@ namespace osmscout {
 
   private:
     OSMId               id{};
-    mutable uint8_t     flags;
+    mutable uint8_t     flags=0;
     std::vector<OSMId>  nodes;
 
   public:
 
   public:
-    inline RawCoastline()
-    : flags(0)
-    {
-      // no code
-    }
+    RawCoastline() = default;
 
     inline OSMId GetId() const
     {
@@ -85,7 +81,7 @@ namespace osmscout {
     void Write(FileWriter& writer) const;
   };
 
-  typedef std::shared_ptr<RawCoastline> RawCoastlineRef;
+  using RawCoastlineRef = std::shared_ptr<RawCoastline>;
 }
 
 #endif

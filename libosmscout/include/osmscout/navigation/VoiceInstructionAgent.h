@@ -185,7 +185,7 @@ public:
     units{units}
   {};
 
-  virtual ~VoiceInstructionAgent() = default;
+  ~VoiceInstructionAgent() override = default;
 
   std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
 

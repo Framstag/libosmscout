@@ -35,8 +35,7 @@ namespace osmscout {
   class OutputDescription
   {
   public:
-    virtual ~OutputDescription()
-    {};
+    virtual ~OutputDescription() = default;
 
     virtual void NextDescription(const Distance& /*distance*/,
                                  std::list<RouteDescription::Node>::const_iterator& /*node*/,
@@ -215,14 +214,13 @@ namespace osmscout {
           nextNode->GetTime()*foundAbscissa+locationOnRoute->GetTime()*(1.0-foundAbscissa));
         return true;
       }
-      else {
-        return false;
-      }
+
+      return false;
     };
 
     bool ClosestPointOnRoute(const GeoCoord& location, GeoCoord& locOnRoute)
     {
-      if(!route){
+      if(route == nullptr){
         return false;
       }
       std::list<RouteDescription::Node>::const_iterator nextNode = route->Nodes().begin();

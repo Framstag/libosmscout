@@ -1358,8 +1358,6 @@ namespace osmscout {
   {
     TypeInfoSet        nodeTypes;
     TypeInfoSet        areaTypes;
-    ObjectFileRef      prevObject;
-    ObjectFileRef      curObject;
     NodeRef            node;
     WayRef             way;
     AreaRef            area;

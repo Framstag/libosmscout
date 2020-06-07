@@ -23,6 +23,13 @@
 
 namespace osmscout {
 
+  FeatureValue& FeatureValue::operator=(const FeatureValue& /*other*/) // NOLINT
+  {
+    assert(false);
+
+    return *this;
+  }
+
   void Feature::RegisterLabel(size_t index,
                               const std::string& labelName)
   {

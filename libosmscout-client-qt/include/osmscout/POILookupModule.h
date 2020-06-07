@@ -53,7 +53,7 @@ private:
 public:
   POILookupModule(QThread *thread,DBThreadRef dbThread);
 
-  virtual ~POILookupModule();
+  ~POILookupModule() override;
 
 private:
   QList<LocationEntry> doPOIlookup(DBInstanceRef db,

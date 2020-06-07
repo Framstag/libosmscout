@@ -19,7 +19,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
- 
+
 #include <QObject>
 #include <QByteArray>
 #include <QNetworkAccessManager>
@@ -40,23 +40,23 @@ namespace osmscout {
 class OsmTileDownloader : public QObject
 {
   Q_OBJECT
- 
+
 public:
   OsmTileDownloader(QString diskCacheDir,
                     const OnlineTileProvider &provider);
-  virtual ~OsmTileDownloader();
-  
+  ~OsmTileDownloader() override;
+
 public slots:
   void download(uint32_t zoomLevel, uint32_t x, uint32_t y);
   void onlineTileProviderChanged(const OnlineTileProvider &provider);
-  
+
 signals:
   void downloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
   void failed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
 
 private slots:
   void fileDownloaded(const TileCacheKey &key, QNetworkReply *reply);
- 
+
 private:
   int                       serverNumber;
   QNetworkAccessManager     webCtrl;

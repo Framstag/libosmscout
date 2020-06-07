@@ -168,7 +168,7 @@ namespace osmscout {
     writer.Write(operatorName);
     writer.Write(network);
 
-    writer.WriteNumber(variants.size());
+    writer.WriteNumber(static_cast<uint32_t>(variants.size()));
 
     for (const auto& variant : variants) {
       writer.Write(variant.name);
@@ -178,8 +178,8 @@ namespace osmscout {
       writer.Write(variant.from);
       writer.Write(variant.to);
 
-      writer.WriteNumber(variant.stops.size());
-      writer.WriteNumber(variant.platforms.size());
+      writer.WriteNumber(static_cast<uint32_t>(variant.stops.size()));
+      writer.WriteNumber(static_cast<uint32_t>(variant.platforms.size()));
 
       for (const auto& stop : variant.stops) {
         writer.Write((uint8_t)stop.type);

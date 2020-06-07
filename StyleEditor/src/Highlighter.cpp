@@ -117,8 +117,9 @@ void Highlighter::updateRules()
 
 void Highlighter::highlightBlock(const QString &text)
 {
-    if (m_baseFontPointSize == 0.0)
+    if (m_baseFontPointSize == 0.0) {
             return;
+    }
 
     int line = currentBlock().firstLineNumber()+1;
     if (currentBlock().lineCount() == 1){
@@ -144,8 +145,11 @@ void Highlighter::highlightBlock(const QString &text)
     QRegExp commentEndExpression = QRegExp("\\*/");
     setCurrentBlockState(0);
     int startIndex = 0;
-    if (previousBlockState() != 1)
+
+    if (previousBlockState() != 1) {
         startIndex = commentStartExpression.indexIn(text);
+    }
+
     while (startIndex >= 0) {
         int endIndex = commentEndExpression.indexIn(text, startIndex);
         int commentLength;
@@ -180,7 +184,7 @@ void Highlighter::onProblematicLines(QSet<int> errorLines, QSet<int> warningLine
     this->errorLines=errorLines;
     this->warningLines=warningLines;
 
-    if (document()) {
+    if (document() != nullptr) {
       for (int line: changedLines) {
         QTextBlock block = document()->findBlockByLineNumber(line - 1);
         rehighlightBlock(block);

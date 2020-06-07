@@ -91,7 +91,7 @@ int main(int /*argc*/, char** /*argv*/)
   std::vector<osmscout::Point> optimised;
   for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
     if (polygon.points[p].draw) {
-      optimised.push_back(osmscout::Point(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y)));
+      optimised.emplace_back(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y));
     }
   }
 
@@ -110,7 +110,7 @@ int main(int /*argc*/, char** /*argv*/)
   optimised.clear();
   for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
     if (polygon.points[p].draw) {
-      optimised.push_back(osmscout::Point(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y)));
+      optimised.emplace_back(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y));
     }
   }
 

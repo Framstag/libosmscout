@@ -26,8 +26,7 @@
 
 #include "TestImportExport.h"
 
-namespace osmscout {
-  namespace test {
+namespace osmscout::test {
 
     enum class PlaceType {
       region,
@@ -90,7 +89,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<Address> AddressRef;
+    using AddressRef = std::shared_ptr<Address>;
 
     class OSMSCOUT_TEST_API Location
     {
@@ -120,7 +119,7 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<Location> LocationRef;
+    using LocationRef = std::shared_ptr<Location>;
 
     class OSMSCOUT_TEST_API PostalArea
     {
@@ -150,10 +149,10 @@ namespace osmscout {
       }
     };
 
-    typedef std::shared_ptr<PostalArea> PostalAreaRef;
+    using PostalAreaRef = std::shared_ptr<PostalArea>;
 
     class Region;
-    typedef std::shared_ptr<Region> RegionRef;
+    using RegionRef = std::shared_ptr<Region>;
 
     class OSMSCOUT_TEST_API Region
     {
@@ -259,6 +258,5 @@ namespace osmscout {
       }
     };
   }
-}
 
 #endif
