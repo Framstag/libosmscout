@@ -65,7 +65,7 @@ namespace osmscout {
     /**
      * A route variant consists of a number of halts.
      */
-    class Stop
+    class OSMSCOUT_API Stop CLASS_FINAL
     {
     private:
       StopType      type;
@@ -91,7 +91,7 @@ namespace osmscout {
     /**
      * A route variant consists of a number of platforms.
      */
-    class Platform
+    class OSMSCOUT_API Platform CLASS_FINAL
     {
     private:
       PlatformType  type;
@@ -121,7 +121,7 @@ namespace osmscout {
      * Normally you have one variant in one direction and a second variant in the
      * opposite direction.
      */
-    class Variant
+    class OSMSCOUT_API Variant CLASS_FINAL
     {
     private:
       std::string name;
