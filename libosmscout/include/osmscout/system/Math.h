@@ -27,20 +27,4 @@
 
 #include <cmath>
 
-#if !defined(M_PI)
-  #define M_PI 3.14159265358979323846
-#endif
-
-#if !defined(M_PI_2) // pi / 2
-  #define M_PI_2 1.57079632679489661923
-#endif
-
-#if !defined(M_PI_4) // pi / 4
-  #define M_PI_4 0.785398163397448309616
-#endif
-
-#if !defined(M_E)
-    #define M_E 2.7182818284590452354
-#endif
-
 #endif
