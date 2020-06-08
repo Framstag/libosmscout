@@ -39,16 +39,19 @@ namespace osmscout {
     std::chrono::steady_clock::time_point start;
     std::chrono::steady_clock::time_point stop;
 
-  private:
-    // We do not want you to make copies of a stop clock
-    StopClock(const StopClock& other);
-
   public:
     StopClock();
+
+    StopClock(const StopClock&) = delete; // We do not want you to make copies of a stop clock
+    StopClock(StopClock&&) = default; // moves are fine
+
+    StopClock& operator=(const StopClock&) = delete;
+    StopClock& operator=(StopClock&&) = default;
 
     void Stop();
 
     double GetMilliseconds() const;
+    std::chrono::steady_clock::duration GetDuration() const;
 
     bool IsSignificant() const;
 

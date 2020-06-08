@@ -44,6 +44,11 @@ namespace osmscout {
     return std::chrono::duration_cast<MilliDouble>(stop-start).count();
   }
 
+  std::chrono::steady_clock::duration StopClock::GetDuration() const
+  {
+    return stop-start;
+  }
+
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
   {
     double   deltaMilli=clock.GetMilliseconds();

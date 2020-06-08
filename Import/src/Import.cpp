@@ -398,18 +398,18 @@ static void DeleteFilesIgnoreError(const osmscout::ImportParameter& parameter,
 
 int main(int argc, char* argv[])
 {
-  osmscout::ImportParameter parameter;
-  osmscout::ConsoleProgress progress;
-  bool                      parameterError=false;
-  bool                      firstRouterOption=true;
+  osmscout::ImportParameter    parameter;
+  osmscout::StatImportProgress progress;
+  bool                         parameterError=false;
+  bool                         firstRouterOption=true;
 
-  std::list<std::string>    mapfiles;
+  std::list<std::string>       mapfiles;
 
-  osmscout::VehicleMask     defaultVehicleMask=osmscout::vehicleBicycle|osmscout::vehicleFoot|osmscout::vehicleCar;
-  bool                      deleteTemporaries=false;
-  bool                      deleteDebugging=false;
-  bool                      deleteAnalysis=false;
-  bool                      deleteReport=false;
+  osmscout::VehicleMask        defaultVehicleMask=osmscout::vehicleBicycle|osmscout::vehicleFoot|osmscout::vehicleCar;
+  bool                         deleteTemporaries=false;
+  bool                         deleteDebugging=false;
+  bool                         deleteAnalysis=false;
+  bool                         deleteReport=false;
 
   InitializeLocale(progress);
 
@@ -947,6 +947,11 @@ int main(int argc, char* argv[])
     progress.SetStep("Summary");
 
     if (result) {
+
+      if (!progress.DumpDotStats(osmscout::AppendFileToDir(
+          parameter.GetDestinationDirectory(), "stats.dot"))){
+        progress.Error("Error while writing stats");
+      }
 
       if (!DumpDataSize(parameter,
                         importer,

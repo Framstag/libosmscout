@@ -26,6 +26,9 @@ set(HEADER_FILES
     include/osmscout/import/GenWayWayDat.h
     include/osmscout/import/Import.h
     include/osmscout/import/ImportErrorReporter.h
+    include/osmscout/import/ImportModule.h
+    include/osmscout/import/ImportParameter.h
+    include/osmscout/import/ImportProgress.h
     include/osmscout/import/MergeAreaData.h
     include/osmscout/import/Preprocess.h
     include/osmscout/import/Preprocessor.h
@@ -71,6 +74,9 @@ set(SOURCE_FILES
     src/osmscout/import/GenWayWayDat.cpp
     src/osmscout/import/Import.cpp
     src/osmscout/import/ImportErrorReporter.cpp
+    src/osmscout/import/ImportModule.cpp
+    src/osmscout/import/ImportParameter.cpp
+    src/osmscout/import/ImportProgress.cpp
     src/osmscout/import/MergeAreaData.cpp
     src/osmscout/import/Preprocess.cpp
     src/osmscout/import/Preprocessor.cpp
