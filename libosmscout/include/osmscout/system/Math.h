@@ -20,27 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-
-#if defined(_WIN32) || defined(_WIN64)
-  #define _USE_MATH_DEFINES
-#endif
-
 #include <cmath>
-
-#if !defined(M_PI)
-  #define M_PI 3.14159265358979323846
-#endif
-
-#if !defined(M_PI_2) // pi / 2
-  #define M_PI_2 1.57079632679489661923
-#endif
-
-#if !defined(M_PI_4) // pi / 4
-  #define M_PI_4 0.785398163397448309616
-#endif
-
-#if !defined(M_E)
-    #define M_E 2.7182818284590452354
-#endif
 
 #endif

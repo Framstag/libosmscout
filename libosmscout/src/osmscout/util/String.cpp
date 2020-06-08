@@ -893,12 +893,13 @@ namespace osmscout {
     std::tm tm = *std::gmtime(&tt);
 
     std::array<char, 64> buff;
-    std::strftime(buff.data(), buff.size(), "%FT%T.", &tm);
+    std::strftime(buff.data(), buff.size(), "%Y-%m-%dT%H:%M:%S", &tm);
 
     stream << buff.data();
 
     // add milliseconds
     auto millisFromEpoch = timestamp.time_since_epoch().count();
+    stream << ".";
     stream << (millisFromEpoch - ((millisFromEpoch / 1000) * 1000));
     stream << "Z";
     return stream.str();

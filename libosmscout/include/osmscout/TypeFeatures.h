@@ -462,12 +462,7 @@ namespace osmscout {
 
   public:
     AccessFeatureValue() = default;
-
-    inline AccessFeatureValue(const AccessFeatureValue& other)
-    : access(other.access)
-    {
-
-    }
+    AccessFeatureValue(const AccessFeatureValue& other) = default;
 
     inline explicit AccessFeatureValue(uint8_t access)
     : access(access)

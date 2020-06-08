@@ -35,6 +35,7 @@ if compiler.get_id()=='msvc'
   # Do not warn regarding insecure function calls
   add_project_arguments('-D_CRT_SECURE_NO_DEPRECATE', language: 'cpp')
   add_project_arguments('-D_CRT_NONSTDC_NO_DEPRECATE', language: 'cpp')
+  add_project_arguments('-D_USE_MATH_DEFINES', language: 'cpp')
 
   # Fast floating point processing
   add_project_arguments('/fp:fast', language: 'cpp')
@@ -46,6 +47,10 @@ if compiler.get_id()=='msvc'
     # TODO: Should only be set for library builds, not executables
     add_project_arguments('-DDLL_EXPORT', language: 'cpp')
   endif
+endif
+
+if build_machine.system()=='windows' and compiler.get_id()=='gcc'
+  add_project_arguments('-D_USE_MATH_DEFINES', language: 'cpp')
 endif
 
 # Check for headers
