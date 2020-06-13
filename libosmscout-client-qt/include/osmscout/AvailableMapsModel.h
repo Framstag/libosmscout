@@ -228,14 +228,14 @@ public:
   };
   Q_ENUM(Roles)
 
-  Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  Q_INVOKABLE virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-  Q_INVOKABLE virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
-  Q_INVOKABLE virtual QModelIndex parent(const QModelIndex &index) const;
+  Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  Q_INVOKABLE int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  Q_INVOKABLE QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
+  Q_INVOKABLE QModelIndex parent(const QModelIndex &index) const override;
 
-  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
-  virtual QHash<int, QByteArray> roleNames() const;
-  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE QVariant data(const QModelIndex &index, int role) const override;
+  QHash<int, QByteArray> roleNames() const override;
+  Q_INVOKABLE Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   Q_INVOKABLE QVariant map(const QModelIndex &index) const;
 
