@@ -203,7 +203,7 @@ int main(int argc, char** argv)
 
   QList<QFileInfo> stylesheets;
   QString stylesheetDirectory = args.stylesheetDirectory;
-  QDirIterator dirIt(stylesheetDirectory, QDirIterator::FollowSymlinks);
+  QDirIterator dirIt(stylesheetDirectory, QDir::Files, QDirIterator::FollowSymlinks);
   while (dirIt.hasNext()) {
     dirIt.next();
     QFileInfo fInfo(dirIt.filePath());
