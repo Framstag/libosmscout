@@ -12,6 +12,7 @@
 **/.idea
 **/*.iml
 /cmake-build-debug
+.vscode
 
 # Backup
 **/*~
