@@ -437,7 +437,7 @@ namespace osmscout {
      * Distance is measured in relation to the center of the bounding box
      *
      * @param types
-     *    Set of type to load conadidates for
+     *    Set of type to load candidates for
      * @param boundingBox
      *    Geographic area to search in
      * @return result object
@@ -451,7 +451,7 @@ namespace osmscout {
      * Distance is measured in relation to the center of the bounding box
      *
      * @param types
-     *    Set of type to load conadidates for
+     *    Set of type to load candidates for
      * @param boundingBox
      *    Geographic area to search in
      * @return result object
@@ -465,7 +465,7 @@ namespace osmscout {
      * Distance is measured in relation to the center of the bounding box
      *
      * @param types
-     *    Set of type to load conadidates for
+     *    Set of type to load candidates for
      * @param boundingBox
      *    Geographic area to search in
      * @return result object

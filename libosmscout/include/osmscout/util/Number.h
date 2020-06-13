@@ -328,7 +328,7 @@ namespace osmscout {
   /**
    * \ingroup Util
    * Encodes the given numbers into a new number of twice the size that has
-   * the bits of each nunber alternating interleaved.
+   * the bits of each number alternating interleaved.
    *
    * This can be used to convert two dimensional coordinates into
    * one number, where coordinates close in 2D are close in the
